@@ -20301,6 +20301,14 @@ Detect=HKLM\Software\Microsoft\ESENT
 Default=False
 RegKey1=HKLM\Software\Microsoft\ESENT\Process
 
+[Windows Retail Demo*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft
+Default=False
+FileKey1=%CommonAppData%\Microsoft\Windows\RetailDemo|.*.|REMOVESELF
+
 [Windows Feedback*]
 DetectOS=10.0|
 Section=3031
