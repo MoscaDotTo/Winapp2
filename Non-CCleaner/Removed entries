@@ -1,5 +1,6 @@
 ; This file contains all the removed entries that were lost, due to being added to CCleaner.
 ; Here you can easily add and edit removed entries, which will eventually get added to the Non-CCleaner version of Winapp2.
+; # of removed entries: 48
 
 [4Sync*]
 LangSecRef=3024
