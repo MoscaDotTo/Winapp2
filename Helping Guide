@@ -1,0 +1,294 @@
+Helping Guide for Winapp2.ini
+
+Q&A
+
+1.)
+Q: Where you can download CCleaner?
+A: You can download it at www.piriform.com
+
+2.)
+Q: What is Winapp2?
+A: It's a custom api for Windows (=Therefore Win-app), where you can add your own rules.
+   But some members have made a file called "Winapp2.ini", which has got a lot of more than 
+   a single man could ever add.
+
+3.)
+Q: Where can I download Winapp2.ini?
+A: You can download it at www.winapp2.com
+
+4.)
+Q: How can unistall Winapp2.ini?
+A: You just have to delete your Winapp2.ini file in (ProgramFiles (x86) or ProgramFiles\CCleaner) Folder.
+
+5.)
+Q: How can I make it faster to work and why it is so slow?
+A: You can download Trim.bat on Winapp2.com. This is slow, because the whole HDD has to be scanned for the existence
+   of the installed programs. This will be very slow if there are a lot of entrys and you have a slow PC.
+
+6.)
+Q: Does this exist for Mac too?
+A: To be sadly say, NO. If you can help, you can do so by making entries for Winapp2.ini.
+But Ccleaner doesn't support this kind of entries for Mac as far we know.	
+
+7.)
+Q: Can all of this be done easier?
+A: Yes, you can download the Tool "CCEnhancer" by Singularlabs, which can download Winapp2.ini and Trim it for you.
+
+8.)
+Q: Can you use Winapp2.ini for the portable CCleaner and is there a portable Version of CCleaner?
+A: You can download the portable version in the official website. Yes you can use it with just placing the file into the folder.
+
+9.)
+Q: Can I help this project to improve?
+A: Yes you can do it. You could make entries or if you are not very good at that, then at least you could add
+   [Useless Files 2.2] entry (you find in this file) to your Winapp2.ini and scan for useless files and send them to us. 
+   But please clean your PC with CCleaner and Winapp2.ini the newest of Both and the you can scan.
+   After that, it would be good to have a dump of your registry, but as this is problematic (A lot of
+   Software stores his password in the registry.), this is not possible. If you find a Useless Files,
+   please store them in this file and send to the Winapp2.ini Forum, so we could add them.
+-------------------------------------------------------------------------------------------------------
+Helpful Tips for Users:
+
+Tip-1:
+
+;    Extra for forum users; Add this to regedit
+;     
+;    [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Dfrg\BootOptimizeFunction]
+;    "Enable"="Y"
+;    "LcnStartLocation"="0"
+;    "LcnEndLocation"="0"
+;     
+;    [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters]
+;    "EnablePrefetcher"=dword:00000003
+;
+;    Then run this command on cmd
+;
+;    Rundll32.exe advapi32.dll,ProcessIdleTasks
+;
+;    Wait for the message and ur done
+
+;    THX, Neverbloom 
+
+Tip-2:
+;     
+;     Go to this Folder:
+;     C:\Program Files (x86)\Google\Chrome\Application
+      And delete the old application folder with the older number:
+
+;      C:\Program Files (x86)\Google\Chrome\Application\35.0.1916.114
+;      C:\Program Files (x86)\Google\Chrome\Application\37.0.2062.120
+;      (In this folder are the old application files, which are just deleteable with script.
+;      CCleaner does not support this right now, perhaps in the future.)
+
+
+Tip-3:
+    
+;     You can find errors in your Winapp2.ini files with following methods:
+;     Search for impossibilities, which aren't used in Winapp2.ini:
+      "**"
+      "//"
+
+      "=="
+      "\\"
+
+Tip-4:
+;     
+      Avoid Constructions like this:
+      "\|", just use "|", so you save space.
+
+Tip-5: 
+
+      You can go to DEBUG Mode with following CMD code:
+      "C:\Program Files\CCleaner\CCleaner64.exe /debug"
+      "C:\Program Files\CCleaner\CCleaner.exe /debug"
+
+Tip-6:
+
+Ccleaner is able to delete the no longer used *.torrent files from the folder "C:\Documents and
+Settings\USER\Application Data\uTorrent"? No, because there is no lock and it deletes all files.
+
+Tip-7:
+
+Printer Queue List Clearing
+"
+net stop spooler
+RD /S %WinDir%\System32\spool\Printers
+net start spooler
+"
+
+Tip-8:
+The following instructions have been created to help you to get rid of "Browsezilla" manually.
+Use this guide at your own risk; software should usually be better suited to remove malware, since it is able to look deeper.
+If this guide was helpful to you, please consider donating towards this site (http://www.safer-networking.org/index.php?page=donate).
+Browsezilla create Browsezilla -Directory, Desktop-Links, ProgramMenu-Section without giving the user a possibility to cancel that process.
+Removal Instructions:
+Please use Windows Explorer or another file manager of your choice to locate and delete these files.
+The file at "c:\browsezilla\id.txt".
+The file at "c:\browsezilla\update.exe".
+The file at "c:\browsezilla\zilla.exe".
+The file at "<$PROGRAMS>\Browsezilla\Browsezilla.lnk".
+The file at "<$PROGRAMS>\Browsezilla\uninstall.lnk".
+The file at "c:\Browsezilla.lnk".
+The file at "<$DESKTOP>\Browsezilla.lnk".
+The file at "<$STARTMENU>\Browsezilla.lnk".
+A file with an unknown location named "zilla.exe".
+Make sure you set your file manager to display hidden and system files. If Browsezilla uses rootkit technologies, use our RootAlyzer (http://forums.spybot.info/downloads.php?id=8) or our Total Commander anti-rootkit plugins (http://forums.spybot.info/downloads.php?id=3).
+You will have to use a global search for files without a name specified. Be extra careful, because just the name might not be enough to identify files!
+Please use Windows Explorer or another file manager of your choice to locate and delete these folders.
+The directory at "<$PROGRAMS>\Browsezilla".
+The directory at "c:\browsezilla".
+Make sure you set your file manager to display hidden and system files. If Browsezilla uses rootkit technologies, use our RootAlyzer (http://forums.spybot.info/downloads.php?id=8) or our Total Commander anti-rootkit plugins (http://forums.spybot.info/downloads.php?id=3).
+You will have to use a global search for files without a name specified. Be extra careful, because just the name might not be enough to identify folders!
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+How to make your own Winapp2.ini entry!
+
+0.) Pfeferred Format:
+
+Preferred Format:
+
+[Name*]
+LangSecRef/Section=
+Detect/DetectFile=
+Default=False
+FileKey/RegKey
+
+
+*Warning=
+*See bottom for information on Warning (it is optional)
+
+[Name*]
+This is the name of your entry, usually followed by a * for formatting purposes. This is what will appear in the Applications list within CCleaner.
+
+LangSecRef=
+This indicates where on the list of applications within CCleaner your entry will appear. Appropriate LangSecRef numbers are below.
+ 
+1.) Sections
+
+Quote
+LangSecRef
+3021 = Applications
+3022 = Internet
+3023 = Multimedia
+3024 = Utilities
+3025 = Windows
+3026 = Firefox/Mozilla
+3027 = Opera
+3028 = Safari
+
+
+Section is the same idea, however it is user-defined. We currently use Section=Games for example in the main download, however it can be set to anything and a new category with that name will appear in the applications tab.
+
+2.)  Filepaths
+
+Detect/DetectFile
+
+These values are what CCleaner looks for to check if it should return true on an entry. Eg. DetectFile=%WinDir%\ will return true because this points to your windows directory.
+Environment Variables (below) are vastly preferred over direct paths (such as C:\*)
+
+Detect= points to a registry key
+DetectFile= points to a file or folder.
+Detect Paths:
+ 
+Quote
+HKLM = HKEY_LOCAL_MACHINE
+HKU = HKEY_USERS
+HKCU = HKEY_CURRENT_USER
+
+DetectFile paths
+ 
+Quote
+( C:\ substituted for system drive)
+
+%AppData%
+Windows XP: C:\Documents and Settings\{username}\Application Data
+Windows Vista/7: C:\Users\{username}\AppData\Roaming
+
+%CommonAppData%
+Windows XP: C:\Documents and Settings\All Users\Application Data
+Windows Vista/7: C:\ProgramData
+
+%CommonProgramFiles%
+C:\Program Files\Common Files
+C:\Program Files(x86)\Common Files
+This will work for both 32 and 64 bit directories as CCleaner will detect it on its own.
+
+%HomeDrive%
+C:\
+
+%LocalAppData%
+Windows XP: C:\Documents and Settings\{username}\Local Settings\Application Data
+Windows Vista/7: C:\Users\{username}\AppData\Local\
+
+%ProgramFiles%
+C:\Program Files\
+C:\Program Files(x86)
+This will work for both 32bit and 64bit because CCleaner detects these paths on its own.
+
+%SystemDrive%
+C:\
+
+%UserProfile%
+Windows XP: %SystemDrive%\Documents and Settings\{username}
+Windows Vista/7: %SystemDrive%\Users\{username}
+
+%WinDir%
+C:\Windows
+
+%Pictures%
+Windows XP: %UserProfile%\My Documents\My Pictures
+Windows Vista/7: %UserProfile%\My Pictures
+
+%Documents%
+Windows XP: %UserProfile%\My Documents
+Windows Vista/7: %UserProfile%\Documents
+
+%Video%
+Windows XP: %UserProfile%\My Documents\My Videos
+Windows Vista/7: %UserProfile%\My Videos
+
+%Music%
+Windows XP: %UserProfile%\My Documents\My Music
+Windows Vista/7: %UserProfile%\My Music
+
+3.) Tick-Untick
+
+Default=False
+
+It is preferred that Default be set to false because Default is the default setting of the tickbox (False=Unticked)
+This is to ensure no one has any boxes ticked that they didn't want ticked.
+
+FileKey1/RegKey1=
+
+
+4.) FileKeys and RegKeys
+
+The FileKeys and RegKeys are paths of items you'd like to delete. When pointing to these, you must list the path (using the environment variables above) then use the pipe symbol | and have the filenames/registry keys after
+ 
+FileKey1=%AppData%\CCleaner|*.* - This deletes all files in a folder
+FileKey2=%LocalAppData%\CCleaner|*.log - This deletes all log files in a folder
+FileKey3=%AppData%\CCleaner|CCleaner.Log|RECURSE - This deletes all files with this name and extension in all subfolders as well
+FileKey4=%LocalAppData%\CCleaner\temp|*.*|REMOVESELF - This deletes all files in a folder and deletes the folder as well.
+FileKey5=%AppData%\CCleaner|*.log;*.tmp;*.txt|RECURSE - This will delete all files with these extensions from the parent folder and all subfolders.
+
+5.) Masking options 
+ 
+| - the pipe symbol is used to separate file mask options.
+*.* - deletes every file in that folder.
+RECURSE - deletes subfolders and their contents
+REMOVESELF - is the same as RECURSE but it deletes the folder as well.
+* Deletes all files with the same extension (*.example) or all files with the same name (example.*)
+; separates different files / filetypes in a filekey.
+
+6.) Warning
+
+Warning=
+
+If there is something the end user should know about an entry, such as it resetting play counts in a media player, high scores on a game, add a warning= followed by the message.
+Eg: Warning=This will delete all of your high scores.
+This is considered a courtesy to the end user in helping making them aware of what they're deleting.
+
+7.) Testing, before adding
+
+Remember, when posting, please test your entries before you post them, so you can be sure they don't harm the workings of the programs. Also try to post which operation system(s) you tested it with! smile.gif
+
