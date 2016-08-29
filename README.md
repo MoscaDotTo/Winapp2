@@ -1,9 +1,9 @@
 # Winapp2
 A database of extended cleaning routines for popular Windows PC based maintenance software. 
 
-There are 2 Winapp2 files published here. One is for CCleaner use, which is modified to remove entries because they were added in CCleaner. The other one is for BleachBit, System Ninja, and Avira System Speedup, which contains all entries, even the removed ones, which is located in the Non-CCleaner folder. Please use the proper one for your cleaner to avoid any issues happening.
+There are two Winapp2 files published here. One is for CCleaner use, which is modified to remove entries because they were added in CCleaner. The other one is for BleachBit, System Ninja, and Avira System Speedup, which contains all entries, even the removed ones, which is located in the Non-CCleaner folder. Please use the proper one for your cleaner to avoid any issues happening.
 
-If you would like to contribute, please file a issue or pull request. If you are a Piriform users, or already have a account at Piriform forums, you can also post requests here: https://forum.piriform.com/index.php?showtopic=32310&page=1
+If you would like to contribute, please file an issue or pull request. If you are a Piriform users, or already have an account at the Piriform forums, you can also post requests here: https://forum.piriform.com/index.php?showtopic=32310&page=1
 
 
 How to install:
@@ -12,6 +12,6 @@ How to install:
 
 - For BleachBit users, open up BleachBit, click on "Edit" tab, then click on "Preferences". Make sure "Download and update cleaners from community (winapp2.ini)" is checked.
 
-- For System Ninja users, you should already have a copy installed in the System Ninja/scripts directory. If not, you can always put a up-to-date one their yourself.
+- For System Ninja users, you should already have a copy installed in the System Ninja/scripts directory. If not, you can always put a up-to-date one there yourself.
 
 - For Avira System Speedup users, go to Settings - Device Optimizer and check "Scan using Winapp2 rules".
