@@ -1,6 +1,6 @@
 ; This file contains all the removed entries that were lost, due to being added to CCleaner.
 ; Here you can easily add and edit removed entries, which will eventually get added to the Non-CCleaner version of Winapp2.
-; # of removed entries: 48
+; # of removed entries: 49
 
 [4Sync*]
 LangSecRef=3024
@@ -374,6 +374,12 @@ LangSecRef=3025
 Detect=HKLM\Software\Microsoft\Windows
 Default=False
 FileKey1=%WINDIR%\logs\CBS\|CbsPersist_*.cab
+
+[Windows Defender Extras*]
+LangSecRef=3024
+Detect=HKLM\Software\Microsoft\Windows Defender
+Default=False
+FileKey1=%CommonAppData%\Microsoft\Windows Defender\Support|*.*|RECURSE
 
 [Windows Log Files Extras*]
 LangSecRef=3025
