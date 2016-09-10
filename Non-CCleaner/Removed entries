@@ -303,7 +303,7 @@ FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|SiteSecurityServiceState.txt
 [SyncBackFree*]
 LangSecRef=3024
 Detect=HKCU\Software\2BrightSparks\SyncBackFree
-Default-False
+Default=False
 FileKey1=%LocalAppData%\2BrightSparks\SyncBackFree\Logs|*.*
 
 [Tag&Rename 3.7*]
@@ -331,7 +331,7 @@ FileKey2=%LocalAppData%\VirtualStore\Program Files*\TeamViewer|*.tmp|RECURSE
 ID=2013
 LangSecRef=3029
 Detect=HKCU\Software\Chromium
-Default-False
+Default=False
 DetectFile1=%LocalAppData%\Google\Chrome\Application\chrome.exe
 DetectFile2=%ProgramFiles%\Google\Chrome\Application\chrome.exe
 DetectFile3=%LocalAppData%\Flock\Application\flock.exe
