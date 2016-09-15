@@ -1,6 +1,6 @@
 ; This file contains all the removed entries that were lost, due to being added to CCleaner.
 ; Here you can easily add and edit removed entries, which will eventually get added to the Non-CCleaner version of Winapp2.
-; # of removed entries: 49
+; # of removed entries: 50
 
 [4Sync*]
 LangSecRef=3024
@@ -159,6 +159,13 @@ LangSecRef=3024
 DetectFile=%AppData%\HandBrake\logs
 Default=False
 FileKey1=%AppData%\HandBrake\logs|*.txt
+
+[Live Kernel Watchdog*]
+LangSecRef=3025
+Detect=HKCU\SOFTWARE\Microsoft
+Default=False
+FileKey1=%WinDir%\LiveKernelReports\WATCHDOG|*.dmp
+FileKey2=%WinDir%\LiveKernelReports|*.dmp|RECURSE
 
 [MailWasher Pro*]
 LangSecRef=3022
