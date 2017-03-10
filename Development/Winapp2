@@ -309,19 +309,10 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\A58-Easytune6|*.log
 FileKey2=%ProgramFiles%\A58-Easytune6|*.log
 
-[ABBYY FineReader 5.0*]
-LangSecRef=3021
-Detect=HKCU\Software\ABBYY\Sprint\5.00
-Default=False
-RegKey1=HKCU\Software\ABBYY\Sprint\5.00\Options|ExportToFilePath
-RegKey2=HKCU\Software\ABBYY\Sprint\5.00\Options|OpenImagePath
-
 [ABBYY FineReader*]
 LangSecRef=3021
-Detect1=HKCU\Software\ABBYY\FineReader\7.00
-Detect2=HKCU\Software\ABBYY\FineReader\8.00
-Detect3=HKCU\Software\ABBYY\FineReader\9.00
-Detect4=HKCU\Software\ABBYY\FineReader\11.00
+Detect1=HKCU\Software\ABBYY\Sprint\5.00
+Detect2=HKCU\Software\ABBYY\FineReader\*
 Default=False
 FileKey1=%LocalAppData%\ABBYY\ScanManager\*|scantwain.txt;scanwia.txt;*.bmp
 RegKey1=HKCU\Software\ABBYY\FineReader\*\Shell\Dialogs|LoadImagePath
@@ -329,6 +320,8 @@ RegKey2=HKCU\Software\ABBYY\FineReader\*\Shell\Dialogs|SaveImagePath
 RegKey3=HKCU\Software\ABBYY\FineReader\*\Shell\Dialogs|SaveToPath
 RegKey4=HKCU\Software\ABBYY\FineReader\*\Shell\Options|LastTAScenario
 RegKey5=HKCU\Software\ABBYY\FineReader\*\Shell\Options|LastWebFoldersNames
+RegKey6=HKCU\Software\ABBYY\Sprint\5.00\Options|ExportToFilePath
+RegKey7=HKCU\Software\ABBYY\Sprint\5.00\Options|OpenImagePath
 
 [Abelssoft GoogleClean*]
 LangSecRef=3024
