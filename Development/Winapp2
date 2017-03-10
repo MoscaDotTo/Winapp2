@@ -328,7 +328,7 @@ RegKey1=HKCU\Software\ABBYY\FineReader\*\Shell\Dialogs|LoadImagePath
 RegKey2=HKCU\Software\ABBYY\FineReader\*\Shell\Dialogs|SaveImagePath
 RegKey3=HKCU\Software\ABBYY\FineReader\*\Shell\Dialogs|SaveToPath
 RegKey4=HKCU\Software\ABBYY\FineReader\*\Shell\Options|LastTAScenario
-RegKey5=HKCU\Software\ABBYY\FineReader\11.00\Shell\Options|LastWebFoldersNames
+RegKey5=HKCU\Software\ABBYY\FineReader\*\Shell\Options|LastWebFoldersNames
 
 [Abelssoft GoogleClean*]
 LangSecRef=3024
