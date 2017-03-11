@@ -1,4 +1,4 @@
-; Version: v5.26.170309
+; Version: v5.26.170310
 ; Application Cleaning file
 ;
 ; Notes
@@ -311,17 +311,27 @@ FileKey2=%ProgramFiles%\A58-Easytune6|*.log
 
 [ABBYY FineReader*]
 LangSecRef=3021
-Detect1=HKCU\Software\ABBYY\Sprint\5.00
-Detect2=HKCU\Software\ABBYY\FineReader\*
+Detect1=HKCU\Software\ABBYY\FineReader\7.00
+Detect2=HKCU\Software\ABBYY\FineReader\8.00
+Detect3=HKCU\Software\ABBYY\FineReader\9.00
+Detect4=HKCU\Software\ABBYY\FineReader\11.00
+Detect5=HKCU\Software\ABBYY\Sprint\5.00
 Default=False
 FileKey1=%LocalAppData%\ABBYY\ScanManager\*|scantwain.txt;scanwia.txt;*.bmp
-RegKey1=HKCU\Software\ABBYY\FineReader\*\Shell\Dialogs|LoadImagePath
-RegKey2=HKCU\Software\ABBYY\FineReader\*\Shell\Dialogs|SaveImagePath
-RegKey3=HKCU\Software\ABBYY\FineReader\*\Shell\Dialogs|SaveToPath
-RegKey4=HKCU\Software\ABBYY\FineReader\*\Shell\Options|LastTAScenario
-RegKey5=HKCU\Software\ABBYY\FineReader\*\Shell\Options|LastWebFoldersNames
-RegKey6=HKCU\Software\ABBYY\Sprint\5.00\Options|ExportToFilePath
-RegKey7=HKCU\Software\ABBYY\Sprint\5.00\Options|OpenImagePath
+RegKey1=HKCU\Software\ABBYY\FineReader\7.00\Shell\Dialogs|LoadImagePath
+RegKey2=HKCU\Software\ABBYY\FineReader\7.00\Shell\Dialogs|SaveImagePath
+RegKey3=HKCU\Software\ABBYY\FineReader\7.00\Shell\Dialogs|SaveToPath
+RegKey4=HKCU\Software\ABBYY\FineReader\8.00\Shell\Dialogs|LoadImagePath
+RegKey5=HKCU\Software\ABBYY\FineReader\8.00\Shell\Dialogs|SaveImagePath
+RegKey6=HKCU\Software\ABBYY\FineReader\8.00\Shell\Dialogs|SaveToPath
+RegKey7=HKCU\Software\ABBYY\FineReader\8.00\Shell\Options|LastTAScenario
+RegKey8=HKCU\Software\ABBYY\FineReader\9.00\Shell\Dialogs|LoadImagePath
+RegKey9=HKCU\Software\ABBYY\FineReader\9.00\Shell\Dialogs|SaveImagePath
+RegKey10=HKCU\Software\ABBYY\FineReader\9.00\Shell\Dialogs|SaveToPath
+RegKey11=HKCU\Software\ABBYY\FineReader\9.00\Shell\Options|LastTAScenario
+RegKey12=HKCU\Software\ABBYY\FineReader\11.00\Shell\Dialogs|SaveToPath
+RegKey13=HKCU\Software\ABBYY\FineReader\11.00\Shell\Options|LastTAScenario
+RegKey14=HKCU\Software\ABBYY\FineReader\11.00\Shell\Options|LastWebFoldersNames
 
 [Abelssoft GoogleClean*]
 LangSecRef=3024
