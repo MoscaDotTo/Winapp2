@@ -1,4 +1,4 @@
-; Version: 170310
+; Version: 170312
 ; Application Cleaning file
 ;
 ; Notes
@@ -1659,24 +1659,19 @@ Detect=HKCU\Software\KC Softwares\ApHeMo
 Default=False
 FileKey1=%AppData%\ApHeMo|*.log
 
-[Apple iDevices Software Updates*]
+[Apple Device Backups*]
+LangSecRef=3023
+Detect=HKLM\Software\Apple Computer, Inc.
+Warning=This will delete all Apple device backups.
+Default=False
+FileKey1=%AppData%\Apple Computer\MobileSync\Backup|*.*|RECURSE
+
+[Apple Device Updates*]
 LangSecRef=3023
 Detect=HKLM\Software\Apple Computer, Inc.
 Default=False
 FileKey1=%AppData%\Apple Computer\iTunes|*.ipsw|RECURSE
-
-[Apple iDevices Updater Logs*]
-LangSecRef=3023
-Detect=HKLM\Software\Apple Computer, Inc.
-Default=False
-FileKey1=%AppData%\Apple Computer\iTunes|*.log|RECURSE
-
-[Apple MobileSync Backup*]
-LangSecRef=3023
-Detect=HKLM\Software\Apple Computer, Inc.
-Warning=This will delete all your iPhone backups.
-Default=False
-FileKey1=%AppData%\Apple Computer\MobileSync\Backup|*.*|RECURSE
+FileKey2=%AppData%\Apple Computer\iTunes|*.log|RECURSE
 
 [Application Cache*]
 LangSecRef=3029
@@ -3921,6 +3916,12 @@ SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%LocalAppData%\Google\CrashReports|*.*
 FileKey2=%LocalAppData%\Google\Chrome\User Data\Crashpad\reports|*.*
+
+[Chrome Temps*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%ProgramFiles%\Google\Chrome\Temp|*.*|RECURSE
 
 [Chrome Updates*]
 LangSecRef=3029
@@ -9996,6 +9997,12 @@ FileKey4=%LocalAppData%\VirtualStore\ProgramData\Kaspersky Lab\*\Bases\Cache|*.*
 FileKey5=%LocalAppData%\VirtualStore\ProgramData\Kaspersky Lab\*\Data\Updater\Temporary Files|*.*|RECURSE
 FileKey6=%LocalAppData%\VirtualStore\ProgramData\Kaspersky Lab\*\Temp|*.*
 FileKey7=%ProgramFiles%\Kaspersky Lab\NetworkAgent\~dumps|*.*
+
+[Kaspersky Dump Files (.dmp)*]
+LangSecRef=3024
+Detect=HKCU\Software\KasperskyLab
+Default=False
+FileKey1=%CommonAppData%\Kaspersky Lab\|*.dmp;*.dmp.stat;*.log
 
 [Kate's Video Toolkit Logs*]
 LangSecRef=3023
@@ -16395,6 +16402,12 @@ Detect=HKCU\Software\Microsoft\Windows
 Default=False
 FileKey1=%WinDir%\inf|*.log*
 
+[SetupMetrics*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%ProgramFiles%\Google\Chrome\Application\SetupMetrics|*.*|RECURSE
+
 [Shareaza More*]
 LangSecRef=3022
 Detect=HKCU\Software\BHO Shareaza
@@ -17040,6 +17053,12 @@ FileKey1=%CommonAppData%\Microsoft\Windows\Sqm\Manifest|*.bin
 FileKey2=%CommonAppData%\Microsoft\Windows\Sqm\Sessions|*.psqm;*.sqm
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\Sqm\Manifest|*.bin
 FileKey4=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\Sqm\Sessions|*.psqm;*.sqm
+
+[Software Reporter Tool*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Software Reporter Tool|*.log
 
 [Soluto Cache*]
 LangSecRef=3024
