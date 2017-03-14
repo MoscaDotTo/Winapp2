@@ -1,13 +1,10 @@
 ; Version: 170314
-; Application Cleaning file
-;
-; Notes
 ; # of entries: 2,570
 ; Want to contribute to Winapp2? Register and post on the official Piriform Forums or at Winapp2 GitHub.
 ; You can get the latest Winapp2.ini here: https://github.com/MoscaDotTo/Winapp2
-; Is CCleaner taking too long to load with Winapp2.ini? Try this: http://www.winapp2.com/trim.bat (place it in your ccleaner folder and run)
-; Feeling generous? You can donate to Robert here: www.winapp2.com/donate.html Shane here: www.singularlabs.com and Piriform here: http://bit.ly/RTxQz9
-; Valid commands can be found on the Piriform Forums thread about.
+; Is CCleaner taking too long to load with Winapp2.ini? Try this: http://www.winapp2.com/trim.bat Place it in your CCleaner folder and run.
+; Feeling generous? You can donate to Robert here: www.winapp2.com/donate.html Shane here: www.singularlabs.com or Piriform here: http://bit.ly/RTxQz9
+; Valid commands can be found on the Piriform Forums thread.
 ; Please do not host this file anywhere without permission. This is to facilitate proper distribution of the latest version. Thanks.
 
 [.NET Framework Cache*]
