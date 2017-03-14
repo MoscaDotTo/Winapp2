@@ -1,4 +1,4 @@
-; Version: 170312
+; Version: 170314
 ; Application Cleaning file
 ;
 ; Notes
@@ -557,7 +557,7 @@ FileKey2=%ProgramFiles%\LSoft Technologies\Active@ KillDisk*|*.log;*.pdf;*.xml
 ExcludeKey1=FILE|%LocalAppData%\VirtualStore\Program Files*\LSoft Technologies\Active@ KillDisk*|BootDisk.pdf;KillDisk.pdf
 ExcludeKey2=FILE|%ProgramFiles%\LSoft Technologies\Active@ KillDisk*|BootDisk.pdf;KillDisk.pdf
 
-[Active@ UNDELETE (Images)*]
+[Active@ UNDELETE Images*]
 LangSecRef=3024
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\{9F0B916A-F7DD-4335-923E-397979C6AE1B}_is1
 Default=False
@@ -565,7 +565,7 @@ Warning=This will delete all saved disk images.
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\LSoft Technologies\Active@ UNDELETE*\disk_images|*.*|REMOVESELF
 FileKey2=%ProgramFiles%\LSoft Technologies\Active@ UNDELETE*\disk_images|*.*|REMOVESELF
 
-[Active@ UNDELETE (Recovered Files)*]
+[Active@ UNDELETE Recovered Files*]
 LangSecRef=3024
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\{9F0B916A-F7DD-4335-923E-397979C6AE1B}_is1
 Default=False
@@ -573,7 +573,7 @@ Warning=This will delete all recovered data.
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\LSoft Technologies\Active@ UNDELETE*\recovered|*.*|REMOVESELF
 FileKey2=%ProgramFiles%\LSoft Technologies\Active@ UNDELETE*\recovered|*.*|REMOVESELF
 
-[Active@ UNDELETE (Sessions)*]
+[Active@ UNDELETE Sessions*]
 LangSecRef=3024
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\{9F0B916A-F7DD-4335-923E-397979C6AE1B}_is1
 Default=False
@@ -698,27 +698,6 @@ DetectFile=%LocalAppData%\Adobe\CameraRaw\Cache
 Default=False
 FileKey1=%LocalAppData%\Adobe\CameraRaw\Cache|*.*|RECURSE
 
-[Adobe CS5 Service Manager*]
-LangSecRef=3024
-DetectFile=%AppData%\Adobe\Cs5servicemanager
-Default=False
-FileKey1=%AppData%\Adobe\Cs5servicemanager\Cache|*.*|RECURSE
-FileKey2=%AppData%\Adobe\Cs5servicemanager\Logs|*.*|RECURSE
-
-[Adobe CS5.5 Service Manager*]
-LangSecRef=3024
-DetectFile=%AppData%\Adobe\CS5.5ServiceManager
-Default=False
-FileKey1=%AppData%\Adobe\CS5.5ServiceManager\Cache|*.*
-FileKey2=%AppData%\Adobe\CS5.5ServiceManager\Logs|*.*
-
-[Adobe CS6 Service Manager*]
-LangSecRef=3021
-DetectFile=%AppData%\Adobe\CS6ServiceManager
-Default=False
-FileKey1=%AppData%\Adobe\CS6ServiceManager\Cache|*.*
-FileKey2=%AppData%\Adobe\CS6ServiceManager\Logs|*.*
-
 [Adobe Customization Wizard*]
 LangSecRef=3021
 Detect1=HKCU\Software\Adobe\Adobe Customization Wizard 8
@@ -794,11 +773,13 @@ Detect=HKCU\Software\Adobe\Photoshop Album
 Default=False
 FileKey1=%AppData%\Adobe\Photoshop Album\*.*|Logse*.txt
 
-[Adobe Photoshop Elements 11*]
+[Adobe Photoshop Elements*]
 LangSecRef=3023
-Detect=HKCU\Software\Adobe\Photoshop Elements\11.0
+Detect1=HKCU\Software\Adobe\Photoshop Elements\11.0
+Detect2=HKCU\Software\Adobe\Photoshop Elements\12.0
+Detect3=HKCU\Software\Adobe\Photoshop Elements\13.0
 Default=False
-FileKey1=%AppData%\Adobe\Elements Organizer\11.0\Organizer|*.txt;status.dat
+FileKey1=%AppData%\Adobe\Elements Organizer\*\Organizer|*.txt;status.dat
 FileKey2=%CommonAppData%\Adobe\Elements Organizer\Catalogs\My Catalog|face.thumb.9.cache;thumb.5.cache
 FileKey3=%CommonAppData%\Adobe\Elements Organizer\Catalogs\My Catalog|WaldoData\waldo.cache
 FileKey4=%CommonAppData%\Adobe\Photoshop Elements\File Agent|WatchFolder.3.cache
@@ -809,67 +790,24 @@ RegKey1=HKCU\Software\Adobe\Elements Organizer\11.0\CurrentMediaFilePath
 RegKey2=HKCU\Software\Adobe\Photoshop Elements\11.0\common\settings\Elements MRU
 RegKey3=HKCU\Software\Adobe\Photoshop Elements\11.0\CurrentMediaFilePath
 RegKey4=HKCU\Software\Adobe\Photoshop Elements\11.0\VisitedDirs|STARTUPIMAGEDIRECTORY
+RegKey5=HKCU\Software\Adobe\Elements Organizer\13.0\CurrentMediaFilePath
+RegKey6=HKCU\Software\Adobe\Photoshop Elements\13.0\common\settings\Elements MRU
+RegKey7=HKCU\Software\Adobe\Photoshop Elements\13.0\CurrentMediaFilePath
+RegKey8=HKCU\Software\Adobe\Photoshop Elements\13.0\VisitedDirs|STARTUPIMAGEDIRECTORY
 
-[Adobe Photoshop Elements 12 More*]
+[Adobe Premiere Elements*]
 LangSecRef=3023
-Detect=HKCU\Software\Adobe\Photoshop Elements\12.0
-Default=False
-FileKey1=%AppData%\Adobe\Elements Organizer\12.0\Organizer|status.dat;*.txt
-FileKey2=%CommonAppData%\Adobe\Elements Organizer\Catalogs\My Catalog\WaldoData|waldo.cache
-FileKey3=%CommonAppData%\Adobe\Photoshop Elements\File Agent|WatchFolder.3.cache
-FileKey4=%LocalAppData%\VirtualStore\ProgramData\Adobe\Elements Organizer\Catalogs\My Catalog\WaldoData|waldo.cache
-FileKey5=%LocalAppData%\VirtualStore\ProgramData\Adobe\Photoshop Elements\File Agent|WatchFolder.3.cache
-
-[Adobe Photoshop Elements 13*]
-LangSecRef=3023
-Detect=HKCU\Software\Adobe\Photoshop Elements\13.0
-Default=False
-FileKey1=%AppData%\Adobe\Elements Organizer\13.0\Organizer|*.txt;status.dat
-FileKey2=%CommonAppData%\Adobe\Elements Organizer\Catalogs\My Catalog|face.thumb.9.cache;thumb.5.cache
-FileKey3=%CommonAppData%\Adobe\Elements Organizer\Catalogs\My Catalog|WaldoData\waldo.cache
-FileKey4=%CommonAppData%\Adobe\Photoshop Elements\File Agent|WatchFolder.3.cache
-RegKey1=HKCU\Software\Adobe\Elements Organizer\13.0\CurrentMediaFilePath
-RegKey2=HKCU\Software\Adobe\Photoshop Elements\13.0\common\settings\Elements MRU
-RegKey3=HKCU\Software\Adobe\Photoshop Elements\13.0\CurrentMediaFilePath
-RegKey4=HKCU\Software\Adobe\Photoshop Elements\13.0\VisitedDirs|STARTUPIMAGEDIRECTORY
-
-[Adobe Premiere Elements 11*]
-LangSecRef=3023
-Detect=HKCU\Software\Adobe\Premiere Elements\11.0
+Detect1=HKCU\Software\Adobe\Premiere Elements\11.0
+Detect2=HKCU\Software\Adobe\Premiere Elements\12.0
+Detect3=HKCU\Software\Adobe\Premiere Elements\13.0
 Default=False
 FileKey1=%AppData%\Adobe\Common\Thumbnail Cache|*.*|RECURSE
 FileKey2=%CommonAppData%|StreamingMediaTechnologyLog.txt
-FileKey3=%Documents%\Adobe\Premiere Elements\11.0|*.log
-FileKey4=%Documents%\NewBlueFX\Logs|*.log;*.txt
-RegKey1=HKCU\Software\Adobe\Premiere Elements\11.0\MRUDocuments
-
-[Adobe Premiere Elements 12 More*]
-LangSecRef=3023
-Detect=HKCU\Software\Adobe\Premiere Elements\12.0
-Default=False
-FileKey1=%AppData%\Adobe\Common\Thumbnail Cache|*.*|RECURSE
-FileKey2=%CommonAppData%|StreamingMediaTechnologyLog.txt
-FileKey3=%Documents%\Adobe\Premiere Elements\12.0|*.log
-FileKey4=%Documents%\NewBlueFX\Logs|*.log;*.txt
-RegKey1=HKCU\Software\Adobe\Premiere Elements\12.0\MRUDocuments
-
-[Adobe Premiere Elements 13*]
-LangSecRef=3023
-Detect=HKCU\Software\Adobe\Premiere Elements\13.0
-Default=False
-FileKey1=%AppData%\Adobe\Common\Thumbnail Cache|*.*|RECURSE
-FileKey2=%CommonAppData%|StreamingMediaTechnologyLog.txt
-FileKey3=%Documents%\Adobe\Premiere Elements\13.0|*.log
+FileKey3=%Documents%\Adobe\Premiere Elements\*|*.log
 FileKey4=%Documents%\NewBlueFX\Logs|*.txt
-RegKey1=HKCU\Software\Adobe\Premiere Elements\13.0\MRUDocuments
-
-[Adobe Premiere Elements 9.0*]
-LangSecRef=3023
-Detect=HKCU\Software\Adobe\photoshop elements\9.0
-Default=False
-FileKey1=%CommonAppData%\Adobe\Premiere Elements\9.0|*log.txt
-FileKey2=%Documents%\Adobe\Premiere Elements\9.0|*.log
-FileKey3=%LocalAppData%\VirtualStore\ProgramData\Adobe\Premiere Elements\9.0|*log.txt
+RegKey1=HKCU\Software\Adobe\Premiere Elements\11.0\MRUDocuments
+RegKey2=HKCU\Software\Adobe\Premiere Elements\12.0\MRUDocuments
+RegKey3=HKCU\Software\Adobe\Premiere Elements\13.0\MRUDocuments
 
 [Adobe Premiere Pro 2.0*]
 LangSecRef=3023
@@ -925,6 +863,19 @@ RegKey4=HKCU\Software\Adobe\Acrobat Reader\11.0\AVGeneral\cToolbars
 RegKey5=HKCU\Software\Adobe\Acrobat Reader\11.0\RememberedViews\cNoCategoryFiles
 RegKey6=HKCU\Software\Adobe\Adobe Synchronizer\11.0
 
+[Adobe Service Manager*]
+LangSecRef=3024
+DetectFile1=%AppData%\Adobe\Cs5servicemanager
+DetectFile2=%AppData%\Adobe\CS5.5ServiceManager
+DetectFile3=%AppData%\Adobe\CS6ServiceManager
+Default=False
+FileKey1=%AppData%\Adobe\Cs5servicemanager\Cache|*.*|RECURSE
+FileKey2=%AppData%\Adobe\Cs5servicemanager\Logs|*.*|RECURSE
+FileKey3=%AppData%\Adobe\CS5.5ServiceManager\Cache|*.*
+FileKey4=%AppData%\Adobe\CS5.5ServiceManager\Logs|*.*
+FileKey5=%AppData%\Adobe\CS6ServiceManager\Cache|*.*
+FileKey6=%AppData%\Adobe\CS6ServiceManager\Logs|*.*
+
 [Adobe Updater*]
 LangSecRef=3021
 Detect=HKCU\Software\Adobe
@@ -964,17 +915,13 @@ DetectFile=%ProgramFiles%\Advanced System Protector\AdvancedSystemProtector.exe
 Default=False
 FileKey1=%AppData%\Systweak\Advanced System Protector\Logs|*.xml
 
-[Advanced Uninstaller 10 History*]
+[Advanced Uninstaller History*]
 LangSecRef=3024
-Detect=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\10
-Default=False
-RegKey1=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\10\compress|listHistoryText
-
-[Advanced Uninstaller 9 History*]
-LangSecRef=3024
-Detect=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\9
+Detect1=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\9
+Detect2=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\10
 Default=False
 RegKey1=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\9\compress|listHistoryText
+RegKey2=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\10\compress|listHistoryText
 
 [AdwCleaner*]
 LangSecRef=3024
