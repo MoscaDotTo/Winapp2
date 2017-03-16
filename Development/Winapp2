@@ -1087,16 +1087,16 @@ Detect=HKCU\Software\FinalWire\AIDA64
 Default=False
 FileKey1=%Documents%\AIDA64 Reports|*.*|REMOVESELF
 
-[Aignes Website-Watcher (AutoBackup)*]
+[Aignes Website-Watcher AutoBackup*]
 LangSecRef=3023
 Warning=This will delete your AutoBackup of your site.
 Detect=HKCU\SOFTWARE\aignes\wswatch
 Default=False
 FileKey1=%AppData%\aignes\website-watcher\config\autobackup|*.*
 
-[Aignes Website-Watcher (Bookmarks)*]
+[Aignes Website-Watcher Bookmarks*]
 LangSecRef=3023
-Warning=This will delete your Bookmarks. Export, before you tick this.
+Warning=This will delete all of your Bookmarks.
 Detect=HKCU\Software\aignes\wswatch
 Default=False
 FileKey1=%AppData%\aignes\website-watcher\bookmarks|*.*
@@ -1150,27 +1150,17 @@ FileKey2=%CommonAppData%\Aimersoft\ProductFeatures\RemoteLogs|*.*|RECURSE
 FileKey3=%LocalAppData%\VirtualStore\Program Files*\Aimersoft\Video Converter Ultimate\TempThumbDir|*.*|RECURS
 FileKey4=%ProgramFiles%\Aimersoft\Video Converter Ultimate\TempThumbDir|*.*|RECURSE
 
-[AIMP 2*]
+[AIMP*]
 LangSecRef=3023
-DetectFile=%ProgramFiles%\AIMP2\AIMP2.exe
+DetectFile1=%ProgramFiles%\AIMP2\AIMP2.exe
+DetectFile2=%ProgramFiles%\AIMP\AIMP.exe
+DetectFile3=%ProgramFiles%\AIMP Classic\cAIMP.exe
 Default=False
 FileKey1=%AppData%\AIMP|*.bak
 FileKey2=%LocalAppData%\VirtualStore\Program Files*\AIMP2\Data|*.bak|RECURSE
 FileKey3=%ProgramFiles%\AIMP2\Data|*.bak|RECURSE
-
-[AIMP 4*]
-LangSecRef=3023
-DetectFile=%ProgramFiles%\AIMP\AIMP.exe
-Default=False
-Warning=This will delete AIMP's auto profile and program backup. Make sure your AIMP running properly before using this entry
-FileKey1=%AppData%\AIMP|*.bak
-Filekey2=%ProgramFiles%\AIMP\!Backup|*.*|REMOVESELF
-
-[AIMP Classic*]
-LangSecRef=3023
-DetectFile=%ProgramFiles%\AIMP Classic\cAIMP.exe
-Default=False
-FileKey1=%ProgramFiles%\AIMP Classic\Data|*.bak|RECURSE
+Filekey4=%ProgramFiles%\AIMP\!Backup|*.*|REMOVESELF
+FileKey5=%ProgramFiles%\AIMP Classic\Data|*.bak|RECURSE
 
 [AirBuccaneers*]
 Section=Games
@@ -1196,14 +1186,14 @@ DetectFile=%LocalAppData%\Akamai
 Default=False
 FileKey1=%LocalAppData%\Akamai\Cache|*.*
 
-[Akamai*]
+[Akamai Logs*]
 LangSecRef=3022
 Detect=HKCU\Software\Akamai
 DetectFile=%LocalAppData%\Akamai
 Default=False
 FileKey1=%LocalAppData%\Akamai\Logs|*.*|RECURSE
 
-[Album Player Cache*]
+[AlbumPlayer Cache*]
 LangSecRef=3023
 DetectFile=%AppData%\AlbumPlayer
 Default=False
@@ -1276,17 +1266,12 @@ Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\All Zombies Must
 Default=False
 FileKey1=%Documents%\My Games\UnrealEngine3\Bzb2Game\Logs|*.*
 
-[Alternate File Shredder Archive Log*]
+[Alternate File Shredder Logs*]
 LangSecRef=3024
-Default=False
 Detect=HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Alternate File Shredder_is1
-FileKey1=%AppData%\Alternate\FileShredder|FileShredderLog_*.txt
-
-[Alternate File Shredder Enable Log*]
-LangSecRef=3024
 Default=False
-Detect=HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Alternate File Shredder_is1
 FileKey1=%AppData%\Alternate\FileShredder|FileShredderLog.txt
+FileKey1=%AppData%\Alternate\FileShredder|FileShredderLog_*.txt
 
 [Always Right*]
 LangSecRef=3024
@@ -1324,7 +1309,7 @@ DetectFile=%LocalAppData%\Amazon Cloud Player
 Default=False
 FileKey1=%LocalAppData%\Amazon Cloud Player\Logs|*.*
 
-[Amazon Kindle for PC (Session)*]
+[Amazon Kindle for PC Session*]
 LangSecRef=3023
 Detect=HKCU\Software\Amazon\Kindle
 Default=False
@@ -1361,7 +1346,7 @@ Detect=HKCU\Software\Amazon\Amazon Music
 Default=False
 FileKey1=%LocalAppData%\Amazon Music\Logs|*.*
 
-[Amazon.com Software Downloads (Logs)*]
+[Amazon Downloader Logs*]
 LangSecRef=3024
 DetectFile=%Documents%\Amazon Downloader Logs
 Default=False
@@ -1404,7 +1389,7 @@ FileKey1=%LocalAppData%\AA2DeployClient|debug*.*
 FileKey2=%LocalAppData%\VirtualStore\Program Files*\USArmy\America's Army 2|*.log|RECURSE
 FileKey3=%ProgramFiles%\USArmy\America's Army 2|*.log|RECURSE
 
-[Amnesia - The Dark Descent*]
+[Amnesia The Dark Descent*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\57300
 Default=False
@@ -1503,7 +1488,7 @@ Default=False
 FileKey1=%AppData%\Ubisoft\ANNO 2070\Logs|*.log;*.dmp
 FileKey2=%AppData%\Ubisoft\ANNO 2070\Logs\netlogs|*.log
 
-[Anvisoft Cloud System Booster (Backups)*]
+[Anvisoft Cloud System Booster Backups*]
 LangSecRef=3024
 Detect=HKLM\Software\Anvisoft\Cloud System Booster
 Default=False
@@ -1527,19 +1512,19 @@ FileKey7=%ProgramFiles%\Anvisoft\Cloud System Booster\logs|*.*
 FileKey8=%ProgramFiles%\Anvisoft\Cloud System Booster\reports|*.*
 FileKey9=%ProgramFiles%\Anvisoft\Cloud System Booster\VLog|*.*
 
-[AnvSoft Any Audio Converter (Logs)*]
+[AnvSoft Any Audio Converter Logs*]
 LangSecRef=3023
 Detect=HKCU\Software\AnvSoft\Any Video Converter\
 Default=False
 FileKey1=%AppData%\AnvSoft\Any Audio Converter|*.log
 
-[AnvSoft Any DVD Converter (Database)*]
+[AnvSoft Any DVD Converter Database*]
 LangSecRef=3023
 Detect=HKCU\Software\AnvSoft
 Default=False
 FileKey1=%AppData%\AnvSoft\Any DVD Converter Professional|*.db
 
-[AnvSoft Any DVD Converter (Logs)*]
+[AnvSoft Any DVD Converter Logs*]
 LangSecRef=3023
 Detect=HKCU\Software\AnvSoft
 Default=False
@@ -1711,17 +1696,13 @@ FileKey1=%Documents%\|ArgusMonitor_EventLog.txt;ArgusMonitor_CSVLog.csv
 FileKey2=%LocalAppData%\VirtualStore\Program Files*|ArgusMonitor_EventLog.txt;ArgusMonitor_CSVLog.csv
 FileKey3=%ProgramFiles%\|ArgusMonitor_EventLog.txt;ArgusMonitor_CSVLog.csv
 
-[ARO 2011*]
-LangSecRef=3024
-Detect=HKCU\Software\Sammsoft\ARO\Version 2011
-Default=False
-FileKey1=%AppData%\Sammsoft\ARO\Version 2011\Logs|*.txt
-
 [ARO 2013*]
 LangSecRef=3024
-Detect=HKCU\Software\Sammsoft\ARO\Version 2013
+Detect1=HKCU\Software\Sammsoft\ARO\Version 2013
+Detect2=HKCU\Software\Sammsoft\ARO\Version 2011
 Default=False
 FileKey1=%AppData%\Sammsoft\ARO\Version 2013\Logs|*.txt
+FileKey2=%AppData%\Sammsoft\ARO\Version 2011\Logs|*.txt
 
 [ART*]
 LangSecRef=3029
@@ -1729,6 +1710,43 @@ SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%CommonProgramFiles%\Microsoft\ART\Backup\Google Chrome\Default|*.tmp|RECURSE
 FileKey2=%CommonProgramFiles%\Microsoft\ART\Backup\Google Chrome\Default\Preferences.bak
+
+[Ashampoo Burning Studio 5*]
+LangSecRef=3021
+Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5
+Default=False
+RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Burn Image Project\SelectImage
+RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\AddDialog
+RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\DumpImage
+RegKey4=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Unknown Project\AddDialog
+
+[Ashampoo Burning Studio 6 Free (Logs)*]
+LangSecRef=3023
+Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6
+Default=False
+FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 6 Free\Logs|*.*
+
+[Ashampoo Burning Studio 6*]
+LangSecRef=3021
+Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6
+Default=False
+RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Burn Image Project\SelectImage
+RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Data Disc Project\AddDialog
+RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Unknown Project\AddDialog
+
+[Ashampoo Burning Studio 7*]
+LangSecRef=3021
+Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7
+Default=False
+RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Burn Image Project\SelectImage
+RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Data Disc Project\AddDialog
+RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Unknown Project\AddDialog
+
+[Ashampoo Burning Studio 8*]
+LangSecRef=3021
+Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 8
+Default=False
+RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 8\Data Disc Project\AddDialog
 
 [Ashampoo Burning Studio 07*]
 LangSecRef=3021
@@ -1841,43 +1859,6 @@ RegKey11=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Unknown Project
 RegKey12=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
 RegKey13=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\VIDEO_TS Disc Project\DumpImage|ImagePath
 RegKey14=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
-
-[Ashampoo Burning Studio 5*]
-LangSecRef=3021
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5
-Default=False
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Burn Image Project\SelectImage
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\AddDialog
-RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\DumpImage
-RegKey4=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Unknown Project\AddDialog
-
-[Ashampoo Burning Studio 6 Free (Logs)*]
-LangSecRef=3023
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 6 Free\Logs|*.*
-
-[Ashampoo Burning Studio 6*]
-LangSecRef=3021
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6
-Default=False
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Burn Image Project\SelectImage
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Data Disc Project\AddDialog
-RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Unknown Project\AddDialog
-
-[Ashampoo Burning Studio 7*]
-LangSecRef=3021
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7
-Default=False
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Burn Image Project\SelectImage
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Data Disc Project\AddDialog
-RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Unknown Project\AddDialog
-
-[Ashampoo Burning Studio 8*]
-LangSecRef=3021
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 8
-Default=False
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 8\Data Disc Project\AddDialog
 
 [Ashampoo Snap 7 (AutoSave)*]
 LangSecRef=3024
