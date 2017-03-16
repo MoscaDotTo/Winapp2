@@ -1,5 +1,5 @@
-; Version: 170314
-; # of entries: 2,570
+; Version: 170316
+; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
 ; Is CCleaner taking too long to load with Winapp2? Please head to this link and follow the instructions: http://www.winapp2.com/howto.html
@@ -19814,6 +19814,12 @@ Default=False
 FileKey1=%AppData%\VoipBuster|*.log
 FileKey2=%WinDir%\System32|VoipBuster*.log
 FileKey3=%WinDir%\SysWOW64|VoipBuster*.log
+
+[Vopt 9*]
+LangSecRef=3024
+Default=False
+Detect=HKCU\Software\Golden Bow Systems\Vopt
+FileKey1=%ProgramFiles%\Golden Bow\Vopt 9|Vopt.log
 
 [VS Code*]
 LangSecRef=3021
