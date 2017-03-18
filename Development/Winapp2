@@ -1,4 +1,4 @@
-; Version: 170316
+; Version: 170318
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -931,20 +931,6 @@ RegKey2=HKLM\Software\AdwCleaner|SearchCount
 RegKey3=HKLM\Software\Wow6432node\AdwCleaner|DeleteCount
 RegKey4=HKLM\Software\Wow6432node\AdwCleaner|SearchCount
 
-[Aegisub (Auto Backups)*]
-LangSecRef=3023
-Detect=HKLM\Software\Aegisub
-Default=False
-Warning=Aegisub automatically saves a backup copy of each script you open. This will delete them.
-FileKey1=%AppData%\Aegisub\autoback|*.*|REMOVESELF
-
-[Aegisub (Autosaves)*]
-LangSecRef=3023
-Detect=HKLM\Software\Aegisub
-Default=False
-Warning=Aegisub automatically saves a copy of each script you are working on. This will delete them.
-FileKey1=%AppData%\Aegisub\autosave|*.*|REMOVESELF
-
 [Aegisub*]
 LangSecRef=3023
 Detect=HKLM\Software\Aegisub
@@ -955,6 +941,14 @@ FileKey3=%AppData%\Aegisub\recovered|*.*|REMOVESELF
 FileKey4=%LocalAppData%\Aegisub\ffms2cache|*.*|REMOVESELF
 FileKey5=%LocalAppData%\VirtualStore\Program Files*\Aegisub|*.txt
 FileKey6=%ProgramFiles%\Aegisub|*.txt
+
+[Aegisub Backups*]
+LangSecRef=3023
+Detect=HKLM\Software\Aegisub
+Default=False
+Warning=Aegisub automatically saves a backup copy of each script you open. This will delete them.
+FileKey1=%AppData%\Aegisub\autoback|*.*|REMOVESELF
+FileKey2=%AppData%\Aegisub\autosave|*.*|REMOVESELF
 
 [Age of Conan*]
 Section=Games
@@ -1711,197 +1705,129 @@ Default=False
 FileKey1=%CommonProgramFiles%\Microsoft\ART\Backup\Google Chrome\Default|*.tmp|RECURSE
 FileKey2=%CommonProgramFiles%\Microsoft\ART\Backup\Google Chrome\Default\Preferences.bak
 
-[Ashampoo Burning Studio 5*]
+[Ashampoo Burning Studio*]
 LangSecRef=3021
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5
+Detect1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5
+Detect2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6
+Detect3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7
+Detect4=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007
+Detect5=HKCU\Software\Ashampoo\Ashampoo Burning Studio 8
+Detect6=HKLM\Software\Ashampoo\Ashampoo Burning Studio 2009
+Detect7=HKCU\Software\Ashampoo\Ashampoo Burning Studio 12
+Detect8=HKCU\Software\Ashampoo\Ashampoo Burning Studio 14
+Detect9=HKCU\Software\Ashampoo\Ashampoo Burning Studio 15
+Detect10=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16
+Detect11=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016
+Detect12=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18
 Default=False
+FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 6 Free\Logs|*.*
+FileKey2=%AppData%\Ashampoo\Ashampoo Burning Studio 2007\Logs|*.*
+FileKey3=%AppData%\Ashampoo\Ashampoo Burning Studio 2009|backupmetainfo.xml
+FileKey4=%AppData%\Ashampoo\Ashampoo Burning Studio 2009\Logs|*.xml
+FileKey5=%AppData%\Ashampoo\Ashampoo Burning Studio 12|backupmetainfo.xml
+FileKey6=%AppData%\Ashampoo\Ashampoo Burning Studio 12\Log|*.xml;*.txt
+FileKey7=%AppData%\Ashampoo\Ashampoo Burning Studio 14|backupmetainfo.xml
+FileKey8=%AppData%\Ashampoo\Ashampoo Burning Studio 15|backupmetainfo.xml
+FileKey9=%AppData%\Ashampoo\Ashampoo Burning Studio 15\Log|*.xml;*.txt
+FileKey10=%AppData%\Ashampoo\Ashampoo Burning Studio 16\log|*.xml;*.txt
+FileKey11=%AppData%\Ashampoo\Ashampoo Burning Studio 2016|backupmetainfo.xml
+FileKey12=%AppData%\Ashampoo\Ashampoo Burning Studio 2016\log|*.xml;*.txt
+FileKey13=%AppData%\Ashampoo\Ashampoo Burning Studio 18\log|*.xml;*.txt
+FileKey14=%AppData%\Ashampoo\Logs|*.txt
 RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Burn Image Project\SelectImage
 RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\AddDialog
 RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\DumpImage
 RegKey4=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Unknown Project\AddDialog
+RegKey5=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Burn Image Project\SelectImage
+RegKey6=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Data Disc Project\AddDialog
+RegKey7=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Unknown Project\AddDialog
+RegKey8=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Burn Image Project\SelectImage
+RegKey9=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Data Disc Project\AddDialog
+RegKey10=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Unknown Project\AddDialog
+RegKey11=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007\Burn Image Project\AddDialog
+RegKey12=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007\Data Disc Project\AddDialog
+RegKey13=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007\Dump Image Project\DumpImage
+RegKey14=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007\Unknown Project\AddDialog
+RegKey15=HKCU\Software\Ashampoo\Ashampoo Burning Studio 8\Data Disc Project\AddDialog
+RegKey16=HKCU\Software\Ashampoo\Ashampoo Burning Studio 14\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
+RegKey17=HKCU\Software\Ashampoo\Ashampoo Burning Studio 14\tempFiles
+RegKey18=HKCU\Software\Ashampoo\Ashampoo Burning Studio 15\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
+RegKey19=HKCU\Software\Ashampoo\Ashampoo Burning Studio 15\tempFiles
+RegKey20=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Audio Disc Project\SaveDialog_CPlaylistDlgEx|InitialDirectory
+RegKey21=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Backup Project\BackupOptions|CustomLocation
+RegKey22=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\BDMV Disc Project\SelectBDMVFolder|BdmvPath
+RegKey23=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Browse Image Project\BrowseImageFile|ImagePath
+RegKey24=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Browse Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey25=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Burn Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey26=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Burn Image Project\SelectImage|ImagePath
+RegKey27=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
+RegKey28=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Data Disc Project\DumpImage|ImagePath
+RegKey29=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\DVD-Video Disc Project\MoviesPage|Path
+RegKey30=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\DVD-Video Disc Project\SaveDialog_authed.CMoviesPage.Movies|InitialDirectory
+RegKey31=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Logs
+RegKey32=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\tempFiles
+RegKey33=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Unknown Project
+RegKey34=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
+RegKey35=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\VIDEO_TS Disc Project\DumpImage|ImagePath
+RegKey36=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
+RegKey37=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Audio Disc Project\SaveDialog_CPlaylistDlgEx|InitialDirectory
+RegKey38=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Backup Project\BackupOptions|CustomLocation
+RegKey39=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Browse Image Project\BrowseImageFile|ImagePath
+RegKey40=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Browse Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey41=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Burn Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey42=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Burn Image Project\SelectImage|ImagePath
+RegKey43=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
+RegKey44=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Data Disc Project\DumpImage|ImagePath
+RegKey45=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Logs
+RegKey46=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\tempFiles
+RegKey47=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Unknown Project
+RegKey48=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
+RegKey49=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\VIDEO_TS Disc Project\DumpImage|ImagePath
+RegKey50=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
+RegKey51=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Audio Disc Project\SaveDialog_CPlaylistDlgEx|InitialDirectory
+RegKey52=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Backup Project\BackupOptions|CustomLocation
+RegKey53=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\BDMV Disc Project\SelectBDMVFolder|BdmvPath
+RegKey54=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Browse Image Project\BrowseImageFile|ImagePath
+RegKey55=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Browse Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey56=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Burn Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey57=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Burn Image Project\SelectImage|ImagePath
+RegKey58=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
+RegKey59=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Data Disc Project\DumpImage|ImagePath
+RegKey60=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\DVD-Video Disc Project\MoviesPage|Path
+RegKey61=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\DVD-Video Disc Project\SaveDialog_authed.CMoviesPage.Movies|InitialDirectory
+RegKey62=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Logs
+RegKey63=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\tempFiles
+RegKey64=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Unknown Project
+RegKey65=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
+RegKey66=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\VIDEO_TS Disc Project\DumpImage|ImagePath
+RegKey67=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
 
-[Ashampoo Burning Studio 6 Free (Logs)*]
-LangSecRef=3023
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 6 Free\Logs|*.*
-
-[Ashampoo Burning Studio 6*]
-LangSecRef=3021
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6
-Default=False
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Burn Image Project\SelectImage
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Data Disc Project\AddDialog
-RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 6\Unknown Project\AddDialog
-
-[Ashampoo Burning Studio 7*]
-LangSecRef=3021
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7
-Default=False
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Burn Image Project\SelectImage
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Data Disc Project\AddDialog
-RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 7\Unknown Project\AddDialog
-
-[Ashampoo Burning Studio 8*]
-LangSecRef=3021
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 8
-Default=False
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 8\Data Disc Project\AddDialog
-
-[Ashampoo Burning Studio 07*]
-LangSecRef=3021
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 2007\Logs|*.*
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007\Burn Image Project\AddDialog
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007\Data Disc Project\AddDialog
-RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007\Dump Image Project\DumpImage
-RegKey4=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2007\Unknown Project\AddDialog
-
-[Ashampoo Burning Studio 09*]
+[Ashampoo Snap*]
 LangSecRef=3024
-Detect=HKLM\Software\Ashampoo\Ashampoo Burning Studio 2009
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 2009|backupmetainfo.xml
-FileKey2=%AppData%\Ashampoo\Ashampoo Burning Studio 2009\Logs|*.xml
-FileKey3=%AppData%\Ashampoo\Logs|*.txt
-
-[Ashampoo Burning Studio 12*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 12
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 12|backupmetainfo.xml
-FileKey2=%AppData%\Ashampoo\Ashampoo Burning Studio 12\Log|*.xml;*.txt
-FileKey3=%AppData%\Ashampoo\Log|*.txt
-
-[Ashampoo Burning Studio 14 More*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 14
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 14|backupmetainfo.xml
-FileKey2=%AppData%\Ashampoo\Log|*.txt
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 14\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 14\tempFiles
-
-[Ashampoo Burning Studio 15*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 15
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 15|backupmetainfo.xml
-FileKey2=%AppData%\Ashampoo\Ashampoo Burning Studio 15\Log|*.xml;*.txt
-FileKey3=%AppData%\Ashampoo\Log|*.txt
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 15\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 15\tempFiles
-
-[Ashampoo Burning Studio 16*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 16\log|*.xml;*.txt
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Audio Disc Project\SaveDialog_CPlaylistDlgEx|InitialDirectory
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Backup Project\BackupOptions|CustomLocation
-RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\BDMV Disc Project\SelectBDMVFolder|BdmvPath
-RegKey4=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Browse Image Project\BrowseImageFile|ImagePath
-RegKey5=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Browse Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
-RegKey6=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Burn Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
-RegKey7=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Burn Image Project\SelectImage|ImagePath
-RegKey8=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
-RegKey9=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Data Disc Project\DumpImage|ImagePath
-RegKey10=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\DVD-Video Disc Project\MoviesPage|Path
-RegKey11=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\DVD-Video Disc Project\SaveDialog_authed.CMoviesPage.Movies|InitialDirectory
-RegKey12=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Logs
-RegKey13=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\tempFiles
-RegKey14=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Unknown Project
-RegKey15=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
-RegKey16=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\VIDEO_TS Disc Project\DumpImage|ImagePath
-RegKey17=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
-
-[Ashampoo Burning Studio 18*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 18\log|*.xml;*.txt
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Audio Disc Project\SaveDialog_CPlaylistDlgEx|InitialDirectory
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Backup Project\BackupOptions|CustomLocation
-RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\BDMV Disc Project\SelectBDMVFolder|BdmvPath
-RegKey4=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Browse Image Project\BrowseImageFile|ImagePath
-RegKey5=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Browse Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
-RegKey6=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Burn Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
-RegKey7=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Burn Image Project\SelectImage|ImagePath
-RegKey8=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
-RegKey9=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Data Disc Project\DumpImage|ImagePath
-RegKey10=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\DVD-Video Disc Project\MoviesPage|Path
-RegKey11=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\DVD-Video Disc Project\SaveDialog_authed.CMoviesPage.Movies|InitialDirectory
-RegKey12=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Logs
-RegKey13=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\tempFiles
-RegKey14=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Unknown Project
-RegKey15=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
-RegKey16=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\VIDEO_TS Disc Project\DumpImage|ImagePath
-RegKey17=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
-
-[Ashampoo Burning Studio 2016*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 2016|backupmetainfo.xml
-FileKey2=%AppData%\Ashampoo\Ashampoo Burning Studio 2016\log|*.xml;*.txt
-RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Audio Disc Project\SaveDialog_CPlaylistDlgEx|InitialDirectory
-RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Backup Project\BackupOptions|CustomLocation
-RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Browse Image Project\BrowseImageFile|ImagePath
-RegKey4=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Browse Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
-RegKey5=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Burn Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
-RegKey6=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Burn Image Project\SelectImage|ImagePath
-RegKey7=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
-RegKey8=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Data Disc Project\DumpImage|ImagePath
-RegKey9=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Logs
-RegKey10=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\tempFiles
-RegKey11=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Unknown Project
-RegKey12=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
-RegKey13=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\VIDEO_TS Disc Project\DumpImage|ImagePath
-RegKey14=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
-
-[Ashampoo Snap 7 (AutoSave)*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Snap 7
-Default=False
-FileKey1=%Pictures%\Ashampoo Snap 7\_SNAPDOC|*.*
-
-[Ashampoo Snap 7*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Snap 7
+Detect1=HKCU\Software\Ashampoo\Ashampoo Snap 7
+Detect2=HKCU\Software\Ashampoo\Ashampoo Snap 8
+Detect3=HKCU\Software\Ashampoo\Ashampoo Snap 9
 Default=False
 FileKey1=%AppData%\Ashampoo\Ashampoo Snap 7|*.*|RECURSE
 FileKey2=%LocalAppData%\CrashRpt\UnsentCrashReports|*.*|RECURSE
 FileKey3=%ProgramFiles%\Ashampoo\Ashampoo Snap 7|_NLogMsg.txt
+FileKey4=%AppData%\Ashampoo\Ashampoo Snap 8|*.*|RECURSE
+FileKey5=%LocalAppData%\CrashRpt\UnsentCrashReports|*.*|RECURSE
+FileKey6=%LocalAppData%\VirtualStore\Program Files*\Ashampoo\Ashampoo Snap 8|_NLogMsg.txt
+FileKey7=%ProgramFiles%\Ashampoo\Ashampoo Snap 8|_NLogMsg.txt
+FileKey8=%AppData%\Ashampoo\Ashampoo Snap 9|*.*|RECURSE
+FileKey9=%LocalAppData%\CrashRpt\UnsentCrashReports|*.*|RECURSE
+FileKey10=%ProgramFiles%\Ashampoo\Ashampoo Snap 9|_NLogMsg.txt
 
-[Ashampoo Snap 8 (AutoSave)*]
+[Ashampoo Snap AutoSave*]
 LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Snap 8
+Detect1=HKCU\Software\Ashampoo\Ashampoo Snap 7
+Detect2=HKCU\Software\Ashampoo\Ashampoo Snap 8
+Detect3=HKCU\Software\Ashampoo\Ashampoo Snap 9
 Default=False
-FileKey1=%Pictures%\Ashampoo Snap 8\_SNAPDOC|*.*
-
-[Ashampoo Snap 8*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Snap 8
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Snap 8|*.*|RECURSE
-FileKey2=%LocalAppData%\CrashRpt\UnsentCrashReports|*.*|RECURSE
-FileKey3=%LocalAppData%\VirtualStore\Program Files*\Ashampoo\Ashampoo Snap 8|_NLogMsg.txt
-FileKey4=%ProgramFiles%\Ashampoo\Ashampoo Snap 8|_NLogMsg.txt
-
-[Ashampoo Snap 9 (AutoSave)*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Snap 9
-Default=False
-FileKey1=%Pictures%\Ashampoo Snap 9\_SNAPDOC|*.*
-
-[Ashampoo Snap 9*]
-LangSecRef=3024
-Detect=HKCU\Software\Ashampoo\Ashampoo Snap 9
-Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Snap 9|*.*|RECURSE
-FileKey2=%LocalAppData%\CrashRpt\UnsentCrashReports|*.*|RECURSE
-FileKey3=%ProgramFiles%\Ashampoo\Ashampoo Snap 9|_NLogMsg.txt
+FileKey1=%Pictures%\Ashampoo Snap 7\_SNAPDOC|*.*
+FileKey2=%Pictures%\Ashampoo Snap 8\_SNAPDOC|*.*
+FileKey3=%Pictures%\Ashampoo Snap 9\_SNAPDOC|*.*
 
 [Ashley Jones - The Heart Of Egypt*]
 Section=Games
@@ -1970,7 +1896,7 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Audio Sliders|*.log
 FileKey2=%ProgramFiles%\Audio Sliders|*.log
 
-[Audio/Video (Stats)*]
+[Audio/Video Stats*]
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows
 Default=False
@@ -1984,11 +1910,13 @@ FileKey1=%AppData%\KC Softwares\AudioGrail|ag.sel;AudioGrail.log
 
 [Auslogics BoostSpeed 5*]
 LangSecRef=3024
-Detect=HKCU\Software\Auslogics\BoostSpeed\
+Detect1=HKCU\Software\Auslogics\BoostSpeed\
+Detect2=HKLM\Software\Auslogics\BoostSpeed\7.x
 Default=False
 FileKey1=%AppData%\Auslogics|*.htm;*.html;*.log;*.rsc;*.sta;*.xml|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\Program Files*\Auslogics\Auslogics BoostSpeed|rdboot.log
-FileKey3=%ProgramFiles%\Auslogics\Auslogics BoostSpeed|rdboot.log
+FileKey2=%CommonAppData%\Auslogics\BoostSpeed\7.x|*.err;*.htm;*.html;*.log;*.rsc;*.sta;*.xml|RECURSE
+FileKey3=%LocalAppData%\VirtualStore\Program Files*\Auslogics\Auslogics BoostSpeed|rdboot.log
+FileKey4=%ProgramFiles%\Auslogics\Auslogics BoostSpeed|rdboot.log
 RegKey1=HKCU\Software\Auslogics\BoostSpeed\5.x\Settings|DiskCleaner.AppLogic.ErrorsFailed
 RegKey2=HKCU\Software\Auslogics\BoostSpeed\5.x\Settings|DiskCleaner.AppLogic.ErrorsFound
 RegKey3=HKCU\Software\Auslogics\BoostSpeed\5.x\Settings|DiskCleaner.AppLogic.ErrorsRemoved
@@ -2002,32 +1930,32 @@ RegKey10=HKCU\Software\Auslogics\BoostSpeed\5.x\Settings|TrackEraser.LastScan.Da
 RegKey11=HKCU\Software\Auslogics\BoostSpeed\5.x\Settings|TrackEraser.LastScan.FailedToRemove
 RegKey12=HKCU\Software\Auslogics\BoostSpeed\5.x\Settings|TrackEraser.LastScan.Found
 RegKey13=HKCU\Software\Auslogics\BoostSpeed\5.x\Settings|TrackEraser.LastScan.Removed
+RegKey14=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.DisksList.SelectedDrives
+RegKey15=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.DateTime
+RegKey16=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.DisksList
+RegKey17=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.FilesCount
+RegKey18=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey19=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey20=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey21=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey22=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.LastScan
+RegKey23=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.DisksList.SelectedDrives
+RegKey24=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.DateTime
+RegKey25=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.DisksList
+RegKey26=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.FilesCount
+RegKey27=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey28=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey29=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey30=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey31=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.LastScan
 
-[Auslogics BoostSpeed 7*]
+[Auslogics Disk Defrag*]
 LangSecRef=3024
-Detect=HKLM\Software\Auslogics\BoostSpeed\7.x
+Detect1=HKLM\SOFTWARE\Auslogics\DiskDefrag
+Detect2=HKLM\SOFTWARE\WOW6432Node\Auslogics\DiskDefrag
 Default=False
-FileKey1=%CommonAppData%\Auslogics\BoostSpeed\7.x|*.err;*.htm;*.html;*.log;*.rsc;*.sta;*.xml|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\Program Files*\Auslogics\Auslogics BoostSpeed|rdboot.log
-FileKey3=%ProgramFiles%\Auslogics\Auslogics BoostSpeed|rdboot.log
-RegKey1=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.DisksList.SelectedDrives
-RegKey2=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.DateTime
-RegKey3=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.DisksList
-RegKey4=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.FilesCount
-RegKey5=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsFailed
-RegKey6=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsFound
-RegKey7=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
-RegKey8=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
-RegKey9=HKLM\Software\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.LastScan
-RegKey10=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.DisksList.SelectedDrives
-RegKey11=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.DateTime
-RegKey12=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.DisksList
-RegKey13=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|DiskDefrag.LastDefragment.FilesCount
-RegKey14=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsFailed
-RegKey15=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsFound
-RegKey16=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
-RegKey17=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
-RegKey18=HKLM\SOFTWARE\Wow6432Node\Auslogics\BoostSpeed\7.x\Settings|RegCleaner.AppLogic.LastScan
+FileKey1=%CommonAppData%\Auslogics\DiskDefrag\*\Logs|*.*|RECURSE
+FileKey2=%CommonAppData%\Auslogics\DiskDefrag\*\Reports|*.*|RECURSE
 
 [Auslogics Disk Defrag Portable*]
 LangSecRef=3024
@@ -2049,81 +1977,58 @@ FileKey1=%CommonAppData%\Auslogics\Disk Defrag Professional\*\Logs|*.*|RECURSE
 FileKey2=%CommonAppData%\Auslogics\Disk Defrag Professional\*\Reports|*.*|RECURSE
 FileKey3=%ProgramFiles%\Auslogics\Disk Defrag Professional|ndefrg.log
 
-[Auslogics Disk Defrag*]
-LangSecRef=3024
-Detect1=HKLM\SOFTWARE\Auslogics\DiskDefrag
-Detect2=HKLM\SOFTWARE\WOW6432Node\Auslogics\DiskDefrag
-Default=False
-FileKey1=%CommonAppData%\Auslogics\DiskDefrag\*\Logs|*.*|RECURSE
-FileKey2=%CommonAppData%\Auslogics\DiskDefrag\*\Reports|*.*|RECURSE
-
-[Auslogics Registry Cleaner 3*]
-LangSecRef=3024
-Detect1=HKLM\Software\Auslogics\Registry Cleaner\3.x
-Detect2=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x
-Default=False
-Warning=This will reset your scan results
-FileKey1=%CommonAppData%\Auslogics\Registry Cleaner\3.x|*.htm;*.html;*.log|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\Auslogics\Registry Cleaner\3.x|*.htm;*.html;*.log|RECURSE
-RegKey1=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsFailed
-RegKey2=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsFound
-RegKey3=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
-RegKey4=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
-RegKey5=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.LastScan
-RegKey6=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsFailed
-RegKey7=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsFound
-RegKey8=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
-RegKey9=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
-RegKey10=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.LastScan
-
-[Auslogics Registry Cleaner 4*]
-LangSecRef=3024
-Detect1=HKLM\Software\Auslogics\Registry Cleaner\4.x
-Detect2=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x
-Default=False
-Warning=This will reset your scan results
-FileKey1=%CommonAppData%\Auslogics\Registry Cleaner\4.x|*.htm;*.html;*.log|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\Auslogics\Registry Cleaner\4.x|*.htm;*.html;*.log|RECURSE
-RegKey1=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsFailed
-RegKey2=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsFound
-RegKey3=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
-RegKey4=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
-RegKey5=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.LastScan
-RegKey6=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsFailed
-RegKey7=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsFound
-RegKey8=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
-RegKey9=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
-RegKey10=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.LastScan
-
-[Auslogics Registry Cleaner 5*]
-LangSecRef=3024
-Detect1=HKLM\Software\Auslogics\Registry Cleaner\5.X
-Detect2=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X
-Default=False
-Warning=This will remove your scan results
-FileKey1=%CommonAppData%\Auslogics\Registry Cleaner\5.X\Rescue\Auslogics Registry Cleaner|*.htm;*.html;*.log|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\Auslogics\Registry Cleaner\5.X\Rescue\Auslogics Registry Cleaner|*.htm;*.html;*.log|RECURSE
-RegKey1=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFailed
-RegKey2=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFound
-RegKey3=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemoved
-RegKey4=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
-RegKey5=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.LastScan
-RegKey6=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFailed
-RegKey7=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFound
-RegKey8=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemoved
-RegKey9=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
-RegKey10=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.LastScan
-
 [Auslogics Registry Cleaner*]
 LangSecRef=3024
-Detect=HKCU\Software\Auslogics\Registry Cleaner
+Detect1=HKCU\Software\Auslogics\Registry Cleaner
+Detect2=HKLM\Software\Auslogics\Registry Cleaner\3.x
+Detect3=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x
+Detect4=HKLM\Software\Auslogics\Registry Cleaner\4.x
+Detect5=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x
+Detect6=HKLM\Software\Auslogics\Registry Cleaner\5.X
+Detect7=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X
 Default=False
-Warning=This will remove your backups, and you will be unable to undo any changes you made with Auslogics Registry Cleaner.
+Warning=This will reset your scan results.
 FileKey1=%AppData%\Auslogics|*.htm;*.html;*.log;*.rsc;*.sta;*.xml|RECURSE
+FileKey2=%CommonAppData%\Auslogics\Registry Cleaner\3.x|*.htm;*.html;*.log|RECURSE
+FileKey3=%LocalAppData%\VirtualStore\ProgramData\Auslogics\Registry Cleaner\3.x|*.htm;*.html;*.log|RECURSE
+FileKey4=%CommonAppData%\Auslogics\Registry Cleaner\4.x|*.htm;*.html;*.log|RECURSE
+FileKey5=%LocalAppData%\VirtualStore\ProgramData\Auslogics\Registry Cleaner\4.x|*.htm;*.html;*.log|RECURSE
+FileKey6=%CommonAppData%\Auslogics\Registry Cleaner\5.X\Rescue\Auslogics Registry Cleaner|*.htm;*.html;*.log|RECURSE
+FileKey7=%LocalAppData%\VirtualStore\ProgramData\Auslogics\Registry Cleaner\5.X\Rescue\Auslogics Registry Cleaner|*.htm;*.html;*.log|RECURSE
 RegKey1=HKCU\Software\Auslogics\Registry Cleaner\2.x\Settings|RegCleaner.AppLogic.ErrorsFailed
 RegKey2=HKCU\Software\Auslogics\Registry Cleaner\2.x\Settings|RegCleaner.AppLogic.ErrorsFound
 RegKey3=HKCU\Software\Auslogics\Registry Cleaner\2.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
 RegKey4=HKCU\Software\Auslogics\Registry Cleaner\2.x\Settings|RegCleaner.AppLogic.LastScan
+RegKey5=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey6=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey7=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey8=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey9=HKLM\Software\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.LastScan
+RegKey10=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey11=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey12=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey13=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey14=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\3.x\Settings|RegCleaner.AppLogic.LastScan
+RegKey15=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey16=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey17=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey18=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey19=HKLM\Software\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.LastScan
+RegKey20=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey21=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey22=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey23=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey24=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\4.x\Settings|RegCleaner.AppLogic.LastScan
+RegKey25=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey26=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey27=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey28=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey29=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.LastScan
+RegKey30=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey31=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey32=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey33=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey34=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.LastScan
 
 [Auslogics Registry Defrag*]
 LangSecRef=3024
@@ -2210,13 +2115,6 @@ Detect=HKCU\Software\Avant Browser
 Default=False
 FileKey1=%AppData%\Avant Browser|keywords.dat;pages.dat;recents.dat;reopen.dat
 
-[Avast! Antivirus 5 More*]
-LangSecRef=3024
-Detect=HKCU\Software\ALWIL Software\Avast\5.0
-Default=False
-FileKey1=%CommonAppData%\Alwil Software\Avast5\backup|*.*|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\Alwil Software\Avast5\backup|*.*|RECURSE
-
 [Avast! Antivirus More*]
 LangSecRef=3024
 Detect1=HKCU\Software\AVAST Software\Avast
@@ -2231,48 +2129,18 @@ FileKey6=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast\backup|*.*
 FileKey7=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast\log|*.*
 FileKey8=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast\report|*.txt
 
+[Avast! Antivirus 5 More*]
+LangSecRef=3024
+Detect=HKCU\Software\ALWIL Software\Avast\5.0
+Default=False
+FileKey1=%CommonAppData%\Alwil Software\Avast5\backup|*.*|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\Alwil Software\Avast5\backup|*.*|RECURSE
+
 [Avast! Browser Cleanup*]
 LangSecRef=3024
 Detect=HKCU\Software\AVAST Software\Avast Browser Cleanup
 Default=False
 RegKey1=HKCU\Software\AVAST Software\Avast Browser Cleanup
-
-[AVG 2015*]
-LangSecRef=3024
-Detect=HKLM\Software\AVG\AVG2015
-Default=False
-FileKey1=%CommonAppData%\AVG2015\Emc\log|*.*
-FileKey2=%CommonAppData%\AVG2015\IDS\config|List.zip.bak
-FileKey3=%CommonAppData%\AVG2015\IDS\profile|globalLoadable.bak
-FileKey4=%CommonAppData%\AVG2015\log|*.log;*.log.lock;history.xml
-FileKey5=%CommonAppData%\AVG2015\scanlogs|*.log
-FileKey6=%CommonAppData%\AVG2015\SetupBackup|*.*|REMOVESELF
-FileKey7=%CommonAppData%\AVG2015\temp|*.*
-FileKey8=%CommonAppData%\AVG2015\update\backup|*.*
-FileKey9=%CommonAppData%\MFAData\logs|*.*
-FileKey10=%CommonAppData%\MFAData\pack|*.*
-FileKey11=%CommonAppData%\MFAData|msistorg.dat.bkp;public_installation_log.xml
-FileKey12=%LocalAppData%\AVG2015\log|*.log;*.log.*
-FileKey13=%LocalAppData%\AVG2015\temp|*.*
-FileKey14=%LocalAppData%\AVG2015\update|*.*
-FileKey15=%LocalAppData%\MFAData\logs|*.*
-FileKey16=%ProgramFiles%\AVG\AVG2015|updatecomps.bak;*.old
-FileKey17=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\dumps|*.*
-FileKey18=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\log|*.*
-FileKey19=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\temp|*.*
-FileKey20=%WinDir%\System32\config\systemprofile\AppData\Local\MFAData\logs|*.*
-FileKey21=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\Avg2015\dumps|*.*
-FileKey22=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\log|*.*
-FileKey23=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\temp|*.*
-FileKey24=%WinDir%\System32\config\systemprofile\Local Settings\MFAData\logs|*.*
-FileKey25=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\dumps|*.*
-FileKey26=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\log|*.*
-FileKey27=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\temp|*.*
-FileKey28=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\MFAData\logs|*.*
-FileKey29=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\dumps|*.*
-FileKey30=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\log|*.*
-FileKey31=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\temp|*.*
-FileKey32=%WinDir%\SysWOW64\config\systemprofile\Local Settings\MFAData\logs|*.*
 
 [AVG AntiVirus 2013 More*]
 LangSecRef=3024
@@ -2341,6 +2209,43 @@ FileKey30=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2014\log|*.*
 FileKey31=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\MFAData\logs|*.*
 FileKey32=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\dumps|*.*
 FileKey33=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\log|*.*
+
+[AVG 2015*]
+LangSecRef=3024
+Detect=HKLM\Software\AVG\AVG2015
+Default=False
+FileKey1=%CommonAppData%\AVG2015\Emc\log|*.*
+FileKey2=%CommonAppData%\AVG2015\IDS\config|List.zip.bak
+FileKey3=%CommonAppData%\AVG2015\IDS\profile|globalLoadable.bak
+FileKey4=%CommonAppData%\AVG2015\log|*.log;*.log.lock;history.xml
+FileKey5=%CommonAppData%\AVG2015\scanlogs|*.log
+FileKey6=%CommonAppData%\AVG2015\SetupBackup|*.*|REMOVESELF
+FileKey7=%CommonAppData%\AVG2015\temp|*.*
+FileKey8=%CommonAppData%\AVG2015\update\backup|*.*
+FileKey9=%CommonAppData%\MFAData\logs|*.*
+FileKey10=%CommonAppData%\MFAData\pack|*.*
+FileKey11=%CommonAppData%\MFAData|msistorg.dat.bkp;public_installation_log.xml
+FileKey12=%LocalAppData%\AVG2015\log|*.log;*.log.*
+FileKey13=%LocalAppData%\AVG2015\temp|*.*
+FileKey14=%LocalAppData%\AVG2015\update|*.*
+FileKey15=%LocalAppData%\MFAData\logs|*.*
+FileKey16=%ProgramFiles%\AVG\AVG2015|updatecomps.bak;*.old
+FileKey17=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\dumps|*.*
+FileKey18=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\log|*.*
+FileKey19=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\temp|*.*
+FileKey20=%WinDir%\System32\config\systemprofile\AppData\Local\MFAData\logs|*.*
+FileKey21=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\Avg2015\dumps|*.*
+FileKey22=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\log|*.*
+FileKey23=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\temp|*.*
+FileKey24=%WinDir%\System32\config\systemprofile\Local Settings\MFAData\logs|*.*
+FileKey25=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\dumps|*.*
+FileKey26=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\log|*.*
+FileKey27=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\temp|*.*
+FileKey28=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\MFAData\logs|*.*
+FileKey29=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\dumps|*.*
+FileKey30=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\log|*.*
+FileKey31=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\temp|*.*
+FileKey32=%WinDir%\SysWOW64\config\systemprofile\Local Settings\MFAData\logs|*.*
 
 [AVG PC TuneUp & TuneUp Utilities (CrashDumps)*]
 LangSecRef=3024
