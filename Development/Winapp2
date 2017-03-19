@@ -1,4 +1,4 @@
-; Version: 170318
+; Version: 170319
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -1726,7 +1726,7 @@ FileKey3=%AppData%\Ashampoo\Ashampoo Burning Studio 2009\Logs|*.xml
 FileKey4=%AppData%\Ashampoo\Ashampoo Burning Studio *|backupmetainfo.xml
 FileKey5=%AppData%\Ashampoo\Ashampoo Burning Studio *\Log|*.xml;*.txt
 FileKey6=%AppData%\Ashampoo\Ashampoo Burning Studio *\log|*.xml;*.txt
-FileKey17=%AppData%\Ashampoo\Logs|*.txt
+FileKey7=%AppData%\Ashampoo\Logs|*.txt
 RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Burn Image Project\SelectImage
 RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\AddDialog
 RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\DumpImage
@@ -1803,7 +1803,7 @@ Detect3=HKCU\Software\Ashampoo\Ashampoo Snap 9
 Default=False
 FileKey1=%AppData%\Ashampoo\Ashampoo Snap *|*.*|RECURSE
 FileKey2=%LocalAppData%\CrashRpt\UnsentCrashReports|*.*|RECURSE
-FileKey3=%LocalAppData%\VirtualStore\Program Files*\Ashampoo\Ashampoo Snap 8|_NLogMsg.txt
+FileKey3=%LocalAppData%\VirtualStore\Program Files\Ashampoo\Ashampoo Snap 8|_NLogMsg.txt
 FileKey4=%ProgramFiles%\Ashampoo\Ashampoo Snap *|_NLogMsg.txt
 
 [Ashampoo Snap AutoSave*]
