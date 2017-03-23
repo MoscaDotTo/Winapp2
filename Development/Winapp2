@@ -5,6 +5,78 @@
 ; Is CCleaner taking too long to load with Winapp2? Please head to this link and follow the instructions: http://www.winapp2.com/howto.html
 ; Valid commands can be found on the first post here: https://forum.piriform.com/index.php?showtopic=32310
 ; Please do not host this file anywhere without permission. This is to facilitate proper distribution of the latest version. Thanks.
+;
+; Chrome Entries.
+
+[Backup*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Amigo\Application|old_amigo.exe
+FileKey2=%LocalAppData%\Google\Chrome*\Application|old_chrome.exe
+FileKey3=%ProgramFiles%\Google\Chrome*\Application|old_chrome.exe
+
+[Bookmark Backup*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Chromium
+Detect2=HKCU\Software\SuperBird
+Detect3=HKCU\Software\Torch
+Default=False
+FileKey1=%LocalAppData%\Amigo\User Data\*\*|*Bookmarks.bak
+FileKey2=%LocalAppData%\Chrome Plus\User Data\*|*Bookmarks.bak
+FileKey3=%LocalAppData%\Chromium\User Data\*|*Bookmarks.bak
+FileKey4=%LocalAppData%\Flock\User Data\*|*Bookmarks.bak
+FileKey5=%LocalAppData%\Google\Chrome*\User Data\*|*Bookmarks.bak
+FileKey6=%LocalAppData%\Rockmelt\User Data\*|*Bookmarks.bak
+FileKey7=%LocalAppData%\SRWare Iron\User Data\*|*Bookmarks.bak
+FileKey8=%LocalAppData%\SuperBird\User Data\*|*Bookmarks.bak
+FileKey9=%LocalAppData%\Torch\User Data\*|*Bookmarks.bak
+
+[Chrome Crash Reports*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\CrashReports|*.*
+FileKey2=%LocalAppData%\Google\Chrome\User Data\Crashpad\reports|*.*
+
+[Chrome Temps*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%ProgramFiles%\Google\Chrome\Temp|*.*|RECURSE
+
+[Chrome Updates*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Update\Download|*.*|RECURSE
+FileKey2=%LocalAppData%\Google\Update\Install|*.*|RECURSE
+FileKey3=%LocalAppData%\Google\Update\Offline|*.*|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Download|*.*|RECURSE
+FileKey5=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Install|*.*|RECURSE
+FileKey6=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Offline|*.*|RECURSE
+FileKey7=%ProgramFiles%\Google\Update\Download|*.*|RECURSE
+FileKey8=%ProgramFiles%\Google\Update\Install|*.*|RECURSE
+FileKey9=%ProgramFiles%\Google\Update\Offline|*.*|RECURSE
+
+; End of Chrome Entries.
+;
+; Firefox Entries
+
+[Bookmark Backups*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\bookmarkbackups|*.json*
+
+[Chatzilla*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\chatzilla|inputHistory.txt
+
+; End of Firefox Entries.
 
 [.NET Framework Cache*]
 LangSecRef=3025
@@ -2101,24 +2173,20 @@ FileKey1=%AppData%\Avant Browser|keywords.dat;pages.dat;recents.dat;reopen.dat
 
 [Avast! Antivirus More*]
 LangSecRef=3024
-Detect1=HKCU\Software\AVAST Software\Avast
-Detect2=HKLM\Software\AVAST Software\Avast
-Default=False
-FileKey1=%CommonAppData%\AVAST Software\Avast|Log.db;backend.txt
-FileKey2=%CommonAppData%\AVAST Software\Avast\backup|*.*|RECURSE
-FileKey3=%CommonAppData%\AVAST Software\Avast\log|*.*
-FileKey4=%CommonAppData%\AVAST Software\Avast\report|*.txt
-FileKey5=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast|Log.db;backend.txt
-FileKey6=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast\backup|*.*|RECURSE
-FileKey7=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast\log|*.*
-FileKey8=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast\report|*.txt
-
-[Avast! Antivirus 5 More*]
-LangSecRef=3024
-Detect=HKCU\Software\ALWIL Software\Avast\5.0
+Detect1=HKCU\Software\ALWIL Software\Avast\5.0
+Detect2=HKCU\Software\AVAST Software\Avast
+Detect3=HKLM\Software\AVAST Software\Avast
 Default=False
 FileKey1=%CommonAppData%\Alwil Software\Avast5\backup|*.*|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\Alwil Software\Avast5\backup|*.*|RECURSE
+FileKey2=%CommonAppData%\AVAST Software\Avast|Log.db;backend.txt
+FileKey3=%CommonAppData%\AVAST Software\Avast\backup|*.*|RECURSE
+FileKey4=%CommonAppData%\AVAST Software\Avast\log|*.*
+FileKey5=%CommonAppData%\AVAST Software\Avast\report|*.txt
+FileKey6=%LocalAppData%\VirtualStore\ProgramData\Alwil Software\Avast5\backup|*.*|RECURSE
+FileKey7=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast|Log.db;backend.txt
+FileKey8=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast\backup|*.*|RECURSE
+FileKey9=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast\log|*.*
+FileKey10=%LocalAppData%\VirtualStore\ProgramData\AVAST Software\Avast\report|*.txt
 
 [Avast! Browser Cleanup*]
 LangSecRef=3024
@@ -2126,9 +2194,11 @@ Detect=HKCU\Software\AVAST Software\Avast Browser Cleanup
 Default=False
 RegKey1=HKCU\Software\AVAST Software\Avast Browser Cleanup
 
-[AVG AntiVirus 2013 More*]
+[AVG AntiVirus More*]
 LangSecRef=3024
-Detect=HKLM\Software\AVG\AVG2013
+Detect1=HKLM\Software\AVG\AVG2013
+Detect2=HKLM\Software\AVG\AVG2014
+Detect3=HKLM\Software\AVG\AVG2015
 Default=False
 FileKey1=%CommonAppData%\AVG2013\IDS\config|*List.zip.bak
 FileKey2=%CommonAppData%\AVG2013\IDS\profile|globalLoadable.bak
@@ -2155,83 +2225,68 @@ FileKey22=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2013\log|*.*
 FileKey23=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\MFAData\logs|*.*
 FileKey24=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\Avg2013\dumps|*.*
 FileKey25=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\Avg2013\log|*.*
+FileKey26=%CommonAppData%\AVG2014\Emc\Log|*.log
+FileKey27=%CommonAppData%\AVG2014\IDS\config|*List.zip.bak
+FileKey28=%CommonAppData%\AVG2014\IDS\profile|globalLoadable.bak
+FileKey29=%CommonAppData%\AVG2014\Log|*.log;history.xml
+FileKey30=%CommonAppData%\AVG2014\scanlogs|*.log
+FileKey31=%CommonAppData%\AVG2014\SetupBackup|*.*
+FileKey32=%CommonAppData%\AVG2014\update\backup|*.*
+FileKey33=%CommonAppData%\AVG2014\Temp|*.tmp
+FileKey34=%LocalAppData%\AVG2014\log|*.log;*.log.*
+FileKey35=%LocalAppData%\AVG2014\temp|*.tmp
+FileKey36=%LocalAppData%\VirtualStore\Program Files*\AVG\AVG2014|updatecomps.bak;*.old
+FileKey37=%LocalAppData%\VirtualStore\ProgramData\AVG2014\Emc\Log|*.log
+FileKey38=%LocalAppData%\VirtualStore\ProgramData\AVG2014\IDS\config|*List.zip.bak
+FileKey39=%LocalAppData%\VirtualStore\ProgramData\AVG2014\IDS\profile|globalLoadable.bak
+FileKey40=%LocalAppData%\VirtualStore\ProgramData\AVG2014\Log|*.log;history.xml
+FileKey41=%LocalAppData%\VirtualStore\ProgramData\AVG2014\scanlogs|*.log
+FileKey42=%LocalAppData%\VirtualStore\ProgramData\AVG2014\SetupBackup|*.*
+FileKey43=%LocalAppData%\VirtualStore\ProgramData\AVG2014\Temp|*.tmp
+FileKey44=%LocalAppData%\VirtualStore\ProgramData\AVG2014\update\backup|*.*
+FileKey45=%LocalAppData%\VirtualStore\ProgramData\MFAData\Logs|*.*
+FileKey46=%ProgramFiles%\AVG\AVG2014|updatecomps.bak;*.old
+FileKey47=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2014\dumps|*.*
+FileKey48=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2014\log|*.*
+FileKey49=%WinDir%\System32\config\systemprofile\AppData\Local\MFAData\logs|*.*
+FileKey50=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\Avg2014\dumps|*.*
+FileKey51=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\log|*.*
+FileKey52=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2014\dumps|*.*
+FileKey53=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2014\log|*.*
+FileKey54=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\dumps|*.*
+FileKey55=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\log|*.*
+FileKey56=%CommonAppData%\AVG2015\Emc\log|*.*
+FileKey57=%CommonAppData%\AVG2015\IDS\config|List.zip.bak
+FileKey58=%CommonAppData%\AVG2015\IDS\profile|globalLoadable.bak
+FileKey59=%CommonAppData%\AVG2015\log|*.log;*.log.lock;history.xml
+FileKey60=%CommonAppData%\AVG2015\scanlogs|*.log
+FileKey61=%CommonAppData%\AVG2015\SetupBackup|*.*|REMOVESELF
+FileKey62=%CommonAppData%\AVG2015\temp|*.*
+FileKey63=%CommonAppData%\AVG2015\update\backup|*.*
+FileKey64=%CommonAppData%\MFAData\pack|*.*
+FileKey65=%CommonAppData%\MFAData|msistorg.dat.bkp;public_installation_log.xml
+FileKey66=%LocalAppData%\AVG2015\log|*.log;*.log.*
+FileKey67=%LocalAppData%\AVG2015\temp|*.*
+FileKey68=%LocalAppData%\AVG2015\update|*.*
+FileKey69=%LocalAppData%\MFAData\logs|*.*
+FileKey70=%ProgramFiles%\AVG\AVG2015|updatecomps.bak;*.old
+FileKey71=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\dumps|*.*
+FileKey72=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\log|*.*
+FileKey73=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\temp|*.*
+FileKey74=%WinDir%\System32\config\systemprofile\AppData\Local\MFAData\logs|*.*
+FileKey75=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\Avg2015\dumps|*.*
+FileKey76=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\log|*.*
+FileKey77=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\temp|*.*
+FileKey78=%WinDir%\System32\config\systemprofile\Local Settings\MFAData\logs|*.*
+FileKey79=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\dumps|*.*
+FileKey80=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\log|*.*
+FileKey81=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\temp|*.*
+FileKey82=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\dumps|*.*
+FileKey83=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\log|*.*
+FileKey84=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\temp|*.*
+FileKey85=%WinDir%\SysWOW64\config\systemprofile\Local Settings\MFAData\logs|*.*
 
-[AVG AntiVirus 2014*]
-LangSecRef=3024
-Detect=HKLM\Software\AVG\AVG2014
-Default=False
-FileKey1=%CommonAppData%\AVG2014\Emc\Log|*.log
-FileKey2=%CommonAppData%\AVG2014\IDS\config|*List.zip.bak
-FileKey3=%CommonAppData%\AVG2014\IDS\profile|globalLoadable.bak
-FileKey4=%CommonAppData%\AVG2014\Log|*.log;history.xml
-FileKey5=%CommonAppData%\AVG2014\scanlogs|*.log
-FileKey6=%CommonAppData%\AVG2014\SetupBackup|*.*
-FileKey7=%CommonAppData%\AVG2014\update\backup|*.*
-FileKey8=%CommonAppData%\AVG2014\Temp|*.tmp
-FileKey9=%CommonAppData%\MFAData\Logs|*.*
-FileKey10=%LocalAppData%\AVG2014\log|*.log;*.log.*
-FileKey11=%LocalAppData%\AVG2014\temp|*.tmp
-FileKey12=%LocalAppData%\MFAData\logs|*.log;*.log.*
-FileKey13=%LocalAppData%\VirtualStore\Program Files*\AVG\AVG2014|updatecomps.bak;*.old
-FileKey14=%LocalAppData%\VirtualStore\ProgramData\AVG2014\Emc\Log|*.log
-FileKey15=%LocalAppData%\VirtualStore\ProgramData\AVG2014\IDS\config|*List.zip.bak
-FileKey16=%LocalAppData%\VirtualStore\ProgramData\AVG2014\IDS\profile|globalLoadable.bak
-FileKey17=%LocalAppData%\VirtualStore\ProgramData\AVG2014\Log|*.log;history.xml
-FileKey18=%LocalAppData%\VirtualStore\ProgramData\AVG2014\scanlogs|*.log
-FileKey19=%LocalAppData%\VirtualStore\ProgramData\AVG2014\SetupBackup|*.*
-FileKey20=%LocalAppData%\VirtualStore\ProgramData\AVG2014\Temp|*.tmp
-FileKey21=%LocalAppData%\VirtualStore\ProgramData\AVG2014\update\backup|*.*
-FileKey22=%LocalAppData%\VirtualStore\ProgramData\MFAData\Logs|*.*
-FileKey23=%ProgramFiles%\AVG\AVG2014|updatecomps.bak;*.old
-FileKey24=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2014\dumps|*.*
-FileKey25=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2014\log|*.*
-FileKey26=%WinDir%\System32\config\systemprofile\AppData\Local\MFAData\logs|*.*
-FileKey27=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\Avg2014\dumps|*.*
-FileKey28=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\log|*.*
-FileKey29=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2014\dumps|*.*
-FileKey30=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2014\log|*.*
-FileKey31=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\MFAData\logs|*.*
-FileKey32=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\dumps|*.*
-FileKey33=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\log|*.*
-
-[AVG 2015*]
-LangSecRef=3024
-Detect=HKLM\Software\AVG\AVG2015
-Default=False
-FileKey1=%CommonAppData%\AVG2015\Emc\log|*.*
-FileKey2=%CommonAppData%\AVG2015\IDS\config|List.zip.bak
-FileKey3=%CommonAppData%\AVG2015\IDS\profile|globalLoadable.bak
-FileKey4=%CommonAppData%\AVG2015\log|*.log;*.log.lock;history.xml
-FileKey5=%CommonAppData%\AVG2015\scanlogs|*.log
-FileKey6=%CommonAppData%\AVG2015\SetupBackup|*.*|REMOVESELF
-FileKey7=%CommonAppData%\AVG2015\temp|*.*
-FileKey8=%CommonAppData%\AVG2015\update\backup|*.*
-FileKey9=%CommonAppData%\MFAData\logs|*.*
-FileKey10=%CommonAppData%\MFAData\pack|*.*
-FileKey11=%CommonAppData%\MFAData|msistorg.dat.bkp;public_installation_log.xml
-FileKey12=%LocalAppData%\AVG2015\log|*.log;*.log.*
-FileKey13=%LocalAppData%\AVG2015\temp|*.*
-FileKey14=%LocalAppData%\AVG2015\update|*.*
-FileKey15=%LocalAppData%\MFAData\logs|*.*
-FileKey16=%ProgramFiles%\AVG\AVG2015|updatecomps.bak;*.old
-FileKey17=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\dumps|*.*
-FileKey18=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\log|*.*
-FileKey19=%WinDir%\System32\config\systemprofile\AppData\Local\Avg2015\temp|*.*
-FileKey20=%WinDir%\System32\config\systemprofile\AppData\Local\MFAData\logs|*.*
-FileKey21=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\Avg2015\dumps|*.*
-FileKey22=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\log|*.*
-FileKey23=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\temp|*.*
-FileKey24=%WinDir%\System32\config\systemprofile\Local Settings\MFAData\logs|*.*
-FileKey25=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\dumps|*.*
-FileKey26=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\log|*.*
-FileKey27=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg2015\temp|*.*
-FileKey28=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\MFAData\logs|*.*
-FileKey29=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\dumps|*.*
-FileKey30=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\log|*.*
-FileKey31=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\temp|*.*
-FileKey32=%WinDir%\SysWOW64\config\systemprofile\Local Settings\MFAData\logs|*.*
-
-[AVG PC TuneUp & TuneUp Utilities (CrashDumps)*]
+[AVG PC TuneUp & TuneUp Utilities CrashDumps*]
 LangSecRef=3024
 Detect1=HKCU\Software\TuneUp
 Detect2=HKCU\Software\AVG\AWL\RegistryCleaner
@@ -2411,12 +2466,6 @@ Detect=HKLM\Software\AVS\DiscCreator
 Default=False
 FileKey1=%WinDir%|coredw.log;datawriter.log
 
-[Awesomium  Logs*]
-LangSecRef=3021
-DetectFile=%AppData%\Awesomium
-Default=False
-FileKey1=%AppData%\Awesomium|*.log
-
 [Awesomium Cache*]
 LangSecRef=3021
 DetectFile=%AppData%\Awesomium
@@ -2428,6 +2477,12 @@ LangSecRef=3021
 DetectFile=%AppData%\Awesomium
 Default=False
 FileKey1=%AppData%\Awesomium\*|Cookies
+
+[Awesomium Logs*]
+LangSecRef=3021
+DetectFile=%AppData%\Awesomium
+Default=False
+FileKey1=%AppData%\Awesomium|*.log
 
 [Awesomium History*]
 LangSecRef=3021
@@ -2484,14 +2539,6 @@ LangSecRef=3024
 Detect=HKCU\Software\Babylon\Babylon Translator\UserInfo
 Default=False
 RegKey1=HKCU\Software\Babylon\Babylon Translator\UserInfo\History
-
-[Backup*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Amigo\Application|old_amigo.exe
-FileKey2=%LocalAppData%\Google\Chrome*\Application|old_chrome.exe
-FileKey3=%ProgramFiles%\Google\Chrome*\Application|old_chrome.exe
 
 [Backyard Basketball 2004*]
 Section=Games
@@ -2594,6 +2641,24 @@ Detect=HKCU\Software\Valve\Steam\Apps\305260
 Default=False
 FileKey1=%ProgramFiles%\Steam\SteamApps\Common\Battle Islands\BattleIslands_Data|output_log.txt
 
+[Battle.net*]
+Section=Games
+Detect=HKCU\Software\Blizzard Entertainment\Battle.net
+Default=False
+FileKey1=%CommonAppData%\Battle.net|*.log|RECURSE
+FileKey2=%CommonAppData%\Battle.net\Agent\Agent.*\Logs|*.*|RECURSE
+FileKey3=%CommonAppData%\Battle.net\Agent\Logs|*.*|RECURSE
+FileKey4=%CommonAppData%\Battle.net\Setup\*\Logs|*.*
+FileKey5=%CommonAppData%\Battle.net\Telemetry|*.*
+FileKey6=%CommonAppData%\Blizzard Entertainment\Battle.net\Cache|*.*|REMOVESELF
+FileKey7=%LocalAppData%\Blizzard Entertainment\Battle.net\Cache|*.*|RECURSE
+FileKey8=%LocalAppData%\Battle.net\Errors|*.*
+FileKey9=%LocalAppData%\Blizzard Entertainment\System Survey|log.txt
+FileKey10=%LocalAppData%\VirtualStore\ProgramData\Battle.net|*.log|RECURSE
+FileKey11=%LocalAppData%\VirtualStore\ProgramData\Battle.net\Agent\Agent.*\Logs|*.*|RECURSE
+FileKey12=%LocalAppData%\VirtualStore\ProgramData\Battle.net\Agent\Logs|*.*|RECURSE
+FileKey13=%LocalAppData%\VirtualStore\ProgramData\Blizzard Entertainment\Battle.net\Cache|*.*|REMOVESELF
+
 [Battle.net Client Cache*]
 Section=Games
 Detect=HKCU\Software\Blizzard Entertainment\Battle.net
@@ -2613,24 +2678,6 @@ FileKey3=%LocalAppData%\Battle.net\Logs|*.*|RECURSE
 FileKey4=%LocalAppData%\Blizzard Entertainment\System Survey|*.log|RECURSE
 FileKey5=%LocalAppData%\VirtualStore\ProgramData\Battle.net\Client\Blizzard Launcher.*\Logs|*.*|RECURSE
 FileKey6=%LocalAppData%\VirtualStore\ProgramData\Battle.net\Client\Logs|*.*|RECURSE
-
-[Battle.net*]
-Section=Games
-Detect=HKCU\Software\Blizzard Entertainment\Battle.net
-Default=False
-FileKey1=%CommonAppData%\Battle.net|*.log|RECURSE
-FileKey2=%CommonAppData%\Battle.net\Agent\Agent.*\Logs|*.*|RECURSE
-FileKey3=%CommonAppData%\Battle.net\Agent\Logs|*.*|RECURSE
-FileKey4=%CommonAppData%\Battle.net\Setup\*\Logs|*.*
-FileKey5=%CommonAppData%\Battle.net\Telemetry|*.*
-FileKey6=%CommonAppData%\Blizzard Entertainment\Battle.net\Cache|*.*|REMOVESELF
-FileKey7=%LocalAppData%\Blizzard Entertainment\Battle.net\Cache|*.*|RECURSE
-FileKey8=%LocalAppData%\Battle.net\Errors|*.*
-FileKey9=%LocalAppData%\Blizzard Entertainment\System Survey|log.txt
-FileKey10=%LocalAppData%\VirtualStore\ProgramData\Battle.net|*.log|RECURSE
-FileKey11=%LocalAppData%\VirtualStore\ProgramData\Battle.net\Agent\Agent.*\Logs|*.*|RECURSE
-FileKey12=%LocalAppData%\VirtualStore\ProgramData\Battle.net\Agent\Logs|*.*|RECURSE
-FileKey13=%LocalAppData%\VirtualStore\ProgramData\Blizzard Entertainment\Battle.net\Cache|*.*|REMOVESELF
 
 [Battlefield 3*]
 Section=Games
@@ -2724,13 +2771,6 @@ Default=False
 FileKey1=%CommonAppData%\JollyBear\Big City Adventure Sydney|error.*
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\JollyBear\Big City Adventure Sydney|error.*
 
-[Big Fish Games Installers*]
-Section=Games
-Detect=HKCU\Software\Big Fish Games
-Default=False
-FileKey1=%CommonAppData%\BigFishCache|*.exe|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\BigFishCache|*.exe|RECURSE
-
 [Big Fish Games*]
 Section=Games
 Detect=HKCU\Software\Big Fish Games
@@ -2743,6 +2783,13 @@ FileKey5=%LocalAppData%\VirtualStore\ProgramData\Big Fish\Game Manager\Addons\BF
 FileKey6=%LocalAppData%\VirtualStore\ProgramData\Big Fish Games\Game Manager\resources-old|*.*|RECURSE
 FileKey7=%LocalAppData%\VirtualStore\ProgramData\BigFishCache\GameManager\log|*.txt|RECURSE
 FileKey8=%LocalAppData%\VirtualStore\ProgramData\BigFishGamesCache\GameManager\log|*.*
+
+[Big Fish Games Installers*]
+Section=Games
+Detect=HKCU\Software\Big Fish Games
+Default=False
+FileKey1=%CommonAppData%\BigFishCache|*.exe|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\BigFishCache|*.exe|RECURSE
 
 [Binding of Isaac Afterbirth+*]
 Section=Games
@@ -2891,14 +2938,6 @@ Detect3=HKLM\SOFTWARE\Wow6432Node\Bitcoin Core
 Default=False
 FileKey1=%AppData%\Bitcoin|*.log;*.old
 
-[BitDefender Total Security 2014/15 (Logs)*]
-LangSecRef=3024
-Detect1=HKLM\Software\BitDefender\Bitdefender Total Security
-Detect2=HKLM\Software\BitDefender\Bitdefender Total Security 2015
-Warning=This removes logs created while scanning external drives and other unneeded scan logs generated by Bitdefender scanner.
-Default=False
-FileKey1=%AppData%\Bitdefender\Desktop\profiles\Logs\*|*.xml
-
 [BitDefender*]
 LangSecRef=3024
 Detect=HKLM\Software\Softwin\BitDefender Antivirus
@@ -2906,13 +2945,20 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Softwin\BitDefender*\Logs|*.*
 FileKey2=%ProgramFiles%\Softwin\BitDefender*\Logs|*.*
 
+[BitDefender Total Security 2014/15 Logs*]
+LangSecRef=3024
+Detect1=HKLM\Software\BitDefender\Bitdefender Total Security
+Detect2=HKLM\Software\BitDefender\Bitdefender Total Security 2015
+Default=False
+FileKey1=%AppData%\Bitdefender\Desktop\profiles\Logs\*|*.xml
+
 [BITS Logs*]
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows
 Default=False
 FileKey1=%CommonAppData%\Microsoft\Network\Downloader|*.*|RECURSE
 
-[BitTorrent (Incomplete Downloads)*]
+[BitTorrent Incomplete Downloads*]
 LangSecRef=3022
 Detect=HKCU\Software\BitTorrent
 Default=False
@@ -2980,7 +3026,7 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Steam\Steamapps\common\Blade Symphony\workshop_temp|*.*|RECURSE
 FileKey2=%ProgramFiles%\Steam\Steamapps\common\Blade Symphony\workshop_temp|*.*|RECURSE
 
-[Blades of Time (Debug)*]
+[Blades of Time Debug*]
 Section=Games
 DetectFile=%LocalAppData%\BladesOfTime
 Default=False
@@ -3064,9 +3110,9 @@ FileKey1=%LocalAppData%\VirtualStore\ProgramData\BlueStacks|*.log;*.log.*|RECURS
 
 [BlueStacks Setup*]
 LangSecRef=3021
-Default=False
 Detect1=HKCU\Software\Bluestacks
 Detect2=HKLM\Software\Bluestacks
+Default=False
 Warning=You will have to redownload these files in order to reinstall the application.
 FileKey1=%LocalAppData%\VirtualStore\ProgramData\BlueStacksSetup\Images|*.*|REMOVESELF
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\BlueStacksSetup|runtimedata_*.zip;runtimedata_*.zip.manifest
@@ -3106,28 +3152,12 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\BOINC|stdout*.*;stderr*.*
 FileKey2=%ProgramFiles%\BOINC|stdout*.*;stderr*.*
 
-[Bookmark Backup*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Detect1=HKCU\Software\Chromium
-Detect2=HKCU\Software\SuperBird
-Detect3=HKCU\Software\Torch
+[Borderlands*]
+Section=Games
+Detect1=HKCU\Software\Valve\Steam\Apps\8980
+Detect2=HKLM\Software\Borderlands
 Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\*|*Bookmarks.bak
-FileKey2=%LocalAppData%\Chrome Plus\User Data\*|*Bookmarks.bak
-FileKey3=%LocalAppData%\Chromium\User Data\*|*Bookmarks.bak
-FileKey4=%LocalAppData%\Flock\User Data\*|*Bookmarks.bak
-FileKey5=%LocalAppData%\Google\Chrome*\User Data\*|*Bookmarks.bak
-FileKey6=%LocalAppData%\Rockmelt\User Data\*|*Bookmarks.bak
-FileKey7=%LocalAppData%\SRWare Iron\User Data\*|*Bookmarks.bak
-FileKey8=%LocalAppData%\SuperBird\User Data\*|*Bookmarks.bak
-FileKey9=%LocalAppData%\Torch\User Data\*|*Bookmarks.bak
-
-[Bookmark Backups*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\bookmarkbackups|*.json*
+FileKey1=%Documents%\My Games\Borderlands*\WillowGame\Logs|*.log
 
 [Borderlands 2*]
 Section=Games
@@ -3135,14 +3165,6 @@ Detect=HKCU\Software\Valve\Steam\Apps\49520
 DetectFile=%Documents%\My Games\Borderlands 2
 Default=False
 FileKey1=%Documents%\My Games\Borderlands 2\WillowGame\Logs|*.*
-
-[Borderlands*]
-Section=Games
-Detect1=HKCU\Software\Valve\Steam\Apps\8980
-Detect2=HKCU\Software\Valve\Steam\Apps\901566
-Detect3=HKLM\Software\Borderlands
-Default=False
-FileKey1=%Documents%\My Games\Borderlands*\WillowGame\Logs|*.log
 
 [Borland C++ Builder 5.0*]
 LangSecRef=3024
@@ -3287,7 +3309,7 @@ Default=False
 FileKey1=%AppData%\bhv-gswvs\users\*\Buchstabenzoo|*.log
 
 [Bugsplat*]
-Section=Games
+LangSecRef=3024
 Detect=HKCU\Software\Bugsplat
 Default=False
 RegKey1=HKCU\Software\Bugsplat\gaspowered\SupremeCommander
@@ -3348,7 +3370,7 @@ FileKey10=%ProgramFiles%\GoBit Games\Burger Shop 2|*.db;*.txt|RECURSE
 Section=Games
 Detect=HKLM\Software\Burn Zombie Burn
 Default=False
-Warning=This will remove the NET Framework 3.0 installer in your Burn Zombie Burn installation directory. It can be reinstalled in your installation source.
+Warning=Make sure .NET framwork 3.0 is installed before running this.
 FileKey1=%ProgramFiles%\P2 Games\Burn Zombie Burn\REQS\NET|*.*|REMOVESELF
 
 [Burn Zombie Burn! Log*]
@@ -3404,7 +3426,7 @@ FileKey1=%LocalAppData%\VirtualStore\Program Files*\EuroSoft\Calendar Magic|*.ba
 FileKey2=%ProgramFiles%\EuroSoft\Calendar Magic|*.bak
 FileKey3=%SystemDrive%\EuroSoft\Calendar Magic|*.bak
 
-[Calendar Magic Log*]
+[Calendar Magic Debug*]
 LangSecRef=3021
 DetectFile1=%ProgramFiles%\EuroSoft\Calendar Magic
 DetectFile2=%SystemDrive%\EuroSoft\Calendar Magic
@@ -3631,12 +3653,6 @@ FileKey8=%ProgramFiles%\Steam\Steamapps\Common\Champions Online\Playtest\Logs\Ga
 FileKey9=%Public%\Games\cryptic studios\Champions Online\Live\Cache|*.*
 FileKey10=%Public%\Games\cryptic studios\Champions Online\PlayTest\Cache|*.*
 
-[Chatzilla*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\chatzilla|inputHistory.txt
-
 [Cheat Engine*]
 LangSecRef=3021
 Detect=HKCU\Software\Cheat Engine
@@ -3729,33 +3745,6 @@ FileKey9=%ProgramFiles%\Foxy Games\Christmas Wonderland 3|*html
 FileKey10=%ProgramFiles%\Foxy Games\Christmas Wonderland 4|*html;*.nfo;*.txt;*.url|RECURSE
 FileKey11=%SystemDrive%\Games\Christmas Wonderland 3|*.nfo;*.url|RECURSE
 FileKey12=%SystemDrive%\Games\Christmas Wonderland 4|*.nfo;*.txt;*.url|RECURSE
-
-[Chrome Crash Reports*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\CrashReports|*.*
-FileKey2=%LocalAppData%\Google\Chrome\User Data\Crashpad\reports|*.*
-
-[Chrome Temps*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%ProgramFiles%\Google\Chrome\Temp|*.*|RECURSE
-
-[Chrome Updates*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Update\Download|*.*|RECURSE
-FileKey2=%LocalAppData%\Google\Update\Install|*.*|RECURSE
-FileKey3=%LocalAppData%\Google\Update\Offline|*.*|RECURSE
-FileKey4=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Download|*.*|RECURSE
-FileKey5=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Install|*.*|RECURSE
-FileKey6=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Offline|*.*|RECURSE
-FileKey7=%ProgramFiles%\Google\Update\Download|*.*|RECURSE
-FileKey8=%ProgramFiles%\Google\Update\Install|*.*|RECURSE
-FileKey9=%ProgramFiles%\Google\Update\Offline|*.*|RECURSE
 
 [Chuzzle Deluxe*]
 Section=Games
@@ -4145,13 +4134,28 @@ FileKey9=%LocalAppData%\Packages\Microsoft.CommsPhone_*\LocalCache|*.*|RECURSE
 FileKey10=%LocalAppData%\Packages\Microsoft.CommsPhone_*\LocalState\Cache|*.*|RECURSE
 FileKey11=%LocalAppData%\Packages\Microsoft.CommsPhone_*\TempState|*.*|RECURSE
 
-[Comodo CertSentry (Logs)*]
+[Comodo*]
+LangSecRef=3024
+Detect=HKCU\Software\ComodoGroup
+Default=False
+FileKey1=%AppData%\ComodoGroup\CSC\Cache|*.*
+FileKey2=%CommonAppData%\Comodo\CisDumps|*.*
+FileKey3=%CommonAppData%\Comodo\Installer|*.*
+FileKey4=%CommonAppData%\Comodo Downloader|*.*
+FileKey5=%LocalAppData%\Temp\Comodo\Firewall Pro\Data\TempFiles|*.*
+FileKey6=%LocalAppData%\VirtualStore\Program Files*\COMODO\COMODO Internet Security|*.tmp
+FileKey7=%LocalAppData%\VirtualStore\ProgramData\Comodo\CisDumps|*.*
+FileKey8=%LocalAppData%\VirtualStore\ProgramData\Comodo\Installer|*.*
+FileKey9=%LocalAppData%\VirtualStore\ProgramData\Comodo Downloader|*.*
+FileKey10=%ProgramFiles%\COMODO\COMODO Internet Security|*.tmp
+
+[Comodo CertSentry Logs*]
 LangSecRef=3022
 Detect=HKLM\Software\COMODO\CertSentry
 Default=False
 FileKey1=%LocalAppData%\COMODO\CertSentry|*.log
 
-[Comodo Dragon (More)*]
+[Comodo Dragon More*]
 LangSecRef=3029
 Detect=HKLM\Software\ComodoGroup\Dragon
 Default=False
@@ -4190,21 +4194,6 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Comodo\GeekBuddy\logs|*.*|RECURSE
 FileKey2=%ProgramFiles%\Comodo\GeekBuddy\logs|*.*|RECURSE
 
-[Comodo*]
-LangSecRef=3024
-Detect=HKCU\Software\ComodoGroup
-Default=False
-FileKey1=%AppData%\ComodoGroup\CSC\Cache|*.*
-FileKey2=%CommonAppData%\Comodo\CisDumps|*.*
-FileKey3=%CommonAppData%\Comodo\Installer|*.*
-FileKey4=%CommonAppData%\Comodo Downloader|*.*
-FileKey5=%LocalAppData%\Temp\Comodo\Firewall Pro\Data\TempFiles|*.*
-FileKey6=%LocalAppData%\VirtualStore\Program Files*\COMODO\COMODO Internet Security|*.tmp
-FileKey7=%LocalAppData%\VirtualStore\ProgramData\Comodo\CisDumps|*.*
-FileKey8=%LocalAppData%\VirtualStore\ProgramData\Comodo\Installer|*.*
-FileKey9=%LocalAppData%\VirtualStore\ProgramData\Comodo Downloader|*.*
-FileKey10=%ProgramFiles%\COMODO\COMODO Internet Security|*.tmp
-
 [Company of Heroes Cache*]
 Section=Games
 DetectFile1=%Documents%\My Games\Company of Heroes\
@@ -4232,13 +4221,6 @@ RegKey2=HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compati
 RegKey3=HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Persisted
 RegKey4=HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store
 
-[Conceiva Mezzmo Crash Dump*]
-LangSecRef=3023
-Detect=HKLM\Software\Conceiva
-Default=False
-FileKey1=%CommonAppData%\Conceiva\Mezzmo\CER|*.zip
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\Conceiva\Mezzmo\CER|*.zip
-
 [Conceiva Mezzmo*]
 LangSecRef=3023
 Detect=HKLM\Software\Conceiva\Mezzmo
@@ -4256,6 +4238,13 @@ FileKey10=%ProgramFiles%\Conceiva\Mezzmo|*.txt
 FileKey11=%ProgramFiles%\Conceiva\Mezzmo\Third\OGMDemuxer\doc|*.*|REMOVESELF
 FileKey12=%ProgramFiles%\Conceiva\Mezzmo\Third\MKVToolNix|*.txt
 RegKey1=HKCU\Software\Conceiva\Mezzmo\General|LastWatchFolder
+
+[Conceiva Mezzmo Crash Dump*]
+LangSecRef=3023
+Detect=HKLM\Software\Conceiva
+Default=False
+FileKey1=%CommonAppData%\Conceiva\Mezzmo\CER|*.zip
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\Conceiva\Mezzmo\CER|*.zip
 
 [Conduit Cache*]
 LangSecRef=3021
@@ -4368,7 +4357,7 @@ FileKey3=%LocalAppData%\VirtualStore\Program Files*\VSO\ConvertX\5|*.log;*.rtf
 FileKey4=%LocalAppData%\VirtualStore\ProgramData\VSO\vsothumbs|*.*|REMOVESELF
 FileKey5=%ProgramFiles%\VSO\ConvertX\5|*.log;*.rtf
 
-[Cook'n (Backups)*]
+[Cook'n Backups*]
 LangSecRef=3021
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Cook'n
 DetectFile1=%LocalAppData%\DVO\Cook'n10App\Cook'n.exe
@@ -4379,7 +4368,7 @@ FileKey3=%Documents%\Cook'n10\Workspace\update|update.zip
 FileKey4=%Documents%\Cook'n11\Download|*.*
 FileKey5=%Documents%\Cook'n Backups|*.ckn
 
-[Cook'n (Cache)*]
+[Cook'n Cache*]
 LangSecRef=3021
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Cook'n
 DetectFile1=%LocalAppData%\DVO\Cook'n10App\Cook'n.exe
@@ -4387,7 +4376,7 @@ DetectFile2=%LocalAppData%\DVO\Cook'n11App\Cook'n.exe
 Default=False
 FileKey1=%AppData%\Mozilla\eclipse\Cache|*.*
 
-[Cook'n (Dups)*]
+[Cook'n Dups*]
 LangSecRef=3021
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Cook'n
 DetectFile=%LocalAppData%\DVO\Cook'n10App\Cook'n.exe
@@ -4395,7 +4384,7 @@ Default=False
 Warning=This removes identical duplicates of the huge Getting Started Guide.
 FileKey1=%LocalAppData%\DVO\Cook'n10App\plugins|Getting Started Guide.rtf|RECURSE
 
-[Cook'n (Logs)*]
+[Cook'n Logs*]
 LangSecRef=3021
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Cook'n
 DetectFile1=%LocalAppData%\DVO\Cook'n10App\Cook'n.exe
