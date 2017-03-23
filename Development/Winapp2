@@ -1,4 +1,4 @@
-; Version: 170319
+; Version: 170323
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -2665,6 +2665,13 @@ FileKey4=%LocalAppData%\VirtualStore\Program Files*\Blueberry Software\*|drvinst
 FileKey5=%LocalAppData%\VirtualStore\Program Files*\Common Files\Blueberry Software|*.log
 FileKey6=%ProgramFiles%\Blueberry Software\*|drvinstlog.txt;*.log
 FileKey7=%WinDir%\system32\MTSLog|*.*|REMOVESELF
+
+[Beckhoff TwinCat Logs*]
+LangSecRef=3021
+Detect=HKCU\SOFTWARE\Beckhoff
+Default=False
+FileKey1=%UserProfile%|*TwinCat*.log;TC*.log;TF*.log
+FileKey2=%HomeDrive%\TwinCAT\3.1\Components\TcEventLogger\EventConfigurator|~evtCfgTmp*.html
 
 [Belarc Advisor*]
 LangSecRef=3024
@@ -14955,17 +14962,17 @@ Default=False
 FileKey1=%ProgramFiles%\Python*|*.icns|RECURSE
 FileKey2=%SystemDrive%\Python*|*.icns|RECURSE
 
-[qBittorrent Backup*]
-LangSecRef=3022
-DetectFile=%LocalAppData%\qBittorrent
-Default=False
-FileKey1=%LocalAppData%\qBittorrent\BT_Backup|*.*
-
 [qBittorrent Cache*]
 LangSecRef=3022
 DetectFile=%LocalAppData%\qBittorrent
 Default=False
 FileKey1=%LocalAppData%\qBittorrent\cache|*.*
+
+[qBittorrent Logs*]
+LangSecRef=3022
+DetectFile=%LocalAppData%\qBittorrent
+Default=False
+FileKey1=%LocalAppData%\qBittorrent\logs|*.*
 
 [QIP 2012 Avatars*]
 LangSecRef=3022
@@ -16706,6 +16713,25 @@ Default=False
 FileKey1=%Pictures%\smplayer2_screenshots|*.*|RECURSE
 FileKey2=%LocalAppData%\SMPlayer2\screenshots|*.*|RECURSE
 
+[Snagit 9 More*]
+LangSecRef=3024
+Detect=HKCU\Software\TechSmith\SnagIt\9
+Default=False
+FileKey1=%LocalAppData%\TechSmith\Snagit\DataStore|*.sdf
+FileKey2=%LocalAppData%\TechSmith\Snagit\DataStore\AppIcons|*.*
+FileKey3=%LocalAppData%\TechSmith\Snagit\DataStore\WebSiteIcons|*.*
+FileKey4=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
+RegKey1=HKCU\Software\TechSmith\SnagIt\9|StampCustomFolder
+
+[Snagit 10/11/12/13 Local Dumps*]
+LangSecRef=3024
+Detect1=HKCU\Software\TechSmith\SnagIt\10
+Detect2=HKCU\Software\TechSmith\SnagIt\11
+Detect3=HKCU\Software\TechSmith\SnagIt\12
+Detect4=HKCU\Software\TechSmith\SnagIt\13
+Default=False
+FileKey1=%LocalAppData%\TechSmith\Snagit\CrashDumps|*.*
+
 [Snagit 10 More*]
 LangSecRef=3024
 Detect=HKCU\Software\TechSmith\SnagIt\10
@@ -16713,12 +16739,6 @@ Default=False
 Warning=This will delete the backups of the captures that you have performed with SnagIt 10.
 FileKey1=%LocalAppData%\TechSmith\Snagit\DataStore|*.sdf;*.SNAG;*.SNAGundo
 RegKey1=HKCU\Software\TechSmith\SnagIt\10|StampCustomFolder
-
-[Snagit 11 Local Dumps*]
-LangSecRef=3024
-Detect=HKCU\Software\TechSmith\SnagIt\11
-Default=False
-FileKey1=%LocalAppData%\TechSmith\Snagit\CrashDumps|*.*
 
 [Snagit 11 More*]
 LangSecRef=3024
@@ -16730,13 +16750,6 @@ FileKey2=%LocalAppData%\TechSmith\Snagit\DataStore|*.sdf;*.SNAG;*.SNAGundo;*.MP4
 RegKey1=HKCU\Software\TechSmith\Snagit\11|CaptureCount
 RegKey2=HKCU\Software\TechSmith\Snagit\Stamps|StampCustomFolder
 
-[Snagit 12/13 Local Dumps*]
-LangSecRef=3024
-Detect1=HKCU\Software\TechSmith\SnagIt\12
-Detect2=HKCU\Software\TechSmith\SnagIt\13
-Default=False
-FileKey1=%LocalAppData%\TechSmith\Snagit\CrashDumps|*.*
-
 [Snagit 12/13 More*]
 LangSecRef=3024
 Detect1=HKCU\Software\TechSmith\SnagIt\12
@@ -16744,10 +16757,12 @@ Detect2=HKCU\Software\TechSmith\SnagIt\13
 Default=False
 Warning=This will delete the backups of the captures that you have performed with SnagIt 12/13.
 FileKey1=%Documents%|SnagItDebug.log
-FileKey2=%LocalAppData%\TechSmith\Snagit\DataStore|*.SNAG;*.SNAGundo;*.MP4
+FileKey2=%LocalAppData%\TechSmith\Snagit\DataStore|*.SNAG;*.SNAGundo;*.MP4;*.sdf
 FileKey3=%LocalAppData%\TechSmith\Logs|*.log
 RegKey1=HKCU\Software\TechSmith\Snagit\12|CaptureCount
-RegKey2=HKCU\Software\TechSmith\Snagit\Stamps|StampCustomFolder
+RegKey2=HKCU\Software\TechSmith\Snagit\13|CaptureCount
+RegKey3=HKCU\Software\TechSmith\Snagit\13|CaptureOpenCount
+RegKey4=HKCU\Software\TechSmith\Snagit\Stamps|StampCustomFolder
 
 [Snagit 13*]
 LangSecRef=3024
@@ -16759,16 +16774,6 @@ FileKey3=%LocalAppData%\TechSmith\SnagIt\DataStore\WebSiteIcons|*.ico
 FileKey4=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
 RegKey1=HKCU\Software\TechSmith\SnagIt\13\Recent Captures
 RegKey2=HKCU\Software\TechSmith\SnagIt\13\SnagItEditor\Recent File List
-
-[Snagit 9 More*]
-LangSecRef=3024
-Detect=HKCU\Software\TechSmith\SnagIt\9
-Default=False
-FileKey1=%LocalAppData%\TechSmith\Snagit\DataStore|*.sdf
-FileKey2=%LocalAppData%\TechSmith\Snagit\DataStore\AppIcons|*.*
-FileKey3=%LocalAppData%\TechSmith\Snagit\DataStore\WebSiteIcons|*.*
-FileKey4=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
-RegKey1=HKCU\Software\TechSmith\SnagIt\9|StampCustomFolder
 
 [Snapfish Picture Mover*]
 LangSecRef=3023
