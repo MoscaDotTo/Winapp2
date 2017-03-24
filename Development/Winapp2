@@ -1,4 +1,4 @@
-; Version: 170323
+; Version: 170324
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -5026,6 +5026,9 @@ Default=False
 FileKey1=%LocalAppData%\Cyberlink\PowerDVD*\cache\|*.*
 FileKey2=%CommonAppData%\Cyberlink\Evoparser\|*.xml
 FileKey3=%LocalAppData%\Cyberlink\PowerDVD*\caches\|*.*|RECURSE
+FileKey4=%LocalAppData%\Cyberlink\PowerDVD*\CL_DMP_Browser\|*.*|RECURSE
+FileKey5=%LocalAppData%\Cyberlink\DigitalHome\|*.log|RECURSE
+FileKey6=%LocalAppData%\Cyberlink\PowerDVD*\|*.log|RECURSE
 
 [CyberLink Youcam MediaCache*]
 LangSecRef=3023
@@ -9120,6 +9123,8 @@ FileKey18=%WinDir%\ServiceProfiles\NetworkService\AppData\Roaming\Microsoft\Wind
 FileKey19=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\INetCache|*.*|RECURSE
 FileKey20=%WinDir%\System32\config\SystemProfile\AppData\LocalLow\Microsoft\Internet Explorer|brndlog.bak;brndlog.txt
 FileKey21=%WinDir%\System32\config\SystemProfile\Application Data\Microsoft\Internet Explorer|brndlog.bak;brndlog.txt
+FileKey22=%LocalAppData%\Microsoft\Windows\INetCache\IE\|*.*|RECURSE
+FileKey23=%LocalAppData%\Microsoft\Windows\INetCache\Content.Word\|*.*
 RegKey1=HKCU\Software\Microsoft\Internet Explorer\International|CNum_CpCache
 RegKey2=HKCU\Software\Microsoft\Internet Explorer\International|CpCache
 RegKey3=HKCU\Software\Microsoft\Internet Explorer\International\CpMRU
@@ -11139,9 +11144,9 @@ FileKey1=%LocalAppData%\Microsoft\BingBar\Apps|*.tmp|RECURSE
 
 [Microsoft Deployment Toolkit*]
 LangSecRef=3024
-Warning=To Get a new Component list, check for Updates in the Management Console!
 DetectFile=%ProgramFiles%\Microsoft Deployment Toolkit
 Default=False
+Warning=To Get a new Component list, check for Updates in the Management Console!
 FileKey1=%ProgramFiles%\Microsoft Deployment Toolkit\Downloads|*.*|RECURSE
 
 [Microsoft Edge More*]
@@ -11157,8 +11162,13 @@ FileKey5=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\#!001\Microsoft\Cr
 FileKey6=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\#!002\Microsoft\CryptnetUrlCache|*.*|RECURSE
 FileKey7=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\Microsoft\CryptnetUrlCache|*.*|RECURSE
 FileKey8=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\Cookies|*.*|RECURSE
-FileKey9=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\User\Default\DataStore\Indexed\Data|*.*|RECURSE
-FileKey10=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AppData\User\Default\Indexed DB|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\User\Default\DataStore\Indexed\Data\|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AppData\User\Default\Indexed DB\|*.log|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\user\default\datastore\Data\nouser1\*\DBStore\Logfiles\|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\user\default\datastore\Data\nouser1\*\DBStore\|*.*|RECURSE
+ExcludeKey1=FILE|%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\user\default\datastore\Data\nouser1\*\DBStore\|edb.chk
+ExcludeKey2=FILE|%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\user\default\datastore\Data\nouser1\*\DBStore\|spartan.edb
+ExcludeKey3=FILE|%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\user\default\datastore\Data\nouser1\*\DBStore\|spartan.jfm
 
 [Microsoft Expression Web*]
 LangSecRef=3025
@@ -17645,6 +17655,7 @@ FileKey20=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\Microsoft\Cryptnet
 FileKey21=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\Temp|*.*|RECURSE
 FileKey22=%LocalAppData%\Packages\Microsoft.WindowsStore_*\LocalCache\*|*.*|RECURSE
 FileKey23=%LocalAppData%\Packages\Microsoft.WindowsStore_*\LocalState\Cache|*.*|RECURSE
+FileKey24=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\INetCookies|*.*|RECURSE
 RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\WinStore_cw5n1h2txyewy\SearchHistory
 
 [Stored Media Player Paths*]
@@ -18447,6 +18458,7 @@ LangSecRef=3023
 Detect=HKCU\Software\Cerious Software Inc.
 Default=False
 FileKey1=%AppData%\Thumbsplus|*.log;*.bak;*.dmp;*.7z;*.exc;*.png
+FileKey2=%ProgramFiles%\Thumbsplus *\Bin|*.log
 
 [Thunderbird Corrupt SQLites*]
 LangSecRef=3030
@@ -20256,6 +20268,14 @@ LangSecRef=3025
 Detect=HKLM\Software\Microsoft\ESENT
 Default=False
 RegKey1=HKLM\Software\Microsoft\ESENT\Process
+
+[Windows Experience Index**]
+LangSecRef=3025
+DetectOS=10.0|
+Warning=You may have to "Take Ownership" of the Windows\Performance\WinSAT folder for it to be entirely cleaned.
+Default=False
+FileKey1=%WinDir%\Performance\WinSAT\|*.*
+FileKey2=%WinDir%\Performance\WinSAT\DataStore\|*.*
 
 [Windows Feedback*]
 DetectOS=10.0|
