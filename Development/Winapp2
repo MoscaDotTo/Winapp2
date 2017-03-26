@@ -1,4 +1,4 @@
-; Version: 170324
+; Version: 170326
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -6,7 +6,24 @@
 ; Valid commands can be found on the first post here: https://forum.piriform.com/index.php?showtopic=32310
 ; Please do not host this file anywhere without permission. This is to facilitate proper distribution of the latest version. Thanks.
 ;
-; Chrome Entries.
+; Chrome/Chromium Entries.
+
+[Application Cache*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Chromium
+Detect2=HKCU\Software\Torch
+Detect3=HKCU\Software\SuperBird
+Default=False
+FileKey1=%LocalAppData%\Amigo\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey2=%LocalAppData%\Chrome Plus\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey3=%LocalAppData%\Chromium\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey4=%LocalAppData%\Flock\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey6=%LocalAppData%\Rockmelt\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey8=%LocalAppData%\SuperBird\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey9=%LocalAppData%\Torch\User Data\*\Application Cache|*.*|REMOVESELF
 
 [Backup*]
 LangSecRef=3029
@@ -75,6 +92,24 @@ LangSecRef=3026
 SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\chatzilla|inputHistory.txt
+
+[Corrupt SQLites*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles|*.corrupt|RECURSE
+
+[Crash Reports*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Crash Reports|*.*|REMOVESELF
+
+[Dump Files*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla|*.dmp|RECURSE
 
 ; End of Firefox Entries.
 
@@ -1664,8 +1699,7 @@ FileKey1=%AppData%\Apple Computer\MobileSync\Backup|*.*|RECURSE
 LangSecRef=3023
 Detect=HKLM\Software\Apple Computer, Inc.
 Default=False
-FileKey1=%AppData%\Apple Computer\iTunes|*.ipsw|RECURSE
-FileKey2=%AppData%\Apple Computer\iTunes|*.log|RECURSE
+FileKey1=%AppData%\Apple Computer\iTunes|*.ipsw;*.log|RECURSE
 
 [Application Cache*]
 LangSecRef=3029
@@ -3799,40 +3833,38 @@ Detect=HKLM\Software\Citrix\ICA Client
 Default=False
 FileKey1=%CommonAppData%\Citrix\Citrix Online Plug-in - Web|*.msi;*.cab;eula*.rtf
 
-[Civilization 4 Cache*]
+[Civilization Cache*]
 Section=Games
-Detect=HKLM\Software\Firaxis Games
+Detect1=HKLM\Software\Firaxis Games
+Detect2=HKCU\Software\Firaxis\Civilization5
 Default=False
 FileKey1=%AppData%\My Games\Beyond the Sword\cache|*.dat
 FileKey2=%AppData%\My Games\Sid Meier's Civilization 4\cache|*.dat
 FileKey3=%AppData%\My Games\Warlords\cache|*.dat
-FileKey4=%LocalAppData%\My Games\Beyond the Sword\cache|*.dat
-FileKey5=%LocalAppData%\My Games\Sid Meier's Civilization 4\cache|*.dat
-FileKey6=%LocalAppData%\My Games\Sid Meier's Civilization IV Colonization\cache|*.dat
-FileKey7=%LocalAppData%\My Games\Warlords\cache|*.dat
+FileKey4=%Documents%\My Games\Sid Meier's Civilization 5\cache|*.db
+FileKey5=%LocalAppData%\My Games\Beyond the Sword\cache|*.dat
+FileKey6=%LocalAppData%\My Games\Sid Meier's Civilization 4\cache|*.dat
+FileKey7=%LocalAppData%\My Games\Sid Meier's Civilization IV Colonization\cache|*.dat
+FileKey8=%LocalAppData%\My Games\Warlords\cache|*.dat
 
-[Civilization 4 Logs*]
+[Civilization Logs*]
 Section=Games
-Detect=HKLM\Software\Firaxis Games
+Detect1=HKLM\Software\Firaxis Games
+Detect2=HKCU\Software\Firaxis\Civilization5
 Default=False
 FileKey1=%Documents%\My Games\Beyond the Sword\Logs|*.*
 FileKey2=%Documents%\My Games\Sid Meier's Civilization 4\Logs|*.*
-FileKey3=%Documents%\My Games\Sid Meier's Civilization IV Colonization\Logs|*.*
-FileKey4=%Documents%\My Games\Warlords\Logs|*.*
-FileKey5=%LocalAppData%\VirtualStore\Program Files*\2K Games\Firaxis Games\Sid Meier's Civilization IV Colonization|*.txt
-FileKey6=%LocalAppData%\VirtualStore\Program Files*\Firaxis Games\Sid Meier's Civilization 4|*.txt
-FileKey7=%LocalAppData%\VirtualStore\Program Files*\Firaxis Games\Sid Meier's Civilization 4\Beyond the Sword|*.txt
-FileKey8=%LocalAppData%\VirtualStore\Program Files*\Firaxis Games\Sid Meier's Civilization 4\Warlords|*.txt
-FileKey9=%ProgramFiles%\2K Games\Firaxis Games\Sid Meier's Civilization IV Colonization|*.txt
-FileKey10=%ProgramFiles%\Firaxis Games\Sid Meier's Civilization 4|*.txt
-FileKey11=%ProgramFiles%\Firaxis Games\Sid Meier's Civilization 4\Beyond the Sword|*.txt
-FileKey12=%ProgramFiles%\Firaxis Games\Sid Meier's Civilization 4\Warlords|*.txt
-
-[Civilization 5 Cache*]
-Section=Games
-Detect=HKCU\Software\Firaxis\Civilization5
-Default=False
-FileKey1=%Documents%\My Games\Sid Meier's Civilization 5\cache|*.db
+FileKey3=%Documents%\My Games\Sid Meier's Civilization 5\Logs|*.*
+FileKey4=%Documents%\My Games\Sid Meier's Civilization IV Colonization\Logs|*.*
+FileKey5=%Documents%\My Games\Warlords\Logs|*.*
+FileKey6=%LocalAppData%\VirtualStore\Program Files*\2K Games\Firaxis Games\Sid Meier's Civilization IV Colonization|*.txt
+FileKey7=%LocalAppData%\VirtualStore\Program Files*\Firaxis Games\Sid Meier's Civilization 4|*.txt
+FileKey8=%LocalAppData%\VirtualStore\Program Files*\Firaxis Games\Sid Meier's Civilization 4\Beyond the Sword|*.txt
+FileKey9=%LocalAppData%\VirtualStore\Program Files*\Firaxis Games\Sid Meier's Civilization 4\Warlords|*.txt
+FileKey10=%ProgramFiles%\2K Games\Firaxis Games\Sid Meier's Civilization IV Colonization|*.txt
+FileKey11=%ProgramFiles%\Firaxis Games\Sid Meier's Civilization 4|*.txt
+FileKey12=%ProgramFiles%\Firaxis Games\Sid Meier's Civilization 4\Beyond the Sword|*.txt
+FileKey13=%ProgramFiles%\Firaxis Games\Sid Meier's Civilization 4\Warlords|*.txt
 
 [Civilization 5 Installers*]
 Section=Games
@@ -3841,12 +3873,6 @@ Default=False
 Warning=This will remove DirectX and Visual C++ installers in your Civilization 5 installation directory. They can be reinstalled in your installation source.
 FileKey1=%ProgramFiles%\Civilization V*\DirectX|*.*|REMOVESELF
 FileKey2=%ProgramFiles%\Civilization V*\VCRedist|*.*|REMOVESELF
-
-[Civilization 5 Logs*]
-Section=Games
-Detect=HKCU\Software\Firaxis\Civilization5
-Default=False
-FileKey1=%Documents%\My Games\Sid Meier's Civilization 5\Logs|*.*
 
 [Civilization 5 Old Autosaves*]
 Section=Games
@@ -3858,11 +3884,9 @@ FileKey1=%Documents%\My Games\Sid Meier's Civilization 5\Saves\*\auto\prev|*.Civ
 LangSecRef=3021
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\{060FE577-1BDF-4330-ACCA-B6760AB07191}_is1
 Default=False
-FileKey1=%AllUsersProfile%\.clamwin\log|*.*|RECURSE
-FileKey2=%AppData%\.clamwin\log|*.*|RECURSE
-FileKey3=%AppData%\ClamSentinel|*.txt
-FileKey4=%LocalAppData%\VirtualStore\Program Files*\ClamSentinel|*.txt
-FileKey5=%ProgramFiles%\ClamSentinel|*.txt
+FileKey1=%AppData%\ClamSentinel|*.txt
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\ClamSentinel|*.txt
+FileKey3=%ProgramFiles%\ClamSentinel|*.txt
 
 [ClamWin*]
 LangSecRef=3021
@@ -4120,8 +4144,8 @@ FileKey5=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\
 [Comms Phone*]
 DetectOS=10.0|
 Section=3031
-Default=False
 Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.CommsPhone_8wekyb3d8bbwe
+Default=False
 FileKey1=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\AppCache|*.*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\INetCache|*.*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\INetCookies|*.*|RECURSE
@@ -4277,8 +4301,8 @@ FileKey4=%ProgramFiles%\Connectify\Portal|*.*|REMOVESELF
 [Connectivity Store*]
 DetectOS=10.0|
 Section=3031
-Default=False
 Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.ConnectivityStore_8wekyb3d8bbwe
+Default=False
 FileKey1=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\AppCache|*.*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\INetCache|*.*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\INetCookies|*.*|RECURSE
@@ -4301,8 +4325,8 @@ FileKey2=%ProgramFiles%\NetDragon\Conquer Online 2.0\AutoPatch|Update.log
 [Contact Support*]
 DetectOS=10.0|
 Section=3031
-Default=False
 Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Windows.ContactSupport_cw5n1h2txyewy
+Default=False
 FileKey1=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\AppCache|*.*|RECURSE
 FileKey2=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\INetCache|*.*|RECURSE
 FileKey3=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\INetCookies|*.*|RECURSE
@@ -4325,8 +4349,8 @@ FileKey18=%LocalAppData%\Packages\Windows.ContactSupport_*\TempState|*.*|RECURSE
 [Content Delivery Manager*]
 DetectOS=10.0|
 Section=3031
-Default=False
 Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy
+Default=False
 FileKey1=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\INetCache|*.*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\INetCookies|*.*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\INetHistory|*.*|RECURSE
@@ -4527,87 +4551,53 @@ DetectFile=%ProgramFiles%\Core Temp
 Default=False
 FileKey1=%ProgramFiles%\Core Temp|*.csv
 
-[Corel PaintShop Photo Pro X3*]
+[Corel PaintShop Photo Pro*]
 LangSecRef=3023
-Detect=HKCU\Software\Corel\PhotoDownloader\2
+Detect1=HKCU\Software\Corel\PhotoDownloader\2
+Detect2=HKCU\Software\Corel\PaintShop Pro\X4
+Detect3=HKCU\Software\Corel\PaintShop Pro\X5
+Detect4=HKCU\Software\Corel\PaintShop Pro\X6
+Detect5=HKCU\Software\Corel\PaintShop Pro\X7
 Default=False
 FileKey1=%AppData%\Corel\PaintShop Photo Pro\13\Cache|*.*|RECURSE
 FileKey2=%LocalAppData%\Corel|*.db;*.PspCache
 FileKey3=%LocalAppData%\Corel\Thumbs|*.*|RECURSE
-RegKey1=HKCU\Software\Corel\PhotoDownloader\2\PhotoDownloader\DefaultDownloadFolder
-RegKey2=HKCU\Software\Corel\PhotoDownloader\2\PhotoDownloader\DownloadFolder
-
-[Corel PaintShop Pro X4 More*]
-LangSecRef=3023
-Detect=HKCU\Software\Corel\PaintShop Pro\X4
-Default=False
-FileKey1=%LocalAppData%\Corel PaintShop Pro\14.0\Database|*.db
-
-[Corel PaintShop Pro X5 More*]
-LangSecRef=3023
-Detect=HKCU\Software\Corel\PaintShop Pro\X5
-Default=False
-FileKey1=%LocalAppData%\Corel PaintShop Pro\15.0\Database|*.db
-FileKey2=%LocalAppData%\Corel PaintShop Pro\15.0\Thumbs|*.*|RECURSE
-
-[Corel PaintShop Pro X6 (AutoPreserve)*]
-LangSecRef=3023
-Detect=HKCU\Software\Corel\PaintShop Pro\X6
-Default=False
-FileKey1=%Pictures%\Corel Auto-Preserve|*.*
-
-[Corel PaintShop Pro X6 More*]
-LangSecRef=3023
-Detect=HKCU\Software\Corel\PaintShop Pro\X6
-Default=False
-FileKey1=%LocalAppData%\Corel PaintShop Pro\16.0\Cache|*.*
-FileKey2=%LocalAppData%\Corel PaintShop Pro\16.0\Database|*.db
-RegKey1=HKCU\Software\Corel\PaintShop Pro\X6\CoreMemoryManager\0
-
-[Corel PaintShop Pro X7 (AutoPreserve)*]
-LangSecRef=3023
-Detect=HKCU\Software\Corel\PaintShop Pro\X7
-Default=False
-FileKey1=%Pictures%\Corel Auto-Preserve|*.*
-
-[Corel PaintShop Pro X7*]
-LangSecRef=3023
-Detect=HKCU\Software\Corel\PaintShop Pro\X7
-Default=False
-FileKey1=%LocalAppData%\Corel PaintShop Pro\17.0\Cache|*.*
-FileKey2=%LocalAppData%\Corel PaintShop Pro\17.0\Database|*.db
+FileKey4=%LocalAppData%\Corel PaintShop Pro\14.0\Database|*.db
+FileKey5=%LocalAppData%\Corel PaintShop Pro\15.0\Database|*.db
+FileKey6=%LocalAppData%\Corel PaintShop Pro\15.0\Thumbs|*.*|RECURSE
+FileKey7=%LocalAppData%\Corel PaintShop Pro\16.0\Cache|*.*
+FileKey8=%LocalAppData%\Corel PaintShop Pro\16.0\Database|*.db
+FileKey9=%LocalAppData%\Corel PaintShop Pro\17.0\Cache|*.*
+FileKey10=%LocalAppData%\Corel PaintShop Pro\17.0\Database|*.db
 RegKey1=HKCU\Software\Corel\PaintShop Pro\X7\CoreMemoryManager\0
+RegKey2=HKCU\Software\Corel\PhotoDownloader\2\PhotoDownloader\DefaultDownloadFolder
+RegKey3=HKCU\Software\Corel\PhotoDownloader\2\PhotoDownloader\DownloadFolder
 
-[Corel VideoStudio Pro X4 More*]
+[Corel PaintShop Pro AutoPreserve*]
 LangSecRef=3023
-Detect=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\14.0
+Detect1=HKCU\Software\Corel\PaintShop Pro\X6
+Detect2=HKCU\Software\Corel\PaintShop Pro\X7
+Default=False
+FileKey1=%Pictures%\Corel Auto-Preserve|*.*
+
+[Corel VideoStudio Pro*]
+LangSecRef=3023
+Detect1=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\14.0
+Detect2=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\15.0
+Detect3=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\16.0
+Detect4=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\17.0
 Default=False
 FileKey1=%Documents%\Corel VideoStudio Pro\14.0\AudioTmp|*.*
+FileKey2=%Documents%\Corel VideoStudio Pro\15.0\AudioTmp|*.*
+FileKey3=%Documents%\Corel VideoStudio Pro\15.0\SmartProxy|*.*
+FileKey4=%Documents%\Corel VideoStudio Pro\16.0\AudioTmp|*.*
+FileKey5=%Documents%\Corel VideoStudio Pro\16.0\SmartProxy|*.*
+FileKey6=%Documents%\Corel VideoStudio Pro\17.0\AudioTmp|*.*
+FileKey7=%Documents%\Corel VideoStudio Pro\17.0\SmartProxy|*.*
 RegKey1=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\14.0\Preference|Working Folder
-
-[Corel VideoStudio Pro X5 More*]
-LangSecRef=3023
-Detect=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\15.0
-Default=False
-FileKey1=%Documents%\Corel VideoStudio Pro\15.0\AudioTmp|*.*
-FileKey2=%Documents%\Corel VideoStudio Pro\15.0\SmartProxy|*.*
-RegKey1=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\15.0\HerRFL
-
-[Corel VideoStudio Pro X6*]
-LangSecRef=3023
-Detect=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\16.0
-Default=False
-FileKey1=%Documents%\Corel VideoStudio Pro\16.0\AudioTmp|*.*
-FileKey2=%Documents%\Corel VideoStudio Pro\16.0\SmartProxy|*.*
-RegKey1=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\16.0\HerRFL
-
-[Corel VideoStudio Pro X7*]
-LangSecRef=3023
-Detect=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\17.0
-Default=False
-FileKey1=%Documents%\Corel VideoStudio Pro\17.0\AudioTmp|*.*
-FileKey2=%Documents%\Corel VideoStudio Pro\17.0\SmartProxy|*.*
-RegKey1=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\17.0\HerRFL
+RegKey2=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\15.0\HerRFL
+RegKey3=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\16.0\HerRFL
+RegKey4=HKCU\Software\Ulead Systems\Corel VideoStudio Pro\17.0\HerRFL
 
 [CorelDRAW Graphics Suite X7*]
 LangSecRef=3021
@@ -4631,12 +4621,6 @@ RegKey4=HKCU\Software\Corel\CorelDRAW\17.0\Draw\Application Preferences\Framewor
 RegKey5=HKCU\Software\Corel\CorelDRAW\17.0\Draw\Application Preferences\HTML Export|DestPath
 RegKey6=HKCU\Software\Corel\CorelDRAW\17.0\Draw\Application Preferences\NewFromTemplate|BrowseTemplateDir
 RegKey7=HKCU\Software\Corel\CorelDRAW\17.0\PHOTO-PAINT\Application Preferences\Framework|RecentFiles
-
-[Corrupt SQLites*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles|*.corrupt|RECURSE
 
 [Cortana*]
 Section=3031
@@ -4673,12 +4657,6 @@ Detect=HKLM\Software\Sunbelt Software\CounterSpy
 Default=False
 FileKey1=%CommonAppData%\Sunbelt Software\CounterSpy\Logs|*.*
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\Sunbelt Software\CounterSpy\Logs|*.*
-
-[Crash Reports*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Crash Reports|*.*|REMOVESELF
 
 [Crayon Physics Deluxe*]
 Section=Games
@@ -4750,7 +4728,7 @@ FileKey3=%UserProfile%\Saved Games\Crysis 3|*.Log.txt
 LangSecRef=3024
 DetectFile=%ProgramFiles%\CrystalDiskInfo\Smart
 Default=False
-Warning=This will delete all saved SMART data (for history/graph function).
+Warning=This will delete all saved SMART data for history/graph function.
 FileKey1=%ProgramFiles%\CrystalDiskInfo\Smart|*.*|RECURSE
 FileKey2=%LocalAppData%\VirtualStore\Program Files*\CrystalDiskInfo\Smart|*.*|RECURSE
 
@@ -4793,19 +4771,15 @@ Detect=HKCR\.cyberducklicense
 Default=False
 FileKey1=%AppData%\Cyberduck|*.log
 
-[CyberLink AudioDirector 4 More*]
+[CyberLink AudioDirector*]
 LangSecRef=3023
-Detect=HKCU\Software\CyberLink\AudioDirector4
+Detect1=HKCU\Software\CyberLink\AudioDirector4
+Detect2=HKCU\Software\CyberLink\AudioDirector5
 Default=False
 FileKey1=%Documents%\Cyberlink\AudioDirector\4.0\SplitterIndex|*.*|RECURSE
-FileKey2=%LocalAppData%\Cyberlink\AudioDirector\4.0|*.*|RECURSE
-
-[CyberLink AudioDirector 5*]
-LangSecRef=3023
-Detect=HKCU\Software\CyberLink\AudioDirector5
-Default=False
-FileKey1=%Documents%\Cyberlink\AudioDirector\5.0\SplitterIndex|*.*|RECURSE
-FileKey2=%LocalAppData%\Cyberlink\AudioDirector\5.0|*.*|RECURSE
+FileKey2=%Documents%\Cyberlink\AudioDirector\5.0\SplitterIndex|*.*|RECURSE
+FileKey3=%LocalAppData%\Cyberlink\AudioDirector\4.0|*.*|RECURSE
+FileKey4=%LocalAppData%\Cyberlink\AudioDirector\5.0|*.*|RECURSE
 RegKey1=HKCU\Software\CyberLink\AudioDirector5\MediaObj\MediaCache5\Data5
 RegKey2=HKCU\Software\CyberLink\AudioDirector5\MediaObj\MediaCache5\Thumbnail5
 
@@ -4849,41 +4823,91 @@ FileKey1=%AppData%\CyberLink\MediaCache|*.*|RECURSE
 RegKey1=HKCU\Software\CyberLink\MediaCache5\Data5
 RegKey2=HKCU\Software\CyberLink\MediaCache5\Thumbnail5
 
-[CyberLink PhotoDirector 3 More*]
+[CyberLink PhotoDirector*]
 LangSecRef=3023
-Detect=HKCU\Software\CyberLink\PhotoDirector3
+Detect1=HKCU\Software\CyberLink\PhotoDirector3
+Detect2=HKLM\Software\CyberLink\PhotoDirector4
+Detect3=HKLM\Software\Wow6432Node\CyberLink\PhotoDirector4
+Detect4=HKLM\SOFTWARE\CyberLink\PhotoDirector6
+Detect5=HKCU\Software\Cyberlink\PowerDirector7
+Detect6=HKCU\Software\CyberLink\PowerDirector10
+Detect7=HKCU\Software\CyberLink\PowerDirector11
+Detect8=HKCU\Software\CyberLink\PowerDirector12
+Detect9=HKCU\Software\CyberLink\PowerDirector13
 Default=False
-FileKey1=%Pictures%\PhotoDirector\3.0\*|*.*|RECURSE
+FileKey1=%AppData%\Cyberlink\PowerDirector\7.0|recentfiles.ini
+FileKey2=%AppData%\Cyberlink\PowerDirector\10.0|Recentfiles.ini
+FileKey3=%AppData%\CyberLink\PowerDirector\10.0\AutoSave|*.*|RECURSE
+FileKey4=%AppData%\CyberLink\PowerDirector\10.0\photoTmp|*.*|RECURSE
+FileKey5=%AppData%\Cyberlink\PowerDirector\10.0\WaveForms|*.*|RECURSE
+FileKey6=%AppData%\Cyberlink\PowerDirector\11.0|Recentfiles.ini
+FileKey7=%AppData%\CyberLink\PowerDirector\11.0\AutoSave|*.*|RECURSE
+FileKey8=%AppData%\CyberLink\PowerDirector\11.0\photoTmp|*.*|RECURSE
+FileKey9=%AppData%\Cyberlink\PowerDirector\11.0\WaveForms|*.*|RECURSE
+FileKey10=%AppData%\Cyberlink\PowerDirector\12.0|Recentfiles.ini
+FileKey11=%AppData%\CyberLink\PowerDirector\12.0\AutoSave|*.*|RECURSE
+FileKey12=%AppData%\CyberLink\PowerDirector\12.0\photoTmp|*.*|RECURSE
+FileKey13=%AppData%\Cyberlink\PowerDirector\12.0\WaveForms|*.*|RECURSE
+FileKey14=%AppData%\Cyberlink\PowerDirector\13.0|Recentfiles.ini
+FileKey15=%AppData%\CyberLink\PowerDirector\13.0\AutoSave|*.*|RECURSE
+FileKey16=%AppData%\CyberLink\PowerDirector\13.0\photoTmp|*.*|RECURSE
+FileKey17=%AppData%\Cyberlink\PowerDirector\13.0\WaveForms|*.*|RECURSE
+FileKey18=%CommonAppData%\CyberLink\Downloader|*.*
+FileKey19=%Documents%\CyberLink\PowerDirector\10.0|Snapshot(*).jpg
+FileKey20=%Documents%\CyberLink\PowerDirector\10.0\MyTitles|*.*|RECURSE
+FileKey21=%Documents%\CyberLink\PowerDirector\10.0\Preview Cache Files|*.*
+FileKey22=%Documents%\CyberLink\PowerDirector\10.0\ShadowEditFiles|*.MPG
+FileKey23=%Documents%\CyberLink\PowerDirector\10.0\SplitterIndex|*.maidx
+FileKey24=%Documents%\CyberLink\PowerDirector\11.0|Snapshot(*).jpg
+FileKey25=%Documents%\CyberLink\PowerDirector\11.0\MyTitles|*.*|RECURSE
+FileKey26=%Documents%\CyberLink\PowerDirector\11.0\Preview Cache Files|*.*
+FileKey27=%Documents%\CyberLink\PowerDirector\11.0\ShadowEditFiles|*.MPG
+FileKey28=%Documents%\CyberLink\PowerDirector\11.0\SplitterIndex|*.maidx
+FileKey29=%Documents%\CyberLink\PowerDirector\12.0|Snapshot(*).jpg
+FileKey30=%Documents%\CyberLink\PowerDirector\12.0\MyTitles|*.*|RECURSE
+FileKey31=%Documents%\CyberLink\PowerDirector\12.0\Preview Cache Files|*.*
+FileKey32=%Documents%\CyberLink\PowerDirector\12.0\ShadowEditFiles|*.MPG
+FileKey33=%Documents%\CyberLink\PowerDirector\12.0\SplitterIndex|*.maidx
+FileKey34=%Documents%\CyberLink\PowerDirector\13.0|Snapshot(*).jpg
+FileKey35=%Documents%\CyberLink\PowerDirector\13.0\MyTitles|*.*|RECURSE
+FileKey36=%Documents%\Cyberlink\PowerDirector\13.0\PDRMUSIC.TMP|*.*|REMOVESELF
+FileKey37=%Documents%\Cyberlink\PowerDirector\13.0\PP.TWOPASS|*.*|REMOVESELF
+FileKey38=%Documents%\CyberLink\PowerDirector\13.0\Preview Cache Files|*.*
+FileKey39=%Documents%\CyberLink\PowerDirector\13.0\ShadowEditFiles|*.MPG
+FileKey40=%Documents%\CyberLink\PowerDirector\13.0\SplitterIndex|*.maidx
+FileKey41=%LocalAppData%\VirtualStore\ProgramData\CyberLink\Downloader|*.*
+FileKey42=%Pictures%\PhotoDirector\3.0\*|*.*|RECURSE
+FileKey43=%Pictures%\PhotoDirector\4.0\*|*.*|RECURSE
+FileKey44=%Pictures%\PhotoDirector\6.0\*|*.*|RECURSE
+RegKey1=HKCU\Software\CyberLink\Hanuman
+RegKey2=HKCU\Software\CyberLink\PowerDirector10\MediaObj\MediaCache5\Data5
+RegKey3=HKCU\Software\CyberLink\PowerDirector10\MediaObj\MediaCache5\Thumbnail5
+RegKey4=HKCU\Software\CyberLink\PowerDirector11\MediaObj\MediaCache5\Data5
+RegKey5=HKCU\Software\CyberLink\PowerDirector11\MediaObj\MediaCache5\Thumbnail5
+RegKey6=HKCU\Software\CyberLink\PowerDirector13\MediaObj\MediaCache5\Data5
+RegKey7=HKCU\Software\CyberLink\PowerDirector13\MediaObj\MediaCache5\Thumbnail5
 ExcludeKey1=FILE|%Pictures%\PhotoDirector\3.0\*|*.phd
+ExcludeKey2=FILE|%Pictures%\PhotoDirector\4.0\*|*.phd
+ExcludeKey3=FILE|%Pictures%\PhotoDirector\6.0\*|*.phd
 
-[CyberLink PhotoDirector 4*]
+[CyberLink Power2Go*]
 LangSecRef=3023
-Detect1=HKLM\Software\CyberLink\PhotoDirector4
-Detect2=HKLM\Software\Wow6432Node\CyberLink\PhotoDirector4
-Default=False
-FileKey1=%CommonAppData%\CyberLink\Downloader|*.*
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\CyberLink\Downloader|*.*
-FileKey3=%Pictures%\PhotoDirector\4.0\*|*.*|RECURSE
-ExcludeKey1=FILE|%Pictures%\PhotoDirector\4.0\*|*.phd
-
-[CyberLink PhotoDirector 6*]
-LangSecRef=3023
-Detect=HKLM\SOFTWARE\CyberLink\PhotoDirector6
-Default=False
-FileKey1=%CommonAppData%\CyberLink\Downloader|*.*
-FileKey2=%Pictures%\PhotoDirector\6.0\*|*.*|RECURSE
-ExcludeKey1=FILE|%Pictures%\PhotoDirector\6.0\*|*.phd
-
-[CyberLink Power2Go 9*]
-LangSecRef=3023
-Detect=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0
+Detect1=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0
+Detect2=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0
+Detect3=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0
 Default=False
 FileKey1=%Documents%\PDRMUSIC.TMP|*.*|REMOVESELF
 FileKey2=%LocalAppData%\Cyberlink\Power2Go9|DLDB.db
-FileKey3=%Music%|*.tmp
-FileKey4=%Pictures%|*.tmp
-FileKey5=%ProgramFiles%\Cyberlink\Power2Go9|*.tmp
-FileKey6=%ProgramFiles%\Cyberlink\Power2Go9|Thumbs.db|RECURSE
+FileKey3=%LocalAppData%\Cyberlink\Power2Go10|DLDB.db
+FileKey4=%LocalAppData%\Cyberlink\Power2Go11|DLDB.db
+FileKey5=%Music%|*.tmp
+FileKey6=%Pictures%|*.tmp
+FileKey7=%ProgramFiles%\Cyberlink\Power2Go9|*.tmp
+FileKey8=%ProgramFiles%\Cyberlink\Power2Go9|Thumbs.db|RECURSE
+FileKey9=%ProgramFiles%\Cyberlink\Power2Go10|*.tmp
+FileKey10=%ProgramFiles%\Cyberlink\Power2Go10|Thumbs.db|RECURSE
+FileKey11=%ProgramFiles%\Cyberlink\Power2Go11|*.tmp
+FileKey12=%ProgramFiles%\Cyberlink\Power2Go11|Thumbs.db|RECURSE
 RegKey1=HKCU\SOFTWARE\CyberLink\LabelPrint\Recent File List
 RegKey2=HKCU\SOFTWARE\CyberLink\MediaCache\Data4
 RegKey3=HKCU\SOFTWARE\CyberLink\MediaCache5\Data5
@@ -4901,40 +4925,35 @@ RegKey14=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|OpenPrjFilePath
 RegKey15=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|SelectedFolderPath
 RegKey16=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0\MediaObj\MediaCache5\Data5
 RegKey17=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0\MediaObj\MediaCache5\Thumbnail5
-RegKey18=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|ImportDir
-RegKey19=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|TempFileDir
-RegKey20=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|WorkDir
-
-[CyberLink Power2Go 10*]
-LangSecRef=3023
-Detect=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0
-Default=False
-FileKey1=%Documents%\PDRMUSIC.TMP|*.*|REMOVESELF
-FileKey2=%LocalAppData%\Cyberlink\Power2Go10|DLDB.db
-FileKey3=%Music%|*.tmp
-FileKey4=%Pictures%|*.tmp
-FileKey5=%ProgramFiles%\Cyberlink\Power2Go10|*.tmp
-FileKey6=%ProgramFiles%\Cyberlink\Power2Go10|Thumbs.db|RECURSE
-RegKey1=HKCU\SOFTWARE\CyberLink\LabelPrint\Recent File List
-RegKey2=HKCU\SOFTWARE\CyberLink\MediaCache\Data4
-RegKey3=HKCU\SOFTWARE\CyberLink\MediaCache5\Data5
-RegKey4=HKCU\SOFTWARE\CyberLink\MediaCache5\Thumbnail5
-RegKey5=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|CDRippingPath
-RegKey6=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|CUEName
-RegKey7=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|CUEPath
-RegKey8=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|DestFolder
-RegKey9=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|DVDFolderPath
-RegKey10=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|ImagePath
-RegKey11=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|LastBrowsePath
-RegKey12=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|LastSaveProjPath
-RegKey13=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|MonitorPaths
-RegKey14=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|OpenPrjFilePath
-RegKey15=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|SelectedFolderPath
-RegKey16=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0\MediaObj\MediaCache5\Data5
-RegKey17=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0\MediaObj\MediaCache5\Thumbnail5
-RegKey18=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|ImportDir
-RegKey19=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|TempFileDir
-RegKey20=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|WorkDir
+RegKey18=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|CDRippingPath
+RegKey19=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|CUEName
+RegKey20=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|CUEPath
+RegKey21=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|DestFolder
+RegKey22=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|DVDFolderPath
+RegKey23=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|ImagePath
+RegKey24=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|LastBrowsePath
+RegKey25=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|LastSaveProjPath
+RegKey26=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|MonitorPaths
+RegKey27=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|OpenPrjFilePath
+RegKey28=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|SelectedFolderPath
+RegKey29=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0\MediaObj\MediaCache5\Data5
+RegKey30=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0\MediaObj\MediaCache5\Thumbnail5
+RegKey31=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|CDRippingPath
+RegKey32=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|CUEName
+RegKey33=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|CUEPath
+RegKey34=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|DestFolder
+RegKey35=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|DVDFolderPath
+RegKey36=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|ImagePath
+RegKey37=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|LastBrowsePath
+RegKey38=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|LastSaveProjPath
+RegKey39=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|MonitorPaths
+RegKey40=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|OpenPrjFilePath
+RegKey41=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0|SelectedFolderPath
+RegKey42=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0\MediaObj\MediaCache5\Data5
+RegKey43=HKCU\SOFTWARE\CyberLink\Power2Go11\11.0\MediaObj\MediaCache5\Thumbnail5
+RegKey44=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|ImportDir
+RegKey45=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|TempFileDir
+RegKey46=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|WorkDir
 
 [Cyberlink PowerCinema*]
 LangSecRef=3023
@@ -4942,82 +4961,6 @@ Detect=HKCU\Software\Cyberlink\PowerCinema
 DetectFile=%LocalAppData%\PowerCinema
 Default=False
 FileKey1=%LocalAppData%\PowerCinema|trace.log;trace.txt
-
-[Cyberlink PowerDirector 7*]
-LangSecRef=3023
-Detect=HKCU\Software\Cyberlink\PowerDirector7
-Default=False
-FileKey1=%AppData%\Cyberlink\PowerDirector\7.0|recentfiles.ini
-
-[CyberLink PowerDirector 10*]
-LangSecRef=3023
-Detect=HKCU\Software\CyberLink\PowerDirector10
-Default=False
-FileKey1=%AppData%\Cyberlink\PowerDirector\10.0|Recentfiles.ini
-FileKey2=%AppData%\CyberLink\PowerDirector\10.0\AutoSave|*.*|RECURSE
-FileKey3=%AppData%\CyberLink\PowerDirector\10.0\photoTmp|*.*|RECURSE
-FileKey4=%AppData%\Cyberlink\PowerDirector\10.0\WaveForms|*.*|RECURSE
-FileKey5=%Documents%\CyberLink\PowerDirector\10.0|Snapshot(*).jpg
-FileKey6=%Documents%\CyberLink\PowerDirector\10.0\MyTitles|*.*|RECURSE
-FileKey7=%Documents%\CyberLink\PowerDirector\10.0\Preview Cache Files|*.*
-FileKey8=%Documents%\CyberLink\PowerDirector\10.0\ShadowEditFiles|*.MPG
-FileKey9=%Documents%\CyberLink\PowerDirector\10.0\SplitterIndex|*.maidx
-RegKey1=HKCU\Software\CyberLink\Hanuman
-RegKey2=HKCU\Software\CyberLink\PowerDirector10\MediaObj\MediaCache5\Data5
-RegKey3=HKCU\Software\CyberLink\PowerDirector10\MediaObj\MediaCache5\Thumbnail5
-
-[CyberLink PowerDirector 11*]
-LangSecRef=3023
-Detect=HKCU\Software\CyberLink\PowerDirector11
-Default=False
-FileKey1=%AppData%\Cyberlink\PowerDirector\11.0|Recentfiles.ini
-FileKey2=%AppData%\CyberLink\PowerDirector\11.0\AutoSave|*.*|RECURSE
-FileKey3=%AppData%\CyberLink\PowerDirector\11.0\photoTmp|*.*|RECURSE
-FileKey4=%AppData%\Cyberlink\PowerDirector\11.0\WaveForms|*.*|RECURSE
-FileKey5=%Documents%\CyberLink\PowerDirector\11.0|Snapshot(*).jpg
-FileKey6=%Documents%\CyberLink\PowerDirector\11.0\MyTitles|*.*|RECURSE
-FileKey7=%Documents%\CyberLink\PowerDirector\11.0\Preview Cache Files|*.*
-FileKey8=%Documents%\CyberLink\PowerDirector\11.0\ShadowEditFiles|*.MPG
-FileKey9=%Documents%\CyberLink\PowerDirector\11.0\SplitterIndex|*.maidx
-RegKey1=HKCU\Software\CyberLink\Hanuman
-RegKey2=HKCU\Software\CyberLink\PowerDirector11\MediaObj\MediaCache5\Data5
-RegKey3=HKCU\Software\CyberLink\PowerDirector11\MediaObj\MediaCache5\Thumbnail5
-
-[CyberLink PowerDirector 12*]
-LangSecRef=3023
-Detect=HKCU\Software\CyberLink\PowerDirector12
-Default=False
-FileKey1=%AppData%\Cyberlink\PowerDirector\12.0|Recentfiles.ini
-FileKey2=%AppData%\CyberLink\PowerDirector\12.0\AutoSave|*.*|RECURSE
-FileKey3=%AppData%\CyberLink\PowerDirector\12.0\photoTmp|*.*|RECURSE
-FileKey4=%AppData%\Cyberlink\PowerDirector\12.0\WaveForms|*.*|RECURSE
-FileKey5=%Documents%\CyberLink\PowerDirector\12.0|Snapshot(*).jpg
-FileKey6=%Documents%\CyberLink\PowerDirector\12.0\MyTitles|*.*|RECURSE
-FileKey7=%Documents%\CyberLink\PowerDirector\12.0\Preview Cache Files|*.*
-FileKey8=%Documents%\CyberLink\PowerDirector\12.0\ShadowEditFiles|*.MPG
-FileKey9=%Documents%\CyberLink\PowerDirector\12.0\SplitterIndex|*.maidx
-RegKey1=HKCU\Software\CyberLink\Hanuman
-RegKey2=HKCU\Software\CyberLink\PowerDirector12\MediaObj\MediaCache5\Data5
-RegKey3=HKCU\Software\CyberLink\PowerDirector12\MediaObj\MediaCache5\Thumbnail5
-
-[CyberLink PowerDirector 13*]
-LangSecRef=3023
-Detect=HKCU\Software\CyberLink\PowerDirector13
-Default=False
-FileKey1=%AppData%\Cyberlink\PowerDirector\13.0|Recentfiles.ini
-FileKey2=%AppData%\CyberLink\PowerDirector\13.0\AutoSave|*.*|RECURSE
-FileKey3=%AppData%\CyberLink\PowerDirector\13.0\photoTmp|*.*|RECURSE
-FileKey4=%AppData%\Cyberlink\PowerDirector\13.0\WaveForms|*.*|RECURSE
-FileKey5=%Documents%\CyberLink\PowerDirector\13.0|Snapshot(*).jpg
-FileKey6=%Documents%\CyberLink\PowerDirector\13.0\MyTitles|*.*|RECURSE
-FileKey7=%Documents%\Cyberlink\PowerDirector\13.0\PDRMUSIC.TMP|*.*|REMOVESELF
-FileKey8=%Documents%\Cyberlink\PowerDirector\13.0\PP.TWOPASS|*.*|REMOVESELF
-FileKey9=%Documents%\CyberLink\PowerDirector\13.0\Preview Cache Files|*.*
-FileKey10=%Documents%\CyberLink\PowerDirector\13.0\ShadowEditFiles|*.MPG
-FileKey11=%Documents%\CyberLink\PowerDirector\13.0\SplitterIndex|*.maidx
-RegKey1=HKCU\Software\CyberLink\Hanuman
-RegKey2=HKCU\Software\CyberLink\PowerDirector13\MediaObj\MediaCache5\Data5
-RegKey3=HKCU\Software\CyberLink\PowerDirector13\MediaObj\MediaCache5\Thumbnail5
 
 [CyberLink PowerDVD 16*]
 LangSecRef=3023
@@ -5346,7 +5289,7 @@ Section=Games
 Detect=HKLM\Software\Desura
 DetectFile=%ProgramFiles%\Desura
 Default=False
-Warning=This will remove tools that are needed in game installations. Don't use this is you have limited bandwidth as they will be re-downloaded on next game installation that needs the same tool.
+Warning=Don't use this if you have limited bandwidth as they will be re-downloaded on next game installation.
 FileKey1=%CommonAppData%\Desura\DesuraApp\tools|*.*|RECURSE
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\Desura\DesuraApp\tools|*.*|RECURSE
 ExcludeKey1=PATH|%CommonAppData%\Desura\DesuraApp\tools\installcheck
@@ -5389,19 +5332,19 @@ DetectFile=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Device
 Default=False
 FileKey1=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Device Metadata\dmrccache\downloads|*.tmp
 
-[Device Manager Cache XP*]
-LangSecRef=3025
-DetectOS=|5.1
-Default=False
-Warning=This clears cached drivers of connected devices. As soon as you connect a new device to your computer, this file will regenerate.
-FileKey1=%WinDir%\inf|INFCACHE.1
-
 [Device Manager Cache*]
-LangSecRef=3025
 DetectOS=6.0|
-Warning=This clears cached drivers of connected devices. As soon as you connect a new device to your computer, this file will regenerate.
+LangSecRef=3025
+Warning=This clears cached drivers of connected devices. As soon as you connect a new device, this file regenerates.
 Default=False
 FileKey1=%WinDir%\System32\DriverStore|INFCACHE.1
+
+[Device Manager Cache XP*]
+DetectOS=5.1|
+LangSecRef=3025
+Default=False
+Warning=This clears cached drivers of connected devices. As soon as you connect a new device, this file regenerates.
+FileKey1=%WinDir%\inf|INFCACHE.1
 
 [DeviceDoctor*]
 LangSecRef=3024
@@ -5409,7 +5352,7 @@ DetectFile=%AppData%\DeviceDoctorSoftware\DeviceDoctor
 Default=False
 FileKey1=%AppData%\DeviceDoctorSoftware\DeviceDoctor\Logs|*.*
 
-[devolo Cockpit*]
+[Devolo Cockpit*]
 LangSecRef=3024
 Detect=HKLM\SOFTWARE\devolo\dLAN
 Default=False
@@ -5429,7 +5372,7 @@ Detect=HKCU\Software\Dexpot
 Default=False
 FileKey1=%AppData%\Dexpot|*.log
 
-[Diablo 2 + LOD Logs*]
+[Diablo 2 Logs*]
 Section=Games
 Detect=HKCU\Software\Blizzard Entertainment\Diablo II
 Default=False
@@ -5507,9 +5450,9 @@ FileKey1=%Documents%\My Games\Dishonored\DishonoredGame\Logs|*.*
 
 [Disk Space Fan History*]
 LangSecRef=3024
-Warning=You will need to rescan your disks.
 Detect=HKCU\Software\Cookapp\DSF4
 Default=False
+Warning=You will need to rescan your disks.
 FileKey1=%AppData%\DiskSpaceFan|history_C.sqlite
 
 [Disk Space Fan Log*]
@@ -5697,7 +5640,7 @@ DetectFile=%AppData%\HitPoint Studios\DrD
 Default=False
 FileKey1=%AppData%\HitPoint Studios\DrD|logfile.txt
 
-[Dr. Kaiser - (DKS) PC Watcher*]
+[Dr. Kaiser - DKS PC Watcher*]
 LangSecRef=3024
 DetectFile=%WinDir%\DKSService.exe
 Default=False
@@ -5748,10 +5691,10 @@ FileKey3=%ProgramFiles%\DriverCleanerDotNET\Backup|*.*|RECURSE
 FileKey4=%ProgramFiles%\DriverCleanerDotNET\Log|*.*
 
 [Driver Fusion Backup*]
-Warning=This will delete your driver backups.
 LangSecRef=3024
 DetectFile=%ProgramFiles%\Driver Fusion\Backup
 Default=False
+Warning=This will delete your driver backups.
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Driver Fusion\Backup|*.*|RECURSE
 FileKey2=%ProgramFiles%\Driver Fusion\Backup|*.*|RECURSE
 
@@ -5829,7 +5772,7 @@ FileKey7=%LocalAppData%\Innovative Solutions\DriverMax\Agent|dmxlog.txt
 LangSecRef=3024
 Detect=HKCU\Software\drpsu
 Default=False
-Warning=This will delete your bug report! Use this if you really know what you are doing!
+Warning=This will delete your bug report. Use this only if you know what you are doing.
 FileKey1=%WinDir%\Logs\SysInfo|*.*
 FileKey2=%WinDir%\Logs\DRPLog|*.png
 FileKey3=%Documents%\DRP-Log|*.*
@@ -5889,14 +5832,6 @@ FileKey4=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\DRM|*.log
 FileKey5=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\DRM\Cache|*.*|RECURSE
 FileKey6=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\DRM\PreUpgrade|*.log
 
-[Dropbox Cache*]
-LangSecRef=3024
-Detect=HKCU\Software\Dropbox
-Default=False
-Warning=This will remove cached versions of modified and deleted files.
-FileKey1=%Documents%\Dropbox\.dropbox.cache|*.*|RECURSE
-FileKey2=%UserProfile%\Dropbox\.dropbox.cache|*.*|RECURSE
-
 [Dropbox*]
 LangSecRef=3024
 Detect=HKCU\Software\Dropbox
@@ -5907,6 +5842,14 @@ FileKey3=%AppData%\Dropbox\logs|*.*|RECURSE
 FileKey4=%AppData%\Dropbox\Cache|*.*|RECURSE
 FileKey5=%CommonAppData%\Dropbox\Update\Log|*.*
 FileKey6=%LocalAppData%\Dropbox\Logs|*.*|RECURSE
+
+[Dropbox Cache*]
+LangSecRef=3024
+Detect=HKCU\Software\Dropbox
+Default=False
+Warning=This will remove cached versions of modified and deleted files.
+FileKey1=%Documents%\Dropbox\.dropbox.cache|*.*|RECURSE
+FileKey2=%UserProfile%\Dropbox\.dropbox.cache|*.*|RECURSE
 
 [DU meter*]
 LangSecRef=3022
@@ -5933,12 +5876,6 @@ LangSecRef=3024
 Detect=HKCU\Software\KC Softwares\DUMo
 Default=False
 FileKey1=%AppData%\KC Softwares\DUMo|*.log
-
-[Dump Files*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla|*.dmp|RECURSE
 
 [Dungeons - The Dark Lord*]
 Section=Games
@@ -20269,7 +20206,7 @@ Detect=HKLM\Software\Microsoft\ESENT
 Default=False
 RegKey1=HKLM\Software\Microsoft\ESENT\Process
 
-[Windows Experience Index**]
+[Windows Experience Index*]
 LangSecRef=3025
 DetectOS=10.0|
 Warning=You may have to "Take Ownership" of the Windows\Performance\WinSAT folder for it to be entirely cleaned.
