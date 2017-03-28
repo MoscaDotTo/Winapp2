@@ -1,4 +1,4 @@
-; Version: 170326
+; Version: 170328
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -4040,13 +4040,6 @@ Detect=HKCU\Software\Valve\Steam\Apps\26500
 Default=False
 FileKey1=%LocalAppData%\Lazy 8 Studio\Cogs|log.txt
 
-[Colorblind Assistant*]
-LangSecRef=3023
-DetectFile=%AppData%\Colorblind Assistant
-Warning=Resets window position.
-Default=False
-FileKey1=%AppData%\Colorblind Assistant|default.ini
-
 [ColorSchemer*]
 LangSecRef=3023
 Detect=HKCU\Software\ColorSchemer
@@ -5290,7 +5283,7 @@ Default=False
 FileKey1=%WinDir%\System32\DriverStore|INFCACHE.1
 
 [Device Manager Cache XP*]
-DetectOS=5.1|
+DetectOS=|5.1
 LangSecRef=3025
 Default=False
 Warning=This clears cached drivers of connected devices. As soon as you connect a new device, this file regenerates.
