@@ -1,0 +1,3622 @@
+What's new in winapp2.ini 5.19.160702
+
+General: 
+43 New Entries
+25 Modified Entries
+07 Removed Entries
+
+Note:
+
+ Change log excludes minor changes (mild pathing changes, key reordering, non-major key tweaks, etc)
+
+Verbose: 
+
+------------------------------------------------------------------------------
+
+New Entries:
+
+[3D Builder*]
+DetectOS=10.0
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.3DBuilder_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.3DBuilder_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.3DBuilder_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.3DBuilder_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.3DBuilder_*\AC\Temp|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.3DBuilder_*\LocalCache|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.3DBuilder_*\LocalState\Cache|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.3DBuilder_*\TempState|*.*|RECURSE
+
+[Accounts Control*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.AccountsControl_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.AccountsControl_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.AccountsControl_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.AccountsControl_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.AccountsControl_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.AccountsControl_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.AccountsControl_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.AccountsControl_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.AccountsControl_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.AccountsControl_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.AccountsControl_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.AccountsControl_*\TempState|*.*|RECURSE
+
+[Adobe Acrobat DC*]
+LangSecRef=3021
+Detect=HKLM\Software\Adobe\Adobe Acrobat\DC
+Default=False
+FileKey1=%ProgramFiles%\Adobe\Acrobat DC\Setup Files|*.*|REMOVESELF
+FileKey2=%LocalAppData%\Adobe\Acrobat\DC\Cache|*.lst
+FileKey3=%LocalAppData%\Adobe\Acrobat\DC\ToolsSearchCacheAcro|*.*|RECURSE
+FileKey4=%LocalAppData%\Adobe\Acrobat\DC|*.lst
+FileKey5=%LocalAppData%\Adobe\Acrobat\DC|UserCache.bin
+FileKey6=%LocalLowAppData%\Adobe\Acrobat\DC\Search|*.*
+RegKey1=HKCU\Software\Adobe\Adobe Acrobat\DC\AVConversionFromPDF\cSettings
+RegKey2=HKCU\Software\Adobe\Adobe Acrobat\DC\AVConversionToPDF\cSettings
+RegKey3=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cDockables
+RegKey4=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cRecentFiles
+RegKey5=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cRecentFolders
+RegKey6=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cRecentToolsList
+RegKey7=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cToolbars
+RegKey8=HKCU\Software\Adobe\Adobe Acrobat\DC\RememberedViews\cNoCategoryFiles
+RegKey9=HKCU\Software\Adobe\Adobe Acrobat\DC\ShareIdentity
+RegKey10=HKCU\Software\Adobe\Adobe Synchronizer\DC
+
+[AIMP 4*]
+LangSecRef=3023
+DetectFile=%ProgramFiles%\AIMP\AIMP.exe
+Default=False
+FileKey1=%AppData%\AIMP|*.bak
+
+[Ashampoo Snap 9 (AutoSave)*]
+LangSecRef=3024
+Detect=HKCU\Software\Ashampoo\Ashampoo Snap 9
+Default=False
+FileKey1=%Pictures%\Ashampoo Snap 9\_SNAPDOC|*.*
+
+[Ashampoo Snap 9*]
+LangSecRef=3024
+Detect=HKCU\Software\Ashampoo\Ashampoo Snap 9
+Default=False
+FileKey1=%LocalAppData%\CrashRpt\UnsentCrashReports|*.*|RECURSE
+FileKey2=%AppData%\Ashampoo\Ashampoo Snap 9|*.*|RECURSE
+FileKey3=%ProgramFiles%\Ashampoo\Ashampoo Snap 9|_NLogMsg.txt
+
+[BITS Logs*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%CommonAppData%\Microsoft\Network\Downloader|*.*|RECURSE
+
+[CamStudio Temps*]
+LangSecRef=3023
+Detect=HKCU\Software\CamStudioOpenSource for Nick
+Default=False
+FileKey1=%Documents%\My CamStudio Temp Files|*.*
+
+[Comms Phone*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.CommsPhone_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.CommsPhone_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.CommsPhone_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.CommsPhone_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.CommsPhone_*\TempState|*.*|RECURSE
+
+[Connectivity Store*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.ConnectivityStore_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.ConnectivityStore_*\TempState|*.*|RECURSE
+
+[Contact Support*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Windows.ContactSupport_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Microsoft\CLR_v4.0|*.log
+FileKey6=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Microsoft\CLR_v4.0\NativeImages\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Microsoft\CLR_v4.0\UsageLogs|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Microsoft\CLR_v4.0_32|*.log
+FileKey9=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Microsoft\CLR_v4.0_32\NativeImages\Temp|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Microsoft\CLR_v4.0_32\UsageLogs|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey14=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\Temp|*.*|RECURSE
+FileKey15=%LocalAppData%\Packages\Windows.ContactSupport_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey16=%LocalAppData%\Packages\Windows.ContactSupport_*\LocalCache|*.*|RECURSE
+FileKey17=%LocalAppData%\Packages\Windows.ContactSupport_*\LocalState\Cache|*.*|RECURSE
+FileKey18=%LocalAppData%\Packages\Windows.ContactSupport_*\TempState|*.*|RECURSE
+
+[CyberLink Power2Go 9*]
+LangSecRef=3023
+Detect=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0
+Default=False
+FileKey1=%ProgramFiles%\Cyberlink\Power2Go9|*.tmp
+FileKey2=%ProgramFiles%\Cyberlink\Power2Go9|Thumbs.db|RECURSE
+FileKey3=%LocalAppData%\Cyberlink\Power2Go9|DLDB.db
+FileKey4=%Documents%\PDRMUSIC.TMP|*.*|REMOVESELF
+FileKey5=%Music%|*.tmp
+FileKey6=%Pictures%|*.tmp
+RegKey1=HKCU\SOFTWARE\CyberLink\LabelPrint\Recent File List
+RegKey2=HKCU\SOFTWARE\CyberLink\MediaCache\Data4
+RegKey3=HKCU\SOFTWARE\CyberLink\MediaCache5\Data5
+RegKey4=HKCU\SOFTWARE\CyberLink\MediaCache5\Thumbnail5
+RegKey5=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|CDRippingPath
+RegKey6=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|CUEName
+RegKey7=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|CUEPath
+RegKey8=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|DestFolder
+RegKey9=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|DVDFolderPath
+RegKey9=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|ImagePath
+RegKey11=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|LastBrowsePath
+RegKey12=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|LastSaveProjPath
+RegKey13=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|MonitorPaths
+RegKey14=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|OpenPrjFilePath
+RegKey15=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0|SelectedFolderPath
+RegKey16=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0\MediaObj\MediaCache5\Data5
+RegKey17=HKCU\SOFTWARE\CyberLink\Power2Go9\9.0\MediaObj\MediaCache5\Thumbnail5
+RegKey18=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|ImportDir
+RegKey19=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|TempFileDir
+RegKey20=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|WorkDir
+
+[CyberLink Power2Go 10*]
+LangSecRef=3023
+Detect=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0
+Default=False
+FileKey1=%ProgramFiles%\Cyberlink\Power2Go10|*.tmp
+FileKey2=%ProgramFiles%\Cyberlink\Power2Go10|Thumbs.db|RECURSE
+FileKey3=%LocalAppData%\Cyberlink\Power2Go10|DLDB.db
+FileKey4=%Documents%\PDRMUSIC.TMP|*.*|REMOVESELF
+FileKey5=%Music%|*.tmp
+FileKey6=%Pictures%|*.tmp
+RegKey1=HKCU\SOFTWARE\CyberLink\LabelPrint\Recent File List
+RegKey2=HKCU\SOFTWARE\CyberLink\MediaCache\Data4
+RegKey3=HKCU\SOFTWARE\CyberLink\MediaCache5\Data5
+RegKey4=HKCU\SOFTWARE\CyberLink\MediaCache5\Thumbnail5
+RegKey5=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|CDRippingPath
+RegKey6=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|CUEName
+RegKey7=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|CUEPath
+RegKey8=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|DestFolder
+RegKey9=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|DVDFolderPath
+RegKey10=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|ImagePath
+RegKey11=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|LastBrowsePath
+RegKey12=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|LastSaveProjPath
+RegKey13=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|MonitorPaths
+RegKey14=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|OpenPrjFilePath
+RegKey15=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0|SelectedFolderPath
+RegKey16=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0\MediaObj\MediaCache5\Data5
+RegKey17=HKCU\SOFTWARE\CyberLink\Power2Go10\10.0\MediaObj\MediaCache5\Thumbnail5
+RegKey18=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|ImportDir
+RegKey19=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|TempFileDir
+RegKey20=HKCU\SOFTWARE\CyberLink\WaveEditor\2.0|WorkDir
+
+[Delivery Optimization Files*]
+LangSecRef=3025
+Detect=HKLM\Software\Microsoft\Windows
+Default=False
+RegKey1=HKLM\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Jobs
+FileKey1=%WinDir%\Logs\dosvc|*.*|RECURSE
+FileKey2=%WinDir%\SoftwareDistribution\DeliveryOptimization|*.*|RECURSE
+
+[DRM Traces*]
+LangSecRef=3025
+Detect=HKLM\Software\Microsoft\DRM
+Default=False
+FileKey1=%CommonAppData%\Microsoft\Windows\DRM\Cache|*.*|RECURSE
+FileKey2=%CommonAppData%\Microsoft\Windows\DRM\PreUpgrade|*.log
+FileKey3=%CommonAppData%\Microsoft\Windows\DRM|*.log
+FileKey4=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\DRM\Cache|*.*|RECURSE
+FileKey5=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\DRM\PreUpgrade|*.log
+FileKey6=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\DRM|*.log
+
+[Get Started*]
+DetectOS=10.0
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Getstarted_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.Getstarted_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Getstarted_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Getstarted_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Getstarted_*\AC\Temp|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Getstarted_*\LocalCache|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Getstarted_*\LocalState\Cache|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Getstarted_*\TempState|*.*|RECURSE
+
+[ImTOO Video Converter Ultimate*]
+LangSecRef=3023
+Detect=HKCU\Software\ImTOO\Video Converter Ultimate
+Default=False
+FileKey1=%CommonAppData%\ImTOO\Video Converter Ultimate\customdata|settings.old
+RegKey1=HKCU\Software\ImTOO\Video Converter Ultimate\Settings|last_openfile_dir
+RegKey2=HKCU\Software\ImTOO\Video Converter Ultimate\Settings|last_output_dir
+RegKey3=HKCU\Software\ImTOO\Video Converter Ultimate\Settings|last_profile_group
+RegKey4=HKCU\Software\ImTOO\Video Converter Ultimate\Settings|last_profile_url
+RegKey5=HKCU\Software\ImTOO\Video Converter Ultimate\Settings|recent_profiles
+RegKey6=HKCU\Software\ImTOO\Video Converter Ultimate\Settings\output
+
+[Leawo Prof. Media*]
+LangSecRef=3023
+Detect=HKCU\Software\Leawo Software\SoftwarePassport\Leawo Prof. Media
+Default=False
+FileKey1=%LocalAppData%\Leawo Prof\cache|*.*|RECURSE
+FileKey2=%AppData%\Leawo\Prof. Media\Burn\MenuTemplate\Cache|*.*|RECURSE
+FileKey3=%AppData%\Leawo\Prof. Media\Burn|*.log
+FileKey4=%AppData%\Leawo\Prof. Media\CrashReport|*.*|RECURSE
+FileKey5=%AppData%\Leawo\Prof. Media\Download\Thumbnails|*.*|RECURSE
+FileKey6=%AppData%\Leawo\Prof. Media\Download\WebCache|*.*|RECURSE
+FileKey7=%AppData%\Leawo\Prof. Media\Download\WebFiles|*.*|RECURSE
+FileKey8=%AppData%\Leawo\Prof. Media\Download|*.dat;*.db;*log;*.xml
+FileKey9=%AppData%\Leawo\Prof. Media\Log|*.*|RECURSE
+
+[Leawo Video Converter Pro*]
+LangSecRef=3023
+DetectFile=%AppData%\Leawo\Video Converter Pro
+Default=False
+FileKey1=%LocalAppData%\Video Converter Pro\cache|*.*|RECURSE
+FileKey2=%AppData%\Leawo\Video Converter Pro\CrashReport|*.*|RECURSE
+FileKey3=%AppData%\Leawo\Video Converter Pro|*.log
+
+[Lock App*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.LockApp_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.LockApp_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.LockApp_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.LockApp_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.LockApp_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.LockApp_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.LockApp_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.LockApp_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.LockApp_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.LockApp_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.LockApp_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.LockApp_*\TempState|*.*|RECURSE
+
+[Maps*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.WindowsMaps_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.WindowsMaps_*\TempState|*.*|RECURSE
+
+[Movavi Video Converter (Logs)*]
+LangSecRef=3023
+Detect=HKCU\Software\MOVAVI
+Default=False
+FileKey1=%LocalAppData%\Movavi\Logs\VideoConverter16\|*.*
+
+[Office 2007 More*]
+LangSecRef=3021
+Detect=HKCU\Software\Microsoft\Office\12.0\Common
+FileKey1=%Documents%|~*.ppt;~*.pptx|RECURSE
+FileKey2=%Documents%|~*.doc;~*.docx|RECURSE
+RegKey1=HKCU\Software\Microsoft\Office\12.0\Common\Internet|UseRWHlinkNavigation
+RegKey2=HKCU\Software\Microsoft\Office\12.0\Word\Reading Locations
+
+ [Office 2016 More*]
+LangSecRef=3021
+Detect=HKCU\Software\Microsoft\Office\16.0\Common
+Default=False
+FileKey1=%Documents%|~*.ppt;~*.pptx|RECURSE
+FileKey2=%Documents%|~*.doc;~*.docx|RECURSE
+RegKey1=HKCU\Software\Microsoft\Office\16.0\Common\Internet|UseRWHlinkNavigation
+RegKey2=HKCU\Software\Microsoft\Office\16.0\Word\Reading Locations
+
+[Orcs Must Die! Unchained Logs*]
+LangSecRef=Games
+Detect=HKCU\SOFTWARE\Robot Entertainment\Orcs Must Die! Unchained
+Default=False
+FileKey1=%Documents%\My Games\Orcs Must Die Unchained\SpitfireGame\Logs|*.log;*.dmg;*.dmp|RECURSE
+
+[Panther*]
+LangSecRef=3025
+DetectFile=%Windir%\Panther
+Default=False
+FileKey1=%WinDir%\Panther|cbs.log;DDACLSys.log;miglog.xml;Migrep.html;PostGatherPnPList.log;PreGatherPnPList.log
+FileKey2=%WinDir%\Panther\FastCleanup|*.log
+FileKey3=%WinDir%\Panther\UnattendGC|diagerr.xml;diagwrn.xml
+FileKey4=%WinDir%\System32\sysprep\Panther\IE|diagerr.xml;diagwrn.xml
+
+[People*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.People_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.People_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.People_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.People_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.People_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.People_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.People_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.People_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.People_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.People_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.People_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.People_*\TempState|*.*|RECURSE
+
+[Phone*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.WindowsPhone_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.WindowsPhone_*\TempState|*.*|RECURSE
+
+[QuizUp*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\QuizUp.QuizUp_n36z36qeaxk8a
+FileKey1=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\Microsoft\CLR_v4.0|*.log|RECURSE
+FileKey6=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\Microsoft\CLR_v4.0\NativeImages\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\Microsoft\CLR_v4.0_32|*.log|RECURSE
+FileKey8=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\Microsoft\CLR_v4.0_32\NativeImages\Temp|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\Temp|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\QuizUp.QuizUp_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\QuizUp.QuizUp_*\LocalCache|*.*|RECURSE
+FileKey14=%LocalAppData%\Packages\QuizUp.QuizUp_*\LocalState\Cache|*.*|RECURSE
+FileKey15=%LocalAppData%\Packages\QuizUp.QuizUp_*\TempState|*.*|RECURSE
+
+[SageThumbs Thumbnail Cache*]
+LangSecRef=3021
+DetectFile=%ProgramFiles%\SageThumbs\64\SageThumbs.dll
+Default=False
+FileKey1=%LocalAppData%\|SageThumbs.*
+
+[Scan*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.WindowsScan_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.WindowsScan_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.WindowsScan_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.WindowsScan_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.WindowsScan_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.WindowsScan_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.WindowsScan_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.WindowsScan_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.WindowsScan_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.WindowsScan_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.WindowsScan_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.WindowsScan_*\TempState|*.*|RECURSE
+
+[Shell Experience Host*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.ShellExperienceHost_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\TempState|*.*|RECURSE
+
+[Signature Verification Logs*]
+DetectOS=|5.1
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%WinDir%|SIGVERIF.TXT
+
+[Snagit 13*]
+LangSecRef=3024
+Detect=HKCU\Software\TechSmith\SnagIt\13
+Default=False
+RegKey1=HKCU\Software\TechSmith\SnagIt\13\Recent Captures
+RegKey2=HKCU\Software\TechSmith\SnagIt\13\SnagItEditor\Recent File List
+FileKey1=%LocalAppData%\TechSmith\SnagIt|Tray.bin
+FileKey2=%LocalAppData%\TechSmith\SnagIt\DataStore\AppIcons|*.ico
+FileKey3=%LocalAppData%\TechSmith\SnagIt\DataStore\WebSiteIcons|*.ico
+FileKey4=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
+
+[Snagit 12/13 Local Dumps*]
+LangSecRef=3024
+Detect1=HKCU\Software\TechSmith\SnagIt\12
+Detect2=HKCU\Software\TechSmith\SnagIt\13
+Default=False
+FileKey1=%LocalAppData%\TechSmith\Snagit\CrashDumps|*.*
+
+[Snagit 12/13 More*]
+LangSecRef=3024
+Detect1=HKCU\Software\TechSmith\SnagIt\12
+Detect2=HKCU\Software\TechSmith\SnagIt\13
+Default=False
+Warning=This will delete the backups of the captures that you have performed with SnagIt 12/13.
+FileKey1=%LocalAppData%\TechSmith\Snagit\DataStore|*.SNAG;*.SNAGundo;*.MP4
+FileKey2=%Documents%\|SnagItDebug.log
+FileKey3=%LocalAppData%\TechSmith\Logs\|*.log
+RegKey1=HKCU\Software\TechSmith\Snagit\12|CaptureCount
+RegKey2=HKCU\Software\TechSmith\Snagit\Stamps|StampCustomFolder
+
+[Sound Recorder*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\TempState|*.*|RECURSE
+
+[Startup Repair Logs*]
+LangSecRef=3025
+Detect=HKLM\Software\Microsoft\Windows
+Default=False
+FileKey1=%WinDir%\System32\LogFiles\Srt|*.*|RECURSE
+
+[Sway*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Office.Sway_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.Office.Sway_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Office.Sway_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Office.Sway_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Office.Sway_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Office.Sway_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Office.Sway_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Office.Sway_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Office.Sway_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.Office.Sway_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Office.Sway_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.Office.Sway_*\TempState|*.*|RECURSE
+
+[WDI Logs*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%WinDir%\System32\WDI\{*}|*.*|REMOVESELF
+FileKey2=%WinDir%\System32\WDI\LogFiles\StartupInfo|*.*|RECURSE
+
+[Wondershare AllMyTube*]
+LangSecRef=3022
+Detect1=HKLM\SOFTWARE\Wondershare\Wondershare AllMyTube
+Detect2=HKLM\SOFTWARE\WOW6432Node\Wondershare\Wondershare AllMyTube
+Default=False
+FileKey1=%ProgramFiles%\Wondershare\AllMyTube\Log|*.*|RECURSE
+FileKey2=%CommonAppData%\Wondershare\AllMyTube|*.bak
+FileKey3=%CommonAppData%\Wondershare AllMyTube\ConvertedLibPic|*.*|RECURSE
+FileKey4=%CommonAppData%\Wondershare AllMyTube|*.xml
+FileKey5=%CommonAppData%\Wondershare Application Common Data\Download\MediaLibPic|*.*|RECURSE
+FileKey6=%CommonAppData%\Wondershare Application Common Data\Download\SiteLogo|*.*|RECURSE
+FileKey7=%CommonAppData%\Wondershare Application Common Data\Download\TempThumbDir|*.*|RECURSE
+FileKey8=%CommonAppData%\Wondershare Application Common Data\Download|*.bak;*.xml
+FileKey9=%AppData%\Wondershare AllMyTube|*.*|RECURSE
+
+[Wondershare MobileGo*]
+LangSecRef=3021
+Detect=HKCU\SOFTWARE\Wondershare\MobileGo
+Default=False
+FileKey1=%ProgramFiles%\Wondershare\MobileGo|*.log
+FileKey2=%CommonAppData%\Wondershare\Dr.FoneTool\Log|*.txt
+FileKey3=%CommonAppData%\Wondershare\WAF\ProductFeatures\LocalLogs|*.*|RECURSE
+FileKey4=%CommonAppData%\Wondershare\WAF\ProductFeatures\RemoteLogs|*.*|RECURSE
+FileKey5=%AppData%\se_tmp|*.*|REMOVESELF
+FileKey6=%AppData%\Wondershare\DataEraser|*.log
+FileKey7=%AppData%\Wondershare\Dr.FoneTool\log|*.log
+FileKey8=%AppData%\Wondershare\DrFoneAndroidTool\log|*.log
+FileKey9=%AppData%\Wondershare\MirrorGo\ImageCache\ADImage|*.*|RECURSE
+FileKey10=%AppData%\Wondershare\MirrorGo|*.log
+FileKey11=%AppData%\Wondershare\MobileGo|*.log
+FileKey12=%AppData%\Wondershare\MobileGo\DeviceImageCache|*.*|RECURSE
+FileKey13=%AppData%\Wondershare\MobileGo\iOSTemp|*.*|REMOVESELF
+FileKey14=%AppData%\Wondershare\MobileGo\Logs\DeviceConnection|*.*|RECURSE
+FileKey15=%AppData%\Wondershare\MobileTransTool|*.log
+FileKey16=%AppData%\Wondershare\WsRoot\Logs|*.*|RECURSE
+
+[Xilisoft Video Converter Ultimate*]
+LangSecRef=3023
+Detect=HKCU\Software\Xilisoft\Video Converter Ultimate
+Default=False
+RegKey1=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|last_openfile_dir
+RegKey2=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|last_output_dir
+RegKey3=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|last_profile_group
+RegKey4=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|last_profile_url
+RegKey5=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|recent_profiles
+RegKey6=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings\output
+FileKey1=%CommonAppData%\Xilisoft\Video Converter Ultimate\customdata|settings.old
+
+
+
+------------------------------------------------------------------------------
+
+Modified Entries:
+
+[Action Center*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Windows\ActionCenterCache|*.*|RECURSE
+RegKey1=HKCU\Software\Microsoft\Windows\CurrentVersion\Action Center\Checks
+RegKey2=HKCU\Software\Microsoft\Windows\CurrentVersion\Action Center\Providers\EventLog
+RegKey3=HKCU\Software\Microsoft\Windows\CurrentVersion\Notifications\Current
+
+	- Added FileKey1, RegKey3
+	
+[Auslogics Disk Defrag Portable*]
+LangSecRef=3024
+Detect1=HKCU\Software\Auslogics\Disk Defrag Portable
+Detect2=HKLM\Software\Auslogics\DiskDefrag Portable
+Detect3=HKLM\Software\Auslogics\Disk Defrag Portable
+Default=False
+FileKey1=%AppData%\Auslogics\Disk Defrag\Reports|*.*
+FileKey2=%AppData%\Auslogics\Disk Defrag\Logs|*.*
+FileKey3=%CommonAppData%\Auslogics\DiskDefrag Portable\*\Reports|*.*
+FileKey4=%CommonAppData%\Auslogics\Disk Defrag Portable\*\Reports|*.*
+
+	- Added Detect3, FileKey4
+	
+[Bing Finance More*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.BingFinance_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.BingFinance_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.BingFinance_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.BingFinance_*\AC\Microsoft\CLR_v4.0\UsageLogs|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.BingFinance_*\AC\PRICache|*.*
+FileKey4=%LocalAppData%\Packages\Microsoft.BingFinance_*\AC\Temp|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.BingFinance_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.BingFinance_*\TempState|*.*|RECURSE
+
+	-Added FileKeys 4 and 5
+	
+[Bing News More*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.BingNews_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.BingNews_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.BingNews_*\AC\Microsoft\CLR_v4.0|*.log|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.BingNews_*\AC\PRICache|*.*
+FileKey3=%LocalAppData%\Packages\Microsoft.BingNews_*\AC\Temp|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.BingNews_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.BingNews_*\LocalState\navigationHistory|*.*|RECURSE
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.BingNews_8wekyb3d8bbwe\SearchHistory
+
+	- Added FileKeys3 and 4
+	
+[Bing Sports More*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.BingSports_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.BingSports_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.BingSports_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.BingSports_*\AC\Microsoft\CLR_v4.0|*.log|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.BingSports_*\AC\PRICache|*.*
+FileKey4=%LocalAppData%\Packages\Microsoft.BingSports_*\AC\Temp|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.BingSports_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.BingSports_*\LocalState\navigationHistory|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.BingSports_*\TempState|*.*|RECURSE
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.BingSports_8wekyb3d8bbwe\SearchHistory
+
+	- Added FileKeys4 and 5
+	
+[Bing Weather*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.BingWeather_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.BingWeather_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\Microsoft\CLR_v4.0|*.log
+FileKey6=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\PRICache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\Temp|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Microsoft.BingWeather_*\LocalState|*.tmp
+FileKey13=%LocalAppData%\Packages\Microsoft.BingWeather_*\LocalState\Cache|*.*|RECURSE
+FileKey14=%LocalAppData%\Packages\Microsoft.BingWeather_*\LocalState\navigationHistory|*.*|RECURSE
+FileKey15=%LocalAppData%\Packages\Microsoft.BingWeather_*\TempState|*.*|RECURSE
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.BingWeather_8wekyb3d8bbwe\SearchHistory
+
+	- Added FileKey11
+	
+[Camera*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Camera_8wekyb3d8bbwe
+Detect2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.WindowsCamera_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.Camera_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Camera_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Camera_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Camera_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Camera_*\AC\Microsoft\CLR_v4.0\UsageLogs|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Camera_*\AC\Microsoft\CryptnetUrlCache\Content|*.*
+FileKey7=%LocalAppData%\Packages\Microsoft.Camera_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*
+FileKey8=%LocalAppData%\Packages\Microsoft.Camera_*\AC\PRICache|*.*
+FileKey9=%LocalAppData%\Packages\Microsoft.Camera_*\AC\Temp|*.*
+FileKey10=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\AC\AppCache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\AC\INetCache|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\AC\INetCookies|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\AC\INetHistory|*.*|RECURSE
+FileKey14=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey15=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey16=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\AC\Temp|*.*|RECURSE
+FileKey17=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey18=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\LocalCache|*.*|RECURSE
+FileKey19=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\LocalState\AppData|*.*|RECURSE
+FileKey20=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\LocalState\Cache|*.*|RECURSE
+FileKey21=%LocalAppData%\Packages\Microsoft.WindowsCamera_*\TempState|*.*|RECURSE
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Camera_8wekyb3d8bbwe\SearchHistory
+
+	- Added Detect2, FileKeys10 through 21
+	
+[Cloud Experience Host*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.CloudExperienceHost_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\TempState|*.*|RECURSE
+
+	- Added FileKey1
+
+[Cortana*]
+Section=3031
+Default=False
+Detect1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Cortana_8wekyb3d8bbwe
+Detect2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.Cortana_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.Cortana_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Cortana_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Cortana_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Cortana_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Cortana_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Cortana_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Cortana_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Cortana_*\AC\Temp|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.Cortana_*\TempState|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\AppCache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\INetCache|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\INetCookies|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\INetHistory|*.*|RECURSE
+FileKey14=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey15=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey16=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey17=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Temp|*.*|RECURSE
+FileKey18=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey19=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\LocalCache|*.*|RECURSE
+FileKey20=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\LocalState\Cache|*.*|RECURSE
+FileKey21=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\LocalState\AppIconCache|*.*|RECURSE
+FileKey22=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\LocalState\DeviceSearchCache|*.*|RECURSE
+FileKey23=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\TempState|*.*|RECURSE
+
+- Added FileKeys 10,21,22
+
+[CyberLink PowerDirector 13*]
+LangSecRef=3023
+Detect=HKCU\Software\CyberLink\PowerDirector13
+Default=False
+FileKey1=%AppData%\CyberLink\PowerDirector\13.0\AutoSave|*.*|RECURSE
+FileKey2=%AppData%\CyberLink\PowerDirector\13.0\photoTmp|*.*|RECURSE
+FileKey3=%AppData%\Cyberlink\PowerDirector\13.0\WaveForms|*.*|RECURSE
+FileKey4=%AppData%\Cyberlink\PowerDirector\13.0|Recentfiles.ini
+FileKey5=%Documents%\CyberLink\PowerDirector\13.0|Snapshot(*).jpg
+FileKey6=%Documents%\CyberLink\PowerDirector\13.0\MyTitles|*.*|RECURSE
+FileKey7=%Documents%\Cyberlink\PowerDirector\13.0\PDRMUSIC.TMP|*.*|REMOVESELF
+FileKey8=%Documents%\Cyberlink\PowerDirector\13.0\PP.TWOPASS|*.*|REMOVESELF
+FileKey9=%Documents%\CyberLink\PowerDirector\13.0\Preview Cache Files|*.*
+FileKey10=%Documents%\CyberLink\PowerDirector\13.0\ShadowEditFiles|*.MPG
+FileKey11=%Documents%\CyberLink\PowerDirector\13.0\SplitterIndex|*.maidx
+RegKey1=HKCU\Software\CyberLink\Hanuman
+RegKey2=HKCU\Software\CyberLink\PowerDirector13\MediaObj\MediaCache5\Data5
+RegKey3=HKCU\Software\CyberLink\PowerDirector13\MediaObj\MediaCache5\Thumbnail5
+
+	- Added FileKey7,8
+
+[Diagnostics Logs*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%WinDir%\debug\WIA|*.log
+	
+	- Switched to Wildcard cleaning 
+	
+[Kaspersky*]
+LangSecRef=3024
+Detect=HKCU\Software\KasperskyLab
+Default=False
+Warning=Make sure to disable “Self Defense” before cleaning.
+FileKey1=%CommonAppData%\Kaspersky Lab\*\Bases\Cache|*.*|RECURSE
+FileKey2=%CommonAppData%\Kaspersky Lab\*\Data\Updater\Temporary Files|*.*|RECURSE
+FileKey3=%CommonAppData%\Kaspersky Lab\*\Temp|*.*
+FileKey4=%LocalAppData%\VirtualStore\ProgramData\Kaspersky Lab\*\Bases\Cache|*.*|RECURSE
+FileKey5=%LocalAppData%\VirtualStore\ProgramData\Kaspersky Lab\*\Data\Updater\Temporary Files|*.*|RECURSE
+FileKey6=%LocalAppData%\VirtualStore\ProgramData\Kaspersky Lab\*\Temp|*.*
+FileKey7=%ProgramFiles%\Kaspersky Lab\NetworkAgent\~dumps|*.*
+
+	- Added FileKey7
+	
+[Leawo Video Converter*]
+LangSecRef=3023
+DetectFile=%AppData%\Leawo\Video Converter
+Default=False
+FileKey1=%LocalAppData%\Video Converter\cache|*.*|RECURSE
+FileKey2=%AppData%\Leawo\Video Converter\CrashReport|*.*|RECURSE
+FileKey3=%AppData%\Leawo\Video Converter|*.log
+
+	- Added FileKey1,2
+	
+[Office 2010 More*]
+LangSecRef=3021
+Detect=HKCU\Software\Microsoft\Office\14.0\Common
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Office\14.0\OfficeFileCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Microsoft\Office\14.0|OneNoteOfflineCache.onecache
+FileKey3=%LocalAppData%\Microsoft\OneNote\14.0\OneNoteOfflineCache_Files|*.*|RECURSE
+FileKey4=%Documents%|~*.ppt;~*.pptx|RECURSE
+FileKey5=%Documents%|~*.doc;~*.docx|RECURSE
+RegKey1=HKCU\Software\Microsoft\Office\14.0\Common\Internet|UseRWHlinkNavigation
+RegKey2=HKCU\Software\Microsoft\Office\14.0\Word\Reading Locations
+
+	- Added FileKeys1,4,5, RegKeys1,2
+	
+[Office 2013 More*]
+LangSecRef=3021
+Detect=HKCU\Software\Microsoft\Office\15.0\Common
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Office\15.0\OfficeFileCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Microsoft\Office\15.0|OneNoteOfflineCache.onecache
+FileKey3=%LocalAppData%\Microsoft\OneNote\15.0\OneNoteOfflineCache_Files|*.*|RECURSE
+FileKey4=%Documents%|~*.ppt;~*.pptx|RECURSE
+FileKey5=%Documents%|~*.doc;~*.docx|RECURSE
+RegKey1=HKCU\Software\Microsoft\Office\15.0\Common\Internet|UseRWHlinkNavigation
+RegKey2=HKCU\Software\Microsoft\Office\15.0\Word\Reading Locations
+
+	- Added FileKeys 1,4,5, regKeys1,2
+
+[OneNote*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Office.OneNote_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.Office.OneNote_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\AC\INetCache|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\AC\INetCookies|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\AC\INetHistory|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\AC\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\LocalState\AppData\Local|msodata*.dat
+FileKey9=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\LocalState\AppData\Local\Office\OTele|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\LocalState\AppData\Local\Office\16.0\WebServiceCache\AllUsers\officeclient.microsoft.com|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\LocalState\AppData\Local\Office\16.0\WebServiceCache\AllUsers\office15client.microsoft.com|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\LocalState\AppData\Local\OneNote\16.0\OneNoteOfflineCache_Files|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\LocalState\AppData\Local\OneNote\16.0\OneNotePagePreviewCache_Files|*.*|RECURSE
+FileKey14=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\LocalState\AppData\Local\OneNote\16.0|*.onecache
+FileKey15=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\TempState|*.*|RECURSE
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Office.OneNote_8wekyb3d8bbwe\SearchHistory
+
+	- Added FileKeys7, 10
+
+[Plex Media Server*]
+LangSecRef=3023
+Detect=HKCU\Software\Plex, Inc.\Plex Media Server
+Default=False
+FileKey1=%ProgramFiles%\Plex\Plex Media Server|*.txt;*.log|RECURSE
+FileKey2=%LocalAppData%\Plex Media Server\Cache\PhotoTranscoder|*.*|RECURSE
+FileKey3=%LocalAppData%\Plex Media Server\Crash Reports|*.*|RECURSE
+FileKey4=%LocalAppData%\Plex Media Server\Logs|*.*|RECURSE
+FileKey5=%LocalAppData%\Plex Media Server\Updates|*.*|RECURSE
+FileKey6=%LocalAppData%\VirtualStore\Program Files*\Plex\Plex Media Server|*.txt;*.log|RECURSE
+FileKey7=%LocalAppData%\VirtualStore\Program Files*\Plex Media Server\Cache\PhotoTranscoder|*.*|RECURSE
+FileKey8=%LocalAppData%\VirtualStore\Program Files*\Plex Media Server\Crash Reports|*.*|RECURSE
+FileKey9=%LocalAppData%\VirtualStore\Program Files*\Plex Media Server\Logs|*.*|RECURSE
+FileKey10=%LocalAppData%\VirtualStore\Program Files*\Plex Media Server\Updates|*.*|RECURSE
+
+	- Added FileKeys2,5,7,10
+	
+[VoidTools Search Everything*]
+LangSecRef=3024
+DetectFile1=%ProgramFiles%\Everything
+DetectFile2=%AppData%\Everything
+Default=False
+FileKey1=%AppData%\Everything|*.csv;*.txt;*.tmp
+FileKey2=%ProgramFiles%\Everything|*.csv;*.txt;*.tmp
+FileKey3=%LocalAppData%\VirtualStore\Program Files*\Everything|*.txt;*.csv;*.tmp
+ExcludeKey1=FILE|%AppData%\Everything\Filters.csv
+ExcludeKey2=FILE|%ProgramFiles%\Everything\Filters.csv
+ExcludeKey3=FILE|%LocalAppData%\VirtualStore\Program Files*\Everything\Filters.csv
+
+	- Added tmp file cleaning
+
+[WebSite-Watcher*]
+LangSecRef=3021
+Detect=HKCU\Software\aignes\wswatch
+Default=False
+FileKey1=%AppData%\aignes\WebSite-Watcher\config\favicons|*.*
+FileKey2=%AppData%\aignes\WebSite-Watcher\config\settings|*.cfg_bak*
+
+	- Removed lines included in other entries
+	
+[Windows Communications Apps*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\microsoft.windowscommunicationsapps_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Comms\Temp|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\AppCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\INetCache|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\INetCookies|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\INetHistory|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\Microsoft\CLR_v4.0\UsageLogs|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\Microsoft\CryptnetUrlCache\Content|*.*
+FileKey8=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*
+FileKey9=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\PRICache|*.*
+FileKey11=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\AC\Temp|*.*
+FileKey12=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\TempState|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\LocalState\LiveComm\*\*\DBStore\LogFiles|edbtmp.log
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\microsoft.windowscommunicationsapps_8wekyb3d8bbwe\SearchHistory
+
+	- Added FileKey1
+	
+[Windows Defender More*]
+LangSecRef=3024
+Detect=HKLM\Software\Microsoft\Windows Defender
+Default=False
+FileKey1=%CommonAppData%\Microsoft\Windows Defender\Definition Updates\Backup|*.*|RECURSE
+FileKey2=%CommonAppData%\Microsoft\Windows Defender\LocalCopy|*.*|RECURSE
+FileKey3=%CommonAppData%\Microsoft\Windows Defender\Network Inspection System\Support|*.txt
+FileKey4=%CommonAppData%\Microsoft\Windows Defender\Scans|*.bin;*.bin*
+FileKey5=%CommonAppData%\Microsoft\Windows Defender\Scans\History\Service|*.log
+FileKey6=%CommonAppData%\Microsoft\Windows Defender\Scans\Scans\History\CacheManager|*.*|RECURSE
+FileKey7=%CommonAppData%\Microsoft\Windows Defender\Support|*.*|RECURSE
+
+	- Added FileKey2
+	
+[Xbox Identity Provider*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.XboxIdentityProvider_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\Microsoft\CLR_v4.0|*.log
+FileKey5=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\Microsoft\CLR_v4.0\NativeImages\Temp|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\Microsoft\CLR_v4.0\UsageLogs|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\Microsoft\CLR_v4.0_32|*.log
+FileKey8=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\Microsoft\CLR_v4.0_32\NativeImages\Temp|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\Microsoft\CLR_v4.0_32\UsageLogs|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\Temp|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\LocalCache|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\LocalState\Cache|*.*|RECURSE
+FileKey14=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\TempState|*.*|RECURSE
+
+	- Added FileKey6.9
+
+[XboxApp*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.XboxApp_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.XboxApp_*\LocalCache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.XboxApp_*\LocalState|*.log;*.log*
+FileKey10=%LocalAppData%\Packages\Microsoft.XboxApp_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.XboxApp_*\LocalState\SmartGlass|*.log
+FileKey12=%LocalAppData%\Packages\Microsoft.XboxApp_*\TempState|*.*|RECURSE
+
+	- Added FileKeys9,11
+	
+[Zune Music*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.ZuneMusic_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.ZuneMusic_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\Microsoft\CLR_v4.0\UsageLogs|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\PRICache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\Temp|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\LocalState\Cache|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\LocalState\ImageCache|*.*|RECURSE
+FileKey14=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\LocalState\navigationHistory|*.*|RECURSE
+FileKey15=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\LocalState\PlayReady|*.*|RECURSE
+FileKey16=%LocalAppData%\Packages\Microsoft.ZuneMusic_*\TempState|*.*|RECURSE
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.ZuneMusic_8wekyb3d8bbwe\SearchHistory
+
+	- Added FileKey11
+	
+[Zune Video*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.ZuneVideo_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.ZuneVideo_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\Microsoft\CLR_v4.0\UsageLogs|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\PRICache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\Temp|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\LocalState\Cache|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\LocalState\ImageCache|*.*|RECURSE
+FileKey14=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\LocalState\navigationHistory|*.*|RECURSE
+FileKey15=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\LocalState\PlayReady|*.*|RECURSE
+FileKey16=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\TempState|*.*|RECURSE
+FileKey17=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\LocalState\Database\anonymous|*.log
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.ZuneVideo_8wekyb3d8bbwe\SearchHistory
+
+	- Added FileKey11
+	
+------------------------------------------------------------------------------
+Removed Entries:
+
+[CyberLink PowerToGo9*]
+LangSecRef=3024
+Detect=HKCU\Software\CyberLink\Power2Go9
+Default=False
+FileKey1=%ProgramFiles%\Cyberlink\Power2Go9\Template\Cyberlink\frame|*.tmp
+
+	- Replaced by new entry
+
+[CyberLink Youcam Installation Files*]
+LangSecRef=3023
+Detect=HKCU\Software\CyberLink\YouCam
+Default=False
+FileKey1=%CommonAppData%\install_clap|*.*|REMOVESELF
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\install_clap|*.*|REMOVESELF
+
+	- Duplicate
+
+[DRM Cache*]
+LangSecRef=3025
+Detect=HKLM\Software\Microsoft\DRM
+Default=False
+FileKey1=%CommonAppData%\Microsoft\Windows\DRM\Cache|*.*|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\DRM\Cache|*.*|RECURSE
+
+	- Replaced by DRM Traces
+
+[Log Files More*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%WinDir%\inf|*.log*
+FileKey2=%WinDir%\Panther|cbs.log;DDACLSys.log;miglog.xml;Migrep.html;PostGatherPnPList.log;PreGatherPnPList.log
+FileKey3=%WinDir%\winsxs|poqexec.log
+FileKey4=%WinDir%\debug\WIA|*.log
+FileKey5=%WinDir%|SIGVERIF.TXT
+FileKey6=%WinDir%\System32\sysprep\Panther\IE|diagerr.xml;diagwrn.xml
+FileKey7=%WinDir%\Panther\UnattendGC|diagerr.xml;diagwrn.xml
+FileKey8=%WinDir%\Panther\FastCleanup|*.log
+
+	- Broken into multiple more concise entries
+	
+[MS Office PowerPoint More*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\Office\12.0
+Detect2=HKCU\Software\Microsoft\Office\14.0
+Detect3=HKCU\Software\Microsoft\Office\15.0
+Detect4=HKCU\Software\Microsoft\Office\16.0
+Default=False
+RegKey1=HKCU\Software\Microsoft\Office\12.0\Common\Internet|UseRWHlinkNavigation
+RegKey2=HKCU\Software\Microsoft\Office\14.0\Common\Internet|UseRWHlinkNavigation
+RegKey3=HKCU\Software\Microsoft\Office\15.0\Common\Internet|UseRWHlinkNavigation
+RegKey4=HKCU\Software\Microsoft\Office\16.0\Common\Internet|UseRWHlinkNavigation
+FileKey1=%Documents%|~*.ppt;~*.pptx|RECURSE
+
+	- Merged into new office entries
+	
+[MS Office Word More*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\Office\12.0
+Detect2=HKCU\Software\Microsoft\Office\14.0
+Detect3=HKCU\Software\Microsoft\Office\15.0
+Detect4=HKCU\Software\Microsoft\Office\16.0
+Default=False
+RegKey1=HKCU\Software\Microsoft\Office\15.0\Word\Reading Locations
+RegKey2=HKCU\Software\Microsoft\Office\16.0\Word\Reading Locations
+FileKey1=%Documents%|~*.doc;~*.docx|RECURSE
+
+	- Merged into new Office entries
+	
+[Panther*]
+LangSecRef=3025
+DetectFile=%Windir%\Panther
+Warning=The Windows\Panther directory is used during a Windows version upgrade. Following the upgrade, this directory can be safely removed.
+Default=False
+FileKey1=%Windir%\Panther\|*.*|REMOVESELF
+
+	- Replaced by new Panther entry
+
+------------------------------------------------------------------------------
+ 
+
+What's new in winapp2.ini 5.14.160208
+
+General: 
+
+11 New Entries
+05 Modified Entries
+00 Removed Entries
+
+Note:
+
+ Change log excludes minor changes (mild pathing changes, key reordering, non-major key tweaks, etc)
+
+Verbose: 
+
+------------------------------------------------------------------------------
+
+New Entries:
+
+[Auslogics Disk Defrag Portable*]
+LangSecRef=3024
+Detect1=HKCU\Software\Auslogics\Disk Defrag Portable
+Detect2=HKLM\Software\Auslogics\DiskDefrag Portable
+Default=False
+FileKey1=%AppData%\Auslogics\Disk Defrag\Reports|*.*
+FileKey2=%AppData%\Auslogics\Disk Defrag\Logs|*.*
+FileKey3=%CommonAppData%\Auslogics\DiskDefrag Portable\*\Reports|*.*
+
+[BlackBeltPrivacy DarkNet Logs*]
+LangSecRef=3023
+DetectFile=%LocalAppData%\BlackBeltPrivacy
+Default=False
+FileKey1=%LocalAppData%\BlackBeltPrivacy\darkNet\logs|*.*|RECURSE
+FileKey2=%LocalAppData%\BlackBeltPrivacy\MicroSip|MicroSIP.log
+FileKey3=%LocalAppData%\BlackBeltPrivacy\Logs|*.*|RECURSE
+
+[BlackBeltPrivacy DarkNet Runtime*]
+LangSecRef=3023
+DetectFile=%LocalAppData%\BlackBeltPrivacy
+Default=False
+FileKey1=%LocalAppData%\BlackBeltPrivacy\3rdParty|*.*|RECURSE
+
+[FileHippo Update Checker*]
+LangSecRef=3024
+Detect=HKCU\Software\Filehippo.com\Update Checker
+Default=False
+FileKey1=%Documents%\My Filehippo Downloads|*.*|RECURSE
+
+[Honeyview Bookmarks*]
+LangSecRef=3023
+Warning=This will delete your Bookmarks.
+Detect=HKCU\SOFTWARE\Honeyview
+Default=False
+RegKey1=HKCU\SOFTWARE\Honeyview\BMPath0
+RegKey2=HKCU\SOFTWARE\Honeyview\BMPath1
+RegKey3=HKCU\SOFTWARE\Honeyview\BMPath2
+RegKey4=HKCU\SOFTWARE\Honeyview\BMPath3
+RegKey5=HKCU\SOFTWARE\Honeyview\BMPath4
+RegKey6=HKCU\SOFTWARE\Honeyview\BMPath5
+RegKey7=HKCU\SOFTWARE\Honeyview\BMPath6
+RegKey8=HKCU\SOFTWARE\Honeyview\BMPath7
+RegKey9=HKCU\SOFTWARE\Honeyview\BMPath8
+RegKey10=HKCU\SOFTWARE\Honeyview\BMPath9
+RegKey11=HKCU\SOFTWARE\Honeyview\BMPath10
+RegKey12=HKCU\SOFTWARE\Honeyview\BMPath11
+RegKey13=HKCU\SOFTWARE\Honeyview\BMPath12
+RegKey14=HKCU\SOFTWARE\Honeyview\BMPath13
+RegKey15=HKCU\SOFTWARE\Honeyview\BMPath14
+RegKey16=HKCU\SOFTWARE\Honeyview\BMPath15
+RegKey17=HKCU\SOFTWARE\Honeyview\BMPath16
+RegKey18=HKCU\SOFTWARE\Honeyview\BMPath17
+RegKey19=HKCU\SOFTWARE\Honeyview\BMPath18
+RegKey20=HKCU\SOFTWARE\Honeyview\BMPath19
+RegKey21=HKCU\SOFTWARE\Honeyview\BMPath20
+RegKey22=HKCU\SOFTWARE\Honeyview\BMPath21
+RegKey23=HKCU\SOFTWARE\Honeyview\BMPath22
+RegKey24=HKCU\SOFTWARE\Honeyview\BMPath23
+RegKey25=HKCU\SOFTWARE\Honeyview\BMPath24
+RegKey26=HKCU\SOFTWARE\Honeyview\BMPath25
+RegKey27=HKCU\SOFTWARE\Honeyview\BMPath26
+RegKey28=HKCU\SOFTWARE\Honeyview\BMPath27
+RegKey29=HKCU\SOFTWARE\Honeyview\BMPath28
+RegKey30=HKCU\SOFTWARE\Honeyview\BMPath29
+
+[Honeyview MRU*]
+LangSecRef=3023
+Detect=HKCU\SOFTWARE\Honeyview
+Default=False
+RegKey1=HKCU\SOFTWARE\Honeyview\RecentFolder0
+RegKey2=HKCU\SOFTWARE\Honeyview\RecentFolder1
+RegKey3=HKCU\SOFTWARE\Honeyview\RecentFolder2
+RegKey4=HKCU\SOFTWARE\Honeyview\RecentFolder3
+RegKey5=HKCU\SOFTWARE\Honeyview\RecentFolder4
+RegKey6=HKCU\SOFTWARE\Honeyview\RecentFolder5
+RegKey7=HKCU\SOFTWARE\Honeyview\RecentFolder6
+RegKey8=HKCU\SOFTWARE\Honeyview\RecentFolder7
+RegKey9=HKCU\SOFTWARE\Honeyview\RecentFolder8
+RegKey10=HKCU\SOFTWARE\Honeyview\RecentFolder9
+RegKey11=HKCU\SOFTWARE\Honeyview\sRecentFolder
+RegKey12=HKCU\SOFTWARE\Honeyview\sStoreFilePath
+RegKey13=HKCU\SOFTWARE\Honeyview\sStoreFilePath2
+RegKey14=HKCU\SOFTWARE\Honeyview\transf.sTargetFolder
+
+[NT Registry Optimizer*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\NT Registry Optimizer\NTREGOPT.EXE
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Windows\UsrClass.bak
+FileKey2=%WinDir%\ServiceProfiles\LocalService\NTUSER.bak
+FileKey3=%WinDir%\ServiceProfiles\NetworkService\NTUSER.bak
+FileKey4=%WinDir%\System32\config\COMPONENTS.bak
+FileKey5=%WinDir%\System32\config\DEFAULT.bak
+FileKey6=%WinDir%\System32\config\SAM.bak
+FileKey7=%WinDir%\System32\config\SECURITY.bak
+FileKey8=%WinDir%\System32\config\SOFTWARE.bak
+FileKey9=%WinDir%\System32\config\SYSTEM.bak
+
+[Polarity Cache*]
+Section=Browsers
+DetectFile=%ProgramFiles%\Polarity
+Default=False
+FileKey1=%AppData%\Stanley Lim\Polarity\Cache|*.*|RECURSE
+
+[Polarity Favicon*]
+Section=Browsers
+DetectFile=%ProgramFiles%\Polarity
+Default=False
+
+[Polarity History*]
+Section=Browsers
+DetectFile=%ProgramFiles%\Polarity
+Default=False
+FileKey1=%UserProfile%\Polarity_Config|history_times.ini;savedTabs.ini;history.ini;history_names.ini;history_times.ini;downloads_urls.ini;downloads_times.ini;downloads_names.ini;
+
+[Xilisoft Video Converter Ultimate*]
+LangSecRef=3023
+Detect=HKCU\Software\Xilisoft\Video Converter Ultimate
+Default=False
+RegKey1=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|last_openfile_dir
+RegKey2=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|last_output_dir
+RegKey3=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|last_profile_group
+RegKey4=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|last_profile_url
+RegKey5=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings|recent_profiles
+RegKey6=HKCU\Software\Xilisoft\Video Converter Ultimate\Settings\output
+FileKey1=%CommonAppData%\Xilisoft\Video Converter Ultimate\customdata|settings.old
+
+------------------------------------------------------------------------------
+
+Modified Entries:
+
+[Ashampoo Burning Studio 16*]
+LangSecRef=3024
+Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16
+Default=False
+FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 16\log|*.xml;*.txt
+RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Audio Disc Project\SaveDialog_CPlaylistDlgEx|InitialDirectory
+RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Backup Project\BackupOptions|CustomLocation
+RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\BDMV Disc Project\SelectBDMVFolder|BdmvPath
+RegKey4=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Browse Image Project\BrowseImageFile|ImagePath
+RegKey5=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Browse Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey6=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Burn Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey7=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Burn Image Project\SelectImage|ImagePath
+RegKey8=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
+RegKey9=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\DVD-Video Disc Project\MoviesPage|Path
+RegKey10=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\DVD-Video Disc Project\SaveDialog_authed.CMoviesPage.Movies|InitialDirectory
+RegKey11=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Logs
+RegKey12=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\tempFiles
+RegKey13=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Unknown Project
+RegKey14=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
+RegKey15=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\VIDEO_TS Disc Project\DumpImage|ImagePath
+RegKey16=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
+
+	- Added RegKeys 3-16
+
+[Compatibility Assistant*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant
+Default=False
+RegKey1=HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Persisted
+RegKey2=HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store
+RegKey3=HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Persisted
+RegKey4=HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store
+
+	- Removed configuration breaking regkeys and associated warning
+	
+[Foxit PhantomPDF 7 More*]
+LangSecRef=3021
+Detect=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0
+Default=False
+FileKey1=%LocalAppData%\Foxit PhantomPDF\msilog|*.log
+FileKey2=%AppData%\Foxit Software\Foxit PhantomPDF\FormFiller|AutoComplete.ds
+FileKey3=%AppData%\Foxit Software\RMS|FXRMS_Log.txt
+RegKey1=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\MRU\File MRU
+RegKey2=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\MRU\Place MRU
+RegKey3=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\Preferences\History
+RegKey4=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\Recent File List
+
+	- Added RegKeys3-4
+
+[Greenshot*]
+LangSecRef=3024
+Detect=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Greenshot_is1
+Default=False
+FileKey1=%LocalAppData%\Greenshot|*.log
+
+	- Removed DetectFile and AppData filekey
+	
+[Media Player Classic More*]
+LangSecRef=3023
+Detect=HKCU\Software\Gabest\Media Player Classic
+Detect2=HKCU\Software\MPC-HC\MPC-HC
+Default=False
+FileKey1=%AppData%\Media Player Classic|*.dmp
+FileKey2=%AppData%\MPC-HC|*.dmp
+RegKey1=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 0
+RegKey2=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 1
+RegKey3=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 2
+RegKey4=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 3
+RegKey5=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 4
+RegKey6=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 5
+RegKey7=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 6
+RegKey8=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 7
+RegKey9=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 8
+RegKey10=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 9
+RegKey11=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 10
+RegKey12=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 11
+RegKey13=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 12
+RegKey14=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 13
+RegKey15=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 14
+RegKey16=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 15
+RegKey17=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 16
+RegKey18=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 17
+RegKey19=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 18
+RegKey20=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 19
+RegKey21=HKCU\Software\Gabest\Media Player Classic\Settings|DVD Position 20
+RegKey22=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File0
+RegKey23=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File1
+RegKey24=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File2
+RegKey25=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File3
+RegKey26=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File4
+RegKey27=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File5
+RegKey28=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File6
+RegKey29=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File7
+RegKey30=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File8
+RegKey31=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File9
+RegKey32=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File10
+RegKey33=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File11
+RegKey34=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File12
+RegKey35=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File13
+RegKey36=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File14
+RegKey37=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File15
+RegKey38=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File16
+RegKey39=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File17
+RegKey40=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File18
+RegKey41=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File19
+RegKey42=HKCU\Software\MPC-HC\MPC-HC\Recent File List|File20
+
+	- Removed 43 regkeys included in ccleaner v5.15
+
+	
+------------------------------------------------------------------------------
+Removed Entries:
+
+
+------------------------------------------------------------------------------
+ 
+
+What's new in winapp2.ini 5.14.160208
+
+General: 
+
+20 New Entries
+61 Modified Entries
+10 Removed Entries
+
+Note:
+
+ Change log excludes minor changes (mild pathing changes, key reordering, non-major key tweaks, etc)
+
+Verbose: 
+
+------------------------------------------------------------------------------
+
+New Entries:
+
+[Aignes Website-Watcher (AutoBackup)*]
+LangSecRef=3023
+Warning=This will delete your AutoBackup of your site.
+Detect=HKCU\SOFTWARE\aignes\wswatch
+Default=False
+FileKey1=%AppData%\aignes\website-watcher\config\autobackup|*.*
+
+[Aignes Website-Watcher*]
+LangSecRef=3023
+Detect=HKCU\SOFTWARE\aignes\wswatch
+Default=False
+FileKey1=%AppData%\aignes\website-watcher\config\log|*.*
+FileKey2=%AppData%\aignes\website-watcher\config\temp|*.*
+
+[Aignes Website-Watcher (Bookmarks)*]
+LangSecRef=3023
+Warning=This will delete your Bookmarks. Export, before you tick this.
+Detect=HKCU\Software\aignes\wswatch
+Default=False
+FileKey1=%AppData%\aignes\website-watcher\bookmarks|*.*
+
+[Cloudfogger*]
+LangSecRef=3023
+Detect1=HKCU\SOFTWARE\Cloudfogger
+Detect2=HKCU\SOFTWARE\Cloudfogger.com
+Default=False
+FileKey1=%AppData%\Cloudfogger|*.log|RECURSE
+FileKey2=%LocalAppData%\CrashRpt|*.log|RECURSE
+
+[Cloudfogger Keys*]
+LangSecRef=3023
+Detect1=HKCU\SOFTWARE\Cloudfogger
+Detect2=HKCU\SOFTWARE\Cloudfogger.com
+Default=False
+FileKey1=%AppData%\Cloudfogger\Keys|*.*|RECURSE
+
+[Electric Sheep*]
+LangSecRef=3021
+DetectFile=%CommonAppData%\ElectricSheep
+Default=False
+FileKey1=%CommonAppData%\ElectricSheep\Logs|*.*
+
+[Lupinho.Net Hardlink Backup Logs*]
+LangSecRef=3023
+Detect=HKLM\Software\Lupinho.Net
+Default=False
+FileKey1=%LocalAppData%\Lupinho.Net|*.log|RECURSE
+
+[Microsoft Edge More*]
+LangSecRef=3022
+Detect=HKCU\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\#!001\Microsoft\CryptnetUrlCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\#!002\Microsoft\CryptnetUrlCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\Microsoft\CryptnetUrlCache|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\User\Default\DataStore\Data|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_*\AC\MicrosoftEdge\User\Default\DataStore\Indexed\Data|*.*|RECURSE
+
+[PerfectDisk 14.0*]
+LangSecRef=3024
+Detect=HKCU\Software\Raxco\PerfectDisk\14.0
+Default=False
+FileKey1=%CommonAppData%\Raxco\PerfectDisk\14.0|PDBootLog
+
+[Photos*]
+DetectOS=10.0
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.Photos_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.Windows.Photos_8wekyb3d8bbwe\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Windows.Photos_8wekyb3d8bbwe\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Windows.Photos_8wekyb3d8bbwe\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Windows.Photos_8wekyb3d8bbwe\AC\Temp|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Windows.Photos_8wekyb3d8bbwe\LocalCache|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Windows.Photos_8wekyb3d8bbwe\LocalState\PhotosAppTile|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Windows.Photos_8wekyb3d8bbwe\TempState|*.*|RECURSE
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.Photos_8wekyb3d8bbwe\PersistedStorageItemTable\ManagedByApp
+RegKey2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.Photos_8wekyb3d8bbwe\PersistedStorageItemTable\MostRecentlyUsed
+
+[Photo Stamp Remover*]
+LangSecRef=3023
+Detect=HKCU\Software\softorbits\PhotoStampRemover
+Default=False
+RegKey1=HKCU\Software\softorbits\PhotoStampRemover|currentFile
+
+[Polarity Log*]
+LangSecRef=3022
+DetectFile=%ProgramFiles%\Polarity
+Default=False
+FileKey1=%ProgramFiles%\Polarity|*.log
+
+[Polarity Cache*]
+LangSecRef=3022
+DetectFile=%ProgramFiles%\Polarity
+Default=False
+FileKey1=%AppData%\Stanley Lim\Polarity\Cache|*.*|RECURSE
+
+[Polarity Favicon*]
+LangSecRef=3022
+DetectFile=%ProgramFiles%\Polarity
+Default=False
+
+[Polarity History*]
+LangSecRef=3022
+DetectFile=%ProgramFiles%\Polarity
+Default=False
+FileKey1=%UserProfile%\Polarity_Config|history_times.ini;savedTabs.ini;history.ini;history_names.ini;history_times.ini;downloads_urls.ini;downloads_times.ini;downloads_names.ini;
+
+[QuickTime Player More*]
+LangSecRef=3023
+Detect=HKLM\Software\Apple Computer, Inc.\QuickTime
+Default=False
+RegKey1=HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE\Apple Computer, Inc.\QuickTime\Favorite Movies
+RegKey2=HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE\Apple Computer, Inc.\QuickTime\Recent Movies
+RegKey3=HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE\WOW6432Node\Apple Computer, Inc.\QuickTime\Favorite Movies
+RegKey4=HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE\WOW6432Node\Apple Computer, Inc.\QuickTime\Recent Movies
+
+[QupZilla Portable (Cookies)*]
+Section=QupZilla Portable
+DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
+Default=False
+FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\profile|cookies.dat
+ 
+[UsbFix*]
+LangSecRef=3023
+Detect=HKCU\SOFTWARE\UsbFix
+Default=False
+RegKey1=HKCU\SOFTWARE\UsbFix\LastReport
+FileKey1=%SystemDrive%\UsbFix|Log|REMOVESELF
+FileKey2=%SystemDrive%\UsbFix|Quarantine|REMOVESELF
+FileKey3=%UserProfile%\Desktop|UsbFix_Report.txt
+
+[Zoner Photo Studio 18 (AutoSave)*]
+LangSecRef=3023
+Detect=HKCU\Software\ZONER\Zoner Photo Studio 18
+Default=False
+FileKey1=%LocalAppData%\Zoner\OriginalsRepository|*.JPG.info;*.JPG.original|RECURSE
+
+[Zoner Photo Studio 18*]
+LangSecRef=3023
+Detect=HKCU\Software\ZONER\Zoner Photo Studio 18
+Default=False
+FileKey1=%LocalAppData%\Zoner\ZPS 18\ZPSCache.dat|*.*
+FileKey2=%Pictures%|*.uid-zps
+FileKey3=%LocalAppData%\Zoner\ZPS 18\CEF|*.log
+FileKey3=%LocalAppData%\Zoner\ZPS 18\Cache|RECURSE|REMOVESELF
+
+------------------------------------------------------------------------------
+
+Modified Entries:
+
+[1954 Alcatraz*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\255280\
+Default=False
+FileKey1=%ProgramFiles%\Steam\SteamApps\common\1954 Alcatraz\Alcatraz_Data|output_log.txt
+FileKey2=%LocalAppData%\VirtualStore\ProgramFiles*\Steam\SteamApps\common\1954 Alcatraz\Alcatraz_Data|output_log.txt
+FileKey3=%LocalLowAppData%\Daedalic Entertainment\1954 Alcatraz|*.log
+
+	- Added FileKey3
+
+[AVG Protection*]
+LangSecRef=3024
+Detect=HKLM\SOFTWARE\AVG\AV
+Default=False
+FileKey1=%ProgramFiles%\AVG\Av|updatecomps.bak;*.old
+FileKey2=%CommonAppData%\Avg\AV\Antispam|*.tmp;*.tmp1;*.tmp2;*.gz
+FileKey3=%CommonAppData%\Avg\AV\SetupBackup|*.*|REMOVESELF
+FileKey4=%CommonAppData%\Avg\log\AV16|history.xml;*.log;*.log.*;*.log.lock
+FileKey5=%CommonAppData%\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey6=%CommonAppData%\MFAData\logs|*.*
+FileKey7=%CommonAppData%\MFAData\pack|*.*
+FileKey8=%CommonAppData%\MFAData|msistorg.dat.bkp;public_installation_log.xml
+FileKey9=%LocalAppData%\Avg\log\av16|history.xml;*.log;*.log.*;*.log.lock
+FileKey10=%LocalAppData%\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey11=%LocalAppData%\AvgSetupLog|*.*|REMOVESELF
+FileKey12=%LocalAppData%\MFAData\logs|*.*
+FileKey13=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\av16\temp|*.*
+FileKey14=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\log\av16|history.xml;*.log;*.log.*;*.log.lock
+FileKey15=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey16=%WinDir%\System32\config\systemprofile\AppData\Local\AvgSetupLog|*.*|REMOVESELF
+FileKey17=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg\av16\temp|*.*
+FileKey18=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg\log\av16|history.xml;*.log;*.log.*;*.log.lock
+FileKey19=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey20=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\AvgSetupLog|*.*|REMOVESELF
+
+	- Added FileKeys16 & 20
+	
+[Battle.net*]
+Section=Games
+Detect=HKCU\Software\Blizzard Entertainment\Battle.net
+Default=False
+FileKey1=%CommonAppData%\Battle.net|*.log|RECURSE
+FileKey2=%CommonAppData%\Battle.net\Agent\Agent.*\Logs|*.*|RECURSE
+FileKey3=%CommonAppData%\Battle.net\Agent\Logs|*.*|RECURSE
+FileKey4=%CommonAppData%\Blizzard Entertainment\Battle.net\Cache|*.*|REMOVESELF
+FileKey5=%LocalAppData%\Blizzard Entertainment\Battle.Net\Cache|*.*|RECURSE
+FileKey6=%LocalAppData%\VirtualStore\ProgramData\Battle.net|*.log|RECURSE
+FileKey7=%LocalAppData%\VirtualStore\ProgramData\Battle.net\Agent\Agent.*\Logs|*.*|RECURSE
+FileKey8=%LocalAppData%\VirtualStore\ProgramData\Battle.net\Agent\Logs|*.*|RECURSE
+FileKey9=%LocalAppData%\VirtualStore\ProgramData\Blizzard Entertainment\Battle.net\Cache|*.*|REMOVESELF
+FileKey10=%LocalAppData%\Blizzard Entertainment\System Survey|log.txt
+FileKey11=%CommonAppData%\Battle.net\Setup\*\Logs|*.*
+RegKey1=HKCU\Software\Blizzard Entertainment\Battle.net\Authenticator
+
+	- Added FileKey10-11
+	
+[Compatibility Assistant*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant
+Warning=The will clear compatibility settings for some applcations.
+Default=False
+RegKey1=HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Persisted
+RegKey2=HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store
+RegKey3=HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers
+RegKey4=HKLM\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers
+RegKey5=HKLM\Software\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers
+RegKey6=HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Persisted
+RegKey7=HKU\.DEFAULT\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store
+
+	- Added RegKey5
+	
+[iTunes Logs*]
+LangSecRef=3023
+Detect=HKLM\Software\Apple Computer, Inc.\iTunes
+Default=False
+FileKey1=%AppData%\Apple Computer\Logs|*.*|RECURSE
+FileKey2=%WinDir%\System32\config\systemprofile\AppData\Roaming\Apple Computer\Logs|*.*|RECURSE
+FileKey3=%WinDir%\SysWOW64\config\systemprofile\AppData\Roaming\Apple Computer\Logs|*.*|RECURSE
+FileKey4=%UserProfile%\Apple Computer\logs|*.log
+
+	- Added FileKey4
+
+[Kalypso Launcher*]
+Section=Games
+DetectFile=%AppData%\Kalypso Media\Launcher
+Default=False
+FileKey1=%AppData%\Kalypso Media\Launcher|log_appdata.txt;log.txt
+
+	- added log.txt 
+
+[Plex Media Server*]
+LangSecRef=3023
+DetectFile=%ProgramFiles%\Plex\Plex Media Server
+Default=False
+FileKey1=%ProgramFiles%\Plex\Plex Media Server|log*.txt;*.log|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\Plex\Plex Media Server|log*.txt;*.log|RECURSE
+FileKey3=%LocalAppData%\Plex Media Server\Logs|*.*|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\Plex Media Server\Logs|*.*|RECURSE
+FileKey5=%LocalAppData%\Plex Media Server\Crash Reports|*.*|RECURSE
+FileKey6=%LocalAppData%\VirtualStore\Program Files*\Plex Media Server\Crash Reports|*.*|RECURSE
+
+	- Extended FileKeys1-2
+	- Added FileKeys3-6
+	
+[Razer Synapse*]
+LangSecRef=3024
+DetectFile=%CommonAppData%\Razer\Synapse
+Default=False
+FileKey1=%CommonAppData%\Razer\Synapse\Logs|*.*
+FileKey2=%CommonAppData%\Razer\Synapse\Accounts\*\DataSync|SyncDate.txt
+FileKey3=%LocalAppData%\Razer\RzUninstallation\Logs|*.*
+FileKey4=%LocalAppData%\VirtualStore\ProgramData\Razer\Synapse\Logs|*.*
+FileKey5=%LocalAppData%\VirtualStore\ProgramData\Razer\Synapse\Accounts\*\DataSync|SyncDate.txt
+FileKey6=%CommonAppData%\Razer\InGameEngine\Logs|*.*
+FileKey7=%CommonAppData%\Razer\Services\Logs|*.*
+
+	- Added FileKey7
+	
+[Registry First Aid*]
+LangSecRef=3024
+Detect1=HKCU\Software\KsL Software\RFA
+Default=False
+FileKey1=%UserProfile%\|NTUSER.tmp;UsrClass.tmp
+FileKey2=%LocalAppData%\Microsoft\Windows|NTUSER.tmp;UsrClass.tmp
+FileKey3=%ProgramFiles%\RFA *|*.diz;*.url
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\RFA *|*.diz;*.url
+FileKey5=%WinDir%\ServiceProfiles\LocalService|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+FileKey6=%WinDir%\ServiceProfiles\NetworkService|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+FileKey7=%WinDir%\System32\config\systemprofile|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+FileKey8=%WinDir%\SysWOW64\config\systemprofile|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+FileKey9=%WinDir%\System32\config|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+
+	- Added FileKeys3-4
+
+[Sauerbraten*]
+Section=Games
+DetectFile=%ProgramFiles%\Sauerbraten\bin\sauerbraten.exe
+Default=False
+FileKey1=%Documents%\My Games\Sauerbraten|log.txt
+FileKey2=%ProgramFiles%\Sauerbraten\packages\base|*.bak|RECURSE
+FileKey3=%LocalAppData%\VirtualStore\Program Files*\Sauerbraten\packages\base|*.bak|RECURSE
+FileKey4=%Documents%\My Games\Crash|*.log
+
+	- Added FileKey4
+	
+[Skype Temporary Files*]
+LangSecRef=3022
+Detect=HKCU\Software\Skype
+Default=False
+FileKey1=%AppData%\Skype\DbTemp|*.*|RECURSE
+FileKey2=%AppData%\Skype|*.tmp|RECURSE
+FileKey3=%AppData%\Skype\|*.db-journal|RECURSE
+FileKey4=%AppData%\Skype\*\simcache|*.*
+FileKey5=%AppData%\Skype\*\httpfe|*.*
+FileKey6=%AppData%\Skype\*\ecache|*.*
+FileKey7=%AppData%\Skype\DataRv|*.*
+FileKey8=%AppData%\Skype\*\media_messaging\media_cache|*.*
+FileKey9=%AppData%\Skype\*\media_messaging\media_cache*|*.*
+FileKey10=%AppData%\Skype\*\media_messaging\storage_db\asyncdb\tmp|*.*
+FileKey11=%AppData%\Skype\*\media_messaging\media_cache\asyncdb\tmp|*.*
+FileKey12=%AppData%\Skype\*\qikdb\tmp|*.*
+FileKey13=%AppData%\Skype\*\logs|*.*
+FileKey14=%UserProfile%\Tracing\WPPMedia\*.*|RECURSE
+
+	- Added FileKey9
+	
+[Steam Browser Cache*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam
+Default=False
+Warning=This will also delete the thumbnails and custom background images of the games in your Library.
+FileKey1=%ProgramFiles%\Steam\appcache\httpcache|*.*|RECURSE
+FileKey2=%ProgramFiles%\Steam\config\cookies|*.*|RECURSE
+FileKey3=%ProgramFiles%\Steam\config\htmlcache|*.*|RECURSE
+FileKey4=%ProgramFiles%\Steam\config\overlaycookies|*.*|RECURSE
+FileKey5=%ProgramFiles%\Steam\config\overlayhtmlcache|*.*|RECURSE
+FileKey6=%ProgramFiles%\Steam\userdata\*\ugcmsgcache|*.*|RECURSE
+FileKey7=%LocalAppData%\VirtualStore\Program Files*\Steam\appcache\httpcache|*.*|RECURSE
+FileKey8=%LocalAppData%\VirtualStore\Program Files*\Steam\config\cookies|*.*|RECURSE
+FileKey9=%LocalAppData%\VirtualStore\Program Files*\Steam\config\htmlcache|*.*|RECURSE
+FileKey10=%LocalAppData%\VirtualStore\Program Files*\Steam\config\overlaycookies|*.*|RECURSE
+FileKey11=%LocalAppData%\VirtualStore\Program Files*\Steam\config\overlayhtmlcache|*.*|RECURSE
+FileKey12=%LocalAppData%\Steam\htmlcache|*.*|RECURSE
+
+	- Added FileKey12
+	
+[Torchlight 2*]
+Section=Games
+Detect1=HKCU\Software\Valve\Steam\Apps\200710
+Detect2=HKLM\Software\Runic Games\Torchlight II
+Default=False
+FileKey1=%Documents%\My Games\Runic Games\Torchlight 2\logs|*.*
+FileKey2=%Documents%\My Games\runic games\torchlight 2|ogre.log
+
+	- Added FileKey2
+	
+[Zoner Photo Studio 14*]
+LangSecRef=3022
+DetectFile=%LocalAppData%\Zoner\ZPS 14
+Default=False
+FileKey1=%LocalAppData%\Zoner\ZPS 14\ZPSCache.dat|*.*
+FileKey2=%LocalAppData%\Zoner\ZPS 14\CEF|*.log
+
+	- Added FileKey2
+	
+[Zoner Photo Studio 15*]
+LangSecRef=3023
+Detect=HKCU\Software\ZONER\Zoner Photo Studio 15
+Default=False
+FileKey1=%LocalAppData%\Zoner\ZPS 15\ZPSCache.dat|*.*
+FileKey2=%Pictures%|*.uid-zps
+FileKey3=%LocalAppData%\Zoner\ZPS 15\CEF|*.log
+
+	- Added FileKey3
+	
+[Zoner Photo Studio 16*]
+LangSecRef=3023
+Detect=HKCU\Software\ZONER\Zoner Photo Studio 16
+Default=False
+FileKey1=%LocalAppData%\Zoner\ZPS 16\ZPSCache.dat|*.*
+FileKey2=%LocalAppData%\Zoner\ZPS 16\CEF|*.log
+FileKey3=%Pictures%|*.uid-zps
+
+	- Added FileKey2
+------------------------------------------------------------------------------
+Removed Entries:
+
+[Acrobat Reader DC*]
+LangSecRef=3021
+Detect=HKLM\Software\Adobe\Acrobat Reader\DC
+Default=False
+FileKey1=%ProgramFiles%\Adobe\Acrobat Reader DC\Setup Files|*.*|REMOVESELF
+FileKey2=%CommonAppData%\Adobe\Setup|*.*|REMOVESELF
+FileKey3=%LocalAppData%\Adobe\Acrobat\DC\Cache|*.*|RECURSE
+FileKey4=%LocalAppData%\Adobe\Acrobat\DC|UserCache.bin
+RegKey1=HKCU\Software\Adobe\Acrobat Reader\DC\AVConversionFromPDF
+RegKey2=HKCU\Software\Adobe\Acrobat Reader\DC\AVConversionToPDF
+RegKey3=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cDockables
+RegKey4=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cRecentFiles
+RegKey5=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cRecentFolders
+RegKey6=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cRecentToolsList
+RegKey7=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cToolbars
+RegKey8=HKCU\Software\Adobe\Acrobat Reader\DC\RememberedViews\cNoCategoryFiles
+RegKey9=HKCU\Software\Adobe\Acrobat Reader\DC\ShareIdentity
+RegKey10=HKCU\Software\Adobe\Adobe Synchronizer\DC
+
+[Adobe Reader DC More*]
+LangSecRef=3021
+Detect=HKLM\Software\Adobe\Acrobat Reader\DC
+Default=False
+FileKey1=%ProgramFiles%\Adobe\Acrobat Reader DC\Setup Files|*.*|REMOVESELF
+FileKey2=%CommonAppData%\Adobe\Setup|*.*|REMOVESELF
+FileKey3=%LocalAppData%\Adobe\Acrobat\DC|UserCache.bin
+RegKey1=HKCU\Software\Adobe\Acrobat Reader\DC\AVConversionFromPDF
+RegKey2=HKCU\Software\Adobe\Acrobat Reader\DC\AVConversionToPDF
+RegKey3=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cDockables
+RegKey4=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cRecentToolsList
+RegKey5=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cToolbars
+RegKey6=HKCU\Software\Adobe\Acrobat Reader\DC\RememberedViews\cNoCategoryFiles
+RegKey7=HKCU\Software\Adobe\Acrobat Reader\DC\ShareIdentity
+RegKey8=HKCU\Software\Adobe\Adobe Synchronizer\DC
+
+[Apple Application Logs*]
+LangSecRef=3021
+Detect=HKCU\Software\Apple Computer, Inc.
+Default=False
+FileKey1=%AppData%\Apple Computer\logs|*.log
+FileKey2=%UserProfile%\Apple Computer\logs|*.log
+FileKey3=%WinDir%\System32\config\systemprofile\AppData\Roaming\Apple Computer\Logs|*.log
+FileKey4=%WinDir%\SysWOW64\config\systemprofile\AppData\Roaming\Apple Computer\Logs|*.log
+
+	- Merged into iTunes Logs
+
+[Cortana - Windows 10*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.Cortana_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\TempState|*.*|RECURSE
+
+	- Merged into Cortana
+
+[Nexus Mod Manager Trace Logs*]
+LangSecRef=3021
+DetectFile=%Documents%\Nexus Mod Manager
+Default=False
+FileKey1=%Documents%\Nexus Mod Manager|TraceLog*.txt
+
+	- Duplicate
+
+[Realtek Audio Install Files*]
+LangSecRef=3021
+Detect=HKLM\Software\Realtek
+Default=False
+FileKey1=%ProgramFiles%\Realtek\Audio|*.InstallLog
+
+	- Duplicate
+	
+[Registry First Aid 10*]
+LangSecRef=3024
+Detect1=HKCU\Software\KsL Software\RFA\10.0
+Detect2=HKCU\Software\KsL Software\RFA\10.1
+Default=False
+FileKey1=%ProgramFiles%\RFA 10|*.diz;*.url
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\RFA 10|*.diz;*.url
+
+	- Merged into Registry First Aid
+
+[Registry First Aid 9*]
+LangSecRef=3024
+Detect=HKCU\Software\KsL Software\RFA\9.0
+Default=False
+FileKey1=%ProgramFiles%\RFA 9|*.diz;*.url
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\RFA 9|*.diz;*.url
+
+	- Merged into Registry First Aid
+
+[Registry Transaction Logs*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Windows|*.regtrans-ms
+FileKey2=%SystemDrive%\Users\Default|*.regtrans-ms
+
+	- Interfering with Windows 10 installations? 
+	
+[Store*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.WindowsStore_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.WindowsStore_*\LocalCache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.WindowsStore_*\LocalState\Cache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.WindowsStore_*\TempState|*.*|RECURSE
+
+	- Merged into Store*
+------------------------------------------------------------------------------
+ 
+
+What's new in winapp2.ini 5.13.151221
+
+General: 
+
+24 New Entries
+10 Modified Entries
+24 Removed Entries
+
+Note:
+
+ Change log excludes minor changes (mild pathing changes, key reordering, non-major key tweaks, etc)
+
+Verbose: 
+
+------------------------------------------------------------------------------
+
+New Entries:
+
+[3 Stars Of Destiny*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\278530\
+Default=False
+FileKey1=%AppData%\3Stars|*.tmp
+
+[Arcane Worlds*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\269610\
+Default=False
+FileKey1=%AppData%\ArcaneWorlds|log.txt
+
+[Archived Data Reporting*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\datareporting\archived|*.jsonlz4|REMOVESELF
+
+[Ashampoo Burning Studio 16*]
+LangSecRef=3024
+Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16
+Default=False
+FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 16\log|*.xml;*.txt
+RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
+RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16\tempFiles
+
+[Ashampoo Burning Studio 2016*]
+LangSecRef=3024
+Detect=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016
+Default=False
+FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 2016|backupmetainfo.xml
+FileKey2=%AppData%\Ashampoo\Ashampoo Burning Studio 2016\Log|*.xml;*.txt
+FileKey3=%AppData%\Ashampoo\Log|*.txt
+RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
+RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016\tempFiles
+
+[Auslogics Disk Defrag Professional*]
+LangSecRef=3024
+Detect1=HKLM\SOFTWARE\Auslogics\Disk Defrag Professional
+Detect2=HKLM\SOFTWARE\WOW6432Node\Auslogics\Disk Defrag Professional
+Default=False
+FileKey1=%CommonAppData%\Auslogics\Disk Defrag Professional\*\Logs|*.*|RECURSE
+FileKey2=%CommonAppData%\Auslogics\Disk Defrag Professional\*\Reports|*.*|RECURSE
+
+[Auslogics Registry Cleaner 5*]
+LangSecRef=3024
+Detect1=HKLM\Software\Auslogics\Registry Cleaner\5.X
+Detect2=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X
+Default=False
+Warning=This will remove your scan results
+FileKey1=%CommonAppData%\Auslogics\Registry Cleaner\5.X\Rescue\Auslogics Registry Cleaner|*.htm;*.html;*.log|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\Auslogics\Registry Cleaner\5.X\Rescue\Auslogics Registry Cleaner|*.htm;*.html;*.log|RECURSE
+RegKey1=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey2=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey3=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey4=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey5=HKLM\Software\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.LastScan
+RegKey6=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFailed
+RegKey7=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsFound
+RegKey8=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemoved
+RegKey9=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.ErrorsRemovedTotal
+RegKey10=HKLM\Software\Wow6432Node\Auslogics\Registry Cleaner\5.X\Settings|RegCleaner.AppLogic.LastScan
+
+[Awesomium Cache*]
+LangSecRef=3021
+DetectFile=%AppData%\Awesomium
+Default=False
+FileKey1=%AppData%\Awesomium\*\Cache|*.*|REMOVESELF
+
+[Awesomium Local Storage*]
+LangSecRef=3021
+DetectFile=%AppData%\Awesomium
+Default=False
+FileKey1=%AppData%\Awesomium\*\Local Storage|*.*|REMOVESELF
+
+[Awesomium Cookies*]
+LangSecRef=3021
+DetectFile=%AppData%\Awesomium
+Default=False
+FileKey1=%AppData%\Awesomium\*|Cookies
+
+[Awesomium History*]
+LangSecRef=3021
+DetectFile=%AppData%\Awesomium
+Default=False
+FileKey1=%AppData%\Awesomium\*|Archived History;History
+
+[Awesomium  Logs*]
+LangSecRef=3021
+DetectFile=%AppData%\Awesomium
+Default=False
+FileKey1=%AppData%\Awesomium|*.log
+
+[Cortana*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.Cortana_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\LocalCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\LocalState\Cache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.Windows.Cortana_*\TempState|*.*|RECURSE
+
+[Cloud Experience Host*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.CloudExperienceHost_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\LocalCache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\LocalState\Cache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\TempState|*.*|RECURSE
+
+[Content Delivery Manager*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\LocalCache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\LocalState\Cache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Windows.ContentDeliveryManager_*\TempState|*.*|RECURSE
+
+[Messaging*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.Messaging_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.Messaging_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.Messaging_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.Messaging_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.Messaging_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Messaging_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Messaging_*\AC\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Messaging_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Messaging_*\LocalCache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.Messaging_*\LocalState\Cache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.Messaging_*\TempState|*.*|RECURSE
+
+[QupZilla Portable (Local App Data)*]
+Section=QupZilla Portable
+DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
+Default=False
+FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\QupZillaLocalAppData|*.*|RECURSE
+ 
+[QupZilla Portable (Network Cache)*]
+Section=QupZilla Portable
+DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
+Default=False
+FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\profile\networkcache|*.*|RECURSE
+ 
+[QupZilla Portable (Session)*]
+Section=QupZilla Portable
+DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
+Default=False
+FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\profile|session.dat*
+ 
+[QupZilla Portable (Thumbnails)*]
+Section=QupZilla Portable
+DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
+Default=False
+FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\profile\thumbnails|*.*
+ 
+[QupZilla Portable (Webpage Icons)*]
+Section=QupZilla Portable
+DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
+Default=False
+FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\profile|WebpageIcons.db
+
+[Store*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.WindowsStore_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.WindowsStore_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.WindowsStore_*\LocalCache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.WindowsStore_*\LocalState\Cache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.WindowsStore_*\TempState|*.*|RECURSE
+
+[XboxApp*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.XboxApp_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\Temp|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.XboxApp_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.XboxApp_*\LocalCache|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.XboxApp_*\LocalState\Cache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.XboxApp_*\TempState|*.*|RECURSE
+
+[Xbox Identity Provider*]
+DetectOS=10.0|
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.XboxIdentityProvider_cw5n1h2txyewy
+FileKey1=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_\AC\Microsoft\CLR_v4.0|*.log|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_\AC\Microsoft\CLR_v4.0\NativeImages\Temp|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_\AC\Microsoft\CLR_v4.0_32|*.log|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_\AC\Microsoft\CLR_v4.0_32\NativeImages\Temp|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\Temp|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\AC\TokenBroker\Cache|*.*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\LocalCache|*.*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\LocalState\Cache|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_*\TempState|*.*|RECURSE
+
+
+------------------------------------------------------------------------------
+
+Modified Entries:
+
+[AVG Protection*]
+LangSecRef=3024
+Detect=HKLM\SOFTWARE\AVG\AV
+Default=False
+FileKey1=%ProgramFiles%\AVG\Av|updatecomps.bak;*.old
+FileKey2=%CommonAppData%\Avg\AV\Antispam|*.tmp;*.tmp1;*.tmp2;*.gz
+FileKey3=%CommonAppData%\Avg\AV\SetupBackup|*.*|REMOVESELF
+FileKey4=%CommonAppData%\Avg\log\AV16|history.xml;*.log;*.log.*;*.log.lock
+FileKey5=%CommonAppData%\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey6=%CommonAppData%\MFAData\logs|*.*
+FileKey7=%CommonAppData%\MFAData\pack|*.*
+FileKey8=%CommonAppData%\MFAData|msistorg.dat.bkp;public_installation_log.xml
+FileKey9=%LocalAppData%\Avg\log\av16|history.xml;*.log;*.log.*;*.log.lock
+FileKey10=%LocalAppData%\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey11=%LocalAppData%\AvgSetupLog|*.*|REMOVESELF
+FileKey12=%LocalAppData%\MFAData\logs|*.*
+FileKey13=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\av16\temp|*.*
+FileKey14=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\log\av16|history.xml;*.log;*.log.*;*.log.lock
+FileKey15=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey16=%WinDir%\System32\config\systemprofile\AppData\Local\AvgSetupLog|*.*|REMOVESELF
+FileKey17=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg\av16\temp|*.*
+FileKey18=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg\log\av16|history.xml;*.log;*.log.*;*.log.lock
+FileKey19=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey20=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\AvgSetupLog|*.*|REMOVESELF
+
+	- Added FileKey16,20
+	
+[CleanMyPC Registry Cleaner*]
+LangSecRef=3024
+Detect=HKCU\Software\CleanMyPC\CleanMyPC - Registry Cleaner
+Default=False
+FileKey1=%AppData%\CleanMyPC Software\CleanMyPC Registry Cleaner|fixlog.ini
+FileKey2=%WinDir%\$regcmp$|*.*|REMOVESELF
+
+	- Removed Registry Backup FileKey
+
+[HTML5 Storage*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Torch
+Detect2=HKCU\Software\SuperBird
+Detect3=HKCU\Software\Chromium
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome*\User Data\*\File System|*.*|REMOVESELF
+FileKey2=%LocalAppData%\Chrome Plus\User Data\*\File System|*.*|REMOVESELF
+FileKey3=%LocalAppData%\Chromium\User Data\*\File System|*.*|REMOVESELF
+FileKey4=%LocalAppData%\Flock\User Data\*\File System|*.*|REMOVESELF
+FileKey5=%LocalAppData%\Rockmelt\User Data\*\File System|*.*|REMOVESELF
+FileKey6=%LocalAppData%\SRWare Iron\User Data\*\File System|*.*|REMOVESELF
+FileKey7=%LocalAppData%\Torch\User Data\*\File System|*.*|REMOVESELF
+FileKey8=%LocalAppData%\SuperBird\User Data\*\File System|*.*|REMOVESELF
+FileKey9=%LocalAppData%\Amigo\User Data\*\File System|*.*|REMOVESELF
+
+	- Changed all entries to REMOVESELF
+
+[MS Office Unsaved Files*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\Office\12.0
+Detect2=HKCU\Software\Microsoft\Office\14.0
+Detect3=HKCU\Software\Microsoft\Office\15.0
+Detect4=HKCU\Software\Microsoft\Office\16.0
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Office\UnsavedFiles|*.*|RECURSE
+FileKey2=%AppData%\Microsoft\Excel|*.*|RECURSE
+FileKey3=%AppData%\Microsoft\PowerPoint|*.*|RECURSE
+FileKey4=%AppData%\Microsoft\Word|*.*|RECURSE
+ExcludeKey1=FILE|%AppData%\Microsoft\Word\listgal.dat
+ExcludeKey2=PATH|%AppData%\Microsoft\Word\STARTUP
+ExcludeKey3=PATH|%AppData%\Microsoft\Excel\XLSTART
+ExcludeKey4=PATH|%AppData%\Microsoft\PowerPoint\PPT*.pcb
+
+	- Added ExcludeKey4
+	
+[Registry First Aid*]
+LangSecRef=3024
+Detect1=HKCU\Software\KsL Software\RFA
+Default=False
+FileKey1=%UserProfile%\|NTUSER.tmp;UsrClass.tmp
+FileKey2=%LocalAppData%\Microsoft\Windows|NTUSER.tmp;UsrClass.tmp
+FileKey3=%WinDir%\ServiceProfiles\LocalService|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+FileKey4=%WinDir%\ServiceProfiles\NetworkService|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+FileKey5=%WinDir%\System32\config\systemprofile|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+FileKey6=%WinDir%\SysWOW64\config\systemprofile|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+FileKey7=%WinDir%\System32\config|*.tmp;*.tmp.LOG1;*.tmp.LOG2
+
+	- Removed registry backup deletions
+	
+[Registry Mechanic*]
+LangSecRef=3024
+Detect=HKLM\Software\PCTools\Registry Mechanic
+Default=False
+FileKey1=%ProgramFiles%\Registry Mechanic\log|*.*
+FileKey2=%ProgramFiles%\Registry Mechanic\logs|*.*
+FileKey3=%AppData%\Registry Mechanic\log|*.html
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\Registry Mechanic\log|*.*
+FileKey5=%LocalAppData%\VirtualStore\Program Files*\Registry Mechanic\logs|*.*
+
+	- Removed registry backup deletions
+	
+[Revo Uninstaller Backups*]
+LangSecRef=3024
+DetectFile=%LocalAppData%\VS Revo group
+Default=False
+FileKey1=%LocalAppData%\VS Revo Group\Revo Uninstaller Free\BackupsData|*.*|RECURSE
+FileKey2=%LocalAppData%\VS Revo Group\Revo Uninstaller Pro\BackupsData|*.*|RECURSE
+FileKey3=%ProgramFiles%\VS Revo Group\Revo Uninstaller Pro|*.bak;rupilogs.rupldb
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\VS Revo Group\Revo Uninstaller Pro|*.bak;rupilogs.rupldb
+
+	- Removed registry backup deletions
+	
+[SketchUp Make*]
+LangSecRef=3021
+Detect=HKCU\Software\SketchUp
+Default=False
+FileKey1=%AppData%\SketchUp\SketchUp *\SketchUp|~*.tmp
+RegKey1=HKCU\Software\SketchUp\SketchUp 2013\Recent File List
+RegKey2=HKCU\Software\SketchUp\SketchUp 2014\Recent File List
+RegKey3=HKCU\Software\SketchUp\SketchUp 2015\Recent File List
+RegKey4=HKCU\Software\SketchUp\SketchUp 2016\Recent File List
+
+	- Added RegKey4
+	
+[Wondershare Dr.Fone for Android*]
+LangSecRef=3021
+Detect=HKLM\SOFTWARE\Wondershare\Dr.Fone for Android
+Default=False
+FileKey1=%SystemDrive%\DrFoneForAndroid|*.*|REMOVESELF
+FileKey2=%ProgramFiles%\Wondershare\Dr.Fone for Android\log|*.*|RECURSE
+FileKey3=%CommonAppData%\Wondershare\DrFoneAndroid\Log|*.*|RECURSE
+FileKey4=%CommonAppData%\Wondershare\DrFoneAndroid\Logs\DeviceConnection|*.*|RECURSE
+FileKey5=%CommonAppData%\Wondershare\ProductFeatures\LocalLogs|*.*|RECURSE
+FileKey6=%CommonAppData%\Wondershare\ProductFeatures\RemoteLogs|*.*|RECURSE
+FileKey7=%LocalAppData%\VirtualStore\Program Files*\Wondershare\Dr.Fone for Android\log|*.*|RECURSE
+
+	- Added FileKey4
+	
+[Wondershare SafeEraser*]
+LangSecRef=3021
+Detect=HKLM\Software\Wondershare\SafeEraser
+Default=False
+FileKey1=%SystemDrive%\se_tmp|*.*|REMOVESELF
+FileKey2=%ProgramFiles%\Wondershare\SafeEraser\se_tmp_win|*.*|REMOVESELF
+FileKey3=%AppData%\HMYGSetting|*.*|REMOVESELF
+FileKey4=%AppData%\HYXDevPsnList|*.*|REMOVESELF
+FileKey5=%AppData%\se_tmp|*.*|REMOVESELF
+FileKey6=%AppData%\se_tmp_win|*.*|REMOVESELF
+FileKey7=%AppData%\Wondershare\SafeEraser|*.log
+FileKey8=%AppData%\Wondershare\SafeEraser\Logs\iOSTemp|*.*|RECURSE
+FileKey9=%AppData%\Wondershare\SafeEraser\Logs\DeviceConnection|*.*|RECURSE
+
+
+	- Added FileKeys3,8-9
+	
+	
+------------------------------------------------------------------------------
+Removed Entries:
+
+[Acebyte Utilities Backup*]
+LangSecRef=3024
+Detect=HKCU\Software\AceBIT
+Default=False
+FileKey1=%CommonAppData%\Acebyte\Acebyte Utilities*\Backup|*.*|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\Acebyte\Acebyte Utilities*\Backup|*.*|RECURSE
+
+	- Registry Backups Removal
+	
+[AMUST Registry Cleaner Undo Data*]
+LangSecRef=3024
+DetectFile=%LocalAppData%\AMUST\Registry Cleaner\UndoData
+Default=False
+FileKey1=%LocalAppData%\AMUST\Registry Cleaner\UndoData|*.*
+
+	- Registry Backups Removal
+	
+[AVG PC TuneUp & TuneUp Utilities (Backups)*]
+LangSecRef=3024
+Detect1=HKCU\Software\TuneUp
+Detect2=HKCU\Software\AVG\AWL\RegistryCleaner
+Default=False
+Warning=This removes ALL backups created by TuneUp Utilities during its registry and other cleaning activities.
+FileKey1=%AppData%\TuneUp Software\*\Backups|*.rcb
+FileKey2=%AppData%\AVG\AWL*\Backups\|*.rcb
+
+	- Registry Backups Removal
+	
+[AVG PC TuneUp & TuneUp Utilities Installation/Update Logs*]
+LangSecRef=3024
+Detect1=HKCU\Software\TuneUp
+Detect2=HKCU\Software\AVG\AWL\RegistryCleaner
+Default=False
+FileKey1=%CommonAppData%\TuneUp Software\TuneUp Utilities *\|*.log
+FileKey2=%CommonAppData%\Avg\AWL*\|*.log
+
+	- Duplicate
+	
+[Eusing Free Registry Cleaner Backups*]
+LangSecRef=3024
+Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eusing Free Registry Cleaner
+Default=False
+FileKey1=%ProgramFiles%\Eusing Free Registry Cleaner\Backup|*.*
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\Eusing Free Registry Cleaner\Backup|*.*
+
+	- Registry Backups Removal
+	
+[Glary Utilities (Backups)*]
+LangSecRef=3024
+Detect=HKCU\Software\GlarySoft\Glary Utilities
+Default=False
+FileKey1=%AppData%\GlarySoft\Glary Utilities\Backups|*.*
+FileKey2=%LocalAppData%\Microsoft\Windows|*.gbck
+FileKey3=%UserProfile%|*.gbck
+FileKey4=%WinDir%\System32\config|*.gbck
+
+	- Registry Backups Removal
+	
+[IObit Advanced SystemCare Ultimate V6 Backup*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\IObit\Advanced SystemCare Ultimate
+Default=False
+FileKey1=%ProgramFiles%\IObit\Advanced SystemCare Ultimate\Backup|*.*|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare Ultimate\Backup|*.*|RECURSE
+
+	- Registry backups removal
+	
+[IObit Advanced SystemCare V5 Backups*]
+LangSecRef=3024
+DetectFile=%AppData%\IObit\Advanced SystemCare V5\
+Default=False
+FileKey1=%AppData%\IObit\Advanced SystemCare V5\Backup|*.*|RECURSE
+
+	- Registry backups removal
+	
+[IObit Advanced SystemCare V6 Backup*]
+LangSecRef=3024
+DetectFile=%CommonAppData%\IObit\Advanced SystemCare V6
+Default=False
+FileKey1=%AppData%\IObit\Advanced SystemCare V6\Backup|*.*|RECURSE
+FileKey2=%ProgramFiles%\IObit\Advanced SystemCare 6\Backup|*.*|RECURSE
+FileKey3=%ProgramFiles%\IObit\Advanced SystemCare 6\SecurityHole_Backup|*.*|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare 6\Backup|*.*|RECURSE
+FileKey5=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare 6\SecurityHole_Backup|*.*|RECURSE
+
+	- Registry Backup Removal
+	
+[jv16 PowerTools 2011 Backup Files*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\jv16 PowerTools 2011\jv16PT.exe
+Default=False
+FileKey1=%ProgramFiles%\jv16 PowerTools 2011\Backups|*.*|RECURSE
+FileKey2=%ProgramFiles%\jv16 PowerTools 2011\Settings|UserActionLog.txt
+FileKey3=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools 2011\Backups|*.*|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools 2011\Settings|UserActionLog.txt
+ExcludeKey1=FILE|%ProgramFiles%\jv16 PowerTools 2011\Backups\License.xbin_backup
+
+	- Registry Backup Removal
+	
+[jv16 PowerTools 2012 Backup Files*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\jv16 PowerTools 2012\jv16PT.exe
+Default=False
+FileKey1=%ProgramFiles%\jv16 PowerTools 2012\Backups|*.*|RECURSE
+FileKey2=%ProgramFiles%\jv16 PowerTools 2012\Settings|UserActionLog.txt
+FileKey3=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools 2012\Backups|*.*|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools 2012\Settings|UserActionLog.txt
+ExcludeKey1=FILE|%ProgramFiles%\jv16 PowerTools 2012\Backups\License.xbin_backup
+
+	- Registry Backup Removal
+	
+[jv16 PowerTools 2013 Backup Files*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\jv16 PowerTools 2013\jv16PT.exe
+Default=False
+FileKey1=%ProgramFiles%\jv16 PowerTools 2013\Backups|*.*|RECURSE
+FileKey2=%ProgramFiles%\jv16 PowerTools 2013\Settings|UserActionLog.txt
+FileKey3=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools 2013\Backups|*.*|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools 2013\Settings|UserActionLog.txt
+ExcludeKey1=FILE|%ProgramFiles%\jv16 PowerTools 2013\Backups\License.xbin_backup
+
+	- Registry Backup Removal
+	
+[jv16 PowerTools 2014 Backup Files*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\jv16 PowerTools 2014\jv16PT.exe
+Default=False
+FileKey1=%ProgramFiles%\jv16 PowerTools 2014\Backups|*.*|RECURSE
+FileKey2=%ProgramFiles%\jv16 PowerTools 2014\Settings|UserActionLog.txt
+FileKey3=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools 2014\Backups|*.*|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools 2014\Settings|UserActionLog.txt
+ExcludeKey1=FILE|%ProgramFiles%\jv16 PowerTools 2014\Backups\License.xbin_backup
+
+	- Registry Backup Removal
+	
+[jv16 PowerTools Reg Compact Backups*]
+LangSecRef=3024
+DetectFile1=%ProgramFiles%\jv16 PowerTools 2009\jv16PT.exe
+DetectFile2=%ProgramFiles%\jv16 PowerTools 2010\jv16PT.exe
+DetectFile3=%ProgramFiles%\jv16 PowerTools 2011\jv16PT.exe
+DetectFile4=%ProgramFiles%\jv16 PowerTools 2012\jv16PT.exe
+DetectFile5=%ProgramFiles%\jv16 PowerTools 2013\jv16PT.exe
+DetectFile6=%ProgramFiles%\jv16 PowerTools 2014\jv16PT.exe
+DetectFile7=%ProgramFiles%\jv16 PowerTools X\jv16PT.exe
+Default=False
+Warning=This removes the registry hive backup files generated by jv16 PowerTools during a registry compaction. These files are not needed once the compaction is successfully completed. They can be safely deleted. NOTE that the system must be rebooted following a registry compaction completion in order for jv16 to release these files for deletion.
+FileKey1=%LocalAppData%\Microsoft\Windows|UsrClass.dat.jv16pt*
+FileKey2=%SystemDrive%\Documents and Settings\NetworkService|NTUSER.DAT.jv16pt*
+FileKey3=%SystemDrive%\Documents and Settings\LocalService|NTUSER.DAT.jv16pt*
+FileKey4=%SystemDrive%\Documents and Settings\NetworkService.NT*|NTUSER.DAT.jv16pt*
+FileKey5=%SystemDrive%\Documents and Settings\LocalService.NT*|NTUSER.DAT.jv16pt*
+FileKey6=%UserProfile%|NTUSER.DAT.jv16pt*
+FileKey7=%WinDir%\System32\config|Default.jv16pt*;software.jv16pt*;system.jv16pt*;SAM.jv16pt*;COMPONENTS.jv16pt*
+FileKey8=%WinDir%\ServiceProfiles\LocalService|NTUSER.DAT.jv16pt*
+FileKey9=%WinDir%\ServiceProfiles\NetworkService|NTUSER.DAT.jv16pt*
+
+	- Registry Backup Removal
+	
+[jv16 PowerTools X Backup Files*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\jv16 PowerTools X\jv16PT.exe
+Default=False
+FileKey1=%ProgramFiles%\jv16 PowerTools X\Backups|*.*|RECURSE
+FileKey2=%ProgramFiles%\jv16 PowerTools X\Settings|UserActionLog.txt
+FileKey3=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools X\Backups|*.*|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools X\Settings|UserActionLog.txt
+ExcludeKey1=FILE|%ProgramFiles%\jv16 PowerTools X\Backups\License.xbin_backup
+
+	- Registry Backup Removal
+	
+[Microsoft Edge More*]
+LangSecRef=3022
+Detect=HKCU\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\#!001\Microsoft\CryptnetUrlCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\#!002\Microsoft\CryptnetUrlCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\Microsoft\CryptnetUrlCache|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\MicrosoftEdge\User\Default\DataStore\Data|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\MicrosoftEdge\User\Default\DataStore\Indexed\Data|*.*|RECURSE
+
+	- Breaking bookmark imports
+
+[Reg Organizer (Backups)*]
+LangSecRef=3024
+Detect=HKCU\Software\ChemTable Software\Reg Organizer
+Default=False
+FileKey1=%AppData%\ChemTable Software\Reg Organizer|ListsHistory.bin
+FileKey2=%LocalAppData%\ChemTable Software\Reg Organizer\BackupHives|*.*|RECURSE
+FileKey3=%LocalAppData%\ChemTable Software\Reg Organizer\backups|*.*|RECURSE
+FileKey4=%LocalAppData%\ChemTable Software\Reg Organizer\RegHives|*.*|RECURSE
+
+	- Registry Backup Removal
+
+[RegCleaner 4.3*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\RegCleaner\RegCleanr.exe
+Default=False
+FileKey1=%ProgramFiles%\RegCleaner\Backups|*.*
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\RegCleaner\Backups|*.*
+
+	- Registry Backup Removal
+	
+[System TuneUp*]
+LangSecRef=3024
+Detect=HKCU\Software\Acelogix\System TuneUp
+Default=False
+FileKey1=%LocalAppData%\Acelogix\System TuneUp\Backups|*.*|RECURSE
+
+	- Registry Backup Removal
+	
+[TeamViewer Connections*]
+LangSecRef=3024
+DetectFile=%AppData%\TeamViewer
+Default=False
+FileKey1=%AppData%\TeamViewer|Connections.txt
+
+	- Included in CCleaner
+
+[TeamViewer Temporary Files*]
+LangSecRef=3024
+Detect=HKCU\Software\TeamViewer
+Default=False
+FileKey1=%ProgramFiles%\TeamViewer|*.tmp|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\TeamViewer|*.tmp|RECURSE
+
+	- Included in CCleaner
+
+[Uniblue Registry Booster 2(Backups)*]
+LangSecRef=3024
+Detect=HKCU\Software\Uniblue\Registry Booster
+Default=False
+FileKey1=%AppData%\Uniblue\Registry Booster2|*.zip
+
+	- Registry Backup Removal
+
+[Uniblue Registry Booster(Backups)*]
+LangSecRef=3024
+Detect=HKCU\Software\Uniblue\Registry Booster
+Default=False
+FileKey1=%AppData%\Uniblue\Registry Booster|*.zip	
+	
+	- Registry Backup Removal
+
+
+	
+[WinASO Registry Optimizer (Backups)*]
+LangSecRef=3024
+Warning=This deletes your backups and you'll be unable to restore them.
+Detect=HKLM\Software\WinASO\Registry Optimizer
+Default=False
+FileKey1=%ProgramFiles%\WinASO\Registry Optimizer\backup|*.*|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\WinASO\Registry Optimizer\backup|*.*|RECURSE
+	
+	- Registry Backup Removal
+
+------------------------------------------------------------------------------
+ 
+
+What's new in winapp2.ini 5.11.151026
+
+General: 
+
+07 New Entries
+07 Modified Entries
+02 Removed Entries
+
+Note:
+
+ Change log excludes minor changes (mild pathing changes, key reordering, non-major key tweaks, etc)
+
+Verbose: 
+
+------------------------------------------------------------------------------
+
+New Entries:
+
+[AccuWeather*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\AccuWeather.AccuWeatherforWindows8_8zz2pj9h1h1d8
+DetectFile=%LocalAppData%\Packages\AccuWeather.AccuWeatherforWindows8_8zz2pj9h1h1d8
+Default=False
+FileKey1=%LocalAppData%\Packages\AccuWeather.AccuWeatherforWindows8_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\AccuWeather.AccuWeatherforWindows8_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\AccuWeather.AccuWeatherforWindows8_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\AccuWeather.AccuWeatherforWindows8_*\AC\Microsoft\CLR_v4.0\UsageLogs|*.log|RECURSE
+FileKey5=%LocalAppData%\Packages\AccuWeather.AccuWeatherforWindows8_*\AC\Temp|*.*
+FileKey6=%LocalAppData%\Packages\AccuWeather.AccuWeatherforWindows8_*\LocalState|*.tmp
+FileKey7=%LocalAppData%\Packages\AccuWeather.AccuWeatherforWindows8_*\TempState\Bing.Maps\Cache|*.*|RECURSE
+
+[Ashley Jones - The Heart Of Egypt*]
+Section=Games
+DetectFile=%CommonAppData%\Fenomen Games\Ashley Jones - The Heart Of Egypt
+Default=False
+FileKey1=%CommonAppData%\Fenomen Games\Ashley Jones - The Heart Of Egypt|*.log
+
+[Baidu Spark*]
+LangSecRef=3021
+Detect=HKCU\Software\Baidu
+Default=False
+FileKey1=%CommonAppData%\Baidu\Spark\AutoUpdate\updatelog|*.*
+
+[Blimb Entertainment AIRSTRIKE3D*]
+Section=Games
+DetectFile1=%ProgramFiles%\Blimb Entertainment\AIRSTRIKE3D
+Default=False
+FileKey1=%ProgramFiles%\Blimb Entertainment\AIRSTRIKE3D|*.log
+
+[CodeMeter Logs*]
+LangSecRef=3023
+DetectFile=%CommonAppData%\CodeMeter
+Default=False
+FileKey1=%CommonAppData%\CodeMeter\Logs|*.*
+
+[MS Office Recent Templates*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\Office\12.0
+Detect2=HKCU\Software\Microsoft\Office\14.0
+Detect3=HKCU\Software\Microsoft\Office\15.0
+Detect4=HKCU\Software\Microsoft\Office\16.0
+Default=False
+FileKey1=%AppData%\Microsoft\Templates|*.xlt;*.xltx;*.pot;*.potx;*.dot;*.dotx
+RegKey1=HKCU\SOFTWARE\Microsoft\Office\12.0\Common\OfficeStart\Web\Templates
+RegKey2=HKCU\SOFTWARE\Microsoft\Office\12.0\Excel\Recent Templates
+RegKey3=HKCU\SOFTWARE\Microsoft\Office\12.0\PowerPoint\Recent Templates
+RegKey4=HKCU\SOFTWARE\Microsoft\Office\12.0\Word\Recent Templates
+RegKey5=HKCU\SOFTWARE\Microsoft\Office\14.0\Common\OfficeStart\Web\Templates
+RegKey6=HKCU\SOFTWARE\Microsoft\Office\14.0\Excel\Recent Templates
+RegKey7=HKCU\SOFTWARE\Microsoft\Office\14.0\PowerPoint\Recent Templates
+RegKey8=HKCU\SOFTWARE\Microsoft\Office\14.0\Word\Recent Templates
+RegKey9=HKCU\SOFTWARE\Microsoft\Office\15.0\Common\OfficeStart\Web\Templates
+RegKey10=HKCU\SOFTWARE\Microsoft\Office\15.0\Excel\Recent Templates
+RegKey11=HKCU\SOFTWARE\Microsoft\Office\15.0\PowerPoint\Recent Templates
+RegKey12=HKCU\SOFTWARE\Microsoft\Office\15.0\Word\Recent Templates
+RegKey13=HKCU\SOFTWARE\Microsoft\Office\16.0\Common\OfficeStart\Web\Templates
+RegKey14=HKCU\SOFTWARE\Microsoft\Office\16.0\Excel\Recent Templates
+RegKey15=HKCU\SOFTWARE\Microsoft\Office\16.0\PowerPoint\Recent Templates
+RegKey16=HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Recent Templates
+
+[Neostar CMS Station Client Logs*]
+LangSecRef=3024
+Detect1=HKLM\SOFTWARE\company\Neostar CMS
+Detect2=HKLM\SOFTWARE\Wow6432Node\company\Neostar CMS
+Default=False
+FileKey1=%ProgramFiles%\Neostar CMS Station\Neostar CMS\Neostar CMS Client\log|*.*
+FileKey2=%ProgramFiles%\Neostar CMS Station\Neostar CMS\Neostar CMS Client\StreamServer|*.log
+FileKey3=%ProgramFiles%\Neostar CMS Station\Neostar CMS\Neostar CMS Client\StreamServer\log|*.*
+
+
+------------------------------------------------------------------------------
+
+Modified Entries:
+
+[Copernic DesktopSearch4 Logs*]
+LangSecRef=3024
+Detect1=HKLM\SOFTWARE\Copernic\DesktopSearch4
+Detect2=HKLM\SOFTWARE\Wow6432Node\Copernic\DesktopSearch4
+Default=False
+FileKey1=%AppData%\Copernic\DesktopSearch4\Logs|*.*|REMOVESELF
+FileKey2=%LocalAppData%\Copernic\DesktopSearch4\Logs|*.*|REMOVESELF
+
+	- Added FileKey2
+
+[Java Setup Files*]
+LangSecRef=3022
+Detect=HKLM\Software\JavaSoft\Java Runtime Environment
+Default=False
+FileKey1=%CommonAppData%\Oracle\Java\installcache|*.*|RECURSE
+FileKey2=%AppData%\Sun\Java\jre*|*.*|REMOVESELF
+FileKey3=%LocalLowAppData%\Sun\Java\jre*|*.*|REMOVESELF
+FileKey4=%LocalLowAppData%\Sun\Java\jdk*|*.*|REMOVESELF
+FileKey5=%LocalLowAppData%\Oracle\Java\jre*|*.*|REMOVESELF
+FileKey6=%LocalLowAppData%\Oracle\Java\jdk*|*.*|REMOVESELF
+
+	- Added FileKeys5 and 6
+	
+[MS Office Customization Tool*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\OfficeCustomizeWizard\12.0
+Detect2=HKCU\Software\Microsoft\OfficeCustomizeWizard\14.0
+Detect3=HKCU\Software\Microsoft\OfficeCustomizeWizard\15.0
+Detect4=HKCU\Software\Microsoft\OfficeCustomizeWizard\16.0
+Default=False
+RegKey1=HKCU\Software\Microsoft\OfficeCustomizeWizard\12.0\RecentFileList
+RegKey2=HKCU\Software\Microsoft\OfficeCustomizeWizard\14.0\RecentFileList
+RegKey3=HKCU\Software\Microsoft\OfficeCustomizeWizard\15.0\RecentFileList
+RegKey4=HKCU\Software\Microsoft\OfficeCustomizeWizard\16.0\RecentFileList
+
+	- Added Office 16 support
+	
+[MS Office PowerPoint More*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\Office\12.0
+Detect2=HKCU\Software\Microsoft\Office\14.0
+Detect3=HKCU\Software\Microsoft\Office\15.0
+Detect4=HKCU\Software\Microsoft\Office\16.0
+Default=False
+RegKey1=HKCU\Software\Microsoft\Office\12.0\Common\Internet|UseRWHlinkNavigation
+RegKey2=HKCU\Software\Microsoft\Office\14.0\Common\Internet|UseRWHlinkNavigation
+RegKey3=HKCU\Software\Microsoft\Office\15.0\Common\Internet|UseRWHlinkNavigation
+RegKey4=HKCU\Software\Microsoft\Office\16.0\Common\Internet|UseRWHlinkNavigation
+FileKey1=%Documents%|~*.ppt;~*.pptx|RECURSE
+
+	- Added FileKey1
+	
+[MS Office Unsaved Files*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\Office\12.0
+Detect2=HKCU\Software\Microsoft\Office\14.0
+Detect3=HKCU\Software\Microsoft\Office\15.0
+Detect4=HKCU\Software\Microsoft\Office\16.0
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Office\UnsavedFiles|*.*
+FileKey2=%AppData%\Microsoft\Excel|*.*|RECURSE
+FileKey3=%AppData%\Microsoft\PowerPoint|*.*|RECURSE
+FileKey4=%AppData%\Microsoft\Word|*.*|RECURSE
+
+	- Added FileKeys2-4
+	
+[MS Office Word More*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\Office\12.0
+Detect2=HKCU\Software\Microsoft\Office\14.0
+Detect3=HKCU\Software\Microsoft\Office\15.0
+Detect4=HKCU\Software\Microsoft\Office\16.0
+Default=False
+RegKey1=HKCU\Software\Microsoft\Office\15.0\Word\Reading Locations
+RegKey2=HKCU\Software\Microsoft\Office\16.0\Word\Reading Locations
+FileKey1=%Documents%|~*.doc;~*.docx|RECURSE
+
+	- Removed FileKey1
+	
+[Project64*]
+Section=Games
+Detect=HKCU\Software\N64 Emulation
+DetectFile1=%ProgramFiles%\Project64 2.0
+DetectFile2=%ProgramFiles%\Project64 2.0
+DetectFile3=%ProgramFiles%\Project64 2.1
+DetectFile4=%ProgramFiles%\Project64 2.2
+Default=False
+FileKey1=%ProgramFiles%\Project64 2.*\Logs|*.*
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\Project64 2.*\Logs|*.*
+RegKey1=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile1
+RegKey2=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile2
+RegKey3=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile3
+RegKey4=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile4
+RegKey5=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile5
+RegKey6=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile6
+RegKey7=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile7
+RegKey8=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile8
+RegKey9=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile9
+RegKey10=HKCU\Software\N64 Emulation\Project64 Version 1.6|RecentFile10
+
+	- Added FileKeys1 and 2
+
+	
+	
+------------------------------------------------------------------------------
+Removed Entries:
+
+[Office 2016*]
+LangSecRef=3021
+Detect=HKCU\Software\Microsoft\Office\16.0\Common
+Default=False
+FileKey1=%AppData%\Microsoft\Office\Recent|*.*
+FileKey2=%LocalAppData%\Microsoft\MSOIdentityCRL\production\temp|*.*_sync
+FileKey3=%AppData%\Microsoft\PowerPoint\Sync\Temp|*.*
+RegKey1=HKCU\Software\Microsoft\Office\16.0\Access\File MRU
+RegKey2=HKCU\Software\Microsoft\Office\16.0\Word\File MRU
+RegKey3=HKCU\Software\Microsoft\Office\16.0\Word\Place MRU
+RegKey4=HKCU\Software\Microsoft\Office\16.0\Excel\File MRU
+RegKey5=HKCU\Software\Microsoft\Office\16.0\Excel\Place MRU
+RegKey6=HKCU\Software\Microsoft\Office\16.0\Publisher\File MRU
+RegKey7=HKCU\Software\Microsoft\Office\16.0\PowerPoint\File MRU
+RegKey8=HKCU\Software\Microsoft\Office\16.0\PowerPoint\Place MRU
+RegKey9=HKCU\Software\Microsoft\Office\16.0\OneNote\RecentNotebooks
+RegKey10=HKCU\Software\Microsoft\Office\16.0\Word\User MRU
+RegKey11=HKCU\Software\Microsoft\Office\16.0\Excel\User MRU
+RegKey12=HKCU\Software\Microsoft\Office\16.0\Access\User MRU
+RegKey13=HKCU\Software\Microsoft\Office\16.0\Publisher\User MRU
+RegKey14=HKCU\Software\Microsoft\Office\16.0\PowerPoint\User MRU
+ExcludeKey1=FILE|%AppData%\Microsoft\Office\Recent\|Welcome to Word.LNK
+ExcludeKey2=FILE|%AppData%\Microsoft\Office\Recent\|Welcome to Publisher.LNK
+ExcludeKey3=FILE|%AppData%\Microsoft\Office\Recent\|Welcome to OneNote.LNK
+
+	- Included in CCleaner v5.11
+	
+[Project64 2.0*]
+Section=Games
+Default=False
+FileKey1=%ProgramFiles%\Project64 2.0\Logs|*.*
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\Project64 2.0\Logs|*.*
+
+	- Merged into Project64
+
+------------------------------------------------------------------------------
+ 
+
+What's new in winapp2.ini 5.10.150925
+
+General: 
+
+09 New Entries
+11 Modified Entries
+04 Removed Entries
+
+Note:
+
+ Change log excludes minor changes (mild pathing changes, key reordering, non-major key tweaks, etc)
+
+Verbose: 
+
+------------------------------------------------------------------------------
+
+New Entries:
+
+[AVG Protection*]
+LangSecRef=3024
+Detect=HKLM\SOFTWARE\AVG\AV
+Default=False
+FileKey1=%ProgramFiles%\AVG\Av|updatecomps.bak;*.old
+FileKey2=%CommonAppData%\Avg\AV\Antispam|*.tmp;*.tmp1;*.tmp2;*.gz
+FileKey3=%CommonAppData%\Avg\AV\SetupBackup|*.*|REMOVESELF
+FileKey4=%CommonAppData%\Avg\log\AV16|*.log;*.log.*;*.log.lock
+FileKey5=%CommonAppData%\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey6=%CommonAppData%\MFAData\logs|*.*
+FileKey7=%CommonAppData%\MFAData\pack|*.*
+FileKey8=%CommonAppData%\MFAData|msistorg.dat.bkp;public_installation_log.xml
+FileKey9=%LocalAppData%\Avg\log\av16|*.log;*.log.*;*.log.lock
+FileKey10=%LocalAppData%\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey11=%LocalAppData%\AvgSetupLog|*.*|REMOVESELF
+FileKey12=%LocalAppData%\MFAData\logs|*.*
+FileKey13=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\av16\temp|*.*
+FileKey14=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\log\av16|*.log;*.log.*;*.log.lock
+FileKey15=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+FileKey16=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg\av16\temp|*.*
+FileKey17=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg\log\av16|*.log;*.log.*;*.log.lock
+FileKey18=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Avg\log\fmw1|*.log;*.log.*;*.log.lock
+
+[Browser Exit Codes*]
+LangSecRef=3029
+Detect1=HKCU\Software\Chromium\BrowserExitCodes
+Detect2=HKCU\Software\Google\Chrome\BrowserExitCodes
+Default=False
+RegKey1=HKCU\Software\Chromium\BrowserExitCodes
+RegKey2=HKCU\Software\Google\Chrome\BrowserExitCodes
+
+[Google Cloud Messaging*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome\User Data\*\GCM Store|*.*|RECURSE
+
+[HuluPlus*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\HuluLLC.HuluPlus_fphbd361v8tya
+Default=False
+FileKey1=%LocalAppData%\Packages\HuluLLC.HuluPlus_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\HuluLLC.HuluPlus_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\HuluLLC.HuluPlus_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\HuluLLC.HuluPlus_*\AC\Temp|*.*
+FileKey5=%LocalAppData%\Packages\HuluLLC.HuluPlus_*\AC\Microsoft\CryptnetUrlCache\Content|*.*
+FileKey6=%LocalAppData%\Packages\HuluLLC.HuluPlus_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*
+FileKey7=%LocalAppData%\Packages\HuluLLC.HuluPlus_*\TempState|*.*|RECURSE
+FileKey8=%LocalAppData%\Packages\HuluLLC.HuluPlus_*\LocalState|*.tmp|RECURSE
+ExcludeKey1=FILE|%LocalAppData%\Packages\HuluLLC.HuluPlus_*\AC\INetCache\|container.dat
+
+[Jing*]
+LangSecRef=3024
+Detect=HKLM\SOFTWARE\TechSmith\Jing
+Default=False
+FileKey1=%LocalAppData%\TechSmith\Jing\DataStore|*.*|RECURSE
+FileKey2=%LocalAppData%\TechSmith\Jing\Temp|*.*|RECURSE
+
+[Microsoft Edge More*]
+LangSecRef=3022
+Detect=HKCU\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+DetectFile=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+Default=False
+FileKey1=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\#!001\Microsoft\CryptnetUrlCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\#!002\Microsoft\CryptnetUrlCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\Microsoft\CryptnetUrlCache|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\MicrosoftEdge\User\Default\DataStore\Data|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\MicrosoftEdge\User\Default\DataStore\Indexed\Data|*.*|RECURSE
+
+[Office 2016*]
+LangSecRef=3021
+Detect=HKCU\Software\Microsoft\Office\16.0\Common
+Default=False
+FileKey1=%AppData%\Microsoft\Office\Recent|*.*
+FileKey2=%LocalAppData%\Microsoft\MSOIdentityCRL\production\temp|*.*_sync
+FileKey3=%AppData%\Microsoft\PowerPoint\Sync\Temp|*.*
+RegKey1=HKCU\Software\Microsoft\Office\16.0\Access\File MRU
+RegKey2=HKCU\Software\Microsoft\Office\16.0\Word\File MRU
+RegKey3=HKCU\Software\Microsoft\Office\16.0\Word\Place MRU
+RegKey4=HKCU\Software\Microsoft\Office\16.0\Excel\File MRU
+RegKey5=HKCU\Software\Microsoft\Office\16.0\Excel\Place MRU
+RegKey6=HKCU\Software\Microsoft\Office\16.0\Publisher\File MRU
+RegKey7=HKCU\Software\Microsoft\Office\16.0\PowerPoint\File MRU
+RegKey8=HKCU\Software\Microsoft\Office\16.0\PowerPoint\Place MRU
+RegKey9=HKCU\Software\Microsoft\Office\16.0\OneNote\RecentNotebooks
+RegKey10=HKCU\Software\Microsoft\Office\16.0\Word\User MRU
+RegKey11=HKCU\Software\Microsoft\Office\16.0\Excel\User MRU
+RegKey12=HKCU\Software\Microsoft\Office\16.0\Access\User MRU
+RegKey13=HKCU\Software\Microsoft\Office\16.0\Publisher\User MRU
+RegKey14=HKCU\Software\Microsoft\Office\16.0\PowerPoint\User MRU
+ExcludeKey1=FILE|%AppData%\Microsoft\Office\Recent\|Welcome to Word.LNK
+ExcludeKey2=FILE|%AppData%\Microsoft\Office\Recent\|Welcome to Publisher.LNK
+ExcludeKey3=FILE|%AppData%\Microsoft\Office\Recent\|Welcome to OneNote.LNK
+
+[SoftEther VPN*]
+LangSecRef=3024
+Detect=HKCU\Software\SoftEther Project\SoftEther VPN
+Warning=Exclude installer.cache if you're using SoftEther VPN Client Web Installer
+Default=False
+FileKey1=%ProgramFiles%\SoftEther VPN Client\vpn_debug|*.*
+FileKey2=%ProgramFiles%\SoftEther VPN Client\backup.vpn_client.config|*.config
+FileKey3=%ProgramFiles%\SoftEther VPN Client\client_log|*.*
+FileKey4=%ProgramFiles%\SoftEther VPN Client\|installer.cache
+
+[Web Applications*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome\User Data\*\File System\000\p\Paths|CURRENT;LOCK
+FileKey2=%LocalAppData%\Google\Chrome\User Data\*\File System\Origins|CURRENT;LOCK
+
+
+------------------------------------------------------------------------------
+
+Modified Entries:
+
+[Adobe Acrobat DC*]
+LangSecRef=3021
+Detect=HKLM\SOFTWARE\Adobe\Adobe Acrobat\DC
+Default=False
+FileKey1=%ProgramFiles%\Adobe\Acrobat DC\Setup Files|*.*|REMOVESELF
+FileKey2=%CommonAppData%\Adobe\Setup|*.*|REMOVESELF
+FileKey3=%LocalAppData%\Adobe\Acrobat|*.idx|RECURSE
+FileKey4=%LocalAppData%\Adobe\Acrobat\DC\Cache|*.*
+FileKey5=%LocalAppData%\Adobe\Acrobat\DC|UserCache.bin
+RegKey1=HKCU\Software\Adobe\Adobe Acrobat\DC\AVConversionFromPDF
+RegKey2=HKCU\Software\Adobe\Adobe Acrobat\DC\AVConversionToPDF
+RegKey3=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cDockables
+RegKey4=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cRecentFiles
+RegKey5=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cRecentFolders
+RegKey6=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cRecentToolsList
+RegKey7=HKCU\Software\Adobe\Adobe Acrobat\DC\AVGeneral\cToolbars
+RegKey8=HKCU\Software\Adobe\Adobe Acrobat\DC\RememberedViews\cNoCategoryFiles
+RegKey9=HKCU\Software\Adobe\Adobe Acrobat\DC\ShareId
+
+	- Added RegKey4-6
+
+[Acrobat Reader DC*]
+LangSecRef=3021
+Detect=HKLM\Software\Adobe\Acrobat Reader\DC
+Default=False
+FileKey1=%ProgramFiles%\Adobe\Acrobat Reader DC\Setup Files|*.*|REMOVESELF
+FileKey2=%CommonAppData%\Adobe\Setup|*.*|REMOVESELF
+FileKey3=%LocalAppData%\Adobe\Acrobat\DC\Cache|*.*|RECURSE
+FileKey4=%LocalAppData%\Adobe\Acrobat\DC|UserCache.bin
+RegKey1=HKCU\Software\Adobe\Acrobat Reader\DC\AVConversionFromPDF
+RegKey2=HKCU\Software\Adobe\Acrobat Reader\DC\AVConversionToPDF
+RegKey3=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cDockables
+RegKey4=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cRecentFiles
+RegKey5=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cRecentFolders
+RegKey6=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cRecentToolsList
+RegKey7=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cToolbars
+RegKey8=HKCU\Software\Adobe\Acrobat Reader\DC\RememberedViews\cNoCategoryFiles
+RegKey9=HKCU\Software\Adobe\Acrobat Reader\DC\ShareIdentity
+RegKey10=HKCU\Software\Adobe\Adobe Synchronizer\DC
+
+	- Added RegKeys4-6
+
+[DVBViewer Setup Files*]
+LangSecRef=3023
+Detect=HKLM\Software\CM&V\DVBViewer
+Default=False
+Warning=This will prevent a modify installation. You have to download the installer to modify the installation.
+FileKey1=%CommonAppData%\CMUV\DVBViewer\backup|*.*|REMOVESELF
+FileKey2=%ProgramFiles%\DVBViewer\backup|*.*|REMOVESELF
+FileKey3=%ProgramFiles%\DVBViewer\GraphPresets|*.fgp
+FileKey4=%ProgramFiles%\DVBViewer\Remotes|*.*
+FileKey5=%ProgramFiles%\DVBViewer\setup|*.*
+FileKey6=%ProgramFiles%\DVBViewer\Transponders|*.*
+
+	-Added FileKeys1-4
+	
+[Dropbox*]
+LangSecRef=3024
+Detect=HKCU\Software\Dropbox
+Default=False
+FileKey1=%AppData%\DropBox|Filecache.db;SigStore.db
+FileKey2=%AppData%\DropBox\Bin|*.log
+FileKey3=%AppData%\Dropbox\logs|*.*|RECURSE
+FileKey4=%AppData%\Dropbox\Cache|*.*|RECURSE
+FileKey5=%CommonAppData%\Dropbox\Update\Log\|*.*
+FileKey6=%LocalAppData%\Dropbox\Logs\|*.*|RECURSE
+
+	- Added FileKey6
+
+[FastStone Capture More*]
+LangSecRef=3024
+Detect=HKCU\SOFTWARE\FastStone Capture
+DetectFile=%AppData%\FastStone\FSC
+Default=False
+FileKey1=%AppData%\FastStone\FSC|*.bak
+FileKey2=%AppData%\FastStone\FSC|fsc.db
+FileKey3=%LocalAppData%\FastStone\FSC|fsc.db
+RegKey1=HKCU\Software\FastStone|_GrbId
+RegKey2=HKCU\Software\FastStone|_LastClipPlayed
+RegKey3=HKCU\Software\FastStone|_LastRecordingFileName
+RegKey4=HKCU\Software\FastStone\APP.FSRecorder\Global|_GrbId
+RegKey5=HKCU\Software\FastStone\APP.FSRecorder\Global|_LastClipPlayed
+RegKey6=HKCU\Software\FastStone\APP.FSRecorder\Global|_LastRecordingFileName
+
+	- Added FileKeys1 & 3
+	- Added RegKeys1-3
+	
+[GEAR DIFx Installers*]
+LangSecRef=3024
+Detect1=HKCR\Installer\Products\CACFC38969C58104B8CE6D8561446C45
+Detect2=HKLM\SOFTWARE\GEAR Software\DIFx
+Detect3=HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Components\3EC13FCAF38E85F44B0F1137C7FB5037
+Default=False
+FileKey1=%AppData%\188F1432-103A-4ffb-80F1-36B633C5C9E1|*.*|REMOVESELF
+FileKey2=%AppData%\34BE82C4-E596-4e99-A191-52C6199EBF69|*.*|REMOVESELF
+FileKey3=%AppData%\9223B3E6-70DD-4e2f-965B-DD8E02D2E20B|*.*|REMOVESELF
+FileKey4=%AppData%\Downloaded Installations|*.*|REMOVESELF
+FileKey5=%CommonAppData%\188F1432-103A-4ffb-80F1-36B633C5C9E1|*.*|REMOVESELF
+FileKey6=%CommonAppData%\34BE82C4-E596-4e99-A191-52C6199EBF69|*.*|REMOVESELF
+FileKey7=%CommonAppData%\9223B3E6-70DD-4e2f-965B-DD8E02D2E20B|*.*|REMOVESELF
+FileKey8=%CommonAppData%\9727E41D-AD6A-47cd-B9BC-CF630B6013FD|*.*|REMOVESELF
+FileKey9=%CommonAppData%\A73B37F8-7A4D-41f4-98A8-7F608CE8B98F|*.*|REMOVESELF
+FileKey10=%CommonAppData%\E1864A66-75E3-486a-BD95-D1B7D99A84A7|*.*|REMOVESELF
+FileKey11=%CommonAppData%\{755AC846-7372-4AC8-8550-C52491DAA8BD}|*.*|REMOVESELF
+FileKey12=%LocalAppData%\Downloaded Installations|*.*|REMOVESELF
+FileKey13=%ProgramFiles%\188F1432-103A-4ffb-80F1-36B633C5C9E1|*.*|REMOVESELF
+FileKey14=%ProgramFiles%\34BE82C4-E596-4e99-A191-52C6199EBF69|*.*|REMOVESELF
+FileKey15=%ProgramFiles%\38FDB89C-1EBD-4366-84B2-336D12CC3209|*.*|REMOVESELF
+FileKey16=%ProgramFiles%\9223B3E6-70DD-4e2f-965B-DD8E02D2E20B|*.*|REMOVESELF
+FileKey17=%ProgramFiles%\93E26451-CD9A-43A5-A2FA-C42392EA4001|*.*|REMOVESELF
+FileKey18=%ProgramFiles%\9727E41D-AD6A-47cd-B9BC-CF630B6013FD|*.*|REMOVESELF
+
+	- Added  FileKey10
+	
+[Java More*]
+LangSecRef=3022
+Detect=HKLM\Software\JavaSoft\Java Runtime Environment
+Default=False
+FileKey1=%AppData%\Sun\Java\Deployment\SystemCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Sun\Java\Deployment\cache|*.*|RECURSE
+FileKey3=%LocalAppData%\Sun\Java\Deployment\SystemCache|*.*|RECURSE
+FileKey4=%LocalLowAppData%\Sun\Java\Deployment\SystemCache|*.*|RECURSE
+FileKey5=%WinDir%\System32\config\systemprofile\AppData\LocalLow\Sun\Java\Deployment\Cache|*.*|RECURSE
+FileKey6=%WinDir%\SysWOW64\config\systemprofile\AppData\LocalLow\Sun\Java\Deployment\Cache|*.*|RECURSE
+FileKey7=%ProgramFiles%\Java\jre*|*PATCH.ERR
+FileKey8=%ProgramFiles%\Java\jre*\lib\security|*.bak
+FileKey9=%LocalAppData%\VirtualStore\Program Files*\Java\jre*|*PATCH.ERR
+FileKey10=%LocalAppData%\VirtualStore\Program Files*\Java\jre*\lib\security|*.bak
+FileKey11=%SystemDrive%\Users\*\.oracle_jre_usage|*.*|REMOVESELF
+
+	- Added FileKey11
+	
+[LocalSystem Cached Certification Files*]
+LangSecRef=3025
+Detect=HKLM\Software\Microsoft\Windows
+Default=False
+FileKey1=%WinDir%\System32\config\SystemProfile\Application Data\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey2=%WinDir%\System32\config\SystemProfile\Application Data\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey3=%WinDir%\System32\config\systemprofile\AppData\LocalLow\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey4=%WinDir%\System32\config\systemprofile\AppData\LocalLow\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+FileKey5=%WinDir%\SysWOW64\config\systemprofile\AppData\LocalLow\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
+FileKey6=%WinDir%\SysWOW64\config\systemprofile\AppData\LocalLow\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+
+	- Added FileKeys 1 & 2
+	
+[MS Office PowerPoint More*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\Office\12.0
+Detect2=HKCU\Software\Microsoft\Office\14.0
+Detect3=HKCU\Software\Microsoft\Office\15.0
+Detect4=HKCU\Software\Microsoft\Office\16.0
+Default=False
+RegKey1=HKCU\Software\Microsoft\Office\12.0\Common\Internet|UseRWHlinkNavigation
+RegKey2=HKCU\Software\Microsoft\Office\14.0\Common\Internet|UseRWHlinkNavigation
+RegKey3=HKCU\Software\Microsoft\Office\15.0\Common\Internet|UseRWHlinkNavigation
+RegKey4=HKCU\Software\Microsoft\Office\16.0\Common\Internet|UseRWHlinkNavigation
+
+	- Added RegKey4
+	
+[Windows Defender More*]
+LangSecRef=3025
+Detect=HKLM\Software\Microsoft\Windows Defender
+Default=False
+FileKey1=%CommonAppData%\Microsoft\Windows Defender\Definition Updates\Backup|*.*|RECURSE
+FileKey2=%CommonAppData%\Microsoft\Windows Defender\Network Inspection System\Support|*.txt
+FileKey3=%CommonAppData%\Microsoft\Windows Defender\Scans|*.bin;*.bin*
+FileKey4=%CommonAppData%\Microsoft\Windows Defender\Scans\History\Service|*.log
+FileKey5=%CommonAppData%\Microsoft\Windows Defender\Scans\Scans\History\CacheManager|*.*|RECURSE
+FileKey6=%CommonAppData%\Microsoft\Windows Defender\Support|*.*|RECURSE
+
+	- Added FileKey2
+	
+[Windows System Profile*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%WinDir%\System32\config\SystemProfile\Cookies|*.*|RECURSE
+FileKey2=%WinDir%\System32\config\SystemProfile\IETldCache|*.*|RECURSE
+FileKey3=%WinDir%\System32\config\SystemProfile\Local Settings\History|*.*|RECURSE
+FileKey4=%WinDir%\System32\config\SystemProfile\Local Settings\Temp|*.*|RECURSE
+FileKey5=%WinDir%\System32\config\SystemProfile\Local Settings\Temporary Internet Files|*.*|RECURSE
+FileKey6=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\Temporary Internet Files|*.*|RECURSE
+FileKey7=%WinDir%\System32\config\systemprofile\AppData\Local\Temp|*.*|RECURSE
+FileKey8=%WinDir%\System32\config\systemprofile\AppData\Roaming\Microsoft\Windows\Cookies|*.*|RECURSE
+FileKey9=%WinDir%\System32\config\systemprofile\AppData\Roaming\Microsoft\Windows\IETldCache|*.*|RECURSE
+FileKey10=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\Windows\Temporary Internet Files|*.*|RECURSE
+FileKey11=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Temp|*.*|RECURSE
+FileKey12=%WinDir%\SysWOW64\config\systemprofile\AppData\Roaming\Microsoft\Windows\Cookies|*.*|RECURSE
+FileKey13=%WinDir%\SysWOW64\config\systemprofile\AppData\Roaming\Microsoft\Windows\IETldCache|*.*|RECURSE
+
+
+	- Added FileKeys1-5
+
+
+	
+------------------------------------------------------------------------------
+Removed Entries:
+
+
+[Jing DataStore*]
+LangSecRef=3024
+Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\{94D5AF0F-E6EE-4A75-BE31-9C9C9A87AD45}
+Default=False
+Warning=This will delete the backups of images you've taken with Jing.
+FileKey1=%LocalAppData%\TechSmith\Jing\DataStore|*.*
+
+	- Merged into Jing
+
+[Jing Temp*]
+LangSecRef=3024
+Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\{94D5AF0F-E6EE-4A75-BE31-9C9C9A87AD45}
+Default=False
+FileKey1=%LocalAppData%\TechSmith\Jing\Temp|*.*
+
+	- Merged into Jing
+
+[Stored HSTS Cookies*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|SiteSecurityServiceState.txt
+
+	- Included in CCleaner
+
+[Windows XP System Profile*]
+DetectOS=|5.1
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%WinDir%\System32\config\SystemProfile\Application Data\Microsoft\CryptnetUrlCache\Content|*.*
+FileKey2=%WinDir%\System32\config\SystemProfile\Application Data\Microsoft\CryptnetUrlCache\MetaData|*.*
+FileKey3=%WinDir%\System32\config\SystemProfile\Cookies|*.*|RECURSE
+FileKey4=%WinDir%\System32\config\SystemProfile\IETldCache|*.*|RECURSE
+FileKey5=%WinDir%\System32\config\SystemProfile\Local Settings\History|*.*|RECURSE
+FileKey6=%WinDir%\System32\config\SystemProfile\Local Settings\Temp|*.*|RECURSE
+FileKey7=%WinDir%\System32\config\SystemProfile\Local Settings\Temporary Internet Files|*.*|RECURSE
+
+	- Marged into Windows System Profile* and LocalSystem Cached Certification Files*
+
+------------------------------------------------------------------------------
+ 
+
+What's new in winapp2.ini 5.09.150825
+
+General: 
+
+04 New Entries
+14 Modified Entries
+03 Removed Entries
+
+Note:
+
+ Change log excludes minor changes (mild pathing changes, key reordering, non-major key tweaks, etc)
+
+Verbose: 
+
+------------------------------------------------------------------------------
+
+New Entries:
+
+[AvaFind - Search Cache*]
+LangSecRef=3023
+Detect=HKLM\Software\Think Less Do More Services\AVA Find
+Default=False
+FileKey1=%AppData%\AvaFind Data|*00.db
+
+[Devolutions Remote Desktop Manager*]
+LangSecRef=3021
+DetectFile=%AppData%\Devolutions\RemoteDesktopManager
+Default=False
+FileKey1=%AppData%\Devolutions\RemoteDesktopManager|*.log;*.log.db
+FileKey2=%LocalAppData%\Devolutions\RemoteDesktopManager|*.log;*.log.db
+
+[Internet Explorer Vault*]
+LangSecRef=3022
+Detect=HKCU\Software\Microsoft\Internet Explorer
+Default=False
+Warning=This will clear the saved passwords in the Windows Mail App
+FileKey1=%LocalAppData%\Microsoft\Vault\*|*.vcrd
+
+[OcenAudio (MRU)*]
+LangSecRef=3023
+Detect=HKCU\Software\OcenAudio
+Detect2=HKLM\Software\OcenAudio
+Default=False
+FileKey1=%LocalAppData%\OcenAudio|ocen.database
+
+
+------------------------------------------------------------------------------
+
+Modified Entries:
+
+
+
+[Facebook More*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Facebook.Facebook_8xx8rvfyw5nnt
+DetectFile=%LocalAppData%\Packages\Facebook.Facebook_8xx8rvfyw5nnt
+Default=False
+FileKey1=%LocalAppData%\Packages\*Facebook_*\LocalState|*.*|RECURSE
+
+	- Renamed
+
+[Hauppauge WinTV*]
+LangSecRef=3024
+Detect=HKLM\SOFTWARE\Hauppauge
+Default=False
+FileKey1=%SystemDrive%\|hcwDriverInstall.txt
+FileKey2=%Public%\Videos\Pause Buffer|*.*|RECURSE
+FileKey3=%Public%\WinTV\Logs\minidump|*.*|RECURSE
+
+	- Renamed
+	- Removed FileKeys2, 4
+		
+[Internet Explorer*]
+LangSecRef=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\windows_ie_ac_001
+DetectFile=%LocalAppData%\Packages\windows_ie_ac_001
+Default=False
+FileKey1=%LocalAppData%\Packages\windows_ie_ac_*\AC\AppCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\windows_ie_ac_*\AC\INetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\windows_ie_ac_*\AC\INetCookies|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\windows_ie_ac_*\AC\INetHistory|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\windows_ie_ac_*\AC\Microsoft\CLR_v4.0\UsageLogs|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\windows_ie_ac_*\AC\Microsoft\CryptnetUrlCache\Content|*.*
+FileKey7=%LocalAppData%\Packages\windows_ie_ac_*\AC\Microsoft\CryptnetUrlCache\MetaData|*.*
+FileKey8=%LocalAppData%\Packages\windows_ie_ac_*\AC\Microsoft\Internet Explorer\DOMStore|*.*|RECURSE
+FileKey9=%LocalAppData%\Packages\windows_ie_ac_*\AC\PRICache|*.*
+FileKey10=%LocalAppData%\Packages\windows_ie_ac_*\AC\Temp|*.*
+FileKey11=%LocalAppData%\Packages\windows_ie_ac_*\LocalState\Cache|*.*|RECURSE
+FileKey12=%LocalAppData%\Packages\windows_ie_ac_*\LocalState\navigationHistory|*.*|RECURSE
+FileKey13=%LocalAppData%\Packages\windows_ie_ac_*\TempState|*.*|RECURSE
+RegKey1=HKCR\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppContainer\Storage\windows_ie_ac_001\Internet Explorer\DOMStorage
+
+	- Renamed
+	
+[Internet Explorer More*]
+LangSecRef=3022
+Detect=HKCU\Software\Microsoft\Internet Explorer
+Default=False
+FileKey1=%SystemDrive%\Documents and Settings\Default User\Application Data\Microsoft\Internet Explorer|brndlog.bak;brndlog.txt
+FileKey2=%SystemDrive%\Documents and Settings\LocalService\IETldCache|*.*|RECURSE
+FileKey3=%SystemDrive%\Documents and Settings\NetworkService\IETldCache|*.*|RECURSE
+FileKey4=%LocalAppData%\Microsoft\Internet Explorer|frameiconcache.dat;tabiconcache.dat
+FileKey5=%LocalAppData%\Microsoft\Internet Explorer|brndlog.txt;brndlog.bak
+FileKey6=%LocalAppData%\Microsoft\Internet Explorer\Recovery\Last Active|*.*|RECURSE
+FileKey7=%LocalAppData%\Microsoft\SmartScreen|*.tmp
+FileKey8=%LocalAppData%\Microsoft\Windows\AppCache|*.*|RECURSE
+FileKey9=%LocalAppData%\Microsoft\Windows\IECompatCache|*.*|RECURSE
+FileKey10=%LocalAppData%\Microsoft\Windows\IECompatUACache|*.*|RECURSE
+FileKey11=%LocalAppData%\Microsoft\Windows\INetCache\Low\|*.*|RECURSE
+FileKey12=%LocalAppData%\Microsoft\Windows\WebCache|*.*|RECURSE
+FileKey13=%LocalAppData%\Microsoft\Windows\WebCache.old|*.*|REMOVESELF
+FileKey14=%LocalLowAppData%\Microsoft\Internet Explorer\iconcache|*.*|RECURSE
+FileKey15=%LocalLowAppData%\Microsoft\Windows\AppCache|*.*|RECURSE
+FileKey16=%AppData%\Microsoft\Internet Explorer|brndlog.bak;brndlog.txt
+FileKey17=%AppData%\Microsoft\Internet Explorer\UserData|*.*|RECURSE
+FileKey18=%WinDir%\ServiceProfiles\LocalService\AppData\Roaming\Microsoft\Windows\IETldCache|*.*|RECURSE
+FileKey19=%WinDir%\ServiceProfiles\NetworkService\AppData\Roaming\Microsoft\Windows\IETldCache|*.*|RECURSE
+FileKey20=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\INetCache|*.*|RECURSE
+FileKey21=%WinDir%\System32\config\SystemProfile\AppData\LocalLow\Microsoft\Internet Explorer|brndlog.bak;brndlog.txt
+FileKey22=%WinDir%\System32\config\SystemProfile\Application Data\Microsoft\Internet Explorer|brndlog.bak;brndlog.txt
+RegKey1=HKCU\Software\Microsoft\Internet Explorer\International|CNum_CpCache
+RegKey2=HKCU\Software\Microsoft\Internet Explorer\International|CpCache
+RegKey3=HKCU\Software\Microsoft\Internet Explorer\International\CpMRU
+RegKey4=HKCU\Software\Microsoft\Internet Explorer\LowRegistry\Audio\PolicyConfig\PropertyStore
+RegKey5=HKCU\Software\Microsoft\Internet Explorer\PageSetup
+RegKey6=HKCU\Software\Microsoft\Internet Explorer\Recovery\PendingDelete
+RegKey7=HKCU\Software\Microsoft\Internet Explorer\TypedURLSTime
+RegKey8=HKCU\Software\Microsoft\Windows\CurrentVersion\Ext\Stats
+
+	- Merged [IETldCache*], [Internet Explorer 10/11*] and [Internet Explorer Icon Cache*] into [Internet Explorer More*].
+	
+[Maintenance Service*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%CommonAppData%\Mozilla*\logs|*.*
+FileKey2=%ProgramFiles%\Mozilla Maintenance Service\logs|*.log
+FileKey3=%LocalAppData%\VirtualStore\ProgramData\Mozilla*\logs|*.*
+FileKey4=%LocalAppData%\VirtualStore\ProgramFiles*\Mozilla Maintenance Service\logs|*.log
+
+	- Added FileKey2 and 4
+	
+[MS Office Word More*]
+LangSecRef=3021
+Detect1=HKCU\Software\Microsoft\Office\12.0
+Detect2=HKCU\Software\Microsoft\Office\14.0
+Detect3=HKCU\Software\Microsoft\Office\15.0
+Default=False
+RegKey1=HKCU\Software\Microsoft\Office\15.0\Word\Reading Locations
+RegKey2=HKCU\Software\Microsoft\Office\15.0\Word\Recent Templates
+FileKey1=%AppData%\Microsoft\Word|*.*|RECURSE
+FileKey2=%Documents%|~*.doc|RECURSE
+ExcludeKey1=FILE|%AppData%\Microsoft\Word\listgal.dat
+ExcludeKey2=PATH|%AppData%\Microsoft\Word\STARTUP
+
+	- Added RegKey2
+
+[Notification Cache*]
+DetectOS=6.2|
+LangSecRef=3025
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Windows\Notifications|*.*|RECURSE
+RegKey1=HKCU\Software\Microsoft\Windows\CurrentVersion\PushNotifications
+
+	- Added RegKey1
+	
+[Paint.NET More*]
+LangSecRef=3021
+Detect=HKCU\Software\Paint.NET
+Default=False
+FileKey1=%LocalAppData%\Paint.NET|*.*|RECURSE
+RegKey1=HKCU\Software\Paint.NET|LastFileDialogDirectory
+
+	- Removed RegKeys2-17	
+	
+[PowerShell Cache*]
+LangSecRef=3024
+Detect=HKLM\Software\Microsoft\PowerShell
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Windows\PowerShell\CommandAnalysis|*.*|RECURSE
+FileKey2=%AppData%\Microsoft\Windows\PowerShell\PSReadline|*.*|RECURSE
+
+	- Added FileKey2
+	
+[Search History*]
+DetectOS=6.2|
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+RegKey1=HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\SearchHistory
+
+	- Removed FileKey1
+	
+------------------------------------------------------------------------------
+Removed Entries:
+
+[IETldCache*]
+LangSecRef=3022
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+FileKey1=%SystemDrive%\Documents and Settings\LocalService\IETldCache|*.*|RECURSE
+FileKey2=%SystemDrive%\Documents and Settings\LocalService.NT*\IETldCache|*.*|RECURSE
+FileKey3=%SystemDrive%\Documents and Settings\NetworkService\IETldCache|*.*|RECURSE
+FileKey4=%SystemDrive%\Documents and Settings\NetworkService.NT*\IETldCache|*.*|RECURSE
+FileKey5=%WinDir%\ServiceProfiles\NetworkService\AppData\Roaming\Microsoft\Windows\IETldCache|*.*|RECURSE
+
+	- Merged into Internet Explorer More
+	
+[Internet Explorer 10/11*]
+LangSecRef=3022
+DetectFile=%LocalAppData%\Microsoft\Windows\WebCache
+Default=False
+FileKey1=%LocalAppData%\Microsoft\SmartScreen|*.tmp
+FileKey2=%LocalAppData%\Microsoft\Windows\AppCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Microsoft\Windows\IECompatCache|*.*|RECURSE
+FileKey4=%LocalAppData%\Microsoft\Windows\IECompatUACache|*.*|RECURSE
+FileKey5=%LocalAppData%\Microsoft\Windows\INetCache|*.*|RECURSE
+FileKey6=%LocalAppData%\Microsoft\Windows\WebCache|*.*|RECURSE
+FileKey7=%LocalAppData%\Microsoft\Windows\WebCache.old|*.*|REMOVESELF
+FileKey8=%LocalLowAppData%\Microsoft\Windows\AppCache|*.*|RECURSE
+FileKey9=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\INetCache|*.*|RECURSE
+RegKey1=HKCU\Software\Microsoft\Internet Explorer\TypedURLSTime
+
+	- Merged into Internet Explorer More
+	
+
+[Internet Explorer Icon Cache*]
+LangSecRef=3022
+Detect=HKCU\Software\Microsoft\Internet Explorer
+Default=False
+FileKey1=%LocalAppData%\Microsoft\Internet Explorer|frameiconcache.dat;tabiconcache.dat
+FileKey2=%LocalLowAppData%\Microsoft\Internet Explorer\iconcache|*.*|RECURSE
+
+	- Merged into Internet Explorer More
+
+
+------------------------------------------------------------------------------
+ 
+
+What's new in winapp2.ini 5.08.150723
+
+General: 
+
+12 New Entries
+03 Modified Entries
+00 Removed Entries
+
+Note:
+
+ Change log excludes minor changes (mild pathing changes, key reordering, non-major key tweaks, etc)
+
+Verbose: 
+
+------------------------------------------------------------------------------
+
+New Entries:
+
+[Acrobat Reader DC*]
+LangSecRef=3021
+Detect=HKLM\Software\Adobe\Acrobat Reader\DC
+Default=False
+FileKey1=%ProgramFiles%\Adobe\Acrobat Reader DC\Setup Files|*.*|REMOVESELF
+FileKey2=%CommonAppData%\Adobe\Setup|*.*|REMOVESELF
+FileKey3=%LocalAppData%\Adobe\Acrobat\DC\Cache|*.*|RECURSE
+RegKey1=HKCU\Software\Adobe\Acrobat Reader\DC\AVConversionFromPDF
+RegKey2=HKCU\Software\Adobe\Acrobat Reader\DC\AVConversionToPDF
+RegKey3=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cDockables
+RegKey4=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cRecentFiles
+RegKey5=HKCU\Software\Adobe\Acrobat Reader\DC\AVGeneral\cToolbars
+RegKey6=HKCU\Software\Adobe\Acrobat Reader\DC\RememberedViews\cNoCategoryFiles
+RegKey7=HKCU\Software\Adobe\Acrobat Reader\DC\ShareIdentity
+RegKey8=HKCU\Software\Adobe\Adobe Synchronizer\DC
+
+[Garmin Express*]
+LangSecRef=3024
+Detect=HKCU\Software\Garmin\Express
+Default=False
+FileKey1=%CommonAppData%\Garmin\Logs|*.log;*.txt|RECURSE
+
+[jv16 PowerTools-X StartupOptimiser Logs**]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\jv16 PowerTools X\jv16PT.exe
+Default=False
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\jv16 PowerTools X|StartupOptimizer*.log
+FileKey2=%ProgramFiles%\jv16 PowerTools X|StartupOptimizer*.log
+
+[Nuclear Dawn Cache*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\17710
+Default=True
+FileKey1=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\config\html|*.*|RECURSE
+FileKey2=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\cache|*.*|RECURSE
+FileKey3=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\materials\temp|*.vtf|RECURSE
+FileKey4=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\downloads|*.*|RECURSE
+ 
+[Nuclear Dawn Custom Content*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\17710
+Default=True
+Warning=Fixes verson mismatches, removes old custom map versions and removes old content. Redownload from server requried.
+FileKey1=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\models|*.*|RECURSE
+FileKey2=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\materials\models|*.*|RECURSE
+FileKey3=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\materials\sprites|*.*|RECURSE
+FileKey4=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\sound\quake|*.*|RECURSE
+FileKey5=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\maps|*corner*;*roadwork*;*rock*;*frost*;*mars*|RECURSE
+ 
+[Nuclear Dawn Developer Files*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\17710
+Default=False
+Warning=This will remove content used by game, map and community developers.
+FileKey1=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\sdk_content|*.*|REMOVESELF
+FileKey2=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\sdk_tools|*.*|REMOVESELF
+FileKey3=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\platform\AddOns|*.*|RECURSE
+FileKey4=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\scripts\vehicles|*.*|REMOVESELF
+FileKey5=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\scripts\units|*.*|REMOVESELF
+FileKey6=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\scripts\scripted_props|*.*|REMOVESELF
+FileKey7=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\maps|*example*|RECURSE
+FileKey8=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\maps\ai_data|nd_codetest.nav|RECURSE
+FileKey9=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\bin|*bsp*;*vtex*;SDKLauncher.exe;modelbrowser.exe|RECURSE
+ 
+[Nuclear Dawn Demos/Screenshots*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\17710
+Default=False
+Warning=This will remove all demos and screenshots which are not uploaded to steam cloud.
+FileKey1=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\maps|*.dem*|RECURSE
+FileKey2=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\donedemos|*.*|RECURSE
+FileKey3=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\screenshots|*.*|RECURSE
+ 
+[Nuclear Dawn Mac/Linux Binaries*]
+Section=Games
+DetectOS=6.0|
+Detect=HKCU\Software\Valve\Steam\Apps\17710
+Default=False
+Warning=This will remove mac and linux binaries. (designed for Windows ONLY)
+FileKey1=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\bin|client.so;client.dylib|RECURSE
+ 
+[Nuclear Dawn SK Gamemode*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\17710
+Default=False
+Warning=Redownload of skrimish gamemode required to play. Not supported by all servers.
+FileKey1=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\maps|*sk_*|RECURSE
+ 
+[Nuclear Dawn Tutorials*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\17710
+Default=False
+Warning=This will prevent running of Nuclear Dawn Tutorials but will free over 850mb of disk space.
+FileKey1=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\media|*tutorial*|RECURSE
+FileKey2=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\maps|*training*|RECURSE
+FileKey3=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\maps\ai_data|*training*|RECURSE
+FileKey4=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\sound\voices\tutorial|*.*|REMOVESELF
+
+[Stored Media Player Paths*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+RegKey1=HKCU\Software\Microsoft\Keyboard\Native Media Players
+
+[Stored MIME Types*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+RegKey1=HKCU\Software\Classes\MIME\Database\Content Type
+
+
+
+------------------------------------------------------------------------------
+
+Modified Entries:
+
+[Greenshot*]
+LangSecRef=3024
+Detect=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Greenshot_is1
+DetectFile=%AppData%\Greenshot
+Default=False
+FileKey1=%AppData%\Greenshot|*.log
+FileKey2=%LocalAppData%\Greenshot|*.log
+
+	- Added DetectFile
+	- Added FileKey2
+
+[Hauppauge WinTV 7*]
+LangSecRef=3024
+Detect=HKLM\SOFTWARE\Hauppauge\WinTV7
+Default=False
+FileKey1=%SystemDrive%\|hcwDriverInstall.txt
+FileKey2=%CommonAppData%\Hauppauge|*.log
+FileKey3=%Public%\Videos\Pause Buffer|*.*|RECURSE
+FileKey4=%Public%\WinTV\Installation Log|*.txt
+FileKey5=%Public%\WinTV\Logs\minidump|*.*|RECURSE
+
+	- Added FileKey2
+
+[Logitech Logs*]
+LangSecRef=3021
+DetectFile=%AppData%\LogiShrd
+Default=False
+FileKey1=%AppData%\LogiShrd\Updater|LuUpdater.log;UpdateList.csv
+FileKey2=%CommonAppData%\Logishrd\unifying|EngineLog.*;*.txt
+FileKey3=%CommonAppData%\LogiShrd|*.log|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\ProgramData\Logishrd\unifying|EngineLog.*
+FileKey5=%LocalAppData%\VirtualStore\ProgramData\LogiShrd|*.log|RECURSE
+
+	- Renamed from LogiShrd Logs
+	
+------------------------------------------------------------------------------
+Removed Entries:
+
+
+
+------------------------------------------------------------------------------
+ 
+ Looking for older changes? http://www.winapp2.com/changes_old3.txt
