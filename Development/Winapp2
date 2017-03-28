@@ -57,20 +57,59 @@ FileKey7=%LocalAppData%\SRWare Iron\User Data\*|*Bookmarks.bak
 FileKey8=%LocalAppData%\SuperBird\User Data\*|*Bookmarks.bak
 FileKey9=%LocalAppData%\Torch\User Data\*|*Bookmarks.bak
 
-[Chrome Crash Reports*]
+[Cloud Messaging*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome\User Data\*\GCM Store|*.*|RECURSE
+
+[Crash Reports*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%LocalAppData%\Google\CrashReports|*.*
 FileKey2=%LocalAppData%\Google\Chrome\User Data\Crashpad\reports|*.*
 
-[Chrome Temps*]
+[FlashPlayer AssetCache*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Torch
+Detect2=HKCU\Software\SuperBird
+Default=False
+FileKey1=%LocalAppData%\Amigo\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Chrome Plus\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Chromium\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
+FileKey4=%LocalAppData%\Flock\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
+FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
+FileKey6=%LocalAppData%\Rockmelt\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
+FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
+FileKey8=%LocalAppData%\SuperBird\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
+FileKey9=%LocalAppData%\Torch\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
+
+[FlashPlayer SharedObjects*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Torch
+Detect2=HKCU\Software\SuperBird
+Default=False
+FileKey1=%LocalAppData%\Amigo\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
+FileKey2=%LocalAppData%\Chrome Plus\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
+FileKey3=%LocalAppData%\Chromium\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
+FileKey4=%LocalAppData%\Flock\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
+FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
+FileKey6=%LocalAppData%\Rockmelt\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
+FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
+FileKey8=%LocalAppData%\SuperBird\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
+FileKey9=%LocalAppData%\Torch\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
+ExcludeKey1=FILE|%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects\*\macromedia.com\support\flashplayer\sys\|settings.sol
+
+[Temps*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%ProgramFiles%\Google\Chrome\Temp|*.*|RECURSE
 
-[Chrome Updates*]
+[Updates*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
 Default=False
@@ -84,7 +123,7 @@ FileKey7=%ProgramFiles%\Google\Update\Download|*.*|RECURSE
 FileKey8=%ProgramFiles%\Google\Update\Install|*.*|RECURSE
 FileKey9=%ProgramFiles%\Google\Update\Offline|*.*|RECURSE
 
-; End of Chrome Entries.
+; End of Chrome/Chromium Entries.
 ;
 ; Firefox Entries
 
@@ -118,7 +157,44 @@ SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla|*.dmp|RECURSE
 
+[FlashGot*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|FlashGot.log;FlashGot.log.bak*
+
+[Logs*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla|*.log|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\Mozilla Firefox|*.log
+FileKey3=%ProgramFiles%\Mozilla Firefox|*.log
+
+[HTML5 Storage*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\storage|*.*|REMOVESELF
+
 ; End of Firefox Entries.
+;
+; Thunderbird entires.
+
+[Email Index*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+Warning=This will cause your message index to be deleted, searching emails may be slow until it is rebuilt.
+FileKey1=%AppData%\Thunderbird\Profiles|global-messages-db.sqlite|RECURSE
+
+[Filter Logs*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%AppData%\Thunderbird\Profiles\*|filterlog.html|RECURSE
+
+; End of Thunderbird entries.
 
 [.NET Framework Cache*]
 LangSecRef=3025
@@ -5794,18 +5870,18 @@ Warning=This will remove cached versions of modified and deleted files.
 FileKey1=%Documents%\Dropbox\.dropbox.cache|*.*|RECURSE
 FileKey2=%UserProfile%\Dropbox\.dropbox.cache|*.*|RECURSE
 
+[DUC*]
+LangSecRef=3022
+Detect=HKCU\Software\Vitalwerks\DUC
+Default=False
+FileKey1=%LocalAppData%\Vitalwerks\DUC|DUC.log
+
 [DU meter*]
 LangSecRef=3022
 Detect=HKCU\Software\Hagel\DU Meter
 Default=False
 FileKey1=%CommonAppData%\Hagel Technologies\DU Meter|*.csv
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\Hagel Technologies\DU Meter|*.csv
-
-[DUC*]
-LangSecRef=3022
-Detect=HKCU\Software\Vitalwerks\DUC
-Default=False
-FileKey1=%LocalAppData%\Vitalwerks\DUC|DUC.log
 
 [Duke Nukem 3D*]
 Section=Games
@@ -5902,17 +5978,17 @@ FileKey5=%LocalAppData%\VirtualStore\ProgramData\DVDRanger\DDF626ADdvdcss|*.*
 FileKey6=%LocalAppData%\VirtualStore\ProgramData\DVDRanger\Logs|*.*
 FileKey7=%SystemDrive%\DVDRanger|*.*|REMOVESELF
 
-[DVD Flick (Logs)*]
+[DVD Flick Logs*]
 LangSecRef=3023
 DetectFile=%ProgramFiles%\DVD Flick\dvdflick.exe
 Default=False
 FileKey1=%AppData%\DVD Flick|dvdflick.log;report.txt
 
-[DVD Shrink (Analysis Results)*]
+[DVD Shrink Analysis Results*]
 LangSecRef=3023
 Detect=HKCU\Software\DVD Shrink
-Warning=Each time you use this you'll have to agree to the DVD Shrink license.
 Default=False
+Warning=Each time you use this you'll have to agree to the DVD Shrink license.
 FileKey1=%CommonAppData%\DVD Shrink|*.*
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\DVD Shrink|*.*
 
@@ -6022,13 +6098,13 @@ Detect=HKCU\Software\Valve\Steam\Apps\19000
 Default=False
 FileKey1=%Documents%\Earth 2160\FontsCache|*.*
 
-[Earth Alerts (Images)*]
+[Earth Alerts Images*]
 LangSecRef=3022
 Detect=HKCU\Software\South Wind Technologies\Earth Alerts
 Default=False
 FileKey1=%AppData%\Earth Alerts\Images|*.*|RECURSE
 
-[Earth Alerts (Messages)*]
+[Earth Alerts Messages*]
 LangSecRef=3022
 Detect=HKCU\Software\South Wind Technologies\Earth Alerts
 Default=False
@@ -6194,13 +6270,6 @@ DetectFile=%AppData%\DS Development\EAC
 Default=False
 FileKey1=%AppData%\DS Development\EAC|*.log
 
-[Email Index*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-Warning=This will cause your message index to be deleted, searching emails may be slow until it is rebuilt.
-FileKey1=%AppData%\Thunderbird\Profiles|global-messages-db.sqlite|RECURSE
-
 [EmEditor*]
 LangSecRef=3024
 Detect=HKCU\Software\EmSoft\EmEditor v3
@@ -6355,17 +6424,6 @@ Detect=HKLM\Software\clients\mail\essentialpim pro
 Default=False
 FileKey1=%AppData%\EssentialPIM Pro\Logs|*.*
 
-[Euro Truck Simulator Profile backups*]
-Section=Games
-Detect1=HKCU\Software\SCS Software
-Detect2=HKLM\Software\SCS Software
-Default=False
-Warning=This will delete your Euro Truck Simulator profile backups. A profile backup of latest game version will regenerate at next start.
-FileKey1=%Documents%\Euro Truck Simulator|backups.txt
-FileKey2=%Documents%\Euro Truck Simulator\profiles*.bak|*.*|REMOVESELF
-FileKey3=%Documents%\Euro Truck Simulator 2|backups.txt
-FileKey4=%Documents%\Euro Truck Simulator 2\profiles*.bak|*.*|REMOVESELF
-
 [Euro Truck Simulator*]
 Section=Games
 Detect1=HKCU\Software\SCS Software
@@ -6374,6 +6432,17 @@ DetectFile=%ProgramFiles%\Euro Truck Simulator 2
 Default=False
 FileKey1=%Documents%\Euro Truck Simulator|*.log;*.crash
 FileKey2=%Documents%\Euro Truck Simulator 2|*.log;*log.txt;*.crash
+
+[Euro Truck Simulator Profile backups*]
+Section=Games
+Detect1=HKCU\Software\SCS Software
+Detect2=HKLM\Software\SCS Software
+Default=False
+Warning=This will delete your Euro Truck Simulator profile backups. A profile backup will regenerate at next start.
+FileKey1=%Documents%\Euro Truck Simulator|backups.txt
+FileKey2=%Documents%\Euro Truck Simulator\profiles*.bak|*.*|REMOVESELF
+FileKey3=%Documents%\Euro Truck Simulator 2|backups.txt
+FileKey4=%Documents%\Euro Truck Simulator 2\profiles*.bak|*.*|REMOVESELF
 
 [EuroSYSTEMS CoCut Professional 2011*]
 LangSecRef=3021
@@ -6527,9 +6596,11 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Steam\Steamapps\common\Fantasy Wars|gui_log.txt
 FileKey2=%ProgramFiles%\Steam\Steamapps\common\Fantasy Wars|gui_log.txt
 
-[FAR Manager 1.7*]
+[FAR Manager*]
 LangSecRef=3021
-Detect=HKCU\Software\Far
+Detect1=HKCU\Software\Far
+Detect2=HKCU\Software\Far2
+Detect3=HKCU\Software\Far18
 Default=False
 RegKey1=HKCU\Software\Far\Editor\LastPositions
 RegKey2=HKCU\Software\Far\SavedDialogHistory
@@ -6538,41 +6609,20 @@ RegKey4=HKCU\Software\Far\SavedFolderHistory
 RegKey5=HKCU\Software\Far\SavedHistory
 RegKey6=HKCU\Software\Far\SavedViewHistory
 RegKey7=HKCU\Software\Far\Viewer\LastPositions
-
-[FAR Manager 1.8*]
-LangSecRef=3021
-Detect=HKCU\Software\Far18
-Default=False
-RegKey1=HKCU\Software\Far18\Editor\LastPositions
-RegKey2=HKCU\Software\Far18\SavedDialogHistory
-RegKey3=HKCU\Software\Far18\SavedDialogHistory\PersPath
-RegKey4=HKCU\Software\Far18\SavedFolderHistory
-RegKey5=HKCU\Software\Far18\SavedHistory
-RegKey6=HKCU\Software\Far18\SavedViewHistory
-RegKey7=HKCU\Software\Far18\Viewer\LastPositions
-
-[FAR Manager 2.0*]
-LangSecRef=3021
-Detect=HKCU\Software\Far2
-Default=False
-RegKey5=HKCU\Software\Far2\Editor\LastPositions
-RegKey1=HKCU\Software\Far2\SavedDialogHistory
-RegKey7=HKCU\Software\Far2\SavedDialogHistory\PersPath
-RegKey2=HKCU\Software\Far2\SavedFolderHistory
-RegKey3=HKCU\Software\Far2\SavedHistory
-RegKey4=HKCU\Software\Far2\SavedViewHistory
-RegKey6=HKCU\Software\Far2\Viewer\LastPositions
-
-[Farming Simulator Old Autosaves*]
-Section=Games
-Detect=HKLM\Software\SCS Software
-Default=False
-FileKey1=%Documents%\My Games\FarmingSimulator2011\savegame*|*.*|REMOVESELF
-FileKey2=%Documents%\My Games\FarmingSimulator2011\savegame*_autoBackup*|*.*|REMOVESELF
-FileKey3=%Documents%\My Games\FarmingSimulator2013\savegame*|*.*|REMOVESELF
-ExcludeKey1=PATH|%Documents%\My Games\FarmingSimulator2011\savegame1\*
-ExcludeKey2=PATH|%Documents%\My Games\FarmingSimulator2013\savegame1\*
-ExcludeKey3=PATH|%Documents%\My Games\FarmingSimulator2013\savegameBackup
+RegKey8=HKCU\Software\Far2\Editor\LastPositions
+RegKey9=HKCU\Software\Far2\SavedDialogHistory
+RegKey10=HKCU\Software\Far2\SavedDialogHistory\PersPath
+RegKey11=HKCU\Software\Far2\SavedFolderHistory
+RegKey12=HKCU\Software\Far2\SavedHistory
+RegKey13=HKCU\Software\Far2\SavedViewHistory
+RegKey14=HKCU\Software\Far2\Viewer\LastPositions
+RegKey15=HKCU\Software\Far18\Editor\LastPositions
+RegKey16=HKCU\Software\Far18\SavedDialogHistory
+RegKey17=HKCU\Software\Far18\SavedDialogHistory\PersPath
+RegKey18=HKCU\Software\Far18\SavedFolderHistory
+RegKey19=HKCU\Software\Far18\SavedHistory
+RegKey20=HKCU\Software\Far18\SavedViewHistory
+RegKey21=HKCU\Software\Far18\Viewer\LastPositions
 
 [Farming Simulator*]
 Section=Games
@@ -6584,6 +6634,17 @@ FileKey3=%Documents%\My Games\FarmingSimulator2011\shader_cache|*.xml|REMOVESELF
 FileKey4=%Documents%\My Games\FarmingSimulator2013|*.txt
 FileKey5=%Documents%\My Games\FarmingSimulator2013\pdlc|*.dlc|REMOVESELF
 FileKey6=%Documents%\My Games\FarmingSimulator2013\shader_cache|*.shc|REMOVESELF
+
+[Farming Simulator Old Autosaves*]
+Section=Games
+Detect=HKLM\Software\SCS Software
+Default=False
+FileKey1=%Documents%\My Games\FarmingSimulator2011\savegame*|*.*|REMOVESELF
+FileKey2=%Documents%\My Games\FarmingSimulator2011\savegame*_autoBackup*|*.*|REMOVESELF
+FileKey3=%Documents%\My Games\FarmingSimulator2013\savegame*|*.*|REMOVESELF
+ExcludeKey1=PATH|%Documents%\My Games\FarmingSimulator2011\savegame1\*
+ExcludeKey2=PATH|%Documents%\My Games\FarmingSimulator2013\savegame1\*
+ExcludeKey3=PATH|%Documents%\My Games\FarmingSimulator2013\savegameBackup
 
 [Fast Clean Pro*]
 LangSecRef=3024
@@ -6653,24 +6714,6 @@ Warning=Fighter System Tray Application needs closed to completely clear all log
 FileKey1=%AppData%\Fighters\Suite\Logs|*.*
 FileKey2=%AppData%\Fighters\Tray\Logs|*.*
 
-[File Shredder*]
-LangSecRef=3024
-Detect=HKCU\Software\Shredder
-Default=False
-RegKey1=HKCU\Software\Shredder\{FF14D9EE-48EB-4873-80AC-8E224BEE5823}
-
-[File Transfer Manager*]
-LangSecRef=3025
-DetectFile=%AppData%\Microsoft\File Transfer Manager
-Default=False
-FileKey1=%AppData%\Microsoft\File Transfer Manager|*.bak
-
-[File Type Doctor Last Selected*]
-LangSecRef=3024
-Detect=HKCU\Software\Creative Element\File Type Doctor
-Default=False
-RegKey1=HKCU\Software\Creative Element\File Type Doctor|LastSelected
-
 [FileCleaner*]
 LangSecRef=3024
 Detect=HKCU\Software\WebMinds, Inc\FileCleaner
@@ -6704,6 +6747,24 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Metability Software\FileMindQuickFix|*.log|RECURSE
 FileKey2=%ProgramFiles%\Metability Software\FileMindQuickFix|*.log|RECURSE
 
+[File Shredder*]
+LangSecRef=3024
+Detect=HKCU\Software\Shredder
+Default=False
+RegKey1=HKCU\Software\Shredder\{FF14D9EE-48EB-4873-80AC-8E224BEE5823}
+
+[File Transfer Manager*]
+LangSecRef=3025
+DetectFile=%AppData%\Microsoft\File Transfer Manager
+Default=False
+FileKey1=%AppData%\Microsoft\File Transfer Manager|*.bak
+
+[File Type Doctor Last Selected*]
+LangSecRef=3024
+Detect=HKCU\Software\Creative Element\File Type Doctor
+Default=False
+RegKey1=HKCU\Software\Creative Element\File Type Doctor|LastSelected
+
 [FileZilla Temps*]
 LangSecRef=3022
 Detect=HKLM\Software\FileZilla Client
@@ -6725,32 +6786,12 @@ FileKey6=%LocalAppData%\Packages\FilmOnLiveTVFree.FilmOnLiveTVFree_*\AC\INetCook
 FileKey7=%LocalAppData%\Packages\FilmOnLiveTVFree.FilmOnLiveTVFree_*\AC\INetHistory|*.*|RECURSE
 RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\FilmOnLiveTVFree.FilmOnLiveTVFree_zx03kxexxb716\SearchHistory
 
-[Filter Logs*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%AppData%\Thunderbird\Profiles\*|filterlog.html|RECURSE
-
 [Firebird Project Logs*]
 LangSecRef=3023
 Detect=HKLM\Software\Firebird Project
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Firebird\Firebird_2_1|*.log
 FileKey2=%ProgramFiles%\Firebird\Firebird_2_1|*.log
-
-[Firefox HTML5 Storage*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\storage|*.*|REMOVESELF
-
-[Firefox Logs*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla|*.log|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\Program Files*\Mozilla Firefox|*.log
-FileKey3=%ProgramFiles%\Mozilla Firefox|*.log
 
 [Fishdom: H2O*]
 Section=Games
@@ -6786,45 +6827,6 @@ FileKey1=%LocalAppData%\VirtualStore\Program Files*\FlashGet|Default.bk*;Default
 FileKey2=%ProgramFiles%\FlashGet|Default.bk*;Default.jcd.bak
 RegKey1=HKCU\Software\JetCar\JetCar|Recent File List
 
-[FlashGot*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|FlashGot.log;FlashGot.log.bak*
-
-[FlashPlayer AssetCache*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Detect1=HKCU\Software\Torch
-Detect2=HKCU\Software\SuperBird
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
-FileKey2=%LocalAppData%\Chrome Plus\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
-FileKey3=%LocalAppData%\Chromium\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
-FileKey4=%LocalAppData%\Flock\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
-FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
-FileKey6=%LocalAppData%\Rockmelt\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
-FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
-FileKey8=%LocalAppData%\SuperBird\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
-FileKey9=%LocalAppData%\Torch\User Data\*\Pepper Data\Shockwave Flash\CacheWritableAdobeRoot\AssetCache|*.*|RECURSE
-
-[FlashPlayer SharedObjects*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Detect1=HKCU\Software\Torch
-Detect2=HKCU\Software\SuperBird
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
-FileKey2=%LocalAppData%\Chrome Plus\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
-FileKey3=%LocalAppData%\Chromium\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
-FileKey4=%LocalAppData%\Flock\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
-FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
-FileKey6=%LocalAppData%\Rockmelt\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
-FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
-FileKey8=%LocalAppData%\SuperBird\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
-FileKey9=%LocalAppData%\Torch\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
-ExcludeKey1=FILE|%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects\*\macromedia.com\support\flashplayer\sys\|settings.sol
-
 [FLEXnet*]
 LangSecRef=3021
 Detect=HKCU\Software\FlexNet
@@ -6852,7 +6854,7 @@ Detect=HKLM\Software\Microsoft\Windows
 Default=False
 FileKey1=%WinDir%\ServiceProfiles\LocalService\AppData\Local\FontCache|~*.dat
 
-[Foobar2000 (Crash Log)*]
+[Foobar2000 Crash Log*]
 LangSecRef=3023
 Detect=HKLM\Software\foobar2000
 Default=False
@@ -6873,9 +6875,9 @@ FileKey1=%AppData%\ForgetBox\cache|*.*|RECURSE
 
 [Format Factory*]
 LangSecRef=3023
-Warning=This will delete the contents of your output folder. All your converted files will be deleted.
 Detect=HKCU\Software\FreeTime\FormatFactory
 Default=False
+Warning=This will delete the contents of your output folder. All your converted files will be deleted.
 FileKey1=%Documents%\FFOutput|*.*|RECURSE
 FileKey2=%SystemDrive%\FFOutput|*.*|RECURSE
 
@@ -6979,40 +6981,26 @@ Detect=HKCU\Software\Foxit Software Company\Foxit PDF Editor
 Default=False
 RegKey1=HKCU\Software\Foxit Software Company\Foxit PDF Editor|Recent File List
 
-[Foxit PhantomPDF 6 More*]
+[Foxit PhantomPDF*]
 LangSecRef=3021
-Detect=HKCU\Software\Foxit Software\Foxit PhantomPDF 6.0
+Detect1=HKCU\Software\Foxit Software\Foxit PhantomPDF 6.0
+Detect2=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0
+Detect3=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0
 Default=False
 FileKey1=%AppData%\Foxit Software\Foxit PhantomPDF\FormFiller|AutoComplete.ds
 FileKey2=%AppData%\Foxit Software\RMS|FXRMS_Log.txt
 FileKey3=%LocalAppData%\Foxit PhantomPDF\msilog|*.log
 RegKey1=HKCU\Software\Foxit Software\Foxit PhantomPDF 6.0\Preferences\History
 RegKey2=HKCU\Software\Foxit Software\Foxit PhantomPDF 6.0\RecentFiles
-
-[Foxit PhantomPDF 7 More*]
-LangSecRef=3021
-Detect=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0
-Default=False
-FileKey1=%AppData%\Foxit Software\Foxit PhantomPDF\FormFiller|AutoComplete.ds
-FileKey2=%AppData%\Foxit Software\RMS|FXRMS_Log.txt
-FileKey3=%LocalAppData%\Foxit PhantomPDF\msilog|*.log
-RegKey1=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\MRU\File MRU
-RegKey2=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\MRU\Place MRU
-RegKey3=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\Preferences\History
-RegKey4=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\Recent File List
-
-[Foxit PhantomPDF 8*]
-LangSecRef=3021
-Detect=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0
-Default=False
-FileKey1=%LocalAppData%\Foxit PhantomPDF\msilog|*.log
-FileKey2=%AppData%\Foxit Software\Foxit PhantomPDF\FormFiller|AutoComplete.ds
-FileKey3=%AppData%\Foxit Software\RMS|FXRMS_Log.txt
-RegKey1=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\MRU\File MRU
-RegKey2=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\MRU\Place MRU
-RegKey3=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\Preferences\History
-RegKey4=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\Recent File List
-RegKey5=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\Foxit PhantomPDF Advanced Editor\Recent File List
+RegKey3=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\MRU\File MRU
+RegKey4=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\MRU\Place MRU
+RegKey5=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\Preferences\History
+RegKey6=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0\Recent File List
+RegKey7=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\MRU\File MRU
+RegKey8=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\MRU\Place MRU
+RegKey9=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\Preferences\History
+RegKey10=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\Recent File List
+RegKey11=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\Foxit PhantomPDF Advanced Editor\Recent File List
 
 [Foxit Reader 6.0 Crash Dumps*]
 LangSecRef=3021
@@ -7156,73 +7144,57 @@ DetectFile=%AppData%\Gajim
 Default=False
 FileKey1=%AppData%\Gajim|Logs.db;gajim.log
 
-[Game Maker 4*]
+[Game Maker*]
 LangSecRef=3021
-Detect=HKCU\Software\Game Maker 4
+Detect1=HKCU\Software\Game Maker 4
+Detect2=HKCU\Software\Game Maker\Version 5
+Detect3=HKCU\Software\Game Maker\Version 6
+Detect4=HKCU\Software\Game Maker\Version 7
+Detect5=HKCU\Software\Game Maker\Version 8
 Default=False
 RegKey1=HKCU\Software\Game Maker 4\Preferences|Recent0
 RegKey2=HKCU\Software\Game Maker 4\Preferences|Recent1
 RegKey3=HKCU\Software\Game Maker 4\Preferences|Recent2
 RegKey4=HKCU\Software\Game Maker 4\Preferences|Recent3
 RegKey5=HKCU\Software\Game Maker 4\Preferences|GameDir
+RegKey6=HKCU\Software\Game Maker\Version 5\Preferences|Recent0
+RegKey7=HKCU\Software\Game Maker\Version 5\Preferences|Recent1
+RegKey8=HKCU\Software\Game Maker\Version 5\Preferences|Recent2
+RegKey9=HKCU\Software\Game Maker\Version 5\Preferences|Recent3
+RegKey10=HKCU\Software\Game Maker\Version 5\Preferences|Recent4
+RegKey11=HKCU\Software\Game Maker\Version 5\Preferences|Recent5
+RegKey12=HKCU\Software\Game Maker\Version 5\Preferences|Recent6
+RegKey13=HKCU\Software\Game Maker\Version 5\Preferences|Recent7
+RegKey14=HKCU\Software\Game Maker\Version 5\Preferences|GameDir
+RegKey15=HKCU\Software\Game Maker\Version 6\Preferences|Recent0
+RegKey16=HKCU\Software\Game Maker\Version 6\Preferences|Recent1
+RegKey17=HKCU\Software\Game Maker\Version 6\Preferences|Recent2
+RegKey18=HKCU\Software\Game Maker\Version 6\Preferences|Recent3
+RegKey19=HKCU\Software\Game Maker\Version 6\Preferences|Recent4
+RegKey20=HKCU\Software\Game Maker\Version 6\Preferences|Recent5
+RegKey21=HKCU\Software\Game Maker\Version 6\Preferences|Recent6
+RegKey22=HKCU\Software\Game Maker\Version 6\Preferences|Recent7
+RegKey23=HKCU\Software\Game Maker\Version 6\Preferences|GameDir
+RegKey24=HKCU\Software\Game Maker\Version 7\Preferences|Recent0
+RegKey25=HKCU\Software\Game Maker\Version 7\Preferences|Recent1
+RegKey26=HKCU\Software\Game Maker\Version 7\Preferences|Recent2
+RegKey27=HKCU\Software\Game Maker\Version 7\Preferences|Recent3
+RegKey28=HKCU\Software\Game Maker\Version 7\Preferences|Recent4
+RegKey29=HKCU\Software\Game Maker\Version 7\Preferences|Recent5
+RegKey30=HKCU\Software\Game Maker\Version 7\Preferences|Recent6
+RegKey31=HKCU\Software\Game Maker\Version 7\Preferences|Recent7
+RegKey32=HKCU\Software\Game Maker\Version 7\Preferences|GameDir
+RegKey33=HKCU\Software\Game Maker\Version 8\Preferences|Recent0
+RegKey34=HKCU\Software\Game Maker\Version 8\Preferences|Recent1
+RegKey35=HKCU\Software\Game Maker\Version 8\Preferences|Recent2
+RegKey36=HKCU\Software\Game Maker\Version 8\Preferences|Recent3
+RegKey37=HKCU\Software\Game Maker\Version 8\Preferences|Recent4
+RegKey38=HKCU\Software\Game Maker\Version 8\Preferences|Recent5
+RegKey39=HKCU\Software\Game Maker\Version 8\Preferences|Recent6
+RegKey40=HKCU\Software\Game Maker\Version 8\Preferences|Recent7
+RegKey41=HKCU\Software\Game Maker\Version 8\Preferences|GameDir
 
-[Game Maker 5*]
-LangSecRef=3021
-Detect=HKCU\Software\Game Maker\Version 5
-Default=False
-RegKey1=HKCU\Software\Game Maker\Version 5\Preferences|Recent0
-RegKey2=HKCU\Software\Game Maker\Version 5\Preferences|Recent1
-RegKey3=HKCU\Software\Game Maker\Version 5\Preferences|Recent2
-RegKey4=HKCU\Software\Game Maker\Version 5\Preferences|Recent3
-RegKey5=HKCU\Software\Game Maker\Version 5\Preferences|Recent4
-RegKey6=HKCU\Software\Game Maker\Version 5\Preferences|Recent5
-RegKey7=HKCU\Software\Game Maker\Version 5\Preferences|Recent6
-RegKey8=HKCU\Software\Game Maker\Version 5\Preferences|Recent7
-RegKey9=HKCU\Software\Game Maker\Version 5\Preferences|GameDir
-
-[Game Maker 6*]
-LangSecRef=3021
-Detect=HKCU\Software\Game Maker\Version 6
-Default=False
-RegKey1=HKCU\Software\Game Maker\Version 6\Preferences|Recent0
-RegKey2=HKCU\Software\Game Maker\Version 6\Preferences|Recent1
-RegKey3=HKCU\Software\Game Maker\Version 6\Preferences|Recent2
-RegKey4=HKCU\Software\Game Maker\Version 6\Preferences|Recent3
-RegKey5=HKCU\Software\Game Maker\Version 6\Preferences|Recent4
-RegKey6=HKCU\Software\Game Maker\Version 6\Preferences|Recent5
-RegKey7=HKCU\Software\Game Maker\Version 6\Preferences|Recent6
-RegKey8=HKCU\Software\Game Maker\Version 6\Preferences|Recent7
-RegKey9=HKCU\Software\Game Maker\Version 6\Preferences|GameDir
-
-[Game Maker 7*]
-LangSecRef=3021
-Detect=HKCU\Software\Game Maker\Version 7
-Default=False
-RegKey1=HKCU\Software\Game Maker\Version 7\Preferences|Recent0
-RegKey2=HKCU\Software\Game Maker\Version 7\Preferences|Recent1
-RegKey3=HKCU\Software\Game Maker\Version 7\Preferences|Recent2
-RegKey4=HKCU\Software\Game Maker\Version 7\Preferences|Recent3
-RegKey5=HKCU\Software\Game Maker\Version 7\Preferences|Recent4
-RegKey6=HKCU\Software\Game Maker\Version 7\Preferences|Recent5
-RegKey7=HKCU\Software\Game Maker\Version 7\Preferences|Recent6
-RegKey8=HKCU\Software\Game Maker\Version 7\Preferences|Recent7
-RegKey9=HKCU\Software\Game Maker\Version 7\Preferences|GameDir
-
-[Game Maker 8*]
-LangSecRef=3021
-Detect=HKCU\Software\Game Maker\Version 8
-Default=False
-RegKey1=HKCU\Software\Game Maker\Version 8\Preferences|Recent0
-RegKey2=HKCU\Software\Game Maker\Version 8\Preferences|Recent1
-RegKey3=HKCU\Software\Game Maker\Version 8\Preferences|Recent2
-RegKey4=HKCU\Software\Game Maker\Version 8\Preferences|Recent3
-RegKey5=HKCU\Software\Game Maker\Version 8\Preferences|Recent4
-RegKey6=HKCU\Software\Game Maker\Version 8\Preferences|Recent5
-RegKey7=HKCU\Software\Game Maker\Version 8\Preferences|Recent6
-RegKey8=HKCU\Software\Game Maker\Version 8\Preferences|Recent7
-RegKey9=HKCU\Software\Game Maker\Version 8\Preferences|GameDir
-
-[Games for Windows Live (DirectX)*]
+[Games for Windows Live DirectX*]
 Section=Games
 Detect1=HKCR\Installer\Products\3128052F989958E40A8727EB849371FE
 Detect2=HKCR\Installer\Products\81024F76746FC3D4EB268FBCF42ECF5D
@@ -7601,12 +7573,6 @@ LangSecRef=3022
 DetectFile=%LocalAppData%\Google\Google Calendar Sync
 Default=False
 FileKey1=%LocalAppData%\Google\Google Calendar Sync|*.log|RECURSE
-
-[Google Cloud Messaging*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Chrome\User Data\*\GCM Store|*.*|RECURSE
 
 [Google Drive*]
 LangSecRef=3024
