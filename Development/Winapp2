@@ -1,4 +1,4 @@
-; Version: 170328
+; Version: 170329
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -63,7 +63,7 @@ SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%LocalAppData%\Google\Chrome\User Data\*\GCM Store|*.*|RECURSE
 
-[Crash Reports*]
+[Chrome Crash Reports*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
 Default=False
@@ -103,13 +103,13 @@ FileKey8=%LocalAppData%\SuperBird\User Data\*\Pepper Data\Shockwave Flash\Writab
 FileKey9=%LocalAppData%\Torch\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
 ExcludeKey1=FILE|%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects\*\macromedia.com\support\flashplayer\sys\|settings.sol
 
-[Temps*]
+[Chrome Temps*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%ProgramFiles%\Google\Chrome\Temp|*.*|RECURSE
 
-[Updates*]
+[Chrome Updates*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
 Default=False
@@ -163,7 +163,7 @@ SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|FlashGot.log;FlashGot.log.bak*
 
-[Logs*]
+[Firefox Logs*]
 LangSecRef=3026
 SpecialDetect=DET_MOZILLA
 Default=False
@@ -171,7 +171,7 @@ FileKey1=%AppData%\Mozilla|*.log|RECURSE
 FileKey2=%LocalAppData%\VirtualStore\Program Files*\Mozilla Firefox|*.log
 FileKey3=%ProgramFiles%\Mozilla Firefox|*.log
 
-[HTML5 Storage*]
+[Firefox HTML5 Storage*]
 LangSecRef=3026
 SpecialDetect=DET_MOZILLA
 Default=False
