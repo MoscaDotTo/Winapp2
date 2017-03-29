@@ -8,7 +8,7 @@
 ;
 ; Chrome/Chromium Entries.
 
-[Application Cache*]
+[Chrome Application Cache*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
 Detect1=HKCU\Software\Chromium
