@@ -1,4 +1,4 @@
-; Version: 170329
+; Version: 170330
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -7,23 +7,6 @@
 ; Please do not host this file anywhere without permission. This is to facilitate proper distribution of the latest version. Thanks.
 ;
 ; Chrome/Chromium Entries.
-
-[Chrome Application Cache*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Detect1=HKCU\Software\Chromium
-Detect2=HKCU\Software\Torch
-Detect3=HKCU\Software\SuperBird
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\Application Cache|*.*|REMOVESELF
-FileKey2=%LocalAppData%\Chrome Plus\User Data\*\Application Cache|*.*|REMOVESELF
-FileKey3=%LocalAppData%\Chromium\User Data\*\Application Cache|*.*|REMOVESELF
-FileKey4=%LocalAppData%\Flock\User Data\*\Application Cache|*.*|REMOVESELF
-FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\Application Cache|*.*|REMOVESELF
-FileKey6=%LocalAppData%\Rockmelt\User Data\*\Application Cache|*.*|REMOVESELF
-FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Application Cache|*.*|REMOVESELF
-FileKey8=%LocalAppData%\SuperBird\User Data\*\Application Cache|*.*|REMOVESELF
-FileKey9=%LocalAppData%\Torch\User Data\*\Application Cache|*.*|REMOVESELF
 
 [ART*]
 LangSecRef=3029
@@ -57,11 +40,22 @@ FileKey7=%LocalAppData%\SRWare Iron\User Data\*|*Bookmarks.bak
 FileKey8=%LocalAppData%\SuperBird\User Data\*|*Bookmarks.bak
 FileKey9=%LocalAppData%\Torch\User Data\*|*Bookmarks.bak
 
-[Cloud Messaging*]
+[Chrome Application Cache*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Chromium
+Detect2=HKCU\Software\Torch
+Detect3=HKCU\Software\SuperBird
 Default=False
-FileKey1=%LocalAppData%\Google\Chrome\User Data\*\GCM Store|*.*|RECURSE
+FileKey1=%LocalAppData%\Amigo\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey2=%LocalAppData%\Chrome Plus\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey3=%LocalAppData%\Chromium\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey4=%LocalAppData%\Flock\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey6=%LocalAppData%\Rockmelt\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey8=%LocalAppData%\SuperBird\User Data\*\Application Cache|*.*|REMOVESELF
+FileKey9=%LocalAppData%\Torch\User Data\*\Application Cache|*.*|REMOVESELF
 
 [Chrome Crash Reports*]
 LangSecRef=3029
@@ -69,6 +63,39 @@ SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%LocalAppData%\Google\CrashReports|*.*
 FileKey2=%LocalAppData%\Google\Chrome\User Data\Crashpad\reports|*.*
+
+[Chrome Temps*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%ProgramFiles%\Google\Chrome\Temp|*.*|RECURSE
+
+[Chrome Updates*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Update\Download|*.*|RECURSE
+FileKey2=%LocalAppData%\Google\Update\Install|*.*|RECURSE
+FileKey3=%LocalAppData%\Google\Update\Offline|*.*|RECURSE
+FileKey4=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Download|*.*|RECURSE
+FileKey5=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Install|*.*|RECURSE
+FileKey6=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Offline|*.*|RECURSE
+FileKey7=%ProgramFiles%\Google\Update\Download|*.*|RECURSE
+FileKey8=%ProgramFiles%\Google\Update\Install|*.*|RECURSE
+FileKey9=%ProgramFiles%\Google\Update\Offline|*.*|RECURSE
+
+[Cloud Messaging*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome\User Data\*\GCM Store|*.*|RECURSE
+
+[Extensions State*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome*\User Data\*\Extension State|*.*|RECURSE
+FileKey2=%LocalAppData%\Amigo\User Data\*\Extension State|*.*|RECURSE
 
 [FlashPlayer AssetCache*]
 LangSecRef=3029
@@ -103,29 +130,21 @@ FileKey8=%LocalAppData%\SuperBird\User Data\*\Pepper Data\Shockwave Flash\Writab
 FileKey9=%LocalAppData%\Torch\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
 ExcludeKey1=FILE|%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects\*\macromedia.com\support\flashplayer\sys\|settings.sol
 
-[Chrome Temps*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%ProgramFiles%\Google\Chrome\Temp|*.*|RECURSE
-
-[Chrome Updates*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Update\Download|*.*|RECURSE
-FileKey2=%LocalAppData%\Google\Update\Install|*.*|RECURSE
-FileKey3=%LocalAppData%\Google\Update\Offline|*.*|RECURSE
-FileKey4=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Download|*.*|RECURSE
-FileKey5=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Install|*.*|RECURSE
-FileKey6=%LocalAppData%\VirtualStore\Program Files*\Google\Update\Offline|*.*|RECURSE
-FileKey7=%ProgramFiles%\Google\Update\Download|*.*|RECURSE
-FileKey8=%ProgramFiles%\Google\Update\Install|*.*|RECURSE
-FileKey9=%ProgramFiles%\Google\Update\Offline|*.*|RECURSE
-
 ; End of Chrome/Chromium Entries.
 ;
 ; Firefox Entries
+
+[Adblock Plus/Edge For Firefox*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\adblock*|patterns-backup*.ini;*.tmp
+
+[Archived Data Reporting*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\datareporting\archived|*.jsonlz4|REMOVESELF
 
 [Bookmark Backups*]
 LangSecRef=3026
@@ -157,12 +176,6 @@ SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla|*.dmp|RECURSE
 
-[FlashGot*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|FlashGot.log;FlashGot.log.bak*
-
 [Firefox Logs*]
 LangSecRef=3026
 SpecialDetect=DET_MOZILLA
@@ -176,6 +189,12 @@ LangSecRef=3026
 SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\storage|*.*|REMOVESELF
+
+[FlashGot*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|FlashGot.log;FlashGot.log.bak*
 
 ; End of Firefox Entries.
 ;
@@ -796,12 +815,6 @@ FileKey1=%LocalAppData%\Adblock Plus for IE|patterns-backup*.ini
 FileKey2=%LocalLowAppData%\Adblock Plus for IE|patterns-backup*.ini
 FileKey3=%WinDir%\System32\config\systemprofile\AppData\LocalLow\Adblock Plus for IE|patterns-backup*.ini
 
-[Adblock Plus/Edge For Firefox*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\adblock*|patterns-backup*.ini;*.tmp
-
 [Add New Hardware Wizard (MRU)*]
 LangSecRef=3025
 Detect=HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup
@@ -1343,7 +1356,7 @@ Default=False
 FileKey1=%AppData%\AIMP|*.bak
 FileKey2=%LocalAppData%\VirtualStore\Program Files*\AIMP2\Data|*.bak|RECURSE
 FileKey3=%ProgramFiles%\AIMP2\Data|*.bak|RECURSE
-Filekey4=%ProgramFiles%\AIMP\!Backup|*.*|REMOVESELF
+FileKey4=%ProgramFiles%\AIMP\!Backup|*.*|REMOVESELF
 FileKey5=%ProgramFiles%\AIMP Classic\Data|*.bak|RECURSE
 
 [AirBuccaneers*]
@@ -1840,12 +1853,6 @@ Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\269610\
 Default=False
 FileKey1=%AppData%\ArcaneWorlds|log.txt
-
-[Archived Data Reporting*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\datareporting\archived|*.jsonlz4|REMOVESELF
 
 [ArcSoft MediaConverter*]
 LangSecRef=3023
@@ -6538,13 +6545,6 @@ Default=False
 RegKey1=HKCU\Software\Vitaliy Levchenko\Exportizer 5\Settings|LastExt
 RegKey2=HKLM\Software\ODBC\Temporary (volatile) Jet DSN for process 0x5ac Thread 0x3d8 DBC 0x2bd1e84 Xbase|DefaultDir
 RegKey3=HKLM\Software\ODBC\Temporary (volatile) Jet DSN for process 0x858 Thread 0xfb0 DBC 0x2ca3a74 Paradox|DefaultDir
-
-[Extensions State*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Chrome*\User Data\*\Extension State|*.*|RECURSE
-FileKey2=%LocalAppData%\Amigo\User Data\*\Extension State|*.*|RECURSE
 
 [EZ Backup Ultimate*]
 LangSecRef=3024
@@ -13216,13 +13216,13 @@ FileKey3=%CommonAppData%\NVIDIA Corporation|*.log
 FileKey4=%CommonAppData%\NVIDIA Corporation\NvTelemetry|*.log;*.bak
 FileKey5=%CommonAppData%\NVIDIA Corporation\Nvstapisvr|*.log;*.old
 FileKey6=%LocalAppData%\NVIDIA\NvBackend|*.log;*.bak
-Filekey7=%LocalAppData%\NVIDIA Corporation\NvNode|*.log;*.bak
+FileKey7=%LocalAppData%\NVIDIA Corporation\NvNode|*.log;*.bak
 FileKey8=%LocalAppData%\NVIDIA Corporation\NvProfileUpdater|*.log;*.bak
-Filekey9=%LocalAppData%\NVIDIA Corporation\NvTelemetry|*.log;*.bak
+FileKey9=%LocalAppData%\NVIDIA Corporation\NvTelemetry|*.log;*.bak
 FileKey10=%LocalAppData%\NVIDIA Corporation\NvTmMon|*.log;*.bak
 FileKey11=%LocalAppData%\NVIDIA Corporation\NvTmRep|*.log;*.bak
-Filekey12=%LocalAppData%\NVIDIA Corporation\NvVAD|*.log;*.bak
-Filekey13=%LocalAppData%\NVIDIA Corporation\NVIDIA Share\CefCache|*.log;*.bak
+FileKey12=%LocalAppData%\NVIDIA Corporation\NvVAD|*.log;*.bak
+FileKey13=%LocalAppData%\NVIDIA Corporation\NVIDIA Share\CefCache|*.log;*.bak
 FileKey14=%LocalAppData%\VirtualStore\Program Files*\NVIDIA Corporation\NetworkAccessManager\Apache Group\Apache2\logs|*.*
 FileKey15=%LocalAppData%\VirtualStore\ProgramData*\NVIDIA|*.log;*.log_backup1|RECURSE
 FileKey16=%LocalAppData%\VirtualStore\ProgramData*\NVIDIA\NvBackend|*.log|RECURSE
