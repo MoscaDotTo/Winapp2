@@ -1,4 +1,4 @@
-; Version: 170330
+; Version: 170407
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -1803,6 +1803,15 @@ DetectFile=%LocalAppData%\ApplicationHistory
 Default=False
 FileKey1=%LocalAppData%\ApplicationHistory|*.*|RECURSE
 
+[Apps CrashDumps*]
+DetectOS=6.2|
+Section=3031
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\WinStore_cw5n1h2txyewy
+Detect2=HKCU\SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.WindowsStore_8wekyb3d8bbwe
+Default=False
+Warning=This deletes crash dumps from Windows Store Apps.
+FileKey1=%LocalAppData%\CrashDumps\|*.*|RECURSE
+
 [Appupdater Log*]
 LangSecRef=3024
 DetectFile=%AppData%\Appupdater
@@ -2370,7 +2379,7 @@ FileKey1=%CommonAppData%\TuneUp Software\TuneUp Utilities *|*.log|RECURSE
 FileKey2=%LocalAppData%\AvgSetupLog|*.*|REMOVESELF
 FileKey3=%LocalAppData%\Avg\AWL*\Log|*.log
 FileKey4=%LocalAppData%\Avg\Log|*.log;zappapi.log.1|RECURSE
-FileKey5=%LocalAppData%\Avg\log\fmw1|*.log
+FileKey5=%LocalAppData%\Avg\log\fmw1|*.*
 FileKey6=%LocalAppData%\Avg\log\tu16|*.log
 FileKey7=%LocalAppData%\TuneUp Software|*.log|RECURSE
 FileKey8=%WinDir%\System32\config\systemprofile\AppData\Local\Avg\Log\fmw1|*.log
@@ -9658,11 +9667,23 @@ FileKey5=%LocalAppData%\VirtualStore\ProgramData\Kaspersky Lab\*\Data\Updater\Te
 FileKey6=%LocalAppData%\VirtualStore\ProgramData\Kaspersky Lab\*\Temp|*.*
 FileKey7=%ProgramFiles%\Kaspersky Lab\NetworkAgent\~dumps|*.*
 
-[Kaspersky Dump Files (.dmp)*]
+[Kaspersky Dump Files*]
 LangSecRef=3024
 Detect=HKCU\Software\KasperskyLab
 Default=False
 FileKey1=%CommonAppData%\Kaspersky Lab\|*.dmp;*.dmp.stat;*.log
+
+[Kaspersky Now*]
+Section=3031
+Default=False
+Detect=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\KasperskyLab.KasperskyNow_8jx5e25qw3tdc
+FileKey1=%LocalAppData%\Packages\KasperskyLab.KasperskyNow_*\AC\INetCache|*.*|RECURSE
+FileKey2=%LocalAppData%\Packages\KasperskyLab.KasperskyNow_*\AC\INetCookies|*.*|RECURSE
+FileKey3=%LocalAppData%\Packages\KasperskyLab.KasperskyNow_*\AC\INetHistory|*.*|RECURSE
+FileKey4=%LocalAppData%\Packages\KasperskyLab.KasperskyNow_*\AC\Microsoft\CLR_v4.0_32\UsageLogs|*.*|RECURSE
+FileKey5=%LocalAppData%\Packages\KasperskyLab.KasperskyNow_*\AC\Temp|*.*|RECURSE
+FileKey6=%LocalAppData%\Packages\KasperskyLab.KasperskyNow_*\LocalCache\|*.*|RECURSE
+FileKey7=%LocalAppData%\Packages\KasperskyLab.KasperskyNow_*\AC\Microsoft\CLR_v4.0_32|*.log
 
 [Kate's Video Toolkit Logs*]
 LangSecRef=3023
@@ -11353,11 +11374,12 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Mousotron|*.log
 FileKey2=%ProgramFiles%\Mousotron|*.log
 
-[Movavi Video Converter (Logs)*]
+[Movavi Video Converter Logs*]
 LangSecRef=3023
 Detect=HKCU\Software\MOVAVI
 Default=False
 FileKey1=%LocalAppData%\Movavi\Logs\VideoConverter*|*.*
+FileKey2=%LocalAppData%\Movavi\Video Converter|Log.txt
 
 [Move Media Player Cache*]
 LangSecRef=3023
@@ -13349,6 +13371,12 @@ Detect2=HKCU\Software\Microsoft\OneDrive
 Default=False
 FileKey1=%LocalAppData%\Microsoft\SkyDrive\Setup\Logs|*.*
 FileKey2=%LocalAppData%\Microsoft\OneDrive\Setup\Logs|*.*
+
+[OneDrive Usage Logs*]
+LangSecRef=3021
+Detect=HKCU\Software\Microsoft\OneDrive
+Default=False
+FileKey1=%LocalAppData%\Microsoft\OneDrive\logs|*.*
 
 [OneNote*]
 LangSecRef=3031
@@ -16617,6 +16645,7 @@ FileKey1=%LocalAppData%\TechSmith\SnagIt|Tray.bin
 FileKey2=%LocalAppData%\TechSmith\SnagIt\DataStore\AppIcons|*.ico
 FileKey3=%LocalAppData%\TechSmith\SnagIt\DataStore\WebSiteIcons|*.ico
 FileKey4=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
+FileKey5=%LocalAppData%\TechSmith\SnagIt\TrackerbirdFiles|*.log
 RegKey1=HKCU\Software\TechSmith\SnagIt\13\Recent Captures
 RegKey2=HKCU\Software\TechSmith\SnagIt\13\SnagItEditor\Recent File List
 
