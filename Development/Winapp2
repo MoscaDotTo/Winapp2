@@ -130,6 +130,74 @@ FileKey8=%LocalAppData%\SuperBird\User Data\*\Pepper Data\Shockwave Flash\Writab
 FileKey9=%LocalAppData%\Torch\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
 ExcludeKey1=FILE|%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects\*\macromedia.com\support\flashplayer\sys\|settings.sol
 
+[GPU Cache*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Torch
+Detect2=HKCU\Software\SuperBird
+Detect3=HKCU\Software\Chromium
+Default=False
+FileKey1=%LocalAppData%\Amigo\User Data\*\GPUCache|*.*
+FileKey2=%LocalAppData%\Chrome Plus\User Data\*\GPUCache|*.*
+FileKey3=%LocalAppData%\Chromium\User Data\*\GPUCache|*.*
+FileKey4=%LocalAppData%\Flock\User Data\*\GPUCache|*.*
+FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\GPUCache|*.*
+FileKey6=%LocalAppData%\Rockmelt\User Data\*\GPUCache|*.*
+FileKey7=%LocalAppData%\SRWare Iron\User Data\*\GPUCache|*.*
+FileKey8=%LocalAppData%\SuperBird\User Data\*\GPUCache|*.*
+FileKey9=%LocalAppData%\Torch\User Data\*\GPUCache|*.*
+
+[History*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome*\User Data\*|History
+
+[HTML5 Storage*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Torch
+Detect2=HKCU\Software\SuperBird
+Detect3=HKCU\Software\Chromium
+Default=False
+FileKey1=%LocalAppData%\Amigo\User Data\*\File System|*.*|REMOVESELF
+FileKey2=%LocalAppData%\Chrome Plus\User Data\*\File System|*.*|REMOVESELF
+FileKey3=%LocalAppData%\Chromium\User Data\*\File System|*.*|REMOVESELF
+FileKey4=%LocalAppData%\Flock\User Data\*\File System|*.*|REMOVESELF
+FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\File System|*.*|REMOVESELF
+FileKey6=%LocalAppData%\Rockmelt\User Data\*\File System|*.*|REMOVESELF
+FileKey7=%LocalAppData%\SRWare Iron\User Data\*\File System|*.*|REMOVESELF
+FileKey8=%LocalAppData%\SuperBird\User Data\*\File System|*.*|REMOVESELF
+FileKey9=%LocalAppData%\Torch\User Data\*\File System|*.*|REMOVESELF
+
+[Installer*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+Warning=Running this may remove Chrome's ability to automatically update to future versions on some computers.
+FileKey1=%LocalAppData%\Google\Chrome*\Application\*\Installer|*.7z|RECURSE
+FileKey2=%LocalAppData%\Google\Update\*\*\Installer|*.7z|RECURSE
+FileKey3=%ProgramFiles%\|GUT*tmp
+FileKey4=%ProgramFiles%\Google\Chrome*\Application\*\Installer|*.7z|RECURSE
+FileKey5=%ProgramFiles%\Google\Update\*\*\Installer|*.7z|RECURSE
+
+[Local Storage*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Torch
+Detect2=HKCU\Software\SuperBird
+Detect3=HKCU\Software\Chromium
+Default=False
+FileKey1=%LocalAppData%\Amigo\User Data\*\Local Storage|http*.*|RECURSE
+FileKey2=%LocalAppData%\Chrome Plus\User Data\*\Local Storage|http*.*|RECURSE
+FileKey3=%LocalAppData%\Chromium\User Data\*\Local Storage|http*.*|RECURSE
+FileKey4=%LocalAppData%\Flock\User Data\*\Local Storage|http*.*|RECURSE
+FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\Local Storage|http*.*|RECURSE
+FileKey6=%LocalAppData%\Rockmelt\User Data\*\Local Storage|http*.*|RECURSE
+FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Local Storage|http*.*|RECURSE
+FileKey8=%LocalAppData%\SuperBird\User Data\*\Local Storage|http*.*|RECURSE
+FileKey9=%LocalAppData%\Torch\User Data\*\Local Storage|http*.*|RECURSE
+
 ; End of Chrome/Chromium Entries.
 ;
 ; Firefox Entries
@@ -195,6 +263,12 @@ LangSecRef=3026
 SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|FlashGot.log;FlashGot.log.bak*
+
+[Lazarus Saved Forms*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|lazarus.sqlite;lazarus-backup.sqlite
 
 ; End of Firefox Entries.
 ;
@@ -7690,23 +7764,6 @@ Detect=HKCU\Software\JoWooD Productions Software AG\Gothic III
 Default=False
 FileKey1=%ProgramFiles%\Gothic III|setup*.txt
 
-[GPU Cache*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Detect1=HKCU\Software\Torch
-Detect2=HKCU\Software\SuperBird
-Detect3=HKCU\Software\Chromium
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\GPUCache|*.*
-FileKey2=%LocalAppData%\Chrome Plus\User Data\*\GPUCache|*.*
-FileKey3=%LocalAppData%\Chromium\User Data\*\GPUCache|*.*
-FileKey4=%LocalAppData%\Flock\User Data\*\GPUCache|*.*
-FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\GPUCache|*.*
-FileKey6=%LocalAppData%\Rockmelt\User Data\*\GPUCache|*.*
-FileKey7=%LocalAppData%\SRWare Iron\User Data\*\GPUCache|*.*
-FileKey8=%LocalAppData%\SuperBird\User Data\*\GPUCache|*.*
-FileKey9=%LocalAppData%\Torch\User Data\*\GPUCache|*.*
-
 [GradeKeeper Recent Files/Assignments*]
 LangSecRef=3021
 Detect=HKCU\Software\Gradekeeper
@@ -7743,7 +7800,7 @@ Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Green RanchFINAL
 Default=False
 FileKey1=%AppData%\Palaplay\GreenRanch_Survey|*.txt
 
-[Greenfish Icon Editor Pro (MRU)*]
+[Greenfish Icon Editor Pro MRU*]
 LangSecRef=3021
 DetectFile=%LocalAppData%\gfie\recent.txt
 Default=False
@@ -7856,13 +7913,13 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\HandBrake|*.stackdump
 FileKey2=%ProgramFiles%\HandBrake|*.stackdump
 
-[Handle Regshot (Reports)*]
+[Handle Regshot Reports*]
 LangSecRef=3024
 DetectFile=%SystemDrive%\Hive
 Default=False
 FileKey1=%SystemDrive%\Hive|*.css;*.html;*.reg
 
-[Handle Regshot (Snapshots)*]
+[Handle Regshot Snapshots*]
 LangSecRef=3024
 DetectFile=%SystemDrive%\Hive
 Default=False
@@ -7973,18 +8030,12 @@ FileKey5=%LocalAppData%\VirtualStore\ProgramData\Hi-Rez Studios\HiPatchService\l
 FileKey6=%ProgramFiles%\Hi-Rez Studios\hireztemp|*.*
 FileKey7=%RootDir%|HiRezUpdateInstallLog.txt
 
-[HijackThis (Backups)*]
+[HijackThis Backups*]
 LangSecRef=3024
 Detect=HKLM\Software\TrendMicro\HijackThis
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Trend Micro\HijackThis\backups|*.*
 FileKey2=%ProgramFiles%\Trend Micro\HijackThis\backups|*.*
-
-[History*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Chrome*\User Data\*|History
 
 [HitManPro*]
 LangSecRef=3024
@@ -8021,7 +8072,6 @@ FileKey2=%ProgramFiles%\HomeCinema\PowerProducer\Template\Cyberlink\frame|*tmp
 
 [Honeyview Bookmarks*]
 LangSecRef=3023
-Warning=This will delete your Bookmarks.
 Detect=HKCU\SOFTWARE\Honeyview
 Default=False
 RegKey1=HKCU\SOFTWARE\Honeyview\BMPath0
@@ -8080,24 +8130,20 @@ DetectFile=%AppData%\Merscom\Hostile Makeover
 Default=False
 FileKey1=%AppData%\Merscom\Hostile Makeover|logfile.txt
 
-[HostsMan's HostsServer (Log)*]
-LangSecRef=3024
-DetectFile=%ProgramFiles%\HostsMan\hostssrv.exe
-Default=False
-FileKey1=%AppData%\abelhadigital.com\HostsServer|*.log|RECURSE
-
-[HostsMan's HostsServer 2.0 (Log)*]
-LangSecRef=3024
-Detect=HKLM\Software\abelhadigital.com\HostsServer
-Default=False
-FileKey1=%LocalLowAppData%\abelhadigital.com\HostsServer\Logs|*.log
-
 [HostsMan Backups*]
 LangSecRef=3024
 DetectFile=%CommonAppData%\abelhadigital.com\HostsMan
 Default=False
 FileKey1=%SystemDrive%\Users\Public\Documents\HostsMan Backups|*.*|RECURSE
 FileKey2=%WinDir%\System32\drivers\etc|HOSTS.bak;HOSTS.tmp
+
+[HostsMan HostsServer Logs*]
+LangSecRef=3024
+Detect=HKLM\Software\abelhadigital.com\HostsServer
+DetectFile=%ProgramFiles%\HostsMan\hostssrv.exe
+Default=False
+FileKey1=%AppData%\abelhadigital.com\HostsServer|*.log|RECURSE
+FileKey2=%LocalLowAppData%\abelhadigital.com\HostsServer\Logs|*.log
 
 [Hotbar*]
 LangSecRef=3022
@@ -8181,7 +8227,6 @@ LangSecRef=3024
 DetectFile1=%SystemDrive%\swsetup
 DetectFile2=%SystemDrive%\HP Universal Print Driver
 Default=False
-Warning=This will delete your HP installation files.
 FileKey1=%SystemDrive%\swsetup|*.*|REMOVESELF
 FileKey2=%SystemDrive%\HP Universal Print Driver|*.*|REMOVESELF
 
@@ -8308,23 +8353,6 @@ FileKey2=%CommonAppData%\Microsoft\HTML Help|hhcolreg.dat
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Microsoft\HTML Help|hhcolreg.dat
 FileKey4=%WinDir%\Application Data\Microsoft\HTML Help|hh.dat
 
-[HTML5 Storage*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Detect1=HKCU\Software\Torch
-Detect2=HKCU\Software\SuperBird
-Detect3=HKCU\Software\Chromium
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\File System|*.*|REMOVESELF
-FileKey2=%LocalAppData%\Chrome Plus\User Data\*\File System|*.*|REMOVESELF
-FileKey3=%LocalAppData%\Chromium\User Data\*\File System|*.*|REMOVESELF
-FileKey4=%LocalAppData%\Flock\User Data\*\File System|*.*|REMOVESELF
-FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\File System|*.*|REMOVESELF
-FileKey6=%LocalAppData%\Rockmelt\User Data\*\File System|*.*|REMOVESELF
-FileKey7=%LocalAppData%\SRWare Iron\User Data\*\File System|*.*|REMOVESELF
-FileKey8=%LocalAppData%\SuperBird\User Data\*\File System|*.*|REMOVESELF
-FileKey9=%LocalAppData%\Torch\User Data\*\File System|*.*|REMOVESELF
-
 [HTTP Error Logs*]
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows
@@ -8338,7 +8366,7 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\HUAWEI Modem Driver|*.log
 FileKey2=%ProgramFiles%\HUAWEI Modem Driver|*.log
 
-[Hulu Desktop*]
+[HuluDesktop*]
 LangSecRef=3023
 DetectFile=%LocalAppData%\HuluDesktop
 Default=False
@@ -8550,11 +8578,11 @@ FileKey12=%LocalAppData%\Packages\windows.immersivecontrolpanel_*\LocalState\nav
 FileKey13=%LocalAppData%\Packages\windows.immersivecontrolpanel_*\TempState|*.*|RECURSE
 RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\windows.immersivecontrolpanel_cw5n1h2txyewy\SearchHistory
 
-[Immunet (ClamAV)*]
+[Immunet*]
 LangSecRef=3021
 Detect=HKLM\Software\Immunet Protect
 Default=False
-Warning='Immunet' service must be stopped to remove log files.
+Warning=Immunet service must be stopped to remove log files.
 FileKey1=%AppData%\Immunet|*.*|REMOVESELF
 FileKey2=%CommonAppData%\Immunet|*.log
 FileKey3=%LocalAppData%\VirtualStore\Program Files*\Immunet|*.log|RECURSE
@@ -8643,7 +8671,7 @@ FileKey10=%AppData%\IMVUClient\ui\profile|*.sqlite;*.js;*.dat;*.mfl
 LangSecRef=3022
 Detect=HKLM\Software\Clients\Mail\IncrediMail
 Default=False
-Warning=This will empty the contents of your 'Deleted' and 'Sent' folders
+Warning=This will empty the contents of your Deleted and Sent folders
 FileKey1=%LocalAppData%\IM\Identities\*\Message Store|deleted items.imm;sent items.imm
 
 [inFlow Inventory*]
@@ -8729,16 +8757,12 @@ Detect=HKCU\Software\MetaGeek, LLC\inSSIDer Home
 Default=False
 FileKey1=%LocalAppData%\MetaGeek,_LLC|ConnectionErrorLog;MetaGeek-OUI.backup
 
-[Installer*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
+[InstallShield*]
+LangSecRef=3024
+Detect=HKCU\Software\InstallShield
 Default=False
-Warning=Running this may remove Chrome's ability to automatically update to future versions on some computers.
-FileKey1=%LocalAppData%\Google\Chrome*\Application\*\Installer|*.7z|RECURSE
-FileKey2=%LocalAppData%\Google\Update\*\*\Installer|*.7z|RECURSE
-FileKey3=%ProgramFiles%\|GUT*tmp
-FileKey4=%ProgramFiles%\Google\Chrome*\Application\*\Installer|*.7z|RECURSE
-FileKey5=%ProgramFiles%\Google\Update\*\*\Installer|*.7z|RECURSE
+FileKey1=%ProgramFiles%\|_ISTMP1.DIR
+FileKey2=%SystemDrive%\|_ISTMP*.DIR
 
 [InstallShield Installation Information Logs*]
 LangSecRef=3024
@@ -8763,13 +8787,6 @@ RegKey8=HKCU\Software\InstallShield\InstallShield Professional\6.0\IsCabVu|MRU1
 RegKey9=HKCU\Software\InstallShield\InstallShield Professional\6.0\IsCabVu|MRU2
 RegKey10=HKCU\Software\InstallShield\InstallShield Professional\6.0\IsCabVu|MRU3
 RegKey11=HKCU\Software\InstallShield\InstallShield Professional\6.0\IsCabVu|MRU4
-
-[InstallShield*]
-LangSecRef=3024
-Detect=HKCU\Software\InstallShield
-Default=False
-FileKey1=%ProgramFiles%\|_ISTMP1.DIR
-FileKey2=%SystemDrive%\|_ISTMP*.DIR
 
 [Instantbird Cache*]
 LangSecRef=3022
@@ -8809,9 +8826,9 @@ FileKey1=%ProgramFiles%\Instantbird|install.log
 
 [Instantbird Logs*]
 LangSecRef=3022
-Warning=This will delete your chat logs as well.
 DetectFile=%AppData%\Instantbird
 Default=False
+Warning=This will delete your chat logs as well.
 FileKey1=%AppData%\Instantbird\Profiles\*\logs|*.*|RECURSE
 
 [Instantbird Minidumps*]
@@ -9084,7 +9101,42 @@ FileKey15=%LocalAppData%\VirtualStore\ProgramData\Intuit\TurboTax\MSI\*\Logs|*.*
 FileKey16=%LocalAppData%\VirtualStore\Program Files*\Common Files\Intuit\Internet Client|Msdun13.exe
 FileKey17=%ProgramFiles%\TurboTax*|*.txt
 
-[IObit Advanced SystemCare Ultimate V6 Logs*]
+[IObit Advanced SystemCare Logs*]
+LangSecRef=3024
+DetectFile1=%AppData%\IObit\Advanced SystemCare V5
+DetectFile2=%CommonAppData%\IObit\Advanced SystemCare V6
+DetectFile3=%CommonAppData%\IObit\Advanced SystemCare V7
+DetectFile4=%CommonAppData%\IObit\Advanced SystemCare V8
+Default=False
+FileKey1=%AppData%\IObit\Advanced SystemCare V5\Log|*.*|RECURSE
+FileKey2=%AppData%\IObit\Advanced SystemCare *|*.log
+FileKey3=%AppData%\IObit\Advanced SystemCare *\Boottime|*.log
+FileKey4=%CommonAppData%\IObit\Advanced SystemCare V6\Log|*.*|RECURSE
+FileKey5=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare *|*.log;*.txt
+FileKey6=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare 6\BootTimeLog|*.log
+FileKey7=%LocalAppData%\VirtualStore\Program Files*\IObit\LiveUpdate|*.log
+FileKey8=%LocalAppData%\VirtualStore\ProgramData\IObit\Advanced SystemCare V6\Log|*.*|RECURSE
+FileKey9=%ProgramFiles%\IObit\Advanced SystemCare *|*.log;*.txt
+FileKey10=%ProgramFiles%\IObit\Advanced SystemCare *\BootTimeLog|*.log
+FileKey11=%SystemDrive%\Users\Default\AppData\Roaming\IObit\Advanced SystemCare *|*.log
+FileKey12=%WinDir%\System32\config\systemprofile\AppData\Roaming\IObit\Advanced SystemCare *|*.log
+FileKey13=%WinDir%\SysWOW64\config\systemprofile\AppData\Roaming\IObit\Advanced SystemCare *|*.log
+
+[IObit Advanced SystemCare V5*]
+LangSecRef=3024
+DetectFile=%AppData%\IObit\Advanced SystemCare V5
+Default=False
+Warning=This will delete your empty folders restore list. You won't be able to restore your empty folders.
+FileKey1=%AppData%\IObit\Advanced SystemCare V5\EmptyFolder|*.*|RECURSE
+
+[IObit Advanced SystemCare V6 Temp*]
+LangSecRef=3024
+DetectFile=%CommonAppData%\IObit\Advanced SystemCare V6
+Default=False
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare 6|*.cab_Temp|REMOVESELF
+FileKey2=%ProgramFiles%\IObit\Advanced SystemCare 6|*.cab_Temp|REMOVESELF
+
+[IObit Advanced SystemCare V6 Ultimate Logs*]
 LangSecRef=3024
 DetectFile=%ProgramFiles%\IObit\Advanced SystemCare Ultimate
 Default=False
@@ -9097,73 +9149,12 @@ FileKey6=%ProgramFiles%\IObit\Advanced SystemCare Ultimate|*.log|RECURSE
 FileKey7=%ProgramFiles%\IObit\Advanced SystemCare Ultimate|ASCService_Log.txt
 FileKey8=%ProgramFiles%\IObit\Advanced SystemCare Ultimate\ASCServiceLog|*.*|RECURSE
 
-[IObit Advanced SystemCare V5 Logs*]
-LangSecRef=3024
-DetectFile=%AppData%\IObit\Advanced SystemCare V5\
-Default=False
-FileKey1=%AppData%\IObit\Advanced SystemCare V5\Log|*.*|RECURSE
-
-[IObit Advanced SystemCare V5*]
-LangSecRef=3024
-DetectFile=%AppData%\IObit\Advanced SystemCare V5\
-Default=False
-Warning=This will delete your empty folders restore list.You won't be able to restore your empty folders.
-FileKey1=%AppData%\IObit\Advanced SystemCare V5\EmptyFolder|*.*|RECURSE
-
-[IObit Advanced SystemCare V6 Logs*]
-LangSecRef=3024
-DetectFile=%CommonAppData%\IObit\Advanced SystemCare V6
-Default=False
-FileKey1=%AppData%\IObit\Advanced SystemCare V6|*.log
-FileKey2=%AppData%\IObit\Advanced SystemCare V6\Boottime|*.log
-FileKey3=%CommonAppData%\IObit\Advanced SystemCare V6\Log|*.*|RECURSE
-FileKey4=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare 6|*.log;*.txt
-FileKey5=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare 6\BootTimeLog|*.log
-FileKey6=%LocalAppData%\VirtualStore\Program Files*\IObit\LiveUpdate|*.log
-FileKey7=%LocalAppData%\VirtualStore\ProgramData\IObit\Advanced SystemCare V6\Log|*.*|RECURSE
-FileKey8=%ProgramFiles%\IObit\Advanced SystemCare 6|*.log;*.txt
-FileKey9=%ProgramFiles%\IObit\Advanced SystemCare 6\BootTimeLog|*.log
-FileKey10=%WinDir%\System32\config\systemprofile\AppData\Roaming\IObit\Advanced SystemCare V6|*.log
-
-[IObit Advanced SystemCare V6 Temp*]
-LangSecRef=3024
-DetectFile=%CommonAppData%\IObit\Advanced SystemCare V6
-Default=False
-FileKey1=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare 6|*.cab_Temp|REMOVESELF
-FileKey2=%ProgramFiles%\IObit\Advanced SystemCare 6|*.cab_Temp|REMOVESELF
-
 [IObit Advanced SystemCare V6 Ultimate Antivirus Backup*]
 LangSecRef=3024
 DetectFile=%ProgramFiles%\IObit\Advanced SystemCare Ultimate
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare Ultimate\Antivirus\BackupRec|*.*|RECURSE
 FileKey2=%ProgramFiles%\IObit\Advanced SystemCare Ultimate\Antivirus\BackupRec|*.*|RECURSE
-
-[IObit Advanced SystemCare V7 Logs*]
-LangSecRef=3024
-DetectFile=%CommonAppData%\IObit\Advanced SystemCare V7
-Default=False
-FileKey1=%AppData%\IObit\Advanced SystemCare V7|*.log
-FileKey2=%AppData%\IObit\Advanced SystemCare V7\Boottime|*.log
-FileKey3=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare 7|*.log;*.txt
-FileKey4=%LocalAppData%\VirtualStore\Program Files*\IObit\LiveUpdate|*.log
-FileKey5=%ProgramFiles%\IObit\Advanced SystemCare 7|*.log;*.txt
-FileKey6=%SystemDrive%\Users\Default\AppData\Roaming\IObit\Advanced SystemCare V7|*.log
-FileKey7=%WinDir%\System32\config\systemprofile\AppData\Roaming\IObit\Advanced SystemCare V7|*.log
-
-[IObit Advanced SystemCare V8 Logs*]
-LangSecRef=3024
-DetectFile=%CommonAppData%\IObit\Advanced SystemCare V8
-Default=False
-FileKey1=%AppData%\IObit\Advanced SystemCare V8|*.log
-FileKey2=%AppData%\IObit\Advanced SystemCare V8\Boottime|*.log
-FileKey3=%LocalAppData%\VirtualStore\Program Files*\IObit\Advanced SystemCare 8|*.log;*.txt
-FileKey4=%LocalAppData%\VirtualStore\Program Files*\IObit\LiveUpdate|*.log
-FileKey5=%ProgramFiles%\IObit\Advanced SystemCare 8|*.log;*.txt
-FileKey6=%SystemDrive%\Users\Default\AppData\Roaming\IObit\Advanced SystemCare V8|*.log
-FileKey7=%WinDir%\System32\config\systemprofile\AppData\Roaming\IObit\Advanced SystemCare V8|*.log
-FileKey8=%WinDir%\SysWOW64\config\systemprofile\AppData\Roaming\IObit\Advanced SystemCare V8|*.log
-FileKey9=%ProgramFiles%\IObit\Advanced SystemCare 8\BoottimeLog|*.log
 
 [IObit ASCDownloader Logs*]
 LangSecRef=3024
@@ -9178,6 +9169,15 @@ DetectFile=%AppData%\IObit\Driver Booster
 Default=False
 FileKey1=%AppData%\IObit\Driver Booster|*.log|RECURSE
 FileKey2=%ProgramFiles%\IObit\Driver Booster|*.log
+
+[IObit Game Booster*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\IObit\Game Booster 3\
+Default=False
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\IObit\Game Booster 3|*.log
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\IObit\Game Booster 3\Update|Update.tmp
+FileKey3=%ProgramFiles%\IObit\Game Booster 3|*.log
+FileKey4=%ProgramFiles%\IObit\Game Booster 3\Update|Update.tmp
 
 [IObit Game Booster Backup*]
 LangSecRef=3024
@@ -9194,20 +9194,10 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\IObit\Game Booster 3\FPS|*.*|RECURSE
 FileKey2=%ProgramFiles%\IObit\Game Booster 3\FPS|*.*|RECURSE
 
-[IObit Game Booster*]
-LangSecRef=3024
-DetectFile=%ProgramFiles%\IObit\Game Booster 3\
-Default=False
-FileKey1=%LocalAppData%\VirtualStore\Program Files*\IObit\Game Booster 3|*.log
-FileKey2=%LocalAppData%\VirtualStore\Program Files*\IObit\Game Booster 3\Update|Update.tmp
-FileKey3=%ProgramFiles%\IObit\Game Booster 3|*.log
-FileKey4=%ProgramFiles%\IObit\Game Booster 3\Update|Update.tmp
-
 [IObit Game Booster 3 GameBox*]
 LangSecRef=3024
 DetectFile=%ProgramFiles%\IObit\Game Booster 3\
 Default=False
-Warning=This will delete your GameBox applications.
 FileKey1=%CommonAppData%\IObit\Game Booster 3|Defrags.ini
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\IObit\Game Booster 3|Defrags.ini
 
@@ -9446,7 +9436,7 @@ FileKey4=%LocalLowAppData%\Oracle\Java\jre*|*.*|REMOVESELF
 FileKey5=%LocalLowAppData%\Sun\Java\jdk*|*.*|REMOVESELF
 FileKey6=%LocalLowAppData%\Sun\Java\jre*|*.*|REMOVESELF
 
-[JavaRa (Log)*]
+[JavaRa Log*]
 LangSecRef=3022
 DetectFile1=%ProgramFiles%\JavaRa\JavaRa.exe
 DetectFile2=%ProgramFiles%\JavaRa 2.0\JavaRa.exe
@@ -9510,12 +9500,12 @@ FileKey4=%UserProfile%\.jd_home\logs|*.0
 [JDownloader2 Logs*]
 LangSecRef=3022
 Detect=HKLM\SOFTWARE\Classes\JDownloader2
-DetectFile=%ProgramFiles%\JDownloader 2\
+DetectFile=%ProgramFiles%\JDownloader 2
 Default=False
-FileKey1=%ProgramFiles%\JDownloader*2*|JDownloader.log;Updater_*-*-*.log;SessionInstallLog.json.*|RECURSE
-FileKey2=%ProgramFiles%\JDownloader*2*\logs|*.*|RECURSE
-FileKey3=%LocalAppData%\VirtualStore\Program Files*\JDownloader*2*|JDownloader.log;Updater_*-*-*.log;SessionInstallLog.json.*
-FileKey4=%LocalAppData%\VirtualStore\Program Files*\JDownloader*2*\logs|*.*|RECURSE
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\JDownloader*2*|JDownloader.log;Updater_*-*-*.log;SessionInstallLog.json.*
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\JDownloader*2*\logs|*.*|RECURSE
+FileKey3=%ProgramFiles%\JDownloader*2*|JDownloader.log;Updater_*-*-*.log;SessionInstallLog.json.*|RECURSE
+FileKey4=%ProgramFiles%\JDownloader*2*\logs|*.*|RECURSE
 
 [JDownloader2 Temps*]
 LangSecRef=3022
@@ -9575,7 +9565,7 @@ DetectFile=%LocalAppData%\Abelssoft\JetDrive
 Default=False
 FileKey1=%LocalAppData%\Abelssoft\JetDrive|JetDrive.reports.xml
 
-[Jetico Personal Firewall (Logs)*]
+[Jetico Personal Firewall Logs*]
 LangSecRef=3022
 Detect=HKLM\Software\Jetico\Personal Firewall
 Default=False
@@ -9619,8 +9609,8 @@ FileKey4=%SystemDrive%|*temp.txt;*test.txt
 [Join.Me Install Backups*]
 LangSecRef=3022
 Detect=HKCU\Software\join.me
-Warning=This will remove all old versions of Join.Me that are automatically backed up on each install.
 Default=False
+Warning=This will remove all old versions of Join.Me that are automatically backed up on each install.
 FileKey1=%LocalAppData%\join.me\join.me.*.*.*.*|*.*|REMOVESELF
 
 [Join.Me Logs*]
@@ -9775,16 +9765,16 @@ DetectFile=%WinDir%\AutoKMS\AutoKMS.exe
 Default=False
 FileKey1=%WinDir%\AutoKMS|AutoKMS.log
 
-[Kodak AiO Software (Disable Startup)*]
+[Kodak AiO Software Disable Startup*]
 LangSecRef=3021
 Detect1=HKLM\Software\Eastman Kodak Company\KODAK AiO Home Center
 Detect2=HKLM\Software\Kodak\Kodak AiO Software
-Warning=Disables the Kodak AiO Software from automatically starting with Windows. Every time you print, it will re-enable itself to start with Windows.
 Default=False
+Warning=Disables the Kodak AiO Software from automatically starting with Windows. Every time you print, it will re-enable itself to start with Windows.
 RegKey1=HKLM\Software\Microsoft\Windows\CurrentVersion\Run|EKAIO2StatusMonitor
 RegKey2=HKLM\Software\Microsoft\Windows\CurrentVersion\Run|EKStatusMonitor
 
-[Kodak AiO Software (Logs)*]
+[Kodak AiO Software Logs*]
 LangSecRef=3021
 Detect1=HKLM\Software\Eastman Kodak Company\KODAK AiO Home Center
 Detect2=HKLM\Software\Kodak\Kodak AiO Software
@@ -9890,12 +9880,6 @@ DetectFile=%AppData%\MysteryStudio\Lavender
 Default=False
 FileKey1=%AppData%\MysteryStudio\Lavender|*.log
 
-[Lazarus Saved Forms*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|lazarus.sqlite;lazarus-backup.sqlite
-
 [League of Legends*]
 Section=Games
 Detect1=HKCU\Software\Bugsplat\lol_beta_riotgames_com
@@ -9952,14 +9936,6 @@ FileKey8=%AppData%\Leawo\Prof. Media\Download\WebCache|*.*|RECURSE
 FileKey9=%AppData%\Leawo\Prof. Media\Download\WebFiles|*.*|RECURSE
 FileKey10=%AppData%\Leawo\Prof. Media\Log|*.*|RECURSE
 
-[Leawo Video Converter Pro*]
-LangSecRef=3023
-DetectFile=%AppData%\Leawo\Video Converter Pro
-Default=False
-FileKey1=%AppData%\Leawo\Video Converter Pro|*.log
-FileKey2=%AppData%\Leawo\Video Converter Pro\CrashReport|*.*|RECURSE
-FileKey3=%LocalAppData%\Video Converter Pro\cache|*.*|RECURSE
-
 [Leawo Video Converter*]
 LangSecRef=3023
 DetectFile=%AppData%\Leawo\Video Converter
@@ -9967,6 +9943,14 @@ Default=False
 FileKey1=%AppData%\Leawo\Video Converter|*.log
 FileKey2=%AppData%\Leawo\Video Converter\CrashReport|*.*|RECURSE
 FileKey3=%LocalAppData%\Video Converter\cache|*.*|RECURSE
+
+[Leawo Video Converter Pro*]
+LangSecRef=3023
+DetectFile=%AppData%\Leawo\Video Converter Pro
+Default=False
+FileKey1=%AppData%\Leawo\Video Converter Pro|*.log
+FileKey2=%AppData%\Leawo\Video Converter Pro\CrashReport|*.*|RECURSE
+FileKey3=%LocalAppData%\Video Converter Pro\cache|*.*|RECURSE
 
 [LEGO Universe*]
 Section=Games
@@ -10020,12 +10004,6 @@ FileKey11=%SystemDrive%|LxDasi.Log
 FileKey12=%ProgramFiles%\Common Files\Lexware|*.log|RECURSE
 FileKey13=%ProgramFiles%\Lexware|*.log|RECURSE
 
-[LibreOffice program_old*]
-LangSecRef=3021
-Detect=HKLM\Software\LibreOffice
-Default=False
-FileKey1=%ProgramFiles%\LibreOffice *.*\program_old*|*.*|REMOVESELF
-
 [LibreOffice*]
 LangSecRef=3021
 Detect=HKLM\Software\LibreOffice
@@ -10034,6 +10012,12 @@ FileKey1=%AppData%\LibreOffice\*\User\backup|*.*
 FileKey2=%AppData%\LibreOffice\*\user\extensions\shared|log.*
 FileKey3=%AppData%\LibreOffice\*\User\temp|*.*
 FileKey4=%AppData%\LibreOffice\*\User\uno_packages\cache|log.*
+
+[LibreOffice program_old*]
+LangSecRef=3021
+Detect=HKLM\Software\LibreOffice
+Default=False
+FileKey1=%ProgramFiles%\LibreOffice *.*\program_old*|*.*|REMOVESELF
 
 [LifeCam*]
 LangSecRef=3031
@@ -10087,23 +10071,6 @@ Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\208090
 Default=False
 FileKey1=%LocalAppData%\EdgeOfReality\Loudout\CrashReports|*.*
-
-[Local Storage*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Detect1=HKCU\Software\Torch
-Detect2=HKCU\Software\SuperBird
-Detect3=HKCU\Software\Chromium
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\Local Storage|http*.*|RECURSE
-FileKey2=%LocalAppData%\Chrome Plus\User Data\*\Local Storage|http*.*|RECURSE
-FileKey3=%LocalAppData%\Chromium\User Data\*\Local Storage|http*.*|RECURSE
-FileKey4=%LocalAppData%\Flock\User Data\*\Local Storage|http*.*|RECURSE
-FileKey5=%LocalAppData%\Google\Chrome*\User Data\*\Local Storage|http*.*|RECURSE
-FileKey6=%LocalAppData%\Rockmelt\User Data\*\Local Storage|http*.*|RECURSE
-FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Local Storage|http*.*|RECURSE
-FileKey8=%LocalAppData%\SuperBird\User Data\*\Local Storage|http*.*|RECURSE
-FileKey9=%LocalAppData%\Torch\User Data\*\Local Storage|http*.*|RECURSE
 
 [LocalService Cached Certification Files*]
 LangSecRef=3025
