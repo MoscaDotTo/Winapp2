@@ -1,4 +1,4 @@
-; Version: 170407
+; Version: 170409
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -1900,6 +1900,7 @@ Detect9=HKCU\Software\Ashampoo\Ashampoo Burning Studio 15
 Detect10=HKCU\Software\Ashampoo\Ashampoo Burning Studio 16
 Detect11=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016
 Detect12=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18
+Detect13=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017
 Default=False
 FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 6 Free\Logs|*.*
 FileKey2=%AppData%\Ashampoo\Ashampoo Burning Studio 2007\Logs|*.*
@@ -1975,6 +1976,20 @@ RegKey64=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\Unknown Project
 RegKey65=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
 RegKey66=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\VIDEO_TS Disc Project\DumpImage|ImagePath
 RegKey67=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
+RegKey68=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Audio Disc Project\SaveDialog_CPlaylistDlgEx|InitialDirectory
+RegKey69=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Backup Project\BackupOptions|CustomLocation
+RegKey70=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Browse Image Project\BrowseImageFile|ImagePath
+RegKey71=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Browse Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey72=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Burn Image Project\SaveDialog_SelectImageBrowse|InitialDirectory
+RegKey73=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Burn Image Project\SelectImage|ImagePath
+RegKey74=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Data Disc Project\SaveDialog_AddFilesAndDirs|InitialDirectory
+RegKey75=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Data Disc Project\DumpImage|ImagePath
+RegKey76=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Logs
+RegKey77=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\tempFiles
+RegKey78=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\Unknown Project
+RegKey79=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\VCD Project\SaveDialog_OnAddMovies|InitialDirectory
+RegKey80=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\VIDEO_TS Disc Project\DumpImage|ImagePath
+RegKey81=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017\VIDEO_TS Disc Project\SelectVideoTSFolder|VideoTSPath
 
 [Ashampoo Snap*]
 LangSecRef=3024
@@ -5994,20 +6009,6 @@ FileKey5=%LocalAppData%\VirtualStore\ProgramData\DVDRanger\DDF626ADdvdcss|*.*
 FileKey6=%LocalAppData%\VirtualStore\ProgramData\DVDRanger\Logs|*.*
 FileKey7=%SystemDrive%\DVDRanger|*.*|REMOVESELF
 
-[DVD Flick Logs*]
-LangSecRef=3023
-DetectFile=%ProgramFiles%\DVD Flick\dvdflick.exe
-Default=False
-FileKey1=%AppData%\DVD Flick|dvdflick.log;report.txt
-
-[DVD Shrink Analysis Results*]
-LangSecRef=3023
-Detect=HKCU\Software\DVD Shrink
-Default=False
-Warning=Each time you use this you'll have to agree to the DVD Shrink license.
-FileKey1=%CommonAppData%\DVD Shrink|*.*
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\DVD Shrink|*.*
-
 [dvdcss*]
 LangSecRef=3023
 DetectFile=%AppData%\dvdcss
@@ -6026,16 +6027,38 @@ RegKey1=HKCU\Software\FabPlayer|DefaultFile
 LangSecRef=3023
 Detect=HKCU\Software\DVDFab
 Default=False
-FileKey1=%Documents%\DVDFab\Log|*.*|REMOVESELF
-FileKey2=%Documents%\DVDFab\Temp|*.*|REMOVESELF
-FileKey3=%Documents%\PcSetup|*.*|REMOVESELF
-RegKey1=HKCU\Software\DVDFab\V9|BuyURL
+FileKey1=%Documents%\DVDFab\Log|*.*|RECURSE
+FileKey2=%Documents%\DVDFab\Temp|*.*|RECURSE
+FileKey3=%Documents%\PcSetup|*.*|RECURSE
+FileKey4=%Documents%\DVDFab*\Log|*.*|RECURSE
+FileKey5=%Documents%\DVDFab*\SceneData|*.*|RECURSE
+FileKey6=%Documents%\DVDFab*\Temp\adPixtureTemp|*.*|RECURSE
+FileKey7=%Documents%\DVDFab*\Temp\MainMovie|*.*|RECURSE
+FileKey8=%Documents%\DVDFab*\Temp\MediaServer|*.*|RECURSE
+FileKey9=%Documents%\DVDFab*\Temp\Record\webService|*.*|RECURSE
+FileKey10=%Documents%\DVDFab*\Temp\ReportCrash|*.*|RECURSE
+FileKey11=%Documents%\DVDFab*\Temp\updateTemp\adPixtureTemp|*.*|RECURSE
+FileKey12=%Documents%\DVDFab*\Temp\updateTemp\updateLog|*.*|RECURSE
 
 [DVDFab Passkey*]
 LangSecRef=3023
 Detect=HKCU\Software\DVDFab Passkey
 Default=False
 FileKey1=%Documents%\DVDFab Passkey\Log|*.*|REMOVESELF
+
+[DVD Flick Logs*]
+LangSecRef=3023
+DetectFile=%ProgramFiles%\DVD Flick\dvdflick.exe
+Default=False
+FileKey1=%AppData%\DVD Flick|dvdflick.log;report.txt
+
+[DVD Shrink Analysis Results*]
+LangSecRef=3023
+Detect=HKCU\Software\DVD Shrink
+Default=False
+Warning=Each time you use this you'll have to agree to the DVD Shrink license.
+FileKey1=%CommonAppData%\DVD Shrink|*.*
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\DVD Shrink|*.*
 
 [DVDSmith*]
 LangSecRef=3023
@@ -9918,15 +9941,16 @@ FileKey2=%LocalAppData%\Learn2.com\strunner\StCache|*.*|RECURSE
 LangSecRef=3023
 Detect=HKCU\Software\Leawo Software\SoftwarePassport\Leawo Prof. Media
 Default=False
-FileKey1=%AppData%\Leawo\Prof. Media\Burn|*.log
-FileKey2=%AppData%\Leawo\Prof. Media\Burn\MenuTemplate\Cache|*.*|RECURSE
-FileKey3=%AppData%\Leawo\Prof. Media\CrashReport|*.*|RECURSE
-FileKey4=%AppData%\Leawo\Prof. Media\Download|*.dat;*.db;*log;*.xml
-FileKey5=%AppData%\Leawo\Prof. Media\Download\Thumbnails|*.*|RECURSE
-FileKey6=%AppData%\Leawo\Prof. Media\Download\WebCache|*.*|RECURSE
-FileKey7=%AppData%\Leawo\Prof. Media\Download\WebFiles|*.*|RECURSE
-FileKey8=%AppData%\Leawo\Prof. Media\Log|*.*|RECURSE
-FileKey9=%LocalAppData%\Leawo Prof\cache|*.*|RECURSE
+FileKey1=%LocalAppData%\Leawo Prof\cache|*.*|RECURSE
+FileKey2=%AppData%\Leawo\Prof. Media|*.xml
+FileKey3=%AppData%\Leawo\Prof. Media\Burn|*.log
+FileKey4=%AppData%\Leawo\Prof. Media\Burn\MenuTemplate\Cache|*.*|RECURSE
+FileKey5=%AppData%\Leawo\Prof. Media\CrashReport|*.*|RECURSE
+FileKey6=%AppData%\Leawo\Prof. Media\Download|*.dat;*.db;*log;*.xml
+FileKey7=%AppData%\Leawo\Prof. Media\Download\Thumbnails|*.*|RECURSE
+FileKey8=%AppData%\Leawo\Prof. Media\Download\WebCache|*.*|RECURSE
+FileKey9=%AppData%\Leawo\Prof. Media\Download\WebFiles|*.*|RECURSE
+FileKey10=%AppData%\Leawo\Prof. Media\Log|*.*|RECURSE
 
 [Leawo Video Converter Pro*]
 LangSecRef=3023
@@ -10972,6 +10996,13 @@ LangSecRef=3021
 Detect=HKCU\Software\metapad
 Default=False
 RegKey1=HKCU\Software\metapad|szLastDirectory
+
+[MetaX*]
+LangSecRef=3024
+Detect=HKCU\Software\No Bull Software\MetaX
+Default=False
+FileKey1=%Documents%\MetaX|*.log
+RegKey1=HKCU\Software\No Bull Software\MetaX\Preferences|lastDir
 
 [MetroTwit Backup*]
 LangSecRef=3022
@@ -13354,29 +13385,13 @@ Default=False
 FileKey1=%LocalAppData%\Amigo\User Data\*\*|Shortcuts
 FileKey2=%LocalAppData%\Google\Chrome*\User Data\*|Shortcuts
 
-[OneDrive App Logs*]
-LangSecRef=3021
-DetectFile1=%LocalAppData%\Microsoft\Windows\SkyDrive
-DetectFile2=%LocalAppData%\Microsoft\Windows\OneDrive
-Default=False
-FileKey1=%LocalAppData%\Microsoft\Windows\SkyDrive\logs|*.*|RECURSE
-FileKey2=%LocalAppData%\Microsoft\Windows\OneDrive\logs|*.*|RECURSE
-FileKey3=%LocalAppData%\Microsoft\SkyDrive\logs|*.*|RECURSE
-FileKey4=%LocalAppData%\Microsoft\OneDrive\logs|*.*|RECURSE
-
-[OneDrive Setup Logs*]
-LangSecRef=3021
-Detect1=HKCU\Software\Microsoft\SkyDrive
-Detect2=HKCU\Software\Microsoft\OneDrive
-Default=False
-FileKey1=%LocalAppData%\Microsoft\SkyDrive\Setup\Logs|*.*
-FileKey2=%LocalAppData%\Microsoft\OneDrive\Setup\Logs|*.*
-
-[OneDrive Usage Logs*]
+[OneDrive Logs*]
 LangSecRef=3021
 Detect=HKCU\Software\Microsoft\OneDrive
 Default=False
-FileKey1=%LocalAppData%\Microsoft\OneDrive\logs|*.*
+FileKey1=%LocalAppData%\Microsoft\OneDrive\logs|*.*|RECURSE
+FileKey2=%LocalAppData%\Microsoft\OneDrive\setup\logs|*.*|RECURSE
+FileKey3=%LocalAppData%\Microsoft\Windows\OneDrive\logs|*.*|RECURSE
 
 [OneNote*]
 LangSecRef=3031
