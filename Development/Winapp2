@@ -1,4 +1,4 @@
-; Version: 170409
+; Version: 170411
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -84,12 +84,6 @@ FileKey7=%ProgramFiles%\Google\Update\Download|*.*|RECURSE
 FileKey8=%ProgramFiles%\Google\Update\Install|*.*|RECURSE
 FileKey9=%ProgramFiles%\Google\Update\Offline|*.*|RECURSE
 
-[Cloud Messaging*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Chrome\User Data\*\GCM Store|*.*|RECURSE
-
 [Extensions State*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
@@ -129,6 +123,12 @@ FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Pepper Data\Shockwave Flash\Writ
 FileKey8=%LocalAppData%\SuperBird\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
 FileKey9=%LocalAppData%\Torch\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects|*.*|RECURSE
 ExcludeKey1=FILE|%LocalAppData%\Google\Chrome*\User Data\*\Pepper Data\Shockwave Flash\WritableRoot\#SharedObjects\*\macromedia.com\support\flashplayer\sys\|settings.sol
+
+[Google Cloud Messaging*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome\User Data\*\GCM Store|*.*|RECURSE
 
 [GPU Cache*]
 LangSecRef=3029
@@ -3574,6 +3574,13 @@ Default=False
 FileKey1=%AppData%\Microsoft\CryptnetUrlCache|*.*|RECURSE
 FileKey2=%LocalLowAppData%\Microsoft\CryptnetUrlCache\Content|*.*|RECURSE
 FileKey3=%LocalLowAppData%\Microsoft\CryptnetUrlCache\MetaData|*.*|RECURSE
+
+[Cached File Extensions*]
+LangSecRef=3025
+Detect=HKCU\Software\Microsoft\Windows
+Default=False
+RegKey1=HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts
+RegKey2=HKU\.DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts
 
 [Cached Shell Extensions*]
 LangSecRef=3025
@@ -9765,15 +9772,6 @@ DetectFile=%WinDir%\AutoKMS\AutoKMS.exe
 Default=False
 FileKey1=%WinDir%\AutoKMS|AutoKMS.log
 
-[Kodak AiO Software Disable Startup*]
-LangSecRef=3021
-Detect1=HKLM\Software\Eastman Kodak Company\KODAK AiO Home Center
-Detect2=HKLM\Software\Kodak\Kodak AiO Software
-Default=False
-Warning=Disables the Kodak AiO Software from automatically starting with Windows. Every time you print, it will re-enable itself to start with Windows.
-RegKey1=HKLM\Software\Microsoft\Windows\CurrentVersion\Run|EKAIO2StatusMonitor
-RegKey2=HKLM\Software\Microsoft\Windows\CurrentVersion\Run|EKStatusMonitor
-
 [Kodak AiO Software Logs*]
 LangSecRef=3021
 Detect1=HKLM\Software\Eastman Kodak Company\KODAK AiO Home Center
@@ -12259,13 +12257,6 @@ FileKey3=%LocalAppData%\VirtualStore\Program Files*\MTA San Andreas 1.3\server\m
 FileKey4=%ProgramFiles%\MTA San Andreas 1.3\MTA\logs|*.*
 FileKey5=%ProgramFiles%\MTA San Andreas 1.3\server\mods\deathmatch\backups|*.*
 FileKey6=%ProgramFiles%\MTA San Andreas 1.3\server\mods\deathmatch\logs|*.*
-
-[MUICache*]
-DetectOS=6.1|
-LangSecRef=3025
-Detect=HKCU\Software\Microsoft\Windows
-Default=False
-RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache
 
 [Multi-Edit 2008 11.04*]
 LangSecRef=3021
@@ -19813,7 +19804,7 @@ Detect=HKCU\Software\NCH Software\WavePad\
 Default=False
 RegKey1=HKCU\Software\NCH Software\WavePad\Recent
 
-[Wavosaur (Logs)*]
+[Wavosaur Logs*]
 LangSecRef=3023
 DetectFile=%ProgramFiles%\Wavosaur\wavosaur.exe
 Default=False
@@ -19841,13 +19832,13 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Weather It Up|*.log
 FileKey2=%ProgramFiles%\Weather It Up|*.log
 
-[Weather Watcher Live (Data Log)*]
+[Weather Watcher Live Data Log*]
 LangSecRef=3021
 Detect=HKCU\Software\VB and VBA Program Settings\Weather Watcher Live
 Default=False
 FileKey1=%AppData%\WeatherWatcherLive|WeatherWatcherLive.log
 
-[Weather Watcher Live (Temp Files)*]
+[Weather Watcher Live Temp Files*]
 LangSecRef=3021
 Detect=HKCU\Software\VB and VBA Program Settings\Weather Watcher Live
 Default=False
@@ -20108,10 +20099,12 @@ RegKey8=HKCU\Software\Microsoft\Microsoft DVD Wizard Settings\MRU3
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows\Windows Error Reporting
 Default=False
-FileKey1=%WinDir%\System32\config\systemprofile\AppData\Local\CrashDumps|*.dmp
-FileKey2=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\CrashDumps|*.dmp
-FileKey3=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\CrashDumps|*.dmp
-FileKey4=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\CrashDumps|*.dmp
+FileKey1=%LocalAppData%\PCHealth\ErrorRep\QSignoff|*.*
+FileKey2=%WinDir%\pchealth\ERRORREP|*.*|RECURSE
+FileKey3=%WinDir%\System32\config\systemprofile\AppData\Local\CrashDumps|*.dmp
+FileKey4=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\CrashDumps|*.dmp
+FileKey5=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\CrashDumps|*.dmp
+FileKey6=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\CrashDumps|*.dmp
 RegKey1=HKCU\Software\Microsoft\Windows\Windows Error Reporting\Debug|StoreLocation
 RegKey2=HKLM\Software\Microsoft\Windows\Windows Error Reporting\Debug|StoreLocation
 RegKey3=HKLM\Software\Microsoft\Windows\Windows Error Reporting\LocalDumps
@@ -20120,7 +20113,7 @@ RegKey5=HKLM\Software\Microsoft\Windows\Windows Error Reporting\FullLiveKernelRe
 RegKey6=HKLM\Software\Microsoft\Windows\Windows Error Reporting\LiveKernelReports\win32k.sys
 RegKey7=HKU\.DEFAULT\Software\Microsoft\Windows\Windows Error Reporting\Debug|StoreLocation
 
-[Windows ESENT Process (MRU)*]
+[Windows ESENT Process MRU*]
 LangSecRef=3025
 Detect=HKLM\Software\Microsoft\ESENT
 Default=False
@@ -20330,6 +20323,16 @@ Detect=HKCU\Software\Microsoft\MovieMaker
 Default=False
 FileKey1=%LocalAppData%\Microsoft\Movie Maker|MEDIATAB*.DAT
 
+[Windows MUICache*]
+LangSecRef=3025
+Detect1=HKCU\Software\Microsoft\Windows
+Detect2=HKCU\Software\Microsoft\Windows\Shell
+Detect3=HKCU\Software\Microsoft\Windows\ShellNoRoam
+Default=False
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache
+RegKey2=HKCU\Software\Microsoft\Windows\Shell\MUICache
+RegKey3=HKCU\Software\Microsoft\Windows\ShellNoRoam\MUICache
+
 [Windows Photo Gallery*]
 LangSecRef=3023
 Detect=HKCU\Software\Microsoft\Windows Photo Gallery
@@ -20385,6 +20388,17 @@ DetectFile=CommonAppData%\Microsoft\Windows\RetailDemo
 Default=False
 FileKey1=%CommonAppData%\Microsoft\Windows\RetailDemo|*.*|REMOVESELF
 
+[Windows ShellBags*]
+LangSecRef=3025
+Detect1=HKCU\Software\Microsoft\Windows
+Detect2=HKCU\Software\Microsoft\Windows\ShellNoRoam
+Default=False
+Warning=This will delete view settings of all folders.
+RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\BagMRU
+RegKey2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags
+RegKey3=HKCU\Software\Microsoft\Windows\ShellNoRoam\BagMRU
+RegKey4=HKCU\Software\Microsoft\Windows\ShellNoRoam\Bags
+
 [Windows Tracing*]
 LangSecRef=3025
 Detect=HKLM\Software\Microsoft
@@ -20418,32 +20432,6 @@ Detect=HKLM\Software\Microsoft\Windows
 Default=False
 Warning=This cleans the Add/Remove Programs cache and will fix very large areas of black gaps in it. Using this will cause Add/Remove Programs to take a very long time to load since it will have to rebuild the cache.
 RegKey1=HKLM\Software\Microsoft\Windows\CurrentVersion\App Management\ARPCache
-
-[Windows XP Error Reporting*]
-DetectOS=|5.2
-LangSecRef=3025
-Warning=This deletes the error reports generated by Windows errors. Make sure you review the error reports first before using this cleaner.
-Default=False
-FileKey1=%LocalAppData%\PCHealth\ErrorRep\QSignoff|*.*
-FileKey2=%WinDir%\pchealth\ERRORREP|*.*|RECURSE
-
-[Windows XP MUICache*]
-DetectOS=|5.1
-LangSecRef=3025
-Detect1=HKCU\Software\Microsoft\Windows\Shell
-Detect2=HKCU\Software\Microsoft\Windows\ShellNoRoam
-Default=False
-RegKey1=HKCU\Software\Microsoft\Windows\Shell\MUICache
-RegKey2=HKCU\Software\Microsoft\Windows\ShellNoRoam\MUICache
-
-[Windows XP ShellBags*]
-DetectOS=|5.1
-LangSecRef=3025
-Detect=HKCU\Software\Microsoft\Windows\ShellNoRoam
-Default=False
-Warning=This will delete window size, window position and view setting of all folders.
-RegKey1=HKCU\Software\Microsoft\Windows\ShellNoRoam\BagMRU
-RegKey2=HKCU\Software\Microsoft\Windows\ShellNoRoam\Bags
 
 [Winemaker Extraordinaire*]
 Section=Games
