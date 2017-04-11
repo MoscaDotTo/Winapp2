@@ -198,6 +198,75 @@ FileKey7=%LocalAppData%\SRWare Iron\User Data\*\Local Storage|http*.*|RECURSE
 FileKey8=%LocalAppData%\SuperBird\User Data\*\Local Storage|http*.*|RECURSE
 FileKey9=%LocalAppData%\Torch\User Data\*\Local Storage|http*.*|RECURSE
 
+[Logs*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Detect1=HKCU\Software\Torch
+Detect2=HKCU\Software\SuperBird
+Default=False
+FileKey1=%LocalAppData%\Amigo\Application|debug.log
+FileKey2=%LocalAppData%\Amigo\User Data\*\*|*LOG.*;Log;*.log;*.old|RECURSE
+FileKey3=%LocalAppData%\Chrome Plus\Application|debug.log
+FileKey4=%LocalAppData%\Chrome Plus\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
+FileKey5=%LocalAppData%\Chromium\Application|debug.log
+FileKey6=%LocalAppData%\Chromium\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
+FileKey7=%LocalAppData%\Flock\Application|debug.log
+FileKey8=%LocalAppData%\Flock\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
+FileKey9=%LocalAppData%\Google\Chrome*\Application|debug.log
+FileKey10=%LocalAppData%\Google\Chrome*\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
+FileKey11=%LocalAppData%\Google\Chrome Cleanup Tool|*.log
+FileKey12=%LocalAppData%\Rockmelt\Application|debug.log
+FileKey13=%LocalAppData%\Rockmelt\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
+FileKey14=%LocalAppData%\SRWare Iron\Application|debug.log
+FileKey15=%LocalAppData%\SRWare Iron\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
+FileKey16=%LocalAppData%\SuperBird\Application|debug.log
+FileKey17=%LocalAppData%\SuperBird\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
+FileKey18=%LocalAppData%\Torch\Application|debug.log
+FileKey19=%LocalAppData%\Torch\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
+FileKey20=%LocalAppData%\VirtualStore\Program Files*\Google\Chrome*\Application|debug.log
+ExcludeKey1=PATH|%LocalAppData%\Amigo\User Data\*\Extensions|*.*
+ExcludeKey2=PATH|%LocalAppData%\Amigo\User Data\*\File System|*.*
+ExcludeKey3=PATH|%LocalAppData%\Amigo\User Data\*\Local App Settings|*.*
+ExcludeKey4=PATH|%LocalAppData%\Amigo\User Data\*\Local Extension Settings|*.*
+ExcludeKey5=PATH|%LocalAppData%\Chrome Plus\User Data\*\Extensions|*.*
+ExcludeKey6=PATH|%LocalAppData%\Chrome Plus\User Data\*\File System|*.*
+ExcludeKey7=PATH|%LocalAppData%\Chrome Plus\User Data\*\Local App Settings|*.*
+ExcludeKey8=PATH|%LocalAppData%\Chrome Plus\User Data\*\Local Extension Settings|*.*
+ExcludeKey9=PATH|%LocalAppData%\Chromium\User Data\*\Extensions|*.*
+ExcludeKey10=PATH|%LocalAppData%\Chromium\User Data\*\Local App Settings|*.*
+ExcludeKey11=PATH|%LocalAppData%\Chromium\User Data\*\Local Extension Settings|*.*
+ExcludeKey12=PATH|%LocalAppData%\Chromium\User Data\*\File System|*.*
+ExcludeKey13=PATH|%LocalAppData%\Flock\User Data\*\Extensions|*.*
+ExcludeKey14=PATH|%LocalAppData%\Flock\User Data\*\File System|*.*
+ExcludeKey15=PATH|%LocalAppData%\Flock\User Data\*\Local App Settings|*.*
+ExcludeKey16=PATH|%LocalAppData%\Flock\User Data\*\Local Extension Settings|*.*
+ExcludeKey17=PATH|%LocalAppData%\Google\Chrome*\User Data\*\Extensions|*.*
+ExcludeKey18=PATH|%LocalAppData%\Google\Chrome*\User Data\*\File System|*.*
+ExcludeKey19=PATH|%LocalAppData%\Google\Chrome*\User Data\*\Local App Settings|*.*
+ExcludeKey20=PATH|%LocalAppData%\Google\Chrome*\User Data\*\Local Extension Settings|*.*
+ExcludeKey21=PATH|%LocalAppData%\Rockmelt\User Data\*\Extensions|*.*
+ExcludeKey22=PATH|%LocalAppData%\Rockmelt\User Data\*\File System|*.*
+ExcludeKey23=PATH|%LocalAppData%\Rockmelt\User Data\*\Local App Settings|*.*
+ExcludeKey24=PATH|%LocalAppData%\Rockmelt\User Data\*\Local Extension Settings|*.*
+ExcludeKey25=PATH|%LocalAppData%\SRWare Iron\User Data\*\Extensions|*.*
+ExcludeKey26=PATH|%LocalAppData%\SRWare Iron\User Data\*\File System|*.*
+ExcludeKey27=PATH|%LocalAppData%\SRWare Iron\User Data\*\Local App Settings|*.*
+ExcludeKey28=PATH|%LocalAppData%\SRWare Iron\User Data\*\Local Extension Settings|*.*
+ExcludeKey29=PATH|%LocalAppData%\Superbird\User Data\*\Extensions|*.*
+ExcludeKey30=PATH|%LocalAppData%\Superbird\User Data\*\File System|*.*
+ExcludeKey31=PATH|%LocalAppData%\Superbird\User Data\*\Local App Settings|*.*
+ExcludeKey32=PATH|%LocalAppData%\Superbird\User Data\*\Local Extension Settings|*.*
+ExcludeKey33=PATH|%LocalAppData%\Torch\User Data\*\Extensions|*.*
+ExcludeKey34=PATH|%LocalAppData%\Torch\User Data\*\File System|*.*
+ExcludeKey35=PATH|%LocalAppData%\Torch\User Data\*\Local App Settings|*.*
+ExcludeKey36=PATH|%LocalAppData%\Torch\User Data\*\Local Extension Settings|*.*
+
+[Minidumps*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\minidumps|*.*
+
 ; End of Chrome/Chromium Entries.
 ;
 ; Firefox Entries
@@ -269,6 +338,35 @@ LangSecRef=3026
 SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|lazarus.sqlite;lazarus-backup.sqlite
+
+[Lock Files*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|*.lock
+
+[Maintenance Service*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%CommonAppData%\Mozilla*\logs|*.*
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\Mozilla*\logs|*.*
+FileKey3=%LocalAppData%\VirtualStore\ProgramFiles*\Mozilla Maintenance Service\logs|*.log
+FileKey4=%ProgramFiles%\Mozilla Maintenance Service\logs|*.log
+
+[Net Predictions*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|seer.sqlite;netpredictions.sqlite
+
+[Nightly Backups*]
+LangSecRef=3026
+DetectFile1=%ProgramFiles%\Nightly
+DetectFile2=%ProgramFiles%\Mozilla\Nightly
+Default=False
+FileKey1=%ProgramFiles%\Nightly.bak|*.*|REMOVESELF
+FileKey2=%ProgramFiles%\Mozilla\Nightly.bak|*.*|REMOVESELF
 
 ; End of Firefox Entries.
 ;
@@ -10170,12 +10268,6 @@ FileKey9=%LocalAppData%\Packages\Microsoft.LockApp_*\LocalCache|*.*|RECURSE
 FileKey10=%LocalAppData%\Packages\Microsoft.LockApp_*\LocalState\Cache|*.*|RECURSE
 FileKey11=%LocalAppData%\Packages\Microsoft.LockApp_*\TempState|*.*|RECURSE
 
-[Lock Files*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|*.lock
-
 [Logitech Camera*]
 LangSecRef=3023
 DetectFile=%LocalAppData%\LogiShrd
@@ -10209,7 +10301,7 @@ FileKey3=%CommonAppData%\Logishrd\unifying|EngineLog.*;*.txt
 FileKey4=%LocalAppData%\VirtualStore\ProgramData\LogiShrd|*.log|RECURSE
 FileKey5=%LocalAppData%\VirtualStore\ProgramData\Logishrd\unifying|EngineLog.*
 
-[Logitech Setpoint 6 (Logs)*]
+[Logitech Setpoint 6 Logs*]
 LangSecRef=3024
 Detect=HKCU\Software\Logitech\Setpoint
 Default=False
@@ -10228,69 +10320,6 @@ FileKey1=%WinDir%\System32\config\systemprofile\AppData\Local\LogMeIn Hamachi|h2
 FileKey2=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\LogMeIn Hamachi|h2-engine.log;h2-ui.log;*.old;*.bak
 FileKey3=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\LogMeIn Hamachi|h2-engine.log;h2-ui.log;*.old;*.bak
 FileKey4=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\LogMeIn Hamachi|h2-engine.log;h2-ui.log;*.old;*.bak
-
-[Logs*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Detect1=HKCU\Software\Torch
-Detect2=HKCU\Software\SuperBird
-Default=False
-FileKey1=%LocalAppData%\Amigo\Application|debug.log
-FileKey2=%LocalAppData%\Amigo\User Data\*\*|*LOG.*;Log;*.log;*.old|RECURSE
-FileKey3=%LocalAppData%\Chrome Plus\Application|debug.log
-FileKey4=%LocalAppData%\Chrome Plus\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
-FileKey5=%LocalAppData%\Chromium\Application|debug.log
-FileKey6=%LocalAppData%\Chromium\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
-FileKey7=%LocalAppData%\Flock\Application|debug.log
-FileKey8=%LocalAppData%\Flock\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
-FileKey9=%LocalAppData%\Google\Chrome*\Application|debug.log
-FileKey10=%LocalAppData%\Google\Chrome*\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
-FileKey11=%LocalAppData%\Google\Chrome Cleanup Tool|*.log
-FileKey12=%LocalAppData%\Rockmelt\Application|debug.log
-FileKey13=%LocalAppData%\Rockmelt\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
-FileKey14=%LocalAppData%\SRWare Iron\Application|debug.log
-FileKey15=%LocalAppData%\SRWare Iron\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
-FileKey16=%LocalAppData%\SuperBird\Application|debug.log
-FileKey17=%LocalAppData%\SuperBird\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
-FileKey18=%LocalAppData%\Torch\Application|debug.log
-FileKey19=%LocalAppData%\Torch\User Data\*|*LOG.*;Log;*.log;*.old|RECURSE
-FileKey20=%LocalAppData%\VirtualStore\Program Files*\Google\Chrome*\Application|debug.log
-ExcludeKey1=PATH|%LocalAppData%\Amigo\User Data\*\Extensions|*.*
-ExcludeKey2=PATH|%LocalAppData%\Amigo\User Data\*\File System|*.*
-ExcludeKey3=PATH|%LocalAppData%\Amigo\User Data\*\Local App Settings|*.*
-ExcludeKey4=PATH|%LocalAppData%\Amigo\User Data\*\Local Extension Settings|*.*
-ExcludeKey5=PATH|%LocalAppData%\Chrome Plus\User Data\*\Extensions|*.*
-ExcludeKey6=PATH|%LocalAppData%\Chrome Plus\User Data\*\File System|*.*
-ExcludeKey7=PATH|%LocalAppData%\Chrome Plus\User Data\*\Local App Settings|*.*
-ExcludeKey8=PATH|%LocalAppData%\Chrome Plus\User Data\*\Local Extension Settings|*.*
-ExcludeKey9=PATH|%LocalAppData%\Chromium\User Data\*\Extensions|*.*
-ExcludeKey10=PATH|%LocalAppData%\Chromium\User Data\*\Local App Settings|*.*
-ExcludeKey11=PATH|%LocalAppData%\Chromium\User Data\*\Local Extension Settings|*.*
-ExcludeKey12=PATH|%LocalAppData%\Chromium\User Data\*\File System|*.*
-ExcludeKey13=PATH|%LocalAppData%\Flock\User Data\*\Extensions|*.*
-ExcludeKey14=PATH|%LocalAppData%\Flock\User Data\*\File System|*.*
-ExcludeKey15=PATH|%LocalAppData%\Flock\User Data\*\Local App Settings|*.*
-ExcludeKey16=PATH|%LocalAppData%\Flock\User Data\*\Local Extension Settings|*.*
-ExcludeKey17=PATH|%LocalAppData%\Google\Chrome*\User Data\*\Extensions|*.*
-ExcludeKey18=PATH|%LocalAppData%\Google\Chrome*\User Data\*\File System|*.*
-ExcludeKey19=PATH|%LocalAppData%\Google\Chrome*\User Data\*\Local App Settings|*.*
-ExcludeKey20=PATH|%LocalAppData%\Google\Chrome*\User Data\*\Local Extension Settings|*.*
-ExcludeKey21=PATH|%LocalAppData%\Rockmelt\User Data\*\Extensions|*.*
-ExcludeKey22=PATH|%LocalAppData%\Rockmelt\User Data\*\File System|*.*
-ExcludeKey23=PATH|%LocalAppData%\Rockmelt\User Data\*\Local App Settings|*.*
-ExcludeKey24=PATH|%LocalAppData%\Rockmelt\User Data\*\Local Extension Settings|*.*
-ExcludeKey25=PATH|%LocalAppData%\SRWare Iron\User Data\*\Extensions|*.*
-ExcludeKey26=PATH|%LocalAppData%\SRWare Iron\User Data\*\File System|*.*
-ExcludeKey27=PATH|%LocalAppData%\SRWare Iron\User Data\*\Local App Settings|*.*
-ExcludeKey28=PATH|%LocalAppData%\SRWare Iron\User Data\*\Local Extension Settings|*.*
-ExcludeKey29=PATH|%LocalAppData%\Superbird\User Data\*\Extensions|*.*
-ExcludeKey30=PATH|%LocalAppData%\Superbird\User Data\*\File System|*.*
-ExcludeKey31=PATH|%LocalAppData%\Superbird\User Data\*\Local App Settings|*.*
-ExcludeKey32=PATH|%LocalAppData%\Superbird\User Data\*\Local Extension Settings|*.*
-ExcludeKey33=PATH|%LocalAppData%\Torch\User Data\*\Extensions|*.*
-ExcludeKey34=PATH|%LocalAppData%\Torch\User Data\*\File System|*.*
-ExcludeKey35=PATH|%LocalAppData%\Torch\User Data\*\Local App Settings|*.*
-ExcludeKey36=PATH|%LocalAppData%\Torch\User Data\*\Local Extension Settings|*.*
 
 [LoL Summonerinfo Logs*]
 Section=Games
@@ -10436,7 +10465,7 @@ FileKey1=%AppData%\Machete|MacheteSettings.xml.bak
 RegKey1=HKCU\Software\Local AppWizard-Generated Applications\Machete\Recent File List
 RegKey2=HKCU\Software\MacheteSoft\Machete\Recent File List
 
-[Macrium Reflect (Logs)*]
+[Macrium Reflect Logs*]
 LangSecRef=3024
 Detect=HKCU\Software\Macrium\Reflect
 Default=False
@@ -10491,30 +10520,17 @@ Detect=HKLM\Software\MAGIX\Video_easy_3_TerraTec
 Default=False
 FileKey1=%AppData%\MAGIX\Video_easy_TERRATEC_Edition|*.log|RECURSE
 
-[MAGIX Video Pro X4*]
+[MAGIX Video Pro*]
 LangSecRef=3023
-Detect=HKCU\Software\MAGIX AG\Videodeluxe18_pro
+Detect1=HKCU\Software\MAGIX AG\Videodeluxe18_pro
+Detect2=HKCU\Software\MAGIX AG\Videodeluxe19_pro
 Default=False
 FileKey1=%AppData%\MAGIX\Video_Pro_X4|*.log
-FileKey2=%Documents%\MAGIX\Video_Pro_X4\AudioTemp|*.*|RECURSE
-
-[MAGIX Video Pro X5*]
-LangSecRef=3023
-Detect=HKCU\Software\MAGIX AG\Videodeluxe19_pro
-Default=False
-FileKey1=%AppData%\MAGIX\Video Pro X5|*.log
+FileKey2=%AppData%\MAGIX\Video Pro X5|*.log
+FileKey3=%Documents%\MAGIX\Video_Pro_X4\AudioTemp|*.*|RECURSE
 FileKey2=%Documents%\MAGIX\Video Pro X5\AudioTemp|*.*|RECURSE
 RegKey1=HKCU\Software\MAGIX AG\Videodeluxe19_pro\ExportConfigurator\DialogItems|LastFile
 RegKey2=HKCU\Software\MAGIX AG\Videodeluxe19_pro\ExportConfigurator\DialogItems|LastPreset
-
-[Maintenance Service*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%CommonAppData%\Mozilla*\logs|*.*
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\Mozilla*\logs|*.*
-FileKey3=%LocalAppData%\VirtualStore\ProgramFiles*\Mozilla Maintenance Service\logs|*.log
-FileKey4=%ProgramFiles%\Mozilla Maintenance Service\logs|*.log
 
 [MAL Updater Image Cache*]
 LangSecRef=3023
@@ -10541,21 +10557,17 @@ FileKey3=%ProgramFiles%\Malwarebytes Anti-Exploit|mbae-uninstall.log;changelog.t
 
 [Malwarebytes Anti-Malware*]
 LangSecRef=3024
+Detect=HKCU\Software\Malwarebytes
 DetectFile=%ProgramFiles%\Malwarebytes Anti-Malware\mbam.exe
 Default=False
+Warning=You must manually and temporarily turn off Malwarebytes "self-protection" to remove the logs.
 FileKey1=%AppData%\Malwarebytes\Malwarebytes' Anti-Malware\Logs|*.*
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\Malwarebytes\Malwarebytes*Anti-Malware\Logs|*.*
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Malwarebytes\Malwarebytes' Anti-Malware|mbam-setup.exe
 FileKey4=%CommonAppData%\Malwarebytes\Malwarebytes*Anti-Malware\Logs|*.*
 FileKey5=%CommonAppData%\Malwarebytes\Malwarebytes' Anti-Malware|mbam-setup.exe
-
-[Malwarebytes V3 Logs*]
-LangSecRef=3024
-Detect=HKCU\Software\Malwarebytes
-Default=False
-Warning=You must manually and temporarily turn off Malwarebytes "self-protection" to remove the logs.
-FileKey1=%CommonAppData%\Malwarebytes\MBAMService|*.log;*.bak
-FileKey2=%CommonAppData%\Malwarebytes\MBAMService\logs|*.*
+FileKey6=%CommonAppData%\Malwarebytes\MBAMService|*.log;*.bak
+FileKey7=%CommonAppData%\Malwarebytes\MBAMService\logs|*.*
 
 [ManiaPlanet Cache*]
 Section=Games
@@ -10650,13 +10662,13 @@ DetectFile=%AppData%\Broderbund\Mavis
 Default=False
 FileKey1=%AppData%\Broderbund\Mavis|logfile.*
 
-[Maxprog iCash (Dumps)*]
+[Maxprog iCash Dumps*]
 LangSecRef=3021
 Detect=HKCR\iCash
 Default=False
 FileKey1=%Documents%\Maxprog\iCash\XML Dumps|*.*|REMOVESELF
 
-[Maxprog iCash (Logs)*]
+[Maxprog iCash Logs*]
 LangSecRef=3021
 Detect=HKCR\iCash
 Default=False
@@ -10664,6 +10676,14 @@ FileKey1=%Documents%\Maxprog\iCash\Database Logs|*.*|REMOVESELF
 FileKey2=%Documents%\Maxprog\iCash\Error Logs|*.*|REMOVESELF
 FileKey3=%ProgramFiles%\iCash\vlogs|*.*|REMOVESELF
 FileKey4=%LocalAppData%\VirtualStore\Program Files*\iCash\vlogs|*.*|REMOVESELF
+
+[Maxthon Browser*]
+LangSecRef=3022
+Detect1=HKCU\Software\Maxthon
+Detect2=HKCU\Software\Maxthon2
+Default=False
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\Maxthon*\Temp|*.*
+FileKey2=%ProgramFiles%\Maxthon*\Temp|*.*
 
 [Maxthon Browser 3 Backups*]
 LangSecRef=3022
@@ -10695,22 +10715,6 @@ Detect=HKCU\Software\Maxthon3
 Default=False
 FileKey1=%AppData%\Maxthon3\Users\*\LocalStorage|*.*|RECURSE
 
-[Maxthon Browser*]
-LangSecRef=3022
-Detect1=HKCU\Software\Maxthon
-Detect2=HKCU\Software\Maxthon2
-Default=False
-FileKey1=%LocalAppData%\VirtualStore\Program Files*\Maxthon*\Temp|*.*
-FileKey2=%ProgramFiles%\Maxthon*\Temp|*.*
-
-[McAfee SiteAdvisor*]
-LangSecRef=3021
-Detect=HKCU\Software\SiteAdvisor
-Default=False
-FileKey1=%AppData%\SiteAdvisor|asserts.txt
-FileKey2=%CommonAppData%\SiteAdvisor|*.log
-FileKey3=%LocalAppData%\VirtualStore\ProgramData\SiteAdvisor|*.log
-
 [McAfee*]
 LangSecRef=3024
 Detect=HKLM\Software\McAfee
@@ -10725,6 +10729,14 @@ FileKey7=%LocalAppData%\VirtualStore\ProgramData\McAfee\MPF\data|*.*|RECURSE
 FileKey8=%LocalAppData%\VirtualStore\ProgramData\McAfee\MSC\Logs|*.*|RECURSE
 FileKey9=%LocalAppData%\VirtualStore\ProgramData\McAfee\VirusScan\Data|*.log;*.old
 FileKey10=%LocalAppData%\VirtualStore\ProgramData\McAfee\VirusScan\Logs|*.*|RECURSE
+
+[McAfee SiteAdvisor*]
+LangSecRef=3021
+Detect=HKCU\Software\SiteAdvisor
+Default=False
+FileKey1=%AppData%\SiteAdvisor|asserts.txt
+FileKey2=%CommonAppData%\SiteAdvisor|*.log
+FileKey3=%LocalAppData%\VirtualStore\ProgramData\SiteAdvisor|*.log
 
 [McPixel*]
 Section=Games
@@ -10853,61 +10865,61 @@ RegKey13=HKCU\Software\JBSoftware\MemoMaster5|FileMRU13
 RegKey14=HKCU\Software\JBSoftware\MemoMaster5|FileMRU14
 RegKey15=HKCU\Software\JBSoftware\MemoMaster5|FileMRU15
 
-[Men of War (Cache)*]
+[Men of War Cache*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\7830
 Default=False
 FileKey1=%Documents%\My Games\men of war\shader_cache|*.*|RECURSE
 
-[Men of War (Log)*]
+[Men of War Log*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\7830
 Default=False
 FileKey1=%Documents%\My Games\men of war\log|*.*
 
-[Men of War: Assault Squad (Cache)*]
+[Men of War: Assault Squad Cache*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\64000
 Default=False
 FileKey1=%Documents%\My Games\Men of War - Assault Squad\shader_cache|*.*|RECURSE
 
-[Men of War: Assault Squad (Log)*]
+[Men of War: Assault Squad Log*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\64000
 Default=False
 FileKey1=%Documents%\My Games\Men of War - Assault Squad\Log|*.*
 
-[Men of War: Condemned Heroes (Cache)*]
+[Men of War: Condemned Heroes Cache*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\204860
 Default=False
 FileKey1=%Documents%\My Games\mow condemned heroes\sharer_cache|*.*|RECURSE
 
-[Men of War: Condemned Heroes (Log)*]
+[Men of War: Condemned Heroes Log*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\204860
 Default=False
 FileKey1=%Documents%\My Games\mow condemned heroes\Log|*.*
 
-[Men of War: Red Tide (Cache)*]
+[Men of War: Red Tide Cache*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\3130
 Default=False
 FileKey1=%Documents%\My Games\mow red tide\shader_cache|*.*|RECURSE
 
-[Men of War: Red Tide (Log)*]
+[Men of War: Red Tide Log*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\3130
 Default=False
 FileKey1=%Documents%\My Games\mow red tide\log|*.*
 
-[Men of War: Vietnam (Cache)*]
+[Men of War: Vietnam Cache*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\63940
 Default=False
 FileKey1=%Documents%\My Games\mow vietnam\shader_cache|*.*|RECURSE
 
-[Men of War: Vietnam (Log)*]
+[Men of War: Vietnam Log*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\63940
 Default=False
@@ -10937,7 +10949,7 @@ FileKey8=%LocalAppData%\Packages\Microsoft.Messaging_*\LocalCache|*.*|RECURSE
 FileKey9=%LocalAppData%\Packages\Microsoft.Messaging_*\LocalState\Cache|*.*|RECURSE
 FileKey10=%LocalAppData%\Packages\Microsoft.Messaging_*\TempState|*.*|RECURSE
 
-[Messenger Plus! Live (Logs)*]
+[Messenger Plus! Live Logs*]
 LangSecRef=3022
 Detect=HKCU\Software\Patchou
 Default=False
@@ -11214,12 +11226,6 @@ FileKey2=%AppData%\.minecraft\crash-reports|*.*
 FileKey3=%AppData%\.minecraft\stats|*.old
 FileKey4=%AppData%\java|*.*|REMOVESELF
 
-[Minidumps*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\minidumps|*.*
-
 [Miranda IM Cache*]
 LangSecRef=3022
 DetectFile=%ProgramFiles%\Miranda IM
@@ -11341,7 +11347,7 @@ DetectFile=%AppData%\Motorola\MotoHelper
 Default=False
 FileKey1=%AppData%\Motorola\MotoHelper|*.log
 
-[Mount & Blade (All)*]
+[Mount & Blade*]
 Section=Games
 Detect1=HKCU\Software\Valve\Steam\Apps\22100
 Detect2=HKCU\Software\Valve\Steam\Apps\48700
@@ -11448,13 +11454,13 @@ FileKey8=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Microsoft antimalware
 FileKey9=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Microsoft antimalware\scans\history\results\System|*.*|REMOVESELF
 FileKey10=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Microsoft antimalware\support|*.log
 
-[MS Backup (Logs)*]
+[MS Backup Logs*]
 LangSecRef=3025
 DetectFile=%SystemRoot%\System32\ntbackup.exe
 Default=False
 FileKey1=%LocalAppData%\Microsoft\Windows NT\NTBackup\Data|*.log
 
-[MS Baseline Analyzer (Cache)*]
+[MS Baseline Analyzer Cache*]
 LangSecRef=3024
 Detect=HKLM\Software\Microsoft\Microsoft Baseline Security Analyzer
 Default=False
@@ -11534,8 +11540,8 @@ RegKey1=HKCU\Software\Microsoft\Conferencing\UI\CallMRU
 [MS Notepad*]
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Notepad
-Warning=If Notepad stops remembering your window size settings, this entry will reset it back to the default size.
 Default=False
+Warning=If Notepad stops remembering your window size settings, this entry will reset it back to the default size.
 RegKey1=HKCU\Software\Microsoft\Notepad|iWindowPosDX
 RegKey2=HKCU\Software\Microsoft\Notepad|iWindowPosDY
 RegKey3=HKCU\Software\Microsoft\Notepad|iWindowPosX
@@ -11552,10 +11558,7 @@ RegKey4=HKCU\Software\Microsoft\Office\11.0\MSE\SolutionMRUList
 
 [MS Office Customization Tool*]
 LangSecRef=3021
-Detect1=HKCU\Software\Microsoft\OfficeCustomizeWizard\12.0
-Detect2=HKCU\Software\Microsoft\OfficeCustomizeWizard\14.0
-Detect3=HKCU\Software\Microsoft\OfficeCustomizeWizard\15.0
-Detect4=HKCU\Software\Microsoft\OfficeCustomizeWizard\16.0
+Detect=HKCU\Software\Microsoft\OfficeCustomizeWizard
 Default=False
 RegKey1=HKCU\Software\Microsoft\OfficeCustomizeWizard\12.0\RecentFileList
 RegKey2=HKCU\Software\Microsoft\OfficeCustomizeWizard\14.0\RecentFileList
@@ -11564,28 +11567,19 @@ RegKey4=HKCU\Software\Microsoft\OfficeCustomizeWizard\16.0\RecentFileList
 
 [MS Office Help Cache*]
 LangSecRef=3021
-Detect1=HKCU\Software\Microsoft\Office\12.0
-Detect2=HKCU\Software\Microsoft\Office\14.0
-Detect3=HKCU\Software\Microsoft\Office\15.0
-Detect4=HKCU\Software\Microsoft\Office\16.0
+Detect=HKCU\Software\Microsoft\Office
 Default=False
 FileKey1=%LocalAppData%\Microsoft Help|*.*
 
 [MS Office Picture Manager More*]
 LangSecRef=3021
-Detect1=HKCU\Software\Microsoft\Office\12.0
-Detect2=HKCU\Software\Microsoft\Office\14.0
-Detect3=HKCU\Software\Microsoft\Office\15.0
-Detect4=HKCU\Software\Microsoft\Office\16.0
+Detect=HKCU\Software\Microsoft\Office
 Default=False
 FileKey1=%AppData%\Microsoft\OIS|Toolbars.dat
 
 [MS Office Recent Templates*]
 LangSecRef=3021
-Detect1=HKCU\Software\Microsoft\Office\12.0
-Detect2=HKCU\Software\Microsoft\Office\14.0
-Detect3=HKCU\Software\Microsoft\Office\15.0
-Detect4=HKCU\Software\Microsoft\Office\16.0
+Detect=HKCU\Software\Microsoft\Office
 Default=False
 FileKey1=%AppData%\Microsoft\Templates|*.xlt;*.xltx;*.pot;*.potx;*.dot;*.dotx
 RegKey1=HKCU\SOFTWARE\Microsoft\Office\12.0\Common\OfficeStart\Web\Templates
@@ -11605,7 +11599,7 @@ RegKey14=HKCU\SOFTWARE\Microsoft\Office\16.0\Excel\Recent Templates
 RegKey15=HKCU\SOFTWARE\Microsoft\Office\16.0\PowerPoint\Recent Templates
 RegKey16=HKCU\SOFTWARE\Microsoft\Office\16.0\Word\Recent Templates
 
-[MS Office Remove Hidden Data Tool (Log)*]
+[MS Office Remove Hidden Data Tool Log*]
 LangSecRef=3021
 Detect=HKLM\Software\Microsoft\Office\Common\Remove Hidden Data Tool
 Default=False
@@ -11613,19 +11607,13 @@ FileKey1=%SystemDrive%|propfix.log
 
 [MS Office Saved CEIP Data*]
 LangSecRef=3021
-Detect1=HKCU\Software\Microsoft\Office\12.0
-Detect2=HKCU\Software\Microsoft\Office\14.0
-Detect3=HKCU\Software\Microsoft\Office\15.0
-Detect4=HKCU\Software\Microsoft\Office\16.0
+Detect=HKCU\Software\Microsoft\Office
 Default=False
 FileKey1=%AppData%\Microsoft\UProof|*.bin;*.XML
 
 [MS Office Unsaved Files*]
 LangSecRef=3021
-Detect1=HKCU\Software\Microsoft\Office\12.0
-Detect2=HKCU\Software\Microsoft\Office\14.0
-Detect3=HKCU\Software\Microsoft\Office\15.0
-Detect4=HKCU\Software\Microsoft\Office\16.0
+Detect=HKCU\Software\Microsoft\Office
 Default=False
 FileKey1=%AppData%\Microsoft\Excel|*.*|RECURSE
 FileKey2=%AppData%\Microsoft\PowerPoint|*.*|RECURSE
@@ -11677,8 +11665,8 @@ FileKey3=%ProgramFiles%\Microsoft\Microsoft Robocopy GUI\Logs|*.*
 [MS Search More*]
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows
-Warning=It could stop Indexing for IE
 Default=False
+Warning=It could stop Indexing for IE
 FileKey1=%CommonAppData%\Microsoft\Search\Data\Applications\Windows|Windows.edb
 FileKey2=%CommonAppData%\Microsoft\Search\Data\Applications\Windows\GatherLogs\SystemIndex|*.*|RECURSE
 FileKey3=%CommonAppData%\Microsoft\Search\Data\Applications\Windows\Projects\SystemIndex\PropMap|*.*|RECURSE
@@ -12576,22 +12564,24 @@ FileKey1=%ProgramFiles%\Neostar CMS Station\Neostar CMS\Neostar CMS Client\log|*
 FileKey2=%ProgramFiles%\Neostar CMS Station\Neostar CMS\Neostar CMS Client\StreamServer|*.log
 FileKey3=%ProgramFiles%\Neostar CMS Station\Neostar CMS\Neostar CMS Client\StreamServer\log|*.*
 
-[Nero 11*]
+[Nero*]
 LangSecRef=3021
 Detect1=HKLM\Software\Nero\Nero 11\Nero11Suite
 Detect2=HKLM\Software\Wow6432Node\Nero\Nero 11\Nero11Suite
+Detect3=HKLM\Software\Nero\Nero 12\Nero12Suite
+Detect4=HKLM\Software\Wow6432Node\Nero\Nero 12\Nero12Suite
 Default=False
 FileKey1=%CommonAppData%\Nero\PeakFiles|*.tmp
 FileKey2=%AppData%\Nero\Nero Burning ROM|*.log
-FileKey3=%AppData%\Nero\Nero 11\Nero BackItUp\Cache|*.*
-FileKey4=%AppData%\Nero\Nero 11\Nero Burning ROM|*.log
-FileKey5=%AppData%\Nero\Nero 11\Nero Recode\AnalysisData|*.dat
-FileKey6=%AppData%\Nero\Nero 11\Nero Recode\Thumbs|*.*
-FileKey7=%AppData%\Nero\Nero 11\Nero Vision\NVFACache|*.*
-FileKey8=%AppData%\Nero\Nero 11\Nero Vision|*.txt;*.bin
-FileKey10=%AppData%\Nero\Nero 11\Nero3D|*.log
-FileKey11=%LocalAppData%\Nero\Nero 11\Nero Vision\Cache|*.*
-FileKey12=%LocalAppData%\Nero\Nero 11\Nero Vision\Cache\GraphicObjectCache|*.*
+FileKey3=%AppData%\Nero\Nero *\Nero BackItUp\Cache|*.*
+FileKey4=%AppData%\Nero\Nero *\Nero Burning ROM|*.log
+FileKey5=%AppData%\Nero\Nero *\Nero Recode\AnalysisData|*.dat
+FileKey6=%AppData%\Nero\Nero *\Nero Recode\Thumbs|*.*
+FileKey7=%AppData%\Nero\Nero *\Nero Vision\NVFACache|*.*
+FileKey8=%AppData%\Nero\Nero *\Nero Vision|*.txt;*.bin
+FileKey10=%AppData%\Nero\Nero *\Nero3D|*.log
+FileKey11=%LocalAppData%\Nero\Nero *\Nero Vision\Cache|*.*
+FileKey12=%LocalAppData%\Nero\Nero *\Nero Vision\Cache\GraphicObjectCache|*.*
 FileKey13=%LocalAppData%\VirtualStore\ProgramData\Nero\PeakFiles|*.tmp
 RegKey1=HKCU\Software\Nero\Nero Blu-ray Player\Settings|DefFolder
 RegKey2=HKCU\Software\Nero\Nero 11\Nero Burning ROM\Compilation|VolumeLabelAutoTemplate
@@ -12633,60 +12623,35 @@ RegKey37=HKCU\Software\Nero\Nero 11\Nero Vision\Application|TmpDir
 RegKey38=HKCU\Software\Nero\Nero 11\Nero Vision\Application|VideoDir
 RegKey39=HKCU\Software\Nero\Nero 11\Nero WaveEditor\Directories|Last
 RegKey40=HKCU\Software\Nero\Nero 11\Nero WaveEditor\Recent File List
-
-[Nero 12*]
-LangSecRef=3021
-Detect1=HKLM\Software\Nero\Nero 12\Nero12Suite
-Detect2=HKLM\Software\Wow6432Node\Nero\Nero 12\Nero12Suite
-Default=False
-FileKey1=%AppData%\Nero\Nero 12\Nero BackItUp\Cache|*.*
-FileKey2=%AppData%\Nero\Nero Burning ROM|*.log
-FileKey3=%AppData%\Nero\Nero 12\Nero Burning ROM|*.log
-FileKey4=%AppData%\Nero\Nero 12\Nero Recode\AnalysisData|*.dat
-FileKey5=%AppData%\Nero\Nero 12\Nero Recode\Thumbs|*.*
-FileKey6=%AppData%\Nero\Nero 12\Nero Vision\NVFACache|*.*
-FileKey7=%AppData%\Nero\Nero 12\Nero Vision|*.txt;*.bin
-FileKey8=%AppData%\Nero\Nero 12\Nero3D|*.log
-FileKey9=%CommonAppData%\Nero\PeakFiles|*.tmp
-FileKey10=%LocalAppData%\Nero\Nero 12\Nero Vision\Cache|*.*
-FileKey11=%LocalAppData%\Nero\Nero 12\Nero Vision\Cache\GraphicObjectCache|*.*
-FileKey12=%LocalAppData%\VirtualStore\ProgramData\Nero\PeakFiles|*.tmp
-RegKey1=HKCU\Software\Nero\Nero Blu-ray Player\Settings|DefFolder
-RegKey2=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Compilation|VolumeLabelAutoTemplate
-RegKey3=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Compilation|VolumeLabelUDFTemplate
-RegKey4=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Compilation|VolumeLabelISOTemplate
-RegKey5=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Compilation|VolumelabelJolietTemplate
-RegKey6=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Settings|WorkingDir
-RegKey7=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Settings|TrackSaveDir
-RegKey8=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Settings|EncodingLastDir
-RegKey9=HKCU\Software\Nero\Nero 12\Nero Express\Compilation|VolumeLabelAutoTemplate
-RegKey10=HKCU\Software\Nero\Nero 12\Nero Express\Compilation|VolumeLabelISOTemplate
-RegKey11=HKCU\Software\Nero\Nero 12\Nero Express\Compilation|VolumelabelJolietTemplate
-RegKey12=HKCU\Software\Nero\Nero 12\Nero Express\Compilation|VolumeLabelUDFTemplate
-RegKey13=HKCU\Software\Nero\Nero 12\Nero Express\Settings|BootImageDir
-RegKey14=HKCU\Software\Nero\Nero 12\Nero Express\Settings|ImageDir
-RegKey15=HKCU\Software\Nero\Nero 12\Nero Express\Settings|NeroCompilation
-RegKey16=HKCU\Software\Nero\Nero 12\Nero Express\Settings|TrackSaveDir
-RegKey17=HKCU\Software\Nero\Nero 12\Nero Toolkit\DiscSpeed\Capture|Folder
-RegKey18=HKCU\Software\Nero\Nero 12\Nero Toolkit\DiscSpeed\Save|Folder
-RegKey19=HKCU\Software\Nero\Nero 12\Nero Vision\Application|AudioDir
-RegKey20=HKCU\Software\Nero\Nero 12\Nero Vision\Application|CaptureDir
-RegKey21=HKCU\Software\Nero\Nero 12\Nero Vision\Application|DocDir
-RegKey22=HKCU\Software\Nero\Nero 12\Nero Vision\Application|ExportAudioDir
-RegKey23=HKCU\Software\Nero\Nero 12\Nero Vision\Application|ExportVideoDir
-RegKey24=HKCU\Software\Nero\Nero 12\Nero Vision\Application|ImportVideoDir
-RegKey25=HKCU\Software\Nero\Nero 12\Nero Vision\Application|MediaDir
-RegKey26=HKCU\Software\Nero\Nero 12\Nero Vision\Application|PicDir
-RegKey27=HKCU\Software\Nero\Nero 12\Nero Vision\Application|PicSaveDir
-RegKey28=HKCU\Software\Nero\Nero 12\Nero Vision\Application|TmpDir
-RegKey29=HKCU\Software\Nero\Nero 12\Nero Vision\Application|VideoDir
-RegKey30=HKCU\Software\Nero\Nero 12\Nero WaveEditor\Directories|Last
-
-[Net Predictions*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|seer.sqlite;netpredictions.sqlite
+RegKey41=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Compilation|VolumeLabelAutoTemplate
+RegKey42=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Compilation|VolumeLabelUDFTemplate
+RegKey43=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Compilation|VolumeLabelISOTemplate
+RegKey44=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Compilation|VolumelabelJolietTemplate
+RegKey45=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Settings|WorkingDir
+RegKey46=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Settings|TrackSaveDir
+RegKey47=HKCU\Software\Nero\Nero 12\Nero Burning ROM\Settings|EncodingLastDir
+RegKey48=HKCU\Software\Nero\Nero 12\Nero Express\Compilation|VolumeLabelAutoTemplate
+RegKey49=HKCU\Software\Nero\Nero 12\Nero Express\Compilation|VolumeLabelISOTemplate
+RegKey50=HKCU\Software\Nero\Nero 12\Nero Express\Compilation|VolumelabelJolietTemplate
+RegKey51=HKCU\Software\Nero\Nero 12\Nero Express\Compilation|VolumeLabelUDFTemplate
+RegKey52=HKCU\Software\Nero\Nero 12\Nero Express\Settings|BootImageDir
+RegKey53=HKCU\Software\Nero\Nero 12\Nero Express\Settings|ImageDir
+RegKey54=HKCU\Software\Nero\Nero 12\Nero Express\Settings|NeroCompilation
+RegKey55=HKCU\Software\Nero\Nero 12\Nero Express\Settings|TrackSaveDir
+RegKey56=HKCU\Software\Nero\Nero 12\Nero Toolkit\DiscSpeed\Capture|Folder
+RegKey57=HKCU\Software\Nero\Nero 12\Nero Toolkit\DiscSpeed\Save|Folder
+RegKey58=HKCU\Software\Nero\Nero 12\Nero Vision\Application|AudioDir
+RegKey59=HKCU\Software\Nero\Nero 12\Nero Vision\Application|CaptureDir
+RegKey60=HKCU\Software\Nero\Nero 12\Nero Vision\Application|DocDir
+RegKey61=HKCU\Software\Nero\Nero 12\Nero Vision\Application|ExportAudioDir
+RegKey62=HKCU\Software\Nero\Nero 12\Nero Vision\Application|ExportVideoDir
+RegKey63=HKCU\Software\Nero\Nero 12\Nero Vision\Application|ImportVideoDir
+RegKey64=HKCU\Software\Nero\Nero 12\Nero Vision\Application|MediaDir
+RegKey65=HKCU\Software\Nero\Nero 12\Nero Vision\Application|PicDir
+RegKey66=HKCU\Software\Nero\Nero 12\Nero Vision\Application|PicSaveDir
+RegKey67=HKCU\Software\Nero\Nero 12\Nero Vision\Application|TmpDir
+RegKey68=HKCU\Software\Nero\Nero 12\Nero Vision\Application|VideoDir
+RegKey69=HKCU\Software\Nero\Nero 12\Nero WaveEditor\Directories|Last
 
 [Net Vampire*]
 LangSecRef=3022
@@ -12885,7 +12850,7 @@ DetectFile=%Documents%\Nexus Mod Manager
 Default=False
 FileKey1=%Documents%\Nexus Mod Manager|*.txt
 
-[NFS Hot Pursuit (2010) Saves*]
+[NFS Hot Pursuit 2010 Saves*]
 Section=Games
 Detect=HKCU\Software\Electronic Arts\Need for Speed(TM) Hot Pursuit
 Default=False
@@ -12898,21 +12863,13 @@ DetectFile=%AppData%\Nidhogg
 Default=False
 FileKey1=%AppData%\Nidhogg|*.log
 
-[Nightly Backups*]
-LangSecRef=3026
-DetectFile1=%ProgramFiles%\Nightly
-DetectFile2=%ProgramFiles%\Mozilla\Nightly
-Default=False
-FileKey1=%ProgramFiles%\Nightly.bak|*.*|REMOVESELF
-FileKey2=%ProgramFiles%\Mozilla\Nightly.bak|*.*|REMOVESELF
-
 [Nikon Capture NX2*]
 Section=Photo
 Detect=HKLM\Software\Nikon\Capture NX 2
 Default=False
 FileKey1=%LocalAppData%\Nikon\Capture NX\ThumbnailCache|*.*|RECURSE
 
-[Nikon ViewNX 2 Pic Viewer (Cache)*]
+[Nikon ViewNX 2 Pic Viewer Cache*]
 LangSecRef=3023
 Detect=HKLM\Software\Nikon\MCA2\ViewNX 2
 Default=False
