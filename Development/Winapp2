@@ -267,6 +267,19 @@ SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\minidumps|*.*
 
+[PnaclTranslation Cache*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome\User Data\PnaclTranslationCache|*.*
+
+[Session Storage*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Amigo\User Data\*\Session Storage|*.*|RECURSE
+FileKey2=%LocalAppData%\Google\Chrome*\User Data\*\Session Storage|*.*|RECURSE
+
 ; End of Chrome/Chromium Entries.
 ;
 ; Firefox Entries
@@ -367,6 +380,18 @@ DetectFile2=%ProgramFiles%\Mozilla\Nightly
 Default=False
 FileKey1=%ProgramFiles%\Nightly.bak|*.*|REMOVESELF
 FileKey2=%ProgramFiles%\Mozilla\Nightly.bak|*.*|REMOVESELF
+
+[Session Backups*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|sessionstore.bak*
+
+[Session Manager deleted sessions*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\sessions\Deleted Sessions|*.session
 
 ; End of Firefox Entries.
 ;
@@ -12929,12 +12954,14 @@ Default=False
 FileKey1=%LocalAppData%\Nokia\Nokia Music|*.log
 FileKey2=%LocalAppData%\Nokia\Nokia Music Player|*.log
 
-[Nokia Software Updater 3 Cache*]
+[Nokia Software Updater Cache*]
 LangSecRef=3021
-Detect=HKCU\Software\Nokia\NSU3
-Warning=This will remove Nokia phone firmwares, applications and other files stored by Nokia Suite Updater. Files will be re-downloaded when updating phone.
+Detect1=HKCU\Software\Nokia\NSU3
+Detect2=HKLM\Software\Nokia\Nokia Suite
 Default=False
+Warning=This will remove Nokia phone firmwares, applications and other files stored by Nokia Suite Updater. Files will be re-downloaded when updating phone.
 FileKey1=%LocalAppData%\Nokia\NSU3\NOSSU2|*.*|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\Nokia\Nokia Suite\NOSSU2|*.*|RECURSE
 ExcludeKey1=FILE|%LocalAppData%\Nokia\NSU3\NOSSU2\usergroups.cfg
 ExcludeKey2=PATH|%LocalAppData%\Nokia\NSU3\NOSSU2\Flash
 
@@ -12942,8 +12969,8 @@ ExcludeKey2=PATH|%LocalAppData%\Nokia\NSU3\NOSSU2\Flash
 LangSecRef=3021
 DetectFile1=%CommonAppData%\Nokia\Nokia Service Layer\A
 DetectFile2=%CommonProgramFiles%\Nokia\Service Layer\A
-Warning=This will remove all files stored by old versions of Nokia Software Updater, which are no longer supported.
 Default=False
+Warning=This will remove all files stored by old versions of Nokia Software Updater, which are no longer supported.
 FileKey1=%CommonAppData%\Nokia\Nokia Service Layer\A|*.*|REMOVESELF
 FileKey2=%CommonProgramFiles%\Nokia\Service Layer\A|*.*|REMOVESELF
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Nokia\Nokia Service Layer\A|*.*|REMOVESELF
@@ -12955,16 +12982,6 @@ DetectFile=%CommonAppData%\NokiaInstallerCache
 Default=False
 FileKey1=%CommonAppData%\NokiaInstallerCache\PackageCache|*.*|RECURSE
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\NokiaInstallerCache\PackageCache|*.*|RECURSE
-
-[Nokia Suite Updater Cache*]
-LangSecRef=3021
-Detect=HKLM\Software\Nokia\Nokia Suite
-Warning=This will remove Nokia phone firmwares, applications and other files stored by Nokia Suite Updater. Files will be re-downloaded when updating phone.
-Default=False
-FileKey1=%CommonAppData%\Nokia\Nokia Suite\NOSSU2|*.*|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\Nokia\Nokia Suite\NOSSU2|*.*|RECURSE
-ExcludeKey1=FILE|%CommonAppData%\Nokia\Nokia Suite\NOSSU2\usergroups.cfg
-ExcludeKey2=PATH|%CommonAppData%\Nokia\Nokia Suite\NOSSU2\Flash
 
 [Norton Dumps*]
 LangSecRef=3024
@@ -12984,8 +13001,8 @@ FileKey3=%LocalAppData%\VirtualStore\ProgramData\NortonInstaller\Logs|*.*|RECURS
 [Norton Power Eraser*]
 LangSecRef=3024
 DetectFile=%CommonAppData%\Norton\NPE\NPEsettings.dat
-Warning=This removes ALL files of Norton's scan tool known as Norton Power Eraser. This tool should be downloaded fresh from Symantec after each run.
 Default=False
+Warning=This removes all files of Norton Power Eraser. This tool should be re-downloaded from Symantec after each run.
 FileKey1=%CommonAppData%\Norton\NPE|*.*|REMOVESELF
 FileKey2=%LocalAppData%\NPE|*.*|REMOVESELF
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Norton\NPE|*.*|REMOVESELF
@@ -13069,7 +13086,7 @@ FileKey4=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\download
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\17710
 Default=False
-Warning=Fixes verson mismatches, removes old custom map versions and removes old content. Redownload from server requried.
+Warning=Fixes version mismatches, removes old custom map versions and removes old content. Re-download from server requried.
 FileKey1=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\models|*.*|RECURSE
 FileKey2=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\materials\models|*.*|RECURSE
 FileKey3=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\materials\sprites|*.*|RECURSE
@@ -13105,7 +13122,7 @@ Section=Games
 DetectOS=6.0|
 Detect=HKCU\Software\Valve\Steam\Apps\17710
 Default=False
-Warning=This will remove mac and linux binaries. (designed for Windows ONLY)
+Warning=This will remove mac and linux binaries.
 FileKey1=%ProgramFiles%\Steam\SteamApps\common\Nuclear Dawn\nucleardawn\bin|client.so;client.dylib|RECURSE
 
 [Nuclear Dawn SK Gamemode*]
@@ -13155,7 +13172,6 @@ FileKey13=%LocalAppData%\VirtualStore\ProgramData\NVIDIA Corporation\NVIDIA GeFo
 FileKey14=%LocalAppData%\VirtualStore\ProgramData\NVIDIA Corporation\nvstreamsvc|*.log
 FileKey15=%LocalAppData%\VirtualStore\ProgramData\NVIDIA Corporation\ShadowPlay|*.log;*.bak;*.stat
 
-
 [NVIDIA GFExperience Updates*]
 LangSecRef=3024
 Detect=HKLM\SOFTWARE\NVIDIA Corporation\Global\GFExperience
@@ -13195,7 +13211,7 @@ FileKey13=%LocalAppData%\NVIDIA Corporation\NVIDIA Share\CefCache|*.log;*.bak
 FileKey14=%LocalAppData%\VirtualStore\Program Files*\NVIDIA Corporation\NetworkAccessManager\Apache Group\Apache2\logs|*.*
 FileKey15=%LocalAppData%\VirtualStore\ProgramData*\NVIDIA|*.log;*.log_backup1|RECURSE
 FileKey16=%LocalAppData%\VirtualStore\ProgramData*\NVIDIA\NvBackend|*.log|RECURSE
-FileKey16=%LocalAppData%\VirtualStore\ProgramData*\NVIDIA Corporation\NvTelemetry|*.log;*.bak
+FileKey17=%LocalAppData%\VirtualStore\ProgramData*\NVIDIA Corporation\NvTelemetry|*.log;*.bak
 FileKey18=%ProgramFiles%\NVIDIA Corporation\NetworkAccessManager\Apache Group\Apache2\logs|*.*
 
 [NVIDIA Updates*]
@@ -13250,43 +13266,25 @@ Detect=HKCU\Software\Valve\Steam\Apps\200230
 Default=False
 FileKey1=%Documents%\My Games\PP3\PP3WorkGame\Logs|*.*
 
-[Office 2007 More*]
+[Office More*]
 LangSecRef=3021
-Detect=HKCU\Software\Microsoft\Office\12.0\Common
+Detect1=HKCU\Software\Microsoft\Office\12.0\Common
+Detect2=HKCU\Software\Microsoft\Office\14.0\Common
+Detect3=HKCU\Software\Microsoft\Office\15.0\Common
+Detect4=HKCU\Software\Microsoft\Office\16.0\Common
 Default=False
 FileKey1=%Documents%|~*.ppt;~*.pptx;~*.doc;~*.docx|RECURSE
+FileKey2=%LocalAppData%\Microsoft\Office\*\OfficeFileCache|*.*|RECURSE
+FileKey3=%LocalAppData%\Microsoft\Office\*|OneNoteOfflineCache.onecache
+FileKey4=%LocalAppData%\Microsoft\OneNote\*\OneNoteOfflineCache_Files|*.*|RECURSE
 RegKey1=HKCU\Software\Microsoft\Office\12.0\Common\Internet|UseRWHlinkNavigation
 RegKey2=HKCU\Software\Microsoft\Office\12.0\Word\Reading Locations
-
-[Office 2010 More*]
-LangSecRef=3021
-Detect=HKCU\Software\Microsoft\Office\14.0\Common
-Default=False
-FileKey1=%LocalAppData%\Microsoft\Office\14.0\OfficeFileCache|*.*|RECURSE
-FileKey2=%LocalAppData%\Microsoft\Office\14.0|OneNoteOfflineCache.onecache
-FileKey3=%LocalAppData%\Microsoft\OneNote\14.0\OneNoteOfflineCache_Files|*.*|RECURSE
-FileKey4=%Documents%|~*.ppt;~*.pptx;~*.doc;~*.docx|RECURSE
-RegKey1=HKCU\Software\Microsoft\Office\14.0\Common\Internet|UseRWHlinkNavigation
-RegKey2=HKCU\Software\Microsoft\Office\14.0\Word\Reading Locations
-
-[Office 2013 More*]
-LangSecRef=3021
-Detect=HKCU\Software\Microsoft\Office\15.0\Common
-Default=False
-FileKey1=%LocalAppData%\Microsoft\Office\15.0\OfficeFileCache|*.*|RECURSE
-FileKey2=%LocalAppData%\Microsoft\Office\15.0|OneNoteOfflineCache.onecache
-FileKey3=%LocalAppData%\Microsoft\OneNote\15.0\OneNoteOfflineCache_Files|*.*|RECURSE
-FileKey4=%Documents%|~*.ppt;~*.pptx;~*.doc;~*.docx|RECURSE
-RegKey1=HKCU\Software\Microsoft\Office\15.0\Common\Internet|UseRWHlinkNavigation
-RegKey2=HKCU\Software\Microsoft\Office\15.0\Word\Reading Locations
-
-[Office 2016 More*]
-LangSecRef=3021
-Detect=HKCU\Software\Microsoft\Office\16.0\Common
-Default=False
-FileKey1=%Documents%|~*.ppt;~*.pptx;~*.doc;~*.docx|RECURSE
-RegKey1=HKCU\Software\Microsoft\Office\16.0\Common\Internet|UseRWHlinkNavigation
-RegKey2=HKCU\Software\Microsoft\Office\16.0\Word\Reading Locations
+RegKey3=HKCU\Software\Microsoft\Office\14.0\Common\Internet|UseRWHlinkNavigation
+RegKey4=HKCU\Software\Microsoft\Office\14.0\Word\Reading Locations
+RegKey5=HKCU\Software\Microsoft\Office\15.0\Common\Internet|UseRWHlinkNavigation
+RegKey6=HKCU\Software\Microsoft\Office\15.0\Word\Reading Locations
+RegKey7=HKCU\Software\Microsoft\Office\16.0\Common\Internet|UseRWHlinkNavigation
+RegKey8=HKCU\Software\Microsoft\Office\16.0\Word\Reading Locations
 
 [Office Password Recovery*]
 LangSecRef=3024
@@ -13477,9 +13475,9 @@ FileKey1=%Documents%\OpenRA\Logs|*.*
 
 [OpenRA Replays*]
 Section=Games
-Warning=This will remove all of your Replays.
 DetectFile=%Documents%\OpenRA
 Default=False
+Warning=This will remove all of your Replays.
 FileKey1=%Documents%\OpenRA\Replays|*.*|RECURSE
 
 [OpenVPN*]
@@ -13489,7 +13487,7 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\OpenVPN\Log|*.*
 FileKey2=%ProgramFiles%\OpenVPN\Log|*.*
 
-[Opera 9 (Classic)*]
+[Opera 9 Classic*]
 LangSecRef=3027
 DetectFile=%ProgramFiles%\Opera 9\Opera.exe
 Default=False
@@ -13548,12 +13546,6 @@ Detect=HKCU\SOFTWARE\Robot Entertainment\Orcs Must Die! Unchained
 Default=False
 FileKey1=%Documents%\My Games\Orcs Must Die Unchained\SpitfireGame\Logs|*.log;*.dmg|RECURSE
 
-[Origin Installers*]
-Section=Games
-Detect=HKLM\Software\Classes\Origin
-Default=False
-FileKey1=%ProgramFiles%\Origin Games|*.cab;vc_red.msi;gfwlivesetup.exe;GamesExplorerIntegrationTool.exe;install.ini;globdata.ini;vcredist.bmp;vc_red.exe;install.exe;install.res.*.dll;eula.*.txt;vcredist_x64.exe;dotNetFx40_Full_setup.exe;dotNetFx40_Full_x86_x64.exe;xnafx40_redist.msi;DSETUP.DLL;oalinst.exe;DXSETUP.EXE;dsetup32.dll;dotnetfx3setup;vcredist_x86.exe;dxwebsetup.exe;xnafx31_redist.msi;dotNetFx35setup.exe;dotnetfx35.exe|RECURSE
-
 [Origin*]
 Section=Games
 Detect=HKLM\Software\Classes\Origin
@@ -13571,7 +13563,13 @@ FileKey10=%LocalAppData%\VirtualStore\ProgramData\Origin\Logs|*.*
 FileKey11=%LocalAppData%\VirtualStore\ProgramData\Origin\Telemetry|*.*
 FileKey12=%SystemDrive%|shared.log
 
-[Osmos (Logs)*]
+[Origin Installers*]
+Section=Games
+Detect=HKLM\Software\Classes\Origin
+Default=False
+FileKey1=%ProgramFiles%\Origin Games|*.cab;vc_red.msi;gfwlivesetup.exe;GamesExplorerIntegrationTool.exe;install.ini;globdata.ini;vcredist.bmp;vc_red.exe;install.exe;install.res.*.dll;eula.*.txt;vcredist_x64.exe;dotNetFx40_Full_setup.exe;dotNetFx40_Full_x86_x64.exe;xnafx40_redist.msi;DSETUP.DLL;oalinst.exe;DXSETUP.EXE;dsetup32.dll;dotnetfx3setup;vcredist_x86.exe;dxwebsetup.exe;xnafx31_redist.msi;dotNetFx35setup.exe;dotnetfx35.exe|RECURSE
+
+[Osmos Logs*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\29180
 Default=False
@@ -13613,8 +13611,8 @@ Detect3=HKCU\Software\Microsoft\Office\12.0\Outlook
 Detect4=HKCU\Software\Microsoft\Office\14.0\Outlook
 Detect5=HKCU\Software\Microsoft\Office\15.0\Outlook
 Detect6=HKCU\Software\Microsoft\Office\16.0\Outlook
-Warning=This Will Remove the Most Frequent Appointment Locations from all Outlook Versions.
 Default=False
+Warning=This Will Remove the Most Frequent Appointment Locations from all Outlook Versions.
 RegKey1=HKCU\Software\Microsoft\Office\9.0\Outlook\Preferences|LocationMRU
 RegKey2=HKCU\Software\Microsoft\Office\11.0\Outlook\Preferences|LocationMRU
 RegKey3=HKCU\Software\Microsoft\Office\12.0\Outlook\Preferences|LocationMRU
@@ -13631,14 +13629,14 @@ FileKey2=%LocalAppData%\VirtualStore\Program Files*\Agnitum\Outpost Firewall Pro
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Agnitum\Security Suite\Feedback\Logs|*.*
 FileKey4=%ProgramFiles%\Agnitum\Outpost Firewall Pro\log|*.*
 
-[Outpost Security Suite (logs)*]
+[Outpost Security Suite logs*]
 LangSecRef=3021
 Detect=HKLM\Software\Agnitum\Security Suite
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Agnitum\Outpost Security Suite Pro\log|*.log
 FileKey2=%ProgramFiles%\Agnitum\Outpost Security Suite Pro\log|*.log
 
-[OVH HubiC (cache)*]
+[OVH HubiC cache*]
 LangSecRef=3021
 Detect=HKCU\Software\OVH\hubiC-browser
 Default=False
@@ -13780,9 +13778,9 @@ FileKey1=%AppData%\Pandion\Profiles|*.log;*.buffer|RECURSE
 
 [Pando Cache*]
 Detect=HKCU\Software\Pando Networks\Pando
-Warning=Make sure Pando is totally shut down before using this
 LangSecRef=3024
 Default=False
+Warning=Make sure Pando is totally shut down before using this
 FileKey1=%LocalAppData%\Pando\Pando Files|*.*|RECURSE
 ExcludeKey1=FILE|%LocalAppData%\Pando\Pando Files|*Pando.prev.log;pando.save;pando.txt;pando.prev.log;pando.sav;pando.log
 ExcludeKey2=PATH|%LocalAppData%\Pando\Pando Files\Cert
@@ -13887,18 +13885,18 @@ Default=False
 Warning=This will cause you to redownload the Paramount Dynamic RSS file.
 FileKey1=%LocalAppData%\Microsoft\Feeds|http~c~f~fthemeserver~dmicrosoft~dcom~fdefault~daspx~mp=Paramount&c=Dynamic&m=en-US~
 
-[Paranormal Agency*]
-Section=Games
-DetectFile=%AppData%\Shape Games\Paranormal_v*
-Default=False
-FileKey1=%AppData%\Shame Games\Paranormal_v*\logs|*.*
-
 [Paranormal*]
 Section=Games
 DetectFile=%ProgramFiles%\Desura\Common\paranormal
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Desura\Common\paranormal\UDKGame\Logs|*.*
 FileKey2=%ProgramFiles%\Desura\Common\paranormal\UDKGame\Logs|*.*
+
+[Paranormal Agency*]
+Section=Games
+DetectFile=%AppData%\Shape Games\Paranormal_v*
+Default=False
+FileKey1=%AppData%\Shame Games\Paranormal_v*\logs|*.*
 
 [Partner Application*]
 LangSecRef=3022
@@ -14006,19 +14004,19 @@ Detect=HKCU\Software\Woozle\PE Module Explorer
 Default=False
 RegKey1=HKCU\Software\Woozle\PE Module Explorer\Recent Files
 
-[Peerblock Failed Lists*]
-LangSecRef=3024
-DetectFile=%ProgramFiles%\Peerblock
-Warning=This will delete all lists that failed to load into your peerblock
-Default=False
-FileKey1=%ProgramFiles%\Peerblock\lists|*.list.failed*
-
 [Peerblock*]
 LangSecRef=3024
 DetectFile=%ProgramFiles%\Peerblock
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Peerblock|*.log;History.db;*.bak;cache.p2b
 FileKey2=%ProgramFiles%\Peerblock|*.log;History.db;*.bak;cache.p2b
+
+[Peerblock Failed Lists*]
+LangSecRef=3024
+DetectFile=%ProgramFiles%\Peerblock
+Default=False
+Warning=This will delete all lists that failed to load into your peerblock
+FileKey1=%ProgramFiles%\Peerblock\lists|*.list.failed*
 
 [PeerNetworking*]
 LangSecRef=3025
@@ -14074,8 +14072,8 @@ FileKey2=%LocalAppData%\VirtualStore\ProgramData\Raxco\PerfectDisk\*|*.log;*.txt
 [PerfectUpdater*]
 LangSecRef=3024
 Detect=HKCU\Software\Raxco\PerfectUpdater
-Warning=This cleans the installation logs, backup files after updating, and the downloads for new updates used for updating your drivers.
 Default=False
+Warning=This cleans the installation logs, backup files after updating, and the downloads for new updates used for updating your drivers.
 FileKey1=%AppData%\Raxco\PerfectUpdater|*.log
 FileKey2=%AppData%\Raxco\PerfectUpdater\Backup|*.*
 FileKey3=%AppData%\Raxco\PerfectUpdater\Download|*.*
@@ -14111,17 +14109,17 @@ FileKey6=%ProgramFiles%\Legacy Interactive\Pet Pals Animal Doctor\temp|*.*|REMOV
 ExcludeKey1=PATH|%ProgramFiles%\Legacy Interactive\Pet Pals Animal Doctor\jre\bin
 ExcludeKey2=PATH|%ProgramFiles%\Legacy Interactive\Pet Pals Animal Doctor\jre\lib
 
-[phase-6 logs*]
-LangSecRef=3021
-DetectFile=%UserProfile%\.phase-6
-Default=False
-FileKey1=%UserProfile%\.phase-6\logs|phase-6.log|REMOVESELF
-
 [phase-6*]
 LangSecRef=3021
 DetectFile=%UserProfile%\.phase-6
 Default=False
 FileKey1=%UserProfile%\.phase-6|window-position.txt|REMOVESELF
+
+[phase-6 logs*]
+LangSecRef=3021
+DetectFile=%UserProfile%\.phase-6
+Default=False
+FileKey1=%UserProfile%\.phase-6\logs|phase-6.log|REMOVESELF
 
 [Phone*]
 DetectOS=10.0|
@@ -14347,12 +14345,6 @@ FileKey7=%LocalAppData%\VirtualStore\Program Files*\Plex Media Server\Logs|*.*|R
 FileKey8=%LocalAppData%\VirtualStore\Program Files*\Plex Media Server\Updates|*.*|RECURSE
 FileKey9=%LocalAppData%\Plex Media Server\Cache\PhotoTranscoder|*.*|RECURSE
 FileKey10=%ProgramFiles%\Plex\Plex Media Server|*.txt;*.log|RECURSE
-
-[PnaclTranslation Cache*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Chrome\User Data\PnaclTranslationCache|*.*
 
 [Pogo Games Cache*]
 Section=Games
@@ -14705,7 +14697,7 @@ Default=False
 FileKey1=%LocalAppData%\PunkBuster|pbcl.log|RECURSE
 FileKey2=%WinDir%\System32\LogFiles\PunkBuster|*.*
 
-[Puran Defrag (Log)*]
+[Puran Defrag Log*]
 LangSecRef=3024
 Detect=HKLM\Software\Puran Software\Puran Defrag
 Default=False
@@ -14800,8 +14792,8 @@ FileKey1=%AppData%\QIP\Profiles\*\Logs|*.*
 LangSecRef=3022
 Detect=HKCU\Software\QIP
 DetectFile=%AppData%\QIP
-Warning=Selecting this will delete any contact list backups, chat history, received files, opened tabs settings and other non-encrypted privacy items.
 Default=False
+Warning=Selecting this will delete any contact list backups, chat history, received files, opened tabs settings and other non-encrypted privacy items.
 FileKey1=%AppData%\QIP\Profiles\*|session.tabs
 FileKey2=%AppData%\QIP\Profiles\*\BackupCL|*.*
 FileKey3=%AppData%\QIP\Profiles\*\History|*.*|RECURSE
@@ -14862,17 +14854,12 @@ FileKey7=%LocalAppData%\VirtualStore\ProgramData\Intuit\SendError|*.log
 FileKey8=%LocalAppData%\Quicken\Common\Authorization\V1\Logs|*.txt
 FileKey9=%ProgramFiles%\Quicken\PDFDrv\|install.log;InstallPDFConverter.log
 
-[Quicken WillMaker Plus 2013*]
+[Quicken WillMaker Plus*]
 LangSecRef=3021
-DetectFile=%LocalAppData%\Quicken WillMaker Plus 2013
+DetectFile1=%LocalAppData%\Quicken WillMaker Plus 2013
+DetectFile2=%LocalAppData%\Quicken WillMaker Plus 2014
 Default=False
-FileKey1=%LocalAppData%\Quicken WillMaker Plus 2013|web update log.txt
-
-[Quicken WillMaker Plus 2014*]
-LangSecRef=3021
-DetectFile=%LocalAppData%\Quicken WillMaker Plus 2014
-Default=False
-FileKey1=%LocalAppData%\Quicken WillMaker Plus 2014|web update log.txt
+FileKey1=%LocalAppData%\Quicken WillMaker Plus *|web update log.txt
 
 [QuickPAR*]
 LangSecRef=3024
@@ -14916,37 +14903,37 @@ SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%LocalAppData%\Google\Chrome\User Data\*|QuotaManager
 
-[QupZilla Portable (Cookies)*]
+[QupZilla Portable Cookies*]
 Section=QupZilla Portable
 DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
 Default=False
 FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\profile|cookies.dat
 
-[QupZilla Portable (Local App Data)*]
+[QupZilla Portable Local App Data*]
 Section=QupZilla Portable
 DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
 Default=False
 FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\QupZillaLocalAppData|*.*|RECURSE
 
-[QupZilla Portable (Network Cache)*]
+[QupZilla Portable Network Cache*]
 Section=QupZilla Portable
 DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
 Default=False
 FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\profile\networkcache|*.*|RECURSE
 
-[QupZilla Portable (Session)*]
+[QupZilla Portable Session*]
 Section=QupZilla Portable
 DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
 Default=False
 FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\profile|session.dat*
 
-[QupZilla Portable (Thumbnails)*]
+[QupZilla Portable Thumbnails*]
 Section=QupZilla Portable
 DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
 Default=False
 FileKey1=%SystemDrive%\PortableApps\QupZillaPortable\Data\profile\thumbnails|*.*
 
-[QupZilla Portable (Webpage Icons)*]
+[QupZilla Portable Webpage Icons*]
 Section=QupZilla Portable
 DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
 Default=False
@@ -15142,7 +15129,7 @@ Detect=HKCU\Software\RealNetworks\RealPlayer
 Default=False
 FileKey1=%AppData%\Real\RealPlayer\db|*.*|RECURSE
 
-[Realtek (Logs)*]
+[Realtek Logs*]
 LangSecRef=3021
 Detect=HKLM\Software\Realtek
 Default=False
@@ -15507,7 +15494,6 @@ FileKey1=%AppData%\Microsoft Games\Rise of Nations\Logs|*.*
 LangSecRef=3024
 DetectFile1=%UserProfile%\Desktop\Rkill
 DetectFile2=%UserProfile%\Desktop\Rkill.txt
-Warning=This will delete your Rkill Log. Make sure you've reviewed it first.
 Default=False
 FileKey1=%UserProfile%\Desktop\Rkill|*.*|REMOVESELF
 FileKey2=%UserProfile%\Desktop|*rkill*.*
@@ -15535,8 +15521,8 @@ FileKey2=%LocalLowAppData%\RbxLogs|*.*|RECURSE
 [RoboBasket3*]
 LangSecRef=3024
 DetectFile=%AppData%\RoboBasket3
-Warning=This may prompt you with an error upon trying to view the log. Just click continue.
 Default=False
+Warning=This may prompt you with an error upon trying to view the log. Just click continue.
 FileKey1=%AppData%\RoboBasket3|log.database
 
 [Rochard*]
@@ -15753,8 +15739,8 @@ FileKey4=%ProgramFiles%\Sauerbraten\packages\base|*.bak|RECURSE
 [Saved Search Folders*]
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows
-Warning=Can cause issues on Windows 8 or newer
 Default=False
+Warning=Can cause issues on Windows 8 or newer
 FileKey1=%UserProfile%\Searches|*.search-ms
 
 [SavingsBull Filter*]
@@ -15809,18 +15795,18 @@ Default=False
 Warning=This Resets Screenshot Naming Back To "Screenshot (1).png"
 RegKey1=HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer|ScreenshotIndex
 
-[Scribe (Finished Jobs)*]
-LangSecRef=3021
-Detect=HKCU\Software\NCH Software\Scribe
-Default=False
-Warning=This will delete copies of files related you have run through Scribe.
-FileKey1=%AppData%\NCH Software\Scribe\Done|*.*
-
 [Scribe*]
 LangSecRef=3021
 Detect=HKCU\Software\NCH Software\Scribe
 Default=False
 FileKey1=%AppData%\NCH Software\Scribe\Logs|*.*
+
+[Scribe Finished Jobs*]
+LangSecRef=3021
+Detect=HKCU\Software\NCH Software\Scribe
+Default=False
+Warning=This will delete copies of files related you have run through Scribe.
+FileKey1=%AppData%\NCH Software\Scribe\Done|*.*
 
 [Scribus*]
 LangSecRef=3023
@@ -15859,6 +15845,12 @@ Default=False
 RegKey1=HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\SearchHistory
 RegKey2=HKCU\Software\Microsoft\Windows\CurrentVersion\Search\RecentApps
 
+[Second Copy*]
+LangSecRef=3024
+DetectFile=%LocalAppData%\Centered Systems\Second Copy
+Default=False
+FileKey1=%LocalAppData%\Centered Systems\Second Copy|log*.*
+
 [Second Copy 2000*]
 LangSecRef=3021
 Detect=HKCU\Software\Centered Systems\Second Copy 2000
@@ -15866,12 +15858,6 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\SecCopy|log.rtf;log-old.rtf
 FileKey2=%ProgramFiles%\SecCopy|log.rtf;log-old.rtf
 RegKey1=HKCU\Software\Centered Systems\Second Copy 2000\MRU
-
-[Second Copy*]
-LangSecRef=3024
-DetectFile=%LocalAppData%\Centered Systems\Second Copy
-Default=False
-FileKey1=%LocalAppData%\Centered Systems\Second Copy|log*.*
 
 [SecondLife Cache*]
 LangSecRef=3021
@@ -15985,18 +15971,6 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Serviio\log|*.*
 FileKey2=%ProgramFiles%\Serviio\log|*.*
 
-[Session Backups*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|sessionstore.bak*
-
-[Session Manager deleted sessions*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\sessions\Deleted Sessions|*.session
-
 [Session Manager*]
 LangSecRef=3025
 Detect=HKLM\Software\Microsoft\Windows
@@ -16006,13 +15980,6 @@ FileKey2=%WinDir%\AppCompat\Programs\Install|*.txt;*.xml
 RegKey1=HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache|AppCompatCache
 RegKey2=HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache|CacheMainSdb
 RegKey3=HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache|SdbTime
-
-[Session Storage*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\Session Storage|*.*|RECURSE
-FileKey2=%LocalAppData%\Google\Chrome*\User Data\*\Session Storage|*.*|RECURSE
 
 [SetRegistryKey Leftovers*]
 LangSecRef=3025
