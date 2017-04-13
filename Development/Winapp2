@@ -1,4 +1,4 @@
-; Version: 170411
+; Version: 170413
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -5191,9 +5191,10 @@ DetectFile=%LocalAppData%\PowerCinema
 Default=False
 FileKey1=%LocalAppData%\PowerCinema|trace.log;trace.txt
 
-[CyberLink PowerDVD 16*]
+[CyberLink PowerDVD 16/17*]
 LangSecRef=3023
-Detect=HKCU\Software\CyberLink\PowerDVD16
+Detect1=HKCU\Software\CyberLink\PowerDVD16
+Detect2=HKCU\Software\CyberLink\PowerDVD17
 Default=False
 FileKey1=%LocalAppData%\Cyberlink\PowerDVD*\cache\|*.*
 FileKey2=%CommonAppData%\Cyberlink\Evoparser\|*.xml
