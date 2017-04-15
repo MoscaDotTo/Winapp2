@@ -1,4 +1,4 @@
-; Version: 170413
+; Version: 170415
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -9895,6 +9895,15 @@ LangSecRef=3024
 DetectFile=%WinDir%\AutoKMS\AutoKMS.exe
 Default=False
 FileKey1=%WinDir%\AutoKMS|AutoKMS.log
+
+[Kodak AiO Software Disable Startup*]
+LangSecRef=3021
+Detect1=HKLM\Software\Eastman Kodak Company\KODAK AiO Home Center
+Detect2=HKLM\Software\Kodak\Kodak AiO Software
+Default=False
+Warning=Disables the Kodak AiO Software from automatically starting with Windows. Every time you print, it will re-enable itself to start with Windows.
+RegKey1=HKLM\Software\Microsoft\Windows\CurrentVersion\Run|EKAIO2StatusMonitor
+RegKey2=HKLM\Software\Microsoft\Windows\CurrentVersion\Run|EKStatusMonitor
 
 [Kodak AiO Software Logs*]
 LangSecRef=3021
@@ -20315,14 +20324,14 @@ FileKey1=%CommonAppData%\Microsoft\Windows\RetailDemo|*.*|REMOVESELF
 
 [Windows ShellBags*]
 LangSecRef=3025
-Detect1=HKCU\Software\Microsoft\Windows
-Detect2=HKCU\Software\Microsoft\Windows\ShellNoRoam
+Detect=HKCU\Software\Microsoft\Windows
 Default=False
-Warning=This will delete view settings of all folders.
 RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\BagMRU
 RegKey2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags
 RegKey3=HKCU\Software\Microsoft\Windows\ShellNoRoam\BagMRU
 RegKey4=HKCU\Software\Microsoft\Windows\ShellNoRoam\Bags
+ExcludeKey1=REG|HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell
+ExcludeKey2=REG|HKCU\Software\Microsoft\Windows\ShellNoRoam\Bags\AllFolders\Shell
 
 [Windows Tracing*]
 LangSecRef=3025
