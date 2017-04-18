@@ -280,6 +280,18 @@ Default=False
 FileKey1=%LocalAppData%\Amigo\User Data\*\Session Storage|*.*|RECURSE
 FileKey2=%LocalAppData%\Google\Chrome*\User Data\*\Session Storage|*.*|RECURSE
 
+[SetupMetrics*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%ProgramFiles%\Google\Chrome\Application\SetupMetrics|*.*|RECURSE
+
+[Software Reporter Tool*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Software Reporter Tool|*.log
+
 ; End of Chrome/Chromium Entries.
 ;
 ; Firefox Entries
@@ -393,6 +405,64 @@ SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\sessions\Deleted Sessions|*.session
 
+[Shortcut Cache*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%LocalAppData%\Mozilla\Firefox\Profiles\*\shortcutCache|*.*
+
+[Startup Cache*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%LocalAppData%\Mozilla\Firefox\Profiles\*\startupCache|*.*
+
+[Stylish Sync Backups*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\*|stylishsync-20*.sqlite|RECURSE
+
+[Sync Logs*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\weave\logs|*.*
+
+[Telemetry*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\FireFox\Profiles\*|Telemetry*.*
+FileKey2=%AppData%\Mozilla\FireFox\Profiles\*\saved-telemetry-pings|*.*
+
+[Temps*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\Mozilla*|*.tmp|RECURSE
+FileKey2=%ProgramFiles%\Mozilla*|*.tmp|RECURSE
+
+[TestPilot Error Logs*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\FireFox\Profiles|TestPilotErrorLog.*|RECURSE
+
+[Update Logs*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%LocalAppData%\Mozilla\Firefox\*\updates|*.*|RECURSE
+FileKey2=%LocalAppData%\Mozilla\Firefox\Mozilla\*|*.log|RECURSE
+
+[urlclassifier3.sqlite*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+Warning=This will delete urlclassifier3.sqlite. If you just want to reduce its size, select Compact Databases instead.
+FileKey1=%LocalAppData%\Mozilla\Firefox\Profiles\*|urlclassifier3.sqlite
+
 ; End of Firefox Entries.
 ;
 ; Thunderbird entires.
@@ -409,6 +479,73 @@ LangSecRef=3030
 SpecialDetect=DET_THUNDERBIRD
 Default=False
 FileKey1=%AppData%\Thunderbird\Profiles\*|filterlog.html|RECURSE
+
+[Thunderbird Corrupt SQLites*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%AppData%\Thunderbird\Profiles|*.corrupt|RECURSE
+
+[Thunderbird Crash Reports*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%AppData%\Thunderbird\Crash Reports|*.*|REMOVESELF
+
+[Thunderbird Extensions Log*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%AppData%\Thunderbird\Profiles\*|extensions.log
+
+[Thunderbird Install Log*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%ProgramFiles%\Mozilla Thunderbird|install.log
+
+[Thunderbird Maintenance Service*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%CommonAppData%\Mozilla*\logs|*.*|REMOVESELF
+FileKey2=%LocalAppData%\VirtualStore\ProgramData\Mozilla*\logs|*.*|REMOVESELF
+
+[Thunderbird Minidumps*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%AppData%\Thunderbird\Profiles\*\Minidumps|*.*
+
+[Thunderbird Net Predictions*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%AppData%\Thunderbird\Profiles\*|seer.sqlite;netpredictions.sqlite
+
+[Thunderbird Startup Cache*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%LocalAppData%\Thunderbird\Profiles\*\startupCache|*.*
+
+[Thunderbird TestPilot Error Logs*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%AppData%\Thunderbird\Profiles\*|TestPilotErrorLog.*|RECURSE
+
+[Thunderbird Update Logs*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%LocalAppData%\Thunderbird\Mozilla\*\Updates|*.log|RECURSE
+
+[Thunderbird webappsstore.sqlite*]
+LangSecRef=3030
+SpecialDetect=DET_THUNDERBIRD
+Default=False
+FileKey1=%AppData%\Thunderbird\Profiles\*|webappsstore.sqlite
 
 ; End of Thunderbird entries.
 
@@ -16013,12 +16150,6 @@ Detect=HKCU\Software\Microsoft\Windows
 Default=False
 FileKey1=%WinDir%\inf|*.log*
 
-[SetupMetrics*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%ProgramFiles%\Google\Chrome\Application\SetupMetrics|*.*|RECURSE
-
 [Shareaza More*]
 LangSecRef=3022
 Detect=HKCU\Software\BHO Shareaza
@@ -16055,8 +16186,8 @@ FileKey1=%Documents%\ShareX\Screenshots|*.*|RECURSE
 DetectOS=6.2|
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows
-Warning=This will remove the frequently shared list. This does not remove the Apps listed under sharing.
 Default=False
+Warning=This will remove the frequently shared list. This does not remove the Apps listed under sharing.
 RegKey1=HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\SharingMFU
 
 [Shark Dash*]
@@ -16114,19 +16245,13 @@ DetectFile=%LocalAppData%\ShippingAssistant
 Default=False
 FileKey1=%LocalAppData%\ShippingAssistant\Logs|*.*|RECURSE
 
-[Shortcut Cache*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%LocalAppData%\Mozilla\Firefox\Profiles\*\shortcutCache|*.*
-
 [ShortKeys*]
 LangSecRef=3021
 Detect=HKCU\Software\Insight Software Solutions\ShortKeys
 Default=False
 RegKey1=HKCU\Software\Insight Software Solutions\ShortKeys\MRU
 
-[Should I Remove It? (Cache)*]
+[Should I Remove It? Cache*]
 LangSecRef=3024
 Detect=HKCU\Software\Reason
 Default=False
@@ -16273,9 +16398,9 @@ FileKey1=%CommonAppData%\Skype|SkypeToolbars.msi;Skype.msi|RECURSE
 
 [Skype Messages*]
 LangSecRef=3022
-Warning=This will delete your chat message history!
 Detect=HKCU\Software\Skype
 Default=False
+Warning=This will delete your chat message history!
 FileKey1=%AppData%\Skype|offline-storage.data;dc.db|RECURSE
 FileKey2=%AppData%\Skype\*\chatsync|*.*|RECURSE
 
@@ -16504,68 +16629,36 @@ Default=False
 FileKey1=%Pictures%\smplayer2_screenshots|*.*|RECURSE
 FileKey2=%LocalAppData%\SMPlayer2\screenshots|*.*|RECURSE
 
-[Snagit 9 More*]
+[Snagit Local Dumps*]
 LangSecRef=3024
-Detect=HKCU\Software\TechSmith\SnagIt\9
-Default=False
-FileKey1=%LocalAppData%\TechSmith\Snagit\DataStore|*.sdf
-FileKey2=%LocalAppData%\TechSmith\Snagit\DataStore\AppIcons|*.*
-FileKey3=%LocalAppData%\TechSmith\Snagit\DataStore\WebSiteIcons|*.*
-FileKey4=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
-RegKey1=HKCU\Software\TechSmith\SnagIt\9|StampCustomFolder
-
-[Snagit 10/11/12/13 Local Dumps*]
-LangSecRef=3024
-Detect1=HKCU\Software\TechSmith\SnagIt\10
-Detect2=HKCU\Software\TechSmith\SnagIt\11
-Detect3=HKCU\Software\TechSmith\SnagIt\12
-Detect4=HKCU\Software\TechSmith\SnagIt\13
+Detect=HKCU\Software\TechSmith\SnagIt
 Default=False
 FileKey1=%LocalAppData%\TechSmith\Snagit\CrashDumps|*.*
 
-[Snagit 10 More*]
+[Snagit More*]
 LangSecRef=3024
-Detect=HKCU\Software\TechSmith\SnagIt\10
+Detect=HKCU\Software\TechSmith\SnagIt
 Default=False
-Warning=This will delete the backups of the captures that you have performed with SnagIt 10.
-FileKey1=%LocalAppData%\TechSmith\Snagit\DataStore|*.sdf;*.SNAG;*.SNAGundo
-RegKey1=HKCU\Software\TechSmith\SnagIt\10|StampCustomFolder
-
-[Snagit 11 More*]
-LangSecRef=3024
-Detect=HKCU\Software\TechSmith\SnagIt\11
-Default=False
-Warning=This will delete the backups of the captures that you have performed with SnagIt 11.
+Warning=This will delete the backups of the captures that you have performed with SnagIt.
 FileKey1=%Documents%|SnagItDebug.log
-FileKey2=%LocalAppData%\TechSmith\Snagit\DataStore|*.sdf;*.SNAG;*.SNAGundo;*.MP4
-RegKey1=HKCU\Software\TechSmith\Snagit\11|CaptureCount
-RegKey2=HKCU\Software\TechSmith\Snagit\Stamps|StampCustomFolder
-
-[Snagit 12/13 More*]
-LangSecRef=3024
-Detect1=HKCU\Software\TechSmith\SnagIt\12
-Detect2=HKCU\Software\TechSmith\SnagIt\13
-Default=False
-Warning=This will delete the backups of the captures that you have performed with SnagIt 12/13.
-FileKey1=%Documents%|SnagItDebug.log
-FileKey2=%LocalAppData%\TechSmith\Snagit\DataStore|*.SNAG;*.SNAGundo;*.MP4;*.sdf
-FileKey3=%LocalAppData%\TechSmith\Logs|*.log
-RegKey1=HKCU\Software\TechSmith\Snagit\12|CaptureCount
-RegKey2=HKCU\Software\TechSmith\Snagit\13|CaptureCount
-RegKey3=HKCU\Software\TechSmith\Snagit\13|CaptureOpenCount
-RegKey4=HKCU\Software\TechSmith\Snagit\Stamps|StampCustomFolder
-
-[Snagit 13*]
-LangSecRef=3024
-Detect=HKCU\Software\TechSmith\SnagIt\13
-Default=False
-FileKey1=%LocalAppData%\TechSmith\SnagIt|Tray.bin
-FileKey2=%LocalAppData%\TechSmith\SnagIt\DataStore\AppIcons|*.ico
-FileKey3=%LocalAppData%\TechSmith\SnagIt\DataStore\WebSiteIcons|*.ico
-FileKey4=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
-FileKey5=%LocalAppData%\TechSmith\SnagIt\TrackerbirdFiles|*.log
-RegKey1=HKCU\Software\TechSmith\SnagIt\13\Recent Captures
-RegKey2=HKCU\Software\TechSmith\SnagIt\13\SnagItEditor\Recent File List
+FileKey2=%LocalAppData%\TechSmith\Logs|*.log
+FileKey3=%LocalAppData%\TechSmith\Snagit\DataStore|*.sdf;*.SNAG;*.SNAGundo;*.MP4
+FileKey4=%LocalAppData%\TechSmith\Snagit\DataStore\AppIcons|*.*
+FileKey5=%LocalAppData%\TechSmith\Snagit\DataStore\WebSiteIcons|*.*
+FileKey6=%LocalAppData%\TechSmith\SnagIt\DataStore\AppIcons|*.ico
+FileKey7=%LocalAppData%\TechSmith\SnagIt\DataStore\WebSiteIcons|*.ico
+FileKey8=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
+FileKey9=%LocalAppData%\TechSmith\SnagIt\TrackerbirdFiles|*.log
+FileKey10=%LocalAppData%\TechSmith\SnagIt|Tray.bin
+RegKey1=HKCU\Software\TechSmith\SnagIt\9|StampCustomFolder
+RegKey2=HKCU\Software\TechSmith\SnagIt\10|StampCustomFolder
+RegKey3=HKCU\Software\TechSmith\Snagit\11|CaptureCount
+RegKey4=HKCU\Software\TechSmith\Snagit\12|CaptureCount
+RegKey5=HKCU\Software\TechSmith\Snagit\13|CaptureCount
+RegKey6=HKCU\Software\TechSmith\Snagit\13|CaptureOpenCount
+RegKey7=HKCU\Software\TechSmith\SnagIt\13\Recent Captures
+RegKey8=HKCU\Software\TechSmith\SnagIt\13\SnagItEditor\Recent File List
+RegKey9=HKCU\Software\TechSmith\Snagit\Stamps|StampCustomFolder
 
 [Snapfish Picture Mover*]
 LangSecRef=3023
@@ -16620,8 +16713,8 @@ FileKey1=%AppData%\SoftCafe\MenuPro|*.tmp
 [SoftEther VPN*]
 LangSecRef=3024
 Detect=HKCU\Software\SoftEther Project\SoftEther VPN
-Warning=Exclude installer.cache if you're using SoftEther VPN Client Web Installer
 Default=False
+Warning=Exclude installer.cache if you're using SoftEther VPN Client Web Installer
 FileKey1=%ProgramFiles%\SoftEther VPN Client|installer.cache
 FileKey2=%ProgramFiles%\SoftEther VPN Client\vpn_debug|*.*
 FileKey3=%ProgramFiles%\SoftEther VPN Client\backup.vpn_client.config|*.config
@@ -16664,12 +16757,6 @@ FileKey2=%CommonAppData%\Microsoft\Windows\Sqm\Sessions|*.psqm;*.sqm
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\Sqm\Manifest|*.bin
 FileKey4=%LocalAppData%\VirtualStore\ProgramData\Microsoft\Windows\Sqm\Sessions|*.psqm;*.sqm
 
-[Software Reporter Tool*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Software Reporter Tool|*.log
-
 [Soluto Cache*]
 LangSecRef=3024
 Detect=HKLM\Software\Soluto
@@ -16684,8 +16771,8 @@ FileKey6=%LocalAppData%\VirtualStore\ProgramData\Soluto\rdcache|*.*|RECURSE
 [Soluto Dumps*]
 LangSecRef=3024
 Detect=HKLM\Software\Soluto
-Warning=This will remove Soluto's dump files. If you use this feature to diagnose dumps, do not use this entry.
 Default=False
+Warning=This will remove Soluto's dump files. If you use this feature to diagnose dumps, do not use this entry.
 FileKey1=%CommonAppData%\Soluto\Dumps|*.*|RECURSE
 FileKey2=%CommonAppData%\Soluto\Logs\KMCustomDumpFolder|*.*|RECURSE
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Soluto\Dumps|*.*|RECURSE
@@ -16803,6 +16890,13 @@ Default=False
 FileKey1=%AppData%\Sony|*.log
 FileKey2=%LocalAppData%\Sony\Vegas Pro\*|*.log
 
+[Soulseek*]
+LangSecRef=3022
+DetectFile=%ProgramFiles%\Soulseek\slsk.exe
+Default=False
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\Soulseek|search.cfg
+FileKey2=%ProgramFiles%\Soulseek|search.cfg
+
 [Soulseek Beta*]
 LangSecRef=3022
 DetectFile=%ProgramFiles%\Soulseek-Test\slsk.exe
@@ -16812,25 +16906,18 @@ FileKey2=%ProgramFiles%\Soulseek-Test|search.cfg
 
 [Soulseek NS*]
 LangSecRef=3022
-Warning=This will delete your chat history.
 Detect=HKCU\Software\Soulseek2
 Default=False
+Warning=This will delete your chat history.
 FileKey1=%Documents%\Soulseek Chat Logs\Private|*.txt
 RegKey1=HKCU\Software\Soulseek2\config|search
 
-[Soulseek*]
-LangSecRef=3022
-DetectFile=%ProgramFiles%\Soulseek\slsk.exe
-Default=False
-FileKey1=%LocalAppData%\VirtualStore\Program Files*\Soulseek|search.cfg
-FileKey2=%ProgramFiles%\Soulseek|search.cfg
-
 [SoulseekQt*]
 LangSecRef=3022
-Warning=This will delete your chat history.
 DetectFile=%ProgramFiles%\SoulseekQt\SoulseekQt.exe
 Detect=HKLM\Software\SoulseekQt
 Default=False
+Warning=This will delete your chat history.
 FileKey1=%LocalAppData%\Soulseek Chat Logs\Users|*.log
 FileKey2=%LocalAppData%\Soulseek Chat Logs\Rooms|*.log
 
@@ -17027,7 +17114,7 @@ FileKey2=%ProgramFiles%\Spyware Terminator|*.err;*.old|RECURSE
 LangSecRef=3024
 DetectFile=%ProgramFiles%\SpywareBlaster\sbautoupdate.exe
 Default=False
-Warning=This deletes SWB program updater file spywareblasterupgrade_latest.exe which is no longer needed once a SWB program version update occurs.
+Warning=This deletes SWB program updater file, which is no longer needed once a SWB program version update occurs.
 FileKey1=%ProgramFiles%\SpywareBlaster|spywareblasterupgrade_latest.exe
 
 [SQL Anywhere 11*]
@@ -17209,17 +17296,12 @@ Default=False
 FileKey1=%CommonAppData%\StarMoney *|*.log|RECURSE
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\StarMoney *|*.log|RECURSE
 
-[StarOffice 8*]
+[StarOffice*]
 LangSecRef=3021
-DetectFile=%ProgramFiles%\Sun\StarOffice 8\program\soffice.exe
+DetectFile1=%ProgramFiles%\Sun\StarOffice 8\program\soffice.exe
+DetectFile2=%ProgramFiles%\Sun\StarOffice 9\program\soffice.exe
 Default=False
-FileKey1=%AppData%\StarOffice8\user\registry\data\org\openoffice\Office|Common.xcu
-
-[StarOffice 9*]
-LangSecRef=3021
-DetectFile=%ProgramFiles%\Sun\StarOffice 9\program\soffice.exe
-Default=False
-FileKey1=%AppData%\StarOffice9\user\registry\data\org\openoffice\Office|Common.xcu
+FileKey1=%AppData%\StarOffice*\user\registry\data\org\openoffice\Office|Common.xcu
 
 [Start Menu Cache*]
 DetectOS=6.2|
@@ -17240,12 +17322,6 @@ LangSecRef=3024
 Detect=HKLM\Software\IObit\StartMenu
 Default=False
 FileKey1=%AppData%\IObit\StartMenu 8|*.log
-
-[Startup Cache*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%LocalAppData%\Mozilla\Firefox\Profiles\*\startupCache|*.*
 
 [Startup Repair Logs*]
 LangSecRef=3025
@@ -17386,15 +17462,10 @@ FileKey1=%AppData%\Stellarium|log.txt
 
 [StepMania 4 Logs*]
 Section=Games
-DetectFile=%AppData%\StepMania 4
+DetectFile1=%AppData%\StepMania
+DetectFile2=%AppData%\StepMania 4
 Default=False
-FileKey1=%AppData%\Stepmania 4\Logs|*.*
-
-[StepMania Logs*]
-Section=Games
-DetectFile=%AppData%\StepMania
-Default=False
-FileKey1=%AppData%\Stepmania\Logs|*.*
+FileKey1=%AppData%\Stepmania *\Logs|*.*
 
 [Sticky Notes Cache*]
 LangSecRef=3021
@@ -17514,29 +17585,15 @@ DetectFile=%AppData%\Style Jukebox Settings
 Default=False
 FileKey1=%AppData%\Style Jukebox Settings|*.bmp|RECURSE
 
-[Stylish Sync Backups*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\*|stylishsync-20*.sqlite|RECURSE
-
-[Sublime Text (Session)*]
-LangSecRef=3021
-DetectFile=%AppData%\Sublime Text
+[Sublime Text Session*]
+LangSecRef=3024
+DetectFile1=%AppData%\Sublime Text
+DetectFile2=%AppData%\Sublime Text 2
+DetectFile3=%AppData%\Sublime Text 3
 Default=False
 FileKey1=%AppData%\Sublime Text\Options|*.*
-
-[Sublime Text 2 Session*]
-LangSecRef=3024
-DetectFile=%AppData%\Sublime Text 2
-Default=False
-FileKey1=%AppData%\Sublime Text 2\Settings|*.sublime_session
-
-[Sublime Text 3 Session*]
-LangSecRef=3024
-DetectFile=%AppData%\Sublime Text 3\
-Default=False
-FileKey1=%AppData%\Sublime Text 3\Local|Session.sublime_session
+FileKey2=%AppData%\Sublime Text 2\Settings|*.sublime_session
+FileKey3=%AppData%\Sublime Text 3\Local|Session.sublime_session
 
 [Success Story*]
 Section=Games
@@ -17730,12 +17787,6 @@ DetectFile=%Public%\Symantec\SymSilent
 Default=False
 FileKey1=%Public%\Symantec\SymSilent\ccLog|*.*
 
-[Sync Logs*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\weave\logs|*.*
-
 [Sync Traces*]
 DetectOS=6.2|
 LangSecRef=3025
@@ -17779,7 +17830,7 @@ Detect=HKCU\Software\Classes\synthesia
 Default=False
 FileKey1=%AppData%\Synthesia|log.txt;log-configuration.txt
 
-[System Mechanic (Snapshots)*]
+[System Mechanic Snapshots*]
 LangSecRef=3024
 Detect=HKCU\Software\iolo\System Mechanic
 Default=False
@@ -17828,7 +17879,7 @@ RegKey5=HKCU\Software\Softpointer\Tag&Rename3\Config|FCurrentFolder
 RegKey6=HKCU\Software\Softpointer\Tag&Rename3\Config|FHistoryList
 RegKey7=HKCU\Software\Softpointer\Tag&Rename3\Config|FileListHeader
 
-[Talkback (Crash Reports)*]
+[Talkback Crash Reports*]
 LangSecRef=3026
 Detect=HKLM\Software\FullCircle\TalkBack
 Default=False
@@ -17915,6 +17966,18 @@ RegKey2=HKCU\Software\TeamViewer\Version5.1|Last_Machine_Connections
 RegKey3=HKCU\Software\TeamViewer\Version6|Last_Machine_Connections
 RegKey4=HKCU\Software\TeamViewer\Version7|Last_Machine_Connections
 
+[Technic Launcher*]
+Section=Games
+DetectFile1=%AppData%\.techniclauncher
+DetectFile2=%AppData%\.techniclauncher
+Default=False
+FileKey1=%AppData%\.technic|*.old;*.log;*.tmp|RECURSE
+FileKey2=%AppData%\.technic\*\logs|*.*|RECURSE
+FileKey3=%AppData%\.technic\temp|*.*RECURSE
+FileKey4=%AppData%\.techniclauncher|*.old;*.log;*.tmp|RECURSE
+FileKey5=%AppData%\.technicLauncher\*\logs|*.*|RECURSE
+FileKey6=%AppData%\.techniclauncher\temp|*.*RECURSE
+
 [Technic Launcher Backups*]
 Section=Games
 DetectFile1=%AppData%\.techniclauncher
@@ -17938,18 +18001,6 @@ DetectFile2=%AppData%\.technic
 Default=False
 FileKey1=%AppData%\.techniclauncher\*\Screenshots|*.*
 FileKey2=%AppData%\.technic\*\Screenshots|*.*
-
-[Technic Launcher*]
-Section=Games
-DetectFile1=%AppData%\.techniclauncher
-DetectFile2=%AppData%\.techniclauncher
-Default=False
-FileKey1=%AppData%\.technic|*.old;*.log;*.tmp|RECURSE
-FileKey2=%AppData%\.technic\*\logs|*.*|RECURSE
-FileKey3=%AppData%\.technic\temp|*.*RECURSE
-FileKey4=%AppData%\.techniclauncher|*.old;*.log;*.tmp|RECURSE
-FileKey5=%AppData%\.technicLauncher\*\logs|*.*|RECURSE
-FileKey6=%AppData%\.techniclauncher\temp|*.*RECURSE
 
 [TechSmith DubIt*]
 LangSecRef=3023
@@ -18023,26 +18074,12 @@ FileKey2=%LocalAppData%\VirtualStore\Program Files*\Tele2 Mobile Partner\Log|*.t
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Tele2 Mobile Partner\log|*.*
 FileKey4=%ProgramFiles%\Tele2 Mobile Partner\Log|*.txt
 
-[Telemetry*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\FireFox\Profiles\*|Telemetry*.*
-FileKey2=%AppData%\Mozilla\FireFox\Profiles\*\saved-telemetry-pings|*.*
-
 [TEMP Folder*]
 LangSecRef=3025
 DetectFile=%CommonAppData%\TEMP
 Default=False
 FileKey1=%CommonAppData%\TEMP|*.*|RECURSE
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\TEMP|*.*|RECURSE
-
-[Temps*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%LocalAppData%\VirtualStore\Program Files*\Mozilla*|*.tmp|RECURSE
-FileKey2=%ProgramFiles%\Mozilla*|*.tmp|RECURSE
 
 [TeraCopy*]
 LangSecRef=3024
@@ -18066,12 +18103,6 @@ Section=Games
 DetectFile=%LocalAppData%\Astar Games\Tesla Legacy
 Default=False
 FileKey1=%LocalAppData%\Astar Games\Tesla Legacy|*.log
-
-[TestPilot Error Logs*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\FireFox\Profiles|TestPilotErrorLog.*|RECURSE
 
 [TeXnicCenter*]
 LangSecRef=3021
@@ -18253,73 +18284,6 @@ Default=False
 FileKey1=%AppData%\Thumbsplus|*.log;*.bak;*.dmp;*.7z;*.exc;*.png
 FileKey2=%ProgramFiles%\Thumbsplus *\Bin|*.log
 
-[Thunderbird Corrupt SQLites*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%AppData%\Thunderbird\Profiles|*.corrupt|RECURSE
-
-[Thunderbird Crash Reports*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%AppData%\Thunderbird\Crash Reports|*.*|REMOVESELF
-
-[Thunderbird Extensions Log*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%AppData%\Thunderbird\Profiles\*|extensions.log
-
-[Thunderbird Install Log*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%ProgramFiles%\Mozilla Thunderbird|install.log
-
-[Thunderbird Maintenance Service*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%CommonAppData%\Mozilla*\logs|*.*|REMOVESELF
-FileKey2=%LocalAppData%\VirtualStore\ProgramData\Mozilla*\logs|*.*|REMOVESELF
-
-[Thunderbird Minidumps*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%AppData%\Thunderbird\Profiles\*\Minidumps|*.*
-
-[Thunderbird Net Predictions*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%AppData%\Thunderbird\Profiles\*|seer.sqlite;netpredictions.sqlite
-
-[Thunderbird Startup Cache*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%LocalAppData%\Thunderbird\Profiles\*\startupCache|*.*
-
-[Thunderbird TestPilot Error Logs*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%AppData%\Thunderbird\Profiles\*|TestPilotErrorLog.*|RECURSE
-
-[Thunderbird Update Logs*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%LocalAppData%\Thunderbird\Mozilla\*\Updates|*.log|RECURSE
-
-[Thunderbird webappsstore.sqlite*]
-LangSecRef=3030
-SpecialDetect=DET_THUNDERBIRD
-Default=False
-FileKey1=%AppData%\Thunderbird\Profiles\*|webappsstore.sqlite
-
 [Tific Client*]
 LangSecRef=3021
 DetectFile=%LocalAppData%\Tific
@@ -18384,8 +18348,8 @@ RegKey1=HKCU\Software\Tipard Studio\Tipard Total Media Converter Platinum\Edit|L
 LangSecRef=3023
 Detect=HKCU\Software\Tipard Studio\Tipard Total Media Converter
 Default=False
-RegKey1=HKCU\Software\Tipard Studio\Tipard Total Media Converter\Edit|LastVideoFilePath
 FileKey1=%LocalAppData%\Tipard Studio\Tipard Total Media Converter|*.txt
+RegKey1=HKCU\Software\Tipard Studio\Tipard Total Media Converter\Edit|LastVideoFilePath
 
 [Tipard Video Converter Ultimate*]
 LangSecRef=3023
@@ -18543,6 +18507,13 @@ Detect=HKCU\Software\Torch
 Default=False
 FileKey1=%LocalAppData%\Torch\User Data\*|Current Tabs;Current session;Last Tabs;Last Session
 
+[Torchlight*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\41500
+DetectFile=%AppData%\Runic Games\Torchlight
+Default=False
+FileKey1=%AppData%\Runic Games\Torchlight|*.log
+
 [Torchlight 2*]
 Section=Games
 Detect1=HKCU\Software\Valve\Steam\Apps\200710
@@ -18550,13 +18521,6 @@ Detect2=HKLM\Software\Runic Games\Torchlight II
 Default=False
 FileKey1=%Documents%\My Games\Runic Games\Torchlight 2\logs|*.*
 FileKey2=%Documents%\My Games\runic games\torchlight 2|ogre.log
-
-[Torchlight*]
-Section=Games
-Detect=HKCU\Software\Valve\Steam\Apps\41500
-DetectFile=%AppData%\Runic Games\Torchlight
-Default=False
-FileKey1=%AppData%\Runic Games\Torchlight|*.log
 
 [Torrent Search Log*]
 LangSecRef=3022
@@ -18623,12 +18587,22 @@ RegKey7=HKCU\Software\HighCriteria\TotalRecorder\Recent File list|File7
 RegKey8=HKCU\Software\HighCriteria\TotalRecorder\Recent File list|File8
 RegKey9=HKCU\Software\HighCriteria\TotalRecorder\Recent File list|File9
 
+[Total Uninstall*]
+LangSecRef=3024
+Detect1=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Total Uninstall 5_is1
+Detect2=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Total Uninstall 6_is1
+Default=False
+FileKey1=%CommonAppData%\Martau\Total Uninstall*|*.Folders;*.cache|RECURSE
+FileKey2=%LocalAppData%\VirtualStore\Program Files*\Total Uninstall*|*.rtf;*.txt|RECURSE
+FileKey3=%LocalAppData%\VirtualStore\ProgramData\Martau\Total Uninstall*|*.Folders;*.cache|RECURSE
+FileKey4=%ProgramFiles%\Total Uninstall*|*.rtf;*.txt|RECURSE
+
 [Total Uninstall Backups*]
 LangSecRef=3024
 Detect1=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Total Uninstall 5_is1
 Detect2=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Total Uninstall 6_is1
-Warning=This will delete analyzed programs, Snapshots, and Backups.
 Default=False
+Warning=This will delete analyzed programs, Snapshots, and Backups.
 FileKey1=%CommonAppData%\Martau\Total Uninstall*|*.tlg;*.zsns;*.zip|RECURSE
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\Martau\Total Uninstall*|*.tlg;*.zsns;*.zip|RECURSE
 
@@ -18650,16 +18624,6 @@ Detect=HKCU\Software\MartS\Total Uninstall
 Default=False
 FileKey1=%ProgramFiles%\Total Uninstall|Log.txt;*.GID
 FileKey2=%LocalAppData%\VirtualStore\Program Files*\Total Uninstall|Log.txt;*.GID
-
-[Total Uninstall*]
-LangSecRef=3024
-Detect1=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Total Uninstall 5_is1
-Detect2=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Total Uninstall 6_is1
-Default=False
-FileKey1=%CommonAppData%\Martau\Total Uninstall*|*.Folders;*.cache|RECURSE
-FileKey2=%LocalAppData%\VirtualStore\Program Files*\Total Uninstall*|*.rtf;*.txt|RECURSE
-FileKey3=%LocalAppData%\VirtualStore\ProgramData\Martau\Total Uninstall*|*.Folders;*.cache|RECURSE
-FileKey4=%ProgramFiles%\Total Uninstall*|*.rtf;*.txt|RECURSE
 
 [Towns*]
 Section=Games
@@ -18758,12 +18722,6 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Trend Micro\RUBotted\DebugLogs|*.*|REMOVESELF
 FileKey2=%ProgramFiles%\Trend Micro\RUBotted\DebugLogs|*.*|REMOVESELF
 
-[Tribes: Ascend Cache*]
-Section=Games
-Detect=HKCU\Software\Valve\Steam\Apps\17080\
-Default=False
-FileKey1=%CommonAppData%\Hi-Rez Studios\BrowserCacheTribes\Default\Cache|*.*|RECURSE
-
 [Tribes: Ascend*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\17080\
@@ -18772,11 +18730,11 @@ FileKey1=%Documents%\My Games\Tribes Ascend\TribesGame\Logs|*.*
 FileKey2=%LocalAppData%\VirtualStore\ProgramFiles*\Steam\steamapps\common\tribes\Binaries\Logs|*.*
 FileKey3=%ProgramFiles%\Steam\steamapps\common\tribes\Binaries\Logs|*.*
 
-[Trillian Logs*]
-LangSecRef=3022
-Detect=HKLM\Software\Clients\IM\Trillian
+[Tribes: Ascend Cache*]
+Section=Games
+Detect=HKCU\Software\Valve\Steam\Apps\17080\
 Default=False
-FileKey1=%AppData%\Trillian\users\*\logs|*.*|RECURSE
+FileKey1=%CommonAppData%\Hi-Rez Studios\BrowserCacheTribes\Default\Cache|*.*|RECURSE
 
 [Trillian*]
 LangSecRef=3022
@@ -18794,49 +18752,44 @@ FileKey9=%ProgramFiles%\Trillian\Crash Files|*.*|RECURSE
 FileKey10=%ProgramFiles%\Trillian\Users\Default\buddyicons|*.*|RECURSE
 FileKey11=%ProgramFiles%\Trillian\Users\Default\instantlookup|*.*
 
-[Trine 2*]
-Section=Games
-Detect=HKCU\Software\Valve\Steam\Apps\35720
+[Trillian Logs*]
+LangSecRef=3022
+Detect=HKLM\Software\Clients\IM\Trillian
 Default=False
-FileKey1=%LocalAppData%\VirtualStore\Program Files*\Steam\SteamApps\Common\Trine 2\log|*.*
-FileKey2=%ProgramFiles%\Steam\SteamApps\Common\Trine 2\log|*.*
+FileKey1=%AppData%\Trillian\users\*\logs|*.*|RECURSE
 
 [Trine*]
 Section=Games
 Detect=HKCU\Software\Valve\Steam\Apps\35700
+Detect=HKCU\Software\Valve\Steam\Apps\35720
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Steam\SteamApps\common\Trine\_enchanted_edition_\log|*.*
 FileKey2=%LocalAppData%\VirtualStore\Program Files*\Steam\SteamApps\Common\Trine\logs|*.*
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\Steam\SteamApps\Common\Trine 2\log|*.*
 FileKey3=%ProgramFiles%\Steam\SteamApps\common\Trine\_enchanted_edition_\log|*.*
-FileKey4=%ProgramFiles%\Steam\SteamApps\Common\Trine\logs|*.*
+FileKey4=%ProgramFiles%\Steam\SteamApps\Common\Trine *\logs|*.*
 
-[TrojanHunter (Debug Logs)*]
+[TrojanHunter Debug Logs*]
 LangSecRef=3024
 Detect=HKCU\Software\TrojanHunter
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\TrojanHunter*|Debug.log;DebugLog.txt
 FileKey2=%ProgramFiles%\TrojanHunter*|Debug.log;DebugLog.txt
 
-[TrojanHunter (Scan Logs)*]
+[TrojanHunter Scan Logs*]
 LangSecRef=3024
 Detect=HKCU\Software\TrojanHunter
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\TrojanHunter*\Scan Reports|*.*
 FileKey2=%ProgramFiles%\TrojanHunter*\Scan Reports|*.*
 
-[Tropico 3*]
+[Tropico*]
 Section=Games
-Detect=HKLM\Software\Haemimont Games\Tropico3
+Detect1=HKLM\Software\Haemimont Games\Tropico3
+Detect2=HKCU\Software\Haemimont Games\Tropico 4
 Default=False
-FileKey1=%AppData%\Tropico 3\logs|*.*|REMOVESELF
-FileKey2=%AppData%\Tropico 3\ShaderCache|*.*|REMOVESELF
-
-[Tropico 4*]
-Section=Games
-Detect=HKCU\Software\Haemimont Games\Tropico 4
-Default=False
-FileKey1=%AppData%\Tropico 4\logs|*.*|REMOVESELF
-FileKey2=%AppData%\Tropico 4\ShaderCache|*.*|REMOVESELF
+FileKey1=%AppData%\Tropico *\logs|*.*|REMOVESELF
+FileKey2=%AppData%\Tropico *\ShaderCache|*.*|REMOVESELF
 FileKey3=%ProgramFiles%\Kalypso Media\*|dotnetfx3.exe;dotnetfx35.exe
 FileKey4=%ProgramFiles%\Kalypso Media\*\DirectXRedist|*.*|REMOVESELF
 
@@ -19005,9 +18958,9 @@ FileKey4=%ProgramFiles%\Ubisoft\Ubisoft Game Launcher\Cache\http*|*.*|RECURSE
 
 [Ubisoft Game Launcher Installers*]
 Section=Games
-Warning=Make sure to launch all of your installed UPlay games at least once before running this, or they may not launch properly.
 DetectFile=%ProgramFiles%\Ubisoft\Ubisoft Game Launcher
 Default=False
+Warning=Make sure to launch all of your installed UPlay games at least once before running this, or they may not launch properly.
 FileKey1=%ProgramFiles%\Ubisoft\Ubisoft Game Launcher\Cache\Installers|*.*|REMOVESELF
 
 [Ubisoft Game Launcher Logs*]
@@ -19032,7 +18985,7 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Disktrix\UltimateDefrag|*.db;*Crash.dmp
 FileKey2=%ProgramFiles%\Disktrix\UltimateDefrag|*.db;*Crash.dmp
 
-[UltraDefrag (Logs)*]
+[UltraDefrag Logs*]
 LangSecRef=3024
 Detect=HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag
 DetectFile=%WinDir%\UltraDefrag\ultradefrag.exe
@@ -19041,7 +18994,7 @@ FileKey1=%ProgramFiles%\UltraDefrag\logs|*.*
 FileKey2=%SystemDrive%|fraglist.luar
 FileKey3=%WinDir%\UltraDefrag\logs|*.log
 
-[UltraDefrag Portable (Log)*]
+[UltraDefrag Portable Log*]
 LangSecRef=3024
 DetectFile=%SystemDrive%\PortableApps\UltraDefragPortable\UltraDefragPortable.exe
 Default=False
@@ -19110,7 +19063,7 @@ Default=False
 FileKey1=%UserProfile%\Unigine Heaven|log.html;*.cache
 FileKey2=%UserProfile%\Unigine Heaven\save|*.*|REMOVESELF
 
-[Uninstall Tool (Dumps)*]
+[Uninstall Tool Dumps*]
 LangSecRef=3024
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Uninstall Tool_is1
 Default=False
@@ -19149,37 +19102,23 @@ FileKey3=%LocalAppData%\VirtualStore\Program Files*\Unlockroot Pro|*.txt
 FileKey4=%ProgramFiles%\Unlockroot*|*.txt
 FileKey5=%ProgramFiles%\Unlockroot*\tools|*.zip
 
-[Updates*]
-LangSecRef=3026
-DetectFile=%LocalAppData%\Mozilla\Updates
-Default=False
-FileKey1=%LocalAppData%\Mozilla\Updates|*.*|RECURSE
-
-[Update Logs*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%LocalAppData%\Mozilla\Firefox\*\updates|*.*|RECURSE
-FileKey2=%LocalAppData%\Mozilla\Firefox\Mozilla\*|*.log|RECURSE
-
 [Update Orchestrator Events Logs*]
 LangSecRef=3025
 Detect=HKLM\Software\Microsoft\Windows
 Default=False
 FileKey1=%CommonAppData%\USOShared\Logs|*.*|RECURSE
 
+[Updates*]
+LangSecRef=3026
+DetectFile=%LocalAppData%\Mozilla\Updates
+Default=False
+FileKey1=%LocalAppData%\Mozilla\Updates|*.*|RECURSE
+
 [UPX Shell*]
 LangSecRef=3024
 Detect=HKCU\Software\ION Tek\UPX Shell
 Default=False
 RegKey1=HKCU\Software\ION Tek\UPX Shell\3.x|History
-
-[urlclassifier3.sqlite*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-Warning=This will delete urlclassifier3.sqlite. If you just want to reduce its size, select Compact Databases instead.
-FileKey1=%LocalAppData%\Mozilla\Firefox\Profiles\*|urlclassifier3.sqlite
 
 [USA Today*]
 LangSecRef=3031
