@@ -1,4 +1,4 @@
-; Version: 170418
+; Version: 170420
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -261,17 +261,24 @@ ExcludeKey34=PATH|%LocalAppData%\Torch\User Data\*\File System|*.*
 ExcludeKey35=PATH|%LocalAppData%\Torch\User Data\*\Local App Settings|*.*
 ExcludeKey36=PATH|%LocalAppData%\Torch\User Data\*\Local Extension Settings|*.*
 
-[Minidumps*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
+[Omnibox Shortcut*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
 Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\minidumps|*.*
+FileKey1=%LocalAppData%\Amigo\User Data\*\*|Shortcuts
+FileKey2=%LocalAppData%\Google\Chrome*\User Data\*|Shortcuts
 
 [PnaclTranslation Cache*]
 LangSecRef=3029
 SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%LocalAppData%\Google\Chrome\User Data\PnaclTranslationCache|*.*
+
+[Quota Manager Data*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome\User Data\*|QuotaManager
 
 [Session Storage*]
 LangSecRef=3029
@@ -378,6 +385,12 @@ FileKey1=%CommonAppData%\Mozilla*\logs|*.*
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\Mozilla*\logs|*.*
 FileKey3=%LocalAppData%\VirtualStore\ProgramFiles*\Mozilla Maintenance Service\logs|*.log
 FileKey4=%ProgramFiles%\Mozilla Maintenance Service\logs|*.log
+
+[Minidumps*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\minidumps|*.*
 
 [Net Predictions*]
 LangSecRef=3026
@@ -13449,13 +13462,6 @@ Detect=HKCU\Software\Intelore\Office Password Recovery
 Default=False
 FileKey1=%AppData%\Intelore\Password Recovery\logs|*.*
 
-[Omnibox Shortcut*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\*|Shortcuts
-FileKey2=%LocalAppData%\Google\Chrome*\User Data\*|Shortcuts
-
 [OneDrive Logs*]
 LangSecRef=3021
 Detect=HKCU\Software\Microsoft\OneDrive
@@ -15054,12 +15060,6 @@ FileKey13=%LocalAppData%\Packages\QuizUp.QuizUp_*\LocalCache|*.*|RECURSE
 FileKey14=%LocalAppData%\Packages\QuizUp.QuizUp_*\LocalState\Cache|*.*|RECURSE
 FileKey15=%LocalAppData%\Packages\QuizUp.QuizUp_*\TempState|*.*|RECURSE
 
-[Quota Manager Data*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Chrome\User Data\*|QuotaManager
-
 [QupZilla Portable Cookies*]
 Section=QupZilla Portable
 DetectFile=%SystemDrive%\PortableApps\QupZillaPortable\QupZillaPortable.exe
@@ -16642,7 +16642,7 @@ Default=False
 Warning=This will delete the backups of the captures that you have performed with SnagIt.
 FileKey1=%Documents%|SnagItDebug.log
 FileKey2=%LocalAppData%\TechSmith\Logs|*.log
-FileKey3=%LocalAppData%\TechSmith\Snagit\DataStore|*.sdf;*.SNAG;*.SNAGundo;*.MP4
+FileKey3=%LocalAppData%\TechSmith\Snagit\DataStore|*.SNAG;*.SNAGundo;*.MP4
 FileKey4=%LocalAppData%\TechSmith\Snagit\DataStore\AppIcons|*.*
 FileKey5=%LocalAppData%\TechSmith\Snagit\DataStore\WebSiteIcons|*.*
 FileKey6=%LocalAppData%\TechSmith\SnagIt\DataStore\AppIcons|*.ico
