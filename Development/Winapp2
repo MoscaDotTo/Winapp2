@@ -299,6 +299,28 @@ SpecialDetect=DET_CHROME
 Default=False
 FileKey1=%LocalAppData%\Google\Software Reporter Tool|*.log
 
+[Web Applications*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Google\Chrome\User Data\*\File System\000\p\Paths|CURRENT;LOCK
+FileKey2=%LocalAppData%\Google\Chrome\User Data\*\File System\Origins|CURRENT;LOCK
+
+[Web Data*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+Warning=This will remove Autofill, Autocomplete, Search Engines keyword, Sign-in and Credit Card info
+FileKey1=%LocalAppData%\Amigo\User Data\*\*|Web Data
+FileKey2=%LocalAppData%\Google\Chrome*\User Data\*|Web Data
+
+[WebRTCIdentityStore*]
+LangSecRef=3029
+SpecialDetect=DET_CHROME
+Default=False
+FileKey1=%LocalAppData%\Amigo\User Data\*\*|WebRTCIdentityStore
+FileKey2=%LocalAppData%\Google\Chrome\User Data\*|WebRTCIdentityStore
+
 ; End of Chrome/Chromium Entries.
 ;
 ; Firefox Entries
@@ -475,6 +497,12 @@ SpecialDetect=DET_MOZILLA
 Default=False
 Warning=This will delete urlclassifier3.sqlite. If you just want to reduce its size, select Compact Databases instead.
 FileKey1=%LocalAppData%\Mozilla\Firefox\Profiles\*|urlclassifier3.sqlite
+
+[webappsstore.sqlite*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|webappsstore.sqlite
 
 ; End of Firefox Entries.
 ;
@@ -19283,7 +19311,7 @@ Detect=HKCU\Software\Gromada\VideoMach
 Default=False
 FileKey1=%Documents%|VideoMach_Log.txt
 
-[Vim (History)*]
+[Vim History*]
 LangSecRef=3021
 Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Vim
 Default=False
@@ -19315,7 +19343,7 @@ Default=False
 RegKey1=HKCU\Software\VirtualDub.org\VirtualDub\MRU List
 RegKey2=HKCU\Software\VirtualDub.org\VirtualDub\Saved filespecs
 
-[VirtualDubMod (MRU)*]
+[VirtualDubMod MRU*]
 LangSecRef=3023
 Detect=HKCU\Software\Freeware\VirtualDubMod
 Default=False
@@ -19480,7 +19508,7 @@ FileKey4=%Documents%\PcSetup|*.log|REMOVESELF
 FileKey5=%LocalAppData%\VirtualStore\ProgramData\VSO|*.cache;*.crashlist;*.log;*.vsothumb|RECURSE
 FileKey6=%UserProfile%|timestamp.txt
 
-[VSO Downloader (Logs)*]
+[VSO Downloader Logs*]
 LangSecRef=3023
 Detect=HKCU\Software\VSO\VSO Downloader
 Default=False
@@ -19560,9 +19588,9 @@ FileKey3=%SystemDrive%\VueScan|*.log|RECURSE
 
 [Vuze Dasu Reports*]
 LangSecRef=3022
-Warning=This will delete data from Dasu plugins. You should review the Dasu plugin reports before deleting it.
 Detect=HKCR\Azureus
 Default=False
+Warning=This will delete data from Dasu plugins. You should review the Dasu plugin reports before deleting it.
 FileKey1=%AppData%\Azureus\plugins\dasu\reports|*.*
 
 [Vuze More*]
@@ -19594,7 +19622,7 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Wallpaper Juggler|*.log
 FileKey2=%ProgramFiles%\Wallpaper Juggler|*.log
 
-[WallWatcher (Logs)*]
+[WallWatcher Logs*]
 LangSecRef=3024
 DetectFile=%ProgramFiles%\Wall Watcher\WallWatcher.exe
 Default=False
@@ -19622,14 +19650,6 @@ FileKey6=%ProgramFiles%\War Thunder\_debuginfo|*.clog
 FileKey7=%ProgramFiles%\Steam\SteamApps\common\War Thunder\.launcher_log|*.txt
 FileKey8=%ProgramFiles%\Steam\SteamApps\common\War Thunder\_debuginfo|*.clog
 
-[Warcraft III Backup Files*]
-Section=Games
-Detect=HKLM\Software\Blizzard Entertainment\Warcraft III
-Default=False
-Warning=This will delete all your Warcraft III backup files. You won't be able to restore from them if something goes wrong.
-FileKey1=%LocalAppData%\VirtualStore\Program Files*\Warcraft III|*.bak;*.old|RECURSE
-FileKey2=%ProgramFiles%\Warcraft III|*.bak;*.old|RECURSE
-
 [Warcraft III*]
 Section=Games
 Detect=HKLM\Software\Blizzard Entertainment\Warcraft III
@@ -19640,6 +19660,14 @@ FileKey2=%LocalAppData%\VirtualStore\Program Files*\Warcraft III|*.log;*.html
 FileKey3=%ProgramFiles%\Warcraft III|*.log;*.html
 FileKey4=%ProgramFiles%\Warcraft III\Errors|*.dmp;*.txt
 ExcludeKey1=FILE|%ProgramFiles%\Warcraft III|*CustomKeyInfo.txt;*CustomKeysSample.txt
+
+[Warcraft III Backup Files*]
+Section=Games
+Detect=HKLM\Software\Blizzard Entertainment\Warcraft III
+Default=False
+Warning=This will delete all your Warcraft III backup files. You won't be able to restore from them if something goes wrong.
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\Warcraft III|*.bak;*.old|RECURSE
+FileKey2=%ProgramFiles%\Warcraft III|*.bak;*.old|RECURSE
 
 [Warframe*]
 Section=Games
@@ -19698,8 +19726,8 @@ FileKey2=%ProgramFiles%\Wavosaur|wavosaur.log
 [WD Smartware Public Downloads File Removal*]
 LangSecRef=3024
 Detect=HKCU\Software\Western Digital\WD Smartware
-Warning=This removes unnecessary files that have been installed by Western Digital Smartware MyCloud products.
 Default=False
+Warning=This removes unnecessary files that have been installed by Western Digital Smartware MyCloud products.
 FileKey1=%SystemDrive%\Users\Public\Documents\Downloads\WD_SmartWare_Installer_*|*.*|REMOVESELF
 
 [WDI Logs*]
@@ -19728,21 +19756,6 @@ Detect=HKCU\Software\VB and VBA Program Settings\Weather Watcher Live
 Default=False
 FileKey1=%AppData%\WeatherWatcherLive\Temp|*.*
 
-[Web Applications*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Google\Chrome\User Data\*\File System\000\p\Paths|CURRENT;LOCK
-FileKey2=%LocalAppData%\Google\Chrome\User Data\*\File System\Origins|CURRENT;LOCK
-
-[Web Data*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Warning=This will remove Autofill, Autocomplete, Search Engines keyword, Sign-in and Credit Card info
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\*|Web Data
-FileKey2=%LocalAppData%\Google\Chrome*\User Data\*|Web Data
-
 [Web Sling Player Cache*]
 LangSecRef=3023
 DetectFile=%AppData%\Sling Media\WebSlingPlayer
@@ -19761,12 +19774,6 @@ LangSecRef=3023
 DetectFile=%AppData%\Sling Media\WebSlingPlayer
 Default=False
 FileKey1=%AppData%\Sling Media\WebSlingPlayer\temp|*.*|RECURSE
-
-[webappsstore.sqlite*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|webappsstore.sqlite
 
 [WebConnect*]
 LangSecRef=3023
@@ -19807,13 +19814,6 @@ DetectFile=%ProgramFiles%\Webroot\WRSA.exe
 Default=False
 FileKey1=%CommonAppData%\WRData|WRLog.log
 FileKey2=%LocalAppData%\VirtualStore\ProgramData\WRData|WRLog.log
-
-[WebRTCIdentityStore*]
-LangSecRef=3029
-SpecialDetect=DET_CHROME
-Default=False
-FileKey1=%LocalAppData%\Amigo\User Data\*\*|WebRTCIdentityStore
-FileKey2=%LocalAppData%\Google\Chrome\User Data\*|WebRTCIdentityStore
 
 [WebSite-Watcher*]
 LangSecRef=3021
@@ -19897,7 +19897,7 @@ DetectFile=%AppData%\WildTangent
 Default=False
 FileKey1=%AppData%\WildTangent\Logs|*.*
 
-[WinAVI Video Converter (Log)*]
+[WinAVI Video Converter Log*]
 LangSecRef=3023
 Detect=HKCU\Software\ZjSoft\WinAVI
 Default=False
@@ -20006,8 +20006,8 @@ RegKey1=HKLM\Software\Microsoft\ESENT\Process
 [Windows Experience Index*]
 LangSecRef=3025
 DetectOS=10.0|
-Warning=You may have to "Take Ownership" of the Windows\Performance\WinSAT folder for it to be entirely cleaned.
 Default=False
+Warning=You may have to "Take Ownership" of the Windows\Performance\WinSAT folder for it to be entirely cleaned.
 FileKey1=%WinDir%\Performance\WinSAT\|*.*
 FileKey2=%WinDir%\Performance\WinSAT\DataStore\|*.*
 
@@ -20169,7 +20169,7 @@ FileKey1=%CommonAppData%\Microsoft\eHome\thmb|TVThumb.db
 FileKey2=%LocalAppData%\Microsoft\Ehome|Image.db;Video.db;musicThumbs.db
 FileKey3=%LocalAppData%\VirtualStore\ProgramData\Microsoft\eHome\thmb|TVThumb.db
 
-[Windows Media Player (Album Art Cache)*]
+[Windows Media Player Album Art Cache*]
 LangSecRef=3023
 Detect1=HKCR\Windows.Movie.Maker
 Detect2=HKCU\Software\Microsoft\MediaPlayer
@@ -20178,7 +20178,7 @@ FileKey1=%SystemDrive%\Documents and Settings\NetworkService\Local Settings\Appl
 FileKey2=%SystemDrive%\Documents and Settings\NetworkService\Local Settings\Microsoft\Media Player\Art Cache\LocalMLS|*.*|RECURSE
 FileKey3=%WinDir%\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Media Player\Art Cache\LocalMLS|*.*|RECURSE
 
-[Windows Media Player (Databases)*]
+[Windows Media Player Databases*]
 LangSecRef=3023
 Detect1=HKCR\Windows.Movie.Maker
 Detect2=HKCU\Software\Microsoft\MediaPlayer
@@ -20188,7 +20188,7 @@ FileKey1=%SystemDrive%\Documents and Settings\NetworkService\Local Settings\Appl
 FileKey2=%SystemDrive%\Documents and Settings\NetworkService\Local Settings\Microsoft\Media Player|*.*|REMOVESELF
 FileKey3=%WinDir%\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Media Player|*.*|RECURSE
 
-[Windows Media Player (MediaGuide)*]
+[Windows Media Player MediaGuide*]
 LangSecRef=3023
 Detect=HKCU\Software\Microsoft\MediaPlayer
 Default=False
@@ -20488,7 +20488,7 @@ FileKey1=%AppData%\Wirecast|*.txt
 LangSecRef=3024
 DetectFile=%AppData%\Wireshark\
 Default=False
-Warning=This will remove custom view settings (like window sizes and hidden toolbars, formatting and last-used profiles).
+Warning=This will remove custom view settings, like window sizes and hidden toolbars, formatting and last-used profiles.
 FileKey1=%AppData%\Wireshark|recent;recent_common
 
 [Wise Care 365*]
@@ -20719,7 +20719,7 @@ Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\WRAL Desktop Alert|*.log
 FileKey2=%ProgramFiles%\WRAL Desktop Alert|*.log
 
-[WS FTP (Pro)*]
+[WS FTP Pro*]
 LangSecRef=3022
 Detect=HKCU\Software\Ipswitch\WS_FTP
 Default=False
@@ -20739,14 +20739,14 @@ Warning=This removes Chat Scrollback and Logs
 FileKey1=%AppData%\X-Chat 2\scrollback|*.*|REMOVESELF
 FileKey2=%AppData%\X-Chat 2\xchatlogs|*.*|REMOVESELF
 
-[X-Cleaner (free)*]
+[X-Cleaner free*]
 LangSecRef=3024
 DetectFile=%ProgramFiles%\X-Cleaner
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\X-Cleaner|XCL_LOG.txt
 FileKey2=%ProgramFiles%\X-Cleaner|XCL_LOG.txt
 
-[X-NetStat (Logs)*]
+[X-NetStat Logs*]
 LangSecRef=3024
 DetectFile=%ProgramFiles%\X-NetStat Professional\xns5.exe
 Default=False
@@ -21125,7 +21125,7 @@ DetectFile=%LocalAppData%\Zemana\Zemana AntiLogger
 Default=False
 FileKey1=%LocalAppData%\Zemana\Zemana AntiLogger|*.*
 
-[Zemana AntiMalware (Reports)*]
+[Zemana AntiMalware Reports*]
 LangSecRef=3024
 Detect1=HKCU\Software\Zemana\AntiMalware
 Detect2=HKLM\Software\Zemana\AntiMalware
@@ -21184,57 +21184,27 @@ DetectFile=%ProgramFiles%\Gasanov.net\ZoneIDTrimmer\ZoneIDTrimmer.Tool.exe
 Default=False
 FileKey1=%AppData%\ZoneIDTrimmer\Logs|ZoneIDTrimmer.log
 
-[Zoner Photo Studio 14*]
+[Zoner Photo Studio*]
 LangSecRef=3022
 DetectFile=%LocalAppData%\Zoner\ZPS 14
+Detect1=HKCU\Software\ZONER\Zoner Photo Studio 15
+Detect2=HKCU\Software\ZONER\Zoner Photo Studio 16
+Detect3=HKCU\Software\ZONER\Zoner Photo Studio 18
 Default=False
-FileKey1=%LocalAppData%\Zoner\ZPS 14\CEF|*.log
-FileKey2=%LocalAppData%\Zoner\ZPS 14\ZPSCache.dat|*.*
-
-[Zoner Photo Studio 15 (AutoSave)*]
-LangSecRef=3023
-Detect=HKCU\Software\ZONER\Zoner Photo Studio 15
-Default=False
-FileKey1=%LocalAppData%\Zoner\OriginalsRepository|*.JPG.info;*.JPG.original|RECURSE
-
-[Zoner Photo Studio 15*]
-LangSecRef=3023
-Detect=HKCU\Software\ZONER\Zoner Photo Studio 15
-Default=False
-FileKey1=%LocalAppData%\Zoner\ZPS 15\CEF|*.log
-FileKey2=%LocalAppData%\Zoner\ZPS 15\ZPSCache.dat|*.*
-FileKey3=%Pictures%|*.uid-zps
-
-[Zoner Photo Studio 16 (AutoSave)*]
-LangSecRef=3023
-Detect=HKCU\Software\ZONER\Zoner Photo Studio 16
-Default=False
-FileKey1=%LocalAppData%\Zoner\OriginalsRepository|*.JPG.info;*.JPG.original|RECURSE
-
-[Zoner Photo Studio 16*]
-LangSecRef=3023
-Detect=HKCU\Software\ZONER\Zoner Photo Studio 16
-Default=False
-FileKey1=%LocalAppData%\Zoner\ZPS 16\CEF|*.log
-FileKey2=%LocalAppData%\Zoner\ZPS 16\ZPSCache.dat|*.*
-FileKey3=%Pictures%|*.uid-zps
-
-[Zoner Photo Studio 18 (AutoSave)*]
-LangSecRef=3023
-Detect=HKCU\Software\ZONER\Zoner Photo Studio 18
-Default=False
-FileKey1=%LocalAppData%\Zoner\OriginalsRepository|*.JPG.info;*.JPG.original|RECURSE
-
-[Zoner Photo Studio 18*]
-LangSecRef=3023
-Detect=HKCU\Software\ZONER\Zoner Photo Studio 18
-Default=False
-FileKey1=%LocalAppData%\Zoner\ZPS 18\Cache|RECURSE|REMOVESELF
-FileKey2=%LocalAppData%\Zoner\ZPS 18\CEF|*.log
-FileKey3=%LocalAppData%\Zoner\ZPS 18\ZPSCache.dat|*.*
+FileKey1=%LocalAppData%\Zoner\ZPS *\Cache|RECURSE|REMOVESELF
+FileKey2=%LocalAppData%\Zoner\ZPS *\CEF|*.log
+FileKey3=%LocalAppData%\Zoner\ZPS *\ZPSCache.dat|*.*
 FileKey4=%Pictures%|*.uid-zps
 
-[Zune (Transcoded Files Cache)*]
+[Zoner Photo Studio AutoSave*]
+LangSecRef=3023
+Detect1=HKCU\Software\ZONER\Zoner Photo Studio 15
+Detect2=HKCU\Software\ZONER\Zoner Photo Studio 16
+Detect3=HKCU\Software\ZONER\Zoner Photo Studio 18
+Default=False
+FileKey1=%LocalAppData%\Zoner\OriginalsRepository|*.JPG.info;*.JPG.original|RECURSE
+
+[Zune Transcoded Files Cache*]
 LangSecRef=3023
 Detect=HKCU\Software\Microsoft\Zune
 Default=False
