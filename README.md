@@ -10,6 +10,8 @@ How to install:
 
 - For CCleaner users, download the latest copy of Winapp2. Move the copy to your CCleaner directory. Then run Trim.bat that is located here: http://www.winapp2.com/downloads.html  Follow the guide on how to use Trim.bat here: http://www.winapp2.com/howto.html
 
+Alternatively, CCleaner users can also use CCenhancer to update and trim Winapp2: https://singularlabs.com/software/ccenhancer/
+
 - For BleachBit users, open up BleachBit, click on "Edit" tab, then click on "Preferences". Make sure "Download and update cleaners from community (winapp2.ini)" is checked.
 
 - For System Ninja users, you should already have a copy installed in the System Ninja/scripts directory. If not, you can always put a up-to-date one there yourself.
