@@ -1,4 +1,4 @@
-; Version: 170420
+; Version: 170422
 ; # of entries: 2,571
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
@@ -367,6 +367,12 @@ SpecialDetect=DET_MOZILLA
 Default=False
 FileKey1=%AppData%\Mozilla|*.dmp|RECURSE
 
+[Firefox HTML5 Storage*]
+LangSecRef=3026
+SpecialDetect=DET_MOZILLA
+Default=False
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\storage|*.*|REMOVESELF
+
 [Firefox Logs*]
 LangSecRef=3026
 SpecialDetect=DET_MOZILLA
@@ -374,12 +380,6 @@ Default=False
 FileKey1=%AppData%\Mozilla|*.log|RECURSE
 FileKey2=%LocalAppData%\VirtualStore\Program Files*\Mozilla Firefox|*.log
 FileKey3=%ProgramFiles%\Mozilla Firefox|*.log
-
-[Firefox HTML5 Storage*]
-LangSecRef=3026
-SpecialDetect=DET_MOZILLA
-Default=False
-FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\storage|*.*|REMOVESELF
 
 [FlashGot*]
 LangSecRef=3026
@@ -1190,7 +1190,7 @@ FileKey1=%LocalAppData%\Adblock Plus for IE|patterns-backup*.ini
 FileKey2=%LocalLowAppData%\Adblock Plus for IE|patterns-backup*.ini
 FileKey3=%WinDir%\System32\config\systemprofile\AppData\LocalLow\Adblock Plus for IE|patterns-backup*.ini
 
-[Add New Hardware Wizard (MRU)*]
+[Add New Hardware Wizard MRU*]
 LangSecRef=3025
 Detect=HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup
 Default=False
@@ -5124,7 +5124,7 @@ Detect=HKCU\Software\Creative Professional\Proteus VX
 Default=False
 RegKey1=HKCU\Software\Creative Professional\Proteus VX VSTi\Recent File List
 
-[Creative Soundblaster (Cache & Logs)*]
+[Creative Soundblaster Cache & Logs*]
 LangSecRef=3024
 Detect1=HKLM\Software\CREATIVE TECH\Software Installed\Software Update
 Detect2=HKLM\Software\CREATIVE TECH\Sound Blaster X-Fi MB
@@ -5907,7 +5907,7 @@ Detect=HKCU\Software\KoshyJohn.com
 Default=False
 FileKey1=%AppData%\KoshyJohn.com\DiskMax|DiskMax Log.txt
 
-[DisplayFusion (Setup File & Log)*]
+[DisplayFusion Setup File & Log*]
 LangSecRef=3024
 Detect=HKCU\Software\Binary Fortress Software\DisplayFusion
 Default=False
@@ -13433,7 +13433,7 @@ Detect=HKCU\Software\O&O\O&O Defrag
 Default=False
 FileKey1=%Documents%\O&O\O&O Defrag\data\reports|*.*|RECURSE
 
-[OcenAudio (MRU)*]
+[OcenAudio MRU*]
 LangSecRef=3023
 Detect=HKCU\Software\OcenAudio
 Detect2=HKLM\Software\OcenAudio
@@ -20099,12 +20099,6 @@ RegKey4=HKCU\Software\Microsoft\Windows Live\Movie Maker|rendertofiledirectory
 RegKey5=HKCU\Software\Microsoft\Windows Live\Movie Maker|snapshotfiledirectory
 RegKey6=HKCU\Software\Microsoft\Windows Live\Movie Maker\recent
 
-[Windows Live OneCare*]
-LangSecRef=3022
-Detect=HKLM\Software\Microsoft\OneCare Protection
-Default=False
-FileKey1=%LocalAppData%\Microsoft\Windows Live OneCare Saftey Scanner|*.sqm|RECURSE
-
 [Windows Live Photo Gallery*]
 LangSecRef=3023
 Detect=HKCU\Software\Microsoft\Windows Live\Photo Gallery
@@ -20148,17 +20142,6 @@ LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows Mail
 Default=False
 FileKey1=%LocalAppData%\Microsoft\Windows Mail|*.log;*.jrs;*.chk|RECURSE
-
-[Windows ME*]
-LangSecRef=3025
-DetectFile=%WinDir%\WINFILE.EXE
-Default=False
-FileKey1=%SystemDrive%|SCANDISK.LOG
-FileKey2=%WinDir%|*.tmp
-FileKey3=%WinDir%\Application Data|dw.log
-FileKey4=%WinDir%\All Users\Application Data\Spybot - Search & Destroy\Logs|*.*
-FileKey5=%WinDir%\APPLOG|*.LGC
-FileKey6=%WinDir%\Windows Update Setup Files|*.*
 
 [Windows Media Center More*]
 LangSecRef=3023
@@ -20484,13 +20467,6 @@ DetectFile=%AppData%\Wirecast
 Default=False
 FileKey1=%AppData%\Wirecast|*.txt
 
-[WireShark Recent Files*]
-LangSecRef=3024
-DetectFile=%AppData%\Wireshark\
-Default=False
-Warning=This will remove custom view settings, like window sizes and hidden toolbars, formatting and last-used profiles.
-FileKey1=%AppData%\Wireshark|recent;recent_common
-
 [Wise Care 365*]
 LangSecRef=3024
 Detect=HKLM\Software\WiseCleaner\WiseCare365
@@ -20778,25 +20754,6 @@ LangSecRef=3024
 Detect=HKCU\Software\Xara\WebDesigner
 Default=False
 RegKey1=HKCU\Software\Xara\WebDesigner\8.0\Workspace\MDI
-
-[XBMC Cache*]
-LangSecRef=3023
-DetectFile=%AppData%\xbmc
-Default=False
-FileKey1=%AppData%\Xbmc\cache|*.*|RECURSE
-
-[XBMC Packages*]
-LangSecRef=3023
-DetectFile=%AppData%\xbmc
-Default=False
-FileKey1=%AppData%\Xbmc\addons\packages|*.*|RECURSE
-
-[XBMC Thumbnails*]
-LangSecRef=3023
-DetectFile=%AppData%\xbmc
-Default=False
-FileKey1=%AppData%\xbmc\userdata\thumbnails|*.*|RECURSE
-FileKey2=%AppData%\xbmc.old\userdata\thumbnails|*.*|RECURSE
 
 [Xbox Identity Provider*]
 DetectOS=10.0|
