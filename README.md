@@ -22,6 +22,6 @@ Donations:
 
 If you like Winapp2 and want to help keep development going, please consider donating some money to our great minds behind Winapp2.
 
-Donate to Robert/MoscaDotTo: https://www.paypal.com/donate/?token=jpXDOB9K-khc3O8i4Kl3fs51yO83gDiVXX7vFRCd6j6VJy9SAF87tKh78-dpdGRaCw7z_W
+Donate to Robert/MoscaDotTo: http://www.winapp2.com/ Go to the link and click on Donate.
 
 Donate to Alex/ROCK N ROLL KID: Send money via PayPal to slinger1410@protonmail.com
