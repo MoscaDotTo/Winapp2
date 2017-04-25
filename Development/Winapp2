@@ -1,5 +1,5 @@
-; Version: 170422
-; # of entries: 2,483
+; Version: 170425
+; # of entries: 2,481
 ; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2
 ; Any contributions are appreciated. Please send them to the link above.
 ; Is CCleaner taking too long to load with Winapp2? Please head to this link and follow the instructions: http://www.winapp2.com/howto.html
@@ -2253,13 +2253,13 @@ FileKey1=%Documents%\|ArgusMonitor_EventLog.txt;ArgusMonitor_CSVLog.csv
 FileKey2=%LocalAppData%\VirtualStore\Program Files*|ArgusMonitor_EventLog.txt;ArgusMonitor_CSVLog.csv
 FileKey3=%ProgramFiles%\|ArgusMonitor_EventLog.txt;ArgusMonitor_CSVLog.csv
 
-[ARO 2013*]
+[ARO 2011/2013*]
 LangSecRef=3024
-Detect1=HKCU\Software\Sammsoft\ARO\Version 2013
-Detect2=HKCU\Software\Sammsoft\ARO\Version 2011
+Detect1=HKCU\Software\Sammsoft\ARO\Version 2011
+Detect2=HKCU\Software\Sammsoft\ARO\Version 2013
 Default=False
-FileKey1=%AppData%\Sammsoft\ARO\Version 2013\Logs|*.txt
-FileKey2=%AppData%\Sammsoft\ARO\Version 2011\Logs|*.txt
+FileKey1=%AppData%\Sammsoft\ARO\Version 2011\Logs|*.txt
+FileKey2=%AppData%\Sammsoft\ARO\Version 2013\Logs|*.txt
 
 [Ashampoo Burning Studio*]
 LangSecRef=3021
@@ -2277,13 +2277,10 @@ Detect11=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2016
 Detect12=HKCU\Software\Ashampoo\Ashampoo Burning Studio 18
 Detect13=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2017
 Default=False
-FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio 6 Free\Logs|*.*
-FileKey2=%AppData%\Ashampoo\Ashampoo Burning Studio 2007\Logs|*.*
-FileKey3=%AppData%\Ashampoo\Ashampoo Burning Studio 2009\Logs|*.xml
-FileKey4=%AppData%\Ashampoo\Ashampoo Burning Studio *|backupmetainfo.xml
-FileKey5=%AppData%\Ashampoo\Ashampoo Burning Studio *\Log|*.xml;*.txt
-FileKey6=%AppData%\Ashampoo\Ashampoo Burning Studio *\log|*.xml;*.txt
-FileKey7=%AppData%\Ashampoo\Logs|*.txt
+FileKey1=%AppData%\Ashampoo\Ashampoo Burning Studio *|backupmetainfo.xml
+FileKey2=%AppData%\Ashampoo\Ashampoo Burning Studio *\Log*|*.xml;*.txt
+FileKey3=%AppData%\Ashampoo\Logs|*.txt
+FileKey4=%AppData%\Ashampoo\Log|*.txt
 RegKey1=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Burn Image Project\SelectImage
 RegKey2=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\AddDialog
 RegKey3=HKCU\Software\Ashampoo\Ashampoo Burning Studio 5\Data Disc Project\DumpImage
@@ -2654,8 +2651,8 @@ RegKey4=HKCU\Software\AutoIt v3\Aut2Exe|LastScriptDir
 [AutoPlay Devices*]
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows
-Warning=This will clear out devices and drives from AutoPlay that you've connected to your computer.
 Default=False
+Warning=This will clear out devices and drives from AutoPlay that you've connected to your computer.
 RegKey1=HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers\KnownDevices
 
 [AvaFind - Search Cache*]
@@ -2919,6 +2916,7 @@ Detect2=HKLM\Software\Avira\Speedup
 Default=False
 FileKey1=%CommonAppData%\Avira\SystemSpeedup\Logs|*.*
 FileKey2=%LocalAppData%\AviraSpeedup\logs|*.*
+FileKey3=%CommonAppData%\Avira\Launcher\Logfiles|*.log
 
 [AVS Audio Converter 6*]
 LangSecRef=3023
@@ -7392,13 +7390,7 @@ Detect2=HKLM\SOFTWARE\Wow6432Node\Mozilla\FossaMail
 Default=False
 FileKey1=%AppData%\FossaMail\Profiles\*|webappsstore.sqlite
 
-[Foxit PDF Editor*]
-LangSecRef=3021
-Detect=HKCU\Software\Foxit Software Company\Foxit PDF Editor
-Default=False
-RegKey1=HKCU\Software\Foxit Software Company\Foxit PDF Editor|Recent File List
-
-[Foxit PhantomPDF*]
+[Foxit PhantomPDF More*]
 LangSecRef=3021
 Detect1=HKCU\Software\Foxit Software\Foxit PhantomPDF 6.0
 Detect2=HKCU\Software\Foxit Software\Foxit PhantomPDF 7.0
@@ -7418,18 +7410,14 @@ RegKey8=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\MRU\Place MRU
 RegKey9=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\Preferences\History
 RegKey10=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\Recent File List
 RegKey11=HKCU\Software\Foxit Software\Foxit PhantomPDF 8.0\Foxit PhantomPDF Advanced Editor\Recent File List
-
-[Foxit Reader 6.0 Crash Dumps*]
-LangSecRef=3021
-Detect=HKCU\Software\Foxit Software\Foxit Reader 6.0
-Default=False
-FileKey1=%LocalAppData%\Foxit Reader|*.TXT;*.zip;*.reg
+RegKey12=HKCU\Software\Foxit Software Company\Foxit PDF Editor|Recent File List
 
 [Foxit Reader 6.0 More*]
 LangSecRef=3021
 Detect=HKCU\Software\Foxit Software\Foxit Reader 6.0
 Default=False
-FileKey1=%AppData%\Foxit Software\Foxit Reader\StartPage\Start|history.txt
+FileKey1=%LocalAppData%\Foxit Reader|*.TXT;*.zip;*.reg
+FileKey2=%AppData%\Foxit Software\Foxit Reader\StartPage\Start|history.txt
 RegKey1=HKCU\Software\Foxit Software\Foxit Reader 6.0\Preferences\History\Options
 
 [Fractal: Make Blooms Not War*]
@@ -13087,7 +13075,7 @@ Default=False
 FileKey1=%AppData%\Nidhogg|*.log
 
 [Nikon Capture NX2*]
-Section=Photo
+Section=3023
 Detect=HKLM\Software\Nikon\Capture NX 2
 Default=False
 FileKey1=%LocalAppData%\Nikon\Capture NX\ThumbnailCache|*.*|RECURSE
@@ -17493,7 +17481,7 @@ Section=Games
 DetectFile1=%AppData%\StepMania
 DetectFile2=%AppData%\StepMania 4
 Default=False
-FileKey1=%AppData%\Stepmania *\Logs|*.*
+FileKey1=%AppData%\Stepmania*\Logs|*.*
 
 [Sticky Notes Cache*]
 LangSecRef=3021
@@ -18793,9 +18781,10 @@ Detect=HKCU\Software\Valve\Steam\Apps\35720
 Default=False
 FileKey1=%LocalAppData%\VirtualStore\Program Files*\Steam\SteamApps\common\Trine\_enchanted_edition_\log|*.*
 FileKey2=%LocalAppData%\VirtualStore\Program Files*\Steam\SteamApps\Common\Trine\logs|*.*
-FileKey1=%LocalAppData%\VirtualStore\Program Files*\Steam\SteamApps\Common\Trine 2\log|*.*
-FileKey3=%ProgramFiles%\Steam\SteamApps\common\Trine\_enchanted_edition_\log|*.*
-FileKey4=%ProgramFiles%\Steam\SteamApps\Common\Trine *\logs|*.*
+FileKey3=%LocalAppData%\VirtualStore\Program Files*\Steam\SteamApps\Common\Trine 2\log|*.*
+FileKey4=%ProgramFiles%\Steam\SteamApps\common\Trine\_enchanted_edition_\log|*.*
+FileKey5=%ProgramFiles%\Steam\SteamApps\Common\Trine\logs|*.*
+FileKey6=%ProgramFiles%\Steam\SteamApps\Common\Trine 2\log|*.*
 
 [TrojanHunter Debug Logs*]
 LangSecRef=3024
@@ -20982,8 +20971,8 @@ ExcludeKey1=FILE|%ProgramFiles%\Yahoo!\Messenger\INSTALL.LOG
 [Yahoo Messenger Photo Sharing cache*]
 LangSecRef=3022
 Detect=HKCU\Software\Yahoo\pager
-Warning=Selecting this will remove all your Yahoo Messenger Photo Sharing photos.
 Default=False
+Warning=Selecting this will remove all your Yahoo Messenger Photo Sharing photos.
 FileKey1=%CommonAppData%\Yahoo!\Messenger\PhotoSharing|*.*|RECURSE
 
 [Yahoo Messenger Profiles Registry Key*]
@@ -21023,13 +21012,12 @@ FileKey1=%LocalAppData%\Yandex\YandexBrowser\User Data\*|Cookies*
 [Yandex Browser - Installer*]
 LangSecRef=3029
 Detect=HKCU\Software\Yandex\YandexBrowser
-Warning=Running this may remove the ability to automatically update to future versions on some computers.
 Default=False
+Warning=Running this may remove the ability to automatically update to future versions on some computers.
 FileKey1=%LocalAppData%\Yandex\YandexBrowser\Application\*\Installer|*.7z
 
 [Yandex Browser - Internet Cache*]
 LangSecRef=3029
-Section=Yandex Browser
 Detect=HKCU\Software\Yandex\YandexBrowser
 Default=False
 FileKey1=%LocalAppData%\Yandex\YandexBrowser\User Data\*|Favicons*
@@ -21148,7 +21136,7 @@ Detect1=HKCU\Software\ZONER\Zoner Photo Studio 15
 Detect2=HKCU\Software\ZONER\Zoner Photo Studio 16
 Detect3=HKCU\Software\ZONER\Zoner Photo Studio 18
 Default=False
-FileKey1=%LocalAppData%\Zoner\ZPS *\Cache|RECURSE|REMOVESELF
+FileKey1=%LocalAppData%\Zoner\ZPS *\Cache|RECURSE
 FileKey2=%LocalAppData%\Zoner\ZPS *\CEF|*.log
 FileKey3=%LocalAppData%\Zoner\ZPS *\ZPSCache.dat|*.*
 FileKey4=%Pictures%|*.uid-zps
