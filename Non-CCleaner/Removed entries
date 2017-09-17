@@ -333,14 +333,14 @@ LangSecRef=3024
 Detect=HKCU\Software\TechSmith\SnagIt
 Default=False
 Warning=This will delete the backups of the captures that you have performed with SnagIt.
-FileKey4=%LocalAppData%\TechSmith\Snagit\DataStore\AppIcons|*.*
-FileKey5=%LocalAppData%\TechSmith\Snagit\DataStore\WebSiteIcons|*.*
-FileKey6=%LocalAppData%\TechSmith\SnagIt\DataStore\AppIcons|*.ico
-FileKey7=%LocalAppData%\TechSmith\SnagIt\DataStore\WebSiteIcons|*.ico
-FileKey8=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
-FileKey10=%LocalAppData%\TechSmith\SnagIt|Tray.bin
-RegKey7=HKCU\Software\TechSmith\SnagIt\13\Recent Captures
-RegKey8=HKCU\Software\TechSmith\SnagIt\13\SnagItEditor\Recent File List
+FileKey1=%LocalAppData%\TechSmith\Snagit\DataStore\AppIcons|*.*
+FileKey2=%LocalAppData%\TechSmith\Snagit\DataStore\WebSiteIcons|*.*
+FileKey3=%LocalAppData%\TechSmith\SnagIt\DataStore\AppIcons|*.ico
+FileKey4=%LocalAppData%\TechSmith\SnagIt\DataStore\WebSiteIcons|*.ico
+FileKey5=%LocalAppData%\TechSmith\SnagIt\Thumbnails|*.*
+FileKey6=%LocalAppData%\TechSmith\SnagIt|Tray.bin
+RegKey1=HKCU\Software\TechSmith\SnagIt\13\Recent Captures
+RegKey2=HKCU\Software\TechSmith\SnagIt\13\SnagItEditor\Recent File List
 
 [Stored HSTS Cookies*]
 LangSecRef=3026
