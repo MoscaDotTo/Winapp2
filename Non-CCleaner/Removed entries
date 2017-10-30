@@ -1,7 +1,7 @@
-; Version: 170917
+; Version: 171030
 ; This file contains all the removed entries that were lost, due to being added to CCleaner.
 ; Here you can easily add and edit removed entries, which will eventually get added to the Non-CCleaner version of Winapp2.
-; # of removed entries: 54
+; # of removed entries: 55
 
 [4Sync*]
 LangSecRef=3024
@@ -65,6 +65,12 @@ RegKey3=HKCU\Software\TechSmith\Camtasia Studio\8.0\Camtasia Studio\8.0|MRUImpor
 RegKey4=HKCU\Software\TechSmith\Camtasia Studio\8.0\Camtasia Studio\8.0|MRUOpenProjectFolder
 RegKey5=HKCU\Software\TechSmith\Camtasia Studio\8.0\Camtasia Studio\8.0|RecentRecordingsMru
 RegKey6=HKCU\Software\TechSmith\Camtasia Studio\8.0\Camtasia Recorder\8.0\General|lstLastSaveDir
+
+[CBS Logs*]
+LangSecRef=3025
+Detect=HKLM\Software\Microsoft\Windows
+Default=False
+FileKey1=%WinDir%\Logs\CBS|cbs.log
 
 [CoolNovo - Cache*]
 LangSecRef=3029
