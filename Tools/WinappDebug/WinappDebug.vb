@@ -1,4 +1,4 @@
-﻿Imports System.IO
+Imports System.IO
 Module Module1
 
     Sub Main()
@@ -14,6 +14,12 @@ Module Module1
         Dim linecount As Integer = 0
         Dim command As String
         Dim number_of_errors As Integer = 0
+        Dim curFileKeyNumber As Integer = 1
+        Dim curRegKeyNumber As Integer = 1
+        Dim curDetectFileNumber As Integer = 1
+        Dim curDetectNumber As Integer = 1
+        Dim firstDetectNumber As Boolean = False
+        Dim firstDetecFileNumber As Boolean = False
 
         'Create a list of supported environmental variables
         Dim envir_vars As New List(Of String)
@@ -36,6 +42,17 @@ Module Module1
                 linecount = linecount + 1
 
                 'Whitespace checks
+
+                If command = "" Then
+                    'reset our counters for the numbers next to commands when we move to the next entry
+                    curFileKeyNumber = 1
+                    curRegKeyNumber = 1
+                    curDetectFileNumber = 1
+                    curDetectNumber = 1
+                    firstDetecFileNumber = False
+                    firstDetectNumber = False
+                End If
+
                 If command = "" = False And command.StartsWith(";") = False Then
 
                     'Check for trailing whitespace
@@ -93,6 +110,10 @@ Module Module1
                         Console.WriteLine("Line: " & linecount & " Error: 'FileKey' entry is incorrectly spelled or formatted. Spelling should be CamelCase." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
                     End If
+                    If command.Contains("FileKey" & curFileKeyNumber) = False Then
+                        Console.WriteLine("Line: " & linecount & " Error: 'FileKey' entry is incorrectly numbered: Expected FileKey" & curFileKeyNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                    End If
+                    curFileKeyNumber = curFileKeyNumber + 1
                 End If
 
                 'Check for cleaning command spelling errors (registry keys)
@@ -101,6 +122,10 @@ Module Module1
                         Console.WriteLine("Line: " & linecount & " Error: 'RegKey' entry is incorrectly spelled or formatted. Spelling should be CamelCase." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
                     End If
+                    If command.Contains("RegKey" & curRegKeyNumber) = False Then
+                        Console.WriteLine("Line: " & linecount & " Error: 'RegKey' entry is incorrectly numbered: Expected RegKey" & curRegKeyNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                    End If
+                    curRegKeyNumber = curRegKeyNumber + 1
                 End If
 
                 'Check for missing numbers next to cleaning commands
@@ -115,11 +140,64 @@ Module Module1
                     number_of_errors = number_of_errors + 1
                 End If
 
+                'Check to make sure Detects are properly numbered
+                If command.StartsWith("DetectF") = False And command.StartsWith("DetectO") = False Then
+
+
+                    'make sure we notice if there are multiple detects but the first is missing a number
+                    If command.StartsWith("Detect") Then
+                        If curDetectNumber = 1 Then
+                            If command.StartsWith("Detect=") Then
+                                firstDetectNumber = False
+                            Else
+                                firstDetectNumber = True
+                            End If
+
+                        End If
+                        If curDetectNumber = 2 And firstDetectNumber = False Then
+                            Console.WriteLine("Line: " & linecount - 1 & " Error: 'Detect" & curDetectNumber & "' detected without preceding 'Detect" & curDetectNumber - 1 & "'")
+                        End If
+                        If curDetectNumber > 1 Then
+                            If command.Contains("Detect" & curDetectNumber) = False Then
+                                Console.WriteLine("Line: " & linecount & " Error: 'Detect' entry is incorrectly numbered: Expected Detect" & curDetectNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                            End If
+
+                        End If
+                        curDetectNumber = curDetectNumber + 1
+                    End If
+                End If
                 'Check for detectfile that contains a registry path
                 If command.StartsWith("DetectFile=HKLM") Or command.StartsWith("DetectFile=HKCU") Or command.StartsWith("DetectFile=HKC") Or command.StartsWith("DetectFile=HKCR") Then
                     Console.WriteLine("Line: " & linecount & " Error: 'DetectFile' can only be used for filesystem paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                     number_of_errors = number_of_errors + 1
                 End If
+
+
+                If command.StartsWith("DetectF") = True Then
+
+                    'make sure we notice if there are multiple detectfiles but the first is missing a number
+                    If command.StartsWith("DetectFile") Then
+                        If curDetectFileNumber = 1 Then
+                            If command.StartsWith("DetectFile=") Then
+                                firstDetecFileNumber = False
+                            Else
+                                firstDetecFileNumber = True
+                            End If
+
+                        End If
+                        If curDetectFileNumber = 2 And firstDetecFileNumber = False Then
+                            Console.WriteLine("Line: " & linecount - 1 & " Error: 'DetectFile" & curDetectFileNumber & "' detected without preceding 'DetectFile" & curDetectFileNumber - 1 & "'")
+                        End If
+                        If curDetectFileNumber > 1 Then
+                            If command.Contains("DetectFile" & curDetectFileNumber) = False Then
+                                Console.WriteLine("Line: " & linecount & " Error: 'DetectFile' entry is incorrectly numbered: Expected DetectFile" & curDetectFileNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                            End If
+
+                        End If
+                    End If
+                    curDetectFileNumber = curDetectFileNumber + 1
+                End If
+
 
                 'Check for missing backslashes on environmental variables
                 For Each var As String In envir_vars
@@ -138,7 +216,7 @@ Module Module1
             r.Close()
 
 
-                Catch ex As Exception
+        Catch ex As Exception
             Console.WriteLine(ex.Message)
         End Try
 
