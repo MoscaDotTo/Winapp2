@@ -23,7 +23,8 @@ Module Module1
 
         'Create a list of supported environmental variables
         Dim envir_vars As New List(Of String)
-        envir_vars.AddRange(New String() {"%userprofile%", "%ProgramFiles%", "%rootdir%", "%windir%", "%appdata%", "%systemdrive%"})
+        envir_vars.AddRange(New String() {"%userprofile%", "%ProgramFiles%", "%rootdir%", "%windir%", "%appdata%", "%systemdrive%", "%Documents%",
+                            "%pictures%", "%video%", "%CommonAppData%", "%LocalAppData%", "%CommonProgramFiles%", "%homedrive%", "%music%", "%tmp%", "%temp%"})
 
         'Create a list of entry titles so we can look for duplicates
         Dim entry_titles As New List(Of String)
@@ -112,6 +113,7 @@ Module Module1
                     End If
                     If command.Contains("FileKey" & curFileKeyNumber) = False Then
                         Console.WriteLine("Line: " & linecount & " Error: 'FileKey' entry is incorrectly numbered: Expected FileKey" & curFileKeyNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                        number_of_errors = number_of_errors + 1
                     End If
                     curFileKeyNumber = curFileKeyNumber + 1
                 End If
@@ -141,31 +143,34 @@ Module Module1
                 End If
 
                 'Check to make sure Detects are properly numbered
-                If command.StartsWith("DetectF") = False And command.StartsWith("DetectO") = False Then
+                If command.StartsWith("DetectF") = False And command.StartsWith("DetectO") = False And command.StartsWith("Detect") Then
 
 
                     'make sure we notice if there are multiple detects but the first is missing a number
-                    If command.StartsWith("Detect") Then
-                        If curDetectNumber = 1 Then
-                            If command.StartsWith("Detect=") Then
-                                firstDetectNumber = False
-                            Else
-                                firstDetectNumber = True
-                            End If
 
+                    If curDetectNumber = 1 Then
+                        If command.StartsWith("Detect=") Or (command.StartsWith("Detect=") = False And command.StartsWith("Detect1=") = False) Then
+                            firstDetectNumber = False
+                        Else
+                            firstDetectNumber = True
                         End If
-                        If curDetectNumber = 2 And firstDetectNumber = False Then
-                            Console.WriteLine("Line: " & linecount - 1 & " Error: 'Detect" & curDetectNumber & "' detected without preceding 'Detect" & curDetectNumber - 1 & "'")
-                        End If
-                        If curDetectNumber > 1 Then
-                            If command.Contains("Detect" & curDetectNumber) = False Then
-                                Console.WriteLine("Line: " & linecount & " Error: 'Detect' entry is incorrectly numbered: Expected Detect" & curDetectNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                            End If
 
-                        End If
-                        curDetectNumber = curDetectNumber + 1
                     End If
+
+
+                    If curDetectNumber = 2 And firstDetectNumber = False Then
+                        Console.WriteLine("Line: " & linecount - 1 & " Error: 'Detect" & curDetectNumber & "' detected without preceding 'Detect" & curDetectNumber - 1 & "'" & Environment.NewLine)
+                        number_of_errors = number_of_errors + 1
+                    End If
+                    If curDetectNumber > 1 Then
+                        If command.Contains("Detect" & curDetectNumber) = False Then
+                            Console.WriteLine("Line: " & linecount & " Error: 'Detect' entry is incorrectly numbered: Expected Detect" & curDetectNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                            number_of_errors = number_of_errors + 1
+                        End If
+                    End If
+                    curDetectNumber = curDetectNumber + 1
                 End If
+
                 'Check for detectfile that contains a registry path
                 If command.StartsWith("DetectFile=HKLM") Or command.StartsWith("DetectFile=HKCU") Or command.StartsWith("DetectFile=HKC") Or command.StartsWith("DetectFile=HKCR") Then
                     Console.WriteLine("Line: " & linecount & " Error: 'DetectFile' can only be used for filesystem paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
@@ -173,29 +178,34 @@ Module Module1
                 End If
 
 
-                If command.StartsWith("DetectF") = True Then
 
-                    'make sure we notice if there are multiple detectfiles but the first is missing a number
-                    If command.StartsWith("DetectFile") Then
-                        If curDetectFileNumber = 1 Then
-                            If command.StartsWith("DetectFile=") Then
-                                firstDetecFileNumber = False
-                            Else
-                                firstDetecFileNumber = True
-                            End If
+                'make sure we notice if there are multiple detectfiles but the first is missing a number
+                If command.StartsWith("DetectFile") Then
 
-                        End If
-                        If curDetectFileNumber = 2 And firstDetecFileNumber = False Then
-                            Console.WriteLine("Line: " & linecount - 1 & " Error: 'DetectFile" & curDetectFileNumber & "' detected without preceding 'DetectFile" & curDetectFileNumber - 1 & "'")
-                        End If
-                        If curDetectFileNumber > 1 Then
-                            If command.Contains("DetectFile" & curDetectFileNumber) = False Then
-                                Console.WriteLine("Line: " & linecount & " Error: 'DetectFile' entry is incorrectly numbered: Expected DetectFile" & curDetectFileNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                            End If
+                    If curDetectFileNumber = 1 Then
 
+                        If command.StartsWith("DetectFile=") Or (command.StartsWith("DetectFile=") = False And command.StartsWith("DetectFile1=") = False) Then
+                            firstDetecFileNumber = False
+                        Else
+                            firstDetecFileNumber = True
                         End If
+
+                    End If
+
+                    If curDetectFileNumber = 2 And firstDetecFileNumber = False Then
+                        Console.WriteLine("Line: " & linecount - 1 & " Error: 'DetectFile" & curDetectFileNumber & "' detected without preceding 'DetectFile" & curDetectFileNumber - 1 & "'" & Environment.NewLine)
+                        number_of_errors = number_of_errors + 1
+                    End If
+
+                    If curDetectFileNumber > 1 Then
+                        If command.Contains("DetectFile" & curDetectFileNumber) = False Then
+                            Console.WriteLine("Line: " & linecount & " Error: 'DetectFile' entry is incorrectly numbered: Expected DetectFile" & curDetectFileNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                            number_of_errors = number_of_errors + 1
+                        End If
+
                     End If
                     curDetectFileNumber = curDetectFileNumber + 1
+
                 End If
 
 
