@@ -115,6 +115,27 @@ Module Module1
                         Console.WriteLine("Line: " & linecount & " Error: 'FileKey' entry is incorrectly numbered: Expected FileKey" & curFileKeyNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
                     End If
+                    Dim iteratorCheckerList() As String = Split(command, "|")
+
+                    'check for incorrect spellings of RECURSE or REMOVESELF
+                    If iteratorCheckerList.Length > 2 Then
+                        If iteratorCheckerList(2).Contains("RECURSE") = False And iteratorCheckerList(2).Contains("REMOVESELF") = False Then
+
+                            Console.WriteLine("Line: " & linecount & " Error: 'RECURSE' or 'REMOVESELF' entry is incorrectly spelled, found " & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+                            number_of_errors = number_of_errors + 1
+
+                        End If
+                    End If
+
+                    'check for missing pipe symbol on recurse and removeself
+                    If command.Contains("RECURSE") = True And Not command.Contains("|RECURSE") Then
+                        Console.WriteLine("Line: " & linecount & " Error: Missing pipe symbol | before RECURSE" & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+                        number_of_errors = number_of_errors + 1
+                    End If
+                    If command.Contains("REMOVESELF") = True And Not command.Contains("|REMOVESELF") Then
+                        Console.WriteLine("Line: " & linecount & " Error: Missing pipe symbol | before REMOVESELF" & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+                        number_of_errors = number_of_errors + 1
+                    End If
                     curFileKeyNumber = curFileKeyNumber + 1
                 End If
 
