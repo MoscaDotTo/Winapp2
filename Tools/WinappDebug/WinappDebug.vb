@@ -20,6 +20,9 @@ Module Module1
         Dim curDetectNumber As Integer = 1
         Dim firstDetectNumber As Boolean = False
         Dim firstDetecFileNumber As Boolean = False
+        Dim havePassedTB As Boolean = False
+
+        Dim misplacedEntryList As New List(Of String)
 
         'Create a list of supported environmental variables
         Dim envir_vars As New List(Of String)
@@ -28,7 +31,7 @@ Module Module1
 
         'Create a list of entry titles so we can look for duplicates
         Dim entry_titles As New List(Of String)
-
+        Dim trimmed_entry_titles As New List(Of String)
         'Read the winapp2.ini file line-by-line
         Dim r As IO.StreamReader
         Try
@@ -54,6 +57,8 @@ Module Module1
                     firstDetectNumber = False
                 End If
 
+
+
                 If command = "" = False And command.StartsWith(";") = False Then
 
                     'Check for trailing whitespace
@@ -68,10 +73,16 @@ Module Module1
                         number_of_errors = number_of_errors + 1
                     End If
 
+                Else
+                    If command.Equals("; End of Thunderbird entries.") Then
+                        havePassedTB = True
+                    End If
                 End If
+
 
                 'Check for duplicate titles
                 If command.StartsWith("[") Then
+
 
                     'Check if it's already in the list
                     If entry_titles.Contains(command) Then
@@ -80,7 +91,18 @@ Module Module1
                     Else
 
                         'Not already in the list. Add it.
+
                         entry_titles.Add(command)
+
+                        Dim currentEntry As String = entry_titles.Last
+                        currentEntry = currentEntry.Remove(0, 1)
+                        currentEntry = currentEntry.Remove(currentEntry.Length - 2)
+
+                        'the entries in and above the thunderbird section don't need to be in order because they are grouped categorically 
+                        If havePassedTB Then
+                            trimmed_entry_titles.Add(currentEntry)
+
+                        End If
 
                     End If
 
@@ -89,7 +111,7 @@ Module Module1
                 'Check for spelling errors in "LangSecRef"
                 If command.StartsWith("Lan") Then
                     If command.Contains("LangSecRef=") = False Then
-                        Console.WriteLine("Line: " & linecount & " Error: 'LangSecRef' entry is incorrectly spelled or formatted." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                        Console.WriteLine("Line:  " & linecount & " Error: 'LangSecRef' entry is incorrectly spelled or formatted." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
                     End If
                 End If
@@ -251,7 +273,32 @@ Module Module1
             Console.WriteLine(ex.Message)
         End Try
 
+        Dim sortedEList As New List(Of String)
+        sortedEList.AddRange(trimmed_entry_titles.ToArray)
+        sortedEList.Sort()
 
+        For i As Integer = 0 To trimmed_entry_titles.Count - 1
+
+            Dim entry As String = trimmed_entry_titles(i)
+            Dim recievedIndex As Integer = trimmed_entry_titles.IndexOf(entry)
+            Dim sortedInfex As Integer = sortedEList.IndexOf(entry)
+
+            If recievedIndex <> sortedInfex Then
+                Dim temp As String = trimmed_entry_titles(recievedIndex)
+
+                If sortedInfex > recievedIndex And misplacedEntryList.Contains(temp) = False Then
+                    Console.WriteLine("Error: Alphabetization. Command: [" & entry & "*] is out of place, detected before: [" & sortedEList(sortedInfex - 1) & "*]" & Environment.NewLine)
+                    misplacedEntryList.Add(entry)
+                    number_of_errors = number_of_errors + 1
+                    trimmed_entry_titles.RemoveAt(recievedIndex)
+                    trimmed_entry_titles.Insert(sortedInfex, temp)
+
+                End If
+
+            End If
+
+
+        Next
 
         'Stop the program from closing on completion
         Console.WriteLine("***********************************************" & Environment.NewLine & "Completed analysis of winapp2.ini. " & number_of_errors & " errors were detected. Press any key to close.")
