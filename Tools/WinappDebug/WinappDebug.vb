@@ -275,33 +275,102 @@ Module Module1
 
         Dim sortedEList As New List(Of String)
         sortedEList.AddRange(trimmed_entry_titles.ToArray)
-        sortedEList.Sort()
+        Dim renamedList As New List(Of String)
+        Dim originalNameList As New List(Of String)
+
+        Dim recievedIndex As Integer
+        Dim sortedIndex As Integer
+
 
         For i As Integer = 0 To trimmed_entry_titles.Count - 1
 
             Dim entry As String = trimmed_entry_titles(i)
-            Dim recievedIndex As Integer = trimmed_entry_titles.IndexOf(entry)
-            Dim sortedInfex As Integer = sortedEList.IndexOf(entry)
 
-            If recievedIndex <> sortedInfex Then
-                Dim temp As String = trimmed_entry_titles(recievedIndex)
+            recievedIndex = trimmed_entry_titles.IndexOf(entry)
+            sortedIndex = sortedEList.IndexOf(entry)
 
-                If sortedInfex > recievedIndex And misplacedEntryList.Contains(temp) = False Then
-                    Console.WriteLine("Error: Alphabetization. Command: [" & entry & "*] is out of place, detected before: [" & sortedEList(sortedInfex - 1) & "*]" & Environment.NewLine)
-                    misplacedEntryList.Add(entry)
-                    number_of_errors = number_of_errors + 1
-                    trimmed_entry_titles.RemoveAt(recievedIndex)
-                    trimmed_entry_titles.Insert(sortedInfex, temp)
+            If entry.Contains("-") Then
+
+                Dim newentry As String = entry.Replace("-", "  ")
+                originalNameList.Add(entry)
+                renamedList.Add(newentry)
+                trimmed_entry_titles(recievedIndex) = newentry
+                sortedEList(sortedIndex) = newentry
+            End If
+        Next
+
+        sortedEList.Sort()
+
+        For i As Integer = 0 To renamedList.Count - 1
+            Dim newentry As String = originalNameList(i)
+            Dim ren As String = renamedList(i)
+
+            recievedIndex = trimmed_entry_titles.IndexOf(ren)
+            trimmed_entry_titles(recievedIndex) = newentry
+
+            sortedIndex = sortedEList.IndexOf(ren)
+            sortedEList(sortedIndex) = newentry
+        Next
+
+
+        For i As Integer = 0 To trimmed_entry_titles.Count - 1
+
+            Dim entry As String = trimmed_entry_titles(i)
+            Dim offset As Integer = 0
+
+            recievedIndex = i
+            sortedIndex = sortedEList.IndexOf(entry)
+
+            If recievedIndex <> sortedIndex Then
+
+                If misplacedEntryList.Contains(entry) = False Then
+
+                    If sortedIndex > recievedIndex Then
+
+
+                        misplacedEntryList.Add(entry)
+                        number_of_errors = number_of_errors + 1
+
+                        trimmed_entry_titles.Insert(sortedIndex, entry)
+                        trimmed_entry_titles.RemoveAt(recievedIndex)
+
+                        'Adjust i because the item in its position has now changed and we don't want to skip it
+                        i = i - 1
+
+                    Else
+                        'Make sure we don't notify the user twice for entries that need to be moved right 
+
+                        Console.WriteLine("Error: Alphabetization. Command: [" & entry & "*] may be out of place. It should follow: [" & sortedEList(sortedIndex + 1) & "*]" & Environment.NewLine & "Follows: [" & trimmed_entry_titles(i - 1) & "*]" & Environment.NewLine)
+                        number_of_errors = number_of_errors + 1
+
+                        'move the entry to the left in our list
+                        trimmed_entry_titles.Insert(sortedIndex, entry)
+                        trimmed_entry_titles.RemoveAt(i + 1)
+
+                        'jump back to the position from which we sorted the entry to make sure we remove any entries that were off by one because of it not having been moved yet
+                        i = sortedIndex + 1
+
+                    End If
 
                 End If
-
+            Else
+                'If we have moved backwards because we moved an element left in the list, we want to remove anything that was off-by-one because of it from the misplaced entry list
+                If misplacedEntryList.Contains(entry) = True Then
+                    number_of_errors = number_of_errors - 1
+                    misplacedEntryList.Remove(entry)
+                End If
             End If
+        Next
 
+        For Each entry As String In misplacedEntryList
+
+            sortedIndex = sortedEList.IndexOf(entry)
+            Console.WriteLine("Error: Alphabetization. Command: [" & entry & "*] may be out of place. It should follow: [" & sortedEList(sortedIndex - 1) & "*]" & Environment.NewLine)
 
         Next
 
         'Stop the program from closing on completion
-        Console.WriteLine("***********************************************" & Environment.NewLine & "Completed analysis of winapp2.ini. " & number_of_errors & " errors were detected. Press any key to close.")
+        Console.WriteLine("***********************************************" & Environment.NewLine & "Completed analysis of winapp2.ini. " & number_of_errors & " possible errors were detected. " & Environment.NewLine & "Number of entries: " & entry_titles.Count & Environment.NewLine & "Press any key to close.")
         Console.ReadKey()
 
 
