@@ -21,9 +21,11 @@ Module Module1
         Dim firstDetectNumber As Boolean = False
         Dim firstDetecFileNumber As Boolean = False
         Dim havePassedTB As Boolean = False
+        Dim FileKeyList As New List(Of String)
+        Dim RegKeyList As New List(Of String)
 
-        Dim misplacedEntryList As New List(Of String)
-
+        Dim FileKeyLineCounts As New List(Of String)
+        Dim RegKeyLineCounts As New List(Of String)
         'Create a list of supported environmental variables
         Dim envir_vars As New List(Of String)
         envir_vars.AddRange(New String() {"%userprofile%", "%ProgramFiles%", "%rootdir%", "%windir%", "%appdata%", "%systemdrive%", "%Documents%",
@@ -55,9 +57,42 @@ Module Module1
                     curDetectNumber = 1
                     firstDetecFileNumber = False
                     firstDetectNumber = False
+
+                    'Assess the sorted state of our filekeys and regkeys
+                    Dim SortedFKList As New List(Of String)
+                    SortedFKList.AddRange(FileKeyList)
+
+                    Dim SortedRKList As New List(Of String)
+                    SortedRKList.AddRange(RegKeyList)
+
+                    Dim FileKeyRenamedList As New List(Of String)
+                    Dim FileKeyOriginalNames As New List(Of String)
+
+                    Dim RegKeyRenamedList As New List(Of String)
+                    Dim RegKeyOriginalNames As New List(Of String)
+
+                    'Assess our FileKeys
+                    'do a necessary replacement
+                    If FileKeyList.Count > 1 Then
+
+                        replaceAndSort(FileKeyList, SortedFKList, "|", " \ \")
+                        findOutOfPlace(FileKeyList, SortedFKList, " Error: FileKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, FileKeyLineCounts)
+
+                    End If
+                    FileKeyList.Clear()
+                    FileKeyLineCounts.Clear()
+
+                    'now do all that again but for regkeys
+                    If RegKeyLineCounts.Count > 1 Then
+
+                        replaceAndSort(RegKeyList, SortedRKList, "|", " \ \")
+                        findOutOfPlace(RegKeyList, SortedRKList, " Error: RegKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, RegKeyLineCounts)
+
+                    End If
+                    RegKeyList.Clear()
+                    RegKeyLineCounts.Clear()
+
                 End If
-
-
 
                 If command = "" = False And command.StartsWith(";") = False Then
 
@@ -129,6 +164,10 @@ Module Module1
 
                 'Check for cleaning command spelling errors (files)
                 If command.StartsWith("Fi") Then
+
+                    Dim cmdList As String() = command.Split("=")
+                    FileKeyList.Add(cmdList(1))
+                    FileKeyLineCounts.Add(linecount)
                     If command.Contains("FileKey") = False Then
                         Console.WriteLine("Line: " & linecount & " Error: 'FileKey' entry is incorrectly spelled or formatted. Spelling should be CamelCase." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
@@ -163,6 +202,10 @@ Module Module1
 
                 'Check for cleaning command spelling errors (registry keys)
                 If command.StartsWith("Re") Then
+                    Dim cmdList2 As String() = command.Split("=")
+                    RegKeyList.Add(cmdList2(1))
+                    RegKeyLineCounts.Add(linecount)
+
                     If command.Contains("RegKey") = False Then
                         Console.WriteLine("Line: " & linecount & " Error: 'RegKey' entry is incorrectly spelled or formatted. Spelling should be CamelCase." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
@@ -275,77 +318,114 @@ Module Module1
 
         Dim sortedEList As New List(Of String)
         sortedEList.AddRange(trimmed_entry_titles.ToArray)
+
+
+        'traverse through our trimmed entry titles list
+        replaceAndSort(trimmed_entry_titles, sortedEList, "-", "  ")
+        findOutOfPlace(trimmed_entry_titles, sortedEList, "Error: Entry Alphabetization. Command: [", "*] may be out of place. It should follow: [", "*]", "Follows: [", "*]", number_of_errors, New List(Of String))
+
+
+
+        'Stop the program from closing on completion
+        Console.WriteLine("***********************************************" & Environment.NewLine & "Completed analysis of winapp2.ini. " & number_of_errors & " possible errors were detected. " & Environment.NewLine & "Number of entries: " & entry_titles.Count & Environment.NewLine & "Press any key to close.")
+        Console.ReadKey()
+
+
+    End Sub
+
+    Public Sub replaceAndSort(ByRef ListToBeSorted As List(Of String), ByRef givenSortedList As List(Of String), characterToReplace As String, ByVal replacementText As String)
+
+        Dim receivedIndex As Integer
+        Dim sortedIndex As Integer
+
         Dim renamedList As New List(Of String)
         Dim originalNameList As New List(Of String)
 
-        Dim recievedIndex As Integer
-        Dim sortedIndex As Integer
+
+        For i As Integer = 0 To ListToBeSorted.Count - 1
+
+            Dim entry As String = ListToBeSorted(i)
+
+            'grab the entry at the current position 
+
+            receivedIndex = i
+            sortedIndex = givenSortedList.IndexOf(entry)
 
 
-        For i As Integer = 0 To trimmed_entry_titles.Count - 1
+            'replace any instance of "-" with "  " for the purposes of sorting 
+            If entry.Contains(characterToReplace) Then
 
-            Dim entry As String = trimmed_entry_titles(i)
-
-            recievedIndex = trimmed_entry_titles.IndexOf(entry)
-            sortedIndex = sortedEList.IndexOf(entry)
-
-            If entry.Contains("-") Then
-
-                Dim newentry As String = entry.Replace("-", "  ")
+                Dim newentry As String = entry.Replace(characterToReplace, replacementText) ' "-" for "  "
                 originalNameList.Add(entry)
                 renamedList.Add(newentry)
-                trimmed_entry_titles(recievedIndex) = newentry
-                sortedEList(sortedIndex) = newentry
+                ListToBeSorted(receivedIndex) = newentry
+                givenSortedList(sortedIndex) = newentry
             End If
         Next
 
-        sortedEList.Sort()
+        givenSortedList.Sort()
 
+        'undo our change made in the name of sorting such that we have the original data back
         For i As Integer = 0 To renamedList.Count - 1
             Dim newentry As String = originalNameList(i)
             Dim ren As String = renamedList(i)
 
-            recievedIndex = trimmed_entry_titles.IndexOf(ren)
-            trimmed_entry_titles(recievedIndex) = newentry
+            Dim recievedIndex = ListToBeSorted.IndexOf(ren)
+            ListToBeSorted(recievedIndex) = newentry
 
-            sortedIndex = sortedEList.IndexOf(ren)
-            sortedEList(sortedIndex) = newentry
+            sortedIndex = givenSortedList.IndexOf(ren)
+            givenSortedList(sortedIndex) = newentry
         Next
 
+    End Sub
 
-        For i As Integer = 0 To trimmed_entry_titles.Count - 1
+    Public Sub findOutOfPlace(ByRef someList As List(Of String), ByRef sortedList As List(Of String), ByVal Err1 As String, ByVal Err2 As String, ByVal Err3 As String, ByVal err4 As String, ByVal err5 As String, ByRef number_of_errors As Integer, ByRef LineCountList As List(Of String))
+        Dim misplacedEntryList As New List(Of String)
+        For i As Integer = 0 To someList.Count - 1
 
-            Dim entry As String = trimmed_entry_titles(i)
-            Dim offset As Integer = 0
+            Dim entry As String = someList(i)
 
-            recievedIndex = i
-            sortedIndex = sortedEList.IndexOf(entry)
+            Dim receivedIndex As Integer = i
+            Dim sortedIndex As Integer = sortedList.IndexOf(entry)
 
-            If recievedIndex <> sortedIndex Then
+            If receivedIndex <> sortedIndex Then
 
                 If misplacedEntryList.Contains(entry) = False Then
 
-                    If sortedIndex > recievedIndex Then
+                    If sortedIndex > receivedIndex Then
 
 
                         misplacedEntryList.Add(entry)
                         number_of_errors = number_of_errors + 1
 
-                        trimmed_entry_titles.Insert(sortedIndex, entry)
-                        trimmed_entry_titles.RemoveAt(recievedIndex)
+                        someList.Insert(sortedIndex, entry)
+                        someList.RemoveAt(receivedIndex)
 
                         'Adjust i because the item in its position has now changed and we don't want to skip it
                         i = i - 1
 
                     Else
-                        'Make sure we don't notify the user twice for entries that need to be moved right 
+                        Dim tmpErr1 As String = Err1
 
-                        Console.WriteLine("Error: Alphabetization. Command: [" & entry & "*] may be out of place. It should follow: [" & sortedEList(sortedIndex + 1) & "*]" & Environment.NewLine & "Follows: [" & trimmed_entry_titles(i - 1) & "*]" & Environment.NewLine)
+                        'some contingency for when we're tracking lines (TODO: Add line tracking for entries)
+                        If LineCountList.Count > 0 Then
+                            LineCountList.Insert(sortedIndex, LineCountList(i))
+                            LineCountList.RemoveAt(i + 1)
+                            Err1 = "Line: " & LineCountList(i) & Err1
+                        End If
+                        Dim shouldBe As String
+                        If (sortedIndex = 0) Then
+                            shouldBe = " Should be first"
+                        Else
+                            shouldBe = sortedList(sortedIndex - 1)
+                        End If
+                        Console.WriteLine(Err1 & entry & Err2 & shouldBe & Err3 & Environment.NewLine & err4 & sortedList(sortedIndex + 1) & err5 & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
+                        Err1 = tmpErr1
 
                         'move the entry to the left in our list
-                        trimmed_entry_titles.Insert(sortedIndex, entry)
-                        trimmed_entry_titles.RemoveAt(i + 1)
+                        someList.Insert(sortedIndex, entry)
+                        someList.RemoveAt(i + 1)
 
                         'jump back to the position from which we sorted the entry to make sure we remove any entries that were off by one because of it not having been moved yet
                         i = sortedIndex + 1
@@ -363,17 +443,21 @@ Module Module1
         Next
 
         For Each entry As String In misplacedEntryList
-
-            sortedIndex = sortedEList.IndexOf(entry)
-            Console.WriteLine("Error: Alphabetization. Command: [" & entry & "*] may be out of place. It should follow: [" & sortedEList(sortedIndex - 1) & "*]" & Environment.NewLine)
-
+            Dim tmperr As String = Err1
+            If LineCountList.Count > 0 Then
+                Err1 = "Line: " & LineCountList(someList.IndexOf(entry)) & " "
+            End If
+            Dim sortedIndex As Integer = sortedList.IndexOf(entry)
+            Dim shouldBe As String
+            If (sortedIndex = 0) Then
+                shouldBe = " Should be first"
+            Else
+                shouldBe = sortedList(sortedIndex - 1)
+            End If
+            Console.WriteLine(Err1 & entry & Err2 & shouldBe & Err3 & Environment.NewLine & err4 & sortedList(sortedIndex - 1) & err5 & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+            Err1 = tmperr
         Next
 
-        'Stop the program from closing on completion
-        Console.WriteLine("***********************************************" & Environment.NewLine & "Completed analysis of winapp2.ini. " & number_of_errors & " possible errors were detected. " & Environment.NewLine & "Number of entries: " & entry_titles.Count & Environment.NewLine & "Press any key to close.")
-        Console.ReadKey()
-
-
     End Sub
-
 End Module
