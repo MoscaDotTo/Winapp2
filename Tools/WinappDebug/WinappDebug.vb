@@ -75,7 +75,7 @@ Module Module1
                     'do a necessary replacement
                     If FileKeyList.Count > 1 Then
 
-                        replaceAndSort(FileKeyList, SortedFKList, "|", " \ \")
+                        replaceAndSort(FileKeyList, SortedFKList, "|", " \ \", "keys")
                         findOutOfPlace(FileKeyList, SortedFKList, " Error: FileKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, FileKeyLineCounts)
 
                     End If
@@ -85,7 +85,7 @@ Module Module1
                     'now do all that again but for regkeys
                     If RegKeyLineCounts.Count > 1 Then
 
-                        replaceAndSort(RegKeyList, SortedRKList, "|", " \ \")
+                        replaceAndSort(RegKeyList, SortedRKList, "|", " \ \", "keys")
                         findOutOfPlace(RegKeyList, SortedRKList, " Error: RegKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, RegKeyLineCounts)
 
                     End If
@@ -321,7 +321,7 @@ Module Module1
 
 
         'traverse through our trimmed entry titles list
-        replaceAndSort(trimmed_entry_titles, sortedEList, "-", "  ")
+        replaceAndSort(trimmed_entry_titles, sortedEList, "-", "  ", "entries")
         findOutOfPlace(trimmed_entry_titles, sortedEList, "Error: Entry Alphabetization. Command: [", "*] may be out of place. It should follow: [", "*]", "Follows: [", "*]", number_of_errors, New List(Of String))
 
 
@@ -333,7 +333,7 @@ Module Module1
 
     End Sub
 
-    Public Sub replaceAndSort(ByRef ListToBeSorted As List(Of String), ByRef givenSortedList As List(Of String), characterToReplace As String, ByVal replacementText As String)
+    Public Sub replaceAndSort(ByRef ListToBeSorted As List(Of String), ByRef givenSortedList As List(Of String), characterToReplace As String, ByVal replacementText As String, ByVal sortType As String)
 
         Dim receivedIndex As Integer
         Dim sortedIndex As Integer
@@ -351,16 +351,26 @@ Module Module1
             receivedIndex = i
             sortedIndex = givenSortedList.IndexOf(entry)
 
-
             'replace any instance of "-" with "  " for the purposes of sorting 
             If entry.Contains(characterToReplace) Then
 
-                Dim newentry As String = entry.Replace(characterToReplace, replacementText) ' "-" for "  "
+                Dim newentry As String = entry.Replace(characterToReplace, replacementText)
                 originalNameList.Add(entry)
                 renamedList.Add(newentry)
                 ListToBeSorted(receivedIndex) = newentry
                 givenSortedList(sortedIndex) = newentry
+                entry = newentry
             End If
+
+            'Console.WriteLine("Done replacing characters in " & entry)
+            'Prefix any singular numbers with 0 to maintain their first order precedence during sorting 
+            'because VB.NET is silly and thinks "10" comes before "2" 
+
+
+            Dim myChars() As Char = entry.ToCharArray()
+            findAndReplNumbers(myChars, entry, originalNameList, renamedList, ListToBeSorted, givenSortedList, i, sortedIndex)
+
+
         Next
 
         givenSortedList.Sort()
@@ -380,6 +390,9 @@ Module Module1
     End Sub
 
     Public Sub findOutOfPlace(ByRef someList As List(Of String), ByRef sortedList As List(Of String), ByVal Err1 As String, ByVal Err2 As String, ByVal Err3 As String, ByVal err4 As String, ByVal err5 As String, ByRef number_of_errors As Integer, ByRef LineCountList As List(Of String))
+        Dim originalPlacement As New List(Of String)
+        originalPlacement.AddRange(someList.ToArray)
+
         Dim misplacedEntryList As New List(Of String)
         For i As Integer = 0 To someList.Count - 1
 
@@ -393,7 +406,6 @@ Module Module1
                 If misplacedEntryList.Contains(entry) = False Then
 
                     If sortedIndex > receivedIndex Then
-
 
                         misplacedEntryList.Add(entry)
                         number_of_errors = number_of_errors + 1
@@ -419,7 +431,15 @@ Module Module1
                         Else
                             shouldBe = sortedList(sortedIndex - 1)
                         End If
-                        Console.WriteLine(Err1 & entry & Err2 & shouldBe & Err3 & Environment.NewLine & err4 & sortedList(sortedIndex + 1) & err5 & Environment.NewLine)
+
+                        Dim recInd As Integer = originalPlacement.IndexOf(entry)
+                        Dim follows As String
+                        If recInd = 0 Then
+                            follows = " Should be first"
+                        Else
+                            follows = originalPlacement(recInd - 1)
+                        End If
+                        Console.WriteLine(Err1 & entry & Err2 & shouldBe & Err3 & Environment.NewLine & err4 & follows & err5 & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
                         Err1 = tmpErr1
 
@@ -454,10 +474,104 @@ Module Module1
             Else
                 shouldBe = sortedList(sortedIndex - 1)
             End If
-            Console.WriteLine(Err1 & entry & Err2 & shouldBe & Err3 & Environment.NewLine & err4 & sortedList(sortedIndex - 1) & err5 & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
+            Dim recInd As Integer = originalPlacement.IndexOf(entry)
+            Dim follows As String
+            If recInd = 0 Then
+                follows = " Should be first"
+            Else
+                follows = originalPlacement(recInd - 1)
+            End If
+            Console.WriteLine(Err1 & entry & Err2 & shouldBe & Err3 & Environment.NewLine & err4 & follows & err5 & Environment.NewLine)
+
             Err1 = tmperr
         Next
 
     End Sub
+
+    Public Sub findAndReplNumbers(ByRef myChars() As Char, ByRef entry As String, ByRef originalNameList As List(Of String), ByRef renamedList As List(Of String), ByRef ListToBeSorted As List(Of String), ByRef givenSortedList As List(Of String), ByVal receivedIndex As Integer, ByVal sortedindex As Integer)
+
+        Dim numIndex As New Integer
+        Dim nextCharIsNum As Boolean = False
+        Dim lastCharWasNum As Boolean = False
+        Dim prefixIndicies As New List(Of Integer)
+        For Each ch As Char In myChars
+
+            numIndex = entry.IndexOf(ch)
+
+            'observe if the next character is a number, we only want to pad instances of single digit numbers
+            If numIndex < myChars.Count - 1 Then
+                Dim nextindex As Integer = numIndex + 1
+                Dim nextChar As Char = entry(nextindex)
+
+                If Char.IsDigit(nextChar) Then
+                    nextCharIsNum = True
+                End If
+
+            End If
+
+            If lastCharWasNum = False Then
+
+                If Char.IsDigit(ch) And nextCharIsNum = False Then
+                    lastCharWasNum = True
+                    prefixIndicies.Add(numIndex)
+                Else
+                    lastCharWasNum = False
+                End If
+            End If
+
+        Next
+
+        Dim finalChar As Char = entry(entry.Count - 1)
+        Dim ntlChar As Char = entry(entry.Count - 2)
+
+        'make sure we don't ignore single digit numbers who happen to be at the last index 
+        If Char.IsDigit(finalChar) = True And Char.IsDigit(ntlChar) = False Then
+            Dim tmp As String = entry
+            tmp = tmp.Insert(entry.Count - 1, "0")
+
+            If renamedList.Contains(entry) = False Then
+                originalNameList.Add(entry)
+                renamedList.Add(tmp)
+                ListToBeSorted(receivedIndex) = tmp
+                givenSortedList(sortedindex) = tmp
+            Else
+                renamedList(renamedList.IndexOf(entry)) = tmp
+                ListToBeSorted(receivedIndex) = tmp
+                givenSortedList(sortedindex) = tmp
+            End If
+            entry = tmp
+        End If
+
+
+        'prefix any numbers that we detected above (except the potential last which has already been replaced)
+        If prefixIndicies.Count >= 1 Then
+            For j As Integer = 0 To prefixIndicies.Count - 1
+
+                Dim tmp As String = entry
+
+                tmp = tmp.Insert(prefixIndicies(j), "0")
+
+                If renamedList.Contains(entry) = False Then
+                    originalNameList.Add(entry)
+                    renamedList.Add(tmp)
+                    ListToBeSorted(receivedIndex) = tmp
+                    givenSortedList(sortedindex) = tmp
+                Else
+                    renamedList(renamedList.IndexOf(entry)) = tmp
+                    ListToBeSorted(receivedIndex) = tmp
+                    givenSortedList(sortedindex) = tmp
+                End If
+
+                'each time we insert our leading zero, remember to adjust the remaining indicies by 1 
+                If j + 1 <= prefixIndicies.Count - 1 Then
+
+                    For k As Integer = j + 1 To prefixIndicies.Count - 1
+                        prefixIndicies(k) = prefixIndicies(k) + 1
+
+                    Next
+                End If
+            Next
+        End If
+    End Sub
+
 End Module
