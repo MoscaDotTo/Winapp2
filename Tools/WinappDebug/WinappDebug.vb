@@ -362,10 +362,8 @@ Module Module1
                 entry = newentry
             End If
 
-            'Console.WriteLine("Done replacing characters in " & entry)
             'Prefix any singular numbers with 0 to maintain their first order precedence during sorting 
             'because VB.NET is silly and thinks "10" comes before "2" 
-
 
             Dim myChars() As Char = entry.ToCharArray()
             findAndReplNumbers(myChars, entry, originalNameList, renamedList, ListToBeSorted, givenSortedList, i, sortedIndex)
@@ -435,7 +433,7 @@ Module Module1
                         Dim recInd As Integer = originalPlacement.IndexOf(entry)
                         Dim follows As String
                         If recInd = 0 Then
-                            follows = " Should be first"
+                            follows = " Is first"
                         Else
                             follows = originalPlacement(recInd - 1)
                         End If
@@ -477,7 +475,7 @@ Module Module1
             Dim recInd As Integer = originalPlacement.IndexOf(entry)
             Dim follows As String
             If recInd = 0 Then
-                follows = " Should be first"
+                follows = " Is first"
             Else
                 follows = originalPlacement(recInd - 1)
             End If
