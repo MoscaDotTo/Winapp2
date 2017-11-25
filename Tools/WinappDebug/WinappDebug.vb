@@ -366,25 +366,27 @@ Module Module1
             'because VB.NET is silly and thinks "10" comes before "2" 
 
             Dim myChars() As Char = entry.ToCharArray()
-            findAndReplNumbers(myChars, entry, originalNameList, renamedList, ListToBeSorted, givenSortedList, i, sortedIndex)
-
+            If sortType = "keys" Or sortType = "entries" Then
+                findAndReplNumbers(myChars, entry, originalNameList, renamedList, ListToBeSorted, givenSortedList, i, sortedIndex)
+            End If
 
         Next
 
         givenSortedList.Sort()
 
         'undo our change made in the name of sorting such that we have the original data back
-        For i As Integer = 0 To renamedList.Count - 1
-            Dim newentry As String = originalNameList(i)
-            Dim ren As String = renamedList(i)
+        If renamedList.Count > 1 Then
+            For i As Integer = 0 To renamedList.Count - 1
+                Dim newentry As String = originalNameList(i)
+                Dim ren As String = renamedList(i)
 
-            Dim recievedIndex = ListToBeSorted.IndexOf(ren)
-            ListToBeSorted(recievedIndex) = newentry
+                Dim recievedIndex = ListToBeSorted.IndexOf(ren)
+                ListToBeSorted(recievedIndex) = newentry
 
-            sortedIndex = givenSortedList.IndexOf(ren)
-            givenSortedList(sortedIndex) = newentry
-        Next
-
+                sortedIndex = givenSortedList.IndexOf(ren)
+                givenSortedList(sortedIndex) = newentry
+            Next
+        End If
     End Sub
 
     Public Sub findOutOfPlace(ByRef someList As List(Of String), ByRef sortedList As List(Of String), ByVal Err1 As String, ByVal Err2 As String, ByVal Err3 As String, ByVal err4 As String, ByVal err5 As String, ByRef number_of_errors As Integer, ByRef LineCountList As List(Of String))
@@ -488,18 +490,20 @@ Module Module1
 
     Public Sub findAndReplNumbers(ByRef myChars() As Char, ByRef entry As String, ByRef originalNameList As List(Of String), ByRef renamedList As List(Of String), ByRef ListToBeSorted As List(Of String), ByRef givenSortedList As List(Of String), ByVal receivedIndex As Integer, ByVal sortedindex As Integer)
 
-        Dim numIndex As New Integer
-        Dim nextCharIsNum As Boolean = False
+        Dim originalEntry As String = entry
         Dim lastCharWasNum As Boolean = False
         Dim prefixIndicies As New List(Of Integer)
-        For Each ch As Char In myChars
 
-            numIndex = entry.IndexOf(ch)
+        For chind As Integer = 0 To myChars.Count - 1
+            Dim ch As Char = myChars(chind)
+
+            Dim nextCharIsNum As Boolean = False
 
             'observe if the next character is a number, we only want to pad instances of single digit numbers
-            If numIndex < myChars.Count - 1 Then
-                Dim nextindex As Integer = numIndex + 1
-                Dim nextChar As Char = entry(nextindex)
+            If chind < myChars.Count - 1 Then
+
+                Dim nextindex As Integer = chind + 1
+                Dim nextChar As Char = originalEntry(nextindex)
 
                 If Char.IsDigit(nextChar) Then
                     nextCharIsNum = True
@@ -509,37 +513,20 @@ Module Module1
 
             If lastCharWasNum = False Then
 
-                If Char.IsDigit(ch) And nextCharIsNum = False Then
+                If Char.IsDigit(ch) = True Then
                     lastCharWasNum = True
-                    prefixIndicies.Add(numIndex)
+                    If nextCharIsNum = False Then
+                        prefixIndicies.Add(chind)
+                    End If
                 Else
                     lastCharWasNum = False
                 End If
-            End If
-
-        Next
-
-        Dim finalChar As Char = entry(entry.Count - 1)
-        Dim ntlChar As Char = entry(entry.Count - 2)
-
-        'make sure we don't ignore single digit numbers who happen to be at the last index 
-        If Char.IsDigit(finalChar) = True And Char.IsDigit(ntlChar) = False Then
-            Dim tmp As String = entry
-            tmp = tmp.Insert(entry.Count - 1, "0")
-
-            If renamedList.Contains(entry) = False Then
-                originalNameList.Add(entry)
-                renamedList.Add(tmp)
-                ListToBeSorted(receivedIndex) = tmp
-                givenSortedList(sortedindex) = tmp
             Else
-                renamedList(renamedList.IndexOf(entry)) = tmp
-                ListToBeSorted(receivedIndex) = tmp
-                givenSortedList(sortedindex) = tmp
+                If Char.IsDigit(ch) = False Then
+                    lastCharWasNum = False
+                End If
             End If
-            entry = tmp
-        End If
-
+        Next
 
         'prefix any numbers that we detected above (except the potential last which has already been replaced)
         If prefixIndicies.Count >= 1 Then
@@ -549,25 +536,25 @@ Module Module1
 
                 tmp = tmp.Insert(prefixIndicies(j), "0")
 
+                'make the necessary adjustments to our tracking lists
                 If renamedList.Contains(entry) = False Then
                     originalNameList.Add(entry)
                     renamedList.Add(tmp)
                     ListToBeSorted(receivedIndex) = tmp
                     givenSortedList(sortedindex) = tmp
+                    entry = tmp
                 Else
                     renamedList(renamedList.IndexOf(entry)) = tmp
                     ListToBeSorted(receivedIndex) = tmp
                     givenSortedList(sortedindex) = tmp
+                    entry = tmp
                 End If
 
                 'each time we insert our leading zero, remember to adjust the remaining indicies by 1 
-                If j + 1 <= prefixIndicies.Count - 1 Then
 
-                    For k As Integer = j + 1 To prefixIndicies.Count - 1
-                        prefixIndicies(k) = prefixIndicies(k) + 1
-
-                    Next
-                End If
+                For k As Integer = j + 1 To prefixIndicies.Count - 1
+                    prefixIndicies(k) = prefixIndicies(k) + 1
+                Next
             Next
         End If
     End Sub
