@@ -1,5 +1,5 @@
 ﻿Imports System.IO
-Module Module1
+Module WinappDebug
 
     Sub Main()
 
@@ -16,16 +16,19 @@ Module Module1
         Dim number_of_errors As Integer = 0
         Dim curFileKeyNumber As Integer = 1
         Dim curRegKeyNumber As Integer = 1
+        Dim curExcludeKeyNumber As Integer = 1
         Dim curDetectFileNumber As Integer = 1
         Dim curDetectNumber As Integer = 1
         Dim firstDetectNumber As Boolean = False
-        Dim firstDetecFileNumber As Boolean = False
+        Dim firstDetectFileNumber As Boolean = False
         Dim havePassedTB As Boolean = False
-        Dim FileKeyList As New List(Of String)
-        Dim RegKeyList As New List(Of String)
+        Dim fileKeyList As New List(Of String)
+        Dim regKeyList As New List(Of String)
+        Dim excludeKeyList As New List(Of String)
 
-        Dim FileKeyLineCounts As New List(Of String)
-        Dim RegKeyLineCounts As New List(Of String)
+        Dim excludeKeyLineCounts As New List(Of String)
+        Dim fileKeyLineCounts As New List(Of String)
+        Dim regKeyLineCounts As New List(Of String)
         'Create a list of supported environmental variables
         Dim envir_vars As New List(Of String)
         envir_vars.AddRange(New String() {"%userprofile%", "%ProgramFiles%", "%rootdir%", "%windir%", "%appdata%", "%systemdrive%", "%Documents%",
@@ -46,56 +49,18 @@ Module Module1
 
                 'Increment the lineocunt value
                 linecount = linecount + 1
+                'Console.WriteLine(linecount)
 
                 'Whitespace checks
 
                 If command = "" Then
-                    'reset our counters for the numbers next to commands when we move to the next entry
-                    curFileKeyNumber = 1
-                    curRegKeyNumber = 1
-                    curDetectFileNumber = 1
-                    curDetectNumber = 1
-                    firstDetecFileNumber = False
-                    firstDetectNumber = False
 
-                    'Assess the sorted state of our filekeys and regkeys
-                    Dim SortedFKList As New List(Of String)
-                    SortedFKList.AddRange(FileKeyList)
-
-                    Dim SortedRKList As New List(Of String)
-                    SortedRKList.AddRange(RegKeyList)
-
-                    Dim FileKeyRenamedList As New List(Of String)
-                    Dim FileKeyOriginalNames As New List(Of String)
-
-                    Dim RegKeyRenamedList As New List(Of String)
-                    Dim RegKeyOriginalNames As New List(Of String)
-
-                    'Assess our FileKeys
-                    'do a necessary replacement
-                    If FileKeyList.Count > 1 Then
-
-                        replaceAndSort(FileKeyList, SortedFKList, "|", " \ \", "keys")
-                        findOutOfPlace(FileKeyList, SortedFKList, " Error: FileKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, FileKeyLineCounts)
-
-                    End If
-                    FileKeyList.Clear()
-                    FileKeyLineCounts.Clear()
-
-                    'now do all that again but for regkeys
-                    If RegKeyLineCounts.Count > 1 Then
-
-                        replaceAndSort(RegKeyList, SortedRKList, "|", " \ \", "keys")
-                        findOutOfPlace(RegKeyList, SortedRKList, " Error: RegKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, RegKeyLineCounts)
-
-                    End If
-                    RegKeyList.Clear()
-                    RegKeyLineCounts.Clear()
-
+                    processEmptyLine(curFileKeyNumber, curRegKeyNumber, curExcludeKeyNumber, curDetectFileNumber, curDetectNumber, firstDetectFileNumber, firstDetectFileNumber,
+                                     fileKeyList, regKeyList, excludeKeyList, regKeyLineCounts, fileKeyLineCounts, excludeKeyLineCounts, number_of_errors)
                 End If
 
                 If command = "" = False And command.StartsWith(";") = False Then
-
+                    'Console.WriteLine("Checking for whitespace")
                     'Check for trailing whitespace
                     If command.EndsWith(" ") Then
                         Console.WriteLine("Line: " & linecount & " Error: Detected unwanted whitespace at end of line." & Environment.NewLine & "Command: " & command & Environment.NewLine)
@@ -115,32 +80,11 @@ Module Module1
                 End If
 
 
-                'Check for duplicate titles
+                'Process entries
                 If command.StartsWith("[") Then
-
-
-                    'Check if it's already in the list
-                    If entry_titles.Contains(command) Then
-                        Console.WriteLine("Line: " & linecount & " Duplicate entry." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
-                    Else
-
-                        'Not already in the list. Add it.
-
-                        entry_titles.Add(command)
-
-                        Dim currentEntry As String = entry_titles.Last
-                        currentEntry = currentEntry.Remove(0, 1)
-                        currentEntry = currentEntry.Remove(currentEntry.Length - 2)
-
-                        'the entries in and above the thunderbird section don't need to be in order because they are grouped categorically 
-                        If havePassedTB Then
-                            trimmed_entry_titles.Add(currentEntry)
-
-                        End If
-
-                    End If
-
+                    'Console.WriteLine("Checking entry name")
+                    processEntryName(command, entry_titles, linecount, havePassedTB, trimmed_entry_titles, number_of_errors)
+                    ' Console.WriteLine("Finished checking entry name")
                 End If
 
                 'Check for spelling errors in "LangSecRef"
@@ -151,149 +95,61 @@ Module Module1
                     End If
                 End If
 
-                If command = "Default=True" Or command = "default=true" Then
-                    Console.WriteLine("Line: " & linecount & " Error: All entries should be disabled by default." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                    number_of_errors = number_of_errors + 1
-                End If
-
                 'Check for environmental variable spacing errors
                 If command.Contains("%Program Files%") Then
                     Console.WriteLine("Line: " & linecount & " Error: '%ProgramFiles%' variable should not have spacing." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                     number_of_errors = number_of_errors + 1
                 End If
 
-                'Check for cleaning command spelling errors (files)
-                If command.StartsWith("Fi") Then
+                'Process FileKey
+                If command.StartsWith("F") Then
 
-                    Dim cmdList As String() = command.Split("=")
-                    FileKeyList.Add(cmdList(1))
-                    FileKeyLineCounts.Add(linecount)
-                    If command.Contains("FileKey") = False Then
-                        Console.WriteLine("Line: " & linecount & " Error: 'FileKey' entry is incorrectly spelled or formatted. Spelling should be CamelCase." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
-                    End If
-                    If command.Contains("FileKey" & curFileKeyNumber) = False Then
-                        Console.WriteLine("Line: " & linecount & " Error: 'FileKey' entry is incorrectly numbered: Expected FileKey" & curFileKeyNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
-                    End If
-                    Dim iteratorCheckerList() As String = Split(command, "|")
+                    processFileKey(command, curFileKeyNumber, fileKeyList, fileKeyLineCounts, linecount, number_of_errors)
 
-                    'check for incorrect spellings of RECURSE or REMOVESELF
-                    If iteratorCheckerList.Length > 2 Then
-                        If iteratorCheckerList(2).Contains("RECURSE") = False And iteratorCheckerList(2).Contains("REMOVESELF") = False Then
-
-                            Console.WriteLine("Line: " & linecount & " Error: 'RECURSE' or 'REMOVESELF' entry is incorrectly spelled, found " & Environment.NewLine & "Command:  " & command & Environment.NewLine)
-                            number_of_errors = number_of_errors + 1
-
-                        End If
-                    End If
-
-                    'check for missing pipe symbol on recurse and removeself
-                    If command.Contains("RECURSE") = True And Not command.Contains("|RECURSE") Then
-                        Console.WriteLine("Line: " & linecount & " Error: Missing pipe symbol | before RECURSE" & Environment.NewLine & "Command:  " & command & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
-                    End If
-                    If command.Contains("REMOVESELF") = True And Not command.Contains("|REMOVESELF") Then
-                        Console.WriteLine("Line: " & linecount & " Error: Missing pipe symbol | before REMOVESELF" & Environment.NewLine & "Command:  " & command & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
-                    End If
-                    curFileKeyNumber = curFileKeyNumber + 1
                 End If
 
-                'Check for cleaning command spelling errors (registry keys)
-                If command.StartsWith("Re") Then
-                    Dim cmdList2 As String() = command.Split("=")
-                    RegKeyList.Add(cmdList2(1))
-                    RegKeyLineCounts.Add(linecount)
+                'Process ExcludeKey
+                If command.StartsWith("E") Then
 
-                    If command.Contains("RegKey") = False Then
-                        Console.WriteLine("Line: " & linecount & " Error: 'RegKey' entry is incorrectly spelled or formatted. Spelling should be CamelCase." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
-                    End If
-                    If command.Contains("RegKey" & curRegKeyNumber) = False Then
-                        Console.WriteLine("Line: " & linecount & " Error: 'RegKey' entry is incorrectly numbered: Expected RegKey" & curRegKeyNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                    End If
-                    curRegKeyNumber = curRegKeyNumber + 1
+                    processExcludeKey(command, curExcludeKeyNumber, excludeKeyList, excludeKeyLineCounts, linecount, number_of_errors)
+
                 End If
 
-                'Check for missing numbers next to cleaning commands
-                If command.StartsWith("FileKey=") Or command.StartsWith("RegKey=") Then
-                    Console.WriteLine("Line: " & linecount & " Error: Cleaning path entry needs to have a trailing number." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                    number_of_errors = number_of_errors + 1
+                'Process RegKey
+                If command.StartsWith("R") Then
+
+                    processRegKey(command, curRegKeyNumber, regKeyList, regKeyLineCounts, linecount, number_of_errors)
+
                 End If
 
-                'Check for Detect that contains a filepath instead of a registry path
-                If command.StartsWith("Detect=%") Or command.StartsWith("Detect=C:\") Then
-                    Console.WriteLine("Line: " & linecount & " Error: 'Detect' can only be used for registry key paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                    number_of_errors = number_of_errors + 1
-                End If
+                If command.StartsWith("D") Then
+                    Dim tmp As String() = Split(command, "=")
 
-                'Check to make sure Detects are properly numbered
-                If command.StartsWith("DetectF") = False And command.StartsWith("DetectO") = False And command.StartsWith("Detect") Then
+                    'We'll make the bold assumption here that all our defaults are spelled correctly, even if not formatted correctly. 
+                    If Not command.ToLower.Contains("default") And Not command.ToLower.Contains("detecto") Then
 
+                        If tmp(0).Length <= 8 Then
+                            'Console.WriteLine("checking reg detect")
+                            processRegDetect(command, curDetectNumber, firstDetectNumber, number_of_errors, linecount)
 
-                    'make sure we notice if there are multiple detects but the first is missing a number
-
-                    If curDetectNumber = 1 Then
-                        If command.StartsWith("Detect=") Or (command.StartsWith("Detect=") = False And command.StartsWith("Detect1=") = False) Then
-                            firstDetectNumber = False
                         Else
-                            firstDetectNumber = True
+                            'Console.WriteLine("checking detectfile: " & command)
+                            processDetectFile(command, curDetectFileNumber, firstDetectNumber, number_of_errors, linecount)
+
+                        End If
+                    Else
+                        'Console.WriteLine("checking default")
+                        If Not command.Contains("Default") And Not command.ToLower.Contains("detecto") Then
+                            Console.WriteLine("Line: " & linecount & " Error: Expected 'Default', found: " & tmp.First)
                         End If
 
-                    End If
-
-
-                    If curDetectNumber = 2 And firstDetectNumber = False Then
-                        Console.WriteLine("Line: " & linecount - 1 & " Error: 'Detect" & curDetectNumber & "' detected without preceding 'Detect" & curDetectNumber - 1 & "'" & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
-                    End If
-                    If curDetectNumber > 1 Then
-                        If command.Contains("Detect" & curDetectNumber) = False Then
-                            Console.WriteLine("Line: " & linecount & " Error: 'Detect' entry is incorrectly numbered: Expected Detect" & curDetectNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                        If command.ToLower.Contains("true") Then
+                            Console.WriteLine("Line: " & linecount & " Error: All entries should be disabled by default." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                             number_of_errors = number_of_errors + 1
                         End If
                     End If
-                    curDetectNumber = curDetectNumber + 1
-                End If
-
-                'Check for detectfile that contains a registry path
-                If command.StartsWith("DetectFile=HKLM") Or command.StartsWith("DetectFile=HKCU") Or command.StartsWith("DetectFile=HKC") Or command.StartsWith("DetectFile=HKCR") Then
-                    Console.WriteLine("Line: " & linecount & " Error: 'DetectFile' can only be used for filesystem paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                    number_of_errors = number_of_errors + 1
-                End If
-
-
-
-                'make sure we notice if there are multiple detectfiles but the first is missing a number
-                If command.StartsWith("DetectFile") Then
-
-                    If curDetectFileNumber = 1 Then
-
-                        If command.StartsWith("DetectFile=") Or (command.StartsWith("DetectFile=") = False And command.StartsWith("DetectFile1=") = False) Then
-                            firstDetecFileNumber = False
-                        Else
-                            firstDetecFileNumber = True
-                        End If
-
-                    End If
-
-                    If curDetectFileNumber = 2 And firstDetecFileNumber = False Then
-                        Console.WriteLine("Line: " & linecount - 1 & " Error: 'DetectFile" & curDetectFileNumber & "' detected without preceding 'DetectFile" & curDetectFileNumber - 1 & "'" & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
-                    End If
-
-                    If curDetectFileNumber > 1 Then
-                        If command.Contains("DetectFile" & curDetectFileNumber) = False Then
-                            Console.WriteLine("Line: " & linecount & " Error: 'DetectFile' entry is incorrectly numbered: Expected DetectFile" & curDetectFileNumber & " found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                            number_of_errors = number_of_errors + 1
-                        End If
-
-                    End If
-                    curDetectFileNumber = curDetectFileNumber + 1
 
                 End If
-
 
                 'Check for missing backslashes on environmental variables
                 For Each var As String In envir_vars
@@ -324,13 +180,139 @@ Module Module1
         replaceAndSort(trimmed_entry_titles, sortedEList, "-", "  ", "entries")
         findOutOfPlace(trimmed_entry_titles, sortedEList, "Error: Entry Alphabetization. Command: [", "*] may be out of place. It should follow: [", "*]", "Follows: [", "*]", number_of_errors, New List(Of String))
 
-
-
         'Stop the program from closing on completion
         Console.WriteLine("***********************************************" & Environment.NewLine & "Completed analysis of winapp2.ini. " & number_of_errors & " possible errors were detected. " & Environment.NewLine & "Number of entries: " & entry_titles.Count & Environment.NewLine & "Press any key to close.")
         Console.ReadKey()
 
 
+    End Sub
+
+    Private Sub processDetectFile(ByRef command As String, ByRef number As Integer, ByRef firstNumberStatus As Boolean, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
+
+        processDetect(command, "DetectFile", number, firstNumberStatus, number_of_errors, lineCount)
+
+        If command.Contains("=HKLM") Or command.Contains("=HKC") Or command.Contains("=HKU") Then
+            Console.WriteLine("Line: " & lineCount & " Error: 'DetectFile' can only be used for filesystem paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+
+    End Sub
+
+    Private Sub processRegDetect(ByRef command As String, ByRef number As Integer, ByRef firstNumberStatus As Boolean, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
+
+        processDetect(command, "Detect", number, firstNumberStatus, number_of_errors, lineCount)
+
+        If command.Contains("=%") Or command.Contains("=C:\") Then
+            Console.WriteLine("Line: " & lineCount & " Error: 'Detect' can only be used for registry key paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+
+    End Sub
+
+    Private Sub processDetect(ByRef command As String, ByVal detectType As String, ByRef number As Integer, ByRef firstNumberStatus As Boolean, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
+        'Console.WriteLine("Processing Detect. Checking for misformated detect type")
+        If Not command.Contains(detectType) Then
+            Console.WriteLine("Line: " & lineCount & " Error: Misformated " & detectType & " found: " & Environment.NewLine & "Command: " & command)
+
+        End If
+        'Console.WriteLine("Done checking for detect type")
+
+        'Console.WriteLine("Checking first number status")
+        If number = 1 Then
+            If command.StartsWith(detectType & " = ") Or (command.StartsWith(detectType & " = ") = False And command.StartsWith(detectType & number.ToString) = False) Then
+                firstNumberStatus = False
+            Else
+                firstNumberStatus = True
+            End If
+
+        End If
+        'Console.WriteLine("Checking second number status against first")
+        If number = 2 And firstNumberStatus = False Then
+            Console.WriteLine("Line:  " & lineCount - 1 & " Error: '" & detectType & number & "' detected without preceding '" & detectType & number - 1 & "'" & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+        If number > 1 Then
+            If command.Contains(detectType & number) = False Then
+                Console.WriteLine("Line: " & lineCount & " Error: '" & detectType & "' entry is incorrectly numbered: Expected '" & detectType & number & "'  found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                number_of_errors = number_of_errors + 1
+            End If
+        End If
+        number = number + 1
+
+
+    End Sub
+
+    Private Sub processRegKey(ByRef command As String, ByRef keyNumber As Integer, ByRef keys As List(Of String), ByRef KeyLineCounts As List(Of String), ByRef lineCount As Integer, ByRef number_of_errors As Integer)
+
+        checkFormat(command, "RegKey", keyNumber, lineCount, number_of_errors, keys, KeyLineCounts)
+
+    End Sub
+
+    Private Sub processExcludeKey(ByRef command As String, ByRef keyNumber As Integer, ByRef keys As List(Of String), ByRef KeyLineCounts As List(Of String), ByRef lineCount As Integer, ByRef number_of_errors As Integer)
+
+        checkFormat(command, "ExcludeKey", keyNumber, lineCount, number_of_errors, keys, KeyLineCounts)
+
+        Dim iteratorCheckerList() As String = Split(command, "|")
+        If iteratorCheckerList(0).Contains("FILE") Then
+            Dim endingslashchecker() As String = Split(command, "\|")
+            If endingslashchecker.Count = 1 Then
+                Console.WriteLine("Line: " & lineCount & " Error: Missing backslash before pipe symbol." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                number_of_errors = number_of_errors + 1
+            End If
+        End If
+
+    End Sub
+
+    Private Sub processFileKey(ByRef command As String, ByRef keyNumber As Integer, ByRef keys As List(Of String), ByRef KeyLineCounts As List(Of String), ByRef lineCount As Integer, ByRef number_of_errors As Integer)
+
+        checkFormat(command, "FileKey", keyNumber, lineCount, number_of_errors, keys, KeyLineCounts)
+
+        Dim iteratorCheckerList() As String = Split(command, "|")
+
+        'check for incorrect spellings of RECURSE or REMOVESELF
+        If iteratorCheckerList.Length > 2 Then
+            If Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF") Then
+
+                Console.WriteLine("Line: " & lineCount & " Error: 'RECURSE' or 'REMOVESELF' entry is incorrectly spelled, found " & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+                number_of_errors = number_of_errors + 1
+
+            End If
+        End If
+
+        'check for missing pipe symbol on recurse and removeself
+        If command.Contains("RECURSE") And Not command.Contains("|RECURSE") Then
+            Console.WriteLine("Line: " & lineCount & " Error: Missing pipe symbol | before RECURSE" & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+        If command.Contains("REMOVESELF") And Not command.Contains("|REMOVESELF") Then
+            Console.WriteLine("Line: " & lineCount & " Error: Missing pipe symbol | before REMOVESELF" & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+
+    End Sub
+
+    Private Sub processEntryName(ByRef command As String, ByRef entry_titles As List(Of String), ByRef linecount As Integer, ByRef havePassedTB As Boolean, ByRef trimmed_entry_titles As List(Of String), ByRef number_of_errors As Integer)
+        'Check if it's already in the list
+        If entry_titles.Contains(command) Then
+            Console.WriteLine("Line: " & linecount & " Duplicate entry." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        Else
+
+            'Not already in the list. Add it.
+
+            entry_titles.Add(command)
+
+            Dim currentEntry As String = entry_titles.Last
+            currentEntry = currentEntry.Remove(0, 1)
+            currentEntry = currentEntry.Remove(currentEntry.Length - 2)
+
+            'the entries in and above the thunderbird section don't need to be in order because they are grouped categorically 
+            If havePassedTB Then
+                trimmed_entry_titles.Add(currentEntry)
+
+            End If
+
+        End If
     End Sub
 
     Public Sub replaceAndSort(ByRef ListToBeSorted As List(Of String), ByRef givenSortedList As List(Of String), characterToReplace As String, ByVal replacementText As String, ByVal sortType As String)
@@ -469,18 +451,21 @@ Module Module1
             End If
             Dim sortedIndex As Integer = sortedList.IndexOf(entry)
             Dim shouldBe As String
+            Dim recInd As Integer = originalPlacement.IndexOf(entry)
+            Dim follows As String
+
             If (sortedIndex = 0) Then
                 shouldBe = " Should be first"
             Else
                 shouldBe = sortedList(sortedIndex - 1)
             End If
-            Dim recInd As Integer = originalPlacement.IndexOf(entry)
-            Dim follows As String
+
             If recInd = 0 Then
                 follows = " Is first"
             Else
                 follows = originalPlacement(recInd - 1)
             End If
+
             Console.WriteLine(Err1 & entry & Err2 & shouldBe & Err3 & Environment.NewLine & err4 & follows & err5 & Environment.NewLine)
 
             Err1 = tmperr
@@ -495,6 +480,7 @@ Module Module1
         Dim prefixIndicies As New List(Of Integer)
 
         For chind As Integer = 0 To myChars.Count - 1
+
             Dim ch As Char = myChars(chind)
 
             Dim nextCharIsNum As Boolean = False
@@ -511,6 +497,7 @@ Module Module1
 
             End If
 
+            'observe the previous character for the same reason
             If lastCharWasNum = False Then
 
                 If Char.IsDigit(ch) = True Then
@@ -557,6 +544,74 @@ Module Module1
                 Next
             Next
         End If
+    End Sub
+
+    Public Sub checkFormat(ByVal command As String, ByVal keyString As String, ByRef keyNumber As Integer, ByVal lineCount As Integer, ByRef number_of_errors As Integer, ByRef keyList As List(Of String), ByRef keyLineCounts As List(Of String))
+
+        'Split the command and save what comes after the '='
+        Dim cmdList As String() = command.Split("=")
+        keyList.Add(cmdList(1))
+        keyLineCounts.Add(lineCount)
+
+        'make sure the current key is correctly numbered
+        If Not command.Contains(keyString & keyNumber) Then
+            Console.WriteLine("Line: " & lineCount & " Error: '" & keyString & "' entry is incorrectly spelled or formatted. Expected: " & keyString & keyNumber & "', Found: " & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+        keyNumber = keyNumber + 1
+
+    End Sub
+
+    Public Sub processEmptyLine(ByRef curFileKeyNumber As Integer, ByRef curRegKeyNumber As Integer, ByRef curExcludeKeyNumber As Integer, ByRef curDetectFileNumber As Integer, ByRef curDetectNumber As Integer,
+                                ByRef firstDetectFileNumber As Boolean, ByRef firstDetectNumber As Integer, ByRef fileKeyList As List(Of String), ByRef regKeyList As List(Of String),
+                                ByRef excludeKeyList As List(Of String), ByRef regKeyLineCounts As List(Of String), ByRef fileKeyLineCounts As List(Of String), ByRef excludeKeyLineCounts As List(Of String), ByRef number_of_errors As Integer)
+
+        'reset our counters for the numbers next to commands when we move to the next entry
+        curFileKeyNumber = 1
+        curRegKeyNumber = 1
+        curDetectFileNumber = 1
+        curDetectNumber = 1
+        curExcludeKeyNumber = 1
+        firstDetectFileNumber = False
+        firstDetectNumber = False
+
+        'create the (soon to be) sorted versions of our lists
+        Dim sortedFKList As New List(Of String)
+        sortedFKList.AddRange(fileKeyList)
+
+        Dim sortedRKList As New List(Of String)
+        sortedRKList.AddRange(regKeyList)
+
+        Dim sortedEKList As New List(Of String)
+        sortedEKList.AddRange(excludeKeyList)
+
+        'Assess our Keys and cleverly sort their stringy selves
+        If fileKeyList.Count > 1 Then
+
+            replaceAndSort(fileKeyList, sortedFKList, "|", " \ \", "keys")
+            findOutOfPlace(fileKeyList, sortedFKList, " Error: FileKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, fileKeyLineCounts)
+
+        End If
+        fileKeyList.Clear()
+        fileKeyLineCounts.Clear()
+
+        If regKeyLineCounts.Count > 1 Then
+
+            replaceAndSort(regKeyList, sortedRKList, "|", " \ \", "keys")
+            findOutOfPlace(regKeyList, sortedRKList, " Error: RegKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, regKeyLineCounts)
+
+        End If
+        regKeyList.Clear()
+        regKeyLineCounts.Clear()
+
+        If excludeKeyLineCounts.Count > 1 Then
+
+            replaceAndSort(excludeKeyList, sortedEKList, "|", " \ \", "keys")
+            findOutOfPlace(excludeKeyList, sortedEKList, " Error: ExcludeKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, excludeKeyLineCounts)
+
+        End If
+        excludeKeyList.Clear()
+        excludeKeyLineCounts.Clear()
     End Sub
 
 End Module
