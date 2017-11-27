@@ -18,6 +18,7 @@ Module WinappDebug
         Dim curRegKeyNumber As Integer = 1
         Dim curExcludeKeyNumber As Integer = 1
         Dim curDetectFileNumber As Integer = 1
+
         Dim curDetectNumber As Integer = 1
         Dim firstDetectNumber As Boolean = False
         Dim firstDetectFileNumber As Boolean = False
@@ -25,10 +26,14 @@ Module WinappDebug
         Dim fileKeyList As New List(Of String)
         Dim regKeyList As New List(Of String)
         Dim excludeKeyList As New List(Of String)
+        Dim detectList As New List(Of String)
+        Dim detectFileList As New List(Of String)
 
         Dim excludeKeyLineCounts As New List(Of String)
         Dim fileKeyLineCounts As New List(Of String)
         Dim regKeyLineCounts As New List(Of String)
+        Dim detectLineCounts As New List(Of String)
+        Dim detectFileLineCounts As New List(Of String)
         'Create a list of supported environmental variables
         Dim envir_vars As New List(Of String)
         envir_vars.AddRange(New String() {"%userprofile%", "%ProgramFiles%", "%rootdir%", "%windir%", "%appdata%", "%systemdrive%", "%Documents%",
@@ -53,7 +58,8 @@ Module WinappDebug
                 If command = "" Then
 
                     processEmptyLine(curFileKeyNumber, curRegKeyNumber, curExcludeKeyNumber, curDetectFileNumber, curDetectNumber, firstDetectFileNumber, firstDetectFileNumber,
-                                     fileKeyList, regKeyList, excludeKeyList, regKeyLineCounts, fileKeyLineCounts, excludeKeyLineCounts, number_of_errors)
+                                     fileKeyList, regKeyList, excludeKeyList, regKeyLineCounts, fileKeyLineCounts, excludeKeyLineCounts, number_of_errors,
+                                     detectFileList, detectFileLineCounts, detectList, detectLineCounts)
                 End If
 
                 If command = "" = False And command.StartsWith(";") = False Then
@@ -128,12 +134,12 @@ Module WinappDebug
 
                         If tmp(0).Length <= 8 Then
 
-                            processDetect(command, "Detect", curDetectNumber, firstDetectNumber, number_of_errors, linecount)
+                            processDetect(command, "Detect", curDetectNumber, firstDetectNumber, number_of_errors, linecount, detectList, detectLineCounts)
                             processRegDetect(command, number_of_errors, linecount)
 
                         Else
 
-                            processDetect(command, "DetectFile", curDetectFileNumber, firstDetectFileNumber, number_of_errors, linecount)
+                            processDetect(command, "DetectFile", curDetectFileNumber, firstDetectFileNumber, number_of_errors, linecount, detectFileList, detectFileLineCounts)
                             processDetectFile(command, number_of_errors, linecount)
                         End If
                     Else
@@ -204,12 +210,16 @@ Module WinappDebug
 
     End Sub
 
-    Private Sub processDetect(ByRef command As String, ByVal detectType As String, ByRef number As Integer, ByRef firstNumberStatus As Boolean, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
+    Private Sub processDetect(ByRef command As String, ByVal detectType As String, ByRef number As Integer, ByRef firstNumberStatus As Boolean, ByRef number_of_errors As Integer, ByRef lineCount As Integer, ByRef keyList As List(Of String), ByRef keyListLineCounts As List(Of String))
 
         If Not command.Contains(detectType) Then
             Console.WriteLine("Line: " & lineCount & " Error: Misformatted " & detectType & " found: " & Environment.NewLine & "Command: " & command)
 
         End If
+
+        Dim cmdList As String() = command.Split("=")
+        keyList.Add(cmdList(1))
+        keyListLineCounts.Add(lineCount)
 
         'Check whether our first Detect or DetectFile is trailed by a number
         If number = 1 Then
@@ -241,7 +251,6 @@ Module WinappDebug
             End If
         End If
         number = number + 1
-
 
     End Sub
 
@@ -562,7 +571,9 @@ Module WinappDebug
 
     Public Sub processEmptyLine(ByRef curFileKeyNumber As Integer, ByRef curRegKeyNumber As Integer, ByRef curExcludeKeyNumber As Integer, ByRef curDetectFileNumber As Integer, ByRef curDetectNumber As Integer,
                                 ByRef firstDetectFileNumber As Boolean, ByRef firstDetectNumber As Integer, ByRef fileKeyList As List(Of String), ByRef regKeyList As List(Of String),
-                                ByRef excludeKeyList As List(Of String), ByRef regKeyLineCounts As List(Of String), ByRef fileKeyLineCounts As List(Of String), ByRef excludeKeyLineCounts As List(Of String), ByRef number_of_errors As Integer)
+                                ByRef excludeKeyList As List(Of String), ByRef regKeyLineCounts As List(Of String), ByRef fileKeyLineCounts As List(Of String), ByRef excludeKeyLineCounts As List(Of String), ByRef number_of_errors As Integer,
+                                ByRef detectFileList As List(Of String), ByRef detectFileLineCounts As List(Of String), ByRef detectList As List(Of String), ByRef detectLineCounts As List(Of String))
+
 
         'reset our counters for the numbers next to commands when we move to the next entry
         curFileKeyNumber = 1
@@ -582,6 +593,12 @@ Module WinappDebug
 
         Dim sortedEKList As New List(Of String)
         sortedEKList.AddRange(excludeKeyList)
+
+        Dim sortedDList As New List(Of String)
+        sortedDList.AddRange(detectList)
+
+        Dim sortedDFList As New List(Of String)
+        sortedDFList.AddRange(detectFileList)
 
         'Assess our Keys and cleverly sort their stringy selves
         If fileKeyList.Count > 1 Then
@@ -610,6 +627,24 @@ Module WinappDebug
         End If
         excludeKeyList.Clear()
         excludeKeyLineCounts.Clear()
-    End Sub
 
+        If detectFileLineCounts.Count > 1 Then
+
+            replaceAndSort(detectFileList, sortedDFList, "|", " \ \", "keys")
+            findOutOfPlace(detectFileList, sortedDFList, " Error: DetectFile Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, detectFileLineCounts)
+
+        End If
+        detectFileList.Clear()
+        detectFileLineCounts.Clear()
+
+        If detectLineCounts.Count > 1 Then
+
+            replaceAndSort(detectList, sortedDList, "|", " \ \", "keys")
+            findOutOfPlace(detectList, sortedDList, " Error: Detect Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, detectLineCounts)
+
+        End If
+        detectList.Clear()
+        detectLineCounts.Clear()
+
+    End Sub
 End Module
