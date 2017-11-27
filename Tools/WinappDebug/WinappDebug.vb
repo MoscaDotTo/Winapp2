@@ -49,9 +49,6 @@ Module WinappDebug
 
                 'Increment the lineocunt value
                 linecount = linecount + 1
-                'Console.WriteLine(linecount)
-
-                'Whitespace checks
 
                 If command = "" Then
 
@@ -60,7 +57,7 @@ Module WinappDebug
                 End If
 
                 If command = "" = False And command.StartsWith(";") = False Then
-                    'Console.WriteLine("Checking for whitespace")
+
                     'Check for trailing whitespace
                     If command.EndsWith(" ") Then
                         Console.WriteLine("Line: " & linecount & " Error: Detected unwanted whitespace at end of line." & Environment.NewLine & "Command: " & command & Environment.NewLine)
@@ -79,17 +76,16 @@ Module WinappDebug
                     End If
                 End If
 
-
                 'Process entries
                 If command.StartsWith("[") Then
-                    'Console.WriteLine("Checking entry name")
+
                     processEntryName(command, entry_titles, linecount, havePassedTB, trimmed_entry_titles, number_of_errors)
                     ' Console.WriteLine("Finished checking entry name")
                 End If
 
                 'Check for spelling errors in "LangSecRef"
-                If command.StartsWith("Lan") Then
-                    If command.Contains("LangSecRef=") = False Then
+                If command.StartsWith("L") Then
+                    If Not command.Contains("LangSecRef=") Then
                         Console.WriteLine("Line:  " & linecount & " Error: 'LangSecRef' entry is incorrectly spelled or formatted." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
                     End If
@@ -104,21 +100,23 @@ Module WinappDebug
                 'Process FileKey
                 If command.StartsWith("F") Then
 
-                    processFileKey(command, curFileKeyNumber, fileKeyList, fileKeyLineCounts, linecount, number_of_errors)
+                    checkFormat(command, "FileKey", curFileKeyNumber, linecount, number_of_errors, fileKeyList, fileKeyLineCounts)
+                    processFileKey(command, number_of_errors, linecount)
 
                 End If
 
                 'Process ExcludeKey
                 If command.StartsWith("E") Then
 
-                    processExcludeKey(command, curExcludeKeyNumber, excludeKeyList, excludeKeyLineCounts, linecount, number_of_errors)
+                    checkFormat(command, "ExcludeKey", curExcludeKeyNumber, linecount, number_of_errors, excludeKeyList, excludeKeyLineCounts)
+                    processExcludeKey(command, number_of_errors, linecount)
 
                 End If
 
                 'Process RegKey
                 If command.StartsWith("R") Then
 
-                    processRegKey(command, curRegKeyNumber, regKeyList, regKeyLineCounts, linecount, number_of_errors)
+                    checkFormat(command, "RegKey", curRegKeyNumber, linecount, number_of_errors, regKeyList, regKeyLineCounts)
 
                 End If
 
@@ -129,18 +127,20 @@ Module WinappDebug
                     If Not command.ToLower.Contains("default") And Not command.ToLower.Contains("detecto") Then
 
                         If tmp(0).Length <= 8 Then
-                            'Console.WriteLine("checking reg detect")
-                            processRegDetect(command, curDetectNumber, firstDetectNumber, number_of_errors, linecount)
+
+                            processDetect(command, "Detect", curDetectNumber, firstDetectNumber, number_of_errors, linecount)
+                            processRegDetect(command, number_of_errors, linecount)
 
                         Else
-                            'Console.WriteLine("checking detectfile: " & command)
-                            processDetectFile(command, curDetectFileNumber, firstDetectNumber, number_of_errors, linecount)
 
+                            processDetect(command, "DetectFile", curDetectFileNumber, firstDetectFileNumber, number_of_errors, linecount)
+                            processDetectFile(command, number_of_errors, linecount)
                         End If
                     Else
-                        'Console.WriteLine("checking default")
+
                         If Not command.Contains("Default") And Not command.ToLower.Contains("detecto") Then
                             Console.WriteLine("Line: " & linecount & " Error: Expected 'Default', found: " & tmp.First)
+                            number_of_errors = number_of_errors + 1
                         End If
 
                         If command.ToLower.Contains("true") Then
@@ -184,12 +184,9 @@ Module WinappDebug
         Console.WriteLine("***********************************************" & Environment.NewLine & "Completed analysis of winapp2.ini. " & number_of_errors & " possible errors were detected. " & Environment.NewLine & "Number of entries: " & entry_titles.Count & Environment.NewLine & "Press any key to close.")
         Console.ReadKey()
 
-
     End Sub
 
-    Private Sub processDetectFile(ByRef command As String, ByRef number As Integer, ByRef firstNumberStatus As Boolean, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
-
-        processDetect(command, "DetectFile", number, firstNumberStatus, number_of_errors, lineCount)
+    Private Sub processDetectFile(ByRef command As String, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
 
         If command.Contains("=HKLM") Or command.Contains("=HKC") Or command.Contains("=HKU") Then
             Console.WriteLine("Line: " & lineCount & " Error: 'DetectFile' can only be used for filesystem paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
@@ -198,9 +195,7 @@ Module WinappDebug
 
     End Sub
 
-    Private Sub processRegDetect(ByRef command As String, ByRef number As Integer, ByRef firstNumberStatus As Boolean, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
-
-        processDetect(command, "Detect", number, firstNumberStatus, number_of_errors, lineCount)
+    Private Sub processRegDetect(ByRef command As String, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
 
         If command.Contains("=%") Or command.Contains("=C:\") Then
             Console.WriteLine("Line: " & lineCount & " Error: 'Detect' can only be used for registry key paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
@@ -210,27 +205,35 @@ Module WinappDebug
     End Sub
 
     Private Sub processDetect(ByRef command As String, ByVal detectType As String, ByRef number As Integer, ByRef firstNumberStatus As Boolean, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
-        'Console.WriteLine("Processing Detect. Checking for misformated detect type")
+
         If Not command.Contains(detectType) Then
-            Console.WriteLine("Line: " & lineCount & " Error: Misformated " & detectType & " found: " & Environment.NewLine & "Command: " & command)
+            Console.WriteLine("Line: " & lineCount & " Error: Misformatted " & detectType & " found: " & Environment.NewLine & "Command: " & command)
 
         End If
-        'Console.WriteLine("Done checking for detect type")
 
-        'Console.WriteLine("Checking first number status")
+        'Check whether our first Detect or DetectFile is trailed by a number
         If number = 1 Then
-            If command.StartsWith(detectType & " = ") Or (command.StartsWith(detectType & " = ") = False And command.StartsWith(detectType & number.ToString) = False) Then
+            If command.StartsWith(detectType & "=") Or (Not command.StartsWith(detectType & "=") And Not command.StartsWith(detectType & "1")) Then
                 firstNumberStatus = False
             Else
                 firstNumberStatus = True
             End If
 
         End If
-        'Console.WriteLine("Checking second number status against first")
+
+        'Make sure our first number is a 1 if there's a number
+        If number = 1 And (Not command.Contains(detectType & "1=") And Not command.Contains(detectType & "=")) Then
+            Console.WriteLine("Line: " & lineCount & " Error: '" & detectType & "' numbering. Expected '" & detectType & "' or '" & detectType & "1, found: " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+
+        'If we're on our second detect, make sure the first one had a 1 
         If number = 2 And firstNumberStatus = False Then
             Console.WriteLine("Line:  " & lineCount - 1 & " Error: '" & detectType & number & "' detected without preceding '" & detectType & number - 1 & "'" & Environment.NewLine)
             number_of_errors = number_of_errors + 1
         End If
+
+        'otherwise, make sure our numbers match up
         If number > 1 Then
             If command.Contains(detectType & number) = False Then
                 Console.WriteLine("Line: " & lineCount & " Error: '" & detectType & "' entry is incorrectly numbered: Expected '" & detectType & number & "'  found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
@@ -242,16 +245,14 @@ Module WinappDebug
 
     End Sub
 
-    Private Sub processRegKey(ByRef command As String, ByRef keyNumber As Integer, ByRef keys As List(Of String), ByRef KeyLineCounts As List(Of String), ByRef lineCount As Integer, ByRef number_of_errors As Integer)
-
-        checkFormat(command, "RegKey", keyNumber, lineCount, number_of_errors, keys, KeyLineCounts)
+    Private Sub processRegKey()
+        'We don't do much here... Yet? Stub method in case further checks are needed for RegKeys 
 
     End Sub
 
-    Private Sub processExcludeKey(ByRef command As String, ByRef keyNumber As Integer, ByRef keys As List(Of String), ByRef KeyLineCounts As List(Of String), ByRef lineCount As Integer, ByRef number_of_errors As Integer)
+    Private Sub processExcludeKey(ByRef command As String, ByRef number_of_errors As Integer, ByVal lineCount As Integer)
 
-        checkFormat(command, "ExcludeKey", keyNumber, lineCount, number_of_errors, keys, KeyLineCounts)
-
+        'Make sure any FILE exclude paths have a backslash before their pipe symbol
         Dim iteratorCheckerList() As String = Split(command, "|")
         If iteratorCheckerList(0).Contains("FILE") Then
             Dim endingslashchecker() As String = Split(command, "\|")
@@ -263,9 +264,7 @@ Module WinappDebug
 
     End Sub
 
-    Private Sub processFileKey(ByRef command As String, ByRef keyNumber As Integer, ByRef keys As List(Of String), ByRef KeyLineCounts As List(Of String), ByRef lineCount As Integer, ByRef number_of_errors As Integer)
-
-        checkFormat(command, "FileKey", keyNumber, lineCount, number_of_errors, keys, KeyLineCounts)
+    Private Sub processFileKey(ByRef command As String, ByRef number_of_errors As Integer, ByVal lineCount As Integer)
 
         Dim iteratorCheckerList() As String = Split(command, "|")
 
@@ -323,7 +322,6 @@ Module WinappDebug
         Dim renamedList As New List(Of String)
         Dim originalNameList As New List(Of String)
 
-
         For i As Integer = 0 To ListToBeSorted.Count - 1
 
             Dim entry As String = ListToBeSorted(i)
@@ -333,7 +331,7 @@ Module WinappDebug
             receivedIndex = i
             sortedIndex = givenSortedList.IndexOf(entry)
 
-            'replace any instance of "-" with "  " for the purposes of sorting 
+            'preform our replacement
             If entry.Contains(characterToReplace) Then
 
                 Dim newentry As String = entry.Replace(characterToReplace, replacementText)
