@@ -18,7 +18,6 @@ Module WinappDebug
         Dim curRegKeyNumber As Integer = 1
         Dim curExcludeKeyNumber As Integer = 1
         Dim curDetectFileNumber As Integer = 1
-
         Dim curDetectNumber As Integer = 1
         Dim firstDetectNumber As Boolean = False
         Dim firstDetectFileNumber As Boolean = False
@@ -123,7 +122,7 @@ Module WinappDebug
                 If command.StartsWith("R") Then
 
                     checkFormat(command, "RegKey", curRegKeyNumber, linecount, number_of_errors, regKeyList, regKeyLineCounts)
-
+                    processRegKey(command, linecount, number_of_errors)
                 End If
 
                 If command.StartsWith("D") Then
@@ -203,10 +202,12 @@ Module WinappDebug
 
     Private Sub processRegDetect(ByRef command As String, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
 
-        If command.Contains("=%") Or command.Contains("=C:\") Then
+        If (command.Contains("=%") Or command.Contains("=C:\")) Or (Not command.Contains("=HKLM") And Not command.Contains("=HKC") And Not command.Contains("=HKU")) Then
             Console.WriteLine("Line: " & lineCount & " Error: 'Detect' can only be used for registry key paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
             number_of_errors = number_of_errors + 1
         End If
+
+
 
     End Sub
 
@@ -254,9 +255,12 @@ Module WinappDebug
 
     End Sub
 
-    Private Sub processRegKey()
-        'We don't do much here... Yet? Stub method in case further checks are needed for RegKeys 
+    Private Sub processRegKey(ByVal command As String, ByVal lineCount As Integer, ByRef number_of_errors As Integer)
+        If Not command.Contains("=HKLM") And Not command.Contains("=HKC") And Not command.Contains("=HKU") Then
+            Console.WriteLine("Line: " & lineCount & " Error: 'RegKey' can only be used for registry key paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
 
+        End If
     End Sub
 
     Private Sub processExcludeKey(ByRef command As String, ByRef number_of_errors As Integer, ByVal lineCount As Integer)
