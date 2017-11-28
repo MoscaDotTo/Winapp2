@@ -29,7 +29,6 @@ Module ccinidebug
 
             Loop
             r.Close()
-            Console.WriteLine("Done adding the lines to a listy thingy")
             lines.Sort()
             lines.Remove("[Options]")
             lines.Insert(0, "[Options]")
