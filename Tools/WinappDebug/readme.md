@@ -4,7 +4,7 @@
 WinappDebug is a console tool for detecting errors in your winapp2.ini file, both syntactical and stylistic. 
 
 Detected syntax errors include:
-* Improperly numbered or misspeled commands 
+* Improperly numbered or misspelled commands 
 * Improperly formatted RECURSE and REMOVESELF
 * Missing pipes or equalities ( '|' or '=' )
 * Missing backslashes after %EnvironmentVariables%
