@@ -9,7 +9,7 @@ Detected syntax errors include:
 * Missing pipes or equalities ( '|' or '=' )
 * Missing backslashes after %EnvironmentVariables%
 * Spaces in %Environment Variables%
-
+* Improper targeting for registry & file specific commands (eg. RegKey points to a filesystem location or FileKey points to a registry location)
 
 Detected style errors include:
 * Improper alphabetization ordering 
