@@ -8,12 +8,14 @@ Detected syntax errors include:
 * Improperly formatted RECURSE and REMOVESELF
 * Missing pipes or equalities ( '|' or '=' )
 * Missing backslashes after %EnvironmentVariables%
+* Spaces in %Environment Variables%
+
 
 Detected style errors include:
 * Improper alphabetization ordering 
 * Improper CamelCasing 
 * Entries that are enabled by default
-
+* Leading and trailing whitespace
 
 ### How to use
 
