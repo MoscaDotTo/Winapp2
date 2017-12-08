@@ -1,4 +1,4 @@
-#ccinidebug
+# ccinidebug
 
 ### What is this? 
 ccinidebug.exe is a tool for alphabetizing ccleaner.ini's contents, and additionally for pruning out "stale" winapp2.ini entries.
