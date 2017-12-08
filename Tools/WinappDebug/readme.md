@@ -1,6 +1,6 @@
-#WinappDebug
+# WinappDebug
 
-###What is this?
+### What is this?
 WinappDebug is a console tool for detecting errors in your winapp2.ini file, both syntactical and stylistic. 
 
 Detected syntax errors include:
