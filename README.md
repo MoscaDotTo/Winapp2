@@ -6,7 +6,7 @@ There are two Winapp2 files published here. One is for CCleaner use, which is mo
 If you would like to contribute, please file an issue or pull request. If you are a Piriform users, or already have an account at the Piriform forums, you can also post requests here: https://forum.piriform.com/index.php?showtopic=32310&page=1
 
 
-How to install:
+How to use Winapp2 for the following cleaners:
 
 - For CCleaner users, download the latest copy of Winapp2. Move the copy to your CCleaner directory. Then run Trim.bat that is located here: http://www.winapp2.com/downloads.html  Follow the guide on how to use Trim.bat here: http://www.winapp2.com/howto.html
 
