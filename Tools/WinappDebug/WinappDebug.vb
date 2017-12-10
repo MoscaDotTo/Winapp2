@@ -1,6 +1,5 @@
 ﻿Imports System.IO
 Module WinappDebug
-
     Sub Main()
 
         'Check if the winapp2.ini file is in the current directory. End program if it isn't.
@@ -27,16 +26,15 @@ Module WinappDebug
         Dim excludeKeyList As New List(Of String)
         Dim detectList As New List(Of String)
         Dim detectFileList As New List(Of String)
+        Dim entryHasDefault As Boolean = False
 
+        Dim entryLineCounts As New List(Of String)
         Dim excludeKeyLineCounts As New List(Of String)
         Dim fileKeyLineCounts As New List(Of String)
         Dim regKeyLineCounts As New List(Of String)
         Dim detectLineCounts As New List(Of String)
         Dim detectFileLineCounts As New List(Of String)
         'Create a list of supported environmental variables
-        Dim envir_vars As New List(Of String)
-        envir_vars.AddRange(New String() {"%userprofile%", "%ProgramFiles%", "%rootdir%", "%windir%", "%appdata%", "%systemdrive%", "%Documents%",
-                            "%pictures%", "%video%", "%CommonAppData%", "%LocalAppData%", "%CommonProgramFiles%", "%homedrive%", "%music%", "%tmp%", "%temp%"})
 
         'Create a list of entry titles so we can look for duplicates
         Dim entry_titles As New List(Of String)
@@ -53,12 +51,18 @@ Module WinappDebug
 
                 'Increment the lineocunt value
                 linecount = linecount + 1
-
+                Dim curEntry As String
                 If command = "" Then
+
+                    If entry_titles.Count = 0 Then
+                        curEntry = ""
+                    Else
+                        curEntry = entry_titles.Last
+                    End If
 
                     processEmptyLine(curFileKeyNumber, curRegKeyNumber, curExcludeKeyNumber, curDetectFileNumber, curDetectNumber, firstDetectFileNumber, firstDetectFileNumber,
                                      fileKeyList, regKeyList, excludeKeyList, regKeyLineCounts, fileKeyLineCounts, excludeKeyLineCounts, number_of_errors,
-                                     detectFileList, detectFileLineCounts, detectList, detectLineCounts)
+                                     detectFileList, detectFileLineCounts, detectList, detectLineCounts, entryHasDefault, curEntry)
                 End If
 
                 If command = "" = False And command.StartsWith(";") = False Then
@@ -84,8 +88,8 @@ Module WinappDebug
                 'Process entries
                 If command.StartsWith("[") Then
 
-                    processEntryName(command, entry_titles, linecount, havePassedTB, trimmed_entry_titles, number_of_errors)
-                    ' Console.WriteLine("Finished checking entry name")
+                    processEntryName(command, entry_titles, linecount, havePassedTB, trimmed_entry_titles, number_of_errors, entryLineCounts)
+
                 End If
 
                 'Check for spelling errors in "LangSecRef"
@@ -152,20 +156,13 @@ Module WinappDebug
                             Console.WriteLine("Line: " & linecount & " Error: All entries should be disabled by default." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                             number_of_errors = number_of_errors + 1
                         End If
+
+                        If command.ToLower.StartsWith("default") Then
+                            entryHasDefault = True
+                        End If
                     End If
 
                 End If
-
-                'Check for missing backslashes on environmental variables
-                For Each var As String In envir_vars
-                    If command.Contains(var) = True Then
-                        If command.Contains(var & "\") = False Then
-                            Console.WriteLine("Line: " & linecount & " Error: Environmental variables must have a trailing backslash." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                            number_of_errors = number_of_errors + 1
-                        End If
-                    End If
-                Next
-
 
             Loop
 
@@ -183,7 +180,7 @@ Module WinappDebug
 
         'traverse through our trimmed entry titles list
         replaceAndSort(trimmed_entry_titles, sortedEList, "-", "  ", "entries")
-        findOutOfPlace(trimmed_entry_titles, sortedEList, "Error: Entry Alphabetization. Command: [", "*] may be out of place. It should follow: [", "*]", "Follows: [", "*]", number_of_errors, New List(Of String))
+        findOutOfPlace(trimmed_entry_titles, sortedEList, "Entry", number_of_errors, entryLineCounts)
 
         'Stop the program from closing on completion
         Console.WriteLine("***********************************************" & Environment.NewLine & "Completed analysis of winapp2.ini. " & number_of_errors & " possible errors were detected. " & Environment.NewLine & "Number of entries: " & entry_titles.Count & Environment.NewLine & "Press any key to close.")
@@ -192,6 +189,26 @@ Module WinappDebug
     End Sub
 
     Private Sub processDetectFile(ByRef command As String, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
+
+        If command(command.Count - 1) = "\" Then
+            Console.WriteLine("Line: " & lineCount & " Error: Trailing backslash on DetectFile. " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+        End If
+
+        Dim cDir As String = command.Split("=")(1)
+        If cDir.Contains("*") Then
+            Dim splitDir As String() = cDir.Split("\")
+            For i As Integer = 0 To splitDir.Count - 1
+                If splitDir.Last = Nothing Then Continue For
+                If splitDir(i).Contains("*") And i <> splitDir.Count - 1 Then
+                    Console.WriteLine("Line: " & lineCount & " Error: Nested wildcard in DetectFile. " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                    number_of_errors = number_of_errors + 1
+                End If
+
+            Next
+
+        End If
+
+
 
         If command.Contains("=HKLM") Or command.Contains("=HKC") Or command.Contains("=HKU") Then
             Console.WriteLine("Line: " & lineCount & " Error: 'DetectFile' can only be used for filesystem paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
@@ -219,8 +236,13 @@ Module WinappDebug
         End If
 
         Dim cmdList As String() = command.Split("=")
-        keyList.Add(cmdList(1))
-        keyListLineCounts.Add(lineCount)
+        If keyList.Contains(cmdList(1).ToLower) Then
+            Console.WriteLine("Line: " & lineCount & " Error: Duplicate command found. " & Environment.NewLine & "Command: " & command & Environment.NewLine & "Duplicates: " & detectType & keyList.IndexOf(cmdList(1).ToLower) + 1 & "=" & cmdList(1) & Environment.NewLine)
+        Else
+            keyList.Add(cmdList(1).ToLower)
+            keyListLineCounts.Add(lineCount)
+
+        End If
 
         'Check whether our first Detect or DetectFile is trailed by a number
         If number = 1 Then
@@ -301,9 +323,14 @@ Module WinappDebug
             number_of_errors = number_of_errors + 1
         End If
 
+        If command.Contains("\VirtualStore\P") And (Not command.ToLower.Contains("programdata") And Not command.ToLower.Contains("program files*") And Not command.ToLower.Contains("program*")) Then
+            Console.WriteLine("Line: " & lineCount & " Error: Incorrect VirtualStore location. Expected: \VirtualStore\Program Files*\ Found: " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+
     End Sub
 
-    Private Sub processEntryName(ByRef command As String, ByRef entry_titles As List(Of String), ByRef linecount As Integer, ByRef havePassedTB As Boolean, ByRef trimmed_entry_titles As List(Of String), ByRef number_of_errors As Integer)
+    Private Sub processEntryName(ByRef command As String, ByRef entry_titles As List(Of String), ByRef linecount As Integer, ByRef havePassedTB As Boolean, ByRef trimmed_entry_titles As List(Of String), ByRef number_of_errors As Integer, ByRef entryLineCounts As List(Of String))
         'Check if it's already in the list
         If entry_titles.Contains(command) Then
             Console.WriteLine("Line: " & linecount & " Duplicate entry." & Environment.NewLine & "Command: " & command & Environment.NewLine)
@@ -320,8 +347,12 @@ Module WinappDebug
 
             'the entries in and above the thunderbird section don't need to be in order because they are grouped categorically 
             If havePassedTB Then
-                trimmed_entry_titles.Add(currentEntry)
+                trimmed_entry_titles.Add(command)
+                entryLineCounts.Add(linecount)
+            End If
 
+            If Not command.Contains(" *]") Then
+                Console.WriteLine("Line: " & linecount & "Error: Improper entry name. All entries should end with a ' *'" & Environment.NewLine & "Command: " & command & Environment.NewLine)
             End If
 
         End If
@@ -382,59 +413,50 @@ Module WinappDebug
         End If
     End Sub
 
-    Public Sub findOutOfPlace(ByRef someList As List(Of String), ByRef sortedList As List(Of String), ByVal Err1 As String, ByVal Err2 As String, ByVal Err3 As String, ByVal err4 As String, ByVal err5 As String, ByRef number_of_errors As Integer, ByRef LineCountList As List(Of String))
+    Public Sub findOutOfPlace(ByRef someList As List(Of String), ByRef sortedList As List(Of String), ByVal findType As String, ByRef number_of_errors As Integer, ByRef LineCountList As List(Of String))
         Dim originalPlacement As New List(Of String)
         originalPlacement.AddRange(someList.ToArray)
-
+        Dim originalLines As New List(Of String)
+        originalLines.AddRange(LineCountList)
         Dim misplacedEntryList As New List(Of String)
         For i As Integer = 0 To someList.Count - 1
 
             Dim entry As String = someList(i)
 
-            Dim receivedIndex As Integer = i
             Dim sortedIndex As Integer = sortedList.IndexOf(entry)
 
-            If receivedIndex <> sortedIndex Then
+            If i <> sortedIndex Then
 
                 If misplacedEntryList.Contains(entry) = False Then
 
-                    If sortedIndex > receivedIndex Then
+                    If sortedIndex > i Then
 
                         misplacedEntryList.Add(entry)
-                        number_of_errors = number_of_errors + 1
 
                         someList.Insert(sortedIndex, entry)
-                        someList.RemoveAt(receivedIndex)
+                        someList.RemoveAt(i)
 
                         'Adjust i because the item in its position has now changed and we don't want to skip it
                         i = i - 1
 
                     Else
-                        Dim tmpErr1 As String = Err1
 
-                        'some contingency for when we're tracking lines (TODO: Add line tracking for entries)
+                        'some contingency for when we're tracking lines
                         If LineCountList.Count > 0 Then
                             LineCountList.Insert(sortedIndex, LineCountList(i))
                             LineCountList.RemoveAt(i + 1)
-                            Err1 = "Line: " & LineCountList(i) & Err1
                         End If
-                        Dim shouldBe As String
-                        If (sortedIndex = 0) Then
-                            shouldBe = " Should be first"
-                        Else
-                            shouldBe = sortedList(sortedIndex - 1)
+                        Dim recInd As Integer = originalPlacement.IndexOf(entry)
+                        Dim sortInd As Integer = sortedList.IndexOf(entry)
+                        Dim curPos As String = LineCountList(sortInd)
+                        Dim sortPos As String = originalLines(recInd - 1)
+
+                        If findType <> "Entry" Then
+                            entry = findType & recInd + 1 & "=" & entry
                         End If
 
-                        Dim recInd As Integer = originalPlacement.IndexOf(entry)
-                        Dim follows As String
-                        If recInd = 0 Then
-                            follows = " Is first"
-                        Else
-                            follows = originalPlacement(recInd - 1)
-                        End If
-                        Console.WriteLine(Err1 & entry & Err2 & shouldBe & Err3 & Environment.NewLine & err4 & follows & err5 & Environment.NewLine)
+                        Console.WriteLine("Line: " & originalLines(recInd) & " Error: '" & findType & "' Alphabetization. " & entry & " appears to be out of place." & Environment.NewLine & "Current  Position: Line " & curPos & Environment.NewLine & "Expected Position: Line " & sortPos & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
-                        Err1 = tmpErr1
 
                         'move the entry to the left in our list
                         someList.Insert(sortedIndex, entry)
@@ -449,37 +471,27 @@ Module WinappDebug
             Else
                 'If we have moved backwards because we moved an element left in the list, we want to remove anything that was off-by-one because of it from the misplaced entry list
                 If misplacedEntryList.Contains(entry) = True Then
-                    number_of_errors = number_of_errors - 1
                     misplacedEntryList.Remove(entry)
                 End If
             End If
         Next
 
         For Each entry As String In misplacedEntryList
-            Dim tmperr As String = Err1
-            If LineCountList.Count > 0 Then
-                Err1 = "Line: " & LineCountList(someList.IndexOf(entry)) & " "
-            End If
-            Dim sortedIndex As Integer = sortedList.IndexOf(entry)
-            Dim shouldBe As String
+
+            'Any remaining entries in the misplaced list were actually misplaced and not just out of order because of a misplacement
             Dim recInd As Integer = originalPlacement.IndexOf(entry)
-            Dim follows As String
+            Dim sortInd As Integer = sortedList.IndexOf(entry)
+            Dim curPos As String = originalLines(recInd)
+            Dim sortPos As String = LineCountList(sortInd)
 
-            If (sortedIndex = 0) Then
-                shouldBe = " Should be first"
-            Else
-                shouldBe = sortedList(sortedIndex - 1)
+            If findType <> "Entry" Then
+                entry = findType & recInd + 1 & "=" & entry
             End If
 
-            If recInd = 0 Then
-                follows = " Is first"
-            Else
-                follows = originalPlacement(recInd - 1)
-            End If
+            Console.WriteLine("Line: " & originalLines(recInd) & " Error: '" & findType & "' Alphabetization. " & entry & " appears to be out of place." & Environment.NewLine & "Current  Position: Line " & curPos & Environment.NewLine & "Expected Position: Line " & sortPos & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
 
-            Console.WriteLine(Err1 & entry & Err2 & shouldBe & Err3 & Environment.NewLine & err4 & follows & err5 & Environment.NewLine)
 
-            Err1 = tmperr
         Next
 
     End Sub
@@ -526,7 +538,7 @@ Module WinappDebug
             End If
         Next
 
-        'prefix any numbers that we detected above (except the potential last which has already been replaced)
+        'prefix any numbers that we detected above 
         If prefixIndicies.Count >= 1 Then
             For j As Integer = 0 To prefixIndicies.Count - 1
 
@@ -561,22 +573,73 @@ Module WinappDebug
 
         'Split the command and save what comes after the '='
         Dim cmdList As String() = command.Split("=")
-        keyList.Add(cmdList(1))
-        keyLineCounts.Add(lineCount)
+
+        If keyList.Contains(cmdList(1).ToLower) Then
+            Console.WriteLine("Line: " & lineCount & " Error: Duplicate command found. " & Environment.NewLine & "Command: " & command & Environment.NewLine & "Duplicates: " & keyString & keyList.IndexOf(cmdList(1).ToLower) + 1 & "=" & cmdList(1) & Environment.NewLine)
+        Else
+            keyList.Add(cmdList(1).ToLower)
+            keyLineCounts.Add(lineCount)
+
+        End If
 
         'make sure the current key is correctly numbered
         If Not command.Contains(keyString & keyNumber) Then
-            Console.WriteLine("Line: " & lineCount & " Error: '" & keyString & "' entry is incorrectly spelled or formatted. Expected: " & keyString & keyNumber & "', Found: " & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+            Console.WriteLine("Line: " & lineCount & " Error: '" & keyString & "' entry is incorrectly spelled or formatted. " & Environment.NewLine & "Expected: " & keyString & keyNumber & Environment.NewLine & "Found:    " & cmdList(0) & Environment.NewLine)
             number_of_errors = number_of_errors + 1
         End If
         keyNumber = keyNumber + 1
+
+        If command(command.Count - 1) = ";" Then
+            Console.WriteLine("Line: " & lineCount & " Error: Trailing semicolon." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+
+
+        'Do some formatting checks for environment variables
+        If keyString = "DetectFile" Or keyString = "FileKey" Or keyString = "ExcludeKey" Then
+
+            If command.Contains("%") Then
+                Dim envir_vars As New List(Of String)
+                envir_vars.AddRange(New String() {"UserProfile", "ProgramFiles", "RootDir", "WinDir", "AppData", "SystemDrive", "Documents", "ProgramData", "AllUsersProfile",
+                            "Pictures", "Video", "CommonAppData", "LocalAppData", "CommonProgramFiles", "HomeDrive", "Music", "tmp", "Temp", "LocalLowAppData", "Public"})
+
+
+                Dim varcheck As String() = command.Split("%")
+                If varcheck.Count <> 3 And varcheck.Count <> 5 Then
+                    Console.WriteLine("Line: " & lineCount & " Error: %EnvironmentVariables% must be surrounded on both sides by a single % character. " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                End If
+
+                If varcheck.Count = 3 Then
+                    If Not envir_vars.Contains(varcheck(1)) Then
+
+                        Dim casingerror As Boolean = False
+                        For Each var As String In envir_vars
+
+                            If varcheck(1).ToLower = var.ToLower Then
+                                casingerror = True
+                                Console.WriteLine("Line: " & lineCount & " Error: Invalid CamelCasing on environment variable. Expected: " & var & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                                number_of_errors = number_of_errors + 1
+                            End If
+
+                        Next
+
+                        If casingerror = False Then
+                            Console.WriteLine("Line: " & lineCount & " Error: Misformatted or invalid environment variable." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                        End If
+                    End If
+
+                End If
+            End If
+
+
+        End If
 
     End Sub
 
     Public Sub processEmptyLine(ByRef curFileKeyNumber As Integer, ByRef curRegKeyNumber As Integer, ByRef curExcludeKeyNumber As Integer, ByRef curDetectFileNumber As Integer, ByRef curDetectNumber As Integer,
                                 ByRef firstDetectFileNumber As Boolean, ByRef firstDetectNumber As Integer, ByRef fileKeyList As List(Of String), ByRef regKeyList As List(Of String),
                                 ByRef excludeKeyList As List(Of String), ByRef regKeyLineCounts As List(Of String), ByRef fileKeyLineCounts As List(Of String), ByRef excludeKeyLineCounts As List(Of String), ByRef number_of_errors As Integer,
-                                ByRef detectFileList As List(Of String), ByRef detectFileLineCounts As List(Of String), ByRef detectList As List(Of String), ByRef detectLineCounts As List(Of String))
+                                ByRef detectFileList As List(Of String), ByRef detectFileLineCounts As List(Of String), ByRef detectList As List(Of String), ByRef detectLineCounts As List(Of String), ByRef entryHasDefault As Boolean, ByVal entryName As String)
 
 
         'reset our counters for the numbers next to commands when we move to the next entry
@@ -587,6 +650,14 @@ Module WinappDebug
         curExcludeKeyNumber = 1
         firstDetectFileNumber = False
         firstDetectNumber = False
+
+        'Observe whether or not we detected a default state (and ignore it when we're looking at sequential newline characters) 
+        If Not entryHasDefault And Not entryName.Equals("") And (fileKeyLineCounts.Count > 0 Or regKeyLineCounts.Count > 0) Then
+            Console.WriteLine("Error:  " & entryName & " appears to be missing its default state. All entries should contain 'Default=False'" & Environment.NewLine)
+            number_of_errors = number_of_errors + 1
+        End If
+
+        entryHasDefault = False
 
         'create the (soon to be) sorted versions of our lists
         Dim sortedFKList As New List(Of String)
@@ -608,7 +679,7 @@ Module WinappDebug
         If fileKeyList.Count > 1 Then
 
             replaceAndSort(fileKeyList, sortedFKList, "|", " \ \", "keys")
-            findOutOfPlace(fileKeyList, sortedFKList, " Error: FileKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, fileKeyLineCounts)
+            findOutOfPlace(fileKeyList, sortedFKList, "FileKey", number_of_errors, fileKeyLineCounts)
 
         End If
         fileKeyList.Clear()
@@ -617,7 +688,7 @@ Module WinappDebug
         If regKeyLineCounts.Count > 1 Then
 
             replaceAndSort(regKeyList, sortedRKList, "|", " \ \", "keys")
-            findOutOfPlace(regKeyList, sortedRKList, " Error: RegKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, regKeyLineCounts)
+            findOutOfPlace(regKeyList, sortedRKList, "RegKey", number_of_errors, regKeyLineCounts)
 
         End If
         regKeyList.Clear()
@@ -626,7 +697,7 @@ Module WinappDebug
         If excludeKeyLineCounts.Count > 1 Then
 
             replaceAndSort(excludeKeyList, sortedEKList, "|", " \ \", "keys")
-            findOutOfPlace(excludeKeyList, sortedEKList, " Error: ExcludeKey Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, excludeKeyLineCounts)
+            findOutOfPlace(excludeKeyList, sortedEKList, "ExcludeKey", number_of_errors, excludeKeyLineCounts)
 
         End If
         excludeKeyList.Clear()
@@ -635,7 +706,7 @@ Module WinappDebug
         If detectFileLineCounts.Count > 1 Then
 
             replaceAndSort(detectFileList, sortedDFList, "|", " \ \", "keys")
-            findOutOfPlace(detectFileList, sortedDFList, " Error: DetectFile Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, detectFileLineCounts)
+            findOutOfPlace(detectFileList, sortedDFList, "DetectFile", number_of_errors, detectFileLineCounts)
 
         End If
         detectFileList.Clear()
@@ -644,7 +715,7 @@ Module WinappDebug
         If detectLineCounts.Count > 1 Then
 
             replaceAndSort(detectList, sortedDList, "|", " \ \", "keys")
-            findOutOfPlace(detectList, sortedDList, " Error: Detect Alphabetization: ", " appears to be out of place, it should follow: ", "", "Follows: ", "", number_of_errors, detectLineCounts)
+            findOutOfPlace(detectList, sortedDList, "Detect", number_of_errors, detectLineCounts)
 
         End If
         detectList.Clear()
