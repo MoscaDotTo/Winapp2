@@ -17,6 +17,7 @@ Detected style errors include:
 * Improper alphabetization ordering 
 * Improper CamelCasing 
 * Entries that are enabled by default
+* Missing default states
 * Leading and trailing whitespace
 * Trailing whitspace and semicolons 
 * Duplicate commands on different lines
