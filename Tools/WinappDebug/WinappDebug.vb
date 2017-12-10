@@ -95,7 +95,7 @@ Module WinappDebug
                 'Check for spelling errors in "LangSecRef"
                 If command.StartsWith("L") Then
                     If Not command.Contains("LangSecRef=") Then
-                        Console.WriteLine("Line:  " & linecount & " Error: 'LangSecRef' entry is incorrectly spelled or formatted." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                        Console.WriteLine("Line: " & linecount & " Error: 'LangSecRef' entry is incorrectly spelled or formatted." & Environment.NewLine & "Command: " & command & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
                     End If
                 End If
@@ -262,7 +262,7 @@ Module WinappDebug
 
         'If we're on our second detect, make sure the first one had a 1 
         If number = 2 And firstNumberStatus = False Then
-            Console.WriteLine("Line:  " & lineCount - 1 & " Error: '" & detectType & number & "' detected without preceding '" & detectType & number - 1 & "'" & Environment.NewLine)
+            Console.WriteLine("Line: " & lineCount - 1 & " Error: '" & detectType & number & "' detected without preceding '" & detectType & number - 1 & "'" & Environment.NewLine)
             number_of_errors = number_of_errors + 1
         End If
 
@@ -307,7 +307,7 @@ Module WinappDebug
         If iteratorCheckerList.Length > 2 Then
             If Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF") Then
 
-                Console.WriteLine("Line: " & lineCount & " Error: 'RECURSE' or 'REMOVESELF' entry is incorrectly spelled, found " & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+                Console.WriteLine("Line: " & lineCount & " Error: 'RECURSE' or 'REMOVESELF' entry is incorrectly spelled, found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
                 number_of_errors = number_of_errors + 1
 
             End If
@@ -315,11 +315,11 @@ Module WinappDebug
 
         'check for missing pipe symbol on recurse and removeself
         If command.Contains("RECURSE") And Not command.Contains("|RECURSE") Then
-            Console.WriteLine("Line: " & lineCount & " Error: Missing pipe symbol | before RECURSE" & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+            Console.WriteLine("Line: " & lineCount & " Error: Missing pipe symbol | before RECURSE" & Environment.NewLine & "Command: " & command & Environment.NewLine)
             number_of_errors = number_of_errors + 1
         End If
         If command.Contains("REMOVESELF") And Not command.Contains("|REMOVESELF") Then
-            Console.WriteLine("Line: " & lineCount & " Error: Missing pipe symbol | before REMOVESELF" & Environment.NewLine & "Command:  " & command & Environment.NewLine)
+            Console.WriteLine("Line: " & lineCount & " Error: Missing pipe symbol | before REMOVESELF" & Environment.NewLine & "Command: " & command & Environment.NewLine)
             number_of_errors = number_of_errors + 1
         End If
 
@@ -352,7 +352,7 @@ Module WinappDebug
             End If
 
             If Not command.Contains(" *]") Then
-                Console.WriteLine("Line: " & linecount & "Error: Improper entry name. All entries should end with a ' *'" & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                Console.WriteLine("Line: " & linecount & " Error: Improper entry name. All entries should end with a ' *'" & Environment.NewLine & "Command: " & command & Environment.NewLine)
             End If
 
         End If
@@ -448,8 +448,8 @@ Module WinappDebug
                         End If
                         Dim recInd As Integer = originalPlacement.IndexOf(entry)
                         Dim sortInd As Integer = sortedList.IndexOf(entry)
-                        Dim curPos As String = LineCountList(sortInd)
-                        Dim sortPos As String = originalLines(recInd - 1)
+                        Dim curPos As String = originalLines(recInd)
+                        Dim sortPos As String = originalLines(sortInd)
 
                         If findType <> "Entry" Then
                             entry = findType & recInd + 1 & "=" & entry
@@ -653,7 +653,7 @@ Module WinappDebug
 
         'Observe whether or not we detected a default state (and ignore it when we're looking at sequential newline characters) 
         If Not entryHasDefault And Not entryName.Equals("") And (fileKeyLineCounts.Count > 0 Or regKeyLineCounts.Count > 0) Then
-            Console.WriteLine("Error:  " & entryName & " appears to be missing its default state. All entries should contain 'Default=False'" & Environment.NewLine)
+            Console.WriteLine("Error: " & entryName & " appears to be missing its default state. All entries should contain 'Default=False'" & Environment.NewLine)
             number_of_errors = number_of_errors + 1
         End If
 
