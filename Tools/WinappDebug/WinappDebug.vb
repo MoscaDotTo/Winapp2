@@ -69,14 +69,12 @@ Module WinappDebug
 
                     'Check for trailing whitespace
                     If command.EndsWith(" ") Then
-                        Console.WriteLine("Line: " & linecount & " Error: Detected unwanted whitespace at end of line." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
+                        err(linecount, "Detected unwanted whitepace at end of line", command, number_of_errors)
                     End If
 
                     'Check for ending whitespace
                     If command.StartsWith(" ") Then
-                        Console.WriteLine("Line: " & linecount & " Error: Detected unwanted whitespace at beginning of line." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
+                        err(linecount, "Detected unwanted whitepace at beginning of line", command, number_of_errors)
                     End If
 
                 Else
@@ -95,15 +93,8 @@ Module WinappDebug
                 'Check for spelling errors in "LangSecRef"
                 If command.StartsWith("L") Then
                     If Not command.Contains("LangSecRef=") Then
-                        Console.WriteLine("Line: " & linecount & " Error: 'LangSecRef' entry is incorrectly spelled or formatted." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                        number_of_errors = number_of_errors + 1
+                        err(linecount, "LangSecRef is incorrected spelled or formatted.", command, number_of_errors)
                     End If
-                End If
-
-                'Check for environmental variable spacing errors
-                If command.Contains("%Program Files%") Then
-                    Console.WriteLine("Line: " & linecount & " Error: '%ProgramFiles%' variable should not have spacing." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                    number_of_errors = number_of_errors + 1
                 End If
 
                 'Process FileKey
@@ -147,14 +138,12 @@ Module WinappDebug
                         End If
                     Else
 
-                        If Not command.Contains("Default") And Not command.ToLower.Contains("detecto") Then
-                            Console.WriteLine("Line: " & linecount & " Error: Expected 'Default', found: " & tmp.First)
-                            number_of_errors = number_of_errors + 1
+                        If Not command.StartsWith("Default=") And Not command.ToLower.Contains("detecto") Then
+                            err2(linecount, "'Default' incorrectly spelled", tmp.First, "Default", number_of_errors)
                         End If
 
                         If command.ToLower.Contains("true") Then
-                            Console.WriteLine("Line: " & linecount & " Error: All entries should be disabled by default." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                            number_of_errors = number_of_errors + 1
+                            err(linecount, "All entries should be disabled by default (Default=False)", command, number_of_errors)
                         End If
 
                         If command.ToLower.StartsWith("default") Then
@@ -191,7 +180,7 @@ Module WinappDebug
     Private Sub processDetectFile(ByRef command As String, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
 
         If command(command.Count - 1) = "\" Then
-            Console.WriteLine("Line: " & lineCount & " Error: Trailing backslash on DetectFile. " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+            err(lineCount, "Trailing backslash on DetectFile", command, number_of_errors)
         End If
 
         Dim cDir As String = command.Split("=")(1)
@@ -200,8 +189,7 @@ Module WinappDebug
             For i As Integer = 0 To splitDir.Count - 1
                 If splitDir.Last = Nothing Then Continue For
                 If splitDir(i).Contains("*") And i <> splitDir.Count - 1 Then
-                    Console.WriteLine("Line: " & lineCount & " Error: Nested wildcard in DetectFile. " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                    number_of_errors = number_of_errors + 1
+                    err(lineCount, "Nested wildcard found in DetectFile", command, number_of_errors)
                 End If
 
             Next
@@ -209,10 +197,8 @@ Module WinappDebug
         End If
 
 
-
         If command.Contains("=HKLM") Or command.Contains("=HKC") Or command.Contains("=HKU") Then
-            Console.WriteLine("Line: " & lineCount & " Error: 'DetectFile' can only be used for filesystem paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
+            err(lineCount, "'DetectFile' can only be used for file system paths", command, number_of_errors)
         End If
 
     End Sub
@@ -220,10 +206,8 @@ Module WinappDebug
     Private Sub processRegDetect(ByRef command As String, ByRef number_of_errors As Integer, ByRef lineCount As Integer)
 
         If (command.Contains("=%") Or command.Contains("=C:\")) Or (Not command.Contains("=HKLM") And Not command.Contains("=HKC") And Not command.Contains("=HKU")) Then
-            Console.WriteLine("Line: " & lineCount & " Error: 'Detect' can only be used for registry key paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
+            err(lineCount, "'Detect' can only be used for registry keys paths.", command, number_of_errors)
         End If
-
 
 
     End Sub
@@ -231,13 +215,13 @@ Module WinappDebug
     Private Sub processDetect(ByRef command As String, ByVal detectType As String, ByRef number As Integer, ByRef firstNumberStatus As Boolean, ByRef number_of_errors As Integer, ByRef lineCount As Integer, ByRef keyList As List(Of String), ByRef keyListLineCounts As List(Of String))
 
         If Not command.Contains(detectType) Then
-            Console.WriteLine("Line: " & lineCount & " Error: Misformatted " & detectType & " found: " & Environment.NewLine & "Command: " & command)
+            err(lineCount, "Misformatted '" & detectType, command, number_of_errors)
 
         End If
 
         Dim cmdList As String() = command.Split("=")
         If keyList.Contains(cmdList(1).ToLower) Then
-            Console.WriteLine("Line: " & lineCount & " Error: Duplicate command found. " & Environment.NewLine & "Command: " & command & Environment.NewLine & "Duplicates: " & detectType & keyList.IndexOf(cmdList(1).ToLower) + 1 & "=" & cmdList(1) & Environment.NewLine)
+            Console.WriteLine("Line: " & lineCount & " - Error: Duplicate command found. " & Environment.NewLine & "Command: " & command & Environment.NewLine & "Duplicates: " & detectType & keyList.IndexOf(cmdList(1).ToLower) + 1 & "=" & cmdList(1) & Environment.NewLine)
         Else
             keyList.Add(cmdList(1).ToLower)
             keyListLineCounts.Add(lineCount)
@@ -256,21 +240,21 @@ Module WinappDebug
 
         'Make sure our first number is a 1 if there's a number
         If number = 1 And (Not command.Contains(detectType & "1=") And Not command.Contains(detectType & "=")) Then
-            Console.WriteLine("Line: " & lineCount & " Error: '" & detectType & "' numbering. Expected '" & detectType & "' or '" & detectType & "1, found: " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
+            err2(lineCount, "'" & detectType & "' numbering.", command, "'" & detectType & "' or '" & detectType & "1", number_of_errors)
+
         End If
 
         'If we're on our second detect, make sure the first one had a 1 
         If number = 2 And firstNumberStatus = False Then
-            Console.WriteLine("Line: " & lineCount - 1 & " Error: '" & detectType & number & "' detected without preceding '" & detectType & number - 1 & "'" & Environment.NewLine)
+            err(lineCount - 1, "'" & detectType & number & "' detected without preceding '" & detectType & number - 1 & "'", command, number_of_errors)
+
             number_of_errors = number_of_errors + 1
         End If
 
         'otherwise, make sure our numbers match up
         If number > 1 Then
             If command.Contains(detectType & number) = False Then
-                Console.WriteLine("Line: " & lineCount & " Error: '" & detectType & "' entry is incorrectly numbered: Expected '" & detectType & number & "'  found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                number_of_errors = number_of_errors + 1
+                err2(lineCount, "'" & detectType & "' entry is incorrectly numbered", command, "'" & detectType & number & "'", number_of_errors)
             End If
         End If
         number = number + 1
@@ -278,23 +262,25 @@ Module WinappDebug
     End Sub
 
     Private Sub processRegKey(ByVal command As String, ByVal lineCount As Integer, ByRef number_of_errors As Integer)
-        If Not command.Contains("=HKLM") And Not command.Contains("=HKC") And Not command.Contains("=HKU") Then
-            Console.WriteLine("Line: " & lineCount & " Error: 'RegKey' can only be used for registry key paths." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
 
+        If Not command.Contains("=HKLM") And Not command.Contains("=HKC") And Not command.Contains("=HKU") Then
+            err(lineCount, "'RegKey' can only be used for registry key paths", command, number_of_errors)
         End If
+
     End Sub
 
     Private Sub processExcludeKey(ByRef command As String, ByRef number_of_errors As Integer, ByVal lineCount As Integer)
 
         'Make sure any FILE exclude paths have a backslash before their pipe symbol
         Dim iteratorCheckerList() As String = Split(command, "|")
+
         If iteratorCheckerList(0).Contains("FILE") Then
             Dim endingslashchecker() As String = Split(command, "\|")
+
             If endingslashchecker.Count = 1 Then
-                Console.WriteLine("Line: " & lineCount & " Error: Missing backslash before pipe symbol." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                number_of_errors = number_of_errors + 1
+                err(lineCount, "Missing backslash (\) before pipe (|) in ExcludeKey", command, number_of_errors)
             End If
+
         End If
 
     End Sub
@@ -303,29 +289,42 @@ Module WinappDebug
 
         Dim iteratorCheckerList() As String = Split(command, "|")
 
+        If Not command.Contains("|") Then
+
+            err(lineCount, "Missing pipe (|) in 'FileKey'", command, number_of_errors)
+
+        End If
+        If command.Contains(";|") Then
+            err(lineCount, "Semicolon (;) found before pipe (|)", command, number_of_errors)
+        End If
+
         'check for incorrect spellings of RECURSE or REMOVESELF
         If iteratorCheckerList.Length > 2 Then
             If Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF") Then
 
-                Console.WriteLine("Line: " & lineCount & " Error: 'RECURSE' or 'REMOVESELF' entry is incorrectly spelled, found " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                number_of_errors = number_of_errors + 1
+                err(lineCount, "'RECURSE' or 'REMOVESELF' entry is incorrectly spelled.", command, number_of_errors)
 
             End If
         End If
 
         'check for missing pipe symbol on recurse and removeself
         If command.Contains("RECURSE") And Not command.Contains("|RECURSE") Then
-            Console.WriteLine("Line: " & lineCount & " Error: Missing pipe symbol | before RECURSE" & Environment.NewLine & "Command: " & command & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
+            err(lineCount, "Missing pipe (|) before 'RECURSE'", command, number_of_errors)
         End If
         If command.Contains("REMOVESELF") And Not command.Contains("|REMOVESELF") Then
-            Console.WriteLine("Line: " & lineCount & " Error: Missing pipe symbol | before REMOVESELF" & Environment.NewLine & "Command: " & command & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
+            err(lineCount, "Missing pipe (|) before 'REMOVESELF'", command, number_of_errors)
         End If
 
         If command.Contains("\VirtualStore\P") And (Not command.ToLower.Contains("programdata") And Not command.ToLower.Contains("program files*") And Not command.ToLower.Contains("program*")) Then
-            Console.WriteLine("Line: " & lineCount & " Error: Incorrect VirtualStore location. Expected: \VirtualStore\Program Files*\ Found: " & Environment.NewLine & "Command: " & command & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
+            err2(lineCount, "Incorrect VirtualStore location.", command, "%LocalAppData%\VirtualStore\Program Files*\", number_of_errors)
+        End If
+
+        If command.Contains("%\|") Then
+            err(lineCount, "Backslash (\) found before pipe (|)", command, number_of_errors)
+        End If
+
+        If command.Contains("%") And Not command.Contains("%|") And Not command.Contains("%\") Then
+            err(lineCount, "Missing backslash (\) after %EnvironmentVariable%", command, number_of_errors)
         End If
 
     End Sub
@@ -352,7 +351,7 @@ Module WinappDebug
             End If
 
             If Not command.Contains(" *]") Then
-                Console.WriteLine("Line: " & linecount & " Error: Improper entry name. All entries should end with a ' *'" & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                err(linecount, "Improper entry name. All entries should end with a ' *'", command, number_of_errors)
             End If
 
         End If
@@ -455,7 +454,7 @@ Module WinappDebug
                             entry = findType & recInd + 1 & "=" & entry
                         End If
 
-                        Console.WriteLine("Line: " & originalLines(recInd) & " Error: '" & findType & "' Alphabetization. " & entry & " appears to be out of place." & Environment.NewLine & "Current  Position: Line " & curPos & Environment.NewLine & "Expected Position: Line " & sortPos & Environment.NewLine)
+                        Console.WriteLine("Line: " & originalLines(recInd) & " - Error: '" & findType & "' Alphabetization. " & entry & " appears to be out of place." & Environment.NewLine & "Current  Position: Line " & curPos & Environment.NewLine & "Expected Position: Line " & sortPos & Environment.NewLine)
                         number_of_errors = number_of_errors + 1
 
                         'move the entry to the left in our list
@@ -488,7 +487,7 @@ Module WinappDebug
                 entry = findType & recInd + 1 & "=" & entry
             End If
 
-            Console.WriteLine("Line: " & originalLines(recInd) & " Error: '" & findType & "' Alphabetization. " & entry & " appears to be out of place." & Environment.NewLine & "Current  Position: Line " & curPos & Environment.NewLine & "Expected Position: Line " & sortPos & Environment.NewLine)
+            Console.WriteLine("Line: " & originalLines(recInd) & " - Error: '" & findType & "' Alphabetization. " & entry & " appears to be out of place." & Environment.NewLine & "Current  Position: Line " & curPos & Environment.NewLine & "Expected Position: Line " & sortPos & Environment.NewLine)
             number_of_errors = number_of_errors + 1
 
 
@@ -575,7 +574,7 @@ Module WinappDebug
         Dim cmdList As String() = command.Split("=")
 
         If keyList.Contains(cmdList(1).ToLower) Then
-            Console.WriteLine("Line: " & lineCount & " Error: Duplicate command found. " & Environment.NewLine & "Command: " & command & Environment.NewLine & "Duplicates: " & keyString & keyList.IndexOf(cmdList(1).ToLower) + 1 & "=" & cmdList(1) & Environment.NewLine)
+            Console.WriteLine("Line: " & lineCount & " - Error: Duplicate command found. " & Environment.NewLine & "Command: " & command & Environment.NewLine & "Duplicates: " & keyString & keyList.IndexOf(cmdList(1).ToLower) + 1 & "=" & cmdList(1) & Environment.NewLine)
         Else
             keyList.Add(cmdList(1).ToLower)
             keyLineCounts.Add(lineCount)
@@ -584,14 +583,12 @@ Module WinappDebug
 
         'make sure the current key is correctly numbered
         If Not command.Contains(keyString & keyNumber) Then
-            Console.WriteLine("Line: " & lineCount & " Error: '" & keyString & "' entry is incorrectly spelled or formatted. " & Environment.NewLine & "Expected: " & keyString & keyNumber & Environment.NewLine & "Found:    " & cmdList(0) & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
+            err2(lineCount, "'" & keyString & "' entry is incorrectly spelled or formatted.", command, keyString & keyNumber, number_of_errors)
         End If
         keyNumber = keyNumber + 1
 
         If command(command.Count - 1) = ";" Then
-            Console.WriteLine("Line: " & lineCount & " Error: Trailing semicolon." & Environment.NewLine & "Command: " & command & Environment.NewLine)
-            number_of_errors = number_of_errors + 1
+            err(lineCount, "Trailing semicolon (;)", command, number_of_errors)
         End If
 
 
@@ -606,7 +603,7 @@ Module WinappDebug
 
                 Dim varcheck As String() = command.Split("%")
                 If varcheck.Count <> 3 And varcheck.Count <> 5 Then
-                    Console.WriteLine("Line: " & lineCount & " Error: %EnvironmentVariables% must be surrounded on both sides by a single % character. " & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                    err(lineCount, "%EnvironmentVariables% must be surrounded on both sides by a single % character.", command, number_of_errors)
                 End If
 
                 If varcheck.Count = 3 Then
@@ -617,14 +614,15 @@ Module WinappDebug
 
                             If varcheck(1).ToLower = var.ToLower Then
                                 casingerror = True
-                                Console.WriteLine("Line: " & lineCount & " Error: Invalid CamelCasing on environment variable. Expected: " & var & Environment.NewLine & "Command: " & command & Environment.NewLine)
-                                number_of_errors = number_of_errors + 1
+                                err2(lineCount, "Invalid CamelCasing on environment variable.", command, var, number_of_errors)
+
                             End If
 
                         Next
 
                         If casingerror = False Then
-                            Console.WriteLine("Line: " & lineCount & " Error: Misformatted or invalid environment variable." & Environment.NewLine & "Command: " & command & Environment.NewLine)
+                            err(lineCount, "Misformatted or invalid environment variable.", command, number_of_errors)
+
                         End If
                     End If
 
@@ -633,6 +631,20 @@ Module WinappDebug
 
 
         End If
+
+    End Sub
+
+    Public Sub err2(ByVal linecount As Int16, ByVal err As String, ByVal command As String, ByVal expected As String, ByRef number_of_errors As Integer)
+
+
+        Console.WriteLine("Line: " & linecount & " - Error: " & err & Environment.NewLine & "Expected: " & expected & Environment.NewLine & "Command: " & command & Environment.NewLine)
+        number_of_errors = number_of_errors + 1
+
+    End Sub
+
+    Public Sub err(ByVal linecount As Integer, ByVal err As String, ByVal command As String, ByRef number_of_errors As Integer)
+
+        Console.WriteLine("Line: " & linecount & " - Error: " & err & Environment.NewLine & "Command: " & command & Environment.NewLine)
 
     End Sub
 
