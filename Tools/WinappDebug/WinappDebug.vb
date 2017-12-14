@@ -645,6 +645,7 @@ Module WinappDebug
     Public Sub err(ByVal linecount As Integer, ByVal err As String, ByVal command As String, ByRef number_of_errors As Integer)
 
         Console.WriteLine("Line: " & linecount & " - Error: " & err & Environment.NewLine & "Command: " & command & Environment.NewLine)
+        number_of_errors = number_of_errors + 1
 
     End Sub
 
