@@ -67,6 +67,19 @@ Module WinappDebug
 
                 If command = "" = False And command.StartsWith(";") = False Then
 
+                    Dim valid_cmds As New List(Of String)
+                    Dim isValidCmd As Boolean = False
+                    valid_cmds.AddRange(New String() {"filekey", "regkey", "detect", "langsecref", "warning", "[", "default", "section", "excludekey"})
+                    For Each cmd As String In valid_cmds
+                        If command.ToLower.Contains(cmd) Then
+                            isValidCmd = True
+                        End If
+                    Next
+
+                    If isValidCmd = False Then
+                        err(linecount, "Invalid command type detected.", command, number_of_errors)
+                    End If
+
                     'Check for trailing whitespace
                     If command.EndsWith(" ") Then
                         err(linecount, "Detected unwanted whitepace at end of line", command, number_of_errors)
