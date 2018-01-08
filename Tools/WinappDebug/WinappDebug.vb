@@ -94,6 +94,10 @@ Module WinappDebug
                     If command.Equals("; End of Thunderbird entries.") Then
                         havePassedTB = True
                     End If
+
+                    If command.Contains("; These entries are the exact") Then
+                        havePassedTB = False
+                    End If
                 End If
 
                 'Process entries
