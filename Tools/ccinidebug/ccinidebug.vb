@@ -18,7 +18,9 @@ Module ccinidebug
             r = New IO.StreamReader(Environment.CurrentDirectory & "\ccleaner.ini")
             Do While (r.Peek() > -1)
                 Dim currentLine As String = r.ReadLine.ToString
-                lines.Add(currentLine)
+                If currentLine.Trim <> "" Then
+                    lines.Add(currentLine)
+                End If
                 If currentLine.StartsWith("(App)") Then
                     Dim tmp1 As String() = Split(currentLine, "(App)")
                     Dim tmp2 As String() = Split(tmp1(1), "=")
@@ -98,7 +100,6 @@ Module ccinidebug
                 For Each line As String In lines
                     file.WriteLine(line.ToString)
                 Next
-                file.WriteLine(Environment.NewLine)
                 file.Close()
                 Console.WriteLine("****************************************************************************************************")
                 Console.WriteLine("Finished modifying ccleaner.ini, press any key to exit.")
