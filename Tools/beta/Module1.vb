@@ -1234,7 +1234,9 @@ Public Module trim
                                         cEntries.Add(cursection)
                                         Exit For
                                     End If
+
                                 Next
+                                Exit For
                             Case "DET_MOZILLA"
                                 If checkExist("%AppData%\Mozilla\Firefox") Then
                                     fxEntries.Add(cursection)
@@ -1285,7 +1287,6 @@ Public Module trim
                     For i As Integer = 0 To 8
                         file.WriteLine(winappfile.comments(i).comment)
                     Next
-                    file.WriteLine()
 
                     writeCustomSectionToFile(cEntries, file)
 
@@ -1370,6 +1371,13 @@ Public Module trim
                         dir = dir.Replace("HKLM\", "")
                         If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing Then
                             Return True
+                        Else
+                            Dim rDir As String = dir.Replace("Software\", "Software\WOW6432Node\")
+                            If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(rDir, True) IsNot Nothing Then
+                                Return True
+                            Else
+                                'Console.WriteLine()
+                            End If
                         End If
                     Case "HKU"
                         dir = dir.Replace("HKU\", "")
@@ -1416,6 +1424,7 @@ Public Module trim
 
     'This function is for writing the chrome/firefox/thunderbird sections back into the file so we don't produce a poorly formatted ini
     Public Sub writeCustomSectionToFile(entryList As List(Of iniSection), file As System.IO.StreamWriter)
+        file.WriteLine()
 
         If entryList.Count > 0 Then
 
@@ -1492,8 +1501,8 @@ Module ccinidebug
         Console.WriteLine("*                       This tool will sort ccleaner.ini alphabetically                            *")
         Console.WriteLine("*                       And also offer To remove outdated winapp2.ini from it                      *")
         Console.WriteLine("*        make sure both winapp2.ini And ccleaner.ini are In the same folder As winapp2ool.exe      *")
-        Console.WriteLine("*                       If the current folder Is the Program Files directory,                      *")
-        Console.WriteLine("*                    you may need To relaunch winapp2ool.exe As an administrator                   *")
+        Console.WriteLine("*                       If the current folder Is the Program Files directory,                      * ")
+        Console.WriteLine(" * you may need To relaunch winapp2ool.exe As an administrator                   *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
 
         Dim lines As New ArrayList()
@@ -1501,7 +1510,7 @@ Module ccinidebug
         Dim trimmedWA2IniEntryList As New List(Of String)
         Dim entriesToPrune As New List(Of String)
         If File.Exists(Environment.CurrentDirectory & "\ccleaner.ini") = False Then
-            Console.WriteLine("ccleaner.ini file could Not be located In the current working directory (" & Environment.CurrentDirectory & ")")
+            Console.WriteLine("ccleaner.ini file could Not be located In the current working directory (" & Environment.CurrentDirectory & ") Then")
             Console.ReadKey()
             End
         End If
@@ -1517,7 +1526,7 @@ Module ccinidebug
                 End If
                 If currentLine.StartsWith("(App)") Then
                     Dim tmp1 As String() = Split(currentLine, "(App)")
-                    Dim tmp2 As String() = Split(tmp1(1), "= ")
+                    Dim tmp2 As String() = Split(tmp1(1), "=")
                     If tmp2(0).Contains("*") Then
                         trimmedCCIniEntryList.Add(tmp2(0))
                     End If
