@@ -16,7 +16,7 @@ Module Module1
         Console.WriteLine("* 3. Diff             - Loads the diff tool to observe the changes between two winapp2.ini files   *")
         Console.WriteLine("* 4. Trim             - Loads the trim tool to debloat winapp2.ini for your system                 *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.WriteLine("Enter a number now, or press any other key to exit.")
+        Console.Write("Enter a number now: ")
 
     End Sub
 
@@ -1124,13 +1124,13 @@ Module diff
         Console.WriteLine("*                The first file should be the older version, and the second the newer.             *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
 
-        Console.WriteLine("Enter first file name or first path and file name: ")
+        Console.Write("Enter first file name or first path and file name: ")
         Dim inLine As String = Console.ReadLine()
         Dim firstFile As New iniFile
         Dim secondFile As New iniFile
         firstFile = fileMaker(inLine)
 
-        Console.WriteLine("Enter the second file name or second file path and file name: ")
+        Console.Write("Enter the second file name or second file path and file name: ")
         inLine = Console.ReadLine()
         secondFile = fileMaker(inLine)
         Try
@@ -1162,8 +1162,8 @@ Public Module trim
         Console.WriteLine("*                       This tool will trim winapp2.ini down to contain only                       *")
         Console.WriteLine("*                       entries relevant to your machine, greatly reducing both                    *")
         Console.WriteLine("*                       application load time and the winapp2.ini filesize.                        *")
-        Console.WriteLine("*                  You must launch winapp2ool as an administrator for this feature.                *")
-        Console.WriteLine("*                                                                                                  *")
+        Console.WriteLine("*                       You must launch winapp2ool as an administrator and have                    *")
+        Console.WriteLine("*                       winapp2.ini in the same folder as winapp2ool for this feature.             *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
 
         Console.WriteLine("Make sure winapp2.ini is in the same folder as winapp2ool.exe and enter Y to begin trim, or press any key to exit.")
@@ -1234,7 +1234,6 @@ Public Module trim
                                         cEntries.Add(cursection)
                                         Exit For
                                     End If
-
                                 Next
                                 Exit For
                             Case "DET_MOZILLA"
@@ -1253,9 +1252,7 @@ Public Module trim
                                     Exit For
                                 End If
                         End Select
-
                     End If
-
                 Next
 
                 If hasDetOS Then
@@ -1306,16 +1303,13 @@ Public Module trim
                     file.WriteLine()
 
                     For Each section As iniSection In trimmedfile
-
                         file.WriteLine("[" & section.name & "]")
                         For Each key As iniKey In section.keys
                             file.WriteLine(key.ToString)
                         Next
-
                         If Not trimmedfile.IndexOf(section).Equals(trimmedfile.Count - 1) Then
                             file.WriteLine()
                         End If
-
                     Next
 
                     file.Close()
@@ -1338,11 +1332,9 @@ Public Module trim
 
         'make sure we get the proper path for environment variables
         If dir.Contains("%") Then
-
             Dim splitDir As String() = dir.Split(System.Convert.ToChar("%"))
             Dim var As String = splitDir(1)
             Dim envDir As String = Environment.GetEnvironmentVariable(var)
-
             Select Case var
                 Case "ProgramFiles"
                     isProgramFiles = True
@@ -1352,9 +1344,7 @@ Public Module trim
                 Case "CommonAppData"
                     envDir = Environment.GetEnvironmentVariable("ProgramData")
             End Select
-
             dir = envDir + splitDir(2)
-
         End If
 
         'Observe the registry paths
@@ -1372,7 +1362,7 @@ Public Module trim
                         If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing Then
                             Return True
                         Else
-                            Dim rDir As String = dir.Replace("Software\", "Software\WOW6432Node\")
+                            Dim rDir As String = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
                             If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(rDir, True) IsNot Nothing Then
                                 Return True
                             Else
@@ -1411,7 +1401,6 @@ Public Module trim
                 If Directory.Exists(dir) Or File.Exists(dir) Then
                     Return True
                 End If
-
             End If
 
         Catch ex As Exception
@@ -1419,7 +1408,6 @@ Public Module trim
         End Try
 
         Return False
-
     End Function
 
     'This function is for writing the chrome/firefox/thunderbird sections back into the file so we don't produce a poorly formatted ini
@@ -1427,7 +1415,6 @@ Public Module trim
         file.WriteLine()
 
         If entryList.Count > 0 Then
-
             For Each section As iniSection In entryList
                 file.WriteLine("[" & section.name & "]")
                 For Each key As iniKey In section.keys
@@ -1436,7 +1423,6 @@ Public Module trim
                 file.WriteLine()
             Next
         End If
-
     End Sub
 
     Private Function detOSCheck(value As String, winveri As Double) As Boolean
@@ -1463,7 +1449,6 @@ Public Module trim
         If winver.Contains("XP") Then
             winveri = 5.1
         End If
-
         If winver.Contains("Vista") Then
             winveri = 6.0
         End If
@@ -1473,19 +1458,15 @@ Public Module trim
         If winver.Contains("8") And Not winver.Contains("8.1") Then
             winveri = 6.2
         End If
-
         If winver.Contains("8.1") Then
             winveri = 6.3
         End If
-
         If winver.Contains("10") Then
             winveri = 10.0
         End If
 
         Return winveri
-
     End Function
-
 End Module
 
 'here the line-by-line implementation actually works fairly well here since our process is simple,
@@ -1494,15 +1475,14 @@ Module ccinidebug
     Sub Main()
 
         Console.Clear()
-
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
         Console.WriteLine("*                                           ccinidebug                                             *")
         Console.WriteLine("*                                                                                                  *")
         Console.WriteLine("*                       This tool will sort ccleaner.ini alphabetically                            *")
         Console.WriteLine("*                       And also offer To remove outdated winapp2.ini from it                      *")
         Console.WriteLine("*        make sure both winapp2.ini And ccleaner.ini are In the same folder As winapp2ool.exe      *")
-        Console.WriteLine("*                       If the current folder Is the Program Files directory,                      * ")
-        Console.WriteLine(" * you may need To relaunch winapp2ool.exe As an administrator                   *")
+        Console.WriteLine("*                       If the current folder Is the Program Files directory,                      *")
+        Console.WriteLine("*                    you may need To relaunch winapp2ool.exe As an administrator                   *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
 
         Dim lines As New ArrayList()
@@ -1517,7 +1497,6 @@ Module ccinidebug
 
         Dim r As IO.StreamReader
         Try
-
             r = New IO.StreamReader(Environment.CurrentDirectory & "\ccleaner.ini")
             Do While (r.Peek() > -1)
                 Dim currentLine As String = r.ReadLine.ToString
@@ -1568,13 +1547,10 @@ Module ccinidebug
                             If entry.Contains(item) Then
                                 linesCopy.Remove(entry)
                             End If
-
                         Next
-
                     Next
                     Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
                     lines = linesCopy
-
                 End If
             Catch ex As Exception
                 Console.WriteLine(ex.Message)
@@ -1582,7 +1558,7 @@ Module ccinidebug
         Catch ex As Exception
             Console.WriteLine(ex.Message)
         End Try
-        Console.WriteLine("Press Y to sort and save ccleaner.ini")
+        Console.WriteLine("Press Y to sort and save ccleaner.ini, or any other key to exit.")
 
         If Console.ReadLine.ToString.ToLower = "y" Then
             Console.WriteLine("Modifying ccleaner.ini...")
@@ -1601,5 +1577,4 @@ Module ccinidebug
             End Try
         End If
     End Sub
-
 End Module
