@@ -3,7 +3,7 @@ Imports System.IO
 Imports System.Net
 
 Module Module1
-    Dim version As Double = 0.3
+    Dim version As Double = 0.35
     Dim checkedForUpdates As Boolean = False
     Dim updateIsAvail As Boolean = False
     Public Sub printMenu()
@@ -1752,7 +1752,8 @@ Module downloader
         End If
         Console.WriteLine("Downloading " & filename & "...")
         Try
-            My.Computer.Network.DownloadFile(fileLink, downloadDir & "\" & filename, userName:=String.Empty, password:=String.Empty, showUI:=False, connectionTimeout:=100000, overwrite:=True)
+            Dim dl As New WebClient
+            dl.DownloadFileAsync(New Uri(fileLink), (downloadDir & "\" & filename))
         Catch ex As Exception
             Console.WriteLine(ex.ToString)
         End Try
