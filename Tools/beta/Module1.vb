@@ -1,6 +1,5 @@
 ﻿Option Strict On
 Imports System.IO
-Imports winapp2ool
 
 Module Module1
 
@@ -83,9 +82,9 @@ Module WinappDebug
         Console.WriteLine("*             This tool will check winapp2.ini For common syntax And style errors.                 *")
         Console.WriteLine("*                                                                                                  *")
         Console.WriteLine("*                                          Menu:                                                   *")
-        Console.WriteLine("*0. Exit                     - Return to the winapp2ool menu.                                      *")
-        Console.WriteLine("*1. Run (default)            - Run with the default settings                                       *")
-        Console.WriteLine("*2. Run (custom)             - Run with an option to provide the path and filename                 *")
+        Console.WriteLine("* 0. Exit                     - Return to the winapp2ool menu.                                     *")
+        Console.WriteLine("* 1. Run (default)            - Run with the default settings                                      *")
+        Console.WriteLine("* 2. Run (custom)             - Run with an option to provide the path and filename                *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
         Console.Write("Enter a number: ")
 
@@ -978,6 +977,16 @@ Public Module iniFileHandler
             End Try
         End Sub
 
+        Public Function getStreamOfComments(startNum As Integer, endNum As Integer) As String
+            Dim out As String = ""
+            While Not startNum = endNum
+                out += Me.comments(startNum).comment & Environment.NewLine
+                startNum += 1
+            End While
+            out += Me.comments(startNum).comment
+            Return out
+        End Function
+
         Public Function getDiff(section As iniSection, changeType As String) As String
             Dim out As String = ""
             out += section.name & " has been " & changeType & Environment.NewLine
@@ -1161,9 +1170,9 @@ Module diff
         Console.WriteLine("*                This tool will output the diff between two winapp2 files                          *")
         Console.WriteLine("*                                                                                                  *")
         Console.WriteLine("*                                            Menu:                                                 *")
-        Console.WriteLine("*0. Exit                - Return to the winapp2ool menu                                            *")
-        Console.WriteLine("*1. Run (default)       - Run Diff on files in the current folder                                  *")
-        Console.WriteLine("*2. Run (custom)        - Run Diff on files in a different folder                                  *")
+        Console.WriteLine("* 0. Exit                - Return to the winapp2ool menu                                           *")
+        Console.WriteLine("* 1. Run (default)       - Run Diff on files in the current folder                                 *")
+        Console.WriteLine("* 2. Run (custom)        - Run Diff on files in a different folder                                 *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
         Console.Write("Enter a number: ")
 
@@ -1264,10 +1273,11 @@ Public Module trim
         Console.WriteLine("*                       application load time and the winapp2.ini filesize.                        *")
         Console.WriteLine("*                                             Menu:                                                *")
         Console.WriteLine("*0. Exit                - Return to the winapp2ool menu                                            *")
-        Console.WriteLine("*1. Trim (default)      - Trim winapp2.ini and save the output to a new file                       *")
-        Console.WriteLine("*2. Trim (overwrite)    - Trim winapp2.ini and overwrite the existing file                         *")
+        Console.WriteLine("*1. Trim (default)      - Trim winapp2.ini and overwrite the existing file                         *")
+        Console.WriteLine("*2. Trim (newfile)      - Trim winapp2.ini and save the output to a new file                       *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
         Console.Write("Enter a number: ")
+
         Dim exitCode As Boolean = False
         Dim input As String = Console.ReadLine()
         Do Until exitCode
@@ -1276,10 +1286,16 @@ Public Module trim
                     Console.WriteLine("Returning to winapp2ool menu...")
                     exitCode = True
                 Case "1"
-                    trim("winapp2-trimmed.ini")
+                    trim("\winapp2.ini")
                     exitCode = True
                 Case "2"
-                    trim("winapp2.ini")
+                    Console.Write("Enter the name of the new file, or press enter to use the default (winapp2-trimmed.ini): ")
+                    Dim in2 As String = Console.ReadLine()
+                    If in2.Trim <> Nothing Then
+                        trim("\" & in2)
+                    Else
+                        trim("\winapp2-trimmed.ini")
+                    End If
                     exitCode = True
                 Case Else
                     Console.Write("Invalid input. Please try again: ")
@@ -1287,6 +1303,13 @@ Public Module trim
             End Select
         Loop
     End Sub
+
+    Public Sub printComments(ifile As iniFile, start As Integer, endpt As Integer, file As StreamWriter)
+        For i As Integer = start To endpt
+            file.WriteLine(ifile.comments(i).comment)
+        Next
+    End Sub
+
 
     Public Sub trim(name As String)
 
@@ -1396,29 +1419,31 @@ Public Module trim
         Dim entrycount As Integer = trimmedfile.Count + cEntries.Count + fxEntries.Count + tbEntries.Count
         Console.WriteLine("Number of entries after trimming: " & entrycount)
         Try
-            Dim file As New System.IO.StreamWriter(Environment.CurrentDirectory & name, False)
+            Dim file As New StreamWriter(Environment.CurrentDirectory & name, False)
 
-            For i As Integer = 0 To 8
-                file.WriteLine(winappfile.comments(i).comment)
-            Next
+            Dim comNum As Integer
+            'contingency for non-cc ini
+            If winappfile.comments.Count > 16 Then
+                comNum = 9
+            Else
+                comNum = 8
+            End If
 
-            file.WriteLine(winappfile.comments(9).comment)
+            file.WriteLine(winappfile.getStreamOfComments(0, comNum))
+            comNum += 1
             file.WriteLine()
             writeCustomSectionToFile(cEntries, file)
 
-            file.WriteLine(winappfile.comments(10).comment)
-            file.WriteLine(winappfile.comments(11).comment)
-            file.WriteLine(winappfile.comments(12).comment)
+            file.WriteLine(winappfile.getStreamOfComments(comNum, comNum + 2))
+            comNum += 3
             file.WriteLine()
             writeCustomSectionToFile(fxEntries, file)
 
-            file.WriteLine(winappfile.comments(13).comment)
-            file.WriteLine(winappfile.comments(14).comment)
-            file.WriteLine(winappfile.comments(15).comment)
+            file.WriteLine(winappfile.getStreamOfComments(comNum, comNum + 2))
             file.WriteLine()
             writeCustomSectionToFile(tbEntries, file)
-
-            file.WriteLine(winappfile.comments(16).comment)
+            comNum += 3
+            file.WriteLine(winappfile.getStreamOfComments(comNum, comNum))
             file.WriteLine()
 
             For Each section As iniSection In trimmedfile
@@ -1583,11 +1608,11 @@ Module ccinidebug
         Console.WriteLine("*               This tool will sort alphabetically the contents of ccleaner.ini                    *")
         Console.WriteLine("*                   and can also prune 'stale' winapp2.ini entries from it                         *")
         Console.WriteLine("*                                           Menu:                                                  *")
-        Console.WriteLine("*0. Exit                 - Return to the winapp2ool menu                                           *")
-        Console.WriteLine("*1. Run (default)        - Prune stale winapp2.ini entries from ccleaner.ini and sort it           *")
-        Console.WriteLine("*2. Run (sort only)      - Only sort ccleaner.ini                                                  *")
+        Console.WriteLine("* 0. Exit                 - Return to the winapp2ool menu                                          *")
+        Console.WriteLine("* 1. Run (default)        - Prune stale winapp2.ini entries from ccleaner.ini and sort it          *")
+        Console.WriteLine("* 2. Run (sort only)      - Only sort ccleaner.ini                                                 *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.Write("Enter a number now: ")
+        Console.Write("Enter a number: ")
 
         Dim exitCode As Boolean = False
         Dim input As String = Console.ReadLine
@@ -1707,7 +1732,6 @@ Module downloader
         End If
         Console.WriteLine("Downloading " & filename & "...")
         Try
-
             My.Computer.Network.DownloadFile(fileLink, downloadDir & "\" & filename, userName:=String.Empty, password:=String.Empty, showUI:=False, connectionTimeout:=100000, overwrite:=True)
         Catch ex As Exception
             Console.WriteLine(ex.ToString)
