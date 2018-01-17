@@ -1,28 +1,48 @@
 ﻿Option Strict On
 Imports System.IO
+Imports System.Net
 
 Module Module1
-
+    Dim version As Double = 0.3
+    Dim checkedForUpdates As Boolean = False
+    Dim updateIsAvail As Boolean = False
     Public Sub printMenu()
 
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
         Console.WriteLine("*                   Winapp2ool - A multitool for winapp2.ini and related files                     *")
         Console.WriteLine("*                                                                                                  *")
         Console.WriteLine("*                                     Menu: Enter a number to select                               *")
+        If updateIsAvail Then
+            Console.WriteLine("*                                                                                                  *")
+            Console.WriteLine("*                                 An update is available for winapp2ool                            *")
+            Console.WriteLine("*                                                                                                  *")
+        End If
         Console.WriteLine("*                                                                                                  *")
         Console.WriteLine("* 0. Exit             - Exits the application                                                      *")
         Console.WriteLine("* 1. WinappDebug      - Loads the WinappDebug tool to check for errors in winapp2.ini              *")
         Console.WriteLine("* 2. ccinidebug       - Loads the ccinidebug tool to sort and trim ccleaner.ini                    *")
         Console.WriteLine("* 3. Diff             - Loads the diff tool to observe the changes between two winapp2.ini files   *")
         Console.WriteLine("* 4. Trim             - Loads the trim tool to debloat winapp2.ini for your system                 *")
-        Console.WriteLine("* 5. Download         - Download files from the Winapp2 GitHub                                     *")
+        Console.WriteLine("* 5. Download         - Download files from the Winapp2 GitHub (including winapp2ool!)             *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
         Console.Write("Enter a number: ")
 
     End Sub
 
-    Sub Main()
+    Public Sub checkUpdates()
+        Dim address As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Tools/beta/version.txt"
+        Dim client As WebClient = New WebClient()
+        Dim reader As StreamReader = New StreamReader(client.OpenRead(address))
+        Dim latestVer As String = reader.ReadToEnd()
+        Dim lvNum As Double = Convert.ToDouble(latestVer)
+        If lvNum > version Then
+            updateIsAvail = True
+        End If
+        checkedForUpdates = true
+    End Sub
 
+    Sub Main()
+        checkUpdates()
         Dim exitCode As Boolean = False
         printMenu()
         Dim cki As String = Console.ReadLine
@@ -1545,7 +1565,7 @@ Public Module trim
     End Function
 
     'This function is for writing the chrome/firefox/thunderbird sections back into the file so we don't produce a poorly formatted ini
-    Public Sub writeCustomSectionToFile(entryList As List(Of iniSection), file As System.IO.StreamWriter)
+    Public Sub writeCustomSectionToFile(entryList As List(Of iniSection), file As StreamWriter)
 
         For i As Integer = 0 To entryList.Count - 1
             file.WriteLine(entryList(i).ToString)
@@ -1648,7 +1668,7 @@ Module ccinidebug
 
         Console.WriteLine("Modifying ccleaner.ini...")
         Try
-            Dim file As New System.IO.StreamWriter(Environment.CurrentDirectory & "\ccleaner.ini", False)
+            Dim file As New StreamWriter(Environment.CurrentDirectory & "\ccleaner.ini", False)
 
             file.WriteLine("[Options]")
             For i As Integer = 0 To ccini.keys.Count - 1
@@ -1728,7 +1748,7 @@ Module downloader
 
     Public Sub download(filename As String, fileLink As String, downloadDir As String)
         If Not Directory.Exists(downloadDir) Then
-            System.IO.Directory.CreateDirectory(downloadDir)
+            Directory.CreateDirectory(downloadDir)
         End If
         Console.WriteLine("Downloading " & filename & "...")
         Try
