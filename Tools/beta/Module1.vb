@@ -38,7 +38,7 @@ Module Module1
         If lvNum > version Then
             updateIsAvail = True
         End If
-        checkedForUpdates = true
+        checkedForUpdates = True
     End Sub
 
     Sub Main()
@@ -216,7 +216,7 @@ Module WinappDebug
 
             Dim entry As String = ListToBeSorted(i)
 
-            'grab the entry at the current position 
+            'grab the entry at the current position
             receivedIndex = i
             sortedIndex = givenSortedList.IndexOf(entry)
 
@@ -231,8 +231,8 @@ Module WinappDebug
                 entry = newentry
             End If
 
-            'Prefix any singular numbers with 0 to maintain their first order precedence during sorting 
-            'because VB.NET is silly and thinks "10" comes before "2" 
+            'Prefix any singular numbers with 0 to maintain their first order precedence during sorting
+            'because VB.NET is silly and thinks "10" comes before "2"
 
             Dim myChars() As Char = entry.ToCharArray()
 
@@ -374,7 +374,7 @@ Module WinappDebug
             End If
         Next
 
-        'prefix any numbers that we detected above 
+        'prefix any numbers that we detected above
         If prefixIndicies.Count >= 1 Then
             For j As Integer = 0 To prefixIndicies.Count - 1
 
@@ -395,7 +395,7 @@ Module WinappDebug
                     entry = tmp
                 End If
 
-                'each time we insert our leading zero, remember to adjust the remaining indicies by 1 
+                'each time we insert our leading zero, remember to adjust the remaining indicies by 1
                 For k As Integer = j + 1 To prefixIndicies.Count - 1
                     prefixIndicies(k) = prefixIndicies(k) + 1
                 Next
@@ -597,7 +597,7 @@ Module WinappDebug
 
     Public Sub pSection(section As iniSection, ByRef numErrs As Integer)
 
-        'initialize some tracking variables 
+        'initialize some tracking variables
         Dim entryHasRegKeys As Boolean = False
         Dim entryKeysOutOfOrder As Boolean = False
         Dim detectKeys As New List(Of iniKey)
@@ -695,7 +695,7 @@ Module WinappDebug
         'process our langsecref (if any)
         pLangSecRef(secRefKey, numErrs)
 
-        'process our default key, throw an error if it's absent 
+        'process our default key, throw an error if it's absent
         If defaultKey.value <> "" Then
             pDefault(defaultKey, numErrs)
         Else
@@ -718,7 +718,7 @@ Module WinappDebug
             err(key.lineNumber, "Trailing backslash on DetectFile.", key.ToString, numErrs)
         End If
 
-        'check for nested wildcards 
+        'check for nested wildcards
         If command.Contains("*") Then
             Dim splitDir As String() = command.Split(Convert.ToChar("\"))
             For i As Integer = 0 To splitDir.Count - 1
@@ -816,7 +816,7 @@ Module WinappDebug
                 err2(key.lineNumber, "'" & detectType & "' numbering.", command, "'" & detectType & "' or '" & detectType & "1.'", numErrs)
             End If
 
-            'If we're on our second detect, make sure the first one had a 1 
+            'If we're on our second detect, make sure the first one had a 1
             If number = 2 And firstNumberStatus = False Then
                 err(key.lineNumber - 1, "'" & detectType & number & "' detected without preceding '" & detectType & number - 1 & ".'", key.ToString, numErrs)
             End If
@@ -1387,7 +1387,7 @@ Public Module trim
                         hasDetOS = True
                         hasMetDetOS = detOSCheck(key.value, winveri)
 
-                        'move on if we don't meet the DetectOS criteria 
+                        'move on if we don't meet the DetectOS criteria
                         If Not hasMetDetOS Then
                             Exit For
                         End If
@@ -1535,7 +1535,7 @@ Public Module trim
                         End If
                 End Select
             Catch ex As Exception
-                'The most common exception here is a permissions one, so assume true if we hit 
+                'The most common exception here is a permissions one, so assume true if we hit
                 'because a permissions exception implies the key exists anyway.
                 Return True
             End Try
@@ -1550,7 +1550,7 @@ Public Module trim
             If isProgramFiles Then
 
                 'it's unlike that (m)any people have this configured differently, but it may be better
-                'to query the env var for %ProgramFiles(x86)% for this. 
+                'to query the env var for %ProgramFiles(x86)% for this.
                 dir = dir.Replace("Program Files", "Program Files (x86)")
                 If Directory.Exists(dir) Or File.Exists(dir) Then
                     Return True
@@ -1684,7 +1684,7 @@ Module ccinidebug
         End Try
     End Sub
 
-    'this function builds the single Options section found in ccleaner.ini and avoids being broken by newlines 
+    'this function builds the single Options section found in ccleaner.ini and avoids being broken by newlines
     Public Function buildOptions() As iniSection
 
         Dim returnSection As New iniSection
@@ -1734,7 +1734,7 @@ Module ccinidebug
             End If
         Next
 
-        'reverse the keys we must remove to avoid any problems with modifying the dictionary as we do so 
+        'reverse the keys we must remove to avoid any problems with modifying the dictionary as we do so
         tbTrimmed.Reverse()
         For i As Integer = 0 To tbTrimmed.Count - 1
             ccini.keys.Remove(tbTrimmed(i))
