@@ -3,9 +3,15 @@ Imports System.IO
 Imports System.Net
 
 Module Module1
-    Dim version As Double = 0.35
+
+    Dim currentVersion As Double = 0.5
+    Dim latestVersion As String
+
     Dim checkedForUpdates As Boolean = False
     Dim updateIsAvail As Boolean = False
+
+    Dim cki2 As ConsoleKeyInfo
+
     Public Sub printMenu()
 
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
@@ -14,78 +20,85 @@ Module Module1
         Console.WriteLine("*                                     Menu: Enter a number to select                               *")
         If updateIsAvail Then
             Console.WriteLine("*                                                                                                  *")
-            Console.WriteLine("*                                 An update is available for winapp2ool                            *")
-            Console.WriteLine("*                                                                                                  *")
+            Console.WriteLine("*                                 A new version of Winapp2ool is available                         *")
+            Console.WriteLine("*                                           Current:   v" & currentVersion & "                                        *")
+            Console.WriteLine("*                                           Available: v" & latestVersion & "                                       *")
         End If
         Console.WriteLine("*                                                                                                  *")
-        Console.WriteLine("* 0. Exit             - Exits the application                                                      *")
-        Console.WriteLine("* 1. WinappDebug      - Loads the WinappDebug tool to check for errors in winapp2.ini              *")
-        Console.WriteLine("* 2. ccinidebug       - Loads the ccinidebug tool to sort and trim ccleaner.ini                    *")
-        Console.WriteLine("* 3. Diff             - Loads the diff tool to observe the changes between two winapp2.ini files   *")
-        Console.WriteLine("* 4. Trim             - Loads the trim tool to debloat winapp2.ini for your system                 *")
-        Console.WriteLine("* 5. Download         - Download files from the Winapp2 GitHub (including winapp2ool!)             *")
+        Console.WriteLine("* 0. Exit             - Exit the application                                                       *")
+        Console.WriteLine("* 1. WinappDebug      - Load the WinappDebug tool to check for errors in winapp2.ini               *")
+        Console.WriteLine("* 2. CCiniDebug       - Load the CCiniDebug tool to sort and trim ccleaner.ini                     *")
+        Console.WriteLine("* 3. Diff             - Load the Diff tool to observe the changes between two winapp2.ini files    *")
+        Console.WriteLine("* 4. Trim             - Load the Trim tool to debloat winapp2.ini for your system                  *")
+        Console.WriteLine("* 5. Downloader       - Load the Downloader tool to download files from the Winapp2 GitHub         *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.Write("Enter a number: ")
-
     End Sub
 
     Public Sub checkUpdates()
-        Dim address As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Tools/beta/version.txt"
-        Dim client As WebClient = New WebClient()
-        Dim reader As StreamReader = New StreamReader(client.OpenRead(address))
-        Dim latestVer As String = reader.ReadToEnd()
-        Dim lvNum As Double = Convert.ToDouble(latestVer)
-        If lvNum > version Then
-            updateIsAvail = True
-        End If
-        checkedForUpdates = True
+        Dim reader As StreamReader = Nothing
+        Try
+            Dim address As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Tools/beta/version.txt"
+            Dim client As New WebClient
+            reader = New StreamReader(client.OpenRead(address))
+            latestVersion = reader.ReadToEnd()
+            Dim lvNum As Double = Convert.ToDouble(latestVersion)
+            If lvNum > currentVersion Then
+                updateIsAvail = True
+            End If
+            checkedForUpdates = True
+        Catch ex As Exception
+            Console.WriteLine("Error: " & ex.ToString)
+            Console.WriteLine("Please report this error on GitHub")
+            Console.WriteLine()
+        Finally
+            reader.Close()
+        End Try
     End Sub
 
     Sub Main()
+        Console.Title = "Winapp2ool v" & currentVersion & " beta"
+
         checkUpdates()
         Dim exitCode As Boolean = False
-        printMenu()
-        Dim cki As String = Console.ReadLine
         Do Until exitCode = True
-            Select Case cki
+            printMenu()
+            Console.WriteLine()
+            Console.Write("Enter a number: ")
+            Dim input As String = Console.ReadLine
+
+            Select Case input
                 Case "0"
                     exitCode = True
                     Console.WriteLine("Exiting...")
                     Environment.Exit(1)
                 Case "1"
                     WinappDebug.Main()
+                    Console.Clear()
                     Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-                    Console.WriteLine("*********************************Finished running WinappDebug***************************************")
-                    printMenu()
-                    cki = Console.ReadLine()
+                    Console.WriteLine("**********************************  Finished running WinappDebug  **********************************")
                 Case "2"
-                    ccinidebug.Main()
-                    Console.WriteLine(" * ------------------------------------------------------------------------------------------------*")
-                    Console.WriteLine(" ********************************* Finished running ccinidebug**************************************")
-                    printMenu()
-                    cki = Console.ReadLine()
+                    CCiniDebug.Main()
+                    Console.Clear()
+                    Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
+                    Console.WriteLine("**********************************  Finished running CCiniDebug   **********************************")
                 Case "3"
-                    diff.main()
+                    Diff.main()
+                    Console.Clear()
                     Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-                    Console.WriteLine("*************************************Finished running Diff******************************************")
-                    printMenu()
-                    cki = Console.ReadLine()
+                    Console.WriteLine("*************************************  Finished running Diff  **************************************")
                 Case "4"
-                    trim.main()
+                    Trim.main()
+                    Console.Clear()
                     Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-                    Console.WriteLine("************************************Finished running trim*******************************************")
-                    printMenu()
-                    cki = Console.ReadLine()
+                    Console.WriteLine("*************************************  Finished running Trim  **************************************")
                 Case "5"
-                    downloader.main()
+                    Downloader.main()
+                    Console.Clear()
                     Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-                    Console.WriteLine("************************************Finished running downloader*************************************")
-                    Console.WriteLine()
-                    printMenu()
-                    cki = Console.ReadLine()
+                    Console.WriteLine("**********************************  Finished running Downloader  ***********************************")
                 Case Else
-                    Console.Write(Environment.NewLine & "Invalid input. Please Try again: ")
-                    cki = Console.ReadLine()
+                    Console.Clear()
+                    Console.WriteLine("Invalid input. Please Try again.")
             End Select
         Loop
     End Sub
@@ -93,61 +106,85 @@ End Module
 
 Module WinappDebug
 
+    Dim numErrs As Integer
+    Dim enVars As String() = {"UserProfile", "ProgramFiles", "RootDir", "WinDir", "AppData", "SystemDrive", "SystemRoot", "Documents", "ProgramData", "AllUsersProfile", "Pictures", "Video", "CommonAppData", "LocalAppData", "CommonProgramFiles", "HomeDrive", "Music", "tmp", "Temp", "LocalLowAppData", "Public"}
+    Dim validCmds As String() = {"specialdetect", "filekey", "regkey", "detect", "langsecref", "warning", "[", "default", "section", "excludekey", "detectfile", "detectos"}
+    Dim sdList As String() = {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}
+    Dim name As String = "winapp2.ini"
+    Dim path As String = Environment.CurrentDirectory
+
     Sub Main()
 
         Console.Clear()
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
         Console.WriteLine("*                                           WinappDebug                                            *")
         Console.WriteLine("*                                                                                                  *")
-        Console.WriteLine("*             This tool will check winapp2.ini For common syntax And style errors.                 *")
+        Console.WriteLine("*               This tool will check winapp2.ini For common syntax And style errors.               *")
         Console.WriteLine("*                                                                                                  *")
-        Console.WriteLine("*                                          Menu:                                                   *")
-        Console.WriteLine("* 0. Exit                     - Return to the winapp2ool menu.                                     *")
-        Console.WriteLine("* 1. Run (default)            - Run with the default settings                                      *")
-        Console.WriteLine("* 2. Run (custom)             - Run with an option to provide the path and filename                *")
+        Console.WriteLine("*                                  Menu: Enter a number to select                                  *")
+        Console.WriteLine("*                                                                                                  *")
+        Console.WriteLine("* 0. Exit                        - Return to the winapp2ool menu.                                  *")
+        Console.WriteLine("* 1. Run (default)               - Run with the default settings                                   *")
+        Console.WriteLine("* 2. Run (custom)                - Run with an option to provide the path and filename             *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.Write("Enter a number: ")
+        Console.Write("Enter a number, or leave blank to run the default: ")
 
-        Dim cki As String = Console.ReadLine()
+        Dim input As String = Console.ReadLine()
         Dim exitCode As Boolean = False
-        Dim cfile As New iniFile
+        Dim cfile As iniFile
         Do While exitCode = False
             Try
-                Select Case cki
+                Select Case input
+                    Case ""
+                        input = "1"
                     Case "0"
                         Console.WriteLine("Returning to menu...")
                         exitCode = True
                     Case "1"
-                        cfile = New iniFile("winapp2.ini")
+                        cfile = New iniFile(name)
                         debug(cfile)
                         exitCode = True
                     Case "2"
-                        Console.Write("Enter the directory of your file, or leave blank to use default (current folder): ")
-                        Dim path As String = Console.ReadLine()
-                        If path.Trim = "" Then
-                            path = Environment.CurrentDirectory
-                        End If
-                        Console.Write("Enter the name of your file, or leave blank to use default (winapp2.ini): ")
-                        Dim name As String = Console.ReadLine()
-                        If name.Trim = "" Then
-                            name = "winapp2.ini"
-                        End If
+                        changeParams()
                         cfile = New iniFile(path, name)
                         debug(cfile)
                         exitCode = True
                     Case Else
                         Console.Write("Invalid input. Please try again: ")
-                        cki = Console.ReadLine()
+                        input = Console.ReadLine()
                 End Select
             Catch ex As Exception
-                Console.WriteLine(ex.ToString)
+                Console.WriteLine("Error: " & ex.ToString)
+                Console.WriteLine("Please report this error on GitHub")
+                Console.WriteLine()
             End Try
         Loop
     End Sub
 
-    Public Sub debug(cFile As iniFile)
+    Public Sub changeParams()
 
-        Dim numErrs As Integer = 0
+        Console.Write("Enter the directory of your file, or leave blank to use default (current folder): ")
+        Dim uPath As String = Console.ReadLine()
+        If uPath.Trim <> "" Then
+            path = uPath
+        Else
+            Console.WriteLine("Keeping default.")
+        End If
+
+        Console.Write("Enter the name of your file, or leave blank to use default (winapp2.ini): ")
+        Dim uName As String = Console.ReadLine()
+        If uName.Trim <> "" Then
+            name = uName
+        Else
+            Console.WriteLine("Keeping default.")
+        End If
+    End Sub
+
+    Public Sub debug(cFile As iniFile)
+        Console.Clear()
+        Console.WriteLine("Beginning analysis of winapp2.ini")
+        Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
+        numErrs = 0
         Dim entryTitles As New List(Of String)
         Dim trimmedEntryTitles As New List(Of String)
         Dim entryLineCounts As New List(Of String)
@@ -157,36 +194,36 @@ Module WinappDebug
         Dim hasTBcomment As Boolean = True
         Dim hasNCCComment As Boolean = False
 
-        If TBCommentLineNum = 0 Then
+        If TBCommentLineNum = -1 Then
             hasTBcomment = False
         End If
 
-        If Not NonCCCommentLineNum = 0 Then
+        If Not NonCCCommentLineNum = -1 Then
             hasNCCComment = True
         End If
 
         For i As Integer = 0 To cFile.sections.Count - 1
 
             Dim curSection As iniSection = cFile.sections.Values(i)
-            pSection(curSection, numErrs)
+            pSection(curSection)
 
             'count the entries and check for duplicates
             If Not entryTitles.Contains(curSection.name) Then
                 entryTitles.Add(curSection.name)
-                entryLineCounts.Add(curSection.startingLineNumber.ToString)
             Else
-                err(curSection.startingLineNumber, "Duplicate entry name.", curSection.name, numErrs)
+                err(curSection.startingLineNumber, "Duplicate entry name.", curSection.name)
             End If
 
             'check that the name is formatted correctly
             If Not curSection.name.Contains(" *") Then
-                err(curSection.startingLineNumber, "All entry names should end with ' *'", curSection.name, numErrs)
+                err(curSection.startingLineNumber, "All entry names should end with ' *'", curSection.name)
             End If
 
             'separate tracking list for the main section of the file that we want alphabetized
             If Not hasTBcomment Or (hasTBcomment And curSection.startingLineNumber > TBCommentLineNum) Then
                 If Not hasNCCComment Or (hasNCCComment And curSection.startingLineNumber < NonCCCommentLineNum) Then
                     trimmedEntryTitles.Add(curSection.name)
+                    entryLineCounts.Add(curSection.startingLineNumber.ToString)
                 End If
             End If
         Next
@@ -196,10 +233,13 @@ Module WinappDebug
         sortedEList.AddRange(trimmedEntryTitles.ToArray)
 
         replaceAndSort(trimmedEntryTitles, sortedEList, "-", "  ", "entries")
-        findOutOfPlace(trimmedEntryTitles, sortedEList, "Entry", numErrs, entryLineCounts)
+        findOutOfPlace(trimmedEntryTitles, sortedEList, "Entry", entryLineCounts)
 
         'Stop the program from closing on completion
-        Console.WriteLine("***********************************************" & Environment.NewLine & "Completed analysis of winapp2.ini. " & numErrs & " possible errors were detected. " & Environment.NewLine & "Number of entries: " & entryTitles.Count & Environment.NewLine & "Press any key to return to the winapp2ool menu.")
+        Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
+        Console.WriteLine("Completed analysis of winapp2.ini. " & numErrs & " possible errors were detected. ")
+        Console.WriteLine("Number of entries: " & entryTitles.Count)
+        Console.WriteLine("Press any key to return to the winapp2ool menu.")
         Console.ReadKey()
     End Sub
 
@@ -232,7 +272,6 @@ Module WinappDebug
             End If
 
             'Prefix any singular numbers with 0 to maintain their first order precedence during sorting
-            'because VB.NET is silly and thinks "10" comes before "2"
 
             Dim myChars() As Char = entry.ToCharArray()
 
@@ -243,7 +282,7 @@ Module WinappDebug
         givenSortedList.Sort()
 
         'undo our change made in the name of sorting such that we have the original data back
-        If renamedList.Count > 1 Then
+        If renamedList.Count > 0 Then
             For i As Integer = 0 To renamedList.Count - 1
                 Dim newentry As String = originalNameList(i)
                 Dim ren As String = renamedList(i)
@@ -257,79 +296,69 @@ Module WinappDebug
         End If
     End Sub
 
-    Public Sub findOutOfPlace(ByRef someList As List(Of String), ByRef sortedList As List(Of String), ByVal findType As String, ByRef numErrs As Integer, ByRef LineCountList As List(Of String))
+    Public Sub findOutOfPlace(ByRef someList As List(Of String), ByRef sortedList As List(Of String), ByVal findType As String, ByRef LineCountList As List(Of String))
 
         Dim originalPlacement As New List(Of String)
         originalPlacement.AddRange(someList.ToArray)
         Dim originalLines As New List(Of String)
         originalLines.AddRange(LineCountList)
-        Dim misplacedEntryList As New List(Of String)
+
+        Dim moveRight As New List(Of String)
+        Dim moveLeft As New List(Of String)
+
+        Dim offset As Integer = 0
         For i As Integer = 0 To someList.Count - 1
 
             Dim entry As String = someList(i)
+            Dim sortInd As Integer = sortedList.IndexOf(entry)
 
-            Dim sortedIndex As Integer = sortedList.IndexOf(entry)
+            If i <> sortInd Then
 
-            If i <> sortedIndex Then
-
-                If misplacedEntryList.Contains(entry) = False Then
-
-                    If sortedIndex > i Then
-                        misplacedEntryList.Add(entry)
-                        someList.Insert(sortedIndex, entry)
-                        someList.RemoveAt(i)
-
-                        'Adjust i because the item in its position has now changed and we don't want to skip it
-                        i -= 1
+                If Not moveRight.Contains(entry) Then
+                    If sortInd > i Then
+                        moveRight.Add(entry)
                     Else
-                        'some contingency for when we're tracking lines
-                        If LineCountList.Count > 1 Then
-                            LineCountList.Insert(sortedIndex, LineCountList(i))
-                            LineCountList.RemoveAt(i + 1)
-                        End If
+                        LineCountList.Insert(sortInd, LineCountList(i))
+                        LineCountList.RemoveAt(i + 1)
 
-                        Dim recInd As Integer = originalPlacement.IndexOf(entry)
-                        Dim sortInd As Integer = sortedList.IndexOf(entry)
-                        Dim curPos As String = originalLines(recInd)
-                        Dim sortPos As String = originalLines(sortInd)
-
-                        If findType <> "Entry" Then
-                            entry = findType & recInd + 1 & "=" & entry
-                        End If
-
-                        Console.WriteLine("Line: " & originalLines(recInd) & " - Error: '" & findType & "' Alphabetization. " & entry & " appears to be out of place." & Environment.NewLine & "Current  Position: Line " & curPos & Environment.NewLine & "Expected Position: Line " & sortPos & Environment.NewLine)
-                        numErrs += 1
+                        moveLeft.Add(entry)
 
                         'move the entry to the left in our list
-                        someList.Insert(sortedIndex, entry)
+                        someList.Insert(sortInd, entry)
                         someList.RemoveAt(i + 1)
 
                         'jump back to the position from which we sorted the entry to make sure we remove any entries that were off by one because of it not having been moved yet
-                        i = sortedIndex + 1
+                        i = sortInd
                     End If
-
                 End If
             Else
-                'If we have moved backwards because we moved an element left in the list, we want to remove anything that was off-by-one because of it from the misplaced entry list
-                If misplacedEntryList.Contains(entry) = True Then
-                    misplacedEntryList.Remove(entry)
+                'Don't keep tracking lines who are now correctly positioned once we've moved another line left in the list
+                If moveRight.Contains(entry) Then
+                    moveRight.Remove(entry)
                 End If
             End If
+
         Next
 
-        For Each entry As String In misplacedEntryList
+        Dim misplacedList As New List(Of String)
+        misplacedList.AddRange(moveRight.ToArray)
+        misplacedList.AddRange(moveLeft.ToArray)
 
-            'Any remaining entries in the misplaced list were actually misplaced and not just out of order because of a misplacement
-            Dim recInd As Integer = originalPlacement.IndexOf(entry)
-            Dim sortInd As Integer = sortedList.IndexOf(entry)
-            Dim curPos As String = originalLines(recInd)
-            Dim sortPos As String = LineCountList(sortInd)
+        For Each entry As String In misplacedList
+            Dim recind As Integer = originalPlacement.IndexOf(entry)
+            Dim sortind As Integer = sortedList.IndexOf(entry)
+            Dim curpos As String = originalLines(recind)
+            Dim sortpos As String = LineCountList(sortind)
 
             If findType <> "Entry" Then
-                entry = findType & recInd + 1 & "=" & entry
+                entry = findType & recind + 1 & "=" & entry
             End If
 
-            Console.WriteLine("Line: " & originalLines(recInd) & " - Error: '" & findType & "' Alphabetization. " & entry & " appears to be out of place, possibly as a result of another out of place line." & Environment.NewLine & "Current Position: Line " & curPos & Environment.NewLine & "Expected Position: Line " & originalLines(recInd + 1) & Environment.NewLine)
+            Console.WriteLine("Line: " & originalLines(recind) & " - Error: '" & findType & "' alphabetization. ")
+            Console.WriteLine(entry & " appears to be out of place.")
+            Console.WriteLine("Current Position: Line " & curpos)
+            Console.WriteLine("Expected Position: Line " & originalLines(sortind))
+            Console.WriteLine()
             numErrs += 1
         Next
 
@@ -403,22 +432,34 @@ Module WinappDebug
         End If
     End Sub
 
-    Public Sub err2(ByVal linecount As Integer, ByVal err As String, ByVal command As String, ByVal expected As String, ByRef numErrs As Integer)
-        Console.WriteLine("Line: " & linecount & " - Error: " & err & Environment.NewLine & "Expected: " & expected & Environment.NewLine & "Command: " & command & Environment.NewLine)
+    Public Sub err2(linecount As Integer, err As String, command As String, expected As String)
+        Console.WriteLine("Line: " & linecount & " - Error: " & err)
+        Console.WriteLine("Expected: " & expected)
+        Console.WriteLine("Command: " & command)
+        Console.WriteLine()
         numErrs += 1
     End Sub
 
-    Public Sub err(ByVal linecount As Integer, ByVal err As String, ByVal command As String, ByRef numErrs As Integer)
-        Console.WriteLine("Line: " & linecount & " - Error: " & err & Environment.NewLine & "Command: " & command & Environment.NewLine)
+    Public Sub err(linecount As Integer, err As String, command As String)
+        Console.WriteLine("Line: " & linecount & " - Error: " & err)
+        Console.WriteLine("Command: " & command)
+        Console.WriteLine()
         numErrs += 1
     End Sub
 
-    Public Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef numErrs As Integer, ByRef keyList As List(Of String))
+    Public Sub fullKeyErr(key As iniKey, err As String)
+        Console.WriteLine("Line: " & key.lineNumber & " - Error: " & err)
+        Console.WriteLine("Command: " & key.ToString)
+        Console.WriteLine()
+        numErrs += 1
+    End Sub
+
+    Public Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef keyList As List(Of String))
 
         Dim command As String = key.ToString
         Dim keyString As String = key.keyType
 
-        'check for duplicates
+        'check for wholly duplicate commands in File/Reg/ExcludeKeys
         If keyList.Contains(key.value) Then
             Console.WriteLine("Line: " & key.lineNumber & " - Error: Duplicate key found." & Environment.NewLine &
                                   "Command: " & command & Environment.NewLine &
@@ -427,32 +468,31 @@ Module WinappDebug
 
         'make sure the current key is correctly numbered
         If Not command.Contains(keyString & keyNumber) Then
-            err2(key.lineNumber, "'" & keyString & "' entry is incorrectly spelled or formatted.", command, keyString & keyNumber, numErrs)
+            err2(key.lineNumber, "'" & keyString & "' entry is incorrectly numbered.", command, keyString & keyNumber)
         End If
         keyNumber += 1
 
         'make sure we don't have any dangly bits on the end of our key
         If command(command.Count - 1) = ";" Then
-            err(key.lineNumber, "Trailing semicolon (;).", command, numErrs)
+            err(key.lineNumber, "Trailing semicolon (;).", command)
         End If
 
         'Do some formatting checks for environment variables
         If keyString = "FileKey" Or keyString = "ExcludeKey" Then
-            enVarChecker(key, numErrs)
+            enVarChecker(key)
         End If
 
     End Sub
 
-    Public Sub enVarChecker(key As iniKey, numErrs As Integer)
+    Public Sub enVarChecker(key As iniKey)
+
+        Dim command As String = key.value
 
         If Command.Contains("%") Then
-            Dim envars As New List(Of String)
-            envars.AddRange(New String() {"UserProfile", "ProgramFiles", "RootDir", "WinDir", "AppData", "SystemDrive", "Documents", "ProgramData", "AllUsersProfile",
-                        "Pictures", "Video", "CommonAppData", "LocalAppData", "CommonProgramFiles", "HomeDrive", "Music", "tmp", "Temp", "LocalLowAppData", "Public"})
 
             Dim varcheck As String() = Command.Split(Convert.ToChar("%"))
             If varcheck.Count <> 3 And varcheck.Count <> 5 Then
-                err(key.lineNumber, "%EnvironmentVariables% must be surrounded on both sides by a single '%' character.", Command, numErrs)
+                err(key.lineNumber, "%EnvironmentVariables% must be surrounded on both sides by a single '%' character.", Command)
             End If
 
             If varcheck.Count = 3 Then
@@ -461,83 +501,72 @@ Module WinappDebug
                     For Each var As String In envars
                         If varcheck(1).ToLower = var.ToLower Then
                             casingerror = True
-                            err2(key.lineNumber, "Invalid CamelCasing on environment variable.", varcheck(1), var, numErrs)
+                            err2(key.lineNumber, "Invalid CamelCasing on environment variable.", varcheck(1), var)
                         End If
                     Next
 
                     If casingerror = False Then
-                        err(key.lineNumber, "Misformatted or invalid environment variable.", Command, numErrs)
+                        err(key.lineNumber, "Misformatted or invalid environment variable.", Command)
                     End If
                 End If
             End If
         End If
     End Sub
 
-    Public Function cValidity(key As iniKey, ByVal validList As List(Of String), numErrs As Integer) As Boolean
+    Public Function cValidity(key As iniKey) As Boolean
 
         'Check for trailing whitespace
         If key.ToString.EndsWith(" ") Then
-            err(key.lineNumber, "Detected unwanted whitepace at end of line.", key.ToString, numErrs)
+            fullKeyErr(key, "Detected unwanted trailing whitepace.")
         End If
 
         'Check for ending whitespace
         If key.ToString.StartsWith(" ") Then
-            err(key.lineNumber, "Detected unwanted whitepace at beginning of line.", key.ToString, numErrs)
+            fullKeyErr(key, "Detected unwanted leading whitespeace.")
         End If
 
         'make sure we have a valid command
         Dim isValidCmd As Boolean = False
-        For Each cmd As String In validList
-            If key.name.ToLower.StartsWith(cmd) Then
-                isValidCmd = True
-                Exit For
-            End If
-        Next
+
+        If validCmds.Contains(key.keyType.ToLower) Then
+            isValidCmd = True
+        End If
 
         'if the command is invalid, print an error and move on to the next command
-        If isValidCmd = False Then
-            err(key.lineNumber, "Invalid command type detected.", key.ToString, numErrs)
+        If Not isValidCmd Then
+            fullKeyErr(key, "Invalid command detected.")
             Return False
         End If
         Return True
     End Function
 
+    Public Sub pLangSecRef(ByVal key As iniKey)
 
-    Public Sub pLangSecRef(ByVal lsrKey As iniKey, ByRef numErrs As Integer)
-
-        If lsrKey.value <> "" Then
+        If key.value <> "" Then
             Dim validSecRefs As New List(Of String)
             validSecRefs.AddRange(New String() {"3021", "3022", "3023", "3024", "3025", "3026", "3027", "3028", "3029", "3030", "3031"})
             Dim hasValidSecRef As Boolean = False
 
-            'make sure langsecref is spelled correctly
-            If Not lsrKey.name.Contains("LangSecRef") Then
-                err(lsrKey.lineNumber, "LangSecRef is incorrected spelled or formatted.", lsrKey.ToString, numErrs)
-            End If
-
             'and make sure the number that follows it is valid
-            For Each secref As String In validSecRefs
-                If lsrKey.value.Contains(secref) Then
-                    hasValidSecRef = True
-                    Exit For
-                End If
-            Next
+            If validSecRefs.Contains(key.value) Then
+                hasValidSecRef = True
+            End If
 
             'if the langsecref number is invalid, throw an error
             If Not hasValidSecRef Then
-                err(lsrKey.lineNumber, "LangSecRef holds an invalid value.", lsrKey.ToString, numErrs)
+                fullKeyErr(key, "LangSecRef holds an invalid value.")
             End If
         End If
     End Sub
 
-    Public Sub pFileKey(ByRef keylist As List(Of iniKey), ByRef numErrs As Integer)
+    Public Sub pFileKey(ByRef keylist As List(Of iniKey))
 
         Dim curFileKeyNum As Integer = 1
         Dim fileKeyList As New List(Of String)
 
         For Each key As iniKey In keylist
             'check the format of the filekey
-            cFormat(key, curFileKeyNum, numErrs, fileKeyList)
+            cFormat(key, curFileKeyNum, fileKeyList)
 
             'add the filekey contents to the duplicate checking list
             Dim command As String = key.value
@@ -546,56 +575,53 @@ Module WinappDebug
             'Pipe symbol checks
             Dim iteratorCheckerList() As String = Split(command, "|")
             If Not command.Contains("|") Then
-                err(key.lineNumber, "Missing pipe (|) in 'FileKey.'", command, numErrs)
+                fullKeyErr(key, "Missing pipe (|) in 'FileKey.'")
             End If
-            If command.Contains(";|") Then
-                err(key.lineNumber, "Semicolon (;) found before pipe (|).", command, numErrs)
+            If command.Contains(";") Then
+                If command.IndexOf(";") < command.IndexOf("|") Then
+                    fullKeyErr(key, "Semicolon (;) found before pipe (|).")
+                End If
             End If
 
             'check for incorrect spellings of RECURSE or REMOVESELF
             If iteratorCheckerList.Length > 2 Then
                 If Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF") Then
-                    err(key.lineNumber, "'RECURSE' or 'REMOVESELF' entry is incorrectly spelled, or there are too many pipe (|) symbols.", command, numErrs)
+                    fullKeyErr(key, "'RECURSE' or 'REMOVESELF' entry is incorrectly spelled, or there are too many pipe (|) symbols.")
                 End If
             End If
 
             'check for missing pipe symbol on recurse and removeself
             If command.Contains("RECURSE") And Not command.Contains("|RECURSE") Then
-                err(key.lineNumber, "Missing pipe (|) before 'RECURSE.'", command, numErrs)
+                fullKeyErr(key, "Missing pipe (|) before 'RECURSE.'")
             End If
             If command.Contains("REMOVESELF") And Not command.Contains("|REMOVESELF") Then
-                err(key.lineNumber, "Missing pipe (|) before 'REMOVESELF.'", command, numErrs)
+                fullKeyErr(key,"Missing pipe (|) before 'REMOVESELF.'")
             End If
 
             'make sure VirtualStore folders point to the correct place
             If command.Contains("\VirtualStore\P") And (Not command.ToLower.Contains("programdata") And Not command.ToLower.Contains("program files*") And Not command.ToLower.Contains("program*")) Then
-                err2(key.lineNumber, "Incorrect VirtualStore location.", command, "%LocalAppData%\VirtualStore\Program Files*\", numErrs)
+                err2(key.lineNumber, "Incorrect VirtualStore location.", command, "%LocalAppData%\VirtualStore\Program Files*\")
             End If
 
             'backslash checks
             If command.Contains("%\|") Then
-                err(key.lineNumber, "Backslash (\) found before pipe (|).", command, numErrs)
+                fullKeyErr(key, "Backslash (\) found before pipe (|).")
             End If
             If command.Contains("%") And Not command.Contains("%|") And Not command.Contains("%\") Then
-                err(key.lineNumber, "Missing backslash (\) after %EnvironmentVariable%.", command, numErrs)
+                fullKeyErr(key, "Missing backslash (\) after %EnvironmentVariable%.")
             End If
         Next
     End Sub
 
-    Public Sub pDefault(key As iniKey, ByRef numErrs As Integer)
-
-        'spell check
-        If Not key.name.StartsWith("Default") And Not key.name.ToLower.Contains("detecto") Then
-            err2(key.lineNumber, "'Default' incorrectly spelled.", key.name, "Default", numErrs)
-        End If
+    Public Sub pDefault(key As iniKey)
 
         'make sure all entries are disabled by default
-        If Command.ToLower.Contains("true") Then
-            err(key.lineNumber, "All entries should be disabled by default (Default=False).", key.ToString, numErrs)
+        If key.value.ToLower.Contains("true") Then
+            fullKeyErr(key, "All entries should be disabled by default (Default=False).")
         End If
     End Sub
 
-    Public Sub pSection(section As iniSection, ByRef numErrs As Integer)
+    Public Sub pSection(section As iniSection)
 
         'initialize some tracking variables
         Dim entryHasRegKeys As Boolean = False
@@ -608,13 +634,11 @@ Module WinappDebug
         Dim secRefKey As New iniKey
         Dim sectionKey As New iniKey
         Dim sdKey As New iniKey
-        Dim validCmds As New List(Of String)
-        validCmds.AddRange(New String() {"specialdetect", "filekey", "regkey", "detect", "langsecref", "warning", "[", "default", "section", "excludekey"})
 
         For i As Integer = 0 To section.keys.Count - 1
             Dim key As iniKey = section.keys.Values(i)
             'make sure our key contains a valid command
-            If Not cValidity(key, validCmds, numErrs) Then
+            If Not cValidity(key) Then
                 Continue For
             End If
 
@@ -626,7 +650,7 @@ Module WinappDebug
 
                     'Make sure that FileKeys come before RegKeys in the section (style error but not syntax)
                     If entryHasRegKeys And Not entryKeysOutOfOrder Then
-                        err(key.lineNumber, "FileKeys should precede RegKeys.", key.ToString, numErrs)
+                        err(key.lineNumber, "FileKeys should precede RegKeys.", key.ToString)
                         entryKeysOutOfOrder = True
                     End If
                 Case "Detect"
@@ -648,7 +672,7 @@ Module WinappDebug
         Next
 
         'process our filekeys
-        pFileKey(fileKeys, numErrs)
+        pFileKey(fileKeys)
 
         Dim fkstrings As New List(Of String)
         Dim sortedFKStrings As New List(Of String)
@@ -659,10 +683,10 @@ Module WinappDebug
         Next
         sortedFKStrings.AddRange(fkstrings)
         replaceAndSort(fkstrings, sortedFKStrings, "|", " \ \", "keys")
-        findOutOfPlace(fkstrings, sortedFKStrings, "FileKey", numErrs, fklinecounts)
+        findOutOfPlace(fkstrings, sortedFKStrings, "FileKey", fklinecounts)
 
         'process our regkeys
-        pRegKey(regKeys, numErrs)
+        pRegKey(regKeys)
 
         Dim rkstrings As New List(Of String)
         Dim sortedRKStrings As New List(Of String)
@@ -673,10 +697,10 @@ Module WinappDebug
         Next
         sortedRKStrings.AddRange(rkstrings)
         replaceAndSort(rkstrings, sortedRKStrings, "|", " \ \", "keys")
-        findOutOfPlace(rkstrings, sortedRKStrings, "RegKey", numErrs, rklinecounts)
+        findOutOfPlace(rkstrings, sortedRKStrings, "RegKey", rklinecounts)
 
         'process our excludekeys
-        pExcludeKey(excludeKeys, numErrs)
+        pExcludeKey(excludeKeys)
 
         Dim ekstrings As New List(Of String)
         Dim sortedEKStrings As New List(Of String)
@@ -687,35 +711,34 @@ Module WinappDebug
         Next
         sortedEKStrings.AddRange(ekstrings)
         replaceAndSort(ekstrings, sortedEKStrings, "|", " \ \", "keys")
-        findOutOfPlace(ekstrings, sortedEKStrings, "ExcludeKey", numErrs, eklinecounts)
+        findOutOfPlace(ekstrings, sortedEKStrings, "ExcludeKey", eklinecounts)
 
         'process our detect keys (if any)
-        pDetect(detectKeys, numErrs)
+        pDetect(detectKeys)
 
         'process our langsecref (if any)
-        pLangSecRef(secRefKey, numErrs)
+        pLangSecRef(secRefKey)
 
         'process our default key, throw an error if it's absent
         If defaultKey.value <> "" Then
-            pDefault(defaultKey, numErrs)
+            pDefault(defaultKey)
         Else
-            err(section.startingLineNumber, "Default state missing", section.name, numErrs)
+            err(section.startingLineNumber, "Default state missing", section.name)
         End If
 
-        pSpecialDetect(sdKey, numErrs)
+        pSpecialDetect(sdKey)
     End Sub
 
-    Private Sub pDetectFile(ByRef key As iniKey, ByRef numErrs As Integer)
+    Private Sub pDetectFile(ByRef key As iniKey)
 
         'check our environment variables
-        enVarChecker(key, numErrs)
+        enVarChecker(key)
 
-        'check for trailing backslashes
         Dim command As String = key.value
 
         'backslash check
         If command(command.Count - 1) = "\" Then
-            err(key.lineNumber, "Trailing backslash on DetectFile.", key.ToString, numErrs)
+            fullKeyErr(key, "Trailing backslash on DetectFile.")
         End If
 
         'check for nested wildcards
@@ -724,27 +747,27 @@ Module WinappDebug
             For i As Integer = 0 To splitDir.Count - 1
                 If splitDir.Last = Nothing Then Continue For
                 If splitDir(i).Contains("*") And i <> splitDir.Count - 1 Then
-                    err(key.lineNumber, "Nested wildcard found in DetectFile.", key.ToString, numErrs)
+                    fullKeyErr(key, "Nested wildcard found in DetectFile")
                 End If
             Next
         End If
 
         'Make sure that DetectFile paths point to a filesystem location
         If Not command.StartsWith("%") And Not command.Contains(":\") Then
-            err(key.lineNumber, "'DetectFile' can only be used for file system paths.", key.ToString, numErrs)
+            fullKeyErr(key, "'DetectFile' can only be used for file system paths.")
         End If
     End Sub
 
-    Private Sub pRegDetect(ByRef key As iniKey, ByRef numErrs As Integer)
+    Private Sub pRegDetect(ByRef key As iniKey)
 
         Dim command As String = key.ToString
         'Make sure that detect paths point to a registry location
         If (command.Contains("=%") Or command.Contains("=C:\")) Or (Not command.Contains("=HKLM") And Not command.Contains("=HKC") And Not command.Contains("=HKU")) Then
-            err(key.lineNumber, "'Detect' can only be used for registry keys paths.", key.ToString, numErrs)
+            fullKeyErr(key, "'Detect' can only be used for registry keys paths.")
         End If
     End Sub
 
-    Private Sub pDetect(ByRef iKeyList As List(Of iniKey), ByRef numErrs As Integer)
+    Private Sub pDetect(ByRef iKeyList As List(Of iniKey))
 
         'tracking variables
         Dim firstNumberStatus As Boolean = False
@@ -759,7 +782,6 @@ Module WinappDebug
         Dim keyList As New List(Of String)
         Dim detectType As String
         Dim number As Integer = 1
-
 
         For Each key As iniKey In iKeyList
 
@@ -781,13 +803,13 @@ Module WinappDebug
 
             'check for dangly bits
             If command.Contains(";") Then
-                err(key.lineNumber, "Semicolon (;) found in " & detectType, key.ToString, numErrs)
+                fullKeyErr(key, "Semicolon (;) found in " & detectType)
             End If
 
             'check for duplicates
             If keyList.Contains(command) Then
                 Console.WriteLine("Line: " & key.lineNumber & " - Error: Duplicate command found. " & Environment.NewLine & "Command: " & key.ToString & Environment.NewLine & "Duplicates: " & detectType & keyList.IndexOf(command) + 1 & "=" & command & Environment.NewLine)
-                numErrs += 1
+                NumErrs += 1
             Else
                 keyList.Add(command)
             End If
@@ -813,19 +835,19 @@ Module WinappDebug
 
             'Make sure our first number is a 1 if there's a number
             If number = 1 And (Not key.ToString.Contains(detectType & "1=") And Not key.ToString.Contains(detectType & "=")) Then
-                err2(key.lineNumber, "'" & detectType & "' numbering.", command, "'" & detectType & "' or '" & detectType & "1.'", numErrs)
+                err2(key.lineNumber, "'" & detectType & "' numbering.", command, "'" & detectType & "' or '" & detectType & "1.'")
             End If
 
             'If we're on our second detect, make sure the first one had a 1
             If number = 2 And firstNumberStatus = False Then
-                err(key.lineNumber - 1, "'" & detectType & number & "' detected without preceding '" & detectType & number - 1 & ".'", key.ToString, numErrs)
+                err(key.lineNumber - 1, "'" & detectType & number & "' detected without preceding '" & detectType & number - 1 & ".'", key.ToString)
             End If
 
             'if we only have one detect entry, make sure it doesnt have a number
             If iKeyList.Count = 1 Then
                 For i As Integer = 0 To 9
                     If key.name.Contains(i.ToString) Then
-                        err(key.lineNumber, "Detected unneeded numbering", key.ToString, numErrs)
+                        fullKeyErr(key, "Detected unneeded numbering")
                         Exit For
                     End If
                 Next
@@ -834,7 +856,7 @@ Module WinappDebug
             'otherwise, make sure our numbers match up
             If number > 1 Then
                 If key.name.Contains(detectType & number) = False Then
-                    err2(key.lineNumber, "'" & detectType & "' entry is incorrectly numbered.", key.ToString, "'" & detectType & number & "'", numErrs)
+                    err2(key.lineNumber, "'" & detectType & "' entry is incorrectly numbered.", key.ToString, "'" & detectType & number & "'")
                 End If
             End If
             number += 1
@@ -843,11 +865,11 @@ Module WinappDebug
             If detectType.Equals("DetectFile") Then
                 curDFNum = number
                 dfkeylist = keyList
-                pDetectFile(key, numErrs)
+                pDetectFile(key)
             Else
                 curDNum = number
                 dkeylist = keyList
-                pRegDetect(key, numErrs)
+                pRegDetect(key)
             End If
         Next
 
@@ -858,47 +880,45 @@ Module WinappDebug
         sortedDStrings.AddRange(dkeylist)
         sortedDFStrings.AddRange(dfkeylist)
         replaceAndSort(dkeylist, sortedDStrings, "|", " \ \", "keys")
-        findOutOfPlace(dkeylist, sortedDStrings, "Detect", numErrs, dlclist)
+        findOutOfPlace(dkeylist, sortedDStrings, "Detect", dlclist)
 
         replaceAndSort(dfkeylist, sortedDFStrings, "|", " \ \", "keys")
-        findOutOfPlace(dfkeylist, sortedDFStrings, "DetectFile", numErrs, dflclist)
+        findOutOfPlace(dfkeylist, sortedDFStrings, "DetectFile", dflclist)
     End Sub
 
-    Private Sub pRegKey(ByVal keyList As List(Of iniKey), ByRef numErrs As Integer)
+    Private Sub pRegKey(ByVal keyList As List(Of iniKey))
 
         Dim curRegKey As Integer = 1
         Dim regKeyList As New List(Of String)
 
         'Ensure that each RegKey points to a valid registry location
         For Each key As iniKey In keyList
-            cFormat(key, curRegKey, numErrs, regKeyList)
+            cFormat(key, curRegKey, regKeyList)
             If Not key.ToString.Contains("=HKLM") And Not key.ToString.Contains("=HKC") And Not key.ToString.Contains("=HKU") Then
-                err(key.lineNumber, "'RegKey' can only be used for registry key paths.", key.ToString, numErrs)
+                fullKeyErr(key, "'RegKey' can only be used for registry key paths.")
             End If
             regKeyList.Add(key.value)
         Next
     End Sub
 
-    Public Sub pSpecialDetect(ByRef key As iniKey, numErrs As Integer)
+    Public Sub pSpecialDetect(ByRef key As iniKey)
 
         'make sure that any SpecialDetect keys hold a valid value
         If key.value <> "" Then
-            Dim sdList As New List(Of String)
-            sdList.AddRange(New String() {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"})
-
             If Not sdList.Contains(key.value) Then
-                err(key.lineNumber, "SpecialDetect holds an invalid value.", key.ToString, numErrs)
+                fullKeyErr(key, "SpecialDetect holds an invalid value.")
             End If
         End If
     End Sub
 
-    Private Sub pExcludeKey(ByRef keyList As List(Of iniKey), ByRef numErrs As Integer)
+    Private Sub pExcludeKey(ByRef keyList As List(Of iniKey))
 
         Dim curExcludeKeyNum As Integer = 1
         Dim ekKeyList As New List(Of String)
         For Each key As iniKey In keyList
+
             'check the format
-            cFormat(key, curExcludeKeyNum, numErrs, ekKeyList)
+            cFormat(key, curExcludeKeyNum, ekKeyList)
             Dim command As String = key.value
             ekKeyList.Add(command)
 
@@ -907,7 +927,7 @@ Module WinappDebug
                 Dim iteratorCheckerList() As String = Split(command, "|")
                 Dim endingslashchecker() As String = Split(command, "\|")
                 If endingslashchecker.Count = 1 Then
-                    err(key.lineNumber, "Missing backslash (\) before pipe (|) in ExcludeKey.", command, numErrs)
+                    fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.")
                 End If
             End If
         Next
@@ -927,74 +947,82 @@ Module WinappDebug
 End Module
 
 Public Module iniFileHandler
-    Class iniFile
 
+    Class iniFile
+        Dim lineCount As Integer = 1
         Public name As String
+        Public dir As String
         Public sections As New Dictionary(Of String, iniSection)
-        'may want to consder changing this to a dictionary too
         Public comments As New Dictionary(Of Integer, iniComment)
 
-        Public Sub New()
-            name = ""
-            sections = New Dictionary(Of String, iniSection)
-            comments = New Dictionary(Of Integer, iniComment)
-        End Sub
-
         Public Sub New(name As String)
-            Me.New(Environment.CurrentDirectory, name)
+            Me.dir = Environment.CurrentDirectory
+            Me.name = name
+            createFile()
         End Sub
 
         Public Sub New(path As String, name As String)
+            Me.name = name
+            Me.dir = path
+            createFile()
+        End Sub
 
-            name = name
-
-            Dim r As IO.StreamReader
+        Public Sub createFile()
+            Dim r As StreamReader
             Try
                 Dim sectionToBeBuilt As New List(Of String)
                 Dim lineTrackingList As New List(Of Integer)
 
-                r = New StreamReader(path & "\" & name)
-                Dim lineCount As Integer = 1
+                r = New StreamReader(dir & "\" & name)
+
                 Do While (r.Peek() > -1)
                     Dim currentLine As String = r.ReadLine.ToString
 
                     If currentLine.StartsWith(";") Then
                         Dim newCom As New iniComment(currentLine, lineCount)
-                        If Me.comments.Count > 0 Then
-                            Me.comments.Add(comments.Count, newCom)
+                        If comments.Count > 0 Then
+                            comments.Add(comments.Count, newCom)
                         Else
-                            Me.comments.Add(0, newCom)
+                            comments.Add(0, newCom)
                         End If
                     Else
-                        If currentLine.Trim <> "" Then
+                        If Not currentLine.StartsWith("[") And currentLine.Trim <> "" Then
                             sectionToBeBuilt.Add(currentLine)
                             lineTrackingList.Add(lineCount)
-                        Else
-                            If Not sectionToBeBuilt.Count < 2 Then
-                                Dim sectionHolder As New iniSection(sectionToBeBuilt, lineTrackingList)
-                                Try
-                                    sections.Add(sectionHolder.name, sectionHolder)
-                                Catch ex As Exception
-                                    Console.WriteLine(ex.Message & Environment.NewLine & "Failure occurred during iniFile construction at line: " & Me.sections.Last.Value.endingLineNumber + 2)
-                                    Console.WriteLine()
-                                End Try
-                                sectionToBeBuilt.Clear()
-                                lineTrackingList.Clear()
+                        ElseIf Not currentLine.Trim = "" Then
+                            If Not sectionToBeBuilt.Count = 0 Then
+                                mkSection(sectionToBeBuilt, lineTrackingList)
+                                sectionToBeBuilt.Add(currentLine)
+                                lineTrackingList.Add(lineCount)
+                            Else
+                                sectionToBeBuilt.Add(currentLine)
+                                lineTrackingList.Add(lineCount)
                             End If
                         End If
                     End If
                     lineCount += 1
                 Loop
                 If sectionToBeBuilt.Count <> 0 Then
-                    Dim sectionHolder As New iniSection(sectionToBeBuilt, lineTrackingList)
-                    sections.Add(sectionHolder.name, sectionHolder)
-                    sectionToBeBuilt.Clear()
-                    lineTrackingList.Clear()
+                    mkSection(sectionToBeBuilt, lineTrackingList)
                 End If
                 r.Close()
             Catch ex As Exception
-                Console.WriteLine(ex.Message & " failure detected during iniFile construction")
+                Console.WriteLine(ex.Message & Environment.NewLine & "Failure occurred during iniFile construction at line: " & lineCount & " in " & name)
+
             End Try
+
+        End Sub
+
+        Public Sub mkSection(sectionToBeBuilt As List(Of String), lineTrackingList As List(Of Integer))
+            Dim sectionHolder As New iniSection(sectionToBeBuilt, lineTrackingList)
+            Try
+                sections.Add(sectionHolder.name, sectionHolder)
+            Catch ex As Exception
+                Console.WriteLine(ex.Message & Environment.NewLine & "Failure occurred while constructing construction at line: " & lineCount & " in " & name)
+                Console.WriteLine()
+            End Try
+            sectionToBeBuilt.Clear()
+            lineTrackingList.Clear()
         End Sub
 
         Public Function getStreamOfComments(startNum As Integer, endNum As Integer) As String
@@ -1036,7 +1064,9 @@ Public Module iniFileHandler
                         outList.Add(getDiff(curSection, "removed."))
                     End If
                 Catch ex As Exception
-                    Console.WriteLine(ex.ToString)
+                    Console.WriteLine("Error: " & ex.ToString)
+                    Console.WriteLine("Please report this error on GitHub")
+                    Console.WriteLine()
                 End Try
             Next
 
@@ -1073,7 +1103,7 @@ Public Module iniFileHandler
 
             Dim tmp1 As String() = listOfLines(0).Split(Convert.ToChar("["))
             Dim tmp2 As String() = tmp1(1).Split(Convert.ToChar("]"))
-            name = tmp2(0)
+            Me.name = tmp2(0)
             startingLineNumber = listOfLineCounts(0)
             endingLineNumber = listOfLineCounts(listOfLineCounts.Count - 1)
 
@@ -1179,27 +1209,30 @@ Public Module iniFileHandler
     End Class
 End Module
 
-Module diff
+Module Diff
 
+    Dim firstFile As iniFile
+    Dim secondFile As iniFile
+    Dim dir As String = Environment.CurrentDirectory
+    Dim dir2 As String = Environment.CurrentDirectory
     Public Sub main()
 
         Console.Clear()
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.WriteLine("*                                            Diff                                                  *")
+        Console.WriteLine("*                                               Diff                                               *")
         Console.WriteLine("*                                                                                                  *")
-        Console.WriteLine("*                This tool will output the diff between two winapp2 files                          *")
+        Console.WriteLine("*                     This tool will output the diff between two winapp2 files                     *")
         Console.WriteLine("*                                                                                                  *")
-        Console.WriteLine("*                                            Menu:                                                 *")
-        Console.WriteLine("* 0. Exit                - Return to the winapp2ool menu                                           *")
-        Console.WriteLine("* 1. Run (default)       - Run Diff on files in the current folder                                 *")
-        Console.WriteLine("* 2. Run (custom)        - Run Diff on files in a different folder                                 *")
+        Console.WriteLine("*                                  Menu: Enter a number to select                                  *")
+        Console.WriteLine("*                                                                                                  *")
+        Console.WriteLine("* 0. Exit                        - Return to the winapp2ool menu                                   *")
+        Console.WriteLine("* 1. Run (default)               - Run Diff on files in the current folder                         *")
+        Console.WriteLine("* 2. Run (custom)                - Run Diff on files in a different folder                         *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.Write("Enter a number: ")
+        Console.Write("Enter a number, or leave blank to run the default: ")
 
         Dim input As String = Console.ReadLine()
         Dim exitCode As Boolean = False
-        Dim firstFile As iniFile
-        Dim secondFile As iniFile
 
         Do Until exitCode
             Try
@@ -1207,45 +1240,71 @@ Module diff
                     Case "0"
                         Console.WriteLine("Exiting diff...")
                         exitCode = True
+                    Case ""
+                        input = "1"
                     Case "1"
-                        Console.Write("Enter the name of the first older file: ")
-                        Dim oName As String = Console.ReadLine()
-                        Console.Write("Enter the name of the second newer file: ")
-                        Dim nNname As String = Console.ReadLine()
-                        firstFile = New iniFile(oName)
-                        secondFile = New iniFile(nNname)
-                        differ(firstFile, secondFile)
+                        loadFiles()
+                        differ()
                         exitCode = True
                     Case "2"
-                        Console.Write("Enter the directory of the older file: ")
-                        Dim oPath As String = Console.ReadLine()
-                        Console.Write("Enter the name of the older file: ")
-                        Dim oName As String = Console.ReadLine()
-                        Console.Write("Enter the directory of the newer file: ")
-                        Dim nPath As String = Console.ReadLine()
-                        Console.Write("Enter the name of the newer file: ")
-                        Dim nName As String = Console.ReadLine()
-                        firstFile = New iniFile(oPath, oName)
-                        secondFile = New iniFile(nPath, nName)
+                        changeParams()
+                        loadFiles()
+                        differ()
                         exitCode = True
                     Case Else
                         Console.Write("Invalid input. Please try again: ")
                         input = Console.ReadLine()
                 End Select
             Catch ex As Exception
-                Console.WriteLine(ex.ToString)
+                Console.WriteLine("Error: " & ex.ToString)
+                Console.WriteLine("Please report this error on GitHub")
+                Console.WriteLine()
             End Try
         Loop
     End Sub
 
-    Public Sub differ(firstFile As iniFile, secondFile As iniFile)
+    Public Sub changeParams()
+        Console.Write("Enter the directory of the older file, or leave blank to use the current directory: ")
+        Dim input As String = Console.ReadLine()
+        If input.Trim <> "" Then
+            dir = input
+        End If
 
+        Console.Write("Enter the directory of the newer file, or leave blank to use the same directory as above: ")
+        input = Console.ReadLine()
+        If input.Trim <> "" Then
+            dir2 = input
+        Else
+            dir2 = dir
+        End If
+
+    End Sub
+
+    Public Sub loadFiles()
+        Try
+            Console.Write("Enter the name of the first older file: ")
+            Dim oName As String = Console.ReadLine()
+            Console.Write("Enter the name of the second newer file: ")
+            Dim nNname As String = Console.ReadLine()
+            firstFile = New iniFile(dir, oName)
+            secondFile = New iniFile(dir2, nNname)
+        Catch ex As Exception
+            Console.WriteLine("Error: " & ex.ToString)
+            Console.WriteLine("Please report this error on GitHub")
+            Console.WriteLine()
+        End Try
+
+    End Sub
+
+    Public Sub differ()
+
+        Console.Clear()
         Try
             Dim fver As String = firstFile.comments(0).comment.ToString
             fver = fver.Split(Convert.ToChar(";"))(1)
             Dim sver As String = secondFile.comments(0).comment.ToString
             sver = sver.Split(Convert.ToChar(";"))(1)
-            Console.WriteLine("Changes made between " & fver & " and" & sver)
+            Console.WriteLine("Changes made between" & fver & " and" & sver)
             Console.WriteLine()
             Dim outList As List(Of String) = firstFile.compareTo(secondFile)
             Dim remCt As Integer = 0
@@ -1272,7 +1331,16 @@ Module diff
             Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
 
         Catch ex As Exception
-            Console.WriteLine("Error: " & ex.ToString)
+            If ex.Message = "The given key was not present in the dictionary." Then
+                Console.WriteLine("Error encountered during diff: " & ex.Message)
+                Console.WriteLine("This error is typically caused by invalid file names, please double check your input and try again.")
+                Console.WriteLine()
+            Else
+                Console.WriteLine("Error: " & ex.ToString)
+                Console.WriteLine("Please report this error on GitHub")
+                Console.WriteLine()
+            End If
+
         End Try
         Console.WriteLine("End of diff. Press any key to return to the winapp2ool menu.")
         Console.ReadKey()
@@ -1280,7 +1348,10 @@ Module diff
 
 End Module
 
-Public Module trim
+Public Module Trim
+
+    Dim dir As String = Environment.CurrentDirectory
+    Dim name As String = "\winapp2.ini"
 
     Public Sub main()
 
@@ -1291,31 +1362,30 @@ Public Module trim
         Console.WriteLine("*                       This tool will trim winapp2.ini down to contain only                       *")
         Console.WriteLine("*                       entries relevant to your machine, greatly reducing both                    *")
         Console.WriteLine("*                       application load time and the winapp2.ini filesize.                        *")
-        Console.WriteLine("*                                             Menu:                                                *")
-        Console.WriteLine("*0. Exit                - Return to the winapp2ool menu                                            *")
-        Console.WriteLine("*1. Trim (default)      - Trim winapp2.ini and overwrite the existing file                         *")
-        Console.WriteLine("*2. Trim (newfile)      - Trim winapp2.ini and save the output to a new file                       *")
+        Console.WriteLine("*                                                                                                  *")
+        Console.WriteLine("*                                     Menu: Enter a number to select                               *")
+        Console.WriteLine("*                                                                                                  *")
+        Console.WriteLine("* 0. Exit                - Return to the winapp2ool menu                                           *")
+        Console.WriteLine("* 1. Trim (default)      - Trim winapp2.ini and overwrite the existing file                        *")
+        Console.WriteLine("* 2. Trim (custom)       - Change the save directory and/or file name                              *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.Write("Enter a number: ")
+        Console.Write("Enter a number, or leave blank to run the default: ")
 
         Dim exitCode As Boolean = False
         Dim input As String = Console.ReadLine()
         Do Until exitCode
             Select Case input
+                Case ""
+                    input = "1"
                 Case "0"
                     Console.WriteLine("Returning to winapp2ool menu...")
                     exitCode = True
                 Case "1"
-                    trim("\winapp2.ini")
+                    trim()
                     exitCode = True
                 Case "2"
-                    Console.Write("Enter the name of the new file, or press enter to use the default (winapp2-trimmed.ini): ")
-                    Dim in2 As String = Console.ReadLine()
-                    If in2.Trim <> Nothing Then
-                        trim("\" & in2)
-                    Else
-                        trim("\winapp2-trimmed.ini")
-                    End If
+                    changeParams()
+                    trim()
                     exitCode = True
                 Case Else
                     Console.Write("Invalid input. Please try again: ")
@@ -1324,14 +1394,33 @@ Public Module trim
         Loop
     End Sub
 
-    Public Sub printComments(ifile As iniFile, start As Integer, endpt As Integer, file As StreamWriter)
-        For i As Integer = start To endpt
-            file.WriteLine(ifile.comments(i).comment)
-        Next
+    Public Sub changeParams()
+        Console.Write("Enter the directory of your file, or leave blank to use default (current folder): ")
+        Dim uPath As String = Console.ReadLine()
+        Select Case uPath
+            Case ""
+                Console.WriteLine("Keeping default.")
+            Case Else
+                dir = uPath
+        End Select
+
+        Console.Write("Enter the name of your file, 1 to use the default renamed file (winapp2-trimmed.ini), or leave blank to use default (winapp2.ini): ")
+        Dim uName As String = Console.ReadLine()
+        Select Case uName
+            Case ""
+                Console.WriteLine("Keeping default.")
+            Case "1"
+                name = "\winapp2-trimmed.ini"
+            Case Else
+                name = "\" & uName
+        End Select
+        Console.WriteLine()
+        Console.WriteLine("Trimmed file will be saved as: " & dir & name)
+        Console.WriteLine()
+
     End Sub
 
-
-    Public Sub trim(name As String)
+    Public Sub trim()
 
         Console.WriteLine("Trimming...")
 
@@ -1434,12 +1523,12 @@ Public Module trim
             End If
 
         Next
-        Console.WriteLine("Trimming complete.")
-        Console.WriteLine("Initial number Of entries: " & winappfile.sections.Count)
+        Console.WriteLine("......Done.")
+        Console.WriteLine("Number of entries before trimming: " & winappfile.sections.Count)
         Dim entrycount As Integer = trimmedfile.Count + cEntries.Count + fxEntries.Count + tbEntries.Count
         Console.WriteLine("Number of entries after trimming: " & entrycount)
         Try
-            Dim file As New StreamWriter(Environment.CurrentDirectory & name, False)
+            Dim file As New StreamWriter(dir & name, False)
 
             Dim comNum As Integer
             'contingency for non-cc ini
@@ -1474,17 +1563,71 @@ Public Module trim
             Next
             file.Close()
         Catch ex As Exception
-            Console.WriteLine(ex.ToString)
+            Console.WriteLine("Error: " & ex.ToString)
+            Console.WriteLine("Please report this error on GitHub")
+            Console.WriteLine()
+        Finally
+            Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
+            Console.WriteLine("Finished trimming winapp2.ini, press any key to return to the winapp2ool menu.")
+            Console.ReadKey()
         End Try
-        Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.WriteLine("Finished trimming winapp2.ini, press any key to return to the winapp2ool menu.")
-        Console.ReadKey()
     End Sub
 
     Public Function checkExist(key As String) As Boolean
 
+        'Observe the registry paths
+        If key.StartsWith("HK") Then
+            Return checkRegExist(key)
+        Else
+            Return checkFileExist(key)
+        End If
+    End Function
+
+    Public Function checkRegExist(key As String) As Boolean
+
         Dim dir As String = key
+        Dim splitDir As String() = dir.Split(Convert.ToChar("\"))
+
+        Try
+            Select Case splitDir(0)
+                Case "HKCU"
+                    dir = dir.Replace("HKCU\", "")
+                    If Microsoft.Win32.Registry.CurrentUser.OpenSubKey(dir, True) IsNot Nothing Then
+                        Return True
+                    End If
+                Case "HKLM"
+                    dir = dir.Replace("HKLM\", "")
+                    If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing Then
+                        Return True
+                    Else
+                        Dim rDir As String = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
+                        If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(rDir, True) IsNot Nothing Then
+                            Return True
+                        End If
+                    End If
+                Case "HKU"
+                    dir = dir.Replace("HKU\", "")
+                    If Microsoft.Win32.Registry.Users.OpenSubKey(dir, True) IsNot Nothing Then
+                        Return True
+                    End If
+                Case "HKCR"
+                    dir = dir.Replace("HKCR\", "")
+                    If Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(dir, True) IsNot Nothing Then
+                        Return True
+                    End If
+            End Select
+        Catch ex As Exception
+            'The most common exception here is a permissions one, so assume true if we hit
+            'because a permissions exception implies the key exists anyway.
+            Return True
+        End Try
+        Return False
+    End Function
+
+    Public Function checkFileExist(key As String) As Boolean
+
         Dim isProgramFiles As Boolean = False
+        Dim dir As String = key
 
         'make sure we get the proper path for environment variables
         If dir.Contains("%") Then
@@ -1503,43 +1646,6 @@ Public Module trim
             dir = envDir + splitDir(2)
         End If
 
-        'Observe the registry paths
-        If dir.StartsWith("HK") Then
-            Dim splitDir As String() = dir.Split(Convert.ToChar("\"))
-            Try
-                Select Case splitDir(0)
-                    Case "HKCU"
-                        dir = dir.Replace("HKCU\", "")
-                        If Microsoft.Win32.Registry.CurrentUser.OpenSubKey(dir, True) IsNot Nothing Then
-                            Return True
-                        End If
-                    Case "HKLM"
-                        dir = dir.Replace("HKLM\", "")
-                        If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing Then
-                            Return True
-                        Else
-                            Dim rDir As String = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
-                            If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(rDir, True) IsNot Nothing Then
-                                Return True
-                            End If
-                        End If
-                    Case "HKU"
-                        dir = dir.Replace("HKU\", "")
-                        If Microsoft.Win32.Registry.Users.OpenSubKey(dir, True) IsNot Nothing Then
-                            Return True
-                        End If
-                    Case "HKCR"
-                        dir = dir.Replace("HKCR\", "")
-                        If Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(dir, True) IsNot Nothing Then
-                            Return True
-                        End If
-                End Select
-            Catch ex As Exception
-                'The most common exception here is a permissions one, so assume true if we hit
-                'because a permissions exception implies the key exists anyway.
-                Return True
-            End Try
-        End If
         Try
             'check out those file/folder paths
             If Directory.Exists(dir) Or File.Exists(dir) Then
@@ -1549,16 +1655,20 @@ Public Module trim
             'if we didn't find it and we're looking in Program Files, check the (x86) directory
             If isProgramFiles Then
 
-                'it's unlike that (m)any people have this configured differently, but it may be better
-                'to query the env var for %ProgramFiles(x86)% for this.
-                dir = dir.Replace("Program Files", "Program Files (x86)")
+                Dim envDir As String = Environment.GetEnvironmentVariable("ProgramFiles(x86)")
+                Dim splitDir As String() = key.Split(CChar("%"))
+
+                dir = envDir + splitDir(2)
                 If Directory.Exists(dir) Or File.Exists(dir) Then
                     Return True
                 End If
             End If
 
         Catch ex As Exception
-            Console.WriteLine(ex.ToString)
+            Console.WriteLine("Error: " & ex.ToString)
+            Console.WriteLine("Please report this error on GitHub")
+            Console.WriteLine()
+            Return True
         End Try
 
         Return False
@@ -1594,49 +1704,52 @@ Public Module trim
     Public Function getWinVer() As Double
 
         Dim winver As String = My.Computer.Info.OSFullName.ToString
-        Dim winveri As Double = 0.0
+        Dim winverD As Double = 0.0
         If winver.Contains("XP") Then
-            winveri = 5.1
+            winverD = 5.1
         End If
         If winver.Contains("Vista") Then
-            winveri = 6.0
+            winverD = 6.0
         End If
         If winver.Contains("7") Then
-            winveri = 6.1
+            winverD = 6.1
         End If
         If winver.Contains("8") And Not winver.Contains("8.1") Then
-            winveri = 6.2
+            winverD = 6.2
         End If
         If winver.Contains("8.1") Then
-            winveri = 6.3
+            winverD = 6.3
         End If
         If winver.Contains("10") Then
-            winveri = 10.0
+            winverD = 10.0
         End If
 
-        Return winveri
+        Return winverD
     End Function
 End Module
 
-Module ccinidebug
+Module CCiniDebug
+
     Sub Main()
 
         Console.Clear()
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.WriteLine("*                                        ccinidebug                                                *")
+        Console.WriteLine("*                                            CCiniDebug                                            *")
         Console.WriteLine("*                                                                                                  *")
-        Console.WriteLine("*               This tool will sort alphabetically the contents of ccleaner.ini                    *")
-        Console.WriteLine("*                   and can also prune 'stale' winapp2.ini entries from it                         *")
-        Console.WriteLine("*                                           Menu:                                                  *")
-        Console.WriteLine("* 0. Exit                 - Return to the winapp2ool menu                                          *")
-        Console.WriteLine("* 1. Run (default)        - Prune stale winapp2.ini entries from ccleaner.ini and sort it          *")
-        Console.WriteLine("* 2. Run (sort only)      - Only sort ccleaner.ini                                                 *")
+        Console.WriteLine("*                   This tool will sort alphabetically the contents of ccleaner.ini                *")
+        Console.WriteLine("*                        and can also prune stale winapp2.ini entries from it                      *")
+        Console.WriteLine("*                                                                                                  *")
+        Console.WriteLine("*                                     Menu: Enter a number to select                               *")
+        Console.WriteLine("*                                                                                                  *")
+        Console.WriteLine("* 0. Exit                          - Return to the winapp2ool menu                                 *")
+        Console.WriteLine("* 1. Run (default)                 - Prune and sort ccleaner.ini                                   *")
+        Console.WriteLine("* 2. Run (sort only)               - Only sort ccleaner.ini                                        *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.Write("Enter a number: ")
+        Console.Write("Enter a number, or leave blank to run the default: ")
 
         Dim exitCode As Boolean = False
         Dim input As String = Console.ReadLine
-        Dim ccini As iniSection
+        Dim ccini As iniFile
         Dim winappini As iniFile
 
         Do Until exitCode
@@ -1645,79 +1758,65 @@ Module ccinidebug
                     Case "0"
                         Console.WriteLine("Returning to winapp2ool menu...")
                         exitCode = True
+                    Case ""
+                        input = "1"
                     Case "1"
-                        ccini = buildOptions()
+                        Console.Clear()
+                        ccini = New iniFile("ccleaner.ini")
                         winappini = New iniFile("winapp2.ini")
-                        ccini = prune(ccini, winappini)
-                        writeccini(ccini)
+                        ccini.sections("Options") = prune(ccini.sections("Options"), winappini)
+                        writeCCini(ccini.sections("Options"))
                         exitCode = True
                     Case "2"
-                        ccini = buildOptions()
-                        writeccini(ccini)
+                        Console.Clear()
+                        ccini = New iniFile("ccleaner.ini")
+                        writeCCini(ccini.sections("Options"))
+                        exitCode = True
                     Case Else
                         Console.Write("Invalid input. Please try again: ")
                         input = Console.ReadLine
                 End Select
             Catch ex As Exception
-                Console.WriteLine(ex.ToString)
+                Console.WriteLine("Error: " & ex.ToString)
+                Console.WriteLine("Please report this error on GitHub")
+                Console.WriteLine()
             End Try
         Loop
     End Sub
 
-    Public Sub writeccini(ccini As iniSection)
-
+    Public Sub writeCCini(ccini As iniSection)
+        Dim file As StreamWriter
         Console.WriteLine("Modifying ccleaner.ini...")
+        Dim lineList As New List(Of String)
         Try
-            Dim file As New StreamWriter(Environment.CurrentDirectory & "\ccleaner.ini", False)
+            file = New StreamWriter(Environment.CurrentDirectory & "\ccleaner.ini", False)
 
             file.WriteLine("[Options]")
             For i As Integer = 0 To ccini.keys.Count - 1
-                file.WriteLine(ccini.keys.Values(i))
+                lineList.Add(ccini.keys.Values(i).ToString)
             Next
 
-            file.Close()
+            lineList.Sort()
+
+            For i As Integer = 0 To lineList.Count - 1
+                file.WriteLine(lineList(i))
+            Next
+
             Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
             Console.WriteLine("Finished modifying ccleaner.ini, press any key to return to the winapp2ool menu.")
             Console.ReadKey()
         Catch ex As Exception
             Console.WriteLine(ex.Message)
+        Finally
+            file.Close()
         End Try
     End Sub
-
-    'this function builds the single Options section found in ccleaner.ini and avoids being broken by newlines
-    Public Function buildOptions() As iniSection
-
-        Dim returnSection As New iniSection
-        Dim line As Integer = 0
-        Dim lineList As New List(Of String)
-        Dim countList As New List(Of Integer)
-        Dim r As IO.StreamReader
-        Try
-            r = New IO.StreamReader(Environment.CurrentDirectory & "\ccleaner.ini")
-            Do While (r.Peek() > -1)
-                line += 1
-                Dim currentLine As String = r.ReadLine.ToString
-                If currentLine.Trim <> "" Then
-                    lineList.Add(currentLine)
-                    countList.Add(line)
-                End If
-            Loop
-            r.Close()
-            lineList.Sort()
-            lineList.Remove("[Options]")
-            lineList.Insert(0, "[Options]")
-            returnSection = New iniSection(lineList, countList)
-            Return returnSection
-        Catch ex As Exception
-            Console.WriteLine(ex.ToString)
-        End Try
-        Return returnSection
-    End Function
 
     Public Function prune(ccini As iniSection, winappini As iniFile) As iniSection
 
         'collect the keys we must remove
         Dim tbTrimmed As New List(Of Integer)
+        Console.WriteLine("The following lines with be removed from ccleaner.ini:")
 
         For i As Integer = 0 To ccini.keys.Count - 1
             Dim optionStr As String = ccini.keys.Values(i).ToString
@@ -1728,7 +1827,7 @@ Module ccinidebug
                 optionStr = optionStr.Replace("=True", "")
                 optionStr = optionStr.Replace("=False", "")
                 If Not winappini.sections.ContainsKey(optionStr) Then
-                    Console.WriteLine(ccini.keys.Values(i).ToString & " will be pruned")
+                    Console.WriteLine(ccini.keys.Values(i).lineString)
                     tbTrimmed.Add(ccini.keys.Keys(i))
                 End If
             End If
@@ -1739,26 +1838,15 @@ Module ccinidebug
         For i As Integer = 0 To tbTrimmed.Count - 1
             ccini.keys.Remove(tbTrimmed(i))
         Next
-        Console.WriteLine("Removed " & tbTrimmed.Count & " stale entries.")
+        Console.WriteLine()
+        Console.WriteLine(tbTrimmed.Count & " lines will be removed.")
         Return ccini
     End Function
 End Module
 
-Module downloader
+Module Downloader
 
-    Public Sub download(filename As String, fileLink As String, downloadDir As String)
-        If Not Directory.Exists(downloadDir) Then
-            Directory.CreateDirectory(downloadDir)
-        End If
-        Console.WriteLine("Downloading " & filename & "...")
-        Try
-            Dim dl As New WebClient
-            dl.DownloadFileAsync(New Uri(fileLink), (downloadDir & "\" & filename))
-        Catch ex As Exception
-            Console.WriteLine(ex.ToString)
-        End Try
-        Console.WriteLine("Downloaded " & filename & " to " & downloadDir)
-    End Sub
+    Dim downloadDir As String = Environment.CurrentDirectory & "\winapp2ool downloads"
 
     Public Sub main()
 
@@ -1768,54 +1856,81 @@ Module downloader
         Console.WriteLine("*                                                                                                  *")
         Console.WriteLine("*                                     Menu: Enter a number to select                               *")
         Console.WriteLine("*                                                                                                  *")
-        Console.WriteLine("* 0. Exit             - Return to the winapp2ool menu                                              *")
-        Console.WriteLine("* 1. winapp2.ini      - Downloads the latest winapp2.ini                                           *")
-        Console.WriteLine("* 2. Non-CCleaner     - Downloads the latest winapp2.ini for non-ccleaner applications             *")
-        Console.WriteLine("* 3. winapp2ool       - Downloads the latest winapp2ool.exe                                        *")
-        Console.WriteLine("* 4. directory        - Change the download directory                                              *")
+        Console.WriteLine("* 0. Exit                         - Return to the winapp2ool menu                                  *")
+        Console.WriteLine("* 1. winapp2.ini                  - Download the latest winapp2.ini                                *")
+        Console.WriteLine("* 2. Non-CCleaner                 - Download the latest non-ccleaner winapp2.ini                   *")
+        Console.WriteLine("* 3. winapp2ool                   - Download the latest winapp2ool.exe                             *")
+        Console.WriteLine("* 4. directory                    - Change the download directory                                  *")
         Console.WriteLine("*--------------------------------------------------------------------------------------------------*")
-        Console.Write("Enter a number: ")
 
         Dim exitCode As Boolean = False
-        Dim input As String = Console.ReadLine()
-        Dim downloadDir As String = Environment.CurrentDirectory & "\winapp2ool downloads"
 
         Dim wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
         Dim nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
         Dim toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/Tools/beta/winapp2ool.exe"
 
         Do Until exitCode
+            Console.WriteLine()
+            Console.Write("Enter a number: ")
+            dim input as string = Console.ReadLine
             Select Case input
                 Case "0"
                     Console.WriteLine("Returning to winapp2ool menu...")
                     exitCode = True
                 Case "1"
                     download("winapp2.ini", wa2Link, downloadDir)
-                    Console.WriteLine("Enter a number (0 to exit): ")
-                    input = Console.ReadLine()
                 Case "2"
                     download("winapp2.ini", nonccLink, downloadDir)
-                    Console.WriteLine("Enter a number (0 to exit): ")
-                    input = Console.ReadLine()
                 Case "3"
                     download("winapp2ool.exe", toolLink, downloadDir)
-                    Console.WriteLine("Enter a number (0 to exit): ")
-                    input = Console.ReadLine()
                 Case "4"
                     Console.WriteLine("Current download directory: " & downloadDir)
-                    Console.Write("Enter new directory, or just press enter to keep the current one: ")
-                    Dim newDir As String = Console.ReadLine()
+                    Console.WriteLine()
+                    Console.Write("Enter new directory, 'parent' to move up a level, or leave blank to keep the current one: ")
+                    Dim newDir As String = Console.ReadLine().ToLower
                     If newDir.Trim <> "" Then
-                        downloadDir = newDir
+                        If newDir = "parent" Then
+                            downloadDir = Directory.GetParent(downloadDir).ToString
+                        Else
+                            downloadDir = newDir
+                        End If
                     End If
+                    Console.WriteLine()
                     Console.WriteLine("Current download directory: " & downloadDir)
-                    Console.Write("Enter a number: ")
-                    input = Console.ReadLine()
                 Case Else
-                    Console.Write("Invalid input. Please try again: ")
-                    input = Console.ReadLine()
+                    Console.WriteLine("Invalid input. Please try again. ")
             End Select
         Loop
     End Sub
 
+    Public Sub download(fileName As String, fileLink As String, downloadDir As String)
+
+        Dim givenName As String = fileName
+
+        If Not Directory.Exists(downloadDir) Then
+            Directory.CreateDirectory(downloadDir)
+        End If
+
+        If File.Exists(downloadDir & "\" & fileName) Then
+            Console.WriteLine(fileName & " already exists in the target directory.")
+            Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
+            Dim nfilename As String = Console.ReadLine()
+            If nfilename.Trim <> "" Then
+                fileName = nfilename
+            End If
+        End If
+
+        Console.WriteLine("Downloading " & givenName & "...")
+
+        Try
+            Dim dl As New WebClient
+            dl.DownloadFileAsync(New Uri(fileLink), (downloadDir & "\" & fileName))
+        Catch ex As Exception
+            Console.WriteLine("Error: " & ex.ToString)
+            Console.WriteLine("Please report this error on GitHub")
+            Console.WriteLine()
+        End Try
+        Console.WriteLine("Download complete.")
+        Console.WriteLine("Downloaded " & fileName & " to " & downloadDir)
+    End Sub
 End Module
