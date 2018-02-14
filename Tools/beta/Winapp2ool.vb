@@ -2,7 +2,7 @@
 Imports System.IO
 Module Winapp2ool
 
-    Dim currentVersion As Double = 0.6
+    Dim currentVersion As Double = 0.61
     Dim latestVersion As String
 
     Dim checkedForUpdates As Boolean = False
