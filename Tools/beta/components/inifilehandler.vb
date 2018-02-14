@@ -98,6 +98,7 @@ Public Module iniFileHandler
             Dim iExitCode As Boolean = False
 
             tmenu(dir & " does not exist.")
+            menu("Options", "c")
             menu("Enter '0' to return to the menu", "l")
             menu("Enter '1' to create it", "l")
             menu("Leave blank to specify a new directory", "l")
@@ -133,6 +134,7 @@ Public Module iniFileHandler
         menu("Current File: ", "c")
         menu(name.Split(CChar("\"))(1), "l")
         menu(menuStr03)
+        menu("Options", "c")
         menu("Enter a new file name", "l")
         menu("Enter '0' to return to the menu", "l")
         Dim menuCounter As Integer = 1
@@ -175,6 +177,7 @@ Public Module iniFileHandler
             menu("Current File: ", "c")
             menu(name.Split(CChar("\"))(1), "l")
             menu(menuStr03)
+            menu("Options", "c")
             menu("Enter '0' to return to the menu", "l")
             menu("Enter '1' to change the file name", "l")
             menu("Enter '2' to change the directory", "l")
@@ -213,6 +216,7 @@ Public Module iniFileHandler
         moMenu("Current Directory: ")
         menu(dir, "l")
         menu(menuStr03)
+        menu("Options", "c")
         menu("Enter a new directory path", "l")
         menu("Enter 'parent' to move up a level", "l")
         menu("Enter '0' to return to the menu", "l")
@@ -237,6 +241,7 @@ Public Module iniFileHandler
         moMenu("Current Directory: ")
         menu(dir, "l")
         menu(menuStr03)
+        menu("Options", "c")
         menu("Enter '1' to change directory", "l")
         menu("Enter anything else to confirm directory change", "l")
         menu(menuStr02)
@@ -419,17 +424,18 @@ Public Module iniFileHandler
             Dim comparedList As New List(Of String)
 
             For i As Integer = 0 To Me.sections.Count - 1
+                Dim curSection As iniSection = Me.sections.Values(i)
+                Dim curName As String = curSection.name
                 Try
-                    Dim curSection As iniSection = Me.sections.Values(i)
-                    Dim curName As String = curSection.name
                     If secondFile.sections.Keys.Contains(curName) And Not comparedList.Contains(curName) Then
                         Dim sSection As iniSection = secondFile.sections(curName)
                         If Not curSection.compareTo(sSection) Then
-                            outList.Add(getDiff(secondFile.sections.Values(i), "modified."))
+                            outList.Add(getDiff(sSection, "modified."))
                         End If
                         comparedList.Add(curName)
                     ElseIf Not secondFile.sections.Keys.Contains(curName) Then
                         outList.Add(getDiff(curSection, "removed."))
+                        comparedList.Add(curName)
                     End If
                 Catch ex As Exception
                     Console.WriteLine("Error: " & ex.ToString)
@@ -511,7 +517,6 @@ Public Module iniFileHandler
             If keys.Count <> secondSection.keys.Count Then
                 Return False
             Else
-                Dim isdiff As Boolean = False
                 For i As Integer = 0 To keys.Count - 1
                     If Not keys(i).compareTo(secondSection.keys(i)) Then
                         Return False
@@ -586,12 +591,7 @@ Public Module iniFileHandler
         End Function
 
         Public Function compareTo(secondKey As iniKey) As Boolean
-
-            If Not Me.toString.Equals(secondKey.toString) Then
-                Return False
-            Else
-                Return True
-            End If
+            Return Me.toString.Equals(secondKey.toString)
         End Function
     End Class
 
