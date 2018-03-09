@@ -12,16 +12,16 @@ Module CCiniDebug
     Private Sub printMenu()
         If Not menuHasTopper Then
             menuHasTopper = True
-            tmenu("CCiniDebug")
+            printMenuLine(tmenu("CCiniDebug"))
         End If
-        menu(menuStr03, "")
-        menu("This tool will sort alphabetically the contents of ccleaner.ini", "c")
-        menu("and can also prune stale winapp2.ini entries from it", "c")
-        menu(menuStr04)
-        menu("0. Exit                          - Return to the winapp2ool menu", "l")
-        menu("1. Run (default)                 - Prune and sort ccleaner.ini", "l")
-        menu("2. Run (sort only)               - Only sort ccleaner.ini", "l")
-        menu(menuStr02, "")
+        printMenuLine(menuStr03)
+        printMenuLine("This tool will sort alphabetically the contents of ccleaner.ini", "c")
+        printMenuLine("and can also prune stale winapp2.ini entries from it", "c")
+        printMenuLine(menuStr04)
+        printMenuLine("0. Exit                          - Return to the winapp2ool menu", "l")
+        printMenuLine("1. Run (default)                 - Prune and sort ccleaner.ini", "l")
+        printMenuLine("2. Run (sort only)               - Only sort ccleaner.ini", "l")
+        printMenuLine(menuStr02)
 
     End Sub
 
@@ -47,30 +47,26 @@ Module CCiniDebug
                         Console.Clear()
 
                         validate(ccDir, ccName, exitCode, "\ccleaner.ini", "")
-                        If exitCode Then
-                            Exit Sub
-                        End If
+                        If exitCode Then Exit Sub
                         ccini = New iniFile(ccDir, ccName)
 
                         validate(dir, name, exitCode, "\winapp2.ini", "")
-                        If exitCode Then
-                            Exit Sub
-                        End If
+                        If exitCode Then Exit Sub
                         winappini = New iniFile(dir, name)
 
-                        tmenu("CCiniDebug Results")
-                        mMenu("Pruning...")
+                        printMenuLine(tmenu("CCiniDebug Results"))
+                        printMenuLine(mMenu("Pruning..."))
                         ccini.sections("Options") = prune(ccini.sections("Options"), winappini)
                         Dim iexitcode As Boolean = False
                         Console.WriteLine()
-                        tmenu("Save File?")
+                        printMenuLine(tmenu("Save File?"))
                         Do Until iexitcode
-                            menu(menuStr03)
-                            menu("Options", "c")
-                            menu("Enter '0' to return to the menu", "l")
-                            menu("Enter '1' to change the save file name", "l")
-                            menu("Leave blank to save as " & ccName.Split(CChar("\"))(1), "l")
-                            menu(menuStr02)
+                            printMenuLine(menuStr03)
+                            printMenuLine("Options", "c")
+                            printMenuLine("Enter '0' to return to the menu", "l")
+                            printMenuLine("Enter '1' to change the save file name", "l")
+                            printMenuLine("Leave blank to save as " & ccName.Split(CChar("\"))(1), "l")
+                            printMenuLine(menuStr02)
                             Dim in2 As String = Console.ReadLine
                             Select Case in2
                                 Case "0"
@@ -82,7 +78,7 @@ Module CCiniDebug
                                     iexitcode = True
                                 Case Else
                                     Console.Clear()
-                                    tmenu("Invalid input. Please try again.")
+                                    printMenuLine(tmenu("Invalid input. Please try again."))
                             End Select
                         Loop
                         writeCCini(ccini.sections("Options"))
@@ -95,12 +91,10 @@ Module CCiniDebug
                         exitCode = True
                     Case Else
                         Console.Clear()
-                        tmenu("Invalid input. Please try again.")
+                        printMenuLine(tmenu("Invalid input. Please try again."))
                 End Select
             Catch ex As Exception
-                Console.WriteLine("Error: " & ex.ToString)
-                Console.WriteLine("Please report this error on GitHub")
-                Console.WriteLine()
+                exc(ex)
             End Try
         Loop
     End Sub
@@ -115,12 +109,10 @@ Module CCiniDebug
             file = New StreamWriter(Environment.CurrentDirectory & ccName, False)
             file.Write(ccini.ToString)
             file.Close()
-            bmenu("File " & ccName.Split(CChar("\"))(1) & " saved. Press any key to return to the winapp2ool menu.", "c")
+            printMenuLine(bmenu("File " & ccName.TrimStart(CChar("\")) & " saved. Press any key to return to the winapp2ool menu.", "c"))
             Console.ReadKey()
         Catch ex As Exception
-            Console.WriteLine("Error: " & ex.ToString)
-            Console.WriteLine("Please report this error on GitHub")
-            Console.WriteLine()
+            exc(ex)
         End Try
     End Sub
 
@@ -128,8 +120,8 @@ Module CCiniDebug
 
         'collect the keys we must remove
         Dim tbTrimmed As New List(Of Integer)
-        menu("The following lines with be removed from ccleaner.ini:", "l")
-        menu(menuStr01)
+        printMenuLine("The following lines with be removed from ccleaner.ini:", "l")
+        printMenuLine(menuStr01)
         For i As Integer = 0 To ccini.keys.Count - 1
             Dim optionStr As String = ccini.keys.Values(i).toString
 
@@ -139,7 +131,7 @@ Module CCiniDebug
                 optionStr = optionStr.Replace("=True", "")
                 optionStr = optionStr.Replace("=False", "")
                 If Not winappini.sections.ContainsKey(optionStr) Then
-                    menu(ccini.keys.Values(i).lineString, "l")
+                    printMenuLine(ccini.keys.Values(i).lineString, "l")
                     tbTrimmed.Add(ccini.keys.Keys(i))
                 End If
             End If
@@ -150,9 +142,9 @@ Module CCiniDebug
         For i As Integer = 0 To tbTrimmed.Count - 1
             ccini.keys.Remove(tbTrimmed(i))
         Next
-        menu(menuStr01)
-        menu(tbTrimmed.Count & " lines will be removed.", "l")
-        menu(menuStr02)
+        printMenuLine(menuStr01)
+        printMenuLine(tbTrimmed.Count & " lines will be removed.", "l")
+        printMenuLine(menuStr02)
         Return ccini
     End Function
 End Module

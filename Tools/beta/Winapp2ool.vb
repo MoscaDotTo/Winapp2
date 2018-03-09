@@ -2,7 +2,7 @@
 Imports System.IO
 Module Winapp2ool
 
-    Dim currentVersion As Double = 0.61
+    Dim currentVersion As Double = 0.7
     Dim latestVersion As String
 
     Dim checkedForUpdates As Boolean = False
@@ -16,33 +16,35 @@ Module Winapp2ool
 
     Private Sub printMenu()
         If menuHasTopper Then
-            mMenu("Winapp2ool - A multitool for winapp2.ini and related files")
+            printMenuLine(mMenu("Winapp2ool - A multitool for winapp2.ini and related files"))
         Else
-            tmenu("Winapp2ool - A multitool for winapp2.ini and related files")
-            menu(menuStr03)
+            printMenuLine(tmenu("Winapp2ool - A multitool for winapp2.ini and related files"))
+            printMenuLine(menuStr03)
             menuHasTopper = True
         End If
-        menu("Menu: Enter a number to select", "c")
+        printMenuLine("Menu: Enter a number to select", "c")
         If updateIsAvail Then
-            menu(menuStr01, "")
-            menu("A new version of Winapp2ool is available!", "c")
-            menu("Current:   v" & currentVersion, "c")
-            menu("Available: v" & latestVersion, "c")
+            printMenuLine(menuStr01)
+            printMenuLine("A new version of Winapp2ool is available!", "c")
+            printMenuLine("Current:   v" & currentVersion, "c")
+            printMenuLine("Available: v" & latestVersion, "c")
         End If
         If waUpdateIsAvail And Not localWa2Ver = "0" Then
-            menu(menuStr01, "")
-            menu("A new version of winapp2.ini is available!", "c")
-            menu("Current:   v" & localWa2Ver, "c")
-            menu("Available: v" & latestWa2Ver, "c")
+            printMenuLine(menuStr01)
+            printMenuLine("A new version of winapp2.ini is available!", "c")
+            printMenuLine("Current:   v" & localWa2Ver, "c")
+            printMenuLine("Available: v" & latestWa2Ver, "c")
         End If
-        menu(menuStr01, "")
-        menu("0. Exit             - Exit the application", "l")
-        menu("1. WinappDebug      - Load the WinappDebug tool to check for errors in winapp2.ini", "l")
-        menu("2. CCiniDebug       - Load the CCiniDebug tool to sort and trim ccleaner.ini", "l")
-        menu("3. Diff             - Load the Diff tool to observe the changes between two winapp2.ini files", "l")
-        menu("4. Trim             - Load the Trim tool to debloat winapp2.ini for your system", "l")
-        menu("5. Downloader       - Load the Downloader tool to download files from the Winapp2 GitHub", "l")
-        menu(menuStr02, "")
+        printMenuLine(menuStr01)
+        printMenuLine("0. Exit             - Exit the application", "l")
+        printMenuLine("1. WinappDebug      - Check for and correct errors in winapp2.ini", "l")
+        printMenuLine("2. Trim             - Debloat winapp2.ini for your system", "l")
+        printMenuLine("3. Merge            - Merge the contents of an ini file into winapp2.ini", "l")
+        printMenuLine("4. Diff             - Observe the changes between two winapp2.ini files", "l")
+        printMenuLine("5. CCiniDebug       - Sort and trim ccleaner.ini", "l")
+        printMenuLine(menuStr01)
+        printMenuLine("6. Downloader       - Download files from the Winapp2 GitHub", "l")
+        printMenuLine(menuStr02)
     End Sub
 
     Public Sub main()
@@ -65,26 +67,30 @@ Module Winapp2ool
                 Case "1"
                     WinappDebug.main()
                     Console.Clear()
-                    tmenu("Finished running WinappDebug")
+                    printMenuLine(tmenu("Finished running WinappDebug"))
                 Case "2"
-                    CCiniDebug.Main()
-                    Console.Clear()
-                    tmenu("Finished running CCiniDebug")
-                Case "3"
-                    Diff.main()
-                    Console.Clear()
-                    tmenu("Finished running Diff")
-                Case "4"
                     Trim.main()
                     Console.Clear()
-                    tmenu("Finished running Trim")
+                    printMenuLine(tmenu("Finished running Trim"))
+                Case "3"
+                    Merge.main()
+                    Console.Clear()
+                    printMenuLine(tmenu("Finished running Merge"))
+                Case "4"
+                    Diff.main()
+                    Console.Clear()
+                    printMenuLine(tmenu("Finished running Diff"))
                 Case "5"
+                    CCiniDebug.Main()
+                    Console.Clear()
+                    printMenuLine(tmenu("Finished running CCiniDebug"))
+                Case "6"
                     Downloader.main()
                     Console.Clear()
-                    tmenu("Finished running Downloader")
+                    printMenuLine(tmenu("Finished running Downloader"))
                 Case Else
                     Console.Clear()
-                    tmenu("Invalid input. Please try again.")
+                    printMenuLine(tmenu("Invalid input. Please try again."))
             End Select
         Loop
     End Sub
@@ -99,7 +105,7 @@ Module Winapp2ool
             latestWa2Ver = getRemoteFileDataAtLineNum(wa2Link, 1).Split(CChar(" "))(2)
             If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then
                 localWa2Ver = "0"
-                tmenu("/!\ Update check failed. /!\")
+                printMenuLine(tmenu("/!\ Update check failed. /!\"))
                 menuHasTopper = True
             Else
                 localWa2Ver = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", 1).Split(CChar(" "))(2)
@@ -109,9 +115,15 @@ Module Winapp2ool
             End If
 
         Catch ex As Exception
-            tmenu("/!\ Update check failed. /!\")
+            printMenuLine(tmenu("/!\ Update check failed. /!\"))
             menuHasTopper = True
         End Try
+    End Sub
+
+    Public Sub exc(ByRef ex As Exception)
+        Console.WriteLine("Error: " & ex.ToString)
+        Console.WriteLine("Please report this error on GitHub")
+        Console.WriteLine()
     End Sub
 
 End Module

@@ -1,20 +1,34 @@
 ﻿Option Strict On
 Module MenuMaker
 
+    'basic menu frames
     Public menuStr00 As String = " ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗"
     Public menuStr01 As String = " ║                                                                                                                    ║"
     Public menuStr02 As String = " ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
     Public menuStr03 As String = " ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣"
-    Public menuStr04 As String = mkMenuLine(menuStr01, "") & Environment.NewLine & mkMenuLine("Menu: Enter a number to select", "c") & Environment.NewLine & mkMenuLine(menuStr01, "")
+    Public menuStr04 As String = menu(menuStr01) & Environment.NewLine & mkMenuLine("Menu: Enter a number to select", "c") & Environment.NewLine & mkMenuLine(menuStr01, "")
 
-    Public Sub menu(lineString As String)
-        Console.WriteLine(mkMenuLine(lineString, ""))
+    'constructs a menu string 
+    Public Function menu(lineString As String) As String
+        Return mkMenuLine(lineString, "")
+    End Function
+
+    'prints a menu string
+    Public Sub printMenuLine(lineString As String)
+        Console.WriteLine(menu(lineString))
     End Sub
 
-    Public Sub menu(lineString As String, align As String)
-        Console.WriteLine(mkMenuLine(lineString, align))
+    'constructs a menu string with alignment
+    Public Function menu(lineString As String, align As String) As String
+        Return mkMenuLine(lineString, align)
+    End Function
+
+    'prints a menu string with alignment
+    Public Sub printMenuLine(lineString As String, align As String)
+        Console.WriteLine(menu(lineString, align))
     End Sub
 
+    'Flip the exitCode status so we can return to menu when desired
     Public Sub revertMenu(ByRef exitCode As Boolean)
         If exitCode Then
             exitCode = False
@@ -23,6 +37,7 @@ Module MenuMaker
         End If
     End Sub
 
+    'Construct a menu line properly fit to the width of the console
     Public Function mkMenuLine(line As String, align As String) As String
         If line.Length >= 119 Then
             Return line
@@ -52,29 +67,33 @@ Module MenuMaker
     End Function
 
     'print a box with a single message inside it
-    Public Sub bmenu(text As String, align As String)
-        menu(menuStr00)
-        menu(text, align)
-        menu(menuStr02)
-    End Sub
+    Public Function bmenu(text As String, align As String) As String
+        Dim out As String = menu(menuStr00) & Environment.NewLine
+        out += menu(text, align) & Environment.NewLine
+        out += menu(menuStr02)
+        Return out
+    End Function
 
     'print the top most part of the menu with no bottom
-    Public Sub tmenu(text As String)
-        menu(menuStr00)
-        menu(text, "c")
-    End Sub
+    Public Function tmenu(text As String) As String
+        Dim out As String = menu(menuStr00) & Environment.NewLine
+        out += menu(text, "c")
+        Return out
+    End Function
 
     'print out a middle menu box with a bottom bar
-    Public Sub mMenu(text As String)
-        menu(menuStr03)
-        menu(text, "c")
-        menu(menuStr03)
-    End Sub
+    Public Function mMenu(text As String) As String
+        Dim out As String = menu(menuStr03) & Environment.NewLine
+        out += menu(text, "c") & Environment.NewLine
+        out += menu(menuStr03)
+        Return out
+    End Function
 
     'print out a middle menu box with no bottom bar
-    Public Sub moMenu(text As String)
-        menu(menuStr03)
-        menu(text, "c")
-    End Sub
+    Public Function moMenu(text As String) As String
+        Dim out As String = menu(menuStr03) & Environment.NewLine
+        out += menu(text, "c")
+        Return out
+    End Function
 
 End Module
