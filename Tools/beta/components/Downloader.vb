@@ -77,6 +77,11 @@ Module Downloader
         Loop
     End Sub
 
+    'fetch winapp2.ini from github (ncc or otherwise)
+    Public Function getRemoteWinapp(ncc As Boolean) As iniFile
+        Return If(ncc, getRemoteIniFile(nonccLink, "\winapp2.ini"), getRemoteIniFile(wa2Link, "\winapp2.ini"))
+    End Function
+
     Public Function getFileDataAtLineNum(address As String, lineNum As Integer) As String
         Dim reader As StreamReader = Nothing
         Try
@@ -102,6 +107,7 @@ Module Downloader
             Return New iniFile(splitFile, name)
         Catch ex As Exception
             exc(ex)
+            Return Nothing
         End Try
     End Function
 
@@ -118,6 +124,7 @@ Module Downloader
 
     End Function
 
+    'Load a remote file and toss it into getTargetLine, return the targeted line as a string
     Public Function getRemoteFileDataAtLineNum(address As String, lineNum As Integer) As String
         Dim reader As StreamReader = Nothing
         Try
@@ -139,23 +146,28 @@ Module Downloader
         End Try
     End Function
 
+    Public Sub remoteDownload(dir As String, name As String, link As String)
+        download(name, link, dir)
+    End Sub
+
     Private Sub download(fileName As String, fileLink As String, downloadDir As String)
 
         Dim givenName As String = fileName
 
-        If Not Directory.Exists(downloadDir) Then
-            Directory.CreateDirectory(downloadDir)
-        End If
+        ' Don't try to download to a place that doesn't exist
+        If Not Directory.Exists(downloadDir) Then Directory.CreateDirectory(downloadDir)
 
-        If File.Exists(downloadDir & "\" & fileName) Then
+        'Prompt to overwrite files if they exist already
+        If File.Exists(downloadDir & "\" & fileName) And Not suppressOutput Then
             Console.WriteLine(fileName & " already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
             Dim nfilename As String = Console.ReadLine()
             If nfilename.Trim <> "" Then fileName = nfilename
         End If
 
-        Console.WriteLine("Downloading " & givenName & "...")
+        cwl("Downloading " & givenName & "...")
 
+        'Preform the actual download
         Try
             Dim dl As New WebClient
             dl.DownloadFile(New Uri(fileLink), downloadDir & "\" & fileName)
@@ -163,7 +175,7 @@ Module Downloader
             exc(ex)
             Console.ReadKey()
         End Try
-        Console.WriteLine("Download complete.")
-        Console.WriteLine("Downloaded " & fileName & " to " & downloadDir)
+        cwl("Download complete.")
+        cwl("Downloaded " & fileName & " to " & downloadDir)
     End Sub
 End Module

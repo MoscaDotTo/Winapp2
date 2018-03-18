@@ -3,15 +3,12 @@ Imports System.IO
 
 Public Module Trim
 
-    Dim dir As String = Environment.CurrentDirectory
-    Dim name As String = "\winapp2.ini"
-    Dim waName As String = "\winapp2.ini"
-    Dim waDir As String = Environment.CurrentDirectory
+    Dim saveDir As String = Environment.CurrentDirectory
+    Dim saveName As String = "\winapp2.ini"
+    Dim winappName As String = "\winapp2.ini"
+    Dim winappDir As String = Environment.CurrentDirectory
     Dim winVer As Double = getWinVer()
-    Dim detChrome As List(Of String)
-
-    'This boolean will prevent us from printing so we can call inner functions silently (eg. trim from commandline), WIP
-    Public suppressOutput As Boolean
+    Dim detChrome As New List(Of String)
 
     Dim hasMenuTopper As Boolean = False
     Dim exitCode As Boolean = False
@@ -22,7 +19,7 @@ Public Module Trim
         printMenuLine("This tool will trim winapp2.ini such that it contains only entries relevant to your machine,", "c")
         printMenuLine("greatly reducing both application load time and the winapp2.ini file size.", "c")
         printMenuLine(menuStr04)
-        printMenuLine("0. Exit                - Return to the winapp2ool menu", "l")
+        printMenuLine("0. Exit               - Return to the winapp2ool menu", "l")
         printMenuLine("1. Run (default)      - Trim winapp2.ini and overwrite the existing file", "l")
         printMenuLine("2. Run (custom)       - Change the save directory and/or file name", "l")
         printMenuLine("3. Run (download)     - Download and trim the latest winapp2.ini and save it to the current folder", "l")
@@ -30,13 +27,6 @@ Public Module Trim
     End Sub
 
     Public Sub main()
-        detChrome = New List(Of String)
-        detChrome.AddRange(New String() {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe", "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe",
-                           "%LocalAppData%\Google\Chrome\Application\chrome.exe", "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe", "%ProgramFiles%\SRWare Iron\iron.exe",
-                           "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe", "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
-                           "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"})
-
-
         exitCode = False
         hasMenuTopper = False
         Console.Clear()
@@ -53,21 +43,12 @@ Public Module Trim
                     Console.WriteLine("Returning to winapp2ool menu...")
                     exitCode = True
                 Case "1", ""
-                    suppressOutput = False
                     initTrim()
-                    revertMenu(exitCode)
-                    Console.Clear()
                 Case "2"
-                    suppressOutput = False
-                    fChooser(dir, name, exitCode, "\winapp2.ini", "\winapp2-trimmed.ini")
+                    fChooser(saveDir, saveName, exitCode, "\winapp2.ini", "\winapp2-trimmed.ini")
                     initTrim()
-                    revertMenu(exitCode)
-                    Console.Clear()
                 Case "3"
-                    suppressOutput = False
                     initDownloadedTrim(Downloader.wa2Link, "\winapp2.ini")
-                    revertMenu(exitCode)
-                    Console.Clear()
                 Case Else
                     Console.Write("Invalid input. Please try again: ")
                     input = Console.ReadLine
@@ -75,10 +56,85 @@ Public Module Trim
         Loop
     End Sub
 
-    'Grab a remote ini file and toss it into the trimmer
-    Public Sub initDownloadedTrim(link As String, name As String)
-        Dim winapp2 As New winapp2file(getRemoteIniFile(link, name))
+    Public Sub remoteTrim(wd As String, wn As String, sd As String, sn As String, download As Boolean, ncc As Boolean)
+        'Handle input taken from the command line to initiate a trim
+        saveDir = sd
+        saveName = sn
+        winappDir = wd
+        winappName = wn
+        If download Then
+            Dim link As String = If(ncc, nonccLink, wa2Link)
+            initDownloadedTrim(link, "\winapp2.ini")
+        Else
+            initTrim()
+        End If
+    End Sub
+
+    Private Sub initTrim()
+        'Validate winapp2.ini's existence, load it as an inifile and convert it to a winapp2file before passing it to trim
+        Dim winappfile As iniFile = validate(winappDir, winappName, exitCode, "\winapp2.ini", "\winapp2-2.ini")
+        If exitCode Then Exit Sub
+        Dim winapp2 As New winapp2file(winappfile)
         trim(winapp2)
+        revertMenu(exitCode)
+        Console.Clear()
+    End Sub
+
+
+    Public Sub initDownloadedTrim(link As String, name As String)
+        'Grab a remote ini file and toss it into the trimmer
+        trim(New winapp2file(getRemoteIniFile(link, name)))
+        revertMenu(exitCode)
+    End Sub
+
+    Private Sub trim(winapp2 As winapp2file)
+        Console.Clear()
+        printMenuLine("Trimming...", "l")
+
+        detChrome.AddRange(New String() {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe", "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe",
+                           "%LocalAppData%\Google\Chrome\Application\chrome.exe", "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe", "%ProgramFiles%\SRWare Iron\iron.exe",
+                           "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe", "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
+                           "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"})
+
+
+        'Save our inital # of entries
+        Dim entryCountBeforeTrim As Integer = winapp2.count
+
+        'Process our entries
+        processEntryList(winapp2.cEntriesW)
+        processEntryList(winapp2.fxEntriesW)
+        processEntryList(winapp2.tbEntriesW)
+        processEntryList(winapp2.mEntriesW)
+
+        'Update the internal inifile objects
+        winapp2.rebuildToIniFiles()
+
+        'Sort the file so that entries are written back alphabetically
+        winapp2.sortInneriniFiles()
+
+        'Print out the results from the trim
+        printMenuLine("...done.", "l")
+        Console.Clear()
+        printMenuLine(tmenu("Trim Complete"))
+        printMenuLine(moMenu("Results"))
+        printMenuLine(menuStr03)
+        printMenuLine("Number of entries before trimming: " & entryCountBeforeTrim, "l")
+        printMenuLine("Number of entries after trimming: " & winapp2.count, "l")
+        printMenuLine(menuStr01)
+        printMenuLine("Press any key to return to the winapp2ool menu", "l")
+        printMenuLine(menuStr02)
+
+        Try
+            'Rewrite our rebuilt ini back to disk
+            Dim file As New StreamWriter(saveDir & saveName, False)
+
+            file.Write(winapp2.winapp2string())
+            file.Close()
+        Catch ex As Exception
+            exc(ex)
+        Finally
+            If Not suppressOutput Then Console.ReadKey()
+        End Try
     End Sub
 
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
@@ -88,12 +144,10 @@ Public Module Trim
         Dim hasMetDetOS As Boolean = False
         Dim exists As Boolean = False
 
-        'Process the DetectOS if we have one, return true if we meet its criteria
+        'Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         If hasDetOS Then
-            If detOSCheck(entry.detectOS(0).value) Then
-                hasMetDetOS = True
-            Else Return False
-            End If
+            hasMetDetOS = detOSCheck(entry.detectOS(0).value)
+            If Not hasMetDetOS Then Return False 
         End If
 
         'Process our SpecialDetect if we have one
@@ -126,67 +180,6 @@ Public Module Trim
         removeEntries(entryList, sectionsToBePruned)
     End Sub
 
-    Private Sub initTrim()
-        'Validate winapp2.ini's existence, load it as an inifile and convert it to a winapp2file before passing it to trim
-        validate(waDir, waName, exitCode, "\winapp2.ini", "\winapp2-2.ini")
-        If exitCode Then Exit Sub
-        Dim winappfile As New iniFile(waDir, waName)
-        Dim winapp2 As New winapp2file(winappfile)
-        trim(winapp2)
-    End Sub
-
-    Private Sub trim(winapp2 As winapp2file)
-        Console.Clear()
-        If Not suppressOutput Then
-            printMenuLine(tmenu("Trim"))
-            printMenuLine("Trimming...", "l")
-        End If
-
-        'Save our inital # of entries
-        Dim entryCountBeforeTrim As Integer = winapp2.count
-
-        'Process our entries
-        processEntryList(winapp2.cEntriesW)
-        processEntryList(winapp2.fxEntriesW)
-        processEntryList(winapp2.tbEntriesW)
-        processEntryList(winapp2.mEntriesW)
-
-        'Update the internal inifile objects
-        winapp2.rebuildToIniFiles()
-
-        'Sort the file so that entries are written back alphabetically
-        winapp2.sortInneriniFiles()
-
-        If Not suppressOutput Then printTrimComplete(entryCountBeforeTrim, winapp2.count)
-
-        Try
-            'Rewrite our rebuilt ini back to disk
-            Dim file As New StreamWriter(dir & name, False)
-
-            file.Write(winapp2.winapp2string())
-            file.Close()
-        Catch ex As Exception
-            exc(ex)
-        Finally
-            If Not suppressOutput Then Console.ReadKey()
-        End Try
-    End Sub
-
-    Private Sub printTrimComplete(before As Integer, after As Integer)
-        'Print out the results from the trim
-        printMenuLine("...done.", "l")
-        Console.Clear()
-        printMenuLine(tmenu("Trim Complete"))
-        printMenuLine(moMenu("Results"))
-        printMenuLine(menuStr03)
-        printMenuLine("Number of entries before trimming: " & before, "l")
-        printMenuLine("Number of entries after trimming: " & after, "l")
-        printMenuLine(menuStr01)
-        printMenuLine("Press any key to return to the winapp2ool menu", "l")
-        printMenuLine(menuStr02)
-
-    End Sub
-
     Private Function checkSpecialDetects(ByVal key As iniKey) As Boolean
         'Return true if a SpecialDetect location exists
 
@@ -196,56 +189,55 @@ Public Module Trim
                     If checkExist(path) Then Return True
                 Next
             Case "DET_MOZILLA"
-                If checkExist("%AppData%\Mozilla\Firefox") Then Return True
+                Return checkFileExist("%AppData%\Mozilla\Firefox")
             Case "DET_THUNDERBIRD"
-                If checkExist("%AppData%\Thunderbird") Then Return True
+                Return checkFileExist("%AppData%\Thunderbird")
             Case "DET_OPERA"
-                If checkExist("%AppData%\Opera Software") Then Return True
+                Return checkFileExist("%AppData%\Opera Software")
         End Select
+
+        'If we didn't return above, SpecialDetect definitely doesn't exist
         Return False
     End Function
 
     Private Function checkExist(key As String) As Boolean
         'The only remaining use for this is the DET_CHROME which has a mix of file and registry detections 
-
-        If key.StartsWith("HK") Then
-            Return checkRegExist(key)
-        Else
-            Return checkFileExist(key)
-        End If
+        Return If(key.StartsWith("HK"), checkRegExist(key), checkFileExist(key))
     End Function
 
     Private Function checkRegExist(key As String) As Boolean
         'Returns True if a given Detect key exists on the system, otherwise returns False
 
         Dim dir As String = key
-        Dim splitDir As String() = dir.Split(Convert.ToChar("\"))
+        Dim splitDir As String() = dir.Split(CChar("\"))
 
         Try
+            'splitDir(0) sould contain the registry hive location, remove it and query the hive for existence
             Select Case splitDir(0)
                 Case "HKCU"
                     dir = dir.Replace("HKCU\", "")
-                    If Microsoft.Win32.Registry.CurrentUser.OpenSubKey(dir, True) IsNot Nothing Then Return True
+                    Return Microsoft.Win32.Registry.CurrentUser.OpenSubKey(dir, True) IsNot Nothing
                 Case "HKLM"
                     dir = dir.Replace("HKLM\", "")
                     If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing Then
                         Return True
                     Else
                         Dim rDir As String = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
-                        If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(rDir, True) IsNot Nothing Then Return True
+                        Return Microsoft.Win32.Registry.LocalMachine.OpenSubKey(rDir, True) IsNot Nothing
                     End If
                 Case "HKU"
                     dir = dir.Replace("HKU\", "")
-                    If Microsoft.Win32.Registry.Users.OpenSubKey(dir, True) IsNot Nothing Then Return True
+                    Return Microsoft.Win32.Registry.Users.OpenSubKey(dir, True) IsNot Nothing
                 Case "HKCR"
                     dir = dir.Replace("HKCR\", "")
-                    If Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(dir, True) IsNot Nothing Then Return True
+                    Return Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(dir, True) IsNot Nothing
             End Select
         Catch ex As Exception
             'The most common (only?) exception here is a permissions one, so assume true if we hit
             'because a permissions exception implies the key exists anyway.
             Return True
         End Try
+        'If we didn't return anything above, registry location probably doesn't exist
         Return False
     End Function
 
@@ -292,13 +284,8 @@ Public Module Trim
     Private Function detOSCheck(value As String) As Boolean
         'Return True if we satisfy the DetectOS criteria, otherwise return False
 
-        Dim splitKey As String() = value.Split(Convert.ToChar("|"))
-
-        If value.StartsWith("|") Then
-            Return Not winVer > Double.Parse(splitKey(1))
-        Else
-            Return Not winVer < Double.Parse(splitKey(0))
-        End If
+        Dim splitKey As String() = value.Split(CChar("|"))
+        Return If(value.StartsWith("|"), Not winVer > Double.Parse(splitKey(1)), Not winVer < Double.Parse(splitKey(0)))
     End Function
 
     Private Function getWinVer() As Double

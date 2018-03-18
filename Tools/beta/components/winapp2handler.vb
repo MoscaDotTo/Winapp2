@@ -59,26 +59,28 @@
 
             Dim chIsDig As Boolean = Char.IsDigit(myChars(chind))
 
+            If Not chIsDig Then lastCharWasNum = False
+
             'observe if the next character is a number, we only want to pad instances of single digit numbers
-            If chind < myChars.Count - 1 Then
-                nextCharIsNum = Char.IsDigit(item(chind + 1))
-            Else
-                nextCharIsNum = False
+            nextCharIsNum = If(chind < myChars.Count - 1, Char.IsDigit(item(chind + 1)), False)
+
+            'At this point, if we're not a digit, we can move on to the next step in the loop
+            If Not chIsDig Then
+                'If the next character isn't a digit either, we can skip it
+                If Not nextCharIsNum Then
+                    chind += 1
+                End If
+                Continue For
             End If
 
-            'observe the previous character for the same reason
+            'observe the previous character to see if it was a digit (since at this point, we are a digit)
             If Not lastCharWasNum Then
-                If chIsDig Then
-                    lastCharWasNum = True
-                    If Not nextCharIsNum Then
-                        prefixIndicies.Add(chind)
-                    End If
-                Else
-                    lastCharWasNum = False
-                End If
-            Else
-                If Not chIsDig Then
-                    lastCharWasNum = False
+                lastCharWasNum = True
+
+                'If the next character isn't a number and the last character wasn't a number and we are, we've found an instance of a single digit number
+                If Not nextCharIsNum Then
+                    prefixIndicies.Add(chind)
+                    chind += 1
                 End If
             End If
         Next
@@ -88,14 +90,10 @@
 
             Dim tmp As String = item
 
+            'Reverse the indicies so we can insert them without adjustment
+            prefixIndicies.Reverse()
             For j As Integer = 0 To prefixIndicies.Count - 1
-
                 tmp = tmp.Insert(prefixIndicies(j), "0")
-
-                'each time we insert our leading zero, remember to adjust the remaining indicies by 1
-                For k As Integer = j + 1 To prefixIndicies.Count - 1
-                    prefixIndicies(k) += 1
-                Next
             Next
 
             'Keep track of any naming changes we've done 
@@ -110,7 +108,6 @@
             listToBeSorted(listToBeSorted.IndexOf(item)) = tmp
 
         End If
-
     End Sub
 
     Public Sub removeEntries(ByRef sectionList As List(Of winapp2entry), ByRef removalList As List(Of winapp2entry))
@@ -155,7 +152,13 @@
 
             'Determine if we're the Non-CCleaner variant of the ini
             isNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
-            version = file.comments.Values(0).comment
+
+            If file.comments.Count = 0 Then
+                version = "; version 000000"
+            Else
+                version = IIf(Not file.comments.Values(0).comment.ToLower.Contains("version"), "; version 000000", file.comments.Values(0).comment)
+            End If
+
             'record the full list of all the entry names
             entryList = New List(Of String)
 
@@ -211,59 +214,46 @@
         End Sub
 
         Public Function count() As Integer
+            'return the total count of entries stored in the internal inifiles
             Return cEntries.sections.Count + tbEntries.sections.Count + fxEntries.sections.Count + mEntries.sections.Count
         End Function
 
         Public Sub sortInneriniFiles()
+            'sort the internal inifiles in winapp2 entry precendence order
             sortIniFile(cEntries, replaceAndSort(cEntries.getSectionNamesAsList, "-", "  "))
             sortIniFile(fxEntries, replaceAndSort(fxEntries.getSectionNamesAsList, "-", "  "))
             sortIniFile(tbEntries, replaceAndSort(tbEntries.getSectionNamesAsList, "-", "  "))
             sortIniFile(mEntries, replaceAndSort(mEntries.getSectionNamesAsList, "-", "  "))
         End Sub
 
+        Private Function rebuildInnerIni(ByRef entryList As List(Of winapp2entry)) As iniFile
+            'Rebuilds a list of winapp2entry objects back into inifile section objects and returns the inifile to the caller
+            Dim tmpini As New iniFile
+            For Each entry In entryList
+                tmpini.sections.Add(entry.name, New iniSection(entry.dumpToListOfStrings))
+            Next
+            Return tmpini
+        End Function
+
         Public Sub rebuildToIniFiles()
-
-            Dim newCFile As New iniFile
-            Dim newFFile As New iniFile
-            Dim newTFile As New iniFile
-            Dim newMfile As New iniFile
-
-            For Each entry In cEntriesW
-                newCFile.sections.Add(entry.name, New iniSection(entry.dumpToListOfStrings))
-            Next
-
-            For Each entry In fxEntriesW
-                newFFile.sections.Add(entry.name, New iniSection(entry.dumpToListOfStrings))
-            Next
-
-            For Each entry In tbEntriesW
-                newTFile.sections.Add(entry.name, New iniSection(entry.dumpToListOfStrings))
-            Next
-
-            For Each entry In mEntriesW
-                newMfile.sections.Add(entry.name, New iniSection(entry.dumpToListOfStrings))
-            Next
-
-            cEntries = newCFile
-            fxEntries = newFFile
-            tbEntries = newTFile
-            mEntries = newMfile
-
+            'Update the internal inifile objects
+            cEntries = rebuildInnerIni(cEntriesW)
+            fxEntries = rebuildInnerIni(fxEntriesW)
+            tbEntries = rebuildInnerIni(tbEntriesW)
+            mEntries = rebuildInnerIni(mEntriesW)
         End Sub
 
         Public Function winapp2string() As String
-            Dim totalEntryCount As Integer = cEntries.sections.Count + tbEntries.sections.Count + fxEntries.sections.Count + mEntries.sections.Count
+            'Build the winapp2.ini text for writing back to a file 
             Dim out As String = version & Environment.NewLine
-            out += "; # of entries: " & totalEntryCount.ToString("#,###") & Environment.NewLine
+            out += "; # of entries: " & count.ToString("#,###") & Environment.NewLine
             If isNCC Then
                 out += "; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner." & Environment.NewLine
                 out += "; DO NOT use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner." & Environment.NewLine
             End If
             out += "; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2" & Environment.NewLine
             out += "; Any contributions are appreciated. Please send them to the link above." & Environment.NewLine
-            If Not isNCC Then
-                out += "; Is CCleaner taking too long to load with Winapp2? Please head to this link and follow the instructions: http://www.winapp2.com/howto.html" & Environment.NewLine
-            End If
+            If Not isNCC Then out += "; Is CCleaner taking too long to load with Winapp2? Please head to this link and follow the instructions: http://www.winapp2.com/howto.html" & Environment.NewLine
             out += "; Valid commands can be found on the first post here: https://forum.piriform.com/index.php?showtopic=32310" & Environment.NewLine
             out += "; Please do not host this file anywhere without permission. This is to facilitate proper distribution of the latest version. Thanks." & Environment.NewLine
             out += ";" & Environment.NewLine
@@ -281,7 +271,6 @@
             out += mEntries.toString
             Return out
         End Function
-
 
     End Class
 
@@ -327,8 +316,8 @@
 
         End Sub
 
-        'dump the keys in the keylist back to a list of strings in proper winapp2.ini order 
         Public Function dumpToListOfStrings() As List(Of String)
+            'dump the keys in the keylist back to a list of strings in proper winapp2.ini order 
             Dim outList As New List(Of String)
             outList.Add(fullname)
             For Each lst In keyListList
@@ -338,6 +327,42 @@
             Next
             Return outList
         End Function
+
+    End Class
+
+    Public Class winapp2KeyParameters
+        Public paramString As String
+        Public argsList As List(Of String)
+        Public flagString As String
+
+        'This method will parameterize a filekey's arguments into a small object. 
+        Public Sub New(key As iniKey)
+            Dim splitKey As String() = key.value.Split(CChar("|"))
+            argsList = New List(Of String)
+            paramString = ""
+            flagString = ""
+            If splitKey.Count > 1 Then
+                paramString = splitKey(0)
+                argsList.AddRange(splitKey(1).Split(CChar(";")))
+                If splitKey.Count >= 3 Then flagString = splitKey(2)
+            End If
+        End Sub
+
+        Public Sub reconstructKey(ByRef key As iniKey)
+            'Reconstruct a filekey's format in the form of path|file;file;file..|FLAG
+            'This also trims any empty comments in a non transparent way
+
+            Dim out As String = ""
+            out += paramString & "|"
+            If argsList.Count > 1 Then
+                For i As Integer = 0 To argsList.Count - 2
+                    If Not argsList(i) = "" Then out += argsList(i) & ";"
+                Next
+            End If
+            out += argsList.Last
+            If Not flagString = "" Then out += "|" & flagString
+            key.value = out
+        End Sub
 
     End Class
 

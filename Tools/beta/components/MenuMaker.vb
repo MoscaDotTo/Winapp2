@@ -15,7 +15,7 @@ Module MenuMaker
 
     'prints a menu string
     Public Sub printMenuLine(lineString As String)
-        Console.WriteLine(menu(lineString))
+        cwl(menu(lineString))
     End Sub
 
     'constructs a menu string with alignment
@@ -25,16 +25,12 @@ Module MenuMaker
 
     'prints a menu string with alignment
     Public Sub printMenuLine(lineString As String, align As String)
-        Console.WriteLine(menu(lineString, align))
+        cwl(menu(lineString, align))
     End Sub
 
     'Flip the exitCode status so we can return to menu when desired
     Public Sub revertMenu(ByRef exitCode As Boolean)
-        If exitCode Then
-            exitCode = False
-        Else
-            exitCode = True
-        End If
+        exitCode = Not exitCode
     End Sub
 
     'Construct a menu line properly fit to the width of the console

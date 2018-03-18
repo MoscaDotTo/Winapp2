@@ -2,7 +2,7 @@
 Imports System.IO
 Module Winapp2ool
 
-    Dim currentVersion As Double = 0.7
+    Dim currentVersion As Double = 0.8
     Dim latestVersion As String
 
     Dim checkedForUpdates As Boolean = False
@@ -10,6 +10,9 @@ Module Winapp2ool
 
     Dim latestWa2Ver As String = ""
     Dim localWa2Ver As String = ""
+
+    'This boolean will prevent us from printing or asking for input under most circumstances, triggered by the -s command line argument 
+    Public suppressOutput As Boolean
 
     Dim waUpdateIsAvail As Boolean = False
     Dim menuHasTopper As Boolean = False
@@ -50,19 +53,20 @@ Module Winapp2ool
     Public Sub main()
         Console.Title = "Winapp2ool v" & currentVersion & " beta"
         Console.WindowWidth = 120
-
+        processCommandLineArgs()
+        If suppressOutput Then Environment.Exit(1)
         checkUpdates()
         Dim exitCode As Boolean = False
         Do Until exitCode = True
             printMenu()
-            Console.WriteLine()
+            cwl()
             Console.Write("Enter a number: ")
             Dim input As String = Console.ReadLine
 
             Select Case input
                 Case "0"
                     exitCode = True
-                    Console.WriteLine("Exiting...")
+                    cwl("Exiting...")
                     Environment.Exit(1)
                 Case "1"
                     WinappDebug.main()
@@ -99,9 +103,7 @@ Module Winapp2ool
         Try
             latestVersion = getRemoteFileDataAtLineNum(toolVerLink, 1)
 
-            If CDbl(latestVersion) > currentVersion Then
-                updateIsAvail = True
-            End If
+            If CDbl(latestVersion) > currentVersion Then updateIsAvail = True
             latestWa2Ver = getRemoteFileDataAtLineNum(wa2Link, 1).Split(CChar(" "))(2)
             If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then
                 localWa2Ver = "0"
@@ -110,9 +112,7 @@ Module Winapp2ool
             Else
                 localWa2Ver = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", 1).Split(CChar(" "))(2)
             End If
-            If CDbl(latestWa2Ver) > CDbl(localWa2Ver) Then
-                waUpdateIsAvail = True
-            End If
+            If CDbl(latestWa2Ver) > CDbl(localWa2Ver) Then waUpdateIsAvail = True
 
         Catch ex As Exception
             printMenuLine(tmenu("/!\ Update check failed. /!\"))
@@ -121,9 +121,17 @@ Module Winapp2ool
     End Sub
 
     Public Sub exc(ByRef ex As Exception)
-        Console.WriteLine("Error: " & ex.ToString)
-        Console.WriteLine("Please report this error on GitHub")
-        Console.WriteLine()
+        cwl("Error: " & ex.ToString)
+        cwl("Please report this error on GitHub")
+        cwl()
+    End Sub
+
+    Public Sub cwl()
+        If Not suppressOutput Then Console.WriteLine()
+    End Sub
+
+    Public Sub cwl(msg As String)
+        If Not suppressOutput Then Console.WriteLine(msg)
     End Sub
 
 End Module

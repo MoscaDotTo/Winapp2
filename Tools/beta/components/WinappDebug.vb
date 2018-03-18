@@ -12,16 +12,18 @@ Module WinappDebug
 
     Dim allEntryNames As List(Of String)
     Dim correctFormatting As Boolean = False
-    Dim correctStatus As String
     Dim menuHasTopper As Boolean = False
     Dim exitCode As Boolean = False
 
+    Public Sub remoteDebug(filedir As String, filename As String, cformatting As Boolean)
+        path = filedir
+        name = filename
+        correctFormatting = cformatting
+        initDebug()
+    End Sub
+
     Private Sub printMenu()
-        If correctFormatting Then
-            correctStatus = "On"
-        Else
-            correctStatus = "Off"
-        End If
+        Dim correctStatus As String = IIf(correctFormatting, "on", "off").ToString
         If Not menuHasTopper Then
             menuHasTopper = True
             printMenuLine(tmenu("WinappDebug"))
@@ -43,30 +45,20 @@ Module WinappDebug
         menuHasTopper = False
         Do While exitCode = False
             printMenu()
-            Console.WriteLine()
+            cwl()
             Console.Write("Enter a number, or leave blank to run the default: ")
             Dim input As String = Console.ReadLine()
 
             Try
                 Select Case input
                     Case "0"
-                        Console.WriteLine("Returning to menu...")
+                        cwl("Returning to menu...")
                         exitCode = True
                     Case "1", ""
-                        debug()
-                        revertMenu(exitCode)
-                        If Not exitCode Then
-                            Console.Clear()
-                            printMenuLine(tmenu("WinappDebug"))
-                        End If
+                        initDebug()
                     Case "2"
                         fChooser(path, name, exitCode, "\winapp2.ini", "")
-                        debug()
-                        revertMenu(exitCode)
-                        If Not exitCode Then
-                            Console.Clear()
-                            printMenuLine(tmenu("WinappDebug"))
-                        End If
+                        initDebug()
                     Case "3"
                         correctFormatting = Not correctFormatting
                         Console.Clear()
@@ -88,21 +80,24 @@ Module WinappDebug
         Return entryList
     End Function
 
-    Private Sub debug()
+    Private Sub initDebug()
+        Dim winapp2 As iniFile = validate(path, name, exitCode, "\winapp2.ini", "")
+        debug(winapp2)
+        revertMenu(exitCode)
+        If Not exitCode Then
+            Console.Clear()
+            printMenuLine(tmenu("WinappDebug"))
+        End If
+    End Sub
 
+    Private Sub debug(cfile As iniFile)
         'don't continue if we have a pending exit
         If exitCode Then Exit Sub
-
         Console.Clear()
-        'make sure our file exists and isn't empty 
-        validate(path, name, exitCode, "\winapp2.ini", "")
-        If exitCode Then Exit Sub
-
-        Dim cFile As New iniFile(path, name)
 
         printMenuLine(tmenu("Beginning analysis of winapp2.ini"))
         printMenuLine(menuStr02)
-        Console.WriteLine()
+        cwl()
 
         Dim winapp2file As New winapp2file(cFile)
         numErrs = 0
@@ -128,16 +123,10 @@ Module WinappDebug
             processEntry(entry)
         Next
 
-        'sort the chrome entries
+        'grab the sorted state of the entry names
         Dim CEntryList As List(Of String) = sortEntryNames(winapp2file.cEntries)
-
-        'sort the thunderbird entries
         Dim TBentryList As List(Of String) = sortEntryNames(winapp2file.tbEntries)
-
-        'sort the firefox entries
         Dim fxEntryList As List(Of String) = sortEntryNames(winapp2file.fxEntries)
-
-        'sort the rest of the entries
         Dim mEntryList As List(Of String) = sortEntryNames(winapp2file.mEntries)
 
         printMenuLine(tmenu("Completed analysis of winapp2.ini"))
@@ -154,7 +143,7 @@ Module WinappDebug
             'rebuild our internal changes
             winapp2file.rebuildToIniFiles()
             sortIniFile(winapp2file.cEntries, CEntryList)
-            sortIniFile(winapp2file.tbEntries, tbEntryList)
+            sortIniFile(winapp2file.tbEntries, TBentryList)
             sortIniFile(winapp2file.fxEntries, fxEntryList)
             sortIniFile(winapp2file.mEntries, mEntryList)
 
@@ -172,7 +161,7 @@ Module WinappDebug
 
         printMenuLine("Press any key to return to the winapp2ool menu.", "l")
         printMenuLine(menuStr02)
-        Console.ReadKey()
+        If Not suppressOutput Then Console.ReadKey()
     End Sub
 
 
@@ -213,9 +202,7 @@ Module WinappDebug
                 End If
             Else
                 'Don't keep tracking lines who are now correctly positioned once we've moved another line left in the list
-                If moveRight.Contains(entry) Then
-                    moveRight.Remove(entry)
-                End If
+                If moveRight.Contains(entry) Then moveRight.Remove(entry)
             End If
         Next
 
@@ -230,36 +217,35 @@ Module WinappDebug
             Dim sortpos As Integer = LineCountList(sortind)
 
             If findType <> "Entry" Then entry = findType & recind + 1 & "=" & entry
-
-            Console.WriteLine("Line: " & originalLines(recind) & " - Error: '" & findType & "' alphabetization. ")
-            Console.WriteLine(entry & " appears to be out of place.")
-            Console.WriteLine("Current Position: Line " & curpos)
-            Console.WriteLine("Expected Position: Line " & originalLines(sortind))
-            Console.WriteLine()
+            cwl("Line: " & originalLines(recind) & " - Error: '" & findType & "' alphabetization. ")
+            cwl(entry & " appears to be out of place.")
+            cwl("Current Position: Line " & curpos)
+            cwl("Expected Position: Line " & originalLines(sortind))
+            cwl()
             numErrs += 1
         Next
 
     End Sub
 
     Private Sub err2(linecount As Integer, err As String, command As String, expected As String)
-        Console.WriteLine("Line: " & linecount & " - Error: " & err)
-        Console.WriteLine("Expected: " & expected)
-        Console.WriteLine("Command: " & command)
-        Console.WriteLine()
+        cwl("Line: " & linecount & " - Error: " & err)
+        cwl("Expected: " & expected)
+        cwl("Command: " & command)
+        cwl()
         numErrs += 1
     End Sub
 
     Private Sub err(linecount As Integer, err As String, command As String)
-        Console.WriteLine("Line: " & linecount & " - Error: " & err)
-        Console.WriteLine("Command: " & command)
-        Console.WriteLine()
+        cwl("Line: " & linecount & " - Error: " & err)
+        cwl("Command: " & command)
+        cwl()
         numErrs += 1
     End Sub
 
     Private Sub fullKeyErr(key As iniKey, err As String)
-        Console.WriteLine("Line: " & key.lineNumber & " - Error: " & err)
-        Console.WriteLine("Command: " & key.toString)
-        Console.WriteLine()
+        cwl("Line: " & key.lineNumber & " - Error: " & err)
+        cwl("Command: " & key.toString)
+        cwl()
         numErrs += 1
     End Sub
 
@@ -380,6 +366,11 @@ Module WinappDebug
 
         For Each key In keyList
 
+            'Sort the alphabetically arguements given to the filekey 
+            Dim keyParams As New winapp2KeyParameters(key)
+            keyParams.argsList.Sort()
+            keyParams.reconstructKey(key)
+
             'check the format of the filekey
             cFormat(key, curFileKeyNum, fileKeyStrings, dupeKeys)
 
@@ -387,6 +378,7 @@ Module WinappDebug
             Dim iteratorCheckerList() As String = Split(key.value, "|")
             If Not key.value.Contains("|") Then fullKeyErr(key, "Missing pipe (|) in FileKey.")
             If key.value.Contains(";") Then
+                'Captures any incident of semi colons coming before the first pipe symbol
                 If key.value.IndexOf(";") < key.value.IndexOf("|") Then fullKeyErr(key, "Semicolon (;) found before pipe (|).")
             End If
 
@@ -469,9 +461,9 @@ Module WinappDebug
             'to be in proper order, but isn't otherwise all that helpful or detailed.
             If newLines(0) < entryLinesList.Last Then
                 If correctFormatting Then
-                    Console.WriteLine(keyList(0).keyType & " detected out of place.")
-                    Console.WriteLine("This error will be corrected automatically.")
-                    Console.WriteLine()
+                    cwl(keyList(0).keyType & " detected out of place.")
+                    cwl("This error will be corrected automatically.")
+                    cwl()
                 End If
             End If
             entryLinesList.AddRange(newLines)
@@ -545,25 +537,25 @@ Module WinappDebug
 
         'Make sure we have at least 1 valid detect key 
         If entry.detectOS.Count + entry.detects.Count + entry.specialDetect.Count + entry.detectFiles.Count = 0 Then
-            Console.WriteLine("No valid detection keys detected in " & entry.name & "(Line " & entry.lineNum & ")")
+            cwl("No valid detection keys detected in " & entry.name & "(Line " & entry.lineNum & ")")
             numErrs += 1
         End If
 
         'Make sure we have at least 1 FileKey or RegKey
         If entry.fileKeys.Count + entry.regKeys.Count = 0 Then
-            Console.WriteLine("No valid FileKey/RegKeys detected in " & entry.name & "(Line " & entry.lineNum & ")")
+            cwl("No valid FileKey/RegKeys detected in " & entry.name & "(Line " & entry.lineNum & ")")
             numErrs += 1
 
             'If we have no FileKeys or RegKeys, we shouldn't have any ExcludeKeys.
             If entry.excludeKeys.Count > 0 Then
-                Console.WriteLine("ExcludeKeys detected without any valid FileKeys or RegKeys in " & entry.name & "(Line " & entry.lineNum & ")")
+                cwl("ExcludeKeys detected without any valid FileKeys or RegKeys in " & entry.name & "(Line " & entry.lineNum & ")")
                 numErrs += 1
             End If
         End If
 
         'Make sure we have a Default key.
         If entry.defaultKey.Count = 0 Then
-            Console.WriteLine("No Default key found in " & entry.fullname)
+            cwl("No Default key found in " & entry.fullname)
 
             'We don't have a default key, so create one and insert it into the entry.
             Dim defKey As New iniKey()
@@ -627,7 +619,7 @@ Module WinappDebug
 
         'check for duplicates
         If keyStrings.Contains(key.value) Then
-            Console.WriteLine("Line: " & key.lineNumber & " - Error: Duplicate key found." & Environment.NewLine &
+            cwl("Line: " & key.lineNumber & " - Error: Duplicate key found." & Environment.NewLine &
                                   "Command: " & key.value & Environment.NewLine &
                                   "Duplicates: " & key.keyType & keyStrings.IndexOf(key.value) + 1 & "=" & key.value.ToLower & Environment.NewLine)
             dupeList.Add(key)
@@ -791,5 +783,4 @@ Module WinappDebug
             keylist.Remove(key)
         Next
     End Sub
-
 End Module

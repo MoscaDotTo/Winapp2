@@ -44,21 +44,21 @@ Public Module iniFileHandler
     End Sub
 
     'Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists
-    Public Sub validate(ByRef path As String, ByRef name As String, ByRef exitcode As Boolean, ByRef defName As String, ByVal defRen As String)
+    Public Function validate(ByRef path As String, ByRef name As String, ByRef exitcode As Boolean, ByRef defName As String, ByVal defRen As String) As iniFile
 
         'if there's a pending exit, do that.
-        If exitcode Then Exit Sub
+        If exitcode Then Return Nothing
 
         'Make sure both the file and the directory actually exist
         While Not File.Exists(path & name)
             If Not Directory.Exists(path) Then
                 dChooser(path, exitcode)
             End If
-            If exitcode Then Exit Sub
+            If exitcode Then Return Nothing
             If Not File.Exists(path & name) Then
                 chkFileExist(path, name, exitcode, defName, defRen)
             End If
-            If exitcode Then Exit Sub
+            If exitcode Then Return Nothing
         End While
 
         'Make sure that the file isn't empty
@@ -69,17 +69,18 @@ Public Module iniFileHandler
                 printMenuLine(bmenu("Empty ini file detected. Press any key to try again.", "c"))
                 Console.ReadKey()
                 fChooser(path, name, exitcode, defName, defRen)
-                If exitcode Then Exit Sub
-                validate(path, name, exitcode, defName, defRen)
-                If exitcode Then Exit Sub
-                iniTester = New iniFile(path, name)
+                If exitcode Then Return Nothing
+                iniTester = validate(path, name, exitcode, defName, defRen)
+                If exitcode Then Return Nothing
             End While
+            Console.Clear()
+            Return iniTester
         Catch ex As Exception
             exc(ex)
-            Console.ReadLine()
+            exitcode = True
+            Return Nothing
         End Try
-        Console.Clear()
-    End Sub
+    End Function
 
     Public Sub chkFileExist(ByRef dir As String, ByRef name As String, ByRef exitcode As Boolean, ByVal defName As String, ByVal defRen As String)
         Dim iExitCode As Boolean = False
@@ -341,6 +342,7 @@ Public Module iniFileHandler
         Private Sub processiniLine(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer), ByRef lastLineWasEmpty As Boolean, ByRef lineCount As Integer)
             If currentLine.StartsWith(";") Then
                 Dim newCom As New iniComment(currentLine, lineCount)
+
                 If comments.Count > 0 Then
                     comments.Add(comments.Count, newCom)
                 Else
@@ -386,9 +388,7 @@ Public Module iniFileHandler
 
                 Do While (r.Peek() > -1)
                     Dim currentLine As String = r.ReadLine.ToString
-
                     processiniLine(currentLine, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty, lineCount)
-
                 Loop
                 If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
                 r.Close()
@@ -599,8 +599,8 @@ Public Module iniFileHandler
             keyType = stripNums(name)
         End Sub
 
-        'Output the key in name=value format
         Public Overrides Function toString() As String
+            'Output the key in name=value format
             Return Me.name & "=" & Me.value
         End Function
 

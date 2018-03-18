@@ -7,8 +7,21 @@ Module Merge
     Dim name As String = "\winapp2.ini"
     Dim sfDir As String = Environment.CurrentDirectory
     Dim sfName As String
+    Dim firstFile As iniFile
+    Dim secondFile As iniFile
     Dim menuHasTopper As Boolean = False
-    Dim exitCode As Boolean
+    Dim exitCode As Boolean = False
+    Dim mergeMode As Boolean
+
+    Public Sub remoteMerge(winappDir As String, winappName As String, sDir As String, sName As String, mm As Boolean)
+        'Handle being called from the commandline
+        dir = winappDir
+        name = winappName
+        sfDir = sDir
+        sfName = sName
+        mergeMode = mm
+        initMerge()
+    End Sub
 
     Private Sub printMenu()
         If menuHasTopper Then
@@ -17,19 +30,24 @@ Module Merge
             printMenuLine(tmenu("Merge"))
             printMenuLine(menu(menuStr03))
         End If
+        Dim mergeStatus As String = IIf(mergeMode, "Replace & Add", "Replace & Remove").ToString
         printMenuLine("This tool will merge winapp2.ini entries from an external file into winapp2.ini.", "c")
+        printMenuLine(menuStr01)
+        printMenuLine("Merge Mode: " & mergeStatus, "c")
         printMenuLine(menuStr04)
         printMenuLine("0. Exit", "l")
         printMenuLine("1. Run (default)          - Merge Removed Entries.ini with Winapp2.ini", "l")
         printMenuLine("2. Run (custom)           - Merge Custom.ini with Winapp2.ini", "l")
+        printMenuLine(menuStr01)
+        printMenuLine("3. Toggle Merge mode      - Switch between merge modes.", "l")
         printMenuLine(menuStr02)
-
     End Sub
 
     Public Sub main()
         Console.Clear()
         exitCode = False
         menuHasTopper = False
+        mergeMode = True
         While Not exitCode
             printMenu()
             Console.WriteLine()
@@ -39,36 +57,41 @@ Module Merge
                 Case "0"
                     exitCode = True
                 Case "1", ""
-                    initMerge("\Removed Entries.ini", sfDir, "\Removed Entries.ini")
-                    revertMenu(exitCode)
+                    sfName = "\Removed Entries.ini"
+                    initMerge()
                 Case "2"
-                    initMerge("\Custom.ini", sfDir, "\Custom.ini")
-                    revertMenu(exitCode)
+                    sfName = "\Custom.ini"
+                    initMerge()
+                Case "3"
+                    mergeMode = Not mergeMode
+                    Console.Clear()
                 Case Else
                     Console.Clear()
                     menuHasTopper = True
                     printMenuLine(tmenu("Invalid Input. Please try again."))
             End Select
-
         End While
-
     End Sub
 
-    Public Sub initMerge(secondFileName As String, secondFileDir As String, defaultName As String)
-        sfDir = secondFileDir
-        sfName = secondFileName
-        validate(dir, name, exitCode, "\winapp2.ini", "")
+    Public Sub initMerge()
+        'Initialize our inifiles
+        firstFile = validate(dir, name, exitCode, "\winapp2.ini", "")
         If exitCode Then Exit Sub
-        Dim mergeFile As New iniFile(dir, name)
-        validate(sfDir, sfName, exitCode, defaultName, "")
+        secondFile = validate(sfDir, sfName, exitCode, sfName, "")
         If exitCode Then Exit Sub
-        Dim secondFile As New iniFile(sfDir, sfName)
-        merge(mergeFile, secondFile)
 
+        'Merge them
+        merge()
+
+        'Flip our menu boolean
+        revertMenu(exitCode)
     End Sub
 
-    Private Sub merge(ByRef firstFile As iniFile, secondFile As iniFile)
+    Private Sub merge()
         Dim out As String = ""
+
+        'Process the merge mode and update the inifiles accordingly
+        processMergeMode(firstFile, secondFile)
 
         'Parse our two files
         Dim tmp As New winapp2file(firstFile)
@@ -97,8 +120,8 @@ Module Merge
 
             'write the merged winapp2string to file
             out += tmp.winapp2string
-            file.WriteLine(out)
-
+            file.Write(out)
+            file.Close()
         Catch ex As Exception
             exc(ex)
         End Try
@@ -107,4 +130,33 @@ Module Merge
 
     End Sub
 
+    Private Sub processMergeMode(ByRef first As iniFile, ByRef second As iniFile)
+        Dim removeList As New List(Of String)
+
+        'If mergemode is true, replace any matches
+        If mergeMode Then
+            For Each section In second.sections.Keys
+                If first.sections.Keys.Contains(section) Then
+                    first.sections.Item(section) = second.sections.Item(section)
+                    removeList.Add(section)
+                End If
+            Next
+            For Each section In removeList
+                second.sections.Remove(section)
+            Next
+        Else
+            'if mergemode is false, remove any matches
+            For Each section In second.sections.Keys
+                If first.sections.Keys.Contains(section) Then
+                    first.sections.Remove(section)
+                    removeList.Add(section)
+                End If
+            Next
+        End If
+
+        'Remove any processed sections from the second file so that only entries to add remain 
+        For Each section In removeList
+            second.sections.Remove(section)
+        Next
+    End Sub
 End Module
