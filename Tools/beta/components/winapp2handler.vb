@@ -251,23 +251,34 @@
                 out += "; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner." & Environment.NewLine
                 out += "; DO NOT use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner." & Environment.NewLine
             End If
+            out += ";" & Environment.NewLine
+            out += "; " & If(isNCC, "Winapp2 (Non-CCleaner version)", "Winapp2") & " is fully licensed under the CC-BY-SA-4.0 license agreement." & Environment.NewLine
+            out += "; If you plan on modifying and/or distrubuting the file in your own program, please ask first." & Environment.NewLine
+            out += ";" & Environment.NewLine
             out += "; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2" & Environment.NewLine
             out += "; Any contributions are appreciated. Please send them to the link above." & Environment.NewLine
             If Not isNCC Then out += "; Is CCleaner taking too long to load with Winapp2? Please head to this link and follow the instructions: http://www.winapp2.com/howto.html" & Environment.NewLine
             out += "; Valid commands can be found on the first post here: https://forum.piriform.com/index.php?showtopic=32310" & Environment.NewLine
             out += "; Please do not host this file anywhere without permission. This is to facilitate proper distribution of the latest version. Thanks." & Environment.NewLine
-            out += ";" & Environment.NewLine
-            out += "; Chrome/Chromium based browsers." & Environment.NewLine & Environment.NewLine
-            out += cEntries.toString
-            out += Environment.NewLine & "; End of Chrome/Chromium based browsers." & Environment.NewLine
-            out += ";" & Environment.NewLine
-            out += "; Firefox/Mozilla based browsers." & Environment.NewLine & Environment.NewLine
-            out += fxEntries.toString
-            out += Environment.NewLine & "; End of Firefox/Mozilla based browsers." & Environment.NewLine
-            out += ";" & Environment.NewLine
-            out += "; Thunderbird entries." & Environment.NewLine & Environment.NewLine
-            out += tbEntries.toString
-            out += Environment.NewLine & "; End of Thunderbird entries." & Environment.NewLine & Environment.NewLine
+            If cEntries.sections.Count > 0 Then
+                out += ";" & Environment.NewLine
+                out += "; Chrome/Chromium based browsers." & Environment.NewLine & Environment.NewLine
+                out += cEntries.toString
+                out += Environment.NewLine & "; End of Chrome/Chromium based browsers." & Environment.NewLine
+            End If
+            If fxEntries.sections.Count > 0 Then
+                out += ";" & Environment.NewLine
+                out += "; Firefox/Mozilla based browsers." & Environment.NewLine & Environment.NewLine
+                out += fxEntries.toString
+                out += Environment.NewLine & "; End of Firefox/Mozilla based browsers." & Environment.NewLine
+            End If
+            If tbEntries.sections.Count > 0 Then
+                out += ";" & Environment.NewLine
+                out += "; Thunderbird entries." & Environment.NewLine & Environment.NewLine
+                out += tbEntries.toString
+                out += Environment.NewLine & "; End of Thunderbird entries." & Environment.NewLine
+            End If
+            out += Environment.NewLine
             out += mEntries.toString
             Return out
         End Function

@@ -3,6 +3,59 @@ Imports System.IO
 
 Public Module iniFileHandler
 
+
+    Public Class IFileHandlr
+        'This class simply holds some information about files we want to load such that we can modify their parts or retain initalized information easily without needing to write the values many times
+
+        Public dir As String
+        Public name As String
+        Public initDir As String
+        Public initName As String
+        Public secondName As String
+
+        Public Sub New(directory As String, filename As String)
+            dir = directory
+            name = filename
+            initDir = directory
+            initName = filename
+            secondName = ""
+        End Sub
+
+        Public Sub New(directory As String, filename As String, rename As String)
+            dir = directory
+            name = filename
+            initDir = directory
+            initName = filename
+            secondName = rename
+        End Sub
+
+        Public Sub resetParams()
+            dir = initDir
+            name = initName
+        End Sub
+
+        Public Function path() As String
+            Return dir & "\" & name
+        End Function
+
+        Public Function filename() As String
+            Return "\" & name
+        End Function
+
+        Public Function initFileName() As String
+            Return "\" & initName
+        End Function
+
+        Public Function fileRename() As String
+            If secondName <> "" Then
+                Return "\" & secondName
+            Else
+                Return ""
+            End If
+        End Function
+
+    End Class
+
     'Strips just the key values from a list of inikeys and returns them as a list of strings
     Public Function getValuesFromKeyList(ByVal keyList As List(Of iniKey)) As List(Of String)
         Dim valList As New List(Of String)
@@ -44,51 +97,54 @@ Public Module iniFileHandler
     End Sub
 
     'Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists
-    Public Function validate(ByRef path As String, ByRef name As String, ByRef exitcode As Boolean, ByRef defName As String, ByVal defRen As String) As iniFile
+    Public Function validate(ByRef someFile As IFileHandlr, exitCode As Boolean) As iniFile
 
         'if there's a pending exit, do that.
-        If exitcode Then Return Nothing
+        If exitCode Then Return Nothing
 
         'Make sure both the file and the directory actually exist
-        While Not File.Exists(path & name)
-            If Not Directory.Exists(path) Then
-                dChooser(path, exitcode)
+        While Not File.Exists(someFile.path)
+            If Not Directory.Exists(someFile.dir) Then
+                dChooser(someFile.dir, exitCode)
             End If
-            If exitcode Then Return Nothing
-            If Not File.Exists(path & name) Then
-                chkFileExist(path, name, exitcode, defName, defRen)
+            If exitCode Then Return Nothing
+            If Not File.Exists(someFile.path) Then
+                chkFileExist(someFile, exitCode)
             End If
-            If exitcode Then Return Nothing
+            If exitCode Then Return Nothing
         End While
 
         'Make sure that the file isn't empty
         Try
-            Dim iniTester As New iniFile(path, name)
+            Dim iniTester As New iniFile(someFile.dir, someFile.name)
+            Dim clearAtEnd As Boolean = False
             While iniTester.sections.Count = 0
+                clearAtEnd = True
                 Console.Clear()
                 printMenuLine(bmenu("Empty ini file detected. Press any key to try again.", "c"))
                 Console.ReadKey()
-                fChooser(path, name, exitcode, defName, defRen)
-                If exitcode Then Return Nothing
-                iniTester = validate(path, name, exitcode, defName, defRen)
-                If exitcode Then Return Nothing
+                fChooser(someFile.dir, someFile.name, exitCode, someFile.initName, someFile.secondName)
+                If exitCode Then Return Nothing
+                iniTester = validate(someFile, exitCode)
+                If exitCode Then Return Nothing
             End While
-            Console.Clear()
+            If clearAtEnd Then Console.Clear()
+
             Return iniTester
         Catch ex As Exception
             exc(ex)
-            exitcode = True
+            exitCode = True
             Return Nothing
         End Try
     End Function
 
-    Public Sub chkFileExist(ByRef dir As String, ByRef name As String, ByRef exitcode As Boolean, ByVal defName As String, ByVal defRen As String)
+    Public Sub chkFileExist(someFile As IFileHandlr, exitcode As Boolean)
         Dim iExitCode As Boolean = False
 
-        While Not File.Exists(dir & name)
+        While Not File.Exists(someFile.path)
             If exitcode Then Exit Sub
             Console.Clear()
-            printMenuLine(tmenu(name.TrimStart(CChar("\")) & " does not exist."))
+            printMenuLine(tmenu(someFile.name & " does not exist."))
             printMenuLine(menuStr03)
             While Not iExitCode
                 printMenuLine("Options", "c")
@@ -103,27 +159,27 @@ Public Module iniFileHandler
                         exitcode = True
                         Exit Sub
                     Case "1"
-                        dChooser(dir, exitcode)
-                        If File.Exists(dir & name) Then
+                        dChooser(Dir, exitcode)
+                        If File.Exists(someFile.path) Then
                             iExitCode = True
                         Else
                             Console.Clear()
-                            printMenuLine(tmenu(name.TrimStart(CChar("\")) & " does not exist."))
+                            printMenuLine(tmenu(someFile.name & " does not exist."))
                             printMenuLine(menuStr03)
                         End If
                     Case ""
-                        fChooser(dir, name, exitcode, defName, defRen)
-                        If File.Exists(dir & name) Then
+                        fChooser(someFile.dir, someFile.name, exitcode, someFile.initName, someFile.secondName)
+                        If File.Exists(someFile.path) Then
                             iExitCode = True
                         Else
                             Console.Clear()
-                            printMenuLine(tmenu(name.TrimStart(CChar("\")) & " does not exist."))
+                            printMenuLine(tmenu(someFile.name & " does not exist."))
                             printMenuLine(menuStr03)
                         End If
                     Case Else
                         Console.Clear()
-                        printMenuLine(tmenu("Invalid input. Please try again."))
-                        printMenuLine(mMenu(name.TrimStart(CChar("\")) & " does not exist."))
+                        printMenuLine(tmenu(invInpStr))
+                        printMenuLine(mMenu(someFile.name & " does not exist."))
                 End Select
             End While
         End While
@@ -157,13 +213,13 @@ Public Module iniFileHandler
                         iExitCode = True
                         Exit Sub
                     Case Else
-                        printMenuLine(tmenu("Invalid input. Please try again."))
+                        printMenuLine(tmenu(invInpStr))
                 End Select
             End While
         End While
     End Sub
 
-    Public Sub fChooser(ByRef dir As String, ByRef name As String, ByRef exitcode As Boolean, ByRef defaultName As String, ByRef defaultRename As String)
+    Public Sub fChooser(ByRef dir As String, ByRef name As String, ByRef exitcode As Boolean, defaultName As String, defaultRename As String)
         If exitcode Then Exit Sub
         Console.Clear()
         printMenuLine(tmenu("File chooser"))
@@ -171,40 +227,38 @@ Public Module iniFileHandler
         printMenuLine(dir, "l")
         printMenuLine(menuStr01)
         printMenuLine("Current File: ", "c")
-        printMenuLine(name.TrimStart(CChar("\")), "l")
+        printMenuLine(name, "l")
         printMenuLine(menuStr03)
         printMenuLine("Options", "c")
         printMenuLine("Enter a new file name", "l")
         printMenuLine("Enter '0' to return to the menu", "l")
-        Dim menuCounter As Integer = 1
-        If defaultName <> "" Then
-            printMenuLine("Enter '" & menuCounter & "' to use the default name (" & defaultName.TrimStart(CChar("\")) & ")", "l")
-            menuCounter += 1
-        End If
+        printMenuLine("Enter '1' to use the default name (" & defaultName.TrimStart(CChar("\")) & ")", "l")
         If defaultRename <> "" Then
-            printMenuLine("Enter '" & menuCounter & "' to use the default rename (" & defaultRename.TrimStart(CChar("\")) & ")", "l")
+            printMenuLine("Enter '" & getMenuNumber(New List(Of Boolean) From {defaultName <> ""}, 1) & "' to use the default rename (" & defaultRename.TrimStart(CChar("\")) & ")", "l")
         End If
-        printMenuLine("Enter '3' to select a new directory", "l")
-        printMenuLine("Leave blank to continue using the current file name (" & name.TrimStart(CChar("\")) & ")", "l")
+        printMenuLine("Enter '" & getMenuNumber(New List(Of Boolean) From {defaultName <> "", defaultRename <> ""}, 1) & "' to select a new directory", "l")
+        printMenuLine("Leave blank to continue using the current file name (" & name & ")", "l")
         printMenuLine(menuStr02)
         Dim input As String = Console.ReadLine
-        Select Case True
-            Case input = "0"
+        Select Case input
+            Case "0"
                 exitcode = True
                 Console.Clear()
                 Exit Sub
-            Case input = "1" And defaultName <> ""
-                name = defaultName
-            Case input = "1" And defaultName = ""
-                name = defaultRename
-            Case input = "2" And defaultRename <> ""
-                name = defaultRename
-            Case input = ""
+            Case ""
                 name = name
-            Case input = "3"
+            Case "1"
+                name = defaultName
+            Case "2"
+                If defaultRename <> "" Then
+                    name = defaultRename
+                Else
+                    dChooser(dir, exitcode)
+                End If
+            Case "3"
                 dChooser(dir, exitcode)
             Case Else
-                name = "\" & input
+                name = input
         End Select
         Console.Clear()
         printMenuLine(tmenu("File Chooser"))
@@ -214,7 +268,7 @@ Public Module iniFileHandler
             printMenuLine(dir, "l")
             printMenuLine(menuStr01)
             printMenuLine("Current File: ", "c")
-            printMenuLine(name.TrimStart(CChar("\")), "l")
+            printMenuLine(name, "l")
             printMenuLine(menuStr03)
             printMenuLine("Options", "c")
             printMenuLine("Enter '0' to return to the menu", "l")
@@ -240,7 +294,7 @@ Public Module iniFileHandler
                     printMenuLine(tmenu("File Chooser"))
                 Case Else
                     Console.Clear()
-                    printMenuLine(tmenu("Invalid input. Please try again."))
+                    printMenuLine(tmenu(invInpStr))
             End Select
 
         Loop
@@ -516,7 +570,7 @@ Public Module iniFileHandler
             Dim out As New List(Of String)
 
             For Each key In Me.keys.Values
-               out.Add(key.toString)
+                out.Add(key.toString)
             Next
 
             Return out

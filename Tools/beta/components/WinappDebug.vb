@@ -3,69 +3,117 @@ Imports System.IO
 
 Module WinappDebug
 
-    Dim numErrs As Integer
+    'File handlers
+    Dim winappFile As IFileHandlr = New IFileHandlr(Environment.CurrentDirectory, "winapp2.ini")
+    Dim outputFile As IFileHandlr = New IFileHandlr(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
+
+    'Menu settings
+    Dim exitCode As Boolean = False
+    Dim menuItemLength As Integer = 35
+    Dim menuTopper As String = ""
+    Dim settingsChanged As Boolean = False
+
+    'Module parameters
+    Dim correctFormatting As Boolean = False
+    Dim allEntryNames As New List(Of String)
+    Dim numErrs As Integer = 0
+
+    'Winapp2 Parameters
     Dim enVars As String() = {"UserProfile", "ProgramFiles", "RootDir", "WinDir", "AppData", "SystemDrive", "SystemRoot", "Documents", "ProgramData", "AllUsersProfile", "Pictures", "Video", "CommonAppData", "LocalAppData", "CommonProgramFiles", "HomeDrive", "Music", "tmp", "Temp", "LocalLowAppData", "Public"}
     Dim validCmds As String() = {"SpecialDetect", "FileKey", "RegKey", "Detect", "LangSecRef", "Warning", "Default", "Section", "ExcludeKey", "DetectFile", "DetectOS"}
     Dim sdList As String() = {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}
-    Dim name As String = "\winapp2.ini"
-    Dim path As String = Environment.CurrentDirectory
 
-    Dim allEntryNames As List(Of String)
-    Dim correctFormatting As Boolean = False
-    Dim menuHasTopper As Boolean = False
-    Dim exitCode As Boolean = False
 
-    Public Sub remoteDebug(filedir As String, filename As String, cformatting As Boolean)
-        path = filedir
-        name = filename
+    'Return the default parameters to the commandline handler
+    Public Sub initDebugParams(ByRef firstFile As IFileHandlr, ByRef secondFile As IFileHandlr, cf As Boolean)
+        initDefaultSettings()
+        firstFile = winappFile
+        secondFile = outputFile
+        cf = correctFormatting
+    End Sub
+
+    'Restore the default state of the module's parameters
+    Private Sub initDefaultSettings()
+        winappFile.resetParams()
+        outputFile.resetParams()
+        settingsChanged = False
+        correctFormatting = False
+    End Sub
+
+    Public Sub remoteDebug(ByRef firstFile As IFileHandlr, secondFile As IFileHandlr, cformatting As Boolean)
+        winappFile = firstFile
+        outputFile = secondFile
         correctFormatting = cformatting
         initDebug()
     End Sub
 
+    Private Sub resetSettings()
+        initDefaultSettings()
+        menuTopper = "WinappDebug settings have been reset to their defaults"
+    End Sub
+
     Private Sub printMenu()
-        Dim correctStatus As String = IIf(correctFormatting, "on", "off").ToString
-        If Not menuHasTopper Then
-            menuHasTopper = True
-            printMenuLine(tmenu("WinappDebug"))
-        End If
+        printMenuLine(tmenu(menuTopper))
         printMenuLine(menuStr03)
         printMenuLine("This tool will check winapp2.ini For common syntax And style errors.", "c")
-        printMenuLine(menuStr04)
-        printMenuLine("0. Exit                          - Return to the winapp2ool menu", "l")
-        printMenuLine("1. Run (default)                 - Run with the default settings", "l")
-        printMenuLine("2. Run (custom)                  - Run with an option to provide the path and filename", "l")
         printMenuLine(menuStr01)
-        printMenuLine("3. Toggle Autocorrect            - Enable/Disable automatic correction of certain types of errors. (" & correctStatus & ")", "l")
+        printMenuLine(menuStr04)
+        printMenuLine("0. Exit", "Return to the winapp2ool menu", menuItemLength)
+        printMenuLine("1. Run (default)", "Run the debugger", menuItemLength)
+        printMenuLine(menuStr01)
+        printMenuLine("2. Toggle Autocorrect", If(correctFormatting, "Disable", "Enable") & " saving of corrected errors", menuItemLength)
+        printMenuLine(menuStr01)
+        printMenuLine("3. File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or location", menuItemLength)
+        If correctFormatting Then printMenuLine("4. File Chooser (save)", "Choose a new save name or location", menuItemLength)
+
+        printMenuLine(menuStr01)
+        printMenuLine("Current winapp2.ini:  " & replDir(winappFile.path), "l")
+        If correctFormatting Then printMenuLine("Current save target:  " & replDir(outputFile.path), "l")
+        If settingsChanged Then
+            printMenuLine(menuStr01)
+            printMenuLine(getMenuNumber(New List(Of Boolean) From {correctFormatting}, 4) & ". Reset Settings", "Restore the default state of the WinappDebug settings", menuItemLength)
+        End If
         printMenuLine(menuStr02)
     End Sub
 
     Sub main()
-        Console.Clear()
         exitCode = False
-        menuHasTopper = False
+        menuTopper = "WinappDebug"
+
         Do While exitCode = False
+            Console.Clear()
             printMenu()
             cwl()
-            Console.Write("Enter a number, or leave blank to run the default: ")
+            Console.Write("Enter a number, Or leave blank to run the default: ")
             Dim input As String = Console.ReadLine()
 
             Try
-                Select Case input
-                    Case "0"
+                Select Case True
+                    Case input = "0"
                         cwl("Returning to menu...")
                         exitCode = True
-                    Case "1", ""
+                    Case input = "1" Or input = ""
                         initDebug()
-                    Case "2"
-                        fChooser(path, name, exitCode, "\winapp2.ini", "")
-                        initDebug()
-                    Case "3"
-                        correctFormatting = Not correctFormatting
-                        Console.Clear()
-                        printMenuLine(tmenu("Autocorrect toggled."))
+                    Case input = "2"
+                        toggleSettingParam(correctFormatting, "Autocorrect ", menuTopper, settingsChanged)
+                    Case input = "3"
+                        changeFileParams(winappFile, menuTopper, settingsChanged, exitCode)
+                    'If the input is 4, either want to change the save file or reset the settings, so select the first which is true
+                    Case input = "4" And (correctFormatting Or settingsChanged)
+
+                        Select Case True
+                            Case correctFormatting
+                                changeFileParams(outputFile, menuTopper, settingsChanged, exitCode)
+                            Case settingsChanged
+                                resetSettings()
+                        End Select
+
+                    'If the input is 5, we want to reset the settings iff both correctformatting and settings changed are true
+                    Case input = "5" And (correctFormatting And settingsChanged)
+                        resetSettings()
+
                     Case Else
-                        Console.Clear()
-                        printMenuLine(tmenu("Invalid input. Please try again."))
+                        menuTopper = invInpStr
                 End Select
             Catch ex As Exception
                 exc(ex)
@@ -81,12 +129,12 @@ Module WinappDebug
     End Function
 
     Private Sub initDebug()
-        Dim winapp2 As iniFile = validate(path, name, exitCode, "\winapp2.ini", "")
+        Dim winapp2 As iniFile = validate(winappFile, exitCode)
         debug(winapp2)
         revertMenu(exitCode)
         If Not exitCode Then
             Console.Clear()
-            printMenuLine(tmenu("WinappDebug"))
+            menuTopper = "WinappDebug"
         End If
     End Sub
 
@@ -149,7 +197,7 @@ Module WinappDebug
 
             'save them to file
             Try
-                Dim file As New StreamWriter(cFile.dir & cFile.name, False)
+                Dim file As New StreamWriter(outputFile.path, False)
                 file.Write(winapp2file.winapp2string)
                 file.Close()
             Catch ex As Exception
@@ -348,10 +396,9 @@ Module WinappDebug
         'validate the content of any LangSecRef keys.
         For Each key In entry.langSecRef
             If key.value <> "" Then
-                Dim validSecRefs As New List(Of String)
-                validSecRefs.AddRange(New String() {"3021", "3022", "3023", "3024", "3025", "3026", "3027", "3028", "3029", "3030", "3031"})
-                Dim hasValidSecRef As Boolean = False
-
+                Dim validSecRefs As New List(Of String) _
+                    From {"3021", "3022", "3023", "3024", "3025", "3026", "3027", "3028", "3029", "3030", "3031"}
+                
                 'and make sure the LangSecRef number is a valid one.
                 If Not validSecRefs.Contains(key.value) Then fullKeyErr(key, "LangSecRef holds an invalid value.")
             End If
@@ -366,9 +413,43 @@ Module WinappDebug
 
         For Each key In keyList
 
-            'Sort the alphabetically arguements given to the filekey 
+            'Get the parameters given to the file key and sort them 
             Dim keyParams As New winapp2KeyParameters(key)
             keyParams.argsList.Sort()
+            Dim argsStrings As New List(Of String)
+            Dim trimmedArgStrings As New List(Of String)
+            Dim dupeArgs As New List(Of String)
+
+            'check for duplicate args
+            For Each arg In keyParams.argsList
+                If argsStrings.Contains(arg) Or trimmedArgStrings.Contains(arg.ToLower) Then
+                    err(key.lineNumber, "Duplicate FileKey parameter found", arg)
+                    dupeArgs.Add(arg)
+                Else
+                    argsStrings.Add(arg)
+                    If arg.Contains("*") Then
+                        Dim splitArg As String() = arg.Split(CChar("*"))
+                        Dim trimmedArg As String = ""
+                        For i As Integer = 0 To splitArg.Length - 1
+                            trimmedArg += splitArg(i)
+                        Next
+                        If trimmedArgStrings.Contains(trimmedArg.ToLower) Then
+                            err(key.lineNumber, "Duplicate FileKey parameter found", arg)
+                            dupeArgs.Add(arg)
+                        Else
+                            trimmedArgStrings.Add(trimmedArg.ToLower)
+                        End If
+                    Else
+                        trimmedArgStrings.Add(arg.ToLower)
+                    End If
+
+                End If
+            Next
+
+            'Remove any duplicate arguments from the key parameters
+            For Each arg In dupeArgs
+                keyParams.argsList.Remove(arg)
+            Next
             keyParams.reconstructKey(key)
 
             'check the format of the filekey

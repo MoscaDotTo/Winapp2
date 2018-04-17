@@ -7,6 +7,8 @@ Module MenuMaker
     Public menuStr02 As String = " ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
     Public menuStr03 As String = " ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣"
     Public menuStr04 As String = menu(menuStr01) & Environment.NewLine & mkMenuLine("Menu: Enter a number to select", "c") & Environment.NewLine & mkMenuLine(menuStr01, "")
+    Public anyKeyStr As String = "Press any key to return to the winapp2ool menu."
+    Public invInpStr As String = "Invalid input. Please try again."
 
     'constructs a menu string 
     Public Function menu(lineString As String) As String
@@ -26,6 +28,15 @@ Module MenuMaker
     'prints a menu string with alignment
     Public Sub printMenuLine(lineString As String, align As String)
         cwl(menu(lineString, align))
+    End Sub
+
+
+    Public Sub printMenuLine(lineString1 As String, lineString2 As String, endLength As Integer)
+        While lineString1.Length < endLength
+            lineString1 += " "
+        End While
+        cwl(menu(lineString1 & "- " & lineString2, "l"))
+
     End Sub
 
     'Flip the exitCode status so we can return to menu when desired
@@ -90,6 +101,15 @@ Module MenuMaker
         Dim out As String = menu(menuStr03) & Environment.NewLine
         out += menu(text, "c")
         Return out
+    End Function
+
+    'Replace instances of Environment.CurrentDirectory in a path with "..\"
+    Public Function replDir(dirStr As String) As String
+        If dirStr.Contains(Environment.CurrentDirectory) Then
+            dirStr = dirStr.Replace(Environment.CurrentDirectory, "..")
+        End If
+
+        Return dirStr
     End Function
 
 End Module

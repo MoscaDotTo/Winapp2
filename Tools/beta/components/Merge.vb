@@ -3,52 +3,87 @@ Imports System.IO
 
 Module Merge
 
-    Dim dir As String = Environment.CurrentDirectory
-    Dim name As String = "\winapp2.ini"
-    Dim sfDir As String = Environment.CurrentDirectory
-    Dim sfName As String
+    'File handlers
+    Dim winappFile As IFileHandlr = New IFileHandlr(Environment.CurrentDirectory, "winapp2.ini")
+    Dim mergeFile As IFileHandlr = New IFileHandlr(Environment.CurrentDirectory, "")
+    Dim outputFile As IFileHandlr = New IFileHandlr(Environment.CurrentDirectory, "winapp2.ini", "winapp2-merged.ini")
     Dim firstFile As iniFile
     Dim secondFile As iniFile
-    Dim menuHasTopper As Boolean = False
-    Dim exitCode As Boolean = False
-    Dim mergeMode As Boolean
 
-    Public Sub remoteMerge(winappDir As String, winappName As String, sDir As String, sName As String, mm As Boolean)
-        'Handle being called from the commandline
-        dir = winappDir
-        name = winappName
-        sfDir = sDir
-        sfName = sName
+    'Menu settings
+    Dim menuTopper As String = ""
+    Dim menuItemLength As Integer = 32
+    Dim exitCode As Boolean = False
+    Dim settingsChanged As Boolean = False
+
+    'Boolean module parameters
+    Dim mergeMode As Boolean = True
+
+    'Return the default parameter states to the command line handler
+    Public Sub initMergeParams(ByRef firstFile As IFileHandlr, ByRef secondFile As IFileHandlr, ByRef thirdFile As IFileHandlr, ByRef mm As Boolean)
+        initDefaultSettings()
+        firstFile = winappFile
+        secondFile = mergeFile
+        thirdFile = outputFile
+        mm = mergeMode
+    End Sub
+
+    'Handle commands from command line ans initalize the merger
+    Public Sub remoteMerge(firstFile As IFileHandlr, secondFile As IFileHandlr, thirdFile As IFileHandlr, mm As Boolean)
+        winappFile = firstFile
+        mergeFile = secondFile
+        outputFile = thirdFile
         mergeMode = mm
         initMerge()
     End Sub
 
+    Private Sub resetSettings()
+        initDefaultSettings()
+        menuTopper = "Merge settings have been reset to their defaults"
+    End Sub
+
+    Private Sub initDefaultSettings()
+        winappFile.resetParams()
+        mergeFile.resetParams()
+        outputFile.resetParams()
+        settingsChanged = False
+    End Sub
+
     Private Sub printMenu()
-        If menuHasTopper Then
-            printMenuLine(mMenu("Merge"))
-        Else
-            printMenuLine(tmenu("Merge"))
-            printMenuLine(menu(menuStr03))
-        End If
-        Dim mergeStatus As String = IIf(mergeMode, "Replace & Add", "Replace & Remove").ToString
+        printMenuLine(tmenu(menuTopper))
+        printMenuLine(menu(menuStr03))
         printMenuLine("This tool will merge winapp2.ini entries from an external file into winapp2.ini.", "c")
-        printMenuLine(menuStr01)
-        printMenuLine("Merge Mode: " & mergeStatus, "c")
         printMenuLine(menuStr04)
         printMenuLine("0. Exit", "l")
-        printMenuLine("1. Run (default)          - Merge Removed Entries.ini with Winapp2.ini", "l")
-        printMenuLine("2. Run (custom)           - Merge Custom.ini with Winapp2.ini", "l")
+        printMenuLine("1. Run (default)", "Merge the two ini files", menuItemLength)
         printMenuLine(menuStr01)
-        printMenuLine("3. Toggle Merge mode      - Switch between merge modes.", "l")
+        printMenuLine("Preset Merge File Choices:", "l")
+        printMenuLine(menuStr01)
+        printMenuLine("2. Removed Entries", "Select Removed Entries.ini", menuItemLength)
+        printMenuLine("3. Custom", "Select Custom.ini", menuItemLength)
+        printMenuLine(menuStr01)
+        printMenuLine("4. File Chooser (winapp2.ini)", "Choose a new name or location for winapp2.ini", menuItemLength)
+        printMenuLine("5. File Chooser (merge)", "Choose a name or location not listed above for merging", menuItemLength)
+        printMenuLine("6. File Chooser (save)", "Choose a new save location for the merged file", menuItemLength)
+        printMenuLine(menuStr01)
+        printMenuLine("Current winapp2.ini: " & replDir(winappFile.path), "l")
+        If Not mergeFile.name = "" Then printMenuLine("Current merge file: " & replDir(mergeFile.path), "l")
+        printMenuLine("Current save target: " & replDir(outputFile.path), "l")
+        printMenuLine(menuStr01)
+        printMenuLine("7. Toggle Merge Mode", "Switch between merge modes. Current mode: " & If(mergeMode, "Replace & Add", "Replace & Remove"), menuItemLength)
+        If settingsChanged Then
+            printMenuLine(menuStr01)
+            printMenuLine("8. Reset Settings", "Restore the default Merge settings", menuItemLength)
+        End If
         printMenuLine(menuStr02)
     End Sub
 
     Public Sub main()
-        Console.Clear()
         exitCode = False
-        menuHasTopper = False
+        menuTopper = "Merge"
         mergeMode = True
         While Not exitCode
+            Console.Clear()
             printMenu()
             Console.WriteLine()
             Console.Write("Enter a number, or leave blank to run the default: ")
@@ -57,27 +92,43 @@ Module Merge
                 Case "0"
                     exitCode = True
                 Case "1", ""
-                    sfName = "\Removed Entries.ini"
-                    initMerge()
+                    If mergeFile.name <> "" Then
+                        initMerge()
+                    Else
+                        menuTopper = "You must select a file to merge"
+                    End If
                 Case "2"
-                    sfName = "\Custom.ini"
-                    initMerge()
+                    mergeFile.name = "\Removed entries.ini"
+                    settingsChanged = True
                 Case "3"
-                    mergeMode = Not mergeMode
-                    Console.Clear()
+                    mergeFile.name = "\Custom.ini"
+                    settingsChanged = True
+                Case "4"
+                    changeFileParams(winappFile, menuTopper, settingsChanged, exitCode)
+                Case "5"
+                    changeFileParams(mergeFile, menuTopper, settingsChanged, exitCode)
+                Case "6"
+                    changeFileParams(outputFile, menuTopper, settingsChanged, exitCode)
+                Case "7"
+                    toggleSettingParam(mergeMode, "Merge Mode ", menuTopper, settingsChanged)
+                Case "8"
+                    If settingsChanged Then
+                        resetSettings()
+                    Else
+                        menuTopper = invInpStr
+                    End If
                 Case Else
-                    Console.Clear()
-                    menuHasTopper = True
-                    printMenuLine(tmenu("Invalid Input. Please try again."))
+                    menuTopper = invInpStr
             End Select
         End While
     End Sub
 
     Public Sub initMerge()
+        Console.Clear()
         'Initialize our inifiles
-        firstFile = validate(dir, name, exitCode, "\winapp2.ini", "")
+        firstFile = validate(winappFile, exitCode)
         If exitCode Then Exit Sub
-        secondFile = validate(sfDir, sfName, exitCode, sfName, "")
+        secondFile = validate(mergeFile, exitCode)
         If exitCode Then Exit Sub
 
         'Merge them
@@ -116,7 +167,7 @@ Module Merge
             sortIniFile(tmp.tbEntries, replaceAndSort(tmp.tbEntries.getSectionNamesAsList, "-", "  "))
             sortIniFile(tmp.mEntries, replaceAndSort(tmp.mEntries.getSectionNamesAsList, "-", "  "))
 
-            Dim file As New StreamWriter(firstFile.dir & "\" & firstFile.name, False)
+            Dim file As New StreamWriter(outputFile.path, False)
 
             'write the merged winapp2string to file
             out += tmp.winapp2string
@@ -127,7 +178,7 @@ Module Merge
         End Try
 
         printMenuLine(bmenu("Finished merging files. Press any key to return to the menu", "c"))
-
+        If Not suppressOutput Then Console.ReadKey()
     End Sub
 
     Private Sub processMergeMode(ByRef first As iniFile, ByRef second As iniFile)

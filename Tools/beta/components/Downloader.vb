@@ -3,21 +3,22 @@ Imports System.IO
 Imports System.Net
 
 Module Downloader
+    'Links to GitHub resources
     Public wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
     Public nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
     Public toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/Tools/beta/winapp2ool.exe"
     Public toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Tools/beta/version.txt"
     Public removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
-    Dim downloadDir As String = Environment.CurrentDirectory & "\winapp2ool downloads"
 
+    'File handler
+    Dim downloadFile As IFileHandlr = New IFileHandlr(Environment.CurrentDirectory & "\winapp2ool downloads", "")
+
+    'Menu settings
     Dim exitCode As Boolean = False
-    Dim hasMenuTopper As Boolean = False
+    Dim menuTopper As String = ""
 
     Private Sub printMenu()
-        If Not hasMenuTopper Then
-            hasMenuTopper = True
-            printMenuLine(tmenu("Download"))
-        End If
+        printMenuLine(tmenu(menuTopper))
         printMenuLine(menuStr03)
         printMenuLine("Menu: Enter a number to select", "c")
         printMenuLine(menuStr01)
@@ -27,16 +28,18 @@ Module Downloader
         printMenuLine("3. Winapp2ool                   - Download the latest winapp2ool.exe", "l")
         printMenuLine("4. Removed Entries.ini          - Download only entries used to create the non-ccleaner winapp2.ini", "l")
         printMenuLine(menuStr01)
-        printMenuLine("5. Directory                    - Change the download directory", "l")
+        printMenuLine("5. Directory                    - Change the save directory", "l")
+        printMenuLine(menuStr01)
+        printMenuLine("Save directory: " & replDir(downloadFile.dir), "l")
         printMenuLine(menuStr02)
-
     End Sub
+
     Public Sub main()
         exitCode = False
-        hasMenuTopper = False
-        Console.Clear()
+        menuTopper = "Download"
 
         Do Until exitCode
+            Console.Clear()
             printMenu()
             Console.WriteLine()
             Console.Write("Enter a number: ")
@@ -46,33 +49,18 @@ Module Downloader
                     Console.WriteLine("Returning to winapp2ool menu...")
                     exitCode = True
                 Case "1"
-                    download("winapp2.ini", wa2Link, downloadDir)
-                    Console.Clear()
-                    printMenuLine(tmenu("Download complete:"))
-                    printMenuLine("winapp2.ini", "c")
+                    download("winapp2.ini", wa2Link, downloadFile.dir)
                 Case "2"
-                    download("winapp2.ini", nonccLink, downloadDir)
-                    Console.Clear()
-                    printMenuLine(tmenu("Download complete:"))
-                    printMenuLine("winapp2.ini", "c")
+                    download("winapp2.ini", nonccLink, downloadFile.dir)
                 Case "3"
-                    download("winapp2ool.exe", toolLink, downloadDir)
-                    Console.Clear()
-                    printMenuLine(tmenu("Download complete:"))
-                    printMenuLine("winapp2ool.exe", "c")
+                    download("winapp2ool.exe", toolLink, downloadFile.dir)
                 Case "4"
-                    download("Removed entries.ini", removedLink, downloadDir)
-                    Console.Clear()
-                    printMenuLine(tmenu("Download complete:"))
-                    printMenuLine("Removed Entries.ini", "c")
+                    download("Removed entries.ini", removedLink, downloadFile.dir)
                 Case "5"
-                    dChooser(downloadDir, exitCode)
-                    Console.Clear()
-                    printMenuLine(tmenu("Current download directory:"))
-                    printMenuLine(downloadDir, "l")
+                    dChooser(downloadFile.dir, exitCode)
+                    menuTopper = "Changed save directory"
                 Case Else
-                    Console.Clear()
-                    printMenuLine(tmenu("Invalid input. Please try again."))
+                    menuTopper = invInpStr
             End Select
         Loop
     End Sub
@@ -177,5 +165,7 @@ Module Downloader
         End Try
         cwl("Download complete.")
         cwl("Downloaded " & fileName & " to " & downloadDir)
+        menuTopper = "Download complete: " & fileName
+
     End Sub
 End Module

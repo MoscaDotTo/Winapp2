@@ -3,27 +3,62 @@ Imports System.IO
 
 Module Diff
 
+    'File handlers
+    Dim oFile As IFileHandlr = New IFileHandlr(Environment.CurrentDirectory, "winapp2.ini")
+    Dim nFile As IFileHandlr = New IFileHandlr(Environment.CurrentDirectory, "")
+    Dim logFile As IFileHandlr = New IFileHandlr(Environment.CurrentDirectory, "diff.txt")
     Dim oldFile As iniFile
     Dim newFile As iniFile
-    Dim oldFileDir As String = Environment.CurrentDirectory
-    Dim newFileDir As String = Environment.CurrentDirectory
-    Dim oldFileName As String = "\winapp2.ini"
-    Dim newFileName As String = "\winapp2.ini"
     Dim outputToFile As String
+
+    'Menu settings
+    Dim menuTopper As String = ""
+    Dim menuItemLength As Integer = 35
+
+    'Boolean module parameters
     Dim exitCode As Boolean = False
-    Dim menuHasTopper As Boolean = False
-    Dim downloadFile As Boolean
-    Dim downloadNCC As Boolean
-    Dim saveLog As Boolean
+    Dim downloadFile As Boolean = False
+    Dim downloadNCC As Boolean = False
+    Dim saveLog As Boolean = False
+    Dim settingsChanged As Boolean = False
+
+    'Return the default parameters to the commandline handler
+    Public Sub initDiffParams(ByRef firstFile As IFileHandlr, ByRef secondFile As IFileHandlr, ByRef thirdFile As IFileHandlr, ByRef d As Boolean, ByRef dncc As Boolean, ByRef sl As Boolean)
+        initDefaultSettings()
+        firstFile = oFile
+        secondFile = nFile
+        thirdFile = logFile
+        d = downloadFile
+        dncc = downloadNCC
+        sl = saveLog
+    End Sub
+
+    'Handle calling Diff from the commandline with 
+    Public Sub remoteDiff(ByRef firstFile As IFileHandlr, secondFile As IFileHandlr, thirdFile As IFileHandlr, d As Boolean, dncc As Boolean, sl As Boolean)
+        oFile = firstFile
+        nFile = secondFile
+        logFile = thirdFile
+        downloadFile = d
+        downloadNCC = dncc
+        saveLog = sl
+        initDiff()
+    End Sub
+
+    'Restore all the module settings to their default state
+    Private Sub initDefaultSettings()
+        oFile.resetParams()
+        nFile.resetParams()
+        logFile.resetParams()
+        downloadFile = False
+        downloadNCC = False
+        saveLog = False
+        settingsChanged = False
+    End Sub
 
     Private Sub printMenu()
-        If Not menuHasTopper Then
-            menuHasTopper = True
-            printMenuLine(tmenu("Diff"))
-        End If
+        printMenuLine(tmenu(menuTopper))
         printMenuLine(menuStr03)
         printMenuLine("This tool will output the diff between two winapp2 files", "c")
-        printMenuLine("Log Saving: " & If(saveLog, "On", "Off"), "c")
         printMenuLine(menuStr01)
         printMenuLine("Menu: Enter a number to select", "c")
         printMenuLine(menuStr01)
@@ -32,19 +67,30 @@ Module Diff
         printMenuLine("2. Run (online)                - Diff your local winapp2.ini against the latest", "l")
         printMenuLine("3. Run (online non ccleaner)   - Diff your local non-ccleaner winapp2.ini against the latest", "l")
         printMenuLine(menuStr01)
-        printMenuLine("4. Toggle Save                        - Enable/Disable diff.txt saving", "l")
+        printMenuLine("4. Toggle Log Saving           - " & If(saveLog, "Disable", "Enable") & " automatic saving of the Diff output", "l")
+
+        If saveLog Then
+            printMenuLine(menuStr01)
+            printMenuLine("5. File Chooser (log)          - Change where Diff saves its log", "l")
+        End If
+
+        printMenuLine(menuStr01)
+        printMenuLine("Older file: " & replDir(oFile.path), "l")
+        If nFile.name <> "" Then printMenuLine("Newer file: " & replDir(nFile.path), "l")
+        If settingsChanged Then
+            printMenuLine(menuStr01)
+            printMenuLine(If(saveLog, "6.", "5.") & " Reset Settings              - Restore the default state of the Diff settings", "l")
+        End If
         printMenuLine(menuStr02)
     End Sub
 
     Public Sub main()
-        menuHasTopper = False
-        downloadFile = False
+        menuTopper = "Diff"
         exitCode = False
-        saveLog = False
         outputToFile = ""
-        Console.Clear()
 
         Do Until exitCode
+            Console.Clear()
             printMenu()
             Console.WriteLine()
             Console.Write("Enter a number, or leave blank to run the default: ")
@@ -66,12 +112,9 @@ Module Diff
                         downloadNCC = True
                         initDiff()
                     Case "4"
-                        saveLog = Not saveLog
-                        Console.Clear()
-                        printMenuLine(tmenu("Log saving toggled."))
+                        toggleSettingParam(saveLog, "Logging ", menuTopper, settingsChanged)
                     Case Else
-                        Console.Clear()
-                        printMenuLine(tmenu("Invalid input. Please try again."))
+                        menuTopper = invInpStr
                 End Select
             Catch ex As Exception
                 exc(ex)
@@ -88,7 +131,7 @@ Module Diff
     End Sub
 
     'Print out the menu for selecting the files to diff
-    Private Function printFileLoader(ageType As String, ByRef path As String, ByRef name As String) As iniFile
+    Private Function printFileLoader(ageType As String, ByRef someFile As IFileHandlr) As iniFile
         printMenuLine(tmenu("Diff file Loader"))
         printMenuLine(menuStr03)
         printMenuLine("Options", "c")
@@ -101,41 +144,29 @@ Module Diff
         Dim input As String = Console.ReadLine()
         Select Case input
             Case ""
-              name = "\winapp2.ini"
+                someFile.name = "winapp2.ini"
             Case "0"
                 exitCode = True
                 Return Nothing
             Case "1"
-                fChooser(path, name, exitCode, "\winapp2.ini", "")
+                fChooser(someFile.dir, someFile.name, exitCode, "winapp2.ini", "")
             Case Else
-                name = "\" & input
+                someFile.name = input
         End Select
 
-        Return validate(path, name, exitCode, "\winapp2.ini", "")
+        Return validate(someFile, exitCode)
     End Function
-
-    Public Sub remoteDiff(firstDir As String, firstName As String, secondDir As String, secondName As String, download As Boolean, ncc As Boolean, save As Boolean)
-        'Handle commandline args for launching the differ
-        oldFileDir = firstDir
-        oldFileName = firstName
-        newFileDir = secondDir
-        newFileName = secondName
-        downloadFile = download
-        downloadNCC = ncc
-        saveLog = save
-        initDiff()
-    End Sub
 
     'load up the files to diff
     Private Sub loadFiles()
         Console.Clear()
         Try
             'Always collect the older file
-            oldFile = printFileLoader("older", oldFileDir, oldFileName)
+            oldFile = printFileLoader("older", oFile)
             If exitCode Then Exit Sub
 
             'Collect the second file conditionally based on whether its a download or a local file
-            newFile = CType(If(downloadFile, getRemoteWinapp(downloadNCC), printFileLoader("newer", newFileDir, newFileName)), iniFile)
+            newFile = If(downloadFile, getRemoteWinapp(downloadNCC), printFileLoader("newer", nFile))
             If exitCode Then Exit Sub
         Catch ex As Exception
             exc(ex)

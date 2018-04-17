@@ -2,7 +2,7 @@
 Imports System.IO
 Module Winapp2ool
 
-    Dim currentVersion As Double = 0.8
+    Dim currentVersion As Double = 0.85
     Dim latestVersion As String
 
     Dim checkedForUpdates As Boolean = False
@@ -12,19 +12,14 @@ Module Winapp2ool
     Dim localWa2Ver As String = ""
 
     'This boolean will prevent us from printing or asking for input under most circumstances, triggered by the -s command line argument 
-    Public suppressOutput As Boolean
+    Public suppressOutput As Boolean = False
 
     Dim waUpdateIsAvail As Boolean = False
-    Dim menuHasTopper As Boolean = False
+    Dim menuTopper As String = ""
 
     Private Sub printMenu()
-        If menuHasTopper Then
-            printMenuLine(mMenu("Winapp2ool - A multitool for winapp2.ini and related files"))
-        Else
-            printMenuLine(tmenu("Winapp2ool - A multitool for winapp2.ini and related files"))
-            printMenuLine(menuStr03)
-            menuHasTopper = True
-        End If
+        printMenuLine(tmenu(menuTopper))
+        printMenuLine(menuStr03)
         printMenuLine("Menu: Enter a number to select", "c")
         If updateIsAvail Then
             printMenuLine(menuStr01)
@@ -51,6 +46,7 @@ Module Winapp2ool
     End Sub
 
     Public Sub main()
+        menuTopper = "Winapp2ool - A multitool for winapp2.ini and related files"
         Console.Title = "Winapp2ool v" & currentVersion & " beta"
         Console.WindowWidth = 120
         processCommandLineArgs()
@@ -58,6 +54,7 @@ Module Winapp2ool
         checkUpdates()
         Dim exitCode As Boolean = False
         Do Until exitCode = True
+            Console.Clear()
             printMenu()
             cwl()
             Console.Write("Enter a number: ")
@@ -70,53 +67,46 @@ Module Winapp2ool
                     Environment.Exit(1)
                 Case "1"
                     WinappDebug.main()
-                    Console.Clear()
-                    printMenuLine(tmenu("Finished running WinappDebug"))
+                    menuTopper = "Finished running WinappDebug"
                 Case "2"
                     Trim.main()
-                    Console.Clear()
-                    printMenuLine(tmenu("Finished running Trim"))
+                    menuTopper = "Finished running Trim"
                 Case "3"
                     Merge.main()
-                    Console.Clear()
-                    printMenuLine(tmenu("Finished running Merge"))
+                    menuTopper = "Finished running Merge"
                 Case "4"
                     Diff.main()
-                    Console.Clear()
-                    printMenuLine(tmenu("Finished running Diff"))
+                    menuTopper = "Finished running Diff"
                 Case "5"
                     CCiniDebug.Main()
-                    Console.Clear()
-                    printMenuLine(tmenu("Finished running CCiniDebug"))
+                    menuTopper = "Finished running CCiniDebug"
                 Case "6"
                     Downloader.main()
-                    Console.Clear()
-                    printMenuLine(tmenu("Finished running Downloader"))
+                    menuTopper = "Finished running Downloader"
                 Case Else
-                    Console.Clear()
-                    printMenuLine(tmenu("Invalid input. Please try again."))
+                    menuTopper = invInpStr
             End Select
         Loop
     End Sub
 
     Private Sub checkUpdates()
         Try
+            'Check for winapp2ool.exe updates
             latestVersion = getRemoteFileDataAtLineNum(toolVerLink, 1)
+            updateIsAvail = CDbl(latestVersion) > currentVersion
 
-            If CDbl(latestVersion) > currentVersion Then updateIsAvail = True
+            'Check for winapp2.ini updates
             latestWa2Ver = getRemoteFileDataAtLineNum(wa2Link, 1).Split(CChar(" "))(2)
             If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then
                 localWa2Ver = "0"
-                printMenuLine(tmenu("/!\ Update check failed. /!\"))
-                menuHasTopper = True
+                menuTopper = "/!\ Winapp2.ini update check failed. /!\"
             Else
                 localWa2Ver = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", 1).Split(CChar(" "))(2)
             End If
-            If CDbl(latestWa2Ver) > CDbl(localWa2Ver) Then waUpdateIsAvail = True
+            waUpdateIsAvail = CDbl(latestWa2Ver) > CDbl(localWa2Ver)
 
         Catch ex As Exception
-            printMenuLine(tmenu("/!\ Update check failed. /!\"))
-            menuHasTopper = True
+            menuTopper = "/!\ Update check failed. /!\"
         End Try
     End Sub
 
@@ -133,5 +123,26 @@ Module Winapp2ool
     Public Sub cwl(msg As String)
         If Not suppressOutput Then Console.WriteLine(msg)
     End Sub
+
+    'Prompt the user to change a file's parameters, flag it as changed, and mark settings as having changed
+    Public Sub changeFileParams(ByRef someFile As IFileHandlr, menuTopper As String, ByRef settingsChangedSetting As Boolean, ByRef ec As Boolean)
+        fChooser(someFile.dir, someFile.name, ec, someFile.initName, someFile.secondName)
+        settingsChangedSetting = True
+        menuTopper = If(someFile.secondName <> "", someFile.initName, "save file") & " parameters updated"
+    End Sub
+
+    'Toggle a parameter on or off and mark settings as having changed
+    Public Sub toggleSettingParam(ByRef setting As Boolean, paramText As String, ByRef topper As String, ByRef settingsChangedSetting As Boolean)
+        setting = Not setting
+        topper = paramText & If(setting, "enabled", "disabled")
+        settingsChangedSetting = True
+    End Sub
+
+    Public Function getMenuNumber(valList As List(Of Boolean), lowestStartingNum As Integer) As Integer
+        For Each setting In valList
+            If setting Then lowestStartingNum += 1
+        Next
+        Return lowestStartingNum
+    End Function
 
 End Module
