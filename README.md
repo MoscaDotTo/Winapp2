@@ -25,3 +25,6 @@ If you like Winapp2 and want to help keep development going, please consider don
 Donate to Robert/MoscaDotTo: http://www.winapp2.com/ Go to the link and click on Donate.
 
 Donate to Alex/ROCK N ROLL KID: Send money via PayPal to slinger1410@protonmail.com
+
+How to make your own Winapp2.ini entrys.
+https://forum.piriform.com/topic/32310-winapp2ini-additions/?page=1
