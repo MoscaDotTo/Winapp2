@@ -44,73 +44,73 @@ RegKey= This is for cleaning registry entries. The process is relatively the sam
 
 Each entry must be sectioned properly. We use numbering to refer to a specific section. You can also use Section="Name" to refer to a custom entry. We currently only use Section= for Games and for Winapp3. The following numbers refer to the specific section:
 
-LangSecRef=3021 = Applications
-LangSecRef=3022 = Internet
-LangSecRef=3023 = Multimedia
-LangSecRef=3024 = Utilities
-LangSecRef=3025 = Windows
-LangSecRef=3026 = Firefox/Mozilla
-LangSecRef=3027 = Opera
-LangSecRef=3028 = Safari
-Section=Games
+LangSecRef=3021 = Applications  
+LangSecRef=3022 = Internet  
+LangSecRef=3023 = Multimedia  
+LangSecRef=3024 = Utilities  
+LangSecRef=3025 = Windows  
+LangSecRef=3026 = Firefox/Mozilla  
+LangSecRef=3027 = Opera  
+LangSecRef=3028 = Safari  
+Section=Games  
 
 
 Variables:
 
 These are all the possible variables that can be used for writting paths in Winapp2.
 
-%AppData%
-XP: C:\\Documents and Settings\\{username}\\Application Data
+%AppData%  
+XP: C:\\Documents and Settings\\{username}\\Application Data  
 Vista-10: C:\\Users\\{username}\\AppData\\Roaming
 
-%CommonAppData%
-XP: C:\\Documents and Settings\\All Users\\Application Data
+%CommonAppData%  
+XP: C:\\Documents and Settings\\All Users\\Application Data  
 Vista-10: C:\\ProgramData
 
-%CommonProgramFiles%
-XP-10: C:\\Program Files\\Common Files
-XP-10: C:\\Program Files (x86)\\Common Files
+%CommonProgramFiles%  
+XP-10: C:\\Program Files\\Common Files  
+XP-10: C:\\Program Files (x86)\\Common Files  
 This will work for both 32 and 64 bit directories as CCleaner will detect it on its own.
 
-%Documents%
-XP: C:\\Documents and Settings\\{username}\\My Documents
+%Documents%  
+XP: C:\\Documents and Settings\\{username}\\My Documents  
 Vista-10: C:\\Users\\{username}\\Documents
 
-%LocalAppData%
-XP: C:\\Documents and Settings\\{username}\\Local Settings\\Application Data
+%LocalAppData%  
+XP: C:\\Documents and Settings\\{username}\\Local Settings\\Application Data  
 Vista-10: C:\\Users\\{username}\\AppData\\Local
 
-%LocalLowAppData%
+%LocalLowAppData%  
 Vista-10: C:\\Users\\{username}\\AppData\\LocalLow
 
-%Music%
-XP: C:\\Documents and Settings\\{username}\\My Documents\\My Music
+%Music%  
+XP: C:\\Documents and Settings\\{username}\\My Documents\\My Music  
 Vista-10: C:\\Users\\{username}\\Music
 
-%Pictures%
-XP: C:\\Documents and Settings\\{username}\\My Documents\\My Pictures
+%Pictures%  
+XP: C:\\Documents and Settings\\{username}\\My Documents\\My Pictures  
 Vista-10: C:\\Users\\{username}\\Pictures
 
-%ProgramFiles%
-XP-10: C:\\Program Files
-XP-10: C:\\Program Files (x86)
+%ProgramFiles%  
+XP-10: C:\\Program Files  
+XP-10: C:\\Program Files (x86)  
 This will work for both 32bit and 64bit because CCleaner detects these paths on its own.
 
-%Public%
+%Public%  
 Vista-10: C:\\Users\\Public
 
-%SystemDrive%
+%SystemDrive%  
 XP-10: C:
 
-%UserProfile%
-XP: C:\\Documents and Settings\\{username}
-Vista-10: C:\\Users\\{username}
+%UserProfile%  
+XP: C:\\Documents and Settings\\{username}  
+Vista-10: C:\\Users\\{username}  
 
-%Video%
-XP: C:\\Documents and Settings\\{username}\\My Documents\\My Videos
+%Video%  
+XP: C:\\Documents and Settings\\{username}\\My Documents\\My Videos  
 Vista-10: C:\\Users\\{username}\\Videos
 
-%WinDir%
+%WinDir%  
 XP-10: C:\\Windows
 
 
