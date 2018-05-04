@@ -22,7 +22,7 @@ How to make your own entries:
 
 Winapp2 entries follow ABC ordering and we currently support all of the following code:
 
-[Name *] Name of the entry. Please include the space between the name and the *.
+[Name \*] Name of the entry. Please include the space between the name and the \*.
 
 DetectOS= Specifies which OS this entry is for. We use kernel version numbering, so for example, 5.1 refers to Windows XP and 6.0 refers to Windows Vista. If you are writting an entry for all Windows operating systems, then you do not need to include this. If you are writting an entry that only exists on Windows XP, you would put DetectOS=5.1|5.1. If you are writing an entry that is for Vista and above, you would put DetectOS=6.0|. If you are writting an entry that is for Windows 7 and below, you would put DetectOS=|6.1. It is very important the vertical bar is put in the right position, otherwise it will detect the wrong operating systems.
 
@@ -38,7 +38,7 @@ Default= This refers to if the entry should be enabled by default. CCleaner is t
 
 Warning= If a entry may break a program or does something weird to ones system, it is a good idea to put a warning in a entry. Please leave warnings short and too the point.
 
-FileKey= This refers to the junk files that need to be cleaned. This can include a path or a specific file. Each file or path must be in it's own FileKey. So if you are trying to clean 2 file paths, you would put 1 path in FileKey1= and the other in FileKey2=. You may also use wildcards in FileKeys to help shrink the amount of FileKeys created. A good time to use these would be when cleaning junk files with the same extension, such as .log. Instead of making multiple FileKeys for cleaning multiple log files, you can make one entry with using a wildcard, for example: Path|*.log This will tell Winapp2 to clean any file that has .log at the end. If your goal is to delete any file within a folder, then you would specify this with just adding a period, for example: path|*.* A | must be used at the end of each path for every FileKey in order for your entry to work properly. Feel free to looks throughout Winapp2 if you ever need a better example. Alternatively, you can use RECURSE and REMOVESELF in your FileKeys. RECURSE tells your entry to clean the files within the path specified, as well as in sub-folders. REMOVESELF does the same as RECURSE, except it also removes the folders along with it, as well.
+FileKey= This refers to the junk files that need to be cleaned. This can include a path or a specific file. Each file or path must be in it's own FileKey. So if you are trying to clean 2 file paths, you would put 1 path in FileKey1= and the other in FileKey2=. You may also use wildcards in FileKeys to help shrink the amount of FileKeys created. A good time to use these would be when cleaning junk files with the same extension, such as .log. Instead of making multiple FileKeys for cleaning multiple log files, you can make one entry with using a wildcard, for example: Path|\*.log This will tell Winapp2 to clean any file that has .log at the end. If your goal is to delete any file within a folder, then you would specify this with just adding a period, for example: path|\*.\* A | must be used at the end of each path for every FileKey in order for your entry to work properly. Feel free to looks throughout Winapp2 if you ever need a better example. Alternatively, you can use RECURSE and REMOVESELF in your FileKeys. RECURSE tells your entry to clean the files within the path specified, as well as in sub-folders. REMOVESELF does the same as RECURSE, except it also removes the folders along with it, as well.
 
 RegKey= This is for cleaning registry entries. The process is relatively the same as the FileKey. We do not support wildcards in RegKey, so each RegKey has to be a specific key.
 
@@ -60,57 +60,58 @@ Variables:
 These are all the possible variables that can be used for writting paths in Winapp2.
 
 %AppData%
-XP: C:\Documents and Settings\{username}\Application Data
-Vista-10: C:\Users\{username}\AppData\Roaming
+XP: C:\\Documents and Settings\\{username}\\Application Data
+Vista-10: C:\\Users\\{username}\\AppData\\Roaming
 
 %CommonAppData%
-XP: C:\Documents and Settings\All Users\Application Data
-Vista-10: C:\ProgramData
+XP: C:\\Documents and Settings\\All Users\\Application Data
+Vista-10: C:\\ProgramData
 
 %CommonProgramFiles%
-XP-10: C:\Program Files\Common Files
-XP-10: C:\Program Files (x86)\Common Files
+XP-10: C:\\Program Files\\Common Files
+XP-10: C:\\Program Files (x86)\\Common Files
 This will work for both 32 and 64 bit directories as CCleaner will detect it on its own.
 
 %Documents%
-XP: C:\Documents and Settings\{username}\My Documents
-Vista-10: C:\Users\{username}\Documents
+XP: C:\\Documents and Settings\\{username}\\My Documents
+Vista-10: C:\\Users\\{username}\\Documents
 
 %LocalAppData%
-XP: C:\Documents and Settings\{username}\Local Settings\Application Data
-Vista-10: C:\Users\{username}\AppData\Local
+XP: C:\\Documents and Settings\\{username}\\Local Settings\\Application Data
+Vista-10: C:\\Users\\{username}\\AppData\\Local
 
 %LocalLowAppData%
-Vista-10: C:\Users\{username}\AppData\LocalLow
+Vista-10: C:\\Users\\{username}\\AppData\\LocalLow
 
 %Music%
-XP: C:\Documents and Settings\{username}\My Documents\My Music
-Vista-10: C:\Users\{username}\Music
+XP: C:\\Documents and Settings\\{username}\\My Documents\\My Music
+Vista-10: C:\\Users\\{username}\\Music
 
 %Pictures%
-XP: C:\Documents and Settings\{username}\My Documents\My Pictures
-Vista-10: C:\Users\{username}\Pictures
+XP: C:\\Documents and Settings\\{username}\\My Documents\\My Pictures
+Vista-10: C:\\Users\\{username}\\Pictures
 
 %ProgramFiles%
-XP-10: C:\Program Files
-This will work for both 32bit and 64bit folder.
+XP-10: C:\\Program Files
+XP-10: C:\\Program Files (x86)
+This will work for both 32bit and 64bit because CCleaner detects these paths on its own.
 
 %Public%
-Vista-10: C:\Users\Public
+Vista-10: C:\\Users\\Public
 
 %SystemDrive%
 XP-10: C:
 
 %UserProfile%
-XP: C:\Documents and Settings\{username}
-Vista-10: C:\Users\{username}
+XP: C:\\Documents and Settings\\{username}
+Vista-10: C:\\Users\\{username}
 
 %Video%
-XP: C:\Documents and Settings\{username}\My Documents\My Videos
-Vista-10: C:\Users\{username}\Videos
+XP: C:\\Documents and Settings\\{username}\\My Documents\\My Videos
+Vista-10: C:\\Users\\{username}\\Videos
 
 %WinDir%
-XP-10: C:\Windows
+XP-10: C:\\Windows
 
 
 Excluding a file or path:
@@ -119,33 +120,33 @@ In a situation where you are writting an entry, but you do not want to remove a 
 
 Example 1:
 
-ExcludeKey1=PATH|%windir%\system32\LogFiles\SCM\|*-*-*-*.*
+ExcludeKey1=PATH|%windir%\\system32\\LogFiles\\SCM\\|\*-\*-\*-\*.\*
 
-This will exclude all of the log files with the pattern *-*-*-*.* in the \system32\LogFiles\SCM\ folder of the user's Windows directory.
+This will exclude all of the log files with the pattern \*-\*-\*-\*.\* in the \\system32\\LogFiles\\SCM\\ folder of the user's Windows directory.
 
 Example 2:
 
-ExcludeKey2=FILE|%windir%\system32\LogFiles\|myfile.txt
+ExcludeKey2=FILE|%windir%\\system32\\LogFiles\\|myfile.txt
 
-This will exclude the myfile.txt file located in the \system32\LogFiles folder of the user's Windows directory.
+This will exclude the myfile.txt file located in the \\system32\\LogFiles folder of the user's Windows directory.
 
 Example 3:
 
-ExcludeKey3=REG|HKCU\software\piriform
+ExcludeKey3=REG|HKCU\\software\\piriform
 
-This will exclude the key located at HKCU\software\piriform (and any subentries)
+This will exclude the key located at HKCU\\software\\piriform (and any subentries)
 
 Example 4:
 
-ExcludeKey4=PATH|C:\temp\|*.*
+ExcludeKey4=PATH|C:\\temp\\|\*.\*
 
-This will exclude the files located in the C:\temp folder and all subfolders.
+This will exclude the files located in the C:\\temp folder and all subfolders.
 
 Example 5:
 
-ExcludeKey5=PATH|C:\Windows\|*.exe;*.bat
+ExcludeKey5=PATH|C:\\Windows\\|\*.exe;\*.bat
 
-This will exclude files of types .exe and .bat in the C:\Windows folder.
+This will exclude files of types .exe and .bat in the C:\\Windows folder.
 
 
 Donations:
