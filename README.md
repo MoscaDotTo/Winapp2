@@ -38,10 +38,9 @@ Default= This refers to if the entry should be enabled by default. CCleaner is t
 
 Warning= If a entry may break a program or does something weird to ones system, it is a good idea to put a warning in a entry. Please leave warnings short and too the point.
 
-FileKey= This refers to the junk files that need to be cleaned. This can include a path or a specific file. Each file or path must be in it's own FileKey. So if you are trying to clean 2 file paths, you would put 1 path in FileKey1= and the other in FileKey2=. Please see below for more information of how to use FileKeys.
+FileKey= This refers to the junk files that need to be cleaned. This can include a path or a specific file. Each file or path must be in it's own FileKey. So if you are trying to clean 2 file paths, you would put 1 path in FileKey1= and the other in FileKey2=. You may also use wildcards in FileKeys to help shrink the amount of FileKeys created. A good time to use these would be when cleaning junk files with the same extension, such as .log. Instead of making multiple FileKeys for cleaning multiple log files, you can make one entry with using a wildcard, for example: Path|*.log This will tell Winapp2 to clean any file that has .log at the end. If your goal is to delete any file within a folder, then you would specify this with just adding a period, for example: path|*.* A | must be used at the end of each path for every FileKey in order for your entry to work properly. Feel free to looks throughout Winapp2 if you ever need a better example. Alternatively, you can use RECURSE and REMOVESELF in your FileKeys. RECURSE tells your entry to clean the files within the path specified, as well as in sub-folders. REMOVESELF does the same as RECURSE, except it also removes the folders along with it, as well.
 
 RegKey= This is for cleaning registry entries. The process is relatively the same as the FileKey. We do not support wildcards in RegKey, so each RegKey has to be a specific key.
-
 
 Each entry must be sectioned properly. We use numbering to refer to a specific section. You can also use Section="Name" to refer to a custom entry. We currently only use Section= for Games and for Winapp3. The following numbers refer to the specific section:
 
@@ -54,9 +53,6 @@ LangSecRef=3026 = Firefox/Mozilla
 LangSecRef=3027 = Opera
 LangSecRef=3028 = Safari
 Section=Games
-
-
-As for FileKeys, as mentioned above, you can specify a path or file. You may also use wildcards in FileKeys to help shrink the amount of FileKeys created. A good time to use these would be when cleaning junk files with the same extension, such as .log. Instead of making multiple FileKeys for cleaning multiple log files, you can make one entry with using a wildcard, for example: Path|*.log This will tell Winapp2 to clean any file that has .log at the end. Feel free to looks throughout Winapp2 if you ever need a better example.
 
 
 Variables:
@@ -119,7 +115,7 @@ XP-10: C:\Windows
 
 Excluding a file or path:
 
-In a situation where you are writting an entry, but you do not want to remove a certain file because it may damage your software, ExcludeKEys can be used. You may use ExcludeKeys to exclude a file, path, or a registry key. Wildcards are also accepable in ExcludeKeys. Examples are below.
+In a situation where you are writting an entry, but you do not want to remove a certain file because it may damage your software, ExcludeKeys can be used. You may use ExcludeKeys to exclude a file, path, or a registry key. Wildcards are also accepable in ExcludeKeys. Examples are below.
 
 Example 1:
 
