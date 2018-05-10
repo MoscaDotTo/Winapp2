@@ -13,9 +13,9 @@ We also have a tool specifically for these files, which is called Winapp2ool. Th
 
 - For BleachBit users, open up BleachBit, click on "Edit" tab, then click on "Preferences". Make sure "Download and update cleaners from community (winapp2.ini)" is checked.
 
-- For System Ninja users, you should already have a copy installed in the System Ninja/scripts directory. If not, you can always put an up-to-date one there yourself.
+- For System Ninja users, System Ninja has Winapp2 built into their cleaner by default and you should already have a copy installed in you System Ninja/scripts folder.
 
-- For Avira System Speedup users, up to version 3.9, you could go into "Settings - Device Optimization" and check "Scan using Winapp2", however, as of version 4.0 and above, this setting does not exist anymore and we are not sure if they are still using Winapp2 in newer versions.
+- For Avira System Speedup users, Avira System Speedup has Winapp2 built into their cleaner and you should already have a copy in your Avira/System Speedup/sdf folder.
 
 
 ### How to make your own entries:
