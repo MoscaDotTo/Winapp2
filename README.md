@@ -9,13 +9,15 @@ We also have a tool specifically for these files, which is called Winapp2ool. Th
 
 ### How to use Winapp2 for the following cleaners:
 
-- For CCleaner users, download the latest copy from here. After that, move the Winapp2 copy to your main directory (where ever the CCleaner.exe file is). Optionally, if CCleaner is taking too long to load, please download Winapp2ool, run it, and run the Trim feature to trim your Winapp2 file. This will speed up CCleaner load times with Winapp2.
+- For [CCleaner users](https://www.ccleaner.com/ccleaner), download the latest copy from here. After that, move the Winapp2 copy to your main directory (where ever the CCleaner.exe file is). Optionally, if CCleaner is taking too long to load, please download Winapp2ool, run it, and run the Trim feature to trim your Winapp2 file. This will speed up CCleaner load times with Winapp2.
 
-- For BleachBit users, open up BleachBit, click on "Edit" tab, then click on "Preferences". Make sure "Download and update cleaners from community (winapp2.ini)" is checked.
+- For [BleachBit users](https://www.bleachbit.org), open up BleachBit, click on "Edit" tab, then click on "Preferences". Make sure "Download and update cleaners from community (winapp2.ini)" is checked.
 
-- For System Ninja users, System Ninja has Winapp2 built into their cleaner by default and you should already have a copy installed in you System Ninja/scripts folder.
+- For [System Ninja users](https://singularlabs.com/software/system-ninja), System Ninja has Winapp2 built into their cleaner by default and you should already have a copy installed in you System Ninja/scripts folder.
 
-- For Avira System Speedup users, Avira System Speedup has Winapp2 built into their cleaner and you should already have a copy in your Avira/System Speedup/sdf folder.
+- For [Avira System Speedup users](https://www.avira.com/en/avira-system-speedup-free), Avira System Speedup has Winapp2 built into their cleaner and you should already have a copy in your Avira/System Speedup/sdf folder.
+
+- For [Tron users](https://github.com/bmrf/tron), Tron has Winapp2 built into their cleaner and you should already have a copy in your tron/resources/stage_1_tempclean/ccleaner folder.
 
 
 ### How to make your own entries:
