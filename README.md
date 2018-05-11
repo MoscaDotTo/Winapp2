@@ -13,7 +13,7 @@ We also have a tool specifically for these files, which is called Winapp2ool. Th
 
 - For [BleachBit users](https://www.bleachbit.org), open up BleachBit, click on "Edit" tab, then click on "Preferences". Make sure "Download and update cleaners from community (winapp2.ini)" is checked.
 
-- For [System Ninja users](https://singularlabs.com/software/system-ninja), System Ninja has Winapp2 built into their cleaner by default and you should already have a copy installed in you System Ninja/scripts folder.
+- For [System Ninja users](https://singularlabs.com/software/system-ninja), System Ninja has Winapp2 built into their cleaner and you should already have a copy installed in you System Ninja/scripts folder.
 
 - For [Avira System Speedup users](https://www.avira.com/en/avira-system-speedup-free), Avira System Speedup has Winapp2 built into their cleaner and you should already have a copy in your Avira/System Speedup/sdf folder.
 
