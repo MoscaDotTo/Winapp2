@@ -13,7 +13,7 @@ We also have a tool specifically for these files, which is called Winapp2ool. Th
 
 - For [BleachBit users](https://www.bleachbit.org), open up BleachBit, click on "Edit" tab, then click on "Preferences". Make sure "Download and update cleaners from community (winapp2.ini)" is checked.
 
-- For [System Ninja users](https://singularlabs.com/software/system-ninja), System Ninja has Winapp2 built into their cleaner and you should already have a copy installed in you System Ninja/scripts folder.
+- For [System Ninja users](https://singularlabs.com/software/system-ninja), System Ninja has Winapp2 built into their cleaner and you should already have a copy installed in your System Ninja/scripts folder.
 
 - For [Avira System Speedup users](https://www.avira.com/en/avira-system-speedup-free), Avira System Speedup has Winapp2 built into their cleaner and you should already have a copy in your Avira/System Speedup/sdf folder.
 
@@ -28,7 +28,17 @@ Winapp2 entries follow ABC ordering and we currently support all of the followin
 
 **DetectOS=** Specifies which OS this entry is for. We use kernel version numbering, so for example, 5.1 refers to Windows XP and 6.0 refers to Windows Vista. If you are writing an entry for all Windows operating systems, then you do not need to include this. If you are writing an entry that only exists on Windows XP, you would put DetectOS=5.1|5.1. If you are writing an entry that is for Vista and above, you would put DetectOS=6.0|. If you are writing an entry that is for Windows 7 and below, you would put DetectOS=|6.1. It is very important the vertical bar is put in the right position, otherwise it will detect the wrong operating systems.
 
-**LangSecRef=** or **Section=** This refers to what section this belongs to. See below for which number to use in your entry.
+**LangSecRef=** or **Section=** This refers to what section this belongs to. Each entry must be sectioned properly. We use numbering to refer to a specific section. You can also use Section="Name" to refer to a custom entry. We currently only use Section= for Games and for Winapp3. The following numbers refer to the specific section:
+
+LangSecRef=3021 = Applications  
+LangSecRef=3022 = Internet  
+LangSecRef=3023 = Multimedia  
+LangSecRef=3024 = Utilities  
+LangSecRef=3025 = Windows  
+LangSecRef=3026 = Firefox/Mozilla  
+LangSecRef=3027 = Opera  
+LangSecRef=3028 = Safari  
+Section=Games
 
 **SpecialDetect=** It is rare you will ever need to use this, but this is part of coding that has been in CCleaner for a while and we decided to reuse it in Winapp2, as well. The only time we really ever use this is for browsers, so for example, **SpecialDetect=DET_CHROME** would refer to Google Chrome and **SpecialDetect=DET_MOZILLA** would refer to Mozilla Firefox. If you need an example, please take a look inside the browser section of Winapp2 (it is the first 2 sections in Winapp2).
 
@@ -43,18 +53,6 @@ Winapp2 entries follow ABC ordering and we currently support all of the followin
 **FileKey=** This refers to the junk files that need to be cleaned. This can include a path or a specific file. Each file or path must be in its own FileKey. So, if you are trying to clean 2 file paths, you would put 1 path in FileKey1= and the other in FileKey2=. You may also use wildcards in FileKeys to help shrink the amount of FileKeys created. A good time to use these would be when cleaning junk files with the same extension, such as .log. Instead of making multiple FileKeys for cleaning multiple log files, you can make one entry with using a wildcard, for example: Path|\*.log This will tell Winapp2 to clean any file that has .log at the end. If your goal is to delete any file within a folder, then you would specify this with just adding a period, for example: path|\*.\* A | must be used at the end of each path for every FileKey in order for your entry to work properly. Feel free to look throughout Winapp2 if you ever need a better example. Alternatively, you can use RECURSE and REMOVESELF in your FileKeys. **RECURSE** tells your entry to clean the files within the path specified, as well as in sub-folders. **REMOVESELF** does the same as RECURSE, except it also removes the folders along with it, as well.
 
 **RegKey=** This is for cleaning registry entries. The process is relatively the same as the FileKey. We do not support wildcards in RegKey, so each RegKey has to be a specific key.
-
-Each entry must be sectioned properly. We use numbering to refer to a specific section. You can also use Section="Name" to refer to a custom entry. We currently only use Section= for Games and for Winapp3. The following numbers refer to the specific section:
-
-LangSecRef=3021 = Applications  
-LangSecRef=3022 = Internet  
-LangSecRef=3023 = Multimedia  
-LangSecRef=3024 = Utilities  
-LangSecRef=3025 = Windows  
-LangSecRef=3026 = Firefox/Mozilla  
-LangSecRef=3027 = Opera  
-LangSecRef=3028 = Safari  
-Section=Games  
 
 
 ### Environment variables:
@@ -139,6 +137,15 @@ This will exclude the files located in the C:\\temp folder and all subfolders.
 *Example 5:* ExcludeKey5=PATH|C:\\Windows\\|\*.exe;\*.bat
 
 This will exclude files of types .exe and .bat in the C:\\Windows folder.
+
+
+### Currently not supported features:
+
+- We do not support wildcards in RegKeys.
+
+- We do not support non-English systems, although it should still be possible to run Winapp2 on non-english systems. If you need a cleaner in a non-English format, we suggest writing a custom.ini file.
+
+- We do not support portable software. This is because these can be placed anywhere on a system. We suggest writing a custom.ini file for portable software.
 
 
 ### Donations:
