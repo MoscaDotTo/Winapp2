@@ -143,7 +143,7 @@ This will exclude files of types .exe and .bat in the C:\\Windows folder.
 
 - We do not support wildcards in RegKeys.
 
-- We do not support non-English systems, although it should still be possible to run Winapp2 on non-english systems. If you need a cleaner in a non-English format, we suggest writing a custom.ini file.
+- We do not support non-English systems, although it should still be possible to run Winapp2 on non-English systems. If you need a cleaner in a non-English format, we suggest writing a custom.ini file.
 
 - We do not support portable software. This is because these can be placed anywhere on a system. We suggest writing a custom.ini file for portable software.
 
