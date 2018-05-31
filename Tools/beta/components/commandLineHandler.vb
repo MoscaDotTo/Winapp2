@@ -4,13 +4,29 @@ Imports System.IO
 Module commandLineHandler
 
     'File Handlers
-    Dim firstFile As IFileHandlr
-    Dim secondFile As IFileHandlr
-    Dim thirdFile As IFileHandlr
+    Dim firstFile As iniFile
+    Dim secondFile As iniFile
+    Dim thirdFile As iniFile
 
+    Private Sub invertSettingAndRemoveArg(ByRef args As List(Of String), ByRef settings As Boolean(), ByRef arg As String)
+        If args.Contains(arg) Then
+            For Each setting In settings
+                setting = Not setting
+            Next
+            args.Remove(arg)
+        End If
+    End Sub
+
+    Private Sub invertAndRemoveAndRename(ByRef args As List(Of String), ByRef settings As Boolean(), ByRef arg As String, ByRef name As String, newname As String)
+        invertSettingAndRemoveArg(args, settings, arg)
+        name = newname
+    End Sub
 
     'Handle commandline args for WinappDebug
     Private Sub autoDebug(ByRef args As List(Of String))
+
+        'WinappDebug specific command line args
+        ' -c      : enable autocorrect
 
         Dim correctErrors As Boolean
 
@@ -18,10 +34,7 @@ Module commandLineHandler
         initDebugParams(firstFile, secondFile, correctErrors)
 
         'Toggle on autocorrect (off by default)
-        If args.Contains("-c") Then
-            correctErrors = True
-            args.Remove("-c")
-        End If
+        invertSettingAndRemoveArg(args, {correctErrors}, "-c")
 
         'Get any file parameters from flags
         validateAndParse(args)
@@ -33,23 +46,20 @@ Module commandLineHandler
     'Handle commandline args for Trim
     Private Sub autoTrim(ByRef args As List(Of String))
 
+        'Trim specific commandline args
+        ' -d     : download the latest winapp2.ini
+        ' -ncc   : download the latest non-ccleaner winapp2.ini (implies -d)
+
         Dim download As Boolean
         Dim ncc As Boolean
 
         initTrimParams(firstFile, secondFile, download, ncc)
 
         'Download a winapp2 to trim?
-        If args.Contains("-download") Then
-            download = True
-            args.Remove("-download")
-        End If
+        invertSettingAndRemoveArg(args, {download}, "-d")
 
         'Download the non ccleaner ini? Implies -d
-        If args.Contains("-ncc") Then
-            ncc = True
-            download = True
-            args.Remove("-ncc")
-        End If
+        invertSettingAndRemoveArg(args, {download, ncc}, "-ncc")
 
         'Get any file parameters from flags
         validateAndParse(args)
@@ -62,24 +72,20 @@ Module commandLineHandler
     'Handle commandline args for Merge
     Private Sub autoMerge(ByRef args As List(Of String))
 
+        'Merge specific command line args
+        ' -mm      : toggle mergemode from replace & add to replace & remove
+        ' -r       : use removed entries.ini as the merge file's name
+        ' -c       : use custom.ini as the merge file's name
+
         Dim mergeMode As Boolean
 
         initMergeParams(firstFile, secondFile, thirdFile, mergeMode)
 
-        If args.Contains("-mm") Then
-            mergeMode = False
-            args.Remove("-mm")
-        End If
+        invertSettingAndRemoveArg(args, {mergeMode}, "-mm")
 
-        If args.Contains("-r") Then
-            secondFile.name = "Removed Entries.ini"
-            args.Remove("-r")
-        End If
-
-        If args.Contains("-c") Then
-            secondFile.name = "Custom.ini"
-            args.Remove("-c")
-        End If
+        'Detect any preset filename calls
+        invertAndRemoveAndRename(args, {}, "-r", secondFile.name, "Removed Entries.ini")
+        invertAndRemoveAndRename(args, {}, "-c", secondFile.name, "Custom.ini")
 
         'Get any file parameters from flags
         validateAndParse(args)
@@ -88,34 +94,35 @@ Module commandLineHandler
         If Not secondFile.name = "" Then remoteMerge(firstFile, secondFile, thirdFile, mergeMode)
     End Sub
 
+    Private Sub removeConflictingArgs(ByRef args As List(Of String), arg1 As String, arg2 As String)
+        If args.Contains(arg2) Then args.Remove(arg1)
+    End Sub
+
     'Handle commandline args for Diff
     Private Sub autoDiff(ByRef args As List(Of String))
+
+        'Diff specific commandline args
+        ' -d          : download the latest winapp2.ini
+        ' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
+        ' -savelog    : save the diff.txt log
+
         Dim ncc As Boolean
         Dim download As Boolean
-        Dim save As Boolean = False
+        Dim save As Boolean
 
         initDiffParams(firstFile, secondFile, thirdFile, download, ncc, save)
 
         'Download & Diff?
-        If args.Contains("-download") Then
-            secondFile.name = "Online winapp2.ini"
-            download = True
-            args.Remove("-download")
-        End If
+        invertAndRemoveAndRename(args, {download}, "-d", secondFile.name, "Online winapp2.ini")
 
         'Downloading non-ccleaner ini?
-        If args.Contains("-ncc") Then
-            ncc = True
-            download = True
-            secondFile.name = "Online non-ccleaner winapp2.ini"
-            args.Remove("-ncc")
-        End If
+        invertAndRemoveAndRename(args, {download, ncc}, "-ncc", secondFile.name, "Online non-ccleaner winapp2.ini")
 
         'Save diff.txt?
-        If args.Contains("-l") Then
-            save = True
-            args.Remove("-l")
-        End If
+        invertSettingAndRemoveArg(args, {save}, "-savelog")
+
+        'Get any file parameters from flags
+        validateAndParse(args)
 
         'Only run if we have a second file (because we assume we're running on a winapp2.ini file by default)
         If Not secondFile.name = "" Then remoteDiff(firstFile, secondFile, thirdFile, download, ncc, save)
@@ -123,6 +130,12 @@ Module commandLineHandler
 
     'Handle commandline args for CCiniDebug
     Private Sub autoccini(ByRef args As List(Of String))
+
+        'CCiniDebug specific commandline args:
+        ' -noprune : disable pruning of stale winapp2.ini entries
+        ' -nosort  : disable sorting ccleaner.ini alphabetically
+        ' -nosave  : disable saving the modified ccleaner.ini back to file
+
         Dim prune As Boolean
         Dim save As Boolean
         Dim sort As Boolean
@@ -130,20 +143,13 @@ Module commandLineHandler
         initCCDebugParams(firstFile, secondFile, thirdFile, prune, save, sort)
 
         'Prune?
-        If args.Contains("-noprune") Then
-            prune = False
-            args.Remove("-noprune")
-        End If
+        invertSettingAndRemoveArg(args, {prune}, "-noprune")
 
-        If args.Contains("-nosave") Then
-            save = False
-            args.Remove("-nosave")
-        End If
+        'Sort?
+        invertSettingAndRemoveArg(args, {sort}, "-nosort")
 
-        If args.Contains("-nosort") Then
-            sort = False
-            args.Remove("-nosort")
-        End If
+        'Save?
+        invertSettingAndRemoveArg(args, {save}, "-nosave")
 
         'Get any file parameters from flags
         validateAndParse(args)
@@ -154,46 +160,35 @@ Module commandLineHandler
 
     Private Sub autodownload(ByRef args As List(Of String))
 
-        Dim downloadFile As String
-        Dim downloadDir As String = Environment.CurrentDirectory & "\winapp2ool downloads"
+        Dim fileLink As String
+        Dim downloadDir As String = Environment.CurrentDirectory
         Dim downloadName As String
-
-        If args.Contains("-p") Then
-            downloadDir = Environment.CurrentDirectory
-            args.Remove("-p")
-        End If
 
         If args.Count > 0 Then
             Select Case args(0)
-                Case "1"
-                    downloadFile = wa2Link
-                    downloadName = "\winapp2.ini"
-                Case "2"
-                    downloadFile = nonccLink
-                    downloadName = "\winapp2.ini"
+                Case "1", "2"
+                    fileLink = If(args(0) = "1", wa2Link, nonccLink)
+                    downloadName = "winapp2.ini"
                 Case "3"
-                    downloadFile = toolLink
-                    downloadName = "\winapp2ool.exe"
+                    fileLink = toolLink
+                    downloadName = "winapp2ool.exe"
                 Case "4"
-                    downloadFile = removedLink
-                    downloadName = "\Removed Entries.ini"
+                    fileLink = removedLink
+                    downloadName = "Removed Entries.ini"
                 Case Else
-                    downloadFile = ""
+                    fileLink = ""
                     downloadName = ""
             End Select
             args.RemoveAt(0)
         Else
-            downloadFile = ""
+            fileLink = ""
             downloadName = ""
         End If
 
         'Get any file parameters from flags
         validateAndParse(args)
 
-        'If we're downloading winapp2ool, make sure we don't try to overwrite the currently running exe
-        If downloadDir = Environment.CurrentDirectory And downloadFile = toolLink Then downloadDir += "\winapp2ool downloads"
-
-        If Not downloadFile = "" Then remoteDownload(downloadDir, downloadName, downloadFile)
+        If Not fileLink = "" Then remoteDownload(downloadDir, downloadName, fileLink, False)
 
     End Sub
 
@@ -207,7 +202,7 @@ Module commandLineHandler
         End If
     End Sub
 
-    Private Sub getFileNameAndDir(ByRef args As List(Of String), flag As String, ByRef file As IFileHandlr)
+    Private Sub getFileNameAndDir(ByRef args As List(Of String), flag As String, ByRef file As iniFile)
         'Take in a file with directory listing and split it into its constituent parts, saving them
         If args.Count >= 2 Then
             Dim ind As Integer = args.IndexOf(flag)
@@ -217,7 +212,7 @@ Module commandLineHandler
         End If
     End Sub
 
-    Private Sub getFileParams(ByRef arg As String, ByRef file As IFileHandlr)
+    Private Sub getFileParams(ByRef arg As String, ByRef file As iniFile)
         'Start either a blank path or, support appending children folders to the current path
         file.dir = If(arg.StartsWith("\"), Environment.CurrentDirectory & "\", "")
 
@@ -242,13 +237,12 @@ Module commandLineHandler
         args.RemoveAt(0)
 
         'the s is for silent, if we have this flag, don't give any output to the user 
-        If args.Contains("-s") Then
-            suppressOutput = True
-            args.Remove("-s")
-        End If
+        invertSettingAndRemoveArg(args, {suppressOutput}, "-s")
+
+        'Make sure we override any -d with -ncc if it exists, since -ncc implies -d
+        removeConflictingArgs(args, "-d", "-ncc")
 
         If args.Count > 0 Then
-
             Select Case args(0)
                 Case "1"
                     args.RemoveAt(0)
@@ -269,7 +263,6 @@ Module commandLineHandler
                     args.RemoveAt(0)
                     autodownload(args)
             End Select
-
         End If
     End Sub
 
@@ -298,7 +291,7 @@ Module commandLineHandler
     Private Sub validateArgs(args As List(Of String))
         'This sub ensures that command line args are properly formatted in a ("-flag","data"...) format
 
-        Dim vArgs As New List(Of String) From {"-1d", "-1f", "-2d", "-2f", "-3d", "-3f"}
+        Dim vArgs As String() = {"-1d", "-1f", "-2d", "-2f", "-3d", "-3f"}
         If args.Count > 0 Then
             Try
                 For i As Integer = 0 To args.Count - 1
