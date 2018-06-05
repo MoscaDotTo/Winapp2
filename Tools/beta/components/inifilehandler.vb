@@ -1,5 +1,6 @@
 ﻿Option Strict On
 Imports System.IO
+Imports System.Text.RegularExpressions
 
 Public Module iniFileHandler
 
@@ -23,309 +24,275 @@ Public Module iniFileHandler
         Return lineList
     End Function
 
-    'Strips just the line numbers from the sections of an inifile and returns them as a list of integers
-    Public Function getLineNumsFromSections(ByVal file As iniFile) As List(Of Integer)
-        Dim outList As New List(Of Integer)
-        For i As Integer = 0 To file.sections.Count - 1
-            outList.Add(file.sections.Values(i).startingLineNumber)
-        Next
-
-        Return outList
-    End Function
-
     'reorders the sections in an inifile to be in the same order as some sorted state provided to the function
     Public Sub sortIniFile(ByRef fileToBeSorted As iniFile, ByVal sortedKeys As List(Of String))
         Dim tempFile As New iniFile
         For Each entryName In sortedKeys
             tempFile.sections.Add(entryName, fileToBeSorted.sections.Item(entryName))
         Next
-
         fileToBeSorted = tempFile
     End Sub
 
-    'Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists
-    Public Function validate(ByRef path As String, ByRef name As String, ByRef exitcode As Boolean, ByRef defName As String, ByVal defRen As String) As iniFile
-
-        'if there's a pending exit, do that.
-        If exitcode Then Return Nothing
-
-        'Make sure both the file and the directory actually exist
-        While Not File.Exists(path & name)
-            If Not Directory.Exists(path) Then
-                dChooser(path, exitcode)
-            End If
-            If exitcode Then Return Nothing
-            If Not File.Exists(path & name) Then
-                chkFileExist(path, name, exitcode, defName, defRen)
-            End If
-            If exitcode Then Return Nothing
-        End While
-
-        'Make sure that the file isn't empty
-        Try
-            Dim iniTester As New iniFile(path, name)
-            While iniTester.sections.Count = 0
-                Console.Clear()
-                printMenuLine(bmenu("Empty ini file detected. Press any key to try again.", "c"))
-                Console.ReadKey()
-                fChooser(path, name, exitcode, defName, defRen)
-                If exitcode Then Return Nothing
-                iniTester = validate(path, name, exitcode, defName, defRen)
-                If exitcode Then Return Nothing
-            End While
-            Console.Clear()
-            Return iniTester
-        Catch ex As Exception
-            exc(ex)
-            exitcode = True
-            Return Nothing
-        End Try
-    End Function
-
-    Public Sub chkFileExist(ByRef dir As String, ByRef name As String, ByRef exitcode As Boolean, ByVal defName As String, ByVal defRen As String)
+    Public Sub chkFileExist(someFile As iniFile)
         Dim iExitCode As Boolean = False
 
-        While Not File.Exists(dir & name)
-            If exitcode Then Exit Sub
-            Console.Clear()
-            printMenuLine(tmenu(name.TrimStart(CChar("\")) & " does not exist."))
-            printMenuLine(menuStr03)
+        While Not File.Exists(someFile.path)
+            If exitCode Then Exit Sub
+            menuTopper = "Error"
             While Not iExitCode
-                printMenuLine("Options", "c")
-                printMenuLine("Enter '0' to return to the menu", "l")
-                printMenuLine("Enter '1' to specify a new directory", "l")
-                printMenuLine("Leave blank to specify a new file", "l")
+                Console.Clear()
+                printMenuTop({someFile.name & " does not exist."}, True)
+                printMenuOpt("File Chooser (default)", "Change the file name")
+                printMenuOpt("Directory Chooser", "Change the directory")
                 printMenuLine(menuStr02)
                 Dim input As String = Console.ReadLine
                 Select Case input
                     Case "0"
                         iExitCode = True
-                        exitcode = True
+                        exitCode = True
                         Exit Sub
-                    Case "1"
-                        dChooser(dir, exitcode)
-                        If File.Exists(dir & name) Then
-                            iExitCode = True
-                        Else
-                            Console.Clear()
-                            printMenuLine(tmenu(name.TrimStart(CChar("\")) & " does not exist."))
-                            printMenuLine(menuStr03)
-                        End If
-                    Case ""
-                        fChooser(dir, name, exitcode, defName, defRen)
-                        If File.Exists(dir & name) Then
-                            iExitCode = True
-                        Else
-                            Console.Clear()
-                            printMenuLine(tmenu(name.TrimStart(CChar("\")) & " does not exist."))
-                            printMenuLine(menuStr03)
-                        End If
+                    Case "1", ""
+                        fileChooser(someFile)
+                    Case "2"
+                        dirChooser(someFile.dir)
                     Case Else
-                        Console.Clear()
-                        printMenuLine(tmenu("Invalid input. Please try again."))
-                        printMenuLine(mMenu(name.TrimStart(CChar("\")) & " does not exist."))
+                        menuTopper = invInpStr
                 End Select
+                If Not File.Exists(someFile.path) And Not menuTopper = invInpStr Then menuTopper = "Error"
             End While
         End While
     End Sub
 
-    Public Sub chkDirExist(ByRef dir As String, ByRef exitcode As Boolean)
-        If exitcode Then Exit Sub
+    Public Sub chkDirExist(ByRef dir As String)
+        If exitCode Then Exit Sub
         While Not Directory.Exists(dir)
-            If exitcode Then Exit Sub
+            If exitCode Then Exit Sub
             Dim iExitCode As Boolean = False
+            menuTopper = "Error"
 
-            printMenuLine(tmenu(dir & " does not exist."))
-            printMenuLine("Options", "c")
-            printMenuLine("Enter '0' to return to the menu", "l")
-            printMenuLine("Enter '1' to create it", "l")
-            printMenuLine("Leave blank to specify a new directory", "l")
-            printMenuLine(menuStr02)
             While Not iExitCode
+                printMenuTop({dir & "does not exist."}, True)
+                printMenuOpt("Create Directory", "Create this directory")
+                printMenuOpt("Directory Chooser (default)", "Specify a new directory")
+                printMenuLine(menuStr02)
                 Dim input As String = Console.ReadLine()
                 Select Case input
-                    Case "1"
-                        Directory.CreateDirectory(dir)
-                        iExitCode = True
                     Case "0"
                         dir = Environment.CurrentDirectory
-                        exitcode = True
+                        exitCode = True
                         iExitCode = True
                         Exit Sub
-                    Case ""
-                        dir = Environment.CurrentDirectory
-                        iExitCode = True
-                        Exit Sub
+                    Case "1"
+                        Directory.CreateDirectory(dir)
+                    Case "2", ""
+                        dirChooser(dir)
                     Case Else
-                        printMenuLine(tmenu("Invalid input. Please try again."))
+                        menuTopper = invInpStr
                 End Select
+                If Not Directory.Exists(dir) And Not menuTopper = invInpStr Then menuTopper = "Error"
             End While
         End While
     End Sub
 
-    Public Sub fChooser(ByRef dir As String, ByRef name As String, ByRef exitcode As Boolean, ByRef defaultName As String, ByRef defaultRename As String)
-        If exitcode Then Exit Sub
+    Public Sub fileChooser(ByRef someFile As iniFile)
+        If exitCode Then Exit Sub
         Console.Clear()
-        printMenuLine(tmenu("File chooser"))
-        printMenuLine(moMenu("Current Directory: "))
-        printMenuLine(dir, "l")
-        printMenuLine(menuStr01)
-        printMenuLine("Current File: ", "c")
-        printMenuLine(name.TrimStart(CChar("\")), "l")
-        printMenuLine(menuStr03)
-        printMenuLine("Options", "c")
-        printMenuLine("Enter a new file name", "l")
-        printMenuLine("Enter '0' to return to the menu", "l")
-        Dim menuCounter As Integer = 1
-        If defaultName <> "" Then
-            printMenuLine("Enter '" & menuCounter & "' to use the default name (" & defaultName.TrimStart(CChar("\")) & ")", "l")
-            menuCounter += 1
-        End If
-        If defaultRename <> "" Then
-            printMenuLine("Enter '" & menuCounter & "' to use the default rename (" & defaultRename.TrimStart(CChar("\")) & ")", "l")
-        End If
-        printMenuLine("Enter '3' to select a new directory", "l")
-        printMenuLine("Leave blank to continue using the current file name (" & name.TrimStart(CChar("\")) & ")", "l")
+        menuTopper = "File Chooser"
+        printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"}, True)
+        printIf(someFile.initName <> "", "opt", someFile.initName, "Use the default name")
+        printIf(someFile.secondName <> "", "opt", someFile.secondName, "Use the default rename")
+        printMenuOpt("Directory Chooser", "Choose a new directory")
+        printBlankMenuLine()
+        printMenuLine("Current Directory: " & replDir(someFile.dir), "l")
+        printMenuLine("Current File:      " & someFile.name, "l")
         printMenuLine(menuStr02)
+        Console.Write("Enter a number, a new file name, or leave blank to continue using '" & someFile.name & "': ")
         Dim input As String = Console.ReadLine
         Select Case True
             Case input = "0"
-                exitcode = True
+                exitCode = True
                 Console.Clear()
                 Exit Sub
-            Case input = "1" And defaultName <> ""
-                name = defaultName
-            Case input = "1" And defaultName = ""
-                name = defaultRename
-            Case input = "2" And defaultRename <> ""
-                name = defaultRename
             Case input = ""
-                name = name
-            Case input = "3"
-                dChooser(dir, exitcode)
+            Case input = "1" And someFile.initName <> ""
+                someFile.name = someFile.initName
+            Case input = "1" And someFile.initName = ""
+                someFile.name = someFile.secondName
+            Case input = "2" And someFile.secondName <> ""
+                someFile.name = someFile.secondName
+            Case input = "2" And someFile.secondName = ""
+                dirChooser(someFile.dir)
+            Case input = "3" And someFile.initName <> "" And someFile.secondName <> ""
+                dirChooser(Dir)
             Case Else
-                name = "\" & input
+                someFile.name = input
         End Select
-        Console.Clear()
-        printMenuLine(tmenu("File Chooser"))
-        Dim iexitcode As Boolean = False
-        Do Until iexitcode
-            printMenuLine(moMenu("Current Directory: "))
-            printMenuLine(dir, "l")
-            printMenuLine(menuStr01)
-            printMenuLine("Current File: ", "c")
-            printMenuLine(name.TrimStart(CChar("\")), "l")
-            printMenuLine(menuStr03)
-            printMenuLine("Options", "c")
-            printMenuLine("Enter '0' to return to the menu", "l")
-            printMenuLine("Enter '1' to change the file name", "l")
-            printMenuLine("Enter '2' to change the directory", "l")
-            printMenuLine("Leave blank to confirm file name", "l")
+        If exitCode Then Exit Sub
+        Dim iExitCode As Boolean = False
+        menuTopper = "File Chooser"
+        Do Until iExitCode
+            Console.Clear()
+            printMenuTop({"Confirm your settings or return to the options to change them."}, True)
+            printMenuOpt("File Chooser", "Change the file name")
+            printMenuOpt("Directory Chooser", "Change the directory")
+            printMenuOpt("Confirm (default)", "Save changes")
+            printBlankMenuLine()
+            printMenuLine("Current Directory: " & replDir(someFile.dir), "l")
+            printMenuLine("Current File:      " & someFile.name, "l")
             printMenuLine(menuStr02)
             Console.WriteLine()
-            If exitcode Then Exit Sub
+            Console.Write("Enter a number, or leave blank to run the default: ")
             input = Console.ReadLine()
             Select Case input
-                Case ""
-                    iexitcode = True
                 Case "0"
-                    exitcode = True
-                    Console.Clear()
-                    iexitcode = True
+                    exitCode = True
+                    iExitCode = True
                 Case "1"
-                    fChooser(dir, name, exitcode, defaultName, defaultRename)
-                    iexitcode = True
+                    fileChooser(someFile)
+                    iExitCode = True
                 Case "2"
-                    dChooser(dir, exitcode)
-                    printMenuLine(tmenu("File Chooser"))
+                    dirChooser(someFile.dir)
+                    iExitCode = True
+                Case "3", ""
+                    iExitCode = True
                 Case Else
-                    Console.Clear()
-                    printMenuLine(tmenu("Invalid input. Please try again."))
+                    menuTopper = invInpStr
             End Select
-
         Loop
-
     End Sub
 
-    Public Sub dChooser(ByRef dir As String, ByRef exitCode As Boolean)
+    Public Sub dirChooser(ByRef dir As String)
         If exitCode Then Exit Sub
         Console.Clear()
-        printMenuLine(tmenu("Directory chooser"))
-        printMenuLine(moMenu("Current Directory: "))
-        printMenuLine(dir, "l")
-        printMenuLine(menuStr03)
-        printMenuLine("Options", "c")
-        printMenuLine("Enter a new directory path", "l")
-        printMenuLine("Enter 'parent' to move up a level", "l")
-        printMenuLine("Enter '0' to return to the menu", "l")
-        printMenuLine("Leave blank to use default (current folder)", "l")
+        menuTopper = "Directory Chooser"
+        printMenuTop({"Choose a directory"}, True)
+        printMenuOpt("Use default (default)", "Use the same folder as winapp2ool.exe")
+        printMenuOpt("Parent Folder", "Go up a level")
+        printMenuOpt("Current folder", "Continue using the same folder as below")
+        printBlankMenuLine()
+        printMenuLine("Current Directory: " & dir, "l")
         printMenuLine(menuStr02)
-        Dim uPath As String = Console.ReadLine()
-        Select Case uPath
-            Case ""
-                dir = Environment.CurrentDirectory
-            Case "parent"
-                dir = Directory.GetParent(dir).ToString
+        Console.WriteLine()
+        Console.Write("Choose a number from above, enter a new directory, or leave blank to run the default: ")
+        Dim input As String = Console.ReadLine()
+        Select Case input
             Case "0"
                 exitCode = True
-                Exit Sub
+            Case "1", ""
+                dir = Environment.CurrentDirectory
+            Case "2"
+                dir = Directory.GetParent(dir).ToString
+            Case "3"
             Case Else
-                dir = uPath
+                dir = input
                 Console.Clear()
-                chkDirExist(dir, exitCode)
+                chkDirExist(dir)
         End Select
+        If exitCode Then Exit Sub
         Console.Clear()
-        printMenuLine(tmenu("Directory chooser"))
-        printMenuLine(moMenu("Current Directory: "))
-        printMenuLine(dir, "l")
-        printMenuLine(menuStr03)
-        printMenuLine("Options", "c")
-        printMenuLine("Enter '1' to change directory", "l")
-        printMenuLine("Enter anything else to confirm directory change", "l")
-        printMenuLine(menuStr02)
-        uPath = Console.ReadLine()
-        If uPath.Trim = "1" Then
-            dChooser(dir, exitCode)
-        End If
+        menuTopper = "Directory Chooser"
+        Dim iExitCode As Boolean = False
+        Do Until iExitCode
+            If exitCode Then Exit Sub
+            printMenuTop({"Choose a directory"}, True)
+            printMenuOpt("Directory Chooser", "Change the directory")
+            printMenuOpt("Confirm (default)", "Use this directory")
+            printBlankMenuLine()
+            printMenuLine("Current Directory: " & dir, "l")
+            printMenuLine(menuStr02)
+            Console.Write("Choose a number from above, or leave blank to run the default: ")
+
+            input = Console.ReadLine()
+            Select Case input
+                Case "0"
+                    iExitCode = True
+                    exitCode = True
+                Case "1"
+                    dirChooser(dir)
+                    iExitCode = True
+                Case "2", ""
+                    iExitCode = True
+                Case Else
+                    menuTopper = invInpStr
+            End Select
+        Loop
     End Sub
 
     Public Class iniFile
         Dim lineCount As Integer = 1
-        Public name As String
+
+        'The current state of the directory & name of the file
         Public dir As String
+        Public name As String
+
+        'The inital state of the direcotry & name of the file (for restoration purposes) 
+        Public initDir As String
+        Public initName As String
+
+        'Suggested rename for output files
+        Public secondName As String
+
+        'Sections will be initally stored in the order they're read
         Public sections As New Dictionary(Of String, iniSection)
+
+        'Any line comments will be saved in the order they're read 
         Public comments As New Dictionary(Of Integer, iniComment)
 
         Public Overrides Function toString() As String
             Dim out As String = ""
-            Dim i As Integer = 0
-            For Each section In Me.sections.Values
-                out += section.ToString
-                If Not i = sections.Count - 1 Then
-                    out += Environment.NewLine
-                    i += 1
-                End If
 
+            For i As Integer = 0 To sections.Count - 2
+                out += sections.Values(i).ToString & Environment.NewLine
             Next
+            out += sections.Values.Last.ToString
+
             Return out
         End Function
 
         Public Sub New()
             dir = ""
             name = ""
+            initDir = ""
+            initName = ""
+            secondName = ""
         End Sub
 
-        Public Sub New(name As String)
-            dir = Environment.CurrentDirectory
-            Me.name = name
-            createFile()
+        Public Sub New(directory As String, filename As String)
+            dir = directory
+            name = filename
+            initDir = directory
+            initName = filename
+            secondName = ""
         End Sub
 
-        Public Sub New(path As String, name As String)
-            Me.name = name
-            dir = path
-            createFile()
+        Public Sub New(directory As String, filename As String, rename As String)
+            dir = directory
+            name = filename
+            initDir = directory
+            initName = filename
+            secondName = rename
         End Sub
+
+        'Restore the parameters used to initalize the inifile
+        Public Sub resetParams()
+            dir = initDir
+            name = initName
+        End Sub
+
+        'Output the filepath as a string
+        Public Function path() As String
+            Return dir & "\" & name
+        End Function
+
+        'Strips just the line numbers from the sections of an inifile and returns them as a list of integers
+        Public Function getLineNumsFromSections() As List(Of Integer)
+            Dim outList As New List(Of Integer)
+            For Each section In sections.Values
+                outList.Add(section.startingLineNumber)
+            Next
+
+            Return outList
+        End Function
 
         'This is used for constructing ini files sourced from the internet
         Public Sub New(lines As String(), name As String)
@@ -334,33 +301,21 @@ Public Module iniFileHandler
             Dim lastLineWasEmpty As Boolean = False
             lineCount = 1
             For Each line In lines
-                processiniLine(line, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty, lineCount)
+                processiniLine(line, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
             Next
             If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
         End Sub
 
-        Private Sub processiniLine(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer), ByRef lastLineWasEmpty As Boolean, ByRef lineCount As Integer)
-            If currentLine.StartsWith(";") Then
-                Dim newCom As New iniComment(currentLine, lineCount)
-
-                If comments.Count > 0 Then
+        Private Sub processiniLine(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer), ByRef lastLineWasEmpty As Boolean)
+            Select Case True
+                Case currentLine.StartsWith(";")
+                    Dim newCom As New iniComment(currentLine, lineCount)
                     comments.Add(comments.Count, newCom)
-                Else
-                    comments.Add(0, newCom)
-                End If
-            Else
-                If Not currentLine.StartsWith("[") And currentLine.Trim <> "" Then
-                    'Most situations where this will arise, the file will be corrected in some manner. Currently disabled this output until an issue with the non-ccleaner ini is fixed
-                    'If lastLineWasEmpty Then
-                    '    Console.WriteLine("Error: Blank line detected within a section.")
-                    '    Console.WriteLine("Line: " & lineCount)
-                    '    Console.WriteLine()
-                    'End If
+                Case Not currentLine.StartsWith("[") And Not currentLine.Trim = ""
                     sectionToBeBuilt.Add(currentLine)
                     lineTrackingList.Add(lineCount)
                     lastLineWasEmpty = False
-                ElseIf currentLine.Trim <> "" Then
-
+                Case currentLine.Trim <> ""
                     If Not sectionToBeBuilt.Count = 0 Then
                         mkSection(sectionToBeBuilt, lineTrackingList)
                         sectionToBeBuilt.Add(currentLine)
@@ -371,40 +326,71 @@ Public Module iniFileHandler
                         lineTrackingList.Add(lineCount)
                         lastLineWasEmpty = False
                     End If
-                Else
+                Case Else
                     lastLineWasEmpty = True
-                End If
-            End If
+            End Select
             lineCount += 1
         End Sub
 
-        Public Sub createFile()
+        Public Sub init()
             Try
-                Dim r As StreamReader
                 Dim sectionToBeBuilt As New List(Of String)
                 Dim lineTrackingList As New List(Of Integer)
                 Dim lastLineWasEmpty As Boolean = False
-                r = New StreamReader(dir & "\" & name)
-
+                Dim r As New StreamReader(Me.path())
                 Do While (r.Peek() > -1)
-                    Dim currentLine As String = r.ReadLine.ToString
-                    processiniLine(currentLine, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty, lineCount)
+                    processiniLine(r.ReadLine.ToString, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
                 Loop
                 If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
                 r.Close()
             Catch ex As Exception
                 Console.WriteLine(ex.Message & Environment.NewLine & "Failure occurred during iniFile construction at line: " & lineCount & " in " & name)
             End Try
-
         End Sub
 
+        'Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists
+        Public Sub validate()
+
+            'if there's a pending exit, do that.
+            If exitCode Then Exit Sub
+
+            'Make sure both the file and the directory actually exist
+            While Not File.Exists(path())
+                chkDirExist(dir)
+                If exitCode Then Exit Sub
+                chkFileExist(Me)
+                If exitCode Then Exit Sub
+            End While
+
+            'Make sure that the file isn't empty
+            Try
+                Dim iniTester As New iniFile(dir, name)
+                iniTester.init()
+                Dim clearAtEnd As Boolean = False
+                While iniTester.sections.Count = 0
+                    clearAtEnd = True
+                    Console.Clear()
+                    printMenuLine(bmenu("Empty ini file detected. Press any key to try again.", "c"))
+                    Console.ReadKey()
+                    fileChooser(iniTester)
+                    If exitCode Then Exit Sub
+                    iniTester.validate()
+                    If exitCode Then Exit Sub
+                End While
+                sections = iniTester.sections
+                comments = iniTester.comments
+                If clearAtEnd Then Console.Clear()
+            Catch ex As Exception
+                exc(ex)
+                exitCode = True
+            End Try
+        End Sub
+
+        'find the line number of a particular comment by its string, return -1 if DNE
         Public Function findCommentLine(com As String) As Integer
-
-            'find the line number of a particular comment by its string, return -1 if DNE
-            For i As Integer = 0 To Me.comments.Count - 1
-                If comments(i).comment.Equals(com) Then Return comments(i).lineNumber
+            For Each comment In comments.Values
+                If comment.comment = com Then Return comment.lineNumber
             Next
-
             Return -1
         End Function
 
@@ -425,17 +411,17 @@ Public Module iniFileHandler
                 'This will catch entries whose names are identical (case sensitive), but will not catch wholly duplicate FileKeys (etc) 
                 If ex.Message = "An item with the same key has already been added." Then
 
-                    Dim dupeInd As Integer
-                    For i As Integer = 0 To Me.sections.Count - 1
-                        If sections.Values(i).name = sectionToBeBuilt(0) Then
-                            dupeInd = i
+                    Dim lineErr As Integer
+                    For Each section In sections.Values
+                        If section.name = sectionToBeBuilt(0) Then
+                            lineErr = section.startingLineNumber
                             Exit For
                         End If
                     Next
 
                     Console.WriteLine("Error: Duplicate section name detected: " & sectionToBeBuilt(0))
                     Console.WriteLine("Line: " & lineCount)
-                    Console.WriteLine("Duplicates the entry on line: " & sections.Values(dupeInd).startingLineNumber)
+                    Console.WriteLine("Duplicates the entry on line: " & lineErr)
                     Console.WriteLine("This section will be ignored until it is given a unique name.")
                     Console.WriteLine()
                 End If
@@ -444,7 +430,6 @@ Public Module iniFileHandler
                 lineTrackingList.Clear()
             End Try
         End Sub
-
     End Class
 
     Public Class iniSection
@@ -478,8 +463,8 @@ Public Module iniFileHandler
 
         Public Sub New(ByVal listOfLines As List(Of String), listOfLineCounts As List(Of Integer))
 
-            Dim tmp1 As String() = listOfLines(0).Split(Convert.ToChar("["))
-            Dim tmp2 As String() = tmp1(1).Split(Convert.ToChar("]"))
+            Dim tmp1 As String() = listOfLines(0).Split(CChar("["))
+            Dim tmp2 As String() = tmp1(1).Split(CChar("]"))
 
             name = tmp2(0)
 
@@ -496,8 +481,8 @@ Public Module iniFileHandler
 
         Public Sub New(ByVal listOfLines As List(Of String))
 
-            Dim tmp1 As String() = listOfLines(0).Split(Convert.ToChar("["))
-            Dim tmp2 As String() = tmp1(1).Split(Convert.ToChar("]"))
+            Dim tmp1 As String() = listOfLines(0).Split(CChar("["))
+            Dim tmp2 As String() = tmp1(1).Split(CChar("]"))
 
             name = tmp2(0)
 
@@ -506,7 +491,7 @@ Public Module iniFileHandler
 
             If listOfLines.Count > 1 Then
                 For i As Integer = 1 To listOfLines.Count - 1
-                    keys.Add(i - 1, New iniKey(listOfLines(i)))
+                    keys.Add(i - 1, New iniKey(listOfLines(i), 0))
                 Next
             End If
         End Sub
@@ -516,24 +501,91 @@ Public Module iniFileHandler
             Dim out As New List(Of String)
 
             For Each key In Me.keys.Values
-               out.Add(key.toString)
+                out.Add(key.toString)
             Next
 
             Return out
         End Function
 
         'returns true if the sections are the same, else returns false
-        Public Function compareTo(secondSection As iniSection) As Boolean
+        Public Function compareTo(ss As iniSection, ByRef removedKeys As List(Of iniKey), ByRef addedKeys As List(Of iniKey), ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey))) As Boolean
 
-            If keys.Count <> secondSection.keys.Count Then
-                Return False
-            Else
-                For i As Integer = 0 To keys.Count - 1
-                    If Not keys(i).compareTo(secondSection.keys(i)) Then Return False
+            'Create a copy of the section so we can modify it
+            Dim secondSection As New iniSection
+            secondSection.name = ss.name
+            secondSection.startingLineNumber = ss.startingLineNumber
+            For i As Integer = 0 To ss.keys.Count - 1
+                secondSection.keys.Add(i, ss.keys.Values(i))
+            Next
+
+            Dim noMatch As Boolean
+            Dim tmpList As New List(Of Integer)
+
+            For Each key In keys.Values
+                noMatch = True
+                For i As Integer = 0 To secondSection.keys.Values.Count - 1
+                    If key.keyType.ToLower = secondSection.keys.Values(i).keyType.ToLower And key.value.ToLower = secondSection.keys.Values(i).value.ToLower Then
+                        noMatch = False
+                        tmpList.Add(i)
+                        Exit For
+                    End If
                 Next
-            End If
+                If noMatch Then
+                    'If the key isn't found in the second (newer) section, consider it removed for now
+                    removedKeys.Add(key)
+                End If
+            Next
 
-            Return True
+            'Remove all matched keys
+            tmpList.Reverse()
+            For Each ind In tmpList
+                secondSection.keys.Remove(ind)
+            Next
+
+            'Assume any remaining keys have been added
+            For Each key In secondSection.keys.Values
+                addedKeys.Add(key)
+            Next
+
+            'Check for keys whose names match
+            Dim rkTemp, akTemp As New List(Of iniKey)
+            rkTemp = removedKeys.ToList
+            akTemp = addedKeys.ToList
+            For Each key In removedKeys
+                For Each skey In addedKeys
+                    If key.name.ToLower = skey.name.ToLower Then
+
+                        Dim oldKey As New winapp2KeyParameters(key)
+                        Dim newKey As New winapp2KeyParameters(skey)
+                        oldKey.argsList.Sort()
+                        newKey.argsList.Sort()
+
+                        If oldKey.argsList.Count = newKey.argsList.Count Then
+
+                            For i As Integer = 0 To oldKey.argsList.Count - 1
+                                If Not oldKey.argsList(i).ToLower = newKey.argsList(i).ToLower Then
+                                    updatedKeys.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
+                                    rkTemp.Remove(key)
+                                    akTemp.Remove(skey)
+                                    Exit For
+                                End If
+                            Next
+                            rkTemp.Remove(key)
+                            akTemp.Remove(skey)
+                        Else
+                            updatedKeys.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
+                            rkTemp.Remove(key)
+                            akTemp.Remove(skey)
+                        End If
+                    End If
+                Next
+            Next
+
+            'Update the lists
+            addedKeys = akTemp
+            removedKeys = rkTemp
+
+            Return removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0
 
         End Function
 
@@ -541,10 +593,9 @@ Public Module iniFileHandler
 
             Dim out As String = Me.getFullName
 
-            For i As Integer = 1 To Me.keys.Count
-                out += Environment.NewLine & Me.keys(i - 1).toString
+            For Each key In keys.Values
+                out += Environment.NewLine & key.toString
             Next
-
             out += Environment.NewLine
             Return out
 
@@ -558,50 +609,94 @@ Public Module iniFileHandler
         Public lineNumber As Integer
         Public keyType As String
 
-        'Create an empty key
-        Public Sub New()
-            name = ""
-            value = ""
-            lineNumber = 0
-            keyType = ""
-        End Sub
+        Public Function nameIs(n As String) As Boolean
+            Return name = n
+        End Function
+
+        Public Function typeIs(t As String) As Boolean
+            Return keyType = t
+        End Function
+
+        'Return whether or not a key starts with or ends with a value
+        Public Function vStartsOrEndsWith(txt As String) As Boolean
+            Return value.StartsWith(txt) Or value.EndsWith(txt)
+        End Function
+
+        Public Function nStartsOrEndsWith(txt As String) As Boolean
+            Return name.StartsWith(txt) Or name.EndsWith(txt)
+        End Function
+
+        'Return whether or not the key's value contains a given string
+        Public Function vHas(txt As String, toLower As Boolean) As Boolean
+            Return If(toLower, value.ToLower.Contains(txt), value.Contains(txt))
+        End Function
+
+        Public Function vHas(txt As String) As Boolean
+            Return vHas(txt, False)
+        End Function
+
+        Public Function vHasAny(txts As String()) As Boolean
+            Return vHasAny(txts, False)
+        End Function
+
+        Public Function vHasAny(txts As String(), toLower As Boolean) As Boolean
+            For Each txt In txts
+                If vHas(txt, toLower) Then Return True
+            Next
+            Return False
+        End Function
+
+        'Return whether or not the key's value is equal to a given string
+        Public Function vIs(txt As String) As Boolean
+            Return vIs(txt, False)
+        End Function
+
+        Public Function vIs(txt As String, toLower As Boolean) As Boolean
+            Return If(toLower, value.ToLower.Equals(txt), value.Equals(txt))
+        End Function
+
+        'Returns true if a key's value doesn't contain any in a given array of strings
+        Public Function vHasnt(strs As String(), toLower As Boolean) As Boolean
+            For Each txt In strs
+                If vHas(txt, toLower) Then Return False
+            Next
+            Return True
+        End Function
 
         'Strip any numbers from the name value in a key (so numbered keys can be identified by "type")
         Private Function stripNums(keyName As String) As String
-            For i As Integer = 0 To 9
-                keyName = keyName.Replace(i.ToString, "")
-            Next
-
-            Return keyName
+            Return New Regex("[\d]").Replace(keyName, "")
         End Function
 
         'Create a key with a line string from a file and line number counter 
         Public Sub New(ByVal line As String, ByVal count As Integer)
 
+            'valid keys have the format name=value
             Try
-                'valid keys have the format name=value
                 Dim splitLine As String() = line.Split(CChar("="))
-                name = splitLine(0)
-                value = splitLine(1)
-                keyType = stripNums(name)
                 lineNumber = count
+                Select Case True
+                    Case splitLine(0) <> "" And splitLine(1) <> ""
+                        name = splitLine(0)
+                        value = splitLine(1)
+                        keyType = stripNums(name)
+                    Case splitLine(0) = "" And splitLine(1) <> ""
+                        name = "KeyTypeNotGiven"
+                        value = splitLine(1)
+                        keyType = "Error"
+                    Case splitLine(0) <> "" And splitLine(1) = ""
+                        name = "DeleteMe"
+                        value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
+                        keyType = "DeleteMe"
+                End Select
             Catch ex As Exception
                 exc(ex)
             End Try
         End Sub
 
-        'for when trackling line numbers doesn't matter
-        Public Sub New(ByVal line As String)
-
-            Dim splitLine As String() = line.Split(CChar("="))
-            name = splitLine(0)
-            value = splitLine(1)
-            keyType = stripNums(name)
-        End Sub
-
+        'Output the key in name=value format
         Public Overrides Function toString() As String
-            'Output the key in name=value format
-            Return Me.name & "=" & Me.value
+            Return name & "=" & value
         End Function
 
         'Output the key in Line: <line number> - name=value format
@@ -609,10 +704,6 @@ Public Module iniFileHandler
             Return "Line: " & lineNumber & " - " & name & "=" & value
         End Function
 
-        'compare the name=value format of two different keys, return their equivalency as boolean
-        Public Function compareTo(secondKey As iniKey) As Boolean
-            Return Me.toString.Equals(secondKey.toString)
-        End Function
     End Class
 
     'small wrapper class for capturing ini comment data

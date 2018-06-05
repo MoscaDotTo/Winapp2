@@ -1,42 +1,36 @@
 ﻿Option Strict On
 Imports System.IO
 Imports System.Net
-
 Module Downloader
+
+    'Links to GitHub resources
     Public wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
     Public nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
     Public toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/Tools/beta/winapp2ool.exe"
     Public toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Tools/beta/version.txt"
     Public removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
-    Dim downloadDir As String = Environment.CurrentDirectory & "\winapp2ool downloads"
 
-    Dim exitCode As Boolean = False
-    Dim hasMenuTopper As Boolean = False
+    'File handler
+    Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
     Private Sub printMenu()
-        If Not hasMenuTopper Then
-            hasMenuTopper = True
-            printMenuLine(tmenu("Download"))
-        End If
-        printMenuLine(menuStr03)
-        printMenuLine("Menu: Enter a number to select", "c")
-        printMenuLine(menuStr01)
-        printMenuLine("0. Exit                         - Return to the winapp2ool menu", "l")
-        printMenuLine("1. Winapp2.ini                  - Download the latest winapp2.ini", "l")
-        printMenuLine("2. Non-CCleaner                 - Download the latest non-ccleaner winapp2.ini", "l")
-        printMenuLine("3. Winapp2ool                   - Download the latest winapp2ool.exe", "l")
-        printMenuLine("4. Removed Entries.ini          - Download only entries used to create the non-ccleaner winapp2.ini", "l")
-        printMenuLine(menuStr01)
-        printMenuLine("5. Directory                    - Change the download directory", "l")
+        printMenuTop({"Download files from the winapp2 GitHub"}, True)
+        printMenuOpt("Winapp2.ini", "Download the latest winapp2.ini")
+        printMenuOpt("Non-CCleaner", "Download the latest non-ccleaner winapp2.ini")
+        printMenuOpt("Winapp2ool", "Download the latest winapp2ool.exe")
+        printMenuOpt("Removed Entries.ini", "Download only entries used to create the non-ccleaner winapp2.ini")
+        printBlankMenuLine()
+        printMenuOpt("Directory", "Change the save directory")
+        printBlankMenuLine()
+        printMenuLine("Save directory: " & replDir(downloadFile.dir), "l")
         printMenuLine(menuStr02)
-
     End Sub
+
     Public Sub main()
-        exitCode = False
-        hasMenuTopper = False
-        Console.Clear()
+        initMenu("Download", 35)
 
         Do Until exitCode
+            Console.Clear()
             printMenu()
             Console.WriteLine()
             Console.Write("Enter a number: ")
@@ -45,36 +39,29 @@ Module Downloader
                 Case "0"
                     Console.WriteLine("Returning to winapp2ool menu...")
                     exitCode = True
-                Case "1"
-                    download("winapp2.ini", wa2Link, downloadDir)
-                    Console.Clear()
-                    printMenuLine(tmenu("Download complete:"))
-                    printMenuLine("winapp2.ini", "c")
-                Case "2"
-                    download("winapp2.ini", nonccLink, downloadDir)
-                    Console.Clear()
-                    printMenuLine(tmenu("Download complete:"))
-                    printMenuLine("winapp2.ini", "c")
+                Case "1", "2"
+                    downloadFile.name = "winapp2.ini"
+                    Dim link As String = If(input = "1", wa2Link, nonccLink)
+                    download(wa2Link, True)
                 Case "3"
-                    download("winapp2ool.exe", toolLink, downloadDir)
-                    Console.Clear()
-                    printMenuLine(tmenu("Download complete:"))
-                    printMenuLine("winapp2ool.exe", "c")
+                    If downloadFile.dir = Environment.CurrentDirectory Then
+                        autoUpdate()
+                    Else
+                        downloadFile.name = "winapp2ool.exe"
+                        download(toolLink, True)
+                    End If
                 Case "4"
-                    download("Removed entries.ini", removedLink, downloadDir)
-                    Console.Clear()
-                    printMenuLine(tmenu("Download complete:"))
-                    printMenuLine("Removed Entries.ini", "c")
+                    downloadFile.name = "Removed entries.ini"
+                    download(removedLink, True)
                 Case "5"
-                    dChooser(downloadDir, exitCode)
-                    Console.Clear()
-                    printMenuLine(tmenu("Current download directory:"))
-                    printMenuLine(downloadDir, "l")
+                    dirChooser(downloadFile.dir)
+                    undoAnyPendingExits()
+                    menuTopper = "Save directory changed"
                 Case Else
-                    Console.Clear()
-                    printMenuLine(tmenu("Invalid input. Please try again."))
+                    menuTopper = invInpStr
             End Select
         Loop
+        revertMenu()
     End Sub
 
     'fetch winapp2.ini from github (ncc or otherwise)
@@ -82,6 +69,7 @@ Module Downloader
         Return If(ncc, getRemoteIniFile(nonccLink, "\winapp2.ini"), getRemoteIniFile(wa2Link, "\winapp2.ini"))
     End Function
 
+    'Read a file until a specified line and return that line 
     Public Function getFileDataAtLineNum(address As String, lineNum As Integer) As String
         Dim reader As StreamReader = Nothing
         Try
@@ -146,23 +134,55 @@ Module Downloader
         End Try
     End Function
 
-    Public Sub remoteDownload(dir As String, name As String, link As String)
-        download(name, link, dir)
+    'Handle a call to download a file from an external module
+    Public Sub remoteDownload(dir As String, name As String, link As String, prompt As Boolean)
+        downloadFile.dir = dir
+        downloadFile.name = name
+        download(link, prompt)
     End Sub
 
-    Private Sub download(fileName As String, fileLink As String, downloadDir As String)
+    'Download the latest version of winapp2ool.exe and replace the currently running version with it, then launch that new version.
+    Public Sub autoUpdate()
+        downloadFile.dir = Environment.CurrentDirectory
+        downloadFile.name = "winapp2ool updated.exe"
+        Try
+            'Remove any existing backups of this version
+            If File.Exists(Environment.CurrentDirectory & "\winapp2ool v" & currentVersion & ".exe.bak") Then File.Delete(Environment.CurrentDirectory & "\winapp2ool v" & currentVersion & ".exe.bak")
 
-        Dim givenName As String = fileName
+            'Remove any old update files that didn't get renamed for whatever reason
+            If File.Exists(downloadFile.path) Then File.Delete(downloadFile.path)
+            download(toolLink, False)
 
-        ' Don't try to download to a place that doesn't exist
-        If Not Directory.Exists(downloadDir) Then Directory.CreateDirectory(downloadDir)
+            'Rename the old executable
+            File.Move("winapp2ool.exe", "winapp2ool v" & currentVersion & ".exe.bak")
 
-        'Prompt to overwrite files if they exist already
-        If File.Exists(downloadDir & "\" & fileName) And Not suppressOutput Then
-            Console.WriteLine(fileName & " already exists in the target directory.")
-            Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
-            Dim nfilename As String = Console.ReadLine()
-            If nfilename.Trim <> "" Then fileName = nfilename
+            'Rename the new executable
+            File.Move("winapp2ool updated.exe", "winapp2ool.exe")
+
+            'Start the new executable and exit the current one
+            System.Diagnostics.Process.Start(Environment.CurrentDirectory & "\winapp2ool.exe")
+            Environment.Exit(0)
+
+        Catch ex As Exception
+            exc(ex)
+        End Try
+    End Sub
+
+    Private Sub download(link As String, prompt As Boolean)
+
+        'Remember the initial given name
+        Dim givenName As String = downloadFile.name
+
+        ' Don't try to download to a directory that doesn't exist
+        If Not Directory.Exists(downloadFile.dir) Then Directory.CreateDirectory(downloadFile.dir)
+
+        If prompt Then
+            If File.Exists(downloadFile.path) And Not suppressOutput Then
+                Console.WriteLine(downloadFile.name & " already exists in the target directory.")
+                Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
+                Dim nfilename As String = Console.ReadLine()
+                If nfilename.Trim <> "" Then downloadFile.name = nfilename
+            End If
         End If
 
         cwl("Downloading " & givenName & "...")
@@ -170,12 +190,14 @@ Module Downloader
         'Preform the actual download
         Try
             Dim dl As New WebClient
-            dl.DownloadFile(New Uri(fileLink), downloadDir & "\" & fileName)
+            dl.DownloadFile(New Uri(link), downloadFile.path)
         Catch ex As Exception
             exc(ex)
             Console.ReadKey()
         End Try
+
         cwl("Download complete.")
-        cwl("Downloaded " & fileName & " to " & downloadDir)
+        cwl("Downloaded " & downloadFile.name & " to " & downloadFile.dir)
+        menuTopper = "Download complete: " & downloadFile.name
     End Sub
 End Module

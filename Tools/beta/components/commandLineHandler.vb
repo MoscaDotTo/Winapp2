@@ -1,238 +1,194 @@
 ﻿Option Strict On
+Imports System.IO
+
 Module commandLineHandler
+
+    'File Handlers
+    Dim firstFile As iniFile
+    Dim secondFile As iniFile
+    Dim thirdFile As iniFile
+
+    Private Sub invertSettingAndRemoveArg(ByRef args As List(Of String), ByRef settings As Boolean(), ByRef arg As String)
+        If args.Contains(arg) Then
+            For Each setting In settings
+                setting = Not setting
+            Next
+            args.Remove(arg)
+        End If
+    End Sub
+
+    Private Sub invertAndRemoveAndRename(ByRef args As List(Of String), ByRef settings As Boolean(), ByRef arg As String, ByRef name As String, newname As String)
+        invertSettingAndRemoveArg(args, settings, arg)
+        name = newname
+    End Sub
 
     'Handle commandline args for WinappDebug
     Private Sub autoDebug(ByRef args As List(Of String))
 
-        'The default run parameters
-        Dim filePath As String = Environment.CurrentDirectory
-        Dim fileName As String = "\winapp2.ini"
-        Dim correctErrors As Boolean = False
+        'WinappDebug specific command line args
+        ' -c      : enable autocorrect
+
+        Dim correctErrors As Boolean
+
+        'Get default params
+        initDebugParams(firstFile, secondFile, correctErrors)
 
         'Toggle on autocorrect (off by default)
-        If args.Contains("-c") Then
-            correctErrors = True
-            args.Remove("-c")
-        End If
+        invertSettingAndRemoveArg(args, {correctErrors}, "-c")
 
-        'At this stage, any properly formatted command line args should contain only an ordered pair 
-        'of a flag and either a full file path or just a file name 
-
-        'Validate that the remainder of the args (if any) are formatted correctly
-        validateArgs(args, "-d -f")
-
-        '-d is a flag for providing a file with path
-        If args(0) = "-d" Then
-            args.RemoveAt(0)
-            getFileParams(args(0), filePath, fileName)
-        End If
-
-        '-f is a flag for simply providing a file in the current directory
-        If args(0) = "-f" Then
-            args.RemoveAt(0)
-            fileName = "\" & args(0)
-        End If
+        'Get any file parameters from flags
+        validateAndParse(args)
 
         'Initialize the debug
-        remoteDebug(filePath, fileName, correctErrors)
+        remoteDebug(firstFile, secondFile, correctErrors)
     End Sub
 
     'Handle commandline args for Trim
     Private Sub autoTrim(ByRef args As List(Of String))
-        Dim winappDir As String = Environment.CurrentDirectory
-        Dim winappName As String = "\winapp2.ini"
-        Dim saveDir As String = Environment.CurrentDirectory
-        Dim saveName As String = "\winapp2.ini"
-        Dim download As Boolean = False
-        Dim ncc As Boolean = False
+
+        'Trim specific commandline args
+        ' -d     : download the latest winapp2.ini
+        ' -ncc   : download the latest non-ccleaner winapp2.ini (implies -d)
+
+        Dim download As Boolean
+        Dim ncc As Boolean
+
+        initTrimParams(firstFile, secondFile, download, ncc)
 
         'Download a winapp2 to trim?
-        If args.Contains("-d") Then
-            download = True
-            args.Remove("-d")
-        End If
+        invertSettingAndRemoveArg(args, {download}, "-d")
 
-        If args.Contains("-ncc") Then
-            ncc = True
-            download = True
-            args.Remove("-ncc")
-        End If
+        'Download the non ccleaner ini? Implies -d
+        invertSettingAndRemoveArg(args, {download, ncc}, "-ncc")
 
-        'Validate the contents of args
-        validateArgs(args, "-wf -wd -sd -sf")
-
-        'Parse the winapp2 file parameters if given
-        If args.Contains("-wd") Then getFileNameAndDir(args, "-wd", winappDir, winappName)
-        If args.Contains("-wf") Then getFileName(args, "-wf", winappName)
-
-        'parse the save file parameters if given, if not given, match the winapp parameters
-        If args.Contains("-sd") Then
-            getFileNameAndDir(args, "-sd", saveDir, saveName)
-        Else
-            saveDir = winappDir
-        End If
-
-        If args.Contains("-sf") Then
-            getFileName(args, "-sf", saveName)
-        Else
-            saveName = winappName
-        End If
+        'Get any file parameters from flags
+        validateAndParse(args)
 
         'Initalize the trim
-        remoteTrim(winappDir, winappName, saveDir, saveName, download, ncc)
+        remoteTrim(firstFile, secondFile, download, ncc)
 
     End Sub
 
     'Handle commandline args for Merge
     Private Sub autoMerge(ByRef args As List(Of String))
-        Dim mergeMode As Boolean = True
-        Dim winappDir As String = Environment.CurrentDirectory
-        Dim winappName As String = "\winapp2.ini"
-        Dim sDir As String = Environment.CurrentDirectory
-        Dim sName As String = ""
 
-        If args.Contains("-mm") Then
-            mergeMode = False
-            args.Remove("-mm")
-        End If
+        'Merge specific command line args
+        ' -mm      : toggle mergemode from replace & add to replace & remove
+        ' -r       : use removed entries.ini as the merge file's name
+        ' -c       : use custom.ini as the merge file's name
 
-        If args.Contains("-r") Then
-            sName = "\Removed Entries.ini"
-            args.Remove("-r")
-        End If
+        Dim mergeMode As Boolean
 
-        If args.Contains("-c") Then
-            sName = "\Custom.ini"
-            args.Remove("-c")
-        End If
+        initMergeParams(firstFile, secondFile, thirdFile, mergeMode)
 
-        'validate args
-        validateArgs(args, "-fd -ff -sd -sf")
+        invertSettingAndRemoveArg(args, {mergeMode}, "-mm")
 
-        'Collect any winapp2 info
-        If args.Contains("-fd") Then getFileNameAndDir(args, "-fd", winappDir, winappName)
-        If args.Contains("-ff") Then getFileName(args, "-ff", winappName)
+        'Detect any preset filename calls
+        invertAndRemoveAndRename(args, {}, "-r", secondFile.name, "Removed Entries.ini")
+        invertAndRemoveAndRename(args, {}, "-c", secondFile.name, "Custom.ini")
 
-        'Collect the merge file's info
-        If args.Contains("-sd") Then getFileNameAndDir(args, "-sd", sDir, sName)
-        If args.Contains("-sf") Then getFileName(args, "-sf", sName)
+        'Get any file parameters from flags
+        validateAndParse(args)
 
-        'If we got a merge file, initiate the merge
-        If Not sName = "" Then remoteMerge(winappDir, winappName, sDir, sName, mergeMode)
+        'If we have a secondfile, initiate the merge
+        If Not secondFile.name = "" Then remoteMerge(firstFile, secondFile, thirdFile, mergeMode)
+    End Sub
+
+    Private Sub removeConflictingArgs(ByRef args As List(Of String), arg1 As String, arg2 As String)
+        If args.Contains(arg2) Then args.Remove(arg1)
     End Sub
 
     'Handle commandline args for Diff
     Private Sub autoDiff(ByRef args As List(Of String))
-        Dim ncc As Boolean = False
-        Dim download As Boolean = False
-        Dim firstDir As String = Environment.CurrentDirectory
-        Dim firstName As String = "\winapp2.ini"
-        Dim secondDir As String = Environment.CurrentDirectory
-        Dim secondName As String = ""
-        Dim save As Boolean = False
+
+        'Diff specific commandline args
+        ' -d          : download the latest winapp2.ini
+        ' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
+        ' -savelog    : save the diff.txt log
+
+        Dim ncc As Boolean
+        Dim download As Boolean
+        Dim save As Boolean
+
+        initDiffParams(firstFile, secondFile, thirdFile, download, ncc, save)
 
         'Download & Diff?
-        If args.Contains("-d") Then
-            secondName = "null"
-            download = True
-            args.Remove("-d")
-        End If
+        invertAndRemoveAndRename(args, {download}, "-d", secondFile.name, "Online winapp2.ini")
 
         'Downloading non-ccleaner ini?
-        If args.Contains("-ncc") Then
-            ncc = True
-            args.Remove("-ncc")
-        End If
+        invertAndRemoveAndRename(args, {download, ncc}, "-ncc", secondFile.name, "Online non-ccleaner winapp2.ini")
 
         'Save diff.txt?
-        If args.Contains("-l") Then
-            save = True
-            args.Remove("-l")
-        End If
+        invertSettingAndRemoveArg(args, {save}, "-savelog")
 
-        'validate args
-        validateArgs(args, "-fd -ff -sd -sf")
-
-        'Get the info for the first file
-        If args.Contains("-fd") Then getFileNameAndDir(args, "-fd", firstDir, firstName)
-        If args.Contains("-ff") Then getFileName(args, "-ff", firstName)
-
-        'Get the info for the second file (if necessary)
-        If args.Contains("-sd") Then getFileNameAndDir(args, "-sd", secondDir, secondName)
-        If args.Contains("-sf") Then getFileName(args, "-sf", secondName)
+        'Get any file parameters from flags
+        validateAndParse(args)
 
         'Only run if we have a second file (because we assume we're running on a winapp2.ini file by default)
-        If Not secondName = "" Then remoteDiff(firstDir, firstName, secondDir, secondName, download, ncc, save)
+        If Not secondFile.name = "" Then remoteDiff(firstFile, secondFile, thirdFile, download, ncc, save)
     End Sub
 
     'Handle commandline args for CCiniDebug
     Private Sub autoccini(ByRef args As List(Of String))
-        Dim winappDir As String = Environment.CurrentDirectory
-        Dim winappName As String = "\winapp2.ini"
-        Dim ccDir As String = Environment.CurrentDirectory
-        Dim ccName As String = "\ccleaner.ini"
-        Dim prune As Boolean = False
+
+        'CCiniDebug specific commandline args:
+        ' -noprune : disable pruning of stale winapp2.ini entries
+        ' -nosort  : disable sorting ccleaner.ini alphabetically
+        ' -nosave  : disable saving the modified ccleaner.ini back to file
+
+        Dim prune As Boolean
+        Dim save As Boolean
+        Dim sort As Boolean
+
+        initCCDebugParams(firstFile, secondFile, thirdFile, prune, save, sort)
 
         'Prune?
-        If args.Contains("-p") Then
-            prune = True
-        End If
+        invertSettingAndRemoveArg(args, {prune}, "-noprune")
 
-        'validate args
-        validateArgs(args, "-wd -wf -cd -cf")
+        'Sort?
+        invertSettingAndRemoveArg(args, {sort}, "-nosort")
 
-        'get the winapp2 info
-        If args.Contains("-wd") Then getFileNameAndDir(args, "-wd", winappDir, winappName)
-        If args.Contains("-wf") Then getFileName(args, "-wf", winappName)
+        'Save?
+        invertSettingAndRemoveArg(args, {save}, "-nosave")
 
-        'get the ccleaner.ini info
-        If args.Contains("-cd") Then getFileNameAndDir(args, "-cd", ccDir, ccName)
-        If args.Contains("-cf") Then getFileName(args, "-wc", ccName)
+        'Get any file parameters from flags
+        validateAndParse(args)
 
-        remoteCC(winappDir, winappName, ccDir, ccName, prune)
+        'run ccinidebug
+        remoteCC(firstFile, secondFile, thirdFile, prune, save, sort)
     End Sub
 
     Private Sub autodownload(ByRef args As List(Of String))
-        Dim downloadDir As String = Environment.CurrentDirectory & "\winapp2ool downloads"
-        Dim downloadName As String = ""
-        Dim downloadFile As String
 
-        If args.Contains("-p") Then
-            downloadDir = Environment.CurrentDirectory
-            args.Remove("-p")
-        End If
+        Dim fileLink As String
+        Dim downloadDir As String = Environment.CurrentDirectory
+        Dim downloadName As String
 
         If args.Count > 0 Then
             Select Case args(0)
-                Case "1"
-                    downloadFile = wa2Link
-                    downloadName = "\winapp2.ini"
-                Case "2"
-                    downloadFile = nonccLink
-                    downloadName = "\winapp2.ini"
+                Case "1", "2"
+                    fileLink = If(args(0) = "1", wa2Link, nonccLink)
+                    downloadName = "winapp2.ini"
                 Case "3"
-                    downloadFile = toolLink
-                    downloadName = "\winapp2ool.exe"
+                    fileLink = toolLink
+                    downloadName = "winapp2ool.exe"
                 Case "4"
-                    downloadFile = removedLink
-                    downloadName = "\Removed Entries.ini"
+                    fileLink = removedLink
+                    downloadName = "Removed Entries.ini"
                 Case Else
-                    downloadFile = ""
+                    fileLink = ""
+                    downloadName = ""
             End Select
             args.RemoveAt(0)
         Else
-            downloadFile = ""
+            fileLink = ""
+            downloadName = ""
         End If
 
-        validateArgs(args, "-dd -df")
+        'Get any file parameters from flags
+        validateAndParse(args)
 
-        If args.Contains("-dd") Then getFileNameAndDir(args, "-dd", downloadDir, downloadName)
-        If args.Contains("-df") Then getFileName(args, "-df", downloadName)
-
-        'If we're downloading winapp2ool, make sure we don't try to overwrite the currently running exe
-        If downloadDir = Environment.CurrentDirectory And downloadFile = toolLink Then downloadDir += "\winapp2ool downloads"
-
-        If Not downloadFile = "" Then remoteDownload(downloadDir, downloadName, downloadFile)
+        If Not fileLink = "" Then remoteDownload(downloadDir, downloadName, fileLink, False)
 
     End Sub
 
@@ -246,28 +202,28 @@ Module commandLineHandler
         End If
     End Sub
 
-    Private Sub getFileNameAndDir(ByRef args As List(Of String), flag As String, ByRef path As String, ByRef name As String)
+    Private Sub getFileNameAndDir(ByRef args As List(Of String), flag As String, ByRef file As iniFile)
         'Take in a file with directory listing and split it into its constituent parts, saving them
         If args.Count >= 2 Then
             Dim ind As Integer = args.IndexOf(flag)
-            getFileParams(args(ind + 1), path, name)
+            getFileParams(args(ind + 1), file)
             args.RemoveAt(ind)
             args.RemoveAt(ind)
         End If
     End Sub
 
-    Private Sub getFileParams(ByRef arg As String, ByRef path As String, ByRef name As String)
+    Private Sub getFileParams(ByRef arg As String, ByRef file As iniFile)
         'Start either a blank path or, support appending children folders to the current path
-        path = If(arg.StartsWith("\"), Environment.CurrentDirectory & "\", "")
+        file.dir = If(arg.StartsWith("\"), Environment.CurrentDirectory & "\", "")
 
         'This function should receive a file path in full form from the command line and return it in pieces
         Dim splitArg As String() = arg.Split(CChar("\"))
         If splitArg.Count >= 2 Then
             For i As Integer = 0 To splitArg.Count - 2
-                path += splitArg(i) & "\"
+                file.dir += splitArg(i) & "\"
             Next
         End If
-        name = splitArg.Last
+        file.name = splitArg.Last
 
     End Sub
 
@@ -281,13 +237,12 @@ Module commandLineHandler
         args.RemoveAt(0)
 
         'the s is for silent, if we have this flag, don't give any output to the user 
-        If args.Contains("-s") Then
-            suppressOutput = True
-            args.Remove("-s")
-        End If
+        invertSettingAndRemoveArg(args, {suppressOutput}, "-s")
+
+        'Make sure we override any -d with -ncc if it exists, since -ncc implies -d
+        removeConflictingArgs(args, "-d", "-ncc")
 
         If args.Count > 0 Then
-
             Select Case args(0)
                 Case "1"
                     args.RemoveAt(0)
@@ -308,24 +263,57 @@ Module commandLineHandler
                     args.RemoveAt(0)
                     autodownload(args)
             End Select
-
         End If
     End Sub
 
-    Private Sub validateArgs(args As List(Of String), validArgs As String)
-        'This sub ensures that command line args are properly formatted in a ("-flag","data"...) format
-        If args.Count > 0 Then
-            Dim vArgs As New List(Of String)
-            vArgs.AddRange(validArgs.Split(CChar(" ")))
+    Private Sub getFileAndDirParams(ByRef args As List(Of String))
+        'Get the info for the first file
+        If args.Contains("-1d") Then getFileNameAndDir(args, "-1d", firstFile)
+        If args.Contains("-1f") Then getFileName(args, "-1f", firstFile.name)
 
-            For i As Integer = 0 To args.Count - 1
-                If Not vArgs.Contains(args(i)) Then
-                    Console.WriteLine("Invalid command line arguements given. Press any key to exit.")
-                    Console.ReadKey()
-                    Environment.Exit(0)
-                End If
-                i += 1
-            Next
+        'Get the info for the second file (if necessary)
+        If args.Contains("-2d") Then getFileNameAndDir(args, "-2d", secondFile)
+        If args.Contains("-2f") Then getFileName(args, "-2f", secondFile.name)
+
+        If args.Contains("-3d") Then getFileNameAndDir(args, "-3d", thirdFile)
+        If args.Contains("-3f") Then getFileName(args, "-3f", thirdFile.name)
+
+    End Sub
+
+    Private Sub validateAndParse(args As List(Of String))
+        'validate args
+        validateArgs(args)
+
+        'Get file params
+        getFileAndDirParams(args)
+    End Sub
+
+    Private Sub validateArgs(args As List(Of String))
+        'This sub ensures that command line args are properly formatted in a ("-flag","data"...) format
+
+        Dim vArgs As String() = {"-1d", "-1f", "-2d", "-2f", "-3d", "-3f"}
+        If args.Count > 0 Then
+            Try
+                For i As Integer = 0 To args.Count - 1
+                    If Not vArgs.Contains(args(i)) Then
+                        Console.WriteLine("Invalid command line arguements given. Press any key to exit.")
+                        Console.ReadKey()
+                        Environment.Exit(0)
+                    Else
+                        If Not Directory.Exists(args(i + 1)) And Not Directory.Exists(Environment.CurrentDirectory & "\" & args(i + 1)) And
+                                Not File.Exists(args(i + 1)) And File.Exists(Environment.CurrentDirectory & "\" & args(i + 1)) Then
+                            Console.WriteLine("Invalid command line arguements given. Press any key to exit.")
+                            Console.ReadKey()
+                            Environment.Exit(0)
+                        End If
+                    End If
+                    i += 1
+                Next
+            Catch ex As Exception
+                Console.WriteLine("Invalid command line arguements given. Press any key to exit.")
+                Console.ReadKey()
+                Environment.Exit(0)
+            End Try
         End If
     End Sub
 End Module
