@@ -40,8 +40,6 @@ LangSecRef=3027 = Opera
 LangSecRef=3028 = Safari  
 Section=Games
 
-**SpecialDetect=** It is rare you will ever need to use this, but this is part of coding that has been in CCleaner for a while and we decided to reuse it in Winapp2, as well. The only time we really ever use this is for browsers, so for example, **SpecialDetect=DET_CHROME** would refer to Google Chrome and **SpecialDetect=DET_MOZILLA** would refer to Mozilla Firefox. If you need an example, please take a look inside the browser section of Winapp2 (it is the first 2 sections in Winapp2).
-
 **Detect=** This refers to the program itself. This is needed in order to clean any program. Usually these refer to a registry key, however, if one doesn't exist, you will need to use **DetectFile=** instead a point to a specific file path or file (usually the main directory or the main .exe file).
 
 **DetectFile=** As mentioned above, this is for when a registry key doesn't exist and must use a file path or a specific file.
