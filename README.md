@@ -50,7 +50,7 @@ Section=Games
 
 **FileKey=** This refers to the junk files that need to be cleaned. This can include a path or a specific file. Each file or path must be in its own FileKey. So, if you are trying to clean 2 file paths, you would put 1 path in FileKey1= and the other in FileKey2=. You may also use wildcards in FileKeys to help shrink the amount of FileKeys created. A good time to use these would be when cleaning junk files with the same extension, such as .log. Instead of making multiple FileKeys for cleaning multiple log files, you can make one entry with using a wildcard, for example: Path|\*.log This will tell Winapp2 to clean any file that has .log at the end. If your goal is to delete any file within a folder, then you would specify this with just adding a period, for example: path|\*.\* A | must be used at the end of each path for every FileKey in order for your entry to work properly. Feel free to look throughout Winapp2 if you ever need a better example. Alternatively, you can use RECURSE and REMOVESELF in your FileKeys. **RECURSE** tells your entry to clean the files within the path specified, as well as in sub-folders. **REMOVESELF** does the same as RECURSE, except it also removes the folders along with it, as well.
 
-**RegKey=** This is for cleaning registry entries. The process is relatively the same as the FileKey. We do not support wildcards in RegKey, so each RegKey has to be a specific key.
+**RegKey=** This is for cleaning registry entries. The process is relatively the same as FileKey, except you would specify each RegKey as a registry path. We support all registry paths in Windows. We do not support wildcards in RegKey, so each RegKey has to be the whole path.
 
 
 ### Environment variables:
