@@ -35,9 +35,12 @@ LangSecRef=3022 = Internet
 LangSecRef=3023 = Multimedia  
 LangSecRef=3024 = Utilities  
 LangSecRef=3025 = Windows  
-LangSecRef=3026 = Firefox/Mozilla  
+LangSecRef=3026 = Firefox  
 LangSecRef=3027 = Opera  
 LangSecRef=3028 = Safari  
+LangSecRef=3029 = Google Chrome  
+LangSecRef=3030 = Thunderbird  
+LangSecRef=3031 = Windows Store  
 Section=Games
 
 **Detect=** This refers to the program itself. This is needed in order to clean any program. Usually these refer to a registry key, however, if one doesn't exist, you will need to use **DetectFile=** instead a point to a specific file path or file (usually the main directory or the main .exe file).
