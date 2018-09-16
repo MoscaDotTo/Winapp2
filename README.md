@@ -154,5 +154,3 @@ This will exclude files of types .exe and .bat in the C:\\Windows folder.
 If you like Winapp2 and want to help keep development going, please consider donating some money to our great minds behind Winapp2.
 
 Donate to Robert/MoscaDotTo: http://www.winapp2.com/ go to the link and click on Donate
-
-Donate to Alex/ROCK N ROLL KID: Send money via PayPal to slinger1410@protonmail.com
