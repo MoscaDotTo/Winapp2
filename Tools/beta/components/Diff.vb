@@ -1,6 +1,25 @@
-﻿Option Strict On
+﻿'    Copyright (C) 2018 Robbie Ward
+' 
+'    This file is a part of Winapp2ool
+' 
+'    Winapp2ool is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    Winap2ool is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+'
+'    You should have received a copy of the GNU General Public License
+'    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+Option Strict On
 Imports System.IO
 
+''' <summary>
+''' A module whose purpose is to allow a user to perform a diff on two winapp2.ini files
+''' </summary>
 Module Diff
 
     'File handlers
@@ -17,7 +36,15 @@ Module Diff
     Dim downloadNCC As Boolean = False
     Dim saveLog As Boolean = False
 
-    'Return the default parameters to the commandline handler
+    ''' <summary>
+    ''' Initializes the default module settings and returns references to them to the calling function
+    ''' </summary>
+    ''' <param name="firstFile">The old winapp2.ini file</param>
+    ''' <param name="secondFile">The new winapp2.ini file</param>
+    ''' <param name="thirdFile">The log file</param>
+    ''' <param name="d">The boolean representing whether or not a file should be downloaded</param>
+    ''' <param name="dncc">The boolean representing whether or not the non-ccleaner file should be downloaded</param>
+    ''' <param name="sl">The boolean representing whether or not we should save our log</param>
     Public Sub initDiffParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, ByRef thirdFile As iniFile, ByRef d As Boolean, ByRef dncc As Boolean, ByRef sl As Boolean)
         initDefaultSettings()
         firstFile = oFile
@@ -28,7 +55,15 @@ Module Diff
         sl = saveLog
     End Sub
 
-    'Handle calling Diff from the commandline with 
+    ''' <summary>
+    ''' Runs the Differ from outside the module
+    ''' </summary>
+    ''' <param name="firstFile">The old winapp2.ini file</param>
+    ''' <param name="secondFile">The new winapp2.ini file</param>
+    ''' <param name="thirdFile">The log file</param>
+    ''' <param name="d">The boolean representing whether or not a file should be downloaded</param>
+    ''' <param name="dncc">The boolean representing whether or not the non-ccleaner file should be downloaded</param>
+    ''' <param name="sl">The boolean representing whether or not we should save our log</param>
     Public Sub remoteDiff(ByRef firstFile As iniFile, secondFile As iniFile, thirdFile As iniFile, d As Boolean, dncc As Boolean, sl As Boolean)
         oFile = firstFile
         nFile = secondFile
@@ -40,6 +75,9 @@ Module Diff
     End Sub
 
     'Restore all the module settings to their default state
+    ''' <summary>
+    ''' Restores the default state of the module's parameters
+    ''' </summary>
     Private Sub initDefaultSettings()
         oFile.resetParams()
         nFile.resetParams()
@@ -50,11 +88,17 @@ Module Diff
         settingsChanged = False
     End Sub
 
+    ''' <summary>
+    ''' Resets the settings to their default state
+    ''' </summary>
     Private Sub resetSettings()
         initDefaultSettings()
         menuTopper = "Diff settings have been reset to their defaults"
     End Sub
 
+    ''' <summary>
+    ''' Prints the main menu to the user
+    ''' </summary>
     Private Sub printMenu()
         printMenuTop({"Observe the differences between two ini files"}, True)
         printMenuOpt("Run (default)", "Run the diff tool")
@@ -83,6 +127,9 @@ Module Diff
         printMenuLine(menuStr02)
     End Sub
 
+    ''' <summary>
+    ''' The main event loop for the Differ 
+    ''' </summary>
     Public Sub main()
         initMenu("Diff", 35)
         Console.WindowHeight = 40
@@ -95,25 +142,29 @@ Module Diff
             Console.Write(promptStr)
 
             Dim input As String = Console.ReadLine()
-            Select Case True
-                Case input = "0"
-                    Console.WriteLine("Exiting diff...")
-                    exitCode = True
-                Case input = "1" Or input = ""
-                    If nFile.name <> "" Then
-                        initDiff()
-                    Else
-                        menuTopper = "Please select a file against which to diff"
-                    End If
-                Case input = "2"
-                    oFile.name = "winapp2.ini"
-                Case input = "3"
-                    changeFileParams(oFile, settingsChanged)
-                Case input = "4"
+            handleUserInput(input)
+        Loop
+        revertMenu()
+    End Sub
+
+    Private Sub handleUserInput(input As String)
+        Select Case True
+            Case input = "0"
+                Console.WriteLine("Exiting diff...")
+                exitCode = True
+            Case input = "1" Or input = ""
+                If Not denyActionWithTopper(nFile.name = "", "Please select a file against which to diff") Then initDiff()
+            Case input = "2"
+                oFile.name = "winapp2.ini"
+            Case input = "3"
+                changeFileParams(oFile, settingsChanged)
+            Case input = "4"
+                If Not denySettingOffline() Then
                     toggleSettingParam(downloadFile, "Download ", settingsChanged)
                     nFile.name = "Online"
-                Case input = "5"
-
+                End If
+            Case input = "5"
+                If Not denySettingOffline() Then
                     Select Case True
                         Case (Not downloadFile And Not downloadNCC) Or (downloadFile And downloadNCC)
                             toggleSettingParam(downloadFile, "Download ", settingsChanged)
@@ -121,27 +172,24 @@ Module Diff
                         Case downloadFile And Not downloadNCC
                             toggleSettingParam(downloadNCC, "Download Non-CCleaner ", settingsChanged)
                     End Select
-
                     nFile.name = If(downloadNCC, "Online (non-ccleaner)", "")
-                Case input = "6"
-                    changeFileParams(nFile, settingsChanged)
-                Case input = "7"
-                    toggleSettingParam(saveLog, "Log Saving ", settingsChanged)
-                Case input = "8" And (saveLog Or settingsChanged)
-                    If saveLog Then
-                        changeFileParams(logFile, settingsChanged)
-                    Else
-                        resetSettings()
-                    End If
-                Case input = "9" And (settingsChanged And saveLog)
-                    resetSettings()
-                Case Else
-                    menuTopper = invInpStr
-            End Select
-        Loop
-        revertMenu()
+                End If
+            Case input = "6"
+                changeFileParams(nFile, settingsChanged)
+            Case input = "7"
+                toggleSettingParam(saveLog, "Log Saving ", settingsChanged)
+            Case input = "8" And saveLog
+                changeFileParams(logFile, settingsChanged)
+            Case (input = "9" And (settingsChanged And saveLog)) Or (input = "8" And Not saveLog And settingsChanged)
+                resetSettings()
+            Case Else
+                menuTopper = invInpStr
+        End Select
     End Sub
 
+    ''' <summary>
+    ''' Carries out the main set of Diffing operations
+    ''' </summary>
     Private Sub initDiff()
         oFile.validate()
         If downloadFile Then
@@ -153,116 +201,102 @@ Module Diff
             nFile.validate()
         End If
         differ()
-        If saveLog Then saveDiff()
+        If saveLog Then logFile.overwriteToFile(outputToFile)
         Console.Clear()
         menuTopper = "Diff Complete"
     End Sub
 
+    ''' <summary>
+    ''' Performs the diff and outputs the info to the user
+    ''' </summary>
     Private Sub differ()
         If exitCode Then Exit Sub
         Console.Clear()
-        Try
-            'collect & verify version #s and print them out for the menu
-            Dim fver As String = oFile.comments(0).comment.ToString
-            fver = If(fver.ToLower.Contains("version"), fver.TrimStart(CChar(";")).Replace("Version:", "version"), " version not given")
 
-            Dim sver As String = nFile.comments(0).comment.ToString
-            sver = If(sver.ToLower.Contains("version"), sver.TrimStart(CChar(";")).Replace("Version:", "version"), " version not given")
+        'collect & verify version #s and print them out for the menu
+        Dim fver As String = If(oFile.comments.Count > 0, oFile.comments(0).comment.ToString, "000000")
+        fver = If(fver.ToLower.Contains("version"), fver.TrimStart(CChar(";")).Replace("Version:", "version"), " version not given")
 
-            outputToFile = tmenu("Changes made between" & fver & " and" & sver) & Environment.NewLine
-            outputToFile += menu(menuStr02) & Environment.NewLine
-            outputToFile += menu(menuStr00) & Environment.NewLine
+        Dim sver As String = If(nFile.comments.Count > 0, nFile.comments(0).comment.ToString, "000000")
+        sver = If(sver.ToLower.Contains("version"), sver.TrimStart(CChar(";")).Replace("Version:", "version"), " version not given")
 
-            'compare the files and then ennumerate their changes
-            Dim outList As List(Of String) = compareTo()
-            Dim remCt As Integer = 0
-            Dim modCt As Integer = 0
-            Dim addCt As Integer = 0
-            For Each change In outList
+        outputToFile = appendNewLine(tmenu("Changes made between" & fver & " and" & sver))
+        outputToFile += appendNewLine(menu(menuStr02))
+        outputToFile += appendNewLine(menu(menuStr00))
 
-                If change.Contains("has been added.") Then
-                    addCt += 1
-                ElseIf change.Contains("has been removed") Then
-                    remCt += 1
-                Else
-                    modCt += 1
-                End If
-                outputToFile += change & Environment.NewLine
-            Next
-
-            outputToFile += menu("Diff complete.", "c") & Environment.NewLine
-            outputToFile += menu(menuStr03) & Environment.NewLine
-            outputToFile += menu("Summary", "c") & Environment.NewLine
-            outputToFile += menu(menuStr01) & Environment.NewLine
-            outputToFile += menu("Added entries: " & addCt, "l") & Environment.NewLine
-            outputToFile += menu("Modified entries: " & modCt, "l") & Environment.NewLine
-            outputToFile += menu("Removed entries: " & remCt, "l") & Environment.NewLine
-            outputToFile += menu(menuStr02)
-            If Not suppressOutput Then Console.Write(outputToFile)
-        Catch ex As Exception
-            If ex.Message = "The given key was not present in the dictionary." Then
-                Console.WriteLine("Error encountered during diff: " & ex.Message)
-                Console.WriteLine("This error is typically caused by invalid file names, please double check your input and try again.")
-                Console.WriteLine()
+        'compare the files and then ennumerate their changes
+        Dim outList As List(Of String) = compareTo()
+        Dim remCt As Integer = 0
+        Dim modCt As Integer = 0
+        Dim addCt As Integer = 0
+        For Each change In outList
+            If change.Contains("has been added.") Then
+                addCt += 1
+            ElseIf change.Contains("has been removed") Then
+                remCt += 1
             Else
-                exc(ex)
+                modCt += 1
             End If
-        End Try
+            outputToFile += appendNewLine(change)
+        Next
+
+        'Print the summary to the user
+        outputToFile += appendNewLine(menu("Diff complete.", "c"))
+        outputToFile += appendNewLine(menu(menuStr03))
+        outputToFile += appendNewLine(menu("Summary", "c"))
+        outputToFile += appendNewLine(menu(menuStr01))
+        outputToFile += appendNewLine(menu("Added entries: " & addCt, "l"))
+        outputToFile += appendNewLine(menu("Modified entries: " & modCt, "l"))
+        outputToFile += appendNewLine(menu("Removed entries: " & remCt, "l"))
+        outputToFile += appendNewLine(menu(menuStr02))
+        If Not suppressOutput Then Console.Write(outputToFile)
 
         Console.WriteLine()
         printMenuLine(bmenu("Press any key to return to the winapp2ool menu.", "l"))
         Console.ReadKey()
     End Sub
 
+    ''' <summary>
+    ''' Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences
+    ''' </summary>
+    ''' <returns></returns>
     Private Function compareTo() As List(Of String)
 
         Dim outList, comparedList As New List(Of String)
 
         For Each section In oFile.sections.Values
-            Try
 
-                'If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
-                If nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
-                    Dim sSection As iniSection = nFile.sections(section.name)
+            'If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
+            If nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
+                Dim sSection As iniSection = nFile.sections(section.name)
 
-                    'and if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
-                    Dim addedKeys, removedKeys As New List(Of iniKey)
-                    Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
-                    If Not section.compareTo(sSection, removedKeys, addedKeys, updatedKeys) Then
-                        Dim tmp As String = getDiff(sSection, "modified.")
-                        If addedKeys.Count > 0 Then
-                            tmp += Environment.NewLine & "Added:"
-                            For Each key In addedKeys
-                                tmp += Environment.NewLine & key.toString
-                            Next
-                        End If
-                        If removedKeys.Count > 0 Then
-                            tmp += Environment.NewLine & Environment.NewLine & "Removed:"
-                            For Each key In removedKeys
-                                tmp += Environment.NewLine & key.toString
-                            Next
-                        End If
-                        If updatedKeys.Count > 0 Then
-                            tmp += If(removedKeys.Count > 0 Or addedKeys.Count > 0, Environment.NewLine & Environment.NewLine, Environment.NewLine) & "Modified:" & Environment.NewLine
-                            For Each pair In updatedKeys
-                                tmp += Environment.NewLine & pair.Key.name & Environment.NewLine
-
-                                tmp += "old:   " & pair.Key.toString & Environment.NewLine
-                                tmp += "new:   " & pair.Value.toString & Environment.NewLine
-                            Next
-                        End If
-                        tmp += Environment.NewLine & Environment.NewLine & menuStr00
-                        outList.Add(tmp)
+                'and if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
+                Dim addedKeys, removedKeys As New List(Of iniKey)
+                Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
+                If Not section.compareTo(sSection, removedKeys, addedKeys) Then
+                    chkLsts(removedKeys, addedKeys, updatedKeys)
+                    'Silently ignore any entries with only alphabetization changes
+                    If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Continue For
+                    Dim tmp As String = getDiff(sSection, "modified.")
+                    getChangesFromList(addedKeys, tmp, prependNewLines(True) & "Added:")
+                    getChangesFromList(removedKeys, tmp, prependNewLines(addedKeys.Count > 0) & "Removed:")
+                    If updatedKeys.Count > 0 Then
+                        tmp += appendNewLine(prependNewLines(removedKeys.Count > 0 Or addedKeys.Count > 0) & "Modified:")
+                        For Each pair In updatedKeys
+                            tmp += appendNewLine(prependNewLines(True) & pair.Key.name)
+                            tmp += "old:   " & appendNewLine(pair.Key.toString)
+                            tmp += "new:   " & appendNewLine(pair.Value.toString)
+                        Next
                     End If
-
-                ElseIf Not nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
-                    'If we do not have the entry in the new file, it has been removed between versions 
-                    outList.Add(getDiff(section, "removed."))
+                    tmp += prependNewLines(False) & menuStr00
+                    outList.Add(tmp)
                 End If
-                comparedList.Add(section.name)
-            Catch ex As Exception
-                exc(ex)
-            End Try
+
+            ElseIf Not nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
+                'If we do not have the entry in the new file, it has been removed between versions 
+                outList.Add(getDiff(section, "removed."))
+            End If
+            comparedList.Add(section.name)
         Next
 
         For Each section In nFile.sections.Values
@@ -273,8 +307,89 @@ Module Diff
         Return outList
     End Function
 
+    ''' <summary>
+    ''' Handles the Added and Removed cases for changes 
+    ''' </summary>
+    ''' <param name="keyList">A list of iniKeys that have been added/removed</param>
+    ''' <param name="out">The output text to be appended to</param>
+    ''' <param name="changeTxt">The text to appear in the output</param>
+    Private Sub getChangesFromList(keyList As List(Of iniKey), ByRef out As String, changeTxt As String)
+        If keyList.Count > 0 Then
+            out += changeTxt
+            For Each key In keyList
+                out += prependNewLines(True) & key.toString
+            Next
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key 
+    ''' </summary>
+    ''' <param name="removedKeys"></param>
+    ''' <param name="addedKeys"></param>
+    ''' <param name="updatedKeys"></param>
+    Private Sub chkLsts(ByRef removedKeys As List(Of iniKey), ByRef addedKeys As List(Of iniKey), ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
+        Dim rkTemp, akTemp As New List(Of iniKey)
+        rkTemp = removedKeys.ToList
+        akTemp = addedKeys.ToList
+        For Each key In removedKeys
+            For Each skey In addedKeys
+                If key.name.ToLower = skey.name.ToLower Then
+                    Dim oldKey As New winapp2KeyParameters(key)
+                    Dim newKey As New winapp2KeyParameters(skey)
+
+                    'Make sure the given path hasn't changed
+                    If Not oldKey.paramString = newKey.paramString Then
+                        updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                        Continue For
+                    End If
+
+                    oldKey.argsList.Sort()
+                    newKey.argsList.Sort()
+                    If oldKey.argsList.Count = newKey.argsList.Count Then
+                        For i As Integer = 0 To oldKey.argsList.Count - 1
+                            If Not oldKey.argsList(i).ToLower = newKey.argsList(i).ToLower Then
+                                updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                                Exit For
+                            End If
+                        Next
+                        'If we get this far, it's probably just an alphabetization change and can be ignored silenty
+                        akTemp.Remove(skey)
+                        rkTemp.Remove(key)
+                    Else
+                        'If the count doesn't match, something has definitely changed
+                        updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                    End If
+                End If
+            Next
+        Next
+
+        'Update the lists
+        addedKeys = akTemp
+        removedKeys = rkTemp
+    End Sub
+
+    ''' <summary>
+    ''' Performs change tracking for chkLst 
+    ''' </summary>
+    ''' <param name="updLst">The list of updated keys</param>
+    ''' <param name="aKeys">The list of added keys</param>
+    ''' <param name="rKeys">The list of removed keys</param>
+    ''' <param name="key">A removed inikey</param>
+    ''' <param name="skey">An added iniKey</param>
+    Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), ByRef aKeys As List(Of iniKey), ByRef rKeys As List(Of iniKey), key As iniKey, skey As iniKey)
+        updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
+        rKeys.Remove(key)
+        aKeys.Remove(skey)
+    End Sub
+
+    ''' <summary>
+    ''' Returns a string containing a menu box listing the change type and entry, followed by the entry's toString
+    ''' </summary>
+    ''' <param name="section">an iniSection object to be diffed</param>
+    ''' <param name="changeType">The type of change to observe</param>
+    ''' <returns></returns>
     Private Function getDiff(section As iniSection, changeType As String) As String
-        'Return a string containing a box containing the change type and entry name, followed by the entry's tostring
         Dim out As String = ""
         out += mkMenuLine(section.name & " has been " & changeType, "c") & Environment.NewLine
         out += mkMenuLine(menuStr02, "") & Environment.NewLine & Environment.NewLine
@@ -282,15 +397,4 @@ Module Diff
         If Not changeType = "modified." Then out += menuStr00
         Return out
     End Function
-
-    'Save diff.txt 
-    Private Sub saveDiff()
-        Try
-            Dim file As New StreamWriter(logFile.path, False)
-            file.Write(outputToFile)
-            file.Close()
-        Catch ex As Exception
-            exc(ex)
-        End Try
-    End Sub
 End Module

@@ -1,6 +1,25 @@
-﻿Option Strict On
+﻿'    Copyright (C) 2018 Robbie Ward
+' 
+'    This file is a part of Winapp2ool
+' 
+'    Winapp2ool is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    Winap2ool is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+'
+'    You should have received a copy of the GNU General Public License
+'    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+Option Strict On
 Imports System.IO
 
+''' <summary>
+''' This module handles the commandline args presented to winapp2ool and attempts to pass them off to their respective modules
+''' </summary>
 Module commandLineHandler
 
     'File Handlers
@@ -8,22 +27,53 @@ Module commandLineHandler
     Dim secondFile As iniFile
     Dim thirdFile As iniFile
 
-    Private Sub invertSettingAndRemoveArg(ByRef args As List(Of String), ByRef settings As Boolean(), ByRef arg As String)
+    'The current state of the command line args at any point
+    Dim args As New List(Of String)
+
+    ''' <summary>
+    ''' Flips a boolean setting and removes its associated argument from the args list
+    ''' </summary>
+    ''' <param name="setting">The boolean setting to be flipped</param>
+    ''' <param name="arg">The string containing the argument that flips the boolean</param>
+    Private Sub invertSettingAndRemoveArg(ByRef setting As Boolean, ByRef arg As String)
         If args.Contains(arg) Then
-            For Each setting In settings
-                setting = Not setting
-            Next
+            setting = Not setting
             args.Remove(arg)
         End If
     End Sub
 
-    Private Sub invertAndRemoveAndRename(ByRef args As List(Of String), ByRef settings As Boolean(), ByRef arg As String, ByRef name As String, newname As String)
-        invertSettingAndRemoveArg(args, settings, arg)
+    ''' <summary>
+    ''' Calls invertSettingAndRemoveArg and assigns a new name to the given reference variable
+    ''' </summary>
+    ''' <param name="setting">The boolean setting</param>
+    ''' <param name="arg">The arg controlling the setting</param>
+    ''' <param name="name">A reference to a String to be renamed</param>
+    ''' <param name="newname">The new value for the String to be renamed</param>
+    Private Sub invertAndRemoveAndRename(ByRef setting As Boolean, ByRef arg As String, ByRef name As String, newname As String)
+        invertSettingAndRemoveArg(setting, arg)
         name = newname
     End Sub
 
-    'Handle commandline args for WinappDebug
-    Private Sub autoDebug(ByRef args As List(Of String))
+    ''' <summary>
+    ''' Processes whether to download and which file to download
+    ''' </summary>
+    ''' <param name="download"></param>
+    ''' <param name="ncc"></param>
+    Private Sub handleDownloadBools(ByRef download As Boolean, ByRef ncc As Boolean)
+        'Download a winapp2 to trim?
+        invertSettingAndRemoveArg(download, "-d")
+
+        'Download the non ccleaner ini? 
+        invertSettingAndRemoveArg(ncc, "-ncc")
+
+        '-ncc implies -d 
+        If ncc And Not download Then download = True
+    End Sub
+
+    ''' <summary>
+    ''' Handles the commandline args for WinappDebug
+    ''' </summary>
+    Private Sub autoDebug()
 
         'WinappDebug specific command line args
         ' -c      : enable autocorrect
@@ -34,19 +84,21 @@ Module commandLineHandler
         initDebugParams(firstFile, secondFile, correctErrors)
 
         'Toggle on autocorrect (off by default)
-        invertSettingAndRemoveArg(args, {correctErrors}, "-c")
+        invertSettingAndRemoveArg(correctErrors, "-c")
 
         'Get any file parameters from flags
-        validateAndParse(args)
+        getFileAndDirParams()
 
         'Initialize the debug
         remoteDebug(firstFile, secondFile, correctErrors)
     End Sub
 
-    'Handle commandline args for Trim
-    Private Sub autoTrim(ByRef args As List(Of String))
+    ''' <summary>
+    ''' Handles the commandline args for Trim
+    ''' </summary>
+    Private Sub autoTrim()
 
-        'Trim specific commandline args
+        'Trim commandline args
         ' -d     : download the latest winapp2.ini
         ' -ncc   : download the latest non-ccleaner winapp2.ini (implies -d)
 
@@ -55,22 +107,21 @@ Module commandLineHandler
 
         initTrimParams(firstFile, secondFile, download, ncc)
 
-        'Download a winapp2 to trim?
-        invertSettingAndRemoveArg(args, {download}, "-d")
-
-        'Download the non ccleaner ini? Implies -d
-        invertSettingAndRemoveArg(args, {download, ncc}, "-ncc")
+        'Are we downloading winapp2.ini?
+        handleDownloadBools(download, ncc)
 
         'Get any file parameters from flags
-        validateAndParse(args)
+        getFileAndDirParams()
 
         'Initalize the trim
         remoteTrim(firstFile, secondFile, download, ncc)
 
     End Sub
 
-    'Handle commandline args for Merge
-    Private Sub autoMerge(ByRef args As List(Of String))
+    ''' <summary>
+    ''' Handles the commandline args for Merge
+    ''' </summary>
+    Private Sub autoMerge()
 
         'Merge specific command line args
         ' -mm      : toggle mergemode from replace & add to replace & remove
@@ -81,27 +132,25 @@ Module commandLineHandler
 
         initMergeParams(firstFile, secondFile, thirdFile, mergeMode)
 
-        invertSettingAndRemoveArg(args, {mergeMode}, "-mm")
+        invertSettingAndRemoveArg(mergeMode, "-mm")
 
         'Detect any preset filename calls
-        invertAndRemoveAndRename(args, {}, "-r", secondFile.name, "Removed Entries.ini")
-        invertAndRemoveAndRename(args, {}, "-c", secondFile.name, "Custom.ini")
+        invertAndRemoveAndRename(False, "-r", secondFile.name, "Removed Entries.ini")
+        invertAndRemoveAndRename(False, "-c", secondFile.name, "Custom.ini")
 
         'Get any file parameters from flags
-        validateAndParse(args)
+        getFileAndDirParams()
 
         'If we have a secondfile, initiate the merge
         If Not secondFile.name = "" Then remoteMerge(firstFile, secondFile, thirdFile, mergeMode)
     End Sub
 
-    Private Sub removeConflictingArgs(ByRef args As List(Of String), arg1 As String, arg2 As String)
-        If args.Contains(arg2) Then args.Remove(arg1)
-    End Sub
+    ''' <summary>
+    ''' Handles the commandline args for Diff
+    ''' </summary>
+    Private Sub autoDiff()
 
-    'Handle commandline args for Diff
-    Private Sub autoDiff(ByRef args As List(Of String))
-
-        'Diff specific commandline args
+        'Diff commandline args
         ' -d          : download the latest winapp2.ini
         ' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
         ' -savelog    : save the diff.txt log
@@ -112,26 +161,28 @@ Module commandLineHandler
 
         initDiffParams(firstFile, secondFile, thirdFile, download, ncc, save)
 
-        'Download & Diff?
-        invertAndRemoveAndRename(args, {download}, "-d", secondFile.name, "Online winapp2.ini")
+        'Downloading winapp2.ini?
+        handleDownloadBools(download, ncc)
 
-        'Downloading non-ccleaner ini?
-        invertAndRemoveAndRename(args, {download, ncc}, "-ncc", secondFile.name, "Online non-ccleaner winapp2.ini")
+        'If downloading, set secondFile's name correctly
+        If download Then secondFile.name = If(ncc, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
 
         'Save diff.txt?
-        invertSettingAndRemoveArg(args, {save}, "-savelog")
+        invertSettingAndRemoveArg(save, "-savelog")
 
         'Get any file parameters from flags
-        validateAndParse(args)
+        getFileAndDirParams()
 
         'Only run if we have a second file (because we assume we're running on a winapp2.ini file by default)
         If Not secondFile.name = "" Then remoteDiff(firstFile, secondFile, thirdFile, download, ncc, save)
     End Sub
 
-    'Handle commandline args for CCiniDebug
-    Private Sub autoccini(ByRef args As List(Of String))
+    ''' <summary>
+    ''' Handles the commandline args for CCiniDebug
+    ''' </summary>
+    Private Sub autoccini()
 
-        'CCiniDebug specific commandline args:
+        'CCiniDebug commandline args:
         ' -noprune : disable pruning of stale winapp2.ini entries
         ' -nosort  : disable sorting ccleaner.ini alphabetically
         ' -nosave  : disable saving the modified ccleaner.ini back to file
@@ -143,26 +194,29 @@ Module commandLineHandler
         initCCDebugParams(firstFile, secondFile, thirdFile, prune, save, sort)
 
         'Prune?
-        invertSettingAndRemoveArg(args, {prune}, "-noprune")
+        invertSettingAndRemoveArg(prune, "-noprune")
 
         'Sort?
-        invertSettingAndRemoveArg(args, {sort}, "-nosort")
+        invertSettingAndRemoveArg(sort, "-nosort")
 
         'Save?
-        invertSettingAndRemoveArg(args, {save}, "-nosave")
+        invertSettingAndRemoveArg(save, "-nosave")
 
         'Get any file parameters from flags
-        validateAndParse(args)
+        getFileAndDirParams()
 
         'run ccinidebug
         remoteCC(firstFile, secondFile, thirdFile, prune, save, sort)
     End Sub
 
-    Private Sub autodownload(ByRef args As List(Of String))
+    ''' <summary>
+    ''' Processes the commandline args for Downloader
+    ''' </summary>
+    Private Sub autodownload()
 
-        Dim fileLink As String
+        Dim fileLink As String = ""
         Dim downloadDir As String = Environment.CurrentDirectory
-        Dim downloadName As String
+        Dim downloadName As String = ""
 
         If args.Count > 0 Then
             Select Case args(0)
@@ -175,25 +229,23 @@ Module commandLineHandler
                 Case "4"
                     fileLink = removedLink
                     downloadName = "Removed Entries.ini"
-                Case Else
-                    fileLink = ""
-                    downloadName = ""
             End Select
             args.RemoveAt(0)
-        Else
-            fileLink = ""
-            downloadName = ""
         End If
 
         'Get any file parameters from flags
-        validateAndParse(args)
+        getFileAndDirParams()
 
         If Not fileLink = "" Then remoteDownload(downloadDir, downloadName, fileLink, False)
 
     End Sub
 
-    Private Sub getFileName(ByRef args As List(Of String), flag As String, ByRef name As String)
-        'Extract (what we assume to be) the file parameter from a file specification flag
+    ''' <summary>
+    ''' Renames an iniFile object if provided a commandline arg to do so
+    ''' </summary>
+    ''' <param name="flag">The flag that precedes the name specification in the args list</param>
+    ''' <param name="name">The reference to the name parameter of an iniFile object</param>
+    Private Sub getFileName(flag As String, ByRef name As String)
         If args.Count >= 2 Then
             Dim ind As Integer = args.IndexOf(flag)
             name = "\" & args(ind + 1)
@@ -202,8 +254,12 @@ Module commandLineHandler
         End If
     End Sub
 
-    Private Sub getFileNameAndDir(ByRef args As List(Of String), flag As String, ByRef file As iniFile)
-        'Take in a file with directory listing and split it into its constituent parts, saving them
+    ''' <summary>
+    ''' Applies a new directory and name to an iniFile object 
+    ''' </summary>
+    ''' <param name="flag">The flag preceeding the file/path parameter in the arg list</param>
+    ''' <param name="file">The iniFile object to be modified</param>
+    Private Sub getFileNameAndDir(flag As String, ByRef file As iniFile)
         If args.Count >= 2 Then
             Dim ind As Integer = args.IndexOf(flag)
             getFileParams(args(ind + 1), file)
@@ -212,11 +268,14 @@ Module commandLineHandler
         End If
     End Sub
 
+    ''' <summary>
+    ''' Takes in a full form filepath with directory and assigns the directory and filename components to the given iniFile object
+    ''' </summary>
+    ''' <param name="arg">The filepath argument</param>
+    ''' <param name="file">The iniFile object to be modified</param>
     Private Sub getFileParams(ByRef arg As String, ByRef file As iniFile)
         'Start either a blank path or, support appending children folders to the current path
         file.dir = If(arg.StartsWith("\"), Environment.CurrentDirectory & "\", "")
-
-        'This function should receive a file path in full form from the command line and return it in pieces
         Dim splitArg As String() = arg.Split(CChar("\"))
         If splitArg.Count >= 2 Then
             For i As Integer = 0 To splitArg.Count - 2
@@ -224,96 +283,96 @@ Module commandLineHandler
             Next
         End If
         file.name = splitArg.Last
-
     End Sub
 
+    ''' <summary>
+    ''' Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler
+    ''' </summary>
     Public Sub processCommandLineArgs()
 
-        'Build the arguments as a list of strings
-        Dim args As New List(Of String)
         args.AddRange(Environment.GetCommandLineArgs)
 
         'Remove the first arg which is simply the name of the executable
         args.RemoveAt(0)
 
-        'the s is for silent, if we have this flag, don't give any output to the user 
-        invertSettingAndRemoveArg(args, {suppressOutput}, "-s")
-
-        'Make sure we override any -d with -ncc if it exists, since -ncc implies -d
-        removeConflictingArgs(args, "-d", "-ncc")
+        'the s is for silent, if we havxe this flag, don't give any output to the user under normal circumstances 
+        invertSettingAndRemoveArg(suppressOutput, "-s")
 
         If args.Count > 0 Then
             Select Case args(0)
                 Case "1"
                     args.RemoveAt(0)
-                    autoDebug(args)
+                    autoDebug()
                 Case "2"
                     args.RemoveAt(0)
-                    autoTrim(args)
+                    autoTrim()
                 Case "3"
                     args.RemoveAt(0)
-                    autoMerge(args)
+                    autoMerge()
                 Case "4"
                     args.RemoveAt(0)
-                    autoDiff(args)
+                    autoDiff()
                 Case "5"
                     args.RemoveAt(0)
-                    autoccini(args)
+                    autoccini()
                 Case "6"
                     args.RemoveAt(0)
-                    autodownload(args)
+                    autodownload()
             End Select
         End If
     End Sub
 
-    Private Sub getFileAndDirParams(ByRef args As List(Of String))
-        'Get the info for the first file
-        If args.Contains("-1d") Then getFileNameAndDir(args, "-1d", firstFile)
-        If args.Contains("-1f") Then getFileName(args, "-1f", firstFile.name)
-
-        'Get the info for the second file (if necessary)
-        If args.Contains("-2d") Then getFileNameAndDir(args, "-2d", secondFile)
-        If args.Contains("-2f") Then getFileName(args, "-2f", secondFile.name)
-
-        If args.Contains("-3d") Then getFileNameAndDir(args, "-3d", thirdFile)
-        If args.Contains("-3f") Then getFileName(args, "-3f", thirdFile.name)
-
+    ''' <summary>
+    ''' Gets the directory and name info for each file given (if any)
+    ''' </summary>
+    Private Sub getFileAndDirParams()
+        'Make sure the args are formatted correctly so the path/name can be extracted 
+        validateArgs()
+        'Parse params
+        getParams(1, firstFile)
+        getParams(2, secondFile)
+        getParams(3, thirdFile)
     End Sub
 
-    Private Sub validateAndParse(args As List(Of String))
-        'validate args
-        validateArgs(args)
-
-        'Get file params
-        getFileAndDirParams(args)
+    ''' <summary>
+    ''' Processes numerically ordered directory (d) and file (f) commandline args on a per-file basis
+    ''' </summary>
+    ''' <param name="someNumber">The number (1-indexed) of our current internal iniFile</param>
+    ''' <param name="someFile">A reference to the iniFile object being operated on</param>
+    Private Sub getParams(someNumber As Integer, someFile As iniFile)
+        Dim argStr As String = "-" & someNumber
+        If args.Contains(argStr & "d") Then getFileNameAndDir(argStr & "d", someFile)
+        If args.Contains(argStr & "f") Then getFileName(argStr & "f", someFile.name)
     End Sub
 
-    Private Sub validateArgs(args As List(Of String))
-        'This sub ensures that command line args are properly formatted in a ("-flag","data"...) format
-
+    ''' <summary>
+    ''' Enforces that commandline args are properly formatted in {"-flag","data"} format
+    ''' </summary>
+    Private Sub validateArgs()
         Dim vArgs As String() = {"-1d", "-1f", "-2d", "-2f", "-3d", "-3f"}
-        If args.Count > 0 Then
+        If args.Count > 1 Then
             Try
-                For i As Integer = 0 To args.Count - 1
-                    If Not vArgs.Contains(args(i)) Then
-                        Console.WriteLine("Invalid command line arguements given. Press any key to exit.")
-                        Console.ReadKey()
-                        Environment.Exit(0)
-                    Else
-                        If Not Directory.Exists(args(i + 1)) And Not Directory.Exists(Environment.CurrentDirectory & "\" & args(i + 1)) And
-                                Not File.Exists(args(i + 1)) And File.Exists(Environment.CurrentDirectory & "\" & args(i + 1)) Then
-                            Console.WriteLine("Invalid command line arguements given. Press any key to exit.")
-                            Console.ReadKey()
-                            Environment.Exit(0)
-                        End If
+                For i As Integer = 0 To args.Count - 2
+                    If (Not vArgs.Contains(args(i))) Or
+                        (Not Directory.Exists(args(i + 1)) And Not Directory.Exists(Environment.CurrentDirectory & "\" & args(i + 1)) And
+                                Not File.Exists(args(i + 1)) And File.Exists(Environment.CurrentDirectory & "\" & args(i + 1))) Then
+                        invalidCmdline()
                     End If
                     i += 1
                 Next
             Catch ex As Exception
-                Console.WriteLine("Invalid command line arguements given. Press any key to exit.")
-                Console.ReadKey()
-                Environment.Exit(0)
+                invalidCmdline()
             End Try
         End If
     End Sub
+
+    ''' <summary>
+    ''' Prints an invalid commandline args error to the user and exits after they press a key.
+    ''' </summary>
+    Private Sub invalidCmdline()
+        Console.WriteLine("Invalid command line arguements given. Press any key to exit.")
+        Console.ReadKey()
+        Environment.Exit(0)
+    End Sub
+
 End Module

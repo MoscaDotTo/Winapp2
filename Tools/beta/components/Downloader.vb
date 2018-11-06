@@ -1,6 +1,26 @@
-﻿Option Strict On
+﻿'    Copyright (C) 2018 Robbie Ward
+' 
+'    This file is a part of Winapp2ool
+' 
+'    Winapp2ool is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    Winap2ool is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+'
+'    You should have received a copy of the GNU General Public License
+'    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+Option Strict On
 Imports System.IO
 Imports System.Net
+''' <summary>
+''' This module contains functions that allow the user to reach online resources. 
+''' Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
+''' </summary>
 Module Downloader
 
     'Links to GitHub resources
@@ -9,10 +29,14 @@ Module Downloader
     Public toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/Tools/beta/winapp2ool.exe"
     Public toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Tools/beta/version.txt"
     Public removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
+    Public wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
 
     'File handler
     Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
+    ''' <summary>
+    ''' Prints the main menu to the user
+    ''' </summary>
     Private Sub printMenu()
         printMenuTop({"Download files from the winapp2 GitHub"}, True)
         printMenuOpt("Winapp2.ini", "Download the latest winapp2.ini")
@@ -21,70 +45,147 @@ Module Downloader
         printMenuOpt("Removed Entries.ini", "Download only entries used to create the non-ccleaner winapp2.ini")
         printBlankMenuLine()
         printMenuOpt("Directory", "Change the save directory")
+        printMenuOpt("Advanced", "Settings for power users")
         printBlankMenuLine()
         printMenuLine("Save directory: " & replDir(downloadFile.dir), "l")
         printMenuLine(menuStr02)
     End Sub
 
+    ''' <summary>
+    ''' Prints the advanced downloads menu
+    ''' </summary>
+    Private Sub printAdvMenu()
+        printMenuTop({"Warning!", "Files in this menu are not recommended for use by beginners."}, True)
+        printMenuOpt("Winapp3.ini", "Download the extended winapp3.ini cleaning rules")
+        printMenuLine(menuStr02)
+    End Sub
+
+    ''' <summary>
+    ''' Handles the advanced downloads menu to allow users to download winapp3
+    ''' </summary>
+    Private Sub advancedMenu()
+        Do Until exitCode
+            Console.Clear()
+            printAdvMenu()
+            Dim input As String = Console.ReadLine
+            Select Case input
+                Case "0"
+                    exitCode = True
+                Case "1"
+                    downloadFile.name = "winapp3.ini"
+                    download(wa3link, True)
+                Case Else
+                    menuTopper = invInpStr
+            End Select
+        Loop
+    End Sub
+
+    ''' <summary>
+    ''' The main event loop for the Downloader
+    ''' </summary>
     Public Sub main()
         initMenu("Download", 35)
-
         Do Until exitCode
             Console.Clear()
             printMenu()
             Console.WriteLine()
             Console.Write("Enter a number: ")
-            Dim input As String = Console.ReadLine
-            Select Case input
-                Case "0"
-                    Console.WriteLine("Returning to winapp2ool menu...")
-                    exitCode = True
-                Case "1", "2"
-                    downloadFile.name = "winapp2.ini"
-                    Dim link As String = If(input = "1", wa2Link, nonccLink)
-                    download(wa2Link, True)
-                Case "3"
+            handleUserInput(Console.ReadLine)
+        Loop
+        revertMenu()
+    End Sub
+
+    ''' <summary>
+    ''' Handles the user input for the menu
+    ''' </summary>
+    ''' <param name="input">The String containing the user's input</param>
+    Private Sub handleUserInput(input As String)
+        Select Case input
+            Case "0"
+                Console.WriteLine("Returning to winapp2ool menu...")
+                exitCode = True
+            Case "1", "2"
+                downloadFile.name = "winapp2.ini"
+                Dim link As String = If(input = "1", wa2Link, nonccLink)
+                download(link, True)
+            Case "3"
+                'Feature gate downloading the executable behind .NET 4.6+
+                If Not denyActionWithTopper(dnfOOD, "This option requires a newer version of the .NET Framework") Then
                     If downloadFile.dir = Environment.CurrentDirectory Then
                         autoUpdate()
                     Else
                         downloadFile.name = "winapp2ool.exe"
                         download(toolLink, True)
                     End If
-                Case "4"
-                    downloadFile.name = "Removed entries.ini"
-                    download(removedLink, True)
-                Case "5"
-                    dirChooser(downloadFile.dir)
-                    undoAnyPendingExits()
-                    menuTopper = "Save directory changed"
-                Case Else
-                    menuTopper = invInpStr
-            End Select
-        Loop
-        revertMenu()
+                End If
+            Case "4"
+                downloadFile.name = "Removed entries.ini"
+                download(removedLink, True)
+            Case "5"
+                dirChooser(downloadFile.dir)
+                undoAnyPendingExits()
+                menuTopper = "Save directory changed"
+            Case "6"
+                menuTopper = "Advanced Downloads"
+                advancedMenu()
+                undoAnyPendingExits()
+                menuTopper = "Advanced Settings closed"
+            Case Else
+                menuTopper = invInpStr
+        End Select
     End Sub
 
-    'fetch winapp2.ini from github (ncc or otherwise)
+    ''' <summary>
+    ''' Feteches a remote winapp2.ini file from GitHub
+    ''' </summary>
+    ''' <param name="ncc">The Boolean specifying whether the non-CCleaner version should be downloaded</param>
+    ''' <returns></returns>
     Public Function getRemoteWinapp(ncc As Boolean) As iniFile
-        Return If(ncc, getRemoteIniFile(nonccLink, "\winapp2.ini"), getRemoteIniFile(wa2Link, "\winapp2.ini"))
+        Return getRemoteIniFile(If(ncc, nonccLink, wa2Link))
     End Function
 
-    'Read a file until a specified line and return that line 
-    Public Function getFileDataAtLineNum(address As String, lineNum As Integer) As String
+    ''' <summary>
+    ''' Reads a file until a specified line number 
+    ''' </summary>
+    ''' <param name="path">The path (or online address) of the file</param>
+    ''' <param name="lineNum">The line number to read to</param>
+    ''' <param name="remote">The boolean specifying whether the resource is remote (online)</param>
+    ''' <returns></returns>
+    Public Function getFileDataAtLineNum(path As String, lineNum As Integer, remote As Boolean) As String
         Dim reader As StreamReader = Nothing
+        Dim out As String = ""
         Try
-            reader = New StreamReader(address)
-            Return getTargetLine(reader, lineNum)
+            reader = If(remote, New StreamReader(New WebClient().OpenRead(path)), New StreamReader(path))
+            out = getTargetLine(reader, lineNum)
         Catch ex As Exception
             exc(ex)
-            Return Nothing
+            Return ""
         Finally
             reader.Close()
         End Try
+        Return out
     End Function
 
-    'Load a remote ini file
-    Public Function getRemoteIniFile(address As String, name As String) As iniFile
+    ''' <summary>
+    ''' Returns true if we are able to connect to the internet, otherwise, returns false.
+    ''' </summary>
+    Public Function checkOnline() As Boolean
+        Dim reader As StreamReader
+        Try
+            reader = New StreamReader(New WebClient().OpenRead("http://www.gooogle.com"))
+            Return True
+        Catch ex As Exception
+            Return False
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Returns an iniFile object created using an online resource
+    ''' </summary>
+    ''' ie. GitHub
+    ''' <param name="address">A URL pointing to an online .ini file</param>
+    ''' <returns></returns>
+    Public Function getRemoteIniFile(address As String) As iniFile
         Dim reader As StreamReader = Nothing
         Try
             Dim client As New WebClient
@@ -92,69 +193,59 @@ Module Downloader
             Dim wholeFile As String = reader.ReadToEnd
             wholeFile += Environment.NewLine
             Dim splitFile As String() = wholeFile.Split(CType(Environment.NewLine, Char()))
-            Return New iniFile(splitFile, name)
+            Return New iniFile(splitFile)
         Catch ex As Exception
             exc(ex)
             Return Nothing
         End Try
     End Function
 
-    'Read a file only until a specific line and then return that line
+    ''' <summary>
+    ''' Reads a file only until reaching a specific line and then returns that line as a String
+    ''' </summary>
+    ''' <param name="reader">An open file stream</param>
+    ''' <param name="lineNum">The target line number</param>
+    ''' <returns></returns>
     Private Function getTargetLine(reader As StreamReader, lineNum As Integer) As String
         Dim out As String = ""
         Dim curLine As Integer = 1
-
         While curLine <= lineNum
             out = reader.ReadLine()
             curLine += 1
         End While
         Return out
-
     End Function
 
-    'Load a remote file and toss it into getTargetLine, return the targeted line as a string
-    Public Function getRemoteFileDataAtLineNum(address As String, lineNum As Integer) As String
-        Dim reader As StreamReader = Nothing
-        Try
-            Dim client As New WebClient
-            reader = New StreamReader(client.OpenRead(address))
-            Return getTargetLine(reader, lineNum)
-            reader.Close()
-
-        Catch ex As Exception
-
-            If ex.Message.StartsWith("The remote name could not be resolved") Then
-                Console.WriteLine("Error: Could not establish connection to " & address)
-                Console.WriteLine("Please check your internet connection settings and try again. If you feel this is a bug, please report it on GitHub.")
-                Console.WriteLine()
-            Else
-                exc(ex)
-            End If
-            Return ""
-        End Try
-    End Function
-
-    'Handle a call to download a file from an external module
+    ''' <summary>
+    ''' Handles a request to download a file from outside the module
+    ''' </summary>
+    ''' <param name="dir">The directory to which the file should be downloaded</param>
+    ''' <param name="name">The name with which to save the file</param>
+    ''' <param name="link">The URL to download from</param>
+    ''' <param name="prompt">Boolean specifying whether or not the user should be asked to overwrite the file should it exist</param>
     Public Sub remoteDownload(dir As String, name As String, link As String, prompt As Boolean)
         downloadFile.dir = dir
         downloadFile.name = name
         download(link, prompt)
     End Sub
 
-    'Download the latest version of winapp2ool.exe and replace the currently running version with it, then launch that new version.
+    ''' <summary>
+    ''' Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.
+    ''' </summary>
     Public Sub autoUpdate()
         downloadFile.dir = Environment.CurrentDirectory
         downloadFile.name = "winapp2ool updated.exe"
+        Dim backupName As String = "winapp2ool v" & currentVersion & ".exe.bak"
         Try
             'Remove any existing backups of this version
-            If File.Exists(Environment.CurrentDirectory & "\winapp2ool v" & currentVersion & ".exe.bak") Then File.Delete(Environment.CurrentDirectory & "\winapp2ool v" & currentVersion & ".exe.bak")
+            If File.Exists(Environment.CurrentDirectory & "\" & backupName) Then File.Delete(Environment.CurrentDirectory & "\" & backupName)
 
             'Remove any old update files that didn't get renamed for whatever reason
             If File.Exists(downloadFile.path) Then File.Delete(downloadFile.path)
             download(toolLink, False)
 
             'Rename the old executable
-            File.Move("winapp2ool.exe", "winapp2ool v" & currentVersion & ".exe.bak")
+            File.Move("winapp2ool.exe", backupName)
 
             'Rename the new executable
             File.Move("winapp2ool updated.exe", "winapp2ool.exe")
@@ -162,42 +253,55 @@ Module Downloader
             'Start the new executable and exit the current one
             System.Diagnostics.Process.Start(Environment.CurrentDirectory & "\winapp2ool.exe")
             Environment.Exit(0)
-
         Catch ex As Exception
             exc(ex)
         End Try
     End Sub
 
+    ''' <summary>
+    ''' Prompts the user to rename or overwrite a file if necessary before downloading.
+    ''' </summary>
+    ''' <param name="link">The URL to be downloaded from</param>
+    ''' <param name="prompt">The boolean indicating whether or not the user should be prompted to rename the file should it exist already.</param>
     Private Sub download(link As String, prompt As Boolean)
-
         'Remember the initial given name
         Dim givenName As String = downloadFile.name
 
         ' Don't try to download to a directory that doesn't exist
         If Not Directory.Exists(downloadFile.dir) Then Directory.CreateDirectory(downloadFile.dir)
 
-        If prompt Then
-            If File.Exists(downloadFile.path) And Not suppressOutput Then
-                Console.WriteLine(downloadFile.name & " already exists in the target directory.")
-                Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
-                Dim nfilename As String = Console.ReadLine()
-                If nfilename.Trim <> "" Then downloadFile.name = nfilename
-            End If
+        'If the file exists and we're prompting or overwrite, do that.
+        If prompt And File.Exists(downloadFile.path) And Not suppressOutput Then
+            cwl(downloadFile.name & " already exists in the target directory.")
+            Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
+            Dim nfilename As String = Console.ReadLine()
+            If nfilename.Trim <> "" Then downloadFile.name = nfilename
         End If
 
         cwl("Downloading " & givenName & "...")
+        Dim success As Boolean = dlFile(link, downloadFile.path)
 
-        'Preform the actual download
+        'Print the results to the user
+        cwl("Download " & If(success, "Complete.", "Failed."))
+        cwl(If(success, "Downloaded ", "Unable to download " & downloadFile.name & " to " & downloadFile.dir))
+        menuTopper = "Download " & If(success, "", "in") & "complete: " & downloadFile.name
+        If Not success Then Console.ReadLine()
+    End Sub
+
+    ''' <summary>
+    ''' Performs the download, returns a boolean indicating the success of the download.
+    ''' </summary>
+    ''' <param name="link">The URL to be downloaded from</param>
+    ''' <param name="path">The file path to be saved to</param>
+    ''' <returns></returns>
+    Private Function dlFile(link As String, path As String) As Boolean
         Try
             Dim dl As New WebClient
-            dl.DownloadFile(New Uri(link), downloadFile.path)
+            dl.DownloadFile(New Uri(link), path)
+            Return True
         Catch ex As Exception
             exc(ex)
-            Console.ReadKey()
+            Return False
         End Try
-
-        cwl("Download complete.")
-        cwl("Downloaded " & downloadFile.name & " to " & downloadFile.dir)
-        menuTopper = "Download complete: " & downloadFile.name
-    End Sub
+    End Function
 End Module

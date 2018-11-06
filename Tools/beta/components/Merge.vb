@@ -1,6 +1,25 @@
-﻿Option Strict On
+﻿'    Copyright (C) 2018 Robbie Ward
+' 
+'    This file is a part of Winapp2ool
+' 
+'    Winapp2ool is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    Winap2ool is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+'
+'    You should have received a copy of the GNU General Public License
+'    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+Option Strict On
 Imports System.IO
 
+''' <summary>
+''' A module that facilitates the merging of two user defined iniFile objects
+''' </summary>
 Module Merge
 
     'File handlers
@@ -14,7 +33,13 @@ Module Merge
     'Boolean module parameters
     Dim mergeMode As Boolean = True
 
-    'Return the default parameter states to the command line handler
+    ''' <summary>
+    ''' Initializes the default module settings and returns references to them to the calling function
+    ''' </summary>
+    ''' <param name="firstFile">The winapp2.ini file</param>
+    ''' <param name="secondFile">The file to be merged</param>
+    ''' <param name="thirdFile">The output file</param>
+    ''' <param name="mm">The boolean representing the mergemode</param>
     Public Sub initMergeParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, ByRef thirdFile As iniFile, ByRef mm As Boolean)
         initDefaultSettings()
         firstFile = winappFile
@@ -23,7 +48,13 @@ Module Merge
         mm = mergeMode
     End Sub
 
-    'Handle commands from command line ans initalize the merger
+    ''' <summary>
+    ''' Merges two iniFiles from outside the module
+    ''' </summary>
+    ''' <param name="firstFile">The winapp2.ini file</param>
+    ''' <param name="secondFile">The file to be merged</param>
+    ''' <param name="thirdFile">The output file</param>
+    ''' <param name="mm">The boolean representing the mergemode</param>
     Public Sub remoteMerge(firstFile As iniFile, secondFile As iniFile, thirdFile As iniFile, mm As Boolean)
         winappFile = firstFile
         mergeFile = secondFile
@@ -32,11 +63,17 @@ Module Merge
         initMerge()
     End Sub
 
+    ''' <summary>
+    ''' Resets the settings and informs the user
+    ''' </summary>
     Private Sub resetSettings()
         initDefaultSettings()
         menuTopper = "Merge settings have been reset to their defaults"
     End Sub
 
+    ''' <summary>
+    ''' Restores the default state of the module's parameters
+    ''' </summary>
     Private Sub initDefaultSettings()
         winappFile.resetParams()
         mergeFile.resetParams()
@@ -44,6 +81,9 @@ Module Merge
         settingsChanged = False
     End Sub
 
+    ''' <summary>
+    ''' Prints the main menu to the user
+    ''' </summary>
     Private Sub printMenu()
         printMenuTop({"Merge the contents of two ini files, while either replacing (default) or removing sections with the same name."}, True)
         printMenuOpt("Run (default)", "Merge the two ini files")
@@ -67,6 +107,9 @@ Module Merge
         printMenuLine(menuStr02)
     End Sub
 
+    ''' <summary>
+    ''' The main event loop for the merge program
+    ''' </summary>
     Public Sub main()
         initMenu("Merge", 35)
         mergeMode = True
@@ -76,125 +119,117 @@ Module Merge
             Console.WriteLine()
             Console.Write(promptStr)
             Dim input As String = Console.ReadLine
-            Select Case input
-                Case "0"
-                    exitCode = True
-                Case "1", ""
-                    If mergeFile.name <> "" Then
-                        initMerge()
-                    Else
-                        menuTopper = "You must select a file to merge"
-                    End If
-                Case "2"
-                    mergeFile.name = "Removed entries.ini"
-                    settingsChanged = True
-                    menuTopper = "Merge filename set"
-                Case "3"
-                    mergeFile.name = "Custom.ini"
-                    settingsChanged = True
-                    menuTopper = "Merge filename set"
-                Case "4"
-                    changeFileParams(winappFile, settingsChanged)
-                Case "5"
-                    changeFileParams(mergeFile, settingsChanged)
-                Case "6"
-                    changeFileParams(outputFile, settingsChanged)
-                Case "7"
-                    toggleSettingParam(mergeMode, "Merge Mode ", settingsChanged)
-                Case "8"
-                    If settingsChanged Then
-                        resetSettings()
-                    Else
-                        menuTopper = invInpStr
-                    End If
-                Case Else
-                    menuTopper = invInpStr
-            End Select
+            handleMenuInput(input)
         End While
         revertMenu()
     End Sub
 
+    ''' <summary>
+    ''' Processes the user's input and acts accordingly based on the state of the program
+    ''' </summary>
+    ''' <param name="input"></param>
+    Private Sub handleMenuInput(input As String)
+        Select Case True
+            Case input = "0"
+                exitCode = True
+            Case input = "1" Or input = ""
+                If Not denyActionWithTopper(mergeFile.name = "", "You must select a file to merge") Then initMerge()
+            Case input = "2"
+                changeMergeName("Removed entries.ini")
+            Case input = "3"
+                changeMergeName("Custom.ini")
+            Case input = "4"
+                changeFileParams(winappFile, settingsChanged)
+            Case input = "5"
+                changeFileParams(mergeFile, settingsChanged)
+            Case input = "6"
+                changeFileParams(outputFile, settingsChanged)
+            Case input = "7"
+                toggleSettingParam(mergeMode, "Merge Mode ", settingsChanged)
+            Case input = "8" And settingsChanged
+                resetSettings()
+            Case Else
+                menuTopper = invInpStr
+        End Select
+    End Sub
+
+    ''' <summary>
+    ''' Changes the merge file's name
+    ''' </summary>
+    ''' <param name="newName">the new name for the merge file</param>
+    Private Sub changeMergeName(newName As String)
+        mergeFile.name = newName
+        settingsChanged = True
+        menuTopper = "Merge filename set"
+    End Sub
+
+    ''' <summary>
+    ''' Validates iniFiles and begins the merging process
+    ''' </summary>
     Public Sub initMerge()
         Console.Clear()
-        'Initialize our inifiles
         winappFile.validate()
         If exitCode Then Exit Sub
         mergeFile.validate()
         If exitCode Then Exit Sub
-
-        'Merge them
         merge()
-
-        'Flip our menu boolean
         revertMenu()
     End Sub
 
+    ''' <summary>
+    ''' Conducts the merger of our two iniFiles
+    ''' </summary>
     Private Sub merge()
         Dim out As String = ""
 
-        'Process the merge mode and update the inifiles accordingly
+        'Joins the mergeFile into the winappFile
         processMergeMode(winappFile, mergeFile)
 
-        'Parse our two files
         Dim tmp As New winapp2file(winappFile)
         Dim tmp2 As New winapp2file(mergeFile)
 
         printMenuLine(bmenu("Merging " & winappFile.name & " with " & mergeFile.name, "c"))
 
-        Try
+        'Add the entries from the second file to their respective sections in the first file
+        For i As Integer = 0 To tmp.winapp2entries.Count - 1
+            tmp.winapp2entries(i).AddRange(tmp2.winapp2entries(i))
+        Next
 
-            'Add the entries from the second file to their respective sections in the first file
-            tmp.cEntriesW.AddRange(tmp2.cEntriesW)
-            tmp.fxEntriesW.AddRange(tmp2.fxEntriesW)
-            tmp.tbEntriesW.AddRange(tmp2.tbEntriesW)
-            tmp.mEntriesW.AddRange(tmp2.mEntriesW)
+        'Rebuild the internal changes
+        tmp.rebuildToIniFiles()
 
-            'Rebuild the internal changes
-            tmp.rebuildToIniFiles()
+        'Sort the merged sections 
+        For Each section In tmp.entrySections
+            section.sortSections(replaceAndSort(section.getSectionNamesAsList, "-", "  "))
+        Next
 
-            'Sort the merged sections 
-            sortIniFile(tmp.cEntries, replaceAndSort(tmp.cEntries.getSectionNamesAsList, "-", "  "))
-            sortIniFile(tmp.fxEntries, replaceAndSort(tmp.fxEntries.getSectionNamesAsList, "-", "  "))
-            sortIniFile(tmp.tbEntries, replaceAndSort(tmp.tbEntries.getSectionNamesAsList, "-", "  "))
-            sortIniFile(tmp.mEntries, replaceAndSort(tmp.mEntries.getSectionNamesAsList, "-", "  "))
-
-            Dim file As New StreamWriter(outputFile.path, False)
-
-            'write the merged winapp2string to file
-            out += tmp.winapp2string
-            file.Write(out)
-            file.Close()
-        Catch ex As Exception
-            exc(ex)
-        End Try
+        'write the merged winapp2string to file
+        out += tmp.winapp2string
+        outputFile.overwriteToFile(out)
 
         printMenuLine(bmenu("Finished merging files. Press any key to return to the menu", "c"))
         If Not suppressOutput Then Console.ReadKey()
     End Sub
 
+    ''' <summary>
+    ''' Performs conflict resolution for the merge process
+    ''' </summary>
+    ''' <param name="first">The iniFile to be merged into</param>
+    ''' <param name="second">The file to merge</param>
     Private Sub processMergeMode(ByRef first As iniFile, ByRef second As iniFile)
         Dim removeList As New List(Of String)
-
-        'If mergemode is true, replace any matches
-        If mergeMode Then
-            For Each section In second.sections.Keys
-                If first.sections.Keys.Contains(section) Then
+        For Each section In second.sections.Keys
+            If first.sections.Keys.Contains(section) Then
+                If mergeMode Then
+                    'If mergemode is true, replace the match
                     first.sections.Item(section) = second.sections.Item(section)
-                    removeList.Add(section)
-                End If
-            Next
-            For Each section In removeList
-                second.sections.Remove(section)
-            Next
-        Else
-            'if mergemode is false, remove any matches
-            For Each section In second.sections.Keys
-                If first.sections.Keys.Contains(section) Then
+                Else
+                    'Otherwise, remove the match
                     first.sections.Remove(section)
-                    removeList.Add(section)
                 End If
-            Next
-        End If
+                removeList.Add(section)
+            End If
+        Next
 
         'Remove any processed sections from the second file so that only entries to add remain 
         For Each section In removeList
