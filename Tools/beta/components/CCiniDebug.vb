@@ -21,19 +21,15 @@ Imports System.IO
 ''' A module whose purpose is to perform some housekeeping on ccleaner.ini to help clean up after winapp2.ini
 ''' </summary>
 Module CCiniDebug
-
     'File Handlers
     Dim winappFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
     Dim ccFile As iniFile = New iniFile(Environment.CurrentDirectory, "ccleaner.ini")
     Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner-debugged.ini")
-
-    'Menu vars
-    Dim settingsChanged As Boolean = False
-
-    'Boolean module parameters
+    'Module parameters
     Dim pruneFile As Boolean = True
     Dim saveFile As Boolean = True
     Dim sortFile As Boolean = True
+    Dim settingsChanged As Boolean = False
 
     ''' <summary>
     ''' Restores the default state of the module's parameters
@@ -89,80 +85,49 @@ Module CCiniDebug
     ''' <summary>
     ''' Prints the CCiniDebug menu to the user
     ''' </summary>
-    Private Sub printMenu()
-        printMenuTop({"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"}, True)
-        printMenuOpt("Run (default)", "Debug ccleaner.ini")
-
-        printBlankMenuLine()
-        printMenuOpt("Toggle Pruning", enStr(pruneFile) & " removal of dead winapp2.ini settings")
-        printMenuOpt("Toggle Saving", enStr(saveFile) & " automatic saving of changes made by CCiniDebug")
-        printMenuOpt("Toggle Sorting", enStr(sortFile) & " alphabetical sorting of ccleaner.ini")
-
-        printBlankMenuLine()
-        printMenuOpt("File Chooser (ccleaner.ini)", "Choose a new ccleaner.ini name or location")
-        printIf(pruneFile, "opt", "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or location")
-        printIf(saveFile, "opt", "File Chooser (save)", "Change where CCiniDebug saves its changes")
-
-        printBlankMenuLine()
-        printMenuLine("Current ccleaner.ini:  " & replDir(ccFile.path), "l")
-        printIf(pruneFile, "line", "Current winapp2.ini:   " & replDir(winappFile.path), "l")
-        printIf(saveFile, "line", "Current save location: " & replDir(outputFile.path), "l")
-        printIf(settingsChanged, "reset", "CCiniDebug", "")
-        printMenuLine(menuStr02)
-    End Sub
-
-    ''' <summary>
-    ''' Resets the module settings to their defaults
-    ''' </summary>
-    Private Sub resetSettings()
-        initDefaultSettings()
-        menuTopper = "CCiniDebug settings have been reset to their defaults"
-    End Sub
-
-    ''' <summary>
-    ''' The main event loop for the program
-    ''' </summary>
-    Public Sub main()
-        initMenu("CCiniDebug", 35)
-        Do Until exitCode
-            Console.Clear()
-            printMenu()
-            Console.WriteLine()
-            Console.Write(promptStr)
-            handleUserInput(Console.ReadLine)
-        Loop
-        revertMenu()
+    Public Sub printMenu()
+        printMenuTop({"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"})
+        print(1, "Run (default)", "Debug ccleaner.ini", trailingBlank:=True)
+        print(1, "Toggle Pruning", $"{enStr(pruneFile)} removal of dead winapp2.ini settings")
+        print(1, "Toggle Saving", $"{enStr(saveFile)} automatic saving of changes made by CCiniDebug")
+        print(1, "Toggle Sorting", $"{enStr(sortFile)} alphabetical sorting of ccleaner.ini", trailingBlank:=True)
+        print(1, "File Chooser (ccleaner.ini)", "Choose a new ccleaner.ini name or location")
+        print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or location", pruneFile, trailingBlank:=Not saveFile)
+        print(1, "File Chooser (save)", "Change where CCiniDebug saves its changes", saveFile, trailingBlank:=True)
+        print(0, $"Current ccleaner.ini:  {replDir(ccFile.path)}")
+        print(0, $"Current winapp2.ini:   {replDir(winappFile.path)}", cond:=pruneFile)
+        print(0, $"Current save location: {replDir(outputFile.path)}", cond:=saveFile, closeMenu:=Not settingsChanged)
+        print(2, "CCiniDebug", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
     ''' <summary>
     ''' Handles the user's input from the menu
     ''' </summary>
     ''' <param name="input">The string containing the user's input</param>
-    Private Sub handleUserInput(input As String)
+    Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                Console.WriteLine("Returning to winapp2ool menu...")
-                exitCode = True
+                exitModule("CCiniDebug")
             Case (input = "1" Or input = "") And (pruneFile Or saveFile Or sortFile)
                 initDebug()
             Case input = "2"
-                toggleSettingParam(pruneFile, "Pruning ", settingsChanged)
+                toggleSettingParam(pruneFile, "Pruning", settingsChanged)
             Case input = "3"
-                toggleSettingParam(saveFile, "Autosaving ", settingsChanged)
+                toggleSettingParam(saveFile, "Autosaving", settingsChanged)
             Case input = "4"
-                toggleSettingParam(sortFile, "Sorting ", settingsChanged)
+                toggleSettingParam(sortFile, "Sorting", settingsChanged)
             Case input = "5"
                 changeFileParams(ccFile, settingsChanged)
             Case input = "6" And pruneFile
                 changeFileParams(winappFile, settingsChanged)
-            Case (input = "6" And Not pruneFile And saveFile) Or (input = "7" And pruneFile And saveFile)
+            Case saveFile And ((input = "6" And Not pruneFile) Or (input = "7" And pruneFile))
                 changeFileParams(outputFile, settingsChanged)
-            Case (input = "6" And Not pruneFile And Not saveFile And settingsChanged) Or (input = "7" And ((pruneFile Or saveFile) And Not (pruneFile And saveFile) And settingsChanged)) Or input = "8" And pruneFile And saveFile And settingsChanged
-                resetSettings()
+            Case settingsChanged And ((input = "6" And Not (pruneFile Or saveFile)) Or (input = "7" And (pruneFile Xor saveFile)) Or (input = "8" And pruneFile And saveFile))
+                resetModuleSettings("CCiniDebug", AddressOf initDefaultSettings)
             Case Not (pruneFile Or saveFile Or sortFile)
-                menuTopper = "Please enable at least one option"
+                menuHeaderText = "Please enable at least one option"
             Case Else
-                menuTopper = invInpStr
+                menuHeaderText = invInpStr
         End Select
     End Sub
 
@@ -170,44 +135,17 @@ Module CCiniDebug
     ''' Performs the debugging process
     ''' </summary>
     Private Sub initDebug()
-        Console.Clear()
         ccFile.validate()
-        If exitCode Then Exit Sub
+        If pruneFile Then winappFile.validate()
+        If pendingExit() Then Exit Sub
         Console.Clear()
-
-        'Load winapp2.ini and use it to prune ccleaner.ini of stale entries
-        If pruneFile Then
-            winappFile.validate()
-            If exitCode Then Exit Sub
-            Console.Clear()
-            printMenuLine(tmenu("CCiniDebug Results"))
-            printMenuLine(menuStr03)
-            printMenuLine("Pruning...", "c")
-            printBlankMenuLine()
-            prune(ccFile.sections("Options"))
-            printBlankMenuLine()
-        Else
-            printMenuLine(tmenu("CCiniDebug Results"))
-            printMenuLine(menuStr03)
-        End If
-        'Sort the keys
-        If sortFile Then
-            printMenuLine("Sorting..", "c")
-            sortCC()
-            printMenuLine("Sorting complete.", "l")
-            printBlankMenuLine()
-        End If
-        'Write ccleaner.ini back to file
-        If saveFile Then
-            outputFile.overwriteToFile(ccFile.toString)
-            printMenuLine(outputFile.name & " saved. " & anyKeyStr, "c")
-        Else
-            printMenuLine("Analysis complete. " & anyKeyStr, "c")
-        End If
-        printMenuLine(menuStr02)
+        printMenuLine(tmenu("CCiniDebug Results"))
+        printMenuLine(menuStr03)
+        If pruneFile Then prune(ccFile.sections("Options"))
+        If sortFile Then sortCC()
+        If saveFile Then outputFile.overwriteToFile(ccFile.toString)
+        print(0, $"{If(saveFile, $"{outputFile.name} saved", "Analysis complete")}. {anyKeyStr}", isCentered:=True, closeMenu:=True)
         If Not suppressOutput Then Console.ReadKey()
-        'Flip the exitCode boolean
-        revertMenu()
     End Sub
 
     ''' <summary>
@@ -215,30 +153,31 @@ Module CCiniDebug
     ''' </summary>
     ''' <param name="optionsSec">The iniSection object containing the Options from ccleaner.ini</param>
     Private Sub prune(ByRef optionsSec As iniSection)
-        printMenuLine("Scanning " & ccFile.name & " for settings left over from removed winapp2.ini entries", "l")
-        printBlankMenuLine()
-
-        'collect the keys we must remove
+        print(0, $"Scanning {ccFile.name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
         Dim tbTrimmed As New List(Of Integer)
-
         For i As Integer = 0 To optionsSec.keys.Count - 1
             Dim optionStr As String = optionsSec.keys.Values(i).toString
-            'only operate on (app) keys belonging to winapp2.ini
+            'Only operate on (app) keys belonging to winapp2.ini
             If optionStr.StartsWith("(App)") And optionStr.Contains("*") Then
-                optionStr = optionStr.Replace("(App)", "")
-                optionStr = optionStr.Replace("=True", "")
-                optionStr = optionStr.Replace("=False", "")
+                trimStrs({"(App)", "=True", "=False"}, optionStr)
                 If Not winappFile.sections.ContainsKey(optionStr) Then
-                    printMenuLine(optionsSec.keys.Values(i).lineString, "l")
+                    printMenuLine(optionsSec.keys.Values(i).toString)
                     tbTrimmed.Add(optionsSec.keys.Keys(i))
                 End If
             End If
         Next
-        printBlankMenuLine()
-        printMenuLine(tbTrimmed.Count & " orphaned settings detected", "l")
-        'Remove the keys
-        For Each key In tbTrimmed
-            optionsSec.keys.Remove(key)
+        print(0, $"{tbTrimmed.Count} orphaned settings detected", leadingBlank:=True, trailingBlank:=True)
+        optionsSec.removeKeys(tbTrimmed)
+    End Sub
+
+    ''' <summary>
+    ''' Removes any instance of the provided strings from a string and returns what's left
+    ''' </summary>
+    ''' <param name="toRemove">The array of strings to be removed</param>
+    ''' <param name="inputTxt">The given string to be modified</param>
+    Private Sub trimStrs(toRemove As String(), ByRef inputTxt As String)
+        For Each param In toRemove
+            inputTxt = inputTxt.Replace(param, "")
         Next
     End Sub
 

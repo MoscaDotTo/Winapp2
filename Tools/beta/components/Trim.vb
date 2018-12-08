@@ -23,16 +23,16 @@ Imports System.IO
 '''    to the user.
 '''   </summary>
 Public Module Trim
-
+    'File handlers
     Dim winappFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
     Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
     Dim winVer As Double
+    'Module parameters
     Dim detChrome As New List(Of String) _
         From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe", "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe",
                            "%LocalAppData%\Google\Chrome\Application\chrome.exe", "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe", "%ProgramFiles%\SRWare Iron\iron.exe",
                            "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe", "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
                            "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
-
     Dim settingsChanged As Boolean
     Dim download As Boolean = False
     Dim downloadNCC As Boolean = False
@@ -80,77 +80,43 @@ Public Module Trim
     End Sub
 
     ''' <summary>
-    ''' Resets the module settings
-    ''' </summary>
-    Private Sub resetSettings()
-        initDefaultSettings()
-        menuTopper = "Trim settings have been reset to their default state"
-    End Sub
-
-    ''' <summary>
     ''' Prints the main menu to the user
     ''' </summary>
-    Private Sub printmenu()
-        printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."}, True)
-        printMenuOpt("Run (default)", "Trim winapp2.ini")
-        printBlankMenuLine()
-        printMenuOpt("Toggle Download", enStr(download) & " using the latest winapp2.ini as the input file")
-        printMenuOpt("Toggle Download (Non-CCleaner)", enStr(downloadNCC) & " using the latest Non-CCleaner winapp2.ini as the input file")
-        printIf(Not (download Or downloadNCC), "opt", "File Chooser (winapp2.ini)", "Change the winapp2.ini name or location")
-        printBlankMenuLine()
-        printMenuOpt("File Chooser (save)", "Change the save file name or location")
-        printBlankMenuLine()
-        printMenuLine("Current winapp2.ini location: " & If(download, If(downloadNCC, "Online (Non-CCleaner)", "Online"), replDir(winappFile.path)), "l")
-        printMenuLine("Current save location: " & replDir(outputFile.path), "l")
-        printIf(settingsChanged, "reset", "Trim", "")
-        printMenuLine(menuStr02)
-    End Sub
-
-    ''' <summary>
-    ''' The main event loop for the trimmer
-    ''' </summary>
-    Public Sub main()
-        initMenu("Trim", 35)
-        Do Until exitCode
-            Console.Clear()
-            printmenu()
-            Console.WriteLine()
-            Console.Write(promptStr)
-            handleUserInput(Console.ReadLine())
-        Loop
-        revertMenu()
+    Public Sub printmenu()
+        printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
+        print(1, "Run (default)", "Trim winapp2.ini")
+        print(1, "Toggle Download", $"{enStr(download)} using the latest winapp2.ini as the input file", Not isOffline, True)
+        print(1, "Toggle Download (Non-CCleaner)", $"{enStr(downloadNCC)} using the latest Non-CCleaner winapp2.ini as the input file", download, trailingBlank:=True)
+        print(1, "File Chooser (winapp2.ini)", "Change the winapp2.ini name or location", Not (download Or downloadNCC), isOffline, True)
+        print(1, "File Chooser (save)", "Change the save file name or location", trailingBlank:=True)
+        print(0, $"Current winapp2.ini location: {If(download, GetNameFromDL(download, downloadNCC), replDir(winappFile.path))}")
+        print(0, $"Current save location: {replDir(outputFile.path)}", closeMenu:=Not settingsChanged)
+        print(2, "Trim", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
     ''' <summary>
     ''' Handles the user input from the menu
     ''' </summary>
     ''' <param name="input">The String containing the user's input</param>
-    Private Sub handleUserInput(input As String)
-        areDownloading = download Or downloadNCC
+    Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                Console.WriteLine("Returning to winapp2ool menu...")
-                exitCode = True
+                exitModule("Trim")
             Case (input = "1" Or input = "")
                 initTrim()
-            Case input = "2"
-                If Not denySettingOffline() Then
-                    toggleSettingParam(download, "Downloading ", settingsChanged)
-                    If (Not download) And downloadNCC Then toggleSettingParam(downloadNCC, "Downloading ", settingsChanged)
-                End If
-            Case input = "3"
-                If Not denySettingOffline() Then
-                    If Not download Then toggleSettingParam(download, "Downloading ", settingsChanged)
-                    toggleSettingParam(downloadNCC, "Downloading ", settingsChanged)
-                End If
-            Case input = "4" And Not areDownloading
+            Case input = "2" And Not isOffline
+                toggleDownload(download, settingsChanged)
+                If downloadNCC And Not download Then downloadNCC = False
+            Case input = "3" And download
+                toggleDownload(downloadNCC, settingsChanged)
+            Case (input = "3" And Not (download Or downloadNCC) And Not isOffline) Or (input = "2" And isOffline)
                 changeFileParams(winappFile, settingsChanged)
-            Case (input = "4" And areDownloading) Or (input = "5" And Not areDownloading)
+            Case (input = "4" And Not isOffline) Or (input = "3" And isOffline)
                 changeFileParams(outputFile, settingsChanged)
-            Case (input = "5" And settingsChanged And areDownloading) Or (input = "6" And settingsChanged And Not areDownloading)
-                resetSettings()
+            Case (input = "5" Or (input = "4" And isOffline)) And settingsChanged
+                resetModuleSettings("Trim", AddressOf initDefaultSettings)
             Case Else
-                menuTopper = invInpStr
+                menuHeaderText = invInpStr
         End Select
     End Sub
 
@@ -158,16 +124,11 @@ Public Module Trim
     ''' Initiates the trim after validating our ini files
     ''' </summary>
     Private Sub initTrim()
-        If Not download Then
-            winappFile.validate()
-            If exitCode Then Exit Sub
-            Dim winapp2 As New winapp2file(winappFile)
-            trim(winapp2)
-        Else
-            Dim link As String = If(downloadNCC, nonccLink, wa2Link)
-            initDownloadedTrim(link)
-        End If
-        menuTopper = "Trim Complete"
+        winappFile.validate()
+        If pendingExit() Then Exit Sub
+        Dim winapp2 As winapp2file = If(Not download, New winapp2file(winappFile), New winapp2file(getRemoteIniFile(If(downloadNCC, nonccLink, wa2Link))))
+        trim(winapp2)
+        menuHeaderText = "Trim Complete"
         Console.Clear()
     End Sub
 
@@ -185,38 +146,45 @@ Public Module Trim
     ''' <param name="winapp2">A winapp2.ini file</param>
     Private Sub trim(winapp2 As winapp2file)
         Console.Clear()
-        printMenuLine("Trimming...", "l")
+        print(0, tmenu("Trimming... Please wait, this may take a moment..."), closeMenu:=True)
         'Save our inital # of entries
         Dim entryCountBeforeTrim As Integer = winapp2.count
-
         'Process our entries
         For Each entryList In winapp2.winapp2entries
             processEntryList(entryList)
         Next
-
         'Update the internal inifile objects
         winapp2.rebuildToIniFiles()
-
         'Sort the file so that entries are written back alphabetically
         winapp2.sortInneriniFiles()
-
         'Print out the results from the trim
-        printMenuLine("...done.", "l")
+        print(0, tmenu("Finished!"), closeMenu:=True)
         Console.Clear()
-        printMenuLine(tmenu("Trim Complete"))
-        printMenuLine(menuStr03)
-        printMenuLine("Results", "c")
-        printBlankMenuLine()
-        printMenuLine("Number of entries before trimming: " & entryCountBeforeTrim, "l")
-        printMenuLine("Number of entries after trimming: " & winapp2.count, "l")
-        printBlankMenuLine()
-        printMenuLine("Press any key to return to the winapp2ool menu", "l")
-        printMenuLine(menuStr02)
-
-        'Write our rebuilt ini back to disk
+        print(0, tmenu("Trim Complete"))
+        print(0, menuStr03)
+        print(0, "Entry Count", isCentered:=True, trailingBlank:=True)
+        print(0, $"Initial: {entryCountBeforeTrim}")
+        print(0, $"Trimmed: {winapp2.count}")
+        Dim difference As Integer = entryCountBeforeTrim - winapp2.count
+        print(0, $"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
+        print(0, anyKeyStr, leadingBlank:=True, closeMenu:=True)
         outputFile.overwriteToFile(winapp2.winapp2string)
         If Not suppressOutput Then Console.ReadKey()
     End Sub
+
+    ''' <summary>
+    ''' Evaluates a list of keys to observe whether they exist on the current machine
+    ''' </summary>
+    ''' <param name="keyList">The list of iniKeys to query</param>
+    ''' <param name="chkExist">The function that evaluates that keyType's parameters</param>
+    ''' <returns></returns>
+    Private Function checkExistence(ByRef keyList As List(Of iniKey), chkExist As Func(Of String, Boolean)) As Boolean
+        If keyList.Count = 0 Then Return False
+        For Each key In keyList
+            If chkExist(key.value) Then Return True
+        Next
+        Return False
+    End Function
 
     ''' <summary>
     ''' Returns true if an entry's detection criteria is matched by the system, false otherwise.
@@ -226,34 +194,20 @@ Public Module Trim
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
         Dim hasDetOS As Boolean = Not entry.detectOS.Count = 0
         Dim hasMetDetOS As Boolean = False
-
         'Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         If hasDetOS Then
             If winVer = Nothing Then winVer = getWinVer()
-            hasMetDetOS = detOSCheck(entry.detectOS(0).value)
+            hasMetDetOS = checkExistence(entry.detectOS, AddressOf checkDetOS)
             If Not hasMetDetOS Then Return False
         End If
-
-        'Process our SpecialDetect if we have one
-        For Each key In entry.specialDetect
-            If checkSpecialDetects(key) Then Return True
-        Next
-
-        'Process our Detects
-        For Each key In entry.detects
-            If checkRegExist(key.value) Then Return True
-        Next
-
-        'Process our DetectFiles
-        For Each key In entry.detectFiles
-            If checkFileExist(key.value) Then Return True
-        Next
-
+        'Process any other Detect criteria we have
+        If checkExistence(entry.specialDetect, AddressOf checkSpecialDetects) Then Return True
+        If checkExistence(entry.detects, AddressOf checkRegExist) Then Return True
+        If checkExistence(entry.detectFiles, AddressOf checkFileExist) Then Return True
         'Return true for the case where we have only a DetectOS and we meet its criteria 
         If hasMetDetOS And entry.specialDetect.Count = 0 And entry.detectFiles.Count = 0 And entry.detects.Count = 0 Then Return True
         'Return true for the case where we have no valid detect criteria
         If entry.detectOS.Count + entry.detectFiles.Count + entry.detects.Count + entry.specialDetect.Count = 0 Then Return True
-
         Return False
     End Function
 
@@ -274,8 +228,8 @@ Public Module Trim
     ''' </summary>
     ''' <param name="key">A SpecialDetect format iniKey</param>
     ''' <returns></returns>
-    Private Function checkSpecialDetects(ByVal key As iniKey) As Boolean
-        Select Case key.value
+    Private Function checkSpecialDetects(ByVal key As String) As Boolean
+        Select Case key
             Case "DET_CHROME"
                 For Each path As String In detChrome
                     If checkExist(path) Then Return True
@@ -294,7 +248,7 @@ Public Module Trim
     ''' <summary>
     ''' Handles passing off checks for the DET_CHROME case
     ''' </summary>
-    ''' <param name="key"></param>
+    ''' <param name="key">An individual Detect parameter for the DET_CHROME case</param>
     ''' <returns></returns>
     Private Function checkExist(key As String) As Boolean
         Return If(key.StartsWith("HK"), checkRegExist(key), checkFileExist(key))
@@ -303,11 +257,11 @@ Public Module Trim
     ''' <summary>
     ''' Returns True if a given Detect path exists in the system registry, false otherwise.
     ''' </summary>
-    ''' <param name="key">A registry path from a Detect key</param>
+    ''' <param name="path">A registry path from a Detect key</param>
     ''' <returns></returns>
-    Private Function checkRegExist(key As String) As Boolean
-        Dim dir As String = key
-        Dim root As String = getFirstDir(key)
+    Private Function checkRegExist(path As String) As Boolean
+        Dim dir As String = path
+        Dim root As String = getFirstDir(path)
         Try
             Select Case root
                 Case "HKCU"
@@ -335,14 +289,13 @@ Public Module Trim
     End Function
 
     ''' <summary>
-    ''' Returns Truei f a DetectFile path exists on the system, false otherwise.
+    ''' Returns True if a DetectFile path exists on the system, false otherwise.
     ''' </summary>
     ''' <param name="key">A DetectFile path</param>
     ''' <returns></returns>
     Private Function checkFileExist(key As String) As Boolean
         Dim isProgramFiles As Boolean = False
         Dim dir As String = key
-
         'make sure we get the proper path for environment variables
         If dir.Contains("%") Then
             Dim splitDir As String() = dir.Split(CChar("%"))
@@ -352,19 +305,17 @@ Public Module Trim
                 Case "ProgramFiles"
                     isProgramFiles = True
                 Case "Documents"
-                    envDir = Environment.GetEnvironmentVariable("UserProfile") & "\Documents"
+                    envDir = $"{Environment.GetEnvironmentVariable("UserProfile")}\Documents"
                 Case "CommonAppData"
                     envDir = Environment.GetEnvironmentVariable("ProgramData")
             End Select
             dir = envDir + splitDir(2)
         End If
-
         Try
             'Process wildcards appropriately if we have them 
             If dir.Contains("*") Then
                 Dim exists As Boolean = False
                 exists = expandWildcard(dir)
-
                 'Small contingency for the isProgramFiles case
                 If Not exists And isProgramFiles Then
                     swapDir(dir, key)
@@ -372,10 +323,9 @@ Public Module Trim
                 End If
                 Return exists
             End If
-
-            'check out those file/folder paths
+            'Check out those file/folder paths
             If Directory.Exists(dir) Or File.Exists(dir) Then Return True
-            'if we didn't find it and we're looking in Program Files, check the (x86) directory
+            'If we didn't find it and we're looking in Program Files, check the (x86) directory
             If isProgramFiles Then
                 swapDir(dir, key)
                 Return (Directory.Exists(dir) Or File.Exists(dir))
@@ -403,7 +353,6 @@ Public Module Trim
     ''' <param name="dir">A path containing a wildcard</param>
     ''' <returns></returns>
     Private Function expandWildcard(dir As String) As Boolean
-
         'This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
         Dim possibleDirs As New List(Of String)
         Dim currentPaths As New List(Of String)
@@ -435,11 +384,11 @@ Public Module Trim
                 possibleDirs.Clear()
             Else
                 If currentPaths.Count = 0 Then
-                    currentPaths.Add(pathPart & "\")
+                    currentPaths.Add($"{pathPart}\")
                 Else
                     Dim newCurPaths As New List(Of String)
                     For Each path As String In currentPaths
-                        If Directory.Exists(path & pathPart & "\") Then newCurPaths.Add(path & pathPart & "\")
+                        If Directory.Exists($"{path}{pathPart}\") Then newCurPaths.Add($"{path}{pathPart}\")
                     Next
                     currentPaths = newCurPaths
                 End If
@@ -457,7 +406,7 @@ Public Module Trim
     ''' </summary>
     ''' <param name="value">The DetectOS criteria to be checked</param>
     ''' <returns></returns>
-    Private Function detOSCheck(value As String) As Boolean
+    Private Function checkDetOS(value As String) As Boolean
         Dim splitKey As String() = value.Split(CChar("|"))
         Return If(value.StartsWith("|"), Not winVer > Double.Parse(splitKey(1)), Not winVer < Double.Parse(splitKey(0)))
     End Function

@@ -28,7 +28,7 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="keyList">A list of iniKey objects to parse values from</param>
     ''' <returns></returns>
-    Public Function getValuesFromKeyList(ByVal keyList As List(Of iniKey)) As List(Of String)
+    Public Function getValues(ByVal keyList As List(Of iniKey)) As List(Of String)
         Dim valList As New List(Of String)
         For Each key In keyList
             valList.Add(key.value)
@@ -64,30 +64,30 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="someFile">An iniFile object with user defined path and name parameters</param>
     Public Sub chkFileExist(someFile As iniFile)
+        If pendingExit() Then Exit Sub
         Dim iExitCode As Boolean = False
         While Not File.Exists(someFile.path)
-            If exitCode Then Exit Sub
-            menuTopper = "Error"
+            If pendingExit() Then Exit Sub
+            menuHeaderText = "Error"
             While Not iExitCode
                 Console.Clear()
-                printMenuTop({someFile.name & " does not exist."}, True)
-                printMenuOpt("File Chooser (default)", "Change the file name")
-                printMenuOpt("Directory Chooser", "Change the directory")
-                printMenuLine(menuStr02)
+                printMenuTop({$"{someFile.name} does not exist."})
+                print(1, "File Chooser (default)", "Change the file name")
+                print(1, "Directory Chooser", "Change the directory", closeMenu:=True)
                 Dim input As String = Console.ReadLine
                 Select Case input
                     Case "0"
-                        iExitCode = True
                         exitCode = True
+                        iExitCode = True
                         Exit Sub
                     Case "1", ""
                         fileChooser(someFile)
                     Case "2"
                         dirChooser(someFile.dir)
                     Case Else
-                        menuTopper = invInpStr
+                        menuHeaderText = invInpStr
                 End Select
-                If Not File.Exists(someFile.path) And Not menuTopper = invInpStr Then menuTopper = "Error"
+                If Not File.Exists(someFile.path) And Not menuHeaderText = invInpStr Then menuHeaderText = "Error"
             End While
         End While
     End Sub
@@ -97,17 +97,14 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="dir">A user defined windows directory</param>
     Public Sub chkDirExist(ByRef dir As String)
-        If exitCode Then Exit Sub
-        If exitCode Then Exit Sub
+        If pendingExit() Then Exit Sub
         Dim iExitCode As Boolean = False
-        menuTopper = "Error"
-
+        menuHeaderText = "Error"
         While Not iExitCode
             Console.Clear()
-            printMenuTop({dir & " does not exist."}, True)
-            printMenuOpt("Create Directory", "Create this directory")
-            printMenuOpt("Directory Chooser (default)", "Specify a new directory")
-            printMenuLine(menuStr02)
+            printMenuTop({$"{dir} does not exist."})
+            print(1, "Create Directory", "Create this directory")
+            print(1, "Directory Chooser (default)", "Specify a new directory", closeMenu:=True)
             Dim input As String = Console.ReadLine()
             Select Case input
                 Case "0"
@@ -119,10 +116,10 @@ Public Module iniFileHandler
                 Case "2", ""
                     dirChooser(dir)
                 Case Else
-                    menuTopper = invInpStr
+                    menuHeaderText = invInpStr
             End Select
             'If the directory still doesn't exist and the last input wasn't valid, 
-            If Not Directory.Exists(dir) And Not menuTopper = invInpStr Then menuTopper = "Error"
+            If Not Directory.Exists(dir) And Not menuHeaderText = invInpStr Then menuHeaderText = "Error"
             If Directory.Exists(dir) Then iExitCode = True
         End While
     End Sub
@@ -132,10 +129,10 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="someFile">An iniFile object with user definable parameters</param>
     Public Sub fileChooser(ByRef someFile As iniFile)
-        If exitCode Then Exit Sub
+        If pendingExit() Then Exit Sub
         Console.Clear()
         handleFileChooserChoice(someFile)
-        If exitCode Then Exit Sub
+        If pendingExit() Then Exit Sub
         handleFileChooserConfirm(someFile)
     End Sub
 
@@ -144,16 +141,14 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
     Private Sub handleFileChooserChoice(ByRef someFile As iniFile)
-        menuTopper = "File Chooser"
-        printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"}, True)
-        printIf(someFile.initName <> "", "opt", someFile.initName, "Use the default name")
-        printIf(someFile.secondName <> "", "opt", someFile.secondName, "Use the default rename")
-        printMenuOpt("Directory Chooser", "Choose a new directory")
-        printBlankMenuLine()
-        printMenuLine("Current Directory: " & replDir(someFile.dir), "l")
-        printMenuLine("Current File:      " & someFile.name, "l")
-        printMenuLine(menuStr02)
-        Console.Write("Enter a number, a new file name, or leave blank to continue using '" & someFile.name & "': ")
+        menuHeaderText = "File Chooser"
+        printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"})
+        print(1, someFile.initName, "Use the default name", someFile.initName <> "")
+        print(1, someFile.secondName, "Use the default rename", someFile.secondName <> "")
+        print(1, "Directory Chooser", "Choose a new directory", trailingBlank:=True)
+        print(0, $"Current Directory: {replDir(someFile.dir)}")
+        print(0, $"Current File:      {someFile.name}", closeMenu:=True)
+        Console.Write($"{Environment.NewLine} Enter a number, a new file name, or leave blank to continue using '{someFile.name}:'")
         Dim input As String = Console.ReadLine
         Select Case True
             Case input = "0"
@@ -177,20 +172,17 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
     Public Sub handleFileChooserConfirm(ByRef someFile As iniFile)
-        menuTopper = "File Chooser"
+        menuHeaderText = "File Chooser"
         Dim iExitCode As Boolean = False
         Do Until iExitCode
             Console.Clear()
-            printMenuTop({"Confirm your settings or return to the options to change them."}, True)
-            printMenuOpt("File Chooser", "Change the file name")
-            printMenuOpt("Directory Chooser", "Change the directory")
-            printMenuOpt("Confirm (default)", "Save changes")
-            printBlankMenuLine()
-            printMenuLine("Current Directory: " & replDir(someFile.dir), "l")
-            printMenuLine("Current File:      " & someFile.name, "l")
-            printMenuLine(menuStr02)
-            Console.WriteLine()
-            Console.Write("Enter a number, or leave blank to run the default: ")
+            printMenuTop({"Confirm your settings or return to the options to change them."})
+            print(1, "File Chooser", "Change the file name")
+            print(1, "Directory Chooser", "Change the directory")
+            print(1, "Confirm (default)", "Save changes")
+            print(0, $"Current Directory: {replDir(someFile.dir)}", leadingBlank:=True)
+            print(0, $"Current File     : {someFile.name}", closeMenu:=True)
+            Console.Write(Environment.NewLine & "Enter a number, or leave blank to run the default: ")
             Dim input As String = Console.ReadLine()
             Select Case input
                 Case "0"
@@ -204,7 +196,7 @@ Public Module iniFileHandler
                 Case "3", ""
                     iExitCode = True
                 Case Else
-                    menuTopper = invInpStr
+                    menuHeaderText = invInpStr
             End Select
         Loop
     End Sub
@@ -214,10 +206,10 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="dir">A user definable windows directory path</param>
     Public Sub dirChooser(ByRef dir As String)
-        If exitCode Then Exit Sub
+        If pendingExit() Then Exit Sub
         Console.Clear()
         handleDirChooserChoice(dir)
-        If exitCode Then Exit Sub
+        If pendingExit() Then Exit Sub
         handleDirChooserConfirm(dir)
     End Sub
 
@@ -227,16 +219,13 @@ Public Module iniFileHandler
     ''' <param name="dir">The String containing the directory the user is parameterizing</param>
     Private Sub handleDirChooserChoice(ByRef dir As String)
         Console.Clear()
-        menuTopper = "Directory Chooser"
-        printMenuTop({"Choose a directory"}, True)
-        printMenuOpt("Use default (default)", "Use the same folder as winapp2ool.exe")
-        printMenuOpt("Parent Folder", "Go up a level")
-        printMenuOpt("Current folder", "Continue using the same folder as below")
-        printBlankMenuLine()
-        printMenuLine("Current Directory: " & dir, "l")
-        printMenuLine(menuStr02)
-        Console.WriteLine()
-        Console.Write("Choose a number from above, enter a new directory, or leave blank to run the default: ")
+        menuHeaderText = "Directory Chooser"
+        printMenuTop({"Choose a directory"})
+        print(1, "Use default (default)", "Use the same folder as winapp2ool.exe")
+        print(1, "Parent Folder", "Go up a level")
+        print(1, "Current folder", "Continue using the same folder as below")
+        print(0, $"Current Directory: {dir}", leadingBlank:=True, closeMenu:=True)
+        Console.Write(Environment.NewLine & "Choose a number from above, enter a new directory, or leave blank to run the default: ")
         Dim input As String = Console.ReadLine()
         Select Case input
             Case "0"
@@ -260,18 +249,16 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="dir">The String containing the directory the user is parameterizing</param>
     Private Sub handleDirChooserConfirm(ByRef dir As String)
-        menuTopper = "Directory Chooser"
+        menuHeaderText = "Directory Chooser"
         Dim iExitCode As Boolean = False
         Do Until iExitCode
-            If exitCode Then Exit Sub
+            If pendingExit() Then Exit Sub
             Console.Clear()
-            printMenuTop({"Choose a directory"}, True)
-            printMenuOpt("Directory Chooser", "Change the directory")
-            printMenuOpt("Confirm (default)", "Use this directory")
-            printBlankMenuLine()
-            printMenuLine("Current Directory: " & dir, "l")
-            printMenuLine(menuStr02)
-            Console.Write("Choose a number from above, or leave blank to run the default: ")
+            printMenuTop({"Choose a directory"})
+            print(1, "Directory Chooser", "Change the directory")
+            print(1, "Confirm (default)", "Use this directory")
+            print(0, $"Current Directory: {dir}", leadingBlank:=True, closeMenu:=True)
+            Console.Write(Environment.NewLine & "Choose a number from above, or leave blank to run the default: ")
             Dim input As String = Console.ReadLine()
             Select Case input
                 Case "0"
@@ -283,7 +270,7 @@ Public Module iniFileHandler
                 Case "2", ""
                     iExitCode = True
                 Case Else
-                    menuTopper = invInpStr
+                    menuHeaderText = invInpStr
             End Select
         Loop
     End Sub
@@ -293,21 +280,16 @@ Public Module iniFileHandler
     ''' </summary>
     Public Class iniFile
         Dim lineCount As Integer = 1
-
         'The current state of the directory & name of the file
         Public dir As String
         Public name As String
-
         'The inital state of the direcotry & name of the file (for restoration purposes) 
         Public initDir As String
         Public initName As String
-
         'Suggested rename for output files
         Public secondName As String
-
         'Sections will be initally stored in the order they're read
         Public sections As New Dictionary(Of String, iniSection)
-
         'Any line comments will be saved in the order they're read 
         Public comments As New Dictionary(Of Integer, iniComment)
 
@@ -325,36 +307,12 @@ Public Module iniFileHandler
         End Function
 
         ''' <summary>
-        ''' Creates an empty iniFile.
-        ''' </summary>
-        Public Sub New()
-            dir = ""
-            name = ""
-            initDir = ""
-            initName = ""
-            secondName = ""
-        End Sub
-
-        ''' <summary>
         ''' Creates an uninitalized iniFile with a directory and a filename.
         ''' </summary>
         ''' <param name="directory">A windows directory containing a .ini file</param>
         ''' <param name="filename">The name of the .ini file contained in the given directory </param>
-        Public Sub New(directory As String, filename As String)
-            dir = directory
-            name = filename
-            initDir = directory
-            initName = filename
-            secondName = ""
-        End Sub
-
-        ''' <summary>
-        ''' Creates an uninitialized iniFile with a suggested alternative name
-        ''' </summary>
-        ''' <param name="directory">A windows directory containing a .ini file</param>
-        ''' <param name="filename">The name of the .ini file contained in the given directory</param>
-        ''' <param name="rename">The alternative/suggested name for the given .ini file</param>
-        Public Sub New(directory As String, filename As String, rename As String)
+        ''' <param name="rename">A provided suggestion for a rename should the user open the File Chooser on this file</param>
+        Public Sub New(Optional directory As String = "", Optional filename As String = "", Optional rename As String = "")
             dir = directory
             name = filename
             initDir = directory
@@ -390,7 +348,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <returns></returns>
         Public Function path() As String
-            Return dir & "\" & name
+            Return $"{dir}\{name}"
         End Function
 
         ''' <summary>
@@ -430,13 +388,12 @@ Public Module iniFileHandler
         Private Sub processiniLine(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer), ByRef lastLineWasEmpty As Boolean)
             Select Case True
                 Case currentLine.StartsWith(";")
-                    Dim newCom As New iniComment(currentLine, lineCount)
-                    comments.Add(comments.Count, newCom)
+                    comments.Add(comments.Count, New iniComment(currentLine, lineCount))
                 Case (Not currentLine.StartsWith("[") And Not currentLine.Trim = "") Or (currentLine.Trim <> "" And sectionToBeBuilt.Count = 0)
-                    lineNotEmpty(currentLine, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
+                    updSec(sectionToBeBuilt, lineTrackingList, currentLine, lastLineWasEmpty)
                 Case currentLine.Trim <> "" And Not sectionToBeBuilt.Count = 0
                     mkSection(sectionToBeBuilt, lineTrackingList)
-                    lineNotEmpty(currentLine, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
+                    updSec(sectionToBeBuilt, lineTrackingList, currentLine, lastLineWasEmpty)
                 Case Else
                     lastLineWasEmpty = True
             End Select
@@ -444,26 +401,15 @@ Public Module iniFileHandler
         End Sub
 
         ''' <summary>
-        ''' Updates the current section being built with the current line, marks the lastlinewasempty (this line) as false
-        ''' </summary>
-        ''' <param name="currentLine">The current line to be added to the inisection</param>
-        ''' <param name="sectionToBeBuilt">The list of Strings that will become an iniSection</param>
-        ''' <param name="lineTrackingList">The line numbers of each line in the section to be built</param>
-        ''' <param name="lastLineWasEmpty">The boolean indicating that this line was not empty</param>
-        Private Sub lineNotEmpty(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer), ByRef lastLineWasEmpty As Boolean)
-            updSec(sectionToBeBuilt, lineTrackingList, currentLine)
-            lastLineWasEmpty = False
-        End Sub
-
-        ''' <summary>
-        ''' Manages line & number tracking for iniSections whose construction is pending
+        ''' Manages line and number tracking for iniSections whose construction is pending
         ''' </summary>
         ''' <param name="secList">The list of strings for the iniSection</param>
         ''' <param name="lineList">The list of line numbers for the iniSection</param>
         ''' <param name="curLine">The current line to be added to the section</param>
-        Private Sub updSec(ByRef secList As List(Of String), ByRef lineList As List(Of Integer), curLine As String)
+        Private Sub updSec(ByRef secList As List(Of String), ByRef lineList As List(Of Integer), curLine As String, ByRef lastLineWasEmpty As Boolean)
             secList.Add(curLine)
             lineList.Add(lineCount)
+            lastLineWasEmpty = False
         End Sub
 
         ''' <summary>
@@ -481,24 +427,24 @@ Public Module iniFileHandler
                 If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
                 r.Close()
             Catch ex As Exception
-                Console.WriteLine(ex.Message & Environment.NewLine & "Failure occurred during iniFile construction at line: " & lineCount & " in " & name)
+                Console.WriteLine(ex.Message & Environment.NewLine & $"Failure occurred during iniFile construction at line: {lineCount} in {name}")
             End Try
         End Sub
 
         ''' <summary>
         ''' Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists.
+        ''' If an iniFile's sections already exist, skip this.
         ''' </summary>
         Public Sub validate()
-            If exitCode Then Exit Sub
-
+            Console.Clear()
+            If pendingExit() Or Me.name = "" Then Exit Sub
             'Make sure both the file and the directory actually exist
             While Not File.Exists(path())
                 chkDirExist(dir)
-                If exitCode Then Exit Sub
+                If pendingExit() Then Exit Sub
                 chkFileExist(Me)
-                If exitCode Then Exit Sub
+                If pendingExit() Then Exit Sub
             End While
-
             'Make sure that the file isn't empty
             Try
                 Dim iniTester As New iniFile(dir, name)
@@ -507,12 +453,12 @@ Public Module iniFileHandler
                 While iniTester.sections.Count = 0
                     clearAtEnd = True
                     Console.Clear()
-                    printMenuLine(bmenu("Empty ini file detected. Press any key to try again.", "c"))
+                    printMenuLine(bmenu("Empty ini file detected. Press any key to try again."))
                     Console.ReadKey()
                     fileChooser(iniTester)
-                    If exitCode Then Exit Sub
+                    If pendingExit() Then Exit Sub
                     iniTester.validate()
-                    If exitCode Then Exit Sub
+                    If pendingExit() Then Exit Sub
                 End While
                 sections = iniTester.sections
                 comments = iniTester.comments
@@ -578,9 +524,9 @@ Public Module iniFileHandler
                             Exit For
                         End If
                     Next
-                    Console.WriteLine("Error: Duplicate section name detected: " & sectionToBeBuilt(0))
-                    Console.WriteLine("Line: " & lineCount)
-                    Console.WriteLine("Duplicates the entry on line: " & lineErr)
+                    Console.WriteLine($"Error: Duplicate section name detected: {sectionToBeBuilt(0)}")
+                    Console.WriteLine($"Line: {lineCount}")
+                    Console.WriteLine($"Duplicates the entry on line: {lineErr}")
                     Console.WriteLine("This section will be ignored until it is given a unique name.")
                     Console.WriteLine()
                 End If
@@ -618,11 +564,21 @@ Public Module iniFileHandler
         End Sub
 
         ''' <summary>
+        ''' Removes a series of keys from the section
+        ''' </summary>
+        ''' <param name="indicies"></param>
+        Public Sub removeKeys(indicies As List(Of Integer))
+            For Each ind In indicies
+                Me.keys.Remove(ind)
+            Next
+        End Sub
+
+        ''' <summary>
         ''' Returns the iniSection name as it would appear on disk.
         ''' </summary>
         ''' <returns></returns>
         Public Function getFullName() As String
-            Return "[" & Me.name & "]"
+            Return $"[{Me.name}]"
         End Function
 
         ''' <summary>
@@ -635,35 +591,16 @@ Public Module iniFileHandler
         End Sub
 
         ''' <summary>
-        ''' Creates a new iniSection object 
-        ''' </summary>
-        ''' <param name="listOfLines">The list of strings comprising the iniSection</param>
-        ''' <param name="listOfLineCounts">The line numbers of the strings comprising the iniSection</param>
-        Public Sub New(ByVal listOfLines As List(Of String), listOfLineCounts As List(Of Integer))
-            name = listOfLines(0).Trim(CChar("[")).Trim(CChar("]"))
-            startingLineNumber = listOfLineCounts(0)
-            endingLineNumber = listOfLineCounts(listOfLineCounts.Count - 1)
-
-            If listOfLines.Count > 1 Then
-                For i As Integer = 1 To listOfLines.Count - 1
-                    Dim curKey As New iniKey(listOfLines(i), listOfLineCounts(i))
-                    keys.Add(i - 1, curKey)
-                Next
-            End If
-        End Sub
-
-        ''' <summary>
         ''' Creates a new iniSection object without tracking the line numbers
         ''' </summary>
         ''' <param name="listOfLines">The list of strings comprising the iniSection</param>
-        Public Sub New(ByVal listOfLines As List(Of String))
-            name = listOfLines(0).Trim(CChar("[")).Trim(CChar("]"))
-            startingLineNumber = 1
-            endingLineNumber = 1 + listOfLines.Count
-
+        Public Sub New(ByVal listOfLines As List(Of String), Optional listOfLineCounts As List(Of Integer) = Nothing)
+            name = listOfLines(0).Trim(CChar("["), CChar("]"))
+            startingLineNumber = If(listOfLineCounts IsNot Nothing, listOfLineCounts(0), 1)
+            endingLineNumber = startingLineNumber + listOfLines.Count
             If listOfLines.Count > 1 Then
                 For i As Integer = 1 To listOfLines.Count - 1
-                    keys.Add(i - 1, New iniKey(listOfLines(i), 0))
+                    keys.Add(i - 1, New iniKey(listOfLines(i), If(listOfLineCounts Is Nothing, 0, listOfLineCounts(i))))
                 Next
             End If
         End Sub
@@ -688,7 +625,6 @@ Public Module iniFileHandler
         ''' <param name="addedKeys">A return list of iniKey objects that appear in the given iniFile object but not this one</param>
         ''' <returns></returns>
         Public Function compareTo(ss As iniSection, ByRef removedKeys As List(Of iniKey), ByRef addedKeys As List(Of iniKey)) As Boolean
-
             'Create a copy of the section so we can modify it
             Dim secondSection As New iniSection
             secondSection.name = ss.name
@@ -696,10 +632,8 @@ Public Module iniFileHandler
             For i As Integer = 0 To ss.keys.Count - 1
                 secondSection.keys.Add(i, ss.keys.Values(i))
             Next
-
             Dim noMatch As Boolean
             Dim tmpList As New List(Of Integer)
-
             For Each key In keys.Values
                 noMatch = True
                 For i As Integer = 0 To secondSection.keys.Values.Count - 1
@@ -709,23 +643,16 @@ Public Module iniFileHandler
                         Exit For
                     End If
                 Next
-                If noMatch Then
-                    'If the key isn't found in the second (newer) section, consider it removed for now
-                    removedKeys.Add(key)
-                End If
+                'If the key isn't found in the second (newer) section, consider it removed for now
+                If noMatch Then removedKeys.Add(key)
             Next
-
             'Remove all matched keys
             tmpList.Reverse()
-            For Each ind In tmpList
-                secondSection.keys.Remove(ind)
-            Next
-
+            secondSection.removeKeys(tmpList)
             'Assume any remaining keys have been added
             For Each key In secondSection.keys.Values
                 addedKeys.Add(key)
             Next
-
             Return removedKeys.Count + addedKeys.Count = 0
         End Function
 
@@ -747,7 +674,6 @@ Public Module iniFileHandler
     ''' An object representing the name value pairs that make up iniSections
     ''' </summary>
     Public Class iniKey
-
         Public name As String
         Public value As String
         Public lineNumber As Integer
@@ -795,26 +721,8 @@ Public Module iniFileHandler
         ''' <param name="txt">The string to search for</param>
         ''' <param name="toLower">A boolean specifying whether or not the strings should be cast to lowercase</param>
         ''' <returns></returns>
-        Public Function vHas(txt As String, toLower As Boolean) As Boolean
+        Public Function vHas(txt As String, Optional toLower As Boolean = False) As Boolean
             Return If(toLower, value.ToLower.Contains(txt.ToLower), value.Contains(txt))
-        End Function
-
-        ''' <summary>
-        ''' Returns whether or not an iniKey object's value contains a given string
-        ''' </summary>
-        ''' <param name="txt">The string to search for</param>
-        ''' <returns></returns>
-        Public Function vHas(txt As String) As Boolean
-            Return vHas(txt, False)
-        End Function
-
-        ''' <summary>
-        ''' Returns whether or not an iniKey object's value contains any of a given array of strings
-        ''' </summary>
-        ''' <param name="txts">The array of search strings</param>
-        ''' <returns></returns>
-        Public Function vHasAny(txts As String()) As Boolean
-            Return vHasAny(txts, False)
         End Function
 
         ''' <summary>
@@ -823,20 +731,11 @@ Public Module iniFileHandler
         ''' <param name="txts">The array of search strings</param>
         ''' <param name="toLower">A boolean specifying whether or not the strings should be cast to lowercase</param>
         ''' <returns></returns>
-        Public Function vHasAny(txts As String(), toLower As Boolean) As Boolean
+        Public Function vHasAny(txts As String(), Optional toLower As Boolean = False) As Boolean
             For Each txt In txts
                 If vHas(txt, toLower) Then Return True
             Next
             Return False
-        End Function
-
-        ''' <summary>
-        ''' Returns whether or not an iniKey object's value is equal to a given string
-        ''' </summary>
-        ''' <param name="txt">The string to be searched for</param>
-        ''' <returns></returns>
-        Public Function vIs(txt As String) As Boolean
-            Return vIs(txt, False)
         End Function
 
         ''' <summary>
@@ -845,7 +744,7 @@ Public Module iniFileHandler
         ''' <param name="txt">The string to be searched for</param>
         ''' <param name="toLower">A boolean specifying whether or not the strings should be cast to lowercase</param>
         ''' <returns></returns>
-        Public Function vIs(txt As String, toLower As Boolean) As Boolean
+        Public Function vIs(txt As String, Optional toLower As Boolean = False) As Boolean
             Return If(toLower, value.ToLower.Equals(txt), value.Equals(txt))
         End Function
 
@@ -891,24 +790,14 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <returns></returns>
         Public Overrides Function toString() As String
-            Return name & "=" & value
+            Return $"{name}={value}"
         End Function
-
-        ''' <summary>
-        ''' Outputs the key in Line: #### - name=value format
-        ''' </summary>
-        ''' <returns></returns>
-        Public Function lineString() As String
-            Return "Line: " & lineNumber & " - " & Me.toString
-        End Function
-
     End Class
 
     ''' <summary>
     ''' An object representing a comment in a .ini file
     ''' </summary>
     Class iniComment
-
         Public comment As String
         Public lineNumber As Integer
 

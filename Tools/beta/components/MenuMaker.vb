@@ -21,106 +21,103 @@ Option Strict On
 Module MenuMaker
 
     'basic menu frames & strings
-    Public menuStr00 As String = " ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗"
-    Public menuStr01 As String = " ║                                                                                                                    ║"
-    Public menuStr02 As String = " ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
-    Public menuStr03 As String = " ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣"
+    Public Const menuStr00 As String = " ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗"
+    Public Const menuStr01 As String = " ║                                                                                                                    ║"
+    Public Const menuStr02 As String = " ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
+    Public Const menuStr03 As String = " ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣"
     Public menuStr04 As String = appendNewLine(menu(menuStr01)) & appendNewLine(mkMenuLine("Menu: Enter a number to select", "c")) & mkMenuLine(menuStr01, "")
-    Public anyKeyStr As String = "Press any key to return to the winapp2ool menu."
-    Public invInpStr As String = "Invalid input. Please try again."
-    Public promptStr As String = "Enter a number, or leave blank to run the default: "
-
-    'the maximum length of the portion of the first half of a '#. Option - Description' style menu line
+    Public Const anyKeyStr As String = "Press any key to return to the menu."
+    Public Const invInpStr As String = "Invalid input. Please try again."
+    Public Const promptStr As String = "Enter a number, or leave blank to run the default: "
+    'This boolean will prevent us from printing output or asking for input under most circumstances, triggered by the -s command line argument 
+    Public suppressOutput As Boolean = False
+    'The maximum length of the portion of the first half of a '#. Option - Description' style menu line
     Dim menuItemLength As Integer
-
     'indicates whether or not we are pending an exit from the menu
     Public exitCode As Boolean
-
-    'Holds the output text at the top of the menu
-    Public menuTopper As String
-
+    'Holds the text that appears in the top block of the menu
+    Public menuHeaderText As String
+    'Holds the current option number at any given moment
     Dim optNum As Integer = 0
 
     ''' <summary>
     ''' Initializes the menu 
     ''' </summary>
-    ''' <param name="topper"></param>
-    ''' <param name="itemlen"></param>
-    Public Sub initMenu(topper As String, itemlen As Integer)
+    ''' <param name="topper">The text to be displayed at the top of the menu screen</param>
+    ''' <param name="itemlen">The length in characters that should comprise the first bloc of options in the menu</param>
+    Public Sub initMenu(topper As String, Optional itemlen As Integer = 35)
         exitCode = False
-        menuTopper = topper
+        menuHeaderText = topper
         menuItemLength = itemlen
     End Sub
 
     ''' <summary>
-    ''' Prints a blank menu line
+    ''' Sets the menu header to an error string conditionally, returns the given condition
     ''' </summary>
-    Public Sub printBlankMenuLine()
-        printMenuLine(menuStr01)
-    End Sub
-
-    ''' <summary>
-    ''' Sets the menuTopper to an error string conditionally, returns the given condition
-    ''' </summary>
-    ''' <param name="cond">The boolean representing the circumstance under which the error text should be printed</param>
-    ''' <param name="errText">The text to be printed to the menu topper</param>
+    ''' <param name="cond">The condition under which the error text should be printed</param>
+    ''' <param name="errText">The error text to be printed in the menu header</param>
     ''' <returns></returns>
     Public Function denyActionWithTopper(cond As Boolean, errText As String) As Boolean
-        If cond Then menuTopper = errText
+        If cond Then menuHeaderText = errText
         Return cond
     End Function
 
     ''' <summary>
-    ''' Prints a menu, option, or reset line conditionally
+    ''' Prints a menu line, option, or reset string, conditionally
     ''' </summary>
     ''' <param name="cond">The condition under which to print</param>
     ''' <param name="printType">The type of menu information to print</param>
     ''' <param name="str1">The first string or half string to be printed</param>
-    ''' <param name="str2">The alginment or second half string to be printed</param>
-    Public Sub printIf(cond As Boolean, printType As String, str1 As String, str2 As String)
+    ''' <param name="optString">The alginment or second half string to be printed</param>
+    Public Sub print(printType As Integer, str1 As String, Optional optString As String = "", Optional cond As Boolean = True, Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False, Optional closeMenu As Boolean = False)
+        If cond And leadingBlank Then printMenuLine()
         Select Case True
-            Case cond And printType = "line"
-                printMenuLine(str1, str2)
-            Case cond And printType = "opt"
-                printMenuOpt(str1, str2)
-            Case cond And printType = "reset"
-                printResetStr(str1)
+            Case cond And printType = 0
+                printMenuLine(str1, isCentered)
+            Case cond And printType = 1
+                printMenuOpt(str1, optString)
+            Case cond And printType = 2
+                print(1, "Reset Settings", $"Restore {str1}'s settings to their default state", leadingBlank:=True)
+            Case cond And printType = 3
+                print(0, tmenu(str1), isCentered:=True, closeMenu:=True)
+            Case cond And printType = 4
+                print(0, $"{str1}, some functions will not be available.", trailingBlank:=True, isCentered:=True)
         End Select
+        If cond And trailingBlank Then printMenuLine()
+        If cond And closeMenu Then printMenuLine(menuStr02)
     End Sub
 
     ''' <summary>
-    ''' Returns the inverse state of a given setting for 
+    ''' Returns the inverse state of a given setting as a String
     ''' </summary>
-    ''' <param name="setting">A given setting to observe the state of</param>
-    ''' <returns></returns
+    ''' <param name="setting">The setting whose state will be reported</param>
+    ''' <returns></returns>
     Public Function enStr(setting As Boolean) As String
         Return If(setting, "Disable", "Enable")
     End Function
 
     ''' <summary>
-    ''' Print the 'Reset Settings' menu option for any given module
+    ''' Exits a menu or module by flipping the exitCode to true 
     ''' </summary>
-    ''' <param name="moduleName"></param>
-    Public Sub printResetStr(moduleName As String)
-        printBlankMenuLine()
-        printMenuOpt("Reset Settings", "Restore " & moduleName & "'s settings to their deault state")
+    ''' <param name="name"></param>
+    Public Sub exitModule(name As String)
+        exitCode = True
     End Sub
 
-    'Print the top of the menu containing the topper, any description text, the menu prompt, and the exit option
     ''' <summary>
     ''' Prints the top of the menu (containing the topper), any description text provided, the menu prompt, and the exit option
     ''' </summary>
     ''' <param name="descriptionItems">Items describing the menu</param>
     ''' <param name="printExit">The boolean representing whether an option to exit should be printed</param>
-    Public Sub printMenuTop(descriptionItems As String(), printExit As Boolean)
-        printMenuLine(tmenu(menuTopper))
+    Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
+        printMenuLine(tmenu(menuHeaderText))
         printMenuLine(menuStr03)
         For Each line In descriptionItems
-            printMenuLine(line, "c")
+            printMenuLine(line, True)
         Next
         printMenuLine(menuStr04)
         optNum = 0
-        If printExit Then printMenuOpt("Exit", "Return to the menu")
+        print(1, "Exit", "Return to the menu", printExit)
     End Sub
 
     ''' <summary>
@@ -129,14 +126,14 @@ Module MenuMaker
     ''' <param name="lineString">A string to be made into a menu line</param>
     ''' <returns></returns>
     Public Function menu(lineString As String) As String
-        Return mkMenuLine(lineString, "")
+        Return mkMenuLine(lineString, "l")
     End Function
 
     ''' <summary>
-    ''' Prints a menu string
+    ''' Prints a line in a menu
     ''' </summary>
     ''' <param name="lineString"></param>
-    Public Sub printMenuLine(lineString As String)
+    Public Sub printMenuLine(Optional lineString As String = menuStr01)
         cwl(menu(lineString))
     End Sub
 
@@ -144,19 +141,19 @@ Module MenuMaker
     ''' Constructs a menu string with a given alignment
     ''' </summary>
     ''' <param name="lineString">The line to be printed</param>
-    ''' <param name="align">The anchoring ('l' or 'c')</param>
+    ''' <param name="isCentered">The boolean indicating whether the line text should be centered</param>
     ''' <returns></returns>
-    Public Function menu(lineString As String, align As String) As String
-        Return mkMenuLine(lineString, align)
+    Public Function menu(lineString As String, Optional isCentered As Boolean = False) As String
+        Return mkMenuLine(lineString, If(isCentered, "c", "l"))
     End Function
 
     ''' <summary>
     ''' Prints a menu string with a given alignment
     ''' </summary>
     ''' <param name="lineString"></param>
-    ''' <param name="align"></param>
-    Public Sub printMenuLine(lineString As String, align As String)
-        cwl(menu(lineString, align))
+    ''' <param name="isCenteredLine">The boolean indicating whether the line text should be centered</param>
+    Public Sub printMenuLine(lineString As String, Optional isCenteredLine As Boolean = False)
+        cwl(menu(lineString, isCenteredLine))
     End Sub
 
     ''' <summary>
@@ -165,11 +162,11 @@ Module MenuMaker
     ''' <param name="lineString1">The first part of the menu option</param>
     ''' <param name="lineString2">The second part of the menu option</param>
     Public Sub printMenuOpt(lineString1 As String, lineString2 As String)
-        lineString1 = optNum & ". " & lineString1
+        lineString1 = $"{optNum}. {lineString1}"
         While lineString1.Length < menuItemLength
             lineString1 += " "
         End While
-        cwl(menu(lineString1 & "- " & lineString2, "l"))
+        cwl(menu($"{lineString1}- {lineString2}"))
         optNum += 1
     End Sub
 
@@ -223,12 +220,11 @@ Module MenuMaker
     ''' <summary>
     ''' Prints a box with a single message inside it 
     ''' </summary>
-    ''' <param name="text"></param>
-    ''' <param name="align"></param>
+    ''' <param name="text">The string to be printed in the box</param>
     ''' <returns></returns>
-    Public Function bmenu(text As String, align As String) As String
-        Dim out As String = menu(menuStr00) & Environment.NewLine
-        out += menu(text, align) & Environment.NewLine
+    Public Function bmenu(text As String) As String
+        Dim out As String = appendNewLine(menu(menuStr00))
+        out += appendNewLine(menu(text, True))
         out += menu(menuStr02)
         Return out
     End Function
@@ -236,11 +232,11 @@ Module MenuMaker
     ''' <summary>
     ''' Prints the topmost part of the menu with no bottom
     ''' </summary>
-    ''' <param name="text"></param>
+    ''' <param name="text">The String to be printed in the faux menu header</param>
     ''' <returns></returns>
     Public Function tmenu(text As String) As String
-        Dim out As String = menu(menuStr00) & Environment.NewLine
-        out += menu(text, "c")
+        Dim out As String = appendNewLine(menu(menuStr00))
+        out += menu(text, True)
         Return out
     End Function
 
@@ -251,5 +247,31 @@ Module MenuMaker
     ''' <returns></returns>
     Public Function replDir(dirStr As String) As String
         Return dirStr.Replace(Environment.CurrentDirectory, "..")
+    End Function
+
+    ''' <summary>
+    ''' Appends a newline to a given String
+    ''' </summary>
+    ''' <param name="line">The string to be appended</param>
+    ''' <returns></returns>
+    Public Function appendNewLine(line As String) As String
+        Return line & Environment.NewLine
+    End Function
+
+    ''' <summary>
+    ''' Prints a line with a string if we're not surpressing output.
+    ''' </summary>
+    ''' <param name="msg">The string to be printed</param>
+    Public Sub cwl(Optional msg As String = Nothing)
+        If Not suppressOutput Then Console.WriteLine(msg)
+    End Sub
+
+    ''' <summary>
+    ''' Clears the console if there's a pending exit, returns exitCode
+    ''' </summary>
+    ''' <returns></returns>
+    Public Function pendingExit() As Boolean
+        If exitCode Then Console.Clear()
+        Return exitCode
     End Function
 End Module

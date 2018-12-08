@@ -57,38 +57,31 @@ Module commandLineHandler
     ''' <summary>
     ''' Processes whether to download and which file to download
     ''' </summary>
-    ''' <param name="download"></param>
-    ''' <param name="ncc"></param>
+    ''' <param name="download">The boolean indicating winapp2.ini should be downloaded</param>
+    ''' <param name="ncc">The boolean indicating that the non-ccleaner variant of winapp2.ini should be used</param>
     Private Sub handleDownloadBools(ByRef download As Boolean, ByRef ncc As Boolean)
         'Download a winapp2 to trim?
         invertSettingAndRemoveArg(download, "-d")
-
         'Download the non ccleaner ini? 
         invertSettingAndRemoveArg(ncc, "-ncc")
-
         '-ncc implies -d 
         If ncc And Not download Then download = True
+        If download And isOffline Then printErrExit("Winapp2ool is currently in offline mode, but you have issued commands that require a network connection. Please try again with a network connection.")
     End Sub
 
     ''' <summary>
     ''' Handles the commandline args for WinappDebug
     ''' </summary>
+    ''' WinappDebug specific command line args
+    ''' -c      : enable autocorrect
     Private Sub autoDebug()
-
-        'WinappDebug specific command line args
-        ' -c      : enable autocorrect
-
         Dim correctErrors As Boolean
-
         'Get default params
         initDebugParams(firstFile, secondFile, correctErrors)
-
         'Toggle on autocorrect (off by default)
         invertSettingAndRemoveArg(correctErrors, "-c")
-
         'Get any file parameters from flags
         getFileAndDirParams()
-
         'Initialize the debug
         remoteDebug(firstFile, secondFile, correctErrors)
     End Sub
@@ -96,51 +89,37 @@ Module commandLineHandler
     ''' <summary>
     ''' Handles the commandline args for Trim
     ''' </summary>
+    ''' Trim commandline args
+    ''' -d     : download the latest winapp2.ini
+    ''' -ncc   : download the latest non-ccleaner winapp2.ini (implies -d)
     Private Sub autoTrim()
-
-        'Trim commandline args
-        ' -d     : download the latest winapp2.ini
-        ' -ncc   : download the latest non-ccleaner winapp2.ini (implies -d)
-
         Dim download As Boolean
         Dim ncc As Boolean
-
         initTrimParams(firstFile, secondFile, download, ncc)
-
         'Are we downloading winapp2.ini?
         handleDownloadBools(download, ncc)
-
         'Get any file parameters from flags
         getFileAndDirParams()
-
         'Initalize the trim
         remoteTrim(firstFile, secondFile, download, ncc)
-
     End Sub
 
     ''' <summary>
     ''' Handles the commandline args for Merge
     ''' </summary>
+    '''  Merge specific command line args
+    ''' -mm      : toggle mergemode from replace and add to replace and remove
+    ''' -r       : use removed entries.ini as the merge file's name
+    ''' -c       : use custom.ini as the merge file's name
     Private Sub autoMerge()
-
-        'Merge specific command line args
-        ' -mm      : toggle mergemode from replace & add to replace & remove
-        ' -r       : use removed entries.ini as the merge file's name
-        ' -c       : use custom.ini as the merge file's name
-
         Dim mergeMode As Boolean
-
         initMergeParams(firstFile, secondFile, thirdFile, mergeMode)
-
         invertSettingAndRemoveArg(mergeMode, "-mm")
-
         'Detect any preset filename calls
         invertAndRemoveAndRename(False, "-r", secondFile.name, "Removed Entries.ini")
         invertAndRemoveAndRename(False, "-c", secondFile.name, "Custom.ini")
-
         'Get any file parameters from flags
         getFileAndDirParams()
-
         'If we have a secondfile, initiate the merge
         If Not secondFile.name = "" Then remoteMerge(firstFile, secondFile, thirdFile, mergeMode)
     End Sub
@@ -148,31 +127,23 @@ Module commandLineHandler
     ''' <summary>
     ''' Handles the commandline args for Diff
     ''' </summary>
+    '''  Diff commandline args
+    ''' -d          : download the latest winapp2.ini
+    ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
+    ''' -savelog    : save the diff.txt log
     Private Sub autoDiff()
-
-        'Diff commandline args
-        ' -d          : download the latest winapp2.ini
-        ' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
-        ' -savelog    : save the diff.txt log
-
         Dim ncc As Boolean
         Dim download As Boolean
         Dim save As Boolean
-
         initDiffParams(firstFile, secondFile, thirdFile, download, ncc, save)
-
         'Downloading winapp2.ini?
         handleDownloadBools(download, ncc)
-
         'If downloading, set secondFile's name correctly
         If download Then secondFile.name = If(ncc, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
-
         'Save diff.txt?
         invertSettingAndRemoveArg(save, "-savelog")
-
         'Get any file parameters from flags
         getFileAndDirParams()
-
         'Only run if we have a second file (because we assume we're running on a winapp2.ini file by default)
         If Not secondFile.name = "" Then remoteDiff(firstFile, secondFile, thirdFile, download, ncc, save)
     End Sub
@@ -180,31 +151,21 @@ Module commandLineHandler
     ''' <summary>
     ''' Handles the commandline args for CCiniDebug
     ''' </summary>
+    '''  CCiniDebug commandline args:
+    ''' -noprune : disable pruning of stale winapp2.ini entries
+    ''' -nosort  : disable sorting ccleaner.ini alphabetically
+    ''' -nosave  : disable saving the modified ccleaner.ini back to file
     Private Sub autoccini()
-
-        'CCiniDebug commandline args:
-        ' -noprune : disable pruning of stale winapp2.ini entries
-        ' -nosort  : disable sorting ccleaner.ini alphabetically
-        ' -nosave  : disable saving the modified ccleaner.ini back to file
-
         Dim prune As Boolean
         Dim save As Boolean
         Dim sort As Boolean
-
         initCCDebugParams(firstFile, secondFile, thirdFile, prune, save, sort)
-
-        'Prune?
+        'Check any provided booleans
         invertSettingAndRemoveArg(prune, "-noprune")
-
-        'Sort?
         invertSettingAndRemoveArg(sort, "-nosort")
-
-        'Save?
         invertSettingAndRemoveArg(save, "-nosave")
-
         'Get any file parameters from flags
         getFileAndDirParams()
-
         'run ccinidebug
         remoteCC(firstFile, secondFile, thirdFile, prune, save, sort)
     End Sub
@@ -213,11 +174,9 @@ Module commandLineHandler
     ''' Processes the commandline args for Downloader
     ''' </summary>
     Private Sub autodownload()
-
         Dim fileLink As String = ""
         Dim downloadDir As String = Environment.CurrentDirectory
         Dim downloadName As String = ""
-
         If args.Count > 0 Then
             Select Case args(0)
                 Case "1", "2"
@@ -232,12 +191,9 @@ Module commandLineHandler
             End Select
             args.RemoveAt(0)
         End If
-
         'Get any file parameters from flags
         getFileAndDirParams()
-
         If Not fileLink = "" Then remoteDownload(downloadDir, downloadName, fileLink, False)
-
     End Sub
 
     ''' <summary>
@@ -289,15 +245,11 @@ Module commandLineHandler
     ''' Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler
     ''' </summary>
     Public Sub processCommandLineArgs()
-
         args.AddRange(Environment.GetCommandLineArgs)
-
         'Remove the first arg which is simply the name of the executable
         args.RemoveAt(0)
-
         'the s is for silent, if we havxe this flag, don't give any output to the user under normal circumstances 
         invertSettingAndRemoveArg(suppressOutput, "-s")
-
         If args.Count > 0 Then
             Select Case args(0)
                 Case "1"
@@ -328,7 +280,6 @@ Module commandLineHandler
     Private Sub getFileAndDirParams()
         'Make sure the args are formatted correctly so the path/name can be extracted 
         validateArgs()
-        'Parse params
         getParams(1, firstFile)
         getParams(2, secondFile)
         getParams(3, thirdFile)
@@ -353,26 +304,26 @@ Module commandLineHandler
         If args.Count > 1 Then
             Try
                 For i As Integer = 0 To args.Count - 2
-                    If (Not vArgs.Contains(args(i))) Or
-                        (Not Directory.Exists(args(i + 1)) And Not Directory.Exists(Environment.CurrentDirectory & "\" & args(i + 1)) And
-                                Not File.Exists(args(i + 1)) And File.Exists(Environment.CurrentDirectory & "\" & args(i + 1))) Then
-                        invalidCmdline()
+                    If Not vArgs.Contains(args(i)) Or
+                        (Not Directory.Exists(args(i + 1)) And Not Directory.Exists($"{Environment.CurrentDirectory}\{args(i + 1)}") And
+                                Not File.Exists(args(i + 1)) And File.Exists($"{Environment.CurrentDirectory}\{args(i + 1)}")) Then
+                        printErrExit("Invalid command line arguements given.")
                     End If
                     i += 1
                 Next
             Catch ex As Exception
-                invalidCmdline()
+                printErrExit("Invalid command line arguements given.")
             End Try
         End If
     End Sub
 
     ''' <summary>
-    ''' Prints an invalid commandline args error to the user and exits after they press a key.
+    ''' Prints an error to the user and exits the application after they have pressed a key
     ''' </summary>
-    Private Sub invalidCmdline()
-        Console.WriteLine("Invalid command line arguements given. Press any key to exit.")
+    ''' <param name="errTxt">The String containing the erorr text to be printed to the user</param>
+    Private Sub printErrExit(errTxt As String)
+        Console.WriteLine($"{errTxt} Press any key to exit.")
         Console.ReadKey()
         Environment.Exit(0)
     End Sub
-
 End Module

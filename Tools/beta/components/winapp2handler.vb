@@ -30,7 +30,6 @@ Module winapp2handler
     ''' <returns> The sorted state of the listToBeSorted</returns>
     Public Function replaceAndSort(ListToBeSorted As List(Of String), characterToReplace As String, replacementText As String) As List(Of String)
         Dim changes As New Dictionary(Of String, String)
-
         'Replace our target characters if they exist
         For i As Integer = 0 To ListToBeSorted.Count - 1
             Dim item As String = ListToBeSorted(i)
@@ -40,15 +39,12 @@ Module winapp2handler
                 ListToBeSorted(i) = renamedItem
             End If
         Next
-
         'Pad numbers if necessary 
         findAndReplaceNumbers(ListToBeSorted, changes)
-
         'Copy the modified list to be sorted and sort it
         Dim sortedEntryList As New List(Of String)
         sortedEntryList.AddRange(ListToBeSorted)
         sortedEntryList.Sort()
-
         'Restore the original state of our data
         undoChanges(changes, {ListToBeSorted, sortedEntryList})
         Return sortedEntryList
@@ -107,11 +103,9 @@ Module winapp2handler
         Dim longestNumLen As Integer = findLongestNumLength(listToBeSorted)
         If longestNumLen < 2 Then Exit Sub
         For i As Integer = 0 To listToBeSorted.Count - 1
-
             Dim baseString As String = listToBeSorted(i)
             Dim paddedString As String = baseString
             Dim numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*")
-
             For Each m As Match In numberAndDecimals.Matches(baseString)
                 'Special procedure for numbers with any amount of decimal points in them
                 Dim currentMatch As String = m.ToString
@@ -125,17 +119,15 @@ Module winapp2handler
                     paddedString = paddedString.Replace(currentMatch, out)
                 Else
                     'Grab characters from both sides so that we don't have to worry about duplicate m matches 
-                    Dim numsPlusReplBits As New Regex("([^\d]|\b)" & currentMatch & "([^\d]|\b)")
+                    Dim numsPlusReplBits As New Regex($"([^\d]|\b){currentMatch}([^\d]|\b)")
                     For Each mm As Match In numsPlusReplBits.Matches(paddedString)
                         Dim replacementText As String = mm.ToString.Replace(currentMatch, padNumberStr(longestNumLen, currentMatch))
                         paddedString = paddedString.Replace(mm.ToString, replacementText)
                     Next
                 End If
             Next
-
             'Don't rename if we didn't change anything
             If baseString = paddedString Then Continue For
-
             'Rename and track changes appropriately
             trackChanges(changes, baseString, paddedString)
             replaceStrAtIndexOf(listToBeSorted, baseString, paddedString)
@@ -191,9 +183,7 @@ Module winapp2handler
     ''' Represents a winapp2.ini format iniFile, and enables easy access to format specific iniFile information
     ''' </summary>
     Public Class winapp2file
-
         Public entryList As List(Of String)
-
         ' "" = main section, bottom most in all circumstances and appearing without a label 
         Dim sectionHeaderFooter As String() = {"Chrome/Chromium based browsers", "Firefox/Mozilla based browsers", "Thunderbird",
             "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
@@ -202,9 +192,7 @@ Module winapp2handler
         Public entrySections(6) As iniFile
         Public entryLines(6) As List(Of Integer)
         Public winapp2entries(6) As List(Of winapp2entry)
-
         Public isNCC As Boolean
-
         Public dir As String
         Public name As String
         Dim version As String
@@ -220,13 +208,10 @@ Module winapp2handler
                 entryLines(i) = New List(Of Integer)
                 winapp2entries(i) = New List(Of winapp2entry)
             Next
-
             'Determine if we're the Non-CCleaner variant of the ini
             isNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
-
             'Determine the version string
             version = If(file.comments.Count = 0 Or Not file.comments.Values(0).comment.ToLower.Contains("version"), "; version 000000", file.comments.Values(0).comment)
-
             'Build the header sections for browsers/thunderbird/winapp3
             Dim langSecRefs As New List(Of String) From {"3029", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous"}
             For Each section In file.sections.Values
@@ -310,10 +295,10 @@ Module winapp2handler
             Dim licLink As String = appendNewLine(If(isNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"))
             'Version string (YYMMDD format) & entry count 
             Dim out As String = appendNewLine(version)
-            out += appendNewLine("; # of entries: " & count.ToString("#,###"))
+            out += appendNewLine($"; # of entries: {count.ToString("#,###")}")
             out += appendNewLine(";")
-            out += "; " & fileName & " is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: " & licLink
-            out += appendNewLine("; If you plan on modifying, distributing, and/or hosting " & fileName & " for your own program or website, please ask first.")
+            out += $"; {fileName} is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: {licLink}"
+            out += appendNewLine($"; If you plan on modifying, distributing, and/or hosting {fileName} for your own program or website, please ask first.")
             out += appendNewLine(";")
             If isNCC Then
                 out += appendNewLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.")
@@ -328,7 +313,7 @@ Module winapp2handler
                     out += appendNewLine("; ")
                     out += appendNewLine(appendNewLine("; " & entrySections(i).name))
                     out += entrySections(i).toString
-                    out += appendNewLine(prependNewLines(False) & "; End of " & entrySections(i).name)
+                    out += appendNewLine($"{prependNewLines(False)}; End of {entrySections(i).name}")
                 End If
             Next
             If entrySections.Last.sections.Count > 0 Then out += prependNewLines(False) & entrySections.Last.toString
@@ -444,8 +429,11 @@ Module winapp2handler
             End Select
         End Sub
 
-        'Reconstruct a filekey's format in the form of path|file;file;file..|FLAG
-        'This also trims any empty comments in a non transparent way
+        ''' <summary>
+        ''' Reconstructs a FileKey to hold the format of FileKeyX=PATH|FILE;FILE;FILE....|FLAG
+        ''' </summary>
+        ''' <param name="key">An iniKey to be reconstructed</param>
+        ''' Also trims empty comments 
         Public Sub reconstructKey(ByRef key As iniKey)
             Dim out As String = ""
             out += paramString & "|"
