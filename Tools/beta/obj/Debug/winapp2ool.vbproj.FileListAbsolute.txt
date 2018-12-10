@@ -1,0 +1,11 @@
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\obj\Debug\winapp2ool.vbprojAssemblyReference.cache
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\obj\Debug\winapp2ool.vbproj.GenerateResource.cache
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\obj\Debug\winapp2ool.Resources.resources
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\obj\Debug\winapp2ool.vbproj.CoreCompileInputs.cache
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\bin\Debug\winapp2ool.exe.config
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\bin\Debug\winapp2ool.exe
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\bin\Debug\winapp2ool.pdb
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\bin\Debug\winapp2ool.xml
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\obj\Debug\winapp2ool.exe
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\obj\Debug\winapp2ool.xml
+C:\Users\robbie\source\repos\moscadotto\winapp2\Tools\beta\obj\Debug\winapp2ool.pdb

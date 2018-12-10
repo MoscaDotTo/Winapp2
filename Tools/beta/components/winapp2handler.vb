@@ -211,7 +211,8 @@ Module winapp2handler
             'Determine if we're the Non-CCleaner variant of the ini
             isNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
             'Determine the version string
-            version = If(file.comments.Count = 0 Or Not file.comments.Values(0).comment.ToLower.Contains("version"), "; version 000000", file.comments.Values(0).comment)
+            If file.comments.Count = 0 Then version = "; version 000000"
+            If file.comments.Count > 0 Then version = If(Not file.comments.Values(0).comment.ToLower.Contains("version"), "; version 000000", file.comments.Values(0).comment)
             'Build the header sections for browsers/thunderbird/winapp3
             Dim langSecRefs As New List(Of String) From {"3029", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous"}
             For Each section In file.sections.Values

@@ -286,7 +286,6 @@ Module WinappDebug
     Private Sub debug(cfile As iniFile)
         If exitCode Then Exit Sub
         Console.Clear()
-
         print(0, tmenu("Beginning analysis of winapp2.ini"), closeMenu:=True)
         cwl()
         numErrs = 0

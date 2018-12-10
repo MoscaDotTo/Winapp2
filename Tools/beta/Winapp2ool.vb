@@ -154,12 +154,9 @@ Module Winapp2ool
     ''' Attempts to return the version number from the first line of winapp2.ini, returns "000000" if it can't
     ''' </summary>
     Private Sub getLocalWinapp2Version()
-        If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then
-            updateCheckFailed("winapp2.ini")
-        Else
-            Dim localStr As String = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", , False)
-            localWa2Ver = If(localStr = "", "000000", localStr.Split(CChar(" "))(2))
-        End If
+        If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then updateCheckFailed("winapp2.ini") : Exit Sub
+        Dim localStr As String = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", remote:=False).ToLower
+        localWa2Ver = If(Not localStr.Contains("version"), "000000", localStr.Split(CChar(" "))(2))
     End Sub
 
     ''' <summary>
