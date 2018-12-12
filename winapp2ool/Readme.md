@@ -7,7 +7,6 @@ If winapp2ool is launched without a network connection or .NET Framework 4.6 (or
 By default, each tool in the application assumes that local files it is looking for are in the same folder as the executable. 
 
 ## Requirements & Notes
-### Windows Vista-10
 ##### Minimum:
 * Windows Vista SP2
 * .NET Framework 4.5
