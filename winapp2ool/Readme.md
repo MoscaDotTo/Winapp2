@@ -84,7 +84,7 @@ WinappDebug is essentially a basic [lint](https://www.wikiwand.com/en/Lint_%28so
    * Invalid winapp2.ini commands
    * No valid Detect / DetectFile / DetectOS / SpecialDetect provided
    * No valid FileKeys or RegKeys provided
-   * ExcludeKeys specified in the absense of corresponding FileKeys or RegKeys
+   * ExcludeKeys specified in the absence of corresponding FileKeys or RegKeys
    * **No Default key provided**
    #### DetectOS
    * More than one DetectOS key provided
@@ -139,8 +139,8 @@ Trim is designed to do as its name implies: trim winapp2.ini. It does this by pr
     * Unavailable in offline mode 
 * Toggle Download (Non-CCleaner)
   * Only shown when downloading is enabled first
-  * CCleaner users shold not use this option
-  * Disabled by default  
+  * CCleaner users should not use this option
+  * Disabled by default 
   * Unavailable in offline mode
 * File Chooser (winapp2.ini)
   * Opens the interface to choose a new local file path for winapp2.ini 
@@ -207,14 +207,14 @@ This tool is designed to simply merge two local ini files. It has two modes, bot
       *  Restores the tool to its default state, undoing any changes the user may have made
            * Only shown if settings have been modified  
 ## CCiniDebug
-This tool was borne of necessity in the advent of a mass renaming of entries in winapp2.ini that left many orphaned settings in CCleaner.ini. Put simply, this tool is a small debugger for CCleaner.ini that will remove any orphaned entry settings left over by removed winapp2.ini keys. 
+This tool was born of necessity in the advent of a mass renaming of entries in winapp2.ini that left many orphaned settings in CCleaner.ini. Put simply, this tool is a small debugger for CCleaner.ini that will remove any orphaned entry settings left over by removed winapp2.ini keys. 
 
 ### Menu Options
 * Exit 
   * Returns you to the winapp2ool menu
 * Run (default)
   * Runs the debugger using your current settings
-     * Will not run if all three settings are diabled
+     * Will not run if all three settings are disabled
  * Toggle Pruning 
    * Enables or disables the pruning of stale winapp2.ini entry settings
    * Default is enabled
