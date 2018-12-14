@@ -124,7 +124,7 @@ Public Module Trim
     ''' Initiates the trim after validating our ini files
     ''' </summary>
     Private Sub initTrim()
-        winappFile.validate()
+        If Not download Then winappFile.validate()
         If pendingExit() Then Exit Sub
         Dim winapp2 As winapp2file = If(Not download, New winapp2file(winappFile), New winapp2file(getRemoteIniFile(If(downloadNCC, nonccLink, wa2Link))))
         trim(winapp2)

@@ -397,9 +397,12 @@ Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Initiates the cFormat function
+    ''' Audits a keyList of winapp2.ini format iniKeys for errors, alerting the user and correcting where possible.
     ''' </summary>
     ''' <param name="keyList">A given list of iniKey objects to have their format audited</param>
+    ''' <param name="processKey">The function that audits the keys of the keyType provided in the keyList</param>
+    ''' <param name="hasF">Optional </param>
+    ''' <param name="hasR"></param>
     Private Sub processKeyList(ByRef keyList As List(Of iniKey), processKey As Func(Of iniKey, iniKey), Optional ByRef hasF As Boolean = False, Optional ByRef hasR As Boolean = False)
         If keyList.Count = 0 Then Exit Sub
         Dim curNum As Integer = 1

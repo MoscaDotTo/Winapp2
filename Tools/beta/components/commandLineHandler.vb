@@ -248,26 +248,26 @@ Module commandLineHandler
         args.AddRange(Environment.GetCommandLineArgs)
         'Remove the first arg which is simply the name of the executable
         args.RemoveAt(0)
-        'the s is for silent, if we havxe this flag, don't give any output to the user under normal circumstances 
+        'The s is for silent, if we havxe this flag, don't give any output to the user under normal circumstances 
         invertSettingAndRemoveArg(suppressOutput, "-s")
         If args.Count > 0 Then
             Select Case args(0)
-                Case "1"
+                Case "1", "-1"
                     args.RemoveAt(0)
                     autoDebug()
-                Case "2"
+                Case "2", "-2"
                     args.RemoveAt(0)
                     autoTrim()
-                Case "3"
+                Case "3", "-3"
                     args.RemoveAt(0)
                     autoMerge()
-                Case "4"
+                Case "4", "-4"
                     args.RemoveAt(0)
                     autoDiff()
-                Case "5"
+                Case "5", "-5"
                     args.RemoveAt(0)
                     autoccini()
-                Case "6"
+                Case "6", "-6"
                     args.RemoveAt(0)
                     autodownload()
             End Select
