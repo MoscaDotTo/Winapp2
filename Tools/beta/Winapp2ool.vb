@@ -17,7 +17,6 @@
 Option Strict On
 Imports System.IO
 Imports Microsoft.Win32
-Imports System.Threading
 
 Module Winapp2ool
     'Update and compatibility settings
