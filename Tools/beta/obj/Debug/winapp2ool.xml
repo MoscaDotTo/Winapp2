@@ -944,8 +944,8 @@ winapp2ool
  <summary>
  Performs conflict resolution for the merge process
  </summary>
- <param name="first">The iniFile to be merged into</param>
- <param name="second">The file to merge</param>
+ <param name="first">The base iniFile that will be modified by Merge</param>
+ <param name="second">The iniFile to be merged into the base</param>
 </member>
 <member name="T:winapp2ool.winapp2handler">
  <summary>
@@ -1274,7 +1274,7 @@ winapp2ool
  <param name="d">Download boolean</param>
  <param name="ncc">Non-CCleaner download boolean</param>
 </member>
-<member name="M:winapp2ool.Trim.printmenu">
+<member name="M:winapp2ool.Trim.printMenu">
  <summary>
  Prints the main menu to the user
  </summary>
@@ -1289,12 +1289,6 @@ winapp2ool
  <summary>
  Initiates the trim after validating our ini files
  </summary>
-</member>
-<member name="M:winapp2ool.Trim.initDownloadedTrim(System.String)">
- <summary>
- Load a remote .ini file and trim it
- </summary>
- <param name="link">The link to the online resource</param>
 </member>
 <member name="M:winapp2ool.Trim.trim(winapp2ool.winapp2handler.winapp2file)">
  <summary>
@@ -1480,13 +1474,13 @@ winapp2ool
  <param name="findType">The type of neighbor checking (keyType for iniKey values)</param>
  <param name="LineCountList">A list containing the line counts of the Strings in someList</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.initCFormat(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@)">
+<member name="M:winapp2ool.WinappDebug.processKeyList(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@,System.Func{winapp2ool.iniFileHandler.iniKey,winapp2ool.iniFileHandler.iniKey},System.Boolean@,System.Boolean@)">
  <summary>
  Initiates the cFormat function
  </summary>
  <param name="keyList">A given list of iniKey objects to have their format audited</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.cFormat(winapp2ool.iniFileHandler.iniKey,System.Int32@,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@)">
+<member name="M:winapp2ool.WinappDebug.cFormat(winapp2ool.iniFileHandler.iniKey,System.Int32@,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@,System.Boolean)">
  <summary>
  Does some basic formatting checks that apply to most winapp2.ini format iniKey objects
  </summary>
@@ -1522,29 +1516,17 @@ winapp2ool
  <param name="setting">The parameter to be observed if only correcting some formatting</param>
  <returns></returns>
 </member>
-<member name="M:winapp2ool.WinappDebug.pLangSecRef(winapp2ool.winapp2handler.winapp2entry@)">
+<member name="M:winapp2ool.WinappDebug.pLangSecRef(winapp2ool.iniFileHandler.iniKey)">
  <summary>
- Processes a list of LangSecRef or Section format winapp2.ini iniKey objects and checks them for errors, correcting where possible
+ Checks the values of a given LangSecRef key for errors
  </summary>
- <param name="entry">A winapp2entry to process</param>
+ <param name="key">A winapp2.ini LangSecRef format iniKey object</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.pFileKey(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@)">
+<member name="M:winapp2ool.WinappDebug.pFileKey(winapp2ool.iniFileHandler.iniKey)">
  <summary>
- Processes a list of FileKEy format winapp2.ini iniKey objects and checks them for errors, correcting where possible
+ Processes a FileKey format winapp2.ini iniKey object and checks it for errors, correcting where possible
  </summary>
- <param name="keyList"></param>
-</member>
-<member name="M:winapp2ool.WinappDebug.pDefault(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey})">
- <summary>
- Processes the Default key(s - there should only be one!) in an entry
- </summary>
- <param name="keyList">The list of Default keys in an winapp2entry</param>
-</member>
-<member name="M:winapp2ool.WinappDebug.confirmOnlyOne(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey})">
- <summary>
- Prints an error for each object in a list of iniKey objects with a length greater than 1
- </summary>
- <param name="keylist">A list of iniKey objects</param>
+ <param name="key">A winap2.ini FileKey format iniKey object</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.validateKeys(winapp2ool.winapp2handler.winapp2entry@)">
  <summary>
@@ -1558,23 +1540,17 @@ winapp2ool
  </summary>
  <param name="entry">The winapp2entry object to be processed</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.pDetOS(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@)">
+<member name="M:winapp2ool.WinappDebug.voidDelegate(winapp2ool.iniFileHandler.iniKey)">
  <summary>
- Processes a list of DetectOS format winapp2.ini iniKey objects and checks them for errors, correcting where possible
+ This method does nothing by design
  </summary>
- <param name="keyList">A list of winapp2.ini DetectOS format iniKey objects to be processed</param>
+ <param name="key">An iniKey object to do nothing with</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.pWarning(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@)">
+<member name="M:winapp2ool.WinappDebug.pDetectFile(winapp2ool.iniFileHandler.iniKey)">
  <summary>
- Processes a list of Warning format winapp2.ini iniKey objects and checks them for errors, correcting where possible
+ Processes a DetectFile format winapp2.ini iniKey objects and checks it for errors, correcting where possible
  </summary>
- <param name="keyList">A list of winapp2.ini Warning format iniKeys to be scanned</param>
-</member>
-<member name="M:winapp2ool.WinappDebug.pDetectFile(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@)">
- <summary>
- Processes a list of DetectFile format winapp2.ini iniKey objects and checks them for errors, correcting where possible
- </summary>
- <param name="keyList">A list of winapp2.ini DetectFile format iniKeys to be scanned</param>
+ <param name="key">A winapp2.ini DetectFile format iniKey</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.chkPathFormatValidity(winapp2ool.iniFileHandler.iniKey,System.Boolean)">
  <summary>
@@ -1589,12 +1565,6 @@ winapp2ool
  </summary>
  <param name="val">The directory listing to be split</param>
  <returns></returns>
-</member>
-<member name="M:winapp2ool.WinappDebug.pRegDetect(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey})">
- <summary>
-Processes a list of Detect format winapp2.ini iniKey objects and checks them for errors, correcting where possible
- </summary>
- <param name="keylist">A list of iniKey objects containing RegKey format winapp2.ini keys</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.chkDupes(System.Collections.Generic.List{System.String}@,System.String)">
  <summary>
@@ -1614,12 +1584,6 @@ Processes a list of Detect format winapp2.ini iniKey objects and checks them for
  <param name="keyNumber">The current expected key number</param>
  <param name="dupeList">The list containing any duplicate iniKey objects found during the audit</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.pDetect(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@)">
- <summary>
- Processes a list of DetectFile or Detect format winapp2.ini iniKey objects and checks them for errors, correcting where possible
- </summary>
- <param name="keyList">The list of iniKeys in winapp2 Detect or DetectFile format</param>
-</member>
 <member name="M:winapp2ool.WinappDebug.sortKeys(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@)">
  <summary>
  Sorts a list of iniKey objects alphabetically (with some changes made for winapp2.ini syntax) based on the contents of their value field
@@ -1633,12 +1597,6 @@ Processes a list of Detect format winapp2.ini iniKey objects and checks them for
  <param name="keyList">The list of iniKey objects to reorder</param>
  <param name="sortedKeyList">The sorted state of the key values in the list</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.pRegKey(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey})">
- <summary>
- Processes a list of RegKey format winapp2.ini iniKey objects and checks them for errors, correcting where possible
- </summary>
- <param name="keyList">A list of winapp2.ini format RegKey iniKey objects</param>
-</member>
 <member name="M:winapp2ool.WinappDebug.cFlags(winapp2ool.iniFileHandler.iniKey@,System.String[])">
  <summary>
  Detects if a pipe symbol is missing before an array of given params
@@ -1646,17 +1604,10 @@ Processes a list of Detect format winapp2.ini iniKey objects and checks them for
  <param name="key">An iniKey object to be observed</param>
  <param name="flagStrs">The array of parameters which should be prceeded by a pipe symbol if they exist in the key value</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.pSpecialDetect(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@)">
- <summary>
- Processes a list of SpecialDetect format winapp2.ini iniKey objects and checks them for errors, correcting where possible
- </summary>
- <param name="keyList">A list of SpecialDetect format winapp2.ini iniKey objects</param>
-</member>
-<member name="M:winapp2ool.WinappDebug.pExcludeKey(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@,System.Boolean@,System.Boolean@)">
+<member name="M:winapp2ool.WinappDebug.pExcludeKey(winapp2ool.iniFileHandler.iniKey@,System.Boolean@,System.Boolean@)">
  <summary>
  Processes a list of ExcludeKey format winapp2.ini iniKey objects and checks them for errors, correcting where possible
  </summary>
- <param name="keyList">A list of ExcludeKey format winapp2.ini iniKey objects</param>
  <param name="hasF">Indicates whether the given list excludes filesystem locations</param>
  <param name="hasR">Indicates whether the given list excludes registry locations</param>
 </member>
@@ -1701,13 +1652,6 @@ Processes a list of Detect format winapp2.ini iniKey objects and checks them for
  </summary>
  <param name="keylist">The list from which objects might be removed</param>
  <param name="dupeList">The list of objects to remove</param>
-</member>
-<member name="M:winapp2ool.WinappDebug.deDupeAndSort(System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey}@,System.Collections.Generic.List{winapp2ool.iniFileHandler.iniKey})">
- <summary>
- Removes duplicate keys from a list of iniKeys and sorts the result
- </summary>
- <param name="keyList">A list of iniKey objects to be culled and sorted</param>
- <param name="dupeList">A list of duplicate iniKey objects to be culled</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.inputMismatchErr(System.Int32,System.String,System.String,System.String,System.Boolean)">
  <summary>

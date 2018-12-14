@@ -21,7 +21,7 @@ Imports System.Threading
 
 Module Winapp2ool
     'Update and compatibility settings
-    Public currentVersion As String = "0.91"
+    Public currentVersion As String = "0.11"
     Dim latestVersion As String = ""
     Dim latestWa2Ver As String = ""
     Dim localWa2Ver As String = ""

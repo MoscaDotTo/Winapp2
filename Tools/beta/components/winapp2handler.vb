@@ -327,7 +327,7 @@ Module winapp2handler
     ''' </summary>
     Public Class winapp2entry
         Public name As String
-        Public fullname As String
+        Public fullName As String
         Public detectOS As New List(Of iniKey)
         Public langSecRef As New List(Of iniKey)
         Public sectionKey As New List(Of iniKey)
@@ -348,7 +348,7 @@ Module winapp2handler
         ''' </summary>
         ''' <param name="section">A winapp2.ini format iniSection object</param>
         Public Sub New(ByVal section As iniSection)
-            fullname = section.getFullName
+            fullName = section.getFullName
             name = section.name
             updKeyListList()
             lineNum = section.startingLineNumber
@@ -382,7 +382,7 @@ Module winapp2handler
         ''' <returns></returns>
         Public Function dumpToListOfStrings() As List(Of String)
             Dim outList As New List(Of String)
-            outList.Add(fullname)
+            outList.Add(fullName)
             updKeyListList()
             For Each lst In keyListList
                 For Each key In lst

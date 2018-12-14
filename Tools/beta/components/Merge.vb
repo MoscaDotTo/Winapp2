@@ -76,16 +76,17 @@ Module Merge
         printMenuTop({"Merge the contents of two ini files, while either replacing (default) or removing sections with the same name."})
         print(1, "Run (default)", "Merge the two ini files")
         print(0, "Preset Merge File Choices:", leadingBlank:=True, trailingBlank:=True)
-        print(1, "Removed Entries", "Select Removed Entries.ini")
-        print(1, "Custom", "Select Custom.ini", trailingBlank:=True)
+        print(1, "Removed Entries", "Select 'Removed Entries.ini'")
+        print(1, "Custom", "Select 'Custom.ini'")
+        print(1, "winapp3.ini", "Select 'winapp3.ini'", trailingBlank:=True)
         print(1, "File Chooser (winapp2.ini)", "Choose a new name or location for winapp2.ini")
-        print(1, "File Chooser (merge)", "Choose a name or location not listed above for merging")
+        print(1, "File Chooser (merge)", "Choose a name or location for merging")
         print(1, "File Chooser (save)", "Choose a new save location for the merged file", trailingBlank:=True)
         print(0, $"Current winapp2.ini: {replDir(winappFile.path)}")
         print(0, $"Current merge file : {If(mergeFile.name = "", "Not yet selected", replDir(mergeFile.path))}")
         print(0, $"Current save target: {replDir(outputFile.path)}", trailingBlank:=True)
         print(1, "Toggle Merge Mode", "Switch between merge modes.")
-        print(0, $"Current mode: {If(mergeMode, "Replace & Add", "Replace & Remove")}", closeMenu:=Not settingsChanged)
+        print(0, $"Current mode: {If(mergeMode, "Add & Replace", "Add & Remove")}", closeMenu:=Not settingsChanged)
         print(2, "Merge", cond:=settingsChanged, closeMenu:=True)
         Console.WindowHeight = If(settingsChanged, 32, 30)
     End Sub
@@ -105,14 +106,16 @@ Module Merge
             Case input = "3"
                 changeMergeName("Custom.ini")
             Case input = "4"
-                changeFileParams(winappFile, settingsChanged)
+                changeMergeName("winapp3.ini")
             Case input = "5"
-                changeFileParams(mergeFile, settingsChanged)
+                changeFileParams(winappFile, settingsChanged)
             Case input = "6"
-                changeFileParams(outputFile, settingsChanged)
+                changeFileParams(mergeFile, settingsChanged)
             Case input = "7"
+                changeFileParams(outputFile, settingsChanged)
+            Case input = "8"
                 toggleSettingParam(mergeMode, "Merge Mode ", settingsChanged)
-            Case input = "8" And settingsChanged
+            Case input = "9" And settingsChanged
                 resetModuleSettings("Merge", AddressOf initDefaultSettings)
             Case Else
                 menuHeaderText = invInpStr
@@ -135,7 +138,6 @@ Module Merge
     Public Sub initMerge()
         Console.Clear()
         winappFile.validate()
-        If pendingExit() Then Exit Sub
         mergeFile.validate()
         If pendingExit() Then Exit Sub
         merge()
@@ -146,7 +148,6 @@ Module Merge
     ''' Conducts the merger of our two iniFiles
     ''' </summary>
     Private Sub merge()
-        Dim out As String = ""
         processMergeMode(winappFile, mergeFile)
         Dim tmp As New winapp2file(winappFile)
         Dim tmp2 As New winapp2file(mergeFile)
@@ -162,7 +163,7 @@ Module Merge
             section.sortSections(replaceAndSort(section.getSectionNamesAsList, "-", "  "))
         Next
         'write the merged winapp2string to file
-        out += tmp.winapp2string
+        Dim out As String = tmp.winapp2string
         outputFile.overwriteToFile(out)
         print(0, bmenu($"Finished merging files. {anyKeyStr}"))
         If Not suppressOutput Then Console.ReadKey()
@@ -171,8 +172,8 @@ Module Merge
     ''' <summary>
     ''' Performs conflict resolution for the merge process
     ''' </summary>
-    ''' <param name="first">The iniFile to be merged into</param>
-    ''' <param name="second">The file to merge</param>
+    ''' <param name="first">The base iniFile that will be modified by Merge</param>
+    ''' <param name="second">The iniFile to be merged into the base</param>
     Private Sub processMergeMode(ByRef first As iniFile, ByRef second As iniFile)
         Dim removeList As New List(Of String)
         For Each section In second.sections.Keys

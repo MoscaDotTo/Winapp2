@@ -82,7 +82,7 @@ Public Module Trim
     ''' <summary>
     ''' Prints the main menu to the user
     ''' </summary>
-    Public Sub printmenu()
+    Public Sub printMenu()
         printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
         print(1, "Run (default)", "Trim winapp2.ini")
         print(1, "Toggle Download", $"{enStr(download)} using the latest winapp2.ini as the input file", Not isOffline, True)
@@ -130,14 +130,6 @@ Public Module Trim
         trim(winapp2)
         menuHeaderText = "Trim Complete"
         Console.Clear()
-    End Sub
-
-    ''' <summary>
-    ''' Load a remote .ini file and trim it
-    ''' </summary>
-    ''' <param name="link">The link to the online resource</param>
-    Public Sub initDownloadedTrim(link As String)
-        trim(New winapp2file(getRemoteIniFile(link)))
     End Sub
 
     ''' <summary>

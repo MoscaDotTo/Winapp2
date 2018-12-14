@@ -148,7 +148,7 @@ Public Module iniFileHandler
         print(1, "Directory Chooser", "Choose a new directory", trailingBlank:=True)
         print(0, $"Current Directory: {replDir(someFile.dir)}")
         print(0, $"Current File:      {someFile.name}", closeMenu:=True)
-        Console.Write($"{Environment.NewLine} Enter a number, a new file name, or leave blank to continue using '{someFile.name}:'")
+        Console.Write($"{Environment.NewLine} Enter a number, {If(Not someFile.name = "", "", "or ")}a new file name{If(someFile.name = "", "", $", or leave blank to continue using '{someFile.name}'")}: ")
         Dim input As String = Console.ReadLine
         Select Case True
             Case input = "0"

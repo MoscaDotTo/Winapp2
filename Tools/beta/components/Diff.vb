@@ -91,11 +91,10 @@ Module Diff
         printMenuTop({"Observe the differences between two ini files"})
         print(1, "Run (default)", "Run the diff tool")
         print(0, "Select Older/Local File:", leadingBlank:=True)
-        print(1, "winapp2.ini", "Use the default name")
         print(1, "File Chooser", "Choose a new name or location for your older ini file")
         print(0, "Select Newer/Remote File:", leadingBlank:=True)
         print(1, "winapp2.ini (online)", $"{enStr(download)} diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, leadingBlank:=True)
-        print(1, "winapp2.ini (non-ccleaner)", $"{enStr(downloadNCC)} diffing against the latest non-ccleaner winapp2.ini version on GitHub", download, trailingBlank:=True)
+        print(1, "winapp2.ini (non-ccleaner)", $"{enStr(downloadNCC)} diffing against the latest Non-CCleaner winapp2.ini version on GitHub", download, trailingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your newer ini file", Not download, isOffline, True)
         print(0, "Log Settings:")
         print(1, "Toggle Log Saving", $"{enStr(saveLog)} automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not saveLog)
@@ -115,26 +114,23 @@ Module Diff
             Case input = "0"
                 exitModule("Diff")
             Case input = "1" Or input = ""
-                If Not denyActionWithTopper(nFile.name = "" And Not download, "Please Select a file against which To diff") Then initDiff()
+                If Not denyActionWithTopper(nFile.name = "" And Not download, "Please select a file against which to diff") Then initDiff()
             Case input = "2"
-                oFile.name = "winapp2.ini"
-                menuHeaderText = "Old/Local filename Set"
-            Case input = "3"
                 changeFileParams(oFile, settingsChanged)
-            Case input = "4" And Not isOffline
+            Case input = "3" And Not isOffline
                 toggleDownload(download, settingsChanged)
                 nFile.name = If(download, GetNameFromDL(download, downloadNCC), "")
                 If downloadNCC And Not download Then downloadNCC = False
-            Case input = "5" And download
+            Case input = "4" And download
                 toggleDownload(downloadNCC, settingsChanged)
                 nFile.name = If(download, GetNameFromDL(download, downloadNCC), "")
-            Case (input = "5" And Not (download Or isOffline)) Or (input = "4" And isOffline)
+            Case (input = "4" And Not (download Or isOffline)) Or (input = "3" And isOffline)
                 changeFileParams(nFile, settingsChanged)
-            Case (input = "6" And Not isOffline) Or (input = "5" And isOffline)
-                toggleSettingParam(saveLog, "Log Saving ", settingsChanged)
-            Case saveLog And ((input = "7" And Not isOffline) Or (input = "6" And isOffline))
+            Case (input = "5" And Not isOffline) Or (input = "4" And isOffline)
+                toggleSettingParam(saveLog, "Log Saving", settingsChanged)
+            Case saveLog And ((input = "6" And Not isOffline) Or (input = "5" And isOffline))
                 changeFileParams(logFile, settingsChanged)
-            Case settingsChanged And (Not isOffline And ((input = "7" And Not saveLog) Or (input = "8" And saveLog)) Or (isOffline And (input = "6") Or (input = "7" And saveLog)))
+            Case settingsChanged And (Not isOffline And ((input = "6" And Not saveLog) Or (input = "7" And saveLog)) Or (isOffline And (input = "5") Or (input = "6" And saveLog)))
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
             Case Else
                 menuHeaderText = invInpStr
