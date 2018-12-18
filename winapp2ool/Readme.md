@@ -26,7 +26,7 @@ Winapp2ool supports command line switches. There are several top level switches 
 * `1,2,3,4,5,6`,`-1,-2,-3,-4,-5,-6`: Calls the module associated with the menu number in the winapp2ool menu. 1 for WinappDebug, 6 for Downloader. All other commands should follow this one. 
 * `-s`: Actives "silent mode" muting most or all output from the application. When silent mode is active, programs will silently fail if they hit an error during execution. The application will automatically exit after it has finished its task.  
 * `-1f`, `-1d`: Defines a new file name or path for winapp2.ini to be used during module execution. You can define subdirectories of the current directory easily with the `-f` flag by simply prepending the directory to the file name. eg: `-1f \subdir\winapp2.ini`. File and directory parameters should always immediately follow their flag.
-* `-2f`,`-2d`: As above, defines the target for the "second file" in program execution, which is more specifically addressed in the module documentatio below. 
+* `-2f`,`-2d`: As above, defines the target for the "second file" in program execution, which is more specifically addressed in the module documentation below. 
 * `-3f`,`-3d`: As above, defines the target for the "third file", if applicable.  
 
 #### Example: 
