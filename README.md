@@ -128,7 +128,7 @@ Winapp2 entries are organized alphabetically, between sections in the file and i
 ### Environment variables:
 
 These are all the possible variables that can be used for writing paths in Winapp2.
-
+##### Variables marked with a * natviely check both 64bit and 32bit locations on 64bit systems.
  Varaible        | Windows Vista-10 Path           | WindowsXP Path  |
  :------------- |:-------------| :-------------|
 `%AppData%`      | `C:\Users\%UserName%\AppData\Roaming` | `C:\Documents and Settings\%UserName%\Application Data` 
