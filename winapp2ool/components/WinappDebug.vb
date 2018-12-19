@@ -519,6 +519,7 @@ Module WinappDebug
     ''' <param name="key">A winapp2.ini LangSecRef format iniKey object</param>
     Private Function pLangSecRef(key As iniKey) As iniKey
         fullKeyErr(key, "LangSecRef holds an invalid value.", Not secRefNums.IsMatch(key.value))
+        Return key
     End Function
 
     ''' <summary>
@@ -622,6 +623,7 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="key">An iniKey object to do nothing with</param>
     Private Function voidDelegate(key As iniKey) As iniKey
+        Return key
     End Function
 
     ''' <summary>

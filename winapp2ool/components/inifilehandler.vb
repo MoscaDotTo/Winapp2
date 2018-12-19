@@ -530,7 +530,7 @@ Public Module iniFileHandler
                     Console.WriteLine("This section will be ignored until it is given a unique name.")
                     Console.WriteLine()
                     Console.WriteLine("Press enter to continue.")
-                    Console.ReadLine("")
+                    Console.ReadLine()
                 End If
             Finally
                 sectionToBeBuilt.Clear()

@@ -108,7 +108,7 @@ Module commandLineHandler
     ''' Handles the commandline args for Merge
     ''' </summary>
     '''  Merge args:
-    ''' -mm      : toggle mergemode from add&replace to add&remove
+    ''' -mm      : toggle mergemode from add&amp;replace to add&amp;remove
     ''' -r       : use removed entries.ini as the merge file's name
     ''' -c       : use custom.ini as the merge file's name
     ''' -w       : use winapp3.ini as the merge file's name
