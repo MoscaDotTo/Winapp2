@@ -30,7 +30,7 @@ Name           | Purpose
 * [Tron](https://github.com/bmrf/tron):
   * Tron ships with winapp2.ini by default, storing it in your `..\tron\resources\stage_1_tempclean\ccleaner` directory.
 
-### Creating entries:
+## Creating entries
 
 Winapp2 entries are organized alphabetically, between sections in the file and individual key values in those sections. Alphabetically, numbers and symbols have precedence over letters. Entries should be ordered with their keys in the following precedence order.
 
@@ -147,11 +147,11 @@ Variable       | Windows Vista-10 Path | WindowsXP Path
 `%Video%` | `C:\Users\%UserName%\Videos` | `C:\Documents and Settings\%UserName%\My Documents\My Videos`
 `%WinDir%` | `C:\Windows` | `C:\Windows`
 
-### Custom.ini:
+## Custom.ini
 
 Winapp2 does not support non-English system configurations or portable software natively. If you have need for these features, we recommend you utilize a "custom.ini" file, and use winapp2ool to merge it with the main file using the Add&Replace setting to override the existing entries.
 
-### Donations:
+## Donations
 
 If you like Winapp2 and want to help keep development going, please consider donating some money to our great minds behind Winapp2.
 
