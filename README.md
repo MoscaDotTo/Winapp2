@@ -2,7 +2,7 @@
 A database of extended cleaning routines for popular Windows PC based maintenance software.
 
 
-Winapp2 comes in 3 different versions. The first version is Winapp2 itself, which is specifically for CCleaner users. It is optimized to remove Winapp2 entries that are already included in CCleaner by default. The second version is the same, except it contains all the removed entries that were removed due to being added in CCleaner. This are for non-CCleaner users. The 3rd version is Winapp3, a much more advanced version that contains dangerous entries that could damage software or even nuke your system. Use this file with extreme cautious.
+Winapp2 comes in 3 different versions. The first version is Winapp2 itself, which is specifically for CCleaner users. It is optimized by removed Winapp2 entries, that are already included in CCleaner by default. The second version is the same, except it contains all the removed entries, that were removed, because they were added in CCleaner. This are for non-CCleaner users. The 3rd version is Winapp3, a much more advanced version that contains dangerous entries that could damage software or even nuke your system. Use this file with extreme cautious.
 
 We also have a tool specifically for these files, which is called Winapp2ool. This tool allows you to combine custom.ini files, detect errors in Winapp2, and trim your file to remove unneeded entries.
 
