@@ -88,7 +88,7 @@ Module Winapp2ool
     ''' Presents the winapp2ool menu to the user, initiates the main event loop for the application
     ''' </summary>
     Public Sub main()
-        Console.Title = $"Winapp2ool v{currentVersion} beta"
+        Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 120
         'winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
         If Not Environment.Version.ToString = "4.0.30319.42000" Then dnfOOD = True
