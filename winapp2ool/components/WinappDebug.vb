@@ -360,6 +360,7 @@ Module WinappDebug
     ''' <param name="sortedList">The sorted state of someList</param>
     ''' <param name="findType">The type of neighbor checking (keyType for iniKey values)</param>
     ''' <param name="LineCountList">A list containing the line counts of the Strings in someList</param>
+    ''' <param name="oopBool">Optional Boolean that reports whether or not there are any out of place entries in the list</param>
     Private Sub findOutOfPlace(ByRef someList As List(Of String), ByRef sortedList As List(Of String), ByVal findType As String, ByRef LineCountList As List(Of Integer), Optional ByRef oopBool As Boolean = False)
         'Only try to find out of place keys when there's more than one
         If someList.Count > 1 Then
@@ -382,16 +383,11 @@ Module WinappDebug
                 Dim curpos As Integer = LineCountList(recind)
                 Dim sortPos As Integer = LineCountList(sortind)
                 If (recind = sortind Or curpos = sortPos) Then Continue For
-                entry = If(findType = "Entry", entry, findType & recind + 1 & "=" & entry)
+                entry = If(findType = "Entry", entry, $"{findType & recind + 1}={entry}")
                 If Not oopBool Then oopBool = True
                 customErr(LineCountList(recind), $"{findType} alphabetization", {$"{entry} appears to be out of place", $"Current line: {curpos}", $"Expected line: {sortPos}"})
             Next
         End If
-    End Sub
-
-    Private Sub checkUnneededNumbering(ByRef key As iniKey)
-        inputMismatchErr(key.lineNumber, "Detected unnecessary numbering.", key.name, key.keyType, Not key.nameIs(key.keyType) And scanNumbers)
-        fixStr(scanNumbers And correctNumbers And Not key.nameIs(key.keyType), key.name, key.keyType)
     End Sub
 
     ''' <summary>
@@ -451,12 +447,13 @@ Module WinappDebug
             customErr(key.lineNumber, "Duplicate key value found", {$"Key:            {key.toString}", $"Duplicates:     {duplicateKeyStr}"})
             dupeList.Add(key)
         End If
-        Dim hasNumberingError As Boolean = Not noNumbers And Not key.nameIs(key.keyType & keyNumber)
-        inputMismatchErr(key.lineNumber, $"{key.keyType} entry is incorrectly numbered.", key.name, $"{key.keyType}{keyNumber}", scanNumbers And hasNumberingError)
-        fixStr(correctNumbers And hasNumberingError, key.name, key.keyType & keyNumber)
-        If noNumbers Then checkUnneededNumbering(key)
+        Dim hasNumberingError As Boolean = If(noNumbers, Not key.nameIs(key.keyType), Not key.nameIs(key.keyType & keyNumber))
+        Dim numberingErrStr As String = If(noNumbers, "Detected unnecessary numbering.", $"{key.keyType} entry is incorrectly numbered.")
+        Dim fixedStr As String = If(noNumbers, key.keyType, key.keyType & keyNumber)
+        inputMismatchErr(key.lineNumber, numberingErrStr, key.name, fixedStr, scanNumbers And hasNumberingError)
+        fixStr(correctNumbers And hasNumberingError, key.name, fixedStr)
         'Scan for and fix any use of incorrect slashes or trailing semicolons
-        fullKeyErr(key, "Forward slash (/) detected in lieu of blackslash (\)", scanSlashes And key.vHas(CChar("/")), correctSlashes, key.value, key.value.Replace(CChar("/"), CChar("\")))
+        fullKeyErr(key, "Forward slash (/) detected in lieu of blackslash (\).", scanSlashes And key.vHas(CChar("/")), correctSlashes, key.value, key.value.Replace(CChar("/"), CChar("\")))
         fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And scanParams, correctParameters, key.value, key.value.TrimEnd(CChar(";")))
         'Do some formatting checks for environment variables
         If {"FileKey", "ExcludeKey", "DetectFile"}.Contains(key.keyType) Then cEnVar(key)
@@ -467,7 +464,7 @@ Module WinappDebug
     ''' Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected
     ''' </summary>
     ''' <param name="caseArray">The parent array of cased Strings</param>
-    ''' <param name="keyValue">The string to be checked for casing errors</param>
+    ''' <param name="keyValue">The String to be checked for casing errors</param>
     Private Function checkCasingError(caseArray As String(), keyValue As String) As String
         For Each casedText In caseArray
             If keyValue.ToLower = casedText.ToLower Then Return casedText
@@ -496,7 +493,7 @@ Module WinappDebug
     ''' <param name="key">an iniKey object to be checked for errors</param>
     ''' <returns></returns>
     Private Function cValidity(key As iniKey) As Boolean
-        'Return false immediately if we are meant to delete the current key 
+        'Return False immediately if we are meant to delete the current key 
         If key.keyType = "DeleteMe" Then Return False
         'Check for leading or trailing whitespace
         fullKeyErr(key, "Detected unwanted whitespace in iniKey value", key.vStartsOrEndsWith(" "), True, key.value, key.value.Trim(CChar(" ")))
@@ -626,6 +623,7 @@ Module WinappDebug
     ''' Processes a DetectFile format winapp2.ini iniKey objects and checks it for errors, correcting where possible
     ''' </summary>
     ''' <param name="key">A winapp2.ini DetectFile format iniKey</param>
+    ''' <returns></returns>
     Private Function pDetectFile(key As iniKey) As iniKey
         'Trailing Backslashes
         fullKeyErr(key, "Trailing backslash (\) found in DetectFile", scanSlashes And key.value.Last = CChar("\"), correctSlashes, key.value, key.value.TrimEnd(CChar("\")))
@@ -671,20 +669,18 @@ Module WinappDebug
     ''' <param name="currentValue">The current value to be audited</param>
     ''' <returns></returns>
     Private Function chkDupes(ByRef valueStrings As List(Of String), currentValue As String) As Boolean
-        If valueStrings.Contains(currentValue.ToLower) Then
-            Return True
-        Else
-            valueStrings.Add(currentValue.ToLower)
-            Return False
-        End If
+        If valueStrings.Contains(currentValue.ToLower) Then Return True
+        valueStrings.Add(currentValue.ToLower)
+        Return False
     End Function
 
     ''' <summary>
     ''' Sorts a list of iniKey objects alphabetically (with some changes made for winapp2.ini syntax) based on the contents of their value field
     ''' </summary>
     ''' <param name="keyList">The list of iniKey objects to be sorted</param>
+    ''' <param name="hadDuplicatesRemoved">The boolean indicating whether or not the keyList has had keys removed from it</param>
     Private Sub sortKeys(ByRef keyList As List(Of iniKey), hadDuplicatesRemoved As Boolean)
-        If (Not scanAlpha) Or keyList.Count <= 1 Then Exit Sub
+        If Not scanAlpha Or keyList.Count <= 1 Then Exit Sub
         Dim keyStrings As List(Of String) = getValues(keyList)
         Dim sortedKeyStringList As List(Of String) = replaceAndSort(keyStrings, "|", " \ \")
         'Rewrite the alphabetized keys back into the keylist (fixes numbering silently) 
@@ -721,6 +717,7 @@ Module WinappDebug
     ''' <summary>
     ''' Processes a list of ExcludeKey format winapp2.ini iniKey objects and checks them for errors, correcting where possible
     ''' </summary>
+    ''' <param name="key">A winapp2.ini ExcludeKey format iniKey object</param>
     ''' <param name="hasF">Indicates whether the given list excludes filesystem locations</param>
     ''' <param name="hasR">Indicates whether the given list excludes registry locations</param>
     Private Sub pExcludeKey(ByRef key As iniKey, ByRef hasF As Boolean, ByRef hasR As Boolean)
@@ -754,7 +751,7 @@ Module WinappDebug
     ''' <summary>
     ''' Attempts to merge FileKeys together if syntactically possible.
     ''' </summary>
-    ''' <param name="keyList">A list of FileKeys</param>
+    ''' <param name="keyList">A list of winapp2.ini FileKey format iniFiles</param>
     Private Sub cOptimization(ByRef keyList As List(Of iniKey))
         If keyList.Count < 2 Or Not scanOpti Then Exit Sub
         Dim dupeList As New List(Of iniKey)
@@ -862,6 +859,7 @@ Module WinappDebug
     ''' <param name="err">The string containing the output error text</param>
     ''' <param name="received">The (erroneous) input data</param>
     ''' <param name="expected">The expected data</param>
+    ''' <param name="cond">Optional condition under which to display the error</param>
     Private Sub inputMismatchErr(linecount As Integer, err As String, received As String, expected As String, Optional cond As Boolean = True)
         If cond Then customErr(linecount, err, {$"Expected: {expected}", $"Found: {received}"})
     End Sub
@@ -891,6 +889,10 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="key">The inikey to be printed</param>
     ''' <param name="err">The string containing the output error text</param>
+    ''' <param name="cond">Optional condition under which the err should be printed</param>
+    ''' <param name="repCond">Optional condition under which to repair the given key</param>
+    ''' <param name="newVal">The value to replace the error value</param>
+    ''' <param name="repairVal">The error value</param>
     Private Sub fullKeyErr(key As iniKey, err As String, Optional cond As Boolean = True, Optional repCond As Boolean = False, Optional ByRef repairVal As String = "", Optional newVal As String = "")
         If cond Then customErr(key.lineNumber, err, {$"Key: {key.toString}"})
         fixStr(cond And repCond, repairVal, newVal)

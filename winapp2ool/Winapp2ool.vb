@@ -264,8 +264,8 @@ Module Winapp2ool
     ''' <summary>
     ''' Handles toggling downloading of winapp2.ini from menus
     ''' </summary>
-    ''' <param name="download">The normal download boolean</param>
-    ''' <param name="settingsChanged">The boolean indicating that settings have changed</param>
+    ''' <param name="download">The download Boolean</param>
+    ''' <param name="settingsChanged">The Boolean indicating that settings have changed</param>
     Public Sub toggleDownload(ByRef download As Boolean, ByRef settingsChanged As Boolean)
         If Not denySettingOffline() Then toggleSettingParam(download, "Downloading ", settingsChanged)
     End Sub
@@ -273,8 +273,8 @@ Module Winapp2ool
     ''' <summary>
     ''' Returns the online download status of winapp2.ini as a String, empty string if not downloading
     ''' </summary>
-    ''' <param name="d">The normal download boolean</param>
-    ''' <param name="dncc">The non-ccleaner download boolean</param>
+    ''' <param name="d">The normal download Boolean</param>
+    ''' <param name="dncc">The non-CCleaner download Boolean</param>
     ''' <returns></returns>
     Public Function GetNameFromDL(d As Boolean, dncc As Boolean) As String
         Return If(d, If(dncc, "Online (non-ccleaner)", "Online"), "")
@@ -283,7 +283,7 @@ Module Winapp2ool
     ''' <summary>
     ''' Resets a module's settings to the defaults
     ''' </summary>
-    ''' <param name="name">The name of the module to be reset</param>
+    ''' <param name="name">The name of the module</param>
     ''' <param name="setDefaultParams">The function that resets the module's settings</param>
     Public Sub resetModuleSettings(name As String, setDefaultParams As Action)
         setDefaultParams()
@@ -307,6 +307,7 @@ Module Winapp2ool
     ''' <param name="name">The name of the module</param>
     ''' <param name="callMenu">The function that prints the module's menu</param>
     ''' <param name="handleInput">The function that handle's the module's input</param>
+    ''' <param name="chkUpd">The Boolean indicating that winapp2ool should check for updates (only called by the main menu)</param>
     Public Sub initModule(name As String, callMenu As Action, handleInput As Action(Of String), Optional chkUpd As Boolean = False)
         initMenu(name)
         Do Until exitCode

@@ -297,7 +297,7 @@ Public Module Trim
                 Case "ProgramFiles"
                     isProgramFiles = True
                 Case "Documents"
-                    envDir = $"{Environment.GetEnvironmentVariable("UserProfile")}\Documents"
+                    envDir = $"{Environment.GetEnvironmentVariable("UserProfile")}\{If(winVer = 5.1, "My ", "")}Documents"
                 Case "CommonAppData"
                     envDir = Environment.GetEnvironmentVariable("ProgramData")
             End Select

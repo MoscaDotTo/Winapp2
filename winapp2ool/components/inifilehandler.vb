@@ -557,11 +557,7 @@ Public Module iniFileHandler
         ''' <param name="listOfKeyLists"></param>
         Public Sub constructKeyLists(ByVal keyTypeList As List(Of String), ByRef listOfKeyLists As List(Of List(Of iniKey)))
             For Each key In Me.keys.Values
-                If keyTypeList.Contains(key.keyType.ToLower) Then
-                    listOfKeyLists(keyTypeList.IndexOf(key.keyType.ToLower)).Add(key)
-                Else
-                    listOfKeyLists.Last.Add(key)
-                End If
+                If keyTypeList.Contains(key.keyType.ToLower) Then listOfKeyLists(keyTypeList.IndexOf(key.keyType.ToLower)).Add(key) Else listOfKeyLists.Last.Add(key)
             Next
         End Sub
 
@@ -595,7 +591,8 @@ Public Module iniFileHandler
         ''' <summary>
         ''' Creates a new iniSection object without tracking the line numbers
         ''' </summary>
-        ''' <param name="listOfLines">The list of strings comprising the iniSection</param>
+        ''' <param name="listOfLines">The list of Strings comprising the iniSection</param>
+        ''' <param name="listOfLineCounts">The list of line numbers associated with the lines</param>
         Public Sub New(ByVal listOfLines As List(Of String), Optional listOfLineCounts As List(Of Integer) = Nothing)
             name = listOfLines(0).Trim(CChar("["), CChar("]"))
             startingLineNumber = If(listOfLineCounts IsNot Nothing, listOfLineCounts(0), 1)

@@ -178,13 +178,8 @@ Module Merge
         Dim removeList As New List(Of String)
         For Each section In second.sections.Keys
             If first.sections.Keys.Contains(section) Then
-                If mergeMode Then
-                    'If mergemode is true, replace the match
-                    first.sections.Item(section) = second.sections.Item(section)
-                Else
-                    'Otherwise, remove the match
-                    first.sections.Remove(section)
-                End If
+                'If mergemode is true, replace the match. otherwise, remove the match
+                If mergeMode Then first.sections.Item(section) = second.sections.Item(section) Else first.sections.Remove(section)
                 removeList.Add(section)
             End If
         Next
