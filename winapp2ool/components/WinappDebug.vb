@@ -447,13 +447,14 @@ Module WinappDebug
             customErr(key.lineNumber, "Duplicate key value found", {$"Key:            {key.toString}", $"Duplicates:     {duplicateKeyStr}"})
             dupeList.Add(key)
         End If
+        'Check for numbering errors
         Dim hasNumberingError As Boolean = If(noNumbers, Not key.nameIs(key.keyType), Not key.nameIs(key.keyType & keyNumber))
         Dim numberingErrStr As String = If(noNumbers, "Detected unnecessary numbering.", $"{key.keyType} entry is incorrectly numbered.")
         Dim fixedStr As String = If(noNumbers, key.keyType, key.keyType & keyNumber)
         inputMismatchErr(key.lineNumber, numberingErrStr, key.name, fixedStr, scanNumbers And hasNumberingError)
         fixStr(correctNumbers And hasNumberingError, key.name, fixedStr)
-        'Scan for and fix any use of incorrect slashes or trailing semicolons
-        fullKeyErr(key, "Forward slash (/) detected in lieu of blackslash (\).", scanSlashes And key.vHas(CChar("/")), correctSlashes, key.value, key.value.Replace(CChar("/"), CChar("\")))
+        'Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
+        fullKeyErr(key, "Forward slash (/) detected in lieu of blackslash (\).", Not key.typeIs("Warning") And scanSlashes And key.vHas(CChar("/")), correctSlashes, key.value, key.value.Replace(CChar("/"), CChar("\")))
         fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And scanParams, correctParameters, key.value, key.value.TrimEnd(CChar(";")))
         'Do some formatting checks for environment variables
         If {"FileKey", "ExcludeKey", "DetectFile"}.Contains(key.keyType) Then cEnVar(key)
