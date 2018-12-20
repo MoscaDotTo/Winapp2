@@ -424,6 +424,7 @@ Module WinappDebug
                         dupeKeys.Add(key)
                     End If
                     cFormat(key, curNum, curStrings, dupeKeys, True)
+                    fullKeyErr(key, "LangSecRef holds an invalid value.", key.typeIs("LangSecRef") And Not secRefNums.IsMatch(key.value))
                     fullKeyErr(key, "SpecialDetect holds an invalid value.", key.typeIs("SpecialDetect") And Not sdList.Contains(key.value))
                     fullKeyErr(key, "All entries should be disabled by default (Default=False).", scanDefaults And Not key.vIs("False") And key.typeIs("Default"), correctDefaults, key.value, "False")
                 Case Else
@@ -518,15 +519,6 @@ Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Checks the values of a given LangSecRef key for errors
-    ''' </summary>
-    ''' <param name="key">A winapp2.ini LangSecRef format iniKey object</param>
-    Private Function pLangSecRef(key As iniKey) As iniKey
-        fullKeyErr(key, "LangSecRef holds an invalid value.", Not secRefNums.IsMatch(key.value))
-        Return key
-    End Function
-
-    ''' <summary>
     ''' Processes a FileKey format winapp2.ini iniKey object and checks it for errors, correcting where possible
     ''' </summary>
     ''' <param name="key">A winap2.ini FileKey format iniKey object</param>
@@ -597,7 +589,7 @@ Module WinappDebug
         'Proess individual keys/keylists in winapp2.ini order
         processKeyList(entry.detectOS, AddressOf voidDelegate)
         processKeyList(entry.sectionKey, AddressOf voidDelegate)
-        processKeyList(entry.langSecRef, AddressOf pLangSecRef)
+        processKeyList(entry.langSecRef, AddressOf voidDelegate)
         processKeyList(entry.specialDetect, AddressOf voidDelegate)
         processKeyList(entry.detects, AddressOf voidDelegate)
         processKeyList(entry.detectFiles, AddressOf pDetectFile)
