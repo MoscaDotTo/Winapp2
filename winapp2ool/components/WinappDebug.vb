@@ -19,7 +19,7 @@ Imports System.IO
 Imports System.Text.RegularExpressions
 
 ''' <summary>
-''' A program whose purpose is to observe and attempt to repair errors in winapp2.ini
+''' A program whose purpose is to observe, report, and attempt to repair errors in winapp2.ini
 ''' </summary>
 Module WinappDebug
 
@@ -279,7 +279,7 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="cfile">A winapp2.ini format iniFile object</param>
     Private Sub debug(cfile As iniFile)
-        If exitCode Then Exit Sub
+        If pendingExit() Then Exit Sub
         Console.Clear()
         print(0, tmenu("Beginning analysis of winapp2.ini"), closeMenu:=True)
         cwl()
@@ -310,9 +310,7 @@ Module WinappDebug
     Private Sub processEntries(ByRef winapp As winapp2file)
         For Each entryList In winapp.winapp2entries
             If entryList.Count = 0 Then Continue For
-            For Each entry In entryList
-                processEntry(entry)
-            Next
+            entryList.ForEach(Sub(entry) processEntry(entry))
         Next
     End Sub
 
@@ -414,22 +412,20 @@ Module WinappDebug
                 Case "ExcludeKey"
                     cFormat(key, curNum, curStrings, dupeKeys)
                     pExcludeKey(key, hasF, hasR)
-                Case "Detect"
-                    chkPathFormatValidity(key, True)
-                    cFormat(key, curNum, curStrings, dupeKeys, keyList.Count = 1)
-                Case "DetectFile"
+                Case "Detect", "DetectFile"
+                    If key.typeIs("Detect") Then chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupeKeys, keyList.Count = 1)
                 Case "RegKey"
                     cFormat(key, curNum, curStrings, dupeKeys)
                     chkPathFormatValidity(key, True)
-                Case "Warning", "DetectOS", "SpecialDetect", "LangSecRef", "Section"
-                    checkUnneededNumbering(key)
-                    If curNum > 1 Then fullKeyErr(key, $"Multiple {key.keyType} detected.")
-                    curNum += 1
+                Case "Warning", "DetectOS", "SpecialDetect", "LangSecRef", "Section", "Default"
+                    If curNum > 1 Then
+                        fullKeyErr(key, $"Multiple {key.keyType} detected.")
+                        dupeKeys.Add(key)
+                    End If
+                    cFormat(key, curNum, curStrings, dupeKeys, True)
                     fullKeyErr(key, "SpecialDetect holds an invalid value.", key.typeIs("SpecialDetect") And Not sdList.Contains(key.value))
-                Case "Default"
-                    checkUnneededNumbering(key)
-                    fullKeyErr(key, "All entries should be disabled by default (Default=False).", scanDefaults And Not key.vIs("False"), correctDefaults, key.value, "False")
+                    fullKeyErr(key, "All entries should be disabled by default (Default=False).", scanDefaults And Not key.vIs("False") And key.typeIs("Default"), correctDefaults, key.value, "False")
                 Case Else
                     cFormat(key, curNum, curStrings, dupeKeys)
             End Select
@@ -448,14 +444,22 @@ Module WinappDebug
     ''' <param name="keyValues">The current list of observed inikey values</param>
     ''' <param name="dupeList">A tracking list of detected duplicate iniKeys</param>
     Private Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As List(Of String), ByRef dupeList As List(Of iniKey), Optional noNumbers As Boolean = False)
-        'Check for wholly duplicate keys and audit their numbering if applicable
-        If Not noNumbers Then checkDupsAndNumbering(keyValues, key, keyNumber, dupeList)
+        'Check for duplicates
+        If chkDupes(keyValues, key.value) Then
+            Dim duplicateKeyStr As String = $"{key.keyType}{If(Not noNumbers, (keyValues.IndexOf(key.value.ToLower) + 1).ToString, "")}={key.value}"
+            customErr(key.lineNumber, "Duplicate key value found", {$"Key:            {key.toString}", $"Duplicates:     {duplicateKeyStr}"})
+            dupeList.Add(key)
+        End If
+        Dim hasNumberingError As Boolean = Not noNumbers And Not key.nameIs(key.keyType & keyNumber)
+        inputMismatchErr(key.lineNumber, $"{key.keyType} entry is incorrectly numbered.", key.name, $"{key.keyType}{keyNumber}", scanNumbers And hasNumberingError)
+        fixStr(correctNumbers And hasNumberingError, key.name, key.keyType & keyNumber)
         If noNumbers Then checkUnneededNumbering(key)
         'Scan for and fix any use of incorrect slashes or trailing semicolons
         fullKeyErr(key, "Forward slash (/) detected in lieu of blackslash (\)", scanSlashes And key.vHas(CChar("/")), correctSlashes, key.value, key.value.Replace(CChar("/"), CChar("\")))
         fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And scanParams, correctParameters, key.value, key.value.TrimEnd(CChar(";")))
         'Do some formatting checks for environment variables
         If {"FileKey", "ExcludeKey", "DetectFile"}.Contains(key.keyType) Then cEnVar(key)
+        keyNumber += 1
     End Sub
 
     ''' <summary>
@@ -682,25 +686,6 @@ Module WinappDebug
             Return False
         End If
     End Function
-
-    ''' <summary>
-    ''' Audits the numbering of keys in their name from 1 to infinity and returns any duplicate keys detected back to the calling function
-    ''' </summary>
-    ''' <param name="keyStrings">The list of values from the iniKeys being audited</param>
-    ''' <param name="key">The current key being audited</param>
-    ''' <param name="keyNumber">The current expected key number</param>
-    ''' <param name="dupeList">The list containing any duplicate iniKey objects found during the audit</param>
-    Private Sub checkDupsAndNumbering(ByRef keyStrings As List(Of String), ByRef key As iniKey, ByRef keyNumber As Integer, ByRef dupeList As List(Of iniKey))
-        'Check for duplicates
-        If chkDupes(keyStrings, key.value) Then
-            customErr(key.lineNumber, "Duplicate key value found", {$"Key:            {key.toString}", $"Duplicates:     {key.keyType}{keyStrings.IndexOf(key.value.ToLower) + 1}={key.value}"})
-            dupeList.Add(key)
-        End If
-        'Make sure the current key is correctly numbered
-        inputMismatchErr(key.lineNumber, $"{key.keyType} entry is incorrectly numbered.", key.name, $"{key.keyType}{keyNumber}", scanNumbers And Not key.nameIs(key.keyType & keyNumber))
-        fixStr(scanNumbers And correctNumbers And Not key.nameIs(key.keyType & keyNumber), key.name, key.keyType & keyNumber)
-        keyNumber += 1
-    End Sub
 
     ''' <summary>
     ''' Sorts a list of iniKey objects alphabetically (with some changes made for winapp2.ini syntax) based on the contents of their value field
