@@ -47,6 +47,8 @@ Section=Games
 
 **DetectFile=** As mentioned above, this is for when a registry key doesn't exist and must use a file path or a specific file.
 
+With the **Detect=** and **DetectFile=** rules gets checked if the program exist on the target system.
+
 **Default=** This refers to if the entry should be enabled by default. CCleaner is the only program that requires this to exist. This should always be **Default=False**, even if the entry is guaranteed to be safe.
 
 **Warning=** If an entry may break a program or does something weird to one's system, it is a good idea to put a warning in an entry. Please leave warnings short and to the point.
