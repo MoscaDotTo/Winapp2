@@ -34,7 +34,7 @@ Winapp2ool supports command line switches. There are several top level switches 
 
 #### Example:
 
-`winapp2ool.exe -1 -c`: Opens winapp2ool and runs WinappDebug with the autocorrect option enabled.
+`winapp2ool.exe -1 -c`: Opens winapp2ool and runs WinappDebug with the autocorrect option enabled.  
 `winapp2ool.exe -2 -d -s`: Silents opens winapp2ool, downloads the latest winapp2.ini, and trims it.
 
 ### Menu Options
@@ -100,7 +100,7 @@ WinappDebug is essentially a basic [lint](https://www.wikiwand.com/en/Lint_%28so
 
 * Toggle Scan Settings
   * Opens the Scan and Repair menu
-  * Allows the enabling and disabling of individual scan and repair routines, helpful for diagnosing application crashes or ignoring certain types of errors if they are known.
+  * Allows the enabling and disabling of individual scan and repair routines, helpful for diagnosing application crashes or ignoring certain types of errors if they are known
 
 * Reset Settings
   * Restores the tool to its default state, undoing any changes the user may have made
@@ -193,7 +193,7 @@ Trim is designed to do as its name implies: trim winapp2.ini. It does this by pr
   * Runs the trimmer using your current settings
 
 * Toggle Download
-  * Enables/Disables downloading of the latest winapp2.ini from GitHub to use as the input for the trimmer.
+  * Enables/Disables downloading of the latest winapp2.ini from GitHub to use as the input for the trimmer
   * Disabled by default
     * Most users will want to select this option
   * Unavailable in offline mode
