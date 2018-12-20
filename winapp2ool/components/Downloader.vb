@@ -166,7 +166,10 @@ Module Downloader
             reader = New StreamReader(client.OpenRead(address))
             Dim wholeFile As String = reader.ReadToEnd
             wholeFile += Environment.NewLine
-            Dim splitFile As String() = wholeFile.Split(CChar(vbLf))
+            Dim splitFile As String() = wholeFile.Split(CChar(Environment.NewLine))
+            For i As Integer = 0 To splitFile.Count - 1
+                splitFile(i) = splitFile(i).Replace(vbCr, "").Replace(vbLf, "")
+            Next
             Return New iniFile(splitFile)
         Catch ex As Exception
             exc(ex)

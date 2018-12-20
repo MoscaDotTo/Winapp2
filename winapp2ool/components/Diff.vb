@@ -215,7 +215,7 @@ Module Diff
                 'And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New List(Of iniKey)
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
-                If Not section.compareTo(sSection, removedKeys, addedKeys) Then
+                If Not section.compareTo(sSection, removedKeys, addedKeys, updatedKeys) Then
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     'Silently ignore any entries with only alphabetization changes
                     If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Continue For
