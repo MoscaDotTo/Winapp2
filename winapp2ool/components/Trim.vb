@@ -139,17 +139,12 @@ Public Module Trim
     Private Sub trim(winapp2 As winapp2file)
         Console.Clear()
         print(0, tmenu("Trimming... Please wait, this may take a moment..."), closeMenu:=True)
-        'Save our inital # of entries
         Dim entryCountBeforeTrim As Integer = winapp2.count
-        'Process our entries
         For Each entryList In winapp2.winapp2entries
             processEntryList(entryList)
         Next
-        'Update the internal inifile objects
         winapp2.rebuildToIniFiles()
-        'Sort the file so that entries are written back alphabetically
         winapp2.sortInneriniFiles()
-        'Print out the results from the trim
         print(0, tmenu("Finished!"), closeMenu:=True)
         Console.Clear()
         print(0, tmenu("Trim Complete"))
