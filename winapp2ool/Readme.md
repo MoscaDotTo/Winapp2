@@ -1,5 +1,5 @@
 
-# Winapp2ool Readme
+# Winapp2ool 
 
 Winapp2ool is a small but robust application designed to take the busy work out of maintaining, managing, downloading, and deploying winapp2.ini. It is designed for use with a network connection, but many functions will work without one by acting on local files.
 
