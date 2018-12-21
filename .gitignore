@@ -1,0 +1,35 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/winapp2ool/.vs/winapp2ool/v16
+/winapp2ool/obj/Release/winapp2ool.xml
+/winapp2ool/obj/Release/winapp2ool.vbproj.GenerateResource.cache
+/winapp2ool/obj/Release/winapp2ool.vbproj.FileListAbsolute.txt
+/winapp2ool/obj/Release/winapp2ool.vbproj.CoreCompileInputs.cache
+/winapp2ool/obj/Release/winapp2ool.Resources.resources
+/winapp2ool/obj/Release/winapp2ool.pdb
+/winapp2ool/obj/Release/TempPE/My Project.Resources.Designer.vb.dll
+/winapp2ool/obj/Release/TempPE
+/winapp2ool/obj/Release/DesignTimeResolveAssemblyReferencesInput.cache
+/winapp2ool/obj/Debug/winapp2ool.xml
+/winapp2ool/obj/Debug/winapp2ool.vbprojAssemblyReference.cache
+/winapp2ool/obj/Debug/winapp2ool.vbproj.GenerateResource.cache
+/winapp2ool/obj/Debug/winapp2ool.vbproj.FileListAbsolute.txt
+/winapp2ool/obj/Debug/winapp2ool.vbproj.CoreCompileInputs.cache
+/winapp2ool/obj/Debug/winapp2ool.Resources.resources
+/winapp2ool/obj/Debug/winapp2ool.pdb
+/winapp2ool/obj/Debug/TempPE/My Project.Resources.Designer.vb.dll
+/winapp2ool/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+/winapp2ool/components/.vs
+/winapp2ool/.vs/winapp2ool/v15
+/winapp2ool/bin/Debug/winapp2ool.xml
+/winapp2ool/bin/Debug/winapp2ool.pdb
+/winapp2ool/bin/Debug/winapp2ool.exe.config
+/winapp2ool/bin/Debug/winapp2.ini
+/winapp2ool/bin/Release/winapp2ool.xml
+/winapp2ool/bin/Release/winapp2ool.pdb
+/winapp2ool/bin/Release/winapp2ool.exe.config
+/winapp2ool/obj/Release/winapp2ool.vbprojAssemblyReference.cache
+/winapp2ool/obj/Release/winapp2ool.exe
+/winapp2ool/obj/Debug/winapp2ool.exe
