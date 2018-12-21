@@ -155,13 +155,10 @@ Module Merge
         For i As Integer = 0 To tmp.winapp2entries.Count - 1
             tmp.winapp2entries(i).AddRange(tmp2.winapp2entries(i))
         Next
-        ' Rebuild the internal changes
         tmp.rebuildToIniFiles()
-        ' Sort the merged sections 
         For Each section In tmp.entrySections
             section.sortSections(replaceAndSort(section.getSectionNamesAsList, "-", "  "))
         Next
-        ' Write the merged winapp2string back to disk
         Dim out As String = tmp.winapp2string
         outputFile.overwriteToFile(out)
         print(0, bmenu($"Finished merging files. {anyKeyStr}"))
