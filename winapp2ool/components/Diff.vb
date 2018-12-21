@@ -278,7 +278,7 @@ Module Diff
                             'Make sure the given path hasn't changed
                             If Not oldKey.paramString = newKey.paramString Then
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
-                                Continue For
+                                Exit For
                             End If
                             oldKey.argsList.Sort()
                             newKey.argsList.Sort()
@@ -295,6 +295,7 @@ Module Diff
                             Else
                                 'If the count doesn't match, something has definitely changed
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                                Exit For
                             End If
                         Case Else
                             If Not key.value.ToLower = skey.value.ToLower Then updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
