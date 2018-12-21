@@ -7,7 +7,7 @@ A database of extended cleaning routines for popular Windows PC based maintenanc
 Name           | Purpose       
 :------------- | :-------------
 [winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini) | An extended database of cleaning routines for CCleaner. *This is the "main" file, **and the one most users will want***.
-[winapp2ool](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/winapp2ool.exe) | A robust tool that allows you to manage winapp2.ini for your system, including automatic downloading and trimming. This tool has its own ReadMe [here](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool).
+[winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) | A robust tool that allows you to manage winapp2.ini for your system, including automatic downloading and trimming. This tool has its own ReadMe [here](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool).
 [Non-CCleaner winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini) | If you don't use CCleaner, this is the file you want. It includes entries that were removed from the main file due to having been included in CCleaner's official distribution. *You should **not** use this file with CCleaner.*
 [winapp3.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini) | An extension for an extension; contains entries for use by power users. *You should **not** use this file if you do not know what you are doing. Entries in this file can potentially be very aggressive/dangerous to your file system.*
 
