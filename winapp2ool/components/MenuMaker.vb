@@ -20,7 +20,7 @@ Option Strict On
 ''' </summary>
 Module MenuMaker
 
-    'basic menu frames & strings
+    ' Basic menu frames & Strings
     Public Const menuStr00 As String = " ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗"
     Public Const menuStr01 As String = " ║                                                                                                                    ║"
     Public Const menuStr02 As String = " ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
@@ -29,15 +29,15 @@ Module MenuMaker
     Public Const anyKeyStr As String = "Press any key to return to the menu."
     Public Const invInpStr As String = "Invalid input. Please try again."
     Public Const promptStr As String = "Enter a number, or leave blank to run the default: "
-    'This boolean will prevent us from printing output or asking for input under most circumstances, triggered by the -s command line argument 
+    ' This boolean will prevent us from printing output or asking for input under most circumstances, triggered by the -s command line argument 
     Public suppressOutput As Boolean = False
-    'The maximum length of the portion of the first half of a '#. Option - Description' style menu line
+    ' The maximum length of the portion of the first half of a '#. Option - Description' style menu line
     Dim menuItemLength As Integer
-    'indicates whether or not we are pending an exit from the menu
+    ' Indicates whether or not we are pending an exit from the menu
     Public exitCode As Boolean
-    'Holds the text that appears in the top block of the menu
+    ' Holds the text that appears in the top block of the menu
     Public menuHeaderText As String
-    'Holds the current option number at any given moment
+    ' Holds the current option number at any given moment
     Dim optNum As Integer = 0
 
     ''' <summary>

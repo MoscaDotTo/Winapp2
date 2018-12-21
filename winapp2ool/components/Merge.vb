@@ -21,11 +21,11 @@ Imports System.IO
 ''' A module that facilitates the merging of two user defined iniFile objects
 ''' </summary>
 Module Merge
-    'File handlers
+    ' File handlers
     Dim winappFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
     Dim mergeFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
     Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-merged.ini")
-    'Module parameters
+    ' Module parameters
     Dim mergeMode As Boolean = True
     Dim settingsChanged As Boolean = False
 
@@ -141,7 +141,6 @@ Module Merge
         mergeFile.validate()
         If pendingExit() Then Exit Sub
         merge()
-        revertMenu()
     End Sub
 
     ''' <summary>
@@ -152,17 +151,17 @@ Module Merge
         Dim tmp As New winapp2file(winappFile)
         Dim tmp2 As New winapp2file(mergeFile)
         print(0, bmenu($"Merging {winappFile.name} with {mergeFile.name}"))
-        'Add the entries from the second file to their respective sections in the first file
+        ' Add the entries from the second file to their respective sections in the first file
         For i As Integer = 0 To tmp.winapp2entries.Count - 1
             tmp.winapp2entries(i).AddRange(tmp2.winapp2entries(i))
         Next
-        'Rebuild the internal changes
+        ' Rebuild the internal changes
         tmp.rebuildToIniFiles()
-        'Sort the merged sections 
+        ' Sort the merged sections 
         For Each section In tmp.entrySections
             section.sortSections(replaceAndSort(section.getSectionNamesAsList, "-", "  "))
         Next
-        'write the merged winapp2string to file
+        ' Write the merged winapp2string back to disk
         Dim out As String = tmp.winapp2string
         outputFile.overwriteToFile(out)
         print(0, bmenu($"Finished merging files. {anyKeyStr}"))
@@ -178,12 +177,12 @@ Module Merge
         Dim removeList As New List(Of String)
         For Each section In second.sections.Keys
             If first.sections.Keys.Contains(section) Then
-                'If mergemode is true, replace the match. otherwise, remove the match
+                ' If mergemode is true, replace the match. otherwise, remove the match
                 If mergeMode Then first.sections.Item(section) = second.sections.Item(section) Else first.sections.Remove(section)
                 removeList.Add(section)
             End If
         Next
-        'Remove any processed sections from the second file so that only entries to add remain 
+        ' Remove any processed sections from the second file so that only entries to add remain 
         For Each section In removeList
             second.sections.Remove(section)
         Next

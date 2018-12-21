@@ -22,22 +22,18 @@ Imports System.Text.RegularExpressions
 ''' A program whose purpose is to observe, report, and attempt to repair errors in winapp2.ini
 ''' </summary>
 Module WinappDebug
-
-    'File handlers
+    ' File handlers
     Dim winappFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
     Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
-
-    'Menu settings
+    ' Menu settings
     Dim settingsChanged As Boolean = False
     Dim scanSettingsChanged As Boolean = False
-
-    'Module parameters
+    ' Module parameters
     Dim correctFormatting As Boolean = False
     Dim allEntryNames As New List(Of String)
     Dim numErrs As Integer = 0
     Dim correctSomeFormatting As Boolean = True
-
-    'Autocorrect Parameters
+    ' Autocorrect Parameters
     Dim correctCasing As Boolean = True
     Dim correctAlpha As Boolean = True
     Dim correctNumbers As Boolean = True
@@ -46,8 +42,7 @@ Module WinappDebug
     Dim correctSlashes As Boolean = True
     Dim correctDefaults As Boolean = True
     Dim correctOpti As Boolean = False
-
-    'Scan parameters
+    ' Scan parameters
     Dim scanCasing As Boolean = True
     Dim scanAlpha As Boolean = True
     Dim scanNumbers As Boolean = True
@@ -56,13 +51,11 @@ Module WinappDebug
     Dim scanSlashes As Boolean = True
     Dim scanDefaults As Boolean = True
     Dim scanOpti As Boolean = False
-
-    'Winapp2 Parameters
+    ' Winapp2 Parameters
     Dim enVars As String() = {"UserProfile", "UserName", "ProgramFiles", "RootDir", "WinDir", "AppData", "SystemDrive", "SystemRoot", "Documents", "ProgramData", "AllUsersProfile", "Pictures", "Video", "CommonAppData", "LocalAppData", "CommonProgramFiles", "HomeDrive", "Music", "tmp", "Temp", "LocalLowAppData", "Public"}
     Dim validCmds As String() = {"SpecialDetect", "FileKey", "RegKey", "Detect", "LangSecRef", "Warning", "Default", "Section", "ExcludeKey", "DetectFile", "DetectOS"}
     Dim sdList As String() = {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}
-
-    'Regex strings 
+    ' Regex strings 
     ReadOnly longReg As New Regex("HKEY_(C(URRENT_(USER$|CONFIG$)|LASSES_ROOT$)|LOCAL_MACHINE$|USERS$)")
     ReadOnly shortReg As New Regex("HK(C(C$|R$|U$)|LM$|U$)")
     ReadOnly secRefNums As New Regex("30(2([0-9])|3(0|1))")
@@ -286,18 +279,13 @@ Module WinappDebug
         numErrs = 0
         allEntryNames = New List(Of String)
         Dim winapp2file As New winapp2file(cfile)
-        'Process the winapp2entries
         processEntries(winapp2file)
-        'Rebuild our internal changes
         winapp2file.rebuildToIniFiles()
-        'Check the alphabetization of entries by name
         alphabetizeEntries(winapp2file)
-        'Print out the analysis results
         print(0, tmenu("Completed analysis of winapp2.ini"))
         print(0, menuStr03)
         print(0, $"{numErrs} possible errors were detected.")
         print(0, $"Number of entries: {cfile.sections.Count}", trailingBlank:=True)
-        'Save changes we've made if necessary
         rewriteChanges(winapp2file)
         print(0, anyKeyStr, closeMenu:=True)
         If Not suppressOutput Then Console.ReadKey()
@@ -365,18 +353,17 @@ Module WinappDebug
         'Only try to find out of place keys when there's more than one
         If someList.Count > 1 Then
             Dim misplacedEntries As New List(Of String)
-            'Learn the neighbors of each string in each respective list
+            ' Learn the neighbors of each string in each respective list
             Dim initalNeighbors As New List(Of KeyValuePair(Of String, String))
             Dim sortedNeigbors As New List(Of KeyValuePair(Of String, String))
-            'Build our neighbor lists
             buildNeighborList(someList, initalNeighbors)
             buildNeighborList(sortedList, sortedNeigbors)
-            'Make sure at least one of the neighbors of each string are the same in both the sorted and unsorted state, otherwise the string has moved 
+            ' Make sure at least one of the neighbors of each string are the same in both the sorted and unsorted state, otherwise the string has moved 
             For i As Integer = 0 To someList.Count - 1
                 Dim sind As Integer = sortedList.IndexOf(someList(i))
                 If Not (initalNeighbors(i).Key = sortedNeigbors(sind).Key And initalNeighbors(i).Value = sortedNeigbors(sind).Value) Then misplacedEntries.Add(someList(i))
             Next
-            'Report any misplaced entries back to the user
+            ' Report any misplaced entries back to the user
             For Each entry In misplacedEntries
                 Dim recind As Integer = someList.IndexOf(entry)
                 Dim sortind As Integer = sortedList.IndexOf(entry)
@@ -441,22 +428,22 @@ Module WinappDebug
     ''' <param name="keyValues">The current list of observed inikey values</param>
     ''' <param name="dupeList">A tracking list of detected duplicate iniKeys</param>
     Private Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As List(Of String), ByRef dupeList As List(Of iniKey), Optional noNumbers As Boolean = False)
-        'Check for duplicates
+        ' Check for duplicates
         If chkDupes(keyValues, key.value) Then
             Dim duplicateKeyStr As String = $"{key.keyType}{If(Not noNumbers, (keyValues.IndexOf(key.value.ToLower) + 1).ToString, "")}={key.value}"
             customErr(key.lineNumber, "Duplicate key value found", {$"Key:            {key.toString}", $"Duplicates:     {duplicateKeyStr}"})
             dupeList.Add(key)
         End If
-        'Check for numbering errors
+        ' Check for numbering errors
         Dim hasNumberingError As Boolean = If(noNumbers, Not key.nameIs(key.keyType), Not key.nameIs(key.keyType & keyNumber))
         Dim numberingErrStr As String = If(noNumbers, "Detected unnecessary numbering.", $"{key.keyType} entry is incorrectly numbered.")
         Dim fixedStr As String = If(noNumbers, key.keyType, key.keyType & keyNumber)
         inputMismatchErr(key.lineNumber, numberingErrStr, key.name, fixedStr, scanNumbers And hasNumberingError)
         fixStr(correctNumbers And hasNumberingError, key.name, fixedStr)
-        'Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
+        ' Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
         fullKeyErr(key, "Forward slash (/) detected in lieu of blackslash (\).", Not key.typeIs("Warning") And scanSlashes And key.vHas(CChar("/")), correctSlashes, key.value, key.value.Replace(CChar("/"), CChar("\")))
         fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And scanParams, correctParameters, key.value, key.value.TrimEnd(CChar(";")))
-        'Do some formatting checks for environment variables
+        ' Do some formatting checks for environment variables if needed
         If {"FileKey", "ExcludeKey", "DetectFile"}.Contains(key.keyType) Then cEnVar(key)
         keyNumber += 1
     End Sub
@@ -483,7 +470,7 @@ Module WinappDebug
             Dim strippedText As String = m.ToString.Trim(CChar("%"))
             Dim camelText As String = checkCasingError(enVars, strippedText)
             fullKeyErr(key, $"Invalid CamelCasing - expected %{camelText}% but found {m.ToString}", scanCasing And camelText <> strippedText, correctCasing, key.value, key.value.Replace(strippedText, camelText))
-            'If we don't have a casing error and enVars doesn't contain our value, it's invalid. 
+            ' If we don't have a casing error and enVars doesn't contain our value, it's invalid. 
             fullKeyErr(key, $"Misformatted or invalid environment variable:  {m.ToString}", camelText = strippedText And Not enVars.Contains(strippedText))
         Next
     End Sub
@@ -494,12 +481,11 @@ Module WinappDebug
     ''' <param name="key">an iniKey object to be checked for errors</param>
     ''' <returns></returns>
     Private Function cValidity(key As iniKey) As Boolean
-        'Return False immediately if we are meant to delete the current key 
         If key.keyType = "DeleteMe" Then Return False
-        'Check for leading or trailing whitespace
+        ' Check for leading or trailing whitespace
         fullKeyErr(key, "Detected unwanted whitespace in iniKey value", key.vStartsOrEndsWith(" "), True, key.value, key.value.Trim(CChar(" ")))
         fullKeyErr(key, "Detected unwanted whitespace in iniKey name", key.nStartsOrEndsWith(" "), True, key.name, key.name.Trim(CChar(" ")))
-        'Make sure the keyType is a valid winapp2.ini command
+        ' Make sure the keyType is a valid winapp2.ini command
         Dim casedString As String = checkCasingError(validCmds, key.keyType)
         fullKeyErr(key, $"{casedString} has a casing error.", casedString <> key.keyType And scanCasing, correctCasing, key.name, key.name.Replace(key.keyType, casedString))
         fixStr(casedString <> key.keyType, key.keyType, casedString)
@@ -521,35 +507,35 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="key">A winap2.ini FileKey format iniKey object</param>
     Private Function pFileKey(key As iniKey) As iniKey
-        'Get the parameters given to the file key and sort them 
+        ' Get the parameters given to the file key and sort them 
         Dim keyParams As New winapp2KeyParameters(key)
         Dim argsStrings As New List(Of String)
         Dim dupeArgs As New List(Of String)
-        'check for duplicate args
+        ' Check for duplicate args
         For Each arg In keyParams.argsList
             If chkDupes(argsStrings, arg) And scanParams Then
                 err(key.lineNumber, "Duplicate FileKey parameter found", arg)
                 dupeArgs.Add(arg)
             End If
         Next
-        'Remove any duplicate arguments from the key parameters
+        ' Remove any duplicate arguments from the key parameters
         For Each arg In dupeArgs
             If fixFormat(correctParameters) Then keyParams.argsList.Remove(arg)
         Next
-        'Reconstruct keys we've modified above
+        ' Reconstruct keys we've modified above
         If fixFormat(correctParameters) Then keyParams.reconstructKey(key)
-        'Pipe symbol checks
+        ' Pipe symbol checks
         Dim iteratorCheckerList() As String = Split(key.value, "|")
         fullKeyErr(key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
-        'Captures any incident of semi colons coming before the first pipe symbol
+        ' Captures any incident of semi colons coming before the first pipe symbol
         fullKeyErr(key, "Semicolon (;) found before pipe (|).", key.vHas(";") And key.value.IndexOf(";") < key.value.IndexOf("|"))
-        'Check for incorrect spellings of RECURSE or REMOVESELF
+        ' Check for incorrect spellings of RECURSE or REMOVESELF
         If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF"))
-        'Check for missing pipe symbol on recurse and removeself, fix them if detected
+        ' Check for missing pipe symbol on recurse and removeself, fix them if detected
         cFlags(key, {"RECURSE", "REMOVESELF"})
-        'Make sure VirtualStore folders point to the correct place
+        ' Make sure VirtualStore folders point to the correct place
         inputMismatchErr(key.lineNumber, "Incorrect VirtualStore location.", key.value, "%LocalAppData%\VirtualStore\Program Files*\", key.vHas("\virtualStore\p", True) And Not key.vHasAny({"programdata", "program files*", "program*"}, True))
-        'Backslash checks, fix if detected
+        ' Backslash checks, fix if detected
         fullKeyErr(key, "Backslash (\) found before pipe (|).", scanSlashes And key.vHas("%\|"), correctSlashes, key.value, key.value.Replace("%\|", "%|"))
         fullKeyErr(key, "Missing backslash (\) after %EnvironmentVariable%.", key.vHas("%") And Not key.vHasAny({"%|", "%\"}))
         Return key
@@ -578,13 +564,13 @@ Module WinappDebug
         Dim entryLinesList As New List(Of Integer)
         Dim hasFileExcludes As Boolean = False
         Dim hasRegExcludes As Boolean = False
-        'Check for duplicate names that are differently cased 
+        ' Check for duplicate names that are differently cased 
         fullNameErrIf(chkDupes(allEntryNames, entry.name), entry, "Duplicate entry name detected")
-        'Check that the entry is named properly 
+        ' Check that the entry is named properly 
         fullNameErrIf(Not entry.name.EndsWith(" *"), entry, "All entries must End In ' *'")
-        'Confirm the validity of keys and remove any broken ones before continuing
+        ' Confirm the validity of keys and remove any broken ones before continuing
         validateKeys(entry)
-        'Proess individual keys/keylists in winapp2.ini order
+        ' Proess individual keys/keylists in winapp2.ini order
         processKeyList(entry.detectOS, AddressOf voidDelegate)
         processKeyList(entry.sectionKey, AddressOf voidDelegate)
         processKeyList(entry.langSecRef, AddressOf voidDelegate)
@@ -595,19 +581,19 @@ Module WinappDebug
         processKeyList(entry.warningKey, AddressOf voidDelegate)
         processKeyList(entry.fileKeys, AddressOf pFileKey)
         processKeyList(entry.regKeys, AddressOf voidDelegate)
-        'Make sure we only have LangSecRef if we have LangSecRef at all
+        ' Make sure we only have LangSecRef if we have LangSecRef at all
         fullNameErrIf(entry.langSecRef.Count <> 0 And entry.sectionKey.Count <> 0, entry, "Section key found alongside LangSecRef key, only one is required.")
-        'Make sure we have at least 1 valid detect key 
+        ' Make sure we have at least 1 valid detect key 
         fullNameErrIf(entry.detectOS.Count + entry.detects.Count + entry.specialDetect.Count + entry.detectFiles.Count = 0, entry, "Entry has no valid detection keys (Detect, DetectFile, DetectOS, SpecialDetect)")
-        'Make sure we have at least 1 FileKey or RegKey
+        ' Make sure we have at least 1 FileKey or RegKey
         fullNameErrIf(entry.fileKeys.Count + entry.regKeys.Count = 0, entry, "Entry has no valid FileKeys or RegKeys")
-        'If we don't have FileKeys or RegKeys, we shouldn't have ExcludeKeys.
+        ' If we don't have FileKeys or RegKeys, we shouldn't have ExcludeKeys.
         fullNameErrIf(entry.excludeKeys.Count > 0 And entry.fileKeys.Count + entry.regKeys.Count = 0, entry, "Entry has ExcludeKeys but no valid FileKeys or RegKeys")
-        'Make sure that if we have file Excludes, we have FileKeys
+        ' Make sure that if we have file Excludes, we have FileKeys
         fullNameErrIf(entry.fileKeys.Count = 0 And hasFileExcludes, entry, "ExcludeKeys targeting filesystem locations found without any corresponding FileKeys")
-        'Likewise for registry
+        ' Likewise for registry
         fullNameErrIf(entry.regKeys.Count = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
-        'Make sure we have a Default key.
+        ' Make sure we have a Default key.
         fullNameErrIf(entry.defaultKey.Count = 0 And scanDefaults, entry, "Entry is missing a Default key")
         addKeyToListIf(New iniKey("Default=False", 0), entry.defaultKey, fixFormat(correctDefaults) And entry.defaultKey.Count = 0)
     End Sub
@@ -626,16 +612,16 @@ Module WinappDebug
     ''' <param name="key">A winapp2.ini DetectFile format iniKey</param>
     ''' <returns></returns>
     Private Function pDetectFile(key As iniKey) As iniKey
-        'Trailing Backslashes
+        ' Trailing Backslashes
         fullKeyErr(key, "Trailing backslash (\) found in DetectFile", scanSlashes And key.value.Last = CChar("\"), correctSlashes, key.value, key.value.TrimEnd(CChar("\")))
-        'Nested wildcards
+        ' Nested wildcards
         If key.vHas("*") Then
             Dim splitDir As String() = key.value.Split(CChar("\"))
             For i As Integer = 0 To splitDir.Count - 1
                 fullKeyErr(key, "Nested wildcard found in DetectFile", splitDir(i).Contains("*") And i <> splitDir.Count - 1)
             Next
         End If
-        'Make sure that DetectFile paths point to a filesystem location
+        ' Make sure that DetectFile paths point to a filesystem location
         chkPathFormatValidity(key, False)
         Return key
     End Function
@@ -646,9 +632,9 @@ Module WinappDebug
     ''' <param name="key">An iniKey to be audited</param>
     ''' <param name="isRegistry">Specifies whether the given key holds a registry path</param>
     Private Sub chkPathFormatValidity(key As iniKey, isRegistry As Boolean)
-        'Remove the flags from ExcludeKeys if we have them before getting the first directory portion
+        ' Remove the flags from ExcludeKeys if we have them before getting the first directory portion
         Dim rootStr As String = If(key.keyType <> "ExcludeKey", getFirstDir(key.value), getFirstDir(pathFromExcludeKey(key)))
-        'Ensure that registry paths have a valid hive and file paths have either a variable or a drive letter
+        ' Ensure that registry paths have a valid hive and file paths have either a variable or a drive letter
         fullKeyErr(key, "Invalid registry path detected.", isRegistry And Not longReg.IsMatch(rootStr) And Not shortReg.IsMatch(rootStr))
         fullKeyErr(key, "Invalid file system path detected.", Not isRegistry And Not driveLtrs.IsMatch(rootStr) And Not rootStr.StartsWith("%"))
     End Sub
@@ -684,7 +670,7 @@ Module WinappDebug
         If Not scanAlpha Or keyList.Count <= 1 Then Exit Sub
         Dim keyStrings As List(Of String) = getValues(keyList)
         Dim sortedKeyStringList As List(Of String) = replaceAndSort(keyStrings, "|", " \ \")
-        'Rewrite the alphabetized keys back into the keylist (fixes numbering silently) 
+        ' Rewrite the alphabetized keys back into the keylist (fixes numbering silently) 
         Dim keysOutOfPlace As Boolean = False
         findOutOfPlace(keyStrings, sortedKeyStringList, keyList(0).keyType, getLineNumsFromKeyList(keyList), keysOutOfPlace)
         If keysOutOfPlace Or hadDuplicatesRemoved Then renumberKeys(keyList, sortedKeyStringList)
@@ -726,13 +712,13 @@ Module WinappDebug
             Case key.vHasAny({"FILE|", "PATH|"})
                 hasF = True
                 chkPathFormatValidity(key, False)
-                'Make sure any filesystem exclude paths have a backslash before their pipe symbol.
+                ' Make sure any filesystem exclude paths have a backslash before their pipe symbol.
                 fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.", (key.vHas("|") And Not key.vHas("\|")))
             Case key.vHas("REG|")
                 hasR = True
                 chkPathFormatValidity(key, True)
             Case Else
-                'If we made it here, we don't have a valid flag
+                ' If we made it here, we don't have a valid flag
                 fullKeyErr(key, "No valid exclude flag (FILE, PATH, or REG) found in ExcludeKey.")
         End Select
     End Sub
@@ -763,15 +749,15 @@ Module WinappDebug
         For i As Integer = 0 To keyList.Count - 1
             Dim key As iniKey = keyList(i)
             Dim tmpWa2 As New winapp2KeyParameters(key)
-            'If we have yet to record any params, record them and move on
+            ' If we have yet to record any params, record them and move on
             If paramList.Count = 0 Then
                 trackParamAndFlags(paramList, flagList, tmpWa2)
                 Continue For
             End If
-            'This should handle the case where for a FileKey: 
-            'The folder provided has appeared in another key
-            'The flagstring (RECURSE, REMOVESELF, "") for both keys matches
-            'The first appearing key should have its parameters appended to and the second appearing key should be removed
+            ' This should handle the case where for a FileKey: 
+            ' The folder provided has appeared in another key
+            ' The flagstring (RECURSE, REMOVESELF, "") for both keys matches
+            ' The first appearing key should have its parameters appended to and the second appearing key should be removed
             If paramList.Contains(tmpWa2.paramString) Then
                 For j As Integer = 0 To paramList.Count - 1
                     If tmpWa2.paramString = paramList(j) And tmpWa2.flagString = flagList(j) Then

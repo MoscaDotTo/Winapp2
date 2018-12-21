@@ -23,14 +23,14 @@ Imports System.Net
 ''' Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
 ''' </summary>
 Module Downloader
-    'Links to GitHub resources
+    ' Links to GitHub resources
     Public wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
     Public nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
     Public toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
     Public toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
     Public removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
     Public wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
-    'File handler
+    ' File handler
     Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
     ''' <summary>
@@ -86,7 +86,7 @@ Module Downloader
                 download(link)
                 If downloadFile.dir = Environment.CurrentDirectory Then checkedForUpdates = False
             Case "3"
-                'Feature gate downloading the executable behind .NET 4.6+
+                ' Feature gate downloading the executable behind .NET 4.6+
                 If Not denyActionWithTopper(dnfOOD, "This option requires a newer version of the .NET Framework") Then
                     If downloadFile.dir = Environment.CurrentDirectory Then
                         autoUpdate()
@@ -214,16 +214,14 @@ Module Downloader
         downloadFile.name = "winapp2ool updated.exe"
         Dim backupName As String = $"winapp2ool v{currentVersion}.exe.bak"
         Try
-            'Remove any existing backups of this version
+            ' Remove any existing backups of this version
             If File.Exists($"{Environment.CurrentDirectory}\{backupName}") Then File.Delete($"{Environment.CurrentDirectory}\{backupName}")
-            'Remove any old update files that didn't get renamed for whatever reason
+            ' Remove any old update files that didn't get renamed for whatever reason
             If File.Exists(downloadFile.path) Then File.Delete(downloadFile.path)
             download(toolLink, False)
-            'Rename the old executable
+            ' Rename the executables and launch the new one
             File.Move("winapp2ool.exe", backupName)
-            'Rename the new executable
             File.Move("winapp2ool updated.exe", "winapp2ool.exe")
-            'Start the new executable and exit the current one
             System.Diagnostics.Process.Start($"{Environment.CurrentDirectory}\winapp2ool.exe")
             Environment.Exit(0)
         Catch ex As Exception
@@ -237,21 +235,18 @@ Module Downloader
     ''' <param name="link">The URL to be downloaded from</param>
     ''' <param name="prompt">The boolean indicating whether or not the user should be prompted to rename the file should it exist already.</param>
     Private Sub download(link As String, Optional prompt As Boolean = True)
-        'Remember the initial given name
         Dim givenName As String = downloadFile.name
-        'Don't try to download to a directory that doesn't exist
+        ' Don't try to download to a directory that doesn't exist
         If Not Directory.Exists(downloadFile.dir) Then Directory.CreateDirectory(downloadFile.dir)
-        'If the file exists and we're prompting or overwrite, do that.
+        ' If the file exists and we're prompting or overwrite, do that.
         If prompt And File.Exists(downloadFile.path) And Not suppressOutput Then
             cwl($"{downloadFile.name} already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
             Dim nfilename As String = Console.ReadLine()
             If nfilename.Trim <> "" Then downloadFile.name = nfilename
         End If
-        'Attempt the download
         cwl($"Downloading {givenName}...")
         Dim success As Boolean = dlFile(link, downloadFile.path)
-        'Print the results to the user
         cwl($"Download {If(success, "Complete.", "Failed.")}")
         cwl(If(success, "Downloaded ", $"Unable to download {downloadFile.name} to {downloadFile.dir}"))
         menuHeaderText = $"Download {If(success, "", "in")}complete: {downloadFile.name}"

@@ -118,7 +118,6 @@ Public Module iniFileHandler
                 Case Else
                     menuHeaderText = invInpStr
             End Select
-            'If the directory still doesn't exist and the last input wasn't valid, 
             If Not Directory.Exists(dir) And Not menuHeaderText = invInpStr Then menuHeaderText = "Error"
             If Directory.Exists(dir) Then iExitCode = True
         End While
@@ -280,17 +279,17 @@ Public Module iniFileHandler
     ''' </summary>
     Public Class iniFile
         Dim lineCount As Integer = 1
-        'The current state of the directory & name of the file
+        ' The current state of the directory & name of the file
         Public dir As String
         Public name As String
-        'The inital state of the direcotry & name of the file (for restoration purposes) 
+        ' The inital state of the direcotry & name of the file (for restoration purposes) 
         Public initDir As String
         Public initName As String
-        'Suggested rename for output files
+        ' Suggested rename for output files
         Public secondName As String
-        'Sections will be initally stored in the order they're read
+        ' Sections will be initally stored in the order they're read
         Public sections As New Dictionary(Of String, iniSection)
-        'Any line comments will be saved in the order they're read 
+        ' Any line comments will be saved in the order they're read 
         Public comments As New Dictionary(Of Integer, iniComment)
 
         ''' <summary>
@@ -438,14 +437,14 @@ Public Module iniFileHandler
         Public Sub validate()
             Console.Clear()
             If pendingExit() Or Me.name = "" Then Exit Sub
-            'Make sure both the file and the directory actually exist
+            ' Make sure both the file and the directory actually exist
             While Not File.Exists(path())
                 chkDirExist(dir)
                 If pendingExit() Then Exit Sub
                 chkFileExist(Me)
                 If pendingExit() Then Exit Sub
             End While
-            'Make sure that the file isn't empty
+            ' Make sure that the file isn't empty
             Try
                 Dim iniTester As New iniFile(dir, name)
                 iniTester.init()
@@ -637,8 +636,7 @@ Public Module iniFileHandler
                 noMatch = True
                 For i As Integer = 0 To secondSection.keys.Values.Count - 1
                     Select Case True
-                        Case key.keyType.ToLower = secondSection.keys.Values(i).keyType.ToLower And key.value.ToLower = secondSection.keys.Values(i).value.ToLower 'Or
-                            ' key.name.ToLower = secondSection.keys.Values(i).name.ToLower And Not key.value.ToLower = secondSection.keys.Values(i).value.ToLower
+                        Case key.keyType.ToLower = secondSection.keys.Values(i).keyType.ToLower And key.value.ToLower = secondSection.keys.Values(i).value.ToLower
                             noMatch = False
                             tmpList.Add(i)
                             Exit For

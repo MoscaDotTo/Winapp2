@@ -26,10 +26,10 @@ Module exceptionHandler
     ''' <param name="ex">A given exception captured during winapp2ool's execution</param>
     Public Sub exc(ByRef ex As Exception)
         Select Case True
-            'Out of date .NET presents us from downloading securely from GitHub as is required for executables.
+            ' Out of date .NET presents us from downloading securely from GitHub as is required for executables.
             Case ex.Message.Contains("SSL/TLS")
                 printDotNetOutOfDateError()
-            'This is thrown when attempting to use remote functions without a working internet connection and other similar tasks
+            ' This is thrown when attempting to use remote functions without a working internet connection and other similar tasks
             Case ex.Message.Contains("The remote name could not be resolved")
                 offlineErr()
             Case Else

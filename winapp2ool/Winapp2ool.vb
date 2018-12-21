@@ -19,7 +19,7 @@ Imports System.IO
 Imports Microsoft.Win32
 
 Module Winapp2ool
-    'Update and compatibility settings
+    ' Update and compatibility settings
     Public currentVersion As String = "1.0"
     Dim latestVersion As String = ""
     Dim latestWa2Ver As String = ""
@@ -29,8 +29,7 @@ Module Winapp2ool
     Dim waUpdateIsAvail As Boolean = False
     Public isOffline As Boolean
     Public dnfOOD As Boolean = False
-
-    'Dummy iniFile obj for when we don't need actual data or when it'll be filled in later
+    ' Dummy iniFile obj for when we don't need actual data or when it'll be filled in later
     Public eini As iniFile = New iniFile("", "")
     Public lwinapp2File As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
 
@@ -90,9 +89,9 @@ Module Winapp2ool
     Public Sub main()
         Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 120
-        'winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
+        ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
         If Not Environment.Version.ToString = "4.0.30319.42000" Then dnfOOD = True
-        'winapp2ool requires internet access for some functions
+        ' winapp2ool requires internet access for some functions
         chkOfflineMode()
         processCommandLineArgs()
         If suppressOutput Then Environment.Exit(1)
@@ -164,14 +163,13 @@ Module Winapp2ool
     Private Sub checkUpdates()
         If checkedForUpdates Then Exit Sub
         Try
-            'Query the latest winapp2ool.exe and winapp2.ini versions 
+            ' Query the latest winapp2ool.exe and winapp2.ini versions 
             latestVersion = getFileDataAtLineNum(toolVerLink)
             latestWa2Ver = getFileDataAtLineNum(wa2Link).Split(CChar(" "))(2)
-            'This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
-            'In this instance we should consider the update check to have failed and put the application into offline mode
+            ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
+            ' In this instance we should consider the update check to have failed and put the application into offline mode
             If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Exit Try
-            'Observe whether or not updates are available
-            'Use Val here instead of CDbl to avoid conversion mistakes when system lang is non-US
+            ' Observe whether or not updates are available, using val to avoid conversion mistakes
             updateIsAvail = Val(latestVersion) > Val(currentVersion)
             getLocalWinapp2Version()
             waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
@@ -238,7 +236,7 @@ Module Winapp2ool
     ''' </summary>
     ''' <returns></returns>
     Public Function getWinVer() As Double
-        'We can return very quickly on Windows 10 using this registry key. Unknown if it exists on earlier versions
+        ' We can return very quickly on Windows 10 using this registry key. Unknown if it exists on earlier versions
         If Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentMajorVersionNumber", Nothing) IsNot Nothing Then
             Dim tmp As String = Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentMajorVersionNumber", Nothing).ToString
             Return CDbl(tmp)
@@ -246,9 +244,8 @@ Module Winapp2ool
         Dim osVersion As String = System.Environment.OSVersion.ToString().Replace("Microsoft Windows NT ", "")
         Dim ver As String() = osVersion.Split(CChar("."))
         Dim out As Double = CDbl($"{ver(0)}.{ver(1)}")
-        'This might not act completely correctly on Windows 8.1 but usage of that seems small enough that it wont be an issue
+        ' This might not act completely correctly on Windows 8.1 but usage of that seems small enough that it wont be an issue
         If Not {5.1, 6.0, 6.1, 6.2, 6.3}.Contains(out) Then
-            'I've never actually tested this function on anything but Windows 10, so if something goes wrong I hope someone reports it! 
             Console.WriteLine("Unable to determine which version of Windows you are running.")
             Console.WriteLine()
             Console.WriteLine("If you see this message, please report your Windows version on GitHub along with the following information:")

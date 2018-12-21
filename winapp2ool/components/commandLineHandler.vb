@@ -21,13 +21,11 @@ Imports System.IO
 ''' This module handles the commandline args presented to winapp2ool and attempts to pass them off to their respective modules
 ''' </summary>
 Module commandLineHandler
-
-    'File Handlers
+    ' File Handlers
     Dim firstFile As iniFile
     Dim secondFile As iniFile
     Dim thirdFile As iniFile
-
-    'The current state of the command line args at any point
+    ' The current state of the command line args at any point
     Dim args As New List(Of String)
 
     ''' <summary>
@@ -60,11 +58,10 @@ Module commandLineHandler
     ''' <param name="download">The boolean indicating winapp2.ini should be downloaded</param>
     ''' <param name="ncc">The boolean indicating that the non-ccleaner variant of winapp2.ini should be used</param>
     Private Sub handleDownloadBools(ByRef download As Boolean, ByRef ncc As Boolean)
-        'Download a winapp2 to trim?
+        ' Download a winapp2 to trim?
         invertSettingAndRemoveArg(download, "-d")
-        'Download the non ccleaner ini? 
         invertSettingAndRemoveArg(ncc, "-ncc")
-        '-ncc implies -d 
+        ' -ncc implies -d 
         If ncc And Not download Then download = True
         If download And isOffline Then printErrExit("Winapp2ool is currently in offline mode, but you have issued commands that require a network connection. Please try again with a network connection.")
     End Sub
@@ -76,13 +73,10 @@ Module commandLineHandler
     ''' -c      : enable autocorrect
     Private Sub autoDebug()
         Dim correctErrors As Boolean
-        'Get default params
         initDebugParams(firstFile, secondFile, correctErrors)
         'Toggle on autocorrect (off by default)
         invertSettingAndRemoveArg(correctErrors, "-c")
-        'Get any file parameters from flags
         getFileAndDirParams()
-        'Initialize the debug
         remoteDebug(firstFile, secondFile, correctErrors)
     End Sub
 
@@ -96,11 +90,8 @@ Module commandLineHandler
         Dim download As Boolean
         Dim ncc As Boolean
         initTrimParams(firstFile, secondFile, download, ncc)
-        'Are we downloading winapp2.ini?
         handleDownloadBools(download, ncc)
-        'Get any file parameters from flags
         getFileAndDirParams()
-        'Initalize the trim
         remoteTrim(firstFile, secondFile, download, ncc)
     End Sub
 
@@ -116,13 +107,10 @@ Module commandLineHandler
         Dim mergeMode As Boolean
         initMergeParams(firstFile, secondFile, thirdFile, mergeMode)
         invertSettingAndRemoveArg(mergeMode, "-mm")
-        'Detect any preset filename calls
         invertAndRemoveAndRename(False, "-r", secondFile.name, "Removed Entries.ini")
         invertAndRemoveAndRename(False, "-c", secondFile.name, "Custom.ini")
         invertAndRemoveAndRename(False, "-w", secondFile.name, "winapp3.ini")
-        'Get any file parameters from flags
         getFileAndDirParams()
-        'If we have a secondfile, initiate the merge
         If Not secondFile.name = "" Then remoteMerge(firstFile, secondFile, thirdFile, mergeMode)
     End Sub
 
@@ -138,14 +126,10 @@ Module commandLineHandler
         Dim download As Boolean
         Dim save As Boolean
         initDiffParams(firstFile, secondFile, thirdFile, download, ncc, save)
-        'Downloading winapp2.ini?
         handleDownloadBools(download, ncc)
         If download Then secondFile.name = If(ncc, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
-        'Save diff.txt?
         invertSettingAndRemoveArg(save, "-savelog")
-        'Get any file parameters from flags
         getFileAndDirParams()
-        'Only run if we have a second file (because we assume we're running on a winapp2.ini file by default)
         If Not secondFile.name = "" Then remoteDiff(firstFile, secondFile, thirdFile, download, ncc, save)
     End Sub
 
@@ -161,13 +145,10 @@ Module commandLineHandler
         Dim save As Boolean
         Dim sort As Boolean
         initCCDebugParams(firstFile, secondFile, thirdFile, prune, save, sort)
-        'Check any provided booleans
         invertSettingAndRemoveArg(prune, "-noprune")
         invertSettingAndRemoveArg(sort, "-nosort")
         invertSettingAndRemoveArg(save, "-nosave")
-        'Get any file parameters from flags
         getFileAndDirParams()
-        'Run ccinidebug
         remoteCC(firstFile, secondFile, thirdFile, prune, save, sort)
     End Sub
 
@@ -195,7 +176,6 @@ Module commandLineHandler
             End Select
             args.RemoveAt(0)
         End If
-        'Get any file parameters from flags
         getFileAndDirParams()
         If Not fileLink = "" Then remoteDownload(downloadDir, downloadName, fileLink, False)
     End Sub
@@ -234,7 +214,7 @@ Module commandLineHandler
     ''' <param name="arg">The filepath argument</param>
     ''' <param name="file">The iniFile object to be modified</param>
     Private Sub getFileParams(ByRef arg As String, ByRef file As iniFile)
-        'Start either a blank path or, support appending children folders to the current path
+        ' Start either a blank path or, support appending children folders to the current path
         file.dir = If(arg.StartsWith("\"), Environment.CurrentDirectory & "\", "")
         Dim splitArg As String() = arg.Split(CChar("\"))
         If splitArg.Count >= 2 Then
@@ -250,9 +230,8 @@ Module commandLineHandler
     ''' </summary>
     Public Sub processCommandLineArgs()
         args.AddRange(Environment.GetCommandLineArgs)
-        'Remove the first arg which is simply the path of the executable
         args.RemoveAt(0)
-        'The s is for silent, if we havxe this flag, don't give any output to the user under normal circumstances 
+        ' The s is for silent, if we havxe this flag, don't give any output to the user under normal circumstances 
         invertSettingAndRemoveArg(suppressOutput, "-s")
         If args.Count > 0 Then
             Select Case args(0)
@@ -282,7 +261,7 @@ Module commandLineHandler
     ''' Gets the directory and name info for each file given (if any)
     ''' </summary>
     Private Sub getFileAndDirParams()
-        'Make sure the args are formatted correctly so the path/name can be extracted 
+        ' Make sure the args are formatted correctly so the path/name can be extracted 
         validateArgs()
         getParams(1, firstFile)
         getParams(2, secondFile)

@@ -21,12 +21,12 @@ Imports System.IO
 ''' A module whose purpose is to allow a user to perform a diff on two winapp2.ini files
 ''' </summary>
 Module Diff
-    'File handlers
+    ' File handlers
     Dim oFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
     Dim nFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
     Dim logFile As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
     Dim outputToFile As String
-    'Module parameters
+    ' Module parameters
     Dim download As Boolean = False
     Dim downloadNCC As Boolean = False
     Dim saveLog As Boolean = False
@@ -167,13 +167,12 @@ Module Diff
     Private Sub differ()
         print(3, "Diffing, please wait. This may take a moment.")
         Console.Clear()
-        'Collect & verify version #s and print them out for the menu
         Dim fver As String = getVer(oFile)
         Dim sver As String = getVer(nFile)
         log(tmenu($"Changes made between{fver} and{sver}"))
         log(menu(menuStr02))
         log(menu(menuStr00))
-        'Compare the files and then ennumerate their changes
+        ' Compare the files and then ennumerate their changes
         Dim outList As List(Of String) = compareTo()
         Dim remCt As Integer = 0
         Dim modCt As Integer = 0
@@ -188,7 +187,7 @@ Module Diff
             End If
             log(change)
         Next
-        'Print the summary to the user
+        ' Print the summary to the user
         log(menu("Diff complete.", True))
         log(menu(menuStr03))
         log(menu("Summary", True))
@@ -209,15 +208,15 @@ Module Diff
     Private Function compareTo() As List(Of String)
         Dim outList, comparedList As New List(Of String)
         For Each section In oFile.sections.Values
-            'If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
+            ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
             If nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
                 Dim sSection As iniSection = nFile.sections(section.name)
-                'And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
+                ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New List(Of iniKey)
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
                 If Not section.compareTo(sSection, removedKeys, addedKeys) Then
                     chkLsts(removedKeys, addedKeys, updatedKeys)
-                    'Silently ignore any entries with only alphabetization changes
+                    ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Continue For
                     Dim tmp As String = getDiff(sSection, "modified")
                     getChangesFromList(addedKeys, tmp, $"{prependNewLines()}Added:")
@@ -232,13 +231,13 @@ Module Diff
                     outList.Add(tmp)
                 End If
             ElseIf Not nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
-                'If we do not have the entry in the new file, it has been removed between versions 
+                ' If we do not have the entry in the new file, it has been removed between versions 
                 outList.Add(getDiff(section, "removed"))
             End If
             comparedList.Add(section.name)
         Next
+        ' Any sections from the new file which are not found in the old file have been added
         For Each section In nFile.sections.Values
-            'Any sections from the new file which are not found in the old file have been added
             If Not oFile.sections.Keys.Contains(section.name) Then outList.Add(getDiff(section, "added"))
         Next
         Return outList
@@ -275,7 +274,7 @@ Module Diff
                         Case "FileKey", "ExcludeKey", "RegKey"
                             Dim oldKey As New winapp2KeyParameters(key)
                             Dim newKey As New winapp2KeyParameters(skey)
-                            'Make sure the given path hasn't changed
+                            ' Make sure the given path hasn't changed
                             If Not oldKey.paramString = newKey.paramString Then
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                 Exit For
@@ -289,11 +288,11 @@ Module Diff
                                         Exit For
                                     End If
                                 Next
-                                'If we get this far, it's probably just an alphabetization change and can be ignored silenty
+                                ' If we get this far, it's probably just an alphabetization change and can be ignored silenty
                                 akTemp.Remove(skey)
                                 rkTemp.Remove(key)
                             Else
-                                'If the count doesn't match, something has definitely changed
+                                ' If the count doesn't match, something has definitely changed
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                 Exit For
                             End If
@@ -303,7 +302,7 @@ Module Diff
                 End If
             Next
         Next
-        'Update the lists
+        ' Update the lists
         addedKeys = akTemp
         removedKeys = rkTemp
     End Sub

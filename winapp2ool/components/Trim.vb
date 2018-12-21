@@ -23,11 +23,11 @@ Imports System.IO
 '''    to the user.
 '''   </summary>
 Public Module Trim
-    'File handlers
+    ' File handlers
     Dim winappFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
     Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
     Dim winVer As Double
-    'Module parameters
+    ' Module parameters
     Dim detChrome As New List(Of String) _
         From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe", "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe",
                            "%LocalAppData%\Google\Chrome\Application\chrome.exe", "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe", "%ProgramFiles%\SRWare Iron\iron.exe",
@@ -186,19 +186,19 @@ Public Module Trim
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
         Dim hasDetOS As Boolean = Not entry.detectOS.Count = 0
         Dim hasMetDetOS As Boolean = False
-        'Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
+        ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         If hasDetOS Then
             If winVer = Nothing Then winVer = getWinVer()
             hasMetDetOS = checkExistence(entry.detectOS, AddressOf checkDetOS)
             If Not hasMetDetOS Then Return False
         End If
-        'Process any other Detect criteria we have
+        ' Process any other Detect criteria we have
         If checkExistence(entry.specialDetect, AddressOf checkSpecialDetects) Then Return True
         If checkExistence(entry.detects, AddressOf checkRegExist) Then Return True
         If checkExistence(entry.detectFiles, AddressOf checkFileExist) Then Return True
-        'Return true for the case where we have only a DetectOS and we meet its criteria 
+        ' Return true for the case where we have only a DetectOS and we meet its criteria 
         If hasMetDetOS And entry.specialDetect.Count = 0 And entry.detectFiles.Count = 0 And entry.detects.Count = 0 Then Return True
-        'Return true for the case where we have no valid detect criteria
+        ' Return true for the case where we have no valid detect criteria
         If entry.detectOS.Count + entry.detectFiles.Count + entry.detects.Count + entry.specialDetect.Count = 0 Then Return True
         Return False
     End Function
@@ -233,7 +233,7 @@ Public Module Trim
             Case "DET_OPERA"
                 Return checkFileExist("%AppData%\Opera Software")
         End Select
-        'If we didn't return above, SpecialDetect definitely doesn't exist
+        ' If we didn't return above, SpecialDetect definitely doesn't exist
         Return False
     End Function
 
@@ -262,7 +262,7 @@ Public Module Trim
                 Case "HKLM"
                     dir = dir.Replace("HKLM\", "")
                     If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing Then Return True
-                    'Small workaround for newer x64 versions of Windows
+                    ' Small workaround for newer x64 versions of Windows
                     dir = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
                     Return Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing
                 Case "HKU"
@@ -273,10 +273,10 @@ Public Module Trim
                     Return Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(dir, True) IsNot Nothing
             End Select
         Catch ex As Exception
-            'The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.
+            ' The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.
             Return True
         End Try
-        'If we didn't return anything above, registry location probably doesn't exist
+        ' If we didn't return anything above, registry location probably doesn't exist
         Return False
     End Function
 
@@ -288,7 +288,7 @@ Public Module Trim
     Private Function checkFileExist(key As String) As Boolean
         Dim isProgramFiles As Boolean = False
         Dim dir As String = key
-        'make sure we get the proper path for environment variables
+        ' Make sure we get the proper path for environment variables
         If dir.Contains("%") Then
             Dim splitDir As String() = dir.Split(CChar("%"))
             Dim var As String = splitDir(1)
@@ -304,20 +304,20 @@ Public Module Trim
             dir = envDir + splitDir(2)
         End If
         Try
-            'Process wildcards appropriately if we have them 
+            ' Process wildcards appropriately if we have them 
             If dir.Contains("*") Then
                 Dim exists As Boolean = False
                 exists = expandWildcard(dir)
-                'Small contingency for the isProgramFiles case
+                ' Small contingency for the isProgramFiles case
                 If Not exists And isProgramFiles Then
                     swapDir(dir, key)
                     exists = expandWildcard(dir)
                 End If
                 Return exists
             End If
-            'Check out those file/folder paths
+            ' Check out those file/folder paths
             If Directory.Exists(dir) Or File.Exists(dir) Then Return True
-            'If we didn't find it and we're looking in Program Files, check the (x86) directory
+            ' If we didn't find it and we're looking in Program Files, check the (x86) directory
             If isProgramFiles Then
                 swapDir(dir, key)
                 Return (Directory.Exists(dir) Or File.Exists(dir))
@@ -345,32 +345,31 @@ Public Module Trim
     ''' <param name="dir">A path containing a wildcard</param>
     ''' <returns></returns>
     Private Function expandWildcard(dir As String) As Boolean
-        'This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
+        ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
         Dim possibleDirs As New List(Of String)
         Dim currentPaths As New List(Of String)
-        'Give an empty starter string for the first directory path to be added to 
         currentPaths.Add("")
-        'Split the given string into sections by directory 
+        ' Split the given string into sections by directory 
         Dim splitDir As String() = dir.Split(CChar("\"))
         For Each pathPart In splitDir
-            'If this directory parameterization includes a wildcard, expand it appropriately
-            'This probably wont work if a string for some reason starts with a *
+            ' If this directory parameterization includes a wildcard, expand it appropriately
+            ' This probably wont work if a string for some reason starts with a *
             If pathPart.Contains("*") Then
                 For Each currentPath In currentPaths
                     Try
-                        'Query the existence of child paths for each current path we hold 
+                        ' Query the existence of child paths for each current path we hold 
                         Dim possibilities As String() = Directory.GetDirectories(currentPath, pathPart)
-                        'If there are any, add them to our possibility list
+                        ' If there are any, add them to our possibility list
                         If Not possibilities.Count = 0 Then possibleDirs.AddRange(possibilities)
                     Catch
-                        'Pretty much exception we'll encounter here is going to be the result of directories not existing.
-                        'The exception will be thrown from the GetDirectories call and will prevent us from attempting to add new
-                        'items to the possibility list. In this instance, we can silently fail (here). 
+                        ' Pretty much exception we'll encounter here is going to be the result of directories not existing.
+                        ' The exception will be thrown from the GetDirectories call and will prevent us from attempting to add new
+                        ' items to the possibility list. In this instance, we can silently fail (here). 
                     End Try
                 Next
-                'If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
+                ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
                 If possibleDirs.Count = 0 Then Return False
-                'Otherwise, clear the current paths and repopulate them with the possible paths 
+                ' Otherwise, clear the current paths and repopulate them with the possible paths 
                 currentPaths.Clear()
                 currentPaths.AddRange(possibleDirs)
                 possibleDirs.Clear()
@@ -386,7 +385,7 @@ Public Module Trim
                 End If
             End If
         Next
-        'If any file/path exists, return true
+        ' If any file/path exists, return true
         For Each currDir In currentPaths
             If Directory.Exists(currDir) Or File.Exists(currDir) Then Return True
         Next

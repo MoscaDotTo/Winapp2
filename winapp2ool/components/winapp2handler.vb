@@ -30,7 +30,7 @@ Module winapp2handler
     ''' <returns> The sorted state of the listToBeSorted</returns>
     Public Function replaceAndSort(ListToBeSorted As List(Of String), characterToReplace As String, replacementText As String) As List(Of String)
         Dim changes As New Dictionary(Of String, String)
-        'Replace our target characters if they exist
+        ' Replace our target characters if they exist
         For i As Integer = 0 To ListToBeSorted.Count - 1
             Dim item As String = ListToBeSorted(i)
             If item.Contains(characterToReplace) Then
@@ -39,13 +39,13 @@ Module winapp2handler
                 ListToBeSorted(i) = renamedItem
             End If
         Next
-        'Pad numbers if necessary 
+        ' Pad numbers if necessary 
         findAndReplaceNumbers(ListToBeSorted, changes)
-        'Copy the modified list to be sorted and sort it
+        ' Copy the modified list to be sorted and sort it
         Dim sortedEntryList As New List(Of String)
         sortedEntryList.AddRange(ListToBeSorted)
         sortedEntryList.Sort()
-        'Restore the original state of our data
+        ' Restore the original state of our data
         undoChanges(changes, {ListToBeSorted, sortedEntryList})
         Return sortedEntryList
     End Function
@@ -107,7 +107,7 @@ Module winapp2handler
             Dim paddedString As String = baseString
             Dim numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*")
             For Each m As Match In numberAndDecimals.Matches(baseString)
-                'Special procedure for numbers with any amount of decimal points in them
+                ' Special procedure for numbers with any amount of decimal points in them
                 Dim currentMatch As String = m.ToString
                 If currentMatch.Contains(".") Then
                     Dim out As String = ""
@@ -118,7 +118,7 @@ Module winapp2handler
                     Next
                     paddedString = paddedString.Replace(currentMatch, out)
                 Else
-                    'Grab characters from both sides so that we don't have to worry about duplicate m matches 
+                    ' Grab characters from both sides so that we don't have to worry about duplicate m matches 
                     Dim numsPlusReplBits As New Regex($"([^\d]|\b){currentMatch}([^\d]|\b)")
                     For Each mm As Match In numsPlusReplBits.Matches(paddedString)
                         Dim replacementText As String = mm.ToString.Replace(currentMatch, padNumberStr(longestNumLen, currentMatch))
@@ -126,9 +126,9 @@ Module winapp2handler
                     Next
                 End If
             Next
-            'Don't rename if we didn't change anything
+            ' Don't rename if we didn't change anything
             If baseString = paddedString Then Continue For
-            'Rename and track changes appropriately
+            ' Rename and track changes appropriately
             trackChanges(changes, baseString, paddedString)
             replaceStrAtIndexOf(listToBeSorted, baseString, paddedString)
         Next
@@ -187,7 +187,6 @@ Module winapp2handler
         ' "" = main section, bottom most in all circumstances and appearing without a label 
         Dim sectionHeaderFooter As String() = {"Chrome/Chromium based browsers", "Firefox/Mozilla based browsers", "Thunderbird",
             "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
-
         ' As above, index 0 = Chrome, 1 = Firefox, 2 = Thunderbird.... 6 = ""
         Public entrySections(6) As iniFile
         Public entryLines(6) As List(Of Integer)
@@ -208,12 +207,12 @@ Module winapp2handler
                 entryLines(i) = New List(Of Integer)
                 winapp2entries(i) = New List(Of winapp2entry)
             Next
-            'Determine if we're the Non-CCleaner variant of the ini
+            ' Determine if we're the Non-CCleaner variant of the ini
             isNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
-            'Determine the version string
+            ' Determine the version string
             If file.comments.Count = 0 Then version = "; version 000000"
             If file.comments.Count > 0 Then version = If(Not file.comments.Values(0).comment.ToLower.Contains("version"), "; version 000000", file.comments.Values(0).comment)
-            'Build the header sections for browsers/thunderbird/winapp3
+            ' Build the header sections for browsers/thunderbird/winapp3
             Dim langSecRefs As New List(Of String) From {"3029", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous"}
             For Each section In file.sections.Values
                 Dim tmpwa2entry As New winapp2entry(section)
@@ -294,7 +293,7 @@ Module winapp2handler
         Public Function winapp2string() As String
             Dim fileName As String = If(isNCC, "Winapp2 (Non-CCleaner version)", "Winapp2")
             Dim licLink As String = appendNewLine(If(isNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"))
-            'Version string (YYMMDD format) & entry count 
+            ' Version string (YYMMDD format) & entry count 
             Dim out As String = appendNewLine(version)
             out += appendNewLine($"; # of entries: {count.ToString("#,###")}")
             out += appendNewLine(";")
@@ -308,7 +307,7 @@ Module winapp2handler
             out += appendNewLine("; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2")
             out += appendNewLine("; Any contributions are appreciated. Please refer to our readme to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md")
             out += appendNewLine("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/blob/master/Tools/beta/winapp2ool.exe")
-            'Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
+            ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
             For i As Integer = 0 To 5
                 If entrySections(i).sections.Count > 0 Then
                     out += appendNewLine("; ")

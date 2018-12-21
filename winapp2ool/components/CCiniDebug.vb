@@ -21,11 +21,11 @@ Imports System.IO
 ''' A module whose purpose is to perform some housekeeping on ccleaner.ini to help clean up after winapp2.ini
 ''' </summary>
 Module CCiniDebug
-    'File Handlers
+    ' File Handlers
     Dim winappFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
     Dim ccFile As iniFile = New iniFile(Environment.CurrentDirectory, "ccleaner.ini")
     Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner-debugged.ini")
-    'Module parameters
+    ' Module parameters
     Dim pruneFile As Boolean = True
     Dim saveFile As Boolean = True
     Dim sortFile As Boolean = True
@@ -157,7 +157,7 @@ Module CCiniDebug
         Dim tbTrimmed As New List(Of Integer)
         For i As Integer = 0 To optionsSec.keys.Count - 1
             Dim optionStr As String = optionsSec.keys.Values(i).toString
-            'Only operate on (app) keys belonging to winapp2.ini
+            ' Only operate on (app) keys belonging to winapp2.ini
             If optionStr.StartsWith("(App)") And optionStr.Contains("*") Then
                 trimStrs({"(App)", "=True", "=False"}, optionStr)
                 If Not winappFile.sections.ContainsKey(optionStr) Then
