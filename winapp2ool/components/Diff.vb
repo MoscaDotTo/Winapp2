@@ -215,7 +215,7 @@ Module Diff
                 'And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New List(Of iniKey)
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
-                If Not section.compareTo(sSection, removedKeys, addedKeys, updatedKeys) Then
+                If Not section.compareTo(sSection, removedKeys, addedKeys) Then
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     'Silently ignore any entries with only alphabetization changes
                     If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Continue For
@@ -271,29 +271,34 @@ Module Diff
         For Each key In removedKeys
             For Each skey In addedKeys
                 If key.name.ToLower = skey.name.ToLower Then
-                    Dim oldKey As New winapp2KeyParameters(key)
-                    Dim newKey As New winapp2KeyParameters(skey)
-                    'Make sure the given path hasn't changed
-                    If Not oldKey.paramString = newKey.paramString Then
-                        updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
-                        Continue For
-                    End If
-                    oldKey.argsList.Sort()
-                    newKey.argsList.Sort()
-                    If oldKey.argsList.Count = newKey.argsList.Count Then
-                        For i As Integer = 0 To oldKey.argsList.Count - 1
-                            If Not oldKey.argsList(i).ToLower = newKey.argsList(i).ToLower Then
+                    Select Case key.keyType
+                        Case "FileKey", "ExcludeKey", "RegKey"
+                            Dim oldKey As New winapp2KeyParameters(key)
+                            Dim newKey As New winapp2KeyParameters(skey)
+                            'Make sure the given path hasn't changed
+                            If Not oldKey.paramString = newKey.paramString Then
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
-                                Exit For
+                                Continue For
                             End If
-                        Next
-                        'If we get this far, it's probably just an alphabetization change and can be ignored silenty
-                        akTemp.Remove(skey)
-                        rkTemp.Remove(key)
-                    Else
-                        'If the count doesn't match, something has definitely changed
-                        updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
-                    End If
+                            oldKey.argsList.Sort()
+                            newKey.argsList.Sort()
+                            If oldKey.argsList.Count = newKey.argsList.Count Then
+                                For i As Integer = 0 To oldKey.argsList.Count - 1
+                                    If Not oldKey.argsList(i).ToLower = newKey.argsList(i).ToLower Then
+                                        updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                                        Exit For
+                                    End If
+                                Next
+                                'If we get this far, it's probably just an alphabetization change and can be ignored silenty
+                                akTemp.Remove(skey)
+                                rkTemp.Remove(key)
+                            Else
+                                'If the count doesn't match, something has definitely changed
+                                updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                            End If
+                        Case Else
+                            If Not key.value.ToLower = skey.value.ToLower Then updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                    End Select
                 End If
             Next
         Next

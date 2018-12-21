@@ -623,8 +623,8 @@ Public Module iniFileHandler
         ''' <param name="removedKeys">A return list on iniKey objects that appear in the iniFile object but not the given</param>
         ''' <param name="addedKeys">A return list of iniKey objects that appear in the given iniFile object but not this one</param>
         ''' <returns></returns>
-        Public Function compareTo(ss As iniSection, ByRef removedKeys As List(Of iniKey), ByRef addedKeys As List(Of iniKey), ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey))) As Boolean
-            'Create a copy of the section so we can modify it
+        Public Function compareTo(ss As iniSection, ByRef removedKeys As List(Of iniKey), ByRef addedKeys As List(Of iniKey)) As Boolean
+            ' Create a copy of the section so we can modify it
             Dim secondSection As New iniSection
             secondSection.name = ss.name
             secondSection.startingLineNumber = ss.startingLineNumber
@@ -633,33 +633,28 @@ Public Module iniFileHandler
             Next
             Dim noMatch As Boolean
             Dim tmpList As New List(Of Integer)
-            Dim hasModKeys As Boolean
             For Each key In keys.Values
-                hasModKeys = False
                 noMatch = True
                 For i As Integer = 0 To secondSection.keys.Values.Count - 1
                     Select Case True
-                        Case key.keyType.ToLower = secondSection.keys.Values(i).keyType.ToLower And key.value.ToLower = secondSection.keys.Values(i).value.ToLower
+                        Case key.keyType.ToLower = secondSection.keys.Values(i).keyType.ToLower And key.value.ToLower = secondSection.keys.Values(i).value.ToLower 'Or
+                            ' key.name.ToLower = secondSection.keys.Values(i).name.ToLower And Not key.value.ToLower = secondSection.keys.Values(i).value.ToLower
                             noMatch = False
                             tmpList.Add(i)
                             Exit For
-                        Case key.name.ToLower = secondSection.keys.Values(i).name.ToLower And Not key.value.ToLower = secondSection.keys.Values(i).value.ToLower
-                            hasModKeys = True
-                            updatedKeys.Add(New KeyValuePair(Of iniKey, iniKey)(key, secondSection.keys.Values(i)))
-                            Exit For
                     End Select
                 Next
-                'If the key isn't found in the second (newer) section, consider it removed for now
+                ' If the key isn't found in the second (newer) section, consider it removed for now
                 If noMatch Then removedKeys.Add(key)
             Next
-            'Remove all matched keys
+            ' Remove all matched keys
             tmpList.Reverse()
             secondSection.removeKeys(tmpList)
-            'Assume any remaining keys have been added
+            ' Assume any remaining keys have been added
             For Each key In secondSection.keys.Values
                 addedKeys.Add(key)
             Next
-            Return removedKeys.Count + addedKeys.Count = 0 And Not hasModKeys
+            Return removedKeys.Count + addedKeys.Count = 0
         End Function
 
         ''' <summary>
