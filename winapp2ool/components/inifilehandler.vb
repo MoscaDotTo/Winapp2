@@ -97,7 +97,7 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="dir">A user defined windows directory</param>
     Public Sub chkDirExist(ByRef dir As String)
-        If pendingExit() Then Exit Sub
+        If pendingExit() Or Directory.Exists(dir) Then Exit Sub
         Dim iExitCode As Boolean = False
         menuHeaderText = "Error"
         While Not iExitCode
