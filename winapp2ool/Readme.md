@@ -297,6 +297,7 @@ This tool is designed to simply merge two local ini files. It has two modes, bot
 * winapp2.ini (Non-CCleaner)
   * Enables downloading the latest Non-CCleaner variant of winapp2.ini to use as the comparator file
     * CCleaner users should not use this option
+    * Only shown if winapp2.ini (online) option is enabled 
 
 * Toggle Log Saving
   * Enables or disables saving the diff output to a file at the end of execution
