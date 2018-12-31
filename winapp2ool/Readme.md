@@ -96,6 +96,7 @@ WinappDebug is essentially a basic [lint](https://www.wikiwand.com/en/Lint_%28so
 
 * File Chooser (save)
   * Opens the interface to select a new target file for saving changes made by the debugger instead of overwriting the input file
+    * Only shown when autocorrection is enabled first
     * Suggests "winapp2-debugged.ini" as the default rename
 
 * Toggle Scan Settings
@@ -198,7 +199,7 @@ Trim is designed to do as its name implies: trim winapp2.ini. It does this by pr
     * Most users will want to select this option
   * Unavailable in offline mode
 
-* Toggle Download (Non-CCleaner)
+* Toggle Download (non-CCleaner)
   * Only shown when downloading is enabled first
   * CCleaner users should not use this option
   * Disabled by default
@@ -241,7 +242,7 @@ This tool is designed to simply merge two local ini files. It has two modes, bot
   * Runs the merger using your current settings
     * Will not run if you have not selected a merge file name
 
-* Removed Entries, Custom, winapp3.ini
+* Removed Entries, Custom, Winapp3.ini
   * Uses the chosen file name as the file to be merged
 
 * File Chooser (winapp2.ini)
@@ -287,15 +288,15 @@ This tool is designed to simply merge two local ini files. It has two modes, bot
   * Runs the differ with your current settings
     * Will not run if you have not chosen a newer/online file
 
-* File Chooser (winapp2.ini)
+* File Chooser
   * Opens the interface to choose a new local winapp2.ini path
 
-* winapp2.ini (online)
+* Winapp2.ini (online)
   * Enables downloading the latest copy of winapp2.ini from GitHub to use as the comparator file
     * Most users will want to select this option
 
-* winapp2.ini (Non-CCleaner)
-  * Enables downloading the latest Non-CCleaner variant of winapp2.ini to use as the comparator file
+* Winapp2.ini (non-CCleaner)
+  * Enables downloading the latest non-CCleaner variant of winapp2.ini to use as the comparator file
     * CCleaner users should not use this option
     * Only shown if winapp2.ini (online) option is enabled 
 
@@ -384,7 +385,7 @@ This tool was born of necessity in the advent of a mass renaming of entries in w
   * Downloads the latest winapp2.ini from GitHub
 
 * Non-CCleaner
-  * Downloads the latest Non-CCleaner winapp2.ini from GitHub
+  * Downloads the latest non-CCleaner winapp2.ini from GitHub
 
 * Winapp2ool
   * Downloads winapp2ool.exe from GitHub
@@ -392,7 +393,7 @@ This tool was born of necessity in the advent of a mass renaming of entries in w
     * Unavailable on winapp2oolXP and on machines running .NET Framework versions older than 4.6
 
 * Removed Entries.ini
-  * Downloads the file used to create the Non-CCleaner variant of winapp2.ini
+  * Downloads the file used to create the non-CCleaner variant of winapp2.ini
 
 * Directory
   * Opens the interface to allow you to choose a new download directory
