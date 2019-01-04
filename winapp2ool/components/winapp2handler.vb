@@ -413,6 +413,8 @@ Module winapp2handler
                         paramString = splitKey(0)
                         argsList.AddRange(splitKey(1).Split(CChar(";")))
                         flagString = If(splitKey.Count >= 3, splitKey.Last, "None")
+                    Else
+                        paramString = key.value
                     End If
                 Case "ExcludeKey"
                     Select Case splitKey.Count
@@ -437,13 +439,13 @@ Module winapp2handler
         ''' Also trims empty comments 
         Public Sub reconstructKey(ByRef key As iniKey)
             Dim out As String = ""
-            out += paramString & "|"
+            out += $"{paramString}{If(argsList.Count > 0, "|", "")}"
             If argsList.Count > 1 Then
                 For i As Integer = 0 To argsList.Count - 2
                     If Not argsList(i) = "" Then out += argsList(i) & ";"
                 Next
             End If
-            out += argsList.Last
+            If argsList.Count > 0 Then out += argsList.Last
             If Not flagString = "None" Then out += "|" & flagString
             key.value = out
         End Sub

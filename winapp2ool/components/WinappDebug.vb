@@ -507,6 +507,20 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="key">A winap2.ini FileKey format iniKey object</param>
     Private Function pFileKey(key As iniKey) As iniKey
+        ' Pipe symbol checks
+        Dim iteratorCheckerList() As String = Split(key.value, "|")
+        fullKeyErr(key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
+        ' Captures any incident of semi colons coming before the first pipe symbol
+        fullKeyErr(key, "Semicolon (;) found before pipe (|).", key.vHas(";") And key.value.IndexOf(";") < key.value.IndexOf("|"))
+        ' Check for incorrect spellings of RECURSE or REMOVESELF
+        If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF"))
+        ' Check for missing pipe symbol on recurse and removeself, fix them if detected
+        cFlags(key, {"RECURSE", "REMOVESELF"})
+        ' Make sure VirtualStore folders point to the correct place
+        inputMismatchErr(key.lineNumber, "Incorrect VirtualStore location.", key.value, "%LocalAppData%\VirtualStore\Program Files*\", key.vHas("\virtualStore\p", True) And Not key.vHasAny({"programdata", "program files*", "program*"}, True))
+        ' Backslash checks, fix if detected
+        fullKeyErr(key, "Backslash (\) found before pipe (|).", scanSlashes And key.vHas("%\|"), correctSlashes, key.value, key.value.Replace("%\|", "%|"))
+        fullKeyErr(key, "Missing backslash (\) after %EnvironmentVariable%.", key.vHas("%") And Not key.vHasAny({"%|", "%\"}))
         ' Get the parameters given to the file key and sort them 
         Dim keyParams As New winapp2KeyParameters(key)
         Dim argsStrings As New List(Of String)
@@ -524,20 +538,6 @@ Module WinappDebug
         Next
         ' Reconstruct keys we've modified above
         If fixFormat(correctParameters) Then keyParams.reconstructKey(key)
-        ' Pipe symbol checks
-        Dim iteratorCheckerList() As String = Split(key.value, "|")
-        fullKeyErr(key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
-        ' Captures any incident of semi colons coming before the first pipe symbol
-        fullKeyErr(key, "Semicolon (;) found before pipe (|).", key.vHas(";") And key.value.IndexOf(";") < key.value.IndexOf("|"))
-        ' Check for incorrect spellings of RECURSE or REMOVESELF
-        If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF"))
-        ' Check for missing pipe symbol on recurse and removeself, fix them if detected
-        cFlags(key, {"RECURSE", "REMOVESELF"})
-        ' Make sure VirtualStore folders point to the correct place
-        inputMismatchErr(key.lineNumber, "Incorrect VirtualStore location.", key.value, "%LocalAppData%\VirtualStore\Program Files*\", key.vHas("\virtualStore\p", True) And Not key.vHasAny({"programdata", "program files*", "program*"}, True))
-        ' Backslash checks, fix if detected
-        fullKeyErr(key, "Backslash (\) found before pipe (|).", scanSlashes And key.vHas("%\|"), correctSlashes, key.value, key.value.Replace("%\|", "%|"))
-        fullKeyErr(key, "Missing backslash (\) after %EnvironmentVariable%.", key.vHas("%") And Not key.vHasAny({"%|", "%\"}))
         Return key
     End Function
 

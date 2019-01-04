@@ -762,7 +762,7 @@ Public Module iniFileHandler
         ''' <param name="line">A string in the format name=value</param>
         ''' <param name="count">The line number for the string</param>
         Public Sub New(ByVal line As String, ByVal count As Integer)
-            Try
+            If line.Contains("=") Then
                 Dim splitLine As String() = line.Split(CChar("="))
                 lineNumber = count
                 Select Case True
@@ -779,9 +779,11 @@ Public Module iniFileHandler
                         value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
                         keyType = "DeleteMe"
                 End Select
-            Catch ex As Exception
-                exc(ex)
-            End Try
+            Else
+                name = line
+                value = ""
+                keyType = "Error"
+            End If
         End Sub
 
         ''' <summary>
