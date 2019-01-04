@@ -195,8 +195,8 @@ Trim is designed to do as its name implies: trim winapp2.ini. It does this by pr
 
 * Toggle Download
   * Enables/Disables downloading of the latest winapp2.ini from GitHub to use as the input for the trimmer
-  * Disabled by default
     * Most users will want to select this option
+  * Disabled by default
   * Unavailable in offline mode
 
 * Toggle Download (non-CCleaner)
