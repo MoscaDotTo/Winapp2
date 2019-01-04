@@ -96,8 +96,8 @@ WinappDebug is essentially a basic [lint](https://www.wikiwand.com/en/Lint_%28so
 
 * File Chooser (save)
   * Opens the interface to select a new target file for saving changes made by the debugger instead of overwriting the input file
-    * Only shown when autocorrection is enabled first
     * Suggests "winapp2-debugged.ini" as the default rename
+  * Only shown when autocorrection is enabled first
 
 * Toggle Scan Settings
   * Opens the Scan and Repair menu
@@ -195,7 +195,7 @@ Trim is designed to do as its name implies: trim winapp2.ini. It does this by pr
 
 * Toggle Download
   * Enables/Disables downloading of the latest winapp2.ini from GitHub to use as the input for the trimmer
-    * Most users will want to select this option
+  * Most users will want to select this option
   * Disabled by default
   * Unavailable in offline mode
 
@@ -293,12 +293,12 @@ This tool is designed to simply merge two local ini files. It has two modes, bot
 
 * Winapp2.ini (online)
   * Enables downloading the latest copy of winapp2.ini from GitHub to use as the comparator file
-    * Most users will want to select this option
+  * Most users will want to select this option
 
 * Winapp2.ini (non-CCleaner)
   * Enables downloading the latest non-CCleaner variant of winapp2.ini to use as the comparator file
-    * CCleaner users should not use this option
-    * Only shown if winapp2.ini (online) option is enabled 
+  * CCleaner users should not use this option
+  * Only shown if winapp2.ini (online) option is enabled 
 
 * Toggle Log Saving
   * Enables or disables saving the diff output to a file at the end of execution
@@ -389,8 +389,8 @@ This tool was born of necessity in the advent of a mass renaming of entries in w
 
 * Winapp2ool
   * Downloads winapp2ool.exe from GitHub
-    * Will attempt to replace the currently running executable
-    * Unavailable on winapp2oolXP and on machines running .NET Framework versions older than 4.6
+  * Will attempt to replace the currently running executable
+  * Unavailable on winapp2oolXP and on machines running .NET Framework versions older than 4.6
 
 * Removed Entries.ini
   * Downloads the file used to create the non-CCleaner variant of winapp2.ini
