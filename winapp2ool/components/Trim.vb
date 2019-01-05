@@ -394,6 +394,6 @@ Public Module Trim
     ''' <returns></returns>
     Private Function checkDetOS(value As String) As Boolean
         Dim splitKey As String() = value.Split(CChar("|"))
-        Return If(value.StartsWith("|"), Not winVer > Double.Parse(splitKey(1)), Not winVer < Double.Parse(splitKey(0)))
+        Return If(value.StartsWith("|"), Not winVer > Val(Double.Parse(splitKey(1))), Not winVer < Val(Double.Parse(splitKey(0))))
     End Function
 End Module

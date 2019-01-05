@@ -243,7 +243,7 @@ Module Winapp2ool
         End If
         Dim osVersion As String = System.Environment.OSVersion.ToString().Replace("Microsoft Windows NT ", "")
         Dim ver As String() = osVersion.Split(CChar("."))
-        Dim out As Double = CDbl($"{ver(0)}.{ver(1)}")
+        Dim out As Double = Val($"{ver(0)}.{ver(1)}")
         ' This might not act completely correctly on Windows 8.1 but usage of that seems small enough that it wont be an issue
         If Not {5.1, 6.0, 6.1, 6.2, 6.3}.Contains(out) Then
             Console.WriteLine("Unable to determine which version of Windows you are running.")
