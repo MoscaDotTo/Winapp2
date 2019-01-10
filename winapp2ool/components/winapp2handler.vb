@@ -376,10 +376,6 @@ Module winapp2handler
             keyListList.Add(errorKeys)
         End Sub
 
-        Public Sub addFileKey(ByVal key As iniKey)
-            fileKeys.Add(key)
-        End Sub
-
         ''' <summary>
         ''' Returns the keys in each keyList back as a list of Strings in winapp2.ini (style) order
         ''' </summary>

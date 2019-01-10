@@ -198,22 +198,21 @@ Public Module Trim
         Return False
     End Function
 
+    ''' <summary>
+    ''' Audits the given entry for legacy codepaths in the machine's VirtualStore locations
+    ''' </summary>
+    ''' <param name="entry"></param>
     Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
-        vsChecker(entry.fileKeys)
-        vsChecker(entry.regKeys)
+        vsKeyChecker(entry.fileKeys)
+        vsKeyChecker(entry.regKeys)
+        vsKeyChecker(entry.excludeKeys)
     End Sub
-
-    Private Sub vsChecker(ByRef keyList As List(Of iniKey))
-        vsFileKeyChecker(keyList)
-        renumberKeys(keyList, replaceAndSort(getValues(keyList), "|", "\ \"))
-    End Sub
-
 
     ''' <summary>
-    ''' Generates FileKeys for VirtualStore locations that exist on the current system and inserts them into the given list
+    ''' Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list
     ''' </summary>
     ''' <param name="keyList">The list of FileKeys from a winapp2entry object</param>
-    Private Sub vsFileKeyChecker(ByRef keyList As List(Of iniKey))
+    Private Sub vsKeyChecker(ByRef keyList As List(Of iniKey))
         If keyList.Count = 0 Then Exit Sub
         Select Case keyList(0).keyType
             Case "FileKey", "ExcludeKey"
