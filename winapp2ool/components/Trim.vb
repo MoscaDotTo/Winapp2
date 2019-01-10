@@ -216,7 +216,7 @@ Public Module Trim
         If keyList.Count = 0 Then Exit Sub
         Select Case keyList(0).keyType
             Case "FileKey", "ExcludeKey"
-                mkVsKeys({"%ProgramFiles%", "%CommonAppData%"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData"}, keyList)
+                mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files"}, keyList)
             Case "RegKey"
                 mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, keyList)
         End Select
@@ -249,10 +249,16 @@ Public Module Trim
         Next
     End Sub
 
+    ''' <summary>
+    ''' Creates the VirtualStore version of a given iniKey
+    ''' </summary>
+    ''' <param name="findStr">The normal filesystem path</param>
+    ''' <param name="replStr">The VirtualStore location path</param>
+    ''' <param name="key">The key to processed</param>
+    ''' <returns></returns>
     Private Function createVSKey(findStr As String, replStr As String, key As iniKey) As iniKey
         Return New iniKey($"{key.name}={key.value.Replace(findStr, replStr)}")
     End Function
-
 
     ''' <summary>
     ''' Processess a list of winapp2.ini entries and removes any from the list that wouldn't be detected by CCleaner
