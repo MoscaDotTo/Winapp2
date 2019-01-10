@@ -376,6 +376,10 @@ Module winapp2handler
             keyListList.Add(errorKeys)
         End Sub
 
+        Public Sub addFileKey(ByVal key As iniKey)
+            fileKeys.Add(key)
+        End Sub
+
         ''' <summary>
         ''' Returns the keys in each keyList back as a list of Strings in winapp2.ini (style) order
         ''' </summary>
@@ -397,7 +401,7 @@ Module winapp2handler
     ''' Provides a few helpful methods for dissecting winapp2key objects
     ''' </summary>
     Public Class winapp2KeyParameters
-        Public paramString As String = ""
+        Public pathString As String = ""
         Public argsList As New List(Of String)
         Public flagString As String = ""
         Public keyType As String = ""
@@ -410,24 +414,24 @@ Module winapp2handler
                 Case "FileKey"
                     keyNum = key.keyType.Replace("FileKey", "")
                     If splitKey.Count > 1 Then
-                        paramString = splitKey(0)
+                        pathString = splitKey(0)
                         argsList.AddRange(splitKey(1).Split(CChar(";")))
                         flagString = If(splitKey.Count >= 3, splitKey.Last, "None")
                     Else
-                        paramString = key.value
+                        pathString = key.value
                     End If
                 Case "ExcludeKey"
                     Select Case splitKey.Count
                         Case 2
-                            paramString = splitKey(1)
+                            pathString = splitKey(1)
                             flagString = splitKey(0)
                         Case 3
-                            paramString = splitKey(1)
+                            pathString = splitKey(1)
                             argsList.AddRange(splitKey(2).Split(CChar(";")))
                             flagString = splitKey(0)
                     End Select
                 Case "RegKey"
-                    paramString = splitKey(0)
+                    pathString = splitKey(0)
                     If splitKey.Count > 1 Then argsList.Add(splitKey(1))
             End Select
         End Sub
@@ -439,7 +443,7 @@ Module winapp2handler
         ''' Also trims empty comments 
         Public Sub reconstructKey(ByRef key As iniKey)
             Dim out As String = ""
-            out += $"{paramString}{If(argsList.Count > 0, "|", "")}"
+            out += $"{pathString}{If(argsList.Count > 0, "|", "")}"
             If argsList.Count > 1 Then
                 For i As Integer = 0 To argsList.Count - 2
                     If Not argsList(i) = "" Then out += argsList(i) & ";"

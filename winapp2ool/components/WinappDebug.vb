@@ -595,7 +595,7 @@ Module WinappDebug
         fullNameErrIf(entry.regKeys.Count = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
         ' Make sure we have a Default key.
         fullNameErrIf(entry.defaultKey.Count = 0 And scanDefaults, entry, "Entry is missing a Default key")
-        addKeyToListIf(New iniKey("Default=False", 0), entry.defaultKey, fixFormat(correctDefaults) And entry.defaultKey.Count = 0)
+        addKeyToListIf(New iniKey("Default=False"), entry.defaultKey, fixFormat(correctDefaults) And entry.defaultKey.Count = 0)
     End Sub
 
     ''' <summary>
@@ -669,7 +669,7 @@ Module WinappDebug
     Private Sub sortKeys(ByRef keyList As List(Of iniKey), hadDuplicatesRemoved As Boolean)
         If Not scanAlpha Or keyList.Count <= 1 Then Exit Sub
         Dim keyStrings As List(Of String) = getValues(keyList)
-        Dim sortedKeyStringList As List(Of String) = replaceAndSort(keyStrings, "|", " \ \")
+        Dim sortedKeyStringList As List(Of String) = replaceAndSort(keyStrings, "|", "\ \")
         ' Rewrite the alphabetized keys back into the keylist (fixes numbering silently) 
         Dim keysOutOfPlace As Boolean = False
         findOutOfPlace(keyStrings, sortedKeyStringList, keyList(0).keyType, getLineNumsFromKeyList(keyList), keysOutOfPlace)
@@ -756,9 +756,9 @@ Module WinappDebug
             ' The folder provided has appeared in another key
             ' The flagstring (RECURSE, REMOVESELF, "") for both keys matches
             ' The first appearing key should have its parameters appended to and the second appearing key should be removed
-            If paramList.Contains(tmpWa2.paramString) Then
+            If paramList.Contains(tmpWa2.pathString) Then
                 For j As Integer = 0 To paramList.Count - 1
-                    If tmpWa2.paramString = paramList(j) And tmpWa2.flagString = flagList(j) Then
+                    If tmpWa2.pathString = paramList(j) And tmpWa2.flagString = flagList(j) Then
                         Dim keyToMergeInto As New winapp2KeyParameters(keyList(j))
                         Dim mergeKeyStr As String = ""
                         addArgs(mergeKeyStr, keyToMergeInto)
@@ -767,7 +767,7 @@ Module WinappDebug
                         Next
                         If tmpWa2.flagString <> "None" Then mergeKeyStr += $"|{tmpWa2.flagString}"
                         dupeList.Add(keyList(i))
-                        newKeyList(j) = New iniKey(mergeKeyStr, 1)
+                        newKeyList(j) = New iniKey(mergeKeyStr)
                         Exit For
                     End If
                 Next
@@ -808,7 +808,7 @@ Module WinappDebug
     ''' <param name="flagList">The list of flags observed</param>
     ''' <param name="params">The current set of params and flags</param>
     Private Sub trackParamAndFlags(ByRef paramList As List(Of String), ByRef flagList As List(Of String), params As winapp2KeyParameters)
-        paramList.Add(params.paramString)
+        paramList.Add(params.pathString)
         flagList.Add(params.flagString)
     End Sub
 
@@ -818,7 +818,7 @@ Module WinappDebug
     ''' <param name="tmpKeyStr">The string to contain the new key text</param>
     ''' <param name="tmp2wa2">A set of parameters to append</param>
     Private Sub addArgs(ByRef tmpKeyStr As String, tmp2wa2 As winapp2KeyParameters)
-        appendStrs({$"{tmp2wa2.keyType}{tmp2wa2.keyNum}=", $"{tmp2wa2.paramString}|", tmp2wa2.argsList(0)}, tmpKeyStr)
+        appendStrs({$"{tmp2wa2.keyType}{tmp2wa2.keyNum}=", $"{tmp2wa2.pathString}|", tmp2wa2.argsList(0)}, tmpKeyStr)
         If tmp2wa2.argsList.Count > 1 Then
             For i As Integer = 1 To tmp2wa2.argsList.Count - 1
                 tmpKeyStr += $";{tmp2wa2.argsList(i)}"

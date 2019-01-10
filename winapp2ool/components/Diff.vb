@@ -275,7 +275,7 @@ Module Diff
                             Dim oldKey As New winapp2KeyParameters(key)
                             Dim newKey As New winapp2KeyParameters(skey)
                             ' Make sure the given path hasn't changed
-                            If Not oldKey.paramString = newKey.paramString Then
+                            If Not oldKey.pathString = newKey.pathString Then
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                 Exit For
                             End If

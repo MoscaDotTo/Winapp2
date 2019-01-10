@@ -761,7 +761,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="line">A string in the format name=value</param>
         ''' <param name="count">The line number for the string</param>
-        Public Sub New(ByVal line As String, ByVal count As Integer)
+        Public Sub New(ByVal line As String, Optional ByVal count As Integer = 0)
             If line.Contains("=") Then
                 Dim splitLine As String() = line.Split(CChar("="))
                 lineNumber = count

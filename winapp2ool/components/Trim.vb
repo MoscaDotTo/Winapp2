@@ -198,19 +198,62 @@ Public Module Trim
         Return False
     End Function
 
-    Private Sub trimFileKeys(ByRef entry As winapp2entry)
-        Dim keysToTrim As New List(Of iniKey)
-        For Each key In entry.fileKeys
-            If key.vHas("VirtualStore") Then
-                Dim params As New winapp2KeyParameters(key)
-                addKeyToListIf(key, keysToTrim, Not checkPathExist(params.paramString))
-            End If
-        Next
-        For Each key In keysToTrim
-            entry.fileKeys.Remove(key)
-        Next
-        If keysToTrim.Count > 0 Then renumberKeys(entry.fileKeys, getValues(entry.fileKeys))
+    Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
+        vsChecker(entry.fileKeys)
+        vsChecker(entry.regKeys)
     End Sub
+
+    Private Sub vsChecker(ByRef keyList As List(Of iniKey))
+        vsFileKeyChecker(keyList)
+        renumberKeys(keyList, replaceAndSort(getValues(keyList), "|", "\ \"))
+    End Sub
+
+
+    ''' <summary>
+    ''' Generates FileKeys for VirtualStore locations that exist on the current system and inserts them into the given list
+    ''' </summary>
+    ''' <param name="keyList">The list of FileKeys from a winapp2entry object</param>
+    Private Sub vsFileKeyChecker(ByRef keyList As List(Of iniKey))
+        If keyList.Count = 0 Then Exit Sub
+        Select Case keyList(0).keyType
+            Case "FileKey", "ExcludeKey"
+                mkVsKeys({"%ProgramFiles%", "%CommonAppData%"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData"}, keyList)
+            Case "RegKey"
+                mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, keyList)
+        End Select
+        renumberKeys(keyList, replaceAndSort(getValues(keyList), "|", "\ \"))
+    End Sub
+
+    ''' <summary>
+    ''' Audits the existence of VirtualStore locations for an iniKey and if they exist, adds them to the list
+    ''' </summary>
+    ''' <param name="findStrs">A list of strings to seek for in the key value</param>
+    ''' <param name="replStrs">A list of strings to replace the sought after key values</param>
+    ''' <param name="keyList">The list of iniKey objects to be processed</param>
+    Private Sub mkVsKeys(findStrs As String(), replStrs As String(), ByRef keyList As List(Of iniKey))
+        Dim initVals As List(Of String) = getValues(keyList)
+        Dim keysToAdd As New List(Of iniKey)
+        For Each key In keyList
+            Dim keyToAdd As New iniKey("Exit=Now")
+            If Not key.vHasAny(findStrs, True) Then Continue For
+            For i As Integer = 0 To findStrs.Count - 1
+                keyToAdd = createVSKey(findStrs(i), replStrs(i), key)
+                If initVals.Contains(keyToAdd.value) Then Continue For
+                addKeyToListIf(keyToAdd, keysToAdd, Not key.value = keyToAdd.value)
+            Next
+            If keyToAdd.name = "Exit" Then Continue For
+        Next
+        For Each key In keysToAdd
+            Dim keyToAddParams As New winapp2KeyParameters(key)
+            Dim exists As Boolean = checkExist(keyToAddParams.pathString)
+            addKeyToListIf(key, keyList, checkExist(keyToAddParams.pathString))
+        Next
+    End Sub
+
+    Private Function createVSKey(findStr As String, replStr As String, key As iniKey) As iniKey
+        Return New iniKey($"{key.name}={key.value.Replace(findStr, replStr)}")
+    End Function
+
 
     ''' <summary>
     ''' Processess a list of winapp2.ini entries and removes any from the list that wouldn't be detected by CCleaner
@@ -219,7 +262,7 @@ Public Module Trim
     Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
         Dim sectionsToBePruned As New List(Of winapp2entry)
         For Each entry In entryList
-            If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else trimFileKeys(entry)
+            If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else virtualStoreChecker(entry)
         Next
         removeEntries(entryList, sectionsToBePruned)
     End Sub
@@ -247,7 +290,7 @@ Public Module Trim
     End Function
 
     ''' <summary>
-    ''' Handles passing off checks for the DET_CHROME case
+    ''' Handles passing off checks from sources that may vary between file system and registry
     ''' </summary>
     ''' <param name="key">An individual Detect parameter for the DET_CHROME case</param>
     ''' <returns></returns>
@@ -384,10 +427,13 @@ Public Module Trim
                 possibleDirs.Clear()
             Else
                 If currentPaths.Count = 0 Then
-                    currentPaths.Add($"{pathPart}\")
+                    currentPaths.Add($"{pathPart}")
                 Else
                     Dim newCurPaths As New List(Of String)
                     For Each path As String In currentPaths
+                        If Not path.EndsWith("\") And path <> "" Then path += "\"
+                        Dim newPath As String = $"{path}{pathPart}\"
+                        Dim exists As Boolean = Directory.Exists(newPath)
                         If Directory.Exists($"{path}{pathPart}\") Then newCurPaths.Add($"{path}{pathPart}\")
                     Next
                     currentPaths = newCurPaths
