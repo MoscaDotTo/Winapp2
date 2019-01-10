@@ -673,7 +673,7 @@ Module WinappDebug
         ' Rewrite the alphabetized keys back into the keylist (fixes numbering silently) 
         Dim keysOutOfPlace As Boolean = False
         findOutOfPlace(keyStrings, sortedKeyStringList, keyList(0).keyType, getLineNumsFromKeyList(keyList), keysOutOfPlace)
-        If keysOutOfPlace Or hadDuplicatesRemoved Then renumberKeys(keyList, sortedKeyStringList)
+        If (keysOutOfPlace Or hadDuplicatesRemoved) And fixFormat(correctAlpha) Then renumberKeys(keyList, sortedKeyStringList)
     End Sub
 
     ''' <summary>
@@ -681,13 +681,11 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="keyList">The list of iniKey objects to reorder</param>
     ''' <param name="sortedKeyList">The sorted state of the key values in the list</param>
-    Private Sub renumberKeys(ByRef keyList As List(Of iniKey), sortedKeyList As List(Of String))
-        If fixFormat(correctAlpha) Then
-            For i As Integer = 0 To keyList.Count - 1
-                keyList(i).name = keyList(i).keyType & i + 1
-                keyList(i).value = sortedKeyList(i)
-            Next
-        End If
+    Public Sub renumberKeys(ByRef keyList As List(Of iniKey), sortedKeyList As List(Of String))
+        For i As Integer = 0 To keyList.Count - 1
+            keyList(i).name = keyList(i).keyType & i + 1
+            keyList(i).value = sortedKeyList(i)
+        Next
     End Sub
 
     ''' <summary>

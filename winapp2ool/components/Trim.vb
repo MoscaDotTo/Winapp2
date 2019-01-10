@@ -190,13 +190,27 @@ Public Module Trim
         ' Process any other Detect criteria we have
         If checkExistence(entry.specialDetect, AddressOf checkSpecialDetects) Then Return True
         If checkExistence(entry.detects, AddressOf checkRegExist) Then Return True
-        If checkExistence(entry.detectFiles, AddressOf checkFileExist) Then Return True
+        If checkExistence(entry.detectFiles, AddressOf checkPathExist) Then Return True
         ' Return true for the case where we have only a DetectOS and we meet its criteria 
         If hasMetDetOS And entry.specialDetect.Count = 0 And entry.detectFiles.Count = 0 And entry.detects.Count = 0 Then Return True
         ' Return true for the case where we have no valid detect criteria
         If entry.detectOS.Count + entry.detectFiles.Count + entry.detects.Count + entry.specialDetect.Count = 0 Then Return True
         Return False
     End Function
+
+    Private Sub trimFileKeys(ByRef entry As winapp2entry)
+        Dim keysToTrim As New List(Of iniKey)
+        For Each key In entry.fileKeys
+            If key.vHas("VirtualStore") Then
+                Dim params As New winapp2KeyParameters(key)
+                addKeyToListIf(key, keysToTrim, Not checkPathExist(params.paramString))
+            End If
+        Next
+        For Each key In keysToTrim
+            entry.fileKeys.Remove(key)
+        Next
+        If keysToTrim.Count > 0 Then renumberKeys(entry.fileKeys, getValues(entry.fileKeys))
+    End Sub
 
     ''' <summary>
     ''' Processess a list of winapp2.ini entries and removes any from the list that wouldn't be detected by CCleaner
@@ -205,7 +219,7 @@ Public Module Trim
     Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
         Dim sectionsToBePruned As New List(Of winapp2entry)
         For Each entry In entryList
-            If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry)
+            If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else trimFileKeys(entry)
         Next
         removeEntries(entryList, sectionsToBePruned)
     End Sub
@@ -222,11 +236,11 @@ Public Module Trim
                     If checkExist(path) Then Return True
                 Next
             Case "DET_MOZILLA"
-                Return checkFileExist("%AppData%\Mozilla\Firefox")
+                Return checkPathExist("%AppData%\Mozilla\Firefox")
             Case "DET_THUNDERBIRD"
-                Return checkFileExist("%AppData%\Thunderbird")
+                Return checkPathExist("%AppData%\Thunderbird")
             Case "DET_OPERA"
-                Return checkFileExist("%AppData%\Opera Software")
+                Return checkPathExist("%AppData%\Opera Software")
         End Select
         ' If we didn't return above, SpecialDetect definitely doesn't exist
         Return False
@@ -238,7 +252,7 @@ Public Module Trim
     ''' <param name="key">An individual Detect parameter for the DET_CHROME case</param>
     ''' <returns></returns>
     Private Function checkExist(key As String) As Boolean
-        Return If(key.StartsWith("HK"), checkRegExist(key), checkFileExist(key))
+        Return If(key.StartsWith("HK"), checkRegExist(key), checkPathExist(key))
     End Function
 
     ''' <summary>
@@ -276,11 +290,11 @@ Public Module Trim
     End Function
 
     ''' <summary>
-    ''' Returns True if a DetectFile path exists on the system, false otherwise.
+    ''' Returns True if a path exists on the system, false otherwise.
     ''' </summary>
-    ''' <param name="key">A DetectFile path</param>
+    ''' <param name="key">A filesystem path</param>
     ''' <returns></returns>
-    Private Function checkFileExist(key As String) As Boolean
+    Private Function checkPathExist(key As String) As Boolean
         Dim isProgramFiles As Boolean = False
         Dim dir As String = key
         ' Make sure we get the proper path for environment variables
@@ -357,7 +371,7 @@ Public Module Trim
                         ' If there are any, add them to our possibility list
                         If Not possibilities.Count = 0 Then possibleDirs.AddRange(possibilities)
                     Catch
-                        ' Pretty much exception we'll encounter here is going to be the result of directories not existing.
+                        ' The exception we encounter here is going to be the result of directories not existing.
                         ' The exception will be thrown from the GetDirectories call and will prevent us from attempting to add new
                         ' items to the possibility list. In this instance, we can silently fail (here). 
                     End Try
