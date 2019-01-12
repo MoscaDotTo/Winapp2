@@ -30,6 +30,7 @@ Module Downloader
     Public toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
     Public removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
     Public wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
+    Public archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
     ' File handler
     Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
@@ -52,7 +53,8 @@ Module Downloader
     ''' </summary>
     Private Sub printAdvMenu()
         printMenuTop({"Warning!", "Files in this menu are not recommended for use by beginners."})
-        print(1, "Winapp3.ini", "Download the extended winapp3.ini cleaning rules", closeMenu:=True)
+        print(1, "Winapp3.ini", "Download the extended winapp3.ini cleaning rules")
+        print(2, "Archived entries.ini", closeMenu:=True)
     End Sub
 
     ''' <summary>
@@ -66,6 +68,9 @@ Module Downloader
             Case "1"
                 downloadFile.name = "winapp3.ini"
                 download(wa3link)
+            Case "2"
+                downloadFile.name = "Archived entries.ini"
+                download(archivedLink)
             Case Else
                 menuHeaderText = invInpStr
         End Select

@@ -220,7 +220,7 @@ Public Module Trim
             Case "RegKey"
                 mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, keyList)
         End Select
-        renumberKeys(keyList, replaceAndSort(getValues(keyList), "|", "\ \"))
+        renumberKeys(keyList, replaceAndSort(getValues(keyList), "|", " \ \"))
     End Sub
 
     ''' <summary>

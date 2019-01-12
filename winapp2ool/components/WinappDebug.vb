@@ -669,7 +669,7 @@ Module WinappDebug
     Private Sub sortKeys(ByRef keyList As List(Of iniKey), hadDuplicatesRemoved As Boolean)
         If Not scanAlpha Or keyList.Count <= 1 Then Exit Sub
         Dim keyStrings As List(Of String) = getValues(keyList)
-        Dim sortedKeyStringList As List(Of String) = replaceAndSort(keyStrings, "|", "\ \")
+        Dim sortedKeyStringList As List(Of String) = replaceAndSort(keyStrings, "|", " \ \")
         ' Rewrite the alphabetized keys back into the keylist (fixes numbering silently) 
         Dim keysOutOfPlace As Boolean = False
         findOutOfPlace(keyStrings, sortedKeyStringList, keyList(0).keyType, getLineNumsFromKeyList(keyList), keysOutOfPlace)

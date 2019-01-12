@@ -33,22 +33,13 @@ Module commandLineHandler
     ''' </summary>
     ''' <param name="setting">The boolean setting to be flipped</param>
     ''' <param name="arg">The string containing the argument that flips the boolean</param>
-    Private Sub invertSettingAndRemoveArg(ByRef setting As Boolean, ByRef arg As String)
+    ''' <param name="name">Optional reference to a file name to be replaced</param>
+    ''' <param name="newname">Optional replacement file name</param>
+    Private Sub invertSettingAndRemoveArg(ByRef setting As Boolean, ByRef arg As String, Optional ByRef name As String = "", Optional ByRef newname As String = "")
         If args.Contains(arg) Then
             setting = Not setting
             args.Remove(arg)
         End If
-    End Sub
-
-    ''' <summary>
-    ''' Calls invertSettingAndRemoveArg and assigns a new name to the given reference variable
-    ''' </summary>
-    ''' <param name="setting">The boolean setting</param>
-    ''' <param name="arg">The arg controlling the setting</param>
-    ''' <param name="name">A reference to a String to be renamed</param>
-    ''' <param name="newname">The new value for the String to be renamed</param>
-    Private Sub invertAndRemoveAndRename(ByRef setting As Boolean, ByRef arg As String, ByRef name As String, newname As String)
-        invertSettingAndRemoveArg(setting, arg)
         name = newname
     End Sub
 
@@ -100,16 +91,19 @@ Module commandLineHandler
     ''' </summary>
     '''  Merge args:
     ''' -mm      : toggle mergemode from add&amp;replace to add&amp;remove
-    ''' -r       : use removed entries.ini as the merge file's name
-    ''' -c       : use custom.ini as the merge file's name
-    ''' -w       : use winapp3.ini as the merge file's name
+    ''' Preset merge file choices
+    ''' -r       : removed entries.ini 
+    ''' -c       : custom.ini 
+    ''' -w       : winapp3.ini
+    ''' -a       : archived entries.ini 
     Private Sub autoMerge()
         Dim mergeMode As Boolean
         initMergeParams(firstFile, secondFile, thirdFile, mergeMode)
         invertSettingAndRemoveArg(mergeMode, "-mm")
-        invertAndRemoveAndRename(False, "-r", secondFile.name, "Removed Entries.ini")
-        invertAndRemoveAndRename(False, "-c", secondFile.name, "Custom.ini")
-        invertAndRemoveAndRename(False, "-w", secondFile.name, "winapp3.ini")
+        invertSettingAndRemoveArg(False, "-r", secondFile.name, "Removed Entries.ini")
+        invertSettingAndRemoveArg(False, "-c", secondFile.name, "Custom.ini")
+        invertSettingAndRemoveArg(False, "-w", secondFile.name, "winapp3.ini")
+        invertSettingAndRemoveArg(False, "-a", secondFile.name, "Archived Entries.ini")
         getFileAndDirParams()
         If Not secondFile.name = "" Then remoteMerge(firstFile, secondFile, thirdFile, mergeMode)
     End Sub
@@ -261,7 +255,6 @@ Module commandLineHandler
     ''' Gets the directory and name info for each file given (if any)
     ''' </summary>
     Private Sub getFileAndDirParams()
-        ' Make sure the args are formatted correctly so the path/name can be extracted 
         validateArgs()
         getParams(1, firstFile)
         getParams(2, secondFile)
