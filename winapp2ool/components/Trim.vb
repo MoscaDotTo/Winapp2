@@ -216,7 +216,7 @@ Public Module Trim
         If keyList.Count = 0 Then Exit Sub
         Select Case keyList(0).keyType
             Case "FileKey", "ExcludeKey"
-                mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files"}, keyList)
+                mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files", "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, keyList)
             Case "RegKey"
                 mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, keyList)
         End Select
@@ -297,10 +297,10 @@ Public Module Trim
     ''' <summary>
     ''' Handles passing off checks from sources that may vary between file system and registry
     ''' </summary>
-    ''' <param name="key">An individual Detect parameter for the DET_CHROME case</param>
+    ''' <param name="path">A filesystem or registry path to be audited for existence</param>
     ''' <returns></returns>
-    Private Function checkExist(key As String) As Boolean
-        Return If(key.StartsWith("HK"), checkRegExist(key), checkPathExist(key))
+    Private Function checkExist(path As String) As Boolean
+        Return If(path.StartsWith("HK"), checkRegExist(path), checkPathExist(path))
     End Function
 
     ''' <summary>
