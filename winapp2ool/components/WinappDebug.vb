@@ -515,7 +515,8 @@ Module WinappDebug
         ' Check for incorrect spellings of RECURSE or REMOVESELF
         If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF"))
         ' Check for missing pipe symbol on recurse and removeself, fix them if detected
-        cFlags(key, {"RECURSE", "REMOVESELF"})
+        Dim flags As New List(Of String) From {"RECURSE", "REMOVESELF"}
+        flags.ForEach(Sub(flagStr As String) fullKeyErr(key, $"Missing pipe (|) before {flagStr}.", scanFlags And key.vHas(flagStr) And Not key.vHas($"|{flagStr}"), correctFlags, key.value, key.value.Replace(flagStr, $"|{flagStr}")))
         ' Make sure VirtualStore folders point to the correct place
         inputMismatchErr(key.lineNumber, "Incorrect VirtualStore location.", key.value, "%LocalAppData%\VirtualStore\Program Files*\", key.vHas("\virtualStore\p", True) And Not key.vHasAny({"programdata", "program files*", "program*"}, True))
         ' Backslash checks, fix if detected
@@ -533,9 +534,7 @@ Module WinappDebug
             End If
         Next
         ' Remove any duplicate arguments from the key parameters
-        For Each arg In dupeArgs
-            If fixFormat(correctParameters) Then keyParams.argsList.Remove(arg)
-        Next
+        dupeArgs.ForEach(Sub(arg As String) If fixFormat(correctParameters) Then keyParams.argsList.Remove(arg))
         ' Reconstruct keys we've modified above
         If fixFormat(correctParameters) Then keyParams.reconstructKey(key)
         Return key
@@ -548,9 +547,7 @@ Module WinappDebug
     Private Sub validateKeys(ByRef entry As winapp2entry)
         For Each lst In entry.keyListList
             Dim brokenKeys As New List(Of iniKey)
-            For Each key In lst
-                addKeyToListIf(key, brokenKeys, Not cValidity(key))
-            Next
+            lst.ForEach(Sub(key As iniKey) addKeyToListIf(key, brokenKeys, Not cValidity(key)))
             removeDuplicateKeys(lst, brokenKeys)
             removeDuplicateKeys(entry.errorKeys, brokenKeys)
         Next
@@ -581,6 +578,7 @@ Module WinappDebug
         processKeyList(entry.warningKey, AddressOf voidDelegate)
         processKeyList(entry.fileKeys, AddressOf pFileKey)
         processKeyList(entry.regKeys, AddressOf voidDelegate)
+        processKeyList(entry.excludeKeys, AddressOf voidDelegate, hasFileExcludes, hasRegExcludes)
         ' Make sure we only have LangSecRef if we have LangSecRef at all
         fullNameErrIf(entry.langSecRef.Count <> 0 And entry.sectionKey.Count <> 0, entry, "Section key found alongside LangSecRef key, only one is required.")
         ' Make sure we have at least 1 valid detect key 
@@ -689,17 +687,6 @@ Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Detects if a pipe symbol is missing before an array of given params
-    ''' </summary>
-    ''' <param name="key">An iniKey object to be observed</param>
-    ''' <param name="flagStrs">The array of parameters which should be prceeded by a pipe symbol if they exist in the key value</param>
-    Private Sub cFlags(ByRef key As iniKey, flagStrs As String())
-        For Each flagstr In flagStrs
-            fullKeyErr(key, $"Missing pipe (|) before {flagstr}.", scanFlags And key.vHas(flagstr) And Not key.vHas($"|{flagstr}"), correctFlags, key.value, key.value.Replace(flagstr, $"|{flagstr}"))
-        Next
-    End Sub
-
-    ''' <summary>
     ''' Processes a list of ExcludeKey format winapp2.ini iniKey objects and checks them for errors, correcting where possible
     ''' </summary>
     ''' <param name="key">A winapp2.ini ExcludeKey format iniKey object</param>
@@ -710,13 +697,12 @@ Module WinappDebug
             Case key.vHasAny({"FILE|", "PATH|"})
                 hasF = True
                 chkPathFormatValidity(key, False)
-                ' Make sure any filesystem exclude paths have a backslash before their pipe symbol.
                 fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.", (key.vHas("|") And Not key.vHas("\|")))
             Case key.vHas("REG|")
                 hasR = True
                 chkPathFormatValidity(key, True)
             Case Else
-                ' If we made it here, we don't have a valid flag
+                If key.value.StartsWith("FILE") Or key.value.StartsWith("PATH") Or key.value.StartsWith("REG") Then fullKeyErr(key, "Missing pipe symbol after ExcludeKey flag)") : Exit Sub
                 fullKeyErr(key, "No valid exclude flag (FILE, PATH, or REG) found in ExcludeKey.")
         End Select
     End Sub
@@ -748,10 +734,7 @@ Module WinappDebug
             Dim key As iniKey = keyList(i)
             Dim tmpWa2 As New winapp2KeyParameters(key)
             ' If we have yet to record any params, record them and move on
-            If paramList.Count = 0 Then
-                trackParamAndFlags(paramList, flagList, tmpWa2)
-                Continue For
-            End If
+            If paramList.Count = 0 Then trackParamAndFlags(paramList, flagList, tmpWa2) : Continue For
             ' This should handle the case where for a FileKey: 
             ' The folder provided has appeared in another key
             ' The flagstring (RECURSE, REMOVESELF, "") for both keys matches
@@ -762,9 +745,7 @@ Module WinappDebug
                         Dim keyToMergeInto As New winapp2KeyParameters(keyList(j))
                         Dim mergeKeyStr As String = ""
                         addArgs(mergeKeyStr, keyToMergeInto)
-                        For Each arg In tmpWa2.argsList
-                            mergeKeyStr += $";{arg}"
-                        Next
+                        tmpWa2.argsList.ForEach(Sub(arg As String) mergeKeyStr += $";{arg}")
                         If tmpWa2.flagString <> "None" Then mergeKeyStr += $"|{tmpWa2.flagString}"
                         dupeList.Add(keyList(i))
                         newKeyList(j) = New iniKey(mergeKeyStr)
@@ -832,9 +813,8 @@ Module WinappDebug
     ''' <param name="keylist">The list from which objects might be removed</param>
     ''' <param name="dupeList">The list of objects to remove</param>
     Private Sub removeDuplicateKeys(ByRef keylist As List(Of iniKey), ByVal dupeList As List(Of iniKey))
-        For Each key In dupeList
-            keylist.Remove(key)
-        Next
+        Dim kl = keylist
+        dupeList.ForEach(Sub(key As iniKey) kl.Remove(key))
     End Sub
 
     ''' <summary>
