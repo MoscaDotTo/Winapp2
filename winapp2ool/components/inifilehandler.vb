@@ -30,9 +30,7 @@ Public Module iniFileHandler
     ''' <returns></returns>
     Public Function getValues(ByVal keyList As List(Of iniKey)) As List(Of String)
         Dim valList As New List(Of String)
-        For Each key In keyList
-            valList.Add(key.value)
-        Next
+        keyList.ForEach(Sub(key As iniKey) valList.Add(key.value))
         Return valList
     End Function
 
@@ -43,9 +41,7 @@ Public Module iniFileHandler
     ''' <returns></returns>
     Public Function getLineNumsFromKeyList(ByRef keyList As List(Of iniKey)) As List(Of Integer)
         Dim lineList As New List(Of Integer)
-        For Each key In keyList
-            lineList.Add(key.lineNumber)
-        Next
+        keyList.ForEach(Sub(key As iniKey) lineList.Add(key.lineNumber))
         Return lineList
     End Function
 
@@ -474,9 +470,7 @@ Public Module iniFileHandler
         ''' <param name="sortedSections">The sorted state of the sections by name</param>
         Public Sub sortSections(ByVal sortedSections As List(Of String))
             Dim tempFile As New iniFile
-            For Each sectionName In sortedSections
-                tempFile.sections.Add(sectionName, sections.Item(sectionName))
-            Next
+            sortedSections.ForEach(Sub(sectionName As String) tempFile.sections.Add(sectionName, sections.Item(sectionName)))
             Me.sections = tempFile.sections
         End Sub
 
@@ -565,9 +559,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="indicies"></param>
         Public Sub removeKeys(indicies As List(Of Integer))
-            For Each ind In indicies
-                Me.keys.Remove(ind)
-            Next
+            indicies.ForEach(Sub(ind As Integer) Me.keys.Remove(ind))
         End Sub
 
         ''' <summary>

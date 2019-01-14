@@ -223,9 +223,7 @@ Module Diff
                     getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.Count > 0)}Removed:")
                     If updatedKeys.Count > 0 Then
                         tmp += appendNewLine($"{prependNewLines(removedKeys.Count > 0 Or addedKeys.Count > 0)}Modified:")
-                        For Each pair In updatedKeys
-                            appendStrs({appendNewLine(prependNewLines() & pair.Key.name), $"Old:   {appendNewLine(pair.Key.toString)}", $"New:   {appendNewLine(pair.Value.toString)}"}, tmp)
-                        Next
+                        updatedKeys.ForEach(Sub(pair As KeyValuePair(Of iniKey, iniKey)) appendStrs({appendNewLine(prependNewLines() & pair.Key.name), $"Old:   {appendNewLine(pair.Key.toString)}", $"New:   {appendNewLine(pair.Value.toString)}"}, tmp))
                     End If
                     tmp += prependNewLines(False) & menuStr00
                     outList.Add(tmp)
