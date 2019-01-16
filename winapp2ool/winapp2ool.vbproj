@@ -110,6 +110,7 @@
     <Compile Include="components\inifilehandler.vb" />
     <Compile Include="components\MenuMaker.vb" />
     <Compile Include="components\Merge.vb" />
+    <Compile Include="components\Minefield.vb" />
     <Compile Include="components\winapp2handler.vb" />
     <Compile Include="components\exceptionHandler.vb" />
     <Compile Include="Winapp2ool.vb" />
