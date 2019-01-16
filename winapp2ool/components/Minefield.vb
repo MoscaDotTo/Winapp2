@@ -19,6 +19,7 @@
 ''' This module serves as a simple interface for testing new ideas that don't fit neatly into an existing module
 ''' </summary>
 Module Minefield
+
     Public Sub printMenu()
         printMenuTop({"A testing ground for new ideas/features, watch your step!"})
         print(1, "Game Entry Maker", "A meta script approach to game entries in winapp2.ini", closeMenu:=True)
@@ -44,6 +45,4 @@ Module Minefield
                 exitCode = True
         End Select
     End Sub
-
-
 End Module
