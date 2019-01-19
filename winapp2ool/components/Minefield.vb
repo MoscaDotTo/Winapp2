@@ -30,13 +30,27 @@ Module Minefield
             Case "0"
                 exitCode = True
             Case "1"
-                initModule("Game Entry Maker", AddressOf printGMMenu, AddressOf handleGMInput)
+                initModule("Java Entry Maker", AddressOf printJMMenu, AddressOf handleJMInput)
+        End Select
+    End Sub
+
+    Private Sub printJMMenu()
+        printMenuTop({"Creates a winapp2.ini entry that cleans up after old Java versions"})
+        print(1, "Run (Default)", "Attempt to create an entry based on the current system", closeMenu:=True)
+    End Sub
+
+    Private Sub handleJMInput(input As String)
+        Select Case input
+            Case "0"
+                exitCode = True
+            Case "1"
+
         End Select
     End Sub
 
     Private Sub printGMMenu()
         printMenuTop({"This tool will allow for a more meta approach to creating entries for games, particularly steam."})
-        print(1, "Run (Default)", "Attempt to generate entries", closeMenu:=True)
+        print(1, "Run (Disabled)", "Attempt to generate entries", closeMenu:=True)
     End Sub
 
     Private Sub handleGMInput(input As String)
