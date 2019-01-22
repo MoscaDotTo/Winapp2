@@ -673,6 +673,10 @@ Public Module iniFileHandler
             keys.Add(key)
         End Sub
 
+        Public Sub add(kl As List(Of iniKey))
+            kl.ForEach(Sub(key) keys.Add(key))
+        End Sub
+
         Public Sub remove(key As iniKey)
             keys.Remove(key)
         End Sub
@@ -689,6 +693,11 @@ Public Module iniFileHandler
             Return keys(0).keyType = type
         End Function
 
+        Public Function toListOfStr() As List(Of String)
+            Dim out As New List(Of String)
+            keys.ForEach(Sub(key) out.Add(key.toString & Environment.NewLine))
+            Return out
+        End Function
     End Class
 
     ''' <summary>

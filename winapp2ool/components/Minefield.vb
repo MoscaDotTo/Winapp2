@@ -47,20 +47,16 @@ Module Minefield
             Case "0"
                 exitCode = True
             Case "1", ""
-                Dim HKCRKeys As New List(Of iniKey)
+                Dim entryKeyList As New keyyList
                 ' Get JavaPlugin and JavaScript keys in HKCR\
                 Dim JavaPluginKeys As List(Of iniKey) = getRegKeys(Microsoft.Win32.Registry.ClassesRoot, {"JavaPlugin", "JavaScript"}.ToList)
                 ' Separate out the JavaScript Author keys
                 Dim JSAKeys As New List(Of iniKey)
                 Dim JSKeys As New List(Of iniKey)
-
                 JavaPluginKeys.ForEach(Sub(key) If key.toString.Contains("JavaScript") Then JSKeys.Add(key))
                 JSKeys.ForEach(Sub(key) JavaPluginKeys.Remove(key))
-
                 JSKeys.ForEach(Sub(key) If key.toString.Contains("Author") Then JSAKeys.Add(key))
                 JSAKeys.ForEach(Sub(key) JSKeys.Remove(key))
-
-                ' Get the CLSID keys (this is a lengthy query)
                 Dim errs As New List(Of iniKey)
                 Dim clsids As New List(Of iniKey)
                 Dim kll As New List(Of List(Of iniKey)) : kll.Add(clsids) : kll.Add(errs)
@@ -71,6 +67,7 @@ Module Minefield
                 jSect.constructKeyLists({"clsid"}.ToList, kll)
                 Dim IDS As List(Of String) = getValues(clsids)
                 clsids.Clear()
+                Dim typeLib As List(Of iniKey) = getRegKeys(Microsoft.Win32.Registry.ClassesRoot.OpenSubKey("WOW6432Node\TypeLib\"), {"{5852F5E0-8BF4-11D4-A245-0080C6F74284}"}.ToList)
                 Dim crids As List(Of iniKey) = getRegKeys(Microsoft.Win32.Registry.ClassesRoot.OpenSubKey("WOW6432Node\CLSID\"), IDS)
                 Dim lcids As List(Of iniKey) = getRegKeys(Microsoft.Win32.Registry.LocalMachine.OpenSubKey("SOFTWARE\Classes\WOW6432Node\CLSID\"), IDS)
                 Dim lmids As List(Of iniKey) = getRegKeys(Microsoft.Win32.Registry.LocalMachine.OpenSubKey("SOFTWARE\WOW6432Node\Classes\CLSID\"), IDS)
@@ -80,17 +77,38 @@ Module Minefield
                 Dim extlmKeys As New List(Of iniKey)
                 lmjkeys.ForEach(Sub(key) If key.toString.Contains("_") Then extlmKeys.Add(key))
                 extlmKeys.ForEach(Sub(key) lmjkeys.Remove(key))
-
+                Dim cujkeys As List(Of iniKey) = getRegKeys(Microsoft.Win32.Registry.CurrentUser.OpenSubKey("Software\JavaSoft\Java Runtime Environment\"), {"1"}.ToList)
+                Dim extcukeys As New List(Of iniKey)
+                cujkeys.ForEach(Sub(key) If key.toString.Contains("_") Then extcukeys.Add(key))
+                extcukeys.ForEach(Sub(key) cujkeys.Remove(key))
+                If Not crids.Count = 0 Then crids.Remove(crids.Last)
+                If Not lcids.Count = 0 Then lcids.Remove(lcids.Last)
+                If Not lmids.Count = 0 Then lcids.Remove(lmids.Last)
+                If Not kdids.Count = 0 Then kdids.Remove(kdids.Last)
+                If Not ksids.Count = 0 Then ksids.Remove(ksids.Last)
+                If Not lmjkeys.Count = 0 Then lmjkeys.Remove(lmjkeys.Last)
+                If Not extlmKeys.Count = 0 Then extlmKeys.Remove(extlmKeys.Last)
+                If Not cujkeys.Count = 0 Then cujkeys.Remove(cujkeys.Last)
+                If Not extcukeys.Count = 0 Then extcukeys.Remove(extcukeys.Last)
+                entryKeyList.add(crids)
+                entryKeyList.add(typeLib)
+                entryKeyList.add(lcids)
+                entryKeyList.add(lmids)
+                entryKeyList.add(lmjkeys)
+                entryKeyList.add(extlmKeys)
+                entryKeyList.add(cujkeys)
+                entryKeyList.add(extcukeys)
+                renumberKeys(entryKeyList.keys, replaceAndSort(getValues(entryKeyList.keys), "-", "-"))
+                Dim entry As New List(Of String)
+                entry.Add("[Java Installation Cleanup *]")
+                entry.Add("Section=Experimental")
+                entry.Add("Default=False")
+                entryKeyList.keys.ForEach(Sub(key) entry.Add(key.toString))
+                Dim out As New iniSection(entry)
+                cwl(out.ToString)
                 cwl() : cwl("Done")
                 Console.ReadLine()
         End Select
-    End Sub
-
-    Private Sub measureTime(ByRef keyList As List(Of iniKey), reg As Microsoft.Win32.RegistryKey, IDS As List(Of String))
-        Dim curTime As Long = DateTime.Now.Ticks
-        keyList = getRegKeys(reg, IDS)
-        Dim newTime As Long = DateTime.Now.Ticks
-        cwl($"Operation took {(newTime - curTime) / TimeSpan.TicksPerSecond } seconds")
     End Sub
 
     Private Function getRegKeys(reg As Microsoft.Win32.RegistryKey, searches As List(Of String)) As List(Of iniKey)
