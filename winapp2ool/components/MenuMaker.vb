@@ -19,7 +19,6 @@ Option Strict On
 ''' Provides functions and methods for presenting and maintaining menus to a user
 ''' </summary>
 Module MenuMaker
-
     ' Basic menu frames & Strings
     Public Const menuStr00 As String = " ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗"
     Public Const menuStr01 As String = " ║                                                                                                                    ║"
@@ -112,9 +111,7 @@ Module MenuMaker
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
         printMenuLine(tmenu(menuHeaderText))
         printMenuLine(menuStr03)
-        For Each line In descriptionItems
-            printMenuLine(line, True)
-        Next
+        descriptionItems.ToList.ForEach(Sub(line) printMenuLine(line, True))
         printMenuLine(menuStr04)
         optNum = 0
         print(1, "Exit", "Return to the menu", printExit)

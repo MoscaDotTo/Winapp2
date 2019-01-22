@@ -516,7 +516,7 @@ Module WinappDebug
         If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF"))
         ' Check for missing pipe symbol on recurse and removeself, fix them if detected
         Dim flags As New List(Of String) From {"RECURSE", "REMOVESELF"}
-        flags.ForEach(Sub(flagStr As String) fullKeyErr(key, $"Missing pipe (|) before {flagStr}.", scanFlags And key.vHas(flagStr) And Not key.vHas($"|{flagStr}"), correctFlags, key.value, key.value.Replace(flagStr, $"|{flagStr}")))
+        flags.ForEach(Sub(flagStr) fullKeyErr(key, $"Missing pipe (|) before {flagStr}.", scanFlags And key.vHas(flagStr) And Not key.vHas($"|{flagStr}"), correctFlags, key.value, key.value.Replace(flagStr, $"|{flagStr}")))
         ' Make sure VirtualStore folders point to the correct place
         inputMismatchErr(key.lineNumber, "Incorrect VirtualStore location.", key.value, "%LocalAppData%\VirtualStore\Program Files*\", key.vHas("\virtualStore\p", True) And Not key.vHasAny({"programdata", "program files*", "program*"}, True))
         ' Backslash checks, fix if detected
@@ -534,7 +534,7 @@ Module WinappDebug
             End If
         Next
         ' Remove any duplicate arguments from the key parameters
-        dupeArgs.ForEach(Sub(arg As String) If fixFormat(correctParameters) Then keyParams.argsList.Remove(arg))
+        dupeArgs.ForEach(Sub(arg) If fixFormat(correctParameters) Then keyParams.argsList.Remove(arg))
         ' Reconstruct keys we've modified above
         If fixFormat(correctParameters) Then keyParams.reconstructKey(key)
         Return key
@@ -547,7 +547,7 @@ Module WinappDebug
     Private Sub validateKeys(ByRef entry As winapp2entry)
         For Each lst In entry.keyListList
             Dim brokenKeys As New List(Of iniKey)
-            lst.ForEach(Sub(key As iniKey) addKeyToListIf(key, brokenKeys, Not cValidity(key)))
+            lst.ForEach(Sub(key) addKeyToListIf(key, brokenKeys, Not cValidity(key)))
             removeDuplicateKeys(lst, brokenKeys)
             removeDuplicateKeys(entry.errorKeys, brokenKeys)
         Next
@@ -745,7 +745,7 @@ Module WinappDebug
                         Dim keyToMergeInto As New winapp2KeyParameters(keyList(j))
                         Dim mergeKeyStr As String = ""
                         addArgs(mergeKeyStr, keyToMergeInto)
-                        tmpWa2.argsList.ForEach(Sub(arg As String) mergeKeyStr += $";{arg}")
+                        tmpWa2.argsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
                         If tmpWa2.flagString <> "None" Then mergeKeyStr += $"|{tmpWa2.flagString}"
                         dupeList.Add(keyList(i))
                         newKeyList(j) = New iniKey(mergeKeyStr)
@@ -814,7 +814,7 @@ Module WinappDebug
     ''' <param name="dupeList">The list of objects to remove</param>
     Private Sub removeDuplicateKeys(ByRef keylist As List(Of iniKey), ByVal dupeList As List(Of iniKey))
         Dim kl = keylist
-        dupeList.ForEach(Sub(key As iniKey) kl.Remove(key))
+        dupeList.ForEach(Sub(key) kl.Remove(key))
     End Sub
 
     ''' <summary>
@@ -871,9 +871,7 @@ Module WinappDebug
     ''' <param name="lines"></param>
     Private Sub customErr(lineCount As Integer, err As String, lines As String())
         cwl($"Line: {lineCount} - Error: {err}")
-        For Each errStr In lines
-            cwl(errStr)
-        Next
+        lines.ToList.ForEach(Sub(errStr As String) cwl(errStr))
         cwl()
         numErrs += 1
     End Sub

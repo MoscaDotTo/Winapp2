@@ -384,11 +384,7 @@ Module winapp2handler
             Dim outList As New List(Of String)
             outList.Add(fullName)
             updKeyListList()
-            For Each lst In keyListList
-                For Each key In lst
-                    outList.Add(key.toString)
-                Next
-            Next
+            keyListList.ForEach(Sub(lst) lst.ForEach(Sub(key) outList.Add(key.toString)))
             Return outList
         End Function
     End Class

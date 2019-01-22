@@ -30,7 +30,7 @@ Public Module iniFileHandler
     ''' <returns></returns>
     Public Function getValues(ByVal keyList As List(Of iniKey)) As List(Of String)
         Dim valList As New List(Of String)
-        keyList.ForEach(Sub(key As iniKey) valList.Add(key.value))
+        keyList.ForEach(Sub(key) valList.Add(key.value))
         Return valList
     End Function
 
@@ -41,7 +41,7 @@ Public Module iniFileHandler
     ''' <returns></returns>
     Public Function getLineNumsFromKeyList(ByRef keyList As List(Of iniKey)) As List(Of Integer)
         Dim lineList As New List(Of Integer)
-        keyList.ForEach(Sub(key As iniKey) lineList.Add(key.lineNumber))
+        keyList.ForEach(Sub(key) lineList.Add(key.lineNumber))
         Return lineList
     End Function
 
@@ -470,7 +470,7 @@ Public Module iniFileHandler
         ''' <param name="sortedSections">The sorted state of the sections by name</param>
         Public Sub sortSections(ByVal sortedSections As List(Of String))
             Dim tempFile As New iniFile
-            sortedSections.ForEach(Sub(sectionName As String) tempFile.sections.Add(sectionName, sections.Item(sectionName)))
+            sortedSections.ForEach(Sub(sectionName) tempFile.sections.Add(sectionName, sections.Item(sectionName)))
             Me.sections = tempFile.sections
         End Sub
 
@@ -559,7 +559,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="indicies"></param>
         Public Sub removeKeys(indicies As List(Of Integer))
-            indicies.ForEach(Sub(ind As Integer) Me.keys.Remove(ind))
+            indicies.ForEach(Sub(ind) Me.keys.Remove(ind))
         End Sub
 
         ''' <summary>
@@ -659,6 +659,36 @@ Public Module iniFileHandler
             out += Environment.NewLine
             Return out
         End Function
+    End Class
+
+
+    Public Class keyyList
+        Public keys As List(Of iniKey)
+
+        Public Sub New()
+            keys = New List(Of iniKey)
+        End Sub
+
+        Public Sub add(key As iniKey)
+            keys.Add(key)
+        End Sub
+
+        Public Sub remove(key As iniKey)
+            keys.Remove(key)
+        End Sub
+
+        Public Sub remove(kl As List(Of iniKey))
+            kl.ForEach(Sub(key) Me.remove(key))
+        End Sub
+
+        Public Function keyCount() As Integer
+            Return keys.Count
+        End Function
+
+        Public Function typeIs(type As String) As Boolean
+            Return keys(0).keyType = type
+        End Function
+
     End Class
 
     ''' <summary>

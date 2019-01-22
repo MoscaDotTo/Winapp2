@@ -266,9 +266,7 @@ Public Module Trim
     ''' <param name="entryList">The list of winapp2entry objects to check existence for</param>
     Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
         Dim sectionsToBePruned As New List(Of winapp2entry)
-        For Each entry In entryList
-            If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else virtualStoreChecker(entry)
-        Next
+        entryList.ForEach(Sub(entry) If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else virtualStoreChecker(entry))
         removeEntries(entryList, sectionsToBePruned)
     End Sub
 
