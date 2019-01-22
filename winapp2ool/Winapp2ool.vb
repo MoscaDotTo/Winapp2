@@ -143,7 +143,7 @@ Module Winapp2ool
             Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not dnfOOD
                 Console.WriteLine("Downloading and updating winapp2ool.exe, this may take a moment...")
                 autoUpdate()
-            Case input.ToLower = "minefield"
+            Case input.ToLower = "m"
                 initModule("Minefield", AddressOf Minefield.printMenu, AddressOf Minefield.handleUserInput)
             Case Else
                 menuHeaderText = invInpStr
