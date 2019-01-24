@@ -380,44 +380,44 @@ Module WinappDebug
     ''' <summary>
     ''' Audits a keyList of winapp2.ini format iniKeys for errors, alerting the user and correcting where possible.
     ''' </summary>
-    ''' <param name="keyList">A given list of iniKey objects to have their format audited</param>
+    ''' <param name="kl">A keylist to audit</param>
     ''' <param name="processKey">The function that audits the keys of the keyType provided in the keyList</param>
     ''' <param name="hasF">Optional boolean for the ExcludeKey case</param>
     ''' <param name="hasR">Optional boolean for the ExcludeKey case</param>
-    Private Sub processKeyList(ByRef keyList As List(Of iniKey), processKey As Func(Of iniKey, iniKey), Optional ByRef hasF As Boolean = False, Optional ByRef hasR As Boolean = False)
-        If keyList.Count = 0 Then Exit Sub
+    Private Sub processKeyList(ByRef kl As keyyList, processKey As Func(Of iniKey, iniKey), Optional ByRef hasF As Boolean = False, Optional ByRef hasR As Boolean = False)
+        If kl.keyCount = 0 Then Exit Sub
         Dim curNum As Integer = 1
         Dim curStrings As New List(Of String)
-        Dim dupeKeys As New List(Of iniKey)
-        For Each key In keyList
+        Dim dupes As New keyyList
+        For Each key In kl.keys
             ' Preprocess key formats before doing key specific audits
             Select Case key.keyType
                 Case "ExcludeKey"
-                    cFormat(key, curNum, curStrings, dupeKeys)
+                    cFormat(key, curNum, curStrings, dupes)
                     pExcludeKey(key, hasF, hasR)
                 Case "Detect", "DetectFile"
                     If key.typeIs("Detect") Then chkPathFormatValidity(key, True)
-                    cFormat(key, curNum, curStrings, dupeKeys, keyList.Count = 1)
+                    cFormat(key, curNum, curStrings, dupes, kl.keyCount = 1)
                 Case "RegKey"
-                    cFormat(key, curNum, curStrings, dupeKeys)
+                    cFormat(key, curNum, curStrings, dupes)
                     chkPathFormatValidity(key, True)
                 Case "Warning", "DetectOS", "SpecialDetect", "LangSecRef", "Section", "Default"
                     If curNum > 1 Then
                         fullKeyErr(key, $"Multiple {key.keyType} detected.")
-                        dupeKeys.Add(key)
+                        dupes.add(key)
                     End If
-                    cFormat(key, curNum, curStrings, dupeKeys, True)
+                    cFormat(key, curNum, curStrings, dupes, True)
                     fullKeyErr(key, "LangSecRef holds an invalid value.", key.typeIs("LangSecRef") And Not secRefNums.IsMatch(key.value))
                     fullKeyErr(key, "SpecialDetect holds an invalid value.", key.typeIs("SpecialDetect") And Not sdList.Contains(key.value))
                     fullKeyErr(key, "All entries should be disabled by default (Default=False).", scanDefaults And Not key.vIs("False") And key.typeIs("Default"), correctDefaults, key.value, "False")
                 Case Else
-                    cFormat(key, curNum, curStrings, dupeKeys)
+                    cFormat(key, curNum, curStrings, dupes)
             End Select
             key = processKey(key)
         Next
-        removeDuplicateKeys(keyList, dupeKeys)
-        sortKeys(keyList, dupeKeys.Count > 0)
-        If keyList(0).typeIs("FileKey") Then cOptimization(keyList)
+        kl.remove(dupes.keys)
+        sortKeys(kl, dupes.keyCount > 0)
+        If kl.typeIs("FileKey") Then cOptimization(kl)
     End Sub
 
     ''' <summary>
@@ -427,12 +427,12 @@ Module WinappDebug
     ''' <param name="keyNumber">The current expected key number</param>
     ''' <param name="keyValues">The current list of observed inikey values</param>
     ''' <param name="dupeList">A tracking list of detected duplicate iniKeys</param>
-    Private Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As List(Of String), ByRef dupeList As List(Of iniKey), Optional noNumbers As Boolean = False)
+    Private Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As List(Of String), ByRef dupeList As keyyList, Optional noNumbers As Boolean = False)
         ' Check for duplicates
         If chkDupes(keyValues, key.value) Then
             Dim duplicateKeyStr As String = $"{key.keyType}{If(Not noNumbers, (keyValues.IndexOf(key.value.ToLower) + 1).ToString, "")}={key.value}"
             customErr(key.lineNumber, "Duplicate key value found", {$"Key:            {key.toString}", $"Duplicates:     {duplicateKeyStr}"})
-            dupeList.Add(key)
+            dupeList.add(key)
         End If
         ' Check for numbering errors
         Dim hasNumberingError As Boolean = If(noNumbers, Not key.nameIs(key.keyType), Not key.nameIs(key.keyType & keyNumber))
@@ -546,10 +546,10 @@ Module WinappDebug
     ''' <param name="entry">A winapp2entry object to be audited</param>
     Private Sub validateKeys(ByRef entry As winapp2entry)
         For Each lst In entry.keyListList
-            Dim brokenKeys As New List(Of iniKey)
-            lst.ForEach(Sub(key) addKeyToListIf(key, brokenKeys, Not cValidity(key)))
-            removeDuplicateKeys(lst, brokenKeys)
-            removeDuplicateKeys(entry.errorKeys, brokenKeys)
+            Dim brokenKeys As New keyyList
+            lst.keys.ForEach(Sub(key) brokenKeys.add(key, Not cValidity(key)))
+            lst.remove(brokenKeys.keys)
+            entry.errorKeys.remove(brokenKeys.keys)
         Next
     End Sub
 
@@ -580,20 +580,20 @@ Module WinappDebug
         processKeyList(entry.regKeys, AddressOf voidDelegate)
         processKeyList(entry.excludeKeys, AddressOf voidDelegate, hasFileExcludes, hasRegExcludes)
         ' Make sure we only have LangSecRef if we have LangSecRef at all
-        fullNameErrIf(entry.langSecRef.Count <> 0 And entry.sectionKey.Count <> 0, entry, "Section key found alongside LangSecRef key, only one is required.")
+        fullNameErrIf(entry.langSecRef.keyCount <> 0 And entry.sectionKey.keyCount <> 0, entry, "Section key found alongside LangSecRef key, only one is required.")
         ' Make sure we have at least 1 valid detect key 
-        fullNameErrIf(entry.detectOS.Count + entry.detects.Count + entry.specialDetect.Count + entry.detectFiles.Count = 0, entry, "Entry has no valid detection keys (Detect, DetectFile, DetectOS, SpecialDetect)")
+        fullNameErrIf(entry.detectOS.keyCount + entry.detects.keyCount + entry.specialDetect.keyCount + entry.detectFiles.keyCount = 0, entry, "Entry has no valid detection keys (Detect, DetectFile, DetectOS, SpecialDetect)")
         ' Make sure we have at least 1 FileKey or RegKey
-        fullNameErrIf(entry.fileKeys.Count + entry.regKeys.Count = 0, entry, "Entry has no valid FileKeys or RegKeys")
+        fullNameErrIf(entry.fileKeys.keyCount + entry.regKeys.keyCount = 0, entry, "Entry has no valid FileKeys or RegKeys")
         ' If we don't have FileKeys or RegKeys, we shouldn't have ExcludeKeys.
-        fullNameErrIf(entry.excludeKeys.Count > 0 And entry.fileKeys.Count + entry.regKeys.Count = 0, entry, "Entry has ExcludeKeys but no valid FileKeys or RegKeys")
+        fullNameErrIf(entry.excludeKeys.keyCount > 0 And entry.fileKeys.keyCount + entry.regKeys.keyCount = 0, entry, "Entry has ExcludeKeys but no valid FileKeys or RegKeys")
         ' Make sure that if we have file Excludes, we have FileKeys
-        fullNameErrIf(entry.fileKeys.Count = 0 And hasFileExcludes, entry, "ExcludeKeys targeting filesystem locations found without any corresponding FileKeys")
+        fullNameErrIf(entry.fileKeys.keyCount = 0 And hasFileExcludes, entry, "ExcludeKeys targeting filesystem locations found without any corresponding FileKeys")
         ' Likewise for registry
-        fullNameErrIf(entry.regKeys.Count = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
+        fullNameErrIf(entry.regKeys.keyCount = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
         ' Make sure we have a Default key.
-        fullNameErrIf(entry.defaultKey.Count = 0 And scanDefaults, entry, "Entry is missing a Default key")
-        addKeyToListIf(New iniKey("Default=False"), entry.defaultKey, fixFormat(correctDefaults) And entry.defaultKey.Count = 0)
+        fullNameErrIf(entry.defaultKey.keyCount = 0 And scanDefaults, entry, "Entry is missing a Default key")
+        entry.defaultKey.add(New iniKey("Default=False"), fixFormat(correctDefaults) And entry.defaultKey.keyCount = 0)
     End Sub
 
     ''' <summary>
@@ -660,30 +660,18 @@ Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Sorts a list of iniKey objects alphabetically (with some changes made for winapp2.ini syntax) based on the contents of their value field
+    ''' Sorts a keylist alphabetically with winapp2.ini precedence applied to the key values
     ''' </summary>
-    ''' <param name="keyList">The list of iniKey objects to be sorted</param>
-    ''' <param name="hadDuplicatesRemoved">The boolean indicating whether or not the keyList has had keys removed from it</param>
-    Private Sub sortKeys(ByRef keyList As List(Of iniKey), hadDuplicatesRemoved As Boolean)
-        If Not scanAlpha Or keyList.Count <= 1 Then Exit Sub
-        Dim keyStrings As List(Of String) = getValues(keyList)
-        Dim sortedKeyStringList As List(Of String) = replaceAndSort(keyStrings, "|", " \ \")
+    ''' <param name="kl">The keylist to be sorted</param>
+    ''' <param name="hadDuplicatesRemoved">The boolean indicating whether keys have been removed from this list</param>
+    Private Sub sortKeys(ByRef kl As keyyList, hadDuplicatesRemoved As Boolean)
+        If Not scanAlpha Or kl.keyCount <= 1 Then Exit Sub
+        Dim keyValues = kl.toListOfStr(True)
+        Dim sortedKeyValues = replaceAndSort(keyValues, "|", " \ \")
         ' Rewrite the alphabetized keys back into the keylist (fixes numbering silently) 
-        Dim keysOutOfPlace As Boolean = False
-        findOutOfPlace(keyStrings, sortedKeyStringList, keyList(0).keyType, getLineNumsFromKeyList(keyList), keysOutOfPlace)
-        If (keysOutOfPlace Or hadDuplicatesRemoved) And fixFormat(correctAlpha) Then renumberKeys(keyList, sortedKeyStringList)
-    End Sub
-
-    ''' <summary>
-    ''' Rewrites the iniKey data in a given list of iniKeys to be numerically ordered and sorted alphabetically
-    ''' </summary>
-    ''' <param name="keyList">The list of iniKey objects to reorder</param>
-    ''' <param name="sortedKeyList">The sorted state of the key values in the list</param>
-    Public Sub renumberKeys(ByRef keyList As List(Of iniKey), sortedKeyList As List(Of String))
-        For i As Integer = 0 To keyList.Count - 1
-            keyList(i).name = keyList(i).keyType & i + 1
-            keyList(i).value = sortedKeyList(i)
-        Next
+        Dim keysOutOfPlace = False
+        findOutOfPlace(keyValues, sortedKeyValues, kl.keyType, kl.lineNums, keysOutOfPlace)
+        If (keysOutOfPlace Or hadDuplicatesRemoved) And fixFormat(correctAlpha) Then kl.renumberKeys(sortedKeyValues)
     End Sub
 
     ''' <summary>
@@ -722,17 +710,16 @@ Module WinappDebug
     ''' <summary>
     ''' Attempts to merge FileKeys together if syntactically possible.
     ''' </summary>
-    ''' <param name="keyList">A list of winapp2.ini FileKey format iniFiles</param>
-    Private Sub cOptimization(ByRef keyList As List(Of iniKey))
-        If keyList.Count < 2 Or Not scanOpti Then Exit Sub
-        Dim dupeList As New List(Of iniKey)
+    ''' <param name="kl">A list of winapp2.ini FileKey format iniFiles</param>
+    Private Sub cOptimization(ByRef kl As keyyList)
+        If kl.keyCount < 2 Or Not scanOpti Then Exit Sub
+        Dim dupes As New keyyList
+        Dim newKeys As New keyyList
         Dim flagList As New List(Of String)
         Dim paramList As New List(Of String)
-        Dim newKeyList As New List(Of iniKey)
-        newKeyList.AddRange(keyList)
-        For i As Integer = 0 To keyList.Count - 1
-            Dim key As iniKey = keyList(i)
-            Dim tmpWa2 As New winapp2KeyParameters(key)
+        newKeys.add(kl.keys)
+        For i As Integer = 0 To kl.keyCount - 1
+            Dim tmpWa2 As New winapp2KeyParameters(kl.keys(i))
             ' If we have yet to record any params, record them and move on
             If paramList.Count = 0 Then trackParamAndFlags(paramList, flagList, tmpWa2) : Continue For
             ' This should handle the case where for a FileKey: 
@@ -742,13 +729,13 @@ Module WinappDebug
             If paramList.Contains(tmpWa2.pathString) Then
                 For j As Integer = 0 To paramList.Count - 1
                     If tmpWa2.pathString = paramList(j) And tmpWa2.flagString = flagList(j) Then
-                        Dim keyToMergeInto As New winapp2KeyParameters(keyList(j))
+                        Dim keyToMergeInto As New winapp2KeyParameters(kl.keys(j))
                         Dim mergeKeyStr As String = ""
                         addArgs(mergeKeyStr, keyToMergeInto)
                         tmpWa2.argsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
                         If tmpWa2.flagString <> "None" Then mergeKeyStr += $"|{tmpWa2.flagString}"
-                        dupeList.Add(keyList(i))
-                        newKeyList(j) = New iniKey(mergeKeyStr)
+                        dupes.add(kl.keys(i))
+                        newKeys.keys(j) = New iniKey(mergeKeyStr)
                         Exit For
                     End If
                 Next
@@ -757,15 +744,15 @@ Module WinappDebug
                 trackParamAndFlags(paramList, flagList, tmpWa2)
             End If
         Next
-        If dupeList.Count > 0 Then
-            removeDuplicateKeys(newKeyList, dupeList)
-            For i As Integer = 0 To newKeyList.Count - 1
-                newKeyList(i).name = $"FileKey{i + 1}"
+        If dupes.keyCount > 0 Then
+            newKeys.remove(dupes.keys)
+            For i As Integer = 0 To newKeys.keyCount - 1
+                newKeys.keys(i).name = $"FileKey{i + 1}"
             Next
-            printOptiSect("Optmization opportunity detected", keyList)
-            printOptiSect("The following keys can be merged into other keys:", dupeList)
-            printOptiSect("The resulting keyList will be reduced to: ", newKeyList)
-            If correctOpti Then keyList = newKeyList
+            printOptiSect("Optmization opportunity detected", kl)
+            printOptiSect("The following keys can be merged into other keys:", dupes)
+            printOptiSect("The resulting keyList will be reduced to: ", newKeys)
+            If correctOpti Then kl = newKeys
         End If
     End Sub
 
@@ -773,12 +760,10 @@ Module WinappDebug
     ''' Prints output from the Optimization function
     ''' </summary>
     ''' <param name="boxStr">The text to go in the optimization section box</param>
-    ''' <param name="keyList">The list of keys to be printed beneath the box</param>
-    Private Sub printOptiSect(boxStr As String, keyList As List(Of iniKey))
-        cwl()
-        print(0, tmenu(boxStr), closeMenu:=True)
-        cwl()
-        keyList.ForEach(Sub(key) cwl(key.toString))
+    ''' <param name="kl">The list of keys to be printed beneath the box</param>
+    Private Sub printOptiSect(boxStr As String, kl As keyyList)
+        cwl() : print(0, tmenu(boxStr), closeMenu:=True) : cwl()
+        kl.keys.ForEach(Sub(key) cwl(key.toString))
         cwl()
     End Sub
 
@@ -805,16 +790,6 @@ Module WinappDebug
                 tmpKeyStr += $";{tmp2wa2.argsList(i)}"
             Next
         End If
-    End Sub
-
-    ''' <summary>
-    ''' Removes any occurance of items in a list of iniKey objects from a given list of iniKey objects
-    ''' </summary>
-    ''' <param name="keylist">The list from which objects might be removed</param>
-    ''' <param name="dupeList">The list of objects to remove</param>
-    Private Sub removeDuplicateKeys(ByRef keylist As List(Of iniKey), ByVal dupeList As List(Of iniKey))
-        Dim kl = keylist
-        dupeList.ForEach(Sub(key) kl.Remove(key))
     End Sub
 
     ''' <summary>

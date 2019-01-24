@@ -216,11 +216,11 @@ Module winapp2handler
             Dim langSecRefs As New List(Of String) From {"3029", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous"}
             For Each section In file.sections.Values
                 Dim tmpwa2entry As New winapp2entry(section)
-                Dim ind As Integer
-                If tmpwa2entry.langSecRef.Count > 0 Then
-                    ind = langSecRefs.IndexOf(tmpwa2entry.langSecRef(0).value)
-                ElseIf tmpwa2entry.sectionKey.Count > 0 Then
-                    ind = langSecRefs.IndexOf(tmpwa2entry.sectionKey(0).value)
+                Dim ind = -1
+                If tmpwa2entry.langSecRef.keyCount > 0 Then
+                    ind = langSecRefs.IndexOf(tmpwa2entry.langSecRef.keys.First.value)
+                ElseIf tmpwa2entry.sectionKey.keyCount > 0 Then
+                    ind = langSecRefs.IndexOf(tmpwa2entry.sectionKey.keys.First.value)
                 End If
                 If ind = -1 Then ind = 6
                 addToInnerFile(ind, tmpwa2entry, section)
@@ -328,19 +328,20 @@ Module winapp2handler
     Public Class winapp2entry
         Public name As String
         Public fullName As String
-        Public detectOS As New List(Of iniKey)
-        Public langSecRef As New List(Of iniKey)
-        Public sectionKey As New List(Of iniKey)
-        Public specialDetect As New List(Of iniKey)
-        Public detects As New List(Of iniKey)
-        Public detectFiles As New List(Of iniKey)
-        Public warningKey As New List(Of iniKey)
-        Public defaultKey As New List(Of iniKey)
-        Public fileKeys As New List(Of iniKey)
-        Public regKeys As New List(Of iniKey)
-        Public excludeKeys As New List(Of iniKey)
-        Public errorKeys As New List(Of iniKey)
-        Public keyListList As New List(Of List(Of iniKey))
+        Public detectOS As New keyyList("DetectOS")
+        Public langSecRef As New keyyList("LangSecRef")
+        Public sectionKey As New keyyList("Section")
+        Public specialDetect As New keyyList("SpecialDetect")
+        Public detects As New keyyList("Detect")
+        Public detectFiles As New keyyList("DetectFile")
+        Public warningKey As New keyyList("Warning")
+        Public defaultKey As New keyyList("Default")
+        Public fileKeys As New keyyList("FileKey")
+        Public regKeys As New keyyList("RegKey")
+        Public excludeKeys As New keyyList("ExcludeKey")
+        Public errorKeys As New keyyList("Error")
+        Public keyListList As New List(Of keyyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
+                                                            warningKey, defaultKey, fileKeys, regKeys, excludeKeys, errorKeys}
         Public lineNum As New Integer
 
         ''' <summary>
@@ -352,28 +353,15 @@ Module winapp2handler
             name = section.name
             updKeyListList()
             lineNum = section.startingLineNumber
-            Dim keylist As New List(Of String)
-            keylist.AddRange(New String() {"detectos", "langsecref", "section", "specialdetect", "detect", "detectfile", "default", "warning", "filekey", "regkey", "excludekey"})
-            section.constructKeyLists(keylist, keyListList)
+            section.constKeyLists(keyListList)
         End Sub
 
         ''' <summary>
         ''' Clears and updates the keyListList with the current state of the keys
         ''' </summary>
         Private Sub updKeyListList()
-            keyListList.Clear()
-            keyListList.Add(detectOS)
-            keyListList.Add(langSecRef)
-            keyListList.Add(sectionKey)
-            keyListList.Add(specialDetect)
-            keyListList.Add(detects)
-            keyListList.Add(detectFiles)
-            keyListList.Add(defaultKey)
-            keyListList.Add(warningKey)
-            keyListList.Add(fileKeys)
-            keyListList.Add(regKeys)
-            keyListList.Add(excludeKeys)
-            keyListList.Add(errorKeys)
+            keyListList = New List(Of keyyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
+                                                      warningKey, defaultKey, fileKeys, regKeys, excludeKeys, errorKeys}
         End Sub
 
         ''' <summary>
@@ -384,7 +372,7 @@ Module winapp2handler
             Dim outList As New List(Of String)
             outList.Add(fullName)
             updKeyListList()
-            keyListList.ForEach(Sub(lst) lst.ForEach(Sub(key) outList.Add(key.toString)))
+            keyListList.ForEach(Sub(lst) lst.keys.ForEach(Sub(key) outList.Add(key.toString)))
             Return outList
         End Function
     End Class

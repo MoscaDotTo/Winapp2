@@ -162,12 +162,12 @@ Public Module Trim
     ''' <summary>
     ''' Evaluates a list of keys to observe whether they exist on the current machine
     ''' </summary>
-    ''' <param name="keyList">The list of iniKeys to query</param>
+    ''' <param name="kl">The list of iniKeys to query</param>
     ''' <param name="chkExist">The function that evaluates that keyType's parameters</param>
     ''' <returns></returns>
-    Private Function checkExistence(ByRef keyList As List(Of iniKey), chkExist As Func(Of String, Boolean)) As Boolean
-        If keyList.Count = 0 Then Return False
-        For Each key In keyList
+    Private Function checkExistence(ByRef kl As keyyList, chkExist As Func(Of String, Boolean)) As Boolean
+        If kl.keyCount = 0 Then Return False
+        For Each key In kl.keys
             If chkExist(key.value) Then Return True
         Next
         Return False
@@ -179,7 +179,7 @@ Public Module Trim
     ''' <param name="entry">A winapp2.ini entry</param>
     ''' <returns></returns>
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
-        Dim hasDetOS As Boolean = Not entry.detectOS.Count = 0
+        Dim hasDetOS As Boolean = Not entry.detectOS.keyCount = 0
         Dim hasMetDetOS As Boolean = False
         ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         If hasDetOS Then
@@ -192,9 +192,9 @@ Public Module Trim
         If checkExistence(entry.detects, AddressOf checkRegExist) Then Return True
         If checkExistence(entry.detectFiles, AddressOf checkPathExist) Then Return True
         ' Return true for the case where we have only a DetectOS and we meet its criteria 
-        If hasMetDetOS And entry.specialDetect.Count = 0 And entry.detectFiles.Count = 0 And entry.detects.Count = 0 Then Return True
+        If hasMetDetOS And entry.specialDetect.keyCount = 0 And entry.detectFiles.keyCount = 0 And entry.detects.keyCount = 0 Then Return True
         ' Return true for the case where we have no valid detect criteria
-        If entry.detectOS.Count + entry.detectFiles.Count + entry.detects.Count + entry.specialDetect.Count = 0 Then Return True
+        If entry.detectOS.keyCount + entry.detectFiles.keyCount + entry.detects.keyCount + entry.specialDetect.keyCount = 0 Then Return True
         Return False
     End Function
 
@@ -211,16 +211,16 @@ Public Module Trim
     ''' <summary>
     ''' Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list
     ''' </summary>
-    ''' <param name="keyList">The list of FileKeys from a winapp2entry object</param>
-    Private Sub vsKeyChecker(ByRef keyList As List(Of iniKey))
-        If keyList.Count = 0 Then Exit Sub
-        Select Case keyList(0).keyType
+    ''' <param name="kl">The keylist of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore</param>
+    Private Sub vsKeyChecker(ByRef kl As keyyList)
+        If kl.keyCount = 0 Then Exit Sub
+        Select Case kl.keyType
             Case "FileKey", "ExcludeKey"
-                mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files", "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, keyList)
+                mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files", "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
             Case "RegKey"
-                mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, keyList)
+                mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
         End Select
-        renumberKeys(keyList, replaceAndSort(getValues(keyList), "|", " \ \"))
+        kl.renumberKeys(replaceAndSort(kl.toListOfStr(True), "|", " \ \"))
     End Sub
 
     ''' <summary>
@@ -228,25 +228,21 @@ Public Module Trim
     ''' </summary>
     ''' <param name="findStrs">A list of strings to seek for in the key value</param>
     ''' <param name="replStrs">A list of strings to replace the sought after key values</param>
-    ''' <param name="keyList">The list of iniKey objects to be processed</param>
-    Private Sub mkVsKeys(findStrs As String(), replStrs As String(), ByRef keyList As List(Of iniKey))
-        Dim initVals As List(Of String) = getValues(keyList)
-        Dim keysToAdd As New List(Of iniKey)
-        For Each key In keyList
-            Dim keyToAdd As New iniKey("Exit=Now")
+    ''' <param name="kl">The keylist to be processed</param>
+    Private Sub mkVsKeys(findStrs As String(), replStrs As String(), ByRef kl As keyyList)
+        Dim initVals = kl.toListOfStr(True)
+        Dim keysToAdd As New keyyList(kl.keyType)
+        For Each key In kl.keys
             If Not key.vHasAny(findStrs, True) Then Continue For
             For i As Integer = 0 To findStrs.Count - 1
-                keyToAdd = createVSKey(findStrs(i), replStrs(i), key)
+                Dim keyToAdd = createVSKey(findStrs(i), replStrs(i), key)
+                ' Don't recreate keys that already exist
                 If initVals.Contains(keyToAdd.value) Then Continue For
-                addKeyToListIf(keyToAdd, keysToAdd, Not key.value = keyToAdd.value)
+                keysToAdd.add(keyToAdd, Not key.value = keyToAdd.value)
             Next
-            If keyToAdd.name = "Exit" Then Continue For
         Next
-        For Each key In keysToAdd
-            Dim keyToAddParams As New winapp2KeyParameters(key)
-            Dim exists As Boolean = checkExist(keyToAddParams.pathString)
-            addKeyToListIf(key, keyList, checkExist(keyToAddParams.pathString))
-        Next
+        Dim kl2 = kl
+        keysToAdd.keys.ForEach(Sub(key) kl2.add(key, checkExist(New winapp2KeyParameters(key).pathString)))
     End Sub
 
     ''' <summary>
@@ -308,7 +304,7 @@ Public Module Trim
     ''' <returns></returns>
     Private Function checkRegExist(path As String) As Boolean
         Dim dir As String = path
-        Dim root As String = getFirstDir(path)
+        Dim root = getFirstDir(path)
         Try
             Select Case root
                 Case "HKCU"
@@ -341,7 +337,7 @@ Public Module Trim
     ''' <param name="key">A filesystem path</param>
     ''' <returns></returns>
     Private Function checkPathExist(key As String) As Boolean
-        Dim isProgramFiles As Boolean = False
+        Dim isProgramFiles = False
         Dim dir As String = key
         ' Make sure we get the proper path for environment variables
         If dir.Contains("%") Then
@@ -361,8 +357,7 @@ Public Module Trim
         Try
             ' Process wildcards appropriately if we have them 
             If dir.Contains("*") Then
-                Dim exists As Boolean = False
-                exists = expandWildcard(dir)
+                Dim exists = expandWildcard(dir)
                 ' Small contingency for the isProgramFiles case
                 If Not exists And isProgramFiles Then
                     swapDir(dir, key)
