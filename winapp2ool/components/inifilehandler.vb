@@ -514,7 +514,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="listOfKeyLists">The list of keyLists to be sorted into</param>
         ''' The last list in the keylist list holds the error keys
-        Public Sub constKeyLists(ByRef listOfKeyLists As List(Of keyyList))
+        Public Sub constKeyLists(ByRef listOfKeyLists As List(Of keyList))
             Dim keyTypeList As New List(Of String)
             listOfKeyLists.ForEach(Sub(kl) keyTypeList.Add(kl.keyType.ToLower))
             For Each key In Me.keys.Values
@@ -583,7 +583,7 @@ Public Module iniFileHandler
         ''' <param name="removedKeys">A return list on iniKey objects that appear in the iniFile object but not the given</param>
         ''' <param name="addedKeys">A return list of iniKey objects that appear in the given iniFile object but not this one</param>
         ''' <returns></returns>
-        Public Function compareTo(ss As iniSection, ByRef removedKeys As keyyList, ByRef addedKeys As keyyList) As Boolean
+        Public Function compareTo(ss As iniSection, ByRef removedKeys As keyList, ByRef addedKeys As keyList) As Boolean
             ' Create a copy of the section so we can modify it
             Dim secondSection As New iniSection
             secondSection.name = ss.name
@@ -631,7 +631,7 @@ Public Module iniFileHandler
     End Class
 
 
-    Public Class keyyList
+    Public Class keyList
         Public keys As List(Of iniKey)
         Public keyType As String
 

@@ -165,7 +165,7 @@ Public Module Trim
     ''' <param name="kl">The list of iniKeys to query</param>
     ''' <param name="chkExist">The function that evaluates that keyType's parameters</param>
     ''' <returns></returns>
-    Private Function checkExistence(ByRef kl As keyyList, chkExist As Func(Of String, Boolean)) As Boolean
+    Private Function checkExistence(ByRef kl As keyList, chkExist As Func(Of String, Boolean)) As Boolean
         If kl.keyCount = 0 Then Return False
         For Each key In kl.keys
             If chkExist(key.value) Then Return True
@@ -212,7 +212,7 @@ Public Module Trim
     ''' Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list
     ''' </summary>
     ''' <param name="kl">The keylist of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore</param>
-    Private Sub vsKeyChecker(ByRef kl As keyyList)
+    Private Sub vsKeyChecker(ByRef kl As keyList)
         If kl.keyCount = 0 Then Exit Sub
         Select Case kl.keyType
             Case "FileKey", "ExcludeKey"
@@ -229,9 +229,9 @@ Public Module Trim
     ''' <param name="findStrs">A list of strings to seek for in the key value</param>
     ''' <param name="replStrs">A list of strings to replace the sought after key values</param>
     ''' <param name="kl">The keylist to be processed</param>
-    Private Sub mkVsKeys(findStrs As String(), replStrs As String(), ByRef kl As keyyList)
+    Private Sub mkVsKeys(findStrs As String(), replStrs As String(), ByRef kl As keyList)
         Dim initVals = kl.toListOfStr(True)
-        Dim keysToAdd As New keyyList(kl.keyType)
+        Dim keysToAdd As New keyList(kl.keyType)
         For Each key In kl.keys
             If Not key.vHasAny(findStrs, True) Then Continue For
             For i As Integer = 0 To findStrs.Count - 1
@@ -303,25 +303,23 @@ Public Module Trim
     ''' <param name="path">A registry path from a Detect key</param>
     ''' <returns></returns>
     Private Function checkRegExist(path As String) As Boolean
-        Dim dir As String = path
+        Dim dir = path
         Dim root = getFirstDir(path)
+        dir = dir.TrimStart(CChar($"{root}\"))
         Try
             Select Case root
                 Case "HKCU"
-                    dir = dir.Replace("HKCU\", "")
-                    Return Microsoft.Win32.Registry.CurrentUser.OpenSubKey(dir, True) IsNot Nothing
+                    Return getCUKey(dir) IsNot Nothing
                 Case "HKLM"
                     dir = dir.Replace("HKLM\", "")
-                    If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing Then Return True
+                    If getLMKey(dir) IsNot Nothing Then Return True
                     ' Small workaround for newer x64 versions of Windows
                     dir = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
-                    Return Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing
+                    Return getLMKey(dir) IsNot Nothing
                 Case "HKU"
-                    dir = dir.Replace("HKU\", "")
-                    Return Microsoft.Win32.Registry.Users.OpenSubKey(dir, True) IsNot Nothing
+                    Return getUserKey(dir) IsNot Nothing
                 Case "HKCR"
-                    dir = dir.Replace("HKCR\", "")
-                    Return Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(dir, True) IsNot Nothing
+                    Return getCRKey(dir) IsNot Nothing
             End Select
         Catch ex As Exception
             ' The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.

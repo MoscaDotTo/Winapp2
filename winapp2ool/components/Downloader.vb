@@ -31,6 +31,7 @@ Module Downloader
     Public removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
     Public wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
     Public archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
+    Public javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
     ' File handler
     Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
@@ -172,6 +173,8 @@ Module Downloader
             Dim wholeFile As String = reader.ReadToEnd
             wholeFile += Environment.NewLine
             Dim splitFile As String() = wholeFile.Split(CChar(Environment.NewLine))
+            ' Workaround for java.ini until the underlying reason for mismatches between line endings can be discovered
+            If address = javaLink Then splitFile = wholeFile.Split(CChar(vbLf))
             For i As Integer = 0 To splitFile.Count - 1
                 splitFile(i) = splitFile(i).Replace(vbCr, "").Replace(vbLf, "")
             Next

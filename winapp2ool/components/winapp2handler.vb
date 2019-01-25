@@ -328,19 +328,19 @@ Module winapp2handler
     Public Class winapp2entry
         Public name As String
         Public fullName As String
-        Public detectOS As New keyyList("DetectOS")
-        Public langSecRef As New keyyList("LangSecRef")
-        Public sectionKey As New keyyList("Section")
-        Public specialDetect As New keyyList("SpecialDetect")
-        Public detects As New keyyList("Detect")
-        Public detectFiles As New keyyList("DetectFile")
-        Public warningKey As New keyyList("Warning")
-        Public defaultKey As New keyyList("Default")
-        Public fileKeys As New keyyList("FileKey")
-        Public regKeys As New keyyList("RegKey")
-        Public excludeKeys As New keyyList("ExcludeKey")
-        Public errorKeys As New keyyList("Error")
-        Public keyListList As New List(Of keyyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
+        Public detectOS As New keyList("DetectOS")
+        Public langSecRef As New keyList("LangSecRef")
+        Public sectionKey As New keyList("Section")
+        Public specialDetect As New keyList("SpecialDetect")
+        Public detects As New keyList("Detect")
+        Public detectFiles As New keyList("DetectFile")
+        Public warningKey As New keyList("Warning")
+        Public defaultKey As New keyList("Default")
+        Public fileKeys As New keyList("FileKey")
+        Public regKeys As New keyList("RegKey")
+        Public excludeKeys As New keyList("ExcludeKey")
+        Public errorKeys As New keyList("Error")
+        Public keyListList As New List(Of keyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
                                                             warningKey, defaultKey, fileKeys, regKeys, excludeKeys, errorKeys}
         Public lineNum As New Integer
 
@@ -360,7 +360,7 @@ Module winapp2handler
         ''' Clears and updates the keyListList with the current state of the keys
         ''' </summary>
         Private Sub updKeyListList()
-            keyListList = New List(Of keyyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
+            keyListList = New List(Of keyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
                                                       warningKey, defaultKey, fileKeys, regKeys, excludeKeys, errorKeys}
         End Sub
 

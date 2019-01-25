@@ -212,7 +212,7 @@ Module Diff
             If nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
                 Dim sSection As iniSection = nFile.sections(section.name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
-                Dim addedKeys, removedKeys As New keyyList
+                Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
                 If Not section.compareTo(sSection, removedKeys, addedKeys) Then
                     chkLsts(removedKeys, addedKeys, updatedKeys)
@@ -247,7 +247,7 @@ Module Diff
     ''' <param name="keyList">A list of iniKeys that have been added/removed</param>
     ''' <param name="out">The output text to be appended to</param>
     ''' <param name="changeTxt">The text to appear in the output</param>
-    Private Sub getChangesFromList(keyList As keyyList, ByRef out As String, changeTxt As String)
+    Private Sub getChangesFromList(keyList As keyList, ByRef out As String, changeTxt As String)
         If keyList.keyCount = 0 Then Exit Sub
         Dim o = out
         o += appendNewLine(changeTxt)
@@ -260,9 +260,9 @@ Module Diff
     ''' <param name="removedKeys">The list of iniKeys that were removed</param>
     ''' <param name="addedKeys">The list of iniKeys that were added</param>
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
-    Private Sub chkLsts(ByRef removedKeys As keyyList, ByRef addedKeys As keyyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
-        Dim rkTemp As New keyyList(removedKeys.keys)
-        Dim akTemp As New keyyList(addedKeys.keys)
+    Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
+        Dim rkTemp As New keyList(removedKeys.keys)
+        Dim akTemp As New keyList(addedKeys.keys)
         For Each key In removedKeys.keys
             For Each skey In addedKeys.keys
                 If key.name.ToLower = skey.name.ToLower Then
@@ -311,7 +311,7 @@ Module Diff
     ''' <param name="rKeys">The list of removed keys</param>
     ''' <param name="key">A removed inikey</param>
     ''' <param name="skey">An added iniKey</param>
-    Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), ByRef aKeys As keyyList, ByRef rKeys As keyyList, key As iniKey, skey As iniKey)
+    Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), ByRef aKeys As keyList, ByRef rKeys As keyList, key As iniKey, skey As iniKey)
         updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
         rKeys.remove(key)
         aKeys.remove(skey)

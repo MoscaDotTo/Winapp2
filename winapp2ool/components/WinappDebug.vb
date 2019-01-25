@@ -384,11 +384,11 @@ Module WinappDebug
     ''' <param name="processKey">The function that audits the keys of the keyType provided in the keyList</param>
     ''' <param name="hasF">Optional boolean for the ExcludeKey case</param>
     ''' <param name="hasR">Optional boolean for the ExcludeKey case</param>
-    Private Sub processKeyList(ByRef kl As keyyList, processKey As Func(Of iniKey, iniKey), Optional ByRef hasF As Boolean = False, Optional ByRef hasR As Boolean = False)
+    Private Sub processKeyList(ByRef kl As keyList, processKey As Func(Of iniKey, iniKey), Optional ByRef hasF As Boolean = False, Optional ByRef hasR As Boolean = False)
         If kl.keyCount = 0 Then Exit Sub
         Dim curNum As Integer = 1
         Dim curStrings As New List(Of String)
-        Dim dupes As New keyyList
+        Dim dupes As New keyList
         For Each key In kl.keys
             ' Preprocess key formats before doing key specific audits
             Select Case key.keyType
@@ -427,7 +427,7 @@ Module WinappDebug
     ''' <param name="keyNumber">The current expected key number</param>
     ''' <param name="keyValues">The current list of observed inikey values</param>
     ''' <param name="dupeList">A tracking list of detected duplicate iniKeys</param>
-    Private Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As List(Of String), ByRef dupeList As keyyList, Optional noNumbers As Boolean = False)
+    Private Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As List(Of String), ByRef dupeList As keyList, Optional noNumbers As Boolean = False)
         ' Check for duplicates
         If chkDupes(keyValues, key.value) Then
             Dim duplicateKeyStr As String = $"{key.keyType}{If(Not noNumbers, (keyValues.IndexOf(key.value.ToLower) + 1).ToString, "")}={key.value}"
@@ -546,7 +546,7 @@ Module WinappDebug
     ''' <param name="entry">A winapp2entry object to be audited</param>
     Private Sub validateKeys(ByRef entry As winapp2entry)
         For Each lst In entry.keyListList
-            Dim brokenKeys As New keyyList
+            Dim brokenKeys As New keyList
             lst.keys.ForEach(Sub(key) brokenKeys.add(key, Not cValidity(key)))
             lst.remove(brokenKeys.keys)
             entry.errorKeys.remove(brokenKeys.keys)
@@ -664,7 +664,7 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="kl">The keylist to be sorted</param>
     ''' <param name="hadDuplicatesRemoved">The boolean indicating whether keys have been removed from this list</param>
-    Private Sub sortKeys(ByRef kl As keyyList, hadDuplicatesRemoved As Boolean)
+    Private Sub sortKeys(ByRef kl As keyList, hadDuplicatesRemoved As Boolean)
         If Not scanAlpha Or kl.keyCount <= 1 Then Exit Sub
         Dim keyValues = kl.toListOfStr(True)
         Dim sortedKeyValues = replaceAndSort(keyValues, "|", " \ \")
@@ -711,10 +711,10 @@ Module WinappDebug
     ''' Attempts to merge FileKeys together if syntactically possible.
     ''' </summary>
     ''' <param name="kl">A list of winapp2.ini FileKey format iniFiles</param>
-    Private Sub cOptimization(ByRef kl As keyyList)
+    Private Sub cOptimization(ByRef kl As keyList)
         If kl.keyCount < 2 Or Not scanOpti Then Exit Sub
-        Dim dupes As New keyyList
-        Dim newKeys As New keyyList
+        Dim dupes As New keyList
+        Dim newKeys As New keyList
         Dim flagList As New List(Of String)
         Dim paramList As New List(Of String)
         newKeys.add(kl.keys)
@@ -761,7 +761,7 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="boxStr">The text to go in the optimization section box</param>
     ''' <param name="kl">The list of keys to be printed beneath the box</param>
-    Private Sub printOptiSect(boxStr As String, kl As keyyList)
+    Private Sub printOptiSect(boxStr As String, kl As keyList)
         cwl() : print(0, tmenu(boxStr), closeMenu:=True) : cwl()
         kl.keys.ForEach(Sub(key) cwl(key.toString))
         cwl()
