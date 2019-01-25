@@ -635,40 +635,69 @@ Public Module iniFileHandler
         Public keys As List(Of iniKey)
         Public keyType As String
 
+        ''' <summary>
+        ''' Creates a new (empty) keylist
+        ''' </summary>
+        ''' <param name="kt">Optional String containing the expected KeyType of the keys in the list</param>
         Public Sub New(Optional kt As String = "")
             keys = New List(Of iniKey)
             keyType = kt
         End Sub
 
+        ''' <summary>
+        ''' Creates a new keylist using an existing list of iniKeys
+        ''' </summary>
+        ''' <param name="kl">A list of iniKeys to be inserted into the keylist</param>
         Public Sub New(kl As List(Of iniKey))
             keys = kl
             keyType = If(keys.Count > 0, keys(0).keyType, "")
         End Sub
 
+        ''' <summary>
+        ''' Conditionally adds a key to the keylist
+        ''' </summary>
+        ''' <param name="key">The key to be added</param>
+        ''' <param name="cond">The condition under which to add the key</param>
         Public Sub add(key As iniKey, Optional cond As Boolean = True)
             If cond Then keys.Add(key)
         End Sub
 
+        ''' <summary>
+        ''' Adds a list of iniKeys to the keylist
+        ''' </summary>
+        ''' <param name="kl">The list to be added</param>
         Public Sub add(kl As List(Of iniKey))
             kl.ForEach(Sub(key) keys.Add(key))
         End Sub
 
+        ''' <summary>
+        ''' Removes a key from the keylist
+        ''' </summary>
+        ''' <param name="key">The key to be removed</param>
         Public Sub remove(key As iniKey)
             keys.Remove(key)
         End Sub
 
+        ''' <summary>
+        ''' Removes a list of keys from the keylist
+        ''' </summary>
+        ''' <param name="kl">The list of keys to be removed</param>
         Public Sub remove(kl As List(Of iniKey))
             kl.ForEach(Sub(key) remove(key))
         End Sub
 
+        ''' <summary>
+        ''' Returns the number of keys in the keylist
+        ''' </summary>
+        ''' <returns></returns>
         Public Function keyCount() As Integer
             Return keys.Count
         End Function
 
         ''' <summary>
-        ''' Returns whether or not the 
+        ''' Returns whether or not the keyType of the list matches the input String
         ''' </summary>
-        ''' <param name="type"></param>
+        ''' <param name="type">The String against which to match the keylist's type</param>
         ''' <returns></returns>
         Public Function typeIs(type As String) As Boolean
             Return If(keyType = "", keys(0).keyType, keyType) = type
