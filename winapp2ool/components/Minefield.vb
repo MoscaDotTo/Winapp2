@@ -27,7 +27,22 @@ Module Minefield
     ''' </summary>
     Public Sub printMenu()
         printMenuTop({"A testing ground for new ideas/features, watch your step!"})
-        print(1, "Java Entry Maker", "A meta script approach to entries in winapp2.ini", closeMenu:=True)
+        print(1, "Java Entry Maker", "Clean up after the messy JRE installer")
+        print(1, "Babel", "Generate winapp2.ini entries for lang files", closeMenu:=True)
+    End Sub
+
+    Public Sub printBabelMenu()
+        printMenuTop({"This tool will attempt to generate winapp2.ini entries to remove language files from your system. Use EXTREME caution!"})
+        print(1, "Run (Default)", "Run the tool")
+    End Sub
+
+    Public Sub handleBabelInput(input As String)
+        Select Case input
+            Case "0"
+                exitCode = True
+            Case "1", ""
+
+        End Select
     End Sub
 
     ''' <summary>
@@ -40,6 +55,8 @@ Module Minefield
                 exitCode = True
             Case "1"
                 initModule("Java Entry Maker", AddressOf printJMMenu, AddressOf handleJMInput)
+            Case "2"
+                initModule("Babel", AddressOf printBabelMenu, AddressOf handleBabelInput)
         End Select
     End Sub
 
