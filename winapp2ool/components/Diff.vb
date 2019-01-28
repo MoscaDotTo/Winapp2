@@ -27,7 +27,7 @@ Module Diff
     Dim logFile As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
     Dim outputToFile As String
     ' Module parameters
-    Dim download As Boolean = False
+    Dim download As Boolean = checkOnline()
     Dim downloadNCC As Boolean = False
     Dim saveLog As Boolean = False
     Dim settingsChanged As Boolean = False
@@ -77,7 +77,7 @@ Module Diff
         oFile.resetParams()
         nFile.resetParams()
         logFile.resetParams()
-        download = False
+        download = checkOnline()
         downloadNCC = False
         saveLog = False
         settingsChanged = False
@@ -219,8 +219,8 @@ Module Diff
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.keyCount + addedKeys.keyCount + updatedKeys.Count = 0 Then Continue For
                     Dim tmp As String = getDiff(sSection, "modified")
-                    getChangesFromList(addedKeys, tmp, $"{prependNewLines()}Added:")
-                    getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.keyCount > 0)}Removed:")
+                    tmp = getChangesFromList(addedKeys, tmp, $"{prependNewLines()}Added:")
+                    tmp = getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.keyCount > 0)}Removed:")
                     If updatedKeys.Count > 0 Then
                         tmp += appendNewLine($"{prependNewLines(removedKeys.keyCount > 0 Or addedKeys.keyCount > 0)}Modified:")
                         updatedKeys.ForEach(Sub(pair) appendStrs({appendNewLine(prependNewLines() & pair.Key.name), $"Old:   {appendNewLine(pair.Key.toString)}", $"New:   {appendNewLine(pair.Value.toString)}"}, tmp))
@@ -247,12 +247,13 @@ Module Diff
     ''' <param name="keyList">A list of iniKeys that have been added/removed</param>
     ''' <param name="out">The output text to be appended to</param>
     ''' <param name="changeTxt">The text to appear in the output</param>
-    Private Sub getChangesFromList(keyList As keyList, ByRef out As String, changeTxt As String)
-        If keyList.keyCount = 0 Then Exit Sub
-        Dim o = out
-        o += appendNewLine(changeTxt)
-        keyList.keys.ForEach(Sub(key) o += appendNewLine(key.toString))
-    End Sub
+    Private Function getChangesFromList(keyList As keyList, out As String, changeTxt As String) As String
+        If keyList.keyCount = 0 Then Return out
+
+        out += appendNewLine(changeTxt)
+        keyList.keys.ForEach(Sub(key) out += key.toString & Environment.NewLine)
+        Return out
+    End Function
 
     ''' <summary>
     ''' Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key 
@@ -261,10 +262,10 @@ Module Diff
     ''' <param name="addedKeys">The list of iniKeys that were added</param>
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
-        Dim rkTemp As New keyList(removedKeys.keys)
-        Dim akTemp As New keyList(addedKeys.keys)
-        For Each key In removedKeys.keys
-            For Each skey In addedKeys.keys
+        Dim rkTemp = removedKeys
+        Dim akTemp = addedKeys
+        For Each key In addedKeys.keys
+            For Each skey In removedKeys.keys
                 If key.name.ToLower = skey.name.ToLower Then
                     Select Case key.keyType
                         Case "FileKey", "ExcludeKey", "RegKey"
@@ -285,15 +286,16 @@ Module Diff
                                     End If
                                 Next
                                 ' If we get this far, it's probably just an alphabetization change and can be ignored silenty
-                                akTemp.remove(skey)
-                                rkTemp.remove(key)
+                                akTemp.Remove(skey)
+                                rkTemp.Remove(key)
                             Else
                                 ' If the count doesn't match, something has definitely changed
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                 Exit For
                             End If
                         Case Else
-                            If Not key.value.ToLower = skey.value.ToLower Then updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                            ' Other keys don't require such complex legwork, thankfully. 
+                            If Not key.compareValues(skey) Then updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                     End Select
                 End If
             Next

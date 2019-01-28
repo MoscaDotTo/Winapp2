@@ -34,7 +34,7 @@ Public Module Trim
                            "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe", "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
                            "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
     Dim settingsChanged As Boolean
-    Dim download As Boolean = False
+    Dim download As Boolean = checkOnline()
     Dim downloadNCC As Boolean = False
     Dim areDownloading As Boolean = False
 
@@ -45,7 +45,7 @@ Public Module Trim
         settingsChanged = False
         winappFile.resetParams()
         outputFile.resetParams()
-        download = False
+        download = checkOnline()
         downloadNCC = False
     End Sub
 
@@ -305,13 +305,12 @@ Public Module Trim
     Private Function checkRegExist(path As String) As Boolean
         Dim dir = path
         Dim root = getFirstDir(path)
-        dir = dir.TrimStart(CChar($"{root}\"))
+        dir = dir.Replace(root & "\", "")
         Try
             Select Case root
                 Case "HKCU"
                     Return getCUKey(dir) IsNot Nothing
                 Case "HKLM"
-                    dir = dir.Replace("HKLM\", "")
                     If getLMKey(dir) IsNot Nothing Then Return True
                     ' Small workaround for newer x64 versions of Windows
                     dir = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
