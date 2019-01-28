@@ -21,8 +21,19 @@ Option Strict On
 ''' </summary>
 Module JavaMaker
     ' Module parameters
-    Dim download As Boolean = True
+    Dim download As Boolean = checkOnline()
     Dim javaFile As New iniFile(Environment.CurrentDirectory, "java.ini")
+    Dim settingsChanged As Boolean
+
+    ''' <summary>
+    ''' Restores the module parameters to their default states
+    ''' </summary>
+    Private Sub initDefaultParams()
+        download = checkOnline()
+        javaFile.resetParams()
+        settingsChanged = False
+    End Sub
+
     ''' <summary>
     ''' Prints the JavaMaker main menu
     ''' </summary>
@@ -31,7 +42,8 @@ Module JavaMaker
         print(1, "Run (Default)", "Attempt to create an entry based on the current system", trailingBlank:=True)
         print(1, "Toggle Download", $"{enStr(download)} downloading of java.ini from GitHub")
         print(1, "File Chooser", "Select a new local file path for java.ini", Not download, trailingBlank:=True)
-        print(0, $"Java definitions file: {replDir(javaFile.path)}")
+        print(0, $"Java definitions file: {If(Not download, replDir(javaFile.path), "online")}", closeMenu:=Not settingsChanged)
+        print(2, "JavaMaker", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
     ''' <summary>
@@ -44,15 +56,21 @@ Module JavaMaker
                 exitCode = True
             Case input = "1" Or input = ""
                 makeSomeJava()
-            Case input = "2" And Not download
+            Case input = "2"
+                toggleSettingParam(download, "Downloading", settingsChanged)
+            Case input = "3" And Not download
                 fileChooser(javaFile)
+            Case input = "4" And settingsChanged
+                resetModuleSettings("JavaMaker", AddressOf initDefaultParams)
+            Case Else
+                menuHeaderText = invInpStr
         End Select
     End Sub
 
     ''' <summary>
     ''' Generates the RegKeylist for the current system
     ''' </summary>
-    ''' <param name="kls">A list of keylists containing the RegKeys that will be in the generated entry</param>
+    ''' <param name="kls">An array of keylists containing the RegKeys that will be in the generated entry</param>
     ''' <returns></returns>
     Private Function mkEntry(kls As keyList()) As keyList
         Dim out As New keyList
@@ -102,10 +120,12 @@ Module JavaMaker
         Dim classRootIDs As New keyList(getRegKeys(getCRKey("WOW6432Node\CLSID\"), IDS))
         Dim localMachineClassesIDs As New keyList(getRegKeys(getLMKey("SOFTWARE\Classes\WOW6432Node\CLSID\"), IDS))
         Dim localMachineWOWIds As New keyList(getRegKeys(getLMKey("SOFTWARE\WOW6432Node\Classes\CLSID\"), IDS))
-        Dim defClassesIDs As New keyList(getRegKeys(getUserKey(".DEFAULT\Software\Classes\CLSID\"), IDS))
+        Dim defClassesIDs As New keyList(getRegKeys(getUserKey(".Default\Software\Classes\CLSID\"), IDS))
         Dim s1518ClassesIDs As New keyList(getRegKeys(getUserKey("S-1-5-18\Software\Classes\CLSID\"), IDS))
         Dim localMachineJREs As New keyList(getRegKeys(getLMKey("Software\JavaSoft\Java Runtime Environment"), {"1"}.ToList))
+        ' Get the JRE versions from HKLM\ and HKCU\, ignore the most recent
         Dim lmJREminorIDs, cuJREminorIDs As New keyList
+        ' Some keys hava the format 1.W.0_XYZ, they match the main 1.W key that also exists along side them and should be separated out
         localMachineJREs.keys.ForEach(Sub(key) lmJREminorIDs.add(key, key.toString.Replace("HKEY_LOCAL_MACHINE", "").Contains("_")))
         localMachineJREs.remove(lmJREminorIDs.keys)
         Dim currentUserJREs As New keyList(getRegKeys(getCUKey("Software\JavaSoft\Java Runtime Environment\"), {"1"}.ToList))
