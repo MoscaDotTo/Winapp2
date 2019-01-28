@@ -56,7 +56,7 @@ Module Downloader
         printMenuTop({"Warning!", "Files in this menu are not recommended for use by beginners."})
         print(1, "Winapp3.ini", "Extended and/or potentially unsafe entries")
         print(1, "Archived entries.ini", "Entries for old or discontinued software")
-        print(1, "Java.ini", "Used by winapp2ool to generate a winapp2.ini entry that cleans up after the Java installer", closeMenu:=True)
+        print(1, "Java.ini", "Used to generate a winapp2.ini entry that cleans up after the Java installer", closeMenu:=True)
     End Sub
 
     ''' <summary>

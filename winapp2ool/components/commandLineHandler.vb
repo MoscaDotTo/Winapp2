@@ -35,12 +35,12 @@ Module commandLineHandler
     ''' <param name="arg">The string containing the argument that flips the boolean</param>
     ''' <param name="name">Optional reference to a file name to be replaced</param>
     ''' <param name="newname">Optional replacement file name</param>
-    Private Sub invertSettingAndRemoveArg(ByRef setting As Boolean, ByRef arg As String, Optional ByRef name As String = "", Optional ByRef newname As String = "")
+    Private Sub invertSettingAndRemoveArg(ByRef setting As Boolean, arg As String, Optional ByRef name As String = "", Optional ByRef newname As String = "")
         If args.Contains(arg) Then
             setting = Not setting
             args.Remove(arg)
+            name = newname
         End If
-        name = newname
     End Sub
 
     ''' <summary>
@@ -61,11 +61,11 @@ Module commandLineHandler
     ''' Handles the commandline args for WinappDebug
     ''' </summary>
     ''' WinappDebug specific command line args
-    ''' -c      : enable autocorrect
+    ''' -c          : enable autocorrect
     Private Sub autoDebug()
         Dim correctErrors As Boolean
         initDebugParams(firstFile, secondFile, correctErrors)
-        'Toggle on autocorrect (off by default)
+        ' Toggle on autocorrect (off by default)
         invertSettingAndRemoveArg(correctErrors, "-c")
         getFileAndDirParams()
         remoteDebug(firstFile, secondFile, correctErrors)
@@ -75,8 +75,8 @@ Module commandLineHandler
     ''' Handles the commandline args for Trim
     ''' </summary>
     ''' Trim args:
-    ''' -d     : download the latest winapp2.ini
-    ''' -ncc   : download the latest non-ccleaner winapp2.ini (implies -d)
+    ''' -d          : download the latest winapp2.ini
+    ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
     Private Sub autoTrim()
         Dim download As Boolean
         Dim ncc As Boolean
@@ -90,12 +90,12 @@ Module commandLineHandler
     ''' Handles the commandline args for Merge
     ''' </summary>
     '''  Merge args:
-    ''' -mm      : toggle mergemode from add&amp;replace to add&amp;remove
+    ''' -mm         : toggle mergemode from add&amp;replace to add&amp;remove
     ''' Preset merge file choices
-    ''' -r       : removed entries.ini 
-    ''' -c       : custom.ini 
-    ''' -w       : winapp3.ini
-    ''' -a       : archived entries.ini 
+    ''' -r          : removed entries.ini 
+    ''' -c          : custom.ini 
+    ''' -w          : winapp3.ini
+    ''' -a          : archived entries.ini 
     Private Sub autoMerge()
         Dim mergeMode As Boolean
         initMergeParams(firstFile, secondFile, thirdFile, mergeMode)
@@ -131,9 +131,9 @@ Module commandLineHandler
     ''' Handles the commandline args for CCiniDebug
     ''' </summary>
     '''  CCiniDebug args:
-    ''' -noprune : disable pruning of stale winapp2.ini entries
-    ''' -nosort  : disable sorting ccleaner.ini alphabetically
-    ''' -nosave  : disable saving the modified ccleaner.ini back to file
+    ''' -noprune    : disable pruning of stale winapp2.ini entries
+    ''' -nosort     : disable sorting ccleaner.ini alphabetically
+    ''' -nosave     : disable saving the modified ccleaner.ini back to file
     Private Sub autoccini()
         Dim prune As Boolean
         Dim save As Boolean
