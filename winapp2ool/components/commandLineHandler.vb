@@ -154,23 +154,23 @@ Module commandLineHandler
         Dim downloadDir As String = Environment.CurrentDirectory
         Dim downloadName As String = ""
         If args.Count > 0 Then
-            Select Case args(0)
-                Case "1", "2"
-                    fileLink = If(args(0) = "1", wa2Link, nonccLink)
+            Select Case args(0).ToLower
+                Case "1", "2", "winapp2"
+                    fileLink = If(Not args.Equals("2"), wa2Link, nonccLink)
                     downloadName = "winapp2.ini"
-                Case "3"
+                Case "3", "winapp2ool"
                     fileLink = toolLink
                     downloadName = "winapp2ool.exe"
-                Case "4"
+                Case "4", "removed"
                     fileLink = removedLink
                     downloadName = "Removed Entries.ini"
-                Case "5"
+                Case "5", "winapp3"
                     fileLink = wa3link
                     downloadName = "winapp3.ini"
-                Case "6"
+                Case "6", "archived"
                     fileLink = archivedLink
                     downloadName = "Archived Entries.ini"
-                Case "7"
+                Case "7", "java"
                     fileLink = javaLink
                     downloadName = "java.ini"
             End Select
