@@ -630,7 +630,9 @@ Public Module iniFileHandler
         End Function
     End Class
 
-
+    ''' <summary>
+    ''' A handy wrapper object for lists of iniKeys
+    ''' </summary>
     Public Class keyList
         Public keys As List(Of iniKey)
         Public keyType As String
@@ -756,7 +758,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="n">The string to check equality for</param>
         ''' <returns></returns>
-        Public Function nameIs(n As String) As Boolean
+        Public Function nameIs(n As String, Optional tolower As Boolean = False) As Boolean
             Return name = n
         End Function
 
@@ -765,8 +767,8 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="t">The string to check equality for</param>
         ''' <returns></returns>
-        Public Function typeIs(t As String) As Boolean
-            Return keyType = t
+        Public Function typeIs(t As String, Optional tolower As Boolean = False) As Boolean
+            Return If(tolower, keyType.ToLower.Equals(t), keyType.Equals(t))
         End Function
 
         ''' <summary>
@@ -827,6 +829,24 @@ Public Module iniFileHandler
         ''' <returns></returns>
         Private Function stripNums(keyName As String) As String
             Return New Regex("[\d]").Replace(keyName, "")
+        End Function
+
+        ''' <summary>
+        ''' Compares the names of two iniKeys and returns whether or not they match
+        ''' </summary>
+        ''' <param name="key"></param>
+        ''' <returns></returns>
+        Public Function compareNames(key As iniKey) As Boolean
+            Return nameIs(key.name.ToLower, True)
+        End Function
+
+        ''' <summary>
+        ''' Compares the values of two iniKeys and returns whether or not they match
+        ''' </summary>
+        ''' <param name="key"></param>
+        ''' <returns></returns>
+        Public Function compareValues(key As iniKey) As Boolean
+            Return vIs(key.value.ToLower, True)
         End Function
 
         ''' <summary>
