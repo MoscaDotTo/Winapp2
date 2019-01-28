@@ -24,14 +24,14 @@ Imports System.Net
 ''' </summary>
 Module Downloader
     ' Links to GitHub resources
-    Public wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
-    Public nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
-    Public toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
-    Public toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
-    Public removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
-    Public wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
-    Public archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
-    Public javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
+    Public Const wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
+    Public Const nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
+    Public Const toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
+    Public Const toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
+    Public Const removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
+    Public Const wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
+    Public Const archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
+    Public Const javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
     ' File handler
     Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
@@ -54,8 +54,9 @@ Module Downloader
     ''' </summary>
     Private Sub printAdvMenu()
         printMenuTop({"Warning!", "Files in this menu are not recommended for use by beginners."})
-        print(1, "Winapp3.ini", "Download the extended winapp3.ini cleaning rules")
-        print(2, "Archived entries.ini", closeMenu:=True)
+        print(1, "Winapp3.ini", "Extended and/or potentially unsafe entries")
+        print(1, "Archived entries.ini", "Entries for old or discontinued software")
+        print(1, "Java.ini", "Used by winapp2ool to generate a winapp2.ini entry that cleans up after the Java installer", closeMenu:=True)
     End Sub
 
     ''' <summary>
@@ -72,6 +73,9 @@ Module Downloader
             Case "2"
                 downloadFile.name = "Archived entries.ini"
                 download(archivedLink)
+            Case "3"
+                downloadFile.name = "java.ini"
+                download(javaLink)
             Case Else
                 menuHeaderText = invInpStr
         End Select

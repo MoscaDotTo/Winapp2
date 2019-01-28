@@ -167,6 +167,12 @@ Module commandLineHandler
                 Case "5"
                     fileLink = wa3link
                     downloadName = "winapp3.ini"
+                Case "6"
+                    fileLink = archivedLink
+                    downloadName = "Archived Entries.ini"
+                Case "7"
+                    fileLink = javaLink
+                    downloadName = "java.ini"
             End Select
             args.RemoveAt(0)
         End If
