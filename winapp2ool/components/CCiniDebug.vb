@@ -159,7 +159,8 @@ Module CCiniDebug
             Dim optionStr As String = optionsSec.keys.Values(i).toString
             ' Only operate on (app) keys belonging to winapp2.ini
             If optionStr.StartsWith("(App)") And optionStr.Contains("*") Then
-                trimStrs({"(App)", "=True", "=False"}, optionStr)
+                Dim toRemove As New List(Of String) From {"(App)", "=True", "=False"}
+                toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
                 If Not winappFile.sections.ContainsKey(optionStr) Then
                     printMenuLine(optionsSec.keys.Values(i).toString)
                     tbTrimmed.Add(optionsSec.keys.Keys(i))
@@ -171,21 +172,11 @@ Module CCiniDebug
     End Sub
 
     ''' <summary>
-    ''' Removes any instance of the provided strings from a string and returns what's left
-    ''' </summary>
-    ''' <param name="toRemove">The array of strings to be removed</param>
-    ''' <param name="inputTxt">The given string to be modified</param>
-    Private Sub trimStrs(toRemove As String(), ByRef inputTxt As String)
-        For Each param In toRemove
-            inputTxt = inputTxt.Replace(param, "")
-        Next
-    End Sub
-
-    ''' <summary>
     ''' Sorts the keys in the Options (only) section of ccleaner.ini
     ''' </summary>
     Private Sub sortCC()
         Dim lineList As List(Of String) = ccFile.sections("Options").getKeysAsList
+        lineList.Sort()
         lineList.Insert(0, "[Options]")
         ccFile.sections("Options") = New iniSection(lineList)
     End Sub
