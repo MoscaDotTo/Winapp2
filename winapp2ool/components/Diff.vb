@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018 Robbie Ward
+﻿'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -27,47 +27,26 @@ Module Diff
     Dim logFile As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
     Dim outputToFile As String
     ' Module parameters
-    Dim download As Boolean = False
+    Dim download As Boolean = Not isOffline
     Dim downloadNCC As Boolean = False
     Dim saveLog As Boolean = False
     Dim settingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Initializes the default module settings and returns references to them to the calling function
+    ''' Handles the commandline args for Diff
     ''' </summary>
-    ''' <param name="firstFile">The old winapp2.ini file</param>
-    ''' <param name="secondFile">The new winapp2.ini file</param>
-    ''' <param name="thirdFile">The log file</param>
-    ''' <param name="d">The boolean representing whether or not a file should be downloaded</param>
-    ''' <param name="dncc">The boolean representing whether or not the non-ccleaner file should be downloaded</param>
-    ''' <param name="sl">The boolean representing whether or not we should save our log</param>
-    Public Sub initDiffParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, ByRef thirdFile As iniFile, ByRef d As Boolean, ByRef dncc As Boolean, ByRef sl As Boolean)
+    '''  Diff args:
+    ''' -d          : download the latest winapp2.ini
+    ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
+    ''' -savelog    : save the diff.txt log
+    Public Sub handleCmdLine()
         initDefaultSettings()
-        firstFile = oFile
-        secondFile = nFile
-        thirdFile = logFile
-        d = download
-        dncc = downloadNCC
-        sl = saveLog
-    End Sub
-
-    ''' <summary>
-    ''' Runs the Differ from outside the module
-    ''' </summary>
-    ''' <param name="firstFile">The old winapp2.ini file</param>
-    ''' <param name="secondFile">The new winapp2.ini file</param>
-    ''' <param name="thirdFile">The log file</param>
-    ''' <param name="d">The boolean representing whether or not a file should be downloaded</param>
-    ''' <param name="dncc">The boolean representing whether or not the non-ccleaner file should be downloaded</param>
-    ''' <param name="sl">The boolean representing whether or not we should save our log</param>
-    Public Sub remoteDiff(ByRef firstFile As iniFile, secondFile As iniFile, thirdFile As iniFile, d As Boolean, dncc As Boolean, sl As Boolean)
-        oFile = firstFile
-        nFile = secondFile
-        logFile = thirdFile
-        download = d
-        downloadNCC = dncc
-        saveLog = sl
-        initDiff()
+        handleDownloadBools(download, downloadNCC)
+        ' Make sure we have a name set for the nfile if we're downloading or else the diff will not run
+        If download Then nFile.name = If(downloadNCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
+        invertSettingAndRemoveArg(saveLog, "-savelog")
+        getFileAndDirParams(oFile, nFile, logFile)
+        If Not nFile.name = "" Then initDiff()
     End Sub
 
     ''' <summary>
@@ -77,10 +56,20 @@ Module Diff
         oFile.resetParams()
         nFile.resetParams()
         logFile.resetParams()
-        download = False
+        download = Not isOffline
         downloadNCC = False
         saveLog = False
         settingsChanged = False
+    End Sub
+
+    ''' <summary>
+    ''' Runs the Differ from outside the module
+    ''' </summary>
+    ''' <param name="firstFile">The old winapp2.ini file</param>
+    Public Sub remoteDiff(firstFile As iniFile, Optional dl As Boolean = True)
+        oFile = firstFile
+        download = dl
+        initDiff()
     End Sub
 
     ''' <summary>
@@ -112,7 +101,7 @@ Module Diff
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                exitModule("Diff")
+                exitModule()
             Case input = "1" Or input = ""
                 If Not denyActionWithTopper(nFile.name = "" And Not download, "Please select a file against which to diff") Then initDiff()
             Case input = "2"
@@ -178,13 +167,14 @@ Module Diff
         Dim modCt As Integer = 0
         Dim addCt As Integer = 0
         For Each change In outList
-            If change.Contains("has been added") Then
-                addCt += 1
-            ElseIf change.Contains("has been removed") Then
-                remCt += 1
-            Else
-                modCt += 1
-            End If
+            Select Case True
+                Case change.Contains("has been added")
+                    addCt += 1
+                Case change.Contains(" has been removed")
+                    remCt += 1
+                Case Else
+                    modCt += 1
+            End Select
             log(change)
         Next
         ' Print the summary to the user
@@ -212,20 +202,18 @@ Module Diff
             If nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
                 Dim sSection As iniSection = nFile.sections(section.name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
-                Dim addedKeys, removedKeys As New List(Of iniKey)
+                Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
                 If Not section.compareTo(sSection, removedKeys, addedKeys) Then
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     ' Silently ignore any entries with only alphabetization changes
-                    If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Continue For
+                    If removedKeys.keyCount + addedKeys.keyCount + updatedKeys.Count = 0 Then Continue For
                     Dim tmp As String = getDiff(sSection, "modified")
-                    getChangesFromList(addedKeys, tmp, $"{prependNewLines()}Added:")
-                    getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.Count > 0)}Removed:")
+                    tmp = getChangesFromList(addedKeys, tmp, $"{prependNewLines()}Added:")
+                    tmp = getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.keyCount > 0)}Removed:")
                     If updatedKeys.Count > 0 Then
-                        tmp += appendNewLine($"{prependNewLines(removedKeys.Count > 0 Or addedKeys.Count > 0)}Modified:")
-                        For Each pair In updatedKeys
-                            appendStrs({appendNewLine(prependNewLines() & pair.Key.name), $"Old:   {appendNewLine(pair.Key.toString)}", $"New:   {appendNewLine(pair.Value.toString)}"}, tmp)
-                        Next
+                        tmp += appendNewLine($"{prependNewLines(removedKeys.keyCount > 0 Or addedKeys.keyCount > 0)}Modified:")
+                        updatedKeys.ForEach(Sub(pair) appendStrs({appendNewLine(prependNewLines() & pair.Key.name), $"Old:   {appendNewLine(pair.Key.toString)}", $"New:   {appendNewLine(pair.Value.toString)}"}, tmp))
                     End If
                     tmp += prependNewLines(False) & menuStr00
                     outList.Add(tmp)
@@ -249,62 +237,63 @@ Module Diff
     ''' <param name="keyList">A list of iniKeys that have been added/removed</param>
     ''' <param name="out">The output text to be appended to</param>
     ''' <param name="changeTxt">The text to appear in the output</param>
-    Private Sub getChangesFromList(keyList As List(Of iniKey), ByRef out As String, changeTxt As String)
-        If keyList.Count = 0 Then Exit Sub
+    Private Function getChangesFromList(keyList As keyList, out As String, changeTxt As String) As String
+        If keyList.keyCount = 0 Then Return out
         out += appendNewLine(changeTxt)
-        For Each key In keyList
-            out += appendNewLine(key.toString)
-        Next
-    End Sub
+        keyList.keys.ForEach(Sub(key) out += key.toString & Environment.NewLine)
+        Return out
+    End Function
 
     ''' <summary>
     ''' Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key 
     ''' </summary>
-    ''' <param name="removedKeys">The list of iniKeys that were removed</param>
-    ''' <param name="addedKeys">The list of iniKeys that were added</param>
+    ''' <param name="removedKeys">The list of iniKeys that were removed from the newer version of the file</param>
+    ''' <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
-    Private Sub chkLsts(ByRef removedKeys As List(Of iniKey), ByRef addedKeys As List(Of iniKey), ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
-        Dim rkTemp, akTemp As New List(Of iniKey)
-        rkTemp = removedKeys.ToList
-        akTemp = addedKeys.ToList
-        For Each key In removedKeys
-            For Each skey In addedKeys
-                If key.name.ToLower = skey.name.ToLower Then
+    Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
+        Dim akTemp = addedKeys
+        Dim rkTemp = removedKeys
+        For i As Integer = 0 To addedKeys.keyCount - 1
+            Dim key = addedKeys.keys(i)
+            For j As Integer = 0 To removedKeys.keyCount - 1
+                Dim skey = removedKeys.keys(j)
+                If key.compareNames(skey) Then
                     Select Case key.keyType
                         Case "FileKey", "ExcludeKey", "RegKey"
                             Dim oldKey As New winapp2KeyParameters(key)
                             Dim newKey As New winapp2KeyParameters(skey)
                             ' Make sure the given path hasn't changed
-                            If Not oldKey.paramString = newKey.paramString Then
+                            If Not oldKey.pathString = newKey.pathString Then
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                 Exit For
                             End If
                             oldKey.argsList.Sort()
                             newKey.argsList.Sort()
                             If oldKey.argsList.Count = newKey.argsList.Count Then
-                                For i As Integer = 0 To oldKey.argsList.Count - 1
-                                    If Not oldKey.argsList(i).ToLower = newKey.argsList(i).ToLower Then
+                                For k As Integer = 0 To oldKey.argsList.Count - 1
+                                    If Not oldKey.argsList(k).ToLower = newKey.argsList(k).ToLower Then
                                         updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                         Exit For
                                     End If
                                 Next
                                 ' If we get this far, it's probably just an alphabetization change and can be ignored silenty
-                                akTemp.Remove(skey)
-                                rkTemp.Remove(key)
+                                akTemp.remove(skey)
+                                rkTemp.remove(key)
                             Else
                                 ' If the count doesn't match, something has definitely changed
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                 Exit For
                             End If
                         Case Else
-                            If Not key.value.ToLower = skey.value.ToLower Then updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                            ' Other keys don't require such complex legwork, thankfully. 
+                            If Not key.compareValues(skey) Then updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                     End Select
                 End If
             Next
         Next
-        ' Update the lists
-        addedKeys = akTemp
-        removedKeys = rkTemp
+        '' Update the lists
+        addedKeys.keys = akTemp.keys
+        removedKeys.keys = rkTemp.keys
     End Sub
 
     ''' <summary>
@@ -315,10 +304,10 @@ Module Diff
     ''' <param name="rKeys">The list of removed keys</param>
     ''' <param name="key">A removed inikey</param>
     ''' <param name="skey">An added iniKey</param>
-    Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), ByRef aKeys As List(Of iniKey), ByRef rKeys As List(Of iniKey), key As iniKey, skey As iniKey)
+    Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), ByRef aKeys As keyList, ByRef rKeys As keyList, key As iniKey, skey As iniKey)
         updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
-        rKeys.Remove(key)
-        aKeys.Remove(skey)
+        rKeys.keys.Remove(skey)
+        aKeys.remove(key)
     End Sub
 
     ''' <summary>

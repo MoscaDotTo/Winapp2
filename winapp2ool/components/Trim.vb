@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018 Robbie Ward
+﻿'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -28,15 +28,27 @@ Public Module Trim
     Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
     Dim winVer As Double
     ' Module parameters
-    Dim detChrome As New List(Of String) _
+    ReadOnly detChrome As New List(Of String) _
         From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe", "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe",
                            "%LocalAppData%\Google\Chrome\Application\chrome.exe", "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe", "%ProgramFiles%\SRWare Iron\iron.exe",
                            "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe", "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
                            "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
     Dim settingsChanged As Boolean
-    Dim download As Boolean = False
+    Dim download As Boolean = Not isOffline
     Dim downloadNCC As Boolean = False
-    Dim areDownloading As Boolean = False
+
+    ''' <summary>
+    ''' Handles the commandline args for Trim
+    ''' </summary>
+    ''' Trim args:
+    ''' -d          : download the latest winapp2.ini
+    ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
+    Public Sub handleCmdLine()
+        initDefaultSettings()
+        handleDownloadBools(download, downloadNCC)
+        getFileAndDirParams(winappFile, outputFile, New iniFile)
+        initTrim()
+    End Sub
 
     ''' <summary>
     ''' Restores the default state of the module's parameters
@@ -45,23 +57,8 @@ Public Module Trim
         settingsChanged = False
         winappFile.resetParams()
         outputFile.resetParams()
-        download = False
+        download = checkOnline()
         downloadNCC = False
-    End Sub
-
-    ''' <summary>
-    ''' Initializes the default module settings and returns references to them to the calling function
-    ''' </summary>
-    ''' <param name="firstFile">The winapp2.ini file</param>
-    ''' <param name="secondFile">The output file</param>
-    ''' <param name="d">Download boolean</param>
-    ''' <param name="dncc">Non-CCleaner download boolean</param>
-    Public Sub initTrimParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, ByRef d As Boolean, ByRef dncc As Boolean)
-        initDefaultSettings()
-        firstFile = winappFile
-        secondFile = outputFile
-        d = download
-        dncc = downloadNCC
     End Sub
 
     ''' <summary>
@@ -101,7 +98,7 @@ Public Module Trim
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                exitModule("Trim")
+                exitModule()
             Case (input = "1" Or input = "")
                 initTrim()
             Case input = "2" And Not isOffline
@@ -162,12 +159,12 @@ Public Module Trim
     ''' <summary>
     ''' Evaluates a list of keys to observe whether they exist on the current machine
     ''' </summary>
-    ''' <param name="keyList">The list of iniKeys to query</param>
+    ''' <param name="kl">The list of iniKeys to query</param>
     ''' <param name="chkExist">The function that evaluates that keyType's parameters</param>
     ''' <returns></returns>
-    Private Function checkExistence(ByRef keyList As List(Of iniKey), chkExist As Func(Of String, Boolean)) As Boolean
-        If keyList.Count = 0 Then Return False
-        For Each key In keyList
+    Private Function checkExistence(ByRef kl As keyList, chkExist As Func(Of String, Boolean)) As Boolean
+        If kl.keyCount = 0 Then Return False
+        For Each key In kl.keys
             If chkExist(key.value) Then Return True
         Next
         Return False
@@ -179,7 +176,7 @@ Public Module Trim
     ''' <param name="entry">A winapp2.ini entry</param>
     ''' <returns></returns>
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
-        Dim hasDetOS As Boolean = Not entry.detectOS.Count = 0
+        Dim hasDetOS As Boolean = Not entry.detectOS.keyCount = 0
         Dim hasMetDetOS As Boolean = False
         ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         If hasDetOS Then
@@ -190,12 +187,70 @@ Public Module Trim
         ' Process any other Detect criteria we have
         If checkExistence(entry.specialDetect, AddressOf checkSpecialDetects) Then Return True
         If checkExistence(entry.detects, AddressOf checkRegExist) Then Return True
-        If checkExistence(entry.detectFiles, AddressOf checkFileExist) Then Return True
+        If checkExistence(entry.detectFiles, AddressOf checkPathExist) Then Return True
         ' Return true for the case where we have only a DetectOS and we meet its criteria 
-        If hasMetDetOS And entry.specialDetect.Count = 0 And entry.detectFiles.Count = 0 And entry.detects.Count = 0 Then Return True
+        If hasMetDetOS And entry.specialDetect.keyCount = 0 And entry.detectFiles.keyCount = 0 And entry.detects.keyCount = 0 Then Return True
         ' Return true for the case where we have no valid detect criteria
-        If entry.detectOS.Count + entry.detectFiles.Count + entry.detects.Count + entry.specialDetect.Count = 0 Then Return True
+        If entry.detectOS.keyCount + entry.detectFiles.keyCount + entry.detects.keyCount + entry.specialDetect.keyCount = 0 Then Return True
         Return False
+    End Function
+
+    ''' <summary>
+    ''' Audits the given entry for legacy codepaths in the machine's VirtualStore locations
+    ''' </summary>
+    ''' <param name="entry"></param>
+    Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
+        vsKeyChecker(entry.fileKeys)
+        vsKeyChecker(entry.regKeys)
+        vsKeyChecker(entry.excludeKeys)
+    End Sub
+
+    ''' <summary>
+    ''' Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list
+    ''' </summary>
+    ''' <param name="kl">The keylist of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore</param>
+    Private Sub vsKeyChecker(ByRef kl As keyList)
+        If kl.keyCount = 0 Then Exit Sub
+        Select Case kl.keyType
+            Case "FileKey", "ExcludeKey"
+                mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files", "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
+            Case "RegKey"
+                mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
+        End Select
+        kl.renumberKeys(replaceAndSort(kl.toListOfStr(True), "|", " \ \"))
+    End Sub
+
+    ''' <summary>
+    ''' Audits the existence of VirtualStore locations for an iniKey and if they exist, adds them to the list
+    ''' </summary>
+    ''' <param name="findStrs">A list of strings to seek for in the key value</param>
+    ''' <param name="replStrs">A list of strings to replace the sought after key values</param>
+    ''' <param name="kl">The keylist to be processed</param>
+    Private Sub mkVsKeys(findStrs As String(), replStrs As String(), ByRef kl As keyList)
+        Dim initVals = kl.toListOfStr(True)
+        Dim keysToAdd As New keyList(kl.keyType)
+        For Each key In kl.keys
+            If Not key.vHasAny(findStrs, True) Then Continue For
+            For i As Integer = 0 To findStrs.Count - 1
+                Dim keyToAdd = createVSKey(findStrs(i), replStrs(i), key)
+                ' Don't recreate keys that already exist
+                If initVals.Contains(keyToAdd.value) Then Continue For
+                keysToAdd.add(keyToAdd, Not key.value = keyToAdd.value)
+            Next
+        Next
+        Dim kl2 = kl
+        keysToAdd.keys.ForEach(Sub(key) kl2.add(key, checkExist(New winapp2KeyParameters(key).pathString)))
+    End Sub
+
+    ''' <summary>
+    ''' Creates the VirtualStore version of a given iniKey
+    ''' </summary>
+    ''' <param name="findStr">The normal filesystem path</param>
+    ''' <param name="replStr">The VirtualStore location path</param>
+    ''' <param name="key">The key to processed</param>
+    ''' <returns></returns>
+    Private Function createVSKey(findStr As String, replStr As String, key As iniKey) As iniKey
+        Return New iniKey($"{key.name}={key.value.Replace(findStr, replStr)}")
     End Function
 
     ''' <summary>
@@ -204,9 +259,7 @@ Public Module Trim
     ''' <param name="entryList">The list of winapp2entry objects to check existence for</param>
     Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
         Dim sectionsToBePruned As New List(Of winapp2entry)
-        For Each entry In entryList
-            If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry)
-        Next
+        entryList.ForEach(Sub(entry) If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else virtualStoreChecker(entry))
         removeEntries(entryList, sectionsToBePruned)
     End Sub
 
@@ -222,23 +275,23 @@ Public Module Trim
                     If checkExist(path) Then Return True
                 Next
             Case "DET_MOZILLA"
-                Return checkFileExist("%AppData%\Mozilla\Firefox")
+                Return checkPathExist("%AppData%\Mozilla\Firefox")
             Case "DET_THUNDERBIRD"
-                Return checkFileExist("%AppData%\Thunderbird")
+                Return checkPathExist("%AppData%\Thunderbird")
             Case "DET_OPERA"
-                Return checkFileExist("%AppData%\Opera Software")
+                Return checkPathExist("%AppData%\Opera Software")
         End Select
         ' If we didn't return above, SpecialDetect definitely doesn't exist
         Return False
     End Function
 
     ''' <summary>
-    ''' Handles passing off checks for the DET_CHROME case
+    ''' Handles passing off checks from sources that may vary between file system and registry
     ''' </summary>
-    ''' <param name="key">An individual Detect parameter for the DET_CHROME case</param>
+    ''' <param name="path">A filesystem or registry path to be audited for existence</param>
     ''' <returns></returns>
-    Private Function checkExist(key As String) As Boolean
-        Return If(key.StartsWith("HK"), checkRegExist(key), checkFileExist(key))
+    Private Function checkExist(path As String) As Boolean
+        Return If(path.StartsWith("HK"), checkRegExist(path), checkPathExist(path))
     End Function
 
     ''' <summary>
@@ -247,25 +300,22 @@ Public Module Trim
     ''' <param name="path">A registry path from a Detect key</param>
     ''' <returns></returns>
     Private Function checkRegExist(path As String) As Boolean
-        Dim dir As String = path
-        Dim root As String = getFirstDir(path)
+        Dim dir = path
+        Dim root = getFirstDir(path)
+        dir = dir.Replace(root & "\", "")
         Try
             Select Case root
                 Case "HKCU"
-                    dir = dir.Replace("HKCU\", "")
-                    Return Microsoft.Win32.Registry.CurrentUser.OpenSubKey(dir, True) IsNot Nothing
+                    Return getCUKey(dir) IsNot Nothing
                 Case "HKLM"
-                    dir = dir.Replace("HKLM\", "")
-                    If Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing Then Return True
+                    If getLMKey(dir) IsNot Nothing Then Return True
                     ' Small workaround for newer x64 versions of Windows
                     dir = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
-                    Return Microsoft.Win32.Registry.LocalMachine.OpenSubKey(dir, True) IsNot Nothing
+                    Return getLMKey(dir) IsNot Nothing
                 Case "HKU"
-                    dir = dir.Replace("HKU\", "")
-                    Return Microsoft.Win32.Registry.Users.OpenSubKey(dir, True) IsNot Nothing
+                    Return getUserKey(dir) IsNot Nothing
                 Case "HKCR"
-                    dir = dir.Replace("HKCR\", "")
-                    Return Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(dir, True) IsNot Nothing
+                    Return getCRKey(dir) IsNot Nothing
             End Select
         Catch ex As Exception
             ' The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.
@@ -276,12 +326,12 @@ Public Module Trim
     End Function
 
     ''' <summary>
-    ''' Returns True if a DetectFile path exists on the system, false otherwise.
+    ''' Returns True if a path exists on the system, false otherwise.
     ''' </summary>
-    ''' <param name="key">A DetectFile path</param>
+    ''' <param name="key">A filesystem path</param>
     ''' <returns></returns>
-    Private Function checkFileExist(key As String) As Boolean
-        Dim isProgramFiles As Boolean = False
+    Private Function checkPathExist(key As String) As Boolean
+        Dim isProgramFiles = False
         Dim dir As String = key
         ' Make sure we get the proper path for environment variables
         If dir.Contains("%") Then
@@ -301,8 +351,7 @@ Public Module Trim
         Try
             ' Process wildcards appropriately if we have them 
             If dir.Contains("*") Then
-                Dim exists As Boolean = False
-                exists = expandWildcard(dir)
+                Dim exists = expandWildcard(dir)
                 ' Small contingency for the isProgramFiles case
                 If Not exists And isProgramFiles Then
                     swapDir(dir, key)
@@ -342,8 +391,7 @@ Public Module Trim
     Private Function expandWildcard(dir As String) As Boolean
         ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
         Dim possibleDirs As New List(Of String)
-        Dim currentPaths As New List(Of String)
-        currentPaths.Add("")
+        Dim currentPaths As New List(Of String) From {""}
         ' Split the given string into sections by directory 
         Dim splitDir As String() = dir.Split(CChar("\"))
         For Each pathPart In splitDir
@@ -357,7 +405,7 @@ Public Module Trim
                         ' If there are any, add them to our possibility list
                         If Not possibilities.Count = 0 Then possibleDirs.AddRange(possibilities)
                     Catch
-                        ' Pretty much exception we'll encounter here is going to be the result of directories not existing.
+                        ' The exception we encounter here is going to be the result of directories not existing.
                         ' The exception will be thrown from the GetDirectories call and will prevent us from attempting to add new
                         ' items to the possibility list. In this instance, we can silently fail (here). 
                     End Try
@@ -370,10 +418,13 @@ Public Module Trim
                 possibleDirs.Clear()
             Else
                 If currentPaths.Count = 0 Then
-                    currentPaths.Add($"{pathPart}\")
+                    currentPaths.Add($"{pathPart}")
                 Else
                     Dim newCurPaths As New List(Of String)
                     For Each path As String In currentPaths
+                        If Not path.EndsWith("\") And path <> "" Then path += "\"
+                        Dim newPath As String = $"{path}{pathPart}\"
+                        Dim exists As Boolean = Directory.Exists(newPath)
                         If Directory.Exists($"{path}{pathPart}\") Then newCurPaths.Add($"{path}{pathPart}\")
                     Next
                     currentPaths = newCurPaths
@@ -394,6 +445,6 @@ Public Module Trim
     ''' <returns></returns>
     Private Function checkDetOS(value As String) As Boolean
         Dim splitKey As String() = value.Split(CChar("|"))
-        Return If(value.StartsWith("|"), Not winVer > Double.Parse(splitKey(1)), Not winVer < Double.Parse(splitKey(0)))
+        Return If(value.StartsWith("|"), Not winVer > Val(splitKey(1)), Not winVer < Val(splitKey(0)))
     End Function
 End Module

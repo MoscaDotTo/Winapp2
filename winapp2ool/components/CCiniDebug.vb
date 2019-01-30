@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018 Robbie Ward
+﻿'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -45,40 +45,18 @@ Module CCiniDebug
     End Sub
 
     ''' <summary>
-    ''' Initializes the default module settings and returns references to them to the calling function
+    ''' Handles the commandline args for CCiniDebug
     ''' </summary>
-    ''' <param name="firstFile">The iniFile object to represent winapp2.ini</param>
-    ''' <param name="secondFile">The iniFile object to represent ccleaner.ini</param>
-    ''' <param name="thirdFile">The iniFile object containing the save path information</param>
-    ''' <param name="pf">The boolean for pruning</param>
-    ''' <param name="sa">The boolean for saving</param>
-    ''' <param name="so">The boolean for sorting</param>
-    Public Sub initCCDebugParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, ByRef thirdFile As iniFile, ByRef pf As Boolean, ByRef sa As Boolean, ByRef so As Boolean)
+    '''  CCiniDebug args:
+    ''' -noprune    : disable pruning of stale winapp2.ini entries
+    ''' -nosort     : disable sorting ccleaner.ini alphabetically
+    ''' -nosave     : disable saving the modified ccleaner.ini back to file
+    Public Sub handleCmdlineArgs()
         initDefaultSettings()
-        firstFile = winappFile
-        secondFile = ccFile
-        thirdFile = outputFile
-        pf = pruneFile
-        sa = saveFile
-        so = sortFile
-    End Sub
-
-    ''' <summary>
-    ''' Runs the debugger when called from outside the module
-    ''' </summary>
-    ''' <param name="firstfile">The winapp2.ini iniFile</param>
-    ''' <param name="secondfile">The ccleaner.ini iniFile</param>
-    ''' <param name="thirdfile">The iniFile with the save location</param>
-    ''' <param name="pf">Boolean for pruning</param>
-    ''' <param name="sa">Boolean for saving</param>
-    ''' <param name="so">Boolean for sorting</param>
-    Public Sub remoteCC(firstfile As iniFile, secondfile As iniFile, thirdfile As iniFile, pf As Boolean, sa As Boolean, so As Boolean)
-        winappFile = firstfile
-        ccFile = secondfile
-        outputFile = thirdfile
-        pruneFile = pf
-        saveFile = sa
-        sortFile = so
+        invertSettingAndRemoveArg(pruneFile, "-noprune")
+        invertSettingAndRemoveArg(sortFile, "-nosort")
+        invertSettingAndRemoveArg(saveFile, "-nosave")
+        getFileAndDirParams(winappFile, ccFile, outputFile)
         initDebug()
     End Sub
 
@@ -107,7 +85,7 @@ Module CCiniDebug
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                exitModule("CCiniDebug")
+                exitModule()
             Case (input = "1" Or input = "") And (pruneFile Or saveFile Or sortFile)
                 initDebug()
             Case input = "2"
@@ -159,7 +137,8 @@ Module CCiniDebug
             Dim optionStr As String = optionsSec.keys.Values(i).toString
             ' Only operate on (app) keys belonging to winapp2.ini
             If optionStr.StartsWith("(App)") And optionStr.Contains("*") Then
-                trimStrs({"(App)", "=True", "=False"}, optionStr)
+                Dim toRemove As New List(Of String) From {"(App)", "=True", "=False"}
+                toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
                 If Not winappFile.sections.ContainsKey(optionStr) Then
                     printMenuLine(optionsSec.keys.Values(i).toString)
                     tbTrimmed.Add(optionsSec.keys.Keys(i))
@@ -171,21 +150,11 @@ Module CCiniDebug
     End Sub
 
     ''' <summary>
-    ''' Removes any instance of the provided strings from a string and returns what's left
-    ''' </summary>
-    ''' <param name="toRemove">The array of strings to be removed</param>
-    ''' <param name="inputTxt">The given string to be modified</param>
-    Private Sub trimStrs(toRemove As String(), ByRef inputTxt As String)
-        For Each param In toRemove
-            inputTxt = inputTxt.Replace(param, "")
-        Next
-    End Sub
-
-    ''' <summary>
     ''' Sorts the keys in the Options (only) section of ccleaner.ini
     ''' </summary>
     Private Sub sortCC()
         Dim lineList As List(Of String) = ccFile.sections("Options").getKeysAsList
+        lineList.Sort()
         lineList.Insert(0, "[Options]")
         ccFile.sections("Options") = New iniSection(lineList)
     End Sub

@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018 Robbie Ward
+﻿'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -185,7 +185,7 @@ Module winapp2handler
     Public Class winapp2file
         Public entryList As List(Of String)
         ' "" = main section, bottom most in all circumstances and appearing without a label 
-        Dim sectionHeaderFooter As String() = {"Chrome/Chromium based browsers", "Firefox/Mozilla based browsers", "Thunderbird",
+        ReadOnly sectionHeaderFooter As String() = {"Chrome/Chromium based browsers", "Firefox/Mozilla based browsers", "Thunderbird",
             "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
         ' As above, index 0 = Chrome, 1 = Firefox, 2 = Thunderbird.... 6 = ""
         Public entrySections(6) As iniFile
@@ -216,11 +216,11 @@ Module winapp2handler
             Dim langSecRefs As New List(Of String) From {"3029", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous"}
             For Each section In file.sections.Values
                 Dim tmpwa2entry As New winapp2entry(section)
-                Dim ind As Integer
-                If tmpwa2entry.langSecRef.Count > 0 Then
-                    ind = langSecRefs.IndexOf(tmpwa2entry.langSecRef(0).value)
-                ElseIf tmpwa2entry.sectionKey.Count > 0 Then
-                    ind = langSecRefs.IndexOf(tmpwa2entry.sectionKey(0).value)
+                Dim ind = -1
+                If tmpwa2entry.langSecRef.keyCount > 0 Then
+                    ind = langSecRefs.IndexOf(tmpwa2entry.langSecRef.keys.First.value)
+                ElseIf tmpwa2entry.sectionKey.keyCount > 0 Then
+                    ind = langSecRefs.IndexOf(tmpwa2entry.sectionKey.keys.First.value)
                 End If
                 If ind = -1 Then ind = 6
                 addToInnerFile(ind, tmpwa2entry, section)
@@ -306,7 +306,8 @@ Module winapp2handler
             End If
             out += appendNewLine("; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2")
             out += appendNewLine("; Any contributions are appreciated. Please refer to our readme to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md")
-            out += appendNewLine("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/blob/master/Tools/beta/winapp2ool.exe")
+            out += appendNewLine("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
+            out += appendNewLine("; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
             ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
             For i As Integer = 0 To 5
                 If entrySections(i).sections.Count > 0 Then
@@ -327,19 +328,20 @@ Module winapp2handler
     Public Class winapp2entry
         Public name As String
         Public fullName As String
-        Public detectOS As New List(Of iniKey)
-        Public langSecRef As New List(Of iniKey)
-        Public sectionKey As New List(Of iniKey)
-        Public specialDetect As New List(Of iniKey)
-        Public detects As New List(Of iniKey)
-        Public detectFiles As New List(Of iniKey)
-        Public warningKey As New List(Of iniKey)
-        Public defaultKey As New List(Of iniKey)
-        Public fileKeys As New List(Of iniKey)
-        Public regKeys As New List(Of iniKey)
-        Public excludeKeys As New List(Of iniKey)
-        Public errorKeys As New List(Of iniKey)
-        Public keyListList As New List(Of List(Of iniKey))
+        Public detectOS As New keyList("DetectOS")
+        Public langSecRef As New keyList("LangSecRef")
+        Public sectionKey As New keyList("Section")
+        Public specialDetect As New keyList("SpecialDetect")
+        Public detects As New keyList("Detect")
+        Public detectFiles As New keyList("DetectFile")
+        Public warningKey As New keyList("Warning")
+        Public defaultKey As New keyList("Default")
+        Public fileKeys As New keyList("FileKey")
+        Public regKeys As New keyList("RegKey")
+        Public excludeKeys As New keyList("ExcludeKey")
+        Public errorKeys As New keyList("Error")
+        Public keyListList As New List(Of keyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
+                                                            warningKey, defaultKey, fileKeys, regKeys, excludeKeys, errorKeys}
         Public lineNum As New Integer
 
         ''' <summary>
@@ -351,28 +353,15 @@ Module winapp2handler
             name = section.name
             updKeyListList()
             lineNum = section.startingLineNumber
-            Dim keylist As New List(Of String)
-            keylist.AddRange(New String() {"detectos", "langsecref", "section", "specialdetect", "detect", "detectfile", "default", "warning", "filekey", "regkey", "excludekey"})
-            section.constructKeyLists(keylist, keyListList)
+            section.constKeyLists(keyListList)
         End Sub
 
         ''' <summary>
         ''' Clears and updates the keyListList with the current state of the keys
         ''' </summary>
         Private Sub updKeyListList()
-            keyListList.Clear()
-            keyListList.Add(detectOS)
-            keyListList.Add(langSecRef)
-            keyListList.Add(sectionKey)
-            keyListList.Add(specialDetect)
-            keyListList.Add(detects)
-            keyListList.Add(detectFiles)
-            keyListList.Add(defaultKey)
-            keyListList.Add(warningKey)
-            keyListList.Add(fileKeys)
-            keyListList.Add(regKeys)
-            keyListList.Add(excludeKeys)
-            keyListList.Add(errorKeys)
+            keyListList = New List(Of keyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
+                                                      warningKey, defaultKey, fileKeys, regKeys, excludeKeys, errorKeys}
         End Sub
 
         ''' <summary>
@@ -380,14 +369,9 @@ Module winapp2handler
         ''' </summary>
         ''' <returns></returns>
         Public Function dumpToListOfStrings() As List(Of String)
-            Dim outList As New List(Of String)
-            outList.Add(fullName)
+            Dim outList As New List(Of String) From {fullName}
             updKeyListList()
-            For Each lst In keyListList
-                For Each key In lst
-                    outList.Add(key.toString)
-                Next
-            Next
+            keyListList.ForEach(Sub(lst) lst.keys.ForEach(Sub(key) outList.Add(key.toString)))
             Return outList
         End Function
     End Class
@@ -396,7 +380,7 @@ Module winapp2handler
     ''' Provides a few helpful methods for dissecting winapp2key objects
     ''' </summary>
     Public Class winapp2KeyParameters
-        Public paramString As String = ""
+        Public pathString As String = ""
         Public argsList As New List(Of String)
         Public flagString As String = ""
         Public keyType As String = ""
@@ -409,22 +393,24 @@ Module winapp2handler
                 Case "FileKey"
                     keyNum = key.keyType.Replace("FileKey", "")
                     If splitKey.Count > 1 Then
-                        paramString = splitKey(0)
+                        pathString = splitKey(0)
                         argsList.AddRange(splitKey(1).Split(CChar(";")))
                         flagString = If(splitKey.Count >= 3, splitKey.Last, "None")
+                    Else
+                        pathString = key.value
                     End If
                 Case "ExcludeKey"
                     Select Case splitKey.Count
                         Case 2
-                            paramString = splitKey(1)
+                            pathString = splitKey(1)
                             flagString = splitKey(0)
                         Case 3
-                            paramString = splitKey(1)
+                            pathString = splitKey(1)
                             argsList.AddRange(splitKey(2).Split(CChar(";")))
                             flagString = splitKey(0)
                     End Select
                 Case "RegKey"
-                    paramString = splitKey(0)
+                    pathString = splitKey(0)
                     If splitKey.Count > 1 Then argsList.Add(splitKey(1))
             End Select
         End Sub
@@ -436,13 +422,13 @@ Module winapp2handler
         ''' Also trims empty comments 
         Public Sub reconstructKey(ByRef key As iniKey)
             Dim out As String = ""
-            out += paramString & "|"
+            out += $"{pathString}{If(argsList.Count > 0, "|", "")}"
             If argsList.Count > 1 Then
                 For i As Integer = 0 To argsList.Count - 2
                     If Not argsList(i) = "" Then out += argsList(i) & ";"
                 Next
             End If
-            out += argsList.Last
+            If argsList.Count > 0 Then out += argsList.Last
             If Not flagString = "None" Then out += "|" & flagString
             key.value = out
         End Sub

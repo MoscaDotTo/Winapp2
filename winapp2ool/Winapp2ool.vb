@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018 Robbie Ward
+﻿'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -20,7 +20,7 @@ Imports Microsoft.Win32
 
 Module Winapp2ool
     ' Update and compatibility settings
-    Public currentVersion As String = "1.0"
+    Public currentVersion As String = "1.02"
     Dim latestVersion As String = ""
     Dim latestWa2Ver As String = ""
     Dim localWa2Ver As String = ""
@@ -137,12 +137,14 @@ Module Winapp2ool
             Case input = "9" And waUpdateIsAvail
                 Console.Clear()
                 Console.Write("Downloading & diffing, this may take a moment...")
-                remoteDiff(lwinapp2File, eini, eini, True, False, False)
+                remoteDiff(lwinapp2File)
                 undoAnyPendingExits()
                 menuHeaderText = "Diff Complete"
             Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not dnfOOD
                 Console.WriteLine("Downloading and updating winapp2ool.exe, this may take a moment...")
                 autoUpdate()
+            Case input.ToLower = "m"
+                initModule("Minefield", AddressOf Minefield.printMenu, AddressOf Minefield.handleUserInput)
             Case Else
                 menuHeaderText = invInpStr
         End Select
@@ -243,7 +245,7 @@ Module Winapp2ool
         End If
         Dim osVersion As String = System.Environment.OSVersion.ToString().Replace("Microsoft Windows NT ", "")
         Dim ver As String() = osVersion.Split(CChar("."))
-        Dim out As Double = CDbl($"{ver(0)}.{ver(1)}")
+        Dim out As Double = Val($"{ver(0)}.{ver(1)}")
         ' This might not act completely correctly on Windows 8.1 but usage of that seems small enough that it wont be an issue
         If Not {5.1, 6.0, 6.1, 6.2, 6.3}.Contains(out) Then
             Console.WriteLine("Unable to determine which version of Windows you are running.")

@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018 Robbie Ward
+﻿'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -19,7 +19,6 @@ Option Strict On
 ''' Handles the processing of errors caught throughout the operation of winapp2ool, hopefully gracefully.
 ''' </summary>
 Module exceptionHandler
-
     ''' <summary>
     ''' Prints out excpetions and any other information related to them that a use may need.
     ''' </summary>

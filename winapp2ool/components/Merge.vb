@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018 Robbie Ward
+﻿'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -30,33 +30,24 @@ Module Merge
     Dim settingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Initializes the default module settings and returns references to them to the calling function
+    ''' Handles the commandline args for Merge
     ''' </summary>
-    ''' <param name="firstFile">The winapp2.ini file</param>
-    ''' <param name="secondFile">The file to be merged</param>
-    ''' <param name="thirdFile">The output file</param>
-    ''' <param name="mm">The boolean representing the mergemode</param>
-    Public Sub initMergeParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, ByRef thirdFile As iniFile, ByRef mm As Boolean)
+    '''  Merge args:
+    ''' -mm         : toggle mergemode from add&amp;replace to add&amp;remove
+    ''' Preset merge file choices
+    ''' -r          : removed entries.ini 
+    ''' -c          : custom.ini 
+    ''' -w          : winapp3.ini
+    ''' -a          : archived entries.ini 
+    Public Sub handleCmdLine()
         initDefaultSettings()
-        firstFile = winappFile
-        secondFile = mergeFile
-        thirdFile = outputFile
-        mm = mergeMode
-    End Sub
-
-    ''' <summary>
-    ''' Merges two iniFiles from outside the module
-    ''' </summary>
-    ''' <param name="firstFile">The winapp2.ini file</param>
-    ''' <param name="secondFile">The file to be merged</param>
-    ''' <param name="thirdFile">The output file</param>
-    ''' <param name="mm">The boolean representing the mergemode</param>
-    Public Sub remoteMerge(firstFile As iniFile, secondFile As iniFile, thirdFile As iniFile, mm As Boolean)
-        winappFile = firstFile
-        mergeFile = secondFile
-        outputFile = thirdFile
-        mergeMode = mm
-        initMerge()
+        invertSettingAndRemoveArg(mergeMode, "-mm")
+        invertSettingAndRemoveArg(False, "-r", mergeFile.name, "Removed Entries.ini")
+        invertSettingAndRemoveArg(False, "-c", mergeFile.name, "Custom.ini")
+        invertSettingAndRemoveArg(False, "-w", mergeFile.name, "winapp3.ini")
+        invertSettingAndRemoveArg(False, "-a", mergeFile.name, "Archived Entries.ini")
+        getFileAndDirParams(winappFile, mergeFile, outputFile)
+        If Not mergeFile.name = "" Then initMerge()
     End Sub
 
     ''' <summary>
@@ -98,7 +89,7 @@ Module Merge
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                exitModule("Merge")
+                exitModule()
             Case input = "1" Or input = ""
                 If Not denyActionWithTopper(mergeFile.name = "", "You must select a file to merge") Then initMerge()
             Case input = "2"

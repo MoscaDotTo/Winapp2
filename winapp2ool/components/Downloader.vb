@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018 Robbie Ward
+﻿'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -24,14 +24,53 @@ Imports System.Net
 ''' </summary>
 Module Downloader
     ' Links to GitHub resources
-    Public wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
-    Public nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
-    Public toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
-    Public toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
-    Public removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
-    Public wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
+    Public Const wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
+    Public Const nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
+    Public Const toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
+    Public Const toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
+    Public Const removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
+    Public Const wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
+    Public Const archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
+    Public Const javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
+    Public Const readMeLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/Readme.md"
     ' File handler
     Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
+
+    ''' <summary>
+    ''' Handles the commandline args for the Downloader 
+    ''' </summary>
+    Public Sub handleCmdLine()
+        Dim fileLink As String = ""
+        If cmdargs.Count > 0 Then
+            Select Case cmdargs(0).ToLower
+                Case "1", "2", "winapp2"
+                    fileLink = If(Not cmdargs(0) = "2", wa2Link, nonccLink)
+                    downloadFile.name = "winapp2.ini"
+                Case "3", "winapp2ool"
+                    fileLink = toolLink
+                    downloadFile.name = "winapp2ool.exe"
+                Case "4", "removed"
+                    fileLink = removedLink
+                    downloadFile.name = "Removed Entries.ini"
+                Case "5", "winapp3"
+                    fileLink = wa3link
+                    downloadFile.name = "winapp3.ini"
+                Case "6", "archived"
+                    fileLink = archivedLink
+                    downloadFile.name = "Archived Entries.ini"
+                Case "7", "java"
+                    fileLink = javaLink
+                    downloadFile.name = "java.ini"
+                Case "8", "readme"
+                    fileLink = readMeLink
+                    downloadFile.name = "readme.txt"
+            End Select
+            cmdargs.RemoveAt(0)
+        End If
+        getFileAndDirParams(downloadFile, New iniFile, New iniFile)
+        If downloadFile.dir = Environment.CurrentDirectory And downloadFile.name = "winapp2ool.exe" Then autoUpdate()
+        download(fileLink)
+    End Sub
 
     ''' <summary>
     ''' Prints the main menu to the user
@@ -44,6 +83,7 @@ Module Downloader
         print(1, "Removed Entries.ini", "Download only entries used to create the non-ccleaner winapp2.ini", leadingBlank:=True)
         print(1, "Directory", "Change the save directory", trailingBlank:=True)
         print(1, "Advanced", "Settings for power users")
+        print(1, "ReadMe", "The winapp2ool ReadMe")
         print(0, $"Save directory: {replDir(downloadFile.dir)}", leadingBlank:=True, closeMenu:=True)
     End Sub
 
@@ -52,7 +92,9 @@ Module Downloader
     ''' </summary>
     Private Sub printAdvMenu()
         printMenuTop({"Warning!", "Files in this menu are not recommended for use by beginners."})
-        print(1, "Winapp3.ini", "Download the extended winapp3.ini cleaning rules", closeMenu:=True)
+        print(1, "Winapp3.ini", "Extended and/or potentially unsafe entries")
+        print(1, "Archived entries.ini", "Entries for old or discontinued software")
+        print(1, "Java.ini", "Used to generate a winapp2.ini entry that cleans up after the Java installer", closeMenu:=True)
     End Sub
 
     ''' <summary>
@@ -62,10 +104,16 @@ Module Downloader
     Private Sub handleAdvInput(input As String)
         Select Case input
             Case "0"
-                exitModule("Downloader")
+                exitModule()
             Case "1"
                 downloadFile.name = "winapp3.ini"
                 download(wa3link)
+            Case "2"
+                downloadFile.name = "Archived entries.ini"
+                download(archivedLink)
+            Case "3"
+                downloadFile.name = "java.ini"
+                download(javaLink)
             Case Else
                 menuHeaderText = invInpStr
         End Select
@@ -104,6 +152,10 @@ Module Downloader
                 menuHeaderText = "Save directory changed"
             Case "6"
                 initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)
+            Case "7"
+                ' It's actually a .md but the user doesn't need to know that  
+                downloadFile.name = "Readme.txt"
+                download(readMeLink)
             Case Else
                 menuHeaderText = invInpStr
         End Select
@@ -160,13 +212,15 @@ Module Downloader
     ''' <param name="address">A URL pointing to an online .ini file</param>
     ''' <returns></returns>
     Public Function getRemoteIniFile(address As String) As iniFile
-        Dim reader As StreamReader = Nothing
+        Dim reader As StreamReader
         Try
             Dim client As New WebClient
             reader = New StreamReader(client.OpenRead(address))
             Dim wholeFile As String = reader.ReadToEnd
             wholeFile += Environment.NewLine
             Dim splitFile As String() = wholeFile.Split(CChar(Environment.NewLine))
+            ' Workaround for java.ini until the underlying reason for mismatches between line endings can be discovered
+            If address = javaLink Then splitFile = wholeFile.Split(CChar(vbLf))
             For i As Integer = 0 To splitFile.Count - 1
                 splitFile(i) = splitFile(i).Replace(vbCr, "").Replace(vbLf, "")
             Next

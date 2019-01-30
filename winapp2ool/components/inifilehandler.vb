@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018 Robbie Ward
+﻿'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -22,42 +22,6 @@ Imports System.Text.RegularExpressions
 ''' A collection of methods and classes for interacting with .ini files 
 ''' </summary>
 Public Module iniFileHandler
-
-    ''' <summary>
-    ''' Returns the values from a list of iniKey objects as a list of strings
-    ''' </summary>
-    ''' <param name="keyList">A list of iniKey objects to parse values from</param>
-    ''' <returns></returns>
-    Public Function getValues(ByVal keyList As List(Of iniKey)) As List(Of String)
-        Dim valList As New List(Of String)
-        For Each key In keyList
-            valList.Add(key.value)
-        Next
-        Return valList
-    End Function
-
-    ''' <summary>
-    ''' Returns the line numbers from a list of iniKey objects as a list of integers
-    ''' </summary>
-    ''' <param name="keyList">A list of iniKey objects to parse line numbers from</param>
-    ''' <returns></returns>
-    Public Function getLineNumsFromKeyList(ByRef keyList As List(Of iniKey)) As List(Of Integer)
-        Dim lineList As New List(Of Integer)
-        For Each key In keyList
-            lineList.Add(key.lineNumber)
-        Next
-        Return lineList
-    End Function
-
-    ''' <summary>
-    ''' Adds an iniKey to a list of iniKeys if the given condition is met
-    ''' </summary>
-    ''' <param name="key">The key to be added</param>
-    ''' <param name="keyList">The list to be added to</param>
-    ''' <param name="cond">The condition under which the key should be added to the list</param>
-    Public Sub addKeyToListIf(ByRef key As iniKey, ByRef keyList As List(Of iniKey), cond As Boolean)
-        If cond Then keyList.Add(key)
-    End Sub
 
     ''' <summary>
     ''' Enforces that a user selected file exists
@@ -97,7 +61,7 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="dir">A user defined windows directory</param>
     Public Sub chkDirExist(ByRef dir As String)
-        If pendingExit() Then Exit Sub
+        If pendingExit() Or Directory.Exists(dir) Then Exit Sub
         Dim iExitCode As Boolean = False
         menuHeaderText = "Error"
         While Not iExitCode
@@ -474,9 +438,7 @@ Public Module iniFileHandler
         ''' <param name="sortedSections">The sorted state of the sections by name</param>
         Public Sub sortSections(ByVal sortedSections As List(Of String))
             Dim tempFile As New iniFile
-            For Each sectionName In sortedSections
-                tempFile.sections.Add(sectionName, sections.Item(sectionName))
-            Next
+            sortedSections.ForEach(Sub(sectionName) tempFile.sections.Add(sectionName, sections.Item(sectionName)))
             Me.sections = tempFile.sections
         End Sub
 
@@ -548,15 +510,16 @@ Public Module iniFileHandler
         Public keys As New Dictionary(Of Integer, iniKey)
 
         ''' <summary>
-        ''' Sorts a section's keys into lists based on keyType
+        ''' Sorts a section's keys into keylists based on their KeyType
         ''' </summary>
-        ''' Expects that the number of parameters in keyTypeList is equal to the number of values in listOfKeyLists, with the final list being an "error" list
-        ''' holding keys of types not defined in the keyTypeList
-        ''' <param name="keyTypeList"></param>
-        ''' <param name="listOfKeyLists"></param>
-        Public Sub constructKeyLists(ByVal keyTypeList As List(Of String), ByRef listOfKeyLists As List(Of List(Of iniKey)))
+        ''' <param name="listOfKeyLists">The list of keyLists to be sorted into</param>
+        ''' The last list in the keylist list holds the error keys
+        Public Sub constKeyLists(ByRef listOfKeyLists As List(Of keyList))
+            Dim keyTypeList As New List(Of String)
+            listOfKeyLists.ForEach(Sub(kl) keyTypeList.Add(kl.keyType.ToLower))
             For Each key In Me.keys.Values
-                If keyTypeList.Contains(key.keyType.ToLower) Then listOfKeyLists(keyTypeList.IndexOf(key.keyType.ToLower)).Add(key) Else listOfKeyLists.Last.Add(key)
+                Dim type = key.keyType.ToLower
+                If keyTypeList.Contains(type) Then listOfKeyLists(keyTypeList.IndexOf(type)).add(key) Else listOfKeyLists.Last.add(key)
             Next
         End Sub
 
@@ -565,9 +528,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="indicies"></param>
         Public Sub removeKeys(indicies As List(Of Integer))
-            For Each ind In indicies
-                Me.keys.Remove(ind)
-            Next
+            indicies.ForEach(Sub(ind) Me.keys.Remove(ind))
         End Sub
 
         ''' <summary>
@@ -622,11 +583,9 @@ Public Module iniFileHandler
         ''' <param name="removedKeys">A return list on iniKey objects that appear in the iniFile object but not the given</param>
         ''' <param name="addedKeys">A return list of iniKey objects that appear in the given iniFile object but not this one</param>
         ''' <returns></returns>
-        Public Function compareTo(ss As iniSection, ByRef removedKeys As List(Of iniKey), ByRef addedKeys As List(Of iniKey)) As Boolean
+        Public Function compareTo(ss As iniSection, ByRef removedKeys As keyList, ByRef addedKeys As keyList) As Boolean
             ' Create a copy of the section so we can modify it
-            Dim secondSection As New iniSection
-            secondSection.name = ss.name
-            secondSection.startingLineNumber = ss.startingLineNumber
+            Dim secondSection As New iniSection With {.name = ss.name, .startingLineNumber = ss.startingLineNumber}
             For i As Integer = 0 To ss.keys.Count - 1
                 secondSection.keys.Add(i, ss.keys.Values(i))
             Next
@@ -643,16 +602,16 @@ Public Module iniFileHandler
                     End Select
                 Next
                 ' If the key isn't found in the second (newer) section, consider it removed for now
-                If noMatch Then removedKeys.Add(key)
+                If noMatch Then removedKeys.add(key)
             Next
             ' Remove all matched keys
             tmpList.Reverse()
             secondSection.removeKeys(tmpList)
             ' Assume any remaining keys have been added
             For Each key In secondSection.keys.Values
-                addedKeys.Add(key)
+                addedKeys.add(key)
             Next
-            Return removedKeys.Count + addedKeys.Count = 0
+            Return removedKeys.keyCount + addedKeys.keyCount = 0
         End Function
 
         ''' <summary>
@@ -665,6 +624,120 @@ Public Module iniFileHandler
                 out += Environment.NewLine & key.toString
             Next
             out += Environment.NewLine
+            Return out
+        End Function
+    End Class
+
+    ''' <summary>
+    ''' A handy wrapper object for lists of iniKeys
+    ''' </summary>
+    Public Class keyList
+        Public keys As List(Of iniKey)
+        Public keyType As String
+
+        ''' <summary>
+        ''' Creates a new (empty) keylist
+        ''' </summary>
+        ''' <param name="kt">Optional String containing the expected KeyType of the keys in the list</param>
+        Public Sub New(Optional kt As String = "")
+            keys = New List(Of iniKey)
+            keyType = kt
+        End Sub
+
+        ''' <summary>
+        ''' Creates a new keylist using an existing list of iniKeys
+        ''' </summary>
+        ''' <param name="kl">A list of iniKeys to be inserted into the keylist</param>
+        Public Sub New(kl As List(Of iniKey))
+            keys = kl
+            keyType = If(keys.Count > 0, keys(0).keyType, "")
+        End Sub
+
+        ''' <summary>
+        ''' Conditionally adds a key to the keylist
+        ''' </summary>
+        ''' <param name="key">The key to be added</param>
+        ''' <param name="cond">The condition under which to add the key</param>
+        Public Sub add(key As iniKey, Optional cond As Boolean = True)
+            If cond Then keys.Add(key)
+        End Sub
+
+        ''' <summary>
+        ''' Adds a list of iniKeys to the keylist
+        ''' </summary>
+        ''' <param name="kl">The list to be added</param>
+        Public Sub add(kl As List(Of iniKey))
+            kl.ForEach(Sub(key) keys.Add(key))
+        End Sub
+
+        ''' <summary>
+        ''' Removes a key from the keylist
+        ''' </summary>
+        ''' <param name="key">The key to be removed</param>
+        Public Sub remove(key As iniKey)
+            Me.keys.Remove(key)
+        End Sub
+
+        ''' <summary>
+        ''' Removes a list of keys from the keylist
+        ''' </summary>
+        ''' <param name="kl">The list of keys to be removed</param>
+        Public Sub remove(kl As List(Of iniKey))
+            kl.ForEach(Sub(key) remove(key))
+        End Sub
+
+        ''' <summary>
+        ''' Returns the number of keys in the keylist
+        ''' </summary>
+        ''' <returns></returns>
+        Public Function keyCount() As Integer
+            Return keys.Count
+        End Function
+
+        ''' <summary>
+        ''' Returns whether or not the keyType of the list matches the input String
+        ''' </summary>
+        ''' <param name="type">The String against which to match the keylist's type</param>
+        ''' <returns></returns>
+        Public Function typeIs(type As String) As Boolean
+            Return If(keyType = "", keys(0).keyType, keyType) = type
+        End Function
+
+        ''' <summary>
+        ''' Returns the keylist in the form of a list of Strings
+        ''' </summary>
+        ''' <returns></returns>
+        Public Function toListOfStr(Optional getVals As Boolean = False) As List(Of String)
+            Dim out As New List(Of String)
+            keys.ForEach(Sub(key) out.Add(If(getVals, key.value, key.toString)))
+            Return out
+        End Function
+
+        ''' <summary>
+        ''' Removes the last element in the key list if it exists
+        ''' </summary>
+        Public Sub removeLast()
+            If keys.Count > 0 Then keys.Remove(keys.Last)
+        End Sub
+
+        ''' <summary>
+        ''' Renumber keys according to the sorted state of the values
+        ''' </summary>
+        ''' <param name="sortedKeyValues"></param>
+        Public Sub renumberKeys(sortedKeyValues As List(Of String))
+            For i As Integer = 0 To Me.keyCount - 1
+                keys(i).name = keys(i).keyType & i + 1
+                keys(i).value = sortedKeyValues(i)
+            Next
+        End Sub
+
+        ''' <summary>
+        ''' Returns a list of integers containing the line numbers from the keylist
+        ''' </summary>
+        ''' <returns></returns>
+        Public Function lineNums() As List(Of Integer)
+            Dim out As New List(Of Integer)
+            keys.ForEach(Sub(key) out.Add(key.lineNumber))
             Return out
         End Function
     End Class
@@ -683,8 +756,9 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="n">The string to check equality for</param>
         ''' <returns></returns>
-        Public Function nameIs(n As String) As Boolean
-            Return name = n
+        Public Function nameIs(n As String, Optional tolower As Boolean = False) As Boolean
+            Return If(tolower, name.ToLower = n.ToLower, name = n)
+            name = n
         End Function
 
         ''' <summary>
@@ -692,8 +766,8 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="t">The string to check equality for</param>
         ''' <returns></returns>
-        Public Function typeIs(t As String) As Boolean
-            Return keyType = t
+        Public Function typeIs(t As String, Optional tolower As Boolean = False) As Boolean
+            Return If(tolower, keyType.ToLower = t.ToLower, keyType = t)
         End Function
 
         ''' <summary>
@@ -757,12 +831,30 @@ Public Module iniFileHandler
         End Function
 
         ''' <summary>
+        ''' Compares the names of two iniKeys and returns whether or not they match
+        ''' </summary>
+        ''' <param name="key"></param>
+        ''' <returns></returns>
+        Public Function compareNames(key As iniKey) As Boolean
+            Return nameIs(key.name, True)
+        End Function
+
+        ''' <summary>
+        ''' Compares the values of two iniKeys and returns whether or not they match
+        ''' </summary>
+        ''' <param name="key"></param>
+        ''' <returns></returns>
+        Public Function compareValues(key As iniKey) As Boolean
+            Return vIs(key.value, True)
+        End Function
+
+        ''' <summary>
         ''' Create an iniKey object from a string containing a name value pair
         ''' </summary>
         ''' <param name="line">A string in the format name=value</param>
         ''' <param name="count">The line number for the string</param>
-        Public Sub New(ByVal line As String, ByVal count As Integer)
-            Try
+        Public Sub New(ByVal line As String, Optional ByVal count As Integer = 0)
+            If line.Contains("=") Then
                 Dim splitLine As String() = line.Split(CChar("="))
                 lineNumber = count
                 Select Case True
@@ -779,9 +871,11 @@ Public Module iniFileHandler
                         value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
                         keyType = "DeleteMe"
                 End Select
-            Catch ex As Exception
-                exc(ex)
-            End Try
+            Else
+                name = line
+                value = ""
+                keyType = "Error"
+            End If
         End Sub
 
         ''' <summary>
