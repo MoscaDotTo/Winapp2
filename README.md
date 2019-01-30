@@ -1,5 +1,5 @@
 
-# Winapp2
+# Winapp2.ini
 A database of extended cleaning routines for popular Windows PC based maintenance software.
 
 ### Files of interest on this repo:
@@ -8,10 +8,10 @@ Name           | Purpose
 :------------- | :-------------
 [winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini) | An extended database of cleaning routines for CCleaner. *This is the "main" file, **and the one most users will want***.
 [winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) | A robust tool that allows you to manage winapp2.ini for your system, including automatic downloading and trimming. This tool has its own ReadMe [here](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool).
-[Non-CCleaner winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini) | If you don't use CCleaner, this is the file you want. It includes entries that were removed from the main file due to having been included in CCleaner's official distribution. *You should **not** use this file with CCleaner.*
+[non-CCleaner winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini) | If you don't use CCleaner, this is the file you want. It includes entries that were removed from the main file due to having been included in CCleaner's official distribution. *You should **not** use this file with CCleaner.*
 [winapp3.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini) | An extension for an extension; contains entries for use by power users. *You should **not** use this file if you do not know what you are doing. Entries in this file can potentially be very aggressive/dangerous to your file system.*
 
-### How to use Winapp2 for the following cleaners:
+### How to use winapp2.ini for the following cleaners:
 
 * [CCleaner](https://www.ccleaner.com/ccleaner):
   * Download the latest winapp2.ini from this repo and place it in the same directory as ccleaner.exe.
@@ -32,11 +32,11 @@ Name           | Purpose
 
 ## Creating entries
 
-Winapp2 entries are organized alphabetically, between sections in the file and individual key values in those sections. Alphabetically, numbers and symbols have precedence over letters. Entries should be ordered with their keys in the following precedence order.
+Winapp2.ini entries are organized alphabetically, between sections in the file and individual key values in those sections. Alphabetically, numbers and symbols have precedence over letters. Entries should be ordered with their keys in the following precedence order.
 
 `[Entry Name *]`
 * The name of the entry as it will appear to users.
-* Please include the space between the name and the \* when submitting as this is how we visual indicate that winapp2 entries are not a part of the host application running them.
+* Please include the space between the name and the \* when submitting as this is how we visual indicate that winapp2.ini entries are not a part of the host application running them.
 
 `DetectOS`
 * This key is used to specify which operating systems the entry is for.
@@ -95,7 +95,7 @@ LangSecRef     | Section
 `Default`
 * Indicates the default state of the entry.
 * Only used by CCleaner.
-* When submitting, every entry must contain `Default=False` as winapp2 entries are always disabled by default.
+* When submitting, every entry must contain `Default=False` as winapp2.ini entries are always disabled by default.
 
 `Warning`
 * This key is not required by any application.
@@ -127,7 +127,7 @@ LangSecRef     | Section
 
 ### Environment variables:
 
-These are all the possible variables that can be used for writing paths in Winapp2.
+These are all the possible variables that can be used for writing paths in winapp2.ini.
 ##### Variables marked with a * natively check both 64bit and 32bit locations on 64bit systems.
 
 Variable       | Windows Vista-10 Path | WindowsXP Path
@@ -149,10 +149,10 @@ Variable       | Windows Vista-10 Path | WindowsXP Path
 
 ## Custom.ini
 
-Winapp2 does not support non-English system configurations or portable software natively. If you have need for these features, we recommend you utilize a "custom.ini" file, and use winapp2ool to merge it with the main file using the Add&Replace setting to override the existing entries.
+Winapp2.ini does not support non-English system configurations or portable software natively. If you have need for these features, we recommend you utilize a "custom.ini" file, and use winapp2ool to merge it with the main file using the Add&Replace setting to override the existing entries.
 
 ## Donations
 
-If you like Winapp2 and want to help keep development going, please consider donating some money to our great minds behind Winapp2.
+If you like winapp2.ini and want to help keep development going, please consider donating some money to our great minds behind winapp2.ini
 
 You can donate to Robbie via PayPal (https://paypal.me/moscadotto/) or Venmo (@woadleaves).
