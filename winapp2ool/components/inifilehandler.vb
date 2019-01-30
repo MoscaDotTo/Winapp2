@@ -757,7 +757,7 @@ Public Module iniFileHandler
         ''' <param name="n">The string to check equality for</param>
         ''' <returns></returns>
         Public Function nameIs(n As String, Optional tolower As Boolean = False) As Boolean
-            Return If(tolower, name.ToLower = n, name = n)
+            Return If(tolower, name.ToLower = n.ToLower, name = n)
             name = n
         End Function
 

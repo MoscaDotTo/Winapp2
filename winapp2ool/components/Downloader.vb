@@ -32,6 +32,7 @@ Module Downloader
     Public Const wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
     Public Const archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
     Public Const javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
+    Public Const readMeLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/Readme.md"
     ' File handler
     Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
@@ -60,10 +61,14 @@ Module Downloader
                 Case "7", "java"
                     fileLink = javaLink
                     downloadFile.name = "java.ini"
+                Case "8", "readme"
+                    fileLink = readMeLink
+                    downloadFile.name = "readme.txt"
             End Select
             cmdargs.RemoveAt(0)
         End If
         getFileAndDirParams(downloadFile, New iniFile, New iniFile)
+        If downloadFile.dir = Environment.CurrentDirectory And downloadFile.name = "winapp2ool.exe" Then autoUpdate()
         download(fileLink)
     End Sub
 
@@ -78,6 +83,7 @@ Module Downloader
         print(1, "Removed Entries.ini", "Download only entries used to create the non-ccleaner winapp2.ini", leadingBlank:=True)
         print(1, "Directory", "Change the save directory", trailingBlank:=True)
         print(1, "Advanced", "Settings for power users")
+        print(1, "ReadMe", "The winapp2ool ReadMe")
         print(0, $"Save directory: {replDir(downloadFile.dir)}", leadingBlank:=True, closeMenu:=True)
     End Sub
 
@@ -146,6 +152,10 @@ Module Downloader
                 menuHeaderText = "Save directory changed"
             Case "6"
                 initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)
+            Case "7"
+                ' It's actually a .md but the user doesn't need to know that  
+                downloadFile.name = "Readme.txt"
+                download(readMeLink)
             Case Else
                 menuHeaderText = invInpStr
         End Select

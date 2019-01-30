@@ -66,9 +66,9 @@ Module Diff
     ''' Runs the Differ from outside the module
     ''' </summary>
     ''' <param name="firstFile">The old winapp2.ini file</param>
-    Public Sub remoteDiff(ByRef firstFile As iniFile)
+    Public Sub remoteDiff(firstFile As iniFile, Optional dl As Boolean = True)
         oFile = firstFile
-        download = True
+        download = dl
         initDiff()
     End Sub
 
@@ -167,13 +167,14 @@ Module Diff
         Dim modCt As Integer = 0
         Dim addCt As Integer = 0
         For Each change In outList
-            If change.Contains("has been added") Then
-                addCt += 1
-            ElseIf change.Contains("has been removed") Then
-                remCt += 1
-            Else
-                modCt += 1
-            End If
+            Select Case True
+                Case change.Contains("has been added")
+                    addCt += 1
+                Case change.Contains(" has been removed")
+                    remCt += 1
+                Case Else
+                    modCt += 1
+            End Select
             log(change)
         Next
         ' Print the summary to the user
@@ -246,8 +247,8 @@ Module Diff
     ''' <summary>
     ''' Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key 
     ''' </summary>
-    ''' <param name="removedKeys">The list of iniKeys that were removed</param>
-    ''' <param name="addedKeys">The list of iniKeys that were added</param>
+    ''' <param name="removedKeys">The list of iniKeys that were removed from the newer version of the file</param>
+    ''' <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
         Dim akTemp = addedKeys

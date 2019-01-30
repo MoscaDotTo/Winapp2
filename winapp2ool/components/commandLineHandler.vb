@@ -125,10 +125,10 @@ Module commandLineHandler
                 Case "4", "-4", "diff", "-diff"
                     cmdargs.RemoveAt(0)
                     Diff.handleCmdLine()
-                Case "5", "-5", "ccdebug"
+                Case "5", "-5", "ccdebug", "-ccdebug"
                     cmdargs.RemoveAt(0)
                     CCiniDebug.handleCmdlineArgs()
-                Case "6", "-6", "download"
+                Case "6", "-6", "download", "-download"
                     cmdargs.RemoveAt(0)
                     Downloader.handleCmdLine()
             End Select
