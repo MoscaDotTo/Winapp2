@@ -20,7 +20,7 @@ Imports Microsoft.Win32
 
 Module Winapp2ool
     ' Update and compatibility settings
-    Public currentVersion As String = "1.01"
+    Public currentVersion As String = "1.02"
     Dim latestVersion As String = ""
     Dim latestWa2Ver As String = ""
     Dim localWa2Ver As String = ""

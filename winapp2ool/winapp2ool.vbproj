@@ -106,7 +106,6 @@
     <Compile Include="components\CCiniDebug.vb" />
     <Compile Include="components\Diff.vb" />
     <Compile Include="components\Downloader.vb" />
-    <Compile Include="components\GlobalSuppressions.vb" />
     <Compile Include="components\inifilehandler.vb" />
     <Compile Include="components\JavaMaker.vb" />
     <Compile Include="components\MenuMaker.vb" />
@@ -115,7 +114,6 @@
     <Compile Include="components\RegistryHelper.vb" />
     <Compile Include="components\winapp2handler.vb" />
     <Compile Include="components\exceptionHandler.vb" />
-    <Compile Include="GlobalSuppressions.vb" />
     <Compile Include="Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
