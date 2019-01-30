@@ -87,16 +87,14 @@ Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Initializes the default module settings and returns references to them to the calling function
+    ''' Handles the commandline args for WinappDebug
     ''' </summary>
-    ''' <param name="firstFile">The winapp2.ini file</param>
-    ''' <param name="secondFile">The save file</param>
-    ''' <param name="cf">boolean for autocorrect</param>
-    Public Sub initDebugParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, cf As Boolean)
-        initDefaultSettings()
-        firstFile = winappFile
-        secondFile = outputFile
-        cf = correctFormatting
+    ''' WinappDebug specific command line args
+    ''' -c          : enable autocorrect
+    Public Sub handleCmdLine()
+        invertSettingAndRemoveArg(correctFormatting, "-c")
+        getFileAndDirParams(winappFile, New iniFile, outputFile)
+        initDebug()
     End Sub
 
     ''' <summary>
@@ -108,19 +106,6 @@ Module WinappDebug
         settingsChanged = False
         correctFormatting = False
         resetScanSettings()
-    End Sub
-
-    ''' <summary>
-    ''' Begins the debugger from outside the module
-    ''' </summary>
-    ''' <param name="firstFile">The winapp2.ini file</param>
-    ''' <param name="secondFile">The output file</param>
-    ''' <param name="cformatting">The autocorrect boolean</param>
-    Public Sub remoteDebug(ByRef firstFile As iniFile, secondFile As iniFile, cformatting As Boolean)
-        winappFile = firstFile
-        outputFile = secondFile
-        correctFormatting = cformatting
-        initDebug()
     End Sub
 
     ''' <summary>

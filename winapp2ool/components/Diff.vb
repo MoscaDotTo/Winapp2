@@ -33,41 +33,20 @@ Module Diff
     Dim settingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Initializes the default module settings and returns references to them to the calling function
+    ''' Handles the commandline args for Diff
     ''' </summary>
-    ''' <param name="firstFile">The old winapp2.ini file</param>
-    ''' <param name="secondFile">The new winapp2.ini file</param>
-    ''' <param name="thirdFile">The log file</param>
-    ''' <param name="d">The boolean representing whether or not a file should be downloaded</param>
-    ''' <param name="dncc">The boolean representing whether or not the non-ccleaner file should be downloaded</param>
-    ''' <param name="sl">The boolean representing whether or not we should save our log</param>
-    Public Sub initDiffParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, ByRef thirdFile As iniFile, ByRef d As Boolean, ByRef dncc As Boolean, ByRef sl As Boolean)
+    '''  Diff args:
+    ''' -d          : download the latest winapp2.ini
+    ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
+    ''' -savelog    : save the diff.txt log
+    Public Sub handleCmdLine()
         initDefaultSettings()
-        firstFile = oFile
-        secondFile = nFile
-        thirdFile = logFile
-        d = download
-        dncc = downloadNCC
-        sl = saveLog
-    End Sub
-
-    ''' <summary>
-    ''' Runs the Differ from outside the module
-    ''' </summary>
-    ''' <param name="firstFile">The old winapp2.ini file</param>
-    ''' <param name="secondFile">The new winapp2.ini file</param>
-    ''' <param name="thirdFile">The log file</param>
-    ''' <param name="d">The boolean representing whether or not a file should be downloaded</param>
-    ''' <param name="dncc">The boolean representing whether or not the non-ccleaner file should be downloaded</param>
-    ''' <param name="sl">The boolean representing whether or not we should save our log</param>
-    Public Sub remoteDiff(ByRef firstFile As iniFile, secondFile As iniFile, thirdFile As iniFile, d As Boolean, dncc As Boolean, sl As Boolean)
-        oFile = firstFile
-        nFile = secondFile
-        logFile = thirdFile
-        download = d
-        downloadNCC = dncc
-        saveLog = sl
-        initDiff()
+        handleDownloadBools(download, downloadNCC)
+        ' Make sure we have a name set for the nfile if we're downloading or else the diff will not run
+        If download Then nFile.name = If(downloadNCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
+        invertSettingAndRemoveArg(saveLog, "-savelog")
+        getFileAndDirParams(oFile, nFile, logFile)
+        If Not nFile.name = "" Then initDiff()
     End Sub
 
     ''' <summary>
@@ -77,10 +56,20 @@ Module Diff
         oFile.resetParams()
         nFile.resetParams()
         logFile.resetParams()
-        download = checkOnline()
+        download = Not isOffline
         downloadNCC = False
         saveLog = False
         settingsChanged = False
+    End Sub
+
+    ''' <summary>
+    ''' Runs the Differ from outside the module
+    ''' </summary>
+    ''' <param name="firstFile">The old winapp2.ini file</param>
+    Public Sub remoteDiff(ByRef firstFile As iniFile)
+        oFile = firstFile
+        download = True
+        initDiff()
     End Sub
 
     ''' <summary>

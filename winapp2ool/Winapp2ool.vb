@@ -137,7 +137,7 @@ Module Winapp2ool
             Case input = "9" And waUpdateIsAvail
                 Console.Clear()
                 Console.Write("Downloading & diffing, this may take a moment...")
-                remoteDiff(lwinapp2File, eini, eini, True, False, False)
+                remoteDiff(lwinapp2File)
                 undoAnyPendingExits()
                 menuHeaderText = "Diff Complete"
             Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not dnfOOD

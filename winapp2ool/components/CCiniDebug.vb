@@ -45,40 +45,18 @@ Module CCiniDebug
     End Sub
 
     ''' <summary>
-    ''' Initializes the default module settings and returns references to them to the calling function
+    ''' Handles the commandline args for CCiniDebug
     ''' </summary>
-    ''' <param name="firstFile">The iniFile object to represent winapp2.ini</param>
-    ''' <param name="secondFile">The iniFile object to represent ccleaner.ini</param>
-    ''' <param name="thirdFile">The iniFile object containing the save path information</param>
-    ''' <param name="pf">The boolean for pruning</param>
-    ''' <param name="sa">The boolean for saving</param>
-    ''' <param name="so">The boolean for sorting</param>
-    Public Sub initCCDebugParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, ByRef thirdFile As iniFile, ByRef pf As Boolean, ByRef sa As Boolean, ByRef so As Boolean)
+    '''  CCiniDebug args:
+    ''' -noprune    : disable pruning of stale winapp2.ini entries
+    ''' -nosort     : disable sorting ccleaner.ini alphabetically
+    ''' -nosave     : disable saving the modified ccleaner.ini back to file
+    Public Sub handleCmdlineArgs()
         initDefaultSettings()
-        firstFile = winappFile
-        secondFile = ccFile
-        thirdFile = outputFile
-        pf = pruneFile
-        sa = saveFile
-        so = sortFile
-    End Sub
-
-    ''' <summary>
-    ''' Runs the debugger when called from outside the module
-    ''' </summary>
-    ''' <param name="firstfile">The winapp2.ini iniFile</param>
-    ''' <param name="secondfile">The ccleaner.ini iniFile</param>
-    ''' <param name="thirdfile">The iniFile with the save location</param>
-    ''' <param name="pf">Boolean for pruning</param>
-    ''' <param name="sa">Boolean for saving</param>
-    ''' <param name="so">Boolean for sorting</param>
-    Public Sub remoteCC(firstfile As iniFile, secondfile As iniFile, thirdfile As iniFile, pf As Boolean, sa As Boolean, so As Boolean)
-        winappFile = firstfile
-        ccFile = secondfile
-        outputFile = thirdfile
-        pruneFile = pf
-        saveFile = sa
-        sortFile = so
+        invertSettingAndRemoveArg(pruneFile, "-noprune")
+        invertSettingAndRemoveArg(sortFile, "-nosort")
+        invertSettingAndRemoveArg(saveFile, "-nosave")
+        getFileAndDirParams(winappFile, ccFile, outputFile)
         initDebug()
     End Sub
 

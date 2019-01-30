@@ -39,6 +39,19 @@ Public Module Trim
     Dim areDownloading As Boolean = False
 
     ''' <summary>
+    ''' Handles the commandline args for Trim
+    ''' </summary>
+    ''' Trim args:
+    ''' -d          : download the latest winapp2.ini
+    ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
+    Public Sub handleCmdLine()
+        initDefaultSettings()
+        handleDownloadBools(download, downloadNCC)
+        getFileAndDirParams(winappFile, outputFile, New iniFile)
+        initTrim()
+    End Sub
+
+    ''' <summary>
     ''' Restores the default state of the module's parameters
     ''' </summary>
     Private Sub initDefaultSettings()
@@ -47,21 +60,6 @@ Public Module Trim
         outputFile.resetParams()
         download = checkOnline()
         downloadNCC = False
-    End Sub
-
-    ''' <summary>
-    ''' Initializes the default module settings and returns references to them to the calling function
-    ''' </summary>
-    ''' <param name="firstFile">The winapp2.ini file</param>
-    ''' <param name="secondFile">The output file</param>
-    ''' <param name="d">Download boolean</param>
-    ''' <param name="dncc">Non-CCleaner download boolean</param>
-    Public Sub initTrimParams(ByRef firstFile As iniFile, ByRef secondFile As iniFile, ByRef d As Boolean, ByRef dncc As Boolean)
-        initDefaultSettings()
-        firstFile = winappFile
-        secondFile = outputFile
-        d = download
-        dncc = downloadNCC
     End Sub
 
     ''' <summary>

@@ -36,6 +36,38 @@ Module Downloader
     Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
     ''' <summary>
+    ''' Handles the commandline args for the Downloader 
+    ''' </summary>
+    Public Sub handleCmdLine()
+        Dim fileLink As String = ""
+        If cmdargs.Count > 0 Then
+            Select Case cmdargs(0).ToLower
+                Case "1", "2", "winapp2"
+                    fileLink = If(Not cmdargs(0) = "2", wa2Link, nonccLink)
+                    downloadFile.name = "winapp2.ini"
+                Case "3", "winapp2ool"
+                    fileLink = toolLink
+                    downloadFile.name = "winapp2ool.exe"
+                Case "4", "removed"
+                    fileLink = removedLink
+                    downloadFile.name = "Removed Entries.ini"
+                Case "5", "winapp3"
+                    fileLink = wa3link
+                    downloadFile.name = "winapp3.ini"
+                Case "6", "archived"
+                    fileLink = archivedLink
+                    downloadFile.name = "Archived Entries.ini"
+                Case "7", "java"
+                    fileLink = javaLink
+                    downloadFile.name = "java.ini"
+            End Select
+            cmdargs.RemoveAt(0)
+        End If
+        getFileAndDirParams(downloadFile, New iniFile, New iniFile)
+        download(fileLink)
+    End Sub
+
+    ''' <summary>
     ''' Prints the main menu to the user
     ''' </summary>
     Public Sub printMenu()
