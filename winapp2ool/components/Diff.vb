@@ -27,7 +27,7 @@ Module Diff
     Dim logFile As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
     Dim outputToFile As String
     ' Module parameters
-    Dim download As Boolean = checkOnline()
+    Dim download As Boolean = Not isOffline
     Dim downloadNCC As Boolean = False
     Dim saveLog As Boolean = False
     Dim settingsChanged As Boolean = False
@@ -249,7 +249,6 @@ Module Diff
     ''' <param name="changeTxt">The text to appear in the output</param>
     Private Function getChangesFromList(keyList As keyList, out As String, changeTxt As String) As String
         If keyList.keyCount = 0 Then Return out
-
         out += appendNewLine(changeTxt)
         keyList.keys.ForEach(Sub(key) out += key.toString & Environment.NewLine)
         Return out
@@ -262,11 +261,13 @@ Module Diff
     ''' <param name="addedKeys">The list of iniKeys that were added</param>
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
-        Dim rkTemp = removedKeys
         Dim akTemp = addedKeys
-        For Each key In addedKeys.keys
-            For Each skey In removedKeys.keys
-                If key.name.ToLower = skey.name.ToLower Then
+        Dim rkTemp = removedKeys
+        For i As Integer = 0 To addedKeys.keyCount - 1
+            Dim key = addedKeys.keys(i)
+            For j As Integer = 0 To removedKeys.keyCount - 1
+                Dim skey = removedKeys.keys(j)
+                If key.compareNames(skey) Then
                     Select Case key.keyType
                         Case "FileKey", "ExcludeKey", "RegKey"
                             Dim oldKey As New winapp2KeyParameters(key)
@@ -279,15 +280,15 @@ Module Diff
                             oldKey.argsList.Sort()
                             newKey.argsList.Sort()
                             If oldKey.argsList.Count = newKey.argsList.Count Then
-                                For i As Integer = 0 To oldKey.argsList.Count - 1
-                                    If Not oldKey.argsList(i).ToLower = newKey.argsList(i).ToLower Then
+                                For k As Integer = 0 To oldKey.argsList.Count - 1
+                                    If Not oldKey.argsList(k).ToLower = newKey.argsList(k).ToLower Then
                                         updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                         Exit For
                                     End If
                                 Next
                                 ' If we get this far, it's probably just an alphabetization change and can be ignored silenty
-                                akTemp.Remove(skey)
-                                rkTemp.Remove(key)
+                                akTemp.remove(skey)
+                                rkTemp.remove(key)
                             Else
                                 ' If the count doesn't match, something has definitely changed
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
@@ -300,7 +301,7 @@ Module Diff
                 End If
             Next
         Next
-        ' Update the lists
+        '' Update the lists
         addedKeys.keys = akTemp.keys
         removedKeys.keys = rkTemp.keys
     End Sub
@@ -315,8 +316,8 @@ Module Diff
     ''' <param name="skey">An added iniKey</param>
     Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), ByRef aKeys As keyList, ByRef rKeys As keyList, key As iniKey, skey As iniKey)
         updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
-        rKeys.remove(key)
-        aKeys.remove(skey)
+        rKeys.keys.Remove(skey)
+        aKeys.remove(key)
     End Sub
 
     ''' <summary>

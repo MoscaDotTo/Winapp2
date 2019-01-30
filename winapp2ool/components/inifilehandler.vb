@@ -677,7 +677,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="key">The key to be removed</param>
         Public Sub remove(key As iniKey)
-            keys.Remove(key)
+            Me.keys.Remove(key)
         End Sub
 
         ''' <summary>
@@ -837,7 +837,7 @@ Public Module iniFileHandler
         ''' <param name="key"></param>
         ''' <returns></returns>
         Public Function compareNames(key As iniKey) As Boolean
-            Return nameIs(key.name.ToLower, True)
+            Return nameIs(key.name, True)
         End Function
 
         ''' <summary>
@@ -846,7 +846,7 @@ Public Module iniFileHandler
         ''' <param name="key"></param>
         ''' <returns></returns>
         Public Function compareValues(key As iniKey) As Boolean
-            Return vIs(key.value.ToLower, True)
+            Return vIs(key.value, True)
         End Function
 
         ''' <summary>

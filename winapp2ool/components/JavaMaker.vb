@@ -21,7 +21,7 @@ Option Strict On
 ''' </summary>
 Module JavaMaker
     ' Module parameters
-    Dim download As Boolean = checkOnline()
+    Dim download As Boolean = Not isOffline
     Dim javaFile As New iniFile(Environment.CurrentDirectory, "java.ini")
     Dim settingsChanged As Boolean
 
@@ -29,7 +29,7 @@ Module JavaMaker
     ''' Restores the module parameters to their default states
     ''' </summary>
     Private Sub initDefaultParams()
-        download = checkOnline()
+        download = Not isOffline
         javaFile.resetParams()
         settingsChanged = False
     End Sub
