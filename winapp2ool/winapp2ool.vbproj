@@ -115,6 +115,7 @@
     <Compile Include="components\RegistryHelper.vb" />
     <Compile Include="components\winapp2handler.vb" />
     <Compile Include="components\exceptionHandler.vb" />
+    <Compile Include="GlobalSuppressions.vb" />
     <Compile Include="Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">

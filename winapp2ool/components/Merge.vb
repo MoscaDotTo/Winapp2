@@ -89,7 +89,7 @@ Module Merge
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                exitModule("Merge")
+                exitModule()
             Case input = "1" Or input = ""
                 If Not denyActionWithTopper(mergeFile.name = "", "You must select a file to merge") Then initMerge()
             Case input = "2"

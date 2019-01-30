@@ -36,7 +36,6 @@ Public Module Trim
     Dim settingsChanged As Boolean
     Dim download As Boolean = checkOnline()
     Dim downloadNCC As Boolean = False
-    Dim areDownloading As Boolean = False
 
     ''' <summary>
     ''' Handles the commandline args for Trim
@@ -99,7 +98,7 @@ Public Module Trim
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                exitModule("Trim")
+                exitModule()
             Case (input = "1" Or input = "")
                 initTrim()
             Case input = "2" And Not isOffline
@@ -392,8 +391,7 @@ Public Module Trim
     Private Function expandWildcard(dir As String) As Boolean
         ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
         Dim possibleDirs As New List(Of String)
-        Dim currentPaths As New List(Of String)
-        currentPaths.Add("")
+        Dim currentPaths As New List(Of String) From {""}
         ' Split the given string into sections by directory 
         Dim splitDir As String() = dir.Split(CChar("\"))
         For Each pathPart In splitDir

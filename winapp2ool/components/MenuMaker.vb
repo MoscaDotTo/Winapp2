@@ -98,8 +98,7 @@ Module MenuMaker
     ''' <summary>
     ''' Exits a menu or module by flipping the exitCode to true 
     ''' </summary>
-    ''' <param name="name"></param>
-    Public Sub exitModule(name As String)
+    Public Sub exitModule()
         exitCode = True
     End Sub
 

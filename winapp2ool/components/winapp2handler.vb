@@ -185,7 +185,7 @@ Module winapp2handler
     Public Class winapp2file
         Public entryList As List(Of String)
         ' "" = main section, bottom most in all circumstances and appearing without a label 
-        Dim sectionHeaderFooter As String() = {"Chrome/Chromium based browsers", "Firefox/Mozilla based browsers", "Thunderbird",
+        ReadOnly sectionHeaderFooter As String() = {"Chrome/Chromium based browsers", "Firefox/Mozilla based browsers", "Thunderbird",
             "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
         ' As above, index 0 = Chrome, 1 = Firefox, 2 = Thunderbird.... 6 = ""
         Public entrySections(6) As iniFile
@@ -369,8 +369,7 @@ Module winapp2handler
         ''' </summary>
         ''' <returns></returns>
         Public Function dumpToListOfStrings() As List(Of String)
-            Dim outList As New List(Of String)
-            outList.Add(fullName)
+            Dim outList As New List(Of String) From {fullName}
             updKeyListList()
             keyListList.ForEach(Sub(lst) lst.keys.ForEach(Sub(key) outList.Add(key.toString)))
             Return outList

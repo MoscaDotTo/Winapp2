@@ -85,7 +85,7 @@ Module CCiniDebug
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                exitModule("CCiniDebug")
+                exitModule()
             Case (input = "1" Or input = "") And (pruneFile Or saveFile Or sortFile)
                 initDebug()
             Case input = "2"

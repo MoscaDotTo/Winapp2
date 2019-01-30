@@ -101,7 +101,7 @@ Module Diff
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                exitModule("Diff")
+                exitModule()
             Case input = "1" Or input = ""
                 If Not denyActionWithTopper(nFile.name = "" And Not download, "Please select a file against which to diff") Then initDiff()
             Case input = "2"

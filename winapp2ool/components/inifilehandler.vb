@@ -585,9 +585,7 @@ Public Module iniFileHandler
         ''' <returns></returns>
         Public Function compareTo(ss As iniSection, ByRef removedKeys As keyList, ByRef addedKeys As keyList) As Boolean
             ' Create a copy of the section so we can modify it
-            Dim secondSection As New iniSection
-            secondSection.name = ss.name
-            secondSection.startingLineNumber = ss.startingLineNumber
+            Dim secondSection As New iniSection With {.name = ss.name, .startingLineNumber = ss.startingLineNumber}
             For i As Integer = 0 To ss.keys.Count - 1
                 secondSection.keys.Add(i, ss.keys.Values(i))
             Next
@@ -759,7 +757,8 @@ Public Module iniFileHandler
         ''' <param name="n">The string to check equality for</param>
         ''' <returns></returns>
         Public Function nameIs(n As String, Optional tolower As Boolean = False) As Boolean
-            Return name = n
+            Return If(tolower, name.ToLower = n, name = n)
+            name = n
         End Function
 
         ''' <summary>
@@ -768,7 +767,7 @@ Public Module iniFileHandler
         ''' <param name="t">The string to check equality for</param>
         ''' <returns></returns>
         Public Function typeIs(t As String, Optional tolower As Boolean = False) As Boolean
-            Return If(tolower, keyType.ToLower.Equals(t), keyType.Equals(t))
+            Return If(tolower, keyType.ToLower = t.ToLower, keyType = t)
         End Function
 
         ''' <summary>

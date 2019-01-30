@@ -98,7 +98,7 @@ Module Downloader
     Private Sub handleAdvInput(input As String)
         Select Case input
             Case "0"
-                exitModule("Downloader")
+                exitModule()
             Case "1"
                 downloadFile.name = "winapp3.ini"
                 download(wa3link)
@@ -202,7 +202,7 @@ Module Downloader
     ''' <param name="address">A URL pointing to an online .ini file</param>
     ''' <returns></returns>
     Public Function getRemoteIniFile(address As String) As iniFile
-        Dim reader As StreamReader = Nothing
+        Dim reader As StreamReader
         Try
             Dim client As New WebClient
             reader = New StreamReader(client.OpenRead(address))
