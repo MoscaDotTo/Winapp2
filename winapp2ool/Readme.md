@@ -25,7 +25,7 @@ Winapp2ool supports command line switches. There are several top level switches 
 
 ### Valid commandline args & their effects:
 
-* `1,2,3,4,5,6`,`debug,trim,merge,diff,ccdebug,download`: Calls the module associated with the menu number in the winapp2ool menu. 1 for WinappDebug, 6 for Downloader. All other commands should follow this one. Use of a `-` before each flag is not required here, but is supported.  
+* `1,2,3,4,5,6`,`debug,trim,merge,diff,ccdebug,download`: Calls the module associated with the menu number in the winapp2ool menu. 1 for WinappDebug, 6 for Downloader. All other commands should follow this one. Use of a `-` before each flag is not required here, but is supported.
 * `-s`: Actives "silent mode" muting most or all output from the application. When silent mode is active, programs will silently fail if they hit an error during execution. The application will automatically exit after it has finished its task.
 * `-1f`, `-1d`: Defines a new file name or path for winapp2.ini to be used during module execution. You can define subdirectories of the current directory easily with the `-f` flag by simply prepending the directory to the file name. eg: `-1f \subdir\winapp2.ini`. File and directory parameters should always immediately follow their flag.
 * `-2f`,`-2d`: As above, defines the target for the "second file" in program execution, which is more specifically addressed in the module documentation below.
@@ -34,8 +34,9 @@ Winapp2ool supports command line switches. There are several top level switches 
 #### Example:
 
 `winapp2ool.exe -1 -c`: Opens winapp2ool and runs WinappDebug with the autocorrect option enabled.  
-`winapp2ool.exe -2 -d -s`: Silently opens winapp2ool, downloads the latest winapp2.ini, and trims it.
-`winapp2ool download winapp2 -s` Silently opens winapp2ool and downloads the latest winapp2.ini
+`winapp2ool.exe -2 -d -s`: Silently opens winapp2ool, downloads the latest winapp2.ini, and trims it.  
+`winapp2ool.exe download winapp2 -s`: Silently opens winapp2ool and downloads the latest winapp2.ini.
+
 ### Menu Options
 
 * WinappDebug, Trim, Merge, Diff, CCiniDebug, Downloader
@@ -197,8 +198,8 @@ Trim is designed to do as its name implies: trim winapp2.ini. It does this by pr
   * Enabled by default if you have an internet connection
   * Unavailable in offline mode
 
-* Toggle Download (Non-CCleaner)
-  * Toggles downloading the Non-CCleaner winapp2.ini
+* Toggle Download (non-CCleaner)
+  * Toggles downloading the non-CCleaner winapp2.ini
   * CCleaner users should not use this option
   * Disabled by default
   * Unavailable if downloading is disabled
@@ -226,7 +227,7 @@ This tool is designed to simply merge two local ini files. It has two modes, bot
 ### Valid commandline args & their effects:
 * `-1f`,`-1d`: Overrides the default path for winapp2.ini
 * `-2f`,`-2d`: Sets the merge file name
-* `-r`: Uses "Removed Entries.ini" as the merge file name
+* `-r`: Uses "removed entries.ini" as the merge file name
 * `-c`: Uses "custom.ini" as the merge file name
 * `-w`: Uses "winapp3.ini" as the merge file name
 * `-a`: Uses "archived entries.ini" as the merge file name
@@ -293,12 +294,13 @@ This tool is designed to simply merge two local ini files. It has two modes, bot
 
 * Winapp2.ini (online)
   * Enables downloading the latest copy of winapp2.ini from GitHub to use as the comparator file
-   * Enabled by default if you have an internet connection  
+  * Enabled by default if you have an internet connection  
 
-* winapp2.ini (Non-CCleaner)
-  * Enables downloading the latest Non-CCleaner variant of winapp2.ini to use as the comparator file
-    * CCleaner users should not use this option 
+* Winapp2.ini (non-CCleaner)
+  * Enables downloading the latest non-CCleaner variant of winapp2.ini to use as the comparator file
+  * CCleaner users should not use this option
   * Unavailable if downloading winapp2.ini is not enabled
+
 * Toggle Log Saving
   * Enables or disables saving the diff output to a file at the end of execution
   * Default log name is diff.txt
@@ -372,9 +374,9 @@ This tool was born of necessity in the advent of a mass renaming of entries in w
 * `1` or `winapp2`: Downloads winapp2.ini
 * `2`: Downloads the non-CCleaner winapp2.ini
 * `3`or `winapp2ool`: Downloads winapp2ool.exe
-* `4`or `removed`: Downloads Removed Entries.ini
+* `4`or `removed`: Downloads removed entries.ini
 * `5`or `winapp3`: Downloads winapp3.ini
-* `6`or `archived`: Downloads Archived Entries.ini
+* `6`or `archived`: Downloads archived entries.ini
 * `7`or `java`: Downloads java.ini
 * `8`or `readme`: Downloads the winapp2ool readme
 
