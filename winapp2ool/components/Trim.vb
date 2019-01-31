@@ -34,7 +34,7 @@ Public Module Trim
                            "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe", "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
                            "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
     Dim settingsChanged As Boolean
-    Dim download As Boolean = Not isOffline
+    Dim download As Boolean = False
     Dim downloadNCC As Boolean = False
 
     ''' <summary>
@@ -57,7 +57,7 @@ Public Module Trim
         settingsChanged = False
         winappFile.resetParams()
         outputFile.resetParams()
-        download = checkOnline()
+        download = False
         downloadNCC = False
     End Sub
 

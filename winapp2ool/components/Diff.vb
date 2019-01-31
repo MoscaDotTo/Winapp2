@@ -27,7 +27,7 @@ Module Diff
     Dim logFile As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
     Dim outputToFile As String
     ' Module parameters
-    Dim download As Boolean = Not isOffline
+    Dim download As Boolean = False
     Dim downloadNCC As Boolean = False
     Dim saveLog As Boolean = False
     Dim settingsChanged As Boolean = False
@@ -56,7 +56,7 @@ Module Diff
         oFile.resetParams()
         nFile.resetParams()
         logFile.resetParams()
-        download = Not isOffline
+        download = False
         downloadNCC = False
         saveLog = False
         settingsChanged = False
