@@ -23,6 +23,8 @@ Module JavaMaker
     ' Module parameters
     Dim download As Boolean = Not isOffline
     Dim javaFile As New iniFile(Environment.CurrentDirectory, "java.ini")
+    Dim saveFile As New iniFile(Environment.CurrentDirectory, "java-generated.ini")
+    Dim save As Boolean = False
     Dim settingsChanged As Boolean
 
     ''' <summary>
@@ -31,6 +33,8 @@ Module JavaMaker
     Private Sub initDefaultParams()
         download = Not isOffline
         javaFile.resetParams()
+        saveFile.resetParams()
+        save = False
         settingsChanged = False
     End Sub
 
@@ -40,9 +44,12 @@ Module JavaMaker
     Public Sub printJMMenu()
         printMenuTop({"Creates a winapp2.ini entry that cleans up after old Java versions"})
         print(1, "Run (Default)", "Attempt to create an entry based on the current system", trailingBlank:=True)
-        print(1, "Toggle Download", $"{enStr(download)} downloading of java.ini from GitHub")
-        print(1, "File Chooser", "Select a new local file path for java.ini", Not download, trailingBlank:=True)
-        print(0, $"Java definitions file: {If(Not download, replDir(javaFile.path), "online")}", closeMenu:=Not settingsChanged)
+        print(1, "Toggle Download", $"{enStr(download)} downloading of java.ini from GitHub", trailingBlank:=download)
+        print(1, "File Chooser (java.ini)", "Select a new local file path for java.ini", Not download, trailingBlank:=True)
+        print(1, "Toggle Save", $"{enStr(save)} Saving the generated entry to disk", trailingBlank:=Not save)
+        print(1, "File Chooser (save)", "Select where winapp2ool saves the generated entry", save, trailingBlank:=True)
+        print(0, $"Java definitions file: {If(Not download, replDir(javaFile.path), "online")}", closeMenu:=Not (save Or settingsChanged))
+        print(0, $"Save file: {replDir(saveFile.path)}", cond:=save, closeMenu:=Not settingsChanged)
         print(2, "JavaMaker", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
@@ -59,8 +66,12 @@ Module JavaMaker
             Case input = "2"
                 toggleSettingParam(download, "Downloading", settingsChanged)
             Case input = "3" And Not download
-                fileChooser(javaFile)
-            Case input = "4" And settingsChanged
+                changeFileParams(javaFile, settingsChanged)
+            Case input = "3" And download Or input = "4" And Not download
+                toggleSettingParam(save, "Saving", settingsChanged)
+            Case save And (input = "5" And Not download) Or (input = "4" And download)
+                changeFileParams(saveFile, settingsChanged)
+            Case settingsChanged And ((input = "6" And Not download And save) Or (input = "5" And Not (download Xor save)) Or (input = "4" And Not download And save))
                 resetModuleSettings("JavaMaker", AddressOf initDefaultParams)
             Case Else
                 menuHeaderText = invInpStr
@@ -138,6 +149,7 @@ Module JavaMaker
         regKeyList.renumberKeys(replaceAndSort(regKeyList.toListOfStr(True), "-", "-"))
         ' Generate the new entry
         Dim entry As New List(Of String)
+        Console.Clear()
         entry.Add("[Java Installation Cleanup *]")
         entry.Add("Section=Experimental")
         entry.Add($"Detect={regKeyList.keys(0).value}")
@@ -145,7 +157,12 @@ Module JavaMaker
         entry.AddRange(regKeyList.toListOfStr)
         Dim out As New iniSection(entry)
         cwl(out.ToString)
-        cwl() : cwl("Done")
+        If save Then
+            cwl() : cwl($"Saving {saveFile.name}")
+            saveFile.overwriteToFile(out.ToString)
+            cwl("Save complete.")
+        End If
+        cwl(anyKeyStr)
         Console.ReadLine()
     End Sub
 End Module
