@@ -458,7 +458,7 @@ Public Module iniFileHandler
         ''' Returns the section names from the iniFile object as a list of Strings
         ''' </summary>
         ''' <returns></returns>
-        Public Function getSectionNamesAsList() As List(Of String)
+        Public Function namesToListOfStr() As List(Of String)
             Dim out As New List(Of String)
             For Each section In sections.Values
                 out.Add(section.name)

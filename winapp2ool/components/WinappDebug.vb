@@ -293,7 +293,7 @@ Module WinappDebug
     ''' <param name="winapp">The object containing the winapp2.ini being operated on</param>
     Private Sub alphabetizeEntries(ByRef winapp As winapp2file)
         For Each innerFile In winapp.entrySections
-            Dim unsortedEntryList As List(Of String) = innerFile.getSectionNamesAsList
+            Dim unsortedEntryList As List(Of String) = innerFile.namesToListOfStr
             Dim sortedEntryList As List(Of String) = sortEntryNames(innerFile)
             findOutOfPlace(unsortedEntryList, sortedEntryList, "Entry", innerFile.getLineNumsFromSections)
             If fixFormat(correctAlpha) Then innerFile.sortSections(sortedEntryList)

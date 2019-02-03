@@ -176,7 +176,7 @@ Module winapp2handler
     ''' <param name="file">The iniFile to be sorted</param>
     ''' <returns></returns>
     Public Function sortEntryNames(ByVal file As iniFile) As List(Of String)
-        Return replaceAndSort(file.getSectionNamesAsList, "-", "  ")
+        Return replaceAndSort(file.namesToListOfStr, "-", "  ")
     End Function
 
     ''' <summary>

@@ -148,7 +148,7 @@ Module Merge
         Next
         tmp.rebuildToIniFiles()
         For Each section In tmp.entrySections
-            section.sortSections(replaceAndSort(section.getSectionNamesAsList, "-", "  "))
+            section.sortSections(replaceAndSort(section.namesToListOfStr, "-", "  "))
         Next
         Dim out As String = tmp.winapp2string
         outputFile.overwriteToFile(out)
