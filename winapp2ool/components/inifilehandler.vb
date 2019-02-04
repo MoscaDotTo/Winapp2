@@ -246,12 +246,12 @@ Public Module iniFileHandler
         ' The current state of the directory & name of the file
         Public dir As String
         Public name As String
-        ' The inital state of the direcotry & name of the file (for restoration purposes) 
+        ' The initial state of the directory & name of the file (for restoration purposes) 
         Public initDir As String
         Public initName As String
         ' Suggested rename for output files
         Public secondName As String
-        ' Sections will be initally stored in the order they're read
+        ' Sections will be initially stored in the order they're read
         Public sections As New Dictionary(Of String, iniSection)
         ' Any line comments will be saved in the order they're read 
         Public comments As New Dictionary(Of Integer, iniComment)
@@ -270,7 +270,7 @@ Public Module iniFileHandler
         End Function
 
         ''' <summary>
-        ''' Creates an uninitalized iniFile with a directory and a filename.
+        ''' Creates an uninitialized iniFile with a directory and a filename.
         ''' </summary>
         ''' <param name="directory">A windows directory containing a .ini file</param>
         ''' <param name="filename">The name of the .ini file contained in the given directory </param>
@@ -342,7 +342,7 @@ Public Module iniFileHandler
         End Sub
 
         ''' <summary>
-        ''' Processes a line in a .ini file and updates the iniFile object metadata accordingly
+        ''' Processes a line in a .ini file and updates the iniFile object meta data accordingly
         ''' </summary>
         ''' <param name="currentLine">The current string being read</param>
         ''' <param name="sectionToBeBuilt">The pending list of strings to be built into an iniSection</param>
@@ -376,7 +376,7 @@ Public Module iniFileHandler
         End Sub
 
         ''' <summary>
-        ''' Attempts to read a .ini file from disk and initalize the iniFile object
+        ''' Attempts to read a .ini file from disk and initialize the iniFile object
         ''' </summary>
         Public Sub init()
             Try
@@ -799,7 +799,7 @@ Public Module iniFileHandler
         End Function
 
         ''' <summary>
-        ''' Returns whether or not an iniKey object's value contains any of a given array of stringd with conditional case casting
+        ''' Returns whether or not an iniKey object's value contains any of a given array of strings with conditional case casting
         ''' </summary>
         ''' <param name="txts">The array of search strings</param>
         ''' <param name="toLower">A boolean specifying whether or not the strings should be cast to lowercase</param>

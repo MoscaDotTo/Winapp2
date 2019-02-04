@@ -67,7 +67,7 @@ Module MenuMaker
     ''' <param name="cond">The condition under which to print</param>
     ''' <param name="printType">The type of menu information to print</param>
     ''' <param name="str1">The first string or half string to be printed</param>
-    ''' <param name="optString">The alginment or second half string to be printed</param>
+    ''' <param name="optString">The alignment or second half string to be printed</param>
     Public Sub print(printType As Integer, str1 As String, Optional optString As String = "", Optional cond As Boolean = True, Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False, Optional closeMenu As Boolean = False)
         If cond And leadingBlank Then printMenuLine()
         Select Case True
@@ -255,7 +255,7 @@ Module MenuMaker
     End Function
 
     ''' <summary>
-    ''' Prints a line with a string if we're not surpressing output.
+    ''' Prints a line with a string if we're not suppressing output.
     ''' </summary>
     ''' <param name="msg">The string to be printed</param>
     Public Sub cwl(Optional msg As String = Nothing)

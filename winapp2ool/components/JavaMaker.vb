@@ -135,7 +135,7 @@ Module JavaMaker
         Dim localMachineJREs As New keyList(getRegKeys(getLMKey("Software\JavaSoft\Java Runtime Environment"), {"1"}.ToList))
         ' Get the JRE versions from HKLM\ and HKCU\, ignore the most recent
         Dim lmJREminorIDs, cuJREminorIDs As New keyList
-        ' Some keys hava the format 1.W.0_XYZ, they match the main 1.W key that also exists along side them and should be separated out
+        ' Some keys have the format 1.W.0_XYZ, they match the main 1.W key that also exists along side them and should be separated out
         localMachineJREs.keys.ForEach(Sub(key) lmJREminorIDs.add(key, key.toString.Replace("HKEY_LOCAL_MACHINE", "").Contains("_")))
         localMachineJREs.remove(lmJREminorIDs.keys)
         Dim currentUserJREs As New keyList(getRegKeys(getCUKey("Software\JavaSoft\Java Runtime Environment\"), {"1"}.ToList))

@@ -36,3 +36,7 @@
 /.vs/*
 /tools/beta/winapp2.ini
 /winapp2ool/bin/Release/winapp2.ini
+/winapp2ool/packages/MSTest.TestAdapter.1.3.2
+/winapp2ool/UnitTests/bin/Debug
+/winapp2ool/UnitTests/obj/Debug
+/winapp2ool/packages/MSTest.TestFramework.1.3.2
