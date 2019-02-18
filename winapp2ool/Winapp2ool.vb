@@ -284,7 +284,7 @@ Module Winapp2ool
     ''' <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
     ''' <returns></returns>
     Public Function GetNameFromDL(shouldDownload As Boolean) As String
-        Return If(shouldDownload, If(remoteWinappIsNonCC, "Online (non-ccleaner)", "Online"), "")
+        Return If(shouldDownload, If(remoteWinappIsNonCC, "Online (Non-CCleaner)", "Online"), "")
     End Function
 
     ''' <summary>

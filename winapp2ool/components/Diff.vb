@@ -80,13 +80,13 @@ Module Diff
         print(0, "Select Older/Local File:", leadingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your older ini file")
         print(0, "Select Newer/Remote File:", leadingBlank:=True)
-        print(1, "winapp2.ini (online)", $"{enStr(download)} diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, leadingBlank:=True)
+        print(1, GetNameFromDL(True), $"{enStr(download)} diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, leadingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your newer ini file", Not download, isOffline, True)
         print(0, "Log Settings:")
         print(1, "Toggle Log Saving", $"{enStr(saveLog)} automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not saveLog)
         print(1, "File Chooser (log)", "Change where Diff saves its log", saveLog, trailingBlank:=True)
         print(0, $"Older file: {replDir(oldOrLocalFile.path)}")
-        print(0, $"Newer file: {If(newOrRemoteFile.name = "" And Not download, "Not yet selected", If(download, GetNameFromDL(download), replDir(newOrRemoteFile.path)))}", closeMenu:=Not saveLog And Not settingsChanged)
+        print(0, $"Newer file: {If(newOrRemoteFile.name = "" And Not download, "Not yet selected", If(download, GetNameFromDL(True), replDir(newOrRemoteFile.path)))}", closeMenu:=Not saveLog And Not settingsChanged)
         print(0, $"Log   file: {replDir(logFile.path)}", cond:=saveLog, closeMenu:=Not settingsChanged)
         print(2, "Diff", cond:=settingsChanged, closeMenu:=True)
     End Sub
@@ -113,7 +113,7 @@ Module Diff
             Case saveLog And ((input = "6" And Not isOffline And Not download) Or (input = "5" And (isOffline Or (Not isOffline And download))))
                 changeFileParams(logFile, settingsChanged)
             Case settingsChanged And 'Online Case below
-                (Not isOffline And ((Not saveLog And (input = "5" And download) Or (input = "6" And Not (download Xor saveLog))) Or (input = "7" And Not download And saveLog))) Or
+                (Not isOffline And (((Not saveLog And input = "5" And download) Or (input = "6" And Not (download Xor saveLog))) Or (input = "7" And Not download And saveLog))) Or
                 ((isOffline) And (input = "5") Or (input = "6" And saveLog)) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
             Case Else

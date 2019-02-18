@@ -41,7 +41,6 @@ Public Module Trim
     ''' </summary>
     ''' Trim args:
     ''' -d          : download the latest winapp2.ini
-    ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
     Public Sub handleCmdLine()
         initDefaultSettings()
         handleDownloadBools(download)
@@ -53,10 +52,10 @@ Public Module Trim
     ''' Restores the default state of the module's parameters
     ''' </summary>
     Private Sub initDefaultSettings()
-        settingsChanged = False
         winappFile.resetParams()
         outputFile.resetParams()
         download = False
+        settingsChanged = False
     End Sub
 
     ''' <summary>
