@@ -94,7 +94,7 @@ Module winapp2handler
     End Function
 
     ''' <summary>
-    ''' Detects the longest length number in a given list of strings and prepends all shorter numbers with zeroes such that all numbers are the same length
+    ''' Detects the longest length number in a given list of strings and prepends all shorter numbers with zeros such that all numbers are the same length
     ''' </summary>
     ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. 
     ''' <param name="listToBeSorted">The list to be modified prior to sorting</param>
@@ -145,9 +145,9 @@ Module winapp2handler
     End Sub
 
     ''' <summary>
-    ''' Pads a number to a given length by preceeding it with zeroes (0's) and returns the padded number
+    ''' Pads a number to a given length by preceding it with zeros (0's) and returns the padded number
     ''' </summary>
-    ''' <param name="longestNumLen">The desired maxmimum length of a number</param>
+    ''' <param name="longestNumLen">The desired maximum length of a number</param>
     ''' <param name="num">a given number</param>
     ''' <returns></returns>
     Private Function padNumberStr(longestNumLen As Integer, num As String) As String
@@ -212,7 +212,7 @@ Module winapp2handler
             ' Determine the version string
             If file.comments.Count = 0 Then version = "; version 000000"
             If file.comments.Count > 0 Then version = If(Not file.comments.Values(0).comment.ToLower.Contains("version"), "; version 000000", file.comments.Values(0).comment)
-            ' Build the header sections for browsers/thunderbird/winapp3
+            ' Build the header sections for browsers/Thunderbird/winapp3
             Dim langSecRefs As New List(Of String) From {"3029", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous"}
             For Each section In file.sections.Values
                 Dim tmpwa2entry As New winapp2entry(section)
@@ -263,7 +263,7 @@ Module winapp2handler
         End Sub
 
         ''' <summary>
-        ''' Rebuilds a list of winapp2entry objects back into iniSection objcts and returns the collection of them as an iniFile
+        ''' Rebuilds a list of winapp2entry objects back into iniSection objects and returns the collection of them as an iniFile
         ''' </summary>
         ''' <param name="entryList"></param>
         ''' <returns></returns>
@@ -305,7 +305,7 @@ Module winapp2handler
                 out += appendNewLine("; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.")
             End If
             out += appendNewLine("; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2")
-            out += appendNewLine("; Any contributions are appreciated. Please refer to our readme to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md")
+            out += appendNewLine("; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md")
             out += appendNewLine("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
             out += appendNewLine("; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
             ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)

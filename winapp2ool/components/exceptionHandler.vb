@@ -20,7 +20,7 @@ Option Strict On
 ''' </summary>
 Module exceptionHandler
     ''' <summary>
-    ''' Prints out excpetions and any other information related to them that a use may need.
+    ''' Prints out exceptions and any other information related to them that a use may need.
     ''' </summary>
     ''' <param name="ex">A given exception captured during winapp2ool's execution</param>
     Public Sub exc(ByRef ex As Exception)

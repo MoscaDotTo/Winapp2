@@ -47,13 +47,9 @@ Module commandLineHandler
     ''' Processes whether to download and which file to download
     ''' </summary>
     ''' <param name="download">The boolean indicating winapp2.ini should be downloaded</param>
-    ''' <param name="ncc">The boolean indicating that the non-ccleaner variant of winapp2.ini should be used</param>
-    Public Sub handleDownloadBools(ByRef download As Boolean, ByRef ncc As Boolean)
+    Public Sub handleDownloadBools(ByRef download As Boolean)
         ' Download a winapp2 to trim?
         invertSettingAndRemoveArg(download, "-d")
-        invertSettingAndRemoveArg(ncc, "-ncc")
-        ' -ncc implies -d 
-        If ncc And Not download Then download = True
         If download And isOffline Then printErrExit("Winapp2ool is currently in offline mode, but you have issued commands that require a network connection. Please try again with a network connection.")
     End Sub
 
@@ -111,6 +107,8 @@ Module commandLineHandler
         cmdargs.RemoveAt(0)
         ' The s is for silent, if we havxe this flag, don't give any output to the user under normal circumstances 
         invertSettingAndRemoveArg(suppressOutput, "-s")
+        ' Toggle the tool to use the non-ccleaner version of winapp2.ini
+        invertSettingAndRemoveArg(remoteWinappIsNonCC, "-ncc")
         If cmdargs.Count > 0 Then
             Select Case cmdargs(0)
                 Case "1", "-1", "debug", "-debug"

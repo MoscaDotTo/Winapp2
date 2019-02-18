@@ -162,15 +162,6 @@ Module Downloader
     End Sub
 
     ''' <summary>
-    ''' Feteches a remote winapp2.ini file from GitHub
-    ''' </summary>
-    ''' <param name="ncc">The Boolean specifying whether the non-CCleaner version should be downloaded</param>
-    ''' <returns></returns>
-    Public Function getRemoteWinapp(ncc As Boolean) As iniFile
-        Return getRemoteIniFile(If(ncc, nonccLink, wa2Link))
-    End Function
-
-    ''' <summary>
     ''' Reads a file until a specified line number 
     ''' </summary>
     ''' <param name="path">The path (or online address) of the file</param>

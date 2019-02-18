@@ -30,8 +30,17 @@ Module Winapp2ool
     Public isOffline As Boolean
     Public dnfOOD As Boolean = False
     ' Dummy iniFile obj for when we don't need actual data or when it'll be filled in later
-    Public eini As iniFile = New iniFile("", "")
-    Public lwinapp2File As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+    Dim eini As iniFile = New iniFile("", "")
+    Dim lwinapp2File As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+    Public remoteWinappIsNonCC As Boolean = False
+
+    ''' <summary>
+    ''' Returns the link to the appropriate winapp2.ini file based on the mode the tool is in
+    ''' </summary>
+    ''' <returns></returns>
+    Public Function getWinappLink() As String
+        Return If(remoteWinappIsNonCC, nonccLink, wa2Link)
+    End Function
 
     ''' <summary>
     ''' Informs the user when an update is available
@@ -130,8 +139,8 @@ Module Winapp2ool
                 undoAnyPendingExits()
             Case input = "8" And waUpdateIsAvail
                 Console.Clear()
-                Console.Write("Downloading & triming, this may take a moment...")
-                remoteTrim(eini, lwinapp2File, True, False)
+                Console.Write("Downloading & trimming, this may take a moment...")
+                remoteTrim(eini, lwinapp2File, True)
                 checkedForUpdates = False
                 undoAnyPendingExits()
             Case input = "9" And waUpdateIsAvail
@@ -186,7 +195,7 @@ Module Winapp2ool
     ''' Handles the case where the update check has failed
     ''' </summary>
     ''' <param name="name">The name of the component whose update check failed</param>
-    ''' <param name="chkOnline">A flag specifying that that the internet connection should be retested</param>
+    ''' <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
     Private Sub updateCheckFailed(name As String, Optional chkOnline As Boolean = False)
         menuHeaderText = $"/!\ {name} update check failed. /!\"
         localWa2Ver = "000000"
@@ -266,17 +275,16 @@ Module Winapp2ool
     ''' <param name="download">The download Boolean</param>
     ''' <param name="settingsChanged">The Boolean indicating that settings have changed</param>
     Public Sub toggleDownload(ByRef download As Boolean, ByRef settingsChanged As Boolean)
-        If Not denySettingOffline() Then toggleSettingParam(download, "Downloading ", settingsChanged)
+        If Not denySettingOffline() Then toggleSettingParam(download, "Downloading", settingsChanged)
     End Sub
 
     ''' <summary>
-    ''' Returns the online download status of winapp2.ini as a String, empty string if not downloading
+    ''' Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading
     ''' </summary>
-    ''' <param name="d">The normal download Boolean</param>
-    ''' <param name="dncc">The non-CCleaner download Boolean</param>
+    ''' <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
     ''' <returns></returns>
-    Public Function GetNameFromDL(d As Boolean, dncc As Boolean) As String
-        Return If(d, If(dncc, "Online (non-ccleaner)", "Online"), "")
+    Public Function GetNameFromDL(shouldDownload As Boolean) As String
+        Return If(shouldDownload, If(remoteWinappIsNonCC, "Online (non-ccleaner)", "Online"), "")
     End Function
 
     ''' <summary>

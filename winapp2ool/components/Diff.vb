@@ -22,13 +22,12 @@ Imports System.IO
 ''' </summary>
 Module Diff
     ' File handlers
-    Dim oFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
-    Dim nFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
+    Dim oldOrLocalFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+    Dim newOrRemoteFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
     Dim logFile As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
     Dim outputToFile As String
     ' Module parameters
     Dim download As Boolean = False
-    Dim downloadNCC As Boolean = False
     Dim saveLog As Boolean = False
     Dim settingsChanged As Boolean = False
 
@@ -41,23 +40,22 @@ Module Diff
     ''' -savelog    : save the diff.txt log
     Public Sub handleCmdLine()
         initDefaultSettings()
-        handleDownloadBools(download, downloadNCC)
-        ' Make sure we have a name set for the nfile if we're downloading or else the diff will not run
-        If download Then nFile.name = If(downloadNCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
+        handleDownloadBools(download)
+        ' Make sure we have a name set for the new file if we're downloading or else the diff will not run
+        If download Then newOrRemoteFile.name = If(remoteWinappIsNonCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
         invertSettingAndRemoveArg(saveLog, "-savelog")
-        getFileAndDirParams(oFile, nFile, logFile)
-        If Not nFile.name = "" Then initDiff()
+        getFileAndDirParams(oldOrLocalFile, newOrRemoteFile, logFile)
+        If Not newOrRemoteFile.name = "" Then initDiff()
     End Sub
 
     ''' <summary>
     ''' Restores the default state of the module's parameters
     ''' </summary>
     Private Sub initDefaultSettings()
-        oFile.resetParams()
-        nFile.resetParams()
-        logFile.resetParams()
         download = False
-        downloadNCC = False
+        logFile.resetParams()
+        newOrRemoteFile.resetParams()
+        oldOrLocalFile.resetParams()
         saveLog = False
         settingsChanged = False
     End Sub
@@ -67,8 +65,8 @@ Module Diff
     ''' </summary>
     ''' <param name="firstFile">The old winapp2.ini file</param>
     Public Sub remoteDiff(firstFile As iniFile, Optional dl As Boolean = True)
-        oFile = firstFile
         download = dl
+        oldOrLocalFile = firstFile
         initDiff()
     End Sub
 
@@ -83,13 +81,12 @@ Module Diff
         print(1, "File Chooser", "Choose a new name or location for your older ini file")
         print(0, "Select Newer/Remote File:", leadingBlank:=True)
         print(1, "winapp2.ini (online)", $"{enStr(download)} diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, leadingBlank:=True)
-        print(1, "winapp2.ini (non-ccleaner)", $"{enStr(downloadNCC)} diffing against the latest Non-CCleaner winapp2.ini version on GitHub", download, trailingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your newer ini file", Not download, isOffline, True)
         print(0, "Log Settings:")
         print(1, "Toggle Log Saving", $"{enStr(saveLog)} automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not saveLog)
         print(1, "File Chooser (log)", "Change where Diff saves its log", saveLog, trailingBlank:=True)
-        print(0, $"Older file: {replDir(oFile.path)}")
-        print(0, $"Newer file: {If(nFile.name = "" And Not download, "Not yet selected", If(download, GetNameFromDL(download, downloadNCC), replDir(nFile.path)))}", closeMenu:=Not saveLog And Not settingsChanged)
+        print(0, $"Older file: {replDir(oldOrLocalFile.path)}")
+        print(0, $"Newer file: {If(newOrRemoteFile.name = "" And Not download, "Not yet selected", If(download, GetNameFromDL(download), replDir(newOrRemoteFile.path)))}", closeMenu:=Not saveLog And Not settingsChanged)
         print(0, $"Log   file: {replDir(logFile.path)}", cond:=saveLog, closeMenu:=Not settingsChanged)
         print(2, "Diff", cond:=settingsChanged, closeMenu:=True)
     End Sub
@@ -103,23 +100,21 @@ Module Diff
             Case input = "0"
                 exitModule()
             Case input = "1" Or input = ""
-                If Not denyActionWithTopper(nFile.name = "" And Not download, "Please select a file against which to diff") Then initDiff()
+                If Not denyActionWithTopper(newOrRemoteFile.name = "" And Not download, "Please select a file against which to diff") Then initDiff()
             Case input = "2"
-                changeFileParams(oFile, settingsChanged)
+                changeFileParams(oldOrLocalFile, settingsChanged)
             Case input = "3" And Not isOffline
                 toggleDownload(download, settingsChanged)
-                nFile.name = If(download, GetNameFromDL(download, downloadNCC), "")
-                If downloadNCC And Not download Then downloadNCC = False
-            Case input = "4" And download
-                toggleDownload(downloadNCC, settingsChanged)
-                nFile.name = If(download, GetNameFromDL(download, downloadNCC), "")
+                newOrRemoteFile.name = GetNameFromDL(download)
             Case (input = "4" And Not (download Or isOffline)) Or (input = "3" And isOffline)
-                changeFileParams(nFile, settingsChanged)
-            Case (input = "5" And Not isOffline) Or (input = "4" And isOffline)
+                changeFileParams(newOrRemoteFile, settingsChanged)
+            Case (input = "5" And Not isOffline And Not download) Or (input = "4" And (isOffline Xor download))
                 toggleSettingParam(saveLog, "Log Saving", settingsChanged)
-            Case saveLog And ((input = "6" And Not isOffline) Or (input = "5" And isOffline))
+            Case saveLog And ((input = "6" And Not isOffline And Not download) Or (input = "5" And (isOffline Or (Not isOffline And download))))
                 changeFileParams(logFile, settingsChanged)
-            Case settingsChanged And (Not isOffline And ((input = "6" And Not saveLog) Or (input = "7" And saveLog)) Or (isOffline And (input = "5") Or (input = "6" And saveLog)))
+            Case settingsChanged And 'Online Case below
+                (Not isOffline And ((Not saveLog And (input = "5" And download) Or (input = "6" And Not (download Xor saveLog))) Or (input = "7" And Not download And saveLog))) Or
+                ((isOffline) And (input = "5") Or (input = "6" And saveLog)) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
             Case Else
                 menuHeaderText = invInpStr
@@ -131,9 +126,9 @@ Module Diff
     ''' </summary>
     Private Sub initDiff()
         outputToFile = ""
-        oFile.validate()
-        If download Then nFile = getRemoteWinapp(downloadNCC)
-        nFile.validate()
+        oldOrLocalFile.validate()
+        If download Then newOrRemoteFile = getRemoteIniFile(getWinappLink)
+        newOrRemoteFile.validate()
         If pendingExit() Then Exit Sub
         differ()
         If saveLog Then logFile.overwriteToFile(outputToFile)
@@ -156,12 +151,12 @@ Module Diff
     Private Sub differ()
         print(3, "Diffing, please wait. This may take a moment.")
         Console.Clear()
-        Dim fver As String = getVer(oFile)
-        Dim sver As String = getVer(nFile)
+        Dim fver As String = getVer(oldOrLocalFile)
+        Dim sver As String = getVer(newOrRemoteFile)
         log(tmenu($"Changes made between{fver} and{sver}"))
         log(menu(menuStr02))
         log(menu(menuStr00))
-        ' Compare the files and then ennumerate their changes
+        ' Compare the files and then enumerate their changes
         Dim outList As List(Of String) = compareTo()
         Dim remCt As Integer = 0
         Dim modCt As Integer = 0
@@ -197,10 +192,10 @@ Module Diff
     ''' <returns></returns>
     Private Function compareTo() As List(Of String)
         Dim outList, comparedList As New List(Of String)
-        For Each section In oFile.sections.Values
+        For Each section In oldOrLocalFile.sections.Values
             ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
-            If nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
-                Dim sSection As iniSection = nFile.sections(section.name)
+            If newOrRemoteFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
+                Dim sSection As iniSection = newOrRemoteFile.sections(section.name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
@@ -218,15 +213,15 @@ Module Diff
                     tmp += prependNewLines(False) & menuStr00
                     outList.Add(tmp)
                 End If
-            ElseIf Not nFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
+            ElseIf Not newOrRemoteFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
                 ' If we do not have the entry in the new file, it has been removed between versions 
                 outList.Add(getDiff(section, "removed"))
             End If
             comparedList.Add(section.name)
         Next
         ' Any sections from the new file which are not found in the old file have been added
-        For Each section In nFile.sections.Values
-            If Not oFile.sections.Keys.Contains(section.name) Then outList.Add(getDiff(section, "added"))
+        For Each section In newOrRemoteFile.sections.Values
+            If Not oldOrLocalFile.sections.Keys.Contains(section.name) Then outList.Add(getDiff(section, "added"))
         Next
         Return outList
     End Function
@@ -251,32 +246,33 @@ Module Diff
     ''' <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
+        ' Create copies of the given keylists so we can modify them during the iteration 
         Dim akTemp = addedKeys
         Dim rkTemp = removedKeys
-        For i As Integer = 0 To addedKeys.keyCount - 1
-            Dim key = addedKeys.keys(i)
-            For j As Integer = 0 To removedKeys.keyCount - 1
-                Dim skey = removedKeys.keys(j)
+        For Each key In addedKeys.keys
+            For Each skey In removedKeys.keys
                 If key.compareNames(skey) Then
                     Select Case key.keyType
                         Case "FileKey", "ExcludeKey", "RegKey"
                             Dim oldKey As New winapp2KeyParameters(key)
                             Dim newKey As New winapp2KeyParameters(skey)
-                            ' Make sure the given path hasn't changed
+                            ' If the path has changed, the key has been updated
                             If Not oldKey.pathString = newKey.pathString Then
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                 Exit For
                             End If
                             oldKey.argsList.Sort()
                             newKey.argsList.Sort()
+                            ' Check the number of arguments provided to the key
                             If oldKey.argsList.Count = newKey.argsList.Count Then
                                 For k As Integer = 0 To oldKey.argsList.Count - 1
+                                    ' If the args count matches but the sorted state of the args doesn't, the key has been updated
                                     If Not oldKey.argsList(k).ToLower = newKey.argsList(k).ToLower Then
                                         updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                         Exit For
                                     End If
                                 Next
-                                ' If we get this far, it's probably just an alphabetization change and can be ignored silenty
+                                ' If we get this far, it's just an alphabetization change and can be ignored silently
                                 akTemp.remove(skey)
                                 rkTemp.remove(key)
                             Else
@@ -285,15 +281,15 @@ Module Diff
                                 Exit For
                             End If
                         Case Else
-                            ' Other keys don't require such complex legwork, thankfully. 
+                            ' Other keys don't require such complex legwork, thankfully. If their values don't match, they've been updated
                             If Not key.compareValues(skey) Then updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                     End Select
                 End If
             Next
         Next
-        '' Update the lists
-        addedKeys.keys = akTemp.keys
-        removedKeys.keys = rkTemp.keys
+        ' Update the lists
+        addedKeys = akTemp
+        removedKeys = rkTemp
     End Sub
 
     ''' <summary>
@@ -302,11 +298,11 @@ Module Diff
     ''' <param name="updLst">The list of updated keys</param>
     ''' <param name="aKeys">The list of added keys</param>
     ''' <param name="rKeys">The list of removed keys</param>
-    ''' <param name="key">A removed inikey</param>
-    ''' <param name="skey">An added iniKey</param>
+    ''' <param name="key">An added key</param>
+    ''' <param name="skey">A removed key</param>
     Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), ByRef aKeys As keyList, ByRef rKeys As keyList, key As iniKey, skey As iniKey)
         updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
-        rKeys.keys.Remove(skey)
+        rKeys.remove(skey)
         aKeys.remove(key)
     End Sub
 

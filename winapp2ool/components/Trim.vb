@@ -35,7 +35,6 @@ Public Module Trim
                            "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
     Dim settingsChanged As Boolean
     Dim download As Boolean = False
-    Dim downloadNCC As Boolean = False
 
     ''' <summary>
     ''' Handles the commandline args for Trim
@@ -45,7 +44,7 @@ Public Module Trim
     ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
     Public Sub handleCmdLine()
         initDefaultSettings()
-        handleDownloadBools(download, downloadNCC)
+        handleDownloadBools(download)
         getFileAndDirParams(winappFile, outputFile, New iniFile)
         initTrim()
     End Sub
@@ -58,7 +57,6 @@ Public Module Trim
         winappFile.resetParams()
         outputFile.resetParams()
         download = False
-        downloadNCC = False
     End Sub
 
     ''' <summary>
@@ -67,12 +65,10 @@ Public Module Trim
     ''' <param name="firstFile">The winapp2.ini file</param>
     ''' <param name="secondFile">The output file</param>
     ''' <param name="d">Download boolean</param>
-    ''' <param name="ncc">Non-CCleaner download boolean</param>
-    Public Sub remoteTrim(firstFile As iniFile, secondFile As iniFile, d As Boolean, ncc As Boolean)
+    Public Sub remoteTrim(firstFile As iniFile, secondFile As iniFile, d As Boolean)
         winappFile = firstFile
         outputFile = secondFile
         download = d
-        downloadNCC = ncc
         initTrim()
     End Sub
 
@@ -83,10 +79,9 @@ Public Module Trim
         printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
         print(1, "Run (default)", "Trim winapp2.ini")
         print(1, "Toggle Download", $"{enStr(download)} using the latest winapp2.ini as the input file", Not isOffline, True)
-        print(1, "Toggle Download (Non-CCleaner)", $"{enStr(downloadNCC)} using the latest Non-CCleaner winapp2.ini as the input file", download, trailingBlank:=True)
-        print(1, "File Chooser (winapp2.ini)", "Change the winapp2.ini name or location", Not (download Or downloadNCC), isOffline, True)
+        print(1, "File Chooser (winapp2.ini)", "Change the winapp2.ini name or location", Not download, isOffline, True)
         print(1, "File Chooser (save)", "Change the save file name or location", trailingBlank:=True)
-        print(0, $"Current winapp2.ini location: {If(download, GetNameFromDL(download, downloadNCC), replDir(winappFile.path))}")
+        print(0, $"Current winapp2.ini location: {If(download, GetNameFromDL(download), replDir(winappFile.path))}")
         print(0, $"Current save location: {replDir(outputFile.path)}", closeMenu:=Not settingsChanged)
         print(2, "Trim", cond:=settingsChanged, closeMenu:=True)
     End Sub
@@ -103,14 +98,11 @@ Public Module Trim
                 initTrim()
             Case input = "2" And Not isOffline
                 toggleDownload(download, settingsChanged)
-                If downloadNCC And Not download Then downloadNCC = False
-            Case input = "3" And download
-                toggleDownload(downloadNCC, settingsChanged)
-            Case (input = "3" And Not (download Or downloadNCC) And Not isOffline) Or (input = "2" And isOffline)
+            Case (input = "3" And Not download And Not isOffline) Or (input = "2" And isOffline)
                 changeFileParams(winappFile, settingsChanged)
-            Case (input = "4" And Not isOffline) Or (input = "3" And isOffline)
+            Case (input = "4" And Not download) Or (input = "3" And isOffline Or download)
                 changeFileParams(outputFile, settingsChanged)
-            Case (input = "5" Or (input = "4" And isOffline)) And settingsChanged
+            Case (input = "5" Or (input = "4" And (isOffline Or download)) And settingsChanged)
                 resetModuleSettings("Trim", AddressOf initDefaultSettings)
             Case Else
                 menuHeaderText = invInpStr
@@ -123,7 +115,7 @@ Public Module Trim
     Private Sub initTrim()
         If Not download Then winappFile.validate()
         If pendingExit() Then Exit Sub
-        Dim winapp2 As winapp2file = If(Not download, New winapp2file(winappFile), New winapp2file(getRemoteIniFile(If(downloadNCC, nonccLink, wa2Link))))
+        Dim winapp2 As winapp2file = If(Not download, New winapp2file(winappFile), New winapp2file(getRemoteIniFile(getWinappLink)))
         trim(winapp2)
         menuHeaderText = "Trim Complete"
         Console.Clear()

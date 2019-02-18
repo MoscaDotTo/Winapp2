@@ -132,7 +132,7 @@ Module WinappDebug
         print(1, "Numbering", $"{enStr(scanNumbers)} detecting improper key numbering")
         print(1, "Parameters", $"{enStr(scanParams)} detecting improper parameterization on FileKeys and ExcludeKeys")
         print(1, "Flags", $"{enStr(scanFlags)} detecting improper RECURSE and REMOVESELF formatting")
-        print(1, "Slashes", $"{enStr(scanSlashes)} detecting propblems surrounding use of slashes (\)")
+        print(1, "Slashes", $"{enStr(scanSlashes)} detecting problems surrounding use of slashes (\)")
         print(1, "Defaults", $"{enStr(scanDefaults)} detecting Default=True or missing Default")
         print(1, "Optimizations", $"{enStr(scanOpti)} detecting situations where keys can be merged")
         print(0, "Repair Options", leadingBlank:=True, trailingBlank:=True)
@@ -141,7 +141,7 @@ Module WinappDebug
         print(1, "Numbering", $"{enStr(correctNumbers)} fixing improper key numbering")
         print(1, "Parameters", $"{enStr(correctParameters)} fixing improper parameterization On FileKeys And ExcludeKeys")
         print(1, "Flags", $"{enStr(correctFlags)} fixing improper RECURSE And REMOVESELF formatting")
-        print(1, "Slashes", $"{enStr(correctSlashes)} fixing propblems surrounding use Of slashes (\)")
+        print(1, "Slashes", $"{enStr(correctSlashes)} fixing problems surrounding use Of slashes (\)")
         print(1, "Defaults", $"{enStr(correctDefaults)} setting Default=True To Default=False or missing Default")
         print(1, "Optimizations", $"{enStr(correctOpti)} automatic merging of keys", closeMenu:=Not scanSettingsChanged)
         print(2, "Scan And Repair", cond:=scanSettingsChanged, closeMenu:=True)
@@ -301,7 +301,7 @@ Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Overwrites the the file on disk with any changes we've made if we are saving them
+    ''' Overwrites the file on disk with any changes we've made if we are saving them
     ''' </summary>
     ''' <param name="winapp2file">The object representing winapp2.ini</param>
     Private Sub rewriteChanges(ByRef winapp2file As winapp2file)
@@ -326,7 +326,7 @@ Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Assess a list and its sorted state to obvserve changes in neighboring strings
+    ''' Assess a list and its sorted state to observe changes in neighboring strings
     ''' </summary>
     ''' eg. changes made to string ordering through sorting
     ''' <param name="someList">A list of strings</param>
@@ -426,7 +426,7 @@ Module WinappDebug
         inputMismatchErr(key.lineNumber, numberingErrStr, key.name, fixedStr, scanNumbers And hasNumberingError)
         fixStr(correctNumbers And hasNumberingError, key.name, fixedStr)
         ' Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
-        fullKeyErr(key, "Forward slash (/) detected in lieu of blackslash (\).", Not key.typeIs("Warning") And scanSlashes And key.vHas(CChar("/")), correctSlashes, key.value, key.value.Replace(CChar("/"), CChar("\")))
+        fullKeyErr(key, "Forward slash (/) detected in lieu of backslash (\).", Not key.typeIs("Warning") And scanSlashes And key.vHas(CChar("/")), correctSlashes, key.value, key.value.Replace(CChar("/"), CChar("\")))
         fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And scanParams, correctParameters, key.value, key.value.TrimEnd(CChar(";")))
         ' Do some formatting checks for environment variables if needed
         If {"FileKey", "ExcludeKey", "DetectFile"}.Contains(key.keyType) Then cEnVar(key)
@@ -456,12 +456,12 @@ Module WinappDebug
             Dim camelText As String = checkCasingError(enVars, strippedText)
             fullKeyErr(key, $"Invalid CamelCasing - expected %{camelText}% but found {m.ToString}", scanCasing And camelText <> strippedText, correctCasing, key.value, key.value.Replace(strippedText, camelText))
             ' If we don't have a casing error and enVars doesn't contain our value, it's invalid. 
-            fullKeyErr(key, $"Misformatted or invalid environment variable:  {m.ToString}", camelText = strippedText And Not enVars.Contains(strippedText))
+            fullKeyErr(key, $"Malformed or invalid environment variable:  {m.ToString}", camelText = strippedText And Not enVars.Contains(strippedText))
         Next
     End Sub
 
     ''' <summary>
-    ''' Does basic syntax and formatting audits that apply across all keys, returns false iff a key in malformatted
+    ''' Does basic syntax and formatting audits that apply across all keys, returns false iff a key is malformed
     ''' </summary>
     ''' <param name="key">an iniKey object to be checked for errors</param>
     ''' <returns></returns>
@@ -552,7 +552,7 @@ Module WinappDebug
         fullNameErrIf(Not entry.name.EndsWith(" *"), entry, "All entries must End In ' *'")
         ' Confirm the validity of keys and remove any broken ones before continuing
         validateKeys(entry)
-        ' Proess individual keys/keylists in winapp2.ini order
+        ' Process the entry's keylists in winapp2.ini order
         processKeyList(entry.detectOS, AddressOf voidDelegate)
         processKeyList(entry.sectionKey, AddressOf voidDelegate)
         processKeyList(entry.langSecRef, AddressOf voidDelegate)
@@ -734,7 +734,7 @@ Module WinappDebug
             For i As Integer = 0 To newKeys.keyCount - 1
                 newKeys.keys(i).name = $"FileKey{i + 1}"
             Next
-            printOptiSect("Optmization opportunity detected", kl)
+            printOptiSect("Optimization opportunity detected", kl)
             printOptiSect("The following keys can be merged into other keys:", dupes)
             printOptiSect("The resulting keyList will be reduced to: ", newKeys)
             If correctOpti Then kl = newKeys
