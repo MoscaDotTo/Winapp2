@@ -247,10 +247,12 @@ Module Diff
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
         ' Create copies of the given keylists so we can modify them during the iteration 
-        Dim akTemp = addedKeys
-        Dim rkTemp = removedKeys
-        For Each key In addedKeys.keys
-            For Each skey In removedKeys.keys
+        Dim akTemp As New keyList(addedKeys.keys)
+        Dim rkTemp As New keyList(removedKeys.keys)
+        For i As Integer = 0 To addedKeys.keyCount - 1
+            Dim key = addedKeys.keys(i)
+            For j As Integer = 0 To removedKeys.keyCount - 1
+                Dim skey = removedKeys.keys(j)
                 If key.compareNames(skey) Then
                     Select Case key.keyType
                         Case "FileKey", "ExcludeKey", "RegKey"
