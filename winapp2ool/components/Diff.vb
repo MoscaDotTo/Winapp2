@@ -269,7 +269,7 @@ Module Diff
                             If oldKey.argsList.Count = newKey.argsList.Count Then
                                 For k As Integer = 0 To oldKey.argsList.Count - 1
                                     ' If the args count matches but the sorted state of the args doesn't, the key has been updated
-                                    If Not oldKey.argsList(k).ToLower = newKey.argsList(k).ToLower Then
+                                    If Not oldKey.argsList(k).Equals(newKey.argsList(k), StringComparison.InvariantCultureIgnoreCase) Then
                                         updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                         Exit For
                                     End If

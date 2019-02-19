@@ -334,14 +334,14 @@ Module winapp2handler
         Public specialDetect As New keyList("SpecialDetect")
         Public detects As New keyList("Detect")
         Public detectFiles As New keyList("DetectFile")
-        Public warningKey As New keyList("Warning")
         Public defaultKey As New keyList("Default")
+        Public warningKey As New keyList("Warning")
         Public fileKeys As New keyList("FileKey")
         Public regKeys As New keyList("RegKey")
         Public excludeKeys As New keyList("ExcludeKey")
         Public errorKeys As New keyList("Error")
         Public keyListList As New List(Of keyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
-                                                            warningKey, defaultKey, fileKeys, regKeys, excludeKeys, errorKeys}
+                                                            defaultKey, warningKey, fileKeys, regKeys, excludeKeys, errorKeys}
         Public lineNum As New Integer
 
         ''' <summary>

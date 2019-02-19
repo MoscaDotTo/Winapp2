@@ -300,7 +300,7 @@ Public Module Trim
                     Return getCUKey(dir) IsNot Nothing
                 Case "HKLM"
                     If getLMKey(dir) IsNot Nothing Then Return True
-                    ' Small workaround for newer x64 versions of Windows
+                    ' Support checking for 32bit applications on Win64
                     dir = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
                     Return getLMKey(dir) IsNot Nothing
                 Case "HKU"
