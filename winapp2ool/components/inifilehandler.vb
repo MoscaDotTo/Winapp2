@@ -517,7 +517,7 @@ Public Module iniFileHandler
         Public Sub constKeyLists(ByRef listOfKeyLists As List(Of keyList))
             Dim keyTypeList As New List(Of String)
             listOfKeyLists.ForEach(Sub(kl) keyTypeList.Add(kl.keyType.ToLower))
-            For Each key In Me.keys.Values
+            For Each key In keys.Values
                 Dim type = key.keyType.ToLower
                 If keyTypeList.Contains(type) Then listOfKeyLists(keyTypeList.IndexOf(type)).add(key) Else listOfKeyLists.Last.add(key)
             Next
@@ -528,7 +528,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <param name="indicies"></param>
         Public Sub removeKeys(indicies As List(Of Integer))
-            indicies.ForEach(Sub(ind) Me.keys.Remove(ind))
+            indicies.ForEach(Sub(ind) keys.Remove(ind))
         End Sub
 
         ''' <summary>
@@ -536,7 +536,7 @@ Public Module iniFileHandler
         ''' </summary>
         ''' <returns></returns>
         Public Function getFullName() As String
-            Return $"[{Me.name}]"
+            Return $"[{name}]"
         End Function
 
         ''' <summary>
@@ -594,8 +594,9 @@ Public Module iniFileHandler
             For Each key In keys.Values
                 noMatch = True
                 For i As Integer = 0 To secondSection.keys.Values.Count - 1
+                    Dim sKey = secondSection.keys.Values(i)
                     Select Case True
-                        Case key.keyType.ToLower = secondSection.keys.Values(i).keyType.ToLower And key.value.ToLower = secondSection.keys.Values(i).value.ToLower
+                        Case key.compareTypes(sKey) And key.compareValues(sKey)
                             noMatch = False
                             tmpList.Add(i)
                             Exit For
@@ -755,9 +756,10 @@ Public Module iniFileHandler
         ''' Returns whether or not an iniKey's name is equal to a given value
         ''' </summary>
         ''' <param name="n">The string to check equality for</param>
+        ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
         ''' <returns></returns>
-        Public Function nameIs(n As String, Optional tolower As Boolean = False) As Boolean
-            Return If(tolower, name.ToLower = n.ToLower, name = n)
+        Public Function nameIs(n As String, Optional ignoreCase As Boolean = False) As Boolean
+            Return If(ignoreCase, name.Equals(n, StringComparison.InvariantCultureIgnoreCase), name = n)
             name = n
         End Function
 
@@ -765,60 +767,43 @@ Public Module iniFileHandler
         ''' Returns whether or not an iniKey's type is equal to a given value
         ''' </summary>
         ''' <param name="t">The string to check equality for</param>
+        ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
         ''' <returns></returns>
-        Public Function typeIs(t As String, Optional tolower As Boolean = False) As Boolean
-            Return If(tolower, keyType.ToLower = t.ToLower, keyType = t)
+        Public Function typeIs(t As String, Optional ignoreCase As Boolean = False) As Boolean
+            Return If(ignoreCase, keyType.Equals(t, StringComparison.InvariantCultureIgnoreCase), keyType = t)
         End Function
 
         ''' <summary>
-        ''' Returns whether or not an iniKey object's value begins or ends with a given value
-        ''' </summary>
-        ''' <param name="txt">The given string to search for</param>
-        ''' <returns></returns>
-        Public Function vStartsOrEndsWith(txt As String) As Boolean
-            Return value.StartsWith(txt) Or value.EndsWith(txt)
-        End Function
-
-        ''' <summary>
-        ''' Returns whether or not an iniKey object's name begin or ends with a given value
-        ''' </summary>
-        ''' <param name="txt">The given string to search for</param>
-        ''' <returns></returns>
-        Public Function nStartsOrEndsWith(txt As String) As Boolean
-            Return name.StartsWith(txt) Or name.EndsWith(txt)
-        End Function
-
-        ''' <summary>
-        ''' Returns whether or not an iniKey object's value contains a given string with conditional case casting
+        ''' Returns whether or not an iniKey object's value contains a given string with conditional case sensitivity
         ''' </summary>
         ''' <param name="txt">The string to search for</param>
-        ''' <param name="toLower">A boolean specifying whether or not the strings should be cast to lowercase</param>
+        ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
         ''' <returns></returns>
-        Public Function vHas(txt As String, Optional toLower As Boolean = False) As Boolean
-            Return If(toLower, value.ToLower.Contains(txt.ToLower), value.Contains(txt))
+        Public Function vHas(txt As String, Optional ignoreCase As Boolean = False) As Boolean
+            Return If(ignoreCase, value.IndexOf(txt, 0, StringComparison.CurrentCultureIgnoreCase) > -1, value.Contains(txt))
         End Function
 
         ''' <summary>
-        ''' Returns whether or not an iniKey object's value contains any of a given array of strings with conditional case casting
+        ''' Returns whether or not an iniKey object's value contains any of a given array of strings with conditional case sensitivity
         ''' </summary>
         ''' <param name="txts">The array of search strings</param>
-        ''' <param name="toLower">A boolean specifying whether or not the strings should be cast to lowercase</param>
+        ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
         ''' <returns></returns>
-        Public Function vHasAny(txts As String(), Optional toLower As Boolean = False) As Boolean
+        Public Function vHasAny(txts As String(), Optional ignoreCase As Boolean = False) As Boolean
             For Each txt In txts
-                If vHas(txt, toLower) Then Return True
+                If vHas(txt, ignoreCase) Then Return True
             Next
             Return False
         End Function
 
         ''' <summary>
-        ''' Returns whether or not an iniKey object's value is equal to a given string with conditional case casting
+        ''' Returns whether or not an iniKey object's value is equal to a given string with conditional case sensitivity
         ''' </summary>
         ''' <param name="txt">The string to be searched for</param>
-        ''' <param name="toLower">A boolean specifying whether or not the strings should be cast to lowercase</param>
+        ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
         ''' <returns></returns>
-        Public Function vIs(txt As String, Optional toLower As Boolean = False) As Boolean
-            Return If(toLower, value.ToLower.Equals(txt), value.Equals(txt))
+        Public Function vIs(txt As String, Optional ignoreCase As Boolean = False) As Boolean
+            Return If(ignoreCase, value.Equals(txt, StringComparison.InvariantCultureIgnoreCase), value = txt)
         End Function
 
         ''' <summary>
@@ -833,7 +818,7 @@ Public Module iniFileHandler
         ''' <summary>
         ''' Compares the names of two iniKeys and returns whether or not they match
         ''' </summary>
-        ''' <param name="key"></param>
+        ''' <param name="key">The iniKey to be compared to</param>
         ''' <returns></returns>
         Public Function compareNames(key As iniKey) As Boolean
             Return nameIs(key.name, True)
@@ -842,10 +827,19 @@ Public Module iniFileHandler
         ''' <summary>
         ''' Compares the values of two iniKeys and returns whether or not they match
         ''' </summary>
-        ''' <param name="key"></param>
+        ''' <param name="key">The iniKey to be compared to</param>
         ''' <returns></returns>
         Public Function compareValues(key As iniKey) As Boolean
             Return vIs(key.value, True)
+        End Function
+
+        ''' <summary>
+        ''' Compares the types of two iniKeys and returns whether or not they match
+        ''' </summary>
+        ''' <param name="key">The iniKey to be compared to</param>
+        ''' <returns></returns>
+        Public Function compareTypes(key As iniKey) As Boolean
+            Return typeIs(key.keyType, True)
         End Function
 
         ''' <summary>

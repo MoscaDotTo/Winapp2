@@ -414,8 +414,9 @@ Module WinappDebug
     ''' <param name="dupeList">A tracking list of detected duplicate iniKeys</param>
     Private Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As List(Of String), ByRef dupeList As keyList, Optional noNumbers As Boolean = False)
         ' Check for duplicates
-        If chkDupes(keyValues, key.value) Then
-            Dim duplicateKeyStr As String = $"{key.keyType}{If(Not noNumbers, (keyValues.IndexOf(key.value.ToLower) + 1).ToString, "")}={key.value}"
+        Dim lowerCaseKeyValue = key.value.ToLower
+        If chkDupes(keyValues, lowerCaseKeyValue) Then
+            Dim duplicateKeyStr As String = $"{key.keyType}{If(Not noNumbers, (keyValues.IndexOf(lowerCaseKeyValue) + 1).ToString, "")}={key.value}"
             customErr(key.lineNumber, "Duplicate key value found", {$"Key:            {key.toString}", $"Duplicates:     {duplicateKeyStr}"})
             dupeList.add(key)
         End If
@@ -440,7 +441,7 @@ Module WinappDebug
     ''' <param name="keyValue">The String to be checked for casing errors</param>
     Private Function checkCasingError(caseArray As String(), keyValue As String) As String
         For Each casedText In caseArray
-            If keyValue.ToLower = casedText.ToLower Then Return casedText
+            If keyValue.Equals(casedText, StringComparison.InvariantCultureIgnoreCase) Then Return casedText
         Next
         Return keyValue
     End Function
@@ -468,8 +469,11 @@ Module WinappDebug
     Private Function cValidity(key As iniKey) As Boolean
         If key.keyType = "DeleteMe" Then Return False
         ' Check for leading or trailing whitespace
-        fullKeyErr(key, "Detected unwanted whitespace in iniKey value", key.vStartsOrEndsWith(" "), True, key.value, key.value.Trim(CChar(" ")))
-        fullKeyErr(key, "Detected unwanted whitespace in iniKey name", key.nStartsOrEndsWith(" "), True, key.name, key.name.Trim(CChar(" ")))
+        If key.name.StartsWith(" ") Or key.name.EndsWith(" ") Or key.value.StartsWith(" ") Or key.value.EndsWith(" ") Then
+            fullKeyErr(key, "Detected unwanted whitespace in iniKey", True)
+            fixStr(True, key.value, key.value.Trim(CChar(" ")))
+            fixStr(True, key.name, key.name.Trim(CChar(" ")))
+        End If
         ' Make sure the keyType is a valid winapp2.ini command
         Dim casedString As String = checkCasingError(validCmds, key.keyType)
         fullKeyErr(key, $"{casedString} has a casing error.", casedString <> key.keyType And scanCasing, correctCasing, key.name, key.name.Replace(key.keyType, casedString))
@@ -513,15 +517,16 @@ Module WinappDebug
         Dim dupeArgs As New List(Of String)
         ' Check for duplicate args
         For Each arg In keyParams.argsList
-            If chkDupes(argsStrings, arg) And scanParams Then
+            If chkDupes(argsStrings, arg.ToLower) And scanParams Then
                 err(key.lineNumber, "Duplicate FileKey parameter found", arg)
                 dupeArgs.Add(arg)
             End If
         Next
-        ' Remove any duplicate arguments from the key parameters
-        dupeArgs.ForEach(Sub(arg) If fixFormat(correctParameters) Then keyParams.argsList.Remove(arg))
-        ' Reconstruct keys we've modified above
-        If fixFormat(correctParameters) Then keyParams.reconstructKey(key)
+        ' Remove any duplicate arguments from the key parameters and reconstruct keys we've modified above
+        If fixFormat(correctParameters) Then
+            dupeArgs.ForEach(Sub(arg) keyParams.argsList.Remove(arg))
+            keyParams.reconstructKey(key)
+        End If
         Return key
     End Function
 
@@ -547,7 +552,7 @@ Module WinappDebug
         Dim hasFileExcludes As Boolean = False
         Dim hasRegExcludes As Boolean = False
         ' Check for duplicate names that are differently cased 
-        fullNameErrIf(chkDupes(allEntryNames, entry.name), entry, "Duplicate entry name detected")
+        fullNameErrIf(chkDupes(allEntryNames, entry.name.ToLower), entry, "Duplicate entry name detected")
         ' Check that the entry is named properly 
         fullNameErrIf(Not entry.name.EndsWith(" *"), entry, "All entries must End In ' *'")
         ' Confirm the validity of keys and remove any broken ones before continuing
@@ -633,14 +638,14 @@ Module WinappDebug
 
     ''' <summary>
     ''' Checks whether the current value appears in the given list of strings (case insensitive). Returns true if there is a duplicate,
-    ''' otherwise, adds the current value to the list.
+    ''' otherwise, adds the current value to the list and returns false.
     ''' </summary>
     ''' <param name="valueStrings">A list of strings holding observed values</param>
     ''' <param name="currentValue">The current value to be audited</param>
     ''' <returns></returns>
     Private Function chkDupes(ByRef valueStrings As List(Of String), currentValue As String) As Boolean
-        If valueStrings.Contains(currentValue.ToLower) Then Return True
-        valueStrings.Add(currentValue.ToLower)
+        If valueStrings.Contains(currentValue) Then Return True
+        valueStrings.Add(currentValue)
         Return False
     End Function
 
