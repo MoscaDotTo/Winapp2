@@ -100,8 +100,12 @@ Module JavaMaker
     Private Function getRegKeys(reg As Microsoft.Win32.RegistryKey, searches As List(Of String)) As List(Of iniKey)
         Dim out As New List(Of iniKey)
         Try
-            Dim keys As List(Of String) = reg.GetSubKeyNames.ToList
-            searches.ForEach(Sub(search) keys.ForEach(Sub(key) If key.Contains(search) Then out.Add(New iniKey($"RegKey1={reg.ToString}\{key}"))))
+            Dim keys = reg.GetSubKeyNames
+            For Each search In searches
+                For Each key In keys
+                    If key.Contains(search) Then out.Add(New iniKey($"RegKey1={reg.ToString}\{key}"))
+                Next
+            Next
         Catch ex As Exception
             ' The only Exception we can expect here is that reg is not set to an instance of an object
             ' This occurs when the requested registry key does not exist on the current system
