@@ -20,13 +20,22 @@ Imports System.IO
 ''' <summary>
 ''' This module handles the commandline args presented to winapp2ool and attempts to pass them off to their respective modules
 ''' </summary>
-Module commandLineHandler
+Public Module commandLineHandler
     ' File Handlers
     Dim firstFile As iniFile
     Dim secondFile As iniFile
     Dim thirdFile As iniFile
     ' The current state of the command line args at any point
-    Public cmdargs As New List(Of String)
+    Private cmdLnArgs As New List(Of String)
+
+    Public Property cmdargs As List(Of String)
+        Get
+            Return cmdLnArgs
+        End Get
+        Set(value As List(Of String))
+            cmdLnArgs = value
+        End Set
+    End Property
 
     ''' <summary>
     ''' Flips a boolean setting and removes its associated argument from the args list
@@ -48,8 +57,8 @@ Module commandLineHandler
     ''' </summary>
     ''' <param name="download">The boolean indicating winapp2.ini should be downloaded</param>
     Public Sub handleDownloadBools(ByRef download As Boolean)
-        ' Download a winapp2 to trim?
         invertSettingAndRemoveArg(download, "-d")
+        ' Ensure that we don't try to download if we're offline
         If download And isOffline Then printErrExit("Winapp2ool is currently in offline mode, but you have issued commands that require a network connection. Please try again with a network connection.")
     End Sub
 
@@ -57,11 +66,22 @@ Module commandLineHandler
     ''' Renames an iniFile object if provided a commandline arg to do so
     ''' </summary>
     ''' <param name="flag">The flag that precedes the name specification in the args list</param>
-    ''' <param name="name">The reference to the name parameter of an iniFile object</param>
-    Private Sub getFileName(flag As String, ByRef name As String)
+    ''' <param name="givenFile">A reference to an iniFile object to be modified</param>
+    Private Sub getFileName(flag As String, ByRef givenFile As iniFile)
         If cmdargs.Count >= 2 Then
-            Dim ind As Integer = cmdargs.IndexOf(flag)
-            name = $"\{cmdargs(ind + 1)}"
+            Dim ind = cmdargs.IndexOf(flag)
+            Dim curArg = cmdargs(ind + 1)
+            ' If this is true, the user has parameterized the file flag with a subdirectory
+            ' We must move this information over to the directory parameter
+            If curArg.StartsWith("\") And Not curArg.LastIndexOf("\") = 0 Then
+                Dim split = cmdargs(ind + 1).Split(CChar("\"))
+                For i As Integer = 1 To split.Count - 2
+                    givenFile.dir += $"\{split(i)}"
+                Next
+                givenFile.name = split.Last
+            Else
+                givenFile.name = $"{cmdargs(ind + 1)}"
+            End If
             cmdargs.RemoveAt(ind)
             cmdargs.RemoveAt(ind)
         End If
@@ -106,7 +126,7 @@ Module commandLineHandler
         ' 0th index holds the executable name, we don't need it. 
         cmdargs.RemoveAt(0)
         ' The s is for silent, if we havxe this flag, don't give any output to the user under normal circumstances 
-        invertSettingAndRemoveArg(suppressOutput, "-s")
+        invertSettingAndRemoveArg(SuppressOutput, "-s")
         ' Toggle the tool to use the non-ccleaner version of winapp2.ini
         invertSettingAndRemoveArg(remoteWinappIsNonCC, "-ncc")
         If cmdargs.Count > 0 Then
@@ -136,6 +156,9 @@ Module commandLineHandler
     ''' <summary>
     ''' Gets the directory and name info for each file given (if any)
     ''' </summary>
+    ''' <param name="ff">The "first file" from a module</param>
+    ''' <param name="sf">The "second file" from a module</param>
+    ''' <param name="tf">The "third file" from a module</param>
     Public Sub getFileAndDirParams(ByRef ff As iniFile, ByRef sf As iniFile, ByRef tf As iniFile)
         validateArgs()
         getParams(1, ff)
@@ -151,7 +174,11 @@ Module commandLineHandler
     Private Sub getParams(someNumber As Integer, someFile As iniFile)
         Dim argStr As String = $"-{someNumber}"
         If cmdargs.Contains($"{argStr}d") Then getFileNameAndDir($"{argStr}d", someFile)
-        If cmdargs.Contains($"{argStr}f") Then getFileName($"{argStr}f", someFile.name)
+        If cmdargs.Contains($"{argStr}f") Then getFileName($"{argStr}f", someFile)
+        ' Make sure there's there's no double slashes or leading/trailing slashes in the file parameters
+        someFile.dir = someFile.dir.Replace(CChar("\\"), CChar("\"))
+        If someFile.name.StartsWith("\") Then someFile.name = someFile.name.TrimStart(CChar("\"))
+        If someFile.dir.EndsWith("\") Then someFile.dir = someFile.dir.TrimEnd(CChar("\"))
     End Sub
 
     ''' <summary>
@@ -165,12 +192,12 @@ Module commandLineHandler
                     If Not vArgs.Contains(cmdargs(i)) Or
                         (Not Directory.Exists(cmdargs(i + 1)) And Not Directory.Exists($"{Environment.CurrentDirectory}\{cmdargs(i + 1)}") And
                                 Not File.Exists(cmdargs(i + 1)) And File.Exists($"{Environment.CurrentDirectory}\{cmdargs(i + 1)}")) Then
-                        printErrExit("Invalid command line arguements given.")
+                        Throw New Exception("Invalid commandline arguments given.")
                     End If
                     i += 1
                 Next
             Catch ex As Exception
-                printErrExit("Invalid command line arguements given.")
+                printErrExit("Invalid commandline arguments given.")
             End Try
         End If
     End Sub
