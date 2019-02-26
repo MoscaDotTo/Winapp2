@@ -153,7 +153,7 @@ Module Merge
         Dim out As String = tmp.winapp2string
         outputFile.overwriteToFile(out)
         print(0, bmenu($"Finished merging files. {anyKeyStr}"))
-        If Not suppressOutput Then Console.ReadKey()
+        If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
     ''' <summary>

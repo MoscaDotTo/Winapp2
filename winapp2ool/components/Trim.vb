@@ -144,7 +144,7 @@ Public Module Trim
         print(0, $"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
         print(0, anyKeyStr, leadingBlank:=True, closeMenu:=True)
         outputFile.overwriteToFile(winapp2.winapp2string)
-        If Not suppressOutput Then Console.ReadKey()
+        If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
     ''' <summary>

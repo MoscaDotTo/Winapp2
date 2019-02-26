@@ -28,8 +28,7 @@ Module MenuMaker
     Public Const anyKeyStr As String = "Press any key to return to the menu."
     Public Const invInpStr As String = "Invalid input. Please try again."
     Public Const promptStr As String = "Enter a number, or leave blank to run the default: "
-    ' This boolean will prevent us from printing output or asking for input under most circumstances, triggered by the -s command line argument 
-    Public suppressOutput As Boolean = False
+    Private _suppressOutput As Boolean = False
     ' The maximum length of the portion of the first half of a '#. Option - Description' style menu line
     Dim menuItemLength As Integer
     ' Indicates whether or not we are pending an exit from the menu
@@ -38,6 +37,18 @@ Module MenuMaker
     Public menuHeaderText As String
     ' Holds the current option number at any given moment
     Dim optNum As Integer = 0
+    ''' <summary>
+    ''' When enabled, prevents winapp2ool from outputting to the console or asking for input (usually)
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property SuppressOutput As Boolean
+        Get
+            Return _suppressOutput
+        End Get
+        Set(value As Boolean)
+            _suppressOutput = value
+        End Set
+    End Property
 
     ''' <summary>
     ''' Initializes the menu 
@@ -110,7 +121,9 @@ Module MenuMaker
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
         printMenuLine(tmenu(menuHeaderText))
         printMenuLine(menuStr03)
-        descriptionItems.ToList.ForEach(Sub(line) printMenuLine(line, True))
+        For Each line In descriptionItems
+            print(0, line, isCentered:=True)
+        Next
         printMenuLine(menuStr04)
         optNum = 0
         print(1, "Exit", "Return to the menu", printExit)
@@ -259,7 +272,7 @@ Module MenuMaker
     ''' </summary>
     ''' <param name="msg">The string to be printed</param>
     Public Sub cwl(Optional msg As String = Nothing)
-        If Not suppressOutput Then Console.WriteLine(msg)
+        If Not SuppressOutput Then Console.WriteLine(msg)
     End Sub
 
     ''' <summary>

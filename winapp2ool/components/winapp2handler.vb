@@ -20,7 +20,7 @@ Imports System.Text.RegularExpressions
 ''' <summary>
 ''' Provides an object model and some helpful functions for working with winapp2.ini format .ini files
 ''' </summary>
-Module winapp2handler
+Public Module winapp2handler
     ''' <summary>
     ''' Sorts a list of strings after performing some mutations on the data (if necessary). Returns the sorted list of strings.
     ''' </summary>
