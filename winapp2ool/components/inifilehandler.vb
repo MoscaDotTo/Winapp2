@@ -707,10 +707,11 @@ Public Module iniFileHandler
         ''' <summary>
         ''' Returns the keylist in the form of a list of Strings
         ''' </summary>
+        ''' <param name="onlyGetVals">Optional Boolean specifying whether or not the function should return only the values from the keys</param>
         ''' <returns></returns>
-        Public Function toListOfStr(Optional getVals As Boolean = False) As List(Of String)
+        Public Function toListOfStr(Optional onlyGetVals As Boolean = False) As List(Of String)
             Dim out As New List(Of String)
-            keys.ForEach(Sub(key) out.Add(If(getVals, key.value, key.toString)))
+            keys.ForEach(Sub(key) out.Add(If(onlyGetVals, key.value, key.toString)))
             Return out
         End Function
 

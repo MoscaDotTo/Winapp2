@@ -123,7 +123,7 @@ Module CCiniDebug
         If sortFile Then sortCC()
         If saveFile Then outputFile.overwriteToFile(ccFile.toString)
         print(0, $"{If(saveFile, $"{outputFile.name} saved", "Analysis complete")}. {anyKeyStr}", isCentered:=True, closeMenu:=True)
-        If Not suppressOutput Then Console.ReadKey()
+        If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
     ''' <summary>

@@ -41,10 +41,10 @@ Module Downloader
     ''' </summary>
     Public Sub handleCmdLine()
         Dim fileLink As String = ""
-        If cmdargs.Count > 0 Then
-            Select Case cmdargs(0).ToLower
+        If Cmdargs.Count > 0 Then
+            Select Case Cmdargs(0).ToLower
                 Case "1", "2", "winapp2"
-                    fileLink = If(Not cmdargs(0) = "2", wa2Link, nonccLink)
+                    fileLink = If(Not Cmdargs(0) = "2", wa2Link, nonccLink)
                     downloadFile.name = "winapp2.ini"
                 Case "3", "winapp2ool"
                     fileLink = toolLink
@@ -65,7 +65,7 @@ Module Downloader
                     fileLink = readMeLink
                     downloadFile.name = "readme.txt"
             End Select
-            cmdargs.RemoveAt(0)
+            Cmdargs.RemoveAt(0)
         End If
         getFileAndDirParams(downloadFile, New iniFile, New iniFile)
         If downloadFile.dir = Environment.CurrentDirectory And downloadFile.name = "winapp2ool.exe" Then autoUpdate()
@@ -284,7 +284,7 @@ Module Downloader
         ' Don't try to download to a directory that doesn't exist
         If Not Directory.Exists(downloadFile.dir) Then Directory.CreateDirectory(downloadFile.dir)
         ' If the file exists and we're prompting or overwrite, do that.
-        If prompt And File.Exists(downloadFile.path) And Not suppressOutput Then
+        If prompt And File.Exists(downloadFile.path) And Not SuppressOutput Then
             cwl($"{downloadFile.name} already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
             Dim nfilename As String = Console.ReadLine()
