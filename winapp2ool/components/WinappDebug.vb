@@ -13,18 +13,19 @@
 '    GNU General Public License for more details.
 '
 '    You should have received a copy of the GNU General Public License
-'    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+'    along with Winapp2ool.  If not, see---+ <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.IO
 Imports System.Text.RegularExpressions
+Imports winapp2ool
 
 ''' <summary>
 ''' A program whose purpose is to observe, report, and attempt to repair errors in winapp2.ini
 ''' </summary>
-Module WinappDebug
+Public Module WinappDebug
     ' File handlers
-    Dim winappFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
-    Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
+    Dim winappDebugWinapp2File As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+    Dim winappDebugOutputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
     ' Menu settings
     Dim settingsChanged As Boolean = False
     Dim scanSettingsChanged As Boolean = False
@@ -32,25 +33,16 @@ Module WinappDebug
     Dim correctFormatting As Boolean = False
     Dim allEntryNames As New List(Of String)
     Dim numErrs As Integer = 0
-    Dim correctSomeFormatting As Boolean = True
+    Dim correctSomeFormatting As Boolean = False
     ' Autocorrect Parameters
-    Dim correctCasing As Boolean = True
-    Dim correctAlpha As Boolean = True
-    Dim correctNumbers As Boolean = True
-    Dim correctParameters As Boolean = True
-    Dim correctFlags As Boolean = True
-    Dim correctSlashes As Boolean = True
-    Dim correctDefaults As Boolean = True
-    Dim correctOpti As Boolean = False
-    ' Scan parameters
-    Dim scanCasing As Boolean = True
-    Dim scanAlpha As Boolean = True
-    Dim scanNumbers As Boolean = True
-    Dim scanParams As Boolean = True
-    Dim scanFlags As Boolean = True
-    Dim scanSlashes As Boolean = True
-    Dim scanDefaults As Boolean = True
-    Dim scanOpti As Boolean = False
+    Dim lintCasing As New lintRule(True, True)
+    Dim lintAlpha As New lintRule(True, True)
+    Dim lintNums As New lintRule(True, True)
+    Dim lintParams As New lintRule(True, True)
+    Dim lintFlags As New lintRule(True, True)
+    Dim lintSlashes As New lintRule(True, True)
+    Dim lintDefaults As New lintRule(True, True)
+    Dim lintOpti As New lintRule(False, False)
     ' Winapp2 Parameters
     ReadOnly enVars As String() = {"UserProfile", "UserName", "ProgramFiles", "RootDir", "WinDir", "AppData", "SystemDrive", "SystemRoot", "Documents", "ProgramData", "AllUsersProfile", "Pictures", "Video", "CommonAppData", "LocalAppData", "CommonProgramFiles", "HomeDrive", "Music", "tmp", "Temp", "LocalLowAppData", "Public"}
     ReadOnly validCmds As String() = {"SpecialDetect", "FileKey", "RegKey", "Detect", "LangSecRef", "Warning", "Default", "Section", "ExcludeKey", "DetectFile", "DetectOS"}
@@ -62,26 +54,154 @@ Module WinappDebug
     ReadOnly driveLtrs As New Regex("[a-zA-z]:")
     ReadOnly envVarRegex As New Regex("%[A-Za-z0-9]*%")
 
+    Private Class lintRule
+        Private _shouldScan As Boolean
+        Private _shouldRepair As Boolean
+        Private initScanState As Boolean
+        Private initRepairState As Boolean
+
+        ''' <summary>
+        ''' Indicates whether or not scans for this rule should run
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property ShouldScan As Boolean
+            Get
+                Return _shouldScan
+            End Get
+            Set(value As Boolean)
+                _shouldScan = value
+            End Set
+        End Property
+
+        ''' <summary>
+        ''' Indicates whether or not repairs for this rule should run
+        ''' </summary>
+        ''' <returns></returns>
+        Public Property ShouldRepair As Boolean
+            Get
+                Return _shouldRepair
+            End Get
+            Set(value As Boolean)
+                _shouldRepair = value
+            End Set
+        End Property
+
+        ''' <summary>
+        ''' Restores the initial lint rule state
+        ''' </summary>
+        Public Sub resetParams()
+            ShouldScan = initScanState
+            ShouldRepair = initRepairState
+        End Sub
+
+        ''' <summary>
+        ''' Creates a new rule for the linter, retains the inital given parameters
+        ''' </summary>
+        ''' <param name="scan">The default scan state</param>
+        ''' <param name="repair">The default repair state </param>
+        Public Sub New(scan As Boolean, repair As Boolean)
+            ShouldScan = scan
+            initScanState = scan
+            ShouldRepair = repair
+            initRepairState = repair
+        End Sub
+
+        ''' <summary>
+        ''' Enables both the scan and repair for the rule
+        ''' </summary>
+        Public Sub turnOn()
+            ShouldScan = True
+            ShouldRepair = True
+        End Sub
+
+        ''' <summary>
+        ''' Disables both the scan and repair for the rule
+        ''' </summary>
+        Public Sub turnOff()
+            ShouldScan = False
+            ShouldRepair = False
+        End Sub
+
+        ''' <summary>
+        ''' Determines whether or not a fix that sits behind an optional flag should be run
+        ''' </summary>
+        ''' <returns></returns>
+        Public Function fixFormat() As Boolean
+            Return CorrectFormatting1 Or (correctSomeFormatting And ShouldRepair)
+        End Function
+
+    End Class
+
+    ''' <summary>
+    ''' The winapp2.ini file that will be linted
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property winappDebugFile1 As iniFile
+        Get
+            Return winappDebugWinapp2File
+        End Get
+        Set(value As iniFile)
+            winappDebugWinapp2File = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' Holds the save path for the linted file (overwrites the input file by default)
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property winappDebugFile3 As iniFile
+        Get
+            Return winappDebugOutputFile
+        End Get
+        Set(value As iniFile)
+            winappDebugOutputFile = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' Indicates whether or not winappdebug should attempt to repair errors it finds, disabled by default
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property CorrectFormatting1 As Boolean
+        Get
+            Return correctFormatting
+        End Get
+        Set(value As Boolean)
+            correctFormatting = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' The number of errors found by the linter
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property errorsFound As Integer
+        Get
+            Return numErrs
+        End Get
+        Set(value As Integer)
+            numErrs = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' The current rules for scans and repairs 
+    ''' </summary>
+    ''' <returns></returns>
+    Private Property Rules1 As lintRule() = initLintRules()
+
+    ''' <summary>
+    ''' Instantiates the default state of the lint rules
+    ''' </summary>
+    Private Function initLintRules() As lintRule()
+        Return {lintCasing, lintAlpha, lintNums, lintParams, lintFlags, lintSlashes, lintDefaults, lintOpti}
+    End Function
+
     ''' <summary>
     ''' Resets the individual scan settings to their defaults
     ''' </summary>
     Private Sub resetScanSettings()
-        correctCasing = True
-        correctAlpha = True
-        correctNumbers = True
-        correctParameters = True
-        correctFlags = True
-        correctSlashes = True
-        correctDefaults = True
-        correctOpti = False
-        scanCasing = True
-        scanAlpha = True
-        scanNumbers = True
-        scanParams = True
-        scanFlags = True
-        scanSlashes = True
-        scanDefaults = True
-        scanOpti = False
+        Rules1 = initLintRules()
         scanSettingsChanged = False
         correctSomeFormatting = False
     End Sub
@@ -92,32 +212,22 @@ Module WinappDebug
     ''' WinappDebug specific command line args
     ''' -c          : enable autocorrect
     Public Sub handleCmdLine()
-        invertSettingAndRemoveArg(correctFormatting, "-c")
-        getFileAndDirParams(winappFile, New iniFile, outputFile)
-        initDebug()
+        initDefaultSettings()
+        invertSettingAndRemoveArg(CorrectFormatting1, "-c")
+        getFileAndDirParams(winappDebugFile1, New iniFile, winappDebugFile3)
+        If Not cmdargs.Contains("UNIT_TESTING_HALT") Then initDebug()
     End Sub
 
     ''' <summary>
     ''' Restore the default state of the module's parameters
     ''' </summary>
     Private Sub initDefaultSettings()
-        winappFile.resetParams()
-        outputFile.resetParams()
+        Rules1 = initLintRules()
+        winappDebugFile1.resetParams()
+        winappDebugFile3.resetParams()
         settingsChanged = False
-        correctFormatting = False
+        CorrectFormatting1 = False
         resetScanSettings()
-    End Sub
-
-    ''' <summary>
-    ''' Matches paired boolean states for scans and their repairs
-    ''' </summary>
-    ''' ie. make sure that if a scan is disabled, so too is its repair, and if a repair is enabled, so too is its scan
-    ''' <param name="setting"></param>
-    ''' <param name="pairedSetting"></param>
-    ''' <param name="type"></param>
-    Private Sub toggleScanSetting(ByRef setting As Boolean, ByRef pairedSetting As Boolean, type As String)
-        toggleSettingParam(setting, type, scanSettingsChanged)
-        If (type = "Scan" And Not setting And pairedSetting) Or (type = "Repair" And setting And Not pairedSetting) Then toggleSettingParam(pairedSetting, type, scanSettingsChanged)
     End Sub
 
     ''' <summary>
@@ -127,23 +237,23 @@ Module WinappDebug
         Console.WindowHeight = 35
         printMenuTop({"Enable or disable specific scans or repairs"})
         print(0, "Scan Options", leadingBlank:=True, trailingBlank:=True)
-        print(1, "Casing", $"{enStr(scanCasing)} detecting improper CamelCasing")
-        print(1, "Alphabetization", $"{enStr(scanAlpha)} detecting improper alphabetization")
-        print(1, "Numbering", $"{enStr(scanNumbers)} detecting improper key numbering")
-        print(1, "Parameters", $"{enStr(scanParams)} detecting improper parameterization on FileKeys and ExcludeKeys")
-        print(1, "Flags", $"{enStr(scanFlags)} detecting improper RECURSE and REMOVESELF formatting")
-        print(1, "Slashes", $"{enStr(scanSlashes)} detecting problems surrounding use of slashes (\)")
-        print(1, "Defaults", $"{enStr(scanDefaults)} detecting Default=True or missing Default")
-        print(1, "Optimizations", $"{enStr(scanOpti)} detecting situations where keys can be merged")
+        print(1, "Casing", $"{enStr(lintCasing.ShouldScan)} detecting improper CamelCasing")
+        print(1, "Alphabetization", $"{enStr(lintAlpha.ShouldScan)} detecting improper alphabetization")
+        print(1, "Numbering", $"{enStr(lintNums.ShouldScan)} detecting improper key numbering")
+        print(1, "Parameters", $"{enStr(lintParams.ShouldScan)} detecting improper parameterization on FileKeys and ExcludeKeys")
+        print(1, "Flags", $"{enStr(lintFlags.ShouldScan)} detecting improper RECURSE and REMOVESELF formatting")
+        print(1, "Slashes", $"{enStr(lintSlashes.ShouldScan)} detecting problems surrounding use of slashes (\)")
+        print(1, "Defaults", $"{enStr(lintDefaults.ShouldScan)} detecting Default=True or missing Default")
+        print(1, "Optimizations", $"{enStr(lintOpti.ShouldScan)} detecting situations where keys can be merged")
         print(0, "Repair Options", leadingBlank:=True, trailingBlank:=True)
-        print(1, "Casing", $"{enStr(correctCasing)} fixing improper CamelCasing")
-        print(1, "Alphabetization", $"{enStr(correctAlpha)} fixing improper alphabetization")
-        print(1, "Numbering", $"{enStr(correctNumbers)} fixing improper key numbering")
-        print(1, "Parameters", $"{enStr(correctParameters)} fixing improper parameterization On FileKeys And ExcludeKeys")
-        print(1, "Flags", $"{enStr(correctFlags)} fixing improper RECURSE And REMOVESELF formatting")
-        print(1, "Slashes", $"{enStr(correctSlashes)} fixing problems surrounding use Of slashes (\)")
-        print(1, "Defaults", $"{enStr(correctDefaults)} setting Default=True To Default=False or missing Default")
-        print(1, "Optimizations", $"{enStr(correctOpti)} automatic merging of keys", closeMenu:=Not scanSettingsChanged)
+        print(1, "Casing", $"{enStr(lintCasing.ShouldRepair)} fixing improper CamelCasing")
+        print(1, "Alphabetization", $"{enStr(lintAlpha.ShouldRepair)} fixing improper alphabetization")
+        print(1, "Numbering", $"{enStr(lintNums.ShouldRepair)} fixing improper key numbering")
+        print(1, "Parameters", $"{enStr(lintParams.ShouldRepair)} fixing improper parameterization On FileKeys And ExcludeKeys")
+        print(1, "Flags", $"{enStr(lintFlags.ShouldRepair)} fixing improper RECURSE And REMOVESELF formatting")
+        print(1, "Slashes", $"{enStr(lintSlashes.ShouldRepair)} fixing problems surrounding use Of slashes (\)")
+        print(1, "Defaults", $"{enStr(lintDefaults.ShouldRepair)} setting Default=True To Default=False or missing Default")
+        print(1, "Optimizations", $"{enStr(lintOpti.ShouldRepair)} automatic merging of keys", closeMenu:=Not scanSettingsChanged)
         print(2, "Scan And Repair", cond:=scanSettingsChanged, closeMenu:=True)
     End Sub
 
@@ -152,50 +262,42 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="input">The String containing the user's input</param>
     Private Sub handleScanInput(input As String)
-        Dim originalSettingsState As Boolean = New Boolean() {scanCasing, scanAlpha, scanNumbers, scanParams, scanFlags, scanSlashes, scanDefaults,
-                correctCasing, correctAlpha, correctNumbers, correctParameters, correctFlags, correctSlashes,
-                correctDefaults, scanSettingsChanged = False, scanOpti = False, correctOpti = False}.All(Function(x As Boolean) x)
-        settingsChanged = Not originalSettingsState
-        Dim tmp3 As Boolean = New Boolean() {correctFormatting = False, correctCasing, correctAlpha, correctNumbers, correctParameters, correctFlags, correctSlashes, correctDefaults}.All(Function(x As Boolean) x)
-        correctFormatting = Not tmp3
-        If Not correctFormatting And tmp3 Then correctSomeFormatting = True
-        Select Case input
-            Case "0"
+        ' Determine which if any scan rules have been modified
+        Dim initRuleState = initLintRules()
+        If Not Rules1.Equals(initRuleState) Then scanSettingsChanged = True
+        Dim repairAll = True
+        Dim repairAny = False
+        ' Determine what degree of formatting checks should take place
+        For Each rule In Rules1
+            If Not rule.ShouldRepair Then
+                repairAll = False
+            Else
+                repairAny = True
+            End If
+        Next
+        If Not repairAll And repairAny Then
+            CorrectFormatting1 = False
+            correctSomeFormatting = True
+        End If
+        Dim scanNums = {"1", "2", "3", "4", "5", "6", "7", "8"}
+        Dim repNums = {"9", "10", "11", "12", "13", "14", "15", "16"}
+        Select Case True
+            Case input = "0"
                 If scanSettingsChanged Then settingsChanged = True
                 exitCode = True
-            Case "1"
-                toggleScanSetting(scanCasing, correctCasing, "Scan")
-            Case "2"
-                toggleScanSetting(scanAlpha, correctAlpha, "Scan")
-            Case "3"
-                toggleScanSetting(scanNumbers, correctNumbers, "Scan")
-            Case "4"
-                toggleScanSetting(scanParams, correctParameters, "Scan")
-            Case "5"
-                toggleScanSetting(scanFlags, correctFlags, "Scan")
-            Case "6"
-                toggleScanSetting(scanSlashes, correctSlashes, "Scan")
-            Case "7"
-                toggleScanSetting(scanDefaults, correctDefaults, "Scan")
-            Case "8"
-                toggleScanSetting(scanOpti, correctOpti, "Scan")
-            Case "9"
-                toggleScanSetting(correctCasing, scanCasing, "Repair")
-            Case "10"
-                toggleScanSetting(correctAlpha, scanAlpha, "Repair")
-            Case "11"
-                toggleScanSetting(correctNumbers, scanNumbers, "Repair")
-            Case "12"
-                toggleScanSetting(correctParameters, scanParams, "Repair")
-            Case "13"
-                toggleScanSetting(correctFlags, scanFlags, "Repair")
-            Case "14"
-                toggleScanSetting(correctSlashes, scanSlashes, "Repair")
-            Case "15"
-                toggleScanSetting(correctDefaults, scanDefaults, "Repair")
-            Case "16"
-                toggleScanSetting(correctOpti, scanOpti, "Repair")
-            Case "17"
+            ' Enable/Disable individual scans
+            Case scanNums.Contains(input)
+                Dim ind = scanNums.ToList.IndexOf(input)
+                toggleSettingParam(Rules1(ind).ShouldScan, "Scan", scanSettingsChanged)
+                ' Force repair off if the scan is off
+                If Not Rules1(ind).ShouldScan Then Rules1(ind).turnOff()
+            ' Enable/Disable individual repairs
+            Case repNums.Contains(input)
+                Dim ind = repNums.ToList.IndexOf(input)
+                toggleSettingParam(Rules1(ind).ShouldRepair, "Repair", scanSettingsChanged)
+                ' Force scan on if the repair is on
+                If Rules1(ind).ShouldRepair Then Rules1(ind).turnOn()
+            Case input = "17"
                 menuHeaderText = If(scanSettingsChanged, "Settings Reset", invInpStr)
                 If scanSettingsChanged Then resetScanSettings()
             Case Else
@@ -210,11 +312,11 @@ Module WinappDebug
         printMenuTop({"Scan winapp2.ini for syntax and style errors, and attempt to repair them."})
         print(1, "Run (Default)", "Run the debugger")
         print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or path", leadingBlank:=True, trailingBlank:=True)
-        print(1, "Toggle Autocorrect", $"{enStr(correctFormatting)} saving the file after correcting errors")
-        print(1, "File Chooser (save)", "Save a copy of changes made instead of overwriting winapp2.ini", correctFormatting, trailingBlank:=True)
-        print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not correctFormatting, trailingBlank:=True)
-        print(0, $"Current winapp2.ini:  {replDir(winappFile.path)}", closeMenu:=Not correctFormatting And Not settingsChanged)
-        print(0, $"Current save target:  {replDir(outputFile.path)}", cond:=correctFormatting, closeMenu:=Not settingsChanged)
+        print(1, "Toggle Autocorrect", $"{enStr(CorrectFormatting1)} saving the file after correcting errors")
+        print(1, "File Chooser (save)", "Save a copy of changes made instead of overwriting winapp2.ini", CorrectFormatting1, trailingBlank:=True)
+        print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not CorrectFormatting1, trailingBlank:=True)
+        print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.path)}", closeMenu:=Not CorrectFormatting1 And Not settingsChanged)
+        print(0, $"Current save target:  {replDir(winappDebugFile3.path)}", cond:=CorrectFormatting1, closeMenu:=Not settingsChanged)
         print(2, "WinappDebug", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
@@ -229,14 +331,14 @@ Module WinappDebug
             Case input = "1" Or input = ""
                 initDebug()
             Case input = "2"
-                changeFileParams(winappFile, settingsChanged)
+                changeFileParams(winappDebugFile1, settingsChanged)
             Case input = "3"
-                toggleSettingParam(correctFormatting, "Autocorrect", settingsChanged)
-            Case input = "4" And correctFormatting
-                changeFileParams(outputFile, settingsChanged)
-            Case (input = "4" And Not correctFormatting) Or (input = "5" And correctFormatting)
+                toggleSettingParam(CorrectFormatting1, "Autocorrect", settingsChanged)
+            Case input = "4" And CorrectFormatting1
+                changeFileParams(winappDebugFile3, settingsChanged)
+            Case (input = "4" And Not CorrectFormatting1) Or (input = "5" And CorrectFormatting1)
                 initModule("Scan Settings", AddressOf printScansMenu, AddressOf handleScanInput)
-            Case settingsChanged And ((input = "5" And Not correctFormatting) Or (input = "6" And correctFormatting))
+            Case settingsChanged And ((input = "5" And Not CorrectFormatting1) Or (input = "6" And CorrectFormatting1))
                 resetModuleSettings("WinappDebug", AddressOf initDefaultSettings)
             Case Else
                 menuHeaderText = invInpStr
@@ -247,33 +349,33 @@ Module WinappDebug
     ''' Validates and debugs the ini file, informs the user upon completion
     ''' </summary>
     Private Sub initDebug()
-        winappFile.validate()
-        debug(winappFile)
+        winappDebugFile1.validate()
+        If pendingExit() Then Exit Sub
+        Dim wa2 As New winapp2file(winappDebugFile1)
+        Console.Clear()
+        print(0, tmenu("Beginning analysis of winapp2.ini"), closeMenu:=True)
+        cwl()
+        debug(wa2)
         menuHeaderText = "Debug Complete"
+        print(0, tmenu("Completed analysis of winapp2.ini"))
+        print(0, menuStr03)
+        print(0, $"{errorsFound} possible errors were detected.")
+        print(0, $"Number of entries: {winappDebugFile1.sections.Count}", trailingBlank:=True)
+        rewriteChanges(wa2)
+        print(0, anyKeyStr, closeMenu:=True)
+        If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
     ''' <summary>
     ''' Performs syntax and format checking on a winapp2.ini format ini file
     ''' </summary>
-    ''' <param name="cfile">A winapp2.ini format iniFile object</param>
-    Private Sub debug(cfile As iniFile)
-        If pendingExit() Then Exit Sub
-        Console.Clear()
-        print(0, tmenu("Beginning analysis of winapp2.ini"), closeMenu:=True)
-        cwl()
-        numErrs = 0
+    ''' <param name="fileToBeDebugged">A winapp2file object to be processed</param>
+    Public Sub debug(ByRef fileToBeDebugged As winapp2file)
+        errorsFound = 0
         allEntryNames = New List(Of String)
-        Dim winapp2file As New winapp2file(cfile)
-        processEntries(winapp2file)
-        winapp2file.rebuildToIniFiles()
-        alphabetizeEntries(winapp2file)
-        print(0, tmenu("Completed analysis of winapp2.ini"))
-        print(0, menuStr03)
-        print(0, $"{numErrs} possible errors were detected.")
-        print(0, $"Number of entries: {cfile.sections.Count}", trailingBlank:=True)
-        rewriteChanges(winapp2file)
-        print(0, anyKeyStr, closeMenu:=True)
-        If Not suppressOutput Then Console.ReadKey()
+        processEntries(fileToBeDebugged)
+        fileToBeDebugged.rebuildToIniFiles()
+        alphabetizeEntries(fileToBeDebugged)
     End Sub
 
     ''' <summary>
@@ -296,7 +398,7 @@ Module WinappDebug
             Dim unsortedEntryList As List(Of String) = innerFile.namesToListOfStr
             Dim sortedEntryList As List(Of String) = sortEntryNames(innerFile)
             findOutOfPlace(unsortedEntryList, sortedEntryList, "Entry", innerFile.getLineNumsFromSections)
-            If fixFormat(correctAlpha) Then innerFile.sortSections(sortedEntryList)
+            If lintAlpha.fixFormat Then innerFile.sortSections(sortedEntryList)
         Next
     End Sub
 
@@ -305,9 +407,9 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="winapp2file">The object representing winapp2.ini</param>
     Private Sub rewriteChanges(ByRef winapp2file As winapp2file)
-        If correctFormatting Then
+        If CorrectFormatting1 Then
             print(0, "Saving changes, do not close winapp2ool or data loss may occur...", leadingBlank:=True)
-            outputFile.overwriteToFile(winapp2file.winapp2string)
+            winappDebugFile3.overwriteToFile(winapp2file.winapp2string)
             print(0, "Finished saving changes.", trailingBlank:=True)
         End If
     End Sub
@@ -384,9 +486,10 @@ Module WinappDebug
                     If key.typeIs("Detect") Then chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupes, kl.keyCount = 1)
                 Case "RegKey"
-                    cFormat(key, curNum, curStrings, dupes)
                     chkPathFormatValidity(key, True)
+                    cFormat(key, curNum, curStrings, dupes)
                 Case "Warning", "DetectOS", "SpecialDetect", "LangSecRef", "Section", "Default"
+                    ' No keys of these types should occur more than once per entry
                     If curNum > 1 Then
                         fullKeyErr(key, $"Multiple {key.keyType} detected.")
                         dupes.add(key)
@@ -394,7 +497,7 @@ Module WinappDebug
                     cFormat(key, curNum, curStrings, dupes, True)
                     fullKeyErr(key, "LangSecRef holds an invalid value.", key.typeIs("LangSecRef") And Not secRefNums.IsMatch(key.value))
                     fullKeyErr(key, "SpecialDetect holds an invalid value.", key.typeIs("SpecialDetect") And Not sdList.Contains(key.value))
-                    fullKeyErr(key, "All entries should be disabled by default (Default=False).", scanDefaults And Not key.vIs("False") And key.typeIs("Default"), correctDefaults, key.value, "False")
+                    fullKeyErr(key, "All entries should be disabled by default (Default=False).", lintDefaults.ShouldScan And Not key.vIs("False") And key.typeIs("Default"), lintDefaults.fixFormat, key.value, "False")
                 Case Else
                     cFormat(key, curNum, curStrings, dupes)
             End Select
@@ -424,11 +527,11 @@ Module WinappDebug
         Dim hasNumberingError As Boolean = If(noNumbers, Not key.nameIs(key.keyType), Not key.nameIs(key.keyType & keyNumber))
         Dim numberingErrStr As String = If(noNumbers, "Detected unnecessary numbering.", $"{key.keyType} entry is incorrectly numbered.")
         Dim fixedStr As String = If(noNumbers, key.keyType, key.keyType & keyNumber)
-        inputMismatchErr(key.lineNumber, numberingErrStr, key.name, fixedStr, scanNumbers And hasNumberingError)
-        fixStr(correctNumbers And hasNumberingError, key.name, fixedStr)
+        inputMismatchErr(key.lineNumber, numberingErrStr, key.name, fixedStr, lintNums.ShouldScan And hasNumberingError)
+        fixStr(lintNums.fixFormat And hasNumberingError, key.name, fixedStr)
         ' Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
-        fullKeyErr(key, "Forward slash (/) detected in lieu of backslash (\).", Not key.typeIs("Warning") And scanSlashes And key.vHas(CChar("/")), correctSlashes, key.value, key.value.Replace(CChar("/"), CChar("\")))
-        fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And scanParams, correctParameters, key.value, key.value.TrimEnd(CChar(";")))
+        fullKeyErr(key, "Forward slash (/) detected in lieu of backslash (\).", Not key.typeIs("Warning") And lintSlashes.ShouldScan And key.vHas(CChar("/")), lintSlashes.fixFormat, key.value, key.value.Replace(CChar("/"), CChar("\")))
+        fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And lintParams.ShouldScan, lintParams.fixFormat, key.value, key.value.TrimEnd(CChar(";")))
         ' Do some formatting checks for environment variables if needed
         If {"FileKey", "ExcludeKey", "DetectFile"}.Contains(key.keyType) Then cEnVar(key)
         keyNumber += 1
@@ -438,12 +541,12 @@ Module WinappDebug
     ''' Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected
     ''' </summary>
     ''' <param name="caseArray">The parent array of cased Strings</param>
-    ''' <param name="keyValue">The String to be checked for casing errors</param>
-    Private Function checkCasingError(caseArray As String(), keyValue As String) As String
+    ''' <param name="inputText">The String to be checked for casing errors</param>
+    Private Function checkCasingError(caseArray As String(), inputText As String) As String
         For Each casedText In caseArray
-            If keyValue.Equals(casedText, StringComparison.InvariantCultureIgnoreCase) Then Return casedText
+            If inputText.Equals(casedText, StringComparison.InvariantCultureIgnoreCase) Then Return casedText
         Next
-        Return keyValue
+        Return inputText
     End Function
 
     ''' <summary>
@@ -455,7 +558,7 @@ Module WinappDebug
         For Each m As Match In envVarRegex.Matches(key.value)
             Dim strippedText As String = m.ToString.Trim(CChar("%"))
             Dim camelText As String = checkCasingError(enVars, strippedText)
-            fullKeyErr(key, $"Invalid CamelCasing - expected %{camelText}% but found {m.ToString}", scanCasing And camelText <> strippedText, correctCasing, key.value, key.value.Replace(strippedText, camelText))
+            fullKeyErr(key, $"Invalid CamelCasing - expected %{camelText}% but found {m.ToString}", lintCasing.ShouldScan And camelText <> strippedText, lintCasing.fixFormat, key.value, key.value.Replace(strippedText, camelText))
             ' If we don't have a casing error and enVars doesn't contain our value, it's invalid. 
             fullKeyErr(key, $"Malformed or invalid environment variable:  {m.ToString}", camelText = strippedText And Not enVars.Contains(strippedText))
         Next
@@ -467,28 +570,20 @@ Module WinappDebug
     ''' <param name="key">an iniKey object to be checked for errors</param>
     ''' <returns></returns>
     Private Function cValidity(key As iniKey) As Boolean
-        If key.keyType = "DeleteMe" Then Return False
+        If key.typeIs("DeleteMe") Then Return False
         ' Check for leading or trailing whitespace
         If key.name.StartsWith(" ") Or key.name.EndsWith(" ") Or key.value.StartsWith(" ") Or key.value.EndsWith(" ") Then
             fullKeyErr(key, "Detected unwanted whitespace in iniKey", True)
             fixStr(True, key.value, key.value.Trim(CChar(" ")))
             fixStr(True, key.name, key.name.Trim(CChar(" ")))
+            fixStr(True, key.keyType, key.keyType.Trim(CChar(" ")))
         End If
         ' Make sure the keyType is a valid winapp2.ini command
         Dim casedString As String = checkCasingError(validCmds, key.keyType)
-        fullKeyErr(key, $"{casedString} has a casing error.", casedString <> key.keyType And scanCasing, correctCasing, key.name, key.name.Replace(key.keyType, casedString))
-        fixStr(casedString <> key.keyType, key.keyType, casedString)
-        fullKeyErr(key, "Invalid keyType detected.", Not validCmds.Contains(key.keyType))
+        Dim hasCasingErr = Not key.typeIs(casedString)
+        fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, lintCasing.fixFormat, key.name, key.name.Replace(key.keyType, casedString))
+        fullKeyErr(key, "Invalid keyType detected.", Not validCmds.Contains(casedString))
         Return True
-    End Function
-
-    ''' <summary>
-    ''' Determines whether or not a fix that sits behind an optional flag should be run
-    ''' </summary>
-    ''' <param name="setting">The parameter to be observed if only correcting some formatting</param>
-    ''' <returns></returns>
-    Private Function fixFormat(setting As Boolean) As Boolean
-        Return correctFormatting Or (correctSomeFormatting And setting)
     End Function
 
     ''' <summary>
@@ -505,11 +600,11 @@ Module WinappDebug
         If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF"))
         ' Check for missing pipe symbol on recurse and removeself, fix them if detected
         Dim flags As New List(Of String) From {"RECURSE", "REMOVESELF"}
-        flags.ForEach(Sub(flagStr) fullKeyErr(key, $"Missing pipe (|) before {flagStr}.", scanFlags And key.vHas(flagStr) And Not key.vHas($"|{flagStr}"), correctFlags, key.value, key.value.Replace(flagStr, $"|{flagStr}")))
+        flags.ForEach(Sub(flagStr) fullKeyErr(key, $"Missing pipe (|) before {flagStr}.", lintFlags.ShouldScan And key.vHas(flagStr) And Not key.vHas($"|{flagStr}"), lintFlags.fixFormat, key.value, key.value.Replace(flagStr, $"|{flagStr}")))
         ' Make sure VirtualStore folders point to the correct place
         inputMismatchErr(key.lineNumber, "Incorrect VirtualStore location.", key.value, "%LocalAppData%\VirtualStore\Program Files*\", key.vHas("\virtualStore\p", True) And Not key.vHasAny({"programdata", "program files*", "program*"}, True))
         ' Backslash checks, fix if detected
-        fullKeyErr(key, "Backslash (\) found before pipe (|).", scanSlashes And key.vHas("%\|"), correctSlashes, key.value, key.value.Replace("%\|", "%|"))
+        fullKeyErr(key, "Backslash (\) found before pipe (|).", lintSlashes.ShouldScan And key.vHas("%\|"), lintSlashes.fixFormat, key.value, key.value.Replace("%\|", "%|"))
         fullKeyErr(key, "Missing backslash (\) after %EnvironmentVariable%.", key.vHas("%") And Not key.vHasAny({"%|", "%\"}))
         ' Get the parameters given to the file key and sort them 
         Dim keyParams As New winapp2KeyParameters(key)
@@ -517,13 +612,13 @@ Module WinappDebug
         Dim dupeArgs As New List(Of String)
         ' Check for duplicate args
         For Each arg In keyParams.argsList
-            If chkDupes(argsStrings, arg.ToLower) And scanParams Then
+            If chkDupes(argsStrings, arg) And lintParams.ShouldScan Then
                 err(key.lineNumber, "Duplicate FileKey parameter found", arg)
                 dupeArgs.Add(arg)
             End If
         Next
         ' Remove any duplicate arguments from the key parameters and reconstruct keys we've modified above
-        If fixFormat(correctParameters) Then
+        If lintParams.fixFormat Then
             dupeArgs.ForEach(Sub(arg) keyParams.argsList.Remove(arg))
             keyParams.reconstructKey(key)
         End If
@@ -538,6 +633,7 @@ Module WinappDebug
         For Each lst In entry.keyListList
             Dim brokenKeys As New keyList
             lst.keys.ForEach(Sub(key) brokenKeys.add(key, Not cValidity(key)))
+
             lst.remove(brokenKeys.keys)
             entry.errorKeys.remove(brokenKeys.keys)
         Next
@@ -552,7 +648,7 @@ Module WinappDebug
         Dim hasFileExcludes As Boolean = False
         Dim hasRegExcludes As Boolean = False
         ' Check for duplicate names that are differently cased 
-        fullNameErrIf(chkDupes(allEntryNames, entry.name.ToLower), entry, "Duplicate entry name detected")
+        fullNameErrIf(chkDupes(allEntryNames, entry.name), entry, "Duplicate entry name detected")
         ' Check that the entry is named properly 
         fullNameErrIf(Not entry.name.EndsWith(" *"), entry, "All entries must End In ' *'")
         ' Confirm the validity of keys and remove any broken ones before continuing
@@ -582,8 +678,8 @@ Module WinappDebug
         ' Likewise for registry
         fullNameErrIf(entry.regKeys.keyCount = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
         ' Make sure we have a Default key.
-        fullNameErrIf(entry.defaultKey.keyCount = 0 And scanDefaults, entry, "Entry is missing a Default key")
-        entry.defaultKey.add(New iniKey("Default=False"), fixFormat(correctDefaults) And entry.defaultKey.keyCount = 0)
+        fullNameErrIf(entry.defaultKey.keyCount = 0 And lintDefaults.ShouldScan, entry, "Entry is missing a Default key")
+        entry.defaultKey.add(New iniKey("Default=False"), lintDefaults.fixFormat And entry.defaultKey.keyCount = 0)
     End Sub
 
     ''' <summary>
@@ -601,7 +697,7 @@ Module WinappDebug
     ''' <returns></returns>
     Private Function pDetectFile(key As iniKey) As iniKey
         ' Trailing Backslashes
-        fullKeyErr(key, "Trailing backslash (\) found in DetectFile", scanSlashes And key.value.Last = CChar("\"), correctSlashes, key.value, key.value.TrimEnd(CChar("\")))
+        fullKeyErr(key, "Trailing backslash (\) found in DetectFile", lintSlashes.ShouldScan And key.value.Last = CChar("\"), lintSlashes.fixFormat, key.value, key.value.TrimEnd(CChar("\")))
         ' Nested wildcards
         If key.vHas("*") Then
             Dim splitDir As String() = key.value.Split(CChar("\"))
@@ -644,7 +740,9 @@ Module WinappDebug
     ''' <param name="currentValue">The current value to be audited</param>
     ''' <returns></returns>
     Private Function chkDupes(ByRef valueStrings As List(Of String), currentValue As String) As Boolean
-        If valueStrings.Contains(currentValue) Then Return True
+        For Each value In valueStrings
+            If currentValue.Equals(value, StringComparison.InvariantCultureIgnoreCase) Then Return True
+        Next
         valueStrings.Add(currentValue)
         Return False
     End Function
@@ -655,13 +753,13 @@ Module WinappDebug
     ''' <param name="kl">The keylist to be sorted</param>
     ''' <param name="hadDuplicatesRemoved">The boolean indicating whether keys have been removed from this list</param>
     Private Sub sortKeys(ByRef kl As keyList, hadDuplicatesRemoved As Boolean)
-        If Not scanAlpha Or kl.keyCount <= 1 Then Exit Sub
+        If Not lintAlpha.ShouldScan Or kl.keyCount <= 1 Then Exit Sub
         Dim keyValues = kl.toListOfStr(True)
         Dim sortedKeyValues = replaceAndSort(keyValues, "|", " \ \")
-        ' Rewrite the alphabetized keys back into the keylist (fixes numbering silently) 
+        ' Rewrite the alphabetized keys back into the keylist (also fixes numbering)
         Dim keysOutOfPlace = False
         findOutOfPlace(keyValues, sortedKeyValues, kl.keyType, kl.lineNums, keysOutOfPlace)
-        If (keysOutOfPlace Or hadDuplicatesRemoved) And fixFormat(correctAlpha) Then kl.renumberKeys(sortedKeyValues)
+        If (keysOutOfPlace Or hadDuplicatesRemoved) And lintAlpha.fixFormat And lintNums.fixFormat Then kl.renumberKeys(sortedKeyValues)
     End Sub
 
     ''' <summary>
@@ -702,7 +800,7 @@ Module WinappDebug
     ''' </summary>
     ''' <param name="kl">A list of winapp2.ini FileKey format iniFiles</param>
     Private Sub cOptimization(ByRef kl As keyList)
-        If kl.keyCount < 2 Or Not scanOpti Then Exit Sub
+        If kl.keyCount < 2 Or Not lintOpti.ShouldScan Then Exit Sub
         Dim dupes As New keyList
         Dim newKeys As New keyList
         Dim flagList As New List(Of String)
@@ -742,7 +840,7 @@ Module WinappDebug
             printOptiSect("Optimization opportunity detected", kl)
             printOptiSect("The following keys can be merged into other keys:", dupes)
             printOptiSect("The resulting keyList will be reduced to: ", newKeys)
-            If correctOpti Then kl = newKeys
+            If lintOpti.fixFormat Then kl = newKeys
         End If
     End Sub
 
@@ -838,7 +936,7 @@ Module WinappDebug
         cwl($"Line: {lineCount} - Error: {err}")
         lines.ToList.ForEach(Sub(errStr As String) cwl(errStr))
         cwl()
-        numErrs += 1
+        errorsFound += 1
     End Sub
 
     ''' <summary>
