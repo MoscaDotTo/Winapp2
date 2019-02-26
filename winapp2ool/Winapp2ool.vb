@@ -103,7 +103,7 @@ Module Winapp2ool
         ' winapp2ool requires internet access for some functions
         chkOfflineMode()
         processCommandLineArgs()
-        If suppressOutput Then Environment.Exit(1)
+        If SuppressOutput Then Environment.Exit(1)
         initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printMenu, AddressOf handleUserInput, Not isOffline)
     End Sub
 
