@@ -76,6 +76,27 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
 
     ' Tests below this point until the marked point test that individual scans and repairs work within WinappDebug's debug method
 
+    ''' <summary>
+    ''' Toggles off all the tests except a specific one
+    ''' </summary>
+    ''' <param name="lintRuleIndex"></param>
+    Private Sub disableAllTextsExcept(lintRuleIndex As Integer)
+        For i As Integer = 0 To winapp2ool.WinappDebug.Rules1.Count - 1
+            If Not i = lintRuleIndex Then
+                ' Turn off all rules by default 
+                winapp2ool.WinappDebug.Rules1(i).turnOff()
+            Else
+                ' Enable the rule we want
+                winapp2ool.WinappDebug.Rules1(i).turnOn()
+            End If
+        Next
+    End Sub
+
+    ''' <summary>
+    ''' Returns a winapp2file object containing the requested test
+    ''' </summary>
+    ''' <param name="testNum">The test index to return from the unit test file</param>
+    ''' <returns></returns>
     Private Function getSingleTestFile(testNum As Integer) As winapp2ool.winapp2file
         Dim unitFile As New winapp2ool.iniFile(Environment.CurrentDirectory, "WinappDebugUnitTests.ini")
         unitFile.validate()
@@ -85,32 +106,50 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Return New winapp2ool.winapp2handler.winapp2file(testFile)
     End Function
 
+    ''' <summary>
+    ''' Tests the debug function in winapp2ool using tests from WinappDebugUnitTests.ini
+    ''' </summary>
+    ''' <param name="testNum">The test number to request from the file</param>
+    ''' <param name="expectedErrsWithoutRepair">The expected number of errors to be found on the first run</param>
+    ''' <param name="expectedErrsWithRepair">The expected number of errors to be found after repairs are run</param>
+    ''' <returns></returns>
     Public Function debug_ErrorFindAndRepair_Success(testNum As Integer, expectedErrsWithoutRepair As Integer, expectedErrsWithRepair As Integer) As winapp2ool.winapp2entry
         ' Initalize the default state of the module
         setDebugStage({}, True)
+        winapp2ool.CorrectSomeFormatting1 = false
         Dim test As winapp2ool.winapp2file = getSingleTestFile(testNum)
         ' Confirm the errors are found without autocorrect on
         winapp2ool.WinappDebug.debug(test)
         Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.errorsFound)
-        ' Enable autocorrect
-        winapp2ool.WinappDebug.CorrectFormatting1 = True
+        ' Enable repairs
+        winapp2ool.WinappDebug.CorrectSomeFormatting1 = True
         winapp2ool.WinappDebug.debug(test)
         ' Confirm the errors are still found (ie. not erroneously corrected during the first test)
         Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.errorsFound)
         winapp2ool.WinappDebug.debug(test)
-        ' Confirm the errors are fixed
+        ' Confirm fixable errors are fixed
         Assert.AreEqual(expectedErrsWithRepair, winapp2ool.WinappDebug.errorsFound)
         ' Return the entry for further assessment
         Return New winapp2ool.winapp2handler.winapp2entry(test.entrySections.Last.sections.Values.First)
     End Function
 
+    ''' <summary>
+    ''' Runs tests to ensure that keys with duplicate values are detected and removed
+    ''' </summary>
     <TestMethod> Public Sub debug_DuplicateKeyValue_FindAndRepair_Success()
-        Dim testOutput = debug_ErrorFindAndRepair_Success(0, 1, 0)
+        ' Disable all the tests so key-specific checks don't get triggered
+        disableAllTextsExcept(7)
+        Dim testOutput = debug_ErrorFindAndRepair_Success(0, 3, 0)
         Assert.AreEqual(1, testOutput.detects.keyCount)
     End Sub
 
+    ''' <summary>
+    ''' Runs tests to ensure that keys that are improperly numbered are detected and repaired
+    ''' </summary>
     <TestMethod> Public Sub debug_KeyNumberingError_FindAndRepair_Sucess()
+        disableAllTextsExcept(2)
         Dim testOutput = debug_ErrorFindAndRepair_Success(1, 1, 0)
+        Assert.AreEqual("Detect2", testOutput.detects.keys.Last.name)
     End Sub
 
 End Class
