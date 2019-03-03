@@ -97,7 +97,7 @@ Module Winapp2ool
     ''' </summary>
     Public Sub main()
         Console.Title = $"Winapp2ool v{currentVersion}"
-        Console.WindowWidth = 120
+        Console.WindowWidth = 126
         ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
         If Not Environment.Version.ToString = "4.0.30319.42000" Then dnfOOD = True
         ' winapp2ool requires internet access for some functions

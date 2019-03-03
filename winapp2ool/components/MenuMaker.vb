@@ -20,10 +20,10 @@ Option Strict On
 ''' </summary>
 Module MenuMaker
     ' Basic menu frames & Strings
-    Public Const menuStr00 As String = " ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗"
-    Public Const menuStr01 As String = " ║                                                                                                                    ║"
-    Public Const menuStr02 As String = " ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
-    Public Const menuStr03 As String = " ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣"
+    Public Const menuStr00 As String = " ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗"
+    Public Const menuStr01 As String = " ║                                                                                                                          ║"
+    Public Const menuStr02 As String = " ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
+    Public Const menuStr03 As String = " ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣"
     Public menuStr04 As String = appendNewLine(menu(menuStr01)) & appendNewLine(mkMenuLine("Menu: Enter a number to select", "c")) & mkMenuLine(menuStr01, "")
     Public Const anyKeyStr As String = "Press any key to return to the menu."
     Public Const invInpStr As String = "Invalid input. Please try again."
@@ -200,16 +200,16 @@ Module MenuMaker
     ''' <param name="align">The alignment of the line to be printed. 'l' for Left or 'c' for Centre</param>
     ''' <returns></returns>
     Public Function mkMenuLine(line As String, align As String) As String
-        If line.Length >= 119 Then Return line
+        If line.Length >= 125 Then Return line
         Dim out As String = " ║"
         Select Case align
             Case "c"
-                padToEnd(out, CInt((((118 - line.Length) / 2) + 2)))
+                padToEnd(out, CInt((((124 - line.Length) / 2) + 2)))
                 out += line
-                padToEnd(out, 118)
+                padToEnd(out, 124)
             Case "l"
                 out += " " & line
-                padToEnd(out, 118)
+                padToEnd(out, 124)
         End Select
         Return out
     End Function
@@ -223,7 +223,7 @@ Module MenuMaker
         While out.Length < targetLen
             out += " "
         End While
-        If targetLen = 118 Then out += "║"
+        If targetLen = 124 Then out += "║"
     End Sub
 
     ''' <summary>
