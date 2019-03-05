@@ -92,6 +92,11 @@ Module MenuMaker
                 print(0, tmenu(str1), isCentered:=True, closeMenu:=True)
             Case cond And printType = 4
                 print(0, $"{str1}, some functions will not be available.", trailingBlank:=True, isCentered:=True)
+            Case printType = 5
+                Console.ForegroundColor = If(cond, ConsoleColor.Green, ConsoleColor.Red)
+                print(1, str1, $"{enStr(cond)} {optString}")
+                Console.ResetColor()
+                If closeMenu Then printMenuLine(menuStr02) : Exit Sub
         End Select
         If cond And trailingBlank Then printMenuLine()
         If cond And closeMenu Then printMenuLine(menuStr02)
