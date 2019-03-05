@@ -51,9 +51,11 @@ Module Winapp2ool
     ''' <param name="newVer">The updated version pending download</param>
     Private Sub printUpdNotif(cond As Boolean, updName As String, oldVer As String, newVer As String)
         If cond Then
+            Console.ForegroundColor = ConsoleColor.Green
             print(0, $"A new version of {updName} is available!", isCentered:=True)
             print(0, $"Current  : v{oldVer}", isCentered:=True)
             print(0, $"Available: v{newVer}", trailingBlank:=True, isCentered:=True)
+            Console.ResetColor()
         End If
     End Sub
 

@@ -79,8 +79,11 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' <summary>
     ''' Toggles off all the tests except a specific one
     ''' </summary>
-    ''' <param name="lintRuleIndex"></param>
-    Private Sub disableAllTextsExcept(lintRuleIndex As Integer)
+    ''' <param name="lintRuleIndex">The index of the rule to be enabled</param>
+    Private Sub disableAllTestsExcept(lintRuleIndex As Integer)
+        ' Don't correct all formatting
+        winapp2ool.CorrectFormatting1 = False
+        winapp2ool.CorrectSomeFormatting1 = False
         For i As Integer = 0 To winapp2ool.WinappDebug.Rules1.Count - 1
             If Not i = lintRuleIndex Then
                 ' Turn off all rules by default 
@@ -113,10 +116,11 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' <param name="expectedErrsWithoutRepair">The expected number of errors to be found on the first run</param>
     ''' <param name="expectedErrsWithRepair">The expected number of errors to be found after repairs are run</param>
     ''' <returns></returns>
-    Public Function debug_ErrorFindAndRepair_Success(testNum As Integer, expectedErrsWithoutRepair As Integer, expectedErrsWithRepair As Integer) As winapp2ool.winapp2entry
+    Public Function debug_ErrorFindAndRepair_Success(testNum As Integer, expectedErrsWithoutRepair As Integer, expectedErrsWithRepair As Integer, lintRuleIndex As Integer) As winapp2ool.winapp2entry
         ' Initalize the default state of the module
         setDebugStage({}, True)
-        winapp2ool.CorrectSomeFormatting1 = false
+        ' Disable all the lint rules we're not currently testing
+        disableAllTestsExcept(lintRuleIndex)
         Dim test As winapp2ool.winapp2file = getSingleTestFile(testNum)
         ' Confirm the errors are found without autocorrect on
         winapp2ool.WinappDebug.debug(test)
@@ -137,18 +141,17 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' Runs tests to ensure that keys with duplicate values are detected and removed
     ''' </summary>
     <TestMethod> Public Sub debug_DuplicateKeyValue_FindAndRepair_Success()
-        ' Disable all the tests so key-specific checks don't get triggered
-        disableAllTextsExcept(7)
-        Dim testOutput = debug_ErrorFindAndRepair_Success(0, 3, 0)
+        ' Disable all the tests except the duplicate checks
+        Dim testOutput = debug_ErrorFindAndRepair_Success(0, 7, 0, 7)
         Assert.AreEqual(1, testOutput.detects.keyCount)
+        Assert.AreEqual(1, testOutput.detectFiles.keyCount)
     End Sub
 
     ''' <summary>
     ''' Runs tests to ensure that keys that are improperly numbered are detected and repaired
     ''' </summary>
     <TestMethod> Public Sub debug_KeyNumberingError_FindAndRepair_Sucess()
-        disableAllTextsExcept(2)
-        Dim testOutput = debug_ErrorFindAndRepair_Success(1, 1, 0)
+        Dim testOutput = debug_ErrorFindAndRepair_Success(1, 1, 0, 2)
         Assert.AreEqual("Detect2", testOutput.detects.keys.Last.name)
     End Sub
 

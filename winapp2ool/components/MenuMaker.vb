@@ -91,7 +91,9 @@ Module MenuMaker
             Case cond And printType = 3
                 print(0, tmenu(str1), isCentered:=True, closeMenu:=True)
             Case cond And printType = 4
+                Console.ForegroundColor = ConsoleColor.Red
                 print(0, $"{str1}, some functions will not be available.", trailingBlank:=True, isCentered:=True)
+                Console.ResetColor()
             Case printType = 5
                 Console.ForegroundColor = If(cond, ConsoleColor.Green, ConsoleColor.Red)
                 print(1, str1, $"{enStr(cond)} {optString}")

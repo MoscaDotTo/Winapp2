@@ -57,12 +57,19 @@ Public Module winapp2handler
     ''' <param name="currentValue">The current value of a string</param>
     ''' <param name="newValue">The new value of a piece of a string</param>
     Public Sub trackChanges(ByRef changeDict As Dictionary(Of String, String), currentValue As String, newValue As String)
-        If changeDict.Keys.Contains(currentValue) Then
-            changeDict.Add(newValue, changeDict.Item(currentValue))
-            changeDict.Remove(currentValue)
-        Else
-            changeDict.Add(newValue, currentValue)
-        End If
+        Try
+            If changeDict.Keys.Contains(currentValue) Then
+                changeDict.Add(newValue, changeDict.Item(currentValue))
+                changeDict.Remove(currentValue)
+            Else
+                changeDict.Add(newValue, currentValue)
+            End If
+        Catch ex As Exception
+            ' If this exception is thrown, there is a duplicate value in the list being audited 
+            ' But we are not linting duplicates (or else this value would have been removed by this point
+            ' For now, silently fail here, unless some issue crops up as a result of this silent failure. 
+            ' No known issues as of 2019-03-05
+        End Try
     End Sub
 
     ''' <summary>
