@@ -102,19 +102,21 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="components\lintRule.vb" />
-    <Compile Include="components\commandLineHandler.vb" />
-    <Compile Include="components\CCiniDebug.vb" />
-    <Compile Include="components\Diff.vb" />
-    <Compile Include="components\Downloader.vb" />
-    <Compile Include="components\inifilehandler.vb" />
-    <Compile Include="components\JavaMaker.vb" />
-    <Compile Include="components\MenuMaker.vb" />
-    <Compile Include="components\Merge.vb" />
-    <Compile Include="components\Minefield.vb" />
-    <Compile Include="components\RegistryHelper.vb" />
-    <Compile Include="components\winapp2handler.vb" />
-    <Compile Include="components\exceptionHandler.vb" />
+    <Compile Include="modules\ccdebug\CCiniDebug.vb" />
+    <Compile Include="modules\diff\Diff.vb" />
+    <Compile Include="modules\download\Downloader.vb" />
+    <Compile Include="modules\handlers\commandLineHandler.vb" />
+    <Compile Include="modules\handlers\exceptionHandler.vb" />
+    <Compile Include="modules\handlers\inifilehandler.vb" />
+    <Compile Include="modules\handlers\MenuMaker.vb" />
+    <Compile Include="modules\handlers\RegistryHelper.vb" />
+    <Compile Include="modules\handlers\winapp2handler.vb" />
+    <Compile Include="modules\merge\Merge.vb" />
+    <Compile Include="modules\minefield\JavaMaker.vb" />
+    <Compile Include="modules\minefield\Minefield.vb" />
+    <Compile Include="modules\trim\Trim.vb" />
+    <Compile Include="modules\winappdebug\lintRule.vb" />
+    <Compile Include="modules\winappdebug\WinappDebug.vb" />
     <Compile Include="Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -131,8 +133,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="components\Trim.vb" />
-    <Compile Include="components\WinappDebug.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">
@@ -175,6 +175,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
