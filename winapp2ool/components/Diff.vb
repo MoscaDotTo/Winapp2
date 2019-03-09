@@ -80,10 +80,10 @@ Module Diff
         print(0, "Select Older/Local File:", leadingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your older ini file")
         print(0, "Select Newer/Remote File:", leadingBlank:=True)
-        print(1, GetNameFromDL(True), $"{enStr(download)} diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, leadingBlank:=True)
+        print(5, GetNameFromDL(True), "diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, enStrCond:=download, leadingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your newer ini file", Not download, isOffline, True)
         print(0, "Log Settings:")
-        print(1, "Toggle Log Saving", $"{enStr(saveLog)} automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not saveLog)
+        print(5, "Toggle Log Saving", "automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not saveLog, enStrCond:=saveLog)
         print(1, "File Chooser (log)", "Change where Diff saves its log", saveLog, trailingBlank:=True)
         print(0, $"Older file: {replDir(oldOrLocalFile.path)}")
         print(0, $"Newer file: {If(newOrRemoteFile.name = "" And Not download, "Not yet selected", If(download, GetNameFromDL(True), replDir(newOrRemoteFile.path)))}", closeMenu:=Not saveLog And Not settingsChanged)
@@ -117,7 +117,7 @@ Module Diff
                 ((isOffline) And (input = "5") Or (input = "6" And saveLog)) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
             Case Else
-                menuHeaderText = invInpStr
+                setHeaderText(invInpStr, True)
         End Select
     End Sub
 
@@ -132,7 +132,7 @@ Module Diff
         If pendingExit() Then Exit Sub
         differ()
         If saveLog Then logFile.overwriteToFile(outputToFile)
-        menuHeaderText = "Diff Complete"
+        setHeaderText("Diff Complete")
     End Sub
 
     ''' <summary>
@@ -141,7 +141,7 @@ Module Diff
     ''' <param name="someFile">winapp2.ini format iniFile object</param>
     ''' <returns></returns>
     Private Function getVer(someFile As iniFile) As String
-        Dim ver As String = If(someFile.comments.Count > 0, someFile.comments(0).comment.ToString.ToLower, "000000")
+        Dim ver = If(someFile.comments.Count > 0, someFile.comments(0).comment.ToString.ToLower, "000000")
         Return If(ver.Contains("version"), ver.TrimStart(CChar(";")).Replace("version:", "version"), " version not given")
     End Function
 
@@ -151,16 +151,16 @@ Module Diff
     Private Sub differ()
         print(3, "Diffing, please wait. This may take a moment.")
         Console.Clear()
-        Dim fver As String = getVer(oldOrLocalFile)
-        Dim sver As String = getVer(newOrRemoteFile)
-        log(tmenu($"Changes made between{fver} and{sver}"))
+        Dim oldVersionNum = getVer(oldOrLocalFile)
+        Dim newVersionNum = getVer(newOrRemoteFile)
+        log(tmenu($"Changes made between{oldVersionNum} and{newVersionNum}"))
         log(menu(menuStr02))
         log(menu(menuStr00))
         ' Compare the files and then enumerate their changes
         Dim outList As List(Of String) = compareTo()
-        Dim remCt As Integer = 0
-        Dim modCt As Integer = 0
-        Dim addCt As Integer = 0
+        Dim remCt = 0
+        Dim modCt = 0
+        Dim addCt = 0
         For Each change In outList
             Select Case True
                 Case change.Contains("has been added")
@@ -203,7 +203,7 @@ Module Diff
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.keyCount + addedKeys.keyCount + updatedKeys.Count = 0 Then Continue For
-                    Dim tmp As String = getDiff(sSection, "modified")
+                    Dim tmp = getDiff(sSection, "modified")
                     tmp = getChangesFromList(addedKeys, tmp, $"{prependNewLines()}Added:")
                     tmp = getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.keyCount > 0)}Removed:")
                     If updatedKeys.Count > 0 Then
@@ -251,7 +251,7 @@ Module Diff
         Dim rkTemp As New keyList(removedKeys.keys)
         For i As Integer = 0 To addedKeys.keyCount - 1
             Dim key = addedKeys.keys(i)
-            For j As Integer = 0 To removedKeys.keyCount - 1
+            For j = 0 To removedKeys.keyCount - 1
                 Dim skey = removedKeys.keys(j)
                 If key.compareNames(skey) Then
                     Select Case key.keyType
@@ -267,7 +267,7 @@ Module Diff
                             newKey.argsList.Sort()
                             ' Check the number of arguments provided to the key
                             If oldKey.argsList.Count = newKey.argsList.Count Then
-                                For k As Integer = 0 To oldKey.argsList.Count - 1
+                                For k = 0 To oldKey.argsList.Count - 1
                                     ' If the args count matches but the sorted state of the args doesn't, the key has been updated
                                     If Not oldKey.argsList(k).Equals(newKey.argsList(k), StringComparison.InvariantCultureIgnoreCase) Then
                                         updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
@@ -315,7 +315,7 @@ Module Diff
     ''' <param name="changeType">The type of change to observe</param>
     ''' <returns></returns>
     Private Function getDiff(section As iniSection, changeType As String) As String
-        Dim out As String = ""
+        Dim out  = ""
         appendStrs({appendNewLine(mkMenuLine($"{section.name} has been {changeType}.", "c")), appendNewLine(appendNewLine(mkMenuLine(menuStr02, ""))), appendNewLine(section.ToString)}, out)
         If Not changeType = "modified" Then out += menuStr00
         Return out

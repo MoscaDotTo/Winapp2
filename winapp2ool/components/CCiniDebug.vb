@@ -66,9 +66,9 @@ Module CCiniDebug
     Public Sub printMenu()
         printMenuTop({"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"})
         print(1, "Run (default)", "Debug ccleaner.ini", trailingBlank:=True)
-        print(1, "Toggle Pruning", $"{enStr(pruneFile)} removal of dead winapp2.ini settings")
-        print(1, "Toggle Saving", $"{enStr(saveFile)} automatic saving of changes made by CCiniDebug")
-        print(1, "Toggle Sorting", $"{enStr(sortFile)} alphabetical sorting of ccleaner.ini", trailingBlank:=True)
+        print(5, "Toggle Pruning", "removal of dead winapp2.ini settings", enStrCond:=pruneFile)
+        print(5, "Toggle Saving", "automatic saving of changes made by CCiniDebug", enStrCond:=saveFile)
+        print(5, "Toggle Sorting", "alphabetical sorting of ccleaner.ini", enStrCond:=sortFile, trailingBlank:=True)
         print(1, "File Chooser (ccleaner.ini)", "Choose a new ccleaner.ini name or location")
         print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or location", pruneFile, trailingBlank:=Not saveFile)
         print(1, "File Chooser (save)", "Change where CCiniDebug saves its changes", saveFile, trailingBlank:=True)
@@ -103,9 +103,9 @@ Module CCiniDebug
             Case settingsChanged And ((input = "6" And Not (pruneFile Or saveFile)) Or (input = "7" And (pruneFile Xor saveFile)) Or (input = "8" And pruneFile And saveFile))
                 resetModuleSettings("CCiniDebug", AddressOf initDefaultSettings)
             Case Not (pruneFile Or saveFile Or sortFile)
-                menuHeaderText = "Please enable at least one option"
+                setHeaderText("Please enable at least one option", True)
             Case Else
-                menuHeaderText = invInpStr
+                setHeaderText(invInpStr, True)
         End Select
     End Sub
 

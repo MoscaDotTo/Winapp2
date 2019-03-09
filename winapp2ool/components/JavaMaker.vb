@@ -46,8 +46,8 @@ Module JavaMaker
         print(1, "Run (Default)", "Attempt to create an entry based on the current system", trailingBlank:=True)
         print(1, "Toggle Download", $"{enStr(download)} downloading of java.ini from GitHub", trailingBlank:=download)
         print(1, "File Chooser (java.ini)", "Select a new local file path for java.ini", Not download, trailingBlank:=True)
-        print(1, "Toggle Merge", $"{enStr(merge)} merging the generated entry into winapp2.ini automatically")
-        print(1, "Toggle Save", $"{enStr(save)} Saving the generated entry to disk", Not merge, trailingBlank:=Not save)
+        print(5, "Toggle Merge", "merging the generated entry into winapp2.ini automatically", enStrCond:=merge)
+        print(5, "Toggle Save", "saving the generated entry to disk", Not merge, trailingBlank:=Not save, enStrCond:=save)
         print(1, "File Chooser (save)", "Select where winapp2ool saves the generated entry", Not merge And save, trailingBlank:=True)
         print(0, $"Java definitions file: {If(Not download, replDir(javaFile.path), "online")}", closeMenu:=Not (save Or settingsChanged))
         print(0, $"Save file: {replDir(saveFile.path)}", cond:=save, closeMenu:=Not settingsChanged)
@@ -77,7 +77,7 @@ Module JavaMaker
             Case settingsChanged And ((input = "6" And Not download And save) Or (input = "5" And Not (download Xor save)) Or (input = "4" And Not download And save))
                 resetModuleSettings("JavaMaker", AddressOf initDefaultParams)
             Case Else
-                menuHeaderText = invInpStr
+                setHeaderText(invInpStr, True)
         End Select
     End Sub
 

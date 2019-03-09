@@ -32,7 +32,7 @@ Public Module iniFileHandler
         Dim iExitCode As Boolean = False
         While Not File.Exists(someFile.path)
             If pendingExit() Then Exit Sub
-            menuHeaderText = "Error"
+            setHeaderText("Error", True)
             While Not iExitCode
                 Console.Clear()
                 printMenuTop({$"{someFile.name} does not exist."})
@@ -49,9 +49,9 @@ Public Module iniFileHandler
                     Case "2"
                         dirChooser(someFile.dir)
                     Case Else
-                        menuHeaderText = invInpStr
+                        setHeaderText(invInpStr, True)
                 End Select
-                If Not File.Exists(someFile.path) And Not menuHeaderText = invInpStr Then menuHeaderText = "Error"
+                If Not File.Exists(someFile.path) And Not menuHeaderText = invInpStr Then setHeaderText("Error", True)
             End While
         End While
     End Sub
@@ -63,7 +63,7 @@ Public Module iniFileHandler
     Public Sub chkDirExist(ByRef dir As String)
         If pendingExit() Or Directory.Exists(dir) Then Exit Sub
         Dim iExitCode As Boolean = False
-        menuHeaderText = "Error"
+        setHeaderText("Error", True)
         While Not iExitCode
             Console.Clear()
             printMenuTop({$"{dir} does not exist."})
@@ -80,9 +80,9 @@ Public Module iniFileHandler
                 Case "2", ""
                     dirChooser(dir)
                 Case Else
-                    menuHeaderText = invInpStr
+                    setHeaderText(invInpStr, True)
             End Select
-            If Not Directory.Exists(dir) And Not menuHeaderText = invInpStr Then menuHeaderText = "Error"
+            If Not Directory.Exists(dir) And Not menuHeaderText = invInpStr Then setHeaderText("Error", True)
             If Directory.Exists(dir) Then iExitCode = True
         End While
     End Sub
@@ -104,7 +104,7 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
     Private Sub handleFileChooserChoice(ByRef someFile As iniFile)
-        menuHeaderText = "File Chooser"
+        setHeaderText("File Chooser")
         printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"})
         print(1, someFile.initName, "Use the default name", someFile.initName <> "")
         print(1, someFile.secondName, "Use the default rename", someFile.secondName <> "")
@@ -135,7 +135,7 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
     Public Sub handleFileChooserConfirm(ByRef someFile As iniFile)
-        menuHeaderText = "File Chooser"
+        setHeaderText("File Chooser")
         Dim iExitCode As Boolean = False
         Do Until iExitCode
             Console.Clear()
@@ -159,7 +159,7 @@ Public Module iniFileHandler
                 Case "3", ""
                     iExitCode = True
                 Case Else
-                    menuHeaderText = invInpStr
+                    setHeaderText(invInpStr, True)
             End Select
         Loop
     End Sub
@@ -182,7 +182,7 @@ Public Module iniFileHandler
     ''' <param name="dir">The String containing the directory the user is parameterizing</param>
     Private Sub handleDirChooserChoice(ByRef dir As String)
         Console.Clear()
-        menuHeaderText = "Directory Chooser"
+        setHeaderText("Directory Chooser")
         printMenuTop({"Choose a directory"})
         print(1, "Use default (default)", "Use the same folder as winapp2ool.exe")
         print(1, "Parent Folder", "Go up a level")
@@ -212,7 +212,7 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="dir">The String containing the directory the user is parameterizing</param>
     Private Sub handleDirChooserConfirm(ByRef dir As String)
-        menuHeaderText = "Directory Chooser"
+        setHeaderText("Directory Chooser")
         Dim iExitCode As Boolean = False
         Do Until iExitCode
             If pendingExit() Then Exit Sub
@@ -233,7 +233,7 @@ Public Module iniFileHandler
                 Case "2", ""
                     iExitCode = True
                 Case Else
-                    menuHeaderText = invInpStr
+                    setHeaderText(invInpStr, True)
             End Select
         Loop
     End Sub

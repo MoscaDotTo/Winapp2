@@ -77,7 +77,7 @@ Public Module Trim
     Public Sub printMenu()
         printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
         print(1, "Run (default)", "Trim winapp2.ini")
-        print(1, "Toggle Download", $"{enStr(download)} using the latest winapp2.ini as the input file", Not isOffline, True)
+        print(5, "Toggle Download", "using the latest winapp2.ini from GitHub as the input file", Not isOffline, True, enStrCond:=download)
         print(1, "File Chooser (winapp2.ini)", "Change the winapp2.ini name or location", Not download, isOffline, True)
         print(1, "File Chooser (save)", "Change the save file name or location", trailingBlank:=True)
         print(0, $"Current winapp2.ini location: {If(download, GetNameFromDL(download), replDir(winappFile.path))}")
@@ -104,7 +104,7 @@ Public Module Trim
             Case (input = "5" Or (input = "4" And (isOffline Or download)) And settingsChanged)
                 resetModuleSettings("Trim", AddressOf initDefaultSettings)
             Case Else
-                menuHeaderText = invInpStr
+                setHeaderText(invInpStr, True)
         End Select
     End Sub
 
@@ -116,7 +116,7 @@ Public Module Trim
         If pendingExit() Then Exit Sub
         Dim winapp2 As winapp2file = If(Not download, New winapp2file(winappFile), New winapp2file(getRemoteIniFile(getWinappLink)))
         trim(winapp2)
-        menuHeaderText = "Trim Complete"
+        setHeaderText("Trim Complete")
         Console.Clear()
     End Sub
 
@@ -126,7 +126,7 @@ Public Module Trim
     ''' <param name="winapp2">A winapp2.ini file</param>
     Private Sub trim(winapp2 As winapp2file)
         Console.Clear()
-        print(0, tmenu("Trimming... Please wait, this may take a moment..."), closeMenu:=True)
+        print(3, "Trimming... Please wait, this may take a moment...")
         Dim entryCountBeforeTrim As Integer = winapp2.count
         For Each entryList In winapp2.winapp2entries
             processEntryList(entryList)
@@ -250,6 +250,7 @@ Public Module Trim
     ''' <param name="entryList">The list of winapp2entry objects to check existence for</param>
     Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
         Dim sectionsToBePruned As New List(Of winapp2entry)
+        ' If the entry's Detect criteria doesn't return true, prune it 
         entryList.ForEach(Sub(entry) If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else virtualStoreChecker(entry))
         removeEntries(entryList, sectionsToBePruned)
     End Sub

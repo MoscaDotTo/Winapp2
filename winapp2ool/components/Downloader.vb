@@ -115,7 +115,7 @@ Module Downloader
                 downloadFile.name = "java.ini"
                 download(javaLink)
             Case Else
-                menuHeaderText = invInpStr
+                setHeaderText(invInpStr, True)
         End Select
     End Sub
 
@@ -149,7 +149,7 @@ Module Downloader
             Case "5"
                 dirChooser(downloadFile.dir)
                 undoAnyPendingExits()
-                menuHeaderText = "Save directory changed"
+                setHeaderText("Save directory changed")
             Case "6"
                 initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)
             Case "7"
@@ -157,7 +157,7 @@ Module Downloader
                 downloadFile.name = "Readme.txt"
                 download(readMeLink)
             Case Else
-                menuHeaderText = invInpStr
+                setHeaderText(invInpStr, True)
         End Select
     End Sub
 
@@ -294,7 +294,7 @@ Module Downloader
         Dim success As Boolean = dlFile(link, downloadFile.path)
         cwl($"Download {If(success, "Complete.", "Failed.")}")
         cwl(If(success, "Downloaded ", $"Unable to download {downloadFile.name} to {downloadFile.dir}"))
-        menuHeaderText = $"Download {If(success, "", "in")}complete: {downloadFile.name}"
+        setHeaderText($"Download {If(success, "", "in")}complete: {downloadFile.name}", Not success)
         If Not success Then Console.ReadLine()
     End Sub
 

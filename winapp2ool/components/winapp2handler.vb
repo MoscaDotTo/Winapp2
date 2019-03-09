@@ -66,9 +66,11 @@ Public Module winapp2handler
             End If
         Catch ex As Exception
             ' If this exception is thrown, there is a duplicate value in the list being audited 
-            ' But we are not linting duplicates (or else this value would have been removed by this point
+            ' But we are not linting duplicates (or else this value would have been removed by this point)
             ' For now, silently fail here, unless some issue crops up as a result of this silent failure. 
-            ' No known issues as of 2019-03-05
+            ' The only other potential failure case I can think of is, if during the sorting process, some entry name or value
+            ' wound up becoming the same due to character replacement (eg. someApp 07 and someApp 7 both becoming someApp007)
+            ' This isn't the case in winapp2.ini and is probably easier rectified by just "Not Doing That™" 
         End Try
     End Sub
 

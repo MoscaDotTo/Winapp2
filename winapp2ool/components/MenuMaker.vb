@@ -35,6 +35,7 @@ Module MenuMaker
     Public exitCode As Boolean
     ' Holds the text that appears in the top block of the menu
     Public menuHeaderText As String
+    Private lastOpWasErr As Boolean
     ' Holds the current option number at any given moment
     Dim optNum As Integer = 0
     ''' <summary>
@@ -50,6 +51,11 @@ Module MenuMaker
         End Set
     End Property
 
+    Public Sub setHeaderText(txt As String, Optional hasErr As Boolean = False)
+        menuHeaderText = txt
+        lastOpWasErr = hasErr
+    End Sub
+
     ''' <summary>
     ''' Initializes the menu 
     ''' </summary>
@@ -57,7 +63,7 @@ Module MenuMaker
     ''' <param name="itemlen">The length in characters that should comprise the first bloc of options in the menu</param>
     Public Sub initMenu(topper As String, Optional itemlen As Integer = 35)
         exitCode = False
-        menuHeaderText = topper
+        setHeaderText(topper)
         menuItemLength = itemlen
     End Sub
 
@@ -68,7 +74,7 @@ Module MenuMaker
     ''' <param name="errText">The error text to be printed in the menu header</param>
     ''' <returns></returns>
     Public Function denyActionWithTopper(cond As Boolean, errText As String) As Boolean
-        If cond Then menuHeaderText = errText
+        If cond Then setHeaderText(errText, True)
         Return cond
     End Function
 
@@ -79,26 +85,33 @@ Module MenuMaker
     ''' <param name="printType">The type of menu information to print</param>
     ''' <param name="str1">The first string or half string to be printed</param>
     ''' <param name="optString">The alignment or second half string to be printed</param>
-    Public Sub print(printType As Integer, str1 As String, Optional optString As String = "", Optional cond As Boolean = True, Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False, Optional closeMenu As Boolean = False)
+    Public Sub print(printType As Integer, str1 As String, Optional optString As String = "", Optional cond As Boolean = True,
+                     Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False,
+                     Optional closeMenu As Boolean = False, Optional enStrCond As Boolean = False)
         If cond And leadingBlank Then printMenuLine()
         Select Case True
+            ' Prints lines
             Case cond And printType = 0
                 printMenuLine(str1, isCentered)
+            ' Prints options
             Case cond And printType = 1
                 printMenuOpt(str1, optString)
+            ' Prints the Reset Settings option
             Case cond And printType = 2
                 print(1, "Reset Settings", $"Restore {str1}'s settings to their default state", leadingBlank:=True)
+            ' Prints a box with centered text
             Case cond And printType = 3
                 print(0, tmenu(str1), isCentered:=True, closeMenu:=True)
+            ' Prints a red error string into the menu
             Case cond And printType = 4
                 Console.ForegroundColor = ConsoleColor.Red
                 print(0, $"{str1}, some functions will not be available.", trailingBlank:=True, isCentered:=True)
                 Console.ResetColor()
+            ' Colored line printing for enable/disable menu options
             Case printType = 5
-                Console.ForegroundColor = If(cond, ConsoleColor.Green, ConsoleColor.Red)
-                print(1, str1, $"{enStr(cond)} {optString}")
+                Console.ForegroundColor = If(enStrCond, ConsoleColor.Green, ConsoleColor.Red)
+                print(1, str1, $"{enStr(enStrCond)} {optString}")
                 Console.ResetColor()
-                If closeMenu Then printMenuLine(menuStr02) : Exit Sub
         End Select
         If cond And trailingBlank Then printMenuLine()
         If cond And closeMenu Then printMenuLine(menuStr02)
@@ -126,8 +139,10 @@ Module MenuMaker
     ''' <param name="descriptionItems">Items describing the menu</param>
     ''' <param name="printExit">The boolean representing whether an option to exit should be printed</param>
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
+        If lastOpWasErr Then Console.ForegroundColor = ConsoleColor.Red
         printMenuLine(tmenu(menuHeaderText))
         printMenuLine(menuStr03)
+        Console.ResetColor()
         For Each line In descriptionItems
             print(0, line, isCentered:=True)
         Next

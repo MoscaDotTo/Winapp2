@@ -102,6 +102,7 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="components\lintRule.vb" />
     <Compile Include="components\commandLineHandler.vb" />
     <Compile Include="components\CCiniDebug.vb" />
     <Compile Include="components\Diff.vb" />

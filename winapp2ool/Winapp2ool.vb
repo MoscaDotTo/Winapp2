@@ -64,7 +64,7 @@ Module Winapp2ool
     ''' </summary>
     ''' <returns></returns>
     Public Function denySettingOffline() As Boolean
-        If isOffline Then menuHeaderText = "This option is unavailable while in offline mode"
+        If isOffline Then setHeaderText("This option is unavailable while in offline mode", True)
         Return isOffline
     End Function
 
@@ -133,6 +133,7 @@ Module Winapp2ool
                 If Not denySettingOffline() Then initModule("Downloader", AddressOf Downloader.printMenu, AddressOf Downloader.handleUserInput)
             Case input = "7" And isOffline
                 chkOfflineMode()
+                If isOffline Then setHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", True)
             Case input = "7" And waUpdateIsAvail
                 Console.Clear()
                 Console.Write("Downloading, this may take a moment...")
@@ -150,14 +151,14 @@ Module Winapp2ool
                 Console.Write("Downloading & diffing, this may take a moment...")
                 remoteDiff(lwinapp2File)
                 undoAnyPendingExits()
-                menuHeaderText = "Diff Complete"
+                setHeaderText("Diff Complete")
             Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not dnfOOD
                 Console.WriteLine("Downloading and updating winapp2ool.exe, this may take a moment...")
                 autoUpdate()
             Case input = "m"
                 initModule("Minefield", AddressOf Minefield.printMenu, AddressOf Minefield.handleUserInput)
             Case Else
-                menuHeaderText = invInpStr
+                setHeaderText(invInpStr, True)
         End Select
     End Sub
 
@@ -199,7 +200,7 @@ Module Winapp2ool
     ''' <param name="name">The name of the component whose update check failed</param>
     ''' <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
     Private Sub updateCheckFailed(name As String, Optional chkOnline As Boolean = False)
-        menuHeaderText = $"/!\ {name} update check failed. /!\"
+        setHeaderText($"/!\ {name} update check failed. /!\", True)
         localWa2Ver = "000000"
         If chkOnline Then chkOfflineMode()
     End Sub
@@ -219,7 +220,7 @@ Module Winapp2ool
     Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean)
         fileChooser(someFile)
         settingsChangedSetting = True
-        menuHeaderText = $"{If(someFile.secondName = "", someFile.initName, "save file")} parameters update{If(exitCode, " aborted", "d")}"
+        setHeaderText($"{If(someFile.secondName = "", someFile.initName, "save file")} parameters update{If(exitCode, " aborted", "d")}", exitCode)
         undoAnyPendingExits()
     End Sub
 
@@ -230,8 +231,8 @@ Module Winapp2ool
     ''' <param name="paramText">The string explaining the setting being toggled</param>
     ''' <param name="settingsChangedSetting">The boolean indicating that the setting has been modified</param>
     Public Sub toggleSettingParam(ByRef setting As Boolean, paramText As String, ByRef settingsChangedSetting As Boolean)
+        setHeaderText($"{paramText} {enStr(setting)}d")
         setting = Not setting
-        menuHeaderText = $"{paramText} {If(setting, "enabled", "disabled")}"
         settingsChangedSetting = True
     End Sub
 
@@ -296,7 +297,7 @@ Module Winapp2ool
     ''' <param name="setDefaultParams">The function that resets the module's settings</param>
     Public Sub resetModuleSettings(name As String, setDefaultParams As Action)
         setDefaultParams()
-        menuHeaderText = $"{name} settings have been reset to their defaults."
+        setHeaderText($"{name} settings have been reset to their defaults.")
     End Sub
 
     ''' <summary>
@@ -327,6 +328,6 @@ Module Winapp2ool
             handleInput(Console.ReadLine)
         Loop
         revertMenu()
-        menuHeaderText = $"{name} closed"
+        setHeaderText($"{name} closed")
     End Sub
 End Module

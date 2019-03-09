@@ -109,7 +109,7 @@ Module Merge
             Case input = "9" And settingsChanged
                 resetModuleSettings("Merge", AddressOf initDefaultSettings)
             Case Else
-                menuHeaderText = invInpStr
+                setHeaderText(invInpStr, True)
         End Select
     End Sub
 
@@ -120,7 +120,7 @@ Module Merge
     Private Sub changeMergeName(newName As String)
         mergeFile.name = newName
         settingsChanged = True
-        menuHeaderText = "Merge filename set"
+        setHeaderText("Merge filename set")
     End Sub
 
     ''' <summary>
