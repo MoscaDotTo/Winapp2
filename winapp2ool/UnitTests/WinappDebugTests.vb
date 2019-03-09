@@ -71,7 +71,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     <TestMethod()> Public Sub handleCmdLine_EnableAutoCorrectSuccess()
         ' Test case: Enable autocorrect 
         setDebugStage({"-c"}, True)
-        Assert.AreEqual(winapp2ool.CorrectFormatting1, True)
+        Assert.AreEqual(winapp2ool.saveChanges, True)
     End Sub
 
     ' Tests below this point until the marked point test that individual scans and repairs work within WinappDebug's debug method
