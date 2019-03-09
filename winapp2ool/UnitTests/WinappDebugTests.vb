@@ -142,17 +142,31 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' </summary>
     <TestMethod> Public Sub debug_DuplicateKeyValue_FindAndRepair_Success()
         ' Disable all the tests except the duplicate checks
-        Dim testOutput = debug_ErrorFindAndRepair_Success(0, 7, 0, 7)
-        Assert.AreEqual(1, testOutput.detects.keyCount)
-        Assert.AreEqual(1, testOutput.detectFiles.keyCount)
+        Dim testOutput = debug_ErrorFindAndRepair_Success(0, 11, 0, 7)
+        ' We expect that the returned object should have 1 key in each keylist except the last
+        For i = 0 To testOutput.keyListList.Count - 2
+            Dim lst = testOutput.keyListList(i)
+            Assert.AreEqual(1, lst.keyCount)
+        Next
+        ' The last keylist (the error keys) should be empty
+        Assert.AreEqual(0, testOutput.keyListList.Last.keyCount)
     End Sub
 
     ''' <summary>
     ''' Runs tests to ensure that keys that are improperly numbered are detected and repaired
     ''' </summary>
     <TestMethod> Public Sub debug_KeyNumberingError_FindAndRepair_Sucess()
-        Dim testOutput = debug_ErrorFindAndRepair_Success(1, 1, 0, 2)
-        Assert.AreEqual("Detect2", testOutput.detects.keys.Last.name)
+        Dim testOutput = debug_ErrorFindAndRepair_Success(1, 8, 0, 2)
+        For i = 0 To testOutput.keyListList.Count - 2
+            Dim lst = testOutput.keyListList(i)
+            Select Case lst.keyType
+                Case "Detect", "DetectFile", "ExcludeKey", "FileKey", "RegKey"
+                    Dim curKeys = lst.keys
+                    ' We expect 2 keys in each of these lists, having the keyNumbers 1 and 2 respectively
+                    Assert.AreEqual(curKeys.First.name, $"{lst.keyType}1")
+                    Assert.AreEqual(curKeys.Last.name, $"{lst.keyType}2")
+            End Select
+        Next
     End Sub
 
 End Class
