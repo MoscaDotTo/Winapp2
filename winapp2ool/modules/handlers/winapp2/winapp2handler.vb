@@ -29,13 +29,13 @@ Public Module winapp2handler
     ''' <param name="replacementText">The chosen replacement text</param>
     ''' <returns> The sorted state of the listToBeSorted</returns>
     Public Function replaceAndSort(ListToBeSorted As List(Of String), characterToReplace As String, replacementText As String) As List(Of String)
-        Dim changes As New Dictionary(Of String, String)
+        Dim changes As New changeDict
         ' Replace our target characters if they exist
         For i As Integer = 0 To ListToBeSorted.Count - 1
             Dim item As String = ListToBeSorted(i)
             If item.Contains(characterToReplace) Then
                 Dim renamedItem As String = item.Replace(characterToReplace, replacementText)
-                trackChanges(changes, item, renamedItem)
+                changes.trackChanges(item, renamedItem)
                 ListToBeSorted(i) = renamedItem
             End If
         Next
@@ -46,46 +46,9 @@ Public Module winapp2handler
         sortedEntryList.AddRange(ListToBeSorted)
         sortedEntryList.Sort()
         ' Restore the original state of our data
-        undoChanges(changes, {ListToBeSorted, sortedEntryList})
+        changes.undoChanges({ListToBeSorted, sortedEntryList})
         Return sortedEntryList
     End Function
-
-    ''' <summary>
-    ''' Tracks renames made while mutating data for string sorting.
-    ''' </summary>
-    ''' <param name="changeDict">The dictionary containing changes</param>
-    ''' <param name="currentValue">The current value of a string</param>
-    ''' <param name="newValue">The new value of a piece of a string</param>
-    Public Sub trackChanges(ByRef changeDict As Dictionary(Of String, String), currentValue As String, newValue As String)
-        Try
-            If changeDict.Keys.Contains(currentValue) Then
-                changeDict.Add(newValue, changeDict.Item(currentValue))
-                changeDict.Remove(currentValue)
-            Else
-                changeDict.Add(newValue, currentValue)
-            End If
-        Catch ex As Exception
-            ' If this exception is thrown, there is a duplicate value in the list being audited 
-            ' But we are not linting duplicates (or else this value would have been removed by this point)
-            ' For now, silently fail here, unless some issue crops up as a result of this silent failure. 
-            ' The only other potential failure case I can think of is, if during the sorting process, some entry name or value
-            ' wound up becoming the same due to character replacement (eg. someApp 07 and someApp 7 both becoming someApp007)
-            ' This isn't the case in winapp2.ini and is probably easier rectified by just "Not Doing That™" 
-        End Try
-    End Sub
-
-    ''' <summary>
-    ''' Restores the original state of data mutated for the purposes of string sorting.
-    ''' </summary>
-    ''' <param name="changeDict">The dictionary containing changes made to data in the lists</param>
-    ''' <param name="lstArray">An array containing lists of strings whose data has been modified</param>
-    Public Sub undoChanges(ByRef changeDict As Dictionary(Of String, String), ByRef lstArray As List(Of String)())
-        For Each lst In lstArray
-            For Each key In changeDict.Keys
-                replaceStrAtIndexOf(lst, key, changeDict.Item(key))
-            Next
-        Next
-    End Sub
 
     ''' <summary>
     ''' Searches the input list for numbers and returns the length of the longest number.
@@ -108,7 +71,7 @@ Public Module winapp2handler
     ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. 
     ''' <param name="listToBeSorted">The list to be modified prior to sorting</param>
     ''' <param name="changes">The dictionary of changes made to the strings in listToBeSorted</param>
-    Private Sub findAndReplaceNumbers(ByRef listToBeSorted As List(Of String), ByRef changes As Dictionary(Of String, String))
+    Private Sub findAndReplaceNumbers(ByRef listToBeSorted As List(Of String), ByRef changes As changeDict)
         Dim longestNumLen As Integer = findLongestNumLength(listToBeSorted)
         If longestNumLen < 2 Then Exit Sub
         For i As Integer = 0 To listToBeSorted.Count - 1
@@ -138,7 +101,7 @@ Public Module winapp2handler
             ' Don't rename if we didn't change anything
             If baseString = paddedString Then Continue For
             ' Rename and track changes appropriately
-            trackChanges(changes, baseString, paddedString)
+            changes.trackChanges(baseString, paddedString)
             replaceStrAtIndexOf(listToBeSorted, baseString, paddedString)
         Next
     End Sub
@@ -149,6 +112,7 @@ Public Module winapp2handler
     ''' <param name="list">The list containing all the strings</param>
     ''' <param name="indexOfText">The text to be replaced</param>
     ''' <param name="newText">The replacement text</param>
+    ''' strlist candidate
     Public Sub replaceStrAtIndexOf(ByRef list As List(Of String), indexOfText As String, newText As String)
         list(list.IndexOf(indexOfText)) = newText
     End Sub

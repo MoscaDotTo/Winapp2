@@ -142,7 +142,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' </summary>
     <TestMethod> Public Sub debug_DuplicateKeyValue_FindAndRepair_Success()
         ' Disable all the tests except the duplicate checks
-        Dim testOutput = debug_ErrorFindAndRepair_Success(0, 11, 0, 7)
+        Dim testOutput = debug_ErrorFindAndRepair_Success(0, 12, 0, 7)
         ' We expect that the returned object should have 1 key in each keylist except the last
         For i = 0 To testOutput.keyListList.Count - 2
             Dim lst = testOutput.keyListList(i)
