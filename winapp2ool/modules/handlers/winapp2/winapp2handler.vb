@@ -28,23 +28,23 @@ Public Module winapp2handler
     ''' <param name="characterToReplace">A character (string) to replace</param>
     ''' <param name="replacementText">The chosen replacement text</param>
     ''' <returns> The sorted state of the listToBeSorted</returns>
-    Public Function replaceAndSort(ListToBeSorted As List(Of String), characterToReplace As String, replacementText As String) As List(Of String)
+    Public Function replaceAndSort(ListToBeSorted As strList, characterToReplace As String, replacementText As String) As strList
         Dim changes As New changeDict
         ' Replace our target characters if they exist
-        For i As Integer = 0 To ListToBeSorted.Count - 1
-            Dim item As String = ListToBeSorted(i)
+        For i As Integer = 0 To ListToBeSorted.items.Count - 1
+            Dim item As String = ListToBeSorted.items(i)
             If item.Contains(characterToReplace) Then
                 Dim renamedItem As String = item.Replace(characterToReplace, replacementText)
                 changes.trackChanges(item, renamedItem)
-                ListToBeSorted(i) = renamedItem
+                ListToBeSorted.items(i) = renamedItem
             End If
         Next
         ' Pad numbers if necessary 
         findAndReplaceNumbers(ListToBeSorted, changes)
         ' Copy the modified list to be sorted and sort it
-        Dim sortedEntryList As New List(Of String)
-        sortedEntryList.AddRange(ListToBeSorted)
-        sortedEntryList.Sort()
+        Dim sortedEntryList As New strList
+        sortedEntryList.items.AddRange(ListToBeSorted.items)
+        sortedEntryList.items.Sort()
         ' Restore the original state of our data
         changes.undoChanges({ListToBeSorted, sortedEntryList})
         Return sortedEntryList
@@ -55,9 +55,9 @@ Public Module winapp2handler
     ''' </summary>
     ''' <param name="lst">A list of strings to be searched</param>
     ''' <returns>The length of the longest number in lst</returns>
-    Private Function findLongestNumLength(ByRef lst As List(Of String)) As Integer
+    Private Function findLongestNumLength(ByRef lst As strList) As Integer
         Dim out As Integer = 0
-        For Each item In lst
+        For Each item In lst.items
             For Each mtch As Match In Regex.Matches(item, "[\d]+")
                 If mtch.Length > out Then out = mtch.Length
             Next
@@ -71,18 +71,18 @@ Public Module winapp2handler
     ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. 
     ''' <param name="listToBeSorted">The list to be modified prior to sorting</param>
     ''' <param name="changes">The dictionary of changes made to the strings in listToBeSorted</param>
-    Private Sub findAndReplaceNumbers(ByRef listToBeSorted As List(Of String), ByRef changes As changeDict)
+    Private Sub findAndReplaceNumbers(ByRef listToBeSorted As strList, ByRef changes As changeDict)
         Dim longestNumLen As Integer = findLongestNumLength(listToBeSorted)
         If longestNumLen < 2 Then Exit Sub
-        For i As Integer = 0 To listToBeSorted.Count - 1
-            Dim baseString As String = listToBeSorted(i)
+        For i As Integer = 0 To listToBeSorted.count - 1
+            Dim baseString As String = listToBeSorted.items(i)
             Dim paddedString As String = baseString
             Dim numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*")
             For Each m As Match In numberAndDecimals.Matches(baseString)
                 ' Special procedure for numbers with any amount of decimal points in them
                 Dim currentMatch As String = m.ToString
                 If currentMatch.Contains(".") Then
-                    Dim out As String = ""
+                    Dim out = ""
                     Dim tStr As String() = currentMatch.Split(CChar("."))
                     For p As Integer = 0 To tStr.Length - 1
                         out += padNumberStr(longestNumLen, tStr(p))
@@ -99,23 +99,26 @@ Public Module winapp2handler
                 End If
             Next
             ' Don't rename if we didn't change anything
-            If baseString = paddedString Then Continue For
+            If baseString.Equals(paddedString) Then Continue For
             ' Rename and track changes appropriately
             changes.trackChanges(baseString, paddedString)
-            replaceStrAtIndexOf(listToBeSorted, baseString, paddedString)
+            listToBeSorted.replaceStrAtIndexOf(baseString, paddedString)
         Next
     End Sub
 
+
+
     ''' <summary>
-    ''' Replaces an item in a list of strings at the index of another given item
+    ''' Returns the value from an ExcludeKey with the Flag parameter removed as a String
     ''' </summary>
-    ''' <param name="list">The list containing all the strings</param>
-    ''' <param name="indexOfText">The text to be replaced</param>
-    ''' <param name="newText">The replacement text</param>
-    ''' strlist candidate
-    Public Sub replaceStrAtIndexOf(ByRef list As List(Of String), indexOfText As String, newText As String)
-        list(list.IndexOf(indexOfText)) = newText
-    End Sub
+    ''' <param name="key">An ExcludeKey iniKey</param>
+    ''' <returns></returns>
+    Public Function pathFromExcludeKey(key As iniKey) As String
+        Dim pathFromKey As String = key.Value.TrimStart(CType("FILE|", Char()))
+        pathFromKey = pathFromKey.TrimStart(CType("PATH|", Char()))
+        pathFromKey = pathFromKey.TrimStart(CType("REG|", Char()))
+        Return pathFromKey
+    End Function
 
     ''' <summary>
     ''' Pads a number to a given length by preceding it with zeros (0's) and returns the padded number
@@ -148,8 +151,8 @@ Public Module winapp2handler
     ''' </summary>
     ''' <param name="file">The iniFile to be sorted</param>
     ''' <returns></returns>
-    Public Function sortEntryNames(ByVal file As iniFile) As List(Of String)
-        Return replaceAndSort(file.namesToListOfStr, "-", "  ")
+    Public Function sortEntryNames(ByVal file As iniFile) As strList
+        Return replaceAndSort(file.namesToStrList, "-", "  ")
     End Function
 
     ''' <summary>
@@ -191,9 +194,9 @@ Public Module winapp2handler
                 Dim tmpwa2entry As New winapp2entry(section)
                 Dim ind = -1
                 If tmpwa2entry.langSecRef.keyCount > 0 Then
-                    ind = langSecRefs.IndexOf(tmpwa2entry.langSecRef.keys.First.value)
+                    ind = langSecRefs.IndexOf(tmpwa2entry.langSecRef.keys.First.Value)
                 ElseIf tmpwa2entry.sectionKey.keyCount > 0 Then
-                    ind = langSecRefs.IndexOf(tmpwa2entry.sectionKey.keys.First.value)
+                    ind = langSecRefs.IndexOf(tmpwa2entry.sectionKey.keys.First.Value)
                 End If
                 If ind = -1 Then ind = 6
                 addToInnerFile(ind, tmpwa2entry, section)
@@ -293,117 +296,5 @@ Public Module winapp2handler
             If entrySections.Last.sections.Count > 0 Then out += prependNewLines(False) & entrySections.Last.toString
             Return out
         End Function
-    End Class
-
-    ''' <summary>
-    ''' Represents a winapp2.ini format iniKey and provides direct access to the keys by their type
-    ''' </summary>
-    Public Class winapp2entry
-        Public name As String
-        Public fullName As String
-        Public detectOS As New keyList("DetectOS")
-        Public langSecRef As New keyList("LangSecRef")
-        Public sectionKey As New keyList("Section")
-        Public specialDetect As New keyList("SpecialDetect")
-        Public detects As New keyList("Detect")
-        Public detectFiles As New keyList("DetectFile")
-        Public defaultKey As New keyList("Default")
-        Public warningKey As New keyList("Warning")
-        Public fileKeys As New keyList("FileKey")
-        Public regKeys As New keyList("RegKey")
-        Public excludeKeys As New keyList("ExcludeKey")
-        Public errorKeys As New keyList("Error")
-        Public keyListList As New List(Of keyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
-                                                        defaultKey, warningKey, fileKeys, regKeys, excludeKeys, errorKeys}
-        Public lineNum As New Integer
-
-        ''' <summary>
-        ''' Construct a new winapp2entry object from an iniSection
-        ''' </summary>
-        ''' <param name="section">A winapp2.ini format iniSection object</param>
-        Public Sub New(ByVal section As iniSection)
-            fullName = section.getFullName
-            name = section.name
-            updKeyListList()
-            lineNum = section.startingLineNumber
-            section.constKeyLists(keyListList)
-        End Sub
-
-        ''' <summary>
-        ''' Clears and updates the keyListList with the current state of the keys
-        ''' </summary>
-        Private Sub updKeyListList()
-            keyListList = New List(Of keyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
-                                                     defaultKey, warningKey, fileKeys, regKeys, excludeKeys, errorKeys}
-        End Sub
-
-        ''' <summary>
-        ''' Returns the keys in each keyList back as a list of Strings in winapp2.ini (style) order
-        ''' </summary>
-        ''' <returns></returns>
-        Public Function dumpToListOfStrings() As List(Of String)
-            Dim outList As New List(Of String) From {fullName}
-            updKeyListList()
-            keyListList.ForEach(Sub(lst) lst.keys.ForEach(Sub(key) outList.Add(key.toString)))
-            Return outList
-        End Function
-    End Class
-
-    ''' <summary>
-    ''' Provides a few helpful methods for dissecting winapp2key objects
-    ''' </summary>
-    Public Class winapp2KeyParameters
-        Public pathString As String = ""
-        Public argsList As New List(Of String)
-        Public flagString As String = ""
-        Public keyType As String = ""
-        Public keyNum As String = ""
-
-        Public Sub New(key As iniKey)
-            keyType = key.keyType
-            Dim splitKey As String() = key.value.Split(CChar("|"))
-            Select Case key.keyType
-                Case "FileKey"
-                    keyNum = key.keyType.Replace("FileKey", "")
-                    If splitKey.Count > 1 Then
-                        pathString = splitKey(0)
-                        argsList.AddRange(splitKey(1).Split(CChar(";")))
-                        flagString = If(splitKey.Count >= 3, splitKey.Last, "None")
-                    Else
-                        pathString = key.value
-                    End If
-                Case "ExcludeKey"
-                    Select Case splitKey.Count
-                        Case 2
-                            pathString = splitKey(1)
-                            flagString = splitKey(0)
-                        Case 3
-                            pathString = splitKey(1)
-                            argsList.AddRange(splitKey(2).Split(CChar(";")))
-                            flagString = splitKey(0)
-                    End Select
-                Case "RegKey"
-                    pathString = splitKey(0)
-                    If splitKey.Count > 1 Then argsList.Add(splitKey(1))
-            End Select
-        End Sub
-
-        ''' <summary>
-        ''' Reconstructs a FileKey to hold the format of FileKeyX=PATH|FILE;FILE;FILE....|FLAG
-        ''' </summary>
-        ''' <param name="key">An iniKey to be reconstructed</param>
-        ''' Also trims empty comments 
-        Public Sub reconstructKey(ByRef key As iniKey)
-            Dim out As String = ""
-            out += $"{pathString}{If(argsList.Count > 0, "|", "")}"
-            If argsList.Count > 1 Then
-                For i As Integer = 0 To argsList.Count - 2
-                    If Not argsList(i) = "" Then out += argsList(i) & ";"
-                Next
-            End If
-            If argsList.Count > 0 Then out += argsList.Last
-            If Not flagString = "None" Then out += "|" & flagString
-            key.value = out
-        End Sub
     End Class
 End Module
