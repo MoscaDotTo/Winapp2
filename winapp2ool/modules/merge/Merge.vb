@@ -127,7 +127,7 @@ Module Merge
     ''' Validates iniFiles and begins the merging process
     ''' </summary>
     Public Sub initMerge()
-        Console.Clear()
+        clrConsole()
         winappFile.validate()
         mergeFile.validate()
         If pendingExit() Then Exit Sub
@@ -148,7 +148,7 @@ Module Merge
         Next
         tmp.rebuildToIniFiles()
         For Each section In tmp.entrySections
-            section.sortSections(replaceAndSort(section.namesToListOfStr, "-", "  "))
+            section.sortSections(replaceAndSort(section.namesToStrList, "-", "  "))
         Next
         Dim out As String = tmp.winapp2string
         outputFile.overwriteToFile(out)

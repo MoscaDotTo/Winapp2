@@ -116,7 +116,7 @@ Module CCiniDebug
         ccFile.validate()
         If pruneFile Then winappFile.validate()
         If pendingExit() Then Exit Sub
-        Console.Clear()
+        clrConsole()
         printMenuLine(tmenu("CCiniDebug Results"))
         printMenuLine(menuStr03)
         If pruneFile Then prune(ccFile.sections("Options"))

@@ -302,7 +302,16 @@ Module MenuMaker
     ''' </summary>
     ''' <returns></returns>
     Public Function pendingExit() As Boolean
-        If exitCode Then Console.Clear()
+        clrConsole(exitCode)
         Return exitCode
     End Function
+
+    ''' <summary>
+    ''' Clears the console conditionally when not running unit tests
+    ''' </summary>
+    ''' <param name="cond">Optional Boolean specifying whether or not the console should be cleared</param>
+    Public Sub clrConsole(Optional cond As Boolean = True)
+        ' Do not clear the console during unit tests because there isnt one and the invalid handler throws an IO Exception
+        If cond And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
+    End Sub
 End Module

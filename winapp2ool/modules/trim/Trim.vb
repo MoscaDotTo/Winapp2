@@ -117,7 +117,7 @@ Public Module Trim
         Dim winapp2 As winapp2file = If(Not download, New winapp2file(winappFile), New winapp2file(getRemoteIniFile(getWinappLink)))
         trim(winapp2)
         setHeaderText("Trim Complete")
-        Console.Clear()
+        clrConsole()
     End Sub
 
     ''' <summary>
@@ -125,7 +125,7 @@ Public Module Trim
     ''' </summary>
     ''' <param name="winapp2">A winapp2.ini file</param>
     Private Sub trim(winapp2 As winapp2file)
-        Console.Clear()
+        clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
         Dim entryCountBeforeTrim As Integer = winapp2.count
         For Each entryList In winapp2.winapp2entries
@@ -134,7 +134,7 @@ Public Module Trim
         winapp2.rebuildToIniFiles()
         winapp2.sortInneriniFiles()
         print(0, tmenu("Finished!"), closeMenu:=True)
-        Console.Clear()
+        clrConsole()
         print(0, tmenu("Trim Complete"))
         print(0, menuStr03)
         print(0, "Entry Count", isCentered:=True, trailingBlank:=True)
@@ -156,7 +156,7 @@ Public Module Trim
     Private Function checkExistence(ByRef kl As keyList, chkExist As Func(Of String, Boolean)) As Boolean
         If kl.keyCount = 0 Then Return False
         For Each key In kl.keys
-            If chkExist(key.value) Then Return True
+            If chkExist(key.Value) Then Return True
         Next
         Return False
     End Function
@@ -208,7 +208,7 @@ Public Module Trim
             Case "RegKey"
                 mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
         End Select
-        kl.renumberKeys(replaceAndSort(kl.toListOfStr(True), "|", " \ \"))
+        kl.renumberKeys(replaceAndSort(kl.toStrLst(True), "|", " \ \"))
     End Sub
 
     ''' <summary>
@@ -225,8 +225,8 @@ Public Module Trim
             For i As Integer = 0 To findStrs.Count - 1
                 Dim keyToAdd = createVSKey(findStrs(i), replStrs(i), key)
                 ' Don't recreate keys that already exist
-                If initVals.Contains(keyToAdd.value) Then Continue For
-                keysToAdd.add(keyToAdd, Not key.value = keyToAdd.value)
+                If initVals.Contains(keyToAdd.Value) Then Continue For
+                keysToAdd.add(keyToAdd, Not key.Value = keyToAdd.Value)
             Next
         Next
         Dim kl2 = kl
@@ -241,7 +241,7 @@ Public Module Trim
     ''' <param name="key">The key to processed</param>
     ''' <returns></returns>
     Private Function createVSKey(findStr As String, replStr As String, key As iniKey) As iniKey
-        Return New iniKey($"{key.name}={key.value.Replace(findStr, replStr)}")
+        Return New iniKey($"{key.Name}={key.Value.Replace(findStr, replStr)}")
     End Function
 
     ''' <summary>

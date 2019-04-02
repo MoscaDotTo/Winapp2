@@ -150,7 +150,7 @@ Module Diff
     ''' </summary>
     Private Sub differ()
         print(3, "Diffing, please wait. This may take a moment.")
-        Console.Clear()
+        clrConsole()
         Dim oldVersionNum = getVer(oldOrLocalFile)
         Dim newVersionNum = getVer(newOrRemoteFile)
         log(tmenu($"Changes made between{oldVersionNum} and{newVersionNum}"))
@@ -208,7 +208,7 @@ Module Diff
                     tmp = getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.keyCount > 0)}Removed:")
                     If updatedKeys.Count > 0 Then
                         tmp += appendNewLine($"{prependNewLines(removedKeys.keyCount > 0 Or addedKeys.keyCount > 0)}Modified:")
-                        updatedKeys.ForEach(Sub(pair) appendStrs({appendNewLine(prependNewLines() & pair.Key.name), $"Old:   {appendNewLine(pair.Key.toString)}", $"New:   {appendNewLine(pair.Value.toString)}"}, tmp))
+                        updatedKeys.ForEach(Sub(pair) appendStrs({appendNewLine(prependNewLines() & pair.Key.Name), $"Old:   {appendNewLine(pair.Key.toString)}", $"New:   {appendNewLine(pair.Value.toString)}"}, tmp))
                     End If
                     tmp += prependNewLines(False) & menuStr00
                     outList.Add(tmp)
@@ -254,7 +254,7 @@ Module Diff
             For j = 0 To removedKeys.keyCount - 1
                 Dim skey = removedKeys.keys(j)
                 If key.compareNames(skey) Then
-                    Select Case key.keyType
+                    Select Case key.KeyType
                         Case "FileKey", "ExcludeKey", "RegKey"
                             Dim oldKey As New winapp2KeyParameters(key)
                             Dim newKey As New winapp2KeyParameters(skey)

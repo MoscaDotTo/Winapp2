@@ -153,13 +153,13 @@ Module JavaMaker
         Dim regKeyList As keyList = mkEntry({classRootIDs, localMachineClassesIDs, localMachineWOWIds, defClassesIDs, s1518ClassesIDs,
                 localMachineJREs, lmJREminorIDs, currentUserJREs, cuJREminorIDs, JavaPluginKeys})
         ' Renumber them 
-        regKeyList.renumberKeys(replaceAndSort(regKeyList.toListOfStr(True), "-", "-"))
+        regKeyList.renumberKeys(replaceAndSort(regKeyList.toStrLst(True), "-", "-"))
         ' Generate the new entry
         Dim entry As New List(Of String)
-        Console.Clear()
+        clrConsole()
         entry.Add("[Java Installation Cleanup *]")
         entry.Add("Section=Experimental")
-        entry.Add($"Detect={regKeyList.keys(0).value}")
+        entry.Add($"Detect={regKeyList.keys(0).Value}")
         entry.Add("Default=False")
         entry.AddRange(regKeyList.toListOfStr)
         Dim out As New iniSection(entry)
