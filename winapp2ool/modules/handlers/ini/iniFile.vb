@@ -161,8 +161,8 @@ Public Class iniFile
     ''' If an iniFile's sections already exist, skip this.
     ''' </summary>
     Public Sub validate()
-        Console.Clear()
-        If pendingExit() Or Me.name = "" Then Exit Sub
+        clrConsole()
+        If pendingExit() Or name = "" Then Exit Sub
         ' Make sure both the file and the directory actually exist
         While Not File.Exists(path())
             chkDirExist(dir)
@@ -177,7 +177,7 @@ Public Class iniFile
             Dim clearAtEnd As Boolean = False
             While iniTester.sections.Count = 0
                 clearAtEnd = True
-                Console.Clear()
+                clrConsole()
                 printMenuLine(bmenu("Empty ini file detected. Press any key to try again."))
                 Console.ReadKey()
                 fileChooser(iniTester)
@@ -187,7 +187,7 @@ Public Class iniFile
             End While
             sections = iniTester.sections
             comments = iniTester.comments
-            If clearAtEnd Then Console.Clear()
+            clrConsole(clearAtEnd)
         Catch ex As Exception
             exc(ex)
             exitCode = True
@@ -198,9 +198,9 @@ Public Class iniFile
     ''' Reorders the iniSections in an iniFile object to be in the same sorted state as a provided list of Strings
     ''' </summary>
     ''' <param name="sortedSections">The sorted state of the sections by name</param>
-    Public Sub sortSections(ByVal sortedSections As List(Of String))
+    Public Sub sortSections(sortedSections As strList)
         Dim tempFile As New iniFile
-        sortedSections.ForEach(Sub(sectionName) tempFile.sections.Add(sectionName, sections.Item(sectionName)))
+        sortedSections.items.ForEach(Sub(sectionName) tempFile.sections.Add(sectionName, sections.Item(sectionName)))
         Me.sections = tempFile.sections
     End Sub
 
@@ -224,6 +224,14 @@ Public Class iniFile
         Dim out As New List(Of String)
         For Each section In sections.Values
             out.Add(section.name)
+        Next
+        Return out
+    End Function
+
+    Public Function namesToStrList() As strList
+        Dim out As New strList
+        For Each section In sections.Values
+            out.add(section.name)
         Next
         Return out
     End Function

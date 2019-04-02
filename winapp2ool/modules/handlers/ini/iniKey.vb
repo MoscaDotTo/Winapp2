@@ -20,20 +20,79 @@ Imports System.Text.RegularExpressions
 ''' An object representing the name value pairs that make up iniSections
 ''' </summary>
 Public Class iniKey
-    Public name As String
-    Public value As String
+    Private _name As String
+    Private _value As String
     Public lineNumber As Integer
-    Public keyType As String
+    Private _keyType As String
+
+    ''' <summary>
+    ''' The value of the iniKey: any text on the right side of the '='
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property Value As String
+        Get
+            Return _value
+        End Get
+        Set(value As String)
+            _value = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property KeyType As String
+        Get
+            Return _keyType
+        End Get
+        Set(value As String)
+            _keyType = value
+        End Set
+    End Property
+
+    Public Property Name As String
+        Get
+            Return _name
+        End Get
+        Set(value As String)
+            _name = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' Assigns or overwrites the value of the iniKey
+    ''' </summary>
+    ''' <param name="newVal">The String containing the new value</param>
+    Public Sub setValue(newVal As String)
+        Value = newVal
+    End Sub
+
+    ''' <summary>
+    ''' Assigns or overwrites the name of the iniKey
+    ''' </summary>
+    ''' <param name="newName">The String containing the new value</param>
+    Public Sub setName(newName As String)
+        Name = newName
+    End Sub
+
+    ''' <summary>
+    ''' Assigns or overwrites the keyType of the iniKey 
+    ''' </summary>
+    ''' <param name="newType">The String containing the new value</param>
+    Public Sub setKeyType(newType As String)
+        KeyType = newType
+    End Sub
 
     ''' <summary>
     ''' Returns whether or not an iniKey's name is equal to a given value
     ''' </summary>
-    ''' <param name="n">The string to check equality for</param>
+    ''' <param name="n">The String to check equality for</param>
     ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
     ''' <returns></returns>
     Public Function nameIs(n As String, Optional ignoreCase As Boolean = False) As Boolean
-        Return If(ignoreCase, name.Equals(n, StringComparison.InvariantCultureIgnoreCase), name = n)
-        name = n
+        Return If(ignoreCase, Name.Equals(n, StringComparison.InvariantCultureIgnoreCase), Name = n)
+        Name = n
     End Function
 
     ''' <summary>
@@ -43,7 +102,7 @@ Public Class iniKey
     ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
     ''' <returns></returns>
     Public Function typeIs(t As String, Optional ignoreCase As Boolean = False) As Boolean
-        Return If(ignoreCase, keyType.Equals(t, StringComparison.InvariantCultureIgnoreCase), keyType = t)
+        Return If(ignoreCase, KeyType.Equals(t, StringComparison.InvariantCultureIgnoreCase), KeyType = t)
     End Function
 
     ''' <summary>
@@ -53,7 +112,7 @@ Public Class iniKey
     ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
     ''' <returns></returns>
     Public Function vHas(txt As String, Optional ignoreCase As Boolean = False) As Boolean
-        Return If(ignoreCase, value.IndexOf(txt, 0, StringComparison.CurrentCultureIgnoreCase) > -1, value.Contains(txt))
+        Return If(ignoreCase, Value.IndexOf(txt, 0, StringComparison.CurrentCultureIgnoreCase) > -1, Value.Contains(txt))
     End Function
 
     ''' <summary>
@@ -76,7 +135,7 @@ Public Class iniKey
     ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
     ''' <returns></returns>
     Public Function vIs(txt As String, Optional ignoreCase As Boolean = False) As Boolean
-        Return If(ignoreCase, value.Equals(txt, StringComparison.InvariantCultureIgnoreCase), value = txt)
+        Return If(ignoreCase, Value.Equals(txt, StringComparison.InvariantCultureIgnoreCase), Value = txt)
     End Function
 
     ''' <summary>
@@ -94,7 +153,7 @@ Public Class iniKey
     ''' <param name="key">The iniKey to be compared to</param>
     ''' <returns></returns>
     Public Function compareNames(key As iniKey) As Boolean
-        Return nameIs(key.name, True)
+        Return nameIs(key.Name, True)
     End Function
 
     ''' <summary>
@@ -103,7 +162,7 @@ Public Class iniKey
     ''' <param name="key">The iniKey to be compared to</param>
     ''' <returns></returns>
     Public Function compareValues(key As iniKey) As Boolean
-        Return vIs(key.value, True)
+        Return vIs(key.Value, True)
     End Function
 
     ''' <summary>
@@ -112,7 +171,7 @@ Public Class iniKey
     ''' <param name="key">The iniKey to be compared to</param>
     ''' <returns></returns>
     Public Function compareTypes(key As iniKey) As Boolean
-        Return typeIs(key.keyType, True)
+        Return typeIs(key.KeyType, True)
     End Function
 
     ''' <summary>
@@ -126,22 +185,22 @@ Public Class iniKey
             lineNumber = count
             Select Case True
                 Case splitLine(0) <> "" And splitLine(1) <> ""
-                    name = splitLine(0)
-                    value = splitLine(1)
-                    keyType = stripNums(name)
+                    Name = splitLine(0)
+                    Value = splitLine(1)
+                    KeyType = stripNums(Name)
                 Case splitLine(0) = "" And splitLine(1) <> ""
-                    name = "KeyTypeNotGiven"
-                    value = splitLine(1)
-                    keyType = "Error"
+                    Name = "KeyTypeNotGiven"
+                    Value = splitLine(1)
+                    KeyType = "Error"
                 Case splitLine(0) <> "" And splitLine(1) = ""
-                    name = "DeleteMe"
-                    value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
-                    keyType = "DeleteMe"
+                    Name = "DeleteMe"
+                    Value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
+                    KeyType = "DeleteMe"
             End Select
         Else
-            name = line
-            value = ""
-            keyType = "Error"
+            Name = line
+            Value = ""
+            KeyType = "Error"
         End If
     End Sub
 
@@ -150,6 +209,6 @@ Public Class iniKey
     ''' </summary>
     ''' <returns></returns>
     Public Overrides Function toString() As String
-        Return $"{name}={value}"
+        Return $"{Name}={Value}"
     End Function
 End Class

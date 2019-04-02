@@ -33,7 +33,7 @@ Public Class iniSection
         Dim keyTypeList As New List(Of String)
         listOfKeyLists.ForEach(Sub(kl) keyTypeList.Add(kl.keyType.ToLower))
         For Each key In keys.Values
-            Dim type = key.keyType.ToLower
+            Dim type = key.KeyType.ToLower
             If keyTypeList.Contains(type) Then listOfKeyLists(keyTypeList.IndexOf(type)).add(key) Else listOfKeyLists.Last.add(key)
         Next
     End Sub

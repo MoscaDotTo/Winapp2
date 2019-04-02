@@ -37,7 +37,7 @@ Public Class keyList
     ''' <param name="kl">A list of iniKeys to be inserted into the keylist</param>
     Public Sub New(kl As List(Of iniKey))
         keys = kl
-        keyType = If(keys.Count > 0, keys(0).keyType, "")
+        keyType = If(keys.Count > 0, keys(0).KeyType, "")
     End Sub
 
     ''' <summary>
@@ -87,7 +87,7 @@ Public Class keyList
     ''' <param name="type">The String against which to match the keylist's type</param>
     ''' <returns></returns>
     Public Function typeIs(type As String) As Boolean
-        Return If(keyType = "", keys(0).keyType, keyType) = type
+        Return If(keyType = "", keys(0).KeyType, keyType) = type
     End Function
 
     ''' <summary>
@@ -97,7 +97,13 @@ Public Class keyList
     ''' <returns></returns>
     Public Function toListOfStr(Optional onlyGetVals As Boolean = False) As List(Of String)
         Dim out As New List(Of String)
-        keys.ForEach(Sub(key) out.Add(If(onlyGetVals, key.value, key.toString)))
+        keys.ForEach(Sub(key) out.Add(If(onlyGetVals, key.Value, key.toString)))
+        Return out
+    End Function
+
+    Public Function toStrLst(Optional onlyGetVals As Boolean = False) As strList
+        Dim out As New strList
+        keys.ForEach(Sub(key) out.add(If(onlyGetVals, key.Value, key.toString)))
         Return out
     End Function
 
@@ -112,10 +118,10 @@ Public Class keyList
     ''' Renumber keys according to the sorted state of the values
     ''' </summary>
     ''' <param name="sortedKeyValues"></param>
-    Public Sub renumberKeys(sortedKeyValues As List(Of String))
+    Public Sub renumberKeys(sortedKeyValues As strList)
         For i As Integer = 0 To Me.keyCount - 1
-            keys(i).name = keys(i).keyType & i + 1
-            keys(i).value = sortedKeyValues(i)
+            keys(i).Name = keys(i).KeyType & i + 1
+            keys(i).Value = sortedKeyValues.items(i)
         Next
     End Sub
 

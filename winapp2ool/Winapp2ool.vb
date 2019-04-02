@@ -20,7 +20,7 @@ Imports Microsoft.Win32
 
 Module Winapp2ool
     ' Update and compatibility settings
-    Public currentVersion As String = "1.02"
+    Public ReadOnly currentVersion As String = "1.02"
     Dim latestVersion As String = ""
     Dim latestWa2Ver As String = ""
     Dim localWa2Ver As String = ""
@@ -135,19 +135,19 @@ Module Winapp2ool
                 chkOfflineMode()
                 If isOffline Then setHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", True)
             Case input = "7" And waUpdateIsAvail
-                Console.Clear()
+                clrConsole()
                 Console.Write("Downloading, this may take a moment...")
                 remoteDownload(Environment.CurrentDirectory, "winapp2.ini", wa2Link, False)
                 checkedForUpdates = False
                 undoAnyPendingExits()
             Case input = "8" And waUpdateIsAvail
-                Console.Clear()
+                clrConsole()
                 Console.Write("Downloading & trimming, this may take a moment...")
                 remoteTrim(eini, lwinapp2File, True)
                 checkedForUpdates = False
                 undoAnyPendingExits()
             Case input = "9" And waUpdateIsAvail
-                Console.Clear()
+                clrConsole()
                 Console.Write("Downloading & diffing, this may take a moment...")
                 remoteDiff(lwinapp2File)
                 undoAnyPendingExits()
@@ -312,6 +312,15 @@ Module Winapp2ool
     End Sub
 
     ''' <summary>
+    ''' Returns the first portion of a registry or filepath parameterization
+    ''' </summary>
+    ''' <param name="val">The directory listing to be split</param>
+    ''' <returns></returns>
+    Public Function getFirstDir(val As String) As String
+        Return val.Split(CChar("\"))(0)
+    End Function
+
+    ''' <summary>
     ''' Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for winapp2ool and its components
     ''' </summary>
     ''' <param name="name">The name of the module</param>
@@ -322,7 +331,7 @@ Module Winapp2ool
         initMenu(name)
         Do Until exitCode
             If chkUpd Then checkUpdates()
-            Console.Clear()
+            clrConsole()
             callMenu()
             Console.Write(Environment.NewLine & promptStr)
             handleInput(Console.ReadLine)

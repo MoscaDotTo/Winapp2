@@ -34,7 +34,7 @@ Public Module iniFileHandler
             If pendingExit() Then Exit Sub
             setHeaderText("Error", True)
             While Not iExitCode
-                Console.Clear()
+                clrConsole()
                 printMenuTop({$"{someFile.name} does not exist."})
                 print(1, "File Chooser (default)", "Change the file name")
                 print(1, "Directory Chooser", "Change the directory", closeMenu:=True)
@@ -65,7 +65,7 @@ Public Module iniFileHandler
         Dim iExitCode As Boolean = False
         setHeaderText("Error", True)
         While Not iExitCode
-            Console.Clear()
+            clrConsole()
             printMenuTop({$"{dir} does not exist."})
             print(1, "Create Directory", "Create this directory")
             print(1, "Directory Chooser (default)", "Specify a new directory", closeMenu:=True)
@@ -93,7 +93,7 @@ Public Module iniFileHandler
     ''' <param name="someFile">An iniFile object with user definable parameters</param>
     Public Sub fileChooser(ByRef someFile As iniFile)
         If pendingExit() Then Exit Sub
-        Console.Clear()
+        clrConsole()
         handleFileChooserChoice(someFile)
         If pendingExit() Then Exit Sub
         handleFileChooserConfirm(someFile)
@@ -116,7 +116,7 @@ Public Module iniFileHandler
         Select Case True
             Case input = "0"
                 exitCode = True
-                Console.Clear()
+                clrConsole()
                 Exit Sub
             Case input = ""
             Case input = "1" And someFile.initName <> ""
@@ -138,7 +138,7 @@ Public Module iniFileHandler
         setHeaderText("File Chooser")
         Dim iExitCode As Boolean = False
         Do Until iExitCode
-            Console.Clear()
+            clrConsole()
             printMenuTop({"Confirm your settings or return to the options to change them."})
             print(1, "File Chooser", "Change the file name")
             print(1, "Directory Chooser", "Change the directory")
@@ -170,7 +170,7 @@ Public Module iniFileHandler
     ''' <param name="dir">A user definable windows directory path</param>
     Public Sub dirChooser(ByRef dir As String)
         If pendingExit() Then Exit Sub
-        Console.Clear()
+        clrConsole()
         handleDirChooserChoice(dir)
         If pendingExit() Then Exit Sub
         handleDirChooserConfirm(dir)
@@ -181,7 +181,7 @@ Public Module iniFileHandler
     ''' </summary>
     ''' <param name="dir">The String containing the directory the user is parameterizing</param>
     Private Sub handleDirChooserChoice(ByRef dir As String)
-        Console.Clear()
+        clrConsole()
         setHeaderText("Directory Chooser")
         printMenuTop({"Choose a directory"})
         print(1, "Use default (default)", "Use the same folder as winapp2ool.exe")
@@ -198,11 +198,11 @@ Public Module iniFileHandler
             Case "2"
                 dir = Directory.GetParent(dir).ToString
             Case "3"
-                Console.Clear()
+                clrConsole()
                 chkDirExist(dir)
             Case Else
                 dir = input
-                Console.Clear()
+                clrConsole()
                 chkDirExist(dir)
         End Select
     End Sub
@@ -216,7 +216,7 @@ Public Module iniFileHandler
         Dim iExitCode As Boolean = False
         Do Until iExitCode
             If pendingExit() Then Exit Sub
-            Console.Clear()
+            clrConsole()
             printMenuTop({"Choose a directory"})
             print(1, "Directory Chooser", "Change the directory")
             print(1, "Confirm (default)", "Use this directory")
