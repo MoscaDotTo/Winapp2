@@ -41,3 +41,6 @@
 /winapp2ool/UnitTests/obj/Debug
 /winapp2ool/packages/MSTest.TestFramework.1.3.2
 /winapp2ool/bin/Debug/CCleaner.exe
+/winapp2ool/TestResults
+/winapp2ool/UnitTests/obj/Release
+/winapp2ool/UnitTests/bin/Release

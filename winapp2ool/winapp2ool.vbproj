@@ -117,6 +117,8 @@
     <Compile Include="modules\handlers\MenuMaker.vb" />
     <Compile Include="modules\handlers\RegistryHelper.vb" />
     <Compile Include="modules\handlers\winapp2\changeDict.vb" />
+    <Compile Include="modules\handlers\winapp2\winapp2keyparameters.vb" />
+    <Compile Include="modules\handlers\winapp2\winapp2entry.vb" />
     <Compile Include="modules\handlers\winapp2\winapp2handler.vb" />
     <Compile Include="modules\merge\Merge.vb" />
     <Compile Include="modules\minefield\JavaMaker.vb" />

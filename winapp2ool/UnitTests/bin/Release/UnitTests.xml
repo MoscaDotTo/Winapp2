@@ -85,7 +85,17 @@ UnitTests
 </member>
 <member name="M:UnitTests.WinappDebugTests.debug_KeyNumberingError_FindAndRepair_Sucess">
  <summary>
- Runs tests to ensure that keys that are improperly numbered are detected and repaired
+ Runs tests to ensure that key with names that are improperly numbered are detected and repaired
+ </summary>
+</member>
+<member name="M:UnitTests.WinappDebugTests.debug_keyNumberingUneededError_FindAndRepair_Success">
+ <summary>
+ Runs tests to ensure that keys in situations where there should be no numbering are detected and repaired
+ </summary>
+</member>
+<member name="M:UnitTests.WinappDebugTests.debug_keyAlphabetization_FindAndRepair_Success">
+ <summary>
+ Runs test to ensure that incorrect alphabetization is caught and repaired
  </summary>
 </member>
 </members>
