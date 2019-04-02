@@ -134,7 +134,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ' Confirm fixable errors are fixed
         Assert.AreEqual(expectedErrsWithRepair, winapp2ool.WinappDebug.errorsFound)
         ' Return the entry for further assessment
-        Return New winapp2ool.winapp2handler.winapp2entry(test.entrySections.Last.sections.Values.First)
+        Return New winapp2ool.winapp2entry(test.entrySections.Last.sections.Values.First)
     End Function
 
     ''' <summary>
@@ -153,7 +153,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     End Sub
 
     ''' <summary>
-    ''' Runs tests to ensure that keys that are improperly numbered are detected and repaired
+    ''' Runs tests to ensure that key with names that are improperly numbered are detected and repaired
     ''' </summary>
     <TestMethod> Public Sub debug_KeyNumberingError_FindAndRepair_Sucess()
         Dim testOutput = debug_ErrorFindAndRepair_Success(1, 8, 0, 2)
@@ -163,10 +163,39 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
                 Case "Detect", "DetectFile", "ExcludeKey", "FileKey", "RegKey"
                     Dim curKeys = lst.keys
                     ' We expect 2 keys in each of these lists, having the keyNumbers 1 and 2 respectively
-                    Assert.AreEqual(curKeys.First.name, $"{lst.keyType}1")
-                    Assert.AreEqual(curKeys.Last.name, $"{lst.keyType}2")
+                    Assert.AreEqual(curKeys.First.Name, $"{lst.keyType}1")
+                    Assert.AreEqual(curKeys.Last.Name, $"{lst.keyType}2")
             End Select
         Next
+    End Sub
+
+    ''' <summary>
+    ''' Runs tests to ensure that keys in situations where there should be no numbering are detected and repaired
+    ''' </summary>
+    <TestMethod> Public Sub debug_keyNumberingUneededError_FindAndRepair_Success()
+        Dim testOutput = debug_ErrorFindAndRepair_Success(2, 8, 0, 8)
+        For Each lst In testOutput.keyListList
+            If lst.keyCount > 0 Then
+                Select Case lst.keyType
+                    ' RegKeys, FileKeys, and ExcludeKeys always require a trailing number in the name, even if there is only one
+                    Case "RegKey", "FileKey", "ExcludeKey"
+                        Assert.AreEqual(lst.keys.First.KeyType & 1, lst.keys.First.Name)
+                    Case Else
+                        Assert.AreEqual(lst.keys.First.KeyType, lst.keys.First.Name)
+                End Select
+            End If
+        Next
+    End Sub
+
+    ''' <summary>
+    ''' Runs test to ensure that incorrect alphabetization is caught and repaired
+    ''' </summary>
+    <TestMethod> Public Sub debug_keyAlphabetization_FindAndRepair_Success()
+        Dim testOutput = debug_ErrorFindAndRepair_Success(3, 4, 0, 1)
+        Assert.AreEqual("HKCU\Software3", testOutput.detects.keys.First.Value)
+        Assert.AreEqual("HKCU\Software4", testOutput.detects.keys(1).Value)
+        Assert.AreEqual("HKCU\Software20", testOutput.detects.keys(2).Value)
+        Assert.AreEqual("HKCU\Software30", testOutput.detects.keys(3).Value)
     End Sub
 
 End Class
