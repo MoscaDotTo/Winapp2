@@ -31,9 +31,7 @@ Module CCiniDebug
     Dim sortFile As Boolean = True
     Dim settingsChanged As Boolean = False
 
-    ''' <summary>
-    ''' Restores the default state of the module's parameters
-    ''' </summary>
+    ''' <summary>Restores the default state of the module's parameters</summary>
     Private Sub initDefaultSettings()
         ccFile.resetParams()
         outputFile.resetParams()
@@ -44,9 +42,7 @@ Module CCiniDebug
         settingsChanged = False
     End Sub
 
-    ''' <summary>
-    ''' Handles the commandline args for CCiniDebug
-    ''' </summary>
+    ''' <summary>Handles the commandline args for CCiniDebug</summary>
     '''  CCiniDebug args:
     ''' -noprune    : disable pruning of stale winapp2.ini entries
     ''' -nosort     : disable sorting ccleaner.ini alphabetically
@@ -60,9 +56,7 @@ Module CCiniDebug
         initDebug()
     End Sub
 
-    ''' <summary>
-    ''' Prints the CCiniDebug menu to the user
-    ''' </summary>
+    ''' <summary>Prints the CCiniDebug menu to the user</summary>
     Public Sub printMenu()
         printMenuTop({"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"})
         print(1, "Run (default)", "Debug ccleaner.ini", trailingBlank:=True)
@@ -78,9 +72,7 @@ Module CCiniDebug
         print(2, "CCiniDebug", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
-    ''' <summary>
-    ''' Handles the user's input from the menu
-    ''' </summary>
+    ''' <summary>Handles the user's input from the menu</summary>
     ''' <param name="input">The string containing the user's input</param>
     Public Sub handleUserInput(input As String)
         Select Case True
@@ -109,9 +101,7 @@ Module CCiniDebug
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Performs the debugging process
-    ''' </summary>
+    ''' <summary>Performs the debugging process</summary>
     Private Sub initDebug()
         ccFile.validate()
         If pruneFile Then winappFile.validate()
@@ -126,9 +116,7 @@ Module CCiniDebug
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
-    ''' <summary>
-    ''' Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file
-    ''' </summary>
+    ''' <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>
     ''' <param name="optionsSec">The iniSection object containing the Options from ccleaner.ini</param>
     Private Sub prune(ByRef optionsSec As iniSection)
         print(0, $"Scanning {ccFile.name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
@@ -149,9 +137,7 @@ Module CCiniDebug
         optionsSec.removeKeys(tbTrimmed)
     End Sub
 
-    ''' <summary>
-    ''' Sorts the keys in the Options (only) section of ccleaner.ini
-    ''' </summary>
+    ''' <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
     Private Sub sortCC()
         Dim lineList As List(Of String) = ccFile.sections("Options").getKeysAsList
         lineList.Sort()

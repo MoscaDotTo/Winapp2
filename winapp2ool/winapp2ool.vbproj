@@ -68,7 +68,7 @@
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
@@ -117,6 +117,7 @@
     <Compile Include="modules\handlers\MenuMaker.vb" />
     <Compile Include="modules\handlers\RegistryHelper.vb" />
     <Compile Include="modules\handlers\winapp2\changeDict.vb" />
+    <Compile Include="modules\handlers\winapp2\winapp2file.vb" />
     <Compile Include="modules\handlers\winapp2\winapp2keyparameters.vb" />
     <Compile Include="modules\handlers\winapp2\winapp2entry.vb" />
     <Compile Include="modules\handlers\winapp2\winapp2handler.vb" />
@@ -124,6 +125,8 @@
     <Compile Include="modules\minefield\JavaMaker.vb" />
     <Compile Include="modules\minefield\Minefield.vb" />
     <Compile Include="modules\trim\Trim.vb" />
+    <Compile Include="modules\winappdebug\advSettings.vb" />
+    <Compile Include="modules\winappdebug\experimentalScans.vb" />
     <Compile Include="modules\winappdebug\lintRule.vb" />
     <Compile Include="modules\winappdebug\WinappDebug.vb" />
     <Compile Include="Winapp2ool.vb" />

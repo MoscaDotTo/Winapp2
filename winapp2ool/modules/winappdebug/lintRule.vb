@@ -19,98 +19,36 @@ Option Strict On
 ''' Holds information about whether or not individual types of scans and repairs should run
 ''' </summary>
 Public Class lintRule
-    Private _shouldScan As Boolean
-    Private _shouldRepair As Boolean
     Private initScanState As Boolean
     Private initRepairState As Boolean
-    Private scanText As String
-    Private repairText As String
-    Private lintName As String
 
-    ''' <summary>
-    ''' Returns true if the current scan/repair settings do not match their inital state
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Returns true if the current scan/repair settings do not match their inital state </summary>
     Public Function hasBeenChanged() As Boolean
-        Return Not _shouldScan = initScanState Or Not _shouldScan = initRepairState
+        Return Not ShouldScan = initScanState Or Not ShouldRepair = initRepairState
     End Function
 
-    ''' <summary>
-    ''' Indicates whether or not scans for this rule should run
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Indicates whether or not scans for this rule should run</summary>
     Public Property ShouldScan As Boolean
-        Get
-            Return _shouldScan
-        End Get
-        Set(value As Boolean)
-            _shouldScan = value
-        End Set
-    End Property
 
-    ''' <summary>
-    ''' Indicates whether or not repairs for this rule should run
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Indicates whether or not repairs for this rule should run</summary>
     Public Property ShouldRepair As Boolean
-        Get
-            Return _shouldRepair
-        End Get
-        Set(value As Boolean)
-            _shouldRepair = value
-        End Set
-    End Property
 
-    ''' <summary>
-    ''' Describes what scan routines this rule controls
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property ScanText1 As String
-        Get
-            Return scanText
-        End Get
-        Set(value As String)
-            scanText = value
-        End Set
-    End Property
+    ''' <summary>Describes what scan routines this rule controls</summary>
+    Public Property ScanText As String
 
-    ''' <summary>
-    ''' Describes what repairs this rule controls
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property RepairText1 As String
-        Get
-            Return repairText
-        End Get
-        Set(value As String)
-            repairText = value
-        End Set
-    End Property
+    ''' <summary>Describes what repairs this rule controls</summary>
+    Public Property RepairText As String
 
-    ''' <summary>
-    ''' The name of the rule as it will appear in menus
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property LintName1 As String
-        Get
-            Return lintName
-        End Get
-        Set(value As String)
-            lintName = value
-        End Set
-    End Property
+    ''' <summary>The name of the rule as it will appear in menus</summary>
+    Public Property LintName As String
 
-    ''' <summary>
-    ''' Restores the initial lint rule state
-    ''' </summary>
+    ''' <summary>Restores the initial lint rule state</summary>
     Public Sub resetParams()
         ShouldScan = initScanState
         ShouldRepair = initRepairState
     End Sub
 
-    ''' <summary>
-    ''' Creates a new rule for the linter, retains the inital given parameters
-    ''' </summary>
+    ''' <summary>Creates a new rule for the linter, retains the inital given parameters</summary>
     ''' <param name="scan">The default scan state</param>
     ''' <param name="repair">The default repair state </param>
     ''' <param name="name">The name that will appear in menus</param>
@@ -126,27 +64,20 @@ Public Class lintRule
         repairText = rpTxt
     End Sub
 
-    ''' <summary>
-    ''' Enables both the scan and repair for the rule
-    ''' </summary>
+    ''' <summary>Enables both the scan and repair for the rule</summary>
     Public Sub turnOn()
         ShouldScan = True
         ShouldRepair = True
     End Sub
 
-    ''' <summary>
-    ''' Disables both the scan and repair for the rule
-    ''' </summary>
+    ''' <summary>Disables both the scan and repair for the rule</summary>
     Public Sub turnOff()
         ShouldScan = False
         ShouldRepair = False
     End Sub
 
-    ''' <summary>
-    ''' Determines whether or not a fix that sits behind an optional flag should be run
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Determines whether or not a fix that sits behind an optional flag should be run</summary>
     Public Function fixFormat() As Boolean
-        Return CorrectFormatting1 Or (CorrectSomeFormatting1 And ShouldRepair)
+        Return repairErrsFound Or (repairSomeErrsFound And ShouldRepair)
     End Function
 End Class

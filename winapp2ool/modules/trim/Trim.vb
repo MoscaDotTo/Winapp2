@@ -36,9 +36,7 @@ Public Module Trim
     Dim settingsChanged As Boolean
     Dim download As Boolean = False
 
-    ''' <summary>
-    ''' Handles the commandline args for Trim
-    ''' </summary>
+    ''' <summary>Handles the commandline args for Trim</summary>
     ''' Trim args:
     ''' -d          : download the latest winapp2.ini
     Public Sub handleCmdLine()
@@ -48,9 +46,7 @@ Public Module Trim
         initTrim()
     End Sub
 
-    ''' <summary>
-    ''' Restores the default state of the module's parameters
-    ''' </summary>
+    ''' <summary>Restores the default state of the module's parameters</summary>
     Private Sub initDefaultSettings()
         winappFile.resetParams()
         outputFile.resetParams()
@@ -58,9 +54,7 @@ Public Module Trim
         settingsChanged = False
     End Sub
 
-    ''' <summary>
-    ''' Runs the trimmer from outside the module
-    ''' </summary>
+    ''' <summary>Runs the trimmer from outside the module</summary>
     ''' <param name="firstFile">The winapp2.ini file</param>
     ''' <param name="secondFile">The output file</param>
     ''' <param name="d">Download boolean</param>
@@ -71,9 +65,7 @@ Public Module Trim
         initTrim()
     End Sub
 
-    ''' <summary>
-    ''' Prints the main menu to the user
-    ''' </summary>
+    ''' <summary>Prints the main menu to the user</summary>
     Public Sub printMenu()
         printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
         print(1, "Run (default)", "Trim winapp2.ini")
@@ -85,9 +77,7 @@ Public Module Trim
         print(2, "Trim", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
-    ''' <summary>
-    ''' Handles the user input from the menu
-    ''' </summary>
+    ''' <summary>Handles the user input from the menu</summary>
     ''' <param name="input">The String containing the user's input</param>
     Public Sub handleUserInput(input As String)
         Select Case True
@@ -108,9 +98,7 @@ Public Module Trim
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Initiates the trim after validating our ini files
-    ''' </summary>
+    ''' <summary>Initiates the trim after validating our ini files</summary>
     Private Sub initTrim()
         If Not download Then winappFile.validate()
         If pendingExit() Then Exit Sub
@@ -120,9 +108,7 @@ Public Module Trim
         clrConsole()
     End Sub
 
-    ''' <summary>
-    ''' Performs the trim
-    ''' </summary>
+    ''' <summary>Performs the trim</summary>
     ''' <param name="winapp2">A winapp2.ini file</param>
     Private Sub trim(winapp2 As winapp2file)
         clrConsole()
@@ -147,12 +133,9 @@ Public Module Trim
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
-    ''' <summary>
-    ''' Evaluates a list of keys to observe whether they exist on the current machine
-    ''' </summary>
+    ''' <summary>Evaluates a list of keys to observe whether they exist on the current machine</summary>
     ''' <param name="kl">The list of iniKeys to query</param>
     ''' <param name="chkExist">The function that evaluates that keyType's parameters</param>
-    ''' <returns></returns>
     Private Function checkExistence(ByRef kl As keyList, chkExist As Func(Of String, Boolean)) As Boolean
         If kl.keyCount = 0 Then Return False
         For Each key In kl.keys
@@ -161,11 +144,8 @@ Public Module Trim
         Return False
     End Function
 
-    ''' <summary>
-    ''' Returns true if an entry's detection criteria is matched by the system, false otherwise.
-    ''' </summary>
+    ''' <summary>Returns true if an entry's detection criteria is matched by the system, false otherwise.</summary>
     ''' <param name="entry">A winapp2.ini entry</param>
-    ''' <returns></returns>
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
         Dim hasDetOS As Boolean = Not entry.detectOS.keyCount = 0
         Dim hasMetDetOS As Boolean = False
@@ -186,9 +166,7 @@ Public Module Trim
         Return False
     End Function
 
-    ''' <summary>
-    ''' Audits the given entry for legacy codepaths in the machine's VirtualStore locations
-    ''' </summary>
+    ''' <summary>Audits the given entry for legacy codepaths in the machine's VirtualStore locations</summary>
     ''' <param name="entry"></param>
     Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
         vsKeyChecker(entry.fileKeys)
@@ -196,9 +174,7 @@ Public Module Trim
         vsKeyChecker(entry.excludeKeys)
     End Sub
 
-    ''' <summary>
-    ''' Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list
-    ''' </summary>
+    ''' <summary>Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list</summary>
     ''' <param name="kl">The keylist of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore</param>
     Private Sub vsKeyChecker(ByRef kl As keyList)
         If kl.keyCount = 0 Then Exit Sub
@@ -211,9 +187,7 @@ Public Module Trim
         kl.renumberKeys(replaceAndSort(kl.toStrLst(True), "|", " \ \"))
     End Sub
 
-    ''' <summary>
-    ''' Audits the existence of VirtualStore locations for an iniKey and if they exist, adds them to the list
-    ''' </summary>
+    ''' <summary>Audits the existence of VirtualStore locations for an iniKey and if they exist, adds them to the list</summary>
     ''' <param name="findStrs">A list of strings to seek for in the key value</param>
     ''' <param name="replStrs">A list of strings to replace the sought after key values</param>
     ''' <param name="kl">The keylist to be processed</param>
@@ -233,9 +207,7 @@ Public Module Trim
         keysToAdd.keys.ForEach(Sub(key) kl2.add(key, checkExist(New winapp2KeyParameters(key).pathString)))
     End Sub
 
-    ''' <summary>
-    ''' Creates the VirtualStore version of a given iniKey
-    ''' </summary>
+    ''' <summary>Creates the VirtualStore version of a given iniKey</summary>
     ''' <param name="findStr">The normal filesystem path</param>
     ''' <param name="replStr">The VirtualStore location path</param>
     ''' <param name="key">The key to processed</param>
@@ -244,9 +216,7 @@ Public Module Trim
         Return New iniKey($"{key.Name}={key.Value.Replace(findStr, replStr)}")
     End Function
 
-    ''' <summary>
-    ''' Processess a list of winapp2.ini entries and removes any from the list that wouldn't be detected by CCleaner
-    ''' </summary>
+    ''' <summary>Processess a list of winapp2.ini entries and removes any from the list that wouldn't be detected by CCleaner</summary>
     ''' <param name="entryList">The list of winapp2entry objects to check existence for</param>
     Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
         Dim sectionsToBePruned As New List(Of winapp2entry)
@@ -255,11 +225,8 @@ Public Module Trim
         removeEntries(entryList, sectionsToBePruned)
     End Sub
 
-    ''' <summary>
-    ''' Returns true if a SpecialDetect location exist, false otherwise
-    ''' </summary>
+    ''' <summary>Returns true if a SpecialDetect location exist, false otherwise</summary>
     ''' <param name="key">A SpecialDetect format iniKey</param>
-    ''' <returns></returns>
     Private Function checkSpecialDetects(ByVal key As String) As Boolean
         Select Case key
             Case "DET_CHROME"
@@ -277,20 +244,14 @@ Public Module Trim
         Return False
     End Function
 
-    ''' <summary>
-    ''' Handles passing off checks from sources that may vary between file system and registry
-    ''' </summary>
+    ''' <summary>Handles passing off checks from sources that may vary between file system and registry</summary>
     ''' <param name="path">A filesystem or registry path to be audited for existence</param>
-    ''' <returns></returns>
     Private Function checkExist(path As String) As Boolean
         Return If(path.StartsWith("HK"), checkRegExist(path), checkPathExist(path))
     End Function
 
-    ''' <summary>
-    ''' Returns True if a given Detect path exists in the system registry, false otherwise.
-    ''' </summary>
+    ''' <summary>Returns True if a given Detect path exists in the system registry, false otherwise.</summary>
     ''' <param name="path">A registry path from a Detect key</param>
-    ''' <returns></returns>
     Private Function checkRegExist(path As String) As Boolean
         Dim dir = path
         Dim root = getFirstDir(path)
@@ -317,11 +278,8 @@ Public Module Trim
         Return False
     End Function
 
-    ''' <summary>
-    ''' Returns True if a path exists on the system, false otherwise.
-    ''' </summary>
+    ''' <summary>Returns True if a path exists on the system, false otherwise.</summary>
     ''' <param name="key">A filesystem path</param>
-    ''' <returns></returns>
     Private Function checkPathExist(key As String) As Boolean
         Dim isProgramFiles = False
         Dim dir As String = key
@@ -365,9 +323,7 @@ Public Module Trim
         Return False
     End Function
 
-    ''' <summary>
-    ''' Swaps out a directory with the ProgramFiles parameterization on 64bit computers
-    ''' </summary>
+    ''' <summary>Swaps out a directory with the ProgramFiles parameterization on 64bit computers</summary>
     ''' <param name="dir">The text to be modified</param>
     ''' <param name="key">The original state of the text</param>
     Private Sub swapDir(ByRef dir As String, key As String)
@@ -375,11 +331,8 @@ Public Module Trim
         dir = envDir & key.Split(CChar("%"))(2)
     End Sub
 
-    ''' <summary>
-    ''' Interpret parameterized wildcards for the current system
-    ''' </summary>
+    ''' <summary>Interpret parameterized wildcards for the current system</summary>
     ''' <param name="dir">A path containing a wildcard</param>
-    ''' <returns></returns>
     Private Function expandWildcard(dir As String) As Boolean
         ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
         Dim possibleDirs As New List(Of String)
@@ -430,11 +383,8 @@ Public Module Trim
         Return False
     End Function
 
-    ''' <summary>
-    ''' Returns true if we satisfy the DetectOS citeria, false otherwise
-    ''' </summary>
+    ''' <summary>Returns true if we satisfy the DetectOS citeria, false otherwise</summary>
     ''' <param name="value">The DetectOS criteria to be checked</param>
-    ''' <returns></returns>
     Private Function checkDetOS(value As String) As Boolean
         Dim splitKey As String() = value.Split(CChar("|"))
         Return If(value.StartsWith("|"), Not winVer > Val(splitKey(1)), Not winVer < Val(splitKey(0)))

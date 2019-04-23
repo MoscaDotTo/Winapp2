@@ -25,9 +25,7 @@ Public Class winapp2KeyParameters
     Public keyType As String = ""
     Public keyNum As String = ""
 
-    ''' <summary>
-    ''' Creates a new keyparams object from a given iniKey object
-    ''' </summary>
+    ''' <summary>Creates a new keyparams object from a given iniKey object</summary>
     ''' <param name="key">The iniKey to get parameters from</param>
     Public Sub New(key As iniKey)
         keyType = key.KeyType
@@ -58,9 +56,7 @@ Public Class winapp2KeyParameters
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Reconstructs a FileKey to hold the format of FileKeyX=PATH|FILE;FILE;FILE....|FLAG
-    ''' </summary>
+    ''' <summary>Reconstructs a FileKey to hold the format of FileKeyX=PATH|FILE;FILE;FILE....|FLAG</summary>
     ''' <param name="key">An iniKey to be reconstructed</param>
     ''' Also trims empty comments 
     Public Sub reconstructKey(ByRef key As iniKey)
@@ -76,9 +72,7 @@ Public Class winapp2KeyParameters
         key.Value = out
     End Sub
 
-    ''' <summary>
-    ''' Constructs a new iniKey in an attempt to merge keys together
-    ''' </summary>
+    ''' <summary>Constructs a new iniKey in an attempt to merge keys together</summary>
     ''' <param name="tmpKeyStr">The string to contain the new key text</param>
     Public Sub addArgs(ByRef tmpKeyStr As String)
         appendStrs({$"{keyType}{keyNum}=", $"{pathString}|", argsList(0)}, tmpKeyStr)
@@ -89,9 +83,7 @@ Public Class winapp2KeyParameters
         End If
     End Sub
 
-    ''' <summary>
-    ''' Tracks params and flags from a winapp2key
-    ''' </summary>
+    ''' <summary>Tracks params and flags from a winapp2key</summary>
     ''' <param name="paramList">The list of params observed</param>
     ''' <param name="flagList">The list of flags observed</param>
     Public Sub trackParamAndFlags(ByRef paramList As strList, ByRef flagList As strList)

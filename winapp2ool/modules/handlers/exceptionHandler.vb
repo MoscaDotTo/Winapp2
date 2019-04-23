@@ -19,9 +19,7 @@ Option Strict On
 ''' Handles the processing of errors caught throughout the operation of winapp2ool, hopefully gracefully.
 ''' </summary>
 Module exceptionHandler
-    ''' <summary>
-    ''' Prints out exceptions and any other information related to them that a use may need.
-    ''' </summary>
+    ''' <summary>Prints out exceptions and any other information related to them that a use may need.</summary>
     ''' <param name="ex">A given exception captured during winapp2ool's execution</param>
     Public Sub exc(ByRef ex As Exception)
         Select Case True
@@ -40,9 +38,7 @@ Module exceptionHandler
         cwl()
     End Sub
 
-    ''' <summary>
-    ''' Inform the user that they cannot 
-    ''' </summary>
+    ''' <summary>Inform the user that they cannot</summary>
     ''' Consider allowing the user to reestablish their internet connection here
     Private Sub offlineErr()
         cwl("Error: Could not establish connection to the remote host (GitHub)")
@@ -50,9 +46,7 @@ Module exceptionHandler
         isOffline = True
     End Sub
 
-    ''' <summary>
-    ''' Prints output to the user instructing them to update their .NET Framework 
-    ''' </summary>
+    ''' <summary>Prints output to the user instructing them to update their .NET Framework</summary>
     Private Sub printDotNetOutOfDateError()
         cwl("Error: download could not be completed.")
         cwl("This issue is caused by an out of date .NET Framework.")

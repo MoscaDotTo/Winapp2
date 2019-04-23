@@ -29,9 +29,7 @@ Module Merge
     Dim mergeMode As Boolean = True
     Dim settingsChanged As Boolean = False
 
-    ''' <summary>
-    ''' Handles the commandline args for Merge
-    ''' </summary>
+    ''' <summary>Handles the commandline args for Merge</summary>
     '''  Merge args:
     ''' -mm         : toggle mergemode from add&amp;replace to add&amp;remove
     ''' Preset merge file choices
@@ -50,9 +48,7 @@ Module Merge
         If Not mergeFile.name = "" Then initMerge()
     End Sub
 
-    ''' <summary>
-    ''' Restores the default state of the module's parameters
-    ''' </summary>
+    ''' <summary>Restores the default state of the module's parameters</summary>
     Private Sub initDefaultSettings()
         winappFile.resetParams()
         mergeFile.resetParams()
@@ -60,9 +56,7 @@ Module Merge
         settingsChanged = False
     End Sub
 
-    ''' <summary>
-    ''' Prints the main menu to the user
-    ''' </summary>
+    ''' <summary>Prints the main menu to the user</summary>
     Public Sub printMenu()
         printMenuTop({"Merge the contents of two ini files, while either replacing (default) or removing sections with the same name."})
         print(1, "Run (default)", "Merge the two ini files")
@@ -82,9 +76,7 @@ Module Merge
         Console.WindowHeight = If(settingsChanged, 32, 30)
     End Sub
 
-    ''' <summary>
-    ''' Processes the user's input and acts accordingly based on the state of the program
-    ''' </summary>
+    ''' <summary>Processes the user's input and acts accordingly based on the state of the program</summary>
     ''' <param name="input">The String containing the user's input</param>
     Public Sub handleUserInput(input As String)
         Select Case True
@@ -113,9 +105,7 @@ Module Merge
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Changes the merge file's name
-    ''' </summary>
+    ''' <summary>Changes the merge file's name</summary>
     ''' <param name="newName">the new name for the merge file</param>
     Private Sub changeMergeName(newName As String)
         mergeFile.name = newName
@@ -123,9 +113,7 @@ Module Merge
         setHeaderText("Merge filename set")
     End Sub
 
-    ''' <summary>
-    ''' Validates iniFiles and begins the merging process
-    ''' </summary>
+    ''' <summary>Validates iniFiles and begins the merging process</summary>
     Public Sub initMerge()
         clrConsole()
         winappFile.validate()
@@ -134,9 +122,7 @@ Module Merge
         merge()
     End Sub
 
-    ''' <summary>
-    ''' Conducts the merger of our two iniFiles
-    ''' </summary>
+    ''' <summary>Conducts the merger of our two iniFiles</summary>
     Private Sub merge()
         processMergeMode(winappFile, mergeFile)
         Dim tmp As New winapp2file(winappFile)
@@ -156,9 +142,7 @@ Module Merge
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
-    ''' <summary>
-    ''' Performs conflict resolution for the merge process
-    ''' </summary>
+    ''' <summary>Performs conflict resolution for the merge process</summary>
     ''' <param name="first">The base iniFile that will be modified by Merge</param>
     ''' <param name="second">The iniFile to be merged into the base</param>
     Private Sub processMergeMode(ByRef first As iniFile, ByRef second As iniFile)

@@ -37,9 +37,7 @@ Public Module commandLineHandler
         End Set
     End Property
 
-    ''' <summary>
-    ''' Flips a boolean setting and removes its associated argument from the args list
-    ''' </summary>
+    ''' <summary>Flips a boolean setting and removes its associated argument from the args list</summary>
     ''' <param name="setting">The boolean setting to be flipped</param>
     ''' <param name="arg">The string containing the argument that flips the boolean</param>
     ''' <param name="name">Optional reference to a file name to be replaced</param>
@@ -52,9 +50,7 @@ Public Module commandLineHandler
         End If
     End Sub
 
-    ''' <summary>
-    ''' Processes whether to download and which file to download
-    ''' </summary>
+    ''' <summary>Processes whether to download and which file to download</summary>
     ''' <param name="download">The boolean indicating winapp2.ini should be downloaded</param>
     Public Sub handleDownloadBools(ByRef download As Boolean)
         invertSettingAndRemoveArg(download, "-d")
@@ -62,9 +58,7 @@ Public Module commandLineHandler
         If download And isOffline Then printErrExit("Winapp2ool is currently in offline mode, but you have issued commands that require a network connection. Please try again with a network connection.")
     End Sub
 
-    ''' <summary>
-    ''' Renames an iniFile object if provided a commandline arg to do so
-    ''' </summary>
+    ''' <summary>Renames an iniFile object if provided a commandline arg to do so</summary>
     ''' <param name="flag">The flag that precedes the name specification in the args list</param>
     ''' <param name="givenFile">A reference to an iniFile object to be modified</param>
     Private Sub getFileName(flag As String, ByRef givenFile As iniFile)
@@ -87,9 +81,7 @@ Public Module commandLineHandler
         End If
     End Sub
 
-    ''' <summary>
-    ''' Applies a new directory and name to an iniFile object 
-    ''' </summary>
+    ''' <summary>Applies a new directory and name to an iniFile object</summary>
     ''' <param name="flag">The flag preceeding the file/path parameter in the arg list</param>
     ''' <param name="file">The iniFile object to be modified</param>
     Private Sub getFileNameAndDir(flag As String, ByRef file As iniFile)
@@ -101,9 +93,7 @@ Public Module commandLineHandler
         End If
     End Sub
 
-    ''' <summary>
-    ''' Takes in a full form filepath with directory and assigns the directory and filename components to the given iniFile object
-    ''' </summary>
+    ''' <summary>Takes in a full form filepath with directory and assigns the directory and filename components to the given iniFile object</summary>
     ''' <param name="arg">The filepath argument</param>
     ''' <param name="file">The iniFile object to be modified</param>
     Private Sub getFileParams(ByRef arg As String, ByRef file As iniFile)
@@ -118,9 +108,7 @@ Public Module commandLineHandler
         file.name = splitArg.Last
     End Sub
 
-    ''' <summary>
-    ''' Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler
-    ''' </summary>
+    ''' <summary>Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler</summary>
     Public Sub processCommandLineArgs()
         cmdargs.AddRange(Environment.GetCommandLineArgs)
         ' 0th index holds the executable name, we don't need it. 
@@ -153,9 +141,7 @@ Public Module commandLineHandler
         End If
     End Sub
 
-    ''' <summary>
-    ''' Gets the directory and name info for each file given (if any)
-    ''' </summary>
+    ''' <summary>Gets the directory and name info for each file given (if any)</summary>
     ''' <param name="ff">The "first file" from a module</param>
     ''' <param name="sf">The "second file" from a module</param>
     ''' <param name="tf">The "third file" from a module</param>
@@ -166,9 +152,7 @@ Public Module commandLineHandler
         getParams(3, tf)
     End Sub
 
-    ''' <summary>
-    ''' Processes numerically ordered directory (d) and file (f) commandline args on a per-file basis
-    ''' </summary>
+    ''' <summary>Processes numerically ordered directory (d) and file (f) commandline args on a per-file basis</summary>
     ''' <param name="someNumber">The number (1-indexed) of our current internal iniFile</param>
     ''' <param name="someFile">A reference to the iniFile object being operated on</param>
     Private Sub getParams(someNumber As Integer, someFile As iniFile)
@@ -181,9 +165,7 @@ Public Module commandLineHandler
         If someFile.dir.EndsWith("\") Then someFile.dir = someFile.dir.TrimEnd(CChar("\"))
     End Sub
 
-    ''' <summary>
-    ''' Enforces that commandline args are properly formatted in {"-flag","data"} format
-    ''' </summary>
+    ''' <summary>Enforces that commandline args are properly formatted in {"-flag","data"} format</summary>
     Private Sub validateArgs()
         Dim vArgs As String() = {"-1d", "-1f", "-2d", "-2f", "-3d", "-3f"}
         If cmdargs.Count > 1 Then
@@ -202,9 +184,7 @@ Public Module commandLineHandler
         End If
     End Sub
 
-    ''' <summary>
-    ''' Prints an error to the user and exits the application after they have pressed a key
-    ''' </summary>
+    ''' <summary>Prints an error to the user and exits the application after they have pressed a key</summary>
     ''' <param name="errTxt">The String containing the erorr text to be printed to the user</param>
     Private Sub printErrExit(errTxt As String)
         Console.WriteLine($"{errTxt} Press any key to exit.")

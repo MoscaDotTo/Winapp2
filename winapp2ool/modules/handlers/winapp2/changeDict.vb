@@ -21,17 +21,12 @@ Option Strict On
 Public Class changeDict
     Private changes As Dictionary(Of String, String)
 
-    ''' <summary>
-    ''' Creates a new string change tracking dictionary
-    ''' </summary>
+    ''' <summary>Creates a new string change tracking dictionary</summary>
     Public Sub New()
         Changes1 = New Dictionary(Of String, String)
     End Sub
 
-    ''' <summary>
-    ''' The dictionary of changes made to a list of strings
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>The dictionary of changes made to a list of strings</summary>
     Public Property Changes1 As Dictionary(Of String, String)
         Get
             Return changes
@@ -41,9 +36,7 @@ Public Class changeDict
         End Set
     End Property
 
-    ''' <summary>
-    ''' Tracks renames made while mutating data for string sorting.
-    ''' </summary>
+    ''' <summary>Tracks renames made while mutating data for string sorting.</summary>
     ''' <param name="currentValue">The current value of a string</param>
     ''' <param name="newValue">The new value of a piece of a string</param>
     Public Sub trackChanges(currentValue As String, newValue As String)
@@ -64,9 +57,7 @@ Public Class changeDict
         End Try
     End Sub
 
-    ''' <summary>
-    ''' Restores the original state of data mutated for the purposes of string sorting.
-    ''' </summary>
+    ''' <summary>Restores the original state of data mutated for the purposes of string sorting.</summary>
     ''' <param name="lstArray">An array containing lists of strings whose data has been modified</param>
     Public Sub undoChanges(ByRef lstArray As strList())
         For Each lst In lstArray

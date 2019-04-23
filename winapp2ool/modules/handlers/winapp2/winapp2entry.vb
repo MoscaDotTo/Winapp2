@@ -37,9 +37,7 @@ Public Class winapp2entry
                                                     defaultKey, warningKey, fileKeys, regKeys, excludeKeys, errorKeys}
     Public lineNum As New Integer
 
-    ''' <summary>
-    ''' Construct a new winapp2entry object from an iniSection
-    ''' </summary>
+    ''' <summary>Construct a new winapp2entry object from an iniSection</summary>
     ''' <param name="section">A winapp2.ini format iniSection object</param>
     Public Sub New(ByVal section As iniSection)
         fullName = section.getFullName
@@ -49,18 +47,13 @@ Public Class winapp2entry
         section.constKeyLists(keyListList)
     End Sub
 
-    ''' <summary>
-    ''' Clears and updates the keyListList with the current state of the keys
-    ''' </summary>
+    ''' <summary>Clears and updates the keyListList with the current state of the keys</summary>
     Private Sub updKeyListList()
         keyListList = New List(Of keyList) From {detectOS, langSecRef, sectionKey, specialDetect, detects, detectFiles,
                                                  defaultKey, warningKey, fileKeys, regKeys, excludeKeys, errorKeys}
     End Sub
 
-    ''' <summary>
-    ''' Returns the keys in each keyList back as a list of Strings in winapp2.ini (style) order
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Returns the keys in each keyList back as a list of Strings in winapp2.ini (style) order</summary>
     Public Function dumpToListOfStrings() As List(Of String)
         Dim outList As New List(Of String) From {fullName}
         updKeyListList()

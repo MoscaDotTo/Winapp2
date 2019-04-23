@@ -20,38 +20,26 @@ Imports Microsoft.Win32
 ''' This module holds any functions winapp2ool might require for accessing and manipulating the windows registry
 ''' </summary>
 Module RegistryHelper
-    ''' <summary>
-    ''' Returns the requested key or subkey from the HKEY_LOCAL_MACHINE registry hive
-    ''' </summary>
+    ''' <summary>Returns the requested key or subkey from the HKEY_LOCAL_MACHINE registry hive</summary>
     ''' <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
-    ''' <returns></returns>
     Public Function getLMKey(Optional subkey As String = "") As RegistryKey
         Return Registry.LocalMachine.OpenSubKey(subkey)
     End Function
 
-    ''' <summary>
-    ''' Returns the requested key or subkey from the HKEY_CLASSES_ROOT registry hive
-    ''' </summary>
+    ''' <summary>Returns the requested key or subkey from the HKEY_CLASSES_ROOT registry hive</summary>
     ''' <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
-    ''' <returns></returns>
     Public Function getCRKey(Optional subkey As String = "") As RegistryKey
         Return Registry.ClassesRoot.OpenSubKey(subkey)
     End Function
 
-    ''' <summary>
-    ''' Returns the requested key or subkey from the HKEY_CURRENT_USER registry hive
-    ''' </summary>
+    ''' <summary>Returns the requested key or subkey from the HKEY_CURRENT_USER registry hive</summary>
     ''' <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
-    ''' <returns></returns>
     Public Function getCUKey(Optional subkey As String = "") As RegistryKey
         Return Registry.CurrentUser.OpenSubKey(subkey)
     End Function
 
-    ''' <summary>
-    ''' Returns the requested key or subkey from the HKEY_USERS registry hive
-    ''' </summary>
+    ''' <summary>Returns the requested key or subkey from the HKEY_USERS registry hive</summary>
     ''' <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
-    ''' <returns></returns>
     Public Function getUserKey(Optional subkey As String = "") As RegistryKey
         Return Registry.Users.OpenSubKey(subkey)
     End Function

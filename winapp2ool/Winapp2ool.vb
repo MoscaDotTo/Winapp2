@@ -34,17 +34,12 @@ Module Winapp2ool
     Dim lwinapp2File As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
     Public remoteWinappIsNonCC As Boolean = False
 
-    ''' <summary>
-    ''' Returns the link to the appropriate winapp2.ini file based on the mode the tool is in
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
     Public Function getWinappLink() As String
         Return If(remoteWinappIsNonCC, nonccLink, wa2Link)
     End Function
 
-    ''' <summary>
-    ''' Informs the user when an update is available
-    ''' </summary>
+    ''' <summary>Informs the user when an update is available</summary>
     ''' <param name="cond">The update condition</param>
     ''' <param name="updName">The item (winapp2.ini or winapp2ool) for which there is a pending update</param>
     ''' <param name="oldVer">The old (currently in use) version</param>
@@ -59,19 +54,15 @@ Module Winapp2ool
         End If
     End Sub
 
-    ''' <summary>
-    ''' Denies the ability to access online-only functions if offline
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Denies the ability to access online-only functions if offline</summary>
     Public Function denySettingOffline() As Boolean
         If isOffline Then setHeaderText("This option is unavailable while in offline mode", True)
         Return isOffline
     End Function
 
-    ''' <summary>
-    ''' Prints the main menu to the user
-    ''' </summary>
+    ''' <summary>Prints the main menu to the user</summary>
     Private Sub printMenu()
+        If Not isOffline Then checkUpdates()
         printMenuTop({}, False)
         print(4, "Winapp2ool is currently in offline mode", cond:=isOffline)
         print(4, "Your .NET Framework is out of date", cond:=dnfOOD)
@@ -94,9 +85,7 @@ Module Winapp2ool
         Console.WindowHeight = If(waUpdateIsAvail And updateIsAvail, 32, 30)
     End Sub
 
-    ''' <summary>
-    ''' Presents the winapp2ool menu to the user, initiates the main event loop for the application
-    ''' </summary>
+    ''' <summary>Presents the winapp2ool menu to the user, initiates the main event loop for the application</summary>
     Public Sub main()
         Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 126
@@ -106,12 +95,10 @@ Module Winapp2ool
         chkOfflineMode()
         processCommandLineArgs()
         If SuppressOutput Then Environment.Exit(1)
-        initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printMenu, AddressOf handleUserInput, Not isOffline)
+        initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printMenu, AddressOf handleUserInput)
     End Sub
 
-    ''' <summary>
-    ''' Handles the user input for the menu
-    ''' </summary>
+    ''' <summary>Handles the user input for the menu</summary>
     ''' <param name="input">The String containing the user input</param>
     Private Sub handleUserInput(input As String)
         Select Case True
@@ -162,18 +149,14 @@ Module Winapp2ool
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Attempts to return the version number from the first line of winapp2.ini, returns "000000" if it can't
-    ''' </summary>
+    ''' <summary>Attempts to return the version number from the first line of winapp2.ini, returns "000000" if it can't</summary>
     Private Sub getLocalWinapp2Version()
         If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then updateCheckFailed("winapp2.ini") : Exit Sub
         Dim localStr As String = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", remote:=False).ToLower
         localWa2Ver = If(Not localStr.Contains("version"), "000000", localStr.Split(CChar(" "))(2))
     End Sub
 
-    ''' <summary>
-    ''' Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.
-    ''' </summary>
+    ''' <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
     Private Sub checkUpdates()
         If checkedForUpdates Then Exit Sub
         Try
@@ -194,9 +177,7 @@ Module Winapp2ool
         End Try
     End Sub
 
-    ''' <summary>
-    ''' Handles the case where the update check has failed
-    ''' </summary>
+    ''' <summary>Handles the case where the update check has failed</summary>
     ''' <param name="name">The name of the component whose update check failed</param>
     ''' <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
     Private Sub updateCheckFailed(name As String, Optional chkOnline As Boolean = False)
@@ -205,16 +186,12 @@ Module Winapp2ool
         If chkOnline Then chkOfflineMode()
     End Sub
 
-    ''' <summary>
-    ''' Updates the offline status of winapp2ool
-    ''' </summary>
+    ''' <summary>Updates the offline status of winapp2ool</summary>
     Private Sub chkOfflineMode()
         isOffline = Not checkOnline()
     End Sub
 
-    ''' <summary>
-    ''' Prompts the user to change a file's parameters, marks both settings and the file as having been changed 
-    ''' </summary>
+    ''' <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
     ''' <param name="someFile">A file whose parameters will be changed</param>
     ''' <param name="settingsChangedSetting">The boolean indicating that a setting has been changed</param>
     Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean)
@@ -224,9 +201,7 @@ Module Winapp2ool
         undoAnyPendingExits()
     End Sub
 
-    ''' <summary>
-    ''' Toggles a setting's boolean state and marks its tracker true
-    ''' </summary>
+    ''' <summary>Toggles a setting's boolean state and marks its tracker true</summary>
     ''' <param name="setting">A boolean to be toggled</param>
     ''' <param name="paramText">The string explaining the setting being toggled</param>
     ''' <param name="settingsChangedSetting">The boolean indicating that the setting has been modified</param>
@@ -236,19 +211,13 @@ Module Winapp2ool
         settingsChangedSetting = True
     End Sub
 
-    ''' <summary>
-    ''' Returns 1 or 2 newline characters conditionally
-    ''' </summary>
+    ''' <summary>Returns 1 or 2 newline characters conditionally</summary>
     ''' <param name="cond">The parameter under which to return two newlines</param>
-    ''' <returns></returns>
     Public Function prependNewLines(Optional cond As Boolean = False) As String
         Return If(cond, Environment.NewLine & Environment.NewLine, Environment.NewLine)
     End Function
 
-    ''' <summary>
-    ''' Attempts to return the Windows version number, return 0.0 if it cannot
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Attempts to return the Windows version number, return 0.0 if it cannot</summary>
     Public Function getWinVer() As Double
         ' We can return very quickly on Windows 10 using this registry key. Unknown if it exists on earlier versions
         If Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentMajorVersionNumber", Nothing) IsNot Nothing Then
@@ -272,27 +241,20 @@ Module Winapp2ool
         Return out
     End Function
 
-    ''' <summary>
-    ''' Handles toggling downloading of winapp2.ini from menus
-    ''' </summary>
+    ''' <summary>Handles toggling downloading of winapp2.ini from menus</summary>
     ''' <param name="download">The download Boolean</param>
     ''' <param name="settingsChanged">The Boolean indicating that settings have changed</param>
     Public Sub toggleDownload(ByRef download As Boolean, ByRef settingsChanged As Boolean)
         If Not denySettingOffline() Then toggleSettingParam(download, "Downloading", settingsChanged)
     End Sub
 
-    ''' <summary>
-    ''' Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading
-    ''' </summary>
+    ''' <summary>Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading</summary>
     ''' <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
-    ''' <returns></returns>
     Public Function GetNameFromDL(shouldDownload As Boolean) As String
         Return If(shouldDownload, If(remoteWinappIsNonCC, "Online (Non-CCleaner)", "Online"), "")
     End Function
 
-    ''' <summary>
-    ''' Resets a module's settings to the defaults
-    ''' </summary>
+    ''' <summary>Resets a module's settings to the defaults</summary>
     ''' <param name="name">The name of the module</param>
     ''' <param name="setDefaultParams">The function that resets the module's settings</param>
     Public Sub resetModuleSettings(name As String, setDefaultParams As Action)
@@ -300,9 +262,7 @@ Module Winapp2ool
         setHeaderText($"{name} settings have been reset to their defaults.")
     End Sub
 
-    ''' <summary>
-    ''' Appends a series of values onto a String
-    ''' </summary>
+    ''' <summary>Appends a series of values onto a String</summary>
     ''' <param name="toAppend">The values to append</param>
     ''' <param name="out">The given string to be extended</param>
     Public Sub appendStrs(toAppend As String(), ByRef out As String)
@@ -311,32 +271,35 @@ Module Winapp2ool
         Next
     End Sub
 
-    ''' <summary>
-    ''' Returns the first portion of a registry or filepath parameterization
-    ''' </summary>
+    ''' <summary>Returns the first portion of a registry or filepath parameterization</summary>
     ''' <param name="val">The directory listing to be split</param>
-    ''' <returns></returns>
     Public Function getFirstDir(val As String) As String
         Return val.Split(CChar("\"))(0)
     End Function
 
-    ''' <summary>
-    ''' Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for winapp2ool and its components
-    ''' </summary>
+    ''' <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for winapp2ool and its components</summary>
     ''' <param name="name">The name of the module</param>
-    ''' <param name="callMenu">The function that prints the module's menu</param>
+    ''' <param name="showMenu">The function that prints the module's menu</param>
     ''' <param name="handleInput">The function that handle's the module's input</param>
-    ''' <param name="chkUpd">The Boolean indicating that winapp2ool should check for updates (only called by the main menu)</param>
-    Public Sub initModule(name As String, callMenu As Action, handleInput As Action(Of String), Optional chkUpd As Boolean = False)
+    Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String))
         initMenu(name)
         Do Until exitCode
-            If chkUpd Then checkUpdates()
             clrConsole()
-            callMenu()
+            showMenu()
             Console.Write(Environment.NewLine & promptStr)
             handleInput(Console.ReadLine)
         Loop
         revertMenu()
         setHeaderText($"{name} closed")
     End Sub
+
+    ''' <summary>Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected</summary>
+    ''' <param name="caseArray">The parent array of cased Strings</param>
+    ''' <param name="inputText">The String to be checked for casing errors</param>
+    Public Function getCasedString(caseArray As String(), inputText As String) As String
+        For Each casedText In caseArray
+            If inputText.Equals(casedText, StringComparison.InvariantCultureIgnoreCase) Then Return casedText
+        Next
+        Return inputText
+    End Function
 End Module

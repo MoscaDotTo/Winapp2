@@ -23,9 +23,7 @@ Imports System.Text.RegularExpressions
 ''' </summary>
 Public Module iniFileHandler
 
-    ''' <summary>
-    ''' Enforces that a user selected file exists
-    ''' </summary>
+    ''' <summary>Enforces that a user selected file exists</summary>
     ''' <param name="someFile">An iniFile object with user defined path and name parameters</param>
     Public Sub chkFileExist(someFile As iniFile)
         If pendingExit() Then Exit Sub
@@ -56,9 +54,7 @@ Public Module iniFileHandler
         End While
     End Sub
 
-    ''' <summary>
-    ''' Enforces that a user defined directory exists, either by selecting a new one or creating one.
-    ''' </summary>
+    ''' <summary>Enforces that a user defined directory exists, either by selecting a new one or creating one.</summary>
     ''' <param name="dir">A user defined windows directory</param>
     Public Sub chkDirExist(ByRef dir As String)
         If pendingExit() Or Directory.Exists(dir) Then Exit Sub
@@ -87,9 +83,7 @@ Public Module iniFileHandler
         End While
     End Sub
 
-    ''' <summary>
-    ''' Presents a menu to the user allowing them to perform some file and directory operations
-    ''' </summary>
+    ''' <summary>Presents a menu to the user allowing them to perform some file and directory operations</summary>
     ''' <param name="someFile">An iniFile object with user definable parameters</param>
     Public Sub fileChooser(ByRef someFile As iniFile)
         If pendingExit() Then Exit Sub
@@ -99,9 +93,7 @@ Public Module iniFileHandler
         handleFileChooserConfirm(someFile)
     End Sub
 
-    ''' <summary>
-    ''' Allows the user change the file name or directory of a given iniFile object
-    ''' </summary>
+    ''' <summary>Allows the user change the file name or directory of a given iniFile object</summary>
     ''' <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
     Private Sub handleFileChooserChoice(ByRef someFile As iniFile)
         setHeaderText("File Chooser")
@@ -130,9 +122,7 @@ Public Module iniFileHandler
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Confirms the user's choice of a file's parameters in the File Chooser and allows them to make changes before saving
-    ''' </summary>
+    ''' <summary>Confirms the user's choice of a file's parameters in the File Chooser and allows them to make changes before saving</summary>
     ''' <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
     Public Sub handleFileChooserConfirm(ByRef someFile As iniFile)
         setHeaderText("File Chooser")
@@ -164,9 +154,7 @@ Public Module iniFileHandler
         Loop
     End Sub
 
-    ''' <summary>
-    ''' Presents an interface to the user allowing them to operate on windows directory parameters
-    ''' </summary>
+    ''' <summary>Presents an interface to the user allowing them to operate on windows directory parameters</summary>
     ''' <param name="dir">A user definable windows directory path</param>
     Public Sub dirChooser(ByRef dir As String)
         If pendingExit() Then Exit Sub
@@ -176,9 +164,7 @@ Public Module iniFileHandler
         handleDirChooserConfirm(dir)
     End Sub
 
-    ''' <summary>
-    ''' Allows the user to select a directory using a similar interface to the File Chooser
-    ''' </summary>
+    ''' <summary>Allows the user to select a directory using a similar interface to the File Chooser</summary>
     ''' <param name="dir">The String containing the directory the user is parameterizing</param>
     Private Sub handleDirChooserChoice(ByRef dir As String)
         clrConsole()
@@ -207,9 +193,7 @@ Public Module iniFileHandler
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Confirms the user's choice of directory and allows them to change it 
-    ''' </summary>
+    ''' <summary>Confirms the user's choice of directory and allows them to change it </summary>
     ''' <param name="dir">The String containing the directory the user is parameterizing</param>
     Private Sub handleDirChooserConfirm(ByRef dir As String)
         setHeaderText("Directory Chooser")

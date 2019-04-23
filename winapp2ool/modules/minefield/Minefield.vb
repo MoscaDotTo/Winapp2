@@ -22,9 +22,7 @@ Option Strict On
 ''' </summary>
 Module Minefield
 
-    ''' <summary>
-    ''' Prints the main Minefield menu
-    ''' </summary>
+    ''' <summary>Prints the main Minefield menu</summary>
     Public Sub printMenu()
         printMenuTop({"A testing ground for new ideas/features, watch your step!"})
         print(1, "Java Entry Maker", "Clean up after the messy JRE installer")
@@ -45,9 +43,7 @@ Module Minefield
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Handles user input for the main Minefield menu
-    ''' </summary>
+    ''' <summary>Handles user input for the main Minefield menu</summary>
     ''' <param name="input">The String containing the user's input</param>
     Public Sub handleUserInput(input As String)
         Select Case input
@@ -60,17 +56,13 @@ Module Minefield
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Prints the GameMaker menu
-    ''' </summary>
+    ''' <summary>Prints the GameMaker menu</summary>
     Private Sub printGMMenu()
         printMenuTop({"This tool will allow for a more meta approach to creating entries for games, particularly steam."})
         print(1, "Run (Disabled)", "Attempt to generate entries", closeMenu:=True)
     End Sub
 
-    ''' <summary>
-    ''' Handles input for GameMaker
-    ''' </summary>
+    ''' <summary>Handles input for GameMaker</summary>
     ''' <param name="input"></param>
     Private Sub handleGMInput(input As String)
         Select Case input

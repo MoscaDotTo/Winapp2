@@ -15,9 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary>
-''' Provides some tools to simplify unit testing winapp2ool
-''' </summary>
+''' <summary>Provides some tools to simplify unit testing winapp2ool</summary>
 Module UnitTools
     Public Sub setCmdLineArgs(handler As Action, args As String(), Optional addHalt As Boolean = False)
         winapp2ool.commandLineHandler.cmdargs = args.ToList

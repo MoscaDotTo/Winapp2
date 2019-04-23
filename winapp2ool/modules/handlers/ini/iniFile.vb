@@ -18,10 +18,7 @@ Public Class iniFile
     ' Any line comments will be saved in the order they're read 
     Public comments As New Dictionary(Of Integer, iniComment)
 
-    ''' <summary>
-    ''' Returns an iniFile as it would appear on disk as a String
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Returns an iniFile as it would appear on disk as a String</summary>
     Public Overrides Function toString() As String
         Dim out As String = ""
         For i As Integer = 0 To sections.Count - 2
@@ -31,9 +28,7 @@ Public Class iniFile
         Return out
     End Function
 
-    ''' <summary>
-    ''' Creates an uninitialized iniFile with a directory and a filename.
-    ''' </summary>
+    ''' <summary>Creates an uninitialized iniFile with a directory and a filename.</summary>
     ''' <param name="directory">A windows directory containing a .ini file</param>
     ''' <param name="filename">The name of the .ini file contained in the given directory </param>
     ''' <param name="rename">A provided suggestion for a rename should the user open the File Chooser on this file</param>
@@ -45,9 +40,7 @@ Public Class iniFile
         secondName = rename
     End Sub
 
-    ''' <summary>
-    ''' Writes the contents of a provided String to our iniFile's path, overwriting any existing contents
-    ''' </summary>
+    ''' <summary>Writes the contents of a provided String to our iniFile's path, overwriting any existing contents</summary>
     ''' <param name="tostr">The string to be written to disk</param>
     Public Sub overwriteToFile(tostr As String)
         Dim file As StreamWriter
@@ -60,26 +53,18 @@ Public Class iniFile
         End Try
     End Sub
 
-    ''' <summary>
-    ''' Restores the initial directory and name parameters in the iniFile 
-    ''' </summary>
+    ''' <summary>Restores the initial directory and name parameters in the iniFile </summary>
     Public Sub resetParams()
         dir = initDir
         name = initName
     End Sub
 
-    ''' <summary>
-    ''' Returns the full windows file path of the iniFile as a String
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Returns the full windows file path of the iniFile as a String</summary>
     Public Function path() As String
         Return $"{dir}\{name}"
     End Function
 
-    ''' <summary>
-    ''' Returns the starting line number of each section in the iniFile as a list of integers
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Returns the starting line number of each section in the iniFile as a list of integers</summary>
     Public Function getLineNumsFromSections() As List(Of Integer)
         Dim outList As New List(Of Integer)
         For Each section In sections.Values
@@ -88,9 +73,7 @@ Public Class iniFile
         Return outList
     End Function
 
-    ''' <summary>
-    ''' Constructs an iniFile object using an internet source
-    ''' </summary>
+    ''' <summary>Constructs an iniFile object using an internet source</summary>
     ''' <param name="lines">The array of Strings representing a remote .ini file</param>
     Public Sub New(lines As String())
         Dim sectionToBeBuilt As New List(Of String)
@@ -103,9 +86,7 @@ Public Class iniFile
         If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
     End Sub
 
-    ''' <summary>
-    ''' Processes a line in a .ini file and updates the iniFile object meta data accordingly
-    ''' </summary>
+    ''' <summary>Processes a line in a .ini file and updates the iniFile object meta data accordingly</summary>
     ''' <param name="currentLine">The current string being read</param>
     ''' <param name="sectionToBeBuilt">The pending list of strings to be built into an iniSection</param>
     ''' <param name="lineTrackingList">The associated list of line number integers for the section strings</param>
@@ -125,9 +106,7 @@ Public Class iniFile
         lineCount += 1
     End Sub
 
-    ''' <summary>
-    ''' Manages line and number tracking for iniSections whose construction is pending
-    ''' </summary>
+    ''' <summary>Manages line and number tracking for iniSections whose construction is pending</summary>
     ''' <param name="secList">The list of strings for the iniSection</param>
     ''' <param name="lineList">The list of line numbers for the iniSection</param>
     ''' <param name="curLine">The current line to be added to the section</param>
@@ -137,9 +116,7 @@ Public Class iniFile
         lastLineWasEmpty = False
     End Sub
 
-    ''' <summary>
-    ''' Attempts to read a .ini file from disk and initialize the iniFile object
-    ''' </summary>
+    ''' <summary>Attempts to read a .ini file from disk and initialize the iniFile object</summary>
     Public Sub init()
         Try
             Dim sectionToBeBuilt As New List(Of String)
@@ -156,12 +133,10 @@ Public Class iniFile
         End Try
     End Sub
 
-    ''' <summary>
-    ''' Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists.
-    ''' If an iniFile's sections already exist, skip this.
-    ''' </summary>
+    ''' <summary>Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists.</summary>
     Public Sub validate()
         clrConsole()
+        ' If an iniFile's sections already exist, skip this.
         If pendingExit() Or name = "" Then Exit Sub
         ' Make sure both the file and the directory actually exist
         While Not File.Exists(path())
@@ -194,9 +169,7 @@ Public Class iniFile
         End Try
     End Sub
 
-    ''' <summary>
-    ''' Reorders the iniSections in an iniFile object to be in the same sorted state as a provided list of Strings
-    ''' </summary>
+    ''' <summary>Reorders the iniSections in an iniFile object to be in the same sorted state as a provided list of Strings</summary>
     ''' <param name="sortedSections">The sorted state of the sections by name</param>
     Public Sub sortSections(sortedSections As strList)
         Dim tempFile As New iniFile
@@ -204,11 +177,8 @@ Public Class iniFile
         Me.sections = tempFile.sections
     End Sub
 
-    ''' <summary>
-    ''' Find the line number of a comment by its string. Returns -1 if not found
-    ''' </summary>
+    ''' <summary>Find the line number of a comment by its string. Returns -1 if not found</summary>
     ''' <param name="com">The string containing the comment text to be searched for</param>
-    ''' <returns></returns>
     Public Function findCommentLine(com As String) As Integer
         For Each comment In comments.Values
             If comment.comment = com Then Return comment.lineNumber
@@ -216,18 +186,7 @@ Public Class iniFile
         Return -1
     End Function
 
-    ''' <summary>
-    ''' Returns the section names from the iniFile object as a list of Strings
-    ''' </summary>
-    ''' <returns></returns>
-    Public Function namesToListOfStr() As List(Of String)
-        Dim out As New List(Of String)
-        For Each section In sections.Values
-            out.Add(section.name)
-        Next
-        Return out
-    End Function
-
+    ''' <summary>Returns the section names from the iniFile object as a list of Strings</summary>
     Public Function namesToStrList() As strList
         Dim out As New strList
         For Each section In sections.Values
@@ -236,9 +195,7 @@ Public Class iniFile
         Return out
     End Function
 
-    ''' <summary>
-    ''' Attempts to create a new iniSection object and add it to the iniFile
-    ''' </summary>
+    ''' <summary>Attempts to create a new iniSection object and add it to the iniFile</summary>
     ''' <param name="sectionToBeBuilt">The list of strings in the iniSection</param>
     ''' <param name="lineTrackingList">The list of line numbers associated with the given strings</param>
     Private Sub mkSection(sectionToBeBuilt As List(Of String), lineTrackingList As List(Of Integer))

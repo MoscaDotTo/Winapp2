@@ -27,9 +27,7 @@ Module JavaMaker
     Dim merge As Boolean = False
     Dim settingsChanged As Boolean
 
-    ''' <summary>
-    ''' Restores the module parameters to their default states
-    ''' </summary>
+    ''' <summary>Restores the module parameters to their default states</summary>
     Private Sub initDefaultParams()
         download = Not isOffline
         javaFile.resetParams()
@@ -38,9 +36,7 @@ Module JavaMaker
         settingsChanged = False
     End Sub
 
-    ''' <summary>
-    ''' Prints the JavaMaker main menu
-    ''' </summary>
+    ''' <summary>Prints the JavaMaker main menu</summary>
     Public Sub printJMMenu()
         printMenuTop({"Creates a winapp2.ini entry that cleans up after old Java versions"})
         print(1, "Run (Default)", "Attempt to create an entry based on the current system", trailingBlank:=True)
@@ -54,9 +50,7 @@ Module JavaMaker
         print(2, "JavaMaker", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
-    ''' <summary>
-    ''' Handles the JavaMaker menu input
-    ''' </summary>
+    ''' <summary>Handles the JavaMaker menu input</summary>
     ''' <param name="input"></param>
     Public Sub handleJMInput(input As String)
         Select Case True
@@ -81,11 +75,8 @@ Module JavaMaker
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Generates the RegKeylist for the current system
-    ''' </summary>
+    ''' <summary>Generates the RegKeylist for the current system</summary>
     ''' <param name="kls">An array of keylists containing the RegKeys that will be in the generated entry</param>
-    ''' <returns></returns>
     Private Function mkEntry(kls As keyList()) As keyList
         Dim out As New keyList
         For Each lst In kls
@@ -95,12 +86,9 @@ Module JavaMaker
         Return out
     End Function
 
-    ''' <summary>
-    ''' Creates RegKeys conditionally based on their presence on the current system
-    ''' </summary>
+    ''' <summary>Creates RegKeys conditionally based on their presence on the current system</summary>
     ''' <param name="reg">The Registry key to observe subkeys of</param>
     ''' <param name="searches">The strings to be searched for in the subkeys</param>
-    ''' <returns></returns>
     Private Function getRegKeys(reg As Microsoft.Win32.RegistryKey, searches As List(Of String)) As List(Of iniKey)
         Dim out As New List(Of iniKey)
         Try
@@ -118,9 +106,7 @@ Module JavaMaker
         Return out
     End Function
 
-    ''' <summary>
-    ''' Creates a winapp2.ini entry to clean up after the Java installation process
-    ''' </summary>
+    ''' <summary>Creates a winapp2.ini entry to clean up after the Java installation process</summary>
     Private Sub makeSomeJava()
         ' Load the java.ini file
         If download Then javaFile = getRemoteIniFile(javaLink)

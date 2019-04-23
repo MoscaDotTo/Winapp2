@@ -24,9 +24,7 @@ Public Class iniSection
     Public name As String
     Public keys As New Dictionary(Of Integer, iniKey)
 
-    ''' <summary>
-    ''' Sorts a section's keys into keylists based on their KeyType
-    ''' </summary>
+    ''' <summary>Sorts a section's keys into keylists based on their KeyType</summary>
     ''' <param name="listOfKeyLists">The list of keyLists to be sorted into</param>
     ''' The last list in the keylist list holds the error keys
     Public Sub constKeyLists(ByRef listOfKeyLists As List(Of keyList))
@@ -38,34 +36,25 @@ Public Class iniSection
         Next
     End Sub
 
-    ''' <summary>
-    ''' Removes a series of keys from the section
-    ''' </summary>
+    ''' <summary>Removes a series of keys from the section</summary>
     ''' <param name="indicies"></param>
     Public Sub removeKeys(indicies As List(Of Integer))
         indicies.ForEach(Sub(ind) keys.Remove(ind))
     End Sub
 
-    ''' <summary>
-    ''' Returns the iniSection name as it would appear on disk.
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Returns the iniSection name as it would appear on disk.</summary>
     Public Function getFullName() As String
         Return $"[{name}]"
     End Function
 
-    ''' <summary>
-    ''' Creates a new (empty) iniSection object.
-    ''' </summary>
+    ''' <summary>Creates a new (empty) iniSection object.</summary>
     Public Sub New()
         startingLineNumber = 0
         endingLineNumber = 0
         name = ""
     End Sub
 
-    ''' <summary>
-    ''' Creates a new iniSection object without tracking the line numbers
-    ''' </summary>
+    ''' <summary>Creates a new iniSection object without tracking the line numbers</summary>
     ''' <param name="listOfLines">The list of Strings comprising the iniSection</param>
     ''' <param name="listOfLineCounts">The list of line numbers associated with the lines</param>
     Public Sub New(ByVal listOfLines As List(Of String), Optional listOfLineCounts As List(Of Integer) = Nothing)
@@ -79,10 +68,7 @@ Public Class iniSection
         End If
     End Sub
 
-    ''' <summary>
-    ''' Returns the keys in the iniSection as a list of Strings
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Returns the keys in the iniSection as a list of Strings</summary>
     Public Function getKeysAsList() As List(Of String)
         Dim out As New List(Of String)
         For Each key In Me.keys.Values
@@ -91,13 +77,10 @@ Public Class iniSection
         Return out
     End Function
 
-    ''' <summary>
-    ''' Compares two iniSections, returns false if they are not the same.
-    ''' </summary>
+    ''' <summary>Compares two iniSections, returns false if they are not the same.</summary>
     ''' <param name="ss">The section to be compared against</param>
     ''' <param name="removedKeys">A return list on iniKey objects that appear in the iniFile object but not the given</param>
     ''' <param name="addedKeys">A return list of iniKey objects that appear in the given iniFile object but not this one</param>
-    ''' <returns></returns>
     Public Function compareTo(ss As iniSection, ByRef removedKeys As keyList, ByRef addedKeys As keyList) As Boolean
         ' Create a copy of the section so we can modify it
         Dim secondSection As New iniSection With {.name = ss.name, .startingLineNumber = ss.startingLineNumber}
@@ -130,10 +113,7 @@ Public Class iniSection
         Return removedKeys.keyCount + addedKeys.keyCount = 0
     End Function
 
-    ''' <summary>
-    ''' Returns an iniSection as it would appear on disk as a String
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Returns an iniSection as it would appear on disk as a String</summary>
     Public Overrides Function ToString() As String
         Dim out As String = Me.getFullName
         For Each key In keys.Values

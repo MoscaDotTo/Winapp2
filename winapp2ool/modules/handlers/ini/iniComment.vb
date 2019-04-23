@@ -22,9 +22,7 @@ Public Class iniComment
     Public comment As String
     Public lineNumber As Integer
 
-    ''' <summary>
-    ''' Creates a new iniComment object
-    ''' </summary>
+    ''' <summary>Creates a new iniComment object</summary>
     ''' <param name="c">The comment text</param>
     ''' <param name="l">The line number</param>
     Public Sub New(c As String, l As Integer)

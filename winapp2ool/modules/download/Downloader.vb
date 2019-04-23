@@ -72,9 +72,7 @@ Module Downloader
         download(fileLink)
     End Sub
 
-    ''' <summary>
-    ''' Prints the main menu to the user
-    ''' </summary>
+    ''' <summary>Prints the main menu to the user</summary>
     Public Sub printMenu()
         printMenuTop({"Download files from the winapp2 GitHub"})
         print(1, "Winapp2.ini", "Download the latest winapp2.ini")
@@ -87,9 +85,7 @@ Module Downloader
         print(0, $"Save directory: {replDir(downloadFile.dir)}", leadingBlank:=True, closeMenu:=True)
     End Sub
 
-    ''' <summary>
-    ''' Prints the advanced downloads menu
-    ''' </summary>
+    ''' <summary>Prints the advanced downloads menu</summary>
     Private Sub printAdvMenu()
         printMenuTop({"Warning!", "Files in this menu are not recommended for use by beginners."})
         print(1, "Winapp3.ini", "Extended and/or potentially unsafe entries")
@@ -97,9 +93,7 @@ Module Downloader
         print(1, "Java.ini", "Used to generate a winapp2.ini entry that cleans up after the Java installer", closeMenu:=True)
     End Sub
 
-    ''' <summary>
-    ''' Handles the user input for the advanced download menu
-    ''' </summary>
+    ''' <summary>Handles the user input for the advanced download menu</summary>
     ''' <param name="input">The string containing the user's input</param>
     Private Sub handleAdvInput(input As String)
         Select Case input
@@ -119,9 +113,7 @@ Module Downloader
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Handles the user input for the menu
-    ''' </summary>
+    ''' <summary>Handles the user input for the menu</summary>
     ''' <param name="input">The String containing the user's input</param>
     Public Sub handleUserInput(input As String)
         Select Case input
@@ -161,13 +153,10 @@ Module Downloader
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Reads a file until a specified line number 
-    ''' </summary>
+    ''' <summary>Reads a file until a specified line number0</summary>
     ''' <param name="path">The path (or online address) of the file</param>
     ''' <param name="lineNum">The line number to read to</param>
     ''' <param name="remote">The boolean specifying whether the resource is remote (online)</param>
-    ''' <returns></returns>
     Public Function getFileDataAtLineNum(path As String, Optional lineNum As Integer = 1, Optional remote As Boolean = True) As String
         Dim reader As StreamReader = Nothing
         Dim out As String = ""
@@ -183,9 +172,7 @@ Module Downloader
         Return If(out = Nothing, "", out)
     End Function
 
-    ''' <summary>
-    ''' Returns true if we are able to connect to the internet, otherwise, returns false.
-    ''' </summary>
+    ''' <summary>Returns true if we are able to connect to the internet, otherwise, returns false.</summary>
     Public Function checkOnline() As Boolean
         Dim reader As StreamReader
         Try
@@ -196,12 +183,8 @@ Module Downloader
         End Try
     End Function
 
-    ''' <summary>
-    ''' Returns an iniFile object created using an online resource
-    ''' </summary>
-    ''' ie. GitHub
+    ''' <summary>Returns an iniFile object created using an online resource ie. GitHub</summary>
     ''' <param name="address">A URL pointing to an online .ini file</param>
-    ''' <returns></returns>
     Public Function getRemoteIniFile(address As String) As iniFile
         Dim reader As StreamReader
         Try
@@ -222,12 +205,9 @@ Module Downloader
         End Try
     End Function
 
-    ''' <summary>
-    ''' Reads a file only until reaching a specific line and then returns that line as a String
-    ''' </summary>
+    ''' <summary>Reads a file only until reaching a specific line and then returns that line as a String</summary>
     ''' <param name="reader">An open file stream</param>
     ''' <param name="lineNum">The target line number</param>
-    ''' <returns></returns>
     Private Function getTargetLine(reader As StreamReader, lineNum As Integer) As String
         Dim out As String = ""
         Dim curLine As Integer = 1
@@ -238,9 +218,7 @@ Module Downloader
         Return If(out = Nothing, "", out)
     End Function
 
-    ''' <summary>
-    ''' Handles a request to download a file from outside the module
-    ''' </summary>
+    ''' <summary>Handles a request to download a file from outside the module</summary>
     ''' <param name="dir">The directory to which the file should be downloaded</param>
     ''' <param name="name">The name with which to save the file</param>
     ''' <param name="link">The URL to download from</param>
@@ -251,9 +229,7 @@ Module Downloader
         download(link, prompt)
     End Sub
 
-    ''' <summary>
-    ''' Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.
-    ''' </summary>
+    ''' <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
     Public Sub autoUpdate()
         downloadFile.dir = Environment.CurrentDirectory
         downloadFile.name = "winapp2ool updated.exe"
@@ -274,9 +250,7 @@ Module Downloader
         End Try
     End Sub
 
-    ''' <summary>
-    ''' Prompts the user to rename or overwrite a file if necessary before downloading.
-    ''' </summary>
+    ''' <summary>Prompts the user to rename or overwrite a file if necessary before downloading.</summary>
     ''' <param name="link">The URL to be downloaded from</param>
     ''' <param name="prompt">The boolean indicating whether or not the user should be prompted to rename the file should it exist already.</param>
     Private Sub download(link As String, Optional prompt As Boolean = True)
@@ -298,12 +272,9 @@ Module Downloader
         If Not success Then Console.ReadLine()
     End Sub
 
-    ''' <summary>
-    ''' Performs the download, returns a boolean indicating the success of the download.
-    ''' </summary>
+    ''' <summary>Performs the download, returns a boolean indicating the success of the download.</summary>
     ''' <param name="link">The URL to be downloaded from</param>
     ''' <param name="path">The file path to be saved to</param>
-    ''' <returns></returns>
     Private Function dlFile(link As String, path As String) As Boolean
         Try
             Dim dl As New WebClient

@@ -31,9 +31,7 @@ Module Diff
     Dim saveLog As Boolean = False
     Dim settingsChanged As Boolean = False
 
-    ''' <summary>
-    ''' Handles the commandline args for Diff
-    ''' </summary>
+    ''' <summary>Handles the commandline args for Diff</summary>
     '''  Diff args:
     ''' -d          : download the latest winapp2.ini
     ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
@@ -48,9 +46,7 @@ Module Diff
         If Not newOrRemoteFile.name = "" Then initDiff()
     End Sub
 
-    ''' <summary>
-    ''' Restores the default state of the module's parameters
-    ''' </summary>
+    ''' <summary>Restores the default state of the module's parameters</summary>
     Private Sub initDefaultSettings()
         download = False
         logFile.resetParams()
@@ -60,9 +56,7 @@ Module Diff
         settingsChanged = False
     End Sub
 
-    ''' <summary>
-    ''' Runs the Differ from outside the module
-    ''' </summary>
+    ''' <summary>Runs the Differ from outside the module </summary>
     ''' <param name="firstFile">The old winapp2.ini file</param>
     Public Sub remoteDiff(firstFile As iniFile, Optional dl As Boolean = True)
         download = dl
@@ -70,9 +64,7 @@ Module Diff
         initDiff()
     End Sub
 
-    ''' <summary>
-    ''' Prints the main menu to the user
-    ''' </summary>
+    ''' <summary>Prints the main menu to the user</summary>
     Public Sub printMenu()
         Console.WindowHeight = If(settingsChanged, 32, 30)
         printMenuTop({"Observe the differences between two ini files"})
@@ -91,9 +83,7 @@ Module Diff
         print(2, "Diff", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
-    ''' <summary>
-    ''' Handles the user input from the main menu
-    ''' </summary>
+    ''' <summary>Handles the user input from the main menu</summary>
     ''' <param name="input">The String containing the user's input from the menu</param>
     Public Sub handleUserInput(input As String)
         Select Case True
@@ -121,9 +111,7 @@ Module Diff
         End Select
     End Sub
 
-    ''' <summary>
-    ''' Carries out the main set of Diffing operations
-    ''' </summary>
+    ''' <summary>Carries out the main set of Diffing operations</summary>
     Private Sub initDiff()
         outputToFile = ""
         oldOrLocalFile.validate()
@@ -135,19 +123,14 @@ Module Diff
         setHeaderText("Diff Complete")
     End Sub
 
-    ''' <summary>
-    ''' Gets the version from winapp2.ini
-    ''' </summary>
+    ''' <summary>Gets the version from winapp2.ini</summary>
     ''' <param name="someFile">winapp2.ini format iniFile object</param>
-    ''' <returns></returns>
     Private Function getVer(someFile As iniFile) As String
         Dim ver = If(someFile.comments.Count > 0, someFile.comments(0).comment.ToString.ToLower, "000000")
         Return If(ver.Contains("version"), ver.TrimStart(CChar(";")).Replace("version:", "version"), " version not given")
     End Function
 
-    ''' <summary>
-    ''' Performs the diff and outputs the info to the user
-    ''' </summary>
+    ''' <summary>Performs the diff and outputs the info to the user</summary>
     Private Sub differ()
         print(3, "Diffing, please wait. This may take a moment.")
         clrConsole()
@@ -186,10 +169,7 @@ Module Diff
         Console.ReadKey()
     End Sub
 
-    ''' <summary>
-    ''' Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences
-    ''' </summary>
-    ''' <returns></returns>
+    ''' <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
     Private Function compareTo() As List(Of String)
         Dim outList, comparedList As New List(Of String)
         For Each section In oldOrLocalFile.sections.Values
@@ -226,9 +206,7 @@ Module Diff
         Return outList
     End Function
 
-    ''' <summary>
-    ''' Handles the Added and Removed cases for changes 
-    ''' </summary>
+    ''' <summary>Handles the Added and Removed cases for changes </summary>
     ''' <param name="keyList">A list of iniKeys that have been added/removed</param>
     ''' <param name="out">The output text to be appended to</param>
     ''' <param name="changeTxt">The text to appear in the output</param>
@@ -239,9 +217,7 @@ Module Diff
         Return out
     End Function
 
-    ''' <summary>
-    ''' Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key 
-    ''' </summary>
+    ''' <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key </summary>
     ''' <param name="removedKeys">The list of iniKeys that were removed from the newer version of the file</param>
     ''' <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
@@ -294,9 +270,7 @@ Module Diff
         removedKeys = rkTemp
     End Sub
 
-    ''' <summary>
-    ''' Performs change tracking for chkLst 
-    ''' </summary>
+    ''' <summary>Performs change tracking for chkLst </summary>
     ''' <param name="updLst">The list of updated keys</param>
     ''' <param name="aKeys">The list of added keys</param>
     ''' <param name="rKeys">The list of removed keys</param>
@@ -308,22 +282,17 @@ Module Diff
         aKeys.remove(key)
     End Sub
 
-    ''' <summary>
-    ''' Returns a string containing a menu box listing the change type and entry, followed by the entry's toString
-    ''' </summary>
+    ''' <summary>Returns a string containing a menu box listing the change type and entry, followed by the entry's toString</summary>
     ''' <param name="section">an iniSection object to be diffed</param>
     ''' <param name="changeType">The type of change to observe</param>
-    ''' <returns></returns>
     Private Function getDiff(section As iniSection, changeType As String) As String
-        Dim out  = ""
+        Dim out = ""
         appendStrs({appendNewLine(mkMenuLine($"{section.name} has been {changeType}.", "c")), appendNewLine(appendNewLine(mkMenuLine(menuStr02, ""))), appendNewLine(section.ToString)}, out)
         If Not changeType = "modified" Then out += menuStr00
         Return out
     End Function
 
-    ''' <summary>
-    ''' Saves a String to the log file
-    ''' </summary>
+    ''' <summary>Saves a String to the log file</summary>
     ''' <param name="toLog">The string to be appended to the log</param>
     Private Sub log(toLog As String)
         cwl(toLog)

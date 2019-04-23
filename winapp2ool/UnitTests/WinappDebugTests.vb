@@ -18,24 +18,19 @@ Option Strict On
 Imports System.Text
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 ''' <summary>
-''' Unit and integration tests for winapp2ool
-''' 's WinappDebug module
+''' Unit and integration tests for winapp2ool's WinappDebug module
 ''' Test naming convention: methodName_testState_expectedBehavior
 ''' </summary>
 <TestClass()> Public Class WinappDebugTests
 
-    ''' <summary>
-    ''' Initializes WinappDebug with provided commandline args
-    ''' </summary>
+    ''' <summary>Initializes WinappDebug with provided commandline args</summary>
     ''' <param name="args">An array of args to pass to WinappDebug</param>
     ''' <param name="addHalt">Optional Boolean specifying whether or not the halting flag should be added to the args</param>
     Private Sub setDebugStage(args As String(), Optional addHalt As Boolean = False)
         setCmdLineArgs(AddressOf winapp2ool.WinappDebug.handleCmdLine, args, addHalt)
     End Sub
 
-    ''' <summary>
-    ''' Tests the commandline handling for WinappDebug to ensure success under no input conditions
-    ''' </summary>
+    ''' <summary>Tests the commandline handling for WinappDebug to ensure success under no input conditions</summary>
     <TestMethod()> Public Sub handleCmdLine_NoInputSuccess()
         ' Test case: Do nothing, expect our default values
         setDebugStage({}, True)
@@ -44,9 +39,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Assert.AreNotEqual(winapp2ool.winappDebugFile1.secondName, winapp2ool.winappDebugFile3.secondName)
     End Sub
 
-    ''' <summary>
-    ''' Tests the commandline handling for WinappDebug to ensure success when changing file directory or name parameters
-    ''' </summary>
+    ''' <summary>Tests the commandline handling for WinappDebug to ensure success when changing file directory or name parameters</summary>
     <TestMethod()> Public Sub handleCmdLine_ChangeFileParamsSuccess()
         ' First test case: Change only the first file name parameter
         setDebugStage({"-1f", "winapp2debugged.ini"}, True)
@@ -74,48 +67,40 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Assert.AreEqual(winapp2ool.saveChanges, True)
     End Sub
 
-    ' Tests below this point until the marked point test that individual scans and repairs work within WinappDebug's debug method
+    ' Tests below this point until the marked point test that individual scans and repairs work within WinappDebug's debug method along happy paths
 
-    ''' <summary>
-    ''' Toggles off all the tests except a specific one
-    ''' </summary>
+    ''' <summary>Toggles off all the tests except a specific one</summary>
     ''' <param name="lintRuleIndex">The index of the rule to be enabled</param>
     Private Sub disableAllTestsExcept(lintRuleIndex As Integer)
         ' Don't correct all formatting
-        winapp2ool.CorrectFormatting1 = False
-        winapp2ool.CorrectSomeFormatting1 = False
-        For i As Integer = 0 To winapp2ool.WinappDebug.Rules1.Count - 1
+        winapp2ool.repairErrsFound = False
+        winapp2ool.repairSomeErrsFound = False
+        For i As Integer = 0 To winapp2ool.WinappDebug.Rules.Count - 1
             If Not i = lintRuleIndex Then
                 ' Turn off all rules by default 
-                winapp2ool.WinappDebug.Rules1(i).turnOff()
+                winapp2ool.WinappDebug.Rules(i).turnOff()
             Else
                 ' Enable the rule we want
-                winapp2ool.WinappDebug.Rules1(i).turnOn()
+                winapp2ool.WinappDebug.Rules(i).turnOn()
             End If
         Next
     End Sub
 
-    ''' <summary>
-    ''' Returns a winapp2file object containing the requested test
-    ''' </summary>
+    ''' <summary>Returns a winapp2file object containing the requested test</summary>
     ''' <param name="testNum">The test index to return from the unit test file</param>
-    ''' <returns></returns>
     Private Function getSingleTestFile(testNum As Integer) As winapp2ool.winapp2file
         Dim unitFile As New winapp2ool.iniFile(Environment.CurrentDirectory, "WinappDebugUnitTests.ini")
         unitFile.validate()
         Dim testFile As New winapp2ool.iniFile
         Dim testSection = unitFile.sections.Values(testNum)
         testFile.sections.Add(testSection.name, testSection)
-        Return New winapp2ool.winapp2handler.winapp2file(testFile)
+        Return New winapp2ool.winapp2file(testFile)
     End Function
 
-    ''' <summary>
-    ''' Tests the debug function in winapp2ool using tests from WinappDebugUnitTests.ini
-    ''' </summary>
+    ''' <summary>Tests the debug function in winapp2ool using tests from WinappDebugUnitTests.ini</summary>
     ''' <param name="testNum">The test number to request from the file</param>
     ''' <param name="expectedErrsWithoutRepair">The expected number of errors to be found on the first run</param>
     ''' <param name="expectedErrsWithRepair">The expected number of errors to be found after repairs are run</param>
-    ''' <returns></returns>
     Public Function debug_ErrorFindAndRepair_Success(testNum As Integer, expectedErrsWithoutRepair As Integer, expectedErrsWithRepair As Integer, lintRuleIndex As Integer) As winapp2ool.winapp2entry
         ' Initalize the default state of the module
         setDebugStage({}, True)
@@ -126,7 +111,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         winapp2ool.WinappDebug.debug(test)
         Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.errorsFound)
         ' Enable repairs
-        winapp2ool.WinappDebug.CorrectSomeFormatting1 = True
+        winapp2ool.WinappDebug.repairSomeErrsFound = True
         winapp2ool.WinappDebug.debug(test)
         ' Confirm the errors are still found (ie. not erroneously corrected during the first test)
         Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.errorsFound)
@@ -137,9 +122,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Return New winapp2ool.winapp2entry(test.entrySections.Last.sections.Values.First)
     End Function
 
-    ''' <summary>
-    ''' Runs tests to ensure that keys with duplicate values are detected and removed
-    ''' </summary>
+    ''' <summary>Runs tests to ensure that keys with duplicate values are detected and removed</summary>
     <TestMethod> Public Sub debug_DuplicateKeyValue_FindAndRepair_Success()
         ' Disable all the tests except the duplicate checks
         Dim testOutput = debug_ErrorFindAndRepair_Success(0, 12, 0, 7)
@@ -152,9 +135,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Assert.AreEqual(0, testOutput.keyListList.Last.keyCount)
     End Sub
 
-    ''' <summary>
-    ''' Runs tests to ensure that key with names that are improperly numbered are detected and repaired
-    ''' </summary>
+    ''' <summary>Runs tests to ensure that key with names that are improperly numbered are detected and repaired</summary>
     <TestMethod> Public Sub debug_KeyNumberingError_FindAndRepair_Sucess()
         Dim testOutput = debug_ErrorFindAndRepair_Success(1, 8, 0, 2)
         For i = 0 To testOutput.keyListList.Count - 2
@@ -169,9 +150,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Next
     End Sub
 
-    ''' <summary>
-    ''' Runs tests to ensure that keys in situations where there should be no numbering are detected and repaired
-    ''' </summary>
+    ''' <summary>Runs tests to ensure that keys in situations where there should be no numbering are detected and repaired</summary>
     <TestMethod> Public Sub debug_keyNumberingUneededError_FindAndRepair_Success()
         Dim testOutput = debug_ErrorFindAndRepair_Success(2, 8, 0, 8)
         For Each lst In testOutput.keyListList
@@ -187,9 +166,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Next
     End Sub
 
-    ''' <summary>
-    ''' Runs test to ensure that incorrect alphabetization is caught and repaired
-    ''' </summary>
+    ''' <summary>Runs test to ensure that incorrect alphabetization is caught and repaired</summary>
     <TestMethod> Public Sub debug_keyAlphabetization_FindAndRepair_Success()
         Dim testOutput = debug_ErrorFindAndRepair_Success(3, 4, 0, 1)
         Assert.AreEqual("HKCU\Software3", testOutput.detects.keys.First.Value)

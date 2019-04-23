@@ -1,0 +1,79 @@
+﻿'    Copyright (C) 2018-2019 Robbie Ward
+' 
+'    This file is a part of Winapp2ool
+' 
+'    Winapp2ool is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    Winap2ool is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+'
+'    You should have received a copy of the GNU General Public License
+'    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+Option Strict On
+
+''' <summary>
+''' This module holds any scans/repairs for WinappDebug that might be disabled by default due to incompleteness. 
+''' </summary>
+Module experimentalScans
+    ''' <summary>Attempts to merge FileKeys together if syntactically possible.</summary>
+    ''' <param name="kl">A list of winapp2.ini FileKey format iniFiles</param>
+    Public Sub cOptimization(ByRef kl As keyList)
+        ' Rules1.Last here is lintOpti 
+        If kl.keyCount < 2 Or Not Rules.Last.ShouldScan Then Exit Sub
+        Dim dupes As New keyList
+        Dim newKeys As New keyList
+        Dim flagList As New strList
+        Dim paramList As New strList
+        newKeys.add(kl.keys)
+        For i = 0 To kl.keyCount - 1
+            Dim tmpWa2 As New winapp2KeyParameters(kl.keys(i))
+            ' If we have yet to record any params, record them and move on
+            If paramList.count = 0 Then tmpWa2.trackParamAndFlags(paramList, flagList) : Continue For
+            ' This should handle the case where for a FileKey: 
+            ' The folder provided has appeared in another key
+            ' The flagstring (RECURSE, REMOVESELF, "") for both keys matches
+            ' The first appearing key should have its parameters appended to and the second appearing key should be removed
+            If paramList.contains(tmpWa2.pathString) Then
+                For j = 0 To paramList.count - 1
+                    If tmpWa2.pathString = paramList.items(j) And tmpWa2.flagString = flagList.items(j) Then
+                        Dim keyToMergeInto As New winapp2KeyParameters(kl.keys(j))
+                        Dim mergeKeyStr = ""
+                        keyToMergeInto.addArgs(mergeKeyStr)
+                        tmpWa2.argsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
+                        If tmpWa2.flagString <> "None" Then mergeKeyStr += $"|{tmpWa2.flagString}"
+                        dupes.add(kl.keys(i))
+                        newKeys.keys(j) = New iniKey(mergeKeyStr)
+                        Exit For
+                    End If
+                Next
+                tmpWa2.trackParamAndFlags(paramList, flagList)
+            Else
+                tmpWa2.trackParamAndFlags(paramList, flagList)
+            End If
+        Next
+        If dupes.keyCount > 0 Then
+            newKeys.remove(dupes.keys)
+            For i = 0 To newKeys.keyCount - 1
+                newKeys.keys(i).Name = $"FileKey{i + 1}"
+            Next
+            printOptiSect("Optimization opportunity detected", kl)
+            printOptiSect("The following keys can be merged into other keys:", dupes)
+            printOptiSect("The resulting keyList will be reduced to: ", newKeys)
+            If Rules.Last.fixFormat Then kl = newKeys
+        End If
+    End Sub
+
+    ''' <summary>Prints output from the Optimization function</summary>
+    ''' <param name="boxStr">The text to go in the optimization section box</param>
+    ''' <param name="kl">The list of keys to be printed beneath the box</param>
+    Private Sub printOptiSect(boxStr As String, kl As keyList)
+        cwl() : print(0, tmenu(boxStr), closeMenu:=True) : cwl()
+        kl.keys.ForEach(Sub(key) cwl(key.toString))
+        cwl()
+    End Sub
+End Module
