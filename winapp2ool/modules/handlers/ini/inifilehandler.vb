@@ -27,30 +27,26 @@ Public Module iniFileHandler
     ''' <param name="someFile">An iniFile object with user defined path and name parameters</param>
     Public Sub chkFileExist(someFile As iniFile)
         If pendingExit() Then Exit Sub
-        Dim iExitCode As Boolean = False
         While Not File.Exists(someFile.path)
             If pendingExit() Then Exit Sub
             setHeaderText("Error", True)
-            While Not iExitCode
-                clrConsole()
-                printMenuTop({$"{someFile.name} does not exist."})
-                print(1, "File Chooser (default)", "Change the file name")
-                print(1, "Directory Chooser", "Change the directory", closeMenu:=True)
-                Dim input As String = Console.ReadLine
-                Select Case input
-                    Case "0"
-                        exitCode = True
-                        iExitCode = True
-                        Exit Sub
-                    Case "1", ""
-                        fileChooser(someFile)
-                    Case "2"
-                        dirChooser(someFile.dir)
-                    Case Else
-                        setHeaderText(invInpStr, True)
-                End Select
-                If Not File.Exists(someFile.path) And Not menuHeaderText = invInpStr Then setHeaderText("Error", True)
-            End While
+            clrConsole()
+            printMenuTop({$"{someFile.name} does not exist."})
+            print(1, "File Chooser (default)", "Change the file name")
+            print(1, "Directory Chooser", "Change the directory", closeMenu:=True)
+            Dim input As String = Console.ReadLine
+            Select Case input
+                Case "0"
+                    exitCode = True
+                    Exit Sub
+                Case "1", ""
+                    fileChooser(someFile)
+                Case "2"
+                    dirChooser(someFile.dir)
+                Case Else
+                    setHeaderText(invInpStr, True)
+            End Select
+            If Not File.Exists(someFile.path) And Not menuHeaderText = invInpStr Then setHeaderText("Error", True)
         End While
     End Sub
 
