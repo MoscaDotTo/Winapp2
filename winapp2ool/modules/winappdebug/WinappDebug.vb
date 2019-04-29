@@ -244,9 +244,9 @@ Public Module WinappDebug
         Dim curNum = 1
         Dim curStrings As New strList
         Dim dupes As New keyList
+        Dim kt = kl.keyType
         For Each key In kl.keys
-            ' Preprocess key formats before doing key specific audits
-            Select Case key.KeyType
+            Select Case kt
                 Case "ExcludeKey"
                     cFormat(key, curNum, curStrings, dupes)
                     pExcludeKey(key, hasF, hasR)
@@ -274,6 +274,7 @@ Public Module WinappDebug
             ' Any further changes to the key are handled by the given function
             key = processKey(key)
         Next
+        ' Remove any duplicates and sort the keys
         kl.remove(dupes.keys)
         sortKeys(kl, dupes.keyCount > 0)
         ' Run optimization checks on FileKey lists only 
