@@ -18,24 +18,11 @@ Option Strict On
 Imports System.IO
 
 ''' <summary>
-''' This module handles the commandline args presented to winapp2ool and attempts to pass them off to their respective modules
+''' This module helps handle any commandline arguments passed to winapp2ool
 ''' </summary>
 Public Module commandLineHandler
-    ' File Handlers
-    Dim firstFile As iniFile
-    Dim secondFile As iniFile
-    Dim thirdFile As iniFile
-    ' The current state of the command line args at any point
-    Private cmdLnArgs As New List(Of String)
-
+    ''' <summary>The current list of the command line args (mutable)</summary>
     Public Property cmdargs As List(Of String)
-        Get
-            Return cmdLnArgs
-        End Get
-        Set(value As List(Of String))
-            cmdLnArgs = value
-        End Set
-    End Property
 
     ''' <summary>Flips a boolean setting and removes its associated argument from the args list</summary>
     ''' <param name="setting">The boolean setting to be flipped</param>
@@ -113,7 +100,7 @@ Public Module commandLineHandler
         cmdargs.AddRange(Environment.GetCommandLineArgs)
         ' 0th index holds the executable name, we don't need it. 
         cmdargs.RemoveAt(0)
-        ' The s is for silent, if we havxe this flag, don't give any output to the user under normal circumstances 
+        ' The s is for silent, if we have this flag, don't give any output or ask for input along the happy path
         invertSettingAndRemoveArg(SuppressOutput, "-s")
         ' Toggle the tool to use the non-ccleaner version of winapp2.ini
         invertSettingAndRemoveArg(remoteWinappIsNonCC, "-ncc")
@@ -155,7 +142,7 @@ Public Module commandLineHandler
     ''' <summary>Processes numerically ordered directory (d) and file (f) commandline args on a per-file basis</summary>
     ''' <param name="someNumber">The number (1-indexed) of our current internal iniFile</param>
     ''' <param name="someFile">A reference to the iniFile object being operated on</param>
-    Private Sub getParams(someNumber As Integer, someFile As iniFile)
+    Private Sub getParams(someNumber As Integer, ByRef someFile As iniFile)
         Dim argStr As String = $"-{someNumber}"
         If cmdargs.Contains($"{argStr}d") Then getFileNameAndDir($"{argStr}d", someFile)
         If cmdargs.Contains($"{argStr}f") Then getFileName($"{argStr}f", someFile)
@@ -176,16 +163,17 @@ Public Module commandLineHandler
                                 Not File.Exists(cmdargs(i + 1)) And File.Exists($"{Environment.CurrentDirectory}\{cmdargs(i + 1)}")) Then
                         Throw New Exception("Invalid commandline arguments given.")
                     End If
+                    ' Increment i here by 1 to skip the next item (i+1) since we've already processed it above
                     i += 1
                 Next
             Catch ex As Exception
-                printErrExit("Invalid commandline arguments given.")
+                printErrExit(ex.Message)
             End Try
         End If
     End Sub
 
     ''' <summary>Prints an error to the user and exits the application after they have pressed a key</summary>
-    ''' <param name="errTxt">The String containing the erorr text to be printed to the user</param>
+    ''' <param name="errTxt">The text to be printed to the user</param>
     Private Sub printErrExit(errTxt As String)
         Console.WriteLine($"{errTxt} Press any key to exit.")
         Console.ReadKey()
