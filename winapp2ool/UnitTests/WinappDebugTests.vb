@@ -64,7 +64,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     <TestMethod()> Public Sub handleCmdLine_EnableAutoCorrectSuccess()
         ' Test case: Enable autocorrect 
         setDebugStage({"-c"}, True)
-        Assert.AreEqual(winapp2ool.saveChanges, True)
+        Assert.AreEqual(winapp2ool.SaveChanges, True)
     End Sub
 
     ' Tests below this point until the marked point test that individual scans and repairs work within WinappDebug's debug method along happy paths
@@ -73,8 +73,8 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' <param name="lintRuleIndex">The index of the rule to be enabled</param>
     Private Sub disableAllTestsExcept(lintRuleIndex As Integer)
         ' Don't correct all formatting
-        winapp2ool.repairErrsFound = False
-        winapp2ool.repairSomeErrsFound = False
+        winapp2ool.RepairErrsFound = False
+        winapp2ool.RepairSomeErrsFound = False
         For i As Integer = 0 To winapp2ool.WinappDebug.Rules.Count - 1
             If Not i = lintRuleIndex Then
                 ' Turn off all rules by default 
@@ -109,15 +109,15 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Dim test As winapp2ool.winapp2file = getSingleTestFile(testNum)
         ' Confirm the errors are found without autocorrect on
         winapp2ool.WinappDebug.debug(test)
-        Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.errorsFound)
+        Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.ErrorsFound)
         ' Enable repairs
-        winapp2ool.WinappDebug.repairSomeErrsFound = True
+        winapp2ool.WinappDebug.RepairSomeErrsFound = True
         winapp2ool.WinappDebug.debug(test)
         ' Confirm the errors are still found (ie. not erroneously corrected during the first test)
-        Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.errorsFound)
+        Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.ErrorsFound)
         winapp2ool.WinappDebug.debug(test)
         ' Confirm fixable errors are fixed
-        Assert.AreEqual(expectedErrsWithRepair, winapp2ool.WinappDebug.errorsFound)
+        Assert.AreEqual(expectedErrsWithRepair, winapp2ool.WinappDebug.ErrorsFound)
         ' Return the entry for further assessment
         Return New winapp2ool.winapp2entry(test.entrySections.Last.sections.Values.First)
     End Function
@@ -173,6 +173,13 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Assert.AreEqual("HKCU\Software4", testOutput.detects.keys(1).Value)
         Assert.AreEqual("HKCU\Software20", testOutput.detects.keys(2).Value)
         Assert.AreEqual("HKCU\Software30", testOutput.detects.keys(3).Value)
+    End Sub
+
+    <TestMethod> Public Sub debug_forwardSlashes_FindAndRepair_Success()
+        Dim testOutput = debug_ErrorFindAndRepair_Success(4, 2, 0, 5)
+        For Each lst In testOutput.keyListList
+            If lst.keyCount > 0 Then Assert.AreEqual(True, lst.keys.First.Value.Contains(CChar("\")))
+        Next
     End Sub
 
 End Class
