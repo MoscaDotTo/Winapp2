@@ -26,7 +26,7 @@ Public Module advSettings
             rule.resetParams()
         Next
         ScanSettingsChanged = False
-        repairSomeErrsFound = False
+        RepairSomeErrsFound = False
     End Sub
 
     ''' <summary>Determines which if any lint rules have been modified and whether or not only some repairs are scheduled to run</summary>
@@ -41,8 +41,8 @@ Public Module advSettings
             If rule.ShouldRepair Then repairAny = True
         Next
         If Not repairAll And repairAny Then
-            repairErrsFound = False
-            repairSomeErrsFound = True
+            RepairErrsFound = False
+            RepairSomeErrsFound = True
         End If
     End Sub
 

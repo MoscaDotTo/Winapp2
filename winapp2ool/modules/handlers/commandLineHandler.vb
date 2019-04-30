@@ -97,7 +97,7 @@ Public Module commandLineHandler
 
     ''' <summary>Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler</summary>
     Public Sub processCommandLineArgs()
-        cmdargs.AddRange(Environment.GetCommandLineArgs)
+        cmdargs = Environment.GetCommandLineArgs.ToList
         ' 0th index holds the executable name, we don't need it. 
         cmdargs.RemoveAt(0)
         ' The s is for silent, if we have this flag, don't give any output or ask for input along the happy path

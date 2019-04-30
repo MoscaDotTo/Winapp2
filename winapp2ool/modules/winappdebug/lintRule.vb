@@ -78,6 +78,6 @@ Public Class lintRule
 
     ''' <summary>Determines whether or not a fix that sits behind an optional flag should be run</summary>
     Public Function fixFormat() As Boolean
-        Return repairErrsFound Or (repairSomeErrsFound And ShouldRepair)
+        Return RepairErrsFound Or (RepairSomeErrsFound And ShouldRepair)
     End Function
 End Class

@@ -26,17 +26,17 @@ Public Module WinappDebug
     Private outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
     ' Module Settings
     ''' <summary> Indicates whether some but not all repairs will run </summary>
-    Public Property repairSomeErrsFound As Boolean
+    Public Property RepairSomeErrsFound As Boolean
     ''' <summary> Indicates whether scan settings have been changed </summary>
     Public Property ScanSettingsChanged As Boolean
     ''' <summary> Indicates whether module settings have been changed </summary>
     Public Property ModuleSettingsChanged As Boolean
-    ''' <summary> Indicates whether or not changes should be saved back to disk (default: off) </summary>
-    Public Property saveChanges As Boolean
-    ''' <summary> Indicates whether or not winappdebug should attempt to repair errors it finds, disabled by default </summary>
-    Public Property repairErrsFound As Boolean
+    ''' <summary> Indicates whether or not changes should be saved back to disk (Default: False) </summary>
+    Public Property SaveChanges As Boolean
+    ''' <summary> Indicates whether or not winappdebug should attempt to repair errors it finds (Default: False)</summary>
+    Public Property RepairErrsFound As Boolean
     ''' <summary> The number of errors found by the linter </summary>
-    Public Property errorsFound As Integer
+    Public Property ErrorsFound As Integer
     Dim allEntryNames As New List(Of String)
     ' Lint Rules
     Private lintCasing As New lintRule(True, True, "Casing", "improper CamelCasing", "fixing improper CamelCasing")
@@ -96,7 +96,7 @@ Public Module WinappDebug
     ''' -c          : enable autocorrect
     Public Sub handleCmdLine()
         initDefaultSettings()
-        invertSettingAndRemoveArg(saveChanges, "-c")
+        invertSettingAndRemoveArg(SaveChanges, "-c")
         getFileAndDirParams(winappDebugFile1, New iniFile, winappDebugFile3)
         If Not cmdargs.Contains("UNIT_TESTING_HALT") Then initDebug()
     End Sub
@@ -106,8 +106,8 @@ Public Module WinappDebug
         winappDebugFile1.resetParams()
         winappDebugFile3.resetParams()
         ModuleSettingsChanged = False
-        repairErrsFound = False
-        saveChanges = False
+        RepairErrsFound = False
+        SaveChanges = False
         resetScanSettings()
     End Sub
 
@@ -116,11 +116,11 @@ Public Module WinappDebug
         printMenuTop({"Scan winapp2.ini For syntax and style errors, And attempt to repair them."})
         print(1, "Run (Default)", "Run the debugger")
         print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or path", leadingBlank:=True, trailingBlank:=True)
-        print(5, "Toggle Saving", "saving the file after correcting errors", enStrCond:=saveChanges)
-        print(1, "File Chooser (save)", "Save a copy of changes made instead of overwriting winapp2.ini", saveChanges, trailingBlank:=True)
-        print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not saveChanges, trailingBlank:=True)
-        print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.path)}", closeMenu:=Not saveChanges And Not ModuleSettingsChanged)
-        print(0, $"Current save target:  {replDir(winappDebugFile3.path)}", cond:=saveChanges, closeMenu:=Not ModuleSettingsChanged)
+        print(5, "Toggle Saving", "saving the file after correcting errors", enStrCond:=SaveChanges)
+        print(1, "File Chooser (save)", "Save a copy of changes made instead of overwriting winapp2.ini", SaveChanges, trailingBlank:=True)
+        print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not SaveChanges, trailingBlank:=True)
+        print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged)
+        print(0, $"Current save target:  {replDir(winappDebugFile3.path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged)
         print(2, "WinappDebug", cond:=ModuleSettingsChanged, closeMenu:=True)
     End Sub
 
@@ -135,13 +135,13 @@ Public Module WinappDebug
             Case input = "2"
                 changeFileParams(winappDebugFile1, ModuleSettingsChanged)
             Case input = "3"
-                toggleSettingParam(saveChanges, "Saving", ModuleSettingsChanged)
-            Case input = "4" And saveChanges
+                toggleSettingParam(SaveChanges, "Saving", ModuleSettingsChanged)
+            Case input = "4" And SaveChanges
                 changeFileParams(winappDebugFile3, ModuleSettingsChanged)
-            Case (input = "4" And Not saveChanges) Or (input = "5" And saveChanges)
+            Case (input = "4" And Not SaveChanges) Or (input = "5" And SaveChanges)
                 initModule("Scan Settings", AddressOf advSettings.printMenu, AddressOf advSettings.handleUserInput)
                 Console.WindowHeight = 30
-            Case ModuleSettingsChanged And ((input = "5" And Not saveChanges) Or (input = "6" And saveChanges))
+            Case ModuleSettingsChanged And ((input = "5" And Not SaveChanges) Or (input = "6" And SaveChanges))
                 resetModuleSettings("WinappDebug", AddressOf initDefaultSettings)
             Case Else
                 setHeaderText(invInpStr, True)
@@ -160,7 +160,7 @@ Public Module WinappDebug
         setHeaderText("Debug Complete")
         print(0, tmenu("Completed analysis of winapp2.ini"))
         print(0, menuStr03)
-        print(0, $"{errorsFound} possible errors were detected.")
+        print(0, $"{ErrorsFound} possible errors were detected.")
         print(0, $"Number of entries: {winappDebugFile1.sections.Count}", trailingBlank:=True)
         rewriteChanges(wa2)
         print(0, anyKeyStr, closeMenu:=True)
@@ -170,7 +170,7 @@ Public Module WinappDebug
     ''' <summary> Performs syntax and format checking on a winapp2.ini format ini file </summary>
     ''' <param name="fileToBeDebugged">A winapp2file object to be processed</param>
     Public Sub debug(ByRef fileToBeDebugged As winapp2file)
-        errorsFound = 0
+        ErrorsFound = 0
         allEntryNames = New List(Of String)
         For Each entryList In fileToBeDebugged.winapp2entries
             If entryList.Count = 0 Then Continue For
@@ -194,7 +194,7 @@ Public Module WinappDebug
     ''' <summary> Overwrites the file on disk with any changes we've made if we are saving them </summary>
     ''' <param name="winapp2file">The object representing winapp2.ini</param>
     Private Sub rewriteChanges(ByRef winapp2file As winapp2file)
-        If saveChanges Then
+        If SaveChanges Then
             print(0, "Saving changes, do not close winapp2ool or data loss may occur...", leadingBlank:=True)
             winappDebugFile3.overwriteToFile(winapp2file.winapp2string)
             print(0, "Finished saving changes.", trailingBlank:=True)
@@ -589,7 +589,7 @@ Public Module WinappDebug
         cwl($"Line: {lineCount} - Error: {err}")
         lines.ToList.ForEach(Sub(errStr As String) cwl(errStr))
         cwl()
-        errorsFound += 1
+        ErrorsFound += 1
     End Sub
 
     ''' <summary>Replace a given string with a new value if the fix condition is met.</summary>
