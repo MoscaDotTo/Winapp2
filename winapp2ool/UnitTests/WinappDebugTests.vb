@@ -176,9 +176,10 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     End Sub
 
     <TestMethod> Public Sub debug_forwardSlashes_FindAndRepair_Success()
-        Dim testOutput = debug_ErrorFindAndRepair_Success(4, 2, 0, 5)
+        Dim testOutput = debug_ErrorFindAndRepair_Success(4, 4, 0, 5)
         For Each lst In testOutput.keyListList
-            If lst.keyCount > 0 Then Assert.AreEqual(True, lst.keys.First.Value.Contains(CChar("\")))
+            ' If the test was successful, none of the keys should have any forward slashes
+            If lst.keyCount > 0 Then Assert.AreEqual(True, Not lst.keys.First.Value.Contains(CChar("/")))
         Next
     End Sub
 

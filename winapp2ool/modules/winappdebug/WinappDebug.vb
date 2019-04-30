@@ -51,9 +51,10 @@ Public Module WinappDebug
     Private lintMulti As New lintRule(True, True, "Multiples", "multiples of key types that should only occur once in an entry", "removing unneeded multiples of key types that should occur only once")
     Private lintInvalid As New lintRule(True, True, "Invalid Values", "invalid key values", "fixing cer,tain types of invalid key values")
     Private lintSyntax As New lintRule(True, True, "Syntax Errors", "some entries whose configuration will not run in CCleaner", "attempting to fix certain types of syntax errors")
+    Private lintPathValidity As New lintRule(True, True, "Path Validity", " invalid filesystem or registry locations", "attempting to repair some basic invalid parameters in paths")
     Private lintOpti As New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)")
     Private currentLintRules As lintRule() = {lintCasing, lintAlpha, lintWrongNums, lintParams, lintFlags, lintSlashes,
-            lintDefaults, lintDupes, lintExtraNums, lintMulti, lintInvalid, lintSyntax, lintOpti}
+            lintDefaults, lintDupes, lintExtraNums, lintMulti, lintInvalid, lintSyntax, lintPathValidity, lintOpti}
     ' Regex 
     ReadOnly longReg As New Regex("HKEY_(C(URRENT_(USER$|CONFIG$)|LASSES_ROOT$)|LOCAL_MACHINE$|USERS$)")
     ReadOnly shortReg As New Regex("HK(C(C$|R$|U$)|LM$|U$)")
@@ -493,6 +494,7 @@ Public Module WinappDebug
     ''' <param name="key">An iniKey to be audited</param>
     ''' <param name="isRegistry">Specifies whether the given key holds a registry path</param>
     Private Sub chkPathFormatValidity(key As iniKey, isRegistry As Boolean)
+        If Not lintPathValidity.ShouldScan Then Exit Sub
         ' Remove the flags from ExcludeKeys if we have them before getting the first directory portion
         Dim rootStr = If(key.KeyType <> "ExcludeKey", getFirstDir(key.Value), getFirstDir(pathFromExcludeKey(key)))
         ' Ensure that registry paths have a valid hive and file paths have either a variable or a drive letter
