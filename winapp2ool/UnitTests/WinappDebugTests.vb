@@ -35,27 +35,27 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ' Test case: Do nothing, expect our default values
         setDebugStage({}, True)
         Assert.AreEqual(winapp2ool.winappDebugFile1.path, winapp2ool.winappDebugFile3.path)
-        Assert.AreEqual("winapp2-debugged.ini", winapp2ool.winappDebugFile3.secondName)
-        Assert.AreNotEqual(winapp2ool.winappDebugFile1.secondName, winapp2ool.winappDebugFile3.secondName)
+        Assert.AreEqual("winapp2-debugged.ini", winapp2ool.winappDebugFile3.SecondName)
+        Assert.AreNotEqual(winapp2ool.winappDebugFile1.SecondName, winapp2ool.winappDebugFile3.SecondName)
     End Sub
 
     ''' <summary>Tests the commandline handling for WinappDebug to ensure success when changing file directory or name parameters</summary>
     <TestMethod()> Public Sub handleCmdLine_ChangeFileParamsSuccess()
         ' First test case: Change only the first file name parameter
         setDebugStage({"-1f", "winapp2debugged.ini"}, True)
-        Assert.AreEqual("winapp2debugged.ini", winapp2ool.winappDebugFile1.name)
-        Assert.AreEqual($"{Environment.CurrentDirectory}\{winapp2ool.winappDebugFile1.name}", winapp2ool.winappDebugFile1.path)
-        Assert.AreEqual("winapp2.ini", winapp2ool.winappDebugFile3.name)
+        Assert.AreEqual("winapp2debugged.ini", winapp2ool.winappDebugFile1.Name)
+        Assert.AreEqual($"{Environment.CurrentDirectory}\{winapp2ool.winappDebugFile1.Name}", winapp2ool.winappDebugFile1.path)
+        Assert.AreEqual("winapp2.ini", winapp2ool.winappDebugFile3.Name)
         ' Second test case: Change the first and third file name parameters, also tests setting of a subdirectory through the file command
         setDebugStage({"-1f", "winapp2debugged.ini", "-3f", "\subdir\winapp2debugged.ini"}, True)
-        Assert.AreEqual("winapp2debugged.ini", winapp2ool.winappDebugFile1.name)
-        Assert.AreEqual(Environment.CurrentDirectory, winapp2ool.winappDebugFile1.dir)
-        Assert.AreEqual("winapp2debugged.ini", winapp2ool.winappDebugFile3.name)
-        Assert.AreEqual(Environment.CurrentDirectory & "\subdir", winapp2ool.winappDebugFile3.dir)
+        Assert.AreEqual("winapp2debugged.ini", winapp2ool.winappDebugFile1.Name)
+        Assert.AreEqual(Environment.CurrentDirectory, winapp2ool.winappDebugFile1.Dir)
+        Assert.AreEqual("winapp2debugged.ini", winapp2ool.winappDebugFile3.Name)
+        Assert.AreEqual(Environment.CurrentDirectory & "\subdir", winapp2ool.winappDebugFile3.Dir)
         ' Third test case: Change directory and name parameters of a single file
         setDebugStage({"-1d", "C:\Test Directory\", "-1f", "winapp2-test2.ini"}, True)
-        Assert.AreEqual("C:\Test Directory", winapp2ool.winappDebugFile1.dir)
-        Assert.AreEqual("winapp2-test2.ini", winapp2ool.winappDebugFile1.name)
+        Assert.AreEqual("C:\Test Directory", winapp2ool.winappDebugFile1.Dir)
+        Assert.AreEqual("winapp2-test2.ini", winapp2ool.winappDebugFile1.Name)
     End Sub
 
     ''' <summary>
@@ -92,8 +92,8 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Dim unitFile As New winapp2ool.iniFile(Environment.CurrentDirectory, "WinappDebugUnitTests.ini")
         unitFile.validate()
         Dim testFile As New winapp2ool.iniFile
-        Dim testSection = unitFile.sections.Values(testNum)
-        testFile.sections.Add(testSection.name, testSection)
+        Dim testSection = unitFile.Sections.Values(testNum)
+        testFile.Sections.Add(testSection.Name, testSection)
         Return New winapp2ool.winapp2file(testFile)
     End Function
 
@@ -119,7 +119,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ' Confirm fixable errors are fixed
         Assert.AreEqual(expectedErrsWithRepair, winapp2ool.WinappDebug.ErrorsFound)
         ' Return the entry for further assessment
-        Return New winapp2ool.winapp2entry(test.entrySections.Last.sections.Values.First)
+        Return New winapp2ool.winapp2entry(test.entrySections.Last.Sections.Values.First)
     End Function
 
     ''' <summary>Runs tests to ensure that keys with duplicate values are detected and removed</summary>
@@ -140,12 +140,12 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Dim testOutput = debug_ErrorFindAndRepair_Success(1, 8, 0, 2)
         For i = 0 To testOutput.keyListList.Count - 2
             Dim lst = testOutput.keyListList(i)
-            Select Case lst.keyType
+            Select Case lst.KeyType
                 Case "Detect", "DetectFile", "ExcludeKey", "FileKey", "RegKey"
-                    Dim curKeys = lst.keys
+                    Dim curKeys = lst.Keys
                     ' We expect 2 keys in each of these lists, having the keyNumbers 1 and 2 respectively
-                    Assert.AreEqual(curKeys.First.Name, $"{lst.keyType}1")
-                    Assert.AreEqual(curKeys.Last.Name, $"{lst.keyType}2")
+                    Assert.AreEqual(curKeys.First.Name, $"{lst.KeyType}1")
+                    Assert.AreEqual(curKeys.Last.Name, $"{lst.KeyType}2")
             End Select
         Next
     End Sub
@@ -155,12 +155,12 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Dim testOutput = debug_ErrorFindAndRepair_Success(2, 8, 0, 8)
         For Each lst In testOutput.keyListList
             If lst.keyCount > 0 Then
-                Select Case lst.keyType
+                Select Case lst.KeyType
                     ' RegKeys, FileKeys, and ExcludeKeys always require a trailing number in the name, even if there is only one
                     Case "RegKey", "FileKey", "ExcludeKey"
-                        Assert.AreEqual(lst.keys.First.KeyType & 1, lst.keys.First.Name)
+                        Assert.AreEqual(lst.Keys.First.KeyType & 1, lst.Keys.First.Name)
                     Case Else
-                        Assert.AreEqual(lst.keys.First.KeyType, lst.keys.First.Name)
+                        Assert.AreEqual(lst.Keys.First.KeyType, lst.Keys.First.Name)
                 End Select
             End If
         Next
@@ -169,17 +169,17 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' <summary>Runs test to ensure that incorrect alphabetization is caught and repaired</summary>
     <TestMethod> Public Sub debug_keyAlphabetization_FindAndRepair_Success()
         Dim testOutput = debug_ErrorFindAndRepair_Success(3, 4, 0, 1)
-        Assert.AreEqual("HKCU\Software3", testOutput.detects.keys.First.Value)
-        Assert.AreEqual("HKCU\Software4", testOutput.detects.keys(1).Value)
-        Assert.AreEqual("HKCU\Software20", testOutput.detects.keys(2).Value)
-        Assert.AreEqual("HKCU\Software30", testOutput.detects.keys(3).Value)
+        Assert.AreEqual("HKCU\Software3", testOutput.detects.Keys.First.Value)
+        Assert.AreEqual("HKCU\Software4", testOutput.detects.Keys(1).Value)
+        Assert.AreEqual("HKCU\Software20", testOutput.detects.Keys(2).Value)
+        Assert.AreEqual("HKCU\Software30", testOutput.detects.Keys(3).Value)
     End Sub
 
     <TestMethod> Public Sub debug_forwardSlashes_FindAndRepair_Success()
         Dim testOutput = debug_ErrorFindAndRepair_Success(4, 4, 0, 5)
         For Each lst In testOutput.keyListList
             ' If the test was successful, none of the keys should have any forward slashes
-            If lst.keyCount > 0 Then Assert.AreEqual(True, Not lst.keys.First.Value.Contains(CChar("/")))
+            If lst.keyCount > 0 Then Assert.AreEqual(True, Not lst.Keys.First.Value.Contains(CChar("/")))
         Next
     End Sub
 

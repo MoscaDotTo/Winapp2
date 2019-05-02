@@ -197,7 +197,7 @@ Module Winapp2ool
     Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean)
         fileChooser(someFile)
         settingsChangedSetting = True
-        setHeaderText($"{If(someFile.secondName = "", someFile.initName, "save file")} parameters update{If(exitCode, " aborted", "d")}", exitCode)
+        setHeaderText($"{If(someFile.SecondName = "", someFile.InitName, "save file")} parameters update{If(exitCode, " aborted", "d")}", exitCode)
         undoAnyPendingExits()
     End Sub
 

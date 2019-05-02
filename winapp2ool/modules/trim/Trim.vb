@@ -138,7 +138,7 @@ Public Module Trim
     ''' <param name="chkExist">The function that evaluates that keyType's parameters</param>
     Private Function checkExistence(ByRef kl As keyList, chkExist As Func(Of String, Boolean)) As Boolean
         If kl.keyCount = 0 Then Return False
-        For Each key In kl.keys
+        For Each key In kl.Keys
             If chkExist(key.Value) Then Return True
         Next
         Return False
@@ -178,7 +178,7 @@ Public Module Trim
     ''' <param name="kl">The keylist of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore</param>
     Private Sub vsKeyChecker(ByRef kl As keyList)
         If kl.keyCount = 0 Then Exit Sub
-        Select Case kl.keyType
+        Select Case kl.KeyType
             Case "FileKey", "ExcludeKey"
                 mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files", "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
             Case "RegKey"
@@ -193,8 +193,8 @@ Public Module Trim
     ''' <param name="kl">The keylist to be processed</param>
     Private Sub mkVsKeys(findStrs As String(), replStrs As String(), ByRef kl As keyList)
         Dim initVals = kl.toListOfStr(True)
-        Dim keysToAdd As New keyList(kl.keyType)
-        For Each key In kl.keys
+        Dim keysToAdd As New keyList(kl.KeyType)
+        For Each key In kl.Keys
             If Not key.vHasAny(findStrs, True) Then Continue For
             For i As Integer = 0 To findStrs.Count - 1
                 Dim keyToAdd = createVSKey(findStrs(i), replStrs(i), key)
@@ -204,7 +204,7 @@ Public Module Trim
             Next
         Next
         Dim kl2 = kl
-        keysToAdd.keys.ForEach(Sub(key) kl2.add(key, checkExist(New winapp2KeyParameters(key).pathString)))
+        keysToAdd.Keys.ForEach(Sub(key) kl2.add(key, checkExist(New winapp2KeyParameters(key).pathString)))
     End Sub
 
     ''' <summary>Creates the VirtualStore version of a given iniKey</summary>

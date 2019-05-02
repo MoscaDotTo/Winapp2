@@ -30,7 +30,7 @@ Public Class iniKey
     ''' <summary>The name of the iniKey: any text on the left side of the '='</summary>
     Public Property Name As String
 
-    ''' <summary>The lineNumber in the original reading of the file on which the key is found.</summary>
+    ''' <summary>The number of the line on which the key was found during the original reading of the file</summary>
     Public Property LineNumber As Integer
 
     ''' <summary>Returns whether or not an iniKey's name is equal to a given value</summary>

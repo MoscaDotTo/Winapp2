@@ -109,27 +109,26 @@ Module CCiniDebug
         clrConsole()
         printMenuLine(tmenu("CCiniDebug Results"))
         printMenuLine(menuStr03)
-        If pruneFile Then prune(ccFile.sections("Options"))
+        If pruneFile Then prune(ccFile.Sections("Options"))
         If sortFile Then sortCC()
         If saveFile Then outputFile.overwriteToFile(ccFile.toString)
-        print(0, $"{If(saveFile, $"{outputFile.name} saved", "Analysis complete")}. {anyKeyStr}", isCentered:=True, closeMenu:=True)
+        print(0, $"{If(saveFile, $"{outputFile.Name} saved", "Analysis complete")}. {anyKeyStr}", isCentered:=True, closeMenu:=True)
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
     ''' <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>
     ''' <param name="optionsSec">The iniSection object containing the Options from ccleaner.ini</param>
     Private Sub prune(ByRef optionsSec As iniSection)
-        print(0, $"Scanning {ccFile.name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
+        print(0, $"Scanning {ccFile.Name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
         Dim tbTrimmed As New List(Of Integer)
-        For i As Integer = 0 To optionsSec.keys.Count - 1
-            Dim optionStr As String = optionsSec.keys.Values(i).toString
+        For i As Integer = 0 To optionsSec.Keys.keyCount - 1
+            Dim optionStr As String = optionsSec.Keys.Keys(i).toString
             ' Only operate on (app) keys belonging to winapp2.ini
             If optionStr.StartsWith("(App)") And optionStr.Contains("*") Then
                 Dim toRemove As New List(Of String) From {"(App)", "=True", "=False"}
                 toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
-                If Not winappFile.sections.ContainsKey(optionStr) Then
-                    printMenuLine(optionsSec.keys.Values(i).toString)
-                    tbTrimmed.Add(optionsSec.keys.Keys(i))
+                If Not winappFile.Sections.ContainsKey(optionStr) Then
+                    tbTrimmed.Add(i)
                 End If
             End If
         Next
@@ -139,9 +138,9 @@ Module CCiniDebug
 
     ''' <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
     Private Sub sortCC()
-        Dim lineList As List(Of String) = ccFile.sections("Options").getKeysAsList
+        Dim lineList As List(Of String) = ccFile.Sections("Options").getKeysAsList
         lineList.Sort()
         lineList.Insert(0, "[Options]")
-        ccFile.sections("Options") = New iniSection(lineList)
+        ccFile.Sections("Options") = New iniSection(lineList)
     End Sub
 End Module

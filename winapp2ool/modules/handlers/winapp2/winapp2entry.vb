@@ -41,9 +41,9 @@ Public Class winapp2entry
     ''' <param name="section">A winapp2.ini format iniSection object</param>
     Public Sub New(ByVal section As iniSection)
         fullName = section.getFullName
-        name = section.name
+        name = section.Name
         updKeyListList()
-        lineNum = section.startingLineNumber
+        lineNum = section.StartingLineNumber
         section.constKeyLists(keyListList)
     End Sub
 
@@ -57,7 +57,7 @@ Public Class winapp2entry
     Public Function dumpToListOfStrings() As List(Of String)
         Dim outList As New List(Of String) From {fullName}
         updKeyListList()
-        keyListList.ForEach(Sub(lst) lst.keys.ForEach(Sub(key) outList.Add(key.toString)))
+        keyListList.ForEach(Sub(lst) lst.Keys.ForEach(Sub(key) outList.Add(key.toString)))
         Return outList
     End Function
 End Class

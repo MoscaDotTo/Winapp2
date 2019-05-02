@@ -57,11 +57,11 @@ Public Module commandLineHandler
             If curArg.StartsWith("\") And Not curArg.LastIndexOf("\") = 0 Then
                 Dim split = cmdargs(ind + 1).Split(CChar("\"))
                 For i As Integer = 1 To split.Count - 2
-                    givenFile.dir += $"\{split(i)}"
+                    givenFile.Dir += $"\{split(i)}"
                 Next
-                givenFile.name = split.Last
+                givenFile.Name = split.Last
             Else
-                givenFile.name = $"{cmdargs(ind + 1)}"
+                givenFile.Name = $"{cmdargs(ind + 1)}"
             End If
             cmdargs.RemoveAt(ind)
             cmdargs.RemoveAt(ind)
@@ -85,14 +85,14 @@ Public Module commandLineHandler
     ''' <param name="file">The iniFile object to be modified</param>
     Private Sub getFileParams(ByRef arg As String, ByRef file As iniFile)
         ' Start either a blank path or, support appending children folders to the current path
-        file.dir = If(arg.StartsWith("\"), Environment.CurrentDirectory & "\", "")
+        file.Dir = If(arg.StartsWith("\"), Environment.CurrentDirectory & "\", "")
         Dim splitArg As String() = arg.Split(CChar("\"))
         If splitArg.Count >= 2 Then
             For i As Integer = 0 To splitArg.Count - 2
-                file.dir += splitArg(i) & "\"
+                file.Dir += splitArg(i) & "\"
             Next
         End If
-        file.name = splitArg.Last
+        file.Name = splitArg.Last
     End Sub
 
     ''' <summary>Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler</summary>
@@ -147,9 +147,9 @@ Public Module commandLineHandler
         If cmdargs.Contains($"{argStr}d") Then getFileNameAndDir($"{argStr}d", someFile)
         If cmdargs.Contains($"{argStr}f") Then getFileName($"{argStr}f", someFile)
         ' Make sure there's there's no double slashes or leading/trailing slashes in the file parameters
-        someFile.dir = someFile.dir.Replace(CChar("\\"), CChar("\"))
-        If someFile.name.StartsWith("\") Then someFile.name = someFile.name.TrimStart(CChar("\"))
-        If someFile.dir.EndsWith("\") Then someFile.dir = someFile.dir.TrimEnd(CChar("\"))
+        someFile.Dir = someFile.Dir.Replace(CChar("\\"), CChar("\"))
+        If someFile.Name.StartsWith("\") Then someFile.Name = someFile.Name.TrimStart(CChar("\"))
+        If someFile.Dir.EndsWith("\") Then someFile.Dir = someFile.Dir.TrimEnd(CChar("\"))
     End Sub
 
     ''' <summary>Enforces that commandline args are properly formatted in {"-flag","data"} format</summary>

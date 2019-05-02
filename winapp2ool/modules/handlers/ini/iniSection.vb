@@ -1,4 +1,5 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿
+'    Copyright (C) 2018-2019 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -19,18 +20,25 @@ Option Strict On
 ''' An object representing a section of a .ini file
 ''' </summary>
 Public Class iniSection
-    Public startingLineNumber As Integer
-    Public endingLineNumber As Integer
-    Public name As String
-    Public keys As New Dictionary(Of Integer, iniKey)
+    ''' <summary> The line number from which the Name of the Section was originally read</summary>
+    Public Property StartingLineNumber As Integer
+
+    ''' <summary> The line number from which the last Key in the Section was originally read </summary>
+    Public Property EndingLineNumber As Integer
+
+    ''' <summary>The name of the Section (without [Braces])</summary>
+    Public Property Name As String
+
+    ''' <summary>The Dictionary</summary>
+    Public Property Keys As keyList
 
     ''' <summary>Sorts a section's keys into keylists based on their KeyType</summary>
     ''' <param name="listOfKeyLists">The list of keyLists to be sorted into</param>
     ''' The last list in the keylist list holds the error keys
     Public Sub constKeyLists(ByRef listOfKeyLists As List(Of keyList))
         Dim keyTypeList As New List(Of String)
-        listOfKeyLists.ForEach(Sub(kl) keyTypeList.Add(kl.keyType.ToLower))
-        For Each key In keys.Values
+        listOfKeyLists.ForEach(Sub(kl) keyTypeList.Add(kl.KeyType.ToLower))
+        For Each key In Keys.Keys
             Dim type = key.KeyType.ToLower
             If keyTypeList.Contains(type) Then listOfKeyLists(keyTypeList.IndexOf(type)).add(key) Else listOfKeyLists.Last.add(key)
         Next
@@ -39,31 +47,33 @@ Public Class iniSection
     ''' <summary>Removes a series of keys from the section</summary>
     ''' <param name="indicies"></param>
     Public Sub removeKeys(indicies As List(Of Integer))
-        indicies.ForEach(Sub(ind) keys.Remove(ind))
+        indicies.ForEach(Sub(ind) Keys.remove(ind))
     End Sub
 
     ''' <summary>Returns the iniSection name as it would appear on disk.</summary>
     Public Function getFullName() As String
-        Return $"[{name}]"
+        Return $"[{Name}]"
     End Function
 
     ''' <summary>Creates a new (empty) iniSection object.</summary>
     Public Sub New()
-        startingLineNumber = 0
-        endingLineNumber = 0
-        name = ""
+        StartingLineNumber = 0
+        EndingLineNumber = 0
+        Name = ""
+        Keys = New keyList
     End Sub
 
     ''' <summary>Creates a new iniSection object without tracking the line numbers</summary>
     ''' <param name="listOfLines">The list of Strings comprising the iniSection</param>
     ''' <param name="listOfLineCounts">The list of line numbers associated with the lines</param>
     Public Sub New(ByVal listOfLines As List(Of String), Optional listOfLineCounts As List(Of Integer) = Nothing)
-        name = listOfLines(0).Trim(CChar("["), CChar("]"))
-        startingLineNumber = If(listOfLineCounts IsNot Nothing, listOfLineCounts(0), 1)
-        endingLineNumber = startingLineNumber + listOfLines.Count
+        Name = listOfLines(0).Trim(CChar("["), CChar("]"))
+        StartingLineNumber = If(listOfLineCounts IsNot Nothing, listOfLineCounts(0), 1)
+        EndingLineNumber = StartingLineNumber + listOfLines.Count
+        Keys = New keyList
         If listOfLines.Count > 1 Then
             For i As Integer = 1 To listOfLines.Count - 1
-                keys.Add(i - 1, New iniKey(listOfLines(i), If(listOfLineCounts Is Nothing, 0, listOfLineCounts(i))))
+                Keys.add(New iniKey(listOfLines(i), If(listOfLineCounts Is Nothing, 0, listOfLineCounts(i))))
             Next
         End If
     End Sub
@@ -71,7 +81,7 @@ Public Class iniSection
     ''' <summary>Returns the keys in the iniSection as a list of Strings</summary>
     Public Function getKeysAsList() As List(Of String)
         Dim out As New List(Of String)
-        For Each key In Me.keys.Values
+        For Each key In Keys.Keys
             out.Add(key.toString)
         Next
         Return out
@@ -83,16 +93,16 @@ Public Class iniSection
     ''' <param name="addedKeys">A return list of iniKey objects that appear in the given iniFile object but not this one</param>
     Public Function compareTo(ss As iniSection, ByRef removedKeys As keyList, ByRef addedKeys As keyList) As Boolean
         ' Create a copy of the section so we can modify it
-        Dim secondSection As New iniSection With {.name = ss.name, .startingLineNumber = ss.startingLineNumber}
-        For i As Integer = 0 To ss.keys.Count - 1
-            secondSection.keys.Add(i, ss.keys.Values(i))
+        Dim secondSection As New iniSection With {.Name = ss.Name, .StartingLineNumber = ss.StartingLineNumber}
+        For i As Integer = 0 To ss.Keys.keyCount - 1
+            secondSection.Keys.add(ss.Keys.Keys(i))
         Next
         Dim noMatch As Boolean
         Dim tmpList As New List(Of Integer)
-        For Each key In keys.Values
+        For Each key In Keys.Keys
             noMatch = True
-            For i As Integer = 0 To secondSection.keys.Values.Count - 1
-                Dim sKey = secondSection.keys.Values(i)
+            For i As Integer = 0 To secondSection.Keys.keyCount - 1
+                Dim sKey = secondSection.Keys.Keys(i)
                 Select Case True
                     Case key.compareTypes(sKey) And key.compareValues(sKey)
                         noMatch = False
@@ -107,7 +117,7 @@ Public Class iniSection
         tmpList.Reverse()
         secondSection.removeKeys(tmpList)
         ' Assume any remaining keys have been added
-        For Each key In secondSection.keys.Values
+        For Each key In secondSection.Keys.Keys
             addedKeys.add(key)
         Next
         Return removedKeys.keyCount + addedKeys.keyCount = 0
@@ -116,7 +126,7 @@ Public Class iniSection
     ''' <summary>Returns an iniSection as it would appear on disk as a String</summary>
     Public Overrides Function ToString() As String
         Dim out As String = Me.getFullName
-        For Each key In keys.Values
+        For Each key In Keys.Keys
             out += Environment.NewLine & key.toString
         Next
         out += Environment.NewLine

@@ -19,29 +19,25 @@ Option Strict On
 ''' A helpful wrapper for List(Of String)s 
 ''' </summary>
 Public Class strList
-    Private lst As New List(Of String)
+    ''' <summary> Creates a new (empty) strList</summary>
+    Public Sub New()
+        items = New List(Of String)
+    End Sub
 
-    ''' <summary>A list of String values</summary>
+    ''' <summary>The values inside the strList</summary>
     Public Property items As List(Of String)
-        Get
-            Return lst
-        End Get
-        Set(value As List(Of String))
-            lst = value
-        End Set
-    End Property
 
     ''' <summary>Returns the index of the given String in the list if it exists. Else -1</summary>
     ''' <param name="item">A String to search for in the list</param>
     Public Function indexOf(item As String) As Integer
-        Return lst.IndexOf(item)
+        Return items.IndexOf(item)
     End Function
 
     ''' <summary>Conditionally adds an item to the list </summary>
     ''' <param name="item">A string value to add to the list</param>
     ''' <param name="cond">The optional condition under which the value should be added (default: true)</param>
     Public Sub add(item As String, Optional cond As Boolean = True)
-        If cond Then lst.Add(item)
+        If cond Then items.Add(item)
     End Sub
 
     ''' <summary>Returns true if the list contains a given value. Case sensitive by default</summary>
@@ -61,14 +57,11 @@ Public Class strList
     ''' <summary>Construct a list of neighbors for strings in a list</summary>
     Public Function getNeighborList() As List(Of KeyValuePair(Of String, String))
         Dim neighborList As New List(Of KeyValuePair(Of String, String))
-        If lst.Count > 1 Then
-
-        End If
-        neighborList.Add(New KeyValuePair(Of String, String)("first", lst(1)))
-        For i = 1 To lst.Count - 2
-            neighborList.Add(New KeyValuePair(Of String, String)(lst(i - 1), lst(i + 1)))
+        neighborList.Add(New KeyValuePair(Of String, String)("first", items(1)))
+        For i = 1 To items.Count - 2
+            neighborList.Add(New KeyValuePair(Of String, String)(items(i - 1), items(i + 1)))
         Next
-        neighborList.Add(New KeyValuePair(Of String, String)(lst(lst.Count - 2), "last"))
+        neighborList.Add(New KeyValuePair(Of String, String)(items(items.Count - 2), "last"))
         Return neighborList
     End Function
 
@@ -83,5 +76,4 @@ Public Class strList
     Public Function count() As Integer
         Return items.Count
     End Function
-
 End Class

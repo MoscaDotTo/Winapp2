@@ -40,12 +40,12 @@ Module Merge
     Public Sub handleCmdLine()
         initDefaultSettings()
         invertSettingAndRemoveArg(mergeMode, "-mm")
-        invertSettingAndRemoveArg(False, "-r", mergeFile.name, "Removed Entries.ini")
-        invertSettingAndRemoveArg(False, "-c", mergeFile.name, "Custom.ini")
-        invertSettingAndRemoveArg(False, "-w", mergeFile.name, "winapp3.ini")
-        invertSettingAndRemoveArg(False, "-a", mergeFile.name, "Archived Entries.ini")
+        invertSettingAndRemoveArg(False, "-r", mergeFile.Name, "Removed Entries.ini")
+        invertSettingAndRemoveArg(False, "-c", mergeFile.Name, "Custom.ini")
+        invertSettingAndRemoveArg(False, "-w", mergeFile.Name, "winapp3.ini")
+        invertSettingAndRemoveArg(False, "-a", mergeFile.Name, "Archived Entries.ini")
         getFileAndDirParams(winappFile, mergeFile, outputFile)
-        If Not mergeFile.name = "" Then initMerge()
+        If Not mergeFile.Name = "" Then initMerge()
     End Sub
 
     ''' <summary>Restores the default state of the module's parameters</summary>
@@ -68,7 +68,7 @@ Module Merge
         print(1, "File Chooser (merge)", "Choose a name or location for merging")
         print(1, "File Chooser (save)", "Choose a new save location for the merged file", trailingBlank:=True)
         print(0, $"Current winapp2.ini: {replDir(winappFile.path)}")
-        print(0, $"Current merge file : {If(mergeFile.name = "", "Not yet selected", replDir(mergeFile.path))}")
+        print(0, $"Current merge file : {If(mergeFile.Name = "", "Not yet selected", replDir(mergeFile.path))}")
         print(0, $"Current save target: {replDir(outputFile.path)}", trailingBlank:=True)
         print(1, "Toggle Merge Mode", "Switch between merge modes.")
         print(0, $"Current mode: {If(mergeMode, "Add & Replace", "Add & Remove")}", closeMenu:=Not settingsChanged)
@@ -83,7 +83,7 @@ Module Merge
             Case input = "0"
                 exitModule()
             Case input = "1" Or input = ""
-                If Not denyActionWithTopper(mergeFile.name = "", "You must select a file to merge") Then initMerge()
+                If Not denyActionWithTopper(mergeFile.Name = "", "You must select a file to merge") Then initMerge()
             Case input = "2"
                 changeMergeName("Removed entries.ini")
             Case input = "3"
@@ -108,7 +108,7 @@ Module Merge
     ''' <summary>Changes the merge file's name</summary>
     ''' <param name="newName">the new name for the merge file</param>
     Private Sub changeMergeName(newName As String)
-        mergeFile.name = newName
+        mergeFile.Name = newName
         settingsChanged = True
         setHeaderText("Merge filename set")
     End Sub
@@ -127,7 +127,7 @@ Module Merge
         processMergeMode(winappFile, mergeFile)
         Dim tmp As New winapp2file(winappFile)
         Dim tmp2 As New winapp2file(mergeFile)
-        print(0, bmenu($"Merging {winappFile.name} with {mergeFile.name}"))
+        print(0, bmenu($"Merging {winappFile.Name} with {mergeFile.Name}"))
         ' Add the entries from the second file to their respective sections in the first file
         For i As Integer = 0 To tmp.winapp2entries.Count - 1
             tmp.winapp2entries(i).AddRange(tmp2.winapp2entries(i))
@@ -147,16 +147,16 @@ Module Merge
     ''' <param name="second">The iniFile to be merged into the base</param>
     Private Sub processMergeMode(ByRef first As iniFile, ByRef second As iniFile)
         Dim removeList As New List(Of String)
-        For Each section In second.sections.Keys
-            If first.sections.Keys.Contains(section) Then
+        For Each section In second.Sections.Keys
+            If first.Sections.Keys.Contains(section) Then
                 ' If mergemode is true, replace the match. otherwise, remove the match
-                If mergeMode Then first.sections.Item(section) = second.sections.Item(section) Else first.sections.Remove(section)
+                If mergeMode Then first.Sections.Item(section) = second.Sections.Item(section) Else first.Sections.Remove(section)
                 removeList.Add(section)
             End If
         Next
         ' Remove any processed sections from the second file so that only entries to add remain 
         For Each section In removeList
-            second.sections.Remove(section)
+            second.Sections.Remove(section)
         Next
     End Sub
 End Module

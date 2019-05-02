@@ -81,7 +81,7 @@ Module JavaMaker
         Dim out As New keyList
         For Each lst In kls
             lst.removeLast()
-            out.add(lst.keys)
+            out.add(lst.Keys)
         Next
         Return out
     End Function
@@ -117,7 +117,7 @@ Module JavaMaker
         Dim clsids As New keyList("CLSID")
         Dim kll As New List(Of keyList) From {clsids, New keyList("Errors")}
         cwl("Running an intense registry query, this will take a few moments...")
-        Dim jSect As iniSection = javaFile.sections.Item("Previous Java Installation Cleanup *")
+        Dim jSect As iniSection = javaFile.Sections.Item("Previous Java Installation Cleanup *")
         jSect.constKeyLists(kll)
         Dim IDS = clsids.toListOfStr(True)
         Dim typeLib As New keyList(getRegKeys(getCRKey("WOW6432Node\TypeLib\"), {"{5852F5E0-8BF4-11D4-A245-0080C6F74284}"}.ToList))
@@ -130,11 +130,11 @@ Module JavaMaker
         ' Get the JRE versions from HKLM\ and HKCU\, ignore the most recent
         Dim lmJREminorIDs, cuJREminorIDs As New keyList
         ' Some keys have the format 1.W.0_XYZ, they match the main 1.W key that also exists along side them and should be separated out
-        localMachineJREs.keys.ForEach(Sub(key) lmJREminorIDs.add(key, key.toString.Replace("HKEY_LOCAL_MACHINE", "").Contains("_")))
-        localMachineJREs.remove(lmJREminorIDs.keys)
+        localMachineJREs.Keys.ForEach(Sub(key) lmJREminorIDs.add(key, key.toString.Replace("HKEY_LOCAL_MACHINE", "").Contains("_")))
+        localMachineJREs.remove(lmJREminorIDs.Keys)
         Dim currentUserJREs As New keyList(getRegKeys(getCUKey("Software\JavaSoft\Java Runtime Environment\"), {"1"}.ToList))
-        currentUserJREs.keys.ForEach(Sub(key) cuJREminorIDs.add(key, key.toString.Replace("HKEY_CURRENT_USER", "").Contains("_")))
-        currentUserJREs.remove(cuJREminorIDs.keys)
+        currentUserJREs.Keys.ForEach(Sub(key) cuJREminorIDs.add(key, key.toString.Replace("HKEY_CURRENT_USER", "").Contains("_")))
+        currentUserJREs.remove(cuJREminorIDs.Keys)
         ' Generate the list of RegKeys
         Dim regKeyList As keyList = mkEntry({classRootIDs, localMachineClassesIDs, localMachineWOWIds, defClassesIDs, s1518ClassesIDs,
                 localMachineJREs, lmJREminorIDs, currentUserJREs, cuJREminorIDs, JavaPluginKeys})
@@ -145,13 +145,13 @@ Module JavaMaker
         clrConsole()
         entry.Add("[Java Installation Cleanup *]")
         entry.Add("Section=Experimental")
-        entry.Add($"Detect={regKeyList.keys(0).Value}")
+        entry.Add($"Detect={regKeyList.Keys(0).Value}")
         entry.Add("Default=False")
         entry.AddRange(regKeyList.toListOfStr)
         Dim out As New iniSection(entry)
         cwl(out.ToString)
         If save Then
-            cwl() : cwl($"Saving {saveFile.name}")
+            cwl() : cwl($"Saving {saveFile.Name}")
             saveFile.overwriteToFile(out.ToString)
             cwl("Save complete.")
         End If

@@ -19,14 +19,16 @@ Option Strict On
 ''' An object representing a comment in a .ini file
 ''' </summary>
 Public Class iniComment
-    Public comment As String
-    Public lineNumber As Integer
+    ''' <summary> The text of the comment</summary>
+    Public Property Comment As String
+    ''' <summary> The line number from which the comment was originally read</summary>
+    Public Property LineNumber As Integer
 
     ''' <summary>Creates a new iniComment object</summary>
     ''' <param name="c">The comment text</param>
     ''' <param name="l">The line number</param>
     Public Sub New(c As String, l As Integer)
-        comment = c
-        lineNumber = l
+        Comment = c
+        LineNumber = l
     End Sub
 End Class

@@ -45,30 +45,30 @@ Module Downloader
             Select Case Cmdargs(0).ToLower
                 Case "1", "2", "winapp2"
                     fileLink = If(Not Cmdargs(0) = "2", wa2Link, nonccLink)
-                    downloadFile.name = "winapp2.ini"
+                    downloadFile.Name = "winapp2.ini"
                 Case "3", "winapp2ool"
                     fileLink = toolLink
-                    downloadFile.name = "winapp2ool.exe"
+                    downloadFile.Name = "winapp2ool.exe"
                 Case "4", "removed"
                     fileLink = removedLink
-                    downloadFile.name = "Removed Entries.ini"
+                    downloadFile.Name = "Removed Entries.ini"
                 Case "5", "winapp3"
                     fileLink = wa3link
-                    downloadFile.name = "winapp3.ini"
+                    downloadFile.Name = "winapp3.ini"
                 Case "6", "archived"
                     fileLink = archivedLink
-                    downloadFile.name = "Archived Entries.ini"
+                    downloadFile.Name = "Archived Entries.ini"
                 Case "7", "java"
                     fileLink = javaLink
-                    downloadFile.name = "java.ini"
+                    downloadFile.Name = "java.ini"
                 Case "8", "readme"
                     fileLink = readMeLink
-                    downloadFile.name = "readme.txt"
+                    downloadFile.Name = "readme.txt"
             End Select
             Cmdargs.RemoveAt(0)
         End If
         getFileAndDirParams(downloadFile, New iniFile, New iniFile)
-        If downloadFile.dir = Environment.CurrentDirectory And downloadFile.name = "winapp2ool.exe" Then autoUpdate()
+        If downloadFile.Dir = Environment.CurrentDirectory And downloadFile.Name = "winapp2ool.exe" Then autoUpdate()
         download(fileLink)
     End Sub
 
@@ -82,7 +82,7 @@ Module Downloader
         print(1, "Directory", "Change the save directory", trailingBlank:=True)
         print(1, "Advanced", "Settings for power users")
         print(1, "ReadMe", "The winapp2ool ReadMe")
-        print(0, $"Save directory: {replDir(downloadFile.dir)}", leadingBlank:=True, closeMenu:=True)
+        print(0, $"Save directory: {replDir(downloadFile.Dir)}", leadingBlank:=True, closeMenu:=True)
     End Sub
 
     ''' <summary>Prints the advanced downloads menu</summary>
@@ -100,13 +100,13 @@ Module Downloader
             Case "0"
                 exitModule()
             Case "1"
-                downloadFile.name = "winapp3.ini"
+                downloadFile.Name = "winapp3.ini"
                 download(wa3link)
             Case "2"
-                downloadFile.name = "Archived entries.ini"
+                downloadFile.Name = "Archived entries.ini"
                 download(archivedLink)
             Case "3"
-                downloadFile.name = "java.ini"
+                downloadFile.Name = "java.ini"
                 download(javaLink)
             Case Else
                 setHeaderText(invInpStr, True)
@@ -121,32 +121,32 @@ Module Downloader
                 Console.WriteLine("Returning to winapp2ool menu...")
                 exitCode = True
             Case "1", "2"
-                downloadFile.name = "winapp2.ini"
+                downloadFile.Name = "winapp2.ini"
                 Dim link As String = If(input = "1", wa2Link, nonccLink)
                 download(link)
-                If downloadFile.dir = Environment.CurrentDirectory Then checkedForUpdates = False
+                If downloadFile.Dir = Environment.CurrentDirectory Then checkedForUpdates = False
             Case "3"
                 ' Feature gate downloading the executable behind .NET 4.6+
                 If Not denyActionWithTopper(dnfOOD, "This option requires a newer version of the .NET Framework") Then
-                    If downloadFile.dir = Environment.CurrentDirectory Then
+                    If downloadFile.Dir = Environment.CurrentDirectory Then
                         autoUpdate()
                     Else
-                        downloadFile.name = "winapp2ool.exe"
+                        downloadFile.Name = "winapp2ool.exe"
                         download(toolLink)
                     End If
                 End If
             Case "4"
-                downloadFile.name = "Removed entries.ini"
+                downloadFile.Name = "Removed entries.ini"
                 download(removedLink)
             Case "5"
-                dirChooser(downloadFile.dir)
+                dirChooser(downloadFile.Dir)
                 undoAnyPendingExits()
                 setHeaderText("Save directory changed")
             Case "6"
                 initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)
             Case "7"
                 ' It's actually a .md but the user doesn't need to know that  
-                downloadFile.name = "Readme.txt"
+                downloadFile.Name = "Readme.txt"
                 download(readMeLink)
             Case Else
                 setHeaderText(invInpStr, True)
@@ -224,15 +224,15 @@ Module Downloader
     ''' <param name="link">The URL to download from</param>
     ''' <param name="prompt">Boolean specifying whether or not the user should be asked to overwrite the file should it exist</param>
     Public Sub remoteDownload(dir As String, name As String, link As String, prompt As Boolean)
-        downloadFile.dir = dir
-        downloadFile.name = name
+        downloadFile.Dir = dir
+        downloadFile.Name = name
         download(link, prompt)
     End Sub
 
     ''' <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
     Public Sub autoUpdate()
-        downloadFile.dir = Environment.CurrentDirectory
-        downloadFile.name = "winapp2ool updated.exe"
+        downloadFile.Dir = Environment.CurrentDirectory
+        downloadFile.Name = "winapp2ool updated.exe"
         Dim backupName As String = $"winapp2ool v{currentVersion}.exe.bak"
         Try
             ' Remove any existing backups of this version
@@ -254,21 +254,21 @@ Module Downloader
     ''' <param name="link">The URL to be downloaded from</param>
     ''' <param name="prompt">The boolean indicating whether or not the user should be prompted to rename the file should it exist already.</param>
     Private Sub download(link As String, Optional prompt As Boolean = True)
-        Dim givenName As String = downloadFile.name
+        Dim givenName As String = downloadFile.Name
         ' Don't try to download to a directory that doesn't exist
-        If Not Directory.Exists(downloadFile.dir) Then Directory.CreateDirectory(downloadFile.dir)
+        If Not Directory.Exists(downloadFile.Dir) Then Directory.CreateDirectory(downloadFile.Dir)
         ' If the file exists and we're prompting or overwrite, do that.
         If prompt And File.Exists(downloadFile.path) And Not SuppressOutput Then
-            cwl($"{downloadFile.name} already exists in the target directory.")
+            cwl($"{downloadFile.Name} already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
             Dim nfilename As String = Console.ReadLine()
-            If nfilename.Trim <> "" Then downloadFile.name = nfilename
+            If nfilename.Trim <> "" Then downloadFile.Name = nfilename
         End If
         cwl($"Downloading {givenName}...")
         Dim success As Boolean = dlFile(link, downloadFile.path)
         cwl($"Download {If(success, "Complete.", "Failed.")}")
-        cwl(If(success, "Downloaded ", $"Unable to download {downloadFile.name} to {downloadFile.dir}"))
-        setHeaderText($"Download {If(success, "", "in")}complete: {downloadFile.name}", Not success)
+        cwl(If(success, "Downloaded ", $"Unable to download {downloadFile.Name} to {downloadFile.Dir}"))
+        setHeaderText($"Download {If(success, "", "in")}complete: {downloadFile.Name}", Not success)
         If Not success Then Console.ReadLine()
     End Sub
 

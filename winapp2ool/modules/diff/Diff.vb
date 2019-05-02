@@ -40,10 +40,10 @@ Module Diff
         initDefaultSettings()
         handleDownloadBools(download)
         ' Make sure we have a name set for the new file if we're downloading or else the diff will not run
-        If download Then newOrRemoteFile.name = If(remoteWinappIsNonCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
+        If download Then newOrRemoteFile.Name = If(remoteWinappIsNonCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
         invertSettingAndRemoveArg(saveLog, "-savelog")
         getFileAndDirParams(oldOrLocalFile, newOrRemoteFile, logFile)
-        If Not newOrRemoteFile.name = "" Then initDiff()
+        If Not newOrRemoteFile.Name = "" Then initDiff()
     End Sub
 
     ''' <summary>Restores the default state of the module's parameters</summary>
@@ -78,7 +78,7 @@ Module Diff
         print(5, "Toggle Log Saving", "automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not saveLog, enStrCond:=saveLog)
         print(1, "File Chooser (log)", "Change where Diff saves its log", saveLog, trailingBlank:=True)
         print(0, $"Older file: {replDir(oldOrLocalFile.path)}")
-        print(0, $"Newer file: {If(newOrRemoteFile.name = "" And Not download, "Not yet selected", If(download, GetNameFromDL(True), replDir(newOrRemoteFile.path)))}", closeMenu:=Not saveLog And Not settingsChanged)
+        print(0, $"Newer file: {If(newOrRemoteFile.Name = "" And Not download, "Not yet selected", If(download, GetNameFromDL(True), replDir(newOrRemoteFile.path)))}", closeMenu:=Not saveLog And Not settingsChanged)
         print(0, $"Log   file: {replDir(logFile.path)}", cond:=saveLog, closeMenu:=Not settingsChanged)
         print(2, "Diff", cond:=settingsChanged, closeMenu:=True)
     End Sub
@@ -90,12 +90,12 @@ Module Diff
             Case input = "0"
                 exitModule()
             Case input = "1" Or input = ""
-                If Not denyActionWithTopper(newOrRemoteFile.name = "" And Not download, "Please select a file against which to diff") Then initDiff()
+                If Not denyActionWithTopper(newOrRemoteFile.Name = "" And Not download, "Please select a file against which to diff") Then initDiff()
             Case input = "2"
                 changeFileParams(oldOrLocalFile, settingsChanged)
             Case input = "3" And Not isOffline
                 toggleDownload(download, settingsChanged)
-                newOrRemoteFile.name = GetNameFromDL(download)
+                newOrRemoteFile.Name = GetNameFromDL(download)
             Case (input = "4" And Not (download Or isOffline)) Or (input = "3" And isOffline)
                 changeFileParams(newOrRemoteFile, settingsChanged)
             Case (input = "5" And Not isOffline And Not download) Or (input = "4" And (isOffline Xor download))
@@ -126,7 +126,7 @@ Module Diff
     ''' <summary>Gets the version from winapp2.ini</summary>
     ''' <param name="someFile">winapp2.ini format iniFile object</param>
     Private Function getVer(someFile As iniFile) As String
-        Dim ver = If(someFile.comments.Count > 0, someFile.comments(0).comment.ToString.ToLower, "000000")
+        Dim ver = If(someFile.Comments.Count > 0, someFile.Comments(0).Comment.ToString.ToLower, "000000")
         Return If(ver.Contains("version"), ver.TrimStart(CChar(";")).Replace("version:", "version"), " version not given")
     End Function
 
@@ -172,10 +172,10 @@ Module Diff
     ''' <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
     Private Function compareTo() As List(Of String)
         Dim outList, comparedList As New List(Of String)
-        For Each section In oldOrLocalFile.sections.Values
+        For Each section In oldOrLocalFile.Sections.Values
             ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
-            If newOrRemoteFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
-                Dim sSection As iniSection = newOrRemoteFile.sections(section.name)
+            If newOrRemoteFile.Sections.Keys.Contains(section.Name) And Not comparedList.Contains(section.Name) Then
+                Dim sSection As iniSection = newOrRemoteFile.Sections(section.Name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
@@ -193,15 +193,15 @@ Module Diff
                     tmp += prependNewLines(False) & menuStr00
                     outList.Add(tmp)
                 End If
-            ElseIf Not newOrRemoteFile.sections.Keys.Contains(section.name) And Not comparedList.Contains(section.name) Then
+            ElseIf Not newOrRemoteFile.Sections.Keys.Contains(section.Name) And Not comparedList.Contains(section.Name) Then
                 ' If we do not have the entry in the new file, it has been removed between versions 
                 outList.Add(getDiff(section, "removed"))
             End If
-            comparedList.Add(section.name)
+            comparedList.Add(section.Name)
         Next
         ' Any sections from the new file which are not found in the old file have been added
-        For Each section In newOrRemoteFile.sections.Values
-            If Not oldOrLocalFile.sections.Keys.Contains(section.name) Then outList.Add(getDiff(section, "added"))
+        For Each section In newOrRemoteFile.Sections.Values
+            If Not oldOrLocalFile.Sections.Keys.Contains(section.Name) Then outList.Add(getDiff(section, "added"))
         Next
         Return outList
     End Function
@@ -213,7 +213,7 @@ Module Diff
     Private Function getChangesFromList(keyList As keyList, out As String, changeTxt As String) As String
         If keyList.keyCount = 0 Then Return out
         out += appendNewLine(changeTxt)
-        keyList.keys.ForEach(Sub(key) out += key.toString & Environment.NewLine)
+        keyList.Keys.ForEach(Sub(key) out += key.toString & Environment.NewLine)
         Return out
     End Function
 
@@ -223,12 +223,12 @@ Module Diff
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
         ' Create copies of the given keylists so we can modify them during the iteration 
-        Dim akTemp As New keyList(addedKeys.keys)
-        Dim rkTemp As New keyList(removedKeys.keys)
+        Dim akTemp As New keyList(addedKeys.Keys)
+        Dim rkTemp As New keyList(removedKeys.Keys)
         For i As Integer = 0 To addedKeys.keyCount - 1
-            Dim key = addedKeys.keys(i)
+            Dim key = addedKeys.Keys(i)
             For j = 0 To removedKeys.keyCount - 1
-                Dim skey = removedKeys.keys(j)
+                Dim skey = removedKeys.Keys(j)
                 If key.compareNames(skey) Then
                     Select Case key.KeyType
                         Case "FileKey", "ExcludeKey", "RegKey"
@@ -287,7 +287,7 @@ Module Diff
     ''' <param name="changeType">The type of change to observe</param>
     Private Function getDiff(section As iniSection, changeType As String) As String
         Dim out = ""
-        appendStrs({appendNewLine(mkMenuLine($"{section.name} has been {changeType}.", "c")), appendNewLine(appendNewLine(mkMenuLine(menuStr02, ""))), appendNewLine(section.ToString)}, out)
+        appendStrs({appendNewLine(mkMenuLine($"{section.Name} has been {changeType}.", "c")), appendNewLine(appendNewLine(mkMenuLine(menuStr02, ""))), appendNewLine(section.ToString)}, out)
         If Not changeType = "modified" Then out += menuStr00
         Return out
     End Function

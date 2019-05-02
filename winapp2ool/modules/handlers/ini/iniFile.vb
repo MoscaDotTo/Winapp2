@@ -1,30 +1,54 @@
-﻿Option Strict On
+﻿'    Copyright (C) 2018-2019 Robbie Ward
+' 
+'    This file is a part of Winapp2ool
+' 
+'    Winapp2ool is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    Winap2ool is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+'
+'    You should have received a copy of the GNU General Public License
+'    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+Option Strict On
 Imports System.IO
+Imports winapp2ool
 ''' <summary>
 ''' An object representing a .ini configuration file
 ''' </summary>
 Public Class iniFile
-    Dim lineCount As Integer = 1
-    ' The current state of the directory & name of the file
-    Public dir As String
-    Public name As String
-    ' The initial state of the directory & name of the file (for restoration purposes) 
-    Public initDir As String
-    Public initName As String
-    ' Suggested rename for output files
-    Public secondName As String
-    ' Sections will be initially stored in the order they're read
-    Public sections As New Dictionary(Of String, iniSection)
-    ' Any line comments will be saved in the order they're read 
-    Public comments As New Dictionary(Of Integer, iniComment)
+    ''' <summary>The directory on the system in which the iniFile can be found</summary>
+    Public Property Dir As String
+    ''' <summary>The name of the file on disk</summary>
+    Public Property Name As String
+    ''' <summary>The Directory with which the iniFile was instantiated</summary>
+    Public Property InitDir As String
+    ''' <summary>The file name with which the iniFile was instantiated</summary>
+    Public Property InitName As String
+
+    ''' <summary>The individual sections found in the file. Keys are the Section's Name</summary>
+    Public Property Sections As Dictionary(Of String, iniSection)
+
+    ''' <summary>Any comments found in the file, in the order they were found. Positions are not remembered.</summary>
+    Public Property Comments As Dictionary(Of Integer, iniComment)
+
+    ''' <summary>The suggested name for a file, shown during File Chooser prompts</summary>
+    Public Property SecondName As String
+
+    ''' <summary>The current line number of the file during reading</summary>
+    Public Property LineCount As Integer
 
     ''' <summary>Returns an iniFile as it would appear on disk as a String</summary>
     Public Overrides Function toString() As String
         Dim out As String = ""
-        For i As Integer = 0 To sections.Count - 2
-            out += sections.Values(i).ToString & Environment.NewLine
+        For i As Integer = 0 To Sections.Count - 2
+            out += Sections.Values(i).ToString & Environment.NewLine
         Next
-        out += sections.Values.Last.ToString
+        out += Sections.Values.Last.ToString
         Return out
     End Function
 
@@ -33,11 +57,11 @@ Public Class iniFile
     ''' <param name="filename">The name of the .ini file contained in the given directory </param>
     ''' <param name="rename">A provided suggestion for a rename should the user open the File Chooser on this file</param>
     Public Sub New(Optional directory As String = "", Optional filename As String = "", Optional rename As String = "")
-        dir = directory
-        name = filename
-        initDir = directory
-        initName = filename
-        secondName = rename
+        Dir = directory
+        Name = filename
+        InitDir = directory
+        InitName = filename
+        SecondName = rename
     End Sub
 
     ''' <summary>Writes the contents of a provided String to our iniFile's path, overwriting any existing contents</summary>
@@ -55,20 +79,20 @@ Public Class iniFile
 
     ''' <summary>Restores the initial directory and name parameters in the iniFile </summary>
     Public Sub resetParams()
-        dir = initDir
-        name = initName
+        Dir = InitDir
+        Name = InitName
     End Sub
 
     ''' <summary>Returns the full windows file path of the iniFile as a String</summary>
     Public Function path() As String
-        Return $"{dir}\{name}"
+        Return $"{Dir}\{Name}"
     End Function
 
     ''' <summary>Returns the starting line number of each section in the iniFile as a list of integers</summary>
     Public Function getLineNumsFromSections() As List(Of Integer)
         Dim outList As New List(Of Integer)
-        For Each section In sections.Values
-            outList.Add(section.startingLineNumber)
+        For Each section In Sections.Values
+            outList.Add(section.StartingLineNumber)
         Next
         Return outList
     End Function
@@ -79,7 +103,7 @@ Public Class iniFile
         Dim sectionToBeBuilt As New List(Of String)
         Dim lineTrackingList As New List(Of Integer)
         Dim lastLineWasEmpty As Boolean = False
-        lineCount = 1
+        LineCount = 1
         For Each line In lines
             processiniLine(line, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
         Next
@@ -94,7 +118,7 @@ Public Class iniFile
     Private Sub processiniLine(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer), ByRef lastLineWasEmpty As Boolean)
         Select Case True
             Case currentLine.StartsWith(";")
-                comments.Add(comments.Count, New iniComment(currentLine, lineCount))
+                Comments.Add(Comments.Count, New iniComment(currentLine, LineCount))
             Case (Not currentLine.StartsWith("[") And Not currentLine.Trim = "") Or (currentLine.Trim <> "" And sectionToBeBuilt.Count = 0)
                 updSec(sectionToBeBuilt, lineTrackingList, currentLine, lastLineWasEmpty)
             Case currentLine.Trim <> "" And Not sectionToBeBuilt.Count = 0
@@ -103,7 +127,7 @@ Public Class iniFile
             Case Else
                 lastLineWasEmpty = True
         End Select
-        lineCount += 1
+        LineCount += 1
     End Sub
 
     ''' <summary>Manages line and number tracking for iniSections whose construction is pending</summary>
@@ -112,7 +136,7 @@ Public Class iniFile
     ''' <param name="curLine">The current line to be added to the section</param>
     Private Sub updSec(ByRef secList As List(Of String), ByRef lineList As List(Of Integer), curLine As String, ByRef lastLineWasEmpty As Boolean)
         secList.Add(curLine)
-        lineList.Add(lineCount)
+        lineList.Add(LineCount)
         lastLineWasEmpty = False
     End Sub
 
@@ -129,7 +153,7 @@ Public Class iniFile
             If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
             r.Close()
         Catch ex As Exception
-            Console.WriteLine(ex.Message & Environment.NewLine & $"Failure occurred during iniFile construction at line: {lineCount} in {name}")
+            Console.WriteLine(ex.Message & Environment.NewLine & $"Failure occurred during iniFile construction at line: {LineCount} in {Name}")
         End Try
     End Sub
 
@@ -137,20 +161,20 @@ Public Class iniFile
     Public Sub validate()
         clrConsole()
         ' If an iniFile's sections already exist, skip this.
-        If pendingExit() Or name = "" Then Exit Sub
+        If pendingExit() Or Name = "" Then Exit Sub
         ' Make sure both the file and the directory actually exist
         While Not File.Exists(path())
-            chkDirExist(dir)
+            chkDirExist(Dir)
             If pendingExit() Then Exit Sub
             chkFileExist(Me)
             If pendingExit() Then Exit Sub
         End While
         ' Make sure that the file isn't empty
         Try
-            Dim iniTester As New iniFile(dir, name)
+            Dim iniTester As New iniFile(Dir, Name)
             iniTester.init()
             Dim clearAtEnd As Boolean = False
-            While iniTester.sections.Count = 0
+            While iniTester.Sections.Count = 0
                 clearAtEnd = True
                 clrConsole()
                 printMenuLine(bmenu("Empty ini file detected. Press any key to try again."))
@@ -160,8 +184,8 @@ Public Class iniFile
                 iniTester.validate()
                 If pendingExit() Then Exit Sub
             End While
-            sections = iniTester.sections
-            comments = iniTester.comments
+            Sections = iniTester.Sections
+            Comments = iniTester.Comments
             clrConsole(clearAtEnd)
         Catch ex As Exception
             exc(ex)
@@ -173,15 +197,15 @@ Public Class iniFile
     ''' <param name="sortedSections">The sorted state of the sections by name</param>
     Public Sub sortSections(sortedSections As strList)
         Dim tempFile As New iniFile
-        sortedSections.items.ForEach(Sub(sectionName) tempFile.sections.Add(sectionName, sections.Item(sectionName)))
-        Me.sections = tempFile.sections
+        sortedSections.items.ForEach(Sub(sectionName) tempFile.Sections.Add(sectionName, Sections.Item(sectionName)))
+        Me.Sections = tempFile.Sections
     End Sub
 
     ''' <summary>Find the line number of a comment by its string. Returns -1 if not found</summary>
     ''' <param name="com">The string containing the comment text to be searched for</param>
     Public Function findCommentLine(com As String) As Integer
-        For Each comment In comments.Values
-            If comment.comment = com Then Return comment.lineNumber
+        For Each comment In Comments.Values
+            If comment.Comment = com Then Return comment.LineNumber
         Next
         Return -1
     End Function
@@ -189,8 +213,8 @@ Public Class iniFile
     ''' <summary>Returns the section names from the iniFile object as a list of Strings</summary>
     Public Function namesToStrList() As strList
         Dim out As New strList
-        For Each section In sections.Values
-            out.add(section.name)
+        For Each section In Sections.Values
+            out.add(section.Name)
         Next
         Return out
     End Function
@@ -201,19 +225,19 @@ Public Class iniFile
     Private Sub mkSection(sectionToBeBuilt As List(Of String), lineTrackingList As List(Of Integer))
         Dim sectionHolder As New iniSection(sectionToBeBuilt, lineTrackingList)
         Try
-            sections.Add(sectionHolder.name, sectionHolder)
+            Sections.Add(sectionHolder.Name, sectionHolder)
         Catch ex As Exception
             'This will catch entries whose names are identical (case sensitive), and ignore them 
             If ex.Message = "An item with the same key has already been added." Then
                 Dim lineErr As Integer
-                For Each section In sections.Values
-                    If section.name = sectionToBeBuilt(0) Then
-                        lineErr = section.startingLineNumber
+                For Each section In Sections.Values
+                    If section.Name = sectionToBeBuilt(0) Then
+                        lineErr = section.StartingLineNumber
                         Exit For
                     End If
                 Next
                 Console.WriteLine($"Error: Duplicate section name detected: {sectionToBeBuilt(0)}")
-                Console.WriteLine($"Line: {lineCount}")
+                Console.WriteLine($"Line: {LineCount}")
                 Console.WriteLine($"Duplicates the entry on line: {lineErr}")
                 Console.WriteLine("This section will be ignored until it is given a unique name.")
                 Console.WriteLine()

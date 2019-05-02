@@ -31,7 +31,7 @@ Public Module iniFileHandler
             If pendingExit() Then Exit Sub
             setHeaderText("Error", True)
             clrConsole()
-            printMenuTop({$"{someFile.name} does not exist."})
+            printMenuTop({$"{someFile.Name} does not exist."})
             print(1, "File Chooser (default)", "Change the file name")
             print(1, "Directory Chooser", "Change the directory", closeMenu:=True)
             Dim input As String = Console.ReadLine
@@ -42,7 +42,7 @@ Public Module iniFileHandler
                 Case "1", ""
                     fileChooser(someFile)
                 Case "2"
-                    dirChooser(someFile.dir)
+                    dirChooser(someFile.Dir)
                 Case Else
                     setHeaderText(invInpStr, True)
             End Select
@@ -94,12 +94,12 @@ Public Module iniFileHandler
     Private Sub handleFileChooserChoice(ByRef someFile As iniFile)
         setHeaderText("File Chooser")
         printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"})
-        print(1, someFile.initName, "Use the default name", someFile.initName <> "")
-        print(1, someFile.secondName, "Use the default rename", someFile.secondName <> "")
+        print(1, someFile.InitName, "Use the default name", someFile.InitName <> "")
+        print(1, someFile.SecondName, "Use the default rename", someFile.SecondName <> "")
         print(1, "Directory Chooser", "Choose a new directory", trailingBlank:=True)
-        print(0, $"Current Directory: {replDir(someFile.dir)}")
-        print(0, $"Current File:      {someFile.name}", closeMenu:=True)
-        Console.Write($"{Environment.NewLine} Enter a number, {If(Not someFile.name = "", "", "or ")}a new file name{If(someFile.name = "", "", $", or leave blank to continue using '{someFile.name}'")}: ")
+        print(0, $"Current Directory: {replDir(someFile.Dir)}")
+        print(0, $"Current File:      {someFile.Name}", closeMenu:=True)
+        Console.Write($"{Environment.NewLine} Enter a number, {If(Not someFile.Name = "", "", "or ")}a new file name{If(someFile.Name = "", "", $", or leave blank to continue using '{someFile.Name}'")}: ")
         Dim input As String = Console.ReadLine
         Select Case True
             Case input = "0"
@@ -107,14 +107,14 @@ Public Module iniFileHandler
                 clrConsole()
                 Exit Sub
             Case input = ""
-            Case input = "1" And someFile.initName <> ""
-                someFile.name = someFile.initName
-            Case (input = "1" And someFile.initName = "") Or (input = "2" And someFile.secondName <> "")
-                someFile.name = someFile.secondName
-            Case (input = "2" And someFile.secondName = "") Or (input = "3" And someFile.initName <> "" And someFile.secondName <> "")
-                dirChooser(someFile.dir)
+            Case input = "1" And someFile.InitName <> ""
+                someFile.Name = someFile.InitName
+            Case (input = "1" And someFile.InitName = "") Or (input = "2" And someFile.SecondName <> "")
+                someFile.Name = someFile.SecondName
+            Case (input = "2" And someFile.SecondName = "") Or (input = "3" And someFile.InitName <> "" And someFile.SecondName <> "")
+                dirChooser(someFile.Dir)
             Case Else
-                someFile.name = input
+                someFile.Name = input
         End Select
     End Sub
 
@@ -129,8 +129,8 @@ Public Module iniFileHandler
             print(1, "File Chooser", "Change the file name")
             print(1, "Directory Chooser", "Change the directory")
             print(1, "Confirm (default)", "Save changes")
-            print(0, $"Current Directory: {replDir(someFile.dir)}", leadingBlank:=True)
-            print(0, $"Current File     : {someFile.name}", closeMenu:=True)
+            print(0, $"Current Directory: {replDir(someFile.Dir)}", leadingBlank:=True)
+            print(0, $"Current File     : {someFile.Name}", closeMenu:=True)
             Console.Write(Environment.NewLine & "Enter a number, or leave blank to run the default: ")
             Dim input As String = Console.ReadLine()
             Select Case input
@@ -140,7 +140,7 @@ Public Module iniFileHandler
                     fileChooser(someFile)
                     iExitCode = True
                 Case "2"
-                    dirChooser(someFile.dir)
+                    dirChooser(someFile.Dir)
                     iExitCode = True
                 Case "3", ""
                     iExitCode = True

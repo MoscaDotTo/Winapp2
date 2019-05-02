@@ -162,7 +162,7 @@ Public Module WinappDebug
         print(0, tmenu("Completed analysis of winapp2.ini"))
         print(0, menuStr03)
         print(0, $"{ErrorsFound} possible errors were detected.")
-        print(0, $"Number of entries: {winappDebugFile1.sections.Count}", trailingBlank:=True)
+        print(0, $"Number of entries: {winappDebugFile1.Sections.Count}", trailingBlank:=True)
         rewriteChanges(wa2)
         print(0, anyKeyStr, closeMenu:=True)
         If Not SuppressOutput Then Console.ReadKey()
@@ -245,8 +245,8 @@ Public Module WinappDebug
         Dim curNum = 1
         Dim curStrings As New strList
         Dim dupes As New keyList
-        Dim kt = kl.keyType
-        For Each key In kl.keys
+        Dim kt = kl.KeyType
+        For Each key In kl.Keys
             Select Case kt
                 Case "ExcludeKey"
                     cFormat(key, curNum, curStrings, dupes)
@@ -276,7 +276,7 @@ Public Module WinappDebug
             key = processKey(key)
         Next
         ' Remove any duplicates and sort the keys
-        kl.remove(dupes.keys)
+        kl.remove(dupes.Keys)
         sortKeys(kl, dupes.keyCount > 0)
         ' Run optimization checks on FileKey lists only 
         If kl.typeIs("FileKey") Then cOptimization(kl)
@@ -416,14 +416,14 @@ Public Module WinappDebug
     Private Sub validateKeys(ByRef entry As winapp2entry)
         For Each lst In entry.keyListList
             Dim brokenKeys As New keyList
-            lst.keys.ForEach(Sub(key) brokenKeys.add(key, Not cValidity(key)))
-            lst.remove(brokenKeys.keys)
-            entry.errorKeys.remove(brokenKeys.keys)
+            lst.Keys.ForEach(Sub(key) brokenKeys.add(key, Not cValidity(key)))
+            lst.remove(brokenKeys.Keys)
+            entry.errorKeys.remove(brokenKeys.Keys)
         Next
         ' Attempt to assign keys that had errors to their intended lists
-        For Each key In entry.errorKeys.keys
+        For Each key In entry.errorKeys.Keys
             For Each lst In entry.keyListList
-                lst.add(key, key.typeIs(lst.keyType))
+                lst.add(key, key.typeIs(lst.KeyType))
             Next
         Next
     End Sub
@@ -443,7 +443,7 @@ Public Module WinappDebug
         ' Process the entry's keylists in winapp2.ini order (ignore the last list because it has only errors)
         For i = 0 To entry.keyListList.Count - 2
             Dim lst = entry.keyListList(i)
-            Select Case lst.keyType
+            Select Case lst.KeyType
                 Case "DetectFile"
                     processKeyList(lst, AddressOf pDetectFile)
                 Case "FileKey"
@@ -525,7 +525,7 @@ Public Module WinappDebug
         Dim sortedKeyValues = replaceAndSort(keyValues, "|", " \ \")
         ' Rewrite the alphabetized keys back into the keylist (also fixes numbering)
         Dim keysOutOfPlace = False
-        findOutOfPlace(keyValues, sortedKeyValues, kl.keyType, kl.lineNums, keysOutOfPlace)
+        findOutOfPlace(keyValues, sortedKeyValues, kl.KeyType, kl.lineNums, keysOutOfPlace)
         If (keysOutOfPlace Or hadDuplicatesRemoved) And (lintAlpha.fixFormat Or lintWrongNums.fixFormat Or lintExtraNums.fixFormat) Then
             kl.renumberKeys(sortedKeyValues)
         End If

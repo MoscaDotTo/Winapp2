@@ -1,4 +1,21 @@
-﻿''' <summary>
+﻿'    Copyright (C) 2018-2019 Robbie Ward
+' 
+'    This file is a part of Winapp2ool
+' 
+'    Winapp2ool is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    Winap2ool is distributed in the hope that it will be useful,
+'    but WITHOUT ANY WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+'
+'    You should have received a copy of the GNU General Public License
+'    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+Option Strict On
+''' <summary>
 ''' Represents a winapp2.ini format iniFile, and enables easy access to format specific iniFile information
 ''' </summary>
 Public Class winapp2file
@@ -20,24 +37,24 @@ Public Class winapp2file
     Public Sub New(ByVal file As iniFile)
         entryList = New List(Of String)
         For i As Integer = 0 To 6
-            entrySections(i) = New iniFile With {.name = sectionHeaderFooter(i)}
+            entrySections(i) = New iniFile With {.Name = sectionHeaderFooter(i)}
             entryLines(i) = New List(Of Integer)
             winapp2entries(i) = New List(Of winapp2entry)
         Next
         ' Determine if we're the Non-CCleaner variant of the ini
         isNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
         ' Determine the version string
-        If file.comments.Count = 0 Then version = "; version 000000"
-        If file.comments.Count > 0 Then version = If(Not file.comments.Values(0).comment.ToLower.Contains("version"), "; version 000000", file.comments.Values(0).comment)
+        If file.Comments.Count = 0 Then version = "; version 000000"
+        If file.Comments.Count > 0 Then version = If(Not file.Comments.Values(0).Comment.ToLower.Contains("version"), "; version 000000", file.Comments.Values(0).Comment)
         ' Build the header sections for browsers/Thunderbird/winapp3
         Dim langSecRefs As New List(Of String) From {"3029", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous"}
-        For Each section In file.sections.Values
+        For Each section In file.Sections.Values
             Dim tmpwa2entry As New winapp2entry(section)
             Dim ind = -1
             If tmpwa2entry.langSecRef.keyCount > 0 Then
-                ind = langSecRefs.IndexOf(tmpwa2entry.langSecRef.keys.First.Value)
+                ind = langSecRefs.IndexOf(tmpwa2entry.langSecRef.Keys.First.Value)
             ElseIf tmpwa2entry.sectionKey.keyCount > 0 Then
-                ind = langSecRefs.IndexOf(tmpwa2entry.sectionKey.keys.First.Value)
+                ind = langSecRefs.IndexOf(tmpwa2entry.sectionKey.Keys.First.Value)
             End If
             If ind = -1 Then ind = 6
             addToInnerFile(ind, tmpwa2entry, section)
@@ -49,9 +66,9 @@ Public Class winapp2file
     ''' <param name="entry">The section in winapp2entry format</param>
     ''' <param name="section">A section to be tracked</param>
     Private Sub addToInnerFile(ind As Integer, entry As winapp2entry, section As iniSection)
-        If Not entrySections(ind).sections.Keys.Contains(section.name) Then
-            entrySections(ind).sections.Add(section.name, section)
-            entryLines(ind).Add(section.startingLineNumber)
+        If Not entrySections(ind).Sections.Keys.Contains(section.Name) Then
+            entrySections(ind).Sections.Add(section.Name, section)
+            entryLines(ind).Add(section.StartingLineNumber)
             winapp2entries(ind).Add(entry)
         End If
     End Sub
@@ -60,7 +77,7 @@ Public Class winapp2file
     Public Function count() As Integer
         Dim out As Integer = 0
         For Each section In entrySections
-            out += section.sections.Count
+            out += section.Sections.Count
         Next
         Return out
     End Function
@@ -77,8 +94,8 @@ Public Class winapp2file
     Private Function rebuildInnerIni(ByRef entryList As List(Of winapp2entry)) As iniFile
         Dim tmpini As New iniFile
         For Each entry In entryList
-            tmpini.sections.Add(entry.name, New iniSection(entry.dumpToListOfStrings))
-            tmpini.sections.Values.Last.startingLineNumber = entry.lineNum
+            tmpini.Sections.Add(entry.name, New iniSection(entry.dumpToListOfStrings))
+            tmpini.Sections.Values.Last.StartingLineNumber = entry.lineNum
         Next
         Return tmpini
     End Function
@@ -87,7 +104,7 @@ Public Class winapp2file
     Public Sub rebuildToIniFiles()
         For i As Integer = 0 To entrySections.Count - 1
             entrySections(i) = rebuildInnerIni(winapp2entries(i))
-            entrySections(i).name = sectionHeaderFooter(i)
+            entrySections(i).Name = sectionHeaderFooter(i)
         Next
     End Sub
 
@@ -112,14 +129,14 @@ Public Class winapp2file
         out += appendNewLine("; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
         ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
         For i As Integer = 0 To 5
-            If entrySections(i).sections.Count > 0 Then
+            If entrySections(i).Sections.Count > 0 Then
                 out += appendNewLine("; ")
-                out += appendNewLine(appendNewLine("; " & entrySections(i).name))
+                out += appendNewLine(appendNewLine("; " & entrySections(i).Name))
                 out += entrySections(i).toString
-                out += appendNewLine($"{prependNewLines(False)}; End of {entrySections(i).name}")
+                out += appendNewLine($"{prependNewLines(False)}; End of {entrySections(i).Name}")
             End If
         Next
-        If entrySections.Last.sections.Count > 0 Then out += prependNewLines(False) & entrySections.Last.toString
+        If entrySections.Last.Sections.Count > 0 Then out += prependNewLines(False) & entrySections.Last.toString
         Return out
     End Function
 End Class

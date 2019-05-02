@@ -55,7 +55,7 @@ Public Module advSettings
         Dim repNums = {"14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26"}
         Select Case True
             Case input = "0"
-                If ScanSettingsChanged Then ModuleSettingsChanged = True
+                If ScanSettingsChanged Then WinappDebug.ModuleSettingsChanged = True
                 exitCode = True
             ' Enable/Disable individual scans
             Case scanNums.Contains(input)
@@ -77,6 +77,7 @@ Public Module advSettings
                 For Each rule In WinappDebug.Rules
                     rule.turnOff()
                 Next
+                ScanSettingsChanged = True
             Case Else
                 setHeaderText(invInpStr, True)
         End Select
@@ -84,7 +85,7 @@ Public Module advSettings
 
     ''' <summary>Prints the menu for individual scans and their repairs to the user</summary>
     Public Sub printMenu()
-        Console.WindowHeight = 46
+        Console.WindowHeight = 48
         printMenuTop({"Enable or disable specific scans or repairs"})
         print(0, "Scan Options", leadingBlank:=True, trailingBlank:=True)
         Dim curRules = WinappDebug.Rules

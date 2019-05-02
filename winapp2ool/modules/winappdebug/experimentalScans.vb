@@ -17,7 +17,7 @@
 Option Strict On
 
 ''' <summary>
-''' This module holds any scans/repairs for WinappDebug that might be disabled by default due to incompleteness. 
+''' This module holds any scans/repairs for WinappDebug that might be disabled by default due to incompleteness.
 ''' </summary>
 Module experimentalScans
     ''' <summary>Attempts to merge FileKeys together if syntactically possible.</summary>
@@ -29,9 +29,9 @@ Module experimentalScans
         Dim newKeys As New keyList
         Dim flagList As New strList
         Dim paramList As New strList
-        newKeys.add(kl.keys)
+        newKeys.add(kl.Keys)
         For i = 0 To kl.keyCount - 1
-            Dim tmpWa2 As New winapp2KeyParameters(kl.keys(i))
+            Dim tmpWa2 As New winapp2KeyParameters(kl.Keys(i))
             ' If we have yet to record any params, record them and move on
             If paramList.count = 0 Then tmpWa2.trackParamAndFlags(paramList, flagList) : Continue For
             ' This should handle the case where for a FileKey: 
@@ -41,13 +41,13 @@ Module experimentalScans
             If paramList.contains(tmpWa2.pathString) Then
                 For j = 0 To paramList.count - 1
                     If tmpWa2.pathString = paramList.items(j) And tmpWa2.flagString = flagList.items(j) Then
-                        Dim keyToMergeInto As New winapp2KeyParameters(kl.keys(j))
+                        Dim keyToMergeInto As New winapp2KeyParameters(kl.Keys(j))
                         Dim mergeKeyStr = ""
                         keyToMergeInto.addArgs(mergeKeyStr)
                         tmpWa2.argsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
                         If tmpWa2.flagString <> "None" Then mergeKeyStr += $"|{tmpWa2.flagString}"
-                        dupes.add(kl.keys(i))
-                        newKeys.keys(j) = New iniKey(mergeKeyStr)
+                        dupes.add(kl.Keys(i))
+                        newKeys.Keys(j) = New iniKey(mergeKeyStr)
                         Exit For
                     End If
                 Next
@@ -57,9 +57,9 @@ Module experimentalScans
             End If
         Next
         If dupes.keyCount > 0 Then
-            newKeys.remove(dupes.keys)
+            newKeys.remove(dupes.Keys)
             For i = 0 To newKeys.keyCount - 1
-                newKeys.keys(i).Name = $"FileKey{i + 1}"
+                newKeys.Keys(i).Name = $"FileKey{i + 1}"
             Next
             printOptiSect("Optimization opportunity detected", kl)
             printOptiSect("The following keys can be merged into other keys:", dupes)
@@ -73,7 +73,7 @@ Module experimentalScans
     ''' <param name="kl">The list of keys to be printed beneath the box</param>
     Private Sub printOptiSect(boxStr As String, kl As keyList)
         cwl() : print(0, tmenu(boxStr), closeMenu:=True) : cwl()
-        kl.keys.ForEach(Sub(key) cwl(key.toString))
+        kl.Keys.ForEach(Sub(key) cwl(key.toString))
         cwl()
     End Sub
 End Module
