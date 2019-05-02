@@ -140,11 +140,11 @@ Module Diff
         log(menu(menuStr02))
         log(menu(menuStr00))
         ' Compare the files and then enumerate their changes
-        Dim outList As List(Of String) = compareTo()
+        Dim outList = compareTo()
         Dim remCt = 0
         Dim modCt = 0
         Dim addCt = 0
-        For Each change In outList
+        For Each change In outList.items
             Select Case True
                 Case change.Contains("has been added")
                     addCt += 1
@@ -170,8 +170,8 @@ Module Diff
     End Sub
 
     ''' <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
-    Private Function compareTo() As List(Of String)
-        Dim outList, comparedList As New List(Of String)
+    Private Function compareTo() As strList
+        Dim outList, comparedList As New strList
         For Each section In oldOrLocalFile.Sections.Values
             ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
             If newOrRemoteFile.Sections.Keys.Contains(section.Name) And Not comparedList.Contains(section.Name) Then
@@ -235,17 +235,17 @@ Module Diff
                             Dim oldKey As New winapp2KeyParameters(key)
                             Dim newKey As New winapp2KeyParameters(skey)
                             ' If the path has changed, the key has been updated
-                            If Not oldKey.pathString = newKey.pathString Then
+                            If Not oldKey.PathString = newKey.PathString Then
                                 updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                 Exit For
                             End If
-                            oldKey.argsList.Sort()
-                            newKey.argsList.Sort()
+                            oldKey.ArgsList.Sort()
+                            newKey.ArgsList.Sort()
                             ' Check the number of arguments provided to the key
-                            If oldKey.argsList.Count = newKey.argsList.Count Then
-                                For k = 0 To oldKey.argsList.Count - 1
+                            If oldKey.ArgsList.Count = newKey.ArgsList.Count Then
+                                For k = 0 To oldKey.ArgsList.Count - 1
                                     ' If the args count matches but the sorted state of the args doesn't, the key has been updated
-                                    If Not oldKey.argsList(k).Equals(newKey.argsList(k), StringComparison.InvariantCultureIgnoreCase) Then
+                                    If Not oldKey.ArgsList(k).Equals(newKey.ArgsList(k), StringComparison.InvariantCultureIgnoreCase) Then
                                         updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
                                         Exit For
                                     End If
