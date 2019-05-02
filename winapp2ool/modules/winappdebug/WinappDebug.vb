@@ -397,7 +397,7 @@ Public Module WinappDebug
         Dim argsStrings As New List(Of String)
         Dim dupeArgs As New List(Of String)
         ' Check for duplicate args
-        For Each arg In keyParams.argsList
+        For Each arg In keyParams.ArgsList
             If chkDupes(argsStrings, arg) And lintParams.ShouldScan Then
                 customErr(key.LineNumber, "Duplicate FileKey parameter found", {$"Command: {arg}"})
                 If lintParams.fixFormat Then dupeArgs.Add(arg)
@@ -405,7 +405,7 @@ Public Module WinappDebug
         Next
         ' Remove any duplicate arguments from the key parameters and reconstruct keys we've modified above
         If lintParams.fixFormat Then
-            dupeArgs.ForEach(Sub(arg) keyParams.argsList.Remove(arg))
+            dupeArgs.ForEach(Sub(arg) keyParams.ArgsList.Remove(arg))
             keyParams.reconstructKey(key)
         End If
         Return key
@@ -414,15 +414,15 @@ Public Module WinappDebug
     ''' <summary>Checks the validity of the keys in an entry and removes any that are too problematic to continue with</summary>
     ''' <param name="entry">A winapp2entry object to be audited</param>
     Private Sub validateKeys(ByRef entry As winapp2entry)
-        For Each lst In entry.keyListList
+        For Each lst In entry.KeyListList
             Dim brokenKeys As New keyList
             lst.Keys.ForEach(Sub(key) brokenKeys.add(key, Not cValidity(key)))
             lst.remove(brokenKeys.Keys)
-            entry.errorKeys.remove(brokenKeys.Keys)
+            entry.ErrorKeys.remove(brokenKeys.Keys)
         Next
         ' Attempt to assign keys that had errors to their intended lists
-        For Each key In entry.errorKeys.Keys
-            For Each lst In entry.keyListList
+        For Each key In entry.ErrorKeys.Keys
+            For Each lst In entry.KeyListList
                 lst.add(key, key.typeIs(lst.KeyType))
             Next
         Next
@@ -435,14 +435,14 @@ Public Module WinappDebug
         Dim hasFileExcludes = False
         Dim hasRegExcludes = False
         ' Check for duplicate names that are differently cased 
-        fullNameErr(chkDupes(allEntryNames, entry.name), entry, "Duplicate entry name detected")
+        fullNameErr(chkDupes(allEntryNames, entry.Name), entry, "Duplicate entry name detected")
         ' Check that the entry is named properly 
-        fullNameErr(Not entry.name.EndsWith(" *"), entry, "All entries must End In ' *'")
+        fullNameErr(Not entry.Name.EndsWith(" *"), entry, "All entries must End In ' *'")
         ' Confirm the validity of keys and remove any broken ones before continuing
         validateKeys(entry)
         ' Process the entry's keylists in winapp2.ini order (ignore the last list because it has only errors)
-        For i = 0 To entry.keyListList.Count - 2
-            Dim lst = entry.keyListList(i)
+        For i = 0 To entry.KeyListList.Count - 2
+            Dim lst = entry.KeyListList(i)
             Select Case lst.KeyType
                 Case "DetectFile"
                     processKeyList(lst, AddressOf pDetectFile)
@@ -453,18 +453,18 @@ Public Module WinappDebug
             End Select
         Next
         ' Make sure we only have LangSecRef if we have LangSecRef at all
-        fullNameErr(entry.langSecRef.keyCount <> 0 And entry.sectionKey.keyCount <> 0 And lintSyntax.ShouldScan, entry, "Section key found alongside LangSecRef key, only one is required.")
+        fullNameErr(entry.LangSecRef.keyCount <> 0 And entry.SectionKey.keyCount <> 0 And lintSyntax.ShouldScan, entry, "Section key found alongside LangSecRef key, only one is required.")
         ' Make sure we have at least 1 valid detect key and at least one valid cleaning key
-        fullNameErr(entry.detectOS.keyCount + entry.detects.keyCount + entry.specialDetect.keyCount + entry.detectFiles.keyCount = 0, entry, "Entry has no valid detection keys (Detect, DetectFile, DetectOS, SpecialDetect)")
-        fullNameErr(entry.fileKeys.keyCount + entry.regKeys.keyCount = 0 And lintSyntax.ShouldScan, entry, "Entry has no valid FileKeys or RegKeys")
+        fullNameErr(entry.DetectOS.keyCount + entry.Detects.keyCount + entry.SpecialDetect.keyCount + entry.DetectFiles.keyCount = 0, entry, "Entry has no valid detection keys (Detect, DetectFile, DetectOS, SpecialDetect)")
+        fullNameErr(entry.FileKeys.keyCount + entry.RegKeys.keyCount = 0 And lintSyntax.ShouldScan, entry, "Entry has no valid FileKeys or RegKeys")
         ' If we don't have FileKeys or RegKeys, we shouldn't have ExcludeKeys.
-        fullNameErr(entry.excludeKeys.keyCount > 0 And entry.fileKeys.keyCount + entry.regKeys.keyCount = 0, entry, "Entry has ExcludeKeys but no valid FileKeys or RegKeys")
+        fullNameErr(entry.ExcludeKeys.keyCount > 0 And entry.FileKeys.keyCount + entry.RegKeys.keyCount = 0, entry, "Entry has ExcludeKeys but no valid FileKeys or RegKeys")
         ' Make sure that if we have excludes, we also have corresponding file/reg keys
-        fullNameErr(entry.fileKeys.keyCount = 0 And hasFileExcludes, entry, "ExcludeKeys targeting filesystem locations found without any corresponding FileKeys")
-        fullNameErr(entry.regKeys.keyCount = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
+        fullNameErr(entry.FileKeys.keyCount = 0 And hasFileExcludes, entry, "ExcludeKeys targeting filesystem locations found without any corresponding FileKeys")
+        fullNameErr(entry.RegKeys.keyCount = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
         ' Make sure we have a Default key.
-        fullNameErr(entry.defaultKey.keyCount = 0 And lintDefaults.ShouldScan, entry, "Entry is missing a Default key")
-        entry.defaultKey.add(New iniKey("Default=False"), lintDefaults.fixFormat And entry.defaultKey.keyCount = 0)
+        fullNameErr(entry.DefaultKey.keyCount = 0 And lintDefaults.ShouldScan, entry, "Entry is missing a Default key")
+        entry.DefaultKey.add(New iniKey("Default=False"), lintDefaults.fixFormat And entry.DefaultKey.keyCount = 0)
     End Sub
 
     ''' <summary> This method does nothing by design </summary>
@@ -568,7 +568,7 @@ Public Module WinappDebug
     ''' <param name="entry">The entry containing an error</param>
     ''' <param name="errTxt">The String containing the text to be printed to the user</param>
     Private Sub fullNameErr(cond As Boolean, entry As winapp2entry, errTxt As String)
-        If cond Then customErr(entry.lineNum, errTxt, {$"Entry Name: {entry.fullName}"})
+        If cond Then customErr(entry.LineNum, errTxt, {$"Entry Name: {entry.FullName}"})
     End Sub
 
     ''' <summary>Prints an error whose output text contains an iniKey string</summary>

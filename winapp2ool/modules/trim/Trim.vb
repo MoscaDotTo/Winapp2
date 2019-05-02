@@ -147,31 +147,31 @@ Public Module Trim
     ''' <summary>Returns true if an entry's detection criteria is matched by the system, false otherwise.</summary>
     ''' <param name="entry">A winapp2.ini entry</param>
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
-        Dim hasDetOS As Boolean = Not entry.detectOS.keyCount = 0
+        Dim hasDetOS As Boolean = Not entry.DetectOS.keyCount = 0
         Dim hasMetDetOS As Boolean = False
         ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         If hasDetOS Then
             If winVer = Nothing Then winVer = getWinVer()
-            hasMetDetOS = checkExistence(entry.detectOS, AddressOf checkDetOS)
+            hasMetDetOS = checkExistence(entry.DetectOS, AddressOf checkDetOS)
             If Not hasMetDetOS Then Return False
         End If
         ' Process any other Detect criteria we have
-        If checkExistence(entry.specialDetect, AddressOf checkSpecialDetects) Then Return True
-        If checkExistence(entry.detects, AddressOf checkRegExist) Then Return True
-        If checkExistence(entry.detectFiles, AddressOf checkPathExist) Then Return True
+        If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then Return True
+        If checkExistence(entry.Detects, AddressOf checkRegExist) Then Return True
+        If checkExistence(entry.DetectFiles, AddressOf checkPathExist) Then Return True
         ' Return true for the case where we have only a DetectOS and we meet its criteria 
-        If hasMetDetOS And entry.specialDetect.keyCount = 0 And entry.detectFiles.keyCount = 0 And entry.detects.keyCount = 0 Then Return True
+        If hasMetDetOS And entry.SpecialDetect.keyCount = 0 And entry.DetectFiles.keyCount = 0 And entry.Detects.keyCount = 0 Then Return True
         ' Return true for the case where we have no valid detect criteria
-        If entry.detectOS.keyCount + entry.detectFiles.keyCount + entry.detects.keyCount + entry.specialDetect.keyCount = 0 Then Return True
+        If entry.DetectOS.keyCount + entry.DetectFiles.keyCount + entry.Detects.keyCount + entry.SpecialDetect.keyCount = 0 Then Return True
         Return False
     End Function
 
     ''' <summary>Audits the given entry for legacy codepaths in the machine's VirtualStore locations</summary>
     ''' <param name="entry"></param>
     Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
-        vsKeyChecker(entry.fileKeys)
-        vsKeyChecker(entry.regKeys)
-        vsKeyChecker(entry.excludeKeys)
+        vsKeyChecker(entry.FileKeys)
+        vsKeyChecker(entry.RegKeys)
+        vsKeyChecker(entry.ExcludeKeys)
     End Sub
 
     ''' <summary>Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list</summary>
@@ -204,7 +204,7 @@ Public Module Trim
             Next
         Next
         Dim kl2 = kl
-        keysToAdd.Keys.ForEach(Sub(key) kl2.add(key, checkExist(New winapp2KeyParameters(key).pathString)))
+        keysToAdd.Keys.ForEach(Sub(key) kl2.add(key, checkExist(New winapp2KeyParameters(key).PathString)))
     End Sub
 
     ''' <summary>Creates the VirtualStore version of a given iniKey</summary>

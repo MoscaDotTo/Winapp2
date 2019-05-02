@@ -127,19 +127,19 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ' Disable all the tests except the duplicate checks
         Dim testOutput = debug_ErrorFindAndRepair_Success(0, 12, 0, 7)
         ' We expect that the returned object should have 1 key in each keylist except the last
-        For i = 0 To testOutput.keyListList.Count - 2
-            Dim lst = testOutput.keyListList(i)
+        For i = 0 To testOutput.KeyListList.Count - 2
+            Dim lst = testOutput.KeyListList(i)
             Assert.AreEqual(1, lst.keyCount)
         Next
         ' The last keylist (the error keys) should be empty
-        Assert.AreEqual(0, testOutput.keyListList.Last.keyCount)
+        Assert.AreEqual(0, testOutput.KeyListList.Last.keyCount)
     End Sub
 
     ''' <summary>Runs tests to ensure that key with names that are improperly numbered are detected and repaired</summary>
     <TestMethod> Public Sub debug_KeyNumberingError_FindAndRepair_Sucess()
         Dim testOutput = debug_ErrorFindAndRepair_Success(1, 8, 0, 2)
-        For i = 0 To testOutput.keyListList.Count - 2
-            Dim lst = testOutput.keyListList(i)
+        For i = 0 To testOutput.KeyListList.Count - 2
+            Dim lst = testOutput.KeyListList(i)
             Select Case lst.KeyType
                 Case "Detect", "DetectFile", "ExcludeKey", "FileKey", "RegKey"
                     Dim curKeys = lst.Keys
@@ -153,7 +153,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' <summary>Runs tests to ensure that keys in situations where there should be no numbering are detected and repaired</summary>
     <TestMethod> Public Sub debug_keyNumberingUneededError_FindAndRepair_Success()
         Dim testOutput = debug_ErrorFindAndRepair_Success(2, 8, 0, 8)
-        For Each lst In testOutput.keyListList
+        For Each lst In testOutput.KeyListList
             If lst.keyCount > 0 Then
                 Select Case lst.KeyType
                     ' RegKeys, FileKeys, and ExcludeKeys always require a trailing number in the name, even if there is only one
@@ -169,15 +169,15 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' <summary>Runs test to ensure that incorrect alphabetization is caught and repaired</summary>
     <TestMethod> Public Sub debug_keyAlphabetization_FindAndRepair_Success()
         Dim testOutput = debug_ErrorFindAndRepair_Success(3, 4, 0, 1)
-        Assert.AreEqual("HKCU\Software3", testOutput.detects.Keys.First.Value)
-        Assert.AreEqual("HKCU\Software4", testOutput.detects.Keys(1).Value)
-        Assert.AreEqual("HKCU\Software20", testOutput.detects.Keys(2).Value)
-        Assert.AreEqual("HKCU\Software30", testOutput.detects.Keys(3).Value)
+        Assert.AreEqual("HKCU\Software3", testOutput.Detects.Keys.First.Value)
+        Assert.AreEqual("HKCU\Software4", testOutput.Detects.Keys(1).Value)
+        Assert.AreEqual("HKCU\Software20", testOutput.Detects.Keys(2).Value)
+        Assert.AreEqual("HKCU\Software30", testOutput.Detects.Keys(3).Value)
     End Sub
 
     <TestMethod> Public Sub debug_forwardSlashes_FindAndRepair_Success()
         Dim testOutput = debug_ErrorFindAndRepair_Success(4, 4, 0, 5)
-        For Each lst In testOutput.keyListList
+        For Each lst In testOutput.KeyListList
             ' If the test was successful, none of the keys should have any forward slashes
             If lst.keyCount > 0 Then Assert.AreEqual(True, Not lst.Keys.First.Value.Contains(CChar("/")))
         Next

@@ -51,10 +51,10 @@ Public Class winapp2file
         For Each section In file.Sections.Values
             Dim tmpwa2entry As New winapp2entry(section)
             Dim ind = -1
-            If tmpwa2entry.langSecRef.keyCount > 0 Then
-                ind = langSecRefs.IndexOf(tmpwa2entry.langSecRef.Keys.First.Value)
-            ElseIf tmpwa2entry.sectionKey.keyCount > 0 Then
-                ind = langSecRefs.IndexOf(tmpwa2entry.sectionKey.Keys.First.Value)
+            If tmpwa2entry.LangSecRef.keyCount > 0 Then
+                ind = langSecRefs.IndexOf(tmpwa2entry.LangSecRef.Keys.First.Value)
+            ElseIf tmpwa2entry.SectionKey.keyCount > 0 Then
+                ind = langSecRefs.IndexOf(tmpwa2entry.SectionKey.Keys.First.Value)
             End If
             If ind = -1 Then ind = 6
             addToInnerFile(ind, tmpwa2entry, section)
@@ -94,8 +94,8 @@ Public Class winapp2file
     Private Function rebuildInnerIni(ByRef entryList As List(Of winapp2entry)) As iniFile
         Dim tmpini As New iniFile
         For Each entry In entryList
-            tmpini.Sections.Add(entry.name, New iniSection(entry.dumpToListOfStrings))
-            tmpini.Sections.Values.Last.StartingLineNumber = entry.lineNum
+            tmpini.Sections.Add(entry.Name, New iniSection(entry.dumpToListOfStrings))
+            tmpini.Sections.Values.Last.StartingLineNumber = entry.LineNum
         Next
         Return tmpini
     End Function

@@ -19,40 +19,49 @@ Option Strict On
 ''' Provides a few helpful methods for dissecting winapp2key objects
 ''' </summary>
 Public Class winapp2KeyParameters
-    Public pathString As String = ""
-    Public argsList As New List(Of String)
-    Public flagString As String = ""
-    Public keyType As String = ""
-    Public keyNum As String = ""
+    ''' <summary>The extracted File/Registry path from the key </summary>
+    Public Property PathString As String
+    ''' <summary>The list of any file names (patterns) /registry keys from the key</summary>
+    Public Property ArgsList As List(Of String)
+    ''' <summary> Holds the key's flag (RECURSE, REMOVESELF, etc)</summary>
+    Public Property FlagString As String
+    ''' <summary>The original KeyType of the iniKey used to create the winapp2key</summary>
+    Public Property KeyType As String
+    ''' <summary>The number associated with the KeyType</summary>
+    Public Property KeyNum As String
 
     ''' <summary>Creates a new keyparams object from a given iniKey object</summary>
     ''' <param name="key">The iniKey to get parameters from</param>
     Public Sub New(key As iniKey)
-        keyType = key.KeyType
-        Dim splitKey As String() = key.Value.Split(CChar("|"))
+        KeyType = key.KeyType
+        Dim splitKey = key.Value.Split(CChar("|"))
+        ArgsList = New List(Of String)
+        FlagString = ""
         Select Case key.KeyType
             Case "FileKey"
-                keyNum = key.KeyType.Replace("FileKey", "")
+                KeyNum = key.KeyType.Replace("FileKey", "")
                 If splitKey.Count > 1 Then
-                    pathString = splitKey(0)
-                    argsList.AddRange(splitKey(1).Split(CChar(";")))
-                    flagString = If(splitKey.Count >= 3, splitKey.Last, "None")
+                    PathString = splitKey(0)
+                    ArgsList.AddRange(splitKey(1).Split(CChar(";")))
+                    FlagString = If(splitKey.Count >= 3, splitKey.Last, "None")
                 Else
-                    pathString = key.Value
+                    PathString = key.Value
                 End If
             Case "ExcludeKey"
+                KeyNum = key.KeyType.Replace("ExcludeKey", "")
                 Select Case splitKey.Count
                     Case 2
-                        pathString = splitKey(1)
-                        flagString = splitKey(0)
+                        PathString = splitKey(1)
+                        FlagString = splitKey(0)
                     Case 3
-                        pathString = splitKey(1)
-                        argsList.AddRange(splitKey(2).Split(CChar(";")))
-                        flagString = splitKey(0)
+                        PathString = splitKey(1)
+                        ArgsList.AddRange(splitKey(2).Split(CChar(";")))
+                        FlagString = splitKey(0)
                 End Select
             Case "RegKey"
-                pathString = splitKey(0)
-                If splitKey.Count > 1 Then argsList.Add(splitKey(1))
+                KeyNum = key.KeyType.Replace("RegKey", "")
+                PathString = splitKey(0)
+                If splitKey.Count > 1 Then ArgsList.Add(splitKey(1))
         End Select
     End Sub
 
@@ -61,24 +70,24 @@ Public Class winapp2KeyParameters
     ''' Also trims empty comments 
     Public Sub reconstructKey(ByRef key As iniKey)
         Dim out As String = ""
-        out += $"{pathString}{If(argsList.Count > 0, "|", "")}"
-        If argsList.Count > 1 Then
-            For i As Integer = 0 To argsList.Count - 2
-                If Not argsList(i) = "" Then out += argsList(i) & ";"
+        out += $"{PathString}{If(ArgsList.Count > 0, "|", "")}"
+        If ArgsList.Count > 1 Then
+            For i As Integer = 0 To ArgsList.Count - 2
+                If Not ArgsList(i) = "" Then out += ArgsList(i) & ";"
             Next
         End If
-        If argsList.Count > 0 Then out += argsList.Last
-        If Not flagString = "None" Then out += "|" & flagString
+        If ArgsList.Count > 0 Then out += ArgsList.Last
+        If Not FlagString = "None" Then out += "|" & FlagString
         key.Value = out
     End Sub
 
     ''' <summary>Constructs a new iniKey in an attempt to merge keys together</summary>
     ''' <param name="tmpKeyStr">The string to contain the new key text</param>
     Public Sub addArgs(ByRef tmpKeyStr As String)
-        appendStrs({$"{keyType}{keyNum}=", $"{pathString}|", argsList(0)}, tmpKeyStr)
-        If argsList.Count > 1 Then
-            For i = 1 To argsList.Count - 1
-                tmpKeyStr += $";{argsList(i)}"
+        appendStrs({$"{KeyType}{KeyNum}=", $"{PathString}|", ArgsList(0)}, tmpKeyStr)
+        If ArgsList.Count > 1 Then
+            For i = 1 To ArgsList.Count - 1
+                tmpKeyStr += $";{ArgsList(i)}"
             Next
         End If
     End Sub
@@ -87,7 +96,7 @@ Public Class winapp2KeyParameters
     ''' <param name="paramList">The list of params observed</param>
     ''' <param name="flagList">The list of flags observed</param>
     Public Sub trackParamAndFlags(ByRef paramList As strList, ByRef flagList As strList)
-        paramList.add(pathString)
-        flagList.add(flagString)
+        paramList.add(PathString)
+        flagList.add(FlagString)
     End Sub
 End Class

@@ -38,14 +38,14 @@ Module experimentalScans
             ' The folder provided has appeared in another key
             ' The flagstring (RECURSE, REMOVESELF, "") for both keys matches
             ' The first appearing key should have its parameters appended to and the second appearing key should be removed
-            If paramList.contains(tmpWa2.pathString) Then
+            If paramList.contains(tmpWa2.PathString) Then
                 For j = 0 To paramList.count - 1
-                    If tmpWa2.pathString = paramList.items(j) And tmpWa2.flagString = flagList.items(j) Then
+                    If tmpWa2.PathString = paramList.items(j) And tmpWa2.FlagString = flagList.items(j) Then
                         Dim keyToMergeInto As New winapp2KeyParameters(kl.Keys(j))
                         Dim mergeKeyStr = ""
                         keyToMergeInto.addArgs(mergeKeyStr)
-                        tmpWa2.argsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
-                        If tmpWa2.flagString <> "None" Then mergeKeyStr += $"|{tmpWa2.flagString}"
+                        tmpWa2.ArgsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
+                        If tmpWa2.FlagString <> "None" Then mergeKeyStr += $"|{tmpWa2.FlagString}"
                         dupes.add(kl.Keys(i))
                         newKeys.Keys(j) = New iniKey(mergeKeyStr)
                         Exit For

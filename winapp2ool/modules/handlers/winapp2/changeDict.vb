@@ -19,33 +19,24 @@ Option Strict On
 ''' Tracks the changes made to a list of Strings and allows for reverting the changes 
 ''' </summary>
 Public Class changeDict
-    Private changes As Dictionary(Of String, String)
-
     ''' <summary>Creates a new string change tracking dictionary</summary>
     Public Sub New()
-        Changes1 = New Dictionary(Of String, String)
+        Changes = New Dictionary(Of String, String)
     End Sub
 
     ''' <summary>The dictionary of changes made to a list of strings</summary>
-    Public Property Changes1 As Dictionary(Of String, String)
-        Get
-            Return changes
-        End Get
-        Set(value As Dictionary(Of String, String))
-            changes = value
-        End Set
-    End Property
+    Public Property Changes As Dictionary(Of String, String)
 
     ''' <summary>Tracks renames made while mutating data for string sorting.</summary>
     ''' <param name="currentValue">The current value of a string</param>
     ''' <param name="newValue">The new value of a piece of a string</param>
     Public Sub trackChanges(currentValue As String, newValue As String)
         Try
-            If changes.Keys.Contains(currentValue) Then
-                changes.Add(newValue, changes.Item(currentValue))
-                changes.Remove(currentValue)
+            If Changes.Keys.Contains(currentValue) Then
+                Changes.Add(newValue, Changes.Item(currentValue))
+                Changes.Remove(currentValue)
             Else
-                changes.Add(newValue, currentValue)
+                Changes.Add(newValue, currentValue)
             End If
         Catch ex As Exception
             ' If this exception is thrown, there is a duplicate value in the list being audited 
@@ -61,8 +52,8 @@ Public Class changeDict
     ''' <param name="lstArray">An array containing lists of strings whose data has been modified</param>
     Public Sub undoChanges(ByRef lstArray As strList())
         For Each lst In lstArray
-            For Each key In changes.Keys
-                lst.replaceStrAtIndexOf(key, changes.Item(key))
+            For Each key In Changes.Keys
+                lst.replaceStrAtIndexOf(key, Changes.Item(key))
             Next
         Next
     End Sub
