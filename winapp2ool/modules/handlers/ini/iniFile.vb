@@ -62,6 +62,9 @@ Public Class iniFile
         InitDir = directory
         InitName = filename
         SecondName = rename
+        Sections = New Dictionary(Of String, iniSection)
+        Comments = New Dictionary(Of Integer, iniComment)
+        LineCount = 1
     End Sub
 
     ''' <summary>Writes the contents of a provided String to our iniFile's path, overwriting any existing contents</summary>
@@ -104,6 +107,8 @@ Public Class iniFile
         Dim lineTrackingList As New List(Of Integer)
         Dim lastLineWasEmpty As Boolean = False
         LineCount = 1
+        Sections = New Dictionary(Of String, iniSection)
+        Comments = New Dictionary(Of Integer, iniComment)
         For Each line In lines
             processiniLine(line, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
         Next
