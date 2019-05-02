@@ -113,6 +113,7 @@ Public Class iniSection
             If noMatch Then removedKeys.add(key)
         Next
         ' Remove all matched keys
+        tmpList.Sort()
         tmpList.Reverse()
         secondSection.removeKeys(tmpList)
         ' Assume any remaining keys have been added

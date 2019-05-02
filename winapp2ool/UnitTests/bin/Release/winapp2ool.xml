@@ -28,45 +28,31 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.CCiniDebug.initDefaultSettings">
- <summary>
- Restores the default state of the module's parameters
- </summary>
+ <summary>Restores the default state of the module's parameters</summary>
 </member>
 <member name="M:winapp2ool.CCiniDebug.handleCmdlineArgs">
- <summary>
- Handles the commandline args for CCiniDebug
- </summary>
+ <summary>Handles the commandline args for CCiniDebug</summary>
   CCiniDebug args:
  -noprune    : disable pruning of stale winapp2.ini entries
  -nosort     : disable sorting ccleaner.ini alphabetically
  -nosave     : disable saving the modified ccleaner.ini back to file
 </member>
 <member name="M:winapp2ool.CCiniDebug.printMenu">
- <summary>
- Prints the CCiniDebug menu to the user
- </summary>
+ <summary>Prints the CCiniDebug menu to the user</summary>
 </member>
 <member name="M:winapp2ool.CCiniDebug.handleUserInput(System.String)">
- <summary>
- Handles the user's input from the menu
- </summary>
+ <summary>Handles the user's input from the menu</summary>
  <param name="input">The string containing the user's input</param>
 </member>
 <member name="M:winapp2ool.CCiniDebug.initDebug">
- <summary>
- Performs the debugging process
- </summary>
+ <summary>Performs the debugging process</summary>
 </member>
 <member name="M:winapp2ool.CCiniDebug.prune(winapp2ool.iniSection@)">
- <summary>
- Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file
- </summary>
+ <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>
  <param name="optionsSec">The iniSection object containing the Options from ccleaner.ini</param>
 </member>
 <member name="M:winapp2ool.CCiniDebug.sortCC">
- <summary>
- Sorts the keys in the Options (only) section of ccleaner.ini
- </summary>
+ <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
 </member>
 <member name="T:winapp2ool.Diff">
  <summary>
@@ -74,79 +60,53 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.Diff.handleCmdLine">
- <summary>
- Handles the commandline args for Diff
- </summary>
+ <summary>Handles the commandline args for Diff</summary>
   Diff args:
  -d          : download the latest winapp2.ini
  -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
  -savelog    : save the diff.txt log
 </member>
 <member name="M:winapp2ool.Diff.initDefaultSettings">
- <summary>
- Restores the default state of the module's parameters
- </summary>
+ <summary>Restores the default state of the module's parameters</summary>
 </member>
 <member name="M:winapp2ool.Diff.remoteDiff(winapp2ool.iniFile,System.Boolean)">
- <summary>
- Runs the Differ from outside the module
- </summary>
+ <summary>Runs the Differ from outside the module </summary>
  <param name="firstFile">The old winapp2.ini file</param>
 </member>
 <member name="M:winapp2ool.Diff.printMenu">
- <summary>
- Prints the main menu to the user
- </summary>
+ <summary>Prints the main menu to the user</summary>
 </member>
 <member name="M:winapp2ool.Diff.handleUserInput(System.String)">
- <summary>
- Handles the user input from the main menu
- </summary>
+ <summary>Handles the user input from the main menu</summary>
  <param name="input">The String containing the user's input from the menu</param>
 </member>
 <member name="M:winapp2ool.Diff.initDiff">
- <summary>
- Carries out the main set of Diffing operations
- </summary>
+ <summary>Carries out the main set of Diffing operations</summary>
 </member>
 <member name="M:winapp2ool.Diff.getVer(winapp2ool.iniFile)">
- <summary>
- Gets the version from winapp2.ini
- </summary>
+ <summary>Gets the version from winapp2.ini</summary>
  <param name="someFile">winapp2.ini format iniFile object</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Diff.differ">
- <summary>
- Performs the diff and outputs the info to the user
- </summary>
+ <summary>Performs the diff and outputs the info to the user</summary>
 </member>
 <member name="M:winapp2ool.Diff.compareTo">
- <summary>
- Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences
- </summary>
- <returns></returns>
+ <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
 </member>
 <member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.String,System.String)">
- <summary>
- Handles the Added and Removed cases for changes 
- </summary>
+ <summary>Handles the Added and Removed cases for changes </summary>
  <param name="keyList">A list of iniKeys that have been added/removed</param>
  <param name="out">The output text to be appended to</param>
  <param name="changeTxt">The text to appear in the output</param>
 </member>
 <member name="M:winapp2ool.Diff.chkLsts(winapp2ool.keyList@,winapp2ool.keyList@,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@)">
- <summary>
- Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key 
- </summary>
+ <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key </summary>
  <param name="removedKeys">The list of iniKeys that were removed from the newer version of the file</param>
  <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
  <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
 </member>
 <member name="M:winapp2ool.Diff.updateKeys(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@,winapp2ool.keyList@,winapp2ool.keyList@,winapp2ool.iniKey,winapp2ool.iniKey)">
- <summary>
- Performs change tracking for chkLst 
- </summary>
+ <summary>Performs change tracking for chkLst </summary>
  <param name="updLst">The list of updated keys</param>
  <param name="aKeys">The list of added keys</param>
  <param name="rKeys">The list of removed keys</param>
@@ -154,17 +114,12 @@ winapp2ool
  <param name="skey">A removed key</param>
 </member>
 <member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.String)">
- <summary>
- Returns a string containing a menu box listing the change type and entry, followed by the entry's toString
- </summary>
+ <summary>Returns a string containing a menu box listing the change type and entry, followed by the entry's toString</summary>
  <param name="section">an iniSection object to be diffed</param>
  <param name="changeType">The type of change to observe</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Diff.log(System.String)">
- <summary>
- Saves a String to the log file
- </summary>
+ <summary>Saves a String to the log file</summary>
  <param name="toLog">The string to be appended to the log</param>
 </member>
 <member name="T:winapp2ool.Downloader">
@@ -179,157 +134,111 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.Downloader.printMenu">
- <summary>
- Prints the main menu to the user
- </summary>
+ <summary>Prints the main menu to the user</summary>
 </member>
 <member name="M:winapp2ool.Downloader.printAdvMenu">
- <summary>
- Prints the advanced downloads menu
- </summary>
+ <summary>Prints the advanced downloads menu</summary>
 </member>
 <member name="M:winapp2ool.Downloader.handleAdvInput(System.String)">
- <summary>
- Handles the user input for the advanced download menu
- </summary>
+ <summary>Handles the user input for the advanced download menu</summary>
  <param name="input">The string containing the user's input</param>
 </member>
 <member name="M:winapp2ool.Downloader.handleUserInput(System.String)">
- <summary>
- Handles the user input for the menu
- </summary>
+ <summary>Handles the user input for the menu</summary>
  <param name="input">The String containing the user's input</param>
 </member>
 <member name="M:winapp2ool.Downloader.getFileDataAtLineNum(System.String,System.Int32,System.Boolean)">
- <summary>
- Reads a file until a specified line number 
- </summary>
+ <summary>Reads a file until a specified line number0</summary>
  <param name="path">The path (or online address) of the file</param>
  <param name="lineNum">The line number to read to</param>
  <param name="remote">The boolean specifying whether the resource is remote (online)</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Downloader.checkOnline">
- <summary>
- Returns true if we are able to connect to the internet, otherwise, returns false.
- </summary>
+ <summary>Returns true if we are able to connect to the internet, otherwise, returns false.</summary>
 </member>
 <member name="M:winapp2ool.Downloader.getRemoteIniFile(System.String)">
- <summary>
- Returns an iniFile object created using an online resource
- </summary>
- ie. GitHub
+ <summary>Returns an iniFile object created using an online resource ie. GitHub</summary>
  <param name="address">A URL pointing to an online .ini file</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Downloader.getTargetLine(System.IO.StreamReader,System.Int32)">
- <summary>
- Reads a file only until reaching a specific line and then returns that line as a String
- </summary>
+ <summary>Reads a file only until reaching a specific line and then returns that line as a String</summary>
  <param name="reader">An open file stream</param>
  <param name="lineNum">The target line number</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Downloader.remoteDownload(System.String,System.String,System.String,System.Boolean)">
- <summary>
- Handles a request to download a file from outside the module
- </summary>
+ <summary>Handles a request to download a file from outside the module</summary>
  <param name="dir">The directory to which the file should be downloaded</param>
  <param name="name">The name with which to save the file</param>
  <param name="link">The URL to download from</param>
  <param name="prompt">Boolean specifying whether or not the user should be asked to overwrite the file should it exist</param>
 </member>
 <member name="M:winapp2ool.Downloader.autoUpdate">
- <summary>
- Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.
- </summary>
+ <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
 </member>
 <member name="M:winapp2ool.Downloader.download(System.String,System.Boolean)">
- <summary>
- Prompts the user to rename or overwrite a file if necessary before downloading.
- </summary>
+ <summary>Prompts the user to rename or overwrite a file if necessary before downloading.</summary>
  <param name="link">The URL to be downloaded from</param>
  <param name="prompt">The boolean indicating whether or not the user should be prompted to rename the file should it exist already.</param>
 </member>
 <member name="M:winapp2ool.Downloader.dlFile(System.String,System.String)">
- <summary>
- Performs the download, returns a boolean indicating the success of the download.
- </summary>
+ <summary>Performs the download, returns a boolean indicating the success of the download.</summary>
  <param name="link">The URL to be downloaded from</param>
  <param name="path">The file path to be saved to</param>
- <returns></returns>
 </member>
 <member name="T:winapp2ool.commandLineHandler">
  <summary>
- This module handles the commandline args presented to winapp2ool and attempts to pass them off to their respective modules
+ This module helps handle any commandline arguments passed to winapp2ool
  </summary>
 </member>
+<member name="P:winapp2ool.commandLineHandler.cmdargs">
+ <summary>The current list of the command line args (mutable)</summary>
+</member>
 <member name="M:winapp2ool.commandLineHandler.invertSettingAndRemoveArg(System.Boolean@,System.String,System.String@,System.String@)">
- <summary>
- Flips a boolean setting and removes its associated argument from the args list
- </summary>
+ <summary>Flips a boolean setting and removes its associated argument from the args list</summary>
  <param name="setting">The boolean setting to be flipped</param>
  <param name="arg">The string containing the argument that flips the boolean</param>
  <param name="name">Optional reference to a file name to be replaced</param>
  <param name="newname">Optional replacement file name</param>
 </member>
 <member name="M:winapp2ool.commandLineHandler.handleDownloadBools(System.Boolean@)">
- <summary>
- Processes whether to download and which file to download
- </summary>
+ <summary>Processes whether to download and which file to download</summary>
  <param name="download">The boolean indicating winapp2.ini should be downloaded</param>
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileName(System.String,winapp2ool.iniFile@)">
- <summary>
- Renames an iniFile object if provided a commandline arg to do so
- </summary>
+ <summary>Renames an iniFile object if provided a commandline arg to do so</summary>
  <param name="flag">The flag that precedes the name specification in the args list</param>
  <param name="givenFile">A reference to an iniFile object to be modified</param>
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileNameAndDir(System.String,winapp2ool.iniFile@)">
- <summary>
- Applies a new directory and name to an iniFile object 
- </summary>
+ <summary>Applies a new directory and name to an iniFile object</summary>
  <param name="flag">The flag preceeding the file/path parameter in the arg list</param>
  <param name="file">The iniFile object to be modified</param>
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileParams(System.String@,winapp2ool.iniFile@)">
- <summary>
- Takes in a full form filepath with directory and assigns the directory and filename components to the given iniFile object
- </summary>
+ <summary>Takes in a full form filepath with directory and assigns the directory and filename components to the given iniFile object</summary>
  <param name="arg">The filepath argument</param>
  <param name="file">The iniFile object to be modified</param>
 </member>
 <member name="M:winapp2ool.commandLineHandler.processCommandLineArgs">
- <summary>
- Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler
- </summary>
+ <summary>Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler</summary>
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileAndDirParams(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile@)">
- <summary>
- Gets the directory and name info for each file given (if any)
- </summary>
+ <summary>Gets the directory and name info for each file given (if any)</summary>
  <param name="ff">The "first file" from a module</param>
  <param name="sf">The "second file" from a module</param>
  <param name="tf">The "third file" from a module</param>
 </member>
-<member name="M:winapp2ool.commandLineHandler.getParams(System.Int32,winapp2ool.iniFile)">
- <summary>
- Processes numerically ordered directory (d) and file (f) commandline args on a per-file basis
- </summary>
+<member name="M:winapp2ool.commandLineHandler.getParams(System.Int32,winapp2ool.iniFile@)">
+ <summary>Processes numerically ordered directory (d) and file (f) commandline args on a per-file basis</summary>
  <param name="someNumber">The number (1-indexed) of our current internal iniFile</param>
  <param name="someFile">A reference to the iniFile object being operated on</param>
 </member>
 <member name="M:winapp2ool.commandLineHandler.validateArgs">
- <summary>
- Enforces that commandline args are properly formatted in {"-flag","data"} format
- </summary>
+ <summary>Enforces that commandline args are properly formatted in {"-flag","data"} format</summary>
 </member>
 <member name="M:winapp2ool.commandLineHandler.printErrExit(System.String)">
- <summary>
- Prints an error to the user and exits the application after they have pressed a key
- </summary>
- <param name="errTxt">The String containing the erorr text to be printed to the user</param>
+ <summary>Prints an error to the user and exits the application after they have pressed a key</summary>
+ <param name="errTxt">The text to be printed to the user</param>
 </member>
 <member name="T:winapp2ool.exceptionHandler">
  <summary>
@@ -337,121 +246,103 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.exceptionHandler.exc(System.Exception@)">
- <summary>
- Prints out exceptions and any other information related to them that a use may need.
- </summary>
+ <summary>Prints out exceptions and any other information related to them that a use may need.</summary>
  <param name="ex">A given exception captured during winapp2ool's execution</param>
 </member>
 <member name="M:winapp2ool.exceptionHandler.offlineErr">
- <summary>
- Inform the user that they cannot 
- </summary>
+ <summary>Inform the user that they cannot</summary>
  Consider allowing the user to reestablish their internet connection here
 </member>
 <member name="M:winapp2ool.exceptionHandler.printDotNetOutOfDateError">
- <summary>
- Prints output to the user instructing them to update their .NET Framework 
- </summary>
+ <summary>Prints output to the user instructing them to update their .NET Framework</summary>
 </member>
 <member name="T:winapp2ool.iniFile">
  <summary>
  An object representing a .ini configuration file
  </summary>
 </member>
+<member name="P:winapp2ool.iniFile.Dir">
+ <summary>The directory on the system in which the iniFile can be found</summary>
+</member>
+<member name="P:winapp2ool.iniFile.Name">
+ <summary>The name of the file on disk</summary>
+</member>
+<member name="P:winapp2ool.iniFile.InitDir">
+ <summary>The Directory with which the iniFile was instantiated</summary>
+</member>
+<member name="P:winapp2ool.iniFile.InitName">
+ <summary>The file name with which the iniFile was instantiated</summary>
+</member>
+<member name="P:winapp2ool.iniFile.Sections">
+ <summary>The individual sections found in the file. Keys are the Section's Name</summary>
+</member>
+<member name="P:winapp2ool.iniFile.Comments">
+ <summary>Any comments found in the file, in the order they were found. Positions are not remembered.</summary>
+</member>
+<member name="P:winapp2ool.iniFile.SecondName">
+ <summary>The suggested name for a file, shown during File Chooser prompts</summary>
+</member>
+<member name="P:winapp2ool.iniFile.LineCount">
+ <summary>The current line number of the file during reading</summary>
+</member>
 <member name="M:winapp2ool.iniFile.ToString">
- <summary>
- Returns an iniFile as it would appear on disk as a String
- </summary>
- <returns></returns>
+ <summary>Returns an iniFile as it would appear on disk as a String</summary>
 </member>
 <member name="M:winapp2ool.iniFile.#ctor(System.String,System.String,System.String)">
- <summary>
- Creates an uninitialized iniFile with a directory and a filename.
- </summary>
+ <summary>Creates an uninitialized iniFile with a directory and a filename.</summary>
  <param name="directory">A windows directory containing a .ini file</param>
  <param name="filename">The name of the .ini file contained in the given directory </param>
  <param name="rename">A provided suggestion for a rename should the user open the File Chooser on this file</param>
 </member>
 <member name="M:winapp2ool.iniFile.overwriteToFile(System.String)">
- <summary>
- Writes the contents of a provided String to our iniFile's path, overwriting any existing contents
- </summary>
+ <summary>Writes the contents of a provided String to our iniFile's path, overwriting any existing contents</summary>
  <param name="tostr">The string to be written to disk</param>
 </member>
 <member name="M:winapp2ool.iniFile.resetParams">
- <summary>
- Restores the initial directory and name parameters in the iniFile 
- </summary>
+ <summary>Restores the initial directory and name parameters in the iniFile </summary>
 </member>
 <member name="M:winapp2ool.iniFile.path">
- <summary>
- Returns the full windows file path of the iniFile as a String
- </summary>
- <returns></returns>
+ <summary>Returns the full windows file path of the iniFile as a String</summary>
 </member>
 <member name="M:winapp2ool.iniFile.getLineNumsFromSections">
- <summary>
- Returns the starting line number of each section in the iniFile as a list of integers
- </summary>
- <returns></returns>
+ <summary>Returns the starting line number of each section in the iniFile as a list of integers</summary>
 </member>
 <member name="M:winapp2ool.iniFile.#ctor(System.String[])">
- <summary>
- Constructs an iniFile object using an internet source
- </summary>
+ <summary>Constructs an iniFile object using an internet source</summary>
  <param name="lines">The array of Strings representing a remote .ini file</param>
 </member>
 <member name="M:winapp2ool.iniFile.processiniLine(System.String@,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.Boolean@)">
- <summary>
- Processes a line in a .ini file and updates the iniFile object meta data accordingly
- </summary>
+ <summary>Processes a line in a .ini file and updates the iniFile object meta data accordingly</summary>
  <param name="currentLine">The current string being read</param>
  <param name="sectionToBeBuilt">The pending list of strings to be built into an iniSection</param>
  <param name="lineTrackingList">The associated list of line number integers for the section strings</param>
  <param name="lastLineWasEmpty">The boolean representing whether or not the previous line was empty</param>
 </member>
 <member name="M:winapp2ool.iniFile.updSec(System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.String,System.Boolean@)">
- <summary>
- Manages line and number tracking for iniSections whose construction is pending
- </summary>
+ <summary>Manages line and number tracking for iniSections whose construction is pending</summary>
  <param name="secList">The list of strings for the iniSection</param>
  <param name="lineList">The list of line numbers for the iniSection</param>
  <param name="curLine">The current line to be added to the section</param>
 </member>
 <member name="M:winapp2ool.iniFile.init">
- <summary>
- Attempts to read a .ini file from disk and initialize the iniFile object
- </summary>
+ <summary>Attempts to read a .ini file from disk and initialize the iniFile object</summary>
 </member>
 <member name="M:winapp2ool.iniFile.validate">
- <summary>
- Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists.
- If an iniFile's sections already exist, skip this.
- </summary>
+ <summary>Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists.</summary>
 </member>
 <member name="M:winapp2ool.iniFile.sortSections(winapp2ool.strList)">
- <summary>
- Reorders the iniSections in an iniFile object to be in the same sorted state as a provided list of Strings
- </summary>
+ <summary>Reorders the iniSections in an iniFile object to be in the same sorted state as a provided list of Strings</summary>
  <param name="sortedSections">The sorted state of the sections by name</param>
 </member>
 <member name="M:winapp2ool.iniFile.findCommentLine(System.String)">
- <summary>
- Find the line number of a comment by its string. Returns -1 if not found
- </summary>
+ <summary>Find the line number of a comment by its string. Returns -1 if not found</summary>
  <param name="com">The string containing the comment text to be searched for</param>
- <returns></returns>
 </member>
-<member name="M:winapp2ool.iniFile.namesToListOfStr">
- <summary>
- Returns the section names from the iniFile object as a list of Strings
- </summary>
- <returns></returns>
+<member name="M:winapp2ool.iniFile.namesToStrList">
+ <summary>Returns the section names from the iniFile object as a list of Strings</summary>
 </member>
 <member name="M:winapp2ool.iniFile.mkSection(System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.Int32})">
- <summary>
- Attempts to create a new iniSection object and add it to the iniFile
- </summary>
+ <summary>Attempts to create a new iniSection object and add it to the iniFile</summary>
  <param name="sectionToBeBuilt">The list of strings in the iniSection</param>
  <param name="lineTrackingList">The list of line numbers associated with the given strings</param>
 </member>
@@ -460,67 +351,63 @@ winapp2ool
  An object representing a section of a .ini file
  </summary>
 </member>
+<member name="P:winapp2ool.iniSection.StartingLineNumber">
+ <summary> The line number from which the Name of the Section was originally read</summary>
+</member>
+<member name="P:winapp2ool.iniSection.EndingLineNumber">
+ <summary> The line number from which the last Key in the Section was originally read </summary>
+</member>
+<member name="P:winapp2ool.iniSection.Name">
+ <summary>The name of the Section (without [Braces])</summary>
+</member>
+<member name="P:winapp2ool.iniSection.Keys">
+ <summary>The Dictionary</summary>
+</member>
 <member name="M:winapp2ool.iniSection.constKeyLists(System.Collections.Generic.List{winapp2ool.keyList}@)">
- <summary>
- Sorts a section's keys into keylists based on their KeyType
- </summary>
+ <summary>Sorts a section's keys into keylists based on their KeyType</summary>
  <param name="listOfKeyLists">The list of keyLists to be sorted into</param>
  The last list in the keylist list holds the error keys
 </member>
 <member name="M:winapp2ool.iniSection.removeKeys(System.Collections.Generic.List{System.Int32})">
- <summary>
- Removes a series of keys from the section
- </summary>
+ <summary>Removes a series of keys from the section</summary>
  <param name="indicies"></param>
 </member>
 <member name="M:winapp2ool.iniSection.getFullName">
- <summary>
- Returns the iniSection name as it would appear on disk.
- </summary>
- <returns></returns>
+ <summary>Returns the iniSection name as it would appear on disk.</summary>
 </member>
 <member name="M:winapp2ool.iniSection.#ctor">
- <summary>
- Creates a new (empty) iniSection object.
- </summary>
+ <summary>Creates a new (empty) iniSection object.</summary>
 </member>
 <member name="M:winapp2ool.iniSection.#ctor(System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.Int32})">
- <summary>
- Creates a new iniSection object without tracking the line numbers
- </summary>
+ <summary>Creates a new iniSection object without tracking the line numbers</summary>
  <param name="listOfLines">The list of Strings comprising the iniSection</param>
  <param name="listOfLineCounts">The list of line numbers associated with the lines</param>
 </member>
 <member name="M:winapp2ool.iniSection.getKeysAsList">
- <summary>
- Returns the keys in the iniSection as a list of Strings
- </summary>
- <returns></returns>
+ <summary>Returns the keys in the iniSection as a list of Strings</summary>
 </member>
 <member name="M:winapp2ool.iniSection.compareTo(winapp2ool.iniSection,winapp2ool.keyList@,winapp2ool.keyList@)">
- <summary>
- Compares two iniSections, returns false if they are not the same.
- </summary>
+ <summary>Compares two iniSections, returns false if they are not the same.</summary>
  <param name="ss">The section to be compared against</param>
  <param name="removedKeys">A return list on iniKey objects that appear in the iniFile object but not the given</param>
  <param name="addedKeys">A return list of iniKey objects that appear in the given iniFile object but not this one</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniSection.ToString">
- <summary>
- Returns an iniSection as it would appear on disk as a String
- </summary>
- <returns></returns>
+ <summary>Returns an iniSection as it would appear on disk as a String</summary>
 </member>
 <member name="T:winapp2ool.iniComment">
  <summary>
  An object representing a comment in a .ini file
  </summary>
 </member>
+<member name="P:winapp2ool.iniComment.Comment">
+ <summary> The text of the comment</summary>
+</member>
+<member name="P:winapp2ool.iniComment.LineNumber">
+ <summary> The line number from which the comment was originally read</summary>
+</member>
 <member name="M:winapp2ool.iniComment.#ctor(System.String,System.Int32)">
- <summary>
- Creates a new iniComment object
- </summary>
+ <summary>Creates a new iniComment object</summary>
  <param name="c">The comment text</param>
  <param name="l">The line number</param>
 </member>
@@ -529,79 +416,65 @@ winapp2ool
  A handy wrapper object for lists of iniKeys
  </summary>
 </member>
+<member name="P:winapp2ool.keyList.Keys">
+ <summary> The list of iniKeys </summary>
+</member>
+<member name="P:winapp2ool.keyList.KeyType">
+ <summary> The KeyType of keys contained in the list</summary>
+</member>
 <member name="M:winapp2ool.keyList.#ctor(System.String)">
- <summary>
- Creates a new (empty) keylist
- </summary>
+ <summary>Creates a new (empty) keylist</summary>
  <param name="kt">Optional String containing the expected KeyType of the keys in the list</param>
 </member>
 <member name="M:winapp2ool.keyList.#ctor(System.Collections.Generic.List{winapp2ool.iniKey})">
- <summary>
- Creates a new keylist using an existing list of iniKeys
- </summary>
+ <summary>Creates a new keylist using an existing list of iniKeys</summary>
  <param name="kl">A list of iniKeys to be inserted into the keylist</param>
 </member>
 <member name="M:winapp2ool.keyList.add(winapp2ool.iniKey,System.Boolean)">
- <summary>
- Conditionally adds a key to the keylist
- </summary>
+ <summary>Conditionally adds a key to the keylist</summary>
  <param name="key">The key to be added</param>
  <param name="cond">The condition under which to add the key</param>
 </member>
 <member name="M:winapp2ool.keyList.add(System.Collections.Generic.List{winapp2ool.iniKey})">
- <summary>
- Adds a list of iniKeys to the keylist
- </summary>
+ <summary>Adds a list of iniKeys to the keylist</summary>
  <param name="kl">The list to be added</param>
 </member>
 <member name="M:winapp2ool.keyList.remove(winapp2ool.iniKey)">
- <summary>
- Removes a key from the keylist
- </summary>
+ <summary>Removes a key from the keylist</summary>
  <param name="key">The key to be removed</param>
 </member>
 <member name="M:winapp2ool.keyList.remove(System.Collections.Generic.List{winapp2ool.iniKey})">
- <summary>
- Removes a list of keys from the keylist
- </summary>
+ <summary>Removes a list of keys from the keylist</summary>
  <param name="kl">The list of keys to be removed</param>
 </member>
+<member name="M:winapp2ool.keyList.remove(System.Int32)">
+ <summary> Removes the key at the provided index</summary>
+ <param name="ind">The index of the key to be removed</param>
+</member>
 <member name="M:winapp2ool.keyList.keyCount">
- <summary>
- Returns the number of keys in the keylist
- </summary>
- <returns></returns>
+ <summary>Returns the number of keys in the keylist</summary>
 </member>
 <member name="M:winapp2ool.keyList.typeIs(System.String)">
- <summary>
- Returns whether or not the keyType of the list matches the input String
- </summary>
+ <summary>Returns whether or not the keyType of the list matches the input String</summary>
  <param name="type">The String against which to match the keylist's type</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.keyList.toListOfStr(System.Boolean)">
- <summary>
- Returns the keylist in the form of a list of Strings
- </summary>
+ <summary>Returns the keylist in the form of a list of Strings</summary>
  <param name="onlyGetVals">Optional Boolean specifying whether or not the function should return only the values from the keys</param>
- <returns></returns>
+</member>
+<member name="M:winapp2ool.keyList.toStrLst(System.Boolean)">
+ <summary>Returns a keyList as a strList</summary>
+ <param name="onlyGetVals">True if only requesting the values from the keys. Defaukt: false</param>
 </member>
 <member name="M:winapp2ool.keyList.removeLast">
- <summary>
- Removes the last element in the key list if it exists
- </summary>
+ <summary>Removes the last element in the key list if it exists</summary>
 </member>
 <member name="M:winapp2ool.keyList.renumberKeys(winapp2ool.strList)">
- <summary>
- Renumber keys according to the sorted state of the values
- </summary>
+ <summary>Renumber keys according to the sorted state of the values</summary>
  <param name="sortedKeyValues"></param>
 </member>
 <member name="M:winapp2ool.keyList.lineNums">
- <summary>
- Returns a list of integers containing the line numbers from the keylist
- </summary>
- <returns></returns>
+ <summary>Returns a list of integers containing the line numbers from the keylist</summary>
 </member>
 <member name="T:winapp2ool.iniKey">
  <summary>
@@ -609,162 +482,101 @@ winapp2ool
  </summary>
 </member>
 <member name="P:winapp2ool.iniKey.Value">
- <summary>
- The value of the iniKey: any text on the right side of the '='
- </summary>
- <returns></returns>
+ <summary>The value of the iniKey: any text on the right side of the '='</summary>
 </member>
 <member name="P:winapp2ool.iniKey.KeyType">
- <summary>
- 
- </summary>
- <returns></returns>
+ <summary>The type of the iniKey: any text on the left side of the '=' (not including numbers)</summary>
 </member>
-<member name="M:winapp2ool.iniKey.setValue(System.String)">
- <summary>
- Assigns or overwrites the value of the iniKey
- </summary>
- <param name="newVal">The String containing the new value</param>
+<member name="P:winapp2ool.iniKey.Name">
+ <summary>The name of the iniKey: any text on the left side of the '='</summary>
 </member>
-<member name="M:winapp2ool.iniKey.setName(System.String)">
- <summary>
- Assigns or overwrites the name of the iniKey
- </summary>
- <param name="newName">The String containing the new value</param>
-</member>
-<member name="M:winapp2ool.iniKey.setKeyType(System.String)">
- <summary>
- Assigns or overwrites the keyType of the iniKey 
- </summary>
- <param name="newType">The String containing the new value</param>
+<member name="P:winapp2ool.iniKey.LineNumber">
+ <summary>The number of the line on which the key was found during the original reading of the file</summary>
 </member>
 <member name="M:winapp2ool.iniKey.nameIs(System.String,System.Boolean)">
- <summary>
- Returns whether or not an iniKey's name is equal to a given value
- </summary>
+ <summary>Returns whether or not an iniKey's name is equal to a given value</summary>
  <param name="n">The String to check equality for</param>
  <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniKey.typeIs(System.String,System.Boolean)">
- <summary>
- Returns whether or not an iniKey's type is equal to a given value
- </summary>
+ <summary>Returns whether or not an iniKey's type is equal to a given value</summary>
  <param name="t">The string to check equality for</param>
  <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniKey.vHas(System.String,System.Boolean)">
- <summary>
- Returns whether or not an iniKey object's value contains a given string with conditional case sensitivity
- </summary>
+ <summary>Returns whether or not an iniKey object's value contains a given string with conditional case sensitivity</summary>
  <param name="txt">The string to search for</param>
  <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniKey.vHasAny(System.String[],System.Boolean)">
- <summary>
- Returns whether or not an iniKey object's value contains any of a given array of strings with conditional case sensitivity
- </summary>
+ <summary>Returns whether or not an iniKey object's value contains any of a given array of strings with conditional case sensitivity</summary>
  <param name="txts">The array of search strings</param>
  <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniKey.vIs(System.String,System.Boolean)">
- <summary>
- Returns whether or not an iniKey object's value is equal to a given string with conditional case sensitivity
- </summary>
+ <summary>Returns whether or not an iniKey object's value is equal to a given string with conditional case sensitivity</summary>
  <param name="txt">The string to be searched for</param>
  <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniKey.stripNums(System.String)">
- <summary>
- Returns an iniKey object's keyName field with numbers removed
- </summary>
+ <summary>Returns an iniKey object's keyName field with numbers removed</summary>
  <param name="keyName">The string containing the iniKey's keyname</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniKey.compareNames(winapp2ool.iniKey)">
- <summary>
- Compares the names of two iniKeys and returns whether or not they match
- </summary>
+ <summary>Compares the names of two iniKeys and returns whether or not they match</summary>
  <param name="key">The iniKey to be compared to</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniKey.compareValues(winapp2ool.iniKey)">
- <summary>
- Compares the values of two iniKeys and returns whether or not they match
- </summary>
+ <summary>Compares the values of two iniKeys and returns whether or not they match</summary>
  <param name="key">The iniKey to be compared to</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniKey.compareTypes(winapp2ool.iniKey)">
- <summary>
- Compares the types of two iniKeys and returns whether or not they match
- </summary>
+ <summary>Compares the types of two iniKeys and returns whether or not they match</summary>
  <param name="key">The iniKey to be compared to</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.iniKey.#ctor(System.String,System.Int32)">
- <summary>
- Create an iniKey object from a string containing a name value pair
- </summary>
+ <summary>Create an iniKey object from a string containing a name value pair</summary>
  <param name="line">A string in the format name=value</param>
  <param name="count">The line number for the string</param>
 </member>
 <member name="M:winapp2ool.iniKey.ToString">
+ <summary>Returns the key in name=value format as a String</summary>
+</member>
+<member name="T:winapp2ool.strList">
  <summary>
- Returns the key in name=value format as a String
+ A helpful wrapper for List(Of String)s 
  </summary>
- <returns></returns>
+</member>
+<member name="M:winapp2ool.strList.#ctor">
+ <summary> Creates a new (empty) strList</summary>
 </member>
 <member name="P:winapp2ool.strList.items">
- <summary>
- A list of String values
- </summary>
- <returns></returns>
+ <summary>The values inside the strList</summary>
 </member>
 <member name="M:winapp2ool.strList.indexOf(System.String)">
- <summary>
- Returns the index of the given String in the list if it exists. Else -1
- </summary>
+ <summary>Returns the index of the given String in the list if it exists. Else -1</summary>
  <param name="item">A String to search for in the list</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.strList.add(System.String,System.Boolean)">
- <summary>
- Conditionally adds an item to the list 
- </summary>
+ <summary>Conditionally adds an item to the list </summary>
  <param name="item">A string value to add to the list</param>
  <param name="cond">The optional condition under which the value should be added (default: true)</param>
 </member>
 <member name="M:winapp2ool.strList.contains(System.String,System.Boolean)">
- <summary>
- Returns true if the list contains a given value. Case sensitive by default
- </summary>
+ <summary>Returns true if the list contains a given value. Case sensitive by default</summary>
  <param name="givenValue">A value to search the list for</param>
  <param name="ignoreCase">The optional condition specifying whether string casing should be ignored</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.strList.getNeighborList">
- <summary>
- Construct a list of neighbors for strings in a list
- </summary>
+ <summary>Construct a list of neighbors for strings in a list</summary>
 </member>
 <member name="M:winapp2ool.strList.replaceStrAtIndexOf(System.String,System.String)">
- <summary>
- Replaces an item in a list of strings at the index of another given item
- </summary>
+ <summary>Replaces an item in a list of strings at the index of another given item</summary>
  <param name="indexOfText">The text to be replaced</param>
  <param name="newText">The replacement text</param>
- strlist candidate
 </member>
 <member name="M:winapp2ool.strList.count">
- <summary>
- Returns the number of items in the strList
- </summary>
- <returns></returns>
+ <summary>Returns the number of items in the strList</summary>
 </member>
 <member name="T:winapp2ool.iniFileHandler">
  <summary>
@@ -772,51 +584,35 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.iniFileHandler.chkFileExist(winapp2ool.iniFile)">
- <summary>
- Enforces that a user selected file exists
- </summary>
+ <summary>Enforces that a user selected file exists</summary>
  <param name="someFile">An iniFile object with user defined path and name parameters</param>
 </member>
 <member name="M:winapp2ool.iniFileHandler.chkDirExist(System.String@)">
- <summary>
- Enforces that a user defined directory exists, either by selecting a new one or creating one.
- </summary>
+ <summary>Enforces that a user defined directory exists, either by selecting a new one or creating one.</summary>
  <param name="dir">A user defined windows directory</param>
 </member>
 <member name="M:winapp2ool.iniFileHandler.fileChooser(winapp2ool.iniFile@)">
- <summary>
- Presents a menu to the user allowing them to perform some file and directory operations
- </summary>
+ <summary>Presents a menu to the user allowing them to perform some file and directory operations</summary>
  <param name="someFile">An iniFile object with user definable parameters</param>
 </member>
 <member name="M:winapp2ool.iniFileHandler.handleFileChooserChoice(winapp2ool.iniFile@)">
- <summary>
- Allows the user change the file name or directory of a given iniFile object
- </summary>
+ <summary>Allows the user change the file name or directory of a given iniFile object</summary>
  <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
 </member>
 <member name="M:winapp2ool.iniFileHandler.handleFileChooserConfirm(winapp2ool.iniFile@)">
- <summary>
- Confirms the user's choice of a file's parameters in the File Chooser and allows them to make changes before saving
- </summary>
+ <summary>Confirms the user's choice of a file's parameters in the File Chooser and allows them to make changes before saving</summary>
  <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
 </member>
 <member name="M:winapp2ool.iniFileHandler.dirChooser(System.String@)">
- <summary>
- Presents an interface to the user allowing them to operate on windows directory parameters
- </summary>
+ <summary>Presents an interface to the user allowing them to operate on windows directory parameters</summary>
  <param name="dir">A user definable windows directory path</param>
 </member>
 <member name="M:winapp2ool.iniFileHandler.handleDirChooserChoice(System.String@)">
- <summary>
- Allows the user to select a directory using a similar interface to the File Chooser
- </summary>
+ <summary>Allows the user to select a directory using a similar interface to the File Chooser</summary>
  <param name="dir">The String containing the directory the user is parameterizing</param>
 </member>
 <member name="M:winapp2ool.iniFileHandler.handleDirChooserConfirm(System.String@)">
- <summary>
- Confirms the user's choice of directory and allows them to change it 
- </summary>
+ <summary>Confirms the user's choice of directory and allows them to change it </summary>
  <param name="dir">The String containing the directory the user is parameterizing</param>
 </member>
 <member name="T:winapp2ool.MenuMaker">
@@ -825,158 +621,112 @@ winapp2ool
  </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.SuppressOutput">
- <summary>
- When enabled, prevents winapp2ool from outputting to the console or asking for input (usually)
- </summary>
- <returns></returns>
+ <summary>When enabled, prevents winapp2ool from outputting to the console or asking for input (usually)</summary>
+</member>
+<member name="P:winapp2ool.MenuMaker.ExitCode">
+ <summary> True if there is a pending exit from the menu</summary>
+</member>
+<member name="P:winapp2ool.MenuMaker.MenuHeaderText">
+ <summary> Holds the text that appears in the top block of the menu </summary>
+</member>
+<member name="M:winapp2ool.MenuMaker.setHeaderText(System.String,System.Boolean)">
+ <summary>Inserts text into the menu header</summary>
+ <param name="txt">The text to appear in the header</param>
+ <param name="hasErr">The boolean indicating whether or not the text should be colored red</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.initMenu(System.String,System.Int32)">
- <summary>
- Initializes the menu 
- </summary>
+ <summary>Initializes the menu</summary>
  <param name="topper">The text to be displayed at the top of the menu screen</param>
  <param name="itemlen">The length in characters that should comprise the first bloc of options in the menu</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.denyActionWithTopper(System.Boolean,System.String)">
- <summary>
- Sets the menu header to an error string conditionally, returns the given condition
- </summary>
+ <summary>Sets the menu header to an error string conditionally, returns the given condition</summary>
  <param name="cond">The condition under which the error text should be printed</param>
  <param name="errText">The error text to be printed in the menu header</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.print(System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
- <summary>
- Prints a menu line, option, or reset string, conditionally
- </summary>
+ <summary>Prints a menu line, option, or reset string, conditionally</summary>
  <param name="cond">The condition under which to print</param>
  <param name="printType">The type of menu information to print</param>
  <param name="str1">The first string or half string to be printed</param>
  <param name="optString">The alignment or second half string to be printed</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.enStr(System.Boolean)">
- <summary>
- Returns the inverse state of a given setting as a String
- </summary>
+ <summary>Returns the inverse state of a given setting as a String</summary>
  <param name="setting">The setting whose state will be reported</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.exitModule">
- <summary>
- Exits a menu or module by flipping the exitCode to true 
- </summary>
+ <summary>Exits a menu or module by flipping the exitCode to true</summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuTop(System.String[],System.Boolean)">
- <summary>
- Prints the top of the menu (containing the topper), any description text provided, the menu prompt, and the exit option
- </summary>
+ <summary>Prints the top of the menu (containing the topper), any description text provided, the menu prompt, and the exit option</summary>
  <param name="descriptionItems">Items describing the menu</param>
  <param name="printExit">The boolean representing whether an option to exit should be printed</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.menu(System.String)">
- <summary>
- Constructs and returns to the calling function a new menu String
- </summary>
+ <summary>Constructs and returns to the calling function a new menu String</summary>
  <param name="lineString">A string to be made into a menu line</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuLine(System.String)">
- <summary>
- Prints a line in a menu
- </summary>
+ <summary>Prints a line in a menu</summary>
  <param name="lineString"></param>
 </member>
 <member name="M:winapp2ool.MenuMaker.menu(System.String,System.Boolean)">
- <summary>
- Constructs a menu string with a given alignment
- </summary>
+ <summary>Constructs a menu string with a given alignment</summary>
  <param name="lineString">The line to be printed</param>
  <param name="isCentered">The boolean indicating whether the line text should be centered</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuLine(System.String,System.Boolean)">
- <summary>
- Prints a menu string with a given alignment
- </summary>
+ <summary>Prints a menu string with a given alignment</summary>
  <param name="lineString"></param>
  <param name="isCenteredLine">The boolean indicating whether the line text should be centered</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuOpt(System.String,System.String)">
- <summary>
- Prints a numbered menu option after padding it to a set length
- </summary>
+ <summary>Prints a numbered menu option after padding it to a set length</summary>
  <param name="lineString1">The first part of the menu option</param>
  <param name="lineString2">The second part of the menu option</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.revertMenu">
- <summary>
- Flips the exitCode boolean so we can return to the menu when desired
- </summary>
+ <summary>Flips the exitCode boolean so we can return to the menu when desired</summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.undoAnyPendingExits">
- <summary>
- Forces the exitCode to be False
- </summary>
+ <summary>Forces the exitCode to be False</summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.String)">
- <summary>
- Constructs a menu line fit to the width of the console
- </summary>
+ <summary>Constructs a menu line fit to the width of the console</summary>
  <param name="line">The line to be printed</param>
  <param name="align">The alignment of the line to be printed. 'l' for Left or 'c' for Centre</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.padToEnd(System.String@,System.Int32)">
- <summary>
- Pads a given string with spaces 
- </summary>
+ <summary>Pads a given string with spaces</summary>
  <param name="out">The string to be padded</param>
  <param name="targetLen">The end length to which the string should be padded</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.bmenu(System.String)">
- <summary>
- Prints a box with a single message inside it 
- </summary>
+ <summary>Prints a box with a single message inside it</summary>
  <param name="text">The string to be printed in the box</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.tmenu(System.String)">
- <summary>
- Prints the topmost part of the menu with no bottom
- </summary>
+ <summary>Prints the topmost part of the menu with no bottom</summary>
  <param name="text">The String to be printed in the faux menu header</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.replDir(System.String)">
- <summary>
- Replaces instances of the current directory in a path string ".."
- </summary>
+ <summary>Replaces instances of the current directory in a path string ".."</summary>
  <param name="dirStr">A String containing a windows path</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.appendNewLine(System.String)">
- <summary>
- Appends a newline to a given String
- </summary>
+ <summary>Appends a newline to a given String</summary>
  <param name="line">The string to be appended</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.cwl(System.String)">
- <summary>
- Prints a line with a string if we're not suppressing output.
- </summary>
+ <summary>Prints a line with a string if we're not suppressing output.</summary>
  <param name="msg">The string to be printed</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.pendingExit">
- <summary>
- Clears the console if there's a pending exit, returns exitCode
- </summary>
- <returns></returns>
+ <summary>Clears the console if there's a pending exit, returns exitCode</summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.clrConsole(System.Boolean)">
- <summary>
- Clears the console conditionally when not running unit tests
- </summary>
+ <summary>Clears the console conditionally when not running unit tests</summary>
  <param name="cond">Optional Boolean specifying whether or not the console should be cleared</param>
 </member>
 <member name="T:winapp2ool.RegistryHelper">
@@ -985,32 +735,20 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.RegistryHelper.getLMKey(System.String)">
- <summary>
- Returns the requested key or subkey from the HKEY_LOCAL_MACHINE registry hive
- </summary>
+ <summary>Returns the requested key or subkey from the HKEY_LOCAL_MACHINE registry hive</summary>
  <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.RegistryHelper.getCRKey(System.String)">
- <summary>
- Returns the requested key or subkey from the HKEY_CLASSES_ROOT registry hive
- </summary>
+ <summary>Returns the requested key or subkey from the HKEY_CLASSES_ROOT registry hive</summary>
  <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.RegistryHelper.getCUKey(System.String)">
- <summary>
- Returns the requested key or subkey from the HKEY_CURRENT_USER registry hive
- </summary>
+ <summary>Returns the requested key or subkey from the HKEY_CURRENT_USER registry hive</summary>
  <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.RegistryHelper.getUserKey(System.String)">
- <summary>
- Returns the requested key or subkey from the HKEY_USERS registry hive
- </summary>
+ <summary>Returns the requested key or subkey from the HKEY_USERS registry hive</summary>
  <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
- <returns></returns>
 </member>
 <member name="T:winapp2ool.changeDict">
  <summary>
@@ -1018,57 +756,86 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.changeDict.#ctor">
- <summary>
- Creates a new string change tracking dictionary
- </summary>
+ <summary>Creates a new string change tracking dictionary</summary>
 </member>
-<member name="P:winapp2ool.changeDict.Changes1">
- <summary>
- The dictionary of changes made to a list of strings
- </summary>
- <returns></returns>
+<member name="P:winapp2ool.changeDict.Changes">
+ <summary>The dictionary of changes made to a list of strings</summary>
 </member>
 <member name="M:winapp2ool.changeDict.trackChanges(System.String,System.String)">
- <summary>
- Tracks renames made while mutating data for string sorting.
- </summary>
+ <summary>Tracks renames made while mutating data for string sorting.</summary>
  <param name="currentValue">The current value of a string</param>
  <param name="newValue">The new value of a piece of a string</param>
 </member>
 <member name="M:winapp2ool.changeDict.undoChanges(winapp2ool.strList[]@)">
- <summary>
- Restores the original state of data mutated for the purposes of string sorting.
- </summary>
+ <summary>Restores the original state of data mutated for the purposes of string sorting.</summary>
  <param name="lstArray">An array containing lists of strings whose data has been modified</param>
+</member>
+<member name="T:winapp2ool.winapp2file">
+ <summary>
+ Represents a winapp2.ini format iniFile, and enables easy access to format specific iniFile information
+ </summary>
+</member>
+<member name="M:winapp2ool.winapp2file.#ctor(winapp2ool.iniFile)">
+ <summary>Create a new meta winapp2 object from an iniFile object</summary>
+ <param name="file">A winapp2.ini format iniFile object</param>
+</member>
+<member name="M:winapp2ool.winapp2file.addToInnerFile(System.Int32,winapp2ool.winapp2entry,winapp2ool.iniSection)">
+ <summary>Inserts an iniSection into its respective tracking file and records the winapp2entry object form accordingly. </summary>
+ <param name="ind">The index of the tracking file</param>
+ <param name="entry">The section in winapp2entry format</param>
+ <param name="section">A section to be tracked</param>
+</member>
+<member name="M:winapp2ool.winapp2file.count">
+ <summary>Returns the total number of entries stored in the internal iniFile objects</summary>
+</member>
+<member name="M:winapp2ool.winapp2file.sortInneriniFiles">
+ <summary>Sorts the internal iniFile objects in winapp2.ini format order</summary>
+</member>
+<member name="M:winapp2ool.winapp2file.rebuildInnerIni(System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
+ <summary>Rebuilds a list of winapp2entry objects back into iniSection objects and returns the collection of them as an iniFile</summary>
+ <param name="entryList"></param>
+</member>
+<member name="M:winapp2ool.winapp2file.rebuildToIniFiles">
+ <summary>Updates the internal iniFile objects</summary>
+</member>
+<member name="M:winapp2ool.winapp2file.winapp2string">
+ <summary>Builds and returns the winapp2.ini text including header comments for writing back to a file</summary>
 </member>
 <member name="T:winapp2ool.winapp2KeyParameters">
  <summary>
  Provides a few helpful methods for dissecting winapp2key objects
  </summary>
 </member>
+<member name="P:winapp2ool.winapp2KeyParameters.PathString">
+ <summary>The extracted File/Registry path from the key </summary>
+</member>
+<member name="P:winapp2ool.winapp2KeyParameters.ArgsList">
+ <summary>The list of any file names (patterns) /registry keys from the key</summary>
+</member>
+<member name="P:winapp2ool.winapp2KeyParameters.FlagString">
+ <summary> Holds the key's flag (RECURSE, REMOVESELF, etc)</summary>
+</member>
+<member name="P:winapp2ool.winapp2KeyParameters.KeyType">
+ <summary>The original KeyType of the iniKey used to create the winapp2key</summary>
+</member>
+<member name="P:winapp2ool.winapp2KeyParameters.KeyNum">
+ <summary>The number associated with the KeyType</summary>
+</member>
 <member name="M:winapp2ool.winapp2KeyParameters.#ctor(winapp2ool.iniKey)">
- <summary>
- Creates a new keyparams object from a given iniKey object
- </summary>
+ <summary>Creates a new keyparams object from a given iniKey object</summary>
  <param name="key">The iniKey to get parameters from</param>
 </member>
 <member name="M:winapp2ool.winapp2KeyParameters.reconstructKey(winapp2ool.iniKey@)">
- <summary>
- Reconstructs a FileKey to hold the format of FileKeyX=PATH|FILE;FILE;FILE....|FLAG
- </summary>
+ <summary>Reconstructs a FileKey to hold the format of FileKeyX=PATH|FILE;FILE;FILE....|FLAG</summary>
  <param name="key">An iniKey to be reconstructed</param>
  Also trims empty comments 
 </member>
 <member name="M:winapp2ool.winapp2KeyParameters.addArgs(System.String@)">
- <summary>
- Constructs a new iniKey in an attempt to merge keys together
- </summary>
+ <summary>Constructs a new iniKey in an attempt to merge keys together</summary>
  <param name="tmpKeyStr">The string to contain the new key text</param>
 </member>
 <member name="M:winapp2ool.winapp2KeyParameters.trackParamAndFlags(winapp2ool.strList@,winapp2ool.strList@)">
- <summary>
- Tracks params and flags from a winapp2key
- </summary>
+ <summary>Tracks params and flags from a winapp2key</summary>
  <param name="paramList">The list of params observed</param>
  <param name="flagList">The list of flags observed</param>
 </member>
@@ -1077,22 +844,68 @@ winapp2ool
  Represents a winapp2.ini format iniKey and provides direct access to the keys by their type
  </summary>
 </member>
+<member name="P:winapp2ool.winapp2entry.Name">
+<summary> The name of the entry (from the iniSection)</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.FullName">
+<summary> The full name with [Brackets] of the entry</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.LineNum">
+<summary> The starting line number of the iniSection used to create the winapp2entry</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.DetectOS">
+ <summary>The keys in the entry with KeyType "DetectOS". Valid winapp2.ini Syntax dictates there be only one key
+ in this list, however this property will hold an arbitrary number</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.LangSecRef">
+ <summary>The keys in the entry with KeyType "LangSecRef". Valid winapp2.ini Syntax dictates there be only one key
+ in this list, however this property will hold an arbitrary number</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.SectionKey">
+ <summary>The keys in the entry with KeyType "Section". Valid winapp2.ini Syntax dictates there be only one key
+ in this list, however this property will hold an arbitrary number</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.Detects">
+ <summary>The keys in the entry with KeyType "Detect"</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.DetectFiles">
+ <summary>The keys in the entry with KeyType "DetectFile"</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.SpecialDetect">
+ <summary>The keys in the entry with the KeyType "SpecialDetect"</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.DefaultKey">
+<summary>The keys in the entry with the KeyType "Default". Valid winapp2.ini Syntax dictates there be only one key
+ in this list, however this property will hold an arbitrary number</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.FileKeys">
+ <summary>The keys in the entry with KeyType "FileKey"</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.RegKeys">
+<summary>The keys in the entry with KeyType "RegKey"</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.WarningKey">
+ <summary>The keys in the entry with KeyType "Warning". Valid winapp2.ini Syntax dictates there be only one key
+ in this list, however this property will hold an arbitrary number</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.ExcludeKeys">
+ <summary>The keys in the entry with KeyType "ExcludeKey"</summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.ErrorKeys">
+ <summary> Keys in the entry with KeyTypes that aren't valid winapp2.ini commands </summary>
+</member>
+<member name="P:winapp2ool.winapp2entry.KeyListList">
+ <summary>A list containing all the KeyLists in winapp2.ini order</summary>
+</member>
 <member name="M:winapp2ool.winapp2entry.#ctor(winapp2ool.iniSection)">
- <summary>
- Construct a new winapp2entry object from an iniSection
- </summary>
+ <summary>Construct a new winapp2entry object from an iniSection</summary>
  <param name="section">A winapp2.ini format iniSection object</param>
 </member>
 <member name="M:winapp2ool.winapp2entry.updKeyListList">
- <summary>
- Clears and updates the keyListList with the current state of the keys
- </summary>
+ <summary>Clears and updates the keyListList with the current state of the keys</summary>
 </member>
 <member name="M:winapp2ool.winapp2entry.dumpToListOfStrings">
- <summary>
- Returns the keys in each keyList back as a list of Strings in winapp2.ini (style) order
- </summary>
- <returns></returns>
+ <summary>Returns the keys in each keyList back as a list of Strings in winapp2.ini (style) order</summary>
 </member>
 <member name="T:winapp2ool.winapp2handler">
  <summary>
@@ -1100,105 +913,38 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.winapp2handler.replaceAndSort(winapp2ool.strList,System.String,System.String)">
- <summary>
- Sorts a list of strings after performing some mutations on the data (if necessary). Returns the sorted list of strings.
- </summary>
+ <summary>Sorts a list of strings after performing some mutations on the data (if necessary). Returns the sorted list of strings.</summary>
  <param name="ListToBeSorted">A list of strings for sorting </param>
  <param name="characterToReplace">A character (string) to replace</param>
  <param name="replacementText">The chosen replacement text</param>
- <returns> The sorted state of the listToBeSorted</returns>
 </member>
 <member name="M:winapp2ool.winapp2handler.findLongestNumLength(winapp2ool.strList@)">
- <summary>
- Searches the input list for numbers and returns the length of the longest number.
- </summary>
+ <summary>Searches the input list for numbers and returns the length of the longest number.</summary>
  <param name="lst">A list of strings to be searched</param>
- <returns>The length of the longest number in lst</returns>
 </member>
 <member name="M:winapp2ool.winapp2handler.findAndReplaceNumbers(winapp2ool.strList@,winapp2ool.changeDict@)">
- <summary>
- Detects the longest length number in a given list of strings and prepends all shorter numbers with zeros such that all numbers are the same length
- </summary>
+ <summary>Detects the longest length number in a given list of strings and prepends all shorter numbers with zeros such that all numbers are the same length</summary>
  This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. 
  <param name="listToBeSorted">The list to be modified prior to sorting</param>
  <param name="changes">The dictionary of changes made to the strings in listToBeSorted</param>
 </member>
 <member name="M:winapp2ool.winapp2handler.pathFromExcludeKey(winapp2ool.iniKey)">
- <summary>
- Returns the value from an ExcludeKey with the Flag parameter removed as a String
- </summary>
+ <summary>Returns the value from an ExcludeKey with the Flag parameter removed as a String</summary>
  <param name="key">An ExcludeKey iniKey</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.winapp2handler.padNumberStr(System.Int32,System.String)">
- <summary>
- Pads a number to a given length by preceding it with zeros (0's) and returns the padded number
- </summary>
+ <summary>Pads a number to a given length by preceding it with zeros (0's) and returns the padded number</summary>
  <param name="longestNumLen">The desired maximum length of a number</param>
  <param name="num">a given number</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.winapp2handler.removeEntries(System.Collections.Generic.List{winapp2ool.winapp2entry}@,System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
- <summary>
- Removes winapp2entry objects from a given winapp2file sectionList
- </summary>
+ <summary>Removes winapp2entry objects from a given winapp2file sectionList</summary>
  <param name="sectionList">The list of winapp2sections </param>
  <param name="removalList"></param>
 </member>
 <member name="M:winapp2ool.winapp2handler.sortEntryNames(winapp2ool.iniFile)">
- <summary>
- Sort the sections in an inifile by name
- </summary>
+ <summary>Sort the sections in an inifile by name</summary>
  <param name="file">The iniFile to be sorted</param>
- <returns></returns>
-</member>
-<member name="T:winapp2ool.winapp2handler.winapp2file">
- <summary>
- Represents a winapp2.ini format iniFile, and enables easy access to format specific iniFile information
- </summary>
-</member>
-<member name="M:winapp2ool.winapp2handler.winapp2file.#ctor(winapp2ool.iniFile)">
- <summary>
- Create a new meta winapp2 object from an iniFile object
- </summary>
- <param name="file">A winapp2.ini format iniFile object</param>
-</member>
-<member name="M:winapp2ool.winapp2handler.winapp2file.addToInnerFile(System.Int32,winapp2ool.winapp2entry,winapp2ool.iniSection)">
- <summary>
- Inserts an iniSection into its respective tracking file and records the winapp2entry object form accordingly. 
- </summary>
- <param name="ind">The index of the tracking file</param>
- <param name="entry">The section in winapp2entry format</param>
- <param name="section">A section to be tracked</param>
-</member>
-<member name="M:winapp2ool.winapp2handler.winapp2file.count">
- <summary>
- Returns the total number of entries stored in the internal iniFile objects
- </summary>
- <returns></returns>
-</member>
-<member name="M:winapp2ool.winapp2handler.winapp2file.sortInneriniFiles">
- <summary>
- Sorts the internal iniFile objects in winapp2.ini format order
- </summary>
-</member>
-<member name="M:winapp2ool.winapp2handler.winapp2file.rebuildInnerIni(System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
- <summary>
- Rebuilds a list of winapp2entry objects back into iniSection objects and returns the collection of them as an iniFile
- </summary>
- <param name="entryList"></param>
- <returns></returns>
-</member>
-<member name="M:winapp2ool.winapp2handler.winapp2file.rebuildToIniFiles">
- <summary>
- Updates the internal iniFile objects
- </summary>
-</member>
-<member name="M:winapp2ool.winapp2handler.winapp2file.winapp2string">
- <summary>
- Builds and returns the winapp2.ini text including header comments for writing back to a file
- </summary>
- <returns></returns>
 </member>
 <member name="T:winapp2ool.Merge">
  <summary>
@@ -1206,9 +952,7 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.Merge.handleCmdLine">
- <summary>
- Handles the commandline args for Merge
- </summary>
+ <summary>Handles the commandline args for Merge</summary>
   Merge args:
  -mm         : toggle mergemode from add&amp;replace to add&amp;remove
  Preset merge file choices
@@ -1218,41 +962,27 @@ winapp2ool
  -a          : archived entries.ini 
 </member>
 <member name="M:winapp2ool.Merge.initDefaultSettings">
- <summary>
- Restores the default state of the module's parameters
- </summary>
+ <summary>Restores the default state of the module's parameters</summary>
 </member>
 <member name="M:winapp2ool.Merge.printMenu">
- <summary>
- Prints the main menu to the user
- </summary>
+ <summary>Prints the main menu to the user</summary>
 </member>
 <member name="M:winapp2ool.Merge.handleUserInput(System.String)">
- <summary>
- Processes the user's input and acts accordingly based on the state of the program
- </summary>
+ <summary>Processes the user's input and acts accordingly based on the state of the program</summary>
  <param name="input">The String containing the user's input</param>
 </member>
 <member name="M:winapp2ool.Merge.changeMergeName(System.String)">
- <summary>
- Changes the merge file's name
- </summary>
+ <summary>Changes the merge file's name</summary>
  <param name="newName">the new name for the merge file</param>
 </member>
 <member name="M:winapp2ool.Merge.initMerge">
- <summary>
- Validates iniFiles and begins the merging process
- </summary>
+ <summary>Validates iniFiles and begins the merging process</summary>
 </member>
 <member name="M:winapp2ool.Merge.merge">
- <summary>
- Conducts the merger of our two iniFiles
- </summary>
+ <summary>Conducts the merger of our two iniFiles</summary>
 </member>
 <member name="M:winapp2ool.Merge.processMergeMode(winapp2ool.iniFile@,winapp2ool.iniFile@)">
- <summary>
- Performs conflict resolution for the merge process
- </summary>
+ <summary>Performs conflict resolution for the merge process</summary>
  <param name="first">The base iniFile that will be modified by Merge</param>
  <param name="second">The iniFile to be merged into the base</param>
 </member>
@@ -1262,40 +992,26 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.JavaMaker.initDefaultParams">
- <summary>
- Restores the module parameters to their default states
- </summary>
+ <summary>Restores the module parameters to their default states</summary>
 </member>
 <member name="M:winapp2ool.JavaMaker.printJMMenu">
- <summary>
- Prints the JavaMaker main menu
- </summary>
+ <summary>Prints the JavaMaker main menu</summary>
 </member>
 <member name="M:winapp2ool.JavaMaker.handleJMInput(System.String)">
- <summary>
- Handles the JavaMaker menu input
- </summary>
+ <summary>Handles the JavaMaker menu input</summary>
  <param name="input"></param>
 </member>
 <member name="M:winapp2ool.JavaMaker.mkEntry(winapp2ool.keyList[])">
- <summary>
- Generates the RegKeylist for the current system
- </summary>
+ <summary>Generates the RegKeylist for the current system</summary>
  <param name="kls">An array of keylists containing the RegKeys that will be in the generated entry</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.JavaMaker.getRegKeys(Microsoft.Win32.RegistryKey,System.Collections.Generic.List{System.String})">
- <summary>
- Creates RegKeys conditionally based on their presence on the current system
- </summary>
+ <summary>Creates RegKeys conditionally based on their presence on the current system</summary>
  <param name="reg">The Registry key to observe subkeys of</param>
  <param name="searches">The strings to be searched for in the subkeys</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.JavaMaker.makeSomeJava">
- <summary>
- Creates a winapp2.ini entry to clean up after the Java installation process
- </summary>
+ <summary>Creates a winapp2.ini entry to clean up after the Java installation process</summary>
 </member>
 <member name="T:winapp2ool.Minefield">
  <summary>
@@ -1304,25 +1020,17 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.Minefield.printMenu">
- <summary>
- Prints the main Minefield menu
- </summary>
+ <summary>Prints the main Minefield menu</summary>
 </member>
 <member name="M:winapp2ool.Minefield.handleUserInput(System.String)">
- <summary>
- Handles user input for the main Minefield menu
- </summary>
+ <summary>Handles user input for the main Minefield menu</summary>
  <param name="input">The String containing the user's input</param>
 </member>
 <member name="M:winapp2ool.Minefield.printGMMenu">
- <summary>
- Prints the GameMaker menu
- </summary>
+ <summary>Prints the GameMaker menu</summary>
 </member>
 <member name="M:winapp2ool.Minefield.handleGMInput(System.String)">
- <summary>
- Handles input for GameMaker
- </summary>
+ <summary>Handles input for GameMaker</summary>
  <param name="input"></param>
 </member>
 <member name="T:winapp2ool.Trim">
@@ -1334,145 +1042,127 @@ winapp2ool
    </summary>
 </member>
 <member name="M:winapp2ool.Trim.handleCmdLine">
- <summary>
- Handles the commandline args for Trim
- </summary>
+ <summary>Handles the commandline args for Trim</summary>
  Trim args:
  -d          : download the latest winapp2.ini
 </member>
 <member name="M:winapp2ool.Trim.initDefaultSettings">
- <summary>
- Restores the default state of the module's parameters
- </summary>
+ <summary>Restores the default state of the module's parameters</summary>
 </member>
 <member name="M:winapp2ool.Trim.remoteTrim(winapp2ool.iniFile,winapp2ool.iniFile,System.Boolean)">
- <summary>
- Runs the trimmer from outside the module
- </summary>
+ <summary>Runs the trimmer from outside the module</summary>
  <param name="firstFile">The winapp2.ini file</param>
  <param name="secondFile">The output file</param>
  <param name="d">Download boolean</param>
 </member>
 <member name="M:winapp2ool.Trim.printMenu">
- <summary>
- Prints the main menu to the user
- </summary>
+ <summary>Prints the main menu to the user</summary>
 </member>
 <member name="M:winapp2ool.Trim.handleUserInput(System.String)">
- <summary>
- Handles the user input from the menu
- </summary>
+ <summary>Handles the user input from the menu</summary>
  <param name="input">The String containing the user's input</param>
 </member>
 <member name="M:winapp2ool.Trim.initTrim">
- <summary>
- Initiates the trim after validating our ini files
- </summary>
+ <summary>Initiates the trim after validating our ini files</summary>
 </member>
-<member name="M:winapp2ool.Trim.trim(winapp2ool.winapp2handler.winapp2file)">
- <summary>
- Performs the trim
- </summary>
+<member name="M:winapp2ool.Trim.trim(winapp2ool.winapp2file)">
+ <summary>Performs the trim</summary>
  <param name="winapp2">A winapp2.ini file</param>
 </member>
 <member name="M:winapp2ool.Trim.checkExistence(winapp2ool.keyList@,System.Func{System.String,System.Boolean})">
- <summary>
- Evaluates a list of keys to observe whether they exist on the current machine
- </summary>
+ <summary>Evaluates a list of keys to observe whether they exist on the current machine</summary>
  <param name="kl">The list of iniKeys to query</param>
  <param name="chkExist">The function that evaluates that keyType's parameters</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Trim.processEntryExistence(winapp2ool.winapp2entry@)">
- <summary>
- Returns true if an entry's detection criteria is matched by the system, false otherwise.
- </summary>
+ <summary>Returns true if an entry's detection criteria is matched by the system, false otherwise.</summary>
  <param name="entry">A winapp2.ini entry</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Trim.virtualStoreChecker(winapp2ool.winapp2entry@)">
- <summary>
- Audits the given entry for legacy codepaths in the machine's VirtualStore locations
- </summary>
+ <summary>Audits the given entry for legacy codepaths in the machine's VirtualStore locations</summary>
  <param name="entry"></param>
 </member>
 <member name="M:winapp2ool.Trim.vsKeyChecker(winapp2ool.keyList@)">
- <summary>
- Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list
- </summary>
+ <summary>Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list</summary>
  <param name="kl">The keylist of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore</param>
 </member>
 <member name="M:winapp2ool.Trim.mkVsKeys(System.String[],System.String[],winapp2ool.keyList@)">
- <summary>
- Audits the existence of VirtualStore locations for an iniKey and if they exist, adds them to the list
- </summary>
+ <summary>Audits the existence of VirtualStore locations for an iniKey and if they exist, adds them to the list</summary>
  <param name="findStrs">A list of strings to seek for in the key value</param>
  <param name="replStrs">A list of strings to replace the sought after key values</param>
  <param name="kl">The keylist to be processed</param>
 </member>
 <member name="M:winapp2ool.Trim.createVSKey(System.String,System.String,winapp2ool.iniKey)">
- <summary>
- Creates the VirtualStore version of a given iniKey
- </summary>
+ <summary>Creates the VirtualStore version of a given iniKey</summary>
  <param name="findStr">The normal filesystem path</param>
  <param name="replStr">The VirtualStore location path</param>
  <param name="key">The key to processed</param>
  <returns></returns>
 </member>
 <member name="M:winapp2ool.Trim.processEntryList(System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
- <summary>
- Processess a list of winapp2.ini entries and removes any from the list that wouldn't be detected by CCleaner
- </summary>
+ <summary>Processess a list of winapp2.ini entries and removes any from the list that wouldn't be detected by CCleaner</summary>
  <param name="entryList">The list of winapp2entry objects to check existence for</param>
 </member>
 <member name="M:winapp2ool.Trim.checkSpecialDetects(System.String)">
- <summary>
- Returns true if a SpecialDetect location exist, false otherwise
- </summary>
+ <summary>Returns true if a SpecialDetect location exist, false otherwise</summary>
  <param name="key">A SpecialDetect format iniKey</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Trim.checkExist(System.String)">
- <summary>
- Handles passing off checks from sources that may vary between file system and registry
- </summary>
+ <summary>Handles passing off checks from sources that may vary between file system and registry</summary>
  <param name="path">A filesystem or registry path to be audited for existence</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Trim.checkRegExist(System.String)">
- <summary>
- Returns True if a given Detect path exists in the system registry, false otherwise.
- </summary>
+ <summary>Returns True if a given Detect path exists in the system registry, false otherwise.</summary>
  <param name="path">A registry path from a Detect key</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Trim.checkPathExist(System.String)">
- <summary>
- Returns True if a path exists on the system, false otherwise.
- </summary>
+ <summary>Returns True if a path exists on the system, false otherwise.</summary>
  <param name="key">A filesystem path</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Trim.swapDir(System.String@,System.String)">
- <summary>
- Swaps out a directory with the ProgramFiles parameterization on 64bit computers
- </summary>
+ <summary>Swaps out a directory with the ProgramFiles parameterization on 64bit computers</summary>
  <param name="dir">The text to be modified</param>
  <param name="key">The original state of the text</param>
 </member>
 <member name="M:winapp2ool.Trim.expandWildcard(System.String)">
- <summary>
- Interpret parameterized wildcards for the current system
- </summary>
+ <summary>Interpret parameterized wildcards for the current system</summary>
  <param name="dir">A path containing a wildcard</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Trim.checkDetOS(System.String)">
- <summary>
- Returns true if we satisfy the DetectOS citeria, false otherwise
- </summary>
+ <summary>Returns true if we satisfy the DetectOS citeria, false otherwise</summary>
  <param name="value">The DetectOS criteria to be checked</param>
- <returns></returns>
+</member>
+<member name="T:winapp2ool.advSettings">
+ <summary>
+ This module holds some methods for managing WinappDebug's scan/repair states
+ </summary>
+</member>
+<member name="M:winapp2ool.advSettings.resetScanSettings">
+ <summary>Resets the individual scan settings to their defaults</summary>
+</member>
+<member name="M:winapp2ool.advSettings.determineScanSettings">
+ <summary>Determines which if any lint rules have been modified and whether or not only some repairs are scheduled to run</summary>
+</member>
+<member name="M:winapp2ool.advSettings.handleUserInput(System.String)">
+ <summary>Handles the user input for the scan settings menu</summary>
+ <param name="input">The String containing the user's input</param>
+</member>
+<member name="M:winapp2ool.advSettings.printMenu">
+ <summary>Prints the menu for individual scans and their repairs to the user</summary>
+</member>
+<member name="T:winapp2ool.experimentalScans">
+ <summary>
+ This module holds any scans/repairs for WinappDebug that might be disabled by default due to incompleteness.
+ </summary>
+</member>
+<member name="M:winapp2ool.experimentalScans.cOptimization(winapp2ool.keyList@)">
+ <summary>Attempts to merge FileKeys together if syntactically possible.</summary>
+ <param name="kl">A list of winapp2.ini FileKey format iniFiles</param>
+</member>
+<member name="M:winapp2ool.experimentalScans.printOptiSect(System.String,winapp2ool.keyList)">
+ <summary>Prints output from the Optimization function</summary>
+ <param name="boxStr">The text to go in the optimization section box</param>
+ <param name="kl">The list of keys to be printed beneath the box</param>
 </member>
 <member name="T:winapp2ool.lintRule">
  <summary>
@@ -1480,50 +1170,28 @@ winapp2ool
  </summary>
 </member>
 <member name="M:winapp2ool.lintRule.hasBeenChanged">
- <summary>
- Returns true if the current scan/repair settings do not match their inital state
- </summary>
- <returns></returns>
+ <summary>Returns true if the current scan/repair settings do not match their inital state </summary>
 </member>
 <member name="P:winapp2ool.lintRule.ShouldScan">
- <summary>
- Indicates whether or not scans for this rule should run
- </summary>
- <returns></returns>
+ <summary>Indicates whether or not scans for this rule should run</summary>
 </member>
 <member name="P:winapp2ool.lintRule.ShouldRepair">
- <summary>
- Indicates whether or not repairs for this rule should run
- </summary>
- <returns></returns>
+ <summary>Indicates whether or not repairs for this rule should run</summary>
 </member>
-<member name="P:winapp2ool.lintRule.ScanText1">
- <summary>
- Describes what scan routines this rule controls
- </summary>
- <returns></returns>
+<member name="P:winapp2ool.lintRule.ScanText">
+ <summary>Describes what scan routines this rule controls</summary>
 </member>
-<member name="P:winapp2ool.lintRule.RepairText1">
- <summary>
- Describes what repairs this rule controls
- </summary>
- <returns></returns>
+<member name="P:winapp2ool.lintRule.RepairText">
+ <summary>Describes what repairs this rule controls</summary>
 </member>
-<member name="P:winapp2ool.lintRule.LintName1">
- <summary>
- The name of the rule as it will appear in menus
- </summary>
- <returns></returns>
+<member name="P:winapp2ool.lintRule.LintName">
+ <summary>The name of the rule as it will appear in menus</summary>
 </member>
 <member name="M:winapp2ool.lintRule.resetParams">
- <summary>
- Restores the initial lint rule state
- </summary>
+ <summary>Restores the initial lint rule state</summary>
 </member>
 <member name="M:winapp2ool.lintRule.#ctor(System.Boolean,System.Boolean,System.String,System.String,System.String)">
- <summary>
- Creates a new rule for the linter, retains the inital given parameters
- </summary>
+ <summary>Creates a new rule for the linter, retains the inital given parameters</summary>
  <param name="scan">The default scan state</param>
  <param name="repair">The default repair state </param>
  <param name="name">The name that will appear in menus</param>
@@ -1531,144 +1199,78 @@ winapp2ool
  <param name="rpTxt">The description of what is repaired</param>
 </member>
 <member name="M:winapp2ool.lintRule.turnOn">
- <summary>
- Enables both the scan and repair for the rule
- </summary>
+ <summary>Enables both the scan and repair for the rule</summary>
 </member>
 <member name="M:winapp2ool.lintRule.turnOff">
- <summary>
- Disables both the scan and repair for the rule
- </summary>
+ <summary>Disables both the scan and repair for the rule</summary>
 </member>
 <member name="M:winapp2ool.lintRule.fixFormat">
- <summary>
- Determines whether or not a fix that sits behind an optional flag should be run
- </summary>
- <returns></returns>
+ <summary>Determines whether or not a fix that sits behind an optional flag should be run</summary>
 </member>
 <member name="T:winapp2ool.WinappDebug">
  <summary>
  A program whose purpose is to observe, report, and attempt to repair errors in winapp2.ini
  </summary>
 </member>
+<member name="P:winapp2ool.WinappDebug.RepairSomeErrsFound">
+ <summary> Indicates whether some but not all repairs will run </summary>
+</member>
+<member name="P:winapp2ool.WinappDebug.ScanSettingsChanged">
+ <summary> Indicates whether scan settings have been changed </summary>
+</member>
+<member name="P:winapp2ool.WinappDebug.ModuleSettingsChanged">
+ <summary> Indicates whether module settings have been changed </summary>
+</member>
+<member name="P:winapp2ool.WinappDebug.SaveChanges">
+ <summary> Indicates whether or not changes should be saved back to disk (Default: False) </summary>
+</member>
+<member name="P:winapp2ool.WinappDebug.RepairErrsFound">
+ <summary> Indicates whether or not winappdebug should attempt to repair errors it finds (Default: False)</summary>
+</member>
+<member name="P:winapp2ool.WinappDebug.ErrorsFound">
+ <summary> The number of errors found by the linter </summary>
+</member>
 <member name="P:winapp2ool.WinappDebug.winappDebugFile1">
- <summary>
- The winapp2.ini file that will be linted
- </summary>
- <returns></returns>
+ <summary> The winapp2.ini file that will be linted </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.winappDebugFile3">
- <summary>
- Holds the save path for the linted file (overwrites the input file by default)
- </summary>
- <returns></returns>
+ <summary> Holds the save path for the linted file (overwrites the input file by default) </summary>
 </member>
-<member name="P:winapp2ool.WinappDebug.saveChanges">
- <summary>
- Indicates whether or not changes should be saved back to disk (default: off)
- </summary>
- <returns></returns>
-</member>
-<member name="P:winapp2ool.WinappDebug.CorrectFormatting1">
- <summary>
- Indicates whether or not winappdebug should attempt to repair errors it finds, disabled by default
- </summary>
- <returns></returns>
-</member>
-<member name="P:winapp2ool.WinappDebug.errorsFound">
- <summary>
- The number of errors found by the linter
- </summary>
- <returns></returns>
-</member>
-<member name="P:winapp2ool.WinappDebug.Rules1">
- <summary>
- The current rules for scans and repairs 
- </summary>
- <returns></returns>
-</member>
-<member name="P:winapp2ool.WinappDebug.CorrectSomeFormatting1">
- <summary>
- Indicates whether some but not all repairs will run
- </summary>
- <returns></returns>
-</member>
-<member name="M:winapp2ool.WinappDebug.resetLintRules">
- <summary>
- Resets the lint rules to their default states
- </summary>
-</member>
-<member name="M:winapp2ool.WinappDebug.resetScanSettings">
- <summary>
- Resets the individual scan settings to their defaults
- </summary>
+<member name="P:winapp2ool.WinappDebug.Rules">
+ <summary> The current rules for scans and repairs </summary>
 </member>
 <member name="M:winapp2ool.WinappDebug.handleCmdLine">
- <summary>
- Handles the commandline args for WinappDebug
- </summary>
+ <summary> Handles the commandline args for WinappDebug </summary>
  WinappDebug specific command line args
  -c          : enable autocorrect
 </member>
 <member name="M:winapp2ool.WinappDebug.initDefaultSettings">
- <summary>
- Restore the default state of the module's parameters
- </summary>
-</member>
-<member name="M:winapp2ool.WinappDebug.printScansMenu">
- <summary>
- Prints the menu for individual scans and their repairs to the user
- </summary>
-</member>
-<member name="M:winapp2ool.WinappDebug.determineScanSettings">
- <summary>
- Determines which if any lint rules have been modified and whether or not only some repairs are scheduled to run
- </summary>
-</member>
-<member name="M:winapp2ool.WinappDebug.handleScanInput(System.String)">
- <summary>
- Handles the user input for the scan settings menu
- </summary>
- <param name="input">The String containing the user's input</param>
+ <summary> Restore the default state of the module's parameters </summary>
 </member>
 <member name="M:winapp2ool.WinappDebug.printMenu">
- <summary>
- Prints the main menu to the user
- </summary>
+ <summary> Prints the main menu to the user </summary>
 </member>
 <member name="M:winapp2ool.WinappDebug.handleUserInput(System.String)">
- <summary>
- Handles the user's input from the menu
- </summary>
+ <summary> Handles the user's input from the menu </summary>
  <param name="input">The String containing the user's input</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.initDebug">
- <summary>
- Validates and debugs the ini file, informs the user upon completion
- </summary>
+ <summary> Validates and debugs the ini file, informs the user upon completion </summary>
 </member>
-<member name="M:winapp2ool.WinappDebug.debug(winapp2ool.winapp2handler.winapp2file@)">
- <summary>
- Performs syntax and format checking on a winapp2.ini format ini file
- </summary>
+<member name="M:winapp2ool.WinappDebug.debug(winapp2ool.winapp2file@)">
+ <summary> Performs syntax and format checking on a winapp2.ini format ini file </summary>
  <param name="fileToBeDebugged">A winapp2file object to be processed</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.alphabetizeEntries(winapp2ool.winapp2handler.winapp2file@)">
- <summary>
- Alphabetizes all the entries in a winapp2.ini file and observes any that were out of place
- </summary>
+<member name="M:winapp2ool.WinappDebug.alphabetizeEntries(winapp2ool.winapp2file@)">
+ <summary>Alphabetizes all the entries in a winapp2.ini file and observes any that were out of place</summary>
  <param name="winapp">The object containing the winapp2.ini being operated on</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.rewriteChanges(winapp2ool.winapp2handler.winapp2file@)">
- <summary>
- Overwrites the file on disk with any changes we've made if we are saving them
- </summary>
+<member name="M:winapp2ool.WinappDebug.rewriteChanges(winapp2ool.winapp2file@)">
+ <summary> Overwrites the file on disk with any changes we've made if we are saving them </summary>
  <param name="winapp2file">The object representing winapp2.ini</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.findOutOfPlace(winapp2ool.strList@,winapp2ool.strList@,System.String,System.Collections.Generic.List{System.Int32}@,System.Boolean@)">
- <summary>
- Assess a list and its sorted state to observe changes in neighboring strings
- </summary>
+ <summary> Assess a list and its sorted state to observe changes in neighboring strings</summary>
  eg. changes made to string ordering through sorting
  <param name="someList">A list of strings</param>
  <param name="sortedList">The sorted state of someList</param>
@@ -1677,85 +1279,60 @@ winapp2ool
  <param name="oopBool">Optional Boolean that reports whether or not there are any out of place entries in the list</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.processKeyList(winapp2ool.keyList@,System.Func{winapp2ool.iniKey,winapp2ool.iniKey},System.Boolean@,System.Boolean@)">
- <summary>
- Audits a keyList of winapp2.ini format iniKeys for errors, alerting the user and correcting where possible.
- </summary>
+ <summary> Audits a keyList of winapp2.ini format iniKeys for errors, alerting the user and correcting where possible.</summary>
  <param name="kl">A keylist to audit</param>
  <param name="processKey">The function that audits the keys of the keyType provided in the keyList</param>
  <param name="hasF">Optional boolean for the ExcludeKey case</param>
  <param name="hasR">Optional boolean for the ExcludeKey case</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.cFormat(winapp2ool.iniKey,System.Int32@,winapp2ool.strList@,winapp2ool.keyList@,System.Boolean)">
- <summary>
- Does some basic formatting checks that apply to most winapp2.ini format iniKey objects
- </summary>
+ <summary> Does some basic formatting checks that apply to most winapp2.ini format iniKey objects </summary>
  <param name="key">The current iniKey object being processed</param>
  <param name="keyNumber">The current expected key number</param>
  <param name="keyValues">The current list of observed inikey values</param>
  <param name="dupeList">A tracking list of detected duplicate iniKeys</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.getCasedString(System.String[],System.String)">
- <summary>
- Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected
- </summary>
- <param name="caseArray">The parent array of cased Strings</param>
- <param name="inputText">The String to be checked for casing errors</param>
-</member>
 <member name="M:winapp2ool.WinappDebug.cEnVar(winapp2ool.iniKey)">
- <summary>
- Assess the formatting of any %EnvironmentVariables% in a given iniKey
- </summary>
+ <summary>Assess the formatting of any %EnvironmentVariables% in a given iniKey</summary>
  <param name="key">An iniKey object to be processed</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.cValidity(winapp2ool.iniKey)">
- <summary>
- Does basic syntax and formatting audits that apply across all keys, returns false iff a key is malformed
- </summary>
+ <summary>Does basic syntax and formatting audits that apply across all keys, returns false iff a key is malformed</summary>
  <param name="key">an iniKey object to be checked for errors</param>
- <returns></returns>
+</member>
+<member name="M:winapp2ool.WinappDebug.chkCasing(winapp2ool.iniKey@,System.String[],System.String@,System.Int32)">
+ <summary>Checks either the value or the keyType of an iniKey object against a given array of expected cased texts</summary>
+ <param name="key">An iniKey object to check casing in</param>
+ <param name="casedArray">The array of expected cased texts</param>
+ <param name="strToChk">A reference to the given string</param>
+ <param name="chkType">0 if checking keyTypes, 1 if checking Values</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.arrayToStr(System.String[])">
- <summary>
- Returns the contents of the array as a single comma delimited String
- </summary>
+ <summary>Returns the contents of the array as a single comma delimited String</summary>
  <param name="given">A given array of Strings</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.WinappDebug.pFileKey(winapp2ool.iniKey)">
- <summary>
- Processes a FileKey format winapp2.ini iniKey object and checks it for errors, correcting where possible
- </summary>
+ <summary>Processes a FileKey format winapp2.ini iniKey object and checks it for errors, correcting where possible</summary>
  <param name="key">A winap2.ini FileKey format iniKey object</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.validateKeys(winapp2ool.winapp2entry@)">
- <summary>
- Checks the validity of the keys in an entry and removes any that are too problematic to continue with
- </summary>
+ <summary>Checks the validity of the keys in an entry and removes any that are too problematic to continue with</summary>
  <param name="entry">A winapp2entry object to be audited</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.processEntry(winapp2ool.winapp2entry@)">
- <summary>
- Processes a winapp2entry object (generated from a winapp2.ini format iniKey object) for errors 
- </summary>
+ <summary>Processes a winapp2entry object (generated from a winapp2.ini format iniKey object) for errors</summary>
  <param name="entry">The winapp2entry object to be processed</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.voidDelegate(winapp2ool.iniKey)">
- <summary>
- This method does nothing by design
- </summary>
+ <summary> This method does nothing by design </summary>
  <param name="key">An iniKey object to do nothing with</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.pDetectFile(winapp2ool.iniKey)">
- <summary>
- Processes a DetectFile format winapp2.ini iniKey objects and checks it for errors, correcting where possible
- </summary>
+ <summary>Processes a DetectFile format winapp2.ini iniKey objects and checks it for errors, correcting where possible </summary>
  <param name="key">A winapp2.ini DetectFile format iniKey</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.WinappDebug.chkPathFormatValidity(winapp2ool.iniKey,System.Boolean)">
- <summary>
- Audits the syntax of file system and registry paths
- </summary>
+ <summary> Audits the syntax of file system and registry paths </summary>
  <param name="key">An iniKey to be audited</param>
  <param name="isRegistry">Specifies whether the given key holds a registry path</param>
 </member>
@@ -1766,40 +1343,20 @@ winapp2ool
  </summary>
  <param name="valueStrings">A list of strings holding observed values</param>
  <param name="currentValue">The current value to be audited</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.WinappDebug.sortKeys(winapp2ool.keyList@,System.Boolean)">
- <summary>
- Sorts a keylist alphabetically with winapp2.ini precedence applied to the key values
- </summary>
+ <summary> Sorts a keylist alphabetically with winapp2.ini precedence applied to the key values </summary>
  <param name="kl">The keylist to be sorted</param>
  <param name="hadDuplicatesRemoved">The boolean indicating whether keys have been removed from this list</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.pExcludeKey(winapp2ool.iniKey@,System.Boolean@,System.Boolean@)">
- <summary>
- Processes a list of ExcludeKey format winapp2.ini iniKey objects and checks them for errors, correcting where possible
- </summary>
+ <summary>Processes a list of ExcludeKey format winapp2.ini iniKey objects and checks them for errors, correcting where possible</summary>
  <param name="key">A winapp2.ini ExcludeKey format iniKey object</param>
  <param name="hasF">Indicates whether the given list excludes filesystem locations</param>
  <param name="hasR">Indicates whether the given list excludes registry locations</param>
 </member>
-<member name="M:winapp2ool.WinappDebug.cOptimization(winapp2ool.keyList@)">
- <summary>
- Attempts to merge FileKeys together if syntactically possible.
- </summary>
- <param name="kl">A list of winapp2.ini FileKey format iniFiles</param>
-</member>
-<member name="M:winapp2ool.WinappDebug.printOptiSect(System.String,winapp2ool.keyList)">
- <summary>
- Prints output from the Optimization function
- </summary>
- <param name="boxStr">The text to go in the optimization section box</param>
- <param name="kl">The list of keys to be printed beneath the box</param>
-</member>
 <member name="M:winapp2ool.WinappDebug.inputMismatchErr(System.Int32,System.String,System.String,System.String,System.Boolean)">
- <summary>
- Prints an error when data is received that does not match an expected value.
- </summary>
+ <summary>Prints an error when data is received that does not match an expected value.</summary>
  <param name="linecount">The line number of the error</param>
  <param name="err">The string containing the output error text</param>
  <param name="received">The (erroneous) input data</param>
@@ -1807,17 +1364,13 @@ winapp2ool
  <param name="cond">Optional condition under which to display the error</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.fullNameErr(System.Boolean,winapp2ool.winapp2entry,System.String)">
- <summary>
- Prints an error followed by the [Full Name *] of the entry to which it belongs
- </summary>
+ <summary>Prints an error followed by the [Full Name *] of the entry to which it belongs</summary>
  <param name="cond">The condition under which to print</param>
  <param name="entry">The entry containing an error</param>
  <param name="errTxt">The String containing the text to be printed to the user</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.fullKeyErr(winapp2ool.iniKey,System.String,System.Boolean,System.Boolean,System.String@,System.String)">
- <summary>
- Prints an error whose output text contains an iniKey string
- </summary>
+ <summary>Prints an error whose output text contains an iniKey string</summary>
  <param name="key">The inikey to be printed</param>
  <param name="err">The string containing the output error text</param>
  <param name="cond">Optional condition under which the err should be printed</param>
@@ -1826,151 +1379,105 @@ winapp2ool
  <param name="repairVal">The error value</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.customErr(System.Int32,System.String,System.String[])">
- <summary>
- Prints arbitrarily defined errors without a precondition
- </summary>
+ <summary>Prints arbitrarily defined errors without a precondition</summary>
  <param name="lineCount"></param>
  <param name="err"></param>
  <param name="lines"></param>
 </member>
 <member name="M:winapp2ool.WinappDebug.fixStr(System.Boolean,System.String@,System.String)">
- <summary>
- Replace a given string with a new value if the fix condition is met. 
- </summary>
+ <summary>Replace a given string with a new value if the fix condition is met.</summary>
  <param name="param">The condition under which the string should be replaced</param>
  <param name="currentValue">A reference to the string to be replaced</param>
  <param name="newValue">The replacement value for the given string</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinappLink">
- <summary>
- Returns the link to the appropriate winapp2.ini file based on the mode the tool is in
- </summary>
- <returns></returns>
+ <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.printUpdNotif(System.Boolean,System.String,System.String,System.String)">
- <summary>
- Informs the user when an update is available
- </summary>
+ <summary>Informs the user when an update is available</summary>
  <param name="cond">The update condition</param>
  <param name="updName">The item (winapp2.ini or winapp2ool) for which there is a pending update</param>
  <param name="oldVer">The old (currently in use) version</param>
  <param name="newVer">The updated version pending download</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.denySettingOffline">
- <summary>
- Denies the ability to access online-only functions if offline
- </summary>
- <returns></returns>
+ <summary>Denies the ability to access online-only functions if offline</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.printMenu">
- <summary>
- Prints the main menu to the user
- </summary>
+ <summary>Prints the main menu to the user</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.main">
- <summary>
- Presents the winapp2ool menu to the user, initiates the main event loop for the application
- </summary>
+ <summary>Presents the winapp2ool menu to the user, initiates the main event loop for the application</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.handleUserInput(System.String)">
- <summary>
- Handles the user input for the menu
- </summary>
+ <summary>Handles the user input for the menu</summary>
  <param name="input">The String containing the user input</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getLocalWinapp2Version">
- <summary>
- Attempts to return the version number from the first line of winapp2.ini, returns "000000" if it can't
- </summary>
+ <summary>Attempts to return the version number from the first line of winapp2.ini, returns "000000" if it can't</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.checkUpdates">
- <summary>
- Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.
- </summary>
+ <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.updateCheckFailed(System.String,System.Boolean)">
- <summary>
- Handles the case where the update check has failed
- </summary>
+ <summary>Handles the case where the update check has failed</summary>
  <param name="name">The name of the component whose update check failed</param>
  <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.chkOfflineMode">
- <summary>
- Updates the offline status of winapp2ool
- </summary>
+ <summary>Updates the offline status of winapp2ool</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.changeFileParams(winapp2ool.iniFile@,System.Boolean@)">
- <summary>
- Prompts the user to change a file's parameters, marks both settings and the file as having been changed 
- </summary>
+ <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
  <param name="someFile">A file whose parameters will be changed</param>
  <param name="settingsChangedSetting">The boolean indicating that a setting has been changed</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.toggleSettingParam(System.Boolean@,System.String,System.Boolean@)">
- <summary>
- Toggles a setting's boolean state and marks its tracker true
- </summary>
+ <summary>Toggles a setting's boolean state and marks its tracker true</summary>
  <param name="setting">A boolean to be toggled</param>
  <param name="paramText">The string explaining the setting being toggled</param>
  <param name="settingsChangedSetting">The boolean indicating that the setting has been modified</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.prependNewLines(System.Boolean)">
- <summary>
- Returns 1 or 2 newline characters conditionally
- </summary>
+ <summary>Returns 1 or 2 newline characters conditionally</summary>
  <param name="cond">The parameter under which to return two newlines</param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
- <summary>
- Attempts to return the Windows version number, return 0.0 if it cannot
- </summary>
- <returns></returns>
+ <summary>Attempts to return the Windows version number, return 0.0 if it cannot</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.toggleDownload(System.Boolean@,System.Boolean@)">
- <summary>
- Handles toggling downloading of winapp2.ini from menus
- </summary>
+ <summary>Handles toggling downloading of winapp2.ini from menus</summary>
  <param name="download">The download Boolean</param>
  <param name="settingsChanged">The Boolean indicating that settings have changed</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.GetNameFromDL(System.Boolean)">
- <summary>
- Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading
- </summary>
+ <summary>Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading</summary>
  <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
- <returns></returns>
 </member>
 <member name="M:winapp2ool.Winapp2ool.resetModuleSettings(System.String,System.Action)">
- <summary>
- Resets a module's settings to the defaults
- </summary>
+ <summary>Resets a module's settings to the defaults</summary>
  <param name="name">The name of the module</param>
  <param name="setDefaultParams">The function that resets the module's settings</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.appendStrs(System.String[],System.String@)">
- <summary>
- Appends a series of values onto a String
- </summary>
+ <summary>Appends a series of values onto a String</summary>
  <param name="toAppend">The values to append</param>
  <param name="out">The given string to be extended</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getFirstDir(System.String)">
- <summary>
- Returns the first portion of a registry or filepath parameterization
- </summary>
+ <summary>Returns the first portion of a registry or filepath parameterization</summary>
  <param name="val">The directory listing to be split</param>
- <returns></returns>
 </member>
-<member name="M:winapp2ool.Winapp2ool.initModule(System.String,System.Action,System.Action{System.String},System.Boolean)">
- <summary>
- Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for winapp2ool and its components
- </summary>
+<member name="M:winapp2ool.Winapp2ool.initModule(System.String,System.Action,System.Action{System.String})">
+ <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for winapp2ool and its components</summary>
  <param name="name">The name of the module</param>
- <param name="callMenu">The function that prints the module's menu</param>
+ <param name="showMenu">The function that prints the module's menu</param>
  <param name="handleInput">The function that handle's the module's input</param>
- <param name="chkUpd">The Boolean indicating that winapp2ool should check for updates (only called by the main menu)</param>
+</member>
+<member name="M:winapp2ool.Winapp2ool.getCasedString(System.String[],System.String)">
+ <summary>Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected</summary>
+ <param name="caseArray">The parent array of cased Strings</param>
+ <param name="inputText">The String to be checked for casing errors</param>
 </member>
 </members>
 </doc>
