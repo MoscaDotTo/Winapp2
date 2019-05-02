@@ -189,7 +189,7 @@ Public Class iniFile
             clrConsole(clearAtEnd)
         Catch ex As Exception
             exc(ex)
-            exitCode = True
+            ExitCode = True
         End Try
     End Sub
 

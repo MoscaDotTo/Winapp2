@@ -55,7 +55,7 @@ Module JavaMaker
     Public Sub handleJMInput(input As String)
         Select Case True
             Case input = "0"
-                exitCode = True
+                ExitCode = True
             Case input = "1" Or input = ""
                 makeSomeJava()
             Case input = "2"

@@ -30,21 +30,21 @@ Module MenuMaker
     Public Const promptStr As String = "Enter a number, or leave blank to run the default: "
     ' The maximum length of the portion of the first half of a '#. Option - Description' style menu line
     Dim menuItemLength As Integer
-    ' Indicates whether or not we are pending an exit from the menu
-    Public exitCode As Boolean
-    ' Holds the text that appears in the top block of the menu
-    Public menuHeaderText As String
     Private lastOpWasErr As Boolean
     ' Holds the current option number at any given moment
     Dim optNum As Integer = 0
     ''' <summary>When enabled, prevents winapp2ool from outputting to the console or asking for input (usually)</summary>
     Public Property SuppressOutput As Boolean = False
+    ''' <summary> True if there is a pending exit from the menu</summary>
+    Public Property ExitCode As Boolean
+    ''' <summary> Holds the text that appears in the top block of the menu </summary>
+    Public Property MenuHeaderText As String
 
     ''' <summary>Inserts text into the menu header</summary>
     ''' <param name="txt">The text to appear in the header</param>
     ''' <param name="hasErr">The boolean indicating whether or not the text should be colored red</param>
     Public Sub setHeaderText(txt As String, Optional hasErr As Boolean = False)
-        menuHeaderText = txt
+        MenuHeaderText = txt
         lastOpWasErr = hasErr
     End Sub
 
@@ -52,7 +52,7 @@ Module MenuMaker
     ''' <param name="topper">The text to be displayed at the top of the menu screen</param>
     ''' <param name="itemlen">The length in characters that should comprise the first bloc of options in the menu</param>
     Public Sub initMenu(topper As String, Optional itemlen As Integer = 35)
-        exitCode = False
+        ExitCode = False
         setHeaderText(topper)
         menuItemLength = itemlen
     End Sub
@@ -110,7 +110,7 @@ Module MenuMaker
 
     ''' <summary>Exits a menu or module by flipping the exitCode to true</summary>
     Public Sub exitModule()
-        exitCode = True
+        ExitCode = True
     End Sub
 
     ''' <summary>Prints the top of the menu (containing the topper), any description text provided, the menu prompt, and the exit option</summary>
@@ -118,7 +118,7 @@ Module MenuMaker
     ''' <param name="printExit">The boolean representing whether an option to exit should be printed</param>
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
         If lastOpWasErr Then Console.ForegroundColor = ConsoleColor.Red
-        printMenuLine(tmenu(menuHeaderText))
+        printMenuLine(tmenu(MenuHeaderText))
         printMenuLine(menuStr03)
         Console.ResetColor()
         For Each line In descriptionItems
@@ -169,12 +169,12 @@ Module MenuMaker
 
     ''' <summary>Flips the exitCode boolean so we can return to the menu when desired</summary>
     Public Sub revertMenu()
-        exitCode = Not exitCode
+        ExitCode = Not ExitCode
     End Sub
 
     ''' <summary>Forces the exitCode to be False</summary>
     Public Sub undoAnyPendingExits()
-        exitCode = False
+        ExitCode = False
     End Sub
 
     ''' <summary>Constructs a menu line fit to the width of the console</summary>
@@ -242,8 +242,8 @@ Module MenuMaker
 
     ''' <summary>Clears the console if there's a pending exit, returns exitCode</summary>
     Public Function pendingExit() As Boolean
-        clrConsole(exitCode)
-        Return exitCode
+        clrConsole(ExitCode)
+        Return ExitCode
     End Function
 
     ''' <summary>Clears the console conditionally when not running unit tests</summary>

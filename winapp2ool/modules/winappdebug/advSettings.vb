@@ -56,7 +56,7 @@ Public Module advSettings
         Select Case True
             Case input = "0"
                 If ScanSettingsChanged Then WinappDebug.ModuleSettingsChanged = True
-                exitCode = True
+                ExitCode = True
             ' Enable/Disable individual scans
             Case scanNums.Contains(input)
                 Dim ind = scanNums.ToList.IndexOf(input)

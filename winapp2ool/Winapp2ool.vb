@@ -103,13 +103,13 @@ Module Winapp2ool
     Private Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                exitCode = True
+                ExitCode = True
                 cwl("Exiting...")
                 Environment.Exit(0)
             Case input = "1"
                 initModule("WinappDebug", AddressOf WinappDebug.printMenu, AddressOf WinappDebug.handleUserInput)
             Case input = "2"
-                initModule("Trim", AddressOf Trim.printmenu, AddressOf Trim.handleUserInput)
+                initModule("Trim", AddressOf Trim.printMenu, AddressOf Trim.handleUserInput)
             Case input = "3"
                 initModule("Merge", AddressOf Merge.printMenu, AddressOf Merge.handleUserInput)
             Case input = "4"
@@ -197,7 +197,7 @@ Module Winapp2ool
     Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean)
         fileChooser(someFile)
         settingsChangedSetting = True
-        setHeaderText($"{If(someFile.SecondName = "", someFile.InitName, "save file")} parameters update{If(exitCode, " aborted", "d")}", exitCode)
+        setHeaderText($"{If(someFile.SecondName = "", someFile.InitName, "save file")} parameters update{If(ExitCode, " aborted", "d")}", ExitCode)
         undoAnyPendingExits()
     End Sub
 
@@ -283,7 +283,7 @@ Module Winapp2ool
     ''' <param name="handleInput">The function that handle's the module's input</param>
     Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String))
         initMenu(name)
-        Do Until exitCode
+        Do Until ExitCode
             clrConsole()
             showMenu()
             Console.Write(Environment.NewLine & promptStr)

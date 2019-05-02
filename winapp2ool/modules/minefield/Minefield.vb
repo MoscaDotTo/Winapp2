@@ -37,7 +37,7 @@ Module Minefield
     Public Sub handleBabelInput(input As String)
         Select Case input
             Case "0"
-                exitCode = True
+                ExitCode = True
             Case "1", ""
 
         End Select
@@ -48,7 +48,7 @@ Module Minefield
     Public Sub handleUserInput(input As String)
         Select Case input
             Case "0"
-                exitCode = True
+                ExitCode = True
             Case "1"
                 initModule("Java Entry Maker", AddressOf printJMMenu, AddressOf handleJMInput)
             Case "2"
@@ -67,7 +67,7 @@ Module Minefield
     Private Sub handleGMInput(input As String)
         Select Case input
             Case "0"
-                exitCode = True
+                ExitCode = True
         End Select
     End Sub
 End Module

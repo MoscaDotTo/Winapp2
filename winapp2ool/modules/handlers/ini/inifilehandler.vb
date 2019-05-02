@@ -37,7 +37,7 @@ Public Module iniFileHandler
             Dim input As String = Console.ReadLine
             Select Case input
                 Case "0"
-                    exitCode = True
+                    ExitCode = True
                     Exit Sub
                 Case "1", ""
                     fileChooser(someFile)
@@ -46,7 +46,7 @@ Public Module iniFileHandler
                 Case Else
                     setHeaderText(invInpStr, True)
             End Select
-            If Not File.Exists(someFile.path) And Not menuHeaderText = invInpStr Then setHeaderText("Error", True)
+            If Not File.Exists(someFile.path) And Not MenuHeaderText = invInpStr Then setHeaderText("Error", True)
         End While
     End Sub
 
@@ -65,7 +65,7 @@ Public Module iniFileHandler
             Select Case input
                 Case "0"
                     dir = Environment.CurrentDirectory
-                    exitCode = iExitCode = True
+                    ExitCode = iExitCode = True
                     Exit Sub
                 Case "1"
                     Directory.CreateDirectory(dir)
@@ -74,7 +74,7 @@ Public Module iniFileHandler
                 Case Else
                     setHeaderText(invInpStr, True)
             End Select
-            If Not Directory.Exists(dir) And Not menuHeaderText = invInpStr Then setHeaderText("Error", True)
+            If Not Directory.Exists(dir) And Not MenuHeaderText = invInpStr Then setHeaderText("Error", True)
             If Directory.Exists(dir) Then iExitCode = True
         End While
     End Sub
@@ -103,7 +103,7 @@ Public Module iniFileHandler
         Dim input As String = Console.ReadLine
         Select Case True
             Case input = "0"
-                exitCode = True
+                ExitCode = True
                 clrConsole()
                 Exit Sub
             Case input = ""
@@ -135,7 +135,7 @@ Public Module iniFileHandler
             Dim input As String = Console.ReadLine()
             Select Case input
                 Case "0"
-                    exitCode = iExitCode = True
+                    ExitCode = iExitCode = True
                 Case "1"
                     fileChooser(someFile)
                     iExitCode = True
@@ -174,7 +174,7 @@ Public Module iniFileHandler
         Dim input As String = Console.ReadLine()
         Select Case input
             Case "0"
-                exitCode = True
+                ExitCode = True
             Case "1", ""
                 dir = Environment.CurrentDirectory
             Case "2"
@@ -206,7 +206,7 @@ Public Module iniFileHandler
             Select Case input
                 Case "0"
                     iExitCode = True
-                    exitCode = True
+                    ExitCode = True
                 Case "1"
                     dirChooser(dir)
                     iExitCode = True

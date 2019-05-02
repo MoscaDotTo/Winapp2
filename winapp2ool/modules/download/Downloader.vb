@@ -119,7 +119,7 @@ Module Downloader
         Select Case input
             Case "0"
                 Console.WriteLine("Returning to winapp2ool menu...")
-                exitCode = True
+                ExitCode = True
             Case "1", "2"
                 downloadFile.Name = "winapp2.ini"
                 Dim link As String = If(input = "1", wa2Link, nonccLink)
