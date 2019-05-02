@@ -125,9 +125,9 @@
     <Compile Include="modules\minefield\JavaMaker.vb" />
     <Compile Include="modules\minefield\Minefield.vb" />
     <Compile Include="modules\trim\Trim.vb" />
-    <Compile Include="modules\winappdebug\advSettings.vb" />
-    <Compile Include="modules\winappdebug\experimentalScans.vb" />
-    <Compile Include="modules\winappdebug\lintRule.vb" />
+    <Compile Include="modules\winappdebug\components\advSettings.vb" />
+    <Compile Include="modules\winappdebug\components\experimentalScans.vb" />
+    <Compile Include="modules\winappdebug\components\lintRule.vb" />
     <Compile Include="modules\winappdebug\WinappDebug.vb" />
     <Compile Include="Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
