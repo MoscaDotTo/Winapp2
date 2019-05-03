@@ -71,7 +71,7 @@ Public Class winapp2entry
         Detects = New keyList("Detect")
         DetectFiles = New keyList("DetectFile")
         DefaultKey = New keyList("Default")
-        WarningKey = New keyList("Warninig")
+        WarningKey = New keyList("Warning")
         FileKeys = New keyList("FileKey")
         RegKeys = New keyList("RegKey")
         ExcludeKeys = New keyList("ExcludeKey")

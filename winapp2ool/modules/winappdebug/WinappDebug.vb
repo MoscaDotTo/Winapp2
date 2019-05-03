@@ -21,10 +21,11 @@ Imports System.Text.RegularExpressions
 ''' A program whose purpose is to observe, report, and attempt to repair errors in winapp2.ini
 ''' </summary>
 Public Module WinappDebug
-    ' File handlers
-    Private winapp2File As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
-    Private outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
-    ' Module Settings
+    ''' <summary> The winapp2.ini file that will be linted </summary>
+    Public Property winappDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+    ''' <summary> Holds the save path for the linted file (overwrites the input file by default) </summary>
+    Public Property winappDebugFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
+
     ''' <summary> Indicates whether some but not all repairs will run </summary>
     Public Property RepairSomeErrsFound As Boolean
     ''' <summary> Indicates whether scan settings have been changed </summary>
@@ -37,50 +38,51 @@ Public Module WinappDebug
     Public Property RepairErrsFound As Boolean
     ''' <summary> The number of errors found by the linter </summary>
     Public Property ErrorsFound As Integer
-    Dim allEntryNames As New List(Of String)
-    ' Lint Rules
-    Private lintCasing As New lintRule(True, True, "Casing", "improper CamelCasing", "fixing improper CamelCasing")
-    Private lintAlpha As New lintRule(True, True, "Alphabetization", "improper alphabetization", "fixing improper alphabetization")
-    Private lintWrongNums As New lintRule(True, True, "Improper Numbering", "improper key numbering", "fixing improper key numbering")
-    Private lintParams As New lintRule(True, True, "Parameters", "improper parameterization on FileKeys and ExcludeKeys", "fixing improper parameterization on FileKeys And ExcludeKeys")
-    Private lintFlags As New lintRule(True, True, "Flags", "improper RECURSE and REMOVESELF formatting", "fixing improper RECURSE and REMOVESELF formatting")
-    Private lintSlashes As New lintRule(True, True, "Slashes", "improper use of slashes (\)", "fixing improper use of slashes (\)")
-    Private lintDefaults As New lintRule(True, True, "Defaults", "Default=True or missing Default key", "enforcing Default=False")
-    Private lintDupes As New lintRule(True, True, "Duplicates", "duplicate key values", "removing keys with duplicated values")
-    Private lintExtraNums As New lintRule(True, True, "Uneeded Numbering", "use of numbers where there should not be", "removing numbers used where they shouldn't be")
-    Private lintMulti As New lintRule(True, True, "Multiples", "multiples of key types that should only occur once in an entry", "removing unneeded multiples of key types that should occur only once")
-    Private lintInvalid As New lintRule(True, True, "Invalid Values", "invalid key values", "fixing cer,tain types of invalid key values")
-    Private lintSyntax As New lintRule(True, True, "Syntax Errors", "some entries whose configuration will not run in CCleaner", "attempting to fix certain types of syntax errors")
-    Private lintPathValidity As New lintRule(True, True, "Path Validity", " invalid filesystem or registry locations", "attempting to repair some basic invalid parameters in paths")
-    Private lintOpti As New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)")
+
+    ''' <summary>The list of all entry names found during a given run of the linter</summary>
+    Private Property allEntryNames As New List(Of String)
+
+    ''' <summary>Controls scan/repairs for CamelCasing issues</summary>
+    Private Property lintCasing As New lintRule(True, True, "Casing", "improper CamelCasing", "fixing improper CamelCasing")
+    ''' <summary>Controls scan/repairs for alphabetization issues</summary>
+    Private Property lintAlpha As New lintRule(True, True, "Alphabetization", "improper alphabetization", "fixing improper alphabetization")
+    ''' <summary>Controls scan/repairs for incorrectly numbered keys</summary>
+    Private Property lintWrongNums As New lintRule(True, True, "Improper Numbering", "improper key numbering", "fixing improper key numbering")
+    ''' <summary>Controls scan/repairs for parameters inside of FileKeys</summary>
+    Private Property lintParams As New lintRule(True, True, "Parameters", "improper parameterization on FileKeys", "fixing improper parameterization on FileKeys")
+    ''' <summary>Controls scan/repairs for flags in ExcludeKeys and FileKeys</summary>
+    Private Property lintFlags As New lintRule(True, True, "Flags", "improper FileKey/ExcludeKey flag formatting", "fixing improper FileKey/ExcludeKey flag formatting")
+    ''' <summary>Controls scan/repairs for improper slash usage</summary>
+    Private Property lintSlashes As New lintRule(True, True, "Slashes", "improper use of slashes (\)", "fixing improper use of slashes (\)")
+    ''' <summary>Controls scan/repairs for missing or True Default values</summary>
+    Private Property lintDefaults As New lintRule(True, True, "Defaults", "Default=True or missing Default key", "enforcing Default=False")
+    ''' <summary>Controls scan/repairs for duplicate values</summary>
+    Private Property lintDupes As New lintRule(True, True, "Duplicates", "duplicate key values", "removing keys with duplicated values")
+    '''<summary>Controls scan/repairs for keys with numbers they shouldn't have</summary>
+    Private Property lintExtraNums As New lintRule(True, True, "Uneeded Numbering", "use of numbers where there should not be", "removing numbers used where they shouldn't be")
+    ''' <summary>Controls scan/repairs for keys which should only occur once</summary>
+    Private Property lintMulti As New lintRule(True, True, "Multiples", "multiples of key types that should only occur once in an entry", "removing unneeded multiples of key types that should occur only once")
+    ''' <summary>Controls scan/repairs for keys with invlaid values</summary>
+    Private Property lintInvalid As New lintRule(True, True, "Invalid Values", "invalid key values", "fixing cer,tain types of invalid key values")
+    ''' <summary>Controls scan/repairs for winapp2.ini syntax errors</summary>
+    Private Property lintSyntax As New lintRule(True, True, "Syntax Errors", "some entries whose configuration will not run in CCleaner", "attempting to fix certain types of syntax errors")
+    ''' <summary>Controls scan/repairs for invalid file or regsitry paths</summary>
+    Private Property lintPathValidity As New lintRule(True, True, "Path Validity", " invalid filesystem or registry locations", "attempting to repair some basic invalid parameters in paths")
+    ''' <summary>Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently)</summary>
+    Private Property lintOpti As New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)")
     Private currentLintRules As lintRule() = {lintCasing, lintAlpha, lintWrongNums, lintParams, lintFlags, lintSlashes,
             lintDefaults, lintDupes, lintExtraNums, lintMulti, lintInvalid, lintSyntax, lintPathValidity, lintOpti}
-    ' Regex 
-    ReadOnly longReg As New Regex("HKEY_(C(URRENT_(USER$|CONFIG$)|LASSES_ROOT$)|LOCAL_MACHINE$|USERS$)")
-    ReadOnly shortReg As New Regex("HK(C(C$|R$|U$)|LM$|U$)")
-    ReadOnly secRefNums As New Regex("30(2([0-9])|3(0|1))")
-    ReadOnly driveLtrs As New Regex("[a-zA-z]:")
-    ReadOnly envVarRegex As New Regex("%[A-Za-z0-9]*%")
 
-    ''' <summary> The winapp2.ini file that will be linted </summary>
-    Public Property winappDebugFile1 As iniFile
-        Get
-            Return winapp2File
-        End Get
-        Set(value As iniFile)
-            winapp2File = value
-        End Set
-    End Property
-
-    ''' <summary> Holds the save path for the linted file (overwrites the input file by default) </summary>
-    Public Property winappDebugFile3 As iniFile
-        Get
-            Return outputFile
-        End Get
-        Set(value As iniFile)
-            outputFile = value
-        End Set
-    End Property
+    '''<summary>Regex to detect long form registry paths</summary>
+    Private Property longReg As New Regex("HKEY_(C(URRENT_(USER$|CONFIG$)|LASSES_ROOT$)|LOCAL_MACHINE$|USERS$)")
+    '''<summary>Regex to detect short form registry paths</summary>
+    Private Property shortReg As New Regex("HK(C(C$|R$|U$)|LM$|U$)")
+    ''' <summary>Regex to detect valid LangSecRef numbers</summary>
+    Private Property secRefNums As New Regex("30(2([0-9])|3(0|1))")
+    '''<summary>Regex to detect valid drive letter parameters</summary>
+    Private Property driveLtrs As New Regex("[a-zA-z]:")
+    '''<summary>Regex to detect potential %EnvironmentVariables%</summary>
+    Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
 
     ''' <summary> The current rules for scans and repairs </summary>
     Public Property Rules As lintRule()

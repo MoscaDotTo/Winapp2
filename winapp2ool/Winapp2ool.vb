@@ -19,24 +19,31 @@ Imports System.IO
 Imports Microsoft.Win32
 
 Module Winapp2ool
-    ' Update and compatibility settings
-    Public ReadOnly currentVersion As String = "1.02"
-    Dim latestVersion As String = ""
-    Dim latestWa2Ver As String = ""
-    Dim localWa2Ver As String = ""
-    Public checkedForUpdates As Boolean = False
-    Dim updateIsAvail As Boolean = False
-    Dim waUpdateIsAvail As Boolean = False
-    Public isOffline As Boolean
-    Public dnfOOD As Boolean = False
-    ' Dummy iniFile obj for when we don't need actual data or when it'll be filled in later
-    Dim eini As iniFile = New iniFile("", "")
-    Dim lwinapp2File As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
-    Public remoteWinappIsNonCC As Boolean = False
+    ''' <summary>Indicates the latest available verson of winapp2ool from GitHub</summary>
+    Private Property latestVersion As String = ""
+    ''' <summary>Indicates the latest available version of winapp2.ini from GitHub</summary>
+    Private Property latestWa2Ver As String = ""
+    ''' <summary>Indicates the local version of winapp2.ini (if available)</summary>
+    Private Property localWa2Ver As String = "000000"
+    ''' <summary>Indicates that a winapp2ool update is available from GitHub</summary>
+    Private Property updateIsAvail As Boolean = False
+    ''' <summary>Indicates that a winapp2.ini update is available from GitHub</summary>
+    Private Property waUpdateIsAvail As Boolean = False
+    ''' <summary>The current version of the executable as used for version checking against GitHub</summary>
+    Public ReadOnly Property currentVersion As String = "1.02"
+    ''' <summary>Indicates whether or not winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini </summary>
+    Public Property RemoteWinappIsNonCC As Boolean = False
+    '''<summary>Indicates whether or not the .NET Framework installed on the current machine is below the targeted version</summary>
+    Public Property DotNetFrameworkOutOfDate As Boolean = False
+    ''' <summary>Indicates whether or not winapp2ool currently has access to the internet</summary>
+    Public Property isOffline As Boolean = False
+    ''' <summary>Indicates whether or not winapp2ool has already checked for updates</summary>
+    Public Property checkedForUpdates As Boolean = False
+
 
     ''' <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
     Public Function getWinappLink() As String
-        Return If(remoteWinappIsNonCC, nonccLink, wa2Link)
+        Return If(RemoteWinappIsNonCC, nonccLink, wa2Link)
     End Function
 
     ''' <summary>Informs the user when an update is available</summary>
@@ -65,8 +72,8 @@ Module Winapp2ool
         If Not isOffline Then checkUpdates()
         printMenuTop({}, False)
         print(4, "Winapp2ool is currently in offline mode", cond:=isOffline)
-        print(4, "Your .NET Framework is out of date", cond:=dnfOOD)
-        printUpdNotif(waUpdateIsAvail And Not localWa2Ver = "0", "winapp2.ini", localWa2Ver, latestWa2Ver)
+        print(4, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate)
+        printUpdNotif(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver)
         printUpdNotif(updateIsAvail, "Winapp2ool", currentVersion, latestVersion)
         print(1, "Exit", "Exit the application")
         print(1, "WinappDebug", "Check for and correct errors in winapp2.ini")
@@ -80,7 +87,7 @@ Module Winapp2ool
             print(1, "Update & Trim", "Download and trim the latest winapp2.ini")
             print(1, "Show update diff", "See the difference between your local file and the latest", closeMenu:=Not updateIsAvail)
         End If
-        print(1, "Update", "Get the latest winapp2ool.exe", updateIsAvail And Not dnfOOD, True, closeMenu:=True)
+        print(1, "Update", "Get the latest winapp2ool.exe", updateIsAvail And Not DotNetFrameworkOutOfDate, True, closeMenu:=True)
         print(1, "Go online", "Retry your internet connection", isOffline, True, closeMenu:=True)
         Console.WindowHeight = If(waUpdateIsAvail And updateIsAvail, 32, 30)
     End Sub
@@ -90,7 +97,7 @@ Module Winapp2ool
         Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 126
         ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
-        If Not Environment.Version.ToString = "4.0.30319.42000" Then dnfOOD = True
+        If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
         ' winapp2ool requires internet access for some functions
         chkOfflineMode()
         processCommandLineArgs()
@@ -130,16 +137,16 @@ Module Winapp2ool
             Case input = "8" And waUpdateIsAvail
                 clrConsole()
                 Console.Write("Downloading & trimming, this may take a moment...")
-                remoteTrim(eini, lwinapp2File, True)
+                remoteTrim(New iniFile("", ""), New iniFile(Environment.CurrentDirectory, "winapp2.ini"), True)
                 checkedForUpdates = False
                 undoAnyPendingExits()
             Case input = "9" And waUpdateIsAvail
                 clrConsole()
                 Console.Write("Downloading & diffing, this may take a moment...")
-                remoteDiff(lwinapp2File)
+                remoteDiff(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
                 undoAnyPendingExits()
                 setHeaderText("Diff Complete")
-            Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not dnfOOD
+            Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not DotNetFrameworkOutOfDate
                 Console.WriteLine("Downloading and updating winapp2ool.exe, this may take a moment...")
                 autoUpdate()
             Case input = "m"
@@ -251,7 +258,7 @@ Module Winapp2ool
     ''' <summary>Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading</summary>
     ''' <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
     Public Function GetNameFromDL(shouldDownload As Boolean) As String
-        Return If(shouldDownload, If(remoteWinappIsNonCC, "Online (Non-CCleaner)", "Online"), "")
+        Return If(shouldDownload, If(RemoteWinappIsNonCC, "Online (Non-CCleaner)", "Online"), "")
     End Function
 
     ''' <summary>Resets a module's settings to the defaults</summary>

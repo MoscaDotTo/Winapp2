@@ -56,8 +56,7 @@ Public Class strList
 
     ''' <summary>Construct a list of neighbors for strings in a list</summary>
     Public Function getNeighborList() As List(Of KeyValuePair(Of String, String))
-        Dim neighborList As New List(Of KeyValuePair(Of String, String))
-        neighborList.Add(New KeyValuePair(Of String, String)("first", items(1)))
+        Dim neighborList As New List(Of KeyValuePair(Of String, String)) From {New KeyValuePair(Of String, String)("first", items(1))}
         For i = 1 To items.Count - 2
             neighborList.Add(New KeyValuePair(Of String, String)(items(i - 1), items(i + 1)))
         Next

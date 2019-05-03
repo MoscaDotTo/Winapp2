@@ -40,7 +40,7 @@ Module Diff
         initDefaultSettings()
         handleDownloadBools(download)
         ' Make sure we have a name set for the new file if we're downloading or else the diff will not run
-        If download Then newOrRemoteFile.Name = If(remoteWinappIsNonCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
+        If download Then newOrRemoteFile.Name = If(RemoteWinappIsNonCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
         invertSettingAndRemoveArg(saveLog, "-savelog")
         getFileAndDirParams(oldOrLocalFile, newOrRemoteFile, logFile)
         If Not newOrRemoteFile.Name = "" Then initDiff()

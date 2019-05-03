@@ -103,7 +103,7 @@ Public Module commandLineHandler
         ' The s is for silent, if we have this flag, don't give any output or ask for input along the happy path
         invertSettingAndRemoveArg(SuppressOutput, "-s")
         ' Toggle the tool to use the non-ccleaner version of winapp2.ini
-        invertSettingAndRemoveArg(remoteWinappIsNonCC, "-ncc")
+        invertSettingAndRemoveArg(RemoteWinappIsNonCC, "-ncc")
         If cmdargs.Count > 0 Then
             Select Case cmdargs(0)
                 Case "1", "-1", "debug", "-debug"
