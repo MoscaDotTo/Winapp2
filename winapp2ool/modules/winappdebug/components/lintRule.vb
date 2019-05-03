@@ -19,8 +19,10 @@ Option Strict On
 ''' Holds information about whether or not individual types of scans and repairs should run
 ''' </summary>
 Public Class lintRule
-    Private initScanState As Boolean
-    Private initRepairState As Boolean
+    ''' <summary>The scan state with which the rule was initially instantiated</summary>
+    Private Property initScanState As Boolean
+    ''' <summary>The repair state with which the rule was initially instantiated</summary>
+    Private Property initRepairState As Boolean
 
     ''' <summary>Returns true if the current scan/repair settings do not match their inital state </summary>
     Public Function hasBeenChanged() As Boolean
@@ -59,9 +61,9 @@ Public Class lintRule
         initScanState = scan
         ShouldRepair = repair
         initRepairState = repair
-        lintName = name
-        scanText = $"detecting {scTxt}"
-        repairText = rpTxt
+        LintName = name
+        ScanText = $"detecting {scTxt}"
+        RepairText = rpTxt
     End Sub
 
     ''' <summary>Enables both the scan and repair for the rule</summary>
