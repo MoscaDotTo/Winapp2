@@ -58,15 +58,15 @@ Public Module WinappDebug
     ''' <summary>Controls scan/repairs for duplicate values</summary>
     Private Property lintDupes As New lintRule(True, True, "Duplicates", "duplicate key values", "removing keys with duplicated values")
     '''<summary>Controls scan/repairs for keys with numbers they shouldn't have</summary>
-    Private Property lintExtraNums As New lintRule(True, True, "Uneeded Numbering", "use of numbers where there should not be", "removing numbers used where they shouldn't be")
+    Private Property lintExtraNums As New lintRule(True, True, "Unneeded Numbering", "use of numbers where there should not be", "removing numbers used where they shouldn't be")
     ''' <summary>Controls scan/repairs for keys which should only occur once</summary>
     Private Property lintMulti As New lintRule(True, True, "Multiples", "multiples of key types that should only occur once in an entry", "removing unneeded multiples of key types that should occur only once")
     ''' <summary>Controls scan/repairs for keys with invlaid values</summary>
-    Private Property lintInvalid As New lintRule(True, True, "Invalid Values", "invalid key values", "fixing cer,tain types of invalid key values")
+    Private Property lintInvalid As New lintRule(True, True, "Invalid Values", "invalid key values", "fixing certain types of invalid key values")
     ''' <summary>Controls scan/repairs for winapp2.ini syntax errors</summary>
     Private Property lintSyntax As New lintRule(True, True, "Syntax Errors", "some entries whose configuration will not run in CCleaner", "attempting to fix certain types of syntax errors")
     ''' <summary>Controls scan/repairs for invalid file or regsitry paths</summary>
-    Private Property lintPathValidity As New lintRule(True, True, "Path Validity", " invalid filesystem or registry locations", "attempting to repair some basic invalid parameters in paths")
+    Private Property lintPathValidity As New lintRule(True, True, "Path Validity", "invalid filesystem or registry locations", "attempting to repair some basic invalid parameters in paths")
     ''' <summary>Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently)</summary>
     Private Property lintOpti As New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)")
     Private currentLintRules As lintRule() = {lintCasing, lintAlpha, lintWrongNums, lintParams, lintFlags, lintSlashes,
@@ -424,6 +424,7 @@ Public Module WinappDebug
         ' Attempt to assign keys that had errors to their intended lists
         For Each key In entry.ErrorKeys.Keys
             For Each lst In entry.KeyListList
+                If lst.KeyType = "Error" Then Continue For
                 lst.add(key, key.typeIs(lst.KeyType))
             Next
         Next
