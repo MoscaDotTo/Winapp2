@@ -19,27 +19,32 @@ Option Strict On
 ''' Represents a winapp2.ini format iniFile, and enables easy access to format specific iniFile information
 ''' </summary>
 Public Class winapp2file
-    Public entryList As List(Of String)
     ' "" = main section, bottom most in all circumstances and appearing without a label 
-    ReadOnly sectionHeaderFooter As String() = {"Chrome/Chromium based browsers", "Firefox/Mozilla based browsers", "Thunderbird",
+    ''' <summary>The names of the sections of entries as they appear in winapp2.ini</summary>
+    Public ReadOnly Property FileSectionHeaders As String() = {"Chrome/Chromium based browsers", "Firefox/Mozilla based browsers", "Thunderbird",
         "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
     ' As above, index 0 = Chrome, 1 = Firefox, 2 = Thunderbird.... 6 = ""
-    Public entrySections(6) As iniFile
-    Public entryLines(6) As List(Of Integer)
-    Public winapp2entries(6) As List(Of winapp2entry)
-    Public isNCC As Boolean
-    Public dir As String
-    Public name As String
-    Dim version As String
+    ''' <summary>A list of iniFiles each containing one of the headers contents</summary>
+    Public Property EntrySections As New List(Of iniFile)
+    ''' <summary>The list of winapp2entry objects for each header section</summary>
+    Public Property Winapp2entries As New List(Of List(Of winapp2entry))
+    ''' <summary>Indicates whether or not this object represents a Non-CCleaner variant of winapp2.ini</summary>
+    Public Property IsNCC As Boolean = False
+    '''<summary>The directory of the iniFile object used to instantiate this object</summary>
+    Public Property Dir As String = ""
+    '''<summary>The file name of the iniFile object used to instantiate this object</summary>
+    Public Property Name As String = ""
+    '''<summary>The version in YYMMDD format of the winapp2.ini file (Defaults to 000000)</summary>
+    Public Property Version As String = "000000"
 
     ''' <summary>Create a new meta winapp2 object from an iniFile object</summary>
     ''' <param name="file">A winapp2.ini format iniFile object</param>
     Public Sub New(ByVal file As iniFile)
-        entryList = New List(Of String)
+        dir = file.Dir
+        name = file.Name
         For i As Integer = 0 To 6
-            entrySections(i) = New iniFile With {.Name = sectionHeaderFooter(i)}
-            entryLines(i) = New List(Of Integer)
-            winapp2entries(i) = New List(Of winapp2entry)
+            entrySections.Add(New iniFile With {.Name = FileSectionHeaders(i)})
+            Winapp2entries.Add(New List(Of winapp2entry))
         Next
         ' Determine if we're the Non-CCleaner variant of the ini
         isNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
@@ -68,7 +73,6 @@ Public Class winapp2file
     Private Sub addToInnerFile(ind As Integer, entry As winapp2entry, section As iniSection)
         If Not entrySections(ind).Sections.Keys.Contains(section.Name) Then
             entrySections(ind).Sections.Add(section.Name, section)
-            entryLines(ind).Add(section.StartingLineNumber)
             winapp2entries(ind).Add(entry)
         End If
     End Sub
@@ -104,7 +108,7 @@ Public Class winapp2file
     Public Sub rebuildToIniFiles()
         For i As Integer = 0 To entrySections.Count - 1
             entrySections(i) = rebuildInnerIni(winapp2entries(i))
-            entrySections(i).Name = sectionHeaderFooter(i)
+            entrySections(i).Name = FileSectionHeaders(i)
         Next
     End Sub
 
