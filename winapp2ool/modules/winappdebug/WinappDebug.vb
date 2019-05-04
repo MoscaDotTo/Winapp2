@@ -35,7 +35,7 @@ Public Module WinappDebug
     ''' <summary> Indicates whether or not changes should be saved back to disk (Default: False) </summary>
     Public Property SaveChanges As Boolean
     ''' <summary> Indicates whether or not winappdebug should attempt to repair errors it finds (Default: False)</summary>
-    Public Property RepairErrsFound As Boolean
+    Public Property RepairErrsFound As Boolean = True
     ''' <summary> The number of errors found by the linter </summary>
     Public Property ErrorsFound As Integer
 
@@ -109,7 +109,7 @@ Public Module WinappDebug
         winappDebugFile1.resetParams()
         winappDebugFile3.resetParams()
         ModuleSettingsChanged = False
-        RepairErrsFound = False
+        RepairErrsFound = True
         SaveChanges = False
         resetScanSettings()
     End Sub
@@ -289,7 +289,7 @@ Public Module WinappDebug
     ''' <param name="keyNumber">The current expected key number</param>
     ''' <param name="keyValues">The current list of observed inikey values</param>
     ''' <param name="dupeList">A tracking list of detected duplicate iniKeys</param>
-    Private Sub cFormat(ByVal key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As strList, ByRef dupeList As keyList, Optional noNumbers As Boolean = False)
+    Private Sub cFormat(ByRef key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As strList, ByRef dupeList As keyList, Optional noNumbers As Boolean = False)
         ' Check for duplicates
         If keyValues.contains(key.Value, True) Then
             Dim dupeKeyStr = $"{key.KeyType}{If(Not noNumbers, (keyValues.items.IndexOf(key.Value) + 1).ToString, "")}={key.Value}"
@@ -600,7 +600,7 @@ Public Module WinappDebug
     ''' <param name="param">The condition under which the string should be replaced</param>
     ''' <param name="currentValue">A reference to the string to be replaced</param>
     ''' <param name="newValue">The replacement value for the given string</param>
-    Private Sub fixStr(param As Boolean, ByRef currentValue As String, newValue As String)
+    Private Sub fixStr(param As Boolean, ByRef currentValue As String, ByRef newValue As String)
         If param Then currentValue = newValue
     End Sub
 End Module
