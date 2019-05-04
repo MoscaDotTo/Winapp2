@@ -269,12 +269,8 @@ Module Diff
             addedKeys.remove(pair.Key)
             removedKeys.remove(pair.Value)
         Next
-        For Each key In akAlpha.Keys
-            addedKeys.remove(key)
-        Next
-        For Each key In rkAlpha.Keys
-            removedKeys.remove(key)
-        Next
+        addedKeys.remove(akAlpha.Keys)
+        removedKeys.remove(rkAlpha.Keys)
     End Sub
 
     ''' <summary>Performs change tracking for chkLst </summary>
