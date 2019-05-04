@@ -222,9 +222,8 @@ Module Diff
     ''' <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
-        ' Create copies of the given keylists so we can modify them during the iteration 
-        Dim akTemp As New keyList(addedKeys.Keys)
-        Dim rkTemp As New keyList(removedKeys.Keys)
+        Dim akAlpha As New keyList
+        Dim rkAlpha As New keyList
         For i As Integer = 0 To addedKeys.keyCount - 1
             Dim key = addedKeys.Keys(i)
             For j = 0 To removedKeys.keyCount - 1
@@ -236,7 +235,7 @@ Module Diff
                             Dim newKey As New winapp2KeyParameters(skey)
                             ' If the path has changed, the key has been updated
                             If Not oldKey.PathString = newKey.PathString Then
-                                updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                                updateKeys(updatedKeys, key, skey)
                                 Exit For
                             End If
                             oldKey.ArgsList.Sort()
@@ -246,40 +245,44 @@ Module Diff
                                 For k = 0 To oldKey.ArgsList.Count - 1
                                     ' If the args count matches but the sorted state of the args doesn't, the key has been updated
                                     If Not oldKey.ArgsList(k).Equals(newKey.ArgsList(k), StringComparison.InvariantCultureIgnoreCase) Then
-                                        updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                                        updateKeys(updatedKeys, key, skey)
                                         Exit For
                                     End If
                                 Next
                                 ' If we get this far, it's just an alphabetization change and can be ignored silently
-                                akTemp.remove(skey)
-                                rkTemp.remove(key)
+                                akAlpha.add(skey)
+                                rkAlpha.add(key)
                             Else
                                 ' If the count doesn't match, something has definitely changed
-                                updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                                updateKeys(updatedKeys, key, skey)
                                 Exit For
                             End If
                         Case Else
                             ' Other keys don't require such complex legwork, thankfully. If their values don't match, they've been updated
-                            If Not key.compareValues(skey) Then updateKeys(updatedKeys, akTemp, rkTemp, key, skey)
+                            If Not key.compareValues(skey) Then updateKeys(updatedKeys, key, skey)
                     End Select
                 End If
             Next
         Next
-        ' Update the lists
-        addedKeys = akTemp
-        removedKeys = rkTemp
+        ' Update the keyLists
+        For Each pair In updatedKeys
+            addedKeys.remove(pair.Key)
+            removedKeys.remove(pair.Value)
+        Next
+        For Each key In akAlpha.Keys
+            addedKeys.remove(key)
+        Next
+        For Each key In rkAlpha.Keys
+            removedKeys.remove(key)
+        Next
     End Sub
 
     ''' <summary>Performs change tracking for chkLst </summary>
     ''' <param name="updLst">The list of updated keys</param>
-    ''' <param name="aKeys">The list of added keys</param>
-    ''' <param name="rKeys">The list of removed keys</param>
     ''' <param name="key">An added key</param>
     ''' <param name="skey">A removed key</param>
-    Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), ByRef aKeys As keyList, ByRef rKeys As keyList, key As iniKey, skey As iniKey)
+    Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), key As iniKey, skey As iniKey)
         updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
-        rKeys.remove(skey)
-        aKeys.remove(key)
     End Sub
 
     ''' <summary>Returns a string containing a menu box listing the change type and entry, followed by the entry's toString</summary>
