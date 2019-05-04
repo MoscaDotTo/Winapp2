@@ -21,9 +21,9 @@ Option Strict On
 Public Class winapp2file
     ' "" = main section, bottom most in all circumstances and appearing without a label 
     ''' <summary>The names of the sections of entries as they appear in winapp2.ini</summary>
-    Public ReadOnly Property FileSectionHeaders As String() = {"Chrome/Chromium based browsers", "Firefox/Mozilla based browsers", "Thunderbird",
+    Public ReadOnly Property FileSectionHeaders As String() = {"Chrome/Chromium based browsers", "Chromium based Edge", "Firefox/Mozilla based browsers", "Thunderbird", "Opera",
         "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
-    ' As above, index 0 = Chrome, 1 = Firefox, 2 = Thunderbird.... 6 = ""
+    ' As above, index 0 = Chrome, 1 = Chrome Based Edge, 2 = FireFox.... 9 = ""
     ''' <summary>A list of iniFiles each containing one of the headers contents</summary>
     Public Property EntrySections As New List(Of iniFile)
     ''' <summary>The list of winapp2entry objects for each header section</summary>
@@ -42,17 +42,17 @@ Public Class winapp2file
     Public Sub New(ByVal file As iniFile)
         dir = file.Dir
         name = file.Name
-        For i As Integer = 0 To 6
-            entrySections.Add(New iniFile With {.Name = FileSectionHeaders(i)})
+        For i As Integer = 0 To 8
+            EntrySections.Add(New iniFile With {.Name = FileSectionHeaders(i)})
             Winapp2entries.Add(New List(Of winapp2entry))
         Next
         ' Determine if we're the Non-CCleaner variant of the ini
-        isNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
+        IsNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
         ' Determine the version string
         If file.Comments.Count = 0 Then version = "; version 000000"
         If file.Comments.Count > 0 Then version = If(Not file.Comments.Values(0).Comment.ToLower.Contains("version"), "; version 000000", file.Comments.Values(0).Comment)
         ' Build the header sections for browsers/Thunderbird/winapp3
-        Dim langSecRefs As New List(Of String) From {"3029", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous"}
+        Dim langSecRefs As New List(Of String) From {"3029", "3005", "3026", "3030", "3027", "Language Files", "Dangerous Long", "Dangerous"}
         For Each section In file.Sections.Values
             Dim tmpwa2entry As New winapp2entry(section)
             Dim ind = -1
@@ -61,7 +61,7 @@ Public Class winapp2file
             ElseIf tmpwa2entry.SectionKey.keyCount > 0 Then
                 ind = langSecRefs.IndexOf(tmpwa2entry.SectionKey.Keys.First.Value)
             End If
-            If ind = -1 Then ind = 6
+            If ind = -1 Then ind = 8
             addToInnerFile(ind, tmpwa2entry, section)
         Next
     End Sub
