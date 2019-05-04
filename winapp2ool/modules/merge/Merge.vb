@@ -15,8 +15,6 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-Imports System.IO
-Imports winapp2ool
 
 ''' <summary>
 ''' A module that facilitates the merging of two user defined iniFile objects

@@ -15,7 +15,6 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-Imports System.IO
 
 ''' <summary>
 ''' A module whose purpose is to allow a user to perform a diff on two winapp2.ini files

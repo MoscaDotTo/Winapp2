@@ -15,7 +15,6 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-Imports System.IO
 Imports System.Text.RegularExpressions
 ''' <summary>
 ''' A program whose purpose is to observe, report, and attempt to repair errors in winapp2.ini
