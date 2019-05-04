@@ -18,9 +18,6 @@ Option Strict On
 Imports System.IO
 Imports Microsoft.Win32
 
-''' <summary>
-''' A multi-tool for winapp2.ini
-''' </summary>
 Module Winapp2ool
     ''' <summary>Indicates the latest available verson of winapp2ool from GitHub</summary>
     Private Property latestVersion As String = ""
