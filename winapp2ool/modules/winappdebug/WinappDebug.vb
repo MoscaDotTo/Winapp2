@@ -359,7 +359,7 @@ Public Module WinappDebug
     ''' <summary>Does basic syntax and formatting audits that apply across all keys, returns false iff a key is malformed</summary>
     ''' <param name="key">an iniKey object to be checked for errors</param>
     Private Function cValidity(key As iniKey) As Boolean
-        Dim validCmds As String() = {"Default", "Detect", "DetectFile", "DetectOS", "ExcludeKey",
+        Dim validCmds As String() = {"Default", "DetectOS", "DetectFile", "Detect", "ExcludeKey",
                            "FileKey", "LangSecRef", "RegKey", "Section", "SpecialDetect", "Warning"}
         If key.typeIs("DeleteMe") Then
             ' Try to fix broken keys 
