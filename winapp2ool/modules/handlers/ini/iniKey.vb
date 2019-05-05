@@ -113,14 +113,14 @@ Public Class iniKey
                     Value = splitLine(1)
                     KeyType = "Error"
                 Case splitLine(0) <> "" And splitLine(1) = ""
-                    Name = "DeleteMe"
+                    Name = splitLine(0)
                     Value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
                     KeyType = "DeleteMe"
             End Select
         Else
             Name = line
-            Value = ""
-            KeyType = "Error"
+            Value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
+            KeyType = "DeleteMe"
         End If
     End Sub
 

@@ -325,12 +325,52 @@ Public Module WinappDebug
         Next
     End Sub
 
+    ''' <summary>Attempts to insert missing equal signs into winapp2.ini format keys</summary>
+    Private Function fixMissingEquals(ByRef key As iniKey, cmds As String()) As Boolean
+        For Each cmd In cmds
+            If key.Name.Contains(cmd) Then
+                Select Case cmd
+                    ' We don't expect numbers in these keys
+                    Case "Default", "DetectOS", "Section", "LangSecRef", "Section", "SpecialDetect"
+                        key.Value = key.Name.Replace(cmd, "")
+                        key.Name = cmd
+                        key.KeyType = cmd
+                    Case Else
+                        Dim newName = cmd
+                        Dim withNums = key.Name.Replace(cmd, "")
+                        For Each c As Char In withNums.ToCharArray
+                            If Char.IsNumber(c) Then
+                                newName += c
+                            Else
+                                Exit For
+                            End If
+                        Next
+                        key.Value = key.Name.Replace(newName, "")
+                        key.Name = newName
+                        key.KeyType = cmd
+                End Select
+                Return True
+            End If
+        Next
+        ' Return  false if no valid command is found
+        Return False
+    End Function
+
     ''' <summary>Does basic syntax and formatting audits that apply across all keys, returns false iff a key is malformed</summary>
     ''' <param name="key">an iniKey object to be checked for errors</param>
     Private Function cValidity(key As iniKey) As Boolean
         Dim validCmds As String() = {"Default", "Detect", "DetectFile", "DetectOS", "ExcludeKey",
                            "FileKey", "LangSecRef", "RegKey", "Section", "SpecialDetect", "Warning"}
-        If key.typeIs("DeleteMe") Then Return False
+        If key.typeIs("DeleteMe") Then
+            ' Try to fix broken keys 
+            If fixMissingEquals(key, validCmds) Then
+                fullKeyErr(key, "Missing '=' detected and repaired in key.")
+            Else
+                ' If we didn't find a fixable situation, delete the key
+                customErr(key.LineNumber, $"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", {})
+                Return False
+            End If
+        End If
         ' Check for leading or trailing whitespace, do this always as spaces in the name interfere with proper keyType identification
         If key.Name.StartsWith(" ") Or key.Name.EndsWith(" ") Or key.Value.StartsWith(" ") Or key.Value.EndsWith(" ") Then
             fullKeyErr(key, "Detected unwanted whitespace in iniKey", True)
@@ -422,12 +462,16 @@ Public Module WinappDebug
             entry.ErrorKeys.remove(brokenKeys.Keys)
         Next
         ' Attempt to assign keys that had errors to their intended lists
+        Dim toRemove As New keyList
         For Each key In entry.ErrorKeys.Keys
             For Each lst In entry.KeyListList
                 If lst.KeyType = "Error" Then Continue For
                 lst.add(key, key.typeIs(lst.KeyType))
+                toRemove.add(key, key.typeIs(lst.KeyType))
             Next
         Next
+        ' Remove any repaired keys
+        entry.ErrorKeys.remove(toRemove.Keys)
     End Sub
 
     ''' <summary>Processes a winapp2entry object (generated from a winapp2.ini format iniKey object) for errors</summary>
