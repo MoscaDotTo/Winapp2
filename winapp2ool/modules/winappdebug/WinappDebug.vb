@@ -325,7 +325,9 @@ Public Module WinappDebug
         Next
     End Sub
 
-    ''' <summary>Attempts to insert missing equal signs into winapp2.ini format keys</summary>
+    ''' <summary>Attempts to insert missing equal signs into winapp2.ini format keys. Returns true if successful, otherwise returns false.</summary>
+    ''' <param name="key">The misformatted iniKey to be repaired</param>
+    ''' <param name="cmds">The array containing valid winapp2.ini commands</param>
     Private Function fixMissingEquals(ByRef key As iniKey, cmds As String()) As Boolean
         For Each cmd In cmds
             If key.Name.Contains(cmd) Then
