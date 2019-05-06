@@ -65,7 +65,7 @@ Public Class winapp2file
             ' Workaround for two separate sections for Microsoft Edge Insider (temporary, hopefully)
             If ind = 8 Then ind = 1
             ' If ind is still -1, we're in the main section
-            If ind = -1 Then ind = 9
+            If ind = -1 Then ind = 8
             addToInnerFile(ind, tmpwa2entry, section)
         Next
     End Sub
