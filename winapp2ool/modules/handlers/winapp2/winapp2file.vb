@@ -136,7 +136,7 @@ Public Class winapp2file
         out += appendNewLine("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
         out += appendNewLine("; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
         ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
-        For i As Integer = 0 To 8
+        For i As Integer = 0 To 7
             If EntrySections(i).Sections.Count > 0 Then
                 out += appendNewLine("; ")
                 out += appendNewLine(appendNewLine("; " & EntrySections(i).Name))
