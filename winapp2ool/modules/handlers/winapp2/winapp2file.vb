@@ -60,11 +60,12 @@ Public Class winapp2file
                 ind = langSecRefs.IndexOf(tmpwa2entry.LangSecRef.Keys.First.Value)
             ElseIf tmpwa2entry.SectionKey.keyCount > 0 Then
                 ind = langSecRefs.IndexOf(tmpwa2entry.SectionKey.Keys.First.Value)
+                If ind = -1 And tmpwa2entry.SectionKey.Keys.First.Value.StartsWith("Dangerous") Then ind = 7
             End If
             ' Workaround for two separate sections for Microsoft Edge Insider (temporary, hopefully)
             If ind = 8 Then ind = 1
             ' If ind is still -1, we're in the main section
-            If ind = -1 Then ind = 8
+            If ind = -1 Then ind = 9
             addToInnerFile(ind, tmpwa2entry, section)
         Next
     End Sub
@@ -135,12 +136,12 @@ Public Class winapp2file
         out += appendNewLine("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
         out += appendNewLine("; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
         ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
-        For i As Integer = 0 To 5
-            If entrySections(i).Sections.Count > 0 Then
+        For i As Integer = 0 To 8
+            If EntrySections(i).Sections.Count > 0 Then
                 out += appendNewLine("; ")
-                out += appendNewLine(appendNewLine("; " & entrySections(i).Name))
-                out += entrySections(i).toString
-                out += appendNewLine($"{prependNewLines(False)}; End of {entrySections(i).Name}")
+                out += appendNewLine(appendNewLine("; " & EntrySections(i).Name))
+                out += EntrySections(i).toString
+                out += appendNewLine($"{prependNewLines(False)}; End of {EntrySections(i).Name}")
             End If
         Next
         If entrySections.Last.Sections.Count > 0 Then out += prependNewLines(False) & entrySections.Last.toString
