@@ -19,25 +19,30 @@ Option Strict On
 ''' A module whose purpose is to perform some housekeeping on ccleaner.ini to help clean up after winapp2.ini
 ''' </summary>
 Module CCiniDebug
-    ' File Handlers
-    Dim winappFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
-    Dim ccFile As iniFile = New iniFile(Environment.CurrentDirectory, "ccleaner.ini")
-    Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner-debugged.ini")
-    ' Module parameters
-    Dim pruneFile As Boolean = True
-    Dim saveFile As Boolean = True
-    Dim sortFile As Boolean = True
-    Dim settingsChanged As Boolean = False
+    ''' <summary>The winapp2.ini file that ccleaner.ini may optionally be checked against</summary>
+    Public Property CCDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+    '''<summary>The ccleaner.ini file to be debugged</summary>
+    Public Property CCDebugFile2 As New iniFile(Environment.CurrentDirectory, "ccleaner.ini")
+    '''<summary>Holds the path for the file that will be saved to disk. Overwrites ccleaner.ini by default</summary>
+    Public Property CCDebugFile3 As New iniFile(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner-debugged.ini")
+    '''<summary>Indicates whether or not stale winapp2.ini entries should be pruned from ccleaner.ini</summary>
+    Public Property PruneStaleEntries As Boolean = True
+    '''<summary>Indicates whether or not the debugged file should be saved back to disk</summary>
+    Public Property SaveDebuggedFile As Boolean = True
+    '''<summary>Indicates whether or not the contents of ccleaner.ini should be sorted alphabetically</summary>
+    Public Property SortFileForOutput As Boolean = True
+    '''<summary>Indicates that module level settings have been changed and can be reset</summary>
+    Public Property ModuleSettingsChanged As Boolean = False
 
     ''' <summary>Restores the default state of the module's parameters</summary>
     Private Sub initDefaultSettings()
-        ccFile.resetParams()
-        outputFile.resetParams()
-        winappFile.resetParams()
-        pruneFile = True
-        saveFile = True
-        sortFile = True
-        settingsChanged = False
+        CCDebugFile2.resetParams()
+        CCDebugFile3.resetParams()
+        CCDebugFile1.resetParams()
+        PruneStaleEntries = True
+        SaveDebuggedFile = True
+        SortFileForOutput = True
+        ModuleSettingsChanged = False
     End Sub
 
     ''' <summary>Handles the commandline args for CCiniDebug</summary>
@@ -47,10 +52,10 @@ Module CCiniDebug
     ''' -nosave     : disable saving the modified ccleaner.ini back to file
     Public Sub handleCmdlineArgs()
         initDefaultSettings()
-        invertSettingAndRemoveArg(pruneFile, "-noprune")
-        invertSettingAndRemoveArg(sortFile, "-nosort")
-        invertSettingAndRemoveArg(saveFile, "-nosave")
-        getFileAndDirParams(winappFile, ccFile, outputFile)
+        invertSettingAndRemoveArg(PruneStaleEntries, "-noprune")
+        invertSettingAndRemoveArg(SortFileForOutput, "-nosort")
+        invertSettingAndRemoveArg(SaveDebuggedFile, "-nosave")
+        getFileAndDirParams(CCDebugFile1, CCDebugFile2, CCDebugFile3)
         initDebug()
     End Sub
 
@@ -58,16 +63,16 @@ Module CCiniDebug
     Public Sub printMenu()
         printMenuTop({"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"})
         print(1, "Run (default)", "Debug ccleaner.ini", trailingBlank:=True)
-        print(5, "Toggle Pruning", "removal of dead winapp2.ini settings", enStrCond:=pruneFile)
-        print(5, "Toggle Saving", "automatic saving of changes made by CCiniDebug", enStrCond:=saveFile)
-        print(5, "Toggle Sorting", "alphabetical sorting of ccleaner.ini", enStrCond:=sortFile, trailingBlank:=True)
+        print(5, "Toggle Pruning", "removal of dead winapp2.ini settings", enStrCond:=PruneStaleEntries)
+        print(5, "Toggle Saving", "automatic saving of changes made by CCiniDebug", enStrCond:=SaveDebuggedFile)
+        print(5, "Toggle Sorting", "alphabetical sorting of ccleaner.ini", enStrCond:=SortFileForOutput, trailingBlank:=True)
         print(1, "File Chooser (ccleaner.ini)", "Choose a new ccleaner.ini name or location")
-        print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or location", pruneFile, trailingBlank:=Not saveFile)
-        print(1, "File Chooser (save)", "Change where CCiniDebug saves its changes", saveFile, trailingBlank:=True)
-        print(0, $"Current ccleaner.ini:  {replDir(ccFile.path)}")
-        print(0, $"Current winapp2.ini:   {replDir(winappFile.path)}", cond:=pruneFile)
-        print(0, $"Current save location: {replDir(outputFile.path)}", cond:=saveFile, closeMenu:=Not settingsChanged)
-        print(2, "CCiniDebug", cond:=settingsChanged, closeMenu:=True)
+        print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or location", PruneStaleEntries, trailingBlank:=Not SaveDebuggedFile)
+        print(1, "File Chooser (save)", "Change where CCiniDebug saves its changes", SaveDebuggedFile, trailingBlank:=True)
+        print(0, $"Current ccleaner.ini:  {replDir(CCDebugFile2.path)}")
+        print(0, $"Current winapp2.ini:   {replDir(CCDebugFile1.path)}", cond:=PruneStaleEntries)
+        print(0, $"Current save location: {replDir(CCDebugFile3.path)}", cond:=SaveDebuggedFile, closeMenu:=Not ModuleSettingsChanged)
+        print(2, "CCiniDebug", cond:=ModuleSettingsChanged, closeMenu:=True)
     End Sub
 
     ''' <summary>Handles the user's input from the menu</summary>
@@ -76,23 +81,23 @@ Module CCiniDebug
         Select Case True
             Case input = "0"
                 exitModule()
-            Case (input = "1" Or input = "") And (pruneFile Or saveFile Or sortFile)
+            Case (input = "1" Or input = "") And (PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput)
                 initDebug()
             Case input = "2"
-                toggleSettingParam(pruneFile, "Pruning", settingsChanged)
+                toggleSettingParam(PruneStaleEntries, "Pruning", ModuleSettingsChanged)
             Case input = "3"
-                toggleSettingParam(saveFile, "Autosaving", settingsChanged)
+                toggleSettingParam(SaveDebuggedFile, "Autosaving", ModuleSettingsChanged)
             Case input = "4"
-                toggleSettingParam(sortFile, "Sorting", settingsChanged)
+                toggleSettingParam(SortFileForOutput, "Sorting", ModuleSettingsChanged)
             Case input = "5"
-                changeFileParams(ccFile, settingsChanged)
-            Case input = "6" And pruneFile
-                changeFileParams(winappFile, settingsChanged)
-            Case saveFile And ((input = "6" And Not pruneFile) Or (input = "7" And pruneFile))
-                changeFileParams(outputFile, settingsChanged)
-            Case settingsChanged And ((input = "6" And Not (pruneFile Or saveFile)) Or (input = "7" And (pruneFile Xor saveFile)) Or (input = "8" And pruneFile And saveFile))
+                changeFileParams(CCDebugFile2, ModuleSettingsChanged)
+            Case input = "6" And PruneStaleEntries
+                changeFileParams(CCDebugFile1, ModuleSettingsChanged)
+            Case SaveDebuggedFile And ((input = "6" And Not PruneStaleEntries) Or (input = "7" And PruneStaleEntries))
+                changeFileParams(CCDebugFile3, ModuleSettingsChanged)
+            Case ModuleSettingsChanged And ((input = "6" And Not (PruneStaleEntries Or SaveDebuggedFile)) Or (input = "7" And (PruneStaleEntries Xor SaveDebuggedFile)) Or (input = "8" And PruneStaleEntries And SaveDebuggedFile))
                 resetModuleSettings("CCiniDebug", AddressOf initDefaultSettings)
-            Case Not (pruneFile Or saveFile Or sortFile)
+            Case Not (PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput)
                 setHeaderText("Please enable at least one option", True)
             Case Else
                 setHeaderText(invInpStr, True)
@@ -101,23 +106,23 @@ Module CCiniDebug
 
     ''' <summary>Performs the debugging process</summary>
     Private Sub initDebug()
-        ccFile.validate()
-        If pruneFile Then winappFile.validate()
+        CCDebugFile2.validate()
+        If PruneStaleEntries Then CCDebugFile1.validate()
         If pendingExit() Then Exit Sub
         clrConsole()
         printMenuLine(tmenu("CCiniDebug Results"))
         printMenuLine(menuStr03)
-        If pruneFile Then prune(ccFile.Sections("Options"))
-        If sortFile Then sortCC()
-        If saveFile Then outputFile.overwriteToFile(ccFile.toString)
-        print(0, $"{If(saveFile, $"{outputFile.Name} saved", "Analysis complete")}. {anyKeyStr}", isCentered:=True, closeMenu:=True)
+        If PruneStaleEntries Then prune(CCDebugFile2.Sections("Options"))
+        If SortFileForOutput Then sortCC()
+        If SaveDebuggedFile Then CCDebugFile3.overwriteToFile(CCDebugFile2.toString)
+        print(0, $"{If(SaveDebuggedFile, $"{CCDebugFile3.Name} saved", "Analysis complete")}. {anyKeyStr}", isCentered:=True, closeMenu:=True)
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
     ''' <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>
     ''' <param name="optionsSec">The iniSection object containing the Options from ccleaner.ini</param>
     Private Sub prune(ByRef optionsSec As iniSection)
-        print(0, $"Scanning {ccFile.Name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
+        print(0, $"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
         Dim tbTrimmed As New List(Of Integer)
         For i As Integer = 0 To optionsSec.Keys.keyCount - 1
             Dim optionStr As String = optionsSec.Keys.Keys(i).toString
@@ -125,7 +130,7 @@ Module CCiniDebug
             If optionStr.StartsWith("(App)") And optionStr.Contains("*") Then
                 Dim toRemove As New List(Of String) From {"(App)", "=True", "=False"}
                 toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
-                If Not winappFile.Sections.ContainsKey(optionStr) Then
+                If Not CCDebugFile1.Sections.ContainsKey(optionStr) Then
                     tbTrimmed.Add(i)
                 End If
             End If
@@ -136,9 +141,9 @@ Module CCiniDebug
 
     ''' <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
     Private Sub sortCC()
-        Dim lineList As List(Of String) = ccFile.Sections("Options").getKeysAsList
+        Dim lineList As List(Of String) = CCDebugFile2.Sections("Options").getKeysAsList
         lineList.Sort()
         lineList.Insert(0, "[Options]")
-        ccFile.Sections("Options") = New iniSection(lineList)
+        CCDebugFile2.Sections("Options") = New iniSection(lineList)
     End Sub
 End Module
