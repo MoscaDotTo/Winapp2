@@ -16,6 +16,7 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.IO
+Imports winapp2ool
 '''    <summary>
 '''    This module parses a winapp2.ini file and checks each entry therein 
 '''    removing any whose detection parameters do not exist on the current system
@@ -23,35 +24,39 @@ Imports System.IO
 '''    to the user.
 '''   </summary>
 Public Module Trim
-    ' File handlers
-    Dim winappFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
-    Dim outputFile As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
-    Dim winVer As Double
-    ' Module parameters
-    ReadOnly detChrome As New List(Of String) _
+    '''<summary>Indicates the major/minor version number on the current system</summary>
+    Private Property winVer As Double
+    '''<summary>Hardcoded list of SpecialDetect evaluations</summary>
+    Private ReadOnly Property detChrome As New List(Of String) _
         From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe", "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe",
                            "%LocalAppData%\Google\Chrome\Application\chrome.exe", "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe", "%ProgramFiles%\SRWare Iron\iron.exe",
                            "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe", "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
                            "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
-    Dim settingsChanged As Boolean
-    Dim download As Boolean = False
+    '''<summary>Indicates module settings have changed and can be reset</summary>
+    Private Property ModuleSettingsChanged As Boolean = False
+    '''<summary>Indicates that we are downloading a winapp2.ini from GitHub</summary>
+    Private Property DownloadFileToTrim As Boolean = False
+    '''<summary>The winapp2.ini file that will be trimmed</summary>
+    Public Property TrimFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+    '''<summary>Holds the path where the output file will be saved to disk. Overwrites the input file by default.</summary>
+    Public Property TrimFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
 
     ''' <summary>Handles the commandline args for Trim</summary>
     ''' Trim args:
     ''' -d          : download the latest winapp2.ini
     Public Sub handleCmdLine()
         initDefaultSettings()
-        handleDownloadBools(download)
-        getFileAndDirParams(winappFile, outputFile, New iniFile)
+        handleDownloadBools(DownloadFileToTrim)
+        getFileAndDirParams(TrimFile1, TrimFile3, New iniFile)
         initTrim()
     End Sub
 
     ''' <summary>Restores the default state of the module's parameters</summary>
     Private Sub initDefaultSettings()
-        winappFile.resetParams()
-        outputFile.resetParams()
-        download = False
-        settingsChanged = False
+        TrimFile1.resetParams()
+        TrimFile3.resetParams()
+        DownloadFileToTrim = False
+        ModuleSettingsChanged = False
     End Sub
 
     ''' <summary>Runs the trimmer from outside the module</summary>
@@ -59,9 +64,9 @@ Public Module Trim
     ''' <param name="secondFile">The output file</param>
     ''' <param name="d">Download boolean</param>
     Public Sub remoteTrim(firstFile As iniFile, secondFile As iniFile, d As Boolean)
-        winappFile = firstFile
-        outputFile = secondFile
-        download = d
+        TrimFile1 = firstFile
+        TrimFile3 = secondFile
+        DownloadFileToTrim = d
         initTrim()
     End Sub
 
@@ -69,12 +74,12 @@ Public Module Trim
     Public Sub printMenu()
         printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
         print(1, "Run (default)", "Trim winapp2.ini")
-        print(5, "Toggle Download", "using the latest winapp2.ini from GitHub as the input file", Not isOffline, True, enStrCond:=download)
-        print(1, "File Chooser (winapp2.ini)", "Change the winapp2.ini name or location", Not download, isOffline, True)
+        print(5, "Toggle Download", "using the latest winapp2.ini from GitHub as the input file", Not isOffline, True, enStrCond:=DownloadFileToTrim)
+        print(1, "File Chooser (winapp2.ini)", "Change the winapp2.ini name or location", Not DownloadFileToTrim, isOffline, True)
         print(1, "File Chooser (save)", "Change the save file name or location", trailingBlank:=True)
-        print(0, $"Current winapp2.ini location: {If(download, GetNameFromDL(download), replDir(winappFile.path))}")
-        print(0, $"Current save location: {replDir(outputFile.path)}", closeMenu:=Not settingsChanged)
-        print(2, "Trim", cond:=settingsChanged, closeMenu:=True)
+        print(0, $"Current winapp2.ini location: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.path))}")
+        print(0, $"Current save location: {replDir(TrimFile3.path)}", closeMenu:=Not ModuleSettingsChanged)
+        print(2, "Trim", cond:=ModuleSettingsChanged, closeMenu:=True)
     End Sub
 
     ''' <summary>Handles the user input from the menu</summary>
@@ -86,12 +91,12 @@ Public Module Trim
             Case (input = "1" Or input = "")
                 initTrim()
             Case input = "2" And Not isOffline
-                toggleDownload(download, settingsChanged)
-            Case (input = "3" And Not download And Not isOffline) Or (input = "2" And isOffline)
-                changeFileParams(winappFile, settingsChanged)
-            Case (input = "4" And Not download) Or (input = "3" And isOffline Or download)
-                changeFileParams(outputFile, settingsChanged)
-            Case (input = "5" Or (input = "4" And (isOffline Or download)) And settingsChanged)
+                toggleDownload(DownloadFileToTrim, ModuleSettingsChanged)
+            Case (input = "3" And Not DownloadFileToTrim And Not isOffline) Or (input = "2" And isOffline)
+                changeFileParams(TrimFile1, ModuleSettingsChanged)
+            Case (input = "4" And Not DownloadFileToTrim) Or (input = "3" And isOffline Or DownloadFileToTrim)
+                changeFileParams(TrimFile3, ModuleSettingsChanged)
+            Case (input = "5" Or (input = "4" And (isOffline Or DownloadFileToTrim)) And ModuleSettingsChanged)
                 resetModuleSettings("Trim", AddressOf initDefaultSettings)
             Case Else
                 setHeaderText(invInpStr, True)
@@ -100,9 +105,9 @@ Public Module Trim
 
     ''' <summary>Initiates the trim after validating our ini files</summary>
     Private Sub initTrim()
-        If Not download Then winappFile.validate()
+        If Not DownloadFileToTrim Then TrimFile1.validate()
         If pendingExit() Then Exit Sub
-        Dim winapp2 As winapp2file = If(Not download, New winapp2file(winappFile), New winapp2file(getRemoteIniFile(getWinappLink)))
+        Dim winapp2 As winapp2file = If(Not DownloadFileToTrim, New winapp2file(TrimFile1), New winapp2file(getRemoteIniFile(getWinappLink)))
         trim(winapp2)
         setHeaderText("Trim Complete")
         clrConsole()
@@ -114,7 +119,7 @@ Public Module Trim
         clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
         Dim entryCountBeforeTrim As Integer = winapp2.count
-        For Each entryList In winapp2.winapp2entries
+        For Each entryList In winapp2.Winapp2entries
             processEntryList(entryList)
         Next
         winapp2.rebuildToIniFiles()
@@ -129,7 +134,7 @@ Public Module Trim
         Dim difference As Integer = entryCountBeforeTrim - winapp2.count
         print(0, $"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
         print(0, anyKeyStr, leadingBlank:=True, closeMenu:=True)
-        outputFile.overwriteToFile(winapp2.winapp2string)
+        TrimFile3.overwriteToFile(winapp2.winapp2string)
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
 

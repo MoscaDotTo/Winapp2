@@ -124,6 +124,7 @@
     <Compile Include="modules\merge\Merge.vb" />
     <Compile Include="modules\minefield\JavaMaker.vb" />
     <Compile Include="modules\minefield\Minefield.vb" />
+    <Compile Include="modules\minefield\OutlookMaker.vb" />
     <Compile Include="modules\trim\Trim.vb" />
     <Compile Include="modules\winappdebug\components\advSettings.vb" />
     <Compile Include="modules\winappdebug\components\experimentalScans.vb" />

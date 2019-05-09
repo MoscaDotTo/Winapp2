@@ -32,7 +32,7 @@ Module CCiniDebug
     '''<summary>Indicates whether or not the contents of ccleaner.ini should be sorted alphabetically</summary>
     Public Property SortFileForOutput As Boolean = True
     '''<summary>Indicates that module level settings have been changed and can be reset</summary>
-    Public Property ModuleSettingsChanged As Boolean = False
+    Private Property ModuleSettingsChanged As Boolean = False
 
     ''' <summary>Restores the default state of the module's parameters</summary>
     Private Sub initDefaultSettings()
