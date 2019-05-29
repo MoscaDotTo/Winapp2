@@ -27,7 +27,7 @@ Public Module iniFileHandler
     ''' <param name="someFile">An iniFile object with user defined path and name parameters</param>
     Public Sub chkFileExist(someFile As iniFile)
         If pendingExit() Then Exit Sub
-        While Not File.Exists(someFile.path)
+        While Not File.Exists(someFile.Path)
             If pendingExit() Then Exit Sub
             setHeaderText("Error", True)
             clrConsole()
@@ -46,7 +46,7 @@ Public Module iniFileHandler
                 Case Else
                     setHeaderText(invInpStr, True)
             End Select
-            If Not File.Exists(someFile.path) And Not MenuHeaderText = invInpStr Then setHeaderText("Error", True)
+            If Not File.Exists(someFile.Path) And Not MenuHeaderText = invInpStr Then setHeaderText("Error", True)
         End While
     End Sub
 

@@ -21,15 +21,13 @@ Option Strict On
 Public Class iniSection
     ''' <summary> The line number from which the Name of the Section was originally read</summary>
     Public Property StartingLineNumber As Integer
-
     ''' <summary> The line number from which the last Key in the Section was originally read </summary>
     Public Property EndingLineNumber As Integer
-
     ''' <summary>The name of the Section (without [Braces])</summary>
     Public Property Name As String
-
     ''' <summary>The Dictionary</summary>
-    Public Property Keys As keyList
+    Public Property Keys As New keyList
+
 
     ''' <summary>Sorts a section's keys into keylists based on their KeyType</summary>
     ''' <param name="listOfKeyLists">The list of keyLists to be sorted into</param>
@@ -78,10 +76,10 @@ Public Class iniSection
     End Sub
 
     ''' <summary>Returns the keys in the iniSection as a list of Strings</summary>
-    Public Function getKeysAsList() As List(Of String)
-        Dim out As New List(Of String)
+    Public Function getKeysAsStrList() As strList
+        Dim out As New strList
         For Each key In Keys.Keys
-            out.Add(key.toString)
+            out.add(key.toString)
         Next
         Return out
     End Function
@@ -93,14 +91,14 @@ Public Class iniSection
     Public Function compareTo(ss As iniSection, ByRef removedKeys As keyList, ByRef addedKeys As keyList) As Boolean
         ' Create a copy of the section so we can modify it
         Dim secondSection As New iniSection With {.Name = ss.Name, .StartingLineNumber = ss.StartingLineNumber}
-        For i As Integer = 0 To ss.Keys.keyCount - 1
+        For i As Integer = 0 To ss.Keys.KeyCount - 1
             secondSection.Keys.add(ss.Keys.Keys(i))
         Next
         Dim noMatch As Boolean
         Dim tmpList As New List(Of Integer)
         For Each key In Keys.Keys
             noMatch = True
-            For i As Integer = 0 To secondSection.Keys.keyCount - 1
+            For i As Integer = 0 To secondSection.Keys.KeyCount - 1
                 Dim sKey = secondSection.Keys.Keys(i)
                 Select Case True
                     Case key.compareTypes(sKey) And key.compareValues(sKey)
@@ -120,7 +118,7 @@ Public Class iniSection
         For Each key In secondSection.Keys.Keys
             addedKeys.add(key)
         Next
-        Return removedKeys.keyCount + addedKeys.keyCount = 0
+        Return removedKeys.KeyCount + addedKeys.KeyCount = 0
     End Function
 
     ''' <summary>Returns an iniSection as it would appear on disk as a String</summary>

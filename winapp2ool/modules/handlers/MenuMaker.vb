@@ -66,14 +66,21 @@ Module MenuMaker
     End Function
 
     ''' <summary>Prints a menu line, option, or reset string, conditionally</summary>
-    ''' <param name="cond">The condition under which to print</param>
+    ''' <param name="cond">The optional condition under which to print (default: true)</param>
     ''' <param name="printType">The type of menu information to print</param>
     ''' <param name="str1">The first string or half string to be printed</param>
-    ''' <param name="optString">The alignment or second half string to be printed</param>
+    ''' <param name="optString">The second half string to be printed for menu options</param>
+    ''' <param name="leadingBlank">Optional condition under which the print should be buffered with a leading blank line (default: false)</param>
+    ''' <param name="trailingBlank">Optional condition under which the print should be buffered with a trailing blank line (default: false)</param>
+    ''' <param name="isCentered">Optional condition specifying whether or not the text should be centered (default: false)</param>
+    ''' <param name="closeMenu">Optional condition specifying whether a menu is waiting to be closed (default: false)</param>
+    ''' <param name="enStrCond">Optional condition that helps color Enabled/Disabled lines</param>
+    ''' <param name="colorLine">Optional condition that indicates we want to color lines without Enabled/Disabled strings in them</param>
     Public Sub print(printType As Integer, str1 As String, Optional optString As String = "", Optional cond As Boolean = True,
                      Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False,
-                     Optional closeMenu As Boolean = False, Optional enStrCond As Boolean = False)
+                     Optional closeMenu As Boolean = False, Optional enStrCond As Boolean = False, Optional colorLine As Boolean = False)
         If cond And leadingBlank Then printMenuLine()
+        If colorLine Then Console.ForegroundColor = If(enStrCond, ConsoleColor.Green, ConsoleColor.Red)
         Select Case True
             ' Prints lines
             Case cond And printType = 0
@@ -91,13 +98,12 @@ Module MenuMaker
             Case cond And printType = 4
                 Console.ForegroundColor = ConsoleColor.Red
                 print(0, $"{str1}, some functions will not be available.", trailingBlank:=True, isCentered:=True)
-                Console.ResetColor()
             ' Colored line printing for enable/disable menu options
             Case printType = 5
                 Console.ForegroundColor = If(enStrCond, ConsoleColor.Green, ConsoleColor.Red)
                 print(1, str1, $"{enStr(enStrCond)} {optString}")
-                Console.ResetColor()
         End Select
+        Console.ResetColor()
         If cond And trailingBlank Then printMenuLine()
         If cond And closeMenu Then printMenuLine(menuStr02)
     End Sub
@@ -182,7 +188,7 @@ Module MenuMaker
     ''' <param name="align">The alignment of the line to be printed. 'l' for Left or 'c' for Centre</param>
     Public Function mkMenuLine(line As String, align As String) As String
         If line.Length >= 125 Then Return line
-        Dim out As String = " ║"
+        Dim out = " ║"
         Select Case align
             Case "c"
                 padToEnd(out, CInt((((124 - line.Length) / 2) + 2)))
@@ -208,7 +214,7 @@ Module MenuMaker
     ''' <summary>Prints a box with a single message inside it</summary>
     ''' <param name="text">The string to be printed in the box</param>
     Public Function bmenu(text As String) As String
-        Dim out As String = appendNewLine(menu(menuStr00))
+        Dim out = appendNewLine(menu(menuStr00))
         out += appendNewLine(menu(text, True))
         out += menu(menuStr02)
         Return out

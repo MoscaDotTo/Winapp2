@@ -21,10 +21,15 @@ Option Strict On
 Public Class keyList
 
     ''' <summary> The list of iniKeys </summary>
-    Public Property Keys As List(Of iniKey)
+    Public Property Keys As New List(Of iniKey)
 
     ''' <summary> The KeyType of keys contained in the list</summary>
     Public Property KeyType As String
+
+    ''' <summary>Returns the number of keys in the keylist</summary>
+    Public Function KeyCount() As Integer
+        Return Keys.Count
+    End Function
 
     ''' <summary>Creates a new (empty) keylist</summary>
     ''' <param name="kt">Optional String containing the expected KeyType of the keys in the list</param>
@@ -71,23 +76,10 @@ Public Class keyList
         Keys.RemoveAt(ind)
     End Sub
 
-    ''' <summary>Returns the number of keys in the keylist</summary>
-    Public Function keyCount() As Integer
-        Return Keys.Count
-    End Function
-
     ''' <summary>Returns whether or not the keyType of the list matches the input String</summary>
     ''' <param name="type">The String against which to match the keylist's type</param>
     Public Function typeIs(type As String) As Boolean
         Return If(KeyType = "", Keys(0).KeyType, KeyType) = type
-    End Function
-
-    ''' <summary>Returns the keylist in the form of a list of Strings</summary>
-    ''' <param name="onlyGetVals">Optional Boolean specifying whether or not the function should return only the values from the keys</param>
-    Public Function toListOfStr(Optional onlyGetVals As Boolean = False) As List(Of String)
-        Dim out As New List(Of String)
-        Keys.ForEach(Sub(key) out.Add(If(onlyGetVals, key.Value, key.toString)))
-        Return out
     End Function
 
     ''' <summary>Returns a keyList as a strList</summary>
@@ -106,9 +98,10 @@ Public Class keyList
     ''' <summary>Renumber keys according to the sorted state of the values</summary>
     ''' <param name="sortedKeyValues"></param>
     Public Sub renumberKeys(sortedKeyValues As strList)
-        For i As Integer = 0 To Me.keyCount - 1
+        gLog("Renumbering keys", indent:=True)
+        For i As Integer = 0 To Me.KeyCount - 1
             Keys(i).Name = Keys(i).KeyType & i + 1
-            Keys(i).Value = sortedKeyValues.items(i)
+            Keys(i).Value = sortedKeyValues.Items(i)
         Next
     End Sub
 

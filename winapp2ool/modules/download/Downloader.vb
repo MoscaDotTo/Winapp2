@@ -41,10 +41,10 @@ Module Downloader
     ''' </summary>
     Public Sub handleCmdLine()
         Dim fileLink As String = ""
-        If Cmdargs.Count > 0 Then
-            Select Case Cmdargs(0).ToLower
+        If cmdargs.Count > 0 Then
+            Select Case cmdargs(0).ToLower
                 Case "1", "2", "winapp2"
-                    fileLink = If(Not Cmdargs(0) = "2", wa2Link, nonccLink)
+                    fileLink = If(Not cmdargs(0) = "2", wa2Link, nonccLink)
                     downloadFile.Name = "winapp2.ini"
                 Case "3", "winapp2ool"
                     fileLink = toolLink
@@ -65,7 +65,7 @@ Module Downloader
                     fileLink = readMeLink
                     downloadFile.Name = "readme.txt"
             End Select
-            Cmdargs.RemoveAt(0)
+            cmdargs.RemoveAt(0)
         End If
         getFileAndDirParams(downloadFile, New iniFile, New iniFile)
         If downloadFile.Dir = Environment.CurrentDirectory And downloadFile.Name = "winapp2ool.exe" Then autoUpdate()
@@ -177,8 +177,11 @@ Module Downloader
         Dim reader As StreamReader
         Try
             reader = New StreamReader(New WebClient().OpenRead("http://www.github.com"))
+            gLog("Established connection to GitHub")
             Return True
         Catch ex As Exception
+            gLog("Unable to establish connection to GitHub")
+            gLog(ex.ToString)
             Return False
         End Try
     End Function
@@ -231,6 +234,7 @@ Module Downloader
 
     ''' <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
     Public Sub autoUpdate()
+        gLog("Starting auto update process")
         downloadFile.Dir = Environment.CurrentDirectory
         downloadFile.Name = "winapp2ool updated.exe"
         Dim backupName As String = $"winapp2ool v{currentVersion}.exe.bak"
@@ -238,7 +242,7 @@ Module Downloader
             ' Remove any existing backups of this version
             If File.Exists($"{Environment.CurrentDirectory}\{backupName}") Then File.Delete($"{Environment.CurrentDirectory}\{backupName}")
             ' Remove any old update files that didn't get renamed for whatever reason
-            If File.Exists(downloadFile.path) Then File.Delete(downloadFile.path)
+            If File.Exists(downloadFile.Path) Then File.Delete(downloadFile.Path)
             download(toolLink, False)
             ' Rename the executables and launch the new one
             File.Move("winapp2ool.exe", backupName)
@@ -258,14 +262,14 @@ Module Downloader
         ' Don't try to download to a directory that doesn't exist
         If Not Directory.Exists(downloadFile.Dir) Then Directory.CreateDirectory(downloadFile.Dir)
         ' If the file exists and we're prompting or overwrite, do that.
-        If prompt And File.Exists(downloadFile.path) And Not SuppressOutput Then
+        If prompt And File.Exists(downloadFile.Path) And Not SuppressOutput Then
             cwl($"{downloadFile.Name} already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
             Dim nfilename As String = Console.ReadLine()
             If nfilename.Trim <> "" Then downloadFile.Name = nfilename
         End If
         cwl($"Downloading {givenName}...")
-        Dim success As Boolean = dlFile(link, downloadFile.path)
+        Dim success As Boolean = dlFile(link, downloadFile.Path)
         cwl($"Download {If(success, "Complete.", "Failed.")}")
         cwl(If(success, "Downloaded ", $"Unable to download {downloadFile.Name} to {downloadFile.Dir}"))
         setHeaderText($"Download {If(success, "", "in")}complete: {downloadFile.Name}", Not success)

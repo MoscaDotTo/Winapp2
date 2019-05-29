@@ -28,20 +28,20 @@ Public Module winapp2handler
     Public Function replaceAndSort(ListToBeSorted As strList, characterToReplace As String, replacementText As String) As strList
         Dim changes As New changeDict
         ' Replace our target characters if they exist
-        For i As Integer = 0 To ListToBeSorted.items.Count - 1
-            Dim item As String = ListToBeSorted.items(i)
+        For i As Integer = 0 To ListToBeSorted.Items.Count - 1
+            Dim item As String = ListToBeSorted.Items(i)
             If item.Contains(characterToReplace) Then
                 Dim renamedItem As String = item.Replace(characterToReplace, replacementText)
                 changes.trackChanges(item, renamedItem)
-                ListToBeSorted.items(i) = renamedItem
+                ListToBeSorted.Items(i) = renamedItem
             End If
         Next
         ' Pad numbers if necessary 
         findAndReplaceNumbers(ListToBeSorted, changes)
         ' Copy the modified list to be sorted and sort it
         Dim sortedEntryList As New strList
-        sortedEntryList.items.AddRange(ListToBeSorted.items)
-        sortedEntryList.items.Sort()
+        sortedEntryList.Items.AddRange(ListToBeSorted.Items)
+        sortedEntryList.Items.Sort()
         ' Restore the original state of our data
         changes.undoChanges({ListToBeSorted, sortedEntryList})
         Return sortedEntryList
@@ -51,7 +51,7 @@ Public Module winapp2handler
     ''' <param name="lst">A list of strings to be searched</param>
     Private Function findLongestNumLength(ByRef lst As strList) As Integer
         Dim out As Integer = 0
-        For Each item In lst.items
+        For Each item In lst.Items
             For Each mtch As Match In Regex.Matches(item, "[\d]+")
                 If mtch.Length > out Then out = mtch.Length
             Next
@@ -66,8 +66,8 @@ Public Module winapp2handler
     Private Sub findAndReplaceNumbers(ByRef listToBeSorted As strList, ByRef changes As changeDict)
         Dim longestNumLen As Integer = findLongestNumLength(listToBeSorted)
         If longestNumLen < 2 Then Exit Sub
-        For i As Integer = 0 To listToBeSorted.count - 1
-            Dim baseString As String = listToBeSorted.items(i)
+        For i As Integer = 0 To listToBeSorted.Count - 1
+            Dim baseString As String = listToBeSorted.Items(i)
             Dim paddedString As String = baseString
             Dim numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*")
             For Each m As Match In numberAndDecimals.Matches(baseString)

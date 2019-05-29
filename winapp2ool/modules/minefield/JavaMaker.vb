@@ -45,8 +45,8 @@ Module JavaMaker
         print(5, "Toggle Merge", "merging the generated entry into winapp2.ini automatically", enStrCond:=merge)
         print(5, "Toggle Save", "saving the generated entry to disk", Not merge, trailingBlank:=Not save, enStrCond:=save)
         print(1, "File Chooser (save)", "Select where winapp2ool saves the generated entry", Not merge And save, trailingBlank:=True)
-        print(0, $"Java definitions file: {If(Not download, replDir(javaFile.path), "online")}", closeMenu:=Not (save Or settingsChanged))
-        print(0, $"Save file: {replDir(saveFile.path)}", cond:=save, closeMenu:=Not settingsChanged)
+        print(0, $"Java definitions file: {If(Not download, replDir(javaFile.Path), "online")}", closeMenu:=Not (save Or settingsChanged))
+        print(0, $"Save file: {replDir(saveFile.Path)}", cond:=save, closeMenu:=Not settingsChanged)
         print(2, "JavaMaker", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
@@ -119,13 +119,13 @@ Module JavaMaker
         cwl("Running an intense registry query, this will take a few moments...")
         Dim jSect As iniSection = javaFile.Sections.Item("Previous Java Installation Cleanup *")
         jSect.constKeyLists(kll)
-        Dim IDS = clsids.toListOfStr(True)
+        Dim IDS = clsids.toStrLst(True)
         Dim typeLib As New keyList(getRegKeys(getCRKey("WOW6432Node\TypeLib\"), {"{5852F5E0-8BF4-11D4-A245-0080C6F74284}"}.ToList))
-        Dim classRootIDs As New keyList(getRegKeys(getCRKey("WOW6432Node\CLSID\"), IDS))
-        Dim localMachineClassesIDs As New keyList(getRegKeys(getLMKey("SOFTWARE\Classes\WOW6432Node\CLSID\"), IDS))
-        Dim localMachineWOWIds As New keyList(getRegKeys(getLMKey("SOFTWARE\WOW6432Node\Classes\CLSID\"), IDS))
-        Dim defClassesIDs As New keyList(getRegKeys(getUserKey(".Default\Software\Classes\CLSID\"), IDS))
-        Dim s1518ClassesIDs As New keyList(getRegKeys(getUserKey("S-1-5-18\Software\Classes\CLSID\"), IDS))
+        Dim classRootIDs As New keyList(getRegKeys(getCRKey("WOW6432Node\CLSID\"), IDS.Items))
+        Dim localMachineClassesIDs As New keyList(getRegKeys(getLMKey("SOFTWARE\Classes\WOW6432Node\CLSID\"), IDS.Items))
+        Dim localMachineWOWIds As New keyList(getRegKeys(getLMKey("SOFTWARE\WOW6432Node\Classes\CLSID\"), IDS.Items))
+        Dim defClassesIDs As New keyList(getRegKeys(getUserKey(".Default\Software\Classes\CLSID\"), IDS.Items))
+        Dim s1518ClassesIDs As New keyList(getRegKeys(getUserKey("S-1-5-18\Software\Classes\CLSID\"), IDS.Items))
         Dim localMachineJREs As New keyList(getRegKeys(getLMKey("Software\JavaSoft\Java Runtime Environment"), {"1"}.ToList))
         ' Get the JRE versions from HKLM\ and HKCU\, ignore the most recent
         Dim lmJREminorIDs, cuJREminorIDs As New keyList
@@ -136,7 +136,7 @@ Module JavaMaker
         currentUserJREs.Keys.ForEach(Sub(key) cuJREminorIDs.add(key, key.toString.Replace("HKEY_CURRENT_USER", "").Contains("_")))
         currentUserJREs.remove(cuJREminorIDs.Keys)
         ' Generate the list of RegKeys
-        Dim regKeyList As keyList = mkEntry({classRootIDs, localMachineClassesIDs, localMachineWOWIds, defClassesIDs, s1518ClassesIDs,
+        Dim regKeyList = mkEntry({classRootIDs, localMachineClassesIDs, localMachineWOWIds, defClassesIDs, s1518ClassesIDs,
                 localMachineJREs, lmJREminorIDs, currentUserJREs, cuJREminorIDs, JavaPluginKeys})
         ' Renumber them 
         regKeyList.renumberKeys(replaceAndSort(regKeyList.toStrLst(True), "-", "-"))
@@ -147,7 +147,7 @@ Module JavaMaker
         entry.Add("Section=Experimental")
         entry.Add($"Detect={regKeyList.Keys(0).Value}")
         entry.Add("Default=False")
-        entry.AddRange(regKeyList.toListOfStr)
+        entry.AddRange(regKeyList.toStrLst.Items)
         Dim out As New iniSection(entry)
         cwl(out.ToString)
         If save Then

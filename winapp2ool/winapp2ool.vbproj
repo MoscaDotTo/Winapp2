@@ -114,6 +114,7 @@
     <Compile Include="modules\handlers\ini\iniKey.vb" />
     <Compile Include="modules\handlers\ini\strList.vb" />
     <Compile Include="modules\handlers\ini\inifilehandler.vb" />
+    <Compile Include="modules\handlers\logger\logger.vb" />
     <Compile Include="modules\handlers\MenuMaker.vb" />
     <Compile Include="modules\handlers\RegistryHelper.vb" />
     <Compile Include="modules\handlers\winapp2\changeDict.vb" />

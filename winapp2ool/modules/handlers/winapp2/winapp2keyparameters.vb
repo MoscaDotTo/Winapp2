@@ -69,15 +69,17 @@ Public Class winapp2KeyParameters
     ''' <param name="key">An iniKey to be reconstructed</param>
     ''' Also trims empty comments 
     Public Sub reconstructKey(ByRef key As iniKey)
-        Dim out As String = ""
+        Dim out = ""
         out += $"{PathString}{If(ArgsList.Count > 0, "|", "")}"
         If ArgsList.Count > 1 Then
-            For i As Integer = 0 To ArgsList.Count - 2
+            For i = 0 To ArgsList.Count - 2
                 If Not ArgsList(i) = "" Then out += ArgsList(i) & ";"
             Next
         End If
         If ArgsList.Count > 0 Then out += ArgsList.Last
         If Not FlagString = "None" Then out += "|" & FlagString
+        ' Small edgecase for when empty parameters lead the pipe, resulting in the above loop leaving a single one for expectation of a next element
+        out = out.Replace(";|", "|")
         key.Value = out
     End Sub
 

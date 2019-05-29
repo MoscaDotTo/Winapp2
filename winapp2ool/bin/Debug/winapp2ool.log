@@ -1,0 +1,238 @@
+Starting application
+Checking online status
+Established connection to GitHub
+Found commandline args: C:\Users\robbie\source\repos\winapp2\winapp2ool\bin\Debug\winapp2ool.exe
+  
+  Loading module Winapp2ool v1.02 - A multitool for winapp2.ini
+  Update available for winapp2.ini from 000000 to 190529
+    
+    Loading module WinappDebug
+      Validating winapp2.ini
+        ini created with 1 sections
+      
+      Beginning lint
+        
+        Processing entry 0 Duplicate Key Value Test *
+        
+          Validating Keys
+          Validation Complete
+        
+          Processing DetectOSs
+          
+          Input mismatch error in DetectOS1=5.0
+            Detected unnecessary numbering.
+              Expected: DetectOS
+              Found: DetectOS1
+            
+              Changing 'DetectOS1' to 'DetectOS'
+          
+            Multiple DetectOS detected.
+              Key: DetectOS2=5.0
+            
+            Duplicate key value found
+              Key:            DetectOS2=5.0
+              Duplicates:     DetectOS=5.0
+            
+          Input mismatch error in DetectOS2=5.0
+            Detected unnecessary numbering.
+              Expected: DetectOS
+              Found: DetectOS2
+            
+              Changing 'DetectOS2' to 'DetectOS'
+          
+          Done processing DetectOSs
+          
+          Processing LangSecRefs
+          
+          Input mismatch error in LangSecRef1=3000
+            Detected unnecessary numbering.
+              Expected: LangSecRef
+              Found: LangSecRef1
+            
+              Changing 'LangSecRef1' to 'LangSecRef'
+          
+            LangSecRef holds an invalid value.
+              Key: LangSecRef=3000
+            
+            Multiple LangSecRef detected.
+              Key: LangSecRef2=3000
+            
+            Duplicate key value found
+              Key:            LangSecRef2=3000
+              Duplicates:     LangSecRef=3000
+            
+          Input mismatch error in LangSecRef2=3000
+            Detected unnecessary numbering.
+              Expected: LangSecRef
+              Found: LangSecRef2
+            
+              Changing 'LangSecRef2' to 'LangSecRef'
+          
+            LangSecRef holds an invalid value.
+              Key: LangSecRef=3000
+            
+          Done processing LangSecRefs
+          
+          Processing Sections
+          
+          Input mismatch error in Section1=Test
+            Detected unnecessary numbering.
+              Expected: Section
+              Found: Section1
+            
+              Changing 'Section1' to 'Section'
+          
+            Multiple Section detected.
+              Key: Section2=TEST
+            
+            Duplicate key value found
+              Key:            Section2=TEST
+              Duplicates:     Section=TEST
+            
+          Input mismatch error in Section2=TEST
+            Detected unnecessary numbering.
+              Expected: Section
+              Found: Section2
+            
+              Changing 'Section2' to 'Section'
+          
+          Done processing Sections
+          
+          Processing SpecialDetects
+          
+          Input mismatch error in SpecialDetect1=DET_MOZILLA
+            Detected unnecessary numbering.
+              Expected: SpecialDetect
+              Found: SpecialDetect1
+            
+              Changing 'SpecialDetect1' to 'SpecialDetect'
+          
+            Multiple SpecialDetect detected.
+              Key: SpecialDetect2=DET_MOZILLA
+            
+            Duplicate key value found
+              Key:            SpecialDetect2=DET_MOZILLA
+              Duplicates:     SpecialDetect=DET_MOZILLA
+            
+          Input mismatch error in SpecialDetect2=DET_MOZILLA
+            Detected unnecessary numbering.
+              Expected: SpecialDetect
+              Found: SpecialDetect2
+            
+              Changing 'SpecialDetect2' to 'SpecialDetect'
+          
+          Done processing SpecialDetects
+          
+          Processing Detects
+          
+            Duplicate key value found
+              Key:            Detect2=HKCU\Software
+              Duplicates:     Detect1=HKCU\Software
+            
+            Duplicate key value found
+              Key:            Detect3=HKCU\Software
+              Duplicates:     Detect1=HKCU\Software
+            
+          Done processing Detects
+          
+          Processing DetectFiles
+          
+            Trailing backslash (\) found in DetectFile
+              Key: DetectFile1=%WinDir%\
+            
+              Changing '%WinDir%\' to '%WinDir%'
+          
+            Duplicate key value found
+              Key:            DetectFile2=%WinDir%\
+              Duplicates:     DetectFile1=%WinDir%\
+            
+            Trailing backslash (\) found in DetectFile
+              Key: DetectFile2=%WinDir%\
+            
+              Changing '%WinDir%\' to '%WinDir%'
+          
+          Done processing DetectFiles
+          
+          Processing Defaults
+          
+          Input mismatch error in Default1=False
+            Detected unnecessary numbering.
+              Expected: Default
+              Found: Default1
+            
+              Changing 'Default1' to 'Default'
+          
+            Multiple Default detected.
+              Key: Default2=False
+            
+            Duplicate key value found
+              Key:            Default2=False
+              Duplicates:     Default=False
+            
+          Input mismatch error in Default2=False
+            Detected unnecessary numbering.
+              Expected: Default
+              Found: Default2
+            
+              Changing 'Default2' to 'Default'
+          
+          Done processing Defaults
+          
+          Processing Warnings
+          
+          Input mismatch error in Warning1=Test
+            Detected unnecessary numbering.
+              Expected: Warning
+              Found: Warning1
+            
+              Changing 'Warning1' to 'Warning'
+          
+            Multiple Warning detected.
+              Key: Warning2=Test
+            
+            Duplicate key value found
+              Key:            Warning2=Test
+              Duplicates:     Warning=Test
+            
+          Input mismatch error in Warning2=Test
+            Detected unnecessary numbering.
+              Expected: Warning
+              Found: Warning2
+            
+              Changing 'Warning2' to 'Warning'
+          
+          Done processing Warnings
+          
+          Processing FileKeys
+          
+            Duplicate key value found
+              Key:            FileKey2=%WinDir%\SomeDir|Somefile1
+              Duplicates:     FileKey1=%WinDir%\SomeDir|Somefile1
+            
+          Done processing FileKeys
+          
+          Processing RegKeys
+          
+            Duplicate key value found
+              Key:            RegKey2=HKLM\Software
+              Duplicates:     RegKey1=HKLM\Software
+            
+          Done processing RegKeys
+          
+          Processing ExcludeKeys
+          
+            Duplicate key value found
+              Key:            ExcludeKey2=FILE|%WinDir%\someFolder\|somefile1
+              Duplicates:     ExcludeKey1=FILE|%WinDir%\someFolder\|somefile1
+            
+          Done processing ExcludeKeys
+          
+          Section key found alongside LangSecRef key, only one is required.
+            Entry Name: [0 Duplicate Key Value Test *]
+          
+        
+        
+      Lint Complete
+      
+    Exiting WinappDebug
+    Update available for winapp2.ini from 000000 to 190529

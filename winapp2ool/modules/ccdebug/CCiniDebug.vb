@@ -62,16 +62,16 @@ Module CCiniDebug
     ''' <summary>Prints the CCiniDebug menu to the user</summary>
     Public Sub printMenu()
         printMenuTop({"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"})
-        print(1, "Run (default)", "Debug ccleaner.ini", trailingBlank:=True)
+        print(1, "Run (default)", "Debug ccleaner.ini", trailingBlank:=True, enStrCond:=PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput, colorLine:=True)
         print(5, "Toggle Pruning", "removal of dead winapp2.ini settings", enStrCond:=PruneStaleEntries)
         print(5, "Toggle Saving", "automatic saving of changes made by CCiniDebug", enStrCond:=SaveDebuggedFile)
         print(5, "Toggle Sorting", "alphabetical sorting of ccleaner.ini", enStrCond:=SortFileForOutput, trailingBlank:=True)
         print(1, "File Chooser (ccleaner.ini)", "Choose a new ccleaner.ini name or location")
         print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or location", PruneStaleEntries, trailingBlank:=Not SaveDebuggedFile)
         print(1, "File Chooser (save)", "Change where CCiniDebug saves its changes", SaveDebuggedFile, trailingBlank:=True)
-        print(0, $"Current ccleaner.ini:  {replDir(CCDebugFile2.path)}")
-        print(0, $"Current winapp2.ini:   {replDir(CCDebugFile1.path)}", cond:=PruneStaleEntries)
-        print(0, $"Current save location: {replDir(CCDebugFile3.path)}", cond:=SaveDebuggedFile, closeMenu:=Not ModuleSettingsChanged)
+        print(0, $"Current ccleaner.ini:  {replDir(CCDebugFile2.Path)}")
+        print(0, $"Current winapp2.ini:   {replDir(CCDebugFile1.Path)}", cond:=PruneStaleEntries)
+        print(0, $"Current save location: {replDir(CCDebugFile3.Path)}", cond:=SaveDebuggedFile, closeMenu:=Not ModuleSettingsChanged)
         print(2, "CCiniDebug", cond:=ModuleSettingsChanged, closeMenu:=True)
     End Sub
 
@@ -104,7 +104,14 @@ Module CCiniDebug
         End Select
     End Sub
 
-    ''' <summary>Performs the debugging process</summary>
+    '''<summary>Performs the debug process on ccleaner.ini</summary>
+    Public Sub ccDebug()
+        If PruneStaleEntries Then prune(CCDebugFile2.Sections("Options"))
+        If SortFileForOutput Then sortCC()
+        CCDebugFile3.overwriteToFile(CCDebugFile2.toString, SaveDebuggedFile)
+    End Sub
+
+    ''' <summary>Sets up the debug and prints its results</summary>
     Private Sub initDebug()
         CCDebugFile2.validate()
         If PruneStaleEntries Then CCDebugFile1.validate()
@@ -112,9 +119,7 @@ Module CCiniDebug
         clrConsole()
         printMenuLine(tmenu("CCiniDebug Results"))
         printMenuLine(menuStr03)
-        If PruneStaleEntries Then prune(CCDebugFile2.Sections("Options"))
-        If SortFileForOutput Then sortCC()
-        If SaveDebuggedFile Then CCDebugFile3.overwriteToFile(CCDebugFile2.toString)
+        ccDebug()
         print(0, $"{If(SaveDebuggedFile, $"{CCDebugFile3.Name} saved", "Analysis complete")}. {anyKeyStr}", isCentered:=True, closeMenu:=True)
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
@@ -124,15 +129,13 @@ Module CCiniDebug
     Private Sub prune(ByRef optionsSec As iniSection)
         print(0, $"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
         Dim tbTrimmed As New List(Of Integer)
-        For i As Integer = 0 To optionsSec.Keys.keyCount - 1
-            Dim optionStr As String = optionsSec.Keys.Keys(i).toString
+        For i = 0 To optionsSec.Keys.KeyCount - 1
+            Dim optionStr = optionsSec.Keys.Keys(i).toString
             ' Only operate on (app) keys belonging to winapp2.ini
             If optionStr.StartsWith("(App)") And optionStr.Contains("*") Then
                 Dim toRemove As New List(Of String) From {"(App)", "=True", "=False"}
                 toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
-                If Not CCDebugFile1.Sections.ContainsKey(optionStr) Then
-                    tbTrimmed.Add(i)
-                End If
+                If Not CCDebugFile1.Sections.ContainsKey(optionStr) Then tbTrimmed.Add(i)
             End If
         Next
         print(0, $"{tbTrimmed.Count} orphaned settings detected", leadingBlank:=True, trailingBlank:=True)
@@ -141,9 +144,9 @@ Module CCiniDebug
 
     ''' <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
     Private Sub sortCC()
-        Dim lineList As List(Of String) = CCDebugFile2.Sections("Options").getKeysAsList
-        lineList.Sort()
-        lineList.Insert(0, "[Options]")
-        CCDebugFile2.Sections("Options") = New iniSection(lineList)
+        Dim lineList = CCDebugFile2.Sections("Options").getKeysAsStrList
+        lineList.Items.Sort()
+        lineList.Items.Insert(0, "[Options]")
+        CCDebugFile2.Sections("Options") = New iniSection(lineList.Items)
     End Sub
 End Module

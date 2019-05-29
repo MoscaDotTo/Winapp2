@@ -67,7 +67,7 @@ Module Diff
     Public Sub printMenu()
         Console.WindowHeight = If(settingsChanged, 32, 30)
         printMenuTop({"Observe the differences between two ini files"})
-        print(1, "Run (default)", "Run the diff tool")
+        print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (newOrRemoteFile.Name = "" And Not download), colorLine:=True)
         print(0, "Select Older/Local File:", leadingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your older ini file")
         print(0, "Select Newer/Remote File:", leadingBlank:=True)
@@ -76,9 +76,9 @@ Module Diff
         print(0, "Log Settings:")
         print(5, "Toggle Log Saving", "automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not saveLog, enStrCond:=saveLog)
         print(1, "File Chooser (log)", "Change where Diff saves its log", saveLog, trailingBlank:=True)
-        print(0, $"Older file: {replDir(oldOrLocalFile.path)}")
-        print(0, $"Newer file: {If(newOrRemoteFile.Name = "" And Not download, "Not yet selected", If(download, GetNameFromDL(True), replDir(newOrRemoteFile.path)))}", closeMenu:=Not saveLog And Not settingsChanged)
-        print(0, $"Log   file: {replDir(logFile.path)}", cond:=saveLog, closeMenu:=Not settingsChanged)
+        print(0, $"Older file: {replDir(oldOrLocalFile.Path)}")
+        print(0, $"Newer file: {If(newOrRemoteFile.Name = "" And Not download, "Not yet selected", If(download, GetNameFromDL(True), replDir(newOrRemoteFile.Path)))}", closeMenu:=Not saveLog And Not settingsChanged)
+        print(0, $"Log   file: {replDir(logFile.Path)}", cond:=saveLog, closeMenu:=Not settingsChanged)
         print(2, "Diff", cond:=settingsChanged, closeMenu:=True)
     End Sub
 
@@ -114,11 +114,11 @@ Module Diff
     Private Sub initDiff()
         outputToFile = ""
         oldOrLocalFile.validate()
-        If download Then newOrRemoteFile = getRemoteIniFile(getWinappLink)
+        If download Then newOrRemoteFile = getRemoteIniFile(winapp2link)
         newOrRemoteFile.validate()
         If pendingExit() Then Exit Sub
         differ()
-        If saveLog Then logFile.overwriteToFile(outputToFile)
+        logFile.overwriteToFile(outputToFile, saveLog)
         setHeaderText("Diff Complete")
     End Sub
 
@@ -143,7 +143,7 @@ Module Diff
         Dim remCt = 0
         Dim modCt = 0
         Dim addCt = 0
-        For Each change In outList.items
+        For Each change In outList.Items
             Select Case True
                 Case change.Contains("has been added")
                     addCt += 1
@@ -173,7 +173,7 @@ Module Diff
         Dim outList, comparedList As New strList
         For Each section In oldOrLocalFile.Sections.Values
             ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
-            If newOrRemoteFile.Sections.Keys.Contains(section.Name) And Not comparedList.Contains(section.Name) Then
+            If newOrRemoteFile.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
                 Dim sSection As iniSection = newOrRemoteFile.Sections(section.Name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New keyList
@@ -181,26 +181,26 @@ Module Diff
                 If Not section.compareTo(sSection, removedKeys, addedKeys) Then
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     ' Silently ignore any entries with only alphabetization changes
-                    If removedKeys.keyCount + addedKeys.keyCount + updatedKeys.Count = 0 Then Continue For
+                    If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
                     Dim tmp = getDiff(sSection, "modified")
                     tmp = getChangesFromList(addedKeys, tmp, $"{prependNewLines()}Added:")
-                    tmp = getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.keyCount > 0)}Removed:")
+                    tmp = getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.KeyCount > 0)}Removed:")
                     If updatedKeys.Count > 0 Then
-                        tmp += appendNewLine($"{prependNewLines(removedKeys.keyCount > 0 Or addedKeys.keyCount > 0)}Modified:")
+                        tmp += appendNewLine($"{prependNewLines(removedKeys.KeyCount > 0 Or addedKeys.KeyCount > 0)}Modified:")
                         updatedKeys.ForEach(Sub(pair) appendStrs({appendNewLine(prependNewLines() & pair.Key.Name), $"Old:   {appendNewLine(pair.Key.toString)}", $"New:   {appendNewLine(pair.Value.toString)}"}, tmp))
                     End If
                     tmp += prependNewLines(False) & menuStr00
-                    outList.Add(tmp)
+                    outList.add(tmp)
                 End If
-            ElseIf Not newOrRemoteFile.Sections.Keys.Contains(section.Name) And Not comparedList.Contains(section.Name) Then
+            ElseIf Not newOrRemoteFile.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
                 ' If we do not have the entry in the new file, it has been removed between versions 
-                outList.Add(getDiff(section, "removed"))
+                outList.add(getDiff(section, "removed"))
             End If
-            comparedList.Add(section.Name)
+            comparedList.add(section.Name)
         Next
         ' Any sections from the new file which are not found in the old file have been added
         For Each section In newOrRemoteFile.Sections.Values
-            If Not oldOrLocalFile.Sections.Keys.Contains(section.Name) Then outList.Add(getDiff(section, "added"))
+            If Not oldOrLocalFile.Sections.Keys.Contains(section.Name) Then outList.add(getDiff(section, "added"))
         Next
         Return outList
     End Function
@@ -210,7 +210,7 @@ Module Diff
     ''' <param name="out">The output text to be appended to</param>
     ''' <param name="changeTxt">The text to appear in the output</param>
     Private Function getChangesFromList(keyList As keyList, out As String, changeTxt As String) As String
-        If keyList.keyCount = 0 Then Return out
+        If keyList.KeyCount = 0 Then Return out
         out += appendNewLine(changeTxt)
         keyList.Keys.ForEach(Sub(key) out += key.toString & Environment.NewLine)
         Return out
@@ -223,9 +223,9 @@ Module Diff
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
         Dim akAlpha As New keyList
         Dim rkAlpha As New keyList
-        For i As Integer = 0 To addedKeys.keyCount - 1
+        For i As Integer = 0 To addedKeys.KeyCount - 1
             Dim key = addedKeys.Keys(i)
-            For j = 0 To removedKeys.keyCount - 1
+            For j = 0 To removedKeys.KeyCount - 1
                 Dim skey = removedKeys.Keys(j)
                 If key.compareNames(skey) Then
                     Select Case key.KeyType

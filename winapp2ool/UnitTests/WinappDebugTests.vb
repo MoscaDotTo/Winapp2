@@ -15,7 +15,6 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-Imports System.Text
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 ''' <summary>
 ''' Unit and integration tests for winapp2ool's WinappDebug module
@@ -34,7 +33,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     <TestMethod()> Public Sub handleCmdLine_NoInputSuccess()
         ' Test case: Do nothing, expect our default values
         setDebugStage({}, True)
-        Assert.AreEqual(winapp2ool.winappDebugFile1.path, winapp2ool.winappDebugFile3.path)
+        Assert.AreEqual(winapp2ool.winappDebugFile1.Path, winapp2ool.winappDebugFile3.Path)
         Assert.AreEqual("winapp2-debugged.ini", winapp2ool.winappDebugFile3.SecondName)
         Assert.AreNotEqual(winapp2ool.winappDebugFile1.SecondName, winapp2ool.winappDebugFile3.SecondName)
     End Sub
@@ -44,7 +43,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ' First test case: Change only the first file name parameter
         setDebugStage({"-1f", "winapp2debugged.ini"}, True)
         Assert.AreEqual("winapp2debugged.ini", winapp2ool.winappDebugFile1.Name)
-        Assert.AreEqual($"{Environment.CurrentDirectory}\{winapp2ool.winappDebugFile1.Name}", winapp2ool.winappDebugFile1.path)
+        Assert.AreEqual($"{Environment.CurrentDirectory}\{winapp2ool.winappDebugFile1.Name}", winapp2ool.winappDebugFile1.Path)
         Assert.AreEqual("winapp2.ini", winapp2ool.winappDebugFile3.Name)
         ' Second test case: Change the first and third file name parameters, also tests setting of a subdirectory through the file command
         setDebugStage({"-1f", "winapp2debugged.ini", "-3f", "\subdir\winapp2debugged.ini"}, True)
@@ -119,7 +118,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ' Confirm fixable errors are fixed
         Assert.AreEqual(expectedErrsWithRepair, winapp2ool.WinappDebug.ErrorsFound)
         ' Return the entry for further assessment
-        Return New winapp2ool.winapp2entry(test.entrySections.Last.Sections.Values.First)
+        Return New winapp2ool.winapp2entry(test.EntrySections.Last.Sections.Values.First)
     End Function
 
     ''' <summary>Runs tests to ensure that keys with duplicate values are detected and removed</summary>
@@ -129,10 +128,10 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ' We expect that the returned object should have 1 key in each keylist except the last
         For i = 0 To testOutput.KeyListList.Count - 2
             Dim lst = testOutput.KeyListList(i)
-            Assert.AreEqual(1, lst.keyCount)
+            Assert.AreEqual(1, lst.KeyCount)
         Next
         ' The last keylist (the error keys) should be empty
-        Assert.AreEqual(0, testOutput.KeyListList.Last.keyCount)
+        Assert.AreEqual(0, testOutput.KeyListList.Last.KeyCount)
     End Sub
 
     ''' <summary>Runs tests to ensure that key with names that are improperly numbered are detected and repaired</summary>
@@ -154,7 +153,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     <TestMethod> Public Sub debug_keyNumberingUneededError_FindAndRepair_Success()
         Dim testOutput = debug_ErrorFindAndRepair_Success(2, 8, 0, 8)
         For Each lst In testOutput.KeyListList
-            If lst.keyCount > 0 Then
+            If lst.KeyCount > 0 Then
                 Select Case lst.KeyType
                     ' RegKeys, FileKeys, and ExcludeKeys always require a trailing number in the name, even if there is only one
                     Case "RegKey", "FileKey", "ExcludeKey"
@@ -179,8 +178,12 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Dim testOutput = debug_ErrorFindAndRepair_Success(4, 4, 0, 5)
         For Each lst In testOutput.KeyListList
             ' If the test was successful, none of the keys should have any forward slashes
-            If lst.keyCount > 0 Then Assert.AreEqual(True, Not lst.Keys.First.Value.Contains(CChar("/")))
+            If lst.KeyCount > 0 Then Assert.AreEqual(True, Not lst.Keys.First.Value.Contains(CChar("/")))
         Next
     End Sub
 
+    <TestMethod> Public Sub debug_trailingSemiColons_FindAndRepair_Success()
+        Dim testOutput = debug_ErrorFindAndRepair_Success(5, 2, 0, 3)
+        Console.ReadLine()
+    End Sub
 End Class

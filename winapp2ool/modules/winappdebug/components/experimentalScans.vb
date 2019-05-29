@@ -15,7 +15,6 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-
 ''' <summary>
 ''' This module holds any scans/repairs for WinappDebug that might be disabled by default due to incompleteness.
 ''' </summary>
@@ -24,23 +23,23 @@ Module experimentalScans
     ''' <param name="kl">A list of winapp2.ini FileKey format iniFiles</param>
     Public Sub cOptimization(ByRef kl As keyList)
         ' Rules1.Last here is lintOpti 
-        If kl.keyCount < 2 Or Not Rules.Last.ShouldScan Then Exit Sub
+        If kl.KeyCount < 2 Or Not Rules.Last.ShouldScan Then Exit Sub
         Dim dupes As New keyList
         Dim newKeys As New keyList
         Dim flagList As New strList
         Dim paramList As New strList
         newKeys.add(kl.Keys)
-        For i = 0 To kl.keyCount - 1
+        For i = 0 To kl.KeyCount - 1
             Dim tmpWa2 As New winapp2KeyParameters(kl.Keys(i))
             ' If we have yet to record any params, record them and move on
-            If paramList.count = 0 Then tmpWa2.trackParamAndFlags(paramList, flagList) : Continue For
+            If paramList.Count = 0 Then tmpWa2.trackParamAndFlags(paramList, flagList) : Continue For
             ' This should handle the case where for a FileKey: 
             ' The folder provided has appeared in another key
             ' The flagstring (RECURSE, REMOVESELF, "") for both keys matches
             ' The first appearing key should have its parameters appended to and the second appearing key should be removed
             If paramList.contains(tmpWa2.PathString) Then
-                For j = 0 To paramList.count - 1
-                    If tmpWa2.PathString = paramList.items(j) And tmpWa2.FlagString = flagList.items(j) Then
+                For j = 0 To paramList.Count - 1
+                    If tmpWa2.PathString = paramList.Items(j) And tmpWa2.FlagString = flagList.Items(j) Then
                         Dim keyToMergeInto As New winapp2KeyParameters(kl.Keys(j))
                         Dim mergeKeyStr = ""
                         keyToMergeInto.addArgs(mergeKeyStr)
@@ -56,9 +55,9 @@ Module experimentalScans
                 tmpWa2.trackParamAndFlags(paramList, flagList)
             End If
         Next
-        If dupes.keyCount > 0 Then
+        If dupes.KeyCount > 0 Then
             newKeys.remove(dupes.Keys)
-            For i = 0 To newKeys.keyCount - 1
+            For i = 0 To newKeys.KeyCount - 1
                 newKeys.Keys(i).Name = $"FileKey{i + 1}"
             Next
             printOptiSect("Optimization opportunity detected", kl)

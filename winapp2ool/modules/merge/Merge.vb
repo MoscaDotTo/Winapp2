@@ -20,7 +20,6 @@ Option Strict On
 ''' A module that facilitates the merging of two user defined iniFile objects
 ''' </summary>
 Module Merge
-    ' Module parameters
     '''<summary>True if replacing collisions, False if removing them</summary>
     Public Property mergeMode As Boolean = True
     '''<summary>Indicates whether or not the module's settings have changed</summary>
@@ -59,15 +58,14 @@ Module Merge
         MergeFile1.resetParams()
         MergeFile2.resetParams()
         MergeFile3.resetParams()
+        mergeMode = True
         ModuleSettingsChanged = False
     End Sub
 
     ''' <summary>Prints the main menu to the user</summary>
     Public Sub printMenu()
         printMenuTop({"Merge the contents of two ini files, while either replacing (default) or removing sections with the same name."})
-        Console.ForegroundColor = If(MergeFile2.Name = "", ConsoleColor.Red, ConsoleColor.Green)
-        print(1, "Run (default)", "Merge the two ini files")
-        Console.ResetColor()
+        print(1, "Run (default)", "Merge the two ini files", enStrCond:=Not (MergeFile2.Name = ""), colorLine:=True)
         print(0, "Preset Merge File Choices:", leadingBlank:=True, trailingBlank:=True)
         print(1, "Removed Entries", "Select 'Removed Entries.ini'")
         print(1, "Custom", "Select 'Custom.ini'")
@@ -75,11 +73,9 @@ Module Merge
         print(1, "File Chooser (winapp2.ini)", "Choose a new name or location for winapp2.ini")
         print(1, "File Chooser (merge)", "Choose a name or location for merging")
         print(1, "File Chooser (save)", "Choose a new save location for the merged file", trailingBlank:=True)
-        print(0, $"Current winapp2.ini: {replDir(MergeFile1.path)}")
-        Console.ForegroundColor = If(MergeFile2.Name = "", ConsoleColor.Red, ConsoleColor.Green)
-        print(0, $"Current merge file : {If(MergeFile2.Name = "", "Not yet selected", replDir(MergeFile2.path))}")
-        Console.ResetColor()
-        print(0, $"Current save target: {replDir(MergeFile3.path)}", trailingBlank:=True)
+        print(0, $"Current winapp2.ini: {replDir(MergeFile1.Path)}")
+        print(0, $"Current merge file : {If(MergeFile2.Name = "", "Not yet selected", replDir(MergeFile2.Path))}", enStrCond:=Not MergeFile2.Name = "", colorLine:=True)
+        print(0, $"Current save target: {replDir(MergeFile3.Path)}", trailingBlank:=True)
         print(1, "Toggle Merge Mode", "Switch between merge modes.")
         print(0, $"Current mode: {If(mergeMode, "Add & Replace", "Add & Remove")}", closeMenu:=Not ModuleSettingsChanged)
         print(2, "Merge", cond:=ModuleSettingsChanged, closeMenu:=True)

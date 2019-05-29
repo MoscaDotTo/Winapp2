@@ -26,7 +26,8 @@ Module Minefield
     Public Sub printMenu()
         printMenuTop({"A testing ground for new ideas/features, watch your step!"})
         print(1, "Java Entry Maker", "Clean up after the messy JRE installer")
-        print(1, "Babel", "Generate winapp2.ini entries for lang files", closeMenu:=True)
+        print(1, "Babel", "Generate winapp2.ini entries for lang files")
+        print(1, "Outlook", "Generate winapp2.ini entries with custom outlook profile support", closeMenu:=True)
     End Sub
 
     Public Sub printBabelMenu()
@@ -53,6 +54,8 @@ Module Minefield
                 initModule("Java Entry Maker", AddressOf printJMMenu, AddressOf handleJMInput)
             Case "2"
                 initModule("Babel", AddressOf printBabelMenu, AddressOf handleBabelInput)
+            Case "3"
+                initModule("Outooker", AddressOf printOutlookMenu, AddressOf handleOutlookInput)
         End Select
     End Sub
 

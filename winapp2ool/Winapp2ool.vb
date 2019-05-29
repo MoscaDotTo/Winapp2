@@ -40,9 +40,8 @@ Module Winapp2ool
     ''' <summary>Indicates whether or not winapp2ool has already checked for updates</summary>
     Public Property checkedForUpdates As Boolean = False
 
-
     ''' <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
-    Public Function getWinappLink() As String
+    Public Function winapp2link() As String
         Return If(RemoteWinappIsNonCC, nonccLink, wa2Link)
     End Function
 
@@ -53,6 +52,7 @@ Module Winapp2ool
     ''' <param name="newVer">The updated version pending download</param>
     Private Sub printUpdNotif(cond As Boolean, updName As String, oldVer As String, newVer As String)
         If cond Then
+            gLog($"Update available for {updName} from {oldVer} to {newVer}")
             Console.ForegroundColor = ConsoleColor.Green
             print(0, $"A new version of {updName} is available!", isCentered:=True)
             print(0, $"Current  : v{oldVer}", isCentered:=True)
@@ -63,6 +63,7 @@ Module Winapp2ool
 
     ''' <summary>Denies the ability to access online-only functions if offline</summary>
     Public Function denySettingOffline() As Boolean
+        gLog("Action was unable to complete because winapp2ool is offline", isOffline)
         If isOffline Then setHeaderText("This option is unavailable while in offline mode", True)
         Return isOffline
     End Function
@@ -94,10 +95,12 @@ Module Winapp2ool
 
     ''' <summary>Presents the winapp2ool menu to the user, initiates the main event loop for the application</summary>
     Public Sub main()
+        gLog($"Starting application")
         Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 126
         ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
         If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
+        gLog($".NET Framework is out of date. Found {Environment.Version.ToString}", DotNetFrameworkOutOfDate)
         ' winapp2ool requires internet access for some functions
         chkOfflineMode()
         processCommandLineArgs()
@@ -151,6 +154,10 @@ Module Winapp2ool
                 autoUpdate()
             Case input = "m"
                 initModule("Minefield", AddressOf Minefield.printMenu, AddressOf Minefield.handleUserInput)
+            Case input = "savelog"
+                GlobalLogFile.overwriteToFile(logger.toString)
+            Case input = "printlog"
+                logger.printLog()
             Case Else
                 setHeaderText(invInpStr, True)
         End Select
@@ -158,8 +165,8 @@ Module Winapp2ool
 
     ''' <summary>Attempts to return the version number from the first line of winapp2.ini, returns "000000" if it can't</summary>
     Private Sub getLocalWinapp2Version()
-        If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then updateCheckFailed("winapp2.ini") : Exit Sub
-        Dim localStr As String = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", remote:=False).ToLower
+        If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then localWa2Ver = "000000 (File not found)" : Exit Sub
+        Dim localStr = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", remote:=False).ToLower
         localWa2Ver = If(Not localStr.Contains("version"), "000000", localStr.Split(CChar(" "))(2))
     End Sub
 
@@ -195,6 +202,7 @@ Module Winapp2ool
 
     ''' <summary>Updates the offline status of winapp2ool</summary>
     Private Sub chkOfflineMode()
+        gLog("Checking online status")
         isOffline = Not checkOnline()
     End Sub
 
@@ -213,6 +221,7 @@ Module Winapp2ool
     ''' <param name="paramText">The string explaining the setting being toggled</param>
     ''' <param name="settingsChangedSetting">The boolean indicating that the setting has been modified</param>
     Public Sub toggleSettingParam(ByRef setting As Boolean, paramText As String, ByRef settingsChangedSetting As Boolean)
+        gLog($"Toggling {paramText}", indent:=True)
         setHeaderText($"{paramText} {enStr(setting)}d")
         setting = Not setting
         settingsChangedSetting = True
@@ -226,14 +235,17 @@ Module Winapp2ool
 
     ''' <summary>Attempts to return the Windows version number, return 0.0 if it cannot</summary>
     Public Function getWinVer() As Double
+        gLog("Checking Windows version")
         ' We can return very quickly on Windows 10 using this registry key. Unknown if it exists on earlier versions
         If Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentMajorVersionNumber", Nothing) IsNot Nothing Then
-            Dim tmp As String = Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentMajorVersionNumber", Nothing).ToString
+            Dim tmp = Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentMajorVersionNumber", Nothing).ToString
+            gLog($"Found Windows {tmp}")
             Return CDbl(tmp)
         End If
-        Dim osVersion As String = System.Environment.OSVersion.ToString().Replace("Microsoft Windows NT ", "")
-        Dim ver As String() = osVersion.Split(CChar("."))
-        Dim out As Double = Val($"{ver(0)}.{ver(1)}")
+        Dim osVersion = System.Environment.OSVersion.ToString().Replace("Microsoft Windows NT ", "")
+        Dim ver = osVersion.Split(CChar("."))
+        Dim out = Val($"{ver(0)}.{ver(1)}")
+        gLog($"Found Windows {out}")
         ' This might not act completely correctly on Windows 8.1 but usage of that seems small enough that it wont be an issue
         If Not {5.1, 6.0, 6.1, 6.2, 6.3}.Contains(out) Then
             Console.WriteLine("Unable to determine which version of Windows you are running.")
@@ -252,6 +264,7 @@ Module Winapp2ool
     ''' <param name="download">The download Boolean</param>
     ''' <param name="settingsChanged">The Boolean indicating that settings have changed</param>
     Public Sub toggleDownload(ByRef download As Boolean, ByRef settingsChanged As Boolean)
+        gLog($"Attempting to {enStr(download)} download")
         If Not denySettingOffline() Then toggleSettingParam(download, "Downloading", settingsChanged)
     End Sub
 
@@ -265,6 +278,7 @@ Module Winapp2ool
     ''' <param name="name">The name of the module</param>
     ''' <param name="setDefaultParams">The function that resets the module's settings</param>
     Public Sub resetModuleSettings(name As String, setDefaultParams As Action)
+        gLog($"Restoring {name}'s module settings to default")
         setDefaultParams()
         setHeaderText($"{name} settings have been reset to their defaults.")
     End Sub
@@ -272,10 +286,17 @@ Module Winapp2ool
     ''' <summary>Appends a series of values onto a String</summary>
     ''' <param name="toAppend">The values to append</param>
     ''' <param name="out">The given string to be extended</param>
-    Public Sub appendStrs(toAppend As String(), ByRef out As String)
-        For Each param In toAppend
-            out += param
-        Next
+    Public Sub appendStrs(toAppend As String(), ByRef out As String, Optional delim As Boolean = False, Optional delimchar As Char = CChar(","))
+        If Not delim Then
+            For Each param In toAppend
+                out += param
+            Next
+        Else
+            For i = 0 To toAppend.Count - 2
+                out += toAppend(i) & $"{delimchar} "
+            Next
+            out += toAppend.Last
+        End If
     End Sub
 
     ''' <summary>Returns the first portion of a registry or filepath parameterization</summary>
@@ -289,15 +310,23 @@ Module Winapp2ool
     ''' <param name="showMenu">The function that prints the module's menu</param>
     ''' <param name="handleInput">The function that handle's the module's input</param>
     Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String))
+        gLog("", ascend:=True)
+        gLog($"Loading module {name}")
         initMenu(name)
-        Do Until ExitCode
-            clrConsole()
-            showMenu()
-            Console.Write(Environment.NewLine & promptStr)
-            handleInput(Console.ReadLine)
-        Loop
-        revertMenu()
-        setHeaderText($"{name} closed")
+        Try
+            Do Until ExitCode
+                clrConsole()
+                showMenu()
+                Console.Write(Environment.NewLine & promptStr)
+                handleInput(Console.ReadLine)
+            Loop
+            revertMenu()
+            setHeaderText($"{name} closed")
+            gLog("", descend:=True)
+            gLog($"Exiting {name}")
+        Catch ex As Exception
+            exc(ex)
+        End Try
     End Sub
 
     ''' <summary>Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected</summary>

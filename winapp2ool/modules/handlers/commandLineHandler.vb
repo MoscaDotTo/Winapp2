@@ -31,6 +31,7 @@ Public Module commandLineHandler
     ''' <param name="newname">Optional replacement file name</param>
     Public Sub invertSettingAndRemoveArg(ByRef setting As Boolean, arg As String, Optional ByRef name As String = "", Optional ByRef newname As String = "")
         If cmdargs.Contains(arg) Then
+            gLog($"Found argument: {arg}")
             setting = Not setting
             cmdargs.Remove(arg)
             name = newname
@@ -98,6 +99,9 @@ Public Module commandLineHandler
     ''' <summary>Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler</summary>
     Public Sub processCommandLineArgs()
         cmdargs = Environment.GetCommandLineArgs.ToList
+        Dim argStr = ""
+        appendStrs(Environment.GetCommandLineArgs, argStr, True)
+        gLog($"Found commandline args: {argStr}")
         ' 0th index holds the executable name, we don't need it. 
         cmdargs.RemoveAt(0)
         ' The s is for silent, if we have this flag, don't give any output or ask for input along the happy path

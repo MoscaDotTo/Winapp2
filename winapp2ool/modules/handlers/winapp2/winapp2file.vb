@@ -40,8 +40,8 @@ Public Class winapp2file
     ''' <summary>Create a new meta winapp2 object from an iniFile object</summary>
     ''' <param name="file">A winapp2.ini format iniFile object</param>
     Public Sub New(ByVal file As iniFile)
-        dir = file.Dir
-        name = file.Name
+        Dir = file.Dir
+        Name = file.Name
         For i As Integer = 0 To 8
             EntrySections.Add(New iniFile With {.Name = FileSectionHeaders(i)})
             Winapp2entries.Add(New List(Of winapp2entry))
@@ -49,16 +49,16 @@ Public Class winapp2file
         ' Determine if we're the Non-CCleaner variant of the ini
         IsNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
         ' Determine the version string
-        If file.Comments.Count = 0 Then version = "; version 000000"
-        If file.Comments.Count > 0 Then version = If(Not file.Comments.Values(0).Comment.ToLower.Contains("version"), "; version 000000", file.Comments.Values(0).Comment)
+        If file.Comments.Count = 0 Then Version = "; version 000000"
+        If file.Comments.Count > 0 Then Version = If(Not file.Comments.Values(0).Comment.ToLower.Contains("version"), "; version 000000", file.Comments.Values(0).Comment)
         ' Build the header sections for browsers/Thunderbird/winapp3
         Dim langSecRefs As New List(Of String) From {"3029", "3005", "3027", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous", "Microsoft Edge Insider"}
         For Each section In file.Sections.Values
             Dim tmpwa2entry As New winapp2entry(section)
             Dim ind = -1
-            If tmpwa2entry.LangSecRef.keyCount > 0 Then
+            If tmpwa2entry.LangSecRef.KeyCount > 0 Then
                 ind = langSecRefs.IndexOf(tmpwa2entry.LangSecRef.Keys.First.Value)
-            ElseIf tmpwa2entry.SectionKey.keyCount > 0 Then
+            ElseIf tmpwa2entry.SectionKey.KeyCount > 0 Then
                 ind = langSecRefs.IndexOf(tmpwa2entry.SectionKey.Keys.First.Value)
                 If ind = -1 And tmpwa2entry.SectionKey.Keys.First.Value.StartsWith("Dangerous") Then ind = 7
             End If
@@ -75,16 +75,16 @@ Public Class winapp2file
     ''' <param name="entry">The section in winapp2entry format</param>
     ''' <param name="section">A section to be tracked</param>
     Private Sub addToInnerFile(ind As Integer, entry As winapp2entry, section As iniSection)
-        If Not entrySections(ind).Sections.Keys.Contains(section.Name) Then
-            entrySections(ind).Sections.Add(section.Name, section)
-            winapp2entries(ind).Add(entry)
+        If Not EntrySections(ind).Sections.Keys.Contains(section.Name) Then
+            EntrySections(ind).Sections.Add(section.Name, section)
+            Winapp2entries(ind).Add(entry)
         End If
     End Sub
 
     ''' <summary>Returns the total number of entries stored in the internal iniFile objects</summary>
     Public Function count() As Integer
-        Dim out As Integer = 0
-        For Each section In entrySections
+        Dim out = 0
+        For Each section In EntrySections
             out += section.Sections.Count
         Next
         Return out
@@ -92,7 +92,7 @@ Public Class winapp2file
 
     ''' <summary>Sorts the internal iniFile objects in winapp2.ini format order</summary>
     Public Sub sortInneriniFiles()
-        For Each innerIni In entrySections
+        For Each innerIni In EntrySections
             innerIni.sortSections(sortEntryNames(innerIni))
         Next
     End Sub
@@ -110,24 +110,24 @@ Public Class winapp2file
 
     ''' <summary>Updates the internal iniFile objects</summary>
     Public Sub rebuildToIniFiles()
-        For i As Integer = 0 To entrySections.Count - 1
-            entrySections(i) = rebuildInnerIni(winapp2entries(i))
-            entrySections(i).Name = FileSectionHeaders(i)
+        For i As Integer = 0 To EntrySections.Count - 1
+            EntrySections(i) = rebuildInnerIni(Winapp2entries(i))
+            EntrySections(i).Name = FileSectionHeaders(i)
         Next
     End Sub
 
     ''' <summary>Builds and returns the winapp2.ini text including header comments for writing back to a file</summary>
     Public Function winapp2string() As String
-        Dim fileName As String = If(isNCC, "Winapp2 (Non-CCleaner version)", "Winapp2")
-        Dim licLink As String = appendNewLine(If(isNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"))
+        Dim fileName = If(IsNCC, "Winapp2 (Non-CCleaner version)", "Winapp2")
+        Dim licLink = appendNewLine(If(IsNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"))
         ' Version string (YYMMDD format) & entry count 
-        Dim out As String = appendNewLine(version)
+        Dim out = appendNewLine(Version)
         out += appendNewLine($"; # of entries: {count.ToString("#,###")}")
         out += appendNewLine(";")
-        out += $"; {fileName} is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: {licLink}"
-        out += appendNewLine($"; If you plan on modifying, distributing, and/or hosting {fileName} for your own program or website, please ask first.")
+        out += $"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: {licLink}"
+        out += appendNewLine($"; If you plan on modifying, distributing, and/or hosting {fileName}.ini for your own program or website, please ask first.")
         out += appendNewLine(";")
-        If isNCC Then
+        If IsNCC Then
             out += appendNewLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.")
             out += appendNewLine("; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.")
         End If
@@ -136,7 +136,7 @@ Public Class winapp2file
         out += appendNewLine("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
         out += appendNewLine("; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
         ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
-        For i As Integer = 0 To 7
+        For i = 0 To 7
             If EntrySections(i).Sections.Count > 0 Then
                 out += appendNewLine("; ")
                 out += appendNewLine(appendNewLine("; " & EntrySections(i).Name))
@@ -144,7 +144,7 @@ Public Class winapp2file
                 out += appendNewLine($"{prependNewLines(False)}; End of {EntrySections(i).Name}")
             End If
         Next
-        If entrySections.Last.Sections.Count > 0 Then out += prependNewLines(False) & entrySections.Last.toString
+        If EntrySections.Last.Sections.Count > 0 Then out += prependNewLines(False) & EntrySections.Last.toString
         Return out
     End Function
 End Class

@@ -22,6 +22,8 @@ Module exceptionHandler
     ''' <summary>Prints out exceptions and any other information related to them that a use may need.</summary>
     ''' <param name="ex">A given exception captured during winapp2ool's execution</param>
     Public Sub exc(ByRef ex As Exception)
+        gLog("Exception Encountered!")
+        gLog(ex.ToString)
         Select Case True
             ' Out of date .NET presents us from downloading securely from GitHub as is required for executables.
             Case ex.Message.Contains("SSL/TLS")
