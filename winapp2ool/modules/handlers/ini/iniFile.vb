@@ -76,12 +76,15 @@ Public Class iniFile
     ''' <param name="tostr">The string to be written to disk</param>
     Public Sub overwriteToFile(tostr As String, Optional cond As Boolean = True)
         If cond Then
+            gLog($"Saving {Name}")
             Dim file As StreamWriter
             Try
                 file = New StreamWriter(Me.Path)
                 file.Write(tostr)
                 file.Close()
+                gLog("Save complete")
             Catch ex As Exception
+                gLog("Save failed")
                 exc(ex)
             End Try
         End If

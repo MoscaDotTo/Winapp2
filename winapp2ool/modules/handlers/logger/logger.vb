@@ -26,17 +26,22 @@ Module logger
     '''<summary>Indicates the current nesting level within the state machine </summary>
     Public Property nestCount As Integer = 0
     ''' <summary>Adds an item into the global log</summary>
-    Public Sub gLog(logstr As String, Optional cond As Boolean = True, Optional ascend As Boolean = False, Optional descend As Boolean = False, Optional indent As Boolean = False)
-        If indent Then nestCount += 1
-        If ascend Then nestCount += 1
-        Dim buffer = ""
-        For i = 0 To nestCount - 1
-            buffer += "  "
-        Next
-        logstr = buffer + logstr
-        If cond Then GlobalLog.add(logstr)
-        If indent Then nestCount -= 1
-        If descend Then nestCount -= 1
+    Public Sub gLog(logstr As String, Optional cond As Boolean = True, Optional ascend As Boolean = False,
+                    Optional descend As Boolean = False, Optional indent As Boolean = False, Optional buffr As Boolean = False, Optional leadr As Boolean = False)
+        If cond Then
+            If leadr Then gLog("")
+            If indent Then nestCount += 1
+            If ascend Then nestCount += 1
+            Dim buffer = ""
+            For i = 0 To nestCount - 1
+                buffer += "  "
+            Next
+            logstr = buffer + logstr
+            GlobalLog.add(logstr)
+            If indent Then nestCount -= 1
+            If descend Then nestCount -= 1
+            If buffr Then gLog("")
+        End If
     End Sub
 
     ''' <summary>Returns the log as a String</summary>

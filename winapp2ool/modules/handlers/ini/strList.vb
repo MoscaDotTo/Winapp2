@@ -88,6 +88,7 @@ Public Class strList
     ''' </summary>
     ''' <param name="currentValue">The current value to be audited</param>
     Public Function chkDupes(currentValue As String) As Boolean
+        If currentValue = "" Then Return True
         For Each value In Items
             If currentValue.Equals(value, StringComparison.InvariantCultureIgnoreCase) Then Return True
         Next

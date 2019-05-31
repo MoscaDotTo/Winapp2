@@ -44,6 +44,9 @@ Public Class iniSection
     ''' <summary>Removes a series of keys from the section</summary>
     ''' <param name="indicies"></param>
     Public Sub removeKeys(indicies As List(Of Integer))
+        ' Sort and reverse the indicies so that we remove from the end of the list towards the beginning
+        indicies.Sort()
+        indicies.Reverse()
         indicies.ForEach(Sub(ind) Keys.remove(ind))
     End Sub
 
@@ -111,8 +114,6 @@ Public Class iniSection
             If noMatch Then removedKeys.add(key)
         Next
         ' Remove all matched keys
-        tmpList.Sort()
-        tmpList.Reverse()
         secondSection.removeKeys(tmpList)
         ' Assume any remaining keys have been added
         For Each key In secondSection.Keys.Keys

@@ -22,7 +22,7 @@ Public Class winapp2KeyParameters
     ''' <summary>The extracted File/Registry path from the key </summary>
     Public Property PathString As String
     ''' <summary>The list of any file names (patterns) /registry keys from the key</summary>
-    Public Property ArgsList As List(Of String)
+    Public Property ArgsList As New List(Of String)
     ''' <summary> Holds the key's flag (RECURSE, REMOVESELF, etc)</summary>
     Public Property FlagString As String
     ''' <summary>The original KeyType of the iniKey used to create the winapp2key</summary>

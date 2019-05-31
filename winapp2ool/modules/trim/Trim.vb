@@ -111,7 +111,6 @@ Public Module Trim
         print(3, "Trimming... Please wait, this may take a moment...")
         Dim entryCountBeforeTrim = winapp2.count
         trim(winapp2)
-        setHeaderText("Trim Complete")
         clrConsole()
         print(0, tmenu("Finished!"), closeMenu:=True)
         clrConsole()
@@ -123,6 +122,8 @@ Public Module Trim
         Dim difference = entryCountBeforeTrim - winapp2.count
         print(0, $"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
         print(0, anyKeyStr, leadingBlank:=True, closeMenu:=True)
+        gLog($"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
+        gLog($"{winapp2.count} entries remain.")
         TrimFile3.overwriteToFile(winapp2.winapp2string)
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
@@ -143,7 +144,10 @@ Public Module Trim
     Private Function checkExistence(ByRef kl As keyList, chkExist As Func(Of String, Boolean)) As Boolean
         If kl.KeyCount = 0 Then Return False
         For Each key In kl.Keys
-            If chkExist(key.Value) Then Return True
+            If chkExist(key.Value) Then
+                gLog($"{key.Value} matched a path on the system", Not kl.KeyType = "DetectOS", descend:=True, indent:=True)
+                Return True
+            End If
         Next
         Return False
     End Function
@@ -151,12 +155,13 @@ Public Module Trim
     ''' <summary>Returns true if an entry's detection criteria is matched by the system, false otherwise.</summary>
     ''' <param name="entry">A winapp2.ini entry</param>
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
+        gLog($"Processing entry: {entry.Name}", ascend:=True)
         Dim hasMetDetOS = False
         ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         If Not entry.DetectOS.KeyCount = 0 Then
             If winVer = Nothing Then winVer = getWinVer()
             hasMetDetOS = checkExistence(entry.DetectOS, AddressOf checkDetOS)
-            gLog($"Met DetectOS criteria: {hasMetDetOS}")
+            gLog("Did not meet DetectOS critera.", Not hasMetDetOS, descend:=True, indent:=True)
             If Not hasMetDetOS Then Return False
         End If
         ' Process any other Detect criteria we have
@@ -164,9 +169,14 @@ Public Module Trim
         If checkExistence(entry.Detects, AddressOf checkRegExist) Then Return True
         If checkExistence(entry.DetectFiles, AddressOf checkPathExist) Then Return True
         ' Return true for the case where we have only a DetectOS and we meet its criteria 
-        If hasMetDetOS And entry.SpecialDetect.KeyCount = 0 And entry.DetectFiles.KeyCount = 0 And entry.Detects.KeyCount = 0 Then Return True
+        Dim onlyHasDetOS = entry.SpecialDetect.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount = 0
+        gLog("No other detection keys found than DetectOS", onlyHasDetOS And hasMetDetOS, descend:=True)
+        If hasMetDetOS And onlyHasDetOS Then Return True
         ' Return true for the case where we have no valid detect criteria
-        If entry.DetectOS.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount + entry.SpecialDetect.KeyCount = 0 Then Return True
+        Dim hasNoDetectKeys = entry.DetectOS.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount + entry.SpecialDetect.KeyCount = 0
+        gLog("No detect keys found, entry will be retained.", hasNoDetectKeys, descend:=True)
+        If hasNoDetectKeys Then Return True
+        gLog("", descend:=True)
         Return False
     End Function
 
@@ -182,13 +192,14 @@ Public Module Trim
     ''' <param name="kl">The keylist of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore</param>
     Private Sub vsKeyChecker(ByRef kl As keyList)
         If kl.KeyCount = 0 Then Exit Sub
+        Dim starterCount = kl.KeyCount
         Select Case kl.KeyType
             Case "FileKey", "ExcludeKey"
                 mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files", "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
             Case "RegKey"
                 mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
         End Select
-        kl.renumberKeys(replaceAndSort(kl.toStrLst(True), "|", " \ \"))
+        If Not starterCount = kl.KeyCount Then kl.renumberKeys(replaceAndSort(kl.toStrLst(True), "|", " \ \"))
     End Sub
 
     ''' <summary>Audits the existence of VirtualStore locations for an iniKey and if they exist, adds them to the list</summary>
@@ -261,6 +272,13 @@ Public Module Trim
         Dim dir = path
         Dim root = getFirstDir(path)
         dir = dir.Replace(root & "\", "")
+        Dim exists = getRegExists(root, dir)
+        'gLog($"{path} matched a location in the registry", exists, indent:=True, descend:=True)
+        ' If we didn't return anything above, registry location probably doesn't exist
+        Return exists
+    End Function
+
+    Private Function getRegExists(root As String, dir As String) As Boolean
         Try
             Select Case root
                 Case "HKCU"
@@ -277,12 +295,11 @@ Public Module Trim
             End Select
         Catch ex As Exception
             ' The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.
+            gLog(ex.Message)
             Return True
         End Try
-        ' If we didn't return anything above, registry location probably doesn't exist
-        Return False
+        Return True
     End Function
-
 
     Private Sub processEnvDirs(ByRef dir As String, ByRef isProgramFiles As Boolean)
         If dir.Contains("%") Then
@@ -317,6 +334,7 @@ Public Module Trim
                     swapDir(dir, key)
                     exists = expandWildcard(dir, True)
                 End If
+                'gLog($"{key} matched a path on the system", exists, indent:=True, descend:=True)
                 Return exists
             End If
             ' Check out those file/folder paths
@@ -324,7 +342,9 @@ Public Module Trim
             ' If we didn't find it and we're looking in Program Files, check the (x86) directory
             If isProgramFiles Then
                 swapDir(dir, key)
-                Return (Directory.Exists(dir) Or File.Exists(dir))
+                Dim exists = Directory.Exists(dir) Or File.Exists(dir)
+                'gLog($"{key} matched a path on the system", exists, indent:=True, descend:=True)
+                Return exists
             End If
         Catch ex As Exception
             exc(ex)
@@ -399,7 +419,6 @@ Public Module Trim
     ''' <summary>Returns true if we satisfy the DetectOS citeria, false otherwise</summary>
     ''' <param name="value">The DetectOS criteria to be checked</param>
     Private Function checkDetOS(value As String) As Boolean
-        gLog("Checking DetectOS")
         Dim splitKey = value.Split(CChar("|"))
         Return If(value.StartsWith("|"), Not winVer > Val(splitKey(1)), Not winVer < Val(splitKey(0)))
     End Function

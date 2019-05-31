@@ -127,6 +127,7 @@ Module CCiniDebug
     ''' <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>
     ''' <param name="optionsSec">The iniSection object containing the Options from ccleaner.ini</param>
     Private Sub prune(ByRef optionsSec As iniSection)
+        gLog($"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries")
         print(0, $"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
         Dim tbTrimmed As New List(Of Integer)
         For i = 0 To optionsSec.Keys.KeyCount - 1
@@ -136,6 +137,9 @@ Module CCiniDebug
                 Dim toRemove As New List(Of String) From {"(App)", "=True", "=False"}
                 toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
                 If Not CCDebugFile1.Sections.ContainsKey(optionStr) Then tbTrimmed.Add(i)
+                Dim foundStr = $"Orphaned entry detected: {optionStr}"
+                print(0, foundStr)
+                gLog(foundStr, Not CCDebugFile1.Sections.ContainsKey(optionStr), indent:=True)
             End If
         Next
         print(0, $"{tbTrimmed.Count} orphaned settings detected", leadingBlank:=True, trailingBlank:=True)
@@ -144,9 +148,11 @@ Module CCiniDebug
 
     ''' <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
     Private Sub sortCC()
+        gLog($"Sorting {CCDebugFile2.Name}", indent:=True)
         Dim lineList = CCDebugFile2.Sections("Options").getKeysAsStrList
         lineList.Items.Sort()
         lineList.Items.Insert(0, "[Options]")
         CCDebugFile2.Sections("Options") = New iniSection(lineList.Items)
+        gLog("Done", indent:=True)
     End Sub
 End Module

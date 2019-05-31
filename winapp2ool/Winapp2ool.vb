@@ -264,7 +264,6 @@ Module Winapp2ool
     ''' <param name="download">The download Boolean</param>
     ''' <param name="settingsChanged">The Boolean indicating that settings have changed</param>
     Public Sub toggleDownload(ByRef download As Boolean, ByRef settingsChanged As Boolean)
-        gLog($"Attempting to {enStr(download)} download")
         If Not denySettingOffline() Then toggleSettingParam(download, "Downloading", settingsChanged)
     End Sub
 
@@ -278,7 +277,7 @@ Module Winapp2ool
     ''' <param name="name">The name of the module</param>
     ''' <param name="setDefaultParams">The function that resets the module's settings</param>
     Public Sub resetModuleSettings(name As String, setDefaultParams As Action)
-        gLog($"Restoring {name}'s module settings to default")
+        gLog($"Restoring {name}'s module settings to default", indent:=True)
         setDefaultParams()
         setHeaderText($"{name} settings have been reset to their defaults.")
     End Sub
@@ -322,8 +321,7 @@ Module Winapp2ool
             Loop
             revertMenu()
             setHeaderText($"{name} closed")
-            gLog("", descend:=True)
-            gLog($"Exiting {name}")
+            gLog($"Exiting {name}", descend:=True, leadr:=True)
         Catch ex As Exception
             exc(ex)
         End Try

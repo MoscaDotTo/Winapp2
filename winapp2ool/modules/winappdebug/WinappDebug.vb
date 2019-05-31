@@ -160,15 +160,13 @@ Public Module WinappDebug
 
     ''' <summary> Validates and debugs the ini file, informs the user upon completion </summary>
     Private Sub initDebug()
-
         winappDebugFile1.validate()
         If pendingExit() Then Exit Sub
         Dim wa2 As New winapp2file(winappDebugFile1)
         clrConsole()
         print(0, tmenu("Beginning analysis of winapp2.ini"), closeMenu:=True)
         cwl()
-        gLog("", ascend:=True)
-        gLog("Beginning lint")
+        gLog("Beginning lint", leadr:=True, ascend:=True)
         debug(wa2)
         gLog("", descend:=True)
         gLog("Lint Complete")
@@ -257,12 +255,12 @@ Public Module WinappDebug
     ''' <param name="hasR">Optional boolean for the ExcludeKey case</param>
     Private Sub processKeyList(ByRef kl As keyList, processKey As Func(Of iniKey, iniKey), Optional ByRef hasF As Boolean = False, Optional ByRef hasR As Boolean = False)
         If kl.KeyCount = 0 Then Exit Sub
-        gLog($"Processing {kl.KeyType}s", ascend:=True)
-        gLog("")
+        gLog($"Processing {kl.KeyType}s", ascend:=True, buffr:=True)
         Dim curNum = 1
         Dim curStrings As New strList
         Dim dupes As New keyList
         Dim kt = kl.KeyType
+        Dim startingNumErrs = ErrorsFound
         For Each key In kl.Keys
             Select Case kt
                 Case "ExcludeKey"
@@ -294,10 +292,9 @@ Public Module WinappDebug
         Next
         ' Remove any duplicates and sort the keys
         kl.remove(dupes.Keys)
-        sortKeys(kl, lintAlpha.fixFormat)
+        sortKeys(kl, dupes.KeyCount > 0)
         ' Run optimization checks on FileKey lists only 
         If kl.typeIs("FileKey") Then cOptimization(kl)
-        gLog($"Done processing {kt}s")
         gLog("", descend:=True)
     End Sub
 
@@ -319,7 +316,7 @@ Public Module WinappDebug
         Dim hasNumberingError = If(noNumbers, Not key.nameIs(key.KeyType), Not key.nameIs(key.KeyType & keyNumber))
         Dim numberingErrStr = If(noNumbers, "Detected unnecessary numbering.", $"{key.KeyType} entry is incorrectly numbered.")
         Dim fixedStr = If(noNumbers, key.KeyType, key.KeyType & keyNumber)
-        gLog($"Input mismatch error in {key.toString}", hasNumberingError)
+        gLog($"Input mismatch error in {key.toString}", hasNumberingError, indent:=True)
         inputMismatchErr(key.LineNumber, numberingErrStr, key.Name, fixedStr, If(noNumbers, lintExtraNums.ShouldScan, lintWrongNums.ShouldScan) And hasNumberingError)
         fixStr(If(noNumbers, lintExtraNums.fixFormat, lintWrongNums.fixFormat) And hasNumberingError, key.Name, fixedStr)
         ' Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
@@ -377,7 +374,7 @@ Public Module WinappDebug
             End If
         Next
         ' Return false if no valid command is found
-        gLog("Repair failed, key will be removed.")
+        gLog("Repair failed, key will be removed.", descend:=True)
         Return False
     End Function
 
@@ -443,6 +440,7 @@ Public Module WinappDebug
         fullKeyErr(key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
         ' Captures any incident of semi colons coming before the first pipe symbol
         fullKeyErr(key, "Semicolon (;) found before pipe (|).", key.vHas(";") And (key.Value.IndexOf(";") < key.Value.IndexOf("|")))
+        fullKeyErr(key, "Trailing semicolon (;) in parameters", key.vHas(";|"), lintParams.fixFormat, key.Value, key.Value.Replace(";|", "|"))
         ' Check for incorrect spellings of RECURSE or REMOVESELF
         If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF"))
         ' Check for missing pipe symbol on recurse and removeself, fix them if detected
@@ -492,15 +490,13 @@ Public Module WinappDebug
         Next
         ' Remove any repaired keys
         entry.ErrorKeys.remove(toRemove.Keys)
-        gLog("Validation Complete", descend:=True)
-        gLog("")
+        gLog("Validation Complete", descend:=True, buffr:=True)
     End Sub
 
     ''' <summary>Processes a winapp2entry object (generated from a winapp2.ini format iniKey object) for errors</summary>
     ''' <param name="entry">The winapp2entry object to be processed</param>
     Private Sub processEntry(ByRef entry As winapp2entry)
-        gLog($"Processing entry {entry.Name}")
-        gLog("")
+        gLog($"Processing entry {entry.Name}", buffr:=True)
         Dim hasFileExcludes = False
         Dim hasRegExcludes = False
         ' Check for duplicate names that are differently cased 
@@ -534,7 +530,7 @@ Public Module WinappDebug
         ' Make sure we have a Default key.
         fullNameErr(entry.DefaultKey.KeyCount = 0 And lintDefaults.ShouldScan, entry, "Entry is missing a Default key")
         entry.DefaultKey.add(New iniKey("Default=False"), lintDefaults.fixFormat And entry.DefaultKey.KeyCount = 0)
-        gLog("")
+        gLog($"Finished processing {entry.Name}", buffr:=True)
     End Sub
 
     ''' <summary> This method does nothing by design </summary>
@@ -662,8 +658,7 @@ Public Module WinappDebug
     ''' <param name="newValue">The replacement value for the given string</param>
     Private Sub fixStr(param As Boolean, ByRef currentValue As String, ByRef newValue As String)
         If param Then
-            gLog($"Changing '{currentValue}' to '{newValue}'", ascend:=True, descend:=True, indent:=True)
-            gLog("")
+            gLog($"Changing '{currentValue}' to '{newValue}'", ascend:=True, descend:=True, indent:=True, buffr:=True)
             currentValue = newValue
         End If
     End Sub
