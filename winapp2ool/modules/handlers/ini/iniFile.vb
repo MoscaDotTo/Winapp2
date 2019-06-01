@@ -82,9 +82,9 @@ Public Class iniFile
                 file = New StreamWriter(Me.Path)
                 file.Write(tostr)
                 file.Close()
-                gLog("Save complete")
+                gLog("Save complete", indent:=True)
             Catch ex As Exception
-                gLog("Save failed")
+                gLog("Save failed", indent:=True)
                 exc(ex)
             End Try
         End If
