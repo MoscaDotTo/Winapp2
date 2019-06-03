@@ -139,8 +139,7 @@ Module Downloader
                 downloadFile.Name = "Removed entries.ini"
                 download(removedLink)
             Case "5"
-                dirChooser(downloadFile.Dir)
-                undoAnyPendingExits()
+                initModule("Directory Chooser", AddressOf downloadFile.printDirChooserMenu, AddressOf downloadFile.handleDirChooserInput)
                 setHeaderText("Save directory changed")
             Case "6"
                 initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)

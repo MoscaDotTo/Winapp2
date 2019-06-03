@@ -30,7 +30,8 @@ Module MenuMaker
     Public Const promptStr As String = "Enter a number, or leave blank to run the default: "
     ' The maximum length of the portion of the first half of a '#. Option - Description' style menu line
     Dim menuItemLength As Integer
-    Private lastOpWasErr As Boolean
+    '''<summary>Indicates that the last operation was unsucessful</summary>
+    Public Property lastOpWasErr As Boolean
     ' Holds the current option number at any given moment
     Dim optNum As Integer = 0
     ''' <summary>When enabled, prevents winapp2ool from outputting to the console or asking for input (usually)</summary>

@@ -36,7 +36,7 @@ Public Module Trim
     '''<summary>Indicates that we are downloading a winapp2.ini from GitHub</summary>
     Private Property DownloadFileToTrim As Boolean = False
     '''<summary>The winapp2.ini file that will be trimmed</summary>
-    Public Property TrimFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+    Public Property TrimFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
     '''<summary>Holds the path where the output file will be saved to disk. Overwrites the input file by default.</summary>
     Public Property TrimFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
 

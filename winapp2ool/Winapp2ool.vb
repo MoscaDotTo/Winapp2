@@ -210,7 +210,8 @@ Module Winapp2ool
     ''' <param name="someFile">A file whose parameters will be changed</param>
     ''' <param name="settingsChangedSetting">The boolean indicating that a setting has been changed</param>
     Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean)
-        fileChooser(someFile)
+        initModule("File Chooser", AddressOf someFile.printFileChooserMenu, AddressOf someFile.handleFileChooserInput)
+        'fileChooser(someFile)
         settingsChangedSetting = True
         setHeaderText($"{If(someFile.SecondName = "", someFile.InitName, "save file")} parameters update{If(ExitCode, " aborted", "d")}", ExitCode)
         undoAnyPendingExits()

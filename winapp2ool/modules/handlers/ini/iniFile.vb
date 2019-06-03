@@ -41,6 +41,10 @@ Public Class iniFile
 
     ''' <summary>The current line number of the file during reading</summary>
     Public Property LineCount As Integer
+    ''' <summary>Holds the file name during attempted renames so changes can be reverted</summary>
+    Private Property tmpRename As String
+    '''<summary>Indicates that this file must have a file name that exists</summary>
+    Public Property mustExist As Boolean
 
     ''' <summary>Returns the full windows file path of the iniFile as a String</summary>
     Public function Path() As String
@@ -61,7 +65,7 @@ Public Class iniFile
     ''' <param name="directory">A windows directory containing a .ini file</param>
     ''' <param name="filename">The name of the .ini file contained in the given directory </param>
     ''' <param name="rename">A provided suggestion for a rename should the user open the File Chooser on this file</param>
-    Public Sub New(Optional directory As String = "", Optional filename As String = "", Optional rename As String = "")
+    Public Sub New(Optional directory As String = "", Optional filename As String = "", Optional rename As String = "", Optional mExist As Boolean = False)
         Dir = directory
         Name = filename
         InitDir = directory
@@ -70,6 +74,7 @@ Public Class iniFile
         Sections = New Dictionary(Of String, iniSection)
         Comments = New Dictionary(Of Integer, iniComment)
         LineCount = 1
+        mustExist = mExist
     End Sub
 
     ''' <summary>Writes the contents of a provided String to our iniFile's path, overwriting any existing contents</summary>
@@ -175,35 +180,20 @@ Public Class iniFile
         ' If an iniFile's sections already exist, skip this.
         If pendingExit() Or Name = "" Then Exit Sub
         ' Make sure both the file and the directory actually exist
-        While Not File.Exists(Path())
-            chkDirExist(Dir)
-            If pendingExit() Then Exit Sub
-            chkFileExist(Me)
-            If pendingExit() Then Exit Sub
+        While Not exists()
+            initModule("File Chooser", AddressOf printFileChooserMenu, AddressOf handleFileChooserInput)
+            If Not exists() Then Exit Sub
         End While
         ' Make sure that the file isn't empty
         Try
             Dim iniTester As New iniFile(Dir, Name)
             iniTester.init()
-            Dim clearAtEnd = False
-            While iniTester.Sections.Count = 0
-                gLog("Error: Empty ini file", indent:=True)
-                clearAtEnd = True
-                clrConsole()
-                printMenuLine(bmenu("Empty ini file detected. Press any key to try again."))
-                Console.ReadKey()
-                fileChooser(iniTester)
-                If pendingExit() Then Exit Sub
-                iniTester.validate()
-                If pendingExit() Then Exit Sub
-            End While
             gLog($"ini created with {iniTester.Sections.Count} sections", indent:=True, descend:=True)
             Sections = iniTester.Sections
             Comments = iniTester.Comments
-            clrConsole(clearAtEnd)
         Catch ex As Exception
             exc(ex)
-            ExitCode = True
+            exitModule()
         End Try
     End Sub
 
@@ -243,7 +233,7 @@ Public Class iniFile
         Catch ex As Exception
             'This will catch entries whose names are identical (case sensitive), and ignore them 
             If ex.Message = "An item with the same key has already been added." Then
-                Dim lineErr As Integer
+                Dim lineErr = -1
                 For Each section In Sections.Values
                     If section.Name = sectionToBeBuilt(0) Then
                         lineErr = section.StartingLineNumber
@@ -265,4 +255,84 @@ Public Class iniFile
             lineTrackingList.Clear()
         End Try
     End Sub
+
+    Public Sub printFileChooserMenu()
+        printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"})
+        print(1, InitName, "Use the default name", InitName <> "")
+        print(1, SecondName, "Use the default rename", SecondName <> "")
+        print(1, "Directory Chooser", "Choose a new directory", trailingBlank:=True)
+        print(0, $"Current Directory: {replDir(Dir)}")
+        print(0, $"Current File:      {Name}", closeMenu:=True)
+    End Sub
+
+    Public Sub handleFileChooserInput(input As String)
+        Select Case True
+            Case input = "0"
+                exitModule()
+            Case input = ""
+                exitIfExists()
+            Case input = "1" And InitName <> ""
+                reName(InitName)
+                exitIfExists(True)
+            Case (input = "1" And InitName = "") Or (input = "2" And SecondName <> "")
+                reName(SecondName)
+                exitIfExists(True)
+            Case (input = "2" And SecondName = "") Or (input = "3" And InitName <> "" And SecondName <> "")
+                initModule("Directory Chooser", AddressOf printDirChooserMenu, AddressOf handleDirChooserInput)
+            Case Else
+                reName(input)
+                exitIfExists(True)
+        End Select
+    End Sub
+
+    Private Sub reName(nname As String)
+        tmpRename = Name
+        Name = nname
+    End Sub
+
+    Private Sub exitIfExists(Optional undoPendingRename As Boolean = False)
+        If Not exists() And mustExist Then
+            setHeaderText($"{Name} does not exist", True)
+            If undoPendingRename Then Name = tmpRename
+        Else
+            exitModule()
+        End If
+    End Sub
+
+    Public Sub printDirChooserMenu()
+        printMenuTop({"Choose a directory", "Enter a new directory below or choose an option"})
+        print(1, "Use default (default)", "Use the same folder as winapp2ool.exe")
+        print(1, "Parent Folder", "Go up a level")
+        print(1, "Current folder", "Continue using the same folder as below")
+        print(0, $"Current Directory: {Dir}", leadingBlank:=True, closeMenu:=True)
+    End Sub
+
+    Public Sub handleDirChooserInput(input As String)
+        Select Case True
+            Case input = "0"
+                exitModule()
+            Case input = "1" Or input = ""
+                Dir = Environment.CurrentDirectory
+                exitModule()
+            Case input = "2"
+                Dir = Directory.GetParent(Dir).ToString
+                exitModule()
+            Case input = "3"
+                exitModule()
+            Case Else
+                Dim tmpDir = Dir
+                Dir = input
+                If Not exists(False) Then
+                    setHeaderText($"{Dir} does not exist", hasErr:=True)
+                Else
+                    exitModule()
+                End If
+        End Select
+    End Sub
+
+    Public Function exists(Optional checkPath As Boolean = True) As Boolean
+        If checkPath Then Return file.exists(path)
+        Return Directory.Exists(Dir)
+    End Function
+
 End Class

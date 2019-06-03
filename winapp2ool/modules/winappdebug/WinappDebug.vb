@@ -21,7 +21,7 @@ Imports System.Text.RegularExpressions
 ''' </summary>
 Public Module WinappDebug
     ''' <summary> The winapp2.ini file that will be linted </summary>
-    Public Property winappDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+    Public Property winappDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
     ''' <summary> Holds the save path for the linted file (overwrites the input file by default) </summary>
     Public Property winappDebugFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
 
@@ -161,6 +161,10 @@ Public Module WinappDebug
     ''' <summary> Validates and debugs the ini file, informs the user upon completion </summary>
     Private Sub initDebug()
         winappDebugFile1.validate()
+        If winappDebugFile1.Sections.Count = 0 Then
+            setHeaderText($"{winappDebugFile1.Name} is empty", True)
+            Exit Sub
+        End If
         If pendingExit() Then Exit Sub
         Dim wa2 As New winapp2file(winappDebugFile1)
         clrConsole()
