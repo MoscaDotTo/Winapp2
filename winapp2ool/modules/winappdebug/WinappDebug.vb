@@ -162,10 +162,10 @@ Public Module WinappDebug
     Private Sub initDebug()
         winappDebugFile1.validate()
         If winappDebugFile1.Sections.Count = 0 Then
-            setHeaderText($"{winappDebugFile1.Name} is empty", True)
+            setHeaderText($"{winappDebugFile1.Name} was empty or not found", True)
+            gLog($"{winappDebugFile1.Name} was empty or not found", indent:=True)
             Exit Sub
         End If
-        If pendingExit() Then Exit Sub
         Dim wa2 As New winapp2file(winappDebugFile1)
         clrConsole()
         print(0, tmenu("Beginning analysis of winapp2.ini"), closeMenu:=True)
