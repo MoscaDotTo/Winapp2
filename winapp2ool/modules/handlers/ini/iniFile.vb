@@ -256,6 +256,7 @@ Public Class iniFile
         End Try
     End Sub
 
+    '''<summary>Prints the menu for the File Chooser submodule</summary>
     Public Sub printFileChooserMenu()
         printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"})
         print(1, InitName, "Use the default name", InitName <> "")
@@ -265,6 +266,8 @@ Public Class iniFile
         print(0, $"Current File:      {Name}", closeMenu:=True)
     End Sub
 
+    ''' <summary>Handles the input for the File Chooser submodule</summary>
+    ''' <param name="input">The user's input</param>
     Public Sub handleFileChooserInput(input As String)
         Select Case True
             Case input = "0"
@@ -285,11 +288,15 @@ Public Class iniFile
         End Select
     End Sub
 
+    ''' <summary>Assigns the Name of the iniFile to the given name and stores the previous name in a temporary container</summary>
+    ''' <param name="nname">The new filename</param>
     Private Sub reName(nname As String)
         tmpRename = Name
         Name = nname
     End Sub
 
+    ''' <summary>Leaves the submodule as long as the inifile exists on disk in the case that mustExist is true</summary>
+    ''' <param name="undoPendingRename">Optional boolean indicating that there's a pending rename that should be reverted if the renamed file doesn't exist (default: off)</param>
     Private Sub exitIfExists(Optional undoPendingRename As Boolean = False)
         If Not exists() And mustExist Then
             setHeaderText($"{Name} does not exist", True)
@@ -299,6 +306,7 @@ Public Class iniFile
         End If
     End Sub
 
+    '''<summary>Prints the menu for the Directory Chooser submodule</summary>
     Public Sub printDirChooserMenu()
         printMenuTop({"Choose a directory", "Enter a new directory below or choose an option"})
         print(1, "Use default (default)", "Use the same folder as winapp2ool.exe")
@@ -307,6 +315,8 @@ Public Class iniFile
         print(0, $"Current Directory: {Dir}", leadingBlank:=True, closeMenu:=True)
     End Sub
 
+    ''' <summary>Handles the user input for the Directory Chooser submodule</summary>
+    ''' <param name="input">The user's input</param>
     Public Sub handleDirChooserInput(input As String)
         Select Case True
             Case input = "0"
@@ -330,9 +340,10 @@ Public Class iniFile
         End Select
     End Sub
 
+    ''' <summary>Returns true if the path (or optionally just the directory) of the inifile exists on the file system</summary>>
+    ''' <param name="checkPath">Optional boolean indicating that only the directory should be checked for existence (default: false)</param>
     Public Function exists(Optional checkPath As Boolean = True) As Boolean
-        If checkPath Then Return file.exists(path)
+        If checkPath Then Return File.Exists(Path)
         Return Directory.Exists(Dir)
     End Function
-
 End Class
