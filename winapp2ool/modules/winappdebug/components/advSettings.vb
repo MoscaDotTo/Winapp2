@@ -52,13 +52,8 @@ Public Module advSettings
         ' Determine the current state of the lint rules
         determineScanSettings()
         ' Get the input as an integer so we can index it against our rules
-        Dim intInput As Integer
-        Try
-            intInput = Integer.Parse(input)
-        Catch ex As Exception
-            setHeaderText(invInpStr, True)
-            Exit Sub
-        End Try
+        Dim intInput = -1
+        Integer.TryParse(input, intInput)
         ' The index of the rule assoicated with the user's input
         Dim ind = intInput - 1
         Select Case True
@@ -66,7 +61,7 @@ Public Module advSettings
                 If ScanSettingsChanged Then WinappDebug.ModuleSettingsChanged = True
                 exitModule()
             ' Enable/Disable individual scans
-            Case intInput < Rules.Count
+            Case intInput > 0 And intInput < Rules.Count
                 toggleSettingParam(Rules(ind).ShouldScan, "Scan", ScanSettingsChanged)
                 ' Force repair off if the scan is off
                 If Not Rules(ind).ShouldScan Then Rules(ind).turnOff()
@@ -81,9 +76,7 @@ Public Module advSettings
                 setHeaderText("Settings Reset")
             ' This isn't documented anywhere and is mostly intended as a debugging shortcut
             Case input = "alloff"
-                For Each rule In WinappDebug.Rules
-                    rule.turnOff()
-                Next
+                Rules.ForEach(Sub(rule) rule.turnOff())
                 ScanSettingsChanged = True
             Case Else
                 setHeaderText(invInpStr, True)
@@ -95,17 +88,15 @@ Public Module advSettings
         Console.WindowHeight = 49
         printMenuTop({"Enable or disable specific scans or repairs"})
         print(0, "Scan Options", leadingBlank:=True, trailingBlank:=True)
-        Dim curRules = WinappDebug.Rules
-        For Each rule In curRules
-            print(5, rule.LintName, rule.ScanText, enStrCond:=rule.ShouldScan)
-        Next
+        Rules.ForEach(Sub(rule) print(5, rule.LintName, rule.ScanText, enStrCond:=rule.ShouldScan))
+        ' Print all repairs except the last one
         print(0, "Repair Options", leadingBlank:=True, trailingBlank:=True)
-        For i = 0 To curRules.Count - 2
-            Dim rule = curRules(i)
+        For i = 0 To Rules.Count - 2
+            Dim rule = Rules(i)
             print(5, rule.LintName, rule.RepairText, enStrCond:=rule.ShouldRepair)
         Next
         ' Special case for the last repair option (closemenu flag)
-        Dim lastRule = curRules.Last
+        Dim lastRule = Rules.Last
         print(5, lastRule.LintName, lastRule.RepairText, closeMenu:=Not ScanSettingsChanged, enStrCond:=lastRule.ShouldRepair)
         print(2, "Scan And Repair", cond:=ScanSettingsChanged, closeMenu:=True)
     End Sub
