@@ -51,25 +51,32 @@ Public Module advSettings
     Public Sub handleUserInput(input As String)
         ' Determine the current state of the lint rules
         determineScanSettings()
-        Dim scanNums = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"}
-        Dim repNums = {"16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"}
+        ' Get the input as an integer so we can index it against our rules
+        Dim intInput As Integer
+        Try
+            intInput = Integer.Parse(input)
+        Catch ex As Exception
+            setHeaderText(invInpStr, True)
+            Exit Sub
+        End Try
+        ' The index of the rule assoicated with the user's input
+        Dim ind = intInput - 1
         Select Case True
             Case input = "0"
                 If ScanSettingsChanged Then WinappDebug.ModuleSettingsChanged = True
-                ExitCode = True
+                exitModule()
             ' Enable/Disable individual scans
-            Case scanNums.Contains(input)
-                Dim ind = scanNums.ToList.IndexOf(input)
+            Case intInput < Rules.Count
                 toggleSettingParam(Rules(ind).ShouldScan, "Scan", ScanSettingsChanged)
                 ' Force repair off if the scan is off
                 If Not Rules(ind).ShouldScan Then Rules(ind).turnOff()
             ' Enable/Disable individual repairs
-            Case repNums.Contains(input)
-                Dim ind = repNums.ToList.IndexOf(input)
+            Case intInput >= Rules.Count And intInput <= 2 * Rules.Count
+                ind -= (Rules.Count)
                 toggleSettingParam(Rules(ind).ShouldRepair, "Repair", ScanSettingsChanged)
                 ' Force scan on if the repair is on
                 If Rules(ind).ShouldRepair Then Rules(ind).turnOn()
-            Case input = "31" And ScanSettingsChanged
+            Case intInput = 2 * Rules.Count + 1 And ScanSettingsChanged
                 resetScanSettings()
                 setHeaderText("Settings Reset")
             ' This isn't documented anywhere and is mostly intended as a debugging shortcut
