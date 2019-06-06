@@ -241,7 +241,7 @@ Public Class iniFile
                     End If
                 Next
                 Console.WriteLine($"Error: Duplicate section name detected: {sectionToBeBuilt(0)}")
-                Console.WriteLine($"Line: {LineCount}")
+                Console.WriteLine($"Line: {lineTrackingList(0)}")
                 Console.WriteLine($"Duplicates the entry on line: {lineErr}")
                 Console.WriteLine("This section will be ignored until it is given a unique name.")
                 Console.WriteLine()
