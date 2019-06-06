@@ -232,7 +232,7 @@ Public Class iniFile
             Sections.Add(sectionHolder.Name, sectionHolder)
         Catch ex As Exception
             'This will catch entries whose names are identical (case sensitive), and ignore them 
-            If ex.Message = "An item with the same key has already been added." Then
+            If ex.GetType.FullName = "System.ArgumentException" Then
                 Dim lineErr = -1
                 For Each section In Sections.Values
                     If section.Name = sectionToBeBuilt(0) Then
