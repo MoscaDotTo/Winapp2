@@ -235,7 +235,7 @@ Public Class iniFile
             If ex.GetType.FullName = "System.ArgumentException" Then
                 Dim lineErr = -1
                 For Each section In Sections.Values
-                    If section.Name = sectionToBeBuilt(0) Then
+                    If section.getFullName = sectionToBeBuilt(0) Then
                         lineErr = section.StartingLineNumber
                         Exit For
                     End If
