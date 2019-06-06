@@ -51,8 +51,8 @@ Public Module advSettings
     Public Sub handleUserInput(input As String)
         ' Determine the current state of the lint rules
         determineScanSettings()
-        Dim scanNums = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
-        Dim repNums = {"15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28"}
+        Dim scanNums = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"}
+        Dim repNums = {"16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"}
         Select Case True
             Case input = "0"
                 If ScanSettingsChanged Then WinappDebug.ModuleSettingsChanged = True
@@ -69,7 +69,7 @@ Public Module advSettings
                 toggleSettingParam(Rules(ind).ShouldRepair, "Repair", ScanSettingsChanged)
                 ' Force scan on if the repair is on
                 If Rules(ind).ShouldRepair Then Rules(ind).turnOn()
-            Case input = "29" And ScanSettingsChanged
+            Case input = "31" And ScanSettingsChanged
                 resetScanSettings()
                 setHeaderText("Settings Reset")
             ' This isn't documented anywhere and is mostly intended as a debugging shortcut
@@ -85,7 +85,7 @@ Public Module advSettings
 
     ''' <summary>Prints the menu for individual scans and their repairs to the user</summary>
     Public Sub printMenu()
-        Console.WindowHeight = 48
+        Console.WindowHeight = 49
         printMenuTop({"Enable or disable specific scans or repairs"})
         print(0, "Scan Options", leadingBlank:=True, trailingBlank:=True)
         Dim curRules = WinappDebug.Rules

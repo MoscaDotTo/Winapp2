@@ -56,6 +56,7 @@ Public Module WinappDebug
         New lintRule(True, True, "Invalid Values", "invalid key values", "fixing certain types of invalid key values"),
         New lintRule(True, True, "Syntax Errors", "some entries whose configuration will not run in CCleaner", "attempting to fix certain types of syntax errors"),
         New lintRule(True, True, "Path Validity", "invalid filesystem or registry locations", "attempting to repair some basic invalid parameters in paths"),
+        New lintRule(True, True, "Semicolons", "improper use of semicolons (;)", "fixing some improper uses of semicolons(;)"),
         New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)")
         }
 
@@ -86,8 +87,10 @@ Public Module WinappDebug
     Private Property lintSyntax As lintRule = Rules(11)
     ''' <summary>Controls scan/repairs for invalid file or regsitry paths</summary>
     Private Property lintPathValidity As lintRule = Rules(12)
+    '''<summary>Controls scan/repairs for improper use of semicolons</summary>
+    Private Property lintSemis As lintRule = Rules(13)
     ''' <summary>Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently)</summary>
-    Private Property lintOpti As lintRule = Rules(13)
+    Private Property lintOpti As lintRule = Rules(14)
     '''<summary>Regex to detect long form registry paths</summary>
     Private Property longReg As New Regex("HKEY_(C(URRENT_(USER$|CONFIG$)|LASSES_ROOT$)|LOCAL_MACHINE$|USERS$)")
     '''<summary>Regex to detect short form registry paths</summary>
@@ -325,7 +328,7 @@ Public Module WinappDebug
         fixStr(If(noNumbers, lintExtraNums.fixFormat, lintWrongNums.fixFormat) And hasNumberingError, key.Name, fixedStr)
         ' Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
         fullKeyErr(key, "Forward slash (/) detected in lieu of backslash (\).", Not key.typeIs("Warning") And lintSlashes.ShouldScan And key.vHas(CChar("/")), lintSlashes.fixFormat, key.Value, key.Value.Replace(CChar("/"), CChar("\")))
-        fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And lintParams.ShouldScan, lintParams.fixFormat, key.Value, key.Value.TrimEnd(CChar(";")))
+        fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And lintSemis.ShouldScan, lintSemis.fixFormat, key.Value, key.Value.TrimEnd(CChar(";")))
         ' Do some formatting checks for environment variables if needed
         If {"FileKey", "ExcludeKey", "DetectFile"}.Contains(key.KeyType) Then cEnVar(key)
         keyNumber += 1
@@ -443,8 +446,8 @@ Public Module WinappDebug
         Dim iteratorCheckerList = Split(key.Value, "|")
         fullKeyErr(key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
         ' Captures any incident of semi colons coming before the first pipe symbol
-        fullKeyErr(key, "Semicolon (;) found before pipe (|).", key.vHas(";") And (key.Value.IndexOf(";") < key.Value.IndexOf("|")))
-        fullKeyErr(key, "Trailing semicolon (;) in parameters", key.vHas(";|"), lintParams.fixFormat, key.Value, key.Value.Replace(";|", "|"))
+        fullKeyErr(key, "Semicolon (;) found before pipe (|).", lintSemis.ShouldScan And key.vHas(";") And (key.Value.IndexOf(";") < key.Value.IndexOf("|")))
+        fullKeyErr(key, "Trailing semicolon (;) in parameters", lintSemis.ShouldScan And key.vHas(";|"), lintSemis.fixFormat, key.Value, key.Value.Replace(";|", "|"))
         ' Check for incorrect spellings of RECURSE or REMOVESELF
         If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF"))
         ' Check for missing pipe symbol on recurse and removeself, fix them if detected
