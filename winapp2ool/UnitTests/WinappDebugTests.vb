@@ -74,7 +74,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ' Don't correct all formatting
         winapp2ool.RepairErrsFound = False
         winapp2ool.RepairSomeErrsFound = False
-        For i As Integer = 0 To winapp2ool.WinappDebug.Rules.Count - 1
+        For i = 0 To winapp2ool.WinappDebug.Rules.Count - 1
             If Not i = lintRuleIndex Then
                 ' Turn off all rules by default 
                 winapp2ool.WinappDebug.Rules(i).turnOff()
@@ -183,7 +183,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     End Sub
 
     <TestMethod> Public Sub debug_trailingSemiColons_FindAndRepair_Success()
-        Dim testOutput = debug_ErrorFindAndRepair_Success(5, 2, 0, 3)
+        Dim testOutput = debug_ErrorFindAndRepair_Success(5, 2, 0, 13)
         Console.ReadLine()
     End Sub
 End Class
