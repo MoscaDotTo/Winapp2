@@ -14,14 +14,12 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
-
 Option Strict On
 ''' <summary>
 ''' This module serves as a simple interface for testing new ideas that don't fit neatly into an existing module
 ''' The ideas here should be considered alpha and the code here should be considered spaghetti 
 ''' </summary>
 Module Minefield
-
     ''' <summary>Prints the main Minefield menu</summary>
     Public Sub printMenu()
         printMenuTop({"A testing ground for new ideas/features, watch your step!", "Some options may not do anything."})
