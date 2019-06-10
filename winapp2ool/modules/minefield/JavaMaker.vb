@@ -127,10 +127,7 @@ Module JavaMaker
         ' Load the java.ini file
         If DownloadJavaDefs Then JavaMakerFile2 = getRemoteIniFile(javaLink)
         JavaMakerFile2.validate()
-        If JavaMakerFile2.Sections.Count = 0 Then
-            setHeaderText("Java.ini empty or not found", True)
-            Exit Sub
-        End If
+        If Not enforceFileHasContent(JavaMakerFile2) Then Exit Sub
         ' Get JavaPlugin and JavaScript keys in HKCR\
         Dim JavaPluginKeys = getRegKeys(Microsoft.Win32.Registry.ClassesRoot, {"JavaPlugin", "JavaScript"}.ToList)
         ' Get the CLSIDs present on the current system
