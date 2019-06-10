@@ -24,23 +24,33 @@ Imports System.Net
 ''' </summary>
 Module Downloader
     ' Links to GitHub resources
-    Public Const wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
-    Public Const nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
-    Public Const toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
-    Public Const toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
-    Public Const removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
-    Public Const wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
-    Public Const archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
-    Public Const javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
-    Public Const readMeLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/Readme.md"
-    ' File handler
-    Dim downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
+
+    '''<summary>The web address of the CCleaner version of winapp2.ini</summary>
+    Public ReadOnly Property wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
+    '''<summary>The web address of the Non-CCleaner version of winapp2.ini</summary>
+    Public ReadOnly Property nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
+    '''<summary>The web address of winapp2ool.exe</summary>
+    Public ReadOnly Property toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
+    '''<summary>The web address of version.txt (winapp2ool's public version identifer)</summary>
+    Public ReadOnly Property toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
+    '''<summary>The web address of removed entries.ini</summary>
+    Public ReadOnly Property removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
+    '''<summary>The web address of winapp3.ini</summary>
+    Public ReadOnly Property wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
+    '''<summary>The web address of archived entries.ini</summary>
+    Public ReadOnly Property archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
+    '''<summary>The web address of java.ini</summary>
+    Public ReadOnly Property javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
+    '''<summary>The web address of the winapp2ool ReadMe file</summary>
+    Public ReadOnly Property readMeLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/Readme.md"
+    '''<summary>Holds the path of any files to be saved by the Downloader</summary>
+    Public Property downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
     ''' <summary>
     ''' Handles the commandline args for the Downloader 
     ''' </summary>
     Public Sub handleCmdLine()
-        Dim fileLink As String = ""
+        Dim fileLink = ""
         If cmdargs.Count > 0 Then
             Select Case cmdargs(0).ToLower
                 Case "1", "2", "winapp2"
