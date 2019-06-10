@@ -28,10 +28,10 @@ Public Module winapp2handler
     Public Function replaceAndSort(ListToBeSorted As strList, characterToReplace As String, replacementText As String) As strList
         Dim changes As New changeDict
         ' Replace our target characters if they exist
-        For i As Integer = 0 To ListToBeSorted.Items.Count - 1
-            Dim item As String = ListToBeSorted.Items(i)
+        For i = 0 To ListToBeSorted.Items.Count - 1
+            Dim item = ListToBeSorted.Items(i)
             If item.Contains(characterToReplace) Then
-                Dim renamedItem As String = item.Replace(characterToReplace, replacementText)
+                Dim renamedItem = item.Replace(characterToReplace, replacementText)
                 changes.trackChanges(item, renamedItem)
                 ListToBeSorted.Items(i) = renamedItem
             End If
@@ -50,7 +50,7 @@ Public Module winapp2handler
     ''' <summary>Searches the input list for numbers and returns the length of the longest number.</summary>
     ''' <param name="lst">A list of strings to be searched</param>
     Private Function findLongestNumLength(ByRef lst As strList) As Integer
-        Dim out As Integer = 0
+        Dim out = 0
         For Each item In lst.Items
             For Each mtch As Match In Regex.Matches(item, "[\d]+")
                 If mtch.Length > out Then out = mtch.Length
@@ -64,19 +64,19 @@ Public Module winapp2handler
     ''' <param name="listToBeSorted">The list to be modified prior to sorting</param>
     ''' <param name="changes">The dictionary of changes made to the strings in listToBeSorted</param>
     Private Sub findAndReplaceNumbers(ByRef listToBeSorted As strList, ByRef changes As changeDict)
-        Dim longestNumLen As Integer = findLongestNumLength(listToBeSorted)
+        Dim longestNumLen = findLongestNumLength(listToBeSorted)
         If longestNumLen < 2 Then Exit Sub
-        For i As Integer = 0 To listToBeSorted.Count - 1
-            Dim baseString As String = listToBeSorted.Items(i)
-            Dim paddedString As String = baseString
+        For i = 0 To listToBeSorted.Count - 1
+            Dim baseString = listToBeSorted.Items(i)
+            Dim paddedString = baseString
             Dim numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*")
             For Each m As Match In numberAndDecimals.Matches(baseString)
                 ' Special procedure for numbers with any amount of decimal points in them
-                Dim currentMatch As String = m.ToString
+                Dim currentMatch = m.ToString
                 If currentMatch.Contains(".") Then
                     Dim out = ""
-                    Dim tStr As String() = currentMatch.Split(CChar("."))
-                    For p As Integer = 0 To tStr.Length - 1
+                    Dim tStr = currentMatch.Split(CChar("."))
+                    For p = 0 To tStr.Length - 1
                         out += padNumberStr(longestNumLen, tStr(p))
                         If p < tStr.Length - 1 Then out += "."
                     Next
@@ -85,7 +85,7 @@ Public Module winapp2handler
                     ' Grab characters from both sides so that we don't have to worry about duplicate m matches 
                     Dim numsPlusReplBits As New Regex($"([^\d]|\b){currentMatch}([^\d]|\b)")
                     For Each mm As Match In numsPlusReplBits.Matches(paddedString)
-                        Dim replacementText As String = mm.ToString.Replace(currentMatch, padNumberStr(longestNumLen, currentMatch))
+                        Dim replacementText = mm.ToString.Replace(currentMatch, padNumberStr(longestNumLen, currentMatch))
                         paddedString = paddedString.Replace(mm.ToString, replacementText)
                     Next
                 End If
@@ -101,7 +101,7 @@ Public Module winapp2handler
     ''' <summary>Returns the value from an ExcludeKey with the Flag parameter removed as a String</summary>
     ''' <param name="key">An ExcludeKey iniKey</param>
     Public Function pathFromExcludeKey(key As iniKey) As String
-        Dim pathFromKey As String = key.Value.TrimStart(CType("FILE|", Char()))
+        Dim pathFromKey = key.Value.TrimStart(CType("FILE|", Char()))
         pathFromKey = pathFromKey.TrimStart(CType("PATH|", Char()))
         pathFromKey = pathFromKey.TrimStart(CType("REG|", Char()))
         Return pathFromKey
@@ -111,7 +111,7 @@ Public Module winapp2handler
     ''' <param name="longestNumLen">The desired maximum length of a number</param>
     ''' <param name="num">a given number</param>
     Private Function padNumberStr(longestNumLen As Integer, num As String) As String
-        Dim replMatch As String = ""
+        Dim replMatch = ""
         While replMatch.Length < longestNumLen - num.Length
             replMatch += "0"
         End While
