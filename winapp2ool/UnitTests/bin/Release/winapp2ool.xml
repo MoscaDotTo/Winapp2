@@ -83,6 +83,27 @@ winapp2ool
  A module whose purpose is to allow a user to perform a diff on two winapp2.ini files
  </summary>
 </member>
+<member name="P:winapp2ool.Diff.DiffFile1">
+ <summary>The old or local version of winapp2.ini to be diffed</summary>
+</member>
+<member name="P:winapp2ool.Diff.DiffFile2">
+<summary>The new or remote version of winapp2.ini to be diffed</summary>
+</member>
+<member name="P:winapp2ool.Diff.DiffFile3">
+<summary>The path to which the log will optionally be saved</summary>
+</member>
+<member name="P:winapp2ool.Diff.DownloadDiffFile">
+<summary>Indicates whether or not we are downloading a remote winapp2.ini</summary>
+</member>
+<member name="P:winapp2ool.Diff.SaveDiffLog">
+<summary>Indicates whether or not the diff output should be saved to disk</summary>
+</member>
+<member name="P:winapp2ool.Diff.ModuleSettingsChanged">
+<summary>Indicates that the module settings have been changed</summary>
+</member>
+<member name="P:winapp2ool.Diff.outputToFile">
+ <summary>Holds the output that will be shown to the user and optionally saved to disk</summary>
+</member>
 <member name="M:winapp2ool.Diff.handleCmdLine">
  <summary>Handles the commandline args for Diff</summary>
   Diff args:
@@ -307,13 +328,19 @@ winapp2ool
 <member name="P:winapp2ool.iniFile.LineCount">
  <summary>The current line number of the file during reading</summary>
 </member>
+<member name="P:winapp2ool.iniFile.tmpRename">
+ <summary>Holds the file name during attempted renames so changes can be reverted</summary>
+</member>
+<member name="P:winapp2ool.iniFile.mustExist">
+<summary>Indicates that this file must have a file name that exists</summary>
+</member>
 <member name="M:winapp2ool.iniFile.Path">
  <summary>Returns the full windows file path of the iniFile as a String</summary>
 </member>
 <member name="M:winapp2ool.iniFile.ToString">
  <summary>Returns an iniFile as it would appear on disk as a String</summary>
 </member>
-<member name="M:winapp2ool.iniFile.#ctor(System.String,System.String,System.String)">
+<member name="M:winapp2ool.iniFile.#ctor(System.String,System.String,System.String,System.Boolean)">
  <summary>Creates an uninitialized iniFile with a directory and a filename.</summary>
  <param name="directory">A windows directory containing a .ini file</param>
  <param name="filename">The name of the .ini file contained in the given directory </param>
@@ -367,6 +394,32 @@ winapp2ool
  <summary>Attempts to create a new iniSection object and add it to the iniFile</summary>
  <param name="sectionToBeBuilt">The list of strings in the iniSection</param>
  <param name="lineTrackingList">The list of line numbers associated with the given strings</param>
+</member>
+<member name="M:winapp2ool.iniFile.printFileChooserMenu">
+<summary>Prints the menu for the File Chooser submodule</summary>
+</member>
+<member name="M:winapp2ool.iniFile.handleFileChooserInput(System.String)">
+ <summary>Handles the input for the File Chooser submodule</summary>
+ <param name="input">The user's input</param>
+</member>
+<member name="M:winapp2ool.iniFile.reName(System.String)">
+ <summary>Assigns the Name of the iniFile to the given name and stores the previous name in a temporary container</summary>
+ <param name="nname">The new filename</param>
+</member>
+<member name="M:winapp2ool.iniFile.exitIfExists(System.Boolean)">
+ <summary>Leaves the submodule as long as the inifile exists on disk in the case that mustExist is true</summary>
+ <param name="undoPendingRename">Optional boolean indicating that there's a pending rename that should be reverted if the renamed file doesn't exist (default: off)</param>
+</member>
+<member name="M:winapp2ool.iniFile.printDirChooserMenu">
+<summary>Prints the menu for the Directory Chooser submodule</summary>
+</member>
+<member name="M:winapp2ool.iniFile.handleDirChooserInput(System.String)">
+ <summary>Handles the user input for the Directory Chooser submodule</summary>
+ <param name="input">The user's input</param>
+</member>
+<member name="M:winapp2ool.iniFile.exists(System.Boolean)">
+ <summary>Returns true if the path (or optionally just the directory) of the inifile exists on the file system</summary>>
+ <param name="checkPath">Optional boolean indicating that only the directory should be checked for existence (default: false)</param>
 </member>
 <member name="T:winapp2ool.iniSection">
  <summary>
@@ -616,43 +669,6 @@ winapp2ool
  <param name="indexOfText">The text to be replaced</param>
  <param name="newText">The replacement text</param>
 </member>
-<member name="T:winapp2ool.iniFileHandler">
- <summary>
- A collection of methods and classes for interacting with .ini files 
- </summary>
-</member>
-<member name="M:winapp2ool.iniFileHandler.chkFileExist(winapp2ool.iniFile)">
- <summary>Enforces that a user selected file exists</summary>
- <param name="someFile">An iniFile object with user defined path and name parameters</param>
-</member>
-<member name="M:winapp2ool.iniFileHandler.chkDirExist(System.String@)">
- <summary>Enforces that a user defined directory exists, either by selecting a new one or creating one.</summary>
- <param name="dir">A user defined windows directory</param>
-</member>
-<member name="M:winapp2ool.iniFileHandler.fileChooser(winapp2ool.iniFile@)">
- <summary>Presents a menu to the user allowing them to perform some file and directory operations</summary>
- <param name="someFile">An iniFile object with user definable parameters</param>
-</member>
-<member name="M:winapp2ool.iniFileHandler.handleFileChooserChoice(winapp2ool.iniFile@)">
- <summary>Allows the user change the file name or directory of a given iniFile object</summary>
- <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
-</member>
-<member name="M:winapp2ool.iniFileHandler.handleFileChooserConfirm(winapp2ool.iniFile@)">
- <summary>Confirms the user's choice of a file's parameters in the File Chooser and allows them to make changes before saving</summary>
- <param name="someFile">The iniFile object whose parameters are being modified by the user</param>
-</member>
-<member name="M:winapp2ool.iniFileHandler.dirChooser(System.String@)">
- <summary>Presents an interface to the user allowing them to operate on windows directory parameters</summary>
- <param name="dir">A user definable windows directory path</param>
-</member>
-<member name="M:winapp2ool.iniFileHandler.handleDirChooserChoice(System.String@)">
- <summary>Allows the user to select a directory using a similar interface to the File Chooser</summary>
- <param name="dir">The String containing the directory the user is parameterizing</param>
-</member>
-<member name="M:winapp2ool.iniFileHandler.handleDirChooserConfirm(System.String@)">
- <summary>Confirms the user's choice of directory and allows them to change it </summary>
- <param name="dir">The String containing the directory the user is parameterizing</param>
-</member>
 <member name="T:winapp2ool.logger">
  <summary>
  This module handles logging for winapp2ool. 
@@ -667,7 +683,7 @@ winapp2ool
 <member name="P:winapp2ool.logger.nestCount">
 <summary>Indicates the current nesting level within the state machine </summary>
 </member>
-<member name="M:winapp2ool.logger.gLog(System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+<member name="M:winapp2ool.logger.gLog(System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
  <summary>Adds an item into the global log</summary>
 </member>
 <member name="M:winapp2ool.logger.toString">
@@ -677,6 +693,9 @@ winapp2ool
  <summary>
  Provides functions and methods for presenting and maintaining menus to a user
  </summary>
+</member>
+<member name="P:winapp2ool.MenuMaker.lastOpWasErr">
+<summary>Indicates that the last operation was unsucessful</summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.SuppressOutput">
  <summary>When enabled, prevents winapp2ool from outputting to the console or asking for input (usually)</summary>
@@ -1094,6 +1113,27 @@ winapp2ool
  This module was designed with the help of Fred de Vries. It produces a winapp2.ini entry to remove irrelevant registry keys generated by the Java Runtime Environment installer. 
  </summary>
 </member>
+<member name="P:winapp2ool.JavaMaker.DownloadJavaDefs">
+ <summary>Indicates that the java.ini file should be downloaded from GitHub</summary>
+</member>
+<member name="P:winapp2ool.JavaMaker.JavaMakerFile1">
+<summary>The winapp2.ini that may potentially be merged into</summary>
+</member>
+<member name="P:winapp2ool.JavaMaker.JavaMakerFile2">
+<summary>The local copy of the JRE definitions file</summary>
+</member>
+<member name="P:winapp2ool.JavaMaker.JavaMakerFile3">
+<summary>The default path for saving generated entries to disk</summary>
+</member>
+<member name="P:winapp2ool.JavaMaker.SaveGeneratedEntry">
+<summary>Indicates whether or not the JRE entry should be saved to disk</summary>
+</member>
+<member name="P:winapp2ool.JavaMaker.MergeGeneratedEntry">
+<summary>Indicates whether or not the JRE entry should be merged into another file</summary>
+</member>
+<member name="P:winapp2ool.JavaMaker.ModuleSettingsChanged">
+<summary>Indicates whether or not module settings have been modified</summary>
+</member>
 <member name="M:winapp2ool.JavaMaker.initDefaultParams">
  <summary>Restores the module parameters to their default states</summary>
 </member>
@@ -1125,6 +1165,13 @@ winapp2ool
 <member name="M:winapp2ool.Minefield.printMenu">
  <summary>Prints the main Minefield menu</summary>
 </member>
+<member name="M:winapp2ool.Minefield.printBabelMenu">
+<summary>Prints the main Babel menu</summary>
+</member>
+<member name="M:winapp2ool.Minefield.handleBabelInput(System.String)">
+<summary>Handles the user input for Babel</summary>
+<param name="input">The String containing the user's input</param>
+</member>
 <member name="M:winapp2ool.Minefield.handleUserInput(System.String)">
  <summary>Handles user input for the main Minefield menu</summary>
  <param name="input">The String containing the user's input</param>
@@ -1134,7 +1181,7 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.Minefield.handleGMInput(System.String)">
  <summary>Handles input for GameMaker</summary>
- <param name="input"></param>
+ <param name="input">The String containing the user's input</param>
 </member>
 <member name="T:winapp2ool.Trim">
     <summary>
@@ -1408,6 +1455,9 @@ winapp2ool
 <member name="P:winapp2ool.WinappDebug.lintPathValidity">
  <summary>Controls scan/repairs for invalid file or regsitry paths</summary>
 </member>
+<member name="P:winapp2ool.WinappDebug.lintSemis">
+<summary>Controls scan/repairs for improper use of semicolons</summary>
+</member>
 <member name="P:winapp2ool.WinappDebug.lintOpti">
  <summary>Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently)</summary>
 </member>
@@ -1563,9 +1613,9 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.WinappDebug.customErr(System.Int32,System.String,System.String[])">
  <summary>Prints arbitrarily defined errors without a precondition</summary>
- <param name="lineCount"></param>
- <param name="err"></param>
- <param name="lines"></param>
+ <param name="lineCount">The line in the file on which the error occured</param>
+ <param name="err">The error text to be printed</param>
+ <param name="lines">Any additional error information to be printed</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.fixStr(System.Boolean,System.String@,System.String@)">
  <summary>Replace a given string with a new value if the fix condition is met.</summary>
@@ -1691,6 +1741,10 @@ winapp2ool
  <summary>Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected</summary>
  <param name="caseArray">The parent array of cased Strings</param>
  <param name="inputText">The String to be checked for casing errors</param>
+</member>
+<member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
+ <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no section.</summary>
+ <param name="iFile">An iniFile to be checked for content</param>
 </member>
 </members>
 </doc>
