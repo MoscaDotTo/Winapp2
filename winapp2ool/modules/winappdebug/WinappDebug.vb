@@ -58,7 +58,7 @@ Public Module WinappDebug
         New lintRule(True, True, "Path Validity", "invalid filesystem or registry locations", "attempting to repair some basic invalid parameters in paths"),
         New lintRule(True, True, "Semicolons", "improper use of semicolons (;)", "fixing some improper uses of semicolons(;)"),
         New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)")
-        }
+    }
 
     ''' <summary>Controls scan/repairs for CamelCasing issues</summary>
     Private Property lintCasing As lintRule = Rules(0)
@@ -436,9 +436,6 @@ Public Module WinappDebug
         fullKeyErr(key, $"Invalid data provided: {strToChk} in {key.toString}{Environment.NewLine}Valid data: {validData}", Not casedArray.Contains(casedString) And lintInvalid.ShouldScan)
     End Sub
 
-
-
-
     ''' <summary>Processes a FileKey format winapp2.ini iniKey object and checks it for errors, correcting where possible</summary>
     ''' <param name="key">A winap2.ini FileKey format iniKey object</param>
     Public Function pFileKey(key As iniKey) As iniKey
@@ -643,9 +640,9 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>Prints arbitrarily defined errors without a precondition</summary>
-    ''' <param name="lineCount"></param>
-    ''' <param name="err"></param>
-    ''' <param name="lines"></param>
+    ''' <param name="lineCount">The line in the file on which the error occured</param>
+    ''' <param name="err">The error text to be printed</param>
+    ''' <param name="lines">Any additional error information to be printed</param>
     Private Sub customErr(lineCount As Integer, err As String, lines As String())
         gLog(err, ascend:=True)
         internalErrorList.Add(err)

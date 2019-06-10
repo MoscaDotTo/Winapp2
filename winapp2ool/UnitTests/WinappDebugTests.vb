@@ -184,6 +184,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
 
     <TestMethod> Public Sub debug_trailingSemiColons_FindAndRepair_Success()
         Dim testOutput = debug_ErrorFindAndRepair_Success(5, 2, 0, 13)
-        Console.ReadLine()
+        Assert.IsTrue(Not testOutput.FileKeys.Keys.First.Value.EndsWith(";"))
+        Assert.IsTrue(Not testOutput.FileKeys.Keys(1).Value.Contains(";|"))
     End Sub
 End Class

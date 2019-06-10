@@ -22,9 +22,7 @@ Public Module advSettings
 
     ''' <summary>Resets the individual scan settings to their defaults</summary>
     Public Sub resetScanSettings()
-        For Each rule In Rules
-            rule.resetParams()
-        Next
+        Rules.ForEach(Sub(rule) rule.resetParams())
         ScanSettingsChanged = False
         RepairSomeErrsFound = False
     End Sub
