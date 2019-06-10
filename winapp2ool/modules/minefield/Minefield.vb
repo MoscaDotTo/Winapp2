@@ -24,21 +24,24 @@ Module Minefield
 
     ''' <summary>Prints the main Minefield menu</summary>
     Public Sub printMenu()
-        printMenuTop({"A testing ground for new ideas/features, watch your step!"})
+        printMenuTop({"A testing ground for new ideas/features, watch your step!", "Some options may not do anything."})
         print(1, "Java Entry Maker", "Clean up after the messy JRE installer")
         print(1, "Babel", "Generate winapp2.ini entries for lang files")
         print(1, "Outlook", "Generate winapp2.ini entries with custom outlook profile support", closeMenu:=True)
     End Sub
 
+    '''<summary>Prints the main Babel menu</summary>
     Public Sub printBabelMenu()
         printMenuTop({"This tool will attempt to generate winapp2.ini entries to remove language files from your system. Use EXTREME caution!"})
         print(1, "Run (Default)", "Run the tool")
     End Sub
 
+    '''<summary>Handles the user input for Babel</summary>
+    '''<param name="input">The String containing the user's input</param>
     Public Sub handleBabelInput(input As String)
         Select Case input
             Case "0"
-                ExitCode = True
+                exitModule()
             Case "1", ""
 
         End Select
@@ -49,7 +52,7 @@ Module Minefield
     Public Sub handleUserInput(input As String)
         Select Case input
             Case "0"
-                ExitCode = True
+                exitModule()
             Case "1"
                 initModule("Java Entry Maker", AddressOf printJMMenu, AddressOf handleJMInput)
             Case "2"
@@ -66,11 +69,11 @@ Module Minefield
     End Sub
 
     ''' <summary>Handles input for GameMaker</summary>
-    ''' <param name="input"></param>
+    ''' <param name="input">The String containing the user's input</param>
     Private Sub handleGMInput(input As String)
         Select Case input
             Case "0"
-                ExitCode = True
+                exitModule()
         End Select
     End Sub
 End Module
