@@ -228,12 +228,6 @@ Module Winapp2ool
         settingsChangedSetting = True
     End Sub
 
-    ''' <summary>Returns 1 or 2 newline characters conditionally</summary>
-    ''' <param name="cond">The parameter under which to return two newlines</param>
-    Public Function prependNewLines(Optional cond As Boolean = False) As String
-        Return If(cond, Environment.NewLine & Environment.NewLine, Environment.NewLine)
-    End Function
-
     ''' <summary>Attempts to return the Windows version number, return 0.0 if it cannot</summary>
     Public Function getWinVer() As Double
         gLog("Checking Windows version")

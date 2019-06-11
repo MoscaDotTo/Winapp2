@@ -24,17 +24,20 @@ Module Diff
     ''' <summary>The old or local version of winapp2.ini to be diffed</summary>
     Public Property DiffFile1 As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
     '''<summary>The new or remote version of winapp2.ini to be diffed</summary>
-    Public Property DiffFile2 As iniFile = New iniFile(Environment.CurrentDirectory, "")
+    Public Property DiffFile2 As iniFile = New iniFile(Environment.CurrentDirectory, "", mExist:=True)
     '''<summary>The path to which the log will optionally be saved</summary>
     Public Property DiffFile3 As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
     '''<summary>Indicates whether or not we are downloading a remote winapp2.ini</summary>
-    Public Property DownloadDiffFile As Boolean = False
+    Public Property DownloadDiffFile As Boolean = Not isOffline
     '''<summary>Indicates whether or not the diff output should be saved to disk</summary>
     Public Property SaveDiffLog As Boolean = False
     '''<summary>Indicates that the module settings have been changed</summary>
     Public Property ModuleSettingsChanged As Boolean = False
     ''' <summary>Holds the output that will be shown to the user and optionally saved to disk</summary>
     Private Property outputToFile As String = ""
+    '''<summary>Indicates that the remote file should be trimmed for the local system before diffing</summary>
+    Public Property TrimRemoteFile As Boolean = Not isOffline
+
 
     ''' <summary>Handles the commandline args for Diff</summary>
     '''  Diff args:
@@ -78,6 +81,7 @@ Module Diff
         print(1, "File Chooser", "Choose a new name or location for your older ini file")
         print(0, "Select Newer/Remote File:", leadingBlank:=True)
         print(5, GetNameFromDL(True), "diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, enStrCond:=DownloadDiffFile, leadingBlank:=True)
+        print(5, "Remote file trimming", "trimming the remote winapp2.ini before diffing", cond:=DownloadDiffFile = True, enStrCond:=TrimRemoteFile, trailingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your newer ini file", Not DownloadDiffFile, isOffline, True)
         print(0, "Log Settings:")
         print(5, "Toggle Log Saving", "automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not SaveDiffLog, enStrCond:=SaveDiffLog)
@@ -101,15 +105,18 @@ Module Diff
             Case input = "3" And Not isOffline
                 toggleDownload(DownloadDiffFile, ModuleSettingsChanged)
                 DiffFile2.Name = GetNameFromDL(DownloadDiffFile)
+            Case input = "4" And DownloadDiffFile
+                toggleSettingParam(TrimRemoteFile, "Trimming", ModuleSettingsChanged)
             Case (input = "4" And Not (DownloadDiffFile Or isOffline)) Or (input = "3" And isOffline)
                 changeFileParams(DiffFile2, ModuleSettingsChanged)
-            Case (input = "5" And Not isOffline And Not DownloadDiffFile) Or (input = "4" And (isOffline Xor DownloadDiffFile))
+            Case (input = "5" And Not isOffline) Or (input = "4" And isOffline)
                 toggleSettingParam(SaveDiffLog, "Log Saving", ModuleSettingsChanged)
-            Case SaveDiffLog And ((input = "6" And Not isOffline And Not DownloadDiffFile) Or (input = "5" And (isOffline Or (Not isOffline And DownloadDiffFile))))
+            Case SaveDiffLog And ((input = "6" And Not isOffline) Or (input = "5" And isOffline))
                 changeFileParams(DiffFile3, ModuleSettingsChanged)
-            Case ModuleSettingsChanged And 'Online Case below
-                (Not isOffline And (((Not SaveDiffLog And input = "5" And DownloadDiffFile) Or (input = "6" And Not (DownloadDiffFile Xor SaveDiffLog))) Or (input = "7" And Not DownloadDiffFile And SaveDiffLog))) Or
-                ((isOffline) And (input = "5") Or (input = "6" And SaveDiffLog)) ' Offline case
+            Case ModuleSettingsChanged And ( 'Online Case below
+                                        (Not isOffline And ((Not SaveDiffLog And input = "6") Or
+                                        (SaveDiffLog And input = "7"))) Or
+                                        (isOffline And ((input = "5") Or (input = "6" And SaveDiffLog)))) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
             Case Else
                 setHeaderText(invInpStr, True)
@@ -122,7 +129,12 @@ Module Diff
         DiffFile1.validate()
         If DownloadDiffFile Then DiffFile2 = getRemoteIniFile(winapp2link)
         DiffFile2.validate()
-        If pendingExit() Then Exit Sub
+        If Not (enforceFileHasContent(DiffFile1) And enforceFileHasContent(DiffFile2)) Then Exit Sub
+        If TrimRemoteFile Then
+            Dim tmp As New winapp2file(DiffFile2)
+            Trim.trim(tmp)
+            DiffFile2.Sections = tmp.toIni.Sections
+        End If
         differ()
         DiffFile3.overwriteToFile(outputToFile, SaveDiffLog)
         setHeaderText("Diff Complete")
@@ -139,8 +151,8 @@ Module Diff
     Private Sub differ()
         print(3, "Diffing, please wait. This may take a moment.")
         clrConsole()
-        Dim oldVersionNum = getVer(diffFile1)
-        Dim newVersionNum = getVer(diffFile2)
+        Dim oldVersionNum = getVer(DiffFile1)
+        Dim newVersionNum = getVer(DiffFile2)
         log(tmenu($"Changes made between{oldVersionNum} and{newVersionNum}"))
         log(menu(menuStr02))
         log(menu(menuStr00))
@@ -177,10 +189,10 @@ Module Diff
     ''' <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
     Private Function compareTo() As strList
         Dim outList, comparedList As New strList
-        For Each section In diffFile1.Sections.Values
+        For Each section In DiffFile1.Sections.Values
             ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
-            If diffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
-                Dim sSection As iniSection = diffFile2.Sections(section.Name)
+            If DiffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
+                Dim sSection As iniSection = DiffFile2.Sections(section.Name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
@@ -189,24 +201,24 @@ Module Diff
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
                     Dim tmp = getDiff(sSection, "modified")
-                    tmp = getChangesFromList(addedKeys, tmp, $"{prependNewLines()}Added:")
-                    tmp = getChangesFromList(removedKeys, tmp, $"{prependNewLines(addedKeys.KeyCount > 0)}Removed:")
+                    tmp = getChangesFromList(addedKeys, tmp, $"{pNL("Added:")}")
+                    tmp = getChangesFromList(removedKeys, tmp, $"{pNL("Removed:", addedKeys.KeyCount > 0)}")
                     If updatedKeys.Count > 0 Then
-                        tmp += appendNewLine($"{prependNewLines(removedKeys.KeyCount > 0 Or addedKeys.KeyCount > 0)}Modified:")
-                        updatedKeys.ForEach(Sub(pair) appendStrs({appendNewLine(prependNewLines() & pair.Key.Name), $"Old:   {appendNewLine(pair.Key.toString)}", $"New:   {appendNewLine(pair.Value.toString)}"}, tmp))
+                        tmp += aNL($"{pNL("Modified:", removedKeys.KeyCount > 0 Or addedKeys.KeyCount > 0)}")
+                        updatedKeys.ForEach(Sub(pair) appendStrs({aNL(pNL("pair.Key.Name")), $"Old:   {aNL(pair.Key.toString)}", $"New:   {aNL(pair.Value.toString)}"}, tmp))
                     End If
-                    tmp += prependNewLines(False) & menuStr00
+                    tmp += pNL(menuStr00)
                     outList.add(tmp)
                 End If
-            ElseIf Not diffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
+            ElseIf Not DiffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
                 ' If we do not have the entry in the new file, it has been removed between versions 
                 outList.add(getDiff(section, "removed"))
             End If
             comparedList.add(section.Name)
         Next
         ' Any sections from the new file which are not found in the old file have been added
-        For Each section In diffFile2.Sections.Values
-            If Not diffFile1.Sections.Keys.Contains(section.Name) Then outList.add(getDiff(section, "added"))
+        For Each section In DiffFile2.Sections.Values
+            If Not DiffFile1.Sections.Keys.Contains(section.Name) Then outList.add(getDiff(section, "added"))
         Next
         Return outList
     End Function
@@ -217,7 +229,7 @@ Module Diff
     ''' <param name="changeTxt">The text to appear in the output</param>
     Private Function getChangesFromList(keyList As keyList, out As String, changeTxt As String) As String
         If keyList.KeyCount = 0 Then Return out
-        out += appendNewLine(changeTxt)
+        out += aNL(changeTxt)
         keyList.Keys.ForEach(Sub(key) out += key.toString & Environment.NewLine)
         Return out
     End Function
@@ -291,7 +303,7 @@ Module Diff
     ''' <param name="changeType">The type of change to observe</param>
     Private Function getDiff(section As iniSection, changeType As String) As String
         Dim out = ""
-        appendStrs({appendNewLine(mkMenuLine($"{section.Name} has been {changeType}.", "c")), appendNewLine(appendNewLine(mkMenuLine(menuStr02, ""))), appendNewLine(section.ToString)}, out)
+        appendStrs({aNL(mkMenuLine($"{section.Name} has been {changeType}.", "c")), aNL(aNL(mkMenuLine(menuStr02, ""))), aNL(section.ToString)}, out)
         If Not changeType = "modified" Then out += menuStr00
         Return out
     End Function
@@ -300,6 +312,6 @@ Module Diff
     ''' <param name="toLog">The string to be appended to the log</param>
     Private Sub log(toLog As String)
         cwl(toLog)
-        outputToFile += appendNewLine(toLog)
+        outputToFile += aNL(toLog)
     End Sub
 End Module

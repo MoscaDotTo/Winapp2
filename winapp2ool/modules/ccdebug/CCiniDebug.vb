@@ -118,7 +118,7 @@ Module CCiniDebug
     Private Sub initDebug()
         CCDebugFile2.validate()
         If PruneStaleEntries Then CCDebugFile1.validate()
-        If pendingExit() Then Exit Sub
+        If Not enforceFileHasContent(CCDebugFile2) Then Exit Sub
         clrConsole()
         printMenuLine(tmenu("CCiniDebug Results"))
         printMenuLine(menuStr03)

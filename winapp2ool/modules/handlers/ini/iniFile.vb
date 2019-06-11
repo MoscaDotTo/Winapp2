@@ -176,9 +176,9 @@ Public Class iniFile
     ''' <summary>Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists.</summary>
     Public Sub validate()
         gLog($"Validating {Name}", ascend:=True)
-        clrConsole()
+        'clrConsole()
         ' If an iniFile's sections already exist, skip this.
-        If pendingExit() Or Name = "" Then Exit Sub
+        If Name = "" Then Exit Sub
         ' Make sure both the file and the directory actually exist
         While Not exists()
             initModule("File Chooser", AddressOf printFileChooserMenu, AddressOf handleFileChooserInput)

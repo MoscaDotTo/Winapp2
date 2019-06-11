@@ -124,7 +124,7 @@ Module Merge
         clrConsole()
         MergeFile1.validate()
         MergeFile2.validate()
-        If pendingExit() Then Exit Sub
+        If Not (enforceFileHasContent(MergeFile1) And enforceFileHasContent(MergeFile2)) Then Exit Sub
         print(0, tmenu($"Merging {MergeFile1.Name} with {MergeFile2.Name}"))
         merge()
         print(0, "", closeMenu:=True)

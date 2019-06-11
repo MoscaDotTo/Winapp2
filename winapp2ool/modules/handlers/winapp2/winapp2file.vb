@@ -21,7 +21,7 @@ Option Strict On
 Public Class winapp2file
     ' "" = main section, bottom most in all circumstances and appearing without a label 
     ''' <summary>The names of the sections of entries as they appear in winapp2.ini</summary>
-    Public ReadOnly Property FileSectionHeaders As String() = {"Chrome/Chromium based browsers", "Microsoft Edge Insider", "Opera", "Firefox/Mozilla based browsers", "Thunderbird",
+    Public ReadOnly Property FileSectionHeaders As New List(Of String) From {"Chrome/Chromium based browsers", "Microsoft Edge Insider", "Opera", "Firefox/Mozilla based browsers", "Thunderbird",
         "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
     ' As above, index 0 = Chrome, 1 = Microsoft Edge Insider, 2 = Opera.... 9 = ""
     ''' <summary>A list of iniFiles each containing one of the headers contents</summary>
@@ -42,8 +42,8 @@ Public Class winapp2file
     Public Sub New(ByVal file As iniFile)
         Dir = file.Dir
         Name = file.Name
-        For i As Integer = 0 To 8
-            EntrySections.Add(New iniFile With {.Name = FileSectionHeaders(i)})
+        For Each header In FileSectionHeaders
+            EntrySections.Add(New iniFile With {.Name = header})
             Winapp2entries.Add(New List(Of winapp2entry))
         Next
         ' Determine if we're the Non-CCleaner variant of the ini
@@ -110,41 +110,52 @@ Public Class winapp2file
 
     ''' <summary>Updates the internal iniFile objects</summary>
     Public Sub rebuildToIniFiles()
-        For i As Integer = 0 To EntrySections.Count - 1
+        For i = 0 To EntrySections.Count - 1
             EntrySections(i) = rebuildInnerIni(Winapp2entries(i))
             EntrySections(i).Name = FileSectionHeaders(i)
         Next
     End Sub
 
+    '''<summary>Returns the winapp2file's inner inifile as a single inifile object with sections ordered as they would be in winapp2.ini</summary>
+    Public Function toIni() As iniFile
+        Dim out As New iniFile
+        For Each entry In EntrySections
+            For Each section In entry.Sections.Values
+                out.Sections.Add(section.Name, section)
+            Next
+        Next
+        Return out
+    End Function
+
     ''' <summary>Builds and returns the winapp2.ini text including header comments for writing back to a file</summary>
     Public Function winapp2string() As String
         Dim fileName = If(IsNCC, "Winapp2 (Non-CCleaner version)", "Winapp2")
-        Dim licLink = appendNewLine(If(IsNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"))
+        Dim licLink = aNL(If(IsNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"))
         ' Version string (YYMMDD format) & entry count 
-        Dim out = appendNewLine(Version)
-        out += appendNewLine($"; # of entries: {count.ToString("#,###")}")
-        out += appendNewLine(";")
+        Dim out = aNL(Version)
+        out += aNL($"; # of entries: {count.ToString("#,###")}")
+        out += aNL(";")
         out += $"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: {licLink}"
-        out += appendNewLine($"; If you plan on modifying, distributing, and/or hosting {fileName}.ini for your own program or website, please ask first.")
-        out += appendNewLine(";")
+        out += aNL($"; If you plan on modifying, distributing, and/or hosting {fileName}.ini for your own program or website, please ask first.")
+        out += aNL(";")
         If IsNCC Then
-            out += appendNewLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.")
-            out += appendNewLine("; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.")
+            out += aNL("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.")
+            out += aNL("; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.")
         End If
-        out += appendNewLine("; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2")
-        out += appendNewLine("; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md")
-        out += appendNewLine("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
-        out += appendNewLine("; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
+        out += aNL("; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2")
+        out += aNL("; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md")
+        out += aNL("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
+        out += aNL("; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
         ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
         For i = 0 To 7
             If EntrySections(i).Sections.Count > 0 Then
-                out += appendNewLine("; ")
-                out += appendNewLine(appendNewLine("; " & EntrySections(i).Name))
+                out += aNL("; ")
+                out += aNL(aNL("; " & EntrySections(i).Name))
                 out += EntrySections(i).toString
-                out += appendNewLine($"{prependNewLines(False)}; End of {EntrySections(i).Name}")
+                out += aNL($"{Environment.NewLine}; End of {EntrySections(i).Name}")
             End If
         Next
-        If EntrySections.Last.Sections.Count > 0 Then out += prependNewLines(False) & EntrySections.Last.toString
+        If EntrySections.Last.Sections.Count > 0 Then out += $"{Environment.NewLine}{EntrySections.Last.toString}"
         Return out
     End Function
 End Class
