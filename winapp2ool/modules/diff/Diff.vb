@@ -38,6 +38,12 @@ Module Diff
     '''<summary>Indicates that the remote file should be trimmed for the local system before diffing</summary>
     Public Property TrimRemoteFile As Boolean = Not isOffline
 
+    '''<summary>The number of entries Diff determines to have been added in a new version</summary>
+    Public Property AddedEntryCount As Integer = 0
+    '''<summary>The number of entries Diff determines to have been modified in a new version</summary>
+    Public Property ModifiedEntryCount As Integer = 0
+    '''<summary>The number of entries Diff determines to have been removed in a new version</summary>
+    Public Property RemovedEntryCount As Integer = 0
 
     ''' <summary>Handles the commandline args for Diff</summary>
     '''  Diff args:
@@ -135,9 +141,25 @@ Module Diff
             Trim.trim(tmp)
             DiffFile2.Sections = tmp.toIni.Sections
         End If
+        logInitDiff()
         differ()
+        logPostDiff()
+        Console.WriteLine()
+        printMenuLine(bmenu(anyKeyStr))
+        If Not SuppressOutput Then Console.ReadLine()
         DiffFile3.overwriteToFile(outputToFile, SaveDiffLog)
         setHeaderText("Diff Complete")
+    End Sub
+
+    '''<summary>Logs the initial portion of the diff output for the user</summary>
+    Private Sub logInitDiff()
+        print(3, "Diffing, please wait. This may take a moment.")
+        clrConsole()
+        Dim oldVersionNum = getVer(DiffFile1)
+        Dim newVersionNum = getVer(DiffFile2)
+        log(tmenu($"Changes made between{oldVersionNum} and{newVersionNum}"))
+        log(menu(menuStr02))
+        log(menu(menuStr00))
     End Sub
 
     ''' <summary>Gets the version from winapp2.ini</summary>
@@ -149,41 +171,34 @@ Module Diff
 
     ''' <summary>Performs the diff and outputs the info to the user</summary>
     Private Sub differ()
-        print(3, "Diffing, please wait. This may take a moment.")
-        clrConsole()
-        Dim oldVersionNum = getVer(DiffFile1)
-        Dim newVersionNum = getVer(DiffFile2)
-        log(tmenu($"Changes made between{oldVersionNum} and{newVersionNum}"))
-        log(menu(menuStr02))
-        log(menu(menuStr00))
         ' Compare the files and then enumerate their changes
         Dim outList = compareTo()
-        Dim remCt = 0
-        Dim modCt = 0
-        Dim addCt = 0
+        AddedEntryCount = 0
+        ModifiedEntryCount = 0
+        RemovedEntryCount = 0
         For Each change In outList.Items
             Select Case True
                 Case change.Contains("has been added")
-                    addCt += 1
+                    AddedEntryCount += 1
                 Case change.Contains(" has been removed")
-                    remCt += 1
+                    RemovedEntryCount += 1
                 Case Else
-                    modCt += 1
+                    ModifiedEntryCount += 1
             End Select
             log(change)
         Next
-        ' Print the summary to the user
+    End Sub
+
+    ''' <summary>Logs the summary of the Diff for output to the user </summary>
+    Private Sub logPostDiff()
         log(menu("Diff complete.", True))
         log(menu(menuStr03))
         log(menu("Summary", True))
         log(menu(menuStr01))
-        log(menu($"Added entries: {addCt}"))
-        log(menu($"Modified entries: {modCt}"))
-        log(menu($"Removed entries: {remCt}"))
+        log(menu($"Added entries: {AddedEntryCount}"))
+        log(menu($"Modified entries: {ModifiedEntryCount}"))
+        log(menu($"Removed entries: {RemovedEntryCount}"))
         log(menu(menuStr02))
-        Console.WriteLine()
-        printMenuLine(bmenu(anyKeyStr))
-        Console.ReadKey()
     End Sub
 
     ''' <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
