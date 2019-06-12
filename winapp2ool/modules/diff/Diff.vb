@@ -220,7 +220,7 @@ Module Diff
                     tmp = getChangesFromList(removedKeys, tmp, $"{pNL("Removed:", addedKeys.KeyCount > 0)}")
                     If updatedKeys.Count > 0 Then
                         tmp += aNL($"{pNL("Modified:", removedKeys.KeyCount > 0 Or addedKeys.KeyCount > 0)}")
-                        updatedKeys.ForEach(Sub(pair) appendStrs({aNL(pNL("pair.Key.Name")), $"Old:   {aNL(pair.Key.toString)}", $"New:   {aNL(pair.Value.toString)}"}, tmp))
+                        updatedKeys.ForEach(Sub(pair) appendStrs({aNL(pNL(pair.Key.Name)), $"Old:   {aNL(pair.Key.toString)}", $"New:   {aNL(pair.Value.toString)}"}, tmp))
                     End If
                     tmp += pNL(menuStr00)
                     outList.add(tmp)
