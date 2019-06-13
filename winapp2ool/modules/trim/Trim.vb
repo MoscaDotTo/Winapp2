@@ -104,7 +104,7 @@ Public Module Trim
 
     ''' <summary>Initiates the trim after validating our ini files</summary>
     Private Sub initTrim()
-        If Not DownloadFileToTrim Then TrimFile1.validate()
+        TrimFile1.validate()
         If Not enforceFileHasContent(TrimFile1) Then Exit Sub
         Dim winapp2 = If(Not DownloadFileToTrim, New winapp2file(TrimFile1), New winapp2file(getRemoteIniFile(winapp2link)))
         clrConsole()
