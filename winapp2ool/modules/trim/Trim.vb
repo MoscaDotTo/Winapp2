@@ -104,8 +104,10 @@ Public Module Trim
 
     ''' <summary>Initiates the trim after validating our ini files</summary>
     Private Sub initTrim()
-        TrimFile1.validate()
-        If Not enforceFileHasContent(TrimFile1) Then Exit Sub
+        If Not DownloadFileToTrim Then
+            TrimFile1.validate()
+            If Not enforceFileHasContent(TrimFile1) Then Exit Sub
+        End If
         Dim winapp2 = If(Not DownloadFileToTrim, New winapp2file(TrimFile1), New winapp2file(getRemoteIniFile(winapp2link)))
         clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
@@ -125,6 +127,7 @@ Public Module Trim
         gLog($"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
         gLog($"{winapp2.count} entries remain.")
         TrimFile3.overwriteToFile(winapp2.winapp2string)
+        setHeaderText($"{TrimFile3.Name} saved")
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
@@ -161,6 +164,8 @@ Public Module Trim
         If Not entry.DetectOS.KeyCount = 0 Then
             If winVer = Nothing Then winVer = getWinVer()
             hasMetDetOS = checkExistence(entry.DetectOS, AddressOf checkDetOS)
+            gLog("Met DetOS Criteria.", indent:=True)
+            gLog(winVer & "matches")
             gLog("Did not meet DetectOS critera.", Not hasMetDetOS, descend:=True, indent:=True)
             If Not hasMetDetOS Then Return False
         End If
@@ -273,7 +278,6 @@ Public Module Trim
         Dim root = getFirstDir(path)
         dir = dir.Replace(root & "\", "")
         Dim exists = getRegExists(root, dir)
-        'gLog($"{path} matched a location in the registry", exists, indent:=True, descend:=True)
         ' If we didn't return anything above, registry location probably doesn't exist
         Return exists
     End Function
@@ -334,7 +338,6 @@ Public Module Trim
                     swapDir(dir, key)
                     exists = expandWildcard(dir, True)
                 End If
-                'gLog($"{key} matched a path on the system", exists, indent:=True, descend:=True)
                 Return exists
             End If
             ' Check out those file/folder paths
@@ -343,7 +346,6 @@ Public Module Trim
             If isProgramFiles Then
                 swapDir(dir, key)
                 Dim exists = Directory.Exists(dir) Or File.Exists(dir)
-                'gLog($"{key} matched a path on the system", exists, indent:=True, descend:=True)
                 Return exists
             End If
         Catch ex As Exception
@@ -420,6 +422,13 @@ Public Module Trim
     ''' <param name="value">The DetectOS criteria to be checked</param>
     Private Function checkDetOS(value As String) As Boolean
         Dim splitKey = value.Split(CChar("|"))
-        Return If(value.StartsWith("|"), Not winVer > Val(splitKey(1)), Not winVer < Val(splitKey(0)))
+        Select Case True
+            Case value.StartsWith("|")
+                Return Not winVer > Val(splitKey(1))
+            Case value.EndsWith("|")
+                Return Not winVer < Val(splitKey(0))
+            Case Else
+                Return winVer.ToString = splitKey(0) Or winVer.ToString = splitKey(1)
+        End Select
     End Function
 End Module
