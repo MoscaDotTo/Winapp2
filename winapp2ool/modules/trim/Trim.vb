@@ -164,9 +164,8 @@ Public Module Trim
         If Not entry.DetectOS.KeyCount = 0 Then
             If winVer = Nothing Then winVer = getWinVer()
             hasMetDetOS = checkExistence(entry.DetectOS, AddressOf checkDetOS)
-            gLog("Met DetOS Criteria.", indent:=True)
-            gLog(winVer & "matches")
-            gLog("Did not meet DetectOS critera.", Not hasMetDetOS, descend:=True, indent:=True)
+            gLog($"Met DetectOS criteria. {winVer} satisfies {entry.DetectOS.Keys.First.Value}", hasMetDetOS, indent:=True)
+            gLog($"Did not meet DetectOS criteria. {winVer} does not satisfy {entry.DetectOS.Keys.First.Value}", Not hasMetDetOS, descend:=True, indent:=True)
             If Not hasMetDetOS Then Return False
         End If
         ' Process any other Detect criteria we have
