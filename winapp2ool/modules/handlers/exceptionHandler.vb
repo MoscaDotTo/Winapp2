@@ -22,30 +22,24 @@ Module exceptionHandler
     ''' <summary>Prints out exceptions and any other information related to them that a use may need.</summary>
     ''' <param name="ex">A given exception captured during winapp2ool's execution</param>
     Public Sub exc(ByRef ex As Exception)
-        gLog("Exception Encountered!")
-        gLog(ex.ToString)
+        gLog("Exception Encountered!", indent:=True, ascend:=True)
         Select Case True
+            Case ex.GetType.FullName = "System.Net.WebException"
+                gLog(ex.Message, ascend:=True)
+                ' If we can't connect to GitHub we may as well be offline since that's where all our online resources 
+                gLog($"winapp2ool's current online status is detected as: {Not isOffline}. It will now be set to False", indent:=True, descend:=True)
+                isOffline = True
             ' Out of date .NET presents us from downloading securely from GitHub as is required for executables.
             Case ex.Message.Contains("SSL/TLS")
                 printDotNetOutOfDateError()
-            ' This is thrown when attempting to use remote functions without a working internet connection and other similar tasks
-            Case ex.Message.Contains("The remote name could not be resolved")
-                offlineErr()
             Case Else
+                gLog(ex.ToString)
                 cwl("Error: " & ex.ToString)
                 cwl("Please report this error on GitHub")
+                cwl("Press Enter to continue")
+                Console.ReadLine()
         End Select
-        cwl("Press Enter to continue")
-        Console.ReadLine()
-        cwl()
-    End Sub
-
-    ''' <summary>Inform the user that they cannot</summary>
-    ''' Consider allowing the user to reestablish their internet connection here
-    Private Sub offlineErr()
-        cwl("Error: Could not establish connection to the remote host (GitHub)")
-        cwl("Please check your internet connection settings and try again. If you feel this is a bug, please report it on GitHub.")
-        isOffline = True
+        gLog("", descend:=True)
     End Sub
 
     ''' <summary>Prints output to the user instructing them to update their .NET Framework</summary>

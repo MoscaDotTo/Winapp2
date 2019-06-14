@@ -126,11 +126,10 @@ Module Downloader
     Public Sub handleUserInput(input As String)
         Select Case input
             Case "0"
-                Console.WriteLine("Returning to winapp2ool menu...")
-                ExitCode = True
+                exitModule()
             Case "1", "2"
                 downloadFile.Name = "winapp2.ini"
-                Dim link As String = If(input = "1", wa2Link, nonccLink)
+                Dim link = If(input = "1", wa2Link, nonccLink)
                 download(link)
                 If downloadFile.Dir = Environment.CurrentDirectory Then checkedForUpdates = False
             Case "3"
@@ -165,18 +164,16 @@ Module Downloader
     ''' <param name="lineNum">The line number to read to</param>
     ''' <param name="remote">The boolean specifying whether the resource is remote (online)</param>
     Public Function getFileDataAtLineNum(path As String, Optional lineNum As Integer = 1, Optional remote As Boolean = True) As String
-        Dim reader As StreamReader = Nothing
-        Dim out As String = ""
+        Dim out As String
         Try
-            reader = If(remote, New StreamReader(New WebClient().OpenRead(path)), New StreamReader(path))
+            Dim reader = If(remote, New StreamReader(New WebClient().OpenRead(path)), New StreamReader(path))
             out = getTargetLine(reader, lineNum)
+            reader.Close()
         Catch ex As Exception
             exc(ex)
             Return ""
-        Finally
-            reader.Close()
         End Try
-        Return If(out = Nothing, "", out)
+        Return out
     End Function
 
     ''' <summary>Returns true if we are able to connect to the internet, otherwise, returns false.</summary>
@@ -187,8 +184,7 @@ Module Downloader
             gLog("Established connection to GitHub")
             Return True
         Catch ex As Exception
-            gLog("Unable to establish connection to GitHub")
-            gLog(ex.ToString)
+            exc(ex)
             Return False
         End Try
     End Function
@@ -196,18 +192,18 @@ Module Downloader
     ''' <summary>Returns an iniFile object created using an online resource ie. GitHub</summary>
     ''' <param name="address">A URL pointing to an online .ini file</param>
     Public Function getRemoteIniFile(address As String) As iniFile
-        Dim reader As StreamReader
         Try
             Dim client As New WebClient
-            reader = New StreamReader(client.OpenRead(address))
-            Dim wholeFile As String = reader.ReadToEnd
+            Dim reader = New StreamReader(client.OpenRead(address))
+            Dim wholeFile = reader.ReadToEnd
             wholeFile += Environment.NewLine
-            Dim splitFile As String() = wholeFile.Split(CChar(Environment.NewLine))
+            Dim splitFile = wholeFile.Split(CChar(Environment.NewLine))
             ' Workaround for java.ini until the underlying reason for mismatches between line endings can be discovered
             If address = javaLink Then splitFile = wholeFile.Split(CChar(vbLf))
-            For i As Integer = 0 To splitFile.Count - 1
+            For i = 0 To splitFile.Count - 1
                 splitFile(i) = splitFile(i).Replace(vbCr, "").Replace(vbLf, "")
             Next
+            reader.Close()
             Return New iniFile(splitFile)
         Catch ex As Exception
             exc(ex)
@@ -219,13 +215,13 @@ Module Downloader
     ''' <param name="reader">An open file stream</param>
     ''' <param name="lineNum">The target line number</param>
     Private Function getTargetLine(reader As StreamReader, lineNum As Integer) As String
-        Dim out As String = ""
-        Dim curLine As Integer = 1
+        Dim out = ""
+        Dim curLine = 1
         While curLine <= lineNum
             out = reader.ReadLine()
             curLine += 1
         End While
-        Return If(out = Nothing, "", out)
+        Return out
     End Function
 
     ''' <summary>Handles a request to download a file from outside the module</summary>
@@ -244,7 +240,7 @@ Module Downloader
         gLog("Starting auto update process")
         downloadFile.Dir = Environment.CurrentDirectory
         downloadFile.Name = "winapp2ool updated.exe"
-        Dim backupName As String = $"winapp2ool v{currentVersion}.exe.bak"
+        Dim backupName = $"winapp2ool v{currentVersion}.exe.bak"
         Try
             ' Remove any existing backups of this version
             If File.Exists($"{Environment.CurrentDirectory}\{backupName}") Then File.Delete($"{Environment.CurrentDirectory}\{backupName}")
@@ -258,6 +254,7 @@ Module Downloader
             Environment.Exit(0)
         Catch ex As Exception
             exc(ex)
+            File.Move(backupName, "winapp2ool.exe")
         End Try
     End Sub
 
@@ -265,18 +262,18 @@ Module Downloader
     ''' <param name="link">The URL to be downloaded from</param>
     ''' <param name="prompt">The boolean indicating whether or not the user should be prompted to rename the file should it exist already.</param>
     Private Sub download(link As String, Optional prompt As Boolean = True)
-        Dim givenName As String = downloadFile.Name
+        Dim givenName = downloadFile.Name
         ' Don't try to download to a directory that doesn't exist
         If Not Directory.Exists(downloadFile.Dir) Then Directory.CreateDirectory(downloadFile.Dir)
         ' If the file exists and we're prompting or overwrite, do that.
         If prompt And File.Exists(downloadFile.Path) And Not SuppressOutput Then
             cwl($"{downloadFile.Name} already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
-            Dim nfilename As String = Console.ReadLine()
+            Dim nfilename = Console.ReadLine()
             If nfilename.Trim <> "" Then downloadFile.Name = nfilename
         End If
         cwl($"Downloading {givenName}...")
-        Dim success As Boolean = dlFile(link, downloadFile.Path)
+        Dim success = dlFile(link, downloadFile.Path)
         cwl($"Download {If(success, "Complete.", "Failed.")}")
         cwl(If(success, "Downloaded ", $"Unable to download {downloadFile.Name} to {downloadFile.Dir}"))
         setHeaderText($"Download {If(success, "", "in")}complete: {downloadFile.Name}", Not success)
