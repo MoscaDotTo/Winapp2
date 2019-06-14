@@ -427,7 +427,7 @@ Public Module Trim
             Case value.EndsWith("|")
                 Return Not winVer < Val(splitKey(0))
             Case Else
-                Return winVer.ToString = splitKey(0) Or winVer.ToString = splitKey(1)
+                Return winVer >= Val(splitKey(0)) And winVer <= Val(splitKey(1))
         End Select
     End Function
 End Module
