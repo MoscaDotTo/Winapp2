@@ -46,9 +46,7 @@ Module Downloader
     '''<summary>Holds the path of any files to be saved by the Downloader</summary>
     Public Property downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
-    ''' <summary>
-    ''' Handles the commandline args for the Downloader 
-    ''' </summary>
+    ''' <summary> Handles the commandline args for the Downloader </summary>
     Public Sub handleCmdLine()
         Dim fileLink = ""
         If cmdargs.Count > 0 Then
