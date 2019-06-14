@@ -134,14 +134,9 @@ Module Diff
     Private Sub initDiff()
         outputToFile = ""
         DiffFile1.validate()
-        If Not enforceFileHasContent(DiffFile1) Then Exit Sub
-        If DownloadDiffFile Then DiffFile2 = getRemoteIniFile(winapp2link)
-        DiffFile2.validate()
-        If Not DownloadDiffFile Then
-            If Not enforceFileHasContent(DiffFile2) Then Exit Sub
-        End If
+        If DownloadDiffFile Then DiffFile2 = getRemoteIniFile(winapp2link) Else DiffFile2.validate()
         If Not (enforceFileHasContent(DiffFile1) And enforceFileHasContent(DiffFile2)) Then Exit Sub
-        If TrimRemoteFile Then
+        If TrimRemoteFile And DownloadDiffFile Then
             Dim tmp As New winapp2file(DiffFile2)
             Trim.trim(tmp)
             DiffFile2.Sections = tmp.toIni.Sections
