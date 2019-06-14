@@ -136,18 +136,15 @@ Module Winapp2ool
                 Console.Write("Downloading, this may take a moment...")
                 remoteDownload(Environment.CurrentDirectory, "winapp2.ini", wa2Link, False)
                 checkedForUpdates = False
-                undoAnyPendingExits()
             Case input = "8" And waUpdateIsAvail
                 clrConsole()
                 Console.Write("Downloading & trimming, this may take a moment...")
                 remoteTrim(New iniFile("", ""), New iniFile(Environment.CurrentDirectory, "winapp2.ini"), True)
                 checkedForUpdates = False
-                undoAnyPendingExits()
             Case input = "9" And waUpdateIsAvail
                 clrConsole()
                 Console.Write("Downloading & diffing, this may take a moment...")
                 remoteDiff(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
-                undoAnyPendingExits()
                 setHeaderText("Diff Complete")
             Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not DotNetFrameworkOutOfDate
                 Console.WriteLine("Downloading and updating winapp2ool.exe, this may take a moment...")
@@ -210,11 +207,12 @@ Module Winapp2ool
     ''' <param name="someFile">A file whose parameters will be changed</param>
     ''' <param name="settingsChangedSetting">The boolean indicating that a setting has been changed</param>
     Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean)
+        Dim curName = someFile.Name
+        Dim curDir = someFile.Dir
         initModule("File Chooser", AddressOf someFile.printFileChooserMenu, AddressOf someFile.handleFileChooserInput)
-        'fileChooser(someFile)
         settingsChangedSetting = True
-        setHeaderText($"{If(someFile.SecondName = "", someFile.InitName, "save file")} parameters update{If(ExitCode, " aborted", "d")}", ExitCode)
-        undoAnyPendingExits()
+        Dim fileChanged = Not someFile.Name = curName Or Not someFile.Dir = curDir
+        setHeaderText($"{If(someFile.SecondName = "", someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
     End Sub
 
     ''' <summary>Toggles a setting's boolean state and marks its tracker true</summary>
@@ -302,7 +300,7 @@ Module Winapp2ool
     ''' <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for winapp2ool and its components</summary>
     ''' <param name="name">The name of the module</param>
     ''' <param name="showMenu">The function that prints the module's menu</param>
-    ''' <param name="handleInput">The function that handle's the module's input</param>
+    ''' <param name="handleInput">The function that handles the module's input</param>
     Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String))
         gLog("", ascend:=True)
         gLog($"Loading module {name}")

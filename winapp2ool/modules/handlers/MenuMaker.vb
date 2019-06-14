@@ -179,11 +179,6 @@ Module MenuMaker
         ExitCode = Not ExitCode
     End Sub
 
-    ''' <summary>Forces the exitCode to be False</summary>
-    Public Sub undoAnyPendingExits()
-        ExitCode = False
-    End Sub
-
     ''' <summary>Constructs a menu line fit to the width of the console</summary>
     ''' <param name="line">The line to be printed</param>
     ''' <param name="align">The alignment of the line to be printed. 'l' for Left or 'c' for Centre</param>
