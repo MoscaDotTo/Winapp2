@@ -33,8 +33,6 @@ Module Diff
     Public Property SaveDiffLog As Boolean = False
     '''<summary>Indicates that the module settings have been changed</summary>
     Public Property ModuleSettingsChanged As Boolean = False
-    ''' <summary>Holds the output that will be shown to the user and optionally saved to disk</summary>
-    Private Property outputToFile As String = ""
     '''<summary>Indicates that the remote file should be trimmed for the local system before diffing</summary>
     Public Property TrimRemoteFile As Boolean = Not isOffline
 
@@ -152,8 +150,22 @@ Module Diff
         Console.WriteLine()
         printMenuLine(bmenu(anyKeyStr))
         If Not SuppressOutput Then Console.ReadKey()
-        DiffFile3.overwriteToFile(logger.toString, SaveDiffLog)
+        getDiffLogFromGlobal()
         setHeaderText("Diff Complete")
+    End Sub
+
+    '''<summary>Gets the portion of the </summary>
+    Private Sub getDiffLogFromGlobal()
+        Dim startind, endind As Integer
+        For Each line In GlobalLog.Items
+            If line.Contains("Beginning diff between version") Then startind = GlobalLog.Items.LastIndexOf(line)
+            If line.EndsWith("Diff complete") Then endind = GlobalLog.Items.LastIndexOf(line)
+        Next
+        Dim out = ""
+        For i = startind To endind
+            out += GlobalLog.Items(i) & Environment.NewLine
+        Next
+        DiffFile3.overwriteToFile(out)
     End Sub
 
     '''<summary>Logs the initial portion of the diff output for the user</summary>
@@ -201,14 +213,15 @@ Module Diff
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
                     Dim tmp = getDiff(sSection, "modified", ModifiedEntryCount)
-                    getChangesFromList(addedKeys, $"Added:")
-                    getChangesFromList(removedKeys, $"Removed:")
+                    getChangesFromList(addedKeys, True)
+                    getChangesFromList(removedKeys, False)
                     If updatedKeys.Count > 0 Then
                         print(0, "Modified:", isCentered:=True)
-                        gLog("Modifed Keys:", indent:=True, ascend:=True, ascAmt:=2)
+                        gLog("Modifed Keys:", ascend:=True, ascAmt:=2)
                         For Each pair In updatedKeys
-                            gLog("Old: " & pair.Key.toString, indent:=True, indAmt:=2)
-                            gLog("New: " & pair.Value.toString, indent:=True, indAmt:=2)
+                            gLog(pair.Key.Name, indent:=True, indAmt:=2)
+                            gLog("Old: " & pair.Key.toString, indent:=True, indAmt:=3)
+                            gLog("New: " & pair.Value.toString, indent:=True, indAmt:=3)
                             print(0, "Old: " & pair.Key.toString, colorLine:=True)
                             print(0, "New: " & pair.Value.toString, colorLine:=True, enStrCond:=True)
                         Next
@@ -229,14 +242,16 @@ Module Diff
 
     ''' <summary>Handles the Added and Removed cases for changes </summary>
     ''' <param name="kl">A list of iniKeys that have been added/removed</param>
-    ''' <param name="changeTxt">The text to appear in the output</param>
-    Private Sub getChangesFromList(kl As keyList, changeTxt As String)
+    Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean)
         If kl.KeyCount = 0 Then Exit Sub
+        Dim changeTxt = If(wasAdded, "Added:", "Removed:")
         print(0, changeTxt, isCentered:=True)
+        gLog(changeTxt, indent:=True, ascend:=True)
         For Each key In kl.Keys
-            print(0, key.toString, colorLine:=True, enStrCond:=changeTxt.Contains("Added"))
-            gLog($"{key.Name} has been {changeTxt}")
+            print(0, key.toString, colorLine:=True, enStrCond:=wasAdded)
+            gLog($"{key.toString}", indent:=True, indAmt:=4)
         Next
+        gLog("", descend:=True)
     End Sub
 
     ''' <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key </summary>
@@ -314,7 +329,13 @@ Module Diff
         print(0, $"{section.Name} has been {changeType}", isCentered:=True,
               colorLine:=changeType.Contains("added") Or changeType.Contains("removed"),
               enStrCond:=If(changeType.Contains("removed"), False, True))
-        If ShowFullEntries Then cwl(Environment.NewLine & section.ToString)
+        If ShowFullEntries Then
+            Dim tmp = section.ToString.Split(CChar(vbCrLf))
+            For Each line In tmp
+                gLog(line.Replace(vbLf, ""), indent:=True, indAmt:=4)
+            Next
+            cwl(Environment.NewLine & section.ToString)
+        End If
         Return out
     End Function
 End Module
