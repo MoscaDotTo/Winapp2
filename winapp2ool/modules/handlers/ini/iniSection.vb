@@ -94,19 +94,20 @@ Public Class iniSection
     Public Function compareTo(ss As iniSection, ByRef removedKeys As keyList, ByRef addedKeys As keyList) As Boolean
         ' Create a copy of the section so we can modify it
         Dim secondSection As New iniSection With {.Name = ss.Name, .StartingLineNumber = ss.StartingLineNumber}
-        For i As Integer = 0 To ss.Keys.KeyCount - 1
+        For i = 0 To ss.Keys.KeyCount - 1
             secondSection.Keys.add(ss.Keys.Keys(i))
         Next
         Dim noMatch As Boolean
         Dim tmpList As New List(Of Integer)
         For Each key In Keys.Keys
             noMatch = True
-            For i As Integer = 0 To secondSection.Keys.KeyCount - 1
+            For i = 0 To secondSection.Keys.KeyCount - 1
                 Dim sKey = secondSection.Keys.Keys(i)
                 Select Case True
                     Case key.compareTypes(sKey) And key.compareValues(sKey)
                         noMatch = False
-                        tmpList.Add(i)
+                        ' In the case where a change includes that a line has been duplicated, nasty things can happen :(
+                        If Not tmpList.Contains(i) Then tmpList.Add(i)
                         Exit For
                 End Select
             Next

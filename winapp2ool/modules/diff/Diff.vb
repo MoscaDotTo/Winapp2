@@ -45,6 +45,9 @@ Module Diff
     '''<summary>The number of entries Diff determines to have been removed in a new version</summary>
     Public Property RemovedEntryCount As Integer = 0
 
+    '''<summary>Indicates whether or not full entries should be printed in the Diff output. Called "verbose mode" in the menu</summary>
+    Public Property ShowFullEntries As Boolean = False
+
     ''' <summary>Handles the commandline args for Diff</summary>
     '''  Diff args:
     ''' -d          : download the latest winapp2.ini
@@ -81,7 +84,7 @@ Module Diff
 
     ''' <summary>Prints the main menu to the user</summary>
     Public Sub printMenu()
-        Console.WindowHeight = If(ModuleSettingsChanged, 32, 30)
+        Console.WindowHeight = If(ModuleSettingsChanged, 34, 32)
         printMenuTop({"Observe the differences between two ini files"})
         print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (DiffFile2.Name = "" And Not DownloadDiffFile), colorLine:=True)
         print(0, "Select Older/Local File:", leadingBlank:=True)
@@ -93,6 +96,7 @@ Module Diff
         print(0, "Log Settings:")
         print(5, "Toggle Log Saving", "automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not SaveDiffLog, enStrCond:=SaveDiffLog)
         print(1, "File Chooser (log)", "Change where Diff saves its log", SaveDiffLog, trailingBlank:=True)
+        print(5, "Verbose Mode", "printing full entries in the diff output", enStrCond:=ShowFullEntries, trailingBlank:=True)
         print(0, $"Older file: {replDir(DiffFile1.Path)}")
         print(0, $"Newer file: {If(DiffFile2.Name = "" And Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))}", closeMenu:=Not SaveDiffLog And Not ModuleSettingsChanged)
         print(0, $"Log   file: {replDir(DiffFile3.Path)}", cond:=SaveDiffLog, closeMenu:=Not ModuleSettingsChanged)
@@ -120,9 +124,11 @@ Module Diff
                 toggleSettingParam(SaveDiffLog, "Log Saving", ModuleSettingsChanged)
             Case SaveDiffLog And ((input = "6" And Not isOffline) Or (input = "5" And isOffline))
                 changeFileParams(DiffFile3, ModuleSettingsChanged)
+            Case input = "6" And Not SaveDiffLog Or input = "7" And SaveDiffLog
+                toggleSettingParam(ShowFullEntries, "Verbose Mode", ModuleSettingsChanged)
             Case ModuleSettingsChanged And ( 'Online Case below
-                                        (Not isOffline And ((Not SaveDiffLog And input = "6") Or
-                                        (SaveDiffLog And input = "7"))) Or
+                                        (Not isOffline And ((Not SaveDiffLog And input = "7") Or
+                                        (SaveDiffLog And input = "8"))) Or
                                         (isOffline And ((input = "5") Or (input = "6" And SaveDiffLog)))) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
             Case Else
@@ -132,9 +138,8 @@ Module Diff
 
     ''' <summary>Carries out the main set of Diffing operations</summary>
     Private Sub initDiff()
-        outputToFile = ""
         DiffFile1.validate()
-        If DownloadDiffFile Then DiffFile2.Sections = getRemoteIniFile(winapp2link).Sections Else DiffFile2.validate()
+        If DownloadDiffFile Then DiffFile2 = getRemoteIniFile(winapp2link, DiffFile2) Else DiffFile2.validate()
         If Not (enforceFileHasContent(DiffFile1) And enforceFileHasContent(DiffFile2)) Then Exit Sub
         If TrimRemoteFile And DownloadDiffFile Then
             Dim tmp As New winapp2file(DiffFile2)
@@ -142,12 +147,12 @@ Module Diff
             DiffFile2.Sections = tmp.toIni.Sections
         End If
         logInitDiff()
-        differ()
+        compareTo()
         logPostDiff()
         Console.WriteLine()
         printMenuLine(bmenu(anyKeyStr))
-        If Not SuppressOutput Then Console.ReadLine()
-        DiffFile3.overwriteToFile(outputToFile, SaveDiffLog)
+        If Not SuppressOutput Then Console.ReadKey()
+        DiffFile3.overwriteToFile(logger.toString, SaveDiffLog)
         setHeaderText("Diff Complete")
     End Sub
 
@@ -157,9 +162,8 @@ Module Diff
         clrConsole()
         Dim oldVersionNum = getVer(DiffFile1)
         Dim newVersionNum = getVer(DiffFile2)
-        log(tmenu($"Changes made between{oldVersionNum} and{newVersionNum}"))
-        log(menu(menuStr02))
-        log(menu(menuStr00))
+        gLog($"Beginning diff between{oldVersionNum} and {newVersionNum}", ascend:=True)
+        print(3, $"Changes between{oldVersionNum} and{newVersionNum}")
     End Sub
 
     ''' <summary>Gets the version from winapp2.ini</summary>
@@ -169,45 +173,26 @@ Module Diff
         Return If(ver.Contains("version"), ver.TrimStart(CChar(";")).Replace("version:", "version"), " version not given")
     End Function
 
-    ''' <summary>Performs the diff and outputs the info to the user</summary>
-    Private Sub differ()
-        ' Compare the files and then enumerate their changes
-        Dim outList = compareTo()
-        AddedEntryCount = 0
-        ModifiedEntryCount = 0
-        RemovedEntryCount = 0
-        For Each change In outList.Items
-            Select Case True
-                Case change.Contains("has been added")
-                    AddedEntryCount += 1
-                Case change.Contains(" has been removed")
-                    RemovedEntryCount += 1
-                Case Else
-                    ModifiedEntryCount += 1
-            End Select
-            log(change)
-        Next
-    End Sub
-
     ''' <summary>Logs the summary of the Diff for output to the user </summary>
     Private Sub logPostDiff()
-        log(menu("Diff complete.", True))
-        log(menu(menuStr03))
-        log(menu("Summary", True))
-        log(menu(menuStr01))
-        log(menu($"Added entries: {AddedEntryCount}"))
-        log(menu($"Modified entries: {ModifiedEntryCount}"))
-        log(menu($"Removed entries: {RemovedEntryCount}"))
-        log(menu(menuStr02))
+        gLog("Diff complete", descend:=True)
+        print(0, menuStr00)
+        print(0, "Summary", isCentered:=True)
+        print(0, $"Added entries: {AddedEntryCount}")
+        print(0, $"Modified entries: {ModifiedEntryCount}")
+        print(0, $"Removed entries: {RemovedEntryCount}", closeMenu:=True)
     End Sub
 
     ''' <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
-    Private Function compareTo() As strList
-        Dim outList, comparedList As New strList
+    Private Sub compareTo()
+        AddedEntryCount = 0
+        RemovedEntryCount = 0
+        ModifiedEntryCount = 0
+        Dim comparedList As New strList
         For Each section In DiffFile1.Sections.Values
             ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
             If DiffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
-                Dim sSection As iniSection = DiffFile2.Sections(section.Name)
+                Dim sSection = DiffFile2.Sections(section.Name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
@@ -215,39 +200,44 @@ Module Diff
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
-                    Dim tmp = getDiff(sSection, "modified")
-                    tmp = getChangesFromList(addedKeys, tmp, $"{pNL("Added:")}")
-                    tmp = getChangesFromList(removedKeys, tmp, $"{pNL("Removed:", addedKeys.KeyCount > 0)}")
+                    Dim tmp = getDiff(sSection, "modified", ModifiedEntryCount)
+                    getChangesFromList(addedKeys, $"Added:")
+                    getChangesFromList(removedKeys, $"Removed:")
                     If updatedKeys.Count > 0 Then
-                        tmp += aNL($"{pNL("Modified:", removedKeys.KeyCount > 0 Or addedKeys.KeyCount > 0)}")
-                        updatedKeys.ForEach(Sub(pair) appendStrs({aNL(pNL(pair.Key.Name)), $"Old:   {aNL(pair.Key.toString)}", $"New:   {aNL(pair.Value.toString)}"}, tmp))
+                        print(0, "Modified:", isCentered:=True)
+                        gLog("Modifed Keys:", indent:=True, ascend:=True, ascAmt:=2)
+                        For Each pair In updatedKeys
+                            gLog("Old: " & pair.Key.toString, indent:=True, indAmt:=2)
+                            gLog("New: " & pair.Value.toString, indent:=True, indAmt:=2)
+                            print(0, "Old: " & pair.Key.toString, colorLine:=True)
+                            print(0, "New: " & pair.Value.toString, colorLine:=True, enStrCond:=True)
+                        Next
+                        gLog("", descend:=True, descAmt:=2)
                     End If
-                    tmp += pNL(menuStr00)
-                    outList.add(tmp)
                 End If
             ElseIf Not DiffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
                 ' If we do not have the entry in the new file, it has been removed between versions 
-                outList.add(getDiff(section, "removed"))
+                getDiff(section, "removed", RemovedEntryCount)
             End If
             comparedList.add(section.Name)
         Next
         ' Any sections from the new file which are not found in the old file have been added
         For Each section In DiffFile2.Sections.Values
-            If Not DiffFile1.Sections.Keys.Contains(section.Name) Then outList.add(getDiff(section, "added"))
+            If Not DiffFile1.Sections.Keys.Contains(section.Name) Then getDiff(section, "added", AddedEntryCount)
         Next
-        Return outList
-    End Function
+    End Sub
 
     ''' <summary>Handles the Added and Removed cases for changes </summary>
-    ''' <param name="keyList">A list of iniKeys that have been added/removed</param>
-    ''' <param name="out">The output text to be appended to</param>
+    ''' <param name="kl">A list of iniKeys that have been added/removed</param>
     ''' <param name="changeTxt">The text to appear in the output</param>
-    Private Function getChangesFromList(keyList As keyList, out As String, changeTxt As String) As String
-        If keyList.KeyCount = 0 Then Return out
-        out += aNL(changeTxt)
-        keyList.Keys.ForEach(Sub(key) out += key.toString & Environment.NewLine)
-        Return out
-    End Function
+    Private Sub getChangesFromList(kl As keyList, changeTxt As String)
+        If kl.KeyCount = 0 Then Exit Sub
+        print(0, changeTxt, isCentered:=True)
+        For Each key In kl.Keys
+            print(0, key.toString, colorLine:=True, enStrCond:=changeTxt.Contains("Added"))
+            gLog($"{key.Name} has been {changeTxt}")
+        Next
+    End Sub
 
     ''' <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key </summary>
     ''' <param name="removedKeys">The list of iniKeys that were removed from the newer version of the file</param>
@@ -256,9 +246,10 @@ Module Diff
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
         Dim akAlpha As New keyList
         Dim rkAlpha As New keyList
-        For i As Integer = 0 To addedKeys.KeyCount - 1
+        For i = 0 To addedKeys.KeyCount - 1
             Dim key = addedKeys.Keys(i)
             For j = 0 To removedKeys.KeyCount - 1
+                If removedKeys.KeyCount = 0 Then Continue For
                 Dim skey = removedKeys.Keys(j)
                 If key.compareNames(skey) Then
                     Select Case key.KeyType
@@ -316,17 +307,14 @@ Module Diff
     ''' <summary>Returns a string containing a menu box listing the change type and entry, followed by the entry's toString</summary>
     ''' <param name="section">an iniSection object to be diffed</param>
     ''' <param name="changeType">The type of change to observe</param>
-    Private Function getDiff(section As iniSection, changeType As String) As String
+    Private Function getDiff(section As iniSection, changeType As String, ByRef changeCounter As Integer) As String
         Dim out = ""
-        appendStrs({aNL(mkMenuLine($"{section.Name} has been {changeType}.", "c")), aNL(aNL(mkMenuLine(menuStr02, ""))), aNL(section.ToString)}, out)
-        If Not changeType = "modified" Then out += menuStr00
+        changeCounter += 1
+        gLog($"{section.Name} has been {changeType}", indent:=True, leadr:=True)
+        print(0, $"{section.Name} has been {changeType}", isCentered:=True,
+              colorLine:=changeType.Contains("added") Or changeType.Contains("removed"),
+              enStrCond:=If(changeType.Contains("removed"), False, True))
+        If ShowFullEntries Then cwl(Environment.NewLine & section.ToString)
         Return out
     End Function
-
-    ''' <summary>Saves a String to the log file</summary>
-    ''' <param name="toLog">The string to be appended to the log</param>
-    Private Sub log(toLog As String)
-        cwl(toLog)
-        outputToFile += aNL(toLog)
-    End Sub
 End Module

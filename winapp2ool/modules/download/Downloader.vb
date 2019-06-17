@@ -191,7 +191,7 @@ Module Downloader
 
     ''' <summary>Returns an iniFile object created using an online resource ie. GitHub</summary>
     ''' <param name="address">A URL pointing to an online .ini file</param>
-    Public Function getRemoteIniFile(address As String) As iniFile
+    Public Function getRemoteIniFile(address As String, Optional ByRef someFile As iniFile = Nothing) As iniFile
         Try
             Dim client As New WebClient
             Dim reader = New StreamReader(client.OpenRead(address))
@@ -204,7 +204,14 @@ Module Downloader
                 splitFile(i) = splitFile(i).Replace(vbCr, "").Replace(vbLf, "")
             Next
             reader.Close()
-            Return New iniFile(splitFile)
+            Dim someFileExists = someFile IsNot Nothing
+            Dim out = New iniFile(splitFile) With {.Dir = If(someFileExists, someFile.Dir, Environment.CurrentDirectory),
+                                                   .InitDir = If(someFileExists, someFile.InitDir, Environment.CurrentDirectory),
+                                                   .mustExist = If(someFileExists, someFile.mustExist, False),
+                                                   .Name = If(someFileExists, someFile.Name, ""),
+                                                   .InitName = If(someFileExists, someFile.InitName, ""),
+                                                   .SecondName = If(someFileExists, someFile.SecondName, "")}
+            Return out
         Catch ex As Exception
             exc(ex)
             Return Nothing
