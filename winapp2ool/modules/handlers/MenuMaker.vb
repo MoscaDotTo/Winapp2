@@ -237,12 +237,6 @@ Module MenuMaker
         Return line & Environment.NewLine
     End Function
 
-    ''' <summary>Prepends a newline (or two) to a given String</summary>
-    ''' <param name="cond">The parameter under which to return two newlines</param>
-    Public Function pNL(line As String, Optional cond As Boolean = False) As String
-        Return If(cond, Environment.NewLine & Environment.NewLine, Environment.NewLine) & line
-    End Function
-
     ''' <summary>Prints a line with a string if we're not suppressing output.</summary>
     ''' <param name="msg">The string to be printed</param>
     Public Sub cwl(Optional msg As String = Nothing)
