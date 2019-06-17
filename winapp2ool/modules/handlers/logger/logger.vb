@@ -27,19 +27,20 @@ Module logger
     Public Property nestCount As Integer = 0
     ''' <summary>Adds an item into the global log</summary>
     Public Sub gLog(logstr As String, Optional cond As Boolean = True, Optional ascend As Boolean = False,
-                    Optional descend As Boolean = False, Optional indent As Boolean = False, Optional buffr As Boolean = False, Optional leadr As Boolean = False)
+                    Optional descend As Boolean = False, Optional indent As Boolean = False, Optional indAmt As Integer = 1,
+                    Optional descAmt As Integer = 1, Optional ascAmt As Integer = 1, Optional buffr As Boolean = False, Optional leadr As Boolean = False)
         If cond Then
             If leadr Then gLog("")
-            If indent Then nestCount += 1
-            If ascend Then nestCount += 1
+            If indent Then nestCount += indAmt
+            If ascend Then nestCount += ascAmt
             Dim buffer = ""
             For i = 0 To nestCount - 1
                 buffer += "  "
             Next
             logstr = buffer + logstr
             GlobalLog.add(logstr)
-            If indent Then nestCount -= 1
-            If descend Then nestCount -= 1
+            If indent Then nestCount -= indAmt
+            If descend Then nestCount -= descAmt
             If buffr Then gLog("")
         End If
     End Sub
