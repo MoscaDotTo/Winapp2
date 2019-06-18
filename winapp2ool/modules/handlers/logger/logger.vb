@@ -60,4 +60,27 @@ Module logger
         cwl("End of log. Press any key to continue.")
         Console.ReadLine()
     End Sub
+
+    '''<summary>Gets the most recent  segment of the global log contained by two phrases (ie. a module name or subroutine) 
+    '''As a string. Can be used to simply fetch the logs from modules for saving to disk or displaying to the user after a run.</summary>
+    ''' <param name="containedPhrase">The starting phrase of the requested log slice</param>
+    ''' <param name="endingPhrase">The ending phease of the requested log slice</param>
+    Public Function getLogSliceFromGlobal(containedPhrase As String, endingPhrase As String) As String
+        Dim startind, endind As Integer
+        For Each line In GlobalLog.Items
+            If line.Contains(containedPhrase) Then startind = GlobalLog.Items.LastIndexOf(line)
+            If line.EndsWith(endingPhrase) Then endind = GlobalLog.Items.LastIndexOf(line)
+        Next
+        ' The global log has nesting based on the depth of the winapp2ool fsm, we trim this to make the requested slice depth=0 
+        Dim toTrim = ""
+        For Each c In GlobalLog.Items(startind)
+            If Not c = CChar(" ") Then Exit For
+            toTrim += " "
+        Next
+        Dim out = ""
+        For i = startind To endind
+            out += GlobalLog.Items(i).Substring(toTrim.Length) & Environment.NewLine
+        Next
+        Return out
+    End Function
 End Module
