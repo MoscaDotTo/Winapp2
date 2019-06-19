@@ -160,7 +160,6 @@ Public Module WinappDebug
             Case Not MostRecentLintLog = "" And (input = "5" And Not ModuleSettingsChanged) Or
                                                 (input = "6" And ModuleSettingsChanged) Or
                                                 (input = "7" And ModuleSettingsChanged And SaveChanges)
-                MostRecentLintLog = getLogSliceFromGlobal("Beginning lint", "Lint complete")
                 printSlice(MostRecentLintLog)
             Case Else
                 setHeaderText(invInpStr, True)
@@ -176,6 +175,7 @@ Public Module WinappDebug
         print(0, tmenu("Beginning analysis of winapp2.ini"), closeMenu:=True)
         cwl()
         gLog("Beginning lint", leadr:=True, ascend:=True)
+        MostRecentLintLog = ""
         debug(wa2)
         gLog("", descend:=True)
         gLog("Lint complete")
@@ -185,7 +185,6 @@ Public Module WinappDebug
         print(0, $"{ErrorsFound} possible errors were detected.")
         print(0, $"Number of entries: {winappDebugFile1.Sections.Count}", trailingBlank:=True)
         rewriteChanges(wa2)
-        MostRecentLintLog = "hasBeenRun"
         print(0, anyKeyStr, closeMenu:=True)
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
@@ -651,12 +650,15 @@ Public Module WinappDebug
     Private Sub customErr(lineCount As Integer, err As String, lines As String())
         gLog(err, ascend:=True)
         cwl($"Line: {lineCount} - Error: {err}")
+        MostRecentLintLog += $"Line: {lineCount} - Error: {err}" & Environment.NewLine
         For Each errStr In lines
             cwl(errStr)
             gLog(errStr, indent:=True)
+            MostRecentLintLog += errStr & Environment.NewLine
         Next
         gLog("", descend:=True)
         cwl()
+        MostRecentLintLog += Environment.NewLine
         ErrorsFound += 1
     End Sub
 
