@@ -130,29 +130,29 @@ Public Class winapp2file
     ''' <summary>Builds and returns the winapp2.ini text including header comments for writing back to a file</summary>
     Public Function winapp2string() As String
         Dim fileName = If(IsNCC, "Winapp2 (Non-CCleaner version)", "Winapp2")
-        Dim licLink = aNL(If(IsNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"))
+        Dim licLink = If(IsNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md") & Environment.NewLine
         ' Version string (YYMMDD format) & entry count 
-        Dim out = aNL(Version)
-        out += aNL($"; # of entries: {count.ToString("#,###")}")
-        out += aNL(";")
-        out += $"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: {licLink}"
-        out += aNL($"; If you plan on modifying, distributing, and/or hosting {fileName}.ini for your own program or website, please ask first.")
-        out += aNL(";")
+        Dim out = Version & Environment.NewLine
+        out += $"; # of entries: {count.ToString("#,###")}{Environment.NewLine}"
+        out += $"; {Environment.NewLine}"
+        out += $"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: {licLink}{Environment.NewLine}"
+        out += $"; If you plan on modifying, distributing, and/or hosting {fileName}.ini for your own program or website, please ask first.{Environment.NewLine}"
+        out += $"; {Environment.NewLine}"
         If IsNCC Then
-            out += aNL("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.")
-            out += aNL("; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.")
+            out += $"; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.{Environment.NewLine}"
+            out += $"; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.{Environment.NewLine}"
         End If
-        out += aNL("; You can get the latest Winapp2 here: https://github.com/MoscaDotTo/Winapp2")
-        out += aNL("; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md")
-        out += aNL("; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
-        out += aNL("; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
+        out += $"; You can get the latest Winapp2.ini here: https://github.com/MoscaDotTo/Winapp2 {Environment.NewLine}"
+        out += $"; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md {Environment.NewLine}"
+        out += $"; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe {Environment.NewLine}"
+        out += $"; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md {Environment.NewLine}"
         ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
         For i = 0 To 7
             If EntrySections(i).Sections.Count > 0 Then
-                out += aNL("; ")
-                out += aNL(aNL("; " & EntrySections(i).Name))
+                out += $"; {Environment.NewLine}"
+                out += $"; {EntrySections(i).Name}{Environment.NewLine}{Environment.NewLine}"
                 out += EntrySections(i).toString
-                out += aNL($"{Environment.NewLine}; End of {EntrySections(i).Name}")
+                out += $"{Environment.NewLine}; End of {EntrySections(i).Name}" & Environment.NewLine
             End If
         Next
         If EntrySections.Last.Sections.Count > 0 Then out += $"{Environment.NewLine}{EntrySections.Last.toString}"

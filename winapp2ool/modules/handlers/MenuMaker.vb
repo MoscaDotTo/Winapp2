@@ -24,7 +24,7 @@ Module MenuMaker
     Public Const menuStr01 As String = " ║                                                                                                                          ║"
     Public Const menuStr02 As String = " ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
     Public Const menuStr03 As String = " ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣"
-    Public menuStr04 As String = aNL(menu(menuStr01)) & aNL(mkMenuLine("Menu: Enter a number to select", "c")) & mkMenuLine(menuStr01, "")
+    Public menuStr04 As String = menu(menuStr01) & Environment.NewLine & mkMenuLine("Menu: Enter a number to select", "c") & Environment.NewLine & mkMenuLine(menuStr01, "")
     Public Const anyKeyStr As String = "Press any key to return to the menu."
     Public Const invInpStr As String = "Invalid input. Please try again."
     Public Const promptStr As String = "Enter a number, or leave blank to run the default: "
@@ -210,8 +210,8 @@ Module MenuMaker
     ''' <summary>Prints a box with a single message inside it</summary>
     ''' <param name="text">The string to be printed in the box</param>
     Public Function bmenu(text As String) As String
-        Dim out = aNL(menu(menuStr00))
-        out += aNL(menu(text, True))
+        Dim out = menu(menuStr00) & Environment.NewLine
+        out += menu(text, True) & Environment.NewLine
         out += menu(menuStr02)
         Return out
     End Function
@@ -219,7 +219,7 @@ Module MenuMaker
     ''' <summary>Prints the topmost part of the menu with no bottom</summary>
     ''' <param name="text">The String to be printed in the faux menu header</param>
     Public Function tmenu(text As String) As String
-        Dim out As String = aNL(menu(menuStr00))
+        Dim out As String = menu(menuStr00) & Environment.NewLine
         out += menu(text, True)
         Return out
     End Function
@@ -228,13 +228,6 @@ Module MenuMaker
     ''' <param name="dirStr">A String containing a windows path</param>
     Public Function replDir(dirStr As String) As String
         Return dirStr.Replace(Environment.CurrentDirectory, "..")
-    End Function
-
-    ''' <summary>Appends a newline (or two) to a given String</summary>
-    ''' <param name="line">The string to be appended</param>
-    ''' <param name="cond">Optional condition under which to append two newlines</param>
-    Public Function aNL(line As String, Optional cond As Boolean = False) As String
-        Return line & Environment.NewLine
     End Function
 
     ''' <summary>Prints a line with a string if we're not suppressing output.</summary>
