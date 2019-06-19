@@ -160,6 +160,7 @@ Public Module WinappDebug
             Case Not MostRecentLintLog = "" And (input = "5" And Not ModuleSettingsChanged) Or
                                                 (input = "6" And ModuleSettingsChanged) Or
                                                 (input = "7" And ModuleSettingsChanged And SaveChanges)
+                MostRecentLintLog = getLogSliceFromGlobal("Beginning lint", "Lint complete")
                 printSlice(MostRecentLintLog)
             Case Else
                 setHeaderText(invInpStr, True)
@@ -184,7 +185,7 @@ Public Module WinappDebug
         print(0, $"{ErrorsFound} possible errors were detected.")
         print(0, $"Number of entries: {winappDebugFile1.Sections.Count}", trailingBlank:=True)
         rewriteChanges(wa2)
-        MostRecentLintLog = getLogSliceFromGlobal("Beginning lint", "Lint complete")
+        MostRecentLintLog = "hasBeenRun"
         print(0, anyKeyStr, closeMenu:=True)
         If Not SuppressOutput Then Console.ReadKey()
     End Sub

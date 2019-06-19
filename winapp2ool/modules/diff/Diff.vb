@@ -132,6 +132,7 @@ Module Diff
                                         (isOffline And ((input = "5") Or (input = "6" And SaveDiffLog)))) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
             Case Not MostRecentDiffLog = "" And ((input = "7" And Not ModuleSettingsChanged) Or (input = "8" And ModuleSettingsChanged))
+                MostRecentDiffLog = getLogSliceFromGlobal("Beginning diff", "Diff complete")
                 printSlice(MostRecentDiffLog)
             Case Else
                 setHeaderText(invInpStr, True)
@@ -154,7 +155,7 @@ Module Diff
         Console.WriteLine()
         printMenuLine(bmenu(anyKeyStr))
         If Not SuppressOutput Then Console.ReadKey()
-        MostRecentDiffLog = getLogSliceFromGlobal("Beginning diff", "Diff complete")
+        MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "hasBeenRun")
         DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
         setHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
     End Sub
