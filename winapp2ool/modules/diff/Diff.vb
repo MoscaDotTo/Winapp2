@@ -15,12 +15,10 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-
 ''' <summary>
 ''' A module whose purpose is to allow a user to perform a diff on two winapp2.ini files
 ''' </summary>
 Module Diff
-
     ''' <summary>The old or local version of winapp2.ini to be diffed</summary>
     Public Property DiffFile1 As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
     '''<summary>The new or remote version of winapp2.ini to be diffed</summary>
@@ -45,6 +43,7 @@ Module Diff
 
     '''<summary>Indicates whether or not full entries should be printed in the Diff output. Called "verbose mode" in the menu</summary>
     Public Property ShowFullEntries As Boolean = False
+    Private Property MostRecentDiffLog As String = ""
 
     ''' <summary>Handles the commandline args for Diff</summary>
     '''  Diff args:
@@ -65,6 +64,7 @@ Module Diff
     Private Sub initDefaultSettings()
         DownloadDiffFile = Not isOffline
         TrimRemoteFile = Not isOffline
+        ShowFullEntries = False
         DiffFile3.resetParams()
         DiffFile2.resetParams()
         DiffFile1.resetParams()
@@ -96,9 +96,11 @@ Module Diff
         print(1, "File Chooser (log)", "Change where Diff saves its log", SaveDiffLog, trailingBlank:=True)
         print(5, "Verbose Mode", "printing full entries in the diff output", enStrCond:=ShowFullEntries, trailingBlank:=True)
         print(0, $"Older file: {replDir(DiffFile1.Path)}")
-        print(0, $"Newer file: {If(DiffFile2.Name = "" And Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))}", closeMenu:=Not SaveDiffLog And Not ModuleSettingsChanged)
-        print(0, $"Log   file: {replDir(DiffFile3.Path)}", cond:=SaveDiffLog, closeMenu:=Not ModuleSettingsChanged)
-        print(2, "Diff", cond:=ModuleSettingsChanged, closeMenu:=True)
+        print(0, $"Newer file: {If(DiffFile2.Name = "" And Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))}",
+                                  closeMenu:=Not SaveDiffLog And Not ModuleSettingsChanged And MostRecentDiffLog = "")
+        print(0, $"Log   file: {replDir(DiffFile3.Path)}", cond:=SaveDiffLog, closeMenu:=(Not ModuleSettingsChanged) And MostRecentDiffLog = "")
+        print(2, "Diff", cond:=ModuleSettingsChanged, closeMenu:=MostRecentDiffLog = "")
+        print(1, "Log Viewer", "Show the most recent Diff log", cond:=Not MostRecentDiffLog = "", closeMenu:=True, leadingBlank:=True)
     End Sub
 
     ''' <summary>Handles the user input from the main menu</summary>
@@ -129,6 +131,10 @@ Module Diff
                                         (SaveDiffLog And input = "8"))) Or
                                         (isOffline And ((input = "5") Or (input = "6" And SaveDiffLog)))) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
+            Case Not MostRecentDiffLog = "" And ((input = "7" And Not ModuleSettingsChanged) Or (input = "8" And ModuleSettingsChanged))
+                clrConsole()
+                cwl(MostRecentDiffLog)
+                Console.ReadLine()
             Case Else
                 setHeaderText(invInpStr, True)
         End Select
@@ -150,22 +156,9 @@ Module Diff
         Console.WriteLine()
         printMenuLine(bmenu(anyKeyStr))
         If Not SuppressOutput Then Console.ReadKey()
-        getDiffLogFromGlobal()
-        setHeaderText("Diff Complete")
-    End Sub
-
-    '''<summary>Gets the portion of the </summary>
-    Private Sub getDiffLogFromGlobal()
-        Dim startind, endind As Integer
-        For Each line In GlobalLog.Items
-            If line.Contains("Beginning diff between version") Then startind = GlobalLog.Items.LastIndexOf(line)
-            If line.EndsWith("Diff complete") Then endind = GlobalLog.Items.LastIndexOf(line)
-        Next
-        Dim out = ""
-        For i = startind To endind
-            out += GlobalLog.Items(i) & Environment.NewLine
-        Next
-        DiffFile3.overwriteToFile(out)
+        MostRecentDiffLog = getLogSliceFromGlobal("Beginning diff", "Diff complete")
+        DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
+        setHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
     End Sub
 
     '''<summary>Logs the initial portion of the diff output for the user</summary>
@@ -174,7 +167,7 @@ Module Diff
         clrConsole()
         Dim oldVersionNum = getVer(DiffFile1)
         Dim newVersionNum = getVer(DiffFile2)
-        gLog($"Beginning diff between{oldVersionNum} and {newVersionNum}", ascend:=True)
+        gLog($"Beginning diff between{oldVersionNum} and{newVersionNum}", ascend:=True)
         print(3, $"Changes between{oldVersionNum} and{newVersionNum}")
     End Sub
 
@@ -185,8 +178,11 @@ Module Diff
         Return If(ver.Contains("version"), ver.TrimStart(CChar(";")).Replace("version:", "version"), " version not given")
     End Function
 
-    ''' <summary>Logs the summary of the Diff for output to the user </summary>
+    ''' <summary>Logs and prints the summary of the Diff</summary>
     Private Sub logPostDiff()
+        gLog($"Added entries: {AddedEntryCount}", indent:=True)
+        gLog($"Modified entries: {ModifiedEntryCount}", indent:=True)
+        gLog($"Removed entries: {RemovedEntryCount}", indent:=True)
         gLog("Diff complete", descend:=True)
         print(0, menuStr00)
         print(0, "Summary", isCentered:=True)
@@ -212,7 +208,7 @@ Module Diff
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
-                    Dim tmp = getDiff(sSection, "modified", ModifiedEntryCount)
+                    getDiff(sSection, "modified", ModifiedEntryCount)
                     getChangesFromList(addedKeys, True)
                     getChangesFromList(removedKeys, False)
                     If updatedKeys.Count > 0 Then
@@ -242,6 +238,7 @@ Module Diff
 
     ''' <summary>Handles the Added and Removed cases for changes </summary>
     ''' <param name="kl">A list of iniKeys that have been added/removed</param>
+    ''' <param name="wasAdded">True if the change type is Added, False if Removed</param>
     Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean)
         If kl.KeyCount = 0 Then Exit Sub
         Dim changeTxt = If(wasAdded, "Added:", "Removed:")
@@ -254,7 +251,7 @@ Module Diff
         gLog("", descend:=True)
     End Sub
 
-    ''' <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key </summary>
+    ''' <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key list </summary>
     ''' <param name="removedKeys">The list of iniKeys that were removed from the newer version of the file</param>
     ''' <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
     ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
@@ -264,7 +261,6 @@ Module Diff
         For i = 0 To addedKeys.KeyCount - 1
             Dim key = addedKeys.Keys(i)
             For j = 0 To removedKeys.KeyCount - 1
-                If removedKeys.KeyCount = 0 Then Continue For
                 Dim skey = removedKeys.Keys(j)
                 If key.compareNames(skey) Then
                     Select Case key.KeyType
@@ -319,23 +315,21 @@ Module Diff
         updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
     End Sub
 
-    ''' <summary>Returns a string containing a menu box listing the change type and entry, followed by the entry's toString</summary>
-    ''' <param name="section">an iniSection object to be diffed</param>
-    ''' <param name="changeType">The type of change to observe</param>
-    Private Function getDiff(section As iniSection, changeType As String, ByRef changeCounter As Integer) As String
-        Dim out = ""
+    ''' <summary>Logs the changes that have been made to a modified entry</summary>
+    ''' <param name="section">The modified entry whose changes are being observed</param>
+    ''' <param name="changeType">The type of change to observe (added, removed, or modified)</param>
+    ''' <param name="changeCounter">A reference the the counter for the type of change being tracked</param>
+    Private Sub getDiff(section As iniSection, changeType As String, ByRef changeCounter As Integer)
         changeCounter += 1
         gLog($"{section.Name} has been {changeType}", indent:=True, leadr:=True)
         print(0, $"{section.Name} has been {changeType}", isCentered:=True,
               colorLine:=changeType.Contains("added") Or changeType.Contains("removed"),
               enStrCond:=If(changeType.Contains("removed"), False, True))
         If ShowFullEntries Then
-            Dim tmp = section.ToString.Split(CChar(vbCrLf))
-            For Each line In tmp
+            For Each line In section.ToString.Split(CChar(vbCrLf))
                 gLog(line.Replace(vbLf, ""), indent:=True, indAmt:=4)
             Next
             cwl(Environment.NewLine & section.ToString)
         End If
-        Return out
-    End Function
+    End Sub
 End Module
