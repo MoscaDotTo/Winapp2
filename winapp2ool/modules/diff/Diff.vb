@@ -132,9 +132,7 @@ Module Diff
                                         (isOffline And ((input = "5") Or (input = "6" And SaveDiffLog)))) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
             Case Not MostRecentDiffLog = "" And ((input = "7" And Not ModuleSettingsChanged) Or (input = "8" And ModuleSettingsChanged))
-                clrConsole()
-                cwl(MostRecentDiffLog)
-                Console.ReadLine()
+                printSlice(MostRecentDiffLog)
             Case Else
                 setHeaderText(invInpStr, True)
         End Select

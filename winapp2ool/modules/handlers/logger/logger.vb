@@ -83,4 +83,12 @@ Module logger
         Next
         Return out
     End Function
+
+    '''<summary>Prints a slice of the global log to the user and waits for input</summary>
+    '''<param name="slice">A portion of the global log to be printed</param>
+    Public Sub printSlice(slice As String)
+        clrConsole()
+        cwl(slice)
+        Console.ReadLine()
+    End Sub
 End Module

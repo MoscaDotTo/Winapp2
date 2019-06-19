@@ -101,8 +101,8 @@ Public Module WinappDebug
     Private Property driveLtrs As New Regex("[a-zA-z]:")
     '''<summary>Regex to detect potential %EnvironmentVariables%</summary>
     Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
-    ''' <summary> Used for UnitTesting and Debugging purposes</summary>
-    Public Property internalErrorList As New List(Of String)
+    ''' <summary>The winapp2ool logslice from the most recent Lint run</summary>
+    Public Property MostRecentLintLog As String = ""
 
     ''' <summary> Handles the commandline args for WinappDebug </summary>
     ''' WinappDebug specific command line args
@@ -132,9 +132,10 @@ Public Module WinappDebug
         print(5, "Toggle Saving", "saving the file after correcting errors", enStrCond:=SaveChanges)
         print(1, "File Chooser (save)", "Save a copy of changes made instead of overwriting winapp2.ini", SaveChanges, trailingBlank:=True)
         print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not SaveChanges, trailingBlank:=True)
-        print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged)
-        print(0, $"Current save target:  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged)
-        print(2, "WinappDebug", cond:=ModuleSettingsChanged, closeMenu:=True)
+        print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged And MostRecentLintLog = "")
+        print(0, $"Current save target:  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged And MostRecentLintLog = "")
+        print(2, "WinappDebug", cond:=ModuleSettingsChanged, closeMenu:=MostRecentLintLog = "")
+        print(1, "Log Viewer", "Show the most recent lint results", cond:=Not MostRecentLintLog = "", closeMenu:=True, leadingBlank:=True)
     End Sub
 
     ''' <summary> Handles the user's input from the menu </summary>
@@ -156,6 +157,10 @@ Public Module WinappDebug
                 Console.WindowHeight = 30
             Case ModuleSettingsChanged And ((input = "5" And Not SaveChanges) Or (input = "6" And SaveChanges))
                 resetModuleSettings("WinappDebug", AddressOf initDefaultSettings)
+            Case Not MostRecentLintLog = "" And (input = "5" And Not ModuleSettingsChanged) Or
+                                                (input = "6" And ModuleSettingsChanged) Or
+                                                (input = "7" And ModuleSettingsChanged And SaveChanges)
+                printSlice(MostRecentLintLog)
             Case Else
                 setHeaderText(invInpStr, True)
         End Select
@@ -172,13 +177,14 @@ Public Module WinappDebug
         gLog("Beginning lint", leadr:=True, ascend:=True)
         debug(wa2)
         gLog("", descend:=True)
-        gLog("Lint Complete")
-        setHeaderText("Debug Complete")
+        gLog("Lint complete")
+        setHeaderText("Lint complete")
         print(0, tmenu("Completed analysis of winapp2.ini"))
         print(0, menuStr03)
         print(0, $"{ErrorsFound} possible errors were detected.")
         print(0, $"Number of entries: {winappDebugFile1.Sections.Count}", trailingBlank:=True)
         rewriteChanges(wa2)
+        MostRecentLintLog = getLogSliceFromGlobal("Beginning lint", "Lint complete")
         print(0, anyKeyStr, closeMenu:=True)
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
@@ -246,7 +252,9 @@ Public Module WinappDebug
                 If (recInd = sortInd Or curLine = sortLine) Then Continue For
                 entry = If(findType = "Entry", entry, $"{findType & recInd + 1}={entry}")
                 If Not oopBool Then oopBool = True
-                customErr(LineCountList(recInd), $"{findType} alphabetization", {$"{entry} appears to be out of place", $"Current line: {curLine}", $"Expected line: {sortLine}"})
+                customErr(LineCountList(recInd), $"{findType} alphabetization", {$"{entry} appears to be out of place",
+                                                                                 $"Current line: {curLine}",
+                                                                                 $"Expected line: {sortLine}"})
             Next
         End If
     End Sub
@@ -641,7 +649,6 @@ Public Module WinappDebug
     ''' <param name="lines">Any additional error information to be printed</param>
     Private Sub customErr(lineCount As Integer, err As String, lines As String())
         gLog(err, ascend:=True)
-        internalErrorList.Add(err)
         cwl($"Line: {lineCount} - Error: {err}")
         For Each errStr In lines
             cwl(errStr)
