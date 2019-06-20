@@ -126,7 +126,7 @@ Module CCiniDebug
         ccDebug()
         gLog("Debug complete", descend:=True)
         print(0, $"{If(SaveDebuggedFile, $"{CCDebugFile3.Name} saved", "Analysis complete")}. {anyKeyStr}", isCentered:=True, closeMenu:=True)
-        If Not SuppressOutput Then Console.ReadKey()
+        crk()
     End Sub
 
     ''' <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>

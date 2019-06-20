@@ -186,7 +186,7 @@ Public Module WinappDebug
         print(0, $"Number of entries: {winappDebugFile1.Sections.Count}", trailingBlank:=True)
         rewriteChanges(wa2)
         print(0, anyKeyStr, closeMenu:=True)
-        If Not SuppressOutput Then Console.ReadKey()
+        crk()
     End Sub
 
     ''' <summary> Performs syntax and format checking on a winapp2.ini format ini file </summary>

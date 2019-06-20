@@ -129,7 +129,7 @@ Module Merge
         merge()
         print(0, "", closeMenu:=True)
         print(0, bmenu($"Finished merging files. {anyKeyStr}"))
-        If Not SuppressOutput Then Console.ReadKey()
+        crk()
     End Sub
 
     ''' <summary>Conducts the merger of our two iniFiles</summary>

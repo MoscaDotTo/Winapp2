@@ -47,6 +47,10 @@ Module Winapp2ool
         Return If(RemoteWinappIsNonCC, nonccLink, wa2Link)
     End Function
 
+    Public Function toolExeLink() As String
+        Return If(isBeta, betaToolLink, toolLink)
+    End Function
+
     ''' <summary>Informs the user when an update is available</summary>
     ''' <param name="cond">The update condition</param>
     ''' <param name="updName">The item (winapp2.ini or winapp2ool) for which there is a pending update</param>
@@ -136,7 +140,7 @@ Module Winapp2ool
             Case input = "7" And waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading, this may take a moment...")
-                remoteDownload(Environment.CurrentDirectory, "winapp2.ini", wa2Link, False)
+                remoteDownload(Environment.CurrentDirectory, "winapp2.ini", winapp2link, False)
                 checkedForUpdates = False
             Case input = "8" And waUpdateIsAvail
                 clrConsole()
@@ -175,7 +179,7 @@ Module Winapp2ool
         Try
             ' Query the latest winapp2ool.exe and winapp2.ini versions 
             latestVersion = getFileDataAtLineNum(toolVerLink)
-            latestWa2Ver = getFileDataAtLineNum(wa2Link).Split(CChar(" "))(2)
+            latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
             ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
             ' In this instance we should consider the update check to have failed and put the application into offline mode
             If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Exit Try

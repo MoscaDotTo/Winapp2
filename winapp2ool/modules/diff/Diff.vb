@@ -154,7 +154,7 @@ Module Diff
         logPostDiff()
         cwl()
         printMenuLine(bmenu(anyKeyStr))
-        If Not SuppressOutput Then Console.ReadKey()
+        crk()
         MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "hasBeenRun")
         DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
         setHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))

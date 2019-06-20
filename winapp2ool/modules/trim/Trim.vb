@@ -128,7 +128,7 @@ Public Module Trim
         gLog($"{winapp2.count} entries remain.")
         TrimFile3.overwriteToFile(winapp2.winapp2string)
         setHeaderText($"{TrimFile3.Name} saved")
-        If Not SuppressOutput Then Console.ReadKey()
+        crk()
     End Sub
 
     ''' <summary>Performs the trim</summary>
