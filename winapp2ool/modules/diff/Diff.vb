@@ -215,10 +215,10 @@ Module Diff
                         gLog("Modifed Keys:", ascend:=True, ascAmt:=2)
                         For Each pair In updatedKeys
                             gLog(pair.Key.Name, indent:=True, indAmt:=2)
-                            gLog("Old: " & pair.Key.toString, indent:=True, indAmt:=3)
-                            gLog("New: " & pair.Value.toString, indent:=True, indAmt:=3)
-                            print(0, "Old: " & pair.Key.toString, colorLine:=True)
-                            print(0, "New: " & pair.Value.toString, colorLine:=True, enStrCond:=True)
+                            gLog("Old: " & pair.Value.toString, indent:=True, indAmt:=3)
+                            gLog("New: " & pair.Key.toString, indent:=True, indAmt:=3)
+                            print(0, "Old: " & pair.Value.toString, colorLine:=True)
+                            print(0, "New: " & pair.Key.toString, colorLine:=True, enStrCond:=True)
                         Next
                         gLog("", descend:=True, descAmt:=2)
                     End If
