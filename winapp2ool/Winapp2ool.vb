@@ -39,6 +39,8 @@ Module Winapp2ool
     Public Property isOffline As Boolean = False
     ''' <summary>Indicates whether or not winapp2ool has already checked for updates</summary>
     Public Property checkedForUpdates As Boolean = False
+    '''<summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
+    Public Property isBeta As Boolean = True
 
     ''' <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
     Public Function winapp2link() As String
@@ -133,21 +135,21 @@ Module Winapp2ool
                 If isOffline Then setHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", True)
             Case input = "7" And waUpdateIsAvail
                 clrConsole()
-                Console.Write("Downloading, this may take a moment...")
+                cwl("Downloading, this may take a moment...")
                 remoteDownload(Environment.CurrentDirectory, "winapp2.ini", wa2Link, False)
                 checkedForUpdates = False
             Case input = "8" And waUpdateIsAvail
                 clrConsole()
-                Console.Write("Downloading & trimming, this may take a moment...")
+                cwl("Downloading & trimming, this may take a moment...")
                 remoteTrim(New iniFile("", ""), New iniFile(Environment.CurrentDirectory, "winapp2.ini"), True)
                 checkedForUpdates = False
             Case input = "9" And waUpdateIsAvail
                 clrConsole()
-                Console.Write("Downloading & diffing, this may take a moment...")
+                cwl("Downloading & diffing, this may take a moment...")
                 remoteDiff(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
                 setHeaderText("Diff Complete")
             Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not DotNetFrameworkOutOfDate
-                Console.WriteLine("Downloading and updating winapp2ool.exe, this may take a moment...")
+                cwl("Downloading and updating winapp2ool.exe, this may take a moment...")
                 autoUpdate()
             Case input = "m"
                 initModule("Minefield", AddressOf Minefield.printMenu, AddressOf Minefield.handleUserInput)
@@ -340,4 +342,11 @@ Module Winapp2ool
         End If
         Return True
     End Function
+
+    ''' <summary>
+    ''' Waits for the user to press a key if we're not supressing output
+    ''' </summary>
+    Public Sub crk()
+        If Not SuppressOutput Then Console.ReadKey()
+    End Sub
 End Module

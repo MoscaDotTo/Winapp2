@@ -152,7 +152,7 @@ Module Diff
         logInitDiff()
         compareTo()
         logPostDiff()
-        Console.WriteLine()
+        cwl()
         printMenuLine(bmenu(anyKeyStr))
         If Not SuppressOutput Then Console.ReadKey()
         MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "hasBeenRun")
