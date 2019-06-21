@@ -30,7 +30,7 @@ Module Winapp2ool
     ''' <summary>Indicates that a winapp2.ini update is available from GitHub</summary>
     Private Property waUpdateIsAvail As Boolean = False
     ''' <summary>The current version of the executable as used for version checking against GitHub</summary>
-    Public ReadOnly Property currentVersion As String = "1.02"
+    Public ReadOnly Property currentVersion As String = System.Reflection.Assembly.GetExecutingAssembly.FullName.Split(CChar(","))(1).Substring(9)
     ''' <summary>Indicates whether or not winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini </summary>
     Public Property RemoteWinappIsNonCC As Boolean = False
     '''<summary>Indicates whether or not the .NET Framework installed on the current machine is below the targeted version</summary>
@@ -178,13 +178,14 @@ Module Winapp2ool
         If checkedForUpdates Then Exit Sub
         Try
             ' Query the latest winapp2ool.exe and winapp2.ini versions 
-            latestVersion = getFileDataAtLineNum(toolVerLink)
+            remoteDownload("C:\users\robbie\appdata\local\tmp", "winapp2ool.exe", toolExeLink, False)
+            latestVersion = System.Reflection.Assembly.LoadFile("C:\users\robbie\appdata\local\tmp\winapp2ool.exe").FullName.Split(CChar(","))(1).Substring(9).Replace(".", "")
             latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
             ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
             ' In this instance we should consider the update check to have failed and put the application into offline mode
             If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Exit Try
             ' Observe whether or not updates are available, using val to avoid conversion mistakes
-            updateIsAvail = Val(latestVersion) > Val(currentVersion)
+            updateIsAvail = Val(latestVersion) > Val(currentVersion.Replace(".", ""))
             getLocalWinapp2Version()
             waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
             checkedForUpdates = True

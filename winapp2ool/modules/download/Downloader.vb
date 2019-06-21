@@ -238,10 +238,10 @@ Module Downloader
     ''' <param name="name">The name with which to save the file</param>
     ''' <param name="link">The URL to download from</param>
     ''' <param name="prompt">Boolean specifying whether or not the user should be asked to overwrite the file should it exist</param>
-    Public Sub remoteDownload(dir As String, name As String, link As String, prompt As Boolean)
+    Public Sub remoteDownload(dir As String, name As String, link As String, Optional prompt As Boolean = True, Optional quietly As Boolean = True)
         downloadFile.Dir = dir
         downloadFile.Name = name
-        download(link, prompt)
+        download(link, prompt, quietly)
     End Sub
 
     ''' <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
@@ -270,21 +270,21 @@ Module Downloader
     ''' <summary>Prompts the user to rename or overwrite a file if necessary before downloading.</summary>
     ''' <param name="link">The URL to be downloaded from</param>
     ''' <param name="prompt">The boolean indicating whether or not the user should be prompted to rename the file should it exist already.</param>
-    Private Sub download(link As String, Optional prompt As Boolean = True)
+    Private Sub download(link As String, Optional prompt As Boolean = True, Optional quietly As Boolean = False)
         Dim givenName = downloadFile.Name
         ' Don't try to download to a directory that doesn't exist
         If Not Directory.Exists(downloadFile.Dir) Then Directory.CreateDirectory(downloadFile.Dir)
         ' If the file exists and we're prompting or overwrite, do that.
-        If prompt And File.Exists(downloadFile.Path) And Not SuppressOutput Then
+        If prompt And File.Exists(downloadFile.Path) And Not SuppressOutput And Not quietly Then
             cwl($"{downloadFile.Name} already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
             Dim nfilename = Console.ReadLine()
             If nfilename.Trim <> "" Then downloadFile.Name = nfilename
         End If
-        cwl($"Downloading {givenName}...")
+        cwl($"Downloading {givenName}...", Not quietly)
         Dim success = dlFile(link, downloadFile.Path)
-        cwl($"Download {If(success, "Complete.", "Failed.")}")
-        cwl(If(success, "Downloaded ", $"Unable to download {downloadFile.Name} to {downloadFile.Dir}"))
+        cwl($"Download {If(success, "Complete.", "Failed.")}", Not quietly)
+        cwl(If(success, "Downloaded ", $"Unable to download {downloadFile.Name} to {downloadFile.Dir}"), Not quietly)
         setHeaderText($"Download {If(success, "", "in")}complete: {downloadFile.Name}", Not success)
         If Not success Then Console.ReadLine()
     End Sub

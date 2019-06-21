@@ -232,14 +232,14 @@ Module MenuMaker
 
     ''' <summary>Prints a line with a string if we're not suppressing output.</summary>
     ''' <param name="msg">The string to be printed</param>
-    Public Sub cwl(Optional msg As String = Nothing)
-        If Not SuppressOutput Then Console.WriteLine(msg)
+    Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
+        If cond And Not SuppressOutput Then Console.WriteLine(msg)
     End Sub
 
     ''' <summary>Clears the console conditionally when not running unit tests</summary>
     ''' <param name="cond">Optional Boolean specifying whether or not the console should be cleared</param>
     Public Sub clrConsole(Optional cond As Boolean = True)
         ' Do not clear the console during unit tests because there isnt one and the invalid handler throws an IO Exception
-        If cond And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
+        If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
     End Sub
 End Module
