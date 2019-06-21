@@ -285,6 +285,7 @@ Module Downloader
             Dim nfilename = Console.ReadLine()
             If nfilename.Trim <> "" Then downloadFile.Name = nfilename
         End If
+        If Not prompt And File.Exists(downloadFile.Path) Then File.Delete(downloadFile.Path)
         cwl($"Downloading {givenName}...", Not quietly)
         Dim success = dlFile(link, downloadFile.Path)
         cwl($"Download {If(success, "Complete.", "Failed.")}", Not quietly)
