@@ -44,9 +44,12 @@ Module MenuMaker
     ''' <summary>Inserts text into the menu header</summary>
     ''' <param name="txt">The text to appear in the header</param>
     ''' <param name="hasErr">The boolean indicating whether or not the text should be colored red</param>
-    Public Sub setHeaderText(txt As String, Optional hasErr As Boolean = False)
-        MenuHeaderText = txt
-        lastOpWasErr = hasErr
+    ''' <param name="cond">Optional boolean indicating whether or not the header should be set (default: true)</param>
+    Public Sub setHeaderText(txt As String, Optional hasErr As Boolean = False, Optional cond As Boolean = True)
+        If cond Then
+            MenuHeaderText = txt
+            lastOpWasErr = hasErr
+        End If
     End Sub
 
     ''' <summary>Initializes the menu</summary>

@@ -239,9 +239,13 @@ Module Downloader
     ''' <param name="link">The URL to download from</param>
     ''' <param name="prompt">Boolean specifying whether or not the user should be asked to overwrite the file should it exist</param>
     Public Sub remoteDownload(dir As String, name As String, link As String, Optional prompt As Boolean = True, Optional quietly As Boolean = True)
+        Dim tmp = downloadFile.Dir
+        Dim tmp2 = downloadFile.Name
         downloadFile.Dir = dir
         downloadFile.Name = name
         download(link, prompt, quietly)
+        downloadFile.Dir = tmp
+        downloadFile.Name = tmp2
     End Sub
 
     ''' <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
@@ -285,7 +289,7 @@ Module Downloader
         Dim success = dlFile(link, downloadFile.Path)
         cwl($"Download {If(success, "Complete.", "Failed.")}", Not quietly)
         cwl(If(success, "Downloaded ", $"Unable to download {downloadFile.Name} to {downloadFile.Dir}"), Not quietly)
-        setHeaderText($"Download {If(success, "", "in")}complete: {downloadFile.Name}", Not success)
+        setHeaderText($"Download {If(success, "", "in")}complete: {downloadFile.Name}", Not success, Not quietly)
         If Not success Then Console.ReadLine()
     End Sub
 

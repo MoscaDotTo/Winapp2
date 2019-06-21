@@ -177,6 +177,7 @@ Module Winapp2ool
     Private Sub checkUpdates()
         If checkedForUpdates Then Exit Sub
         Try
+            gLog("Checking for updates")
             ' Query the latest winapp2ool.exe and winapp2.ini versions 
             remoteDownload("C:\users\robbie\appdata\local\tmp", "winapp2ool.exe", toolExeLink, False)
             latestVersion = System.Reflection.Assembly.LoadFile("C:\users\robbie\appdata\local\tmp\winapp2ool.exe").FullName.Split(CChar(","))(1).Substring(9).Replace(".", "")
@@ -189,6 +190,15 @@ Module Winapp2ool
             getLocalWinapp2Version()
             waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
             checkedForUpdates = True
+            gLog("Update check complete:")
+            gLog($"Winapp2ool:", ascend:=True)
+            gLog("Local: " & currentVersion.Replace(".", ""))
+            gLog("Remote: " & latestVersion)
+            gLog("Update available: " & updateIsAvail, descend:=True)
+            gLog("Winapp2.ini:")
+            gLog("Local:" & localWa2Ver, ascend:=True)
+            gLog("Remote: " & latestWa2Ver)
+            gLog("Update available: " & waUpdateIsAvail, descend:=True)
         Catch ex As Exception
             exc(ex)
             updateCheckFailed("winapp2ool or winapp2.ini")
