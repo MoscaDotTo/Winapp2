@@ -175,7 +175,7 @@ Module Downloader
             exc(ex)
             Return ""
         End Try
-        Return out
+        Return If(Not out = Nothing, out, "")
     End Function
 
     ''' <summary>Returns true if we are able to connect to the internet, otherwise, returns false.</summary>
