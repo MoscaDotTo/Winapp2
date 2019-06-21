@@ -170,7 +170,7 @@ Module Winapp2ool
     Private Sub getLocalWinapp2Version()
         If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then localWa2Ver = "000000 (File not found)" : Exit Sub
         Dim localStr = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", remote:=False).ToLower
-        localWa2Ver = If(Not localStr.Contains("version"), "000000", localStr.Split(CChar(" "))(2))
+        If localStr.Contains("version") Then localWa2Ver = localStr.Split(CChar(" "))(2)
     End Sub
 
     ''' <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>

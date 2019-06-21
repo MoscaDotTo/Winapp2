@@ -25,7 +25,8 @@ Module Minefield
         printMenuTop({"A testing ground for new ideas/features, watch your step!", "Some options may not do anything."})
         print(1, "Java Entry Maker", "Clean up after the messy JRE installer")
         print(1, "Babel", "Generate winapp2.ini entries for lang files")
-        print(1, "Outlook", "Generate winapp2.ini entries with custom outlook profile support", closeMenu:=True)
+        print(1, "Outlook", "Generate winapp2.ini entries with custom outlook profile support")
+        print(1, "Search", "Generate lists of sections", closeMenu:=True)
     End Sub
 
     '''<summary>Prints the main Babel menu</summary>
@@ -57,7 +58,51 @@ Module Minefield
                 initModule("Babel", AddressOf printBabelMenu, AddressOf handleBabelInput)
             Case "3"
                 initModule("Outooker", AddressOf printOutlookMenu, AddressOf handleOutlookInput)
+            Case "4"
+                initModule("Search", AddressOf printSearchMenu, AddressOf handleSearchInput)
         End Select
+    End Sub
+
+    Public Sub printSearchMenu()
+        printMenuTop({"Outputs all sections that fit the given pattern in a file"})
+        print(1, "winapp2.ini", "Search winapp2.ini by section criteria", closeMenu:=True)
+    End Sub
+
+    Public Sub handleSearchInput(input As String)
+        Select Case True
+            Case input = "0"
+                exitModule()
+            Case input = "1" Or input = ""
+                clrConsole()
+                Console.Write("Enter the Section or LangSecRef you'd like from the file:")
+                Dim sect = Console.ReadLine
+                Dim iwinapp2 = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
+                iwinapp2.validate()
+                Dim winapp2 = New winapp2file(iwinapp2)
+                Dim out = ""
+                For Each lst In winapp2.Winapp2entries
+                    For Each entry In lst
+                        checkSection(entry, entry.SectionKey, sect, out)
+                        checkSection(entry, entry.LangSecRef, sect, out)
+                    Next
+                Next
+                cwl(out)
+                crk()
+        End Select
+    End Sub
+
+    Private Sub checkSection(entry As winapp2entry, lst As keyList, sect As String, ByRef out As String)
+        If lst.KeyCount = 0 Then Exit Sub
+
+        If lst.Keys(0).Value = sect Then
+            Dim tmp = entry.dumpToListOfStrings
+            For Each line In tmp
+                out += line & Environment.NewLine
+            Next
+            out += Environment.NewLine
+        End If
+
+
     End Sub
 
     ''' <summary>Prints the GameMaker menu</summary>

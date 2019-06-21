@@ -101,8 +101,20 @@ winapp2ool
 <member name="P:winapp2ool.Diff.ModuleSettingsChanged">
 <summary>Indicates that the module settings have been changed</summary>
 </member>
-<member name="P:winapp2ool.Diff.outputToFile">
- <summary>Holds the output that will be shown to the user and optionally saved to disk</summary>
+<member name="P:winapp2ool.Diff.TrimRemoteFile">
+<summary>Indicates that the remote file should be trimmed for the local system before diffing</summary>
+</member>
+<member name="P:winapp2ool.Diff.AddedEntryCount">
+<summary>The number of entries Diff determines to have been added in a new version</summary>
+</member>
+<member name="P:winapp2ool.Diff.ModifiedEntryCount">
+<summary>The number of entries Diff determines to have been modified in a new version</summary>
+</member>
+<member name="P:winapp2ool.Diff.RemovedEntryCount">
+<summary>The number of entries Diff determines to have been removed in a new version</summary>
+</member>
+<member name="P:winapp2ool.Diff.ShowFullEntries">
+<summary>Indicates whether or not full entries should be printed in the Diff output. Called "verbose mode" in the menu</summary>
 </member>
 <member name="M:winapp2ool.Diff.handleCmdLine">
  <summary>Handles the commandline args for Diff</summary>
@@ -128,24 +140,26 @@ winapp2ool
 <member name="M:winapp2ool.Diff.initDiff">
  <summary>Carries out the main set of Diffing operations</summary>
 </member>
+<member name="M:winapp2ool.Diff.logInitDiff">
+<summary>Logs the initial portion of the diff output for the user</summary>
+</member>
 <member name="M:winapp2ool.Diff.getVer(winapp2ool.iniFile)">
  <summary>Gets the version from winapp2.ini</summary>
  <param name="someFile">winapp2.ini format iniFile object</param>
 </member>
-<member name="M:winapp2ool.Diff.differ">
- <summary>Performs the diff and outputs the info to the user</summary>
+<member name="M:winapp2ool.Diff.logPostDiff">
+ <summary>Logs and prints the summary of the Diff</summary>
 </member>
 <member name="M:winapp2ool.Diff.compareTo">
  <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
 </member>
-<member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.String,System.String)">
+<member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.Boolean)">
  <summary>Handles the Added and Removed cases for changes </summary>
- <param name="keyList">A list of iniKeys that have been added/removed</param>
- <param name="out">The output text to be appended to</param>
- <param name="changeTxt">The text to appear in the output</param>
+ <param name="kl">A list of iniKeys that have been added/removed</param>
+ <param name="wasAdded">True if the change type is Added, False if Removed</param>
 </member>
 <member name="M:winapp2ool.Diff.chkLsts(winapp2ool.keyList@,winapp2ool.keyList@,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@)">
- <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key </summary>
+ <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key list </summary>
  <param name="removedKeys">The list of iniKeys that were removed from the newer version of the file</param>
  <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
  <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
@@ -156,14 +170,11 @@ winapp2ool
  <param name="key">An added key</param>
  <param name="skey">A removed key</param>
 </member>
-<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.String)">
- <summary>Returns a string containing a menu box listing the change type and entry, followed by the entry's toString</summary>
- <param name="section">an iniSection object to be diffed</param>
- <param name="changeType">The type of change to observe</param>
-</member>
-<member name="M:winapp2ool.Diff.log(System.String)">
- <summary>Saves a String to the log file</summary>
- <param name="toLog">The string to be appended to the log</param>
+<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.String,System.Int32@)">
+ <summary>Logs the changes that have been made to a modified entry</summary>
+ <param name="section">The modified entry whose changes are being observed</param>
+ <param name="changeType">The type of change to observe (added, removed, or modified)</param>
+ <param name="changeCounter">A reference the the counter for the type of change being tracked</param>
 </member>
 <member name="T:winapp2ool.Downloader">
  <summary>
@@ -171,10 +182,41 @@ winapp2ool
  Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
  </summary>
 </member>
+<member name="P:winapp2ool.Downloader.wa2Link">
+<summary>The web address of the CCleaner version of winapp2.ini</summary>
+</member>
+<member name="P:winapp2ool.Downloader.nonccLink">
+<summary>The web address of the Non-CCleaner version of winapp2.ini</summary>
+</member>
+<member name="P:winapp2ool.Downloader.toolLink">
+<summary>The web address of winapp2ool.exe</summary>
+</member>
+<member name="P:winapp2ool.Downloader.betaToolLink">
+<summary>The web address of the beta build of winapp2ool.exe</summary>
+</member>
+<member name="P:winapp2ool.Downloader.toolVerLink">
+<summary>The web address of version.txt (winapp2ool's public version identifer)</summary>
+</member>
+<member name="P:winapp2ool.Downloader.removedLink">
+<summary>The web address of removed entries.ini</summary>
+</member>
+<member name="P:winapp2ool.Downloader.wa3link">
+<summary>The web address of winapp3.ini</summary>
+</member>
+<member name="P:winapp2ool.Downloader.archivedLink">
+<summary>The web address of archived entries.ini</summary>
+</member>
+<member name="P:winapp2ool.Downloader.javaLink">
+<summary>The web address of java.ini</summary>
+</member>
+<member name="P:winapp2ool.Downloader.readMeLink">
+<summary>The web address of the winapp2ool ReadMe file</summary>
+</member>
+<member name="P:winapp2ool.Downloader.downloadFile">
+<summary>Holds the path of any files to be saved by the Downloader</summary>
+</member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
- <summary>
- Handles the commandline args for the Downloader 
- </summary>
+ <summary> Handles the commandline args for the Downloader </summary>
 </member>
 <member name="M:winapp2ool.Downloader.printMenu">
  <summary>Prints the main menu to the user</summary>
@@ -199,7 +241,7 @@ winapp2ool
 <member name="M:winapp2ool.Downloader.checkOnline">
  <summary>Returns true if we are able to connect to the internet, otherwise, returns false.</summary>
 </member>
-<member name="M:winapp2ool.Downloader.getRemoteIniFile(System.String)">
+<member name="M:winapp2ool.Downloader.getRemoteIniFile(System.String,winapp2ool.iniFile@)">
  <summary>Returns an iniFile object created using an online resource ie. GitHub</summary>
  <param name="address">A URL pointing to an online .ini file</param>
 </member>
@@ -208,7 +250,7 @@ winapp2ool
  <param name="reader">An open file stream</param>
  <param name="lineNum">The target line number</param>
 </member>
-<member name="M:winapp2ool.Downloader.remoteDownload(System.String,System.String,System.String,System.Boolean)">
+<member name="M:winapp2ool.Downloader.remoteDownload(System.String,System.String,System.String,System.Boolean,System.Boolean)">
  <summary>Handles a request to download a file from outside the module</summary>
  <param name="dir">The directory to which the file should be downloaded</param>
  <param name="name">The name with which to save the file</param>
@@ -218,7 +260,7 @@ winapp2ool
 <member name="M:winapp2ool.Downloader.autoUpdate">
  <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
 </member>
-<member name="M:winapp2ool.Downloader.download(System.String,System.Boolean)">
+<member name="M:winapp2ool.Downloader.download(System.String,System.Boolean,System.Boolean)">
  <summary>Prompts the user to rename or overwrite a file if necessary before downloading.</summary>
  <param name="link">The URL to be downloaded from</param>
  <param name="prompt">The boolean indicating whether or not the user should be prompted to rename the file should it exist already.</param>
@@ -291,10 +333,6 @@ winapp2ool
 <member name="M:winapp2ool.exceptionHandler.exc(System.Exception@)">
  <summary>Prints out exceptions and any other information related to them that a use may need.</summary>
  <param name="ex">A given exception captured during winapp2ool's execution</param>
-</member>
-<member name="M:winapp2ool.exceptionHandler.offlineErr">
- <summary>Inform the user that they cannot</summary>
- Consider allowing the user to reestablish their internet connection here
 </member>
 <member name="M:winapp2ool.exceptionHandler.printDotNetOutOfDateError">
  <summary>Prints output to the user instructing them to update their .NET Framework</summary>
@@ -683,11 +721,21 @@ winapp2ool
 <member name="P:winapp2ool.logger.nestCount">
 <summary>Indicates the current nesting level within the state machine </summary>
 </member>
-<member name="M:winapp2ool.logger.gLog(System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+<member name="M:winapp2ool.logger.gLog(System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean)">
  <summary>Adds an item into the global log</summary>
 </member>
 <member name="M:winapp2ool.logger.toString">
  <summary>Returns the log as a String</summary>
+</member>
+<member name="M:winapp2ool.logger.getLogSliceFromGlobal(System.String,System.String)">
+<summary>Gets the most recent  segment of the global log contained by two phrases (ie. a module name or subroutine) 
+As a string. Can be used to simply fetch the logs from modules for saving to disk or displaying to the user after a run.</summary>
+ <param name="containedPhrase">The starting phrase of the requested log slice</param>
+ <param name="endingPhrase">The ending phease of the requested log slice</param>
+</member>
+<member name="M:winapp2ool.logger.printSlice(System.String)">
+<summary>Prints a slice of the global log to the user and waits for input</summary>
+<param name="slice">A portion of the global log to be printed</param>
 </member>
 <member name="T:winapp2ool.MenuMaker">
  <summary>
@@ -706,10 +754,11 @@ winapp2ool
 <member name="P:winapp2ool.MenuMaker.MenuHeaderText">
  <summary> Holds the text that appears in the top block of the menu </summary>
 </member>
-<member name="M:winapp2ool.MenuMaker.setHeaderText(System.String,System.Boolean)">
+<member name="M:winapp2ool.MenuMaker.setHeaderText(System.String,System.Boolean,System.Boolean)">
  <summary>Inserts text into the menu header</summary>
  <param name="txt">The text to appear in the header</param>
  <param name="hasErr">The boolean indicating whether or not the text should be colored red</param>
+ <param name="cond">Optional boolean indicating whether or not the header should be set (default: true)</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.initMenu(System.String,System.Int32)">
  <summary>Initializes the menu</summary>
@@ -772,9 +821,6 @@ winapp2ool
 <member name="M:winapp2ool.MenuMaker.revertMenu">
  <summary>Flips the exitCode boolean so we can return to the menu when desired</summary>
 </member>
-<member name="M:winapp2ool.MenuMaker.undoAnyPendingExits">
- <summary>Forces the exitCode to be False</summary>
-</member>
 <member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.String)">
  <summary>Constructs a menu line fit to the width of the console</summary>
  <param name="line">The line to be printed</param>
@@ -797,16 +843,9 @@ winapp2ool
  <summary>Replaces instances of the current directory in a path string ".."</summary>
  <param name="dirStr">A String containing a windows path</param>
 </member>
-<member name="M:winapp2ool.MenuMaker.appendNewLine(System.String)">
- <summary>Appends a newline to a given String</summary>
- <param name="line">The string to be appended</param>
-</member>
-<member name="M:winapp2ool.MenuMaker.cwl(System.String)">
+<member name="M:winapp2ool.MenuMaker.cwl(System.String,System.Boolean)">
  <summary>Prints a line with a string if we're not suppressing output.</summary>
  <param name="msg">The string to be printed</param>
-</member>
-<member name="M:winapp2ool.MenuMaker.pendingExit">
- <summary>Clears the console if there's a pending exit, returns exitCode</summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.clrConsole(System.Boolean)">
  <summary>Clears the console conditionally when not running unit tests</summary>
@@ -901,6 +940,9 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.winapp2file.rebuildToIniFiles">
  <summary>Updates the internal iniFile objects</summary>
+</member>
+<member name="M:winapp2ool.winapp2file.toIni">
+<summary>Returns the winapp2file's inner inifile as a single inifile object with sections ordered as they would be in winapp2.ini</summary>
 </member>
 <member name="M:winapp2ool.winapp2file.winapp2string">
  <summary>Builds and returns the winapp2.ini text including header comments for writing back to a file</summary>
@@ -1476,8 +1518,8 @@ winapp2ool
 <member name="P:winapp2ool.WinappDebug.envVarRegex">
 <summary>Regex to detect potential %EnvironmentVariables%</summary>
 </member>
-<member name="P:winapp2ool.WinappDebug.internalErrorList">
- <summary> Used for UnitTesting and Debugging purposes</summary>
+<member name="P:winapp2ool.WinappDebug.MostRecentLintLog">
+ <summary>The winapp2ool logslice from the most recent Lint run</summary>
 </member>
 <member name="M:winapp2ool.WinappDebug.handleCmdLine">
  <summary> Handles the commandline args for WinappDebug </summary>
@@ -1653,6 +1695,9 @@ winapp2ool
 <member name="P:winapp2ool.Winapp2ool.checkedForUpdates">
  <summary>Indicates whether or not winapp2ool has already checked for updates</summary>
 </member>
+<member name="P:winapp2ool.Winapp2ool.isBeta">
+<summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
+</member>
 <member name="M:winapp2ool.Winapp2ool.winapp2link">
  <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
 </member>
@@ -1701,10 +1746,6 @@ winapp2ool
  <param name="paramText">The string explaining the setting being toggled</param>
  <param name="settingsChangedSetting">The boolean indicating that the setting has been modified</param>
 </member>
-<member name="M:winapp2ool.Winapp2ool.prependNewLines(System.Boolean)">
- <summary>Returns 1 or 2 newline characters conditionally</summary>
- <param name="cond">The parameter under which to return two newlines</param>
-</member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
  <summary>Attempts to return the Windows version number, return 0.0 if it cannot</summary>
 </member>
@@ -1735,7 +1776,7 @@ winapp2ool
  <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for winapp2ool and its components</summary>
  <param name="name">The name of the module</param>
  <param name="showMenu">The function that prints the module's menu</param>
- <param name="handleInput">The function that handle's the module's input</param>
+ <param name="handleInput">The function that handles the module's input</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getCasedString(System.String[],System.String)">
  <summary>Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected</summary>
@@ -1745,6 +1786,11 @@ winapp2ool
 <member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
  <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no section.</summary>
  <param name="iFile">An iniFile to be checked for content</param>
+</member>
+<member name="M:winapp2ool.Winapp2ool.crk">
+ <summary>
+ Waits for the user to press a key if we're not supressing output
+ </summary>
 </member>
 </members>
 </doc>
