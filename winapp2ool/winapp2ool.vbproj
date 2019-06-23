@@ -106,6 +106,7 @@
     <Compile Include="modules\diff\Diff.vb" />
     <Compile Include="modules\download\Downloader.vb" />
     <Compile Include="modules\handlers\commandLineHandler.vb" />
+    <Compile Include="modules\handlers\downloadr.vb" />
     <Compile Include="modules\handlers\exceptionHandler.vb" />
     <Compile Include="modules\handlers\ini\iniFile.vb" />
     <Compile Include="modules\handlers\ini\iniSection.vb" />
@@ -116,6 +117,7 @@
     <Compile Include="modules\handlers\logger\logger.vb" />
     <Compile Include="modules\handlers\MenuMaker.vb" />
     <Compile Include="modules\handlers\RegistryHelper.vb" />
+    <Compile Include="modules\updater\updater.vb" />
     <Compile Include="modules\handlers\winapp2\changeDict.vb" />
     <Compile Include="modules\handlers\winapp2\winapp2file.vb" />
     <Compile Include="modules\handlers\winapp2\winapp2keyparameters.vb" />

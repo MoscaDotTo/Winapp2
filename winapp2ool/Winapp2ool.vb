@@ -100,7 +100,7 @@ Module Winapp2ool
             Case input = "7" And waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading, this may take a moment...")
-                remoteDownload(Environment.CurrentDirectory, "winapp2.ini", winapp2link, False)
+                download(New iniFile(Environment.CurrentDirectory, "winapp2.ini"), winapp2link, False)
                 checkedForUpdates = False
             Case input = "8" And waUpdateIsAvail
                 clrConsole()
@@ -120,7 +120,7 @@ Module Winapp2ool
             Case input = "savelog"
                 GlobalLogFile.overwriteToFile(logger.toString)
             Case input = "printlog"
-                logger.printLog()
+                printLog()
             Case Else
                 setHeaderText(invInpStr, True)
         End Select

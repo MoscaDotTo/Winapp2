@@ -41,7 +41,8 @@ Public Module updater
             ' Query the latest winapp2ool.exe and winapp2.ini versions 
             If isBeta Then
                 Dim tmp = Environment.GetEnvironmentVariable("temp")
-                remoteDownload($"{Environment.GetEnvironmentVariable("temp")}\", "winapp2ool.exe", toolExeLink, False)
+                download(New iniFile($"{Environment.GetEnvironmentVariable("temp")}\", "`winapp2ool.exe"), toolExeLink, False, True)
+
                 latestVersion = System.Reflection.Assembly.LoadFile($"{Environment.GetEnvironmentVariable("temp")}\winapp2ool.exe").FullName.Split(CChar(","))(1).Substring(9)
                 Dim tmp1 = latestVersion.Split(CChar("."))
                 ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one digit short 
@@ -120,15 +121,14 @@ Public Module updater
     ''' <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
     Public Sub autoUpdate()
         gLog("Starting auto update process")
-        downloadFile.Dir = Environment.CurrentDirectory
-        downloadFile.Name = "winapp2ool updated.exe"
+        Dim newTool As New iniFile(Environment.CurrentDirectory, "winapp2ool updated.exe")
         Dim backupName = $"winapp2ool v{currentVersion}.exe.bak"
         Try
             ' Remove any existing backups of this version
             If File.Exists($"{Environment.CurrentDirectory}\{backupName}") Then File.Delete($"{Environment.CurrentDirectory}\{backupName}")
             ' Remove any old update files that didn't get renamed for whatever reason
-            If File.Exists(downloadFile.Path) Then File.Delete(downloadFile.Path)
-            download(If(isBeta, betaToolLink, toolLink), False)
+            If File.Exists(newTool.Path) Then File.Delete(newTool.Path)
+            download(newTool, If(isBeta, betaToolLink, toolLink), False)
             ' Rename the executables and launch the new one
             File.Move("winapp2ool.exe", backupName)
             File.Move("winapp2ool updated.exe", "winapp2ool.exe")
