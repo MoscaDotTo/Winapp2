@@ -18,7 +18,7 @@ Option Strict On
 ''' <summary>
 ''' This module handles logging for winapp2ool. 
 ''' </summary>
-Module logger
+Public Module logger
     ''' <summary> Holds the contents of the winapp2ool log</summary>
     Public Property GlobalLog As New strList
     '''<summary>Holds the save path information for the winapp2ool log</summary>
@@ -53,9 +53,10 @@ Module logger
     End Function
 
     Public Sub printLog()
+        cwl("Printing the winapp2ool log, this may take a moment")
+        Dim out = logger.toString
         clrConsole()
-        cwl(logger.toString)
-        cwl()
+        cwl(out)
         cwl()
         cwl("End of log. Press any key to continue.")
         Console.ReadLine()
