@@ -105,6 +105,7 @@
     <Compile Include="modules\ccdebug\CCiniDebug.vb" />
     <Compile Include="modules\diff\Diff.vb" />
     <Compile Include="modules\download\Downloader.vb" />
+    <Compile Include="modules\download\advDownloads.vb" />
     <Compile Include="modules\handlers\commandLineHandler.vb" />
     <Compile Include="modules\handlers\downloadr.vb" />
     <Compile Include="modules\handlers\exceptionHandler.vb" />

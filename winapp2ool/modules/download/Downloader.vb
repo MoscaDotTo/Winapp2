@@ -92,34 +92,6 @@ Module Downloader
         print(0, $"Save directory: {replDir(downloadFile.Dir)}", leadingBlank:=True, closeMenu:=True)
     End Sub
 
-    ''' <summary>Prints the advanced downloads menu</summary>
-    Private Sub printAdvMenu()
-        printMenuTop({"Warning!", "Files in this menu are not recommended for use by beginners."})
-        print(1, "Winapp3.ini", "Extended and/or potentially unsafe entries")
-        print(1, "Archived entries.ini", "Entries for old or discontinued software")
-        print(1, "Java.ini", "Used to generate a winapp2.ini entry that cleans up after the Java installer", closeMenu:=True)
-    End Sub
-
-    ''' <summary>Handles the user input for the advanced download menu</summary>
-    ''' <param name="input">The string containing the user's input</param>
-    Private Sub handleAdvInput(input As String)
-        Select Case input
-            Case "0"
-                exitModule()
-            Case "1"
-                downloadFile.Name = "winapp3.ini"
-                download(downloadFile, wa3link)
-            Case "2"
-                downloadFile.Name = "Archived entries.ini"
-                download(downloadFile, archivedLink)
-            Case "3"
-                downloadFile.Name = "java.ini"
-                download(downloadFile, javaLink)
-            Case Else
-                setHeaderText(invInpStr, True)
-        End Select
-    End Sub
-
     ''' <summary>Handles the user input for the menu</summary>
     ''' <param name="input">The String containing the user's input</param>
     Public Sub handleUserInput(input As String)
