@@ -15,57 +15,17 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-Imports System.IO
 Imports Microsoft.Win32
 
 Module Winapp2ool
-    ''' <summary>Indicates the latest available verson of winapp2ool from GitHub</summary>
-    Private Property latestVersion As String = ""
-    ''' <summary>Indicates the latest available version of winapp2.ini from GitHub</summary>
-    Private Property latestWa2Ver As String = ""
-    ''' <summary>Indicates the local version of winapp2.ini (if available)</summary>
-    Private Property localWa2Ver As String = "000000"
-    ''' <summary>Indicates that a winapp2ool update is available from GitHub</summary>
-    Private Property updateIsAvail As Boolean = False
-    ''' <summary>Indicates that a winapp2.ini update is available from GitHub</summary>
-    Private Property waUpdateIsAvail As Boolean = False
-    ''' <summary>The current version of the executable as used for version checking against GitHub</summary>
-    Public ReadOnly Property currentVersion As String = System.Reflection.Assembly.GetExecutingAssembly.FullName.Split(CChar(","))(1).Substring(9)
     ''' <summary>Indicates whether or not winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini </summary>
     Public Property RemoteWinappIsNonCC As Boolean = False
     '''<summary>Indicates whether or not the .NET Framework installed on the current machine is below the targeted version</summary>
     Public Property DotNetFrameworkOutOfDate As Boolean = False
     ''' <summary>Indicates whether or not winapp2ool currently has access to the internet</summary>
     Public Property isOffline As Boolean = False
-    ''' <summary>Indicates whether or not winapp2ool has already checked for updates</summary>
-    Public Property checkedForUpdates As Boolean = False
     '''<summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
     Public Property isBeta As Boolean = True
-
-    ''' <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
-    Public Function winapp2link() As String
-        Return If(RemoteWinappIsNonCC, nonccLink, wa2Link)
-    End Function
-
-    Public Function toolExeLink() As String
-        Return If(isBeta, betaToolLink, toolLink)
-    End Function
-
-    ''' <summary>Informs the user when an update is available</summary>
-    ''' <param name="cond">The update condition</param>
-    ''' <param name="updName">The item (winapp2.ini or winapp2ool) for which there is a pending update</param>
-    ''' <param name="oldVer">The old (currently in use) version</param>
-    ''' <param name="newVer">The updated version pending download</param>
-    Private Sub printUpdNotif(cond As Boolean, updName As String, oldVer As String, newVer As String)
-        If cond Then
-            gLog($"Update available for {updName} from {oldVer} to {newVer}")
-            Console.ForegroundColor = ConsoleColor.Green
-            print(0, $"A new version of {updName} is available!", isCentered:=True)
-            print(0, $"Current  : v{oldVer}", isCentered:=True)
-            print(0, $"Available: v{newVer}", trailingBlank:=True, isCentered:=True)
-            Console.ResetColor()
-        End If
-    End Sub
 
     ''' <summary>Denies the ability to access online-only functions if offline</summary>
     Public Function denySettingOffline() As Boolean
@@ -164,59 +124,6 @@ Module Winapp2ool
             Case Else
                 setHeaderText(invInpStr, True)
         End Select
-    End Sub
-
-    ''' <summary>Attempts to return the version number from the first line of winapp2.ini, returns "000000" if it can't</summary>
-    Private Sub getLocalWinapp2Version()
-        If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then localWa2Ver = "000000 (File not found)" : Exit Sub
-        Dim localStr = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", remote:=False).ToLower
-        If localStr.Contains("version") Then localWa2Ver = localStr.Split(CChar(" "))(2)
-    End Sub
-
-    ''' <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
-    Private Sub checkUpdates()
-        If checkedForUpdates Then Exit Sub
-        Try
-            gLog("Checking for updates")
-            ' Query the latest winapp2ool.exe and winapp2.ini versions 
-            Dim tmp = Environment.GetEnvironmentVariable("temp")
-            remoteDownload($"{Environment.GetEnvironmentVariable("temp")}\", "winapp2ool.exe", toolExeLink, False)
-            latestVersion = System.Reflection.Assembly.LoadFile($"{Environment.GetEnvironmentVariable("temp")}\winapp2ool.exe").FullName.Split(CChar(","))(1).Substring(9)
-            latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
-            ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
-            ' In this instance we should consider the update check to have failed and put the application into offline mode
-            If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Exit Try
-            ' Observe whether or not updates are available, using val to avoid conversion mistakes
-            updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
-            getLocalWinapp2Version()
-            waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
-            checkedForUpdates = True
-            gLog("Update check complete:")
-            gLog($"Winapp2ool:")
-            gLog("Local: " & currentVersion, indent:=True)
-            gLog("Remote: " & latestVersion, indent:=True)
-            gLog("Winapp2.ini:")
-            gLog("Local:" & localWa2Ver, indent:=True)
-            gLog("Remote: " & latestWa2Ver, indent:=True)
-        Catch ex As Exception
-            exc(ex)
-            updateCheckFailed("winapp2ool or winapp2.ini")
-        End Try
-    End Sub
-
-    ''' <summary>Handles the case where the update check has failed</summary>
-    ''' <param name="name">The name of the component whose update check failed</param>
-    ''' <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
-    Private Sub updateCheckFailed(name As String, Optional chkOnline As Boolean = False)
-        setHeaderText($"/!\ {name} update check failed. /!\", True)
-        localWa2Ver = "000000"
-        If chkOnline Then chkOfflineMode()
-    End Sub
-
-    ''' <summary>Updates the offline status of winapp2ool</summary>
-    Private Sub chkOfflineMode()
-        gLog("Checking online status")
-        isOffline = Not checkOnline()
     End Sub
 
     ''' <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
