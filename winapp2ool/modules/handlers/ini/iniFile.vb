@@ -332,7 +332,7 @@ Public Class iniFile
                 Dim tmpDir = Dir
                 Dir = input
                 If Not exists(False) Then
-                    setHeaderText($"{Dir} does not exist", hasErr:=True)
+                    setHeaderText($"{Dir} does not exist", cHeader:=True)
                 Else
                     exitModule()
                 End If

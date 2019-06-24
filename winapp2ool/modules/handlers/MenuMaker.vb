@@ -30,10 +30,13 @@ Module MenuMaker
     Public Const promptStr As String = "Enter a number, or leave blank to run the default: "
     ' The maximum length of the portion of the first half of a '#. Option - Description' style menu line
     Dim menuItemLength As Integer
-    '''<summary>Indicates that the last operation was unsucessful</summary>
-    Public Property lastOpWasErr As Boolean
-    ' Holds the current option number at any given moment
-    Dim optNum As Integer = 0
+    '''<summary>Indicates that the menu header should be printed with color </summary>
+    Public Property colorHeader As Boolean
+    '''<summary>The color with which the next header should be printed if color is used</summary>
+    Public Property headerColor As ConsoleColor
+
+    '''<summary>Holds the current option number for the menu instance</summary>
+    Private Property optNum As Integer = 0
     ''' <summary>When enabled, prevents winapp2ool from outputting to the console or asking for input (usually)</summary>
     Public Property SuppressOutput As Boolean = False
     ''' <summary> True if there is a pending exit from the menu</summary>
@@ -43,12 +46,13 @@ Module MenuMaker
 
     ''' <summary>Inserts text into the menu header</summary>
     ''' <param name="txt">The text to appear in the header</param>
-    ''' <param name="hasErr">The boolean indicating whether or not the text should be colored red</param>
+    ''' <param name="cHeader">The boolean indicating whether or not the text should be colored</param>
     ''' <param name="cond">Optional boolean indicating whether or not the header should be set (default: true)</param>
-    Public Sub setHeaderText(txt As String, Optional hasErr As Boolean = False, Optional cond As Boolean = True)
+    Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
         If cond Then
             MenuHeaderText = txt
-            lastOpWasErr = hasErr
+            colorHeader = cHeader
+            headerColor = printColor
         End If
     End Sub
 
@@ -65,13 +69,14 @@ Module MenuMaker
     ''' <param name="cond">The condition under which the error text should be printed</param>
     ''' <param name="errText">The error text to be printed in the menu header</param>
     Public Function denyActionWithTopper(cond As Boolean, errText As String) As Boolean
-        If cond Then setHeaderText(errText, True)
+        setHeaderText(errText, True, cond)
         Return cond
     End Function
 
     ''' <summary>Prints a menu line, option, or reset string, conditionally</summary>
     ''' <param name="cond">The optional condition under which to print (default: true)</param>
-    ''' <param name="printType">The type of menu information to print</param>
+    ''' <param name="printType">The type of menu information to print. 0: line, 1: opt, 2: Reset Settings, 3: Box w/ centered text, 
+    ''' 4: red error string, 5: enable/disable string</param>
     ''' <param name="str1">The first string or half string to be printed</param>
     ''' <param name="optString">The second half string to be printed for menu options</param>
     ''' <param name="leadingBlank">Optional condition under which the print should be buffered with a leading blank line (default: false)</param>
@@ -127,7 +132,7 @@ Module MenuMaker
     ''' <param name="descriptionItems">Items describing the menu</param>
     ''' <param name="printExit">The boolean representing whether an option to exit should be printed</param>
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
-        If lastOpWasErr Then Console.ForegroundColor = ConsoleColor.Red
+        If colorHeader Then Console.ForegroundColor = headerColor
         printMenuLine(tmenu(MenuHeaderText))
         printMenuLine(menuStr03)
         Console.ResetColor()
@@ -222,7 +227,7 @@ Module MenuMaker
     ''' <summary>Prints the topmost part of the menu with no bottom</summary>
     ''' <param name="text">The String to be printed in the faux menu header</param>
     Public Function tmenu(text As String) As String
-        Dim out As String = menu(menuStr00) & Environment.NewLine
+        Dim out = menu(menuStr00) & Environment.NewLine
         out += menu(text, True)
         Return out
     End Function
