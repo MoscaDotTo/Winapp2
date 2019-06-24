@@ -30,13 +30,13 @@ Module Winapp2ool
     ''' <summary>Denies the ability to access online-only functions if offline</summary>
     Public Function denySettingOffline() As Boolean
         gLog("Action was unable to complete because winapp2ool is offline", isOffline)
-        If isOffline Then setHeaderText("This option is unavailable while in offline mode", True)
+        setHeaderText("This option is unavailable while in offline mode", True, isOffline)
         Return isOffline
     End Function
 
     ''' <summary>Prints the main menu to the user</summary>
     Private Sub printMenu()
-        If Not isOffline Then checkUpdates()
+        checkUpdates(Not isOffline)
         printMenuTop({}, False)
         print(4, "Winapp2ool is currently in offline mode", cond:=isOffline)
         print(4, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate)
@@ -96,7 +96,7 @@ Module Winapp2ool
                 If Not denySettingOffline() Then initModule("Downloader", AddressOf Downloader.printMenu, AddressOf Downloader.handleUserInput)
             Case input = "7" And isOffline
                 chkOfflineMode()
-                If isOffline Then setHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", True)
+                setHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", True, isOffline)
             Case input = "7" And waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading, this may take a moment...")
@@ -126,29 +126,6 @@ Module Winapp2ool
         End Select
     End Sub
 
-    ''' <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
-    ''' <param name="someFile">A file whose parameters will be changed</param>
-    ''' <param name="settingsChangedSetting">The boolean indicating that a setting has been changed</param>
-    Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean)
-        Dim curName = someFile.Name
-        Dim curDir = someFile.Dir
-        initModule("File Chooser", AddressOf someFile.printFileChooserMenu, AddressOf someFile.handleFileChooserInput)
-        settingsChangedSetting = True
-        Dim fileChanged = Not someFile.Name = curName Or Not someFile.Dir = curDir
-        setHeaderText($"{If(someFile.SecondName = "", someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
-    End Sub
-
-    ''' <summary>Toggles a setting's boolean state and marks its tracker true</summary>
-    ''' <param name="setting">A boolean to be toggled</param>
-    ''' <param name="paramText">The string explaining the setting being toggled</param>
-    ''' <param name="settingsChangedSetting">The boolean indicating that the setting has been modified</param>
-    Public Sub toggleSettingParam(ByRef setting As Boolean, paramText As String, ByRef settingsChangedSetting As Boolean)
-        gLog($"Toggling {paramText}", indent:=True)
-        setHeaderText($"{paramText} {enStr(setting)}d")
-        setting = Not setting
-        settingsChangedSetting = True
-    End Sub
-
     ''' <summary>Attempts to return the Windows version number, return 0.0 if it cannot</summary>
     Public Function getWinVer() As Double
         gLog("Checking Windows version")
@@ -175,28 +152,6 @@ Module Winapp2ool
         End If
         Return out
     End Function
-
-    ''' <summary>Handles toggling downloading of winapp2.ini from menus</summary>
-    ''' <param name="download">The download Boolean</param>
-    ''' <param name="settingsChanged">The Boolean indicating that settings have changed</param>
-    Public Sub toggleDownload(ByRef download As Boolean, ByRef settingsChanged As Boolean)
-        If Not denySettingOffline() Then toggleSettingParam(download, "Downloading", settingsChanged)
-    End Sub
-
-    ''' <summary>Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading</summary>
-    ''' <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
-    Public Function GetNameFromDL(shouldDownload As Boolean) As String
-        Return If(shouldDownload, If(RemoteWinappIsNonCC, "Online (Non-CCleaner)", "Online"), "")
-    End Function
-
-    ''' <summary>Resets a module's settings to the defaults</summary>
-    ''' <param name="name">The name of the module</param>
-    ''' <param name="setDefaultParams">The function that resets the module's settings</param>
-    Public Sub resetModuleSettings(name As String, setDefaultParams As Action)
-        gLog($"Restoring {name}'s module settings to default", indent:=True)
-        setDefaultParams()
-        setHeaderText($"{name} settings have been reset to their defaults.")
-    End Sub
 
     ''' <summary>Appends a series of values onto a String</summary>
     ''' <param name="toAppend">The values to append</param>

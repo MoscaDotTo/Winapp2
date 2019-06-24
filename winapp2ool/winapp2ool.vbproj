@@ -118,6 +118,7 @@
     <Compile Include="modules\handlers\logger\logger.vb" />
     <Compile Include="modules\handlers\MenuMaker.vb" />
     <Compile Include="modules\handlers\RegistryHelper.vb" />
+    <Compile Include="modules\helpers\settings\SettingsManager.vb" />
     <Compile Include="modules\updater\updater.vb" />
     <Compile Include="modules\handlers\winapp2\changeDict.vb" />
     <Compile Include="modules\handlers\winapp2\winapp2file.vb" />

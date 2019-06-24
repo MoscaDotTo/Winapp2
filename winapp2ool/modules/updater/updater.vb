@@ -34,8 +34,8 @@ Public Module updater
     Public Property checkedForUpdates As Boolean = False
 
     ''' <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
-    Public Sub checkUpdates()
-        If checkedForUpdates Then Exit Sub
+    Public Sub checkUpdates(Optional cond As Boolean = False)
+        If checkedForUpdates Or Not cond Then Exit Sub
         Try
             gLog("Checking for updates")
             ' Query the latest winapp2ool.exe and winapp2.ini versions 
