@@ -16,7 +16,7 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 '''<summary>Holds functions that modify and manage settings for winapp2ool and its sub modules</summary>
-Module SettingsChanger
+Module SettingsManager
     ''' <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
     ''' <param name="someFile">A pointer to an iniFile whose parameters will be changed</param>
     ''' <param name="settingsChangedSetting">A pointer to the boolean indicating that a module's settings been modified from their default state </param>
