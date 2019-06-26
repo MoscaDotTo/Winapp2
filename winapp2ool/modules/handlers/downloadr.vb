@@ -119,6 +119,7 @@ Module downloadr
                 splitFile(i) = splitFile(i).Replace(vbCr, "").Replace(vbLf, "")
             Next
             reader.Close()
+            client.Dispose()
             Dim someFileExists = someFile IsNot Nothing
             Dim out = New iniFile(splitFile) With {.Dir = If(someFileExists, someFile.Dir, Environment.CurrentDirectory),
                                                    .InitDir = If(someFileExists, someFile.InitDir, Environment.CurrentDirectory),
@@ -126,8 +127,6 @@ Module downloadr
                                                    .Name = If(someFileExists, someFile.Name, ""),
                                                    .InitName = If(someFileExists, someFile.InitName, ""),
                                                    .SecondName = If(someFileExists, someFile.SecondName, "")}
-            reader.Close()
-            client.Dispose()
             Return out
         Catch ex As Exception
             exc(ex)

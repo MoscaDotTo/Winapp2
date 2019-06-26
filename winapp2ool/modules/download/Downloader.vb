@@ -20,8 +20,6 @@ Option Strict On
 ''' Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
 ''' </summary>
 Module Downloader
-    ' Links to GitHub resources
-
     '''<summary>The web address of the CCleaner version of winapp2.ini</summary>
     Public ReadOnly Property wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
     '''<summary>The web address of the Non-CCleaner version of winapp2.ini</summary>
