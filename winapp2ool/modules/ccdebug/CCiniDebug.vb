@@ -120,8 +120,8 @@ Module CCiniDebug
         If PruneStaleEntries Then CCDebugFile1.validate()
         If Not enforceFileHasContent(CCDebugFile2) Then Exit Sub
         clrConsole()
-        printMenuLine(tmenu("CCiniDebug Results"))
-        printMenuLine(menuStr03)
+        print(0, tmenu("CCiniDebug Results"))
+        print(0, getFrame(3))
         gLog("Debugging CCleaner.ini", ascend:=True)
         ccDebug()
         gLog("Debug complete", descend:=True)

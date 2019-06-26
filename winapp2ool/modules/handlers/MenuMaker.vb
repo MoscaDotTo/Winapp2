@@ -19,17 +19,14 @@ Option Strict On
 ''' Provides functions and methods for presenting and maintaining menus to a user
 ''' </summary>
 Module MenuMaker
-    ' Basic menu frames & Strings
-    Public Const menuStr00 As String = " ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗"
-    Public Const menuStr01 As String = " ║                                                                                                                          ║"
-    Public Const menuStr02 As String = " ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝"
-    Public Const menuStr03 As String = " ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣"
-    Public menuStr04 As String = menu(menuStr01) & Environment.NewLine & mkMenuLine("Menu: Enter a number to select", "c") & Environment.NewLine & mkMenuLine(menuStr01, "")
-    Public Const anyKeyStr As String = "Press any key to return to the menu."
-    Public Const invInpStr As String = "Invalid input. Please try again."
-    Public Const promptStr As String = "Enter a number, or leave blank to run the default: "
-    ' The maximum length of the portion of the first half of a '#. Option - Description' style menu line
-    Dim menuItemLength As Integer
+    '''<summary>String literal containing an instruction to press any key to return </summary>
+    Public ReadOnly Property anyKeyStr As String = "Press any key to return to the menu."
+    '''<summary>String literal containing an error message informing the user their input was invalid</summary>
+    Public ReadOnly Property invInpStr As String = "Invalid input. Please try again."
+    '''<summary>String literal containing an instruction for the user to provide input</summary>
+    Public ReadOnly Property promptStr As String = "Enter a number, or leave blank to run the default: "
+    '''<summary>The maximum length of the portion of the first half of a '#. Option - Description' style menu line</summary>
+    Private Property menuItemLength As Integer
     '''<summary>Indicates that the menu header should be printed with color </summary>
     Public Property colorHeader As Boolean
     '''<summary>The color with which the next header should be printed if color is used</summary>
@@ -43,6 +40,13 @@ Module MenuMaker
     Public Property ExitCode As Boolean
     ''' <summary> Holds the text that appears in the top block of the menu </summary>
     Public Property MenuHeaderText As String
+
+    '''<summary>Returns a menuframe</summary>
+    '''<param name="frameNum">Indicates which frame should be returned. <br />
+    '''0: empty line, 1: top, 2: bottom, 3: conjoiner</param>
+    Public Function getFrame(Optional frameNum As Integer = 0) As String
+        Return mkMenuLine("", "f", frameNum)
+    End Function
 
     ''' <summary>Inserts text into the menu header</summary>
     ''' <param name="txt">The text to appear in the header</param>
@@ -75,46 +79,50 @@ Module MenuMaker
 
     ''' <summary>Prints a menu line, option, or reset string, conditionally</summary>
     ''' <param name="cond">The optional condition under which to print (default: true)</param>
-    ''' <param name="printType">The type of menu information to print. 0: line, 1: opt, 2: Reset Settings, 3: Box w/ centered text, 
+    ''' <param name="printType">The type of menu information to print. <br /> 0: line, 1: opt, 2: Reset Settings, 3: Box w/ centered text, 
     ''' 4: red error string, 5: enable/disable string</param>
     ''' <param name="str1">The first string or half string to be printed</param>
-    ''' <param name="optString">The second half string to be printed for menu options</param>
-    ''' <param name="leadingBlank">Optional condition under which the print should be buffered with a leading blank line (default: false)</param>
-    ''' <param name="trailingBlank">Optional condition under which the print should be buffered with a trailing blank line (default: false)</param>
-    ''' <param name="isCentered">Optional condition specifying whether or not the text should be centered (default: false)</param>
-    ''' <param name="closeMenu">Optional condition specifying whether a menu is waiting to be closed (default: false)</param>
-    ''' <param name="enStrCond">Optional condition that helps color Enabled/Disabled lines</param>
-    ''' <param name="colorLine">Optional condition that indicates we want to color lines without Enabled/Disabled strings in them</param>
+    ''' <param name="optString">The second half string to be printed for menu options <br /> Default: ""</param>
+    ''' <param name="leadingBlank">Optional condition under which the print should be buffered with a leading blank line <br /> Default: False</param>
+    ''' <param name="trailingBlank">Optional condition under which the print should be buffered with a trailing blank line <br /> Default: False</param>
+    ''' <param name="isCentered">Optional condition specifying whether or not the text should be centered <br /> Default: False</param>
+    ''' <param name="closeMenu">Optional condition specifying whether a menu is waiting to be closed <br /> Default: False</param>
+    ''' <param name="enStrCond">Optional condition that helps color Enabled/Disabled lines <br /> Default: False</param>
+    ''' <param name="colorLine">Optional condition that indicates we want to color lines without Enabled/Disabled strings in them <br /> Default: False</param>
+    ''' <param name="arbitraryColor">Optional ConsoleColor to be used when printing with colorLine but wanting to use a color outside red/green <br /> Default: Nothing</param>
+    ''' <param name="useArbitraryColor">Optional condition specifying whether or not the line should be colored using the value provided by arbitraryColor <br /> Default: False</param>
     Public Sub print(printType As Integer, str1 As String, Optional optString As String = "", Optional cond As Boolean = True,
                      Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False,
-                     Optional closeMenu As Boolean = False, Optional enStrCond As Boolean = False, Optional colorLine As Boolean = False)
-        If cond And leadingBlank Then printMenuLine()
-        If colorLine Then Console.ForegroundColor = If(enStrCond, ConsoleColor.Green, ConsoleColor.Red)
-        Select Case True
+                     Optional closeMenu As Boolean = False, Optional enStrCond As Boolean = False, Optional colorLine As Boolean = False,
+                     Optional useArbitraryColor As Boolean = False, Optional arbitraryColor As ConsoleColor = Nothing)
+        If Not cond Then Exit Sub
+        print(0, Nothing, cond:=leadingBlank)
+        If colorLine Then Console.ForegroundColor = If(useArbitraryColor, arbitraryColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red))
+        Select Case printType
             ' Prints lines
-            Case cond And printType = 0
+            Case 0
                 printMenuLine(str1, isCentered)
             ' Prints options
-            Case cond And printType = 1
+            Case 1
                 printMenuOpt(str1, optString)
             ' Prints the Reset Settings option
-            Case cond And printType = 2
+            Case 2
                 print(1, "Reset Settings", $"Restore {str1}'s settings to their default state", leadingBlank:=True)
             ' Prints a box with centered text
-            Case cond And printType = 3
+            Case 3
                 print(0, tmenu(str1), isCentered:=True, closeMenu:=True)
             ' Prints a red error string into the menu
-            Case cond And printType = 4
+            Case 4
                 Console.ForegroundColor = ConsoleColor.Red
                 print(0, $"{str1}, some functions will not be available.", trailingBlank:=True, isCentered:=True)
             ' Colored line printing for enable/disable menu options
-            Case cond And printType = 5
+            Case 5
                 Console.ForegroundColor = If(enStrCond, ConsoleColor.Green, ConsoleColor.Red)
                 print(1, str1, $"{enStr(enStrCond)} {optString}")
         End Select
         Console.ResetColor()
-        If cond And trailingBlank Then printMenuLine()
-        If cond And closeMenu Then printMenuLine(menuStr02)
+        print(0, Nothing, cond:=trailingBlank)
+        print(0, getFrame(2), cond:=closeMenu)
     End Sub
 
     ''' <summary>Returns the inverse state of a given setting as a String</summary>
@@ -132,75 +140,61 @@ Module MenuMaker
     ''' <param name="descriptionItems">Items describing the menu</param>
     ''' <param name="printExit">The boolean representing whether an option to exit should be printed</param>
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
-        If colorHeader Then Console.ForegroundColor = headerColor
-        printMenuLine(tmenu(MenuHeaderText))
-        printMenuLine(menuStr03)
+        print(0, tmenu(MenuHeaderText), isCentered:=True, colorLine:=colorHeader, useArbitraryColor:=True, arbitraryColor:=headerColor)
+        print(0, getFrame(3), colorLine:=colorHeader, useArbitraryColor:=True, arbitraryColor:=headerColor)
         Console.ResetColor()
         For Each line In descriptionItems
             print(0, line, isCentered:=True)
         Next
-        printMenuLine(menuStr04)
+        print(0, getFrame() & Environment.NewLine & mkMenuLine("Menu: Enter a number to select", "c") & Environment.NewLine & getFrame())
         optNum = 0
         print(1, "Exit", "Return to the menu", printExit)
     End Sub
 
-    ''' <summary>Constructs and returns to the calling function a new menu String</summary>
-    ''' <param name="lineString">A string to be made into a menu line</param>
-    Public Function menu(lineString As String) As String
-        Return mkMenuLine(lineString, "l")
-    End Function
-
-    ''' <summary>Prints a line in a menu</summary>
-    ''' <param name="lineString"></param>
-    Public Sub printMenuLine(Optional lineString As String = menuStr01)
-        cwl(menu(lineString))
-    End Sub
-
-    ''' <summary>Constructs a menu string with a given alignment</summary>
-    ''' <param name="lineString">The line to be printed</param>
-    ''' <param name="isCentered">The boolean indicating whether the line text should be centered</param>
-    Public Function menu(lineString As String, Optional isCentered As Boolean = False) As String
-        Return mkMenuLine(lineString, If(isCentered, "c", "l"))
-    End Function
-
-    ''' <summary>Prints a menu string with a given alignment</summary>
-    ''' <param name="lineString"></param>
-    ''' <param name="isCenteredLine">The boolean indicating whether the line text should be centered</param>
-    Public Sub printMenuLine(lineString As String, Optional isCenteredLine As Boolean = False)
-        cwl(menu(lineString, isCenteredLine))
+    ''' <summary>Prints a line from the menu that does not contain an option</summary>
+    ''' <param name="lineString">The text to be printed. <br/> Default: Nothing, will print an empty menu frame with no text in it</param>
+    ''' <param name="isCentered">Optional boolean indicating whether or not the text should be centered <br /> Default: False</param>
+    Private Sub printMenuLine(Optional lineString As String = Nothing, Optional isCentered As Boolean = False)
+        If lineString = Nothing Then lineString = getFrame()
+        cwl(mkMenuLine(lineString, If(isCentered, "c", "l")))
     End Sub
 
     ''' <summary>Prints a numbered menu option after padding it to a set length</summary>
     ''' <param name="lineString1">The first part of the menu option</param>
     ''' <param name="lineString2">The second part of the menu option</param>
-    Public Sub printMenuOpt(lineString1 As String, lineString2 As String)
+    Private Sub printMenuOpt(lineString1 As String, lineString2 As String)
         lineString1 = $"{optNum}. {lineString1}"
-        While lineString1.Length < menuItemLength
-            lineString1 += " "
-        End While
-        cwl(menu($"{lineString1}- {lineString2}"))
+        padToEnd(lineString1, menuItemLength, "")
+        cwl(mkMenuLine($"{lineString1}- {lineString2}", "l"))
         optNum += 1
     End Sub
 
-    ''' <summary>Flips the exitCode boolean so we can return to the menu when desired</summary>
+    ''' <summary>Flips the exitCode boolean so we can return to the previous menu when desired</summary>
     Public Sub revertMenu()
         ExitCode = Not ExitCode
     End Sub
 
     ''' <summary>Constructs a menu line fit to the width of the console</summary>
     ''' <param name="line">The line to be printed</param>
-    ''' <param name="align">The alignment of the line to be printed. 'l' for Left or 'c' for Centre</param>
-    Public Function mkMenuLine(line As String, align As String) As String
-        If line.Length >= 125 Then Return line
-        Dim out = " ║"
+    ''' <param name="align">The alignment of the line to be printed: <br /> 'l' for Left, 'c' for Centre, 'f' for Frame</param>
+    ''' <param name="borderInd">Determines which characters should create the border for the menuline: <br />
+    ''' 0: Vertical lines, 1: ceiling brackets, 2: floor brackets, 3: conjoining brackets</param>
+    Private Function mkMenuLine(line As String, align As String, Optional borderInd As Integer = 0) As String
+        If line.Length >= Console.WindowWidth - 1 Then Return line
+        Dim openers = {"║", "╔", "╚", "╠"}
+        Dim closers = {"║", "╗", "╝", "╣"}
+        Dim out = $" {openers(borderInd)}"
         Select Case align
             Case "c"
-                padToEnd(out, CInt((((124 - line.Length) / 2) + 2)))
+                padToEnd(out, CInt((((Console.WindowWidth - line.Length) / 2) + 2)), closers(borderInd))
                 out += line
-                padToEnd(out, 124)
+                padToEnd(out, Console.WindowWidth - 2, closers(borderInd))
             Case "l"
                 out += " " & line
-                padToEnd(out, 124)
+                padToEnd(out, Console.WindowWidth - 2, closers(borderInd))
+            Case "f"
+                Dim padChar = If(borderInd = 0, " ", "═")
+                padToEnd(out, Console.WindowWidth - 2, closers(borderInd), If(borderInd = 0, " ", "═"))
         End Select
         Return out
     End Function
@@ -208,27 +202,18 @@ Module MenuMaker
     ''' <summary>Pads a given string with spaces</summary>
     ''' <param name="out">The string to be padded</param>
     ''' <param name="targetLen">The end length to which the string should be padded</param>
-    Private Sub padToEnd(ByRef out As String, targetLen As Integer)
+    Private Sub padToEnd(ByRef out As String, targetLen As Integer, endline As String, Optional padChar As String = " ")
         While out.Length < targetLen
-            out += " "
+            out += padChar
         End While
-        If targetLen = 124 Then out += "║"
+        If targetLen = Console.WindowWidth - 2 Then out += endline
     End Sub
 
-    ''' <summary>Prints a box with a single message inside it</summary>
-    ''' <param name="text">The string to be printed in the box</param>
-    Public Function bmenu(text As String) As String
-        Dim out = menu(menuStr00) & Environment.NewLine
-        out += menu(text, True) & Environment.NewLine
-        out += menu(menuStr02)
-        Return out
-    End Function
-
-    ''' <summary>Prints the topmost part of the menu with no bottom</summary>
+    ''' <summary>Returns a String containing the topmost part of the menu with no bottom</summary>
     ''' <param name="text">The String to be printed in the faux menu header</param>
     Public Function tmenu(text As String) As String
-        Dim out = menu(menuStr00) & Environment.NewLine
-        out += menu(text, True)
+        Dim out = getFrame(1) & Environment.NewLine
+        out += mkMenuLine(text, "c")
         Return out
     End Function
 
@@ -249,5 +234,28 @@ Module MenuMaker
     Public Sub clrConsole(Optional cond As Boolean = True)
         ' Do not clear the console during unit tests because there isnt one and the invalid handler throws an IO Exception
         If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
+    End Sub
+
+    ''' <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for anything built with MenuMaker</summary>
+    ''' <param name="name">The name of the module</param>
+    ''' <param name="showMenu">The function that prints the module's menu</param>
+    ''' <param name="handleInput">The function that handles the module's input</param>
+    Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String))
+        gLog("", ascend:=True)
+        gLog($"Loading module {name}")
+        initMenu(name)
+        Try
+            Do Until ExitCode
+                clrConsole()
+                showMenu()
+                Console.Write(Environment.NewLine & promptStr)
+                handleInput(Console.ReadLine)
+            Loop
+            revertMenu()
+            setHeaderText($"{name} closed")
+            gLog($"Exiting {name}", descend:=True, leadr:=True)
+        Catch ex As Exception
+            exc(ex)
+        End Try
     End Sub
 End Module

@@ -117,7 +117,7 @@ Public Module Trim
         print(0, tmenu("Finished!"), closeMenu:=True)
         clrConsole()
         print(0, tmenu("Trim Complete"))
-        print(0, menuStr03)
+        print(0, getFrame(3))
         print(0, "Entry Count", isCentered:=True, trailingBlank:=True)
         print(0, $"Initial: {entryCountBeforeTrim}")
         print(0, $"Trimmed: {winapp2.count}")

@@ -181,7 +181,7 @@ Public Module WinappDebug
         gLog("Lint complete")
         setHeaderText("Lint complete")
         print(0, tmenu("Completed analysis of winapp2.ini"))
-        print(0, menuStr03)
+        print(0, getFrame(3))
         print(0, $"{ErrorsFound} possible errors were detected.")
         print(0, $"Number of entries: {winappDebugFile1.Sections.Count}", trailingBlank:=True)
         rewriteChanges(wa2)

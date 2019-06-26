@@ -128,7 +128,7 @@ Module Merge
         print(0, tmenu($"Merging {MergeFile1.Name} with {MergeFile2.Name}"))
         merge()
         print(0, "", closeMenu:=True)
-        print(0, bmenu($"Finished merging files. {anyKeyStr}"))
+        print(3, $"Finished merging files. {anyKeyStr}")
         crk()
     End Sub
 

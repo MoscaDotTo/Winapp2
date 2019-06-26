@@ -168,29 +168,6 @@ Module Winapp2ool
         Return val.Split(CChar("\"))(0)
     End Function
 
-    ''' <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for winapp2ool and its components</summary>
-    ''' <param name="name">The name of the module</param>
-    ''' <param name="showMenu">The function that prints the module's menu</param>
-    ''' <param name="handleInput">The function that handles the module's input</param>
-    Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String))
-        gLog("", ascend:=True)
-        gLog($"Loading module {name}")
-        initMenu(name)
-        Try
-            Do Until ExitCode
-                clrConsole()
-                showMenu()
-                Console.Write(Environment.NewLine & promptStr)
-                handleInput(Console.ReadLine)
-            Loop
-            revertMenu()
-            setHeaderText($"{name} closed")
-            gLog($"Exiting {name}", descend:=True, leadr:=True)
-        Catch ex As Exception
-            exc(ex)
-        End Try
-    End Sub
-
     ''' <summary>Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected</summary>
     ''' <param name="caseArray">The parent array of cased Strings</param>
     ''' <param name="inputText">The String to be checked for casing errors</param>
