@@ -40,18 +40,23 @@ Module MenuMaker
     Public Property ExitCode As Boolean
     ''' <summary> Holds the text that appears in the top block of the menu </summary>
     Public Property MenuHeaderText As String
+    '''<summary>Frame characters used to open a menu line</summary>
+    Private ReadOnly Property openers As String() = {"║", "╔", "╚", "╠"}
+    '''<summary>Frame characters used to close a menu line</summary>
+    Private ReadOnly Property closers As String() = {"║", "╗", "╝", "╣"}
 
     '''<summary>Returns a menuframe</summary>
     '''<param name="frameNum">Indicates which frame should be returned. <br />
-    '''0: empty line, 1: top, 2: bottom, 3: conjoiner</param>
+    '''0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
     Public Function getFrame(Optional frameNum As Integer = 0) As String
         Return mkMenuLine("", "f", frameNum)
     End Function
 
     ''' <summary>Inserts text into the menu header</summary>
     ''' <param name="txt">The text to appear in the header</param>
-    ''' <param name="cHeader">The boolean indicating whether or not the text should be colored</param>
-    ''' <param name="cond">Optional boolean indicating whether or not the header should be set (default: true)</param>
+    ''' <param name="cHeader">Optional boolean indicating whether or not the text should be colored <br />Default: False</param>
+    ''' <param name="cond">Optional boolean indicating whether or not the header should be set <br /> Default: True</param>
+    ''' <param name="printColor">Optional ConsoleColor with which the header should be colored <br/> Default: Red</param>
     Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
         If cond Then
             MenuHeaderText = txt
@@ -62,7 +67,7 @@ Module MenuMaker
 
     ''' <summary>Initializes the menu</summary>
     ''' <param name="topper">The text to be displayed at the top of the menu screen</param>
-    ''' <param name="itemlen">The length in characters that should comprise the first bloc of options in the menu</param>
+    ''' <param name="itemlen">The length in characters that should comprise the first bloc of options in the menu <br />Default: 35</param>
     Public Sub initMenu(topper As String, Optional itemlen As Integer = 35)
         ExitCode = False
         setHeaderText(topper)
@@ -138,7 +143,7 @@ Module MenuMaker
 
     ''' <summary>Prints the top of the menu (containing the topper), any description text provided, the menu prompt, and the exit option</summary>
     ''' <param name="descriptionItems">Items describing the menu</param>
-    ''' <param name="printExit">The boolean representing whether an option to exit should be printed</param>
+    ''' <param name="printExit">Optional boolean indicating whether an option to exit should be printed <br /> Default: True</param>
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
         print(0, tmenu(MenuHeaderText), isCentered:=True, colorLine:=colorHeader, useArbitraryColor:=True, arbitraryColor:=headerColor)
         print(0, getFrame(3), colorLine:=colorHeader, useArbitraryColor:=True, arbitraryColor:=headerColor)
@@ -181,8 +186,6 @@ Module MenuMaker
     ''' 0: Vertical lines, 1: ceiling brackets, 2: floor brackets, 3: conjoining brackets</param>
     Private Function mkMenuLine(line As String, align As String, Optional borderInd As Integer = 0) As String
         If line.Length >= Console.WindowWidth - 1 Then Return line
-        Dim openers = {"║", "╔", "╚", "╠"}
-        Dim closers = {"║", "╗", "╝", "╣"}
         Dim out = $" {openers(borderInd)}"
         Select Case align
             Case "c"
@@ -193,7 +196,6 @@ Module MenuMaker
                 out += " " & line
                 padToEnd(out, Console.WindowWidth - 2, closers(borderInd))
             Case "f"
-                Dim padChar = If(borderInd = 0, " ", "═")
                 padToEnd(out, Console.WindowWidth - 2, closers(borderInd), If(borderInd = 0, " ", "═"))
         End Select
         Return out
@@ -202,6 +204,8 @@ Module MenuMaker
     ''' <summary>Pads a given string with spaces</summary>
     ''' <param name="out">The string to be padded</param>
     ''' <param name="targetLen">The end length to which the string should be padded</param>
+    ''' <param name="endline">The closer character for the type of frame being built</param>
+    ''' <param name="padChar">The character with which to pad the line <br /> Default: " " (space character)</param>
     Private Sub padToEnd(ByRef out As String, targetLen As Integer, endline As String, Optional padChar As String = " ")
         While out.Length < targetLen
             out += padChar
@@ -224,13 +228,14 @@ Module MenuMaker
     End Function
 
     ''' <summary>Prints a line with a string if we're not suppressing output.</summary>
-    ''' <param name="msg">The string to be printed</param>
+    ''' <param name="msg">The string to be printed <br />Default: Nothing</param>
+    ''' <param name="cond">The optional condition under which to print the line <br /> Default: True</param>
     Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
         If cond And Not SuppressOutput Then Console.WriteLine(msg)
     End Sub
 
     ''' <summary>Clears the console conditionally when not running unit tests</summary>
-    ''' <param name="cond">Optional Boolean specifying whether or not the console should be cleared</param>
+    ''' <param name="cond">Optional Boolean specifying whether or not the console should be cleared <br /> Default: True</param>
     Public Sub clrConsole(Optional cond As Boolean = True)
         ' Do not clear the console during unit tests because there isnt one and the invalid handler throws an IO Exception
         If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
