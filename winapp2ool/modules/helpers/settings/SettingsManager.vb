@@ -55,4 +55,11 @@ Module SettingsManager
         setDefaultParams()
         setHeaderText($"{name} settings have been reset to their defaults.")
     End Sub
+
+    ''' <summary>Denies the ability to access online-only functions if offline</summary>
+    Public Function denySettingOffline() As Boolean
+        gLog("Action was unable to complete because winapp2ool is offline", isOffline)
+        setHeaderText("This option is unavailable while in offline mode", True, isOffline)
+        Return isOffline
+    End Function
 End Module

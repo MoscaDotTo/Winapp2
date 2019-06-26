@@ -27,13 +27,6 @@ Module Winapp2ool
     '''<summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
     Public Property isBeta As Boolean = True
 
-    ''' <summary>Denies the ability to access online-only functions if offline</summary>
-    Public Function denySettingOffline() As Boolean
-        gLog("Action was unable to complete because winapp2ool is offline", isOffline)
-        setHeaderText("This option is unavailable while in offline mode", True, isOffline)
-        Return isOffline
-    End Function
-
     ''' <summary>Prints the main menu to the user</summary>
     Private Sub printMenu()
         checkUpdates(Not isOffline)
