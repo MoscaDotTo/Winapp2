@@ -71,7 +71,7 @@ Module experimentalScans
     ''' <param name="boxStr">The text to go in the optimization section box</param>
     ''' <param name="kl">The list of keys to be printed beneath the box</param>
     Private Sub printOptiSect(boxStr As String, kl As keyList)
-        cwl() : print(0, tmenu(boxStr), closeMenu:=True) : cwl()
+        print(3, boxStr, buffr:=True, trailr:=True)
         kl.Keys.ForEach(Sub(key) cwl(key.toString))
         cwl()
     End Sub

@@ -172,16 +172,14 @@ Public Module WinappDebug
         If Not enforceFileHasContent(winappDebugFile1) Then Exit Sub
         Dim wa2 As New winapp2file(winappDebugFile1)
         clrConsole()
-        print(0, tmenu("Beginning analysis of winapp2.ini"), closeMenu:=True)
-        cwl()
+        print(3, "Beginning analysis of winapp2.ini", trailr:=True)
         gLog("Beginning lint", leadr:=True, ascend:=True)
         MostRecentLintLog = ""
         debug(wa2)
         gLog("", descend:=True)
         gLog("Lint complete")
         setHeaderText("Lint complete")
-        print(0, tmenu("Completed analysis of winapp2.ini"))
-        print(0, getFrame(3))
+        print(4, "Completed analysis of winapp2.ini", conjoin:=True)
         print(0, $"{ErrorsFound} possible errors were detected.")
         print(0, $"Number of entries: {winappDebugFile1.Sections.Count}", trailingBlank:=True)
         rewriteChanges(wa2)

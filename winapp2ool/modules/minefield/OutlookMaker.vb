@@ -28,7 +28,7 @@ Module OutlookMaker
     Public Sub handleOutlookInput(input As String)
         Select Case input
             Case "0"
-                ExitCode = True
+                exitModule()
             Case "1"
                 initOutlooker()
             Case Else

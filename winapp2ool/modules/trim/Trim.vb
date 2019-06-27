@@ -114,9 +114,9 @@ Public Module Trim
         Dim entryCountBeforeTrim = winapp2.count
         trim(winapp2)
         clrConsole()
-        print(0, tmenu("Finished!"), closeMenu:=True)
+        print(3, "Finished!")
         clrConsole()
-        print(0, tmenu("Trim Complete"))
+        print(4, "Trim Complete")
         print(0, getFrame(3))
         print(0, "Entry Count", isCentered:=True, trailingBlank:=True)
         print(0, $"Initial: {entryCountBeforeTrim}")

@@ -103,7 +103,7 @@ Module Downloader
                 If downloadFile.Dir = Environment.CurrentDirectory Then checkedForUpdates = False
             Case "3"
                 ' Feature gate downloading the executable behind .NET 4.6+
-                If Not denyActionWithTopper(DotNetFrameworkOutOfDate, "This option requires a newer version of the .NET Framework") Then
+                If Not denyActionWithHeader(DotNetFrameworkOutOfDate, "This option requires a newer version of the .NET Framework") Then
                     If downloadFile.Dir = Environment.CurrentDirectory Then
                         autoUpdate()
                     Else

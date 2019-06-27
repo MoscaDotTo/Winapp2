@@ -110,7 +110,7 @@ Module Diff
             Case input = "0"
                 exitModule()
             Case input = "1" Or input = ""
-                If Not denyActionWithTopper(DiffFile2.Name = "" And Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
+                If Not denyActionWithHeader(DiffFile2.Name = "" And Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
             Case input = "2"
                 changeFileParams(DiffFile1, ModuleSettingsChanged)
             Case input = "3" And Not isOffline
@@ -152,7 +152,6 @@ Module Diff
         logInitDiff()
         compareTo()
         logPostDiff()
-        cwl()
         print(3, anyKeyStr)
         crk()
         MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "hasBeenRun")
@@ -183,11 +182,10 @@ Module Diff
         gLog($"Modified entries: {ModifiedEntryCount}", indent:=True)
         gLog($"Removed entries: {RemovedEntryCount}", indent:=True)
         gLog("Diff complete", descend:=True)
-        print(0, getFrame(0))
-        print(0, "Summary", isCentered:=True)
+        print(4, "Summary", conjoin:=True)
         print(0, $"Added entries: {AddedEntryCount}")
         print(0, $"Modified entries: {ModifiedEntryCount}")
-        print(0, $"Removed entries: {RemovedEntryCount}", closeMenu:=True)
+        print(0, $"Removed entries: {RemovedEntryCount}", closeMenu:=True, trailr:=True)
     End Sub
 
     ''' <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>

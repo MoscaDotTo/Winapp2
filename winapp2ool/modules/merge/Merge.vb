@@ -89,7 +89,7 @@ Module Merge
             Case input = "0"
                 exitModule()
             Case input = "1" Or input = ""
-                If Not denyActionWithTopper(MergeFile2.Name = "", "You must select a file to merge") Then initMerge()
+                If Not denyActionWithHeader(MergeFile2.Name = "", "You must select a file to merge") Then initMerge()
             Case input = "2"
                 changeMergeName("Removed entries.ini")
             Case input = "3"
@@ -125,7 +125,7 @@ Module Merge
         MergeFile1.validate()
         MergeFile2.validate()
         If Not (enforceFileHasContent(MergeFile1) And enforceFileHasContent(MergeFile2)) Then Exit Sub
-        print(0, tmenu($"Merging {MergeFile1.Name} with {MergeFile2.Name}"))
+        print(4, $"Merging {MergeFile1.Name} with {MergeFile2.Name}")
         merge()
         print(0, "", closeMenu:=True)
         print(3, $"Finished merging files. {anyKeyStr}")

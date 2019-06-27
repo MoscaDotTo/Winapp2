@@ -31,8 +31,8 @@ Module Winapp2ool
     Private Sub printMenu()
         checkUpdates(Not isOffline)
         printMenuTop({}, False)
-        print(4, "Winapp2ool is currently in offline mode", cond:=isOffline)
-        print(4, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate)
+        print(0, "Winapp2ool is currently in offline mode", cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
+        print(0, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
         printUpdNotif(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver)
         printUpdNotif(updateIsAvail, "Winapp2ool", currentVersion, latestVersion)
         print(1, "Exit", "Exit the application")
@@ -72,7 +72,7 @@ Module Winapp2ool
     Private Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
-                ExitCode = True
+                exitModule()
                 cwl("Exiting...")
                 Environment.Exit(0)
             Case input = "1"
