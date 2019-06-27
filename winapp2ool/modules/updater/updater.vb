@@ -41,7 +41,7 @@ Public Module updater
             ' Query the latest winapp2ool.exe and winapp2.ini versions 
             If isBeta Then
                 Dim tmp = Environment.GetEnvironmentVariable("temp")
-                download(New iniFile($"{Environment.GetEnvironmentVariable("temp")}\", "`winapp2ool.exe"), toolExeLink, False, True)
+                download(New iniFile($"{Environment.GetEnvironmentVariable("temp")}\", "winapp2ool.exe"), toolExeLink, False, True)
 
                 latestVersion = System.Reflection.Assembly.LoadFile($"{Environment.GetEnvironmentVariable("temp")}\winapp2ool.exe").FullName.Split(CChar(","))(1).Substring(9)
                 Dim tmp1 = latestVersion.Split(CChar("."))
