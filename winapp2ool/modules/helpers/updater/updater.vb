@@ -18,17 +18,17 @@ Option Strict On
 Imports System.IO
 ''' <summary>Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe</summary>
 Public Module updater
-    ''' <summary>Indicates the latest available verson of winapp2ool from GitHub</summary>
+    ''' <summary>The latest available verson of winapp2ool from GitHub</summary>
     Public Property latestVersion As String = ""
-    ''' <summary>Indicates the latest available version of winapp2.ini from GitHub</summary>
+    ''' <summary>The latest available version of winapp2.ini from GitHub</summary>
     Public Property latestWa2Ver As String = ""
-    ''' <summary>Indicates the local version of winapp2.ini (if available)</summary>
+    ''' <summary>The local version of winapp2.ini (if available)</summary>
     Public Property localWa2Ver As String = "000000"
     ''' <summary>Indicates that a winapp2ool update is available from GitHub</summary>
     Public Property updateIsAvail As Boolean = False
     ''' <summary>Indicates that a winapp2.ini update is available from GitHub</summary>
     Public Property waUpdateIsAvail As Boolean = False
-    ''' <summary>The current version of the executable as used for version checking against GitHub</summary>
+    ''' <summary>The local version of winapp2ool</summary>
     Public Property currentVersion As String = Reflection.Assembly.GetExecutingAssembly.FullName.Split(CChar(","))(1).Substring(9)
     ''' <summary>Indicates that an update check has been performed</summary>
     Public Property checkedForUpdates As Boolean = False
