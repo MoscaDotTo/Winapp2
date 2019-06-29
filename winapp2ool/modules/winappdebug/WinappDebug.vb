@@ -24,23 +24,20 @@ Public Module WinappDebug
     Public Property winappDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
     ''' <summary> Holds the save path for the linted file (overwrites the input file by default) </summary>
     Public Property winappDebugFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
-
-    ''' <summary> Indicates whether some but not all repairs will run </summary>
+    ''' <summary> Indicates that some but not all repairs will run </summary>
     Public Property RepairSomeErrsFound As Boolean = False
-    ''' <summary> Indicates whether scan settings have been changed </summary>
+    ''' <summary> Indicates that the scan settings have been modified from their defaults</summary>
     Public Property ScanSettingsChanged As Boolean = False
-    ''' <summary> Indicates whether module settings have been changed </summary>
+    ''' <summary> Indicates that the module settings have been modified from their defaults</summary>
     Public Property ModuleSettingsChanged As Boolean = False
-    ''' <summary> Indicates whether or not changes should be saved back to disk (Default: False) </summary>
+    ''' <summary> Indicates that the any changes made by the linter should be saved back to disk <br /> Default: False </summary>
     Public Property SaveChanges As Boolean = False
-    ''' <summary> Indicates whether or not winappdebug should attempt to repair errors it finds (Default: False)</summary>
+    ''' <summary> Indicates that the linter should attempt to repair errors it finds <br /> Default: True</summary>
     Public Property RepairErrsFound As Boolean = True
-    ''' <summary> The number of errors found by the linter </summary>
+    ''' <summary> The number of errors found by the linter</summary>
     Public Property ErrorsFound As Integer = 0
-
     ''' <summary>The list of all entry names found during a given run of the linter</summary>
     Private Property allEntryNames As New strList
-
     ''' <summary> The current rules for scans and repairs </summary>
     Public Property Rules As New List(Of lintRule) From {
         New lintRule(True, True, "Casing", "improper CamelCasing", "fixing improper CamelCasing"),
@@ -59,10 +56,8 @@ Public Module WinappDebug
         New lintRule(True, True, "Semicolons", "improper use of semicolons (;)", "fixing some improper uses of semicolons(;)"),
         New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)")
     }
-
     ''' <summary>Controls scan/repairs for CamelCasing issues</summary>
     Private Property lintCasing As lintRule = Rules(0)
-
     ''' <summary>Controls scan/repairs for alphabetization issues</summary>
     Private Property lintAlpha As lintRule = Rules(1)
     ''' <summary>Controls scan/repairs for incorrectly numbered keys</summary>
@@ -126,7 +121,7 @@ Public Module WinappDebug
 
     ''' <summary> Prints the main menu to the user </summary>
     Public Sub printMenu()
-        printMenuTop({"Scan winapp2.ini For syntax and style errors, And attempt to repair them."})
+        printMenuTop({"Scan winapp2.ini for style and syntax errors, and attempt to repair them where possible."})
         print(1, "Run (Default)", "Run the debugger")
         print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or path", leadingBlank:=True, trailingBlank:=True)
         print(5, "Toggle Saving", "saving the file after correcting errors", enStrCond:=SaveChanges)
@@ -228,7 +223,7 @@ Public Module WinappDebug
     ''' <param name="sortedList">The sorted state of someList</param>
     ''' <param name="findType">The type of neighbor checking (keyType for iniKey values)</param>
     ''' <param name="LineCountList">A list containing the line counts of the Strings in someList</param>
-    ''' <param name="oopBool">Optional Boolean that reports whether or not there are any out of place entries in the list</param>
+    ''' <param name="oopBool">Indicates that there are out of place entries in the list <br/>Optional, Default: False</param>
     Private Sub findOutOfPlace(ByRef someList As strList, ByRef sortedList As strList, ByVal findType As String, ByRef LineCountList As List(Of Integer), Optional ByRef oopBool As Boolean = False)
         ' Only try to find out of place keys when there's more than one
         If someList.Count > 1 Then
@@ -259,9 +254,10 @@ Public Module WinappDebug
 
     ''' <summary> Audits a keyList of winapp2.ini format iniKeys for errors, alerting the user and correcting where possible.</summary>
     ''' <param name="kl">A keylist to audit</param>
-    ''' <param name="processKey">The function that audits the keys of the keyType provided in the keyList</param>
-    ''' <param name="hasF">Optional boolean for the ExcludeKey case</param>
-    ''' <param name="hasR">Optional boolean for the ExcludeKey case</param>
+    ''' <param name="processKey">The function that audits the keys of the keyType provided in the keyList. <br /> 
+    ''' VoidDelegate if no further operations are needed outside of the formatting checks</param>
+    ''' <param name="hasF">Indicates that the ExcludeKeys contain file system locations <br /> Optional, Default: False</param>
+    ''' <param name="hasR">Indicates that the ExcludeKeys contain registry locations <br />Optional, Default: False</param>
     Private Sub processKeyList(ByRef kl As keyList, processKey As Func(Of iniKey, iniKey), Optional ByRef hasF As Boolean = False, Optional ByRef hasR As Boolean = False)
         If kl.KeyCount = 0 Then Exit Sub
         gLog($"Processing {kl.KeyType}s", ascend:=True, buffr:=True)
@@ -479,7 +475,6 @@ Public Module WinappDebug
     ''' <summary>Checks the validity of the keys in an entry and removes any that are too problematic to continue with</summary>
     ''' <param name="entry">A winapp2entry object to be audited</param>
     Private Sub validateKeys(ByRef entry As winapp2entry)
-        gLog("Validating Keys", ascend:=True)
         For Each lst In entry.KeyListList
             Dim brokenKeys As New keyList
             lst.Keys.ForEach(Sub(key) brokenKeys.add(key, Not cValidity(key)))
@@ -497,7 +492,6 @@ Public Module WinappDebug
         Next
         ' Remove any repaired keys
         entry.ErrorKeys.remove(toRemove.Keys)
-        gLog("Validation Complete", descend:=True, buffr:=True)
     End Sub
 
     ''' <summary>Processes a winapp2entry object (generated from a winapp2.ini format iniKey object) for errors</summary>
@@ -565,7 +559,7 @@ Public Module WinappDebug
 
     ''' <summary> Audits the syntax of file system and registry paths </summary>
     ''' <param name="key">An iniKey to be audited</param>
-    ''' <param name="isRegistry">Specifies whether the given key holds a registry path</param>
+    ''' <param name="isRegistry">Indicates that the given key holds a registry path</param>
     Private Sub chkPathFormatValidity(key As iniKey, isRegistry As Boolean)
         If Not lintPathValidity.ShouldScan Then Exit Sub
         ' Remove the flags from ExcludeKeys if we have them before getting the first directory portion
@@ -614,29 +608,29 @@ Public Module WinappDebug
 
     ''' <summary>Prints an error when data is received that does not match an expected value.</summary>
     ''' <param name="linecount">The line number of the error</param>
-    ''' <param name="err">The string containing the output error text</param>
+    ''' <param name="err">Text describing the error to be printed to the user</param>
     ''' <param name="received">The (erroneous) input data</param>
     ''' <param name="expected">The expected data</param>
-    ''' <param name="cond">Optional condition under which to display the error</param>
+    ''' <param name="cond">Indicates that the error condition is present <br />Optional, Default: True</param>
     Private Sub inputMismatchErr(linecount As Integer, err As String, received As String, expected As String, Optional cond As Boolean = True)
         If cond Then customErr(linecount, err, {$"Expected: {expected}", $"Found: {received}"})
     End Sub
 
     ''' <summary>Prints an error followed by the [Full Name *] of the entry to which it belongs</summary>
-    ''' <param name="cond">The condition under which to print</param>
+    ''' <param name="cond">Indicates that the error condition is present</param>
     ''' <param name="entry">The entry containing an error</param>
-    ''' <param name="errTxt">The String containing the text to be printed to the user</param>
+    ''' <param name="errTxt">Text describing the error to be printed to the user</param>
     Private Sub fullNameErr(cond As Boolean, entry As winapp2entry, errTxt As String)
         If cond Then customErr(entry.LineNum, errTxt, {$"Entry Name: {entry.FullName}"})
     End Sub
 
     ''' <summary>Prints an error whose output text contains an iniKey string</summary>
     ''' <param name="key">The inikey to be printed</param>
-    ''' <param name="err">The string containing the output error text</param>
-    ''' <param name="cond">Optional condition under which the err should be printed</param>
-    ''' <param name="repCond">Optional condition under which to repair the given key</param>
-    ''' <param name="newVal">The value to replace the error value</param>
-    ''' <param name="repairVal">The error value</param>
+    ''' <param name="err">Text describing the error to be printed to the user</param>
+    ''' <param name="cond">Indicates that the error condition is present <br />Optional, Default: True</param>
+    ''' <param name="repCond">Indicates that the repair function should run <br /> Optional, Default: False</param>
+    ''' <param name="newVal">The String with which to replace the incorrect String <br />Optional, Default: ""</param>
+    ''' <param name="repairVal">The incorrect String <br />Optional, Default: ""</param>
     Private Sub fullKeyErr(key As iniKey, err As String, Optional cond As Boolean = True, Optional repCond As Boolean = False, Optional ByRef repairVal As String = "", Optional newVal As String = "")
         If cond Then customErr(key.LineNumber, err, {$"Key: {key.toString}"})
         fixStr(cond And repCond, repairVal, newVal)
