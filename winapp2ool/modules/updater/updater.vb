@@ -29,54 +29,61 @@ Public Module updater
     ''' <summary>Indicates that a winapp2.ini update is available from GitHub</summary>
     Public Property waUpdateIsAvail As Boolean = False
     ''' <summary>The current version of the executable as used for version checking against GitHub</summary>
-    Public ReadOnly Property currentVersion As String = System.Reflection.Assembly.GetExecutingAssembly.FullName.Split(CChar(","))(1).Substring(9)
-    ''' <summary>Indicates whether or not winapp2ool has already checked for updates</summary>
+    Public Property currentVersion As String = Reflection.Assembly.GetExecutingAssembly.FullName.Split(CChar(","))(1).Substring(9)
+    ''' <summary>Indicates that an update check has been performed</summary>
     Public Property checkedForUpdates As Boolean = False
 
+    ''' <summary>Pads the seconds portion of the version number to always be length of 5</summary>
+    ''' <param name="version">A version number to pad</param>
+    Private Sub padVersionNum(ByRef version As String)
+        Dim tmp = version.Split(CChar("."))
+        Dim tmp1 = tmp.Last
+        While tmp1.Length < 5
+            tmp1 = "0" & tmp1
+        End While
+        version.Replace(tmp.Last, tmp1)
+    End Sub
+
     ''' <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
+    ''' <param name="cond">Indicates that the update check should be performed. <br /></param>
     Public Sub checkUpdates(Optional cond As Boolean = False)
         If checkedForUpdates Or Not cond Then Exit Sub
-        Try
-            gLog("Checking for updates")
-            ' Query the latest winapp2ool.exe and winapp2.ini versions 
-            If isBeta Then
-                Dim tmp = Environment.GetEnvironmentVariable("temp")
-                download(New iniFile($"{Environment.GetEnvironmentVariable("temp")}\", "winapp2ool.exe"), toolExeLink, False, True)
+        gLog("Checking for updates")
+        ' Query the latest winapp2ool.exe and winapp2.ini versions 
+        toolVersionCheck()
+        latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
+        ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
+        ' In this instance we should consider the update check to have failed and put the application into offline mode
+        If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Exit Sub
+        ' Observe whether or not updates are available, using val to avoid conversion mistakes
+        updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
+        getLocalWinapp2Version()
+        waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
+        checkedForUpdates = True
+        gLog("Update check complete:")
+        gLog($"Winapp2ool:")
+        gLog("Local: " & currentVersion, indent:=True)
+        gLog("Remote: " & latestVersion, indent:=True)
+        gLog("Winapp2.ini:")
+        gLog("Local:" & localWa2Ver, indent:=True)
+        gLog("Remote: " & latestWa2Ver, indent:=True)
+    End Sub
 
-                latestVersion = System.Reflection.Assembly.LoadFile($"{Environment.GetEnvironmentVariable("temp")}\winapp2ool.exe").FullName.Split(CChar(","))(1).Substring(9)
-                Dim tmp1 = latestVersion.Split(CChar("."))
-                ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one digit short 
-                ' Pad it with a 0 when this is the case to avoid telling user's there's an update available when there is not 
-                If Not tmp1.Last.Length = 5 Then
-                    Dim tmp2 = ""
-                    For i = tmp1.Last.Length To 5
-                        tmp2 += "0"
-                    Next
-                    latestVersion = latestVersion.Replace(tmp1.Last, tmp2 & tmp1.Last)
-                End If
-            Else
-                latestVersion = getFileDataAtLineNum(toolVerLink)
-            End If
-            latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
-            ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
-            ' In this instance we should consider the update check to have failed and put the application into offline mode
-            If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Exit Try
-            ' Observe whether or not updates are available, using val to avoid conversion mistakes
-            updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
-            getLocalWinapp2Version()
-            waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
-            checkedForUpdates = True
-            gLog("Update check complete:")
-            gLog($"Winapp2ool:")
-            gLog("Local: " & currentVersion, indent:=True)
-            gLog("Remote: " & latestVersion, indent:=True)
-            gLog("Winapp2.ini:")
-            gLog("Local:" & localWa2Ver, indent:=True)
-            gLog("Remote: " & latestWa2Ver, indent:=True)
-        Catch ex As Exception
-            exc(ex)
-            updateCheckFailed("winapp2ool or winapp2.ini")
-        End Try
+    '''<summary>Performs the version chcking for winapp2ool.exe</summary>
+    Private Sub toolVersionCheck()
+        If Not isBeta Then
+            latestVersion = getFileDataAtLineNum(toolVerLink)
+        Else
+            Dim tmpDir = Environment.GetEnvironmentVariable("temp")
+            Dim tmpPath = $"{tmpDir}\winapp2ool.exe"
+            fDelete(tmpPath)
+            download(New iniFile($"{tmpDir}\", "winapp2ool.exe"), toolExeLink, False, True)
+            latestVersion = Reflection.Assembly.LoadFile(tmpPath).FullName.Split(CChar(","))(1).Substring(9)
+            ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
+            ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
+            padVersionNum(latestVersion)
+            padVersionNum(currentVersion)
+        End If
     End Sub
 
     ''' <summary>Handles the case where the update check has failed</summary>
@@ -94,7 +101,6 @@ Public Module updater
         Dim localStr = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", remote:=False).ToLower
         If localStr.Contains("version") Then localWa2Ver = localStr.Split(CChar(" "))(2)
     End Sub
-
 
     ''' <summary>Updates the offline status of winapp2ool</summary>
     Public Sub chkOfflineMode()
@@ -124,13 +130,13 @@ Public Module updater
         Dim newTool As New iniFile(Environment.CurrentDirectory, "winapp2ool updated.exe")
         Dim backupName = $"winapp2ool v{currentVersion}.exe.bak"
         Try
-            ' Remove any existing backups of this version
-            If File.Exists($"{Environment.CurrentDirectory}\{backupName}") Then File.Delete($"{Environment.CurrentDirectory}\{backupName}")
+            ' Replace any existing backups of this version
+            fDelete($"{Environment.CurrentDirectory}\{backupName}")
+            File.Move("winapp2ool.exe", backupName)
             ' Remove any old update files that didn't get renamed for whatever reason
-            If File.Exists(newTool.Path) Then File.Delete(newTool.Path)
+            fDelete(newTool.Path)
             download(newTool, If(isBeta, betaToolLink, toolLink), False)
             ' Rename the executables and launch the new one
-            File.Move("winapp2ool.exe", backupName)
             File.Move("winapp2ool updated.exe", "winapp2ool.exe")
             System.Diagnostics.Process.Start($"{Environment.CurrentDirectory}\winapp2ool.exe")
             Environment.Exit(0)
@@ -138,5 +144,10 @@ Public Module updater
             exc(ex)
             File.Move(backupName, "winapp2ool.exe")
         End Try
+    End Sub
+
+    '''<summary>Deletes a file from the disk if it exists</summary>
+    Public Sub fDelete(path As String)
+        If File.Exists(path) Then File.Delete(path)
     End Sub
 End Module
