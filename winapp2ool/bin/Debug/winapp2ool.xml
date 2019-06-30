@@ -832,7 +832,9 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="isCentered">Indicates that the printed text should be centered <br /> Optional, Default: False</param>
  <param name="closeMenu">Indicates that the bottom menu frame should be printed <br /> Optional, Default: False</param>
  <param name="openMenu">Indicates that the top menu frame should be printed <br />Optional, Default: False</param>
- <param name="enStrCond">A module setting whose menu text will include an Enable/Disable toggle <br /> Optional, Default: False </param>
+ <param name="enStrCond">A module setting whose menu text will include an Enable/Disable toggle <br /> 
+ If <paramref name="colorLine"/> is True and <paramref name="useArbitraryColor"/> is False, the line will be printed 
+ Green if <paramref name="enStrCond"/> is True, Red if False<br /> Optional, Default: False (Red) </param>
  <param name="colorLine">Indicates we want to color lines without Enabled/Disabled strings in them <br /> Optional, Default: False</param>
  <param name="useArbitraryColor">Indicates that the line should be colored using the value provided by <paramref name="arbitraryColor"/><br /> Optional, Default: False</param>
  <param name="arbitraryColor">Foreground ConsoleColor to be used when printing with when <paramref name="colorLine"/> is true, but wanting to use a color other than red/green <br /> Optional, Default: Nothing</param>
@@ -985,7 +987,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="M:winapp2ool.updater.checkUpdates(System.Boolean)">
  <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
- <param name="cond">Indicates that the update check should be performed. <br /></param>
+ <param name="cond">Indicates that the update check should be performed. <br />Optional, Default: False</param>
 </member>
 <member name="M:winapp2ool.updater.toolVersionCheck">
 <summary>Performs the version chcking for winapp2ool.exe</summary>

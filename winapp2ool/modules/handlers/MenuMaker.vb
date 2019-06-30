@@ -61,8 +61,8 @@ Module MenuMaker
     Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
         If cond Then
             MenuHeaderText = txt
-            colorHeader = cHeader
-            headerColor = printColor
+            ColorHeader = cHeader
+            HeaderColor = printColor
         End If
     End Sub
 
@@ -101,7 +101,9 @@ Module MenuMaker
     ''' <param name="isCentered">Indicates that the printed text should be centered <br /> Optional, Default: False</param>
     ''' <param name="closeMenu">Indicates that the bottom menu frame should be printed <br /> Optional, Default: False</param>
     ''' <param name="openMenu">Indicates that the top menu frame should be printed <br />Optional, Default: False</param>
-    ''' <param name="enStrCond">A module setting whose menu text will include an Enable/Disable toggle <br /> Optional, Default: False </param>
+    ''' <param name="enStrCond">A module setting whose menu text will include an Enable/Disable toggle <br /> 
+    ''' If <paramref name="colorLine"/> is True and <paramref name="useArbitraryColor"/> is False, the line will be printed 
+    ''' Green if <paramref name="enStrCond"/> is True, Red if False<br /> Optional, Default: False (Red) </param>
     ''' <param name="colorLine">Indicates we want to color lines without Enabled/Disabled strings in them <br /> Optional, Default: False</param>
     ''' <param name="useArbitraryColor">Indicates that the line should be colored using the value provided by <paramref name="arbitraryColor"/><br /> Optional, Default: False</param>
     ''' <param name="arbitraryColor">Foreground ConsoleColor to be used when printing with when <paramref name="colorLine"/> is true, but wanting to use a color other than red/green <br /> Optional, Default: Nothing</param>
@@ -166,7 +168,7 @@ Module MenuMaker
             print(0, line, isCentered:=True)
         Next
         print(0, "Menu: Enter a number to select", leadingBlank:=True, trailingBlank:=True, isCentered:=True)
-        optNum = 0
+        OptNum = 0
         print(1, "Exit", "Return to the menu", printExit)
     End Sub
 
@@ -182,10 +184,10 @@ Module MenuMaker
     ''' <param name="lineString1">The name of the menu option</param>
     ''' <param name="lineString2">The description of the menu option</param>
     Private Sub printMenuOpt(lineString1 As String, lineString2 As String)
-        lineString1 = $"{optNum}. {lineString1}"
+        lineString1 = $"{OptNum}. {lineString1}"
         padToEnd(lineString1, menuItemLength, "")
         cwl(mkMenuLine($"{lineString1}- {lineString2}", "l"))
-        optNum += 1
+        OptNum += 1
     End Sub
 
     ''' <summary>Constructs a menu line fit to the width of the console</summary>
@@ -204,17 +206,17 @@ Module MenuMaker
     ''' <item><description>3: Conjoining brackets </description></item></list> <br />Optional, Default: 0</param>
     Private Function mkMenuLine(line As String, align As String, Optional borderInd As Integer = 0) As String
         If line.Length >= Console.WindowWidth - 1 Then Return line
-        Dim out = $" {openers(borderInd)}"
+        Dim out = $" {Openers(borderInd)}"
         Select Case align
             Case "c"
-                padToEnd(out, CInt((((Console.WindowWidth - line.Length) / 2) + 2)), closers(borderInd))
+                padToEnd(out, CInt((((Console.WindowWidth - line.Length) / 2) + 2)), Closers(borderInd))
                 out += line
-                padToEnd(out, Console.WindowWidth - 2, closers(borderInd))
+                padToEnd(out, Console.WindowWidth - 2, Closers(borderInd))
             Case "l"
                 out += " " & line
-                padToEnd(out, Console.WindowWidth - 2, closers(borderInd))
+                padToEnd(out, Console.WindowWidth - 2, Closers(borderInd))
             Case "f"
-                padToEnd(out, Console.WindowWidth - 2, closers(borderInd), If(borderInd = 0, " ", "═"))
+                padToEnd(out, Console.WindowWidth - 2, Closers(borderInd), If(borderInd = 0, " ", "═"))
         End Select
         Return out
     End Function

@@ -45,7 +45,7 @@ Public Module updater
     End Sub
 
     ''' <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
-    ''' <param name="cond">Indicates that the update check should be performed. <br /></param>
+    ''' <param name="cond">Indicates that the update check should be performed. <br />Optional, Default: False</param>
     Public Sub checkUpdates(Optional cond As Boolean = False)
         If checkedForUpdates Or Not cond Then Exit Sub
         gLog("Checking for updates")
@@ -114,14 +114,11 @@ Public Module updater
     ''' <param name="oldVer">The old (currently in use) version</param>
     ''' <param name="newVer">The updated version pending download</param>
     Public Sub printUpdNotif(cond As Boolean, updName As String, oldVer As String, newVer As String)
-        If cond Then
-            gLog($"Update available for {updName} from {oldVer} to {newVer}")
-            Console.ForegroundColor = ConsoleColor.Green
-            print(0, $"A new version of {updName} is available!", isCentered:=True)
-            print(0, $"Current  : v{oldVer}", isCentered:=True)
-            print(0, $"Available: v{newVer}", trailingBlank:=True, isCentered:=True)
-            Console.ResetColor()
-        End If
+        If Not cond Then Exit Sub
+        gLog($"Update available for {updName} from {oldVer} to {newVer}")
+        print(0, $"A new version of {updName} is available!", isCentered:=True, colorLine:=True, enStrCond:=True)
+        print(0, $"Current  : v{oldVer}", isCentered:=True, colorLine:=True, enStrCond:=True)
+        print(0, $"Available: v{newVer}", trailingBlank:=True, isCentered:=True, colorLine:=True, enStrCond:=True)
     End Sub
 
     ''' <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>

@@ -138,10 +138,9 @@ Module Merge
         Dim tmp As New winapp2file(MergeFile1)
         Dim tmp2 As New winapp2file(MergeFile2)
         ' Add the entries from the second file to their respective sections in the first file
-        Console.ForegroundColor = ConsoleColor.Green
         For i As Integer = 0 To tmp.Winapp2entries.Count - 1
             tmp.Winapp2entries(i).AddRange(tmp2.Winapp2entries(i))
-            tmp2.Winapp2entries(i).ForEach(Sub(ent As winapp2entry) print(0, $"Adding {ent.Name}"))
+            tmp2.Winapp2entries(i).ForEach(Sub(ent As winapp2entry) print(0, $"Adding {ent.Name}", colorLine:=True, enStrCond:=True))
         Next
         Console.ResetColor()
         tmp.rebuildToIniFiles()
@@ -163,10 +162,9 @@ Module Merge
     ''' <param name="second">The iniFile to be merged into the base</param>
     Private Sub processMergeMode(ByRef first As iniFile, ByRef second As iniFile)
         Dim removeList As New List(Of String)
-        Console.ForegroundColor = If(mergeMode, ConsoleColor.Green, ConsoleColor.Red)
         For Each section In second.Sections.Keys
             If first.Sections.Keys.Contains(section) Then
-                print(0, $"{If(mergeMode, "Replacing", "Removing")} {first.Sections.Item(section).Name}")
+                print(0, $"{If(mergeMode, "Replacing", "Removing")} {first.Sections.Item(section).Name}", colorLine:=True, enStrCond:=mergeMode)
                 ' If mergemode is true, replace the match. otherwise, remove the match
                 If mergeMode Then first.Sections.Item(section) = second.Sections.Item(section) Else first.Sections.Remove(section)
                 removeList.Add(section)
