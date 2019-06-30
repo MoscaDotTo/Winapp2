@@ -770,7 +770,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <summary>Indicates that the menu header should be printed with color </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.HeaderColor">
-<summary>The color with which the next header should be printed if color is used</summary>
+<summary>The color with which the next header should be printed if <c>ColorHeader</c> is <c>True</c></summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.OptNum">
 <summary>Holds the current option number for the menu instance</summary>
@@ -851,11 +851,11 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.MenuMaker.printMenuTop(System.String[],System.Boolean)">
  <summary>Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option</summary>
  <param name="descriptionItems">Items describing the menu</param>
- <param name="printExit">Indicates that the option exit should be printed <br /> Optional, Default: True</param>
+ <param name="printExit">Indicates that an option to exit to the previous menu should be printed <br /> Optional, Default: True</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuLine(System.String,System.Boolean)">
- <summary>Prints a line bounded by vertical menu frames</summary>
- <param name="lineString">The text to be printed. <br/> Default: Nothing, will print an empty menu frame with no text in it</param>
+ <summary>Prints a line bounded by vertical menu frames, an empty menu line if <paramref name="lineString"/> is <c>Nothing</c></summary>
+ <param name="lineString">The text to be printed. <br/> Default: Nothing</param>
  <param name="isCentered">Indicates that the printed text should be centered <br /> Optional, Default: False</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuOpt(System.String,System.String)">
@@ -888,15 +888,17 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="M:winapp2ool.MenuMaker.replDir(System.String)">
  <summary>Replaces instances of the current directory in a path string ".."</summary>
- <param name="dirStr">A String containing a windows path</param>
+ <param name="dirStr">A windows filesystem path</param>
+ <returns><paramref name="dirStr"/> with instances of the current directory replaced with <c>".."</c></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.cwl(System.String,System.Boolean)">
- <summary>Prints a line with a string if we're not suppressing output.</summary>
+ <summary>Prints a line to the console window if <c>SuppressOutput</c> and <paramref name="cond"/> are true </summary>
  <param name="msg">The string to be printed <br />Default: Nothing</param>
  <param name="cond">The optional condition under which to print the line <br /> Default: True</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.clrConsole(System.Boolean)">
- <summary>Clears the console conditionally when not running unit tests</summary>
+ <summary>Clears the console if <paramref name="cond"/> is <c>True</c> and we're not unit testing</summary>
+ <remarks>When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that</remarks>
  <param name="cond">Indicates that the console should be cleared <br /> Optional, Default: True</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.initModule(System.String,System.Action,System.Action{System.String},System.Int32)">
@@ -1822,17 +1824,18 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.printMenu">
- <summary>Prints the main menu to the user</summary>
+ <summary>Prints the main winapp2ool menu to the user</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.main">
- <summary>Presents the winapp2ool menu to the user, initiates the main event loop for the application</summary>
+ <summary>Processes the commandline args and then initalizes the main winapp2ool module</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.handleUserInput(System.String)">
  <summary>Handles the user input for the menu</summary>
- <param name="input">The String containing the user input</param>
+ <param name="input">The user's input</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
- <summary>Attempts to return the Windows version number, return 0.0 if it cannot</summary>
+ <summary>Checks the version of Windows on the current system</summary>
+ <returns>The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined</returns>
 </member>
 <member name="M:winapp2ool.Winapp2ool.appendStrs(System.String[],System.String@,System.Boolean,System.Char)">
  <summary>Appends a series of values onto a String</summary>
@@ -1853,9 +1856,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="iFile">An iniFile to be checked for content</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.crk">
- <summary>
- Waits for the user to press a key if we're not supressing output
- </summary>
+ <summary>Waits for the user to press a key if <c>SuppressOutput</c> is <c>False</c></summary>
 </member>
 </members>
 </doc>

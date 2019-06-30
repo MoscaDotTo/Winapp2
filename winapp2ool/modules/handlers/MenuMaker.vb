@@ -29,7 +29,7 @@ Module MenuMaker
     Private Property menuItemLength As Integer
     '''<summary>Indicates that the menu header should be printed with color </summary>
     Public Property ColorHeader As Boolean
-    '''<summary>The color with which the next header should be printed if color is used</summary>
+    '''<summary>The color with which the next header should be printed if <c>ColorHeader</c> is <c>True</c></summary>
     Public Property HeaderColor As ConsoleColor
     '''<summary>Holds the current option number for the menu instance</summary>
     Private Property OptNum As Integer = 0
@@ -48,6 +48,7 @@ Module MenuMaker
     '''<summary>Returns a menuframe</summary>
     '''<param name="frameNum">Indicates which frame should be returned. <br />
     '''0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
+    '''<returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
     Public Function getFrame(Optional frameNum As Integer = 0) As String
         Return mkMenuLine("", "f", frameNum)
     End Function
@@ -56,7 +57,7 @@ Module MenuMaker
     ''' <param name="txt">The text to appear in the header</param>
     ''' <param name="cHeader">Indicates that the header should be colored <br />Optional, Default: False</param>
     ''' <param name="cond">Indicates the header text should be set <br /> Optional, Default: True</param>
-    ''' <param name="printColor">ConsoleColor with which the header should be colored <br/> Optional, Default: Red</param>
+    ''' <param name="printColor">ConsoleColor with which the header should be colored when <paramref name="cHeader"/> is True <br/> Optional, Default: Red</param>
     Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
         If cond Then
             MenuHeaderText = txt
@@ -67,7 +68,7 @@ Module MenuMaker
 
     ''' <summary>Initializes the menu</summary>
     ''' <param name="headerTxt">The text to be displayed at the top of the menu screen</param>
-    ''' <param name="itemlen">The length in characters that should comprise the first bloc of options in the menu <br />Default: 35</param>
+    ''' <param name="itemlen">The total length of the text bloc that contains the option's name <br />Default: 35</param>
     Public Sub initMenu(headerTxt As String, Optional itemlen As Integer = 35)
         ExitCode = False
         setHeaderText(headerTxt)
@@ -83,10 +84,17 @@ Module MenuMaker
     End Function
 
     ''' <summary>Prints menu lines, options, and frames fit to the current console window width</summary>
-    ''' <param name="printType">The type of menu information to print. <br /> 0: line, 1: opt, 2: Reset Settings, 3: Box w/ centered text, 
-    ''' 4: Opens a menu, 5: enable/disable string</param>
-    ''' <param name="menuText">The text to be printed. <br /> For MenuOptions, This contains the name of the option</param>
-    ''' <param name="optString">A description of a menu option <br /> Optional, Default: ""</param>
+    ''' <param name="printType">The type of menu information to print. <br /> 
+    ''' <list type="bullet">
+    ''' <item><description>0: Line </description></item>
+    ''' <item><description>1: Option</description></item>
+    ''' <item><description>2: Option with a "Reset Settings" prompt </description></item>
+    ''' <item><description>3: Box with centered text</description></item>
+    ''' <item><description>4: Menu top</description></item>
+    ''' <item><description>5: Option with an Enable/Disable prompt</description></item>
+    ''' </list></param>
+    ''' <param name="menuText">The text to be printed. <br /> When <paramref name="printType"/> is  1, this contains the name of the menu option</param>
+    ''' <param name="optString">The description of the menu option<br /> Optional, Default: ""</param>
     ''' <param name="cond">Indicates that the line should be printed. <br /> Optional, Default: True</param>
     ''' <param name="leadingBlank">Indicates that a blank menu line should be printed immediately before the printed line <br /> Optional, Default: False</param>
     ''' <param name="trailingBlank">Indicates that a blank menu line should be printed immediately after the printed line <br /> Optional, Default: False</param>
@@ -95,8 +103,8 @@ Module MenuMaker
     ''' <param name="openMenu">Indicates that the top menu frame should be printed <br />Optional, Default: False</param>
     ''' <param name="enStrCond">A module setting whose menu text will include an Enable/Disable toggle <br /> Optional, Default: False </param>
     ''' <param name="colorLine">Indicates we want to color lines without Enabled/Disabled strings in them <br /> Optional, Default: False</param>
-    ''' <param name="useArbitraryColor">Indicates that the line should be colored using the value provided by arbitraryColor <br /> Optional, Default: False</param>
-    ''' <param name="arbitraryColor">Foreground ConsoleColor to be used when printing with when colorLine is true, but wanting to use a color other than red/green <br /> Optional, Default: Nothing</param>
+    ''' <param name="useArbitraryColor">Indicates that the line should be colored using the value provided by <paramref name="arbitraryColor"/><br /> Optional, Default: False</param>
+    ''' <param name="arbitraryColor">Foreground ConsoleColor to be used when printing with when <paramref name="colorLine"/> is true, but wanting to use a color other than red/green <br /> Optional, Default: Nothing</param>
     ''' <param name="buffr">Indicates that a leading newline should be printed <br />Optional, Default: False</param>
     ''' <param name="trailr">Indicates that a trailing newline should be printed <br />Optional, Default: False</param>
     ''' <param name="conjoin">Indicates that a conjoining menu frame should be printed <br /> Optional, Default: False</param>
@@ -139,6 +147,7 @@ Module MenuMaker
 
     ''' <summary>Returns the inverse state of a given boolean as a String</summary>
     ''' <param name="setting">A module setting whose state will be observed</param>
+    ''' <returns><c>"Disable"</c> if <paramref name="setting"/>is True, <c>"Enable"</c>otherwise</returns>
     Public Function enStr(setting As Boolean) As String
         Return If(setting, "Disable", "Enable")
     End Function
@@ -150,7 +159,7 @@ Module MenuMaker
 
     ''' <summary>Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option</summary>
     ''' <param name="descriptionItems">Items describing the menu</param>
-    ''' <param name="printExit">Indicates that the option exit should be printed <br /> Optional, Default: True</param>
+    ''' <param name="printExit">Indicates that an option to exit to the previous menu should be printed <br /> Optional, Default: True</param>
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
         print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=True, arbitraryColor:=HeaderColor, conjoin:=True)
         For Each line In descriptionItems
@@ -161,8 +170,8 @@ Module MenuMaker
         print(1, "Exit", "Return to the menu", printExit)
     End Sub
 
-    ''' <summary>Prints a line bounded by vertical menu frames</summary>
-    ''' <param name="lineString">The text to be printed. <br/> Default: Nothing, will print an empty menu frame with no text in it</param>
+    ''' <summary>Prints a line bounded by vertical menu frames, an empty menu line if <paramref name="lineString"/> is <c>Nothing</c></summary>
+    ''' <param name="lineString">The text to be printed. <br/> Default: Nothing</param>
     ''' <param name="isCentered">Indicates that the printed text should be centered <br /> Optional, Default: False</param>
     Private Sub printMenuLine(Optional lineString As String = Nothing, Optional isCentered As Boolean = False)
         If lineString = Nothing Then lineString = getFrame()
@@ -180,10 +189,19 @@ Module MenuMaker
     End Sub
 
     ''' <summary>Constructs a menu line fit to the width of the console</summary>
-    ''' <param name="line">The line to be printed</param>
-    ''' <param name="align">The alignment of the line to be printed: <br /> 'l' for Left, 'c' for Centre, 'f' for Frame</param>
+    ''' <param name="line">The text to be printed</param>
+    ''' <param name="align">The alignment of the line to be printed: <br /> 
+    ''' <list type="bullet">
+    ''' <item><description>'c': centers the string </description></item>
+    ''' <item><description>'l': leftaligns the string</description></item>
+    ''' <item><description>'f': prints a menu frame</description></item>
+    ''' </list></param>
     ''' <param name="borderInd">Determines which characters should create the border for the menuline: <br />
-    ''' 0: Vertical lines, 1: ceiling brackets, 2: floor brackets, 3: conjoining brackets</param>
+    ''' <list type="bullet">
+    ''' <item><description>0: Vertical lines</description></item>
+    ''' <item><description>1: Ceiling brackets</description></item>
+    ''' <item><description>2: Floor brackets</description></item>
+    ''' <item><description>3: Conjoining brackets </description></item></list> <br />Optional, Default: 0</param>
     Private Function mkMenuLine(line As String, align As String, Optional borderInd As Integer = 0) As String
         If line.Length >= Console.WindowWidth - 1 Then Return line
         Dim out = $" {openers(borderInd)}"
@@ -202,10 +220,10 @@ Module MenuMaker
     End Function
 
     ''' <summary>Pads a given string with spaces</summary>
-    ''' <param name="out">The string to be padded</param>
-    ''' <param name="targetLen">The end length to which the string should be padded</param>
+    ''' <param name="out">The text to be padded</param>
+    ''' <param name="targetLen">The length to which the string should be padded</param>
     ''' <param name="endline">The closer character for the type of frame being built</param>
-    ''' <param name="padChar">The character with which to pad the line <br /> Default: " " (space character)</param>
+    ''' <param name="padChar">The character with which to pad the text <br /> Default: " " (space character)</param>
     Private Sub padToEnd(ByRef out As String, targetLen As Integer, endline As String, Optional padChar As String = " ")
         While out.Length < targetLen
             out += padChar
@@ -214,22 +232,23 @@ Module MenuMaker
     End Sub
 
     ''' <summary>Replaces instances of the current directory in a path string ".."</summary>
-    ''' <param name="dirStr">A String containing a windows path</param>
+    ''' <param name="dirStr">A windows filesystem path</param>
+    ''' <returns><paramref name="dirStr"/> with instances of the current directory replaced with <c>".."</c></returns>
     Public Function replDir(dirStr As String) As String
         Return dirStr.Replace(Environment.CurrentDirectory, "..")
     End Function
 
-    ''' <summary>Prints a line with a string if we're not suppressing output.</summary>
+    ''' <summary>Prints a line to the console window if <c>SuppressOutput</c> and <paramref name="cond"/> are true </summary>
     ''' <param name="msg">The string to be printed <br />Default: Nothing</param>
     ''' <param name="cond">The optional condition under which to print the line <br /> Default: True</param>
     Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
         If cond And Not SuppressOutput Then Console.WriteLine(msg)
     End Sub
 
-    ''' <summary>Clears the console conditionally when not running unit tests</summary>
+    ''' <summary>Clears the console if <paramref name="cond"/> is <c>True</c> and we're not unit testing</summary>
+    ''' <remarks>When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that</remarks>
     ''' <param name="cond">Indicates that the console should be cleared <br /> Optional, Default: True</param>
     Public Sub clrConsole(Optional cond As Boolean = True)
-        ' Do not clear the console during unit tests because there isnt one and the invalid handler throws an IO Exception
         If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
     End Sub
 

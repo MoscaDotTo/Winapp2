@@ -21,8 +21,9 @@ Imports System.Net
 Module downloadr
 
     ''' <summary>Performs the download, returns a boolean indicating the success of the download.</summary>
-    ''' <param name="link">The URL to be downloaded from</param>
-    ''' <param name="path">The file path to be saved to</param>
+    ''' <param name="link">The URL from which we are downloading</param>
+    ''' <param name="path">The path to which the downloaded file should be saved</param>
+    ''' <returns><c>True</c> if the download is successful<c>False</c> otherwise</returns>
     Public Function dlFile(link As String, path As String) As Boolean
         Try
             Dim dl As New WebClient
@@ -36,9 +37,9 @@ Module downloadr
     End Function
 
     ''' <summary>Prompts the user to rename or overwrite a file if necessary before downloading.</summary>
-    ''' <param name="link">The URL to be downloaded from</param>
-    ''' <param name="prompt">The boolean indicating whether or not the user should be prompted to rename the file should it exist already.</param>
-    ''' <param name="quietly">Optional boolean indicating all output should be suppressed (default: false)</param>
+    ''' <param name="link">The URL from which we are downloading</param>
+    ''' <param name="prompt">Indicates that a "rename file" prompt should be shown if the target path already exists <br />Optional, Default: True </param>
+    ''' <param name="quietly">Indicates that all downloading output should be suppressed <br />Optional, Default: False</param>
     Public Sub download(pathHolder As iniFile, link As String, Optional prompt As Boolean = True, Optional quietly As Boolean = False)
         Dim givenName = pathHolder.Name
         ' Don't try to download to a directory that doesn't exist
@@ -50,7 +51,7 @@ Module downloadr
             Dim nfilename = Console.ReadLine()
             If nfilename.Trim <> "" Then pathHolder.Name = nfilename
         End If
-        If Not prompt And File.Exists(pathHolder.Path) Then File.Delete(pathHolder.Path)
+        If Not prompt Then fDelete(pathHolder.Path)
         cwl($"Downloading {givenName}...", Not quietly)
         Dim success = dlFile(link, pathHolder.Path)
         cwl($"Download {If(success, "Complete.", "Failed.")}", Not quietly)
@@ -60,9 +61,9 @@ Module downloadr
     End Sub
 
     ''' <summary>Reads a file until a specified line number0</summary>
-    ''' <param name="path">The path (or online address) of the file</param>
-    ''' <param name="lineNum">The line number to read to</param>
-    ''' <param name="remote">The boolean specifying whether the resource is remote (online)</param>
+    ''' <param name="path">If <paramref name="remote"/> is <c>True</c> The URL of file hosted on GitHub. Otherwise, the path of a local file</param>
+    ''' <param name="lineNum">The line number to return from the file</param>
+    ''' <param name="remote">Indicates that the resource we're looking for is online <br/> Default: False</param>
     Public Function getFileDataAtLineNum(path As String, Optional lineNum As Integer = 1, Optional remote As Boolean = True) As String
         Dim out As String
         Try
@@ -76,7 +77,8 @@ Module downloadr
         Return If(Not out = Nothing, out, "")
     End Function
 
-    ''' <summary>Returns true if we are able to connect to the internet, otherwise, returns false.</summary>
+    ''' <summary>Attempts to connect to the internet</summary>
+    ''' <returns><c>True</c>If the connection is successful <c>False</c> otherwise</returns>
     Public Function checkOnline() As Boolean
         Dim reader As StreamReader
         Try
@@ -93,6 +95,7 @@ Module downloadr
     ''' <summary>Reads a file only until reaching a specific line and then returns that line as a String</summary>
     ''' <param name="reader">An open file stream</param>
     ''' <param name="lineNum">The target line number</param>
+    ''' <returns>The String on the line given by <paramref name="lineNum"/></returns>
     Private Function getTargetLine(reader As StreamReader, lineNum As Integer) As String
         Dim out = ""
         Dim curLine = 1
@@ -103,9 +106,10 @@ Module downloadr
         Return out
     End Function
 
-
-    ''' <summary>Returns an iniFile object created using an online resource ie. GitHub</summary>
+    ''' <summary>Attempts to create an <c>iniFile</c> using the data provided by <paramref name="address"/></summary>
     ''' <param name="address">A URL pointing to an online .ini file</param>
+    ''' <param name="someFile">An iniFile object whose parameters will be copied over into the newly created object's fields <br />Optional, Default: Nothing</param>
+    ''' <returns>An <c>iniFile</c>created using the remote data if that data is properly formatted, <c>Nothing</c> otherwise</returns>
     Public Function getRemoteIniFile(address As String, Optional ByRef someFile As iniFile = Nothing) As iniFile
         Try
             Dim client As New WebClient

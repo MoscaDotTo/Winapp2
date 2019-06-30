@@ -27,7 +27,7 @@ Module Winapp2ool
     '''<summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
     Public Property isBeta As Boolean = True
 
-    ''' <summary>Prints the main menu to the user</summary>
+    ''' <summary>Prints the main winapp2ool menu to the user</summary>
     Private Sub printMenu()
         checkUpdates(Not isOffline)
         printMenuTop({}, False)
@@ -52,7 +52,7 @@ Module Winapp2ool
         Console.WindowHeight = If(waUpdateIsAvail And updateIsAvail, 32, 30)
     End Sub
 
-    ''' <summary>Presents the winapp2ool menu to the user, initiates the main event loop for the application</summary>
+    ''' <summary>Processes the commandline args and then initalizes the main winapp2ool module</summary>
     Public Sub main()
         gLog($"Starting application")
         Console.Title = $"Winapp2ool v{currentVersion}"
@@ -68,7 +68,7 @@ Module Winapp2ool
     End Sub
 
     ''' <summary>Handles the user input for the menu</summary>
-    ''' <param name="input">The String containing the user input</param>
+    ''' <param name="input">The user's input</param>
     Private Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
@@ -119,7 +119,8 @@ Module Winapp2ool
         End Select
     End Sub
 
-    ''' <summary>Attempts to return the Windows version number, return 0.0 if it cannot</summary>
+    ''' <summary>Checks the version of Windows on the current system</summary>
+    ''' <returns>The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined</returns>
     Public Function getWinVer() As Double
         gLog("Checking Windows version")
         ' We can return very quickly on Windows 10 using this registry key. Unknown if it exists on earlier versions
@@ -189,9 +190,7 @@ Module Winapp2ool
         Return True
     End Function
 
-    ''' <summary>
-    ''' Waits for the user to press a key if we're not supressing output
-    ''' </summary>
+    ''' <summary>Waits for the user to press a key if <c>SuppressOutput</c> is <c>False</c></summary>
     Public Sub crk()
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
