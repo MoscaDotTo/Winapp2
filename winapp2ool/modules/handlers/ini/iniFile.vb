@@ -16,7 +16,6 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.IO
-Imports winapp2ool
 ''' <summary>
 ''' An object representing a .ini configuration file
 ''' </summary>
@@ -27,10 +26,10 @@ Public Class iniFile
     Public Property Name As String
     ''' <summary>The Directory with which the iniFile was instantiated</summary>
     Public Property InitDir As String
-    ''' <summary>The file name with which the iniFile was instantiated</summary>
+    ''' <summary>The Name with which the iniFile was instantiated</summary>
     Public Property InitName As String
 
-    ''' <summary>The individual sections found in the file. Keys are the Section's Name</summary>
+    ''' <summary>The individual sections found in the file. Dictionary keys are the contained section's Name field</summary>
     Public Property Sections As New Dictionary(Of String, iniSection)
 
     ''' <summary>Any comments found in the file, in the order they were found. Positions are not remembered.</summary>
@@ -47,9 +46,9 @@ Public Class iniFile
     Public Property mustExist As Boolean
 
     ''' <summary>Returns the full windows file path of the iniFile as a String</summary>
-    Public function Path() As String
+    Public Function Path() As String
         Return $"{Dir}\{Name}"
-    End function 
+    End Function
 
     ''' <summary>Returns an iniFile as it would appear on disk as a String</summary>
     Public Overrides Function toString() As String
@@ -61,10 +60,18 @@ Public Class iniFile
         Return out
     End Function
 
+    '''<summary>Returns a Boolean indicating the existence of a section by its Name</summary>
+    '''<param name="sectionName">The name of the section to search for </param>
+    '''<returns><c>True</c> if <paramref name="sectionName"/> matches the name of a section in the iniFile, <c>False</c> otherwise</returns>
+    Public Function hasSection(sectionName As String) As Boolean
+        Return Sections.ContainsKey(sectionName)
+    End Function
+
     ''' <summary>Creates an uninitialized iniFile with a directory and a filename.</summary>
-    ''' <param name="directory">A windows directory containing a .ini file</param>
-    ''' <param name="filename">The name of the .ini file contained in the given directory </param>
+    ''' <param name="directory">A windows directory containing the ini file</param>
+    ''' <param name="filename">The name of the ini file contained in <paramref name="directory"/></param>
     ''' <param name="rename">A provided suggestion for a rename should the user open the File Chooser on this file</param>
+    ''' <param name="mExist">Indicates that this file must exist <br />Optional, Default: False</param>"
     Public Sub New(Optional directory As String = "", Optional filename As String = "", Optional rename As String = "", Optional mExist As Boolean = False)
         Dir = directory
         Name = filename
@@ -77,25 +84,25 @@ Public Class iniFile
         mustExist = mExist
     End Sub
 
-    ''' <summary>Writes the contents of a provided String to our iniFile's path, overwriting any existing contents</summary>
-    ''' <param name="tostr">The string to be written to disk</param>
+    ''' <summary>Conditionally writes the contents of a provided String to our iniFile's path, overwriting any existing contents</summary>
+    ''' <param name="tostr">The file text to the be written to disk</param>
+    ''' <param name="cond">Indicates that the file should be written to disk <br />Optional, Default: True</param>
     Public Sub overwriteToFile(tostr As String, Optional cond As Boolean = True)
-        If cond Then
-            gLog($"Saving {Name}")
-            Dim file As StreamWriter
-            Try
-                file = New StreamWriter(Me.Path)
-                file.Write(tostr)
-                file.Close()
-                gLog("Save complete", indent:=True)
-            Catch ex As Exception
-                gLog("Save failed", indent:=True)
-                exc(ex)
-            End Try
-        End If
+        If Not cond Then Exit Sub
+        gLog($"Saving {Name}")
+        Dim file As StreamWriter
+        Try
+            file = New StreamWriter(Me.Path)
+            file.Write(tostr)
+            file.Close()
+            gLog("Save complete", indent:=True)
+        Catch ex As Exception
+            gLog("Save failed", indent:=True)
+            exc(ex)
+        End Try
     End Sub
 
-    ''' <summary>Restores the initial directory and name parameters in the iniFile </summary>
+    ''' <summary>Restores the directory and name parameters used to instantiate the iniFile object</summary>
     Public Sub resetParams()
         Dir = InitDir
         Name = InitName
@@ -111,18 +118,12 @@ Public Class iniFile
     End Function
 
     ''' <summary>Constructs an iniFile object using an internet source</summary>
-    ''' <param name="lines">The array of Strings representing a remote .ini file</param>
-    Public Sub New(lines As String())
-        Dim sectionToBeBuilt As New List(Of String)
-        Dim lineTrackingList As New List(Of Integer)
-        Dim lastLineWasEmpty = False
-        LineCount = 1
+    ''' <param name="r">A StreamReader object containing a Stream of an iniFile, remote or local</param>
+    Public Sub New(r As StreamReader)
         Sections = New Dictionary(Of String, iniSection)
         Comments = New Dictionary(Of Integer, iniComment)
-        For Each line In lines
-            processiniLine(line, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
-        Next
-        If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
+        LineCount = 1
+        buildIniFromStream(r)
     End Sub
 
     ''' <summary>Processes a line in a .ini file and updates the iniFile object meta data accordingly</summary>
@@ -155,25 +156,30 @@ Public Class iniFile
         lastLineWasEmpty = False
     End Sub
 
+    '''<summary>Populates the Sections and Comments of an iniFile using a StreamReader from either disk or the internet</summary>
+    ''' <param name="r">A StreamReader object containing a Stream of an iniFile, remote or local</param>
+    Public Sub buildIniFromStream(ByRef r As StreamReader)
+        Dim sectionToBeBuilt As New List(Of String)
+        Dim lineTrackingList As New List(Of Integer)
+        Dim lastLineWasEmpty = False
+        Do While r.Peek() > -1
+            processiniLine(r.ReadLine, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
+        Loop
+        If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
+        r.Close()
+    End Sub
+
     ''' <summary>Attempts to read a .ini file from disk and initialize the iniFile object</summary>
     Public Sub init()
         Try
-            Dim sectionToBeBuilt As New List(Of String)
-            Dim lineTrackingList As New List(Of Integer)
-            Dim lastLineWasEmpty = False
-            Dim r As New StreamReader(Me.Path())
-            Do While (r.Peek() > -1)
-                processiniLine(r.ReadLine.ToString, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
-            Loop
-            If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
-            r.Close()
+            buildIniFromStream(New StreamReader(Me.Path()))
         Catch ex As Exception
             Console.WriteLine(ex.Message & Environment.NewLine & $"Failure occurred during iniFile construction at line: {LineCount} in {Name}")
             Console.ReadLine()
         End Try
     End Sub
 
-    ''' <summary>Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists.</summary>
+    ''' <summary>Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists</summary>
     Public Sub validate()
         gLog($"Validating {Name}", ascend:=True)
         Sections = New Dictionary(Of String, iniSection)
@@ -183,17 +189,8 @@ Public Class iniFile
             initModule("File Chooser", AddressOf printFileChooserMenu, AddressOf handleFileChooserInput)
             If Not exists() Then Exit Sub
         End While
-        ' Make sure that the file isn't empty
-        Try
-            Dim iniTester As New iniFile(Dir, Name)
-            iniTester.init()
-            gLog($"ini created with {iniTester.Sections.Count} sections", indent:=True, descend:=True)
-            Sections = iniTester.Sections
-            Comments = iniTester.Comments
-        Catch ex As Exception
-            exc(ex)
-            exitModule()
-        End Try
+        init()
+        gLog($"ini created with {Sections.Count} sections", indent:=True, descend:=True)
     End Sub
 
     ''' <summary>Reorders the iniSections in an iniFile object to be in the same sorted state as a provided list of Strings</summary>
@@ -275,15 +272,12 @@ Public Class iniFile
                 exitIfExists()
             Case input = "1" And InitName <> ""
                 reName(InitName)
-                exitIfExists(True)
             Case (input = "1" And InitName = "") Or (input = "2" And SecondName <> "")
                 reName(SecondName)
-                exitIfExists(True)
             Case (input = "2" And SecondName = "") Or (input = "3" And InitName <> "" And SecondName <> "")
                 initModule("Directory Chooser", AddressOf printDirChooserMenu, AddressOf handleDirChooserInput)
             Case Else
                 reName(input)
-                exitIfExists(True)
         End Select
     End Sub
 
@@ -292,10 +286,11 @@ Public Class iniFile
     Private Sub reName(nname As String)
         tmpRename = Name
         Name = nname
+        exitIfExists(True)
     End Sub
 
     ''' <summary>Leaves the submodule as long as the inifile exists on disk in the case that mustExist is true</summary>
-    ''' <param name="undoPendingRename">Optional boolean indicating that there's a pending rename that should be reverted if the renamed file doesn't exist (default: off)</param>
+    ''' <param name="undoPendingRename">Indicates that there's a pending rename that should be reverted if the renamed file doesn't exist <br/>Optional, Default: False</param>
     Private Sub exitIfExists(Optional undoPendingRename As Boolean = False)
         If Not exists() And mustExist Then
             setHeaderText($"{Name} does not exist", True)
@@ -340,7 +335,8 @@ Public Class iniFile
     End Sub
 
     ''' <summary>Returns true if the path (or optionally just the directory) of the inifile exists on the file system</summary>>
-    ''' <param name="checkPath">Optional boolean indicating that only the directory should be checked for existence (default: false)</param>
+    ''' <param name="checkPath">Indicates that the full path should be checked for existence. When <paramref name="checkPath"/> is False, only the directory will be checked
+    ''' <br/>Optional, Default: True</param>
     Public Function exists(Optional checkPath As Boolean = True) As Boolean
         If checkPath Then Return File.Exists(Path)
         Return Directory.Exists(Dir)

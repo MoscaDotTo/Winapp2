@@ -125,8 +125,7 @@ Module JavaMaker
     ''' <summary>Creates a winapp2.ini entry to clean up after the Java installation process</summary>
     Private Sub makeSomeJava()
         ' Load the java.ini file
-        If DownloadJavaDefs Then JavaMakerFile2 = getRemoteIniFile(javaLink)
-        JavaMakerFile2.validate()
+        If DownloadJavaDefs Then JavaMakerFile2 = getRemoteIniFile(javaLink) Else JavaMakerFile2.validate()
         If Not enforceFileHasContent(JavaMakerFile2) Then Exit Sub
         ' Get JavaPlugin and JavaScript keys in HKCR\
         Dim JavaPluginKeys = getRegKeys(Microsoft.Win32.Registry.ClassesRoot, {"JavaPlugin", "JavaScript"}.ToList)

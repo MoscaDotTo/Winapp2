@@ -125,7 +125,7 @@ Public Class iniSection
 
     ''' <summary>Returns an iniSection as it would appear on disk as a String</summary>
     Public Overrides Function ToString() As String
-        Dim out As String = Me.getFullName
+        Dim out = Me.getFullName
         For Each key In Keys.Keys
             out += Environment.NewLine & key.toString
         Next

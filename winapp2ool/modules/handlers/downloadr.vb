@@ -114,23 +114,15 @@ Module downloadr
         Try
             Dim client As New WebClient
             Dim reader = New StreamReader(client.OpenRead(address))
-            Dim wholeFile = reader.ReadToEnd
-            wholeFile += Environment.NewLine
-            Dim splitFile = wholeFile.Split(CChar(Environment.NewLine))
-            ' Workaround for java.ini until the underlying reason for mismatches between line endings can be discovered
-            If address = javaLink Then splitFile = wholeFile.Split(CChar(vbLf))
-            For i = 0 To splitFile.Count - 1
-                splitFile(i) = splitFile(i).Replace(vbCr, "").Replace(vbLf, "")
-            Next
-            reader.Close()
-            client.Dispose()
             Dim someFileExists = someFile IsNot Nothing
-            Dim out = New iniFile(splitFile) With {.Dir = If(someFileExists, someFile.Dir, Environment.CurrentDirectory),
+            Dim out = New iniFile(reader) With {.Dir = If(someFileExists, someFile.Dir, Environment.CurrentDirectory),
                                                    .InitDir = If(someFileExists, someFile.InitDir, Environment.CurrentDirectory),
                                                    .mustExist = If(someFileExists, someFile.mustExist, False),
                                                    .Name = If(someFileExists, someFile.Name, ""),
                                                    .InitName = If(someFileExists, someFile.InitName, ""),
                                                    .SecondName = If(someFileExists, someFile.SecondName, "")}
+            ' Reader gets closed internally on the New iniFile call
+            client.Dispose()
             Return out
         Catch ex As Exception
             exc(ex)

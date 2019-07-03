@@ -37,16 +37,17 @@ winapp2ool
 <summary>Holds the path for the file that will be saved to disk. Overwrites ccleaner.ini by default</summary>
 </member>
 <member name="P:winapp2ool.CCiniDebug.PruneStaleEntries">
-<summary>Indicates whether or not stale winapp2.ini entries should be pruned from ccleaner.ini</summary>
+<summary>Indicates that stale winapp2.ini entries should be pruned from ccleaner.ini</summary>
+<remarks>A "stale" entry is one that appears in an (app) key in ccleaner.ini but does not exist in winapp2.ini</remarks>
 </member>
 <member name="P:winapp2ool.CCiniDebug.SaveDebuggedFile">
-<summary>Indicates whether or not the debugged file should be saved back to disk</summary>
+<summary>Indicates that the debugged file should be saved back to disk</summary>
 </member>
 <member name="P:winapp2ool.CCiniDebug.SortFileForOutput">
-<summary>Indicates whether or not the contents of ccleaner.ini should be sorted alphabetically</summary>
+<summary>Indicates that the contents of ccleaner.ini should be sorted alphabetically</summary>
 </member>
 <member name="P:winapp2ool.CCiniDebug.ModuleSettingsChanged">
-<summary>Indicates that module level settings have been changed and can be reset</summary>
+<summary>Indicates that the module's settings have been modified from their defaults</summary>
 </member>
 <member name="M:winapp2ool.CCiniDebug.initDefaultSettings">
  <summary>Restores the default state of the module's parameters</summary>
@@ -62,8 +63,8 @@ winapp2ool
  <summary>Prints the CCiniDebug menu to the user</summary>
 </member>
 <member name="M:winapp2ool.CCiniDebug.handleUserInput(System.String)">
- <summary>Handles the user's input from the menu</summary>
- <param name="input">The string containing the user's input</param>
+ <summary>Handles the user's input from the CCiniDebug menu</summary>
+ <param name="input">The user's input</param>
 </member>
 <member name="M:winapp2ool.CCiniDebug.ccDebug">
 <summary>Performs the debug process on ccleaner.ini</summary>
@@ -73,7 +74,7 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.CCiniDebug.prune(winapp2ool.iniSection@)">
  <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>
- <param name="optionsSec">The iniSection object containing the Options from ccleaner.ini</param>
+ <param name="optionsSec">The iniSection object containing the Options section from ccleaner.ini</param>
 </member>
 <member name="M:winapp2ool.CCiniDebug.sortCC">
  <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
@@ -364,10 +365,10 @@ winapp2ool
  <summary>The Directory with which the iniFile was instantiated</summary>
 </member>
 <member name="P:winapp2ool.iniFile.InitName">
- <summary>The file name with which the iniFile was instantiated</summary>
+ <summary>The Name with which the iniFile was instantiated</summary>
 </member>
 <member name="P:winapp2ool.iniFile.Sections">
- <summary>The individual sections found in the file. Keys are the Section's Name</summary>
+ <summary>The individual sections found in the file. Dictionary keys are the contained section's Name field</summary>
 </member>
 <member name="P:winapp2ool.iniFile.Comments">
  <summary>Any comments found in the file, in the order they were found. Positions are not remembered.</summary>
@@ -390,25 +391,32 @@ winapp2ool
 <member name="M:winapp2ool.iniFile.ToString">
  <summary>Returns an iniFile as it would appear on disk as a String</summary>
 </member>
+<member name="M:winapp2ool.iniFile.hasSection(System.String)">
+<summary>Returns a Boolean indicating the existence of a section by its Name</summary>
+<param name="sectionName">The name of the section to search for </param>
+<returns><c>True</c> if <paramref name="sectionName"/> matches the name of a section in the iniFile, <c>False</c> otherwise</returns>
+</member>
 <member name="M:winapp2ool.iniFile.#ctor(System.String,System.String,System.String,System.Boolean)">
  <summary>Creates an uninitialized iniFile with a directory and a filename.</summary>
- <param name="directory">A windows directory containing a .ini file</param>
- <param name="filename">The name of the .ini file contained in the given directory </param>
+ <param name="directory">A windows directory containing the ini file</param>
+ <param name="filename">The name of the ini file contained in <paramref name="directory"/></param>
  <param name="rename">A provided suggestion for a rename should the user open the File Chooser on this file</param>
+ <param name="mExist">Indicates that this file must exist <br />Optional, Default: False</param>"
 </member>
 <member name="M:winapp2ool.iniFile.overwriteToFile(System.String,System.Boolean)">
- <summary>Writes the contents of a provided String to our iniFile's path, overwriting any existing contents</summary>
- <param name="tostr">The string to be written to disk</param>
+ <summary>Conditionally writes the contents of a provided String to our iniFile's path, overwriting any existing contents</summary>
+ <param name="tostr">The file text to the be written to disk</param>
+ <param name="cond">Indicates that the file should be written to disk <br />Optional, Default: True</param>
 </member>
 <member name="M:winapp2ool.iniFile.resetParams">
- <summary>Restores the initial directory and name parameters in the iniFile </summary>
+ <summary>Restores the directory and name parameters used to instantiate the iniFile object</summary>
 </member>
 <member name="M:winapp2ool.iniFile.getLineNumsFromSections">
  <summary>Returns the starting line number of each section in the iniFile as a list of integers</summary>
 </member>
-<member name="M:winapp2ool.iniFile.#ctor(System.String[])">
+<member name="M:winapp2ool.iniFile.#ctor(System.IO.StreamReader)">
  <summary>Constructs an iniFile object using an internet source</summary>
- <param name="lines">The array of Strings representing a remote .ini file</param>
+ <param name="r">A StreamReader object containing a Stream of an iniFile, remote or local</param>
 </member>
 <member name="M:winapp2ool.iniFile.processiniLine(System.String@,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.Boolean@)">
  <summary>Processes a line in a .ini file and updates the iniFile object meta data accordingly</summary>
@@ -423,11 +431,15 @@ winapp2ool
  <param name="lineList">The list of line numbers for the iniSection</param>
  <param name="curLine">The current line to be added to the section</param>
 </member>
+<member name="M:winapp2ool.iniFile.buildIniFromStream(System.IO.StreamReader@)">
+<summary>Populates the Sections and Comments of an iniFile using a StreamReader from either disk or the internet</summary>
+ <param name="r">A StreamReader object containing a Stream of an iniFile, remote or local</param>
+</member>
 <member name="M:winapp2ool.iniFile.init">
  <summary>Attempts to read a .ini file from disk and initialize the iniFile object</summary>
 </member>
 <member name="M:winapp2ool.iniFile.validate">
- <summary>Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists.</summary>
+ <summary>Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists</summary>
 </member>
 <member name="M:winapp2ool.iniFile.sortSections(winapp2ool.strList)">
  <summary>Reorders the iniSections in an iniFile object to be in the same sorted state as a provided list of Strings</summary>
@@ -458,7 +470,7 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.iniFile.exitIfExists(System.Boolean)">
  <summary>Leaves the submodule as long as the inifile exists on disk in the case that mustExist is true</summary>
- <param name="undoPendingRename">Optional boolean indicating that there's a pending rename that should be reverted if the renamed file doesn't exist (default: off)</param>
+ <param name="undoPendingRename">Indicates that there's a pending rename that should be reverted if the renamed file doesn't exist <br/>Optional, Default: False</param>
 </member>
 <member name="M:winapp2ool.iniFile.printDirChooserMenu">
 <summary>Prints the menu for the Directory Chooser submodule</summary>
@@ -469,7 +481,8 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.iniFile.exists(System.Boolean)">
  <summary>Returns true if the path (or optionally just the directory) of the inifile exists on the file system</summary>>
- <param name="checkPath">Optional boolean indicating that only the directory should be checked for existence (default: false)</param>
+ <param name="checkPath">Indicates that the full path should be checked for existence. When <paramref name="checkPath"/> is False, only the directory will be checked
+ <br/>Optional, Default: True</param>
 </member>
 <member name="T:winapp2ool.iniSection">
  <summary>
@@ -1387,7 +1400,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <summary>Hardcoded list of SpecialDetect evaluations</summary>
 </member>
 <member name="P:winapp2ool.Trim.ModuleSettingsChanged">
-<summary>Indicates module settings have changed and can be reset</summary>
+<summary>Indicates that the module settings have been modified from their defaults</summary>
 </member>
 <member name="P:winapp2ool.Trim.DownloadFileToTrim">
 <summary>Indicates that we are downloading a winapp2.ini from GitHub</summary>
@@ -1814,13 +1827,13 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="newValue">The replacement value for the given string</param>
 </member>
 <member name="P:winapp2ool.Winapp2ool.RemoteWinappIsNonCC">
- <summary>Indicates whether or not winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini </summary>
+ <summary>Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini </summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.DotNetFrameworkOutOfDate">
-<summary>Indicates whether or not the .NET Framework installed on the current machine is below the targeted version</summary>
+<summary>Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)</summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.isOffline">
- <summary>Indicates whether or not winapp2ool currently has access to the internet</summary>
+ <summary>Indicates that winapp2ool currently has access to the internet</summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.isBeta">
 <summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
@@ -1836,17 +1849,21 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="input">The user's input</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
- <summary>Checks the version of Windows on the current system</summary>
+ <summary>Checks the version of Windows on the current system and returns it as a Double</summary>
  <returns>The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined</returns>
 </member>
 <member name="M:winapp2ool.Winapp2ool.appendStrs(System.String[],System.String@,System.Boolean,System.Char)">
- <summary>Appends a series of values onto a String</summary>
- <param name="toAppend">The values to append</param>
+ <summary>Appends a series of values onto a given String</summary>
+ <param name="toAppend">The values to append to <paramref name="out"/></param>
  <param name="out">The given string to be extended</param>
+ <param name="delim">Indicates that the appended Strings should be delimited using the <paramref name="delimchar"/></param>
+ <param name="delimchar">The Char with which to delimit the items in <paramref name="toAppend"/> as they are appended
+ to <paramref name="out"/> when <paramref name="delim"/> is True</param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getFirstDir(System.String)">
  <summary>Returns the first portion of a registry or filepath parameterization</summary>
- <param name="val">The directory listing to be split</param>
+ <param name="val">A Windows filesystem or registry path from which the root should be returned</param>
+ <returns>The root directory given by <paramref name="val"/></returns>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getCasedString(System.String[],System.String)">
  <summary>Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected</summary>
