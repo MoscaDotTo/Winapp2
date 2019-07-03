@@ -49,7 +49,7 @@ Module MenuMaker
     '''<param name="frameNum">Indicates which frame should be returned. <br />
     '''0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
     '''<returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
-    Public Function getFrame(Optional frameNum As Integer = 0) As String
+    Private Function getFrame(Optional frameNum As Integer = 0) As String
         Return mkMenuLine("", "f", frameNum)
     End Function
 
