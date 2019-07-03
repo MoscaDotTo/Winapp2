@@ -25,13 +25,14 @@ Module CCiniDebug
     Public Property CCDebugFile2 As New iniFile(Environment.CurrentDirectory, "ccleaner.ini")
     '''<summary>Holds the path for the file that will be saved to disk. Overwrites ccleaner.ini by default</summary>
     Public Property CCDebugFile3 As New iniFile(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner-debugged.ini")
-    '''<summary>Indicates whether or not stale winapp2.ini entries should be pruned from ccleaner.ini</summary>
+    '''<summary>Indicates that stale winapp2.ini entries should be pruned from ccleaner.ini</summary>
+    '''<remarks>A "stale" entry is one that appears in an (app) key in ccleaner.ini but does not exist in winapp2.ini</remarks>
     Public Property PruneStaleEntries As Boolean = True
-    '''<summary>Indicates whether or not the debugged file should be saved back to disk</summary>
+    '''<summary>Indicates that the debugged file should be saved back to disk</summary>
     Public Property SaveDebuggedFile As Boolean = True
-    '''<summary>Indicates whether or not the contents of ccleaner.ini should be sorted alphabetically</summary>
+    '''<summary>Indicates that the contents of ccleaner.ini should be sorted alphabetically</summary>
     Public Property SortFileForOutput As Boolean = True
-    '''<summary>Indicates that module level settings have been changed and can be reset</summary>
+    '''<summary>Indicates that the module's settings have been modified from their defaults</summary>
     Private Property ModuleSettingsChanged As Boolean = False
 
     ''' <summary>Restores the default state of the module's parameters</summary>
@@ -75,8 +76,8 @@ Module CCiniDebug
         print(2, "CCiniDebug", cond:=ModuleSettingsChanged, closeMenu:=True)
     End Sub
 
-    ''' <summary>Handles the user's input from the menu</summary>
-    ''' <param name="input">The string containing the user's input</param>
+    ''' <summary>Handles the user's input from the CCiniDebug menu</summary>
+    ''' <param name="input">The user's input</param>
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
@@ -108,7 +109,7 @@ Module CCiniDebug
     End Sub
 
     '''<summary>Performs the debug process on ccleaner.ini</summary>
-    Public Sub ccDebug()
+    Private Sub ccDebug()
         If PruneStaleEntries Then prune(CCDebugFile2.Sections("Options"))
         If SortFileForOutput Then sortCC()
         CCDebugFile3.overwriteToFile(CCDebugFile2.toString, SaveDebuggedFile)
@@ -129,7 +130,7 @@ Module CCiniDebug
     End Sub
 
     ''' <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>
-    ''' <param name="optionsSec">The iniSection object containing the Options from ccleaner.ini</param>
+    ''' <param name="optionsSec">The iniSection object containing the Options section from ccleaner.ini</param>
     Private Sub prune(ByRef optionsSec As iniSection)
         gLog($"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries", ascend:=True)
         print(0, $"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
@@ -140,10 +141,10 @@ Module CCiniDebug
             If optionStr.StartsWith("(App)") And optionStr.Contains("*") Then
                 Dim toRemove As New List(Of String) From {"(App)", "=True", "=False"}
                 toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
-                If Not CCDebugFile1.Sections.ContainsKey(optionStr) Then tbTrimmed.Add(i)
+                If Not CCDebugFile1.hasSection(optionStr) Then tbTrimmed.Add(i)
                 Dim foundStr = $"Orphaned entry detected: {optionStr}"
-                print(0, foundStr)
-                gLog(foundStr, Not CCDebugFile1.Sections.ContainsKey(optionStr), indent:=True)
+                    print(0, foundStr, colorLine:=True)
+                gLog(foundStr, Not CCDebugFile1.hasSection(optionStr), indent:=True)
             End If
         Next
         print(0, $"{tbTrimmed.Count} orphaned settings detected", leadingBlank:=True, trailingBlank:=True)
