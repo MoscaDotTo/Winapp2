@@ -31,7 +31,7 @@ Public Module Trim
                            "%LocalAppData%\Google\Chrome\Application\chrome.exe", "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe", "%ProgramFiles%\SRWare Iron\iron.exe",
                            "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe", "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
                            "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
-    '''<summary>Indicates module settings have changed and can be reset</summary>
+    '''<summary>Indicates that the module settings have been modified from their defaults</summary>
     Private Property ModuleSettingsChanged As Boolean = False
     '''<summary>Indicates that we are downloading a winapp2.ini from GitHub</summary>
     Private Property DownloadFileToTrim As Boolean = False

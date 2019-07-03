@@ -16,13 +16,12 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports Microsoft.Win32
-
 Module Winapp2ool
-    ''' <summary>Indicates whether or not winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini </summary>
+    ''' <summary>Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini </summary>
     Public Property RemoteWinappIsNonCC As Boolean = False
-    '''<summary>Indicates whether or not the .NET Framework installed on the current machine is below the targeted version</summary>
+    '''<summary>Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)</summary>
     Public Property DotNetFrameworkOutOfDate As Boolean = False
-    ''' <summary>Indicates whether or not winapp2ool currently has access to the internet</summary>
+    ''' <summary>Indicates that winapp2ool currently has access to the internet</summary>
     Public Property isOffline As Boolean = False
     '''<summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
     Public Property isBeta As Boolean = True
@@ -119,7 +118,7 @@ Module Winapp2ool
         End Select
     End Sub
 
-    ''' <summary>Checks the version of Windows on the current system</summary>
+    ''' <summary>Checks the version of Windows on the current system and returns it as a Double</summary>
     ''' <returns>The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined</returns>
     Public Function getWinVer() As Double
         gLog("Checking Windows version")
@@ -147,9 +146,12 @@ Module Winapp2ool
         Return out
     End Function
 
-    ''' <summary>Appends a series of values onto a String</summary>
-    ''' <param name="toAppend">The values to append</param>
+    ''' <summary>Appends a series of values onto a given String</summary>
+    ''' <param name="toAppend">The values to append to <paramref name="out"/></param>
     ''' <param name="out">The given string to be extended</param>
+    ''' <param name="delim">Indicates that the appended Strings should be delimited using the <paramref name="delimchar"/></param>
+    ''' <param name="delimchar">The Char with which to delimit the items in <paramref name="toAppend"/> as they are appended
+    ''' to <paramref name="out"/> when <paramref name="delim"/> is True</param>
     Public Sub appendStrs(toAppend As String(), ByRef out As String, Optional delim As Boolean = False, Optional delimchar As Char = CChar(","))
         If Not delim Then
             For Each param In toAppend
@@ -164,7 +166,8 @@ Module Winapp2ool
     End Sub
 
     ''' <summary>Returns the first portion of a registry or filepath parameterization</summary>
-    ''' <param name="val">The directory listing to be split</param>
+    ''' <param name="val">A Windows filesystem or registry path from which the root should be returned</param>
+    ''' <returns>The root directory given by <paramref name="val"/></returns>
     Public Function getFirstDir(val As String) As String
         Return val.Split(CChar("\"))(0)
     End Function
