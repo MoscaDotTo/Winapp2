@@ -380,7 +380,7 @@ Public Module Trim
                         If isFileSystem Then
                             Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
                             ' If there are any, add them to our possibility list
-                            If Not possibilities.Count = 0 Then possibleDirs.add(possibilities)
+                            possibleDirs.add(possibilities, Not possibilities.Count = 0)
                         Else
                             ' Registry Query here
                         End If

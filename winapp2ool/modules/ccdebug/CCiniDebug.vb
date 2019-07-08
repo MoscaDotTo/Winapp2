@@ -143,7 +143,7 @@ Module CCiniDebug
                 toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
                 If Not CCDebugFile1.hasSection(optionStr) Then tbTrimmed.Add(i)
                 Dim foundStr = $"Orphaned entry detected: {optionStr}"
-                    print(0, foundStr, colorLine:=True)
+                print(0, foundStr, colorLine:=True)
                 gLog(foundStr, Not CCDebugFile1.hasSection(optionStr), indent:=True)
             End If
         Next

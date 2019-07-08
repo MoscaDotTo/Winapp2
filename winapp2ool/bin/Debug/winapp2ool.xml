@@ -768,13 +768,13 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.anyKeyStr">
-<summary>String literal containing an instruction to press any key to return </summary>
+<summary>An instruction to press any key to return to the previous menu </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.invInpStr">
-<summary>String literal containing an error message informing the user their input was invalid</summary>
+<summary>An error message informing the user their input was invalid</summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.promptStr">
-<summary>String literal containing an instruction for the user to provide input</summary>
+<summary>An instruction for the user to provide input</summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.menuItemLength">
 <summary>The maximum length of the portion of the first half of a '#. Option - Description' style menu line</summary>
@@ -792,7 +792,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary>Indicates that the application should not output or ask input from the user except when encountering exceptions <br /> Default: False </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.ExitCode">
- <summary> Indicates that an exit from the menu is pending </summary>
+ <summary> Indicates that an exit from the current menu is pending </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.MenuHeaderText">
  <summary> Holds the text that appears in the top block of the menu </summary>
@@ -812,8 +812,8 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.MenuMaker.setHeaderText(System.String,System.Boolean,System.Boolean,System.ConsoleColor)">
  <summary>Saves a menu header to be printed atop the next menu, contionally with color</summary>
  <param name="txt">The text to appear in the header</param>
- <param name="cHeader">Indicates that the header should be colored <br />Optional, Default: False</param>
- <param name="cond">Indicates the header text should be set <br /> Optional, Default: True</param>
+ <param name="cHeader">Indicates that the header should be colored using the color given by <paramref name="printColor"/><br />Optional, Default: False</param>
+ <param name="cond">Indicates that the header text should be assigned the value given by <paramref name="txt"/><br /> Optional, Default: True</param>
  <param name="printColor">ConsoleColor with which the header should be colored when <paramref name="cHeader"/> is True <br/> Optional, Default: Red</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.initMenu(System.String,System.Int32)">
@@ -837,7 +837,8 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <item><description>4: Menu top</description></item>
  <item><description>5: Option with an Enable/Disable prompt</description></item>
  </list></param>
- <param name="menuText">The text to be printed. <br /> When <paramref name="printType"/> is  1, this contains the name of the menu option</param>
+ <param name="menuText">The text to be printed. <br /> When <paramref name="printType"/> is  1 or 5, <paramref name="menuText"/> contains the name of the menu option
+ <br/>When <paramref name="printType"/> is 3, <paramref name="menuText"/> contains the name of the module whose settings are being reset</param>
  <param name="optString">The description of the menu option<br /> Optional, Default: ""</param>
  <param name="cond">Indicates that the line should be printed. <br /> Optional, Default: True</param>
  <param name="leadingBlank">Indicates that a blank menu line should be printed immediately before the printed line <br /> Optional, Default: False</param>
