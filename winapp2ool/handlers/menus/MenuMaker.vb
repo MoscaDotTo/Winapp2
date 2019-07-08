@@ -19,11 +19,11 @@ Option Strict On
 ''' Provides functions and methods for presenting and maintaining menus to a user
 ''' </summary>
 Module MenuMaker
-    '''<summary>String literal containing an instruction to press any key to return </summary>
+    '''<summary>An instruction to press any key to return to the previous menu </summary>
     Public ReadOnly Property anyKeyStr As String = "Press any key to return to the menu."
-    '''<summary>String literal containing an error message informing the user their input was invalid</summary>
+    '''<summary>An error message informing the user their input was invalid</summary>
     Public ReadOnly Property invInpStr As String = "Invalid input. Please try again."
-    '''<summary>String literal containing an instruction for the user to provide input</summary>
+    '''<summary>An instruction for the user to provide input</summary>
     Public ReadOnly Property promptStr As String = "Enter a number, or leave blank to run the default: "
     '''<summary>The maximum length of the portion of the first half of a '#. Option - Description' style menu line</summary>
     Private Property menuItemLength As Integer
@@ -35,7 +35,7 @@ Module MenuMaker
     Private Property OptNum As Integer = 0
     ''' <summary>Indicates that the application should not output or ask input from the user except when encountering exceptions <br /> Default: False </summary>
     Public Property SuppressOutput As Boolean = False
-    ''' <summary> Indicates that an exit from the menu is pending </summary>
+    ''' <summary> Indicates that an exit from the current menu is pending </summary>
     Public Property ExitCode As Boolean
     ''' <summary> Holds the text that appears in the top block of the menu </summary>
     Public Property MenuHeaderText As String
@@ -55,8 +55,8 @@ Module MenuMaker
 
     ''' <summary>Saves a menu header to be printed atop the next menu, contionally with color</summary>
     ''' <param name="txt">The text to appear in the header</param>
-    ''' <param name="cHeader">Indicates that the header should be colored <br />Optional, Default: False</param>
-    ''' <param name="cond">Indicates the header text should be set <br /> Optional, Default: True</param>
+    ''' <param name="cHeader">Indicates that the header should be colored using the color given by <paramref name="printColor"/><br />Optional, Default: False</param>
+    ''' <param name="cond">Indicates that the header text should be assigned the value given by <paramref name="txt"/><br /> Optional, Default: True</param>
     ''' <param name="printColor">ConsoleColor with which the header should be colored when <paramref name="cHeader"/> is True <br/> Optional, Default: Red</param>
     Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
         If cond Then
@@ -93,7 +93,8 @@ Module MenuMaker
     ''' <item><description>4: Menu top</description></item>
     ''' <item><description>5: Option with an Enable/Disable prompt</description></item>
     ''' </list></param>
-    ''' <param name="menuText">The text to be printed. <br /> When <paramref name="printType"/> is  1, this contains the name of the menu option</param>
+    ''' <param name="menuText">The text to be printed. <br /> When <paramref name="printType"/> is  1 or 5, <paramref name="menuText"/> contains the name of the menu option
+    ''' <br/>When <paramref name="printType"/> is 3, <paramref name="menuText"/> contains the name of the module whose settings are being reset</param>
     ''' <param name="optString">The description of the menu option<br /> Optional, Default: ""</param>
     ''' <param name="cond">Indicates that the line should be printed. <br /> Optional, Default: True</param>
     ''' <param name="leadingBlank">Indicates that a blank menu line should be printed immediately before the printed line <br /> Optional, Default: False</param>
@@ -117,9 +118,9 @@ Module MenuMaker
                      Optional buffr As Boolean = False, Optional trailr As Boolean = False, Optional conjoin As Boolean = False)
         If Not cond Then Exit Sub
         cwl(cond:=buffr)
+        If colorLine Then Console.ForegroundColor = If(useArbitraryColor, arbitraryColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red))
         print(0, Nothing, cond:=leadingBlank)
         print(0, getFrame(1), cond:=openMenu)
-        If colorLine Then Console.ForegroundColor = If(useArbitraryColor, arbitraryColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red))
         Select Case printType
             ' Prints lines
             Case 0
@@ -132,18 +133,18 @@ Module MenuMaker
                 print(1, "Reset Settings", $"Restore {menuText}'s settings to their default state", leadingBlank:=True)
             ' Prints a box with centered text
             Case 3
-                print(4, menuText, closeMenu:=True, useArbitraryColor:=useArbitraryColor, arbitraryColor:=arbitraryColor)
+                print(4, menuText, closeMenu:=True)
             ' The top of a menu with a header
             Case 4
-                print(0, menuText, isCentered:=True, useArbitraryColor:=useArbitraryColor, arbitraryColor:=arbitraryColor, colorLine:=colorLine, openMenu:=True)
+                print(0, menuText, isCentered:=True, openMenu:=True)
             ' Colored line printing for enable/disable menu options
             Case 5
                 print(1, menuText, $"{enStr(enStrCond)} {optString}", colorLine:=True, enStrCond:=enStrCond)
         End Select
-        print(0, getFrame(3), cond:=conjoin, colorLine:=colorLine, useArbitraryColor:=useArbitraryColor, arbitraryColor:=arbitraryColor)
-        Console.ResetColor()
+        print(0, getFrame(3), cond:=conjoin)
         print(0, Nothing, cond:=trailingBlank)
         print(0, getFrame(2), cond:=closeMenu)
+        If colorLine Then Console.ResetColor()
         cwl(cond:=trailr)
     End Sub
 
