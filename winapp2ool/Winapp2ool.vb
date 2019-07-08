@@ -93,12 +93,12 @@ Module Winapp2ool
                 clrConsole()
                 cwl("Downloading, this may take a moment...")
                 download(New iniFile(Environment.CurrentDirectory, "winapp2.ini"), winapp2link, False)
-                checkedForUpdates = False
+                waUpdateIsAvail = False
             Case input = "8" And waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading & trimming, this may take a moment...")
                 remoteTrim(New iniFile("", ""), New iniFile(Environment.CurrentDirectory, "winapp2.ini"), True)
-                checkedForUpdates = False
+                waUpdateIsAvail = False
             Case input = "9" And waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading & diffing, this may take a moment...")
