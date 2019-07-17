@@ -108,6 +108,8 @@ Module CCiniDebug
         End Select
     End Sub
 
+
+
     '''<summary>Performs the debug process on ccleaner.ini</summary>
     Private Sub ccDebug()
         If PruneStaleEntries Then prune(CCDebugFile2.Sections("Options"))
