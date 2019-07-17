@@ -52,7 +52,7 @@ Public Class winapp2file
         If file.Comments.Count = 0 Then Version = "; version 000000"
         If file.Comments.Count > 0 Then Version = If(Not file.Comments.Values(0).Comment.ToLower.Contains("version"), "; version 000000", file.Comments.Values(0).Comment)
         ' Build the header sections for browsers/Thunderbird/winapp3
-        Dim langSecRefs As New List(Of String) From {"3029", "3005", "3027", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous", "Microsoft Edge Insider"}
+        Dim langSecRefs As New List(Of String) From {"3029", "3006", "3027", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous", "Microsoft Edge Insider"}
         For Each section In file.Sections.Values
             Dim tmpwa2entry As New winapp2entry(section)
             Dim ind = -1
