@@ -16,7 +16,7 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 ''' <summary>
-''' Provides functions and methods for presenting and maintaining menus to a user
+''' MenuMaker is a singleton driver module for powering dyanamic finite state console applications with numbered menus
 ''' </summary>
 Module MenuMaker
     '''<summary>An instruction to press any key to return to the previous menu </summary>
@@ -36,7 +36,7 @@ Module MenuMaker
     ''' <summary>Indicates that the application should not output or ask input from the user except when encountering exceptions <br /> Default: False </summary>
     Public Property SuppressOutput As Boolean = False
     ''' <summary> Indicates that an exit from the current menu is pending </summary>
-    Public Property ExitCode As Boolean
+    Public Property ExitPending As Boolean
     ''' <summary> Holds the text that appears in the top block of the menu </summary>
     Public Property MenuHeaderText As String
 
@@ -45,46 +45,30 @@ Module MenuMaker
     '''<summary>Frame characters used to close a menu line</summary>
     Private ReadOnly Property Closers As String() = {"║", "╗", "╝", "╣"}
 
-    '''<summary>Returns a menuframe</summary>
-    '''<param name="frameNum">Indicates which frame should be returned. <br />
-    '''0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
-    '''<returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
-    Private Function getFrame(Optional frameNum As Integer = 0) As String
-        Return mkMenuLine("", "f", frameNum)
-    End Function
-
-    ''' <summary>Saves a menu header to be printed atop the next menu, contionally with color</summary>
-    ''' <param name="txt">The text to appear in the header</param>
-    ''' <param name="cHeader">Indicates that the header should be colored using the color given by <paramref name="printColor"/><br />Optional, Default: False</param>
-    ''' <param name="cond">Indicates that the header text should be assigned the value given by <paramref name="txt"/><br /> Optional, Default: True</param>
-    ''' <param name="printColor">ConsoleColor with which the header should be colored when <paramref name="cHeader"/> is True <br/> Optional, Default: Red</param>
-    Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
-        If cond Then
-            MenuHeaderText = txt
-            ColorHeader = cHeader
-            HeaderColor = printColor
-        End If
+    ''' <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for anything built with MenuMaker</summary>
+    ''' <param name="name">The name of the module as it will be displayed to the user</param>
+    ''' <param name="showMenu">The subroutine prints the module's menu</param>
+    ''' <param name="handleInput">The subroutine that handles the module's input</param>
+    ''' <param name="itmLen">Indicates the maximum length of menu option names<br/>Optional, Default: 35</param>
+    Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String), Optional itmLen As Integer = 35)
+        gLog("", ascend:=True)
+        gLog($"Loading module {name}")
+        ExitPending = False
+        setHeaderText(name)
+        menuItemLength = itmLen
+        Do Until ExitPending
+            clrConsole()
+            showMenu()
+            Console.Write(Environment.NewLine & promptStr)
+            handleInput(Console.ReadLine)
+        Loop
+        ExitPending = False
+        setHeaderText($"{name} closed")
+        gLog($"Exiting {name}", descend:=True, leadr:=True)
     End Sub
-
-    ''' <summary>Initializes the menu</summary>
-    ''' <param name="headerTxt">The text to be displayed at the top of the menu screen</param>
-    ''' <param name="itemlen">The total length of the text bloc that contains the option's name <br />Default: 35</param>
-    Public Sub initMenu(headerTxt As String, Optional itemlen As Integer = 35)
-        ExitCode = False
-        setHeaderText(headerTxt)
-        menuItemLength = itemlen
-    End Sub
-
-    ''' <summary>Sets the menu header to an error string conditionally, returns the given condition.</summary>
-    ''' <param name="cond">Indicates that the error text should be printed</param>
-    ''' <param name="errText">The error text to be printed in the menu header</param>
-    Public Function denyActionWithHeader(cond As Boolean, errText As String) As Boolean
-        setHeaderText(errText, True, cond)
-        Return cond
-    End Function
 
     ''' <summary>Prints menu lines, options, and frames fit to the current console window width</summary>
-    ''' <param name="printType">The type of menu information to print. <br /> 
+    ''' <param name="printType">The type of menu information to print <br /> 
     ''' <list type="bullet">
     ''' <item><description>0: Line </description></item>
     ''' <item><description>1: Option</description></item>
@@ -105,18 +89,18 @@ Module MenuMaker
     ''' <param name="enStrCond">A module setting whose menu text will include an Enable/Disable toggle <br /> 
     ''' If <paramref name="colorLine"/> is True and <paramref name="useArbitraryColor"/> is False, the line will be printed 
     ''' Green if <paramref name="enStrCond"/> is True, Red if False<br /> Optional, Default: False (Red) </param>
-    ''' <param name="colorLine">Indicates we want to color lines without Enabled/Disabled strings in them <br /> Optional, Default: False</param>
+    ''' <param name="colorLine">Indicates we want to color any lines we print<br /> Optional, Default: False</param>
     ''' <param name="useArbitraryColor">Indicates that the line should be colored using the value provided by <paramref name="arbitraryColor"/><br /> Optional, Default: False</param>
     ''' <param name="arbitraryColor">Foreground ConsoleColor to be used when printing with when <paramref name="colorLine"/> is true, but wanting to use a color other than red/green <br /> Optional, Default: Nothing</param>
-    ''' <param name="buffr">Indicates that a leading newline should be printed <br />Optional, Default: False</param>
-    ''' <param name="trailr">Indicates that a trailing newline should be printed <br />Optional, Default: False</param>
+    ''' <param name="buffr">Indicates that a leading newline should be printed before the menu lines<br />Optional, Default: False</param>
+    ''' <param name="trailr">Indicates that a trailing newline should be printed after the menu lines<br />Optional, Default: False</param>
     ''' <param name="conjoin">Indicates that a conjoining menu frame should be printed <br /> Optional, Default: False</param>
     Public Sub print(printType As Integer, menuText As String, Optional optString As String = "", Optional cond As Boolean = True,
                      Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False,
                      Optional closeMenu As Boolean = False, Optional openMenu As Boolean = False, Optional enStrCond As Boolean = False,
                      Optional colorLine As Boolean = False, Optional useArbitraryColor As Boolean = False, Optional arbitraryColor As ConsoleColor = Nothing,
                      Optional buffr As Boolean = False, Optional trailr As Boolean = False, Optional conjoin As Boolean = False)
-        If Not cond Then Exit Sub
+        If Not cond Then Return
         cwl(cond:=buffr)
         If colorLine Then Console.ForegroundColor = If(useArbitraryColor, arbitraryColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red))
         print(0, Nothing, cond:=leadingBlank)
@@ -148,6 +132,48 @@ Module MenuMaker
         cwl(cond:=trailr)
     End Sub
 
+    ''' <summary>Prints a line to the console window if <c>SuppressOutput</c> and <paramref name="cond"/> are true </summary>
+    ''' <param name="msg">The string to be printed <br />Default: Nothing</param>
+    ''' <param name="cond">The optional condition under which to print the line <br /> Default: True</param>
+    Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
+        If cond And Not SuppressOutput Then Console.WriteLine(msg)
+    End Sub
+
+    ''' <summary>Clears the console if <paramref name="cond"/> is <c>True</c> and we're not unit testing</summary>
+    ''' <remarks>When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that</remarks>
+    ''' <param name="cond">Indicates that the console should be cleared <br /> Optional, Default: True</param>
+    Public Sub clrConsole(Optional cond As Boolean = True)
+        If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
+    End Sub
+
+    '''<summary>Returns a menuframe</summary>
+    '''<param name="frameNum">Indicates which frame should be returned. <br />
+    '''0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
+    '''<returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
+    Private Function getFrame(Optional frameNum As Integer = 0) As String
+        Return mkMenuLine("", "f", frameNum)
+    End Function
+
+    ''' <summary>Saves a menu header to be printed atop the next menu, contionally with color</summary>
+    ''' <param name="txt">The text to appear in the header</param>
+    ''' <param name="cHeader">Indicates that the header should be colored using the color given by <paramref name="printColor"/><br />Optional, Default: False</param>
+    ''' <param name="cond">Indicates that the header text should be assigned the value given by <paramref name="txt"/><br /> Optional, Default: True</param>
+    ''' <param name="printColor">ConsoleColor with which the header should be colored when <paramref name="cHeader"/> is True <br/> Optional, Default: Red</param>
+    Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
+        If Not cond Then Return
+        MenuHeaderText = txt
+        ColorHeader = cHeader
+        HeaderColor = printColor
+    End Sub
+
+    ''' <summary>Sets the menu header to an error string conditionally, returns the given condition.</summary>
+    ''' <param name="cond">Indicates that the error text should be printed</param>
+    ''' <param name="errText">The error text to be printed in the menu header</param>
+    Public Function denyActionWithHeader(cond As Boolean, errText As String) As Boolean
+        setHeaderText(errText, True, cond)
+        Return cond
+    End Function
+
     ''' <summary>Returns the inverse state of a given boolean as a String</summary>
     ''' <param name="setting">A module setting whose state will be observed</param>
     ''' <returns><c>"Disable"</c> if <paramref name="setting"/>is True, <c>"Enable"</c>otherwise</returns>
@@ -155,9 +181,9 @@ Module MenuMaker
         Return If(setting, "Disable", "Enable")
     End Function
 
-    ''' <summary>Exits a menu or module by flipping the exitCode to true</summary>
+    ''' <summary>Enforces that initMenu exit the current level in the stack on the next iteration of its loop</summary>
     Public Sub exitModule()
-        ExitCode = True
+        ExitPending = True
     End Sub
 
     ''' <summary>Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option</summary>
@@ -240,41 +266,4 @@ Module MenuMaker
     Public Function replDir(dirStr As String) As String
         Return dirStr.Replace(Environment.CurrentDirectory, "..")
     End Function
-
-    ''' <summary>Prints a line to the console window if <c>SuppressOutput</c> and <paramref name="cond"/> are true </summary>
-    ''' <param name="msg">The string to be printed <br />Default: Nothing</param>
-    ''' <param name="cond">The optional condition under which to print the line <br /> Default: True</param>
-    Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
-        If cond And Not SuppressOutput Then Console.WriteLine(msg)
-    End Sub
-
-    ''' <summary>Clears the console if <paramref name="cond"/> is <c>True</c> and we're not unit testing</summary>
-    ''' <remarks>When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that</remarks>
-    ''' <param name="cond">Indicates that the console should be cleared <br /> Optional, Default: True</param>
-    Public Sub clrConsole(Optional cond As Boolean = True)
-        If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
-    End Sub
-
-    ''' <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for anything built with MenuMaker</summary>
-    ''' <param name="name">The name of the module</param>
-    ''' <param name="showMenu">The function that prints the module's menu</param>
-    ''' <param name="handleInput">The function that handles the module's input</param>
-    Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String), Optional itmLen As Integer = 35)
-        gLog("", ascend:=True)
-        gLog($"Loading module {name}")
-        initMenu(name, itmLen)
-        Try
-            Do Until ExitCode
-                clrConsole()
-                showMenu()
-                Console.Write(Environment.NewLine & promptStr)
-                handleInput(Console.ReadLine)
-            Loop
-            ExitCode = False
-            setHeaderText($"{name} closed")
-            gLog($"Exiting {name}", descend:=True, leadr:=True)
-        Catch ex As Exception
-            exc(ex)
-        End Try
-    End Sub
 End Module

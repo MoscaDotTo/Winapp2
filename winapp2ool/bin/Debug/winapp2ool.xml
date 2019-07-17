@@ -764,7 +764,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="T:winapp2ool.MenuMaker">
  <summary>
- Provides functions and methods for presenting and maintaining menus to a user
+ MenuMaker is a singleton driver module for powering dyanamic finite state console applications with numbered menus
  </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.anyKeyStr">
@@ -791,7 +791,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="P:winapp2ool.MenuMaker.SuppressOutput">
  <summary>Indicates that the application should not output or ask input from the user except when encountering exceptions <br /> Default: False </summary>
 </member>
-<member name="P:winapp2ool.MenuMaker.ExitCode">
+<member name="P:winapp2ool.MenuMaker.ExitPending">
  <summary> Indicates that an exit from the current menu is pending </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.MenuHeaderText">
@@ -803,32 +803,16 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="P:winapp2ool.MenuMaker.Closers">
 <summary>Frame characters used to close a menu line</summary>
 </member>
-<member name="M:winapp2ool.MenuMaker.getFrame(System.Int32)">
-<summary>Returns a menuframe</summary>
-<param name="frameNum">Indicates which frame should be returned. <br />
-0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
-<returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
-</member>
-<member name="M:winapp2ool.MenuMaker.setHeaderText(System.String,System.Boolean,System.Boolean,System.ConsoleColor)">
- <summary>Saves a menu header to be printed atop the next menu, contionally with color</summary>
- <param name="txt">The text to appear in the header</param>
- <param name="cHeader">Indicates that the header should be colored using the color given by <paramref name="printColor"/><br />Optional, Default: False</param>
- <param name="cond">Indicates that the header text should be assigned the value given by <paramref name="txt"/><br /> Optional, Default: True</param>
- <param name="printColor">ConsoleColor with which the header should be colored when <paramref name="cHeader"/> is True <br/> Optional, Default: Red</param>
-</member>
-<member name="M:winapp2ool.MenuMaker.initMenu(System.String,System.Int32)">
- <summary>Initializes the menu</summary>
- <param name="headerTxt">The text to be displayed at the top of the menu screen</param>
- <param name="itemlen">The total length of the text bloc that contains the option's name <br />Default: 35</param>
-</member>
-<member name="M:winapp2ool.MenuMaker.denyActionWithHeader(System.Boolean,System.String)">
- <summary>Sets the menu header to an error string conditionally, returns the given condition.</summary>
- <param name="cond">Indicates that the error text should be printed</param>
- <param name="errText">The error text to be printed in the menu header</param>
+<member name="M:winapp2ool.MenuMaker.initModule(System.String,System.Action,System.Action{System.String},System.Int32)">
+ <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for anything built with MenuMaker</summary>
+ <param name="name">The name of the module as it will be displayed to the user</param>
+ <param name="showMenu">The subroutine prints the module's menu</param>
+ <param name="handleInput">The subroutine that handles the module's input</param>
+ <param name="itmLen">Indicates the maximum length of menu option names<br/>Optional, Default: 35</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.print(System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean,System.Boolean,System.Boolean)">
  <summary>Prints menu lines, options, and frames fit to the current console window width</summary>
- <param name="printType">The type of menu information to print. <br /> 
+ <param name="printType">The type of menu information to print <br /> 
  <list type="bullet">
  <item><description>0: Line </description></item>
  <item><description>1: Option</description></item>
@@ -849,12 +833,40 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="enStrCond">A module setting whose menu text will include an Enable/Disable toggle <br /> 
  If <paramref name="colorLine"/> is True and <paramref name="useArbitraryColor"/> is False, the line will be printed 
  Green if <paramref name="enStrCond"/> is True, Red if False<br /> Optional, Default: False (Red) </param>
- <param name="colorLine">Indicates we want to color lines without Enabled/Disabled strings in them <br /> Optional, Default: False</param>
+ <param name="colorLine">Indicates we want to color any lines we print<br /> Optional, Default: False</param>
  <param name="useArbitraryColor">Indicates that the line should be colored using the value provided by <paramref name="arbitraryColor"/><br /> Optional, Default: False</param>
  <param name="arbitraryColor">Foreground ConsoleColor to be used when printing with when <paramref name="colorLine"/> is true, but wanting to use a color other than red/green <br /> Optional, Default: Nothing</param>
- <param name="buffr">Indicates that a leading newline should be printed <br />Optional, Default: False</param>
- <param name="trailr">Indicates that a trailing newline should be printed <br />Optional, Default: False</param>
+ <param name="buffr">Indicates that a leading newline should be printed before the menu lines<br />Optional, Default: False</param>
+ <param name="trailr">Indicates that a trailing newline should be printed after the menu lines<br />Optional, Default: False</param>
  <param name="conjoin">Indicates that a conjoining menu frame should be printed <br /> Optional, Default: False</param>
+</member>
+<member name="M:winapp2ool.MenuMaker.cwl(System.String,System.Boolean)">
+ <summary>Prints a line to the console window if <c>SuppressOutput</c> and <paramref name="cond"/> are true </summary>
+ <param name="msg">The string to be printed <br />Default: Nothing</param>
+ <param name="cond">The optional condition under which to print the line <br /> Default: True</param>
+</member>
+<member name="M:winapp2ool.MenuMaker.clrConsole(System.Boolean)">
+ <summary>Clears the console if <paramref name="cond"/> is <c>True</c> and we're not unit testing</summary>
+ <remarks>When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that</remarks>
+ <param name="cond">Indicates that the console should be cleared <br /> Optional, Default: True</param>
+</member>
+<member name="M:winapp2ool.MenuMaker.getFrame(System.Int32)">
+<summary>Returns a menuframe</summary>
+<param name="frameNum">Indicates which frame should be returned. <br />
+0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
+<returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
+</member>
+<member name="M:winapp2ool.MenuMaker.setHeaderText(System.String,System.Boolean,System.Boolean,System.ConsoleColor)">
+ <summary>Saves a menu header to be printed atop the next menu, contionally with color</summary>
+ <param name="txt">The text to appear in the header</param>
+ <param name="cHeader">Indicates that the header should be colored using the color given by <paramref name="printColor"/><br />Optional, Default: False</param>
+ <param name="cond">Indicates that the header text should be assigned the value given by <paramref name="txt"/><br /> Optional, Default: True</param>
+ <param name="printColor">ConsoleColor with which the header should be colored when <paramref name="cHeader"/> is True <br/> Optional, Default: Red</param>
+</member>
+<member name="M:winapp2ool.MenuMaker.denyActionWithHeader(System.Boolean,System.String)">
+ <summary>Sets the menu header to an error string conditionally, returns the given condition.</summary>
+ <param name="cond">Indicates that the error text should be printed</param>
+ <param name="errText">The error text to be printed in the menu header</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.enStr(System.Boolean)">
  <summary>Returns the inverse state of a given boolean as a String</summary>
@@ -862,7 +874,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <returns><c>"Disable"</c> if <paramref name="setting"/>is True, <c>"Enable"</c>otherwise</returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.exitModule">
- <summary>Exits a menu or module by flipping the exitCode to true</summary>
+ <summary>Enforces that initMenu exit the current level in the stack on the next iteration of its loop</summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuTop(System.String[],System.Boolean)">
  <summary>Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option</summary>
@@ -906,22 +918,6 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary>Replaces instances of the current directory in a path string ".."</summary>
  <param name="dirStr">A windows filesystem path</param>
  <returns><paramref name="dirStr"/> with instances of the current directory replaced with <c>".."</c></returns>
-</member>
-<member name="M:winapp2ool.MenuMaker.cwl(System.String,System.Boolean)">
- <summary>Prints a line to the console window if <c>SuppressOutput</c> and <paramref name="cond"/> are true </summary>
- <param name="msg">The string to be printed <br />Default: Nothing</param>
- <param name="cond">The optional condition under which to print the line <br /> Default: True</param>
-</member>
-<member name="M:winapp2ool.MenuMaker.clrConsole(System.Boolean)">
- <summary>Clears the console if <paramref name="cond"/> is <c>True</c> and we're not unit testing</summary>
- <remarks>When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that</remarks>
- <param name="cond">Indicates that the console should be cleared <br /> Optional, Default: True</param>
-</member>
-<member name="M:winapp2ool.MenuMaker.initModule(System.String,System.Action,System.Action{System.String},System.Int32)">
- <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for anything built with MenuMaker</summary>
- <param name="name">The name of the module</param>
- <param name="showMenu">The function that prints the module's menu</param>
- <param name="handleInput">The function that handles the module's input</param>
 </member>
 <member name="T:winapp2ool.RegistryHelper">
  <summary>
