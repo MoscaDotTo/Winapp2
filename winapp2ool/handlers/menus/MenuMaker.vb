@@ -134,7 +134,7 @@ Module MenuMaker
 
     ''' <summary>Prints a line to the console window if <c>SuppressOutput</c> and <paramref name="cond"/> are true </summary>
     ''' <param name="msg">The string to be printed <br />Default: Nothing</param>
-    ''' <param name="cond">The optional condition under which to print the line <br /> Default: True</param>
+    ''' <param name="cond">Indicates the line should be printed <br />Optional, Default: True</param>
     Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
         If cond And Not SuppressOutput Then Console.WriteLine(msg)
     End Sub
@@ -148,13 +148,19 @@ Module MenuMaker
 
     '''<summary>Returns a menuframe</summary>
     '''<param name="frameNum">Indicates which frame should be returned. <br />
+    '''<list type="bullet">
+    '''<item><description>0: Empty menu line with vertical frames</description></item>
+    '''<item><description>1: Filled menu line with downward opening 90° angle frames</description></item>
+    '''<item><description>2: Filled menu line with upward opening 90° angle frames</description></item>
+    '''<item><description>3: Filled menu line with inward facing T-frames </description></item>
+    ''' </list>
     '''0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
     '''<returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
     Private Function getFrame(Optional frameNum As Integer = 0) As String
         Return mkMenuLine("", "f", frameNum)
     End Function
 
-    ''' <summary>Saves a menu header to be printed atop the next menu, contionally with color</summary>
+    ''' <summary>Saves a menu header to be printed atop the next menu, optionally with color</summary>
     ''' <param name="txt">The text to appear in the header</param>
     ''' <param name="cHeader">Indicates that the header should be colored using the color given by <paramref name="printColor"/><br />Optional, Default: False</param>
     ''' <param name="cond">Indicates that the header text should be assigned the value given by <paramref name="txt"/><br /> Optional, Default: True</param>
@@ -166,8 +172,8 @@ Module MenuMaker
         HeaderColor = printColor
     End Sub
 
-    ''' <summary>Sets the menu header to an error string conditionally, returns the given condition.</summary>
-    ''' <param name="cond">Indicates that the error text should be printed</param>
+    ''' <summary>Informs a user when an action is unable to proceed due to a condition</summary>
+    ''' <param name="cond">Indicates that an action should be denied</param>
     ''' <param name="errText">The error text to be printed in the menu header</param>
     Public Function denyActionWithHeader(cond As Boolean, errText As String) As Boolean
         setHeaderText(errText, True, cond)
@@ -187,7 +193,7 @@ Module MenuMaker
     End Sub
 
     ''' <summary>Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option</summary>
-    ''' <param name="descriptionItems">Items describing the menu</param>
+    ''' <param name="descriptionItems">Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line</param>
     ''' <param name="printExit">Indicates that an option to exit to the previous menu should be printed <br /> Optional, Default: True</param>
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
         print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=True, arbitraryColor:=HeaderColor, conjoin:=True)
@@ -200,7 +206,7 @@ Module MenuMaker
     End Sub
 
     ''' <summary>Prints a line bounded by vertical menu frames, an empty menu line if <paramref name="lineString"/> is <c>Nothing</c></summary>
-    ''' <param name="lineString">The text to be printed. <br/> Default: Nothing</param>
+    ''' <param name="lineString">The text to be printed. <br/> Optional, Default: Nothing</param>
     ''' <param name="isCentered">Indicates that the printed text should be centered <br /> Optional, Default: False</param>
     Private Sub printMenuLine(Optional lineString As String = Nothing, Optional isCentered As Boolean = False)
         If lineString = Nothing Then lineString = getFrame()
@@ -248,9 +254,9 @@ Module MenuMaker
         Return out
     End Function
 
-    ''' <summary>Pads a given string with spaces</summary>
+    ''' <summary>Pads a given string with spaces until it is a target length</summary>
     ''' <param name="out">The text to be padded</param>
-    ''' <param name="targetLen">The length to which the string should be padded</param>
+    ''' <param name="targetLen">The length to which the text should be padded</param>
     ''' <param name="endline">The closer character for the type of frame being built</param>
     ''' <param name="padChar">The character with which to pad the text <br /> Default: " " (space character)</param>
     Private Sub padToEnd(ByRef out As String, targetLen As Integer, endline As String, Optional padChar As String = " ")
