@@ -231,6 +231,7 @@ End Function
 |:-|:-|:-|
 |cond|`Boolean`|Indicates that an action should be denied|
 |errText|`String`|The error text to be printed in the menu header
+
 As demonstrated in the example program above, this function can be used to gate execution of a function behind a `Boolean` state. It accepts the condition that, when `True` should prevent further execution (eg. `toggleBool = False`). It returns the `Boolean` it is fed, and if `True`, sets the menu header's text to a given error string. 
 
 ## enStr
@@ -240,7 +241,7 @@ Public Function enStr(setting As Boolean) As String
     Return If(setting, "Disable", "Enable")
 End Function
  ```
- | Parameter|Type|Description |
+| Parameter|Type|Description |
 |:-|:-|:-|
 |setting|`Boolean`|>A module setting whose state will be observed
 
@@ -257,7 +258,7 @@ Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Bool
     print(1, "Exit", "Return to the menu", printExit)
 End Sub
 ```
- | Parameter|Type|Description |Optional|
+| Parameter|Type|Description |Optional|
 |:-|:-|:-|:-
 |descriptionItems|`String()`|Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line|No
 |printExit|`Boolean`|Indicates that an option to exit to the previous menu should be printed |Yes, default: `True`
@@ -269,7 +270,7 @@ Public Sub clrConsole(Optional cond As Boolean = True)
     If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
 End Sub
 ```
- | Parameter|Type|Description |Optional|
+| Parameter|Type|Description |Optional|
 |:-|:-|:-|:-
 cond|`Boolean`|Indicates that the console should be cleared |Yes, default: `True`
 
@@ -310,8 +311,9 @@ Public Function replDir(dirStr As String) As String
     Return dirStr.Replace(Environment.CurrentDirectory, "..")
 End Function
 ```
-| Parameter|Type|Description 
-|:-|:-|:-|:-
+
+|Parameter|Type|Description 
+|:-|:-|:-
 dirStr|`String`|A windows filesystem path
 
 # Private members 
@@ -323,11 +325,13 @@ Private Function getFrame(Optional frameNum As Integer = 0) As String
     Return mkMenuLine("", "f", frameNum)
 End Function 
 ```
-| Parameter|Type|Description |Optional|
+
+|Parameter|Type|Description |Optional|
 |:-|:-|:-|:-
 frameNum|`Integer`|Indicates which frame should be returned * | Yes, default: `0`
 
 \* frameNums:
+
 |frameNum|Frame Type|
 |:-|:-|
 |`0`|Empty menu line with vertical frames
@@ -343,7 +347,8 @@ Private Sub printMenuLine(Optional lineString As String = Nothing, Optional isCe
     cwl(mkMenuLine(lineString, If(isCentered, "c", "l")))
 End Sub
 ```
-| Parameter|Type|Description |Optional|
+
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-
 lineString|`String`|The text to be printed|Yes, default: `Nothing`
 isCentered|`Boolean`|Indicates that the printed text should be centered|Yes, default: `False`
@@ -358,8 +363,9 @@ Private Sub printMenuOpt(lineString1 As String, lineString2 As String)
     OptNum += 1
 End Sub
 ```
-| Parameter|Type|Description 
-|:-|:-|:-|:-
+
+|Parameter|Type|Description 
+|:-|:-|:-
 |lineString1|`String`|The name of the menu option
 |lineString2|`String`|The description of the menu option
 
@@ -383,7 +389,8 @@ Private Function mkMenuLine(line As String, align As String, Optional borderInd 
     Return out
 End Function
 ```
-| Parameter|Type|Description |Optional|
+
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-
 line|`String`|The text to be printed|No
 align|`String`|The alignment of the line to be printed *|No
@@ -409,9 +416,10 @@ Private Sub padToEnd(ByRef out As String, targetLen As Integer, endline As Strin
     If targetLen = Console.WindowWidth - 2 Then out += endline
 End Sub 
 ```
-| Parameter|Type|Description |Optional|
-|:-|:-|:-|:-
-out|`String`|The text to be padded|No
-targetLen|`Integer`|The length to which the text should be padded|No
-endLine|`String`|The closer character for the type of frame being built|No
-padChar|`String`|The single length String with which to pad the text|Yes, default: `" "`
+
+|Parameter|Type|Description |Optional|
+|:-|:-|:-|:-|
+out|`String`|The text to be padded|No|
+targetLen|`Integer`|The length to which the text should be padded|No|
+endLine|`String`|The closer character for the type of frame being built|No|
+padChar|`String`|The single length String with which to pad the text|Yes, default: `" "`|
