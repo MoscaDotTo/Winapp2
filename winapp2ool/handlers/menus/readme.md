@@ -165,14 +165,15 @@ Code
 |conjoin|`Boolean`|Indicates that a conjoining menu frame should be printed|Yes, Default: False
 
 \* **PrintTypes**
+
 |Integer Value|Result|
 |:-|:-|
-|0|Menu Line
-|1|Menu Option
-|2|Menu Option containing a "Reset Settings" prompt
-|3|Box with centered text
-|4|Menu Header
-|5|Menu Option containing an Enable/Disable toggle
+|0|Menu Line|
+|1|Menu Option|
+|2|Menu Option containing a "Reset Settings" prompt|
+|3|Box with centered text|
+|4|Menu Header|
+|5|Menu Option containing an Enable/Disable toggle|
 
 \** When `printType` is `1` or `5`, `menuText` contains the name of the menu option, when `printType` is `3`, `menuText` contains the name of the module whose settings will be reset  
 
