@@ -6,12 +6,12 @@
 '    it under the terms of the GNU General Public License as published by
 '    the Free Software Foundation, either version 3 of the License, or
 '    (at your option) any later version.
-'
+' 
 '    Winap2ool is distributed in the hope that it will be useful,
 '    but WITHOUT ANY WARRANTY; without even the implied warranty of
 '    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
-'
+' 
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
@@ -19,19 +19,19 @@ Option Strict On
 ''' MenuMaker is a singleton driver module for powering dyanamic finite state console applications with numbered menus
 ''' </summary>
 Module MenuMaker
-    '''<summary>An instruction to press any key to return to the previous menu </summary>
+    ''' <summary>An instruction to press any key to return to the previous menu </summary>
     Public ReadOnly Property anyKeyStr As String = "Press any key to return to the menu."
-    '''<summary>An error message informing the user their input was invalid</summary>
+    ''' <summary>An error message informing the user their input was invalid</summary>
     Public ReadOnly Property invInpStr As String = "Invalid input. Please try again."
-    '''<summary>An instruction for the user to provide input</summary>
+    ''' <summary>An instruction for the user to provide input</summary>
     Public ReadOnly Property promptStr As String = "Enter a number, or leave blank to run the default: "
-    '''<summary>The maximum length of the portion of the first half of a '#. Option - Description' style menu line</summary>
+    ''' <summary>The maximum length of the portion of the first half of a '#. Option - Description' style menu line</summary>
     Private Property menuItemLength As Integer
-    '''<summary>Indicates that the menu header should be printed with color </summary>
+    ''' <summary>Indicates that the menu header should be printed with color </summary>
     Public Property ColorHeader As Boolean
-    '''<summary>The color with which the next header should be printed if <c>ColorHeader</c> is <c>True</c></summary>
+    ''' <summary>The color with which the next header should be printed if <c>ColorHeader</c> is <c>True</c></summary>
     Public Property HeaderColor As ConsoleColor
-    '''<summary>Holds the current option number for the menu instance</summary>
+    ''' <summary>Holds the current option number for the menu instance</summary>
     Private Property OptNum As Integer = 0
     ''' <summary>Indicates that the application should not output or ask input from the user except when encountering exceptions <br /> Default: False </summary>
     Public Property SuppressOutput As Boolean = False
@@ -40,9 +40,9 @@ Module MenuMaker
     ''' <summary> Holds the text that appears in the top block of the menu </summary>
     Public Property MenuHeaderText As String
 
-    '''<summary>Frame characters used to open a menu line</summary>
+    ''' <summary>Frame characters used to open a menu line</summary>
     Private ReadOnly Property Openers As String() = {"║", "╔", "╚", "╠"}
-    '''<summary>Frame characters used to close a menu line</summary>
+    ''' <summary>Frame characters used to close a menu line</summary>
     Private ReadOnly Property Closers As String() = {"║", "╗", "╝", "╣"}
 
     ''' <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for anything built with MenuMaker</summary>
@@ -151,16 +151,16 @@ Module MenuMaker
         If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
     End Sub
 
-    '''<summary>Returns a menuframe</summary>
-    '''<param name="frameNum">Indicates which frame should be returned. <br />
-    '''<list type="bullet">
-    '''<item><description>0: Empty menu line with vertical frames</description></item>
-    '''<item><description>1: Filled menu line with downward opening 90° angle frames</description></item>
-    '''<item><description>2: Filled menu line with upward opening 90° angle frames</description></item>
-    '''<item><description>3: Filled menu line with inward facing T-frames </description></item>
+    ''' <summary>Returns a menuframe</summary>
+    ''' <param name="frameNum">Indicates which frame should be returned. <br />
+    ''' <list type="bullet">
+    ''' <item><description>0: Empty menu line with vertical frames</description></item>
+    ''' <item><description>1: Filled menu line with downward opening 90° angle frames</description></item>
+    ''' <item><description>2: Filled menu line with upward opening 90° angle frames</description></item>
+    ''' <item><description>3: Filled menu line with inward facing T-frames </description></item>
     ''' </list>
-    '''0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
-    '''<returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
+    ''' 0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
+    ''' <returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
     Private Function getFrame(Optional frameNum As Integer = 0) As String
         Return mkMenuLine("", "f", frameNum)
     End Function
