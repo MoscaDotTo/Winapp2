@@ -19,11 +19,11 @@ Imports Microsoft.Win32
 Module Winapp2ool
     ''' <summary>Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub</summary>
     Public Property RemoteWinappIsNonCC As Boolean = False
-    '''<summary>Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)</summary>
+    ''' <summary>Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)</summary>
     Public Property DotNetFrameworkOutOfDate As Boolean = False
     ''' <summary>Indicates that winapp2ool currently has access to the internet</summary>
     Public Property isOffline As Boolean = False
-    '''<summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
+    ''' <summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
     Public Property isBeta As Boolean = True
 
     ''' <summary>Prints the main winapp2ool menu to the user</summary>
@@ -52,19 +52,19 @@ Module Winapp2ool
     End Sub
 
     ''' <summary>Processes the commandline args and then initalizes the main winapp2ool module</summary>
-        Public Sub main()
-            gLog($"Starting application")
-            Console.Title = $"Winapp2ool v{currentVersion}"
-            Console.WindowWidth = 126
-            ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
-            If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
-            gLog($".NET Framework is out of date. Found {Environment.Version.ToString}", DotNetFrameworkOutOfDate)
-            ' winapp2ool requires internet access for some functions
-            chkOfflineMode()
-            processCommandLineArgs()
-            If SuppressOutput Then Environment.Exit(1)
-            initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printMenu, AddressOf handleUserInput)
-        End Sub
+    Public Sub main()
+        gLog($"Starting application")
+        Console.Title = $"Winapp2ool v{currentVersion}"
+        Console.WindowWidth = 126
+        ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
+        If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
+        gLog($".NET Framework is out of date. Found {Environment.Version.ToString}", DotNetFrameworkOutOfDate)
+        ' winapp2ool requires internet access for some functions
+        chkOfflineMode()
+        processCommandLineArgs()
+        If SuppressOutput Then Environment.Exit(1)
+        initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printMenu, AddressOf handleUserInput)
+    End Sub
 
     ''' <summary>Handles the user input for the menu</summary>
     ''' <param name="input">The user's input</param>
