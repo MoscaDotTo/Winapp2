@@ -1836,13 +1836,13 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary>Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub</summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.DotNetFrameworkOutOfDate">
-<summary>Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)</summary>
+ <summary>Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)</summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.isOffline">
  <summary>Indicates that winapp2ool currently has access to the internet</summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.isBeta">
-<summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
+ <summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.printMenu">
  <summary>Prints the main winapp2ool menu to the user</summary>
