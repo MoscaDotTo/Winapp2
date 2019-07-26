@@ -141,9 +141,8 @@ Module Diff
 
     ''' <summary>Carries out the main set of Diffing operations</summary>
     Private Sub initDiff()
-        DiffFile1.validate()
-        If DownloadDiffFile Then DiffFile2 = getRemoteIniFile(winapp2link, DiffFile2) Else DiffFile2.validate()
-        If Not (enforceFileHasContent(DiffFile1) And enforceFileHasContent(DiffFile2)) Then Exit Sub
+        If Not enforceFileHasContent(DiffFile1) Then Exit Sub
+        If DownloadDiffFile Then DiffFile2 = getRemoteIniFile(winapp2link, DiffFile2) Else If Not enforceFileHasContent(DiffFile2) Then Exit Sub
         If TrimRemoteFile And DownloadDiffFile Then
             Dim tmp As New winapp2file(DiffFile2)
             Trim.trim(tmp)

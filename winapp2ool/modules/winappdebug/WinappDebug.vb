@@ -163,7 +163,6 @@ Public Module WinappDebug
 
     ''' <summary> Validates and debugs the ini file, informs the user upon completion </summary>
     Private Sub initDebug()
-        winappDebugFile1.validate()
         If Not enforceFileHasContent(winappDebugFile1) Then Exit Sub
         Dim wa2 As New winapp2file(winappDebugFile1)
         clrConsole()

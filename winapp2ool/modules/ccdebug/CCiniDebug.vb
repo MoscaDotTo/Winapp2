@@ -108,8 +108,6 @@ Module CCiniDebug
         End Select
     End Sub
 
-
-
     '''<summary>Performs the debug process on ccleaner.ini</summary>
     Private Sub ccDebug()
         If PruneStaleEntries Then prune(CCDebugFile2.Sections("Options"))
@@ -119,9 +117,9 @@ Module CCiniDebug
 
     ''' <summary>Sets up the debug and prints its results</summary>
     Private Sub initDebug()
-        CCDebugFile2.validate()
-        If PruneStaleEntries Then CCDebugFile1.validate()
         If Not enforceFileHasContent(CCDebugFile2) Then Exit Sub
+        ' winapp2.ini is not really required to be populated for this task so we do not need to enforce that it has content
+        If PruneStaleEntries Then CCDebugFile1.validate()
         clrConsole()
         print(4, "CCiniDebug Results", conjoin:=True)
         gLog("Debugging CCleaner.ini", ascend:=True)

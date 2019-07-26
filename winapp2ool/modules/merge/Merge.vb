@@ -122,8 +122,6 @@ Module Merge
     ''' <summary>Validates iniFiles and begins the merging process</summary>
     Public Sub initMerge()
         clrConsole()
-        MergeFile1.validate()
-        MergeFile2.validate()
         If Not (enforceFileHasContent(MergeFile1) And enforceFileHasContent(MergeFile2)) Then Exit Sub
         print(4, $"Merging {MergeFile1.Name} with {MergeFile2.Name}")
         merge()

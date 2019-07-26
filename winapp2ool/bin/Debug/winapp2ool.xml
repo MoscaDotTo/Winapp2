@@ -768,25 +768,25 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.anyKeyStr">
-<summary>An instruction to press any key to return to the previous menu </summary>
+ <summary>An instruction to press any key to return to the previous menu </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.invInpStr">
-<summary>An error message informing the user their input was invalid</summary>
+ <summary>An error message informing the user their input was invalid</summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.promptStr">
-<summary>An instruction for the user to provide input</summary>
+ <summary>An instruction for the user to provide input</summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.menuItemLength">
-<summary>The maximum length of the portion of the first half of a '#. Option - Description' style menu line</summary>
+ <summary>The maximum length of the portion of the first half of a '#. Option - Description' style menu line</summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.ColorHeader">
-<summary>Indicates that the menu header should be printed with color </summary>
+ <summary>Indicates that the menu header should be printed with color </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.HeaderColor">
-<summary>The color with which the next header should be printed if <c>ColorHeader</c> is <c>True</c></summary>
+ <summary>The color with which the next header should be printed if <c>ColorHeader</c> is <c>True</c></summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.OptNum">
-<summary>Holds the current option number for the menu instance</summary>
+ <summary>Holds the current option number for the menu instance</summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.SuppressOutput">
  <summary>Indicates that the application should not output or ask input from the user except when encountering exceptions <br /> Default: False </summary>
@@ -798,10 +798,10 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary> Holds the text that appears in the top block of the menu </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.Openers">
-<summary>Frame characters used to open a menu line</summary>
+ <summary>Frame characters used to open a menu line</summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.Closers">
-<summary>Frame characters used to close a menu line</summary>
+ <summary>Frame characters used to close a menu line</summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.initModule(System.String,System.Action,System.Action{System.String},System.Int32)">
  <summary>Initializes a module's menu, prints it, and handles the user input. Effectively the main event loop for anything built with MenuMaker</summary>
@@ -854,16 +854,16 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="cond">Indicates that the console should be cleared <br /> Optional, Default: True</param>
 </member>
 <member name="M:winapp2ool.MenuMaker.getFrame(System.Int32)">
-<summary>Returns a menuframe</summary>
-<param name="frameNum">Indicates which frame should be returned. <br />
-<list type="bullet">
-<item><description>0: Empty menu line with vertical frames</description></item>
-<item><description>1: Filled menu line with downward opening 90° angle frames</description></item>
-<item><description>2: Filled menu line with upward opening 90° angle frames</description></item>
-<item><description>3: Filled menu line with inward facing T-frames </description></item>
+ <summary>Returns a menuframe</summary>
+ <param name="frameNum">Indicates which frame should be returned. <br />
+ <list type="bullet">
+ <item><description>0: Empty menu line with vertical frames</description></item>
+ <item><description>1: Filled menu line with downward opening 90° angle frames</description></item>
+ <item><description>2: Filled menu line with upward opening 90° angle frames</description></item>
+ <item><description>3: Filled menu line with inward facing T-frames </description></item>
  </list>
-0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
-<returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
+ 0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
+ <returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.setHeaderText(System.String,System.Boolean,System.Boolean,System.ConsoleColor)">
  <summary>Saves a menu header to be printed atop the next menu, optionally with color</summary>
@@ -1864,7 +1864,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <returns>The root directory given by <paramref name="val"/></returns>
 </member>
 <member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
- <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no section.</summary>
+ <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no sections</summary>
  <param name="iFile">An iniFile to be checked for content</param>
 </member>
 </members>
