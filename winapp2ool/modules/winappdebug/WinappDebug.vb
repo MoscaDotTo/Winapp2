@@ -419,7 +419,11 @@ Public Module WinappDebug
     ''' <param name="chkType">0 if checking keyTypes, 1 if checking Values</param>
     Private Sub chkCasing(ByRef key As iniKey, casedArray As String(), ByRef strToChk As String, chkType As Integer)
         ' Get the properly cased string
-        Dim casedString = getCasedString(casedArray, strToChk)
+        Dim casedList = casedArray.ToList
+        Dim casedString = strToChk
+        For Each casedText In casedArray
+            If strToChk.Equals(casedText, StringComparison.InvariantCultureIgnoreCase) Then casedString = casedText
+        Next
         ' Determine if there's a casing error
         Dim hasCasingErr = Not casedString.Equals(strToChk) And casedArray.Contains(casedString)
         Dim replacementText = ""
@@ -429,9 +433,9 @@ Public Module WinappDebug
             Case 1
                 replacementText = key.Value.Replace(key.Value, casedString)
         End Select
-        Dim validData = ""
-        appendStrs(casedArray, validData, True)
+        Dim validData = String.Join(",", casedArray)
         fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, lintCasing.fixFormat, strToChk, replacementText)
+        fixStr(chkType = 0, key.Name, replacementText)
         fullKeyErr(key, $"Invalid data provided: {strToChk} in {key.toString}{Environment.NewLine}Valid data: {validData}", Not casedArray.Contains(casedString) And lintInvalid.ShouldScan)
     End Sub
 
