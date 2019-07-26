@@ -17,7 +17,7 @@
 Option Strict On
 Imports Microsoft.Win32
 Module Winapp2ool
-    ''' <summary>Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini </summary>
+    ''' <summary>Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub</summary>
     Public Property RemoteWinappIsNonCC As Boolean = False
     '''<summary>Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)</summary>
     Public Property DotNetFrameworkOutOfDate As Boolean = False
@@ -52,19 +52,19 @@ Module Winapp2ool
     End Sub
 
     ''' <summary>Processes the commandline args and then initalizes the main winapp2ool module</summary>
-    Public Sub main()
-        gLog($"Starting application")
-        Console.Title = $"Winapp2ool v{currentVersion}"
-        Console.WindowWidth = 126
-        ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
-        If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
-        gLog($".NET Framework is out of date. Found {Environment.Version.ToString}", DotNetFrameworkOutOfDate)
-        ' winapp2ool requires internet access for some functions
-        chkOfflineMode()
-        processCommandLineArgs()
-        If SuppressOutput Then Environment.Exit(1)
-        initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printMenu, AddressOf handleUserInput)
-    End Sub
+        Public Sub main()
+            gLog($"Starting application")
+            Console.Title = $"Winapp2ool v{currentVersion}"
+            Console.WindowWidth = 126
+            ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
+            If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
+            gLog($".NET Framework is out of date. Found {Environment.Version.ToString}", DotNetFrameworkOutOfDate)
+            ' winapp2ool requires internet access for some functions
+            chkOfflineMode()
+            processCommandLineArgs()
+            If SuppressOutput Then Environment.Exit(1)
+            initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printMenu, AddressOf handleUserInput)
+        End Sub
 
     ''' <summary>Handles the user input for the menu</summary>
     ''' <param name="input">The user's input</param>
@@ -122,64 +122,18 @@ Module Winapp2ool
     ''' <returns>The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined</returns>
     Public Function getWinVer() As Double
         gLog("Checking Windows version")
-        ' We can return very quickly on Windows 10 using this registry key. Unknown if it exists on earlier versions
-        If Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentMajorVersionNumber", Nothing) IsNot Nothing Then
-            Dim tmp = Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentMajorVersionNumber", Nothing).ToString
-            gLog($"Found Windows {tmp}")
-            Return CDbl(tmp)
-        End If
         Dim osVersion = System.Environment.OSVersion.ToString().Replace("Microsoft Windows NT ", "")
         Dim ver = osVersion.Split(CChar("."))
         Dim out = Val($"{ver(0)}.{ver(1)}")
         gLog($"Found Windows {out}")
-        ' This might not act completely correctly on Windows 8.1 but usage of that seems small enough that it wont be an issue
-        If Not {5.1, 6.0, 6.1, 6.2, 6.3}.Contains(out) Then
-            Console.WriteLine("Unable to determine which version of Windows you are running.")
-            Console.WriteLine()
-            Console.WriteLine("If you see this message, please report your Windows version on GitHub along with the following information:")
-            Console.WriteLine($"out: {out}")
-            Console.WriteLine()
-            Console.WriteLine("Press any key to continue")
-            Console.ReadKey()
-            out = 0.0
-        End If
         Return out
     End Function
-
-    ''' <summary>Appends a series of values onto a given String</summary>
-    ''' <param name="toAppend">The values to append to <paramref name="out"/></param>
-    ''' <param name="out">The given string to be extended</param>
-    ''' <param name="delim">Indicates that the appended Strings should be delimited using the <paramref name="delimchar"/></param>
-    ''' <param name="delimchar">The Char with which to delimit the items in <paramref name="toAppend"/> as they are appended
-    ''' to <paramref name="out"/> when <paramref name="delim"/> is True</param>
-    Public Sub appendStrs(toAppend As String(), ByRef out As String, Optional delim As Boolean = False, Optional delimchar As Char = CChar(","))
-        If Not delim Then
-            For Each param In toAppend
-                out += param
-            Next
-        Else
-            For i = 0 To toAppend.Count - 2
-                out += toAppend(i) & $"{delimchar} "
-            Next
-            out += toAppend.Last
-        End If
-    End Sub
 
     ''' <summary>Returns the first portion of a registry or filepath parameterization</summary>
     ''' <param name="val">A Windows filesystem or registry path from which the root should be returned</param>
     ''' <returns>The root directory given by <paramref name="val"/></returns>
     Public Function getFirstDir(val As String) As String
         Return val.Split(CChar("\"))(0)
-    End Function
-
-    ''' <summary>Checks a String for casing errors against a provided array of cased strings, returns the input string if no error is detected</summary>
-    ''' <param name="caseArray">The parent array of cased Strings</param>
-    ''' <param name="inputText">The String to be checked for casing errors</param>
-    Public Function getCasedString(caseArray As String(), inputText As String) As String
-        For Each casedText In caseArray
-            If inputText.Equals(casedText, StringComparison.InvariantCultureIgnoreCase) Then Return casedText
-        Next
-        Return inputText
     End Function
 
     ''' <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no section.</summary>
