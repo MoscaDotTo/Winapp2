@@ -139,6 +139,11 @@ Module MenuMaker
         If cond And Not SuppressOutput Then Console.WriteLine(msg)
     End Sub
 
+    ''' <summary>Waits for the user to press a key if <c>SuppressOutput</c> is <c>False</c></summary>
+    Public Sub crk()
+        If Not SuppressOutput Then Console.ReadKey()
+    End Sub
+
     ''' <summary>Clears the console if <paramref name="cond"/> is <c>True</c> and we're not unit testing</summary>
     ''' <remarks>When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that</remarks>
     ''' <param name="cond">Indicates that the console should be cleared <br /> Optional, Default: True</param>

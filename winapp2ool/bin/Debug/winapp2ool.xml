@@ -845,6 +845,9 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="msg">The string to be printed <br />Default: Nothing</param>
  <param name="cond">Indicates the line should be printed <br />Optional, Default: True</param>
 </member>
+<member name="M:winapp2ool.MenuMaker.crk">
+ <summary>Waits for the user to press a key if <c>SuppressOutput</c> is <c>False</c></summary>
+</member>
 <member name="M:winapp2ool.MenuMaker.clrConsole(System.Boolean)">
  <summary>Clears the console if <paramref name="cond"/> is <c>True</c> and we're not unit testing</summary>
  <remarks>When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that</remarks>
@@ -1863,9 +1866,6 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
  <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no section.</summary>
  <param name="iFile">An iniFile to be checked for content</param>
-</member>
-<member name="M:winapp2ool.Winapp2ool.crk">
- <summary>Waits for the user to press a key if <c>SuppressOutput</c> is <c>False</c></summary>
 </member>
 </members>
 </doc>

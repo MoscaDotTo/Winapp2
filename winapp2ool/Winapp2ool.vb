@@ -146,9 +146,4 @@ Module Winapp2ool
         End If
         Return True
     End Function
-
-    ''' <summary>Waits for the user to press a key if <c>SuppressOutput</c> is <c>False</c></summary>
-    Public Sub crk()
-        If Not SuppressOutput Then Console.ReadKey()
-    End Sub
 End Module
