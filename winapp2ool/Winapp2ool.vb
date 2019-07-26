@@ -136,7 +136,7 @@ Module Winapp2ool
         Return val.Split(CChar("\"))(0)
     End Function
 
-    ''' <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no section.</summary>
+    ''' <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no sections</summary>
     ''' <param name="iFile">An iniFile to be checked for content</param>
     Public Function enforceFileHasContent(iFile As iniFile) As Boolean
         If iFile.Sections.Count = 0 Then
