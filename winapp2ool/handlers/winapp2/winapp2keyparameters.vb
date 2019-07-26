@@ -86,7 +86,7 @@ Public Class winapp2KeyParameters
     ''' <summary>Constructs a new iniKey in an attempt to merge keys together</summary>
     ''' <param name="tmpKeyStr">The string to contain the new key text</param>
     Public Sub addArgs(ByRef tmpKeyStr As String)
-        appendStrs({$"{KeyType}{KeyNum}=", $"{PathString}|", ArgsList(0)}, tmpKeyStr)
+        tmpKeyStr += $"{KeyType}{KeyNum}={PathString}|{ArgsList(0)}"
         If ArgsList.Count > 1 Then
             For i = 1 To ArgsList.Count - 1
                 tmpKeyStr += $";{ArgsList(i)}"
