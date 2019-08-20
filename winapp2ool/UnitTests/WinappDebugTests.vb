@@ -22,6 +22,8 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
 ''' </summary>
 <TestClass()> Public Class WinappDebugTests
 
+    Private Property WDUTFile1 As New winapp2ool.iniFile(Environment.CurrentDirectory, "WinappDebugUnitTests.ini")
+
     ''' <summary>Initializes WinappDebug with provided commandline args</summary>
     ''' <param name="args">An array of args to pass to WinappDebug</param>
     ''' <param name="addHalt">Optional Boolean specifying whether or not the halting flag should be added to the args</param>
@@ -88,10 +90,9 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' <summary>Returns a winapp2file object containing the requested test</summary>
     ''' <param name="testNum">The test index to return from the unit test file</param>
     Private Function getSingleTestFile(testNum As Integer) As winapp2ool.winapp2file
-        Dim unitFile As New winapp2ool.iniFile(Environment.CurrentDirectory, "WinappDebugUnitTests.ini")
-        unitFile.validate()
+        If Not WDUTFile1.Sections.Count > 0 Then WDUTFile1.validate()
+        Dim testSection = WDUTFile1.Sections.Values(testNum)
         Dim testFile As New winapp2ool.iniFile
-        Dim testSection = unitFile.Sections.Values(testNum)
         testFile.Sections.Add(testSection.Name, testSection)
         Return New winapp2ool.winapp2file(testFile)
     End Function
@@ -120,6 +121,14 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ' Return the entry for further assessment
         Return New winapp2ool.winapp2entry(test.EntrySections.Last.Sections.Values.First)
     End Function
+
+    '''<summary>Confirms that the unit test file was initialzed correctly</summary>
+    '''<remarks>Test is named this way to make sure it is first on the list of tests, and prevent the overhead of loading the test file
+    '''from being reflected in other tests runtimes</remarks>
+    <TestMethod> Public Sub debug_AAGetTestFile_success()
+        Dim init = getSingleTestFile(0)
+        Assert.IsTrue(WDUTFile1.Sections.Count = 12)
+    End Sub
 
     ''' <summary>Runs tests to ensure that keys with duplicate values are detected and removed</summary>
     <TestMethod> Public Sub debug_DuplicateKeyValue_FindAndRepair_Success()
@@ -186,5 +195,11 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Dim testOutput = debug_ErrorFindAndRepair_Success(5, 2, 0, 13)
         Assert.IsTrue(Not testOutput.FileKeys.Keys.First.Value.EndsWith(";"))
         Assert.IsTrue(Not testOutput.FileKeys.Keys(1).Value.Contains(";|"))
+    End Sub
+
+    <TestMethod> Public Sub debug_multipleBackSlashes_FindAndRepair_Success()
+        Dim testOutput = debug_ErrorFindAndRepair_Success(11, 2, 0, 5)
+        Assert.IsTrue(Not testOutput.Detects.Keys.First.Value.Contains("\\"))
+        Assert.IsTrue(Not testOutput.FileKeys.Keys.First.Value.Contains("\\"))
     End Sub
 End Class

@@ -1812,10 +1812,10 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="errTxt">Text describing the error to be printed to the user</param>
 </member>
 <member name="M:winapp2ool.WinappDebug.fullKeyErr(winapp2ool.iniKey,System.String,System.Boolean,System.Boolean,System.String@,System.String)">
- <summary>Prints an error whose output text contains an iniKey string</summary>
- <param name="key">The inikey to be printed</param>
+ <summary>Prints an error whose output text contains an iniKey string, optionally correcting that value with one that is provided</summary>
+ <param name="key">The inikey to be printed and/or modified</param>
  <param name="err">Text describing the error to be printed to the user</param>
- <param name="cond">Indicates that the error condition is present <br />Optional, Default: True</param>
+ <param name="cond">Indicates that the error conditions are present (including any <c>lintRule.shouldScan</c>) <br />Optional, Default: True</param>
  <param name="repCond">Indicates that the repair function should run <br /> Optional, Default: False</param>
  <param name="newVal">The String with which to replace the incorrect String <br />Optional, Default: ""</param>
  <param name="repairVal">The incorrect String <br />Optional, Default: ""</param>

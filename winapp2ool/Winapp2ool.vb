@@ -15,7 +15,6 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-Imports Microsoft.Win32
 Module Winapp2ool
     ''' <summary>Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub</summary>
     Public Property RemoteWinappIsNonCC As Boolean = False
