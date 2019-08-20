@@ -324,7 +324,7 @@ Public Module WinappDebug
         inputMismatchErr(key.LineNumber, numberingErrStr, key.Name, fixedStr, If(noNumbers, lintExtraNums.ShouldScan, lintWrongNums.ShouldScan) And hasNumberingError)
         fixStr(If(noNumbers, lintExtraNums.fixFormat, lintWrongNums.fixFormat) And hasNumberingError, key.Name, fixedStr)
         ' Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
-        fullKeyErr(key, "Forward slash (/) detected in lieu of backslash (\).", Not key.typeIs("Warning") And lintSlashes.ShouldScan And key.vHas(CChar("/")),
+        fullKeyErr(key, "Forward slash (/) detected in lieu of backslash (\).", Not key.typeIs("Warning") And lintSlashes.ShouldScan And key.vHas("/"),
                                                                                                             lintSlashes.fixFormat, key.Value, key.Value.Replace("/", "\"))
         fullKeyErr(key, "Trailing semicolon (;).", key.toString.Last = CChar(";") And lintSemis.ShouldScan, lintSemis.fixFormat, key.Value, key.Value.TrimEnd(CChar(";")))
         ' Do some formatting checks for environment variables if needed
@@ -399,12 +399,18 @@ Public Module WinappDebug
                 Return False
             End If
         End If
+        If key.Value.Contains("\\") Then
+            fullKeyErr(key, "Extraneous backslashes (\\) detected", lintSlashes.ShouldScan)
+            While (key.Value.Contains("\\") And lintSlashes.fixFormat)
+                key.Value = key.Value.Replace("\\", "\")
+            End While
+        End If
         ' Check for leading or trailing whitespace, do this always as spaces in the name interfere with proper keyType identification
         If key.Name.StartsWith(" ") Or key.Name.EndsWith(" ") Or key.Value.StartsWith(" ") Or key.Value.EndsWith(" ") Then
             fullKeyErr(key, "Detected unwanted whitespace in iniKey", True)
-            fixStr(True, key.Value, key.Value.Trim(CChar(" ")))
-            fixStr(True, key.Name, key.Name.Trim(CChar(" ")))
-            fixStr(True, key.KeyType, key.KeyType.Trim(CChar(" ")))
+            fixStr(True, key.Value, key.Value.Trim)
+            fixStr(True, key.Name, key.Name.Trim)
+            fixStr(True, key.KeyType, key.KeyType.Trim)
         End If
         ' Make sure the keyType is valid
         chkCasing(key, validCmds, key.KeyType, 0)
@@ -418,7 +424,6 @@ Public Module WinappDebug
     ''' <param name="chkType">0 if checking keyTypes, 1 if checking Values</param>
     Private Sub chkCasing(ByRef key As iniKey, casedArray As String(), ByRef strToChk As String, chkType As Integer)
         ' Get the properly cased string
-        Dim casedList = casedArray.ToList
         Dim casedString = strToChk
         For Each casedText In casedArray
             If strToChk.Equals(casedText, StringComparison.InvariantCultureIgnoreCase) Then casedString = casedText
@@ -432,7 +437,7 @@ Public Module WinappDebug
             Case 1
                 replacementText = key.Value.Replace(key.Value, casedString)
         End Select
-        Dim validData = String.Join(",", casedArray)
+        Dim validData = String.Join(", ", casedArray)
         fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, lintCasing.fixFormat, strToChk, replacementText)
         fixStr(chkType = 0, key.Name, replacementText)
         fullKeyErr(key, $"Invalid data provided: {strToChk} in {key.toString}{Environment.NewLine}Valid data: {validData}", Not casedArray.Contains(casedString) And lintInvalid.ShouldScan)
@@ -627,10 +632,10 @@ Public Module WinappDebug
         If cond Then customErr(entry.LineNum, errTxt, {$"Entry Name: {entry.FullName}"})
     End Sub
 
-    ''' <summary>Prints an error whose output text contains an iniKey string</summary>
-    ''' <param name="key">The inikey to be printed</param>
+    ''' <summary>Prints an error whose output text contains an iniKey string, optionally correcting that value with one that is provided</summary>
+    ''' <param name="key">The inikey to be printed and/or modified</param>
     ''' <param name="err">Text describing the error to be printed to the user</param>
-    ''' <param name="cond">Indicates that the error condition is present <br />Optional, Default: True</param>
+    ''' <param name="cond">Indicates that the error conditions are present (including any <c>lintRule.shouldScan</c>) <br />Optional, Default: True</param>
     ''' <param name="repCond">Indicates that the repair function should run <br /> Optional, Default: False</param>
     ''' <param name="newVal">The String with which to replace the incorrect String <br />Optional, Default: ""</param>
     ''' <param name="repairVal">The incorrect String <br />Optional, Default: ""</param>
