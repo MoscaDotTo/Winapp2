@@ -1,5 +1,6 @@
 
 # MenuMaker
+
 **MenuMaker** is a singleton driver module for making dynamic finite state console applications with numbered menus
 
 # Properties
@@ -13,14 +14,15 @@ menuItemLength|`Integer`|`None`, but every winapp2ool module initalizes using `3
 ColorHeader|`Boolean`|`Nothing`, but modules initialize it with `False` by default | Indicates that the menu header should be printed with color|
 HeaderColor|`ConsoleColor`|`Nothing`|The color with which the next header should be printed if `ColorHeader` is `True`|
 OptNum|`Integer`|`0`|Holds the current option number for the menu instance|
-SuppressOutput|`Boolean`|`False`|Indicates that the application should not output or ask input from the user except when encountering exceptions 
-ExitCode|`Boolean`|`False`|Indicates that an exit from the current menu is pending 
+SuppressOutput|`Boolean`|`False`|Indicates that the application should not output or ask input from the user except when encountering exceptions
+ExitCode|`Boolean`|`False`|Indicates that an exit from the current menu is pending
 MenuHeaderText|`String`|`Nothing`|Holds the text that appears in the top block of the menu|
 Openers|`String()`|`{"║", "╔", "╚", "╠"}`|Frame characters used to open a menu line|
 Closers|`String()`|`{"║", "╗", "╝", "╣"}`|Frame characters used to close a menu line
 
-
 # Creating a menu
+
+The general structure of a menu looks something like this
 
 ```
  ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
@@ -35,26 +37,32 @@ Closers|`String()`|`{"║", "╗", "╝", "╣"}`|Frame characters used to close
  ║ 1. Some First Option               - Execute some function or toggle some setting                                        ║
  ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
-Enter a number, or leave blank to run the default:                                                                                                                                   
- ```  
-###### The general structure of a menu looks something like this
+Enter a number, or leave blank to run the default:
+
+ ```
+
 Creating this menu is very simple:
+
 ```vb
     Public Sub printMenu()
         setHeaderText("Menu Header Text Goes Here")
         printMenuTop({"Menu description items go here", "No fixed number of lines"})
         print(1, "Some First Option", "Execute some function or toggle some setting", closeMenu:=True)
 ```
-### Some notes
+
+## Notes
+
 * The `Console` class in Windows is *extremely* limited in terms of its capacity to show colors. The new Windows terminal has much better support for colors but isn't currently supported by **MenuMaker**
-* Generated frames will be fit to the current console width as best they can be. 
-* Lines that are longer than the current console width will not have a closing frame character 
+* Generated frames will be fit to the current console width as best they can be.
+* Lines that are longer than the current console width will not have a closing frame character
 * The above snippet calls `setHeaderText` but this is not necessary when instantiating menus through `initModule` (see below)
 
 # Displaying menus
-Menus are displayed and handled by the `initModule` subroutine 
+
+Menus are displayed and handled by the `initModule` subroutine
 
 Code
+
 ```vb
     Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String), Optional itmLen As Integer = 35)
         ExitPending = False
@@ -70,7 +78,6 @@ Code
         setHeaderText($"{name} closed")
     End Sub
 ```
-###### 
 
 | Parameter|Type|Description |Optional|
 |:-|:-|:-|:-|
@@ -79,14 +86,16 @@ Code
 |handleInput|`Action(Of String)`|The subroutine that handles the module's input|No
 |itmLen|`Integer`|Indicates the maximum length of menu option names|Yes, default: `35`
 
-#### Notes
-* The `Name` parameter is used to populate the menu header when `initMenu` is called and when its loop terminates. Beyond this, the module being initalized has control of the header at all times through the `setHeaderText` subroutine 
+## Notes
+
+* The `Name` parameter is used to populate the menu header when `initMenu` is called and when its loop terminates. Beyond this, the module being initalized has control of the header at all times through the `setHeaderText` subroutine
 * Prompts the user for input using the value provided by the `promptStr` module property
 * Exiting a menu returns the user exactly one level up in the stack
 
 ## Handling input
 
 `initMenu` requires that you provide it with a subroutine that accepts a `String` value to handle the user's input. A snippet for this typically begins like this
+
 ```vb
 Public Sub handleInput(input As String)
         Select Case True
@@ -99,13 +108,15 @@ Public Sub handleInput(input As String)
         End Select
     End Sub
 ```
-###### Selecting for case `input` is also a good option if the menu doesn't need to consider any further conditions, such as online status or the state of module parameters (see below)
+
+Selecting for case `input` is also a good option if the menu doesn't need to consider any further conditions, such as online status or the state of module parameters (see below)
 
 ## (Actually) Displaying Menus
 
-Printing menus is handled entirely through the `print` subroutine. It takes many parameters, but most are optional flags whose effects are described below, and whose default values cause them to be disabled 
+Printing menus is handled entirely through the `print` subroutine. It takes many parameters, but most are optional flags whose effects are described below, and whose default values cause them to be disabled
 
 Code
+
 ```vb
     Public Sub print(printType As Integer, menuText As String, Optional optString As String = "", Optional cond As Boolean = True,
                      Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False,
@@ -144,7 +155,9 @@ Code
         cwl(cond:=trailr)
     End Sub
 ```
-###### Who needs ENUMS? 
+
+ Who needs ENUMS?
+
 | Parameter|Type|Description |Optional|
 |:-|:-|:-|:-|
 |printType|`Integer`|The type of menu information to print*|No
@@ -178,8 +191,10 @@ Code
 
 \*** If `colorLine` is `True`and `useArbitraryColor` is `False`, the line will be printed based on the value of `enStrCond`. This is `ConsoleColor.Green` when it is `True` and `ConsoleColor.Red` when it is False. The default value is `False` and as a result, the default color in this case will be red.
 
- # Example Program
+# Example Program
+
  The following code can be used alongside MenuMaker.vb to create a simple demo menu
+
  ```vb
  Module Module1
     Property toggleBool As Boolean = False
@@ -216,10 +231,13 @@ End Module
 ```
 
 # Helper Functions
+
 MenuMaker has some helper functions that should help format menu content
 
 ## denyActionWithHeader
-#### Informs a user when an action is unable to proceed due to a condition
+
+### Informs a user when an action is unable to proceed due to a condition
+
 ```vb
 Public Function denyActionWithHeader(cond As Boolean, errText As String) As Boolean
     setHeaderText(errText, True, cond)
@@ -232,21 +250,26 @@ End Function
 |cond|`Boolean`|Indicates that an action should be denied|
 |errText|`String`|The error text to be printed in the menu header
 
-As demonstrated in the example program above, this function can be used to gate execution of a function behind a `Boolean` state. It accepts the condition that, when `True` should prevent further execution (eg. `toggleBool = False`). It returns the `Boolean` it is fed, and if `True`, sets the menu header's text to a given error string. 
+As demonstrated in the example program above, this function can be used to gate execution of a function behind a `Boolean` state. It accepts the condition that, when `True` should prevent further execution (eg. `toggleBool = False`). It returns the `Boolean` it is fed, and if `True`, sets the menu header's text to a given error string.
 
 ## enStr
-#### Returns the inverse state of a given boolean as a String, ie. `"Disable"` if `setting` is `True`, `"Enable"` otherwise. Useful for creating toggles 
+
+### Returns the inverse state of a given boolean as a String, ie. `"Disable"` if `setting` is `True`, `"Enable"` otherwise. Useful for creating toggles
+
 ```vb
 Public Function enStr(setting As Boolean) As String
     Return If(setting, "Disable", "Enable")
 End Function
  ```
+
 | Parameter|Type|Description |
 |:-|:-|:-|
 |setting|`Boolean`|>A module setting whose state will be observed
 
 ## printMenuTop
-#### Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option (optional)
+
+### Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option (optional)
+
 ```vb
 Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
     print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=True, arbitraryColor:=HeaderColor, conjoin:=True)
@@ -258,36 +281,45 @@ Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Bool
     print(1, "Exit", "Return to the menu", printExit)
 End Sub
 ```
+
 | Parameter|Type|Description |Optional|
 |:-|:-|:-|:-
 |descriptionItems|`String()`|Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line|No
 |printExit|`Boolean`|Indicates that an option to exit to the previous menu should be printed |Yes, default: `True`
 
 ## clrConsole
-#### Clears the console if `cond` is `True`, `SuppressOutput` is `False`, and the caller is not an x86 unit testing console window
+
+### Clears the console if `cond` is `True`, `SuppressOutput` is `False`, and the caller is not an x86 unit testing console window
+
 ```vb
 Public Sub clrConsole(Optional cond As Boolean = True)
     If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
 End Sub
 ```
+
 | Parameter|Type|Description |Optional|
 |:-|:-|:-|:-
 cond|`Boolean`|Indicates that the console should be cleared |Yes, default: `True`
 
 ## cwl
-#### Prints a line to the console window if `SuppressOutput` is `False` and `cond` is `True`
+
+### Prints a line to the console window if `SuppressOutput` is `False` and `cond` is `True`
+
 ```vb
 Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
     If cond And Not SuppressOutput Then Console.WriteLine(msg)
 End Sub
 ```
+
 | Parameter|Type|Description |Optional|
 |:-|:-|:-|:-
 msg|`String`|The line to be printed|Yes, default: `Nothing`
 cond|`Boolean`|Indicates the line should be printed|Yes, default: `True`
 
 ## setHeaderText
-#### Saves a menu header to be printed atop the next menu, optionally with color
+
+### Saves a menu header to be printed atop the next menu, optionally with color
+
 ```vb
 Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
     If Not cond Then Return
@@ -305,25 +337,31 @@ cond|`Boolean`|Indicates that the header text should be set|Yes, default: `True`
 printColor|`ConsoleColor`|ConsoleColor with which the header should be colored when `cHeader` is `True`|Yes, default: `ConsoleColor.Red`
 
 ## replDir
-#### Replaces instances of the current directory in a path string with `".."`
+
+### Replaces instances of the current directory in a path string with `".."`
+
 ```vb
 Public Function replDir(dirStr As String) As String
     Return dirStr.Replace(Environment.CurrentDirectory, "..")
 End Function
 ```
 
-|Parameter|Type|Description 
+|Parameter|Type|Description
 |:-|:-|:-
 dirStr|`String`|A windows filesystem path
 
-# Private members 
+# Private members
+
 The following are private member subroutines and functions of MenuMaker
 
 ## getFrame
+
+### Returns a menuFrame of the requested shape
+
 ```vb
 Private Function getFrame(Optional frameNum As Integer = 0) As String
     Return mkMenuLine("", "f", frameNum)
-End Function 
+End Function
 ```
 
 |Parameter|Type|Description |Optional|
@@ -337,10 +375,12 @@ frameNum|`Integer`|Indicates which frame should be returned * | Yes, default: `0
 |`0`|Empty menu line with vertical frames
 |`1`|Filled menu line with downward opening 90° angle frames
 |`2`|Filled menu line with upward opening 90° angle frames
-|`3`|Filled menu line with inward facing T-frames 
+|`3`|Filled menu line with inward facing T-frames
 
 ## printMenuLine
-#### Prints a line bounded by vertical menu frames, an empty menu line if `lineString` is `Nothing`
+
+### Prints a line bounded by vertical menu frames, an empty menu line if `lineString` is `Nothing`
+
 ```vb
 Private Sub printMenuLine(Optional lineString As String = Nothing, Optional isCentered As Boolean = False)
     If lineString = Nothing Then lineString = getFrame()
@@ -354,7 +394,9 @@ lineString|`String`|The text to be printed|Yes, default: `Nothing`
 isCentered|`Boolean`|Indicates that the printed text should be centered|Yes, default: `False`
 
 ## printMenuOpt
-#### Prints a numbered menu option after padding it to a set length
+
+### Prints a numbered menu option after padding it to a set length
+
 ```vb
 Private Sub printMenuOpt(lineString1 As String, lineString2 As String)
     lineString1 = $"{OptNum}. {lineString1}"
@@ -364,13 +406,15 @@ Private Sub printMenuOpt(lineString1 As String, lineString2 As String)
 End Sub
 ```
 
-|Parameter|Type|Description 
+|Parameter|Type|Description
 |:-|:-|:-
 |lineString1|`String`|The name of the menu option
 |lineString2|`String`|The description of the menu option
 
 ## mkMenuLine
-#### Constructs a menu line fit to the width of the console
+
+### Constructs a menu line fit to the width of the console
+
 ```vb
 Private Function mkMenuLine(line As String, align As String, Optional borderInd As Integer = 0) As String
     If line.Length >= Console.WindowWidth - 1 Then Return line
@@ -407,14 +451,16 @@ borderInd|`Integer`|Determines which characters should create the border for the
 ** `borderInd` refers to the index within the `openers` and `closers` property for the desired frame character
 
 ## padToEnd
-#### Pads a given string with spaces until it is a target length
+
+### Pads a given string with spaces until it is a target length
+
 ```vb
 Private Sub padToEnd(ByRef out As String, targetLen As Integer, endline As String, Optional padChar As String = " ")
     While out.Length < targetLen
         out += padChar
     End While
     If targetLen = Console.WindowWidth - 2 Then out += endline
-End Sub 
+End Sub
 ```
 
 |Parameter|Type|Description |Optional|

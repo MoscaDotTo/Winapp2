@@ -151,7 +151,7 @@ Module MenuMaker
         If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
     End Sub
 
-    ''' <summary>Returns a menuframe</summary>
+    ''' <summary>Returns a menuFrame of the requested shape</summary>
     ''' <param name="frameNum">Indicates which frame should be returned. <br />
     ''' <list type="bullet">
     ''' <item><description>0: Empty menu line with vertical frames</description></item>
