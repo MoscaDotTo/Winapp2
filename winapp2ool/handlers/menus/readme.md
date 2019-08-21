@@ -5,13 +5,13 @@
 
 # Properties
 
-| Name|Type|Default Value|Description|
+|Name|Type|Default Value|Description|
 |:-|:-|:-|:-|
-|anyKeyStr|`String`|`"Press any key to return to the menu."` | An instruction to press any key to return to the previous menu|
+|anyKeyStr|`String`|`"Press any key to return to the menu."`|An instruction to press any key to return to the previous menu|
 invInpStr|`String`|`"Invalid input. Please try again."`|An error message informing the user their input was invalid|
 promptStr|`String`|`"Enter a number, or leave blank to run the default: "`|An instruction for the user to provide input|
-menuItemLength|`Integer`|`None`, but every winapp2ool module initalizes using `35` | The maximum length of the portion of the first half of a '#. Option - Description' style menu line|
-ColorHeader|`Boolean`|`Nothing`, but modules initialize it with `False` by default | Indicates that the menu header should be printed with color|
+menuItemLength|`Integer`|`None`, but every winapp2ool module initalizes using `35`|The maximum length of the portion of the first half of a '#. Option - Description' style menu line|
+ColorHeader|`Boolean`|`Nothing`, but modules initialize it with `False` by default|Indicates that the menu header should be printed with color|
 HeaderColor|`ConsoleColor`|`Nothing`|The color with which the next header should be printed if `ColorHeader` is `True`|
 OptNum|`Integer`|`0`|Holds the current option number for the menu instance|
 SuppressOutput|`Boolean`|`False`|Indicates that the application should not output or ask input from the user except when encountering exceptions
@@ -61,8 +61,6 @@ Creating this menu is very simple:
 
 Menus are displayed and handled by the `initModule` subroutine
 
-Code
-
 ```vb
     Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String), Optional itmLen As Integer = 35)
         ExitPending = False
@@ -79,7 +77,7 @@ Code
     End Sub
 ```
 
-| Parameter|Type|Description |Optional|
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-|
 |Name|`String`|The name of the module as it will be displayed to the user|No
 |showMenu|`Action`|The subroutine prints the module's menu|No
@@ -114,8 +112,6 @@ Selecting for case `input` is also a good option if the menu doesn't need to con
 ## (Actually) Displaying Menus
 
 Printing menus is handled entirely through the `print` subroutine. It takes many parameters, but most are optional flags whose effects are described below, and whose default values cause them to be disabled
-
-Code
 
 ```vb
     Public Sub print(printType As Integer, menuText As String, Optional optString As String = "", Optional cond As Boolean = True,
@@ -158,7 +154,7 @@ Code
 
  Who needs ENUMS?
 
-| Parameter|Type|Description |Optional|
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-|
 |printType|`Integer`|The type of menu information to print*|No
 |menuText|`String`|The text to be printed **|No|
@@ -166,7 +162,7 @@ Code
 |cond|`Boolean`|Indicates that the line should be printed|Yes, default: `True`
 |leadingBlank|`Boolean`|Indicates that a blank menu line should be printed immediately before the printed line|Yes, default: `False`
 |trailingBlank|`Boolean`|Indicates that a blank menu line should be printed immediately after the printed line|Yes, default: `False`
-|isCentered|`Boolean`|Indicates that the printed text should be centered |Yes, default: `False`
+|isCentered|`Boolean`|Indicates that the printed text should be centered|Yes, default: `False`
 |closeMenu|`Boolean`|Indicates that the bottom menu frame should be printed|Yes, default: `False`
 |openMenu|`Boolean`|Indicates that the top menu frame should be printed|Yes, default: `False`
 |enStrCond|`Boolean`|A module setting whose menu text will include an Enable/Disable toggle ***|Yes, default: `False`
@@ -245,7 +241,7 @@ Public Function denyActionWithHeader(cond As Boolean, errText As String) As Bool
 End Function
 ```
 
-| Parameter|Type|Description |
+|Parameter|Type|Description|
 |:-|:-|:-|
 |cond|`Boolean`|Indicates that an action should be denied|
 |errText|`String`|The error text to be printed in the menu header
@@ -262,7 +258,7 @@ Public Function enStr(setting As Boolean) As String
 End Function
  ```
 
-| Parameter|Type|Description |
+|Parameter|Type|Description|
 |:-|:-|:-|
 |setting|`Boolean`|>A module setting whose state will be observed
 
@@ -282,10 +278,10 @@ Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Bool
 End Sub
 ```
 
-| Parameter|Type|Description |Optional|
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-
 |descriptionItems|`String()`|Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line|No
-|printExit|`Boolean`|Indicates that an option to exit to the previous menu should be printed |Yes, default: `True`
+|printExit|`Boolean`|Indicates that an option to exit to the previous menu should be printed|Yes, default: `True`
 
 ## clrConsole
 
@@ -297,13 +293,13 @@ Public Sub clrConsole(Optional cond As Boolean = True)
 End Sub
 ```
 
-| Parameter|Type|Description |Optional|
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-
-cond|`Boolean`|Indicates that the console should be cleared |Yes, default: `True`
+cond|`Boolean`|Indicates that the console should be cleared|Yes, default: `True`
 
 ## cwl
 
-### Prints a line to the console window if `SuppressOutput` is `False` and `cond` is `True`
+### Prints a line to the console window if output is not currently being suppressed and the given `cond` is met
 
 ```vb
 Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
@@ -311,10 +307,20 @@ Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True
 End Sub
 ```
 
-| Parameter|Type|Description |Optional|
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-
 msg|`String`|The line to be printed|Yes, default: `Nothing`
 cond|`Boolean`|Indicates the line should be printed|Yes, default: `True`
+
+## crk
+
+### Waits for the user to press a key if output is not currently being suppressed
+
+```vb
+Public Sub crk()
+    If Not SuppressOutput Then Console.ReadKey()
+End Sub
+```
 
 ## setHeaderText
 
@@ -329,7 +335,7 @@ Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Opt
 End Sub
 ```
 
-| Parameter|Type|Description |Optional|
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-
 txt|`String`|The text to appear in the header|No
 cHeader|`Boolean`|Indicates that the header should be colored using the color given by `printColor`|Yes, default: `False`|
@@ -364,9 +370,9 @@ Private Function getFrame(Optional frameNum As Integer = 0) As String
 End Function
 ```
 
-|Parameter|Type|Description |Optional|
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-
-frameNum|`Integer`|Indicates which frame should be returned * | Yes, default: `0`
+frameNum|`Integer`|Indicates which frame should be returned \*|Yes, default: `0`
 
 \* frameNums:
 
@@ -438,7 +444,7 @@ End Function
 |:-|:-|:-|:-
 line|`String`|The text to be printed|No
 align|`String`|The alignment of the line to be printed *|No
-borderInd|`Integer`|Determines which characters should create the border for the menuline **| Yes, default: `0`
+borderInd|`Integer`|Determines which characters should create the border for the menuline **|Yes, default: `0`
 
 \* aligns
 
@@ -463,7 +469,7 @@ Private Sub padToEnd(ByRef out As String, targetLen As Integer, endline As Strin
 End Sub
 ```
 
-|Parameter|Type|Description |Optional|
+|Parameter|Type|Description|Optional|
 |:-|:-|:-|:-|
 out|`String`|The text to be padded|No|
 targetLen|`Integer`|The length to which the text should be padded|No|

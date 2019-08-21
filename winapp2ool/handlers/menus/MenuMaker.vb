@@ -132,14 +132,14 @@ Module MenuMaker
         cwl(cond:=trailr)
     End Sub
 
-    ''' <summary>Prints a line to the console window if <c>SuppressOutput</c> and <paramref name="cond"/> are true </summary>
+    ''' <summary>Prints a line to the console window if output is not currently being suppressed and the given <paramref name="cond"/> is met</summary>
     ''' <param name="msg">The string to be printed <br />Default: Nothing</param>
     ''' <param name="cond">Indicates the line should be printed <br />Optional, Default: True</param>
     Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
         If cond And Not SuppressOutput Then Console.WriteLine(msg)
     End Sub
 
-    ''' <summary>Waits for the user to press a key if <c>SuppressOutput</c> is <c>False</c></summary>
+    ''' <summary>Waits for the user to press a key if output is not currently being suppressed</summary>
     Public Sub crk()
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
