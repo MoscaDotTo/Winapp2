@@ -15,14 +15,13 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary>
-''' This module holds any scans/repairs for WinappDebug that might be disabled by default due to incompleteness.
-''' </summary>
+''' <summary> This module holds any scans/repairs for <c> WinappDebug </c> that are be disabled by default due to incompleteness </summary>
 Module experimentalScans
-    ''' <summary>Attempts to merge FileKeys together if syntactically possible.</summary>
-    ''' <param name="kl">A list of winapp2.ini FileKey format iniFiles</param>
+
+    ''' <summary> Attempts to merge FileKeys together if syntactically possible </summary>
+    ''' <param name="kl"> A <c> keyList </c> of FileKey format <c> iniKeys </c> </param>
     Public Sub cOptimization(ByRef kl As keyList)
-        ' Rules1.Last here is lintOpti 
+        ' Rules1.Last here is lintOpti
         If kl.KeyCount < 2 Or Not Rules.Last.ShouldScan Then Exit Sub
         Dim dupes As New keyList
         Dim newKeys As New keyList
@@ -67,9 +66,9 @@ Module experimentalScans
         End If
     End Sub
 
-    ''' <summary>Prints output from the Optimization function</summary>
-    ''' <param name="boxStr">The text to go in the optimization section box</param>
-    ''' <param name="kl">The list of keys to be printed beneath the box</param>
+    ''' <summary> Prints output from the Optimization function </summary>
+    ''' <param name="boxStr"> The text to be printed in the optimization section box </param>
+    ''' <param name="kl"> The list of <c> iniKeys </c>to be printed beneath the box </param>
     Private Sub printOptiSect(boxStr As String, kl As keyList)
         print(3, boxStr, buffr:=True, trailr:=True)
         kl.Keys.ForEach(Sub(key) cwl(key.toString))
