@@ -16,6 +16,7 @@ lintRule is a component of **WinappDebug** and holds information about whether o
 |LintName|`String`|`Nothing`|The name of the rule as it will appear in menus
 |*initScanState*|`Boolean`|`Nothing`|The instantiating (default) value of ShouldScan
 |*initRepairState*|`Boolean`|`Nothing`|The instantiating (default) value of ShouldRepair
+
 Lint rules are not instantiated with anything less than *all* the parameters that they require, so they do not carry default values.
 
 # Creating a lint rule
