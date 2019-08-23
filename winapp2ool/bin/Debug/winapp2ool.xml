@@ -777,16 +777,13 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary> An instruction for the user to provide input </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.menuItemLength">
- <summary> The maximum length of the portion of the first half of a '#. Option - Description' style menu line </summary>
+ <summary> The maximum length of the 'Name' half of a '#. Name - Description' style menu option </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.ColorHeader">
  <summary> Indicates that the menu header should be printed with color </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.HeaderColor">
  <summary> The color with which the next header should be printed if <c> ColorHeader </c> is <c> True </c> </summary>
-</member>
-<member name="P:winapp2ool.MenuMaker.OptNum">
- <summary> Holds the current option number for the menu instance </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.SuppressOutput">
  <summary> Indicates that the application should not output or ask input from the user except when encountering exceptions <br/> Default: <c> False </c> </summary>
@@ -797,137 +794,142 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="P:winapp2ool.MenuMaker.MenuHeaderText">
  <summary> The text that appears in the top block of the menu </summary>
 </member>
+<member name="P:winapp2ool.MenuMaker.OptNum">
+ <summary> The number associated with the next <c> Menu Option </c> that will be printed (if any) </summary>
+</member>
 <member name="P:winapp2ool.MenuMaker.Openers">
- <summary>Frame characters used to open a menu line</summary>
+ <summary> Frame characters used to open a menu line </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.Closers">
- <summary>Frame characters used to close a menu line</summary>
+ <summary> Frame characters used to close a menu line </summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.initModule(System.String,System.Action,System.Action{System.String},System.Int32)">
- <summary> Displays a menu to and collects input from the user <br/> Effectively the main event loop for anything built with <c> MenuMaker </c> </summary>
+ <summary> Displays a menu to and passes the user's input over to be handled until the exit command is given 
+ <br/> Exiting a menu returns exactly one level up in the stack to the menu that called it 
+ <br/> Effectively the main event loop for anything built with <c> MenuMaker </c> </summary>
  <param name="name"> The name of the module as it will be displayed to the user </param>
- <param name="showMenu"> The subroutine prints the module's menu </param>
+ <param name="showMenu"> The subroutine that prints the module's menu </param>
  <param name="handleInput"> The subroutine that handles the module's input </param>
- <param name="itmLen"> Indicates the maximum length of menu option names <br/>Optional, Default: <c> 35 </c> </param>
+ <param name="itmLen"> Indicates the maximum length of menu option names <br/> Optional, Default: <c> 35 </c> </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.print(System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean,System.Boolean,System.Boolean)">
  <summary> Prints menu lines, options, and frames fit to the current console window width </summary>
  <param name="printType"> The type of menu information to print <br/> 
  <list type="bullet">
- <item> <description> <c>0</c>: Line </description> </item>
- <item> <description> <c>1</c>: Option </description> </item>
- <item> <description> <c>2</c>: Option with a "Reset Settings" prompt </description> </item>
- <item> <description> <c>3</c>: Box with centered text </description> </item>
- <item> <description> <c>4</c>: Menu top </description> </item>
- <item> <description> <c>5</c>: Option with an Enable/Disable prompt </description> </item>
+ <item> <description> <c> 0 </c>: Line </description> </item>
+ <item> <description> <c> 1 </c>: Option </description> </item>
+ <item> <description> <c> 2 </c>: Option with a "Reset Settings" prompt </description> </item>
+ <item> <description> <c> 3 </c>: Box with centered text </description> </item>
+ <item> <description> <c> 4 </c>: Menu top </description> </item>
+ <item> <description> <c> 5 </c>: Option with an Enable/Disable prompt </description> </item>
  </list> </param>
  <param name="menuText"> The text to be printed <br/> <br/> When <c> <paramref name="printType"/> </c> is <c> 1 </c> or <c>5</c>, <c> <paramref name="menuText"/> </c> contains the name of 
  the menu option <br/> When <c> <paramref name="printType"/> </c> is <c> 3 </c>, <c> <paramref name="menuText"/> </c> contains the name of the module whose settings are being reset </param>
  <param name="optString"> The description of the menu option <br/> Optional, Default: <c> "" </c> </param>
- <param name="cond"> Indicates that the line should be printed <br /> Optional, Default: <c> True </c> </param>
- <param name="leadingBlank"> Indicates that a blank menu line should be printed immediately before the printed line <br /> Optional, Default: <c> False </c> </param>
- <param name="trailingBlank"> Indicates that a blank menu line should be printed immediately after the printed line <br /> Optional, Default: <c> False </c> </param>
+ <param name="cond"> Indicates that the line should be printed <br/> Optional, Default: <c> True </c> </param>
+ <param name="leadingBlank"> Indicates that a blank menu line should be printed immediately before the printed line <br/> Optional, Default: <c> False </c> </param>
+ <param name="trailingBlank"> Indicates that a blank menu line should be printed immediately after the printed line <br/> Optional, Default: <c> False </c> </param>
  <param name="isCentered"> Indicates that the printed text should be centered <br/> Optional, Default: <c> False </c> </param>
  <param name="closeMenu"> Indicates that the bottom menu frame should be printed <br/> Optional, Default: <c> False </c> </param>
  <param name="openMenu"> Indicates that the top menu frame should be printed <br/> Optional, Default: <c> False </c> </param>
  <param name="enStrCond"> A module setting whose menu text will include an Enable/Disable toggle <br/> <br/>
- If lines are being colored without an arbitrary color, they will be printed <c> Green </c> if <c> <paramref name="enStrCond"/> </c> is <c> True </c>, otherwise it will be printed <c> Red </c>
- <br/> Optional, Default: <c> False (Red) </c> </param>
+ If lines are being colored without an <c> <paramref name="arbitraryColor"/> </c>, they will be printed <c> Green </c> if <c> <paramref name="enStrCond"/> </c> is <c> True </c>,
+ otherwise they will be printed <c> Red </c> <br/> Optional, Default: <c> False (Red) </c> </param>
  <param name="colorLine"> Indicates that lines should be printed using color <br/> Optional, Default: <c> False </c> </param>
  <param name="useArbitraryColor"> Indicates that the line should be colored using the value provided by <c> <paramref name="arbitraryColor"/> </c> <br/> Optional, Default: <c> False </c> </param>
- <param name="arbitraryColor"> Foreground ConsoleColor to be used when printing with when <c> <paramref name="colorLine"/> </c> is <c> True </c>, but wanting to use a color other than red/green <br/> 
- Optional, Default: <c> Nothing </c> </param>
- <param name="buffr"> Indicates that a leading newline should be printed before the menu lines <br/> Optional, Default: False </param>
- <param name="trailr"> Indicates that a trailing newline should be printed after the menu lines <br/> Optional, Default: False </param>
- <param name="conjoin"> Indicates that a conjoining menu frame should be printed <br /> Optional, Default: False </param>
+ <param name="arbitraryColor"> Foreground <c> ConsoleColor </c> to be used when printing with when <c> <paramref name="colorLine"/> </c> is <c> True </c>, 
+ but wanting to use a color other than <c> Red </c> or <c> Green </c> <br/> Optional, Default: <c> Nothing </c> </param>
+ <param name="buffr"> Indicates that a leading newline should be printed before the menu lines <br/> Optional, Default: <c> False </c> </param>
+ <param name="trailr"> Indicates that a trailing newline should be printed after the menu lines <br/> Optional, Default: <c> False </c> </param>
+ <param name="conjoin"> Indicates that a conjoining menu frame should be printed after the printed lines <br/> Optional, Default: <c> False </c> </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.cwl(System.String,System.Boolean)">
- <summary>Prints a line to the console window if output is not currently being suppressed and the given <paramref name="cond"/> is met</summary>
- <param name="msg">The string to be printed <br />Default: Nothing</param>
- <param name="cond">Indicates the line should be printed <br />Optional, Default: True</param>
+ <summary> Prints a line to the console window if output is not currently being suppressed and the given <c> <paramref name="cond"/> </c> is met </summary>
+ <param name="msg"> The string to be printed <br/> Optional, Default: <c> Nothing </c> </param>
+ <param name="cond"> Indicates the line should be printed <br/> Optional, Default: <c> True </c> </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.crk">
- <summary>Waits for the user to press a key if output is not currently being suppressed</summary>
+ <summary> Waits for the user to press a key if output is not currently being suppressed </summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.clrConsole(System.Boolean)">
- <summary>Clears the console if <paramref name="cond"/> is <c>True</c> and we're not unit testing</summary>
- <remarks>When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that</remarks>
- <param name="cond">Indicates that the console should be cleared <br /> Optional, Default: True</param>
+ <summary> Clears the console when the given <c> <paramref name="cond"/> </c> is <c> True </c> and we're not unit testing </summary>
+ <remarks> When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that </remarks>
+ <param name="cond"> Indicates that the console should be cleared <br/> Optional, Default: <c> True </c> </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.getFrame(System.Int32)">
- <summary>Returns a menuFrame of the requested shape</summary>
- <param name="frameNum">Indicates which frame should be returned. <br />
+ <summary> Returns an empty menu line, or a variety of filled menu lines </summary>
+ <param name="frameNum"> Indicates which frame should be returned <br/>
  <list type="bullet">
- <item><description>0: Empty menu line with vertical frames</description></item>
- <item><description>1: Filled menu line with downward opening 90° angle frames</description></item>
- <item><description>2: Filled menu line with upward opening 90° angle frames</description></item>
- <item><description>3: Filled menu line with inward facing T-frames </description></item>
- </list>
- 0: empty line, 1: top, 2: bottom, 3: conjoiner <br /> Default: 0</param>
- <returns>A menu frame based on the value of <paramref name="frameNum"/></returns>
+ <item> <description> 0: Empty menu line with vertical frames <c> ║     ║ </c> </description> </item>
+ <item> <description> 1: Filled menu line with downward opening 90° angle frames <c> ╔═════╗ </c> </description> </item>
+ <item> <description> 2: Filled menu line with upward opening 90° angle frames <c> ╚═════╝ </c> </description> </item>
+ <item> <description> 3: Filled menu line with inward facing T-frames <c> ╠═════╣ </c> </description> </item> </list>
+ <br/> Optional, Default: <c> 0 </c> </param>
+ <returns> A String containing the menuFrame requested by <c> <paramref name="frameNum"/> </c> </returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.setHeaderText(System.String,System.Boolean,System.Boolean,System.ConsoleColor)">
- <summary>Saves a menu header to be printed atop the next menu, optionally with color</summary>
- <param name="txt">The text to appear in the header</param>
- <param name="cHeader">Indicates that the header should be colored using the color given by <paramref name="printColor"/><br />Optional, Default: False</param>
- <param name="cond">Indicates that the header text should be assigned the value given by <paramref name="txt"/><br /> Optional, Default: True</param>
- <param name="printColor">ConsoleColor with which the header should be colored when <paramref name="cHeader"/> is True <br/> Optional, Default: Red</param>
+ <summary> Saves a menu header to be printed atop the next menu, optionally with color </summary>
+ <param name="txt"> The text to appear in the header </param>
+ <param name="cHeader"> Indicates that the header should be colored using the color given by <c> <paramref name="printColor"/> </c> <br/> Optional, Default: <c> False </c> </param>
+ <param name="cond"> Indicates that the header text should be assigned the value given by <c> <paramref name="txt"/> </c> <br/> Optional, Default: <c> True </c> </param>
+ <param name="printColor"> <c> ConsoleColor </c> with which the header will be colored when <c> <paramref name="cHeader"/> </c> is <c> True </c> <br/> Optional, Default: <c> Red </c> </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.denyActionWithHeader(System.Boolean,System.String)">
- <summary>Informs a user when an action is unable to proceed due to a condition</summary>
- <param name="cond">Indicates that an action should be denied</param>
- <param name="errText">The error text to be printed in the menu header</param>
+ <summary> Informs a user when an action is unable to proceed due to a condition </summary>
+ <param name="cond"> Indicates that an action should be denied </param>
+ <param name="errText"> The error text to be printed in the menu header </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.enStr(System.Boolean)">
- <summary>Returns the inverse state of a given boolean as a String</summary>
- <param name="setting">A module setting whose state will be observed</param>
- <returns><c>"Disable"</c> if <paramref name="setting"/>is True, <c>"Enable"</c>otherwise</returns>
+ <summary> Returns the inverse state of a given boolean as a String </summary>
+ <param name="setting"> A <c> module setting </c> whose state will be observed </param>
+ <returns> <c> "Disable" </c> if <c> <paramref name="setting"/> </c> is <c> True </c>, <c> "Enable" </c> otherwise </returns>
 </member>
 <member name="M:winapp2ool.MenuMaker.exitModule">
- <summary>Enforces that initMenu exit the current level in the stack on the next iteration of its loop</summary>
+ <summary> Enforces that <c> initMenu </c> exit the current level in the stack on the next iteration of its loop </summary>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuTop(System.String[],System.Boolean)">
- <summary>Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option</summary>
- <param name="descriptionItems">Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line</param>
- <param name="printExit">Indicates that an option to exit to the previous menu should be printed <br /> Optional, Default: True</param>
+ <summary> Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option </summary>
+ <param name="descriptionItems"> Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line </param>
+ <param name="printExit"> Indicates that an option to exit to the previous menu should be printed <br/> Optional, Default: <c> True </c> </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuLine(System.String,System.Boolean)">
- <summary>Prints a line bounded by vertical menu frames, an empty menu line if <paramref name="lineString"/> is <c>Nothing</c></summary>
- <param name="lineString">The text to be printed. <br/> Optional, Default: Nothing</param>
- <param name="isCentered">Indicates that the printed text should be centered <br /> Optional, Default: False</param>
+ <summary> Prints a line bounded by vertical menu frames, or an empty menu line if <c> <paramref name="lineString"/> </c> is <c> Nothing </c></summary>
+ <param name="lineString"> The text to be printed <br/> Optional, Default: <c> Nothing </c> </param>
+ <param name="isCentered"> Indicates that the printed text should be centered <br/> Optional, Default: <c> False </c> </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuOpt(System.String,System.String)">
- <summary>Prints a numbered menu option after padding it to a set length</summary>
- <param name="lineString1">The name of the menu option</param>
- <param name="lineString2">The description of the menu option</param>
+ <summary> Prints a numbered menu option after padding it to a set length </summary>
+ <param name="lineString1"> The name of the menu option </param>
+ <param name="lineString2"> The description of the menu option </param>
 </member>
-<member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.String,System.Int32)">
- <summary>Constructs a menu line fit to the width of the console</summary>
- <param name="line">The text to be printed</param>
- <param name="align">The alignment of the line to be printed: <br /> 
+<member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.Int32,System.Int32)">
+ <summary> Constructs a menu line fit to the width of the console </summary>
+ <param name="line"> The text to be printed </param>
+ <param name="align">The alignment of the line to be printed: <br/> 
  <list type="bullet">
- <item><description>'c': centers the string </description></item>
- <item><description>'l': leftaligns the string</description></item>
- <item><description>'f': prints a menu frame</description></item>
- </list></param>
- <param name="borderInd">Determines which characters should create the border for the menuline: <br />
+ <item><description> 0: centers the string </description> </item>
+ <item><description> 1: leftaligns the string </description> </item>
+ <item><description> 2: prints a menu frame </description> </item>
+ </list> </param>
+ <param name="borderInd"> Determines which characters should create the border for the menuline: <br/>
  <list type="bullet">
- <item><description>0: Vertical lines</description></item>
- <item><description>1: Ceiling brackets</description></item>
- <item><description>2: Floor brackets</description></item>
- <item><description>3: Conjoining brackets </description></item></list> <br />Optional, Default: 0</param>
+ <item> <description> 0: Vertical lines </description> </item>
+ <item> <description> 1: Ceiling brackets </description> </item>
+ <item> <description> 2: Floor brackets </description> </item>
+ <item> <description> 3: Conjoining brackets </description> </item> </list>
+ <br/> Optional, Default: <c> 0 </c> </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.padToEnd(System.String@,System.Int32,System.String,System.String)">
- <summary>Pads a given string with spaces until it is a target length</summary>
- <param name="out">The text to be padded</param>
- <param name="targetLen">The length to which the text should be padded</param>
- <param name="endline">The closer character for the type of frame being built</param>
- <param name="padChar">The character with which to pad the text <br /> Default: " " (space character)</param>
+ <summary> Pads a given string until it is a given length </summary>
+ <param name="out"> The text to be padded </param>
+ <param name="targetLen"> The length to which the text should be padded </param>
+ <param name="endline"> The closer character for the type of frame being built </param>
+ <param name="padStr"> The character(s) with which to pad the text <br/> Default: <c> " " </c> (space character) </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.replDir(System.String)">
- <summary>Replaces instances of the current directory in a path string ".."</summary>
- <param name="dirStr">A windows filesystem path</param>
- <returns><paramref name="dirStr"/> with instances of the current directory replaced with <c>".."</c></returns>
+ <summary> Replaces instances of the current directory in a path string with <c> ".." </c> </summary>
+ <param name="dirStr"> A windows filesystem path </param>
+ <returns> <c> <paramref name="dirStr"/> </c> with instances of the current directory replaced with <c> ".." </c> </returns>
 </member>
 <member name="T:winapp2ool.RegistryHelper">
  <summary>
@@ -1510,85 +1512,79 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="value">The DetectOS criteria to be checked</param>
 </member>
 <member name="T:winapp2ool.advSettings">
- <summary>
- This module holds some methods for managing WinappDebug's scan/repair states
- </summary>
-</member>
-<member name="M:winapp2ool.advSettings.resetScanSettings">
- <summary>Resets the individual scan settings to their defaults</summary>
-</member>
-<member name="M:winapp2ool.advSettings.determineScanSettings">
- <summary>Determines which if any lint rules have been modified and whether or not only some repairs are scheduled to run</summary>
-</member>
-<member name="M:winapp2ool.advSettings.handleUserInput(System.String)">
- <summary>Handles the user input for the scan settings menu</summary>
- <param name="input">The String containing the user's input</param>
+ <summary> This module holds some methods for managing WinappDebug's scan/repair states </summary>
 </member>
 <member name="M:winapp2ool.advSettings.printMenu">
- <summary>Prints the menu for individual scans and their repairs to the user</summary>
+ <summary> Prints the scan/repair management menu to the user </summary>
+</member>
+<member name="M:winapp2ool.advSettings.handleUserInput(System.String)">
+ <summary> Handles the user input for the scan/repair management menu </summary>
+ <param name="input"> The String containing the user's input </param>
+</member>
+<member name="M:winapp2ool.advSettings.determineScanSettings">
+ <summary> Determines which if any lint rules have been modified and whether or not only some repairs are scheduled to run </summary>
+</member>
+<member name="M:winapp2ool.advSettings.resetScanSettings">
+ <summary> Resets the individual scan/repair settings to their defaults </summary>
 </member>
 <member name="T:winapp2ool.experimentalScans">
- <summary>
- This module holds any scans/repairs for WinappDebug that might be disabled by default due to incompleteness.
- </summary>
+ <summary> This module holds any scans/repairs for <c> WinappDebug </c> that are be disabled by default due to incompleteness </summary>
 </member>
 <member name="M:winapp2ool.experimentalScans.cOptimization(winapp2ool.keyList@)">
- <summary>Attempts to merge FileKeys together if syntactically possible.</summary>
- <param name="kl">A list of winapp2.ini FileKey format iniFiles</param>
+ <summary> Attempts to merge FileKeys together if syntactically possible </summary>
+ <param name="kl"> A <c> keyList </c> of FileKey format <c> iniKeys </c> </param>
 </member>
 <member name="M:winapp2ool.experimentalScans.printOptiSect(System.String,winapp2ool.keyList)">
- <summary>Prints output from the Optimization function</summary>
- <param name="boxStr">The text to go in the optimization section box</param>
- <param name="kl">The list of keys to be printed beneath the box</param>
+ <summary> Prints output from the Optimization function </summary>
+ <param name="boxStr"> The text to be printed in the optimization section box </param>
+ <param name="kl"> The list of <c> iniKeys </c>to be printed beneath the box </param>
 </member>
 <member name="T:winapp2ool.lintRule">
- <summary>
- Holds information about whether or not individual types of scans and repairs should run
- </summary>
+ <summary> Holds information about whether or not individual types of scans and repairs should run </summary>
 </member>
 <member name="P:winapp2ool.lintRule.initScanState">
- <summary>The scan state with which the rule was initially instantiated</summary>
+ <summary> The scan state with which the rule was initially instantiated </summary>
 </member>
 <member name="P:winapp2ool.lintRule.initRepairState">
- <summary>The repair state with which the rule was initially instantiated</summary>
+ <summary> The repair state with which the rule was initially instantiated </summary>
 </member>
 <member name="P:winapp2ool.lintRule.ShouldScan">
- <summary>Indicates whether or not scans for this rule should run</summary>
+ <summary> Indicates whether or not scans for this rule should run </summary>
 </member>
 <member name="P:winapp2ool.lintRule.ShouldRepair">
- <summary>Indicates whether or not repairs for this rule should run</summary>
+ <summary> Indicates whether or not repairs for this rule should run </summary>
 </member>
 <member name="P:winapp2ool.lintRule.ScanText">
- <summary>Describes which type of scan routines this rule controls</summary>
+ <summary> Describes to the user which type of scan routines this rule controls </summary>
 </member>
 <member name="P:winapp2ool.lintRule.RepairText">
- <summary>Describes which type of repairs this rule controls</summary>
+ <summary> Describes to the user which type of repairs this rule controls </summary>
 </member>
 <member name="P:winapp2ool.lintRule.LintName">
- <summary>The name of the rule as it will appear in menus</summary>
+ <summary> The name of the rule as it will appear in menus </summary>
 </member>
 <member name="M:winapp2ool.lintRule.hasBeenChanged">
- <summary>Returns true if the current scan/repair settings do not match their inital state </summary>
+ <summary> Returns <c> True </c> if the current scan/repair settings do not match their inital states </summary>
 </member>
 <member name="M:winapp2ool.lintRule.resetParams">
- <summary>Restores the initial lint rule state</summary>
+ <summary> Restores the initial scan/repair states </summary>
 </member>
 <member name="M:winapp2ool.lintRule.#ctor(System.Boolean,System.Boolean,System.String,System.String,System.String)">
- <summary>Creates a new rule for the linter, retains the inital given parameters</summary>
- <param name="scan">The default state for scans <br/><c>True</c> for Enabled<br/><c>False</c> for Disabled</param>
- <param name="repair">The default state for repairs <br/><c>True</c> for Enabled<br/><c>False</c> for Disabled</param>
- <param name="name">The name that will appear in menus</param>
- <param name="scTxt">The description of what is scanned for</param>
- <param name="rpTxt">The description of what is repaired</param>
+ <summary> Creates a new rule for the linter, retains the inital given parameters for later restoration </summary>
+ <param name="scan"> The default state for scans <br/> <br/> <c> True </c> for Enabled <br/> <c> False </c> for Disabled </param>
+ <param name="repair"> The default state for repairs <br/> <br/> <c> True </c> for Enabled <br/> <c> False </c> for Disabled </param>
+ <param name="name"> The name of the rule as it will appear in menus </param>
+ <param name="scTxt"> The description of what the rule scans for as it will appear in menus </param>
+ <param name="rpTxt"> The description of what the the rule repairs as it will appear in menus </param>
 </member>
 <member name="M:winapp2ool.lintRule.turnOn">
- <summary>Enables both the scan and repair for the rule</summary>
+ <summary> Enables both the scan and repair for the rule </summary>
 </member>
 <member name="M:winapp2ool.lintRule.turnOff">
- <summary>Disables both the scan and repair for the rule</summary>
+ <summary> Disables both the scan and repair for the rule </summary>
 </member>
 <member name="M:winapp2ool.lintRule.fixFormat">
- <summary>Determines whether or not a fix that sits behind an optional flag should be run</summary>
+ <summary> Returns a Boolean indicating whether or not the repairs gated by this rule should be run </summary>
 </member>
 <member name="T:winapp2ool.WinappDebug">
  <summary>
