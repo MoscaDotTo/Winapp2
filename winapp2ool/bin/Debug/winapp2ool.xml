@@ -1587,36 +1587,37 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary> Returns a Boolean indicating whether or not the repairs gated by this rule should be run </summary>
 </member>
 <member name="T:winapp2ool.WinappDebug">
- <summary>
- A program whose purpose is to observe, report, and attempt to repair errors in winapp2.ini
- </summary>
+ <summary> Observes, reports, and attempts to repair errors in winapp2.ini </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.winappDebugFile1">
  <summary> The winapp2.ini file that will be linted </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.winappDebugFile3">
- <summary> Holds the save path for the linted file (overwrites the input file by default) </summary>
+ <summary> The save path for the linted file (overwrites the input file by default) </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.RepairSomeErrsFound">
  <summary> Indicates that some but not all repairs will run </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.ScanSettingsChanged">
- <summary> Indicates that the scan settings have been modified from their defaults </summary>
+ <summary> Indicates that the scan settings have been modified from their defaults <br /> Default: <c> False </c> </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.ModuleSettingsChanged">
- <summary> Indicates that the module settings have been modified from their defaults </summary>
+ <summary> Indicates that the module settings have been modified from their defaults <br/> Default: <c> False </c> </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.SaveChanges">
  <summary> Indicates that the any changes made by the linter should be saved back to disk <br/> Default: <c> False </c> </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.RepairErrsFound">
- <summary> Indicates that the linter should attempt to repair errors it finds <br/> Default: True</summary>
+ <summary> Indicates that the linter should attempt to repair errors it finds <br/> Default: <c> True </c> </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.ErrorsFound">
  <summary> The number of errors found during the lint </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.allEntryNames">
  <summary> The list of all entry names found during the lint </summary>
+</member>
+<member name="P:winapp2ool.WinappDebug.MostRecentLintLog">
+ <summary> The winapp2ool logslice from the most recent Lint run </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.Rules">
  <summary> The current rules for scans and repairs </summary>
@@ -1646,7 +1647,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary> Controls scan/repairs for duplicate values </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.lintExtraNums">
-<summary> Controls scan/repairs for keys with numbers they shouldn't have </summary>
+ <summary> Controls scan/repairs for keys with numbers they shouldn't have </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.lintMulti">
  <summary> Controls scan/repairs for keys which should only occur once </summary>
@@ -1661,31 +1662,28 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary> Controls scan/repairs for invalid file or regsitry paths </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.lintSemis">
-<summary> Controls scan/repairs for improper use of semicolons </summary>
+ <summary> Controls scan/repairs for improper use of semicolons </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.lintOpti">
  <summary> Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently) </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.longReg">
-<summary> Regex to detect long form registry paths </summary>
+ <summary> Detects long form registry paths </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.shortReg">
-<summary> Regex to detect short form registry paths </summary>
+ <summary> Detects short form registry paths </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.secRefNums">
- <summary> Regex to detect valid LangSecRef numbers </summary>
+ <summary> Detects valid LangSecRef numbers </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.driveLtrs">
-<summary> Regex to detect valid drive letter parameters </summary>
+ <summary> Detects valid drive letter parameters </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.envVarRegex">
-<summary> Regex to detect potential %EnvironmentVariables% </summary>
-</member>
-<member name="P:winapp2ool.WinappDebug.MostRecentLintLog">
- <summary> The winapp2ool logslice from the most recent Lint run </summary>
+ <summary> Detects potential %EnvironmentVariables% </summary>
 </member>
 <member name="M:winapp2ool.WinappDebug.handleCmdLine">
- <summary> Handles the commandline args for WinappDebug </summary>
+ <summary> Handles the commandline args for <c> WinappDebug </c> </summary>
  WinappDebug specific command line args
  -c          : enable autocorrect
 </member>
@@ -1693,14 +1691,14 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary> Restore the default state of the module's parameters </summary>
 </member>
 <member name="M:winapp2ool.WinappDebug.printMenu">
- <summary> Prints the main menu to the user </summary>
+ <summary> Displays the <c> WinappDebug </c> menu to the user </summary>
 </member>
 <member name="M:winapp2ool.WinappDebug.handleUserInput(System.String)">
  <summary> Handles the user's input from the menu </summary>
  <param name="input"> The String containing the user's input </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.initDebug">
- <summary> Validates and debugs the ini file, informs the user upon completion </summary>
+ <summary> Validates winapp2.ini and runs the linter from the main menu or commandline </summary>
 </member>
 <member name="M:winapp2ool.WinappDebug.debug(winapp2ool.winapp2file@)">
  <summary> Performs syntax and format checking on a winapp2.ini format ini file </summary>
@@ -1726,7 +1724,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.WinappDebug.processKeyList(winapp2ool.keyList@,System.Func{winapp2ool.iniKey,winapp2ool.iniKey},System.Boolean@,System.Boolean@)">
  <summary> Audits a keyList of winapp2.ini format iniKeys for errors, alerting the user and correcting where possible </summary>
  <param name="kl"> A <c> keyList </c> of a particular <c> keyType </c> to be audited </param>
- <param name="processKey"> The function that audits the keys of the <c> KeyType </c> provided in <c> <paramref name="kl"/> </c><br/> 
+ <param name="processKey"> The <c> function </c> that audits the keys of the <c> KeyType </c> provided in <c> <paramref name="kl"/> </c><br/> 
  <c> VoidDelegate </c> if no further operations are needed outside of the basic formatting checks </param>
  <param name="hasF"> Indicates that the ExcludeKeys contain file system locations <br/> Optional, Default: <c> False </c> </param>
  <param name="hasR"> Indicates that the ExcludeKeys contain registry locations <br/> Optional, Default: <c> False </c> </param>

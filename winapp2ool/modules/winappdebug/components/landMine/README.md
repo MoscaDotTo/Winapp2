@@ -24,7 +24,7 @@ Public Sub cOptimization(ByRef kl As keyList)
         Dim tmpWa2 As New winapp2KeyParameters(kl.Keys(i))
         ' If we have yet to record any params, record them and move on
         If paramList.Count = 0 Then tmpWa2.trackParamAndFlags(paramList, flagList) : Continue For
-        ' This should handle the case where for a FileKey: 
+        ' This should handle the case where for a FileKey:
         ' The folder provided has appeared in another key
         ' The flagstring (RECURSE, REMOVESELF, "") for both keys matches
         ' The first appearing key should have its parameters appended to and the second appearing key should be removed
