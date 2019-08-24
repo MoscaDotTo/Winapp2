@@ -1,15 +1,17 @@
 
+# Winapp2ool
 
-# Winapp2ool 
-
-Winapp2ool is a small but robust application designed to take the busy work out of maintaining, managing, downloading, and deploying winapp2.ini. 
+Winapp2ool is a small but robust application designed to take the busy work out of maintaining, managing, downloading, and deploying winapp2.ini 
 
 ## Requirements & Notes
 
-##### Minimum:
+### Minimum
+
 * Windows Vista SP2
 * .NET Framework 4.5
-##### Suggested:
+
+### Suggested
+
 * Windows 7 or higher
 * .NET Framework 4.6 or higher (for automatically updating the executable)
 
@@ -28,7 +30,7 @@ By default, each tool in the application assumes that local files it is looking 
 |Option|Effect
 :-|:-
 WinappDebug|Opens WinappDebug, a static analysis tool for winapp2.ini
-Trim|Opens Trim, a tool for tailoring winapp2.ini to a user's system 
+Trim|Opens Trim, a tool for tailoring winapp2.ini to a user's system
 Merge|Opens Merge, a tool for merging and removal operations between multiple ini files
 Diff|Opens Diff, a tool for generating Diffs between two versions of an ini file
 CCiniDebug|Opens CCiniDebug, a tool for cleaning up ccleaner.ini
@@ -37,11 +39,9 @@ Go Online|Attempts to reestablish your network connection. **Only available in o
 Update|Downloads the latest winapp2.ini from GitHub to the current folder. **Only available alongside an available update**
 Update & Trim|Downloads the latest winapp2.ini to the current folder and trims it. **Only available alongside an available update**
 Show Update Diff|Diffs your local copy of winapp2.ini against the latest version hosted on GitHub in order to show a changelog. **Only available alongside an available update**
-Update|Attempts to automatically update winapp2ool.exe to the latest version from GitHub. ****Only available alongside an available update for winap2ool. Unavailable in offline mode, or on machines with .NET Framework 4.5 or lower installed (ie. Winapp2oolXP)** 
+Update|Attempts to automatically update winapp2ool.exe to the latest version from GitHub. **Only available alongside an available update for winap2ool. Unavailable in offline mode, or on machines with .NET Framework 4.5 or lower installed (ie. Winapp2oolXP)**
 
-
-
-## Command-line arguments 
+## Command-line arguments
 
 Winapp2ool supports command line arguments ("args"). There are several top level args which apply settings globally, and then there are tool specific args which will be defined in the respective section for those tools.
 
@@ -56,7 +56,7 @@ The first argument provided should always refer to the module you would like to 
 |`5` or `ccdebug`|Launches CCiniDebug
 |`6` or `download`|Launches Downloader
 
-#### Other top level args 
+### Other top level args
 
 |Arg|Effect|
 |:-|:-|
@@ -65,10 +65,11 @@ The first argument provided should always refer to the module you would like to 
 `-1f`, `-2f`, or `-3f`| Defines a new file name for the module's respectively numbered file **
 
 ##### Notes
+
 \* The "first file" (`-1d` or `-1f`) in all modules is winapp2.ini. Refer to a specific module's documentation for information on its other files.
-\** You can easily define subdirectories by using the `-f` flag for your file and providing the directory before the file name, eg `-1f \subdir\winapp2.ini` 
- 
-#### Example:
+\** You can easily define subdirectories by using the `-f` flag for your file and providing the directory before the file name, eg `-1f \subdir\winapp2.ini`
+
+#### Example
 
 Args|Effect|
 |:-|:-|
@@ -76,10 +77,9 @@ Args|Effect|
 |`winapp2ool.exe -2 -d -s`|Silently opens Trim and trims the latest winapp2.ini from GitHub
 |`winapp2ool download winapp2 -s`|Silently opens Downloader and downloads the latest winapp2.ini
 
-
 ##### Module code documentation below
-# Winapp2ool
 
+# Winapp2ool
 
 # Properties
 
@@ -93,7 +93,9 @@ isBeta|`Boolean`|`False` on Release, `True` on Beta|Indicates that this build is
 ## Helper functions
 
 ### getWinVer
+
 #### Checks the version of Windows on the current system and returns it as a Double
+
 ```vb
 Public Function getWinVer() As Double
         Dim osVersion = System.Environment.OSVersion.ToString().Replace("Microsoft Windows NT ", "")
@@ -104,7 +106,9 @@ Public Function getWinVer() As Double
  ```
 
 ### getFirstDir
+
 #### Returns the first portion of a registry or filepath parameterization
+
 ```vb
 Public Function getFirstDir(val As String) As String
     Return val.Split(CChar("\"))(0)
@@ -116,7 +120,9 @@ Parameter|Type|Description
 val|`String`|A Windows filesystem or registry path from which the root should be returned
 
 ### enforceFileHasContent
+
 #### Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no sections
+
 ```vb
 Public Function enforceFileHasContent(iFile As iniFile) As Boolean
     iFile.validate()
@@ -136,7 +142,9 @@ iFile|`iniFile`|An iniFile to be checked for content
 ## Menu & Input
 
 ### printMenu
-#### 	Prints the main winapp2ool menu to the user
+
+#### Prints the main winapp2ool menu to the user
+
 ```vb
 Private Sub printMenu()
     checkUpdates(Not isOffline)
@@ -164,7 +172,9 @@ End Sub
 ```
 
 ### handleUserInput
+
 #### Handles the user input for the menu
+
 ```vb
 Private Sub handleUserInput(input As String)
     Select Case True
@@ -216,13 +226,15 @@ Private Sub handleUserInput(input As String)
     End Select
 End Sub
 ```
+
 |Parameter|Type|Description
 :-|:-|:-
 input|`String`|The user's input
 
 ## Main
-### main
-#### Processes the command-line args and then initializes the main winapp2ool module
+
+### Processes the command-line args and then initializes the main winapp2ool module
+
 ```vb
 Public Sub main()
     gLog($"Starting application")

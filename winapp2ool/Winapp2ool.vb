@@ -16,16 +16,16 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Module Winapp2ool
-    ''' <summary>Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub</summary>
+    ''' <summary> Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub </summary>
     Public Property RemoteWinappIsNonCC As Boolean = False
-    ''' <summary>Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)</summary>
+    ''' <summary> Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5) </summary>
     Public Property DotNetFrameworkOutOfDate As Boolean = False
-    ''' <summary>Indicates that winapp2ool currently has access to the internet</summary>
+    ''' <summary> Indicates that winapp2ool currently has access to the internet </summary>
     Public Property isOffline As Boolean = False
-    ''' <summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
+    ''' <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
     Public Property isBeta As Boolean = True
 
-    ''' <summary>Prints the main winapp2ool menu to the user</summary>
+    ''' <summary> Prints the main winapp2ool menu to the user </summary>
     Private Sub printMenu()
         checkUpdates(Not isOffline)
         printMenuTop({}, False)
@@ -50,7 +50,7 @@ Module Winapp2ool
         Console.WindowHeight = If(waUpdateIsAvail And updateIsAvail, 32, 30)
     End Sub
 
-    ''' <summary>Processes the commandline args and then initalizes the main winapp2ool module</summary>
+    ''' <summary> Processes the commandline args and then initalizes the main winapp2ool module </summary>
     Public Sub main()
         gLog($"Starting application")
         Console.Title = $"Winapp2ool v{currentVersion}"
@@ -65,8 +65,8 @@ Module Winapp2ool
         initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printMenu, AddressOf handleUserInput)
     End Sub
 
-    ''' <summary>Handles the user input for the menu</summary>
-    ''' <param name="input">The user's input</param>
+    ''' <summary> Handles the user input for the menu </summary>
+    ''' <param name="input"> The user's input </param>
     Private Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
@@ -117,8 +117,8 @@ Module Winapp2ool
         End Select
     End Sub
 
-    ''' <summary>Checks the version of Windows on the current system and returns it as a Double</summary>
-    ''' <returns>The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined</returns>
+    ''' <summary> Checks the version of Windows on the current system and returns it as a Double </summary>
+    ''' <returns> The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined </returns>
     Public Function getWinVer() As Double
         gLog("Checking Windows version")
         Dim osVersion = System.Environment.OSVersion.ToString().Replace("Microsoft Windows NT ", "")
@@ -128,15 +128,15 @@ Module Winapp2ool
         Return out
     End Function
 
-    ''' <summary>Returns the first portion of a registry or filepath parameterization</summary>
-    ''' <param name="val">A Windows filesystem or registry path from which the root should be returned</param>
-    ''' <returns>The root directory given by <paramref name="val"/></returns>
+    ''' <summary> Returns the first portion of a registry or filepath parameterization </summary>
+    ''' <param name="val"> A Windows filesystem or registry path from which the root should be returned </param>
+    ''' <returns> The root directory given by <paramref name="val"/> </returns>
     Public Function getFirstDir(val As String) As String
         Return val.Split(CChar("\"))(0)
     End Function
 
-    ''' <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no sections</summary>
-    ''' <param name="iFile">An iniFile to be checked for content</param>
+    ''' <summary> Ensures that an <c> iniFile </c> has content and informs the user if it does not. Returns <c> False </c> if there are no sections </summary>
+    ''' <param name="iFile">An <c> iniFile </c> to be checked for content </param>
     Public Function enforceFileHasContent(iFile As iniFile) As Boolean
         iFile.validate()
         If iFile.Sections.Count = 0 Then
