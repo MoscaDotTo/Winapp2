@@ -1403,113 +1403,122 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
    </summary>
 </member>
 <member name="P:winapp2ool.Trim.winVer">
-<summary>Indicates the major/minor version number on the current system</summary>
+ <summary> Indicates the major/minor version number on the current system </summary>
 </member>
 <member name="P:winapp2ool.Trim.detChrome">
-<summary>Hardcoded list of SpecialDetect evaluations</summary>
+ <summary> Hardcoded list of SpecialDetect evaluations </summary>
 </member>
 <member name="P:winapp2ool.Trim.ModuleSettingsChanged">
-<summary>Indicates that the module settings have been modified from their defaults</summary>
+ <summary> Indicates that the module settings have been modified from their defaults </summary>
 </member>
 <member name="P:winapp2ool.Trim.DownloadFileToTrim">
-<summary>Indicates that we are downloading a winapp2.ini from GitHub</summary>
+ <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
 </member>
 <member name="P:winapp2ool.Trim.TrimFile1">
-<summary>The winapp2.ini file that will be trimmed</summary>
+ <summary> The winapp2.ini file that will be trimmed </summary>
 </member>
 <member name="P:winapp2ool.Trim.TrimFile3">
-<summary>Holds the path where the output file will be saved to disk. Overwrites the input file by default.</summary>
+ <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
 </member>
 <member name="M:winapp2ool.Trim.handleCmdLine">
- <summary>Handles the commandline args for Trim</summary>
+ <summary> Handles the commandline args for Trim </summary>
  Trim args:
  -d          : download the latest winapp2.ini
 </member>
 <member name="M:winapp2ool.Trim.initDefaultSettings">
- <summary>Restores the default state of the module's parameters</summary>
+ <summary> Restores the default state of the module's parameters </summary>
 </member>
 <member name="M:winapp2ool.Trim.remoteTrim(winapp2ool.iniFile,winapp2ool.iniFile,System.Boolean)">
- <summary>Runs the trimmer from outside the module</summary>
- <param name="firstFile">The winapp2.ini file</param>
- <param name="secondFile">The output file</param>
- <param name="d">Download boolean</param>
+ <summary> Runs Trims an <c> iniFile </c> from outside the module </summary>
+ <param name="firstFile"> The winapp2.ini file </param>
+ <param name="secondFile"> The output file </param>
+ <param name="d"> Indicates that the input winapp2.ini should be downloaded from GitHub </param>
 </member>
 <member name="M:winapp2ool.Trim.printMenu">
- <summary>Prints the main menu to the user</summary>
+ <summary> Prints the Trim menu to the user </summary>
 </member>
 <member name="M:winapp2ool.Trim.handleUserInput(System.String)">
- <summary>Handles the user input from the menu</summary>
- <param name="input">The String containing the user's input</param>
+ <summary> Handles the user input from the menu </summary>
+ <param name="input"> The String containing the user's input </param>
 </member>
 <member name="M:winapp2ool.Trim.initTrim">
- <summary>Initiates the trim after validating our ini files</summary>
+ <summary> Initiates the <c> Trim </c> process from the main menu or commandline </summary>
 </member>
 <member name="M:winapp2ool.Trim.trim(winapp2ool.winapp2file)">
- <summary>Performs the trim</summary>
- <param name="winapp2">A winapp2.ini file</param>
+ <summary> Trims a <c> winapp2file </c>, removing entries not relevant to the current system </summary>
+ <param name="winapp2"> A <c> winapp2file </c> to be trimmed to fit the current system </param>
 </member>
 <member name="M:winapp2ool.Trim.checkExistence(winapp2ool.keyList@,System.Func{System.String,System.Boolean})">
- <summary>Evaluates a list of keys to observe whether they exist on the current machine</summary>
- <param name="kl">The list of iniKeys to query</param>
- <param name="chkExist">The function that evaluates that keyType's parameters</param>
+ <summary> Evaluates a <c> keyList </c> to observe whether they exist on the current machine </summary>
+ <param name="kl"> The <c> keyList </c> containing detection criteria to be evaluated </param>
+ <param name="chkExist"> The <c> function </c> that evaluates the detection criteria in <c> <paramref name="kl"/> </c> </param>
 </member>
 <member name="M:winapp2ool.Trim.processEntryExistence(winapp2ool.winapp2entry@)">
- <summary>Returns true if an entry's detection criteria is matched by the system, false otherwise.</summary>
- <param name="entry">A winapp2.ini entry</param>
+ <summary> Audits the detection criteria in a given <c> winapp2entry </c> against the current system </summary>
+ <param name="entry"> A <c> winapp2entry </c> to whose detection criteria will be audited </param>
 </member>
 <member name="M:winapp2ool.Trim.virtualStoreChecker(winapp2ool.winapp2entry@)">
- <summary>Audits the given entry for legacy codepaths in the machine's VirtualStore locations</summary>
- <param name="entry"></param>
+ <summary> Audits the given entry for legacy codepaths in the machine's VirtualStore </summary>
+ <param name="entry"> The <c> winapp2entry </c> to audit </param>
 </member>
 <member name="M:winapp2ool.Trim.vsKeyChecker(winapp2ool.keyList@)">
- <summary>Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list</summary>
- <param name="kl">The keylist of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore</param>
+ <summary> Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list </summary>
+ <param name="kl"> The <c> keyList </c> of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore </param>
 </member>
 <member name="M:winapp2ool.Trim.mkVsKeys(System.String[],System.String[],winapp2ool.keyList@)">
- <summary>Audits the existence of VirtualStore locations for an iniKey and if they exist, adds them to the list</summary>
- <param name="findStrs">A list of strings to seek for in the key value</param>
- <param name="replStrs">A list of strings to replace the sought after key values</param>
- <param name="kl">The keylist to be processed</param>
+ <summary> Creates `iniKeys` to handle VirtualStore locations that correspond to paths given in <c> <paramref name="kl"/> </c> </summary>
+ <param name="findStrs"> An array of Strings to seek for in the key value </param>
+ <param name="replStrs"> An array of strings to replace the sought after key values </param>
+ <param name="kl"> The <c> keylist </c> to be processed </param>
 </member>
 <member name="M:winapp2ool.Trim.createVSKey(System.String,System.String,winapp2ool.iniKey)">
- <summary>Creates the VirtualStore version of a given iniKey</summary>
- <param name="findStr">The normal filesystem path</param>
- <param name="replStr">The VirtualStore location path</param>
- <param name="key">The key to processed</param>
- <returns></returns>
+ <summary> Creates the VirtualStore version of a given <c> iniKey </c> </summary>
+ <param name="findStr"> The normal filesystem path </param>
+ <param name="replStr"> The VirtualStore location path </param>
+ <param name="key"> The <c> iniKey </c> to processed into a VirtualStore key </param>
 </member>
 <member name="M:winapp2ool.Trim.processEntryList(System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
- <summary>Processess a list of winapp2.ini entries and removes any from the list that wouldn't be detected by CCleaner</summary>
- <param name="entryList">The list of winapp2entry objects to check existence for</param>
+ <summary> Processess a list of <c> winapp2entries </c> and removes any from the list that wouldn't be detected by CCleaner </summary>
+ <param name="entryList"> The list of <c> winapp2entries </c> who detection criteria will be audited </param>
 </member>
 <member name="M:winapp2ool.Trim.checkSpecialDetects(System.String)">
- <summary>Returns true if a SpecialDetect location exist, false otherwise</summary>
- <param name="key">A SpecialDetect format iniKey</param>
+ <summary> Returns <c> True </c> if a SpecialDetect location exists, <c> False </c> otherwise </summary>
+ <param name="key"> A SpecialDetect format <c> iniKey </c> </param>
 </member>
 <member name="M:winapp2ool.Trim.checkExist(System.String)">
- <summary>Handles passing off checks from sources that may vary between file system and registry</summary>
- <param name="path">A filesystem or registry path to be audited for existence</param>
+ <summary> Handles passing off checks from sources that may vary between file system and registry </summary>
+ <param name="path"> A filesystem or registry path whose existence will be audited </param>
 </member>
 <member name="M:winapp2ool.Trim.checkRegExist(System.String)">
- <summary>Returns True if a given Detect path exists in the system registry, false otherwise.</summary>
- <param name="path">A registry path from a Detect key</param>
+ <summary> Returns <c> True </c> if a given key exists in the Windows Registry, <c> False </c> otherwise </summary>
+ <param name="path"> A registry path to be audited for existence </param>
+</member>
+<member name="M:winapp2ool.Trim.getRegExists(System.String,System.String)">
+ <summary> Returns <c> True </c> if a given key exists in the registry, <c> False </c> otherwise </summary>
+ <param name="root"> The registry hive that contains the key whose existence will be audited </param>
+ <param name="dir"> The path of the key whose existence will be audited </param>
+</member>
+<member name="M:winapp2ool.Trim.processEnvDirs(System.String@,System.Boolean@)">
+ <summary> Handles some CCleaner variables and logs if the current variable is ProgramFiles so the 32bit location can be checked later </summary>
+ <param name="dir"> A filesystem path to process for environment variables </param>
+ <param name="isProgramFiles"> Indicates that the %ProgramFiles% variable has been seen </param>
 </member>
 <member name="M:winapp2ool.Trim.checkPathExist(System.String)">
- <summary>Returns True if a path exists on the system, false otherwise.</summary>
- <param name="key">A filesystem path</param>
+ <summary> Returns <c> True </c> if a path exists on the file system, <c> False </c> otherwise </summary>
+ <param name="key"> A filesystem path </param>
 </member>
 <member name="M:winapp2ool.Trim.swapDir(System.String@,System.String)">
- <summary>Swaps out a directory with the ProgramFiles parameterization on 64bit computers</summary>
- <param name="dir">The text to be modified</param>
- <param name="key">The original state of the text</param>
+ <summary> Swaps out a directory with the ProgramFiles parameterization on 64bit computers </summary>
+ <param name="dir"> The file system path to be modified </param>
+ <param name="key"> The original state of the path </param>
 </member>
 <member name="M:winapp2ool.Trim.expandWildcard(System.String,System.Boolean)">
- <summary>Interpret parameterized wildcards for the current system</summary>
- <param name="dir">A path containing a wildcard</param>
+ <summary> Interprets parameterized wildcards for the current system </summary>
+ <param name="dir"> A path containing a wildcard </param>
 </member>
 <member name="M:winapp2ool.Trim.checkDetOS(System.String)">
- <summary>Returns true if we satisfy the DetectOS citeria, false otherwise</summary>
- <param name="value">The DetectOS criteria to be checked</param>
+ <summary> Returns <c> True </c> if the system satisfies the DetectOS citeria, <c> False </c> otherwise </summary>
+ <param name="value"> The DetectOS criteria to be checked </param>
 </member>
 <member name="T:winapp2ool.advSettings">
  <summary> This module holds some methods for managing WinappDebug's scan/repair states </summary>
@@ -1701,8 +1710,16 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary> Validates winapp2.ini and runs the linter from the main menu or commandline </summary>
 </member>
 <member name="M:winapp2ool.WinappDebug.debug(winapp2ool.winapp2file@)">
- <summary> Performs syntax and format checking on a winapp2.ini format ini file </summary>
+ <summary> Performs syntax and format checking on a winapp2.ini format <c> iniFile </c> </summary>
  <param name="fileToBeDebugged"> A <c> winapp2file </c> to be linted </param>
+</member>
+<member name="M:winapp2ool.WinappDebug.processEntry(winapp2ool.winapp2entry@)">
+ <summary> Audits the given <c> winapp2entry </c> for errors </summary>
+ <param name="entry"> The <c> winapp2entry </c> to be audited for errors </param>
+</member>
+<member name="M:winapp2ool.WinappDebug.validateKeys(winapp2ool.winapp2entry@)">
+ <summary> Checks the validity of all <c>iniKeys </c> in a <c> winapp2entry </c> and removes any that are too problematic to continue with </summary>
+ <param name="entry"> A <c> winapp2entry </c> whose <c> iniKeys </c> will be audited for validity </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.alphabetizeEntries(winapp2ool.winapp2file@)">
  <summary> Alphabetizes all the entries in a winapp2.ini file and observes any that were out of place </summary>
@@ -1715,30 +1732,35 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.WinappDebug.findOutOfPlace(winapp2ool.strList@,winapp2ool.strList@,System.String,System.Collections.Generic.List{System.Int32}@,System.Boolean@)">
  <summary> Assess a list and its sorted state to observe changes in neighboring strings, such as the changes 
  made while sorting the strings alphabetically </summary>
- <param name="someList"> An unsorted list of strings </param>
- <param name="sortedList"> The sorted state of <c> <paramref name="someList"/> </c></param>
+ <param name="someList"> An unsorted list of strings (iniKey values or iniSection names) </param>
+ <param name="sortedList"> The sorted state of <c> <paramref name="someList"/> </c> </param>
  <param name="findType"> The type of neighbor checking <br/> <br/> When checking iniKeys (as opposed to entries), <paramref name="findType"/> contains a <c> keyType </c> </param>
  <param name="LineCountList"> The line numbers associated with the lines in <c> <paramref name="someList"/> </c> </param>
  <param name="oopBool"> Indicates that there are out of place entries in the list <br/>  Optional, Default: <c> False </c> </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.processKeyList(winapp2ool.keyList@,System.Func{winapp2ool.iniKey,winapp2ool.iniKey},System.Boolean@,System.Boolean@)">
- <summary> Audits a keyList of winapp2.ini format iniKeys for errors, alerting the user and correcting where possible </summary>
+ <summary> Hands off each <c> iniKey </c> in a winapp2.ini format <c> keyList </c> to be audited for correctness </summary>
  <param name="kl"> A <c> keyList </c> of a particular <c> keyType </c> to be audited </param>
- <param name="processKey"> The <c> function </c> that audits the keys of the <c> KeyType </c> provided in <c> <paramref name="kl"/> </c><br/> 
+ <param name="processKey"> The <c> function </c> that audits the keys of the <c> KeyType </c> provided in <c> <paramref name="kl"/> </c> <br/> 
  <c> VoidDelegate </c> if no further operations are needed outside of the basic formatting checks </param>
  <param name="hasF"> Indicates that the ExcludeKeys contain file system locations <br/> Optional, Default: <c> False </c> </param>
  <param name="hasR"> Indicates that the ExcludeKeys contain registry locations <br/> Optional, Default: <c> False </c> </param>
 </member>
+<member name="M:winapp2ool.WinappDebug.voidDelegate(winapp2ool.iniKey)">
+ <summary> This function does nothing by design </summary>
+ <param name="key"> An <c> iniKey </c> to do nothing with </param>
+</member>
 <member name="M:winapp2ool.WinappDebug.cFormat(winapp2ool.iniKey@,System.Int32@,winapp2ool.strList@,winapp2ool.keyList@,System.Boolean)">
- <summary> Does some basic formatting checks that apply to most winapp2.ini format iniKey objects </summary>
+ <summary> Does some basic formatting checks that apply to all winapp2.ini format <c> iniKeys </c> </summary>
  <param name="key"> An <c> iniKey </c> whose format will be audited </param>
  <param name="keyNumber"> The current expected key number for numbered keys </param>
  <param name="keyValues"> The current list of observed <c> iniKey </c> values </param>
  <param name="dupeList"> A tracking list of <c> iniKeys </c> with duplicate values </param>
+ <param name="noNumbers"> Indicates that the current set of keys should not be numbered </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.cEnVar(winapp2ool.iniKey)">
- <summary> Assess the formatting of any %EnvironmentVariables% in a given <c> iniKey </c> </summary>
- <param name="key">The <c> iniKey </c> to assess</param>
+ <summary> Audits the formatting of any %EnvironmentVariables% in a given <c> iniKey </c> </summary>
+ <param name="key">The <c> iniKey </c> to audit </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.fixMissingEquals(winapp2ool.iniKey@,System.String[])">
  <summary> Attempts to insert missing equal signs (=) into <c> iniKeys </c> <br/> <br/> Returns <c> True </c> if the repair is 
@@ -1748,7 +1770,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="M:winapp2ool.WinappDebug.cValidity(winapp2ool.iniKey)">
  <summary> Does basic syntax and formatting audits that apply across all keys, returns <c> False </c> iff a key is malformed </summary>
- <param name="key"> The <c> iniKey </c> whose validity will be assessed </param>
+ <param name="key"> The <c> iniKey </c> whose validity will be audited </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.chkCasing(winapp2ool.iniKey@,System.String[],System.String@,System.Boolean)">
  <summary> Checks either the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey </c> against a given array of expected cased values </summary>
@@ -1759,39 +1781,27 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="M:winapp2ool.WinappDebug.pFileKey(winapp2ool.iniKey)">
  <summary> Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible </summary>
- <param name="key"> A winap2.ini FileKey format <c> iniKey </c> </param>
-</member>
-<member name="M:winapp2ool.WinappDebug.validateKeys(winapp2ool.winapp2entry@)">
- <summary> Checks the validity of all <c>iniKeys </c> in a <c> winapp2entry </c> and removes any that are too problematic to continue with </summary>
- <param name="entry"> A <c> winapp2entry </c> whose <c> iniKeys </c> will be audited for validity </param>
-</member>
-<member name="M:winapp2ool.WinappDebug.processEntry(winapp2ool.winapp2entry@)">
- <summary> Audits the given <c> winapp2entry </c> for errors </summary>
- <param name="entry"> The <c> winapp2entry </c> to be audited for errors </param>
-</member>
-<member name="M:winapp2ool.WinappDebug.voidDelegate(winapp2ool.iniKey)">
- <summary> This method does nothing by design </summary>
- <param name="key"> An <c> iniKey </c> to do nothing with </param>
+ <param name="key"> A winap2.ini FileKey format <c> iniKey </c> to be checked for correctness </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.pDetectFile(winapp2ool.iniKey)">
  <summary> Processes a DetectFile format <c> iniKey </c> and checks it for errors, correcting where possible </summary>
- <param name="key"> A winapp2.ini DetectFile format <c> iniKey </c> </param>
+ <param name="key"> A winapp2.ini DetectFile format <c> iniKey </c> to be checked for correctness </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.chkPathFormatValidity(winapp2ool.iniKey,System.Boolean)">
  <summary> Audits the syntax of file system and registry paths </summary>
  <param name="key"> An <c> iniKey </c> to be audited </param>
- <param name="isRegistry"> Indicates that the given key holds a registry path </param>
+ <param name="isRegistry"> Indicates that the given <c> <paramref name="key"/> </c> is expected to hold a registry path </param>
+</member>
+<member name="M:winapp2ool.WinappDebug.pExcludeKey(winapp2ool.iniKey@,System.Boolean@,System.Boolean@)">
+ <summary> Processes a list of ExcludeKey format <c> iniKeys </c> and checks them for errors, correcting where possible </summary>
+ <param name="key"> A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness </param>
+ <param name="hasF"> Indicates whether the entry excludes any filesystem locations </param>
+ <param name="hasR"> Indicates whether the entry excludes any registry locations </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.sortKeys(winapp2ool.keyList@,System.Boolean)">
  <summary> Sorts a <c> keyList </c> alphabetically with winapp2.ini precedence applied to the key values </summary>
  <param name="kl"> The <c> keyList </c> to be sorted </param>
  <param name="hadDuplicatesRemoved"> Indicates that keys have been removed from <c> <paramref name="kl"/> </c> </param>
-</member>
-<member name="M:winapp2ool.WinappDebug.pExcludeKey(winapp2ool.iniKey@,System.Boolean@,System.Boolean@)">
- <summary> Processes a list of ExcludeKey format <c> iniKeys </c> and checks them for errors, correcting where possible </summary>
- <param name="key"> An ExcludeKey <c> iniKey </c> </param>
- <param name="hasF"> Indicates whether the entry excludes filesystem locations </param>
- <param name="hasR"> Indicates whether the entry excludes registry locations </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.inputMismatchErr(System.Int32,System.String,System.String,System.String,System.Boolean)">
  <summary> Prints an error when data is received that does not match an expected value </summary>
@@ -1822,46 +1832,46 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="err"> A description of the error as it will be displayed to the user </param>
  <param name="lines"> Any additional error information to be printed alongside the description </param>
 </member>
-<member name="M:winapp2ool.WinappDebug.fixStr(System.Boolean,System.String@,System.String@)">
+<member name="M:winapp2ool.WinappDebug.fixStr(System.Boolean,System.String@,System.String)">
  <summary> Replace a given string with a new value if the fix condition is met </summary>
  <param name="param"> The condition under which the string should be replaced </param>
- <param name="currentValue"> A reference to the string to be replaced </param>
+ <param name="currentValue"> A pointer to the string to be replaced </param>
  <param name="newValue"> The replacement value for <c> <paramref name="currentValue"/> </c> </param>
 </member>
 <member name="P:winapp2ool.Winapp2ool.RemoteWinappIsNonCC">
- <summary>Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub</summary>
+ <summary> Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub </summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.DotNetFrameworkOutOfDate">
- <summary>Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)</summary>
+ <summary> Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5) </summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.isOffline">
- <summary>Indicates that winapp2ool currently has access to the internet</summary>
+ <summary> Indicates that winapp2ool currently has access to the internet </summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.isBeta">
- <summary>Indicates that this build is beta and should check the beta branch link for updates</summary>
+ <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.printMenu">
- <summary>Prints the main winapp2ool menu to the user</summary>
+ <summary> Prints the main winapp2ool menu to the user </summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.main">
- <summary>Processes the commandline args and then initalizes the main winapp2ool module</summary>
+ <summary> Processes the commandline args and then initalizes the main winapp2ool module </summary>
 </member>
 <member name="M:winapp2ool.Winapp2ool.handleUserInput(System.String)">
- <summary>Handles the user input for the menu</summary>
- <param name="input">The user's input</param>
+ <summary> Handles the user input for the menu </summary>
+ <param name="input"> The user's input </param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
- <summary>Checks the version of Windows on the current system and returns it as a Double</summary>
- <returns>The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined</returns>
+ <summary> Checks the version of Windows on the current system and returns it as a Double </summary>
+ <returns> The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined </returns>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getFirstDir(System.String)">
- <summary>Returns the first portion of a registry or filepath parameterization</summary>
- <param name="val">A Windows filesystem or registry path from which the root should be returned</param>
- <returns>The root directory given by <paramref name="val"/></returns>
+ <summary> Returns the first portion of a registry or filepath parameterization </summary>
+ <param name="val"> A Windows filesystem or registry path from which the root should be returned </param>
+ <returns> The root directory given by <paramref name="val"/> </returns>
 </member>
 <member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
- <summary>Ensures that an iniFile has content and informs the user if it does not. Returns false if there are no sections</summary>
- <param name="iFile">An iniFile to be checked for content</param>
+ <summary> Ensures that an <c> iniFile </c> has content and informs the user if it does not. Returns <c> False </c> if there are no sections </summary>
+ <param name="iFile">An <c> iniFile </c> to be checked for content </param>
 </member>
 </members>
 </doc>
