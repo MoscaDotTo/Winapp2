@@ -113,12 +113,12 @@
     <Compile Include="handlers\cmdline\commandLineHandler.vb" />
     <Compile Include="handlers\downloads\downloadr.vb" />
     <Compile Include="handlers\exceptions\exceptionHandler.vb" />
-    <Compile Include="handlers\ini\iniFile.vb" />
-    <Compile Include="handlers\ini\iniSection.vb" />
-    <Compile Include="handlers\ini\iniComment.vb" />
-    <Compile Include="handlers\ini\keyList.vb" />
-    <Compile Include="handlers\ini\iniKey.vb" />
-    <Compile Include="handlers\ini\strList.vb" />
+    <Compile Include="handlers\ini\iniFile\iniFile.vb" />
+    <Compile Include="handlers\ini\iniFile\iniSection\iniSection.vb" />
+    <Compile Include="handlers\ini\iniFile\iniComment\iniComment.vb" />
+    <Compile Include="handlers\ini\keyList\keyList.vb" />
+    <Compile Include="handlers\ini\iniFile\iniKey\iniKey.vb" />
+    <Compile Include="handlers\ini\iniFile\components\strList\strList.vb" />
     <Compile Include="handlers\logger\logger.vb" />
     <Compile Include="handlers\menus\MenuMaker.vb" />
     <Compile Include="helpers\registry\RegistryHelper.vb" />
@@ -198,6 +198,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="handlers\ini\comments\" />
     <Folder Include="helpers\filesystem\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
