@@ -23,22 +23,16 @@ Imports System.IO
 '''    to the user.
 '''   </summary>
 Public Module Trim
-    ''' <summary> Indicates the major/minor version number on the current system </summary>
-    Private Property winVer As Double
-    ''' <summary> Hardcoded list of SpecialDetect evaluations </summary>
-    Private ReadOnly Property detChrome As New List(Of String) _
-        From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe", "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe",
-                           "%LocalAppData%\Google\Chrome\Application\chrome.exe", "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe", "%ProgramFiles%\SRWare Iron\iron.exe",
-                           "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe", "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
-                           "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
-    ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
-    Private Property ModuleSettingsChanged As Boolean = False
-    ''' <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
-    Private Property DownloadFileToTrim As Boolean = False
     ''' <summary> The winapp2.ini file that will be trimmed </summary>
     Public Property TrimFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
     ''' <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
     Public Property TrimFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
+    ''' <summary> The major/minor version number on the current system </summary>
+    Private Property winVer As Double
+    ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
+    Private Property ModuleSettingsChanged As Boolean = False
+    ''' <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
+    Private Property DownloadFileToTrim As Boolean = False
 
     ''' <summary> Handles the commandline args for Trim </summary>
     ''' Trim args:
@@ -46,7 +40,7 @@ Public Module Trim
     Public Sub handleCmdLine()
         initDefaultSettings()
         handleDownloadBools(DownloadFileToTrim)
-        getFileAndDirParams(TrimFile1, TrimFile3, New iniFile)
+        getFileAndDirParams(TrimFile1, New iniFile, TrimFile3)
         initTrim()
     End Sub
 
@@ -58,13 +52,13 @@ Public Module Trim
         ModuleSettingsChanged = False
     End Sub
 
-    ''' <summary> Runs Trims an <c> iniFile </c> from outside the module </summary>
-    ''' <param name="firstFile"> The winapp2.ini file </param>
-    ''' <param name="secondFile"> The output file </param>
+    ''' <summary> Trims an <c> iniFile </c> from outside the module </summary>
+    ''' <param name="firstFile"> The winapp2.ini file to be trimmed </param>
+    ''' <param name="thirdFile"> <c> iniFile </c> containing the path on disk to which the trimmed file will be saved </param>
     ''' <param name="d"> Indicates that the input winapp2.ini should be downloaded from GitHub </param>
-    Public Sub remoteTrim(firstFile As iniFile, secondFile As iniFile, d As Boolean)
+    Public Sub remoteTrim(firstFile As iniFile, thirdFile As iniFile, d As Boolean)
         TrimFile1 = firstFile
-        TrimFile3 = secondFile
+        TrimFile3 = thirdFile
         DownloadFileToTrim = d
         initTrim()
     End Sub
@@ -245,6 +239,13 @@ Public Module Trim
     Private Function checkSpecialDetects(ByVal key As String) As Boolean
         Select Case key
             Case "DET_CHROME"
+                Dim detChrome As New List(Of String) _
+                            From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe",
+                            "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe", "%LocalAppData%\Google\Chrome\Application\chrome.exe",
+                            "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe",
+                            "%ProgramFiles%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe",
+                            "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
+                            "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
                 For Each path As String In detChrome
                     If checkExist(path) Then Return True
                 Next
