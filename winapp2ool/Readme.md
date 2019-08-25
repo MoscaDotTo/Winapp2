@@ -1,7 +1,7 @@
 
 # Winapp2ool
 
-Winapp2ool is a small but robust application designed to take the busy work out of maintaining, managing, downloading, and deploying winapp2.ini 
+Winapp2ool is a small but robust application designed to take the busy work out of maintaining, managing, downloading, and deploying winapp2.ini
 
 ## Requirements & Notes
 
@@ -79,9 +79,7 @@ Args|Effect|
 
 ##### Module code documentation below
 
-# Winapp2ool
-
-# Properties
+## Properties
 
 Name|Type|Default Value|Description
 :-|:-|:-|:-
