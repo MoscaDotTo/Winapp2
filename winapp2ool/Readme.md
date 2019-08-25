@@ -63,6 +63,7 @@ The first argument provided should always refer to the module you would like to 
 `-s`|Enables "silent mode" - muting almost all output and prompts for input. Exceptions may not be shown when silent mode is enabled
 `-1d`, `-2d`, or `-3d`|Defines a new file name and/or path for the module's respectively numbered file. *
 `-1f`, `-2f`, or `-3f`| Defines a new file name for the module's respectively numbered file **
+`-ncc`|Enables "Non-CCleaner" mode and sets the Non-CCleaner ini as the default
 
 ##### Notes
 
