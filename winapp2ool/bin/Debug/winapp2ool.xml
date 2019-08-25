@@ -1396,29 +1396,26 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="T:winapp2ool.Trim">
     <summary>
-    This module parses a winapp2.ini file and checks each entry therein 
+    This module parses a winapp2.ini file and checks each entry therein
     removing any whose detection parameters do not exist on the current system
     and outputting a "trimmed" file containing only entries that exist on the system
     to the user.
    </summary>
-</member>
-<member name="P:winapp2ool.Trim.winVer">
- <summary> Indicates the major/minor version number on the current system </summary>
-</member>
-<member name="P:winapp2ool.Trim.detChrome">
- <summary> Hardcoded list of SpecialDetect evaluations </summary>
-</member>
-<member name="P:winapp2ool.Trim.ModuleSettingsChanged">
- <summary> Indicates that the module settings have been modified from their defaults </summary>
-</member>
-<member name="P:winapp2ool.Trim.DownloadFileToTrim">
- <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
 </member>
 <member name="P:winapp2ool.Trim.TrimFile1">
  <summary> The winapp2.ini file that will be trimmed </summary>
 </member>
 <member name="P:winapp2ool.Trim.TrimFile3">
  <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
+</member>
+<member name="P:winapp2ool.Trim.winVer">
+ <summary> The major/minor version number on the current system </summary>
+</member>
+<member name="P:winapp2ool.Trim.ModuleSettingsChanged">
+ <summary> Indicates that the module settings have been modified from their defaults </summary>
+</member>
+<member name="P:winapp2ool.Trim.DownloadFileToTrim">
+ <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
 </member>
 <member name="M:winapp2ool.Trim.handleCmdLine">
  <summary> Handles the commandline args for Trim </summary>
@@ -1429,13 +1426,13 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary> Restores the default state of the module's parameters </summary>
 </member>
 <member name="M:winapp2ool.Trim.remoteTrim(winapp2ool.iniFile,winapp2ool.iniFile,System.Boolean)">
- <summary> Runs Trims an <c> iniFile </c> from outside the module </summary>
- <param name="firstFile"> The winapp2.ini file </param>
- <param name="secondFile"> The output file </param>
+ <summary> Trims an <c> iniFile </c> from outside the module </summary>
+ <param name="firstFile"> The winapp2.ini file to be trimmed </param>
+ <param name="thirdFile"> <c> iniFile </c> containing the path on disk to which the trimmed file will be saved </param>
  <param name="d"> Indicates that the input winapp2.ini should be downloaded from GitHub </param>
 </member>
 <member name="M:winapp2ool.Trim.printMenu">
- <summary> Prints the Trim menu to the user </summary>
+ <summary> Prints the <c> Trim </c> menu to the user </summary>
 </member>
 <member name="M:winapp2ool.Trim.handleUserInput(System.String)">
  <summary> Handles the user input from the menu </summary>
@@ -1454,7 +1451,8 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="chkExist"> The <c> function </c> that evaluates the detection criteria in <c> <paramref name="kl"/> </c> </param>
 </member>
 <member name="M:winapp2ool.Trim.processEntryExistence(winapp2ool.winapp2entry@)">
- <summary> Audits the detection criteria in a given <c> winapp2entry </c> against the current system </summary>
+ <summary> Audits the detection criteria in a given <c> winapp2entry </c> against the current system <br/> <br/>
+ Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise </summary>
  <param name="entry"> A <c> winapp2entry </c> to whose detection criteria will be audited </param>
 </member>
 <member name="M:winapp2ool.Trim.virtualStoreChecker(winapp2ool.winapp2entry@)">
@@ -1466,7 +1464,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="kl"> The <c> keyList </c> of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore </param>
 </member>
 <member name="M:winapp2ool.Trim.mkVsKeys(System.String[],System.String[],winapp2ool.keyList@)">
- <summary> Creates `iniKeys` to handle VirtualStore locations that correspond to paths given in <c> <paramref name="kl"/> </c> </summary>
+ <summary> Creates <c> iniKeys </c> to handle VirtualStore locations that correspond to paths given in <c> <paramref name="kl"/> </c> </summary>
  <param name="findStrs"> An array of Strings to seek for in the key value </param>
  <param name="replStrs"> An array of strings to replace the sought after key values </param>
  <param name="kl"> The <c> keylist </c> to be processed </param>
@@ -1474,11 +1472,11 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.Trim.createVSKey(System.String,System.String,winapp2ool.iniKey)">
  <summary> Creates the VirtualStore version of a given <c> iniKey </c> </summary>
  <param name="findStr"> The normal filesystem path </param>
- <param name="replStr"> The VirtualStore location path </param>
+ <param name="replStr"> The VirtualStore path </param>
  <param name="key"> The <c> iniKey </c> to processed into a VirtualStore key </param>
 </member>
 <member name="M:winapp2ool.Trim.processEntryList(System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
- <summary> Processess a list of <c> winapp2entries </c> and removes any from the list that wouldn't be detected by CCleaner </summary>
+ <summary> Processes a list of <c> winapp2entries </c> and removes any from the list that wouldn't be detected by CCleaner </summary>
  <param name="entryList"> The list of <c> winapp2entries </c> who detection criteria will be audited </param>
 </member>
 <member name="M:winapp2ool.Trim.checkSpecialDetects(System.String)">

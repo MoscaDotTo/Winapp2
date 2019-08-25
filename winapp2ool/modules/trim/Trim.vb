@@ -1,7 +1,7 @@
 ﻿'    Copyright (C) 2018-2019 Robbie Ward
-' 
+'
 '    This file is a part of Winapp2ool
-' 
+'
 '    Winapp2ool is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
 '    the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@
 Option Strict On
 Imports System.IO
 '''    <summary>
-'''    This module parses a winapp2.ini file and checks each entry therein 
+'''    This module parses a winapp2.ini file and checks each entry therein
 '''    removing any whose detection parameters do not exist on the current system
 '''    and outputting a "trimmed" file containing only entries that exist on the system
 '''    to the user.
@@ -63,7 +63,7 @@ Public Module Trim
         initTrim()
     End Sub
 
-    ''' <summary> Prints the Trim menu to the user </summary>
+    ''' <summary> Prints the <c> Trim </c> menu to the user </summary>
     Public Sub printMenu()
         printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
         print(1, "Run (default)", "Trim winapp2.ini")
@@ -145,7 +145,8 @@ Public Module Trim
         Return False
     End Function
 
-    ''' <summary> Audits the detection criteria in a given <c> winapp2entry </c> against the current system </summary>
+    ''' <summary> Audits the detection criteria in a given <c> winapp2entry </c> against the current system <br/> <br/>
+    ''' Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise </summary>
     ''' <param name="entry"> A <c> winapp2entry </c> to whose detection criteria will be audited </param>
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
         gLog($"Processing entry: {entry.Name}", ascend:=True)
@@ -162,7 +163,7 @@ Public Module Trim
         If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then Return True
         If checkExistence(entry.Detects, AddressOf checkRegExist) Then Return True
         If checkExistence(entry.DetectFiles, AddressOf checkPathExist) Then Return True
-        ' Return true for the case where we have only a DetectOS and we meet its criteria 
+        ' Return true for the case where we have only a DetectOS and we meet its criteria
         Dim onlyHasDetOS = entry.SpecialDetect.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount = 0
         gLog("No other detection keys found than DetectOS", onlyHasDetOS And hasMetDetOS, descend:=True)
         If hasMetDetOS And onlyHasDetOS Then Return True
@@ -196,7 +197,7 @@ Public Module Trim
         If Not starterCount = kl.KeyCount Then kl.renumberKeys(replaceAndSort(kl.toStrLst(True), "|", " \ \"))
     End Sub
 
-    ''' <summary> Creates `iniKeys` to handle VirtualStore locations that correspond to paths given in <c> <paramref name="kl"/> </c> </summary>
+    ''' <summary> Creates <c> iniKeys </c> to handle VirtualStore locations that correspond to paths given in <c> <paramref name="kl"/> </c> </summary>
     ''' <param name="findStrs"> An array of Strings to seek for in the key value </param>
     ''' <param name="replStrs"> An array of strings to replace the sought after key values </param>
     ''' <param name="kl"> The <c> keylist </c> to be processed </param>
@@ -219,17 +220,17 @@ Public Module Trim
 
     ''' <summary> Creates the VirtualStore version of a given <c> iniKey </c> </summary>
     ''' <param name="findStr"> The normal filesystem path </param>
-    ''' <param name="replStr"> The VirtualStore location path </param>
+    ''' <param name="replStr"> The VirtualStore path </param>
     ''' <param name="key"> The <c> iniKey </c> to processed into a VirtualStore key </param>
     Private Function createVSKey(findStr As String, replStr As String, key As iniKey) As iniKey
         Return New iniKey($"{key.Name}={key.Value.Replace(findStr, replStr)}")
     End Function
 
-    ''' <summary> Processess a list of <c> winapp2entries </c> and removes any from the list that wouldn't be detected by CCleaner </summary>
+    ''' <summary> Processes a list of <c> winapp2entries </c> and removes any from the list that wouldn't be detected by CCleaner </summary>
     ''' <param name="entryList"> The list of <c> winapp2entries </c> who detection criteria will be audited </param>
     Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
         Dim sectionsToBePruned As New List(Of winapp2entry)
-        ' If the entry's Detect criteria doesn't return true, prune it 
+        ' If the entry's Detect criteria doesn't return true, prune it
         entryList.ForEach(Sub(entry) If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else virtualStoreChecker(entry))
         removeEntries(entryList, sectionsToBePruned)
     End Sub
@@ -240,12 +241,12 @@ Public Module Trim
         Select Case key
             Case "DET_CHROME"
                 Dim detChrome As New List(Of String) _
-                            From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe",
-                            "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe", "%LocalAppData%\Google\Chrome\Application\chrome.exe",
-                            "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe",
-                            "%ProgramFiles%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe",
-                            "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
-                            "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
+                        From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe",
+                        "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe", "%LocalAppData%\Google\Chrome\Application\chrome.exe",
+                        "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe",
+                        "%ProgramFiles%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe",
+                        "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
+                        "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
                 For Each path As String In detChrome
                     If checkExist(path) Then Return True
                 Next
@@ -331,7 +332,7 @@ Public Module Trim
         ' Make sure we get the proper path for environment variables
         processEnvDirs(dir, isProgramFiles)
         Try
-            ' Process wildcards appropriately if we have them 
+            ' Process wildcards appropriately if we have them
             If dir.Contains("*") Then
                 Dim exists = expandWildcard(dir, True)
                 ' Small contingency for the isProgramFiles case
@@ -371,7 +372,7 @@ Public Module Trim
         Dim possibleDirs As New strList
         Dim currentPaths As New strList
         currentPaths.add("")
-        ' Split the given string into sections by directory 
+        ' Split the given string into sections by directory
         Dim splitDir = dir.Split(CChar("\"))
         For Each pathPart In splitDir
             ' If this directory parameterization includes a wildcard, expand it appropriately
@@ -379,7 +380,7 @@ Public Module Trim
             If pathPart.Contains("*") Then
                 For Each currentPath In currentPaths.Items
                     Try
-                        ' Query the existence of child paths for each current path we hold 
+                        ' Query the existence of child paths for each current path we hold
                         If isFileSystem Then
                             Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
                             ' If there are any, add them to our possibility list
@@ -390,12 +391,12 @@ Public Module Trim
                     Catch
                         ' The exception we encounter here is going to be the result of directories not existing.
                         ' The exception will be thrown from the GetDirectories call and will prevent us from attempting to add new
-                        ' items to the possibility list. In this instance, we can silently fail (here). 
+                        ' items to the possibility list. In this instance, we can silently fail (here).
                     End Try
                 Next
                 ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
                 If possibleDirs.Count = 0 Then Return False
-                ' Otherwise, clear the current paths and repopulate them with the possible paths 
+                ' Otherwise, clear the current paths and repopulate them with the possible paths
                 currentPaths.clear()
                 currentPaths.add(possibleDirs)
                 possibleDirs.clear()
