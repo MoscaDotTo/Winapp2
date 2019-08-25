@@ -27,19 +27,19 @@ By default, each tool in the application assumes that local files it is looking 
 
 ## Menu Options
 
-|Option|Effect
-:-|:-
+|Option|Effect|Notes
+:-|:-|:-
 WinappDebug|Opens WinappDebug, a static analysis tool for winapp2.ini
 Trim|Opens Trim, a tool for tailoring winapp2.ini to a user's system
 Merge|Opens Merge, a tool for merging and removal operations between multiple ini files
 Diff|Opens Diff, a tool for generating Diffs between two versions of an ini file
 CCiniDebug|Opens CCiniDebug, a tool for cleaning up ccleaner.ini
-Downloader|Opens Downloader, a tool for downloading files from GitHub. **Unavailable in offline mode**
-Go Online|Attempts to reestablish your network connection. **Only available in offline mode**
-Update|Downloads the latest winapp2.ini from GitHub to the current folder. **Only available alongside an available update**
-Update & Trim|Downloads the latest winapp2.ini to the current folder and trims it. **Only available alongside an available update**
-Show Update Diff|Diffs your local copy of winapp2.ini against the latest version hosted on GitHub in order to show a changelog. **Only available alongside an available update**
-Update|Attempts to automatically update winapp2ool.exe to the latest version from GitHub. **Only available alongside an available update for winap2ool. Unavailable in offline mode, or on machines with .NET Framework 4.5 or lower installed (ie. Winapp2oolXP)**
+Downloader|Opens Downloader, a tool for downloading files from GitHub |**Unavailable in offline mode**
+Go Online|Attempts to reestablish your network connection.| **Only available in offline mode**
+Update|Downloads the latest winapp2.ini from GitHub to the current folder| **Only available alongside an available update**
+Update & Trim|Downloads the latest winapp2.ini to the current folder and trims it|**Only available alongside an available update**
+Show Update Diff|Diffs your local copy of winapp2.ini against the latest version hosted on GitHub in order to show a changelog| **Only available alongside an available update**
+Update|Attempts to automatically update winapp2ool.exe to the latest version from GitHub |**Only available alongside an available update for winap2ool. Unavailable in offline mode, or on machines with .NET Framework 4.5 or lower installed (ie. Winapp2oolXP)**
 
 ## Command-line arguments
 
