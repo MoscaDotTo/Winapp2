@@ -160,7 +160,7 @@ Public Module WinappDebug
 
     ''' <summary> Validates winapp2.ini and runs the linter from the main menu or commandline </summary>
     Private Sub initDebug()
-        If Not enforceFileHasContent(winappDebugFile1) Then Exit Sub
+        If Not enforceFileHasContent(winappDebugFile1) Then Return
         Dim wa2 As New winapp2file(winappDebugFile1)
         clrConsole()
         print(3, "Beginning analysis of winapp2.ini", trailr:=True)
@@ -317,7 +317,7 @@ Public Module WinappDebug
     ''' <param name="hasF"> Indicates that the ExcludeKeys contain file system locations <br/> Optional, Default: <c> False </c> </param>
     ''' <param name="hasR"> Indicates that the ExcludeKeys contain registry locations <br/> Optional, Default: <c> False </c> </param>
     Private Sub processKeyList(ByRef kl As keyList, processKey As Func(Of iniKey, iniKey), Optional ByRef hasF As Boolean = False, Optional ByRef hasR As Boolean = False)
-        If kl.KeyCount = 0 Then Exit Sub
+        If kl.KeyCount = 0 Then Return
         gLog($"Processing {kl.KeyType}s", ascend:=True, buffr:=True)
         Dim curNum = 1
         Dim curStrings As New strList
@@ -561,7 +561,7 @@ Public Module WinappDebug
     ''' <param name="key"> An <c> iniKey </c> to be audited </param>
     ''' <param name="isRegistry"> Indicates that the given <c> <paramref name="key"/> </c> is expected to hold a registry path </param>
     Private Sub chkPathFormatValidity(key As iniKey, isRegistry As Boolean)
-        If Not lintPathValidity.ShouldScan Then Exit Sub
+        If Not lintPathValidity.ShouldScan Then Return
         ' Remove the flags from ExcludeKeys if we have them before getting the first directory portion
         Dim rootStr = If(key.KeyType <> "ExcludeKey", getFirstDir(key.Value), getFirstDir(pathFromExcludeKey(key)))
         ' Ensure that registry paths have a valid hive and file paths have either a variable or a drive letter
@@ -585,7 +585,7 @@ Public Module WinappDebug
             Case Else
                 If key.Value.StartsWith("FILE") Or key.Value.StartsWith("PATH") Or key.Value.StartsWith("REG") Then
                     fullKeyErr(key, "Missing pipe symbol after ExcludeKey flag)")
-                    Exit Sub
+                    Return
                 End If
                 fullKeyErr(key, "No valid exclude flag (FILE, PATH, or REG) found in ExcludeKey.")
         End Select
@@ -595,7 +595,7 @@ Public Module WinappDebug
     ''' <param name="kl"> The <c> keyList </c> to be sorted </param>
     ''' <param name="hadDuplicatesRemoved"> Indicates that keys have been removed from <c> <paramref name="kl"/> </c> </param>
     Private Sub sortKeys(ByRef kl As keyList, hadDuplicatesRemoved As Boolean)
-        If Not lintAlpha.ShouldScan Or kl.KeyCount <= 1 Then Exit Sub
+        If Not lintAlpha.ShouldScan Or kl.KeyCount <= 1 Then Return
         Dim keyValues = kl.toStrLst(True)
         Dim sortedKeyValues = replaceAndSort(keyValues, "|", " \ \")
         ' Rewrite the alphabetized keys back into the keylist (also fixes numbering)

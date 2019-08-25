@@ -98,7 +98,7 @@ Public Module Trim
 
     ''' <summary> Initiates the <c> Trim </c> process from the main menu or commandline </summary>
     Private Sub initTrim()
-        If Not DownloadFileToTrim Then If Not enforceFileHasContent(TrimFile1) Then Exit Sub
+        If Not DownloadFileToTrim Then If Not enforceFileHasContent(TrimFile1) Then Return
         Dim winapp2 = If(Not DownloadFileToTrim, New winapp2file(TrimFile1), New winapp2file(getRemoteIniFile(winapp2link)))
         clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
@@ -186,7 +186,7 @@ Public Module Trim
     ''' <summary> Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list </summary>
     ''' <param name="kl"> The <c> keyList </c> of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore </param>
     Private Sub vsKeyChecker(ByRef kl As keyList)
-        If kl.KeyCount = 0 Then Exit Sub
+        If kl.KeyCount = 0 Then Return
         Dim starterCount = kl.KeyCount
         Select Case kl.KeyType
             Case "FileKey", "ExcludeKey"

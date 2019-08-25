@@ -89,7 +89,7 @@ Public Class iniFile
     ''' <param name="tostr"> The text to be written to disk </param>
     ''' <param name="cond"> Indicates that the file should be written to disk <br/> Optional, Default: <c> True </c> </param>
     Public Sub overwriteToFile(tostr As String, Optional cond As Boolean = True)
-        If Not cond Then Exit Sub
+        If Not cond Then Return
         gLog($"Saving {Name}")
         Dim file As StreamWriter
         Try
@@ -183,7 +183,7 @@ Public Class iniFile
         ' Make sure both the file and the directory actually exist
         While Not exists()
             initModule("File Chooser", AddressOf printFileChooserMenu, AddressOf handleFileChooserInput)
-            If Not exists() Then Exit Sub
+            If Not exists() Then Return
         End While
         init()
         gLog($"ini created with {Sections.Count} sections", indent:=True, descend:=True)
