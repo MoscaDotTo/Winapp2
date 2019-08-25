@@ -419,14 +419,13 @@ winapp2ool
  <summary> Constructs an <c> iniFile </c> from a text stream </summary>
  <param name="r"> A StreamReader object containing a Stream of an iniFile, remote or local </param>
 </member>
-<member name="M:winapp2ool.iniFile.processiniLine(System.String@,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.Boolean@)">
+<member name="M:winapp2ool.iniFile.processiniLine(System.String@,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@)">
  <summary> Processes a line in a ini file and updates the <c> iniFile </c> object meta data accordingly </summary>
  <param name="currentLine"> The current line being read </param>
  <param name="sectionToBeBuilt"> The lines comprising an <c> iniSection </c> whose construction is pending </param>
  <param name="lineTrackingList"> The corresponding <c> Integers </c> representing line numbers associated with the <c> iniSection's </c> lines </param>
- <param name="lastLineWasEmpty"> Indicates that the previous line was empty </param>
 </member>
-<member name="M:winapp2ool.iniFile.updSec(System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.String,System.Boolean@)">
+<member name="M:winapp2ool.iniFile.updSec(System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.String)">
  <summary> Manages line and number tracking for <c> iniSections </c> whose construction is pending </summary>
  <param name="secList"> The list of strings to be built into an <c> iniSection </c> </param>
  <param name="lineList"> The corresponding list of integers representing line numbers associated with the <c> iniSection's </c> strings </param>

@@ -131,18 +131,15 @@ Public Class iniFile
     ''' <param name="currentLine"> The current line being read </param>
     ''' <param name="sectionToBeBuilt"> The lines comprising an <c> iniSection </c> whose construction is pending </param>
     ''' <param name="lineTrackingList"> The corresponding <c> Integers </c> representing line numbers associated with the <c> iniSection's </c> lines </param>
-    ''' <param name="lastLineWasEmpty"> Indicates that the previous line was empty </param>
-    Private Sub processiniLine(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer), ByRef lastLineWasEmpty As Boolean)
+    Private Sub processiniLine(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer))
         Select Case True
             Case currentLine.StartsWith(";")
                 Comments.Add(Comments.Count, New iniComment(currentLine, LineCount))
             Case (Not currentLine.StartsWith("[") And Not currentLine.Trim = "") Or (currentLine.Trim <> "" And sectionToBeBuilt.Count = 0)
-                updSec(sectionToBeBuilt, lineTrackingList, currentLine, lastLineWasEmpty)
+                updSec(sectionToBeBuilt, lineTrackingList, currentLine)
             Case currentLine.Trim <> "" And Not sectionToBeBuilt.Count = 0
                 mkSection(sectionToBeBuilt, lineTrackingList)
-                updSec(sectionToBeBuilt, lineTrackingList, currentLine, lastLineWasEmpty)
-            Case Else
-                lastLineWasEmpty = True
+                updSec(sectionToBeBuilt, lineTrackingList, currentLine)
         End Select
         LineCount += 1
     End Sub
@@ -151,10 +148,9 @@ Public Class iniFile
     ''' <param name="secList"> The list of strings to be built into an <c> iniSection </c> </param>
     ''' <param name="lineList"> The corresponding list of integers representing line numbers associated with the <c> iniSection's </c> strings </param>
     ''' <param name="curLine"> The current line to be added to the section </param>
-    Private Sub updSec(ByRef secList As List(Of String), ByRef lineList As List(Of Integer), curLine As String, ByRef lastLineWasEmpty As Boolean)
+    Private Sub updSec(ByRef secList As List(Of String), ByRef lineList As List(Of Integer), curLine As String)
         secList.Add(curLine)
         lineList.Add(LineCount)
-        lastLineWasEmpty = False
     End Sub
 
     ''' <summary> Populates the Sections and Comments of an iniFile using a StreamReader from either disk or the internet </summary>
@@ -162,9 +158,8 @@ Public Class iniFile
     Public Sub buildIniFromStream(ByRef r As StreamReader)
         Dim sectionToBeBuilt As New List(Of String)
         Dim lineTrackingList As New List(Of Integer)
-        Dim lastLineWasEmpty = False
         Do While r.Peek() > -1
-            processiniLine(r.ReadLine, sectionToBeBuilt, lineTrackingList, lastLineWasEmpty)
+            processiniLine(r.ReadLine, sectionToBeBuilt, lineTrackingList)
         Loop
         If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
         r.Close()
