@@ -1265,27 +1265,25 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="file">The iniFile to be sorted</param>
 </member>
 <member name="T:winapp2ool.Merge">
- <summary>
- A module that facilitates the merging of two user defined iniFile objects
- </summary>
+ <summary> Facilitates the merger of one <c> iniFile </c> into another </summary>
 </member>
 <member name="P:winapp2ool.Merge.mergeMode">
-<summary>True if replacing collisions, False if removing them</summary>
+ <summary> <c> True </c> if replacing collisions, <c> False </c> if removing them </summary>
 </member>
 <member name="P:winapp2ool.Merge.ModuleSettingsChanged">
-<summary>Indicates whether or not the module's settings have changed</summary>
+ <summary> Indicates that module's settings have been modified from their defaults </summary>
 </member>
 <member name="P:winapp2ool.Merge.MergeFile1">
-<summary>The master file to be merged into</summary>
+ <summary> The file with whose contents <c> MergeFile2 </c> will be merged </summary>
 </member>
 <member name="P:winapp2ool.Merge.MergeFile2">
-<summary> The file whose contents will be merged into MergeFile1</summary>
+ <summary> The file whose contents will be merged into <c> MergeFile1 </c> </summary>
 </member>
 <member name="P:winapp2ool.Merge.MergeFile3">
- <summary>Stores the path for where the merged file should be saved to disk (overwrites MergeFile1 by default)</summary>
+ <summary>Stores the path to which the merged file should be written back to disk (overwrites <c> MergeFile1 </c> by default) </summary>
 </member>
 <member name="M:winapp2ool.Merge.handleCmdLine">
- <summary>Handles the commandline args for Merge</summary>
+ <summary> Handles the commandline args for Merge </summary>
   Merge args:
  -mm         : toggle mergemode from add&amp;replace to add&amp;remove
  Preset merge file choices
@@ -1295,32 +1293,33 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  -a          : archived entries.ini 
 </member>
 <member name="M:winapp2ool.Merge.initDefaultSettings">
- <summary>Restores the default state of the module's parameters</summary>
+ <summary> Restores the default state of the module's properties </summary>
 </member>
 <member name="M:winapp2ool.Merge.printMenu">
- <summary>Prints the main menu to the user</summary>
+ <summary> Prints the <c> Merge </c> menu to the user, includes some predefined merge files choices for ease of access </summary>
 </member>
 <member name="M:winapp2ool.Merge.handleUserInput(System.String)">
- <summary>Processes the user's input and acts accordingly based on the state of the program</summary>
- <param name="input">The String containing the user's input</param>
+ <summary> Handles the user's input from the main menu </summary>
+ <param name="input"> The user's input </param>
 </member>
 <member name="M:winapp2ool.Merge.changeMergeName(System.String)">
- <summary>Changes the merge file's name</summary>
- <param name="newName">the new name for the merge file</param>
+ <summary> Changes the merge file's name </summary>
+ <param name="newName"> The new <c> Name </c> for <c> MergeFile2 </c> </param>
 </member>
 <member name="M:winapp2ool.Merge.initMerge">
- <summary>Validates iniFiles and begins the merging process</summary>
+ <summary> Validates the <c> iniFiles </c> and kicks off the merging process </summary>
 </member>
-<member name="M:winapp2ool.Merge.merge">
+<member name="M:winapp2ool.Merge.merge(System.Boolean)">
  <summary>Conducts the merger of our two iniFiles</summary>
 </member>
 <member name="M:winapp2ool.Merge.merge(winapp2ool.iniFile@,winapp2ool.iniFile@)">
 <summary>Allows other modules to call Merge on iniFile objects</summary>
 </member>
-<member name="M:winapp2ool.Merge.processMergeMode(winapp2ool.iniFile@,winapp2ool.iniFile@)">
- <summary>Performs conflict resolution for the merge process</summary>
- <param name="first">The base iniFile that will be modified by Merge</param>
- <param name="second">The iniFile to be merged into the base</param>
+<member name="M:winapp2ool.Merge.resolveConflicts(winapp2ool.iniFile@,winapp2ool.iniFile@)">
+ <summary> Performs conflict resolution for the merge process, handling the case where <c> iniSections </c> 
+ in both files have the same <c> Name </c> </summary>
+ <param name="first"> The master <c> iniFile </c> </param>
+ <param name="second"> The <c> iniFile </c> whose contents will be merged into <c> <paramref name="first"/> </c> </param>
 </member>
 <member name="T:winapp2ool.JavaMaker">
  <summary>

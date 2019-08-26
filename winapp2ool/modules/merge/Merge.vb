@@ -16,25 +16,23 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 
-''' <summary>
-''' A module that facilitates the merging of two user defined iniFile objects
-''' </summary>
+''' <summary> Facilitates the merger of one <c> iniFile </c> into another </summary>
 Module Merge
-    '''<summary>True if replacing collisions, False if removing them</summary>
+    ''' <summary> <c> True </c> if replacing collisions, <c> False </c> if removing them </summary>
     Public Property mergeMode As Boolean = True
-    '''<summary>Indicates whether or not the module's settings have changed</summary>
+    ''' <summary> Indicates that module's settings have been modified from their defaults </summary>
     Public Property ModuleSettingsChanged As Boolean = False
 
-    '''<summary>The master file to be merged into</summary>
+    ''' <summary> The file with whose contents <c> MergeFile2 </c> will be merged </summary>
     Public Property MergeFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
 
-    '''<summary> The file whose contents will be merged into MergeFile1</summary>
+    ''' <summary> The file whose contents will be merged into <c> MergeFile1 </c> </summary>
     Public Property MergeFile2 As New iniFile(Environment.CurrentDirectory, "")
 
-    ''' <summary>Stores the path for where the merged file should be saved to disk (overwrites MergeFile1 by default)</summary>
+    ''' <summary>Stores the path to which the merged file should be written back to disk (overwrites <c> MergeFile1 </c> by default) </summary>
     Public Property MergeFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-merged.ini")
 
-    ''' <summary>Handles the commandline args for Merge</summary>
+    ''' <summary> Handles the commandline args for Merge </summary>
     '''  Merge args:
     ''' -mm         : toggle mergemode from add&amp;replace to add&amp;remove
     ''' Preset merge file choices
@@ -53,7 +51,7 @@ Module Merge
         If Not MergeFile2.Name = "" Then initMerge()
     End Sub
 
-    ''' <summary>Restores the default state of the module's parameters</summary>
+    ''' <summary> Restores the default state of the module's properties </summary>
     Private Sub initDefaultSettings()
         MergeFile1.resetParams()
         MergeFile2.resetParams()
@@ -62,7 +60,7 @@ Module Merge
         ModuleSettingsChanged = False
     End Sub
 
-    ''' <summary>Prints the main menu to the user</summary>
+    ''' <summary> Prints the <c> Merge </c> menu to the user, includes some predefined merge files choices for ease of access </summary>
     Public Sub printMenu()
         printMenuTop({"Merge the contents of two ini files, while either replacing (default) or removing sections with the same name."})
         print(1, "Run (default)", "Merge the two ini files", enStrCond:=Not (MergeFile2.Name = ""), colorLine:=True)
@@ -82,8 +80,8 @@ Module Merge
         Console.WindowHeight = If(ModuleSettingsChanged, 32, 30)
     End Sub
 
-    ''' <summary>Processes the user's input and acts accordingly based on the state of the program</summary>
-    ''' <param name="input">The String containing the user's input</param>
+    ''' <summary> Handles the user's input from the main menu </summary>
+    ''' <param name="input"> The user's input </param>
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
@@ -111,28 +109,28 @@ Module Merge
         End Select
     End Sub
 
-    ''' <summary>Changes the merge file's name</summary>
-    ''' <param name="newName">the new name for the merge file</param>
+    ''' <summary> Changes the merge file's name </summary>
+    ''' <param name="newName"> The new <c> Name </c> for <c> MergeFile2 </c> </param>
     Private Sub changeMergeName(newName As String)
         MergeFile2.Name = newName
         ModuleSettingsChanged = True
         setHeaderText("Merge filename set")
     End Sub
 
-    ''' <summary>Validates iniFiles and begins the merging process</summary>
+    ''' <summary> Validates the <c> iniFiles </c> and kicks off the merging process </summary>
     Public Sub initMerge()
         clrConsole()
-        If Not (enforceFileHasContent(MergeFile1) And enforceFileHasContent(MergeFile2)) Then Exit Sub
+        If Not (enforceFileHasContent(MergeFile1) And enforceFileHasContent(MergeFile2)) Then Return
         print(4, $"Merging {MergeFile1.Name} with {MergeFile2.Name}")
-        merge()
+        merge(True)
         print(0, "", closeMenu:=True)
         print(3, $"Finished merging files. {anyKeyStr}")
         crk()
     End Sub
 
     ''' <summary>Conducts the merger of our two iniFiles</summary>
-    Private Sub merge()
-        processMergeMode(MergeFile1, MergeFile2)
+    Private Sub merge(isWinapp2 As Boolean)
+        resolveConflicts(MergeFile1, MergeFile2)
         Dim tmp As New winapp2file(MergeFile1)
         Dim tmp2 As New winapp2file(MergeFile2)
         ' Add the entries from the second file to their respective sections in the first file
@@ -155,10 +153,11 @@ Module Merge
         MergeFile2 = sourceFile
     End Sub
 
-    ''' <summary>Performs conflict resolution for the merge process</summary>
-    ''' <param name="first">The base iniFile that will be modified by Merge</param>
-    ''' <param name="second">The iniFile to be merged into the base</param>
-    Private Sub processMergeMode(ByRef first As iniFile, ByRef second As iniFile)
+    ''' <summary> Performs conflict resolution for the merge process, handling the case where <c> iniSections </c> 
+    ''' in both files have the same <c> Name </c> </summary>
+    ''' <param name="first"> The master <c> iniFile </c> </param>
+    ''' <param name="second"> The <c> iniFile </c> whose contents will be merged into <c> <paramref name="first"/> </c> </param>
+    Private Sub resolveConflicts(ByRef first As iniFile, ByRef second As iniFile)
         Dim removeList As New List(Of String)
         For Each section In second.Sections.Keys
             If first.Sections.Keys.Contains(section) Then
