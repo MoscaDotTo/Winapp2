@@ -68,9 +68,9 @@ Public Class iniFile
     End Function
 
     ''' <summary> Creates an <c> uninitialized iniFile </c> with a directory and a filename </summary>
-    ''' <param name="directory"> A filesystem directory containing the ini file </param>
+    ''' <param name="directory"> A filesystem directory </param>
     ''' <param name="filename"> The name of the file on disk contained in <c> <paramref name="directory"/> </c> </param>
-    ''' <param name="rename"> A provided suggestion for a rename should the user open the File Chooser on this file </param>
+    ''' <param name="rename"> A provided suggestion for a rename should the user open the File Chooser for this file </param>
     ''' <param name="mExist"> Indicates that this file must exist for its owner to perform its work <br/> Optional, Default: <c> False </c> </param>
     Public Sub New(Optional directory As String = "", Optional filename As String = "", Optional rename As String = "", Optional mExist As Boolean = False)
         Dir = directory
@@ -128,9 +128,9 @@ Public Class iniFile
     End Sub
 
     ''' <summary> Processes a line in a ini file and updates the <c> iniFile </c> object meta data accordingly </summary>
-    ''' <param name="currentLine"> The current line being read </param>
+    ''' <param name="currentLine"> The current line in the stream being read </param>
     ''' <param name="sectionToBeBuilt"> The lines comprising an <c> iniSection </c> whose construction is pending </param>
-    ''' <param name="lineTrackingList"> The corresponding <c> Integers </c> representing line numbers associated with the <c> iniSection's </c> lines </param>
+    ''' <param name="lineTrackingList"> The numbers associated with the lines in <c> <paramref name="sectionToBeBuilt"/> </c> </param>
     Private Sub processiniLine(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer))
         Select Case True
             Case currentLine.StartsWith(";")
@@ -145,16 +145,16 @@ Public Class iniFile
     End Sub
 
     ''' <summary> Manages line and number tracking for <c> iniSections </c> whose construction is pending </summary>
-    ''' <param name="secList"> The list of strings to be built into an <c> iniSection </c> </param>
-    ''' <param name="lineList"> The corresponding list of integers representing line numbers associated with the <c> iniSection's </c> strings </param>
-    ''' <param name="curLine"> The current line to be added to the section </param>
+    ''' <param name="secList"> Values to be built into <c> iniKeys </c> for the <c> iniSection </c> </param>
+    ''' <param name="lineList"> Line numbers associated with the lines in <c> <paramref name="secList"/> </c> </param>
+    ''' <param name="curLine"> An <c> iniKey </c> to be constructed and added to the <c> iniSection </c> </param>
     Private Sub updSec(ByRef secList As List(Of String), ByRef lineList As List(Of Integer), curLine As String)
         secList.Add(curLine)
         lineList.Add(LineCount)
     End Sub
 
     ''' <summary> Populates the Sections and Comments of an iniFile using a StreamReader from either disk or the internet </summary>
-    ''' <param name="r"> A StreamReader object containing a Stream of an iniFile, remote or local </param>
+    ''' <param name="r"> A <c> byte stream </c> containing an ini file </param>
     Public Sub buildIniFromStream(ByRef r As StreamReader)
         Dim sectionToBeBuilt As New List(Of String)
         Dim lineTrackingList As New List(Of Integer)
@@ -162,20 +162,22 @@ Public Class iniFile
             processiniLine(r.ReadLine, sectionToBeBuilt, lineTrackingList)
         Loop
         If sectionToBeBuilt.Count <> 0 Then mkSection(sectionToBeBuilt, lineTrackingList)
-        r.Close()
     End Sub
 
-    ''' <summary> Attempts to read a .ini file from disk and initialize the iniFile object </summary>
+    ''' <summary> Attempts to read an ini file from disk and populate its contents into the <c> Sections </c> property </summary>
     Public Sub init()
         Try
-            buildIniFromStream(New StreamReader(Me.Path()))
+            Dim reader = New StreamReader(Me.Path)
+            buildIniFromStream(reader)
+            reader.Close()
         Catch ex As Exception
             Console.WriteLine(ex.Message & Environment.NewLine & $"Failure occurred during iniFile construction at line: {LineCount} in {Name}")
             Console.ReadLine()
         End Try
     End Sub
 
-    ''' <summary> Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists </summary>
+    ''' <summary> Ensures that any call to an ini file on the system will be to a file that exists in a directory that exists 
+    ''' before attempting to populate the <c> Sections </c> property </summary>
     Public Sub validate()
         gLog($"Validating {Name}", ascend:=True)
         Sections = New Dictionary(Of String, iniSection)
@@ -189,16 +191,16 @@ Public Class iniFile
         gLog($"ini created with {Sections.Count} sections", indent:=True, descend:=True)
     End Sub
 
-    ''' <summary> Reorders the iniSections in an iniFile object to be in the same sorted state as a provided list of Strings </summary>
-    ''' <param name="sortedSections"> The sorted state of the sections by name </param>
+    ''' <summary> Reorders this object's <c> Sections </c> to be in the same ordered state as a provided list of Strings </summary>
+    ''' <param name="sortedSections"> The <c> Names </c> of the <c> iniSections </c> in the desired sorted order </param>
     Public Sub sortSections(sortedSections As strList)
         Dim tempFile As New iniFile
         sortedSections.Items.ForEach(Sub(sectionName) tempFile.Sections.Add(sectionName, Sections.Item(sectionName)))
         Me.Sections = tempFile.Sections
     End Sub
 
-    ''' <summary> Find the line number of a comment by its string. Returns -1 if not found </summary>
-    ''' <param name="com"> The string containing the comment text to be searched for </param>
+    ''' <summary> Find the <c> LineNumber </c> of a comment by its <c> Value </c>. Returns <c> -1 </c> if not found </summary>
+    ''' <param name="com"> The comment text for which to search </param>
     Public Function findCommentLine(com As String) As Integer
         For Each comment In Comments.Values
             If comment.Comment = com Then Return comment.LineNumber
@@ -206,7 +208,7 @@ Public Class iniFile
         Return -1
     End Function
 
-    ''' <summary> Returns the section names from the iniFile object as a list of Strings </summary>
+    ''' <summary> Returns the <c> Name </c> property from each <c> iniSection </c> in the <c> iniFile </c> as a list of strings</summary>
     Public Function namesToStrList() As strList
         Dim out As New strList
         For Each section In Sections.Values
@@ -215,9 +217,10 @@ Public Class iniFile
         Return out
     End Function
 
-    ''' <summary> Attempts to create a new iniSection object and add it to the iniFile </summary>
-    ''' <param name="sectionToBeBuilt"> The list of strings in the iniSection </param>
-    ''' <param name="lineTrackingList"> The list of line numbers associated with the given strings </param>
+    ''' <summary> Attempts to create a new <c> iniSection </c> and add it to <c> Sections </c>
+    ''' <br/> <br/> Sections with duplicate names (CaSe SeNsItIvE) will be ignored in a user-facing way </summary>
+    ''' <param name="sectionToBeBuilt"> <c> iniKeys </c> to be constructed and added to the <c> iniSection </c> being built </param>
+    ''' <param name="lineTrackingList"> Line numbers associated with the lines in <c> <paramref name="sectionToBeBuilt"/> </c> </param>
     Private Sub mkSection(sectionToBeBuilt As List(Of String), lineTrackingList As List(Of Integer))
         Try
             Dim sectionHolder As New iniSection(sectionToBeBuilt, lineTrackingList)
@@ -248,7 +251,8 @@ Public Class iniFile
         End Try
     End Sub
 
-    ''' <summary> Prints the menu for the File Chooser submodule </summary>
+    ''' <summary> Prints the menu for the <c> File Chooser </c> submodule, enabling the user to change the <c> Name </c>
+    ''' property or open the <c> Directory Chooser </c> sister submodule through a familiar MenuMaker interface </summary>
     Public Sub printFileChooserMenu()
         printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"})
         print(1, InitName, "Use the default name", InitName <> "")
@@ -258,7 +262,7 @@ Public Class iniFile
         print(0, $"Current File:      {Name}", closeMenu:=True)
     End Sub
 
-    ''' <summary> Handles the input for the File Chooser submodule </summary>
+    ''' <summary> Handles the input for the <c> File Chooser </c> submodule </summary>
     ''' <param name="input"> The user's input </param>
     Public Sub handleFileChooserInput(input As String)
         Select Case True
@@ -277,7 +281,8 @@ Public Class iniFile
         End Select
     End Sub
 
-    ''' <summary> Assigns the Name of the iniFile to the given name and stores the previous name in a temporary container </summary>
+    ''' <summary> Assigns the <c> Name </c> of the <c> iniFile </c> to the given <c> <paramref name="nname"/> </c> and stores the previous <c> Name </c>
+    ''' in a temporary container so this change may be undone </summary>
     ''' <param name="nname"> The new filename </param>
     Private Sub reName(nname As String)
         tmpRename = Name
@@ -285,8 +290,8 @@ Public Class iniFile
         exitIfExists(True)
     End Sub
 
-    ''' <summary> Leaves the submodule as long as the inifile exists on disk in the case that mustExist is true </summary>
-    ''' <param name="undoPendingRename"> Indicates that there's a pending rename that should be reverted if the renamed file doesn't exist <br/>Optional, Default: False </param>
+    ''' <summary> Makes sure that the file exists if its <c> mExist </c> flag is set, undoes any rename operations if necessary </summary>
+    ''' <param name="undoPendingRename"> Indicates that there's a pending rename that should be reverted if the renamed file doesn't exist <br/> Optional, Default: <c> False </c> </param>
     Private Sub exitIfExists(Optional undoPendingRename As Boolean = False)
         If Not exists() And mustExist Then
             setHeaderText($"{Name} does not exist", True)
@@ -296,7 +301,8 @@ Public Class iniFile
         End If
     End Sub
 
-    ''' <summary> Prints the menu for the Directory Chooser submodule </summary>
+    ''' <summary> Prints the menu for the <c> Directory Chooser </c> submodule allowing the user to change 
+    ''' the <c> Directory </c> property for the <c> iniFile </c> through a familiar MenuMaker interface </summary>
     Public Sub printDirChooserMenu()
         printMenuTop({"Choose a directory", "Enter a new directory below or choose an option"})
         print(1, "Use default (default)", "Use the same folder as winapp2ool.exe")
@@ -330,9 +336,10 @@ Public Class iniFile
         End Select
     End Sub
 
-    ''' <summary> Returns true if the path (or optionally just the directory) of the inifile exists on the file system </summary>>
-    ''' <param name="checkPath"> Indicates that the full path should be checked for existence. When <paramref name="checkPath"/> is False, only the directory will be checked
-    ''' <br/> Optional, Default: True </param>
+    ''' <summary> Returns <c> True </c> if the <c> Path </c> (or, optionally, just the <c> Directory </c>) of the <c> inifile </c> exists on the file system </summary>>
+    ''' <param name="checkPath"> Indicates that the full path should be checked for existence 
+    ''' <br/> When <paramref name="checkPath"/> is False, only the directory will be checked
+    ''' <br/> Optional, Default: <c> True </c> </param>
     Public Function exists(Optional checkPath As Boolean = True) As Boolean
         If checkPath Then Return File.Exists(Path)
         Return Directory.Exists(Dir)
