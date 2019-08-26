@@ -100,6 +100,7 @@ Public Module Trim
     Private Sub initTrim()
         If Not DownloadFileToTrim Then If Not enforceFileHasContent(TrimFile1) Then Return
         If DownloadFileToTrim And waUpdateIsAvail Then waUpdateIsAvail = False
+        Dim test = getRemoteIniFile(winapp2link)
         Dim winapp2 = If(Not DownloadFileToTrim, New winapp2file(TrimFile1), New winapp2file(getRemoteIniFile(winapp2link)))
         clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
