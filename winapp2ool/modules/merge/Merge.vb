@@ -143,6 +143,7 @@ Module Merge
             MergeFile1.Sections = tmp.toIni.Sections
             MergeFile3.overwriteToFile(tmp.winapp2string)
         Else
+            MergeFile1.sortSections(MergeFile1.namesToStrList)
             MergeFile3.overwriteToFile(MergeFile1.toString)
         End If
     End Sub
