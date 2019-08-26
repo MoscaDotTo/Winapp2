@@ -67,9 +67,11 @@ Module downloadr
     Public Function getFileDataAtLineNum(path As String, Optional lineNum As Integer = 1, Optional remote As Boolean = True) As String
         Dim out As String
         Try
-            Dim reader = If(remote, New StreamReader(New WebClient().OpenRead(path)), New StreamReader(path))
+            Dim wc As New WebClient
+            Dim reader = If(remote, New StreamReader(wc.OpenRead(path)), New StreamReader(path))
             out = getTargetLine(reader, lineNum)
             reader.Close()
+            wc.Dispose()
         Catch ex As Exception
             exc(ex)
             Return ""
@@ -82,9 +84,11 @@ Module downloadr
     Public Function checkOnline() As Boolean
         Dim reader As StreamReader
         Try
-            reader = New StreamReader(New WebClient().OpenRead("http://www.github.com"))
+            Dim wc As New WebClient
+            reader = New StreamReader(wc.OpenRead("http://www.github.com"))
             gLog("Established connection to GitHub")
             reader.Close()
+            wc.Dispose()
             Return True
         Catch ex As Exception
             exc(ex)
@@ -121,7 +125,7 @@ Module downloadr
                                                    .Name = If(someFileExists, someFile.Name, ""),
                                                    .InitName = If(someFileExists, someFile.InitName, ""),
                                                    .SecondName = If(someFileExists, someFile.SecondName, "")}
-            ' Reader gets closed internally on the New iniFile call
+            reader.Close()
             client.Dispose()
             Return out
         Catch ex As Exception
