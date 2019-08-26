@@ -128,29 +128,36 @@ Module Merge
         crk()
     End Sub
 
-    ''' <summary>Conducts the merger of our two iniFiles</summary>
+    ''' <summary> Conducts the merger of our two iniFiles </summary>
+    ''' <param name="isWinapp2"> Indicates that the <c> iniFiles </c> being operated on are of winapp2.ini syntax </param>
     Private Sub merge(isWinapp2 As Boolean)
         resolveConflicts(MergeFile1, MergeFile2)
-        Dim tmp As New winapp2file(MergeFile1)
-        Dim tmp2 As New winapp2file(MergeFile2)
-        ' Add the entries from the second file to their respective sections in the first file
-        For i As Integer = 0 To tmp.Winapp2entries.Count - 1
-            tmp.Winapp2entries(i).AddRange(tmp2.Winapp2entries(i))
-            tmp2.Winapp2entries(i).ForEach(Sub(ent As winapp2entry) print(0, $"Adding {ent.Name}", colorLine:=True, enStrCond:=True))
+        ' After conflicts are resolved, remaining entries need only be added 
+        For Each section In MergeFile2.Sections.Values
+            MergeFile1.Sections.Add(section.Name, section)
+            print(0, $"Adding {section.Name}", colorLine:=True, enStrCond:=True)
         Next
-        Console.ResetColor()
-        tmp.rebuildToIniFiles()
-        For Each section In tmp.EntrySections
-            section.sortSections(replaceAndSort(section.namesToStrList, "-", "  "))
-        Next
-        Dim out As String = tmp.winapp2string
-        MergeFile3.overwriteToFile(out)
+        If isWinapp2 Then
+            Dim tmp As New winapp2file(MergeFile1)
+            tmp.sortInneriniFiles()
+            MergeFile1.Sections = tmp.toIni.Sections
+            MergeFile3.overwriteToFile(tmp.winapp2string)
+        Else
+            MergeFile3.overwriteToFile(MergeFile1.toString)
+        End If
     End Sub
 
-    '''<summary>Allows other modules to call Merge on iniFile objects</summary>
-    Public Sub merge(ByRef mergeFile As iniFile, ByRef sourceFile As iniFile)
+    ''' <summary> Facilitates merging <c> iniFiles </c> from outside the module </summary>
+    ''' <param name="mergeFile"> An <c> iniFile </c> to whom content will be added </param>
+    ''' <param name="sourceFile">An <c> iniFile </c> whose content will be added to <c> <paramref name="mergeFile"/> </c> </param>
+    ''' <param name="isWinapp"> Indicates that the <c> iniFiles </c> being worked with contain winapp2.ini syntax </param>
+    ''' <param name="mm"> Indicates the <c> MergeMode </c> for the merger <br/> 
+    ''' <c> True </c> to replace conflicts, <c> False </c> to remove them </param>
+    Public Sub RemoteMerge(ByRef mergeFile As iniFile, ByRef sourceFile As iniFile, isWinapp As Boolean, mm As Boolean)
         MergeFile1 = mergeFile
         MergeFile2 = sourceFile
+        mergeMode = mm
+        merge(isWinapp)
     End Sub
 
     ''' <summary> Performs conflict resolution for the merge process, handling the case where <c> iniSections </c> 
