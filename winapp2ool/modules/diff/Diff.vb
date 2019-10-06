@@ -15,37 +15,36 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary>
-''' A module whose purpose is to allow a user to perform a diff on two winapp2.ini files
-''' </summary>
+''' <summary> Performs a diff operation on two winapp2.ini files </summary>
 Module Diff
-    ''' <summary>The old or local version of winapp2.ini to be diffed</summary>
+    ''' <summary> The old or local version of winapp2.ini to be diffed </summary>
     Public Property DiffFile1 As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
-    '''<summary>The new or remote version of winapp2.ini to be diffed</summary>
+    ''' <summary> The new or remote version of winapp2.ini to be diffed against </summary>
     Public Property DiffFile2 As iniFile = New iniFile(Environment.CurrentDirectory, "", mExist:=True)
-    '''<summary>The path to which the log will optionally be saved</summary>
+    ''' <summary> The path to which the log will optionally be saved </summary>
     Public Property DiffFile3 As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
-    '''<summary>Indicates whether or not we are downloading a remote winapp2.ini</summary>
+    ''' <summary> Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c> </summary>
     Public Property DownloadDiffFile As Boolean = Not isOffline
-    '''<summary>Indicates whether or not the diff output should be saved to disk</summary>
+    ''' <summary> Indicates that the diff output should be saved to disk </summary>
     Public Property SaveDiffLog As Boolean = False
-    '''<summary>Indicates that the module settings have been changed</summary>
+    ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
     Public Property ModuleSettingsChanged As Boolean = False
-    '''<summary>Indicates that the remote file should be trimmed for the local system before diffing</summary>
+    ''' <summary> Indicates that the remote file should be trimmed for the local system before diffing </summary>
     Public Property TrimRemoteFile As Boolean = Not isOffline
 
-    '''<summary>The number of entries Diff determines to have been added in a new version</summary>
+    ''' <summary> The number of entries Diff determines to have been added between versions </summary>
     Public Property AddedEntryCount As Integer = 0
-    '''<summary>The number of entries Diff determines to have been modified in a new version</summary>
+    ''' <summary> The number of entries Diff determines to have been modified between versions </summary>
     Public Property ModifiedEntryCount As Integer = 0
-    '''<summary>The number of entries Diff determines to have been removed in a new version</summary>
+    ''' <summary> The number of entries Diff determines to have been removed between versions </summary>
     Public Property RemovedEntryCount As Integer = 0
 
-    '''<summary>Indicates whether or not full entries should be printed in the Diff output. Called "verbose mode" in the menu</summary>
+    ''' <summary> Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu </summary>
     Public Property ShowFullEntries As Boolean = False
+    ''' <summary> Holds the log from the most recent run of the Differ to display back to the user </summary>
     Private Property MostRecentDiffLog As String = ""
 
-    ''' <summary>Handles the commandline args for Diff</summary>
+    ''' <summary> Handles the commandline args for Diff </summary>
     '''  Diff args:
     ''' -d          : download the latest winapp2.ini
     ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
@@ -60,7 +59,7 @@ Module Diff
         If Not DiffFile2.Name = "" Then initDiff()
     End Sub
 
-    ''' <summary>Restores the default state of the module's parameters</summary>
+    ''' <summary> Restores the default state of the module's parameters </summary>
     Private Sub initDefaultSettings()
         DownloadDiffFile = Not isOffline
         TrimRemoteFile = Not isOffline
@@ -72,15 +71,15 @@ Module Diff
         ModuleSettingsChanged = False
     End Sub
 
-    ''' <summary>Runs the Differ from outside the module </summary>
-    ''' <param name="firstFile">The old winapp2.ini file</param>
-    Public Sub remoteDiff(firstFile As iniFile, Optional dl As Boolean = True)
-        DownloadDiffFile = dl
+    ''' <summary> Runs the Differ from outside the module </summary>
+    ''' <param name="firstFile"> The local winapp2.ini file to diff against the master GitHub copy </param>
+    Public Sub remoteDiff(firstFile As iniFile)
         DiffFile1 = firstFile
+        DownloadDiffFile = True
         initDiff()
     End Sub
 
-    ''' <summary>Prints the main menu to the user</summary>
+    ''' <summary> Prints the main menu to the user </summary>
     Public Sub printMenu()
         Console.WindowHeight = If(ModuleSettingsChanged, 34, 32)
         printMenuTop({"Observe the differences between two ini files"})
@@ -103,8 +102,8 @@ Module Diff
         print(1, "Log Viewer", "Show the most recent Diff log", cond:=Not MostRecentDiffLog = "", closeMenu:=True, leadingBlank:=True)
     End Sub
 
-    ''' <summary>Handles the user input from the main menu</summary>
-    ''' <param name="input">The String containing the user's input from the menu</param>
+    ''' <summary> Handles the user input from the main menu </summary>
+    ''' <param name="input"> The user's input </param>
     Public Sub handleUserInput(input As String)
         Select Case True
             Case input = "0"
@@ -139,7 +138,7 @@ Module Diff
         End Select
     End Sub
 
-    ''' <summary>Carries out the main set of Diffing operations</summary>
+    ''' <summary> Carries out the main set of Diffing operations </summary>
     Private Sub initDiff()
         If Not enforceFileHasContent(DiffFile1) Then Exit Sub
         If DownloadDiffFile Then DiffFile2 = getRemoteIniFile(winapp2link, DiffFile2) Else If Not enforceFileHasContent(DiffFile2) Then Exit Sub
@@ -175,7 +174,7 @@ Module Diff
         Return If(ver.Contains("version"), ver.TrimStart(CChar(";")).Replace("version:", "version"), " version not given")
     End Function
 
-    ''' <summary>Logs and prints the summary of the Diff</summary>
+    ''' <summary> Logs and prints the summary of the Diff </summary>
     Private Sub logPostDiff()
         gLog($"Added entries: {AddedEntryCount}", indent:=True)
         gLog($"Modified entries: {ModifiedEntryCount}", indent:=True)
@@ -204,7 +203,7 @@ Module Diff
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
-                    getDiff(sSection, "modified", ModifiedEntryCount)
+                    getDiff(sSection, 2, ModifiedEntryCount)
                     getChangesFromList(addedKeys, True)
                     getChangesFromList(removedKeys, False)
                     If updatedKeys.Count > 0 Then
@@ -222,19 +221,19 @@ Module Diff
                 End If
             ElseIf Not DiffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
                 ' If we do not have the entry in the new file, it has been removed between versions 
-                getDiff(section, "removed", RemovedEntryCount)
+                getDiff(section, 1, RemovedEntryCount)
             End If
             comparedList.add(section.Name)
         Next
         ' Any sections from the new file which are not found in the old file have been added
         For Each section In DiffFile2.Sections.Values
-            If Not DiffFile1.Sections.Keys.Contains(section.Name) Then getDiff(section, "added", AddedEntryCount)
+            If Not DiffFile1.Sections.Keys.Contains(section.Name) Then getDiff(section, 0, AddedEntryCount)
         Next
     End Sub
 
-    ''' <summary>Handles the Added and Removed cases for changes </summary>
-    ''' <param name="kl">A list of iniKeys that have been added/removed</param>
-    ''' <param name="wasAdded">True if the change type is Added, False if Removed</param>
+    ''' <summary> Handles the Added and Removed cases for changes </summary>
+    ''' <param name="kl"> A list of iniKeys that have been added/removed</param>
+    ''' <param name="wasAdded"> True if the change type is Added, False if Removed </param>
     Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean)
         If kl.KeyCount = 0 Then Exit Sub
         Dim changeTxt = If(wasAdded, "Added:", "Removed:")
@@ -247,10 +246,10 @@ Module Diff
         gLog("", descend:=True)
     End Sub
 
-    ''' <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key list </summary>
-    ''' <param name="removedKeys">The list of iniKeys that were removed from the newer version of the file</param>
-    ''' <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
-    ''' <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
+    ''' <summary> Determines the category of change associated with key found by Diff </summary>
+    ''' <param name="removedKeys"> <c> iniKeys </c> determined to have been removed from the newer version of the <c> iniSection </c> </param>
+    ''' <param name="addedKeys"> <c> iniKeys </c> determined to have been added to the newer version of the <c> iniSection </c> </param>
+    ''' <param name="updatedKeys"> <c> iniKeys </c> determined to have been modified in the newer version of the <c> iniSection </c> </param>
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
         Dim akAlpha As New keyList
         Dim rkAlpha As New keyList
@@ -311,21 +310,27 @@ Module Diff
         updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
     End Sub
 
-    ''' <summary>Logs the changes that have been made to a modified entry</summary>
-    ''' <param name="section">The modified entry whose changes are being observed</param>
-    ''' <param name="changeType">The type of change to observe (added, removed, or modified)</param>
-    ''' <param name="changeCounter">A reference the the counter for the type of change being tracked</param>
-    Private Sub getDiff(section As iniSection, changeType As String, ByRef changeCounter As Integer)
+    ''' <summary> Logs the changes that have been made to a modified entry </summary>
+    ''' <param name="section"> The modified entry whose changes are being observed </param>
+    ''' <param name="changeType"> The type of change to observe (as it will be described to the user) <br />
+    ''' <list type="bullet">
+    ''' <item> <description> <c> 0 </c>: "added"    </description> </item>
+    ''' <item> <description> <c> 1 </c>: "removed"  </description> </item>
+    ''' <item> <description> <c> 2 </c>: "modified" </description> </item>
+    ''' </list></param>
+    ''' <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
+    Private Sub getDiff(section As iniSection, changeType As Integer, ByRef changeCounter As Integer)
+        Dim changeTypeStrs = {"added", "removed", "modified"}
         changeCounter += 1
-        gLog($"{section.Name} has been {changeType}", indent:=True, leadr:=True)
-        print(0, $"{section.Name} has been {changeType}", isCentered:=True,
-              colorLine:=changeType.Contains("added") Or changeType.Contains("removed"),
-              enStrCond:=If(changeType.Contains("removed"), False, True))
+        gLog($"{section.Name} has been {changeTypeStrs(changeType)}", indent:=True, leadr:=True)
+        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", isCentered:=True, colorLine:=changeType <= 1, enStrCond:=If(changeType = 1, False, True))
         If ShowFullEntries Then
+            print(0, "")
             For Each line In section.ToString.Split(CChar(vbCrLf))
                 gLog(line.Replace(vbLf, ""), indent:=True, indAmt:=4)
+                print(0, line.Replace(vbLf, ""))
             Next
-            cwl(Environment.NewLine & section.ToString)
+            print(0, "")
         End If
     End Sub
 End Module
