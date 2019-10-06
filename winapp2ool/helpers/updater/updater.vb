@@ -50,7 +50,7 @@ Public Module updater
         If checkedForUpdates Or Not cond Then Exit Sub
         gLog("Checking for updates")
         ' Query the latest winapp2ool.exe and winapp2.ini versions 
-        toolVersionCheck()
+        If latestVersion = "" Then toolVersionCheck()
         latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
@@ -143,7 +143,7 @@ Public Module updater
         End Try
     End Sub
 
-    '''<summary>Deletes a file from the disk if it exists</summary>
+    '''<summary> Deletes a file from the disk if it exists </summary>
     Public Sub fDelete(path As String)
         If File.Exists(path) Then File.Delete(path)
     End Sub

@@ -80,66 +80,67 @@ winapp2ool
  <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
 </member>
 <member name="T:winapp2ool.Diff">
- <summary>
- A module whose purpose is to allow a user to perform a diff on two winapp2.ini files
- </summary>
+ <summary> Performs a diff operation on two winapp2.ini files </summary>
 </member>
 <member name="P:winapp2ool.Diff.DiffFile1">
- <summary>The old or local version of winapp2.ini to be diffed</summary>
+ <summary> The old or local version of winapp2.ini to be diffed </summary>
 </member>
 <member name="P:winapp2ool.Diff.DiffFile2">
-<summary>The new or remote version of winapp2.ini to be diffed</summary>
+ <summary> The new or remote version of winapp2.ini to be diffed against </summary>
 </member>
 <member name="P:winapp2ool.Diff.DiffFile3">
-<summary>The path to which the log will optionally be saved</summary>
+ <summary> The path to which the log will optionally be saved </summary>
 </member>
 <member name="P:winapp2ool.Diff.DownloadDiffFile">
-<summary>Indicates whether or not we are downloading a remote winapp2.ini</summary>
+ <summary> Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c> </summary>
 </member>
 <member name="P:winapp2ool.Diff.SaveDiffLog">
-<summary>Indicates whether or not the diff output should be saved to disk</summary>
+ <summary> Indicates that the diff output should be saved to disk </summary>
 </member>
 <member name="P:winapp2ool.Diff.ModuleSettingsChanged">
-<summary>Indicates that the module settings have been changed</summary>
+ <summary> Indicates that the module settings have been modified from their defaults </summary>
 </member>
 <member name="P:winapp2ool.Diff.TrimRemoteFile">
-<summary>Indicates that the remote file should be trimmed for the local system before diffing</summary>
+ <summary> Indicates that the remote file should be trimmed for the local system before diffing </summary>
 </member>
 <member name="P:winapp2ool.Diff.AddedEntryCount">
-<summary>The number of entries Diff determines to have been added in a new version</summary>
+ <summary> The number of entries Diff determines to have been added between versions </summary>
 </member>
 <member name="P:winapp2ool.Diff.ModifiedEntryCount">
-<summary>The number of entries Diff determines to have been modified in a new version</summary>
+ <summary> The number of entries Diff determines to have been modified between versions </summary>
 </member>
 <member name="P:winapp2ool.Diff.RemovedEntryCount">
-<summary>The number of entries Diff determines to have been removed in a new version</summary>
+ <summary> The number of entries Diff determines to have been removed between versions </summary>
 </member>
 <member name="P:winapp2ool.Diff.ShowFullEntries">
-<summary>Indicates whether or not full entries should be printed in the Diff output. Called "verbose mode" in the menu</summary>
+ <summary> Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu </summary>
+</member>
+<member name="P:winapp2ool.Diff.MostRecentDiffLog">
+ <summary> Holds the log from the most recent run of the Differ to display back to the user </summary>
 </member>
 <member name="M:winapp2ool.Diff.handleCmdLine">
- <summary>Handles the commandline args for Diff</summary>
+ <summary> Handles the commandline args for Diff </summary>
   Diff args:
  -d          : download the latest winapp2.ini
  -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
  -savelog    : save the diff.txt log
 </member>
 <member name="M:winapp2ool.Diff.initDefaultSettings">
- <summary>Restores the default state of the module's parameters</summary>
+ <summary> Restores the default state of the module's parameters </summary>
 </member>
-<member name="M:winapp2ool.Diff.remoteDiff(winapp2ool.iniFile,System.Boolean)">
- <summary>Runs the Differ from outside the module </summary>
- <param name="firstFile">The old winapp2.ini file</param>
+<member name="M:winapp2ool.Diff.remoteDiff(winapp2ool.iniFile)">
+ <summary> Runs the Differ from outside the module </summary>
+ <param name="firstFile"> The local winapp2.ini file to diff against the master GitHub copy </param>
 </member>
 <member name="M:winapp2ool.Diff.printMenu">
- <summary>Prints the main menu to the user</summary>
+ <summary> Prints the main menu to the user </summary>
 </member>
 <member name="M:winapp2ool.Diff.handleUserInput(System.String)">
- <summary>Handles the user input from the main menu</summary>
- <param name="input">The String containing the user's input from the menu</param>
+ <summary> Handles the user input from the main menu </summary>
+ <param name="input"> The user's input </param>
 </member>
 <member name="M:winapp2ool.Diff.initDiff">
- <summary>Carries out the main set of Diffing operations</summary>
+ <summary> Carries out the main set of Diffing operations </summary>
 </member>
 <member name="M:winapp2ool.Diff.logInitDiff">
 <summary>Logs the initial portion of the diff output for the user</summary>
@@ -149,21 +150,21 @@ winapp2ool
  <param name="someFile">winapp2.ini format iniFile object</param>
 </member>
 <member name="M:winapp2ool.Diff.logPostDiff">
- <summary>Logs and prints the summary of the Diff</summary>
+ <summary> Logs and prints the summary of the Diff </summary>
 </member>
 <member name="M:winapp2ool.Diff.compareTo">
  <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
 </member>
 <member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.Boolean)">
- <summary>Handles the Added and Removed cases for changes </summary>
- <param name="kl">A list of iniKeys that have been added/removed</param>
- <param name="wasAdded">True if the change type is Added, False if Removed</param>
+ <summary> Handles the Added and Removed cases for changes </summary>
+ <param name="kl"> A list of iniKeys that have been added/removed</param>
+ <param name="wasAdded"> True if the change type is Added, False if Removed </param>
 </member>
 <member name="M:winapp2ool.Diff.chkLsts(winapp2ool.keyList@,winapp2ool.keyList@,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@)">
- <summary>Observes lists of added and removed keys from a section for diffing, adds any changes to the updated key list </summary>
- <param name="removedKeys">The list of iniKeys that were removed from the newer version of the file</param>
- <param name="addedKeys">The list of iniKeys that were added to the newer version of the file</param>
- <param name="updatedKeys">The list containing iniKeys rationalized by this function as having been updated rather than added or removed</param>
+ <summary> Determines the category of change associated with key found by Diff </summary>
+ <param name="removedKeys"> <c> iniKeys </c> determined to have been removed from the newer version of the <c> iniSection </c> </param>
+ <param name="addedKeys"> <c> iniKeys </c> determined to have been added to the newer version of the <c> iniSection </c> </param>
+ <param name="updatedKeys"> <c> iniKeys </c> determined to have been modified in the newer version of the <c> iniSection </c> </param>
 </member>
 <member name="M:winapp2ool.Diff.updateKeys(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@,winapp2ool.iniKey,winapp2ool.iniKey)">
  <summary>Performs change tracking for chkLst </summary>
@@ -171,11 +172,16 @@ winapp2ool
  <param name="key">An added key</param>
  <param name="skey">A removed key</param>
 </member>
-<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.String,System.Int32@)">
- <summary>Logs the changes that have been made to a modified entry</summary>
- <param name="section">The modified entry whose changes are being observed</param>
- <param name="changeType">The type of change to observe (added, removed, or modified)</param>
- <param name="changeCounter">A reference the the counter for the type of change being tracked</param>
+<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.Int32,System.Int32@)">
+ <summary> Logs the changes that have been made to a modified entry </summary>
+ <param name="section"> The modified entry whose changes are being observed </param>
+ <param name="changeType"> The type of change to observe (as it will be described to the user) <br />
+ <list type="bullet">
+ <item> <description> <c> 0 </c>: "added"    </description> </item>
+ <item> <description> <c> 1 </c>: "removed"  </description> </item>
+ <item> <description> <c> 2 </c>: "modified" </description> </item>
+ </list></param>
+ <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
 </member>
 <member name="T:winapp2ool.Downloader">
  <summary>
@@ -1042,7 +1048,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
 </member>
 <member name="M:winapp2ool.updater.fDelete(System.String)">
-<summary>Deletes a file from the disk if it exists</summary>
+<summary> Deletes a file from the disk if it exists </summary>
 </member>
 <member name="T:winapp2ool.changeDict">
  <summary>
