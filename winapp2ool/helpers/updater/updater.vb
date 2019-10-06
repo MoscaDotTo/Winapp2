@@ -50,7 +50,7 @@ Public Module updater
         If checkedForUpdates Or Not cond Then Exit Sub
         gLog("Checking for updates")
         ' Query the latest winapp2ool.exe and winapp2.ini versions 
-        If latestVersion = "" Then toolVersionCheck()
+        toolVersionCheck()
         latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
@@ -71,6 +71,8 @@ Public Module updater
 
     '''<summary>Performs the version chcking for winapp2ool.exe</summary>
     Private Sub toolVersionCheck()
+        ' Let's just assume winapp2ool didn't update after we've checked for updates 
+        If Not latestVersion = "" Then Exit Sub
         If Not isBeta Then
             latestVersion = getFileDataAtLineNum(toolVerLink)
         Else
