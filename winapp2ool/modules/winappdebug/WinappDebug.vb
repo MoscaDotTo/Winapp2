@@ -46,7 +46,7 @@ Public Module WinappDebug
         New lintRule(True, True, "Parameters", "improper parameterization on FileKeys", "fixing improper parameterization on FileKeys"),
         New lintRule(True, True, "Flags", "improper FileKey/ExcludeKey flag formatting", "fixing improper FileKey/ExcludeKey flag formatting"),
         New lintRule(True, True, "Slashes", "improper use of slashes (\)", "fixing improper use of slashes (\)"),
-        New lintRule(True, True, "Defaults", "Default=True or missing Default key", "enforcing Default=False"),
+        New lintRule(True, True, "Defaults", "Default=True", "enforcing no default key"),
         New lintRule(True, True, "Duplicates", "duplicate key values", "removing keys with duplicated values"),
         New lintRule(True, True, "Unneeded Numbering", "use of numbers where there should not be", "removing numbers used where they shouldn't be"),
         New lintRule(True, True, "Multiples", "multiples of key types that should only occur once in an entry", "removing unneeded multiples of key types that should occur only once"),
@@ -227,8 +227,8 @@ Public Module WinappDebug
         fullNameErr(entry.FileKeys.KeyCount = 0 And hasFileExcludes, entry, "ExcludeKeys targeting filesystem locations found without any corresponding FileKeys")
         fullNameErr(entry.RegKeys.KeyCount = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
         ' Make sure we have a Default key.
-        fullNameErr(entry.DefaultKey.KeyCount = 0 And lintDefaults.ShouldScan, entry, "Entry is missing a Default key")
-        entry.DefaultKey.add(New iniKey("Default=False"), lintDefaults.fixFormat And entry.DefaultKey.KeyCount = 0)
+        fullNameErr(entry.DefaultKey.KeyCount > 0 And lintDefaults.ShouldScan, entry, "Entry has a Default key where there should be none")
+        If lintDefaults.fixFormat And entry.DefaultKey.KeyCount > 0 Then entry.DefaultKey.Keys.Clear()
         gLog($"Finished processing {entry.Name}", buffr:=True)
     End Sub
 
@@ -344,8 +344,6 @@ Public Module WinappDebug
                     ' Scan for invalid values in LangSecRef and SpecialDetect
                     If key.typeIs("SpecialDetect") Then chkCasing(key, {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}, key.Value, False)
                     fullKeyErr(key, "LangSecRef holds an invalid value.", lintInvalid.ShouldScan And key.typeIs("LangSecRef") And Not secRefNums.IsMatch(key.Value))
-                    ' Enforce that Default=False
-                    fullKeyErr(key, "All entries should be disabled by default (Default=False).", lintDefaults.ShouldScan And Not key.vIs("False") And key.typeIs("Default"), lintDefaults.fixFormat, key.Value, "False")
                 Case Else
                     cFormat(key, curNum, curStrings, dupes)
             End Select
