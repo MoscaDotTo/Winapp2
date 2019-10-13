@@ -322,11 +322,9 @@ winapp2ool
  <param name="prompt">Indicates that a "rename file" prompt should be shown if the target path already exists <br />Optional, Default: True </param>
  <param name="quietly">Indicates that all downloading output should be suppressed <br />Optional, Default: False</param>
 </member>
-<member name="M:winapp2ool.downloadr.getFileDataAtLineNum(System.String,System.Int32,System.Boolean)">
- <summary>Reads a file until a specified line number0</summary>
- <param name="path">If <paramref name="remote"/> is <c>True</c> The URL of file hosted on GitHub. Otherwise, the path of a local file</param>
+<member name="M:winapp2ool.downloadr.getFileDataAtLineNum(System.String,System.Int32)">
+ <summary>Reads a file until a specified line number</summary>
  <param name="lineNum">The line number to return from the file</param>
- <param name="remote">Indicates that the resource we're looking for is online <br/> Default: False</param>
 </member>
 <member name="M:winapp2ool.downloadr.checkOnline">
  <summary>Attempts to connect to the internet</summary>
@@ -338,7 +336,7 @@ winapp2ool
  <param name="lineNum">The target line number</param>
  <returns>The String on the line given by <paramref name="lineNum"/></returns>
 </member>
-<member name="M:winapp2ool.downloadr.getRemoteIniFile(System.String,winapp2ool.iniFile@)">
+<member name="M:winapp2ool.downloadr.getRemoteIniFile(System.String,winapp2ool.iniFile@,System.Boolean)">
  <summary>Attempts to create an <c>iniFile</c> using the data provided by <paramref name="address"/></summary>
  <param name="address">A URL pointing to an online .ini file</param>
  <param name="someFile">An iniFile object whose parameters will be copied over into the newly created object's fields <br />Optional, Default: Nothing</param>
@@ -1031,8 +1029,10 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="name">The name of the component whose update check failed</param>
  <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
 </member>
-<member name="M:winapp2ool.updater.getLocalWinapp2Version">
- <summary>Attempts to return the version number from the first line of winapp2.ini, returns "000000" if it can't</summary>
+<member name="M:winapp2ool.updater.getVersionFromLocalFile(System.String@,System.String)">
+ <summary> Attempts to return the version number from a file found on disk, returns <c> "000000" </c> if it's unable to do so </summary>
+ <param name="versionNum"> The version number being looked for </param>
+ <param name="path"> The path of the file whose version number will be queried </param>
 </member>
 <member name="M:winapp2ool.updater.chkOfflineMode">
  <summary>Updates the offline status of winapp2ool</summary>

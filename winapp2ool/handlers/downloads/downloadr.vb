@@ -60,18 +60,14 @@ Module downloadr
         If Not success Then Console.ReadLine()
     End Sub
 
-    ''' <summary>Reads a file until a specified line number0</summary>
-    ''' <param name="path">If <paramref name="remote"/> is <c>True</c> The URL of file hosted on GitHub. Otherwise, the path of a local file</param>
+    ''' <summary>Reads a file until a specified line number</summary>
     ''' <param name="lineNum">The line number to return from the file</param>
-    ''' <param name="remote">Indicates that the resource we're looking for is online <br/> Default: False</param>
-    Public Function getFileDataAtLineNum(path As String, Optional lineNum As Integer = 1, Optional remote As Boolean = True) As String
+    Public Function getFileDataAtLineNum(path As String, Optional lineNum As Integer = 1) As String
         Dim out As String
         Try
-            Dim wc As New WebClient
-            Dim reader = If(remote, New StreamReader(wc.OpenRead(path)), New StreamReader(path))
+            Dim reader = New StreamReader(path)
             out = getTargetLine(reader, lineNum)
             reader.Close()
-            wc.Dispose()
         Catch ex As Exception
             exc(ex)
             Return ""
@@ -114,19 +110,25 @@ Module downloadr
     ''' <param name="address">A URL pointing to an online .ini file</param>
     ''' <param name="someFile">An iniFile object whose parameters will be copied over into the newly created object's fields <br />Optional, Default: Nothing</param>
     ''' <returns>An <c>iniFile</c>created using the remote data if that data is properly formatted, <c>Nothing</c> otherwise</returns>
-    Public Function getRemoteIniFile(address As String, Optional ByRef someFile As iniFile = Nothing) As iniFile
+    Public Function getRemoteIniFile(address As String, Optional ByRef someFile As iniFile = Nothing, Optional tmpFile As Boolean = True) As iniFile
         Try
+            Dim tmpDir = Environment.GetEnvironmentVariable("tmp")
+            Dim fName = address.Split(CChar("/"))
+            Dim path = $"{tmpDir}\{fName.Last}"
+            dlFile(address, path)
+
             Dim client As New WebClient
             Dim reader = New StreamReader(client.OpenRead(address))
             Dim someFileExists = someFile IsNot Nothing
-            Dim out = New iniFile(reader) With {.Dir = If(someFileExists, someFile.Dir, Environment.CurrentDirectory),
-                                                   .InitDir = If(someFileExists, someFile.InitDir, Environment.CurrentDirectory),
+            Dim out = New iniFile(tmpDir, fName.Last) With {.Dir = If(someFileExists, someFile.Dir, tmpDir),
+                                                   .InitDir = If(someFileExists, someFile.InitDir, tmpDir),
                                                    .mustExist = If(someFileExists, someFile.mustExist, False),
-                                                   .Name = If(someFileExists, someFile.Name, ""),
+                                                   .Name = If(someFileExists, someFile.Name, fName.Last),
                                                    .InitName = If(someFileExists, someFile.InitName, ""),
                                                    .SecondName = If(someFileExists, someFile.SecondName, "")}
-            reader.Close()
             client.Dispose()
+            reader.Close()
+            out.init()
             Return out
         Catch ex As Exception
             exc(ex)

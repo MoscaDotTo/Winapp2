@@ -44,6 +44,15 @@ Public Module updater
         version.Replace(tmp.Last, tmp1)
     End Sub
 
+    Public Sub getRemoteVersion(remotelink As String, ByRef verVar As String)
+        Dim tmpDir = Environment.GetEnvironmentVariable("temp")
+        Dim tmpName = remotelink.Split(CChar("/")).Last
+        Dim tmpPath = tmpDir & "\" & tmpName
+        fDelete(tmpPath)
+        dlFile(remotelink, tmpPath)
+        getVersionFromLocalFile(verVar, tmpPath)
+    End Sub
+
     ''' <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
     ''' <param name="cond">Indicates that the update check should be performed. <br />Optional, Default: False</param>
     Public Sub checkUpdates(Optional cond As Boolean = False)
@@ -51,13 +60,14 @@ Public Module updater
         gLog("Checking for updates")
         ' Query the latest winapp2ool.exe and winapp2.ini versions 
         toolVersionCheck()
-        latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
+        getRemoteVersion(winapp2link, latestWa2Ver)
+        ' latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Exit Sub
         ' Observe whether or not updates are available, using val to avoid conversion mistakes
         updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
-        getLocalWinapp2Version()
+        getVersionFromLocalFile(localWa2Ver)
         waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
         checkedForUpdates = True
         gLog("Update check complete:")
@@ -65,7 +75,7 @@ Public Module updater
         gLog("Local: " & currentVersion, indent:=True)
         gLog("Remote: " & latestVersion, indent:=True)
         gLog("Winapp2.ini:")
-        gLog("Local:" & localWa2Ver, indent:=True)
+        gLog("Local: " & localWa2Ver, indent:=True)
         gLog("Remote: " & latestWa2Ver, indent:=True)
     End Sub
 
@@ -74,7 +84,7 @@ Public Module updater
         ' Let's just assume winapp2ool didn't update after we've checked for updates 
         If Not latestVersion = "" Then Exit Sub
         If Not isBeta Then
-            latestVersion = getFileDataAtLineNum(toolVerLink)
+            getRemoteVersion(toolVerLink, latestVersion)
         Else
             Dim tmpDir = Environment.GetEnvironmentVariable("temp")
             Dim tmpPath = $"{tmpDir}\winapp2ool.exe"
@@ -97,11 +107,15 @@ Public Module updater
         If chkOnline Then chkOfflineMode()
     End Sub
 
-    ''' <summary>Attempts to return the version number from the first line of winapp2.ini, returns "000000" if it can't</summary>
-    Private Sub getLocalWinapp2Version()
-        If Not File.Exists(Environment.CurrentDirectory & "\winapp2.ini") Then localWa2Ver = "000000 (File not found)" : Exit Sub
-        Dim localStr = getFileDataAtLineNum(Environment.CurrentDirectory & "\winapp2.ini", remote:=False).ToLower
-        If localStr.Contains("version") Then localWa2Ver = localStr.Split(CChar(" "))(2)
+    ''' <summary> Attempts to return the version number from a file found on disk, returns <c> "000000" </c> if it's unable to do so </summary>
+    ''' <param name="versionNum"> The version number being looked for </param>
+    ''' <param name="path"> The path of the file whose version number will be queried </param>
+    Private Sub getVersionFromLocalFile(ByRef versionNum As String, Optional path As String = "")
+        If path = "" Then path = Environment.CurrentDirectory & "\winapp2.ini"
+        If Not File.Exists(path) Then versionNum = "000000 (file not found)"
+        Dim versionString = getFileDataAtLineNum(path).ToLower
+        If versionString.Contains("version") Then versionString = versionString.Split(CChar(" "))(2)
+        versionNum = versionString
     End Sub
 
     ''' <summary>Updates the offline status of winapp2ool</summary>
