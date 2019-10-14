@@ -112,9 +112,9 @@ Public Module updater
     ''' <param name="path"> The path of the file whose version number will be queried </param>
     Private Sub getVersionFromLocalFile(ByRef versionNum As String, Optional path As String = "")
         If path = "" Then path = Environment.CurrentDirectory & "\winapp2.ini"
-        If Not File.Exists(path) Then versionNum = "000000 (file not found)"
+        If Not File.Exists(path) Then versionNum = "000000 (file not found)" : Return
         Dim versionString = getFileDataAtLineNum(path).ToLower
-        If versionString.Contains("version") Then versionString = versionString.Split(CChar(" "))(2)
+        versionString = If(versionString.Contains("version"), versionString.Split(CChar(" "))(2), "000000 (version not found)")
         versionNum = versionString
     End Sub
 
