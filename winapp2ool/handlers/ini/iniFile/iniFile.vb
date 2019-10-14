@@ -84,6 +84,13 @@ Public Class iniFile
         mustExist = mExist
     End Sub
 
+    ''' <summary> Creates an <c> uninitalized iniFile </c> from a path </summary>
+    ''' <param name="path"> A filesystem path containing an ini format file </param>
+    Public Sub New(path As String)
+        ' This is ugly but New only works if it's the *first* line in a constructor, so we must inline 
+        Me.New(path.Replace($"\{path.Split(CChar("\")).Last}", ""), path.Split(CChar("\")).Last, "", False)
+    End Sub
+
     ''' <summary> Writes a given <c> String </c> (generally an ini file) to disk if the given 
     ''' <c> <paramref name="cond"/> </c> is met, overwriting any existing file contents </summary>
     ''' <param name="tostr"> The text to be written to disk </param>
