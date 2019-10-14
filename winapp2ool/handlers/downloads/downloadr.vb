@@ -106,28 +106,24 @@ Module downloadr
         Return out
     End Function
 
-    ''' <summary>Attempts to create an <c>iniFile</c> using the data provided by <paramref name="address"/></summary>
-    ''' <param name="address">A URL pointing to an online .ini file</param>
-    ''' <param name="someFile">An iniFile object whose parameters will be copied over into the newly created object's fields <br />Optional, Default: Nothing</param>
-    ''' <returns>An <c>iniFile</c>created using the remote data if that data is properly formatted, <c>Nothing</c> otherwise</returns>
-    Public Function getRemoteIniFile(address As String, Optional ByRef someFile As iniFile = Nothing, Optional tmpFile As Boolean = True) As iniFile
-        Try
-            Dim tmpDir = Environment.GetEnvironmentVariable("tmp")
-            Dim fName = address.Split(CChar("/"))
-            Dim path = $"{tmpDir}\{fName.Last}"
-            dlFile(address, path)
+    ''' <summary> Downloads a file to the Windows temporary directory and returns its path. If the file already exists, it will be deleted and overwritten with the downloaded file </summary>
+    ''' <param name="remotelink"> A GitHub link to a file to be downloaded </param>
+    Public Function setDownloadedFileStage(remotelink As String) As String
+        Dim tmpDir = Environment.GetEnvironmentVariable("temp")
+        Dim tmpName = remotelink.Split(CChar("/")).Last
+        Dim tmpPath = $"{tmpDir}\{tmpName}"
+        fDelete(tmpPath)
+        dlFile(remotelink, tmpPath)
+        Return tmpPath
+    End Function
 
-            Dim client As New WebClient
-            Dim reader = New StreamReader(client.OpenRead(address))
-            Dim someFileExists = someFile IsNot Nothing
-            Dim out = New iniFile(tmpDir, fName.Last) With {.Dir = If(someFileExists, someFile.Dir, tmpDir),
-                                                   .InitDir = If(someFileExists, someFile.InitDir, tmpDir),
-                                                   .mustExist = If(someFileExists, someFile.mustExist, False),
-                                                   .Name = If(someFileExists, someFile.Name, fName.Last),
-                                                   .InitName = If(someFileExists, someFile.InitName, ""),
-                                                   .SecondName = If(someFileExists, someFile.SecondName, "")}
-            client.Dispose()
-            reader.Close()
+    ''' <summary>Attempts to create an <c>iniFile</c> using the data provided by <paramref name="address"/></summary>
+    ''' <param name="address"> A URL pointing to an online .ini file </param>
+    ''' <returns>An <c> iniFile </c> created using the remote data if that data is properly formatted, <c> Nothing </c> otherwise </returns>
+    Public Function getRemoteIniFile(address As String) As iniFile
+        Try
+            Dim path = setDownloadedFileStage(address)
+            Dim out = New iniFile(path)
             out.init()
             Return out
         Catch ex As Exception

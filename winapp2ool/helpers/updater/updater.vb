@@ -18,6 +18,7 @@ Option Strict On
 Imports System.IO
 ''' <summary>Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe</summary>
 Public Module updater
+
     ''' <summary>The latest available verson of winapp2ool from GitHub</summary>
     Public Property latestVersion As String = ""
     ''' <summary>The latest available version of winapp2.ini from GitHub</summary>
@@ -44,14 +45,10 @@ Public Module updater
         version.Replace(tmp.Last, tmp1)
     End Sub
 
-    Public Sub getRemoteVersion(remotelink As String, ByRef verVar As String)
-        Dim tmpDir = Environment.GetEnvironmentVariable("temp")
-        Dim tmpName = remotelink.Split(CChar("/")).Last
-        Dim tmpPath = tmpDir & "\" & tmpName
-        fDelete(tmpPath)
-        dlFile(remotelink, tmpPath)
-        getVersionFromLocalFile(verVar, tmpPath)
-    End Sub
+    Public Function getRemoteVersion(remotelink As String) As String
+        Dim tmpPath = setDownloadedFileStage(remotelink)
+        Return getVersionFromLocalFile(tmpPath)
+    End Function
 
     ''' <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
     ''' <param name="cond">Indicates that the update check should be performed. <br />Optional, Default: False</param>
@@ -60,14 +57,13 @@ Public Module updater
         gLog("Checking for updates")
         ' Query the latest winapp2ool.exe and winapp2.ini versions 
         toolVersionCheck()
-        getRemoteVersion(winapp2link, latestWa2Ver)
-        ' latestWa2Ver = getFileDataAtLineNum(winapp2link).Split(CChar(" "))(2)
+        latestWa2Ver = getRemoteVersion(winapp2link)
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Exit Sub
         ' Observe whether or not updates are available, using val to avoid conversion mistakes
         updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
-        getVersionFromLocalFile(localWa2Ver)
+        localWa2Ver = getVersionFromLocalFile()
         waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
         checkedForUpdates = True
         gLog("Update check complete:")
@@ -84,13 +80,10 @@ Public Module updater
         ' Let's just assume winapp2ool didn't update after we've checked for updates 
         If Not latestVersion = "" Then Exit Sub
         If Not isBeta Then
-            getRemoteVersion(toolVerLink, latestVersion)
+            ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
+            latestVersion = getRemoteVersion(toolVerLink)
         Else
-            Dim tmpDir = Environment.GetEnvironmentVariable("temp")
-            Dim tmpPath = $"{tmpDir}\winapp2ool.exe"
-            fDelete(tmpPath)
-            dlFile(betaToolLink, tmpPath)
-            'download(New iniFile($"{tmpDir}\", "winapp2ool.exe"), toolExeLink, False, True)
+            Dim tmpPath = setDownloadedFileStage(toolExeLink)
             latestVersion = Reflection.Assembly.Load(File.ReadAllBytes(tmpPath)).FullName.Split(CChar(","))(1).Substring(9)
             ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
             ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
@@ -109,15 +102,13 @@ Public Module updater
     End Sub
 
     ''' <summary> Attempts to return the version number from a file found on disk, returns <c> "000000" </c> if it's unable to do so </summary>
-    ''' <param name="versionNum"> The version number being looked for </param>
     ''' <param name="path"> The path of the file whose version number will be queried </param>
-    Private Sub getVersionFromLocalFile(ByRef versionNum As String, Optional path As String = "")
+    Private Function getVersionFromLocalFile(Optional path As String = "") As String
         If path = "" Then path = Environment.CurrentDirectory & "\winapp2.ini"
-        If Not File.Exists(path) Then versionNum = "000000 (file not found)" : Return
+        If Not File.Exists(path) Then Return "000000 (file not found)"
         Dim versionString = getFileDataAtLineNum(path).ToLower
-        versionString = If(versionString.Contains("version"), versionString.Split(CChar(" "))(2), "000000 (version not found)")
-        versionNum = versionString
-    End Sub
+        Return If(versionString.Contains("version"), versionString.Split(CChar(" "))(2), "000000 (version not found)")
+    End Function
 
     ''' <summary>Updates the offline status of winapp2ool</summary>
     Public Sub chkOfflineMode()
@@ -162,6 +153,10 @@ Public Module updater
 
     '''<summary> Deletes a file from the disk if it exists </summary>
     Public Sub fDelete(path As String)
-        If File.Exists(path) Then File.Delete(path)
+        Try
+            If File.Exists(path) Then File.Delete(path)
+        Catch ex As Exception
+            exc(ex)
+        End Try
     End Sub
 End Module

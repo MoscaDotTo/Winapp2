@@ -336,11 +336,14 @@ winapp2ool
  <param name="lineNum">The target line number</param>
  <returns>The String on the line given by <paramref name="lineNum"/></returns>
 </member>
-<member name="M:winapp2ool.downloadr.getRemoteIniFile(System.String,winapp2ool.iniFile@,System.Boolean)">
+<member name="M:winapp2ool.downloadr.setDownloadedFileStage(System.String)">
+ <summary> Downloads a file to the Windows temporary directory and returns its path. If the file already exists, it will be deleted and overwritten with the downloaded file </summary>
+ <param name="remotelink"> A GitHub link to a file to be downloaded </param>
+</member>
+<member name="M:winapp2ool.downloadr.getRemoteIniFile(System.String)">
  <summary>Attempts to create an <c>iniFile</c> using the data provided by <paramref name="address"/></summary>
- <param name="address">A URL pointing to an online .ini file</param>
- <param name="someFile">An iniFile object whose parameters will be copied over into the newly created object's fields <br />Optional, Default: Nothing</param>
- <returns>An <c>iniFile</c>created using the remote data if that data is properly formatted, <c>Nothing</c> otherwise</returns>
+ <param name="address"> A URL pointing to an online .ini file </param>
+ <returns>An <c> iniFile </c> created using the remote data if that data is properly formatted, <c> Nothing </c> otherwise </returns>
 </member>
 <member name="T:winapp2ool.exceptionHandler">
  <summary>
@@ -406,6 +409,10 @@ winapp2ool
  <param name="filename"> The name of the file on disk contained in <c> <paramref name="directory"/> </c> </param>
  <param name="rename"> A provided suggestion for a rename should the user open the File Chooser for this file </param>
  <param name="mExist"> Indicates that this file must exist for its owner to perform its work <br/> Optional, Default: <c> False </c> </param>
+</member>
+<member name="M:winapp2ool.iniFile.#ctor(System.String)">
+ <summary> Creates an <c> uninitalized iniFile </c> from a path </summary>
+ <param name="path"> A filesystem path containing an ini format file </param>
 </member>
 <member name="M:winapp2ool.iniFile.overwriteToFile(System.String,System.Boolean)">
  <summary> Writes a given <c> String </c> (generally an ini file) to disk if the given 
@@ -1029,9 +1036,8 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="name">The name of the component whose update check failed</param>
  <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
 </member>
-<member name="M:winapp2ool.updater.getVersionFromLocalFile(System.String@,System.String)">
+<member name="M:winapp2ool.updater.getVersionFromLocalFile(System.String)">
  <summary> Attempts to return the version number from a file found on disk, returns <c> "000000" </c> if it's unable to do so </summary>
- <param name="versionNum"> The version number being looked for </param>
  <param name="path"> The path of the file whose version number will be queried </param>
 </member>
 <member name="M:winapp2ool.updater.chkOfflineMode">
