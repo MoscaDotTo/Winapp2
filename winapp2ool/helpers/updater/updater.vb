@@ -83,7 +83,7 @@ Public Module updater
             ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
             latestVersion = getRemoteVersion(toolVerLink)
         Else
-            Dim tmpPath = setDownloadedFileStage(toolExeLink)
+            Dim tmpPath = setDownloadedFileStage(betaToolLink)
             latestVersion = Reflection.Assembly.Load(File.ReadAllBytes(tmpPath)).FullName.Split(CChar(","))(1).Substring(9)
             ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
             ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 

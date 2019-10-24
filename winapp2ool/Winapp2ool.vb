@@ -27,7 +27,7 @@ Module Winapp2ool
 
     ''' <summary> Prints the main winapp2ool menu to the user </summary>
     Private Sub printMenu()
-        checkUpdates(Not isOffline)
+        checkUpdates(Not isOffline And Not checkedForUpdates)
         printMenuTop({}, False)
         print(0, "Winapp2ool is currently in offline mode", cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
         print(0, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
