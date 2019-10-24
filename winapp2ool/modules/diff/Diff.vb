@@ -19,7 +19,7 @@ Option Strict On
 Module Diff
     ''' <summary> The old or local version of winapp2.ini to be diffed </summary>
     Public Property DiffFile1 As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
-    ''' <summary> The new or remote version of winapp2.ini to be diffed against </summary>
+    ''' <summary> The new or remote version of winapp2.ini against which DiffFile1 will be compared </summary>
     Public Property DiffFile2 As iniFile = New iniFile(Environment.CurrentDirectory, "", mExist:=True)
     ''' <summary> The path to which the log will optionally be saved </summary>
     Public Property DiffFile3 As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
@@ -140,13 +140,14 @@ Module Diff
 
     ''' <summary> Carries out the main set of Diffing operations </summary>
     Private Sub initDiff()
-        If Not enforceFileHasContent(DiffFile1) Then Exit Sub
+        If Not enforceFileHasContent(DiffFile1) Then Return
         If DownloadDiffFile Then
             Dim downloadedIniFile = getRemoteIniFile(winapp2link)
             DiffFile2.Sections = downloadedIniFile.Sections
+            ' We don't actually do anything with the comments but in case we ever do, we may as well retain them 
             DiffFile2.Comments = downloadedIniFile.Comments
         Else
-            If Not enforceFileHasContent(DiffFile2) Then Exit Sub
+            If Not enforceFileHasContent(DiffFile2) Then Return
         End If
         If TrimRemoteFile And DownloadDiffFile Then
             Dim tmp As New winapp2file(DiffFile2)
@@ -163,7 +164,7 @@ Module Diff
         setHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
     End Sub
 
-    '''<summary>Logs the initial portion of the diff output for the user</summary>
+    '''<summary> Logs the initial portion of the diff output for the user </summary>
     Private Sub logInitDiff()
         print(3, "Diffing, please wait. This may take a moment.")
         clrConsole()
@@ -173,8 +174,8 @@ Module Diff
         print(3, $"Changes between{oldVersionNum} and{newVersionNum}")
     End Sub
 
-    ''' <summary>Gets the version from winapp2.ini</summary>
-    ''' <param name="someFile">winapp2.ini format iniFile object</param>
+    ''' <summary> Gets the version from winapp2.ini </summary>
+    ''' <param name="someFile"> A winapp2.ini format <c> iniFile </c> </param>
     Private Function getVer(someFile As iniFile) As String
         Dim ver = If(someFile.Comments.Count > 0, someFile.Comments(0).Comment.ToString.ToLower, "000000")
         Return If(ver.Contains("version"), ver.TrimStart(CChar(";")).Replace("version:", "version"), " version not given")
@@ -192,7 +193,7 @@ Module Diff
         print(0, $"Removed entries: {RemovedEntryCount}", closeMenu:=True, trailr:=True)
     End Sub
 
-    ''' <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
+    ''' <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
     Private Sub compareTo()
         AddedEntryCount = 0
         RemovedEntryCount = 0
@@ -238,10 +239,11 @@ Module Diff
     End Sub
 
     ''' <summary> Handles the Added and Removed cases for changes </summary>
-    ''' <param name="kl"> A list of iniKeys that have been added/removed</param>
-    ''' <param name="wasAdded"> True if the change type is Added, False if Removed </param>
+    ''' <param name="kl"> A list of iniKeys that have been added or removed from an entry </param>
+    ''' <param name="wasAdded"> <c> True </c> if the keys in <c> <paramref name="kl"/> </c> were added, 
+    ''' <c> False </c> if they were removed </param>
     Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean)
-        If kl.KeyCount = 0 Then Exit Sub
+        If kl.KeyCount = 0 Then Return
         Dim changeTxt = If(wasAdded, "Added:", "Removed:")
         print(0, changeTxt, isCentered:=True)
         gLog(changeTxt, indent:=True, ascend:=True)
@@ -290,7 +292,6 @@ Module Diff
                             Else
                                 ' If the count doesn't match, something has definitely changed
                                 updateKeys(updatedKeys, key, skey)
-                                Exit For
                             End If
                         Case Else
                             ' Other keys don't require such complex legwork, thankfully. If their values don't match, they've been updated
@@ -308,10 +309,10 @@ Module Diff
         removedKeys.remove(rkAlpha.Keys)
     End Sub
 
-    ''' <summary>Performs change tracking for chkLst </summary>
-    ''' <param name="updLst">The list of updated keys</param>
-    ''' <param name="key">An added key</param>
-    ''' <param name="skey">A removed key</param>
+    ''' <summary> Performs change tracking for chkLst </summary>
+    ''' <param name="updLst"> The list of updated keys </param>
+    ''' <param name="key"> An added key </param>
+    ''' <param name="skey"> A removed key </param>
     Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), key As iniKey, skey As iniKey)
         updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
     End Sub

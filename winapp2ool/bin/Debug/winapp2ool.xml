@@ -86,7 +86,7 @@ winapp2ool
  <summary> The old or local version of winapp2.ini to be diffed </summary>
 </member>
 <member name="P:winapp2ool.Diff.DiffFile2">
- <summary> The new or remote version of winapp2.ini to be diffed against </summary>
+ <summary> The new or remote version of winapp2.ini against which DiffFile1 will be compared </summary>
 </member>
 <member name="P:winapp2ool.Diff.DiffFile3">
  <summary> The path to which the log will optionally be saved </summary>
@@ -143,22 +143,23 @@ winapp2ool
  <summary> Carries out the main set of Diffing operations </summary>
 </member>
 <member name="M:winapp2ool.Diff.logInitDiff">
-<summary>Logs the initial portion of the diff output for the user</summary>
+<summary> Logs the initial portion of the diff output for the user </summary>
 </member>
 <member name="M:winapp2ool.Diff.getVer(winapp2ool.iniFile)">
- <summary>Gets the version from winapp2.ini</summary>
- <param name="someFile">winapp2.ini format iniFile object</param>
+ <summary> Gets the version from winapp2.ini </summary>
+ <param name="someFile"> A winapp2.ini format <c> iniFile </c> </param>
 </member>
 <member name="M:winapp2ool.Diff.logPostDiff">
  <summary> Logs and prints the summary of the Diff </summary>
 </member>
 <member name="M:winapp2ool.Diff.compareTo">
- <summary>Compares two winapp2.ini format iniFiles and builds the output for the user containing the differences</summary>
+ <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
 </member>
 <member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.Boolean)">
  <summary> Handles the Added and Removed cases for changes </summary>
- <param name="kl"> A list of iniKeys that have been added/removed</param>
- <param name="wasAdded"> True if the change type is Added, False if Removed </param>
+ <param name="kl"> A list of iniKeys that have been added or removed from an entry </param>
+ <param name="wasAdded"> <c> True </c> if the keys in <c> <paramref name="kl"/> </c> were added, 
+ <c> False </c> if they were removed </param>
 </member>
 <member name="M:winapp2ool.Diff.chkLsts(winapp2ool.keyList@,winapp2ool.keyList@,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@)">
  <summary> Determines the category of change associated with key found by Diff </summary>
@@ -167,10 +168,10 @@ winapp2ool
  <param name="updatedKeys"> <c> iniKeys </c> determined to have been modified in the newer version of the <c> iniSection </c> </param>
 </member>
 <member name="M:winapp2ool.Diff.updateKeys(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@,winapp2ool.iniKey,winapp2ool.iniKey)">
- <summary>Performs change tracking for chkLst </summary>
- <param name="updLst">The list of updated keys</param>
- <param name="key">An added key</param>
- <param name="skey">A removed key</param>
+ <summary> Performs change tracking for chkLst </summary>
+ <param name="updLst"> The list of updated keys </param>
+ <param name="key"> An added key </param>
+ <param name="skey"> A removed key </param>
 </member>
 <member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.Int32,System.Int32@)">
  <summary> Logs the changes that have been made to a modified entry </summary>
