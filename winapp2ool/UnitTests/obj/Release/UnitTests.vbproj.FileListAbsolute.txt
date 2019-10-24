@@ -15,7 +15,6 @@ C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\bin\Release\Microsoft.
 C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.vbprojAssemblyReference.cache
 C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.Resources.resources
 C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.vbproj.GenerateResource.cache
-C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.vbproj.CoreCompileInputs.cache
 C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.vbproj.CopyComplete
 C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.dll
 C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.xml
