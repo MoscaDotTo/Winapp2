@@ -60,7 +60,7 @@ Public Module updater
         latestWa2Ver = getRemoteVersion(winapp2link)
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
-        If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Exit Sub
+        If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Return
         ' Observe whether or not updates are available, using val to avoid conversion mistakes
         updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
         localWa2Ver = getVersionFromLocalFile()
@@ -73,6 +73,9 @@ Public Module updater
         gLog("Winapp2.ini:")
         gLog("Local: " & localWa2Ver, indent:=True)
         gLog("Remote: " & latestWa2Ver, indent:=True)
+        Dim updHeader = $"Update{If(waUpdateIsAvail And updateIsAvail, "s", "")} available for {If(updateIsAvail, "winapp2ool ", "")}{If(waUpdateIsAvail And updateIsAvail, "and ", "")}{If(waUpdateIsAvail,
+            "winapp2.ini", "")}"
+        setHeaderText(updHeader, True, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
     End Sub
 
     '''<summary>Performs the version chcking for winapp2ool.exe</summary>
