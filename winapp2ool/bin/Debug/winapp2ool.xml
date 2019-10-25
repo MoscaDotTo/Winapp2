@@ -998,61 +998,61 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary>Denies the ability to access online-only functions if offline</summary>
 </member>
 <member name="T:winapp2ool.updater">
- <summary>Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe</summary>
+ <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
 </member>
 <member name="P:winapp2ool.updater.latestVersion">
- <summary>The latest available verson of winapp2ool from GitHub</summary>
+ <summary> The latest available verson of winapp2ool from GitHub </summary>
 </member>
 <member name="P:winapp2ool.updater.latestWa2Ver">
- <summary>The latest available version of winapp2.ini from GitHub</summary>
+ <summary> The latest available version of winapp2.ini from GitHub </summary>
 </member>
 <member name="P:winapp2ool.updater.localWa2Ver">
- <summary>The local version of winapp2.ini (if available)</summary>
+ <summary> The local version of winapp2.ini (if available) </summary>
 </member>
 <member name="P:winapp2ool.updater.updateIsAvail">
- <summary>Indicates that a winapp2ool update is available from GitHub</summary>
+ <summary> Indicates that a winapp2ool update is available from GitHub </summary>
 </member>
 <member name="P:winapp2ool.updater.waUpdateIsAvail">
- <summary>Indicates that a winapp2.ini update is available from GitHub</summary>
+ <summary> Indicates that a winapp2.ini update is available from GitHub </summary>
 </member>
 <member name="P:winapp2ool.updater.currentVersion">
- <summary>The local version of winapp2ool</summary>
+ <summary> The local version of winapp2ool </summary>
 </member>
 <member name="P:winapp2ool.updater.checkedForUpdates">
- <summary>Indicates that an update check has been performed</summary>
+ <summary> Indicates that an update check has been performed </summary>
 </member>
 <member name="M:winapp2ool.updater.padVersionNum(System.String@)">
- <summary>Pads the seconds portion of the version number to always be length of 5</summary>
- <param name="version">A version number to pad</param>
+ <summary> Pads the seconds portion of the version number, ensuring that it always have a length of 5 </summary>
+ <param name="version"> A version number to pad </param>
 </member>
 <member name="M:winapp2ool.updater.checkUpdates(System.Boolean)">
- <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
- <param name="cond">Indicates that the update check should be performed. <br />Optional, Default: False</param>
+ <summary> Checks the versions of winapp2ool, .NET, and winapp2.ini and notes which, if any, are out of date </summary>
+ <param name="cond"> Indicates that the update check should be performed <br /> Optional, Default: <c> False </c> </param>
 </member>
 <member name="M:winapp2ool.updater.toolVersionCheck">
-<summary>Performs the version chcking for winapp2ool.exe</summary>
+<summary> Performs the version chcking for winapp2ool.exe </summary>
 </member>
 <member name="M:winapp2ool.updater.updateCheckFailed(System.String,System.Boolean)">
- <summary>Handles the case where the update check has failed</summary>
- <param name="name">The name of the component whose update check failed</param>
- <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
+ <summary> Handles the case where the update check has failed </summary>
+ <param name="name"> The name of the component whose update check failed </param>
+ <param name="chkOnline"> A flag specifying that the internet connection should be retested </param>
 </member>
 <member name="M:winapp2ool.updater.getVersionFromLocalFile(System.String)">
  <summary> Attempts to return the version number from a file found on disk, returns <c> "000000" </c> if it's unable to do so </summary>
  <param name="path"> The path of the file whose version number will be queried </param>
 </member>
 <member name="M:winapp2ool.updater.chkOfflineMode">
- <summary>Updates the offline status of winapp2ool</summary>
+ <summary> Updates the offline status of winapp2ool </summary>
 </member>
 <member name="M:winapp2ool.updater.printUpdNotif(System.Boolean,System.String,System.String,System.String)">
- <summary>Informs the user when an update is available</summary>
- <param name="cond">The update condition</param>
- <param name="updName">The item (winapp2.ini or winapp2ool) for which there is a pending update</param>
- <param name="oldVer">The old (currently in use) version</param>
- <param name="newVer">The updated version pending download</param>
+ <summary> Informs the user when an update is available </summary>
+ <param name="cond"> The update condition </param>
+ <param name="updName"> The item (winapp2.ini or winapp2ool) for which there is a pending update </param>
+ <param name="oldVer"> The old (currently in use) version </param>
+ <param name="newVer"> The updated version pending download </param>
 </member>
 <member name="M:winapp2ool.updater.autoUpdate">
- <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
+ <summary> Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program </summary>
 </member>
 <member name="M:winapp2ool.updater.fDelete(System.String)">
 <summary> Deletes a file from the disk if it exists </summary>

@@ -16,26 +16,26 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.IO
-''' <summary>Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe</summary>
+''' <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
 Public Module updater
 
-    ''' <summary>The latest available verson of winapp2ool from GitHub</summary>
+    ''' <summary> The latest available verson of winapp2ool from GitHub </summary>
     Public Property latestVersion As String = ""
-    ''' <summary>The latest available version of winapp2.ini from GitHub</summary>
+    ''' <summary> The latest available version of winapp2.ini from GitHub </summary>
     Public Property latestWa2Ver As String = ""
-    ''' <summary>The local version of winapp2.ini (if available)</summary>
+    ''' <summary> The local version of winapp2.ini (if available) </summary>
     Public Property localWa2Ver As String = "000000"
-    ''' <summary>Indicates that a winapp2ool update is available from GitHub</summary>
+    ''' <summary> Indicates that a winapp2ool update is available from GitHub </summary>
     Public Property updateIsAvail As Boolean = False
-    ''' <summary>Indicates that a winapp2.ini update is available from GitHub</summary>
+    ''' <summary> Indicates that a winapp2.ini update is available from GitHub </summary>
     Public Property waUpdateIsAvail As Boolean = False
-    ''' <summary>The local version of winapp2ool</summary>
+    ''' <summary> The local version of winapp2ool </summary>
     Public Property currentVersion As String = Reflection.Assembly.GetExecutingAssembly.FullName.Split(CChar(","))(1).Substring(9)
-    ''' <summary>Indicates that an update check has been performed</summary>
+    ''' <summary> Indicates that an update check has been performed </summary>
     Public Property checkedForUpdates As Boolean = False
 
-    ''' <summary>Pads the seconds portion of the version number to always be length of 5</summary>
-    ''' <param name="version">A version number to pad</param>
+    ''' <summary> Pads the seconds portion of the version number, ensuring that it always have a length of 5 </summary>
+    ''' <param name="version"> A version number to pad </param>
     Private Sub padVersionNum(ByRef version As String)
         Dim tmp = version.Split(CChar("."))
         Dim tmp1 = tmp.Last
@@ -50,8 +50,8 @@ Public Module updater
         Return getVersionFromLocalFile(tmpPath)
     End Function
 
-    ''' <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
-    ''' <param name="cond">Indicates that the update check should be performed. <br />Optional, Default: False</param>
+    ''' <summary> Checks the versions of winapp2ool, .NET, and winapp2.ini and notes which, if any, are out of date </summary>
+    ''' <param name="cond"> Indicates that the update check should be performed <br /> Optional, Default: <c> False </c> </param>
     Public Sub checkUpdates(Optional cond As Boolean = False)
         If checkedForUpdates Or Not cond Then Exit Sub
         gLog("Checking for updates")
@@ -78,7 +78,7 @@ Public Module updater
         setHeaderText(updHeader, True, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
     End Sub
 
-    '''<summary>Performs the version chcking for winapp2ool.exe</summary>
+    '''<summary> Performs the version chcking for winapp2ool.exe </summary>
     Private Sub toolVersionCheck()
         ' Let's just assume winapp2ool didn't update after we've checked for updates 
         If Not latestVersion = "" Then Exit Sub
@@ -95,9 +95,9 @@ Public Module updater
         End If
     End Sub
 
-    ''' <summary>Handles the case where the update check has failed</summary>
-    ''' <param name="name">The name of the component whose update check failed</param>
-    ''' <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
+    ''' <summary> Handles the case where the update check has failed </summary>
+    ''' <param name="name"> The name of the component whose update check failed </param>
+    ''' <param name="chkOnline"> A flag specifying that the internet connection should be retested </param>
     Private Sub updateCheckFailed(name As String, Optional chkOnline As Boolean = False)
         setHeaderText($"/!\ {name} update check failed. /!\", True)
         localWa2Ver = "000000"
@@ -113,17 +113,17 @@ Public Module updater
         Return If(versionString.Contains("version"), versionString.Split(CChar(" "))(2), "000000 (version not found)")
     End Function
 
-    ''' <summary>Updates the offline status of winapp2ool</summary>
+    ''' <summary> Updates the offline status of winapp2ool </summary>
     Public Sub chkOfflineMode()
         gLog("Checking online status")
         isOffline = Not checkOnline()
     End Sub
 
-    ''' <summary>Informs the user when an update is available</summary>
-    ''' <param name="cond">The update condition</param>
-    ''' <param name="updName">The item (winapp2.ini or winapp2ool) for which there is a pending update</param>
-    ''' <param name="oldVer">The old (currently in use) version</param>
-    ''' <param name="newVer">The updated version pending download</param>
+    ''' <summary> Informs the user when an update is available </summary>
+    ''' <param name="cond"> The update condition </param>
+    ''' <param name="updName"> The item (winapp2.ini or winapp2ool) for which there is a pending update </param>
+    ''' <param name="oldVer"> The old (currently in use) version </param>
+    ''' <param name="newVer"> The updated version pending download </param>
     Public Sub printUpdNotif(cond As Boolean, updName As String, oldVer As String, newVer As String)
         If Not cond Then Exit Sub
         gLog($"Update available for {updName} from {oldVer} to {newVer}")
@@ -132,7 +132,7 @@ Public Module updater
         print(0, $"Available: v{newVer}", trailingBlank:=True, isCentered:=True, colorLine:=True, enStrCond:=True)
     End Sub
 
-    ''' <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
+    ''' <summary> Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program </summary>
     Public Sub autoUpdate()
         gLog("Starting auto update process")
         Dim newTool As New iniFile(Environment.CurrentDirectory, "winapp2ool updated.exe")
