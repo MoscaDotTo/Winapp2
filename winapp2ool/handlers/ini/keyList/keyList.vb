@@ -26,86 +26,86 @@ Public Class keyList
     ''' <summary> The KeyType of keys contained in the list</summary>
     Public Property KeyType As String
 
-    ''' <summary>Returns the number of keys in the keylist</summary>
+    ''' <summary> Returns the number of keys in the keylist </summary>
     Public Function KeyCount() As Integer
         Return Keys.Count
     End Function
 
-    ''' <summary>Creates a new (empty) keylist</summary>
-    ''' <param name="kt">Optional String containing the expected KeyType of the keys in the list</param>
+    ''' <summary> Creates a new (empty) keylist </summary>
+    ''' <param name="kt"> The expected KeyType of the keys in the list <br /> Optional, Default: <c> False </c> </param>
     Public Sub New(Optional kt As String = "")
         Keys = New List(Of iniKey)
         KeyType = kt
     End Sub
 
-    ''' <summary>Creates a new keylist using an existing list of iniKeys</summary>
-    ''' <param name="kl">A list of iniKeys to be inserted into the keylist</param>
+    ''' <summary> Creates a new keylist using an existing list of <c> iniKeys </c> </summary>
+    ''' <param name="kl"> A list of <c> iniKeys </c> to be inserted into the <c> keylist </c> </param>
     Public Sub New(kl As List(Of iniKey))
         Keys = kl
         KeyType = If(Keys.Count > 0, Keys(0).KeyType, "")
     End Sub
 
-    ''' <summary>Conditionally adds a key to the keylist</summary>
-    ''' <param name="key">The key to be added</param>
-    ''' <param name="cond">The condition under which to add the key</param>
+    ''' <summary> Conditionally adds a key to the <c> keyList </c> </summary>
+    ''' <param name="key"> The <c> iniKey </c>to be added </param>
+    ''' <param name="cond"> The condition under which to add the <c> iniKey </c> </param>
     Public Sub add(key As iniKey, Optional cond As Boolean = True)
         If cond Then Keys.Add(key)
     End Sub
 
-    ''' <summary>Adds a list of iniKeys to the keylist</summary>
-    ''' <param name="kl">The list to be added</param>
+    ''' <summary> Adds a list of <c>iniKeys</c> to the <c> keyList </c> </summary>
+    ''' <param name="kl">The list of <c> iniKeys </c> to be added </param>
     Public Sub add(kl As List(Of iniKey))
         kl.ForEach(Sub(key) Keys.Add(key))
     End Sub
 
-    ''' <summary>Removes a key from the keylist</summary>
-    ''' <param name="key">The key to be removed</param>
+    ''' <summary> Removes an <c> iniKey </c> from the <c>keyList </c> </summary>
+    ''' <param name="key">The <c> iniKey </c>to be removed </param>
     Public Sub remove(key As iniKey)
         Me.Keys.Remove(key)
     End Sub
 
-    ''' <summary>Removes a list of keys from the keylist</summary>
-    ''' <param name="kl">The list of keys to be removed</param>
+    ''' <summary>Removes a list of <c> iniKeys </c>from the <c> keyList </c> </summary>
+    ''' <param name="kl"> The list of <c> iniKeys </c>to be removed </param>
     Public Sub remove(kl As List(Of iniKey))
         kl.ForEach(Sub(key) remove(key))
     End Sub
 
-    ''' <summary> Removes the key at the provided index</summary>
-    ''' <param name="ind">The index of the key to be removed</param>
+    ''' <summary> Removes the <c>iniKey </c>at the provided index provided by <c> <paramref name="ind"/> </c> from the <c> keyList </c> </summary>
+    ''' <param name="ind"> The index of the <c> iniKey </c> to be removed </param>
     Public Sub remove(ind As Integer)
         Keys.RemoveAt(ind)
     End Sub
 
-    ''' <summary>Returns whether or not the keyType of the list matches the input String</summary>
-    ''' <param name="type">The String against which to match the keylist's type</param>
+    ''' <summary> Returns a <c> Boolean </c> indicating whether or not the <c> keyType  </c>of the list matches the <c> keyType </c> provided by <c> <paramref name="type"/> </c> </summary>
+    ''' <param name="type"> The String against which to match the <c> keylist's keyType </c> </param>
     Public Function typeIs(type As String) As Boolean
         Return If(KeyType = "", Keys(0).KeyType, KeyType) = type
     End Function
 
-    ''' <summary>Returns a keyList as a strList</summary>
-    ''' <param name="onlyGetVals">True if only requesting the values from the keys. Defaukt: false</param>
+    ''' <summary> Returns a <c> keyList </c> as a <c> strList </c> </summary>
+    ''' <param name="onlyGetVals"> <c> True </c> if only requesting the values from the keys. <br /> Optional, Default: <c> False </c> </param>
     Public Function toStrLst(Optional onlyGetVals As Boolean = False) As strList
         Dim out As New strList
         Keys.ForEach(Sub(key) out.add(If(onlyGetVals, key.Value, key.toString)))
         Return out
     End Function
 
-    ''' <summary>Removes the last element in the key list if it exists</summary>
+    ''' <summary> Removes the last element in the <c> keyList </c> if it exists</summary>
     Public Sub removeLast()
         If Keys.Count > 0 Then Keys.Remove(Keys.Last)
     End Sub
 
-    ''' <summary>Renumber keys according to the sorted state of the values</summary>
-    ''' <param name="sortedKeyValues"></param>
+    ''' <summary> Renumber keys according to the sorted state of the values provided by <c> <paramref name="sortedKeyValues"/> </c> </summary>
+    ''' <param name="sortedKeyValues"> Some target sorted state of the <c> Values </c> of the <c> iniKeys </c> in the <c> keyList </c> </param>
     Public Sub renumberKeys(sortedKeyValues As strList)
         gLog("Renumbering keys", indent:=True)
-        For i As Integer = 0 To Me.KeyCount - 1
+        For i = 0 To Me.KeyCount - 1
             Keys(i).Name = Keys(i).KeyType & i + 1
             Keys(i).Value = sortedKeyValues.Items(i)
         Next
     End Sub
 
-    ''' <summary>Returns a list of integers containing the line numbers from the keylist</summary>
+    ''' <summary> Returns a <c> List(Of Integer)</c> containing the line numbers from the <c> iniKeys </c> in the <c> keyList </c> </summary>
     Public Function lineNums() As List(Of Integer)
         Dim out As New List(Of Integer)
         Keys.ForEach(Sub(key) out.Add(key.LineNumber))
