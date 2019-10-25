@@ -17,13 +17,13 @@
 Option Strict On
 Imports System.IO
 Imports System.Net
-''' <summary>Provides functions to download files to the rest of the tool</summary>
+''' <summary> Provides functions to download files to the rest of the application </summary>
 Module downloadr
 
-    ''' <summary>Performs the download, returns a boolean indicating the success of the download.</summary>
-    ''' <param name="link">The URL from which we are downloading</param>
-    ''' <param name="path">The path to which the downloaded file should be saved</param>
-    ''' <returns><c>True</c> if the download is successful<c>False</c> otherwise</returns>
+    ''' <summary> Performs the download, returns a boolean indicating the success of the download </summary>
+    ''' <param name="link"> The URL from which we are downloading </param>
+    ''' <param name="path"> The path to which the downloaded file should be saved </param>
+    ''' <returns> <c> True </c> if the download is successful <c> False </c> otherwise </returns>
     Public Function dlFile(link As String, path As String) As Boolean
         Try
             Dim dl As New WebClient
@@ -36,10 +36,10 @@ Module downloadr
         End Try
     End Function
 
-    ''' <summary>Prompts the user to rename or overwrite a file if necessary before downloading.</summary>
-    ''' <param name="link">The URL from which we are downloading</param>
-    ''' <param name="prompt">Indicates that a "rename file" prompt should be shown if the target path already exists <br />Optional, Default: True </param>
-    ''' <param name="quietly">Indicates that all downloading output should be suppressed <br />Optional, Default: False</param>
+    ''' <summary> Downloads a file from the internet, optionally prompting the user to rename the download or overwrite existing files using the default name </summary>
+    ''' <param name="link"> The URL from which we are downloading </param>
+    ''' <param name="prompt"> Indicates that a "rename file" prompt should be shown if the target path already exists <br /> Optional, Default: <c> True </c> </param>
+    ''' <param name="quietly"> Indicates that all downloading output should be suppressed <br /> Optional, Default: <c> False </c> </param>
     Public Sub download(pathHolder As iniFile, link As String, Optional prompt As Boolean = True, Optional quietly As Boolean = False)
         Dim givenName = pathHolder.Name
         ' Don't try to download to a directory that doesn't exist
@@ -60,8 +60,8 @@ Module downloadr
         If Not success Then Console.ReadLine()
     End Sub
 
-    ''' <summary>Reads a file until a specified line number</summary>
-    ''' <param name="lineNum">The line number to return from the file</param>
+    ''' <summary> Reads a file until a specified line number, returns the contents of that line </summary>
+    ''' <param name="lineNum"> The line number to return from the file </param>
     Public Function getFileDataAtLineNum(path As String, Optional lineNum As Integer = 1) As String
         Dim out As String
         Try
@@ -75,8 +75,8 @@ Module downloadr
         Return If(Not out = Nothing, out, "")
     End Function
 
-    ''' <summary>Attempts to connect to the internet</summary>
-    ''' <returns><c>True</c>If the connection is successful <c>False</c> otherwise</returns>
+    ''' <summary> Attempts to connect to the internet </summary>
+    ''' <returns> <c> True </c> If the connection is successful <c> False </c> otherwise </returns>
     Public Function checkOnline() As Boolean
         Dim reader As StreamReader
         Try
@@ -92,10 +92,10 @@ Module downloadr
         End Try
     End Function
 
-    ''' <summary>Reads a file only until reaching a specific line and then returns that line as a String</summary>
-    ''' <param name="reader">An open file stream</param>
-    ''' <param name="lineNum">The target line number</param>
-    ''' <returns>The String on the line given by <paramref name="lineNum"/></returns>
+    ''' <summary> Reads a file only until reaching a specific line and then returns that line as a String </summary>
+    ''' <param name="reader"> An open file stream </param>
+    ''' <param name="lineNum"> The target line number </param>
+    ''' <returns> The String on the line given by <paramref name="lineNum"/> </returns>
     Private Function getTargetLine(reader As StreamReader, lineNum As Integer) As String
         Dim out = ""
         Dim curLine = 1
@@ -117,9 +117,9 @@ Module downloadr
         Return tmpPath
     End Function
 
-    ''' <summary>Attempts to create an <c>iniFile</c> using the data provided by <paramref name="address"/></summary>
+    ''' <summary> Attempts to create an <c> iniFile </c> using the data provided by <paramref name="address"/> </summary>
     ''' <param name="address"> A URL pointing to an online .ini file </param>
-    ''' <returns>An <c> iniFile </c> created using the remote data if that data is properly formatted, <c> Nothing </c> otherwise </returns>
+    ''' <returns> An <c> iniFile </c> created using the remote data if that data is properly formatted, <c> Nothing </c> otherwise </returns>
     Public Function getRemoteIniFile(address As String) As iniFile
         Try
             Dim path = setDownloadedFileStage(address)
