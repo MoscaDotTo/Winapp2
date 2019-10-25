@@ -508,7 +508,9 @@ Public Module WinappDebug
         ' Pipe symbol checks
         Dim iteratorCheckerList = Split(key.Value, "|")
         fullKeyErr(key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
-        fullKeyErr(key, "Colon (:) found where there should be a semicolon (;)", key.Value.Contains(":"), lintSemis.fixFormat, key.Value, key.Value.Replace(":", ";"))
+        ' The driveLtr check to allow entries that contain hard coded drive letters to contain colons. Since this is an edge case only likely to pop up in winapp3.ini (as far as official releases go)
+        ' We'll assume that if the path contains a hard coded drive letter, any colon use is intentional and disable this check. 
+        fullKeyErr(key, "Colon (:) found where there should be a semicolon (;)", key.Value.Contains(":") And Not driveLtrs.IsMatch(getFirstDir(key.Value)), lintSemis.fixFormat, key.Value, key.Value.Replace(":", ";"))
         ' Captures any incident of semi colons coming before the first pipe symbol
         fullKeyErr(key, "Semicolon (;) found before pipe (|).", lintSemis.ShouldScan And key.vHas(";") And (key.Value.IndexOf(";") < key.Value.IndexOf("|")))
         fullKeyErr(key, "Trailing semicolon (;) in parameters", lintSemis.ShouldScan And key.vHas(";|"), lintSemis.fixFormat, key.Value, key.Value.Replace(";|", "|"))
