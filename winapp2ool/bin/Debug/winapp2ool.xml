@@ -1803,7 +1803,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="M:winapp2ool.WinappDebug.pFileKey(winapp2ool.iniKey)">
  <summary> Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible </summary>
- <param name="key"> A winap2.ini FileKey format <c> iniKey </c> to be checked for correctness </param>
+ <param name="key"> A winapp2.ini FileKey format <c> iniKey </c> to be checked for correctness </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.pDetectFile(winapp2ool.iniKey)">
  <summary> Processes a DetectFile format <c> iniKey </c> and checks it for errors, correcting where possible </summary>

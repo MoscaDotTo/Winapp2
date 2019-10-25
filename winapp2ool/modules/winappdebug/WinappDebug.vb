@@ -7,7 +7,7 @@
 '    the Free Software Foundation, either version 3 of the License, or
 '    (at your option) any later version.
 '
-'    Winap2ool is distributed in the hope that it will be useful,
+'    Winapp2ool is distributed in the hope that it will be useful,
 '    but WITHOUT ANY WARRANTY; without even the implied warranty of
 '    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
@@ -503,7 +503,7 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary> Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible </summary>
-    ''' <param name="key"> A winap2.ini FileKey format <c> iniKey </c> to be checked for correctness </param>
+    ''' <param name="key"> A winapp2.ini FileKey format <c> iniKey </c> to be checked for correctness </param>
     Public Function pFileKey(key As iniKey) As iniKey
         ' Pipe symbol checks
         Dim iteratorCheckerList = Split(key.Value, "|")
