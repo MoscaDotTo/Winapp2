@@ -20,10 +20,10 @@ Option Strict On
 ''' </summary>
 Public Class keyList
 
-    ''' <summary> The list of iniKeys </summary>
+    ''' <summary> The list of <c> iniKeys </c> </summary>
     Public Property Keys As New List(Of iniKey)
 
-    ''' <summary> The KeyType of keys contained in the list</summary>
+    ''' <summary> The <c> KeyType </c> of the <c> iniKeys </c> contained in the <c> keyList </c> </summary>
     Public Property KeyType As String
 
     ''' <summary> Returns the number of keys in the keylist </summary>
@@ -31,41 +31,41 @@ Public Class keyList
         Return Keys.Count
     End Function
 
-    ''' <summary> Creates a new (empty) keylist </summary>
-    ''' <param name="kt"> The expected KeyType of the keys in the list <br /> Optional, Default: <c> False </c> </param>
+    ''' <summary> Creates a new (empty) <c> keyList </c> </summary>
+    ''' <param name="kt"> The expected <c> keyType </c> of the <c> iniKeys </c> in the <c> keyList </c> <br /> Optional, Default: <c> "" </c> </param>
     Public Sub New(Optional kt As String = "")
         Keys = New List(Of iniKey)
         KeyType = kt
     End Sub
 
-    ''' <summary> Creates a new keylist using an existing list of <c> iniKeys </c> </summary>
+    ''' <summary> Creates a new <c> keyList </c> using an existing list of <c> iniKeys </c> </summary>
     ''' <param name="kl"> A list of <c> iniKeys </c> to be inserted into the <c> keylist </c> </param>
     Public Sub New(kl As List(Of iniKey))
         Keys = kl
         KeyType = If(Keys.Count > 0, Keys(0).KeyType, "")
     End Sub
 
-    ''' <summary> Conditionally adds a key to the <c> keyList </c> </summary>
+    ''' <summary> Conditionally adds an <c> iniKey </c> into the <c> keyList </c> </summary>
     ''' <param name="key"> The <c> iniKey </c>to be added </param>
     ''' <param name="cond"> The condition under which to add the <c> iniKey </c> </param>
     Public Sub add(key As iniKey, Optional cond As Boolean = True)
         If cond Then Keys.Add(key)
     End Sub
 
-    ''' <summary> Adds a list of <c>iniKeys</c> to the <c> keyList </c> </summary>
+    ''' <summary> Adds a list of <c> iniKeys </c> to the <c> keyList </c> </summary>
     ''' <param name="kl">The list of <c> iniKeys </c> to be added </param>
     Public Sub add(kl As List(Of iniKey))
         kl.ForEach(Sub(key) Keys.Add(key))
     End Sub
 
-    ''' <summary> Removes an <c> iniKey </c> from the <c>keyList </c> </summary>
-    ''' <param name="key">The <c> iniKey </c>to be removed </param>
+    ''' <summary> Removes an <c> iniKey </c> from the <c> keyList </c> </summary>
+    ''' <param name="key">The <c> iniKey </c> to be removed </param>
     Public Sub remove(key As iniKey)
         Me.Keys.Remove(key)
     End Sub
 
     ''' <summary>Removes a list of <c> iniKeys </c>from the <c> keyList </c> </summary>
-    ''' <param name="kl"> The list of <c> iniKeys </c>to be removed </param>
+    ''' <param name="kl"> The list of <c> iniKeys </c> to be removed </param>
     Public Sub remove(kl As List(Of iniKey))
         kl.ForEach(Sub(key) remove(key))
     End Sub

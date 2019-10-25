@@ -573,38 +573,38 @@ winapp2ool
  </summary>
 </member>
 <member name="P:winapp2ool.keyList.Keys">
- <summary> The list of iniKeys </summary>
+ <summary> The list of <c> iniKeys </c> </summary>
 </member>
 <member name="P:winapp2ool.keyList.KeyType">
- <summary> The KeyType of keys contained in the list</summary>
+ <summary> The <c> KeyType </c> of the <c> iniKeys </c> contained in the <c> keyList </c> </summary>
 </member>
 <member name="M:winapp2ool.keyList.KeyCount">
  <summary> Returns the number of keys in the keylist </summary>
 </member>
 <member name="M:winapp2ool.keyList.#ctor(System.String)">
- <summary> Creates a new (empty) keylist </summary>
- <param name="kt"> The expected KeyType of the keys in the list <br /> Optional, Default: <c> False </c> </param>
+ <summary> Creates a new (empty) <c> keyList </c> </summary>
+ <param name="kt"> The expected <c> keyType </c> of the <c> iniKeys </c> in the <c> keyList </c> <br /> Optional, Default: <c> "" </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.#ctor(System.Collections.Generic.List{winapp2ool.iniKey})">
- <summary> Creates a new keylist using an existing list of <c> iniKeys </c> </summary>
+ <summary> Creates a new <c> keyList </c> using an existing list of <c> iniKeys </c> </summary>
  <param name="kl"> A list of <c> iniKeys </c> to be inserted into the <c> keylist </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.add(winapp2ool.iniKey,System.Boolean)">
- <summary> Conditionally adds a key to the <c> keyList </c> </summary>
+ <summary> Conditionally adds an <c> iniKey </c> into the <c> keyList </c> </summary>
  <param name="key"> The <c> iniKey </c>to be added </param>
  <param name="cond"> The condition under which to add the <c> iniKey </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.add(System.Collections.Generic.List{winapp2ool.iniKey})">
- <summary> Adds a list of <c>iniKeys</c> to the <c> keyList </c> </summary>
+ <summary> Adds a list of <c> iniKeys </c> to the <c> keyList </c> </summary>
  <param name="kl">The list of <c> iniKeys </c> to be added </param>
 </member>
 <member name="M:winapp2ool.keyList.remove(winapp2ool.iniKey)">
- <summary> Removes an <c> iniKey </c> from the <c>keyList </c> </summary>
- <param name="key">The <c> iniKey </c>to be removed </param>
+ <summary> Removes an <c> iniKey </c> from the <c> keyList </c> </summary>
+ <param name="key">The <c> iniKey </c> to be removed </param>
 </member>
 <member name="M:winapp2ool.keyList.remove(System.Collections.Generic.List{winapp2ool.iniKey})">
  <summary>Removes a list of <c> iniKeys </c>from the <c> keyList </c> </summary>
- <param name="kl"> The list of <c> iniKeys </c>to be removed </param>
+ <param name="kl"> The list of <c> iniKeys </c> to be removed </param>
 </member>
 <member name="M:winapp2ool.keyList.remove(System.Int32)">
  <summary> Removes the <c>iniKey </c>at the provided index provided by <c> <paramref name="ind"/> </c> from the <c> keyList </c> </summary>
