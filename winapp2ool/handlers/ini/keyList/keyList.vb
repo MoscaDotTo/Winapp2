@@ -15,9 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary>
-''' A handy wrapper object for lists of iniKeys
-''' </summary>
+''' <summary> A handy wrapper object for lists of iniKeys </summary>
 Public Class keyList
 
     ''' <summary> The list of <c> iniKeys </c> </summary>
@@ -90,7 +88,7 @@ Public Class keyList
         Return out
     End Function
 
-    ''' <summary> Removes the last element in the <c> keyList </c> if it exists</summary>
+    ''' <summary> Removes the last element in the <c> keyList </c> if it exists </summary>
     Public Sub removeLast()
         If Keys.Count > 0 Then Keys.Remove(Keys.Last)
     End Sub
@@ -105,7 +103,7 @@ Public Class keyList
         Next
     End Sub
 
-    ''' <summary> Returns a <c> List(Of Integer)</c> containing the line numbers from the <c> iniKeys </c> in the <c> keyList </c> </summary>
+    ''' <summary> Returns a <c> List(Of Integer) </c> containing the line numbers from the <c> iniKeys </c> in the <c> keyList </c> </summary>
     Public Function lineNums() As List(Of Integer)
         Dim out As New List(Of Integer)
         Keys.ForEach(Sub(key) out.Add(key.LineNumber))

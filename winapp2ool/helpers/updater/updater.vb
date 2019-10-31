@@ -138,7 +138,7 @@ Public Module updater
         gLog("Starting auto update process")
         Dim backupName = $"winapp2ool v{currentVersion}.exe.bak"
         Try
-            ' Ensure we have the latest version 
+            ' Ensure we always have the latest version
             Dim tmpToolPath = setDownloadedFileStage(toolExeLink)
             ' Replace any existing backups of this version
             fDelete($"{Environment.CurrentDirectory}\{backupName}")

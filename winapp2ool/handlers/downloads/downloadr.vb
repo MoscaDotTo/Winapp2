@@ -44,7 +44,7 @@ Module downloadr
         Dim givenName = pathHolder.Name
         ' Don't try to download to a directory that doesn't exist
         If Not Directory.Exists(pathHolder.Dir) Then Directory.CreateDirectory(pathHolder.Dir)
-        ' If the file exists and we're prompting or overwrite, do that.
+        ' If the file exists and we're prompting for overwrites, do that.
         If prompt And File.Exists(pathHolder.Path) And Not SuppressOutput And Not quietly Then
             cwl($"{pathHolder.Name} already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")

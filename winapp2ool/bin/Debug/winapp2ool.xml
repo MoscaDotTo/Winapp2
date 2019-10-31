@@ -568,9 +568,7 @@ winapp2ool
  <param name="l">The line number</param>
 </member>
 <member name="T:winapp2ool.keyList">
- <summary>
- A handy wrapper object for lists of iniKeys
- </summary>
+ <summary> A handy wrapper object for lists of iniKeys </summary>
 </member>
 <member name="P:winapp2ool.keyList.Keys">
  <summary> The list of <c> iniKeys </c> </summary>
@@ -619,14 +617,14 @@ winapp2ool
  <param name="onlyGetVals"> <c> True </c> if only requesting the values from the keys. <br /> Optional, Default: <c> False </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.removeLast">
- <summary> Removes the last element in the <c> keyList </c> if it exists</summary>
+ <summary> Removes the last element in the <c> keyList </c> if it exists </summary>
 </member>
 <member name="M:winapp2ool.keyList.renumberKeys(winapp2ool.strList)">
  <summary> Renumber keys according to the sorted state of the values provided by <c> <paramref name="sortedKeyValues"/> </c> </summary>
  <param name="sortedKeyValues"> Some target sorted state of the <c> Values </c> of the <c> iniKeys </c> in the <c> keyList </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.lineNums">
- <summary> Returns a <c> List(Of Integer)</c> containing the line numbers from the <c> iniKeys </c> in the <c> keyList </c> </summary>
+ <summary> Returns a <c> List(Of Integer) </c> containing the line numbers from the <c> iniKeys </c> in the <c> keyList </c> </summary>
 </member>
 <member name="T:winapp2ool.iniKey">
  <summary>
@@ -1052,7 +1050,8 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <param name="newVer"> The updated version pending download </param>
 </member>
 <member name="M:winapp2ool.updater.autoUpdate">
- <summary> Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program </summary>
+ <summary> Replaces the currently running executable with the latest from GitHub before launching that new executable and closing the current one,
+ ensures that this change can be undone by backing up the current version before replacing it </summary>
 </member>
 <member name="M:winapp2ool.updater.fDelete(System.String)">
 <summary> Deletes a file from the disk if it exists </summary>
