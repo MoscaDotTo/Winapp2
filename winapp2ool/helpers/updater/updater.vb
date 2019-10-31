@@ -132,21 +132,20 @@ Public Module updater
         print(0, $"Available: v{newVer}", trailingBlank:=True, isCentered:=True, colorLine:=True, enStrCond:=True)
     End Sub
 
-    ''' <summary> Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program </summary>
+    ''' <summary> Replaces the currently running executable with the latest from GitHub before launching that new executable and closing the current one,
+    ''' ensures that this change can be undone by backing up the current version before replacing it </summary>
     Public Sub autoUpdate()
         gLog("Starting auto update process")
-        Dim newTool As New iniFile(Environment.CurrentDirectory, "winapp2ool updated.exe")
         Dim backupName = $"winapp2ool v{currentVersion}.exe.bak"
         Try
+            ' Ensure we have the latest version 
+            Dim tmpToolPath = setDownloadedFileStage(toolExeLink)
             ' Replace any existing backups of this version
             fDelete($"{Environment.CurrentDirectory}\{backupName}")
             File.Move("winapp2ool.exe", backupName)
-            ' Remove any old update files that didn't get renamed for whatever reason
-            fDelete(newTool.Path)
-            download(newTool, If(isBeta, betaToolLink, toolLink), False)
-            ' Rename the executables and launch the new one
-            File.Move("winapp2ool updated.exe", "winapp2ool.exe")
-            System.Diagnostics.Process.Start($"{Environment.CurrentDirectory}\winapp2ool.exe")
+            ' Move the latest version to the current directory and launch it
+            File.Move(tmpToolPath, $"{Environment.CurrentDirectory}\winapp2ool.exe")
+            System.Diagnostics.Process.Start("winapp2ool.exe")
             Environment.Exit(0)
         Catch ex As Exception
             exc(ex)
