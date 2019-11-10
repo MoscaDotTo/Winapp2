@@ -20,29 +20,29 @@ Option Strict On
 ''' Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
 ''' </summary>
 Module Downloader
-    '''<summary>The web address of the CCleaner version of winapp2.ini</summary>
+    '''<summary> The web address of the CCleaner version of winapp2.ini </summary>
     Public ReadOnly Property wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
-    '''<summary>The web address of the Non-CCleaner version of winapp2.ini</summary>
+    '''<summary> The web address of the Non-CCleaner version of winapp2.ini </summary>
     Public ReadOnly Property nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
-    '''<summary>The web address of winapp2ool.exe</summary>
+    '''<summary> The web address of winapp2ool.exe </summary>
     Public ReadOnly Property toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
-    '''<summary>The web address of the beta build of winapp2ool.exe</summary>
+    '''<summary> The web address of the beta build of winapp2ool.exe </summary>
     Public ReadOnly Property betaToolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/Branch1/winapp2ool/bin/Debug/winapp2ool.exe"
-    '''<summary>The web address of version.txt (winapp2ool's public version identifer)</summary>
+    '''<summary> The web address of version.txt (winapp2ool's public version identifer) </summary>
     Public ReadOnly Property toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
     ''' <summary> The web address of version.txt on the beta branch </summary>
     Public ReadOnly Property betaToolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/branch1/winapp2ool/version.txt"
-    '''<summary>The web address of removed entries.ini</summary>
+    '''<summary> The web address of removed entries.ini </summary>
     Public ReadOnly Property removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
-    '''<summary>The web address of winapp3.ini</summary>
+    '''<summary> The web address of winapp3.ini </summary>
     Public ReadOnly Property wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
-    '''<summary>The web address of archived entries.ini</summary>
+    '''<summary> The web address of archived entries.ini </summary>
     Public ReadOnly Property archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
-    '''<summary>The web address of java.ini</summary>
+    '''<summary> The web address of java.ini </summary>
     Public ReadOnly Property javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
-    '''<summary>The web address of the winapp2ool ReadMe file</summary>
+    '''<summary> The web address of the winapp2ool ReadMe file </summary>
     Public ReadOnly Property readMeLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/Readme.md"
-    '''<summary>Holds the path of any files to be saved by the Downloader</summary>
+    '''<summary> Holds the path of any files to be saved by the Downloader </summary>
     Public Property downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
     ''' <summary> Handles the commandline args for the Downloader </summary>
@@ -79,7 +79,7 @@ Module Downloader
         download(downloadFile, fileLink)
     End Sub
 
-    ''' <summary>Prints the main menu to the user</summary>
+    ''' <summary> Prints the download menu to the user </summary>
     Public Sub printMenu()
         printMenuTop({"Download files from the winapp2 GitHub"})
         print(1, "Winapp2.ini", "Download the latest winapp2.ini")
@@ -92,8 +92,8 @@ Module Downloader
         print(0, $"Save directory: {replDir(downloadFile.Dir)}", leadingBlank:=True, closeMenu:=True)
     End Sub
 
-    ''' <summary>Handles the user input for the menu</summary>
-    ''' <param name="input">The String containing the user's input</param>
+    ''' <summary> Handles user input for the Downloader menu </summary>
+    ''' <param name="input"> The user's input </param>
     Public Sub handleUserInput(input As String)
         Select Case input
             Case "0"
@@ -130,12 +130,12 @@ Module Downloader
         End Select
     End Sub
 
-    ''' <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
+    ''' <summary> Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration </summary>
     Public Function winapp2link() As String
         Return If(RemoteWinappIsNonCC, nonccLink, wa2Link)
     End Function
 
-    '''<summary>Returns the link to the appropriate branch of winapp2ool's executable</summary>
+    '''<summary> Returns the link to winapp2ool.exe on the appropriate branch for the current executable </summary>
     Public Function toolExeLink() As String
         Return If(isBeta, betaToolLink, toolLink)
     End Function
@@ -146,8 +146,8 @@ Module Downloader
 
     End Function
 
-    ''' <summary>Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading</summary>
-    ''' <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
+    ''' <summary> Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading </summary>
+    ''' <param name="shouldDownload"> Indicates that a module is configured to download a remote winapp2.ini </param>
     Public Function GetNameFromDL(shouldDownload As Boolean) As String
         Return If(shouldDownload, If(RemoteWinappIsNonCC, "Online (Non-CCleaner)", "Online"), "")
     End Function
