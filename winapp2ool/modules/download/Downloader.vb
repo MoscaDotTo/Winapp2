@@ -30,6 +30,8 @@ Module Downloader
     Public ReadOnly Property betaToolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/Branch1/winapp2ool/bin/Debug/winapp2ool.exe"
     '''<summary>The web address of version.txt (winapp2ool's public version identifer)</summary>
     Public ReadOnly Property toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
+    ''' <summary> The web address of version.txt on the beta branch </summary>
+    Public ReadOnly Property betaToolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/branch1/winapp2ool/version.txt"
     '''<summary>The web address of removed entries.ini</summary>
     Public ReadOnly Property removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
     '''<summary>The web address of winapp3.ini</summary>
