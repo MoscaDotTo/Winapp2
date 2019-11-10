@@ -143,7 +143,6 @@ Module Downloader
     ''' <summary> Returns the link to version.txt on the appropriate branch for the current executable </summary>
     Public Function toolVerTxtLink() As String
         Return If(isBeta, betaToolVerLink, toolVerLink)
-
     End Function
 
     ''' <summary> Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading </summary>

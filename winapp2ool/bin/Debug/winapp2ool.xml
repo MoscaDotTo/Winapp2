@@ -191,57 +191,63 @@ winapp2ool
  </summary>
 </member>
 <member name="P:winapp2ool.Downloader.wa2Link">
-<summary>The web address of the CCleaner version of winapp2.ini</summary>
+<summary> The web address of the CCleaner version of winapp2.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.nonccLink">
-<summary>The web address of the Non-CCleaner version of winapp2.ini</summary>
+<summary> The web address of the Non-CCleaner version of winapp2.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.toolLink">
-<summary>The web address of winapp2ool.exe</summary>
+<summary> The web address of winapp2ool.exe </summary>
 </member>
 <member name="P:winapp2ool.Downloader.betaToolLink">
-<summary>The web address of the beta build of winapp2ool.exe</summary>
+<summary> The web address of the beta build of winapp2ool.exe </summary>
 </member>
 <member name="P:winapp2ool.Downloader.toolVerLink">
-<summary>The web address of version.txt (winapp2ool's public version identifer)</summary>
+<summary> The web address of version.txt (winapp2ool's public version identifer) </summary>
+</member>
+<member name="P:winapp2ool.Downloader.betaToolVerLink">
+ <summary> The web address of version.txt on the beta branch </summary>
 </member>
 <member name="P:winapp2ool.Downloader.removedLink">
-<summary>The web address of removed entries.ini</summary>
+<summary> The web address of removed entries.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.wa3link">
-<summary>The web address of winapp3.ini</summary>
+<summary> The web address of winapp3.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.archivedLink">
-<summary>The web address of archived entries.ini</summary>
+<summary> The web address of archived entries.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.javaLink">
-<summary>The web address of java.ini</summary>
+<summary> The web address of java.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.readMeLink">
-<summary>The web address of the winapp2ool ReadMe file</summary>
+<summary> The web address of the winapp2ool ReadMe file </summary>
 </member>
 <member name="P:winapp2ool.Downloader.downloadFile">
-<summary>Holds the path of any files to be saved by the Downloader</summary>
+<summary> Holds the path of any files to be saved by the Downloader </summary>
 </member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
  <summary> Handles the commandline args for the Downloader </summary>
 </member>
 <member name="M:winapp2ool.Downloader.printMenu">
- <summary>Prints the main menu to the user</summary>
+ <summary> Prints the download menu to the user </summary>
 </member>
 <member name="M:winapp2ool.Downloader.handleUserInput(System.String)">
- <summary>Handles the user input for the menu</summary>
- <param name="input">The String containing the user's input</param>
+ <summary> Handles user input for the Downloader menu </summary>
+ <param name="input"> The user's input </param>
 </member>
 <member name="M:winapp2ool.Downloader.winapp2link">
- <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
+ <summary> Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration </summary>
 </member>
 <member name="M:winapp2ool.Downloader.toolExeLink">
-<summary>Returns the link to the appropriate branch of winapp2ool's executable</summary>
+<summary> Returns the link to winapp2ool.exe on the appropriate branch for the current executable </summary>
+</member>
+<member name="M:winapp2ool.Downloader.toolVerTxtLink">
+ <summary> Returns the link to version.txt on the appropriate branch for the current executable </summary>
 </member>
 <member name="M:winapp2ool.Downloader.GetNameFromDL(System.Boolean)">
- <summary>Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading</summary>
- <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
+ <summary> Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading </summary>
+ <param name="shouldDownload"> Indicates that a module is configured to download a remote winapp2.ini </param>
 </member>
 <member name="T:winapp2ool.advDownloads">
  <summary>The advanced download submodule for Downloader</summary>
