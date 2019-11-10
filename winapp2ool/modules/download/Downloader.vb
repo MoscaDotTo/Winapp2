@@ -140,6 +140,12 @@ Module Downloader
         Return If(isBeta, betaToolLink, toolLink)
     End Function
 
+    ''' <summary> Returns the link to version.txt on the appropriate branch for the current executable </summary>
+    Public Function toolVerTxtLink() As String
+        Return If(isBeta, betaToolVerLink, toolVerLink)
+
+    End Function
+
     ''' <summary>Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading</summary>
     ''' <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
     Public Function GetNameFromDL(shouldDownload As Boolean) As String
