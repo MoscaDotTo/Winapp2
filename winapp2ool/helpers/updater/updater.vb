@@ -86,7 +86,6 @@ Public Module updater
             ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
             latestVersion = getRemoteVersion(toolVerLink)
         Else
-            Dim latestVersion___TEST = getRemoteVersion(betaToolVerLink)
             Dim tmpPath = setDownloadedFileStage(betaToolLink)
             latestVersion = Reflection.Assembly.Load(File.ReadAllBytes(tmpPath)).FullName.Split(CChar(","))(1).Substring(9)
             ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
@@ -108,6 +107,10 @@ Public Module updater
     ''' <summary> Attempts to return the version number from a file found on disk, returns <c> "000000" </c> if it's unable to do so </summary>
     ''' <param name="path"> The path of the file whose version number will be queried </param>
     Private Function getVersionFromLocalFile(Optional path As String = "") As String
+        ' Handle a special version.txt edge case
+        If path.EndsWith("version.txt") Then
+            Return getFileDataAtLineNum(path)
+        End If
         If path = "" Then path = Environment.CurrentDirectory & "\winapp2.ini"
         If Not File.Exists(path) Then Return "000000 (file not found)"
         Dim versionString = getFileDataAtLineNum(path).ToLower
