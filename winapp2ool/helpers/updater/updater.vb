@@ -16,6 +16,7 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.IO
+Imports System.Runtime.InteropServices.WindowsRuntime
 ''' <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
 Public Module updater
 
@@ -53,7 +54,7 @@ Public Module updater
     ''' <summary> Checks the versions of winapp2ool, .NET, and winapp2.ini and notes which, if any, are out of date </summary>
     ''' <param name="cond"> Indicates that the update check should be performed <br /> Optional, Default: <c> False </c> </param>
     Public Sub checkUpdates(Optional cond As Boolean = False)
-        If checkedForUpdates Or Not cond Then Exit Sub
+        If checkedForUpdates Or Not cond Then Return
         gLog("Checking for updates")
         ' Query the latest winapp2ool.exe and winapp2.ini versions 
         toolVersionCheck()
@@ -81,7 +82,7 @@ Public Module updater
     '''<summary> Performs the version chcking for winapp2ool.exe </summary>
     Private Sub toolVersionCheck()
         ' Let's just assume winapp2ool didn't update after we've checked for updates 
-        If Not latestVersion = "" Then Exit Sub
+        If Not latestVersion = "" Then Return
         If Not isBeta Then
             ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
             latestVersion = getRemoteVersion(toolVerLink)
@@ -129,7 +130,7 @@ Public Module updater
     ''' <param name="oldVer"> The old (currently in use) version </param>
     ''' <param name="newVer"> The updated version pending download </param>
     Public Sub printUpdNotif(cond As Boolean, updName As String, oldVer As String, newVer As String)
-        If Not cond Then Exit Sub
+        If Not cond Then Return
         gLog($"Update available for {updName} from {oldVer} to {newVer}")
         print(0, $"A new version of {updName} is available!", isCentered:=True, colorLine:=True, enStrCond:=True)
         print(0, $"Current  : v{oldVer}", isCentered:=True, colorLine:=True, enStrCond:=True)
