@@ -24,6 +24,8 @@ Module Winapp2ool
     Public Property isOffline As Boolean = False
     ''' <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
     Public Property isBeta As Boolean = True
+    ''' <summary> Inidcates that we're unable to download the executable </summary>
+    Public Property cantDownloadExecutable As Boolean = False
 
     ''' <summary> Prints the main winapp2ool menu to the user </summary>
     Private Sub printMenu()
@@ -31,6 +33,7 @@ Module Winapp2ool
         printMenuTop({}, False)
         print(0, "Winapp2ool is currently in offline mode", cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
         print(0, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
+        print(0, "Winapp2ool is currently running from the temporary folder, some functions may be impacted", cond:=cantDownloadExecutable, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
         printUpdNotif(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver)
         printUpdNotif(updateIsAvail, "Winapp2ool", currentVersion, latestVersion)
         print(1, "Exit", "Exit the application")
@@ -58,6 +61,8 @@ Module Winapp2ool
         ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
         If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
         gLog($".NET Framework is out of date. Found {Environment.Version.ToString}", DotNetFrameworkOutOfDate)
+        ' Make sure we're not operating in the temporary directory 
+        If Environment.CurrentDirectory = Environment.GetEnvironmentVariable("temp") Then cantDownloadExecutable = True
         ' winapp2ool requires internet access for some functions
         chkOfflineMode()
         processCommandLineArgs()
@@ -103,7 +108,7 @@ Module Winapp2ool
                 cwl("Downloading & diffing, this may take a moment...")
                 remoteDiff(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
                 setHeaderText("Diff Complete")
-            Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not DotNetFrameworkOutOfDate
+            Case (input = "10" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not (DotNetFrameworkOutOfDate Or cantDownloadExecutable)
                 cwl("Downloading and updating winapp2ool.exe, this may take a moment...")
                 autoUpdate()
             Case input = "m"

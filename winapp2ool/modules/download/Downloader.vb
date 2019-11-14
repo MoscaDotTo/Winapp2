@@ -106,11 +106,14 @@ Module Downloader
             Case "3"
                 ' Feature gate downloading the executable behind .NET 4.6+
                 If Not denyActionWithHeader(DotNetFrameworkOutOfDate, "This option requires a newer version of the .NET Framework") Then
-                    If downloadFile.Dir = Environment.CurrentDirectory Then
-                        autoUpdate()
-                    Else
-                        downloadFile.Name = "winapp2ool.exe"
-                        download(downloadFile, toolExeLink)
+                    If Not denyActionWithHeader(cantDownloadExecutable And downloadFile.Dir = Environment.CurrentDirectory,
+                                                "Unable to download winapp2ool to the current directory, choose another directory before trying again") Then
+                        If downloadFile.Dir = Environment.CurrentDirectory Then
+                            autoUpdate()
+                        Else
+                            downloadFile.Name = "winapp2ool.exe"
+                            download(downloadFile, toolExeLink)
+                        End If
                     End If
                 End If
             Case "4"

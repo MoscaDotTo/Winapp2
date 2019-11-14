@@ -1877,6 +1877,9 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="P:winapp2ool.Winapp2ool.isBeta">
  <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
 </member>
+<member name="P:winapp2ool.Winapp2ool.cantDownloadExecutable">
+ <summary> Inidcates that we're unable to download the executable </summary>
+</member>
 <member name="M:winapp2ool.Winapp2ool.printMenu">
  <summary> Prints the main winapp2ool menu to the user </summary>
 </member>

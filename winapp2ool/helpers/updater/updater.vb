@@ -87,6 +87,7 @@ Public Module updater
             ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
             latestVersion = getRemoteVersion(toolVerLink)
         Else
+            If cantDownloadExecutable Then latestVersion = "000000 (couldn't download)" : Return
             Dim tmpPath = setDownloadedFileStage(betaToolLink)
             latestVersion = Reflection.Assembly.Load(File.ReadAllBytes(tmpPath)).FullName.Split(CChar(","))(1).Substring(9)
             ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
@@ -145,9 +146,11 @@ Public Module updater
         Try
             ' Ensure we always have the latest version
             Dim tmpToolPath = setDownloadedFileStage(toolExeLink)
-            ' Replace any existing backups of this version
+            ' Replace any existing backups of this version before backing it up
             fDelete($"{Environment.CurrentDirectory}\{backupName}")
             File.Move(Environment.GetCommandLineArgs(0), backupName)
+            ' Ensure that we don't have lingering winapp2ool.exes 
+            File.Move("winapp2ool.exe", "winapp2ool.exe.bak")
             ' Move the latest version to the current directory and launch it
             File.Move(tmpToolPath, $"{Environment.CurrentDirectory}\winapp2ool.exe")
             System.Diagnostics.Process.Start("winapp2ool.exe")
