@@ -147,7 +147,7 @@ Public Module updater
             Dim tmpToolPath = setDownloadedFileStage(toolExeLink)
             ' Replace any existing backups of this version
             fDelete($"{Environment.CurrentDirectory}\{backupName}")
-            File.Move("winapp2ool.exe", backupName)
+            File.Move(Environment.GetCommandLineArgs(0), backupName)
             ' Move the latest version to the current directory and launch it
             File.Move(tmpToolPath, $"{Environment.CurrentDirectory}\winapp2ool.exe")
             System.Diagnostics.Process.Start("winapp2ool.exe")
