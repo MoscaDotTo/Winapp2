@@ -494,7 +494,7 @@ Public Module WinappDebug
         Next
         ' Determine if there's a casing error
         Dim hasCasingErr = Not casedString.Equals(strToChk) And casedArray.Contains(casedString)
-        Dim replacementText = If(chkType, key.keytype.Replace(key.KeyType, casedString), key.Value.Replace(key.Value, casedString))
+        Dim replacementText = If(chkType, key.KeyType.Replace(key.KeyType, casedString), key.Value.Replace(key.Value, casedString))
         Dim validData = String.Join(", ", casedArray)
         fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, lintCasing.fixFormat, strToChk, replacementText)
         fixStr(chkType And hasCasingErr, key.Name, key.Name.Replace(key.KeyType, replacementText))
