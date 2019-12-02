@@ -26,6 +26,11 @@ Module Winapp2ool
     Public Property isBeta As Boolean = True
     ''' <summary> Inidcates that we're unable to download the executable </summary>
     Public Property cantDownloadExecutable As Boolean = False
+    ''' <summary> Indicates that winapp2ool.exe has already been downloaded during this session and prevents us from redownloading it </summary>
+    ''' <remarks> This is to handle the fact that opening a file's manifest to read it's version number as we do on the beta branch puts a lock on that file
+    ''' which necessarily prevents us from deleting it, a critical step in ensuring that we have the latest binary. Attempts to read the manifest from the bytestream 
+    ''' without locking the file cause many antivirus' to flag winapp2ool as a malicious entity and in some cases, automatically remove it from the system. </remarks>
+    Public Property alreadyDownloadedExecutable As Boolean = False
 
     ''' <summary> Prints the main winapp2ool menu to the user </summary>
     Private Sub printMenu()

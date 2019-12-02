@@ -43,7 +43,7 @@ Public Module updater
         While tmp1.Length < 5
             tmp1 = "0" & tmp1
         End While
-        version.Replace(tmp.Last, tmp1)
+        version = version.Replace(tmp.Last, tmp1)
     End Sub
 
     Public Function getRemoteVersion(remotelink As String) As String
@@ -88,12 +88,16 @@ Public Module updater
             latestVersion = getRemoteVersion(toolVerLink)
         Else
             If cantDownloadExecutable Then latestVersion = "000000 (couldn't download)" : Return
-            Dim tmpPath = setDownloadedFileStage(betaToolLink)
-            latestVersion = Reflection.Assembly.Load(File.ReadAllBytes(tmpPath)).FullName.Split(CChar(","))(1).Substring(9)
-            ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
-            ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
-            padVersionNum(latestVersion)
-            padVersionNum(currentVersion)
+            If Not alreadyDownloadedExecutable Then
+                Dim tmpPath = setDownloadedFileStage(betaToolLink)
+                alreadyDownloadedExecutable = True
+                ' This places a lock on winapp2ool.exe in the tmp folder that will remain until we close the application
+                latestVersion = Reflection.Assembly.LoadFile(tmpPath).FullName.Split(CChar(","))(1).Substring(9)
+                ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
+                ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
+                padVersionNum(latestVersion)
+                padVersionNum(currentVersion)
+            End If
         End If
     End Sub
 
