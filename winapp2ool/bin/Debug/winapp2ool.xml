@@ -1907,7 +1907,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
  <summary> Ensures that an <c> iniFile </c> has content and informs the user if it does not. Returns <c> False </c> if there are no sections </summary>
- <param name="iFile">An <c> iniFile </c> to be checked for content </param>
+ <param name="iFile"> An <c> iniFile </c> to be checked for content </param>
 </member>
 </members>
 </doc>

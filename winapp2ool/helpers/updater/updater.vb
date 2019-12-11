@@ -31,7 +31,7 @@ Public Module updater
     ''' <summary> Indicates that a winapp2.ini update is available from GitHub </summary>
     Public Property waUpdateIsAvail As Boolean = False
     ''' <summary> The local version of winapp2ool </summary>
-    Public Property currentVersion As String = Reflection.Assembly.GetExecutingAssembly.FullName.Split(CChar(","))(1).Substring(9)
+    Public Property currentVersion As String = ""
     ''' <summary> Indicates that an update check has been performed </summary>
     Public Property checkedForUpdates As Boolean = False
 
@@ -79,9 +79,14 @@ Public Module updater
         setHeaderText(updHeader, True, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
     End Sub
 
+    Public Function getToolVersionWithoutHook(pathToFile As String) As String
+        'Return Reflection.Assembly.LoadFile(pathToFile).FullName.Split(CChar(","))(1).Substring(9)
+        Return Reflection.Assembly.Load(File.ReadAllBytes(pathToFile)).FullName.Split(CChar(","))(1).Substring(9)
+    End Function
+
     '''<summary> Performs the version chcking for winapp2ool.exe </summary>
     Private Sub toolVersionCheck()
-        ' Let's just assume winapp2ool didn't update after we've checked for updates 
+        ' Let's just assume winapp2ool didn't update after we've checked for updates
         If Not latestVersion = "" Then Return
         If Not isBeta Then
             ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
@@ -92,7 +97,8 @@ Public Module updater
                 Dim tmpPath = setDownloadedFileStage(betaToolLink)
                 alreadyDownloadedExecutable = True
                 ' This places a lock on winapp2ool.exe in the tmp folder that will remain until we close the application
-                latestVersion = Reflection.Assembly.LoadFile(tmpPath).FullName.Split(CChar(","))(1).Substring(9)
+                'latestVersion = Reflection.Assembly.LoadFile(tmpPath).FullName.Split(CChar(","))(1).Substring(9)
+                latestVersion = getToolVersionWithoutHook(tmpPath)
                 ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
                 ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
                 padVersionNum(latestVersion)
@@ -154,7 +160,7 @@ Public Module updater
             fDelete($"{Environment.CurrentDirectory}\{backupName}")
             File.Move(Environment.GetCommandLineArgs(0), backupName)
             ' Ensure that we don't have lingering winapp2ool.exes 
-            File.Move("winapp2ool.exe", "winapp2ool.exe.bak")
+            fDelete("winapp2ool.exe")
             ' Move the latest version to the current directory and launch it
             File.Move(tmpToolPath, $"{Environment.CurrentDirectory}\winapp2ool.exe")
             System.Diagnostics.Process.Start("winapp2ool.exe")

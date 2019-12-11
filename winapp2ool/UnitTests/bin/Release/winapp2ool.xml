@@ -191,57 +191,63 @@ winapp2ool
  </summary>
 </member>
 <member name="P:winapp2ool.Downloader.wa2Link">
-<summary>The web address of the CCleaner version of winapp2.ini</summary>
+<summary> The web address of the CCleaner version of winapp2.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.nonccLink">
-<summary>The web address of the Non-CCleaner version of winapp2.ini</summary>
+<summary> The web address of the Non-CCleaner version of winapp2.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.toolLink">
-<summary>The web address of winapp2ool.exe</summary>
+<summary> The web address of winapp2ool.exe </summary>
 </member>
 <member name="P:winapp2ool.Downloader.betaToolLink">
-<summary>The web address of the beta build of winapp2ool.exe</summary>
+<summary> The web address of the beta build of winapp2ool.exe </summary>
 </member>
 <member name="P:winapp2ool.Downloader.toolVerLink">
-<summary>The web address of version.txt (winapp2ool's public version identifer)</summary>
+<summary> The web address of version.txt (winapp2ool's public version identifer) </summary>
+</member>
+<member name="P:winapp2ool.Downloader.betaToolVerLink">
+ <summary> The web address of version.txt on the beta branch </summary>
 </member>
 <member name="P:winapp2ool.Downloader.removedLink">
-<summary>The web address of removed entries.ini</summary>
+<summary> The web address of removed entries.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.wa3link">
-<summary>The web address of winapp3.ini</summary>
+<summary> The web address of winapp3.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.archivedLink">
-<summary>The web address of archived entries.ini</summary>
+<summary> The web address of archived entries.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.javaLink">
-<summary>The web address of java.ini</summary>
+<summary> The web address of java.ini </summary>
 </member>
 <member name="P:winapp2ool.Downloader.readMeLink">
-<summary>The web address of the winapp2ool ReadMe file</summary>
+<summary> The web address of the winapp2ool ReadMe file </summary>
 </member>
 <member name="P:winapp2ool.Downloader.downloadFile">
-<summary>Holds the path of any files to be saved by the Downloader</summary>
+<summary> Holds the path of any files to be saved by the Downloader </summary>
 </member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
  <summary> Handles the commandline args for the Downloader </summary>
 </member>
 <member name="M:winapp2ool.Downloader.printMenu">
- <summary>Prints the main menu to the user</summary>
+ <summary> Prints the download menu to the user </summary>
 </member>
 <member name="M:winapp2ool.Downloader.handleUserInput(System.String)">
- <summary>Handles the user input for the menu</summary>
- <param name="input">The String containing the user's input</param>
+ <summary> Handles user input for the Downloader menu </summary>
+ <param name="input"> The user's input </param>
 </member>
 <member name="M:winapp2ool.Downloader.winapp2link">
- <summary>Returns the link to the appropriate winapp2.ini file based on the mode the tool is in</summary>
+ <summary> Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration </summary>
 </member>
 <member name="M:winapp2ool.Downloader.toolExeLink">
-<summary>Returns the link to the appropriate branch of winapp2ool's executable</summary>
+<summary> Returns the link to winapp2ool.exe on the appropriate branch for the current executable </summary>
+</member>
+<member name="M:winapp2ool.Downloader.toolVerTxtLink">
+ <summary> Returns the link to version.txt on the appropriate branch for the current executable </summary>
 </member>
 <member name="M:winapp2ool.Downloader.GetNameFromDL(System.Boolean)">
- <summary>Returns the online download status (name) of winapp2.ini as a String, empty string if not downloading</summary>
- <param name="shouldDownload">The boolean indicating whether or not a module will be downloading </param>
+ <summary> Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading </summary>
+ <param name="shouldDownload"> Indicates that a module is configured to download a remote winapp2.ini </param>
 </member>
 <member name="T:winapp2ool.advDownloads">
  <summary>The advanced download submodule for Downloader</summary>
@@ -309,42 +315,42 @@ winapp2ool
  <param name="errTxt">The text to be printed to the user</param>
 </member>
 <member name="T:winapp2ool.downloadr">
- <summary>Provides functions to download files to the rest of the tool</summary>
+ <summary> Provides functions to download files to the rest of the application </summary>
 </member>
 <member name="M:winapp2ool.downloadr.dlFile(System.String,System.String)">
- <summary>Performs the download, returns a boolean indicating the success of the download.</summary>
- <param name="link">The URL from which we are downloading</param>
- <param name="path">The path to which the downloaded file should be saved</param>
- <returns><c>True</c> if the download is successful<c>False</c> otherwise</returns>
+ <summary> Performs the download, returns a boolean indicating the success of the download </summary>
+ <param name="link"> The URL from which we are downloading </param>
+ <param name="path"> The path to which the downloaded file should be saved </param>
+ <returns> <c> True </c> if the download is successful <c> False </c> otherwise </returns>
 </member>
 <member name="M:winapp2ool.downloadr.download(winapp2ool.iniFile,System.String,System.Boolean,System.Boolean)">
- <summary>Prompts the user to rename or overwrite a file if necessary before downloading.</summary>
- <param name="link">The URL from which we are downloading</param>
- <param name="prompt">Indicates that a "rename file" prompt should be shown if the target path already exists <br />Optional, Default: True </param>
- <param name="quietly">Indicates that all downloading output should be suppressed <br />Optional, Default: False</param>
+ <summary> Downloads a file from the internet, optionally prompting the user to rename the download or overwrite existing files using the default name </summary>
+ <param name="link"> The URL from which we are downloading </param>
+ <param name="prompt"> Indicates that a "rename file" prompt should be shown if the target path already exists <br /> Optional, Default: <c> True </c> </param>
+ <param name="quietly"> Indicates that all downloading output should be suppressed <br /> Optional, Default: <c> False </c> </param>
 </member>
 <member name="M:winapp2ool.downloadr.getFileDataAtLineNum(System.String,System.Int32)">
- <summary>Reads a file until a specified line number</summary>
- <param name="lineNum">The line number to return from the file</param>
+ <summary> Reads a file until a specified line number, returns the contents of that line </summary>
+ <param name="lineNum"> The line number to return from the file </param>
 </member>
 <member name="M:winapp2ool.downloadr.checkOnline">
- <summary>Attempts to connect to the internet</summary>
- <returns><c>True</c>If the connection is successful <c>False</c> otherwise</returns>
+ <summary> Attempts to connect to the internet </summary>
+ <returns> <c> True </c> If the connection is successful <c> False </c> otherwise </returns>
 </member>
 <member name="M:winapp2ool.downloadr.getTargetLine(System.IO.StreamReader,System.Int32)">
- <summary>Reads a file only until reaching a specific line and then returns that line as a String</summary>
- <param name="reader">An open file stream</param>
- <param name="lineNum">The target line number</param>
- <returns>The String on the line given by <paramref name="lineNum"/></returns>
+ <summary> Reads a file only until reaching a specific line and then returns that line as a String </summary>
+ <param name="reader"> An open file stream </param>
+ <param name="lineNum"> The target line number </param>
+ <returns> The String on the line given by <paramref name="lineNum"/> </returns>
 </member>
 <member name="M:winapp2ool.downloadr.setDownloadedFileStage(System.String)">
  <summary> Downloads a file to the Windows temporary directory and returns its path. If the file already exists, it will be deleted and overwritten with the downloaded file </summary>
  <param name="remotelink"> A GitHub link to a file to be downloaded </param>
 </member>
 <member name="M:winapp2ool.downloadr.getRemoteIniFile(System.String)">
- <summary>Attempts to create an <c>iniFile</c> using the data provided by <paramref name="address"/></summary>
+ <summary> Attempts to create an <c> iniFile </c> using the data provided by <paramref name="address"/> </summary>
  <param name="address"> A URL pointing to an online .ini file </param>
- <returns>An <c> iniFile </c> created using the remote data if that data is properly formatted, <c> Nothing </c> otherwise </returns>
+ <returns> An <c> iniFile </c> created using the remote data if that data is properly formatted, <c> Nothing </c> otherwise </returns>
 </member>
 <member name="T:winapp2ool.exceptionHandler">
  <summary>
@@ -568,65 +574,63 @@ winapp2ool
  <param name="l">The line number</param>
 </member>
 <member name="T:winapp2ool.keyList">
- <summary>
- A handy wrapper object for lists of iniKeys
- </summary>
+ <summary> A handy wrapper object for lists of iniKeys </summary>
 </member>
 <member name="P:winapp2ool.keyList.Keys">
- <summary> The list of iniKeys </summary>
+ <summary> The list of <c> iniKeys </c> </summary>
 </member>
 <member name="P:winapp2ool.keyList.KeyType">
- <summary> The KeyType of keys contained in the list</summary>
+ <summary> The <c> KeyType </c> of the <c> iniKeys </c> contained in the <c> keyList </c> </summary>
 </member>
 <member name="M:winapp2ool.keyList.KeyCount">
- <summary>Returns the number of keys in the keylist</summary>
+ <summary> Returns the number of keys in the keylist </summary>
 </member>
 <member name="M:winapp2ool.keyList.#ctor(System.String)">
- <summary>Creates a new (empty) keylist</summary>
- <param name="kt">Optional String containing the expected KeyType of the keys in the list</param>
+ <summary> Creates a new (empty) <c> keyList </c> </summary>
+ <param name="kt"> The expected <c> keyType </c> of the <c> iniKeys </c> in the <c> keyList </c> <br /> Optional, Default: <c> "" </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.#ctor(System.Collections.Generic.List{winapp2ool.iniKey})">
- <summary>Creates a new keylist using an existing list of iniKeys</summary>
- <param name="kl">A list of iniKeys to be inserted into the keylist</param>
+ <summary> Creates a new <c> keyList </c> using an existing list of <c> iniKeys </c> </summary>
+ <param name="kl"> A list of <c> iniKeys </c> to be inserted into the <c> keylist </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.add(winapp2ool.iniKey,System.Boolean)">
- <summary>Conditionally adds a key to the keylist</summary>
- <param name="key">The key to be added</param>
- <param name="cond">The condition under which to add the key</param>
+ <summary> Conditionally adds an <c> iniKey </c> into the <c> keyList </c> </summary>
+ <param name="key"> The <c> iniKey </c>to be added </param>
+ <param name="cond"> The condition under which to add the <c> iniKey </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.add(System.Collections.Generic.List{winapp2ool.iniKey})">
- <summary>Adds a list of iniKeys to the keylist</summary>
- <param name="kl">The list to be added</param>
+ <summary> Adds a list of <c> iniKeys </c> to the <c> keyList </c> </summary>
+ <param name="kl">The list of <c> iniKeys </c> to be added </param>
 </member>
 <member name="M:winapp2ool.keyList.remove(winapp2ool.iniKey)">
- <summary>Removes a key from the keylist</summary>
- <param name="key">The key to be removed</param>
+ <summary> Removes an <c> iniKey </c> from the <c> keyList </c> </summary>
+ <param name="key">The <c> iniKey </c> to be removed </param>
 </member>
 <member name="M:winapp2ool.keyList.remove(System.Collections.Generic.List{winapp2ool.iniKey})">
- <summary>Removes a list of keys from the keylist</summary>
- <param name="kl">The list of keys to be removed</param>
+ <summary>Removes a list of <c> iniKeys </c>from the <c> keyList </c> </summary>
+ <param name="kl"> The list of <c> iniKeys </c> to be removed </param>
 </member>
 <member name="M:winapp2ool.keyList.remove(System.Int32)">
- <summary> Removes the key at the provided index</summary>
- <param name="ind">The index of the key to be removed</param>
+ <summary> Removes the <c>iniKey </c>at the provided index provided by <c> <paramref name="ind"/> </c> from the <c> keyList </c> </summary>
+ <param name="ind"> The index of the <c> iniKey </c> to be removed </param>
 </member>
 <member name="M:winapp2ool.keyList.typeIs(System.String)">
- <summary>Returns whether or not the keyType of the list matches the input String</summary>
- <param name="type">The String against which to match the keylist's type</param>
+ <summary> Returns a <c> Boolean </c> indicating whether or not the <c> keyType  </c>of the list matches the <c> keyType </c> provided by <c> <paramref name="type"/> </c> </summary>
+ <param name="type"> The String against which to match the <c> keylist's keyType </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.toStrLst(System.Boolean)">
- <summary>Returns a keyList as a strList</summary>
- <param name="onlyGetVals">True if only requesting the values from the keys. Defaukt: false</param>
+ <summary> Returns a <c> keyList </c> as a <c> strList </c> </summary>
+ <param name="onlyGetVals"> <c> True </c> if only requesting the values from the keys. <br /> Optional, Default: <c> False </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.removeLast">
- <summary>Removes the last element in the key list if it exists</summary>
+ <summary> Removes the last element in the <c> keyList </c> if it exists </summary>
 </member>
 <member name="M:winapp2ool.keyList.renumberKeys(winapp2ool.strList)">
- <summary>Renumber keys according to the sorted state of the values</summary>
- <param name="sortedKeyValues"></param>
+ <summary> Renumber keys according to the sorted state of the values provided by <c> <paramref name="sortedKeyValues"/> </c> </summary>
+ <param name="sortedKeyValues"> Some target sorted state of the <c> Values </c> of the <c> iniKeys </c> in the <c> keyList </c> </param>
 </member>
 <member name="M:winapp2ool.keyList.lineNums">
- <summary>Returns a list of integers containing the line numbers from the keylist</summary>
+ <summary> Returns a <c> List(Of Integer) </c> containing the line numbers from the <c> iniKeys </c> in the <c> keyList </c> </summary>
 </member>
 <member name="T:winapp2ool.iniKey">
  <summary>
@@ -998,61 +1002,62 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary>Denies the ability to access online-only functions if offline</summary>
 </member>
 <member name="T:winapp2ool.updater">
- <summary>Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe</summary>
+ <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
 </member>
 <member name="P:winapp2ool.updater.latestVersion">
- <summary>The latest available verson of winapp2ool from GitHub</summary>
+ <summary> The latest available verson of winapp2ool from GitHub </summary>
 </member>
 <member name="P:winapp2ool.updater.latestWa2Ver">
- <summary>The latest available version of winapp2.ini from GitHub</summary>
+ <summary> The latest available version of winapp2.ini from GitHub </summary>
 </member>
 <member name="P:winapp2ool.updater.localWa2Ver">
- <summary>The local version of winapp2.ini (if available)</summary>
+ <summary> The local version of winapp2.ini (if available) </summary>
 </member>
 <member name="P:winapp2ool.updater.updateIsAvail">
- <summary>Indicates that a winapp2ool update is available from GitHub</summary>
+ <summary> Indicates that a winapp2ool update is available from GitHub </summary>
 </member>
 <member name="P:winapp2ool.updater.waUpdateIsAvail">
- <summary>Indicates that a winapp2.ini update is available from GitHub</summary>
+ <summary> Indicates that a winapp2.ini update is available from GitHub </summary>
 </member>
 <member name="P:winapp2ool.updater.currentVersion">
- <summary>The local version of winapp2ool</summary>
+ <summary> The local version of winapp2ool </summary>
 </member>
 <member name="P:winapp2ool.updater.checkedForUpdates">
- <summary>Indicates that an update check has been performed</summary>
+ <summary> Indicates that an update check has been performed </summary>
 </member>
 <member name="M:winapp2ool.updater.padVersionNum(System.String@)">
- <summary>Pads the seconds portion of the version number to always be length of 5</summary>
- <param name="version">A version number to pad</param>
+ <summary> Pads the seconds portion of the version number, ensuring that it always have a length of 5 </summary>
+ <param name="version"> A version number to pad </param>
 </member>
 <member name="M:winapp2ool.updater.checkUpdates(System.Boolean)">
- <summary>Checks the versions of winapp2ool, .NET, and winapp2.ini and records if any are outdated.</summary>
- <param name="cond">Indicates that the update check should be performed. <br />Optional, Default: False</param>
+ <summary> Checks the versions of winapp2ool, .NET, and winapp2.ini and notes which, if any, are out of date </summary>
+ <param name="cond"> Indicates that the update check should be performed <br /> Optional, Default: <c> False </c> </param>
 </member>
 <member name="M:winapp2ool.updater.toolVersionCheck">
-<summary>Performs the version chcking for winapp2ool.exe</summary>
+<summary> Performs the version chcking for winapp2ool.exe </summary>
 </member>
 <member name="M:winapp2ool.updater.updateCheckFailed(System.String,System.Boolean)">
- <summary>Handles the case where the update check has failed</summary>
- <param name="name">The name of the component whose update check failed</param>
- <param name="chkOnline">A flag specifying that the internet connection should be retested</param>
+ <summary> Handles the case where the update check has failed </summary>
+ <param name="name"> The name of the component whose update check failed </param>
+ <param name="chkOnline"> A flag specifying that the internet connection should be retested </param>
 </member>
 <member name="M:winapp2ool.updater.getVersionFromLocalFile(System.String)">
  <summary> Attempts to return the version number from a file found on disk, returns <c> "000000" </c> if it's unable to do so </summary>
  <param name="path"> The path of the file whose version number will be queried </param>
 </member>
 <member name="M:winapp2ool.updater.chkOfflineMode">
- <summary>Updates the offline status of winapp2ool</summary>
+ <summary> Updates the offline status of winapp2ool </summary>
 </member>
 <member name="M:winapp2ool.updater.printUpdNotif(System.Boolean,System.String,System.String,System.String)">
- <summary>Informs the user when an update is available</summary>
- <param name="cond">The update condition</param>
- <param name="updName">The item (winapp2.ini or winapp2ool) for which there is a pending update</param>
- <param name="oldVer">The old (currently in use) version</param>
- <param name="newVer">The updated version pending download</param>
+ <summary> Informs the user when an update is available </summary>
+ <param name="cond"> The update condition </param>
+ <param name="updName"> The item (winapp2.ini or winapp2ool) for which there is a pending update </param>
+ <param name="oldVer"> The old (currently in use) version </param>
+ <param name="newVer"> The updated version pending download </param>
 </member>
 <member name="M:winapp2ool.updater.autoUpdate">
- <summary>Downloads the latest version of winapp2ool.exe and replaces the currently running executable with it before launching that new executable and closing the program.</summary>
+ <summary> Replaces the currently running executable with the latest from GitHub before launching that new executable and closing the current one,
+ ensures that this change can be undone by backing up the current version before replacing it </summary>
 </member>
 <member name="M:winapp2ool.updater.fDelete(System.String)">
 <summary> Deletes a file from the disk if it exists </summary>
@@ -1803,7 +1808,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="M:winapp2ool.WinappDebug.pFileKey(winapp2ool.iniKey)">
  <summary> Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible </summary>
- <param name="key"> A winap2.ini FileKey format <c> iniKey </c> to be checked for correctness </param>
+ <param name="key"> A winapp2.ini FileKey format <c> iniKey </c> to be checked for correctness </param>
 </member>
 <member name="M:winapp2ool.WinappDebug.pDetectFile(winapp2ool.iniKey)">
  <summary> Processes a DetectFile format <c> iniKey </c> and checks it for errors, correcting where possible </summary>
@@ -1871,6 +1876,15 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="P:winapp2ool.Winapp2ool.isBeta">
  <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
+</member>
+<member name="P:winapp2ool.Winapp2ool.cantDownloadExecutable">
+ <summary> Inidcates that we're unable to download the executable </summary>
+</member>
+<member name="P:winapp2ool.Winapp2ool.alreadyDownloadedExecutable">
+ <summary> Indicates that winapp2ool.exe has already been downloaded during this session and prevents us from redownloading it </summary>
+ <remarks> This is to handle the fact that opening a file's manifest to read it's version number as we do on the beta branch puts a lock on that file
+ which necessarily prevents us from deleting it, a critical step in ensuring that we have the latest binary. Attempts to read the manifest from the bytestream 
+ without locking the file cause many antivirus' to flag winapp2ool as a malicious entity and in some cases, automatically remove it from the system. </remarks>
 </member>
 <member name="M:winapp2ool.Winapp2ool.printMenu">
  <summary> Prints the main winapp2ool menu to the user </summary>

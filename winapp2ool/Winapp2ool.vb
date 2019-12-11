@@ -61,6 +61,10 @@ Module Winapp2ool
     ''' <summary> Processes the commandline args and then initalizes the main winapp2ool module </summary>
     Public Sub main()
         gLog($"Starting application")
+        ' winapp2ool requires internet access for some functions
+        chkOfflineMode()
+        currentVersion = getToolVersionWithoutHook(Environment.GetCommandLineArgs(0))
+        ' Set the console stage 
         Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 126
         ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
@@ -68,8 +72,6 @@ Module Winapp2ool
         gLog($".NET Framework is out of date. Found {Environment.Version.ToString}", DotNetFrameworkOutOfDate)
         ' Make sure we're not operating in the temporary directory 
         If Environment.CurrentDirectory = Environment.GetEnvironmentVariable("temp") Then cantDownloadExecutable = True
-        ' winapp2ool requires internet access for some functions
-        chkOfflineMode()
         processCommandLineArgs()
         If SuppressOutput Then Environment.Exit(1)
         initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printMenu, AddressOf handleUserInput)
@@ -122,6 +124,8 @@ Module Winapp2ool
                 GlobalLogFile.overwriteToFile(logger.toString)
             Case input = "printlog"
                 printLog()
+            Case input = "forceupdate"
+                autoUpdate()
             Case Else
                 setHeaderText(invInpStr, True)
         End Select
@@ -146,7 +150,7 @@ Module Winapp2ool
     End Function
 
     ''' <summary> Ensures that an <c> iniFile </c> has content and informs the user if it does not. Returns <c> False </c> if there are no sections </summary>
-    ''' <param name="iFile">An <c> iniFile </c> to be checked for content </param>
+    ''' <param name="iFile"> An <c> iniFile </c> to be checked for content </param>
     Public Function enforceFileHasContent(iFile As iniFile) As Boolean
         iFile.validate()
         If iFile.Sections.Count = 0 Then
