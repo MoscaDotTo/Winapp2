@@ -132,7 +132,7 @@ Module Winapp2ool
     End Sub
 
     ''' <summary> Checks the version of Windows on the current system and returns it as a Double </summary>
-    ''' <returns> The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined </returns>
+    ''' <returns> The Windows version running on the machine, <c> 0.0 </c> if the windows version cannot be determined </returns>
     Public Function getWinVer() As Double
         gLog("Checking Windows version")
         Dim osVersion = System.Environment.OSVersion.ToString().Replace("Microsoft Windows NT ", "")

@@ -21,17 +21,17 @@ Imports System.Text.RegularExpressions
 ''' Provides an object model and some helpful functions for working with winapp2.ini format .ini files
 ''' </summary>
 Public Module winapp2handler
-    ''' <summary>Sorts a list of strings after performing some mutations on the data (if necessary). Returns the sorted list of strings.</summary>
-    ''' <param name="ListToBeSorted">A list of strings for sorting </param>
-    ''' <param name="characterToReplace">A character (string) to replace</param>
-    ''' <param name="replacementText">The chosen replacement text</param>
-    Public Function replaceAndSort(ListToBeSorted As strList, characterToReplace As String, replacementText As String) As strList
+    ''' <summary> Sorts a list of <c> Strings </c> after performing some mutations on the data (if necessary). Returns the sorted list of strings. </summary>
+    ''' <param name="ListToBeSorted"> A <c> list (of String)s </c> to be sorted </param>
+    ''' <param name="textToBeReplaced"> The <c> String </c> data that will be replaced during mutations </param>
+    ''' <param name="replacementText">The data with which <c> <paramref name="textToBeReplaced"/> </c> will be replaced </param>
+    Public Function replaceAndSort(ListToBeSorted As strList, textToBeReplaced As String, replacementText As String) As strList
         Dim changes As New changeDict
         ' Replace our target characters if they exist
         For i = 0 To ListToBeSorted.Items.Count - 1
             Dim item = ListToBeSorted.Items(i)
-            If item.Contains(characterToReplace) Then
-                Dim renamedItem = item.Replace(characterToReplace, replacementText)
+            If item.Contains(textToBeReplaced) Then
+                Dim renamedItem = item.Replace(textToBeReplaced, replacementText)
                 changes.trackChanges(item, renamedItem)
                 ListToBeSorted.Items(i) = renamedItem
             End If
@@ -47,8 +47,8 @@ Public Module winapp2handler
         Return sortedEntryList
     End Function
 
-    ''' <summary>Searches the input list for numbers and returns the length of the longest number.</summary>
-    ''' <param name="lst">A list of strings to be searched</param>
+    ''' <summary> Searches the <c> <paramref name="lst"/> </c> for integers and returns the length of the longest integer found </summary>
+    ''' <param name="lst"> A list of strings to be searched </param>
     Private Function findLongestNumLength(ByRef lst As strList) As Integer
         Dim out = 0
         For Each item In lst.Items
@@ -59,10 +59,10 @@ Public Module winapp2handler
         Return out
     End Function
 
-    ''' <summary>Detects the longest length number in a given list of strings and prepends all shorter numbers with zeros such that all numbers are the same length</summary>
+    ''' <summary> Detects the length (number of digits) in the "longest" integer in a given <c> list (of String)s </c> and prepends all shorter integers with zeros such that all the integers in all Strings are the same length </summary>
     ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. 
-    ''' <param name="listToBeSorted">The list to be modified prior to sorting</param>
-    ''' <param name="changes">The dictionary of changes made to the strings in listToBeSorted</param>
+    ''' <param name="listToBeSorted"> The list to be modified and sorted </param>
+    ''' <param name="changes"> Dictonary of the changes made to the Strings in <c> <paramref name="listToBeSorted"/> </c></param>
     Private Sub findAndReplaceNumbers(ByRef listToBeSorted As strList, ByRef changes As changeDict)
         Dim longestNumLen = findLongestNumLength(listToBeSorted)
         If longestNumLen < 2 Then Exit Sub
@@ -98,8 +98,8 @@ Public Module winapp2handler
         Next
     End Sub
 
-    ''' <summary>Returns the value from an ExcludeKey with the Flag parameter removed as a String</summary>
-    ''' <param name="key">An ExcludeKey iniKey</param>
+    ''' <summary> Returns the path from an ExcludeKey with the <c> Flag </c> parameter removed, as a <c> String </c></summary>
+    ''' <param name="key"> An ExcludeKey <c> iniKey </c></param>
     Public Function pathFromExcludeKey(key As iniKey) As String
         Dim pathFromKey = key.Value.TrimStart(CType("FILE|", Char()))
         pathFromKey = pathFromKey.TrimStart(CType("PATH|", Char()))
@@ -107,9 +107,9 @@ Public Module winapp2handler
         Return pathFromKey
     End Function
 
-    ''' <summary>Pads a number to a given length by preceding it with zeros (0's) and returns the padded number</summary>
-    ''' <param name="longestNumLen">The desired maximum length of a number</param>
-    ''' <param name="num">a given number</param>
+    ''' <summary> Pads a given number to a given length by prepending it with zeros (0's), returns the padded number </summary>
+    ''' <param name="longestNumLen"> The desired maximum length of a number </param>
+    ''' <param name="num"> The given number </param>
     Private Function padNumberStr(longestNumLen As Integer, num As String) As String
         Dim replMatch = ""
         While replMatch.Length < longestNumLen - num.Length
@@ -118,9 +118,9 @@ Public Module winapp2handler
         Return replMatch & num
     End Function
 
-    ''' <summary>Removes winapp2entry objects from a given winapp2file sectionList</summary>
-    ''' <param name="sectionList">The list of winapp2sections </param>
-    ''' <param name="removalList"></param>
+    ''' <summary> Removes <c> winapp2entry </c> objects from a given <c> winapp2file's </c> <c> sectionList </c></summary>
+    ''' <param name="sectionList">The list of <c> winapp2entrys </c> representing a given "section" in the file </param>
+    ''' <param name="removalList">The list of <c> winapp2entrys </c> to be removed from a section </param>
     Public Sub removeEntries(ByRef sectionList As List(Of winapp2entry), ByRef removalList As List(Of winapp2entry))
         For Each item In removalList
             sectionList.Remove(item)
@@ -128,8 +128,8 @@ Public Module winapp2handler
         removalList.Clear()
     End Sub
 
-    ''' <summary>Sort the sections in an inifile by name</summary>
-    ''' <param name="file">The iniFile to be sorted</param>
+    ''' <summary> Returns the <c> Names </c> of the <c> iniSections </c> in an <c> iniFile </c> sorted in winapp2.ini order as a <c> strList </c></summary>
+    ''' <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
     Public Function sortEntryNames(ByVal file As iniFile) As strList
         Return replaceAndSort(file.namesToStrList, "-", "  ")
     End Function

@@ -74,14 +74,25 @@ Public Module updater
         gLog("Winapp2.ini:")
         gLog("Local: " & localWa2Ver, indent:=True)
         gLog("Remote: " & latestWa2Ver, indent:=True)
-        Dim updHeader = $"Update{If(waUpdateIsAvail And updateIsAvail, "s", "")} available for {If(updateIsAvail, "winapp2ool ", "")}{If(waUpdateIsAvail And updateIsAvail, "and ", "")}{If(waUpdateIsAvail,
-            "winapp2.ini", "")}"
+        Dim bothUpdatesAreAvail = waUpdateIsAvail And updateIsAvail
+        Dim updHeader = $"Update{If(bothUpdatesAreAvail, "s", "")} available for {If(updateIsAvail, "winapp2ool ", "")}{If(bothUpdatesAreAvail, "and ", "")}{If(waUpdateIsAvail, "winapp2.ini", "")}"
         setHeaderText(updHeader, True, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
     End Sub
 
+    ''' <summary> Returns the version number from winapp2ool.exe by reading it from the manifest. Does so without placing a lock on the file by reading 
+    ''' the manifest as a bytestream. </summary>
+    ''' <param name="pathToFile"> An absolute path to a winapp2ool.exe file </param>
     Public Function getToolVersionWithoutHook(pathToFile As String) As String
-        'Return Reflection.Assembly.LoadFile(pathToFile).FullName.Split(CChar(","))(1).Substring(9)
-        Return Reflection.Assembly.Load(File.ReadAllBytes(pathToFile)).FullName.Split(CChar(","))(1).Substring(9)
+        ' The commented out line does the same thing as the uncommented one but necessarily places a file hook on the file at PathToFile
+        If Not File.Exists(pathToFile) Then Return "000000 (file not found)"
+        Try
+            Return Reflection.Assembly.Load(File.ReadAllBytes(pathToFile)).FullName.Split(CChar(","))(1).Substring(9)
+        Catch ex As Exception
+            ' Pretty much the only exception here is that winapp2ool has been flagged as malicious and cannot be downloaded. Working on a fix for this but for now just eat the error 
+            exc(ex)
+            clrConsole()
+            Return "000000 (exception encountered)"
+        End Try
     End Function
 
     '''<summary> Performs the version chcking for winapp2ool.exe </summary>
@@ -97,7 +108,6 @@ Public Module updater
                 Dim tmpPath = setDownloadedFileStage(betaToolLink)
                 alreadyDownloadedExecutable = True
                 ' This places a lock on winapp2ool.exe in the tmp folder that will remain until we close the application
-                'latestVersion = Reflection.Assembly.LoadFile(tmpPath).FullName.Split(CChar(","))(1).Substring(9)
                 latestVersion = getToolVersionWithoutHook(tmpPath)
                 ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
                 ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
@@ -120,9 +130,7 @@ Public Module updater
     ''' <param name="path"> The path of the file whose version number will be queried </param>
     Private Function getVersionFromLocalFile(Optional path As String = "") As String
         ' Handle a special version.txt edge case
-        If path.EndsWith("version.txt") Then
-            Return getFileDataAtLineNum(path)
-        End If
+        If path.EndsWith("version.txt") Then Return getFileDataAtLineNum(path)
         If path = "" Then path = Environment.CurrentDirectory & "\winapp2.ini"
         If Not File.Exists(path) Then Return "000000 (file not found)"
         Dim versionString = getFileDataAtLineNum(path).ToLower

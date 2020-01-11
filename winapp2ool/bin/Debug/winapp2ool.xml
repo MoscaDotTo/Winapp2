@@ -1033,6 +1033,11 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary> Checks the versions of winapp2ool, .NET, and winapp2.ini and notes which, if any, are out of date </summary>
  <param name="cond"> Indicates that the update check should be performed <br /> Optional, Default: <c> False </c> </param>
 </member>
+<member name="M:winapp2ool.updater.getToolVersionWithoutHook(System.String)">
+ <summary> Returns the version number from winapp2ool.exe by reading it from the manifest. Does so without placing a lock on the file by reading 
+ the manifest as a bytestream. </summary>
+ <param name="pathToFile"> An absolute path to a winapp2ool.exe file </param>
+</member>
 <member name="M:winapp2ool.updater.toolVersionCheck">
 <summary> Performs the version chcking for winapp2ool.exe </summary>
 </member>
@@ -1088,35 +1093,35 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  </summary>
 </member>
 <member name="P:winapp2ool.winapp2file.FileSectionHeaders">
- <summary>The names of the sections of entries as they appear in winapp2.ini</summary>
+ <summary> The names of the sections of entries as they appear in winapp2.ini </summary>
 </member>
 <member name="P:winapp2ool.winapp2file.EntrySections">
- <summary>A list of iniFiles each containing one of the headers contents</summary>
+ <summary> A list of iniFiles each containing one of the headers contents </summary>
 </member>
 <member name="P:winapp2ool.winapp2file.Winapp2entries">
- <summary>The list of winapp2entry objects for each header section</summary>
+ <summary> The list of winapp2entry objects for each header section </summary>
 </member>
 <member name="P:winapp2ool.winapp2file.IsNCC">
- <summary>Indicates whether or not this object represents a Non-CCleaner variant of winapp2.ini</summary>
+ <summary> Indicates whether or not this object represents a Non-CCleaner variant of winapp2.ini </summary>
 </member>
 <member name="P:winapp2ool.winapp2file.Dir">
-<summary>The directory of the iniFile object used to instantiate this object</summary>
+<summary> The directory of the iniFile object used to instantiate this object </summary>
 </member>
 <member name="P:winapp2ool.winapp2file.Name">
-<summary>The file name of the iniFile object used to instantiate this object</summary>
+<summary> The file name of the iniFile object used to instantiate this object </summary>
 </member>
 <member name="P:winapp2ool.winapp2file.Version">
-<summary>The version in YYMMDD format of the winapp2.ini file (Defaults to 000000)</summary>
+<summary> The version in YYMMDD format of the winapp2.ini file (Defaults to 000000) </summary>
 </member>
 <member name="M:winapp2ool.winapp2file.#ctor(winapp2ool.iniFile)">
- <summary>Create a new meta winapp2 object from an iniFile object</summary>
- <param name="file">A winapp2.ini format iniFile object</param>
+ <summary> Creates a new <c> winapp2file </c> from an <c> iniFile </c> </summary>
+ <param name="file"> A winapp2.ini format <c> iniFile </c> object </param>
 </member>
 <member name="M:winapp2ool.winapp2file.addToInnerFile(System.Int32,winapp2ool.winapp2entry,winapp2ool.iniSection)">
- <summary>Inserts an iniSection into its respective tracking file and records the winapp2entry object form accordingly. </summary>
- <param name="ind">The index of the tracking file</param>
- <param name="entry">The section in winapp2entry format</param>
- <param name="section">A section to be tracked</param>
+ <summary> Inserts an <c> iniSection </c> into its respective tracking file and records the winapp2entry object form accordingly. </summary>
+ <param name="ind"> The index of the tracking file </param>
+ <param name="entry"> The section in winapp2entry format </param>
+ <param name="section"> A section to be tracked </param>
 </member>
 <member name="M:winapp2ool.winapp2file.count">
  <summary>Returns the total number of entries stored in the internal iniFile objects</summary>
@@ -1125,17 +1130,17 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  <summary>Sorts the internal iniFile objects in winapp2.ini format order</summary>
 </member>
 <member name="M:winapp2ool.winapp2file.rebuildInnerIni(System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
- <summary>Rebuilds a list of winapp2entry objects back into iniSection objects and returns the collection of them as an iniFile</summary>
+ <summary> Rebuilds a <c> list of winapp2entry </c> objects back into iniSection objects and returns the collection of them as an iniFile </summary>
  <param name="entryList"></param>
 </member>
 <member name="M:winapp2ool.winapp2file.rebuildToIniFiles">
- <summary>Updates the internal iniFile objects</summary>
+ <summary> Updates the internal iniFile objects </summary>
 </member>
 <member name="M:winapp2ool.winapp2file.toIni">
-<summary>Returns the winapp2file's inner inifile as a single inifile object with sections ordered as they would be in winapp2.ini</summary>
+<summary> Returns the <c> winapp2file </c>'s inner <c> inifiles </c> as a single <c> inifile </c>object with its sections ordered as they would be in winapp2.ini on disk </summary>
 </member>
 <member name="M:winapp2ool.winapp2file.winapp2string">
- <summary>Builds and returns the winapp2.ini text including header comments for writing back to a file</summary>
+ <summary> Builds and returns the winapp2.ini text including the preamble comments </summary>
 </member>
 <member name="T:winapp2ool.winapp2KeyParameters">
  <summary>
@@ -1249,38 +1254,38 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  </summary>
 </member>
 <member name="M:winapp2ool.winapp2handler.replaceAndSort(winapp2ool.strList,System.String,System.String)">
- <summary>Sorts a list of strings after performing some mutations on the data (if necessary). Returns the sorted list of strings.</summary>
- <param name="ListToBeSorted">A list of strings for sorting </param>
- <param name="characterToReplace">A character (string) to replace</param>
- <param name="replacementText">The chosen replacement text</param>
+ <summary> Sorts a list of <c> Strings </c> after performing some mutations on the data (if necessary). Returns the sorted list of strings. </summary>
+ <param name="ListToBeSorted"> A <c> list (of String)s </c> to be sorted </param>
+ <param name="textToBeReplaced"> The <c> String </c> data that will be replaced during mutations </param>
+ <param name="replacementText">The data with which <c> <paramref name="textToBeReplaced"/> </c> will be replaced </param>
 </member>
 <member name="M:winapp2ool.winapp2handler.findLongestNumLength(winapp2ool.strList@)">
- <summary>Searches the input list for numbers and returns the length of the longest number.</summary>
- <param name="lst">A list of strings to be searched</param>
+ <summary> Searches the <c> <paramref name="lst"/> </c> for integers and returns the length of the longest integer found </summary>
+ <param name="lst"> A list of strings to be searched </param>
 </member>
 <member name="M:winapp2ool.winapp2handler.findAndReplaceNumbers(winapp2ool.strList@,winapp2ool.changeDict@)">
- <summary>Detects the longest length number in a given list of strings and prepends all shorter numbers with zeros such that all numbers are the same length</summary>
+ <summary> Detects the length (number of digits) in the "longest" integer in a given <c> list (of String)s </c> and prepends all shorter integers with zeros such that all the integers in all Strings are the same length </summary>
  This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. 
- <param name="listToBeSorted">The list to be modified prior to sorting</param>
- <param name="changes">The dictionary of changes made to the strings in listToBeSorted</param>
+ <param name="listToBeSorted"> The list to be modified and sorted </param>
+ <param name="changes"> Dictonary of the changes made to the Strings in <c> <paramref name="listToBeSorted"/> </c></param>
 </member>
 <member name="M:winapp2ool.winapp2handler.pathFromExcludeKey(winapp2ool.iniKey)">
- <summary>Returns the value from an ExcludeKey with the Flag parameter removed as a String</summary>
- <param name="key">An ExcludeKey iniKey</param>
+ <summary> Returns the path from an ExcludeKey with the <c> Flag </c> parameter removed, as a <c> String </c></summary>
+ <param name="key"> An ExcludeKey <c> iniKey </c></param>
 </member>
 <member name="M:winapp2ool.winapp2handler.padNumberStr(System.Int32,System.String)">
- <summary>Pads a number to a given length by preceding it with zeros (0's) and returns the padded number</summary>
- <param name="longestNumLen">The desired maximum length of a number</param>
- <param name="num">a given number</param>
+ <summary> Pads a given number to a given length by prepending it with zeros (0's), returns the padded number </summary>
+ <param name="longestNumLen"> The desired maximum length of a number </param>
+ <param name="num"> The given number </param>
 </member>
 <member name="M:winapp2ool.winapp2handler.removeEntries(System.Collections.Generic.List{winapp2ool.winapp2entry}@,System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
- <summary>Removes winapp2entry objects from a given winapp2file sectionList</summary>
- <param name="sectionList">The list of winapp2sections </param>
- <param name="removalList"></param>
+ <summary> Removes <c> winapp2entry </c> objects from a given <c> winapp2file's </c> <c> sectionList </c></summary>
+ <param name="sectionList">The list of <c> winapp2entrys </c> representing a given "section" in the file </param>
+ <param name="removalList">The list of <c> winapp2entrys </c> to be removed from a section </param>
 </member>
 <member name="M:winapp2ool.winapp2handler.sortEntryNames(winapp2ool.iniFile)">
- <summary>Sort the sections in an inifile by name</summary>
- <param name="file">The iniFile to be sorted</param>
+ <summary> Returns the <c> Names </c> of the <c> iniSections </c> in an <c> iniFile </c> sorted in winapp2.ini order as a <c> strList </c></summary>
+ <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
 </member>
 <member name="T:winapp2ool.Merge">
  <summary> Facilitates the merger of one <c> iniFile </c> into another </summary>
@@ -1898,7 +1903,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
  <summary> Checks the version of Windows on the current system and returns it as a Double </summary>
- <returns> The Windows version running on the machine, <c>0.0</c> if the windows version cannot be determined </returns>
+ <returns> The Windows version running on the machine, <c> 0.0 </c> if the windows version cannot be determined </returns>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getFirstDir(System.String)">
  <summary> Returns the first portion of a registry or filepath parameterization </summary>

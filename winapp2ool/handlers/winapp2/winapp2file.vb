@@ -20,25 +20,25 @@ Option Strict On
 ''' </summary>
 Public Class winapp2file
     ' "" = main section, bottom most in all circumstances and appearing without a label 
-    ''' <summary>The names of the sections of entries as they appear in winapp2.ini</summary>
+    ''' <summary> The names of the sections of entries as they appear in winapp2.ini </summary>
     Public ReadOnly Property FileSectionHeaders As New List(Of String) From {"Chrome/Chromium based browsers", "Microsoft Edge Insider", "Opera", "Firefox/Mozilla based browsers", "Thunderbird",
         "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
     ' As above, index 0 = Chrome, 1 = Microsoft Edge Insider, 2 = Opera.... 9 = ""
-    ''' <summary>A list of iniFiles each containing one of the headers contents</summary>
+    ''' <summary> A list of iniFiles each containing one of the headers contents </summary>
     Public Property EntrySections As New List(Of iniFile)
-    ''' <summary>The list of winapp2entry objects for each header section</summary>
+    ''' <summary> The list of winapp2entry objects for each header section </summary>
     Public Property Winapp2entries As New List(Of List(Of winapp2entry))
-    ''' <summary>Indicates whether or not this object represents a Non-CCleaner variant of winapp2.ini</summary>
+    ''' <summary> Indicates whether or not this object represents a Non-CCleaner variant of winapp2.ini </summary>
     Public Property IsNCC As Boolean = False
-    '''<summary>The directory of the iniFile object used to instantiate this object</summary>
+    '''<summary> The directory of the iniFile object used to instantiate this object </summary>
     Public Property Dir As String = ""
-    '''<summary>The file name of the iniFile object used to instantiate this object</summary>
+    '''<summary> The file name of the iniFile object used to instantiate this object </summary>
     Public Property Name As String = ""
-    '''<summary>The version in YYMMDD format of the winapp2.ini file (Defaults to 000000)</summary>
+    '''<summary> The version in YYMMDD format of the winapp2.ini file (Defaults to 000000) </summary>
     Public Property Version As String = "000000"
 
-    ''' <summary>Create a new meta winapp2 object from an iniFile object</summary>
-    ''' <param name="file">A winapp2.ini format iniFile object</param>
+    ''' <summary> Creates a new <c> winapp2file </c> from an <c> iniFile </c> </summary>
+    ''' <param name="file"> A winapp2.ini format <c> iniFile </c> object </param>
     Public Sub New(ByVal file As iniFile)
         Dir = file.Dir
         Name = file.Name
@@ -60,7 +60,7 @@ Public Class winapp2file
                 ind = langSecRefs.IndexOf(tmpwa2entry.LangSecRef.Keys.First.Value)
             ElseIf tmpwa2entry.SectionKey.KeyCount > 0 Then
                 ind = langSecRefs.IndexOf(tmpwa2entry.SectionKey.Keys.First.Value)
-                If ind = -1 And tmpwa2entry.SectionKey.Keys.First.Value.StartsWith("Dangerous") Then ind = 7
+                If ind = 8 And tmpwa2entry.SectionKey.Keys.First.Value.StartsWith("Dangerous") Then ind = 7
             End If
             ' Workaround for two separate sections for Microsoft Edge Insider (temporary, hopefully)
             If ind = 8 Then ind = 1
@@ -70,10 +70,10 @@ Public Class winapp2file
         Next
     End Sub
 
-    ''' <summary>Inserts an iniSection into its respective tracking file and records the winapp2entry object form accordingly. </summary>
-    ''' <param name="ind">The index of the tracking file</param>
-    ''' <param name="entry">The section in winapp2entry format</param>
-    ''' <param name="section">A section to be tracked</param>
+    ''' <summary> Inserts an <c> iniSection </c> into its respective tracking file and records the winapp2entry object form accordingly. </summary>
+    ''' <param name="ind"> The index of the tracking file </param>
+    ''' <param name="entry"> The section in winapp2entry format </param>
+    ''' <param name="section"> A section to be tracked </param>
     Private Sub addToInnerFile(ind As Integer, entry As winapp2entry, section As iniSection)
         If Not EntrySections(ind).Sections.Keys.Contains(section.Name) Then
             EntrySections(ind).Sections.Add(section.Name, section)
@@ -97,7 +97,7 @@ Public Class winapp2file
         Next
     End Sub
 
-    ''' <summary>Rebuilds a list of winapp2entry objects back into iniSection objects and returns the collection of them as an iniFile</summary>
+    ''' <summary> Rebuilds a <c> list of winapp2entry </c> objects back into iniSection objects and returns the collection of them as an iniFile </summary>
     ''' <param name="entryList"></param>
     Private Function rebuildInnerIni(ByRef entryList As List(Of winapp2entry)) As iniFile
         Dim tmpini As New iniFile
@@ -108,7 +108,7 @@ Public Class winapp2file
         Return tmpini
     End Function
 
-    ''' <summary>Updates the internal iniFile objects</summary>
+    ''' <summary> Updates the internal iniFile objects </summary>
     Public Sub rebuildToIniFiles()
         For i = 0 To EntrySections.Count - 1
             EntrySections(i) = rebuildInnerIni(Winapp2entries(i))
@@ -116,7 +116,7 @@ Public Class winapp2file
         Next
     End Sub
 
-    '''<summary>Returns the winapp2file's inner inifile as a single inifile object with sections ordered as they would be in winapp2.ini</summary>
+    '''<summary> Returns the <c> winapp2file </c>'s inner <c> inifiles </c> as a single <c> inifile </c>object with its sections ordered as they would be in winapp2.ini on disk </summary>
     Public Function toIni() As iniFile
         Dim out As New iniFile
         For Each entry In EntrySections
@@ -127,7 +127,7 @@ Public Class winapp2file
         Return out
     End Function
 
-    ''' <summary>Builds and returns the winapp2.ini text including header comments for writing back to a file</summary>
+    ''' <summary> Builds and returns the winapp2.ini text including the preamble comments </summary>
     Public Function winapp2string() As String
         Dim fileName = If(IsNCC, "Winapp2 (Non-CCleaner version)", "Winapp2")
         Dim licLink = If(IsNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md") & Environment.NewLine
