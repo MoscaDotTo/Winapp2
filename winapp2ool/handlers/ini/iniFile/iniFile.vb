@@ -53,7 +53,9 @@ Public Class iniFile
     ''' <summary> Returns an <c> iniFile </c> as a single <c> String </c> </summary>
     Public Overrides Function toString() As String
         Dim out As String = ""
-        For i As Integer = 0 To Sections.Count - 2
+        If Sections.Count = 0 Then Return out
+        If Sections.Count = 1 Then Return Sections.Values.Last.ToString
+        For i = 0 To Sections.Count - 2
             out += Sections.Values(i).ToString & Environment.NewLine
         Next
         out += Sections.Values.Last.ToString
@@ -65,6 +67,12 @@ Public Class iniFile
     ''' <returns> <c> True </c> if <paramref name="sectionName"/> matches the <c> Name </c> of an <c> iniSection </c> in the <c> iniFile </c>, <c> False </c> otherwise </returns>
     Public Function hasSection(sectionName As String) As Boolean
         Return Sections.ContainsKey(sectionName)
+    End Function
+
+    ''' <summary> Returns an  </summary>
+    ''' <param name="sectionName"></param>
+    Public Function getSection(sectionName As String) As iniSection
+        Return If(hasSection(sectionName), Sections(sectionName), Nothing)
     End Function
 
     ''' <summary> Creates an <c> uninitialized iniFile </c> with a directory and a filename </summary>
@@ -142,9 +150,9 @@ Public Class iniFile
         Select Case True
             Case currentLine.StartsWith(";")
                 Comments.Add(Comments.Count, New iniComment(currentLine, LineCount))
-            Case (Not currentLine.StartsWith("[") And Not currentLine.Trim = "") Or (currentLine.Trim <> "" And sectionToBeBuilt.Count = 0)
+            Case (Not currentLine.StartsWith("[") And Not currentLine.Trim.Length = 0) Or (currentLine.Trim.Length <> 0 And sectionToBeBuilt.Count = 0)
                 updSec(sectionToBeBuilt, lineTrackingList, currentLine)
-            Case currentLine.Trim <> "" And Not sectionToBeBuilt.Count = 0
+            Case currentLine.Trim.Length <> 0 And Not sectionToBeBuilt.Count = 0
                 mkSection(sectionToBeBuilt, lineTrackingList)
                 updSec(sectionToBeBuilt, lineTrackingList, currentLine)
         End Select
@@ -262,8 +270,8 @@ Public Class iniFile
     ''' property or open the <c> Directory Chooser </c> sister submodule through a familiar MenuMaker interface </summary>
     Public Sub printFileChooserMenu()
         printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"})
-        print(1, InitName, "Use the default name", InitName <> "")
-        print(1, SecondName, "Use the default rename", SecondName <> "")
+        print(1, InitName, "Use the default name", InitName.Length <> 0)
+        print(1, SecondName, "Use the default rename", SecondName.Length <> 0)
         print(1, "Directory Chooser", "Choose a new directory", trailingBlank:=True)
         print(0, $"Current Directory: {replDir(Dir)}")
         print(0, $"Current File:      {Name}", closeMenu:=True)
@@ -275,13 +283,13 @@ Public Class iniFile
         Select Case True
             Case input = "0"
                 exitModule()
-            Case input = ""
+            Case input.Length = 0
                 exitIfExists()
-            Case input = "1" And InitName <> ""
+            Case input = "1" And InitName.Length <> 0
                 reName(InitName)
-            Case (input = "1" And InitName = "") Or (input = "2" And SecondName <> "")
+            Case (input = "1" And InitName.Length = 0) Or (input = "2" And SecondName.Length <> 0)
                 reName(SecondName)
-            Case (input = "2" And SecondName = "") Or (input = "3" And InitName <> "" And SecondName <> "")
+            Case (input = "2" And SecondName.Length = 0) Or (input = "3" And InitName.Length <> 0 And SecondName.Length <> 0)
                 initModule("Directory Chooser", AddressOf printDirChooserMenu, AddressOf handleDirChooserInput)
             Case Else
                 reName(input)
@@ -324,7 +332,7 @@ Public Class iniFile
         Select Case True
             Case input = "0"
                 exitModule()
-            Case input = "1" Or input = ""
+            Case input = "1" Or input.Length = 0
                 Dir = Environment.CurrentDirectory
                 exitModule()
             Case input = "2"
@@ -337,6 +345,7 @@ Public Class iniFile
                 Dir = input
                 If Not exists(False) Then
                     setHeaderText($"{Dir} does not exist", cHeader:=True)
+                    Dir = tmpDir
                 Else
                     exitModule()
                 End If
