@@ -100,19 +100,20 @@ Public Class iniKey
     ''' <param name="line">A string in the format name=value</param>
     ''' <param name="count">The line number for the string</param>
     Public Sub New(ByVal line As String, Optional ByVal count As Integer = 0)
+        If line Is Nothing Then Return
         If line.Contains("=") Then
             Dim splitLine As String() = line.Split(CChar("="))
             LineNumber = count
             Select Case True
-                Case splitLine(0) <> "" And splitLine(1) <> ""
+                Case splitLine(0).Length <> 0 And splitLine(1).Length <> 0
                     Name = splitLine(0)
                     Value = splitLine(1)
                     KeyType = stripNums(Name)
-                Case splitLine(0) = "" And splitLine(1) <> ""
+                Case splitLine(0).Length = 0 And splitLine(1).Length <> 0
                     Name = "KeyTypeNotGiven"
                     Value = splitLine(1)
                     KeyType = "Error"
-                Case splitLine(0) <> "" And splitLine(1) = ""
+                Case splitLine(0).Length <> 0 And splitLine(1).Length = 0
                     Name = splitLine(0)
                     Value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
                     KeyType = "DeleteMe"
