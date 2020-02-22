@@ -15,7 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-Imports Microsoft.VisualStudio.TestTools.UnitTesting
+
 ''' <summary>
 ''' Unit and integration tests for winapp2ool's WinappDebug module
 ''' Test naming convention: methodName_testState_expectedBehavior
