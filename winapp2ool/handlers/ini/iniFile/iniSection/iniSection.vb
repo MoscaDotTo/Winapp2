@@ -19,19 +19,19 @@ Option Strict On
 ''' An object representing a section of a .ini file
 ''' </summary>
 Public Class iniSection
-    ''' <summary> The line number from which the Name of the Section was originally read</summary>
+    ''' <summary> The line number from which the <c> Name </c> of the <c> iniSection </c> was originally read </summary>
     Public Property StartingLineNumber As Integer
-    ''' <summary> The line number from which the last Key in the Section was originally read </summary>
+    ''' <summary> The line number from which the last <c> iniKey </c> in the <c> iniSection </c> was originally read </summary>
     Public Property EndingLineNumber As Integer
-    ''' <summary>The name of the Section (without [Braces])</summary>
+    ''' <summary> The name of the <c> iniSection </c> without [Braces] </summary>
     Public Property Name As String
-    ''' <summary>The Dictionary</summary>
+    ''' <summary>The list of <c> iniKeys </c> contained in the <c> iniSection </c></summary>
     Public Property Keys As New keyList
 
 
-    ''' <summary>Sorts a section's keys into keylists based on their KeyType</summary>
-    ''' <param name="listOfKeyLists">The list of keyLists to be sorted into</param>
-    ''' The last list in the keylist list holds the error keys
+    ''' <summary> Sorts a section's <c>iniKeys </c> into <c> keyLists </c> based on their <c> KeyType </c> </summary>
+    ''' <param name="listOfKeyLists">The list of <c>KeyLists </c> into which <c> iniKeys </c> will be sorted <br />
+    ''' The last list in the keylistlist holds the keys determined to contain errors </param> 
     Public Sub constKeyLists(ByRef listOfKeyLists As List(Of keyList))
         Dim keyTypeList As New List(Of String)
         listOfKeyLists.ForEach(Sub(kl) keyTypeList.Add(kl.KeyType.ToLower))
@@ -41,8 +41,8 @@ Public Class iniSection
         Next
     End Sub
 
-    ''' <summary>Removes a series of keys from the section</summary>
-    ''' <param name="indicies"></param>
+    ''' <summary>Removes keys from the <c> iniSection </c> by their index </summary>
+    ''' <param name="indicies"> A given list of indicies pointing to keys to remove from the <c> iniSection </c> </param>
     Public Sub removeKeys(indicies As List(Of Integer))
         ' Sort and reverse the indicies so that we remove from the end of the list towards the beginning
         indicies.Sort()
@@ -50,12 +50,12 @@ Public Class iniSection
         indicies.ForEach(Sub(ind) Keys.remove(ind))
     End Sub
 
-    ''' <summary>Returns the iniSection name as it would appear on disk.</summary>
+    ''' <summary> Returns the <c> iniSection's </c> <c> Name </c> as it would appear on disk </summary>
     Public Function getFullName() As String
         Return $"[{Name}]"
     End Function
 
-    ''' <summary>Creates a new (empty) iniSection object.</summary>
+    ''' <summary> Creates a new (empty) <c> iniSection </c> object </summary>
     Public Sub New()
         StartingLineNumber = 0
         EndingLineNumber = 0
@@ -63,9 +63,9 @@ Public Class iniSection
         Keys = New keyList
     End Sub
 
-    ''' <summary>Creates a new iniSection object without tracking the line numbers</summary>
-    ''' <param name="listOfLines">The list of Strings comprising the iniSection</param>
-    ''' <param name="listOfLineCounts">The list of line numbers associated with the lines</param>
+    ''' <summary> Creates a new <c> iniSection </c> object without tracking the line numbers </summary>
+    ''' <param name="listOfLines">The list of Strings comprising the <c> iniSection </c></param>
+    ''' <param name="listOfLineCounts">The list of line numbers associated with the lines </param>
     Public Sub New(ByVal listOfLines As List(Of String), Optional listOfLineCounts As List(Of Integer) = Nothing)
         Name = listOfLines(0).Trim(CChar("["), CChar("]"))
         StartingLineNumber = If(listOfLineCounts IsNot Nothing, listOfLineCounts(0), 1)
@@ -78,7 +78,7 @@ Public Class iniSection
         End If
     End Sub
 
-    ''' <summary>Returns the keys in the iniSection as a list of Strings</summary>
+    ''' <summary> Returns the keys in the <c> iniSection </c> as a <c> strList </c> </summary>
     Public Function getKeysAsStrList() As strList
         Dim out As New strList
         For Each key In Keys.Keys
@@ -87,10 +87,10 @@ Public Class iniSection
         Return out
     End Function
 
-    ''' <summary>Compares two iniSections, returns false if they are not the same.</summary>
-    ''' <param name="ss">The section to be compared against</param>
-    ''' <param name="removedKeys">A return list on iniKey objects that appear in the iniFile object but not the given</param>
-    ''' <param name="addedKeys">A return list of iniKey objects that appear in the given iniFile object but not this one</param>
+    ''' <summary> Compares two <c> iniSections </c>, returns <c> False </c> if they are not the same </summary>
+    ''' <param name="ss"> The <c> iniSection </c> against which this object will be compared </param>
+    ''' <param name="removedKeys"> A return <c> keyList </c> that appear in this <c> iniSection </c> object but not the given <c> iniSection </c> </param>
+    ''' <param name="addedKeys"> A return <c> keyList </c> that appear in the given <c> iniSection </c> object but not this object </param>
     Public Function compareTo(ss As iniSection, ByRef removedKeys As keyList, ByRef addedKeys As keyList) As Boolean
         ' Create a copy of the section so we can modify it
         Dim secondSection As New iniSection With {.Name = ss.Name, .StartingLineNumber = ss.StartingLineNumber}
@@ -112,7 +112,7 @@ Public Class iniSection
                 End Select
             Next
             ' If the key isn't found in the second (newer) section, consider it removed for now
-            If noMatch Then removedKeys.add(key)
+            removedKeys.add(key, noMatch)
         Next
         ' Remove all matched keys
         secondSection.removeKeys(tmpList)
@@ -123,7 +123,7 @@ Public Class iniSection
         Return removedKeys.KeyCount + addedKeys.KeyCount = 0
     End Function
 
-    ''' <summary>Returns an iniSection as it would appear on disk as a String</summary>
+    ''' <summary> Returns the <c> iniSection </c> as it would appear on disk as a <c> String </c> </summary>
     Public Overrides Function ToString() As String
         Dim out = Me.getFullName
         For Each key In Keys.Keys
