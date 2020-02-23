@@ -15,9 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary>
-''' This module is an internal logger for winapp2ool  
-''' </summary>
+''' <summary> This module is an internal logger for winapp2ool </summary>
 Public Module logger
     ''' <summary> Holds the contents of the winapp2ool log </summary>
     Public Property GlobalLog As New strList
@@ -58,13 +56,14 @@ Public Module logger
         End If
     End Sub
 
-    ''' <summary>Returns the log as a String</summary>
+    ''' <summary> Returns the log as a single <c> String </c> </summary>
     Public Function toString() As String
         Dim out = ""
         GlobalLog.Items.ForEach(Sub(line) out += line & Environment.NewLine)
         Return out
     End Function
 
+    ''' <summary> Prints the winapp2ool log to the user and waits for the 'enter' key to be pressed before returning to the calling menu </summary>
     Public Sub printLog()
         cwl("Printing the winapp2ool log, this may take a moment")
         Dim out = logger.toString
@@ -75,10 +74,10 @@ Public Module logger
         Console.ReadLine()
     End Sub
 
-    '''<summary>Gets the most recent  segment of the global log contained by two phrases (ie. a module name or subroutine) 
-    '''As a string. Can be used to simply fetch the logs from modules for saving to disk or displaying to the user after a run.</summary>
-    ''' <param name="containedPhrase">The starting phrase of the requested log slice</param>
-    ''' <param name="endingPhrase">The ending phease of the requested log slice</param>
+    '''<summary> Gets the most recent segment of the global log contained by two phrases (ie. a module name or subroutine) 
+    ''' As a <c> String </c> <br /> Can be used to simply fetch the logs from modules for saving to disk or displaying to the user after a run.</summary>
+    ''' <param name="containedPhrase"> The starting phrase of the requested log slice </param>
+    ''' <param name="endingPhrase"> The ending phrase of the requested log slice </param>
     Public Function getLogSliceFromGlobal(containedPhrase As String, endingPhrase As String) As String
         Dim startind, endind As Integer
         For Each line In GlobalLog.Items
@@ -98,8 +97,8 @@ Public Module logger
         Return out
     End Function
 
-    '''<summary>Prints a slice of the global log to the user and waits for input</summary>
-    '''<param name="slice">A portion of the global log to be printed</param>
+    '''<summary> Prints a slice of the global log to the user and waits for them to press the 'enter' key </summary>
+    '''<param name="slice"> A portion of the global log to be printed to the user </param>
     Public Sub printSlice(slice As String)
         clrConsole()
         cwl(slice)
