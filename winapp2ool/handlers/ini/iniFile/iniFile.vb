@@ -20,7 +20,7 @@ Imports System.IO
 ''' An object representing a .ini configuration file
 ''' </summary>
 Public Class iniFile
-    ''' <summary> The directory on the system in which the iniFile can be found </summary>
+    ''' <summary> The directory on the filesystem in which the iniFile can be found </summary>
     Public Property Dir As String
     ''' <summary> The name of the file on disk </summary>
     Public Property Name As String
@@ -69,16 +69,17 @@ Public Class iniFile
         Return Sections.ContainsKey(sectionName)
     End Function
 
-    ''' <summary> Returns an  </summary>
-    ''' <param name="sectionName"></param>
+    ''' <summary> Returns the <c> iniSection bearing the given <c> <paramref name="sectionName"/> </c></c>, otherwise,
+    ''' returns a <c> New iniSection </c> object with the requested <c> <paramref name="sectionName"/> </c> </summary>
+    ''' <param name="sectionName"> The <c> Name </c> of the <c> iniSection </c> to be Returned </param>
     Public Function getSection(sectionName As String) As iniSection
-        Return If(hasSection(sectionName), Sections(sectionName), Nothing)
+        Return If(hasSection(sectionName), Sections(sectionName), New iniSection With {.Name = sectionName})
     End Function
 
-    ''' <summary> Creates an <c> uninitialized iniFile </c> with a directory and a filename </summary>
-    ''' <param name="directory"> A filesystem directory </param>
-    ''' <param name="filename"> The name of the file on disk contained in <c> <paramref name="directory"/> </c> </param>
-    ''' <param name="rename"> A provided suggestion for a rename should the user open the File Chooser for this file </param>
+    ''' <summary> Creates an uninitialized <c> iniFile </c> </summary>
+    ''' <param name="directory"> The filesystem directory expected to contain an ini file <br /> Optional, Default: <c>""</c> </param>
+    ''' <param name="filename"> The name of the file on disk expected to be contained in <c> <paramref name="directory"/> </c> <br /> Optional, Default: <c>""</c> </param>
+    ''' <param name="rename"> A provided suggestion for renaming the file should the user open the File Chooser for this file <br /> Optional, Default: <c>""</c> (No rename suggestion) </param>
     ''' <param name="mExist"> Indicates that this file must exist for its owner to perform its work <br/> Optional, Default: <c> False </c> </param>
     Public Sub New(Optional directory As String = "", Optional filename As String = "", Optional rename As String = "", Optional mExist As Boolean = False)
         Dir = directory
@@ -92,14 +93,14 @@ Public Class iniFile
         mustExist = mExist
     End Sub
 
-    ''' <summary> Creates an <c> uninitalized iniFile </c> from a path </summary>
-    ''' <param name="path"> A filesystem path containing an ini format file </param>
+    ''' <summary> Creates an <c> uninitalized iniFile </c> from an absolute path </summary>
+    ''' <param name="path"> An absolute path containing an ini format file </param>
     Public Sub New(path As String)
         ' This is ugly but New only works if it's the *first* line in a constructor, so we must inline 
         Me.New(path.Replace($"\{path.Split(CChar("\")).Last}", ""), path.Split(CChar("\")).Last, "", False)
     End Sub
 
-    ''' <summary> Writes a given <c> String </c> (generally an ini file) to disk if the given 
+    ''' <summary> Writes a given <c> String </c> (generally an <c> iniFile </c>) to disk if the given 
     ''' <c> <paramref name="cond"/> </c> is met, overwriting any existing file contents </summary>
     ''' <param name="tostr"> The text to be written to disk </param>
     ''' <param name="cond"> Indicates that the file should be written to disk <br/> Optional, Default: <c> True </c> </param>
