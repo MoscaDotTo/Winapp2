@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -16,16 +16,29 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 ''' <summary>
-''' This module handles logging for winapp2ool. 
+''' This module is an internal logger for winapp2ool  
 ''' </summary>
 Public Module logger
-    ''' <summary> Holds the contents of the winapp2ool log</summary>
+    ''' <summary> Holds the contents of the winapp2ool log </summary>
     Public Property GlobalLog As New strList
-    '''<summary>Holds the save path information for the winapp2ool log</summary>
+    '''<summary> Holds the filesystem location to which the log file will be saved </summary>
     Public Property GlobalLogFile As New iniFile(Environment.CurrentDirectory, "winapp2ool.log")
-    '''<summary>Indicates the current nesting level within the state machine </summary>
+    '''<summary> Indicates the current nesting level </summary>
     Public Property nestCount As Integer = 0
-    ''' <summary>Adds an item into the global log</summary>
+
+    ''' <summary> Adds an item into the global log </summary>
+    ''' <param name="logstr"> The <c> String </c> to be added into the log </param>
+    ''' <param name="cond"> Indicates that the <c> <paramref name="logstr"/> </c> should be added into the log <br /> Optional, Default: <c> True </c> </param>
+    ''' <param name="ascend"> Indicates that the line should be indented. (Generally) requires a corresponding <c> <paramref name="descend"/></c> to "undo." Usefor for blocking 
+    ''' groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each <br /> Optional, Default: <c> False </c></param>
+    ''' <param name="descend"> Indicates that the line should be unindented. (Generally) follows a corresponding <c> <paramref name="ascend"/> </c>. Useful for blocking 
+    ''' groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each <br /> Optional, Default: <c> False </c> </param>
+    ''' <param name="indent"> Indicates that the line should be indented individually, without affecting the indentation of following lines <br/> Optional, Default: <c> False </c> </param>
+    ''' <param name="indAmt"> The number of times by which the line should be indented given <c> <paramref name="indent"/> </c> is <c> True </c> <br /> Optional, Default: <c> 1 </c> </param>
+    ''' <param name="descAmt"> The number of times *fewer* by which following lines should be indented <br /> Optional, Default: <c> 1 </c> </param>
+    ''' <param name="ascAmt"> The number of times by which this and following lines should be indented <br /> Optional, Default: <c> 1 </c> </param>
+    ''' <param name="buffr"> Indicates that an empty line should be added into the log following <c> <paramref name="logstr"/> </c> </param>
+    ''' <param name="leadr"> Indicates that an empty line should be added into the log before <c> <paramref name="logstr"/> </c> </param>
     Public Sub gLog(logstr As String, Optional cond As Boolean = True, Optional ascend As Boolean = False,
                     Optional descend As Boolean = False, Optional indent As Boolean = False, Optional indAmt As Integer = 1,
                     Optional descAmt As Integer = 1, Optional ascAmt As Integer = 1, Optional buffr As Boolean = False, Optional leadr As Boolean = False)
@@ -58,7 +71,7 @@ Public Module logger
         clrConsole()
         cwl(out)
         cwl()
-        cwl("End of log. Press any key to continue.")
+        cwl("End of log. Press enter to continue.")
         Console.ReadLine()
     End Sub
 
