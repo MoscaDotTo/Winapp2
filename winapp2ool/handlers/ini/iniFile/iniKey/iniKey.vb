@@ -115,12 +115,12 @@ Public Class iniKey
                     KeyType = "Error"
                 Case splitLine(0).Length <> 0 And splitLine(1).Length = 0
                     Name = splitLine(0)
-                    Value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
+                    Value = ""
                     KeyType = "DeleteMe"
             End Select
         Else
             Name = line
-            Value = "This key was not provided with a value and will be deleted. The user should never see this, if you do, please report it as a bug on GitHub"
+            Value = ""
             KeyType = "DeleteMe"
         End If
     End Sub
