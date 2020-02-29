@@ -325,7 +325,8 @@ Public Module Trim
                 Case "HKLM"
                     If getLMKey(dir) IsNot Nothing Then Return True
                     ' Support checking for 32bit applications on Win64
-                    dir = dir.ToLower.Replace("software\", "Software\WOW6432Node\")
+                    dir = root + "\" + dir
+                    dir = dir.ToLower.Replace("hklm\software", "Software\WOW6432Node")
                     Return getLMKey(dir) IsNot Nothing
                 Case "HKU"
                     Return getUserKey(dir) IsNot Nothing
