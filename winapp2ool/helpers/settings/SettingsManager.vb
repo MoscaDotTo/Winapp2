@@ -35,8 +35,8 @@ Module SettingsManager
     ''' <param name="setting">A pointer to the boolean representing a module setting to be toggled</param>
     ''' <param name="paramText">A string explaining the setting being toggled</param>
     ''' <param name="mSettingsChanged">A pointer to the boolean indicating that a module's settings been modified from their default state</param>
-    Public Sub toggleSettingParam(ByRef setting As Boolean, paramText As String, ByRef mSettingsChanged As Boolean, Optional callingModule As String = "",
-                                  Optional settingName As String = "", Optional settingChangedName As String = "")
+    Public Sub toggleSettingParam(ByRef setting As Boolean, paramText As String, ByRef mSettingsChanged As Boolean, callingModule As String,
+                                  settingName As String, settingChangedName As String)
         gLog($"Toggling {paramText}", indent:=True)
         setHeaderText($"{paramText} {enStr(setting)}d", True, True, If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
         setting = Not setting
@@ -44,13 +44,6 @@ Module SettingsManager
         updateSettings(callingModule, settingName, setting.ToString)
         updateSettings(callingModule, settingChangedName, mSettingsChanged.ToString)
         settingsFile.overwriteToFile(settingsFile.toString, settingName = NameOf(saveSettingsToDisk) Or settingName = NameOf(readSettingsFromDisk))
-    End Sub
-
-    ''' <summary>Handles toggling downloading of winapp2.ini from menus</summary>
-    ''' <param name="download">A pointer to a boolean that indicates whether or not a file should be downloaded</param>
-    ''' <param name="settingsChanged">A pointer to the boolean indicating that a module's settings been modified from their default state</param>
-    Public Sub toggleDownload(ByRef download As Boolean, ByRef settingsChanged As Boolean)
-        If Not denySettingOffline() Then toggleSettingParam(download, "Downloading", settingsChanged)
     End Sub
 
     ''' <summary>Resets a module's settings to the defaults</summary>
