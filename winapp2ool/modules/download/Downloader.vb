@@ -159,6 +159,7 @@ Module Downloader
                     headerTxt = "Save directory changed"
                     updateSettings(NameOf(Downloader), NameOf(downloadFile) & "_Dir", downloadFile.Dir)
                     ModuleSettingsChanged = True
+                    updateSettings(NameOf(Downloader), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
                     saveSettingsFile()
                 End If
                 setHeaderText(headerTxt)

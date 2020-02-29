@@ -202,11 +202,11 @@ Public Module WinappDebug
             Case input = "1" Or input.Length = 0
                 initDebug()
             Case input = "2"
-                changeFileParams(winappDebugFile1, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1))
+                changeFileParams(winappDebugFile1, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(ModuleSettingsChanged))
             Case input = "3"
-                toggleSettingParam(SaveChanges, "Saving", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(SaveChanges))
+                toggleSettingParam(SaveChanges, "Saving", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(SaveChanges), NameOf(ModuleSettingsChanged))
             Case input = "4" And SaveChanges
-                changeFileParams(winappDebugFile3, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3))
+                changeFileParams(winappDebugFile3, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(ModuleSettingsChanged))
             Case (input = "4" And Not SaveChanges) Or (input = "5" And SaveChanges)
                 initModule("Scan Settings", AddressOf advSettings.printMenu, AddressOf advSettings.handleUserInput)
                 Console.WindowHeight = 30

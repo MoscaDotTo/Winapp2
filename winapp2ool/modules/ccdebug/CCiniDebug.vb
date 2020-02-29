@@ -132,17 +132,17 @@ Module CCiniDebug
             Case (input = "1" Or input = "") And (PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput)
                 initDebug()
             Case input = "2"
-                toggleSettingParam(PruneStaleEntries, "Pruning", ModuleSettingsChanged)
+                toggleSettingParam(PruneStaleEntries, "Pruning", ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(PruneStaleEntries), NameOf(ModuleSettingsChanged))
             Case input = "3"
-                toggleSettingParam(SaveDebuggedFile, "Autosaving", ModuleSettingsChanged)
+                toggleSettingParam(SaveDebuggedFile, "Autosaving", ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(SaveDebuggedFile), NameOf(ModuleSettingsChanged))
             Case input = "4"
-                toggleSettingParam(SortFileForOutput, "Sorting", ModuleSettingsChanged)
+                toggleSettingParam(SortFileForOutput, "Sorting", ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(SortFileForOutput), NameOf(ModuleSettingsChanged))
             Case input = "5"
-                changeFileParams(CCDebugFile2, ModuleSettingsChanged)
+                changeFileParams(CCDebugFile2, ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile2), NameOf(ModuleSettingsChanged))
             Case input = "6" And PruneStaleEntries
-                changeFileParams(CCDebugFile1, ModuleSettingsChanged)
+                changeFileParams(CCDebugFile1, ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile1), NameOf(ModuleSettingsChanged))
             Case SaveDebuggedFile And ((input = "6" And Not PruneStaleEntries) Or (input = "7" And PruneStaleEntries))
-                changeFileParams(CCDebugFile3, ModuleSettingsChanged)
+                changeFileParams(CCDebugFile3, ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile3), NameOf(ModuleSettingsChanged))
             Case ModuleSettingsChanged And
                                         ((input = "6" And Not (PruneStaleEntries Or SaveDebuggedFile)) Or
                                         (input = "7" And (PruneStaleEntries Xor SaveDebuggedFile)) Or

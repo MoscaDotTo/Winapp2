@@ -244,7 +244,7 @@ Module Winapp2ool
             Case input = "4"
                 printLog()
             Case input = "5"
-                changeFileParams(GlobalLogFile, toolSettingsHaveChanged, moduleName, NameOf(GlobalLogFile))
+                changeFileParams(GlobalLogFile, toolSettingsHaveChanged, moduleName, NameOf(GlobalLogFile), NameOf(toolSettingsHaveChanged))
             Case input = "6"
                 GlobalLogFile.overwriteToFile(logger.toString)
             Case input = "7"

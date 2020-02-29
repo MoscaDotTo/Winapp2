@@ -54,13 +54,13 @@ Public Module advSettings
                 exitModule()
         ' Enable/Disable individual scans
             Case intInput > 0 And intInput <= Rules.Count
-                toggleSettingParam(Rules(ind).ShouldScan, "Scan", ScanSettingsChanged, NameOf(WinappDebug), lints(ind) & "_Scan")
+                toggleSettingParam(Rules(ind).ShouldScan, "Scan", ScanSettingsChanged, NameOf(WinappDebug), lints(ind) & "_Scan", NameOf(ScanSettingsChanged))
                 ' Force repair off if the scan is off
                 If Not Rules(ind).ShouldScan Then Rules(ind).turnOff()
         ' Enable/Disable individual repairs
             Case intInput > Rules.Count And intInput <= 2 * Rules.Count
                 ind -= (Rules.Count)
-                toggleSettingParam(Rules(ind).ShouldRepair, "Repair", ScanSettingsChanged, NameOf(WinappDebug), lints(ind) & "_Repair")
+                toggleSettingParam(Rules(ind).ShouldRepair, "Repair", ScanSettingsChanged, NameOf(WinappDebug), lints(ind) & "_Repair", NameOf(ScanSettingsChanged))
                 ' Force scan on if the repair is on
                 If Rules(ind).ShouldRepair Then Rules(ind).turnOn()
             Case intInput = 2 * Rules.Count + 1 And ScanSettingsChanged

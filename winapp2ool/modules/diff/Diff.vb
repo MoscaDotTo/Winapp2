@@ -160,20 +160,21 @@ Module Diff
             Case input = "1" Or input.Length = 0
                 If Not denyActionWithHeader(DiffFile2.Name.Length = 0 And Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
             Case input = "2"
-                changeFileParams(DiffFile1, ModuleSettingsChanged)
+                changeFileParams(DiffFile1, ModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(ModuleSettingsChanged))
             Case input = "3" And Not isOffline
-                toggleDownload(DownloadDiffFile, ModuleSettingsChanged)
+                If Not denySettingOffline() Then toggleSettingParam(DownloadDiffFile, "Downloading", ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(DownloadDiffFile),
+                                                                  NameOf(ModuleSettingsChanged))
                 DiffFile2.Name = GetNameFromDL(DownloadDiffFile)
             Case input = "4" And DownloadDiffFile
-                toggleSettingParam(TrimRemoteFile, "Trimming", ModuleSettingsChanged)
+                toggleSettingParam(TrimRemoteFile, "Trimming", ModuleSettingsChanged, NameOf(Trim), NameOf(TrimRemoteFile), NameOf(ModuleSettingsChanged))
             Case (input = "4" And Not (DownloadDiffFile Or isOffline)) Or (input = "3" And isOffline)
-                changeFileParams(DiffFile2, ModuleSettingsChanged)
+                changeFileParams(DiffFile2, ModuleSettingsChanged, NameOf(Trim), NameOf(DiffFile2), NameOf(ModuleSettingsChanged))
             Case (input = "5" And Not isOffline) Or (input = "4" And isOffline)
-                toggleSettingParam(SaveDiffLog, "Log Saving", ModuleSettingsChanged)
+                toggleSettingParam(SaveDiffLog, "Log Saving", ModuleSettingsChanged, NameOf(Trim), NameOf(SaveDiffLog), NameOf(ModuleSettingsChanged))
             Case SaveDiffLog And ((input = "6" And Not isOffline) Or (input = "5" And isOffline))
-                changeFileParams(DiffFile3, ModuleSettingsChanged)
+                changeFileParams(DiffFile3, ModuleSettingsChanged, NameOf(Trim), NameOf(DiffFile3), NameOf(ModuleSettingsChanged))
             Case input = "6" And Not SaveDiffLog Or input = "7" And SaveDiffLog
-                toggleSettingParam(ShowFullEntries, "Verbose Mode", ModuleSettingsChanged)
+                toggleSettingParam(ShowFullEntries, "Verbose Mode", ModuleSettingsChanged, NameOf(Trim), NameOf(ShowFullEntries), NameOf(ModuleSettingsChanged))
             Case ModuleSettingsChanged And ( 'Online Case below
                                         (Not isOffline And ((Not SaveDiffLog And input = "7") Or
                                         (SaveDiffLog And input = "8"))) Or

@@ -131,13 +131,13 @@ Module Merge
             Case input = "4"
                 changeMergeName("winapp3.ini")
             Case input = "5"
-                changeFileParams(MergeFile1, ModuleSettingsChanged)
+                changeFileParams(MergeFile1, ModuleSettingsChanged, NameOf(Merge), NameOf(MergeFile1), NameOf(ModuleSettingsChanged))
             Case input = "6"
-                changeFileParams(MergeFile2, ModuleSettingsChanged)
+                changeFileParams(MergeFile2, ModuleSettingsChanged, NameOf(Merge), NameOf(MergeFile2), NameOf(ModuleSettingsChanged))
             Case input = "7"
-                changeFileParams(MergeFile3, ModuleSettingsChanged)
+                changeFileParams(MergeFile3, ModuleSettingsChanged, NameOf(Merge), NameOf(MergeFile3), NameOf(ModuleSettingsChanged))
             Case input = "8"
-                toggleSettingParam(mergeMode, "Merge Mode ", ModuleSettingsChanged)
+                toggleSettingParam(mergeMode, "Merge Mode ", ModuleSettingsChanged, NameOf(Merge), NameOf(mergeMode), NameOf(ModuleSettingsChanged))
             Case input = "9" And ModuleSettingsChanged
                 resetModuleSettings("Merge", AddressOf initDefaultSettings)
             Case Else

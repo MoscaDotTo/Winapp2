@@ -118,11 +118,12 @@ Public Module Trim
             Case (input = "1" Or input = "")
                 initTrim()
             Case input = "2" And Not isOffline
-                toggleDownload(DownloadFileToTrim, ModuleSettingsChanged)
+                If Not denySettingOffline() Then toggleSettingParam(DownloadFileToTrim, "Downloading", ModuleSettingsChanged,
+                                                                    NameOf(Trim), NameOf(DownloadFileToTrim), NameOf(ModuleSettingsChanged))
             Case (input = "3" And Not DownloadFileToTrim And Not isOffline) Or (input = "2" And isOffline)
-                changeFileParams(TrimFile1, ModuleSettingsChanged)
+                changeFileParams(TrimFile1, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
             Case (input = "4" And Not DownloadFileToTrim And Not isOffline) Or (input = "3" And (isOffline Or DownloadFileToTrim))
-                changeFileParams(TrimFile3, ModuleSettingsChanged)
+                changeFileParams(TrimFile3, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(ModuleSettingsChanged))
             Case ModuleSettingsChanged And ((input = "5" And Not DownloadFileToTrim) Or (input = "4" And (isOffline Or DownloadFileToTrim)))
                 resetModuleSettings("Trim", AddressOf initDefaultSettings)
             Case Else

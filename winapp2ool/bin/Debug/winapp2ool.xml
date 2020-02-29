@@ -1091,7 +1091,7 @@ winapp2ool
 <member name="T:winapp2ool.SettingsManager">
 <summary>Holds functions that modify and manage settings for winapp2ool and its sub modules</summary>
 </member>
-<member name="M:winapp2ool.SettingsManager.changeFileParams(winapp2ool.iniFile@,System.Boolean@,System.String,System.String)">
+<member name="M:winapp2ool.SettingsManager.changeFileParams(winapp2ool.iniFile@,System.Boolean@,System.String,System.String,System.String)">
  <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
  <param name="someFile">A pointer to an iniFile whose parameters will be changed</param>
  <param name="settingsChangedSetting">A pointer to the boolean indicating that a module's settings been modified from their default state </param>
@@ -1101,11 +1101,6 @@ winapp2ool
  <param name="setting">A pointer to the boolean representing a module setting to be toggled</param>
  <param name="paramText">A string explaining the setting being toggled</param>
  <param name="mSettingsChanged">A pointer to the boolean indicating that a module's settings been modified from their default state</param>
-</member>
-<member name="M:winapp2ool.SettingsManager.toggleDownload(System.Boolean@,System.Boolean@)">
- <summary>Handles toggling downloading of winapp2.ini from menus</summary>
- <param name="download">A pointer to a boolean that indicates whether or not a file should be downloaded</param>
- <param name="settingsChanged">A pointer to the boolean indicating that a module's settings been modified from their default state</param>
 </member>
 <member name="M:winapp2ool.SettingsManager.resetModuleSettings(System.String,System.Action)">
  <summary>Resets a module's settings to the defaults</summary>
