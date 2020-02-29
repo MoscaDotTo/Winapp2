@@ -182,6 +182,7 @@ Public Class iniFile
 
     ''' <summary> Attempts to read an ini file from disk and populate its contents into the <c> Sections </c> property </summary>
     Public Sub init()
+        LineCount = 1
         Try
             Dim reader = New StreamReader(Me.Path)
             buildIniFromStream(reader)
