@@ -68,15 +68,15 @@ Module JavaMaker
             Case input = "1" Or input = ""
                 makeSomeJava()
             Case input = "2"
-                toggleSettingParam(DownloadJavaDefs, "Downloading", ModuleSettingsChanged)
+                'toggleSettingParam(DownloadJavaDefs, "Downloading", ModuleSettingsChanged)
             Case input = "3" And Not DownloadJavaDefs
                 changeFileParams(JavaMakerFile2, ModuleSettingsChanged)
             Case input = "3" And DownloadJavaDefs Or input = "4" And Not DownloadJavaDefs
-                toggleSettingParam(SaveGeneratedEntry, "Saving", ModuleSettingsChanged)
+                'toggleSettingParam(SaveGeneratedEntry, "Saving", ModuleSettingsChanged)
             Case SaveGeneratedEntry And (input = "5" And Not DownloadJavaDefs) Or (input = "4" And DownloadJavaDefs)
                 changeFileParams(JavaMakerFile3, ModuleSettingsChanged)
             Case input = "6" And Not DownloadJavaDefs Or input = "5" And DownloadJavaDefs
-                toggleSettingParam(MergeGeneratedEntry, "Merging", ModuleSettingsChanged)
+                'toggleSettingParam(MergeGeneratedEntry, "Merging", ModuleSettingsChanged)
             Case ModuleSettingsChanged And
                 ((input = "6" And Not DownloadJavaDefs And SaveGeneratedEntry) Or
                 (input = "5" And Not (DownloadJavaDefs Xor SaveGeneratedEntry)) Or
