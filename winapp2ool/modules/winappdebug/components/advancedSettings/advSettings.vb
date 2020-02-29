@@ -39,6 +39,8 @@ Public Module advSettings
     ''' <summary> Handles the user input for the scan/repair management menu </summary>
     ''' <param name="input"> The String containing the user's input </param>
     Public Sub handleUserInput(input As String)
+        Dim lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters", "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
+                "Multiples", "Invalid Values", "Syntax Errors", "Path Validity", "Semicolons", "Optimizations"}
         ' Determine the current state of the lint rules
         determineScanSettings()
         ' Get the input as an integer so we can index it against our rules
@@ -52,13 +54,13 @@ Public Module advSettings
                 exitModule()
         ' Enable/Disable individual scans
             Case intInput > 0 And intInput <= Rules.Count
-                toggleSettingParam(Rules(ind).ShouldScan, "Scan", ScanSettingsChanged)
+                toggleSettingParam(Rules(ind).ShouldScan, "Scan", ScanSettingsChanged, NameOf(WinappDebug), lints(ind) & "_Scan")
                 ' Force repair off if the scan is off
                 If Not Rules(ind).ShouldScan Then Rules(ind).turnOff()
         ' Enable/Disable individual repairs
             Case intInput > Rules.Count And intInput <= 2 * Rules.Count
                 ind -= (Rules.Count)
-                toggleSettingParam(Rules(ind).ShouldRepair, "Repair", ScanSettingsChanged)
+                toggleSettingParam(Rules(ind).ShouldRepair, "Repair", ScanSettingsChanged, NameOf(WinappDebug), lints(ind) & "_Repair")
                 ' Force scan on if the repair is on
                 If Rules(ind).ShouldRepair Then Rules(ind).turnOn()
             Case intInput = 2 * Rules.Count + 1 And ScanSettingsChanged

@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -56,7 +56,7 @@ Module Diff
         If DownloadDiffFile Then DiffFile2.Name = If(RemoteWinappIsNonCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
         invertSettingAndRemoveArg(SaveDiffLog, "-savelog")
         getFileAndDirParams(DiffFile1, DiffFile2, DiffFile3)
-        If Not DiffFile2.Name = "" Then initDiff()
+        If Not DiffFile2.Name.Length = 0 Then initDiff()
     End Sub
 
     ''' <summary> Restores the default state of the module's parameters </summary>
@@ -69,6 +69,55 @@ Module Diff
         DiffFile1.resetParams()
         SaveDiffLog = False
         ModuleSettingsChanged = False
+        restoreDefaultSettings(NameOf(Diff), AddressOf createDiffSettingsSection)
+    End Sub
+
+    ''' <summary> Loads values from disk into memory for the Diff module settings </summary>
+    Public Sub getSerializedDiffSettings()
+        For Each kvp In settingsDict(NameOf(Diff))
+            Select Case kvp.Key
+                Case NameOf(DiffFile1) & "_Name"
+                    DiffFile1.Name = kvp.Value
+                Case NameOf(DiffFile1) & "_Dir"
+                    DiffFile1.Dir = kvp.Value
+                Case NameOf(DiffFile2) & "_Name"
+                    DiffFile2.Name = kvp.Value
+                Case NameOf(DiffFile2) & "_Dir"
+                    DiffFile2.Dir = kvp.Value
+                Case NameOf(DiffFile3) & "_Name"
+                    DiffFile3.Name = kvp.Value
+                Case NameOf(DiffFile3) & "_Dir"
+                    DiffFile3.Dir = kvp.Value
+                Case NameOf(DownloadDiffFile)
+                    DownloadDiffFile = CBool(kvp.Value)
+                Case NameOf(TrimRemoteFile)
+                    TrimRemoteFile = CBool(kvp.Value)
+                Case NameOf(ShowFullEntries)
+                    ShowFullEntries = CBool(kvp.Value)
+                Case NameOf(SaveDiffLog)
+                    SaveDiffLog = CBool(kvp.Value)
+                Case NameOf(ModuleSettingsChanged)
+                    ModuleSettingsChanged = CBool(kvp.Value)
+            End Select
+        Next
+    End Sub
+
+    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+    Public Sub createDiffSettingsSection()
+        Dim moduleName = NameOf(Diff)
+        createModuleSettingsSection(moduleName, {
+            getSettingIniKey(moduleName, NameOf(DiffFile1), DiffFile1.Name, isName:=True),
+            getSettingIniKey(moduleName, NameOf(DiffFile1), DiffFile1.Dir, isDir:=True),
+            getSettingIniKey(moduleName, NameOf(DiffFile2), DiffFile2.Name, isName:=True),
+            getSettingIniKey(moduleName, NameOf(DiffFile2), DiffFile2.Dir, isDir:=True),
+            getSettingIniKey(moduleName, NameOf(DiffFile3), DiffFile3.Name, isName:=True),
+            getSettingIniKey(moduleName, NameOf(DiffFile3), DiffFile3.Dir, isDir:=True),
+            getSettingIniKey(moduleName, NameOf(DownloadDiffFile), DownloadDiffFile.ToString),
+            getSettingIniKey(moduleName, NameOf(TrimRemoteFile), TrimRemoteFile.ToString),
+            getSettingIniKey(moduleName, NameOf(ShowFullEntries), ShowFullEntries.ToString),
+            getSettingIniKey(moduleName, NameOf(SaveDiffLog), SaveDiffLog.ToString),
+            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+            })
     End Sub
 
     ''' <summary> Runs the Differ from outside the module </summary>
@@ -83,7 +132,7 @@ Module Diff
     Public Sub printMenu()
         Console.WindowHeight = If(ModuleSettingsChanged, 34, 32)
         printMenuTop({"Observe the differences between two ini files"})
-        print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (DiffFile2.Name = "" And Not DownloadDiffFile), colorLine:=True)
+        print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (DiffFile2.Name.Length = 0 And Not DownloadDiffFile), colorLine:=True)
         print(0, "Select Older/Local File:", leadingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your older ini file")
         print(0, "Select Newer/Remote File:", leadingBlank:=True)
@@ -95,11 +144,11 @@ Module Diff
         print(1, "File Chooser (log)", "Change where Diff saves its log", SaveDiffLog, trailingBlank:=True)
         print(5, "Verbose Mode", "printing full entries in the diff output", enStrCond:=ShowFullEntries, trailingBlank:=True)
         print(0, $"Older file: {replDir(DiffFile1.Path)}")
-        print(0, $"Newer file: {If(DiffFile2.Name = "" And Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))}",
-                                  closeMenu:=Not SaveDiffLog And Not ModuleSettingsChanged And MostRecentDiffLog = "")
-        print(0, $"Log   file: {replDir(DiffFile3.Path)}", cond:=SaveDiffLog, closeMenu:=(Not ModuleSettingsChanged) And MostRecentDiffLog = "")
-        print(2, "Diff", cond:=ModuleSettingsChanged, closeMenu:=MostRecentDiffLog = "")
-        print(1, "Log Viewer", "Show the most recent Diff log", cond:=Not MostRecentDiffLog = "", closeMenu:=True, leadingBlank:=True)
+        print(0, $"Newer file: {If(DiffFile2.Name.Length = 0 And Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))}",
+                                  closeMenu:=Not SaveDiffLog And Not ModuleSettingsChanged And MostRecentDiffLog.Length = 0)
+        print(0, $"Log   file: {replDir(DiffFile3.Path)}", cond:=SaveDiffLog, closeMenu:=(Not ModuleSettingsChanged) And MostRecentDiffLog.Length = 0)
+        print(2, "Diff", cond:=ModuleSettingsChanged, closeMenu:=MostRecentDiffLog.Length = 0)
+        print(1, "Log Viewer", "Show the most recent Diff log", cond:=Not MostRecentDiffLog.Length = 0, closeMenu:=True, leadingBlank:=True)
     End Sub
 
     ''' <summary> Handles the user input from the main menu </summary>
@@ -108,8 +157,8 @@ Module Diff
         Select Case True
             Case input = "0"
                 exitModule()
-            Case input = "1" Or input = ""
-                If Not denyActionWithHeader(DiffFile2.Name = "" And Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
+            Case input = "1" Or input.Length = 0
+                If Not denyActionWithHeader(DiffFile2.Name.Length = 0 And Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
             Case input = "2"
                 changeFileParams(DiffFile1, ModuleSettingsChanged)
             Case input = "3" And Not isOffline
@@ -130,7 +179,7 @@ Module Diff
                                         (SaveDiffLog And input = "8"))) Or
                                         (isOffline And ((input = "5") Or (input = "6" And SaveDiffLog)))) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultSettings)
-            Case Not MostRecentDiffLog = "" And ((input = "7" And Not ModuleSettingsChanged) Or (input = "8" And ModuleSettingsChanged))
+            Case Not MostRecentDiffLog.Length = 0 And ((input = "7" And Not ModuleSettingsChanged) Or (input = "8" And ModuleSettingsChanged))
                 MostRecentDiffLog = getLogSliceFromGlobal("Beginning diff", "Diff complete")
                 printSlice(MostRecentDiffLog)
             Case Else
@@ -151,7 +200,7 @@ Module Diff
         End If
         If TrimRemoteFile And DownloadDiffFile Then
             Dim tmp As New winapp2file(DiffFile2)
-            Trim.trim(tmp)
+            Trim.trimFile(tmp)
             DiffFile2.Sections = tmp.toIni.Sections
         End If
         logInitDiff()

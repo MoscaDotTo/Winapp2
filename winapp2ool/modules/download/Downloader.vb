@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -45,6 +45,37 @@ Module Downloader
     '''<summary> Holds the path of any files to be saved by the Downloader </summary>
     Public Property downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
+    ''' <summary> Indicates that the Downloader module's settings have been changed from their defaults </summary>
+    Private Property ModuleSettingsChanged As Boolean = False
+
+    ''' <summary> Restores the default state of the module's parameters </summary>
+    Private Sub initDefaultSettings()
+        downloadFile.resetParams()
+        ModuleSettingsChanged = False
+        restoreDefaultSettings(NameOf(Downloader), AddressOf createDownloadSettingsSection)
+    End Sub
+
+    ''' <summary> Loads values from disk into memory for the Downloader module settings </summary>
+    Public Sub getSerializedDownloaderSettings()
+        For Each kvp In settingsDict(NameOf(Downloader))
+            Select Case kvp.Key
+                Case NameOf(downloadFile) & "_Dir"
+                    downloadFile.Dir = kvp.Value
+                Case NameOf(ModuleSettingsChanged)
+                    ModuleSettingsChanged = CBool(kvp.Value)
+            End Select
+        Next
+    End Sub
+
+    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+    Public Sub createDownloadSettingsSection()
+        Dim moduleName = NameOf(Downloader)
+        createModuleSettingsSection(moduleName, {
+                    getSettingIniKey(moduleName, NameOf(downloadFile), downloadFile.Dir, isDir:=True),
+                    getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+        })
+    End Sub
+
     ''' <summary> Handles the commandline args for the Downloader </summary>
     Public Sub handleCmdLine()
         Dim fileLink = ""
@@ -89,7 +120,8 @@ Module Downloader
         print(1, "Directory", "Change the save directory", trailingBlank:=True)
         print(1, "Advanced", "Settings for power users")
         print(1, "ReadMe", "The winapp2ool ReadMe")
-        print(0, $"Save directory: {replDir(downloadFile.Dir)}", leadingBlank:=True, closeMenu:=True)
+        print(0, $"Save directory: {replDir(downloadFile.Dir)}", leadingBlank:=True, closeMenu:=Not ModuleSettingsChanged)
+        print(2, NameOf(Downloader), cond:=ModuleSettingsChanged, closeMenu:=True)
     End Sub
 
     ''' <summary> Handles user input for the Downloader menu </summary>
@@ -120,14 +152,24 @@ Module Downloader
                 downloadFile.Name = "Removed entries.ini"
                 download(downloadFile, removedLink)
             Case "5"
+                Dim tmp = downloadFile.Dir
                 initModule("Directory Chooser", AddressOf downloadFile.printDirChooserMenu, AddressOf downloadFile.handleDirChooserInput)
-                setHeaderText("Save directory changed")
+                Dim headerTxt = "Directory change aborted"
+                If Not tmp = downloadFile.Dir Then
+                    headerTxt = "Save directory changed"
+                    updateSettings(NameOf(Downloader), NameOf(downloadFile) & "_Dir", downloadFile.Dir)
+                    ModuleSettingsChanged = True
+                    saveSettingsFile()
+                End If
+                setHeaderText(headerTxt)
             Case "6"
                 initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)
             Case "7"
                 ' It's actually a .md but the user doesn't need to know that  
                 downloadFile.Name = "Readme.txt"
                 download(downloadFile, readMeLink)
+            Case "8"
+                If ModuleSettingsChanged Then initDefaultSettings()
             Case Else
                 setHeaderText(invInpStr, True)
         End Select

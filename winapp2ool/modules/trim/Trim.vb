@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 '
 '    This file is a part of Winapp2ool
 '
@@ -50,6 +50,40 @@ Public Module Trim
         TrimFile3.resetParams()
         DownloadFileToTrim = False
         ModuleSettingsChanged = False
+        restoreDefaultSettings(NameOf(Trim), AddressOf createTrimSettingsSection)
+    End Sub
+
+    ''' <summary> Loads values from disk into memory for the Trim module settings </summary>
+    Public Sub getSerializedTrimSettings()
+        For Each kvp In settingsDict(NameOf(Trim))
+            Select Case kvp.Key
+                Case NameOf(TrimFile1) & "_Name"
+                    TrimFile1.Name = kvp.Value
+                Case NameOf(TrimFile1) & "_Dir"
+                    TrimFile1.Dir = kvp.Value
+                Case NameOf(TrimFile3) & "_Name"
+                    TrimFile3.Name = kvp.Value
+                Case NameOf(TrimFile3) & "_Dir"
+                    TrimFile3.Dir = kvp.Value
+                Case NameOf(DownloadFileToTrim)
+                    DownloadFileToTrim = CBool(kvp.Value)
+                Case NameOf(ModuleSettingsChanged)
+                    ModuleSettingsChanged = CBool(kvp.Value)
+            End Select
+        Next
+    End Sub
+
+    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+    Public Sub createTrimSettingsSection()
+        Dim moduleName = NameOf(Trim)
+        createModuleSettingsSection(moduleName, {
+            getSettingIniKey(moduleName, NameOf(MergeFile1), MergeFile1.Name, isName:=True),
+            getSettingIniKey(moduleName, NameOf(MergeFile1), MergeFile1.Dir, isDir:=True),
+            getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Name, isName:=True),
+            getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
+            getSettingIniKey(moduleName, NameOf(DownloadFileToTrim), DownloadFileToTrim.ToString),
+            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+            })
     End Sub
 
     ''' <summary> Trims an <c> iniFile </c> from outside the module </summary>
@@ -72,7 +106,7 @@ Public Module Trim
         print(1, "File Chooser (save)", "Change the save file name or location", trailingBlank:=True)
         print(0, $"Current winapp2.ini location: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}")
         print(0, $"Current save location: {replDir(TrimFile3.Path)}", closeMenu:=Not ModuleSettingsChanged)
-        print(2, "Trim", cond:=ModuleSettingsChanged, closeMenu:=True)
+        print(2, NameOf(Trim), cond:=ModuleSettingsChanged, closeMenu:=True)
     End Sub
 
     ''' <summary> Handles the user input from the menu </summary>
@@ -104,7 +138,7 @@ Public Module Trim
         clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
         Dim entryCountBeforeTrim = winapp2.count
-        trim(winapp2)
+        trimFile(winapp2)
         clrConsole()
         print(3, "Finished!")
         clrConsole()
@@ -124,7 +158,7 @@ Public Module Trim
 
     ''' <summary> Trims a <c> winapp2file </c>, removing entries not relevant to the current system </summary>
     ''' <param name="winapp2"> A <c> winapp2file </c> to be trimmed to fit the current system </param>
-    Public Sub trim(winapp2 As winapp2file)
+    Public Sub trimFile(winapp2 As winapp2file)
         For Each entryList In winapp2.Winapp2entries
             processEntryList(entryList)
         Next
@@ -407,7 +441,7 @@ Public Module Trim
                 Else
                     Dim newCurPaths As New strList
                     For Each path In currentPaths.Items
-                        If Not path.EndsWith("\") And path <> "" Then path += "\"
+                        If Not path.EndsWith("\") And Not path.Length = 0 Then path += "\"
                         newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
                     Next
                     currentPaths = newCurPaths

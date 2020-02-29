@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -48,7 +48,7 @@ Module Merge
         invertSettingAndRemoveArg(False, "-w", MergeFile2.Name, "winapp3.ini")
         invertSettingAndRemoveArg(False, "-a", MergeFile2.Name, "Archived Entries.ini")
         getFileAndDirParams(MergeFile1, MergeFile2, MergeFile3)
-        If Not MergeFile2.Name = "" Then initMerge()
+        If Not MergeFile2.Name.Length = 0 Then initMerge()
     End Sub
 
     ''' <summary> Restores the default state of the module's properties </summary>
@@ -58,12 +58,48 @@ Module Merge
         MergeFile3.resetParams()
         mergeMode = True
         ModuleSettingsChanged = False
+        restoreDefaultSettings(NameOf(Merge), AddressOf createMergeSettingsSection)
+    End Sub
+
+    ''' <summary> Loads values from disk into memory for the Merge module settings </summary>
+    Public Sub getSeralizedMergeSettings()
+        For Each kvp In settingsDict(NameOf(Merge))
+            Select Case kvp.Key
+                Case NameOf(MergeFile1) & "_Name"
+                    MergeFile1.Name = kvp.Value
+                Case NameOf(MergeFile1) & "_Dir"
+                    MergeFile1.Dir = kvp.Value
+                Case NameOf(MergeFile2) & "_Name"
+                    MergeFile2.Name = kvp.Value
+                Case NameOf(MergeFile2) & "_Dir"
+                    MergeFile2.Dir = kvp.Value
+                Case NameOf(MergeFile3) & "_Name"
+                    MergeFile3.Name = kvp.Value
+                Case NameOf(MergeFile3) & "_Dir"
+                    MergeFile1.Dir = kvp.Value
+            End Select
+        Next
+    End Sub
+
+    '''<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+    Public Sub createMergeSettingsSection()
+        Dim moduleName = NameOf(Merge)
+        createModuleSettingsSection(moduleName,
+                                    {getSettingIniKey(moduleName, NameOf(MergeFile1), MergeFile1.Name, isName:=True),
+                                    getSettingIniKey(moduleName, NameOf(MergeFile1), MergeFile1.Dir, isDir:=True),
+                                    getSettingIniKey(moduleName, NameOf(MergeFile2), MergeFile2.Name, isName:=True),
+                                    getSettingIniKey(moduleName, NameOf(MergeFile2), MergeFile2.Dir, isDir:=True),
+                                    getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Name, isName:=True),
+                                    getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
+                                    getSettingIniKey(moduleName, NameOf(mergeMode), mergeMode.ToString),
+                                    getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+                                    })
     End Sub
 
     ''' <summary> Prints the <c> Merge </c> menu to the user, includes some predefined merge files choices for ease of access </summary>
     Public Sub printMenu()
         printMenuTop({"Merge the contents of two ini files, while either replacing (default) or removing sections with the same name."})
-        print(1, "Run (default)", "Merge the two ini files", enStrCond:=Not (MergeFile2.Name = ""), colorLine:=True)
+        print(1, "Run (default)", "Merge the two ini files", enStrCond:=Not MergeFile2.Name.Length = 0, colorLine:=True)
         print(0, "Preset Merge File Choices:", leadingBlank:=True, trailingBlank:=True)
         print(1, "Removed Entries", "Select 'Removed Entries.ini'")
         print(1, "Custom", "Select 'Custom.ini'")
@@ -72,11 +108,11 @@ Module Merge
         print(1, "File Chooser (merge)", "Choose a name or location for merging")
         print(1, "File Chooser (save)", "Choose a new save location for the merged file", trailingBlank:=True)
         print(0, $"Current winapp2.ini: {replDir(MergeFile1.Path)}")
-        print(0, $"Current merge file : {If(MergeFile2.Name = "", "Not yet selected", replDir(MergeFile2.Path))}", enStrCond:=Not MergeFile2.Name = "", colorLine:=True)
+        print(0, $"Current merge file : {If(MergeFile2.Name.Length = 0, "Not yet selected", replDir(MergeFile2.Path))}", enStrCond:=Not MergeFile2.Name.Length = 0, colorLine:=True)
         print(0, $"Current save target: {replDir(MergeFile3.Path)}", trailingBlank:=True)
         print(1, "Toggle Merge Mode", "Switch between merge modes.")
         print(0, $"Current mode: {If(mergeMode, "Add & Replace", "Add & Remove")}", closeMenu:=Not ModuleSettingsChanged)
-        print(2, "Merge", cond:=ModuleSettingsChanged, closeMenu:=True)
+        print(2, NameOf(Merge), cond:=ModuleSettingsChanged, closeMenu:=True)
         Console.WindowHeight = If(ModuleSettingsChanged, 32, 30)
     End Sub
 
@@ -86,8 +122,8 @@ Module Merge
         Select Case True
             Case input = "0"
                 exitModule()
-            Case input = "1" Or input = ""
-                If Not denyActionWithHeader(MergeFile2.Name = "", "You must select a file to merge") Then initMerge()
+            Case input = "1" Or input.Length = 0
+                If Not denyActionWithHeader(MergeFile2.Name.Length = 0, "You must select a file to merge") Then initMerge()
             Case input = "2"
                 changeMergeName("Removed entries.ini")
             Case input = "3"
@@ -122,7 +158,7 @@ Module Merge
         clrConsole()
         If Not (enforceFileHasContent(MergeFile1) And enforceFileHasContent(MergeFile2)) Then Return
         print(4, $"Merging {MergeFile1.Name} with {MergeFile2.Name}")
-        merge(True)
+        mergeFiles(True)
         print(0, "", closeMenu:=True)
         print(3, $"Finished merging files. {anyKeyStr}")
         crk()
@@ -130,7 +166,7 @@ Module Merge
 
     ''' <summary> Conducts the merger of our two iniFiles </summary>
     ''' <param name="isWinapp2"> Indicates that the <c> iniFiles </c> being operated on are of winapp2.ini syntax </param>
-    Private Sub merge(isWinapp2 As Boolean)
+    Private Sub mergeFiles(isWinapp2 As Boolean)
         resolveConflicts(MergeFile1, MergeFile2)
         ' After conflicts are resolved, remaining entries need only be added 
         For Each section In MergeFile2.Sections.Values
@@ -158,7 +194,7 @@ Module Merge
         MergeFile1 = mergeFile
         MergeFile2 = sourceFile
         mergeMode = mm
-        merge(isWinapp)
+        mergeFiles(isWinapp)
     End Sub
 
     ''' <summary> Performs conflict resolution for the merge process, handling the case where <c> iniSections </c> 

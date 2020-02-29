@@ -115,20 +115,82 @@ Public Module WinappDebug
         RepairErrsFound = True
         SaveChanges = False
         resetScanSettings()
+        restoreDefaultSettings(NameOf(WinappDebug), AddressOf createLintSettingsSection)
+    End Sub
+
+    ''' <summary> Loads values from disk into memory for the WinappDebug module settings </summary>
+    Public Sub getSeralizedLintSettings()
+        If Not readSettingsFromDisk Then Return
+        For Each kvp In settingsDict(NameOf(WinappDebug))
+            Dim lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters", "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
+                "Multiples", "Invalid Values", "Syntax Errors", "Path Validity", "Semicolons", "Optimizations"}
+            Select Case kvp.Key
+                Case NameOf(winappDebugFile1) & "_Dir"
+                    winappDebugFile1.Dir = kvp.Value
+                Case NameOf(winappDebugFile1) & "_Name"
+                    winappDebugFile1.Name = kvp.Value
+                Case NameOf(winappDebugFile3) & "_Dir"
+                    winappDebugFile3.Dir = kvp.Value
+                Case NameOf(winappDebugFile3) & "_Name"
+                    winappDebugFile3.Name = kvp.Value
+                Case NameOf(RepairSomeErrsFound)
+                    RepairSomeErrsFound = CBool(kvp.Value)
+                Case NameOf(ScanSettingsChanged)
+                    ScanSettingsChanged = CBool(kvp.Value)
+                Case NameOf(ModuleSettingsChanged)
+                    ModuleSettingsChanged = CBool(kvp.Value)
+                Case NameOf(SaveChanges)
+                    SaveChanges = CBool(kvp.Value)
+                Case NameOf(RepairErrsFound)
+                    RepairErrsFound = CBool(kvp.Value)
+                Case Else
+                    Dim lintType = kvp.Key.Replace("_Scan", "")
+                    lintType = lintType.Replace("_Repair", "")
+                    Dim ind = lints.IndexOf(lintType)
+                    If kvp.Key.Contains("_Scan") Then Rules(ind).ShouldScan = CBool(kvp.Value)
+                    If kvp.Key.Contains("_Repair") Then Rules(ind).ShouldRepair = CBool(kvp.Value)
+            End Select
+        Next
+    End Sub
+
+    '''<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+    Public Sub createLintSettingsSection()
+        Dim moduleName = NameOf(WinappDebug)
+        Dim lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters", "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
+                "Multiples", "Invalid Values", "Syntax Errors", "Path Validity", "Semicolons", "Optimizations"}
+        Dim settingsKeys As String()
+        settingsKeys = New String(38) {}
+        settingsKeys(0) = getSettingIniKey(moduleName, NameOf(winappDebugFile1), winappDebugFile1.Dir, isDir:=True)
+        settingsKeys(1) = getSettingIniKey(moduleName, NameOf(winappDebugFile1), winappDebugFile1.Name, isName:=True)
+        settingsKeys(2) = getSettingIniKey(moduleName, NameOf(winappDebugFile3), winappDebugFile3.Name, isName:=True)
+        settingsKeys(3) = getSettingIniKey(moduleName, NameOf(winappDebugFile3), winappDebugFile3.Dir, isDir:=True)
+        settingsKeys(4) = getSettingIniKey(moduleName, NameOf(RepairSomeErrsFound), RepairSomeErrsFound.ToString)
+        settingsKeys(5) = getSettingIniKey(moduleName, NameOf(ScanSettingsChanged), ScanSettingsChanged.ToString)
+        settingsKeys(6) = getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+        settingsKeys(7) = getSettingIniKey(moduleName, NameOf(SaveChanges), SaveChanges.ToString)
+        settingsKeys(8) = getSettingIniKey(moduleName, NameOf(RepairErrsFound), RepairErrsFound.ToString)
+        Dim innerInd = 0
+        For i = 9 To 38
+            settingsKeys(i) = getSettingIniKey(moduleName, $"{lints(innerInd)}_Scan", Rules(innerInd).ShouldScan.ToString)
+            settingsKeys(i + 1) = getSettingIniKey(moduleName, $"{lints(innerInd)}_Repair", Rules(innerInd).ShouldRepair.ToString)
+            innerInd += 1
+            i += 1
+        Next
+        createModuleSettingsSection(NameOf(WinappDebug), settingsKeys)
     End Sub
 
     ''' <summary> Displays the <c> WinappDebug </c> menu to the user </summary>
     Public Sub printMenu()
-        printMenuTop({"Scan winapp2.ini for style and syntax errors, and attempt to repair them where possible."})
+        printMenuTop({"Scan winapp2.ini For style and syntax errors, and attempt To repair them where possible."})
         print(1, "Run (Default)", "Run the debugger")
-        print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or path", leadingBlank:=True, trailingBlank:=True)
+        print(1, "File Chooser (winapp2.ini)", "Choose a different file name or path for winapp2.ini", leadingBlank:=True, trailingBlank:=True)
         print(5, "Toggle Saving", "saving the file after correcting errors", enStrCond:=SaveChanges)
-        print(1, "File Chooser (save)", "Save a copy of changes made instead of overwriting winapp2.ini", SaveChanges, trailingBlank:=True)
+        print(1, "File Chooser (save)", "Save a copy of changes made to a new file instead of overwriting winapp2.ini", SaveChanges, trailingBlank:=True)
         print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not SaveChanges, trailingBlank:=True)
-        print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged And MostRecentLintLog = "")
-        print(0, $"Current save target:  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged And MostRecentLintLog = "")
-        print(2, "WinappDebug", cond:=ModuleSettingsChanged, closeMenu:=MostRecentLintLog = "")
-        print(1, "Log Viewer", "Show the most recent lint results", cond:=Not MostRecentLintLog = "", closeMenu:=True, leadingBlank:=True)
+        print(0, $"Current winapp2.ini  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
+        print(0, $"Current save target  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
+        print(2, NameOf(WinappDebug), cond:=ModuleSettingsChanged, closeMenu:=MostRecentLintLog.Length = 0)
+        print(1, "Log Viewer", "Show the most recent lint results", cond:=Not MostRecentLintLog.Length = 0, closeMenu:=True, leadingBlank:=True)
     End Sub
 
     ''' <summary> Handles the user's input from the menu </summary>
@@ -137,20 +199,20 @@ Public Module WinappDebug
         Select Case True
             Case input = "0"
                 exitModule()
-            Case input = "1" Or input = ""
+            Case input = "1" Or input.Length = 0
                 initDebug()
             Case input = "2"
-                changeFileParams(winappDebugFile1, ModuleSettingsChanged)
+                changeFileParams(winappDebugFile1, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1))
             Case input = "3"
-                toggleSettingParam(SaveChanges, "Saving", ModuleSettingsChanged)
+                toggleSettingParam(SaveChanges, "Saving", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(SaveChanges))
             Case input = "4" And SaveChanges
-                changeFileParams(winappDebugFile3, ModuleSettingsChanged)
+                changeFileParams(winappDebugFile3, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3))
             Case (input = "4" And Not SaveChanges) Or (input = "5" And SaveChanges)
                 initModule("Scan Settings", AddressOf advSettings.printMenu, AddressOf advSettings.handleUserInput)
                 Console.WindowHeight = 30
             Case ModuleSettingsChanged And ((input = "5" And Not SaveChanges) Or (input = "6" And SaveChanges))
                 resetModuleSettings("WinappDebug", AddressOf initDefaultSettings)
-            Case Not MostRecentLintLog = "" And (input = "5" And Not ModuleSettingsChanged) Or
+            Case Not MostRecentLintLog.Length = 0 And (input = "5" And Not ModuleSettingsChanged) Or
                                         ModuleSettingsChanged And ((input = "6" And Not SaveChanges) Or (input = "7" And SaveChanges))
                 printSlice(MostRecentLintLog)
             Case Else
@@ -172,7 +234,7 @@ Public Module WinappDebug
         setHeaderText("Lint complete")
         print(4, "Completed analysis of winapp2.ini", conjoin:=True)
         print(0, $"{ErrorsFound} possible errors were detected.")
-        print(0, $"Number of entries: {winappDebugFile1.Sections.Count}", trailingBlank:=True)
+        print(0, $"Number of entries {winappDebugFile1.Sections.Count}", trailingBlank:=True)
         rewriteChanges(wa2)
         print(0, anyKeyStr, closeMenu:=True)
         crk()
@@ -459,7 +521,7 @@ Public Module WinappDebug
                 fullKeyErr(key, "Missing '=' detected and repaired in key.")
             Else
                 ' If we didn't find a fixable situation, delete the key
-                customErr(key.LineNumber, $"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", {})
+                customErr(key.LineNumber, $"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", Array.Empty(Of String)())
                 Return False
             End If
         End If
@@ -530,7 +592,7 @@ Public Module WinappDebug
         ' Check for duplicate args
         For Each arg In keyParams.ArgsList
             If argsStrings.chkDupes(arg) And lintParams.ShouldScan Then
-                customErr(key.LineNumber, $"{If(arg = "", "Empty", "Duplicate")} FileKey parameter found", {$"Command: {arg}"})
+                customErr(key.LineNumber, $"{If(arg.Length = 0, "Empty", "Duplicate")} FileKey parameter found", {$"Command: {arg}"})
                 dupeArgs.add(arg, lintParams.fixFormat)
             End If
         Next

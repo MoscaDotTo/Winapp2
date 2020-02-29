@@ -22,6 +22,78 @@ winapp2ool
   resource lookups using this strongly typed resource class.
 </summary>
 </member>
+<member name="T:winapp2ool.settingsHandler">
+ <summary> settingsHandler provides an interface for winapp2ool modules to serialize some of their settings to disk using a familiar ini interface </summary>
+</member>
+<member name="P:winapp2ool.settingsHandler.settingsFile">
+ <summary> A copy of winapp2ool's user configurable settings that was read from disk <br/> 
+ Its contents overwritten with the contents of the settingsDict whenever settings are changed </summary>
+</member>
+<member name="P:winapp2ool.settingsHandler.settingsDict">
+ <summary> A more nicely accessible structure for accessing module settings <br /> 
+ Keys in the primary dictionary are module names, the value dictionaries are simple key value pairs where 
+ the key is the name of a setting and the value is the state of the setting </summary>
+</member>
+<member name="P:winapp2ool.settingsHandler.saveSettingsToDisk">
+<summary> Indicates that changes to the application's settings should be serialized back to the disk </summary>
+</member>
+<member name="P:winapp2ool.settingsHandler.readSettingsFromDisk">
+ <summary> Indicates that settings who are read from the disk should override the corresponding default module settings </summary>
+</member>
+<member name="M:winapp2ool.settingsHandler.saveSettingsFile">
+ <summary> Saves the winapp2ool settings to disk </summary>
+</member>
+<member name="M:winapp2ool.settingsHandler.updateSettings(System.String,System.String,System.String)">
+ <summary> Updates the disk-writable representations of the application's settings as the user makes changes to them </summary>
+ <param name="targetModule"> The name of the module who owns the setting being updated </param>
+ <param name="settingName"> The name of the setting being updated </param>
+ <param name="newVal"> The updated value held by the setting </param>
+</member>
+<member name="M:winapp2ool.settingsHandler.addToSettingsDict(System.String,winapp2ool.iniSection)">
+ <summary> Adds the <c> Keys </c> from a given <c> iniSection </c> to the disk-writable copy of winapp2ool's settings for the <c> <paramref name="targetModule"/> </c></summary>
+ <param name="targetModule"> The module whose settings should be updated </param>
+ <param name="settings"> The <c> iniSection </c> containing <c> iniKey </c> format serialized winapp2ool settings </param>
+</member>
+<member name="M:winapp2ool.settingsHandler.loadSettings">
+ <summary> Looks for the <c> settingsFile </c> and attempts to load it from disk. If the <c> settingsFile </c> 
+ is empty, settings will be loaded from their default configuration </summary>
+</member>
+<member name="M:winapp2ool.settingsHandler.loadAllModuleSettings">
+ <summary> Loads all module settings into disk-writable representation in the form of both an <c> iniFile </c> and a <c> Dictionary </c> </summary>
+</member>
+<member name="M:winapp2ool.settingsHandler.clearAllModuleSettings(System.String)">
+ <summary> Clears the settings belonging to the <c> <paramref name="moduleName"/> </c> given from the settingsDict and from the respective <c> iniSection </c> in the settingsFile </summary>
+ <param name="moduleName"> The name of the module whose settings are being cleared </param>
+</member>
+<member name="M:winapp2ool.settingsHandler.serializeModuleSettings(System.String,System.Action,System.Action)">
+ <summary> Creates the disk-writable representation of a module's settings, either by generating their default values or by assigning 
+ values given from a previous session to the current values </summary>
+ <param name="moduleName"> The winapp2ool module whose settings will be either instantiated or read from disk </param>
+ <param name="createModuleSettings"> The function who creates the in-memory representation of the module's setting in the absence of a
+ version on disk from which to read them </param>
+ <param name="getSerializedSettings"> The function who assigns values from disk to the current active session of a module's settings </param>
+</member>
+<member name="M:winapp2ool.settingsHandler.createModuleSettingsSection(System.String,System.String[])">
+ <summary> Creates the <c> iniSection </c> containing the default values for variables associated with the calling module
+ and adds them to the dictionary representation of the settings </summary>
+ <param name="callingModule"> The name of the module whose settings are being created </param>
+ <param name="settingKeys"> The array of Strings containing the module's settings and their default values </param>
+</member>
+<member name="M:winapp2ool.settingsHandler.getSettingIniKey(System.String,System.String,System.String,System.Boolean,System.Boolean)">
+ <summary> Returns the text that will comprise the <c> iniKey </c> representation of the given <c> <paramref name="settingName"/> </c> iff it doesn't already
+ exist in the <c> settingDict </c> <br /> Returns <c> "" </c> otherwise </summary>
+ <param name="moduleName"> The name of the module whose settings are being queried </param>
+ <param name="settingName"> The name of the setting being queried as it will appear on disk </param>
+ <param name="settingValue"> The current value of the setting as a String </param>
+ <param name="isName"> Indicates that the <c> <paramref name="settingName"/> </c> is an <c> iniFile's Name</c> property <br/> Optional, Default <c> False </c> </param>
+ <param name="isDir"> Indicates that the <c> <paramref name="settingName"/> </c> is an <c> iniFile's Dir </c> property <br/> Optional, Default <c> False </c></param>
+ <returns></returns>
+</member>
+<member name="M:winapp2ool.settingsHandler.restoreDefaultSettings(System.String,System.Action)">
+ <summary> Clears the current module setting from the disk-writable representation of the <c> <paramref name="callingModule"/>'s </c> module settings </summary>
+ <param name="callingModule"> The name of the module whose settings will be cleared </param>
+ <param name="createSection"> The subroutine that creates the module's disk-writable settings </param>
+</member>
 <member name="T:winapp2ool.CCiniDebug">
  <summary>
  A module whose purpose is to perform some housekeeping on ccleaner.ini to help clean up after winapp2.ini
@@ -51,6 +123,12 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.CCiniDebug.initDefaultSettings">
  <summary>Restores the default state of the module's parameters</summary>
+</member>
+<member name="M:winapp2ool.CCiniDebug.getSerializedDebugSettings">
+ <summary> Loads values from disk into memory for the CCiniDebug module settings </summary>
+</member>
+<member name="M:winapp2ool.CCiniDebug.createDebugSettingsSection">
+ <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
 </member>
 <member name="M:winapp2ool.CCiniDebug.handleCmdlineArgs">
  <summary>Handles the commandline args for CCiniDebug</summary>
@@ -127,6 +205,12 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.Diff.initDefaultSettings">
  <summary> Restores the default state of the module's parameters </summary>
+</member>
+<member name="M:winapp2ool.Diff.getSerializedDiffSettings">
+ <summary> Loads values from disk into memory for the Diff module settings </summary>
+</member>
+<member name="M:winapp2ool.Diff.createDiffSettingsSection">
+ <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
 </member>
 <member name="M:winapp2ool.Diff.remoteDiff(winapp2ool.iniFile)">
  <summary> Runs the Differ from outside the module </summary>
@@ -225,6 +309,18 @@ winapp2ool
 </member>
 <member name="P:winapp2ool.Downloader.downloadFile">
 <summary> Holds the path of any files to be saved by the Downloader </summary>
+</member>
+<member name="P:winapp2ool.Downloader.ModuleSettingsChanged">
+ <summary> Indicates that the Downloader module's settings have been changed from their defaults </summary>
+</member>
+<member name="M:winapp2ool.Downloader.initDefaultSettings">
+ <summary>Restores the default state of the module's parameters</summary>
+</member>
+<member name="M:winapp2ool.Downloader.getSerializedDownloaderSettings">
+ <summary> Loads values from disk into memory for the Downloader module settings </summary>
+</member>
+<member name="M:winapp2ool.Downloader.createDownloadSettingsSection">
+ <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
 </member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
  <summary> Handles the commandline args for the Downloader </summary>
@@ -370,7 +466,7 @@ winapp2ool
  </summary>
 </member>
 <member name="P:winapp2ool.iniFile.Dir">
- <summary> The directory on the system in which the iniFile can be found </summary>
+ <summary> The directory on the filesystem in which the iniFile can be found </summary>
 </member>
 <member name="P:winapp2ool.iniFile.Name">
  <summary> The name of the file on disk </summary>
@@ -410,19 +506,24 @@ winapp2ool
  <param name="sectionName"> The <c> Name </c> of the section to search for </param>
  <returns> <c> True </c> if <paramref name="sectionName"/> matches the <c> Name </c> of an <c> iniSection </c> in the <c> iniFile </c>, <c> False </c> otherwise </returns>
 </member>
+<member name="M:winapp2ool.iniFile.getSection(System.String)">
+ <summary> Returns the <c> iniSection bearing the given <c> <paramref name="sectionName"/> </c></c>, otherwise,
+ returns a <c> New iniSection </c> object with the requested <c> <paramref name="sectionName"/> </c> </summary>
+ <param name="sectionName"> The <c> Name </c> of the <c> iniSection </c> to be Returned </param>
+</member>
 <member name="M:winapp2ool.iniFile.#ctor(System.String,System.String,System.String,System.Boolean)">
- <summary> Creates an <c> uninitialized iniFile </c> with a directory and a filename </summary>
- <param name="directory"> A filesystem directory </param>
- <param name="filename"> The name of the file on disk contained in <c> <paramref name="directory"/> </c> </param>
- <param name="rename"> A provided suggestion for a rename should the user open the File Chooser for this file </param>
+ <summary> Creates an uninitialized <c> iniFile </c> </summary>
+ <param name="directory"> The filesystem directory expected to contain an ini file <br /> Optional, Default: <c>""</c> </param>
+ <param name="filename"> The name of the file on disk expected to be contained in <c> <paramref name="directory"/> </c> <br /> Optional, Default: <c>""</c> </param>
+ <param name="rename"> A provided suggestion for renaming the file should the user open the File Chooser for this file <br /> Optional, Default: <c>""</c> (No rename suggestion) </param>
  <param name="mExist"> Indicates that this file must exist for its owner to perform its work <br/> Optional, Default: <c> False </c> </param>
 </member>
 <member name="M:winapp2ool.iniFile.#ctor(System.String)">
- <summary> Creates an <c> uninitalized iniFile </c> from a path </summary>
- <param name="path"> A filesystem path containing an ini format file </param>
+ <summary> Creates an <c> uninitalized iniFile </c> from an absolute path </summary>
+ <param name="path"> An absolute path containing an ini format file </param>
 </member>
 <member name="M:winapp2ool.iniFile.overwriteToFile(System.String,System.Boolean)">
- <summary> Writes a given <c> String </c> (generally an ini file) to disk if the given 
+ <summary> Writes a given <c> String </c> (generally an <c> iniFile </c>) to disk if the given 
  <c> <paramref name="cond"/> </c> is met, overwriting any existing file contents </summary>
  <param name="tostr"> The text to be written to disk </param>
  <param name="cond"> Indicates that the file should be written to disk <br/> Optional, Default: <c> True </c> </param>
@@ -514,48 +615,48 @@ winapp2ool
  </summary>
 </member>
 <member name="P:winapp2ool.iniSection.StartingLineNumber">
- <summary> The line number from which the Name of the Section was originally read</summary>
+ <summary> The line number from which the <c> Name </c> of the <c> iniSection </c> was originally read </summary>
 </member>
 <member name="P:winapp2ool.iniSection.EndingLineNumber">
- <summary> The line number from which the last Key in the Section was originally read </summary>
+ <summary> The line number from which the last <c> iniKey </c> in the <c> iniSection </c> was originally read </summary>
 </member>
 <member name="P:winapp2ool.iniSection.Name">
- <summary>The name of the Section (without [Braces])</summary>
+ <summary> The name of the <c> iniSection </c> without [Braces] </summary>
 </member>
 <member name="P:winapp2ool.iniSection.Keys">
- <summary>The Dictionary</summary>
+ <summary>The list of <c> iniKeys </c> contained in the <c> iniSection </c></summary>
 </member>
 <member name="M:winapp2ool.iniSection.constKeyLists(System.Collections.Generic.List{winapp2ool.keyList}@)">
- <summary>Sorts a section's keys into keylists based on their KeyType</summary>
- <param name="listOfKeyLists">The list of keyLists to be sorted into</param>
- The last list in the keylist list holds the error keys
+ <summary> Sorts a section's <c>iniKeys </c> into <c> keyLists </c> based on their <c> KeyType </c> </summary>
+ <param name="listOfKeyLists">The list of <c>KeyLists </c> into which <c> iniKeys </c> will be sorted <br />
+ The last list in the keylistlist holds the keys determined to contain errors </param> 
 </member>
 <member name="M:winapp2ool.iniSection.removeKeys(System.Collections.Generic.List{System.Int32})">
- <summary>Removes a series of keys from the section</summary>
- <param name="indicies"></param>
+ <summary>Removes keys from the <c> iniSection </c> by their index </summary>
+ <param name="indicies"> A given list of indicies pointing to keys to remove from the <c> iniSection </c> </param>
 </member>
 <member name="M:winapp2ool.iniSection.getFullName">
- <summary>Returns the iniSection name as it would appear on disk.</summary>
+ <summary> Returns the <c> iniSection's </c> <c> Name </c> as it would appear on disk </summary>
 </member>
 <member name="M:winapp2ool.iniSection.#ctor">
- <summary>Creates a new (empty) iniSection object.</summary>
+ <summary> Creates a new (empty) <c> iniSection </c> object </summary>
 </member>
 <member name="M:winapp2ool.iniSection.#ctor(System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.Int32})">
- <summary>Creates a new iniSection object without tracking the line numbers</summary>
- <param name="listOfLines">The list of Strings comprising the iniSection</param>
- <param name="listOfLineCounts">The list of line numbers associated with the lines</param>
+ <summary> Creates a new <c> iniSection </c> object without tracking the line numbers </summary>
+ <param name="listOfLines">The list of Strings comprising the <c> iniSection </c></param>
+ <param name="listOfLineCounts">The list of line numbers associated with the lines </param>
 </member>
 <member name="M:winapp2ool.iniSection.getKeysAsStrList">
- <summary>Returns the keys in the iniSection as a list of Strings</summary>
+ <summary> Returns the keys in the <c> iniSection </c> as a <c> strList </c> </summary>
 </member>
 <member name="M:winapp2ool.iniSection.compareTo(winapp2ool.iniSection,winapp2ool.keyList@,winapp2ool.keyList@)">
- <summary>Compares two iniSections, returns false if they are not the same.</summary>
- <param name="ss">The section to be compared against</param>
- <param name="removedKeys">A return list on iniKey objects that appear in the iniFile object but not the given</param>
- <param name="addedKeys">A return list of iniKey objects that appear in the given iniFile object but not this one</param>
+ <summary> Compares two <c> iniSections </c>, returns <c> False </c> if they are not the same </summary>
+ <param name="ss"> The <c> iniSection </c> against which this object will be compared </param>
+ <param name="removedKeys"> A return <c> keyList </c> that appear in this <c> iniSection </c> object but not the given <c> iniSection </c> </param>
+ <param name="addedKeys"> A return <c> keyList </c> that appear in the given <c> iniSection </c> object but not this object </param>
 </member>
 <member name="M:winapp2ool.iniSection.ToString">
- <summary>Returns an iniSection as it would appear on disk as a String</summary>
+ <summary> Returns the <c> iniSection </c> as it would appear on disk as a <c> String </c> </summary>
 </member>
 <member name="T:winapp2ool.iniComment">
  <summary>
@@ -755,34 +856,47 @@ winapp2ool
  <param name="newText">The replacement text</param>
 </member>
 <member name="T:winapp2ool.logger">
- <summary>
- This module handles logging for winapp2ool. 
- </summary>
+ <summary> This module is an internal logger for winapp2ool </summary>
 </member>
 <member name="P:winapp2ool.logger.GlobalLog">
- <summary> Holds the contents of the winapp2ool log</summary>
+ <summary> Holds the contents of the winapp2ool log </summary>
 </member>
 <member name="P:winapp2ool.logger.GlobalLogFile">
-<summary>Holds the save path information for the winapp2ool log</summary>
+<summary> Holds the filesystem location to which the log file will be saved </summary>
 </member>
 <member name="P:winapp2ool.logger.nestCount">
-<summary>Indicates the current nesting level within the state machine </summary>
+<summary> Indicates the current nesting level </summary>
 </member>
 <member name="M:winapp2ool.logger.gLog(System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean)">
- <summary>Adds an item into the global log</summary>
+ <summary> Adds an item into the global log </summary>
+ <param name="logstr"> The <c> String </c> to be added into the log <br /> Optional, Default: <c> ""</c> </param>
+ <param name="cond"> Indicates that the <c> <paramref name="logstr"/> </c> should be added into the log <br /> Optional, Default: <c> True </c> </param>
+ <param name="ascend"> Indicates that the line should be indented. (Generally) requires a corresponding <c> <paramref name="descend"/></c> to "undo." Usefor for blocking 
+ groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each <br /> Optional, Default: <c> False </c></param>
+ <param name="descend"> Indicates that the line should be unindented. (Generally) follows a corresponding <c> <paramref name="ascend"/> </c>. Useful for blocking 
+ groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each <br /> Optional, Default: <c> False </c> </param>
+ <param name="indent"> Indicates that the line should be indented individually, without affecting the indentation of following lines <br/> Optional, Default: <c> False </c> </param>
+ <param name="indAmt"> The number of times by which the line should be indented given <c> <paramref name="indent"/> </c> is <c> True </c> <br /> Optional, Default: <c> 1 </c> </param>
+ <param name="descAmt"> The number of times *fewer* by which following lines should be indented <br /> Optional, Default: <c> 1 </c> </param>
+ <param name="ascAmt"> The number of times by which this and following lines should be indented <br /> Optional, Default: <c> 1 </c> </param>
+ <param name="buffr"> Indicates that an empty line should be added into the log following <c> <paramref name="logstr"/> </c> </param>
+ <param name="leadr"> Indicates that an empty line should be added into the log before <c> <paramref name="logstr"/> </c> </param>
 </member>
 <member name="M:winapp2ool.logger.toString">
- <summary>Returns the log as a String</summary>
+ <summary> Returns the log as a single <c> String </c> </summary>
+</member>
+<member name="M:winapp2ool.logger.printLog">
+ <summary> Prints the winapp2ool log to the user and waits for the 'enter' key to be pressed before returning to the calling menu </summary>
 </member>
 <member name="M:winapp2ool.logger.getLogSliceFromGlobal(System.String,System.String)">
-<summary>Gets the most recent  segment of the global log contained by two phrases (ie. a module name or subroutine) 
-As a string. Can be used to simply fetch the logs from modules for saving to disk or displaying to the user after a run.</summary>
- <param name="containedPhrase">The starting phrase of the requested log slice</param>
- <param name="endingPhrase">The ending phease of the requested log slice</param>
+<summary> Gets the most recent segment of the global log contained by two phrases (ie. a module name or subroutine) 
+ As a <c> String </c> <br /> Can be used to simply fetch the logs from modules for saving to disk or displaying to the user after a run.</summary>
+ <param name="containedPhrase"> The starting phrase of the requested log slice </param>
+ <param name="endingPhrase"> The ending phrase of the requested log slice </param>
 </member>
 <member name="M:winapp2ool.logger.printSlice(System.String)">
-<summary>Prints a slice of the global log to the user and waits for input</summary>
-<param name="slice">A portion of the global log to be printed</param>
+<summary> Prints a slice of the global log to the user and waits for them to press the 'enter' key </summary>
+<param name="slice"> A portion of the global log to be printed to the user </param>
 </member>
 <member name="T:winapp2ool.MenuMaker">
  <summary>
@@ -977,12 +1091,12 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="T:winapp2ool.SettingsManager">
 <summary>Holds functions that modify and manage settings for winapp2ool and its sub modules</summary>
 </member>
-<member name="M:winapp2ool.SettingsManager.changeFileParams(winapp2ool.iniFile@,System.Boolean@)">
+<member name="M:winapp2ool.SettingsManager.changeFileParams(winapp2ool.iniFile@,System.Boolean@,System.String,System.String)">
  <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
  <param name="someFile">A pointer to an iniFile whose parameters will be changed</param>
  <param name="settingsChangedSetting">A pointer to the boolean indicating that a module's settings been modified from their default state </param>
 </member>
-<member name="M:winapp2ool.SettingsManager.toggleSettingParam(System.Boolean@,System.String,System.Boolean@)">
+<member name="M:winapp2ool.SettingsManager.toggleSettingParam(System.Boolean@,System.String,System.Boolean@,System.String,System.String,System.String)">
  <summary>Toggles a setting's boolean state and marks its tracker true</summary>
  <param name="setting">A pointer to the boolean representing a module setting to be toggled</param>
  <param name="paramText">A string explaining the setting being toggled</param>
@@ -1318,6 +1432,12 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.Merge.initDefaultSettings">
  <summary> Restores the default state of the module's properties </summary>
 </member>
+<member name="M:winapp2ool.Merge.getSeralizedMergeSettings">
+ <summary> Loads values from disk into memory for the Merge module settings </summary>
+</member>
+<member name="M:winapp2ool.Merge.createMergeSettingsSection">
+<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+</member>
 <member name="M:winapp2ool.Merge.printMenu">
  <summary> Prints the <c> Merge </c> menu to the user, includes some predefined merge files choices for ease of access </summary>
 </member>
@@ -1332,7 +1452,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.Merge.initMerge">
  <summary> Validates the <c> iniFiles </c> and kicks off the merging process </summary>
 </member>
-<member name="M:winapp2ool.Merge.merge(System.Boolean)">
+<member name="M:winapp2ool.Merge.mergeFiles(System.Boolean)">
  <summary> Conducts the merger of our two iniFiles </summary>
  <param name="isWinapp2"> Indicates that the <c> iniFiles </c> being operated on are of winapp2.ini syntax </param>
 </member>
@@ -1459,6 +1579,12 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.Trim.initDefaultSettings">
  <summary> Restores the default state of the module's parameters </summary>
 </member>
+<member name="M:winapp2ool.Trim.getSerializedTrimSettings">
+ <summary> Loads values from disk into memory for the Trim module settings </summary>
+</member>
+<member name="M:winapp2ool.Trim.createTrimSettingsSection">
+ <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+</member>
 <member name="M:winapp2ool.Trim.remoteTrim(winapp2ool.iniFile,winapp2ool.iniFile,System.Boolean)">
  <summary> Trims an <c> iniFile </c> from outside the module </summary>
  <param name="firstFile"> The winapp2.ini file to be trimmed </param>
@@ -1475,7 +1601,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.Trim.initTrim">
  <summary> Initiates the <c> Trim </c> process from the main menu or commandline </summary>
 </member>
-<member name="M:winapp2ool.Trim.trim(winapp2ool.winapp2file)">
+<member name="M:winapp2ool.Trim.trimFile(winapp2ool.winapp2file)">
  <summary> Trims a <c> winapp2file </c>, removing entries not relevant to the current system </summary>
  <param name="winapp2"> A <c> winapp2file </c> to be trimmed to fit the current system </param>
 </member>
@@ -1731,6 +1857,12 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.WinappDebug.initDefaultSettings">
  <summary> Restore the default state of the module's parameters </summary>
 </member>
+<member name="M:winapp2ool.WinappDebug.getSeralizedLintSettings">
+ <summary> Loads values from disk into memory for the WinappDebug module settings </summary>
+</member>
+<member name="M:winapp2ool.WinappDebug.createLintSettingsSection">
+<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+</member>
 <member name="M:winapp2ool.WinappDebug.printMenu">
  <summary> Displays the <c> WinappDebug </c> menu to the user </summary>
 </member>
@@ -1891,6 +2023,18 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
  which necessarily prevents us from deleting it, a critical step in ensuring that we have the latest binary. Attempts to read the manifest from the bytestream 
  without locking the file cause many antivirus' to flag winapp2ool as a malicious entity and in some cases, automatically remove it from the system. </remarks>
 </member>
+<member name="P:winapp2ool.Winapp2ool.toolSettingsHaveChanged">
+ <summary> Indicates that the module's settings have been changed </summary>
+</member>
+<member name="M:winapp2ool.Winapp2ool.initDefaultSettings">
+ <summary> Initalizes the default state of the winapp2ool module settings </summary>
+</member>
+<member name="M:winapp2ool.Winapp2ool.getSeralizedToolSettings">
+ <summary> Loads values from disk into memory for the winapp2ool module settings </summary>
+</member>
+<member name="M:winapp2ool.Winapp2ool.createToolSettingsSection">
+<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+</member>
 <member name="M:winapp2ool.Winapp2ool.printMenu">
  <summary> Prints the main winapp2ool menu to the user </summary>
 </member>
@@ -1899,7 +2043,7 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 </member>
 <member name="M:winapp2ool.Winapp2ool.handleUserInput(System.String)">
  <summary> Handles the user input for the menu </summary>
- <param name="input"> The user's input </param>
+ <param name="input"> The <c> String </c> containing the user's input </param>
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
  <summary> Checks the version of Windows on the current system and returns it as a Double </summary>
@@ -1913,6 +2057,13 @@ As a string. Can be used to simply fetch the logs from modules for saving to dis
 <member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
  <summary> Ensures that an <c> iniFile </c> has content and informs the user if it does not. Returns <c> False </c> if there are no sections </summary>
  <param name="iFile"> An <c> iniFile </c> to be checked for content </param>
+</member>
+<member name="M:winapp2ool.Winapp2ool.printToolSettingsMenu">
+ <summary> Prints the winapp2ool settings menu to the user </summary>
+</member>
+<member name="M:winapp2ool.Winapp2ool.handleToolSettingsInput(System.String)">
+ <summary> Handles the user input for the winapp2ool settings menu </summary>
+ <param name="input"> The user's input </param>
 </member>
 </members>
 </doc>

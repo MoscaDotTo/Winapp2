@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -20,24 +20,30 @@ Module SettingsManager
     ''' <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
     ''' <param name="someFile">A pointer to an iniFile whose parameters will be changed</param>
     ''' <param name="settingsChangedSetting">A pointer to the boolean indicating that a module's settings been modified from their default state </param>
-    Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean)
+    Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean, Optional callingModule As String = "", Optional settingName As String = "")
         Dim curName = someFile.Name
         Dim curDir = someFile.Dir
         initModule("File Chooser", AddressOf someFile.printFileChooserMenu, AddressOf someFile.handleFileChooserInput)
         settingsChangedSetting = True
         Dim fileChanged = Not someFile.Name = curName Or Not someFile.Dir = curDir
-        setHeaderText($"{If(someFile.SecondName = "", someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
+        updateSettings(callingModule, $"{settingName}_Dir", someFile.Dir)
+        updateSettings(callingModule, $"{settingName}_Name", someFile.Name)
+        setHeaderText($"{If(someFile.SecondName.Length = 0, someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
     End Sub
 
     ''' <summary>Toggles a setting's boolean state and marks its tracker true</summary>
     ''' <param name="setting">A pointer to the boolean representing a module setting to be toggled</param>
     ''' <param name="paramText">A string explaining the setting being toggled</param>
     ''' <param name="mSettingsChanged">A pointer to the boolean indicating that a module's settings been modified from their default state</param>
-    Public Sub toggleSettingParam(ByRef setting As Boolean, paramText As String, ByRef mSettingsChanged As Boolean)
+    Public Sub toggleSettingParam(ByRef setting As Boolean, paramText As String, ByRef mSettingsChanged As Boolean, Optional callingModule As String = "",
+                                  Optional settingName As String = "", Optional settingChangedName As String = "")
         gLog($"Toggling {paramText}", indent:=True)
         setHeaderText($"{paramText} {enStr(setting)}d", True, True, If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
         setting = Not setting
         mSettingsChanged = True
+        updateSettings(callingModule, settingName, setting.ToString)
+        updateSettings(callingModule, settingChangedName, mSettingsChanged.ToString)
+        settingsFile.overwriteToFile(settingsFile.toString, settingName = NameOf(saveSettingsToDisk) Or settingName = NameOf(readSettingsFromDisk))
     End Sub
 
     ''' <summary>Handles toggling downloading of winapp2.ini from menus</summary>

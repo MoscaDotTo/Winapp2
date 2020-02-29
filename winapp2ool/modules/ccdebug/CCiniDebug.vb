@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -44,7 +44,54 @@ Module CCiniDebug
         SaveDebuggedFile = True
         SortFileForOutput = True
         ModuleSettingsChanged = False
+        restoreDefaultSettings(NameOf(CCiniDebug), AddressOf createDebugSettingsSection)
     End Sub
+
+    ''' <summary> Loads values from disk into memory for the CCiniDebug module settings </summary>
+    Public Sub getSerializedDebugSettings()
+        For Each kvp In settingsDict(NameOf(CCiniDebug))
+            Select Case kvp.Key
+                Case NameOf(CCDebugFile1) & "_Name"
+                    CCDebugFile1.Name = kvp.Value
+                Case NameOf(CCDebugFile1) & "_Dir"
+                    CCDebugFile1.Dir = kvp.Value
+                Case NameOf(CCDebugFile2) & "_Name"
+                    CCDebugFile2.Name = kvp.Value
+                Case NameOf(CCDebugFile2) & "_Dir"
+                    CCDebugFile2.Dir = kvp.Value
+                Case NameOf(CCDebugFile3) & "_Name"
+                    CCDebugFile3.Name = kvp.Value
+                Case NameOf(CCDebugFile3) & "_Dir"
+                    CCDebugFile3.Dir = kvp.Value
+                Case NameOf(PruneStaleEntries)
+                    PruneStaleEntries = CBool(kvp.Value)
+                Case NameOf(SaveDebuggedFile)
+                    SaveDebuggedFile = CBool(kvp.Value)
+                Case NameOf(SortFileForOutput)
+                    SortFileForOutput = CBool(kvp.Value)
+                Case NameOf(ModuleSettingsChanged)
+                    ModuleSettingsChanged = CBool(kvp.Value)
+            End Select
+        Next
+    End Sub
+
+    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+    Public Sub createDebugSettingsSection()
+        Dim moduleName = NameOf(CCiniDebug)
+        createModuleSettingsSection(moduleName, {
+            getSettingIniKey(moduleName, NameOf(CCDebugFile1), CCDebugFile1.Name, isName:=True),
+            getSettingIniKey(moduleName, NameOf(CCDebugFile1), CCDebugFile1.Dir, isDir:=True),
+            getSettingIniKey(moduleName, NameOf(CCDebugFile2), CCDebugFile2.Name, isName:=True),
+            getSettingIniKey(moduleName, NameOf(CCDebugFile2), CCDebugFile2.Dir, isDir:=True),
+            getSettingIniKey(moduleName, NameOf(CCDebugFile3), CCDebugFile3.Name, isName:=True),
+            getSettingIniKey(moduleName, NameOf(CCDebugFile3), CCDebugFile3.Dir, isDir:=True),
+            getSettingIniKey(moduleName, NameOf(PruneStaleEntries), PruneStaleEntries.ToString),
+            getSettingIniKey(moduleName, NameOf(SaveDebuggedFile), SaveDebuggedFile.ToString),
+            getSettingIniKey(moduleName, NameOf(SortFileForOutput), SortFileForOutput.ToString),
+            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+            })
+    End Sub
+
 
     ''' <summary>Handles the commandline args for CCiniDebug</summary>
     '''  CCiniDebug args:
@@ -73,7 +120,7 @@ Module CCiniDebug
         print(0, $"Current ccleaner.ini:  {replDir(CCDebugFile2.Path)}")
         print(0, $"Current winapp2.ini:   {replDir(CCDebugFile1.Path)}", cond:=PruneStaleEntries)
         print(0, $"Current save location: {replDir(CCDebugFile3.Path)}", cond:=SaveDebuggedFile, closeMenu:=Not ModuleSettingsChanged)
-        print(2, "CCiniDebug", cond:=ModuleSettingsChanged, closeMenu:=True)
+        print(2, NameOf(CCiniDebug), cond:=ModuleSettingsChanged, closeMenu:=True)
     End Sub
 
     ''' <summary>Handles the user's input from the CCiniDebug menu</summary>
