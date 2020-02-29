@@ -25,7 +25,7 @@ Public Module logger
     Public Property nestCount As Integer = 0
 
     ''' <summary> Adds an item into the global log </summary>
-    ''' <param name="logstr"> The <c> String </c> to be added into the log </param>
+    ''' <param name="logstr"> The <c> String </c> to be added into the log <br /> Optional, Default: <c> ""</c> </param>
     ''' <param name="cond"> Indicates that the <c> <paramref name="logstr"/> </c> should be added into the log <br /> Optional, Default: <c> True </c> </param>
     ''' <param name="ascend"> Indicates that the line should be indented. (Generally) requires a corresponding <c> <paramref name="descend"/></c> to "undo." Usefor for blocking 
     ''' groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each <br /> Optional, Default: <c> False </c></param>
@@ -37,11 +37,11 @@ Public Module logger
     ''' <param name="ascAmt"> The number of times by which this and following lines should be indented <br /> Optional, Default: <c> 1 </c> </param>
     ''' <param name="buffr"> Indicates that an empty line should be added into the log following <c> <paramref name="logstr"/> </c> </param>
     ''' <param name="leadr"> Indicates that an empty line should be added into the log before <c> <paramref name="logstr"/> </c> </param>
-    Public Sub gLog(logstr As String, Optional cond As Boolean = True, Optional ascend As Boolean = False,
+    Public Sub gLog(Optional logstr As String = "", Optional cond As Boolean = True, Optional ascend As Boolean = False,
                     Optional descend As Boolean = False, Optional indent As Boolean = False, Optional indAmt As Integer = 1,
                     Optional descAmt As Integer = 1, Optional ascAmt As Integer = 1, Optional buffr As Boolean = False, Optional leadr As Boolean = False)
         If cond Then
-            If leadr Then gLog("")
+            If leadr Then gLog()
             If indent Then nestCount += indAmt
             If ascend Then nestCount += ascAmt
             Dim buffer = ""
@@ -52,7 +52,7 @@ Public Module logger
             GlobalLog.add(logstr)
             If indent Then nestCount -= indAmt
             If descend Then nestCount -= descAmt
-            If buffr Then gLog("")
+            If buffr Then gLog()
         End If
     End Sub
 
