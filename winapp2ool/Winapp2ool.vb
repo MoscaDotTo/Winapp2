@@ -76,7 +76,7 @@ Module Winapp2ool
                                         getSettingIniKey(moduleName, NameOf(RemoteWinappIsNonCC), RemoteWinappIsNonCC.ToString),
                                         getSettingIniKey(moduleName, NameOf(toolSettingsHaveChanged), toolSettingsHaveChanged.ToString),
                                         getSettingIniKey(moduleName, NameOf(GlobalLogFile) & "_Dir", GlobalLogFile.Dir),
-                                        getSettingIniKey(moduleName,NameOf(GlobalLogFile) & "_Name",GlobalLogFile.Name)
+                                        getSettingIniKey(moduleName, NameOf(GlobalLogFile) & "_Name", GlobalLogFile.Name)
                                     })
     End Sub
 
@@ -84,17 +84,17 @@ Module Winapp2ool
     Private Sub printMenu()
         checkUpdates(Not isOffline And Not checkedForUpdates)
         printMenuTop(Array.Empty(Of String)(), False)
-        print(0, "Winapp2ool Is currently in offline mode", cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
-        print(0, "Your .NET Framework Is out of date", cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
-        print(0, "Winapp2ool Is currently running from the temporary folder, some functions may be impacted", cond:=cantDownloadExecutable, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
+        print(0, "Winapp2ool is currently in offline mode", cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
+        print(0, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
+        print(0, "Winapp2ool is currently running from the temporary folder, some functions may be impacted", cond:=cantDownloadExecutable, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
         printUpdNotif(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver)
         printUpdNotif(updateIsAvail, "Winapp2ool", currentVersion, latestVersion)
         print(1, "Exit", "Exit the application")
-        print(1, "WinappDebug", "Check for And correct errors in winapp2.ini")
+        print(1, "WinappDebug", "Check for and correct errors in winapp2.ini")
         print(1, "Trim", "Debloat winapp2.ini for your system")
         print(1, "Merge", "Merge the contents of an ini file into winapp2.ini")
         print(1, "Diff", "Observe the changes between two winapp2.ini files")
-        print(1, "CCiniDebug", "Sort And trim ccleaner.ini", trailingBlank:=True)
+        print(1, "CCiniDebug", "Sort and trim ccleaner.ini", trailingBlank:=True)
         print(1, "Downloader", "Download files from the Winapp2 GitHub")
         print(1, "Settings", "Manage Winapp2ool's settings", closeMenu:=Not (isOffline Or waUpdateIsAvail Or updateIsAvail))
         If waUpdateIsAvail And Not isOffline Then

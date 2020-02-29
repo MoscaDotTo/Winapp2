@@ -181,14 +181,14 @@ Public Module WinappDebug
 
     ''' <summary> Displays the <c> WinappDebug </c> menu to the user </summary>
     Public Sub printMenu()
-        printMenuTop({"Scan winapp2.ini For style and syntax errors, and attempt To repair them where possible."})
+        printMenuTop({"Scan winapp2.ini for style and syntax errors, and attempt to repair them where possible."})
         print(1, "Run (Default)", "Run the debugger")
         print(1, "File Chooser (winapp2.ini)", "Choose a different file name or path for winapp2.ini", leadingBlank:=True, trailingBlank:=True)
         print(5, "Toggle Saving", "saving the file after correcting errors", enStrCond:=SaveChanges)
         print(1, "File Chooser (save)", "Save a copy of changes made to a new file instead of overwriting winapp2.ini", SaveChanges, trailingBlank:=True)
         print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not SaveChanges, trailingBlank:=True)
-        print(0, $"Current winapp2.ini  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
-        print(0, $"Current save target  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
+        print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
+        print(0, $"Current save target:  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
         print(2, NameOf(WinappDebug), cond:=ModuleSettingsChanged, closeMenu:=MostRecentLintLog.Length = 0)
         print(1, "Log Viewer", "Show the most recent lint results", cond:=Not MostRecentLintLog.Length = 0, closeMenu:=True, leadingBlank:=True)
     End Sub
