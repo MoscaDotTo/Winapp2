@@ -314,7 +314,7 @@ winapp2ool
  <summary> Indicates that the Downloader module's settings have been changed from their defaults </summary>
 </member>
 <member name="M:winapp2ool.Downloader.initDefaultSettings">
- <summary>Restores the default state of the module's parameters</summary>
+ <summary> Restores the default state of the module's parameters </summary>
 </member>
 <member name="M:winapp2ool.Downloader.getSerializedDownloaderSettings">
  <summary> Loads values from disk into memory for the Downloader module settings </summary>
