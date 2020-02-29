@@ -20,7 +20,8 @@ Module SettingsManager
     ''' <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
     ''' <param name="someFile">A pointer to an iniFile whose parameters will be changed</param>
     ''' <param name="settingsChangedSetting">A pointer to the boolean indicating that a module's settings been modified from their default state </param>
-    Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean, Optional callingModule As String = "", Optional settingName As String = "")
+    Public Sub changeFileParams(ByRef someFile As iniFile, ByRef settingsChangedSetting As Boolean, callingModule As String, settingName As String,
+                                settingChangedName As String)
         Dim curName = someFile.Name
         Dim curDir = someFile.Dir
         initModule("File Chooser", AddressOf someFile.printFileChooserMenu, AddressOf someFile.handleFileChooserInput)
@@ -28,6 +29,7 @@ Module SettingsManager
         Dim fileChanged = Not someFile.Name = curName Or Not someFile.Dir = curDir
         updateSettings(callingModule, $"{settingName}_Dir", someFile.Dir)
         updateSettings(callingModule, $"{settingName}_Name", someFile.Name)
+        updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString)
         setHeaderText($"{If(someFile.SecondName.Length = 0, someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
     End Sub
 
