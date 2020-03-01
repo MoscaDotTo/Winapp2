@@ -229,7 +229,7 @@ Public Module WinappDebug
         gLog("Beginning lint", leadr:=True, ascend:=True)
         MostRecentLintLog = ""
         debug(wa2)
-        gLog("", descend:=True)
+        gLog(descend:=True)
         gLog("Lint complete")
         setHeaderText("Lint complete")
         print(4, "Completed analysis of winapp2.ini", conjoin:=True)
@@ -245,7 +245,7 @@ Public Module WinappDebug
     Public Sub debug(ByRef fileToBeDebugged As winapp2file)
         ErrorsFound = 0
         allEntryNames = New strList
-        gLog("", ascend:=True)
+        gLog(ascend:=True)
         For Each entryList In fileToBeDebugged.Winapp2entries
             If entryList.Count = 0 Then Continue For
             entryList.ForEach(Sub(entry) processEntry(entry))
@@ -417,7 +417,7 @@ Public Module WinappDebug
         sortKeys(kl, dupes.KeyCount > 0)
         ' Run optimization checks on FileKey lists only 
         If kl.typeIs("FileKey") Then cOptimization(kl)
-        gLog("", descend:=True)
+        gLog(descend:=True)
     End Sub
 
     ''' <summary> This function does nothing by design </summary>
@@ -713,7 +713,7 @@ Public Module WinappDebug
             gLog(errStr, indent:=True)
             MostRecentLintLog += errStr & Environment.NewLine
         Next
-        gLog("", descend:=True)
+        gLog(descend:=True)
         cwl()
         MostRecentLintLog += Environment.NewLine
         ErrorsFound += 1

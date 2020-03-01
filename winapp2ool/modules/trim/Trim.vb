@@ -207,7 +207,7 @@ Public Module Trim
         Dim hasNoDetectKeys = entry.DetectOS.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount + entry.SpecialDetect.KeyCount = 0
         gLog("No detect keys found, entry will be retained.", hasNoDetectKeys, descend:=True)
         If hasNoDetectKeys Then Return True
-        gLog("", descend:=True)
+        gLog(descend:=True)
         Return False
     End Function
 

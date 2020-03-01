@@ -301,7 +301,7 @@ Module Diff
             print(0, key.toString, colorLine:=True, enStrCond:=wasAdded)
             gLog($"{key.toString}", indent:=True, indAmt:=4)
         Next
-        gLog("", descend:=True)
+        gLog(descend:=True)
     End Sub
 
     ''' <summary> Determines the category of change associated with key found by Diff </summary>
