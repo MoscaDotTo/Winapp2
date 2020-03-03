@@ -64,3 +64,9 @@
 /winapp2ool/bin/Debug/Readme.txt
 /winapp2ool/bin/Debug/ccleaner.ini
 /winapp2ool/bin/Debug/winapp2ool.ini
+/winapp2ool/packages/Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.6
+/winapp2ool/packages/Microsoft.NetFramework.Analyzers.2.9.6
+/winapp2ool/packages/Microsoft.CodeQuality.Analyzers.2.9.6
+/winapp2ool/packages/Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6
+/winapp2ool/packages/Microsoft.NetCore.Analyzers.2.9.6
+/winapp2ool/packages.config
