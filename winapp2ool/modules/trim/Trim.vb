@@ -81,8 +81,8 @@ Public Module Trim
             getSettingIniKey(moduleName, NameOf(MergeFile1), MergeFile1.Dir, isDir:=True),
             getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Name, isName:=True),
             getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(DownloadFileToTrim), DownloadFileToTrim.ToString),
-            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+            getSettingIniKey(moduleName, NameOf(DownloadFileToTrim), DownloadFileToTrim.ToString(Globalization.CultureInfo.InvariantCulture)),
+            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(Globalization.CultureInfo.InvariantCulture))
             })
     End Sub
 
@@ -112,10 +112,11 @@ Public Module Trim
     ''' <summary> Handles the user input from the menu </summary>
     ''' <param name="input"> The String containing the user's input </param>
     Public Sub handleUserInput(input As String)
+        If input Is Nothing Then exc(New ArgumentNullException(NameOf(input))) : Return
         Select Case True
             Case input = "0"
                 exitModule()
-            Case (input = "1" Or input = "")
+            Case (input = "1" Or input.Length = 0)
                 initTrim()
             Case input = "2" And Not isOffline
                 If Not denySettingOffline() Then toggleSettingParam(DownloadFileToTrim, "Downloading", ModuleSettingsChanged,
@@ -160,7 +161,9 @@ Public Module Trim
     ''' <summary> Trims a <c> winapp2file </c>, removing entries not relevant to the current system </summary>
     ''' <param name="winapp2"> A <c> winapp2file </c> to be trimmed to fit the current system </param>
     Public Sub trimFile(winapp2 As winapp2file)
-        For Each entryList In winapp2.Winapp2entries
+        If winapp2 Is Nothing Then exc(New ArgumentNullException(NameOf(winapp2))) : Return
+        For i = 0 To winapp2.Winapp2entries.Count - 1
+            Dim entryList = winapp2.Winapp2entries(i)
             processEntryList(entryList)
         Next
         winapp2.rebuildToIniFiles()
@@ -242,7 +245,7 @@ Public Module Trim
         Dim keysToAdd As New keyList(kl.KeyType)
         For Each key In kl.Keys
             If Not key.vHasAny(findStrs, True) Then Continue For
-            For i = 0 To findStrs.Count - 1
+            For i = 0 To findStrs.Length - 1
                 Dim keyToAdd = createVSKey(findStrs(i), replStrs(i), key)
                 ' Don't recreate keys that already exist
                 If initVals.contains(keyToAdd.Value) Then Continue For
@@ -300,7 +303,7 @@ Public Module Trim
     ''' <summary> Handles passing off checks from sources that may vary between file system and registry </summary>
     ''' <param name="path"> A filesystem or registry path whose existence will be audited </param>
     Private Function checkExist(path As String) As Boolean
-        Return If(path.StartsWith("HK"), checkRegExist(path), checkPathExist(path))
+        Return If(path.StartsWith("HK", StringComparison.InvariantCulture), checkRegExist(path), checkPathExist(path))
     End Function
 
     ''' <summary> Returns <c> True </c> if a given key exists in the Windows Registry, <c> False </c> otherwise </summary>
@@ -326,7 +329,7 @@ Public Module Trim
                     If getLMKey(dir) IsNot Nothing Then Return True
                     ' Support checking for 32bit applications on Win64
                     dir = root + "\" + dir
-                    dir = dir.ToLower.Replace("hklm\software", "Software\WOW6432Node")
+                    dir = dir.ToUpperInvariant.Replace("HKLM\SOFTWARE", "SOFTWARE\WOW6432Node")
                     Return getLMKey(dir) IsNot Nothing
                 Case "HKU"
                     Return getUserKey(dir) IsNot Nothing
@@ -335,6 +338,7 @@ Public Module Trim
             End Select
         Catch ex As Exception
             ' The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.
+            exc(ex)
             gLog(ex.Message)
             Return True
         End Try
@@ -353,7 +357,7 @@ Public Module Trim
                 Case "ProgramFiles"
                     isProgramFiles = True
                 Case "Documents"
-                    envDir = $"{Environment.GetEnvironmentVariable("UserProfile")}\{If(winVer = 5.1, "My ", "")}Documents"
+                    envDir = $"{Environment.GetEnvironmentVariable("UserProfile")}\{If(winVer = 5.1 Or winVer = 5.2, "My ", "")}Documents"
                 Case "CommonAppData"
                     envDir = Environment.GetEnvironmentVariable("ProgramData")
             End Select
@@ -408,7 +412,6 @@ Public Module Trim
         ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
         Dim possibleDirs As New strList
         Dim currentPaths As New strList
-        currentPaths.add("")
         ' Split the given string into sections by directory
         Dim splitDir = dir.Split(CChar("\"))
         For Each pathPart In splitDir
@@ -416,20 +419,14 @@ Public Module Trim
             ' This probably wont work if a string for some reason starts with a *
             If pathPart.Contains("*") Then
                 For Each currentPath In currentPaths.Items
-                    Try
-                        ' Query the existence of child paths for each current path we hold
-                        If isFileSystem Then
-                            Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
-                            ' If there are any, add them to our possibility list
-                            possibleDirs.add(possibilities, Not possibilities.Count = 0)
-                        Else
-                            ' Registry Query here
-                        End If
-                    Catch
-                        ' The exception we encounter here is going to be the result of directories not existing.
-                        ' The exception will be thrown from the GetDirectories call and will prevent us from attempting to add new
-                        ' items to the possibility list. In this instance, we can silently fail (here).
-                    End Try
+                    ' Query the existence of child paths for each current path we hold
+                    If isFileSystem Then
+                        Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
+                        ' If there are any, add them to our possibility list
+                        possibleDirs.add(possibilities, possibilities.Any)
+                    Else
+                        ' Registry Query here
+                    End If
                 Next
                 ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
                 If possibleDirs.Count = 0 Then Return False
@@ -443,10 +440,11 @@ Public Module Trim
                 Else
                     Dim newCurPaths As New strList
                     For Each path In currentPaths.Items
-                        If Not path.EndsWith("\") And Not path.Length = 0 Then path += "\"
+                        If Not path.EndsWith("\", StringComparison.InvariantCulture) And Not path.Length = 0 Then path += "\"
                         newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
                     Next
                     currentPaths = newCurPaths
+                    If currentPaths.Count = 0 Then Return False
                 End If
             End If
         Next
@@ -462,9 +460,9 @@ Public Module Trim
     Private Function checkDetOS(value As String) As Boolean
         Dim splitKey = value.Split(CChar("|"))
         Select Case True
-            Case value.StartsWith("|")
+            Case value.StartsWith("|", StringComparison.InvariantCultureIgnoreCase)
                 Return Not winVer > Val(splitKey(1))
-            Case value.EndsWith("|")
+            Case value.EndsWith("|", StringComparison.InvariantCultureIgnoreCase)
                 Return Not winVer < Val(splitKey(0))
             Case Else
                 Return winVer >= Val(splitKey(0)) And winVer <= Val(splitKey(1))
