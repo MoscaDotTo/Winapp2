@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -19,6 +19,8 @@ Option Strict On
 ''' MenuMaker is a singleton driver module for powering dyanamic finite state console applications with numbered menus
 ''' </summary>
 Module MenuMaker
+    ''' <summary> An instruction to press the Enter button to continue </summary>
+    Public ReadOnly Property pressEnterStr As String = "Press Enter to continue"
     ''' <summary> An instruction to press any key to return to the previous menu </summary>
     Public ReadOnly Property anyKeyStr As String = "Press any key to return to the menu."
     ''' <summary> An error message informing the user their input was invalid </summary>
