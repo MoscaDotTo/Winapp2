@@ -56,6 +56,12 @@ Public Module logger
         End If
     End Sub
 
+    ''' <summary> Saves the global log to disk if the given <c> <paramref name="cond"/> </c> is met </summary>
+    ''' <param name="cond"> Indicates that the global log should be saved to disk <br /> Optional, Default: <c> False </c> </param>
+    Public Sub saveGlobalLog(Optional cond As Boolean = True)
+        GlobalLogFile.overwriteToFile(logger.toString, cond)
+    End Sub
+
     ''' <summary> Returns the log as a single <c> String </c> </summary>
     Public Function toString() As String
         Dim out = ""
@@ -70,7 +76,7 @@ Public Module logger
         clrConsole()
         cwl(out)
         cwl()
-        cwl("End of log. Press enter to continue.")
+        cwl($"End of log. {pressEnterStr}")
         Console.ReadLine()
     End Sub
 
@@ -82,7 +88,7 @@ Public Module logger
         Dim startind, endind As Integer
         For Each line In GlobalLog.Items
             If line.Contains(containedPhrase) Then startind = GlobalLog.Items.LastIndexOf(line)
-            If line.EndsWith(endingPhrase) Then endind = GlobalLog.Items.LastIndexOf(line)
+            If line.EndsWith(endingPhrase, StringComparison.InvariantCultureIgnoreCase) Then endind = GlobalLog.Items.LastIndexOf(line)
         Next
         ' The global log has nesting based on the depth of the winapp2ool fsm, we trim this to make the requested slice depth=0 
         Dim toTrim = ""
