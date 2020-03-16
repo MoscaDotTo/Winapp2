@@ -15,12 +15,14 @@ Name           | Purpose
 
 * [CCleaner](https://www.ccleaner.com/ccleaner):
   * Download the latest winapp2.ini from this repo and place it in the same directory as ccleaner.exe.
-
+  * Note: CCleaner 5.64.7613 is the last version to work on XP and Vista. Winapp2 and Winapp3 will continue to work with this version.
+  
 * [BleachBit](https://www.bleachbit.org):
   * Open BleachBit.
   * Select the "Edit" tab, and then "Preferences".
   * Check the box that reads "Download and update cleaners from community (winapp2.ini)".
-
+  * Note: Bleachbit 2.2 is the last version to work on Windows XP. Winapp2 and Winapp3 will continue to work with this version.
+  
 * [System Ninja](https://singularlabs.com/software/system-ninja):
   * System Ninja ships with winapp2.ini by default, storing it in your `..\System Ninja\scripts\` directory.
 
