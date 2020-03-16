@@ -68,13 +68,14 @@ Module Winapp2ool
 
     '''<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createToolSettingsSection()
+        Dim compCult = System.Globalization.CultureInfo.InvariantCulture
         Dim moduleName = NameOf(Winapp2ool)
         createModuleSettingsSection(NameOf(Winapp2ool), {
-                                        getSettingIniKey(moduleName, NameOf(isBeta), isBeta.ToString),
-                                        getSettingIniKey(moduleName, NameOf(saveSettingsToDisk), saveSettingsToDisk.ToString),
-                                        getSettingIniKey(moduleName, NameOf(readSettingsFromDisk), readSettingsFromDisk.ToString),
-                                        getSettingIniKey(moduleName, NameOf(RemoteWinappIsNonCC), RemoteWinappIsNonCC.ToString),
-                                        getSettingIniKey(moduleName, NameOf(toolSettingsHaveChanged), toolSettingsHaveChanged.ToString),
+                                        getSettingIniKey(moduleName, NameOf(isBeta), isBeta.ToString(compCult)),
+                                        getSettingIniKey(moduleName, NameOf(saveSettingsToDisk), saveSettingsToDisk.ToString(compCult)),
+                                        getSettingIniKey(moduleName, NameOf(readSettingsFromDisk), readSettingsFromDisk.ToString(compCult)),
+                                        getSettingIniKey(moduleName, NameOf(RemoteWinappIsNonCC), RemoteWinappIsNonCC.ToString(compCult)),
+                                        getSettingIniKey(moduleName, NameOf(toolSettingsHaveChanged), toolSettingsHaveChanged.ToString(compCult)),
                                         getSettingIniKey(moduleName, NameOf(GlobalLogFile) & "_Dir", GlobalLogFile.Dir),
                                         getSettingIniKey(moduleName, NameOf(GlobalLogFile) & "_Name", GlobalLogFile.Name)
                                     })
@@ -223,6 +224,7 @@ Module Winapp2ool
         print(1, "File Chooser (log)", "Change the filename or path to which the winapp2ool log should be saved")
         print(1, "Save Log", "Save winapp2ool's internal log to the disk")
         print(0, $"Current log file target: {replDir(GlobalLogFile.Path)}", leadingBlank:=True, trailingBlank:=True)
+        print(1, "Visit GitHub", "Open the winapp2.ini/winapp2ool GitHub in your default web browser", trailingBlank:=True)
         print(5, "Toggle Beta Participation", $"participating in the 'beta' builds of winapp2ool (requires a restart)", enStrCond:=isBeta, closeMenu:=Not toolSettingsHaveChanged)
         print(2, NameOf(Winapp2ool), cond:=toolSettingsHaveChanged, closeMenu:=True)
     End Sub
@@ -248,11 +250,13 @@ Module Winapp2ool
             Case input = "6"
                 GlobalLogFile.overwriteToFile(logger.toString)
             Case input = "7"
+                Process.Start(gitLink)
+            Case input = "8"
                 If Not denyActionWithHeader(DotNetFrameworkOutOfDate, "Winapp2ool beta requires .NET 4.6 or higher") Then
                     toggleSettingParam(isBeta, "Beta Participation", toolSettingsHaveChanged, moduleName, NameOf(isBeta), settingsChangedName)
                     autoUpdate()
                 End If
-            Case input = "8" And toolSettingsHaveChanged
+            Case input = "9" And toolSettingsHaveChanged
                 initDefaultSettings()
             Case Else
                 setHeaderText(invInpStr, True)
