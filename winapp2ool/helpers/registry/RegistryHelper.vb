@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -46,10 +46,6 @@ Module RegistryHelper
         Return Registry.Users.OpenSubKey(subkey)
     End Function
 
-    Private Sub mkLstTmp(splitPath As String(), ind As Integer, ByRef trackLst1 As strList, trackLst2 As strList)
-
-    End Sub
-
     Public Function getWildcardKeys(path As String) As strList
         Dim out As New strList
         Dim tmp As New strList
@@ -60,7 +56,7 @@ Module RegistryHelper
         ' This will be anything that would return under the first wildcard
         cwl($"Finding all subkeys of {splitPath(0)}")
         Dim baseList = getSubKeys(splitPath(0))
-        For i = 0 To splitPath.Count - 1
+        For i = 0 To splitPath.Length - 1
 
         Next
         For Each item In baseList.Items
