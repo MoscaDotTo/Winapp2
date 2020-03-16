@@ -274,6 +274,9 @@ winapp2ool
  Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
  </summary>
 </member>
+<member name="P:winapp2ool.Downloader.gitLink">
+ <summary> The web address of the winapp2.ini GitHub </summary>
+</member>
 <member name="P:winapp2ool.Downloader.wa2Link">
 <summary> The web address of the CCleaner version of winapp2.ini </summary>
 </member>
@@ -449,16 +452,41 @@ winapp2ool
  <returns> An <c> iniFile </c> created using the remote data if that data is properly formatted, <c> Nothing </c> otherwise </returns>
 </member>
 <member name="T:winapp2ool.exceptionHandler">
- <summary>
- Handles the processing of errors caught throughout the operation of winapp2ool, hopefully gracefully.
- </summary>
+ <summary> Handles the processing of errors caught throughout the operation of winapp2ool, hopefully gracefully. </summary>
 </member>
 <member name="M:winapp2ool.exceptionHandler.exc(System.Exception@)">
- <summary>Prints out exceptions and any other information related to them that a use may need.</summary>
- <param name="ex">A given exception captured during winapp2ool's execution</param>
+ <summary> Catches general exceptions and logs them for debugging purposes  </summary>
+ <param name="ex"> Any given exception captured during winapp2ool's execution </param>
 </member>
-<member name="M:winapp2ool.exceptionHandler.printDotNetOutOfDateError">
- <summary>Prints output to the user instructing them to update their .NET Framework</summary>
+<member name="M:winapp2ool.exceptionHandler.handleWebException(System.Net.WebException)">
+ <summary> Enters Exceptions caused by a lack of internet access into the global log </summary>
+ <param name="ex"> An exception of type <c> Net.WebException </c> </param>
+</member>
+<member name="M:winapp2ool.exceptionHandler.handleIOException(System.IO.IOException)">
+ <summary> Enters Exceptions caused by being unable to access files into the global log </summary>
+ <param name="ex"> An Exception of type <c> IOException </c> </param>
+</member>
+<member name="M:winapp2ool.exceptionHandler.argIsNull(System.String)">
+ <summary> Creates a new <c> ArgumentNullException </c> when a public member is passed a <c> Null </c> parameter </summary>
+ <param name="argName"> The name of the argument whose value is <c> Null </c> </param>
+</member>
+<member name="M:winapp2ool.exceptionHandler.argIsInvalid(System.String)">
+ <summary> Creates a new <c> ArgumentException </c> when a public member is passed an invalid parameter </summary>
+ <param name="argName"> The name of the argument whose value is invalid </param>
+</member>
+<member name="M:winapp2ool.exceptionHandler.handleInvalidArgException(System.ArgumentException)">
+ <summary> Passes off exceptions caused by invalid arugments to be logged and displayed to the user </summary>
+ <param name="ex"> An Exception of type <c> ArgumentException </c> </param>
+</member>
+<member name="M:winapp2ool.exceptionHandler.printAndLogExceptionForUser(System.String,System.String,System.Boolean)">
+ <summary> Informs the user that an exception occured and records it in the winapp2ool log </summary>
+ <param name="exTxt"> The full text of the exception </param>
+ <param name="exType"> The <c> Type </c> of the exception </param>
+ <param name="forceAcknowledge"> Indicates that the user should be forced to press enter before the application continues <br /> Optional, Default: <c> False </c> </param>
+</member>
+<member name="M:winapp2ool.exceptionHandler.handleNullArgException(System.ArgumentNullException)">
+ <summary> Passes off exceptions caused by Null arguments to be logged and displayed to the user </summary>
+ <param name="ex"> An Exception of type <c> ArgumentNullException </c> </param>
 </member>
 <member name="T:winapp2ool.iniFile">
  <summary>
@@ -882,6 +910,10 @@ winapp2ool
  <param name="buffr"> Indicates that an empty line should be added into the log following <c> <paramref name="logstr"/> </c> </param>
  <param name="leadr"> Indicates that an empty line should be added into the log before <c> <paramref name="logstr"/> </c> </param>
 </member>
+<member name="M:winapp2ool.logger.saveGlobalLog(System.Boolean)">
+ <summary> Saves the global log to disk if the given <c> <paramref name="cond"/> </c> is met </summary>
+ <param name="cond"> Indicates that the global log should be saved to disk <br /> Optional, Default: <c> False </c> </param>
+</member>
 <member name="M:winapp2ool.logger.toString">
  <summary> Returns the log as a single <c> String </c> </summary>
 </member>
@@ -902,6 +934,9 @@ winapp2ool
  <summary>
  MenuMaker is a singleton driver module for powering dyanamic finite state console applications with numbered menus
  </summary>
+</member>
+<member name="P:winapp2ool.MenuMaker.pressEnterStr">
+ <summary> An instruction to press the Enter button to continue </summary>
 </member>
 <member name="P:winapp2ool.MenuMaker.anyKeyStr">
  <summary> An instruction to press any key to return to the previous menu </summary>
