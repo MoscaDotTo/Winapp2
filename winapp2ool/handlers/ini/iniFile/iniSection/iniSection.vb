@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -33,10 +33,11 @@ Public Class iniSection
     ''' <param name="listOfKeyLists">The list of <c>KeyLists </c> into which <c> iniKeys </c> will be sorted <br />
     ''' The last list in the keylistlist holds the keys determined to contain errors </param> 
     Public Sub constKeyLists(ByRef listOfKeyLists As List(Of keyList))
+        If listOfKeyLists Is Nothing Then argIsNull(NameOf(listOfKeyLists)) : Return
         Dim keyTypeList As New List(Of String)
-        listOfKeyLists.ForEach(Sub(kl) keyTypeList.Add(kl.KeyType.ToLower))
+        listOfKeyLists.ForEach(Sub(kl) keyTypeList.Add(kl.KeyType.ToUpperInvariant))
         For Each key In Keys.Keys
-            Dim type = key.KeyType.ToLower
+            Dim type = key.KeyType.ToUpperInvariant
             If keyTypeList.Contains(type) Then listOfKeyLists(keyTypeList.IndexOf(type)).add(key) Else listOfKeyLists.Last.add(key)
         Next
     End Sub
@@ -44,6 +45,7 @@ Public Class iniSection
     ''' <summary>Removes keys from the <c> iniSection </c> by their index </summary>
     ''' <param name="indicies"> A given list of indicies pointing to keys to remove from the <c> iniSection </c> </param>
     Public Sub removeKeys(indicies As List(Of Integer))
+        If indicies Is Nothing Then argIsNull(NameOf(indicies)) : Return
         ' Sort and reverse the indicies so that we remove from the end of the list towards the beginning
         indicies.Sort()
         indicies.Reverse()
@@ -67,6 +69,7 @@ Public Class iniSection
     ''' <param name="listOfLines">The list of Strings comprising the <c> iniSection </c></param>
     ''' <param name="listOfLineCounts">The list of line numbers associated with the lines </param>
     Public Sub New(ByVal listOfLines As List(Of String), Optional listOfLineCounts As List(Of Integer) = Nothing)
+        If listOfLines Is Nothing Then argIsNull(NameOf(listOfLines)) : Return
         Name = listOfLines(0).Trim(CChar("["), CChar("]"))
         StartingLineNumber = If(listOfLineCounts IsNot Nothing, listOfLineCounts(0), 1)
         EndingLineNumber = StartingLineNumber + listOfLines.Count
@@ -92,6 +95,9 @@ Public Class iniSection
     ''' <param name="removedKeys"> A return <c> keyList </c> that appear in this <c> iniSection </c> object but not the given <c> iniSection </c> </param>
     ''' <param name="addedKeys"> A return <c> keyList </c> that appear in the given <c> iniSection </c> object but not this object </param>
     Public Function compareTo(ss As iniSection, ByRef removedKeys As keyList, ByRef addedKeys As keyList) As Boolean
+        If ss Is Nothing Then argIsNull(NameOf(ss)) : Return False
+        If removedKeys Is Nothing Then argIsNull(NameOf(removedKeys)) : Return False
+        If addedKeys Is Nothing Then argIsNull(NameOf(addedKeys)) : Return False
         ' Create a copy of the section so we can modify it
         Dim secondSection As New iniSection With {.Name = ss.Name, .StartingLineNumber = ss.StartingLineNumber}
         For i = 0 To ss.Keys.KeyCount - 1

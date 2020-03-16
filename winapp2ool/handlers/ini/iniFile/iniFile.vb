@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -97,7 +97,7 @@ Public Class iniFile
     ''' <param name="path"> An absolute path containing an ini format file </param>
     Public Sub New(path As String)
         ' This is ugly but New only works if it's the *first* line in a constructor, so we must inline 
-        Me.New(path.Replace($"\{path.Split(CChar("\")).Last}", ""), path.Split(CChar("\")).Last, "", False)
+        Me.New(path.Replace($"\{path.Split(CChar("\")).Last}", ""), path.Split(CChar("\")).Last, "", True)
     End Sub
 
     ''' <summary> Writes a given <c> String </c> (generally an <c> iniFile </c>) to disk if the given 
@@ -113,9 +113,9 @@ Public Class iniFile
             file.Write(tostr)
             file.Close()
             gLog("Save complete", indent:=True)
-        Catch ex As Exception
+        Catch ex As IOException
             gLog("Save failed", indent:=True)
-            exc(ex)
+            handleIOException(ex)
         End Try
     End Sub
 
@@ -149,9 +149,9 @@ Public Class iniFile
     ''' <param name="lineTrackingList"> The numbers associated with the lines in <c> <paramref name="sectionToBeBuilt"/> </c> </param>
     Private Sub processiniLine(ByRef currentLine As String, ByRef sectionToBeBuilt As List(Of String), ByRef lineTrackingList As List(Of Integer))
         Select Case True
-            Case currentLine.StartsWith(";")
+            Case currentLine.StartsWith(";", StringComparison.InvariantCulture)
                 Comments.Add(Comments.Count, New iniComment(currentLine, LineCount))
-            Case (Not currentLine.StartsWith("[") And Not currentLine.Trim.Length = 0) Or (currentLine.Trim.Length <> 0 And sectionToBeBuilt.Count = 0)
+            Case (Not currentLine.StartsWith("[", StringComparison.InvariantCulture) And Not currentLine.Trim.Length = 0) Or (currentLine.Trim.Length <> 0 And sectionToBeBuilt.Count = 0)
                 updSec(sectionToBeBuilt, lineTrackingList, currentLine)
             Case currentLine.Trim.Length <> 0 And Not sectionToBeBuilt.Count = 0
                 mkSection(sectionToBeBuilt, lineTrackingList)
@@ -172,6 +172,7 @@ Public Class iniFile
     ''' <summary> Populates the Sections and Comments of an iniFile using a StreamReader from either disk or the internet </summary>
     ''' <param name="r"> A <c> byte stream </c> containing an ini file </param>
     Public Sub buildIniFromStream(ByRef r As StreamReader)
+        If r Is Nothing Then argIsNull(NameOf(r)) : Return
         Dim sectionToBeBuilt As New List(Of String)
         Dim lineTrackingList As New List(Of Integer)
         Do While r.Peek() > -1
@@ -187,9 +188,8 @@ Public Class iniFile
             Dim reader = New StreamReader(Me.Path)
             buildIniFromStream(reader)
             reader.Close()
-        Catch ex As Exception
-            Console.WriteLine(ex.Message & Environment.NewLine & $"Failure occurred during iniFile construction at line: {LineCount} in {Name}")
-            Console.ReadLine()
+        Catch ex As FileNotFoundException
+
         End Try
     End Sub
 
@@ -211,6 +211,7 @@ Public Class iniFile
     ''' <summary> Reorders this object's <c> Sections </c> to be in the same ordered state as a provided list of Strings </summary>
     ''' <param name="sortedSections"> The <c> Names </c> of the <c> iniSections </c> in the desired sorted order </param>
     Public Sub sortSections(sortedSections As strList)
+        If sortedSections Is Nothing Then argIsNull(NameOf(sortedSections)) : Return
         Dim tempFile As New iniFile
         sortedSections.Items.ForEach(Sub(sectionName) tempFile.Sections.Add(sectionName, Sections.Item(sectionName)))
         Me.Sections = tempFile.Sections
@@ -242,26 +243,22 @@ Public Class iniFile
         Try
             Dim sectionHolder As New iniSection(sectionToBeBuilt, lineTrackingList)
             Sections.Add(sectionHolder.Name, sectionHolder)
-        Catch ex As Exception
+        Catch ex As ArgumentException
             'This will catch entries whose names are identical (case sensitive), and ignore them 
-            If ex.GetType.FullName = "System.ArgumentException" Then
-                Dim lineErr = -1
-                For Each section In Sections.Values
-                    If section.getFullName = sectionToBeBuilt(0) Then
-                        lineErr = section.StartingLineNumber
-                        Exit For
-                    End If
-                Next
-                Console.WriteLine($"Error: Duplicate section name detected: {sectionToBeBuilt(0)}")
-                Console.WriteLine($"Line: {lineTrackingList(0)}")
-                Console.WriteLine($"Duplicates the entry on line: {lineErr}")
-                Console.WriteLine("This section will be ignored until it is given a unique name.")
-                Console.WriteLine()
-                Console.WriteLine("Press enter to continue.")
-                Console.ReadLine()
-            Else
-                exc(ex)
-            End If
+            Dim lineErr = -1
+            For Each section In Sections.Values
+                If section.getFullName = sectionToBeBuilt(0) Then
+                    lineErr = section.StartingLineNumber
+                    Exit For
+                End If
+            Next
+            Console.WriteLine($"Error: Duplicate section name detected: {sectionToBeBuilt(0)}")
+            Console.WriteLine($"Line: {lineTrackingList(0)}")
+            Console.WriteLine($"Duplicates the entry on line: {lineErr}")
+            Console.WriteLine($"{sectionToBeBuilt(0)} will be ignored until it is given a unique name.")
+            Console.WriteLine()
+            Console.WriteLine(pressEnterStr)
+            Console.ReadLine()
         Finally
             sectionToBeBuilt.Clear()
             lineTrackingList.Clear()
@@ -282,6 +279,7 @@ Public Class iniFile
     ''' <summary> Handles the input for the <c> File Chooser </c> submodule </summary>
     ''' <param name="input"> The user's input </param>
     Public Sub handleFileChooserInput(input As String)
+        If input Is Nothing Then argIsNull(NameOf(input)) : Return
         Select Case True
             Case input = "0"
                 exitModule()
@@ -331,6 +329,7 @@ Public Class iniFile
     ''' <summary> Handles the user input for the Directory Chooser submodule </summary>
     ''' <param name="input"> The user's input </param>
     Public Sub handleDirChooserInput(input As String)
+        If input Is Nothing Then argIsNull(NameOf(input)) : Return
         Select Case True
             Case input = "0"
                 exitModule()

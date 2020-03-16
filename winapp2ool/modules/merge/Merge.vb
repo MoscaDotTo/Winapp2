@@ -1,4 +1,5 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿Option Strict On
+'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,7 +15,7 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
-Option Strict On
+Imports System.Globalization
 
 ''' <summary> Facilitates the merger of one <c> iniFile </c> into another </summary>
 Module Merge
@@ -91,8 +92,8 @@ Module Merge
                                     getSettingIniKey(moduleName, NameOf(MergeFile2), MergeFile2.Dir, isDir:=True),
                                     getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Name, isName:=True),
                                     getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
-                                    getSettingIniKey(moduleName, NameOf(mergeMode), mergeMode.ToString),
-                                    getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+                                    getSettingIniKey(moduleName, NameOf(mergeMode), mergeMode.ToString(CultureInfo.InvariantCulture)),
+                                    getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
                                     })
     End Sub
 

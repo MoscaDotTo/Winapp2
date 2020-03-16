@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -26,6 +26,7 @@ Public Module winapp2handler
     ''' <param name="textToBeReplaced"> The <c> String </c> data that will be replaced during mutations </param>
     ''' <param name="replacementText">The data with which <c> <paramref name="textToBeReplaced"/> </c> will be replaced </param>
     Public Function replaceAndSort(ListToBeSorted As strList, textToBeReplaced As String, replacementText As String) As strList
+        If ListToBeSorted Is Nothing Then argIsNull(NameOf(ListToBeSorted)) : Return Nothing
         Dim changes As New changeDict
         ' Replace our target characters if they exist
         For i = 0 To ListToBeSorted.Items.Count - 1
@@ -91,7 +92,7 @@ Public Module winapp2handler
                 End If
             Next
             ' Don't rename if we didn't change anything
-            If baseString.Equals(paddedString) Then Continue For
+            If baseString.Equals(paddedString, StringComparison.InvariantCulture) Then Continue For
             ' Rename and track changes appropriately
             changes.trackChanges(baseString, paddedString)
             listToBeSorted.replaceStrAtIndexOf(baseString, paddedString)
@@ -101,6 +102,7 @@ Public Module winapp2handler
     ''' <summary> Returns the path from an ExcludeKey with the <c> Flag </c> parameter removed, as a <c> String </c></summary>
     ''' <param name="key"> An ExcludeKey <c> iniKey </c></param>
     Public Function pathFromExcludeKey(key As iniKey) As String
+        If key Is Nothing Then argIsNull(NameOf(key)) : Return Nothing
         Dim pathFromKey = key.Value.TrimStart(CType("FILE|", Char()))
         pathFromKey = pathFromKey.TrimStart(CType("PATH|", Char()))
         pathFromKey = pathFromKey.TrimStart(CType("REG|", Char()))
@@ -122,6 +124,8 @@ Public Module winapp2handler
     ''' <param name="sectionList">The list of <c> winapp2entrys </c> representing a given "section" in the file </param>
     ''' <param name="removalList">The list of <c> winapp2entrys </c> to be removed from a section </param>
     Public Sub removeEntries(ByRef sectionList As List(Of winapp2entry), ByRef removalList As List(Of winapp2entry))
+        If removalList Is Nothing Then argIsNull(NameOf(removalList)) : Return
+        If sectionList Is Nothing Then argIsNull(NameOf(sectionList)) : Return
         For Each item In removalList
             sectionList.Remove(item)
         Next
@@ -131,6 +135,7 @@ Public Module winapp2handler
     ''' <summary> Returns the <c> Names </c> of the <c> iniSections </c> in an <c> iniFile </c> sorted in winapp2.ini order as a <c> strList </c></summary>
     ''' <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
     Public Function sortEntryNames(ByVal file As iniFile) As strList
+        If file Is Nothing Then argIsNull(NameOf(file)) : Return Nothing
         Return replaceAndSort(file.namesToStrList, "-", "  ")
     End Function
 End Module

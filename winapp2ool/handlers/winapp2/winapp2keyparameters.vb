@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -33,6 +33,7 @@ Public Class winapp2KeyParameters
     ''' <summary>Creates a new keyparams object from a given iniKey object</summary>
     ''' <param name="key">The iniKey to get parameters from</param>
     Public Sub New(key As iniKey)
+        If key Is Nothing Then argIsNull(NameOf(key)) : Return
         KeyType = key.KeyType
         Dim splitKey = key.Value.Split(CChar("|"))
         ArgsList = New List(Of String)
@@ -40,16 +41,16 @@ Public Class winapp2KeyParameters
         Select Case key.KeyType
             Case "FileKey"
                 KeyNum = key.KeyType.Replace("FileKey", "")
-                If splitKey.Count > 1 Then
+                If splitKey.Length > 1 Then
                     PathString = splitKey(0)
                     ArgsList.AddRange(splitKey(1).Split(CChar(";")))
-                    FlagString = If(splitKey.Count >= 3, splitKey.Last, "None")
+                    FlagString = If(splitKey.Length >= 3, splitKey.Last, "None")
                 Else
                     PathString = key.Value
                 End If
             Case "ExcludeKey"
                 KeyNum = key.KeyType.Replace("ExcludeKey", "")
-                Select Case splitKey.Count
+                Select Case splitKey.Length
                     Case 2
                         PathString = splitKey(1)
                         FlagString = splitKey(0)
@@ -69,11 +70,12 @@ Public Class winapp2KeyParameters
     ''' <param name="key">An iniKey to be reconstructed</param>
     ''' Also trims empty comments 
     Public Sub reconstructKey(ByRef key As iniKey)
+        If key Is Nothing Then argIsNull(NameOf(key)) : Return
         Dim out = ""
         out += $"{PathString}{If(ArgsList.Count > 0, "|", "")}"
         If ArgsList.Count > 1 Then
             For i = 0 To ArgsList.Count - 2
-                If Not ArgsList(i) = "" Then out += ArgsList(i) & ";"
+                If Not ArgsList(i).Length = 0 Then out += ArgsList(i) & ";"
             Next
         End If
         If ArgsList.Count > 0 Then out += ArgsList.Last
@@ -98,6 +100,8 @@ Public Class winapp2KeyParameters
     ''' <param name="paramList">The list of params observed</param>
     ''' <param name="flagList">The list of flags observed</param>
     Public Sub trackParamAndFlags(ByRef paramList As strList, ByRef flagList As strList)
+        If paramList Is Nothing Then argIsNull(NameOf(paramList)) : Return
+        If flagList Is Nothing Then argIsNull(NameOf(flagList)) : Return
         paramList.add(PathString)
         flagList.add(FlagString)
     End Sub

@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -45,7 +45,10 @@ Public Module advSettings
         determineScanSettings()
         ' Get the input as an integer so we can index it against our rules
         Dim intInput = -1
-        Integer.TryParse(input, intInput)
+        If Not Integer.TryParse(input, intInput) Then
+            ' This isn't an error since we have the "alloff" command, but the compiler throws a warning if we don't check that this is successful
+            ' If the "alloff" debugging command is removed though, this will be a case of an invalid input since there is no default option in this menu
+        End If
         ' The index of the rule assoicated with the user's input
         Dim ind = intInput - 1
         Select Case True

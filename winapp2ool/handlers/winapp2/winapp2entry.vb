@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -60,6 +60,7 @@ Public Class winapp2entry
     ''' <summary>Construct a new winapp2entry object from an iniSection</summary>
     ''' <param name="section">A winapp2.ini format iniSection object</param>
     Public Sub New(ByVal section As iniSection)
+        If section Is Nothing Then argIsNull(NameOf(section)) : Return
         FullName = section.getFullName
         Name = section.Name
         updKeyListList()

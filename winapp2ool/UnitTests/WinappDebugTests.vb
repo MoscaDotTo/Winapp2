@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -34,7 +34,7 @@ Option Strict On
     ''' <summary>Tests the commandline handling for WinappDebug to ensure success under no input conditions</summary>
     <TestMethod()> Public Sub handleCmdLine_NoInputSuccess()
         ' Test case: Do nothing, expect our default values
-        setDebugStage({}, True)
+        setDebugStage(Array.Empty(Of String)(), True)
         Assert.AreEqual(winapp2ool.winappDebugFile1.Path, winapp2ool.winappDebugFile3.Path)
         Assert.AreEqual("winapp2-debugged.ini", winapp2ool.winappDebugFile3.SecondName)
         Assert.AreNotEqual(winapp2ool.winappDebugFile1.SecondName, winapp2ool.winappDebugFile3.SecondName)
@@ -103,7 +103,7 @@ Option Strict On
     ''' <param name="expectedErrsWithRepair">The expected number of errors to be found after repairs are run</param>
     Public Function debug_ErrorFindAndRepair_Success(testNum As Integer, expectedErrsWithoutRepair As Integer, expectedErrsWithRepair As Integer, lintRuleIndex As Integer) As winapp2ool.winapp2entry
         ' Initalize the default state of the module
-        setDebugStage({}, True)
+        setDebugStage(Array.Empty(Of String)(), True)
         ' Disable all the lint rules we're not currently testing
         disableAllTestsExcept(lintRuleIndex)
         Dim test As winapp2ool.winapp2file = getSingleTestFile(testNum)

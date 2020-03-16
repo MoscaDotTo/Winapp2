@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -30,8 +30,8 @@ Module downloadr
             dl.DownloadFile(New Uri(link), path)
             dl.Dispose()
             Return True
-        Catch ex As Exception
-            exc(ex)
+        Catch ex As WebException
+            handleWebException(ex)
             Return False
         End Try
     End Function
@@ -49,7 +49,7 @@ Module downloadr
             cwl($"{pathHolder.Name} already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
             Dim nfilename = Console.ReadLine()
-            If nfilename.Trim <> "" Then pathHolder.Name = nfilename
+            If Not nfilename.Trim.Length = 0 Then pathHolder.Name = nfilename
         End If
         If Not prompt Then fDelete(pathHolder.Path)
         cwl($"Downloading {givenName}...", Not quietly)
@@ -63,31 +63,31 @@ Module downloadr
     ''' <summary> Reads a file until a specified line number, returns the contents of that line </summary>
     ''' <param name="lineNum"> The line number to return from the file </param>
     Public Function getFileDataAtLineNum(path As String, Optional lineNum As Integer = 1) As String
-        Dim out As String
+        Dim out As String = ""
         Try
             Dim reader = New StreamReader(path)
             out = getTargetLine(reader, lineNum)
             reader.Close()
-        Catch ex As Exception
-            exc(ex)
+            If out Is Nothing Then Throw New ArgumentException(paramName:=NameOf(lineNum), message:=$"{lineNum} didn't return any data. It may be greater than the number of lines in the file.")
+        Catch ex As ArgumentException
+            handleInvalidArgException(ex)
             Return ""
         End Try
-        Return If(Not out = Nothing, out, "")
+        Return out
     End Function
 
     ''' <summary> Attempts to connect to the internet </summary>
     ''' <returns> <c> True </c> If the connection is successful <c> False </c> otherwise </returns>
     Public Function checkOnline() As Boolean
-        Dim reader As StreamReader
         Try
             Dim wc As New WebClient
-            reader = New StreamReader(wc.OpenRead("http://www.github.com"))
+            gLog("Attempting to connect to GitHub")
+            wc.OpenRead("http://www.github.com")
             gLog("Established connection to GitHub")
-            reader.Close()
             wc.Dispose()
             Return True
-        Catch ex As Exception
-            exc(ex)
+        Catch ex As WebException
+            handleWebException(ex)
             Return False
         End Try
     End Function
@@ -124,10 +124,11 @@ Module downloadr
         Try
             Dim path = setDownloadedFileStage(address)
             Dim out = New iniFile(path)
+            If Not File.Exists(path) Then Throw New WebException : Return Nothing
             out.init()
             Return out
-        Catch ex As Exception
-            exc(ex)
+        Catch ex As WebException
+            handleWebException(ex)
             Return Nothing
         End Try
     End Function

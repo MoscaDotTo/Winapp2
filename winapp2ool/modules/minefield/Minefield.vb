@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -72,7 +72,7 @@ Module Minefield
         Select Case True
             Case input = "0"
                 exitModule()
-            Case input = "1" Or input = ""
+            Case input = "1" Or input.Length = 0
                 clrConsole()
                 Console.Write("Enter the Section or LangSecRef you'd like from the file:")
                 Dim sect = Console.ReadLine

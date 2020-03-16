@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -155,6 +155,7 @@ Public Module WinappDebug
 
     '''<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createLintSettingsSection()
+        Dim compCult = System.Globalization.CultureInfo.InvariantCulture
         Dim moduleName = NameOf(WinappDebug)
         Dim lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters", "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
                 "Multiples", "Invalid Values", "Syntax Errors", "Path Validity", "Semicolons", "Optimizations"}
@@ -164,15 +165,15 @@ Public Module WinappDebug
         settingsKeys(1) = getSettingIniKey(moduleName, NameOf(winappDebugFile1), winappDebugFile1.Name, isName:=True)
         settingsKeys(2) = getSettingIniKey(moduleName, NameOf(winappDebugFile3), winappDebugFile3.Name, isName:=True)
         settingsKeys(3) = getSettingIniKey(moduleName, NameOf(winappDebugFile3), winappDebugFile3.Dir, isDir:=True)
-        settingsKeys(4) = getSettingIniKey(moduleName, NameOf(RepairSomeErrsFound), RepairSomeErrsFound.ToString)
-        settingsKeys(5) = getSettingIniKey(moduleName, NameOf(ScanSettingsChanged), ScanSettingsChanged.ToString)
-        settingsKeys(6) = getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
-        settingsKeys(7) = getSettingIniKey(moduleName, NameOf(SaveChanges), SaveChanges.ToString)
-        settingsKeys(8) = getSettingIniKey(moduleName, NameOf(RepairErrsFound), RepairErrsFound.ToString)
+        settingsKeys(4) = getSettingIniKey(moduleName, NameOf(RepairSomeErrsFound), RepairSomeErrsFound.ToString(compCult))
+        settingsKeys(5) = getSettingIniKey(moduleName, NameOf(ScanSettingsChanged), ScanSettingsChanged.ToString(compCult))
+        settingsKeys(6) = getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(compCult))
+        settingsKeys(7) = getSettingIniKey(moduleName, NameOf(SaveChanges), SaveChanges.ToString(compCult))
+        settingsKeys(8) = getSettingIniKey(moduleName, NameOf(RepairErrsFound), RepairErrsFound.ToString(compCult))
         Dim innerInd = 0
         For i = 9 To 38
-            settingsKeys(i) = getSettingIniKey(moduleName, $"{lints(innerInd)}_Scan", Rules(innerInd).ShouldScan.ToString)
-            settingsKeys(i + 1) = getSettingIniKey(moduleName, $"{lints(innerInd)}_Repair", Rules(innerInd).ShouldRepair.ToString)
+            settingsKeys(i) = getSettingIniKey(moduleName, $"{lints(innerInd)}_Scan", Rules(innerInd).ShouldScan.ToString(compCult))
+            settingsKeys(i + 1) = getSettingIniKey(moduleName, $"{lints(innerInd)}_Repair", Rules(innerInd).ShouldRepair.ToString(compCult))
             innerInd += 1
             i += 1
         Next
@@ -196,6 +197,7 @@ Public Module WinappDebug
     ''' <summary> Handles the user's input from the menu </summary>
     ''' <param name="input"> The String containing the user's input </param>
     Public Sub handleUserInput(input As String)
+        If input Is Nothing Then argIsNull(NameOf(input)) : Return
         Select Case True
             Case input = "0"
                 exitModule()
@@ -243,6 +245,7 @@ Public Module WinappDebug
     ''' <summary> Performs syntax and format checking on a winapp2.ini format <c> iniFile </c> </summary>
     ''' <param name="fileToBeDebugged"> A <c> winapp2file </c> to be linted </param>
     Public Sub debug(ByRef fileToBeDebugged As winapp2file)
+        If fileToBeDebugged Is Nothing Then argIsNull(NameOf(fileToBeDebugged)) : Return
         ErrorsFound = 0
         allEntryNames = New strList
         gLog(ascend:=True)
@@ -263,7 +266,7 @@ Public Module WinappDebug
         ' Check for duplicate names that are differently cased 
         fullNameErr(allEntryNames.chkDupes(entry.Name), entry, "Duplicate entry name detected")
         ' Check that the entry is named properly 
-        fullNameErr(Not entry.Name.EndsWith(" *"), entry, "All entries must End In ' *'")
+        fullNameErr(Not entry.Name.EndsWith(" *", StringComparison.InvariantCulture), entry, "All entries must End In ' *'")
         ' Confirm the validity of keys and remove any broken ones before continuing
         validateKeys(entry)
         ' Process the entry's keylists in winapp2.ini order (ignore the last list because it has only errors)
@@ -435,7 +438,7 @@ Public Module WinappDebug
     Private Sub cFormat(ByRef key As iniKey, ByRef keyNumber As Integer, ByRef keyValues As strList, ByRef dupeList As keyList, Optional noNumbers As Boolean = False)
         ' Check for duplicates
         If keyValues.contains(key.Value, True) Then
-            Dim dupeKeyStr = $"{key.KeyType}{If(Not noNumbers, (keyValues.Items.IndexOf(key.Value) + 1).ToString, "")}={key.Value}"
+            Dim dupeKeyStr = $"{key.KeyType}{If(Not noNumbers, (keyValues.Items.IndexOf(key.Value) + 1).ToString(Globalization.CultureInfo.InvariantCulture), "")}={key.Value}"
             If lintDupes.ShouldScan Then customErr(key.LineNumber, "Duplicate key value found", {$"Key:            {key.toString}", $"Duplicates:     {dupeKeyStr}"})
             dupeList.add(key, lintDupes.fixFormat)
         Else
@@ -479,7 +482,7 @@ Public Module WinappDebug
     Private Function fixMissingEquals(ByRef key As iniKey, cmds As String()) As Boolean
         gLog("Attempting missing equals repair", ascend:=True)
         For Each cmd In cmds
-            If key.Name.ToLower.Contains(cmd.ToLower) Then
+            If key.Name.ToUpperInvariant.Contains(cmd.ToUpperInvariant) Then
                 Select Case cmd
                 ' We don't expect numbers in these keys
                     Case "Default", "DetectOS", "Section", "LangSecRef", "Section", "SpecialDetect"
@@ -512,6 +515,7 @@ Public Module WinappDebug
     ''' <summary> Does basic syntax and formatting audits that apply across all keys, returns <c> False </c> iff a key is malformed </summary>
     ''' <param name="key"> The <c> iniKey </c> whose validity will be audited </param>
     Private Function cValidity(key As iniKey) As Boolean
+        If key Is Nothing Then argIsNull(NameOf(key)) : Return False
         Dim validCmds = {"Default", "DetectOS", "DetectFile", "Detect", "ExcludeKey",
                         "FileKey", "LangSecRef", "RegKey", "Section", "SpecialDetect", "Warning"}
         If key.typeIs("DeleteMe") Then
@@ -532,7 +536,8 @@ Public Module WinappDebug
             End While
         End If
         ' Check for leading or trailing whitespace, do this always as spaces in the name interfere with proper keyType identification
-        If key.Name.StartsWith(" ") Or key.Name.EndsWith(" ") Or key.Value.StartsWith(" ") Or key.Value.EndsWith(" ") Then
+        If key.Name.StartsWith(" ", StringComparison.InvariantCulture) Or key.Name.EndsWith(" ", StringComparison.InvariantCulture) Or
+            key.Value.StartsWith(" ", StringComparison.InvariantCulture) Or key.Value.EndsWith(" ", StringComparison.InvariantCulture) Then
             fullKeyErr(key, "Detected unwanted whitespace in iniKey", True)
             fixStr(True, key.Value, key.Value.Trim)
             fixStr(True, key.Name, key.Name.Trim)
@@ -555,7 +560,7 @@ Public Module WinappDebug
             If strToChk.Equals(casedText, StringComparison.InvariantCultureIgnoreCase) Then casedString = casedText
         Next
         ' Determine if there's a casing error
-        Dim hasCasingErr = Not casedString.Equals(strToChk) And casedArray.Contains(casedString)
+        Dim hasCasingErr = Not casedString.Equals(strToChk, StringComparison.InvariantCulture) And casedArray.Contains(casedString)
         Dim replacementText = If(chkType, key.KeyType.Replace(key.KeyType, casedString), key.Value.Replace(key.Value, casedString))
         Dim validData = String.Join(", ", casedArray)
         fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, lintCasing.fixFormat, strToChk, replacementText)
@@ -567,6 +572,7 @@ Public Module WinappDebug
     ''' <summary> Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible </summary>
     ''' <param name="key"> A winapp2.ini FileKey format <c> iniKey </c> to be checked for correctness </param>
     Public Function pFileKey(key As iniKey) As iniKey
+        If key Is Nothing Then argIsNull(NameOf(key)) : Return key
         ' Pipe symbol checks
         Dim iteratorCheckerList = Split(key.Value, "|")
         fullKeyErr(key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
@@ -574,7 +580,7 @@ Public Module WinappDebug
         ' We'll assume that if the path contains a hard coded drive letter, any colon use is intentional and disable this check. 
         fullKeyErr(key, "Colon (:) found where there should be a semicolon (;)", key.Value.Contains(":") And Not driveLtrs.IsMatch(getFirstDir(key.Value)), lintSemis.fixFormat, key.Value, key.Value.Replace(":", ";"))
         ' Captures any incident of semi colons coming before the first pipe symbol
-        fullKeyErr(key, "Semicolon (;) found before pipe (|).", lintSemis.ShouldScan And key.vHas(";") And (key.Value.IndexOf(";") < key.Value.IndexOf("|")))
+        fullKeyErr(key, "Semicolon (;) found before pipe (|).", lintSemis.ShouldScan And key.vHas(";") And (key.Value.IndexOf(";", StringComparison.InvariantCultureIgnoreCase) < key.Value.IndexOf("|", StringComparison.InvariantCultureIgnoreCase)))
         fullKeyErr(key, "Trailing semicolon (;) in parameters", lintSemis.ShouldScan And key.vHas(";|"), lintSemis.fixFormat, key.Value, key.Value.Replace(";|", "|"))
         ' Check for incorrect spellings of RECURSE or REMOVESELF
         If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Contains("RECURSE") And Not iteratorCheckerList(2).Contains("REMOVESELF"))
@@ -612,8 +618,8 @@ Public Module WinappDebug
     And key.Value.Last = CChar("\"), lintSlashes.fixFormat, key.Value, key.Value.TrimEnd(CChar("\")))
         If key.vHas("*") Then
             Dim splitDir = key.Value.Split(CChar("\"))
-            For i = 0 To splitDir.Count - 1
-                fullKeyErr(key, "Nested wildcard found in DetectFile", splitDir(i).Contains("*") And i <> splitDir.Count - 1)
+            For i = 0 To splitDir.Length - 1
+                fullKeyErr(key, "Nested wildcard found in DetectFile", splitDir(i).Contains("*") And i <> splitDir.Length - 1)
             Next
         End If
         ' Make sure that DetectFile paths point to a filesystem location
@@ -630,7 +636,7 @@ Public Module WinappDebug
         Dim rootStr = If(key.KeyType <> "ExcludeKey", getFirstDir(key.Value), getFirstDir(pathFromExcludeKey(key)))
         ' Ensure that registry paths have a valid hive and file paths have either a variable or a drive letter
         fullKeyErr(key, "Invalid registry path detected.", isRegistry And Not longReg.IsMatch(rootStr) And Not shortReg.IsMatch(rootStr))
-        fullKeyErr(key, "Invalid file system path detected.", Not isRegistry And Not driveLtrs.IsMatch(rootStr) And Not rootStr.StartsWith("%"))
+        fullKeyErr(key, "Invalid file system path detected.", Not isRegistry And Not driveLtrs.IsMatch(rootStr) And Not rootStr.StartsWith("%", StringComparison.InvariantCultureIgnoreCase))
     End Sub
 
     ''' <summary> Processes a list of ExcludeKey format <c> iniKeys </c> and checks them for errors, correcting where possible </summary>
@@ -647,7 +653,9 @@ Public Module WinappDebug
                 hasR = True
                 chkPathFormatValidity(key, True)
             Case Else
-                If key.Value.StartsWith("FILE") Or key.Value.StartsWith("PATH") Or key.Value.StartsWith("REG") Then
+                If key.Value.StartsWith("FILE", StringComparison.InvariantCulture) Or
+                        key.Value.StartsWith("PATH", StringComparison.InvariantCulture) Or
+                        key.Value.StartsWith("REG", StringComparison.InvariantCulture) Then
                     fullKeyErr(key, "Missing pipe symbol after ExcludeKey flag)")
                     Return
                 End If

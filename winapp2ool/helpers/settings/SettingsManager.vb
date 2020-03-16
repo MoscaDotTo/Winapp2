@@ -15,6 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
+Imports System.Globalization
 '''<summary>Holds functions that modify and manage settings for winapp2ool and its sub modules</summary>
 Module SettingsManager
     ''' <summary>Prompts the user to change a file's parameters, marks both settings and the file as having been changed </summary>
@@ -29,7 +30,7 @@ Module SettingsManager
         Dim fileChanged = Not someFile.Name = curName Or Not someFile.Dir = curDir
         updateSettings(callingModule, $"{settingName}_Dir", someFile.Dir)
         updateSettings(callingModule, $"{settingName}_Name", someFile.Name)
-        updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString)
+        updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
         setHeaderText($"{If(someFile.SecondName.Length = 0, someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
     End Sub
 
@@ -43,8 +44,8 @@ Module SettingsManager
         setHeaderText($"{paramText} {enStr(setting)}d", True, True, If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
         setting = Not setting
         mSettingsChanged = True
-        updateSettings(callingModule, settingName, setting.ToString)
-        updateSettings(callingModule, settingChangedName, mSettingsChanged.ToString)
+        updateSettings(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
+        updateSettings(callingModule, settingChangedName, mSettingsChanged.ToString(CultureInfo.InvariantCulture))
         settingsFile.overwriteToFile(settingsFile.toString, settingName = NameOf(saveSettingsToDisk) Or settingName = NameOf(readSettingsFromDisk))
     End Sub
 

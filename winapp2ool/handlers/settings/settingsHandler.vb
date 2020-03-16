@@ -131,6 +131,7 @@ Public Module settingsHandler
     ''' <param name="callingModule"> The name of the module whose settings are being created </param>
     ''' <param name="settingKeys"> The array of Strings containing the module's settings and their default values </param>
     Public Sub createModuleSettingsSection(callingModule As String, settingKeys As String())
+        If settingKeys Is Nothing Then argIsNull(NameOf(settingKeys)) : Return
         Dim toolSection = settingsFile.getSection(callingModule)
         Dim mustSaveFile = False
         For Each key In settingKeys
@@ -163,6 +164,7 @@ Public Module settingsHandler
     ''' <param name="callingModule"> The name of the module whose settings will be cleared </param>
     ''' <param name="createSection"> The subroutine that creates the module's disk-writable settings </param>
     Public Sub restoreDefaultSettings(callingModule As String, createSection As Action)
+        If createSection Is Nothing Then argIsNull(NameOf(createSection)) : Return
         clearAllModuleSettings(callingModule)
         createSection()
         saveSettingsFile()

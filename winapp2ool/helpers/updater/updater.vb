@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -16,7 +16,8 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.IO
-Imports System.Runtime.InteropServices.WindowsRuntime
+Imports System.Net
+Imports System.Security
 ''' <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
 Public Module updater
 
@@ -47,6 +48,7 @@ Public Module updater
     End Sub
 
     Public Function getRemoteVersion(remotelink As String) As String
+        If remotelink Is Nothing Then argIsNull(NameOf(remotelink)) : Return ""
         Dim tmpPath = setDownloadedFileStage(remotelink)
         Return getVersionFromLocalFile(tmpPath)
     End Function
@@ -61,7 +63,7 @@ Public Module updater
         latestWa2Ver = getRemoteVersion(winapp2link)
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
-        If latestVersion = "" Or latestWa2Ver = "" Then updateCheckFailed("online", True) : Return
+        If latestVersion.Length = 0 Or latestWa2Ver.Length = 0 Then updateCheckFailed("online", True) : Return
         ' Observe whether or not updates are available, using val to avoid conversion mistakes
         updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
         localWa2Ver = getVersionFromLocalFile()
@@ -87,9 +89,8 @@ Public Module updater
         If Not File.Exists(pathToFile) Then Return "000000 (file not found)"
         Try
             Return Reflection.Assembly.Load(File.ReadAllBytes(pathToFile)).FullName.Split(CChar(","))(1).Substring(9)
-        Catch ex As Exception
+        Catch ex As SecurityException
             ' Pretty much the only exception here is that winapp2ool has been flagged as malicious and cannot be downloaded. Working on a fix for this but for now just eat the error 
-            exc(ex)
             clrConsole()
             Return "000000 (exception encountered)"
         End Try
@@ -98,7 +99,7 @@ Public Module updater
     '''<summary> Performs the version chcking for winapp2ool.exe </summary>
     Private Sub toolVersionCheck()
         ' Let's just assume winapp2ool didn't update after we've checked for updates
-        If Not latestVersion = "" Then Return
+        If Not latestVersion.Length = 0 Then Return
         If Not isBeta Then
             ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
             latestVersion = getRemoteVersion(toolVerLink)
@@ -130,11 +131,11 @@ Public Module updater
     ''' <param name="path"> The path of the file whose version number will be queried </param>
     Private Function getVersionFromLocalFile(Optional path As String = "") As String
         ' Handle a special version.txt edge case
-        If path.EndsWith("version.txt") Then Return getFileDataAtLineNum(path)
-        If path = "" Then path = Environment.CurrentDirectory & "\winapp2.ini"
+        If path.EndsWith("version.txt", StringComparison.InvariantCultureIgnoreCase) Then Return getFileDataAtLineNum(path)
+        If path.Length = 0 Then path = Environment.CurrentDirectory & "\winapp2.ini"
         If Not File.Exists(path) Then Return "000000 (file not found)"
-        Dim versionString = getFileDataAtLineNum(path).ToLower
-        Return If(versionString.Contains("version"), versionString.Split(CChar(" "))(2), "000000 (version not found)")
+        Dim versionString = getFileDataAtLineNum(path)
+        Return If(versionString.ToUpperInvariant.Contains("VERSION"), versionString.Split(CChar(" "))(2), "000000 (version not found)")
     End Function
 
     ''' <summary> Updates the offline status of winapp2ool </summary>
@@ -161,21 +162,26 @@ Public Module updater
     Public Sub autoUpdate()
         gLog("Starting auto update process")
         Dim backupName = $"winapp2ool v{currentVersion}.exe.bak"
+        Dim w2lName = "winapp2ool.exe"
         Try
             ' Ensure we always have the latest version
             Dim tmpToolPath = setDownloadedFileStage(toolExeLink)
+            If Not File.Exists(tmpToolPath) Then Throw New WebException
             ' Replace any existing backups of this version before backing it up
             fDelete($"{Environment.CurrentDirectory}\{backupName}")
             File.Move(Environment.GetCommandLineArgs(0), backupName)
             ' Ensure that we don't have lingering winapp2ool.exes 
-            fDelete("winapp2ool.exe")
+            fDelete(w2lName)
             ' Move the latest version to the current directory and launch it
-            File.Move(tmpToolPath, $"{Environment.CurrentDirectory}\winapp2ool.exe")
-            System.Diagnostics.Process.Start("winapp2ool.exe")
+            File.Move(tmpToolPath, $"{Environment.CurrentDirectory}\{w2lName}")
+            System.Diagnostics.Process.Start(w2lName)
             Environment.Exit(0)
-        Catch ex As Exception
-            exc(ex)
-            File.Move(backupName, "winapp2ool.exe")
+        Catch ex As IOException
+            handleIOException(ex)
+            File.Move(backupName, w2lName)
+        Catch ex As WebException
+            handleWebException(ex)
+            File.Move(backupName, w2lName)
         End Try
     End Sub
 
@@ -183,8 +189,9 @@ Public Module updater
     Public Sub fDelete(path As String)
         Try
             If File.Exists(path) Then File.Delete(path)
-        Catch ex As Exception
-            exc(ex)
+        Catch ex As IOException
+            gLog("Failed to delete file")
+            handleIOException(ex)
         End Try
     End Sub
 End Module

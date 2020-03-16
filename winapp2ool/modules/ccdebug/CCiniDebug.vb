@@ -1,4 +1,5 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿Option Strict On
+'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,7 +15,7 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
-Option Strict On
+Imports System.Globalization
 ''' <summary>
 ''' A module whose purpose is to perform some housekeeping on ccleaner.ini to help clean up after winapp2.ini
 ''' </summary>
@@ -85,10 +86,10 @@ Module CCiniDebug
             getSettingIniKey(moduleName, NameOf(CCDebugFile2), CCDebugFile2.Dir, isDir:=True),
             getSettingIniKey(moduleName, NameOf(CCDebugFile3), CCDebugFile3.Name, isName:=True),
             getSettingIniKey(moduleName, NameOf(CCDebugFile3), CCDebugFile3.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(PruneStaleEntries), PruneStaleEntries.ToString),
-            getSettingIniKey(moduleName, NameOf(SaveDebuggedFile), SaveDebuggedFile.ToString),
-            getSettingIniKey(moduleName, NameOf(SortFileForOutput), SortFileForOutput.ToString),
-            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+            getSettingIniKey(moduleName, NameOf(PruneStaleEntries), PruneStaleEntries.ToString(CultureInfo.InvariantCulture)),
+            getSettingIniKey(moduleName, NameOf(SaveDebuggedFile), SaveDebuggedFile.ToString(CultureInfo.InvariantCulture)),
+            getSettingIniKey(moduleName, NameOf(SortFileForOutput), SortFileForOutput.ToString(CultureInfo.InvariantCulture)),
+            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
             })
     End Sub
 
@@ -129,7 +130,7 @@ Module CCiniDebug
         Select Case True
             Case input = "0"
                 exitModule()
-            Case (input = "1" Or input = "") And (PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput)
+            Case (input = "1" Or input.Length = 0) And (PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput)
                 initDebug()
             Case input = "2"
                 toggleSettingParam(PruneStaleEntries, "Pruning", ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(PruneStaleEntries), NameOf(ModuleSettingsChanged))
@@ -185,7 +186,7 @@ Module CCiniDebug
         For i = 0 To optionsSec.Keys.KeyCount - 1
             Dim optionStr = optionsSec.Keys.Keys(i).toString
             ' Only operate on (app) keys belonging to winapp2.ini
-            If optionStr.StartsWith("(App)") And optionStr.Contains("*") Then
+            If optionStr.StartsWith("(App)", StringComparison.InvariantCulture) And optionStr.Contains("*") Then
                 Dim toRemove As New List(Of String) From {"(App)", "=True", "=False"}
                 toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
                 If Not CCDebugFile1.hasSection(optionStr) Then tbTrimmed.Add(i)

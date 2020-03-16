@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -49,6 +49,7 @@ Public Class strList
     ''' <param name="items">An array of items to be added</param>
     ''' <param name="cond">The optional condition under which the items should be added (default: true)</param>
     Public Sub add(items As String(), Optional cond As Boolean = True)
+        If items Is Nothing Then argIsNull(NameOf(items)) : Return
         For Each item In items
             add(item, cond)
         Next
@@ -58,6 +59,7 @@ Public Class strList
     ''' <param name="items">A strlist of items to be added</param>
     ''' <param name="cond">The optional condition under which the items should be added (default: true)</param>
     Public Sub add(items As strList, Optional cond As Boolean = True)
+        If items Is Nothing Then argIsNull(NameOf(items)) : Return
         For Each item In items.Items
             add(item, cond)
         Next
@@ -72,14 +74,8 @@ Public Class strList
     ''' <param name="givenValue">A value to search the list for</param>
     ''' <param name="ignoreCase">The optional condition specifying whether string casing should be ignored</param>
     Public Function contains(givenValue As String, Optional ignoreCase As Boolean = False) As Boolean
-        If ignoreCase Then
-            For Each value In Items
-                If givenValue.Equals(value, StringComparison.InvariantCultureIgnoreCase) Then Return True
-            Next
-            Return False
-        Else
-            Return Items.Contains(givenValue)
-        End If
+        Items.Contains(givenValue, StringComparer.InvariantCultureIgnoreCase)
+        Return If(ignoreCase, Items.Contains(givenValue, StringComparer.InvariantCultureIgnoreCase), Items.Contains(givenValue, StringComparer.InvariantCulture))
     End Function
 
     ''' <summary>
@@ -88,7 +84,8 @@ Public Class strList
     ''' </summary>
     ''' <param name="currentValue">The current value to be audited</param>
     Public Function chkDupes(currentValue As String) As Boolean
-        If currentValue = "" Then Return True
+        If currentValue Is Nothing Then argIsNull(NameOf(currentValue)) : Return False
+        If currentValue.Length = 0 Then Return True
         For Each value In Items
             If currentValue.Equals(value, StringComparison.InvariantCultureIgnoreCase) Then Return True
         Next

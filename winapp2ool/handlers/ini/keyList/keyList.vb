@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -39,8 +39,8 @@ Public Class keyList
     ''' <summary> Creates a new <c> keyList </c> using an existing list of <c> iniKeys </c> </summary>
     ''' <param name="kl"> A list of <c> iniKeys </c> to be inserted into the <c> keylist </c> </param>
     Public Sub New(kl As List(Of iniKey))
-        Keys = kl
-        KeyType = If(Keys.Count > 0, Keys(0).KeyType, "")
+        If kl Is Nothing Then argIsNull(NameOf(kl)) : Return
+        KeyType = If(kl.Count > 0, kl(0).KeyType, "")
     End Sub
 
     ''' <summary> Conditionally adds an <c> iniKey </c> into the <c> keyList </c> </summary>
@@ -53,6 +53,7 @@ Public Class keyList
     ''' <summary> Adds a list of <c> iniKeys </c> to the <c> keyList </c> </summary>
     ''' <param name="kl">The list of <c> iniKeys </c> to be added </param>
     Public Sub add(kl As List(Of iniKey))
+        If kl Is Nothing Then argIsNull(NameOf(kl)) : Return
         kl.ForEach(Sub(key) Keys.Add(key))
     End Sub
 
@@ -65,6 +66,7 @@ Public Class keyList
     ''' <summary>Removes a list of <c> iniKeys </c>from the <c> keyList </c> </summary>
     ''' <param name="kl"> The list of <c> iniKeys </c> to be removed </param>
     Public Sub remove(kl As List(Of iniKey))
+        If kl Is Nothing Then argIsNull(NameOf(kl)) : Return
         kl.ForEach(Sub(key) remove(key))
     End Sub
 
@@ -77,7 +79,7 @@ Public Class keyList
     ''' <summary> Returns a <c> Boolean </c> indicating whether or not the <c> keyType  </c>of the list matches the <c> keyType </c> provided by <c> <paramref name="type"/> </c> </summary>
     ''' <param name="type"> The String against which to match the <c> keylist's keyType </c> </param>
     Public Function typeIs(type As String) As Boolean
-        Return If(KeyType = "", Keys(0).KeyType, KeyType) = type
+        Return If(KeyType.Length = 0, Keys(0).KeyType, KeyType) = type
     End Function
 
     ''' <summary> Returns a <c> keyList </c> as a <c> strList </c> </summary>
@@ -96,6 +98,7 @@ Public Class keyList
     ''' <summary> Renumber keys according to the sorted state of the values provided by <c> <paramref name="sortedKeyValues"/> </c> </summary>
     ''' <param name="sortedKeyValues"> Some target sorted state of the <c> Values </c> of the <c> iniKeys </c> in the <c> keyList </c> </param>
     Public Sub renumberKeys(sortedKeyValues As strList)
+        If sortedKeyValues Is Nothing Then argIsNull(NameOf(sortedKeyValues)) : Return
         gLog("Renumbering keys", indent:=True)
         For i = 0 To Me.KeyCount - 1
             Keys(i).Name = Keys(i).KeyType & i + 1

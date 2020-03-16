@@ -112,7 +112,7 @@ Public Module Trim
     ''' <summary> Handles the user input from the menu </summary>
     ''' <param name="input"> The String containing the user's input </param>
     Public Sub handleUserInput(input As String)
-        If input Is Nothing Then exc(New ArgumentNullException(NameOf(input))) : Return
+        If input Is Nothing Then argIsNull(NameOf(input)) : Return
         Select Case True
             Case input = "0"
                 exitModule()
@@ -135,8 +135,8 @@ Public Module Trim
     ''' <summary> Initiates the <c> Trim </c> process from the main menu or commandline </summary>
     Private Sub initTrim()
         If Not DownloadFileToTrim Then If Not enforceFileHasContent(TrimFile1) Then Return
-        If DownloadFileToTrim And waUpdateIsAvail Then waUpdateIsAvail = False
-        Dim winapp2 = If(Not DownloadFileToTrim, New winapp2file(TrimFile1), New winapp2file(getRemoteIniFile(winapp2link)))
+        If DownloadFileToTrim Then If Not checkOnline() Then setHeaderText("Internet connection lost! Please check your network connection and try again", True) : Return
+        Dim winapp2 = If(DownloadFileToTrim, New winapp2file(getRemoteIniFile(winapp2link)), New winapp2file(TrimFile1))
         clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
         Dim entryCountBeforeTrim = winapp2.count
@@ -161,7 +161,7 @@ Public Module Trim
     ''' <summary> Trims a <c> winapp2file </c>, removing entries not relevant to the current system </summary>
     ''' <param name="winapp2"> A <c> winapp2file </c> to be trimmed to fit the current system </param>
     Public Sub trimFile(winapp2 As winapp2file)
-        If winapp2 Is Nothing Then exc(New ArgumentNullException(NameOf(winapp2))) : Return
+        If winapp2 Is Nothing Then argIsNull(NameOf(winapp2)) : Return
         For i = 0 To winapp2.Winapp2entries.Count - 1
             Dim entryList = winapp2.Winapp2entries(i)
             processEntryList(entryList)
@@ -336,10 +336,8 @@ Public Module Trim
                 Case "HKCR"
                     Return getCRKey(dir) IsNot Nothing
             End Select
-        Catch ex As Exception
+        Catch ex As UnauthorizedAccessException
             ' The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.
-            exc(ex)
-            gLog(ex.Message)
             Return True
         End Try
         Return True
@@ -391,8 +389,7 @@ Public Module Trim
                 Dim exists = Directory.Exists(dir) Or File.Exists(dir)
                 Return exists
             End If
-        Catch ex As Exception
-            exc(ex)
+        Catch ex As UnauthorizedAccessException
             Return True
         End Try
         Return False

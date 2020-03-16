@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -59,6 +59,7 @@ Public Class iniKey
     ''' <param name="txts">The array of search strings</param>
     ''' <param name="ignoreCase">Optional boolean specifying whether or not the casing of the strings should be ignored (default false)</param>
     Public Function vHasAny(txts As String(), Optional ignoreCase As Boolean = False) As Boolean
+        If txts Is Nothing Then argIsNull(NameOf(txts)) : Return False
         For Each txt In txts
             If vHas(txt, ignoreCase) Then Return True
         Next
@@ -81,18 +82,21 @@ Public Class iniKey
     ''' <summary>Compares the names of two iniKeys and returns whether or not they match</summary>
     ''' <param name="key">The iniKey to be compared to</param>
     Public Function compareNames(key As iniKey) As Boolean
+        If key Is Nothing Then argIsNull(NameOf(key)) : Return False
         Return nameIs(key.Name, True)
     End Function
 
     ''' <summary>Compares the values of two iniKeys and returns whether or not they match</summary>
     ''' <param name="key">The iniKey to be compared to</param>
     Public Function compareValues(key As iniKey) As Boolean
+        If key Is Nothing Then argIsNull(NameOf(key)) : Return False
         Return vIs(key.Value, True)
     End Function
 
     ''' <summary>Compares the types of two iniKeys and returns whether or not they match</summary>
     ''' <param name="key">The iniKey to be compared to</param>
     Public Function compareTypes(key As iniKey) As Boolean
+        If key Is Nothing Then argIsNull(NameOf(key)) : Return False
         Return typeIs(key.KeyType, True)
     End Function
 
@@ -100,7 +104,7 @@ Public Class iniKey
     ''' <param name="line">A string in the format name=value</param>
     ''' <param name="count">The line number for the string</param>
     Public Sub New(ByVal line As String, Optional ByVal count As Integer = 0)
-        If line Is Nothing Then Return
+        If line Is Nothing Then argIsNull(NameOf(line)) : Return
         If line.Contains("=") Then
             Dim splitLine As String() = line.Split(CChar("="))
             LineNumber = count

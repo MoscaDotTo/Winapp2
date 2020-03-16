@@ -1,4 +1,5 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿Option Strict On
+'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,7 +15,7 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
-Option Strict On
+Imports System.Globalization
 ''' <summary> Performs a diff operation on two winapp2.ini files </summary>
 Module Diff
     ''' <summary> The old or local version of winapp2.ini to be diffed </summary>
@@ -104,6 +105,7 @@ Module Diff
 
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createDiffSettingsSection()
+        Dim cultInf = CultureInfo.InvariantCulture
         Dim moduleName = NameOf(Diff)
         createModuleSettingsSection(moduleName, {
             getSettingIniKey(moduleName, NameOf(DiffFile1), DiffFile1.Name, isName:=True),
@@ -112,11 +114,11 @@ Module Diff
             getSettingIniKey(moduleName, NameOf(DiffFile2), DiffFile2.Dir, isDir:=True),
             getSettingIniKey(moduleName, NameOf(DiffFile3), DiffFile3.Name, isName:=True),
             getSettingIniKey(moduleName, NameOf(DiffFile3), DiffFile3.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(DownloadDiffFile), DownloadDiffFile.ToString),
-            getSettingIniKey(moduleName, NameOf(TrimRemoteFile), TrimRemoteFile.ToString),
-            getSettingIniKey(moduleName, NameOf(ShowFullEntries), ShowFullEntries.ToString),
-            getSettingIniKey(moduleName, NameOf(SaveDiffLog), SaveDiffLog.ToString),
-            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+            getSettingIniKey(moduleName, NameOf(DownloadDiffFile), DownloadDiffFile.ToString(cultInf)),
+            getSettingIniKey(moduleName, NameOf(TrimRemoteFile), TrimRemoteFile.ToString(cultInf)),
+            getSettingIniKey(moduleName, NameOf(ShowFullEntries), ShowFullEntries.ToString(cultInf)),
+            getSettingIniKey(moduleName, NameOf(SaveDiffLog), SaveDiffLog.ToString(cultInf)),
+            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(cultInf))
             })
     End Sub
 
@@ -227,8 +229,8 @@ Module Diff
     ''' <summary> Gets the version from winapp2.ini </summary>
     ''' <param name="someFile"> A winapp2.ini format <c> iniFile </c> </param>
     Private Function getVer(someFile As iniFile) As String
-        Dim ver = If(someFile.Comments.Count > 0, someFile.Comments(0).Comment.ToString.ToLower, "000000")
-        Return If(ver.Contains("version"), ver.TrimStart(CChar(";")).Replace("version:", "version"), " version not given")
+        Dim ver = If(someFile.Comments.Count > 0, someFile.Comments(0).Comment.ToString(CultureInfo.InvariantCulture).ToUpperInvariant, "000000")
+        Return If(ver.Contains("VERSION"), ver.TrimStart(CChar(";")).Replace("VERSION:", "version"), " version not given")
     End Function
 
     ''' <summary> Logs and prints the summary of the Diff </summary>

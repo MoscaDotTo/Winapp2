@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -55,9 +55,9 @@ Public Module commandLineHandler
             Dim curArg = cmdargs(ind + 1)
             ' If this is true, the user has parameterized the file flag with a subdirectory
             ' We must move this information over to the directory parameter
-            If curArg.StartsWith("\") And Not curArg.LastIndexOf("\") = 0 Then
+            If curArg.StartsWith("\", StringComparison.InvariantCulture) And Not curArg.LastIndexOf("\", StringComparison.InvariantCulture) = 0 Then
                 Dim split = cmdargs(ind + 1).Split(CChar("\"))
-                For i As Integer = 1 To split.Count - 2
+                For i As Integer = 1 To split.Length - 2
                     givenFile.Dir += $"\{split(i)}"
                 Next
                 givenFile.Name = split.Last
@@ -86,10 +86,10 @@ Public Module commandLineHandler
     ''' <param name="file">The iniFile object to be modified</param>
     Private Sub getFileParams(ByRef arg As String, ByRef file As iniFile)
         ' Start either a blank path or, support appending children folders to the current path
-        file.Dir = If(arg.StartsWith("\"), Environment.CurrentDirectory & "\", "")
+        file.Dir = If(arg.StartsWith("\", StringComparison.InvariantCulture), Environment.CurrentDirectory & "\", "")
         Dim splitArg As String() = arg.Split(CChar("\"))
-        If splitArg.Count >= 2 Then
-            For i As Integer = 0 To splitArg.Count - 2
+        If splitArg.Length >= 2 Then
+            For i As Integer = 0 To splitArg.Length - 2
                 file.Dir += splitArg(i) & "\"
             Next
         End If
@@ -136,6 +136,9 @@ Public Module commandLineHandler
     ''' <param name="sf">The "second file" from a module</param>
     ''' <param name="tf">The "third file" from a module</param>
     Public Sub getFileAndDirParams(ByRef ff As iniFile, ByRef sf As iniFile, ByRef tf As iniFile)
+        If ff Is Nothing Then argIsNull(NameOf(ff)) : Return
+        If sf Is Nothing Then argIsNull(NameOf(sf)) : Return
+        If tf Is Nothing Then argIsNull(NameOf(tf)) : Return
         validateArgs()
         getParams(1, ff)
         getParams(2, sf)
@@ -151,8 +154,8 @@ Public Module commandLineHandler
         If cmdargs.Contains($"{argStr}f") Then getFileName($"{argStr}f", someFile)
         ' Make sure there's there's no double slashes or leading/trailing slashes in the file parameters
         someFile.Dir = someFile.Dir.Replace(CChar("\\"), CChar("\"))
-        If someFile.Name.StartsWith("\") Then someFile.Name = someFile.Name.TrimStart(CChar("\"))
-        If someFile.Dir.EndsWith("\") Then someFile.Dir = someFile.Dir.TrimEnd(CChar("\"))
+        If someFile.Name.StartsWith("\", StringComparison.InvariantCulture) Then someFile.Name = someFile.Name.TrimStart(CChar("\"))
+        If someFile.Dir.EndsWith("\", StringComparison.InvariantCulture) Then someFile.Dir = someFile.Dir.TrimEnd(CChar("\"))
     End Sub
 
     ''' <summary>Enforces that commandline args are properly formatted in {"-flag","data"} format</summary>
@@ -164,12 +167,13 @@ Public Module commandLineHandler
                     If Not vArgs.Contains(cmdargs(i)) Or
                         (Not Directory.Exists(cmdargs(i + 1)) And Not Directory.Exists($"{Environment.CurrentDirectory}\{cmdargs(i + 1)}") And
                                 Not File.Exists(cmdargs(i + 1)) And File.Exists($"{Environment.CurrentDirectory}\{cmdargs(i + 1)}")) Then
-                        Throw New Exception("Invalid commandline arguments given.")
+                        Throw New ArgumentException("Invalid commandline arguments given.")
                     End If
                     ' Increment i here by 1 to skip the next item (i+1) since we've already processed it above
                     i += 1
                 Next
-            Catch ex As Exception
+            Catch ex As ArgumentException
+                handleInvalidArgException(ex)
                 printErrExit(ex.Message)
             End Try
         End If

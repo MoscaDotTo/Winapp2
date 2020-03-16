@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -38,7 +38,7 @@ Public Class changeDict
             Else
                 Changes.Add(newValue, currentValue)
             End If
-        Catch ex As Exception
+        Catch ex As ArgumentException
             ' If this exception is thrown, there is a duplicate value in the list being audited 
             ' But we are not linting duplicates (or else this value would have been removed by this point)
             ' For now, silently fail here, unless some issue crops up as a result of this silent failure. 
@@ -51,6 +51,7 @@ Public Class changeDict
     ''' <summary>Restores the original state of data mutated for the purposes of string sorting.</summary>
     ''' <param name="lstArray">An array containing lists of strings whose data has been modified</param>
     Public Sub undoChanges(ByRef lstArray As strList())
+        If lstArray Is Nothing Then argIsNull(NameOf(lstArray)) : Return
         For Each lst In lstArray
             For Each key In Changes.Keys
                 lst.replaceStrAtIndexOf(key, Changes.Item(key))

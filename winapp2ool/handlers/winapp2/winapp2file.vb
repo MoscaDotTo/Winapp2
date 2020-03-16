@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2019 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -40,6 +40,7 @@ Public Class winapp2file
     ''' <summary> Creates a new <c> winapp2file </c> from an <c> iniFile </c> </summary>
     ''' <param name="file"> A winapp2.ini format <c> iniFile </c> object </param>
     Public Sub New(ByVal file As iniFile)
+        If file Is Nothing Then argIsNull(NameOf(file)) : Return
         Dir = file.Dir
         Name = file.Name
         For Each header In FileSectionHeaders
@@ -50,7 +51,7 @@ Public Class winapp2file
         IsNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
         ' Determine the version string
         If file.Comments.Count = 0 Then Version = "; version 000000"
-        If file.Comments.Count > 0 Then Version = If(Not file.Comments.Values(0).Comment.ToLower.Contains("version"), "; version 000000", file.Comments.Values(0).Comment)
+        If file.Comments.Count > 0 Then Version = If(Not file.Comments.Values(0).Comment.ToUpperInvariant.Contains("VERSION"), "; version 000000", file.Comments.Values(0).Comment)
         ' Build the header sections for browsers/Thunderbird/winapp3
         Dim langSecRefs As New List(Of String) From {"3029", "3006", "3027", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous", "Microsoft Edge Insider"}
         For Each section In file.Sections.Values
@@ -60,7 +61,7 @@ Public Class winapp2file
                 ind = langSecRefs.IndexOf(tmpwa2entry.LangSecRef.Keys.First.Value)
             ElseIf tmpwa2entry.SectionKey.KeyCount > 0 Then
                 ind = langSecRefs.IndexOf(tmpwa2entry.SectionKey.Keys.First.Value)
-                If ind = 8 And tmpwa2entry.SectionKey.Keys.First.Value.StartsWith("Dangerous") Then ind = 7
+                If ind = 8 And tmpwa2entry.SectionKey.Keys.First.Value.ToUpperInvariant.StartsWith("DANGEROUS", StringComparison.InvariantCulture) Then ind = 7
             End If
             ' Workaround for two separate sections for Microsoft Edge Insider (temporary, hopefully)
             If ind = 8 Then ind = 1
@@ -133,7 +134,7 @@ Public Class winapp2file
         Dim licLink = If(IsNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md") & Environment.NewLine
         ' Version string (YYMMDD format) & entry count 
         Dim out = Version & Environment.NewLine
-        out += $"; # of entries: {count.ToString("#,###")}{Environment.NewLine}"
+        out += $"; # of entries: {count():#,###}{Environment.NewLine}"
         out += $"; {Environment.NewLine}"
         out += $"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: {licLink}{Environment.NewLine}"
         out += $"; If you plan on modifying, distributing, and/or hosting {fileName}.ini for your own program or website, please ask first.{Environment.NewLine}"

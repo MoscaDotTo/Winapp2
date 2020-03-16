@@ -1,4 +1,5 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿Option Strict On
+'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,12 +15,14 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
-Option Strict On
+Imports System.Globalization
 ''' <summary>
 ''' This module contains functions that allow the user to reach online resources. 
 ''' Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
 ''' </summary>
 Module Downloader
+    ''' <summary> The web address of the winapp2.ini GitHub </summary>
+    Public ReadOnly Property gitLink As String = "https://github.com/MoscaDotTo/Winapp2/"
     '''<summary> The web address of the CCleaner version of winapp2.ini </summary>
     Public ReadOnly Property wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
     '''<summary> The web address of the Non-CCleaner version of winapp2.ini </summary>
@@ -72,7 +75,7 @@ Module Downloader
         Dim moduleName = NameOf(Downloader)
         createModuleSettingsSection(moduleName, {
                     getSettingIniKey(moduleName, NameOf(downloadFile), downloadFile.Dir, isDir:=True),
-                    getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+                    getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
         })
     End Sub
 
@@ -80,26 +83,26 @@ Module Downloader
     Public Sub handleCmdLine()
         Dim fileLink = ""
         If cmdargs.Count > 0 Then
-            Select Case cmdargs(0).ToLower
-                Case "1", "2", "winapp2"
+            Select Case cmdargs(0).ToUpperInvariant
+                Case "1", "2", "WINAPP2"
                     fileLink = If(Not cmdargs(0) = "2", wa2Link, nonccLink)
                     downloadFile.Name = "winapp2.ini"
-                Case "3", "winapp2ool"
+                Case "3", "WINAPP2OOL"
                     fileLink = toolLink
                     downloadFile.Name = "winapp2ool.exe"
-                Case "4", "removed"
+                Case "4", "REMOVED"
                     fileLink = removedLink
                     downloadFile.Name = "Removed Entries.ini"
-                Case "5", "winapp3"
+                Case "5", "WINAPP3"
                     fileLink = wa3link
                     downloadFile.Name = "winapp3.ini"
-                Case "6", "archived"
+                Case "6", "ARCHIVED"
                     fileLink = archivedLink
                     downloadFile.Name = "Archived Entries.ini"
-                Case "7", "java"
+                Case "7", "JAVA"
                     fileLink = javaLink
                     downloadFile.Name = "java.ini"
-                Case "8", "readme"
+                Case "8", "README"
                     fileLink = readMeLink
                     downloadFile.Name = "readme.txt"
             End Select
@@ -159,7 +162,7 @@ Module Downloader
                     headerTxt = "Save directory changed"
                     updateSettings(NameOf(Downloader), NameOf(downloadFile) & "_Dir", downloadFile.Dir)
                     ModuleSettingsChanged = True
-                    updateSettings(NameOf(Downloader), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString)
+                    updateSettings(NameOf(Downloader), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
                     saveSettingsFile()
                 End If
                 setHeaderText(headerTxt)
