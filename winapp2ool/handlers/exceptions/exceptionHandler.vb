@@ -76,7 +76,7 @@ Module exceptionHandler
         cwl("Please report this error on GitHub. It will be saved to winapp2ool.log in the same folder as winapp2ool.")
         saveGlobalLog()
         If forceAcknowledge Then
-            cwl("Press Enter to continue")
+            cwl(pressEnterStr)
             Console.ReadLine()
         End If
     End Sub
