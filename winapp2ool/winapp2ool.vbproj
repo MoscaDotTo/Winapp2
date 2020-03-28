@@ -1,5 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.6\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props" Condition="Exists('packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.6\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" />
+  <Import Project="packages\Microsoft.NetFramework.Analyzers.2.9.6\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('packages\Microsoft.NetFramework.Analyzers.2.9.6\build\Microsoft.NetFramework.Analyzers.props')" />
+  <Import Project="packages\Microsoft.NetCore.Analyzers.2.9.6\build\Microsoft.NetCore.Analyzers.props" Condition="Exists('packages\Microsoft.NetCore.Analyzers.2.9.6\build\Microsoft.NetCore.Analyzers.props')" />
+  <Import Project="packages\Microsoft.CodeQuality.Analyzers.2.9.6\build\Microsoft.CodeQuality.Analyzers.props" Condition="Exists('packages\Microsoft.CodeQuality.Analyzers.2.9.6\build\Microsoft.CodeQuality.Analyzers.props')" />
+  <Import Project="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props" Condition="Exists('packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -29,6 +34,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -38,8 +45,11 @@
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
     <DocumentationFile>winapp2ool.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <NoWarn>
+    </NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
+    <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
+    <CodeAnalysisRuleSet>BasicCorrectnessRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -49,8 +59,10 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DocumentationFile>winapp2ool.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <NoWarn>
+    </NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
+    <WarningsAsErrors>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036</WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <OptionExplicit>On</OptionExplicit>
@@ -59,7 +71,7 @@
     <OptionCompare>Binary</OptionCompare>
   </PropertyGroup>
   <PropertyGroup>
-    <OptionStrict>Off</OptionStrict>
+    <OptionStrict>On</OptionStrict>
   </PropertyGroup>
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
@@ -68,7 +80,7 @@
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
@@ -102,18 +114,40 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="components\commandLineHandler.vb" />
-    <Compile Include="components\CCiniDebug.vb" />
-    <Compile Include="components\Diff.vb" />
-    <Compile Include="components\Downloader.vb" />
-    <Compile Include="components\inifilehandler.vb" />
-    <Compile Include="components\JavaMaker.vb" />
-    <Compile Include="components\MenuMaker.vb" />
-    <Compile Include="components\Merge.vb" />
-    <Compile Include="components\Minefield.vb" />
-    <Compile Include="components\RegistryHelper.vb" />
-    <Compile Include="components\winapp2handler.vb" />
-    <Compile Include="components\exceptionHandler.vb" />
+    <Compile Include="handlers\settings\settingsHandler.vb" />
+    <Compile Include="modules\ccdebug\CCiniDebug.vb" />
+    <Compile Include="modules\diff\Diff.vb" />
+    <Compile Include="modules\download\Downloader.vb" />
+    <Compile Include="modules\download\advDownloads.vb" />
+    <Compile Include="handlers\cmdline\commandLineHandler.vb" />
+    <Compile Include="handlers\downloads\downloadr.vb" />
+    <Compile Include="handlers\exceptions\exceptionHandler.vb" />
+    <Compile Include="handlers\ini\iniFile\iniFile.vb" />
+    <Compile Include="handlers\ini\iniFile\iniSection\iniSection.vb" />
+    <Compile Include="handlers\ini\iniFile\iniComment\iniComment.vb" />
+    <Compile Include="handlers\ini\keyList\keyList.vb" />
+    <Compile Include="handlers\ini\iniFile\iniKey\iniKey.vb" />
+    <Compile Include="handlers\ini\iniFile\components\strList\strList.vb" />
+    <Compile Include="handlers\logger\logger.vb" />
+    <Compile Include="handlers\menus\MenuMaker.vb" />
+    <Compile Include="helpers\registry\RegistryHelper.vb" />
+    <Compile Include="helpers\settings\SettingsManager.vb" />
+    <Compile Include="helpers\updater\updater.vb" />
+    <Compile Include="handlers\winapp2\changeDict.vb" />
+    <Compile Include="handlers\winapp2\winapp2file.vb" />
+    <Compile Include="handlers\winapp2\winapp2keyparameters.vb" />
+    <Compile Include="handlers\winapp2\winapp2entry.vb" />
+    <Compile Include="handlers\winapp2\winapp2handler.vb" />
+    <Compile Include="modules\merge\Merge.vb" />
+    <Compile Include="modules\minefield\java\JavaMaker.vb" />
+    <Compile Include="modules\minefield\Minefield.vb" />
+    <Compile Include="modules\minefield\outlooker\OutlookMaker.vb" />
+    <Compile Include="modules\minefield\search\search.vb" />
+    <Compile Include="modules\trim\Trim.vb" />
+    <Compile Include="modules\winappdebug\components\advancedSettings\advSettings.vb" />
+    <Compile Include="modules\winappdebug\components\landMine\experimentalScans.vb" />
+    <Compile Include="modules\winappdebug\components\lintRules\lintRule.vb" />
+    <Compile Include="modules\winappdebug\WinappDebug.vb" />
     <Compile Include="Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -130,8 +164,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="components\Trim.vb" />
-    <Compile Include="components\WinappDebug.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">
@@ -155,6 +187,7 @@
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
+    <None Include="packages.config" />
     <None Include="winapp2ool_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -174,7 +207,31 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="handlers\ini\comments\" />
+    <Folder Include="helpers\filesystem\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
+    <Analyzer Include="packages\Microsoft.CodeQuality.Analyzers.2.9.6\analyzers\dotnet\vb\Humanizer.dll" />
+    <Analyzer Include="packages\Microsoft.CodeQuality.Analyzers.2.9.6\analyzers\dotnet\vb\Microsoft.CodeQuality.Analyzers.dll" />
+    <Analyzer Include="packages\Microsoft.CodeQuality.Analyzers.2.9.6\analyzers\dotnet\vb\Microsoft.CodeQuality.VisualBasic.Analyzers.dll" />
+    <Analyzer Include="packages\Microsoft.NetCore.Analyzers.2.9.6\analyzers\dotnet\vb\Microsoft.NetCore.Analyzers.dll" />
+    <Analyzer Include="packages\Microsoft.NetCore.Analyzers.2.9.6\analyzers\dotnet\vb\Microsoft.NetCore.VisualBasic.Analyzers.dll" />
+    <Analyzer Include="packages\Microsoft.NetFramework.Analyzers.2.9.6\analyzers\dotnet\vb\Microsoft.NetFramework.Analyzers.dll" />
+    <Analyzer Include="packages\Microsoft.NetFramework.Analyzers.2.9.6\analyzers\dotnet\vb\Microsoft.NetFramework.VisualBasic.Analyzers.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props'))" />
+    <Error Condition="!Exists('packages\Microsoft.CodeQuality.Analyzers.2.9.6\build\Microsoft.CodeQuality.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeQuality.Analyzers.2.9.6\build\Microsoft.CodeQuality.Analyzers.props'))" />
+    <Error Condition="!Exists('packages\Microsoft.NetCore.Analyzers.2.9.6\build\Microsoft.NetCore.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NetCore.Analyzers.2.9.6\build\Microsoft.NetCore.Analyzers.props'))" />
+    <Error Condition="!Exists('packages\Microsoft.NetFramework.Analyzers.2.9.6\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NetFramework.Analyzers.2.9.6\build\Microsoft.NetFramework.Analyzers.props'))" />
+    <Error Condition="!Exists('packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.6\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.6\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
