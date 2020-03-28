@@ -19,3 +19,4 @@ C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.
 C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.dll
 C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.xml
 C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.pdb
+C:\Users\robbie\source\repos\winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.vbproj.CoreCompileInputs.cache

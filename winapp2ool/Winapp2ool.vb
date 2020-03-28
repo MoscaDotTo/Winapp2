@@ -23,7 +23,7 @@ Module Winapp2ool
     ''' <summary> Indicates that winapp2ool currently has access to the internet </summary>
     Public Property isOffline As Boolean = False
     ''' <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
-    Public Property isBeta As Boolean = True
+    Public Property isBeta As Boolean = False
     ''' <summary> Inidcates that we're unable to download the executable </summary>
     Public Property cantDownloadExecutable As Boolean = False
     ''' <summary> Indicates that winapp2ool.exe has already been downloaded during this session and prevents us from redownloading it </summary>
