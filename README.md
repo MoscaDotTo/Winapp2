@@ -21,7 +21,7 @@ Name           | Purpose
   * Open BleachBit.
   * Select the "Edit" tab, and then "Preferences".
   * Check the box that reads "Download and update cleaners from community (winapp2.ini)".
-  * Note: Bleachbit 2.2 is the last version to work on Windows XP. Winapp2 and Winapp3 will continue to work with this version.
+  * Note: BleachBit 2.2 is the last version to work on Windows XP. Winapp2 and Winapp3 will continue to work with this version.
   
 * [System Ninja](https://singularlabs.com/software/system-ninja):
   * System Ninja ships with winapp2.ini by default, storing it in your `..\System Ninja\scripts\` directory.
@@ -140,7 +140,7 @@ Variable       | Windows Vista-10 Path | WindowsXP Path
 `%Documents%` | `C:\Users\%UserName%\Documents` | `C:\Documents and Settings\%UserName%\My Documents`
 `%LocalAppData%` | `C:\Users\%UserName%\AppData\Local` | `C:\Documents and Settings\%UserName%\Local Settings\Application Data`
 `%LoalLowAppData%` | `C:\Users\%UserName%\AppData\LocalLow` | N/A
-`%Music` | `C:\Users\%UserName%\Music` | `C:\Documents and Settings\%UserName%\My Documents\My Music`
+`%Music%` | `C:\Users\%UserName%\Music` | `C:\Documents and Settings\%UserName%\My Documents\My Music`
 `%Pictures%` | `C:\Users\%UserName%\Pictures` | `C:\Documents and Settings\%UserName%\My Documents\My Pictures`
 `%ProgramFiles%`* | `C:\Program Files` | `C:\Program Files`
 `%Public%` | `C:\Users\Public` | N/A
