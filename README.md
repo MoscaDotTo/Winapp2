@@ -140,7 +140,7 @@ Variable       | Windows Vista-10 Path | WindowsXP Path
 `%Documents%` | `C:\Users\%UserName%\Documents` | `C:\Documents and Settings\%UserName%\My Documents`
 `%LocalAppData%` | `C:\Users\%UserName%\AppData\Local` | `C:\Documents and Settings\%UserName%\Local Settings\Application Data`
 `%LoalLowAppData%` | `C:\Users\%UserName%\AppData\LocalLow` | N/A
-`%Music` | `C:\Users\%UserName%\Music` | `C:\Documents and Settings\%UserName%\My Documents\My Music`
+`%Music%` | `C:\Users\%UserName%\Music` | `C:\Documents and Settings\%UserName%\My Documents\My Music`
 `%Pictures%` | `C:\Users\%UserName%\Pictures` | `C:\Documents and Settings\%UserName%\My Documents\My Pictures`
 `%ProgramFiles%`* | `C:\Program Files` | `C:\Program Files`
 `%Public%` | `C:\Users\Public` | N/A
