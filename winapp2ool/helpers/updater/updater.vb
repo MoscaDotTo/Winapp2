@@ -60,7 +60,14 @@ Public Module updater
         gLog("Checking for updates")
         ' Query the latest winapp2ool.exe and winapp2.ini versions 
         toolVersionCheck()
-        latestWa2Ver = getRemoteVersion(winapp2link)
+        ' If winapp2.ini doesn't exist, an update is necessarily available. Avoid downloading in this case 
+        ' anti virus vendors don't seem to like the fact that winapp2ool downloads a configuration file, particularly one containing 
+        ' commands pertaining to yet more anti virus. If we can avoid doing this by default, we may be able to more easily fly under the radar 
+        If Not File.Exists("winapp2.ini") Then
+            latestWa2Ver = "999999"
+        Else
+            latestWa2Ver = getRemoteVersion(winapp2link)
+        End If
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion.Length = 0 Or latestWa2Ver.Length = 0 Then updateCheckFailed("online", True) : Return
@@ -151,10 +158,12 @@ Public Module updater
     ''' <param name="newVer"> The updated version pending download </param>
     Public Sub printUpdNotif(cond As Boolean, updName As String, oldVer As String, newVer As String)
         If Not cond Then Return
-        gLog($"Update available for {updName} from {oldVer} to {newVer}")
+        Dim tmpNewVer = newVer
+        If tmpNewVer = "999999" Then tmpNewVer = "20XXXX (latest online version)"
+        gLog($"Update available for {updName} from {oldVer} to {tmpNewVer}")
         print(0, $"A new version of {updName} is available!", isCentered:=True, colorLine:=True, enStrCond:=True)
-        print(0, $"Current  : v{oldVer}", isCentered:=True, colorLine:=True, enStrCond:=True)
-        print(0, $"Available: v{newVer}", trailingBlank:=True, isCentered:=True, colorLine:=True, enStrCond:=True)
+        print(0, $"Current: v{oldVer}", isCentered:=True, colorLine:=True, enStrCond:=True)
+        print(0, $"Available: v{tmpNewVer}", trailingBlank:=True, isCentered:=True, colorLine:=True, enStrCond:=True)
     End Sub
 
     ''' <summary> Replaces the currently running executable with the latest from GitHub before launching that new executable and closing the current one,
