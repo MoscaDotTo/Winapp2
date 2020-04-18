@@ -2038,66 +2038,82 @@ winapp2ool
 </member>
 <member name="P:winapp2ool.Winapp2ool.RemoteWinappIsNonCC">
  <summary> Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="P:winapp2ool.Winapp2ool.DotNetFrameworkOutOfDate">
  <summary> Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5) </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="P:winapp2ool.Winapp2ool.isOffline">
  <summary> Indicates that winapp2ool currently has access to the internet </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="P:winapp2ool.Winapp2ool.isBeta">
  <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="P:winapp2ool.Winapp2ool.cantDownloadExecutable">
  <summary> Inidcates that we're unable to download the executable </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="P:winapp2ool.Winapp2ool.alreadyDownloadedExecutable">
  <summary> Indicates that winapp2ool.exe has already been downloaded during this session and prevents us from redownloading it </summary>
- <remarks> This is to handle the fact that opening a file's manifest to read it's version number as we do on the beta branch puts a lock on that file
- which necessarily prevents us from deleting it, a critical step in ensuring that we have the latest binary. Attempts to read the manifest from the bytestream 
- without locking the file cause many antivirus' to flag winapp2ool as a malicious entity and in some cases, automatically remove it from the system. </remarks>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="P:winapp2ool.Winapp2ool.toolSettingsHaveChanged">
  <summary> Indicates that the module's settings have been changed </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.initDefaultSettings">
  <summary> Initalizes the default state of the winapp2ool module settings </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.getSeralizedToolSettings">
  <summary> Loads values from disk into memory for the winapp2ool module settings </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.createToolSettingsSection">
 <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.printMenu">
  <summary> Prints the main winapp2ool menu to the user </summary>
+ Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.main">
- <summary> Processes the commandline args and then initalizes the main winapp2ool module </summary>
+ <summary> Initilizes winapp2ool by checking for internet connectivity, serializing any settings from disk,
+ and processing any commandline arguments  before loading the tool's main menu </summary>
+ Docs last updated: 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.handleUserInput(System.String)">
  <summary> Handles the user input for the menu </summary>
  <param name="input"> The <c> String </c> containing the user's input </param>
+ Docs last updated: 2020-04-18 | Code last updated: 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
  <summary> Checks the version of Windows on the current system and returns it as a Double </summary>
  <returns> The Windows version running on the machine, <c> 0.0 </c> if the windows version cannot be determined </returns>
+ Docs last updated: 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.getFirstDir(System.String)">
  <summary> Returns the first portion of a registry or filepath parameterization </summary>
  <param name="val"> A Windows filesystem or registry path from which the root should be returned </param>
  <returns> The root directory given by <paramref name="val"/> </returns>
+ Docs last updated: 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
  <summary> Ensures that an <c> iniFile </c> has content and informs the user if it does not. Returns <c> False </c> if there are no sections </summary>
  <param name="iFile"> An <c> iniFile </c> to be checked for content </param>
+ Docs last updated: 2020-04-18 | Code last updated: Before 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.printToolSettingsMenu">
  <summary> Prints the winapp2ool settings menu to the user </summary>
+ Docs last updated: 2020-04-18 | Code last updated: 2020-04-18
 </member>
 <member name="M:winapp2ool.Winapp2ool.handleToolSettingsInput(System.String)">
  <summary> Handles the user input for the winapp2ool settings menu </summary>
  <param name="input"> The user's input </param>
+ Docs last updated: 2020-04-18 | Code last updated: 2020-04-18
 </member>
 </members>
 </doc>
