@@ -35,7 +35,9 @@ Public Module updater
     Public Property currentVersion As String = ""
     ''' <summary> Indicates that an update check has been performed </summary>
     Public Property checkedForUpdates As Boolean = False
-
+    ''' <summary> Indicates that an update check should be performed for winapp2ool.exe on the beta branch </summary>
+    ''' This is so we can disable tool update checking by default, and hopefully reduce the false positive rate on anti virus' 
+    Public Property autoCheckBetaToolUpdates As Boolean = False
     ''' <summary> Pads the seconds portion of the version number, ensuring that it always have a length of 5 </summary>
     ''' <param name="version"> A version number to pad </param>
     Private Sub padVersionNum(ByRef version As String)
@@ -63,11 +65,7 @@ Public Module updater
         ' If winapp2.ini doesn't exist, an update is necessarily available. Avoid downloading in this case 
         ' anti virus vendors don't seem to like the fact that winapp2ool downloads a configuration file, particularly one containing 
         ' commands pertaining to yet more anti virus. If we can avoid doing this by default, we may be able to more easily fly under the radar 
-        If Not File.Exists("winapp2.ini") Then
-            latestWa2Ver = "999999"
-        Else
-            latestWa2Ver = getRemoteVersion(winapp2link)
-        End If
+        latestWa2Ver = If(File.Exists("winapp2.ini"), getRemoteVersion(winapp2link), "999999")
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion.Length = 0 Or latestWa2Ver.Length = 0 Then updateCheckFailed("online", True) : Return
@@ -82,7 +80,7 @@ Public Module updater
         gLog("Remote: " & latestVersion, indent:=True)
         gLog("Winapp2.ini:")
         gLog("Local: " & localWa2Ver, indent:=True)
-        gLog("Remote: " & latestWa2Ver, indent:=True)
+        gLog("Remote: " & If(localWa2Ver = "999999", "20XXXX (latest online file)", localWa2Ver), indent:=True)
         Dim bothUpdatesAreAvail = waUpdateIsAvail And updateIsAvail
         Dim updHeader = $"Update{If(bothUpdatesAreAvail, "s", "")} available for {If(updateIsAvail, "winapp2ool ", "")}{If(bothUpdatesAreAvail, "and ", "")}{If(waUpdateIsAvail, "winapp2.ini", "")}"
         setHeaderText(updHeader, True, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
@@ -103,7 +101,7 @@ Public Module updater
         End Try
     End Function
 
-    '''<summary> Performs the version chcking for winapp2ool.exe </summary>
+    '''<summary> Performs the version checking for winapp2ool.exe </summary>
     Private Sub toolVersionCheck()
         ' Let's just assume winapp2ool didn't update after we've checked for updates
         If Not latestVersion.Length = 0 Then Return
@@ -111,7 +109,7 @@ Public Module updater
             ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
             latestVersion = getRemoteVersion(toolVerLink)
         Else
-            If cantDownloadExecutable Then latestVersion = "000000 (couldn't download)" : Return
+            If Not autoCheckBetaToolUpdates Or cantDownloadExecutable Then latestVersion = "000000 (update check disabled)" : Return
             If Not alreadyDownloadedExecutable Then
                 Dim tmpPath = setDownloadedFileStage(betaToolLink)
                 alreadyDownloadedExecutable = True

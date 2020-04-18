@@ -78,18 +78,17 @@ Module CCiniDebug
 
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createDebugSettingsSection()
-        Dim moduleName = NameOf(CCiniDebug)
-        createModuleSettingsSection(moduleName, {
-            getSettingIniKey(moduleName, NameOf(CCDebugFile1), CCDebugFile1.Name, isName:=True),
-            getSettingIniKey(moduleName, NameOf(CCDebugFile1), CCDebugFile1.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(CCDebugFile2), CCDebugFile2.Name, isName:=True),
-            getSettingIniKey(moduleName, NameOf(CCDebugFile2), CCDebugFile2.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(CCDebugFile3), CCDebugFile3.Name, isName:=True),
-            getSettingIniKey(moduleName, NameOf(CCDebugFile3), CCDebugFile3.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(PruneStaleEntries), PruneStaleEntries.ToString(CultureInfo.InvariantCulture)),
-            getSettingIniKey(moduleName, NameOf(SaveDebuggedFile), SaveDebuggedFile.ToString(CultureInfo.InvariantCulture)),
-            getSettingIniKey(moduleName, NameOf(SortFileForOutput), SortFileForOutput.ToString(CultureInfo.InvariantCulture)),
-            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
+        createModuleSettingsSection(NameOf(CCiniDebug), {
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile1), CCDebugFile1.Name, isName:=True),
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile1), CCDebugFile1.Dir, isDir:=True),
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile2), CCDebugFile2.Name, isName:=True),
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile2), CCDebugFile2.Dir, isDir:=True),
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile3), CCDebugFile3.Name, isName:=True),
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile3), CCDebugFile3.Dir, isDir:=True),
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(PruneStaleEntries), PruneStaleEntries.ToString(CultureInfo.InvariantCulture)),
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(SaveDebuggedFile), SaveDebuggedFile.ToString(CultureInfo.InvariantCulture)),
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(SortFileForOutput), SortFileForOutput.ToString(CultureInfo.InvariantCulture)),
+            getSettingIniKey(NameOf(CCiniDebug), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
             })
     End Sub
 

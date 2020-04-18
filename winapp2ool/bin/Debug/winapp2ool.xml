@@ -1169,6 +1169,10 @@ winapp2ool
 <member name="P:winapp2ool.updater.checkedForUpdates">
  <summary> Indicates that an update check has been performed </summary>
 </member>
+<member name="P:winapp2ool.updater.autoCheckBetaToolUpdates">
+ <summary> Indicates that an update check should be performed for winapp2ool.exe on the beta branch </summary>
+ This is so we can disable tool update checking by default, and hopefully reduce the false positive rate on anti virus' 
+</member>
 <member name="M:winapp2ool.updater.padVersionNum(System.String@)">
  <summary> Pads the seconds portion of the version number, ensuring that it always have a length of 5 </summary>
  <param name="version"> A version number to pad </param>
@@ -1183,7 +1187,7 @@ winapp2ool
  <param name="pathToFile"> An absolute path to a winapp2ool.exe file </param>
 </member>
 <member name="M:winapp2ool.updater.toolVersionCheck">
-<summary> Performs the version chcking for winapp2ool.exe </summary>
+<summary> Performs the version checking for winapp2ool.exe </summary>
 </member>
 <member name="M:winapp2ool.updater.updateCheckFailed(System.String,System.Boolean)">
  <summary> Handles the case where the update check has failed </summary>

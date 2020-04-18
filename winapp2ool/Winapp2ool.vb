@@ -41,6 +41,7 @@ Module Winapp2ool
         saveSettingsToDisk = False
         readSettingsFromDisk = False
         toolSettingsHaveChanged = False
+        autoCheckBetaToolUpdates = False
         restoreDefaultSettings(NameOf(Winapp2ool), AddressOf createToolSettingsSection)
     End Sub
 
@@ -62,6 +63,8 @@ Module Winapp2ool
                     GlobalLogFile.Dir = kvp.Value
                 Case NameOf(GlobalLogFile) & "_Name"
                     GlobalLogFile.Name = kvp.Value
+                Case NameOf(autoCheckBetaToolUpdates)
+                    autoCheckBetaToolUpdates = CBool(kvp.Value)
             End Select
         Next
     End Sub
@@ -69,15 +72,15 @@ Module Winapp2ool
     '''<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createToolSettingsSection()
         Dim compCult = System.Globalization.CultureInfo.InvariantCulture
-        Dim moduleName = NameOf(Winapp2ool)
         createModuleSettingsSection(NameOf(Winapp2ool), {
-                                        getSettingIniKey(moduleName, NameOf(isBeta), isBeta.ToString(compCult)),
-                                        getSettingIniKey(moduleName, NameOf(saveSettingsToDisk), saveSettingsToDisk.ToString(compCult)),
-                                        getSettingIniKey(moduleName, NameOf(readSettingsFromDisk), readSettingsFromDisk.ToString(compCult)),
-                                        getSettingIniKey(moduleName, NameOf(RemoteWinappIsNonCC), RemoteWinappIsNonCC.ToString(compCult)),
-                                        getSettingIniKey(moduleName, NameOf(toolSettingsHaveChanged), toolSettingsHaveChanged.ToString(compCult)),
-                                        getSettingIniKey(moduleName, NameOf(GlobalLogFile) & "_Dir", GlobalLogFile.Dir),
-                                        getSettingIniKey(moduleName, NameOf(GlobalLogFile) & "_Name", GlobalLogFile.Name)
+                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(isBeta), isBeta.ToString(compCult)),
+                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(saveSettingsToDisk), saveSettingsToDisk.ToString(compCult)),
+                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(readSettingsFromDisk), readSettingsFromDisk.ToString(compCult)),
+                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(RemoteWinappIsNonCC), RemoteWinappIsNonCC.ToString(compCult)),
+                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(toolSettingsHaveChanged), toolSettingsHaveChanged.ToString(compCult)),
+                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(GlobalLogFile) & "_Dir", GlobalLogFile.Dir),
+                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(GlobalLogFile) & "_Name", GlobalLogFile.Name),
+                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(autoCheckBetaToolUpdates), autoCheckBetaToolUpdates.ToString(compCult))
                                     })
     End Sub
 
@@ -121,7 +124,7 @@ Module Winapp2ool
         If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
         gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
         ' Make sure we're not operating in the temporary directory 
-        If Environment.CurrentDirectory = Environment.GetEnvironmentVariable("temp") Then cantDownloadExecutable = True
+        cantDownloadExecutable = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
         loadSettings()
         processCommandLineArgs()
         If SuppressOutput Then Environment.Exit(1)
@@ -137,15 +140,15 @@ Module Winapp2ool
                 cwl("Exiting...")
                 Environment.Exit(0)
             Case input = "1"
-                initModule("WinappDebug", AddressOf WinappDebug.printMenu, AddressOf WinappDebug.handleUserInput)
+                initModule(NameOf(WinappDebug), AddressOf WinappDebug.printMenu, AddressOf WinappDebug.handleUserInput)
             Case input = "2"
-                initModule("Trim", AddressOf Trim.printMenu, AddressOf Trim.handleUserInput)
+                initModule(NameOf(Trim), AddressOf Trim.printMenu, AddressOf Trim.handleUserInput)
             Case input = "3"
-                initModule("Merge", AddressOf Merge.printMenu, AddressOf Merge.handleUserInput)
+                initModule(NameOf(Merge), AddressOf Merge.printMenu, AddressOf Merge.handleUserInput)
             Case input = "4"
-                initModule("Diff", AddressOf Diff.printMenu, AddressOf Diff.handleUserInput)
+                initModule(NameOf(Diff), AddressOf Diff.printMenu, AddressOf Diff.handleUserInput)
             Case input = "5"
-                initModule("CCiniDebug", AddressOf CCiniDebug.printMenu, AddressOf CCiniDebug.handleUserInput)
+                initModule(NameOf(CCiniDebug), AddressOf CCiniDebug.printMenu, AddressOf CCiniDebug.handleUserInput)
             Case input = "6"
                 If Not denySettingOffline() Then initModule("Downloader", AddressOf Downloader.printMenu, AddressOf Downloader.handleUserInput)
             Case input = "7"
@@ -161,7 +164,7 @@ Module Winapp2ool
             Case input = "9" And waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading & trimming, this may take a moment...")
-                remoteTrim(New iniFile("", ""), New iniFile(Environment.CurrentDirectory, "winapp2.ini"), True)
+                remoteTrim(New iniFile(), New iniFile(Environment.CurrentDirectory, "winapp2.ini"), True)
                 waUpdateIsAvail = False
             Case input = "10" And waUpdateIsAvail
                 clrConsole()
@@ -225,38 +228,40 @@ Module Winapp2ool
         print(1, "Save Log", "Save winapp2ool's internal log to the disk")
         print(0, $"Current log file target: {replDir(GlobalLogFile.Path)}", leadingBlank:=True, trailingBlank:=True)
         print(1, "Visit GitHub", "Open the winapp2.ini/winapp2ool GitHub in your default web browser", trailingBlank:=True)
-        print(5, "Toggle Beta Participation", $"participating in the 'beta' builds of winapp2ool (requires a restart)", enStrCond:=isBeta, closeMenu:=Not toolSettingsHaveChanged)
+        print(5, "Toggle Beta Participation", $"participating in the 'beta' builds of winapp2ool (requires a restart)", enStrCond:=isBeta, closeMenu:=Not isBeta And Not toolSettingsHaveChanged)
+        print(5, "Toggle Update Checking", "automatic update checking for winapp2ool beta (requires a restart)", enStrCond:=autoCheckBetaToolUpdates, closeMenu:=Not toolSettingsHaveChanged, cond:=isBeta)
         print(2, NameOf(Winapp2ool), cond:=toolSettingsHaveChanged, closeMenu:=True)
     End Sub
 
     ''' <summary> Handles the user input for the winapp2ool settings menu </summary>
     ''' <param name="input"> The user's input </param>
     Private Sub handleToolSettingsInput(input As String)
-        Dim moduleName = NameOf(Winapp2ool)
-        Dim settingsChangedName = NameOf(toolSettingsHaveChanged)
         Select Case True
             Case input = "0"
                 exitModule()
             Case input = "1"
-                toggleSettingParam(saveSettingsToDisk, "Saving settings to disk", toolSettingsHaveChanged, moduleName, NameOf(saveSettingsToDisk), settingsChangedName)
+                toggleSettingParam(saveSettingsToDisk, "Saving settings to disk", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(saveSettingsToDisk), NameOf(toolSettingsHaveChanged))
             Case input = "2"
-                toggleSettingParam(readSettingsFromDisk, "Reading settings from disk", toolSettingsHaveChanged, moduleName, NameOf(readSettingsFromDisk), settingsChangedName)
+                toggleSettingParam(readSettingsFromDisk, "Reading settings from disk", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(readSettingsFromDisk), NameOf(toolSettingsHaveChanged))
             Case input = "3"
-                toggleSettingParam(RemoteWinappIsNonCC, "Non-CCleaner mode", toolSettingsHaveChanged, moduleName, NameOf(RemoteWinappIsNonCC), settingsChangedName)
+                toggleSettingParam(RemoteWinappIsNonCC, "Non-CCleaner mode", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(RemoteWinappIsNonCC), NameOf(toolSettingsHaveChanged))
             Case input = "4"
                 printLog()
             Case input = "5"
-                changeFileParams(GlobalLogFile, toolSettingsHaveChanged, moduleName, NameOf(GlobalLogFile), NameOf(toolSettingsHaveChanged))
+                changeFileParams(GlobalLogFile, toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(GlobalLogFile), NameOf(toolSettingsHaveChanged))
             Case input = "6"
                 GlobalLogFile.overwriteToFile(logger.toString)
             Case input = "7"
                 Process.Start(gitLink)
             Case input = "8"
                 If Not denyActionWithHeader(DotNetFrameworkOutOfDate, "Winapp2ool beta requires .NET 4.6 or higher") Then
-                    toggleSettingParam(isBeta, "Beta Participation", toolSettingsHaveChanged, moduleName, NameOf(isBeta), settingsChangedName)
+                    toggleSettingParam(isBeta, "Beta Participation", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(isBeta), NameOf(toolSettingsHaveChanged))
                     autoUpdate()
                 End If
-            Case input = "9" And toolSettingsHaveChanged
+            Case input = "9" And isBeta
+                toggleSettingParam(autoCheckBetaToolUpdates, "Update Checking", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(autoCheckBetaToolUpdates), NameOf(toolSettingsHaveChanged))
+                checkedForUpdates = False
+            Case toolSettingsHaveChanged And ((input = "9" And Not isBeta) Or (input = "10" And isBeta))
                 initDefaultSettings()
             Case Else
                 setHeaderText(invInpStr, True)

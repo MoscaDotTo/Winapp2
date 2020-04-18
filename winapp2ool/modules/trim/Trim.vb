@@ -75,14 +75,13 @@ Public Module Trim
 
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createTrimSettingsSection()
-        Dim moduleName = NameOf(Trim)
-        createModuleSettingsSection(moduleName, {
-            getSettingIniKey(moduleName, NameOf(MergeFile1), MergeFile1.Name, isName:=True),
-            getSettingIniKey(moduleName, NameOf(MergeFile1), MergeFile1.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Name, isName:=True),
-            getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(DownloadFileToTrim), DownloadFileToTrim.ToString(Globalization.CultureInfo.InvariantCulture)),
-            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(Globalization.CultureInfo.InvariantCulture))
+        createModuleSettingsSection(NameOf(Trim), {
+            getSettingIniKey(NameOf(Trim), NameOf(MergeFile1), MergeFile1.Name, isName:=True),
+            getSettingIniKey(NameOf(Trim), NameOf(MergeFile1), MergeFile1.Dir, isDir:=True),
+            getSettingIniKey(NameOf(Trim), NameOf(MergeFile3), MergeFile3.Name, isName:=True),
+            getSettingIniKey(NameOf(Trim), NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
+            getSettingIniKey(NameOf(Trim), NameOf(DownloadFileToTrim), DownloadFileToTrim.ToString(Globalization.CultureInfo.InvariantCulture)),
+            getSettingIniKey(NameOf(Trim), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(Globalization.CultureInfo.InvariantCulture))
             })
     End Sub
 
@@ -126,7 +125,7 @@ Public Module Trim
             Case (input = "4" And Not DownloadFileToTrim And Not isOffline) Or (input = "3" And (isOffline Or DownloadFileToTrim))
                 changeFileParams(TrimFile3, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(ModuleSettingsChanged))
             Case ModuleSettingsChanged And ((input = "5" And Not DownloadFileToTrim) Or (input = "4" And (isOffline Or DownloadFileToTrim)))
-                resetModuleSettings("Trim", AddressOf initDefaultSettings)
+                resetModuleSettings(NameOf(Trim), AddressOf initDefaultSettings)
             Case Else
                 setHeaderText(invInpStr, True)
         End Select

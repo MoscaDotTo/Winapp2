@@ -84,16 +84,15 @@ Module Merge
 
     '''<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createMergeSettingsSection()
-        Dim moduleName = NameOf(Merge)
-        createModuleSettingsSection(moduleName,
-                                    {getSettingIniKey(moduleName, NameOf(MergeFile1), MergeFile1.Name, isName:=True),
-                                    getSettingIniKey(moduleName, NameOf(MergeFile1), MergeFile1.Dir, isDir:=True),
-                                    getSettingIniKey(moduleName, NameOf(MergeFile2), MergeFile2.Name, isName:=True),
-                                    getSettingIniKey(moduleName, NameOf(MergeFile2), MergeFile2.Dir, isDir:=True),
-                                    getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Name, isName:=True),
-                                    getSettingIniKey(moduleName, NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
-                                    getSettingIniKey(moduleName, NameOf(mergeMode), mergeMode.ToString(CultureInfo.InvariantCulture)),
-                                    getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
+        createModuleSettingsSection(NameOf(Merge),
+                                    {getSettingIniKey(NameOf(Merge), NameOf(MergeFile1), MergeFile1.Name, isName:=True),
+                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile1), MergeFile1.Dir, isDir:=True),
+                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile2), MergeFile2.Name, isName:=True),
+                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile2), MergeFile2.Dir, isDir:=True),
+                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile3), MergeFile3.Name, isName:=True),
+                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
+                                    getSettingIniKey(NameOf(Merge), NameOf(mergeMode), mergeMode.ToString(CultureInfo.InvariantCulture)),
+                                    getSettingIniKey(NameOf(Merge), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
                                     })
     End Sub
 

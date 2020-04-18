@@ -72,10 +72,9 @@ Module Downloader
 
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createDownloadSettingsSection()
-        Dim moduleName = NameOf(Downloader)
-        createModuleSettingsSection(moduleName, {
-                    getSettingIniKey(moduleName, NameOf(downloadFile), downloadFile.Dir, isDir:=True),
-                    getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
+        createModuleSettingsSection(NameOf(Downloader), {
+                    getSettingIniKey(NameOf(Downloader), NameOf(downloadFile), downloadFile.Dir, isDir:=True),
+                    getSettingIniKey(NameOf(Downloader), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
         })
     End Sub
 
