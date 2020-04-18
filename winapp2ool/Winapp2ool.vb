@@ -260,7 +260,8 @@ Module Winapp2ool
                 End If
             Case input = "9" And isBeta
                 toggleSettingParam(autoCheckBetaToolUpdates, "Update Checking", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(autoCheckBetaToolUpdates), NameOf(toolSettingsHaveChanged))
-                checkedForUpdates = False
+                ' Make sure we check for updates again when we return to the main menu if we've enabled update checking 
+                If autoCheckBetaToolUpdates Then latestVersion = "" : checkedForUpdates = False
             Case toolSettingsHaveChanged And ((input = "9" And Not isBeta) Or (input = "10" And isBeta))
                 initDefaultSettings()
             Case Else
