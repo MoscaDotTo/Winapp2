@@ -100,7 +100,7 @@ Module Winapp2ool
         print(1, "Diff", "Observe the changes between two winapp2.ini files")
         print(1, "CCiniDebug", "Sort and trim ccleaner.ini", trailingBlank:=True)
         print(1, "Downloader", "Download files from the Winapp2 GitHub")
-        print(1, "Settings", "Manage Winapp2ool's settings", closeMenu:=Not (isOffline Or waUpdateIsAvail Or updateIsAvail))
+        print(1, "Settings", "Manage Winapp2ool's settings", closeMenu:=Not (isOffline Or waUpdateIsAvail Or updateIsAvail), arbitraryColor:=ConsoleColor.Yellow, colorLine:=True, useArbitraryColor:=True)
         If waUpdateIsAvail And Not isOffline Then
             print(1, "Update", "Update your local copy of winapp2.ini", leadingBlank:=True)
             print(1, "Update & Trim", "Download and trim the latest winapp2.ini")
