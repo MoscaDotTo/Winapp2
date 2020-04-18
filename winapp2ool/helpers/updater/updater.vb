@@ -94,9 +94,9 @@ Public Module updater
         If Not File.Exists(pathToFile) Then Return "000000 (file not found)"
         Try
             Return Reflection.Assembly.Load(File.ReadAllBytes(pathToFile)).FullName.Split(CChar(","))(1).Substring(9)
-        Catch ex As SecurityException
-            ' Pretty much the only exception here is that winapp2ool has been flagged as malicious and cannot be downloaded. Working on a fix for this but for now just eat the error 
-            clrConsole()
+        Catch ex As IOException
+            ' Pretty much the only exception here is that winapp2ool has been flagged as malicious and cannot be downloaded 
+            handleIOException(ex)
             Return "000000 (exception encountered)"
         End Try
     End Function
