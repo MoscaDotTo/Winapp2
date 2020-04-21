@@ -104,24 +104,21 @@ Public Module settingsHandler
     ''' version on disk from which to read them </param>
     ''' <param name="getSerializedSettings"> The function who assigns values from disk to the current active session of a module's settings </param>
     Private Sub serializeModuleSettings(moduleName As String, createModuleSettings As Action, getSerializedSettings As Action)
-        Dim toolName = NameOf(Winapp2ool)
         Dim rdSttngsName = NameOf(readSettingsFromDisk)
         Dim moduleSection = settingsFile.getSection(moduleName)
         addToSettingsDict(moduleName, moduleSection)
-        If settingsDict(toolName).ContainsKey(rdSttngsName) Then
-            If CBool(settingsDict(toolName)(rdSttngsName)) Then
+        If settingsDict(NameOf(Winapp2ool)).ContainsKey(rdSttngsName) Then
+            If CBool(settingsDict(NameOf(Winapp2ool))(rdSttngsName)) Then
                 getSerializedSettings()
             Else
                 ' If we're serializing the root module's settings and it tells us not to read from disk, load the defaults
-                If moduleName = toolName Then
-                    clearAllModuleSettings(toolName)
-                End If
+                If moduleName = NameOf(Winapp2ool) Then clearAllModuleSettings(NameOf(Winapp2ool))
             End If
         Else
             ' If we don't know if we're reading settings from disk, we probably just shouldn't. 
             ' clear the settings inifile And the settingsdict for winapp2ool and load the defaults 
             ' Unless something goes terribly wrong, we won't hit this path again after initalizing the root winapp2ool module 
-            clearAllModuleSettings(toolName)
+            clearAllModuleSettings(NameOf(Winapp2ool))
         End If
         createModuleSettings()
     End Sub

@@ -106,19 +106,18 @@ Module Diff
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createDiffSettingsSection()
         Dim cultInf = CultureInfo.InvariantCulture
-        Dim moduleName = NameOf(Diff)
-        createModuleSettingsSection(moduleName, {
-            getSettingIniKey(moduleName, NameOf(DiffFile1), DiffFile1.Name, isName:=True),
-            getSettingIniKey(moduleName, NameOf(DiffFile1), DiffFile1.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(DiffFile2), DiffFile2.Name, isName:=True),
-            getSettingIniKey(moduleName, NameOf(DiffFile2), DiffFile2.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(DiffFile3), DiffFile3.Name, isName:=True),
-            getSettingIniKey(moduleName, NameOf(DiffFile3), DiffFile3.Dir, isDir:=True),
-            getSettingIniKey(moduleName, NameOf(DownloadDiffFile), DownloadDiffFile.ToString(cultInf)),
-            getSettingIniKey(moduleName, NameOf(TrimRemoteFile), TrimRemoteFile.ToString(cultInf)),
-            getSettingIniKey(moduleName, NameOf(ShowFullEntries), ShowFullEntries.ToString(cultInf)),
-            getSettingIniKey(moduleName, NameOf(SaveDiffLog), SaveDiffLog.ToString(cultInf)),
-            getSettingIniKey(moduleName, NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(cultInf))
+        createModuleSettingsSection(NameOf(Diff), {
+            getSettingIniKey(NameOf(Diff), NameOf(DiffFile1), DiffFile1.Name, isName:=True),
+            getSettingIniKey(NameOf(Diff), NameOf(DiffFile1), DiffFile1.Dir, isDir:=True),
+            getSettingIniKey(NameOf(Diff), NameOf(DiffFile2), DiffFile2.Name, isName:=True),
+            getSettingIniKey(NameOf(Diff), NameOf(DiffFile2), DiffFile2.Dir, isDir:=True),
+            getSettingIniKey(NameOf(Diff), NameOf(DiffFile3), DiffFile3.Name, isName:=True),
+            getSettingIniKey(NameOf(Diff), NameOf(DiffFile3), DiffFile3.Dir, isDir:=True),
+            getSettingIniKey(NameOf(Diff), NameOf(DownloadDiffFile), DownloadDiffFile.ToString(cultInf)),
+            getSettingIniKey(NameOf(Diff), NameOf(TrimRemoteFile), TrimRemoteFile.ToString(cultInf)),
+            getSettingIniKey(NameOf(Diff), NameOf(ShowFullEntries), ShowFullEntries.ToString(cultInf)),
+            getSettingIniKey(NameOf(Diff), NameOf(SaveDiffLog), SaveDiffLog.ToString(cultInf)),
+            getSettingIniKey(NameOf(Diff), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(cultInf))
             })
     End Sub
 
