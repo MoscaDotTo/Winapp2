@@ -30,7 +30,7 @@ Module Downloader
     '''<summary> The web address of winapp2ool.exe </summary>
     Public ReadOnly Property toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
     '''<summary> The web address of the beta build of winapp2ool.exe </summary>
-    Public ReadOnly Property betaToolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/Branch1/winapp2ool/bin/Debug/winapp2ool.exe"
+    Public ReadOnly Property betaToolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/Branch1/winapp2ool/bin/Release/winapp2ool.exe"
     '''<summary> The web address of version.txt (winapp2ool's public version identifer) </summary>
     Public ReadOnly Property toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
     ''' <summary> The web address of version.txt on the beta branch </summary>
