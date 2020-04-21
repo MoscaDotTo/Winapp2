@@ -243,7 +243,7 @@ Module Winapp2ool
         print(1, "Save Log", "Save winapp2ool's internal log to the disk")
         print(0, $"Current log file target: {replDir(GlobalLogFile.Path)}", leadingBlank:=True, trailingBlank:=True)
         print(1, "Visit GitHub", "Open the winapp2.ini/winapp2ool GitHub in your default web browser", trailingBlank:=True)
-        print(5, "Toggle Beta Participation", $"participating in the 'beta' builds of winapp2ool (requires a restart)", enStrCond:=isBeta, closeMenu:=Not isBeta And Not toolSettingsHaveChanged)
+        print(5, "Toggle Beta Participation", $"participating in the 'beta' builds of winapp2ool", enStrCond:=isBeta, closeMenu:=Not isBeta And Not toolSettingsHaveChanged)
         print(5, "Toggle Update Checking", "automatic update checking for winapp2ool beta (requires a restart)", enStrCond:=autoCheckBetaToolUpdates, closeMenu:=Not toolSettingsHaveChanged, cond:=isBeta)
         print(2, NameOf(Winapp2ool), cond:=toolSettingsHaveChanged, closeMenu:=True)
     End Sub
