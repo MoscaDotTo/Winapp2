@@ -86,21 +86,6 @@ Public Module updater
         setHeaderText(updHeader, True, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
     End Sub
 
-    ''' <summary> Returns the version number from winapp2ool.exe by reading it from the manifest. Does so without placing a lock on the file by reading 
-    ''' the manifest as a bytestream. </summary>
-    ''' <param name="pathToFile"> An absolute path to a winapp2ool.exe file </param>
-    Public Function getToolVersionWithoutHook(pathToFile As String) As String
-        ' The commented out line does the same thing as the uncommented one but necessarily places a file hook on the file at PathToFile
-        If Not File.Exists(pathToFile) Then Return "000000 (file not found)"
-        Try
-            Return Reflection.Assembly.Load(File.ReadAllBytes(pathToFile)).FullName.Split(CChar(","))(1).Substring(9)
-        Catch ex As IOException
-            ' Pretty much the only exception here is that winapp2ool has been flagged as malicious and cannot be downloaded 
-            handleIOException(ex)
-            Return "000000 (exception encountered)"
-        End Try
-    End Function
-
     '''<summary> Performs the version checking for winapp2ool.exe </summary>
     Private Sub toolVersionCheck()
         ' Let's just assume winapp2ool didn't update after we've checked for updates
@@ -114,7 +99,7 @@ Public Module updater
                 Dim tmpPath = setDownloadedFileStage(betaToolLink)
                 alreadyDownloadedExecutable = True
                 ' This places a lock on winapp2ool.exe in the tmp folder that will remain until we close the application
-                latestVersion = getToolVersionWithoutHook(tmpPath)
+                latestVersion = FileVersionInfo.GetVersionInfo(tmpPath).FileVersion
                 ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
                 ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
                 padVersionNum(latestVersion)

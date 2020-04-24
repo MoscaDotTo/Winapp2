@@ -27,7 +27,7 @@ Module Winapp2ool
     Public Property isOffline As Boolean = False
     ''' <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
     ''' Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
-    Public Property isBeta As Boolean = False
+    Public Property isBeta As Boolean = True
     ''' <summary> Inidcates that we're unable to download the executable </summary>
     ''' Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
     Public Property cantDownloadExecutable As Boolean = False
@@ -126,7 +126,7 @@ Module Winapp2ool
         gLog($"Starting application")
         ' winapp2ool requires internet access for some functions
         chkOfflineMode()
-        currentVersion = getToolVersionWithoutHook(Environment.GetCommandLineArgs(0))
+        currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         ' Set the console stage 
         Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 126

@@ -1181,11 +1181,6 @@ winapp2ool
  <summary> Checks the versions of winapp2ool, .NET, and winapp2.ini and notes which, if any, are out of date </summary>
  <param name="cond"> Indicates that the update check should be performed <br /> Optional, Default: <c> False </c> </param>
 </member>
-<member name="M:winapp2ool.updater.getToolVersionWithoutHook(System.String)">
- <summary> Returns the version number from winapp2ool.exe by reading it from the manifest. Does so without placing a lock on the file by reading 
- the manifest as a bytestream. </summary>
- <param name="pathToFile"> An absolute path to a winapp2ool.exe file </param>
-</member>
 <member name="M:winapp2ool.updater.toolVersionCheck">
 <summary> Performs the version checking for winapp2ool.exe </summary>
 </member>
