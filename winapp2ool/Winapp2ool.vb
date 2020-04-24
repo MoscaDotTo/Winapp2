@@ -178,7 +178,7 @@ Module Winapp2ool
                 cwl("Downloading & diffing, this may take a moment...")
                 remoteDiff(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
                 setHeaderText("Diff Complete")
-            Case (input = "11" And (updateIsAvail And waUpdateIsAvail)) Or (input = "7" And (Not waUpdateIsAvail And updateIsAvail)) And Not (DotNetFrameworkOutOfDate Or cantDownloadExecutable)
+            Case (input = "11" And (updateIsAvail And waUpdateIsAvail)) Or (input = "8" And (Not waUpdateIsAvail And updateIsAvail)) And Not (DotNetFrameworkOutOfDate Or cantDownloadExecutable)
                 cwl("Downloading and updating Winapp2ool.exe, this may take a moment...")
                 autoUpdate()
             Case input = "m"
