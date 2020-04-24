@@ -27,7 +27,7 @@ Module Winapp2ool
     Public Property isOffline As Boolean = False
     ''' <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
     ''' Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
-    Public Property isBeta As Boolean = True
+    Public Property isBeta As Boolean = False
     ''' <summary> Inidcates that we're unable to download the executable </summary>
     ''' Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
     Public Property cantDownloadExecutable As Boolean = False
