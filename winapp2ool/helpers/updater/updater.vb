@@ -65,7 +65,7 @@ Public Module updater
         ' If winapp2.ini doesn't exist, an update is necessarily available. Avoid downloading in this case 
         ' anti virus vendors don't seem to like the fact that winapp2ool downloads a configuration file, particularly one containing 
         ' commands pertaining to yet more anti virus. If we can avoid doing this by default, we may be able to more easily fly under the radar 
-        latestWa2Ver = If(File.Exists("winapp2.ini"), getRemoteVersion(winapp2link), "999999")
+        latestWa2Ver = getRemoteVersion(winapp2link)
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion.Length = 0 Or latestWa2Ver.Length = 0 Then updateCheckFailed("online", True) : Return
@@ -80,7 +80,7 @@ Public Module updater
         gLog("Remote: " & latestVersion, indent:=True)
         gLog("Winapp2.ini:")
         gLog("Local: " & localWa2Ver, indent:=True)
-        gLog("Remote: " & If(localWa2Ver = "999999", "20XXXX (latest online file)", localWa2Ver), indent:=True)
+        gLog("Remote: " & latestWa2Ver, indent:=True)
         Dim bothUpdatesAreAvail = waUpdateIsAvail And updateIsAvail
         Dim updHeader = $"Update{If(bothUpdatesAreAvail, "s", "")} available for {If(updateIsAvail, "winapp2ool ", "")}{If(bothUpdatesAreAvail, "and ", "")}{If(waUpdateIsAvail, "winapp2.ini", "")}"
         setHeaderText(updHeader, True, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
@@ -142,7 +142,7 @@ Public Module updater
     Public Sub printUpdNotif(cond As Boolean, updName As String, oldVer As String, newVer As String)
         If Not cond Then Return
         Dim tmpNewVer = newVer
-        If tmpNewVer = "999999" Then tmpNewVer = "20XXXX (latest online version)"
+        'If tmpNewVer = "999999" Then tmpNewVer = "20XXXX (latest online version)"
         gLog($"Update available for {updName} from {oldVer} to {tmpNewVer}")
         print(0, $"A new version of {updName} is available!", isCentered:=True, colorLine:=True, enStrCond:=True)
         print(0, $"Current: v{oldVer}", isCentered:=True, colorLine:=True, enStrCond:=True)
