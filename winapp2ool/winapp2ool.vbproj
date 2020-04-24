@@ -94,6 +94,9 @@
   <PropertyGroup>
     <ManifestKeyFile>winapp2ool_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>magic_wand.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -220,6 +223,9 @@
     <Analyzer Include="packages\Microsoft.NetCore.Analyzers.2.9.6\analyzers\dotnet\vb\Microsoft.NetCore.VisualBasic.Analyzers.dll" />
     <Analyzer Include="packages\Microsoft.NetFramework.Analyzers.2.9.6\analyzers\dotnet\vb\Microsoft.NetFramework.Analyzers.dll" />
     <Analyzer Include="packages\Microsoft.NetFramework.Analyzers.2.9.6\analyzers\dotnet\vb\Microsoft.NetFramework.VisualBasic.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="magic_wand.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

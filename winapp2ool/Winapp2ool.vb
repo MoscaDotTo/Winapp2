@@ -46,7 +46,6 @@ Module Winapp2ool
         saveSettingsToDisk = False
         readSettingsFromDisk = False
         toolSettingsHaveChanged = False
-        autoCheckBetaToolUpdates = False
         restoreDefaultSettings(NameOf(Winapp2ool), AddressOf createToolSettingsSection)
     End Sub
 
@@ -69,8 +68,6 @@ Module Winapp2ool
                     GlobalLogFile.Dir = kvp.Value
                 Case NameOf(GlobalLogFile) & "_Name"
                     GlobalLogFile.Name = kvp.Value
-                Case NameOf(autoCheckBetaToolUpdates)
-                    autoCheckBetaToolUpdates = CBool(kvp.Value)
             End Select
         Next
     End Sub
@@ -86,8 +83,7 @@ Module Winapp2ool
                                         getSettingIniKey(NameOf(Winapp2ool), NameOf(RemoteWinappIsNonCC), RemoteWinappIsNonCC.ToString(compCult)),
                                         getSettingIniKey(NameOf(Winapp2ool), NameOf(toolSettingsHaveChanged), toolSettingsHaveChanged.ToString(compCult)),
                                         getSettingIniKey(NameOf(Winapp2ool), NameOf(GlobalLogFile) & "_Dir", GlobalLogFile.Dir),
-                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(GlobalLogFile) & "_Name", GlobalLogFile.Name),
-                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(autoCheckBetaToolUpdates), autoCheckBetaToolUpdates.ToString(compCult))
+                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(GlobalLogFile) & "_Name", GlobalLogFile.Name)
                                     })
     End Sub
 
@@ -126,7 +122,7 @@ Module Winapp2ool
         gLog($"Starting application")
         ' winapp2ool requires internet access for some functions
         chkOfflineMode()
-        currentVersion = getToolVersionWithoutHook(Environment.GetCommandLineArgs(0))
+        currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         ' Set the console stage 
         Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 126
@@ -243,8 +239,7 @@ Module Winapp2ool
         print(1, "Save Log", "Save winapp2ool's internal log to the disk")
         print(0, $"Current log file target: {replDir(GlobalLogFile.Path)}", leadingBlank:=True, trailingBlank:=True)
         print(1, "Visit GitHub", "Open the winapp2.ini/winapp2ool GitHub in your default web browser", trailingBlank:=True)
-        print(5, "Toggle Beta Participation", $"participating in the 'beta' builds of winapp2ool", enStrCond:=isBeta, closeMenu:=Not isBeta And Not toolSettingsHaveChanged)
-        print(5, "Toggle Update Checking", "automatic update checking for winapp2ool beta (requires a restart)", enStrCond:=autoCheckBetaToolUpdates, closeMenu:=Not toolSettingsHaveChanged, cond:=isBeta)
+        print(5, "Toggle Beta Participation", $"participating in the 'beta' builds of winapp2ool (requires a restart)", enStrCond:=isBeta, closeMenu:=Not toolSettingsHaveChanged)
         print(2, NameOf(Winapp2ool), cond:=toolSettingsHaveChanged, closeMenu:=True)
     End Sub
 
@@ -274,11 +269,7 @@ Module Winapp2ool
                     toggleSettingParam(isBeta, "Beta Participation", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(isBeta), NameOf(toolSettingsHaveChanged))
                     autoUpdate()
                 End If
-            Case input = "9" And isBeta
-                toggleSettingParam(autoCheckBetaToolUpdates, "Update Checking", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(autoCheckBetaToolUpdates), NameOf(toolSettingsHaveChanged))
-                ' Make sure we check for updates again when we return to the main menu if we've enabled update checking 
-                If autoCheckBetaToolUpdates Then latestVersion = "" : checkedForUpdates = False
-            Case toolSettingsHaveChanged And ((input = "9" And Not isBeta) Or (input = "10" And isBeta))
+            Case input = "9" And toolSettingsHaveChanged
                 initDefaultSettings()
             Case Else
                 setHeaderText(invInpStr, True)
