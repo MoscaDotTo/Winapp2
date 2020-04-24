@@ -35,9 +35,7 @@ Public Module updater
     Public Property currentVersion As String = ""
     ''' <summary> Indicates that an update check has been performed </summary>
     Public Property checkedForUpdates As Boolean = False
-    ''' <summary> Indicates that an update check should be performed for winapp2ool.exe on the beta branch </summary>
-    ''' This is so we can disable tool update checking by default, and hopefully reduce the false positive rate on anti virus' 
-    Public Property autoCheckBetaToolUpdates As Boolean = False
+
     ''' <summary> Pads the seconds portion of the version number, ensuring that it always have a length of 5 </summary>
     ''' <param name="version"> A version number to pad </param>
     Private Sub padVersionNum(ByRef version As String)
@@ -94,7 +92,7 @@ Public Module updater
             ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
             latestVersion = getRemoteVersion(toolVerLink)
         Else
-            If Not autoCheckBetaToolUpdates Or cantDownloadExecutable Then latestVersion = "000000 (update check disabled)" : Return
+            If cantDownloadExecutable Then latestVersion = "000000 (update check disabled)" : Return
             If Not alreadyDownloadedExecutable Then
                 Dim tmpPath = setDownloadedFileStage(betaToolLink)
                 alreadyDownloadedExecutable = True
