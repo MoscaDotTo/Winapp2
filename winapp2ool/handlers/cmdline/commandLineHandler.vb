@@ -103,6 +103,8 @@ Public Module commandLineHandler
         gLog($"Found commandline args: {argStr}")
         ' 0th index holds the executable name, we don't need it. 
         cmdargs.RemoveAt(0)
+        checkUpdates(cmdargs.Contains("-autoupdate"))
+        If updateIsAvail Then autoUpdate()
         ' The s is for silent, if we have this flag, don't give any output or ask for input along the happy path
         invertSettingAndRemoveArg(SuppressOutput, "-s")
         ' Toggle the tool to use the non-ccleaner version of winapp2.ini
