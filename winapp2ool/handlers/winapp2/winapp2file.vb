@@ -21,8 +21,8 @@ Option Strict On
 Public Class winapp2file
     ' "" = main section, bottom most in all circumstances and appearing without a label 
     ''' <summary> The names of the sections of entries as they appear in winapp2.ini </summary>
-    Public ReadOnly Property FileSectionHeaders As New List(Of String) From {"Chrome/Chromium based browsers", "Microsoft Edge Insider", "Opera", "Firefox/Mozilla based browsers", "Thunderbird",
-        "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
+    Public ReadOnly Property FileSectionHeaders As New List(Of String) From {"Chrome/Chromium based browsers", "Edge Chromium", "Vivaldi", "Brave", "Opera", "Firefox/Mozilla based browsers", "Thunderbird",
+        "Internet Explorer", "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
     ' As above, index 0 = Chrome, 1 = Microsoft Edge Insider, 2 = Opera.... 9 = ""
     ''' <summary> A list of iniFiles each containing one of the headers contents </summary>
     Public Property EntrySections As New List(Of iniFile)
@@ -53,7 +53,7 @@ Public Class winapp2file
         If file.Comments.Count = 0 Then Version = "; version 000000"
         If file.Comments.Count > 0 Then Version = If(Not file.Comments.Values(0).Comment.ToUpperInvariant.Contains("VERSION"), "; version 000000", file.Comments.Values(0).Comment)
         ' Build the header sections for browsers/Thunderbird/winapp3
-        Dim langSecRefs As New List(Of String) From {"3029", "3006", "3027", "3026", "3030", "Language Files", "Dangerous Long", "Dangerous", "Microsoft Edge Insider"}
+        Dim langSecRefs As New List(Of String) From {"3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001", "Language Files", "Dangerous Long", "Dangerous"}
         For Each section In file.Sections.Values
             Dim tmpwa2entry As New winapp2entry(section)
             Dim ind = -1
@@ -136,12 +136,12 @@ Public Class winapp2file
         Dim out = Version & Environment.NewLine
         out += $"; # of entries: {count():#,###}{Environment.NewLine}"
         out += $"; {Environment.NewLine}"
-        out += $"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: {licLink}{Environment.NewLine}"
-        out += $"; If you plan on modifying, distributing, and/or hosting {fileName}.ini for your own program or website, please ask first.{Environment.NewLine}"
+        out += $"; {fileName}.ini Is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2: {licLink}{Environment.NewLine}"
+        out += $"; If you plan on modifying, distributing, And/Or hosting {fileName}.ini for your own program Or website, please ask first.{Environment.NewLine}"
         out += $"; {Environment.NewLine}"
         If IsNCC Then
-            out += $"; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.{Environment.NewLine}"
-            out += $"; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.{Environment.NewLine}"
+            out += $"; This Is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.{Environment.NewLine}"
+            out += $"; Do Not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.{Environment.NewLine}"
         End If
         out += $"; You can get the latest Winapp2.ini here: https://github.com/MoscaDotTo/Winapp2 {Environment.NewLine}"
         out += $"; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md {Environment.NewLine}"
