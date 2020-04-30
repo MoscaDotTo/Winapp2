@@ -61,12 +61,10 @@ Public Class winapp2file
                 ind = langSecRefs.IndexOf(tmpwa2entry.LangSecRef.Keys.First.Value)
             ElseIf tmpwa2entry.SectionKey.KeyCount > 0 Then
                 ind = langSecRefs.IndexOf(tmpwa2entry.SectionKey.Keys.First.Value)
-                If ind = 8 And tmpwa2entry.SectionKey.Keys.First.Value.ToUpperInvariant.StartsWith("DANGEROUS", StringComparison.InvariantCulture) Then ind = 7
+                If ind = -1 And tmpwa2entry.SectionKey.Keys.First.Value.ToUpperInvariant.StartsWith("DANGEROUS", StringComparison.InvariantCulture) Then ind = langSecRefs.Count - 1
             End If
-            ' Workaround for two separate sections for Microsoft Edge Insider (temporary, hopefully)
-            If ind = 8 Then ind = 1
             ' If ind is still -1, we're in the main section
-            If ind = -1 Then ind = 8
+            If ind = -1 Then ind = langSecRefs.Count
             addToInnerFile(ind, tmpwa2entry, section)
         Next
     End Sub
