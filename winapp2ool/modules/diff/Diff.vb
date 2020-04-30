@@ -322,31 +322,21 @@ Module Diff
                             Dim oldKey As New winapp2KeyParameters(key)
                             Dim newKey As New winapp2KeyParameters(skey)
                             ' If the path has changed, the key has been updated
-                            If Not oldKey.PathString = newKey.PathString Then
-                                updateKeys(updatedKeys, key, skey)
-                                Exit For
-                            End If
-                            oldKey.ArgsList.Sort()
-                            newKey.ArgsList.Sort()
-                            ' Check the number of arguments provided to the key
-                            If oldKey.ArgsList.Count = newKey.ArgsList.Count Then
-                                For k = 0 To oldKey.ArgsList.Count - 1
-                                    ' If the args count matches but the sorted state of the args doesn't, the key has been updated
-                                    If Not oldKey.ArgsList(k).Equals(newKey.ArgsList(k), StringComparison.InvariantCultureIgnoreCase) Then
-                                        updateKeys(updatedKeys, key, skey)
-                                        Exit For
-                                    End If
-                                Next
-                                ' If we get this far, it's just an alphabetization change and can be ignored silently
-                                akAlpha.add(skey)
-                                rkAlpha.add(key)
-                            Else
-                                ' If the count doesn't match, something has definitely changed
-                                updateKeys(updatedKeys, key, skey)
-                            End If
+                            If Not oldKey.PathString = newKey.PathString Then updateKeys(updatedKeys, key, skey) : Exit For
+                            Dim oldArgsUpper As New List(Of String)
+                            Dim newArgsUpper As New List(Of String)
+                            oldKey.ArgsList.ForEach(Sub(arg) oldArgsUpper.Add(arg.ToUpperInvariant))
+                            newKey.ArgsList.ForEach(Sub(arg) newArgsUpper.Add(arg.ToUpperInvariant))
+                            Dim oldArgs = oldArgsUpper.ToArray
+                            Dim newArgs = newArgsUpper.ToArray
+                            ' If the arguments aren't identical, the key has been updated 
+                            If oldArgs.Except(newArgs).Any Or newArgs.Except(oldArgs).Any Then updateKeys(updatedKeys, key, skey) : Exit For
+                            ' If we get this far, it's just an alphabetization change and can be ignored silently
+                            akAlpha.add(skey)
+                            rkAlpha.add(key)
                         Case Else
                             ' Other keys don't require such complex legwork, thankfully. If their values don't match, they've been updated
-                            If Not key.compareValues(skey) Then updateKeys(updatedKeys, key, skey)
+                            updateKeys(updatedKeys, key, skey, Not key.compareValues(skey))
                     End Select
                 End If
             Next
@@ -364,8 +354,8 @@ Module Diff
     ''' <param name="updLst"> The list of updated keys </param>
     ''' <param name="key"> An added key </param>
     ''' <param name="skey"> A removed key </param>
-    Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), key As iniKey, skey As iniKey)
-        updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
+    Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), key As iniKey, skey As iniKey, Optional cond As Boolean = True)
+        If cond Then updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
     End Sub
 
     ''' <summary> Logs the changes that have been made to a modified entry </summary>

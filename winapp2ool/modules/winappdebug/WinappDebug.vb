@@ -524,11 +524,7 @@ Public Module WinappDebug
                         Dim newName = cmd
                         Dim withNums = key.Name.Replace(cmd, "")
                         For Each c As Char In withNums.ToCharArray
-                            If Char.IsNumber(c) Then
-                                newName += c
-                            Else
-                                Exit For
-                            End If
+                            If Char.IsNumber(c) Then newName += c : Else : Exit For
                         Next
                         key.Value = key.Name.Replace(newName, "")
                         key.Name = newName
