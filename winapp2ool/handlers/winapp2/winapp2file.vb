@@ -146,7 +146,7 @@ Public Class winapp2file
         out += $"; Try out Winapp2ool for many useful additional features including updating and trimming winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe {Environment.NewLine}"
         out += $"; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md {Environment.NewLine}"
         ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
-        For i = 0 To 7
+        For i = 0 To EntrySections.Count - 1
             If EntrySections(i).Sections.Count > 0 Then
                 out += $"; {Environment.NewLine}"
                 out += $"; {EntrySections(i).Name}{Environment.NewLine}{Environment.NewLine}"
