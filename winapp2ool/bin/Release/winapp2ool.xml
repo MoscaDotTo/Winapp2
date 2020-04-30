@@ -251,7 +251,7 @@ winapp2ool
  <param name="addedKeys"> <c> iniKeys </c> determined to have been added to the newer version of the <c> iniSection </c> </param>
  <param name="updatedKeys"> <c> iniKeys </c> determined to have been modified in the newer version of the <c> iniSection </c> </param>
 </member>
-<member name="M:winapp2ool.Diff.updateKeys(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@,winapp2ool.iniKey,winapp2ool.iniKey)">
+<member name="M:winapp2ool.Diff.updateKeys(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@,winapp2ool.iniKey,winapp2ool.iniKey,System.Boolean)">
  <summary> Performs change tracking for chkLst </summary>
  <param name="updLst"> The list of updated keys </param>
  <param name="key"> An added key </param>
