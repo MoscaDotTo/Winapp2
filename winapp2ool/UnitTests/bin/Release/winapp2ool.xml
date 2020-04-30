@@ -1874,6 +1874,12 @@ winapp2ool
 <member name="P:winapp2ool.WinappDebug.envVarRegex">
  <summary> Detects potential %EnvironmentVariables% </summary>
 </member>
+<member name="P:winapp2ool.WinappDebug.overrideDefaultVal">
+ <summary> Indicates that Default keys should have their values auited instead of being considered invalid for existing </summary>
+</member>
+<member name="P:winapp2ool.WinappDebug.expectedDefaultValue">
+ <summary> The expected value for Default keys when auditing their values </summary>
+</member>
 <member name="M:winapp2ool.WinappDebug.handleCmdLine">
  <summary> Handles the commandline args for <c> WinappDebug </c> </summary>
  WinappDebug specific command line args
