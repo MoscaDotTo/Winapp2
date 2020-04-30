@@ -15,6 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
+Imports System.Globalization
 Imports System.Text.RegularExpressions
 ''' <summary> Observes, reports, and attempts to repair errors in winapp2.ini </summary>
 Public Module WinappDebug
@@ -96,6 +97,10 @@ Public Module WinappDebug
     Private Property driveLtrs As New Regex("[a-zA-z]:")
     ''' <summary> Detects potential %EnvironmentVariables% </summary>
     Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
+    ''' <summary> Indicates that Default keys should have their values auited instead of being considered invalid for existing </summary>
+    Private Property overrideDefaultVal As Boolean = False
+    ''' <summary> The expected value for Default keys when auditing their values </summary>
+    Private Property expectedDefaultValue As Boolean = False
 
     ''' <summary> Handles the commandline args for <c> WinappDebug </c> </summary>
     ''' WinappDebug specific command line args
@@ -114,6 +119,8 @@ Public Module WinappDebug
         ModuleSettingsChanged = False
         RepairErrsFound = True
         SaveChanges = False
+        overrideDefaultVal = False
+        expectedDefaultValue = False
         resetScanSettings()
         restoreDefaultSettings(NameOf(WinappDebug), AddressOf createLintSettingsSection)
     End Sub
@@ -143,6 +150,10 @@ Public Module WinappDebug
                     SaveChanges = CBool(kvp.Value)
                 Case NameOf(RepairErrsFound)
                     RepairErrsFound = CBool(kvp.Value)
+                Case NameOf(overrideDefaultVal)
+                    overrideDefaultVal = CBool(kvp.Value)
+                Case NameOf(expectedDefaultValue)
+                    expectedDefaultValue = CBool(kvp.Value)
                 Case Else
                     Dim lintType = kvp.Key.Replace("_Scan", "")
                     lintType = lintType.Replace("_Repair", "")
@@ -187,6 +198,8 @@ Public Module WinappDebug
         print(5, "Toggle Saving", "saving the file after correcting errors", enStrCond:=SaveChanges)
         print(1, "File Chooser (save)", "Save a copy of changes made to a new file instead of overwriting winapp2.ini", SaveChanges, trailingBlank:=True)
         print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not SaveChanges, trailingBlank:=True)
+        print(5, "Toggle Default Value Audit", "enforcing a specific value for Default keys", enStrCond:=overrideDefaultVal, trailingBlank:=Not overrideDefaultVal)
+        print(1, "Toggle Expected Default", $"Enforcing that Default keys have a value of {expectedDefaultValue}", trailingBlank:=True, cond:=overrideDefaultVal)
         print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
         print(0, $"Current save target:  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
         print(2, NameOf(WinappDebug), cond:=ModuleSettingsChanged, closeMenu:=MostRecentLintLog.Length = 0)
@@ -197,6 +210,9 @@ Public Module WinappDebug
     ''' <param name="input"> The String containing the user's input </param>
     Public Sub handleUserInput(input As String)
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
+        Dim saveOrOverride = SaveChanges Or overrideDefaultVal
+        Dim saveXorOverride = SaveChanges Xor overrideDefaultVal
+        Dim saveAndOverride = SaveChanges And overrideDefaultVal
         Select Case True
             Case input = "0"
                 exitModule()
@@ -211,11 +227,17 @@ Public Module WinappDebug
             Case (input = "4" And Not SaveChanges) Or (input = "5" And SaveChanges)
                 initModule("Scan Settings", AddressOf advSettings.printMenu, AddressOf advSettings.handleUserInput)
                 Console.WindowHeight = 30
-            Case ModuleSettingsChanged And ((input = "5" And Not SaveChanges) Or (input = "6" And SaveChanges))
+            Case (input = "5" And Not SaveChanges) Or (input = "6" And SaveChanges)
+                toggleSettingParam(overrideDefaultVal, "Default Value Overriding", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(overrideDefaultVal), NameOf(ModuleSettingsChanged))
+
+            Case ModuleSettingsChanged And ((input = "6" And Not saveOrOverride) Or (input = "7" And saveXorOverride) Or (input = "8" And saveAndOverride))
                 resetModuleSettings("WinappDebug", AddressOf initDefaultSettings)
-            Case Not MostRecentLintLog.Length = 0 And (input = "5" And Not ModuleSettingsChanged) Or
-                                        ModuleSettingsChanged And ((input = "6" And Not SaveChanges) Or (input = "7" And SaveChanges))
+            Case Not MostRecentLintLog.Length = 0 And (input = "6" And Not ModuleSettingsChanged) Or
+                                        ModuleSettingsChanged And ((input = "7" And (Not saveOrOverride) Or
+                                        (input = "8" And saveXorOverride) Or (input = "9" And saveAndOverride)))
                 printSlice(MostRecentLintLog)
+            Case overrideDefaultVal And (input = "6" And Not SaveChanges) Or (input = "7" And SaveChanges)
+                toggleSettingParam(expectedDefaultValue, "Expected Default Value", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(expectedDefaultValue), NameOf(ModuleSettingsChanged))
             Case Else
                 setHeaderText(invInpStr, True)
         End Select
@@ -290,9 +312,19 @@ Public Module WinappDebug
         ' Make sure that if we have excludes, we also have corresponding file/reg keys
         fullNameErr(entry.FileKeys.KeyCount = 0 And hasFileExcludes, entry, "ExcludeKeys targeting filesystem locations found without any corresponding FileKeys")
         fullNameErr(entry.RegKeys.KeyCount = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
-        ' Make sure we have a Default key.
-        fullNameErr(entry.DefaultKey.KeyCount > 0 And lintDefaults.ShouldScan, entry, "Entry has a Default key where there should be none")
-        If lintDefaults.fixFormat And entry.DefaultKey.KeyCount > 0 Then entry.DefaultKey.Keys.Clear()
+        ' Make sure we have a Default key and that it holds the right value
+        If overrideDefaultVal Then
+            Dim expected = expectedDefaultValue.ToString(CultureInfo.InvariantCulture)
+            If entry.DefaultKey.KeyCount > 0 Then
+                Dim key = entry.DefaultKey.Keys(0)
+                fullKeyErr(key, "Incorrect value for Default Key found", Not key.Value = expected, lintDefaults.fixFormat, key.Value, expected)
+            Else
+                fullNameErr(True, entry, "No Default Key found")
+                entry.DefaultKey.add(New iniKey($"Default={expected}"))
+            End If
+        End If
+        fullNameErr(entry.DefaultKey.KeyCount > 0 And lintDefaults.ShouldScan And Not overrideDefaultVal, entry, "Entry has a Default key where there should be none")
+        If lintDefaults.fixFormat And entry.DefaultKey.KeyCount > 0 And Not overrideDefaultVal Then entry.DefaultKey.Keys.Clear()
         gLog($"Finished processing {entry.Name}", buffr:=True)
     End Sub
 
