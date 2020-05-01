@@ -474,11 +474,11 @@ winapp2ool
  <summary> Creates a new <c> ArgumentException </c> when a public member is passed an invalid parameter </summary>
  <param name="argName"> The name of the argument whose value is invalid </param>
 </member>
-<member name="M:winapp2ool.exceptionHandler.handleInvalidArgException(System.ArgumentException)">
+<member name="M:winapp2ool.exceptionHandler.handleInvalidArgException(System.ArgumentException,System.Boolean,System.Boolean)">
  <summary> Passes off exceptions caused by invalid arugments to be logged and displayed to the user </summary>
  <param name="ex"> An Exception of type <c> ArgumentException </c> </param>
 </member>
-<member name="M:winapp2ool.exceptionHandler.printAndLogExceptionForUser(System.String,System.String,System.Boolean)">
+<member name="M:winapp2ool.exceptionHandler.printAndLogExceptionForUser(System.String,System.String,System.Boolean,System.Boolean)">
  <summary> Informs the user that an exception occured and records it in the winapp2ool log </summary>
  <param name="exTxt"> The full text of the exception </param>
  <param name="exType"> The <c> Type </c> of the exception </param>
@@ -1584,8 +1584,14 @@ winapp2ool
 <member name="P:winapp2ool.Trim.TrimFile1">
  <summary> The winapp2.ini file that will be trimmed </summary>
 </member>
+<member name="P:winapp2ool.Trim.TrimFile2">
+ <summary> Holds the path of an iniFile containing the names of Sections who should never be trimmed </summary>
+</member>
 <member name="P:winapp2ool.Trim.TrimFile3">
  <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
+</member>
+<member name="P:winapp2ool.Trim.TrimFile4">
+ <summary> Holds the path of an iniFile containing the names of Sections who should always be trimmed </summary>
 </member>
 <member name="P:winapp2ool.Trim.winVer">
  <summary> The major/minor version number on the current system </summary>
@@ -1595,6 +1601,12 @@ winapp2ool
 </member>
 <member name="P:winapp2ool.Trim.DownloadFileToTrim">
  <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
+</member>
+<member name="P:winapp2ool.Trim.UseWhiteList">
+ <summary> Indicates that the whitelist should be consulted while trimming </summary>
+</member>
+<member name="P:winapp2ool.Trim.useBlackList">
+ <summary> Indicates that the blacklist should be consulted while trimming </summary>
 </member>
 <member name="M:winapp2ool.Trim.handleCmdLine">
  <summary> Handles the commandline args for Trim </summary>
