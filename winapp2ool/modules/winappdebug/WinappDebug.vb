@@ -170,7 +170,7 @@ Public Module WinappDebug
         Dim lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters", "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
                 "Multiples", "Invalid Values", "Syntax Errors", "Path Validity", "Semicolons", "Optimizations"}
         Dim settingsKeys As String()
-        settingsKeys = New String(38) {}
+        settingsKeys = New String(40) {}
         settingsKeys(0) = getSettingIniKey(NameOf(WinappDebug), NameOf(winappDebugFile1), winappDebugFile1.Dir, isDir:=True)
         settingsKeys(1) = getSettingIniKey(NameOf(WinappDebug), NameOf(winappDebugFile1), winappDebugFile1.Name, isName:=True)
         settingsKeys(2) = getSettingIniKey(NameOf(WinappDebug), NameOf(winappDebugFile3), winappDebugFile3.Name, isName:=True)
@@ -180,8 +180,10 @@ Public Module WinappDebug
         settingsKeys(6) = getSettingIniKey(NameOf(WinappDebug), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(compCult))
         settingsKeys(7) = getSettingIniKey(NameOf(WinappDebug), NameOf(SaveChanges), SaveChanges.ToString(compCult))
         settingsKeys(8) = getSettingIniKey(NameOf(WinappDebug), NameOf(RepairErrsFound), RepairErrsFound.ToString(compCult))
+        settingsKeys(9) = getSettingIniKey(NameOf(WinappDebug), NameOf(overrideDefaultVal), overrideDefaultVal.ToString(compCult))
+        settingsKeys(10) = getSettingIniKey(NameOf(WinappDebug), NameOf(expectedDefaultValue), expectedDefaultValue.ToString(compCult))
         Dim innerInd = 0
-        For i = 9 To 38
+        For i = 11 To 40
             settingsKeys(i) = getSettingIniKey(NameOf(WinappDebug), $"{lints(innerInd)}_Scan", Rules(innerInd).ShouldScan.ToString(compCult))
             settingsKeys(i + 1) = getSettingIniKey(NameOf(WinappDebug), $"{lints(innerInd)}_Repair", Rules(innerInd).ShouldRepair.ToString(compCult))
             innerInd += 1
