@@ -168,7 +168,7 @@ Public Module Trim
                     (input = "6" And DownloadFileToTrim And Not whiteOrBlack) Or
                     (input = "7" And ((Not DownloadFileToTrim And Not whiteOrBlack) Or (DownloadFileToTrim And whiteXorBlack))) Or
                     (input = "8" And ((Not DownloadFileToTrim And whiteXorBlack) Or (DownloadFileToTrim And whiteAndBlack))) Or
-                    (input = "9" And DownloadFileToTrim And whiteAndBlack))
+                    (input = "9" And Not DownloadFileToTrim And whiteAndBlack))
                 resetModuleSettings(NameOf(Trim), AddressOf initDefaultSettings)
             Case ModuleSettingsChanged And isOffline And ((input = "6" And Not whiteOrBlack) Or (input = "7" And whiteXorBlack) Or (input = "8" And whiteAndBlack))
                 resetModuleSettings(NameOf(Trim), AddressOf initDefaultSettings)
@@ -176,7 +176,7 @@ Public Module Trim
                 toggleSettingParam(UseWhiteList, "Whitelisting", ModuleSettingsChanged, NameOf(Trim), NameOf(UseWhiteList), NameOf(ModuleSettingsChanged))
             Case UseWhiteList And (Not isOffline And ((DownloadFileToTrim And input = "5") Or (Not DownloadFileToTrim And input = "6")) Or (isOffline And input = "5"))
                 changeFileParams(TrimFile2, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
-            Case (Not isOffline And ((input = "6" And ((Not DownloadFileToTrim And Not UseWhiteList) Or DownloadFileToTrim And UseWhiteList) Or
+            Case (Not isOffline And ((input = "7" And Not DownloadFileToTrim And UseWhiteList) Or (input = "6" And ((Not DownloadFileToTrim And Not UseWhiteList) Or DownloadFileToTrim And UseWhiteList) Or
                     (input = "5" And DownloadFileToTrim And Not UseWhiteList))) Or (isOffline And ((input = "5" And Not UseWhiteList) Or (input = "6" And UseWhiteList))))
                 toggleSettingParam(useBlackList, "Blacklisting", ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile4), NameOf(ModuleSettingsChanged))
             Case useBlackList And ((Not isOffline And (
