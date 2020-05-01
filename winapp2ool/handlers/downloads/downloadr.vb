@@ -70,7 +70,7 @@ Module downloadr
             reader.Close()
             If out Is Nothing Then Throw New ArgumentException(paramName:=NameOf(lineNum), message:=$"{lineNum} didn't return any data. It may be greater than the number of lines in the file.")
         Catch ex As ArgumentException
-            handleInvalidArgException(ex)
+            handleInvalidArgException(ex, False, True)
             Return ""
         End Try
         Return out
