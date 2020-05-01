@@ -401,9 +401,7 @@ Public Module WinappDebug
                 If (recInd = sortInd Or curLine = sortLine) Then Continue For
                 entry = If(findType = "Entry", entry, $"{findType & recInd + 1}={entry}")
                 If Not oopBool Then oopBool = True
-                customErr(LineCountList(recInd), $"{findType} alphabetization", {$"{entry} appears to be out of place",
-                                                                                $"Current line: {curLine}",
-                                                                                $"Expected line: {sortLine}"})
+                customErr(LineCountList(recInd), $"{findType} alphabetization", {$"{entry} appears to be out of place", $"Current line: {curLine}", $"Expected line: {sortLine}"})
             Next
         End If
     End Sub
@@ -526,13 +524,15 @@ Public Module WinappDebug
                         Dim newName = cmd
                         Dim withNums = key.Name.Replace(cmd, "")
                         For Each c As Char In withNums.ToCharArray
-                            If Char.IsNumber(c) Then newName += c : Else : Exit For
+                            If Char.IsNumber(c) Then newName += c : Else Exit For
                         Next
                         key.Value = key.Name.Replace(newName, "")
                         key.Name = newName
                         key.KeyType = cmd
                 End Select
                 gLog($"Repair complete. Result: {key.toString}", indent:=True, descend:=True)
+                ' Don't allow valueless keys in winapp2.ini 
+                If key.Value.Length = 0 Then gLog("Repair failed, key will be removed.", descend:=True) : Return False
                 Return True
             End If
         Next
@@ -549,16 +549,12 @@ Public Module WinappDebug
                         "FileKey", "LangSecRef", "RegKey", "Section", "SpecialDetect", "Warning"}
         If key.typeIs("DeleteMe") Then
             gLog($"Broken Key Found: {key.Name}", indent:=True, ascend:=True)
-            ' Try to fix broken keys 
-            If fixMissingEquals(key, validCmds) Then
-                fullKeyErr(key, "Missing '=' detected and repaired in key.")
-            Else
-                ' If we didn't find a fixable situation, delete the key
-                customErr(key.LineNumber, $"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", Array.Empty(Of String)())
-                Return False
-            End If
+            ' If we didn't find a fixable situation, delete the key
+            Dim fixedMsngEq = fixMissingEquals(key, validCmds)
+            If Not fixedMsngEq Then customErr(key.LineNumber, $"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", Array.Empty(Of String)()) : Return False
+            fullKeyErr(key, "Missing '=' detected and repaired in key.", fixedMsngEq)
         End If
-        If key.Value.Contains("\\") Then
+        If key.vHas("\\", True) Then
             fullKeyErr(key, "Extraneous backslashes (\\) detected", lintSlashes.ShouldScan)
             While (key.Value.Contains("\\") And lintSlashes.fixFormat)
                 key.Value = key.Value.Replace("\\", "\")
