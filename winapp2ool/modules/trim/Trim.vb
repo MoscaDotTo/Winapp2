@@ -178,7 +178,7 @@ Public Module Trim
                 changeFileParams(TrimFile2, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
             Case (Not isOffline And ((input = "7" And Not DownloadFileToTrim And UseWhiteList) Or (input = "6" And ((Not DownloadFileToTrim And Not UseWhiteList) Or DownloadFileToTrim And UseWhiteList) Or
                     (input = "5" And DownloadFileToTrim And Not UseWhiteList))) Or (isOffline And ((input = "5" And Not UseWhiteList) Or (input = "6" And UseWhiteList))))
-                toggleSettingParam(useBlackList, "Blacklisting", ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile4), NameOf(ModuleSettingsChanged))
+                toggleSettingParam(useBlackList, "Blacklisting", ModuleSettingsChanged, NameOf(Trim), NameOf(useBlackList), NameOf(ModuleSettingsChanged))
             Case useBlackList And ((Not isOffline And (
                     (input = "6" And DownloadFileToTrim And Not UseWhiteList) Or
                     (input = "7" And ((Not DownloadFileToTrim And Not UseWhiteList) Or (DownloadFileToTrim And UseWhiteList))) Or
