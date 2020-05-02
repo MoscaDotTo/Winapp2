@@ -195,8 +195,8 @@ Public Module Trim
         If Not DownloadFileToTrim Then If Not enforceFileHasContent(TrimFile1) Then Return
         If DownloadFileToTrim Then If Not checkOnline() Then setHeaderText("Internet connection lost! Please check your network connection and try again", True) : Return
         Dim winapp2 = If(DownloadFileToTrim, New winapp2file(getRemoteIniFile(winapp2link)), New winapp2file(TrimFile1))
-        If UseWhiteList Then TrimFile2.init()
-        If useBlackList Then TrimFile4.init()
+        If UseWhiteList Then TrimFile2.validate()
+        If useBlackList Then TrimFile4.validate()
         clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
         Dim entryCountBeforeTrim = winapp2.count
