@@ -15,14 +15,14 @@ Name           | Purpose
 
 * [CCleaner](https://www.ccleaner.com/ccleaner):
   * Download the latest winapp2.ini from this repo and place it in the same directory as ccleaner.exe.
-  * Note: CCleaner 5.64.7613 is the last version to work on XP and Vista. Winapp2 and Winapp3 will continue to work with this version.
-  
+  * Note: CCleaner 5.64.7613 is the last version to work on Windows XP and Vista. Winapp2.ini and winapp3.ini will continue to work with this version.
+
 * [BleachBit](https://www.bleachbit.org):
   * Open BleachBit.
   * Select the "Edit" tab, and then "Preferences".
   * Check the box that reads "Download and update cleaners from community (winapp2.ini)".
-  * Note: BleachBit 2.2 is the last version to work on Windows XP. Winapp2 and Winapp3 will continue to work with this version.
-  
+  * Note: BleachBit 2.2 is the last version to work on Windows XP. Winapp2.ini and winapp3.ini will continue to work with this version.
+
 * [System Ninja](https://singularlabs.com/software/system-ninja):
   * System Ninja ships with winapp2.ini by default, storing it in your `..\System Ninja\scripts\` directory.
 
@@ -74,6 +74,9 @@ Kernel Number  | Windows Version
 
 LangSecRef     | Section
 :------------- | :-------------
+3001 | Internet Explorer
+3005 | Microsoft Edge
+3006 | Edge Chromium
 3021 | Applications
 3022 | Internet
 3023 | Multimedia
@@ -85,6 +88,9 @@ LangSecRef     | Section
 3029 | Google Chrome
 3030 | Thunderbird
 3031 | Windows Store
+3032 | CCleaner Browser
+3033 | Vivaldi
+3034 | Brave
 
 `Detect` or `DetectFile`
 * These keys specify the condition under which the key should be considered valid for a system.
