@@ -469,50 +469,58 @@ Public Module Trim
     ''' <summary> Interprets parameterized wildcards for the current system </summary>
     ''' <param name="dir"> A path containing a wildcard </param>
     Private Function expandWildcard(dir As String, isFileSystem As Boolean) As Boolean
-        ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
-        Dim possibleDirs As New strList
-        Dim currentPaths As New strList
-        ' Split the given string into sections by directory
-        Dim splitDir = dir.Split(CChar("\"))
-        For Each pathPart In splitDir
-            ' If this directory parameterization includes a wildcard, expand it appropriately
-            ' This probably wont work if a string for some reason starts with a *
-            If pathPart.Contains("*") Then
-                For Each currentPath In currentPaths.Items
-                    ' Query the existence of child paths for each current path we hold
-                    If isFileSystem Then
-                        Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
-                        ' If there are any, add them to our possibility list
-                        possibleDirs.add(possibilities, possibilities.Any)
-                    Else
-                        ' Registry Query here
-                    End If
-                Next
-                ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
-                If possibleDirs.Count = 0 Then Return False
-                ' Otherwise, clear the current paths and repopulate them with the possible paths
-                currentPaths.clear()
-                currentPaths.add(possibleDirs)
-                possibleDirs.clear()
-            Else
-                If currentPaths.Count = 0 Then
-                    currentPaths.add($"{pathPart}")
-                Else
-                    Dim newCurPaths As New strList
-                    For Each path In currentPaths.Items
-                        If Not path.EndsWith("\", StringComparison.InvariantCulture) And Not path.Length = 0 Then path += "\"
-                        newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
+        gLog("Expanding Wildcard", ascend:=True)
+        Try
+            ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
+            Dim possibleDirs As New strList
+            Dim currentPaths As New strList
+            ' Split the given string into sections by directory
+            Dim splitDir = dir.Split(CChar("\"))
+            For Each pathPart In splitDir
+                ' If this directory parameterization includes a wildcard, expand it appropriately
+                ' This probably wont work if a string for some reason starts with a *
+                If pathPart.Contains("*") Then
+                    For Each currentPath In currentPaths.Items
+                        ' Query the existence of child paths for each current path we hold
+                        If isFileSystem Then
+                            gLog("Investigating: " & currentPath, indent:=True)
+                            Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
+                            ' If there are any, add them to our possibility list
+                            possibleDirs.add(possibilities, possibilities.Any)
+                        Else
+                            ' Registry Query here
+                        End If
                     Next
-                    currentPaths = newCurPaths
-                    If currentPaths.Count = 0 Then Return False
+                    ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
+                    If possibleDirs.Count = 0 Then gLog(descend:=True) : Return False
+                    ' Otherwise, clear the current paths and repopulate them with the possible paths
+                    currentPaths.clear()
+                    currentPaths.add(possibleDirs)
+                    possibleDirs.clear()
+                Else
+                    If currentPaths.Count = 0 Then
+                        currentPaths.add($"{pathPart}")
+                    Else
+                        Dim newCurPaths As New strList
+                        For Each path In currentPaths.Items
+                            If Not path.EndsWith("\", StringComparison.InvariantCulture) And Not path.Length = 0 Then path += "\"
+                            newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
+                        Next
+                        currentPaths = newCurPaths
+                        If currentPaths.Count = 0 Then gLog(descend:=True) : Return False
+                    End If
                 End If
-            End If
-        Next
-        ' If any file/path exists, return true
-        For Each currDir In currentPaths.Items
-            If Directory.Exists(currDir) Or File.Exists(currDir) Then Return True
-        Next
-        Return False
+            Next
+            ' If any file/path exists, return true
+            For Each currDir In currentPaths.Items
+                If Directory.Exists(currDir) Or File.Exists(currDir) Then gLog(descend:=True) : Return True
+            Next
+            gLog(descend:=True)
+            Return False
+        Catch ex As Exception
+            gLog("Please include in your bug report the name of the entry that was being processed and the last path logged as being investigated. Thank you!")
+            exc(ex)
+        End Try
     End Function
 
     ''' <summary> Returns <c> True </c> if the system satisfies the DetectOS citeria, <c> False </c> otherwise </summary>
