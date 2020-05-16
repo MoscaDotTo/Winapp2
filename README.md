@@ -15,13 +15,13 @@ Name           | Purpose
 
 * [CCleaner](https://www.ccleaner.com/ccleaner):
   * Download the latest winapp2.ini from this repo and place it in the same directory as ccleaner.exe.
-  * Note: CCleaner 5.64.7613 is the last version to work on Windows XP and Vista. Winapp2.ini and winapp3.ini will continue to work with this version.
+  * Note: CCleaner 5.64.7613 is the last version to work on Windows XP and Vista. Winapp2.ini and Winapp3.ini will continue to work with this version.
 
 * [BleachBit](https://www.bleachbit.org):
   * Open BleachBit.
   * Select the "Edit" tab, and then "Preferences".
   * Check the box that reads "Download and update cleaners from community (winapp2.ini)".
-  * Note: BleachBit 2.2 is the last version to work on Windows XP. Winapp2.ini and winapp3.ini will continue to work with this version.
+  * Note: BleachBit 2.2 is the last version to work on Windows XP. Winapp2.ini and Winapp3.ini will continue to work with this version.
 
 * [System Ninja](https://singularlabs.com/software/system-ninja):
   * System Ninja ships with winapp2.ini by default, storing it in your `..\System Ninja\scripts\` directory.
@@ -99,11 +99,6 @@ LangSecRef     | Section
 * `DetectFile` keys point to Windows Filesystem paths. Can point to either a directory or a specific file.
   * Wildcards are supported, but only in the last part of the parameterization.
   * Nesting wildcards in DetectFile is not supported by CCleaner.
-  
-`Default`
-* Indicates the default state of the entry.
-* Only used by CCleaner.
-* When submitting, every entry must contain `Default=False` as winapp2.ini entries are always disabled by default.
 
 `Warning`
 * This key is not required by any application.
@@ -132,6 +127,20 @@ LangSecRef     | Section
   * `ExcludeKey1=PATH|%WinDir%\System32\LogFiles\SCM\|*-*-*-*.*` excludes all of the files whose name matches the pattern  `*-*-*-*.*` in the `%WinDir%\System32\LogFiles\SCM` directory from being deleted.
   * `ExcludeKey1=PATH|C:\Temp\|*.*` excludes all of the files located in the `C:\Temp` directory and all sub directories from being deleted.
   * `ExcludeKey2=PATH|C:\Windows\|*.exe;*.bat` excludes files of types `.exe` and `.bat` in the `C:\Windows` directory from being deleted.
+  
+### Unsupported functions:
+
+The Following are functions that are not used in the official Winapp2 file, but can still be used in a Custom.ini file.
+
+`Default=`
+* Allows you to set if you want a entry to be cleaned by default.
+* Default=True will clean a entry by Default, while Default=False will not.
+* CCleaner assumes Default=False by default, while Avira System Cleaner, BleachBit, System Ninja and Tron do not make use of this function.
+
+`SpecialDetect`
+* Used for a quick way of detecting a path for a program.
+* More commonly, this was used for browser entries. For example, SpecialDetect=Chrome would automatically find the default path for chrome, so you do not need to make a Detect=.
+* This function is not compatabile when used along side DetectFile= and was since removed from Winapp2 due to compatability issues.
 
 ### Environment variables:
 
