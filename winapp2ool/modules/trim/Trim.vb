@@ -469,7 +469,7 @@ Public Module Trim
     ''' <summary> Interprets parameterized wildcards for the current system </summary>
     ''' <param name="dir"> A path containing a wildcard </param>
     Private Function expandWildcard(dir As String, isFileSystem As Boolean) As Boolean
-        gLog("Expanding Wildcard", ascend:=True)
+        gLog("Expanding Wildcard: " & dir, ascend:=True)
         Try
             ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
             Dim possibleDirs As New strList
@@ -481,9 +481,10 @@ Public Module Trim
                 ' This probably wont work if a string for some reason starts with a *
                 If pathPart.Contains("*") Then
                     For Each currentPath In currentPaths.Items
+                        If currentPath.Length = 0 Then gLog(NameOf(currentPath) & " is empty, aborting wildcard expansion", descend:=True) : Return False
                         ' Query the existence of child paths for each current path we hold
                         If isFileSystem Then
-                            gLog("Investigating: " & currentPath, indent:=True)
+                            gLog("Investigating: " & pathPart & " as a subdir of" & currentPath, indent:=True)
                             Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
                             ' If there are any, add them to our possibility list
                             possibleDirs.add(possibilities, possibilities.Any)
@@ -492,7 +493,7 @@ Public Module Trim
                         End If
                     Next
                     ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
-                    If possibleDirs.Count = 0 Then gLog(descend:=True) : Return False
+                    If possibleDirs.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return False
                     ' Otherwise, clear the current paths and repopulate them with the possible paths
                     currentPaths.clear()
                     currentPaths.add(possibleDirs)
@@ -507,13 +508,13 @@ Public Module Trim
                             newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
                         Next
                         currentPaths = newCurPaths
-                        If currentPaths.Count = 0 Then gLog(descend:=True) : Return False
+                        If currentPaths.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return False
                     End If
                 End If
             Next
             ' If any file/path exists, return true
             For Each currDir In currentPaths.Items
-                If Directory.Exists(currDir) Or File.Exists(currDir) Then gLog(descend:=True) : Return True
+                If Directory.Exists(currDir) Or File.Exists(currDir) Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return True
             Next
             gLog(descend:=True)
             Return False
