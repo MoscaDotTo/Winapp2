@@ -127,20 +127,20 @@ LangSecRef     | Section
   * `ExcludeKey1=PATH|%WinDir%\System32\LogFiles\SCM\|*-*-*-*.*` excludes all of the files whose name matches the pattern  `*-*-*-*.*` in the `%WinDir%\System32\LogFiles\SCM` directory from being deleted.
   * `ExcludeKey1=PATH|C:\Temp\|*.*` excludes all of the files located in the `C:\Temp` directory and all sub directories from being deleted.
   * `ExcludeKey2=PATH|C:\Windows\|*.exe;*.bat` excludes files of types `.exe` and `.bat` in the `C:\Windows` directory from being deleted.
-  
+
 ### Unsupported functions:
 
-The Following are functions that are not used in the official Winapp2 file, but can still be used in a Custom.ini file.
+The following are functions that are not used in the official Winapp2.ini file, but can still be used in a Custom.ini file.
 
-`Default=`
-* Allows you to set if you want a entry to be cleaned by default.
-* Default=True will clean a entry by Default, while Default=False will not.
-* CCleaner assumes Default=False by default, while Avira System Cleaner, BleachBit, System Ninja and Tron do not make use of this function.
+`Default`
+* Allows you to set if you want an entry to be cleaned by default.
+* `Default=True` will clean an entry by default, while `Default=False` will not.
+* CCleaner assumes `Default=False` by default, while Avira System Cleaner, BleachBit, System Ninja and Tron do not make use of this function.
 
 `SpecialDetect`
 * Used for a quick way of detecting a path for a program.
-* More commonly, this was used for browser entries. For example, SpecialDetect=Chrome would automatically find the default path for chrome, so you do not need to make a Detect=.
-* This function is not compatabile when used along side DetectFile= and was since removed from Winapp2 due to compatability issues.
+* More commonly, this was used for browser entries. For example, `SpecialDetect=Chrome` would automatically find the default path for Chrome, so you do not need to make a `Detect=`.
+* This function is not compatible when used alongside `DetectFile=` and was since removed from Winapp2.ini due to compatibility issues.
 
 ### Environment variables:
 
