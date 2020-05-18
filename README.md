@@ -70,7 +70,7 @@ Kernel Number  | Windows Version
 * If this key is not provided, CCleaner will appended the entry to the bottom of the Applications tab.
 * Any value can be provided for `Section` keys.
 * If submitting an entry for a video game, please use `Section=Games`.
-* For LangSecRef, CCleaner syntax is followed. A table of valid values is below:
+* For `LangSecRef`, CCleaner syntax is followed. A table of valid values is below:
 
 LangSecRef     | Section
 :------------- | :-------------
@@ -139,8 +139,8 @@ The following are functions that are not used in the official Winapp2.ini file, 
 
 `SpecialDetect`
 * Used for a quick way of detecting a path for a program.
-* More commonly, this was used for browser entries. For example, `SpecialDetect=Chrome` would automatically find the default path for Chrome, so you do not need to make a `Detect=`.
-* This function is not compatible when used alongside `DetectFile=` and was since removed from Winapp2.ini due to compatibility issues.
+* More commonly, this was used for browser entries. For example, `SpecialDetect=Chrome` would automatically find the default path for Chrome, so you do not need to make a `Detect`.
+* This function is not compatible when used alongside `Detect` or `DetectFile` and was since removed from Winapp2.ini due to compatibility issues.
 
 ### Environment variables:
 
@@ -170,6 +170,6 @@ Winapp2.ini does not support non-English system configurations or portable softw
 
 ## Donations
 
-If you like Winapp2.ini and want to help keep development going, please consider donating some money to our great minds behind Winapp2.ini
+If you like Winapp2.ini and want to help keep development going, please consider donating some money to our great minds behind Winapp2.ini.
 
 You can donate to Robbie via PayPal (https://paypal.me/moscadotto/) or Venmo (@woadleaves).
