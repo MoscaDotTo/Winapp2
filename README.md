@@ -135,11 +135,11 @@ The following are functions that are not used in the official Winapp2.ini file, 
 `Default`
 * Allows you to set if you want an entry to be cleaned by default.
 * `Default=True` will clean an entry by default, while `Default=False` will not.
-* CCleaner assumes `Default=False` by default, while Avira System Cleaner, BleachBit, System Ninja and Tron do not make use of this function.
+* CCleaner assumes `Default=False` by default, while Avira System Speedup, BleachBit, System Ninja and Tron do not make use of this function.
 
 `SpecialDetect`
 * Used for a quick way of detecting a path for a program.
-* More commonly, this was used for browser entries. For example, `SpecialDetect=Chrome` would automatically find the default path for Chrome, so you do not need to make a `Detect`.
+* More commonly, this was used for browser entries. For example, `SpecialDetect=DET_CHROME` would automatically find the default path for Chrome, so you do not need to make a `Detect`.
 * This function is not compatible when used alongside `Detect` or `DetectFile` and was since removed from Winapp2.ini due to compatibility issues.
 
 ### Environment variables:
