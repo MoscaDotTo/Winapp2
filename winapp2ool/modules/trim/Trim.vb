@@ -262,9 +262,9 @@ Public Module Trim
             If Not hasMetDetOS Then Return False
         End If
         ' Process any other Detect criteria we have
-        If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then Return True
         If checkExistence(entry.Detects, AddressOf checkRegExist) Then Return True
         If checkExistence(entry.DetectFiles, AddressOf checkPathExist) Then Return True
+        If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then Return True
         ' Return true for the case where we have only a DetectOS and we meet its criteria
         Dim onlyHasDetOS = entry.SpecialDetect.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount = 0
         gLog("No other detection keys found than DetectOS", onlyHasDetOS And hasMetDetOS, descend:=True)
@@ -470,9 +470,9 @@ Public Module Trim
     ''' <param name="dir"> A path containing a wildcard </param>
     Private Function expandWildcard(dir As String, isFileSystem As Boolean) As Boolean
         gLog("Expanding Wildcard: " & dir, ascend:=True)
-        Try
-            ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
-            Dim possibleDirs As New strList
+
+        ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
+        Dim possibleDirs As New strList
             Dim currentPaths As New strList
             ' Split the given string into sections by directory
             Dim splitDir = dir.Split(CChar("\"))
@@ -482,16 +482,24 @@ Public Module Trim
                 If pathPart.Contains("*") Then
                     For Each currentPath In currentPaths.Items
                         If currentPath.Length = 0 Then gLog(NameOf(currentPath) & " is empty, aborting wildcard expansion", descend:=True) : Return False
-                        ' Query the existence of child paths for each current path we hold
-                        If isFileSystem Then
-                            gLog("Investigating: " & pathPart & " as a subdir of" & currentPath, indent:=True)
+                    ' Query the existence of child paths for each current path we hold
+                    If isFileSystem Then
+                        gLog("Investigating: " & pathPart & " as a subdir of" & currentPath, indent:=True)
+                        Try
                             Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
                             ' If there are any, add them to our possibility list
                             possibleDirs.add(possibilities, possibilities.Any)
-                        Else
-                            ' Registry Query here
-                        End If
-                    Next
+                        Catch ex As ArgumentException
+                            ' These are thrown by currentPaths containing illegal characters, we'll assume this means the target doesn't exist
+                            Return False
+                        Catch ex As UnauthorizedAccessException
+                            ' Assume that if there's some directory we don't have access to, the target exists and we just can't see it 
+                            Return True
+                        End Try
+                    Else
+                        ' Registry Query here
+                    End If
+                Next
                     ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
                     If possibleDirs.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return False
                     ' Otherwise, clear the current paths and repopulate them with the possible paths
@@ -517,11 +525,7 @@ Public Module Trim
                 If Directory.Exists(currDir) Or File.Exists(currDir) Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return True
             Next
             gLog(descend:=True)
-            Return False
-        Catch ex As Exception
-            gLog("Please include in your bug report the name of the entry that was being processed and the last path logged as being investigated. Thank you!")
-            exc(ex)
-        End Try
+        Return False
     End Function
 
     ''' <summary> Returns <c> True </c> if the system satisfies the DetectOS citeria, <c> False </c> otherwise </summary>
