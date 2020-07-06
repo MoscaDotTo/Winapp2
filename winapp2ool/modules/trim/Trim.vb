@@ -376,6 +376,7 @@ Public Module Trim
         Dim root = getFirstDir(path)
         dir = dir.Replace(root & "\", "")
         Dim exists = getRegExists(root, dir)
+        gLog($"{root}\{dir} exists", exists, indent:=True)
         ' If we didn't return anything above, registry location probably doesn't exist
         Return exists
     End Function
@@ -398,6 +399,10 @@ Public Module Trim
                     Return getUserKey(dir) IsNot Nothing
                 Case "HKCR"
                     Return getCRKey(dir) IsNot Nothing
+                Case Else
+                    ' Reject malformated keys
+                    gLog($"Your key seems to be malformatted (bad root? - root: {root} - expected 'HKCU','HKLM','HKU' or 'HKCR')", indent:=True)
+                    Return False
             End Select
         Catch ex As UnauthorizedAccessException
             ' The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.
@@ -484,7 +489,7 @@ Public Module Trim
                         If currentPath.Length = 0 Then gLog(NameOf(currentPath) & " is empty, aborting wildcard expansion", descend:=True) : Return False
                     ' Query the existence of child paths for each current path we hold
                     If isFileSystem Then
-                        gLog("Investigating: " & pathPart & " as a subdir of" & currentPath, indent:=True)
+                        gLog("Investigating: " & pathPart & " as a subdir of " & currentPath, indent:=True)
                         Try
                             Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
                             ' If there are any, add them to our possibility list
