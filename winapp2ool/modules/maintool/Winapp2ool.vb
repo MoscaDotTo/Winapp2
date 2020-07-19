@@ -15,7 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary> This is the top level module for winapp2ool, through which all other user-facing modules are accessed. The "main menu" </summary>
+''' <summary> This is the top level module for winapp2ool, through which all other user-facing modules are accessed. The "main menu"  </summary>
 Module Winapp2ool
     ''' <summary> Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub </summary>
     ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
@@ -70,6 +70,12 @@ Module Winapp2ool
             Return False
         End If
         Return True
+    End Function
+
+    ''' <summary> Returns an invariant string representation of a boolean </summary>
+    ''' <param name="bool"> A boolean value to return as a string </param>
+    Public Function tsInvariant(bool As Boolean) As String
+        Return bool.ToString(System.Globalization.CultureInfo.InvariantCulture)
     End Function
 
 End Module

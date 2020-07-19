@@ -99,20 +99,10 @@ Public Module Trim
 
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createTrimSettingsSection()
-        createModuleSettingsSection(NameOf(Trim), {
-            getSettingIniKey(NameOf(Trim), NameOf(TrimFile1), TrimFile1.Name, isName:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(TrimFile1), TrimFile1.Dir, isDir:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(TrimFile2), TrimFile2.Name, isName:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(TrimFile2), TrimFile2.Dir, isDir:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(TrimFile3), TrimFile3.Name, isName:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(TrimFile3), TrimFile3.Dir, isDir:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(TrimFile4), TrimFile4.Name, isName:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(TrimFile4), TrimFile4.Dir, isDir:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(DownloadFileToTrim), DownloadFileToTrim.ToString(Globalization.CultureInfo.InvariantCulture)),
-            getSettingIniKey(NameOf(Trim), NameOf(UseWhiteList), UseWhiteList.ToString(Globalization.CultureInfo.InvariantCulture)),
-            getSettingIniKey(NameOf(Trim), NameOf(useBlackList), useBlackList.ToString(Globalization.CultureInfo.InvariantCulture)),
-            getSettingIniKey(NameOf(Trim), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(Globalization.CultureInfo.InvariantCulture))
-            })
+        Dim trimSettingsTuple As New List(Of String) From {NameOf(DownloadFileToTrim), tsInvariant(DownloadFileToTrim), NameOf(UseWhiteList), tsInvariant(UseWhiteList),
+        NameOf(useBlackList), tsInvariant(useBlackList), NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged), NameOf(TrimFile1), TrimFile1.Name, TrimFile1.Dir,
+        NameOf(TrimFile2), TrimFile2.Name, TrimFile2.Dir, NameOf(TrimFile3), TrimFile3.Name, TrimFile3.Dir, NameOf(TrimFile4), TrimFile4.Name, TrimFile4.Dir}
+        createModuleSettingsSection(NameOf(Trim), trimSettingsTuple, 4, 4)
     End Sub
 
     ''' <summary> Trims an <c> iniFile </c> from outside the module </summary>

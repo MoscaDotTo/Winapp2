@@ -84,16 +84,9 @@ Module Merge
 
     '''<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createMergeSettingsSection()
-        createModuleSettingsSection(NameOf(Merge),
-                                    {getSettingIniKey(NameOf(Merge), NameOf(MergeFile1), MergeFile1.Name, isName:=True),
-                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile1), MergeFile1.Dir, isDir:=True),
-                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile2), MergeFile2.Name, isName:=True),
-                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile2), MergeFile2.Dir, isDir:=True),
-                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile3), MergeFile3.Name, isName:=True),
-                                    getSettingIniKey(NameOf(Merge), NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
-                                    getSettingIniKey(NameOf(Merge), NameOf(mergeMode), mergeMode.ToString(CultureInfo.InvariantCulture)),
-                                    getSettingIniKey(NameOf(Merge), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
-                                    })
+        Dim mergeSettingsTuple As New List(Of String) From {NameOf(mergeMode), tsInvariant(mergeMode), NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged),
+            NameOf(MergeFile1), MergeFile1.Name, MergeFile1.Dir, NameOf(MergeFile2), MergeFile2.Name, MergeFile2.Dir, NameOf(MergeFile3), MergeFile3.Name, MergeFile3.Dir}
+        createModuleSettingsSection(NameOf(Merge), mergeSettingsTuple, 2)
     End Sub
 
     ''' <summary> Prints the <c> Merge </c> menu to the user, includes some predefined merge files choices for ease of access </summary>

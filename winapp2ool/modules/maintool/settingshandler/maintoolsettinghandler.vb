@@ -44,16 +44,10 @@ Module mainToolSettingsHandler
     '''<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Sub createToolSettingsSection()
-        Dim compCult = System.Globalization.CultureInfo.InvariantCulture
-        createModuleSettingsSection(NameOf(Winapp2ool), {
-                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(isBeta), isBeta.ToString(compCult)),
-                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(saveSettingsToDisk), saveSettingsToDisk.ToString(compCult)),
-                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(readSettingsFromDisk), readSettingsFromDisk.ToString(compCult)),
-                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(RemoteWinappIsNonCC), RemoteWinappIsNonCC.ToString(compCult)),
-                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(toolSettingsHaveChanged), toolSettingsHaveChanged.ToString(compCult)),
-                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(GlobalLogFile) & "_Dir", GlobalLogFile.Dir),
-                                        getSettingIniKey(NameOf(Winapp2ool), NameOf(GlobalLogFile) & "_Name", GlobalLogFile.Name)
-                                    })
+        Dim mainToolModuleTuple As New List(Of String) From {NameOf(isBeta), tsInvariant(isBeta), NameOf(saveSettingsToDisk), tsInvariant(saveSettingsToDisk),
+            NameOf(readSettingsFromDisk), tsInvariant(readSettingsFromDisk), NameOf(RemoteWinappIsNonCC), tsInvariant(RemoteWinappIsNonCC), NameOf(toolSettingsHaveChanged),
+            tsInvariant(toolSettingsHaveChanged), NameOf(GlobalLogFile), GlobalLogFile.Name, GlobalLogFile.Dir}
+        createModuleSettingsSection(NameOf(Winapp2ool), mainToolModuleTuple, 5, 1)
     End Sub
 
 

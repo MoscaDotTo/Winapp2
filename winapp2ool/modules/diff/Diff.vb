@@ -105,20 +105,10 @@ Module Diff
 
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createDiffSettingsSection()
-        Dim cultInf = CultureInfo.InvariantCulture
-        createModuleSettingsSection(NameOf(Diff), {
-            getSettingIniKey(NameOf(Diff), NameOf(DiffFile1), DiffFile1.Name, isName:=True),
-            getSettingIniKey(NameOf(Diff), NameOf(DiffFile1), DiffFile1.Dir, isDir:=True),
-            getSettingIniKey(NameOf(Diff), NameOf(DiffFile2), DiffFile2.Name, isName:=True),
-            getSettingIniKey(NameOf(Diff), NameOf(DiffFile2), DiffFile2.Dir, isDir:=True),
-            getSettingIniKey(NameOf(Diff), NameOf(DiffFile3), DiffFile3.Name, isName:=True),
-            getSettingIniKey(NameOf(Diff), NameOf(DiffFile3), DiffFile3.Dir, isDir:=True),
-            getSettingIniKey(NameOf(Diff), NameOf(DownloadDiffFile), DownloadDiffFile.ToString(cultInf)),
-            getSettingIniKey(NameOf(Diff), NameOf(TrimRemoteFile), TrimRemoteFile.ToString(cultInf)),
-            getSettingIniKey(NameOf(Diff), NameOf(ShowFullEntries), ShowFullEntries.ToString(cultInf)),
-            getSettingIniKey(NameOf(Diff), NameOf(SaveDiffLog), SaveDiffLog.ToString(cultInf)),
-            getSettingIniKey(NameOf(Diff), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(cultInf))
-            })
+        Dim diffSettingsTuples As New List(Of String) From {NameOf(downloadFile), tsInvariant(DownloadDiffFile), NameOf(TrimRemoteFile), tsInvariant(TrimRemoteFile),
+            NameOf(ShowFullEntries), tsInvariant(ShowFullEntries), NameOf(SaveDiffLog), tsInvariant(SaveDiffLog), NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged),
+            NameOf(DiffFile1), DiffFile1.Name, DiffFile1.Dir, NameOf(DiffFile2), DiffFile2.Name, DiffFile2.Dir, NameOf(DiffFile3), DiffFile3.Name, DiffFile3.Dir}
+        createModuleSettingsSection(NameOf(Diff), diffSettingsTuples, 5)
     End Sub
 
     ''' <summary> Runs the Differ from outside the module </summary>
@@ -371,7 +361,7 @@ Module Diff
         Dim changeTypeStrs = {"added", "removed", "modified"}
         changeCounter += 1
         gLog($"{section.Name} has been {changeTypeStrs(changeType)}", indent:=True, leadr:=True)
-        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", isCentered:=True, colorLine:=changeType <= 1, enStrCond:=If(changeType = 1, False, True))
+        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", isCentered:=True, colorLine:=changeType <= 1, enStrCond:=changeType <> 1)
         If ShowFullEntries Then
             print(0, "")
             For Each line In section.ToString.Split(CChar(vbCrLf))
