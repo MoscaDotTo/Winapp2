@@ -1,5 +1,4 @@
-﻿Option Strict On
-'    Copyright (C) 2018-2020 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -15,10 +14,8 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
-Imports System.Globalization
-''' <summary>
-''' A module whose purpose is to perform some housekeeping on ccleaner.ini to help clean up after winapp2.ini
-''' </summary>
+Option Strict On
+''' <summary> This module performs housekeeping on ccleaner.ini to clean up leftovers from winapp2.ini </summary>
 Module CCiniDebug
     ''' <summary>The winapp2.ini file that ccleaner.ini may optionally be checked against</summary>
     Public Property CCDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
@@ -34,64 +31,7 @@ Module CCiniDebug
     '''<summary>Indicates that the contents of ccleaner.ini should be sorted alphabetically</summary>
     Public Property SortFileForOutput As Boolean = True
     '''<summary>Indicates that the module's settings have been modified from their defaults</summary>
-    Private Property ModuleSettingsChanged As Boolean = False
-
-    ''' <summary>Restores the default state of the module's parameters</summary>
-    Private Sub initDefaultSettings()
-        CCDebugFile2.resetParams()
-        CCDebugFile3.resetParams()
-        CCDebugFile1.resetParams()
-        PruneStaleEntries = True
-        SaveDebuggedFile = True
-        SortFileForOutput = True
-        ModuleSettingsChanged = False
-        restoreDefaultSettings(NameOf(CCiniDebug), AddressOf createDebugSettingsSection)
-    End Sub
-
-    ''' <summary> Loads values from disk into memory for the CCiniDebug module settings </summary>
-    Public Sub getSerializedDebugSettings()
-        For Each kvp In settingsDict(NameOf(CCiniDebug))
-            Select Case kvp.Key
-                Case NameOf(CCDebugFile1) & "_Name"
-                    CCDebugFile1.Name = kvp.Value
-                Case NameOf(CCDebugFile1) & "_Dir"
-                    CCDebugFile1.Dir = kvp.Value
-                Case NameOf(CCDebugFile2) & "_Name"
-                    CCDebugFile2.Name = kvp.Value
-                Case NameOf(CCDebugFile2) & "_Dir"
-                    CCDebugFile2.Dir = kvp.Value
-                Case NameOf(CCDebugFile3) & "_Name"
-                    CCDebugFile3.Name = kvp.Value
-                Case NameOf(CCDebugFile3) & "_Dir"
-                    CCDebugFile3.Dir = kvp.Value
-                Case NameOf(PruneStaleEntries)
-                    PruneStaleEntries = CBool(kvp.Value)
-                Case NameOf(SaveDebuggedFile)
-                    SaveDebuggedFile = CBool(kvp.Value)
-                Case NameOf(SortFileForOutput)
-                    SortFileForOutput = CBool(kvp.Value)
-                Case NameOf(ModuleSettingsChanged)
-                    ModuleSettingsChanged = CBool(kvp.Value)
-            End Select
-        Next
-    End Sub
-
-    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
-    Public Sub createDebugSettingsSection()
-        createModuleSettingsSection(NameOf(CCiniDebug), {
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile1), CCDebugFile1.Name, isName:=True),
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile1), CCDebugFile1.Dir, isDir:=True),
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile2), CCDebugFile2.Name, isName:=True),
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile2), CCDebugFile2.Dir, isDir:=True),
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile3), CCDebugFile3.Name, isName:=True),
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(CCDebugFile3), CCDebugFile3.Dir, isDir:=True),
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(PruneStaleEntries), PruneStaleEntries.ToString(CultureInfo.InvariantCulture)),
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(SaveDebuggedFile), SaveDebuggedFile.ToString(CultureInfo.InvariantCulture)),
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(SortFileForOutput), SortFileForOutput.ToString(CultureInfo.InvariantCulture)),
-            getSettingIniKey(NameOf(CCiniDebug), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
-            })
-    End Sub
-
+    Public Property CCDBSettingsChanged As Boolean = False
 
     ''' <summary>Handles the commandline args for CCiniDebug</summary>
     '''  CCiniDebug args:
@@ -99,60 +39,12 @@ Module CCiniDebug
     ''' -nosort     : disable sorting ccleaner.ini alphabetically
     ''' -nosave     : disable saving the modified ccleaner.ini back to file
     Public Sub handleCmdlineArgs()
-        initDefaultSettings()
+        initDefaultCCDBSettings()
         invertSettingAndRemoveArg(PruneStaleEntries, "-noprune")
         invertSettingAndRemoveArg(SortFileForOutput, "-nosort")
         invertSettingAndRemoveArg(SaveDebuggedFile, "-nosave")
         getFileAndDirParams(CCDebugFile1, CCDebugFile2, CCDebugFile3)
-        initDebug()
-    End Sub
-
-    ''' <summary>Prints the CCiniDebug menu to the user</summary>
-    Public Sub printMenu()
-        printMenuTop({"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"})
-        print(1, "Run (default)", "Debug ccleaner.ini", trailingBlank:=True, enStrCond:=PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput, colorLine:=True)
-        print(5, "Toggle Pruning", "removal of dead winapp2.ini settings", enStrCond:=PruneStaleEntries)
-        print(5, "Toggle Saving", "automatic saving of changes made by CCiniDebug", enStrCond:=SaveDebuggedFile)
-        print(5, "Toggle Sorting", "alphabetical sorting of ccleaner.ini", enStrCond:=SortFileForOutput, trailingBlank:=True)
-        print(1, "File Chooser (ccleaner.ini)", "Choose a new ccleaner.ini name or location")
-        print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or location", PruneStaleEntries, trailingBlank:=Not SaveDebuggedFile)
-        print(1, "File Chooser (save)", "Change where CCiniDebug saves its changes", SaveDebuggedFile, trailingBlank:=True)
-        print(0, $"Current ccleaner.ini:  {replDir(CCDebugFile2.Path)}")
-        print(0, $"Current winapp2.ini:   {replDir(CCDebugFile1.Path)}", cond:=PruneStaleEntries)
-        print(0, $"Current save location: {replDir(CCDebugFile3.Path)}", cond:=SaveDebuggedFile, closeMenu:=Not ModuleSettingsChanged)
-        print(2, NameOf(CCiniDebug), cond:=ModuleSettingsChanged, closeMenu:=True)
-    End Sub
-
-    ''' <summary>Handles the user's input from the CCiniDebug menu</summary>
-    ''' <param name="input">The user's input</param>
-    Public Sub handleUserInput(input As String)
-        Select Case True
-            Case input = "0"
-                exitModule()
-            Case (input = "1" Or input.Length = 0) And (PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput)
-                initDebug()
-            Case input = "2"
-                toggleSettingParam(PruneStaleEntries, "Pruning", ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(PruneStaleEntries), NameOf(ModuleSettingsChanged))
-            Case input = "3"
-                toggleSettingParam(SaveDebuggedFile, "Autosaving", ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(SaveDebuggedFile), NameOf(ModuleSettingsChanged))
-            Case input = "4"
-                toggleSettingParam(SortFileForOutput, "Sorting", ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(SortFileForOutput), NameOf(ModuleSettingsChanged))
-            Case input = "5"
-                changeFileParams(CCDebugFile2, ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile2), NameOf(ModuleSettingsChanged))
-            Case input = "6" And PruneStaleEntries
-                changeFileParams(CCDebugFile1, ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile1), NameOf(ModuleSettingsChanged))
-            Case SaveDebuggedFile And ((input = "6" And Not PruneStaleEntries) Or (input = "7" And PruneStaleEntries))
-                changeFileParams(CCDebugFile3, ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile3), NameOf(ModuleSettingsChanged))
-            Case ModuleSettingsChanged And
-                                        ((input = "6" And Not (PruneStaleEntries Or SaveDebuggedFile)) Or
-                                        (input = "7" And (PruneStaleEntries Xor SaveDebuggedFile)) Or
-                                        (input = "8" And PruneStaleEntries And SaveDebuggedFile))
-                resetModuleSettings("CCiniDebug", AddressOf initDefaultSettings)
-            Case Not (PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput)
-                setHeaderText("Please enable at least one option", True)
-            Case Else
-                setHeaderText(invInpStr, True)
-        End Select
+        initCCDebug()
     End Sub
 
     '''<summary>Performs the debug process on ccleaner.ini</summary>
@@ -163,8 +55,8 @@ Module CCiniDebug
     End Sub
 
     ''' <summary>Sets up the debug and prints its results</summary>
-    Private Sub initDebug()
-        If Not enforceFileHasContent(CCDebugFile2) Then Exit Sub
+    Public Sub initCCDebug()
+        If Not enforceFileHasContent(CCDebugFile2) Then Return
         ' winapp2.ini is not really required to be populated for this task so we do not need to enforce that it has content
         If PruneStaleEntries Then CCDebugFile1.validate()
         clrConsole()
@@ -184,14 +76,16 @@ Module CCiniDebug
         Dim tbTrimmed As New List(Of Integer)
         For i = 0 To optionsSec.Keys.KeyCount - 1
             Dim optionStr = optionsSec.Keys.Keys(i).toString
-            ' Only operate on (app) keys belonging to winapp2.ini
-            If optionStr.StartsWith("(App)", StringComparison.InvariantCulture) And optionStr.Contains("*") Then
+            ' Only operate on (app) keys belonging to winapp2.ini, marked with a * 
+            If optionStr.StartsWith("(App)", StringComparison.InvariantCulture) AndAlso optionStr.Contains("*") Then
                 Dim toRemove As New List(Of String) From {"(App)", "=True", "=False"}
                 toRemove.ForEach(Sub(param) optionStr = optionStr.Replace(param, ""))
-                If Not CCDebugFile1.hasSection(optionStr) Then tbTrimmed.Add(i)
-                Dim foundStr = $"Orphaned entry detected: {optionStr}"
-                print(0, foundStr, colorLine:=True)
-                gLog(foundStr, Not CCDebugFile1.hasSection(optionStr), indent:=True)
+                If Not CCDebugFile1.hasSection(optionStr) Then
+                    tbTrimmed.Add(i)
+                    Dim foundStr = $"Orphaned entry detected: {optionStr}"
+                    print(0, foundStr, colorLine:=True)
+                    gLog(foundStr, indent:=True)
+                End If
             End If
         Next
         print(0, $"{tbTrimmed.Count} orphaned settings detected", leadingBlank:=True, trailingBlank:=True)

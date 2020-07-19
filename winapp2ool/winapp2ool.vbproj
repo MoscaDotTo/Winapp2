@@ -136,6 +136,8 @@
   <ItemGroup>
     <Compile Include="handlers\settings\settingsHandler.vb" />
     <Compile Include="modules\ccdebug\CCiniDebug.vb" />
+    <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
+    <Compile Include="modules\ccdebug\settingshandler\ccdebugsettinghandler.vb" />
     <Compile Include="modules\diff\Diff.vb" />
     <Compile Include="modules\download\Downloader.vb" />
     <Compile Include="modules\download\advDownloads.vb" />
