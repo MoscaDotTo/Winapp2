@@ -64,7 +64,7 @@ Module maintoolmenu
             Case input = "4"
                 initModule(NameOf(Diff), AddressOf Diff.printMenu, AddressOf Diff.handleUserInput)
             Case input = "5"
-                initModule(NameOf(CCiniDebug), AddressOf CCiniDebug.printMenu, AddressOf CCiniDebug.handleUserInput)
+                initModule(NameOf(CCiniDebug), AddressOf printCCDBMainMenu, AddressOf handleCCDBMainMenuUserInput)
             Case input = "6"
                 If Not denySettingOffline() Then initModule("Downloader", AddressOf Downloader.printMenu, AddressOf Downloader.handleUserInput)
             Case input = "7"
