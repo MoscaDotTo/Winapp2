@@ -17,27 +17,42 @@
 Option Strict On
 ''' <summary> This module performs housekeeping on ccleaner.ini to clean up leftovers from winapp2.ini </summary>
 Module CCiniDebug
-    ''' <summary>The winapp2.ini file that ccleaner.ini may optionally be checked against</summary>
+
+    ''' <summary> The winapp2.ini file that ccleaner.ini may optionally be checked against </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Property CCDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
-    '''<summary>The ccleaner.ini file to be debugged</summary>
-    Public Property CCDebugFile2 As New iniFile(Environment.CurrentDirectory, "ccleaner.ini")
-    '''<summary>Holds the path for the file that will be saved to disk. Overwrites ccleaner.ini by default</summary>
+
+    '''<summary> The ccleaner.ini file to be debugged </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+    Public Property CCDebugFile2 As New iniFile(Environment.CurrentDirectory, "ccleaner.ini", mExist:=True)
+
+    '''<summary> Holds the path for the debugged file that will be saved to disk. Overwrites ccleaner.ini by default </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Property CCDebugFile3 As New iniFile(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner-debugged.ini")
-    '''<summary>Indicates that stale winapp2.ini entries should be pruned from ccleaner.ini</summary>
-    '''<remarks>A "stale" entry is one that appears in an (app) key in ccleaner.ini but does not exist in winapp2.ini</remarks>
+
+    '''<summary> Indicates that stale winapp2.ini entries should be pruned from ccleaner.ini <br/> Default: <c> True </c> </summary>
+    '''<remarks> A "stale" entry is one that appears in an (app) key in <c> CCDebugFile2 </c> but does not have a corresponding section in <c> CCDebugFile1</c> </remarks>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Property PruneStaleEntries As Boolean = True
-    '''<summary>Indicates that the debugged file should be saved back to disk</summary>
+
+    '''<summary> Indicates that the debugged file should be saved back to disk <br/> Default: <c> True </c> </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Property SaveDebuggedFile As Boolean = True
-    '''<summary>Indicates that the contents of ccleaner.ini should be sorted alphabetically</summary>
+
+    '''<summary> Indicates that the contents of ccleaner.ini should be sorted alphabetically <br /> Default: <c> True </c> </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Property SortFileForOutput As Boolean = True
-    '''<summary>Indicates that the module's settings have been modified from their defaults</summary>
+
+    '''<summary> Indicates that the module's settings have been modified from their defaults </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Property CCDBSettingsChanged As Boolean = False
 
-    ''' <summary>Handles the commandline args for CCiniDebug</summary>
+    ''' <summary> Handles the commandline args for CCiniDebug </summary>
     '''  CCiniDebug args:
     ''' -noprune    : disable pruning of stale winapp2.ini entries
     ''' -nosort     : disable sorting ccleaner.ini alphabetically
     ''' -nosave     : disable saving the modified ccleaner.ini back to file
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Sub handleCmdlineArgs()
         initDefaultCCDBSettings()
         invertSettingAndRemoveArg(PruneStaleEntries, "-noprune")
@@ -47,14 +62,16 @@ Module CCiniDebug
         initCCDebug()
     End Sub
 
-    '''<summary>Performs the debug process on ccleaner.ini</summary>
+    '''<summary> Prunes, sorts, and/or saves ccleaner.ini </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Private Sub ccDebug()
         If PruneStaleEntries Then prune(CCDebugFile2.Sections("Options"))
         If SortFileForOutput Then sortCC()
         CCDebugFile3.overwriteToFile(CCDebugFile2.toString, SaveDebuggedFile)
     End Sub
 
-    ''' <summary>Sets up the debug and prints its results</summary>
+    ''' <summary> Sets up the debug and prints its results </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Sub initCCDebug()
         If Not enforceFileHasContent(CCDebugFile2) Then Return
         ' winapp2.ini is not really required to be populated for this task so we do not need to enforce that it has content
@@ -68,8 +85,9 @@ Module CCiniDebug
         crk()
     End Sub
 
-    ''' <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>
-    ''' <param name="optionsSec">The iniSection object containing the Options section from ccleaner.ini</param>
+    ''' <summary> Scans for and removes stale winapp2.ini entry settings from given Options section of a ccleaner.ini file </summary>
+    ''' <param name="optionsSec"> The Options section from ccleaner.ini </param>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Private Sub prune(ByRef optionsSec As iniSection)
         gLog($"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries", ascend:=True)
         print(0, $"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries", leadingBlank:=True, trailingBlank:=True)
@@ -93,7 +111,8 @@ Module CCiniDebug
         optionsSec.removeKeys(tbTrimmed)
     End Sub
 
-    ''' <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
+    ''' <summary> Sorts the keys in the Options section of <c> CCiniDebugFile2 </c></summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Private Sub sortCC()
         gLog($"Sorting {CCDebugFile2.Name}", indent:=True)
         Dim lineList = CCDebugFile2.Sections("Options").getKeysAsStrList

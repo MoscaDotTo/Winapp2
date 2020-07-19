@@ -18,7 +18,8 @@ Option Strict On
 ''' <summary> Syncs CCiniDebug settings to and from disk </summary>
 Module ccdebugsettinghandler
 
-    ''' <summary>Restores the default state of the module's parameters</summary>
+    ''' <summary> Restores the default state of CCiniDebug's parameters </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Sub initDefaultCCDBSettings()
         CCDebugFile1.resetParams()
         CCDebugFile2.resetParams()
@@ -27,10 +28,11 @@ Module ccdebugsettinghandler
         SaveDebuggedFile = True
         SortFileForOutput = True
         CCDBSettingsChanged = False
-        restoreDefaultSettings(NameOf(CCiniDebug), AddressOf createDebugSettingsSection)
+        restoreDefaultSettings(NameOf(CCiniDebug), AddressOf createCCDBSettingsSection)
     End Sub
 
     ''' <summary> Loads values from disk into memory for the CCiniDebug module settings </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Sub getSerializedDebugSettings()
         For Each kvp In settingsDict(NameOf(CCiniDebug))
             Select Case kvp.Key
@@ -58,8 +60,9 @@ Module ccdebugsettinghandler
         Next
     End Sub
 
-    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
-    Public Sub createDebugSettingsSection()
+    ''' <summary> Adds the current (typically default) state of the CCiniDebug module's settings into the disk-writable settings representation </summary>
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+    Public Sub createCCDBSettingsSection()
         Dim ccDebugSettingsTuples As New List(Of String) From {
             NameOf(PruneStaleEntries), tsInvariant(PruneStaleEntries), NameOf(SaveDebuggedFile), tsInvariant(SaveDebuggedFile), NameOf(SortFileForOutput), tsInvariant(SortFileForOutput),
             NameOf(CCDBSettingsChanged), tsInvariant(CCDBSettingsChanged), NameOf(CCDebugFile1), CCDebugFile1.Name, CCDebugFile1.Dir, NameOf(CCDebugFile2),
