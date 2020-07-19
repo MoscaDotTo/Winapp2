@@ -144,8 +144,7 @@ Public Module settingsHandler
 
     Private Function getSettingKeys(settingsTuples As List(Of String), moduleName As String, numBools As Integer, Optional numFiles As Integer = 3) As List(Of String)
         ' Ensure that we only operate on properly formatted tuples 
-        Dim argErr = Not settingsTuples.Count = 2 * numBools + 3 * numFiles
-        gLog($"The number of settings provided to {moduleName}'s settings initializer doesn't match the number expected.", argErr)
+        gLog($"The number of settings provided to {moduleName}'s settings initializer doesn't match the number expected.", Not settingsTuples.Count = 2 * numBools + 3 * numFiles)
         Dim out As New List(Of String)
         For i = 0 To settingsTuples.Count - 3
             If i < 2 * numBools Then
