@@ -140,7 +140,7 @@ Module MenuMaker
     ''' <param name="msg"> The string to be printed <br/> Optional, Default: <c> Nothing </c> </param>
     ''' <param name="cond"> Indicates the line should be printed <br/> Optional, Default: <c> True </c> </param>
     Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
-        If cond And Not SuppressOutput Then Console.WriteLine(msg)
+        If cond AndAlso Not SuppressOutput Then Console.WriteLine(msg)
     End Sub
 
     ''' <summary> Waits for the user to press a key if output is not currently being suppressed </summary>
@@ -152,7 +152,7 @@ Module MenuMaker
     ''' <remarks> When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that </remarks>
     ''' <param name="cond"> Indicates that the console should be cleared <br/> Optional, Default: <c> True </c> </param>
     Public Sub clrConsole(Optional cond As Boolean = True)
-        If cond And Not SuppressOutput And Not Console.Title.Contains("testhost.x86") Then Console.Clear()
+        If cond AndAlso Not SuppressOutput AndAlso Not Console.Title.Contains("testhost.x86") Then Console.Clear()
     End Sub
 
     ''' <summary> Returns an empty menu line, or a variety of filled menu lines </summary>
