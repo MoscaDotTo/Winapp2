@@ -47,30 +47,30 @@ Module diffmainmenu
         Select Case True
             Case input = "0"
                 exitModule()
-            Case input = "1" Or input.Length = 0
-                If Not denyActionWithHeader(DiffFile2.Name.Length = 0 And Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
+            Case input = "1" OrElse input.Length = 0
+                If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
             Case input = "2"
                 changeFileParams(DiffFile1, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))
-            Case input = "3" And Not isOffline
+            Case input = "3" AndAlso Not isOffline
                 If Not denySettingOffline() Then toggleSettingParam(DownloadDiffFile, "Downloading", DiffModuleSettingsChanged, NameOf(CCiniDebug), NameOf(DownloadDiffFile),
-                                                                  NameOf(DiffModuleSettingsChanged))
+                                                                                                                                            NameOf(DiffModuleSettingsChanged))
                 DiffFile2.Name = GetNameFromDL(DownloadDiffFile)
-            Case input = "4" And DownloadDiffFile
+            Case input = "4" AndAlso DownloadDiffFile
                 toggleSettingParam(TrimRemoteFile, "Trimming", DiffModuleSettingsChanged, NameOf(Trim), NameOf(TrimRemoteFile), NameOf(DiffModuleSettingsChanged))
-            Case (input = "4" And Not (DownloadDiffFile Or isOffline)) Or (input = "3" And isOffline)
+            Case (input = "4" AndAlso Not (DownloadDiffFile OrElse isOffline)) OrElse (input = "3" AndAlso isOffline)
                 changeFileParams(DiffFile2, DiffModuleSettingsChanged, NameOf(Trim), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged))
-            Case (input = "5" And Not isOffline) Or (input = "4" And isOffline)
+            Case (input = "5" AndAlso Not isOffline) OrElse (input = "4" AndAlso isOffline)
                 toggleSettingParam(SaveDiffLog, "Log Saving", DiffModuleSettingsChanged, NameOf(Trim), NameOf(SaveDiffLog), NameOf(DiffModuleSettingsChanged))
-            Case SaveDiffLog And ((input = "6" And Not isOffline) Or (input = "5" And isOffline))
+            Case SaveDiffLog AndAlso ((input = "6" AndAlso Not isOffline) OrElse (input = "5" AndAlso isOffline))
                 changeFileParams(DiffFile3, DiffModuleSettingsChanged, NameOf(Trim), NameOf(DiffFile3), NameOf(DiffModuleSettingsChanged))
-            Case input = "6" And Not SaveDiffLog Or input = "7" And SaveDiffLog
+            Case (input = "6" AndAlso Not SaveDiffLog) OrElse (input = "7" AndAlso SaveDiffLog)
                 toggleSettingParam(ShowFullEntries, "Verbose Mode", DiffModuleSettingsChanged, NameOf(Trim), NameOf(ShowFullEntries), NameOf(DiffModuleSettingsChanged))
-            Case DiffModuleSettingsChanged And ( 'Online Case below
-                                        (Not isOffline And ((Not SaveDiffLog And input = "7") Or
-                                        (SaveDiffLog And input = "8"))) Or
-                                        (isOffline And ((input = "5") Or (input = "6" And SaveDiffLog)))) ' Offline case
+            Case DiffModuleSettingsChanged AndAlso ( 'Online Case below
+                                        (Not isOffline AndAlso ((Not SaveDiffLog AndAlso input = "7") OrElse
+                                        (SaveDiffLog AndAlso input = "8"))) OrElse
+                                        (isOffline AndAlso ((input = "5") OrElse (input = "6" AndAlso SaveDiffLog)))) ' Offline case
                 resetModuleSettings("Diff", AddressOf initDefaultDiffSettings)
-            Case Not MostRecentDiffLog.Length = 0 And ((input = "7" And Not DiffModuleSettingsChanged) Or (input = "8" And DiffModuleSettingsChanged))
+            Case Not MostRecentDiffLog.Length = 0 AndAlso ((input = "7" AndAlso Not DiffModuleSettingsChanged) OrElse (input = "8" AndAlso DiffModuleSettingsChanged))
                 MostRecentDiffLog = getLogSliceFromGlobal("Beginning diff", "Diff complete")
                 printSlice(MostRecentDiffLog)
             Case Else
