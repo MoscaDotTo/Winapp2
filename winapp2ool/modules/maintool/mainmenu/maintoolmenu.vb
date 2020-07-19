@@ -62,7 +62,7 @@ Module maintoolmenu
             Case input = "3"
                 initModule(NameOf(Merge), AddressOf Merge.printMenu, AddressOf Merge.handleUserInput)
             Case input = "4"
-                initModule(NameOf(Diff), AddressOf Diff.printMenu, AddressOf Diff.handleUserInput)
+                initModule(NameOf(Diff), AddressOf printDiffMainMenu, AddressOf handleDiffMainMenuUserInput)
             Case input = "5"
                 initModule(NameOf(CCiniDebug), AddressOf printCCDBMainMenu, AddressOf handleCCDBMainMenuUserInput)
             Case input = "6"

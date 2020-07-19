@@ -139,6 +139,8 @@
     <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
     <Compile Include="modules\ccdebug\settingshandler\ccdebugsettinghandler.vb" />
     <Compile Include="modules\diff\Diff.vb" />
+    <Compile Include="modules\diff\mainmenu\diffmainmenu.vb" />
+    <Compile Include="modules\diff\settingshandler\diffsettingshandler.vb" />
     <Compile Include="modules\download\Downloader.vb" />
     <Compile Include="modules\download\advDownloads.vb" />
     <Compile Include="handlers\cmdline\commandLineHandler.vb" />

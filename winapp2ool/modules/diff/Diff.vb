@@ -1,5 +1,4 @@
-﻿Option Strict On
-'    Copyright (C) 2018-2020 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -15,6 +14,7 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+Option Strict On
 Imports System.Globalization
 ''' <summary> Performs a diff operation on two winapp2.ini files </summary>
 Module Diff
@@ -29,7 +29,7 @@ Module Diff
     ''' <summary> Indicates that the diff output should be saved to disk </summary>
     Public Property SaveDiffLog As Boolean = False
     ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
-    Public Property ModuleSettingsChanged As Boolean = False
+    Public Property DiffModuleSettingsChanged As Boolean = False
     ''' <summary> Indicates that the remote file should be trimmed for the local system before diffing </summary>
     Public Property TrimRemoteFile As Boolean = Not isOffline
 
@@ -42,8 +42,9 @@ Module Diff
 
     ''' <summary> Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu </summary>
     Public Property ShowFullEntries As Boolean = False
+
     ''' <summary> Holds the log from the most recent run of the Differ to display back to the user </summary>
-    Private Property MostRecentDiffLog As String = ""
+    Public MostRecentDiffLog As String = ""
 
     ''' <summary> Handles the commandline args for Diff </summary>
     '''  Diff args:
@@ -51,64 +52,13 @@ Module Diff
     ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
     ''' -savelog    : save the diff.txt log
     Public Sub handleCmdLine()
-        initDefaultSettings()
+        initDefaultDiffSettings()
         handleDownloadBools(DownloadDiffFile)
         ' Make sure we have a name set for the new file if we're downloading or else the diff will not run
         If DownloadDiffFile Then DiffFile2.Name = If(RemoteWinappIsNonCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
         invertSettingAndRemoveArg(SaveDiffLog, "-savelog")
         getFileAndDirParams(DiffFile1, DiffFile2, DiffFile3)
         If Not DiffFile2.Name.Length = 0 Then initDiff()
-    End Sub
-
-    ''' <summary> Restores the default state of the module's parameters </summary>
-    Private Sub initDefaultSettings()
-        DownloadDiffFile = Not isOffline
-        TrimRemoteFile = Not isOffline
-        ShowFullEntries = False
-        DiffFile3.resetParams()
-        DiffFile2.resetParams()
-        DiffFile1.resetParams()
-        SaveDiffLog = False
-        ModuleSettingsChanged = False
-        restoreDefaultSettings(NameOf(Diff), AddressOf createDiffSettingsSection)
-    End Sub
-
-    ''' <summary> Loads values from disk into memory for the Diff module settings </summary>
-    Public Sub getSerializedDiffSettings()
-        For Each kvp In settingsDict(NameOf(Diff))
-            Select Case kvp.Key
-                Case NameOf(DiffFile1) & "_Name"
-                    DiffFile1.Name = kvp.Value
-                Case NameOf(DiffFile1) & "_Dir"
-                    DiffFile1.Dir = kvp.Value
-                Case NameOf(DiffFile2) & "_Name"
-                    DiffFile2.Name = kvp.Value
-                Case NameOf(DiffFile2) & "_Dir"
-                    DiffFile2.Dir = kvp.Value
-                Case NameOf(DiffFile3) & "_Name"
-                    DiffFile3.Name = kvp.Value
-                Case NameOf(DiffFile3) & "_Dir"
-                    DiffFile3.Dir = kvp.Value
-                Case NameOf(DownloadDiffFile)
-                    DownloadDiffFile = CBool(kvp.Value)
-                Case NameOf(TrimRemoteFile)
-                    TrimRemoteFile = CBool(kvp.Value)
-                Case NameOf(ShowFullEntries)
-                    ShowFullEntries = CBool(kvp.Value)
-                Case NameOf(SaveDiffLog)
-                    SaveDiffLog = CBool(kvp.Value)
-                Case NameOf(ModuleSettingsChanged)
-                    ModuleSettingsChanged = CBool(kvp.Value)
-            End Select
-        Next
-    End Sub
-
-    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
-    Public Sub createDiffSettingsSection()
-        Dim diffSettingsTuples As New List(Of String) From {NameOf(downloadFile), tsInvariant(DownloadDiffFile), NameOf(TrimRemoteFile), tsInvariant(TrimRemoteFile),
-            NameOf(ShowFullEntries), tsInvariant(ShowFullEntries), NameOf(SaveDiffLog), tsInvariant(SaveDiffLog), NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged),
-            NameOf(DiffFile1), DiffFile1.Name, DiffFile1.Dir, NameOf(DiffFile2), DiffFile2.Name, DiffFile2.Dir, NameOf(DiffFile3), DiffFile3.Name, DiffFile3.Dir}
-        createModuleSettingsSection(NameOf(Diff), diffSettingsTuples, 5)
     End Sub
 
     ''' <summary> Runs the Differ from outside the module </summary>
@@ -119,68 +69,8 @@ Module Diff
         initDiff()
     End Sub
 
-    ''' <summary> Prints the main menu to the user </summary>
-    Public Sub printMenu()
-        Console.WindowHeight = If(ModuleSettingsChanged, 34, 32)
-        printMenuTop({"Observe the differences between two ini files"})
-        print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (DiffFile2.Name.Length = 0 And Not DownloadDiffFile), colorLine:=True)
-        print(0, "Select Older/Local File:", leadingBlank:=True)
-        print(1, "File Chooser", "Choose a new name or location for your older ini file")
-        print(0, "Select Newer/Remote File:", leadingBlank:=True)
-        print(5, GetNameFromDL(True), "diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, enStrCond:=DownloadDiffFile, leadingBlank:=True)
-        print(5, "Remote file trimming", "trimming the remote winapp2.ini before diffing", cond:=DownloadDiffFile = True, enStrCond:=TrimRemoteFile, trailingBlank:=True)
-        print(1, "File Chooser", "Choose a new name or location for your newer ini file", Not DownloadDiffFile, isOffline, True)
-        print(0, "Log Settings:")
-        print(5, "Toggle Log Saving", "automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not SaveDiffLog, enStrCond:=SaveDiffLog)
-        print(1, "File Chooser (log)", "Change where Diff saves its log", SaveDiffLog, trailingBlank:=True)
-        print(5, "Verbose Mode", "printing full entries in the diff output", enStrCond:=ShowFullEntries, trailingBlank:=True)
-        print(0, $"Older file: {replDir(DiffFile1.Path)}")
-        print(0, $"Newer file: {If(DiffFile2.Name.Length = 0 And Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))}",
-                                  closeMenu:=Not SaveDiffLog And Not ModuleSettingsChanged And MostRecentDiffLog.Length = 0)
-        print(0, $"Log   file: {replDir(DiffFile3.Path)}", cond:=SaveDiffLog, closeMenu:=(Not ModuleSettingsChanged) And MostRecentDiffLog.Length = 0)
-        print(2, "Diff", cond:=ModuleSettingsChanged, closeMenu:=MostRecentDiffLog.Length = 0)
-        print(1, "Log Viewer", "Show the most recent Diff log", cond:=Not MostRecentDiffLog.Length = 0, closeMenu:=True, leadingBlank:=True)
-    End Sub
-
-    ''' <summary> Handles the user input from the main menu </summary>
-    ''' <param name="input"> The user's input </param>
-    Public Sub handleUserInput(input As String)
-        Select Case True
-            Case input = "0"
-                exitModule()
-            Case input = "1" Or input.Length = 0
-                If Not denyActionWithHeader(DiffFile2.Name.Length = 0 And Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
-            Case input = "2"
-                changeFileParams(DiffFile1, ModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(ModuleSettingsChanged))
-            Case input = "3" And Not isOffline
-                If Not denySettingOffline() Then toggleSettingParam(DownloadDiffFile, "Downloading", ModuleSettingsChanged, NameOf(CCiniDebug), NameOf(DownloadDiffFile),
-                                                                  NameOf(ModuleSettingsChanged))
-                DiffFile2.Name = GetNameFromDL(DownloadDiffFile)
-            Case input = "4" And DownloadDiffFile
-                toggleSettingParam(TrimRemoteFile, "Trimming", ModuleSettingsChanged, NameOf(Trim), NameOf(TrimRemoteFile), NameOf(ModuleSettingsChanged))
-            Case (input = "4" And Not (DownloadDiffFile Or isOffline)) Or (input = "3" And isOffline)
-                changeFileParams(DiffFile2, ModuleSettingsChanged, NameOf(Trim), NameOf(DiffFile2), NameOf(ModuleSettingsChanged))
-            Case (input = "5" And Not isOffline) Or (input = "4" And isOffline)
-                toggleSettingParam(SaveDiffLog, "Log Saving", ModuleSettingsChanged, NameOf(Trim), NameOf(SaveDiffLog), NameOf(ModuleSettingsChanged))
-            Case SaveDiffLog And ((input = "6" And Not isOffline) Or (input = "5" And isOffline))
-                changeFileParams(DiffFile3, ModuleSettingsChanged, NameOf(Trim), NameOf(DiffFile3), NameOf(ModuleSettingsChanged))
-            Case input = "6" And Not SaveDiffLog Or input = "7" And SaveDiffLog
-                toggleSettingParam(ShowFullEntries, "Verbose Mode", ModuleSettingsChanged, NameOf(Trim), NameOf(ShowFullEntries), NameOf(ModuleSettingsChanged))
-            Case ModuleSettingsChanged And ( 'Online Case below
-                                        (Not isOffline And ((Not SaveDiffLog And input = "7") Or
-                                        (SaveDiffLog And input = "8"))) Or
-                                        (isOffline And ((input = "5") Or (input = "6" And SaveDiffLog)))) ' Offline case
-                resetModuleSettings("Diff", AddressOf initDefaultSettings)
-            Case Not MostRecentDiffLog.Length = 0 And ((input = "7" And Not ModuleSettingsChanged) Or (input = "8" And ModuleSettingsChanged))
-                MostRecentDiffLog = getLogSliceFromGlobal("Beginning diff", "Diff complete")
-                printSlice(MostRecentDiffLog)
-            Case Else
-                setHeaderText(invInpStr, True)
-        End Select
-    End Sub
-
     ''' <summary> Carries out the main set of Diffing operations </summary>
-    Private Sub initDiff()
+    Public Sub initDiff()
         If Not enforceFileHasContent(DiffFile1) Then Return
         If DownloadDiffFile Then
             Dim downloadedIniFile = getRemoteIniFile(winapp2link)
@@ -361,7 +251,7 @@ Module Diff
         Dim changeTypeStrs = {"added", "removed", "modified"}
         changeCounter += 1
         gLog($"{section.Name} has been {changeTypeStrs(changeType)}", indent:=True, leadr:=True)
-        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", isCentered:=True, colorLine:=changeType <= 1, enStrCond:=changeType <> 1)
+        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", isCentered:=True, colorLine:=changeType <= 1, enStrCond:=If(changeType = 1, False, True))
         If ShowFullEntries Then
             print(0, "")
             For Each line In section.ToString.Split(CChar(vbCrLf))
