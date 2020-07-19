@@ -84,7 +84,7 @@ Public Module settingsHandler
         serializeModuleSettings(NameOf(Trim), AddressOf createTrimSettingsSection, AddressOf getSerializedTrimSettings)
         serializeModuleSettings(NameOf(Merge), AddressOf createMergeSettingsSection, AddressOf getSeralizedMergeSettings)
         serializeModuleSettings(NameOf(Diff), AddressOf createDiffSettingsSection, AddressOf getSerializedDiffSettings)
-        serializeModuleSettings(NameOf(CCiniDebug), AddressOf createDebugSettingsSection, AddressOf getSerializedDebugSettings)
+        serializeModuleSettings(NameOf(CCiniDebug), AddressOf createCCDBSettingsSection, AddressOf getSerializedDebugSettings)
         serializeModuleSettings(NameOf(Downloader), AddressOf createDownloadSettingsSection, AddressOf getSerializedDownloaderSettings)
     End Sub
 
