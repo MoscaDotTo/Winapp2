@@ -25,12 +25,16 @@ Name           | Purpose
 
 * [System Ninja](https://singularlabs.com/software/system-ninja):
   * System Ninja ships with Winapp2.ini by default, storing it in your `..\System Ninja\scripts\` directory.
+  * Note: System Ninja 3.2.7 is the last version to work on Windows XP and Vista. Winapp2.ini and Winapp3.ini will continue to work with this version.
 
 * [Avira System Speedup](https://www.avira.com/en/avira-system-speedup-free):
   * Avira System Speedup ships with Winapp2.ini by default, storing it in your `..\Avira\System Speedup\sdf` directory.
 
 * [Tron](https://github.com/bmrf/tron):
   * Tron ships with Winapp2.ini by default, storing it in your `..\tron\resources\stage_1_tempclean\ccleaner` directory.
+  
+* [R-Wipe](https://www.r-wipe.com):
+  * R-Wipe has unofficial support for Winapp2. Please follow this guide to use Winapp2: https://forum.r-tt.com/viewtopic.php?t=11018
 
 ## Creating entries
 
