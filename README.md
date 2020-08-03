@@ -33,8 +33,8 @@ Name           | Purpose
 * [Tron](https://github.com/bmrf/tron):
   * Tron ships with Winapp2.ini by default, storing it in your `..\tron\resources\stage_1_tempclean\ccleaner` directory.
   
-* [R-Wipe](https://www.r-wipe.com):
-  * R-Wipe has unofficial support for Winapp2. Please follow this guide to use Winapp2: https://forum.r-tt.com/viewtopic.php?t=11018
+* [R-Wipe & Clean](https://www.r-wipe.com):
+  * R-Wipe & Clean has unofficial support for Winapp2.ini. Please follow this guide to use Winapp2.ini: https://forum.r-tt.com/viewtopic.php?t=11018
 
 ## Creating entries
 
