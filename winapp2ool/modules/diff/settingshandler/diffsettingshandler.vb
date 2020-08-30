@@ -16,9 +16,11 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 ''' <summary> Syncs the Diff module settings to and from disk </summary>
+''' Docs last updated: 2020-08-30
 Module diffsettingshandler
 
-    ''' <summary> Restores the default state of the module's parameters </summary>
+    ''' <summary> Restores the default state of the Diff module's properties </summary>
+    ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
     Public Sub initDefaultDiffSettings()
         DownloadDiffFile = Not isOffline
         TrimRemoteFile = Not isOffline
@@ -31,7 +33,8 @@ Module diffsettingshandler
         restoreDefaultSettings(NameOf(Diff), AddressOf createDiffSettingsSection)
     End Sub
 
-    ''' <summary> Loads values from disk into memory for the Diff module settings </summary>
+    ''' <summary> Assigns Diff module property values based on  </summary>
+    ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
     Public Sub getSerializedDiffSettings()
         For Each kvp In settingsDict(NameOf(Diff))
             Select Case kvp.Key
@@ -62,6 +65,7 @@ Module diffsettingshandler
     End Sub
 
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+    ''' Docs last updated: 2020-08-30 | Code last updated: 2020-07-19
     Public Sub createDiffSettingsSection()
         Dim diffSettingsTuples As New List(Of String) From {NameOf(downloadFile), tsInvariant(DownloadDiffFile), NameOf(TrimRemoteFile), tsInvariant(TrimRemoteFile),
             NameOf(ShowFullEntries), tsInvariant(ShowFullEntries), NameOf(SaveDiffLog), tsInvariant(SaveDiffLog), NameOf(DiffModuleSettingsChanged), tsInvariant(DiffModuleSettingsChanged),

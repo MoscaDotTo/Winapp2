@@ -16,9 +16,11 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 ''' <summary> Displays the Diff main menu to the user and handles their input </summary>
+''' Docs last updated: 2020-08-30
 Module diffmainmenu
 
-    ''' <summary> Prints the main menu to the user </summary>
+    ''' <summary> Prints the Diff main menu to the user </summary>
+    ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
     Public Sub printDiffMainMenu()
         Console.WindowHeight = If(DiffModuleSettingsChanged, 34, 32)
         printMenuTop({"Observe the differences between two ini files"})
@@ -41,8 +43,9 @@ Module diffmainmenu
         print(1, "Log Viewer", "Show the most recent Diff log", cond:=Not MostRecentDiffLog.Length = 0, closeMenu:=True, leadingBlank:=True)
     End Sub
 
-    ''' <summary> Handles the user input from the main menu </summary>
+    ''' <summary> Handles the user input from the Diff main menu </summary>
     ''' <param name="input"> The user's input </param>
+    ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
     Public Sub handleDiffMainMenuUserInput(input As String)
         Select Case True
             Case input = "0"
