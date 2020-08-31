@@ -148,6 +148,12 @@ Module MenuMaker
         If Not SuppressOutput Then Console.ReadKey()
     End Sub
 
+    ''' <summary> Waits for the users to press Enter if output is not currently being suppressed </summary>
+    ''' Docs last updated: 2020-08-31 | Code last updated: 2020-08-31
+    Public Sub crl()
+        If Not SuppressOutput Then Console.ReadLine()
+    End Sub
+
     ''' <summary> Clears the console when the given <c> <paramref name="cond"/> </c> is <c> True </c> and we're not unit testing </summary>
     ''' <remarks> When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that </remarks>
     ''' <param name="cond"> Indicates that the console should be cleared <br/> Optional, Default: <c> True </c> </param>
