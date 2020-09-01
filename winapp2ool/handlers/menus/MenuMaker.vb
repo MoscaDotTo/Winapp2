@@ -106,9 +106,12 @@ Module MenuMaker
                      Optional buffr As Boolean = False, Optional trailr As Boolean = False, Optional conjoin As Boolean = False)
         If Not cond Then Return
         cwl(cond:=buffr)
-        If colorLine Then Console.ForegroundColor = If(useArbitraryColor, arbitraryColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red))
-        print(0, Nothing, cond:=leadingBlank)
+        determinePrintColor(colorLine, useArbitraryColor, arbitraryColor, enStrCond)
+        Dim printColor = Console.ForegroundColor
+        print(0, Nothing, cond:=leadingBlank, colorLine:=False)
+        Console.ForegroundColor = printColor
         print(0, getFrame(1), cond:=openMenu)
+        Console.ForegroundColor = printColor
         Select Case printType
             ' Prints lines
             Case 0
@@ -124,16 +127,22 @@ Module MenuMaker
                 print(4, menuText, closeMenu:=True)
             ' The top of a menu with a header
             Case 4
-                print(0, menuText, isCentered:=True, openMenu:=True)
+                print(0, menuText, isCentered:=True, openMenu:=True, colorLine:=colorLine, arbitraryColor:=arbitraryColor, useArbitraryColor:=useArbitraryColor)
             ' Colored line printing for enable/disable menu options
             Case 5
                 print(1, menuText, $"{enStr(enStrCond)} {optString}", colorLine:=True, enStrCond:=enStrCond)
         End Select
         print(0, getFrame(3), cond:=conjoin)
-        print(0, Nothing, cond:=trailingBlank)
+        Console.ForegroundColor = printColor
+        print(0, Nothing, cond:=trailingBlank, colorLine:=False)
+        determinePrintColor(colorLine, useArbitraryColor, arbitraryColor, enStrCond)
         print(0, getFrame(2), cond:=closeMenu)
         If colorLine Then Console.ResetColor()
         cwl(cond:=trailr)
+    End Sub
+
+    Private Sub determinePrintColor(colorLine As Boolean, useArbColor As Boolean, arbColor As ConsoleColor, enStrCond As Boolean)
+        If colorLine Then Console.ForegroundColor = If(useArbColor, arbColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red)) Else Console.ResetColor()
     End Sub
 
     ''' <summary> Prints a line to the console window if output is not currently being suppressed and the given <c> <paramref name="cond"/> </c> is met </summary>
@@ -210,7 +219,7 @@ Module MenuMaker
     ''' <param name="descriptionItems"> Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line </param>
     ''' <param name="printExit"> Indicates that an option to exit to the previous menu should be printed <br/> Optional, Default: <c> True </c> </param>
     Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
-        print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=True, arbitraryColor:=HeaderColor, conjoin:=True)
+        print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=ColorHeader, arbitraryColor:=HeaderColor, conjoin:=True)
         For Each line In descriptionItems
             print(0, line, isCentered:=True)
         Next
