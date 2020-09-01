@@ -45,7 +45,7 @@ Module diffmainmenu
 
     ''' <summary> Handles the user input from the Diff main menu </summary>
     ''' <param name="input"> The user's input </param>
-    ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
+    ''' Docs last updated: 2020-09-01 | Code last updated: 2020-09-01
     Public Sub handleDiffMainMenuUserInput(input As String)
         Select Case True
             Case input = "0"
@@ -72,7 +72,7 @@ Module diffmainmenu
                                         (Not isOffline AndAlso ((Not SaveDiffLog AndAlso input = "7") OrElse
                                         (SaveDiffLog AndAlso input = "8"))) OrElse
                                         (isOffline AndAlso ((input = "5") OrElse (input = "6" AndAlso SaveDiffLog)))) ' Offline case
-                resetModuleSettings("Diff", AddressOf initDefaultDiffSettings)
+                resetModuleSettings(NameOf(Diff), AddressOf initDefaultDiffSettings)
             Case Not MostRecentDiffLog.Length = 0 AndAlso ((input = "7" AndAlso Not DiffModuleSettingsChanged) OrElse (input = "8" AndAlso DiffModuleSettingsChanged))
                 MostRecentDiffLog = getLogSliceFromGlobal("Beginning diff", "Diff complete")
                 printSlice(MostRecentDiffLog)
