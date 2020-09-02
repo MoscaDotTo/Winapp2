@@ -17,40 +17,60 @@
 Option Strict On
 Imports System.Globalization
 ''' <summary> Performs a "Diff" on two winapp2.ini files </summary>
+''' Docs last updated: 2020-09-01 
 Module Diff
     ''' <summary> The old or local version of winapp2.ini to be diffed </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DiffFile1 As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
     ''' <summary> The new or remote version of winapp2.ini against which DiffFile1 will be compared </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DiffFile2 As iniFile = New iniFile(Environment.CurrentDirectory, "", mExist:=True)
     ''' <summary> The path to which the log will optionally be saved </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DiffFile3 As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
     ''' <summary> Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c> </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DownloadDiffFile As Boolean = Not isOffline
     ''' <summary> Indicates that the diff output should be saved to disk </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property SaveDiffLog As Boolean = False
     ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DiffModuleSettingsChanged As Boolean = False
     ''' <summary> Indicates that the remote file should be trimmed for the local system before diffing </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property TrimRemoteFile As Boolean = Not isOffline
 
     ''' <summary> The number of entries Diff determines to have been added between versions </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property AddedEntryCount As Integer = 0
     ''' <summary> The number of entries Diff determines to have been modified between versions </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property ModifiedEntryCount As Integer = 0
     ''' <summary> The number of entries Diff determines to have been removed between versions </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property RemovedEntryCount As Integer = 0
 
+    ''' <summary> The total number of keys that were added to modified entries </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Property ModEntriesAddedKeyTotal As Integer = 0
+    ''' <summary> The total number of keys that were removed from modified entries </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Property ModEntriesRemovedKeyTotal As Integer = 0
+    ''' <summary> The total number of keys that were updated in modified entries </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Property ModEntrtiesUpdatedKeyTotal As Integer = 0
 
     ''' <summary> Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property ShowFullEntries As Boolean = False
 
     ''' <summary> Holds the log from the most recent run of the Differ to display back to the user </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public MostRecentDiffLog As String = ""
 
     ''' <summary> Handles the commandline args for Diff </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     '''  Diff args:
     ''' -d          : download the latest winapp2.ini
     ''' -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
@@ -67,6 +87,7 @@ Module Diff
 
     ''' <summary> Runs the Differ from outside the module </summary>
     ''' <param name="firstFile"> The local winapp2.ini file to diff against the master GitHub copy </param>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Sub remoteDiff(firstFile As iniFile)
         DiffFile1 = firstFile
         DownloadDiffFile = True
@@ -74,6 +95,7 @@ Module Diff
     End Sub
 
     ''' <summary> Carries out the main set of Diffing operations </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Sub initDiff()
         If Not enforceFileHasContent(DiffFile1) Then Return
         If DownloadDiffFile Then
@@ -100,6 +122,7 @@ Module Diff
     End Sub
 
     '''<summary> Logs the initial portion of the diff output for the user </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub logInitDiff()
         print(3, "Diffing, please wait. This may take a moment.")
         clrConsole()
@@ -111,12 +134,14 @@ Module Diff
 
     ''' <summary> Gets the version from winapp2.ini </summary>
     ''' <param name="someFile"> A winapp2.ini format <c> iniFile </c> </param>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Function getVer(someFile As iniFile) As String
         Dim ver = If(someFile.Comments.Count > 0, someFile.Comments(0).Comment.ToString(CultureInfo.InvariantCulture).ToUpperInvariant, "000000")
         Return If(ver.Contains("VERSION"), ver.TrimStart(CChar(";")).Replace("VERSION:", "version"), " version not given")
     End Function
 
     ''' <summary> Logs and prints the summary of the Diff </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub logPostDiff()
         gLog($"Added entries: {AddedEntryCount}", indent:=True)
         gLog($"Modified entries: {ModifiedEntryCount}", indent:=True)
@@ -133,6 +158,7 @@ Module Diff
     End Sub
 
     ''' <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub compareTo()
         AddedEntryCount = 0
         RemovedEntryCount = 0
@@ -188,6 +214,11 @@ Module Diff
         Next
     End Sub
 
+    ''' <summary> Records the number of changes made in a modified entry </summary>
+    ''' <param name="ktList">The KeyTypes for the type of change being observed </param>
+    ''' <param name="countsList">The counts of the changed KeyTypes </param>
+    ''' <param name="keyType"> A KeyType from a key that has been changed and whose change will be recorded </param>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub recordModification(ByRef ktList As List(Of String), ByRef countsList As List(Of Integer), ByRef keyType As String)
         If Not ktList.Contains(keyType) Then
             ktList.Add(keyType)
@@ -197,6 +228,11 @@ Module Diff
         End If
     End Sub
 
+    ''' <summary> Outputs the entry update summary </summary>
+    ''' <param name="keyTypeList"> The KeyTypes that have been updated </param>
+    ''' <param name="countList"> The quantity of keys by KeyType who have been modified </param>
+    ''' <param name="changeType">The type of change being summarized </param>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub summarizeEntryUpdate(keyTypeList As List(Of String), countList As List(Of Integer), changeType As String)
         For i = 0 To keyTypeList.Count - 1
             gLog($"{changeType} {countList(i)} {keyTypeList(i)}s")
@@ -204,10 +240,15 @@ Module Diff
         Next
     End Sub
 
-    ''' <summary> Handles the Added and Removed cases for changes </summary>
-    ''' <param name="kl"> A list of iniKeys that have been added or removed from an entry </param>
-    ''' <param name="wasAdded"> <c> True </c> if the keys in <c> <paramref name="kl"/> </c> were added, 
-    ''' <c> False </c> if they were removed </param>
+    ''' <summary>
+    ''' Handles the Added and Removed cases for entry changes 
+    ''' </summary>
+    ''' <param name="kl"> The iniKeys that have been added/removed from an entry </param>
+    ''' <param name="wasAdded"> <c> True </c> if keys in <c> <paramref name="kl"/> </c> were added, <c> False </c> otherwise </param>
+    ''' <param name="ktList"> The KeyTypes of modified keys </param>
+    ''' <param name="countList"> The counts of the KeyTypes for modified keys </param>
+    ''' <param name="endOfEntryChanges"> Indicates that there are no more changes associated with this entry </param>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean, ByRef ktList As List(Of String), ByRef countList As List(Of Integer), endOfEntryChanges As Boolean)
         If kl.KeyCount = 0 Then Return
         Dim changeTxt = If(wasAdded, "Added", "Removed")
@@ -230,6 +271,7 @@ Module Diff
     ''' <param name="removedKeys"> <c> iniKeys </c> determined to have been removed from the newer version of the <c> iniSection </c> </param>
     ''' <param name="addedKeys"> <c> iniKeys </c> determined to have been added to the newer version of the <c> iniSection </c> </param>
     ''' <param name="updatedKeys"> <c> iniKeys </c> determined to have been modified in the newer version of the <c> iniSection </c> </param>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub chkLsts(ByRef removedKeys As keyList, ByRef addedKeys As keyList, ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)))
         Dim akAlpha As New keyList
         Dim rkAlpha As New keyList
@@ -275,6 +317,8 @@ Module Diff
     ''' <param name="updLst"> The list of updated keys </param>
     ''' <param name="key"> An added key </param>
     ''' <param name="skey"> A removed key </param>
+    ''' <param name="cond"> Indicates that the keys should be updated <br> Optional, Default: <c> True </c> </br> </param>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub updateKeys(ByRef updLst As List(Of KeyValuePair(Of iniKey, iniKey)), key As iniKey, skey As iniKey, Optional cond As Boolean = True)
         If cond Then updLst.Add(New KeyValuePair(Of iniKey, iniKey)(key, skey))
     End Sub
@@ -288,6 +332,7 @@ Module Diff
     ''' <item> <description> <c> 2 </c>: "modified" </description> </item>
     ''' </list></param>
     ''' <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub getDiff(section As iniSection, changeType As Integer, ByRef changeCounter As Integer)
         Dim changeTypeStrs = {"added", "removed", "modified"}
         changeCounter += 1
