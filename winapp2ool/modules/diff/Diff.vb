@@ -16,7 +16,7 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.Globalization
-''' <summary> Performs a diff operation on two winapp2.ini files </summary>
+''' <summary> Performs a "Diff" on two winapp2.ini files </summary>
 Module Diff
     ''' <summary> The old or local version of winapp2.ini to be diffed </summary>
     Public Property DiffFile1 As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
@@ -40,6 +40,10 @@ Module Diff
     ''' <summary> The number of entries Diff determines to have been removed between versions </summary>
     Public Property RemovedEntryCount As Integer = 0
 
+    Private Property ModEntriesAddedKeyTotal As Integer = 0
+    Private Property ModEntriesRemovedKeyTotal As Integer = 0
+    Private Property ModEntrtiesUpdatedKeyTotal As Integer = 0
+
     ''' <summary> Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu </summary>
     Public Property ShowFullEntries As Boolean = False
 
@@ -58,7 +62,7 @@ Module Diff
         If DownloadDiffFile Then DiffFile2.Name = If(RemoteWinappIsNonCC, "Online non-ccleaner winapp2.ini", "Online winapp2.ini")
         invertSettingAndRemoveArg(SaveDiffLog, "-savelog")
         getFileAndDirParams(DiffFile1, DiffFile2, DiffFile3)
-        If Not DiffFile2.Name.Length = 0 Then initDiff()
+        If DiffFile2.Name.Length <> 0 Then initDiff()
     End Sub
 
     ''' <summary> Runs the Differ from outside the module </summary>
@@ -88,8 +92,8 @@ Module Diff
         logInitDiff()
         compareTo()
         logPostDiff()
-        print(3, anyKeyStr)
-        crk()
+        print(3, pressEnterStr)
+        crl()
         MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "hasBeenRun")
         DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
         setHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
@@ -102,7 +106,7 @@ Module Diff
         Dim oldVersionNum = getVer(DiffFile1)
         Dim newVersionNum = getVer(DiffFile2)
         gLog($"Beginning diff between{oldVersionNum} and{newVersionNum}", ascend:=True)
-        print(3, $"Changes between{oldVersionNum} and{newVersionNum}")
+        print(6, $"Changes between{oldVersionNum} and{newVersionNum}", enStrCond:=False)
     End Sub
 
     ''' <summary> Gets the version from winapp2.ini </summary>
@@ -118,10 +122,14 @@ Module Diff
         gLog($"Modified entries: {ModifiedEntryCount}", indent:=True)
         gLog($"Removed entries: {RemovedEntryCount}", indent:=True)
         gLog("Diff complete", descend:=True)
+        print(0, Nothing, closeMenu:=True)
         print(4, "Summary", conjoin:=True)
-        print(0, $"Added entries: {AddedEntryCount}")
-        print(0, $"Modified entries: {ModifiedEntryCount}")
-        print(0, $"Removed entries: {RemovedEntryCount}", closeMenu:=True, trailr:=True)
+        print(0, $"Added entries: {AddedEntryCount}", colorLine:=True, enStrCond:=True)
+        print(0, $"Removed entries: {RemovedEntryCount}", colorLine:=True, enStrCond:=False)
+        print(0, $"Modified entries: {ModifiedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow, closeMenu:=ModifiedEntryCount = 0)
+        print(0, $" * {ModEntriesAddedKeyTotal} added keys (total between all entries)", colorLine:=True, enStrCond:=True, cond:=ModEntriesAddedKeyTotal > 0, closeMenu:=ModEntriesRemovedKeyTotal + ModEntrtiesUpdatedKeyTotal = 0)
+        print(0, $" * {ModEntriesRemovedKeyTotal} removed keys (total between all entries)", colorLine:=True, enStrCond:=False, cond:=ModEntriesRemovedKeyTotal > 0, closeMenu:=ModEntrtiesUpdatedKeyTotal = 0)
+        print(0, $" * {ModEntrtiesUpdatedKeyTotal} updated keys (total between all entries)", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow, cond:=ModEntrtiesUpdatedKeyTotal > 0, closeMenu:=True)
     End Sub
 
     ''' <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
@@ -129,9 +137,14 @@ Module Diff
         AddedEntryCount = 0
         RemovedEntryCount = 0
         ModifiedEntryCount = 0
+        ModEntriesAddedKeyTotal = 0
+        ModEntriesRemovedKeyTotal = 0
+        ModEntrtiesUpdatedKeyTotal = 0
         Dim comparedList As New strList
         For Each section In DiffFile1.Sections.Values
             ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
+            Dim modCounts, addCounts, remCounts As New List(Of Integer)
+            Dim modKeyTypes, addKeyTypes, remKeyTypes As New List(Of String)
             If DiffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
                 Dim sSection = DiffFile2.Sections(section.Name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
@@ -142,20 +155,26 @@ Module Diff
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
                     getDiff(sSection, 2, ModifiedEntryCount)
-                    getChangesFromList(addedKeys, True)
-                    getChangesFromList(removedKeys, False)
+                    getChangesFromList(addedKeys, True, addKeyTypes, addCounts, removedKeys.KeyCount + updatedKeys.Count = 0)
+                    getChangesFromList(removedKeys, False, remKeyTypes, remCounts, updatedKeys.Count = 0)
                     If updatedKeys.Count > 0 Then
-                        print(0, "Modified:", isCentered:=True)
                         gLog("Modifed Keys:", ascend:=True, ascAmt:=2)
-                        For Each pair In updatedKeys
+                        updatedKeys.ForEach(Sub(pair) recordModification(modKeyTypes, modCounts, pair.Value.KeyType))
+                        summarizeEntryUpdate(modKeyTypes, modCounts, "Modified")
+                        For i = 0 To updatedKeys.Count - 1
+                            Dim pair = updatedKeys(i)
+                            recordModification(modKeyTypes, modCounts, pair.Value.KeyType)
                             gLog(pair.Key.Name, indent:=True, indAmt:=2)
                             gLog("Old: " & pair.Value.toString, indent:=True, indAmt:=3)
                             gLog("New: " & pair.Key.toString, indent:=True, indAmt:=3)
                             print(0, "Old: " & pair.Value.toString, colorLine:=True)
-                            print(0, "New: " & pair.Key.toString, colorLine:=True, enStrCond:=True)
+                            print(0, "New: " & pair.Key.toString, colorLine:=True, enStrCond:=True, conjoin:=i = updatedKeys.Count - 1, fillBorder:=False, trailingBlank:=True)
                         Next
-                        gLog("", descend:=True, descAmt:=2)
+                        gLog(descend:=True, descAmt:=2)
                     End If
+                    addCounts.ForEach(Sub(count) ModEntriesAddedKeyTotal += count)
+                    remCounts.ForEach(Sub(count) ModEntriesRemovedKeyTotal += count)
+                    modCounts.ForEach(Sub(count) ModEntrtiesUpdatedKeyTotal += count)
                 End If
             ElseIf Not DiffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
                 ' If we do not have the entry in the new file, it has been removed between versions 
@@ -169,17 +188,39 @@ Module Diff
         Next
     End Sub
 
+    Private Sub recordModification(ByRef ktList As List(Of String), ByRef countsList As List(Of Integer), ByRef keyType As String)
+        If Not ktList.Contains(keyType) Then
+            ktList.Add(keyType)
+            countsList.Add(1)
+        Else
+            countsList(ktList.IndexOf(keyType)) += 1
+        End If
+    End Sub
+
+    Private Sub summarizeEntryUpdate(keyTypeList As List(Of String), countList As List(Of Integer), changeType As String)
+        For i = 0 To keyTypeList.Count - 1
+            gLog($"{changeType} {countList(i)} {keyTypeList(i)}s")
+            print(0, $"{changeType} {countList(i)} {keyTypeList(i)}s", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow, isCentered:=True, trailingBlank:=i = keyTypeList.Count - 1)
+        Next
+    End Sub
+
     ''' <summary> Handles the Added and Removed cases for changes </summary>
     ''' <param name="kl"> A list of iniKeys that have been added or removed from an entry </param>
     ''' <param name="wasAdded"> <c> True </c> if the keys in <c> <paramref name="kl"/> </c> were added, 
     ''' <c> False </c> if they were removed </param>
-    Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean)
+    Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean, ByRef ktList As List(Of String), ByRef countList As List(Of Integer), endOfEntryChanges As Boolean)
         If kl.KeyCount = 0 Then Return
-        Dim changeTxt = If(wasAdded, "Added:", "Removed:")
-        print(0, changeTxt, isCentered:=True)
+        Dim changeTxt = If(wasAdded, "Added", "Removed")
         gLog(changeTxt, indent:=True, ascend:=True)
-        For Each key In kl.Keys
-            print(0, key.toString, colorLine:=True, enStrCond:=wasAdded)
+        Dim tmpKtList = ktList
+        Dim tmpCountList = countList
+        kl.Keys.ForEach(Sub(key) recordModification(tmpKtList, tmpCountList, key.KeyType))
+        ktList = tmpKtList
+        countList = tmpCountList
+        summarizeEntryUpdate(ktList, countList, changeTxt)
+        For i = 0 To kl.Keys.Count - 1
+            Dim key = kl.Keys(i)
+            print(0, key.toString, colorLine:=True, enStrCond:=wasAdded, conjoin:=endOfEntryChanges AndAlso i = kl.Keys.Count - 1, fillBorder:=False, trailingBlank:=endOfEntryChanges AndAlso i = kl.Keys.Count)
             gLog($"{key.toString}", indent:=True, indAmt:=4)
         Next
         gLog(descend:=True)
@@ -202,7 +243,7 @@ Module Diff
                             Dim oldKey As New winapp2KeyParameters(key)
                             Dim newKey As New winapp2KeyParameters(skey)
                             ' If the path has changed, the key has been updated
-                            If Not oldKey.PathString = newKey.PathString Then updateKeys(updatedKeys, key, skey) : Exit For
+                            If oldKey.PathString <> newKey.PathString Then updateKeys(updatedKeys, key, skey) : Exit For
                             Dim oldArgsUpper As New List(Of String)
                             Dim newArgsUpper As New List(Of String)
                             oldKey.ArgsList.ForEach(Sub(arg) oldArgsUpper.Add(arg.ToUpperInvariant))
@@ -251,7 +292,7 @@ Module Diff
         Dim changeTypeStrs = {"added", "removed", "modified"}
         changeCounter += 1
         gLog($"{section.Name} has been {changeTypeStrs(changeType)}", indent:=True, leadr:=True)
-        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", isCentered:=True, colorLine:=changeType <= 1, enStrCond:=If(changeType = 1, False, True))
+        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", trailingBlank:=changeType <> 2, isCentered:=True, conjoin:=True, fillBorder:=False, colorLine:=True, useArbitraryColor:=changeType = 2, enStrCond:=changeType < 1, arbitraryColor:=ConsoleColor.Cyan)
         If ShowFullEntries Then
             print(0, "")
             For Each line In section.ToString.Split(CChar(vbCrLf))
@@ -261,4 +302,5 @@ Module Diff
             print(0, "")
         End If
     End Sub
+
 End Module
