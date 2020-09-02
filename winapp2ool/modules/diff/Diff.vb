@@ -106,7 +106,7 @@ Module Diff
         Else
             If Not enforceFileHasContent(DiffFile2) Then Return
         End If
-        If TrimRemoteFile And DownloadDiffFile Then
+        If TrimRemoteFile AndAlso DownloadDiffFile Then
             Dim tmp As New winapp2file(DiffFile2)
             Trim.trimFile(tmp)
             DiffFile2.Sections = tmp.toIni.Sections
@@ -171,7 +171,7 @@ Module Diff
             ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
             Dim modCounts, addCounts, remCounts As New List(Of Integer)
             Dim modKeyTypes, addKeyTypes, remKeyTypes As New List(Of String)
-            If DiffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
+            If DiffFile2.Sections.Keys.Contains(section.Name) AndAlso Not comparedList.contains(section.Name) Then
                 Dim sSection = DiffFile2.Sections(section.Name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New keyList
@@ -202,7 +202,7 @@ Module Diff
                     remCounts.ForEach(Sub(count) ModEntriesRemovedKeyTotal += count)
                     modCounts.ForEach(Sub(count) ModEntrtiesUpdatedKeyTotal += count)
                 End If
-            ElseIf Not DiffFile2.Sections.Keys.Contains(section.Name) And Not comparedList.contains(section.Name) Then
+            ElseIf Not DiffFile2.Sections.Keys.Contains(section.Name) AndAlso Not comparedList.contains(section.Name) Then
                 ' If we do not have the entry in the new file, it has been removed between versions 
                 getDiff(section, 1, RemovedEntryCount)
             End If
@@ -261,7 +261,7 @@ Module Diff
         summarizeEntryUpdate(ktList, countList, changeTxt)
         For i = 0 To kl.Keys.Count - 1
             Dim key = kl.Keys(i)
-            print(0, key.toString, colorLine:=True, enStrCond:=wasAdded, conjoin:=endOfEntryChanges AndAlso i = kl.Keys.Count - 1, fillBorder:=False, trailingBlank:=endOfEntryChanges AndAlso i = kl.Keys.Count)
+            print(0, key.toString, colorLine:=True, enStrCond:=wasAdded, conjoin:=endOfEntryChanges AndAlso i = kl.Keys.Count - 1, fillBorder:=False, trailingBlank:=endOfEntryChanges AndAlso i = kl.Keys.Count - 1)
             gLog($"{key.toString}", indent:=True, indAmt:=4)
         Next
         gLog(descend:=True)

@@ -24,7 +24,7 @@ Module diffmainmenu
     Public Sub printDiffMainMenu()
         Console.WindowHeight = If(DiffModuleSettingsChanged, 34, 32)
         printMenuTop({"Observe the differences between two ini files"})
-        print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (DiffFile2.Name.Length = 0 And Not DownloadDiffFile), colorLine:=True)
+        print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile), colorLine:=True)
         print(0, "Select Older/Local File:", leadingBlank:=True)
         print(1, "File Chooser", "Choose a new name or location for your older ini file")
         print(0, "Select Newer/Remote File:", leadingBlank:=True)
@@ -36,9 +36,9 @@ Module diffmainmenu
         print(1, "File Chooser (log)", "Change where Diff saves its log", SaveDiffLog, trailingBlank:=True)
         print(5, "Verbose Mode", "printing full entries in the diff output", enStrCond:=ShowFullEntries, trailingBlank:=True)
         print(0, $"Older file: {replDir(DiffFile1.Path)}")
-        print(0, $"Newer file: {If(DiffFile2.Name.Length = 0 And Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))}",
-                                  closeMenu:=Not SaveDiffLog And Not DiffModuleSettingsChanged And MostRecentDiffLog.Length = 0)
-        print(0, $"Log   file: {replDir(DiffFile3.Path)}", cond:=SaveDiffLog, closeMenu:=(Not DiffModuleSettingsChanged) And MostRecentDiffLog.Length = 0)
+        print(0, $"Newer file: {If(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))}",
+                                  closeMenu:=Not SaveDiffLog AndAlso Not DiffModuleSettingsChanged AndAlso MostRecentDiffLog.Length = 0)
+        print(0, $"Log   file: {replDir(DiffFile3.Path)}", cond:=SaveDiffLog, closeMenu:=(Not DiffModuleSettingsChanged) AndAlso MostRecentDiffLog.Length = 0)
         print(2, "Diff", cond:=DiffModuleSettingsChanged, closeMenu:=MostRecentDiffLog.Length = 0)
         print(1, "Log Viewer", "Show the most recent Diff log", cond:=Not MostRecentDiffLog.Length = 0, closeMenu:=True, leadingBlank:=True)
     End Sub
