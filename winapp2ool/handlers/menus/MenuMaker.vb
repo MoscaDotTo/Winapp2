@@ -103,14 +103,14 @@ Module MenuMaker
                      Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False,
                      Optional closeMenu As Boolean = False, Optional openMenu As Boolean = False, Optional enStrCond As Boolean = False,
                      Optional colorLine As Boolean = False, Optional useArbitraryColor As Boolean = False, Optional arbitraryColor As ConsoleColor = Nothing,
-                     Optional buffr As Boolean = False, Optional trailr As Boolean = False, Optional conjoin As Boolean = False)
+                     Optional buffr As Boolean = False, Optional trailr As Boolean = False, Optional conjoin As Boolean = False, Optional fillBorder As Boolean = True)
         If Not cond Then Return
         cwl(cond:=buffr)
         determinePrintColor(colorLine, useArbitraryColor, arbitraryColor, enStrCond)
         Dim printColor = Console.ForegroundColor
         print(0, Nothing, cond:=leadingBlank, colorLine:=False)
         Console.ForegroundColor = printColor
-        print(0, getFrame(1), cond:=openMenu)
+        print(0, getFrame(1, fillBorder), cond:=openMenu)
         Console.ForegroundColor = printColor
         Select Case printType
             ' Prints lines
@@ -124,19 +124,23 @@ Module MenuMaker
                 print(1, "Reset Settings", $"Restore {menuText}'s settings to their default state", leadingBlank:=True)
             ' Prints a box with centered text
             Case 3
-                print(4, menuText, closeMenu:=True)
+                print(4, menuText, closeMenu:=True, fillBorder:=fillBorder)
             ' The top of a menu with a header
             Case 4
                 print(0, menuText, isCentered:=True, openMenu:=True, colorLine:=colorLine, arbitraryColor:=arbitraryColor, useArbitraryColor:=useArbitraryColor)
             ' Colored line printing for enable/disable menu options
             Case 5
                 print(1, menuText, $"{enStr(enStrCond)} {optString}", colorLine:=True, enStrCond:=enStrCond)
+            ' Prints a menu header with a trailing conjoiner 
+            Case 6
+                print(0, menuText, conjoin:=True, isCentered:=True, openMenu:=True)
         End Select
-        print(0, getFrame(3), cond:=conjoin)
+        ' Overload enStrCond when printing with printType 6 to enable the conjoiner to be unfilled when the top frame is filled 
+        print(0, getFrame(3, If(openMenu AndAlso conjoin, enStrCond, fillBorder)), cond:=conjoin)
         Console.ForegroundColor = printColor
         print(0, Nothing, cond:=trailingBlank, colorLine:=False)
         determinePrintColor(colorLine, useArbitraryColor, arbitraryColor, enStrCond)
-        print(0, getFrame(2), cond:=closeMenu)
+        print(0, getFrame(2, fillBorder), cond:=closeMenu)
         If colorLine Then Console.ResetColor()
         cwl(cond:=trailr)
     End Sub
@@ -179,8 +183,8 @@ Module MenuMaker
     ''' <item> <description> 3: Filled menu line with inward facing T-frames <c> ╠═════╣ </c> </description> </item> </list>
     ''' <br/> Optional, Default: <c> 0 </c> </param>
     ''' <returns> A String containing the menuFrame requested by <c> <paramref name="frameNum"/> </c> </returns>
-    Private Function getFrame(Optional frameNum As Integer = 0) As String
-        Return mkMenuLine("", 2, frameNum)
+    Private Function getFrame(Optional frameNum As Integer = 0, Optional fillFrame As Boolean = False) As String
+        Return mkMenuLine("", 2, frameNum, fillFrame)
     End Function
 
     ''' <summary> Saves a menu header to be printed atop the next menu, optionally with color </summary>
@@ -218,8 +222,8 @@ Module MenuMaker
     ''' <summary> Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option </summary>
     ''' <param name="descriptionItems"> Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line </param>
     ''' <param name="printExit"> Indicates that an option to exit to the previous menu should be printed <br/> Optional, Default: <c> True </c> </param>
-    Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True)
-        print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=ColorHeader, arbitraryColor:=HeaderColor, conjoin:=True)
+    Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True, Optional fillConjoiner As Boolean = True)
+        print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=ColorHeader, arbitraryColor:=HeaderColor, conjoin:=True, fillBorder:=fillConjoiner)
         For Each line In descriptionItems
             print(0, line, isCentered:=True)
         Next
@@ -248,20 +252,21 @@ Module MenuMaker
 
     ''' <summary> Constructs a menu line fit to the width of the console </summary>
     ''' <param name="line"> The text to be printed </param>
-    ''' <param name="align">The alignment of the line to be printed: <br/> 
+    ''' <param name="align"> The alignment of the line to be printed: <br/> 
     ''' <list type="bullet">
-    ''' <item><description> 0: centers the string </description> </item>
-    ''' <item><description> 1: leftaligns the string </description> </item>
-    ''' <item><description> 2: prints a menu frame </description> </item>
+    ''' <item> <description> 0: centers the string </description> </item>
+    ''' <item> <description> 1: leftaligns the string </description> </item>
+    ''' <item> <description> 2: prints a menu frame (filled) </description> </item>
     ''' </list> </param>
     ''' <param name="borderInd"> Determines which characters should create the border for the menuline: <br/>
     ''' <list type="bullet">
-    ''' <item> <description> 0: Vertical lines </description> </item>
-    ''' <item> <description> 1: Ceiling brackets </description> </item>
-    ''' <item> <description> 2: Floor brackets </description> </item>
-    ''' <item> <description> 3: Conjoining brackets </description> </item> </list>
+    ''' <item> <description> 0: Vertical lines (empty) </description> </item>
+    ''' <item> <description> 1: Ceiling brackets (filled) </description> </item>
+    ''' <item> <description> 2: Floor brackets (filled) </description> </item>
+    ''' <item> <description> 3: Conjoining brackets (filled) </description> </item> 
+    ''' </list>
     ''' <br/> Optional, Default: <c> 0 </c> </param>
-    Private Function mkMenuLine(line As String, align As Integer, Optional borderInd As Integer = 0) As String
+    Private Function mkMenuLine(line As String, align As Integer, Optional borderInd As Integer = 0, Optional fillBorder As Boolean = True) As String
         If line.Length >= Console.WindowWidth - 1 Then Return line
         Dim out = $" {Openers(borderInd)}"
         Select Case align
@@ -273,7 +278,7 @@ Module MenuMaker
                 out += " " & line
                 padToEnd(out, Console.WindowWidth - 2, Closers(borderInd))
             Case 2
-                padToEnd(out, Console.WindowWidth - 2, Closers(borderInd), If(borderInd = 0, " ", "═"))
+                padToEnd(out, Console.WindowWidth - 2, Closers(borderInd), If(fillBorder, "═", " "))
         End Select
         Return out
     End Function
