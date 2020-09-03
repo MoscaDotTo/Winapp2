@@ -291,18 +291,16 @@ winapp2ool
  Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.Boolean,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.Boolean)">
- <summary>
- Handles the Added and Removed cases for entry changes 
- </summary>
+ <summary> Prints any added or removed keys from an updated entry to the user </summary>
  <param name="kl"> The iniKeys that have been added/removed from an entry </param>
  <param name="wasAdded"> <c> True </c> if keys in <c> <paramref name="kl"/> </c> were added, <c> False </c> otherwise </param>
  <param name="ktList"> The KeyTypes of modified keys </param>
  <param name="countList"> The counts of the KeyTypes for modified keys </param>
  <param name="endOfEntryChanges"> Indicates that there are no more changes associated with this entry </param>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2020-09-03 | Code last updated: 2020-09-02
 </member>
 <member name="M:winapp2ool.Diff.chkLsts(winapp2ool.keyList@,winapp2ool.keyList@,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@)">
- <summary> Determines the category of change associated with key found by Diff </summary>
+ <summary> Determines the category of change associated with keys found by Diff </summary>
  <param name="removedKeys"> <c> iniKeys </c> determined to have been removed from the newer version of the <c> iniSection </c> </param>
  <param name="addedKeys"> <c> iniKeys </c> determined to have been added to the newer version of the <c> iniSection </c> </param>
  <param name="updatedKeys"> <c> iniKeys </c> determined to have been modified in the newer version of the <c> iniSection </c> </param>
