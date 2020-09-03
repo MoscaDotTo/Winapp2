@@ -194,7 +194,8 @@ Module Diff
                             gLog("Old: " & pair.Value.toString, indent:=True, indAmt:=3)
                             gLog("New: " & pair.Key.toString, indent:=True, indAmt:=3)
                             print(0, "Old: " & pair.Value.toString, colorLine:=True)
-                            print(0, "New: " & pair.Key.toString, colorLine:=True, enStrCond:=True, conjoin:=i = updatedKeys.Count - 1, fillBorder:=False, trailingBlank:=True)
+                            print(0, "New: " & pair.Key.toString, colorLine:=True, enStrCond:=True)
+                            print(0, Nothing, cond:=i = updatedKeys.Count - 1, conjoin:=i = updatedKeys.Count - 1, fillBorder:=False)
                         Next
                         gLog(descend:=True, descAmt:=2)
                     End If
@@ -259,7 +260,8 @@ Module Diff
         summarizeEntryUpdate(ktList, countList, changeTxt)
         For i = 0 To kl.KeyCount - 1
             Dim key = kl.Keys(i)
-            print(0, key.toString, colorLine:=True, enStrCond:=wasAdded, conjoin:=endOfEntryChanges AndAlso i = kl.Keys.Count - 1, fillBorder:=False, trailingBlank:=i = kl.KeyCount - 1 AndAlso Not endOfEntryChanges)
+            print(0, key.toString, colorLine:=True, enStrCond:=wasAdded)
+            print(0, Nothing, cond:=i = kl.KeyCount - 1, conjoin:=i = kl.KeyCount - 1, fillBorder:=False)
             gLog($"{key.toString}", indent:=True, indAmt:=4)
         Next
         gLog(descend:=True)
