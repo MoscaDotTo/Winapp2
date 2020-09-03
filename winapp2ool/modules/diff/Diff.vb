@@ -240,15 +240,13 @@ Module Diff
         Next
     End Sub
 
-    ''' <summary>
-    ''' Handles the Added and Removed cases for entry changes 
-    ''' </summary>
+    ''' <summary> Prints any added or removed keys from an updated entry to the user </summary>
     ''' <param name="kl"> The iniKeys that have been added/removed from an entry </param>
     ''' <param name="wasAdded"> <c> True </c> if keys in <c> <paramref name="kl"/> </c> were added, <c> False </c> otherwise </param>
     ''' <param name="ktList"> The KeyTypes of modified keys </param>
     ''' <param name="countList"> The counts of the KeyTypes for modified keys </param>
     ''' <param name="endOfEntryChanges"> Indicates that there are no more changes associated with this entry </param>
-    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+    ''' Docs last updated: 2020-09-03 | Code last updated: 2020-09-02
     Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean, ByRef ktList As List(Of String), ByRef countList As List(Of Integer), endOfEntryChanges As Boolean)
         If kl.KeyCount = 0 Then Return
         Dim changeTxt = If(wasAdded, "Added", "Removed")
@@ -259,15 +257,15 @@ Module Diff
         ktList = tmpKtList
         countList = tmpCountList
         summarizeEntryUpdate(ktList, countList, changeTxt)
-        For i = 0 To kl.Keys.Count - 1
+        For i = 0 To kl.KeyCount - 1
             Dim key = kl.Keys(i)
-            print(0, key.toString, colorLine:=True, enStrCond:=wasAdded, conjoin:=endOfEntryChanges AndAlso i = kl.Keys.Count - 1, fillBorder:=False, trailingBlank:=endOfEntryChanges AndAlso i = kl.Keys.Count - 1)
+            print(0, key.toString, colorLine:=True, enStrCond:=wasAdded, conjoin:=endOfEntryChanges AndAlso i = kl.Keys.Count - 1, fillBorder:=False, trailingBlank:=i = kl.KeyCount - 1 AndAlso Not endOfEntryChanges)
             gLog($"{key.toString}", indent:=True, indAmt:=4)
         Next
         gLog(descend:=True)
     End Sub
 
-    ''' <summary> Determines the category of change associated with key found by Diff </summary>
+    ''' <summary> Determines the category of change associated with keys found by Diff </summary>
     ''' <param name="removedKeys"> <c> iniKeys </c> determined to have been removed from the newer version of the <c> iniSection </c> </param>
     ''' <param name="addedKeys"> <c> iniKeys </c> determined to have been added to the newer version of the <c> iniSection </c> </param>
     ''' <param name="updatedKeys"> <c> iniKeys </c> determined to have been modified in the newer version of the <c> iniSection </c> </param>
