@@ -181,8 +181,8 @@ Module Diff
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
                     getDiff(sSection, 2, ModifiedEntryCount)
-                    getChangesFromList(addedKeys, True, addKeyTypes, addCounts, removedKeys.KeyCount + updatedKeys.Count = 0)
-                    getChangesFromList(removedKeys, False, remKeyTypes, remCounts, updatedKeys.Count = 0)
+                    getChangesFromList(addedKeys, True, addKeyTypes, addCounts)
+                    getChangesFromList(removedKeys, False, remKeyTypes, remCounts)
                     If updatedKeys.Count > 0 Then
                         gLog("Modifed Keys:", ascend:=True, ascAmt:=2)
                         updatedKeys.ForEach(Sub(pair) recordModification(modKeyTypes, modCounts, pair.Value.KeyType))
@@ -246,9 +246,8 @@ Module Diff
     ''' <param name="wasAdded"> <c> True </c> if keys in <c> <paramref name="kl"/> </c> were added, <c> False </c> otherwise </param>
     ''' <param name="ktList"> The KeyTypes of modified keys </param>
     ''' <param name="countList"> The counts of the KeyTypes for modified keys </param>
-    ''' <param name="endOfEntryChanges"> Indicates that there are no more changes associated with this entry </param>
-    ''' Docs last updated: 2020-09-03 | Code last updated: 2020-09-02
-    Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean, ByRef ktList As List(Of String), ByRef countList As List(Of Integer), endOfEntryChanges As Boolean)
+    ''' Docs last updated: 2020-09-03 | Code last updated: 2020-09-03
+    Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean, ByRef ktList As List(Of String), ByRef countList As List(Of Integer))
         If kl.KeyCount = 0 Then Return
         Dim changeTxt = If(wasAdded, "Added", "Removed")
         gLog(changeTxt, indent:=True, ascend:=True)
