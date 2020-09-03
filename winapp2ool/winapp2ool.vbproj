@@ -135,10 +135,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="handlers\settings\settingsHandler.vb" />
-    <Compile Include="modules\ccdebug\CCiniDebug.vb" />
+    <Compile Include="modules\ccdebug\tool\CCiniDebug.vb" />
     <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
     <Compile Include="modules\ccdebug\settingshandler\ccdebugsettinghandler.vb" />
-    <Compile Include="modules\diff\Diff.vb" />
+    <Compile Include="modules\diff\tool\Diff.vb" />
     <Compile Include="modules\diff\mainmenu\diffmainmenu.vb" />
     <Compile Include="modules\diff\settingshandler\diffsettingshandler.vb" />
     <Compile Include="modules\download\Downloader.vb" />
