@@ -290,14 +290,13 @@ winapp2ool
  <param name="changeType">The type of change being summarized </param>
  Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
-<member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.Boolean,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.Boolean)">
+<member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.Boolean,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@)">
  <summary> Prints any added or removed keys from an updated entry to the user </summary>
  <param name="kl"> The iniKeys that have been added/removed from an entry </param>
  <param name="wasAdded"> <c> True </c> if keys in <c> <paramref name="kl"/> </c> were added, <c> False </c> otherwise </param>
  <param name="ktList"> The KeyTypes of modified keys </param>
  <param name="countList"> The counts of the KeyTypes for modified keys </param>
- <param name="endOfEntryChanges"> Indicates that there are no more changes associated with this entry </param>
- Docs last updated: 2020-09-03 | Code last updated: 2020-09-02
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.Diff.chkLsts(winapp2ool.keyList@,winapp2ool.keyList@,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@)">
  <summary> Determines the category of change associated with keys found by Diff </summary>
@@ -324,7 +323,7 @@ winapp2ool
  <item> <description> <c> 2 </c>: "modified" </description> </item>
  </list></param>
  <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="T:winapp2ool.diffmainmenu">
  <summary> Displays the Diff main menu to the user and handles their input </summary>
@@ -354,6 +353,15 @@ winapp2ool
 <member name="M:winapp2ool.diffsettingshandler.createDiffSettingsSection">
  <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
  Docs last updated: 2020-08-30 | Code last updated: 2020-07-19
+</member>
+<member name="T:winapp2ool.downloadsettingshandler">
+ <summary> </summary>
+</member>
+<member name="M:winapp2ool.downloadsettingshandler.getSerializedDownloaderSettings">
+ <summary> Loads values from disk into memory for the Downloader module settings </summary>
+</member>
+<member name="M:winapp2ool.downloadsettingshandler.createDownloadSettingsSection">
+ <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
 </member>
 <member name="T:winapp2ool.Downloader">
  <summary>
@@ -400,36 +408,17 @@ winapp2ool
 <member name="P:winapp2ool.Downloader.downloadFile">
 <summary> Holds the path of any files to be saved by the Downloader </summary>
 </member>
-<member name="P:winapp2ool.Downloader.ModuleSettingsChanged">
+<member name="P:winapp2ool.Downloader.DownloadModuleSettingsChanged">
  <summary> Indicates that the Downloader module's settings have been changed from their defaults </summary>
-</member>
-<member name="M:winapp2ool.Downloader.initDefaultSettings">
- <summary> Restores the default state of the module's parameters </summary>
-</member>
-<member name="M:winapp2ool.Downloader.getSerializedDownloaderSettings">
- <summary> Loads values from disk into memory for the Downloader module settings </summary>
-</member>
-<member name="M:winapp2ool.Downloader.createDownloadSettingsSection">
- <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
 </member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
  <summary> Handles the commandline args for the Downloader </summary>
-</member>
-<member name="M:winapp2ool.Downloader.printMenu">
- <summary> Prints the download menu to the user </summary>
-</member>
-<member name="M:winapp2ool.Downloader.handleUserInput(System.String)">
- <summary> Handles user input for the Downloader menu </summary>
- <param name="input"> The user's input </param>
 </member>
 <member name="M:winapp2ool.Downloader.winapp2link">
  <summary> Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration </summary>
 </member>
 <member name="M:winapp2ool.Downloader.toolExeLink">
 <summary> Returns the link to winapp2ool.exe on the appropriate branch for the current executable </summary>
-</member>
-<member name="M:winapp2ool.Downloader.toolVerTxtLink">
- <summary> Returns the link to version.txt on the appropriate branch for the current executable </summary>
 </member>
 <member name="M:winapp2ool.Downloader.GetNameFromDL(System.Boolean)">
  <summary> Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading </summary>
@@ -1517,6 +1506,19 @@ winapp2ool
 <member name="M:winapp2ool.winapp2handler.sortEntryNames(winapp2ool.iniFile)">
  <summary> Returns the <c> Names </c> of the <c> iniSections </c> in an <c> iniFile </c> sorted in winapp2.ini order as a <c> strList </c></summary>
  <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
+</member>
+<member name="T:winapp2ool.downloadmainmenu">
+ <summary> </summary>
+</member>
+<member name="M:winapp2ool.downloadmainmenu.initDefaultSettings">
+ <summary> Restores the default state of the module's parameters </summary>
+</member>
+<member name="M:winapp2ool.downloadmainmenu.printDownloadMainMenu">
+ <summary> Prints the download menu to the user </summary>
+</member>
+<member name="M:winapp2ool.downloadmainmenu.handleDownloadUserInput(System.String)">
+ <summary> Handles user input for the Downloader menu </summary>
+ <param name="input"> The user's input </param>
 </member>
 <member name="T:winapp2ool.launcher">
  <summary> The main event loop for winapp2ool  </summary>
