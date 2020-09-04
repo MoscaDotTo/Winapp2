@@ -246,7 +246,7 @@ Module Diff
     ''' <param name="wasAdded"> <c> True </c> if keys in <c> <paramref name="kl"/> </c> were added, <c> False </c> otherwise </param>
     ''' <param name="ktList"> The KeyTypes of modified keys </param>
     ''' <param name="countList"> The counts of the KeyTypes for modified keys </param>
-    ''' Docs last updated: 2020-09-03 | Code last updated: 2020-09-03
+    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private Sub getChangesFromList(kl As keyList, wasAdded As Boolean, ByRef ktList As List(Of String), ByRef countList As List(Of Integer))
         If kl.KeyCount = 0 Then Return
         Dim changeTxt = If(wasAdded, "Added", "Removed")
@@ -260,7 +260,7 @@ Module Diff
         For i = 0 To kl.KeyCount - 1
             Dim key = kl.Keys(i)
             print(0, key.toString, colorLine:=True, enStrCond:=wasAdded)
-            print(0, Nothing, cond:=i = kl.KeyCount - 1, conjoin:=i = kl.KeyCount - 1, fillBorder:=False)
+            print(0, Nothing, cond:=i = kl.KeyCount - 1, conjoin:=True, fillBorder:=False)
             gLog($"{key.toString}", indent:=True, indAmt:=4)
         Next
         gLog(descend:=True)
@@ -331,12 +331,14 @@ Module Diff
     ''' <item> <description> <c> 2 </c>: "modified" </description> </item>
     ''' </list></param>
     ''' <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
-    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private Sub getDiff(section As iniSection, changeType As Integer, ByRef changeCounter As Integer)
         Dim changeTypeStrs = {"added", "removed", "modified"}
         changeCounter += 1
         gLog($"{section.Name} has been {changeTypeStrs(changeType)}", indent:=True, leadr:=True)
-        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", trailingBlank:=changeType <> 2, isCentered:=True, conjoin:=True, fillBorder:=False, colorLine:=True, useArbitraryColor:=changeType = 2, enStrCond:=changeType < 1, arbitraryColor:=ConsoleColor.Cyan)
+        print(0, Nothing)
+        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", isCentered:=True, fillBorder:=False, colorLine:=True, useArbitraryColor:=changeType = 2, enStrCond:=changeType < 1, arbitraryColor:=ConsoleColor.Cyan)
+        print(0, Nothing, conjoin:=True, fillBorder:=False)
         If ShowFullEntries Then
             print(0, "")
             For Each line In section.ToString.Split(CChar(vbCrLf))
