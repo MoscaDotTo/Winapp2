@@ -1,5 +1,4 @@
-﻿Option Strict On
-'    Copyright (C) 2018-2020 Robbie Ward
+﻿'    Copyright (C) 2018-2020 Robbie Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -15,7 +14,7 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
-Imports System.Globalization
+Option Strict On
 ''' <summary>
 ''' This module contains functions that allow the user to reach online resources. 
 ''' Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
@@ -49,32 +48,7 @@ Module Downloader
     Public Property downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
     ''' <summary> Indicates that the Downloader module's settings have been changed from their defaults </summary>
-    Private Property ModuleSettingsChanged As Boolean = False
-
-    ''' <summary> Restores the default state of the module's parameters </summary>
-    Private Sub initDefaultSettings()
-        downloadFile.resetParams()
-        ModuleSettingsChanged = False
-        restoreDefaultSettings(NameOf(Downloader), AddressOf createDownloadSettingsSection)
-    End Sub
-
-    ''' <summary> Loads values from disk into memory for the Downloader module settings </summary>
-    Public Sub getSerializedDownloaderSettings()
-        For Each kvp In settingsDict(NameOf(Downloader))
-            Select Case kvp.Key
-                Case NameOf(downloadFile) & "_Dir"
-                    downloadFile.Dir = kvp.Value
-                Case NameOf(ModuleSettingsChanged)
-                    ModuleSettingsChanged = CBool(kvp.Value)
-            End Select
-        Next
-    End Sub
-
-    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
-    Public Sub createDownloadSettingsSection()
-        Dim downloadSettingTuple As New List(Of String) From {NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged), NameOf(downloadFile), "", downloadFile.Dir}
-        createModuleSettingsSection(NameOf(Downloader), downloadSettingTuple, 1, 1)
-    End Sub
+    Public Property DownloadModuleSettingsChanged As Boolean = False
 
     ''' <summary> Handles the commandline args for the Downloader </summary>
     Public Sub handleCmdLine()
@@ -82,7 +56,7 @@ Module Downloader
         If cmdargs.Count > 0 Then
             Select Case cmdargs(0).ToUpperInvariant
                 Case "1", "2", "WINAPP2"
-                    fileLink = If(Not cmdargs(0) = "2", wa2Link, nonccLink)
+                    fileLink = If(cmdargs(0) <> "2", wa2Link, nonccLink)
                     downloadFile.Name = "winapp2.ini"
                 Case "3", "WINAPP2OOL"
                     fileLink = toolLink
@@ -110,72 +84,6 @@ Module Downloader
         download(downloadFile, fileLink)
     End Sub
 
-    ''' <summary> Prints the download menu to the user </summary>
-    Public Sub printMenu()
-        printMenuTop({"Download files from the winapp2 GitHub"})
-        print(1, "Winapp2.ini", "Download the latest winapp2.ini")
-        print(1, "Non-CCleaner", "Download the latest non-ccleaner winapp2.ini")
-        print(1, "Winapp2ool", "Download the latest winapp2ool.exe")
-        print(1, "Removed Entries.ini", "Download only entries used to create the non-ccleaner winapp2.ini", leadingBlank:=True)
-        print(1, "Directory", "Change the save directory", trailingBlank:=True)
-        print(1, "Advanced", "Settings for power users")
-        print(1, "ReadMe", "The winapp2ool ReadMe")
-        print(0, $"Save directory: {replDir(downloadFile.Dir)}", leadingBlank:=True, closeMenu:=Not ModuleSettingsChanged)
-        print(2, NameOf(Downloader), cond:=ModuleSettingsChanged, closeMenu:=True)
-    End Sub
-
-    ''' <summary> Handles user input for the Downloader menu </summary>
-    ''' <param name="input"> The user's input </param>
-    Public Sub handleUserInput(input As String)
-        Select Case input
-            Case "0"
-                exitModule()
-            Case "1", "2"
-                downloadFile.Name = "winapp2.ini"
-                Dim link = If(input = "1", wa2Link, nonccLink)
-                download(downloadFile, link)
-                If downloadFile.Dir = Environment.CurrentDirectory Then checkedForUpdates = False
-            Case "3"
-                ' Feature gate downloading the executable behind .NET 4.6+
-                If Not denyActionWithHeader(DotNetFrameworkOutOfDate, "This option requires a newer version of the .NET Framework") Then
-                    If Not denyActionWithHeader(cantDownloadExecutable And downloadFile.Dir = Environment.CurrentDirectory,
-                                                "Unable to download winapp2ool to the current directory, choose another directory before trying again") Then
-                        If downloadFile.Dir = Environment.CurrentDirectory Then
-                            autoUpdate()
-                        Else
-                            downloadFile.Name = "winapp2ool.exe"
-                            download(downloadFile, toolExeLink)
-                        End If
-                    End If
-                End If
-            Case "4"
-                downloadFile.Name = "Removed entries.ini"
-                download(downloadFile, removedLink)
-            Case "5"
-                Dim tmp = downloadFile.Dir
-                initModule("Directory Chooser", AddressOf downloadFile.printDirChooserMenu, AddressOf downloadFile.handleDirChooserInput)
-                Dim headerTxt = "Directory change aborted"
-                If Not tmp = downloadFile.Dir Then
-                    headerTxt = "Save directory changed"
-                    updateSettings(NameOf(Downloader), NameOf(downloadFile) & "_Dir", downloadFile.Dir)
-                    ModuleSettingsChanged = True
-                    updateSettings(NameOf(Downloader), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(CultureInfo.InvariantCulture))
-                    saveSettingsFile()
-                End If
-                setHeaderText(headerTxt)
-            Case "6"
-                initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)
-            Case "7"
-                ' It's actually a .md but the user doesn't need to know that  
-                downloadFile.Name = "Readme.txt"
-                download(downloadFile, readMeLink)
-            Case "8"
-                If ModuleSettingsChanged Then initDefaultSettings()
-            Case Else
-                setHeaderText(invInpStr, True)
-        End Select
-    End Sub
-
     ''' <summary> Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration </summary>
     Public Function winapp2link() As String
         Return If(RemoteWinappIsNonCC, nonccLink, wa2Link)
@@ -184,11 +92,6 @@ Module Downloader
     '''<summary> Returns the link to winapp2ool.exe on the appropriate branch for the current executable </summary>
     Public Function toolExeLink() As String
         Return If(isBeta, betaToolLink, toolLink)
-    End Function
-
-    ''' <summary> Returns the link to version.txt on the appropriate branch for the current executable </summary>
-    Public Function toolVerTxtLink() As String
-        Return If(isBeta, betaToolVerLink, toolVerLink)
     End Function
 
     ''' <summary> Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading </summary>

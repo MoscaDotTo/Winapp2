@@ -141,8 +141,9 @@
     <Compile Include="modules\diff\tool\Diff.vb" />
     <Compile Include="modules\diff\mainmenu\diffmainmenu.vb" />
     <Compile Include="modules\diff\settingshandler\diffsettingshandler.vb" />
-    <Compile Include="modules\download\Downloader.vb" />
-    <Compile Include="modules\download\advDownloads.vb" />
+    <Compile Include="modules\download\settingshandler\downloadsettingshandler.vb" />
+    <Compile Include="modules\download\tool\Downloader.vb" />
+    <Compile Include="modules\download\tool\advDownloads.vb" />
     <Compile Include="handlers\cmdline\commandLineHandler.vb" />
     <Compile Include="handlers\downloads\downloadr.vb" />
     <Compile Include="handlers\exceptions\exceptionHandler.vb" />
@@ -162,6 +163,7 @@
     <Compile Include="handlers\winapp2\winapp2keyparameters.vb" />
     <Compile Include="handlers\winapp2\winapp2entry.vb" />
     <Compile Include="handlers\winapp2\winapp2handler.vb" />
+    <Compile Include="modules\download\mainmenu\downloadmainmenu.vb" />
     <Compile Include="modules\launcher\launcher.vb" />
     <Compile Include="modules\maintool\mainmenu\maintoolmenu.vb" />
     <Compile Include="modules\maintool\settingshandler\maintoolsettinghandler.vb" />

@@ -66,7 +66,7 @@ Module maintoolmenu
             Case input = "5"
                 initModule(NameOf(CCiniDebug), AddressOf printCCDBMainMenu, AddressOf handleCCDBMainMenuUserInput)
             Case input = "6"
-                If Not denySettingOffline() Then initModule("Downloader", AddressOf Downloader.printMenu, AddressOf Downloader.handleUserInput)
+                If Not denySettingOffline() Then initModule("Downloader", AddressOf printDownloadMainMenu, AddressOf handleDownloadUserInput)
             Case input = "7"
                 initModule("Winapp2ool Settings", AddressOf printMainToolSettingsMenu, AddressOf handleMainToolSettingsInput)
             Case input = "8" And isOffline
