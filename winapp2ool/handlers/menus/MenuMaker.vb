@@ -139,7 +139,7 @@ Module MenuMaker
         print(0, getFrame(3, If(openMenu AndAlso conjoin, enStrCond, fillBorder)), cond:=conjoin)
         Console.ForegroundColor = printColor
         print(0, Nothing, cond:=trailingBlank, colorLine:=False)
-        determinePrintColor(colorLine, useArbitraryColor, arbitraryColor, enStrCond)
+        Console.ForegroundColor = printColor
         print(0, getFrame(2, fillBorder), cond:=closeMenu)
         If colorLine Then Console.ResetColor()
         cwl(cond:=trailr)
