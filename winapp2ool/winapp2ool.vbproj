@@ -239,6 +239,9 @@
   <ItemGroup>
     <Folder Include="handlers\ini\comments\" />
     <Folder Include="helpers\filesystem\" />
+    <Folder Include="modules\merge\mainmenu\" />
+    <Folder Include="modules\merge\settingshandler\" />
+    <Folder Include="modules\merge\tool\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />

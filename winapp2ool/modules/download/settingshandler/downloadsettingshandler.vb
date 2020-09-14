@@ -15,10 +15,12 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary> </summary>
+''' <summary> Syncs settings for the Download module to and from the disk </summary>
+''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 Module downloadsettingshandler
 
     ''' <summary> Loads values from disk into memory for the Downloader module settings </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Sub getSerializedDownloaderSettings()
         For Each kvp In settingsDict(NameOf(Downloader))
             Select Case kvp.Key
@@ -31,6 +33,7 @@ Module downloadsettingshandler
     End Sub
 
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Sub createDownloadSettingsSection()
         Dim downloadSettingTuple As New List(Of String) From {NameOf(DownloadModuleSettingsChanged), tsInvariant(DownloadModuleSettingsChanged), NameOf(downloadFile), "", downloadFile.Dir}
         createModuleSettingsSection(NameOf(Downloader), downloadSettingTuple, 1, 1)

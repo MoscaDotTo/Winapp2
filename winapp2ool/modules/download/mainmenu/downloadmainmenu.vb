@@ -15,10 +15,12 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary> </summary>
+''' <summary> Displays the Downloader Module main menu to the user and handles their input </summary>
+''' Docs last updated: 2020-09-14
 Module downloadmainmenu
 
     ''' <summary> Restores the default state of the module's parameters </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Private Sub initDefaultSettings()
         downloadFile.resetParams()
         DownloadModuleSettingsChanged = False
@@ -26,6 +28,7 @@ Module downloadmainmenu
     End Sub
 
     ''' <summary> Prints the download menu to the user </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Sub printDownloadMainMenu()
         printMenuTop({"Download files from the winapp2 GitHub"})
         print(1, "Winapp2.ini", "Download the latest winapp2.ini")
@@ -39,8 +42,9 @@ Module downloadmainmenu
         print(2, NameOf(Downloader), cond:=DownloadModuleSettingsChanged, closeMenu:=True)
     End Sub
 
-    ''' <summary> Handles user input for the Downloader menu </summary>
+    ''' <summary> Handles user input for the Downloader main menu </summary>
     ''' <param name="input"> The user's input </param>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Sub handleDownloadUserInput(input As String)
         Select Case input
             Case "0"
@@ -90,6 +94,5 @@ Module downloadmainmenu
                 setHeaderText(invInpStr, True)
         End Select
     End Sub
-
 
 End Module

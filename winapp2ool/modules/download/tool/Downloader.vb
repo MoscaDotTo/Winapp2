@@ -15,42 +15,55 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary>
-''' This module contains functions that allow the user to reach online resources. 
-''' Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
-''' </summary>
+''' <summary> Allows users to download files from GitHub through a simple menu </summary>
+''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 Module Downloader
     ''' <summary> The web address of the winapp2.ini GitHub </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property gitLink As String = "https://github.com/MoscaDotTo/Winapp2/"
     '''<summary> The web address of the CCleaner version of winapp2.ini </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
     '''<summary> The web address of the Non-CCleaner version of winapp2.ini </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
     '''<summary> The web address of winapp2ool.exe </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property toolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe"
     '''<summary> The web address of the beta build of winapp2ool.exe </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property betaToolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/Branch1/winapp2ool/bin/Release/winapp2ool.exe"
     '''<summary> The web address of version.txt (winapp2ool's public version identifer) </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
     ''' <summary> The web address of version.txt on the beta branch </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property betaToolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/Branch1/winapp2ool/version.txt"
     '''<summary> The web address of removed entries.ini </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property removedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Removed%20entries.ini"
     '''<summary> The web address of winapp3.ini </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property wa3link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini"
     '''<summary> The web address of archived entries.ini </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property archivedLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Archived%20entries.ini"
     '''<summary> The web address of java.ini </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
     '''<summary> The web address of the winapp2ool ReadMe file </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public ReadOnly Property readMeLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/Readme.md"
     '''<summary> Holds the path of any files to be saved by the Downloader </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Property downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
 
     ''' <summary> Indicates that the Downloader module's settings have been changed from their defaults </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Property DownloadModuleSettingsChanged As Boolean = False
 
     ''' <summary> Handles the commandline args for the Downloader </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Sub handleCmdLine()
         Dim fileLink = ""
         If cmdargs.Count > 0 Then
@@ -85,18 +98,22 @@ Module Downloader
     End Sub
 
     ''' <summary> Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Function winapp2link() As String
         Return If(RemoteWinappIsNonCC, nonccLink, wa2Link)
     End Function
 
-    '''<summary> Returns the link to winapp2ool.exe on the appropriate branch for the current executable </summary>
+    '''<summary> Returns the link to winapp2ool.exe on the appropriate branch for the current tool configuration </summary>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Function toolExeLink() As String
         Return If(isBeta, betaToolLink, toolLink)
     End Function
 
     ''' <summary> Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading </summary>
     ''' <param name="shouldDownload"> Indicates that a module is configured to download a remote winapp2.ini </param>
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Function GetNameFromDL(shouldDownload As Boolean) As String
         Return If(shouldDownload, If(RemoteWinappIsNonCC, "Online (Non-CCleaner)", "Online"), "")
     End Function
+
 End Module
