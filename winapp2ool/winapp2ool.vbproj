@@ -167,7 +167,9 @@
     <Compile Include="modules\launcher\launcher.vb" />
     <Compile Include="modules\maintool\mainmenu\maintoolmenu.vb" />
     <Compile Include="modules\maintool\settingshandler\maintoolsettinghandler.vb" />
-    <Compile Include="modules\merge\Merge.vb" />
+    <Compile Include="modules\merge\mainmenu\mergemainmenu.vb" />
+    <Compile Include="modules\merge\tool\Merge.vb" />
+    <Compile Include="modules\merge\settingshandler\mergesettinghandler.vb" />
     <Compile Include="modules\minefield\java\JavaMaker.vb" />
     <Compile Include="modules\minefield\Minefield.vb" />
     <Compile Include="modules\minefield\outlooker\OutlookMaker.vb" />
@@ -239,9 +241,6 @@
   <ItemGroup>
     <Folder Include="handlers\ini\comments\" />
     <Folder Include="helpers\filesystem\" />
-    <Folder Include="modules\merge\mainmenu\" />
-    <Folder Include="modules\merge\settingshandler\" />
-    <Folder Include="modules\merge\tool\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />

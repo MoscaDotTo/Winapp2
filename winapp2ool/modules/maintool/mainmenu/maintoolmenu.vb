@@ -60,7 +60,7 @@ Module maintoolmenu
             Case input = "2"
                 initModule(NameOf(Trim), AddressOf Trim.printMenu, AddressOf Trim.handleUserInput)
             Case input = "3"
-                initModule(NameOf(Merge), AddressOf Merge.printMenu, AddressOf Merge.handleUserInput)
+                initModule(NameOf(Merge), AddressOf printMergeMainMenu, AddressOf handleMergeMainMenuUserInput)
             Case input = "4"
                 initModule(NameOf(Diff), AddressOf printDiffMainMenu, AddressOf handleDiffMainMenuUserInput)
             Case input = "5"
