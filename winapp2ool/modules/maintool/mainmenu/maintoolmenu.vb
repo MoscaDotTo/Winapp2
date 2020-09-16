@@ -21,7 +21,7 @@ Module maintoolmenu
     ''' <summary> Prints the main winapp2ool menu to the user </summary>
     ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Sub printToolMainMenu()
-        checkUpdates(Not isOffline And Not checkedForUpdates)
+        checkUpdates(Not isOffline AndAlso Not checkedForUpdates)
         printMenuTop(Array.Empty(Of String)(), False)
         print(0, "Winapp2ool is currently in offline mode", cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
         print(0, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
@@ -36,14 +36,14 @@ Module maintoolmenu
         print(1, "CCiniDebug", "Sort and trim ccleaner.ini", trailingBlank:=True)
         print(1, "Downloader", "Download files from the Winapp2 GitHub")
         print(1, "Settings", "Manage Winapp2ool's settings", closeMenu:=Not (isOffline Or waUpdateIsAvail Or updateIsAvail), arbitraryColor:=ConsoleColor.Yellow, colorLine:=True, useArbitraryColor:=True)
-        If waUpdateIsAvail And Not isOffline Then
+        If waUpdateIsAvail AndAlso Not isOffline Then
             print(1, "Update", "Update your local copy of winapp2.ini", leadingBlank:=True)
             print(1, "Update & Trim", "Download and trim the latest winapp2.ini")
             print(1, "Show update diff", "See the difference between your local file and the latest", closeMenu:=Not updateIsAvail)
         End If
-        print(1, "Update", "Get the latest Winapp2ool.exe", updateIsAvail And Not DotNetFrameworkOutOfDate, True, closeMenu:=True)
+        print(1, "Update", "Get the latest Winapp2ool.exe", updateIsAvail AndAlso Not DotNetFrameworkOutOfDate, True, closeMenu:=True)
         print(1, "Go online", "Retry your internet connection", isOffline, True, closeMenu:=True)
-        Console.WindowHeight = If(waUpdateIsAvail And updateIsAvail, 34, 32)
+        Console.WindowHeight = If(waUpdateIsAvail AndAlso updateIsAvail, 34, 32)
     End Sub
 
     ''' <summary> Handles the user input for the menu </summary>
@@ -69,25 +69,25 @@ Module maintoolmenu
                 If Not denySettingOffline() Then initModule("Downloader", AddressOf printDownloadMainMenu, AddressOf handleDownloadUserInput)
             Case input = "7"
                 initModule("Winapp2ool Settings", AddressOf printMainToolSettingsMenu, AddressOf handleMainToolSettingsInput)
-            Case input = "8" And isOffline
+            Case input = "8" AndAlso isOffline
                 chkOfflineMode()
                 setHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", True, isOffline)
-            Case input = "8" And waUpdateIsAvail
+            Case input = "8" AndAlso waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading, this may take a moment...")
                 download(New iniFile(Environment.CurrentDirectory, "winapp2.ini"), winapp2link, False)
                 waUpdateIsAvail = False
-            Case input = "9" And waUpdateIsAvail
+            Case input = "9" AndAlso waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading & trimming, this may take a moment...")
                 remoteTrim(New iniFile(), New iniFile(Environment.CurrentDirectory, "winapp2.ini"), True)
                 waUpdateIsAvail = False
-            Case input = "10" And waUpdateIsAvail
+            Case input = "10" AndAlso waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading & diffing, this may take a moment...")
                 remoteDiff(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
                 setHeaderText("Diff Complete")
-            Case (input = "11" And (updateIsAvail And waUpdateIsAvail)) Or (input = "8" And (Not waUpdateIsAvail And updateIsAvail)) And Not (DotNetFrameworkOutOfDate Or cantDownloadExecutable)
+            Case (input = "11" AndAlso (updateIsAvail AndAlso waUpdateIsAvail)) OrElse (input = "8" AndAlso (Not waUpdateIsAvail AndAlso updateIsAvail)) AndAlso Not (DotNetFrameworkOutOfDate OrElse cantDownloadExecutable)
                 cwl("Downloading and updating Winapp2ool.exe, this may take a moment...")
                 autoUpdate()
             Case input = "m"
