@@ -59,7 +59,7 @@ Module mergemainmenu
                 changeFileParams(MergeFile3, MergeModuleSettingsChanged, NameOf(Merge), NameOf(MergeFile3), NameOf(MergeModuleSettingsChanged))
             Case input = "8"
                 toggleSettingParam(mergeMode, "Merge Mode ", MergeModuleSettingsChanged, NameOf(Merge), NameOf(mergeMode), NameOf(MergeModuleSettingsChanged))
-            Case input = "9" And ModuleSettingsChanged
+            Case input = "9" And MergeModuleSettingsChanged
                 resetModuleSettings("Merge", AddressOf initDefaultMergeSettings)
             Case Else
                 setHeaderText(invInpStr, True)
