@@ -43,7 +43,7 @@ Module mergemainmenu
         Select Case True
             Case input = "0"
                 exitModule()
-            Case input = "1" Or input.Length = 0
+            Case input = "1" OrElse input.Length = 0
                 If Not denyActionWithHeader(MergeFile2.Name.Length = 0, "You must select a file to merge") Then initMerge()
             Case input = "2"
                 changeMergeName("Removed entries.ini")
@@ -65,6 +65,5 @@ Module mergemainmenu
                 setHeaderText(invInpStr, True)
         End Select
     End Sub
-
 
 End Module
