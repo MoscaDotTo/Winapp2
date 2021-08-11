@@ -128,7 +128,7 @@ LangSecRef     | Section
   * `ExcludeKey1=FILE|%WinDir%\System32\LogFiles\|myfile.txt` excludes `myfile.txt` in the `%WinDir%\System32\LogFiles` directory from being deleted.
   * `ExcludeKey2=REG|HKCU\Software\Piriform` will prevent keys in `HKEY_CURRENT_USER\Software\Piriform` from being deleted from the Registry.
 * Supports wildcards: 
-  * `ExcludeKey1=PATH|C:\Windows\|*.exe` excludes files of types `.exe` in the `C:\Windows` directory from being deleted.
+  * `ExcludeKey1=PATH|C:\Windows\|*.exe` excludes files of type `.exe` in the `C:\Windows` directory from being deleted.
   * `ExcludeKey2=PATH|C:\Temp\|*.*` excludes all of the files located in the `C:\Temp` directory and all sub directories from being deleted.
   * `ExcludeKey3=PATH|%WinDir%\System32\LogFiles\SCM\|*-*-*-*.*` excludes all of the files whose name matches the pattern  `*-*-*-*.*` in the `%WinDir%\System32\LogFiles\SCM` directory from being deleted.
 
