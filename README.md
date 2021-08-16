@@ -15,7 +15,7 @@ Name           | Purpose
 
 * [CCleaner](https://www.ccleaner.com/ccleaner):
   * Download the latest Winapp2.ini from this repo and place it in the same directory as ccleaner.exe.
-  * Note: CCleaner 5.64.7613 is the last version to work on Windows XP and Vista. Winapp2.ini and Winapp3.ini will continue to work with this version.
+  * Note: CCleaner 5.64.7577 is the last version to work on Windows XP and Vista (for non-SSE2 CPUs CCleaner 5.26.5937). Winapp2.ini and Winapp3.ini will continue to work with this version.
 
 * [BleachBit](https://www.bleachbit.org):
   * Open BleachBit.
@@ -128,9 +128,9 @@ LangSecRef     | Section
   * `ExcludeKey1=FILE|%WinDir%\System32\LogFiles\|myfile.txt` excludes `myfile.txt` in the `%WinDir%\System32\LogFiles` directory from being deleted.
   * `ExcludeKey2=REG|HKCU\Software\Piriform` will prevent keys in `HKEY_CURRENT_USER\Software\Piriform` from being deleted from the Registry.
 * Supports wildcards: 
-  * `ExcludeKey1=PATH|%WinDir%\System32\LogFiles\SCM\|*-*-*-*.*` excludes all of the files whose name matches the pattern  `*-*-*-*.*` in the `%WinDir%\System32\LogFiles\SCM` directory from being deleted.
-  * `ExcludeKey1=PATH|C:\Temp\|*.*` excludes all of the files located in the `C:\Temp` directory and all sub directories from being deleted.
-  * `ExcludeKey2=PATH|C:\Windows\|*.exe;*.bat` excludes files of types `.exe` and `.bat` in the `C:\Windows` directory from being deleted.
+  * `ExcludeKey1=PATH|C:\Windows\|*.exe` excludes files of type `.exe` in the `C:\Windows` directory from being deleted.
+  * `ExcludeKey2=PATH|C:\Temp\|*.*` excludes all of the files located in the `C:\Temp` directory and all sub directories from being deleted.
+  * `ExcludeKey3=PATH|%WinDir%\System32\LogFiles\SCM\|*-*-*-*.*` excludes all of the files whose name matches the pattern  `*-*-*-*.*` in the `%WinDir%\System32\LogFiles\SCM` directory from being deleted.
 
 ### Unsupported functions:
 
@@ -158,7 +158,7 @@ Variable       | Windows Vista-10 Path | WindowsXP Path
 `%CommonProgramFiles%`* | `C:\Program Files\Common Files` | `C:\Program Files\Common Files`
 `%Documents%` | `C:\Users\%UserName%\Documents` | `C:\Documents and Settings\%UserName%\My Documents`
 `%LocalAppData%` | `C:\Users\%UserName%\AppData\Local` | `C:\Documents and Settings\%UserName%\Local Settings\Application Data`
-`%LoalLowAppData%` | `C:\Users\%UserName%\AppData\LocalLow` | N/A
+`%LocalLowAppData%` | `C:\Users\%UserName%\AppData\LocalLow` | N/A
 `%Music%` | `C:\Users\%UserName%\Music` | `C:\Documents and Settings\%UserName%\My Documents\My Music`
 `%Pictures%` | `C:\Users\%UserName%\Pictures` | `C:\Documents and Settings\%UserName%\My Documents\My Pictures`
 `%ProgramFiles%`* | `C:\Program Files` | `C:\Program Files`
