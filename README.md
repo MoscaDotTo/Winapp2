@@ -71,7 +71,7 @@ Kernel Number  | Windows Version
 
 `LangSecRef` or `Section`
 * Defines the category of the entry.
-* If this key is not provided, CCleaner will appended the entry to the bottom of the Applications tab.
+* If this key is not provided, CCleaner will append the entry to the bottom of the Applications tab.
 * Any value can be provided for `Section` keys.
 * If submitting an entry for a video game, please use `Section=Games`.
 * For `LangSecRef`, CCleaner syntax is followed. A table of valid values is below:
