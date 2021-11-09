@@ -98,7 +98,7 @@ Public Module WinappDebug
     ''' <summary> Detects short form registry paths </summary>
     Private Property shortReg As New Regex("HK(C(C$|R$|U$)|LM$|U$)")
     ''' <summary> Detects valid LangSecRef numbers </summary>
-    Private Property secRefNums As New Regex("30(0([1-6])|2([1-9])|3([0-4]))")
+    Private Property secRefNums As New Regex("30(0([1-6])|2([1-9])|3([0-8]))")
     ''' <summary> Detects valid drive letter parameters </summary>
     Private Property driveLtrs As New Regex("[a-zA-z]:")
     ''' <summary> Detects potential %EnvironmentVariables% </summary>
