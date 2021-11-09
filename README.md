@@ -95,6 +95,10 @@ LangSecRef     | Section
 3032 | CCleaner Browser
 3033 | Vivaldi
 3034 | Brave
+3035	| Opera GX
+3036 | Spotify
+3037 | Avast Secure Browser
+3038 | AVG Secure Browser
 
 `Detect` or `DetectFile`
 * These keys specify the condition under which the key should be considered valid for a system.
