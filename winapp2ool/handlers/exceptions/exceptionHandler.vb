@@ -85,4 +85,8 @@ Module exceptionHandler
     Public Sub handleNullArgException(ex As ArgumentNullException)
         printAndLogExceptionForUser(ex.ToString, ex.GetType.ToString, True)
     End Sub
+
+    Public Sub handleFileNotFoundException(ex As FileNotFoundException)
+        printAndLogExceptionForUser(ex.ToString, ex.GetType.ToString, False)
+    End Sub
 End Module
