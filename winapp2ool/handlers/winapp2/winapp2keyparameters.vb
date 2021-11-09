@@ -62,7 +62,7 @@ Public Class winapp2KeyParameters
             Case "RegKey"
                 KeyNum = key.KeyType.Replace("RegKey", "")
                 PathString = splitKey(0)
-                If splitKey.Count > 1 Then ArgsList.Add(splitKey(1))
+                If splitKey.Length > 1 Then ArgsList.Add(splitKey(1))
         End Select
     End Sub
 
