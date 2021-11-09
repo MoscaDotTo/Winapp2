@@ -73,11 +73,11 @@ winapp2ool
  version on disk from which to read them </param>
  <param name="getSerializedSettings"> The function who assigns values from disk to the current active session of a module's settings </param>
 </member>
-<member name="M:winapp2ool.settingsHandler.createModuleSettingsSection(System.String,System.String[])">
+<member name="M:winapp2ool.settingsHandler.createModuleSettingsSection(System.String,System.Collections.Generic.List{System.String},System.Int32,System.Int32)">
  <summary> Creates the <c> iniSection </c> containing the default values for variables associated with the calling module
  and adds them to the dictionary representation of the settings </summary>
  <param name="callingModule"> The name of the module whose settings are being created </param>
- <param name="settingKeys"> The array of Strings containing the module's settings and their default values </param>
+ <param name="settingTuples"> The array of Strings containing the module's settings and their default values </param>
 </member>
 <member name="M:winapp2ool.settingsHandler.getSettingIniKey(System.String,System.String,System.String,System.Boolean,System.Boolean)">
  <summary> Returns the text that will comprise the <c> iniKey </c> representation of the given <c> <paramref name="settingName"/> </c> iff it doesn't already
@@ -95,167 +95,223 @@ winapp2ool
  <param name="createSection"> The subroutine that creates the module's disk-writable settings </param>
 </member>
 <member name="T:winapp2ool.CCiniDebug">
- <summary>
- A module whose purpose is to perform some housekeeping on ccleaner.ini to help clean up after winapp2.ini
- </summary>
+ <summary> This module performs housekeeping on ccleaner.ini to clean up leftovers from winapp2.ini </summary>
 </member>
 <member name="P:winapp2ool.CCiniDebug.CCDebugFile1">
- <summary>The winapp2.ini file that ccleaner.ini may optionally be checked against</summary>
+ <summary> The winapp2.ini file that ccleaner.ini may optionally be checked against </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="P:winapp2ool.CCiniDebug.CCDebugFile2">
-<summary>The ccleaner.ini file to be debugged</summary>
+<summary> The ccleaner.ini file to be debugged </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="P:winapp2ool.CCiniDebug.CCDebugFile3">
-<summary>Holds the path for the file that will be saved to disk. Overwrites ccleaner.ini by default</summary>
+<summary> Holds the path for the debugged file that will be saved to disk. Overwrites ccleaner.ini by default </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="P:winapp2ool.CCiniDebug.PruneStaleEntries">
-<summary>Indicates that stale winapp2.ini entries should be pruned from ccleaner.ini</summary>
-<remarks>A "stale" entry is one that appears in an (app) key in ccleaner.ini but does not exist in winapp2.ini</remarks>
+<summary> Indicates that stale winapp2.ini entries should be pruned from ccleaner.ini <br/> Default: <c> True </c> </summary>
+<remarks> A "stale" entry is one that appears in an (app) key in <c> CCDebugFile2 </c> but does not have a corresponding section in <c> CCDebugFile1</c> </remarks>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="P:winapp2ool.CCiniDebug.SaveDebuggedFile">
-<summary>Indicates that the debugged file should be saved back to disk</summary>
+<summary> Indicates that the debugged file should be saved back to disk <br/> Default: <c> True </c> </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="P:winapp2ool.CCiniDebug.SortFileForOutput">
-<summary>Indicates that the contents of ccleaner.ini should be sorted alphabetically</summary>
+<summary> Indicates that the contents of ccleaner.ini should be sorted alphabetically <br /> Default: <c> True </c> </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
-<member name="P:winapp2ool.CCiniDebug.ModuleSettingsChanged">
-<summary>Indicates that the module's settings have been modified from their defaults</summary>
-</member>
-<member name="M:winapp2ool.CCiniDebug.initDefaultSettings">
- <summary>Restores the default state of the module's parameters</summary>
-</member>
-<member name="M:winapp2ool.CCiniDebug.getSerializedDebugSettings">
- <summary> Loads values from disk into memory for the CCiniDebug module settings </summary>
-</member>
-<member name="M:winapp2ool.CCiniDebug.createDebugSettingsSection">
- <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+<member name="P:winapp2ool.CCiniDebug.CCDBSettingsChanged">
+<summary> Indicates that the module's settings have been modified from their defaults </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="M:winapp2ool.CCiniDebug.handleCmdlineArgs">
- <summary>Handles the commandline args for CCiniDebug</summary>
+ <summary> Handles the commandline args for CCiniDebug </summary>
   CCiniDebug args:
  -noprune    : disable pruning of stale winapp2.ini entries
  -nosort     : disable sorting ccleaner.ini alphabetically
  -nosave     : disable saving the modified ccleaner.ini back to file
-</member>
-<member name="M:winapp2ool.CCiniDebug.printMenu">
- <summary>Prints the CCiniDebug menu to the user</summary>
-</member>
-<member name="M:winapp2ool.CCiniDebug.handleUserInput(System.String)">
- <summary>Handles the user's input from the CCiniDebug menu</summary>
- <param name="input">The user's input</param>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="M:winapp2ool.CCiniDebug.ccDebug">
-<summary>Performs the debug process on ccleaner.ini</summary>
+<summary> Prunes, sorts, and/or saves ccleaner.ini </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
-<member name="M:winapp2ool.CCiniDebug.initDebug">
- <summary>Sets up the debug and prints its results</summary>
+<member name="M:winapp2ool.CCiniDebug.initCCDebug">
+ <summary> Sets up the debug and prints its results </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="M:winapp2ool.CCiniDebug.prune(winapp2ool.iniSection@)">
- <summary>Scans for and removes stale winapp2.ini entry settings from the Options section of a ccleaner.ini file</summary>
- <param name="optionsSec">The iniSection object containing the Options section from ccleaner.ini</param>
+ <summary> Scans for and removes stale winapp2.ini entry settings from given Options section of a ccleaner.ini file </summary>
+ <param name="optionsSec"> The Options section from ccleaner.ini </param>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="M:winapp2ool.CCiniDebug.sortCC">
- <summary>Sorts the keys in the Options (only) section of ccleaner.ini</summary>
+ <summary> Sorts the keys in the Options section of <c> CCiniDebugFile2 </c></summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+</member>
+<member name="T:winapp2ool.ccdbmainmenu">
+ <summary> Contains the menu for CCiniDebug and handles the user input into that menu </summary>
+</member>
+<member name="M:winapp2ool.ccdbmainmenu.printCCDBMainMenu">
+ <summary> Prints the CCiniDebug menu to the user </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+</member>
+<member name="M:winapp2ool.ccdbmainmenu.handleCCDBMainMenuUserInput(System.String)">
+ <summary> Handles the user's input from the CCiniDebug main menu </summary>
+ <param name="input"> The user's input </param>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+</member>
+<member name="T:winapp2ool.ccdebugsettinghandler">
+ <summary> Syncs CCiniDebug settings to and from disk </summary>
+</member>
+<member name="M:winapp2ool.ccdebugsettinghandler.initDefaultCCDBSettings">
+ <summary> Restores the default state of CCiniDebug's parameters </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+</member>
+<member name="M:winapp2ool.ccdebugsettinghandler.getSerializedDebugSettings">
+ <summary> Loads values from disk into memory for the CCiniDebug module settings </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+</member>
+<member name="M:winapp2ool.ccdebugsettinghandler.createCCDBSettingsSection">
+ <summary> Adds the current (typically default) state of the CCiniDebug module's settings into the disk-writable settings representation </summary>
+ Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="T:winapp2ool.Diff">
- <summary> Performs a diff operation on two winapp2.ini files </summary>
+ <summary> Performs a "Diff" on two winapp2.ini files </summary>
+ Docs last updated: 2020-09-01 
 </member>
 <member name="P:winapp2ool.Diff.DiffFile1">
  <summary> The old or local version of winapp2.ini to be diffed </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="P:winapp2ool.Diff.DiffFile2">
  <summary> The new or remote version of winapp2.ini against which DiffFile1 will be compared </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="P:winapp2ool.Diff.DiffFile3">
  <summary> The path to which the log will optionally be saved </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="P:winapp2ool.Diff.DownloadDiffFile">
  <summary> Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c> </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="P:winapp2ool.Diff.SaveDiffLog">
  <summary> Indicates that the diff output should be saved to disk </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
-<member name="P:winapp2ool.Diff.ModuleSettingsChanged">
+<member name="P:winapp2ool.Diff.DiffModuleSettingsChanged">
  <summary> Indicates that the module settings have been modified from their defaults </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="P:winapp2ool.Diff.TrimRemoteFile">
  <summary> Indicates that the remote file should be trimmed for the local system before diffing </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="P:winapp2ool.Diff.AddedEntryCount">
  <summary> The number of entries Diff determines to have been added between versions </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="P:winapp2ool.Diff.ModifiedEntryCount">
  <summary> The number of entries Diff determines to have been modified between versions </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="P:winapp2ool.Diff.RemovedEntryCount">
  <summary> The number of entries Diff determines to have been removed between versions </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+</member>
+<member name="P:winapp2ool.Diff.ModEntriesAddedKeyTotal">
+ <summary> The total number of keys that were added to modified entries </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+</member>
+<member name="P:winapp2ool.Diff.ModEntriesRemovedKeyTotal">
+ <summary> The total number of keys that were removed from modified entries </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+</member>
+<member name="P:winapp2ool.Diff.ModEntrtiesUpdatedKeyTotal">
+ <summary> The total number of keys that were updated in modified entries </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="P:winapp2ool.Diff.ShowFullEntries">
  <summary> Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
-<member name="P:winapp2ool.Diff.MostRecentDiffLog">
+<member name="F:winapp2ool.Diff.MostRecentDiffLog">
  <summary> Holds the log from the most recent run of the Differ to display back to the user </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="M:winapp2ool.Diff.handleCmdLine">
  <summary> Handles the commandline args for Diff </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
   Diff args:
  -d          : download the latest winapp2.ini
  -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
  -savelog    : save the diff.txt log
 </member>
-<member name="M:winapp2ool.Diff.initDefaultSettings">
- <summary> Restores the default state of the module's parameters </summary>
-</member>
-<member name="M:winapp2ool.Diff.getSerializedDiffSettings">
- <summary> Loads values from disk into memory for the Diff module settings </summary>
-</member>
-<member name="M:winapp2ool.Diff.createDiffSettingsSection">
- <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
-</member>
 <member name="M:winapp2ool.Diff.remoteDiff(winapp2ool.iniFile)">
  <summary> Runs the Differ from outside the module </summary>
  <param name="firstFile"> The local winapp2.ini file to diff against the master GitHub copy </param>
-</member>
-<member name="M:winapp2ool.Diff.printMenu">
- <summary> Prints the main menu to the user </summary>
-</member>
-<member name="M:winapp2ool.Diff.handleUserInput(System.String)">
- <summary> Handles the user input from the main menu </summary>
- <param name="input"> The user's input </param>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="M:winapp2ool.Diff.initDiff">
  <summary> Carries out the main set of Diffing operations </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="M:winapp2ool.Diff.logInitDiff">
 <summary> Logs the initial portion of the diff output for the user </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="M:winapp2ool.Diff.getVer(winapp2ool.iniFile)">
  <summary> Gets the version from winapp2.ini </summary>
  <param name="someFile"> A winapp2.ini format <c> iniFile </c> </param>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="M:winapp2ool.Diff.logPostDiff">
  <summary> Logs and prints the summary of the Diff </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="M:winapp2ool.Diff.compareTo">
  <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
-<member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.Boolean)">
- <summary> Handles the Added and Removed cases for changes </summary>
- <param name="kl"> A list of iniKeys that have been added or removed from an entry </param>
- <param name="wasAdded"> <c> True </c> if the keys in <c> <paramref name="kl"/> </c> were added, 
- <c> False </c> if they were removed </param>
+<member name="M:winapp2ool.Diff.recordModification(System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.String@)">
+ <summary> Records the number of changes made in a modified entry </summary>
+ <param name="ktList">The KeyTypes for the type of change being observed </param>
+ <param name="countsList">The counts of the changed KeyTypes </param>
+ <param name="keyType"> A KeyType from a key that has been changed and whose change will be recorded </param>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+</member>
+<member name="M:winapp2ool.Diff.summarizeEntryUpdate(System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.Int32},System.String)">
+ <summary> Outputs the entry update summary </summary>
+ <param name="keyTypeList"> The KeyTypes that have been updated </param>
+ <param name="countList"> The quantity of keys by KeyType who have been modified </param>
+ <param name="changeType">The type of change being summarized </param>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+</member>
+<member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.Boolean,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@)">
+ <summary> Prints any added or removed keys from an updated entry to the user </summary>
+ <param name="kl"> The iniKeys that have been added/removed from an entry </param>
+ <param name="wasAdded"> <c> True </c> if keys in <c> <paramref name="kl"/> </c> were added, <c> False </c> otherwise </param>
+ <param name="ktList"> The KeyTypes of modified keys </param>
+ <param name="countList"> The counts of the KeyTypes for modified keys </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.Diff.chkLsts(winapp2ool.keyList@,winapp2ool.keyList@,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@)">
- <summary> Determines the category of change associated with key found by Diff </summary>
+ <summary> Determines the category of change associated with keys found by Diff </summary>
  <param name="removedKeys"> <c> iniKeys </c> determined to have been removed from the newer version of the <c> iniSection </c> </param>
  <param name="addedKeys"> <c> iniKeys </c> determined to have been added to the newer version of the <c> iniSection </c> </param>
  <param name="updatedKeys"> <c> iniKeys </c> determined to have been modified in the newer version of the <c> iniSection </c> </param>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
-<member name="M:winapp2ool.Diff.updateKeys(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@,winapp2ool.iniKey,winapp2ool.iniKey)">
+<member name="M:winapp2ool.Diff.updateKeys(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@,winapp2ool.iniKey,winapp2ool.iniKey,System.Boolean)">
  <summary> Performs change tracking for chkLst </summary>
  <param name="updLst"> The list of updated keys </param>
  <param name="key"> An added key </param>
  <param name="skey"> A removed key </param>
+ <param name="cond"> Indicates that the keys should be updated <br> Optional, Default: <c> True </c> </br> </param>
+ Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
 <member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.Int32,System.Int32@)">
  <summary> Logs the changes that have been made to a modified entry </summary>
@@ -267,6 +323,45 @@ winapp2ool
  <item> <description> <c> 2 </c>: "modified" </description> </item>
  </list></param>
  <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
+</member>
+<member name="T:winapp2ool.diffmainmenu">
+ <summary> Displays the Diff main menu to the user and handles their input </summary>
+ Docs last updated: 2020-08-30
+</member>
+<member name="M:winapp2ool.diffmainmenu.printDiffMainMenu">
+ <summary> Prints the Diff main menu to the user </summary>
+ Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
+</member>
+<member name="M:winapp2ool.diffmainmenu.handleDiffMainMenuUserInput(System.String)">
+ <summary> Handles the user input from the Diff main menu </summary>
+ <param name="input"> The user's input </param>
+ Docs last updated: 2020-09-01 | Code last updated: 2020-09-01
+</member>
+<member name="T:winapp2ool.diffsettingshandler">
+ <summary> Syncs the Diff module settings to and from disk </summary>
+ Docs last updated: 2020-08-30
+</member>
+<member name="M:winapp2ool.diffsettingshandler.initDefaultDiffSettings">
+ <summary> Restores the default state of the Diff module's properties </summary>
+ Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
+</member>
+<member name="M:winapp2ool.diffsettingshandler.getSerializedDiffSettings">
+ <summary> Assigns Diff module property values based on  </summary>
+ Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
+</member>
+<member name="M:winapp2ool.diffsettingshandler.createDiffSettingsSection">
+ <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+ Docs last updated: 2020-08-30 | Code last updated: 2020-07-19
+</member>
+<member name="T:winapp2ool.downloadsettingshandler">
+ <summary> </summary>
+</member>
+<member name="M:winapp2ool.downloadsettingshandler.getSerializedDownloaderSettings">
+ <summary> Loads values from disk into memory for the Downloader module settings </summary>
+</member>
+<member name="M:winapp2ool.downloadsettingshandler.createDownloadSettingsSection">
+ <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
 </member>
 <member name="T:winapp2ool.Downloader">
  <summary>
@@ -313,36 +408,17 @@ winapp2ool
 <member name="P:winapp2ool.Downloader.downloadFile">
 <summary> Holds the path of any files to be saved by the Downloader </summary>
 </member>
-<member name="P:winapp2ool.Downloader.ModuleSettingsChanged">
+<member name="P:winapp2ool.Downloader.DownloadModuleSettingsChanged">
  <summary> Indicates that the Downloader module's settings have been changed from their defaults </summary>
-</member>
-<member name="M:winapp2ool.Downloader.initDefaultSettings">
- <summary> Restores the default state of the module's parameters </summary>
-</member>
-<member name="M:winapp2ool.Downloader.getSerializedDownloaderSettings">
- <summary> Loads values from disk into memory for the Downloader module settings </summary>
-</member>
-<member name="M:winapp2ool.Downloader.createDownloadSettingsSection">
- <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
 </member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
  <summary> Handles the commandline args for the Downloader </summary>
-</member>
-<member name="M:winapp2ool.Downloader.printMenu">
- <summary> Prints the download menu to the user </summary>
-</member>
-<member name="M:winapp2ool.Downloader.handleUserInput(System.String)">
- <summary> Handles user input for the Downloader menu </summary>
- <param name="input"> The user's input </param>
 </member>
 <member name="M:winapp2ool.Downloader.winapp2link">
  <summary> Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration </summary>
 </member>
 <member name="M:winapp2ool.Downloader.toolExeLink">
 <summary> Returns the link to winapp2ool.exe on the appropriate branch for the current executable </summary>
-</member>
-<member name="M:winapp2ool.Downloader.toolVerTxtLink">
- <summary> Returns the link to version.txt on the appropriate branch for the current executable </summary>
 </member>
 <member name="M:winapp2ool.Downloader.GetNameFromDL(System.Boolean)">
  <summary> Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading </summary>
@@ -474,11 +550,11 @@ winapp2ool
  <summary> Creates a new <c> ArgumentException </c> when a public member is passed an invalid parameter </summary>
  <param name="argName"> The name of the argument whose value is invalid </param>
 </member>
-<member name="M:winapp2ool.exceptionHandler.handleInvalidArgException(System.ArgumentException)">
+<member name="M:winapp2ool.exceptionHandler.handleInvalidArgException(System.ArgumentException,System.Boolean,System.Boolean)">
  <summary> Passes off exceptions caused by invalid arugments to be logged and displayed to the user </summary>
  <param name="ex"> An Exception of type <c> ArgumentException </c> </param>
 </member>
-<member name="M:winapp2ool.exceptionHandler.printAndLogExceptionForUser(System.String,System.String,System.Boolean)">
+<member name="M:winapp2ool.exceptionHandler.printAndLogExceptionForUser(System.String,System.String,System.Boolean,System.Boolean)">
  <summary> Informs the user that an exception occured and records it in the winapp2ool log </summary>
  <param name="exTxt"> The full text of the exception </param>
  <param name="exType"> The <c> Type </c> of the exception </param>
@@ -983,7 +1059,7 @@ winapp2ool
  <param name="handleInput"> The subroutine that handles the module's input </param>
  <param name="itmLen"> Indicates the maximum length of menu option names <br/> Optional, Default: <c> 35 </c> </param>
 </member>
-<member name="M:winapp2ool.MenuMaker.print(System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean,System.Boolean,System.Boolean)">
+<member name="M:winapp2ool.MenuMaker.print(System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
  <summary> Prints menu lines, options, and frames fit to the current console window width </summary>
  <param name="printType"> The type of menu information to print <br/> 
  <list type="bullet">
@@ -1022,12 +1098,16 @@ winapp2ool
 <member name="M:winapp2ool.MenuMaker.crk">
  <summary> Waits for the user to press a key if output is not currently being suppressed </summary>
 </member>
+<member name="M:winapp2ool.MenuMaker.crl">
+ <summary> Waits for the users to press Enter if output is not currently being suppressed </summary>
+ Docs last updated: 2020-08-31 | Code last updated: 2020-08-31
+</member>
 <member name="M:winapp2ool.MenuMaker.clrConsole(System.Boolean)">
  <summary> Clears the console when the given <c> <paramref name="cond"/> </c> is <c> True </c> and we're not unit testing </summary>
  <remarks> When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that </remarks>
  <param name="cond"> Indicates that the console should be cleared <br/> Optional, Default: <c> True </c> </param>
 </member>
-<member name="M:winapp2ool.MenuMaker.getFrame(System.Int32)">
+<member name="M:winapp2ool.MenuMaker.getFrame(System.Int32,System.Boolean)">
  <summary> Returns an empty menu line, or a variety of filled menu lines </summary>
  <param name="frameNum"> Indicates which frame should be returned <br/>
  <list type="bullet">
@@ -1058,7 +1138,7 @@ winapp2ool
 <member name="M:winapp2ool.MenuMaker.exitModule">
  <summary> Enforces that <c> initMenu </c> exit the current level in the stack on the next iteration of its loop </summary>
 </member>
-<member name="M:winapp2ool.MenuMaker.printMenuTop(System.String[],System.Boolean)">
+<member name="M:winapp2ool.MenuMaker.printMenuTop(System.String[],System.Boolean,System.Boolean)">
  <summary> Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option </summary>
  <param name="descriptionItems"> Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line </param>
  <param name="printExit"> Indicates that an option to exit to the previous menu should be printed <br/> Optional, Default: <c> True </c> </param>
@@ -1073,21 +1153,22 @@ winapp2ool
  <param name="lineString1"> The name of the menu option </param>
  <param name="lineString2"> The description of the menu option </param>
 </member>
-<member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.Int32,System.Int32)">
+<member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.Int32,System.Int32,System.Boolean)">
  <summary> Constructs a menu line fit to the width of the console </summary>
  <param name="line"> The text to be printed </param>
- <param name="align">The alignment of the line to be printed: <br/> 
+ <param name="align"> The alignment of the line to be printed: <br/> 
  <list type="bullet">
- <item><description> 0: centers the string </description> </item>
- <item><description> 1: leftaligns the string </description> </item>
- <item><description> 2: prints a menu frame </description> </item>
+ <item> <description> 0: centers the string </description> </item>
+ <item> <description> 1: leftaligns the string </description> </item>
+ <item> <description> 2: prints a menu frame (filled) </description> </item>
  </list> </param>
  <param name="borderInd"> Determines which characters should create the border for the menuline: <br/>
  <list type="bullet">
- <item> <description> 0: Vertical lines </description> </item>
- <item> <description> 1: Ceiling brackets </description> </item>
- <item> <description> 2: Floor brackets </description> </item>
- <item> <description> 3: Conjoining brackets </description> </item> </list>
+ <item> <description> 0: Vertical lines (empty) </description> </item>
+ <item> <description> 1: Ceiling brackets (filled) </description> </item>
+ <item> <description> 2: Floor brackets (filled) </description> </item>
+ <item> <description> 3: Conjoining brackets (filled) </description> </item> 
+ </list>
  <br/> Optional, Default: <c> 0 </c> </param>
 </member>
 <member name="M:winapp2ool.MenuMaker.padToEnd(System.String@,System.Int32,System.String,System.String)">
@@ -1426,6 +1507,49 @@ winapp2ool
  <summary> Returns the <c> Names </c> of the <c> iniSections </c> in an <c> iniFile </c> sorted in winapp2.ini order as a <c> strList </c></summary>
  <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
 </member>
+<member name="T:winapp2ool.downloadmainmenu">
+ <summary> </summary>
+</member>
+<member name="M:winapp2ool.downloadmainmenu.initDefaultSettings">
+ <summary> Restores the default state of the module's parameters </summary>
+</member>
+<member name="M:winapp2ool.downloadmainmenu.printDownloadMainMenu">
+ <summary> Prints the download menu to the user </summary>
+</member>
+<member name="M:winapp2ool.downloadmainmenu.handleDownloadUserInput(System.String)">
+ <summary> Handles user input for the Downloader menu </summary>
+ <param name="input"> The user's input </param>
+</member>
+<member name="T:winapp2ool.launcher">
+ <summary> The main event loop for winapp2ool  </summary>
+</member>
+<member name="M:winapp2ool.launcher.main">
+ <summary> Performs startup checks and then initializes the winapp2ool main menu module </summary>
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+</member>
+<member name="T:winapp2ool.maintoolmenu">
+ <summary> Displays the main winapp2ool menu to the user and handles input from that menu </summary>
+</member>
+<member name="M:winapp2ool.maintoolmenu.printToolMainMenu">
+ <summary> Prints the main winapp2ool menu to the user </summary>
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+</member>
+<member name="M:winapp2ool.maintoolmenu.handleToolMainUserInput(System.String)">
+ <summary> Handles the user input for the menu </summary>
+ <param name="input"> The <c> String </c> containing the user's input </param>
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+</member>
+<member name="T:winapp2ool.mainToolSettingsHandler">
+ <summary> Syncs the winapp2ool module settings to and from disk  </summary>
+</member>
+<member name="M:winapp2ool.mainToolSettingsHandler.getSeralizedToolSettings">
+ <summary> Loads values from disk into memory for the winapp2ool module settings </summary>
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+</member>
+<member name="M:winapp2ool.mainToolSettingsHandler.createToolSettingsSection">
+<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+</member>
 <member name="T:winapp2ool.Merge">
  <summary> Facilitates the merger of one <c> iniFile </c> into another </summary>
 </member>
@@ -1573,6 +1697,22 @@ winapp2ool
 <member name="T:winapp2ool.search">
 <summary></summary>
 </member>
+<member name="T:winapp2ool.globalsettingsmenu">
+ <summary> Displays the global settings menu to the user and handles input from that menu  </summary>
+</member>
+<member name="M:winapp2ool.globalsettingsmenu.initDefaultSettings">
+ <summary> Initalizes the default state of the winapp2ool module settings </summary>
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+</member>
+<member name="M:winapp2ool.globalsettingsmenu.printMainToolSettingsMenu">
+ <summary> Prints the winapp2ool settings menu to the user </summary>
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+</member>
+<member name="M:winapp2ool.globalsettingsmenu.handleMainToolSettingsInput(System.String)">
+ <summary> Handles the user input for the winapp2ool settings menu </summary>
+ <param name="input"> The user's input </param>
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+</member>
 <member name="T:winapp2ool.Trim">
     <summary>
     This module parses a winapp2.ini file and checks each entry therein
@@ -1584,8 +1724,14 @@ winapp2ool
 <member name="P:winapp2ool.Trim.TrimFile1">
  <summary> The winapp2.ini file that will be trimmed </summary>
 </member>
+<member name="P:winapp2ool.Trim.TrimFile2">
+ <summary> Holds the path of an iniFile containing the names of Sections who should never be trimmed </summary>
+</member>
 <member name="P:winapp2ool.Trim.TrimFile3">
  <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
+</member>
+<member name="P:winapp2ool.Trim.TrimFile4">
+ <summary> Holds the path of an iniFile containing the names of Sections who should always be trimmed </summary>
 </member>
 <member name="P:winapp2ool.Trim.winVer">
  <summary> The major/minor version number on the current system </summary>
@@ -1595,6 +1741,12 @@ winapp2ool
 </member>
 <member name="P:winapp2ool.Trim.DownloadFileToTrim">
  <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
+</member>
+<member name="P:winapp2ool.Trim.UseWhiteList">
+ <summary> Indicates that the whitelist should be consulted while trimming </summary>
+</member>
+<member name="P:winapp2ool.Trim.useBlackList">
+ <summary> Indicates that the blacklist should be consulted while trimming </summary>
 </member>
 <member name="M:winapp2ool.Trim.handleCmdLine">
  <summary> Handles the commandline args for Trim </summary>
@@ -1874,6 +2026,12 @@ winapp2ool
 <member name="P:winapp2ool.WinappDebug.envVarRegex">
  <summary> Detects potential %EnvironmentVariables% </summary>
 </member>
+<member name="P:winapp2ool.WinappDebug.overrideDefaultVal">
+ <summary> Indicates that Default keys should have their values auited instead of being considered invalid for existing </summary>
+</member>
+<member name="P:winapp2ool.WinappDebug.expectedDefaultValue">
+ <summary> The expected value for Default keys when auditing their values </summary>
+</member>
 <member name="M:winapp2ool.WinappDebug.handleCmdLine">
  <summary> Handles the commandline args for <c> WinappDebug </c> </summary>
  WinappDebug specific command line args
@@ -2027,84 +2185,56 @@ winapp2ool
  <param name="currentValue"> A pointer to the string to be replaced </param>
  <param name="newValue"> The replacement value for <c> <paramref name="currentValue"/> </c> </param>
 </member>
+<member name="T:winapp2ool.Winapp2ool">
+ <summary> This is the top level module for winapp2ool, through which all other user-facing modules are accessed. The "main menu"  </summary>
+</member>
 <member name="P:winapp2ool.Winapp2ool.RemoteWinappIsNonCC">
  <summary> Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.Winapp2ool.DotNetFrameworkOutOfDate">
  <summary> Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5) </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.Winapp2ool.isOffline">
  <summary> Indicates that winapp2ool currently has access to the internet </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.Winapp2ool.isBeta">
  <summary> Indicates that this build is beta and should check the beta branch link for updates </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.Winapp2ool.cantDownloadExecutable">
  <summary> Inidcates that we're unable to download the executable </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.Winapp2ool.alreadyDownloadedExecutable">
  <summary> Indicates that winapp2ool.exe has already been downloaded during this session and prevents us from redownloading it </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.Winapp2ool.toolSettingsHaveChanged">
  <summary> Indicates that the module's settings have been changed </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
-</member>
-<member name="M:winapp2ool.Winapp2ool.initDefaultSettings">
- <summary> Initalizes the default state of the winapp2ool module settings </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
-</member>
-<member name="M:winapp2ool.Winapp2ool.getSeralizedToolSettings">
- <summary> Loads values from disk into memory for the winapp2ool module settings </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
-</member>
-<member name="M:winapp2ool.Winapp2ool.createToolSettingsSection">
-<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
-</member>
-<member name="M:winapp2ool.Winapp2ool.printMenu">
- <summary> Prints the main winapp2ool menu to the user </summary>
- Docs last updated: Before 2020-04-18 | Code last updated: Before 2020-04-18
-</member>
-<member name="M:winapp2ool.Winapp2ool.main">
- <summary> Initilizes winapp2ool by checking for internet connectivity, serializing any settings from disk,
- and processing any commandline arguments  before loading the tool's main menu </summary>
- Docs last updated: 2020-04-18 | Code last updated: Before 2020-04-18
-</member>
-<member name="M:winapp2ool.Winapp2ool.handleUserInput(System.String)">
- <summary> Handles the user input for the menu </summary>
- <param name="input"> The <c> String </c> containing the user's input </param>
- Docs last updated: 2020-04-18 | Code last updated: 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
  <summary> Checks the version of Windows on the current system and returns it as a Double </summary>
  <returns> The Windows version running on the machine, <c> 0.0 </c> if the windows version cannot be determined </returns>
- Docs last updated: 2020-04-18 | Code last updated: Before 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="M:winapp2ool.Winapp2ool.getFirstDir(System.String)">
  <summary> Returns the first portion of a registry or filepath parameterization </summary>
  <param name="val"> A Windows filesystem or registry path from which the root should be returned </param>
  <returns> The root directory given by <paramref name="val"/> </returns>
- Docs last updated: 2020-04-18 | Code last updated: Before 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
  <summary> Ensures that an <c> iniFile </c> has content and informs the user if it does not. Returns <c> False </c> if there are no sections </summary>
  <param name="iFile"> An <c> iniFile </c> to be checked for content </param>
- Docs last updated: 2020-04-18 | Code last updated: Before 2020-04-18
+ Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
-<member name="M:winapp2ool.Winapp2ool.printToolSettingsMenu">
- <summary> Prints the winapp2ool settings menu to the user </summary>
- Docs last updated: 2020-04-18 | Code last updated: 2020-04-18
-</member>
-<member name="M:winapp2ool.Winapp2ool.handleToolSettingsInput(System.String)">
- <summary> Handles the user input for the winapp2ool settings menu </summary>
- <param name="input"> The user's input </param>
- Docs last updated: 2020-04-18 | Code last updated: 2020-04-18
+<member name="M:winapp2ool.Winapp2ool.tsInvariant(System.Boolean)">
+ <summary> Returns an invariant string representation of a boolean </summary>
+ <param name="bool"> A boolean value to return as a string </param>
 </member>
 </members>
 </doc>

@@ -11,7 +11,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{F6C7DD7F-A0EE-4D4B-A111-C7B7E117512B}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <StartupObject>winapp2ool.Winapp2ool</StartupObject>
+    <StartupObject>winapp2ool.launcher</StartupObject>
     <RootNamespace>winapp2ool</RootNamespace>
     <AssemblyName>winapp2ool</AssemblyName>
     <FileAlignment>512</FileAlignment>
@@ -89,13 +89,30 @@
     <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>FB7811C37A35A366973781F82D669B8E369694ED</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>7131B54A81BCBEF4EA6876A9BB792F590C694585</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>winapp2ool_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>
+    </ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>magic_wand.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>rward.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestTimestampUrl>
+    </ManifestTimestampUrl>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -118,10 +135,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="handlers\settings\settingsHandler.vb" />
-    <Compile Include="modules\ccdebug\CCiniDebug.vb" />
-    <Compile Include="modules\diff\Diff.vb" />
-    <Compile Include="modules\download\Downloader.vb" />
-    <Compile Include="modules\download\advDownloads.vb" />
+    <Compile Include="modules\ccdebug\tool\CCiniDebug.vb" />
+    <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
+    <Compile Include="modules\ccdebug\settingshandler\ccdebugsettinghandler.vb" />
+    <Compile Include="modules\diff\tool\Diff.vb" />
+    <Compile Include="modules\diff\mainmenu\diffmainmenu.vb" />
+    <Compile Include="modules\diff\settingshandler\diffsettingshandler.vb" />
+    <Compile Include="modules\download\settingshandler\downloadsettingshandler.vb" />
+    <Compile Include="modules\download\tool\Downloader.vb" />
+    <Compile Include="modules\download\tool\advDownloads.vb" />
     <Compile Include="handlers\cmdline\commandLineHandler.vb" />
     <Compile Include="handlers\downloads\downloadr.vb" />
     <Compile Include="handlers\exceptions\exceptionHandler.vb" />
@@ -141,17 +163,24 @@
     <Compile Include="handlers\winapp2\winapp2keyparameters.vb" />
     <Compile Include="handlers\winapp2\winapp2entry.vb" />
     <Compile Include="handlers\winapp2\winapp2handler.vb" />
-    <Compile Include="modules\merge\Merge.vb" />
+    <Compile Include="modules\download\mainmenu\downloadmainmenu.vb" />
+    <Compile Include="modules\launcher\launcher.vb" />
+    <Compile Include="modules\maintool\mainmenu\maintoolmenu.vb" />
+    <Compile Include="modules\maintool\settingshandler\maintoolsettinghandler.vb" />
+    <Compile Include="modules\merge\mainmenu\mergemainmenu.vb" />
+    <Compile Include="modules\merge\tool\Merge.vb" />
+    <Compile Include="modules\merge\settingshandler\mergesettinghandler.vb" />
     <Compile Include="modules\minefield\java\JavaMaker.vb" />
     <Compile Include="modules\minefield\Minefield.vb" />
     <Compile Include="modules\minefield\outlooker\OutlookMaker.vb" />
     <Compile Include="modules\minefield\search\search.vb" />
+    <Compile Include="modules\maintool\settingsmenu\globalsettingsmenu.vb" />
     <Compile Include="modules\trim\Trim.vb" />
     <Compile Include="modules\winappdebug\components\advancedSettings\advSettings.vb" />
     <Compile Include="modules\winappdebug\components\landMine\experimentalScans.vb" />
     <Compile Include="modules\winappdebug\components\lintRules\lintRule.vb" />
     <Compile Include="modules\winappdebug\WinappDebug.vb" />
-    <Compile Include="Winapp2ool.vb" />
+    <Compile Include="modules\maintool\tool\Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -191,7 +220,6 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="packages.config" />
-    <None Include="winapp2ool_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -238,6 +266,10 @@
     <Error Condition="!Exists('packages\Microsoft.NetFramework.Analyzers.2.9.6\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NetFramework.Analyzers.2.9.6\build\Microsoft.NetFramework.Analyzers.props'))" />
     <Error Condition="!Exists('packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.6\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.6\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props'))" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿'    Copyright (C) 2018-2021 Hazel Ward
 '
 '    This file is a part of Winapp2ool
 '
@@ -25,14 +25,22 @@ Imports System.IO
 Public Module Trim
     ''' <summary> The winapp2.ini file that will be trimmed </summary>
     Public Property TrimFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
+    ''' <summary> Holds the path of an iniFile containing the names of Sections who should never be trimmed </summary>
+    Public Property TrimFile2 As New iniFile(Environment.CurrentDirectory, "whitelist.ini")
     ''' <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
     Public Property TrimFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
+    ''' <summary> Holds the path of an iniFile containing the names of Sections who should always be trimmed </summary>
+    Public Property TrimFile4 As New iniFile(Environment.CurrentDirectory, "blacklist.ini")
     ''' <summary> The major/minor version number on the current system </summary>
     Private Property winVer As Double
     ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
     Private Property ModuleSettingsChanged As Boolean = False
     ''' <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
     Private Property DownloadFileToTrim As Boolean = False
+    ''' <summary> Indicates that the whitelist should be consulted while trimming </summary>
+    Private Property UseWhiteList As Boolean = False
+    ''' <summary> Indicates that the blacklist should be consulted while trimming </summary>
+    Private Property useBlackList As Boolean = False
 
     ''' <summary> Handles the commandline args for Trim </summary>
     ''' Trim args:
@@ -47,9 +55,13 @@ Public Module Trim
     ''' <summary> Restores the default state of the module's parameters </summary>
     Private Sub initDefaultSettings()
         TrimFile1.resetParams()
+        TrimFile2.resetParams()
         TrimFile3.resetParams()
+        TrimFile4.resetParams()
         DownloadFileToTrim = False
         ModuleSettingsChanged = False
+        UseWhiteList = False
+        useBlackList = False
         restoreDefaultSettings(NameOf(Trim), AddressOf createTrimSettingsSection)
     End Sub
 
@@ -61,28 +73,36 @@ Public Module Trim
                     TrimFile1.Name = kvp.Value
                 Case NameOf(TrimFile1) & "_Dir"
                     TrimFile1.Dir = kvp.Value
+                Case NameOf(TrimFile2) & "_Name"
+                    TrimFile2.Name = kvp.Value
+                Case NameOf(TrimFile2) & "_Dir"
+                    TrimFile2.Dir = kvp.Value
                 Case NameOf(TrimFile3) & "_Name"
                     TrimFile3.Name = kvp.Value
                 Case NameOf(TrimFile3) & "_Dir"
                     TrimFile3.Dir = kvp.Value
+                Case NameOf(TrimFile4) & "_Name"
+                    TrimFile4.Name = kvp.Value
+                Case NameOf(TrimFile4) & "_Dir"
+                    TrimFile4.Dir = kvp.Value
                 Case NameOf(DownloadFileToTrim)
                     DownloadFileToTrim = CBool(kvp.Value)
                 Case NameOf(ModuleSettingsChanged)
                     ModuleSettingsChanged = CBool(kvp.Value)
+                Case NameOf(UseWhiteList)
+                    UseWhiteList = CBool(kvp.Value)
+                Case NameOf(useBlackList)
+                    useBlackList = CBool(kvp.Value)
             End Select
         Next
     End Sub
 
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     Public Sub createTrimSettingsSection()
-        createModuleSettingsSection(NameOf(Trim), {
-            getSettingIniKey(NameOf(Trim), NameOf(MergeFile1), MergeFile1.Name, isName:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(MergeFile1), MergeFile1.Dir, isDir:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(MergeFile3), MergeFile3.Name, isName:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(MergeFile3), MergeFile3.Dir, isDir:=True),
-            getSettingIniKey(NameOf(Trim), NameOf(DownloadFileToTrim), DownloadFileToTrim.ToString(Globalization.CultureInfo.InvariantCulture)),
-            getSettingIniKey(NameOf(Trim), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(Globalization.CultureInfo.InvariantCulture))
-            })
+        Dim trimSettingsTuple As New List(Of String) From {NameOf(DownloadFileToTrim), tsInvariant(DownloadFileToTrim), NameOf(UseWhiteList), tsInvariant(UseWhiteList),
+        NameOf(useBlackList), tsInvariant(useBlackList), NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged), NameOf(TrimFile1), TrimFile1.Name, TrimFile1.Dir,
+        NameOf(TrimFile2), TrimFile2.Name, TrimFile2.Dir, NameOf(TrimFile3), TrimFile3.Name, TrimFile3.Dir, NameOf(TrimFile4), TrimFile4.Name, TrimFile4.Dir}
+        createModuleSettingsSection(NameOf(Trim), trimSettingsTuple, 4, 4)
     End Sub
 
     ''' <summary> Trims an <c> iniFile </c> from outside the module </summary>
@@ -98,13 +118,20 @@ Public Module Trim
 
     ''' <summary> Prints the <c> Trim </c> menu to the user </summary>
     Public Sub printMenu()
+        If isOffline Then DownloadFileToTrim = False
         printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
         print(1, "Run (default)", "Trim winapp2.ini")
         print(5, "Toggle Download", "using the latest winapp2.ini from GitHub as the input file", Not isOffline, True, enStrCond:=DownloadFileToTrim, trailingBlank:=True)
-        print(1, "File Chooser (winapp2.ini)", "Change the winapp2.ini name or location", Not DownloadFileToTrim, isOffline, True)
-        print(1, "File Chooser (save)", "Change the save file name or location", trailingBlank:=True)
-        print(0, $"Current winapp2.ini location: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}")
-        print(0, $"Current save location: {replDir(TrimFile3.Path)}", closeMenu:=Not ModuleSettingsChanged)
+        print(1, "File Chooser (winapp2.ini)", "Configure the path to winapp2.ini ", Not DownloadFileToTrim, isOffline, True)
+        print(1, "File Chooser (save)", "Cofigure the path to which the trimmed winapp2.ini will be saved", trailingBlank:=True)
+        print(5, "Toggle Whitelist", "always keeping certain entries", enStrCond:=UseWhiteList, trailingBlank:=Not UseWhiteList)
+        print(1, "File Chooser (whitelist)", "Configure the path to the whitelist file", cond:=UseWhiteList, trailingBlank:=True)
+        print(5, "Toggle Blacklist", "always discarding certain entries", enStrCond:=useBlackList, trailingBlank:=Not useBlackList)
+        print(1, "File Chooser (blacklist)", "Configure the path to the blacklist file", cond:=useBlackList, trailingBlank:=True)
+        print(0, $"Current winapp2.ini path: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}")
+        print(0, $"Current save path: {replDir(TrimFile3.Path)}", closeMenu:=Not (UseWhiteList Or useBlackList Or ModuleSettingsChanged))
+        print(0, $"Current whitelist path: {replDir(TrimFile2.Path)}", cond:=UseWhiteList, closeMenu:=Not (useBlackList Or ModuleSettingsChanged))
+        print(0, $"Current blacklist path: {replDir(TrimFile4.Path)}", cond:=useBlackList, closeMenu:=Not ModuleSettingsChanged)
         print(2, NameOf(Trim), cond:=ModuleSettingsChanged, closeMenu:=True)
     End Sub
 
@@ -112,6 +139,9 @@ Public Module Trim
     ''' <param name="input"> The String containing the user's input </param>
     Public Sub handleUserInput(input As String)
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
+        Dim whiteOrBlack = UseWhiteList Or useBlackList
+        Dim whiteAndBlack = UseWhiteList And useBlackList
+        Dim whiteXorBlack= UseWhiteList Xor useBlackList
         Select Case True
             Case input = "0"
                 exitModule()
@@ -122,10 +152,29 @@ Public Module Trim
                                                                     NameOf(Trim), NameOf(DownloadFileToTrim), NameOf(ModuleSettingsChanged))
             Case (input = "3" And Not DownloadFileToTrim And Not isOffline) Or (input = "2" And isOffline)
                 changeFileParams(TrimFile1, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
-            Case (input = "4" And Not DownloadFileToTrim And Not isOffline) Or (input = "3" And (isOffline Or DownloadFileToTrim))
+            Case (Not isOffline And ((input = "4" And Not DownloadFileToTrim)) Or (input = "3" And (DownloadFileToTrim Or isOffline)))
                 changeFileParams(TrimFile3, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(ModuleSettingsChanged))
-            Case ModuleSettingsChanged And ((input = "5" And Not DownloadFileToTrim) Or (input = "4" And (isOffline Or DownloadFileToTrim)))
+            Case ModuleSettingsChanged And Not isOffline And (
+                    (input = "6" And DownloadFileToTrim And Not whiteOrBlack) Or
+                    (input = "7" And ((Not DownloadFileToTrim And Not whiteOrBlack) Or (DownloadFileToTrim And whiteXorBlack))) Or
+                    (input = "8" And ((Not DownloadFileToTrim And whiteXorBlack) Or (DownloadFileToTrim And whiteAndBlack))) Or
+                    (input = "9" And Not DownloadFileToTrim And whiteAndBlack))
                 resetModuleSettings(NameOf(Trim), AddressOf initDefaultSettings)
+            Case ModuleSettingsChanged And isOffline And ((input = "6" And Not whiteOrBlack) Or (input = "7" And whiteXorBlack) Or (input = "8" And whiteAndBlack))
+                resetModuleSettings(NameOf(Trim), AddressOf initDefaultSettings)
+            Case Not isOffline And ((input = "4" And DownloadFileToTrim) Or (input = "5" And Not DownloadFileToTrim)) Or (isOffline And input = "4")
+                toggleSettingParam(UseWhiteList, "Whitelisting", ModuleSettingsChanged, NameOf(Trim), NameOf(UseWhiteList), NameOf(ModuleSettingsChanged))
+            Case UseWhiteList And (Not isOffline And ((DownloadFileToTrim And input = "5") Or (Not DownloadFileToTrim And input = "6")) Or (isOffline And input = "5"))
+                changeFileParams(TrimFile2, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
+            Case (Not isOffline And ((input = "7" And Not DownloadFileToTrim And UseWhiteList) Or (input = "6" And ((Not DownloadFileToTrim And Not UseWhiteList) Or DownloadFileToTrim And UseWhiteList) Or
+                    (input = "5" And DownloadFileToTrim And Not UseWhiteList))) Or (isOffline And ((input = "5" And Not UseWhiteList) Or (input = "6" And UseWhiteList))))
+                toggleSettingParam(useBlackList, "Blacklisting", ModuleSettingsChanged, NameOf(Trim), NameOf(useBlackList), NameOf(ModuleSettingsChanged))
+            Case useBlackList And ((Not isOffline And (
+                    (input = "6" And DownloadFileToTrim And Not UseWhiteList) Or
+                    (input = "7" And ((Not DownloadFileToTrim And Not UseWhiteList) Or (DownloadFileToTrim And UseWhiteList))) Or
+                    (input = "8" And Not DownloadFileToTrim And UseWhiteList))) Or (isOffline And
+                    (input = "6" And Not UseWhiteList) Or (input = "7" And UseWhiteList)))
+                changeFileParams(TrimFile4, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile4), NameOf(ModuleSettingsChanged))
             Case Else
                 setHeaderText(invInpStr, True)
         End Select
@@ -136,6 +185,8 @@ Public Module Trim
         If Not DownloadFileToTrim Then If Not enforceFileHasContent(TrimFile1) Then Return
         If DownloadFileToTrim Then If Not checkOnline() Then setHeaderText("Internet connection lost! Please check your network connection and try again", True) : Return
         Dim winapp2 = If(DownloadFileToTrim, New winapp2file(getRemoteIniFile(winapp2link)), New winapp2file(TrimFile1))
+        If UseWhiteList Then TrimFile2.validate()
+        If useBlackList Then TrimFile4.validate()
         clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
         Dim entryCountBeforeTrim = winapp2.count
@@ -153,6 +204,7 @@ Public Module Trim
         gLog($"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
         gLog($"{winapp2.count} entries remain.")
         TrimFile3.overwriteToFile(winapp2.winapp2string)
+        If DownloadFileToTrim Then waUpdateIsAvail = False
         setHeaderText($"{TrimFile3.Name} saved")
         crk()
     End Sub
@@ -188,6 +240,8 @@ Public Module Trim
     ''' <param name="entry"> A <c> winapp2entry </c> to whose detection criteria will be audited </param>
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
         gLog($"Processing entry: {entry.Name}", ascend:=True)
+        If UseWhiteList And TrimFile2.hasSection(entry.Name) Then Return True
+        If useBlackList And TrimFile4.hasSection(entry.Name) Then Return False
         Dim hasMetDetOS = False
         ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         If Not entry.DetectOS.KeyCount = 0 Then
@@ -198,9 +252,9 @@ Public Module Trim
             If Not hasMetDetOS Then Return False
         End If
         ' Process any other Detect criteria we have
-        If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then Return True
         If checkExistence(entry.Detects, AddressOf checkRegExist) Then Return True
         If checkExistence(entry.DetectFiles, AddressOf checkPathExist) Then Return True
+        If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then Return True
         ' Return true for the case where we have only a DetectOS and we meet its criteria
         Dim onlyHasDetOS = entry.SpecialDetect.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount = 0
         gLog("No other detection keys found than DetectOS", onlyHasDetOS And hasMetDetOS, descend:=True)
@@ -312,6 +366,7 @@ Public Module Trim
         Dim root = getFirstDir(path)
         dir = dir.Replace(root & "\", "")
         Dim exists = getRegExists(root, dir)
+        gLog($"{root}\{dir} exists", exists, indent:=True)
         ' If we didn't return anything above, registry location probably doesn't exist
         Return exists
     End Function
@@ -334,6 +389,10 @@ Public Module Trim
                     Return getUserKey(dir) IsNot Nothing
                 Case "HKCR"
                     Return getCRKey(dir) IsNot Nothing
+                Case Else
+                    ' Reject malformated keys
+                    gLog($"Your key seems to be malformatted (bad root? - root: {root} - expected 'HKCU','HKLM','HKU' or 'HKCR')", indent:=True)
+                    Return False
             End Select
         Catch ex As UnauthorizedAccessException
             ' The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.
@@ -405,49 +464,62 @@ Public Module Trim
     ''' <summary> Interprets parameterized wildcards for the current system </summary>
     ''' <param name="dir"> A path containing a wildcard </param>
     Private Function expandWildcard(dir As String, isFileSystem As Boolean) As Boolean
+        gLog("Expanding Wildcard: " & dir, ascend:=True)
+
         ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
         Dim possibleDirs As New strList
-        Dim currentPaths As New strList
-        ' Split the given string into sections by directory
-        Dim splitDir = dir.Split(CChar("\"))
-        For Each pathPart In splitDir
-            ' If this directory parameterization includes a wildcard, expand it appropriately
-            ' This probably wont work if a string for some reason starts with a *
-            If pathPart.Contains("*") Then
-                For Each currentPath In currentPaths.Items
+            Dim currentPaths As New strList
+            ' Split the given string into sections by directory
+            Dim splitDir = dir.Split(CChar("\"))
+            For Each pathPart In splitDir
+                ' If this directory parameterization includes a wildcard, expand it appropriately
+                ' This probably wont work if a string for some reason starts with a *
+                If pathPart.Contains("*") Then
+                    For Each currentPath In currentPaths.Items
+                        If currentPath.Length = 0 Then gLog(NameOf(currentPath) & " is empty, aborting wildcard expansion", descend:=True) : Return False
                     ' Query the existence of child paths for each current path we hold
                     If isFileSystem Then
-                        Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
-                        ' If there are any, add them to our possibility list
-                        possibleDirs.add(possibilities, possibilities.Any)
+                        gLog("Investigating: " & pathPart & " as a subdir of " & currentPath, indent:=True)
+                        Try
+                            Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
+                            ' If there are any, add them to our possibility list
+                            possibleDirs.add(possibilities, possibilities.Any)
+                        Catch ex As ArgumentException
+                            ' These are thrown by currentPaths containing illegal characters, we'll assume this means the target doesn't exist
+                            Return False
+                        Catch ex As UnauthorizedAccessException
+                            ' Assume that if there's some directory we don't have access to, the target exists and we just can't see it 
+                            Return True
+                        End Try
                     Else
                         ' Registry Query here
                     End If
                 Next
-                ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
-                If possibleDirs.Count = 0 Then Return False
-                ' Otherwise, clear the current paths and repopulate them with the possible paths
-                currentPaths.clear()
-                currentPaths.add(possibleDirs)
-                possibleDirs.clear()
-            Else
-                If currentPaths.Count = 0 Then
-                    currentPaths.add($"{pathPart}")
+                    ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
+                    If possibleDirs.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return False
+                    ' Otherwise, clear the current paths and repopulate them with the possible paths
+                    currentPaths.clear()
+                    currentPaths.add(possibleDirs)
+                    possibleDirs.clear()
                 Else
-                    Dim newCurPaths As New strList
-                    For Each path In currentPaths.Items
-                        If Not path.EndsWith("\", StringComparison.InvariantCulture) And Not path.Length = 0 Then path += "\"
-                        newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
-                    Next
-                    currentPaths = newCurPaths
-                    If currentPaths.Count = 0 Then Return False
+                    If currentPaths.Count = 0 Then
+                        currentPaths.add($"{pathPart}")
+                    Else
+                        Dim newCurPaths As New strList
+                        For Each path In currentPaths.Items
+                            If Not path.EndsWith("\", StringComparison.InvariantCulture) And Not path.Length = 0 Then path += "\"
+                            newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
+                        Next
+                        currentPaths = newCurPaths
+                        If currentPaths.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return False
+                    End If
                 End If
-            End If
-        Next
-        ' If any file/path exists, return true
-        For Each currDir In currentPaths.Items
-            If Directory.Exists(currDir) Or File.Exists(currDir) Then Return True
-        Next
+            Next
+            ' If any file/path exists, return true
+            For Each currDir In currentPaths.Items
+                If Directory.Exists(currDir) Or File.Exists(currDir) Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return True
+            Next
+            gLog(descend:=True)
         Return False
     End Function
 

@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿'    Copyright (C) 2018-2021 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -70,7 +70,7 @@ Module downloadr
             reader.Close()
             If out Is Nothing Then Throw New ArgumentException(paramName:=NameOf(lineNum), message:=$"{lineNum} didn't return any data. It may be greater than the number of lines in the file.")
         Catch ex As ArgumentException
-            handleInvalidArgException(ex)
+            handleInvalidArgException(ex, False, True)
             Return ""
         End Try
         Return out
@@ -82,7 +82,7 @@ Module downloadr
         Try
             Dim wc As New WebClient
             gLog("Attempting to connect to GitHub")
-            wc.OpenRead("http://www.github.com")
+            wc.OpenRead("http://www.github.com").Close()
             gLog("Established connection to GitHub")
             wc.Dispose()
             Return True

@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿'    Copyright (C) 2018-2021 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -164,7 +164,12 @@ Public Module updater
             fDelete(w2lName)
             ' Move the latest version to the current directory and launch it
             File.Move(tmpToolPath, $"{Environment.CurrentDirectory}\{w2lName}")
-            System.Diagnostics.Process.Start(w2lName)
+            Dim args = ""
+            ' Pass any args that were used to start this instance of winapp2ool over to the next instance 
+            If cmdargs.Count > 1 Then cmdargs.ForEach(Sub(arg) args += arg & ", ")
+            ' Remove the trailing comma 
+            If Not args.Length = 0 Then args = args.Remove(args.Length - 2)
+            Process.Start(w2lName, args)
             Environment.Exit(0)
         Catch ex As IOException
             handleIOException(ex)

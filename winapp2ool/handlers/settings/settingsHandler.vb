@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿'    Copyright (C) 2018-2021 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -84,7 +84,7 @@ Public Module settingsHandler
         serializeModuleSettings(NameOf(Trim), AddressOf createTrimSettingsSection, AddressOf getSerializedTrimSettings)
         serializeModuleSettings(NameOf(Merge), AddressOf createMergeSettingsSection, AddressOf getSeralizedMergeSettings)
         serializeModuleSettings(NameOf(Diff), AddressOf createDiffSettingsSection, AddressOf getSerializedDiffSettings)
-        serializeModuleSettings(NameOf(CCiniDebug), AddressOf createDebugSettingsSection, AddressOf getSerializedDebugSettings)
+        serializeModuleSettings(NameOf(CCiniDebug), AddressOf createCCDBSettingsSection, AddressOf getSerializedDebugSettings)
         serializeModuleSettings(NameOf(Downloader), AddressOf createDownloadSettingsSection, AddressOf getSerializedDownloaderSettings)
     End Sub
 
@@ -126,9 +126,10 @@ Public Module settingsHandler
     ''' <summary> Creates the <c> iniSection </c> containing the default values for variables associated with the calling module
     ''' and adds them to the dictionary representation of the settings </summary>
     ''' <param name="callingModule"> The name of the module whose settings are being created </param>
-    ''' <param name="settingKeys"> The array of Strings containing the module's settings and their default values </param>
-    Public Sub createModuleSettingsSection(callingModule As String, settingKeys As String())
-        If settingKeys Is Nothing Then argIsNull(NameOf(settingKeys)) : Return
+    ''' <param name="settingTuples"> The array of Strings containing the module's settings and their default values </param>
+    Public Sub createModuleSettingsSection(callingModule As String, settingTuples As List(Of String), numBools As Integer, Optional numFiles As Integer = 3)
+        If settingTuples Is Nothing Then argIsNull(NameOf(settingTuples)) : Return
+        Dim settingKeys = getSettingKeys(settingTuples, callingModule, numBools, numFiles)
         Dim toolSection = settingsFile.getSection(callingModule)
         Dim mustSaveFile = False
         For Each key In settingKeys
@@ -141,6 +142,25 @@ Public Module settingsHandler
         If mustSaveFile Then saveSettingsFile()
     End Sub
 
+    Private Function getSettingKeys(settingsTuples As List(Of String), moduleName As String, numBools As Integer, Optional numFiles As Integer = 3) As List(Of String)
+        ' Ensure that we only operate on properly formatted tuples 
+        gLog($"The number of settings provided to {moduleName}'s settings initializer doesn't match the number expected.", Not settingsTuples.Count = 2 * numBools + 3 * numFiles)
+        Dim out As New List(Of String)
+        For i = 0 To settingsTuples.Count - 3
+            If i < 2 * numBools Then
+                ' boolean settings are in (name,value) pairs
+                out.Add(getSettingIniKey(moduleName, settingsTuples(i), settingsTuples(i + 1)))
+                i += 1
+            Else
+                ' file settings are in (name, filename, dir) triplets 
+                out.Add(getSettingIniKey(moduleName, settingsTuples(i), settingsTuples(i + 1), isName:=True))
+                out.Add(getSettingIniKey(moduleName, settingsTuples(i), settingsTuples(i + 2), isDir:=True))
+                i += 2
+            End If
+        Next
+        Return out
+    End Function
+
     ''' <summary> Returns the text that will comprise the <c> iniKey </c> representation of the given <c> <paramref name="settingName"/> </c> iff it doesn't already
     ''' exist in the <c> settingDict </c> <br /> Returns <c> "" </c> otherwise </summary>
     ''' <param name="moduleName"> The name of the module whose settings are being queried </param>
@@ -149,7 +169,7 @@ Public Module settingsHandler
     ''' <param name="isName"> Indicates that the <c> <paramref name="settingName"/> </c> is an <c> iniFile's Name</c> property <br/> Optional, Default <c> False </c> </param>
     ''' <param name="isDir"> Indicates that the <c> <paramref name="settingName"/> </c> is an <c> iniFile's Dir </c> property <br/> Optional, Default <c> False </c></param>
     ''' <returns></returns>
-    Public Function getSettingIniKey(moduleName As String, settingName As String, settingValue As String, Optional isName As Boolean = False, Optional isDir As Boolean = False) As String
+    Private Function getSettingIniKey(moduleName As String, settingName As String, settingValue As String, Optional isName As Boolean = False, Optional isDir As Boolean = False) As String
         If isName Then settingName += "_Name"
         If isDir Then settingName += "_Dir"
         Dim settingInDict = settingsDict(moduleName).ContainsKey(settingName)

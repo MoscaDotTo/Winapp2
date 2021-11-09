@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿'    Copyright (C) 2018-2021 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -55,15 +55,15 @@ Module exceptionHandler
 
     ''' <summary> Passes off exceptions caused by invalid arugments to be logged and displayed to the user </summary>
     ''' <param name="ex"> An Exception of type <c> ArgumentException </c> </param>
-    Public Sub handleInvalidArgException(ex As ArgumentException)
-        printAndLogExceptionForUser(ex.ToString, ex.GetType.ToString, True)
+    Public Sub handleInvalidArgException(ex As ArgumentException, Optional forceAck As Boolean = True, Optional onlyLog As Boolean = False)
+        printAndLogExceptionForUser(ex.ToString, ex.GetType.ToString, forceAck, onlyLog)
     End Sub
 
     ''' <summary> Informs the user that an exception occured and records it in the winapp2ool log </summary>
     ''' <param name="exTxt"> The full text of the exception </param>
     ''' <param name="exType"> The <c> Type </c> of the exception </param>
     ''' <param name="forceAcknowledge"> Indicates that the user should be forced to press enter before the application continues <br /> Optional, Default: <c> False </c> </param>
-    Public Sub printAndLogExceptionForUser(exTxt As String, exType As String, Optional forceAcknowledge As Boolean = False)
+    Public Sub printAndLogExceptionForUser(exTxt As String, exType As String, Optional forceAcknowledge As Boolean = False, Optional onlyLog As Boolean = False)
         gLog($"{exType} Encountered!")
         gLog("Please report the following information on GitHub: ", ascend:=True, buffr:=True)
         gLog(exTxt)
@@ -71,13 +71,12 @@ Module exceptionHandler
         gLog("The old winapp2.ini website, https://www.winapp2.com also redirects to GitHub for your convenience")
         gLog("A link to our GitHub can be found in the winapp2ool settings as well!")
         gLog(descend:=True)
-        cwl($"Error: {exType} Encountered")
-        cwl(exTxt)
-        cwl("Please report this error on GitHub. It will be saved to winapp2ool.log in the same folder as winapp2ool.")
-        saveGlobalLog()
-        If forceAcknowledge Then
-            cwl(pressEnterStr)
-            Console.ReadLine()
+        If Not onlyLog Then
+            cwl($"Error: {exType} Encountered")
+            cwl(exTxt)
+            cwl("Please report this error on GitHub. It will be saved to winapp2ool.log in the same folder as winapp2ool.")
+            saveGlobalLog()
+            If forceAcknowledge Then cwl(pressEnterStr) : Console.ReadLine()
         End If
     End Sub
 

@@ -73,3 +73,9 @@
 /winapp2ool/bin/Debug/winapp2ool.log
 /winapp2ool/obj
 /winapp2ool/bin/Release/winapp2ool.ini
+/winapp2ool/bin/Debug/blacklist.ini
+/winapp2ool/bin/Debug/whitelist.ini
+/winapp2ool/rward.pfx
+/winapp2ool/signwinapp2ool.bat
+/winapp2ool/.vs/winapp2ool/v17/.suo
+/winapp2ool/.vs/winapp2ool/project-colors.json

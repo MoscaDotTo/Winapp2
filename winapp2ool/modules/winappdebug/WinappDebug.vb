@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2020 Robbie Ward
+﻿'    Copyright (C) 2018-2021 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -15,6 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
+Imports System.Globalization
 Imports System.Text.RegularExpressions
 ''' <summary> Observes, reports, and attempts to repair errors in winapp2.ini </summary>
 Public Module WinappDebug
@@ -54,7 +55,8 @@ Public Module WinappDebug
         New lintRule(True, True, "Syntax Errors", "some entries whose configuration will not run in CCleaner", "attempting to fix certain types of syntax errors"),
         New lintRule(True, True, "Path Validity", "invalid filesystem or registry locations", "attempting to repair some basic invalid parameters in paths"),
         New lintRule(True, True, "Semicolons", "improper use of semicolons (;)", "fixing some improper uses of semicolons(;)"),
-        New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)")
+        New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)"),
+        New lintRule(False, False, "Potentially Duplicate Keys", "duplicated keys between multiple entries", "repair not yet supported")
     }
     ''' <summary> Controls scan/repairs for CamelCasing issues </summary>
     Private Property lintCasing As lintRule = Rules(0)
@@ -86,16 +88,24 @@ Public Module WinappDebug
     Private Property lintSemis As lintRule = Rules(13)
     ''' <summary> Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently) </summary>
     Private Property lintOpti As lintRule = Rules(14)
+    ''' <summary> Controls scan/repairs for keys that may possibly exist in more than one entry </summary>
+
+    Private Property lintMutliDupe As lintRule = Rules(15)
+
     ''' <summary> Detects long form registry paths </summary>
     Private Property longReg As New Regex("HKEY_(C(URRENT_(USER$|CONFIG$)|LASSES_ROOT$)|LOCAL_MACHINE$|USERS$)")
     ''' <summary> Detects short form registry paths </summary>
     Private Property shortReg As New Regex("HK(C(C$|R$|U$)|LM$|U$)")
     ''' <summary> Detects valid LangSecRef numbers </summary>
-    Private Property secRefNums As New Regex("30(0(5|6)|2([0-9])|3(0|1))")
+    Private Property secRefNums As New Regex("30(0([1-6])|2([1-9])|3([0-8]))")
     ''' <summary> Detects valid drive letter parameters </summary>
     Private Property driveLtrs As New Regex("[a-zA-z]:")
     ''' <summary> Detects potential %EnvironmentVariables% </summary>
     Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
+    ''' <summary> Indicates that Default keys should have their values auited instead of being considered invalid for existing </summary>
+    Private Property overrideDefaultVal As Boolean = False
+    ''' <summary> The expected value for Default keys when auditing their values </summary>
+    Private Property expectedDefaultValue As Boolean = False
 
     ''' <summary> Handles the commandline args for <c> WinappDebug </c> </summary>
     ''' WinappDebug specific command line args
@@ -114,6 +124,8 @@ Public Module WinappDebug
         ModuleSettingsChanged = False
         RepairErrsFound = True
         SaveChanges = False
+        overrideDefaultVal = False
+        expectedDefaultValue = False
         resetScanSettings()
         restoreDefaultSettings(NameOf(WinappDebug), AddressOf createLintSettingsSection)
     End Sub
@@ -143,6 +155,10 @@ Public Module WinappDebug
                     SaveChanges = CBool(kvp.Value)
                 Case NameOf(RepairErrsFound)
                     RepairErrsFound = CBool(kvp.Value)
+                Case NameOf(overrideDefaultVal)
+                    overrideDefaultVal = CBool(kvp.Value)
+                Case NameOf(expectedDefaultValue)
+                    expectedDefaultValue = CBool(kvp.Value)
                 Case Else
                     Dim lintType = kvp.Key.Replace("_Scan", "")
                     lintType = lintType.Replace("_Repair", "")
@@ -158,25 +174,18 @@ Public Module WinappDebug
         Dim compCult = System.Globalization.CultureInfo.InvariantCulture
         Dim lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters", "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
                 "Multiples", "Invalid Values", "Syntax Errors", "Path Validity", "Semicolons", "Optimizations"}
-        Dim settingsKeys As String()
-        settingsKeys = New String(38) {}
-        settingsKeys(0) = getSettingIniKey(NameOf(WinappDebug), NameOf(winappDebugFile1), winappDebugFile1.Dir, isDir:=True)
-        settingsKeys(1) = getSettingIniKey(NameOf(WinappDebug), NameOf(winappDebugFile1), winappDebugFile1.Name, isName:=True)
-        settingsKeys(2) = getSettingIniKey(NameOf(WinappDebug), NameOf(winappDebugFile3), winappDebugFile3.Name, isName:=True)
-        settingsKeys(3) = getSettingIniKey(NameOf(WinappDebug), NameOf(winappDebugFile3), winappDebugFile3.Dir, isDir:=True)
-        settingsKeys(4) = getSettingIniKey(NameOf(WinappDebug), NameOf(RepairSomeErrsFound), RepairSomeErrsFound.ToString(compCult))
-        settingsKeys(5) = getSettingIniKey(NameOf(WinappDebug), NameOf(ScanSettingsChanged), ScanSettingsChanged.ToString(compCult))
-        settingsKeys(6) = getSettingIniKey(NameOf(WinappDebug), NameOf(ModuleSettingsChanged), ModuleSettingsChanged.ToString(compCult))
-        settingsKeys(7) = getSettingIniKey(NameOf(WinappDebug), NameOf(SaveChanges), SaveChanges.ToString(compCult))
-        settingsKeys(8) = getSettingIniKey(NameOf(WinappDebug), NameOf(RepairErrsFound), RepairErrsFound.ToString(compCult))
-        Dim innerInd = 0
-        For i = 9 To 38
-            settingsKeys(i) = getSettingIniKey(NameOf(WinappDebug), $"{lints(innerInd)}_Scan", Rules(innerInd).ShouldScan.ToString(compCult))
-            settingsKeys(i + 1) = getSettingIniKey(NameOf(WinappDebug), $"{lints(innerInd)}_Repair", Rules(innerInd).ShouldRepair.ToString(compCult))
-            innerInd += 1
-            i += 1
+        Dim settingsKeys As New List(Of String) From {
+            NameOf(RepairSomeErrsFound), tsInvariant(RepairSomeErrsFound), NameOf(ScanSettingsChanged), tsInvariant(ScanSettingsChanged), NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged),
+            NameOf(SaveChanges), tsInvariant(SaveChanges), NameOf(RepairErrsFound), tsInvariant(RepairErrsFound), NameOf(overrideDefaultVal), tsInvariant(overrideDefaultVal),
+            NameOf(expectedDefaultValue), tsInvariant(expectedDefaultValue)}
+        For i = 0 To lints.Count - 1
+            settingsKeys.Add(lints(i) & "_Scan")
+            settingsKeys.Add(tsInvariant(Rules(i).ShouldScan))
+            settingsKeys.Add(lints(i) & "_Repair")
+            settingsKeys.Add(tsInvariant(Rules(i).ShouldRepair))
         Next
-        createModuleSettingsSection(NameOf(WinappDebug), settingsKeys)
+        settingsKeys.AddRange({NameOf(winappDebugFile1), winappDebugFile1.Name, winappDebugFile1.Dir, NameOf(winappDebugFile3), winappDebugFile3.Name, winappDebugFile3.Dir})
+        createModuleSettingsSection(NameOf(WinappDebug), settingsKeys, 37, 2)
     End Sub
 
     ''' <summary> Displays the <c> WinappDebug </c> menu to the user </summary>
@@ -187,6 +196,8 @@ Public Module WinappDebug
         print(5, "Toggle Saving", "saving the file after correcting errors", enStrCond:=SaveChanges)
         print(1, "File Chooser (save)", "Save a copy of changes made to a new file instead of overwriting winapp2.ini", SaveChanges, trailingBlank:=True)
         print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not SaveChanges, trailingBlank:=True)
+        print(5, "Toggle Default Value Audit", "enforcing a specific value for Default keys", enStrCond:=overrideDefaultVal, trailingBlank:=Not overrideDefaultVal)
+        print(1, "Toggle Expected Default", $"Enforcing that Default keys have a value of {expectedDefaultValue}", trailingBlank:=True, cond:=overrideDefaultVal)
         print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
         print(0, $"Current save target:  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
         print(2, NameOf(WinappDebug), cond:=ModuleSettingsChanged, closeMenu:=MostRecentLintLog.Length = 0)
@@ -197,6 +208,9 @@ Public Module WinappDebug
     ''' <param name="input"> The String containing the user's input </param>
     Public Sub handleUserInput(input As String)
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
+        Dim saveOrOverride = SaveChanges Or overrideDefaultVal
+        Dim saveXorOverride = SaveChanges Xor overrideDefaultVal
+        Dim saveAndOverride = SaveChanges And overrideDefaultVal
         Select Case True
             Case input = "0"
                 exitModule()
@@ -211,11 +225,17 @@ Public Module WinappDebug
             Case (input = "4" And Not SaveChanges) Or (input = "5" And SaveChanges)
                 initModule("Scan Settings", AddressOf advSettings.printMenu, AddressOf advSettings.handleUserInput)
                 Console.WindowHeight = 30
-            Case ModuleSettingsChanged And ((input = "5" And Not SaveChanges) Or (input = "6" And SaveChanges))
+            Case (input = "5" And Not SaveChanges) Or (input = "6" And SaveChanges)
+                toggleSettingParam(overrideDefaultVal, "Default Value Overriding", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(overrideDefaultVal), NameOf(ModuleSettingsChanged))
+
+            Case ModuleSettingsChanged And ((input = "6" And Not saveOrOverride) Or (input = "7" And saveXorOverride) Or (input = "8" And saveAndOverride))
                 resetModuleSettings("WinappDebug", AddressOf initDefaultSettings)
-            Case Not MostRecentLintLog.Length = 0 And (input = "5" And Not ModuleSettingsChanged) Or
-                                        ModuleSettingsChanged And ((input = "6" And Not SaveChanges) Or (input = "7" And SaveChanges))
+            Case Not MostRecentLintLog.Length = 0 And (input = "6" And Not ModuleSettingsChanged) Or
+                                        ModuleSettingsChanged And ((input = "7" And (Not saveOrOverride) Or
+                                        (input = "8" And saveXorOverride) Or (input = "9" And saveAndOverride)))
                 printSlice(MostRecentLintLog)
+            Case overrideDefaultVal And (input = "6" And Not SaveChanges) Or (input = "7" And SaveChanges)
+                toggleSettingParam(expectedDefaultValue, "Expected Default Value", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(expectedDefaultValue), NameOf(ModuleSettingsChanged))
             Case Else
                 setHeaderText(invInpStr, True)
         End Select
@@ -290,9 +310,20 @@ Public Module WinappDebug
         ' Make sure that if we have excludes, we also have corresponding file/reg keys
         fullNameErr(entry.FileKeys.KeyCount = 0 And hasFileExcludes, entry, "ExcludeKeys targeting filesystem locations found without any corresponding FileKeys")
         fullNameErr(entry.RegKeys.KeyCount = 0 And hasRegExcludes, entry, "ExcludeKeys targeting registry locations found without any corresponding RegKeys")
-        ' Make sure we have a Default key.
-        fullNameErr(entry.DefaultKey.KeyCount > 0 And lintDefaults.ShouldScan, entry, "Entry has a Default key where there should be none")
-        If lintDefaults.fixFormat And entry.DefaultKey.KeyCount > 0 Then entry.DefaultKey.Keys.Clear()
+        ' Make sure we have a Default key and that it holds the right value
+        If overrideDefaultVal Then
+            Dim expected = expectedDefaultValue.ToString(CultureInfo.InvariantCulture)
+            If entry.DefaultKey.KeyCount > 0 Then
+                Dim key = entry.DefaultKey.Keys(0)
+                fullKeyErr(key, "Incorrect value for Default Key found", Not key.Value = expected, lintDefaults.fixFormat, key.Value, expected)
+            Else
+                fullNameErr(True, entry, "No Default Key found")
+                entry.DefaultKey.add(New iniKey($"Default={expected}"))
+            End If
+        End If
+        fullNameErr(entry.DefaultKey.KeyCount > 0 And lintDefaults.ShouldScan And Not overrideDefaultVal, entry, "Entry has a Default key where there should be none")
+        If lintDefaults.fixFormat And entry.DefaultKey.KeyCount > 0 And Not overrideDefaultVal Then entry.DefaultKey.Keys.Clear()
+        resetMasterKeyLists()
         gLog($"Finished processing {entry.Name}", buffr:=True)
     End Sub
 
@@ -324,7 +355,7 @@ Public Module WinappDebug
         For Each innerFile In winapp.EntrySections
             Dim unsortedEntryList = innerFile.namesToStrList
             Dim sortedEntryList = sortEntryNames(innerFile)
-            findOutOfPlace(unsortedEntryList, sortedEntryList, "Entry", innerFile.getLineNumsFromSections)
+            If lintAlpha.ShouldScan Then findOutOfPlace(unsortedEntryList, sortedEntryList, "Entry", innerFile.getLineNumsFromSections)
             If lintAlpha.fixFormat Then innerFile.sortSections(sortedEntryList)
         Next
     End Sub
@@ -367,9 +398,7 @@ Public Module WinappDebug
                 If (recInd = sortInd Or curLine = sortLine) Then Continue For
                 entry = If(findType = "Entry", entry, $"{findType & recInd + 1}={entry}")
                 If Not oopBool Then oopBool = True
-                customErr(LineCountList(recInd), $"{findType} alphabetization", {$"{entry} appears to be out of place",
-                                                                                $"Current line: {curLine}",
-                                                                                $"Expected line: {sortLine}"})
+                customErr(LineCountList(recInd), $"{findType} alphabetization", {$"{entry} appears to be out of place", $"Current line: {curLine}", $"Expected line: {sortLine}"})
             Next
         End If
     End Sub
@@ -395,9 +424,11 @@ Public Module WinappDebug
                 Case "Detect", "DetectFile"
                     If key.typeIs("Detect") Then chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupes, kl.KeyCount = 1)
+                    If lintMutliDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
                 Case "RegKey"
                     chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupes)
+                    If lintMutliDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
                 Case "Warning", "DetectOS", "SpecialDetect", "LangSecRef", "Section", "Default"
                     ' No keys of these types should occur more than once per entry
                     If curNum > 1 And lintMulti.ShouldScan Then
@@ -418,7 +449,7 @@ Public Module WinappDebug
         kl.remove(dupes.Keys)
         sortKeys(kl, dupes.KeyCount > 0)
         ' Run optimization checks on FileKey lists only 
-        If kl.typeIs("FileKey") Then cOptimization(kl)
+        If kl.typeIs("FileKey") And lintOpti.ShouldScan Then cOptimization(kl)
         gLog(descend:=True)
     End Sub
 
@@ -492,17 +523,15 @@ Public Module WinappDebug
                         Dim newName = cmd
                         Dim withNums = key.Name.Replace(cmd, "")
                         For Each c As Char In withNums.ToCharArray
-                            If Char.IsNumber(c) Then
-                                newName += c
-                            Else
-                                Exit For
-                            End If
+                            If Char.IsNumber(c) Then newName += c : Else Exit For
                         Next
                         key.Value = key.Name.Replace(newName, "")
                         key.Name = newName
                         key.KeyType = cmd
                 End Select
                 gLog($"Repair complete. Result: {key.toString}", indent:=True, descend:=True)
+                ' Don't allow valueless keys in winapp2.ini 
+                If key.Value.Length = 0 Then gLog("Repair failed, key will be removed.", descend:=True) : Return False
                 Return True
             End If
         Next
@@ -519,16 +548,12 @@ Public Module WinappDebug
                         "FileKey", "LangSecRef", "RegKey", "Section", "SpecialDetect", "Warning"}
         If key.typeIs("DeleteMe") Then
             gLog($"Broken Key Found: {key.Name}", indent:=True, ascend:=True)
-            ' Try to fix broken keys 
-            If fixMissingEquals(key, validCmds) Then
-                fullKeyErr(key, "Missing '=' detected and repaired in key.")
-            Else
-                ' If we didn't find a fixable situation, delete the key
-                customErr(key.LineNumber, $"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", Array.Empty(Of String)())
-                Return False
-            End If
+            ' If we didn't find a fixable situation, delete the key
+            Dim fixedMsngEq = fixMissingEquals(key, validCmds)
+            If Not fixedMsngEq Then customErr(key.LineNumber, $"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", Array.Empty(Of String)()) : Return False
+            fullKeyErr(key, "Missing '=' detected and repaired in key.", fixedMsngEq)
         End If
-        If key.Value.Contains("\\") Then
+        If key.vHas("\\", True) Then
             fullKeyErr(key, "Extraneous backslashes (\\) detected", lintSlashes.ShouldScan)
             While (key.Value.Contains("\\") And lintSlashes.fixFormat)
                 key.Value = key.Value.Replace("\\", "\")
@@ -646,8 +671,10 @@ Public Module WinappDebug
         Select Case True
             Case key.vHasAny({"FILE|", "PATH|"})
                 hasF = True
-                chkPathFormatValidity(key, False)
-                fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.", (key.vHas("|") And Not key.vHas("\|")))
+                If lintPathValidity.ShouldScan Then
+                    chkPathFormatValidity(key, False)
+                    fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.", key.vHas("|") And Not key.vHas("\|"))
+                End If
             Case key.vHas("REG|")
                 hasR = True
                 chkPathFormatValidity(key, True)
