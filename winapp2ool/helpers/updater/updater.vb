@@ -94,14 +94,18 @@ Public Module updater
         Else
             If cantDownloadExecutable Then latestVersion = "000000 (update check disabled)" : Return
             If Not alreadyDownloadedExecutable Then
-                Dim tmpPath = setDownloadedFileStage(betaToolLink)
-                alreadyDownloadedExecutable = True
-                ' This places a lock on winapp2ool.exe in the tmp folder that will remain until we close the application
-                latestVersion = FileVersionInfo.GetVersionInfo(tmpPath).FileVersion
-                ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
-                ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
-                padVersionNum(latestVersion)
-                padVersionNum(currentVersion)
+                Try
+                    Dim tmpPath = setDownloadedFileStage(betaToolLink)
+                    alreadyDownloadedExecutable = True
+                    ' This places a lock on winapp2ool.exe in the tmp folder that will remain until we close the application
+                    latestVersion = FileVersionInfo.GetVersionInfo(tmpPath).FileVersion
+                    ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
+                    ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
+                    padVersionNum(latestVersion)
+                    padVersionNum(currentVersion)
+                Catch ex As FileNotFoundException
+                    handleFileNotFoundException(ex)
+                End Try
             End If
         End If
     End Sub
