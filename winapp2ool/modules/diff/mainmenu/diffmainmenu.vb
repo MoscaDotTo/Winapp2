@@ -59,15 +59,15 @@ Module diffmainmenu
                                                                                                                                             NameOf(DiffModuleSettingsChanged))
                 DiffFile2.Name = GetNameFromDL(DownloadDiffFile)
             Case input = "4" AndAlso DownloadDiffFile
-                toggleSettingParam(TrimRemoteFile, "Trimming", DiffModuleSettingsChanged, NameOf(Trim), NameOf(TrimRemoteFile), NameOf(DiffModuleSettingsChanged))
+                toggleSettingParam(TrimRemoteFile, "Trimming", DiffModuleSettingsChanged, NameOf(Diff), NameOf(TrimRemoteFile), NameOf(DiffModuleSettingsChanged))
             Case (input = "4" AndAlso Not (DownloadDiffFile OrElse isOffline)) OrElse (input = "3" AndAlso isOffline)
-                changeFileParams(DiffFile2, DiffModuleSettingsChanged, NameOf(Trim), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged))
+                changeFileParams(DiffFile2, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged))
             Case (input = "5" AndAlso Not isOffline) OrElse (input = "4" AndAlso isOffline)
-                toggleSettingParam(SaveDiffLog, "Log Saving", DiffModuleSettingsChanged, NameOf(Trim), NameOf(SaveDiffLog), NameOf(DiffModuleSettingsChanged))
+                toggleSettingParam(SaveDiffLog, "Log Saving", DiffModuleSettingsChanged, NameOf(Diff), NameOf(SaveDiffLog), NameOf(DiffModuleSettingsChanged))
             Case SaveDiffLog AndAlso ((input = "6" AndAlso Not isOffline) OrElse (input = "5" AndAlso isOffline))
-                changeFileParams(DiffFile3, DiffModuleSettingsChanged, NameOf(Trim), NameOf(DiffFile3), NameOf(DiffModuleSettingsChanged))
+                changeFileParams(DiffFile3, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile3), NameOf(DiffModuleSettingsChanged))
             Case (input = "6" AndAlso Not SaveDiffLog) OrElse (input = "7" AndAlso SaveDiffLog)
-                toggleSettingParam(ShowFullEntries, "Verbose Mode", DiffModuleSettingsChanged, NameOf(Trim), NameOf(ShowFullEntries), NameOf(DiffModuleSettingsChanged))
+                toggleSettingParam(ShowFullEntries, "Verbose Mode", DiffModuleSettingsChanged, NameOf(Diff), NameOf(ShowFullEntries), NameOf(DiffModuleSettingsChanged))
             Case DiffModuleSettingsChanged AndAlso ( 'Online Case below
                                         (Not isOffline AndAlso ((Not SaveDiffLog AndAlso input = "7") OrElse
                                         (SaveDiffLog AndAlso input = "8"))) OrElse
