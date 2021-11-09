@@ -355,84 +355,105 @@ winapp2ool
  Docs last updated: 2020-08-30 | Code last updated: 2020-07-19
 </member>
 <member name="T:winapp2ool.downloadsettingshandler">
- <summary> </summary>
+ <summary> Syncs settings for the Download module to and from the disk </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.downloadsettingshandler.getSerializedDownloaderSettings">
  <summary> Loads values from disk into memory for the Downloader module settings </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.downloadsettingshandler.createDownloadSettingsSection">
  <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.Downloader">
- <summary>
- This module contains functions that allow the user to reach online resources. 
- Its primary user-facing functionality is to present the list of downloads from the GitHub to the user
- </summary>
+ <summary> Allows users to download files from GitHub through a simple menu </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.gitLink">
  <summary> The web address of the winapp2.ini GitHub </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.wa2Link">
 <summary> The web address of the CCleaner version of winapp2.ini </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.nonccLink">
 <summary> The web address of the Non-CCleaner version of winapp2.ini </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.toolLink">
 <summary> The web address of winapp2ool.exe </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.betaToolLink">
 <summary> The web address of the beta build of winapp2ool.exe </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.toolVerLink">
 <summary> The web address of version.txt (winapp2ool's public version identifer) </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.betaToolVerLink">
  <summary> The web address of version.txt on the beta branch </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.removedLink">
 <summary> The web address of removed entries.ini </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.wa3link">
 <summary> The web address of winapp3.ini </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.archivedLink">
 <summary> The web address of archived entries.ini </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.javaLink">
 <summary> The web address of java.ini </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.readMeLink">
 <summary> The web address of the winapp2ool ReadMe file </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.downloadFile">
 <summary> Holds the path of any files to be saved by the Downloader </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.DownloadModuleSettingsChanged">
  <summary> Indicates that the Downloader module's settings have been changed from their defaults </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
  <summary> Handles the commandline args for the Downloader </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Downloader.winapp2link">
  <summary> Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Downloader.toolExeLink">
-<summary> Returns the link to winapp2ool.exe on the appropriate branch for the current executable </summary>
+<summary> Returns the link to winapp2ool.exe on the appropriate branch for the current tool configuration </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Downloader.GetNameFromDL(System.Boolean)">
  <summary> Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading </summary>
  <param name="shouldDownload"> Indicates that a module is configured to download a remote winapp2.ini </param>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.advDownloads">
- <summary>The advanced download submodule for Downloader</summary>
+ <summary> A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo </summary>
 </member>
 <member name="M:winapp2ool.advDownloads.printAdvMenu">
- <summary>Prints the advanced downloads menu</summary>
+ <summary> Prints the advanced downloads menu </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.advDownloads.handleAdvInput(System.String)">
- <summary>Handles the user input for the advanced download menu</summary>
- <param name="input">The string containing the user's input</param>
+ <summary> Handles the user input for the advanced download menu </summary>
+ <param name="input">The user's input </param>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.commandLineHandler">
  <summary>
@@ -1007,48 +1028,60 @@ winapp2ool
 <param name="slice"> A portion of the global log to be printed to the user </param>
 </member>
 <member name="T:winapp2ool.MenuMaker">
- <summary>
- MenuMaker is a singleton driver module for powering dyanamic finite state console applications with numbered menus
- </summary>
+ <summary> MenuMaker is a singleton driver module for powering dyanamic finite state console applications with numbered menus </summary>
+ Docs last updated: 2020-09-04 
 </member>
 <member name="P:winapp2ool.MenuMaker.pressEnterStr">
  <summary> An instruction to press the Enter button to continue </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.anyKeyStr">
  <summary> An instruction to press any key to return to the previous menu </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.invInpStr">
  <summary> An error message informing the user their input was invalid </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.promptStr">
  <summary> An instruction for the user to provide input </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.menuItemLength">
  <summary> The maximum length of the 'Name' half of a '#. Name - Description' style menu option </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.ColorHeader">
  <summary> Indicates that the menu header should be printed with color </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.HeaderColor">
  <summary> The color with which the next header should be printed if <c> ColorHeader </c> is <c> True </c> </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.SuppressOutput">
  <summary> Indicates that the application should not output or ask input from the user except when encountering exceptions <br/> Default: <c> False </c> </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.ExitPending">
  <summary> Indicates that an exit from the current menu is pending </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.MenuHeaderText">
  <summary> The text that appears in the top block of the menu </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.OptNum">
  <summary> The number associated with the next <c> Menu Option </c> that will be printed (if any) </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.Openers">
  <summary> Frame characters used to open a menu line </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="P:winapp2ool.MenuMaker.Closers">
  <summary> Frame characters used to close a menu line </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.initModule(System.String,System.Action,System.Action{System.String},System.Int32)">
  <summary> Displays a menu to and passes the user's input over to be handled until the exit command is given 
@@ -1058,6 +1091,7 @@ winapp2ool
  <param name="showMenu"> The subroutine that prints the module's menu </param>
  <param name="handleInput"> The subroutine that handles the module's input </param>
  <param name="itmLen"> Indicates the maximum length of menu option names <br/> Optional, Default: <c> 35 </c> </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.print(System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
  <summary> Prints menu lines, options, and frames fit to the current console window width </summary>
@@ -1089,14 +1123,26 @@ winapp2ool
  <param name="buffr"> Indicates that a leading newline should be printed before the menu lines <br/> Optional, Default: <c> False </c> </param>
  <param name="trailr"> Indicates that a trailing newline should be printed after the menu lines <br/> Optional, Default: <c> False </c> </param>
  <param name="conjoin"> Indicates that a conjoining menu frame should be printed after the printed lines <br/> Optional, Default: <c> False </c> </param>
+ <param name="fillBorder"> Indicates whether or not any menu frames should be filled or be empty <br /> Optional, Default: <c> True (filled) </c> </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
+</member>
+<member name="M:winapp2ool.MenuMaker.determinePrintColor(System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean)">
+ <summary> Determines which color should be used when printing. If no color is to be used, the print colors are reset to their defaults </summary>
+ <param name="colorLine"> Indicates that the line should be printed in color </param>
+ <param name="useArbColor"> Indicates that the value provided by <c> <paramref name="arbColor"/> </c> should be used </param>
+ <param name="arbColor"> A console color to print with </param>
+ <param name="enStrCond"> Determines Red/Green coloring when not using an <c> <paramref name="arbColor"/> </c></param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.cwl(System.String,System.Boolean)">
  <summary> Prints a line to the console window if output is not currently being suppressed and the given <c> <paramref name="cond"/> </c> is met </summary>
  <param name="msg"> The string to be printed <br/> Optional, Default: <c> Nothing </c> </param>
  <param name="cond"> Indicates the line should be printed <br/> Optional, Default: <c> True </c> </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.crk">
  <summary> Waits for the user to press a key if output is not currently being suppressed </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.crl">
  <summary> Waits for the users to press Enter if output is not currently being suppressed </summary>
@@ -1106,17 +1152,19 @@ winapp2ool
  <summary> Clears the console when the given <c> <paramref name="cond"/> </c> is <c> True </c> and we're not unit testing </summary>
  <remarks> When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that </remarks>
  <param name="cond"> Indicates that the console should be cleared <br/> Optional, Default: <c> True </c> </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.getFrame(System.Int32,System.Boolean)">
  <summary> Returns an empty menu line, or a variety of filled menu lines </summary>
  <param name="frameNum"> Indicates which frame should be returned <br/>
  <list type="bullet">
- <item> <description> 0: Empty menu line with vertical frames <c> ║     ║ </c> </description> </item>
- <item> <description> 1: Filled menu line with downward opening 90° angle frames <c> ╔═════╗ </c> </description> </item>
- <item> <description> 2: Filled menu line with upward opening 90° angle frames <c> ╚═════╝ </c> </description> </item>
- <item> <description> 3: Filled menu line with inward facing T-frames <c> ╠═════╣ </c> </description> </item> </list>
+ <item> <description> 0: Vertical frames <c> ║     ║ </c> </description> </item>
+ <item> <description> 1: Downward opening 90° angle frames <c> ╔ ═ ═ ═ ═ ═╗ </c> </description> </item>
+ <item> <description> 2: Upward opening 90° angle frames <c> ╚ ═ ═ ═ ═ ═╝ </c> </description> </item>
+ <item> <description> 3: Inward facing T-frames <c> ╠ ═ ═ ═ ═ ═ ╣ </c> </description> </item> </list>
  <br/> Optional, Default: <c> 0 </c> </param>
  <returns> A String containing the menuFrame requested by <c> <paramref name="frameNum"/> </c> </returns>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.setHeaderText(System.String,System.Boolean,System.Boolean,System.ConsoleColor)">
  <summary> Saves a menu header to be printed atop the next menu, optionally with color </summary>
@@ -1124,34 +1172,42 @@ winapp2ool
  <param name="cHeader"> Indicates that the header should be colored using the color given by <c> <paramref name="printColor"/> </c> <br/> Optional, Default: <c> False </c> </param>
  <param name="cond"> Indicates that the header text should be assigned the value given by <c> <paramref name="txt"/> </c> <br/> Optional, Default: <c> True </c> </param>
  <param name="printColor"> <c> ConsoleColor </c> with which the header will be colored when <c> <paramref name="cHeader"/> </c> is <c> True </c> <br/> Optional, Default: <c> Red </c> </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.denyActionWithHeader(System.Boolean,System.String)">
  <summary> Informs a user when an action is unable to proceed due to a condition </summary>
  <param name="cond"> Indicates that an action should be denied </param>
  <param name="errText"> The error text to be printed in the menu header </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.enStr(System.Boolean)">
  <summary> Returns the inverse state of a given boolean as a String </summary>
  <param name="setting"> A <c> module setting </c> whose state will be observed </param>
  <returns> <c> "Disable" </c> if <c> <paramref name="setting"/> </c> is <c> True </c>, <c> "Enable" </c> otherwise </returns>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.exitModule">
  <summary> Enforces that <c> initMenu </c> exit the current level in the stack on the next iteration of its loop </summary>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuTop(System.String[],System.Boolean,System.Boolean)">
  <summary> Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option </summary>
  <param name="descriptionItems"> Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line </param>
  <param name="printExit"> Indicates that an option to exit to the previous menu should be printed <br/> Optional, Default: <c> True </c> </param>
+ <param name="fillConjoiner"> Indicates that the conjoining frame at the bottom of the menu headed should be filled <br /> Optional, Default: <c> True (Filled)</c> </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuLine(System.String,System.Boolean)">
  <summary> Prints a line bounded by vertical menu frames, or an empty menu line if <c> <paramref name="lineString"/> </c> is <c> Nothing </c></summary>
  <param name="lineString"> The text to be printed <br/> Optional, Default: <c> Nothing </c> </param>
  <param name="isCentered"> Indicates that the printed text should be centered <br/> Optional, Default: <c> False </c> </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.printMenuOpt(System.String,System.String)">
  <summary> Prints a numbered menu option after padding it to a set length </summary>
  <param name="lineString1"> The name of the menu option </param>
  <param name="lineString2"> The description of the menu option </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.Int32,System.Int32,System.Boolean)">
  <summary> Constructs a menu line fit to the width of the console </summary>
@@ -1160,16 +1216,18 @@ winapp2ool
  <list type="bullet">
  <item> <description> 0: centers the string </description> </item>
  <item> <description> 1: leftaligns the string </description> </item>
- <item> <description> 2: prints a menu frame (filled) </description> </item>
+ <item> <description> 2: prints a menu frame </description> </item>
  </list> </param>
  <param name="borderInd"> Determines which characters should create the border for the menuline: <br/>
  <list type="bullet">
- <item> <description> 0: Vertical lines (empty) </description> </item>
- <item> <description> 1: Ceiling brackets (filled) </description> </item>
- <item> <description> 2: Floor brackets (filled) </description> </item>
- <item> <description> 3: Conjoining brackets (filled) </description> </item> 
+ <item> <description> 0: Vertical lines </description> </item>
+ <item> <description> 1: Ceiling brackets </description> </item>
+ <item> <description> 2: Floor brackets </description> </item>
+ <item> <description> 3: Conjoining brackets </description> </item> 
  </list>
  <br/> Optional, Default: <c> 0 </c> </param>
+ <param name="fillBorder"> Indicates that top and bottom borders should be printed when printing menuframes </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.padToEnd(System.String@,System.Int32,System.String,System.String)">
  <summary> Pads a given string until it is a given length </summary>
@@ -1177,11 +1235,13 @@ winapp2ool
  <param name="targetLen"> The length to which the text should be padded </param>
  <param name="endline"> The closer character for the type of frame being built </param>
  <param name="padStr"> The character(s) with which to pad the text <br/> Default: <c> " " </c> (space character) </param>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="M:winapp2ool.MenuMaker.replDir(System.String)">
  <summary> Replaces instances of the current directory in a path string with <c> ".." </c> </summary>
  <param name="dirStr"> A windows filesystem path </param>
  <returns> <c> <paramref name="dirStr"/> </c> with instances of the current directory replaced with <c> ".." </c> </returns>
+ Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
 <member name="T:winapp2ool.RegistryHelper">
  <summary>
@@ -1508,17 +1568,21 @@ winapp2ool
  <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
 </member>
 <member name="T:winapp2ool.downloadmainmenu">
- <summary> </summary>
+ <summary> Displays the Downloader Module main menu to the user and handles their input </summary>
+ Docs last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.downloadmainmenu.initDefaultSettings">
  <summary> Restores the default state of the module's parameters </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.downloadmainmenu.printDownloadMainMenu">
  <summary> Prints the download menu to the user </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.downloadmainmenu.handleDownloadUserInput(System.String)">
- <summary> Handles user input for the Downloader menu </summary>
+ <summary> Handles user input for the Downloader main menu </summary>
  <param name="input"> The user's input </param>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.launcher">
  <summary> The main event loop for winapp2ool  </summary>
@@ -1550,23 +1614,36 @@ winapp2ool
 <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
  Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
+<member name="M:winapp2ool.mergemainmenu.printMergeMainMenu">
+ <summary> Prints the <c> Merge </c> menu to the user, includes some predefined merge files choices for ease of access </summary>
+</member>
+<member name="M:winapp2ool.mergemainmenu.handleMergeMainMenuUserInput(System.String)">
+ <summary> Handles the user's input from the main menu </summary>
+ <param name="input"> The user's input </param>
+</member>
 <member name="T:winapp2ool.Merge">
  <summary> Facilitates the merger of one <c> iniFile </c> into another </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Merge.mergeMode">
  <summary> <c> True </c> if replacing collisions, <c> False </c> if removing them </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
-<member name="P:winapp2ool.Merge.ModuleSettingsChanged">
+<member name="P:winapp2ool.Merge.MergeModuleSettingsChanged">
  <summary> Indicates that module's settings have been modified from their defaults </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Merge.MergeFile1">
  <summary> The file with whose contents <c> MergeFile2 </c> will be merged </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Merge.MergeFile2">
  <summary> The file whose contents will be merged into <c> MergeFile1 </c> </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Merge.MergeFile3">
- <summary>Stores the path to which the merged file should be written back to disk (overwrites <c> MergeFile1 </c> by default) </summary>
+ <summary> Stores the path to which the merged file should be written back to disk (overwrites <c> MergeFile1 </c> by default) </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Merge.handleCmdLine">
  <summary> Handles the commandline args for Merge </summary>
@@ -1577,33 +1654,16 @@ winapp2ool
  -c          : custom.ini 
  -w          : winapp3.ini
  -a          : archived entries.ini 
-</member>
-<member name="M:winapp2ool.Merge.initDefaultSettings">
- <summary> Restores the default state of the module's properties </summary>
-</member>
-<member name="M:winapp2ool.Merge.getSeralizedMergeSettings">
- <summary> Loads values from disk into memory for the Merge module settings </summary>
-</member>
-<member name="M:winapp2ool.Merge.createMergeSettingsSection">
-<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
-</member>
-<member name="M:winapp2ool.Merge.printMenu">
- <summary> Prints the <c> Merge </c> menu to the user, includes some predefined merge files choices for ease of access </summary>
-</member>
-<member name="M:winapp2ool.Merge.handleUserInput(System.String)">
- <summary> Handles the user's input from the main menu </summary>
- <param name="input"> The user's input </param>
-</member>
-<member name="M:winapp2ool.Merge.changeMergeName(System.String)">
- <summary> Changes the merge file's name </summary>
- <param name="newName"> The new <c> Name </c> for <c> MergeFile2 </c> </param>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Merge.initMerge">
  <summary> Validates the <c> iniFiles </c> and kicks off the merging process </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Merge.mergeFiles(System.Boolean)">
  <summary> Conducts the merger of our two iniFiles </summary>
  <param name="isWinapp2"> Indicates that the <c> iniFiles </c> being operated on are of winapp2.ini syntax </param>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Merge.RemoteMerge(winapp2ool.iniFile@,winapp2ool.iniFile@,System.Boolean,System.Boolean)">
  <summary> Facilitates merging <c> iniFiles </c> from outside the module </summary>
@@ -1612,12 +1672,35 @@ winapp2ool
  <param name="isWinapp"> Indicates that the <c> iniFiles </c> being worked with contain winapp2.ini syntax </param>
  <param name="mm"> Indicates the <c> MergeMode </c> for the merger <br/> 
  <c> True </c> to replace conflicts, <c> False </c> to remove them </param>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Merge.resolveConflicts(winapp2ool.iniFile@,winapp2ool.iniFile@)">
  <summary> Performs conflict resolution for the merge process, handling the case where <c> iniSections </c> 
  in both files have the same <c> Name </c> </summary>
  <param name="first"> The master <c> iniFile </c> </param>
  <param name="second"> The <c> iniFile </c> whose contents will be merged into <c> <paramref name="first"/> </c> </param>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+</member>
+<member name="T:winapp2ool.mergesettinghandler">
+ <summary> Syncs settings for the Merge module to and from the disk </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+</member>
+<member name="M:winapp2ool.mergesettinghandler.initDefaultMergeSettings">
+ <summary> Restores the default state of the module's properties </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+</member>
+<member name="M:winapp2ool.mergesettinghandler.getSeralizedMergeSettings">
+ <summary> Loads values from disk into memory for the Merge module settings </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+</member>
+<member name="M:winapp2ool.mergesettinghandler.createMergeSettingsSection">
+<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+</member>
+<member name="M:winapp2ool.mergesettinghandler.changeMergeName(System.String)">
+ <summary> Changes the merge file's <c> Name </c> </summary>
+ <param name="newName"> The new <c> Name </c> for <c> MergeFile2 </c> </param>
+ Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.JavaMaker">
  <summary>
@@ -2010,6 +2093,9 @@ winapp2ool
 </member>
 <member name="P:winapp2ool.WinappDebug.lintOpti">
  <summary> Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently) </summary>
+</member>
+<member name="P:winapp2ool.WinappDebug.lintMutliDupe">
+ <summary> Controls scan/repairs for keys that may possibly exist in more than one entry </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.longReg">
  <summary> Detects long form registry paths </summary>
