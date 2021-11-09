@@ -16,7 +16,6 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.Globalization
-Imports System.Security
 Imports System.Text.RegularExpressions
 ''' <summary> Observes, reports, and attempts to repair errors in winapp2.ini </summary>
 Public Module WinappDebug
