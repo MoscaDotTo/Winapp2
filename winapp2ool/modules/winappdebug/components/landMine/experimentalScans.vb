@@ -18,11 +18,20 @@ Option Strict On
 ''' <summary> This module holds any scans/repairs for <c> WinappDebug </c> that are be disabled by default due to incompleteness </summary>
 Module experimentalScans
 
+    Private Property masterDetectList As New strList
+    Private Property masterDetectFileList As New strList
+    Private Property masterRegKeyList As New strList
+    Private Property masterFileKeyList As New strList
+
+    Public Sub resetMasterKeyLists()
+        masterRegKeyList.Items.Clear()
+        masterFileKeyList.Items.Clear()
+    End Sub
+
     ''' <summary> Attempts to merge FileKeys together if syntactically possible </summary>
     ''' <param name="kl"> A <c> keyList </c> of FileKey format <c> iniKeys </c> </param>
     Public Sub cOptimization(ByRef kl As keyList)
-        ' Rules1.Last here is lintOpti
-        If kl.KeyCount < 2 Or Not Rules.Last.ShouldScan Then Exit Sub
+        If kl.KeyCount < 2 Then Exit Sub
         Dim dupes As New keyList
         Dim newKeys As New keyList
         Dim flagList As New strList
@@ -73,5 +82,26 @@ Module experimentalScans
         print(3, boxStr, buffr:=True, trailr:=True)
         kl.Keys.ForEach(Sub(key) cwl(key.toString))
         cwl()
+    End Sub
+
+    Public Sub cDuplicateKeysBetweenEntries(key As iniKey)
+        Select Case key.KeyType
+            Case "RegKey"
+                auditDupe(masterRegKeyList, key)
+            Case "FileKey"
+                auditDupe(masterFileKeyList, key)
+        End Select
+    End Sub
+
+    Private Sub auditDupe(masterList As strList, key As iniKey)
+        If masterList.Count = 0 Then
+            masterList.add(key.Value)
+        Else
+            If masterList.contains(key.Value, True) Then
+                print(3, key.Value + " may exist in multiple entries")
+            Else
+                masterList.add(key.Value)
+            End If
+        End If
     End Sub
 End Module

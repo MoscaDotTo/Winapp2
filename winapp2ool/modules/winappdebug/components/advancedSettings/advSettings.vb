@@ -20,7 +20,7 @@ Public Module advSettings
 
     ''' <summary> Prints the scan/repair management menu to the user </summary>
     Public Sub printMenu()
-        Console.WindowHeight = 49
+        Console.WindowHeight = 51
         printMenuTop({"Enable or disable specific scans or repairs"})
         print(0, "Scan Options", leadingBlank:=True, trailingBlank:=True)
         Rules.ForEach(Sub(rule) print(5, rule.LintName, rule.ScanText, enStrCond:=rule.ShouldScan))
@@ -40,7 +40,7 @@ Public Module advSettings
     ''' <param name="input"> The String containing the user's input </param>
     Public Sub handleUserInput(input As String)
         Dim lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters", "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
-                "Multiples", "Invalid Values", "Syntax Errors", "Path Validity", "Semicolons", "Optimizations"}
+                "Multiples", "Invalid Values", "Syntax Errors", "Path Validity", "Semicolons", "Optimizations", "Potential Duplicate Keys Between Entries"}
         ' Determine the current state of the lint rules
         determineScanSettings()
         ' Get the input as an integer so we can index it against our rules

@@ -56,7 +56,8 @@ Public Module WinappDebug
         New lintRule(True, True, "Syntax Errors", "some entries whose configuration will not run in CCleaner", "attempting to fix certain types of syntax errors"),
         New lintRule(True, True, "Path Validity", "invalid filesystem or registry locations", "attempting to repair some basic invalid parameters in paths"),
         New lintRule(True, True, "Semicolons", "improper use of semicolons (;)", "fixing some improper uses of semicolons(;)"),
-        New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)")
+        New lintRule(False, False, "Optimizations", "situations where keys can be merged (experimental)", "automatic merging of keys (experimental)"),
+        New lintRule(False, False, "Potentially Duplicate Keys", "duplicated keys between multiple entries", "repair not yet supported")
     }
     ''' <summary> Controls scan/repairs for CamelCasing issues </summary>
     Private Property lintCasing As lintRule = Rules(0)
@@ -88,6 +89,10 @@ Public Module WinappDebug
     Private Property lintSemis As lintRule = Rules(13)
     ''' <summary> Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently) </summary>
     Private Property lintOpti As lintRule = Rules(14)
+    ''' <summary> Controls scan/repairs for keys that may possibly exist in more than one entry </summary>
+
+    Private Property lintMutliDupe As lintRule = Rules(15)
+
     ''' <summary> Detects long form registry paths </summary>
     Private Property longReg As New Regex("HKEY_(C(URRENT_(USER$|CONFIG$)|LASSES_ROOT$)|LOCAL_MACHINE$|USERS$)")
     ''' <summary> Detects short form registry paths </summary>
@@ -319,6 +324,7 @@ Public Module WinappDebug
         End If
         fullNameErr(entry.DefaultKey.KeyCount > 0 And lintDefaults.ShouldScan And Not overrideDefaultVal, entry, "Entry has a Default key where there should be none")
         If lintDefaults.fixFormat And entry.DefaultKey.KeyCount > 0 And Not overrideDefaultVal Then entry.DefaultKey.Keys.Clear()
+        resetMasterKeyLists()
         gLog($"Finished processing {entry.Name}", buffr:=True)
     End Sub
 
@@ -350,7 +356,7 @@ Public Module WinappDebug
         For Each innerFile In winapp.EntrySections
             Dim unsortedEntryList = innerFile.namesToStrList
             Dim sortedEntryList = sortEntryNames(innerFile)
-            findOutOfPlace(unsortedEntryList, sortedEntryList, "Entry", innerFile.getLineNumsFromSections)
+            If lintAlpha.ShouldScan Then findOutOfPlace(unsortedEntryList, sortedEntryList, "Entry", innerFile.getLineNumsFromSections)
             If lintAlpha.fixFormat Then innerFile.sortSections(sortedEntryList)
         Next
     End Sub
@@ -419,9 +425,11 @@ Public Module WinappDebug
                 Case "Detect", "DetectFile"
                     If key.typeIs("Detect") Then chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupes, kl.KeyCount = 1)
+                    If lintMutliDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
                 Case "RegKey"
                     chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupes)
+                    If lintMutliDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
                 Case "Warning", "DetectOS", "SpecialDetect", "LangSecRef", "Section", "Default"
                     ' No keys of these types should occur more than once per entry
                     If curNum > 1 And lintMulti.ShouldScan Then
@@ -442,7 +450,7 @@ Public Module WinappDebug
         kl.remove(dupes.Keys)
         sortKeys(kl, dupes.KeyCount > 0)
         ' Run optimization checks on FileKey lists only 
-        If kl.typeIs("FileKey") Then cOptimization(kl)
+        If kl.typeIs("FileKey") And lintOpti.ShouldScan Then cOptimization(kl)
         gLog(descend:=True)
     End Sub
 
@@ -664,8 +672,10 @@ Public Module WinappDebug
         Select Case True
             Case key.vHasAny({"FILE|", "PATH|"})
                 hasF = True
-                chkPathFormatValidity(key, False)
-                fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.", (key.vHas("|") And Not key.vHas("\|")))
+                If lintPathValidity.ShouldScan Then
+                    chkPathFormatValidity(key, False)
+                    fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.", key.vHas("|") And Not key.vHas("\|"))
+                End If
             Case key.vHas("REG|")
                 hasR = True
                 chkPathFormatValidity(key, True)
