@@ -145,7 +145,7 @@ Public Class winapp2file
         out += $"; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md{Environment.NewLine}"
         out += $";{Environment.NewLine}"
         out += $"; Is CCleaner taking too long to load with Winapp2.ini? Try out Winapp2ool for many useful additional features including updating and trimming Winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe{Environment.NewLine}"
-        out += $"; You can find the Winapp2ool ReadMe here: {readMeLink}{Environment.NewLine}"
+        out += $"; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md{Environment.NewLine}" 
         ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
         For i = 0 To EntrySections.Count - 2
             If EntrySections(i).Sections.Count > 0 Then
