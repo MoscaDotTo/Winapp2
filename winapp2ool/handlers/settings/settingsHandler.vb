@@ -39,7 +39,6 @@ Public Module settingsHandler
     ''' <param name="settingName"> The name of the setting being updated </param>
     ''' <param name="newVal"> The updated value held by the setting </param>
     Public Sub updateSettings(targetModule As String, settingName As String, newVal As String)
-        ' gLog("Setting " + settingsDict(targetModule)(settingName) + " to " + newVal)
         settingsDict(targetModule)(settingName) = newVal
         For Each key In settingsFile.getSection(targetModule).Keys.Keys
             If key.Name = settingName Then
