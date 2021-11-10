@@ -1,4 +1,5 @@
-﻿' 
+﻿'    Copyright (C) 2018-2021 Hazel Ward
+' 
 '    This file is a part of Winapp2ool
 ' 
 '    Winapp2ool is free software: you can redistribute it and/or modify
