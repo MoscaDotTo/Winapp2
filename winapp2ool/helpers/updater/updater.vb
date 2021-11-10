@@ -17,7 +17,6 @@
 Option Strict On
 Imports System.IO
 Imports System.Net
-Imports System.Security
 ''' <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
 Public Module updater
 
