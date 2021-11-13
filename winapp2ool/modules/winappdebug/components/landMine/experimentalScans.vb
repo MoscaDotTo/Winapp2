@@ -41,7 +41,7 @@ Module experimentalScans
     ''' potential to merge multiple keys into a single key </param>
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Public Sub cOptimization(ByRef kl As keyList)
-        If kl.KeyCount < 2 Then Exit Sub
+        If kl.KeyCount < 2 Then Return
         Dim dupes As New keyList
         Dim newKeys As New keyList
         Dim flagList As New strList
@@ -56,14 +56,22 @@ Module experimentalScans
             ' The flagstring (RECURSE, REMOVESELF, "") for both keys matches
             ' The first appearing key should have its parameters appended to and the second appearing key should be removed
             If paramList.contains(tmpWa2.PathString) Then
+                gLog($"{kl.Keys(i)} has a path that matches another key")
                 For j = 0 To paramList.Count - 1
+                    ' If the current processing key's path has already appeared, create a new temporary winapp2entry at the index of the first 
+                    ' item in the paramlist whose path and flag matches the current key 
                     If tmpWa2.PathString = paramList.Items(j) And tmpWa2.FlagString = flagList.Items(j) Then
+                        gLog($"Matching key has index {j} in the unique path list")
                         Dim keyToMergeInto As New winapp2KeyParameters(kl.Keys(j))
+                        ' If we have already merged something into this key, use that updated key instead of the original key
+                        If newKeys.KeyCount >= j Then keyToMergeInto = New winapp2KeyParameters(newKeys.Keys(j))
                         Dim mergeKeyStr = ""
                         keyToMergeInto.addArgs(mergeKeyStr)
                         tmpWa2.ArgsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
                         If tmpWa2.FlagString <> "None" Then mergeKeyStr += $"|{tmpWa2.FlagString}"
                         dupes.add(kl.Keys(i))
+                        gLog($"Key will be merged and have the new value: {mergeKeyStr}")
+                        ' Overwrite the key with the same index in the unique path list with the appended parameters list
                         newKeys.Keys(j) = New iniKey(mergeKeyStr)
                         Exit For
                     End If
@@ -81,7 +89,7 @@ Module experimentalScans
             printOptiSect("Optimization opportunity detected", kl)
             printOptiSect("The following keys can be merged into other keys:", dupes)
             printOptiSect("The resulting keyList will be reduced to: ", newKeys)
-            If Rules.Last.fixFormat Then kl = newKeys
+            If lintOpti.ShouldRepair Then kl.Keys = newKeys.Keys
         End If
     End Sub
 
