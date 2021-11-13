@@ -424,7 +424,6 @@ Public Module WinappDebug
                 Case "Detect", "DetectFile"
                     If key.typeIs("Detect") Then chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupes, kl.KeyCount = 1)
-                    If lintMutliDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
                 Case "RegKey"
                     chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupes)
@@ -631,6 +630,7 @@ Public Module WinappDebug
             dupeArgs.Items.ForEach(Sub(arg) keyParams.ArgsList.Remove(arg))
             keyParams.reconstructKey(key)
         End If
+        If lintMutliDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
         Return key
     End Function
 
