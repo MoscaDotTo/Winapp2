@@ -20,7 +20,7 @@ Public Module advSettings
 
     ''' <summary> Prints the scan/repair management menu to the user </summary>
     Public Sub printMenu()
-        Console.WindowHeight = 51
+        Console.WindowHeight = 52
         printMenuTop({"Enable or disable specific scans or repairs"})
         print(0, "Scan Options", leadingBlank:=True, trailingBlank:=True)
         Rules.ForEach(Sub(rule) print(5, rule.LintName, rule.ScanText, enStrCond:=rule.ShouldScan))
