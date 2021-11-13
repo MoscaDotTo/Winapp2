@@ -62,9 +62,7 @@ Module experimentalScans
                     ' item in the paramlist whose path and flag matches the current key 
                     If tmpWa2.PathString = paramList.Items(j) And tmpWa2.FlagString = flagList.Items(j) Then
                         gLog($"Matching key has index {j} in the unique path list")
-                        Dim keyToMergeInto As New winapp2KeyParameters(kl.Keys(j))
-                        ' If we have already merged something into this key, use that updated key instead of the original key
-                        If newKeys.KeyCount >= j Then keyToMergeInto = New winapp2KeyParameters(newKeys.Keys(j))
+                        Dim keyToMergeInto As New winapp2KeyParameters(newKeys.Keys(j))
                         Dim mergeKeyStr = ""
                         keyToMergeInto.addArgs(mergeKeyStr)
                         tmpWa2.ArgsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
