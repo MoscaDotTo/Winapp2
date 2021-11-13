@@ -134,7 +134,7 @@ Module experimentalScans
                 RawKeyText = key.Value
             End If
             If masterList.contains(UpperKeyText, True) Then
-                print(3, RawKeyText & " may exist in multiple places")
+                print(3, $"{RawKeyText} may exist in multiple places")
             Else
                 masterList.add(UpperKeyText)
             End If
