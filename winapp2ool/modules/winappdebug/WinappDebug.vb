@@ -242,7 +242,7 @@ Public Module WinappDebug
         print(1, "File Chooser (save)", "Save a copy of changes made to a new file instead of overwriting winapp2.ini", SaveChanges, trailingBlank:=True)
         print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not SaveChanges, trailingBlank:=True)
         print(5, "Toggle Default Value Audit", "enforcing a specific value for Default keys", enStrCond:=overrideDefaultVal, trailingBlank:=Not overrideDefaultVal)
-        print(1, "Toggle Expected Default", $"Enforcing that Default keys have a value of {expectedDefaultValue}", trailingBlank:=True, cond:=overrideDefaultVal)
+        print(1, "Toggle Expected Default", $"Currently enforcing that Default keys have a value of: {expectedDefaultValue}", trailingBlank:=True, cond:=overrideDefaultVal)
         print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
         print(0, $"Current save target:  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
         print(2, NameOf(WinappDebug), cond:=ModuleSettingsChanged, closeMenu:=MostRecentLintLog.Length = 0)
