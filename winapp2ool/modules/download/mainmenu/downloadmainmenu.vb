@@ -28,7 +28,7 @@ Module downloadmainmenu
     End Sub
 
     ''' <summary> Prints the download menu to the user </summary>
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2021-11-16
     Public Sub printDownloadMainMenu()
         printMenuTop({"Download files from the winapp2 GitHub"})
         print(1, "Winapp2.ini", "Download the latest winapp2.ini")
@@ -36,7 +36,7 @@ Module downloadmainmenu
         print(1, "Winapp2ool", "Download the latest winapp2ool.exe")
         print(1, "Removed Entries.ini", "Download only entries used to create the non-ccleaner winapp2.ini", leadingBlank:=True)
         print(1, "Directory", "Change the save directory", trailingBlank:=True)
-        print(1, "Advanced", "Settings for power users")
+        print(1, "Advanced", "Additional downloads for power users")
         print(1, "ReadMe", "The winapp2ool ReadMe")
         print(0, $"Save directory: {replDir(downloadFile.Dir)}", leadingBlank:=True, closeMenu:=Not DownloadModuleSettingsChanged)
         print(2, NameOf(Downloader), cond:=DownloadModuleSettingsChanged, closeMenu:=True)

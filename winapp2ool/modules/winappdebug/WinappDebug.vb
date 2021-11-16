@@ -233,7 +233,7 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary> Displays the <c> WinappDebug </c> menu to the user </summary>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-16
     Public Sub printMenu()
         printMenuTop({"Scan winapp2.ini for style and syntax errors, and attempt to repair them where possible."})
         print(1, "Run (Default)", "Run the debugger")
