@@ -1577,7 +1577,7 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.downloadmainmenu.printDownloadMainMenu">
  <summary> Prints the download menu to the user </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ Docs last updated: 2020-09-14 | Code last updated: 2021-11-16
 </member>
 <member name="M:winapp2ool.downloadmainmenu.handleDownloadUserInput(System.String)">
  <summary> Handles user input for the Downloader main menu </summary>
@@ -2209,7 +2209,7 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.WinappDebug.printMenu">
  <summary> Displays the <c> WinappDebug </c> menu to the user </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2021-11-16
 </member>
 <member name="M:winapp2ool.WinappDebug.handleUserInput(System.String)">
  <summary> Handles the user's input from the menu </summary>
