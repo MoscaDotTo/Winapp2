@@ -42,7 +42,7 @@ Winapp2.ini entries are organized alphabetically, between sections in the file a
 
 `[Entry Name *]`
 * The name of the entry as it will appear to users.
-* Please include the space between the name and the \* when submitting as this is how we visual indicate that Winapp2.ini entries are not a part of the host application running them.
+* Please include the space between the name and the \* when submitting as this is how we visually indicate that Winapp2.ini entries are not a part of the host application running them.
 
 `DetectOS`
 * This key is used to specify which operating systems the entry is for.
@@ -176,8 +176,3 @@ Variable       | Windows Vista-10 Path | WindowsXP Path
 
 Winapp2.ini does not support non-English system configurations or portable software natively. If you have need for these features, we recommend you utilize a "Custom.ini" file, and use Winapp2ool to merge it with the main file using the Add&Replace setting to override the existing entries.
 
-## Donations
-
-If you like Winapp2.ini and want to help keep development going, please consider donating some money to our great minds behind Winapp2.ini.
-
-You can donate to Robbie via PayPal (https://paypal.me/moscadotto/) or Venmo (@woadleaves).
