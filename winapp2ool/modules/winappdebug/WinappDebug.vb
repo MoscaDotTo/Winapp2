@@ -328,7 +328,7 @@ Public Module WinappDebug
 
     ''' <summary> Validates the basic structure of a <c> winapp2entry </c> and sends off its individual keys for more specific analysis </summary>
     ''' <param name="entry"> A <c> winapp2entry </c> to be audited for syntax errors </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2022-01-11
     Private Sub processEntry(ByRef entry As winapp2entry)
         gLog($"Processing entry {entry.Name}", buffr:=True)
         Dim hasFileExcludes = False
@@ -352,7 +352,9 @@ Public Module WinappDebug
             End Select
         Next
         ' Make sure we only have LangSecRef if we have LangSecRef at all
-        fullNameErr(entry.LangSecRef.KeyCount <> 0 And entry.SectionKey.KeyCount <> 0 And lintSyntax.ShouldScan, entry, "Section key found alongside LangSecRef key, only one is required.")
+        fullNameErr(entry.LangSecRef.KeyCount <> 0 And entry.SectionKey.KeyCount <> 0 And lintSyntax.ShouldScan, entry, "Section key found alongside LangSecRef key, but only one should be present")
+        ' Make sure we have a LangSecRef or a Section 
+        fullNameErr(entry.LangSecRef.KeyCount = 0 And entry.SectionKey.KeyCount = 0 And lintSyntax.ShouldScan, entry, "Entry has no valid classifier key (LangSecRef, Section)")
         ' Make sure we have at least 1 valid detect key and at least one valid cleaning key
         fullNameErr(entry.DetectOS.KeyCount + entry.Detects.KeyCount + entry.SpecialDetect.KeyCount + entry.DetectFiles.KeyCount = 0, entry, "Entry has no valid detection keys (Detect, DetectFile, DetectOS, SpecialDetect)")
         fullNameErr(entry.FileKeys.KeyCount + entry.RegKeys.KeyCount = 0 And lintSyntax.ShouldScan, entry, "Entry has no valid FileKeys or RegKeys")

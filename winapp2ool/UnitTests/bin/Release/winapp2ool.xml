@@ -2229,7 +2229,7 @@ winapp2ool
 <member name="M:winapp2ool.WinappDebug.processEntry(winapp2ool.winapp2entry@)">
  <summary> Validates the basic structure of a <c> winapp2entry </c> and sends off its individual keys for more specific analysis </summary>
  <param name="entry"> A <c> winapp2entry </c> to be audited for syntax errors </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2022-01-11
 </member>
 <member name="M:winapp2ool.WinappDebug.validateKeys(winapp2ool.winapp2entry@)">
  <summary> Checks the basic structure of all <c>iniKeys </c> in a <c> winapp2entry </c>,
