@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2021 Hazel Ward
+﻿'    Copyright (C) 2018-2022 Hazel Ward
 '
 '    This file is a part of Winapp2ool
 '

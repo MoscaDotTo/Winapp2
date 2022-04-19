@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2021 Hazel Ward
+﻿'    Copyright (C) 2018-2022 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -42,7 +42,10 @@ Public Module settingsHandler
     Public Sub updateSettings(targetModule As String, settingName As String, newVal As String)
         settingsDict(targetModule)(settingName) = newVal
         For Each key In settingsFile.getSection(targetModule).Keys.Keys
-            If key.Name = settingName Then key.Value = newVal : Exit For
+            If key.Name = settingName Then
+                key.Value = newVal
+                Exit For
+            End If
         Next
         saveSettingsFile()
     End Sub
