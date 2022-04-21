@@ -109,6 +109,14 @@ Public Class iniFile
         gLog($"Saving {Name}")
         Dim file As StreamWriter
         Try
+            If Not System.IO.File.Exists(Me.Path) Then
+                gLog($"Target file doesn't exist")
+                gLog($"Creating {Me.Dir}")
+                System.IO.Directory.CreateDirectory(Me.Dir)
+                gLog($"Creatin {Me.Path}")
+                Dim streamWriter = System.IO.File.CreateText(Me.Path)
+                streamWriter.Dispose()
+            End If
             file = New StreamWriter(Me.Path)
             file.Write(tostr)
             file.Close()
