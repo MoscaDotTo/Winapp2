@@ -24,7 +24,6 @@ Public Module launcher
         gLog($"Starting application")
         ' winapp2ool requires internet access for some functions
         chkOfflineMode()
-        currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
         If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
         gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
@@ -37,6 +36,7 @@ Public Module launcher
         ' Exit if we're in silent mode 
         If SuppressOutput Then Environment.Exit(1)
         ' Set the console stage 
+        currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 126
         ' Launch the main menu 

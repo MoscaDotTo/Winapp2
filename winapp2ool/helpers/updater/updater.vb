@@ -154,6 +154,8 @@ Public Module updater
     ''' ensures that this change can be undone by backing up the current version before replacing it </summary>
     Public Sub autoUpdate()
         gLog("Starting auto update process")
+        ' The only time currentVersion will still be blank when we arrive at this line is if winapp2ool is launched with the -autoupdate flag 
+        If currentVersion = "" Then currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         Dim backupName = $"winapp2ool v{currentVersion}.exe.bak"
         Dim w2lName = "winapp2ool.exe"
         Try
