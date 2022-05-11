@@ -24,18 +24,22 @@ Public Module launcher
         gLog($"Starting application")
         ' winapp2ool requires internet access for some functions
         chkOfflineMode()
-        currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
-        ' Set the console stage 
-        Console.Title = $"Winapp2ool v{currentVersion}"
-        Console.WindowWidth = 126
         ' winapp2ool requires .NET 4.6 or higher for full functionality, all versions of which report the following version
         If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
         gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
         ' If winapp2ool is run from the temporary folder the executable cannot be downloaded as all downloads are initally staged to the temporary folder
         cantDownloadExecutable = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
+        ' Initialize all the module settings 
         loadSettings()
+        ' Handle any input from the command line 
         processCommandLineArgs()
+        ' Exit if we're in silent mode 
         If SuppressOutput Then Environment.Exit(1)
+        ' Set the console stage 
+        currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
+        Console.Title = $"Winapp2ool v{currentVersion}"
+        Console.WindowWidth = 126
+        ' Launch the main menu 
         initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
     End Sub
 
