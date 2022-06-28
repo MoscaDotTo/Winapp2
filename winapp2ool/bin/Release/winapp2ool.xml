@@ -222,6 +222,14 @@ winapp2ool
  <summary> The number of entries Diff determines to have been removed between versions </summary>
  Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
+<member name="P:winapp2ool.Diff.MergedEntryCount">
+ <summary> The number of entries Diff determines to have been merged between versions  </summary>
+ Docs last upated 2022-06-20 | Code last updated 2022-06-20 
+</member>
+<member name="P:winapp2ool.Diff.RenamedEntryCount">
+ <summary> The number of entries Diff determines to have been renamed between versions  </summary>
+ Docs last upated 2022-06-20 | Code last updated 2022-06-20 
+</member>
 <member name="P:winapp2ool.Diff.ModEntriesAddedKeyTotal">
  <summary> The total number of keys that were added to modified entries </summary>
  Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
@@ -270,11 +278,20 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.Diff.logPostDiff">
  <summary> Logs and prints the summary of the Diff </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2020-09-02 | Code last updated: 2022-06-20
 </member>
 <member name="M:winapp2ool.Diff.compareTo">
  <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2020-09-02 | Code last updated: 2022-06-28
+</member>
+<member name="M:winapp2ool.Diff.assessKeyMatches(winapp2ool.keyList,winapp2ool.keyList,System.Boolean@,System.Boolean@,System.Boolean@,System.Int32@)">
+ <summary> Counts the number of matching key contents between two ini keyLists </summary>
+ <param name="currentKeyList"> The list of keys from the "old" version of the entry </param>
+ <param name="newKeyList"> The list of keys from the "new" version of the entry </param>
+ <param name="countTracker"> Tracks the number of matches observed between the two given keyLists </param>
+ <param name="someKeysMatchedTracker"> Tracks whether or not any keys have matched </param>
+ <param name="allKeysMatchedTracker"> Tracks whether or not all the keys have matched </param>
+ <param name="MatchCount"> The number of matches observed </param>
 </member>
 <member name="M:winapp2ool.Diff.recordModification(System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.String@)">
  <summary> Records the number of changes made in a modified entry </summary>
@@ -313,7 +330,7 @@ winapp2ool
  <param name="cond"> Indicates that the keys should be updated <br> Optional, Default: <c> True </c> </br> </param>
  Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
-<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.Int32,System.Int32@)">
+<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.Int32,System.Int32@,System.String,winapp2ool.iniSection)">
  <summary> Logs the changes that have been made to a modified entry </summary>
  <param name="section"> The modified entry whose changes are being observed </param>
  <param name="changeType"> The type of change to observe (as it will be described to the user) <br />
@@ -321,9 +338,12 @@ winapp2ool
  <item> <description> <c> 0 </c>: "added"    </description> </item>
  <item> <description> <c> 1 </c>: "removed"  </description> </item>
  <item> <description> <c> 2 </c>: "modified" </description> </item>
- </list></param>
+ <item> <description> <c> 3 </c>: "renamed to " </description> </item>
+ <item> <description> <c> 4 </c>: "merged into " </description> </item>
+ </list> </param>
  <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
- Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
+ <param name="renamedOrMergedEntryName"> In the event that an entry was renamed or merged, this is the name of the entry containing its keys </param>
+ Docs last updated: 2022-06-20 | Code last updated: 2022-06-20
 </member>
 <member name="T:winapp2ool.diffmainmenu">
  <summary> Displays the Diff main menu to the user and handles their input </summary>

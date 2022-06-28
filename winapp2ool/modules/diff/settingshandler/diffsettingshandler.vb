@@ -67,7 +67,7 @@ Module diffsettingshandler
     ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
     ''' Docs last updated: 2020-08-30 | Code last updated: 2020-07-19
     Public Sub createDiffSettingsSection()
-        Dim diffSettingsTuples As New List(Of String) From {NameOf(downloadFile), tsInvariant(DownloadDiffFile), NameOf(TrimRemoteFile), tsInvariant(TrimRemoteFile),
+        Dim diffSettingsTuples As New List(Of String) From {NameOf(DownloadDiffFile), tsInvariant(DownloadDiffFile), NameOf(TrimRemoteFile), tsInvariant(TrimRemoteFile),
             NameOf(ShowFullEntries), tsInvariant(ShowFullEntries), NameOf(SaveDiffLog), tsInvariant(SaveDiffLog), NameOf(DiffModuleSettingsChanged), tsInvariant(DiffModuleSettingsChanged),
             NameOf(DiffFile1), DiffFile1.Name, DiffFile1.Dir, NameOf(DiffFile2), DiffFile2.Name, DiffFile2.Dir, NameOf(DiffFile3), DiffFile3.Name, DiffFile3.Dir}
         createModuleSettingsSection(NameOf(Diff), diffSettingsTuples, 5)

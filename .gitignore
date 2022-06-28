@@ -80,3 +80,4 @@
 /winapp2ool/.vs/winapp2ool/project-colors.json
 /winapp2ool/.vs/winapp2ool/FileContentIndex
 *.pfx
+/winapp2ool/bin/Debug/winapp2-old.ini

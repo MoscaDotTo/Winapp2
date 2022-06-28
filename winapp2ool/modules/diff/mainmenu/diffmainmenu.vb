@@ -55,8 +55,9 @@ Module diffmainmenu
             Case input = "2"
                 changeFileParams(DiffFile1, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))
             Case input = "3" AndAlso Not isOffline
-                If Not denySettingOffline() Then toggleSettingParam(DownloadDiffFile, "Downloading", DiffModuleSettingsChanged, NameOf(CCiniDebug), NameOf(DownloadDiffFile),
-                                                                                                                                            NameOf(DiffModuleSettingsChanged))
+                If Not denySettingOffline() Then
+                    toggleSettingParam(DownloadDiffFile, "Downloading", DiffModuleSettingsChanged, NameOf(Diff), NameOf(DownloadDiffFile), NameOf(DiffModuleSettingsChanged))
+                End If
                 DiffFile2.Name = GetNameFromDL(DownloadDiffFile)
             Case input = "4" AndAlso DownloadDiffFile
                 toggleSettingParam(TrimRemoteFile, "Trimming", DiffModuleSettingsChanged, NameOf(Diff), NameOf(TrimRemoteFile), NameOf(DiffModuleSettingsChanged))

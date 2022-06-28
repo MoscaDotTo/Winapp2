@@ -19,24 +19,31 @@ Imports System.Globalization
 ''' <summary> Performs a "Diff" on two winapp2.ini files </summary>
 ''' Docs last updated: 2020-09-01 
 Module Diff
+
     ''' <summary> The old or local version of winapp2.ini to be diffed </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DiffFile1 As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
+
     ''' <summary> The new or remote version of winapp2.ini against which DiffFile1 will be compared </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DiffFile2 As iniFile = New iniFile(Environment.CurrentDirectory, "", mExist:=True)
+
     ''' <summary> The path to which the log will optionally be saved </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DiffFile3 As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
+
     ''' <summary> Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c> </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DownloadDiffFile As Boolean = Not isOffline
+
     ''' <summary> Indicates that the diff output should be saved to disk </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property SaveDiffLog As Boolean = False
+
     ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property DiffModuleSettingsChanged As Boolean = False
+
     ''' <summary> Indicates that the remote file should be trimmed for the local system before diffing </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property TrimRemoteFile As Boolean = Not isOffline
@@ -44,19 +51,32 @@ Module Diff
     ''' <summary> The number of entries Diff determines to have been added between versions </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property AddedEntryCount As Integer = 0
+
     ''' <summary> The number of entries Diff determines to have been modified between versions </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property ModifiedEntryCount As Integer = 0
+
     ''' <summary> The number of entries Diff determines to have been removed between versions </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property RemovedEntryCount As Integer = 0
 
+    ''' <summary> The number of entries Diff determines to have been merged between versions  </summary>
+    ''' Docs last upated 2022-06-20 | Code last updated 2022-06-20 
+    Public Property MergedEntryCount As Integer = 0
+
+    ''' <summary> The number of entries Diff determines to have been renamed between versions  </summary>
+    ''' Docs last upated 2022-06-20 | Code last updated 2022-06-20 
+    Public Property RenamedEntryCount As Integer = 0
+
+
     ''' <summary> The total number of keys that were added to modified entries </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Property ModEntriesAddedKeyTotal As Integer = 0
+
     ''' <summary> The total number of keys that were removed from modified entries </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Property ModEntriesRemovedKeyTotal As Integer = 0
+
     ''' <summary> The total number of keys that were updated in modified entries </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Property ModEntrtiesUpdatedKeyTotal As Integer = 0
@@ -141,7 +161,7 @@ Module Diff
     End Function
 
     ''' <summary> Logs and prints the summary of the Diff </summary>
-    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2022-06-20
     Private Sub logPostDiff()
         gLog($"Added entries: {AddedEntryCount}", indent:=True)
         gLog($"Modified entries: {ModifiedEntryCount}", indent:=True)
@@ -151,14 +171,16 @@ Module Diff
         print(4, "Summary", conjoin:=True)
         print(0, $"Added entries: {AddedEntryCount}", colorLine:=True, enStrCond:=True)
         print(0, $"Removed entries: {RemovedEntryCount}", colorLine:=True, enStrCond:=False)
-        print(0, $"Modified entries: {ModifiedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow, closeMenu:=ModifiedEntryCount = 0)
-        print(0, $" * {ModEntriesAddedKeyTotal} added keys (total between all entries)", colorLine:=True, enStrCond:=True, cond:=ModEntriesAddedKeyTotal > 0, closeMenu:=ModEntriesRemovedKeyTotal + ModEntrtiesUpdatedKeyTotal = 0)
-        print(0, $" * {ModEntriesRemovedKeyTotal} removed keys (total between all entries)", colorLine:=True, enStrCond:=False, cond:=ModEntriesRemovedKeyTotal > 0, closeMenu:=ModEntrtiesUpdatedKeyTotal = 0)
-        print(0, $" * {ModEntrtiesUpdatedKeyTotal} updated keys (total between all entries)", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow, cond:=ModEntrtiesUpdatedKeyTotal > 0, closeMenu:=True)
+        print(0, $"Modified entries: {ModifiedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+        print(0, $" * {ModEntriesAddedKeyTotal} added keys (total between all entries)", colorLine:=True, enStrCond:=True, cond:=ModEntriesAddedKeyTotal > 0)
+        print(0, $" * {ModEntriesRemovedKeyTotal} removed keys (total between all entries)", colorLine:=True, enStrCond:=False, cond:=ModEntriesRemovedKeyTotal > 0)
+        print(0, $" * {ModEntrtiesUpdatedKeyTotal} updated keys (total between all entries)", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow, cond:=ModEntrtiesUpdatedKeyTotal > 0)
+        print(0, $"Renamed entries: {RenamedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Magenta)
+        print(0, $"Merged entries: {MergedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan, closeMenu:=True)
     End Sub
 
     ''' <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
-    ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+    ''' Docs last updated: 2020-09-02 | Code last updated: 2022-06-28
     Private Sub compareTo()
         AddedEntryCount = 0
         RemovedEntryCount = 0
@@ -166,21 +188,39 @@ Module Diff
         ModEntriesAddedKeyTotal = 0
         ModEntriesRemovedKeyTotal = 0
         ModEntrtiesUpdatedKeyTotal = 0
-        Dim comparedList As New strList
+        RenamedEntryCount = 0
+        MergedEntryCount = 0
+        Dim renamedEntryNameList As New strList
+        Dim modifiedEntryNameList As New strList
+        Dim addedEntryNameList As New strList
+        Dim removedEntryNameList As New strList
+        ' Determine the names of the entries who appear only in the "new" file 
+        For Each section In DiffFile2.Sections.Values
+            addedEntryNameList.add(section.Name, Not DiffFile1.Sections.ContainsKey(section.Name))
+        Next
+
+        ' Determine the names of the entries who appear only in the "old" file 
         For Each section In DiffFile1.Sections.Values
-            ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
+            removedEntryNameList.add(section.Name, Not DiffFile2.Sections.ContainsKey(section.Name))
+        Next
+
+        ' Determine which entries who appear in both files have been modified 
+        For Each section In DiffFile1.Sections.Values
             Dim modCounts, addCounts, remCounts As New List(Of Integer)
             Dim modKeyTypes, addKeyTypes, remKeyTypes As New List(Of String)
-            If DiffFile2.Sections.Keys.Contains(section.Name) AndAlso Not comparedList.contains(section.Name) Then
+            ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
+            If DiffFile2.Sections.Keys.Contains(section.Name) Then
                 Dim sSection = DiffFile2.Sections(section.Name)
                 ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
                 If Not section.compareTo(sSection, removedKeys, addedKeys) Then
+                    modifiedEntryNameList.add(sSection.Name)
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
                     getDiff(sSection, 2, ModifiedEntryCount)
+                    modifiedEntryNameList.add(sSection.Name)
                     getChangesFromList(addedKeys, True, addKeyTypes, addCounts)
                     getChangesFromList(removedKeys, False, remKeyTypes, remCounts)
                     If updatedKeys.Count > 0 Then
@@ -203,16 +243,103 @@ Module Diff
                     remCounts.ForEach(Sub(count) ModEntriesRemovedKeyTotal += count)
                     modCounts.ForEach(Sub(count) ModEntrtiesUpdatedKeyTotal += count)
                 End If
-            ElseIf Not DiffFile2.Sections.Keys.Contains(section.Name) AndAlso Not comparedList.contains(section.Name) Then
-                ' If we do not have the entry in the new file, it has been removed between versions 
-                getDiff(section, 1, RemovedEntryCount)
             End If
-            comparedList.add(section.Name)
         Next
-        ' Any sections from the new file which are not found in the old file have been added
+
+        ' Entries that appear in the old file but not in the new file had one of three things occur: 
+        ' They had their name changed but none of the keys changed, we'll consider this a "rename" 
+        ' They were merged into another key, or renamed directly and then that renamed key was modified some additional way, we'll consider this a "merge" 
+        ' They were actually removed from the file without their contents being merged into another entry or with their contents merged into another entry
+        ' in a way in which we cannot track (ie. through use of wildcards), in which case we will just consider the entry removed 
+        For Each entry In removedEntryNameList.Items
+            Dim regKeyCountsMatch = False
+            Dim fileKeyCountsMatch = False
+            Dim newMergedOrRenamedName = ""
+            Dim highestMatchCount = 0
+            Dim entryWasRenamedOrMerged = False
+            Dim oldSectionVersion = DiffFile1.getSection(entry)
+
+            For Each sSection In DiffFile2.Sections.Values
+                ' Don't consider the contents of entries that are neither new nor modified in the new version 
+                If Not addedEntryNameList.contains(sSection.Name) And Not modifiedEntryNameList.contains(sSection.Name) Then Continue For
+                Dim allFileKeysMatched = False
+                Dim someFileKeysMatched = False
+                Dim allRegKeysMatched = False
+                Dim someRegKeysMatched = False
+                fileKeyCountsMatch = False
+                regKeyCountsMatch = False
+                Dim wa2sSection As New winapp2entry(sSection)
+                Dim curwa2Section As New winapp2entry(oldSectionVersion)
+                Dim totalMatches = 0
+                assessKeyMatches(curwa2Section.FileKeys, wa2sSection.FileKeys, fileKeyCountsMatch, someFileKeysMatched, allFileKeysMatched, totalMatches)
+                assessKeyMatches(curwa2Section.RegKeys, wa2sSection.RegKeys, regKeyCountsMatch, someRegKeysMatched, allRegKeysMatched, totalMatches)
+                ' If we hit matches along the way, we'll remember the name of the entry with the largest number of matching keys to assess at the end 
+                ' but only if it exists in the set of entries who have been added or modified 
+                If someFileKeysMatched And someRegKeysMatched And totalMatches > highestMatchCount And
+                    (modifiedEntryNameList.contains(sSection.Name) Or addedEntryNameList.contains(sSection.Name)) Then
+                    newMergedOrRenamedName = sSection.Name
+                End If
+                ' If all the filekeys and regkeys and their respective counts match between two entries then it 
+                ' stands to reason that the old version of the key was renamed into the new version 
+                If allFileKeysMatched And allRegKeysMatched And fileKeyCountsMatch And regKeyCountsMatch Then
+                    getDiff(oldSectionVersion, 3, RenamedEntryCount, newMergedOrRenamedName, sSection)
+                    entryWasRenamedOrMerged = True
+                    renamedEntryNameList.add(newMergedOrRenamedName)
+                    Continue For
+                ElseIf allFileKeysMatched And allRegKeysMatched Then
+                    ' Likewise, if all the keys matched but the counts don't match, then the entry was probably merged 
+                    getDiff(oldSectionVersion, 4, MergedEntryCount, newMergedOrRenamedName, sSection)
+                    entryWasRenamedOrMerged = True
+                    renamedEntryNameList.add(newMergedOrRenamedName)
+                    Continue For
+                End If
+            Next
+            ' At this stage we'll consider ourselves unable to definitively state that an entry has been renamed and classify the entry 
+            ' as having been merged if it 
+            If Not entryWasRenamedOrMerged Then
+                If modifiedEntryNameList.contains(newMergedOrRenamedName) Or renamedEntryNameList.contains(newMergedOrRenamedName) Or
+                        addedEntryNameList.contains(newMergedOrRenamedName) Then
+                    getDiff(oldSectionVersion, 4, MergedEntryCount, newMergedOrRenamedName, DiffFile2.getSection(newMergedOrRenamedName))
+                    renamedEntryNameList.add(newMergedOrRenamedName)
+                    renamedEntryNameList.add(oldSectionVersion.Name)
+                    Continue For
+                End If
+                ' If at this stage we haven't determined the entry to exist as part of another entry, it was probably removed for realsies 
+                getDiff(oldSectionVersion, 1, RemovedEntryCount)
+            End If
+        Next
+        ' Any sections from the new file which are not found in the old file have been added 
         For Each section In DiffFile2.Sections.Values
             If Not DiffFile1.Sections.Keys.Contains(section.Name) Then getDiff(section, 0, AddedEntryCount)
         Next
+    End Sub
+
+    ''' <summary> Counts the number of matching key contents between two ini keyLists </summary>
+    ''' <param name="currentKeyList"> The list of keys from the "old" version of the entry </param>
+    ''' <param name="newKeyList"> The list of keys from the "new" version of the entry </param>
+    ''' <param name="countTracker"> Tracks the number of matches observed between the two given keyLists </param>
+    ''' <param name="someKeysMatchedTracker"> Tracks whether or not any keys have matched </param>
+    ''' <param name="allKeysMatchedTracker"> Tracks whether or not all the keys have matched </param>
+    ''' <param name="MatchCount"> The number of matches observed </param>
+    Public Sub assessKeyMatches(currentKeyList As keyList, newKeyList As keyList, ByRef countTracker As Boolean, ByRef someKeysMatchedTracker As Boolean, ByRef allKeysMatchedTracker As Boolean, ByRef MatchCount As Integer)
+        If currentKeyList.KeyCount = newKeyList.KeyCount Then countTracker = True
+        ' If there's nothing to match, consider the keys matched 
+        If currentKeyList.KeyCount = 0 Then
+            someKeysMatchedTracker = True
+            allKeysMatchedTracker = True
+        Else
+            ' Otherwise, determine whether or not some or all the FileKeys have matched 
+            For Each key In currentKeyList.Keys
+                For Each newFileKey In newKeyList.Keys
+                    If String.Equals(newFileKey.Value, key.Value, StringComparison.InvariantCultureIgnoreCase) Then
+                        someKeysMatchedTracker = True
+                        MatchCount += 1
+                        Exit For
+                    End If
+                Next
+            Next
+            If MatchCount = currentKeyList.KeyCount Then allKeysMatchedTracker = True
+        End If
     End Sub
 
     ''' <summary> Records the number of changes made in a modified entry </summary>
@@ -329,23 +456,45 @@ Module Diff
     ''' <item> <description> <c> 0 </c>: "added"    </description> </item>
     ''' <item> <description> <c> 1 </c>: "removed"  </description> </item>
     ''' <item> <description> <c> 2 </c>: "modified" </description> </item>
-    ''' </list></param>
+    ''' <item> <description> <c> 3 </c>: "renamed to " </description> </item>
+    ''' <item> <description> <c> 4 </c>: "merged into " </description> </item>
+    ''' </list> </param>
     ''' <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub getDiff(section As iniSection, changeType As Integer, ByRef changeCounter As Integer)
-        Dim changeTypeStrs = {"added", "removed", "modified"}
+    ''' <param name="renamedOrMergedEntryName"> In the event that an entry was renamed or merged, this is the name of the entry containing its keys </param>
+    ''' Docs last updated: 2022-06-20 | Code last updated: 2022-06-20
+    Private Sub getDiff(section As iniSection, changeType As Integer, ByRef changeCounter As Integer, Optional renamedOrMergedEntryName As String = "", Optional newSection As iniSection = Nothing)
+        Dim changeTypeStrs = {"added", "removed", "modified", "renamed to ", "merged into "}
         changeCounter += 1
-        gLog($"{section.Name} has been {changeTypeStrs(changeType)}", indent:=True, leadr:=True)
+        Dim printColor As ConsoleColor = ConsoleColor.Cyan
+        Select Case changeType
+            Case 2
+                printColor = ConsoleColor.Yellow
+            Case 3
+                printColor = ConsoleColor.Magenta
+        End Select
+        Dim changeStr = $"{section.Name} has been {changeTypeStrs(changeType)}{renamedOrMergedEntryName}"
+        gLog(changeStr, indent:=True, leadr:=True)
         print(0, Nothing)
-        print(0, $"{section.Name} has been {changeTypeStrs(changeType)}", isCentered:=True, fillBorder:=False, colorLine:=True, useArbitraryColor:=changeType = 2, enStrCond:=changeType < 1, arbitraryColor:=ConsoleColor.Cyan)
+        print(0, changeStr, isCentered:=True, fillBorder:=False, colorLine:=True, useArbitraryColor:=changeType >= 2, enStrCond:=changeType < 1, arbitraryColor:=printColor)
         print(0, Nothing, conjoin:=True, fillBorder:=False)
         If ShowFullEntries Then
             print(0, "")
+            print(0, "Old entry: ", cond:=changeType >= 3)
             For Each line In section.ToString.Split(CChar(vbCrLf))
                 gLog(line.Replace(vbLf, ""), indent:=True, indAmt:=4)
                 print(0, line.Replace(vbLf, ""))
             Next
             print(0, "")
+            If changeType >= 3 Then
+                print(0, "")
+                print(0, If(changeType = 3, "Renamed entry: ", "Merged entry: "), cond:=changeType >= 3)
+                gLog(If(changeType = 3, "Renamed Entry: ", "Merged entry: "))
+                For Each line In newSection.ToString.Split(CChar(vbCrLf))
+                    gLog(line.Replace(vbLf, ""), indent:=True, indAmt:=4)
+                    print(0, line.Replace(vbLf, ""))
+                Next
+                print(0, "")
+            End If
         End If
     End Sub
 
