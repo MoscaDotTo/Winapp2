@@ -191,9 +191,12 @@ Module Diff
         RenamedEntryCount = 0
         MergedEntryCount = 0
         Dim renamedEntryNameList As New strList
+        Dim mergedEntryNameList As New strList
         Dim modifiedEntryNameList As New strList
         Dim addedEntryNameList As New strList
         Dim removedEntryNameList As New strList
+        Dim mergeDict As New Dictionary(Of String, List(Of String))
+
         ' Determine the names of the entries who appear only in the "new" file 
         For Each section In DiffFile2.Sections.Values
             addedEntryNameList.add(section.Name, Not DiffFile1.Sections.ContainsKey(section.Name))
@@ -208,19 +211,20 @@ Module Diff
         For Each section In DiffFile1.Sections.Values
             Dim modCounts, addCounts, remCounts As New List(Of Integer)
             Dim modKeyTypes, addKeyTypes, remKeyTypes As New List(Of String)
-            ' If we're looking at an entry in the old file and the new file contains it, and we haven't yet processed this entry
+
+            ' If any entry exists in both DiffFile1 and DiffFile2, and does not pass the compareTo, then it has been modified 
             If DiffFile2.Sections.Keys.Contains(section.Name) Then
                 Dim sSection = DiffFile2.Sections(section.Name)
-                ' And if that entry in the new file does not compareTo the entry in the old file, we have a modified entry
                 Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
+
                 If Not section.compareTo(sSection, removedKeys, addedKeys) Then
                     modifiedEntryNameList.add(sSection.Name)
+                    ' Determine the types of modifications made to the entry 
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
                     getDiff(sSection, 2, ModifiedEntryCount)
-                    modifiedEntryNameList.add(sSection.Name)
                     getChangesFromList(addedKeys, True, addKeyTypes, addCounts)
                     getChangesFromList(removedKeys, False, remKeyTypes, remCounts)
                     If updatedKeys.Count > 0 Then
@@ -275,8 +279,8 @@ Module Diff
                 assessKeyMatches(curwa2Section.RegKeys, wa2sSection.RegKeys, regKeyCountsMatch, someRegKeysMatched, allRegKeysMatched, totalMatches)
                 ' If we hit matches along the way, we'll remember the name of the entry with the largest number of matching keys to assess at the end 
                 ' but only if it exists in the set of entries who have been added or modified 
-                If someFileKeysMatched And someRegKeysMatched And totalMatches > highestMatchCount And
-                    (modifiedEntryNameList.contains(sSection.Name) Or addedEntryNameList.contains(sSection.Name)) Then
+                If (curwa2Section.FileKeys.KeyCount > 0 And someFileKeysMatched) Or (someRegKeysMatched And curwa2Section.RegKeys.KeyCount > 0) And
+                     totalMatches > highestMatchCount And strList.IsInAny({addedEntryNameList, modifiedEntryNameList}, sSection.Name) Then
                     newMergedOrRenamedName = sSection.Name
                 End If
                 ' If all the filekeys and regkeys and their respective counts match between two entries then it 
@@ -290,18 +294,20 @@ Module Diff
                     ' Likewise, if all the keys matched but the counts don't match, then the entry was probably merged 
                     getDiff(oldSectionVersion, 4, MergedEntryCount, newMergedOrRenamedName, sSection)
                     entryWasRenamedOrMerged = True
-                    renamedEntryNameList.add(newMergedOrRenamedName)
+                    mergedEntryNameList.add(newMergedOrRenamedName)
+                    If Not mergeDict.ContainsKey(newMergedOrRenamedName) Then mergeDict.Add(newMergedOrRenamedName, New List(Of String))
+                    mergeDict(newMergedOrRenamedName).Add(entry)
                     Continue For
                 End If
             Next
             ' At this stage we'll consider ourselves unable to definitively state that an entry has been renamed and classify the entry 
             ' as having been merged if it 
             If Not entryWasRenamedOrMerged Then
-                If modifiedEntryNameList.contains(newMergedOrRenamedName) Or renamedEntryNameList.contains(newMergedOrRenamedName) Or
-                        addedEntryNameList.contains(newMergedOrRenamedName) Then
-                    getDiff(oldSectionVersion, 4, MergedEntryCount, newMergedOrRenamedName, DiffFile2.getSection(newMergedOrRenamedName))
-                    renamedEntryNameList.add(newMergedOrRenamedName)
-                    renamedEntryNameList.add(oldSectionVersion.Name)
+                If strList.IsInAny({modifiedEntryNameList, renamedEntryNameList, addedEntryNameList, mergedEntryNameList}, newMergedOrRenamedName) Then
+                    mergedEntryNameList.add(newMergedOrRenamedName)
+                    getDiff(oldSectionVersion, 4, MergedEntryCount, newMergedOrRenamedName, DiffFile2.Sections(newMergedOrRenamedName))
+                    If Not mergeDict.ContainsKey(newMergedOrRenamedName) Then mergeDict.Add(newMergedOrRenamedName, New List(Of String))
+                    mergeDict(newMergedOrRenamedName).Add(entry)
                     Continue For
                 End If
                 ' If at this stage we haven't determined the entry to exist as part of another entry, it was probably removed for realsies 
@@ -310,7 +316,16 @@ Module Diff
         Next
         ' Any sections from the new file which are not found in the old file have been added 
         For Each section In DiffFile2.Sections.Values
-            If Not DiffFile1.Sections.Keys.Contains(section.Name) Then getDiff(section, 0, AddedEntryCount)
+            If Not DiffFile1.Sections.Keys.Contains(section.Name) And Not renamedEntryNameList.contains(section.Name) Then
+                getDiff(section, 0, AddedEntryCount)
+                If mergeDict.ContainsKey(section.Name) Then
+                    print(0, "This entry contains keys merged from the following removed entries:", isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+                    For Each mergedEntry In mergeDict(section.Name)
+                        print(0, mergedEntry, isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan)
+                    Next
+                    print(0, "", conjoin:=True, fillBorder:=False)
+                End If
+            End If
         Next
     End Sub
 
@@ -462,7 +477,7 @@ Module Diff
     ''' <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
     ''' <param name="renamedOrMergedEntryName"> In the event that an entry was renamed or merged, this is the name of the entry containing its keys </param>
     ''' Docs last updated: 2022-06-20 | Code last updated: 2022-06-20
-    Private Sub getDiff(section As iniSection, changeType As Integer, ByRef changeCounter As Integer, Optional renamedOrMergedEntryName As String = "", Optional newSection As iniSection = Nothing)
+    Private Sub getDiff(section As iniSection, changeType As Integer, ByRef changeCounter As Integer, Optional renamedOrMergedEntryName As String = "", Optional newSection As iniSection = Nothing, Optional mergeDict As Dictionary(Of String, List(Of String)) = Nothing)
         Dim changeTypeStrs = {"added", "removed", "modified", "renamed to ", "merged into "}
         changeCounter += 1
         Dim printColor As ConsoleColor = ConsoleColor.Cyan

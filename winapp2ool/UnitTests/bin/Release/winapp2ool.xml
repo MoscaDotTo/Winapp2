@@ -330,7 +330,7 @@ winapp2ool
  <param name="cond"> Indicates that the keys should be updated <br> Optional, Default: <c> True </c> </br> </param>
  Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
 </member>
-<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.Int32,System.Int32@,System.String,winapp2ool.iniSection)">
+<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.Int32,System.Int32@,System.String,winapp2ool.iniSection,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}})">
  <summary> Logs the changes that have been made to a modified entry </summary>
  <param name="section"> The modified entry whose changes are being observed </param>
  <param name="changeType"> The type of change to observe (as it will be described to the user) <br />

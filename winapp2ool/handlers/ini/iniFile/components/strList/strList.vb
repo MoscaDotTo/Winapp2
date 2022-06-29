@@ -78,6 +78,13 @@ Public Class strList
         Return If(ignoreCase, Items.Contains(givenValue, StringComparer.InvariantCultureIgnoreCase), Items.Contains(givenValue, StringComparer.InvariantCulture))
     End Function
 
+    Public Shared Function IsInAny(strLists As strList(), phrase As String) As Boolean
+        For i = 0 To strLists.Length - 1
+            If strLists(i).contains(phrase) Then Return True
+        Next
+        Return False
+    End Function
+
     ''' <summary>
     ''' Checks whether the current value appears in the given list of strings (case insensitive). Returns true if there is a duplicate,
     ''' otherwise, adds the current value to the list and returns false.
