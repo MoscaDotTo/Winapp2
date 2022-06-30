@@ -60,6 +60,8 @@ Module Diff
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Property RemovedEntryCount As Integer = 0
 
+    Public Property RemovedByMergerCount As Integer = 0
+
     ''' <summary> The number of entries Diff determines to have been merged between versions  </summary>
     ''' Docs last upated 2022-06-20 | Code last updated 2022-06-20 
     Public Property MergedEntryCount As Integer = 0
@@ -68,6 +70,12 @@ Module Diff
     ''' Docs last upated 2022-06-20 | Code last updated 2022-06-20 
     Public Property RenamedEntryCount As Integer = 0
 
+    ''' <summary> The number of entries Diff determines to have both been added and contain keys from entries that were removed </summary>
+
+    Public Property AddedEntryWithMergerCount As Integer = 0
+
+    Public Property ModifiedEntryWithMergerCount As Integer = 0
+    Public Property EntriesMergedToModified As Integer = 0
 
     ''' <summary> The total number of keys that were added to modified entries </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
@@ -169,14 +177,16 @@ Module Diff
         gLog("Diff complete", descend:=True)
         print(0, Nothing, closeMenu:=True)
         print(4, "Summary", conjoin:=True)
-        print(0, $"Added entries: {AddedEntryCount}", colorLine:=True, enStrCond:=True)
-        print(0, $"Removed entries: {RemovedEntryCount}", colorLine:=True, enStrCond:=False)
         print(0, $"Modified entries: {ModifiedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
         print(0, $" * {ModEntriesAddedKeyTotal} added keys (total between all entries)", colorLine:=True, enStrCond:=True, cond:=ModEntriesAddedKeyTotal > 0)
         print(0, $" * {ModEntriesRemovedKeyTotal} removed keys (total between all entries)", colorLine:=True, enStrCond:=False, cond:=ModEntriesRemovedKeyTotal > 0)
         print(0, $" * {ModEntrtiesUpdatedKeyTotal} updated keys (total between all entries)", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow, cond:=ModEntrtiesUpdatedKeyTotal > 0)
+        print(0, $" * {ModifiedEntryWithMergerCount} modified entries contain keys from {EntriesMergedToModified} removed entries", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan, cond:=EntriesMergedToModified > 0)
         print(0, $"Renamed entries: {RenamedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Magenta)
-        print(0, $"Merged entries: {MergedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan, closeMenu:=True)
+        print(0, $"Merged entries: {MergedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
+        print(0, $"Removed entries: {RemovedEntryCount}", colorLine:=True, enStrCond:=False)
+        print(0, $"Added entries: {AddedEntryCount}", colorLine:=True, enStrCond:=True, closeMenu:=AddedEntryWithMergerCount = 0)
+        print(0, $" * {AddedEntryWithMergerCount} added entries contain keys from {RemovedByMergerCount} removed entries", cond:=AddedEntryWithMergerCount > 0, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan, closeMenu:=True)
     End Sub
 
     ''' <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
@@ -190,6 +200,10 @@ Module Diff
         ModEntrtiesUpdatedKeyTotal = 0
         RenamedEntryCount = 0
         MergedEntryCount = 0
+        AddedEntryWithMergerCount = 0
+        RemovedByMergerCount = 0
+        EntriesMergedToModified = 0
+        ModifiedEntryWithMergerCount = 0
         Dim renamedEntryNameList As New strList
         Dim mergedEntryNameList As New strList
         Dim modifiedEntryNameList As New strList
@@ -274,13 +288,14 @@ Module Diff
                 regKeyCountsMatch = False
                 Dim wa2sSection As New winapp2entry(sSection)
                 Dim curwa2Section As New winapp2entry(oldSectionVersion)
-                Dim totalMatches = 0
-                assessKeyMatches(curwa2Section.FileKeys, wa2sSection.FileKeys, fileKeyCountsMatch, someFileKeysMatched, allFileKeysMatched, totalMatches)
-                assessKeyMatches(curwa2Section.RegKeys, wa2sSection.RegKeys, regKeyCountsMatch, someRegKeysMatched, allRegKeysMatched, totalMatches)
+                Dim fileKeyMatches = 0
+                Dim regKeyMatches = 0
+                assessKeyMatches(curwa2Section.FileKeys, wa2sSection.FileKeys, fileKeyCountsMatch, someFileKeysMatched, allFileKeysMatched, fileKeyMatches)
+                assessKeyMatches(curwa2Section.RegKeys, wa2sSection.RegKeys, regKeyCountsMatch, someRegKeysMatched, allRegKeysMatched, regKeyMatches)
                 ' If we hit matches along the way, we'll remember the name of the entry with the largest number of matching keys to assess at the end 
                 ' but only if it exists in the set of entries who have been added or modified 
                 If (curwa2Section.FileKeys.KeyCount > 0 And someFileKeysMatched) Or (someRegKeysMatched And curwa2Section.RegKeys.KeyCount > 0) And
-                     totalMatches > highestMatchCount And strList.IsInAny({addedEntryNameList, modifiedEntryNameList}, sSection.Name) Then
+                     fileKeyMatches + regKeyMatches > highestMatchCount And strList.IsInAny({addedEntryNameList, modifiedEntryNameList}, sSection.Name) Then
                     newMergedOrRenamedName = sSection.Name
                 End If
                 ' If all the filekeys and regkeys and their respective counts match between two entries then it 
@@ -295,7 +310,11 @@ Module Diff
                     getDiff(oldSectionVersion, 4, MergedEntryCount, newMergedOrRenamedName, sSection)
                     entryWasRenamedOrMerged = True
                     mergedEntryNameList.add(newMergedOrRenamedName)
-                    If Not mergeDict.ContainsKey(newMergedOrRenamedName) Then mergeDict.Add(newMergedOrRenamedName, New List(Of String))
+                    If Not mergeDict.ContainsKey(newMergedOrRenamedName) Then
+                        mergeDict.Add(newMergedOrRenamedName, New List(Of String))
+                        If modifiedEntryNameList.contains(newMergedOrRenamedName) Then ModifiedEntryWithMergerCount += 1
+                    End If
+                    If modifiedEntryNameList.contains(newMergedOrRenamedName) Then EntriesMergedToModified += 1
                     mergeDict(newMergedOrRenamedName).Add(entry)
                     Continue For
                 End If
@@ -305,8 +324,13 @@ Module Diff
             If Not entryWasRenamedOrMerged Then
                 If strList.IsInAny({modifiedEntryNameList, renamedEntryNameList, addedEntryNameList, mergedEntryNameList}, newMergedOrRenamedName) Then
                     mergedEntryNameList.add(newMergedOrRenamedName)
+                    If modifiedEntryNameList.contains(newMergedOrRenamedName) Then ModifiedEntryWithMergerCount += 1
                     getDiff(oldSectionVersion, 4, MergedEntryCount, newMergedOrRenamedName, DiffFile2.Sections(newMergedOrRenamedName))
-                    If Not mergeDict.ContainsKey(newMergedOrRenamedName) Then mergeDict.Add(newMergedOrRenamedName, New List(Of String))
+                    If Not mergeDict.ContainsKey(newMergedOrRenamedName) Then
+                        mergeDict.Add(newMergedOrRenamedName, New List(Of String))
+                        If modifiedEntryNameList.contains(newMergedOrRenamedName) Then ModifiedEntryWithMergerCount += 1
+                    End If
+                    If modifiedEntryNameList.contains(newMergedOrRenamedName) Then EntriesMergedToModified += 1
                     mergeDict(newMergedOrRenamedName).Add(entry)
                     Continue For
                 End If
@@ -316,6 +340,7 @@ Module Diff
         Next
         ' Any sections from the new file which are not found in the old file have been added 
         For Each section In DiffFile2.Sections.Values
+            ' If an entry has been renamed but not otherwise changed, we wont list it as being "added" 
             If Not DiffFile1.Sections.Keys.Contains(section.Name) And Not renamedEntryNameList.contains(section.Name) Then
                 getDiff(section, 0, AddedEntryCount)
                 If mergeDict.ContainsKey(section.Name) Then
@@ -324,6 +349,8 @@ Module Diff
                         print(0, mergedEntry, isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan)
                     Next
                     print(0, "", conjoin:=True, fillBorder:=False)
+                    AddedEntryWithMergerCount += 1
+                    RemovedByMergerCount += mergeDict(section.Name).Count
                 End If
             End If
         Next
