@@ -287,7 +287,18 @@ winapp2ool
  <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
  Docs last updated: 2020-09-02 | Code last updated: 2022-06-28
 </member>
-<member name="M:winapp2ool.Diff.assessKeyMatches(winapp2ool.keyList,winapp2ool.keyList,System.Boolean@,System.Boolean@,System.Boolean@,System.Int32@)">
+<member name="M:winapp2ool.Diff.mergeDiff(winapp2ool.iniSection,winapp2ool.iniSection,System.Boolean@,winapp2ool.strList@,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}}@,winapp2ool.strList@)">
+ <summary>
+ Handles the case where an entry was merged into another 
+ </summary>
+ <param name="oldSectionVersion"> The removed entry that has been merged into <c> newIniSectionVersion </c> </param>
+ <param name="newIniSectionVersion"> The entry into which some or all of the keys from <c> oldSectionVersion </c> have been merged </param>
+ <param name="entryWasRenamedOrMerged"> Tracks whether or not the entry has been determined to have been merged </param>
+ <param name="mergedEntryNameList"> The list of entries detected as having been merged </param>
+ <param name="mergeDict"> The dictionary containing the merger information </param>
+ <param name="modifiedEntryNameList"> The list of entries detected as having been modified </param>
+</member>
+<member name="M:winapp2ool.Diff.assessKeyMatches(winapp2ool.keyList,winapp2ool.keyList,System.Boolean@,System.Boolean@,System.Boolean@,System.Int32@,System.Collections.Generic.List{System.String})">
  <summary> Counts the number of matching key contents between two ini keyLists </summary>
  <param name="currentKeyList"> The list of keys from the "old" version of the entry </param>
  <param name="newKeyList"> The list of keys from the "new" version of the entry </param>
@@ -295,6 +306,7 @@ winapp2ool
  <param name="someKeysMatchedTracker"> Tracks whether or not any keys have matched </param>
  <param name="allKeysMatchedTracker"> Tracks whether or not all the keys have matched </param>
  <param name="MatchCount"> The number of matches observed </param>
+ <param name="disallowedValues"> Any values whose matching should be ignored </param>
 </member>
 <member name="M:winapp2ool.Diff.recordModification(System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.String@)">
  <summary> Records the number of changes made in a modified entry </summary>
