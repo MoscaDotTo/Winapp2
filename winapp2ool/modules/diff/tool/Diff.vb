@@ -15,6 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
+Imports System.Collections.Specialized.BitVector32
 Imports System.Globalization
 ''' <summary> Performs a "Diff" on two winapp2.ini files </summary>
 ''' Docs last updated: 2020-09-01 
@@ -125,6 +126,7 @@ Module Diff
     ''' <summary> Carries out the main set of Diffing operations </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Public Sub initDiff()
+
         If Not enforceFileHasContent(DiffFile1) Then Return
         If DownloadDiffFile Then
             Dim downloadedIniFile = getRemoteIniFile(winapp2link)
@@ -147,30 +149,36 @@ Module Diff
         MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "hasBeenRun")
         DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
         setHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
+
     End Sub
 
     '''<summary> Logs the initial portion of the diff output for the user </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Sub logInitDiff()
+
         print(3, "Diffing, please wait. This may take a moment.")
         clrConsole()
         Dim oldVersionNum = getVer(DiffFile1)
         Dim newVersionNum = getVer(DiffFile2)
         gLog($"Beginning diff between{oldVersionNum} and{newVersionNum}", ascend:=True)
         print(6, $"Changes between{oldVersionNum} and{newVersionNum}", enStrCond:=False)
+
     End Sub
 
     ''' <summary> Gets the version from winapp2.ini </summary>
     ''' <param name="someFile"> A winapp2.ini format <c> iniFile </c> </param>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
     Private Function getVer(someFile As iniFile) As String
+
         Dim ver = If(someFile.Comments.Count > 0, someFile.Comments(0).Comment.ToString(CultureInfo.InvariantCulture).ToUpperInvariant, "000000")
         Return If(ver.Contains("VERSION"), ver.TrimStart(CChar(";")).Replace("VERSION:", "version"), " version not given")
+
     End Function
 
     ''' <summary> Logs and prints the summary of the Diff </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2022-06-20
     Private Sub logPostDiff()
+
         gLog($"Added entries: {AddedEntryCount}", indent:=True)
         gLog($"Modified entries: {ModifiedEntryCount}", indent:=True)
         gLog($"Removed entries: {RemovedEntryCount}", indent:=True)
@@ -187,11 +195,13 @@ Module Diff
         print(0, $"Removed entries: {RemovedEntryCount}", colorLine:=True, enStrCond:=False)
         print(0, $"Added entries: {AddedEntryCount}", colorLine:=True, enStrCond:=True, closeMenu:=AddedEntryWithMergerCount = 0)
         print(0, $" * {AddedEntryWithMergerCount} added entries contain keys from {RemovedByMergerCount} removed entries", cond:=AddedEntryWithMergerCount > 0, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan, closeMenu:=True)
+
     End Sub
 
     ''' <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
     ''' Docs last updated: 2020-09-02 | Code last updated: 2022-06-28
     Private Sub compareTo()
+
         AddedEntryCount = 0
         RemovedEntryCount = 0
         ModifiedEntryCount = 0
@@ -216,32 +226,32 @@ Module Diff
             addedEntryNameList.add(section.Name, Not DiffFile1.Sections.ContainsKey(section.Name))
         Next
 
-        ' Determine the names of the entries who appear only in the "old" file 
-        For Each section In DiffFile1.Sections.Values
-            removedEntryNameList.add(section.Name, Not DiffFile2.Sections.ContainsKey(section.Name))
-        Next
-
         ' Determine which entries who appear in both files have been modified 
         For Each section In DiffFile1.Sections.Values
+
             Dim modCounts, addCounts, remCounts As New List(Of Integer)
             Dim modKeyTypes, addKeyTypes, remKeyTypes As New List(Of String)
 
-            ' If any entry exists in both DiffFile1 and DiffFile2, and does not pass the compareTo, then it has been modified 
             If DiffFile2.Sections.Keys.Contains(section.Name) Then
+
                 Dim sSection = DiffFile2.Sections(section.Name)
                 Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
 
+                ' If an entry exists in both files and doesn't pass the compareTo check, then it has been modified 
                 If Not section.compareTo(sSection, removedKeys, addedKeys) Then
-                    modifiedEntryNameList.add(sSection.Name)
-                    ' Determine the types of modifications made to the entry 
+
+                    ' Determine the type of modifications made and silently ignore any entries with only alphabetization changes
                     chkLsts(removedKeys, addedKeys, updatedKeys)
-                    ' Silently ignore any entries with only alphabetization changes
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
+
+                    ' Record the entry name and output the changes to the user 
+                    modifiedEntryNameList.add(sSection.Name)
                     getDiff(sSection, 2, ModifiedEntryCount)
                     getChangesFromList(addedKeys, True, addKeyTypes, addCounts)
                     getChangesFromList(removedKeys, False, remKeyTypes, remCounts)
                     If updatedKeys.Count > 0 Then
+
                         gLog("Modifed Keys:", ascend:=True, ascAmt:=2)
                         updatedKeys.ForEach(Sub(pair) recordModification(modKeyTypes, modCounts, pair.Value.KeyType))
                         summarizeEntryUpdate(modKeyTypes, modCounts, "Modified")
@@ -255,12 +265,21 @@ Module Diff
                             print(0, "New: " & pair.Key.toString, colorLine:=True, enStrCond:=True)
                             print(0, Nothing, cond:=i = updatedKeys.Count - 1, conjoin:=i = updatedKeys.Count - 1, fillBorder:=False)
                         Next
+
                         gLog(descend:=True, descAmt:=2)
+
                     End If
+
                     addCounts.ForEach(Sub(count) ModEntriesAddedKeyTotal += count)
                     remCounts.ForEach(Sub(count) ModEntriesRemovedKeyTotal += count)
                     modCounts.ForEach(Sub(count) ModEntrtiesUpdatedKeyTotal += count)
+
                 End If
+            Else
+
+                ' Entries who do not appear in the new file have been removed 
+                removedEntryNameList.add(section.Name)
+
             End If
         Next
 
@@ -270,6 +289,7 @@ Module Diff
         ' They were actually removed from the file without their contents being merged into another entry or with their contents merged into another entry
         ' in a way in which we cannot track (ie. through use of wildcards), in which case we will just consider the entry removed 
         For Each entry In removedEntryNameList.Items
+
             Dim regKeyCountsMatch = False
             Dim fileKeyCountsMatch = False
             Dim newMergedOrRenamedName = ""
@@ -278,8 +298,10 @@ Module Diff
             Dim oldSectionVersion = DiffFile1.getSection(entry)
 
             For Each sSection In DiffFile2.Sections.Values
+
                 ' Don't consider the contents of entries that are neither new nor modified in the new version 
                 If Not addedEntryNameList.contains(sSection.Name) And Not modifiedEntryNameList.contains(sSection.Name) Then Continue For
+
                 Dim allFileKeysMatched = False
                 Dim someFileKeysMatched = False
                 Dim allRegKeysMatched = False
@@ -292,68 +314,117 @@ Module Diff
                 Dim regKeyMatches = 0
                 assessKeyMatches(curwa2Section.FileKeys, wa2sSection.FileKeys, fileKeyCountsMatch, someFileKeysMatched, allFileKeysMatched, fileKeyMatches)
                 assessKeyMatches(curwa2Section.RegKeys, wa2sSection.RegKeys, regKeyCountsMatch, someRegKeysMatched, allRegKeysMatched, regKeyMatches)
+
                 ' If we hit matches along the way, we'll remember the name of the entry with the largest number of matching keys to assess at the end 
                 ' but only if it exists in the set of entries who have been added or modified 
                 If (curwa2Section.FileKeys.KeyCount > 0 And someFileKeysMatched) Or (someRegKeysMatched And curwa2Section.RegKeys.KeyCount > 0) And
                      fileKeyMatches + regKeyMatches > highestMatchCount And strList.IsInAny({addedEntryNameList, modifiedEntryNameList}, sSection.Name) Then
                     newMergedOrRenamedName = sSection.Name
                 End If
-                ' If all the filekeys and regkeys and their respective counts match between two entries then it 
-                ' stands to reason that the old version of the key was renamed into the new version 
+
                 If allFileKeysMatched And allRegKeysMatched And fileKeyCountsMatch And regKeyCountsMatch Then
+
+                    ' If all the filekeys and regkeys and their respective counts match between two entries then it 
+                    ' stands to reason that the old version of the key was renamed into the new version 
                     getDiff(oldSectionVersion, 3, RenamedEntryCount, newMergedOrRenamedName, sSection)
                     entryWasRenamedOrMerged = True
                     renamedEntryNameList.add(newMergedOrRenamedName)
                     Continue For
+
                 ElseIf allFileKeysMatched And allRegKeysMatched Then
+
                     ' Likewise, if all the keys matched but the counts don't match, then the entry was probably merged 
-                    getDiff(oldSectionVersion, 4, MergedEntryCount, newMergedOrRenamedName, sSection)
-                    entryWasRenamedOrMerged = True
-                    mergedEntryNameList.add(newMergedOrRenamedName)
-                    If Not mergeDict.ContainsKey(newMergedOrRenamedName) Then
-                        mergeDict.Add(newMergedOrRenamedName, New List(Of String))
-                        If modifiedEntryNameList.contains(newMergedOrRenamedName) Then ModifiedEntryWithMergerCount += 1
-                    End If
-                    If modifiedEntryNameList.contains(newMergedOrRenamedName) Then EntriesMergedToModified += 1
-                    mergeDict(newMergedOrRenamedName).Add(entry)
+                    mergeDiff(oldSectionVersion, sSection, entryWasRenamedOrMerged, mergedEntryNameList, mergeDict, modifiedEntryNameList)
                     Continue For
+
                 End If
+
+                ' Just skip this next check on the browser sections, they all share the same detections 
+                If curwa2Section.SectionKey.KeyCount > 0 OrElse {"3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001"}.Contains(curwa2Section.LangSecRef.Keys(0).Value) Then Continue For
+
+                ' If we get here, we didn't find a match based on the deletion keys, we can check for the detection criteria as well
+                Dim someDetectsMatched = False
+                Dim someDetectFilesMatched = False
+
+                ' We have some values that are too generic here to truly consider useful
+                Dim ignoredValues As New List(Of String) From {"HKCU\Software\Microsoft\Windows", {"HKLM\Software\Microsoft\Windows"}}
+                assessKeyMatches(curwa2Section.Detects, wa2sSection.Detects, False, someDetectsMatched, False, 0, ignoredValues)
+                assessKeyMatches(curwa2Section.DetectFiles, wa2sSection.DetectFiles, False, someDetectFilesMatched, False, 0)
+
+                ' If we have detects that match at this point, we'll consider those mergers 
+                If someDetectFilesMatched And curwa2Section.DetectFiles.KeyCount > 0 Or someDetectsMatched And curwa2Section.Detects.KeyCount > 0 Then
+
+                    mergeDiff(oldSectionVersion, sSection, entryWasRenamedOrMerged, mergedEntryNameList, mergeDict, modifiedEntryNameList)
+                    Continue For
+
+                End If
+
             Next
-            ' At this stage we'll consider ourselves unable to definitively state that an entry has been renamed and classify the entry 
-            ' as having been merged if it 
+
             If Not entryWasRenamedOrMerged Then
                 If strList.IsInAny({modifiedEntryNameList, renamedEntryNameList, addedEntryNameList, mergedEntryNameList}, newMergedOrRenamedName) Then
-                    mergedEntryNameList.add(newMergedOrRenamedName)
-                    If modifiedEntryNameList.contains(newMergedOrRenamedName) Then ModifiedEntryWithMergerCount += 1
-                    getDiff(oldSectionVersion, 4, MergedEntryCount, newMergedOrRenamedName, DiffFile2.Sections(newMergedOrRenamedName))
-                    If Not mergeDict.ContainsKey(newMergedOrRenamedName) Then
-                        mergeDict.Add(newMergedOrRenamedName, New List(Of String))
-                        If modifiedEntryNameList.contains(newMergedOrRenamedName) Then ModifiedEntryWithMergerCount += 1
-                    End If
-                    If modifiedEntryNameList.contains(newMergedOrRenamedName) Then EntriesMergedToModified += 1
-                    mergeDict(newMergedOrRenamedName).Add(entry)
+
+                    ' We'll consider the fact that we set a merge name candidate who appears in one of these lists a good basis to believe the entries were merged
+                    mergeDiff(oldSectionVersion, DiffFile2.Sections(newMergedOrRenamedName), entryWasRenamedOrMerged, mergedEntryNameList, mergeDict, modifiedEntryNameList)
                     Continue For
+
                 End If
+
                 ' If at this stage we haven't determined the entry to exist as part of another entry, it was probably removed for realsies 
                 getDiff(oldSectionVersion, 1, RemovedEntryCount)
+
             End If
         Next
-        ' Any sections from the new file which are not found in the old file have been added 
-        For Each section In DiffFile2.Sections.Values
+
+        ' All that's left is to print the added entries 
+        For Each entry In addedEntryNameList.Items
+
             ' If an entry has been renamed but not otherwise changed, we wont list it as being "added" 
-            If Not DiffFile1.Sections.Keys.Contains(section.Name) And Not renamedEntryNameList.contains(section.Name) Then
-                getDiff(section, 0, AddedEntryCount)
-                If mergeDict.ContainsKey(section.Name) Then
-                    print(0, "This entry contains keys merged from the following removed entries:", isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
-                    For Each mergedEntry In mergeDict(section.Name)
-                        print(0, mergedEntry, isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan)
-                    Next
-                    print(0, "", conjoin:=True, fillBorder:=False)
-                    AddedEntryWithMergerCount += 1
-                    RemovedByMergerCount += mergeDict(section.Name).Count
-                End If
+            If renamedEntryNameList.contains(entry) Then Continue For
+            Dim section = DiffFile2.Sections(entry)
+            getDiff(section, 0, AddedEntryCount)
+
+            ' Inform the user if the entry contains key from removed entries 
+            If mergeDict.ContainsKey(section.Name) Then
+
+                print(0, "This entry contains keys merged from the following removed entries:", isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+                For Each mergedEntry In mergeDict(section.Name)
+                    print(0, mergedEntry, isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan)
+                Next
+                print(0, "", conjoin:=True, fillBorder:=False)
+                AddedEntryWithMergerCount += 1
+                RemovedByMergerCount += mergeDict(section.Name).Count
+
             End If
         Next
+    End Sub
+
+    ''' <summary>
+    ''' Handles the case where an entry was merged into another 
+    ''' </summary>
+    ''' <param name="oldSectionVersion"> The removed entry that has been merged into <c> newIniSectionVersion </c> </param>
+    ''' <param name="newIniSectionVersion"> The entry into which some or all of the keys from <c> oldSectionVersion </c> have been merged </param>
+    ''' <param name="entryWasRenamedOrMerged"> Tracks whether or not the entry has been determined to have been merged </param>
+    ''' <param name="mergedEntryNameList"> The list of entries detected as having been merged </param>
+    ''' <param name="mergeDict"> The dictionary containing the merger information </param>
+    ''' <param name="modifiedEntryNameList"> The list of entries detected as having been modified </param>
+    Private Sub mergeDiff(oldSectionVersion As iniSection, newIniSectionVersion As iniSection,
+                          ByRef entryWasRenamedOrMerged As Boolean, ByRef mergedEntryNameList As strList,
+                          ByRef mergeDict As Dictionary(Of String, List(Of String)), ByRef modifiedEntryNameList As strList)
+
+        Dim mergeName = newIniSectionVersion.Name
+        getDiff(oldSectionVersion, 4, MergedEntryCount, mergeName, newIniSectionVersion)
+        entryWasRenamedOrMerged = True
+        mergedEntryNameList.add(mergeName)
+
+        If Not mergeDict.ContainsKey(mergeName) Then
+            mergeDict.Add(mergeName, New List(Of String))
+            If modifiedEntryNameList.contains(mergeName) Then ModifiedEntryWithMergerCount += 1
+        End If
+        If modifiedEntryNameList.contains(mergeName) Then EntriesMergedToModified += 1
+
+        mergeDict(mergeName).Add(oldSectionVersion.Name)
+
     End Sub
 
     ''' <summary> Counts the number of matching key contents between two ini keyLists </summary>
@@ -363,24 +434,43 @@ Module Diff
     ''' <param name="someKeysMatchedTracker"> Tracks whether or not any keys have matched </param>
     ''' <param name="allKeysMatchedTracker"> Tracks whether or not all the keys have matched </param>
     ''' <param name="MatchCount"> The number of matches observed </param>
-    Public Sub assessKeyMatches(currentKeyList As keyList, newKeyList As keyList, ByRef countTracker As Boolean, ByRef someKeysMatchedTracker As Boolean, ByRef allKeysMatchedTracker As Boolean, ByRef MatchCount As Integer)
+    ''' <param name="disallowedValues"> Any values whose matching should be ignored </param>
+    Private Sub assessKeyMatches(currentKeyList As keyList, newKeyList As keyList,
+                                ByRef countTracker As Boolean, ByRef someKeysMatchedTracker As Boolean,
+                                ByRef allKeysMatchedTracker As Boolean, ByRef MatchCount As Integer,
+                                Optional disallowedValues As List(Of String) = Nothing)
+
         If currentKeyList.KeyCount = newKeyList.KeyCount Then countTracker = True
+
         ' If there's nothing to match, consider the keys matched 
         If currentKeyList.KeyCount = 0 Then
+
             someKeysMatchedTracker = True
             allKeysMatchedTracker = True
+
         Else
-            ' Otherwise, determine whether or not some or all the FileKeys have matched 
+            ' Otherwise, determine whether or not some or all the key values have matched 
             For Each key In currentKeyList.Keys
                 For Each newFileKey In newKeyList.Keys
                     If String.Equals(newFileKey.Value, key.Value, StringComparison.InvariantCultureIgnoreCase) Then
+
+                        ' We can pass a list of hard coded disallowed values to ignore as matches, if we need to 
+                        If disallowedValues IsNot Nothing Then
+                            If disallowedValues.Contains(key.Value) Then Exit For
+                        End If
+
+                        ' Otherwise if the values matched then record it 
                         someKeysMatchedTracker = True
                         MatchCount += 1
                         Exit For
+
                     End If
                 Next
             Next
+
+            ' If we have as many matches as keys then all keys must have matched 
             If MatchCount = currentKeyList.KeyCount Then allKeysMatchedTracker = True
+
         End If
     End Sub
 
