@@ -230,6 +230,9 @@ winapp2ool
  <summary> The number of entries Diff determines to have been renamed between versions  </summary>
  Docs last upated 2022-06-20 | Code last updated 2022-06-20 
 </member>
+<member name="P:winapp2ool.Diff.AddedEntryWithMergerCount">
+ <summary> The number of entries Diff determines to have both been added and contain keys from entries that were removed </summary>
+</member>
 <member name="P:winapp2ool.Diff.ModEntriesAddedKeyTotal">
  <summary> The total number of keys that were added to modified entries </summary>
  Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
