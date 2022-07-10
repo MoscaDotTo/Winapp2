@@ -1939,7 +1939,7 @@ winapp2ool
  <summary> Returns <c> True </c> if a SpecialDetect location exists, <c> False </c> otherwise </summary>
  <param name="key"> A SpecialDetect format <c> iniKey </c> </param>
 </member>
-<member name="M:winapp2ool.Trim.checkExist(System.String)">
+<member name="M:winapp2ool.Trim.checkExist(System.String,System.String)">
  <summary> Handles passing off checks from sources that may vary between file system and registry </summary>
  <param name="path"> A filesystem or registry path whose existence will be audited </param>
 </member>

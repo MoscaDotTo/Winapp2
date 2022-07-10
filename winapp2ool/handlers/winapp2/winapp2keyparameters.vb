@@ -54,7 +54,7 @@ Public Class winapp2KeyParameters
                     Case 2
                         PathString = splitKey(1)
                         FlagString = splitKey(0)
-                    Case 3
+                    Case 3, 4
                         PathString = splitKey(1)
                         ArgsList.AddRange(splitKey(2).Split(CChar(";")))
                         FlagString = splitKey(0)
