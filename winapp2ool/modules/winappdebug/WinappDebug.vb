@@ -763,6 +763,7 @@ Public Module WinappDebug
                 End If
                 fullKeyErr(key, "No valid exclude flag (FILE, PATH, or REG) found in ExcludeKey.")
         End Select
+        fullKeyErr(key, "ExcludeKey has too many flags", key.Value.Split(CChar("|")).Length > 3)
     End Sub
 
     ''' <summary> Sorts a <c> keyList </c> alphabetically with winapp2.ini precedence applied to the key values </summary>
