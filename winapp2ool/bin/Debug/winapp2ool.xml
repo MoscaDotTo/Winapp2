@@ -1995,48 +1995,52 @@ winapp2ool
  to incompleteness or by virtue of being out of scope of the normal linting process </summary>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="P:winapp2ool.experimentalScans.masterRegKeyList">
+<member name="P:winapp2ool.experimentalScans.regKeyTracker">
  <summary> Holds the entire text of every RegKey observed during duplicate checks between all entries </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
-<member name="P:winapp2ool.experimentalScans.masterFileKeyList">
+<member name="P:winapp2ool.experimentalScans.fileKeyTracker">
  <summary> Holds the path of every FileKey observed during duplicate checks between all entries </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
-<member name="M:winapp2ool.experimentalScans.resetMasterKeyLists">
- <summary>
- Empties the contents of the master key lists used for duplicate checking between entries 
- </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+<member name="P:winapp2ool.experimentalScans.detectTracker">
+ <summary> Holds the path of every Detect observed during duplicate checks between all entries </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+</member>
+<member name="P:winapp2ool.experimentalScans.detectFileTracker">
+ <summary> Holds the path of every DetectFile observed during duplicate checks between all entries </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+</member>
+<member name="M:winapp2ool.experimentalScans.resetKeyTrackers">
+ <summary> Empties the key value trackers of their contents </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.experimentalScans.cOptimization(winapp2ool.keyList@)">
  <summary> Attempts to merge FileKeys together if syntactically possible </summary>
  <param name="kl"> A <c> keyList </c> of FileKey format <c> iniKeys </c> which will be assessed for 
  potential to merge multiple keys into a single key </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.experimentalScans.printOptiSect(System.String,winapp2ool.keyList)">
  <summary> Prints output from the Optimization function </summary>
  <param name="boxStr"> The text to be printed in the optimization section box </param>
  <param name="kl"> The list of <c> iniKeys </c>to be printed beneath the box </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.experimentalScans.cDuplicateKeysBetweenEntries(winapp2ool.iniKey)">
- <summary>
- Sets up the duplicate key text checker with the proper master list 
- </summary>
+ <summary> Sets up the duplicate key text checker with the proper tracker </summary>
  <param name="key"> An <c> iniKey </c> to have its value audited against the duplicate list </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
-<member name="M:winapp2ool.experimentalScans.auditDupe(winapp2ool.strList,winapp2ool.iniKey)">
+<member name="M:winapp2ool.experimentalScans.auditDupe(System.Collections.Generic.HashSet{System.String}@,winapp2ool.iniKey)">
  <summary>
- Observes whether or not the text of a FileKey or RegKey has previously been seen during this lint session. FileKeys are considered
- to be potential duplicates if they have the same path parameter but different file parameters, RegKeys are only considered potential 
+ Tracks whether or not the value of a key has been obsered multiple times during this lint session. FileKeys are considered
+ to be potential duplicates if they have the same path parameter but different file parameters, All other keys are only considered potential 
  duplicates if their entire parameterization is identical. 
  </summary>
- <param name="masterList"> The list of all keys of this type to have been observed during this lint session </param>
- <param name="key"> A particular iniKey to check against the list </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ <param name="tracker"> The set of all values of keys of the type given by <c> <paramref name="key"/> </c> to have been observed during this lint session </param>
+ <param name="key"> A particular iniKey to check against the set of observed values </param>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="T:winapp2ool.lintRule">
  <summary> Holds information about whether or not individual types of scans and repairs should run </summary>
@@ -2192,7 +2196,7 @@ winapp2ool
  <summary> Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently) <br /> Default: <c> False </c> </summary>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="P:winapp2ool.WinappDebug.lintMutliDupe">
+<member name="P:winapp2ool.WinappDebug.lintMultiDupe">
  <summary> Controls scan/repairs for keys that may possibly exist in more than one entry <br /> Default: <c> False </c> </summary>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
