@@ -15,6 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
+Imports System.Collections.Specialized.BitVector32
 Imports System.Globalization
 
 ''' <summary> Performs a "Diff" on two winapp2.ini files, attempting to deliver specific details about changes to the user  </summary>
@@ -255,11 +256,9 @@ Module Diff
 
         Next
 
-        ' Determine which entries who appear in both files have been modified 
+        ' Determine which entries appear in both files and have been modified in a non-superficial way
+        ' We're going to do this work twice which is a little silly, but it probably wont matter 
         For Each section In DiffFile1.Sections.Values
-
-            Dim modCounts, addCounts, remCounts As New List(Of Integer)
-            Dim modKeyTypes, addKeyTypes, remKeyTypes As New List(Of String)
 
             If DiffFile2.Sections.Keys.Contains(section.Name) Then
 
@@ -267,45 +266,14 @@ Module Diff
                 Dim addedKeys, removedKeys As New keyList
                 Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
 
-                ' If an entry exists in both files and doesn't pass the compareTo check, then it has been modified 
-                If Not section.compareTo(sSection, removedKeys, addedKeys) Then
+                If Not section.compareTo(DiffFile2.Sections(section.Name), removedKeys, addedKeys) Then
 
-                    ' Determine the type of modifications made and silently ignore any entries with only alphabetization changes
+                    ' Silently ignore any entries with only alphabetization changes
                     chkLsts(removedKeys, addedKeys, updatedKeys)
                     If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Continue For
 
                     ' Record the entry name and output the changes to the user 
                     modifiedEntryTracker.Add(sSection.Name)
-                    getDiff(sSection, 2, ModifiedEntryCount)
-                    getChangesFromList(addedKeys, True, addKeyTypes, addCounts)
-                    getChangesFromList(removedKeys, False, remKeyTypes, remCounts)
-
-                    If updatedKeys.Count > 0 Then
-
-                        gLog("Modifed Keys:", ascend:=True, ascAmt:=2)
-                        updatedKeys.ForEach(Sub(pair) recordModification(modKeyTypes, modCounts, pair.Value.KeyType))
-                        summarizeEntryUpdate(modKeyTypes, modCounts, "Modified")
-
-                        For i = 0 To updatedKeys.Count - 1
-
-                            Dim pair = updatedKeys(i)
-                            recordModification(modKeyTypes, modCounts, pair.Value.KeyType)
-                            gLog(pair.Key.Name, indent:=True, indAmt:=2)
-                            gLog("Old: " & pair.Value.toString, indent:=True, indAmt:=3)
-                            gLog("New: " & pair.Key.toString, indent:=True, indAmt:=3)
-                            print(0, "Old: " & pair.Value.toString, colorLine:=True)
-                            print(0, "New: " & pair.Key.toString, colorLine:=True, enStrCond:=True)
-                            print(0, Nothing, cond:=i = updatedKeys.Count - 1, conjoin:=i = updatedKeys.Count - 1, fillBorder:=False)
-
-                        Next
-
-                        gLog(descend:=True, descAmt:=2)
-
-                    End If
-
-                    addCounts.ForEach(Sub(count) ModEntriesAddedKeyTotal += count)
-                    remCounts.ForEach(Sub(count) ModEntriesRemovedKeyTotal += count)
-                    modCounts.ForEach(Sub(count) ModEntrtiesUpdatedKeyTotal += count)
 
                 End If
 
@@ -418,6 +386,66 @@ Module Diff
 
         Next
 
+        For Each entry In modifiedEntryTracker.ToList
+
+            ' For each modified entry, quantify the changes for the user 
+            Dim modCounts, addCounts, remCounts As New List(Of Integer)
+            Dim modKeyTypes, addKeyTypes, remKeyTypes As New List(Of String)
+            Dim newSectionVer = DiffFile2.Sections(entry)
+            Dim addedKeys, removedKeys As New keyList
+            Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
+            DiffFile1.Sections(entry).compareTo(newSectionVer, removedKeys, addedKeys)
+            chkLsts(removedKeys, addedKeys, updatedKeys)
+            getDiff(newSectionVer, 2, ModifiedEntryCount)
+            getChangesFromList(addedKeys, True, addKeyTypes, addCounts)
+            getChangesFromList(removedKeys, False, remKeyTypes, remCounts)
+
+            If updatedKeys.Count > 0 Then
+
+                gLog("Modifed Keys:", ascend:=True, ascAmt:=2)
+                updatedKeys.ForEach(Sub(pair) recordModification(modKeyTypes, modCounts, pair.Value.KeyType))
+                summarizeEntryUpdate(modKeyTypes, modCounts, "Modified")
+
+                For i = 0 To updatedKeys.Count - 1
+
+                    Dim pair = updatedKeys(i)
+                    recordModification(modKeyTypes, modCounts, pair.Value.KeyType)
+                    gLog(pair.Key.Name, indent:=True, indAmt:=2)
+                    gLog("Old: " & pair.Value.toString, indent:=True, indAmt:=3)
+                    gLog("New: " & pair.Key.toString, indent:=True, indAmt:=3)
+                    print(0, "Old: " & pair.Value.toString, colorLine:=True)
+                    print(0, "New: " & pair.Key.toString, colorLine:=True, enStrCond:=True)
+                    print(0, Nothing, cond:=i = updatedKeys.Count - 1, conjoin:=i = updatedKeys.Count - 1, fillBorder:=False)
+
+                Next
+
+                gLog(descend:=True, descAmt:=2)
+
+            End If
+
+            addCounts.ForEach(Sub(count) ModEntriesAddedKeyTotal += count)
+            remCounts.ForEach(Sub(count) ModEntriesRemovedKeyTotal += count)
+            modCounts.ForEach(Sub(count) ModEntrtiesUpdatedKeyTotal += count)
+
+            ' If other entries appear to have had their content merged into this one, report that to the user 
+            If mergeDict.ContainsKey(entry) Then
+
+                print(0, "This entry contains keys merged from the following removed entries:", isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+
+                ' Count each entry detected as having been merged into the new added entry 
+                For Each mergedEntry In mergeDict(entry)
+
+                    ' but don't count multiple times entries who had their keys split into multiple new entries 
+                    print(0, mergedEntry, isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan)
+
+                Next
+
+                print(0, "", conjoin:=True, fillBorder:=False)
+
+            End If
+
+        Next
+
         processedEntryNameList.Clear()
 
         ' All that's left is to print the added entries 
@@ -452,6 +480,7 @@ Module Diff
                 print(0, "", conjoin:=True, fillBorder:=False)
 
             End If
+
         Next
     End Sub
 
@@ -524,12 +553,16 @@ Module Diff
         Else
             ' Otherwise, determine whether or not some or all the key values have matched 
             For Each key In currentKeyList.Keys
+
                 For Each newFileKey In newKeyList.Keys
+
                     If String.Equals(newFileKey.Value, key.Value, StringComparison.InvariantCultureIgnoreCase) Then
 
                         ' We can pass a list of hard coded disallowed values to ignore as matches, if we need to 
                         If disallowedValues IsNot Nothing Then
+
                             If disallowedValues.Contains(key.Value) Then Exit For
+
                         End If
 
                         ' Otherwise if the values matched then record it 
