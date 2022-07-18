@@ -179,83 +179,96 @@ winapp2ool
  Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="T:winapp2ool.Diff">
- <summary> Performs a "Diff" on two winapp2.ini files </summary>
- Docs last updated: 2020-09-01 
+ <summary> Performs a "Diff" on two winapp2.ini files, attempting to deliver specific details about changes to the user  </summary>
+ Docs last updated: 2022-07-14 
 </member>
 <member name="P:winapp2ool.Diff.DiffFile1">
  <summary> The old or local version of winapp2.ini to be diffed </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.DiffFile2">
  <summary> The new or remote version of winapp2.ini against which DiffFile1 will be compared </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.DiffFile3">
  <summary> The path to which the log will optionally be saved </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.DownloadDiffFile">
  <summary> Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c> </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.SaveDiffLog">
  <summary> Indicates that the diff output should be saved to disk </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.DiffModuleSettingsChanged">
  <summary> Indicates that the module settings have been modified from their defaults </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.TrimRemoteFile">
  <summary> Indicates that the remote file should be trimmed for the local system before diffing </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.AddedEntryCount">
  <summary> The number of entries Diff determines to have been added between versions </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.ModifiedEntryCount">
  <summary> The number of entries Diff determines to have been modified between versions </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.RemovedEntryCount">
  <summary> The number of entries Diff determines to have been removed between versions </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+</member>
+<member name="P:winapp2ool.Diff.RemovedByAdditionCount">
+ <summary> The number of entries Diff determines to have been removed whose content appears in an entry determined to have been added </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.MergedEntryCount">
- <summary> The number of entries Diff determines to have been merged between versions  </summary>
- Docs last upated 2022-06-20 | Code last updated 2022-06-20 
+ <summary> The number of entries Diff determines to have been merged between versions </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.RenamedEntryCount">
- <summary> The number of entries Diff determines to have been renamed between versions  </summary>
- Docs last upated 2022-06-20 | Code last updated 2022-06-20 
+ <summary> The number of entries Diff determines to have been renamed between versions </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.AddedEntryWithMergerCount">
  <summary> The number of entries Diff determines to have both been added and contain keys from entries that were removed </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+</member>
+<member name="P:winapp2ool.Diff.ModifiedEntryWithMergerCount">
+ <summary> The number of entries Diff determines to both have been modified and contain keys from entries that were removed </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+</member>
+<member name="P:winapp2ool.Diff.EntriesMergedToModified">
+ <summary> The number of entries Diff determines to have been removed whose content appears in an entry determined to have been modified </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.ModEntriesAddedKeyTotal">
  <summary> The total number of keys that were added to modified entries </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.ModEntriesRemovedKeyTotal">
  <summary> The total number of keys that were removed from modified entries </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.ModEntrtiesUpdatedKeyTotal">
  <summary> The total number of keys that were updated in modified entries </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="P:winapp2ool.Diff.ShowFullEntries">
  <summary> Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="F:winapp2ool.Diff.MostRecentDiffLog">
  <summary> Holds the log from the most recent run of the Differ to display back to the user </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.Diff.handleCmdLine">
  <summary> Handles the commandline args for Diff </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
   Diff args:
  -d          : download the latest winapp2.ini
  -ncc        : download the latest non-ccleaner winapp2.ini (implies -d)
@@ -264,11 +277,11 @@ winapp2ool
 <member name="M:winapp2ool.Diff.remoteDiff(winapp2ool.iniFile)">
  <summary> Runs the Differ from outside the module </summary>
  <param name="firstFile"> The local winapp2.ini file to diff against the master GitHub copy </param>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.Diff.initDiff">
  <summary> Carries out the main set of Diffing operations </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.Diff.logInitDiff">
 <summary> Logs the initial portion of the diff output for the user </summary>
@@ -285,20 +298,19 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.Diff.compareTo">
  <summary> Compares two winapp2.ini format <c> iniFiles </c> and quantifies the differences to the user </summary>
- Docs last updated: 2020-09-02 | Code last updated: 2022-06-28
 </member>
-<member name="M:winapp2ool.Diff.mergeDiff(winapp2ool.iniSection,winapp2ool.iniSection,System.Boolean@,winapp2ool.strList@,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}}@,winapp2ool.strList@)">
- <summary>
- Handles the case where an entry was merged into another 
- </summary>
+<member name="M:winapp2ool.Diff.mergeDiff(winapp2ool.iniSection,winapp2ool.iniSection,System.Boolean@,System.Collections.Generic.HashSet{System.String}@,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}}@,System.Collections.Generic.HashSet{System.String}@,System.Collections.Generic.HashSet{System.String})">
+ <summary> Handles diffing in the case where an entry was merged into another </summary>
  <param name="oldSectionVersion"> The removed entry that has been merged into <c> newIniSectionVersion </c> </param>
  <param name="newIniSectionVersion"> The entry into which some or all of the keys from <c> oldSectionVersion </c> have been merged </param>
  <param name="entryWasRenamedOrMerged"> Tracks whether or not the entry has been determined to have been merged </param>
- <param name="mergedEntryNameList"> The list of entries detected as having been merged </param>
+ <param name="mergedEntryNameList"> The set of entries detected as having been merged </param>
  <param name="mergeDict"> The dictionary containing the merger information </param>
- <param name="modifiedEntryNameList"> The list of entries detected as having been modified </param>
+ <param name="modifiedEntryNameList"> The set of entries detected as having been modified </param>
+ <param name="processedEntryNameList"> The set of entries who have already been observed to have been merged </param>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
-<member name="M:winapp2ool.Diff.assessKeyMatches(winapp2ool.keyList,winapp2ool.keyList,System.Boolean@,System.Boolean@,System.Boolean@,System.Int32@,System.Collections.Generic.List{System.String})">
+<member name="M:winapp2ool.Diff.assessKeyMatches(winapp2ool.keyList,winapp2ool.keyList,System.Boolean@,System.Boolean@,System.Boolean@,System.Int32@,System.Collections.Generic.HashSet{System.String})">
  <summary> Counts the number of matching key contents between two ini keyLists </summary>
  <param name="currentKeyList"> The list of keys from the "old" version of the entry </param>
  <param name="newKeyList"> The list of keys from the "new" version of the entry </param>
@@ -307,20 +319,21 @@ winapp2ool
  <param name="allKeysMatchedTracker"> Tracks whether or not all the keys have matched </param>
  <param name="MatchCount"> The number of matches observed </param>
  <param name="disallowedValues"> Any values whose matching should be ignored </param>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.Diff.recordModification(System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.String@)">
  <summary> Records the number of changes made in a modified entry </summary>
  <param name="ktList">The KeyTypes for the type of change being observed </param>
  <param name="countsList">The counts of the changed KeyTypes </param>
  <param name="keyType"> A KeyType from a key that has been changed and whose change will be recorded </param>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.Diff.summarizeEntryUpdate(System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.Int32},System.String)">
  <summary> Outputs the entry update summary </summary>
  <param name="keyTypeList"> The KeyTypes that have been updated </param>
  <param name="countList"> The quantity of keys by KeyType who have been modified </param>
  <param name="changeType">The type of change being summarized </param>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.Diff.getChangesFromList(winapp2ool.keyList,System.Boolean,System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@)">
  <summary> Prints any added or removed keys from an updated entry to the user </summary>
@@ -328,14 +341,14 @@ winapp2ool
  <param name="wasAdded"> <c> True </c> if keys in <c> <paramref name="kl"/> </c> were added, <c> False </c> otherwise </param>
  <param name="ktList"> The KeyTypes of modified keys </param>
  <param name="countList"> The counts of the KeyTypes for modified keys </param>
- Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.Diff.chkLsts(winapp2ool.keyList@,winapp2ool.keyList@,System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@)">
  <summary> Determines the category of change associated with keys found by Diff </summary>
  <param name="removedKeys"> <c> iniKeys </c> determined to have been removed from the newer version of the <c> iniSection </c> </param>
  <param name="addedKeys"> <c> iniKeys </c> determined to have been added to the newer version of the <c> iniSection </c> </param>
  <param name="updatedKeys"> <c> iniKeys </c> determined to have been modified in the newer version of the <c> iniSection </c> </param>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.Diff.updateKeys(System.Collections.Generic.List{System.Collections.Generic.KeyValuePair{winapp2ool.iniKey,winapp2ool.iniKey}}@,winapp2ool.iniKey,winapp2ool.iniKey,System.Boolean)">
  <summary> Performs change tracking for chkLst </summary>
@@ -343,10 +356,10 @@ winapp2ool
  <param name="key"> An added key </param>
  <param name="skey"> A removed key </param>
  <param name="cond"> Indicates that the keys should be updated <br> Optional, Default: <c> True </c> </br> </param>
- Docs last updated: 2020-09-02 | Code last updated: 2020-09-02
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
-<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.Int32,System.Int32@,System.String,winapp2ool.iniSection,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}})">
- <summary> Logs the changes that have been made to a modified entry </summary>
+<member name="M:winapp2ool.Diff.getDiff(winapp2ool.iniSection,System.Int32,System.Int32@,winapp2ool.iniSection)">
+ <summary> Outputs the details of a modified entry's changes to the user </summary>
  <param name="section"> The modified entry whose changes are being observed </param>
  <param name="changeType"> The type of change to observe (as it will be described to the user) <br />
  <list type="bullet">
@@ -357,8 +370,8 @@ winapp2ool
  <item> <description> <c> 4 </c>: "merged into " </description> </item>
  </list> </param>
  <param name="changeCounter"> A pointer to the counter for the type of change being tracked </param>
- <param name="renamedOrMergedEntryName"> In the event that an entry was renamed or merged, this is the name of the entry containing its keys </param>
- Docs last updated: 2022-06-20 | Code last updated: 2022-06-20
+ <param name="newSection"> The new version of the modified entry or the entry into which another has been merged </param>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="T:winapp2ool.diffmainmenu">
  <summary> Displays the Diff main menu to the user and handles their input </summary>
@@ -1863,10 +1876,10 @@ winapp2ool
 <member name="P:winapp2ool.Trim.DownloadFileToTrim">
  <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
 </member>
-<member name="P:winapp2ool.Trim.UseWhiteList">
+<member name="P:winapp2ool.Trim.UseIncludes">
  <summary> Indicates that the whitelist should be consulted while trimming </summary>
 </member>
-<member name="P:winapp2ool.Trim.useBlackList">
+<member name="P:winapp2ool.Trim.useExcludes">
  <summary> Indicates that the blacklist should be consulted while trimming </summary>
 </member>
 <member name="M:winapp2ool.Trim.handleCmdLine">
@@ -1997,48 +2010,52 @@ winapp2ool
  to incompleteness or by virtue of being out of scope of the normal linting process </summary>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="P:winapp2ool.experimentalScans.masterRegKeyList">
+<member name="P:winapp2ool.experimentalScans.regKeyTracker">
  <summary> Holds the entire text of every RegKey observed during duplicate checks between all entries </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
-<member name="P:winapp2ool.experimentalScans.masterFileKeyList">
+<member name="P:winapp2ool.experimentalScans.fileKeyTracker">
  <summary> Holds the path of every FileKey observed during duplicate checks between all entries </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
-<member name="M:winapp2ool.experimentalScans.resetMasterKeyLists">
- <summary>
- Empties the contents of the master key lists used for duplicate checking between entries 
- </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+<member name="P:winapp2ool.experimentalScans.detectTracker">
+ <summary> Holds the path of every Detect observed during duplicate checks between all entries </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+</member>
+<member name="P:winapp2ool.experimentalScans.detectFileTracker">
+ <summary> Holds the path of every DetectFile observed during duplicate checks between all entries </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+</member>
+<member name="M:winapp2ool.experimentalScans.resetKeyTrackers">
+ <summary> Empties the key value trackers of their contents </summary>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.experimentalScans.cOptimization(winapp2ool.keyList@)">
  <summary> Attempts to merge FileKeys together if syntactically possible </summary>
  <param name="kl"> A <c> keyList </c> of FileKey format <c> iniKeys </c> which will be assessed for 
  potential to merge multiple keys into a single key </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.experimentalScans.printOptiSect(System.String,winapp2ool.keyList)">
  <summary> Prints output from the Optimization function </summary>
  <param name="boxStr"> The text to be printed in the optimization section box </param>
  <param name="kl"> The list of <c> iniKeys </c>to be printed beneath the box </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="M:winapp2ool.experimentalScans.cDuplicateKeysBetweenEntries(winapp2ool.iniKey)">
- <summary>
- Sets up the duplicate key text checker with the proper master list 
- </summary>
+ <summary> Sets up the duplicate key text checker with the proper tracker </summary>
  <param name="key"> An <c> iniKey </c> to have its value audited against the duplicate list </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
-<member name="M:winapp2ool.experimentalScans.auditDupe(winapp2ool.strList,winapp2ool.iniKey)">
+<member name="M:winapp2ool.experimentalScans.auditDupe(System.Collections.Generic.HashSet{System.String}@,winapp2ool.iniKey)">
  <summary>
- Observes whether or not the text of a FileKey or RegKey has previously been seen during this lint session. FileKeys are considered
- to be potential duplicates if they have the same path parameter but different file parameters, RegKeys are only considered potential 
+ Tracks whether or not the value of a key has been obsered multiple times during this lint session. FileKeys are considered
+ to be potential duplicates if they have the same path parameter but different file parameters, All other keys are only considered potential 
  duplicates if their entire parameterization is identical. 
  </summary>
- <param name="masterList"> The list of all keys of this type to have been observed during this lint session </param>
- <param name="key"> A particular iniKey to check against the list </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ <param name="tracker"> The set of all values of keys of the type given by <c> <paramref name="key"/> </c> to have been observed during this lint session </param>
+ <param name="key"> A particular iniKey to check against the set of observed values </param>
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="T:winapp2ool.lintRule">
  <summary> Holds information about whether or not individual types of scans and repairs should run </summary>
@@ -2194,7 +2211,7 @@ winapp2ool
  <summary> Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently) <br /> Default: <c> False </c> </summary>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="P:winapp2ool.WinappDebug.lintMutliDupe">
+<member name="P:winapp2ool.WinappDebug.lintMultiDupe">
  <summary> Controls scan/repairs for keys that may possibly exist in more than one entry <br /> Default: <c> False </c> </summary>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>

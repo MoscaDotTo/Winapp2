@@ -116,7 +116,7 @@ Public Module WinappDebug
     Public Property lintOpti As lintRule = Rules(14)
     ''' <summary> Controls scan/repairs for keys that may possibly exist in more than one entry <br /> Default: <c> False </c> </summary>
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Property lintMutliDupe As lintRule = Rules(15)
+    Private Property lintMultiDupe As lintRule = Rules(15)
 
     ''' <summary> Regex to detect long form registry paths </summary>
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
@@ -129,7 +129,7 @@ Public Module WinappDebug
     Private Property secRefNums As New Regex("30(0([1-6])|2([1-9])|3([0-8]))")
     ''' <summary> Regex to detect valid drive letter parameters </summary>
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Property driveLtrs As New Regex("[a-zA-z]:")
+    Private Property driveLtrs As New Regex("[a-zA-Z]:")
     ''' <summary> Regex to detect potential %EnvironmentVariables% </summary>
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
@@ -322,6 +322,7 @@ Public Module WinappDebug
             If entryList.Count = 0 Then Continue For
             entryList.ForEach(Sub(entry) processEntry(entry))
         Next
+        resetKeyTrackers()
         fileToBeDebugged.rebuildToIniFiles()
         alphabetizeEntries(fileToBeDebugged)
     End Sub
@@ -376,7 +377,6 @@ Public Module WinappDebug
         End If
         fullNameErr(entry.DefaultKey.KeyCount > 0 And lintDefaults.ShouldScan And Not overrideDefaultVal, entry, "Entry has a Default key where there should be none")
         If lintDefaults.fixFormat And entry.DefaultKey.KeyCount > 0 And Not overrideDefaultVal Then entry.DefaultKey.Keys.Clear()
-        resetMasterKeyLists()
         gLog($"Finished processing {entry.Name}", buffr:=True)
     End Sub
 
@@ -484,10 +484,11 @@ Public Module WinappDebug
                 Case "Detect", "DetectFile"
                     If key.typeIs("Detect") Then chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupes, kl.KeyCount = 1)
+                    If lintMultiDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
                 Case "RegKey"
                     chkPathFormatValidity(key, True)
                     cFormat(key, curNum, curStrings, dupes)
-                    If lintMutliDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
+                    If lintMultiDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
                 Case "Warning", "DetectOS", "SpecialDetect", "LangSecRef", "Section", "Default"
                     ' No keys of these types should occur more than once per entry
                     If curNum > 1 And lintMulti.ShouldScan Then
@@ -703,7 +704,7 @@ Public Module WinappDebug
             dupeArgs.Items.ForEach(Sub(arg) keyParams.ArgsList.Remove(arg))
             keyParams.reconstructKey(key)
         End If
-        If lintMutliDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
+        If lintMultiDupe.ShouldScan Then cDuplicateKeysBetweenEntries(key)
         Return key
     End Function
 
@@ -763,6 +764,7 @@ Public Module WinappDebug
                 End If
                 fullKeyErr(key, "No valid exclude flag (FILE, PATH, or REG) found in ExcludeKey.")
         End Select
+        fullKeyErr(key, "ExcludeKey has too many flags", key.Value.Split(CChar("|")).Length > 3)
     End Sub
 
     ''' <summary> Sorts a <c> keyList </c> alphabetically with winapp2.ini precedence applied to the key values </summary>

@@ -21,129 +21,191 @@ Option Strict On
 Module experimentalScans
 
     ''' <summary> Holds the entire text of every RegKey observed during duplicate checks between all entries </summary>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Property masterRegKeyList As New strList
-    ''' <summary> Holds the path of every FileKey observed during duplicate checks between all entries </summary>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Property masterFileKeyList As New strList
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+    Private Property regKeyTracker As New HashSet(Of String)
 
-    ''' <summary>
-    ''' Empties the contents of the master key lists used for duplicate checking between entries 
-    ''' </summary>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Sub resetMasterKeyLists()
-        masterRegKeyList.Items.Clear()
-        masterFileKeyList.Items.Clear()
+    ''' <summary> Holds the path of every FileKey observed during duplicate checks between all entries </summary>
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+    Private Property fileKeyTracker As New HashSet(Of String)
+
+    ''' <summary> Holds the path of every Detect observed during duplicate checks between all entries </summary>
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+
+    Private Property detectTracker As New HashSet(Of String)
+
+    ''' <summary> Holds the path of every DetectFile observed during duplicate checks between all entries </summary>
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+    Private Property detectFileTracker As New HashSet(Of String)
+
+    ''' <summary> Empties the key value trackers of their contents </summary>
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+    Public Sub resetKeyTrackers()
+
+        regKeyTracker.Clear()
+        fileKeyTracker.Clear()
+        detectFileTracker.Clear()
+        detectTracker.Clear()
+
     End Sub
 
     ''' <summary> Attempts to merge FileKeys together if syntactically possible </summary>
     ''' <param name="kl"> A <c> keyList </c> of FileKey format <c> iniKeys </c> which will be assessed for 
     ''' potential to merge multiple keys into a single key </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
     Public Sub cOptimization(ByRef kl As keyList)
+
+        ' No need to check for duplicates if there can't possibly be any 
         If kl.KeyCount < 2 Then Return
+
         Dim dupes As New keyList
         Dim newKeys As New keyList
         Dim flagList As New strList
         Dim paramList As New strList
         newKeys.add(kl.Keys)
+
         For i = 0 To kl.KeyCount - 1
+
             Dim tmpWa2 As New winapp2KeyParameters(kl.Keys(i))
+
             ' If we have yet to record any params, record them and move on
             If paramList.Count = 0 Then tmpWa2.trackParamAndFlags(paramList, flagList) : Continue For
-            ' This should handle the case where for a FileKey: 
+
+            ' FileKey Case: 
             ' The folder provided has appeared in another key
             ' The flagstring (RECURSE, REMOVESELF, "") for both keys matches
-            ' The first appearing key should have its parameters appended to and the second appearing key should be removed
+            ' The first key to appear will have the parameters from the second key appended into its own 
+            ' Then, the second key is removed 
             If paramList.contains(tmpWa2.PathString) Then
+
                 gLog($"{kl.Keys(i)} has a path that matches another key")
+
                 For j = 0 To paramList.Count - 1
+
                     ' If the current processing key's path has already appeared, create a new temporary winapp2entry at the index of the first 
                     ' item in the paramlist whose path and flag matches the current key 
                     If tmpWa2.PathString = paramList.Items(j) And tmpWa2.FlagString = flagList.Items(j) Then
+
                         gLog($"Matching key has index {j} in the unique path list")
+
                         Dim keyToMergeInto As New winapp2KeyParameters(newKeys.Keys(j))
                         Dim mergeKeyStr = ""
                         keyToMergeInto.addArgs(mergeKeyStr)
                         tmpWa2.ArgsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
+
                         If tmpWa2.FlagString <> "None" Then mergeKeyStr += $"|{tmpWa2.FlagString}"
                         dupes.add(kl.Keys(i))
                         gLog($"Key will be merged and have the new value: {mergeKeyStr}")
-                        ' Overwrite the key with the same index in the unique path list with the appended parameters list
+
+                        ' Overwrite the key with the same index in the unique path list with the new parameters list
                         newKeys.Keys(j) = New iniKey(mergeKeyStr)
                         Exit For
+
                     End If
                 Next
+
                 tmpWa2.trackParamAndFlags(paramList, flagList)
+
             Else
+
                 tmpWa2.trackParamAndFlags(paramList, flagList)
+
             End If
         Next
+
+        ' Print out any observations to the user 
         If dupes.KeyCount > 0 Then
+
             newKeys.remove(dupes.Keys)
+
             For i = 0 To newKeys.KeyCount - 1
+
                 newKeys.Keys(i).Name = $"FileKey{i + 1}"
+
             Next
+
             printOptiSect("Optimization opportunity detected", kl)
             printOptiSect("The following keys can be merged into other keys:", dupes)
             printOptiSect("The resulting keyList will be reduced to: ", newKeys)
+
             If lintOpti.ShouldRepair Then kl.Keys = newKeys.Keys
+
         End If
     End Sub
 
     ''' <summary> Prints output from the Optimization function </summary>
     ''' <param name="boxStr"> The text to be printed in the optimization section box </param>
     ''' <param name="kl"> The list of <c> iniKeys </c>to be printed beneath the box </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
     Private Sub printOptiSect(boxStr As String, kl As keyList)
+
         print(3, boxStr, buffr:=True, trailr:=True)
         kl.Keys.ForEach(Sub(key) cwl(key.toString))
         cwl()
+
     End Sub
 
-    ''' <summary>
-    ''' Sets up the duplicate key text checker with the proper master list 
-    ''' </summary>
+    ''' <summary> Sets up the duplicate key text checker with the proper tracker </summary>
     ''' <param name="key"> An <c> iniKey </c> to have its value audited against the duplicate list </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
     Public Sub cDuplicateKeysBetweenEntries(key As iniKey)
+
         Select Case key.KeyType
+
             Case "RegKey"
-                auditDupe(masterRegKeyList, key)
+
+                auditDupe(regKeyTracker, key)
+
             Case "FileKey"
-                auditDupe(masterFileKeyList, key)
+
+                auditDupe(fileKeyTracker, key)
+
+            Case "Detect"
+
+                auditDupe(detectTracker, key)
+
+            Case "DetectFile"
+
+                auditDupe(detectFileTracker, key)
+
         End Select
     End Sub
 
     ''' <summary>
-    ''' Observes whether or not the text of a FileKey or RegKey has previously been seen during this lint session. FileKeys are considered
-    ''' to be potential duplicates if they have the same path parameter but different file parameters, RegKeys are only considered potential 
+    ''' Tracks whether or not the value of a key has been obsered multiple times during this lint session. FileKeys are considered
+    ''' to be potential duplicates if they have the same path parameter but different file parameters, All other keys are only considered potential 
     ''' duplicates if their entire parameterization is identical. 
     ''' </summary>
-    ''' <param name="masterList"> The list of all keys of this type to have been observed during this lint session </param>
-    ''' <param name="key"> A particular iniKey to check against the list </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Sub auditDupe(masterList As strList, key As iniKey)
+    ''' <param name="tracker"> The set of all values of keys of the type given by <c> <paramref name="key"/> </c> to have been observed during this lint session </param>
+    ''' <param name="key"> A particular iniKey to check against the set of observed values </param>
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+    Private Sub auditDupe(ByRef tracker As HashSet(Of String), key As iniKey)
+
         Dim tmpKey As New winapp2KeyParameters(key)
-        If masterList.Count = 0 Then
-            masterList.add(If(key.KeyType = "FileKey", tmpKey.PathString.ToUpperInvariant, key.Value.ToUpperInvariant))
-        Else
-            Dim UpperKeyText As String
-            Dim RawKeyText As String
-            ' We may be interested in FileKeys who point to the same folder but have different file parameters
-            If key.KeyType = "FileKey" Then
+        Dim UpperKeyText As String
+        Dim RawKeyText As String
+
+        Select Case True
+
+            Case key.KeyType = "FileKey"
+
+                ' For FileKeys we are interested in the case where paths collide, but perhaps have different file parameters
                 UpperKeyText = tmpKey.PathString.ToUpperInvariant
                 RawKeyText = tmpKey.PathString
-            Else
-                ' We're interested in RegKeys where the entire key matches 
+
+            Case Else
+
+                ' For other keys, we're interested in the case where the entire value matches 
                 UpperKeyText = key.Value.ToUpperInvariant
                 RawKeyText = key.Value
-            End If
-            If masterList.contains(UpperKeyText, True) Then
-                print(3, $"{RawKeyText} may exist in multiple places")
-            Else
-                masterList.add(UpperKeyText)
-            End If
-        End If
+
+        End Select
+
+        ' If the cased key text is in the tracking set, inform the user (this will be NOISY) 
+        print(3, $"{RawKeyText} may exists in multiple places", cond:=tracker.Contains(UpperKeyText))
+
+        ' Add the current text to the tracker if it hasn't been already 
+        tracker.Add(UpperKeyText)
+
     End Sub
+
 End Module
