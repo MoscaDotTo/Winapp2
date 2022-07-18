@@ -26,20 +26,20 @@ Public Module Trim
     ''' <summary> The winapp2.ini file that will be trimmed </summary>
     Public Property TrimFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
     ''' <summary> Holds the path of an iniFile containing the names of Sections who should never be trimmed </summary>
-    Public Property TrimFile2 As New iniFile(Environment.CurrentDirectory, "whitelist.ini")
+    Public Property TrimFile2 As New iniFile(Environment.CurrentDirectory, "includes.ini")
     ''' <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
     Public Property TrimFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
     ''' <summary> Holds the path of an iniFile containing the names of Sections who should always be trimmed </summary>
-    Public Property TrimFile4 As New iniFile(Environment.CurrentDirectory, "blacklist.ini")
+    Public Property TrimFile4 As New iniFile(Environment.CurrentDirectory, "excludes.ini")
     ''' <summary> The major/minor version number on the current system </summary>
     Private Property winVer As Double
     ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
     Private Property ModuleSettingsChanged As Boolean = False
     ''' <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
     Private Property DownloadFileToTrim As Boolean = False
-    ''' <summary> Indicates that the whitelist should be consulted while trimming </summary>
+    ''' <summary> Indicates that the includes should be consulted while trimming </summary>
     Private Property UseIncludes As Boolean = False
-    ''' <summary> Indicates that the blacklist should be consulted while trimming </summary>
+    ''' <summary> Indicates that the excludes should be consulted while trimming </summary>
     Private Property useExcludes As Boolean = False
 
     ''' <summary> Handles the commandline args for Trim </summary>
@@ -164,9 +164,9 @@ Public Module Trim
         print(1, "File Chooser (winapp2.ini)", "Configure the path to winapp2.ini ", Not DownloadFileToTrim, isOffline, True)
         print(1, "File Chooser (save)", "Cofigure the path to which the trimmed winapp2.ini will be saved", trailingBlank:=True)
         print(5, "Toggle Includes", "always keeping certain entries", enStrCond:=UseIncludes, trailingBlank:=Not UseIncludes)
-        print(1, "File Chooser (Includes)", "Configure the path to the whitelist file", cond:=UseIncludes, trailingBlank:=True)
+        print(1, "File Chooser (Includes)", "Configure the path to the includes file", cond:=UseIncludes, trailingBlank:=True)
         print(5, "Toggle Excludes", "always discarding certain entries", enStrCond:=useExcludes, trailingBlank:=Not useExcludes)
-        print(1, "File Chooser (Excludes)", "Configure the path to the blacklist file", cond:=useExcludes, trailingBlank:=True)
+        print(1, "File Chooser (Excludes)", "Configure the path to the excludes file", cond:=useExcludes, trailingBlank:=True)
         print(0, $"Current winapp2.ini path: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}")
         print(0, $"Current save path: {replDir(TrimFile3.Path)}", closeMenu:=Not (UseIncludes Or useExcludes Or ModuleSettingsChanged))
         print(0, $"Current includes path: {replDir(TrimFile2.Path)}", cond:=UseIncludes, closeMenu:=Not (useExcludes Or ModuleSettingsChanged))
@@ -230,7 +230,7 @@ Public Module Trim
                     (input = "5" And Not DownloadFileToTrim)) Or
                     (input = "4" And isOffline)
 
-                toggleSettingParam(UseIncludes, "Whitelisting", ModuleSettingsChanged, NameOf(Trim), NameOf(UseIncludes), NameOf(ModuleSettingsChanged))
+                toggleSettingParam(UseIncludes, "Includes", ModuleSettingsChanged, NameOf(Trim), NameOf(UseIncludes), NameOf(ModuleSettingsChanged))
 
             Case UseIncludes And (Not isOffline And (
                     (input = "5" And DownloadFileToTrim) Or
@@ -247,7 +247,7 @@ Public Module Trim
                     (input = "5" And Not UseIncludes) Or
                     (input = "6" And UseIncludes))))
 
-                toggleSettingParam(useExcludes, "Blacklisting", ModuleSettingsChanged, NameOf(Trim), NameOf(useExcludes), NameOf(ModuleSettingsChanged))
+                toggleSettingParam(useExcludes, "Excludes", ModuleSettingsChanged, NameOf(Trim), NameOf(useExcludes), NameOf(ModuleSettingsChanged))
 
             Case useExcludes And ((Not isOffline And (
                     (input = "6" And DownloadFileToTrim And Not UseIncludes) Or

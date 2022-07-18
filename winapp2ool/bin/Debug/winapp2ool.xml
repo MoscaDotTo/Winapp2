@@ -1877,10 +1877,10 @@ winapp2ool
  <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
 </member>
 <member name="P:winapp2ool.Trim.UseIncludes">
- <summary> Indicates that the whitelist should be consulted while trimming </summary>
+ <summary> Indicates that the includes should be consulted while trimming </summary>
 </member>
 <member name="P:winapp2ool.Trim.useExcludes">
- <summary> Indicates that the blacklist should be consulted while trimming </summary>
+ <summary> Indicates that the excludes should be consulted while trimming </summary>
 </member>
 <member name="M:winapp2ool.Trim.handleCmdLine">
  <summary> Handles the commandline args for Trim </summary>
