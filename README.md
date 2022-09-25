@@ -176,3 +176,12 @@ Variable       | Windows Vista-10 Path | WindowsXP Path
 
 Winapp2.ini does not support non-English system configurations or portable software natively. If you have need for these features, we recommend you utilize a "Custom.ini" file, and use Winapp2ool to merge it with the main file using the Add&Replace setting to override the existing entries.
 
+## blacklist.ini
+To blacklist entries, create a blacklist.ini file and add the block names you want to get removed from your winapp2.ini file. One line per entry.   
+Afterward use the trim function and enable the blacklist in the console menu.   
+
+Example:     
+```
+[Remote Desktop *]
+[Windows Installer *]
+```
