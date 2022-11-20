@@ -181,50 +181,88 @@ Public Module Trim
 
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
 
-        Dim whiteOrBlack = UseIncludes Or useExcludes
-        Dim whiteAndBlack = UseIncludes And useExcludes
-        Dim whiteXorBlack = UseIncludes Xor useExcludes
+        ' At least one Include/Exclude option is toggled
+        Dim IncOrExcl = UseIncludes Or useExcludes
+        ' Both the Include and the Exclude options are toggled, applies +2 to all settings numbers following the excludes option in the menu 
+        Dim IncAndExcl = UseIncludes And useExcludes
+        ' One and only one of the Include/Exclude options are toggled, applies +1 to all settings after the enabled option 
+        Dim IncXorExcl = UseIncludes Xor useExcludes
 
         Select Case True
 
+            ' Option Name:                                 Exit 
+            ' Option States:
+            ' Default                                      -> 0 (Default) 
             Case input = "0"
 
                 exitModule()
 
+            ' Option Name:                                 Run (default) 
+            ' Option States:
+            ' Default                                      -> 1 (Default)
             Case (input = "1" Or input.Length = 0)
 
                 initTrim()
 
+            ' Option Name:                                  Toggle Download 
+            ' Option States: 
+            ' Offline                                      -> Unavailable (not displayed) (offsets all following menu options by -1 from their defaults)
+            ' Online                                       -> 2 (default) 
             Case input = "2" And Not isOffline
 
                 If Not denySettingOffline() Then toggleSettingParam(DownloadFileToTrim, "Downloading", ModuleSettingsChanged, NameOf(Trim), NameOf(DownloadFileToTrim), NameOf(ModuleSettingsChanged))
 
-            Case (input = "3" And Not DownloadFileToTrim And Not isOffline) Or
-                    (input = "2" And isOffline)
+            ' Option Name:                                 File Chooser (winapp2.ini) 
+            ' Option states: 
+            ' Downloading                                  -> Unavailable (not displayed) (offsets all following menu options by -1 from their default ) 
+            ' Offline (-1)                                 -> 2 (default offline)
+            ' Online (-1)                                  -> 3 (default online) 
+            Case (
+                    (input = "3" And Not DownloadFileToTrim And Not isOffline) Or
+                    (input = "2" And isOffline))
 
                 changeFileParams(TrimFile1, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
 
+            ' Option Name:                                 File Chooser (save) 
+            ' Option states:
+            ' Offline (-1) or Downloading (-1)             -> 3 (default offline) [these two settings are mutually exclusive]
+            ' Online, Not downloading                      -> 4 (default online) 
             Case (Not isOffline And (
                     (input = "4" And Not DownloadFileToTrim)) Or
                     (input = "3" And (DownloadFileToTrim Or isOffline)))
 
                 changeFileParams(TrimFile3, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(ModuleSettingsChanged))
 
-            Case ModuleSettingsChanged And Not isOffline And (
-                    (input = "6" And DownloadFileToTrim And Not whiteOrBlack) Or
-                    (input = "7" And ((Not DownloadFileToTrim And Not whiteOrBlack) Or (DownloadFileToTrim And whiteXorBlack))) Or
-                    (input = "8" And ((Not DownloadFileToTrim And whiteXorBlack) Or (DownloadFileToTrim And whiteAndBlack))) Or
-                    (input = "9" And Not DownloadFileToTrim And whiteAndBlack))
+            ' Reset Settings menu option (online case) 
+            ' Option States: 
+            ' ModuleSettingsChanged = False                 -> Unavailable (not displayed) 
+            ' Offline (-1), IncOrExcl = False               -> 6 (default offline)
+            ' Downloading (-1), and IncOrExcl = False       -> 6 
+            ' Not Downloading, and IncOrExcl = False        -> 7 (default online) 
+            ' Downloading (-1), and IncXorExcl (+1) = True  -> 7
+            ' Offline (-1), IncXorExclude = True            -> 7 
+            ' Not Downloading, and IncXorExcl (+1) = True   -> 8 
+            ' Downloading (-1), and IncAndExcl = True (+2)  -> 8
+            ' Offline (-1), IncAndExcl (+2) = True          -> 8               
+            ' Not Downloading, and IncAndExcl (+2) = True   -> 9 
+            Case ModuleSettingsChanged And (
+                    (Not isOffline And (
+                    (input = "6" And DownloadFileToTrim And Not IncOrExcl) Or
+                    (input = "7" And ((Not DownloadFileToTrim And Not IncOrExcl) Or (DownloadFileToTrim And IncXorExcl))) Or
+                    (input = "8" And ((Not DownloadFileToTrim And IncXorExcl) Or (DownloadFileToTrim And IncAndExcl))) Or
+                    (input = "9" And Not DownloadFileToTrim And IncAndExcl))) _
+                    Or (isOffline And (
+                    (input = "6" And Not IncOrExcl) Or
+                    (input = "7" And IncXorExcl) Or
+                    (input = "8" And IncAndExcl))))
 
                 resetModuleSettings(NameOf(Trim), AddressOf initDefaultSettings)
 
-            Case ModuleSettingsChanged And isOffline And (
-                    (input = "6" And Not whiteOrBlack) Or
-                    (input = "7" And whiteXorBlack) Or
-                    (input = "8" And whiteAndBlack))
-
-                resetModuleSettings(NameOf(Trim), AddressOf initDefaultSettings)
-
+            ' Option Name:                                 Toggle Includes 
+            ' Option states: 
+            ' Downloading                                  -> 4
+            ' Offline (-1) or Downloading (-1)             -> 4 [these two settings are mutually exclusive]
+            ' Online, Not Downloading                      -> 5 (default) 
             Case Not isOffline And (
                     (input = "4" And DownloadFileToTrim) Or
                     (input = "5" And Not DownloadFileToTrim)) Or
@@ -232,6 +270,11 @@ Public Module Trim
 
                 toggleSettingParam(UseIncludes, "Includes", ModuleSettingsChanged, NameOf(Trim), NameOf(UseIncludes), NameOf(ModuleSettingsChanged))
 
+            ' Option Name:                                 File Chooser (Includes) 
+            ' Option states: 
+            ' Downloading (-1)                             -> 5 
+            ' Online, Not Downloading                      -> 6 (default) 
+            ' Offline                                      -> 5 (default offline) 
             Case UseIncludes And (Not isOffline And (
                     (input = "5" And DownloadFileToTrim) Or
                     (input = "6" And Not DownloadFileToTrim)) Or
@@ -239,6 +282,14 @@ Public Module Trim
 
                 changeFileParams(TrimFile2, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
 
+            ' Option Name:                                 Toggle Excludes 
+            ' Option states: 
+            ' Offline (-1), Not Including                  -> 5 (default offline)
+            ' Online, Downloading (-1), Not including      -> 5
+            ' Offline (-1), Including (+1)                 -> 6 
+            ' Online, Not Downloading, Not Inlcuding       -> 6 (default online)  
+            ' Online, Downloading (-1), Including (+1)     -> 6 
+            ' Online, Not Downloading, Including           -> 7 
             Case (Not isOffline And (
                     (input = "7" And Not DownloadFileToTrim And UseIncludes) Or
                     (input = "6" And ((Not DownloadFileToTrim And Not UseIncludes) Or DownloadFileToTrim And UseIncludes) Or
@@ -249,6 +300,14 @@ Public Module Trim
 
                 toggleSettingParam(useExcludes, "Excludes", ModuleSettingsChanged, NameOf(Trim), NameOf(useExcludes), NameOf(ModuleSettingsChanged))
 
+            ' Option Name:                                 File Chooser (Exclude) 
+            ' Option States:
+            ' Online, Downloading (-1), Not Including      -> 6
+            ' Offline (-1), Not including                  -> 6 (default offline)
+            ' Online, Not Downloading, Not Including       -> 7 (default online)
+            ' Online, Downloading (-1), Including (+1)     -> 7
+            ' Offline (-1), Including (+1)                 -> 7
+            ' Online, Not Downloading, Including (+1)      -> 8
             Case useExcludes And ((Not isOffline And (
                     (input = "6" And DownloadFileToTrim And Not UseIncludes) Or
                     (input = "7" And ((Not DownloadFileToTrim And Not UseIncludes) Or (DownloadFileToTrim And UseIncludes))) Or
