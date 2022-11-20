@@ -608,24 +608,54 @@ Public Module Trim
             Dim splitDir = dir.Split(CChar("%"))
             Dim var = splitDir(1)
             Dim envDir = Environment.GetEnvironmentVariable(var)
-
+            Dim userProfileDir = Environment.GetEnvironmentVariable("UserProfile")
             Select Case var
 
+                ' %ProgramFiles% in CCleaner points to both C:\Program Files and C:\Program Files (x86)
+                ' This particular case is handled later in the trim process, we simply note it here for that purpose 
                 Case "ProgramFiles"
 
                     isProgramFiles = True
 
+                ' %Documents% is a CCleaner-only variable and points to two paths depending on system 
+                ' Windows XP:       %UserProfile%\My Documents
+                ' Windows Vista+:   %UserProfile%\Documents	
                 Case "Documents"
 
-                    envDir = $"{Environment.GetEnvironmentVariable("UserProfile")}\{If(winVer = 5.1 Or winVer = 5.2, "My ", "")}Documents"
+                    envDir = $"{userProfileDir}\{If(winVer = 5.1 Or winVer = 5.2, "My ", "")}Documents"
 
+                ' %CommonAppData% is a CCleaner-only variable which creates parity between the all users profile in windows xp and the programdata folder in vista+ 
+                ' Windows XP:       %AllUsersProfile%\Application Data
+                ' Windows Vista+    %AllUsersProfile%\
                 Case "CommonAppData"
 
-                    envDir = Environment.GetEnvironmentVariable("ProgramData")
+                    envDir = $"{Environment.GetEnvironmentVariable("AllUsersProfile")}\{If(winVer = 5.1 Or winVer = 5.2, "Application Data\", "")}"
 
+                ' %LocalLowAppData% is a CCleaner-only variable which points to %UserProfile%\AppData\LocalLow
                 Case "LocalLowAppData"
 
                     envDir = $"{Environment.GetEnvironmentVariable("LocalAppData").Replace("Local", "LocalLow")}"
+
+                ' %Pictures% is a CCleaner-only variable which points to two paths depending on system 
+                ' Windows XP:       %UserProfile%\My Documents\My Pictures
+                ' Windows Vista+:   %UserProfile%\Pictures
+                Case "%Pictures%"
+
+                    envDir = $"{userProfileDir}\{If(winVer = 5.1 Or winVer = 5.2, "My Documents\My ", "")}Pictures"
+
+                ' %Music% is a CCleaner-only variable which points to two paths depending on system 
+                ' Windows XP:       %UserProfile%\My Documents\My Music
+                ' Windows Vista+:   %UserProfile%\Music
+                Case "%Music%"
+
+                    envDir = $"{userProfileDir}\{If(winVer = 5.1 Or winVer = 5.2, "My Documents\My ", "")}Music"
+
+                ' %Video% is a CCleaner-only variable which points to two paths depending on system 
+                ' Windows XP:       %UserProfile%\My Documents\My Videos
+                ' Windows Vista+:   %UserProfile%\Videos
+                Case "%Video%"
+
+                    envDir = $"{userProfileDir}\{If(winVer = 5.1 Or winVer = 5.2, "My Documents\My ", "")}Videos"
 
             End Select
 
