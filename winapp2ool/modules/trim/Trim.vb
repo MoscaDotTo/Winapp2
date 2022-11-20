@@ -200,7 +200,7 @@ Public Module Trim
             ' Option Name:                                 Run (default) 
             ' Option States:
             ' Default                                      -> 1 (Default)
-            Case (input = "1" Or input.Length = 0)
+            Case (input = "1" OrElse input.Length = 0)
 
                 initTrim()
 
@@ -208,7 +208,7 @@ Public Module Trim
             ' Option States: 
             ' Offline                                      -> Unavailable (not displayed) (offsets all following menu options by -1 from their defaults)
             ' Online                                       -> 2 (default) 
-            Case input = "2" And Not isOffline
+            Case input = "2" AndAlso Not isOffline
 
                 If Not denySettingOffline() Then toggleSettingParam(DownloadFileToTrim, "Downloading", ModuleSettingsChanged, NameOf(Trim), NameOf(DownloadFileToTrim), NameOf(ModuleSettingsChanged))
 
@@ -218,8 +218,8 @@ Public Module Trim
             ' Offline (-1)                                 -> 2 (default offline)
             ' Online (-1)                                  -> 3 (default online) 
             Case (
-                    (input = "3" And Not DownloadFileToTrim And Not isOffline) Or
-                    (input = "2" And isOffline))
+                    (input = "3" AndAlso Not DownloadFileToTrim AndAlso Not isOffline) OrElse
+                    (input = "2" AndAlso isOffline))
 
                 changeFileParams(TrimFile1, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
 
@@ -227,9 +227,9 @@ Public Module Trim
             ' Option states:
             ' Offline (-1) or Downloading (-1)             -> 3 (default offline) [these two settings are mutually exclusive]
             ' Online, Not downloading                      -> 4 (default online) 
-            Case (Not isOffline And (
-                    (input = "4" And Not DownloadFileToTrim)) Or
-                    (input = "3" And (DownloadFileToTrim Or isOffline)))
+            Case (Not isOffline AndAlso (
+                    (input = "4" AndAlso Not DownloadFileToTrim)) OrElse
+                    (input = "3" AndAlso (DownloadFileToTrim OrElse isOffline)))
 
                 changeFileParams(TrimFile3, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(ModuleSettingsChanged))
 
@@ -245,16 +245,16 @@ Public Module Trim
             ' Downloading (-1), and IncAndExcl = True (+2)  -> 8
             ' Offline (-1), IncAndExcl (+2) = True          -> 8               
             ' Not Downloading, and IncAndExcl (+2) = True   -> 9 
-            Case ModuleSettingsChanged And (
-                    (Not isOffline And (
-                    (input = "6" And DownloadFileToTrim And Not IncOrExcl) Or
-                    (input = "7" And ((Not DownloadFileToTrim And Not IncOrExcl) Or (DownloadFileToTrim And IncXorExcl))) Or
-                    (input = "8" And ((Not DownloadFileToTrim And IncXorExcl) Or (DownloadFileToTrim And IncAndExcl))) Or
-                    (input = "9" And Not DownloadFileToTrim And IncAndExcl))) _
-                    Or (isOffline And (
-                    (input = "6" And Not IncOrExcl) Or
-                    (input = "7" And IncXorExcl) Or
-                    (input = "8" And IncAndExcl))))
+            Case ModuleSettingsChanged AndAlso (
+                    (Not isOffline AndAlso (
+                    (input = "6" AndAlso DownloadFileToTrim And Not IncOrExcl) OrElse
+                    (input = "7" AndAlso ((Not DownloadFileToTrim AndAlso Not IncOrExcl) OrElse (DownloadFileToTrim AndAlso IncXorExcl))) OrElse
+                    (input = "8" AndAlso ((Not DownloadFileToTrim AndAlso IncXorExcl) OrElse (DownloadFileToTrim AndAlso IncAndExcl))) OrElse
+                    (input = "9" AndAlso Not DownloadFileToTrim AndAlso IncAndExcl))) _
+                    Or (isOffline AndAlso (
+                    (input = "6" AndAlso Not IncOrExcl) OrElse
+                    (input = "7" AndAlso IncXorExcl) OrElse
+                    (input = "8" AndAlso IncAndExcl))))
 
                 resetModuleSettings(NameOf(Trim), AddressOf initDefaultSettings)
 
@@ -263,10 +263,10 @@ Public Module Trim
             ' Downloading                                  -> 4
             ' Offline (-1) or Downloading (-1)             -> 4 [these two settings are mutually exclusive]
             ' Online, Not Downloading                      -> 5 (default) 
-            Case Not isOffline And (
-                    (input = "4" And DownloadFileToTrim) Or
-                    (input = "5" And Not DownloadFileToTrim)) Or
-                    (input = "4" And isOffline)
+            Case Not isOffline AndAlso (
+                    (input = "4" AndAlso DownloadFileToTrim) OrElse
+                    (input = "5" AndAlso Not DownloadFileToTrim)) OrElse
+                    (input = "4" AndAlso isOffline)
 
                 toggleSettingParam(UseIncludes, "Includes", ModuleSettingsChanged, NameOf(Trim), NameOf(UseIncludes), NameOf(ModuleSettingsChanged))
 
@@ -275,10 +275,10 @@ Public Module Trim
             ' Downloading (-1)                             -> 5 
             ' Online, Not Downloading                      -> 6 (default) 
             ' Offline                                      -> 5 (default offline) 
-            Case UseIncludes And (Not isOffline And (
-                    (input = "5" And DownloadFileToTrim) Or
-                    (input = "6" And Not DownloadFileToTrim)) Or
-                    (input = "5" And isOffline))
+            Case UseIncludes AndAlso Not isOffline AndAlso (
+                    (input = "5" AndAlso DownloadFileToTrim) OrElse
+                    (input = "6" AndAlso Not DownloadFileToTrim)) OrElse
+                    (input = "5" AndAlso isOffline)
 
                 changeFileParams(TrimFile2, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
 
@@ -290,13 +290,13 @@ Public Module Trim
             ' Online, Not Downloading, Not Inlcuding       -> 6 (default online)  
             ' Online, Downloading (-1), Including (+1)     -> 6 
             ' Online, Not Downloading, Including           -> 7 
-            Case (Not isOffline And (
-                    (input = "7" And Not DownloadFileToTrim And UseIncludes) Or
-                    (input = "6" And ((Not DownloadFileToTrim And Not UseIncludes) Or DownloadFileToTrim And UseIncludes) Or
-                    (input = "5" And DownloadFileToTrim And Not UseIncludes))) Or
-                    (isOffline And (
-                    (input = "5" And Not UseIncludes) Or
-                    (input = "6" And UseIncludes))))
+            Case (Not isOffline AndAlso (
+                    (input = "7" AndAlso Not DownloadFileToTrim AndAlso UseIncludes) OrElse
+                    (input = "6" AndAlso ((Not DownloadFileToTrim AndAlso Not UseIncludes) OrElse DownloadFileToTrim AndAlso UseIncludes) Or
+                    (input = "5" AndAlso DownloadFileToTrim AndAlso Not UseIncludes))) OrElse
+                    (isOffline AndAlso (
+                    (input = "5" AndAlso Not UseIncludes) OrElse
+                    (input = "6" AndAlso UseIncludes))))
 
                 toggleSettingParam(useExcludes, "Excludes", ModuleSettingsChanged, NameOf(Trim), NameOf(useExcludes), NameOf(ModuleSettingsChanged))
 
@@ -308,13 +308,13 @@ Public Module Trim
             ' Online, Downloading (-1), Including (+1)     -> 7
             ' Offline (-1), Including (+1)                 -> 7
             ' Online, Not Downloading, Including (+1)      -> 8
-            Case useExcludes And ((Not isOffline And (
-                    (input = "6" And DownloadFileToTrim And Not UseIncludes) Or
-                    (input = "7" And ((Not DownloadFileToTrim And Not UseIncludes) Or (DownloadFileToTrim And UseIncludes))) Or
-                    (input = "8" And Not DownloadFileToTrim And UseIncludes))) Or
-                    (isOffline And
-                    (input = "6" And Not UseIncludes) Or
-                    (input = "7" And UseIncludes)))
+            Case useExcludes AndAlso ((Not isOffline AndAlso (
+                    (input = "6" AndAlso DownloadFileToTrim AndAlso Not UseIncludes) OrElse
+                    (input = "7" AndAlso ((Not DownloadFileToTrim AndAlso Not UseIncludes) OrElse (DownloadFileToTrim AndAlso UseIncludes))) OrElse
+                    (input = "8" AndAlso Not DownloadFileToTrim AndAlso UseIncludes))) OrElse
+                    (isOffline AndAlso
+                    (input = "6" AndAlso Not UseIncludes) OrElse
+                    (input = "7" AndAlso UseIncludes)))
 
                 changeFileParams(TrimFile4, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile4), NameOf(ModuleSettingsChanged))
 
