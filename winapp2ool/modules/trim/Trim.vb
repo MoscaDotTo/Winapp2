@@ -399,7 +399,8 @@ Public Module Trim
 
             If chkExist(key.Value) Then
 
-                gLog($"{key.Value} matched a path on the system", Not kl.KeyType = "DetectOS", descend:=True, indent:=True)
+                gLog($"{key.Value} matched a path on the system", Not kl.KeyType = "DetectOS", descend:=True, indent:=True, buffr:=True)
+
                 Return True
 
             End If
@@ -415,7 +416,7 @@ Public Module Trim
     ''' <param name="entry"> A <c> winapp2entry </c> to whose detection criteria will be audited </param>
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
 
-        gLog($"Processing entry: {entry.Name}", ascend:=True)
+        gLog($"Processing entry: {entry.Name}", ascend:=True, buffr:=True, leadr:=True)
 
         ' Respect the include/excludes 
         If UseIncludes AndAlso TrimFile2.hasSection(entry.Name) Then Return True
@@ -451,7 +452,7 @@ Public Module Trim
         gLog("No detect keys found, entry will be retained.", hasNoDetectKeys, descend:=True)
         If hasNoDetectKeys Then Return True
 
-        gLog(descend:=True)
+        gLog(descend:=True, leadr:=True)
 
         Return False
 
@@ -461,9 +462,11 @@ Public Module Trim
     ''' <param name="entry"> The <c> winapp2entry </c> to audit </param>
     Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
 
+        gLog("Attempting to generate any neccessary VirtualStore keysfor " & entry.Name, buffr:=True, ascend:=True)
         vsKeyChecker(entry.FileKeys)
         vsKeyChecker(entry.RegKeys)
         vsKeyChecker(entry.ExcludeKeys)
+        gLog("VirtualStore audit complete ", leadr:=True, indent:=True, descend:=True)
 
     End Sub
 
@@ -601,7 +604,7 @@ Public Module Trim
         Dim root = getFirstDir(path)
         dir = dir.Replace(root & "\", "")
         Dim exists = getRegExists(root, dir)
-        gLog($"{root}\{dir} exists", exists, indent:=True)
+        gLog($"{root}\{dir} exists", exists, indent:=True, buffr:=True)
         ' If we didn't return anything above, registry location probably doesn't exist
         Return exists
 
@@ -839,7 +842,7 @@ Public Module Trim
 
                 ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
 
-                If possibleDirs.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return False
+                If possibleDirs.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True, buffr:=True) : Return False
 
                 ' Otherwise, clear the current paths and repopulate them with the possible paths
                 currentPaths.clear()
@@ -864,7 +867,7 @@ Public Module Trim
                     Next
 
                     currentPaths = newCurPaths
-                    If currentPaths.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return False
+                    If currentPaths.Items.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return False
 
                 End If
 
@@ -875,7 +878,7 @@ Public Module Trim
         ' If any file/path exists, return true
         For Each currDir In currentPaths.Items
 
-            If Directory.Exists(currDir) OrElse File.Exists(currDir) Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return True
+            If Directory.Exists(currDir) OrElse File.Exists(currDir) Then gLog($"Wildcard parameterization returned a valid path: {currDir}", descend:=True, buffr:=True) : Return True
 
             Next
 
