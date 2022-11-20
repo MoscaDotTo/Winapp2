@@ -623,6 +623,10 @@ Public Module Trim
 
                     envDir = Environment.GetEnvironmentVariable("ProgramData")
 
+                Case "LocalLowAppData"
+
+                    envDir = $"{Environment.GetEnvironmentVariable("LocalAppData").Replace("Local", "LocalLow")}"
+
             End Select
 
             dir = envDir + splitDir(2)
