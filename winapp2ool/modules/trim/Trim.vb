@@ -168,8 +168,8 @@ Public Module Trim
         print(5, "Toggle Excludes", "always discarding certain entries", enStrCond:=useExcludes, trailingBlank:=Not useExcludes)
         print(1, "File Chooser (Excludes)", "Configure the path to the excludes file", cond:=useExcludes, trailingBlank:=True)
         print(0, $"Current winapp2.ini path: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}")
-        print(0, $"Current save path: {replDir(TrimFile3.Path)}", closeMenu:=Not (UseIncludes Or useExcludes Or ModuleSettingsChanged))
-        print(0, $"Current includes path: {replDir(TrimFile2.Path)}", cond:=UseIncludes, closeMenu:=Not (useExcludes Or ModuleSettingsChanged))
+        print(0, $"Current save path: {replDir(TrimFile3.Path)}", closeMenu:=Not (UseIncludes OrElse useExcludes OrElse ModuleSettingsChanged))
+        print(0, $"Current includes path: {replDir(TrimFile2.Path)}", cond:=UseIncludes, closeMenu:=Not (useExcludes OrElse ModuleSettingsChanged))
         print(0, $"Current excludes path: {replDir(TrimFile4.Path)}", cond:=useExcludes, closeMenu:=Not ModuleSettingsChanged)
         print(2, NameOf(Trim), cond:=ModuleSettingsChanged, closeMenu:=True)
 
@@ -182,9 +182,9 @@ Public Module Trim
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
 
         ' At least one Include/Exclude option is toggled
-        Dim IncOrExcl = UseIncludes Or useExcludes
+        Dim IncOrExcl = UseIncludes OrElse useExcludes
         ' Both the Include and the Exclude options are toggled, applies +2 to all settings numbers following the excludes option in the menu 
-        Dim IncAndExcl = UseIncludes And useExcludes
+        Dim IncAndExcl = UseIncludes AndAlso useExcludes
         ' One and only one of the Include/Exclude options are toggled, applies +1 to all settings after the enabled option 
         Dim IncXorExcl = UseIncludes Xor useExcludes
 
@@ -247,11 +247,11 @@ Public Module Trim
             ' Not Downloading, and IncAndExcl (+2) = True   -> 9 
             Case ModuleSettingsChanged AndAlso (
                     (Not isOffline AndAlso (
-                    (input = "6" AndAlso DownloadFileToTrim And Not IncOrExcl) OrElse
+                    (input = "6" AndAlso DownloadFileToTrim AndAlso Not IncOrExcl) OrElse
                     (input = "7" AndAlso ((Not DownloadFileToTrim AndAlso Not IncOrExcl) OrElse (DownloadFileToTrim AndAlso IncXorExcl))) OrElse
                     (input = "8" AndAlso ((Not DownloadFileToTrim AndAlso IncXorExcl) OrElse (DownloadFileToTrim AndAlso IncAndExcl))) OrElse
                     (input = "9" AndAlso Not DownloadFileToTrim AndAlso IncAndExcl))) _
-                    Or (isOffline AndAlso (
+                    OrElse (isOffline AndAlso (
                     (input = "6" AndAlso Not IncOrExcl) OrElse
                     (input = "7" AndAlso IncXorExcl) OrElse
                     (input = "8" AndAlso IncAndExcl))))
@@ -418,9 +418,8 @@ Public Module Trim
         gLog($"Processing entry: {entry.Name}", ascend:=True)
 
         ' Respect the include/excludes 
-        If UseIncludes And TrimFile2.hasSection(entry.Name) Then Return True
-        If useExcludes And TrimFile4.hasSection(entry.Name) Then Return False
-
+        If UseIncludes AndAlso TrimFile2.hasSection(entry.Name) Then Return True
+        If useExcludes AndAlso TrimFile4.hasSection(entry.Name) Then Return False
 
         ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         Dim hasMetDetOS = False
@@ -444,8 +443,8 @@ Public Module Trim
 
         ' Return true for the case where we have only a DetectOS and we meet its criteria
         Dim onlyHasDetOS = entry.SpecialDetect.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount = 0
-        gLog("No other detection keys found than DetectOS", onlyHasDetOS And hasMetDetOS, descend:=True)
-        If hasMetDetOS And onlyHasDetOS Then Return True
+        gLog("No other detection keys found than DetectOS", onlyHasDetOS AndAlso hasMetDetOS, descend:=True)
+        If onlyHasDetOS AndAlso hasMetDetOS Then Return True
 
         ' Return true for the case where we have no valid detect criteria
         Dim hasNoDetectKeys = entry.DetectOS.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount + entry.SpecialDetect.KeyCount = 0
@@ -681,14 +680,14 @@ Public Module Trim
                 ' Windows Vista+:   %UserProfile%\Documents	
                 Case "Documents"
 
-                    envDir = $"{userProfileDir}\{If(winVer = 5.1 Or winVer = 5.2, "My ", "")}Documents"
+                    envDir = $"{userProfileDir}\{If(winVer = 5.1 OrElse winVer = 5.2, "My ", "")}Documents"
 
                 ' %CommonAppData% is a CCleaner-only variable which creates parity between the all users profile in windows xp and the programdata folder in vista+ 
                 ' Windows XP:       %AllUsersProfile%\Application Data
                 ' Windows Vista+    %AllUsersProfile%\
                 Case "CommonAppData"
 
-                    envDir = $"{Environment.GetEnvironmentVariable("AllUsersProfile")}\{If(winVer = 5.1 Or winVer = 5.2, "Application Data\", "")}"
+                    envDir = $"{Environment.GetEnvironmentVariable("AllUsersProfile")}\{If(winVer = 5.1 OrElse winVer = 5.2, "Application Data\", "")}"
 
                 ' %LocalLowAppData% is a CCleaner-only variable which points to %UserProfile%\AppData\LocalLow
                 Case "LocalLowAppData"
@@ -700,21 +699,21 @@ Public Module Trim
                 ' Windows Vista+:   %UserProfile%\Pictures
                 Case "%Pictures%"
 
-                    envDir = $"{userProfileDir}\{If(winVer = 5.1 Or winVer = 5.2, "My Documents\My ", "")}Pictures"
+                    envDir = $"{userProfileDir}\{If(winVer = 5.1 OrElse winVer = 5.2, "My Documents\My ", "")}Pictures"
 
                 ' %Music% is a CCleaner-only variable which points to two paths depending on system 
                 ' Windows XP:       %UserProfile%\My Documents\My Music
                 ' Windows Vista+:   %UserProfile%\Music
                 Case "%Music%"
 
-                    envDir = $"{userProfileDir}\{If(winVer = 5.1 Or winVer = 5.2, "My Documents\My ", "")}Music"
+                    envDir = $"{userProfileDir}\{If(winVer = 5.1 OrElse winVer = 5.2, "My Documents\My ", "")}Music"
 
                 ' %Video% is a CCleaner-only variable which points to two paths depending on system 
                 ' Windows XP:       %UserProfile%\My Documents\My Videos
                 ' Windows Vista+:   %UserProfile%\Videos
                 Case "%Video%"
 
-                    envDir = $"{userProfileDir}\{If(winVer = 5.1 Or winVer = 5.2, "My Documents\My ", "")}Videos"
+                    envDir = $"{userProfileDir}\{If(winVer = 5.1 OrElse winVer = 5.2, "My Documents\My ", "")}Videos"
 
             End Select
 
@@ -742,7 +741,7 @@ Public Module Trim
 
                 ' Small contingency for the isProgramFiles case
 
-                If Not exists And isProgramFiles Then
+                If Not exists AndAlso isProgramFiles Then
 
                     swapDir(dir, key)
                     exists = expandWildcard(dir, True)
@@ -754,13 +753,13 @@ Public Module Trim
             End If
 
             ' Check out those file/folder paths
-            If Directory.Exists(dir) Or File.Exists(dir) Then Return True
+            If Directory.Exists(dir) OrElse File.Exists(dir) Then Return True
 
             ' If we didn't find it and we're looking in Program Files, check the (x86) directory
             If isProgramFiles Then
 
                 swapDir(dir, key)
-                Dim exists = Directory.Exists(dir) Or File.Exists(dir)
+                Dim exists = Directory.Exists(dir) OrElse File.Exists(dir)
                 Return exists
 
             End If
@@ -859,7 +858,7 @@ Public Module Trim
 
                     For Each path In currentPaths.Items
 
-                        If Not path.EndsWith("\", StringComparison.InvariantCulture) And Not path.Length = 0 Then path += "\"
+                        If Not path.EndsWith("\", StringComparison.InvariantCulture) AndAlso Not path.Length = 0 Then path += "\"
                         newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
 
                     Next
@@ -876,11 +875,11 @@ Public Module Trim
         ' If any file/path exists, return true
         For Each currDir In currentPaths.Items
 
-            If Directory.Exists(currDir) Or File.Exists(currDir) Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return True
+            If Directory.Exists(currDir) OrElse File.Exists(currDir) Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return True
 
-        Next
+            Next
 
-        gLog(descend:=True)
+            gLog(descend:=True)
         Return False
 
     End Function
@@ -903,7 +902,7 @@ Public Module Trim
 
             Case Else
 
-                Return winVer >= Val(splitKey(0)) And winVer <= Val(splitKey(1))
+                Return winVer >= Val(splitKey(0)) AndAlso winVer <= Val(splitKey(1))
 
         End Select
 
