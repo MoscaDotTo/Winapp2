@@ -22,6 +22,8 @@ Module diffmainmenu
     ''' <summary> Prints the Diff main menu to the user </summary>
     ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
     Public Sub printDiffMainMenu()
+        ' Force disable the Download if it's enabled in offline mode 
+        If isOffline Then DownloadDiffFile = False
         Console.WindowHeight = If(DiffModuleSettingsChanged, 34, 32)
         printMenuTop({"Observe the differences between two ini files"})
         print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile), colorLine:=True)
@@ -29,8 +31,8 @@ Module diffmainmenu
         print(1, "File Chooser", "Choose a new name or location for your older ini file")
         print(0, "Select Newer/Remote File:", leadingBlank:=True)
         print(5, GetNameFromDL(True), "diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, enStrCond:=DownloadDiffFile, leadingBlank:=True)
-        print(5, "Remote file trimming", "trimming the remote winapp2.ini before diffing", cond:=DownloadDiffFile = True, enStrCond:=TrimRemoteFile, trailingBlank:=True)
-        print(1, "File Chooser", "Choose a new name or location for your newer ini file", Not DownloadDiffFile, isOffline, True)
+        print(5, "Remote file trimming", "trimming the remote winapp2.ini before diffing", cond:=Not isOffline AndAlso DownloadDiffFile = True, enStrCond:=TrimRemoteFile, trailingBlank:=True)
+        print(1, "File Chooser", "Choose a new name or location for your newer ini file", isOffline OrElse Not DownloadDiffFile, isOffline, True)
         print(0, "Log Settings:")
         print(5, "Toggle Log Saving", "automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not SaveDiffLog, enStrCond:=SaveDiffLog)
         print(1, "File Chooser (log)", "Change where Diff saves its log", SaveDiffLog, trailingBlank:=True)
@@ -45,41 +47,115 @@ Module diffmainmenu
 
     ''' <summary> Handles the user input from the Diff main menu </summary>
     ''' <param name="input"> The user's input </param>
-    ''' Docs last updated: 2020-09-01 | Code last updated: 2020-09-01
+    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
     Public Sub handleDiffMainMenuUserInput(input As String)
+
         Select Case True
+
+            ' Option Name:                                 Exit
+            ' Option States:
+            ' Default                                      -> 0 (default)
             Case input = "0"
+
                 exitModule()
+
+            ' Option Name:                                 Run (default)
+            ' Option States:
+            ' Default                                      -> 1 (default)
             Case input = "1" OrElse input.Length = 0
+
                 If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
+
+            ' Option Name:                                 File Chooser (Older File)
+            ' Option States:
+            ' Default                                      -> 2 (default)
             Case input = "2"
+
                 changeFileParams(DiffFile1, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))
+
+            ' Option Name:                                 Online
+            ' Option States:
+            ' Offline                                      -> Unavailable (not displayed)
+            ' Online                                       -> 3 (default) 
             Case input = "3" AndAlso Not isOffline
+
                 If Not denySettingOffline() Then
                     toggleSettingParam(DownloadDiffFile, "Downloading", DiffModuleSettingsChanged, NameOf(Diff), NameOf(DownloadDiffFile), NameOf(DiffModuleSettingsChanged))
                 End If
                 DiffFile2.Name = GetNameFromDL(DownloadDiffFile)
+
+            ' Option Name:                                 Remote file trimming
+            ' Option States:
+            ' Offline                                      -> Unavailable (not displayed) 
+            ' Online, not downloading                      -> Unavailable (not displayed)
+            ' Online                                       -> 4 (default) 
             Case input = "4" AndAlso DownloadDiffFile
+
                 toggleSettingParam(TrimRemoteFile, "Trimming", DiffModuleSettingsChanged, NameOf(Diff), NameOf(TrimRemoteFile), NameOf(DiffModuleSettingsChanged))
-            Case (input = "4" AndAlso Not (DownloadDiffFile OrElse isOffline)) OrElse (input = "3" AndAlso isOffline)
+
+            ' Option Name:                                 File Chooser (Newer File)
+            ' Option States:
+            ' Downloading                                  -> Unavailable (not displayed) 
+            ' Offline (-1)                                 -> 3
+            ' Online, not downloading                      -> 4 (default)
+            Case input = computeMenuNumber(4, {isOffline}, {-1})
+
                 changeFileParams(DiffFile2, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged))
-            Case (input = "5" AndAlso Not isOffline) OrElse (input = "4" AndAlso isOffline)
+
+            ' Option Name:                                 Toggle Log Saving
+            ' Option States:
+            ' Offline (-1)                                 -> 4 
+            ' Online                                       -> 5 (default)
+            Case input = computeMenuNumber(5, {isOffline}, {-1})
+
                 toggleSettingParam(SaveDiffLog, "Log Saving", DiffModuleSettingsChanged, NameOf(Diff), NameOf(SaveDiffLog), NameOf(DiffModuleSettingsChanged))
-            Case SaveDiffLog AndAlso ((input = "6" AndAlso Not isOffline) OrElse (input = "5" AndAlso isOffline))
+
+            ' Option Name:                                 File Chooser (log)
+            ' Option States:
+            ' Not Saving Log                               -> Unavailable (not displayed) 
+            ' Offline (-1)                                 -> 5 
+            ' Online                                       -> 6 (default)
+            Case SaveDiffLog AndAlso input = computeMenuNumber(6, {isOffline}, {-1})
+
                 changeFileParams(DiffFile3, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile3), NameOf(DiffModuleSettingsChanged))
-            Case (input = "6" AndAlso Not SaveDiffLog) OrElse (input = "7" AndAlso SaveDiffLog)
+
+            ' Option Name:                                 Verbose Mode
+            ' Option States:
+            ' Offline (-1), not saving log                 -> 5
+            ' Online, not saving log                       -> 6 (default)
+            ' Offline (-1), saving log (+1)                -> 6
+            Case input = computeMenuNumber(6, {isOffline, SaveDiffLog}, {-1, 1})
+
                 toggleSettingParam(ShowFullEntries, "Verbose Mode", DiffModuleSettingsChanged, NameOf(Diff), NameOf(ShowFullEntries), NameOf(DiffModuleSettingsChanged))
-            Case DiffModuleSettingsChanged AndAlso ( 'Online Case below
-                                        (Not isOffline AndAlso ((Not SaveDiffLog AndAlso input = "7") OrElse
-                                        (SaveDiffLog AndAlso input = "8"))) OrElse
-                                        (isOffline AndAlso ((input = "5") OrElse (input = "6" AndAlso SaveDiffLog)))) ' Offline case
+
+            ' Option Name:                                 Reset Settings
+            ' Option States:
+            ' DiffModuleSettingsChanged = False            -> Unavailable (not displayed) 
+            ' Offline (-1), not saving log                 -> 6
+            ' Online, Not saving log                       -> 7 (default)
+            ' Offline (-1), saving log (+1)                -> 7
+            ' Online, saving log (+1)                      -> 8 
+
+            Case DiffModuleSettingsChanged AndAlso input = computeMenuNumber(7, {isOffline, SaveDiffLog}, {-1, 1})
                 resetModuleSettings(NameOf(Diff), AddressOf initDefaultDiffSettings)
-            Case Not MostRecentDiffLog.Length = 0 AndAlso ((input = "7" AndAlso Not DiffModuleSettingsChanged) OrElse (input = "8" AndAlso DiffModuleSettingsChanged))
+
+            ' Option Name:                                 Log Viewer
+            ' Option States
+            ' Offline (-1), not saving log                 -> 7
+            ' Online, not saving log                       -> 8 (default)
+            ' Offline (-1), saving log (+1)                -> 8
+            ' Online, saving log (+1)                      -> 9
+            Case Not MostRecentDiffLog.Length = 0 AndAlso input = computeMenuNumber(8, {isOffline, SaveDiffLog}, {-1, 1})
+
                 MostRecentDiffLog = getLogSliceFromGlobal("Beginning diff", "Diff complete")
                 printSlice(MostRecentDiffLog)
+
             Case Else
+
                 setHeaderText(invInpStr, True)
+
         End Select
+
     End Sub
 
 End Module
