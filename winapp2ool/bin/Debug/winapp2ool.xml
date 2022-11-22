@@ -1291,6 +1291,14 @@ winapp2ool
  <returns> <c> <paramref name="dirStr"/> </c> with instances of the current directory replaced with <c> ".." </c> </returns>
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
+<member name="M:winapp2ool.MenuMaker.computeMenuNumber(System.Int32,System.Boolean[],System.Int32[])">
+ <summary> Determines the number currently associated with a particular menu option </summary>
+ This avoids a boolean headache so severe I'm not sure how I didn't implement it sooner 
+ <param name="defaultNumber"> The menu number associated with the option in winapp2ool's default, online configuration </param>
+ <param name="weightedComponents"> A set of parameters which influence the position of a menu option in the menu </param>
+ <param name="weights"> The weights correlating to each <c>Component</c> in <c><paramref name="weightedComponents"/> </c> </param>
+ Docs last updated: 2021-11-21 | Code last updated: 2022-11-21
+</member>
 <member name="T:winapp2ool.RegistryHelper">
  <summary>
  This module holds any functions winapp2ool might require for accessing and manipulating the windows registry
