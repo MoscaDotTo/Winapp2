@@ -384,7 +384,7 @@ winapp2ool
 <member name="M:winapp2ool.diffmainmenu.handleDiffMainMenuUserInput(System.String)">
  <summary> Handles the user input from the Diff main menu </summary>
  <param name="input"> The user's input </param>
- Docs last updated: 2020-09-01 | Code last updated: 2020-09-01
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="T:winapp2ool.diffsettingshandler">
  <summary> Syncs the Diff module settings to and from disk </summary>
