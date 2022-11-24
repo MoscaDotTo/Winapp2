@@ -45,19 +45,19 @@ Public Module Trim
 
     ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Property ModuleSettingsChanged As Boolean = False
+    Public Property TrimModuleSettingsChanged As Boolean = False
 
     ''' <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Property DownloadFileToTrim As Boolean = False
+    Public Property DownloadFileToTrim As Boolean = False
 
     ''' <summary> Indicates that the includes should be consulted while trimming </summary>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Property UseIncludes As Boolean = False
+    Public Property UseTrimIncludes As Boolean = False
 
     ''' <summary> Indicates that the excludes should be consulted while trimming </summary>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Property useExcludes As Boolean = False
+    Public Property UseTrimExcludes As Boolean = False
 
     ''' <summary> Handles the commandline args for Trim </summary>
     ''' Trim args:
@@ -65,99 +65,10 @@ Public Module Trim
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
     Public Sub handleCmdLine()
 
-        initDefaultSettings()
+        initDefaultTrimSettings()
         handleDownloadBools(DownloadFileToTrim)
         getFileAndDirParams(TrimFile1, New iniFile, TrimFile3)
         initTrim()
-
-    End Sub
-
-    ''' <summary> Restores the default state of the module's parameters </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Sub initDefaultSettings()
-
-        TrimFile1.resetParams()
-        TrimFile2.resetParams()
-        TrimFile3.resetParams()
-        TrimFile4.resetParams()
-        DownloadFileToTrim = False
-        ModuleSettingsChanged = False
-        UseIncludes = False
-        useExcludes = False
-        restoreDefaultSettings(NameOf(Trim), AddressOf createTrimSettingsSection)
-
-    End Sub
-
-    ''' <summary> Loads values from disk into memory for the Trim module settings </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Sub getSerializedTrimSettings()
-
-        For Each kvp In settingsDict(NameOf(Trim))
-
-            Select Case kvp.Key
-
-                Case NameOf(TrimFile1) & "_Name"
-
-                    TrimFile1.Name = kvp.Value
-
-                Case NameOf(TrimFile1) & "_Dir"
-
-                    TrimFile1.Dir = kvp.Value
-
-                Case NameOf(TrimFile2) & "_Name"
-
-                    TrimFile2.Name = kvp.Value
-
-                Case NameOf(TrimFile2) & "_Dir"
-
-                    TrimFile2.Dir = kvp.Value
-
-                Case NameOf(TrimFile3) & "_Name"
-
-                    TrimFile3.Name = kvp.Value
-
-                Case NameOf(TrimFile3) & "_Dir"
-
-                    TrimFile3.Dir = kvp.Value
-
-                Case NameOf(TrimFile4) & "_Name"
-
-                    TrimFile4.Name = kvp.Value
-
-                Case NameOf(TrimFile4) & "_Dir"
-
-                    TrimFile4.Dir = kvp.Value
-
-                Case NameOf(DownloadFileToTrim)
-
-                    DownloadFileToTrim = CBool(kvp.Value)
-
-                Case NameOf(ModuleSettingsChanged)
-
-                    ModuleSettingsChanged = CBool(kvp.Value)
-
-                Case NameOf(UseIncludes)
-
-                    UseIncludes = CBool(kvp.Value)
-
-                Case NameOf(useExcludes)
-
-                    useExcludes = CBool(kvp.Value)
-
-            End Select
-
-        Next
-
-    End Sub
-
-    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Sub createTrimSettingsSection()
-
-        Dim trimSettingsTuple As New List(Of String) From {NameOf(DownloadFileToTrim), tsInvariant(DownloadFileToTrim), NameOf(UseIncludes), tsInvariant(UseIncludes),
-        NameOf(useExcludes), tsInvariant(useExcludes), NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged), NameOf(TrimFile1), TrimFile1.Name, TrimFile1.Dir,
-        NameOf(TrimFile2), TrimFile2.Name, TrimFile2.Dir, NameOf(TrimFile3), TrimFile3.Name, TrimFile3.Dir, NameOf(TrimFile4), TrimFile4.Name, TrimFile4.Dir}
-        createModuleSettingsSection(NameOf(Trim), trimSettingsTuple, 4, 4)
 
     End Sub
 
@@ -175,155 +86,11 @@ Public Module Trim
 
     End Sub
 
-    ''' <summary> Prints the <c> Trim </c> menu to the user </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Sub printMenu()
 
-        If isOffline Then DownloadFileToTrim = False
-
-        printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
-        print(1, "Run (default)", "Trim winapp2.ini")
-        print(5, "Toggle Download", "using the latest winapp2.ini from GitHub as the input file", Not isOffline, True, enStrCond:=DownloadFileToTrim, trailingBlank:=True)
-        print(1, "File Chooser (winapp2.ini)", "Configure the path to winapp2.ini ", Not DownloadFileToTrim, isOffline, True)
-        print(1, "File Chooser (save)", "Cofigure the path to which the trimmed winapp2.ini will be saved", trailingBlank:=True)
-        print(5, "Toggle Includes", "always keeping certain entries", enStrCond:=UseIncludes, trailingBlank:=Not UseIncludes)
-        print(1, "File Chooser (Includes)", "Configure the path to the includes file", cond:=UseIncludes, trailingBlank:=True)
-        print(5, "Toggle Excludes", "always discarding certain entries", enStrCond:=useExcludes, trailingBlank:=Not useExcludes)
-        print(1, "File Chooser (Excludes)", "Configure the path to the excludes file", cond:=useExcludes, trailingBlank:=True)
-        print(0, $"Current winapp2.ini path: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}")
-        print(0, $"Current save path: {replDir(TrimFile3.Path)}", closeMenu:=Not (UseIncludes OrElse useExcludes OrElse ModuleSettingsChanged))
-        print(0, $"Current includes path: {replDir(TrimFile2.Path)}", cond:=UseIncludes, closeMenu:=Not (useExcludes OrElse ModuleSettingsChanged))
-        print(0, $"Current excludes path: {replDir(TrimFile4.Path)}", cond:=useExcludes, closeMenu:=Not ModuleSettingsChanged)
-        print(2, NameOf(Trim), cond:=ModuleSettingsChanged, closeMenu:=True)
-
-    End Sub
-
-    ''' <summary> Handles the user input from the menu </summary>
-    ''' <param name="input"> The String containing the user's input </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Sub handleUserInput(input As String)
-
-        If input Is Nothing Then argIsNull(NameOf(input)) : Return
-
-        ' Both the Include and the Exclude options are toggled, applies +2 to all settings numbers following the excludes option in the menu 
-        Dim IncAndExcl = UseIncludes AndAlso useExcludes
-        ' One and only one of the Include/Exclude options are toggled, applies +1 to all settings after the enabled option 
-        Dim IncXorExcl = UseIncludes Xor useExcludes
-
-        Select Case True
-
-            ' Option Name:                                 Exit 
-            ' Option States:
-            ' Default                                      -> 0 (Default) 
-            Case input = "0"
-
-                exitModule()
-
-            ' Option Name:                                 Run (default) 
-            ' Option States:
-            ' Default                                      -> 1 (Default)
-            Case (input = "1" OrElse input.Length = 0)
-
-                initTrim()
-
-            ' Option Name:                                  Toggle Download 
-            ' Option States: 
-            ' Offline                                      -> Unavailable (not displayed) (offsets all following menu options by -1 from their defaults)
-            ' Online                                       -> 2 (default) 
-            Case input = "2" AndAlso Not isOffline
-
-                If Not denySettingOffline() Then toggleSettingParam(DownloadFileToTrim, "Downloading", ModuleSettingsChanged, NameOf(Trim), NameOf(DownloadFileToTrim), NameOf(ModuleSettingsChanged))
-
-            ' Option Name:                                 File Chooser (winapp2.ini) 
-            ' Option states: 
-            ' Downloading                                  -> Unavailable (not displayed) (offsets all following menu options by -1 from their default ) 
-            ' Offline (-1)                                 -> 2 
-            ' Online                                       -> 3 (default) 
-            Case Not DownloadFileToTrim AndAlso input = computeMenuNumber(3, {isOffline}, {-1})
-
-                changeFileParams(TrimFile1, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
-
-            ' Option Name:                                 File Chooser (save) 
-            ' Option states:
-            ' Offline (-1) or Downloading (-1)             -> 3 [these two settings are mutually exclusive]
-            ' Online, Not downloading                      -> 4 (default)
-            ' 
-            Case input = computeMenuNumber(4, {isOffline, DownloadFileToTrim}, {-1, -1})
-
-                changeFileParams(TrimFile3, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(ModuleSettingsChanged))
-
-            ' Option Name:                                  Reset Settings 
-            ' Option States: 
-            ' ModuleSettingsChanged = False                 -> Unavailable (not displayed) 
-            ' Offline (-1), IncOrExcl = False               -> 6 (Available only if the user has toggled one of these two settings on and then off again) 
-            ' Downloading (-1), and IncOrExcl = False       -> 6 
-            ' Not Downloading, and IncOrExcl = False        -> 7 (default) 
-            ' Downloading (-1), and IncXorExcl (+1) = True  -> 7
-            ' Offline (-1), IncXorExclude = True            -> 7 
-            ' Not Downloading, and IncXorExcl (+1) = True   -> 8 
-            ' Downloading (-1), and IncAndExcl = True (+2)  -> 8
-            ' Offline (-1), IncAndExcl (+2) = True          -> 8               
-            ' Not Downloading, and IncAndExcl (+2) = True   -> 9 
-            Case ModuleSettingsChanged AndAlso input = computeMenuNumber(7, {isOffline, DownloadFileToTrim, IncXorExcl, IncAndExcl}, {-1, -1, +1, +2})
-
-                resetModuleSettings(NameOf(Trim), AddressOf initDefaultSettings)
-
-            ' Option Name:                                 Toggle Includes 
-            ' Option states: 
-            ' Downloading                                  -> 4
-            ' Offline (-1) or Downloading (-1)             -> 4 [these two settings are mutually exclusive]
-            ' Online, Not Downloading                      -> 5 (default)
-            ' 
-            Case Not isOffline AndAlso input = computeMenuNumber(5, {isOffline, DownloadFileToTrim}, {-1, -1})
-
-                toggleSettingParam(UseIncludes, "Includes", ModuleSettingsChanged, NameOf(Trim), NameOf(UseIncludes), NameOf(ModuleSettingsChanged))
-
-            ' Option Name:                                 File Chooser (Includes) 
-            ' Option states: 
-            ' Downloading (-1)                             -> 5 
-            ' Online, Not Downloading                      -> 6 (default) 
-            ' Offline                                      -> 5 (default offline) 
-
-            Case UseIncludes AndAlso input = computeMenuNumber(6, {isOffline, DownloadFileToTrim}, {-1, -1})
-
-                changeFileParams(TrimFile2, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
-
-            ' Option Name:                                 Toggle Excludes 
-            ' Option states: 
-            ' Offline (-1), Not Including                  -> 5 (default offline)
-            ' Online, Downloading (-1), Not including      -> 5
-            ' Offline (-1), Including (+1)                 -> 6 
-            ' Online, Not Downloading, Not Inlcuding       -> 6 (default online)  
-            ' Online, Downloading (-1), Including (+1)     -> 6 
-            ' Online, Not Downloading, Including           -> 7
-            ' 
-            Case input = computeMenuNumber(6, {isOffline, DownloadFileToTrim, UseIncludes}, {-1, -1, 1})
-
-                toggleSettingParam(useExcludes, "Excludes", ModuleSettingsChanged, NameOf(Trim), NameOf(useExcludes), NameOf(ModuleSettingsChanged))
-
-            ' Option Name:                                 File Chooser (Exclude) 
-            ' Option States:
-            ' Online, Downloading (-1), Not Including      -> 6
-            ' Offline (-1), Not including                  -> 6 (default offline)
-            ' Online, Not Downloading, Not Including       -> 7 (default online)
-            ' Online, Downloading (-1), Including (+1)     -> 7
-            ' Offline (-1), Including (+1)                 -> 7
-            ' Online, Not Downloading, Including (+1)      -> 8
-            Case useExcludes AndAlso input = computeMenuNumber(7, {isOffline, DownloadFileToTrim, UseIncludes}, {-1, -1, 1})
-
-                changeFileParams(TrimFile4, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile4), NameOf(ModuleSettingsChanged))
-
-            Case Else
-
-                setHeaderText(invInpStr, True)
-
-        End Select
-
-    End Sub
 
     ''' <summary> Initiates the <c> Trim </c> process from the main menu or commandline </summary>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Sub initTrim()
+    Public Sub initTrim()
 
         ' Don't try to trim an empty file 
         If Not DownloadFileToTrim Then If Not enforceFileHasContent(TrimFile1) Then Return
@@ -334,8 +101,8 @@ Public Module Trim
         Dim winapp2 = If(DownloadFileToTrim, New winapp2file(getRemoteIniFile(winapp2link)), New winapp2file(TrimFile1))
 
         ' Spin up our include/excludes 
-        If UseIncludes Then TrimFile2.validate()
-        If useExcludes Then TrimFile4.validate()
+        If UseTrimIncludes Then TrimFile2.validate()
+        If UseTrimExcludes Then TrimFile4.validate()
 
         clrConsole()
         print(3, "Trimming... Please wait, this may take a moment...")
@@ -422,8 +189,8 @@ Public Module Trim
         gLog($"Processing entry: {entry.Name}", ascend:=True, buffr:=True, leadr:=True)
 
         ' Respect the include/excludes 
-        If UseIncludes AndAlso TrimFile2.hasSection(entry.Name) Then gLog("Retaining entry: " & entry.Name, indent:=True, indAmt:=2, leadr:=True, buffr:=True) : Return True
-        If useExcludes AndAlso TrimFile4.hasSection(entry.Name) Then gLog("Discarding entry: " & entry.Name, leadr:=True, indent:=True, buffr:=True) : Return False
+        If UseTrimIncludes AndAlso TrimFile2.hasSection(entry.Name) Then gLog("Retaining entry: " & entry.Name, indent:=True, indAmt:=2, leadr:=True, buffr:=True) : Return True
+        If UseTrimExcludes AndAlso TrimFile4.hasSection(entry.Name) Then gLog("Discarding entry: " & entry.Name, leadr:=True, indent:=True, buffr:=True) : Return False
 
         ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         Dim hasMetDetOS = False
