@@ -23,7 +23,7 @@ Module diffmainmenu
     ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
     Public Sub printDiffMainMenu()
         ' Force disable the Download if it's enabled in offline mode 
-        If isOffline Then DownloadDiffFile = False
+        If isOffline AndAlso DownloadDiffFile Then DownloadDiffFile = False
         Console.WindowHeight = If(DiffModuleSettingsChanged, 34, 32)
         printMenuTop({"Observe the differences between two ini files"})
         print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile), colorLine:=True)
