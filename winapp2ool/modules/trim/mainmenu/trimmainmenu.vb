@@ -20,7 +20,7 @@ Option Strict On
 Module trimmainmenu
     ''' <summary> Prints the <c> Trim </c> menu to the user </summary>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Sub printMenu()
+    Public Sub printTrimMenu()
 
         If isOffline Then DownloadFileToTrim = False
 
@@ -44,7 +44,7 @@ Module trimmainmenu
     ''' <summary> Handles the user input from the menu </summary>
     ''' <param name="input"> The String containing the user's input </param>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Sub handleUserInput(input As String)
+    Public Sub handleTrimUserInput(input As String)
 
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
 

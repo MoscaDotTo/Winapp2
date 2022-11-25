@@ -86,8 +86,6 @@ Public Module Trim
 
     End Sub
 
-
-
     ''' <summary> Initiates the <c> Trim </c> process from the main menu or commandline </summary>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
     Public Sub initTrim()

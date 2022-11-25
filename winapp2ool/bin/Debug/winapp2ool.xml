@@ -1855,6 +1855,35 @@ winapp2ool
  <param name="input"> The user's input </param>
  Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
+<member name="T:winapp2ool.trimmainmenu">
+ <summary> Displays the trim main menu to the user and handles their input </summary>
+ Docs last updated: 2020-11-24
+</member>
+<member name="M:winapp2ool.trimmainmenu.printTrimMenu">
+ <summary> Prints the <c> Trim </c> menu to the user </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="M:winapp2ool.trimmainmenu.handleTrimUserInput(System.String)">
+ <summary> Handles the user input from the menu </summary>
+ <param name="input"> The String containing the user's input </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="T:winapp2ool.trimsettingshandler">
+ <summary> Syncs settings for the Trim module to and from the disk </summary>
+ Docs last updated: 2022-11-24 | Code last updated: 2022-11-24
+</member>
+<member name="M:winapp2ool.trimsettingshandler.initDefaultTrimSettings">
+ <summary> Restores the default state of the module's parameters </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="M:winapp2ool.trimsettingshandler.getSerializedTrimSettings">
+ <summary> Loads values from disk into memory for the Trim module settings </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="M:winapp2ool.trimsettingshandler.createTrimSettingsSection">
+ <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
 <member name="T:winapp2ool.Trim">
     <summary>
     Checks the detection criteria of each entry in a winapp2.ini file against the current system 
@@ -1882,7 +1911,7 @@ winapp2ool
  <summary> The major/minor version number on the current system </summary>
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
-<member name="P:winapp2ool.Trim.ModuleSettingsChanged">
+<member name="P:winapp2ool.Trim.TrimModuleSettingsChanged">
  <summary> Indicates that the module settings have been modified from their defaults </summary>
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
@@ -1890,11 +1919,11 @@ winapp2ool
  <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
-<member name="P:winapp2ool.Trim.UseIncludes">
+<member name="P:winapp2ool.Trim.UseTrimIncludes">
  <summary> Indicates that the includes should be consulted while trimming </summary>
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
-<member name="P:winapp2ool.Trim.useExcludes">
+<member name="P:winapp2ool.Trim.UseTrimExcludes">
  <summary> Indicates that the excludes should be consulted while trimming </summary>
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
@@ -1904,32 +1933,11 @@ winapp2ool
  -d          : download the latest winapp2.ini
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
-<member name="M:winapp2ool.Trim.initDefaultSettings">
- <summary> Restores the default state of the module's parameters </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="M:winapp2ool.Trim.getSerializedTrimSettings">
- <summary> Loads values from disk into memory for the Trim module settings </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="M:winapp2ool.Trim.createTrimSettingsSection">
- <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
 <member name="M:winapp2ool.Trim.remoteTrim(winapp2ool.iniFile,winapp2ool.iniFile,System.Boolean)">
  <summary> Trims an <c> iniFile </c> from outside the module </summary>
  <param name="firstFile"> The winapp2.ini file to be trimmed </param>
  <param name="thirdFile"> <c> iniFile </c> containing the path on disk to which the trimmed file will be saved </param>
  <param name="d"> Indicates that the input winapp2.ini should be downloaded from GitHub </param>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="M:winapp2ool.Trim.printMenu">
- <summary> Prints the <c> Trim </c> menu to the user </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="M:winapp2ool.Trim.handleUserInput(System.String)">
- <summary> Handles the user input from the menu </summary>
- <param name="input"> The String containing the user's input </param>
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.initTrim">
