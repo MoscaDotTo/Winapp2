@@ -16,6 +16,7 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.Text.RegularExpressions
+Imports System.Threading
 ''' <summary> Observes, reports, and attempts to repair errors in winapp2.ini </summary>
 Public Module WinappDebug
 
@@ -682,7 +683,7 @@ Public Module WinappDebug
                     End If
                     cFormat(key, curNum, curStrings, dupes, True)
                     ' Scan for invalid values in LangSecRef and SpecialDetect
-                    If key.typeIs("SpecialDetect") Then chkCasing(key, {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}, key.Value, False)
+                    If key.typeIs("SpecialDetect") Then chkCasing(key, {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}, key.Value)
                     fullKeyErr(key, "LangSecRef holds an invalid value.", lintInvalid.ShouldScan And key.typeIs("LangSecRef") And Not secRefNums.IsMatch(key.Value))
                 Case Else
                     cFormat(key, curNum, curStrings, dupes)
@@ -751,10 +752,11 @@ Public Module WinappDebug
         Dim enVars = {"AllUsersProfile", "AppData", "CommonAppData", "CommonProgramFiles",
         "Documents", "HomeDrive", "LocalAppData", "LocalLowAppData", "Music", "Pictures", "ProgramData", "ProgramFiles", "Public",
         "RootDir", "SystemDrive", "SystemRoot", "Temp", "Tmp", "UserName", "UserProfile", "Video", "WinDir"}
+        fullKeyErr(key, "Double '%' found in environment variable", key.vHas("%%"), lintSyntax.ShouldRepair, key.Value, key.Value.Replace("%%", "%"))
         fullKeyErr(key, "%EnvironmentVariables% must be surrounded on both sides by a single '%' character.", key.vHas("%") And envVarRegex.Matches(key.Value).Count = 0)
         For Each m As Match In envVarRegex.Matches(key.Value)
             Dim strippedText = m.ToString.Trim(CChar("%"))
-            chkCasing(key, enVars, strippedText, False)
+            chkCasing(key, enVars, strippedText)
         Next
         ' Environment variables should be trailed by a backslash 
         fullKeyErr(key, "Missing backslash (\) after %EnvironmentVariable%.", lintSlashes.ShouldScan And key.vHas("%") And Not key.vHasAny({"%|", "%\"}))
@@ -828,7 +830,7 @@ Public Module WinappDebug
             fixStr(True, key.KeyType, key.KeyType.Trim)
         End If
         ' Make sure the keyType is valid
-        chkCasing(key, validCmds, key.KeyType, True)
+        chkCasing(key, validCmds, key.KeyType)
         Return True
     End Function
 
@@ -837,22 +839,28 @@ Public Module WinappDebug
     ''' <param name="key"> The <c> iniKey </c> whose casing will be audited </param>
     ''' <param name="casedArray"> The array of expected cased values </param>
     ''' <param name="strToChk"> A pointer to the value being audited </param>
-    ''' <param name="chkType"> <c> True </c> to check <c> KeyTypes </c>, <c> False </c> to check <c> Values </c> </param>
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Sub chkCasing(ByRef key As iniKey, casedArray As String(), ByRef strToChk As String, chkType As Boolean)
-        ' Get the properly cased string
-        Dim casedString = strToChk
+    Private Sub chkCasing(ByRef key As iniKey, casedArray As String(), ByRef strToChk As String)
+
+        ' Get the properly cased string 
+        Dim casedString As String = strToChk
         For Each casedText In casedArray
             If strToChk.Equals(casedText, StringComparison.InvariantCultureIgnoreCase) Then casedString = casedText
         Next
+
         ' Determine if there's a casing error
         Dim hasCasingErr = Not casedString.Equals(strToChk, StringComparison.InvariantCulture) And casedArray.Contains(casedString)
-        Dim replacementText = If(chkType, key.KeyType.Replace(key.KeyType, casedString), key.Value.Replace(key.Value, casedString))
         Dim validData = String.Join(", ", casedArray)
-        fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, lintCasing.fixFormat, strToChk, replacementText)
-        fixStr(chkType And hasCasingErr, key.Name, key.Name.Replace(key.KeyType, replacementText))
-        fixStr(chkType And hasCasingErr, key.KeyType, replacementText)
+
+        ' Inform the user if there are casing errors and fix them 
+        fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, lintCasing.fixFormat, "", "")
+        fixStr(hasCasingErr And key.Value.Contains(strToChk), key.Value, key.Value.Replace(strToChk, casedString))
+        fixStr(hasCasingErr And key.Name.Contains(strToChk), key.Name, key.Name.Replace(key.KeyType, casedString))
+        fixStr(hasCasingErr And key.KeyType.Contains(strToChk), key.KeyType, casedString)
+
+        ' Inform the user about invalid data 
         fullKeyErr(key, $"Invalid data provided: {strToChk} in {key.toString}{Environment.NewLine}Valid data: {validData}", Not casedArray.Contains(casedString) And lintInvalid.ShouldScan)
+
     End Sub
 
     ''' <summary> Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible </summary>
@@ -862,6 +870,10 @@ Public Module WinappDebug
         If key Is Nothing Then argIsNull(NameOf(key)) : Return key
         ' Pipe symbol checks
         Dim iteratorCheckerList = Split(key.Value, "|")
+        If iteratorCheckerList.Length > 2 Then
+            chkCasing(key, {"RECURSE", "REMOVESELF"}, iteratorCheckerList.Last)
+            iteratorCheckerList = Split(key.Value, "|")
+        End If
         fullKeyErr(key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
         ' The driveLtr check to allow entries that contain hard coded drive letters to contain colons. Since this is an edge case only likely to pop up in winapp3.ini (as far as official releases go)
         ' We'll assume that if the path contains a hard coded drive letter, any colon use is intentional and disable this check. 

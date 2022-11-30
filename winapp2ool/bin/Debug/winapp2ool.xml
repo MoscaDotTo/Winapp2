@@ -384,7 +384,7 @@ winapp2ool
 <member name="M:winapp2ool.diffmainmenu.handleDiffMainMenuUserInput(System.String)">
  <summary> Handles the user input from the Diff main menu </summary>
  <param name="input"> The user's input </param>
- Docs last updated: 2020-09-01 | Code last updated: 2020-09-01
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="T:winapp2ool.diffsettingshandler">
  <summary> Syncs the Diff module settings to and from disk </summary>
@@ -1291,6 +1291,14 @@ winapp2ool
  <returns> <c> <paramref name="dirStr"/> </c> with instances of the current directory replaced with <c> ".." </c> </returns>
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
+<member name="M:winapp2ool.MenuMaker.computeMenuNumber(System.Int32,System.Boolean[],System.Int32[])">
+ <summary> Determines the number currently associated with a particular menu option </summary>
+ This avoids a boolean headache so severe I'm not sure how I didn't implement it sooner 
+ <param name="defaultNumber"> The menu number associated with the option in winapp2ool's default, online configuration </param>
+ <param name="weightedComponents"> A set of parameters which influence the position of a menu option in the menu </param>
+ <param name="weights"> The weights correlating to each <c>Component</c> in <c><paramref name="weightedComponents"/> </c> </param>
+ Docs last updated: 2021-11-21 | Code last updated: 2022-11-21
+</member>
 <member name="T:winapp2ool.RegistryHelper">
  <summary>
  This module holds any functions winapp2ool might require for accessing and manipulating the windows registry
@@ -1847,139 +1855,178 @@ winapp2ool
  <param name="input"> The user's input </param>
  Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
+<member name="T:winapp2ool.trimmainmenu">
+ <summary> Displays the trim main menu to the user and handles their input </summary>
+ Docs last updated: 2020-11-24
+</member>
+<member name="M:winapp2ool.trimmainmenu.printTrimMenu">
+ <summary> Prints the <c> Trim </c> menu to the user </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="M:winapp2ool.trimmainmenu.handleTrimUserInput(System.String)">
+ <summary> Handles the user input from the menu </summary>
+ <param name="input"> The String containing the user's input </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="T:winapp2ool.trimsettingshandler">
+ <summary> Syncs settings for the Trim module to and from the disk </summary>
+ Docs last updated: 2022-11-24 | Code last updated: 2022-11-24
+</member>
+<member name="M:winapp2ool.trimsettingshandler.initDefaultTrimSettings">
+ <summary> Restores the default state of the module's parameters </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="M:winapp2ool.trimsettingshandler.getSerializedTrimSettings">
+ <summary> Loads values from disk into memory for the Trim module settings </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="M:winapp2ool.trimsettingshandler.createTrimSettingsSection">
+ <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
 <member name="T:winapp2ool.Trim">
     <summary>
-    This module parses a winapp2.ini file and checks each entry therein
-    removing any whose detection parameters do not exist on the current system
-    and outputting a "trimmed" file containing only entries that exist on the system
-    to the user.
+    Checks the detection criteria of each entry in a winapp2.ini file against the current system 
+    Any entries whose criteria do not match the current system are then removed from the final output file
    </summary>
+   Docs last updated 2022-11-21
 </member>
 <member name="P:winapp2ool.Trim.TrimFile1">
  <summary> The winapp2.ini file that will be trimmed </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="P:winapp2ool.Trim.TrimFile2">
  <summary> Holds the path of an iniFile containing the names of Sections who should never be trimmed </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="P:winapp2ool.Trim.TrimFile3">
  <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="P:winapp2ool.Trim.TrimFile4">
  <summary> Holds the path of an iniFile containing the names of Sections who should always be trimmed </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="P:winapp2ool.Trim.winVer">
  <summary> The major/minor version number on the current system </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
-<member name="P:winapp2ool.Trim.ModuleSettingsChanged">
+<member name="P:winapp2ool.Trim.TrimModuleSettingsChanged">
  <summary> Indicates that the module settings have been modified from their defaults </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="P:winapp2ool.Trim.DownloadFileToTrim">
  <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
-<member name="P:winapp2ool.Trim.UseIncludes">
- <summary> Indicates that the whitelist should be consulted while trimming </summary>
+<member name="P:winapp2ool.Trim.UseTrimIncludes">
+ <summary> Indicates that the includes should be consulted while trimming </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
-<member name="P:winapp2ool.Trim.useExcludes">
- <summary> Indicates that the blacklist should be consulted while trimming </summary>
+<member name="P:winapp2ool.Trim.UseTrimExcludes">
+ <summary> Indicates that the excludes should be consulted while trimming </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.handleCmdLine">
  <summary> Handles the commandline args for Trim </summary>
  Trim args:
  -d          : download the latest winapp2.ini
-</member>
-<member name="M:winapp2ool.Trim.initDefaultSettings">
- <summary> Restores the default state of the module's parameters </summary>
-</member>
-<member name="M:winapp2ool.Trim.getSerializedTrimSettings">
- <summary> Loads values from disk into memory for the Trim module settings </summary>
-</member>
-<member name="M:winapp2ool.Trim.createTrimSettingsSection">
- <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.remoteTrim(winapp2ool.iniFile,winapp2ool.iniFile,System.Boolean)">
  <summary> Trims an <c> iniFile </c> from outside the module </summary>
  <param name="firstFile"> The winapp2.ini file to be trimmed </param>
  <param name="thirdFile"> <c> iniFile </c> containing the path on disk to which the trimmed file will be saved </param>
  <param name="d"> Indicates that the input winapp2.ini should be downloaded from GitHub </param>
-</member>
-<member name="M:winapp2ool.Trim.printMenu">
- <summary> Prints the <c> Trim </c> menu to the user </summary>
-</member>
-<member name="M:winapp2ool.Trim.handleUserInput(System.String)">
- <summary> Handles the user input from the menu </summary>
- <param name="input"> The String containing the user's input </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.initTrim">
  <summary> Initiates the <c> Trim </c> process from the main menu or commandline </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.trimFile(winapp2ool.winapp2file)">
  <summary> Trims a <c> winapp2file </c>, removing entries not relevant to the current system </summary>
  <param name="winapp2"> A <c> winapp2file </c> to be trimmed to fit the current system </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.checkExistence(winapp2ool.keyList@,System.Func{System.String,System.Boolean})">
  <summary> Evaluates a <c> keyList </c> to observe whether they exist on the current machine </summary>
  <param name="kl"> The <c> keyList </c> containing detection criteria to be evaluated </param>
  <param name="chkExist"> The <c> function </c> that evaluates the detection criteria in <c> <paramref name="kl"/> </c> </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.processEntryExistence(winapp2ool.winapp2entry@)">
  <summary> Audits the detection criteria in a given <c> winapp2entry </c> against the current system <br/> <br/>
  Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise </summary>
  <param name="entry"> A <c> winapp2entry </c> to whose detection criteria will be audited </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.virtualStoreChecker(winapp2ool.winapp2entry@)">
  <summary> Audits the given entry for legacy codepaths in the machine's VirtualStore </summary>
  <param name="entry"> The <c> winapp2entry </c> to audit </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.vsKeyChecker(winapp2ool.keyList@)">
  <summary> Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list </summary>
  <param name="kl"> The <c> keyList </c> of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.mkVsKeys(System.String[],System.String[],winapp2ool.keyList@)">
  <summary> Creates <c> iniKeys </c> to handle VirtualStore locations that correspond to paths given in <c> <paramref name="kl"/> </c> </summary>
  <param name="findStrs"> An array of Strings to seek for in the key value </param>
  <param name="replStrs"> An array of strings to replace the sought after key values </param>
  <param name="kl"> The <c> keylist </c> to be processed </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.createVSKey(System.String,System.String,winapp2ool.iniKey)">
  <summary> Creates the VirtualStore version of a given <c> iniKey </c> </summary>
  <param name="findStr"> The normal filesystem path </param>
  <param name="replStr"> The VirtualStore path </param>
  <param name="key"> The <c> iniKey </c> to processed into a VirtualStore key </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.processEntryList(System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
  <summary> Processes a list of <c> winapp2entries </c> and removes any from the list that wouldn't be detected by CCleaner </summary>
  <param name="entryList"> The list of <c> winapp2entries </c> who detection criteria will be audited </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.checkSpecialDetects(System.String)">
  <summary> Returns <c> True </c> if a SpecialDetect location exists, <c> False </c> otherwise </summary>
  <param name="key"> A SpecialDetect format <c> iniKey </c> </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.checkExist(System.String)">
  <summary> Handles passing off checks from sources that may vary between file system and registry </summary>
  <param name="path"> A filesystem or registry path whose existence will be audited </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.checkRegExist(System.String)">
  <summary> Returns <c> True </c> if a given key exists in the Windows Registry, <c> False </c> otherwise </summary>
  <param name="path"> A registry path to be audited for existence </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.getRegExists(System.String,System.String)">
  <summary> Returns <c> True </c> if a given key exists in the registry, <c> False </c> otherwise </summary>
  <param name="root"> The registry hive that contains the key whose existence will be audited </param>
  <param name="dir"> The path of the key whose existence will be audited </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.processEnvDirs(System.String@,System.Boolean@)">
  <summary> Handles some CCleaner variables and logs if the current variable is ProgramFiles so the 32bit location can be checked later </summary>
  <param name="dir"> A filesystem path to process for environment variables </param>
  <param name="isProgramFiles"> Indicates that the %ProgramFiles% variable has been seen </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.checkPathExist(System.String)">
  <summary> Returns <c> True </c> if a path exists on the file system, <c> False </c> otherwise </summary>
  <param name="key"> A filesystem path </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.swapDir(System.String@,System.String)">
  <summary> Swaps out a directory with the ProgramFiles parameterization on 64bit computers </summary>
  <param name="dir"> The file system path to be modified </param>
  <param name="key"> The original state of the path </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.expandWildcard(System.String,System.Boolean)">
  <summary> Interprets parameterized wildcards for the current system </summary>
@@ -1988,6 +2035,7 @@ winapp2ool
 <member name="M:winapp2ool.Trim.checkDetOS(System.String)">
  <summary> Returns <c> True </c> if the system satisfies the DetectOS citeria, <c> False </c> otherwise </summary>
  <param name="value"> The DetectOS criteria to be checked </param>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="T:winapp2ool.advSettings">
  <summary> This module holds some methods for managing WinappDebug's scan/repair states </summary>
@@ -2354,13 +2402,12 @@ winapp2ool
  <param name="key"> A <c> iniKey </c> whose basic syntactic validity will be assessed </param>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="M:winapp2ool.WinappDebug.chkCasing(winapp2ool.iniKey@,System.String[],System.String@,System.Boolean)">
+<member name="M:winapp2ool.WinappDebug.chkCasing(winapp2ool.iniKey@,System.String[],System.String@)">
  <summary> Checks the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey </c> against a given array of expected cased values, attempts 
  to repair casing errors if possible </summary>
  <param name="key"> The <c> iniKey </c> whose casing will be audited </param>
  <param name="casedArray"> The array of expected cased values </param>
  <param name="strToChk"> A pointer to the value being audited </param>
- <param name="chkType"> <c> True </c> to check <c> KeyTypes </c>, <c> False </c> to check <c> Values </c> </param>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="M:winapp2ool.WinappDebug.pFileKey(winapp2ool.iniKey)">

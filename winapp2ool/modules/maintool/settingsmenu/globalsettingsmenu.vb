@@ -41,7 +41,9 @@ Module globalsettingsmenu
         print(1, "Save Log", "Save winapp2ool's internal log to the disk")
         print(0, $"Current log file target: {replDir(GlobalLogFile.Path)}", leadingBlank:=True, trailingBlank:=True)
         print(1, "Visit GitHub", "Open the winapp2.ini/winapp2ool GitHub in your default web browser", trailingBlank:=True)
-        print(5, "Toggle Beta Participation", $"participating in the 'beta' builds of winapp2ool (requires a restart)", enStrCond:=isBeta, closeMenu:=Not toolSettingsHaveChanged)
+        print(5, "Toggle Beta Participation", $"participating in the 'beta' builds of winapp2ool (requires a restart)", enStrCond:=isBeta)
+        print(5, "Toggle Offline Mode", $"Force winapp2ool into offline mode", enStrCond:=isOffline, closeMenu:=Not toolSettingsHaveChanged)
+
         print(2, NameOf(Winapp2ool), cond:=toolSettingsHaveChanged, closeMenu:=True)
     End Sub
 
@@ -71,7 +73,9 @@ Module globalsettingsmenu
                     toggleSettingParam(isBeta, "Beta Participation", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(isBeta), NameOf(toolSettingsHaveChanged))
                     autoUpdate()
                 End If
-            Case input = "9" And toolSettingsHaveChanged
+            Case input = "9"
+                isOffline = True
+            Case input = "10" And toolSettingsHaveChanged
                 initDefaultSettings()
             Case Else
                 setHeaderText(invInpStr, True)

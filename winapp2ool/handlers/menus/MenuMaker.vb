@@ -338,4 +338,18 @@ Module MenuMaker
     Public Function replDir(dirStr As String) As String
         Return dirStr.Replace(Environment.CurrentDirectory, "..")
     End Function
+
+    ''' <summary> Determines the number currently associated with a particular menu option </summary>
+    ''' This avoids a boolean headache so severe I'm not sure how I didn't implement it sooner 
+    ''' <param name="defaultNumber"> The menu number associated with the option in winapp2ool's default, online configuration </param>
+    ''' <param name="weightedComponents"> A set of parameters which influence the position of a menu option in the menu </param>
+    ''' <param name="weights"> The weights correlating to each <c>Component</c> in <c><paramref name="weightedComponents"/> </c> </param>
+    ''' Docs last updated: 2021-11-21 | Code last updated: 2022-11-21
+    Public Function computeMenuNumber(defaultNumber As Integer, weightedComponents As Boolean(), weights As Integer()) As String
+        Dim out = defaultNumber
+        For i = 0 To weightedComponents.Length - 1
+            If weightedComponents(i) Then out += weights(i)
+        Next
+        Return out.ToString
+    End Function
 End Module
