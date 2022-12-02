@@ -2396,19 +2396,19 @@ winapp2ool
  <param name="cmds"> An array containing valid winapp2.ini <c> keyTypes </c> </param>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="M:winapp2ool.WinappDebug.cValidity(winapp2ool.iniKey)">
+<member name="M:winapp2ool.WinappDebug.cValidity(winapp2ool.iniKey@)">
  <summary> Does basic syntax and formatting audits that apply across all keys, returns <c> False </c> 
  if a key is malformed or if a null argument is given </summary>
  <param name="key"> A <c> iniKey </c> whose basic syntactic validity will be assessed </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2022-12-01
 </member>
-<member name="M:winapp2ool.WinappDebug.chkCasing(winapp2ool.iniKey@,System.String[],System.String@)">
+<member name="M:winapp2ool.WinappDebug.chkCasing(winapp2ool.iniKey@,System.String[],System.String)">
  <summary> Checks the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey </c> against a given array of expected cased values, attempts 
  to repair casing errors if possible </summary>
  <param name="key"> The <c> iniKey </c> whose casing will be audited </param>
  <param name="casedArray"> The array of expected cased values </param>
  <param name="strToChk"> A pointer to the value being audited </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2022-12-01
 </member>
 <member name="M:winapp2ool.WinappDebug.pFileKey(winapp2ool.iniKey)">
  <summary> Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible </summary>

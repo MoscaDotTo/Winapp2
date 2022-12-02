@@ -801,8 +801,8 @@ Public Module WinappDebug
     ''' <summary> Does basic syntax and formatting audits that apply across all keys, returns <c> False </c> 
     ''' if a key is malformed or if a null argument is given </summary>
     ''' <param name="key"> A <c> iniKey </c> whose basic syntactic validity will be assessed </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Function cValidity(key As iniKey) As Boolean
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2022-12-01
+    Private Function cValidity(ByRef key As iniKey) As Boolean
         If key Is Nothing Then argIsNull(NameOf(key)) : Return False
         Dim validCmds = {"Default", "DetectOS", "DetectFile", "Detect", "ExcludeKey",
                         "FileKey", "LangSecRef", "RegKey", "Section", "SpecialDetect", "Warning"}
@@ -839,8 +839,8 @@ Public Module WinappDebug
     ''' <param name="key"> The <c> iniKey </c> whose casing will be audited </param>
     ''' <param name="casedArray"> The array of expected cased values </param>
     ''' <param name="strToChk"> A pointer to the value being audited </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Sub chkCasing(ByRef key As iniKey, casedArray As String(), ByRef strToChk As String)
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2022-12-01
+    Private Sub chkCasing(ByRef key As iniKey, casedArray As String(), strToChk As String)
 
         ' Get the properly cased string 
         Dim casedString As String = strToChk
@@ -853,11 +853,10 @@ Public Module WinappDebug
         Dim validData = String.Join(", ", casedArray)
 
         ' Inform the user if there are casing errors and fix them 
-        fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, lintCasing.fixFormat, "", "")
-        fixStr(hasCasingErr And key.Value.Contains(strToChk), key.Value, key.Value.Replace(strToChk, casedString))
-        fixStr(hasCasingErr And key.Name.Contains(strToChk), key.Name, key.Name.Replace(key.KeyType, casedString))
-        fixStr(hasCasingErr And key.KeyType.Contains(strToChk), key.KeyType, casedString)
-
+        fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, False, "", "")
+        fixStr(hasCasingErr AndAlso key.Value.Contains(strToChk), key.Value, key.Value.Replace(strToChk, casedString))
+        fixStr(hasCasingErr AndAlso key.Name.Contains(strToChk), key.Name, key.Name.Replace(key.KeyType, casedString))
+        fixStr(hasCasingErr AndAlso key.KeyType.Contains(strToChk), key.KeyType, key.KeyType.Replace(key.KeyType, casedString))
         ' Inform the user about invalid data 
         fullKeyErr(key, $"Invalid data provided: {strToChk} in {key.toString}{Environment.NewLine}Valid data: {validData}", Not casedArray.Contains(casedString) And lintInvalid.ShouldScan)
 
