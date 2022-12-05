@@ -311,67 +311,103 @@ Public Module WinappDebug
 
     ''' <summary> Handles the user's input from the menu </summary>
     ''' <param name="input"> The String containing the user's input </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2022-12-04 | Code last updated: 2022-12-04
     Public Sub handleUserInput(input As String)
 
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
 
         Dim saveOrOverride = SaveChanges Or overrideDefaultVal
         Dim saveXorOverride = SaveChanges Xor overrideDefaultVal
-        Dim saveAndOverride = SaveChanges And overrideDefaultVal
+        Dim saveAndOverride = SaveChanges AndAlso overrideDefaultVal
 
         Select Case True
 
+            ' Option Name:                                 Exit 
+            ' Option states:
+            ' Default                                      -> 0 (default)
             Case input = "0"
 
                 exitModule()
 
+            ' Option Name:                                 Run (default)
+            ' Option states:
+            ' Default                                      -> 1 (default)
             Case input = "1" Or input.Length = 0
 
                 initDebug()
 
+
+            ' Option Name:                                 File Chooser (winapp2.ini)
+            ' Option states:
+            ' Default                                      -> 2 (default)
             Case input = "2"
 
                 changeFileParams(winappDebugFile1, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(ModuleSettingsChanged))
 
+            ' Option Name:                                Toggle Saving 
+            ' Option states:
+            ' Default                                      -> 3 (default)
             Case input = "3"
 
                 toggleSettingParam(SaveChanges, "Saving", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(SaveChanges), NameOf(ModuleSettingsChanged))
 
-            Case input = "4" And SaveChanges
+            ' Option Name:                                 File Chooser (save)
+            ' Option states:
+            ' Not saving changes                           -> Unavailable (not displayed)
+            ' Saving changes                               -> 4 (default)
+
+            Case input = "4" AndAlso SaveChanges
 
                 changeFileParams(winappDebugFile3, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(ModuleSettingsChanged))
 
-            Case (input = "4" And Not SaveChanges) Or
-                     (input = "5" And SaveChanges)
+            ' Option Name:                                 Toggle Scan Settings
+            ' Option states:
+            ' Not saving                                   -> 4 (default)
+            ' Saving (+1)                                  -> 5
+            Case input = computeMenuNumber(4, {SaveChanges}, {1})
 
                 initModule("Scan Settings", AddressOf advSettings.printMenu, AddressOf advSettings.handleUserInput)
                 Console.WindowHeight = 30
 
-            Case (input = "5" And Not SaveChanges) Or
-                     (input = "6" And SaveChanges)
+            ' Option Name:                                  Toggle Default Value Audit 
+            ' Option states:
+            ' Not saving                                   -> 5 (default)
+            ' Saving (+1)                                  -> 6
+            Case input = computeMenuNumber(5, {SaveChanges}, {1})
+
 
                 toggleSettingParam(overrideDefaultVal, "Default Value Overriding", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(overrideDefaultVal), NameOf(ModuleSettingsChanged))
 
-            Case ModuleSettingsChanged And (
-                     (input = "6" And Not saveOrOverride) Or
-                     (input = "7" And saveXorOverride) Or
-                     (input = "8" And saveAndOverride))
+            ' Option Name:                           Reset Settings       
+            ' Option states:
+            ' Module Settings not changed                  -> Unavailable (not displayed)
+            ' Not Saving, Not auditing defaults            -> 6 (default)
+            ' Saving (+1), not auditing                    -> 7
+            ' Not saving, auditing (+1)                    -> 7
+            ' Saving and auditing                          -> 8 
+            Case ModuleSettingsChanged And input = computeMenuNumber(6, {SaveChanges, overrideDefaultVal}, {1, 1})
 
                 resetModuleSettings("WinappDebug", AddressOf initDefaultSettings)
 
-            Case Not MostRecentLintLog.Length = 0 And
-                     (input = "6" And Not ModuleSettingsChanged) Or
-                     ModuleSettingsChanged And
-                     ((input = "7" And (Not saveOrOverride) Or
-                     (input = "8" And saveXorOverride) Or
-                     (input = "9" And saveAndOverride)))
+            ' Option Name:                                 Log Viewer
+            ' Option states:
+            ' No log exists                                -> Unavailable (not displayed) 
+            ' No settings changes, not saving, no audit    -> 6 (default) 
+            ' Settings changed(+1), not saving, no audit   -> 7
+            ' Settings changed(+1), saving(+1), no audit   -> 8
+            ' Settings changed(+1), saving(+1), audit(+1)  -> 9
+            ' Settings changed(+1), not saving, audit(+1)  -> 8 
 
+
+            Case Not MostRecentLintLog.Length = 0 AndAlso input = computeMenuNumber(6, {ModuleSettingsChanged, SaveChanges, overrideDefaultVal}, {1, 1, 1})
                 printSlice(MostRecentLintLog)
 
-            Case overrideDefaultVal And
-                     (input = "6" And Not SaveChanges) Or
-                     (input = "7" And SaveChanges)
+            ' Option Name:                                 Toggle Expected Default
+            ' Option states:
+            ' Not auditing                                 -> Unavailable (not displayed)
+            ' Not saving                                   -> 6
+            ' Saving (+1)                                  -> 7
+            Case overrideDefaultVal And input = computeMenuNumber(6, {SaveChanges}, {1})
 
                 toggleSettingParam(expectedDefaultValue, "Expected Default Value", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(expectedDefaultValue), NameOf(ModuleSettingsChanged))
 

@@ -2317,7 +2317,7 @@ winapp2ool
 <member name="M:winapp2ool.WinappDebug.handleUserInput(System.String)">
  <summary> Handles the user's input from the menu </summary>
  <param name="input"> The String containing the user's input </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2022-12-04 | Code last updated: 2022-12-04
 </member>
 <member name="M:winapp2ool.WinappDebug.initDebug">
  <summary> Validates winapp2.ini, then sets up the output window before sending it off to the linter.
