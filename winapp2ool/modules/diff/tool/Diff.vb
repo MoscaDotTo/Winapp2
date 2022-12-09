@@ -249,6 +249,23 @@ Module Diff
 
         Dim processedEntryNameList As New HashSet(Of String)
 
+        ' This is a work-around to accomodate a broader change I'm introducing into winapp2.ini which is to use * in place of *.*
+        ' This will be removed when it becomes less relevant, but for now the many keys already reflecting this (and only this) change are just noise in the diff 
+        ' So we'll preemptively apply this change to every key for the purposes of the diff 
+
+        For Each section In DiffFile2.Sections.Values
+            For Each key In section.Keys.Keys
+                If key.Value.Contains("*.*") Then key.Value = key.Value.Replace("*.*", "*")
+            Next
+        Next
+
+        For Each section In DiffFile1.Sections.Values
+            For Each key In section.Keys.Keys
+                If key.Value.Contains("*.*") Then key.Value = key.Value.Replace("*.*", "*")
+            Next
+        Next
+
+
         ' Determine the names of the entries who appear only in the "new" file 
         For Each section In DiffFile2.Sections.Values
 
