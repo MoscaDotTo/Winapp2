@@ -342,14 +342,14 @@ Module Diff
 
                 ' If we hit matches along the way, we'll remember the name of the entry with the largest number of matching keys to assess at the end 
                 ' but only if it exists in the set of entries who have been added or modified 
-                If (curwa2Section.FileKeys.KeyCount > 0 And someFileKeysMatched) Or (someRegKeysMatched And curwa2Section.RegKeys.KeyCount > 0) And
-                     fileKeyMatches + regKeyMatches > highestMatchCount And (addedEntryTracker.Contains(sSection.Name) OrElse modifiedEntryTracker.Contains(sSection.Name)) Then
+                If (curwa2Section.FileKeys.KeyCount > 0 AndAlso someFileKeysMatched) OrElse (someRegKeysMatched AndAlso curwa2Section.RegKeys.KeyCount > 0) AndAlso
+                     fileKeyMatches + regKeyMatches > highestMatchCount AndAlso (addedEntryTracker.Contains(sSection.Name) OrElse modifiedEntryTracker.Contains(sSection.Name)) Then
 
                     newMergedOrRenamedName = sSection.Name
 
                 End If
 
-                If allFileKeysMatched And allRegKeysMatched And fileKeyCountsMatch And regKeyCountsMatch Then
+                If allFileKeysMatched AndAlso allRegKeysMatched AndAlso fileKeyCountsMatch AndAlso regKeyCountsMatch Then
                     ' If all the filekeys and regkeys and their respective counts match between two entries then it 
                     ' stands to reason that the old version of the key was renamed into the new version 
                     getDiff(oldSectionVersion, 3, RenamedEntryCount, sSection)
@@ -357,7 +357,7 @@ Module Diff
                     renamedEntryTracker.Add(newMergedOrRenamedName)
                     Exit For
 
-                ElseIf allFileKeysMatched And allRegKeysMatched Then
+                ElseIf allFileKeysMatched AndAlso allRegKeysMatched Then
 
                     ' Likewise, if all the keys matched but the counts don't match, then the entry was probably merged 
                     mergeDiff(oldSectionVersion, sSection, entryWasRenamedOrMerged, mergedEntryTracker, mergeDict, modifiedEntryTracker, processedEntryNameList)
@@ -537,11 +537,11 @@ Module Diff
         If Not mergeDict.ContainsKey(mergeName) Then
 
             mergeDict.Add(mergeName, New List(Of String))
-            If modifiedEntryNameList.Contains(mergeName) And Not processedEntryNameList.Contains(oldSectionVersion.Name) Then ModifiedEntryWithMergerCount += 1
+            If modifiedEntryNameList.Contains(mergeName) AndAlso Not processedEntryNameList.Contains(oldSectionVersion.Name) Then ModifiedEntryWithMergerCount += 1
 
         End If
 
-        If modifiedEntryNameList.Contains(mergeName) And Not processedEntryNameList.Contains(oldSectionVersion.Name) Then EntriesMergedToModified += 1
+        If modifiedEntryNameList.Contains(mergeName) AndAlso Not processedEntryNameList.Contains(oldSectionVersion.Name) Then EntriesMergedToModified += 1
         mergeDict(mergeName).Add(oldSectionVersion.Name)
         processedEntryNameList.Add(oldSectionVersion.Name)
 
@@ -555,7 +555,7 @@ Module Diff
     ''' <param name="allKeysMatchedTracker"> Tracks whether or not all the keys have matched </param>
     ''' <param name="MatchCount"> The number of matches observed </param>
     ''' <param name="disallowedValues"> Any values whose matching should be ignored </param>
-    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-12-10
     Private Sub assessKeyMatches(oldKeyList As keyList,
                                 newKeyList As keyList,
                                 ByRef countTracker As Boolean,
@@ -601,7 +601,7 @@ Module Diff
                     ' If the string isn't a direct match, it's possible that the parameterization has changed through a wildcard. 
                     ' We will try to catch this case here but it's probably dodgy. This is only true for DetectFile and FileKey as CCleaner does not support 
                     ' Registry wildcards. We're actually going to ignore DetectFile as a case here because there are many collisions
-                    If key.typeIs("FileKey") Or key.typeIs("DetectFile") Then
+                    If key.typeIs("FileKey") OrElse key.typeIs("DetectFile") Then
 
                         Dim newKeyFirstSplit = newKey.Value.Split(CChar("\"))
                         Dim oldKeyFirstSplit = key.Value.Split(CChar("\"))
@@ -666,7 +666,9 @@ Module Diff
                             ' It's not likely that we'd have a disallowed value that's parameterized with a wildcard, which is essentially the case here
                             ' but better safe than sorry 
                             If disallowedValues IsNot Nothing Then
+
                                 If disallowedValues.Contains(newKey.Value.Split(CChar("|"))(0)) Then Exit For
+
                             End If
 
                             ' Matching the path good, but let's express additional scrutiny when the last parameter in the directory is a wildcard (For FileKeys)
@@ -829,7 +831,7 @@ Module Diff
                             Dim newArgs = newArgsUpper.ToArray
 
                             ' If the arguments aren't identical, the key has been updated 
-                            If oldArgs.Except(newArgs).Any Or newArgs.Except(oldArgs).Any Then updateKeys(updatedKeys, key, skey) : Exit For
+                            If oldArgs.Except(newArgs).Any OrElse newArgs.Except(oldArgs).Any Then updateKeys(updatedKeys, key, skey) : Exit For
 
                             ' If we get this far, it's just an alphabetization change and can be ignored silently
                             akAlpha.add(skey)

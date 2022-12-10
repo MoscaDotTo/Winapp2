@@ -319,7 +319,7 @@ winapp2ool
  <param name="allKeysMatchedTracker"> Tracks whether or not all the keys have matched </param>
  <param name="MatchCount"> The number of matches observed </param>
  <param name="disallowedValues"> Any values whose matching should be ignored </param>
- Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
+ Docs last updated: 2022-07-14 | Code last updated: 2022-12-10
 </member>
 <member name="M:winapp2ool.Diff.recordModification(System.Collections.Generic.List{System.String}@,System.Collections.Generic.List{System.Int32}@,System.String@)">
  <summary> Records the number of changes made in a modified entry </summary>
