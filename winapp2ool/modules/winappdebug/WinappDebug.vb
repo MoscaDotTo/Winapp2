@@ -16,7 +16,6 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.Text.RegularExpressions
-Imports System.Threading
 ''' <summary> Observes, reports, and attempts to repair errors in winapp2.ini </summary>
 Public Module WinappDebug
 
@@ -316,7 +315,6 @@ Public Module WinappDebug
 
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
 
-        Dim saveOrOverride = SaveChanges Or overrideDefaultVal
         Dim saveXorOverride = SaveChanges Xor overrideDefaultVal
         Dim saveAndOverride = SaveChanges AndAlso overrideDefaultVal
 
@@ -336,7 +334,6 @@ Public Module WinappDebug
 
                 initDebug()
 
-
             ' Option Name:                                 File Chooser (winapp2.ini)
             ' Option states:
             ' Default                                      -> 2 (default)
@@ -355,7 +352,6 @@ Public Module WinappDebug
             ' Option states:
             ' Not saving changes                           -> Unavailable (not displayed)
             ' Saving changes                               -> 4 (default)
-
             Case input = "4" AndAlso SaveChanges
 
                 changeFileParams(winappDebugFile3, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(ModuleSettingsChanged))
@@ -397,8 +393,6 @@ Public Module WinappDebug
             ' Settings changed(+1), saving(+1), no audit   -> 8
             ' Settings changed(+1), saving(+1), audit(+1)  -> 9
             ' Settings changed(+1), not saving, audit(+1)  -> 8 
-
-
             Case Not MostRecentLintLog.Length = 0 AndAlso input = computeMenuNumber(6, {ModuleSettingsChanged, SaveChanges, overrideDefaultVal}, {1, 1, 1})
                 printSlice(MostRecentLintLog)
 

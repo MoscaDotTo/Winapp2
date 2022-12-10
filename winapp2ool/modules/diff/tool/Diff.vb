@@ -16,7 +16,9 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 Imports System.Collections.Specialized.BitVector32
+Imports System.Diagnostics.Eventing.Reader
 Imports System.Globalization
+Imports System.Text.RegularExpressions
 
 ''' <summary> Performs a "Diff" on two winapp2.ini files, attempting to deliver specific details about changes to the user  </summary>
 ''' Docs last updated: 2022-07-14 
@@ -212,6 +214,7 @@ Module Diff
         gLog("Diff complete", descend:=True)
         print(0, Nothing, closeMenu:=True)
         print(4, "Summary", conjoin:=True)
+        print(0, $"Net entry count change: {DiffFile2.Sections.Count - DiffFile1.Sections.Count}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.White)
         print(0, $"Modified entries: {ModifiedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
         print(0, $" * {ModEntriesAddedKeyTotal} added keys (total between all entries)", colorLine:=True, enStrCond:=True, cond:=ModEntriesAddedKeyTotal > 0)
         print(0, $" * {ModEntriesRemovedKeyTotal} removed keys (total between all entries)", colorLine:=True, enStrCond:=False, cond:=ModEntriesRemovedKeyTotal > 0)
@@ -248,6 +251,22 @@ Module Diff
         Dim mergeDict As New Dictionary(Of String, List(Of String))
 
         Dim processedEntryNameList As New HashSet(Of String)
+
+        ' This is a work-around to accomodate a broader change I'm introducing into winapp2.ini which is to use * in place of *.*
+        ' This will be removed when it becomes less relevant, but for now the many keys already reflecting this (and only this) change are just noise in the diff 
+        ' So we'll preemptively apply this change to every key for the purposes of the diff 
+
+        For Each section In DiffFile2.Sections.Values
+            For Each key In section.Keys.Keys
+                If key.Value.Contains("*.*") Then key.Value = key.Value.Replace("*.*", "*")
+            Next
+        Next
+
+        For Each section In DiffFile1.Sections.Values
+            For Each key In section.Keys.Keys
+                If key.Value.Contains("*.*") Then key.Value = key.Value.Replace("*.*", "*")
+            Next
+        Next
 
         ' Determine the names of the entries who appear only in the "new" file 
         For Each section In DiffFile2.Sections.Values
@@ -301,7 +320,7 @@ Module Diff
             For Each sSection In DiffFile2.Sections.Values
 
                 ' Don't consider the contents of entries that are neither new nor modified in the new version 
-                If Not addedEntryTracker.Contains(sSection.Name) And Not modifiedEntryTracker.Contains(sSection.Name) Then Continue For
+                If Not addedEntryTracker.Contains(sSection.Name) AndAlso Not modifiedEntryTracker.Contains(sSection.Name) Then Continue For
 
                 Dim allFileKeysMatched = False
                 Dim someFileKeysMatched = False
@@ -314,21 +333,23 @@ Module Diff
                 Dim fileKeyMatches = 0
                 Dim regKeyMatches = 0
 
+                Dim disallowed As New HashSet(Of String) From {"%Documents%\Add-in Express", "%UserProfile%\Desktop", "%LocalAppData%", "%WinDir%\System32",
+                                                              "%SystemDrive%", "%WinDir", "%UserProfile%", "%Documents%", "%CommonAppData%", "%AppData%",
+                                                              "%Pictures%", "%Public%", "%Music%", "%Video%"}
                 ' Quantify the number of filekeys and regkeys from the old entry who exist in the new entry 
-                assessKeyMatches(curwa2Section.FileKeys, wa2sSection.FileKeys, fileKeyCountsMatch, someFileKeysMatched, allFileKeysMatched, fileKeyMatches)
+                assessKeyMatches(curwa2Section.FileKeys, wa2sSection.FileKeys, fileKeyCountsMatch, someFileKeysMatched, allFileKeysMatched, fileKeyMatches, disallowed)
                 assessKeyMatches(curwa2Section.RegKeys, wa2sSection.RegKeys, regKeyCountsMatch, someRegKeysMatched, allRegKeysMatched, regKeyMatches)
 
                 ' If we hit matches along the way, we'll remember the name of the entry with the largest number of matching keys to assess at the end 
                 ' but only if it exists in the set of entries who have been added or modified 
-                If (curwa2Section.FileKeys.KeyCount > 0 And someFileKeysMatched) Or (someRegKeysMatched And curwa2Section.RegKeys.KeyCount > 0) And
-                     fileKeyMatches + regKeyMatches > highestMatchCount And (addedEntryTracker.Contains(sSection.Name) OrElse modifiedEntryTracker.Contains(sSection.Name)) Then
+                If (curwa2Section.FileKeys.KeyCount > 0 AndAlso someFileKeysMatched) OrElse (someRegKeysMatched AndAlso curwa2Section.RegKeys.KeyCount > 0) AndAlso
+                     fileKeyMatches + regKeyMatches > highestMatchCount AndAlso (addedEntryTracker.Contains(sSection.Name) OrElse modifiedEntryTracker.Contains(sSection.Name)) Then
 
                     newMergedOrRenamedName = sSection.Name
 
                 End If
 
-                If allFileKeysMatched And allRegKeysMatched And fileKeyCountsMatch And regKeyCountsMatch Then
-
+                If allFileKeysMatched AndAlso allRegKeysMatched AndAlso fileKeyCountsMatch AndAlso regKeyCountsMatch Then
                     ' If all the filekeys and regkeys and their respective counts match between two entries then it 
                     ' stands to reason that the old version of the key was renamed into the new version 
                     getDiff(oldSectionVersion, 3, RenamedEntryCount, sSection)
@@ -336,7 +357,7 @@ Module Diff
                     renamedEntryTracker.Add(newMergedOrRenamedName)
                     Exit For
 
-                ElseIf allFileKeysMatched And allRegKeysMatched Then
+                ElseIf allFileKeysMatched AndAlso allRegKeysMatched Then
 
                     ' Likewise, if all the keys matched but the counts don't match, then the entry was probably merged 
                     mergeDiff(oldSectionVersion, sSection, entryWasRenamedOrMerged, mergedEntryTracker, mergeDict, modifiedEntryTracker, processedEntryNameList)
@@ -344,21 +365,22 @@ Module Diff
 
                 End If
 
-                ' Just skip this next check on the browser sections, they all share the same detections 
-                If curwa2Section.SectionKey.KeyCount > 0 OrElse {"3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001"}.Contains(curwa2Section.LangSecRef.Keys(0).Value) Then Continue For
                 If entryWasRenamedOrMerged Then Continue For
+
+                ' Just skip this next check on the browser sections, they all share the same detections 
+                If curwa2Section.LangSecRef.KeyCount > 0 AndAlso {"3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001"}.Contains(curwa2Section.LangSecRef.Keys(0).Value) Then Continue For
 
                 ' If we get here, we didn't find a match based on the deletion keys, we can check for the detection criteria as well
                 Dim someDetectsMatched = False
                 Dim someDetectFilesMatched = False
 
                 ' We have some values that are too generic here to truly consider useful
-                Dim ignoredValues As New HashSet(Of String) From {"HKCU\Software\Microsoft\Windows", "HKLM\Software\Microsoft\Windows", "HKCU\Software\Microsoft\VisualStudio"}
-                assessKeyMatches(curwa2Section.Detects, wa2sSection.Detects, False, someDetectsMatched, False, 0, ignoredValues)
-                assessKeyMatches(curwa2Section.DetectFiles, wa2sSection.DetectFiles, False, someDetectFilesMatched, False, 0)
+                Dim ignoredValues As New HashSet(Of String) From {"HKCU\Software\Microsoft\Windows", "HKLM\Software\Microsoft\Windows", "HKCU\Software\Microsoft\VisualStudio", "%Documents%\Add-in Express"}
+                assessKeyMatches(curwa2Section.Detects, wa2sSection.Detects, True, someDetectsMatched, False, 0, ignoredValues)
+                assessKeyMatches(curwa2Section.DetectFiles, wa2sSection.DetectFiles, True, someDetectFilesMatched, False, 0, ignoredValues)
 
                 ' If we have detects that match at this point, we'll consider those mergers 
-                If someDetectFilesMatched And curwa2Section.DetectFiles.KeyCount > 0 Or someDetectsMatched And curwa2Section.Detects.KeyCount > 0 Then
+                If someDetectFilesMatched AndAlso curwa2Section.DetectFiles.KeyCount > 0 OrElse someDetectsMatched AndAlso curwa2Section.Detects.KeyCount > 0 Then
 
                     mergeDiff(oldSectionVersion, sSection, entryWasRenamedOrMerged, mergedEntryTracker, mergeDict, modifiedEntryTracker, processedEntryNameList)
                     Continue For
@@ -515,26 +537,26 @@ Module Diff
         If Not mergeDict.ContainsKey(mergeName) Then
 
             mergeDict.Add(mergeName, New List(Of String))
-            If modifiedEntryNameList.Contains(mergeName) And Not processedEntryNameList.Contains(oldSectionVersion.Name) Then ModifiedEntryWithMergerCount += 1
+            If modifiedEntryNameList.Contains(mergeName) AndAlso Not processedEntryNameList.Contains(oldSectionVersion.Name) Then ModifiedEntryWithMergerCount += 1
 
         End If
 
-        If modifiedEntryNameList.Contains(mergeName) And Not processedEntryNameList.Contains(oldSectionVersion.Name) Then EntriesMergedToModified += 1
+        If modifiedEntryNameList.Contains(mergeName) AndAlso Not processedEntryNameList.Contains(oldSectionVersion.Name) Then EntriesMergedToModified += 1
         mergeDict(mergeName).Add(oldSectionVersion.Name)
         processedEntryNameList.Add(oldSectionVersion.Name)
 
     End Sub
 
     ''' <summary> Counts the number of matching key contents between two ini keyLists </summary>
-    ''' <param name="currentKeyList"> The list of keys from the "old" version of the entry </param>
+    ''' <param name="oldKeyList"> The list of keys from the "old" version of the entry </param>
     ''' <param name="newKeyList"> The list of keys from the "new" version of the entry </param>
     ''' <param name="countTracker"> Tracks the number of matches observed between the two given keyLists </param>
     ''' <param name="someKeysMatchedTracker"> Tracks whether or not any keys have matched </param>
     ''' <param name="allKeysMatchedTracker"> Tracks whether or not all the keys have matched </param>
     ''' <param name="MatchCount"> The number of matches observed </param>
     ''' <param name="disallowedValues"> Any values whose matching should be ignored </param>
-    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
-    Private Sub assessKeyMatches(currentKeyList As keyList,
+    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-12-10
+    Private Sub assessKeyMatches(oldKeyList As keyList,
                                 newKeyList As keyList,
                                 ByRef countTracker As Boolean,
                                 ByRef someKeysMatchedTracker As Boolean,
@@ -542,24 +564,26 @@ Module Diff
                                 ByRef MatchCount As Integer,
                                 Optional disallowedValues As HashSet(Of String) = Nothing)
 
-        If currentKeyList.KeyCount = newKeyList.KeyCount Then countTracker = True
+        If oldKeyList.KeyCount = newKeyList.KeyCount Then countTracker = True
 
         ' If there's nothing to match, consider the keys matched 
-        If currentKeyList.KeyCount = 0 Then
+        If oldKeyList.KeyCount = 0 Then
 
             someKeysMatchedTracker = True
             allKeysMatchedTracker = True
 
         Else
             ' Otherwise, determine whether or not some or all the key values have matched 
-            For Each key In currentKeyList.Keys
+            For Each key In oldKeyList.Keys
 
-                For Each newFileKey In newKeyList.Keys
+                For Each newKey In newKeyList.Keys
 
-                    If String.Equals(newFileKey.Value, key.Value, StringComparison.InvariantCultureIgnoreCase) Then
+                    If String.Equals(newKey.Value, key.Value, StringComparison.InvariantCultureIgnoreCase) Then
 
-                        ' We can pass a list of hard coded disallowed values to ignore as matches, if we need to 
-                        If disallowedValues IsNot Nothing Then
+                        ' We can pass a list of hard coded disallowed values to ignore as matches, if we need to
+                        ' In the case of a FileKey, most of the things we want to ignore are just generic file system locations 
+                        ' We should override this in some special cases, such as when the paths match exactly 
+                        If disallowedValues IsNot Nothing AndAlso Not key.typeIs("FileKey") Then
 
                             If disallowedValues.Contains(key.Value) Then Exit For
 
@@ -571,11 +595,117 @@ Module Diff
                         Exit For
 
                     End If
+
+                    Dim matched = False
+
+                    ' If the string isn't a direct match, it's possible that the parameterization has changed through a wildcard. 
+                    ' We will try to catch this case here but it's probably dodgy. This is only true for DetectFile and FileKey as CCleaner does not support 
+                    ' Registry wildcards. We're actually going to ignore DetectFile as a case here because there are many collisions
+                    If key.typeIs("FileKey") OrElse key.typeIs("DetectFile") Then
+
+                        Dim newKeyFirstSplit = newKey.Value.Split(CChar("\"))
+                        Dim oldKeyFirstSplit = key.Value.Split(CChar("\"))
+                        matched = True
+                        ' We're only going to try to catch the case where a path has been simplified 
+                        If newKeyFirstSplit.Length = oldKeyFirstSplit.Length Then
+
+                            ' Assess the path provided in the new key 
+                            For i = 0 To newKeyFirstSplit.Length - 1
+
+                                ' If the new path piece matches the respective old path piece look at the next one 
+                                If newKeyFirstSplit(i).Equals(oldKeyFirstSplit(i), StringComparison.InvariantCultureIgnoreCase) Then Continue For
+
+                                ' escape regex special characters 
+                                Dim newVal = newKeyFirstSplit(i).Replace("+", "\+")
+                                newVal = newKeyFirstSplit(i).Replace("*", ".*")
+
+                                ' We need to break the any params off the end of the value which is also the last iteration  
+                                If i = newKeyFirstSplit.Length - 1 AndAlso key.typeIs("FileKey") Then
+
+                                    Dim oldVal = oldKeyFirstSplit(i).Split(CChar("|"))(0)
+                                    Dim newValFinal = newVal
+                                    newValFinal = newValFinal.Replace("+", "\+")
+                                    newValFinal = newValFinal.Split(CChar("|"))(0)
+
+                                    ' Since this is the last iteration and we've only made it here if we've otherwise matched 
+                                    ' We can set matched to this result and then exit the loop 
+                                    matched = Regex.IsMatch(oldVal, newValFinal, RegexOptions.IgnoreCase)
+                                    Exit For
+
+                                End If
+
+                                ' If not and the new path has a wildcard, evaluate it to see if it captures the old piece 
+                                If newKeyFirstSplit(i).Contains("*") Then
+
+                                    ' If there's a wildcard, try evaulating it. winapp2.ini only uses the "any character and number of times" type of wildcard
+                                    If Regex.IsMatch(oldKeyFirstSplit(i), newVal) Then Continue For
+
+                                    ' If not, no match. Move on
+                                    matched = False
+                                    Exit For
+
+                                End If
+
+                                'If the path doesn't have a wildcard then no match
+                                matched = False
+                                Exit For
+
+                            Next
+
+                        Else
+
+                            ' It's possible that a key could have been reduced in a way that reduces the length of its path parameter 
+                            ' but we're not going to consider that case because it probably relies on system specific wildcard evaluation 
+                            ' that we can't reasonably predict here in the diff. So we'll mark this no match 
+                            matched = False
+
+                        End If
+
+                        If matched Then
+
+                            ' It's not likely that we'd have a disallowed value that's parameterized with a wildcard, which is essentially the case here
+                            ' but better safe than sorry 
+                            If disallowedValues IsNot Nothing Then
+
+                                If disallowedValues.Contains(newKey.Value.Split(CChar("|"))(0)) Then Exit For
+
+                            End If
+
+                            ' Matching the path good, but let's express additional scrutiny when the last parameter in the directory is a wildcard (For FileKeys)
+                            If key.typeIs("FileKey") AndAlso newKeyFirstSplit.Last.Split(CChar("|"))(0).Contains("*") Then
+
+                                ' We're only going to consider the case where where the set of parameters matches exactly. This is to reduce noise 
+                                ' We can probably do a little work to see if a notable amount of parameters match through additional wildcard assessment here 
+                                ' so as to be more granular in the case where we dont have an exact match 
+                                Dim flags = newKeyFirstSplit.Last.Split(CChar("|"))(1)
+                                Dim oldFlags = oldKeyFirstSplit.Last.Split(CChar("|"))(1)
+                                If flags.Equals(oldFlags, StringComparison.InvariantCultureIgnoreCase) Then
+
+                                    someKeysMatchedTracker = True
+                                    MatchCount += 1
+                                    Exit For
+
+                                End If
+
+                            Else
+
+                                ' No wildcard no problem, mark it matched and exit the loop
+                                someKeysMatchedTracker = True
+                                MatchCount += 1
+                                Exit For
+
+                            End If
+
+                        End If
+
+                    End If
+
                 Next
+
             Next
 
             ' If we have as many matches as keys then all keys must have matched 
-            If MatchCount = currentKeyList.KeyCount Then allKeysMatchedTracker = True
+            If MatchCount = oldKeyList.KeyCount Then allKeysMatchedTracker = True
 
         End If
     End Sub
@@ -701,7 +831,7 @@ Module Diff
                             Dim newArgs = newArgsUpper.ToArray
 
                             ' If the arguments aren't identical, the key has been updated 
-                            If oldArgs.Except(newArgs).Any Or newArgs.Except(oldArgs).Any Then updateKeys(updatedKeys, key, skey) : Exit For
+                            If oldArgs.Except(newArgs).Any OrElse newArgs.Except(oldArgs).Any Then updateKeys(updatedKeys, key, skey) : Exit For
 
                             ' If we get this far, it's just an alphabetization change and can be ignored silently
                             akAlpha.add(skey)
