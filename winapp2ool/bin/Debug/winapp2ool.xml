@@ -312,7 +312,7 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.Diff.assessKeyMatches(winapp2ool.keyList,winapp2ool.keyList,System.Boolean@,System.Boolean@,System.Boolean@,System.Int32@,System.Collections.Generic.HashSet{System.String})">
  <summary> Counts the number of matching key contents between two ini keyLists </summary>
- <param name="currentKeyList"> The list of keys from the "old" version of the entry </param>
+ <param name="oldKeyList"> The list of keys from the "old" version of the entry </param>
  <param name="newKeyList"> The list of keys from the "new" version of the entry </param>
  <param name="countTracker"> Tracks the number of matches observed between the two given keyLists </param>
  <param name="someKeysMatchedTracker"> Tracks whether or not any keys have matched </param>
