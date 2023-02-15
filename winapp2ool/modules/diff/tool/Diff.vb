@@ -216,9 +216,9 @@ Module Diff
         print(4, "Summary", conjoin:=True)
         print(0, $"Net entry count change: {DiffFile2.Sections.Count - DiffFile1.Sections.Count}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.White)
         print(0, $"Modified entries: {ModifiedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
-        print(0, $" * {ModEntriesAddedKeyTotal} added keys (total between all entries)", colorLine:=True, enStrCond:=True, cond:=ModEntriesAddedKeyTotal > 0)
-        print(0, $" * {ModEntriesRemovedKeyTotal} removed keys (total between all entries)", colorLine:=True, enStrCond:=False, cond:=ModEntriesRemovedKeyTotal > 0)
-        print(0, $" * {ModEntrtiesUpdatedKeyTotal} updated keys (total between all entries)", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow, cond:=ModEntrtiesUpdatedKeyTotal > 0)
+        print(0, $" + {ModEntriesAddedKeyTotal} added keys (total between all entries)", colorLine:=True, enStrCond:=True, cond:=ModEntriesAddedKeyTotal > 0)
+        print(0, $" - {ModEntriesRemovedKeyTotal} removed keys (total between all entries)", colorLine:=True, enStrCond:=False, cond:=ModEntriesRemovedKeyTotal > 0)
+        print(0, $" ~ {ModEntrtiesUpdatedKeyTotal} updated keys (total between all entries)", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow, cond:=ModEntrtiesUpdatedKeyTotal > 0)
         print(0, $" * {ModifiedEntryWithMergerCount} modified entries contain keys from {EntriesMergedToModified} removed entries", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan, cond:=EntriesMergedToModified > 0)
         print(0, $"Renamed entries: {RenamedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Magenta)
         print(0, $"Merged entries: {MergedEntryCount}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
@@ -334,8 +334,9 @@ Module Diff
                 Dim regKeyMatches = 0
 
                 Dim disallowed As New HashSet(Of String) From {"%Documents%\Add-in Express", "%UserProfile%\Desktop", "%LocalAppData%", "%WinDir%\System32",
-                                                              "%SystemDrive%", "%WinDir", "%UserProfile%", "%Documents%", "%CommonAppData%", "%AppData%",
-                                                              "%Pictures%", "%Public%", "%Music%", "%Video%"}
+                                                              "%SystemDrive%", "%WinDir%", "%UserProfile%", "%Documents%", "%CommonAppData%", "%AppData%",
+                                                              "%Pictures%", "%Public%", "%Music%", "%Video%", "HKCU\Software\Microsoft\Windows",
+                                                              "HKLM\Software\Microsoft\Windows", "HKCU\Software\Microsoft\VisualStudio"}
                 ' Quantify the number of filekeys and regkeys from the old entry who exist in the new entry 
                 assessKeyMatches(curwa2Section.FileKeys, wa2sSection.FileKeys, fileKeyCountsMatch, someFileKeysMatched, allFileKeysMatched, fileKeyMatches, disallowed)
                 assessKeyMatches(curwa2Section.RegKeys, wa2sSection.RegKeys, regKeyCountsMatch, someRegKeysMatched, allRegKeysMatched, regKeyMatches)
@@ -375,9 +376,8 @@ Module Diff
                 Dim someDetectFilesMatched = False
 
                 ' We have some values that are too generic here to truly consider useful
-                Dim ignoredValues As New HashSet(Of String) From {"HKCU\Software\Microsoft\Windows", "HKLM\Software\Microsoft\Windows", "HKCU\Software\Microsoft\VisualStudio", "%Documents%\Add-in Express"}
-                assessKeyMatches(curwa2Section.Detects, wa2sSection.Detects, True, someDetectsMatched, False, 0, ignoredValues)
-                assessKeyMatches(curwa2Section.DetectFiles, wa2sSection.DetectFiles, True, someDetectFilesMatched, False, 0, ignoredValues)
+                assessKeyMatches(curwa2Section.Detects, wa2sSection.Detects, True, someDetectsMatched, False, 0, disallowed)
+                assessKeyMatches(curwa2Section.DetectFiles, wa2sSection.DetectFiles, True, someDetectFilesMatched, False, 0, disallowed)
 
                 ' If we have detects that match at this point, we'll consider those mergers 
                 If someDetectFilesMatched AndAlso curwa2Section.DetectFiles.KeyCount > 0 OrElse someDetectsMatched AndAlso curwa2Section.Detects.KeyCount > 0 Then
@@ -452,13 +452,15 @@ Module Diff
             ' If other entries appear to have had their content merged into this one, report that to the user 
             If mergeDict.ContainsKey(entry) Then
 
-                print(0, "This entry contains keys merged from the following removed entries:", isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+                Dim outTxt = "This entry contains keys merged from the following removed entries"
+                gLog("* " + outTxt, indAmt:=1, indent:=True)
+                print(0, outTxt, isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
 
                 ' Count each entry detected as having been merged into the new added entry 
                 For Each mergedEntry In mergeDict(entry)
 
-                    ' but don't count multiple times entries who had their keys split into multiple new entries 
                     print(0, mergedEntry, isCentered:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.DarkCyan)
+                    gLog($"- {mergedEntry}", indent:=True)
 
                 Next
 
@@ -679,20 +681,56 @@ Module Diff
                                 ' so as to be more granular in the case where we dont have an exact match 
                                 Dim flags = newKeyFirstSplit.Last.Split(CChar("|"))(1)
                                 Dim oldFlags = oldKeyFirstSplit.Last.Split(CChar("|"))(1)
+
                                 If flags.Equals(oldFlags, StringComparison.InvariantCultureIgnoreCase) Then
 
                                     someKeysMatchedTracker = True
                                     MatchCount += 1
                                     Exit For
-
+                                Else
+                                    ' If the parameters don't match exactly, lets consider whether or not the an old parameter exists within the scope of the new one 
+                                    Dim splitParams = newKeyFirstSplit.Last.Split(CChar("|"))(1).Split(CChar(";"))
+                                    Dim tmpCount = MatchCount
+                                    For Each param In splitParams
+                                        Dim tmp = param.Replace(".", "\.")
+                                        tmp = tmp.Replace("*", ".*")
+                                        For Each oldParam In oldKeyFirstSplit.Last.Split(CChar("|"))(1).Split(CChar(";"))
+                                            If Regex.IsMatch(oldParam, tmp) Then
+                                                someKeysMatchedTracker = True
+                                                MatchCount += 1
+                                                Exit For
+                                            End If
+                                        Next
+                                        ' If we already detected a match then move on 
+                                        If MatchCount <> tmpCount Then Exit For
+                                    Next
                                 End If
 
                             Else
 
-                                ' No wildcard no problem, mark it matched and exit the loop
-                                someKeysMatchedTracker = True
-                                MatchCount += 1
-                                Exit For
+                                If newKeyFirstSplit.Last.Contains(";") Then
+                                    Dim splitParams = newKeyFirstSplit.Last.Split(CChar("|"))(1).Split(CChar(";"))
+                                    Dim tmpCount = MatchCount
+                                    For Each param In splitParams
+                                        Dim tmp = param.Replace(".", "\.")
+                                        tmp = tmp.Replace("*", ".*")
+                                        For Each oldParam In oldKeyFirstSplit.Last.Split(CChar("|"))(1).Split(CChar(";"))
+                                            If Regex.IsMatch(oldParam, tmp) Then
+                                                someKeysMatchedTracker = True
+                                                MatchCount += 1
+                                                Exit For
+                                            End If
+                                        Next
+                                        ' If we already detected a match then move on 
+                                        If MatchCount <> tmpCount Then Exit For
+                                    Next
+                                Else
+
+                                    ' No wildcard, no delimit, no problem. mark it matched and exit the loop
+                                    someKeysMatchedTracker = True
+                                    MatchCount += 1
+                                    Exit For
+                                End If
 
                             End If
 
