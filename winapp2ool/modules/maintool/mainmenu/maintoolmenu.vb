@@ -58,7 +58,7 @@ Module maintoolmenu
             Case input = "1"
                 initModule(NameOf(WinappDebug), AddressOf WinappDebug.printMenu, AddressOf WinappDebug.handleUserInput)
             Case input = "2"
-                initModule(NameOf(Trim), AddressOf Trim.printMenu, AddressOf Trim.handleUserInput)
+                initModule(NameOf(Trim), AddressOf printTrimMenu, AddressOf handleTrimUserInput)
             Case input = "3"
                 initModule(NameOf(Merge), AddressOf printMergeMainMenu, AddressOf handleMergeMainMenuUserInput)
             Case input = "4"

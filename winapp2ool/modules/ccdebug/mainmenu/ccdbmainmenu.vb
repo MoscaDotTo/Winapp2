@@ -39,33 +39,90 @@ Module ccdbmainmenu
     ''' <param name="input"> The user's input </param>
     ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
     Public Sub handleCCDBMainMenuUserInput(input As String)
+
         Select Case True
+
+            ' Option Name:                                 Exit
+            ' Option States:
+            ' Default                                      -> 0 (default)
             Case input = "0"
+
                 exitModule()
+
+            ' Option Name:                                 Run (default)
+            ' Option States:
+            ' Default                                      -> 1 (default)
             Case (input = "1" OrElse input.Length = 0) AndAlso (PruneStaleEntries OrElse SaveDebuggedFile OrElse SortFileForOutput)
+
                 initCCDebug()
+
+            ' Option Name:                                 Toggle Pruning
+            ' Option States:
+            ' Default                                      -> 2 (default)
             Case input = "2"
+
                 toggleSettingParam(PruneStaleEntries, "Pruning", CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(PruneStaleEntries), NameOf(CCDBSettingsChanged))
+
+            ' Option Name:                                 Toggle Saving
+            ' Option States:
+            ' Default                                      -> 3 (default)
             Case input = "3"
+
                 toggleSettingParam(SaveDebuggedFile, "Autosaving", CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(SaveDebuggedFile), NameOf(CCDBSettingsChanged))
+
+            ' Option Name:                                 Toggle Sorting
+            ' Option States:
+            ' Default                                      -> 4 (default)
             Case input = "4"
+
                 toggleSettingParam(SortFileForOutput, "Sorting", CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(SortFileForOutput), NameOf(CCDBSettingsChanged))
+
+            ' Option Name:                                 File Chooser (ccleaner.ini)
+            ' Option States:
+            ' Default                                      -> 5 (default)
             Case input = "5"
+
                 changeFileParams(CCDebugFile2, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile2), NameOf(CCDBSettingsChanged))
+
+            ' Option Name:                                 File Chooser (winapp2.ini)
+            ' Option States:
+            ' Not pruning                                  -> Unavailable (not displayed)
+            ' Default                                      -> 6 (default)
             Case input = "6" AndAlso PruneStaleEntries
+
                 changeFileParams(CCDebugFile1, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile1), NameOf(CCDBSettingsChanged))
+
+            ' Option Name:                                 File Chooser (save)
+            ' Option States:
+            ' Not Saving                                   -> Unavailable (not displayed)
+            ' Saving, Not pruning (-1)                     -> 6 
+            ' Saving                                       -> 7 (default) 
             Case SaveDebuggedFile AndAlso ((input = "6" AndAlso Not PruneStaleEntries) OrElse (input = "7" AndAlso PruneStaleEntries))
+
                 changeFileParams(CCDebugFile3, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile3), NameOf(CCDBSettingsChanged))
-            Case CCDBSettingsChanged AndAlso
-                                        ((input = "6" AndAlso Not (PruneStaleEntries OrElse SaveDebuggedFile)) OrElse
-                                        (input = "7" AndAlso (PruneStaleEntries Xor SaveDebuggedFile)) OrElse
-                                        (input = "8" AndAlso PruneStaleEntries AndAlso SaveDebuggedFile))
+
+            ' Option Name:                                 Reset Settings
+            ' Option States:
+            ' CCDBSettingsChanged = False                  -> Unavailable (not displayed)
+            ' Not saving (-1), not pruning (-1)            -> 6
+            ' Not Saving (-1), pruning                     -> 7
+            ' Saving, not pruning (-1)                     -> 7
+            ' Saving, pruning                              -> 8 (default)
+            Case CCDBSettingsChanged AndAlso input = computeMenuNumber(8, {Not SaveDebuggedFile, Not PruneStaleEntries}, {-1, -1})
+
                 resetModuleSettings("CCiniDebug", AddressOf initDefaultCCDBSettings)
+
+            ' Reject attempts to run ccinidebug with no options selected 
             Case Not (PruneStaleEntries OrElse SaveDebuggedFile OrElse SortFileForOutput)
+
                 setHeaderText("Please enable at least one option", True)
+
             Case Else
+
                 setHeaderText(invInpStr, True)
+
         End Select
+
     End Sub
 
 End Module
