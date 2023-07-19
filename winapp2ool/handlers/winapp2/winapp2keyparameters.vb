@@ -63,6 +63,9 @@ Public Class winapp2KeyParameters
                 KeyNum = key.KeyType.Replace("RegKey", "")
                 PathString = splitKey(0)
                 If splitKey.Length > 1 Then ArgsList.Add(splitKey(1))
+            Case "DetectFile"
+                KeyNum = key.KeyType.Replace("DetectFile", "")
+                PathString = splitKey(0)
         End Select
     End Sub
 
