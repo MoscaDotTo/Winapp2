@@ -135,7 +135,7 @@ Public Class winapp2file
         out += $"; # of entries: {count():#,###}{Environment.NewLine}"
         out += $";{Environment.NewLine}"
         out += $"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2.ini: {licLink}"
-        out += $"; If you plan on modifying, distributing, and/or hosting {fileName}.ini for your own program or website, please ask first.{Environment.NewLine}"
+        out += $"; You may copy, modify, remix, share, show, and transmit {fileName} but you must redistribute under the same license and you must attribute the original work to the winapp2 project {Environment.NewLine}"
         out += $";{Environment.NewLine}"
         If IsNCC Then
             out += $"; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.{Environment.NewLine}"
@@ -144,7 +144,7 @@ Public Class winapp2file
         out += $"; You can get the latest Winapp2.ini here: https://github.com/MoscaDotTo/Winapp2{Environment.NewLine}"
         out += $"; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md{Environment.NewLine}"
         out += $";{Environment.NewLine}"
-        out += $"; Is CCleaner taking too long to load with Winapp2.ini? Try out Winapp2ool for many useful additional features including updating and trimming Winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe{Environment.NewLine}"
+        out += $"; Try out Winapp2ool for many useful additional features including updating and trimming Winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe{Environment.NewLine}"
         out += $"; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md{Environment.NewLine}" 
         ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
         For i = 0 To EntrySections.Count - 2
