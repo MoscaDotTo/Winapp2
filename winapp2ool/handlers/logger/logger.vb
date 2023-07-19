@@ -56,6 +56,25 @@ Public Module logger
         End If
     End Sub
 
+    ''' <summary>
+    ''' Adds a given message to the global log and also prints it to the console, this is just a wrapper function to avoid having to call both 
+    ''' glog and print for the same message sometimes 
+    ''' </summary>
+
+    Public Sub LogAndPrint(printType As Integer, menuText As String, Optional logCond As Boolean = True, Optional ascend As Boolean = False,
+                    Optional descend As Boolean = False, Optional indent As Boolean = False, Optional indAmt As Integer = 1,
+                    Optional descAmt As Integer = 1, Optional ascAmt As Integer = 1, Optional logBuffr As Boolean = False, Optional leadr As Boolean = False,
+                    Optional optString As String = "", Optional cond As Boolean = True,
+                    Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False,
+                    Optional closeMenu As Boolean = False, Optional openMenu As Boolean = False, Optional enStrCond As Boolean = False,
+                    Optional colorLine As Boolean = False, Optional useArbitraryColor As Boolean = False, Optional arbitraryColor As ConsoleColor = Nothing,
+                    Optional buffr As Boolean = False, Optional trailr As Boolean = False, Optional conjoin As Boolean = False, Optional fillBorder As Boolean = True)
+
+        gLog(menuText, logCond, ascend, descend, indent, indAmt, descAmt, ascAmt, logBuffr, leadr)
+        print(printType, menuText, optString, cond, leadingBlank, trailingBlank, isCentered, closeMenu, openMenu, enStrCond, colorLine, useArbitraryColor, arbitraryColor, buffr, trailr, conjoin, fillBorder)
+
+    End Sub
+
     ''' <summary> Saves the global log to disk if the given <c> <paramref name="cond"/> </c> is met </summary>
     ''' <param name="cond"> Indicates that the global log should be saved to disk <br /> Optional, Default: <c> False </c> </param>
     Public Sub saveGlobalLog(Optional cond As Boolean = True)
