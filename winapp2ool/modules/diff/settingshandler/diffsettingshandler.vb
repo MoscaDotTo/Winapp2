@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2023 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,63 +14,114 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
-''' <summary> Syncs the Diff module settings to and from disk </summary>
-''' Docs last updated: 2020-08-30
+
+''' <summary> 
+''' Manages the settings of the Diff module for the purpose of syncing to disk 
+''' </summary>
+''' 
+''' Docs last updated: 2023-06-12
 Module diffsettingshandler
 
-    ''' <summary> Restores the default state of the Diff module's properties </summary>
-    ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
-    Public Sub initDefaultDiffSettings()
+    ''' <summary> 
+    ''' Restores the default state of the Diff module's properties 
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2020-06-10 | Code last updated: 2020-06-10
+    Public Sub InitDefaultDiffSettings()
+
         DownloadDiffFile = Not isOffline
         TrimRemoteFile = Not isOffline
         ShowFullEntries = False
+        SaveDiffLog = False
+        DiffModuleSettingsChanged = False
         DiffFile3.resetParams()
         DiffFile2.resetParams()
         DiffFile1.resetParams()
-        SaveDiffLog = False
-        DiffModuleSettingsChanged = False
         restoreDefaultSettings(NameOf(Diff), AddressOf createDiffSettingsSection)
+
     End Sub
 
-    ''' <summary> Assigns Diff module property values based on  </summary>
-    ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
-    Public Sub getSerializedDiffSettings()
+    ''' <summary> 
+    ''' Assigns the module settings to diff based on the current disk-writable settings representation
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2023-06-12 | Code last updated: 2023-06-12
+    Public Sub GetSerializedDiffSettings()
+
         For Each kvp In settingsDict(NameOf(Diff))
+
             Select Case kvp.Key
+
                 Case NameOf(DiffFile1) & "_Name"
+
                     DiffFile1.Name = kvp.Value
+
                 Case NameOf(DiffFile1) & "_Dir"
+
                     DiffFile1.Dir = kvp.Value
+
                 Case NameOf(DiffFile2) & "_Name"
+
                     DiffFile2.Name = kvp.Value
+
                 Case NameOf(DiffFile2) & "_Dir"
+
                     DiffFile2.Dir = kvp.Value
+
                 Case NameOf(DiffFile3) & "_Name"
+
                     DiffFile3.Name = kvp.Value
+
                 Case NameOf(DiffFile3) & "_Dir"
+
                     DiffFile3.Dir = kvp.Value
+
                 Case NameOf(DownloadDiffFile)
+
                     DownloadDiffFile = CBool(kvp.Value)
+
                 Case NameOf(TrimRemoteFile)
+
                     TrimRemoteFile = CBool(kvp.Value)
+
                 Case NameOf(ShowFullEntries)
+
                     ShowFullEntries = CBool(kvp.Value)
+
                 Case NameOf(SaveDiffLog)
+
                     SaveDiffLog = CBool(kvp.Value)
+
                 Case NameOf(DiffModuleSettingsChanged)
+
                     DiffModuleSettingsChanged = CBool(kvp.Value)
+
             End Select
+
         Next
+
     End Sub
 
-    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
-    ''' Docs last updated: 2020-08-30 | Code last updated: 2020-07-19
-    Public Sub createDiffSettingsSection()
+    ''' <summary>
+    ''' Adds the current state of the module's settings into the disk-writable settings representation 
+    ''' </summary>
+    ''' 
+    ''' <remarks>
+    ''' Most often, this is the default state of these settings 
+    ''' </remarks>
+    ''' 
+    ''' Docs last updated: 2023-06-12 | Code last updated: 2023-06-12
+    Public Sub CreateDiffSettingsSection()
+
         Dim diffSettingsTuples As New List(Of String) From {NameOf(DownloadDiffFile), tsInvariant(DownloadDiffFile), NameOf(TrimRemoteFile), tsInvariant(TrimRemoteFile),
-            NameOf(ShowFullEntries), tsInvariant(ShowFullEntries), NameOf(SaveDiffLog), tsInvariant(SaveDiffLog), NameOf(DiffModuleSettingsChanged), tsInvariant(DiffModuleSettingsChanged),
-            NameOf(DiffFile1), DiffFile1.Name, DiffFile1.Dir, NameOf(DiffFile2), DiffFile2.Name, DiffFile2.Dir, NameOf(DiffFile3), DiffFile3.Name, DiffFile3.Dir}
+                                                            NameOf(ShowFullEntries), tsInvariant(ShowFullEntries), NameOf(SaveDiffLog), tsInvariant(SaveDiffLog),
+                                                            NameOf(DiffModuleSettingsChanged), tsInvariant(DiffModuleSettingsChanged), NameOf(DiffFile1), DiffFile1.Name,
+                                                            DiffFile1.Dir, NameOf(DiffFile2), DiffFile2.Name, DiffFile2.Dir, NameOf(DiffFile3), DiffFile3.Name, DiffFile3.Dir}
+
         createModuleSettingsSection(NameOf(Diff), diffSettingsTuples, 5)
+
     End Sub
 
 End Module
