@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2023 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -344,7 +344,7 @@ Module MenuMaker
     ''' <param name="defaultNumber"> The menu number associated with the option in winapp2ool's default, online configuration </param>
     ''' <param name="weightedComponents"> A set of parameters which influence the position of a menu option in the menu </param>
     ''' <param name="weights"> The weights correlating to each <c>Component</c> in <c><paramref name="weightedComponents"/> </c> </param>
-    ''' Docs last updated: 2021-11-21 | Code last updated: 2022-11-21
+    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
     Public Function computeMenuNumber(defaultNumber As Integer, weightedComponents As Boolean(), weights As Integer()) As String
         Dim out = defaultNumber
         For i = 0 To weightedComponents.Length - 1

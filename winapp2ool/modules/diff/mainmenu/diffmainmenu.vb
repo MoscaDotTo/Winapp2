@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2023 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,39 +14,84 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
-''' <summary> Displays the Diff main menu to the user and handles their input </summary>
+
+''' <summary>
+''' Displays the Diff main menu to the user and handles their input 
+''' </summary>
+''' 
 ''' Docs last updated: 2020-08-30
 Module diffmainmenu
 
-    ''' <summary> Prints the Diff main menu to the user </summary>
-    ''' Docs last updated: 2020-07-23 | Code last updated: 2020-07-19
+    ''' <summary> 
+    ''' Prints the Diff main menu to the user 
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
     Public Sub printDiffMainMenu()
-        ' Force disable the Download if it's enabled in offline mode 
-        If isOffline AndAlso DownloadDiffFile Then DownloadDiffFile = False
-        Console.WindowHeight = If(DiffModuleSettingsChanged, 34, 32)
-        printMenuTop({"Observe the differences between two ini files"})
-        print(1, "Run (default)", "Run the diff tool", enStrCond:=Not (DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile), colorLine:=True)
-        print(0, "Select Older/Local File:", leadingBlank:=True)
-        print(1, "File Chooser", "Choose a new name or location for your older ini file")
-        print(0, "Select Newer/Remote File:", leadingBlank:=True)
-        print(5, GetNameFromDL(True), "diffing against the latest winapp2.ini version on GitHub", cond:=Not isOffline, enStrCond:=DownloadDiffFile, leadingBlank:=True)
-        print(5, "Remote file trimming", "trimming the remote winapp2.ini before diffing", cond:=Not isOffline AndAlso DownloadDiffFile = True, enStrCond:=TrimRemoteFile, trailingBlank:=True)
-        print(1, "File Chooser", "Choose a new name or location for your newer ini file", isOffline OrElse Not DownloadDiffFile, isOffline, True)
-        print(0, "Log Settings:")
-        print(5, "Toggle Log Saving", "automatic saving of the Diff output", leadingBlank:=True, trailingBlank:=Not SaveDiffLog, enStrCond:=SaveDiffLog)
-        print(1, "File Chooser (log)", "Change where Diff saves its log", SaveDiffLog, trailingBlank:=True)
-        print(5, "Verbose Mode", "printing full entries in the diff output", enStrCond:=ShowFullEntries, trailingBlank:=True)
-        print(0, $"Older file: {replDir(DiffFile1.Path)}")
-        print(0, $"Newer file: {If(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))}",
-                                  closeMenu:=Not SaveDiffLog AndAlso Not DiffModuleSettingsChanged AndAlso MostRecentDiffLog.Length = 0)
-        print(0, $"Log   file: {replDir(DiffFile3.Path)}", cond:=SaveDiffLog, closeMenu:=(Not DiffModuleSettingsChanged) AndAlso MostRecentDiffLog.Length = 0)
-        print(2, "Diff", cond:=DiffModuleSettingsChanged, closeMenu:=MostRecentDiffLog.Length = 0)
-        print(1, "Log Viewer", "Show the most recent Diff log", cond:=Not MostRecentDiffLog.Length = 0, closeMenu:=True, leadingBlank:=True)
+
+        Dim newerFileText = If(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))
+        Dim DiffDesc = "Observes the differences between two ini files"
+        Dim RunOptionText = "Run (default)"
+        Dim RunOptionDesc = "Run the diff tool"
+        Dim OlderFileOptionText = "Select Older/Local File:"
+        Dim FileChooserText = "File Chooser"
+        Dim OlderFileOptionDesc = "Choose a new name or location for your older ini file"
+        Dim NewerFileOptionText = "Select Newer/Remote File:"
+        Dim NewerFileOptionDesc = "Choose a new name or location for your newer ini file"
+        Dim LogSettingsOptionText = "Log Settings"
+        Dim ToggleLogOptionText = "Toggle Log Saving"
+        Dim ToggleLogOptionDesc = "automatic saving of the Diff output"
+        Dim RemoteFileTrimmingOptionText = "Remote File Trimming"
+        Dim RemoteFileTrimmingOptionDesc = "trimming the remote winapp2.ini before diffing"
+        Dim RemoteDiffOptionText = GetNameFromDL(True)
+        Dim RemoteDiffOptionDesc = "diffing against the latest winapp2.ini version on GitHub"
+        Dim LogLocationOptionDesc = "Change where Diff save its log"
+        Dim VerboseModeOptionText = "Verbose Mode"
+        Dim VerboseModeOptionDesc = "printing full entries in the diff output"
+        Dim OlderFileName = $"Older file: {replDir(DiffFile1.Path)}"
+        Dim NewerFileName = $"Newer file: {newerFileText}"
+        Dim LogFileName = $"Log   file: {replDir(DiffFile3.Path)}"
+        Dim ModuleName = "Diff"
+        Dim LogViewerOptionText = "Log Viewer"
+        Dim LogViewerOptionDesc = "View the most recent Diff log"
+
+        Dim noLog = MostRecentDiffLog.Length = 0
+        Dim SettingsUnchangedAndNoLog = Not DiffModuleSettingsChanged AndAlso noLog
+
+        If isOffline Then DownloadDiffFile = False
+
+        Console.WindowHeight = If(DiffModuleSettingsChanged, 36, 34)
+
+        printMenuTop({DiffDesc})
+        print(1, RunOptionText, RunOptionDesc, enStrCond:=Not (DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile), colorLine:=True)
+        print(0, OlderFileOptionText, leadingBlank:=True)
+        print(1, FileChooserText, OlderFileOptionDesc)
+        print(0, NewerFileOptionText, leadingBlank:=True)
+        print(5, RemoteDiffOptionText, RemoteDiffOptionDesc, cond:=Not isOffline, enStrCond:=DownloadDiffFile, leadingBlank:=True)
+        print(5, RemoteFileTrimmingOptionText, RemoteFileTrimmingOptionDesc, cond:=DownloadDiffFile, enStrCond:=TrimRemoteFile, trailingBlank:=True)
+        print(1, FileChooserText, NewerFileOptionDesc, Not DownloadDiffFile, isOffline, True)
+        print(0, LogSettingsOptionText)
+        print(5, ToggleLogOptionText, ToggleLogOptionDesc, leadingBlank:=True, trailingBlank:=Not SaveDiffLog, enStrCond:=SaveDiffLog)
+        print(1, FileChooserText, LogLocationOptionDesc, SaveDiffLog, trailingBlank:=True)
+        print(5, VerboseModeOptionText, VerboseModeOptionDesc, enStrCond:=ShowFullEntries, trailingBlank:=True)
+        print(0, OlderFileName)
+        print(0, NewerFileName, closeMenu:=Not SaveDiffLog AndAlso SettingsUnchangedAndNoLog)
+        print(0, LogFileName, cond:=SaveDiffLog, closeMenu:=SettingsUnchangedAndNoLog)
+        print(2, ModuleName, cond:=DiffModuleSettingsChanged, closeMenu:=noLog)
+        print(1, LogViewerOptionText, LogViewerOptionDesc, cond:=Not noLog, closeMenu:=True, leadingBlank:=True)
+
     End Sub
 
-    ''' <summary> Handles the user input from the Diff main menu </summary>
-    ''' <param name="input"> The user's input </param>
+    ''' <summary> 
+    ''' Handles the user input from the Diff main menu 
+    ''' </summary>
+    ''' 
+    ''' <param name="input"> 
+    ''' The user's input 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
     Public Sub handleDiffMainMenuUserInput(input As String)
 
@@ -64,7 +109,7 @@ Module diffmainmenu
             ' Default                                      -> 1 (default)
             Case input = "1" OrElse input.Length = 0
 
-                If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then initDiff()
+                If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then ConductDiff()
 
             ' Option Name:                                 File Chooser (Older File)
             ' Option States:
@@ -137,7 +182,7 @@ Module diffmainmenu
             ' Online, saving log (+1)                      -> 8 
 
             Case DiffModuleSettingsChanged AndAlso input = computeMenuNumber(7, {isOffline, SaveDiffLog}, {-1, 1})
-                resetModuleSettings(NameOf(Diff), AddressOf initDefaultDiffSettings)
+                resetModuleSettings(NameOf(Diff), AddressOf InitDefaultDiffSettings)
 
             ' Option Name:                                 Log Viewer
             ' Option States

@@ -85,7 +85,7 @@ Module maintoolmenu
             Case input = "10" AndAlso waUpdateIsAvail
                 clrConsole()
                 cwl("Downloading & diffing, this may take a moment...")
-                remoteDiff(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
+                DiffRemoteFile(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
                 setHeaderText("Diff Complete")
             Case (input = "11" AndAlso (updateIsAvail AndAlso waUpdateIsAvail)) OrElse (input = "8" AndAlso (Not waUpdateIsAvail AndAlso updateIsAvail)) AndAlso Not (DotNetFrameworkOutOfDate OrElse cantDownloadExecutable)
                 cwl("Downloading and updating Winapp2ool.exe, this may take a moment...")
