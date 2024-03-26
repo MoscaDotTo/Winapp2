@@ -31,66 +31,34 @@ Module maintoolmenu
     ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
     Public Sub printToolMainMenu()
 
-        Dim offlineModeErr = "Winapp2ool is currently in offline mode"
-        Dim dotNetFrameworkErr = "Your .NET Framework is out of date"
-        Dim tempFolderErr = "Winapp2ool is currently running from the temporary folder, some functions may be impacted"
-        Dim filename = "winapp2.ini"
-        Dim toolName = "Winapp2ool"
-        Dim exitOptionName = "Exit"
-        Dim exitOptionDesc = "Exit the application"
-        Dim linterOptionName = "WinappDebug"
-        Dim linterOptionDesc = "Check for and correct errors in winapp2.ini"
-        Dim trimOptionName = "Trim"
-        Dim trimOptionDesc = "Debloat winapp2.ini for your system"
-        Dim mergeOptionName = "Merge"
-        Dim mergeOptionDesc = "Merge the contents of an ini file into winapp2.ini"
-        Dim diffOptionName = "Diff"
-        Dim diffOptionDesc = "Observe the changes between two winapp2.ini files"
-        Dim cciniOptionName = "CCiniDebug"
-        Dim cciniOptionDesc = "Sort and trim ccleaner.ini"
-        Dim downloaderOptionName = "Downloader"
-        Dim downloaderOptionDesc = "Download files from the Winapp2 GitHub"
-        Dim settingsOptionName = "Settings"
-        Dim settingsOptionDesc = "Manage Winapp2ool's settings"
-        Dim updateOptionName = "Update"
-        Dim updateOptionDesc = "Update your local copy of winapp2.ini"
-        Dim updateAndTrimOptionName = "Update & Trim"
-        Dim updateAndTrimOptionDesc = "Download and trim the latest winapp2.ini"
-        Dim showUpdateDiffOptionName = "Show update diff"
-        Dim showUpdateDiffOptionDesc = "See the difference between your local file and the latest"
-        Dim updateToolOptionName = "Update"
-        Dim updateToolOptionDesc = "Get the latest Winapp2ool.exe"
-        Dim goOnlineOptionName = "Go online"
-        Dim goOnlineOptionDesc = "Retry your internet connection"
-
         Dim noUpdatesAvailable = Not (isOffline OrElse waUpdateIsAvail OrElse updateIsAvail)
 
         checkUpdates(Not isOffline AndAlso Not checkedForUpdates)
         printMenuTop(Array.Empty(Of String)(), False)
-        print(0, offlineModeErr, cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
-        print(0, dotNetFrameworkErr, cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
-        print(0, tempFolderErr, cond:=cantDownloadExecutable, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
-        printUpdNotif(waUpdateIsAvail, filename, localWa2Ver, latestWa2Ver)
-        printUpdNotif(updateIsAvail, toolName, currentVersion, latestVersion)
-        print(1, exitOptionName, exitOptionDesc)
-        print(1, linterOptionName, linterOptionDesc)
-        print(1, trimOptionName, trimOptionDesc)
-        print(1, mergeOptionName, mergeOptionDesc)
-        print(1, diffOptionName, diffOptionDesc)
-        print(1, cciniOptionName, cciniOptionDesc, trailingBlank:=True)
-        print(1, downloaderOptionName, downloaderOptionDesc)
-        print(1, settingsOptionName, settingsOptionDesc, closeMenu:=noUpdatesAvailable, arbitraryColor:=ConsoleColor.Yellow, colorLine:=True, useArbitraryColor:=True)
+        print(0, "Winapp2ool is currently in offline mode", cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
+        print(0, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
+        print(0, "Winapp2ool is currently running from the temporary folder, some functions may be impacted", cond:=cantDownloadExecutable, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
+        printUpdNotif(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver)
+        printUpdNotif(updateIsAvail, "Winapp2ool", currentVersion, latestVersion)
+        print(1, "Exit", "Exit the application")
+        print(1, "WinappDebug", "Check for and correct errors in winapp2.ini")
+        print(1, "Trim", "Debloat winapp2.ini for your system")
+        print(1, "Merge", "Merge the contents of an ini file into winapp2.ini")
+        print(1, "Diff", "Observe the changes between two winapp2.ini files")
+        print(1, "CCiniDebug", "Sort and trim ccleaner.ini", trailingBlank:=True)
+        print(1, "Downloader", "Download files from the Winapp2 GitHub")
+        print(1, "Settings", "Manage Winapp2ool's settings", closeMenu:=noUpdatesAvailable, arbitraryColor:=ConsoleColor.Yellow, colorLine:=True, useArbitraryColor:=True)
 
         If waUpdateIsAvail AndAlso Not isOffline Then
 
-            print(1, updateOptionName, updateOptionDesc, leadingBlank:=True)
-            print(1, updateAndTrimOptionName, updateAndTrimOptionDesc)
-            print(1, showUpdateDiffOptionName, showUpdateDiffOptionDesc, closeMenu:=Not updateIsAvail)
+            print(1, "Update", "Update your local copy of winapp2.ini", leadingBlank:=True)
+            print(1, "Update & Trim", "Download and trim the latest winapp2.ini")
+            print(1, "Show update diff", "See the difference between your local file and the latest", closeMenu:=Not updateIsAvail)
 
         End If
 
-        print(1, updateToolOptionName, updateToolOptionDesc, updateIsAvail AndAlso Not DotNetFrameworkOutOfDate, True, closeMenu:=True)
-        print(1, goOnlineOptionName, goOnlineOptionDesc, isOffline, True, closeMenu:=True)
+        print(1, "Update", "Get the latest Winapp2ool.exe", updateIsAvail AndAlso Not DotNetFrameworkOutOfDate, True, closeMenu:=True)
+        print(1, "Go online", "Retry your internet connection", isOffline, True, closeMenu:=True)
 
         Console.WindowHeight = If(waUpdateIsAvail AndAlso updateIsAvail, 34, 32)
 
@@ -123,7 +91,7 @@ Module maintoolmenu
             ' Default                                      -> 1 (default)
             Case input = "1"
 
-                initModule(NameOf(WinappDebug), AddressOf WinappDebug.printMenu, AddressOf WinappDebug.handleUserInput)
+                initModule(NameOf(WinappDebug), AddressOf printLintMainMenu, AddressOf handleLintUserInput)
 
             ' Option Name:                                 Trim
             ' Option States:
