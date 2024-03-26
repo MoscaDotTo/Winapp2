@@ -169,6 +169,8 @@
     <Compile Include="modules\winappdebug\components\advancedSettings\advSettings.vb" />
     <Compile Include="modules\winappdebug\components\landMine\experimentalScans.vb" />
     <Compile Include="modules\winappdebug\components\lintRules\lintRule.vb" />
+    <Compile Include="modules\winappdebug\mainmenu\lintmainmenu.vb" />
+    <Compile Include="modules\winappdebug\settingshandler\lintsettingshandler.vb" />
     <Compile Include="modules\winappdebug\WinappDebug.vb" />
     <Compile Include="modules\maintool\tool\Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -231,6 +233,7 @@
   <ItemGroup>
     <Folder Include="handlers\ini\comments\" />
     <Folder Include="helpers\filesystem\" />
+    <Folder Include="modules\winappdebug\tool\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />

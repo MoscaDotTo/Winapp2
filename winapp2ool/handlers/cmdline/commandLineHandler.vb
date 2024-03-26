@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2024 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,86 +14,164 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
+
 Imports System.IO
 
 ''' <summary>
 ''' This module helps handle any commandline arguments passed to winapp2ool
 ''' </summary>
 Public Module commandLineHandler
-    ''' <summary>The current list of the command line args (mutable)</summary>
+
+    ''' <summary>
+    ''' The current list of the command line args (mutable)
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
     Public Property cmdargs As List(Of String)
 
-    ''' <summary>Flips a boolean setting and removes its associated argument from the args list</summary>
-    ''' <param name="setting">The boolean setting to be flipped</param>
-    ''' <param name="arg">The string containing the argument that flips the boolean</param>
-    ''' <param name="name">Optional reference to a file name to be replaced</param>
-    ''' <param name="newname">Optional replacement file name</param>
+    ''' <summary>
+    ''' Flips a boolean setting and removes its associated argument from the args list
+    ''' </summary>
+    ''' 
+    ''' <param name="setting">
+    ''' A boolean module setting whose state will be inverted 
+    ''' </param>
+    ''' 
+    ''' <param name="arg">
+    ''' A commandline argument targeting <c> <paramref name="setting"/> </c>
+    ''' </param>
+    ''' 
+    ''' <param name="name">
+    ''' A File name to be modified if the arg is found
+    ''' <br /> Optional, default: <c> "" </c>
+    ''' </param>
+    ''' 
+    ''' <param name="newname">
+    ''' The nenw name with which <c> <paramref name="name"/> </c> will be replaced if the arg is found 
+    ''' <br /> Optional, default: <c> "" </c>
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
     Public Sub invertSettingAndRemoveArg(ByRef setting As Boolean, arg As String, Optional ByRef name As String = "", Optional ByRef newname As String = "")
-        If cmdargs.Contains(arg) Then
-            gLog($"Found argument: {arg}")
-            setting = Not setting
-            cmdargs.Remove(arg)
-            name = newname
-        End If
+
+        If Not cmdargs.Contains(arg) Then Return
+
+        gLog($"Found argument: {arg}")
+        setting = Not setting
+        cmdargs.Remove(arg)
+        name = newname
+
     End Sub
 
-    ''' <summary>Processes whether to download and which file to download</summary>
-    ''' <param name="download">The boolean indicating winapp2.ini should be downloaded</param>
+    ''' <summary>
+    ''' Processes whether to download and which file to download
+    ''' </summary>
+    ''' 
+    ''' <param name="download">
+    ''' Indicates that winapp2.ini should be downloaded from GitHub 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
     Public Sub handleDownloadBools(ByRef download As Boolean)
+
         invertSettingAndRemoveArg(download, "-d")
-        ' Ensure that we don't try to download if we're offline
-        If download And isOffline Then printErrExit("Winapp2ool is currently in offline mode, but you have issued commands that require a network connection. Please try again with a network connection.")
+
+        Dim networkErr = "Winapp2ool is currently in offline mode, but you have issued commands that require a network connection. Please try again with a network connection."
+        If download And isOffline Then printErrExit(networkErr)
+
     End Sub
 
-    ''' <summary>Renames an iniFile object if provided a commandline arg to do so</summary>
-    ''' <param name="flag">The flag that precedes the name specification in the args list</param>
-    ''' <param name="givenFile">A reference to an iniFile object to be modified</param>
-    Private Sub getFileName(flag As String, ByRef givenFile As iniFile)
-        If cmdargs.Count >= 2 Then
-            Dim ind = cmdargs.IndexOf(flag)
-            Dim curArg = cmdargs(ind + 1)
-            ' If this is true, the user has parameterized the file flag with a subdirectory
-            ' We must move this information over to the directory parameter
-            If curArg.StartsWith("\", StringComparison.InvariantCulture) And Not curArg.LastIndexOf("\", StringComparison.InvariantCulture) = 0 Then
-                Dim split = cmdargs(ind + 1).Split(CChar("\"))
-                For i As Integer = 1 To split.Length - 2
-                    givenFile.Dir += $"\{split(i)}"
-                Next
-                givenFile.Name = split.Last
-            Else
-                givenFile.Name = $"{cmdargs(ind + 1)}"
-            End If
-            cmdargs.RemoveAt(ind)
-            cmdargs.RemoveAt(ind)
+    ''' <summary>
+    ''' Renames or modifies the filename of an <c> iniFile </c> via the commandline 
+    ''' </summary>
+    ''' 
+    ''' <param name="arg">
+    ''' Commandline arg pointing to some particular file in a module 
+    ''' <br /> eg. -2f or -1d 
+    ''' </param>
+    ''' 
+    ''' <param name="givenFile">
+    ''' An <c> iniFile </c> whose path will be modified 
+    ''' </param>
+    ''' 
+    ''' <remarks> 
+    ''' Supports appending child folders to the current directory 
+    ''' <br /> eg. -2f "\folder1\folder2\file.ini"
+    ''' </remarks>
+    ''' 
+    ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
+    Private Sub getFileName(arg As String, ByRef givenFile As iniFile)
+
+        If cmdargs.Count < 2 Then Return
+
+        Dim ind = cmdargs.IndexOf(arg)
+        Dim curArg = cmdargs(ind + 1)
+
+        givenFile.Name = curArg
+
+        If curArg.StartsWith("\", StringComparison.InvariantCulture) AndAlso Not curArg.LastIndexOf("\", StringComparison.InvariantCulture) = 0 Then
+
+            Dim split = curArg.Split(CChar("\"))
+
+            For i As Integer = 1 To split.Length - 2
+
+                givenFile.Dir += $"\{split(i)}"
+
+            Next
+
+            givenFile.Name = split.Last
+
         End If
+
+        cmdargs.RemoveAt(ind)
+        cmdargs.RemoveAt(ind)
+
     End Sub
 
-    ''' <summary>Applies a new directory and name to an iniFile object</summary>
-    ''' <param name="flag">The flag preceeding the file/path parameter in the arg list</param>
-    ''' <param name="file">The iniFile object to be modified</param>
+    ''' <summary>
+    ''' Applies a new directory and name to an iniFile object
+    ''' </summary>
+    ''' 
+    ''' <param name="flag">
+    ''' The flag preceeding the file/path parameter in the arg list
+    ''' </param>
+    ''' 
+    ''' <param name="file">
+    ''' The iniFile object to be modified
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
     Private Sub getFileNameAndDir(flag As String, ByRef file As iniFile)
-        If cmdargs.Count >= 2 Then
-            Dim ind As Integer = cmdargs.IndexOf(flag)
-            getFileParams(cmdargs(ind + 1), file)
-            cmdargs.RemoveAt(ind)
-            cmdargs.RemoveAt(ind)
-        End If
+
+        If cmdargs.Count < 2 Then Return
+
+        Dim ind As Integer = cmdargs.IndexOf(flag)
+        getFileParams(cmdargs(ind + 1), file)
+        cmdargs.RemoveAt(ind)
+        cmdargs.RemoveAt(ind)
+
     End Sub
 
     ''' <summary>Takes in a full form filepath with directory and assigns the directory and filename components to the given iniFile object</summary>
     ''' <param name="arg">The filepath argument</param>
     ''' <param name="file">The iniFile object to be modified</param>
     Private Sub getFileParams(ByRef arg As String, ByRef file As iniFile)
-        ' Start either a blank path or, support appending children folders to the current path
+
         file.Dir = If(arg.StartsWith("\", StringComparison.InvariantCulture), Environment.CurrentDirectory & "\", "")
         Dim splitArg As String() = arg.Split(CChar("\"))
-        If splitArg.Length >= 2 Then
-            For i As Integer = 0 To splitArg.Length - 2
-                file.Dir += splitArg(i) & "\"
-            Next
-        End If
+
         file.Name = splitArg.Last
+
+        If splitArg.Length < 2 Then Return
+
+        For i As Integer = 0 To splitArg.Length - 2
+
+            file.Dir += splitArg(i) & "\"
+
+        Next
+
     End Sub
 
     ''' <summary>Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler</summary>
@@ -113,7 +191,7 @@ Public Module commandLineHandler
             Select Case cmdargs(0)
                 Case "1", "-1", "debug", "-debug"
                     cmdargs.RemoveAt(0)
-                    WinappDebug.handleCmdLine()
+                    HandleLintCmdLine()
                 Case "2", "-2", "trim", "-trim"
                     cmdargs.RemoveAt(0)
                     Trim.handleCmdLine()
@@ -122,7 +200,7 @@ Public Module commandLineHandler
                     Merge.handleCmdLine()
                 Case "4", "-4", "diff", "-diff"
                     cmdargs.RemoveAt(0)
-                    Diff.handleCmdLine()
+                    Diff.HandleCmdLine()
                 Case "5", "-5", "ccdebug", "-ccdebug"
                     cmdargs.RemoveAt(0)
                     CCiniDebug.handleCmdlineArgs()

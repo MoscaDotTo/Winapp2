@@ -1351,28 +1351,83 @@ winapp2ool
  </summary>
 </member>
 <member name="P:winapp2ool.commandLineHandler.cmdargs">
- <summary>The current list of the command line args (mutable)</summary>
+ <summary>
+ The current list of the command line args (mutable)
+ </summary>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
 <member name="M:winapp2ool.commandLineHandler.invertSettingAndRemoveArg(System.Boolean@,System.String,System.String@,System.String@)">
- <summary>Flips a boolean setting and removes its associated argument from the args list</summary>
- <param name="setting">The boolean setting to be flipped</param>
- <param name="arg">The string containing the argument that flips the boolean</param>
- <param name="name">Optional reference to a file name to be replaced</param>
- <param name="newname">Optional replacement file name</param>
+ <summary>
+ Flips a boolean setting and removes its associated argument from the args list
+ </summary>
+ 
+ <param name="setting">
+ A boolean module setting whose state will be inverted 
+ </param>
+ 
+ <param name="arg">
+ A commandline argument targeting <c> <paramref name="setting"/> </c>
+ </param>
+ 
+ <param name="name">
+ A File name to be modified if the arg is found
+ <br /> Optional, default: <c> "" </c>
+ </param>
+ 
+ <param name="newname">
+ The nenw name with which <c> <paramref name="name"/> </c> will be replaced if the arg is found 
+ <br /> Optional, default: <c> "" </c>
+ </param>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
 <member name="M:winapp2ool.commandLineHandler.handleDownloadBools(System.Boolean@)">
- <summary>Processes whether to download and which file to download</summary>
- <param name="download">The boolean indicating winapp2.ini should be downloaded</param>
+ <summary>
+ Processes whether to download and which file to download
+ </summary>
+ 
+ <param name="download">
+ Indicates that winapp2.ini should be downloaded from GitHub 
+ </param>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileName(System.String,winapp2ool.iniFile@)">
- <summary>Renames an iniFile object if provided a commandline arg to do so</summary>
- <param name="flag">The flag that precedes the name specification in the args list</param>
- <param name="givenFile">A reference to an iniFile object to be modified</param>
+ <summary>
+ Renames or modifies the filename of an <c> iniFile </c> via the commandline 
+ </summary>
+ 
+ <param name="arg">
+ Commandline arg pointing to some particular file in a module 
+ <br /> eg. -2f or -1d 
+ </param>
+ 
+ <param name="givenFile">
+ An <c> iniFile </c> whose path will be modified 
+ </param>
+ 
+ <remarks> 
+ Supports appending child folders to the current directory 
+ <br /> eg. -2f "\folder1\folder2\file.ini"
+ </remarks>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileNameAndDir(System.String,winapp2ool.iniFile@)">
- <summary>Applies a new directory and name to an iniFile object</summary>
- <param name="flag">The flag preceeding the file/path parameter in the arg list</param>
- <param name="file">The iniFile object to be modified</param>
+ <summary>
+ Applies a new directory and name to an iniFile object
+ </summary>
+ 
+ <param name="flag">
+ The flag preceeding the file/path parameter in the arg list
+ </param>
+ 
+ <param name="file">
+ The iniFile object to be modified
+ </param>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileParams(System.String@,winapp2ool.iniFile@)">
  <summary>Takes in a full form filepath with directory and assigns the directory and filename components to the given iniFile object</summary>
@@ -2795,10 +2850,21 @@ winapp2ool
  Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.launcher">
- <summary> The main event loop for winapp2ool  </summary>
+ <summary> 
+ The main event loop for winapp2ool  
+ </summary>
 </member>
 <member name="M:winapp2ool.launcher.main">
- <summary> Performs startup checks and then initializes the winapp2ool main menu module </summary>
+ <summary> 
+ Performs startup checks and then initializes the winapp2ool main menu module 
+ </summary>
+ 
+ <remarks> 
+ Winapp2ool requires an internet connection for some functions 
+ .NET 4.6 or higher is required to update the executable 
+ When run from the temporary folder, winapp2ool.exe update functionality is disabled
+ </remarks>
+ 
  Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="T:winapp2ool.maintoolmenu">
@@ -3203,7 +3269,8 @@ Adds the current (typically default) state of the module's settings into the dis
  <summary> Handles some CCleaner variables and logs if the current variable is ProgramFiles so the 32bit location can be checked later </summary>
  <param name="dir"> A filesystem path to process for environment variables </param>
  <param name="isProgramFiles"> Indicates that the %ProgramFiles% variable has been seen </param>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+ Docs last updated: 2024-03-26- | Code last updated: 2024-03-26
+ <returns> <c> True </c>c> if an error occurred <br /> <c> False </c> otherwise </returns>
 </member>
 <member name="M:winapp2ool.Trim.checkPathExist(System.String)">
  <summary> Returns <c> True </c> if a path exists on the file system, <c> False </c> otherwise </summary>
@@ -3340,236 +3407,502 @@ Adds the current (typically default) state of the module's settings into the dis
 <member name="M:winapp2ool.lintRule.fixFormat">
  <summary> Returns a Boolean indicating whether or not the repairs gated by this rule should be run </summary>
 </member>
+<member name="T:winapp2ool.lintmainmenu">
+ <summary>
+ Prints the main menu for the WinappDebug module to the user and handles user input
+ </summary>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
+</member>
+<member name="M:winapp2ool.lintmainmenu.printLintMainMenu">
+ <summary>
+ Displays the main <c> WinappDebug </c> menu to the user 
+ </summary>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
+</member>
+<member name="M:winapp2ool.lintmainmenu.handleLintUserInput(System.String)">
+ <summary> 
+ Handles the user input for the <c> WinappDebug </c> main menu
+ </summary>
+ 
+ <param name="input">
+ The user's input 
+ </param>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2022-12-04
+</member>
+<member name="T:winapp2ool.lintsettingshandler">
+ <summary>
+ Manages the settings of the WinappDebug module for the purpose of syncing to disk 
+ </summary>
+</member>
+<member name="P:winapp2ool.lintsettingshandler.Lints">
+ <summary>
+ The names of each type of error supported by WinappDebug
+ </summary>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
+</member>
+<member name="M:winapp2ool.lintsettingshandler.InitDefaultLintSettings">
+ <summary> 
+ Restore the default state of all of the module's parameters, undoing any changes the user may have made to them 
+ </summary>
+ 
+ Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+</member>
+<member name="M:winapp2ool.lintsettingshandler.getSeralizedLintSettings">
+ <summary> 
+ Loads the WinappDebug settings from disk and loads them into memory, overriding the default settings 
+ </summary>
+ 
+ Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+</member>
+<member name="M:winapp2ool.lintsettingshandler.CheckScanRepair(System.Collections.Generic.KeyValuePair{System.String,System.String})">
+ <summary>
+ Handles the checking of the scan and repair settings for each lint type and rejects invalid settings 
+ </summary>
+ 
+ <param name="kvp">
+ A <c> KeyValuePair </c> containing a setting name and a value for that setting 
+ <br /> In this case, we expect the setting name to be a lint type (either a scan or repair setting) and the value to be a boolean
+ </param>
+ 
+ Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
+</member>
+<member name="M:winapp2ool.lintsettingshandler.CreateLintSettingsSection">
+<summary>
+Adds the current (typically default) state of the module's settings into the disk-writable settings representation 
+</summary>
+
+ Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+</member>
 <member name="T:winapp2ool.WinappDebug">
- <summary> Observes, reports, and attempts to repair errors in winapp2.ini </summary>
+ <summary> 
+ Observes, reports, and attempts to repair errors in winapp2.ini 
+ </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.winappDebugFile1">
- <summary> The winapp2.ini file that will be linted </summary>
+ <summary> 
+ The winapp2.ini file that will be linted 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.winappDebugFile3">
- <summary> The save path for the linted file. Overwrites the input file by default </summary>
+ <summary> 
+ The save path for the linted file. Overwrites the input file by default 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.RepairSomeErrsFound">
- <summary> Indicates that some but not all repairs will run </summary>
+ <summary> 
+ Indicates that some but not all repairs will run 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.ScanSettingsChanged">
- <summary> Indicates that the scan settings have been modified from their defaults <br /> Default: <c> False </c> </summary>
+ <summary>
+ Indicates that the scan settings have been modified from their defaults 
+ <br /> Default: <c> False </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.ModuleSettingsChanged">
- <summary> Indicates that the module settings have been modified from their defaults <br/> Default: <c> False </c> </summary>
+ <summary>
+ Indicates that the module settings have been modified from their defaults 
+ <br/> Default: <c> False </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.SaveChanges">
- <summary> Indicates that the any changes made by the linter should be saved back to disk <br/> Default: <c> False </c> </summary>
+ <summary> 
+ Indicates that the any changes made by the linter should be saved back to disk 
+ <br/> Default: <c> False </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.RepairErrsFound">
- <summary> Indicates that the linter should attempt to repair errors it finds <br/> Default: <c> True </c> </summary>
+ <summary> 
+ Indicates that the linter should attempt to repair errors it finds 
+ <br/> Default: <c> True </c>
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.ErrorsFound">
- <summary> The number of errors found during the lint </summary>
+ <summary> 
+ The number of errors found during the lint 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.allEntryNames">
- <summary> The list of all entry names found during the lint, used to check for duplicates </summary>
+ <summary> 
+ The list of all entry names found during the lint, used to check for duplicates 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.MostRecentLintLog">
- <summary> The winapp2ool logslice from the most recent Lint run </summary>
+ <summary> 
+ The winapp2ool logslice from the most recent Lint run 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.Rules">
- <summary> The current rules for scans and repairs </summary>
+ <summary> 
+ The current rules for scans and repairs 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintCasing">
- <summary> Controls scan/repairs for CamelCasing issues <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for CamelCasing issues 
+ <br /> Default: <c> True </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintAlpha">
- <summary> Controls scan/repairs for alphabetization issues <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for alphabetization issues 
+ <br /> Default: <c> True </c>
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintWrongNums">
- <summary> Controls scan/repairs for incorrectly numbered keys <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for incorrectly numbered keys 
+ <br /> Default: <c> True </c>
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintParams">
- <summary> Controls scan/repairs for parameters inside of FileKeys <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for parameters inside of FileKeys 
+ <br /> Default: <c> True </c>
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintFlags">
- <summary> Controls scan/repairs for flags in ExcludeKeys and FileKeys <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for flags in ExcludeKeys and FileKeys 
+ <br /> Default: <c> True </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintSlashes">
- <summary> Controls scan/repairs for improper slash usage <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for improper slash usage 
+ <br /> Default: <c> True </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintDefaults">
- <summary> Controls scan/repairs for missing or True Default values <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for missing or True Default values 
+ <br /> Default: <c> True </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintDupes">
- <summary> Controls scan/repairs for duplicate values <br /> Default: <c> True </c> </summary>
+ <summary>
+ Controls scan/repairs for duplicate values 
+ <br /> Default: <c> True </c>
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintExtraNums">
- <summary> Controls scan/repairs for keys with numbers they shouldn't have <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for keys with numbers they shouldn't have 
+ <br /> Default: <c> True </c>
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintMulti">
- <summary> Controls scan/repairs for keys which should only occur once <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for keys which should only occur once 
+ <br /> Default: <c> True </c>
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintInvalid">
- <summary> Controls scan/repairs for keys with invlaid values <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for keys with invlaid values 
+ <br /> Default: <c> True </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintSyntax">
- <summary> Controls scan/repairs for winapp2.ini syntax errors <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for winapp2.ini syntax errors 
+ <br /> Default: <c> True </c>
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintPathValidity">
- <summary> Controls scan/repairs for invalid file or regsitry paths <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for invalid file or regsitry paths 
+ <br /> Default: <c> True </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintSemis">
- <summary> Controls scan/repairs for improper use of semicolons <br /> Default: <c> True </c> </summary>
+ <summary> 
+ Controls scan/repairs for improper use of semicolons 
+ <br /> Default: <c> True </c>
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintOpti">
- <summary> Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently) <br /> Default: <c> False </c> </summary>
+ <summary> 
+ Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently) 
+ <br /> Default: <c> False </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.lintMultiDupe">
- <summary> Controls scan/repairs for keys that may possibly exist in more than one entry <br /> Default: <c> False </c> </summary>
+ <summary> 
+ Controls scan/repairs for keys that may possibly exist in more than one entry 
+ <br /> Default: <c> False </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.longReg">
- <summary> Regex to detect long form registry paths </summary>
+ <summary> 
+ Regex to detect long form registry paths 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.shortReg">
- <summary> Regex to detect short form registry paths </summary>
+ <summary> 
+ Regex to detect short form registry paths 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.secRefNums">
- <summary> Regex to detect valid LangSecRef numbers </summary>
+ <summary> 
+ Regex to detect valid LangSecRef numbers 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.driveLtrs">
- <summary> Regex to detect valid drive letter parameters </summary>
+ <summary> 
+ Regex to detect valid drive letter parameters 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.envVarRegex">
- <summary> Regex to detect potential %EnvironmentVariables% </summary>
+ <summary> 
+ Regex to detect potential %EnvironmentVariables% 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.overrideDefaultVal">
- <summary> Indicates that Default keys should have their values auited instead of being considered invalid for existing <br /> Default: <c> False </c> </summary>
+ <summary> 
+ Indicates that Default keys should have their values auited instead of being considered invalid for existing 
+ <br /> Default: <c> False </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="P:winapp2ool.WinappDebug.expectedDefaultValue">
- <summary> The expected value for Default keys when auditing their values <br/> Default: <c> Faalse </c> </summary>
+ <summary> 
+ The expected value for Default keys when auditing their values 
+ <br/> Default: <c> Faalse </c> 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="M:winapp2ool.WinappDebug.handleCmdLine">
- <summary> Handles the commandline args for <c> WinappDebug </c> <br />
+<member name="M:winapp2ool.WinappDebug.HandleLintCmdLine">
+ <summary>
+ Handles the commandline args for <c> WinappDebug </c> <br />
  WinappDebug commandline args: <br />
  <c> -c </c> enable saving of changes made by the linter
  </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="M:winapp2ool.WinappDebug.initDefaultSettings">
- <summary> Restore the default state of all of the module's parameters, undoing any changes the user may have made to them </summary>
+<member name="M:winapp2ool.WinappDebug.InitDebug">
+ <summary> 
+ Validates winapp2.ini, then sets up the output window before sending it off to the linter.
+ After linting, reports the results of the lint to the user 
+ </summary>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="M:winapp2ool.WinappDebug.getSeralizedLintSettings">
- <summary> Loads the WinappDebug settings from disk and loads them into memory, overriding the default settings </summary>
+<member name="M:winapp2ool.WinappDebug.Debug(winapp2ool.winapp2file@)">
+ <summary> 
+ Sends the entries in a winapp2.ini format <c> iniFile </c> into specific format and syntax checking routines 
+ </summary>
+ 
+ <param name="fileToBeDebugged"> 
+ A <c> winapp2file </c> to be linted 
+ </param>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="M:winapp2ool.WinappDebug.createLintSettingsSection">
-<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-</member>
-<member name="M:winapp2ool.WinappDebug.printMenu">
- <summary> Displays the <c> WinappDebug </c> menu to the user </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-16
-</member>
-<member name="M:winapp2ool.WinappDebug.handleUserInput(System.String)">
- <summary> Handles the user's input from the menu </summary>
- <param name="input"> The String containing the user's input </param>
- Docs last updated: 2022-12-04 | Code last updated: 2022-12-04
-</member>
-<member name="M:winapp2ool.WinappDebug.initDebug">
- <summary> Validates winapp2.ini, then sets up the output window before sending it off to the linter.
- After linting, reports the results of the lint to the user </summary>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-</member>
-<member name="M:winapp2ool.WinappDebug.debug(winapp2ool.winapp2file@)">
- <summary> Sends the entries in a winapp2.ini format <c> iniFile </c> into specific format and syntax checking routines </summary>
- <param name="fileToBeDebugged"> A <c> winapp2file </c> to be linted </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-</member>
-<member name="M:winapp2ool.WinappDebug.processEntry(winapp2ool.winapp2entry@)">
+<member name="M:winapp2ool.WinappDebug.ProcessEntry(winapp2ool.winapp2entry@)">
  <summary> Validates the basic structure of a <c> winapp2entry </c> and sends off its individual keys for more specific analysis </summary>
  <param name="entry"> A <c> winapp2entry </c> to be audited for syntax errors </param>
  Docs last updated: 2021-11-13 | Code last updated: 2022-01-11
 </member>
-<member name="M:winapp2ool.WinappDebug.validateKeys(winapp2ool.winapp2entry@)">
- <summary> Checks the basic structure of all <c>iniKeys </c> in a <c> winapp2entry </c>,
- attempts to repair some keys, and removes any that are too problematic to continue with </summary>
- <param name="entry"> A <c> winapp2entry </c> whose <c> iniKeys </c> will be audited for basic syntax correctness </param>
+<member name="M:winapp2ool.WinappDebug.ValidateKeys(winapp2ool.winapp2entry@)">
+ <summary> 
+ Checks the basic structure of all <c>iniKeys </c> in a <c> winapp2entry </c>,
+ attempts to repair some keys and place them back into their appropriate <c> keyList </c>,
+ and removes any that are too problematic to continue with 
+ </summary>
+ 
+ <param name="entry"> 
+ A <c> winapp2entry </c> whose <c> iniKeys </c> will be audited for basic syntax correctness 
+ </param>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="M:winapp2ool.WinappDebug.alphabetizeEntries(winapp2ool.winapp2file@)">
- <summary> Alphabetizes all the entries in a winapp2.ini file and observes any that were out of place </summary>
- <param name="winapp"> The <c> winapp2file </c> whose entries will be alphabetized </param>
+<member name="M:winapp2ool.WinappDebug.AlphabetizeEntries(winapp2ool.winapp2file@)">
+ <summary> 
+ Alphabetizes all the entries in a winapp2.ini file and observes any that were out of place 
+ </summary>
+ 
+ <param name="winapp">
+ The <c> winapp2file </c> whose entries will be alphabetized 
+ </param>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="M:winapp2ool.WinappDebug.rewriteChanges(winapp2ool.winapp2file@)">
- <summary> Writes any changes made during the lint back to disk, correcting any errors that were found and repaired </summary>
- <param name="winapp2file"> The <c> winapp2file </c> that was linted </param>
+<member name="M:winapp2ool.WinappDebug.RewriteChanges(winapp2ool.winapp2file@)">
+ <summary> 
+ Writes any changes made during the lint back to disk, correcting any errors that were found and repaired 
+ </summary>
+ 
+ <param name="winapp2file">
+ The <c> winapp2file </c> that was linted 
+ </param>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="M:winapp2ool.WinappDebug.findOutOfPlace(winapp2ool.strList@,winapp2ool.strList@,System.String,System.Collections.Generic.List{System.Int32}@,System.Boolean@)">
- <summary> Assess a list and its sorted state to observe changes in neighboring strings, such as the changes 
- made while sorting the strings alphabetically </summary>
- <param name="someList"> An unsorted list of strings (iniKey values or iniSection names) </param>
- <param name="sortedList"> The sorted state of <c> <paramref name="someList"/> </c> </param>
- <param name="findType"> The type of neighbor checking <br/> <br/> When checking iniKeys (as opposed to entries), <paramref name="findType"/> contains a <c> keyType </c> </param>
- <param name="LineCountList"> The line numbers associated with the lines in <c> <paramref name="someList"/> </c> </param>
- <param name="oopBool"> Indicates that there are out of place entries in the list <br/>  Optional, Default: <c> False </c> </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ <summary> 
+ Assess a list and its sorted state to observe changes in neighboring strings, 
+ such as the changes made while sorting the strings alphabetically 
+ </summary>
+ 
+ <param name="someList"> 
+ An unsorted list of strings (iniKey values or iniSection names)
+ </param>
+ 
+ <param name="sortedList"> 
+ The sorted state of <c> <paramref name="someList"/> </c> 
+ </param>
+ 
+ <param name="findType"> 
+ The type of neighbor checking 
+ <br/> <br/> When checking iniKeys (as opposed to entries), 
+ <paramref name="findType"/> contains a <c> keyType </c> 
+ </param>
+ 
+ <param name="LineCountList"> 
+ The line numbers associated with the lines in <c> <paramref name="someList"/> </c> 
+ </param>
+ 
+ <param name="oopBool"> 
+ Tracking variable indicating that alphabetization errors have been found 
+ <br/>  Optional, Default: <c> False </c> 
+ </param>
+ 
+ Docs last updated: 2023-07-22 | Code last updated: 2021-11-13
 </member>
 <member name="M:winapp2ool.WinappDebug.processKeyList(winapp2ool.keyList@,System.Func{winapp2ool.iniKey,winapp2ool.iniKey},System.Boolean@,System.Boolean@)">
- <summary> Hands off each <c> iniKey </c> in a winapp2.ini format <c> keyList </c> to be audited for correctness </summary>
- <param name="kl"> A <c> keyList </c> of a particular <c> keyType </c> to be audited </param>
- <param name="processKey"> The <c> function </c> that audits the keys of the <c> KeyType </c> provided in <c> <paramref name="kl"/> </c> <br/> 
- <c> VoidDelegate </c> if no further operations are needed outside of the basic formatting checks </param>
- <param name="hasF"> Indicates that the ExcludeKeys contain file system locations <br/> Optional, Default: <c> False </c> </param>
- <param name="hasR"> Indicates that the ExcludeKeys contain registry locations <br/> Optional, Default: <c> False </c> </param>
+ <summary> 
+ Hands off each <c> iniKey </c> in a winapp2.ini format <c> keyList </c> to be audited for correctness 
+ </summary>
+ 
+ <param name="kl">
+ A <c> keyList </c> of a particular <c> keyType </c> to be audited 
+ </param>
+ 
+ <param name="processKey"> 
+ The <c> function </c> that audits the keys of the <c> KeyType </c> provided in <c> <paramref name="kl"/> </c> <br/> 
+ <c> VoidDelegate </c> if no further operations are needed outside of the basic formatting checks 
+ </param>
+ 
+ <param name="hasF"> 
+ Tracking variable indicating that there exist ExcludeKeys for file system locations 
+ <br/> Optional, Default: <c> False </c> 
+ </param>
+ 
+ <param name="hasR">
+ Tracking variable indicating that there exist ExcludeKeys contain registry locations 
+ <br/> Optional, Default: <c> False </c> 
+ </param>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="M:winapp2ool.WinappDebug.voidDelegate(winapp2ool.iniKey)">
- <summary> This function does nothing by design, used when a method or function expects to be passed a function 
- who modifies and iniKey on a KeyType where we don't want to modify the keys </summary>
- <param name="key"> An <c> iniKey </c> to do nothing with </param>
+ <summary> 
+ This function does nothing by design, used when a method or function expects to be passed a function 
+ who modifies and iniKey on a KeyType where we don't want to modify the keys 
+ </summary>
+ 
+ <param name="key"> 
+ An <c> iniKey </c> with which to do nothing 
+ </param>
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="M:winapp2ool.WinappDebug.cFormat(winapp2ool.iniKey@,System.Int32@,winapp2ool.strList@,winapp2ool.keyList@,System.Boolean)">
- <summary> Does some basic formatting checks that apply to all winapp2.ini format <c> iniKeys </c> </summary>
- <param name="key"> An <c> iniKey </c> whose format will be audited </param>
- <param name="keyNumber"> The current expected key number for numbered keys </param>
- <param name="keyValues"> The current list of observed <c> iniKey </c> values </param>
- <param name="dupeList"> A tracking list of <c> iniKeys </c> with duplicate values </param>
- <param name="noNumbers"> Indicates that the current set of keys should not be numbered </param>
+ <summary> 
+ Does some basic formatting checks that apply to all winapp2.ini format <c> iniKeys </c>
+ </summary>
+ 
+ <param name="key"> 
+ An <c> iniKey </c> whose format will be audited 
+ </param>
+ 
+ <param name="keyNumber"> 
+ The current expected key number for numbered keys
+ </param>
+ 
+ <param name="keyValues"> 
+ The current list of observed <c> iniKey </c> values
+ </param>
+ 
+ <param name="dupeList">
+ A tracking list of <c> iniKeys </c> with duplicate values 
+ </param>
+ 
+ <param name="noNumbers"> 
+ Indicates that the current set of keys should not be numbered 
+ </param>
+ 
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
 <member name="M:winapp2ool.WinappDebug.cEnVar(winapp2ool.iniKey)">
