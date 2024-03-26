@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2024 Hazel Ward
 '
 '    This file is a part of Winapp2ool
 '
@@ -435,11 +435,17 @@ Public Module Trim
 
     End Function
 
+
+
+
     ''' <summary> Handles some CCleaner variables and logs if the current variable is ProgramFiles so the 32bit location can be checked later </summary>
     ''' <param name="dir"> A filesystem path to process for environment variables </param>
     ''' <param name="isProgramFiles"> Indicates that the %ProgramFiles% variable has been seen </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Sub processEnvDirs(ByRef dir As String, ByRef isProgramFiles As Boolean)
+    ''' Docs last updated: 2024-03-26- | Code last updated: 2024-03-26
+    ''' <returns> <c> True </c>c> if an error occurred <br /> <c> False </c> otherwise </returns>
+    Private Function processEnvDirs(ByRef dir As String, ByRef isProgramFiles As Boolean) As Boolean
+
+        Dim errDetected = False
 
         If dir.Contains("%") Then
 
@@ -497,11 +503,21 @@ Public Module Trim
 
             End Select
 
-            dir = envDir + splitDir(2)
+            Try
+
+                dir = envDir + splitDir(2)
+
+            Catch ex As IndexOutOfRangeException
+
+                errDetected = True
+
+            End Try
 
         End If
 
-    End Sub
+        Return errDetected
+
+    End Function
 
     ''' <summary> Returns <c> True </c> if a path exists on the file system, <c> False </c> otherwise </summary>
     ''' <param name="key"> A filesystem path </param>
@@ -511,7 +527,16 @@ Public Module Trim
         ' Make sure we get the proper path for environment variables
         Dim isProgramFiles = False
         Dim dir = key
-        processEnvDirs(dir, isProgramFiles)
+
+        If processEnvDirs(dir, isProgramFiles) Then
+
+            cwl("Error: " & key & " contains a malformatted environment variable and has been ignored")
+            cwl("The associated entry will be retained in the final output file")
+            cwl("Press any key to continue")
+            crk()
+            Return True
+
+        End If
 
         Try
 
