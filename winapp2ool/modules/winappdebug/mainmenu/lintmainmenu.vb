@@ -135,8 +135,8 @@ Module lintmainmenu
             ' No settings changes, not saving, no audit    -> 6 (default) 
             ' Settings changed(+1), not saving, no audit   -> 7
             ' Settings changed(+1), saving(+1), no audit   -> 8
-            ' Settings changed(+1), saving(+1), audit(+1)  -> 9
             ' Settings changed(+1), not saving, audit(+1)  -> 8 
+            ' Settings changed(+1), saving(+1), audit(+1)  -> 9
             Case Not MostRecentLintLog.Length = 0 AndAlso input = computeMenuNumber(6, {ModuleSettingsChanged, SaveChanges, overrideDefaultVal}, {1, 1, 1})
                 printSlice(MostRecentLintLog)
 
