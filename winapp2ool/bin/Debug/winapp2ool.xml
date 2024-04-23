@@ -3905,10 +3905,20 @@ Adds the current (typically default) state of the module's settings into the dis
  
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
-<member name="M:winapp2ool.WinappDebug.cEnVar(winapp2ool.iniKey)">
+<member name="M:winapp2ool.WinappDebug.fixBrokenEnVars(winapp2ool.iniKey@,System.String[],System.Boolean)">
+ <summary>
+ Attempts to fix any broken environment variables in a given <c> iniKey </c> <br/> <br/>
+ This function will attempt to repair any environment variables that are missing leading or trailing % characters    
+ </summary>
+ <param name="key"> An <c> iniKey </c> whose value will be audited for syntax errors </param>
+ <param name="enVars"> The list of valid Environment Variables for Winapp2.ini </param>
+ <param name="cond"> The condition under which this scan should be run </param>
+ Docs last updated: 2024-04-22 | Code last updated: 2024-04-22
+</member>
+<member name="M:winapp2ool.WinappDebug.cEnVar(winapp2ool.iniKey@)">
  <summary> Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey </c> </summary>
  <param name="key">The <c> iniKey </c> whose data will be audited for environment variable correctness </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
 </member>
 <member name="M:winapp2ool.WinappDebug.fixMissingEquals(winapp2ool.iniKey@,System.String[])">
  <summary> Attempts to insert missing equal signs (=) into <c> iniKeys </c> <br/> <br/> Returns <c> True </c> if the repair is 
@@ -3984,7 +3994,7 @@ Adds the current (typically default) state of the module's settings into the dis
  <param name="repCond"> Indicates that the repair function should run <br/> Optional, Default: <c> False </c> </param>
  <param name="newVal"> The corrected value with which to replace the incorrect correct value held by <c> <paramref name="repairVal"/> </c> <br/> Optional, Default: <c> "" </c> </param>
  <param name="repairVal"> The incorrect value <br/> Optional, Default: <c> "" </c> </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
 </member>
 <member name="M:winapp2ool.WinappDebug.customErr(System.Int32,System.String,System.String[])">
  <summary> Prints arbitrarily defined errors without a precondition </summary>
@@ -3998,7 +4008,7 @@ Adds the current (typically default) state of the module's settings into the dis
  <param name="param"> The condition under which the string should be replaced </param>
  <param name="currentValue"> A pointer to the string to be replaced </param>
  <param name="newValue"> The replacement value for <c> <paramref name="currentValue"/> </c> </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
 </member>
 <member name="T:winapp2ool.Winapp2ool">
  <summary> 
