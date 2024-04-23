@@ -28,7 +28,7 @@ Option Strict On
     ''' <param name="args">An array of args to pass to WinappDebug</param>
     ''' <param name="addHalt">Optional Boolean specifying whether or not the halting flag should be added to the args</param>
     Private Sub setDebugStage(args As String(), Optional addHalt As Boolean = False)
-        setCmdLineArgs(AddressOf winapp2ool.WinappDebug.handleCmdLine, args, addHalt)
+        setCmdLineArgs(AddressOf winapp2ool.WinappDebug.HandleLintCmdLine, args, addHalt)
     End Sub
 
     ''' <summary>Tests the commandline handling for WinappDebug to ensure success under no input conditions</summary>
