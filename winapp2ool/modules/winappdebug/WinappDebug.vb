@@ -790,22 +790,90 @@ Public Module WinappDebug
         keyNumber += 1
     End Sub
 
+    ''' <summary>
+    ''' Attempts to fix any broken environment variables in a given <c> iniKey </c> <br/> <br/>
+    ''' This function will attempt to repair any environment variables that are missing leading or trailing % characters    
+    ''' </summary>
+    ''' <param name="key"> An <c> iniKey </c> whose value will be audited for syntax errors </param>
+    ''' <param name="enVars"> The list of valid Environment Variables for Winapp2.ini </param>
+    ''' <param name="cond"> The condition under which this scan should be run </param>
+    ''' Docs last updated: 2024-04-22 | Code last updated: 2024-04-22
+    Private Sub fixBrokenEnVars(ByRef key As iniKey, enVars As String(), cond As Boolean)
+
+        If Not cond Then Return
+
+        For Each enVar In enVars
+
+            If Not key.vHas(enVar) Then Continue For
+
+            Dim tmpRegex As New Regex(enVar)
+
+            Dim trailingCharMissing As New Regex($"%{enVar}\\")
+            Dim leadingCharMissing As New Regex($"^{enVar}%")
+            Dim bothCharsMissing As New Regex($"^{enVar}\\")
+
+            Dim msg = ""
+            Dim replValue = ""
+            Dim repairMade = False
+
+            Select Case True
+
+                Case trailingCharMissing.IsMatch(key.Value)
+
+                    msg = "Environment Variable is missing trailing %"
+                    replValue = key.Value.Replace($"%{enVar}", $"%{enVar}%")
+                    repairMade = True
+
+                Case leadingCharMissing.IsMatch(key.Value)
+
+                    msg = "Environment Variable is missing leading %"
+                    replValue = key.Value.Replace($"{enVar}%", $"%{enVar}%")
+                    repairMade = True
+
+                Case bothCharsMissing.IsMatch(key.Value)
+
+                    msg = "Environment Variable is missing leading and trailing %"
+                    replValue = key.Value.Replace($"{enVar}\", $"%{enVar}%\")
+                    repairMade = True
+
+                Case Else
+
+                    ' This only happens because "AppData" is a substring of "LocalAppData" and will result in this code path being hit 
+                    ' We can silently ignore this case 
+
+            End Select
+
+            fullKeyErr(key, msg, lintSyntax.ShouldScan AndAlso repairMade, lintSyntax.ShouldRepair, key.Value, replValue)
+
+            If repairMade Then Exit For
+
+        Next
+
+    End Sub
+
+
     ''' <summary> Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey </c> </summary>
     ''' <param name="key">The <c> iniKey </c> whose data will be audited for environment variable correctness </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Sub cEnVar(key As iniKey)
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
+    Private Sub cEnVar(ByRef key As iniKey)
+
         ' Valid Environmental Variables for winapp2.ini
         Dim enVars = {"AllUsersProfile", "AppData", "CommonAppData", "CommonProgramFiles",
         "Documents", "HomeDrive", "LocalAppData", "LocalLowAppData", "Music", "Pictures", "ProgramData", "ProgramFiles", "Public",
         "RootDir", "SystemDrive", "SystemRoot", "Temp", "Tmp", "UserName", "UserProfile", "Video", "WinDir"}
+
         fullKeyErr(key, "Double '%' found in environment variable", key.vHas("%%"), lintSyntax.ShouldRepair, key.Value, key.Value.Replace("%%", "%"))
-        fullKeyErr(key, "%EnvironmentVariables% must be surrounded on both sides by a single '%' character.", key.vHas("%") And envVarRegex.Matches(key.Value).Count = 0)
+
+        fixBrokenEnVars(key, enVars, key.vHas("%") AndAlso envVarRegex.Matches(key.Value).Count = 0 OrElse key.vHasAny(enVars) AndAlso Not key.vHas("%"))
+
         For Each m As Match In envVarRegex.Matches(key.Value)
             Dim strippedText = m.ToString.Trim(CChar("%"))
             chkCasing(key, enVars, strippedText)
         Next
+
         ' Environment variables should be trailed by a backslash 
         fullKeyErr(key, "Missing backslash (\) after %EnvironmentVariable%.", lintSlashes.ShouldScan And key.vHas("%") And Not key.vHasAny({"%|", "%\"}))
+
     End Sub
 
     ''' <summary> Attempts to insert missing equal signs (=) into <c> iniKeys </c> <br/> <br/> Returns <c> True </c> if the repair is 
@@ -1057,10 +1125,14 @@ Public Module WinappDebug
     ''' <param name="repCond"> Indicates that the repair function should run <br/> Optional, Default: <c> False </c> </param>
     ''' <param name="newVal"> The corrected value with which to replace the incorrect correct value held by <c> <paramref name="repairVal"/> </c> <br/> Optional, Default: <c> "" </c> </param>
     ''' <param name="repairVal"> The incorrect value <br/> Optional, Default: <c> "" </c> </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
     Private Sub fullKeyErr(key As iniKey, err As String, Optional cond As Boolean = True, Optional repCond As Boolean = False, Optional ByRef repairVal As String = "", Optional newVal As String = "")
-        If cond Then customErr(key.LineNumber, err, {$"Key: {key.toString}"})
+
+        If Not cond Then Return
+
+        customErr(key.LineNumber, err, {$"Key: {key.toString}"})
         fixStr(cond And repCond, repairVal, newVal)
+
     End Sub
 
     ''' <summary> Prints arbitrarily defined errors without a precondition </summary>
@@ -1087,11 +1159,14 @@ Public Module WinappDebug
     ''' <param name="param"> The condition under which the string should be replaced </param>
     ''' <param name="currentValue"> A pointer to the string to be replaced </param>
     ''' <param name="newValue"> The replacement value for <c> <paramref name="currentValue"/> </c> </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
     Private Sub fixStr(param As Boolean, ByRef currentValue As String, newValue As String)
-        If param Then
-            gLog($"Changing '{currentValue}' to '{newValue}'", ascend:=True, descend:=True, indent:=True, buffr:=True)
-            currentValue = newValue
-        End If
+
+        If Not param Then Return
+
+        gLog($"Changing '{currentValue}' to '{newValue}'", ascend:=True, descend:=True, indent:=True, buffr:=True)
+        currentValue = newValue
+
     End Sub
+
 End Module
