@@ -3925,7 +3925,7 @@ Adds the current (typically default) state of the module's settings into the dis
   successful, <c> False </c> otherwise </summary>
  <param name="key"> A misformatted <c> iniKey </c> to attempt to repair </param>
  <param name="cmds"> An array containing valid winapp2.ini <c> keyTypes </c> </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2024-05-03
 </member>
 <member name="M:winapp2ool.WinappDebug.cValidity(winapp2ool.iniKey@)">
  <summary> Does basic syntax and formatting audits that apply across all keys, returns <c> False </c> 
@@ -3955,20 +3955,28 @@ Adds the current (typically default) state of the module's settings into the dis
  <summary> Audits the syntax of file system and registry paths </summary>
  <param name="key"> An <c> iniKey </c> containing a registry or filesystem path to have its syntax validated </param>
  <param name="isRegistry"> Indicates that the given <c> <paramref name="key"/> </c> is expected to hold a registry path </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2024-05-03
 </member>
 <member name="M:winapp2ool.WinappDebug.pExcludeKey(winapp2ool.iniKey@,System.Boolean@,System.Boolean@)">
  <summary> Processes a list of ExcludeKey format <c> iniKeys </c> and checks them for errors, correcting where possible </summary>
  <param name="key"> A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness </param>
  <param name="hasF"> Indicates whether the entry excludes any filesystem locations </param>
  <param name="hasR"> Indicates whether the entry excludes any registry locations </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2024-05-03
+</member>
+<member name="M:winapp2ool.WinappDebug.checkExcludeFlags(winapp2ool.iniKey@)">
+ <summary>
+ Assesses the formatting of ExcludeKey format <c> iniKeys </c> to see if the flag (FILE, PATH, REG) 
+ is malformatted. Attempts to repair when possible.
+ </summary>
+ <param name="key"> A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness </param>
+ Docs last updated: 2024-05-03 | Code last updated: 2024-05-03
 </member>
 <member name="M:winapp2ool.WinappDebug.sortKeys(winapp2ool.keyList@,System.Boolean)">
  <summary> Sorts a <c> keyList </c> alphabetically with winapp2.ini precedence applied to the key values </summary>
  <param name="kl"> A <c> keyList </c> to be sorted alphabetically (with numbers having precedence) </param>
  <param name="hadDuplicatesRemoved"> Indicates that keys have been removed from <c> <paramref name="kl"/> </c> </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
 </member>
 <member name="M:winapp2ool.WinappDebug.inputMismatchErr(System.Int32,System.String,System.String,System.String,System.Boolean)">
  <summary> Prints an error when data is received that does not match an expected value </summary>
@@ -3977,14 +3985,14 @@ Adds the current (typically default) state of the module's settings into the dis
  <param name="received"> The (erroneous) input data </param>
  <param name="expected"> The expected data </param>
  <param name="cond"> Indicates that the error condition is present <br/> Optional, Default: <c> True </c> </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
 </member>
 <member name="M:winapp2ool.WinappDebug.fullNameErr(System.Boolean,winapp2ool.winapp2entry,System.String)">
  <summary> Prints an error followed by the [Full Name *] of the entry to which it belongs </summary>
  <param name="cond"> Indicates that the error condition is present </param>
  <param name="entry"> The <c> winapp2entry </c> containing an error </param>
  <param name="errTxt"> A description of the error as it will be displayed to the user </param>
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
 </member>
 <member name="M:winapp2ool.WinappDebug.fullKeyErr(winapp2ool.iniKey,System.String,System.Boolean,System.Boolean,System.String@,System.String)">
  <summary> Prints an error whose output text contains an <c> iniKey </c> string, optionally correcting that value with one that is provided </summary>
