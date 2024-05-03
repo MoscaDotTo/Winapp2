@@ -1058,44 +1058,71 @@ Public Module WinappDebug
     ''' <param name="key"> A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness </param>
     ''' <param name="hasF"> Indicates whether the entry excludes any filesystem locations </param>
     ''' <param name="hasR"> Indicates whether the entry excludes any registry locations </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
     Private Sub pExcludeKey(ByRef key As iniKey, ByRef hasF As Boolean, ByRef hasR As Boolean)
+
         Select Case True
-            Case key.vHasAny({"FILE|", "PATH|"})
+
+            Case key.vHasAny({"FILE|", "PATH|"}) AndAlso lintPathValidity.ShouldScan
+
                 hasF = True
-                If lintPathValidity.ShouldScan Then
-                    chkPathFormatValidity(key, False)
-                    fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.", key.vHas("|") And Not key.vHas("\|"))
-                End If
-            Case key.vHas("REG|")
+
+                chkPathFormatValidity(key, False)
+
+                fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.", key.vHas("|") And Not key.vHas("\|"))
+
+            Case key.vHas("REG|") AndAlso lintPathValidity.ShouldScan
+
                 hasR = True
+
                 chkPathFormatValidity(key, True)
+
             Case Else
-                If key.Value.StartsWith("FILE", StringComparison.InvariantCulture) Or
-                        key.Value.StartsWith("PATH", StringComparison.InvariantCulture) Or
-                        key.Value.StartsWith("REG", StringComparison.InvariantCulture) Then
-                    fullKeyErr(key, "Missing pipe symbol after ExcludeKey flag)")
+
+                If Not lintFlags.ShouldScan Then Return
+
+                Dim HasFlagRegex = New Regex("^(FILE|PATH|REG)")
+                Dim matches = HasFlagRegex.Matches(key.Value)
+
+                If matches.Count = 0 Then
+
+                    fullKeyErr(key, "No valid exclude flag (FILE, PATH, or REG) found in ExcludeKey.")
                     Return
+
                 End If
-                fullKeyErr(key, "No valid exclude flag (FILE, PATH, or REG) found in ExcludeKey.")
+
+                Dim foundFlag = HasFlagRegex.Matches(key.Value)(0)
+                Dim fixedValue = key.Value.Insert(foundFlag.Length, "|")
+                fullKeyErr(key, "Missing pipe (|) after ExcludeKey flag", repCond:=lintFlags.ShouldRepair, repairVal:=key.Value, newVal:=fixedValue)
+
+                Return
+
         End Select
+
         fullKeyErr(key, "ExcludeKey has too many flags", key.Value.Split(CChar("|")).Length > 3)
+
     End Sub
 
     ''' <summary> Sorts a <c> keyList </c> alphabetically with winapp2.ini precedence applied to the key values </summary>
     ''' <param name="kl"> A <c> keyList </c> to be sorted alphabetically (with numbers having precedence) </param>
     ''' <param name="hadDuplicatesRemoved"> Indicates that keys have been removed from <c> <paramref name="kl"/> </c> </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
     Private Sub sortKeys(ByRef kl As keyList, hadDuplicatesRemoved As Boolean)
+
         If Not lintAlpha.ShouldScan Or kl.KeyCount <= 1 Then Return
+
         Dim keyValues = kl.toStrLst(True)
         Dim sortedKeyValues = replaceAndSort(keyValues, "|", " \ \")
+
         ' Rewrite the alphabetized keys back into the keylist (also fixes numbering)
         Dim keysOutOfPlace = False
         findOutOfPlace(keyValues, sortedKeyValues, kl.KeyType, kl.lineNums, keysOutOfPlace)
-        If (keysOutOfPlace Or hadDuplicatesRemoved) And (lintAlpha.fixFormat Or lintWrongNums.fixFormat Or lintExtraNums.fixFormat) Then
-            kl.renumberKeys(sortedKeyValues)
-        End If
+
+        If Not (keysOutOfPlace OrElse hadDuplicatesRemoved) AndAlso
+               (lintAlpha.fixFormat OrElse lintWrongNums.fixFormat OrElse lintExtraNums.fixFormat) Then Return
+
+        kl.renumberKeys(sortedKeyValues)
+
     End Sub
 
     ''' <summary> Prints an error when data is received that does not match an expected value </summary>
@@ -1104,18 +1131,24 @@ Public Module WinappDebug
     ''' <param name="received"> The (erroneous) input data </param>
     ''' <param name="expected"> The expected data </param>
     ''' <param name="cond"> Indicates that the error condition is present <br/> Optional, Default: <c> True </c> </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
     Private Sub inputMismatchErr(linecount As Integer, err As String, received As String, expected As String, Optional cond As Boolean = True)
-        If cond Then customErr(linecount, err, {$"Expected: {expected}", $"Found: {received}"})
+
+        If Not cond Then Return
+        customErr(linecount, err, {$"Expected: {expected}", $"Found: {received}"})
+
     End Sub
 
     ''' <summary> Prints an error followed by the [Full Name *] of the entry to which it belongs </summary>
     ''' <param name="cond"> Indicates that the error condition is present </param>
     ''' <param name="entry"> The <c> winapp2entry </c> containing an error </param>
     ''' <param name="errTxt"> A description of the error as it will be displayed to the user </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
     Private Sub fullNameErr(cond As Boolean, entry As winapp2entry, errTxt As String)
-        If cond Then customErr(entry.LineNum, errTxt, {$"Entry Name: {entry.FullName}"})
+
+        If Not cond Then Return
+        customErr(entry.LineNum, errTxt, {$"Entry Name: {entry.FullName}"})
+
     End Sub
 
     ''' <summary> Prints an error whose output text contains an <c> iniKey </c> string, optionally correcting that value with one that is provided </summary>
@@ -1141,18 +1174,27 @@ Public Module WinappDebug
     ''' <param name="lines"> Any additional error information to be printed alongside the description </param>
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Sub customErr(lineCount As Integer, err As String, lines As String())
+
         gLog(err, ascend:=True)
-        cwl($"Line: {lineCount} - Error: {err}")
-        MostRecentLintLog += $"Line: {lineCount} - Error: {err}" & Environment.NewLine
+
+        Dim out = $"Line: {lineCount} - Error: {err}"
+        cwl(out)
+        MostRecentLintLog += out & Environment.NewLine
+
         For Each errStr In lines
+
             cwl(errStr)
             gLog(errStr, indent:=True)
             MostRecentLintLog += errStr & Environment.NewLine
+
         Next
+
         gLog(descend:=True)
         cwl()
+
         MostRecentLintLog += Environment.NewLine
         ErrorsFound += 1
+
     End Sub
 
     ''' <summary> Replace a given string with a new value if the fix condition is met </summary>
