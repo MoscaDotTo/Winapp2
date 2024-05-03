@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2024 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -19,6 +19,7 @@ Module mergemainmenu
 
     ''' <summary> Prints the <c> Merge </c> menu to the user, includes some predefined merge files choices for ease of access </summary>
     Public Sub printMergeMainMenu()
+
         printMenuTop({"Merge the contents of two ini files, while either replacing (default) or removing sections with the same name."})
         print(1, "Run (default)", "Merge the two ini files", enStrCond:=Not MergeFile2.Name.Length = 0, colorLine:=True)
         print(0, "Preset Merge File Choices:", leadingBlank:=True, trailingBlank:=True)
@@ -35,6 +36,7 @@ Module mergemainmenu
         print(0, $"Current mode: {If(mergeMode, "Add & Replace", "Add & Remove")}", closeMenu:=Not MergeModuleSettingsChanged)
         print(2, NameOf(Merge), cond:=MergeModuleSettingsChanged, closeMenu:=True)
         Console.WindowHeight = If(MergeModuleSettingsChanged, 32, 30)
+
     End Sub
 
     ''' <summary> Handles the user's input from the main menu </summary>

@@ -130,6 +130,7 @@ Module experimentalScans
             If lintOpti.ShouldRepair Then kl.Keys = newKeys.Keys
 
         End If
+
     End Sub
 
     ''' <summary> Prints output from the Optimization function </summary>
@@ -168,6 +169,7 @@ Module experimentalScans
                 auditDupe(detectFileTracker, key)
 
         End Select
+
     End Sub
 
     ''' <summary>
@@ -201,7 +203,7 @@ Module experimentalScans
         End Select
 
         ' If the cased key text is in the tracking set, inform the user (this will be NOISY) 
-        print(3, $"{RawKeyText} may exists in multiple places", cond:=tracker.Contains(UpperKeyText))
+        print(3, $"{RawKeyText} exists in multiple places", cond:=tracker.Contains(UpperKeyText))
 
         ' Add the current text to the tracker if it hasn't been already 
         tracker.Add(UpperKeyText)
