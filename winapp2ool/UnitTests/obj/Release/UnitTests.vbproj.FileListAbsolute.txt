@@ -38,7 +38,7 @@ C:\Users\hazel\source\repos\Winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.v
 C:\Users\hazel\source\repos\Winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.Resources.resources
 C:\Users\hazel\source\repos\Winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.vbproj.GenerateResource.cache
 C:\Users\hazel\source\repos\Winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.vbproj.CoreCompileInputs.cache
-C:\Users\hazel\source\repos\Winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.vbproj.CopyComplete
 C:\Users\hazel\source\repos\Winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.dll
 C:\Users\hazel\source\repos\Winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.xml
 C:\Users\hazel\source\repos\Winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.pdb
+C:\Users\hazel\source\repos\Winapp2\winapp2ool\UnitTests\obj\Release\UnitTests.vbproj.Up2Date
