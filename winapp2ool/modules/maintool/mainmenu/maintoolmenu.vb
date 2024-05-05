@@ -31,9 +31,9 @@ Module maintoolmenu
     ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
     Public Sub printToolMainMenu()
 
-        Dim noUpdatesAvailable = Not (isOffline OrElse waUpdateIsAvail OrElse updateIsAvail)
-
         checkUpdates(Not isOffline AndAlso Not checkedForUpdates)
+        Dim UpdatesAvailable = Not isOffline AndAlso (waUpdateIsAvail OrElse updateIsAvail)
+
         printMenuTop(Array.Empty(Of String)(), False)
         print(0, "Winapp2ool is currently in offline mode", cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
         print(0, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
@@ -47,7 +47,7 @@ Module maintoolmenu
         print(1, "Diff", "Observe the changes between two winapp2.ini files")
         print(1, "CCiniDebug", "Sort and trim ccleaner.ini", trailingBlank:=True)
         print(1, "Downloader", "Download files from the Winapp2 GitHub")
-        print(1, "Settings", "Manage Winapp2ool's settings", closeMenu:=noUpdatesAvailable, arbitraryColor:=ConsoleColor.Yellow, colorLine:=True, useArbitraryColor:=True)
+        print(1, "Settings", "Manage Winapp2ool's settings", closeMenu:=Not UpdatesAvailable, arbitraryColor:=ConsoleColor.Yellow, colorLine:=True, useArbitraryColor:=True)
 
         If waUpdateIsAvail AndAlso Not isOffline Then
 
