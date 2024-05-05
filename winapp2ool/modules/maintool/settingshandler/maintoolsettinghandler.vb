@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2023 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,41 +14,75 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
-''' <summary> Syncs the winapp2ool module settings to and from disk  </summary>
+
+''' <summary> 
+''' Syncs the winapp2ool main module settings to and from disk 
+''' </summary>
 Module mainToolSettingsHandler
 
-    ''' <summary> Loads values from disk into memory for the winapp2ool module settings </summary>
+    ''' <summary> 
+    ''' Loads values from disk into memory for the winapp2ool module settings
+    ''' </summary>
+    ''' 
     ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Sub getSeralizedToolSettings()
+
         For Each kvp In settingsDict(NameOf(Winapp2ool))
+
             Select Case kvp.Key
+
                 Case NameOf(isBeta)
+
                     isBeta = CBool(kvp.Value)
+
                 Case NameOf(readSettingsFromDisk)
+
                     readSettingsFromDisk = CBool(kvp.Value)
+
                 Case NameOf(saveSettingsToDisk)
+
                     saveSettingsToDisk = CBool(kvp.Value)
+
                 Case NameOf(RemoteWinappIsNonCC)
+
                     RemoteWinappIsNonCC = CBool(kvp.Value)
+
                 Case NameOf(toolSettingsHaveChanged)
+
                     toolSettingsHaveChanged = CBool(kvp.Value)
+
                 Case NameOf(GlobalLogFile) & "_Dir"
+
                     GlobalLogFile.Dir = kvp.Value
+
                 Case NameOf(GlobalLogFile) & "_Name"
+
                     GlobalLogFile.Name = kvp.Value
+
             End Select
+
         Next
+
     End Sub
 
-    '''<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+    '''<summary> 
+    '''Adds the current (typically default) state of the module's settings into the disk-writable settings representation 
+    '''</summary>
+    '''
     ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Sub createToolSettingsSection()
-        Dim mainToolModuleTuple As New List(Of String) From {NameOf(isBeta), tsInvariant(isBeta), NameOf(saveSettingsToDisk), tsInvariant(saveSettingsToDisk),
-            NameOf(readSettingsFromDisk), tsInvariant(readSettingsFromDisk), NameOf(RemoteWinappIsNonCC), tsInvariant(RemoteWinappIsNonCC), NameOf(toolSettingsHaveChanged),
-            tsInvariant(toolSettingsHaveChanged), NameOf(GlobalLogFile), GlobalLogFile.Name, GlobalLogFile.Dir}
-        createModuleSettingsSection(NameOf(Winapp2ool), mainToolModuleTuple, 5, 1)
-    End Sub
 
+        Dim mainToolModuleTuple As New List(Of String) From {NameOf(isBeta), tsInvariant(isBeta),
+                                                             NameOf(saveSettingsToDisk), tsInvariant(saveSettingsToDisk),
+                                                             NameOf(readSettingsFromDisk), tsInvariant(readSettingsFromDisk),
+                                                             NameOf(RemoteWinappIsNonCC), tsInvariant(RemoteWinappIsNonCC),
+                                                             NameOf(toolSettingsHaveChanged), tsInvariant(toolSettingsHaveChanged),
+                                                             NameOf(GlobalLogFile), GlobalLogFile.Name, GlobalLogFile.Dir}
+
+        createModuleSettingsSection(NameOf(Winapp2ool), mainToolModuleTuple, 5, 1)
+
+    End Sub
 
 End Module
