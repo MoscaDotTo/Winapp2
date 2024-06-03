@@ -158,7 +158,8 @@ These are all the possible variables that can be used for writing paths in Winap
 Variable       | Windows Vista-10 Path | WindowsXP Path
 :------------- | :-------------        | :-------------
 `%AppData%` | `C:\Users\%UserName%\AppData\Roaming` | `C:\Documents and Settings\%UserName%\Application Data`
-`%CommonAppData%` | `C:\ProgramData` | `C:\Documents and Settings\All Users\Application Data`
+`%CommonAppData%` is outdated | `C:\ProgramData` | `C:\Documents and Settings\All Users\Application Data`
+`%ProgramData%` | `C:\ProgramData` | `C:\Documents and Settings\All Users\Application Data`
 `%CommonProgramFiles%`* | `C:\Program Files\Common Files` | `C:\Program Files\Common Files`
 `%Documents%` | `C:\Users\%UserName%\Documents` | `C:\Documents and Settings\%UserName%\My Documents`
 `%LocalAppData%` | `C:\Users\%UserName%\AppData\Local` | `C:\Documents and Settings\%UserName%\Local Settings\Application Data`
