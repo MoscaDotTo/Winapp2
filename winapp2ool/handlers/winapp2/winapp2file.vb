@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2024 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -15,147 +15,319 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
+Imports System.Globalization
+Imports System.Text
+
 ''' <summary>
 ''' Represents a winapp2.ini format iniFile, and enables easy access to format specific iniFile information
 ''' </summary>
+''' 
+''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 Public Class winapp2file
-    ' "" = main section, bottom most in all circumstances and appearing without a label 
-    ''' <summary> The names of the sections of entries as they appear in winapp2.ini </summary>
-    Public ReadOnly Property FileSectionHeaders As New List(Of String) From {"Chrome/Chromium based browsers", "Edge Chromium", "Vivaldi", "Brave", "Opera", "Firefox/Mozilla based browsers", "Thunderbird",
-        "Internet Explorer", "Language entries", "Potentially very long scan time (and also dangerous) entries", "Dangerous entries", ""}
-    ' As above, index 0 = Chrome, 1 = Microsoft Edge Insider, 2 = Opera.... 9 = ""
-    ''' <summary> A list of iniFiles each containing one of the headers contents </summary>
-    Public Property EntrySections As New List(Of iniFile)
-    ''' <summary> The list of winapp2entry objects for each header section </summary>
-    Public Property Winapp2entries As New List(Of List(Of winapp2entry))
-    ''' <summary> Indicates whether or not this object represents a Non-CCleaner variant of winapp2.ini </summary>
-    Public Property IsNCC As Boolean = False
-    '''<summary> The directory of the iniFile object used to instantiate this object </summary>
-    Public Property Dir As String = ""
-    '''<summary> The file name of the iniFile object used to instantiate this object </summary>
-    Public Property Name As String = ""
-    '''<summary> The version in YYMMDD format of the winapp2.ini file (Defaults to 000000) </summary>
-    Public Property Version As String = "000000"
 
-    ''' <summary> Creates a new <c> winapp2file </c> from an <c> iniFile </c> </summary>
-    ''' <param name="file"> A winapp2.ini format <c> iniFile </c> object </param>
-    Public Sub New(ByVal file As iniFile)
+    ''' <summary> 
+    ''' The names of the sections of entries as they appear in winapp2.ini <br/>
+    ''' "" = main section, bottommost (on disk, last index in memory) section, has label otherwise
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
+    Public ReadOnly Property FileSectionHeaders As New List(Of String) From {
+                                                "Chrome/Chromium based browsers",
+                                                "Edge Chromium",
+                                                "Vivaldi", "Brave",
+                                                "Opera",
+                                                "Firefox/Mozilla based browsers",
+                                                "Thunderbird", "Internet Explorer",
+                                                "Language entries",
+                                                "Potentially very long scan time (and also dangerous) entries",
+                                                "Dangerous entries",
+                                                ""
+                                          }
+
+    ''' <summary> 
+    ''' A list of iniFiles each containing one of the headers contents 
+    ''' <br/> Onto with the indicies from <c> FileSectionHeaders </c> <br  />
+    ''' ie. index 0 = Chrome, 1 = Edge Chromium, 2 = Opera, ... 9 = ""
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
+    Public Property EntrySections As New List(Of iniFile)
+
+    ''' <summary> 
+    ''' The list of winapp2entry objects for each header section 
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
+    Public Property Winapp2entries As New List(Of List(Of winapp2entry))
+
+    ''' <summary> 
+    ''' Indicates whether or not this object represents a Non-CCleaner variant of winapp2.ini 
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
+    Public Property IsNCC As Boolean = False
+
+    '''<summary> 
+    '''The directory of the iniFile object used to instantiate this object 
+    '''</summary>
+    '''
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
+    Public Property Dir As String = ""
+
+    '''<summary> 
+    '''The file name of the iniFile object used to instantiate this object 
+    '''</summary>
+    '''
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
+    Public Property Name As String = ""
+
+    '''<summary> 
+    '''The version in YYMMDD format of the winapp2.ini file 
+    '''<br /> Default value: <c> "; version 000000" </c>
+    '''<br /> This will be updated to the current date if the file is saved with the <c> useTodaysDate </c> parameter set to <c> True </c>
+    '''<br /> Otherwise, this will be set to the version string found in the file, if one exists 
+    '''</summary>
+    '''
+    ''' Docs last updated: 2024-05-19 | Code last updated: 2024-05-19
+    Public Property Version As String = "; Version: 000000"
+
+    ''' <summary> 
+    ''' Creates a new <c> winapp2file </c> from an <c> iniFile </c> 
+    ''' </summary>
+    ''' 
+    ''' <param name="file"> 
+    ''' A winapp2.ini format <c> iniFile </c> object 
+    ''' </param>
+    ''' 
+    ''' <param name="useTodaysDate"> 
+    ''' 
+    ''' Indicates that the version should be updated to reflect the current date in YYMMDD format 
+    ''' <br /> Optional, Default: <c> False </c>
+    ''' 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2024-05-19 | Code last updated: 2024-05-19
+    Public Sub New(ByVal file As iniFile, Optional useTodaysDate As Boolean = False)
+
         If file Is Nothing Then argIsNull(NameOf(file)) : Return
+
         Dir = file.Dir
         Name = file.Name
-        For Each header In FileSectionHeaders
-            EntrySections.Add(New iniFile With {.Name = header})
-            Winapp2entries.Add(New List(Of winapp2entry))
-        Next
+
+        EntrySections = FileSectionHeaders.Select(Function(header) New iniFile With {.Name = header}).ToList()
+        Winapp2entries = FileSectionHeaders.Select(Function(f) New List(Of winapp2entry)).ToList()
+
         ' Determine if we're the Non-CCleaner variant of the ini
         IsNCC = Not file.findCommentLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.") = -1
+
         ' Determine the version string
-        If file.Comments.Count = 0 Then Version = "; version 000000"
-        If file.Comments.Count > 0 Then Version = If(Not file.Comments.Values(0).Comment.ToUpperInvariant.Contains("VERSION"), "; version 000000", file.Comments.Values(0).Comment)
+        Version = DetermineVersionString(file, useTodaysDate)
+
         ' Build the header sections for browsers/Thunderbird/winapp3
-        Dim langSecRefs As New List(Of String) From {"3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001", "Language Files", "Dangerous Long", "Dangerous"}
+        ' Order: Chrome/Chromium, Edge Chromium, Opera, Brave, Vivaldi, Firefox, Thunderbird, Internet Explorer, Language Files, Dangerous Long, Dangerous
+        Dim LeadingCategories As New List(Of String) From {"3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001", "Language Files", "Dangerous Long", "Dangerous"}
+
         For Each section In file.Sections.Values
+
             Dim tmpwa2entry As New winapp2entry(section)
-            Dim ind = -1
-            If tmpwa2entry.LangSecRef.KeyCount > 0 Then
-                ind = langSecRefs.IndexOf(tmpwa2entry.LangSecRef.Keys.First.Value)
-            ElseIf tmpwa2entry.SectionKey.KeyCount > 0 Then
-                ind = langSecRefs.IndexOf(tmpwa2entry.SectionKey.Keys.First.Value)
-                If ind = -1 And tmpwa2entry.SectionKey.Keys.First.Value.ToUpperInvariant.StartsWith("DANGEROUS", StringComparison.InvariantCulture) Then ind = langSecRefs.Count - 1
-            End If
-            ' If ind is still -1, we're in the main section
-            If ind = -1 Then ind = langSecRefs.Count
-            addToInnerFile(ind, tmpwa2entry, section)
-        Next
-    End Sub
+            Dim ind = GetCategoryIndex(tmpwa2entry, LeadingCategories)
 
-    ''' <summary> Inserts an <c> iniSection </c> into its respective tracking file and records the winapp2entry object form accordingly. </summary>
-    ''' <param name="ind"> The index of the tracking file </param>
-    ''' <param name="entry"> The section in winapp2entry format </param>
-    ''' <param name="section"> A section to be tracked </param>
-    Private Sub addToInnerFile(ind As Integer, entry As winapp2entry, section As iniSection)
-        If Not EntrySections(ind).Sections.Keys.Contains(section.Name) Then
             EntrySections(ind).Sections.Add(section.Name, section)
-            Winapp2entries(ind).Add(entry)
-        End If
+            Winapp2entries(ind).Add(tmpwa2entry)
+
+        Next
+
     End Sub
 
-    ''' <summary>Returns the total number of entries stored in the internal iniFile objects</summary>
+    ''' <summary>
+    ''' Determines and returns the index of the inner ini category to which given <c> <paramref name="entry"/> </c> belongs
+    ''' </summary>
+    ''' 
+    ''' <param name="entry">
+    ''' A <c> winapp2entry </c> object to be placed into winapp2.ini 
+    ''' </param>
+    ''' 
+    ''' <param name="categoryValues">
+    ''' The list of categories by section and/or langsecref in winapp2.ini order into which each <c> winapp2entry </c> is placed 
+    ''' </param>
+    ''' 
+    ''' <returns> The index of the inner ini category to which given <c> <paramref name="entry"/> </c> belongs </returns>
+    ''' 
+    ''' Docs last updated: 2024-05-20 | Code last updated: 2024-05-19
+    Private Function GetCategoryIndex(entry As winapp2entry, categoryValues As List(Of String)) As Integer
+
+        ' If there's no langSecRef or sectionKey, we're in the main section for sure
+        If entry.LangSecRef.KeyCount = 0 AndAlso entry.SectionKey.KeyCount = 0 Then Return -1
+
+        Dim categoryKey As String = If(entry.LangSecRef.KeyCount > 0, entry.LangSecRef.Keys.First.Value, entry.SectionKey.Keys.First.Value)
+        Dim ind = categoryValues.IndexOf(categoryKey)
+
+        ' Winapp3 entries are in the second to last section
+        If ind = -1 AndAlso categoryKey.ToUpperInvariant.StartsWith("DANGEROUS", StringComparison.InvariantCulture) Then ind = categoryValues.Count - 1
+
+        ' If ind is still -1, we're in the main section
+        If ind = -1 Then ind = categoryValues.Count
+
+        Return ind
+
+    End Function
+
+    ''' <summary>
+    ''' Returns either the version string found in the file or the current date in YYMMDD format
+    ''' </summary>
+    ''' 
+    ''' <param name="file">
+    ''' A winapp2.ini format <c> iniFile </c>
+    ''' </param>
+    ''' 
+    ''' <param name="useTodaysDate"> 
+    ''' Indicates that the version should be updated to reflect the current date in YYMMDD format 
+    ''' <br /> Optional, Default: <c> False </c>
+    ''' </param>
+    ''' 
+    ''' <returns> The version string found in the file or an updated version string with the current date </returns>
+    ''' 
+    ''' Docs last updated: 2024-05-19 | Code last updated: 2024-05-19
+    Private Function DetermineVersionString(file As iniFile, Optional useTodaysDate As Boolean = False) As String
+
+        If useTodaysDate Then Return $"; Version: {DateTime.Now.ToString("yyMMdd", CultureInfo.InvariantCulture)}"
+
+        Dim hasVersionComment = file.Comments.Count > 0 AndAlso file.Comments.Values(0).Comment.ToUpperInvariant.Contains("VERSION")
+
+        If hasVersionComment Then Return file.Comments.Values(0).Comment
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the total number of entries stored in the internal iniFile objects
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
     Public Function count() As Integer
-        Dim out = 0
-        For Each section In EntrySections
-            out += section.Sections.Count
-        Next
-        Return out
+
+        Return EntrySections.Sum(Function(section) section.Sections.Count)
+
     End Function
 
-    ''' <summary>Sorts the internal iniFile objects in winapp2.ini format order</summary>
+
+    ''' <summary>
+    ''' Sorts the internal iniFile objects in winapp2.ini format order
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
     Public Sub sortInneriniFiles()
-        For Each innerIni In EntrySections
-            innerIni.sortSections(sortEntryNames(innerIni))
-        Next
+
+        EntrySections.ForEach(Sub(innerIni) innerIni.sortSections(sortEntryNames(innerIni)))
+
     End Sub
 
-    ''' <summary> Rebuilds a <c> list of winapp2entry </c> objects back into iniSection objects and returns the collection of them as an iniFile </summary>
-    ''' <param name="entryList"></param>
+    ''' <summary> 
+    ''' Rebuilds a <c> list of winapp2entry </c> objects back into iniSection objects and returns the collection of them as a single <c> iniFile </c>
+    ''' </summary>
+    ''' 
+    ''' <param name="entryList">
+    ''' The list of <c> winapp2entry </c> objects to be rebuilt into a single <c> iniFile </c>
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
     Private Function rebuildInnerIni(ByRef entryList As List(Of winapp2entry)) As iniFile
+
         Dim tmpini As New iniFile
-        For Each entry In entryList
-            tmpini.Sections.Add(entry.Name, New iniSection(entry.dumpToListOfStrings))
-            tmpini.Sections.Values.Last.StartingLineNumber = entry.LineNum
-        Next
+
+        entryList.ForEach(Sub(entry) tmpini.Sections.Add(entry.Name, New iniSection(entry.dumpToListOfStrings) With {.StartingLineNumber = entry.LineNum}))
+
         Return tmpini
+
     End Function
 
-    ''' <summary> Updates the internal iniFile objects </summary>
-    Public Sub rebuildToIniFiles()
+    ''' <summary> 
+    ''' Updates the internal <c> iniFile </c> objects to reflect any changes which have been made to the <c> winapp2entry </c> objects 
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
+    Public Sub rebuildWinapp2ChangesToIniFiles()
+
         For i = 0 To EntrySections.Count - 1
+
             EntrySections(i) = rebuildInnerIni(Winapp2entries(i))
             EntrySections(i).Name = FileSectionHeaders(i)
+
         Next
+
     End Sub
 
-    '''<summary> Returns the <c> winapp2file </c>'s inner <c> inifiles </c> as a single <c> inifile </c>object with its sections ordered as they would be in winapp2.ini on disk </summary>
+    '''<summary>
+    ''' Returns the <c> winapp2file's </c> inner <c> iniFiles </c> as a single <c> inifile </c> object 
+    ''' with its sections ordered as they would be in winapp2.ini on disk 
+    '''</summary>
+    '''
+    ''' <returns> A single <c> iniFile </c> containing all the ordered sections from all of the inner <c> iniFiles </c> </returns>
+    ''' 
+    ''' Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
     Public Function toIni() As iniFile
+
         Dim out As New iniFile
-        For Each entry In EntrySections
-            For Each section In entry.Sections.Values
-                out.Sections.Add(section.Name, section)
-            Next
+
+        For Each section In EntrySections.SelectMany(Function(entry) entry.Sections.Values)
+
+            out.Sections.Add(section.Name, section)
+
         Next
+
         Return out
+
     End Function
 
-    ''' <summary> Builds and returns the winapp2.ini text including the preamble comments </summary>
+    ''' <summary> 
+    ''' Builds and returns the winapp2.ini text including the preamble comments 
+    ''' </summary>
+    ''' 
+    ''' <returns> The complete text of winapp2.ini as a single String </returns>
+    ''' 
+    ''' Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
     Public Function winapp2string() As String
+
+        Dim builder As New StringBuilder()
         Dim fileName = If(IsNCC, "Winapp2 (Non-CCleaner version)", "Winapp2")
-        Dim licLink = If(IsNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md") & Environment.NewLine
-        ' Version string (YYMMDD format) & entry count 
-        Dim out = Version & Environment.NewLine
-        out += $"; # of entries: {count():#,###}{Environment.NewLine}"
-        out += $";{Environment.NewLine}"
-        out += $"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2.ini: {licLink}"
-        out += $"; You may copy, modify, remix, share, show, and transmit {fileName} but you must redistribute under the same license and you must attribute the original work to the winapp2 project {Environment.NewLine}"
-        out += $";{Environment.NewLine}"
+        Dim licLink = If(IsNCC, "https://github.com/MoscaDotTo/Winapp2/blob/master/Non-CCleaner/License.md", "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md")
+
+        builder.AppendLine(Version)
+        builder.AppendLine($"; # of entries: {count():#,###}")
+        builder.AppendLine(";")
+        builder.AppendLine($"; {fileName}.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2.ini: {licLink}")
+        builder.AppendLine($"; You may copy, modify, remix, share, show, and transmit {fileName} but you must redistribute under the same license and you must attribute the original work to the winapp2 project")
+        builder.AppendLine(";")
+
         If IsNCC Then
-            out += $"; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.{Environment.NewLine}"
-            out += $"; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.{Environment.NewLine}"
+
+            builder.AppendLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.")
+            builder.AppendLine("; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.")
+
         End If
-        out += $"; You can get the latest Winapp2.ini here: https://github.com/MoscaDotTo/Winapp2{Environment.NewLine}"
-        out += $"; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md{Environment.NewLine}"
-        out += $";{Environment.NewLine}"
-        out += $"; Try out Winapp2ool for many useful additional features including updating and trimming Winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe{Environment.NewLine}"
-        out += $"; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md{Environment.NewLine}" 
-        ' Adds each section's toString if it exists with a proper header and footer, followed by the main section (if it exists)
+
+        builder.AppendLine($"; You can get the latest Winapp2.ini here: https://github.com/MoscaDotTo/Winapp2")
+        builder.AppendLine($"; Any contributions are appreciated. Please refer to our ReadMe to learn to make your own entries here: https://github.com/MoscaDotTo/Winapp2/blob/master/README.md")
+        builder.AppendLine(";")
+        builder.AppendLine($"; Try out Winapp2ool for many useful additional features including updating and trimming Winapp2.ini: https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe")
+        builder.AppendLine($"; You can find the Winapp2ool ReadMe here: https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md")
+
         For i = 0 To EntrySections.Count - 2
-            If EntrySections(i).Sections.Count > 0 Then
-                out += $";{Environment.NewLine}"
-                out += $"; {EntrySections(i).Name}{Environment.NewLine}{Environment.NewLine}"
-                out += EntrySections(i).toString
-                out += $"{Environment.NewLine}; End of {EntrySections(i).Name}" & Environment.NewLine
-            End If
+
+            If EntrySections(i).Sections.Count <= 0 Then Continue For
+
+            builder.AppendLine(";")
+            builder.AppendLine($"; {EntrySections(i).Name} ({EntrySections(i).Sections.Count})")
+            builder.AppendLine()
+            builder.AppendLine(EntrySections(i).toString)
+            builder.AppendLine($"; End of {EntrySections(i).Name}")
+
         Next
-        If EntrySections.Last.Sections.Count > 0 Then out += $"{Environment.NewLine}{EntrySections.Last.toString}"
-        Return out
+
+        builder.AppendLine()
+        If EntrySections.Last.Sections.Count > 0 Then builder.Append($"{EntrySections.Last.toString}")
+
+        Return builder.ToString()
+
     End Function
+
 End Class

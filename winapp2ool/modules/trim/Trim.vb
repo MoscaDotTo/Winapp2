@@ -147,7 +147,7 @@ Public Module Trim
             processEntryList(entryList)
         Next
 
-        winapp2.rebuildToIniFiles()
+        winapp2.rebuildWinapp2ChangesToIniFiles()
         winapp2.sortInneriniFiles()
 
     End Sub

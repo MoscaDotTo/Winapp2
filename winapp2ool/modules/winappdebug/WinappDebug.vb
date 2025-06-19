@@ -380,7 +380,7 @@ Public Module WinappDebug
         Next
 
         resetKeyTrackers()
-        fileToBeDebugged.rebuildToIniFiles()
+        fileToBeDebugged.rebuildWinapp2ChangesToIniFiles()
         AlphabetizeEntries(fileToBeDebugged)
 
     End Sub
