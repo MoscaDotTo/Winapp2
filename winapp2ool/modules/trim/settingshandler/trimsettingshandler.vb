@@ -50,7 +50,7 @@ Public Module trimsettingshandler
     ''' Docs last updated: 2024-05-08 | Code last updated: 2022-11-21
     Public Sub getSerializedTrimSettings()
 
-        LoadModuleSettingsFromDict("Trim", GetType(trimsettings))
+        LoadModuleSettingsFromDict(NameOf(Trim), GetType(trimsettings))
 
     End Sub
 
