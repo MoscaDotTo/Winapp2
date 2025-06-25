@@ -257,7 +257,7 @@ Public Module settingsHandler
     Public Sub createModuleSettingsSection(callingModule As String, settingTuples As List(Of String), numBools As Integer, Optional numFiles As Integer = 3)
         If settingTuples Is Nothing Then argIsNull(NameOf(settingTuples)) : Return
         Dim settingKeys As List(Of String)
-        If callingModule = "Trim" Then
+        If callingModule = "Trim" OrElse callingModule = "Diff" Then
             settingKeys = getSettingKeys2(settingTuples, callingModule, numBools, numFiles)
         Else
             settingKeys = getSettingKeys(settingTuples, callingModule, numBools, numFiles)
@@ -278,7 +278,7 @@ Public Module settingsHandler
     Private Function getSettingKeys2(settingsTuples As List(Of String), moduleName As String, numBools As Integer, Optional numFiles As Integer = 3) As List(Of String)
         ' Ensure that we only operate on properly formatted tuples 
         Dim expectedSettingsCount = 2 * numBools + 3 * numFiles
-        gLog($"The number of settings provided to {moduleName}'s settings initializer ({settingsTuples.Count})doesn't match the number expected ({expectedSettingsCount}).", Not settingsTuples.Count = expectedSettingsCount)
+        gLog($"GET2 ::: The number of settings provided to {moduleName}'s settings initializer ({settingsTuples.Count})doesn't match the number expected ({expectedSettingsCount}).", Not settingsTuples.Count = expectedSettingsCount)
         Dim out As New List(Of String)
 
         For i = 0 To settingsTuples.Count - 2
@@ -400,10 +400,24 @@ Public Module settingsHandler
 
         For Each prop As PropertyInfo In winapp2oolmodule.GetProperties()
 
-            If Not prop.CanWrite OrElse Not dict.ContainsKey(prop.Name) Then Continue For
+            If Not prop.CanWrite Then Continue For
+
+            Dim value2 = prop.GetValue(Nothing)
+
+            If value2.GetType().Name = "iniFile" Then
+
+                Dim iniProp As iniFile = CType(value2, iniFile)
+
+                iniProp.Name = dict(prop.Name & "_Name")
+                iniProp.Dir = dict(prop.Name & "_Dir")
+
+                Continue For
+
+            End If
 
             Dim valueStr = dict(prop.Name)
             Dim value = Convert.ChangeType(valueStr, prop.PropertyType)
+
             prop.SetValue(winapp2oolmodule, value)
 
         Next
@@ -433,7 +447,7 @@ Public Module settingsHandler
             Dim value = prop.GetValue(Nothing)
             If value Is Nothing Then Continue For
 
-            ' Boolean Properties 
+            ' Boolean Properties
             If Not value.GetType().Name = "iniFile" Then
 
                 tuple.Add(prop.Name)
@@ -442,7 +456,7 @@ Public Module settingsHandler
 
             End If
 
-            ' iniFile properties 
+            ' iniFile properties
             Dim ini As iniFile = CType(value, iniFile)
             tuple.Add(prop.Name)
             tuple.Add($"{ini.Name}")
