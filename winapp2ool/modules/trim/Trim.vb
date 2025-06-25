@@ -23,41 +23,10 @@ Imports System.IO
 '''   </summary>
 '''   Docs last updated 2022-11-21
 Public Module Trim
-    ''' <summary> The winapp2.ini file that will be trimmed </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Property TrimFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
-
-    ''' <summary> Holds the path of an iniFile containing the names of Sections who should never be trimmed </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Property TrimFile2 As New iniFile(Environment.CurrentDirectory, "includes.ini")
-
-    ''' <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Property TrimFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini")
-
-    ''' <summary> Holds the path of an iniFile containing the names of Sections who should always be trimmed </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Property TrimFile4 As New iniFile(Environment.CurrentDirectory, "excludes.ini")
 
     ''' <summary> The major/minor version number on the current system </summary>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
     Private Property winVer As Double
-
-    ''' <summary> Indicates that the module settings have been modified from their defaults </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Property TrimModuleSettingsChanged As Boolean = False
-
-    ''' <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Property DownloadFileToTrim As Boolean = False
-
-    ''' <summary> Indicates that the includes should be consulted while trimming </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Property UseTrimIncludes As Boolean = False
-
-    ''' <summary> Indicates that the excludes should be consulted while trimming </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Property UseTrimExcludes As Boolean = False
 
     ''' <summary> Handles the commandline args for Trim </summary>
     ''' Trim args:
@@ -85,6 +54,10 @@ Public Module Trim
         initTrim()
 
     End Sub
+
+    Public Function getTrimmedIni(firstFile As iniFile, thirdFile As iniFile) As iniFile
+
+    End Function
 
     ''' <summary> Initiates the <c> Trim </c> process from the main menu or commandline </summary>
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
@@ -329,12 +302,33 @@ Public Module Trim
             Case "DET_CHROME"
 
                 Dim detChrome As New List(Of String) _
-                        From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe",
-                        "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe", "%LocalAppData%\Google\Chrome\Application\chrome.exe",
-                        "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe",
-                        "%ProgramFiles%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe",
-                        "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
-                        "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
+                        From {"%AppData%\ChromePlus\chrome.exe",
+                              "%LocalAppData%\Chromium\Application\chrome.exe",
+                              "%LocalAppData%\Chromium\chrome.exe",
+                              "%LocalAppData%\Flock\Application\flock.exe",
+                              "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe",
+                              "%LocalAppData%\Google\Chrome\Application\chrome.exe",
+                              "%LocalAppData%\RockMelt\Application\rockmelt.exe",
+                              "%LocalAppData%\SRWare Iron\iron.exe",
+                              "%ProgramFiles%\Chromium\Application\chrome.exe",
+                              "%ProgramFiles%\SRWare Iron\iron.exe",
+                              "%ProgramFiles%\Chromium\chrome.exe",
+                              "%ProgramFiles%\Flock\Application\flock.exe",
+                              "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe",
+                              "%ProgramFiles%\Google\Chrome\Application\chrome.exe",
+                              "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
+                              "HKCU\Software\Chromium",
+                              "HKCU\Software\SuperBird",
+                              "HKCU\Software\Torch",
+                              "HKCU\Software\Vivaldi",
+                              "HKCU\Software\CentBrowser",
+                              "HKCU\Software\Comodo\Dragon",
+                              "HKCU\Software\CocCoc\Browser",
+                              "HKCU\Software\Epic Privacy Browser",
+                              "HKCU\Software\Yandex\YandexBrowser",
+                              "HKCU\Software\Slimjet",
+                              "HKCU\Software\Iridium"
+                            }
 
                 For Each path In detChrome
 
@@ -453,6 +447,7 @@ Public Module Trim
             Dim var = splitDir(1)
             Dim envDir = Environment.GetEnvironmentVariable(var)
             Dim userProfileDir = Environment.GetEnvironmentVariable("UserProfile")
+            Dim isWinXP = winVer = 5.1 OrElse winVer = 5.2
             Select Case var
 
                 ' %ProgramFiles% in CCleaner points to both C:\Program Files and C:\Program Files (x86)
@@ -466,14 +461,14 @@ Public Module Trim
                 ' Windows Vista+:   %UserProfile%\Documents	
                 Case "Documents"
 
-                    envDir = $"{userProfileDir}\{If(winVer = 5.1 OrElse winVer = 5.2, "My ", "")}Documents"
+                    envDir = $"{userProfileDir}\{If(isWinXP, "My ", "")}Documents"
 
                 ' %CommonAppData% is a CCleaner-only variable which creates parity between the all users profile in windows xp and the programdata folder in vista+ 
                 ' Windows XP:       %AllUsersProfile%\Application Data
                 ' Windows Vista+    %AllUsersProfile%\
                 Case "CommonAppData"
 
-                    envDir = $"{Environment.GetEnvironmentVariable("AllUsersProfile")}\{If(winVer = 5.1 OrElse winVer = 5.2, "Application Data\", "")}"
+                    envDir = $"{Environment.GetEnvironmentVariable("AllUsersProfile")}\{If(isWinXP, "Application Data\", "")}"
 
                 ' %LocalLowAppData% is a CCleaner-only variable which points to %UserProfile%\AppData\LocalLow
                 Case "LocalLowAppData"
@@ -485,21 +480,21 @@ Public Module Trim
                 ' Windows Vista+:   %UserProfile%\Pictures
                 Case "%Pictures%"
 
-                    envDir = $"{userProfileDir}\{If(winVer = 5.1 OrElse winVer = 5.2, "My Documents\My ", "")}Pictures"
+                    envDir = $"{userProfileDir}\{If(isWinXP, "My Documents\My ", "")}Pictures"
 
                 ' %Music% is a CCleaner-only variable which points to two paths depending on system 
                 ' Windows XP:       %UserProfile%\My Documents\My Music
                 ' Windows Vista+:   %UserProfile%\Music
                 Case "%Music%"
 
-                    envDir = $"{userProfileDir}\{If(winVer = 5.1 OrElse winVer = 5.2, "My Documents\My ", "")}Music"
+                    envDir = $"{userProfileDir}\{If(isWinXP, "My Documents\My ", "")}Music"
 
                 ' %Video% is a CCleaner-only variable which points to two paths depending on system 
                 ' Windows XP:       %UserProfile%\My Documents\My Videos
                 ' Windows Vista+:   %UserProfile%\Videos
                 Case "%Video%"
 
-                    envDir = $"{userProfileDir}\{If(winVer = 5.1 OrElse winVer = 5.2, "My Documents\My ", "")}Videos"
+                    envDir = $"{userProfileDir}\{If(isWinXP, "My Documents\My ", "")}Videos"
 
             End Select
 
