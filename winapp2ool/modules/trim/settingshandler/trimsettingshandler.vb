@@ -18,10 +18,11 @@
 Option Strict On
 
 ''' <summary> 
-''' Manages the settings of the Trim module for the purpose of syncing to disk 
+''' Provides methods for managing the Trim module settings, including support methods for syncing to disk
+''' Also provides the function which restores the default state of the Trim module's properties
 ''' </summary>
 ''' 
-''' Docs last updated: 2024-05-08
+''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 Public Module trimsettingshandler
 
     ''' <summary> 

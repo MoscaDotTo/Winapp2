@@ -14,6 +14,7 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
 Imports System.IO
 
@@ -24,14 +25,22 @@ Imports System.IO
 '''   Docs last updated 2022-11-21
 Public Module Trim
 
-    ''' <summary> The major/minor version number on the current system </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' The major/minor version number on the current system 
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Property winVer As Double
 
-    ''' <summary> Handles the commandline args for Trim </summary>
+    ''' <summary> 
+    ''' Handles the commandline args for Trim 
+    ''' </summary>
+    ''' 
+    ''' <remarks>
     ''' Trim args:
     ''' -d          : download the latest winapp2.ini
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' </remarks>
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Public Sub handleCmdLine()
 
         initDefaultTrimSettings()
@@ -41,12 +50,26 @@ Public Module Trim
 
     End Sub
 
-    ''' <summary> Trims an <c> iniFile </c> from outside the module </summary>
-    ''' <param name="firstFile"> The winapp2.ini file to be trimmed </param>
-    ''' <param name="thirdFile"> <c> iniFile </c> containing the path on disk to which the trimmed file will be saved </param>
-    ''' <param name="d"> Indicates that the input winapp2.ini should be downloaded from GitHub </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Sub remoteTrim(firstFile As iniFile, thirdFile As iniFile, d As Boolean)
+    ''' <summary> 
+    ''' Trims an <c> iniFile </c> from outside the module 
+    ''' </summary>
+    ''' 
+    ''' <param name="firstFile">
+    ''' The winapp2.ini file to be trimmed 
+    ''' </param>
+    ''' 
+    ''' <param name="thirdFile">
+    ''' <c> iniFile </c> containing the path on disk to which the trimmed file will be saved 
+    ''' </param>
+    ''' 
+    ''' <param name="d"> 
+    ''' Indicates that the input winapp2.ini should be downloaded from GitHub 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
+    Public Sub remoteTrim(firstFile As iniFile,
+                          thirdFile As iniFile,
+                          d As Boolean)
 
         TrimFile1 = firstFile
         TrimFile3 = thirdFile
@@ -55,12 +78,16 @@ Public Module Trim
 
     End Sub
 
-    Public Function getTrimmedIni(firstFile As iniFile, thirdFile As iniFile) As iniFile
+    Public Function getTrimmedIni(firstFile As iniFile,
+                                  thirdFile As iniFile) As iniFile
 
     End Function
 
-    ''' <summary> Initiates the <c> Trim </c> process from the main menu or commandline </summary>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Initiates the <c> Trim </c> process from the main menu or commandline 
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Public Sub initTrim()
 
         ' Don't try to trim an empty file 
@@ -106,9 +133,15 @@ Public Module Trim
 
     End Sub
 
-    ''' <summary> Trims a <c> winapp2file </c>, removing entries not relevant to the current system </summary>
-    ''' <param name="winapp2"> A <c> winapp2file </c> to be trimmed to fit the current system </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Trims a <c> winapp2file </c>, removing entries not relevant to the current system 
+    ''' </summary>
+    ''' 
+    ''' <param name="winapp2">
+    ''' A <c> winapp2file </c> to be trimmed to fit the current system 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Public Sub trimFile(winapp2 As winapp2file)
 
         If winapp2 Is Nothing Then argIsNull(NameOf(winapp2)) : Return
@@ -116,8 +149,10 @@ Public Module Trim
         ' Winapp2.ini is composed of multiple entry lists representing the different top-level sections that we separate from the rest of the entries
         ' Pass them off individually and in-order for processing
         For i = 0 To winapp2.Winapp2entries.Count - 1
+
             Dim entryList = winapp2.Winapp2entries(i)
             processEntryList(entryList)
+
         Next
 
         winapp2.rebuildWinapp2ChangesToIniFiles()
@@ -125,11 +160,21 @@ Public Module Trim
 
     End Sub
 
-    ''' <summary> Evaluates a <c> keyList </c> to observe whether they exist on the current machine </summary>
-    ''' <param name="kl"> The <c> keyList </c> containing detection criteria to be evaluated </param>
-    ''' <param name="chkExist"> The <c> function </c> that evaluates the detection criteria in <c> <paramref name="kl"/> </c> </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Function checkExistence(ByRef kl As keyList, chkExist As Func(Of String, Boolean)) As Boolean
+    ''' <summary> 
+    ''' Evaluates a <c> keyList </c> to observe whether they exist on the current machine 
+    ''' </summary>
+    ''' 
+    ''' <param name="kl">
+    ''' The <c> keyList </c> containing detection criteria to be evaluated 
+    ''' </param>
+    ''' 
+    ''' <param name="chkExist">
+    ''' The <c> function </c> that evaluates the detection criteria in <c> <paramref name="kl"/> </c> 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
+    Private Function checkExistence(ByRef kl As keyList,
+                                    chkExist As Func(Of String, Boolean)) As Boolean
 
         ' If there's no keys then their content cannot exist 
         If kl.KeyCount = 0 Then Return False
@@ -137,12 +182,10 @@ Public Module Trim
         ' Process each key individually, if any exist return true 
         For Each key In kl.Keys
 
-            If chkExist(key.Value) Then
+            If Not chkExist(key.Value) Then Continue For
 
-                gLog($"{key.Value} matched a path on the system", Not kl.KeyType = "DetectOS", descend:=True, indent:=True, buffr:=True)
-                Return True
-
-            End If
+            gLog($"{key.Value} matched a path on the system", Not kl.KeyType = "DetectOS", descend:=True, indent:=True, buffr:=True)
+            Return True
 
         Next
 
@@ -151,10 +194,16 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> Audits the detection criteria in a given <c> winapp2entry </c> against the current system <br/> <br/>
-    ''' Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise </summary>
-    ''' <param name="entry"> A <c> winapp2entry </c> to whose detection criteria will be audited </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Audits the detection criteria in a given <c> winapp2entry </c> against the current system <br/> <br/>
+    ''' Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise 
+    ''' </summary>
+    ''' 
+    ''' <param name="entry">
+    ''' A <c> winapp2entry </c> to whose detection criteria will be audited 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
 
         gLog($"Processing entry: {entry.Name}", ascend:=True, buffr:=True, leadr:=True)
@@ -198,9 +247,15 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> Audits the given entry for legacy codepaths in the machine's VirtualStore </summary>
-    ''' <param name="entry"> The <c> winapp2entry </c> to audit </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Audits the given entry for legacy codepaths in the machine's VirtualStore 
+    ''' </summary>
+    ''' 
+    ''' <param name="entry"> 
+    ''' The <c> winapp2entry </c> to audit
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
 
         gLog("Attempting to generate any neccessary VirtualStore keys for " & entry.Name, indent:=True, buffr:=True, ascend:=True)
@@ -211,9 +266,15 @@ Public Module Trim
 
     End Sub
 
-    ''' <summary> Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list </summary>
-    ''' <param name="kl"> The <c> keyList </c> of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list 
+    ''' </summary>
+    ''' 
+    ''' <param name="kl"> 
+    ''' The <c> keyList </c> of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Sub vsKeyChecker(ByRef kl As keyList)
 
         If kl.KeyCount = 0 Then Return
@@ -236,12 +297,26 @@ Public Module Trim
 
     End Sub
 
-    ''' <summary> Creates <c> iniKeys </c> to handle VirtualStore locations that correspond to paths given in <c> <paramref name="kl"/> </c> </summary>
-    ''' <param name="findStrs"> An array of Strings to seek for in the key value </param>
-    ''' <param name="replStrs"> An array of strings to replace the sought after key values </param>
-    ''' <param name="kl"> The <c> keylist </c> to be processed </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Sub mkVsKeys(findStrs As String(), replStrs As String(), ByRef kl As keyList)
+    ''' <summary> 
+    ''' Creates <c> iniKeys </c> to handle VirtualStore locations that correspond to paths given in <c> <paramref name="kl"/> </c> 
+    ''' </summary>
+    ''' 
+    ''' <param name="findStrs"> 
+    ''' An array of Strings to seek for in the key value 
+    ''' </param>
+    ''' 
+    ''' <param name="replStrs"> 
+    ''' An array of strings to replace the sought after key values
+    ''' </param>
+    ''' 
+    ''' <param name="kl">
+    ''' The <c> keylist </c> to be processed 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
+    Private Sub mkVsKeys(findStrs As String(),
+                         replStrs As String(),
+                         ByRef kl As keyList)
 
         Dim initVals = kl.toStrLst(True)
         Dim keysToAdd As New keyList(kl.KeyType)
@@ -269,20 +344,40 @@ Public Module Trim
 
     End Sub
 
-    ''' <summary> Creates the VirtualStore version of a given <c> iniKey </c> </summary>
-    ''' <param name="findStr"> The normal filesystem path </param>
-    ''' <param name="replStr"> The VirtualStore path </param>
-    ''' <param name="key"> The <c> iniKey </c> to processed into a VirtualStore key </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Function createVSKey(findStr As String, replStr As String, key As iniKey) As iniKey
+    ''' <summary> 
+    ''' Creates the VirtualStore version of a given <c> iniKey </c>
+    ''' </summary>
+    ''' 
+    ''' <param name="findStr"> 
+    ''' The normal filesystem path 
+    ''' </param>
+    ''' 
+    ''' <param name="replStr"> 
+    ''' The VirtualStore path 
+    ''' </param>
+    ''' 
+    ''' <param name="key"> 
+    ''' The <c> iniKey </c> to processed into a VirtualStore key 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
+    Private Function createVSKey(findStr As String,
+                                 replStr As String,
+                                 key As iniKey) As iniKey
 
         Return New iniKey($"{key.Name}={key.Value.Replace(findStr, replStr)}")
 
     End Function
 
-    ''' <summary> Processes a list of <c> winapp2entries </c> and removes any from the list that wouldn't be detected by CCleaner </summary>
-    ''' <param name="entryList"> The list of <c> winapp2entries </c> who detection criteria will be audited </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Processes a list of <c> winapp2entries </c> and removes any from the list that wouldn't be detected by CCleaner
+    ''' </summary>
+    ''' 
+    ''' <param name="entryList"> 
+    ''' The list of <c> winapp2entries </c> who detection criteria will be audited 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
 
         ' If the entry's Detect criteria doesn't return true, prune it
@@ -292,9 +387,15 @@ Public Module Trim
 
     End Sub
 
-    ''' <summary> Returns <c> True </c> if a SpecialDetect location exists, <c> False </c> otherwise </summary>
-    ''' <param name="key"> A SpecialDetect format <c> iniKey </c> </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Returns <c> True </c> if a SpecialDetect location exists, <c> False </c> otherwise 
+    ''' </summary>
+    ''' 
+    ''' <param name="key"> 
+    ''' A SpecialDetect format <c> iniKey </c> 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkSpecialDetects(ByVal key As String) As Boolean
 
         Select Case key
@@ -355,18 +456,30 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> Handles passing off checks from sources that may vary between file system and registry </summary>
-    ''' <param name="path"> A filesystem or registry path whose existence will be audited </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Handles passing off checks from sources that may vary between file system and registry 
+    ''' </summary>
+    ''' 
+    ''' <param name="path">
+    ''' A filesystem or registry path whose existence will be audited 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkExist(path As String) As Boolean
 
         Return If(path.StartsWith("HK", StringComparison.InvariantCulture), checkRegExist(path), checkPathExist(path))
 
     End Function
 
-    ''' <summary> Returns <c> True </c> if a given key exists in the Windows Registry, <c> False </c> otherwise </summary>
-    ''' <param name="path"> A registry path to be audited for existence </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Returns <c> True </c> if a given key exists in the Windows Registry, <c> False </c> otherwise 
+    ''' </summary>
+    ''' 
+    ''' <param name="path">
+    ''' A registry path to be audited for existence 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkRegExist(path As String) As Boolean
 
         Dim dir = path
@@ -379,11 +492,21 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> Returns <c> True </c> if a given key exists in the registry, <c> False </c> otherwise </summary>
-    ''' <param name="root"> The registry hive that contains the key whose existence will be audited </param>
-    ''' <param name="dir"> The path of the key whose existence will be audited </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Function getRegExists(root As String, dir As String) As Boolean
+    ''' <summary>
+    ''' Returns <c> True </c> if a given key exists in the registry, <c> False </c> otherwise 
+    ''' </summary>
+    ''' 
+    ''' <param name="root">
+    ''' The registry hive that contains the key whose existence will be audited 
+    ''' </param>
+    ''' 
+    ''' <param name="dir"> 
+    ''' The path of the key whose existence will be audited
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
+    Private Function getRegExists(root As String,
+                                  dir As String) As Boolean
 
         Try
 
@@ -429,15 +552,25 @@ Public Module Trim
 
     End Function
 
-
-
-
-    ''' <summary> Handles some CCleaner variables and logs if the current variable is ProgramFiles so the 32bit location can be checked later </summary>
-    ''' <param name="dir"> A filesystem path to process for environment variables </param>
-    ''' <param name="isProgramFiles"> Indicates that the %ProgramFiles% variable has been seen </param>
-    ''' Docs last updated: 2024-03-26- | Code last updated: 2024-03-26
-    ''' <returns> <c> True </c>c> if an error occurred <br /> <c> False </c> otherwise </returns>
-    Private Function processEnvDirs(ByRef dir As String, ByRef isProgramFiles As Boolean) As Boolean
+    ''' <summary> 
+    ''' Handles some CCleaner variables and logs if the current variable is ProgramFiles so the 32bit location can be checked later 
+    ''' </summary>
+    ''' 
+    ''' <param name="dir">
+    ''' A filesystem path to process for environment variables 
+    ''' </param>
+    ''' 
+    ''' <param name="isProgramFiles"> 
+    ''' Indicates that the %ProgramFiles% variable has been seen 
+    ''' </param>
+    ''' 
+    ''' <returns> 
+    ''' <c> True </c>c> if an error occurred <br /> <c> False </c> otherwise 
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2024-03-26
+    Private Function processEnvDirs(ByRef dir As String,
+                                    ByRef isProgramFiles As Boolean) As Boolean
 
         Dim errDetected = False
 
@@ -514,9 +647,15 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> Returns <c> True </c> if a path exists on the file system, <c> False </c> otherwise </summary>
-    ''' <param name="key"> A filesystem path </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Returns <c> True </c> if a path exists on the file system, <c> False </c> otherwise 
+    ''' </summary>
+    ''' 
+    ''' <param name="key"> 
+    ''' A filesystem path 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkPathExist(key As String) As Boolean
 
         ' Make sure we get the proper path for environment variables
@@ -575,20 +714,42 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> Swaps out a directory with the ProgramFiles parameterization on 64bit computers </summary>
-    ''' <param name="dir"> The file system path to be modified </param>
-    ''' <param name="key"> The original state of the path </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Private Sub swapDir(ByRef dir As String, key As String)
+    ''' <summary> 
+    ''' Swaps out a directory with the ProgramFiles parameterization on 64bit computers 
+    ''' </summary>
+    ''' 
+    ''' <param name="dir">
+    ''' The file system path to be modified
+    ''' </param>
+    ''' 
+    ''' <param name="key">
+    ''' The original state of the path 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
+    Private Sub swapDir(ByRef dir As String,
+                        key As String)
 
         Dim envDir = Environment.GetEnvironmentVariable("ProgramFiles(x86)")
         dir = envDir & key.Split(CChar("%"))(2)
 
     End Sub
 
-    ''' <summary> Interprets parameterized wildcards for the current system </summary>
-    ''' <param name="dir"> A path containing a wildcard </param>
-    Private Function expandWildcard(dir As String, isFileSystem As Boolean) As Boolean
+    ''' <summary> 
+    ''' Interprets parameterized wildcards for the current system 
+    ''' </summary>
+    ''' 
+    ''' <param name="dir">
+    ''' A path containing a wildcard 
+    ''' </param>
+    ''' 
+    ''' <param name="isFileSystem"> 
+    ''' Indicates that the path is a filesystem path, <c> False </c> if it is a registry path
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
+    Private Function expandWildcard(dir As String,
+                                    isFileSystem As Boolean) As Boolean
 
         gLog("Expanding Wildcard: " & dir, ascend:=True)
 
@@ -688,9 +849,15 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> Returns <c> True </c> if the system satisfies the DetectOS citeria, <c> False </c> otherwise </summary>
-    ''' <param name="value"> The DetectOS criteria to be checked </param>
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' <summary> 
+    ''' Returns <c> True </c> if the system satisfies the DetectOS criteria, <c> False </c> otherwise 
+    ''' </summary>
+    ''' 
+    ''' <param name="value"> 
+    ''' The DetectOS criteria to be checked 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkDetOS(value As String) As Boolean
 
         Dim splitKey = value.Split(CChar("|"))
