@@ -17,9 +17,11 @@
 
 Option Strict On
 
-''' <summary>
+''' <summary> 
 ''' Manages the settings of the WinappDebug module for the purpose of syncing to disk 
 ''' </summary>
+''' 
+''' Docs last updated: 2024-05-08
 Module lintsettingshandler
 
     ''' <summary>
@@ -27,16 +29,30 @@ Module lintsettingshandler
     ''' </summary>
     ''' 
     ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
-    Private Property Lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters",
-                                                        "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
-                                                        "Multiples", "Invalid Values", "Syntax Errors", "Path Validity",
-                                                        "Semicolons", "Optimizations", "Potential Duplicate Keys Between Entries"}
+    Private ReadOnly Property Lints As New List(Of String) From {
+        "Casing",
+        "Alphabetization",
+        "Improper Numbering",
+        "Parameters",
+        "Flags",
+        "Slashes",
+        "Defaults",
+        "Duplicates",
+        "Unneeded Numbering",
+        "Multiples",
+        "Invalid Values",
+        "Syntax Errors",
+        "Path Validity",
+        "Semicolons",
+        "Optimizations",
+        "Potential Duplicate Keys Between Entries"
+    }
 
     ''' <summary> 
-    ''' Restore the default state of all of the module's parameters, undoing any changes the user may have made to them 
+    ''' Restores the default state of the WinappDebug module's properties 
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2023-07-19
     Public Sub InitDefaultLintSettings()
 
         winappDebugFile1.resetParams()
@@ -54,10 +70,10 @@ Module lintsettingshandler
     End Sub
 
     ''' <summary> 
-    ''' Loads the WinappDebug settings from disk and loads them into memory, overriding the default settings 
+    ''' Assigns the module settings to Trim based on the current disk-writable settings representation
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub getSeralizedLintSettings()
 
         If Not readSettingsFromDisk Then Return
@@ -149,21 +165,18 @@ Module lintsettingshandler
 
     End Sub
 
-    '''<summary>
-    '''Adds the current (typically default) state of the module's settings into the disk-writable settings representation 
-    '''</summary>
-    '''
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' <summary>
+    ''' Adds the current state of the module's settings into the disk-writable settings representation 
+    ''' </summary>
+    ''' 
+    ''' <remarks>
+    ''' Most often, this is the default state of these settings 
+    ''' </remarks>
+    ''' 
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub CreateLintSettingsSection()
 
-        Dim settingsKeys As New List(Of String) From {
-                                                      NameOf(RepairSomeErrsFound), tsInvariant(RepairSomeErrsFound),
-                                                      NameOf(ScanSettingsChanged), tsInvariant(ScanSettingsChanged),
-                                                      NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged),
-                                                      NameOf(SaveChanges), tsInvariant(SaveChanges),
-                                                      NameOf(RepairErrsFound), tsInvariant(RepairErrsFound),
-                                                      NameOf(overrideDefaultVal), tsInvariant(overrideDefaultVal),
-                                                      NameOf(expectedDefaultValue), tsInvariant(expectedDefaultValue)}
+        Dim settingsKeys As New List(Of String)
 
         For i = 0 To Lints.Count - 1
 
@@ -174,8 +187,19 @@ Module lintsettingshandler
 
         Next
 
-        settingsKeys.AddRange({NameOf(winappDebugFile1), winappDebugFile1.Name, winappDebugFile1.Dir, NameOf(winappDebugFile3), winappDebugFile3.Name, winappDebugFile3.Dir})
-        createModuleSettingsSection(NameOf(WinappDebug), settingsKeys, 39, 2)
+        settingsKeys.AddRange({
+            NameOf(RepairSomeErrsFound), tsInvariant(RepairSomeErrsFound),
+            NameOf(ScanSettingsChanged), tsInvariant(ScanSettingsChanged),
+            NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged),
+            NameOf(SaveChanges), tsInvariant(SaveChanges),
+            NameOf(RepairErrsFound), tsInvariant(RepairErrsFound),
+            NameOf(overrideDefaultVal), tsInvariant(overrideDefaultVal),
+            NameOf(expectedDefaultValue), tsInvariant(expectedDefaultValue),
+            NameOf(winappDebugFile1), winappDebugFile1.Name, winappDebugFile1.Dir,
+            NameOf(winappDebugFile3), winappDebugFile3.Name, winappDebugFile3.Dir
+        })
+
+        createModuleSettingsSection(NameOf(WinappDebug), settingsKeys, 7 + 2 * Lints.Count, 2)
 
     End Sub
 
