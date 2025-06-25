@@ -1247,7 +1247,7 @@ Module Diff
     ''' 
     ''' Docs last updated: 2023-06-10 | Code last updated: 2023-06-10
     Private Sub ItemizeMergedEntries(entry As String,
-                                       isMerger As Boolean)
+                                     isMerger As Boolean)
 
         If Not MergeDict.ContainsKey(entry) Then Return
 
@@ -1603,7 +1603,7 @@ Module Diff
     ''' 
     ''' Docs last updated: 2023-05-30 | Code last updated: 2023-05-30
     Private Sub trackMerger(oldSectionVersion As iniSection,
-                          newIniSectionVersion As iniSection)
+                            newIniSectionVersion As iniSection)
 
         Dim mergeName = newIniSectionVersion.Name
         MergedEntryTracker.Add(mergeName)
@@ -1659,13 +1659,13 @@ Module Diff
     ''' Docs last updated: 2023-04-20 | Code last updated: 2023-04-20
 
     Private Sub assessKeyMatches(oldKeyList As keyList,
-                                newKeyList As keyList,
-                                ByRef countTracker As Boolean,
-                                ByRef allKeysMatchedTracker As Boolean,
-                                ByRef MatchCount As Integer,
-                                Optional disallowedValues As HashSet(Of String) = Nothing,
-                                Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
-                                Optional ByRef possibleWildCardReduction As Boolean = False)
+                                 newKeyList As keyList,
+                                 ByRef countTracker As Boolean,
+                                 ByRef allKeysMatchedTracker As Boolean,
+                                 ByRef MatchCount As Integer,
+                                 Optional disallowedValues As HashSet(Of String) = Nothing,
+                                 Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
+                                 Optional ByRef possibleWildCardReduction As Boolean = False)
 
         For Each key In oldKeyList.Keys
 
@@ -1777,9 +1777,9 @@ Module Diff
     ''' 
     ''' Docs last updated: 2023-06-05 | Code last updated: 2023-06-05
     Private Sub ItemizeChangesFromList(kl As keyList,
-                                   wasAdded As Boolean,
-                                   ByRef ktList As List(Of String),
-                                   ByRef countList As List(Of Integer))
+                                       wasAdded As Boolean,
+                                       ByRef ktList As List(Of String),
+                                       ByRef countList As List(Of Integer))
 
         If kl.KeyCount = 0 Then Return
 
@@ -1939,8 +1939,8 @@ Module Diff
     ''' 
     ''' Docs last updated: 2022-06-10 | Code last updated: 2022-06-10
     Private Sub MakeDiff(section As iniSection,
-                        changeType As Integer,
-                        Optional newSection As iniSection = Nothing)
+                         changeType As Integer,
+                         Optional newSection As iniSection = Nothing)
 
         Dim printColor As ConsoleColor = ConsoleColor.Cyan
         If changeType = 2 OrElse changeType = 3 Then printColor = If(changeType = 2, ConsoleColor.Yellow, ConsoleColor.Magenta)

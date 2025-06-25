@@ -15,10 +15,13 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
+
 ''' <summary>
-''' Holds the settings for the Diff module, which is responsible for trimming the winapp2.ini file.
-''' This modu
+''' Holds the settings for the Diff module, which is responsible for assessing changes between two versions of winapp2.ini.
+''' This module contains properties that define the input and output files, as well as flags to download the diff file and save the diff log.
+''' It also tracks whether the module settings have been modified from their defaults and whether the remote file should be trimmed if downloading.
 ''' </summary>
+''' 
 ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 Public Module diffsettings
 
