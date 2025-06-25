@@ -215,6 +215,10 @@ Module maintoolmenu
 
                 autoUpdate()
 
+            Case input = "e"
+
+                'initModule("Executor", AddressOf printExecutorMenu, AddressOf handleExecutorInput)
+
             Case Else
 
                 setHeaderText(invInpStr, True)
