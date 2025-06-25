@@ -18,35 +18,6 @@ Option Strict On
 ''' <summary> This module performs housekeeping on ccleaner.ini to clean up leftovers from winapp2.ini </summary>
 Module CCiniDebug
 
-    ''' <summary> The winapp2.ini file that ccleaner.ini may optionally be checked against </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
-    Public Property CCDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
-
-    '''<summary> The ccleaner.ini file to be debugged </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
-    Public Property CCDebugFile2 As New iniFile(Environment.CurrentDirectory, "ccleaner.ini", mExist:=True)
-
-    '''<summary> Holds the path for the debugged file that will be saved to disk. Overwrites ccleaner.ini by default </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
-    Public Property CCDebugFile3 As New iniFile(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner-debugged.ini")
-
-    '''<summary> Indicates that stale winapp2.ini entries should be pruned from ccleaner.ini <br/> Default: <c> True </c> </summary>
-    '''<remarks> A "stale" entry is one that appears in an (app) key in <c> CCDebugFile2 </c> but does not have a corresponding section in <c> CCDebugFile1</c> </remarks>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
-    Public Property PruneStaleEntries As Boolean = True
-
-    '''<summary> Indicates that the debugged file should be saved back to disk <br/> Default: <c> True </c> </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
-    Public Property SaveDebuggedFile As Boolean = True
-
-    '''<summary> Indicates that the contents of ccleaner.ini should be sorted alphabetically <br /> Default: <c> True </c> </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
-    Public Property SortFileForOutput As Boolean = True
-
-    '''<summary> Indicates that the module's settings have been modified from their defaults </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
-    Public Property CCDBSettingsChanged As Boolean = False
-
     ''' <summary> Handles the commandline args for CCiniDebug </summary>
     '''  CCiniDebug args:
     ''' -noprune    : disable pruning of stale winapp2.ini entries

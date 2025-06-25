@@ -21,7 +21,7 @@ Option Strict On
 ''' Manages the settings of the CCiniDebug module for the purpose of syncing to disk 
 ''' </summary>
 ''' 
-''' Docs last updated: 2024-05-08
+''' Docs last updated: 2024-05-08 | Code last updated: 2025-06-25
 Module ccdebugsettinghandler
 
     ''' <summary> 
@@ -46,56 +46,10 @@ Module ccdebugsettinghandler
     ''' Assigns the module settings to CCiniDebug based on the current disk-writable settings representation
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2025-06-25
     Public Sub getSerializedDebugSettings()
 
-        For Each kvp In settingsDict(NameOf(CCiniDebug))
-
-            Select Case kvp.Key
-
-                Case NameOf(CCDebugFile1) & "_Name"
-
-                    CCDebugFile1.Name = kvp.Value
-
-                Case NameOf(CCDebugFile1) & "_Dir"
-
-                    CCDebugFile1.Dir = kvp.Value
-
-                Case NameOf(CCDebugFile2) & "_Name"
-
-                    CCDebugFile2.Name = kvp.Value
-
-                Case NameOf(CCDebugFile2) & "_Dir"
-
-                    CCDebugFile2.Dir = kvp.Value
-
-                Case NameOf(CCDebugFile3) & "_Name"
-
-                    CCDebugFile3.Name = kvp.Value
-
-                Case NameOf(CCDebugFile3) & "_Dir"
-
-                    CCDebugFile3.Dir = kvp.Value
-
-                Case NameOf(PruneStaleEntries)
-
-                    PruneStaleEntries = CBool(kvp.Value)
-
-                Case NameOf(SaveDebuggedFile)
-
-                    SaveDebuggedFile = CBool(kvp.Value)
-
-                Case NameOf(SortFileForOutput)
-
-                    SortFileForOutput = CBool(kvp.Value)
-
-                Case NameOf(CCDBSettingsChanged)
-
-                    CCDBSettingsChanged = CBool(kvp.Value)
-
-            End Select
-
-        Next
+        LoadModuleSettingsFromDict(NameOf(CCiniDebug), GetType(ccdebugsettings))
 
     End Sub
 
@@ -107,20 +61,12 @@ Module ccdebugsettinghandler
     ''' Most often, this is the default state of these settings 
     ''' </remarks>
     ''' 
-    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2025-06-25
     Public Sub createCCDBSettingsSection()
 
-        Dim ccDebugSettingsTuples As New List(Of String) From {
-            NameOf(PruneStaleEntries), tsInvariant(PruneStaleEntries),
-            NameOf(SaveDebuggedFile), tsInvariant(SaveDebuggedFile),
-            NameOf(SortFileForOutput), tsInvariant(SortFileForOutput),
-            NameOf(CCDBSettingsChanged), tsInvariant(CCDBSettingsChanged),
-            NameOf(CCDebugFile1), CCDebugFile1.Name, CCDebugFile1.Dir,
-            NameOf(CCDebugFile2), CCDebugFile2.Name, CCDebugFile2.Dir,
-            NameOf(CCDebugFile3), CCDebugFile3.Name, CCDebugFile3.Dir
-        }
+        Dim ccdebugSettingsTuple = GetSettingsTupleWithReflection(GetType(diffsettings))
 
-        createModuleSettingsSection(NameOf(CCiniDebug), ccDebugSettingsTuples, 4)
+        createModuleSettingsSection(NameOf(CCiniDebug), ccdebugSettingsTuple, getNumBools(GetType(ccdebugsettings)), getNumFiles(GetType(ccdebugsettings)))
 
     End Sub
 

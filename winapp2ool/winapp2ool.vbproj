@@ -123,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="handlers\settings\settingsHandler.vb" />
+    <Compile Include="modules\ccdebug\settingshandler\ccdebugsettings.vb" />
     <Compile Include="modules\ccdebug\tool\CCiniDebug.vb" />
     <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
     <Compile Include="modules\ccdebug\settingshandler\ccdebugsettinghandler.vb" />
