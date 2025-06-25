@@ -18,12 +18,14 @@
 Option Strict On
 
 ''' <summary> 
-''' Syncs the winapp2ool main module settings to and from disk 
+''' Manages the settings of the main winapp2ool module for the purpose of syncing to disk 
 ''' </summary>
+''' 
+''' Docs last updated: 2024-05-08
 Module mainToolSettingsHandler
 
     ''' <summary> 
-    ''' Loads values from disk into memory for the winapp2ool module settings
+    ''' Assigns the module settings to main winapp2ool module based on the current disk-writable settings representation
     ''' </summary>
     ''' 
     ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
@@ -67,19 +69,25 @@ Module mainToolSettingsHandler
 
     End Sub
 
-    '''<summary> 
-    '''Adds the current (typically default) state of the module's settings into the disk-writable settings representation 
-    '''</summary>
-    '''
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+    ''' <summary>
+    ''' Adds the current state of the module's settings into the disk-writable settings representation 
+    ''' </summary>
+    ''' 
+    ''' <remarks>
+    ''' Most often, this is the default state of these settings 
+    ''' </remarks>
+    ''' 
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub createToolSettingsSection()
 
-        Dim mainToolModuleTuple As New List(Of String) From {NameOf(isBeta), tsInvariant(isBeta),
-                                                             NameOf(saveSettingsToDisk), tsInvariant(saveSettingsToDisk),
-                                                             NameOf(readSettingsFromDisk), tsInvariant(readSettingsFromDisk),
-                                                             NameOf(RemoteWinappIsNonCC), tsInvariant(RemoteWinappIsNonCC),
-                                                             NameOf(toolSettingsHaveChanged), tsInvariant(toolSettingsHaveChanged),
-                                                             NameOf(GlobalLogFile), GlobalLogFile.Name, GlobalLogFile.Dir}
+        Dim mainToolModuleTuple As New List(Of String) From {
+            NameOf(isBeta), tsInvariant(isBeta),
+            NameOf(saveSettingsToDisk), tsInvariant(saveSettingsToDisk),
+            NameOf(readSettingsFromDisk), tsInvariant(readSettingsFromDisk),
+            NameOf(RemoteWinappIsNonCC), tsInvariant(RemoteWinappIsNonCC),
+            NameOf(toolSettingsHaveChanged), tsInvariant(toolSettingsHaveChanged),
+            NameOf(GlobalLogFile), GlobalLogFile.Name, GlobalLogFile.Dir
+        }
 
         createModuleSettingsSection(NameOf(Winapp2ool), mainToolModuleTuple, 5, 1)
 
