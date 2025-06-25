@@ -316,6 +316,10 @@ Module Diff
                                                               "HKLM\Software\Microsoft\Windows", "HKCU\Software\Microsoft\VisualStudio", "%LocalAppData%\Microsoft\Edge*",
                                                               "HKCU\Software\Opera Software", "HKCU\Software\Vivaldi", "HKCU\Software\BraveSoftware"}
 
+    Public Property DiffLogStartPhrase As String = "Beginning Diff"
+
+    Public Property DiffLogEndPhrase As String = "Diff complete"
+
     ''' <summary> 
     ''' Runs a diff using command line arguments, allowing Diff to be called programmatically 
     ''' <list type="table"> 
@@ -388,11 +392,16 @@ Module Diff
         End If
 
         clrConsole()
+
+        gLog(DiffLogStartPhrase)
+
         LogAndPrint(6, $"Changes between{GetVer(DiffFile1)} and{GetVer(DiffFile2)}", enStrCond:=False, ascend:=True)
 
         CompareFiles()
 
         LogPostDiff()
+
+        gLog(DiffLogEndPhrase)
 
         print(3, pressEnterStr)
 
@@ -426,22 +435,29 @@ Module Diff
     End Function
 
     ''' <summary> Records the summary of the diff results and reports them to the user <br />
+    ''' output as follows: 
+    ''' 
     ''' Summary: <br />
+    ''' 
     ''' Net entry count change: <br />
+    ''' 
     ''' Modified Entries: total <br />
-    '''  added keys (if applicable) <br />
-    '''  removed keys (if applicable) <br />
-    '''  updated keys (if applicable) <br />
+    '''  Added keys (if applicable) <br />
+    '''  Removed keys (if applicable) <br />
+    '''  Updated keys (if applicable) <br />
+    ''' 
     ''' Removed entries: total <br />
     '''  Merged entries: total <br />
     '''  Removed without replacement: total <br />
+    ''' 
     ''' Added entries: total <br />
     '''  Added entries with no merged content: total <br />
     '''  Added entries with merged content: total <br />
     '''  Added entries determined renamed: total <br />
+    ''' 
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2023-05-29 | Code last updated: 2023-05-29
+    ''' Docs last updated: 2025-06-24 | Code last updated: 2023-05-29
     Private Sub LogPostDiff()
 
         Dim netDiff = DiffFile2.Sections.Count - DiffFile1.Sections.Count
@@ -527,7 +543,7 @@ Module Diff
 
         If Not matched Then Return False
 
-        Dim firstMatch = Regex.Match(oldVal, newVal)
+        Dim firstMatch = Regex.Match(oldVal, newVal, RegexOptions.IgnoreCase)
 
         ' There might be a better way to do this but due to the nature of regex matches, 
         ' we can match a sub string where we might not actually want to.
@@ -1493,7 +1509,7 @@ Module Diff
             assessKeyMatches(oldWa2Section.RegKeys, newWa2sSection.RegKeys, regKeyCountsMatch,
                              allRegKeysMatched, regKeyMatches, Disallowed)
 
-            setMergeCandidate(fileKeyMatches + regKeyMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
+            SetMergeCandidate(fileKeyMatches + regKeyMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
 
             If fileKeyMatches = 0 AndAlso regKeyMatches = 0 Then Continue For
 
@@ -1514,7 +1530,7 @@ Module Diff
 
             assessKeyMatches(oldWa2Section.Detects, newWa2sSection.Detects, True, False, detectMatches, Disallowed)
             assessKeyMatches(oldWa2Section.DetectFiles, newWa2sSection.DetectFiles, True, False, detectFileMatches, Disallowed)
-            setMergeCandidate(fileKeyMatches + regKeyMatches + detectFileMatches + detectMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
+            SetMergeCandidate(fileKeyMatches + regKeyMatches + detectFileMatches + detectMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
 
         Next
 
@@ -1643,7 +1659,6 @@ Module Diff
                                 Optional disallowedValues As HashSet(Of String) = Nothing,
                                 Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                                 Optional ByRef possibleWildCardReduction As Boolean = False)
-
 
         For Each key In oldKeyList.Keys
 
@@ -1855,7 +1870,6 @@ Module Diff
     ''' A list of <c> iniKeys </c> and their matched partners (in [new, old] KeyValuePairs) for the purpose of identifying "modified" keys 
     ''' </returns>
     ''' Docs last updated: 2023-06-12 | Code last updated: 2023-06-12
-
     Private Function DetermineModifiedKeys(ByRef removedKeys As keyList,
                                            ByRef addedKeys As keyList) As List(Of KeyValuePair(Of iniKey, iniKey))
 

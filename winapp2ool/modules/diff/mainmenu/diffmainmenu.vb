@@ -192,7 +192,7 @@ Module diffmainmenu
             ' Online, saving log (+1)                      -> 9
             Case Not MostRecentDiffLog.Length = 0 AndAlso input = computeMenuNumber(8, {isOffline, SaveDiffLog}, {-1, 1})
 
-                MostRecentDiffLog = getLogSliceFromGlobal("Beginning diff", "Diff complete")
+                MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
                 printSlice(MostRecentDiffLog)
 
             Case Else

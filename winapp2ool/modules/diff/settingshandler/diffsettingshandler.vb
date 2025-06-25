@@ -21,7 +21,7 @@ Option Strict On
 ''' Manages the settings of the Diff module for the purpose of syncing to disk 
 ''' </summary>
 ''' 
-''' Docs last updated: 2023-06-12
+''' Docs last updated: 2024-05-08
 Module diffsettingshandler
 
     ''' <summary> 
@@ -39,15 +39,15 @@ Module diffsettingshandler
         DiffFile3.resetParams()
         DiffFile2.resetParams()
         DiffFile1.resetParams()
-        restoreDefaultSettings(NameOf(Diff), AddressOf createDiffSettingsSection)
+        restoreDefaultSettings(NameOf(Diff), AddressOf CreateDiffSettingsSection)
 
     End Sub
 
     ''' <summary> 
-    ''' Assigns the module settings to diff based on the current disk-writable settings representation
+    ''' Assigns the module settings to Diff based on the current disk-writable settings representation
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2023-06-12 | Code last updated: 2023-06-12
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub GetSerializedDiffSettings()
 
         For Each kvp In settingsDict(NameOf(Diff))
@@ -112,13 +112,19 @@ Module diffsettingshandler
     ''' Most often, this is the default state of these settings 
     ''' </remarks>
     ''' 
-    ''' Docs last updated: 2023-06-12 | Code last updated: 2023-06-12
+    ''' Docs last updated: 2023-06-12 | Code last updated: 2024-05-08
     Public Sub CreateDiffSettingsSection()
 
-        Dim diffSettingsTuples As New List(Of String) From {NameOf(DownloadDiffFile), tsInvariant(DownloadDiffFile), NameOf(TrimRemoteFile), tsInvariant(TrimRemoteFile),
-                                                            NameOf(ShowFullEntries), tsInvariant(ShowFullEntries), NameOf(SaveDiffLog), tsInvariant(SaveDiffLog),
-                                                            NameOf(DiffModuleSettingsChanged), tsInvariant(DiffModuleSettingsChanged), NameOf(DiffFile1), DiffFile1.Name,
-                                                            DiffFile1.Dir, NameOf(DiffFile2), DiffFile2.Name, DiffFile2.Dir, NameOf(DiffFile3), DiffFile3.Name, DiffFile3.Dir}
+        Dim diffSettingsTuples As New List(Of String) From {
+            NameOf(DownloadDiffFile), tsInvariant(DownloadDiffFile),
+            NameOf(TrimRemoteFile), tsInvariant(TrimRemoteFile),
+            NameOf(ShowFullEntries), tsInvariant(ShowFullEntries),
+            NameOf(SaveDiffLog), tsInvariant(SaveDiffLog),
+            NameOf(DiffModuleSettingsChanged), tsInvariant(DiffModuleSettingsChanged),
+            NameOf(DiffFile1), DiffFile1.Name, DiffFile1.Dir,
+            NameOf(DiffFile2), DiffFile2.Name, DiffFile2.Dir,
+            NameOf(DiffFile3), DiffFile3.Name, DiffFile3.Dir
+        }
 
         createModuleSettingsSection(NameOf(Diff), diffSettingsTuples, 5)
 

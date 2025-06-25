@@ -164,6 +164,7 @@
     <Compile Include="modules\minefield\search\search.vb" />
     <Compile Include="modules\maintool\settingsmenu\globalsettingsmenu.vb" />
     <Compile Include="modules\trim\mainmenu\trimmainmenu.vb" />
+    <Compile Include="modules\trim\settingshandler\trimsettings.vb" />
     <Compile Include="modules\trim\settingshandler\trimsettingshandler.vb" />
     <Compile Include="modules\trim\Trim.vb" />
     <Compile Include="modules\winappdebug\components\advancedSettings\advSettings.vb" />

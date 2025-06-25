@@ -26,6 +26,7 @@ Module Minefield
         print(1, "Java Entry Maker", "Clean up after the messy JRE installer")
         print(1, "Babel", "Generate winapp2.ini entries for lang files")
         print(1, "Outlook", "Generate winapp2.ini entries with custom outlook profile support")
+        print(1, "Executor", "Modify your filesystem with winapp2.ini")
         print(1, "Search", "Generate lists of sections", closeMenu:=True)
     End Sub
 
@@ -59,9 +60,12 @@ Module Minefield
             Case "3"
                 initModule("Outooker", AddressOf printOutlookMenu, AddressOf handleOutlookInput)
             Case "4"
+                'initModule("Executor", AddressOf printExecutorMenu, AddressOf handleExecutorInput)
+            Case "5"
                 initModule("Search", AddressOf printSearchMenu, AddressOf handleSearchInput)
         End Select
     End Sub
+
 
     Public Sub printSearchMenu()
         printMenuTop({"Outputs all sections that fit the given pattern in a file"})
@@ -105,18 +109,4 @@ Module Minefield
 
     End Sub
 
-    ''' <summary>Prints the GameMaker menu</summary>
-    Private Sub printGMMenu()
-        printMenuTop({"This tool will allow for a more meta approach to creating entries for games, particularly steam."})
-        print(1, "Run (Disabled)", "Attempt to generate entries", closeMenu:=True)
-    End Sub
-
-    ''' <summary>Handles input for GameMaker</summary>
-    ''' <param name="input">The String containing the user's input</param>
-    Private Sub handleGMInput(input As String)
-        Select Case input
-            Case "0"
-                exitModule()
-        End Select
-    End Sub
 End Module

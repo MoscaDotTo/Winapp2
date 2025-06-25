@@ -23,40 +23,91 @@ winapp2ool
 </summary>
 </member>
 <member name="T:winapp2ool.settingsHandler">
- <summary> settingsHandler provides an interface for winapp2ool modules to serialize some of their settings to disk using a familiar ini interface </summary>
+ <summary> 
+ settingsHandler manages the disk-writable representation of winapp2ool module properties for persistence between sessions  
+ </summary>
+ 
+ Docs last updated: 2025-06-25 | Code last updated 2025-06-25
 </member>
 <member name="P:winapp2ool.settingsHandler.settingsFile">
- <summary> A copy of winapp2ool's user configurable settings that was read from disk <br/> 
- Its contents overwritten with the contents of the settingsDict whenever settings are changed </summary>
+ <summary> 
+ A copy of winapp2ool's current set of user configurable settings that can be read from or written to disk in a familiar ini format
+ <br /> If <c> saveSettingsToDisk </c> is <c> True </c> then this file will be overwritten on disk every time a setting is updated 
+ </summary>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="P:winapp2ool.settingsHandler.settingsDict">
- <summary> A more nicely accessible structure for accessing module settings <br /> 
+ <summary> 
+ A cleaner structure for accessing module settings which can be easily written to <c> settingsFile </c> <br /> 
  Keys in the primary dictionary are module names, the value dictionaries are simple key value pairs where 
- the key is the name of a setting and the value is the state of the setting </summary>
+ the key is the name of a setting and the value is the state of the setting
+ </summary>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="P:winapp2ool.settingsHandler.saveSettingsToDisk">
-<summary> Indicates that changes to the application's settings should be serialized back to the disk </summary>
+<summary> 
+Indicates that changes to the application's settings should be serialized back to the disk 
+</summary>
+
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="P:winapp2ool.settingsHandler.readSettingsFromDisk">
- <summary> Indicates that settings who are read from the disk should override the corresponding default module settings </summary>
+ <summary> 
+ Indicates that settings who are read from the disk should override the corresponding default module settings 
+ </summary>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="M:winapp2ool.settingsHandler.saveSettingsFile">
- <summary> Saves the winapp2ool settings to disk </summary>
+ <summary> 
+ If saving is enabled, saves the current state of winapp2ool's settings to disk, overwriting any existing settings. 
+ </summary>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="M:winapp2ool.settingsHandler.updateSettings(System.String,System.String,System.String)">
- <summary> Updates the disk-writable representations of the application's settings as the user makes changes to them </summary>
- <param name="targetModule"> The name of the module who owns the setting being updated </param>
- <param name="settingName"> The name of the setting being updated </param>
- <param name="newVal"> The updated value held by the setting </param>
+ <summary> 
+ Updates the disk-writable representations of the application's settings as the user makes changes to them 
+ </summary>
+ 
+ <param name="targetModule">
+ The name of the module who owns the setting being updated 
+ </param>
+ 
+ <param name="settingName"> 
+ The name of the setting being updated
+ </param>
+ 
+ <param name="newVal"> 
+ The updated value held by the setting 
+ </param>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="M:winapp2ool.settingsHandler.addToSettingsDict(System.String,winapp2ool.iniSection)">
- <summary> Adds the <c> Keys </c> from a given <c> iniSection </c> to the disk-writable copy of winapp2ool's settings for the <c> <paramref name="targetModule"/> </c></summary>
- <param name="targetModule"> The module whose settings should be updated </param>
- <param name="settings"> The <c> iniSection </c> containing <c> iniKey </c> format serialized winapp2ool settings </param>
+ <summary> 
+ Adds the <c> Keys </c> from a given <c> iniSection </c> to the disk-writable copy of winapp2ool's settings for the <c> <paramref name="targetModule"/> </c>
+ </summary>
+ 
+ <param name="targetModule">
+ The module whose settings should be updated 
+ </param>
+ 
+ <param name="settings">
+ The <c> iniSection </c> containing <c> iniKey </c> format serialized winapp2ool settings 
+ </param>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="M:winapp2ool.settingsHandler.loadSettings">
- <summary> Looks for the <c> settingsFile </c> and attempts to load it from disk. If the <c> settingsFile </c> 
- is empty, settings will be loaded from their default configuration </summary>
+ <summary> 
+ Looks for the <c> settingsFile </c> and attempts to load it from disk. If the <c> settingsFile </c> 
+ is empty, settings will be loaded from their default configuration 
+ </summary>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="M:winapp2ool.settingsHandler.loadAllModuleSettings">
  <summary> Loads all module settings into disk-writable representation in the form of both an <c> iniFile </c> and a <c> Dictionary </c> </summary>
@@ -90,9 +141,48 @@ winapp2ool
  <returns></returns>
 </member>
 <member name="M:winapp2ool.settingsHandler.restoreDefaultSettings(System.String,System.Action)">
- <summary> Clears the current module setting from the disk-writable representation of the <c> <paramref name="callingModule"/>'s </c> module settings </summary>
- <param name="callingModule"> The name of the module whose settings will be cleared </param>
- <param name="createSection"> The subroutine that creates the module's disk-writable settings </param>
+ <summary> 
+ Clears the current module setting from the disk-writable representation of the <c> <paramref name="callingModule"/>'s </c> module settings 
+ </summary>
+ 
+ <param name="callingModule">
+ The name of the module whose settings will be cleared 
+ </param>
+ 
+ <param name="createSection"> 
+ The subroutine that creates the module's disk-writable settings 
+ </param>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
+</member>
+<member name="M:winapp2ool.settingsHandler.LoadModuleSettingsFromDict(System.String,System.Type)">
+ <summary>
+ Assigns a module's properties for the current session of a winapp2ool module by reading them from the disk-writable representation of the settings
+ </summary>
+ 
+ <param name="moduleName"> 
+ The name of the module whose properties will be assigned 
+ </param>
+ 
+ <param name="winapp2oolmodule"> 
+ A module containing the set of public properties for <c> <paramref name="moduleName"/> </c>
+ </param>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
+</member>
+<member name="M:winapp2ool.settingsHandler.GetSettingsTupleWithReflection(System.Type)">
+ <summary>
+ Returns a list of strings representing the settings of a module, uses reflection to access these properties 
+ tuple is comprised of (Name, Value) pairs for <c> Boolean </c> properties and (Name, Filename, Dir) triplets for <c> iniFile </c> properties
+ </summary>
+ 
+ <param name="moduleType"> The type of the module whose settings will be retrieved </param>
+ 
+ <returns>
+ A <c> List (Of String) </c> containing the disk-writable key/value pair names 
+ </returns>
+ 
+ Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="T:winapp2ool.CCiniDebug">
  <summary> This module performs housekeeping on ccleaner.ini to clean up leftovers from winapp2.ini </summary>
@@ -164,19 +254,36 @@ winapp2ool
  Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="T:winapp2ool.ccdebugsettinghandler">
- <summary> Syncs CCiniDebug settings to and from disk </summary>
+ <summary> 
+ Manages the settings of the CCiniDebug module for the purpose of syncing to disk 
+ </summary>
+ 
+ Docs last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.ccdebugsettinghandler.initDefaultCCDBSettings">
- <summary> Restores the default state of CCiniDebug's parameters </summary>
- Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+ <summary> 
+ Restores the default state the CCiniDebug module's properties 
+ </summary>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2020-07-18
 </member>
 <member name="M:winapp2ool.ccdebugsettinghandler.getSerializedDebugSettings">
- <summary> Loads values from disk into memory for the CCiniDebug module settings </summary>
- Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+ <summary>
+ Assigns the module settings to CCiniDebug based on the current disk-writable settings representation
+ </summary>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.ccdebugsettinghandler.createCCDBSettingsSection">
- <summary> Adds the current (typically default) state of the CCiniDebug module's settings into the disk-writable settings representation </summary>
- Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+ <summary>
+ Adds the current state of the module's settings into the disk-writable settings representation 
+ </summary>
+ 
+ <remarks>
+ Most often, this is the default state of these settings 
+ </remarks>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="T:winapp2ool.Diff">
  <summary> 
@@ -521,22 +628,29 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.Diff.LogPostDiff">
  <summary> Records the summary of the diff results and reports them to the user <br />
+ output as follows: 
+ 
  Summary: <br />
+ 
  Net entry count change: <br />
+ 
  Modified Entries: total <br />
-  added keys (if applicable) <br />
-  removed keys (if applicable) <br />
-  updated keys (if applicable) <br />
+  Added keys (if applicable) <br />
+  Removed keys (if applicable) <br />
+  Updated keys (if applicable) <br />
+ 
  Removed entries: total <br />
   Merged entries: total <br />
   Removed without replacement: total <br />
+ 
  Added entries: total <br />
   Added entries with no merged content: total <br />
   Added entries with merged content: total <br />
   Added entries determined renamed: total <br />
+ 
  </summary>
  
- Docs last updated: 2023-05-29 | Code last updated: 2023-05-29
+ Docs last updated: 2025-06-24 | Code last updated: 2023-05-29
 </member>
 <member name="M:winapp2ool.Diff.CompareValues(System.String,System.String)">
  <summary>
@@ -1217,7 +1331,7 @@ winapp2ool
  Manages the settings of the Diff module for the purpose of syncing to disk 
  </summary>
  
- Docs last updated: 2023-06-12
+ Docs last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.diffsettingshandler.InitDefaultDiffSettings">
  <summary> 
@@ -1228,10 +1342,10 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.diffsettingshandler.GetSerializedDiffSettings">
  <summary> 
- Assigns the module settings to diff based on the current disk-writable settings representation
+ Assigns the module settings to Diff based on the current disk-writable settings representation
  </summary>
  
- Docs last updated: 2023-06-12 | Code last updated: 2023-06-12
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.diffsettingshandler.CreateDiffSettingsSection">
  <summary>
@@ -1242,19 +1356,32 @@ winapp2ool
  Most often, this is the default state of these settings 
  </remarks>
  
- Docs last updated: 2023-06-12 | Code last updated: 2023-06-12
+ Docs last updated: 2023-06-12 | Code last updated: 2024-05-08
 </member>
 <member name="T:winapp2ool.downloadsettingshandler">
- <summary> Syncs settings for the Download module to and from the disk </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Manages the settings of the Downloader module for the purpose of syncing to disk 
+ </summary>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.downloadsettingshandler.getSerializedDownloaderSettings">
- <summary> Loads values from disk into memory for the Downloader module settings </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary>
+ Assigns the module settings to Downloader based on the current disk-writable settings representation
+ </summary>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.downloadsettingshandler.createDownloadSettingsSection">
- <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary>
+ Adds the current state of the module's settings into the disk-writable settings representation 
+ </summary>
+ 
+ <remarks>
+ Most often, this is the default state of these settings 
+ </remarks>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="T:winapp2ool.Downloader">
  <summary> Allows users to download files from GitHub through a simple menu </summary>
@@ -1926,57 +2053,121 @@ winapp2ool
  <param name="newText">The replacement text</param>
 </member>
 <member name="T:winapp2ool.logger">
- <summary> This module is an internal logger for winapp2ool </summary>
+ <summary> 
+ Maintains the global log for winapp2ool, which is used to track internal operations and errors.
+ Provides methods for adding to the log, saving it to disk, and printing it to the console.
+ </summary>
+ 
+ Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
 </member>
 <member name="P:winapp2ool.logger.GlobalLog">
- <summary> Holds the contents of the winapp2ool log </summary>
+ <summary> 
+ The global Winapp2ool log, containing everything logged during the current session 
+ </summary>
+ 
+ Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
 </member>
 <member name="P:winapp2ool.logger.GlobalLogFile">
-<summary> Holds the filesystem location to which the log file will be saved </summary>
+<summary> 
+Holds the filesystem location to which the log file will optionally be saved.
+</summary>
+
+ Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
 </member>
 <member name="P:winapp2ool.logger.nestCount">
-<summary> Indicates the current nesting level </summary>
+<summary> 
+The current indentation level of the global log.
+</summary>
+
+ Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
 </member>
 <member name="M:winapp2ool.logger.gLog(System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean)">
- <summary> Adds an item into the global log </summary>
- <param name="logstr"> The <c> String </c> to be added into the log <br /> Optional, Default: <c> ""</c> </param>
- <param name="cond"> Indicates that the <c> <paramref name="logstr"/> </c> should be added into the log <br /> Optional, Default: <c> True </c> </param>
- <param name="ascend"> Indicates that the line should be indented. (Generally) requires a corresponding <c> <paramref name="descend"/></c> to "undo." Usefor for blocking 
- groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each <br /> Optional, Default: <c> False </c></param>
- <param name="descend"> Indicates that the line should be unindented. (Generally) follows a corresponding <c> <paramref name="ascend"/> </c>. Useful for blocking 
- groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each <br /> Optional, Default: <c> False </c> </param>
- <param name="indent"> Indicates that the line should be indented individually, without affecting the indentation of following lines <br/> Optional, Default: <c> False </c> </param>
- <param name="indAmt"> The number of times by which the line should be indented given <c> <paramref name="indent"/> </c> is <c> True </c> <br /> Optional, Default: <c> 1 </c> </param>
- <param name="descAmt"> The number of times *fewer* by which following lines should be indented <br /> Optional, Default: <c> 1 </c> </param>
- <param name="ascAmt"> The number of times by which this and following lines should be indented <br /> Optional, Default: <c> 1 </c> </param>
- <param name="buffr"> Indicates that an empty line should be added into the log following <c> <paramref name="logstr"/> </c> </param>
- <param name="leadr"> Indicates that an empty line should be added into the log before <c> <paramref name="logstr"/> </c> </param>
+ <summary> 
+ Adds an item into the global log 
+ </summary>
+ 
+ <param name="logstr"> 
+ The <c> String </c> to be added into the log <br /> 
+ Optional, Default: <c> ""</c> 
+ </param>
+ 
+ <param name="cond"> 
+ Indicates that the <c> <paramref name="logstr"/> </c> should be added into the log <br /> 
+ Optional, Default: <c> True </c> 
+ </param>
+ 
+ <param name="ascend">
+ Indicates that the line should be indented. (Generally) requires a corresponding <c> <paramref name="descend"/></c> 
+ to "undo." Useful for blocking groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each 
+ <br /> Optional, Default: <c> False </c>
+ </param>
+ 
+ <param name="descend">
+ Indicates that the line should be unindented. (Generally) follows a corresponding <c> <paramref name="ascend"/> </c>. 
+ Useful for blocking groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each 
+ <br /> Optional, Default: <c> False </c> 
+ </param>
+  
+ <param name="indent">
+ Indicates that the line should be indented individually, without affecting the indentation of following lines 
+ <br/> Optional, Default: <c> False </c> 
+ </param>
+ 
+ <param name="indAmt">
+ The number of times by which the line should be indented given <c> <paramref name="indent"/> </c> is <c> True </c> 
+ <br /> Optional, Default: <c> 1 </c> 
+ </param>
+ 
+ <param name="descAmt">
+ The number of times *fewer* by which following lines should be indented 
+ <br /> Optional, Default: <c> 1 </c> 
+ </param>
+ 
+ <param name="ascAmt"> The number of times by which this and following lines should be indented 
+ <br /> Optional, Default: <c> 1 </c> 
+ </param>
+ 
+ <param name="buffr"> 
+ Indicates that an empty line should be added into the log following <c> <paramref name="logstr"/> </c> 
+ </param>
+ 
+ <param name="leadr"> 
+ Indicates that an empty line should be added into the log before <c> <paramref name="logstr"/> </c> 
+ </param>
+ 
+ Docs last updated: 2025-06-24 | Code last updated: 2025-06-19
 </member>
 <member name="M:winapp2ool.logger.LogAndPrint(System.Int32,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Int32,System.Int32,System.Int32,System.Boolean,System.Boolean,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
  <summary>
  Adds a given message to the global log and also prints it to the console, this is just a wrapper function to avoid having to call both 
  glog and print for the same message sometimes 
  </summary>
+ Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
 </member>
 <member name="M:winapp2ool.logger.saveGlobalLog(System.Boolean)">
  <summary> Saves the global log to disk if the given <c> <paramref name="cond"/> </c> is met </summary>
  <param name="cond"> Indicates that the global log should be saved to disk <br /> Optional, Default: <c> False </c> </param>
+ Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
 </member>
 <member name="M:winapp2ool.logger.toString">
  <summary> Returns the log as a single <c> String </c> </summary>
+ Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
 </member>
 <member name="M:winapp2ool.logger.printLog">
  <summary> Prints the winapp2ool log to the user and waits for the 'enter' key to be pressed before returning to the calling menu </summary>
+ Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
 </member>
 <member name="M:winapp2ool.logger.getLogSliceFromGlobal(System.String,System.String)">
 <summary> Gets the most recent segment of the global log contained by two phrases (ie. a module name or subroutine) 
  As a <c> String </c> <br /> Can be used to simply fetch the logs from modules for saving to disk or displaying to the user after a run.</summary>
- <param name="containedPhrase"> The starting phrase of the requested log slice </param>
+ <param name="startingPhrase"> The starting phrase of the requested log slice </param>
  <param name="endingPhrase"> The ending phrase of the requested log slice </param>
+ Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
 </member>
 <member name="M:winapp2ool.logger.printSlice(System.String)">
 <summary> Prints a slice of the global log to the user and waits for them to press the 'enter' key </summary>
 <param name="slice"> A portion of the global log to be printed to the user </param>
+ Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
 </member>
 <member name="T:winapp2ool.MenuMaker">
  <summary> 
@@ -2636,56 +2827,167 @@ winapp2ool
  <summary>
  Represents a winapp2.ini format iniFile, and enables easy access to format specific iniFile information
  </summary>
+ 
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="P:winapp2ool.winapp2file.FileSectionHeaders">
- <summary> The names of the sections of entries as they appear in winapp2.ini </summary>
+ <summary> 
+ The names of the sections of entries as they appear in winapp2.ini <br/>
+ "" = main section, bottommost (on disk, last index in memory) section, has label otherwise
+ </summary>
+ 
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="P:winapp2ool.winapp2file.EntrySections">
- <summary> A list of iniFiles each containing one of the headers contents </summary>
+ <summary> 
+ A list of iniFiles each containing one of the headers contents 
+ <br/> Onto with the indicies from <c> FileSectionHeaders </c> <br  />
+ ie. index 0 = Chrome, 1 = Edge Chromium, 2 = Opera, ... 9 = ""
+ </summary>
+ 
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="P:winapp2ool.winapp2file.Winapp2entries">
- <summary> The list of winapp2entry objects for each header section </summary>
+ <summary> 
+ The list of winapp2entry objects for each header section 
+ </summary>
+ 
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="P:winapp2ool.winapp2file.IsNCC">
- <summary> Indicates whether or not this object represents a Non-CCleaner variant of winapp2.ini </summary>
+ <summary> 
+ Indicates whether or not this object represents a Non-CCleaner variant of winapp2.ini 
+ </summary>
+ 
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="P:winapp2ool.winapp2file.Dir">
-<summary> The directory of the iniFile object used to instantiate this object </summary>
+<summary> 
+The directory of the iniFile object used to instantiate this object 
+</summary>
+
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="P:winapp2ool.winapp2file.Name">
-<summary> The file name of the iniFile object used to instantiate this object </summary>
+<summary> 
+The file name of the iniFile object used to instantiate this object 
+</summary>
+
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="P:winapp2ool.winapp2file.Version">
-<summary> The version in YYMMDD format of the winapp2.ini file (Defaults to 000000) </summary>
+<summary> 
+The version in YYMMDD format of the winapp2.ini file 
+<br /> Default value: <c> "; version 000000" </c>
+<br /> This will be updated to the current date if the file is saved with the <c> useTodaysDate </c> parameter set to <c> True </c>
+<br /> Otherwise, this will be set to the version string found in the file, if one exists 
+</summary>
+
+ Docs last updated: 2024-05-19 | Code last updated: 2024-05-19
 </member>
-<member name="M:winapp2ool.winapp2file.#ctor(winapp2ool.iniFile)">
- <summary> Creates a new <c> winapp2file </c> from an <c> iniFile </c> </summary>
- <param name="file"> A winapp2.ini format <c> iniFile </c> object </param>
+<member name="M:winapp2ool.winapp2file.#ctor(winapp2ool.iniFile,System.Boolean)">
+ <summary> 
+ Creates a new <c> winapp2file </c> from an <c> iniFile </c> 
+ </summary>
+ 
+ <param name="file"> 
+ A winapp2.ini format <c> iniFile </c> object 
+ </param>
+ 
+ <param name="useTodaysDate"> 
+ 
+ Indicates that the version should be updated to reflect the current date in YYMMDD format 
+ <br /> Optional, Default: <c> False </c>
+ 
+ </param>
+ 
+ Docs last updated: 2024-05-19 | Code last updated: 2024-05-19
 </member>
-<member name="M:winapp2ool.winapp2file.addToInnerFile(System.Int32,winapp2ool.winapp2entry,winapp2ool.iniSection)">
- <summary> Inserts an <c> iniSection </c> into its respective tracking file and records the winapp2entry object form accordingly. </summary>
- <param name="ind"> The index of the tracking file </param>
- <param name="entry"> The section in winapp2entry format </param>
- <param name="section"> A section to be tracked </param>
+<member name="M:winapp2ool.winapp2file.GetCategoryIndex(winapp2ool.winapp2entry,System.Collections.Generic.List{System.String})">
+ <summary>
+ Determines and returns the index of the inner ini category to which given <c> <paramref name="entry"/> </c> belongs
+ </summary>
+ 
+ <param name="entry">
+ A <c> winapp2entry </c> object to be placed into winapp2.ini 
+ </param>
+ 
+ <param name="categoryValues">
+ The list of categories by section and/or langsecref in winapp2.ini order into which each <c> winapp2entry </c> is placed 
+ </param>
+ 
+ <returns> The index of the inner ini category to which given <c> <paramref name="entry"/> </c> belongs </returns>
+ 
+ Docs last updated: 2024-05-20 | Code last updated: 2024-05-19
+</member>
+<member name="M:winapp2ool.winapp2file.DetermineVersionString(winapp2ool.iniFile,System.Boolean)">
+ <summary>
+ Returns either the version string found in the file or the current date in YYMMDD format
+ </summary>
+ 
+ <param name="file">
+ A winapp2.ini format <c> iniFile </c>
+ </param>
+ 
+ <param name="useTodaysDate"> 
+ Indicates that the version should be updated to reflect the current date in YYMMDD format 
+ <br /> Optional, Default: <c> False </c>
+ </param>
+ 
+ <returns> The version string found in the file or an updated version string with the current date </returns>
+ 
+ Docs last updated: 2024-05-19 | Code last updated: 2024-05-19
 </member>
 <member name="M:winapp2ool.winapp2file.count">
- <summary>Returns the total number of entries stored in the internal iniFile objects</summary>
+ <summary>
+ Returns the total number of entries stored in the internal iniFile objects
+ </summary>
+ 
+ Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
 </member>
 <member name="M:winapp2ool.winapp2file.sortInneriniFiles">
- <summary>Sorts the internal iniFile objects in winapp2.ini format order</summary>
+ <summary>
+ Sorts the internal iniFile objects in winapp2.ini format order
+ </summary>
+ 
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="M:winapp2ool.winapp2file.rebuildInnerIni(System.Collections.Generic.List{winapp2ool.winapp2entry}@)">
- <summary> Rebuilds a <c> list of winapp2entry </c> objects back into iniSection objects and returns the collection of them as an iniFile </summary>
- <param name="entryList"></param>
+ <summary> 
+ Rebuilds a <c> list of winapp2entry </c> objects back into iniSection objects and returns the collection of them as a single <c> iniFile </c>
+ </summary>
+ 
+ <param name="entryList">
+ The list of <c> winapp2entry </c> objects to be rebuilt into a single <c> iniFile </c>
+ </param>
+ 
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
-<member name="M:winapp2ool.winapp2file.rebuildToIniFiles">
- <summary> Updates the internal iniFile objects </summary>
+<member name="M:winapp2ool.winapp2file.rebuildWinapp2ChangesToIniFiles">
+ <summary> 
+ Updates the internal <c> iniFile </c> objects to reflect any changes which have been made to the <c> winapp2entry </c> objects 
+ </summary>
+ 
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="M:winapp2ool.winapp2file.toIni">
-<summary> Returns the <c> winapp2file </c>'s inner <c> inifiles </c> as a single <c> inifile </c>object with its sections ordered as they would be in winapp2.ini on disk </summary>
+<summary>
+ Returns the <c> winapp2file's </c> inner <c> iniFiles </c> as a single <c> inifile </c> object 
+ with its sections ordered as they would be in winapp2.ini on disk 
+</summary>
+
+ <returns> A single <c> iniFile </c> containing all the ordered sections from all of the inner <c> iniFiles </c> </returns>
+ 
+ Docs last updated: 2024-05-23 | Code last updated: 2024-05-23
 </member>
 <member name="M:winapp2ool.winapp2file.winapp2string">
- <summary> Builds and returns the winapp2.ini text including the preamble comments </summary>
+ <summary> 
+ Builds and returns the winapp2.ini text including the preamble comments 
+ </summary>
+ 
+ <returns> The complete text of winapp2.ini as a single String </returns>
+ 
+ Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
 </member>
 <member name="T:winapp2ool.winapp2KeyParameters">
  <summary>
@@ -2894,22 +3196,28 @@ winapp2ool
 </member>
 <member name="T:winapp2ool.mainToolSettingsHandler">
  <summary> 
- Syncs the winapp2ool main module settings to and from disk 
+ Manages the settings of the main winapp2ool module for the purpose of syncing to disk 
  </summary>
+ 
+ Docs last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.mainToolSettingsHandler.getSeralizedToolSettings">
  <summary> 
- Loads values from disk into memory for the winapp2ool module settings
+ Assigns the module settings to main winapp2ool module based on the current disk-writable settings representation
  </summary>
  
  Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="M:winapp2ool.mainToolSettingsHandler.createToolSettingsSection">
-<summary> 
-Adds the current (typically default) state of the module's settings into the disk-writable settings representation 
-</summary>
-
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+ <summary>
+ Adds the current state of the module's settings into the disk-writable settings representation 
+ </summary>
+ 
+ <remarks>
+ Most often, this is the default state of these settings 
+ </remarks>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.mergemainmenu.printMergeMainMenu">
  <summary> Prints the <c> Merge </c> menu to the user, includes some predefined merge files choices for ease of access </summary>
@@ -2979,24 +3287,39 @@ Adds the current (typically default) state of the module's settings into the dis
  Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.mergesettinghandler">
- <summary> Syncs settings for the Merge module to and from the disk </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Manages the settings of the Diff module for the purpose of syncing to disk 
+ </summary>
+ 
+ Docs last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.mergesettinghandler.initDefaultMergeSettings">
- <summary> Restores the default state of the module's properties </summary>
+ <summary> 
+ Restores the default state of the module's properties 
+ </summary>
+ 
  Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.mergesettinghandler.getSeralizedMergeSettings">
- <summary> Loads values from disk into memory for the Merge module settings </summary>
+ <summary> 
+ Loads values from disk into memory for the Merge module settings 
+ </summary>
+ 
  Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.mergesettinghandler.createMergeSettingsSection">
-<summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
+<summary>
+Adds the current (typically default) state of the module's settings into the disk-writable settings representation 
+</summary>
+
  Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.mergesettinghandler.changeMergeName(System.String)">
- <summary> Changes the merge file's <c> Name </c> </summary>
+ <summary> 
+ Changes the merge file's <c> Name </c>
+ </summary>
  <param name="newName"> The new <c> Name </c> for <c> MergeFile2 </c> </param>
+ 
  Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.JavaMaker">
@@ -3067,13 +3390,6 @@ Adds the current (typically default) state of the module's settings into the dis
  <summary>Handles user input for the main Minefield menu</summary>
  <param name="input">The String containing the user's input</param>
 </member>
-<member name="M:winapp2ool.Minefield.printGMMenu">
- <summary>Prints the GameMaker menu</summary>
-</member>
-<member name="M:winapp2ool.Minefield.handleGMInput(System.String)">
- <summary>Handles input for GameMaker</summary>
- <param name="input">The String containing the user's input</param>
-</member>
 <member name="T:winapp2ool.search">
 <summary></summary>
 </member>
@@ -3122,21 +3438,69 @@ Adds the current (typically default) state of the module's settings into the dis
  <param name="input"> The String containing the user's input </param>
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
+<member name="P:winapp2ool.trimsettings.TrimFile1">
+ <summary> The winapp2.ini file that will be trimmed </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="P:winapp2ool.trimsettings.TrimFile2">
+ <summary> Holds the path of an iniFile containing the names of Sections who should never be trimmed </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="P:winapp2ool.trimsettings.TrimFile3">
+ <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="P:winapp2ool.trimsettings.TrimFile4">
+ <summary> Holds the path of an iniFile containing the names of Sections who should always be trimmed </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="P:winapp2ool.trimsettings.DownloadFileToTrim">
+ <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="P:winapp2ool.trimsettings.UseTrimIncludes">
+ <summary> Indicates that the includes should be consulted while trimming </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="P:winapp2ool.trimsettings.UseTrimExcludes">
+ <summary> Indicates that the excludes should be consulted while trimming </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
+<member name="P:winapp2ool.trimsettings.TrimModuleSettingsChanged">
+ <summary> Indicates that the module settings have been modified from their defaults </summary>
+ Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+</member>
 <member name="T:winapp2ool.trimsettingshandler">
- <summary> Syncs settings for the Trim module to and from the disk </summary>
- Docs last updated: 2022-11-24 | Code last updated: 2022-11-24
+ <summary> 
+ Manages the settings of the Trim module for the purpose of syncing to disk 
+ </summary>
+ 
+ Docs last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.trimsettingshandler.initDefaultTrimSettings">
- <summary> Restores the default state of the module's parameters </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+ <summary> 
+ Restores the default state of the Trim module's properties 
+ </summary>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.trimsettingshandler.getSerializedTrimSettings">
- <summary> Loads values from disk into memory for the Trim module settings </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+ <summary> 
+ Assigns the module settings to Trim based on the current disk-writable settings representation
+ </summary>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.trimsettingshandler.createTrimSettingsSection">
- <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+ <summary>
+ Adds the current state of the module's settings into the disk-writable settings representation 
+ </summary>
+ 
+ <remarks>
+ Most often, this is the default state of these settings 
+ </remarks>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="T:winapp2ool.Trim">
     <summary>
@@ -3145,40 +3509,8 @@ Adds the current (typically default) state of the module's settings into the dis
    </summary>
    Docs last updated 2022-11-21
 </member>
-<member name="P:winapp2ool.Trim.TrimFile1">
- <summary> The winapp2.ini file that will be trimmed </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="P:winapp2ool.Trim.TrimFile2">
- <summary> Holds the path of an iniFile containing the names of Sections who should never be trimmed </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="P:winapp2ool.Trim.TrimFile3">
- <summary> Holds the path where the output file will be saved to disk. Overwrites the input file by default </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="P:winapp2ool.Trim.TrimFile4">
- <summary> Holds the path of an iniFile containing the names of Sections who should always be trimmed </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
 <member name="P:winapp2ool.Trim.winVer">
  <summary> The major/minor version number on the current system </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="P:winapp2ool.Trim.TrimModuleSettingsChanged">
- <summary> Indicates that the module settings have been modified from their defaults </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="P:winapp2ool.Trim.DownloadFileToTrim">
- <summary> Indicates that we are downloading a winapp2.ini from GitHub </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="P:winapp2ool.Trim.UseTrimIncludes">
- <summary> Indicates that the includes should be consulted while trimming </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-</member>
-<member name="P:winapp2ool.Trim.UseTrimExcludes">
- <summary> Indicates that the excludes should be consulted while trimming </summary>
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
 <member name="M:winapp2ool.Trim.handleCmdLine">
@@ -3433,9 +3765,11 @@ Adds the current (typically default) state of the module's settings into the dis
  Docs last updated: 2023-07-20 | Code last updated: 2022-12-04
 </member>
 <member name="T:winapp2ool.lintsettingshandler">
- <summary>
+ <summary> 
  Manages the settings of the WinappDebug module for the purpose of syncing to disk 
  </summary>
+ 
+ Docs last updated: 2024-05-08
 </member>
 <member name="P:winapp2ool.lintsettingshandler.Lints">
  <summary>
@@ -3446,17 +3780,17 @@ Adds the current (typically default) state of the module's settings into the dis
 </member>
 <member name="M:winapp2ool.lintsettingshandler.InitDefaultLintSettings">
  <summary> 
- Restore the default state of all of the module's parameters, undoing any changes the user may have made to them 
+ Restores the default state of the WinappDebug module's properties 
  </summary>
  
- Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+ Docs last updated: 2024-05-08 | Code last updated: 2023-07-19
 </member>
 <member name="M:winapp2ool.lintsettingshandler.getSeralizedLintSettings">
  <summary> 
- Loads the WinappDebug settings from disk and loads them into memory, overriding the default settings 
+ Assigns the module settings to Trim based on the current disk-writable settings representation
  </summary>
  
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="M:winapp2ool.lintsettingshandler.CheckScanRepair(System.Collections.Generic.KeyValuePair{System.String,System.String})">
  <summary>
@@ -3471,11 +3805,15 @@ Adds the current (typically default) state of the module's settings into the dis
  Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
 <member name="M:winapp2ool.lintsettingshandler.CreateLintSettingsSection">
-<summary>
-Adds the current (typically default) state of the module's settings into the disk-writable settings representation 
-</summary>
-
- Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+ <summary>
+ Adds the current state of the module's settings into the disk-writable settings representation 
+ </summary>
+ 
+ <remarks>
+ Most often, this is the default state of these settings 
+ </remarks>
+ 
+ Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 </member>
 <member name="T:winapp2ool.WinappDebug">
  <summary> 

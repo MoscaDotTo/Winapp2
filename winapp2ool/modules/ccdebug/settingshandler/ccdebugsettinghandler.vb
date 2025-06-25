@@ -14,13 +14,23 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
-''' <summary> Syncs CCiniDebug settings to and from disk </summary>
+
+''' <summary> 
+''' Manages the settings of the CCiniDebug module for the purpose of syncing to disk 
+''' </summary>
+''' 
+''' Docs last updated: 2024-05-08
 Module ccdebugsettinghandler
 
-    ''' <summary> Restores the default state of CCiniDebug's parameters </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+    ''' <summary> 
+    ''' Restores the default state the CCiniDebug module's properties 
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2020-07-18
     Public Sub initDefaultCCDBSettings()
+
         CCDebugFile1.resetParams()
         CCDebugFile2.resetParams()
         CCDebugFile3.resetParams()
@@ -29,45 +39,89 @@ Module ccdebugsettinghandler
         SortFileForOutput = True
         CCDBSettingsChanged = False
         restoreDefaultSettings(NameOf(CCiniDebug), AddressOf createCCDBSettingsSection)
+
     End Sub
 
-    ''' <summary> Loads values from disk into memory for the CCiniDebug module settings </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+    ''' <summary>
+    ''' Assigns the module settings to CCiniDebug based on the current disk-writable settings representation
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub getSerializedDebugSettings()
+
         For Each kvp In settingsDict(NameOf(CCiniDebug))
+
             Select Case kvp.Key
+
                 Case NameOf(CCDebugFile1) & "_Name"
+
                     CCDebugFile1.Name = kvp.Value
+
                 Case NameOf(CCDebugFile1) & "_Dir"
+
                     CCDebugFile1.Dir = kvp.Value
+
                 Case NameOf(CCDebugFile2) & "_Name"
+
                     CCDebugFile2.Name = kvp.Value
+
                 Case NameOf(CCDebugFile2) & "_Dir"
+
                     CCDebugFile2.Dir = kvp.Value
+
                 Case NameOf(CCDebugFile3) & "_Name"
+
                     CCDebugFile3.Name = kvp.Value
+
                 Case NameOf(CCDebugFile3) & "_Dir"
+
                     CCDebugFile3.Dir = kvp.Value
+
                 Case NameOf(PruneStaleEntries)
+
                     PruneStaleEntries = CBool(kvp.Value)
+
                 Case NameOf(SaveDebuggedFile)
+
                     SaveDebuggedFile = CBool(kvp.Value)
+
                 Case NameOf(SortFileForOutput)
+
                     SortFileForOutput = CBool(kvp.Value)
+
                 Case NameOf(CCDBSettingsChanged)
+
                     CCDBSettingsChanged = CBool(kvp.Value)
+
             End Select
+
         Next
+
     End Sub
 
-    ''' <summary> Adds the current (typically default) state of the CCiniDebug module's settings into the disk-writable settings representation </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+    ''' <summary>
+    ''' Adds the current state of the module's settings into the disk-writable settings representation 
+    ''' </summary>
+    ''' 
+    ''' <remarks>
+    ''' Most often, this is the default state of these settings 
+    ''' </remarks>
+    ''' 
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub createCCDBSettingsSection()
+
         Dim ccDebugSettingsTuples As New List(Of String) From {
-            NameOf(PruneStaleEntries), tsInvariant(PruneStaleEntries), NameOf(SaveDebuggedFile), tsInvariant(SaveDebuggedFile), NameOf(SortFileForOutput), tsInvariant(SortFileForOutput),
-            NameOf(CCDBSettingsChanged), tsInvariant(CCDBSettingsChanged), NameOf(CCDebugFile1), CCDebugFile1.Name, CCDebugFile1.Dir, NameOf(CCDebugFile2),
-            CCDebugFile2.Name, CCDebugFile2.Dir, NameOf(CCDebugFile3), CCDebugFile3.Name, CCDebugFile3.Dir}
+            NameOf(PruneStaleEntries), tsInvariant(PruneStaleEntries),
+            NameOf(SaveDebuggedFile), tsInvariant(SaveDebuggedFile),
+            NameOf(SortFileForOutput), tsInvariant(SortFileForOutput),
+            NameOf(CCDBSettingsChanged), tsInvariant(CCDBSettingsChanged),
+            NameOf(CCDebugFile1), CCDebugFile1.Name, CCDebugFile1.Dir,
+            NameOf(CCDebugFile2), CCDebugFile2.Name, CCDebugFile2.Dir,
+            NameOf(CCDebugFile3), CCDebugFile3.Name, CCDebugFile3.Dir
+        }
+
         createModuleSettingsSection(NameOf(CCiniDebug), ccDebugSettingsTuples, 4)
+
     End Sub
 
 End Module
