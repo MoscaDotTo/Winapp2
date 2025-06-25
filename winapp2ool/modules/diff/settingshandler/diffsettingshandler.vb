@@ -50,57 +50,7 @@ Module diffsettingshandler
     ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub GetSerializedDiffSettings()
 
-        For Each kvp In settingsDict(NameOf(Diff))
-
-            Select Case kvp.Key
-
-                Case NameOf(DiffFile1) & "_Name"
-
-                    DiffFile1.Name = kvp.Value
-
-                Case NameOf(DiffFile1) & "_Dir"
-
-                    DiffFile1.Dir = kvp.Value
-
-                Case NameOf(DiffFile2) & "_Name"
-
-                    DiffFile2.Name = kvp.Value
-
-                Case NameOf(DiffFile2) & "_Dir"
-
-                    DiffFile2.Dir = kvp.Value
-
-                Case NameOf(DiffFile3) & "_Name"
-
-                    DiffFile3.Name = kvp.Value
-
-                Case NameOf(DiffFile3) & "_Dir"
-
-                    DiffFile3.Dir = kvp.Value
-
-                Case NameOf(DownloadDiffFile)
-
-                    DownloadDiffFile = CBool(kvp.Value)
-
-                Case NameOf(TrimRemoteFile)
-
-                    TrimRemoteFile = CBool(kvp.Value)
-
-                Case NameOf(ShowFullEntries)
-
-                    ShowFullEntries = CBool(kvp.Value)
-
-                Case NameOf(SaveDiffLog)
-
-                    SaveDiffLog = CBool(kvp.Value)
-
-                Case NameOf(DiffModuleSettingsChanged)
-
-                    DiffModuleSettingsChanged = CBool(kvp.Value)
-
-            End Select
-
-        Next
+        LoadModuleSettingsFromDict(NameOf(Diff), GetType(diffsettings))
 
     End Sub
 
@@ -115,18 +65,9 @@ Module diffsettingshandler
     ''' Docs last updated: 2023-06-12 | Code last updated: 2024-05-08
     Public Sub CreateDiffSettingsSection()
 
-        Dim diffSettingsTuples As New List(Of String) From {
-            NameOf(DownloadDiffFile), tsInvariant(DownloadDiffFile),
-            NameOf(TrimRemoteFile), tsInvariant(TrimRemoteFile),
-            NameOf(ShowFullEntries), tsInvariant(ShowFullEntries),
-            NameOf(SaveDiffLog), tsInvariant(SaveDiffLog),
-            NameOf(DiffModuleSettingsChanged), tsInvariant(DiffModuleSettingsChanged),
-            NameOf(DiffFile1), DiffFile1.Name, DiffFile1.Dir,
-            NameOf(DiffFile2), DiffFile2.Name, DiffFile2.Dir,
-            NameOf(DiffFile3), DiffFile3.Name, DiffFile3.Dir
-        }
+        Dim diffSettingsTuple = GetSettingsTupleWithReflection(GetType(diffsettings))
 
-        createModuleSettingsSection(NameOf(Diff), diffSettingsTuples, 5)
+        createModuleSettingsSection(NameOf(Diff), diffSettingsTuple, getNumBools(GetType(diffsettings)), getNumFiles(GetType(diffsettings)))
 
     End Sub
 
