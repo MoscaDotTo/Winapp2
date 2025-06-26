@@ -138,7 +138,10 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String), Optional itmLen As Integer = 35)
+    Public Sub initModule(name As String,
+                          showMenu As Action,
+                          handleInput As Action(Of String),
+                          Optional itmLen As Integer = 35)
 
         gLog("", ascend:=True)
         gLog($"Loading module {name}")
@@ -263,11 +266,23 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub print(printType As Integer, menuText As String, Optional optString As String = "", Optional cond As Boolean = True,
-                     Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False,
-                     Optional closeMenu As Boolean = False, Optional openMenu As Boolean = False, Optional enStrCond As Boolean = False,
-                     Optional colorLine As Boolean = False, Optional useArbitraryColor As Boolean = False, Optional arbitraryColor As ConsoleColor = Nothing,
-                     Optional buffr As Boolean = False, Optional trailr As Boolean = False, Optional conjoin As Boolean = False, Optional fillBorder As Boolean = True)
+    Public Sub print(printType As Integer,
+                     menuText As String,
+                     Optional optString As String = "",
+                     Optional cond As Boolean = True,
+                     Optional leadingBlank As Boolean = False,
+                     Optional trailingBlank As Boolean = False,
+                     Optional isCentered As Boolean = False,
+                     Optional closeMenu As Boolean = False,
+                     Optional openMenu As Boolean = False,
+                     Optional enStrCond As Boolean = False,
+                     Optional colorLine As Boolean = False,
+                     Optional useArbitraryColor As Boolean = False,
+                     Optional arbitraryColor As ConsoleColor = Nothing,
+                     Optional buffr As Boolean = False,
+                     Optional trailr As Boolean = False,
+                     Optional conjoin As Boolean = False,
+                     Optional fillBorder As Boolean = True)
 
         If Not cond Then Return
 
@@ -359,9 +374,14 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub determinePrintColor(colorLine As Boolean, useArbColor As Boolean, arbColor As ConsoleColor, enStrCond As Boolean)
+    Private Sub determinePrintColor(colorLine As Boolean,
+                                    useArbColor As Boolean,
+                                    arbColor As ConsoleColor,
+                                    enStrCond As Boolean)
 
-        If colorLine Then Console.ForegroundColor = If(useArbColor, arbColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red)) Else Console.ResetColor()
+        If Not colorLine Then Console.ResetColor() : Return
+
+        Console.ForegroundColor = If(useArbColor, arbColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red))
 
     End Sub
 
@@ -380,9 +400,12 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
+    Public Sub cwl(Optional msg As String = Nothing,
+                   Optional cond As Boolean = True)
 
-        If cond AndAlso Not SuppressOutput Then Console.WriteLine(msg)
+        If Not cond OrElse SuppressOutput Then Return
+
+        Console.WriteLine(msg)
 
     End Sub
 
@@ -393,7 +416,9 @@ Module MenuMaker
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Sub crk()
 
-        If Not SuppressOutput Then Console.ReadKey()
+        If SuppressOutput Then Return
+
+        Console.ReadKey()
 
     End Sub
 
@@ -404,7 +429,9 @@ Module MenuMaker
     ''' Docs last updated: 2020-08-31 | Code last updated: 2020-08-31
     Public Sub crl()
 
-        If Not SuppressOutput Then Console.ReadLine()
+        If SuppressOutput Then Return
+
+        Console.ReadLine()
 
     End Sub
 
@@ -434,11 +461,35 @@ Module MenuMaker
     ''' 
     ''' <param name="frameNum"> 
     ''' Indicates which frame should be returned <br/>
+    ''' 
     ''' <list type="bullet">
-    ''' <item> <description> 0: Vertical frames <c> ║     ║ </c> </description> </item>
-    ''' <item> <description> 1: Downward opening 90° angle frames <c> ╔ ═ ═ ═ ═ ═╗ </c> </description> </item>
-    ''' <item> <description> 2: Upward opening 90° angle frames <c> ╚ ═ ═ ═ ═ ═╝ </c> </description> </item>
-    ''' <item> <description> 3: Inward facing T-frames <c> ╠ ═ ═ ═ ═ ═ ╣ </c> </description> </item> </list>
+    ''' 
+    ''' <item>
+    ''' <description>
+    ''' 0: Vertical frames <c> ║     ║ </c>
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 1: Downward opening 90° angle frames <c> ╔ ═ ═ ═ ═ ═╗ </c>
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 2: Upward opening 90° angle frames <c> ╚ ═ ═ ═ ═ ═╝ </c>
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item> 
+    ''' <description> 
+    ''' 3: Inward facing T-frames <c> ╠ ═ ═ ═ ═ ═ ╣ </c> 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' </list>
+    ''' 
     ''' <br/> Optional, Default: <c> 0 </c>
     ''' </param>
     ''' 
@@ -447,7 +498,8 @@ Module MenuMaker
     ''' </returns>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Function getFrame(Optional frameNum As Integer = 0, Optional fillFrame As Boolean = False) As String
+    Private Function getFrame(Optional frameNum As Integer = 0,
+                              Optional fillFrame As Boolean = False) As String
 
         Return mkMenuLine("", 2, frameNum, fillFrame)
 
@@ -477,7 +529,10 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
+    Public Sub setHeaderText(txt As String,
+                             Optional cHeader As Boolean = False,
+                             Optional cond As Boolean = True,
+                             Optional printColor As ConsoleColor = ConsoleColor.Red)
 
         If Not cond Then Return
         MenuHeaderText = txt
@@ -499,7 +554,8 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Function denyActionWithHeader(cond As Boolean, errText As String) As Boolean
+    Public Function denyActionWithHeader(cond As Boolean,
+                                         errText As String) As Boolean
 
         setHeaderText(errText, True, cond)
         Return cond
@@ -532,7 +588,9 @@ Module MenuMaker
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Sub exitModule()
+
         ExitPending = True
+
     End Sub
 
     ''' <summary> 
@@ -554,7 +612,9 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True, Optional fillConjoiner As Boolean = True)
+    Public Sub printMenuTop(descriptionItems As String(),
+                            Optional printExit As Boolean = True,
+                            Optional fillConjoiner As Boolean = True)
 
         print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=ColorHeader, arbitraryColor:=HeaderColor, conjoin:=True, fillBorder:=fillConjoiner)
 
@@ -586,7 +646,8 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub printMenuLine(Optional lineString As String = Nothing, Optional isCentered As Boolean = False)
+    Private Sub printMenuLine(Optional lineString As String = Nothing,
+                              Optional isCentered As Boolean = False)
 
         If lineString = Nothing Then lineString = getFrame()
         cwl(mkMenuLine(lineString, If(isCentered, 0, 1)))
@@ -606,7 +667,8 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub printMenuOpt(lineString1 As String, lineString2 As String)
+    Private Sub printMenuOpt(lineString1 As String,
+                             lineString2 As String)
 
         lineString1 = $"{OptNum}. {lineString1}"
         padToEnd(lineString1, menuItemLength, "")
@@ -625,21 +687,61 @@ Module MenuMaker
     ''' 
     ''' <param name="align"> 
     ''' The alignment of the line to be printed: <br/> 
+    ''' 
     ''' <list type="bullet">
-    ''' <item> <description> 0: centers the string </description> </item>
-    ''' <item> <description> 1: leftaligns the string </description> </item>
-    ''' <item> <description> 2: prints a menu frame </description> </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 0: centers the string 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 1: leftaligns the string 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 2: prints a menu frame 
+    ''' </description> 
+    ''' </item>
+    ''' 
     ''' </list> 
     ''' </param>
     ''' 
     ''' <param name="borderInd"> 
     ''' Determines which characters should create the border for the menuline: <br/>
+    ''' 
     ''' <list type="bullet">
-    ''' <item> <description> 0: Vertical lines </description> </item>
-    ''' <item> <description> 1: Ceiling brackets </description> </item>
-    ''' <item> <description> 2: Floor brackets </description> </item>
-    ''' <item> <description> 3: Conjoining brackets </description> </item> 
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 0: Vertical lines 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item> 
+    ''' <description> 
+    ''' 1: Ceiling brackets 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item> 
+    ''' <description> 
+    ''' 2: Floor brackets 
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 3: Conjoining brackets 
+    ''' </description> 
+    ''' </item> 
+    ''' 
     ''' </list>
+    ''' 
     ''' <br/> Optional, Default: <c> 0 </c> 
     ''' </param>
     ''' 
@@ -648,7 +750,10 @@ Module MenuMaker
     ''' </param>
     '''
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Function mkMenuLine(line As String, align As Integer, Optional borderInd As Integer = 0, Optional fillBorder As Boolean = True) As String
+    Private Function mkMenuLine(line As String,
+                                align As Integer,
+                                Optional borderInd As Integer = 0,
+                                Optional fillBorder As Boolean = True) As String
 
         If line.Length >= Console.WindowWidth - 1 Then Return line
 
@@ -698,7 +803,10 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub padToEnd(ByRef out As String, targetLen As Integer, endline As String, Optional padStr As String = " ")
+    Private Sub padToEnd(ByRef out As String,
+                         targetLen As Integer,
+                         endline As String,
+                         Optional padStr As String = " ")
 
         While out.Length < targetLen
 
@@ -746,7 +854,9 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Function computeMenuNumber(defaultNumber As Integer, weightedComponents As Boolean(), weights As Integer()) As String
+    Public Function computeMenuNumber(defaultNumber As Integer,
+                                      weightedComponents As Boolean(),
+                                      weights As Integer()) As String
 
         Dim out = defaultNumber
 
