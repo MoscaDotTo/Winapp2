@@ -18,7 +18,7 @@
 Option Strict On
 
 ''' <summary> 
-''' Manages the settings of the Downloader module for the purpose of syncing to disk 
+''' Provides methods for managing the Downloader module settings, including support methods for syncing to disk
 ''' </summary>
 ''' 
 ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
@@ -31,21 +31,7 @@ Module downloadsettingshandler
     ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub getSerializedDownloaderSettings()
 
-        For Each kvp In settingsDict(NameOf(Downloader))
-
-            Select Case kvp.Key
-
-                Case NameOf(downloadFile) & "_Dir"
-
-                    downloadFile.Dir = kvp.Value
-
-                Case NameOf(DownloadModuleSettingsChanged)
-
-                    DownloadModuleSettingsChanged = CBool(kvp.Value)
-
-            End Select
-
-        Next
+        LoadModuleSettingsFromDict(NameOf(Downloader), GetType(downloadersettings))
 
     End Sub
 
@@ -60,12 +46,9 @@ Module downloadsettingshandler
     ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub createDownloadSettingsSection()
 
-        Dim downloadSettingTuple As New List(Of String) From {
-            NameOf(DownloadModuleSettingsChanged), tsInvariant(DownloadModuleSettingsChanged),
-            NameOf(downloadFile), "", downloadFile.Dir
-        }
+        Dim trimSettingsTuple = GetSettingsTupleWithReflection(GetType(downloadersettings))
 
-        createModuleSettingsSection(NameOf(Downloader), downloadSettingTuple, 1, 1)
+        createModuleSettingsSection(NameOf(Downloader), trimSettingsTuple, getNumBools(GetType(downloadersettings)), getNumFiles(GetType(downloadersettings)))
 
     End Sub
 

@@ -131,6 +131,7 @@
     <Compile Include="modules\diff\tool\Diff.vb" />
     <Compile Include="modules\diff\mainmenu\diffmainmenu.vb" />
     <Compile Include="modules\diff\settingshandler\diffsettingshandler.vb" />
+    <Compile Include="modules\download\settingshandler\downloadersettings.vb" />
     <Compile Include="modules\download\settingshandler\downloadsettingshandler.vb" />
     <Compile Include="modules\download\tool\Downloader.vb" />
     <Compile Include="modules\download\tool\advDownloads.vb" />
