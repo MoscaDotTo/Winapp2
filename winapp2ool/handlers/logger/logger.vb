@@ -32,12 +32,7 @@ Public Module logger
     ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
     Public Property GlobalLog As New strList
 
-    '''<summary> 
-    '''Holds the filesystem location to which the log file will optionally be saved.
-    '''</summary>
-    '''
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
-    Public Property GlobalLogFile As New iniFile(Environment.CurrentDirectory, "winapp2ool.log")
+
 
     '''<summary> 
     '''The current indentation level of the global log.

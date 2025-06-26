@@ -43,20 +43,6 @@ Public Module settingsHandler
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Property settingsDict As New Dictionary(Of String, Dictionary(Of String, String))
 
-    '''<summary> 
-    '''Indicates that changes to the application's settings should be serialized back to the disk 
-    '''</summary>
-    '''
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
-    Public Property saveSettingsToDisk As Boolean = False
-
-    ''' <summary> 
-    ''' Indicates that settings who are read from the disk should override the corresponding default module settings 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
-    Public Property readSettingsFromDisk As Boolean = False
-
     ''' <summary> 
     ''' If saving is enabled, saves the current state of winapp2ool's settings to disk, overwriting any existing settings. 
     ''' </summary>
@@ -257,7 +243,11 @@ Public Module settingsHandler
     Public Sub createModuleSettingsSection(callingModule As String, settingTuples As List(Of String), numBools As Integer, Optional numFiles As Integer = 3)
         If settingTuples Is Nothing Then argIsNull(NameOf(settingTuples)) : Return
         Dim settingKeys As List(Of String)
-        If callingModule = "Trim" OrElse callingModule = "Diff" Then
+        If callingModule = "Trim" OrElse
+            callingModule = "Diff" OrElse
+            callingModule = "CCiniDebug" OrElse
+            callingModule = "Downloader" OrElse
+            callingModule = "Winapp2ool" Then
             settingKeys = getSettingKeys2(settingTuples, callingModule, numBools, numFiles)
         Else
             settingKeys = getSettingKeys(settingTuples, callingModule, numBools, numFiles)
@@ -293,6 +283,7 @@ Public Module settingsHandler
                 i += 2
             End If
         Next
+        gLog($"Reflection: {moduleName}")
         Return out
     End Function
 

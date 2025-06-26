@@ -24,13 +24,6 @@ Option Strict On
 ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
 Module Winapp2ool
 
-    ''' <summary>
-    ''' Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
-    Public Property RemoteWinappIsNonCC As Boolean = False
-
     ''' <summary> 
     ''' Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)
     ''' </summary>
@@ -46,13 +39,6 @@ Module Winapp2ool
     Public Property isOffline As Boolean = False
 
     ''' <summary> 
-    ''' Indicates that this build is beta and should check the beta branch link for updates 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
-    Public Property isBeta As Boolean = False
-
-    ''' <summary> 
     ''' Indicates that we're unable to download the executable 
     ''' </summary>
     ''' 
@@ -65,13 +51,6 @@ Module Winapp2ool
     ''' 
     ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Property alreadyDownloadedExecutable As Boolean = False
-
-    ''' <summary> 
-    ''' Indicates that the module's settings have been changed
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
-    Public Property toolSettingsHaveChanged As Boolean = False
 
     ''' <summary> 
     ''' Checks the version of Windows on the current system and returns it as a Double 

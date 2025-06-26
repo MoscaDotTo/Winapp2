@@ -158,6 +158,7 @@
     <Compile Include="modules\launcher\launcher.vb" />
     <Compile Include="modules\maintool\mainmenu\maintoolmenu.vb" />
     <Compile Include="modules\maintool\settingshandler\maintoolsettinghandler.vb" />
+    <Compile Include="modules\maintool\settingshandler\maintoolsettings.vb" />
     <Compile Include="modules\merge\mainmenu\mergemainmenu.vb" />
     <Compile Include="modules\merge\tool\Merge.vb" />
     <Compile Include="modules\merge\settingshandler\mergesettinghandler.vb" />

@@ -31,41 +31,7 @@ Module mainToolSettingsHandler
     ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Sub getSeralizedToolSettings()
 
-        For Each kvp In settingsDict(NameOf(Winapp2ool))
-
-            Select Case kvp.Key
-
-                Case NameOf(isBeta)
-
-                    isBeta = CBool(kvp.Value)
-
-                Case NameOf(readSettingsFromDisk)
-
-                    readSettingsFromDisk = CBool(kvp.Value)
-
-                Case NameOf(saveSettingsToDisk)
-
-                    saveSettingsToDisk = CBool(kvp.Value)
-
-                Case NameOf(RemoteWinappIsNonCC)
-
-                    RemoteWinappIsNonCC = CBool(kvp.Value)
-
-                Case NameOf(toolSettingsHaveChanged)
-
-                    toolSettingsHaveChanged = CBool(kvp.Value)
-
-                Case NameOf(GlobalLogFile) & "_Dir"
-
-                    GlobalLogFile.Dir = kvp.Value
-
-                Case NameOf(GlobalLogFile) & "_Name"
-
-                    GlobalLogFile.Name = kvp.Value
-
-            End Select
-
-        Next
+        LoadModuleSettingsFromDict(NameOf(Winapp2ool), GetType(maintoolsettings))
 
     End Sub
 
@@ -80,16 +46,9 @@ Module mainToolSettingsHandler
     ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub createToolSettingsSection()
 
-        Dim mainToolModuleTuple As New List(Of String) From {
-            NameOf(isBeta), tsInvariant(isBeta),
-            NameOf(saveSettingsToDisk), tsInvariant(saveSettingsToDisk),
-            NameOf(readSettingsFromDisk), tsInvariant(readSettingsFromDisk),
-            NameOf(RemoteWinappIsNonCC), tsInvariant(RemoteWinappIsNonCC),
-            NameOf(toolSettingsHaveChanged), tsInvariant(toolSettingsHaveChanged),
-            NameOf(GlobalLogFile), GlobalLogFile.Name, GlobalLogFile.Dir
-        }
+        Dim mainToolSettingsTuple = GetSettingsTupleWithReflection(GetType(maintoolsettings))
 
-        createModuleSettingsSection(NameOf(Winapp2ool), mainToolModuleTuple, 5, 1)
+        createModuleSettingsSection(NameOf(Winapp2ool), mainToolSettingsTuple, getNumBools(GetType(maintoolsettings)), getNumFiles(GetType(maintoolsettings)))
 
     End Sub
 
