@@ -14,6 +14,7 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
 
 ''' <summary> 
@@ -46,37 +47,7 @@ Module mergesettinghandler
     ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Sub getSeralizedMergeSettings()
 
-        For Each kvp In settingsDict(NameOf(Merge))
-
-            Select Case kvp.Key
-
-                Case NameOf(MergeFile1) & "_Name"
-
-                    MergeFile1.Name = kvp.Value
-
-                Case NameOf(MergeFile1) & "_Dir"
-
-                    MergeFile1.Dir = kvp.Value
-
-                Case NameOf(MergeFile2) & "_Name"
-
-                    MergeFile2.Name = kvp.Value
-
-                Case NameOf(MergeFile2) & "_Dir"
-
-                    MergeFile2.Dir = kvp.Value
-
-                Case NameOf(MergeFile3) & "_Name"
-
-                    MergeFile3.Name = kvp.Value
-
-                Case NameOf(MergeFile3) & "_Dir"
-
-                    MergeFile1.Dir = kvp.Value
-
-            End Select
-
-        Next
+        LoadModuleSettingsFromDict(NameOf(Merge), GetType(mergesettings))
 
     End Sub
 
@@ -84,18 +55,12 @@ Module mergesettinghandler
     '''Adds the current (typically default) state of the module's settings into the disk-writable settings representation 
     '''</summary>
     '''
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+    ''' Docs last updated: 2020-09-14 | Code last updated: 2025-06-25
     Public Sub createMergeSettingsSection()
 
-        Dim mergeSettingsTuple As New List(Of String) From {
-            NameOf(mergeMode), tsInvariant(mergeMode),
-            NameOf(MergeModuleSettingsChanged), tsInvariant(MergeModuleSettingsChanged),
-            NameOf(MergeFile1), MergeFile1.Name, MergeFile1.Dir,
-            NameOf(MergeFile2), MergeFile2.Name, MergeFile2.Dir,
-            NameOf(MergeFile3), MergeFile3.Name, MergeFile3.Dir
-        }
+        Dim mergeSettingsTuple = GetSettingsTupleWithReflection(GetType(mergesettings))
 
-        createModuleSettingsSection(NameOf(Merge), mergeSettingsTuple, 2)
+        createModuleSettingsSection(NameOf(Merge), mergeSettingsTuple, getNumBools(GetType(mergesettings)), getNumFiles(GetType(mergesettings)))
 
     End Sub
 

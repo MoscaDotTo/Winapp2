@@ -160,6 +160,7 @@
     <Compile Include="modules\maintool\settingshandler\maintoolsettinghandler.vb" />
     <Compile Include="modules\maintool\settingshandler\maintoolsettings.vb" />
     <Compile Include="modules\merge\mainmenu\mergemainmenu.vb" />
+    <Compile Include="modules\merge\settingshandler\mergesettings.vb" />
     <Compile Include="modules\merge\tool\Merge.vb" />
     <Compile Include="modules\merge\settingshandler\mergesettinghandler.vb" />
     <Compile Include="modules\minefield\java\JavaMaker.vb" />
