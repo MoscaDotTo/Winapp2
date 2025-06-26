@@ -239,73 +239,102 @@ Public Module settingsHandler
     ''' The array of Strings containing the module's settings and their default values
     ''' </param>
     ''' 
+    ''' <param name="numBools"> 
+    ''' The number of boolean settings in the module 
+    ''' </param>
+    ''' 
+    ''' <param name="numFiles"> 
+    ''' The number of <c> iniFile </c> settings in the module 
+    ''' </param>
+    ''' 
+    ''' <remarks>
+    ''' The <c> settingTuples </c> should be formatted as follows: 
+    ''' (Name, Value) pairs for boolean settings and (Name, Filename, Dir) triplets for <c> iniFile </c> settings
+    ''' </remarks>
+    ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
-    Public Sub createModuleSettingsSection(callingModule As String, settingTuples As List(Of String), numBools As Integer, Optional numFiles As Integer = 3)
+    Public Sub createModuleSettingsSection(callingModule As String,
+                                           settingTuples As List(Of String),
+                                           numBools As Integer,
+                                           numFiles As Integer)
+
         If settingTuples Is Nothing Then argIsNull(NameOf(settingTuples)) : Return
         Dim settingKeys As List(Of String)
-        If callingModule = "Trim" OrElse
-            callingModule = "Diff" OrElse
-            callingModule = "CCiniDebug" OrElse
-            callingModule = "Downloader" OrElse
-            callingModule = "Winapp2ool" OrElse
-            callingModule = "Merge" OrElse
-            callingModule = "WinappDebug" Then
-            settingKeys = getSettingKeys2(settingTuples, callingModule, numBools, numFiles)
-        Else
-            settingKeys = getSettingKeys(settingTuples, callingModule, numBools, numFiles)
-        End If
+
+        settingKeys = getSettingKeys(settingTuples, callingModule, numBools, numFiles)
 
         Dim toolSection = settingsFile.getSection(callingModule)
         Dim mustSaveFile = False
+
         For Each key In settingKeys
+
             If key.Length = 0 Then Continue For
             toolSection.Keys.add(New iniKey(key))
             mustSaveFile = True
+
         Next
+
         If Not settingsFile.hasSection(callingModule) Then settingsFile.Sections.Add(callingModule, toolSection) : mustSaveFile = True
         addToSettingsDict(callingModule, toolSection)
         If mustSaveFile Then saveSettingsFile()
+
     End Sub
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="settingsTuples"> 
+    ''' A set of module properties to process into iniKeys
+    ''' </param>
+    ''' 
+    ''' <param name="moduleName">
+    ''' The name of the module whose properties will be returned as iniKeys 
+    ''' </param>
+    ''' 
+    ''' <param name="numBools"> 
+    ''' The number of boolean settings in the module 
+    ''' </param>
+    ''' 
+    ''' <param name="numFiles"> 
+    ''' The number of <c> iniFile </c> settings in the module 
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' A list of iniKeys representing the settings for the specified module to be written to disk 
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
+    Private Function getSettingKeys(settingsTuples As List(Of String),
+                                    moduleName As String,
+                                    numBools As Integer,
+                                    numFiles As Integer) As List(Of String)
 
-    Private Function getSettingKeys2(settingsTuples As List(Of String), moduleName As String, numBools As Integer, Optional numFiles As Integer = 3) As List(Of String)
-        ' Ensure that we only operate on properly formatted tuples 
-        Dim expectedSettingsCount = 2 * numBools + 3 * numFiles
-        gLog($"GET2 ::: The number of settings provided to {moduleName}'s settings initializer ({settingsTuples.Count})doesn't match the number expected ({expectedSettingsCount}).", Not settingsTuples.Count = expectedSettingsCount)
-        Dim out As New List(Of String)
-
-        For i = 0 To settingsTuples.Count - 2
-            If i >= 3 * numFiles - 1 Then
-                ' boolean settings are in (name,value) pairs
-                out.Add(getSettingIniKey(moduleName, settingsTuples(i), settingsTuples(i + 1)))
-                i += 1
-            Else
-                ' file settings are in (name, filename, dir) triplets 
-                out.Add(getSettingIniKey(moduleName, settingsTuples(i), settingsTuples(i + 1), isName:=True))
-                out.Add(getSettingIniKey(moduleName, settingsTuples(i), settingsTuples(i + 2), isDir:=True))
-                i += 2
-            End If
-        Next
-        gLog($"Reflection: {moduleName}")
-        Return out
-    End Function
-
-    Private Function getSettingKeys(settingsTuples As List(Of String), moduleName As String, numBools As Integer, Optional numFiles As Integer = 3) As List(Of String)
         ' Ensure that we only operate on properly formatted tuples 
         Dim expectedSettingsCount = 2 * numBools + 3 * numFiles
         gLog($"The number of settings provided to {moduleName}'s settings initializer ({settingsTuples.Count})doesn't match the number expected ({expectedSettingsCount}).", Not settingsTuples.Count = expectedSettingsCount)
+
         Dim out As New List(Of String)
-        For i = 0 To settingsTuples.Count - 3
-            If i < 2 * numBools Then
+
+        For i = 0 To settingsTuples.Count - 2
+
+            If i >= 3 * numFiles - 1 Then
+
                 ' boolean settings are in (name,value) pairs
                 out.Add(getSettingIniKey(moduleName, settingsTuples(i), settingsTuples(i + 1)))
                 i += 1
+
             Else
+
                 ' file settings are in (name, filename, dir) triplets 
                 out.Add(getSettingIniKey(moduleName, settingsTuples(i), settingsTuples(i + 1), isName:=True))
                 out.Add(getSettingIniKey(moduleName, settingsTuples(i), settingsTuples(i + 2), isDir:=True))
                 i += 2
+
             End If
+
         Next
+
+        gLog($"Finished loading settings for {moduleName}")
+
         Return out
     End Function
 
@@ -341,12 +370,21 @@ Public Module settingsHandler
     ''' </returns>
     ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
-    Private Function getSettingIniKey(moduleName As String, settingName As String, settingValue As String, Optional isName As Boolean = False, Optional isDir As Boolean = False) As String
+    Private Function getSettingIniKey(moduleName As String,
+                                      settingName As String,
+                                      settingValue As String,
+                                      Optional isName As Boolean = False,
+                                      Optional isDir As Boolean = False) As String
+
         If isName Then settingName += "_Name"
         If isDir Then settingName += "_Dir"
+
         Dim settingInDict = settingsDict(moduleName).ContainsKey(settingName)
+
         gLog($"{settingName} was not found in {settingsFile.Name}", Not settingInDict, indent:=True)
+
         Return If(Not settingInDict, $"{settingName}={settingValue}", "")
+
     End Function
 
     ''' <summary> 
@@ -362,7 +400,8 @@ Public Module settingsHandler
     ''' </param>
     ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
-    Public Sub restoreDefaultSettings(callingModule As String, createSection As Action)
+    Public Sub restoreDefaultSettings(callingModule As String,
+                                      createSection As Action)
 
         If createSection Is Nothing Then argIsNull(NameOf(createSection)) : Return
 
@@ -386,7 +425,8 @@ Public Module settingsHandler
     ''' </param>
     ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
-    Public Sub LoadModuleSettingsFromDict(moduleName As String, winapp2oolmodule As Type)
+    Public Sub LoadModuleSettingsFromDict(moduleName As String,
+                                          winapp2oolmodule As Type)
 
         If Not moduleName = "Winapp2ool" AndAlso Not readSettingsFromDisk Then Return
 
