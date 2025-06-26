@@ -247,7 +247,9 @@ Public Module settingsHandler
             callingModule = "Diff" OrElse
             callingModule = "CCiniDebug" OrElse
             callingModule = "Downloader" OrElse
-            callingModule = "Winapp2ool" Then
+            callingModule = "Winapp2ool" OrElse
+            callingModule = "Merge" OrElse
+            callingModule = "WinappDebug" Then
             settingKeys = getSettingKeys2(settingTuples, callingModule, numBools, numFiles)
         Else
             settingKeys = getSettingKeys(settingTuples, callingModule, numBools, numFiles)
@@ -343,7 +345,7 @@ Public Module settingsHandler
         If isName Then settingName += "_Name"
         If isDir Then settingName += "_Dir"
         Dim settingInDict = settingsDict(moduleName).ContainsKey(settingName)
-        gLog($"{settingName} was not found in the settings dictionary", Not settingInDict, indent:=True)
+        gLog($"{settingName} was not found in {settingsFile.Name}", Not settingInDict, indent:=True)
         Return If(Not settingInDict, $"{settingName}={settingValue}", "")
     End Function
 
@@ -386,6 +388,8 @@ Public Module settingsHandler
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Sub LoadModuleSettingsFromDict(moduleName As String, winapp2oolmodule As Type)
 
+        If Not moduleName = "Winapp2ool" AndAlso Not readSettingsFromDisk Then Return
+
         If Not settingsDict.ContainsKey(moduleName) Then Return
         Dim dict = settingsDict(moduleName)
 
@@ -397,6 +401,8 @@ Public Module settingsHandler
 
             If value2.GetType().Name = "iniFile" Then
 
+                If Not dict.ContainsKey(prop.Name & "_Name") OrElse Not dict.ContainsKey(prop.Name & "_Dir") Then Continue For
+
                 Dim iniProp As iniFile = CType(value2, iniFile)
 
                 iniProp.Name = dict(prop.Name & "_Name")
@@ -405,6 +411,8 @@ Public Module settingsHandler
                 Continue For
 
             End If
+
+            If Not dict.ContainsKey(prop.Name) Then Continue For
 
             Dim valueStr = dict(prop.Name)
             Dim value = Convert.ChangeType(valueStr, prop.PropertyType)

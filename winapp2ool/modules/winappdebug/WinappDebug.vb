@@ -25,59 +25,6 @@ Imports System.Text.RegularExpressions
 Public Module WinappDebug
 
     ''' <summary> 
-    ''' The winapp2.ini file that will be linted 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property winappDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
-
-    ''' <summary> 
-    ''' The save path for the linted file. Overwrites the input file by default 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property winappDebugFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
-
-    ''' <summary> 
-    ''' Indicates that some but not all repairs will run 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property RepairSomeErrsFound As Boolean = False
-
-    ''' <summary>
-    ''' Indicates that the scan settings have been modified from their defaults 
-    ''' <br /> Default: <c> False </c> 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property ScanSettingsChanged As Boolean = False
-
-    ''' <summary>
-    ''' Indicates that the module settings have been modified from their defaults 
-    ''' <br/> Default: <c> False </c> 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property ModuleSettingsChanged As Boolean = False
-
-    ''' <summary> 
-    ''' Indicates that the any changes made by the linter should be saved back to disk 
-    ''' <br/> Default: <c> False </c> 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property SaveChanges As Boolean = False
-
-    ''' <summary> 
-    ''' Indicates that the linter should attempt to repair errors it finds 
-    ''' <br/> Default: <c> True </c>
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property RepairErrsFound As Boolean = True
-
-    ''' <summary> 
     ''' The number of errors found during the lint 
     ''' </summary>
     ''' 
@@ -287,22 +234,6 @@ Public Module WinappDebug
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
 
-    ''' <summary> 
-    ''' Indicates that Default keys should have their values auited instead of being considered invalid for existing 
-    ''' <br /> Default: <c> False </c> 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property overrideDefaultVal As Boolean = False
-
-    ''' <summary> 
-    ''' The expected value for Default keys when auditing their values 
-    ''' <br/> Default: <c> Faalse </c> 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property expectedDefaultValue As Boolean = False
-
     ''' <summary>
     ''' Handles the commandline args for <c> WinappDebug </c> <br />
     ''' WinappDebug commandline args: <br />
@@ -385,8 +316,14 @@ Public Module WinappDebug
 
     End Sub
 
-    ''' <summary> Validates the basic structure of a <c> winapp2entry </c> and sends off its individual keys for more specific analysis </summary>
-    ''' <param name="entry"> A <c> winapp2entry </c> to be audited for syntax errors </param>
+    ''' <summary> 
+    ''' Validates the basic structure of a <c> winapp2entry </c> and sends off its individual keys for more specific analysis 
+    ''' </summary>
+    ''' 
+    ''' <param name="entry">
+    ''' A <c> winapp2entry </c> to be audited for syntax errors
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2022-01-11
     Private Sub ProcessEntry(ByRef entry As winapp2entry)
 
@@ -810,9 +747,19 @@ Public Module WinappDebug
     ''' Attempts to fix any broken environment variables in a given <c> iniKey </c> <br/> <br/>
     ''' This function will attempt to repair any environment variables that are missing leading or trailing % characters    
     ''' </summary>
-    ''' <param name="key"> An <c> iniKey </c> whose value will be audited for syntax errors </param>
-    ''' <param name="enVars"> The list of valid Environment Variables for Winapp2.ini </param>
-    ''' <param name="cond"> The condition under which this scan should be run </param>
+    ''' 
+    ''' <param name="key">
+    ''' An <c> iniKey </c> whose value will be audited for syntax errors
+    ''' </param>
+    ''' 
+    ''' <param name="enVars"> 
+    ''' The list of valid Environment Variables for Winapp2.ini 
+    ''' </param>
+    ''' 
+    ''' <param name="cond"> 
+    ''' The condition under which this scan should be run 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2024-04-22 | Code last updated: 2024-04-22
     Private Sub fixBrokenEnVars(ByRef key As iniKey, enVars As String(), cond As Boolean)
 
@@ -868,8 +815,14 @@ Public Module WinappDebug
     End Sub
 
 
-    ''' <summary> Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey </c> </summary>
-    ''' <param name="key">The <c> iniKey </c> whose data will be audited for environment variable correctness </param>
+    ''' <summary> 
+    ''' Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey </c>
+    ''' </summary>
+    ''' 
+    ''' <param name="key">
+    ''' The <c> iniKey </c> whose data will be audited for environment variable correctness 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
     Private Sub cEnVar(ByRef key As iniKey)
 
@@ -894,12 +847,22 @@ Public Module WinappDebug
 
     End Sub
 
-    ''' <summary> Attempts to insert missing equal signs (=) into <c> iniKeys </c> <br/> <br/> Returns <c> True </c> if the repair is 
-    '''  successful, <c> False </c> otherwise </summary>
-    ''' <param name="key"> A misformatted <c> iniKey </c> to attempt to repair </param>
-    ''' <param name="cmds"> An array containing valid winapp2.ini <c> keyTypes </c> </param>
+    ''' <summary> 
+    ''' Attempts to insert missing equal signs (=) into <c> iniKeys </c> <br/> <br/> Returns <c> True </c> if the repair is 
+    '''  successful, <c> False </c> otherwise 
+    '''  </summary>
+    '''  
+    ''' <param name="key">
+    ''' A misformatted <c> iniKey </c> to attempt to repair 
+    ''' </param>
+    ''' 
+    ''' <param name="cmds">
+    ''' An array containing valid winapp2.ini <c> keyTypes </c> 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2024-05-03
-    Private Function fixMissingEquals(ByRef key As iniKey, cmds As String()) As Boolean
+    Private Function fixMissingEquals(ByRef key As iniKey,
+                                      cmds As String()) As Boolean
 
         gLog("Attempting missing equals repair", ascend:=True)
 
@@ -949,16 +912,32 @@ Public Module WinappDebug
 
     End Function
 
-    ''' <summary> Does basic syntax and formatting audits that apply across all keys, returns <c> False </c> 
-    ''' if a key is malformed or if a null argument is given </summary>
-    ''' <param name="key"> A <c> iniKey </c> whose basic syntactic validity will be assessed </param>
+    ''' <summary> 
+    ''' Does basic syntax and formatting audits that apply across all keys, returns <c> False </c> 
+    ''' if a key is malformed or if a null argument is given 
+    ''' </summary>
+    ''' 
+    ''' <param name="key"> 
+    ''' A <c> iniKey </c> whose basic syntactic validity will be assessed 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2022-12-01
     Private Function cValidity(ByRef key As iniKey) As Boolean
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return False
 
-        Dim validCmds = {"Default", "DetectOS", "DetectFile", "Detect", "ExcludeKey",
-                        "FileKey", "LangSecRef", "RegKey", "Section", "SpecialDetect", "Warning"}
+        Dim validCmds = {"Default",
+                         "DetectOS",
+                         "DetectFile",
+                         "Detect",
+                         "ExcludeKey",
+                         "FileKey",
+                         "LangSecRef",
+                         "RegKey",
+                         "Section",
+                         "SpecialDetect",
+                         "Warning"
+                        }
 
         ' Attempt to fix the case where keys are missing an equal sign to delineate name and value 
         If key.typeIs("DeleteMe") Then
@@ -1006,13 +985,27 @@ Public Module WinappDebug
 
     End Function
 
-    ''' <summary> Checks the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey </c> against a given array of expected cased values, attempts 
-    ''' to repair casing errors if possible </summary>
-    ''' <param name="key"> The <c> iniKey </c> whose casing will be audited </param>
-    ''' <param name="casedArray"> The array of expected cased values </param>
-    ''' <param name="strToChk"> A pointer to the value being audited </param>
+    ''' <summary> 
+    ''' Checks the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey </c> against a given array of expected cased values, attempts 
+    ''' to repair casing errors if possible 
+    ''' </summary>
+    ''' 
+    ''' <param name="key"> 
+    ''' The <c> iniKey </c> whose casing will be audited 
+    ''' </param>
+    ''' 
+    ''' <param name="casedArray"> 
+    ''' The array of expected cased values 
+    ''' </param>
+    ''' 
+    ''' <param name="strToChk"> 
+    ''' A pointer to the value being audited 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2022-12-01
-    Private Sub chkCasing(ByRef key As iniKey, casedArray As String(), strToChk As String)
+    Private Sub chkCasing(ByRef key As iniKey,
+                          casedArray As String(),
+                          strToChk As String)
 
         ' Get the properly cased string 
         Dim casedString As String = strToChk
@@ -1037,8 +1030,14 @@ Public Module WinappDebug
 
     End Sub
 
-    ''' <summary> Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible </summary>
-    ''' <param name="key"> A winapp2.ini FileKey format <c> iniKey </c> to be checked for correctness </param>
+    ''' <summary> 
+    ''' Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible 
+    ''' </summary>
+    ''' 
+    ''' <param name="key"> 
+    ''' A winapp2.ini FileKey format <c> iniKey </c> to be checked for correctness 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Public Function pFileKey(key As iniKey) As iniKey
 
@@ -1106,8 +1105,14 @@ Public Module WinappDebug
 
     End Function
 
-    ''' <summary> Processes a DetectFile format <c> iniKey </c> and checks it for errors, correcting where possible </summary>
-    ''' <param name="key"> A winapp2.ini DetectFile format <c> iniKey </c> to be checked for correctness </param>
+    ''' <summary> 
+    ''' Processes a DetectFile format <c> iniKey </c> and checks it for errors, correcting where possible 
+    ''' </summary>
+    ''' 
+    ''' <param name="key">
+    ''' A winapp2.ini DetectFile format <c> iniKey </c> to be checked for correctness 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Function pDetectFile(key As iniKey) As iniKey
 
@@ -1134,9 +1139,18 @@ Public Module WinappDebug
 
     End Function
 
-    ''' <summary> Audits the syntax of file system and registry paths </summary>
-    ''' <param name="key"> An <c> iniKey </c> containing a registry or filesystem path to have its syntax validated </param>
-    ''' <param name="isRegistry"> Indicates that the given <c> <paramref name="key"/> </c> is expected to hold a registry path </param>
+    ''' <summary> 
+    ''' Audits the syntax of file system and registry paths 
+    ''' </summary>
+    ''' 
+    ''' <param name="key">
+    ''' An <c> iniKey </c> containing a registry or filesystem path to have its syntax validated 
+    ''' </param>
+    ''' 
+    ''' <param name="isRegistry"> 
+    ''' Indicates that the given <c> <paramref name="key"/> </c> is expected to hold a registry path 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2024-05-03
     Private Sub chkPathFormatValidity(key As iniKey, isRegistry As Boolean)
 
@@ -1152,12 +1166,26 @@ Public Module WinappDebug
 
     End Sub
 
-    ''' <summary> Processes a list of ExcludeKey format <c> iniKeys </c> and checks them for errors, correcting where possible </summary>
-    ''' <param name="key"> A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness </param>
-    ''' <param name="hasF"> Indicates whether the entry excludes any filesystem locations </param>
-    ''' <param name="hasR"> Indicates whether the entry excludes any registry locations </param>
+    ''' <summary>
+    ''' Processes a list of ExcludeKey format <c> iniKeys </c> and checks them for errors, correcting where possible 
+    ''' </summary>
+    ''' 
+    ''' <param name="key"> 
+    ''' A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness 
+    ''' </param>
+    ''' 
+    ''' <param name="hasF"> 
+    ''' Indicates whether the entry excludes any filesystem locations 
+    ''' </param>
+    ''' 
+    ''' <param name="hasR"> 
+    ''' Indicates whether the entry excludes any registry locations 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2024-05-03
-    Private Sub pExcludeKey(ByRef key As iniKey, ByRef hasF As Boolean, ByRef hasR As Boolean)
+    Private Sub pExcludeKey(ByRef key As iniKey,
+                            ByRef hasF As Boolean,
+                            ByRef hasR As Boolean)
 
         Dim hasValidFlags = key.vHasAny({"FILE|", "PATH|", "REG|"})
         If Not hasValidFlags Then hasValidFlags = checkExcludeFlags(key)
@@ -1194,7 +1222,11 @@ Public Module WinappDebug
     ''' Assesses the formatting of ExcludeKey format <c> iniKeys </c> to see if the flag (FILE, PATH, REG) 
     ''' is malformatted. Attempts to repair when possible.
     ''' </summary>
-    ''' <param name="key"> A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness </param>
+    ''' 
+    ''' <param name="key"> 
+    ''' A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2024-05-03 | Code last updated: 2024-05-03
     Private Function checkExcludeFlags(ByRef key As iniKey) As Boolean
 
@@ -1219,11 +1251,21 @@ Public Module WinappDebug
 
     End Function
 
-    ''' <summary> Sorts a <c> keyList </c> alphabetically with winapp2.ini precedence applied to the key values </summary>
-    ''' <param name="kl"> A <c> keyList </c> to be sorted alphabetically (with numbers having precedence) </param>
-    ''' <param name="hadDuplicatesRemoved"> Indicates that keys have been removed from <c> <paramref name="kl"/> </c> </param>
+    ''' <summary> 
+    ''' Sorts a <c> keyList </c> alphabetically with winapp2.ini precedence applied to the key values 
+    ''' </summary>
+    ''' 
+    ''' <param name="kl">
+    ''' A <c> keyList </c> to be sorted alphabetically (with numbers having precedence) 
+    ''' </param>
+    ''' 
+    ''' <param name="hadDuplicatesRemoved"> 
+    ''' Indicates that keys have been removed from <c> <paramref name="kl"/> </c>
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
-    Private Sub sortKeys(ByRef kl As keyList, hadDuplicatesRemoved As Boolean)
+    Private Sub sortKeys(ByRef kl As keyList,
+                         hadDuplicatesRemoved As Boolean)
 
         If kl.KeyCount <= 1 OrElse Not lintAlpha.ShouldScan Then Return
 
@@ -1241,41 +1283,108 @@ Public Module WinappDebug
 
     End Sub
 
-    ''' <summary> Prints an error when data is received that does not match an expected value </summary>
-    ''' <param name="linecount"> The line number on which the error was detected </param>
-    ''' <param name="err"> A description of the error as it will be displayed to the user </param>
-    ''' <param name="received"> The (erroneous) input data </param>
-    ''' <param name="expected"> The expected data </param>
-    ''' <param name="cond"> Indicates that the error condition is present <br/> Optional, Default: <c> True </c> </param>
+    ''' <summary> 
+    ''' Prints an error when data is received that does not match an expected value 
+    ''' </summary>
+    ''' 
+    ''' <param name="linecount"> 
+    ''' The line number on which the error was detected 
+    ''' </param>
+    ''' 
+    ''' <param name="err">
+    ''' A description of the error as it will be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' <param name="received">
+    ''' The (erroneous) input data 
+    ''' </param>
+    ''' 
+    ''' <param name="expected"> 
+    ''' The expected data 
+    ''' </param>
+    ''' 
+    ''' <param name="cond"> 
+    ''' Indicates that the error condition is present 
+    ''' <br/> Optional, Default: <c> True </c>
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
-    Private Sub inputMismatchErr(linecount As Integer, err As String, received As String, expected As String, Optional cond As Boolean = True)
+    Private Sub inputMismatchErr(linecount As Integer,
+                                 err As String,
+                                 received As String,
+                                 expected As String,
+                                 Optional cond As Boolean = True)
 
         If Not cond Then Return
         customErr(linecount, err, {$"Expected: {expected}", $"Found: {received}"})
 
     End Sub
 
-    ''' <summary> Prints an error followed by the [Full Name *] of the entry to which it belongs </summary>
-    ''' <param name="cond"> Indicates that the error condition is present </param>
-    ''' <param name="entry"> The <c> winapp2entry </c> containing an error </param>
-    ''' <param name="errTxt"> A description of the error as it will be displayed to the user </param>
+    ''' <summary> 
+    ''' Prints an error followed by the [Full Name *] of the entry to which it belongs
+    ''' </summary>
+    ''' 
+    ''' <param name="cond"> 
+    ''' Indicates that the error condition is present
+    ''' </param>
+    ''' 
+    ''' <param name="entry">
+    ''' The <c> winapp2entry </c> containing an error 
+    ''' </param>
+    ''' 
+    ''' <param name="errTxt"> 
+    ''' A description of the error as it will be displayed to the user 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
-    Private Sub fullNameErr(cond As Boolean, entry As winapp2entry, errTxt As String)
+    Private Sub fullNameErr(cond As Boolean,
+                            entry As winapp2entry,
+                            errTxt As String)
 
         If Not cond Then Return
         customErr(entry.LineNum, errTxt, {$"Entry Name: {entry.FullName}"})
 
     End Sub
 
-    ''' <summary> Prints an error whose output text contains an <c> iniKey </c> string, optionally correcting that value with one that is provided </summary>
-    ''' <param name="key"> The <c> iniKey </c> containing an error </param>
-    ''' <param name="err"> A description of the error as it will be displayed to the user </param>
-    ''' <param name="cond"> Indicates that the error condition(s) are present (including any <c> lintRule.shouldScans </c>) <br/> Optional, Default: <c> True </c> </param>
-    ''' <param name="repCond"> Indicates that the repair function should run <br/> Optional, Default: <c> False </c> </param>
-    ''' <param name="newVal"> The corrected value with which to replace the incorrect correct value held by <c> <paramref name="repairVal"/> </c> <br/> Optional, Default: <c> "" </c> </param>
-    ''' <param name="repairVal"> The incorrect value <br/> Optional, Default: <c> "" </c> </param>
+    ''' <summary>
+    ''' Prints an error whose output text contains an <c> iniKey </c> string, optionally correcting that value with one that is provided 
+    ''' </summary>
+    ''' 
+    ''' <param name="key">
+    ''' The <c> iniKey </c> containing an error 
+    ''' </param>
+    ''' 
+    ''' <param name="err"> 
+    ''' A description of the error as it will be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' <param name="cond"> 
+    ''' Indicates that the error condition(s) are present (including any <c> lintRule.shouldScans </c>)
+    ''' <br/> Optional, Default: <c> True </c>
+    ''' </param>
+    ''' 
+    ''' <param name="repCond"> 
+    ''' Indicates that the repair function should run 
+    ''' <br/> Optional, Default: <c> False </c>
+    ''' </param>
+    ''' 
+    ''' <param name="newVal"> 
+    ''' The corrected value with which to replace the incorrect correct value held by <c> <paramref name="repairVal"/> </c> 
+    ''' <br/> Optional, Default: <c> "" </c> 
+    ''' </param>
+    ''' 
+    ''' <param name="repairVal"> 
+    ''' The incorrect value 
+    ''' <br/> Optional, Default: <c> "" </c> 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
-    Private Sub fullKeyErr(key As iniKey, err As String, Optional cond As Boolean = True, Optional repCond As Boolean = False, Optional ByRef repairVal As String = "", Optional newVal As String = "")
+    Private Sub fullKeyErr(key As iniKey,
+                           err As String,
+                           Optional cond As Boolean = True,
+                           Optional repCond As Boolean = False,
+                           Optional ByRef repairVal As String = "",
+                           Optional newVal As String = "")
 
         If Not cond Then Return
 
@@ -1284,12 +1393,26 @@ Public Module WinappDebug
 
     End Sub
 
-    ''' <summary> Prints arbitrarily defined errors without a precondition </summary>
-    ''' <param name="lineCount"> The line number on which the error was detected </param>
-    ''' <param name="err"> A description of the error as it will be displayed to the user </param>
-    ''' <param name="lines"> Any additional error information to be printed alongside the description </param>
+    ''' <summary> 
+    ''' Prints arbitrarily defined errors without a precondition 
+    ''' </summary>
+    ''' 
+    ''' <param name="lineCount">
+    ''' The line number on which the error was detected 
+    ''' </param>
+    ''' 
+    ''' <param name="err"> 
+    ''' A description of the error as it will be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' <param name="lines"> 
+    ''' Any additional error information to be printed alongside the description 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Private Sub customErr(lineCount As Integer, err As String, lines As String())
+    Private Sub customErr(lineCount As Integer,
+                          err As String,
+                          lines As String())
 
         gLog(err, ascend:=True)
 
@@ -1313,12 +1436,26 @@ Public Module WinappDebug
 
     End Sub
 
-    ''' <summary> Replace a given string with a new value if the fix condition is met </summary>
-    ''' <param name="param"> The condition under which the string should be replaced </param>
-    ''' <param name="currentValue"> A pointer to the string to be replaced </param>
-    ''' <param name="newValue"> The replacement value for <c> <paramref name="currentValue"/> </c> </param>
+    ''' <summary> 
+    ''' Replace a given string with a new value if the fix condition is met 
+    ''' </summary>
+    ''' 
+    ''' <param name="param"> 
+    ''' The condition under which the string should be replaced 
+    ''' </param>
+    ''' 
+    ''' <param name="currentValue"> 
+    ''' A pointer to the string to be replaced 
+    ''' </param>
+    ''' 
+    ''' <param name="newValue">
+    ''' The replacement value for <c> <paramref name="currentValue"/> </c> 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
-    Private Sub fixStr(param As Boolean, ByRef currentValue As String, newValue As String)
+    Private Sub fixStr(param As Boolean,
+                       ByRef currentValue As String,
+                       newValue As String)
 
         If Not param Then Return
 

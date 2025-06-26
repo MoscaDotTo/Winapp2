@@ -53,7 +53,7 @@ Public Module advSettings
         Dim ind = intInput - 1
         Select Case True
             Case input = "0"
-                If ScanSettingsChanged Then WinappDebug.ModuleSettingsChanged = True
+                If ScanSettingsChanged Then LintModuleSettingsChanged = True
                 exitModule()
         ' Enable/Disable individual scans
             Case intInput > 0 And intInput <= Rules.Count

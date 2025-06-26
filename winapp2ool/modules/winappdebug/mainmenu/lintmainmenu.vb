@@ -39,9 +39,9 @@ Module lintmainmenu
         print(1, "Toggle Scan Settings", "Enable or disable individual scan and correction routines", leadingBlank:=Not SaveChanges, trailingBlank:=True)
         print(5, "Toggle Default Value Audit", "enforcing a specific value for Default keys", enStrCond:=overrideDefaultVal, trailingBlank:=Not overrideDefaultVal)
         print(1, "Toggle Expected Default", $"Currently enforcing that Default keys have a value of: {expectedDefaultValue}", cond:=overrideDefaultVal, trailingBlank:=True)
-        print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
-        print(0, $"Current save target:  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not ModuleSettingsChanged And MostRecentLintLog.Length = 0)
-        print(2, NameOf(WinappDebug), cond:=ModuleSettingsChanged, closeMenu:=MostRecentLintLog.Length = 0)
+        print(0, $"Current winapp2.ini:  {replDir(winappDebugFile1.Path)}", closeMenu:=Not SaveChanges And Not LintModuleSettingsChanged And MostRecentLintLog.Length = 0)
+        print(0, $"Current save target:  {replDir(winappDebugFile3.Path)}", cond:=SaveChanges, closeMenu:=Not LintModuleSettingsChanged And MostRecentLintLog.Length = 0)
+        print(2, NameOf(WinappDebug), cond:=LintModuleSettingsChanged, closeMenu:=MostRecentLintLog.Length = 0)
         print(1, "Log Viewer", "Show the most recent lint results", cond:=Not MostRecentLintLog.Length = 0, closeMenu:=True, leadingBlank:=True)
 
     End Sub
@@ -83,14 +83,14 @@ Module lintmainmenu
             ' Default                                      -> 2 (default)
             Case input = "2"
 
-                changeFileParams(winappDebugFile1, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(ModuleSettingsChanged))
+                changeFileParams(winappDebugFile1, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(LintModuleSettingsChanged))
 
             ' Option Name:                                Toggle Saving 
             ' Option states:
             ' Default                                      -> 3 (default)
             Case input = "3"
 
-                toggleSettingParam(SaveChanges, "Saving", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(SaveChanges), NameOf(ModuleSettingsChanged))
+                toggleSettingParam(SaveChanges, "Saving", LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(SaveChanges), NameOf(LintModuleSettingsChanged))
 
             ' Option Name:                                 File Chooser (save)
             ' Option states:
@@ -98,7 +98,7 @@ Module lintmainmenu
             ' Saving changes                               -> 4 (default)
             Case input = "4" AndAlso SaveChanges
 
-                changeFileParams(winappDebugFile3, ModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(ModuleSettingsChanged))
+                changeFileParams(winappDebugFile3, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(LintModuleSettingsChanged))
 
             ' Option Name:                                 Toggle Scan Settings
             ' Option states:
@@ -116,7 +116,7 @@ Module lintmainmenu
             Case input = computeMenuNumber(5, {SaveChanges}, {1})
 
 
-                toggleSettingParam(overrideDefaultVal, "Default Value Overriding", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(overrideDefaultVal), NameOf(ModuleSettingsChanged))
+                toggleSettingParam(overrideDefaultVal, "Default Value Overriding", LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(overrideDefaultVal), NameOf(LintModuleSettingsChanged))
 
             ' Option Name:                           Reset Settings       
             ' Option states:
@@ -125,7 +125,7 @@ Module lintmainmenu
             ' Saving (+1), not auditing                    -> 7
             ' Not saving, auditing (+1)                    -> 7
             ' Saving and auditing                          -> 8 
-            Case ModuleSettingsChanged And input = computeMenuNumber(6, {SaveChanges, overrideDefaultVal}, {1, 1})
+            Case LintModuleSettingsChanged And input = computeMenuNumber(6, {SaveChanges, overrideDefaultVal}, {1, 1})
 
                 resetModuleSettings("WinappDebug", AddressOf InitDefaultLintSettings)
 
@@ -137,7 +137,7 @@ Module lintmainmenu
             ' Settings changed(+1), saving(+1), no audit   -> 8
             ' Settings changed(+1), not saving, audit(+1)  -> 8 
             ' Settings changed(+1), saving(+1), audit(+1)  -> 9
-            Case Not MostRecentLintLog.Length = 0 AndAlso input = computeMenuNumber(6, {ModuleSettingsChanged, SaveChanges, overrideDefaultVal}, {1, 1, 1})
+            Case Not MostRecentLintLog.Length = 0 AndAlso input = computeMenuNumber(6, {LintModuleSettingsChanged, SaveChanges, overrideDefaultVal}, {1, 1, 1})
                 printSlice(MostRecentLintLog)
 
             ' Option Name:                                 Toggle Expected Default
@@ -147,7 +147,7 @@ Module lintmainmenu
             ' Saving (+1)                                  -> 7
             Case overrideDefaultVal And input = computeMenuNumber(6, {SaveChanges}, {1})
 
-                toggleSettingParam(expectedDefaultValue, "Expected Default Value", ModuleSettingsChanged, NameOf(WinappDebug), NameOf(expectedDefaultValue), NameOf(ModuleSettingsChanged))
+                toggleSettingParam(expectedDefaultValue, "Expected Default Value", LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(expectedDefaultValue), NameOf(LintModuleSettingsChanged))
 
             Case Else
 
