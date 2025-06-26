@@ -34,10 +34,10 @@ Module trimmainmenu
         print(5, "Toggle Excludes", "always discarding certain entries", enStrCond:=UseTrimExcludes, trailingBlank:=Not UseTrimExcludes)
         print(1, "File Chooser (Excludes)", "Configure the path to the excludes file", cond:=UseTrimExcludes, trailingBlank:=True)
         print(0, $"Current winapp2.ini path: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}")
-        print(0, $"Current save path: {replDir(TrimFile3.Path)}", closeMenu:=Not (UseTrimIncludes OrElse UseTrimExcludes OrElse ModuleSettingsChanged))
-        print(0, $"Current includes path: {replDir(TrimFile2.Path)}", cond:=UseTrimIncludes, closeMenu:=Not (UseTrimExcludes OrElse ModuleSettingsChanged))
-        print(0, $"Current excludes path: {replDir(TrimFile4.Path)}", cond:=UseTrimExcludes, closeMenu:=Not ModuleSettingsChanged)
-        print(2, NameOf(Trim), cond:=ModuleSettingsChanged, closeMenu:=True)
+        print(0, $"Current save path: {replDir(TrimFile3.Path)}", closeMenu:=Not (UseTrimIncludes OrElse UseTrimExcludes OrElse LintModuleSettingsChanged))
+        print(0, $"Current includes path: {replDir(TrimFile2.Path)}", cond:=UseTrimIncludes, closeMenu:=Not (UseTrimExcludes OrElse LintModuleSettingsChanged))
+        print(0, $"Current excludes path: {replDir(TrimFile4.Path)}", cond:=UseTrimExcludes, closeMenu:=Not LintModuleSettingsChanged)
+        print(2, NameOf(Trim), cond:=LintModuleSettingsChanged, closeMenu:=True)
 
     End Sub
 
@@ -75,7 +75,7 @@ Module trimmainmenu
             ' Online                                       -> 2 (default) 
             Case input = "2" AndAlso Not isOffline
 
-                If Not denySettingOffline() Then toggleSettingParam(DownloadFileToTrim, "Downloading", ModuleSettingsChanged, NameOf(Trim), NameOf(DownloadFileToTrim), NameOf(ModuleSettingsChanged))
+                If Not denySettingOffline() Then toggleSettingParam(DownloadFileToTrim, "Downloading", TrimModuleSettingsChanged, NameOf(Trim), NameOf(DownloadFileToTrim), NameOf(TrimModuleSettingsChanged))
 
             ' Option Name:                                 File Chooser (winapp2.ini) 
             ' Option states: 
@@ -84,7 +84,7 @@ Module trimmainmenu
             ' Online                                       -> 3 (default) 
             Case Not DownloadFileToTrim AndAlso input = computeMenuNumber(3, {isOffline}, {-1})
 
-                changeFileParams(TrimFile1, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
+                changeFileParams(TrimFile1, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged))
 
             ' Option Name:                                 File Chooser (save) 
             ' Option states:
@@ -93,7 +93,7 @@ Module trimmainmenu
             ' 
             Case input = computeMenuNumber(4, {isOffline, DownloadFileToTrim}, {-1, -1})
 
-                changeFileParams(TrimFile3, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(ModuleSettingsChanged))
+                changeFileParams(TrimFile3, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(TrimModuleSettingsChanged))
 
             ' Option Name:                                  Reset Settings 
             ' Option States: 
@@ -107,7 +107,7 @@ Module trimmainmenu
             ' Downloading (-1), and IncAndExcl = True (+2)  -> 8
             ' Offline (-1), IncAndExcl (+2) = True          -> 8               
             ' Not Downloading, and IncAndExcl (+2) = True   -> 9 
-            Case ModuleSettingsChanged AndAlso input = computeMenuNumber(7, {isOffline, DownloadFileToTrim, IncXorExcl, IncAndExcl}, {-1, -1, +1, +2})
+            Case LintModuleSettingsChanged AndAlso input = computeMenuNumber(7, {isOffline, DownloadFileToTrim, IncXorExcl, IncAndExcl}, {-1, -1, +1, +2})
 
                 resetModuleSettings(NameOf(Trim), AddressOf initDefaultTrimSettings)
 
@@ -119,7 +119,7 @@ Module trimmainmenu
             ' 
             Case Not isOffline AndAlso input = computeMenuNumber(5, {isOffline, DownloadFileToTrim}, {-1, -1})
 
-                toggleSettingParam(UseTrimIncludes, "Includes", ModuleSettingsChanged, NameOf(Trim), NameOf(UseTrimIncludes), NameOf(ModuleSettingsChanged))
+                toggleSettingParam(UseTrimIncludes, "Includes", TrimModuleSettingsChanged, NameOf(Trim), NameOf(UseTrimIncludes), NameOf(TrimModuleSettingsChanged))
 
             ' Option Name:                                 File Chooser (Includes) 
             ' Option states: 
@@ -129,7 +129,7 @@ Module trimmainmenu
 
             Case UseTrimIncludes AndAlso input = computeMenuNumber(6, {isOffline, DownloadFileToTrim}, {-1, -1})
 
-                changeFileParams(TrimFile2, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(ModuleSettingsChanged))
+                changeFileParams(TrimFile2, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged))
 
             ' Option Name:                                 Toggle Excludes 
             ' Option states: 
@@ -142,7 +142,7 @@ Module trimmainmenu
             ' 
             Case input = computeMenuNumber(6, {isOffline, DownloadFileToTrim, UseTrimIncludes}, {-1, -1, 1})
 
-                toggleSettingParam(UseTrimExcludes, "Excludes", ModuleSettingsChanged, NameOf(Trim), NameOf(UseTrimExcludes), NameOf(ModuleSettingsChanged))
+                toggleSettingParam(UseTrimExcludes, "Excludes", TrimModuleSettingsChanged, NameOf(Trim), NameOf(UseTrimExcludes), NameOf(TrimModuleSettingsChanged))
 
             ' Option Name:                                 File Chooser (Exclude) 
             ' Option States:
@@ -154,7 +154,7 @@ Module trimmainmenu
             ' Online, Not Downloading, Including (+1)      -> 8
             Case UseTrimExcludes AndAlso input = computeMenuNumber(7, {isOffline, DownloadFileToTrim, UseTrimIncludes}, {-1, -1, 1})
 
-                changeFileParams(TrimFile4, ModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile4), NameOf(ModuleSettingsChanged))
+                changeFileParams(TrimFile4, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile4), NameOf(TrimModuleSettingsChanged))
 
             Case Else
 
