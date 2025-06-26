@@ -16,6 +16,7 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
+Imports System.Globalization
 Imports System.IO
 Imports System.Reflection
 
@@ -103,9 +104,11 @@ Public Module settingsHandler
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 
     Private Sub addToSettingsDict(targetModule As String, settings As iniSection)
+
         Dim subDict As New Dictionary(Of String, String)
         settings.Keys.Keys.ForEach(Sub(key) If Not subDict.ContainsKey(key.Name) Then subDict.Add(key.Name, key.Value))
         settingsDict(targetModule) = subDict
+
     End Sub
 
     ''' <summary> 
@@ -149,6 +152,7 @@ Public Module settingsHandler
     ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Private Sub loadAllModuleSettings()
+
         serializeModuleSettings(NameOf(Winapp2ool), AddressOf createToolSettingsSection, AddressOf getSeralizedToolSettings)
         serializeModuleSettings(NameOf(WinappDebug), AddressOf CreateLintSettingsSection, AddressOf getSeralizedLintSettings)
         serializeModuleSettings(NameOf(Trim), AddressOf createTrimSettingsSection, AddressOf getSerializedTrimSettings)
@@ -156,6 +160,7 @@ Public Module settingsHandler
         serializeModuleSettings(NameOf(Diff), AddressOf CreateDiffSettingsSection, AddressOf GetSerializedDiffSettings)
         serializeModuleSettings(NameOf(CCiniDebug), AddressOf createCCDBSettingsSection, AddressOf getSerializedDebugSettings)
         serializeModuleSettings(NameOf(Downloader), AddressOf createDownloadSettingsSection, AddressOf getSerializedDownloaderSettings)
+
     End Sub
 
 
@@ -170,9 +175,12 @@ Public Module settingsHandler
     ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Sub clearAllModuleSettings(moduleName As String)
+
         gLog($"Clearing {moduleName}'s settings")
+
         settingsDict(moduleName).Clear()
         settingsFile.getSection(moduleName).Keys.Keys.Clear()
+
     End Sub
 
     ''' <summary> 
@@ -279,6 +287,7 @@ Public Module settingsHandler
         If mustSaveFile Then saveSettingsFile()
 
     End Sub
+
     ''' <summary>
     ''' 
     ''' </summary>
@@ -366,7 +375,7 @@ Public Module settingsHandler
     ''' </param>
     ''' 
     ''' <returns>
-    ''' 
+    ''' A string representing the iniKey or an empty string if the setting already exists in the dictionary
     ''' </returns>
     ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
@@ -421,7 +430,7 @@ Public Module settingsHandler
     ''' </param>
     ''' 
     ''' <param name="winapp2oolmodule"> 
-    ''' A module containing the set of public properties for <c> <paramref name="moduleName"/> </c>
+    ''' A module containing the set of disk-writable properties for <c> <paramref name="moduleName"/> </c>
     ''' </param>
     ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
@@ -455,7 +464,7 @@ Public Module settingsHandler
             If Not dict.ContainsKey(prop.Name) Then Continue For
 
             Dim valueStr = dict(prop.Name)
-            Dim value = Convert.ChangeType(valueStr, prop.PropertyType)
+            Dim value = Convert.ChangeType(valueStr, prop.PropertyType, CultureInfo.InvariantCulture)
 
             prop.SetValue(winapp2oolmodule, value)
 
@@ -479,7 +488,7 @@ Public Module settingsHandler
 
         Dim tuple As New List(Of String)
 
-        For Each prop As PropertyInfo In moduleType.GetProperties(BindingFlags.Public Or BindingFlags.Static)
+        For Each prop As PropertyInfo In moduleType.GetProperties()
 
             If Not prop.CanRead OrElse Not prop.CanWrite Then Continue For
 
@@ -512,7 +521,7 @@ Public Module settingsHandler
     ''' </summary>
     ''' 
     ''' <param name="winapp2oolModule">
-    ''' The name of the winapp2ool module whose properties are being counted
+    ''' The winapp2ool Module whose properties are being counted
     ''' </param>
     ''' 
     ''' <returns> The number of <c> iniFile> </c> properties in the specified module type </returns>
@@ -537,7 +546,7 @@ Public Module settingsHandler
     ''' </summary>
     ''' 
     ''' <param name="winapp2oolModule">
-    ''' The name of the winapp2ool module whose properties are being counted
+    ''' The winapp2ool Module whose properties are being counted
     ''' </param>
     ''' 
     ''' <returns> 
@@ -549,7 +558,7 @@ Public Module settingsHandler
 
         Dim numBools = 0
 
-        For Each prop As PropertyInfo In winapp2oolModule.GetProperties(BindingFlags.Public Or BindingFlags.Static)
+        For Each prop As PropertyInfo In winapp2oolModule.GetProperties()
 
             If prop.PropertyType Is GetType(Boolean) Then numBools += 1
 
