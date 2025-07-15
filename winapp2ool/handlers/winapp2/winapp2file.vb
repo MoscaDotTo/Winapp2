@@ -157,7 +157,7 @@ Public Class winapp2file
     Private Function GetCategoryIndex(entry As winapp2entry, categoryValues As List(Of String)) As Integer
 
         ' If there's no langSecRef or sectionKey, we're in the main section for sure
-        If entry.LangSecRef.KeyCount = 0 AndAlso entry.SectionKey.KeyCount = 0 Then Return -1
+        If entry.LangSecRef.KeyCount = 0 AndAlso entry.SectionKey.KeyCount = 0 Then Return categoryValues.Count
 
         Dim categoryKey As String = If(entry.LangSecRef.KeyCount > 0, entry.LangSecRef.Keys.First.Value, entry.SectionKey.Keys.First.Value)
         Dim ind = categoryValues.IndexOf(categoryKey)
