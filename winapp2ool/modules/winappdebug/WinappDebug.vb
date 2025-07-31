@@ -251,6 +251,26 @@ Public Module WinappDebug
 
     End Sub
 
+    Public Function remotedebug(givenIni As iniFile, Optional forceOpti As Boolean = False) As iniFile
+
+        ' Browser builder would really like to not have to think
+        ' too hard about the content of keys when applying the browser additions.
+        If forceOpti Then
+            lintOpti.ShouldScan = True
+            lintOpti.ShouldRepair = True
+        End If
+
+        ' Silently return the fully corrected file after running it through the debugger
+        If givenIni Is Nothing Then argIsNull(NameOf(givenIni)) : Return Nothing
+        Dim wa2 As New winapp2file(givenIni)
+        SuppressOutput = True
+        Debug(wa2)
+        SuppressOutput = False
+        Dim ret = wa2.toIni
+        Return wa2.toIni
+
+    End Function
+
     ''' <summary> 
     ''' Validates winapp2.ini, then sets up the output window before sending it off to the linter.
     ''' After linting, reports the results of the lint to the user 
