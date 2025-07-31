@@ -16,7 +16,6 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
-Imports System.Globalization
 
 ''' <summary> 
 ''' Manages the settings of the Transmute module for the purpose of syncing to disk 
