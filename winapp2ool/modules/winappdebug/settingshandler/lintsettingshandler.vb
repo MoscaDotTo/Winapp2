@@ -70,7 +70,7 @@ Module lintsettingshandler
     End Sub
 
     ''' <summary> 
-    ''' Assigns the module settings to Trim based on the current disk-writable settings representation
+    ''' Assigns the module settings to WinappDebug based on the current disk-writable settings representation
     ''' </summary>
     ''' 
     ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
