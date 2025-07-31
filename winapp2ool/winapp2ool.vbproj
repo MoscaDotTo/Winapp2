@@ -159,10 +159,11 @@
     <Compile Include="modules\maintool\mainmenu\maintoolmenu.vb" />
     <Compile Include="modules\maintool\settingshandler\maintoolsettinghandler.vb" />
     <Compile Include="modules\maintool\settingshandler\maintoolsettings.vb" />
-    <Compile Include="modules\merge\mainmenu\mergemainmenu.vb" />
-    <Compile Include="modules\merge\settingshandler\mergesettings.vb" />
-    <Compile Include="modules\merge\tool\Merge.vb" />
-    <Compile Include="modules\merge\settingshandler\mergesettinghandler.vb" />
+    <Compile Include="modules\transmute\mainmenu\transmutemainmenu.vb" />
+    <Compile Include="modules\transmute\settingshandler\transmutesettings.vb" />
+    <Compile Include="modules\transmute\tool\Transmute.vb" />
+    <Compile Include="modules\transmute\settingshandler\transmutesettingshandler.vb" />
+    <Compile Include="modules\minefield\browserbuilder\browserbuilder.vb" />
     <Compile Include="modules\minefield\java\JavaMaker.vb" />
     <Compile Include="modules\minefield\Minefield.vb" />
     <Compile Include="modules\minefield\outlooker\OutlookMaker.vb" />

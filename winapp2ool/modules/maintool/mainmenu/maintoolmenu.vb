@@ -43,7 +43,7 @@ Module maintoolmenu
         print(1, "Exit", "Exit the application")
         print(1, "WinappDebug", "Check for and correct errors in winapp2.ini")
         print(1, "Trim", "Debloat winapp2.ini for your system")
-        print(1, "Merge", "Merge the contents of an ini file into winapp2.ini")
+        print(1, "Transmute", "Add, replace, or remove entire sections or individual keys from winapp2.ini")
         print(1, "Diff", "Observe the changes between two winapp2.ini files")
         print(1, "CCiniDebug", "Sort and trim ccleaner.ini", trailingBlank:=True)
         print(1, "Downloader", "Download files from the Winapp2 GitHub")
@@ -100,12 +100,12 @@ Module maintoolmenu
 
                 initModule(NameOf(Trim), AddressOf printTrimMenu, AddressOf handleTrimUserInput)
 
-            ' Option Name:                                 Merge
+            ' Option Name:                                 Transmute
             ' Option States:
             ' Default                                      -> 3 (default)
             Case input = "3"
 
-                initModule(NameOf(Merge), AddressOf printMergeMainMenu, AddressOf handleMergeMainMenuUserInput)
+                initModule(NameOf(Transmute), AddressOf printTransmuteMainMenu, AddressOf handleTransmuteMainMenuUserInput)
 
             ' Option Name:                                 Diff
             ' Option States:

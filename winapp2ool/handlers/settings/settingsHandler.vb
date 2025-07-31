@@ -191,9 +191,9 @@ Public Module settingsHandler
                                 AddressOf createTrimSettingsSection,
                                 AddressOf getSerializedTrimSettings)
 
-        serializeModuleSettings(NameOf(Merge),
-                                AddressOf createMergeSettingsSection,
-                                AddressOf getSeralizedMergeSettings)
+        serializeModuleSettings(NameOf(Transmute),
+                                AddressOf createTransmuteSettingsSection,
+                                AddressOf getSerializedTransmuteSettings)
 
         serializeModuleSettings(NameOf(Diff),
                                 AddressOf CreateDiffSettingsSection,
@@ -206,6 +206,10 @@ Public Module settingsHandler
         serializeModuleSettings(NameOf(Downloader),
                                 AddressOf createDownloadSettingsSection,
                                 AddressOf getSerializedDownloaderSettings)
+
+        serializeModuleSettings(NameOf(browserbuilder),
+                                AddressOf createBrowserBuilderSettingsSection,
+                                AddressOf getSerializedBrowserBuilderSettings)
 
     End Sub
 

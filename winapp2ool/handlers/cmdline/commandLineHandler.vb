@@ -197,7 +197,7 @@ Public Module commandLineHandler
                     Trim.handleCmdLine()
                 Case "3", "-3", "merge", "-merge"
                     cmdargs.RemoveAt(0)
-                    Merge.handleCmdLine()
+                    Transmute.handleCmdLine()
                 Case "4", "-4", "diff", "-diff"
                     cmdargs.RemoveAt(0)
                     Diff.HandleCmdLine()
