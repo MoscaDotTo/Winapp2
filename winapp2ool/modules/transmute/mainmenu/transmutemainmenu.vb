@@ -22,7 +22,7 @@ Option Strict On
 ''' </summary>
 ''' 
 ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
-Module transmutemainmenu
+Public Module transmuteMainMenu
 
     ''' <summary> 
     ''' Prints the <c> Transmute </c> menu to the user, includes predefined source files choices and sub mode options

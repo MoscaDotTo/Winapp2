@@ -26,7 +26,7 @@ Option Strict On
 ''' </summary>
 ''' 
 ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
-Public Module transmutesettings
+Public Module transmuteSettings
 
     ''' <summary> 
     ''' The 'base' file for Transmute, the one whose content will be modified by the transmute process

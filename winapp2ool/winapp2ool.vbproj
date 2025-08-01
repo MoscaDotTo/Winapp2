@@ -123,6 +123,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="handlers\settings\settingsHandler.vb" />
+    <Compile Include="modules\browserbuilder\mainmenu\browserbuildermainmenu.vb" />
+    <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettings.vb" />
+    <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettingshandler.vb" />
     <Compile Include="modules\ccdebug\settingshandler\ccdebugsettings.vb" />
     <Compile Include="modules\ccdebug\tool\CCiniDebug.vb" />
     <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
@@ -163,7 +166,7 @@
     <Compile Include="modules\transmute\settingshandler\transmutesettings.vb" />
     <Compile Include="modules\transmute\tool\Transmute.vb" />
     <Compile Include="modules\transmute\settingshandler\transmutesettingshandler.vb" />
-    <Compile Include="modules\minefield\browserbuilder\browserbuilder.vb" />
+    <Compile Include="modules\browserbuilder\tool\BrowserBuilder.vb" />
     <Compile Include="modules\minefield\java\JavaMaker.vb" />
     <Compile Include="modules\minefield\Minefield.vb" />
     <Compile Include="modules\minefield\outlooker\OutlookMaker.vb" />
@@ -241,6 +244,9 @@
   <ItemGroup>
     <Folder Include="handlers\ini\comments\" />
     <Folder Include="helpers\filesystem\" />
+    <Folder Include="modules\assemble\mainmenu\" />
+    <Folder Include="modules\assemble\settingshandler\" />
+    <Folder Include="modules\assemble\tool\" />
     <Folder Include="modules\winappdebug\tool\" />
   </ItemGroup>
   <ItemGroup>

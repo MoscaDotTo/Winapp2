@@ -22,7 +22,7 @@ Option Strict On
 ''' </summary>
 ''' 
 ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
-Module transmutesettingshandler
+Public Module transmuteSettingsHandler
 
     ''' <summary> 
     ''' Restores the default state of the module's properties 
@@ -50,7 +50,7 @@ Module transmutesettingshandler
     ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub getSerializedTransmuteSettings()
 
-        LoadModuleSettingsFromDict(NameOf(Transmute), GetType(transmutesettings))
+        LoadModuleSettingsFromDict(NameOf(Transmute), GetType(transmuteSettings))
 
         Transmutator = If(TransmuteModeIsAdd, TransmuteMode.Add,
                             If(TransmuteModeIsRemove, TransmuteMode.Remove, TransmuteMode.Replace))
@@ -73,9 +73,9 @@ Module transmutesettingshandler
 
         updateTransmuteEnumFlags()
 
-        Dim transmuteSettingsTuple = GetSettingsTupleWithReflection(GetType(transmutesettings))
+        Dim transmuteSettingsTuple = GetSettingsTupleWithReflection(GetType(transmuteSettings))
 
-        createModuleSettingsSection(NameOf(Transmute), transmuteSettingsTuple, getNumBools(GetType(transmutesettings)), getNumFiles(GetType(transmutesettings)))
+        createModuleSettingsSection(NameOf(Transmute), transmuteSettingsTuple, getNumBools(GetType(transmuteSettings)), getNumFiles(GetType(transmuteSettings)))
 
     End Sub
 
@@ -131,10 +131,10 @@ Module transmutesettingshandler
         Dim names As New List(Of String)
         Dim vals As New List(Of String)
 
-        For Each prop In GetType(transmutesettings).GetProperties()
+        For Each prop In GetType(transmuteSettings).GetProperties()
 
             ' This will actually update all Booleans but that's probably fine
-            If Not prop.PropertyType.Name Is GetType(Boolean).Name Then Continue For
+            If prop.PropertyType.Name IsNot GetType(Boolean).Name Then Continue For
 
             updateSettings(NameOf(Transmute), prop.Name, prop.GetValue(prop).ToString)
 

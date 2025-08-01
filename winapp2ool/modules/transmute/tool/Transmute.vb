@@ -96,7 +96,7 @@ Option Strict On
 ''' </remarks>
 ''' 
 ''' Docs last updated: 2025-07-25 | Code last updated: 2025-07-25
-Module Transmute
+Public Module Transmute
 
     ''' <summary>
     ''' Enum representing the different primary modes of modifying the base file
@@ -394,7 +394,7 @@ Module Transmute
         If Not (enforceFileHasContent(TransmuteFile1) AndAlso enforceFileHasContent(TransmuteFile2)) Then Return
         LogAndPrint(4, $"Applying changes to {TransmuteFile1.Name}")
 
-        Dim remModeStr = $"{TransmuteRemoveMode}{If(TransmuteRemoveMode = RemoveMode.ByKey, $" - {TransmuteRemoveKeyMode.ToString}", "")}"
+        Dim remModeStr = $"{TransmuteRemoveMode}{If(TransmuteRemoveMode = RemoveMode.ByKey, $" - {TransmuteRemoveKeyMode}", "")}"
         Dim replaceModeStr = $"{TransmuteReplaceMode}"
         Dim xmuteModeStr As String = $"Transmutator: {Transmutator}{If(TransmuteModeIsAdd, If(Transmutator = TransmuteMode.Replace, replaceModeStr, remModeStr), "")}"
 
@@ -499,6 +499,10 @@ Module Transmute
                             Optional removeMode As RemoveMode = RemoveMode.ByKey,
                             Optional removeKeyMode As RemoveKeyMode = RemoveKeyMode.ByName,
                             Optional quiet As Boolean = True)
+
+        ' We're going to assume here that not every invocation of RemoteTransmute specifically
+        ' through Flavorize() will necessarily include a defined source file. 
+        If sourceFile Is Nothing Then gLog($"Source file not provided, skipping!") : Return
 
         If baseFile.Sections.Count = 0 Then baseFile.init()
 
@@ -727,7 +731,7 @@ Module Transmute
         baseFile.Sections(sectionName) = sourceSection
         LogAndPrint(0, $"  *§ Replaced entire section: {sectionName}", colorLine:=True, enStrCond:=False)
 
-        End Sub
+    End Sub
 
     ''' <summary>
     ''' Handles the Replace by Key mode for the <c> Replace Transmutator </c>, replacing the values
@@ -868,6 +872,109 @@ Module Transmute
             LogAndPrint(0, $"  /!\ Removal target not found: {key} not found in {baseSection.Name} /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
 
         Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Applies a 'flavor' to an <c> iniFile </c>. A flavor is like a compatibility layer that
+    ''' allows a base file to be adjusted in slight ways to make it more suitable to a specific use
+    ''' <br /><br/> 
+    ''' In the context of winapp2.ini, we can use this to create different versions of winapp2.ini 
+    ''' for different use cases (eg. a CCleaner or BleachBit specific versions) or else to 
+    ''' correct the output of generative components of winapp2ool <br /><br />
+    ''' 
+    ''' Always applies Flavorings in the following order: <br /><br />
+    ''' Section Removal -> Key Name Removal -> Key Value Removal -> Section Replacement ->
+    ''' Key Replacement -> Section and Key Additions
+    ''' </summary>
+    ''' 
+    ''' <param name="baseFile">
+    ''' The <c> iniFile </c> to whom a particular flavor will be applied
+    ''' </param>
+    ''' 
+    ''' <param name="outputFile">
+    ''' The location on disk to which the flavorized <c> baseFile </c> will be saved 
+    ''' </param>
+    ''' 
+    ''' <param name="additionsFile">
+    ''' The <c> iniFile </c> containing the set of sections and individual keys within sections
+    ''' which should be added to <c> <paramref name="baseFile"/> </c> to create the flavor <br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
+    ''' 
+    ''' <param name="sectionRemovalFile">
+    ''' The <c> iniFile </c> containing the set of sections to be removed from the 
+    ''' <c> <paramref name="baseFile"/> </c> to create the flavor <br /> 
+    ''' Sections will be removed regardless of whether or not keys are provided <br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
+    ''' 
+    ''' <param name="keyNameRemovalFile">
+    ''' The <c> iniFile </c> containing the set of individual keys to be removed 
+    ''' from the <c> <paramref name="baseFile"/> </c> when matched by their Name parameter 
+    ''' to create the flavor <br />
+    ''' The values provided for keys in this file do not matter and will not be used for matching <br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
+    ''' 
+    ''' <param name="keyValueRemovalFile">
+    ''' The <c> iniFile </c> containing the set of individual keys to be removed from the 
+    ''' <c> <paramref name="baseFile"/> </c> when matched by their KeyName and Value pairs 
+    ''' to create the flavor <br />
+    ''' Numbers in key names will be ignored in this file and can be omitted. Numberless name
+    ''' and value pairs will be used for matching. <br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
+    ''' 
+    ''' <param name="sectionReplacementFile">
+    ''' The <c> iniFile </c> containing the set of sections to replace entire sections of an
+    ''' exactly matching (case sensitive) name in the <c> <paramref name="baseFile"/> </c> 
+    ''' to create the flavor <br />
+    ''' This will not preserve non-overlapping content from the base key <br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' </param>
+    ''' 
+    ''' <param name="keyReplacementFile">
+    ''' The <c> iniFile </c> containing the set of individual keys to replace within a matching
+    ''' section within <c> <paramref name="baseFile"/> </c> to create the flavor <br />
+    ''' Keys in this file will only replace keys in the base file if both their Seciton and Key 
+    ''' names match exactly (case sensitive) <br />
+    ''' Optional, Default: <c> Nothing </c>
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="isWinapp">
+    ''' Indicates that the <c> iniFile </c> being flavorized has winapp2.ini syntax <br />
+    ''' Optional, Default: <c> True </c>
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="quiet">
+    ''' Indicates whether or not the output from the Flavorizer should be muted <br />
+    ''' Optional, Default: <c> False </c>
+    ''' 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+    Public Sub Flavorize(ByRef baseFile As iniFile,
+                         ByRef outputFile As iniFile,
+                      Optional additionsFile As iniFile = Nothing,
+                      Optional sectionRemovalFile As iniFile = Nothing,
+                      Optional keyNameRemovalFile As iniFile = Nothing,
+                      Optional keyValueRemovalFile As iniFile = Nothing,
+                      Optional sectionReplacementFile As iniFile = Nothing,
+                      Optional keyReplacementFile As iniFile = Nothing,
+                      Optional isWinapp As Boolean = True,
+                      Optional quiet As Boolean = True)
+
+        RemoteTransmute(baseFile, sectionRemovalFile, outputFile, isWinapp, TransmuteMode.Remove, removeMode:=RemoveMode.BySection, quiet:=quiet)
+        RemoteTransmute(baseFile, keyNameRemovalFile, outputFile, isWinapp, TransmuteMode.Remove, removeKeyMode:=RemoveKeyMode.ByName, quiet:=quiet)
+        RemoteTransmute(baseFile, keyValueRemovalFile, outputFile, isWinapp, TransmuteMode.Remove, removeKeyMode:=RemoveKeyMode.ByValue, quiet:=quiet)
+
+        RemoteTransmute(baseFile, sectionReplacementFile, outputFile, isWinapp, TransmuteMode.Replace, replaceMode:=ReplaceMode.BySection, quiet:=quiet)
+        RemoteTransmute(baseFile, keyReplacementFile, outputFile, isWinapp, TransmuteMode.Replace, quiet:=quiet)
+
+        RemoteTransmute(baseFile, additionsFile, outputFile, isWinapp, quiet:=quiet)
 
     End Sub
 
