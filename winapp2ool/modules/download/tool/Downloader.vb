@@ -102,11 +102,19 @@ Module Downloader
     Public ReadOnly Property javaLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/java.ini"
 
     ''' <summary> 
-    ''' The web address of the winapp2ool ReadMe file 
+    ''' The web address of the winapp2ool ReadMe file, for 
+    ''' downloading the file itself to the local drive 
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+    ''' Docs last updated: 2025-08-01 | Code last updated: 2020-09-14
     Public ReadOnly Property readMeLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/Readme.md"
+
+    ''' <summary>
+    ''' The web address of the winapp2ool ReadMe for opening in web browsers
+    ''' </summary>
+    '''
+    ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+    Public ReadOnly Property readMeUrl As String = "https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool"
 
     ''' <summary> 
     ''' Handles the commandline args for the Downloader 
