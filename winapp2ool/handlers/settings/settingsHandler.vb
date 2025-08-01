@@ -207,7 +207,7 @@ Public Module settingsHandler
                                 AddressOf createDownloadSettingsSection,
                                 AddressOf getSerializedDownloaderSettings)
 
-        serializeModuleSettings(NameOf(browserbuilder),
+        serializeModuleSettings(NameOf(BrowserBuilder),
                                 AddressOf createBrowserBuilderSettingsSection,
                                 AddressOf getSerializedBrowserBuilderSettings)
 

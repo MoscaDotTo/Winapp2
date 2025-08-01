@@ -27,12 +27,13 @@ Module Minefield
         print(1, "Babel", "Generate winapp2.ini entries for lang files")
         print(1, "Outlook", "Generate winapp2.ini entries with custom outlook profile support")
         print(1, "Executor", "Modify your filesystem with winapp2.ini")
-        print(1, "Search", "Generate lists of sections", closeMenu:=True)
+        print(1, "Browser Builder", "Generate browser configuration files for Chromium and Gecko based browsers")
+        print(1, "Search", "Generate lists Of sections", closeMenu:=True)
     End Sub
 
     '''<summary>Prints the main Babel menu</summary>
     Public Sub printBabelMenu()
-        printMenuTop({"This tool will attempt to generate winapp2.ini entries to remove language files from your system. Use EXTREME caution!"})
+        printMenuTop({"This tool will attempt To generate winapp2.ini entries To remove language files from your system. Use EXTREME caution!"})
         print(1, "Run (Default)", "Run the tool")
     End Sub
 
@@ -62,13 +63,15 @@ Module Minefield
             Case "4"
                 'initModule("Executor", AddressOf printExecutorMenu, AddressOf handleExecutorInput)
             Case "5"
+                initModule("Browser Builder", AddressOf printBrowserBuilderMenu, AddressOf handleBrowserBuilderInput)
+            Case "6"
                 initModule("Search", AddressOf printSearchMenu, AddressOf handleSearchInput)
         End Select
     End Sub
 
 
     Public Sub printSearchMenu()
-        printMenuTop({"Outputs all sections that fit the given pattern in a file"})
+        printMenuTop({"Outputs all sections that fit the given pattern In a file"})
         print(1, "winapp2.ini", "Search winapp2.ini by section criteria", closeMenu:=True)
     End Sub
 
@@ -78,7 +81,7 @@ Module Minefield
                 exitModule()
             Case input = "1" Or input.Length = 0
                 clrConsole()
-                Console.Write("Enter the Section or LangSecRef you'd like from the file:")
+                Console.Write("Enter the Section Or LangSecRef you'd like from the file:")
                 Dim sect = Console.ReadLine
                 Dim iwinapp2 = New iniFile(Environment.CurrentDirectory, "winapp2.ini")
                 iwinapp2.validate()
