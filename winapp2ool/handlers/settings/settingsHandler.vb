@@ -176,40 +176,22 @@ Public Module settingsHandler
     ''' in the form of both an <c> iniFile </c> and a <c> Dictionary </c> 
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-08-04
     Private Sub loadAllModuleSettings()
 
-        serializeModuleSettings(NameOf(Winapp2ool),
-                                AddressOf createToolSettingsSection,
-                                AddressOf getSeralizedToolSettings)
+        Dim modules = New Dictionary(Of String, KeyValuePair(Of Action, Action)) From {
+        {NameOf(Winapp2ool), New KeyValuePair(Of Action, Action)(AddressOf createToolSettingsSection, AddressOf getSeralizedToolSettings)},
+        {NameOf(WinappDebug), New KeyValuePair(Of Action, Action)(AddressOf CreateLintSettingsSection, AddressOf getSerializedLintSettings)},
+        {NameOf(Trim), New KeyValuePair(Of Action, Action)(AddressOf createTrimSettingsSection, AddressOf getSerializedTrimSettings)},
+        {NameOf(Transmute), New KeyValuePair(Of Action, Action)(AddressOf createTransmuteSettingsSection, AddressOf getSerializedTransmuteSettings)},
+        {NameOf(Diff), New KeyValuePair(Of Action, Action)(AddressOf CreateDiffSettingsSection, AddressOf GetSerializedDiffSettings)},
+        {NameOf(CCiniDebug), New KeyValuePair(Of Action, Action)(AddressOf createCCDBSettingsSection, AddressOf getSerializedDebugSettings)},
+        {NameOf(Downloader), New KeyValuePair(Of Action, Action)(AddressOf createDownloadSettingsSection, AddressOf getSerializedDownloaderSettings)},
+        {NameOf(BrowserBuilder), New KeyValuePair(Of Action, Action)(AddressOf createBrowserBuilderSettingsSection, AddressOf getSerializedBrowserBuilderSettings)},
+        {NameOf(Flavorizer), New KeyValuePair(Of Action, Action)(AddressOf createFlavorizerSettingsSection, AddressOf getSerializedFlavorizerSettings)}
+    }
 
-        serializeModuleSettings(NameOf(WinappDebug),
-                                AddressOf CreateLintSettingsSection,
-                                AddressOf getSeralizedLintSettings)
-
-        serializeModuleSettings(NameOf(Trim),
-                                AddressOf createTrimSettingsSection,
-                                AddressOf getSerializedTrimSettings)
-
-        serializeModuleSettings(NameOf(Transmute),
-                                AddressOf createTransmuteSettingsSection,
-                                AddressOf getSerializedTransmuteSettings)
-
-        serializeModuleSettings(NameOf(Diff),
-                                AddressOf CreateDiffSettingsSection,
-                                AddressOf GetSerializedDiffSettings)
-
-        serializeModuleSettings(NameOf(CCiniDebug),
-                                AddressOf createCCDBSettingsSection,
-                                AddressOf getSerializedDebugSettings)
-
-        serializeModuleSettings(NameOf(Downloader),
-                                AddressOf createDownloadSettingsSection,
-                                AddressOf getSerializedDownloaderSettings)
-
-        serializeModuleSettings(NameOf(BrowserBuilder),
-                                AddressOf createBrowserBuilderSettingsSection,
-                                AddressOf getSerializedBrowserBuilderSettings)
+        modules.ToList().ForEach(Sub(m) serializeModuleSettings(m.Key, m.Value.Key, m.Value.Value))
 
     End Sub
 
