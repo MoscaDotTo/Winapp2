@@ -251,7 +251,53 @@ Public Module WinappDebug
 
     End Sub
 
-    Public Function remotedebug(givenIni As iniFile, Optional forceOpti As Boolean = False) As iniFile
+    ''' <summary>
+    ''' Ensures that an <c> iniFile </c> has a proper line number information for each key and section <br />
+    ''' Useful when working with generated <c> iniFile</c>s
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-08-04 | Code last updated: 2025-08-04
+    Private Sub assignLineNumbers(ByRef outputFile As iniFile)
+
+        Dim currentLine As Integer = 1
+
+        For Each section In outputFile.Sections.Values
+
+            section.StartingLineNumber = currentLine
+            currentLine += 1
+
+            For Each key In section.Keys.Keys
+                key.LineNumber = currentLine
+                currentLine += 1
+            Next
+
+            section.EndingLineNumber = currentLine
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Lints <c> <paramref name="givenIni"/> </c>'s winapp2.ini formatting from outside the module's UI <br />
+    ''' Returns the linted <c> iniFile </c>
+    ''' </summary>
+    ''' 
+    ''' <param name="givenIni">
+    ''' The winapp2.ini syntax <c> iniFile to be linted </c>
+    ''' </param>
+    ''' 
+    ''' <param name="forceOpti">
+    ''' Indicates whether or not the linter should attempt to optimize entries <br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-04 | Code last updated: 2025-08-04
+    Public Function remotedebug(givenIni As iniFile,
+                       Optional forceOpti As Boolean = False) As iniFile
+
+        If givenIni Is Nothing Then argIsNull(NameOf(givenIni)) : Return Nothing
+
+        assignLineNumbers(givenIni)
 
         ' Browser builder would really like to not have to think
         ' too hard about the content of keys when applying the browser additions.
@@ -260,13 +306,10 @@ Public Module WinappDebug
             lintOpti.ShouldRepair = True
         End If
 
-        ' Silently return the fully corrected file after running it through the debugger
-        If givenIni Is Nothing Then argIsNull(NameOf(givenIni)) : Return Nothing
         Dim wa2 As New winapp2file(givenIni)
         SuppressOutput = True
         Debug(wa2)
         SuppressOutput = False
-        Dim ret = wa2.toIni
         Return wa2.toIni
 
     End Function
