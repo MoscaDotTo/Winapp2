@@ -74,7 +74,7 @@ Module lintsettingshandler
     ''' </summary>
     ''' 
     ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
-    Public Sub getSeralizedLintSettings()
+    Public Sub getSerializedLintSettings()
 
         loadLintRulesFromDict()
         LoadModuleSettingsFromDict(NameOf(WinappDebug), GetType(lintsettings))
