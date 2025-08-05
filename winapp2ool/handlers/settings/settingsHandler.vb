@@ -260,6 +260,15 @@ Public Module settingsHandler
 
     End Sub
 
+    ''' <summary>
+    ''' Determines whether or not we should be reading the winapp2ool settings from disk
+    ''' </summary>
+    ''' <returns> 
+    ''' <c> True </c> if we should be reading from disk <br /> 
+    ''' <c> False </c> otherwise 
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Function DetermineReadSettingsBehavior() As Boolean
 
         Dim rdSttngsName = NameOf(readSettingsFromDisk)
@@ -267,8 +276,10 @@ Public Module settingsHandler
         addToSettingsDict(NameOf(Winapp2ool), settingsFile.getSection(NameOf(Winapp2ool)))
 
         If Not settingsDict(NameOf(Winapp2ool)).ContainsKey(rdSttngsName) Then
+
             clearAllModuleSettings(NameOf(Winapp2ool))
             Return False
+
         End If
 
         Return CBool(settingsDict(NameOf(Winapp2ool))(rdSttngsName))
