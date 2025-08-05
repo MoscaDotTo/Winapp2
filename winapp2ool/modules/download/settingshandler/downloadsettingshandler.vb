@@ -43,12 +43,13 @@ Module downloadsettingshandler
     ''' Most often, this is the default state of these settings 
     ''' </remarks>
     ''' 
-    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2025-08-05
     Public Sub createDownloadSettingsSection()
 
-        Dim trimSettingsTuple = GetSettingsTupleWithReflection(GetType(downloadersettings))
+        Dim settingsModule = GetType(downloadersettings)
+        Dim moduleName = NameOf(Downloader)
 
-        createModuleSettingsSection(NameOf(Downloader), trimSettingsTuple, getNumBools(GetType(downloadersettings)), getNumFiles(GetType(downloadersettings)))
+        createModuleSettingsSection(moduleName, settingsModule)
 
     End Sub
 

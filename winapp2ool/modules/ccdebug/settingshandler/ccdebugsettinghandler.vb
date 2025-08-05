@@ -61,12 +61,13 @@ Module ccdebugsettinghandler
     ''' Most often, this is the default state of these settings 
     ''' </remarks>
     ''' 
-    ''' Docs last updated: 2024-05-08 | Code last updated: 2025-06-25
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2025-08-05
     Public Sub createCCDBSettingsSection()
 
-        Dim ccdebugSettingsTuple = GetSettingsTupleWithReflection(GetType(ccdebugsettings))
+        Dim settingsModule = GetType(ccdebugsettings)
+        Dim moduleName = NameOf(CCiniDebug)
 
-        createModuleSettingsSection(NameOf(CCiniDebug), ccdebugSettingsTuple, getNumBools(GetType(ccdebugsettings)), getNumFiles(GetType(ccdebugsettings)))
+        createModuleSettingsSection(moduleName, settingsModule)
 
     End Sub
 

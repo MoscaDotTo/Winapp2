@@ -43,12 +43,13 @@ Module mainToolSettingsHandler
     ''' Most often, this is the default state of these settings 
     ''' </remarks>
     ''' 
-    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2025-08-05
     Public Sub createToolSettingsSection()
 
-        Dim mainToolSettingsTuple = GetSettingsTupleWithReflection(GetType(maintoolsettings))
+        Dim settingsModule = GetType(maintoolsettings)
+        Dim moduleName = NameOf(Winapp2ool)
 
-        createModuleSettingsSection(NameOf(Winapp2ool), mainToolSettingsTuple, getNumBools(GetType(maintoolsettings)), getNumFiles(GetType(maintoolsettings)))
+        createModuleSettingsSection(moduleName, settingsModule)
 
     End Sub
 

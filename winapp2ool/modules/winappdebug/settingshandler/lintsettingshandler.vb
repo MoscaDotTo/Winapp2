@@ -120,18 +120,23 @@ Module lintsettingshandler
     ''' Docs last updated: 2024-05-08 | Code last updated: 2025-06-25
     Public Sub CreateLintSettingsSection()
 
-        Dim lintSettingsTuple = GetSettingsTupleWithReflection(GetType(lintsettings))
+        Dim settingsModule = GetType(lintsettings)
+        Dim moduleName = NameOf(WinappDebug)
 
+        Dim lintSettingsTuples = GetSettingsTupleWithReflection(settingsModule)
+
+        ' We add the individual lint scan settings to the tuple and provide it to the initalizer
         For i = 0 To Lints.Count - 1
 
-            lintSettingsTuple.Add($"{Lints(i)}_Scan")
-            lintSettingsTuple.Add(tsInvariant(Rules(i).ShouldScan))
-            lintSettingsTuple.Add($"{Lints(i)}_Repair")
-            lintSettingsTuple.Add(tsInvariant(Rules(i).ShouldRepair))
+            lintSettingsTuples.Add($"{Lints(i)}_Scan")
+            lintSettingsTuples.Add(tsInvariant(Rules(i).ShouldScan))
+            lintSettingsTuples.Add($"{Lints(i)}_Repair")
+            lintSettingsTuples.Add(tsInvariant(Rules(i).ShouldRepair))
 
         Next
 
-        createModuleSettingsSection(NameOf(WinappDebug), lintSettingsTuple, getNumBools(GetType(lintsettings)) + 2 * Lints.Count, getNumFiles(GetType(lintsettings)))
+        Dim addlBools = Lints.Count * 2
+        createModuleSettingsSection(moduleName, settingsModule, lintSettingsTuples, addlBools)
 
     End Sub
 

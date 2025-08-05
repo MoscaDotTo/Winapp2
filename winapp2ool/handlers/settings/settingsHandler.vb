@@ -19,6 +19,7 @@ Option Strict On
 Imports System.Globalization
 Imports System.IO
 Imports System.Reflection
+Imports System.Runtime.InteropServices
 
 ''' <summary> 
 ''' settingsHandler manages the disk-writable representation of winapp2ool
@@ -191,7 +192,9 @@ Public Module settingsHandler
         {NameOf(Flavorizer), New KeyValuePair(Of Action, Action)(AddressOf createFlavorizerSettingsSection, AddressOf getSerializedFlavorizerSettings)}
     }
 
-        modules.ToList().ForEach(Sub(m) serializeModuleSettings(m.Key, m.Value.Key, m.Value.Value))
+        Dim readSettingsFromDisk = DetermineReadSettingsBehavior()
+
+        modules.ToList().ForEach(Sub(m) serializeModuleSettings(m.Key, m.Value.Key, m.Value.Value, readSettingsFromDisk))
 
     End Sub
 
@@ -238,41 +241,39 @@ Public Module settingsHandler
     ''' the current active session of a module's settings 
     ''' </param>
     ''' 
+    ''' <param name="shouldReadFromDisk">
+    ''' Indicates whether or not the module settings should be read from disk and loaded 
+    ''' <br /> If <c> False </c>, the default module settings will be loaded 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Private Sub serializeModuleSettings(moduleName As String,
                                         createModuleSettings As Action,
-                                        getSerializedSettings As Action)
+                                        getSerializedSettings As Action,
+                                        shouldReadFromDisk As Boolean)
 
-        Dim rdSttngsName = NameOf(readSettingsFromDisk)
-        Dim moduleSection = settingsFile.getSection(moduleName)
+        addToSettingsDict(moduleName, settingsFile.getSection(moduleName))
 
-        addToSettingsDict(moduleName, moduleSection)
-
-        If settingsDict(NameOf(Winapp2ool)).ContainsKey(rdSttngsName) Then
-
-            If CBool(settingsDict(NameOf(Winapp2ool))(rdSttngsName)) Then
-
-                getSerializedSettings()
-
-            Else
-
-                ' If we're serializing the root module's settings and it tells us not to read from disk, load the defaults
-                If moduleName = NameOf(Winapp2ool) Then clearAllModuleSettings(NameOf(Winapp2ool))
-
-            End If
-
-        Else
-
-            ' If we don't know if we're reading settings from disk, we probably just shouldn't. 
-            ' clear the settings inifile And the settingsdict for winapp2ool and load the defaults 
-            ' Unless something goes terribly wrong, we won't hit this path again after initalizing the root winapp2ool module 
-            clearAllModuleSettings(NameOf(Winapp2ool))
-
-        End If
+        If shouldReadFromDisk Then getSerializedSettings()
 
         createModuleSettings()
 
     End Sub
+
+    Private Function DetermineReadSettingsBehavior() As Boolean
+
+        Dim rdSttngsName = NameOf(readSettingsFromDisk)
+
+        addToSettingsDict(NameOf(Winapp2ool), settingsFile.getSection(NameOf(Winapp2ool)))
+
+        If Not settingsDict(NameOf(Winapp2ool)).ContainsKey(rdSttngsName) Then
+            clearAllModuleSettings(NameOf(Winapp2ool))
+            Return False
+        End If
+
+        Return CBool(settingsDict(NameOf(Winapp2ool))(rdSttngsName))
+
+    End Function
 
     ''' <summary> 
     ''' Creates the <c> iniSection </c> containing the default values
@@ -281,20 +282,24 @@ Public Module settingsHandler
     ''' </summary>
     ''' 
     ''' <param name="callingModule"> 
-    ''' The name of the module whose settings are being created
+    ''' The name of the module whose settings are being created.
+    ''' This will be the Section name on disk inside winapp2ool.ini
     ''' </param>
     ''' 
-    ''' <param name="settingTuples"> 
-    ''' The array of Strings containing the
-    ''' module's settings and their default values
+    ''' <param name="winapp2Module">
+    ''' The module containing the disk-writable settings for <c> <paramref name="callingModule"/> </c>
     ''' </param>
     ''' 
-    ''' <param name="numBools"> 
-    ''' The number of boolean settings in the module 
+    ''' <param name="settingsTuples">
+    ''' A pre-computed set of tuples containing a module's settings <br />
+    ''' Provided by modules which have to do some extra work to serialize complex datatypes <br />
+    ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     ''' 
-    ''' <param name="numFiles"> 
-    ''' The number of <c> iniFile </c> settings in the module 
+    ''' <param name="addlBools">
+    ''' The number of additional <c> Boolean </c> properties provided in a given set of 
+    ''' <c> <paramref name="settingsTuples"/> </c> in excess of what is provided in the 
+    ''' <c> <paramref name="winapp2Module"/> </c>
     ''' </param>
     ''' 
     ''' <remarks>
@@ -303,16 +308,19 @@ Public Module settingsHandler
     ''' (Name, Filename, Dir) triplets for <c> iniFile </c> settings
     ''' </remarks>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
+    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Public Sub createModuleSettingsSection(callingModule As String,
-                                           settingTuples As List(Of String),
-                                           numBools As Integer,
-                                           numFiles As Integer)
+                                           winapp2Module As Type,
+                                  Optional settingsTuples As List(Of String) = Nothing,
+                                  Optional addlBools As Integer = 0)
 
-        If settingTuples Is Nothing Then argIsNull(NameOf(settingTuples)) : Return
+        If settingsTuples Is Nothing Then settingsTuples = GetSettingsTupleWithReflection(winapp2Module)
         Dim settingKeys As List(Of String)
 
-        settingKeys = getSettingKeys(settingTuples, callingModule, numBools, numFiles)
+        Dim numBools = getNumBools(winapp2Module) + addlBools
+        Dim numFiles = getNumFiles(winapp2Module)
+
+        settingKeys = getSettingKeys(settingsTuples, callingModule, numBools, numFiles)
 
         Dim toolSection = settingsFile.getSection(callingModule)
         Dim mustSaveFile = False
@@ -361,8 +369,8 @@ Public Module settingsHandler
                                     numBools As Integer,
                                     numFiles As Integer) As List(Of String)
 
-        ' Ensure that we only operate on properly formatted tuples 
         Dim expectedSettingsCount = 2 * numBools + 3 * numFiles
+        gLog($"Expected {expectedSettingsCount} settings for {moduleName}, found {settingsTuples.Count}")
 
         Dim out As New List(Of String)
 
@@ -388,6 +396,7 @@ Public Module settingsHandler
         gLog($"Finished loading settings for {moduleName}")
 
         Return out
+
     End Function
 
     ''' <summary> 
@@ -433,8 +442,8 @@ Public Module settingsHandler
                                       Optional isName As Boolean = False,
                                       Optional isDir As Boolean = False) As String
 
-        If isName Then settingName += "_Name"
-        If isDir Then settingName += "_Dir"
+        If isName Then settingName &= "_Name"
+        If isDir Then settingName &= "_Dir"
 
         Dim settingInDict = settingsDict(moduleName).ContainsKey(settingName)
 

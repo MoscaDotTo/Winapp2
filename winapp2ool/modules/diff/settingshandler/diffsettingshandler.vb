@@ -63,12 +63,13 @@ Module diffsettingshandler
     ''' Most often, this is the default state of these settings 
     ''' </remarks>
     ''' 
-    ''' Docs last updated: 2023-06-12 | Code last updated: 2024-05-08
+    ''' Docs last updated: 2023-06-12 | Code last updated: 2025-08-05
     Public Sub CreateDiffSettingsSection()
 
-        Dim diffSettingsTuple = GetSettingsTupleWithReflection(GetType(diffsettings))
+        Dim settingsModule = GetType(diffsettings)
+        Dim moduleName = NameOf(Diff)
 
-        createModuleSettingsSection(NameOf(Diff), diffSettingsTuple, getNumBools(GetType(diffsettings)), getNumFiles(GetType(diffsettings)))
+        createModuleSettingsSection(moduleName, settingsModule)
 
     End Sub
 
