@@ -39,7 +39,7 @@ Module SettingsManager
     ''' A pointer to the boolean indicating that a module's settings been modified from their default state 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
+    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-08-05
     Public Sub changeFileParams(ByRef someFile As iniFile,
                                 ByRef settingsChangedSetting As Boolean,
                                       callingModule As String,
@@ -62,7 +62,7 @@ Module SettingsManager
         updateSettings(callingModule, $"{settingName}_Name", someFile.Name)
         updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
 
-        settingsFile.overwriteToFile(settingsFile.toString, settingName = NameOf(saveSettingsToDisk) Or settingName = NameOf(readSettingsFromDisk))
+        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso saveSettingsToDisk)
 
     End Sub
 
@@ -85,14 +85,16 @@ Module SettingsManager
     ''' <param name="callingModule">
     ''' The name of the module calling this function
     ''' </param>
+    ''' 
     ''' <param name="settingName">
     ''' The name of the setting being toggled
     ''' </param>
+    ''' 
     ''' <param name="settingChangedName">
     ''' The name of the settings changed flag
     ''' </param>  
     ''' 
-    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-07-22\
+    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
     Public Sub toggleSettingParam(ByRef setting As Boolean,
                                         paramText As String,
                                   ByRef mSettingsChanged As Boolean,
@@ -109,7 +111,8 @@ Module SettingsManager
         updateSettings(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
         updateSettings(callingModule, settingChangedName, mSettingsChanged.ToString(CultureInfo.InvariantCulture))
 
-        settingsFile.overwriteToFile(settingsFile.toString, settingName = NameOf(saveSettingsToDisk) Or settingName = NameOf(readSettingsFromDisk))
+        Dim isSaveReadSetting = settingName = NameOf(saveSettingsToDisk) OrElse settingName = NameOf(readSettingsFromDisk)
+        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso isSaveReadSetting)
 
     End Sub
 
@@ -192,7 +195,6 @@ Module SettingsManager
         Dim currentIndex = Array.IndexOf(enumValues, currentValue)
         Dim nextIndex = (currentIndex + 1) Mod enumValues.Length
 
-        ' Use DirectCast instead of CType for enum conversion
         Dim nextValue As Object = enumValues.GetValue(nextIndex)
         currentValue = CType(nextValue, T)
 
