@@ -50,7 +50,7 @@ Module CCiniDebug
         invertSettingAndRemoveArg(SortFileForOutput, "-nosort")
         invertSettingAndRemoveArg(SaveDebuggedFile, "-nosave")
 
-        getFileAndDirParams(CCDebugFile1, CCDebugFile2, CCDebugFile3)
+        getFileAndDirParams({CCDebugFile1, CCDebugFile2, CCDebugFile3})
 
         initCCDebug()
 

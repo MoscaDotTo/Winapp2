@@ -245,7 +245,7 @@ Public Module WinappDebug
 
         InitDefaultLintSettings()
         invertSettingAndRemoveArg(SaveChanges, "-c")
-        getFileAndDirParams(winappDebugFile1, New iniFile, winappDebugFile3)
+        getFileAndDirParams({winappDebugFile1, New iniFile, winappDebugFile3})
 
         If Not cmdargs.Contains("UNIT_TESTING_HALT") Then InitDebug()
 

@@ -45,7 +45,7 @@ Public Module Trim
 
         initDefaultTrimSettings()
         handleDownloadBools(DownloadFileToTrim)
-        getFileAndDirParams(TrimFile1, New iniFile, TrimFile3)
+        getFileAndDirParams({TrimFile1, New iniFile, TrimFile3})
         initTrim()
 
     End Sub

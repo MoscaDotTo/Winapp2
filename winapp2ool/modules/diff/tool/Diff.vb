@@ -342,7 +342,7 @@ Module Diff
         If DownloadDiffFile Then DiffFile2.Name = "Online winapp2.ini"
 
         invertSettingAndRemoveArg(SaveDiffLog, "-savelog")
-        getFileAndDirParams(DiffFile1, DiffFile2, DiffFile3)
+        getFileAndDirParams({DiffFile1, DiffFile2, DiffFile3})
 
         If DiffFile2.Name.Length <> 0 Then ConductDiff()
 

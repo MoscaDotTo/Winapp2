@@ -170,7 +170,7 @@ Module Downloader
 
         End If
 
-        getFileAndDirParams(downloadFile, New iniFile, New iniFile)
+        getFileAndDirParams({downloadFile, New iniFile, New iniFile})
 
         If downloadFile.Dir = Environment.CurrentDirectory And downloadFile.Name = "winapp2ool.exe" Then autoUpdate()
 
