@@ -19,8 +19,88 @@ Option Strict On
 
 ''' <summary>
 ''' Holds the settings for the Browser Builder module, which allows winapp2ool to build bespoke entries
-''' for indivudal web browsers through a simple scripting interface 
+''' for indivudal web browsers through a simple scripting interface <br /><br />
+''' 
+''' Summary of Browser Builder files and their expected content: 
+''' 
+''' <list>
+''' <item>
+''' <b><c> BuilderFile1 </c></b> 
+''' <description> 
+''' chromium.ini - the generative rulesets for Chromium-based browsers - either this or 
+''' BuilderFile2 must be present in order for Browser Builder to run
+''' </description>
+''' </item>
+''' 
+''' <item>
+''' <b><c> BuilderFile2 </c></b>
+''' <description> 
+''' gecko.ini - the generative rulesets for Gecko/Goanna-based browsers - either this or
+''' BuilderFile1 must be present in order for Browser Builder to run
+''' </description>
+''' </item>
+''' 
+''' <item>
+''' <b><c> BuilderFile3 </c> </b>
+''' <description>
+''' browsers.ini - Browser Builder saves its output here
+''' </description>
+''' </item>
+''' 
+''' <item>
+''' <b> <c> BuilderFile4 </c> </b>
+''' <description>
+''' browser_additions.ini - The set of entries and keys to be added to browsers.ini after generation
+''' </description>
+''' </item>
+''' 
+''' <item>
+''' <b> <c> BuilderFile5 </c> </b>
+''' <description>
+''' browser_section_removals.ini - The optional set of sections to be entirely removed from 
+''' browsers.ini after generation
+''' </description>
+''' </item>
+''' 
+''' <item>
+''' <b> <c> BuilderFile6 </c> </b>
+''' <description>
+''' browser_name_removals.ini - The optional set of individual keys to be removed by Name 
+''' from browsers.ini after generation
+''' </description>
+''' </item>
+''' 
+''' <item>
+''' <b> <c> BuilderFile7 </c></b>
+''' <description>
+''' browser_key_replacements.ini - The optional set of individual keys to have their values
+''' replace the ones browsers.ini after generation
+''' </description>
+''' </item>
+''' 
+''' <item>
+''' <b> <c> BuilderFile8 </c></b>
+''' <description>
+''' browser_section_replacements.ini - The optional set of sections to entirely replace sections 
+''' of the same in browsers.ini after generation
+''' </description>
+''' </item>
+''' 
+''' <item>
+''' <b> <c> BuilderFile9 </c></b>
+''' <description>
+''' browser_value_removals.ini - The optional set of individual keys to be removed by value 
+''' from browsers.ini after generation
+''' </description>
+''' </item>
+''' </list>
+''' 
 ''' </summary>
+''' <remarks>
+''' <b> Remarks: </b> <br /><br />
+''' Only the generative rulesets need to be segregated by browser engine. All other files contain a 
+''' mix of chromium, gecko, and/or any other extant browser engines or embedded runtimes
+''' </remarks>
 ''' 
 ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 Public Module browserbuildersettings
@@ -29,6 +109,7 @@ Public Module browserbuildersettings
     ''' The <c> iniFile </c> containing the generative information for Chromium browser entries <br />
     ''' This should include a set of <c> BrowserInfo </c> sections defining the individual web browsers and
     ''' a set of <c> EntryScaffold </c> sections defining the structure of the individual entries 
+    ''' <br/><br/>
     ''' </summary>
     ''' 
     ''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02

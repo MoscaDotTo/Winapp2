@@ -32,6 +32,8 @@ Public Module browserbuildermainmenu
     ''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
     Public Sub printBrowserBuilderMenu()
 
+        Console.WindowWidth = 130
+
         printMenuTop({"Generate winapp2.ini entries for web browsers and web views",
                      "Supports both Chromium-based and Gecko-based entry generation",
                      "Consult the winapp2ool ReadMe before using this module!"})
@@ -42,8 +44,8 @@ Public Module browserbuildermainmenu
         print(1, "File Chooser (save)", "Configure the path for the output file", trailingBlank:=True)
         print(1, "File Chooser (additions)", "Configure the path to the file containing any additional entry code", trailingBlank:=True)
         print(0, $"Current chromium.ini path: {replDir(BuilderFile1.Path)}")
-        print(0, $"Current gecko.ini path: {replDir(builderfile2.Path)}")
-        print(0, $"Current save path: {replDir(builderfile3.Path)}", closeMenu:=Not BrowserBuilderModuleSettingsChanged)
+        print(0, $"Current gecko.ini path: {replDir(BuilderFile2.Path)}")
+        print(0, $"Current save path: {replDir(BuilderFile3.Path)}", closeMenu:=Not BrowserBuilderModuleSettingsChanged)
         print(2, NameOf(BrowserBuilder), cond:=BrowserBuilderModuleSettingsChanged, closeMenu:=True)
 
     End Sub

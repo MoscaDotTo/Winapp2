@@ -56,12 +56,13 @@ Public Module browserbuildersettingshandler
     ''' Most often, this is the default state of these settings 
     ''' </remarks>
     ''' 
-    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
+    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-08-05
     Public Sub createBrowserBuilderSettingsSection()
 
-        Dim browserBuilderSettingsTuple = GetSettingsTupleWithReflection(GetType(BrowserBuilder))
+        Dim settingsModule = GetType(browserbuildersettings)
+        Dim moduleName = NameOf(BrowserBuilder)
 
-        createModuleSettingsSection(NameOf(BrowserBuilder), browserBuilderSettingsTuple, getNumBools(GetType(BrowserBuilder)), getNumFiles(GetType(BrowserBuilder)))
+        createModuleSettingsSection(moduleName, settingsModule)
 
     End Sub
 

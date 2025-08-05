@@ -1,5 +1,4 @@
-﻿Option Strict On
-'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -16,15 +15,31 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
-Imports System.Collections.Specialized.BitVector32
-Imports Microsoft.SqlServer.Server
+Option Strict On
 
 ''' <summary>
-''' The BrowserBuilder module handles management of three browser configuration files:
-''' chromium.ini, gecko.ini, and browsers.ini
+''' BrowserBuilder is a winapp2ool module which handles the generation of bespoke winapp2.ini 
+''' entries for a very large number of web browsers. It provides a small scripting interface 
+''' which allows for the dynamic creation of entire groups of winapp2.ini entries using a limited
+''' set of easily accessed information. <br /><br />
+''' 
+''' This module expects to interact with at least one of two specially formatted ini files. 
+''' These files, chromium.ini and gecko.ini, provide the rulesets needed to generate entries for
+''' web browsers running with these respective engines. Refer to these files for more specific 
+''' documentation on how they are used by the user. BrowserBuilder is primarily intended as a 
+''' small devops tool but end users might find it useful as it enables them to generate entries 
+''' for non standard installation paths or portable applications while keeping winapp2.ini up
+''' to date separately <br /><br />
+''' 
+''' Additionally, and because it is intended to simplify the devops, Browser Builder expects to 
+''' "Flavorize" the browsers.ini that it produces. This is done so as to resolve over and under 
+''' coverages by generated entries as well as resolve incompatibilities. Accordingly, it expects
+''' but does not require a set of Flavor files (up to 1 "Add" file, up to 3 "Remove" files, and
+''' up to 2 "Replace" files). Consult the Transmute documentation for more information about Flavors
+''' <br/><br/> Unflavored browser.ini files may be broken or incomplete depending on use case
 ''' </summary>
 ''' 
-''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
+''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
 Public Module BrowserBuilder
 
     ''' <summary>
@@ -111,11 +126,16 @@ Public Module BrowserBuilder
 
     End Structure
 
+    Public Sub handleCmdLine()
+
+
+    End Sub
+
     ''' <summary>
     ''' Initializes the browser builder process
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
+    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-08-05
     Public Sub initBrowserBuilder()
 
         clrConsole()
@@ -124,11 +144,10 @@ Public Module BrowserBuilder
         BuilderFile1.init()
         BuilderFile2.init()
 
-        If BuilderFile1.Sections.Count + BuilderFile2.Sections.Count = 0 Then
+        Dim noRules = BuilderFile1.Sections.Count + BuilderFile2.Sections.Count = 0
 
-            LogAndPrint(4, "No valid generative rulesets found ")
-
-        End If
+        setHeaderText("No valid generative rulesets found", True, noRules)
+        If noRules Then Return
 
         LogAndPrint(4, "Building browser configuration entries", trailr:=True, leadr:=True, ascend:=True, closeMenu:=True)
 
@@ -162,16 +181,8 @@ Public Module BrowserBuilder
         ' Process each scaffold entry for Gecko 
         buildScaffolds(BuilderFile2, True, outputFile)
 
-        ' Save the generated file to disk and reload it :) just in case  
-        outputFile.overwriteToFile(outputFile.toString)
-        outputFile.Sections.Clear()
-        outputFile.init()
-
-        ' Apply any necessary corrections to our generated output and save
+        ' Apply corrections to our generated output and save
         Flavorize(outputFile, outputFile, BuilderFile4, BuilderFile5, BuilderFile6, BuilderFile9, BuilderFile8, BuilderFile7)
-        outputFile.overwriteToFile(outputFile.toString)
-        outputFile.Sections.Clear()
-        outputFile.init()
 
         outputFile.Sections = remotedebug(outputFile, True).Sections
 
@@ -222,7 +233,7 @@ Public Module BrowserBuilder
     ''' </param>
     ''' 
     ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
-    Public Sub buildScaffolds(rulesetFile As iniFile,
+    Private Sub buildScaffolds(rulesetFile As iniFile,
                               isGecko As Boolean,
                         ByRef outputFile As iniFile)
 
@@ -245,7 +256,7 @@ Public Module BrowserBuilder
 
                 Case Else
 
-                    LogAndPrint(0, $"/!\ Invalid section found and ignored: [{section.Name}] /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+                    LogAndPrint(7, $"Invalid section found and ignored: [{section.Name}]")
 
             End Select
 
@@ -306,11 +317,17 @@ Public Module BrowserBuilder
 
                 Case Else
 
-                    LogAndPrint(0, $"/!\ Unexpected KeyType in {browserSection.Name}: {key.KeyType} /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+                    LogAndPrint(7, $"Unexpected KeyType in {browserSection.Name}: {key.KeyType}")
 
             End Select
 
         Next
+
+        Dim noUserData = browserInfo.UserDataPaths.Count = 0
+        Dim noSection = browserInfo.SectionName = ""
+
+        LogAndPrint(7, $"No valid UserDataPath key found in {browserName}", logCond:=noUserData, cond:=noUserData)
+        LogAndPrint(7, $"No valid Section key found in {browserName}", logCond:=noSection, cond:=noSection)
 
         Return browserInfo
 
@@ -392,6 +409,7 @@ Public Module BrowserBuilder
     ''' <param name="fileKeyBase">
     ''' A FileKey template to be transformed such that it is appropriate for Opera GX
     ''' </param>
+    ''' 
     ''' <param name="fileKeyNum">
     ''' The number of the current FileKey being generated
     ''' </param>
@@ -417,8 +435,9 @@ Public Module BrowserBuilder
         Dim baseKeyValue As String
         Dim sideProfileKeyValue As String
 
-        ' Opera GX stores files both in the main user data directory and in _side_profiles\* subdirectories
-        ' We need to transform paths according to these rules:
+        ' Opera GX stores files both in the main user data directory (without a folder such as Default)
+        ' and any profiles created in _side_profiles\* subdirectories instead of the usual Profile1, etc.
+        ' Accordingly, we transform our scaffold templates to accommodate this 
         ' %UserDataPath%\*|<params> -> %UserDataPath%|<params> + %UserDataPath%\_side_profiles\*|<params>
         ' %UserDataPath%\*\<directory> -> %UserDataPath%\<directory> + %UserDataPath%\_side_profiles\*\<directory>
         ' %UserDataPath%|<params> -> %UserDataPath%|<params> + %UserDataPath%\_side_profiles\*|<params>
@@ -432,7 +451,6 @@ Public Module BrowserBuilder
                 Dim afterWildcardPipe As String = fileKeyBase.Substring(fileKeyBase.IndexOf("%UserDataPath%\*|") + "%UserDataPath%\*|".Length)
                 Dim basePattern As String = "%UserDataPath%|" & afterWildcardPipe
                 baseKeyValue = basePattern.Replace("%UserDataPath%", userDataPath)
-
                 Dim sideProfilesPattern As String = "%UserDataPath%\_side_profiles\*|" & afterWildcardPipe
                 sideProfileKeyValue = sideProfilesPattern.Replace("%UserDataPath%", userDataPath)
 
@@ -442,7 +460,6 @@ Public Module BrowserBuilder
                 Dim afterWildcard As String = fileKeyBase.Substring(fileKeyBase.IndexOf("%UserDataPath%\*\") + "%UserDataPath%\*\".Length)
                 Dim unnestedBase As String = "%UserDataPath%\" & afterWildcard
                 baseKeyValue = unnestedBase.Replace("%UserDataPath%", userDataPath)
-
                 Dim sideProfilesBase As String = "%UserDataPath%\_side_profiles\*\" & afterWildcard
                 sideProfileKeyValue = sideProfilesBase.Replace("%UserDataPath%", userDataPath)
 
@@ -451,7 +468,6 @@ Public Module BrowserBuilder
 
                 Dim afterPipe As String = fileKeyBase.Substring("%UserDataPath%|".Length)
                 baseKeyValue = fileKeyBase.Replace("%UserDataPath%", userDataPath)
-
                 Dim sideProfilesBase As String = "%UserDataPath%\_side_profiles\*|" & afterPipe
                 sideProfileKeyValue = sideProfilesBase.Replace("%UserDataPath%", userDataPath)
 
@@ -460,13 +476,12 @@ Public Module BrowserBuilder
 
                 Dim afterBackslash As String = fileKeyBase.Substring("%UserDataPath%\".Length)
                 baseKeyValue = fileKeyBase.Replace("%UserDataPath%", userDataPath)
-
                 Dim sideProfilesBase As String = "%UserDataPath%\_side_profiles\*\" & afterBackslash
                 sideProfileKeyValue = sideProfilesBase.Replace("%UserDataPath%", userDataPath)
 
             Case Else
 
-                LogAndPrint(0, $"/!\ Unsupported OperaGX path provided in {fileKeyBase} /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+                LogAndPrint(7, $"Unsupported OperaGX path provided in {fileKeyBase}")
 
         End Select
 
@@ -509,11 +524,11 @@ Public Module BrowserBuilder
     ''' 
     ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
     Private Sub generateBrowserEntry(browserInfo As BrowserInfo,
-                                 scaffoldName As String,
-                                 fileKeyBases As List(Of String),
-                                 regKeyBases As List(Of String),
-                           ByRef outputFile As iniFile,
-                                 isGecko As Boolean)
+                                     scaffoldName As String,
+                                     fileKeyBases As List(Of String),
+                                     regKeyBases As List(Of String),
+                               ByRef outputFile As iniFile,
+                                     isGecko As Boolean)
 
         gLog($"Generating entry for browser: {browserInfo.Name}", indent:=True)
 
@@ -522,10 +537,7 @@ Public Module BrowserBuilder
         Dim newSection As New iniSection With {.Name = entryName}
         newSection.Keys.add(New iniKey($"Section={browserInfo.SectionName}"))
 
-        ' Process user data paths using pre-computed information
-        processUserDataPaths(newSection, browserInfo.UserDataPaths, browserInfo.UserDataParentPaths,
-                        browserInfo.SectionName, browserInfo.TruncateDetect, fileKeyBases,
-                        browserInfo.Name, isGecko)
+        processUserDataPaths(newSection, browserInfo.UserDataPaths, browserInfo.UserDataParentPaths, browserInfo.SectionName, browserInfo.TruncateDetect, fileKeyBases, browserInfo.Name, isGecko)
 
         ' Process registry keys
         processRegKeyBases(regKeyBases, newSection, browserInfo.RegistryRoots)
@@ -642,15 +654,19 @@ Public Module BrowserBuilder
     ''' The name of the Browser for which the current entry is being built
     ''' </param>
     ''' 
+    ''' <param name="isGecko">
+    ''' Indicates whether or not the current browser is gecko-based 
+    ''' </param>
+    ''' 
     ''' Docs last updated: 2025-07-31 | Code last updated: 2025-07-31
-    Public Sub processUserDataPaths(ByRef newSection As iniSection,
-                                    ByRef userDataPaths As List(Of String),
-                                    ByRef userDataParentPaths As List(Of String),
-                                          sectionName As String,
-                                          truncate As Boolean,
-                                    ByRef fileKeyBases As List(Of String),
-                                          BrowserName As String,
-                                          isGecko As Boolean)
+    Private Sub processUserDataPaths(ByRef newSection As iniSection,
+                                     ByRef userDataPaths As List(Of String),
+                                     ByRef userDataParentPaths As List(Of String),
+                                           sectionName As String,
+                                           truncate As Boolean,
+                                     ByRef fileKeyBases As List(Of String),
+                                           BrowserName As String,
+                                           isGecko As Boolean)
 
         Dim fileKeyNum As Integer = 1
 
