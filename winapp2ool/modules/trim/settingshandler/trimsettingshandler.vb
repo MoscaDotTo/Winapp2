@@ -66,9 +66,10 @@ Public Module trimsettingshandler
     ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub createTrimSettingsSection()
 
-        Dim trimSettingsTuple = GetSettingsTupleWithReflection(GetType(trimsettings))
+        Dim settingsModule = GetType(trimsettings)
+        Dim moduleName = NameOf(Trim)
 
-        createModuleSettingsSection(NameOf(Trim), trimSettingsTuple, getNumBools(GetType(trimsettings)), getNumFiles(GetType(trimsettings)))
+        createModuleSettingsSection(moduleName, settingsModule)
 
     End Sub
 
