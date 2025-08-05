@@ -112,13 +112,6 @@ Module Diff
     Public Property AddedEntryWithMergerCount As Integer = 0
 
     ''' <summary> 
-    ''' Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
-    Public Property ShowFullEntries As Boolean = False
-
-    ''' <summary> 
     ''' The total number of keys that were added to modified entries 
     ''' </summary>
     ''' 
