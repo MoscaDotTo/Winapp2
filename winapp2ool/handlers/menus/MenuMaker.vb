@@ -264,6 +264,17 @@ Module MenuMaker
     ''' </description> 
     ''' </item>
     ''' 
+    ''' <item>
+    ''' <description>
+    ''' <c> 6 </c>: Menu header with trailing conjoiner 
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description>
+    ''' <c> 7 </c>: Yellow menu line with /!\ warning text /!\
+    ''' </description>
+    ''' </item>
     ''' </list>
     ''' </param>
     ''' 
@@ -447,6 +458,11 @@ Module MenuMaker
 
                 ' Prints a menu header with a trailing conjoiner 
                 print(0, menuText, conjoin:=True, isCentered:=True, openMenu:=True)
+
+            Case 7
+
+                ' Prints a yellow colored menu line with warning text 
+                print(0, $"/!\ {menuText} /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
 
         End Select
 
