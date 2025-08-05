@@ -81,18 +81,29 @@ Option Strict On
 ''' without numbers) must also match. Works best for numbered keys whose numbers may change 
 ''' or be unclear when invoking Transmute
 ''' </item>
-''' 
 ''' </list>
 ''' 
+''' <br /><br />
+''' Additionally, Transmute provides an important function called Flavorize. Flavorize is used to 
+''' apply "flavors" to an ini file. In the context on winapp2.ini, there has historically existed 
+''' at least one flavor: the "non-ccleaner" file. Flavorize automates and also democratizes what has 
+''' historically been a very labor intensive process: Maintaining a concise set of transformations
+''' on the base winapp2.ini that can be used to adapt it to different purposes. The flavorization 
+''' process always takes in a base ini file and then applies operations in the following order: <br />
+''' <br />
+''' Section Removal -> Key Name Removal -> Key Value Removal -> Section Replacement ->
+''' Key Replacement -> Section and Key Additions
+''' <br/>
 ''' </summary>
 ''' <remarks> 
+''' <b> Remarks: </b> <br />
 ''' Transmute replaces the Merge module and has has three modes which are wholly discrete from 
 ''' one another. This is a breaking change from old versions of Merge prior to 2025, which 
 ''' always add entries which don't exist and perform conflict resolution as part of that process.
-''' 
+''' <br /><br />
 ''' As the functionality of Merge evolved, it no longer felt appropriate to refer to its output as
 ''' the result of a "merger" necessarily. We now consider the resulting output a Transmutation. 
-''' Nevertheless, this is still spiritually the Merge module
+''' Nevertheless, this is still spiritually the Merge module 
 ''' </remarks>
 ''' 
 ''' Docs last updated: 2025-07-25 | Code last updated: 2025-07-25
@@ -377,7 +388,7 @@ Public Module Transmute
         invertSettingAndRemoveArg(False, "-w", TransmuteFile2.Name, "winapp3.ini")
         invertSettingAndRemoveArg(False, "-a", TransmuteFile2.Name, "Archived Entries.ini")
 
-        getFileAndDirParams(TransmuteFile1, TransmuteFile2, TransmuteFile3)
+        getFileAndDirParams({TransmuteFile1, TransmuteFile2, TransmuteFile3})
         If TransmuteFile2.Name.Length <> 0 Then initTransmute()
 
     End Sub
@@ -507,7 +518,7 @@ Public Module Transmute
         If baseFile.Sections.Count = 0 Then baseFile.init()
 
         If sourceFile.Sections.Count = 0 Then sourceFile.init()
-        gLog("Source file is empty!", sourceFile.Sections.Count = 0)
+        gLog($"{sourceFile.Name} is empty!", sourceFile.Sections.Count = 0)
 
         SuppressOutput = False
 
@@ -558,7 +569,7 @@ Public Module Transmute
             ' If we're not adding and the base file doesn't have a section of the same name, there's no conflicts to resolve 
             If Not baseFileHasSection AndAlso Not Transmutator = TransmuteMode.Add Then
 
-                LogAndPrint(0, $"/!\ Target section not found in base file: [{sectionName}] - no changes applied /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+                LogAndPrint(7, $"Target section not found in base file: [{sectionName}] - no changes applied")
                 Continue For
 
             End If
@@ -777,7 +788,7 @@ Public Module Transmute
         ' report any missed replacement targets
         For Each key In sourceKeys.Values
 
-            LogAndPrint(0, $"  /!\ Replacement target not found: {key.Name} not found in {baseSection.Name} /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+            LogAndPrint(7, $"Replacement target not found: {key.Name} not found in {baseSection.Name}")
 
         Next
 
@@ -869,7 +880,7 @@ Public Module Transmute
         ' report any missed removal targets 
         For Each key In sourceData
 
-            LogAndPrint(0, $"  /!\ Removal target not found: {key} not found in {baseSection.Name} /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+            LogAndPrint(7, $"Removal target not found: {key} not found in {baseSection.Name}")
 
         Next
 
@@ -967,13 +978,21 @@ Public Module Transmute
                       Optional isWinapp As Boolean = True,
                       Optional quiet As Boolean = True)
 
+        LogAndPrint(0, $"Flavorizing {baseFile.Name}", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
+
+        LogAndPrint(0, $"Removing sections", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
         RemoteTransmute(baseFile, sectionRemovalFile, outputFile, isWinapp, TransmuteMode.Remove, removeMode:=RemoveMode.BySection, quiet:=quiet)
+        LogAndPrint(0, $"Removing keys by name", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
         RemoteTransmute(baseFile, keyNameRemovalFile, outputFile, isWinapp, TransmuteMode.Remove, removeKeyMode:=RemoveKeyMode.ByName, quiet:=quiet)
+        LogAndPrint(0, $"Removing keys by value", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
         RemoteTransmute(baseFile, keyValueRemovalFile, outputFile, isWinapp, TransmuteMode.Remove, removeKeyMode:=RemoveKeyMode.ByValue, quiet:=quiet)
 
+        LogAndPrint(0, $"Replacing sections", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
         RemoteTransmute(baseFile, sectionReplacementFile, outputFile, isWinapp, TransmuteMode.Replace, replaceMode:=ReplaceMode.BySection, quiet:=quiet)
+        LogAndPrint(0, $"Replacing keys by name", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
         RemoteTransmute(baseFile, keyReplacementFile, outputFile, isWinapp, TransmuteMode.Replace, quiet:=quiet)
 
+        LogAndPrint(0, $"Adding keys and sections", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
         RemoteTransmute(baseFile, additionsFile, outputFile, isWinapp, quiet:=quiet)
 
     End Sub

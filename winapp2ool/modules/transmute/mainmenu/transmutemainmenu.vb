@@ -42,6 +42,8 @@ Public Module transmuteMainMenu
 
         print(1, "Run (default)", "Perform the transmutation", enStrCond:=Not TransmuteFile2.Name.Length = 0, colorLine:=True)
 
+        print(1, "Open Flavorizer", "Apply a complex series of modifications to an ini file", leadingBlank:=True)
+
         print(0, "Preset source File Choices:", leadingBlank:=True, trailingBlank:=True)
         print(1, "Removed Entries", "Select 'Removed Entries.ini'")
         print(1, "Custom", "Select 'Custom.ini'")
@@ -120,56 +122,63 @@ Public Module transmuteMainMenu
 
                 If Not denyActionWithHeader(TransmuteFile2.Name.Length = 0, "You must select a source file") Then initTransmute()
 
-            ' Option Name:                                 Preset File Name: Removed Entries 
+            ' Option Name:                                 Open Flavorizer
             ' Option States:
             ' Default                                      -> 2 (default)
             Case input = "2"
+
+                initModule("Flavorizer", AddressOf printFlavorizerMainMenu, AddressOf handleFlavorizerMainMenuUserInput)
+
+            ' Option Name:                                 Preset File Name: Removed Entries 
+            ' Option States:
+            ' Default                                      -> 3 (default)
+            Case input = "3"
 
                 changeBaseFileName("Removed entries.ini")
 
             ' Option Name:                                 Preset File Name: Custom
             ' Option States:
-            ' Default                                      -> 3 (default)
-            Case input = "3"
+            ' Default                                      -> 4 (default)
+            Case input = "4"
 
                 changeBaseFileName("Custom.ini")
 
             ' Option Name:                                 Preset File Name: winapp3.ini
             ' Option States:
-            ' Default                                      -> 4 (default)
-            Case input = "4"
+            ' Default                                      -> 5 (default)
+            Case input = "5"
 
                 changeBaseFileName("winapp3.ini")
 
             ' Option Name:                                 File Chooser (base)
             ' Option States:
-            ' Default                                      -> 5 (default)
+            ' Default                                      -> 6 (default)
 
-            Case input = "5"
+            Case input = "6"
 
                 changeFileParams(TransmuteFile1, TransmuteModuleSettingsChanged,
                                  NameOf(Transmute), NameOf(TransmuteFile1), NameOf(TransmuteModuleSettingsChanged))
 
             ' Option Name:                                 File Chooser (source)
             ' Option States:
-            ' Default                                      -> 6 (default)
-            Case input = "6"
+            ' Default                                      -> 7 (default)
+            Case input = "7"
 
                 changeFileParams(TransmuteFile2, TransmuteModuleSettingsChanged,
                                  NameOf(Transmute), NameOf(TransmuteFile2), NameOf(TransmuteModuleSettingsChanged))
 
             ' Option Name:                                 File Chooser (save)
             ' Option States:
-            ' Default                                      -> 7 (default)
-            Case input = "7"
+            ' Default                                      -> 8 (default)
+            Case input = "8"
 
                 changeFileParams(TransmuteFile3, TransmuteModuleSettingsChanged,
                                  NameOf(Transmute), NameOf(TransmuteFile3), NameOf(TransmuteModuleSettingsChanged))
 
             ' Option Name:                                 Change Transmute Mode 
             ' Option States:
-            ' Default                                      -> 8 (default)
-            Case input = "8"
+            ' Default                                      -> 9 (default)
+            Case input = "9"
 
                 cycleEnumSetting(Transmutator, GetType(TransmuteMode), "Transmutator",
                                  TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
@@ -179,8 +188,8 @@ Public Module transmuteMainMenu
             ' Option Name:                                 Change Replace Mode
             ' Option States:
             ' TransmuteModeIsReplace = False               -> Unavailable (not displayed)
-            ' Default                                      -> 9 (default)
-            Case input = "9" And Transmutator = TransmuteMode.Replace
+            ' Default                                      -> 10 (default)
+            Case input = "10" And Transmutator = TransmuteMode.Replace
 
                 cycleEnumSetting(TransmuteReplaceMode, GetType(ReplaceMode), "Replace Mode",
                                  TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
@@ -190,8 +199,8 @@ Public Module transmuteMainMenu
             ' Option Name:                                 Change Remove Mode
             ' Option States:
             ' TransmuteModeIsRemove = False                -> Unavailable (not displayed)
-            ' Default                                      -> 9 (default)
-            Case input = "9" And Transmutator = TransmuteMode.Remove
+            ' Default                                      -> 10 (default)
+            Case input = "10" And Transmutator = TransmuteMode.Remove
 
                 cycleEnumSetting(TransmuteRemoveMode, GetType(RemoveMode), "Remove Mode",
                                  TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
@@ -201,8 +210,8 @@ Public Module transmuteMainMenu
             ' Option Name:                                 Change Remove Key Mode
             ' Option States:
             ' RemoveModeIsByKey = False                    -> Unavailable (not displayed)
-            ' Default                                      -> 10 (default)
-            Case input = "10" And Transmutator = TransmuteMode.Remove And TransmuteRemoveMode = RemoveMode.ByKey
+            ' Default                                      -> 11 (default)
+            Case input = "11" And Transmutator = TransmuteMode.Remove And TransmuteRemoveMode = RemoveMode.ByKey
 
                 cycleEnumSetting(TransmuteRemoveKeyMode, GetType(RemoveKeyMode), "Remove Key Mode",
                                  TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
@@ -212,12 +221,12 @@ Public Module transmuteMainMenu
             ' Option Name:                                  Reset Settings 
             ' Option States: 
             ' ModuleSettingsChanged = False                 -> Unavailable (not displayed) 
-            ' TransmuteModeIsAdd                            -> 9 (default)
-            ' TransmuteModeIsReplace (+1)                   -> 10  
-            ' TransmuteModeIsRemove (+1) and BySection (+0) -> 10
-            ' TransmuteModeIsRemove (+1) and ByKey (+1)     -> 11
+            ' TransmuteModeIsAdd                            -> 10 (default)
+            ' TransmuteModeIsReplace (+1)                   -> 11  
+            ' TransmuteModeIsRemove (+1) and BySection (+0) -> 11
+            ' TransmuteModeIsRemove (+1) and ByKey (+1)     -> 12
             Case TransmuteModuleSettingsChanged AndAlso
-                 input = computeMenuNumber(9, {TransmuteModeIsAdd, TransmuteModeIsReplace,
+                 input = computeMenuNumber(10, {TransmuteModeIsAdd, TransmuteModeIsReplace,
                                                TransmuteModeIsRemove AndAlso RemoveModeIsBySection,
                                                TransmuteModeIsRemove AndAlso RemoveModeIsByKey}, {0, 1, 1, 2})
 

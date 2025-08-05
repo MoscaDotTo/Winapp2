@@ -162,6 +162,10 @@
     <Compile Include="modules\maintool\mainmenu\maintoolmenu.vb" />
     <Compile Include="modules\maintool\settingshandler\maintoolsettinghandler.vb" />
     <Compile Include="modules\maintool\settingshandler\maintoolsettings.vb" />
+    <Compile Include="modules\transmute\Flavorizer\mainmenu\FlavorizerMainMenu.vb" />
+    <Compile Include="modules\transmute\Flavorizer\settingshandler\FlavorizerSettings.vb" />
+    <Compile Include="modules\transmute\Flavorizer\settingshandler\FlavorizerSettingsHandler.vb" />
+    <Compile Include="modules\transmute\Flavorizer\tool\Flavorizer.vb" />
     <Compile Include="modules\transmute\mainmenu\transmutemainmenu.vb" />
     <Compile Include="modules\transmute\settingshandler\transmutesettings.vb" />
     <Compile Include="modules\transmute\tool\Transmute.vb" />
@@ -210,6 +214,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="modules\transmute\readme.md" />
     <None Include="My Project\app.manifest">
       <SubType>Designer</SubType>
     </None>
