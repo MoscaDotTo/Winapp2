@@ -64,7 +64,7 @@ Module ccdebugsettinghandler
     ''' Docs last updated: 2024-05-08 | Code last updated: 2025-06-25
     Public Sub createCCDBSettingsSection()
 
-        Dim ccdebugSettingsTuple = GetSettingsTupleWithReflection(GetType(diffsettings))
+        Dim ccdebugSettingsTuple = GetSettingsTupleWithReflection(GetType(ccdebugsettings))
 
         createModuleSettingsSection(NameOf(CCiniDebug), ccdebugSettingsTuple, getNumBools(GetType(ccdebugsettings)), getNumFiles(GetType(ccdebugsettings)))
 
