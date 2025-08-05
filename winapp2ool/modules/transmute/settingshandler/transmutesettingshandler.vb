@@ -73,9 +73,10 @@ Public Module transmuteSettingsHandler
 
         updateTransmuteEnumFlags()
 
-        Dim transmuteSettingsTuple = GetSettingsTupleWithReflection(GetType(transmuteSettings))
+        Dim settingsModule = GetType(transmuteSettings)
+        Dim moduleName = NameOf(Transmute)
 
-        createModuleSettingsSection(NameOf(Transmute), transmuteSettingsTuple, getNumBools(GetType(transmuteSettings)), getNumFiles(GetType(transmuteSettings)))
+        createModuleSettingsSection(moduleName, settingsModule)
 
     End Sub
 
