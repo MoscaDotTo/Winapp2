@@ -416,7 +416,7 @@ Public Module Transmute
         transmute(TransmuteFile1, TransmuteFile2, TransmuteFile3, True)
 
         print(0, "", closeMenu:=True)
-        print(3, $"Changes applied. {anyKeyStr}")
+        print(3, $"Changes applied. {anyKeyStr}", arbitraryColor:=ConsoleColor.Yellow)
         crk()
 
     End Sub
@@ -440,7 +440,6 @@ Public Module Transmute
                        Optional isWinapp2 As Boolean = True,
                        Optional sortBeforeSave As Boolean = True)
 
-        ' Transmute the base file 
         resolveConflicts(baseFile, sourceFile)
 
         If isWinapp2 Then
@@ -978,22 +977,34 @@ Public Module Transmute
                       Optional isWinapp As Boolean = True,
                       Optional quiet As Boolean = True)
 
-        LogAndPrint(0, $"Flavorizing {baseFile.Name}", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
+        LogAndPrint(0, $"Flavorizing {baseFile.Name}", cond:=Not quiet, arbitraryColor:=ConsoleColor.Magenta)
 
-        LogAndPrint(0, $"Removing sections", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
-        RemoteTransmute(baseFile, sectionRemovalFile, outputFile, isWinapp, TransmuteMode.Remove, removeMode:=RemoveMode.BySection, quiet:=quiet)
-        LogAndPrint(0, $"Removing keys by name", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
-        RemoteTransmute(baseFile, keyNameRemovalFile, outputFile, isWinapp, TransmuteMode.Remove, removeKeyMode:=RemoveKeyMode.ByName, quiet:=quiet)
-        LogAndPrint(0, $"Removing keys by value", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
-        RemoteTransmute(baseFile, keyValueRemovalFile, outputFile, isWinapp, TransmuteMode.Remove, removeKeyMode:=RemoveKeyMode.ByValue, quiet:=quiet)
+        Dim flavorOperations As New Dictionary(Of String, Object()) From {
+            {"Removing sections", {sectionRemovalFile, TransmuteMode.Remove, ReplaceMode.ByKey, RemoveMode.BySection, RemoveKeyMode.ByName}},
+            {"Removing keys by name", {keyNameRemovalFile, TransmuteMode.Remove, ReplaceMode.ByKey, RemoveMode.ByKey, RemoveKeyMode.ByName}},
+            {"Removing keys by value", {keyValueRemovalFile, TransmuteMode.Remove, ReplaceMode.ByKey, RemoveMode.ByKey, RemoveKeyMode.ByValue}},
+            {"Replacing sections", {sectionReplacementFile, TransmuteMode.Replace, ReplaceMode.BySection, RemoveMode.ByKey, RemoveKeyMode.ByName}},
+            {"Replacing keys by name", {keyReplacementFile, TransmuteMode.Replace, ReplaceMode.ByKey, RemoveMode.ByKey, RemoveKeyMode.ByName}},
+            {"Adding keys and sections", {additionsFile, TransmuteMode.Add, ReplaceMode.ByKey, RemoveMode.ByKey, RemoveKeyMode.ByName}}
+        }
 
-        LogAndPrint(0, $"Replacing sections", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
-        RemoteTransmute(baseFile, sectionReplacementFile, outputFile, isWinapp, TransmuteMode.Replace, replaceMode:=ReplaceMode.BySection, quiet:=quiet)
-        LogAndPrint(0, $"Replacing keys by name", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
-        RemoteTransmute(baseFile, keyReplacementFile, outputFile, isWinapp, TransmuteMode.Replace, quiet:=quiet)
+        For Each operation In flavorOperations
 
-        LogAndPrint(0, $"Adding keys and sections", cond:=Not quiet, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
-        RemoteTransmute(baseFile, additionsFile, outputFile, isWinapp, quiet:=quiet)
+            Dim description = operation.Key
+            Dim config = operation.Value
+            Dim flavorFile = DirectCast(config(0), iniFile)
+            Dim curMode = DirectCast(config(1), TransmuteMode)
+            Dim curReplMode = DirectCast(config(2), ReplaceMode)
+            Dim curRemMode = DirectCast(config(3), RemoveMode)
+            Dim curRemKMode = DirectCast(config(4), RemoveKeyMode)
+
+            LogAndPrint(0, description, cond:=Not quiet, arbitraryColor:=ConsoleColor.Cyan)
+            RemoteTransmute(baseFile, flavorFile, outputFile, isWinapp, curMode, curReplMode, curRemMode, curRemKMode, quiet)
+
+        Next
+
+        LogAndPrint(0, $"{baseFile.Name} Flavorized", cond:=Not quiet, arbitraryColor:=ConsoleColor.Magenta)
+
 
     End Sub
 

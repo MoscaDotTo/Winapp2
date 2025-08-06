@@ -38,20 +38,22 @@ Public Module transmuteMainMenu
                       "Features by mode:",
                       "Add entire sections or individual keys to specific sections",
                       "Replace entire sections or individual keys within specific sections by Value",
-                      "Remove entire sections or individual keys within specific sections by Name or Value"})
+                      "Remove entire sections or individual keys within specific sections by Name or Value"},
+                      givenHeaderColor:=ConsoleColor.Magenta)
 
         print(1, "Run (default)", "Perform the transmutation", enStrCond:=Not TransmuteFile2.Name.Length = 0, colorLine:=True)
 
-        print(1, "Open Flavorizer", "Apply a complex series of modifications to an ini file", leadingBlank:=True)
+        print(1, "Open Flavorizer", "Apply a complex series of modifications to an ini file", leadingBlank:=True, arbitraryColor:=ConsoleColor.Yellow)
 
-        print(0, "Preset source File Choices:", leadingBlank:=True, trailingBlank:=True)
+        print(0, "Preset source file choices:", leadingBlank:=True)
         print(1, "Removed Entries", "Select 'Removed Entries.ini'")
         print(1, "Custom", "Select 'Custom.ini'")
-        print(1, "winapp3.ini", "Select 'winapp3.ini'", trailingBlank:=True)
+        print(1, "winapp3.ini", "Select 'winapp3.ini'")
+        print(1, "browsers.ini", "select 'browsers.ini'", trailingBlank:=True)
 
-        print(1, "File Chooser (base)", "Choose a new name or location for the base file")
-        print(1, "File Chooser (source)", "Choose a name or location for the source file")
-        print(1, "File Chooser (save)", "Choose a new save location for the output of the transmutation", trailingBlank:=True)
+        print(1, "Change base file", "Select a new base file to be modified")
+        print(1, "Change source file", "Select the source file providing modifications")
+        print(1, "Change save target", "Select a save target for the output", trailingBlank:=True)
 
         print(0, $"Current base file: {replDir(TransmuteFile1.Path)}")
         print(0, $"Current source file : {If(TransmuteFile2.Name.Length = 0, "Not yet selected", replDir(TransmuteFile2.Path))}", enStrCond:=Not TransmuteFile2.Name.Length = 0, colorLine:=True)
@@ -59,20 +61,20 @@ Public Module transmuteMainMenu
 
         Dim modeColor = If(Transmutator = TransmuteMode.Add, ConsoleColor.Green, If(Transmutator = TransmuteMode.Replace, ConsoleColor.Yellow, ConsoleColor.Red))
         print(1, "Change transmute mode", "Cycle through primary transmute modes (Add/Replace/Remove)")
-        print(0, $"Current mode: {Transmutator}", leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=modeColor, closeMenu:=TransmuteModeIsAdd AndAlso Not TransmuteModuleSettingsChanged)
+        print(0, $"Transmute mode: {Transmutator}", leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=modeColor, closeMenu:=TransmuteModeIsAdd AndAlso Not TransmuteModuleSettingsChanged)
 
         Dim subModeColor = If(TransmuteModeIsReplace, ConsoleColor.Magenta, If(TransmuteRemoveMode = RemoveMode.BySection, ConsoleColor.Magenta, ConsoleColor.Cyan))
         Dim replaceModeDesc = If(ReplaceModeIsByKey, "Replace individual key values in within particular sections in the base file ", "Replace entire sections in the base file")
         print(1, "Change Replace mode", "Toggle between replacing by section or by key", TransmuteModeIsReplace)
-        print(0, $"Current replace mode: {TransmuteReplaceMode}: {replaceModeDesc}", cond:=TransmuteModeIsReplace, leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=subModeColor)
+        print(0, $"Replace mode: {TransmuteReplaceMode}: {replaceModeDesc}", cond:=TransmuteModeIsReplace, leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=subModeColor)
 
         Dim removeModeDesc = If(RemoveModeIsByKey, "Remove individual keys in within particular sections in the base file ", "Remove entire sections in the base file")
         print(1, "Change Remove mode", "Toggle between removing by section or by key", TransmuteModeIsRemove)
-        print(0, $"Current remove mode: {TransmuteRemoveMode}: {removeModeDesc}", cond:=TransmuteModeIsRemove, leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=subModeColor)
+        print(0, $"Remove mode: {TransmuteRemoveMode}: {removeModeDesc}", cond:=TransmuteModeIsRemove, leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=subModeColor)
 
         Dim keyModeColor = If(TransmuteRemoveKeyMode = RemoveKeyMode.ByName, ConsoleColor.Magenta, ConsoleColor.DarkYellow)
         print(1, "Change Key Removal mode", "Toggle between removing keys by name or by value", TransmuteModeIsRemove AndAlso RemoveModeIsByKey)
-        print(0, $"Current remove key mode: {TransmuteRemoveKeyMode}", cond:=TransmuteModeIsRemove AndAlso RemoveModeIsByKey, leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=keyModeColor)
+        print(0, $"Key removal mode: {TransmuteRemoveKeyMode}", cond:=TransmuteModeIsRemove AndAlso RemoveModeIsByKey, leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=keyModeColor)
 
         print(2, NameOf(Transmute), cond:=TransmuteModuleSettingsChanged, closeMenu:=True)
 
@@ -106,6 +108,21 @@ Public Module transmuteMainMenu
     ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub handleTransmuteMainMenuUserInput(input As String)
 
+        Dim presetFileNames As New Dictionary(Of String, String) From {
+            {"3", "Removed Entries.ini"},
+            {"4", "Custom.ini"},
+            {"5", "winapp3.ini"},
+            {"6", "browsers.ini"}
+        }
+
+        Dim transmuteFiles As New Dictionary(Of String, iniFile) From {
+            {NameOf(TransmuteFile1), TransmuteFile1},
+            {NameOf(TransmuteFile2), TransmuteFile2},
+            {NameOf(TransmuteFile3), TransmuteFile3}
+        }
+
+        Dim fileOpts = {"6", "7", "8"}
+
         Select Case True
 
             ' Option Name:                                 Exit 
@@ -129,51 +146,27 @@ Public Module transmuteMainMenu
 
                 initModule("Flavorizer", AddressOf printFlavorizerMainMenu, AddressOf handleFlavorizerMainMenuUserInput)
 
-            ' Option Name:                                 Preset File Name: Removed Entries 
+            ' Option Name:                                 Preset File Names
             ' Option States:
-            ' Default                                      -> 3 (default)
-            Case input = "3"
+            ' Removed Entries.ini                          -> 3 (default)
+            ' Custom.ini                                   -> 4 (default)
+            ' winapp3.ini                                  -> 5 (default)
+            ' browsers.ini                                 -> 6 (default)
 
-                changeBaseFileName("Removed entries.ini")
+            Case presetFileNames.ContainsKey(input)
 
-            ' Option Name:                                 Preset File Name: Custom
-            ' Option States:
-            ' Default                                      -> 4 (default)
-            Case input = "4"
+                changeBaseFileName(presetFileNames(input))
 
-                changeBaseFileName("Custom.ini")
+          ' Option Name:                                   File Selectors
+          ' Option States:
+          ' Change base file                              -> 7 (default)
+          ' Change source file                            -> 8 (default)
+          ' Change save target                            -> 9 (default)
+            Case fileOpts.Contains(input)
 
-            ' Option Name:                                 Preset File Name: winapp3.ini
-            ' Option States:
-            ' Default                                      -> 5 (default)
-            Case input = "5"
-
-                changeBaseFileName("winapp3.ini")
-
-            ' Option Name:                                 File Chooser (base)
-            ' Option States:
-            ' Default                                      -> 6 (default)
-
-            Case input = "6"
-
-                changeFileParams(TransmuteFile1, TransmuteModuleSettingsChanged,
-                                 NameOf(Transmute), NameOf(TransmuteFile1), NameOf(TransmuteModuleSettingsChanged))
-
-            ' Option Name:                                 File Chooser (source)
-            ' Option States:
-            ' Default                                      -> 7 (default)
-            Case input = "7"
-
-                changeFileParams(TransmuteFile2, TransmuteModuleSettingsChanged,
-                                 NameOf(Transmute), NameOf(TransmuteFile2), NameOf(TransmuteModuleSettingsChanged))
-
-            ' Option Name:                                 File Chooser (save)
-            ' Option States:
-            ' Default                                      -> 8 (default)
-            Case input = "8"
-
-                changeFileParams(TransmuteFile3, TransmuteModuleSettingsChanged,
-                                 NameOf(Transmute), NameOf(TransmuteFile3), NameOf(TransmuteModuleSettingsChanged))
+                Dim i = CType(input, Integer) - 7
+                changeFileParams(transmuteFiles(transmuteFiles.Keys(i)), TransmuteModuleSettingsChanged, NameOf(Transmute),
+                                 transmuteFiles.Keys(i), NameOf(TransmuteModuleSettingsChanged))
 
             ' Option Name:                                 Change Transmute Mode 
             ' Option States:
