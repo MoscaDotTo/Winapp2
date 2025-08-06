@@ -400,7 +400,7 @@ Module MenuMaker
                      Optional isCentered As Boolean = False,
                      Optional closeMenu As Boolean = False,
                      Optional openMenu As Boolean = False,
-                     Optional enStrCond As Boolean = False,
+                     Optional enStrCond As Nullable(Of Boolean) = Nothing,
                      Optional colorLine As Boolean = False,
                      Optional useArbitraryColor As Boolean = False,
                      Optional arbitraryColor As ConsoleColor = Nothing,
@@ -410,6 +410,12 @@ Module MenuMaker
                      Optional fillBorder As Boolean = True)
 
         If Not cond Then Return
+
+        ' Having a color to print suggests we'll be printing in color
+        If Not arbitraryColor = Nothing Then colorLine = True : useArbitraryColor = True
+
+        ' Enable/Disable is always printed in color
+        If Not enStrCond Is Nothing Then colorLine = True
 
         cwl(cond:=buffr)
 
@@ -510,7 +516,7 @@ Module MenuMaker
     Private Sub determinePrintColor(colorLine As Boolean,
                                     useArbColor As Boolean,
                                     arbColor As ConsoleColor,
-                                    enStrCond As Boolean)
+                                    enStrCond As Nullable(Of Boolean))
 
         If Not colorLine Then Console.ResetColor() : Return
 
@@ -641,7 +647,7 @@ Module MenuMaker
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private Function getFrame(Optional frameNum As Integer = 0,
-                              Optional fillFrame As Boolean = False) As String
+                              Optional fillFrame As Nullable(Of Boolean) = False) As String
 
         Return mkMenuLine("", 2, frameNum, fillFrame)
 
@@ -725,7 +731,7 @@ Module MenuMaker
     ''' </returns>
     '''
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Function enStr(setting As Boolean) As String
+    Public Function enStr(setting As Nullable(Of Boolean)) As String
 
         Return If(setting, "Disable", "Enable")
 
@@ -913,7 +919,7 @@ Module MenuMaker
     Private Function mkMenuLine(line As String,
                                 align As Integer,
                                 Optional borderInd As Integer = 0,
-                                Optional fillBorder As Boolean = True) As String
+                                Optional fillBorder As Nullable(Of Boolean) = True) As String
 
         If line.Length >= GetConsoleWidth() - 1 Then Return line
 
