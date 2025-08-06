@@ -97,22 +97,19 @@ Public Module Flavorizer
 
         If Not enforceFileHasContent(FlavorizerFile1) Then Return
 
-        LogAndPrint(4, $"Applying flavor to {FlavorizerFile1.Name}", trailr:=True, leadr:=True, ascend:=True, closeMenu:=True)
+        LogAndPrint(4, $"Applying flavor to {FlavorizerFile1.Name}", trailr:=True, leadr:=True, ascend:=True, closeMenu:=True, arbitraryColor:=ConsoleColor.Yellow)
 
         Dim correctionFiles As New List(Of iniFile) From {FlavorizerFile3, FlavorizerFile4, FlavorizerFile5, FlavorizerFile6, FlavorizerFile7, FlavorizerFile8}
         Dim validFiles = correctionFiles.Where(Function(f) f.exists).Count()
 
         Dim hasValidFiles = Not validFiles = 0
 
-        If validFiles = 0 Then
-            LogAndPrint(0, "No correction files specified - output will be identical to input", cond:=Not hasValidFiles, logCond:=Not hasValidFiles, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
-        Else
-            LogAndPrint(0, $"Applying {validFiles} correction file(s)", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
-        End If
+        LogAndPrint(0, "No correction files specified - output will be identical to input", cond:=Not hasValidFiles, logCond:=Not hasValidFiles, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+        LogAndPrint(0, $"Applying {validFiles} correction file(s)", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
 
         performFlavorization()
 
-        LogAndPrint(4, "Flavorization completed successfully", buffr:=True, descend:=True, conjoin:=True)
+        LogAndPrint(4, "Flavorization completed successfully", buffr:=True, descend:=True, conjoin:=True, arbitraryColor:=ConsoleColor.Yellow)
         print(0, anyKeyStr, closeMenu:=True)
         crk()
 
