@@ -33,53 +33,47 @@ Public Module transmuteMainMenu
 
         adjustTransmuteConsoleHeight()
 
+        Dim modeColor = If(Transmutator = TransmuteMode.Add, ConsoleColor.Green, If(Transmutator = TransmuteMode.Replace, ConsoleColor.Yellow, ConsoleColor.Red))
+        Dim subModeColor = If(TransmuteModeIsReplace, ConsoleColor.Magenta, If(TransmuteRemoveMode = RemoveMode.BySection, ConsoleColor.Magenta, ConsoleColor.Cyan))
+        Dim replaceModeDesc = $"Currently replacing {If(ReplaceModeIsByKey, "individual key values within particular", "entire")} sections in the base file"
+        Dim removeModeDesc = $"Currently removing {If(RemoveModeIsByKey, "individual keys within particular", "entire")} sections from the base file"
+        Dim keyModeColor = If(TransmuteRemoveKeyMode = RemoveKeyMode.ByName, ConsoleColor.Magenta, ConsoleColor.DarkYellow)
+        Dim keyRemovalModeDesc = $"Currently removing keys by {If(RemoveKeyModeIsByName, "name matching only", "name (numberless) and value pair matching")}"
 
-        printMenuTop({"Transmute an ini file with sections and keys provided by a second ini file",
+        Dim menuDescriptionLines = {"Transmute an ini file with sections and keys provided by a second ini file",
                       "Features by mode:",
                       "Add entire sections or individual keys to specific sections",
                       "Replace entire sections or individual keys within specific sections by Value",
-                      "Remove entire sections or individual keys within specific sections by Name or Value"},
-                      givenHeaderColor:=ConsoleColor.Magenta)
+                      "Remove entire sections or individual keys within specific sections by Name or Value"}
 
-        print(1, "Run (default)", "Perform the transmutation", enStrCond:=Not TransmuteFile2.Name.Length = 0, colorLine:=True)
+        Dim menu = MenuSection.CreateCompleteMenu("Transmute", menuDescriptionLines, ConsoleColor.Magenta)
 
-        print(1, "Open Flavorizer", "Apply a complex series of modifications to an ini file", leadingBlank:=True, arbitraryColor:=ConsoleColor.Yellow)
+        menu.AddColoredOption("Run (default", "Perform the transmutation", GetRedGreen(TransmuteFile1.Name.Length = 0)) _
+            .AddColoredOption("Open Flavorizer", "Apply a complex series of modifications to an ini file", ConsoleColor.Yellow).AddBlank() _
+            .AddLine("Preset source files") _
+            .AddOption("Removed Entries", "Select 'Removed Entries.ini'") _
+            .AddOption("Custom", "Select 'Custom.ini'") _
+            .AddOption("winapp3.ini", "Select 'winapp3.ini'") _
+            .AddOption("browsers.ini", "Select 'browsers.ini'").AddBlank() _
+            .AddOption("Change base file", "Select a new base file to be modified") _
+            .AddOption("Change source file", "Select the source file providing modifications for the base file") _
+            .AddOption("Change save target", "Select a save target for the output").AddBlank() _
+            .AddOption("Change transmute mode", "Cycle through primary transmute modes (Add/Replace/Remove)") _
+            .AddColoredLine($"Transmute mode: {Transmutator}", modeColor) _
+            .AddBlank(TransmuteModeIsReplace) _
+            .AddOption("Change Replace mode", "Toggle between replacing by section or by key", TransmuteModeIsReplace) _
+            .AddColoredLine(replaceModeDesc, subModeColor, condition:=TransmuteModeIsReplace) _
+            .AddBlank(TransmuteModeIsRemove) _
+            .AddOption("Change Remove mode", "Toggle between removing by section or by key", TransmuteModeIsRemove) _
+            .AddColoredLine(removeModeDesc, subModeColor, condition:=TransmuteModeIsRemove) _
+            .AddOption("Change Key Removal mode", "Toggle between removing keys by name or by value", TransmuteModeIsRemove AndAlso RemoveModeIsByKey) _
+            .AddColoredLine(keyRemovalModeDesc, keyModeColor, condition:=TransmuteModeIsRemove AndAlso RemoveModeIsByKey) _
+            .AddBlank(TransmuteModuleSettingsChanged) _
+            .AddResetOpt(NameOf(Transmute), TransmuteModuleSettingsChanged)
 
-        print(0, "Preset source file choices:", leadingBlank:=True)
-        print(1, "Removed Entries", "Select 'Removed Entries.ini'")
-        print(1, "Custom", "Select 'Custom.ini'")
-        print(1, "winapp3.ini", "Select 'winapp3.ini'")
-        print(1, "browsers.ini", "select 'browsers.ini'", trailingBlank:=True)
-
-        print(1, "Change base file", "Select a new base file to be modified")
-        print(1, "Change source file", "Select the source file providing modifications")
-        print(1, "Change save target", "Select a save target for the output", trailingBlank:=True)
-
-        print(0, $"Current base file: {replDir(TransmuteFile1.Path)}")
-        print(0, $"Current source file : {If(TransmuteFile2.Name.Length = 0, "Not yet selected", replDir(TransmuteFile2.Path))}", enStrCond:=Not TransmuteFile2.Name.Length = 0, colorLine:=True)
-        print(0, $"Current save target: {replDir(TransmuteFile3.Path)}", trailingBlank:=True)
-
-        Dim modeColor = If(Transmutator = TransmuteMode.Add, ConsoleColor.Green, If(Transmutator = TransmuteMode.Replace, ConsoleColor.Yellow, ConsoleColor.Red))
-        print(1, "Change transmute mode", "Cycle through primary transmute modes (Add/Replace/Remove)")
-        print(0, $"Transmute mode: {Transmutator}", leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=modeColor, closeMenu:=TransmuteModeIsAdd AndAlso Not TransmuteModuleSettingsChanged)
-
-        Dim subModeColor = If(TransmuteModeIsReplace, ConsoleColor.Magenta, If(TransmuteRemoveMode = RemoveMode.BySection, ConsoleColor.Magenta, ConsoleColor.Cyan))
-        Dim replaceModeDesc = If(ReplaceModeIsByKey, "Replace individual key values in within particular sections in the base file ", "Replace entire sections in the base file")
-        print(1, "Change Replace mode", "Toggle between replacing by section or by key", TransmuteModeIsReplace)
-        print(0, $"Replace mode: {TransmuteReplaceMode}: {replaceModeDesc}", cond:=TransmuteModeIsReplace, leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=subModeColor)
-
-        Dim removeModeDesc = If(RemoveModeIsByKey, "Remove individual keys in within particular sections in the base file ", "Remove entire sections in the base file")
-        print(1, "Change Remove mode", "Toggle between removing by section or by key", TransmuteModeIsRemove)
-        print(0, $"Remove mode: {TransmuteRemoveMode}: {removeModeDesc}", cond:=TransmuteModeIsRemove, leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=subModeColor)
-
-        Dim keyModeColor = If(TransmuteRemoveKeyMode = RemoveKeyMode.ByName, ConsoleColor.Magenta, ConsoleColor.DarkYellow)
-        print(1, "Change Key Removal mode", "Toggle between removing keys by name or by value", TransmuteModeIsRemove AndAlso RemoveModeIsByKey)
-        print(0, $"Key removal mode: {TransmuteRemoveKeyMode}", cond:=TransmuteModeIsRemove AndAlso RemoveModeIsByKey, leadingBlank:=True, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=keyModeColor)
-
-        print(2, NameOf(Transmute), cond:=TransmuteModuleSettingsChanged, closeMenu:=True)
+        menu.Print()
 
     End Sub
-
 
     ''' <summary>
     ''' Once per run of the module, we'll set the console height to be large enough so as to 
@@ -89,9 +83,7 @@ Public Module transmuteMainMenu
     ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Private Sub adjustTransmuteConsoleHeight()
 
-        Dim baseHeight = Console.WindowHeight
-
-        If baseHeight > 42 Then Return
+        If Console.WindowHeight > 42 Then Return
 
         Console.WindowHeight = 43
 
@@ -106,7 +98,7 @@ Public Module transmuteMainMenu
     ''' </param>
     ''' 
     ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
-    Public Sub handleTransmuteMainMenuUserInput(input As String)
+    Public Sub handleTransmuteUserInput(input As String)
 
         Dim presetFileNames As New Dictionary(Of String, String) From {
             {"3", "Removed Entries.ini"},
@@ -121,7 +113,7 @@ Public Module transmuteMainMenu
             {NameOf(TransmuteFile3), TransmuteFile3}
         }
 
-        Dim fileOpts = {"6", "7", "8"}
+        Dim fileOpts = {"7", "8", "9"}
 
         Select Case True
 
@@ -170,8 +162,8 @@ Public Module transmuteMainMenu
 
             ' Option Name:                                 Change Transmute Mode 
             ' Option States:
-            ' Default                                      -> 9 (default)
-            Case input = "9"
+            ' Default                                      -> 10 (default)
+            Case input = "10"
 
                 cycleEnumSetting(Transmutator, GetType(TransmuteMode), "Transmutator",
                                  TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
@@ -181,8 +173,8 @@ Public Module transmuteMainMenu
             ' Option Name:                                 Change Replace Mode
             ' Option States:
             ' TransmuteModeIsReplace = False               -> Unavailable (not displayed)
-            ' Default                                      -> 10 (default)
-            Case input = "10" And Transmutator = TransmuteMode.Replace
+            ' Default                                      -> 11 (default)
+            Case input = "11" AndAlso TransmuteModeIsReplace
 
                 cycleEnumSetting(TransmuteReplaceMode, GetType(ReplaceMode), "Replace Mode",
                                  TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
@@ -192,8 +184,8 @@ Public Module transmuteMainMenu
             ' Option Name:                                 Change Remove Mode
             ' Option States:
             ' TransmuteModeIsRemove = False                -> Unavailable (not displayed)
-            ' Default                                      -> 10 (default)
-            Case input = "10" And Transmutator = TransmuteMode.Remove
+            ' Default                                      -> 12 (default)
+            Case input = "11" AndAlso TransmuteModeIsRemove
 
                 cycleEnumSetting(TransmuteRemoveMode, GetType(RemoveMode), "Remove Mode",
                                  TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
@@ -204,7 +196,7 @@ Public Module transmuteMainMenu
             ' Option States:
             ' RemoveModeIsByKey = False                    -> Unavailable (not displayed)
             ' Default                                      -> 11 (default)
-            Case input = "11" And Transmutator = TransmuteMode.Remove And TransmuteRemoveMode = RemoveMode.ByKey
+            Case input = "12" AndAlso TransmuteModeIsRemove AndAlso RemoveModeIsByKey
 
                 cycleEnumSetting(TransmuteRemoveKeyMode, GetType(RemoveKeyMode), "Remove Key Mode",
                                  TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
@@ -214,12 +206,12 @@ Public Module transmuteMainMenu
             ' Option Name:                                  Reset Settings 
             ' Option States: 
             ' ModuleSettingsChanged = False                 -> Unavailable (not displayed) 
-            ' TransmuteModeIsAdd                            -> 10 (default)
-            ' TransmuteModeIsReplace (+1)                   -> 11  
-            ' TransmuteModeIsRemove (+1) and BySection (+0) -> 11
-            ' TransmuteModeIsRemove (+1) and ByKey (+1)     -> 12
+            ' TransmuteModeIsAdd                            -> 11 (default)
+            ' TransmuteModeIsReplace (+1)                   -> 12  
+            ' TransmuteModeIsRemove (+1) and BySection (+0) -> 12
+            ' TransmuteModeIsRemove (+1) and ByKey (+1)     -> 13
             Case TransmuteModuleSettingsChanged AndAlso
-                 input = computeMenuNumber(10, {TransmuteModeIsAdd, TransmuteModeIsReplace,
+                 input = computeMenuNumber(11, {TransmuteModeIsAdd, TransmuteModeIsReplace,
                                                TransmuteModeIsRemove AndAlso RemoveModeIsBySection,
                                                TransmuteModeIsRemove AndAlso RemoveModeIsByKey}, {0, 1, 1, 2})
 
@@ -227,7 +219,7 @@ Public Module transmuteMainMenu
 
             Case Else
 
-                setHeaderText(invInpStr, True)
+                setHeaderText(invInpStr, True, printColor:=ConsoleColor.Red)
 
         End Select
 
