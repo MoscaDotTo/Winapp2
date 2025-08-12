@@ -52,7 +52,7 @@ Module SettingsManager
         initModule("File Chooser", AddressOf someFile.printFileChooserMenu, AddressOf someFile.handleFileChooserInput)
 
         Dim fileChanged = Not someFile.Name = curName OrElse Not someFile.Dir = curDir
-        settingsChangedSetting = fileChanged
+        If Not settingsChangedSetting Then settingsChangedSetting = fileChanged
 
         setHeaderText($"{If(someFile.SecondName.Length = 0, someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
 
@@ -103,8 +103,8 @@ Module SettingsManager
                                         settingChangedName As String)
 
         gLog($"Toggling {paramText} from {setting} to {Not setting}", indent:=True)
-        setHeaderText($"{paramText} {enStr(setting)}d", True, True, If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
-
+        'setHeaderText($"{paramText} {enStr(setting)}d", True, True, If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
+        setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
         setting = Not setting
         mSettingsChanged = True
 
