@@ -32,7 +32,7 @@ Public Module launcher
     ''' When run from the temporary folder, winapp2ool.exe update functionality is disabled
     ''' </remarks>
     ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+    ''' Docs last updated: 2020-07-14 | Code last updated: 2025-08-06
     Public Sub main()
 
         gLog($"Starting application")
@@ -42,7 +42,8 @@ Public Module launcher
         If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
         gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
 
-        cantDownloadExecutable = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
+        Dim curDirIsTemp As Boolean = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
+        cantDownloadExecutable = curDirIsTemp OrElse DotNetFrameworkOutOfDate
 
         loadSettings()
 
@@ -53,6 +54,7 @@ Public Module launcher
         currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         Console.Title = $"Winapp2ool v{currentVersion}"
         Console.WindowWidth = 126
+        Console.WindowHeight = 34
 
         initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
 
