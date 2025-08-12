@@ -140,4 +140,42 @@ Module Winapp2ool
 
     End Function
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' 
+    ''' <param name="flavorFile">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' 
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
+    Public Function getFileMenuColor(menuFile As iniFile) As ConsoleColor
+
+        Return If(menuFile.Name.Length > 0, ConsoleColor.Green, ConsoleColor.Red)
+
+    End Function
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' 
+    ''' <param name="menuFile">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' 
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
+    Public Function getFileMenuName(menuFile As iniFile) As String
+
+        Return If(menuFile.Name.Length > 0, replDir(menuFile.Path), "Not specified")
+
+    End Function
+
 End Module
