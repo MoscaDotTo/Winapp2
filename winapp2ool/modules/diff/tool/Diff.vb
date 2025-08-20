@@ -379,9 +379,11 @@ Module Diff
             Dim downloadedIniFile = getRemoteIniFile(winapp2link)
             DiffFile2.Sections = downloadedIniFile.Sections
 
-        End If
+        Else
 
-        If Not enforceFileHasContent(DiffFile2) Then Return
+            If Not enforceFileHasContent(DiffFile2) Then Return
+
+        End If
 
         If TrimRemoteFile AndAlso DownloadDiffFile Then
 
@@ -407,7 +409,7 @@ Module Diff
 
         crl()
 
-        MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "hasBeenRun")
+        MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "")
         DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
         setHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
 
