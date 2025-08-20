@@ -122,6 +122,8 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="handlers\menus\builders\MenuItemBuilder\MenuItemBuilder.vb" />
+    <Compile Include="handlers\menus\MenuSection\MenuSection.vb" />
     <Compile Include="handlers\settings\settingsHandler.vb" />
     <Compile Include="modules\browserbuilder\mainmenu\browserbuildermainmenu.vb" />
     <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettings.vb" />
@@ -130,6 +132,7 @@
     <Compile Include="modules\ccdebug\tool\CCiniDebug.vb" />
     <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
     <Compile Include="modules\ccdebug\settingshandler\ccdebugsettinghandler.vb" />
+    <Compile Include="modules\combine\tool\Combine.vb" />
     <Compile Include="modules\diff\settingshandler\diffsettings.vb" />
     <Compile Include="modules\diff\tool\Diff.vb" />
     <Compile Include="modules\diff\mainmenu\diffmainmenu.vb" />
@@ -172,21 +175,21 @@
     <Compile Include="modules\transmute\settingshandler\transmutesettingshandler.vb" />
     <Compile Include="modules\browserbuilder\tool\BrowserBuilder.vb" />
     <Compile Include="modules\minefield\java\JavaMaker.vb" />
-    <Compile Include="modules\minefield\Minefield.vb" />
+    <Compile Include="modules\minefield\tool\Minefield.vb" />
     <Compile Include="modules\minefield\outlooker\OutlookMaker.vb" />
     <Compile Include="modules\minefield\search\search.vb" />
     <Compile Include="modules\maintool\settingsmenu\globalsettingsmenu.vb" />
     <Compile Include="modules\trim\mainmenu\trimmainmenu.vb" />
     <Compile Include="modules\trim\settingshandler\trimsettings.vb" />
     <Compile Include="modules\trim\settingshandler\trimsettingshandler.vb" />
-    <Compile Include="modules\trim\Trim.vb" />
+    <Compile Include="modules\trim\tool\Trim.vb" />
     <Compile Include="modules\winappdebug\components\advancedSettings\advSettings.vb" />
     <Compile Include="modules\winappdebug\components\landMine\experimentalScans.vb" />
     <Compile Include="modules\winappdebug\components\lintRules\lintRule.vb" />
     <Compile Include="modules\winappdebug\mainmenu\lintmainmenu.vb" />
     <Compile Include="modules\winappdebug\settingshandler\lintsettings.vb" />
     <Compile Include="modules\winappdebug\settingshandler\lintsettingshandler.vb" />
-    <Compile Include="modules\winappdebug\WinappDebug.vb" />
+    <Compile Include="modules\winappdebug\tool\WinappDebug.vb" />
     <Compile Include="modules\maintool\tool\Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -252,7 +255,8 @@
     <Folder Include="modules\assemble\mainmenu\" />
     <Folder Include="modules\assemble\settingshandler\" />
     <Folder Include="modules\assemble\tool\" />
-    <Folder Include="modules\winappdebug\tool\" />
+    <Folder Include="modules\combine\mainmenu\" />
+    <Folder Include="modules\combine\settingshandler\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
