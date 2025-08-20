@@ -70,19 +70,13 @@ Module trimmainmenu
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
 
         ' Determine set of available toggles
-        Dim toggleOpts = If(isOffline, {"2", "3"}, {"2", "3", "4"})
+        'Dim toggleOpts = If(isOffline, {"2", "3"}, {"2", "3", "4"})
         Dim baseToggles = getToggleOpts()
+        Dim toggleOpts = getMenuNumbering(baseToggles, 2)
 
         ' Determine set of available file selectors
         Dim baseFileOpts = getFileOpts()
-        Dim fileOpts = New List(Of String)
-        For i = 0 To baseFileOpts.Count - 1
-
-            Dim baseNum = If(isOffline, 4, 5)
-            Dim optNum = baseNum + i
-            fileOpts.Add(optNum.ToString)
-
-        Next
+        Dim fileOpts = getMenuNumbering(baseFileOpts, If(isOffline, 4, 5))
 
         Select Case True
 
@@ -107,23 +101,19 @@ Module trimmainmenu
             ' Offline -> 2 | Online -> 3 (default)
             ' 
             ' Excludes Toggle 
-            ' Offline -> 3 |Online -> 4 (default)
+            ' Offline -> 3 | Online -> 4 (default)
             Case toggleOpts.Contains(input)
 
                 Dim i = CType(input, Integer) - 2
 
                 Dim toggleMenuText = baseToggles.Keys(i)
                 Dim toggleName = baseToggles(toggleMenuText)
-                Dim toggleBool = CBool(GetType(trimsettings).GetProperty(toggleName).GetValue(Nothing, Nothing))
 
-                toggleSettingParam(toggleBool, toggleMenuText, TrimModuleSettingsChanged,
-                                   NameOf(Trim), toggleName, NameOf(TrimModuleSettingsChanged))
-
-                GetType(trimsettings).GetProperty(toggleName).SetValue(toggleName, toggleBool)
-
+                toggleModuleSetting(toggleMenuText, NameOf(Trim), GetType(trimsettings),
+                                    toggleName, NameOf(TrimModuleSettingsChanged))
 
             ' File Selectors
-            '
+            ' Note: Downloading implies not offline
             ' Winapp2.ini                                 
             ' Downloading -> Unavailable | Offline -> 4 | Not downloading -> 5 (default)
             '
@@ -139,7 +129,7 @@ Module trimmainmenu
             ' Not downloading, including                                             -> 8
             Case fileOpts.Contains(input)
 
-                Dim i = CType(input, Integer) - 2 - toggleOpts.Length
+                Dim i = CType(input, Integer) - 2 - toggleOpts.Count
 
                 If i > baseFileOpts.Count - 1 Then setHeaderText(invInpStr, True) : Return
 
