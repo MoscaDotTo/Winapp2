@@ -69,39 +69,30 @@ Module trimmainmenu
 
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
 
-        ' Determine set of available toggles
-        'Dim toggleOpts = If(isOffline, {"2", "3"}, {"2", "3", "4"})
         Dim baseToggles = getToggleOpts()
         Dim toggleOpts = getMenuNumbering(baseToggles, 2)
 
-        ' Determine set of available file selectors
         Dim baseFileOpts = getFileOpts()
         Dim fileOpts = getMenuNumbering(baseFileOpts, If(isOffline, 4, 5))
 
         Select Case True
 
             ' Exit 
-            ' Default -> 0 (Default)
+            ' Notes: Always "0"
             Case input = "0"
 
                 exitModule()
 
             ' Run (default)
-            ' Default -> 1 (Default) | No input 
+            ' Notes: Always "1", also triggered by no input if run conditions are otherwise satisfied
             Case (input = "1" OrElse input.Length = 0)
 
                 initTrim()
 
             ' Toggles
-            ' 
-            ' Download Toggle
-            ' Offline -> Unavailable | Online -> 2 (default) 
-            '
-            ' Includes Toggle
-            ' Offline -> 2 | Online -> 3 (default)
-            ' 
-            ' Excludes Toggle 
-            ' Offline -> 3 | Online -> 4 (default)
+            ' Downloading (unavailable when offline)
+            ' Includes 
+            ' Excludes 
             Case toggleOpts.Contains(input)
 
                 Dim i = CType(input, Integer) - 2
@@ -113,20 +104,11 @@ Module trimmainmenu
                                     toggleName, NameOf(TrimModuleSettingsChanged))
 
             ' File Selectors
-            ' Note: Downloading implies not offline
-            ' Winapp2.ini                                 
-            ' Downloading -> Unavailable | Offline -> 4 | Not downloading -> 5 (default)
-            '
+            ' Notes: Downloading implies not offline
+            ' Winapp2.ini (unavailable when downloading)
             ' Save Target
-            ' Offline XOR Downloading -> 5 | Not downloading -> 6 (default)
-            '
-            ' Includes list   
-            ' Not including -> Unavailable | Offline XOR Downloading -> 6 | Not downloading -> 7 (default)
-            '
-            ' Excludes list
-            ' Not excluding -> Unavailable | Downloading XOR Offline, not including  -> 6
-            ' Downloading XOR offline, including | not downloading, not including    -> 7 (default)
-            ' Not downloading, including                                             -> 8
+            ' Includes (unavailable when not including)
+            ' Excludes (unavailable when not excluding)
             Case fileOpts.Contains(input)
 
                 Dim i = CType(input, Integer) - 2 - toggleOpts.Count
@@ -139,13 +121,8 @@ Module trimmainmenu
                 changeFileParams(fileObj, TrimModuleSettingsChanged, NameOf(Trim), fileName, NameOf(TrimModuleSettingsChanged))
 
             ' Reset Settings 
-            ' 
-            ' Not ModuleSettingsChanged                                            -> Unavailable 
-            ' Offline XOR Downloading, Not IncOrExcl                               -> 6  
-            ' Not Downloading, Not IncOrExcl | Downloading XOR Offline, IncXorExcl -> 7  
-            ' Not Downloading, IncXorExcl | Offline XOR Downloading, IncAndExcl    -> 8
-            ' Not Downloading, IncAndExcl                                          -> 9 
-            Case TrimModuleSettingsChanged AndAlso input = computeMenuNumber(7, {isOffline, DownloadFileToTrim, UseTrimIncludes, UseTrimExcludes}, {-1, -1, +1, +1})
+            ' Notes: Only available after a setting has been changed, always comes last in the menu
+            Case TrimModuleSettingsChanged AndAlso CInt(input) = 2 + fileOpts.Count + fileOpts.Count + 1
 
                 resetModuleSettings(NameOf(Trim), AddressOf initDefaultTrimSettings)
 
@@ -230,7 +207,7 @@ Module trimmainmenu
     ''' The set of <c> iniFile </c> properties for an object currently displayed on the menu
     ''' </returns>
     ''' 
-    ''' Docs last updated: 2028-08-12 | Code last updated: 2025-08-12
+    ''' Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
     Private Function getFileOpts() As Dictionary(Of String, iniFile)
 
         Dim baseFileOpts As New Dictionary(Of String, iniFile)
