@@ -18,17 +18,17 @@
 Option Strict On
 
 ''' <summary>
-''' Displays the Diff main menu to the user and handles their input 
+''' Displays the Diff main menu to the user and handles their input accordingly
 ''' </summary>
 ''' 
-''' Docs last updated: 2020-08-30
+''' Docs last updated: 2025-08-21
 Module diffmainmenu
 
     ''' <summary> 
     ''' Prints the Diff main menu to the user 
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+    ''' Docs last updated: 2023-07-19 | Code last updated: 2025-08-19
     Public Sub printDiffMainMenu()
 
         Dim newFileHasName = Not (DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile)
@@ -74,7 +74,7 @@ Module diffmainmenu
     ''' The user's input 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+    ''' Docs last updated: 2022-11-21 | Code last updated: 2025-08-21
     Public Sub handleDiffUserInput(input As String)
 
         Dim toggleOpts = getToggleOpts()
@@ -82,6 +82,9 @@ Module diffmainmenu
 
         Dim fileOpts = getFileOpts()
         Dim fileNums = getMenuNumbering(fileOpts, 2 + toggleNums.Count)
+
+        Dim logViewerNum = CType(2 + toggleOpts.Count + fileOpts.Count, String)
+        Dim resetNum = CType(fileOpts.Count + toggleOpts.Count + 2 + If(MostRecentDiffLog = "", 0, 1), String)
 
         Select Case True
 
@@ -98,7 +101,6 @@ Module diffmainmenu
                 If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then ConductDiff()
 
             ' Toggles
-            '
             ' Remote Diffing (unavailable when offline)
             ' Remote file trimming (unavailable when not remote diffing)
             ' Log saving
@@ -114,7 +116,6 @@ Module diffmainmenu
                                     toggleName, NameOf(DiffModuleSettingsChanged))
 
             ' File Selectors
-            ' 
             ' Older/Local file
             ' Newer file (not available when remote diffing)
             ' Save target (not available when not saving log)
@@ -129,15 +130,15 @@ Module diffmainmenu
 
             ' Log Viewer
             ' Notes: Only available after Diff has been run at least once during the current session 
-            ' Appears between toggles and selectors when available
-            Case MostRecentDiffLog.Length > 0 AndAlso CInt(input) = 2 + toggleOpts.Count + fileOpts.Count
+            ' Appears after all other options except Reset Settings
+            Case MostRecentDiffLog.Length > 0 AndAlso input = logViewerNum
 
                 MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
                 printSlice(MostRecentDiffLog)
 
             ' Reset settings
-            ' Note: Only available after a setting has been changed, always comes last in the option list
-            Case DiffModuleSettingsChanged AndAlso CInt(input) = fileOpts.Count + toggleOpts.Count + 2 + If(MostRecentDiffLog = "", 0, 1)
+            ' Notes: Only available after a setting has been changed, always comes last in the option list
+            Case DiffModuleSettingsChanged AndAlso input = resetNum
 
                 resetModuleSettings(NameOf(Diff), AddressOf InitDefaultDiffSettings)
 
@@ -222,13 +223,15 @@ Module diffmainmenu
     ''' Docs last updated: 2028-08-12 | Code last updated: 2025-08-12
     Private Function getFileOpts() As Dictionary(Of String, iniFile)
 
-        Dim baseFileOpts As New Dictionary(Of String, iniFile)
+        Dim selectors As New Dictionary(Of String, iniFile)
 
-        baseFileOpts.Add(NameOf(DiffFile1), DiffFile1)
-        If Not DownloadDiffFile Then baseFileOpts.Add(NameOf(DiffFile2), DiffFile2)
-        If SaveDiffLog Then baseFileOpts.Add(NameOf(DiffFile3), DiffFile3)
+        selectors.Add(NameOf(DiffFile1), DiffFile1)
 
-        Return baseFileOpts
+        If Not DownloadDiffFile Then selectors.Add(NameOf(DiffFile2), DiffFile2)
+
+        If SaveDiffLog Then selectors.Add(NameOf(DiffFile3), DiffFile3)
+
+        Return selectors
 
     End Function
 
