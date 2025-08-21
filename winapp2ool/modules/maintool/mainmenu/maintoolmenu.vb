@@ -233,4 +233,43 @@ Module maintoolmenu
 
     End Sub
 
+    ''' <summary> 
+    ''' Informs the user when an update is available for winapp2ool or winapp2.ini
+    ''' </summary>
+    ''' 
+    ''' <param name="cond"> 
+    ''' Indicates whether or not an update for winapp2ool or winapp2.ini is available <br />
+    ''' <c> True </c> if an update is available <br />
+    ''' <c> False </c> if no update is available 
+    ''' </param>
+    ''' 
+    ''' <param name="updName">
+    ''' The name of the file (winapp2.ini or winapp2ool) for which there is a pending update
+    ''' </param>
+    ''' 
+    ''' <param name="oldVer">
+    ''' The old (currently in use) version 
+    ''' </param>
+    ''' 
+    ''' <param name="newVer"> 
+    ''' The updated version pending download
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
+    Private Sub printUpdNotif(cond As Boolean,
+                             updName As String,
+                             oldVer As String,
+                             newVer As String,
+                             menu As MenuSection)
+
+        If Not cond Then Return
+
+        gLog($"Update available for {updName} from {oldVer} to {newVer}")
+
+        menu.AddColoredLine($"A new version of {updName} is available!", ConsoleColor.Green, True) _
+            .AddColoredLine($"Current: v{oldVer}", ConsoleColor.Green, True) _
+            .AddColoredLine($"Available: v{newVer}", ConsoleColor.Green, True).AddBlank().Print()
+
+    End Sub
+
 End Module
