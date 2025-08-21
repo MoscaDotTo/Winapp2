@@ -69,11 +69,11 @@ Module trimmainmenu
 
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
 
-        Dim baseToggles = getToggleOpts()
-        Dim toggleOpts = getMenuNumbering(baseToggles, 2)
+        Dim toggles = getToggleOpts()
+        Dim toggleNums = getMenuNumbering(toggles, 2)
 
-        Dim baseFileOpts = getFileOpts()
-        Dim fileOpts = getMenuNumbering(baseFileOpts, If(isOffline, 4, 5))
+        Dim fileOpts = getFileOpts()
+        Dim fileNums = getMenuNumbering(fileOpts, If(isOffline, 4, 5))
 
         Select Case True
 
@@ -93,12 +93,12 @@ Module trimmainmenu
             ' Downloading (unavailable when offline)
             ' Includes 
             ' Excludes 
-            Case toggleOpts.Contains(input)
+            Case toggleNums.Contains(input)
 
                 Dim i = CType(input, Integer) - 2
 
-                Dim toggleMenuText = baseToggles.Keys(i)
-                Dim toggleName = baseToggles(toggleMenuText)
+                Dim toggleMenuText = toggles.Keys(i)
+                Dim toggleName = toggles(toggleMenuText)
 
                 toggleModuleSetting(toggleMenuText, NameOf(Trim), GetType(trimsettings),
                                     toggleName, NameOf(TrimModuleSettingsChanged))
@@ -109,14 +109,12 @@ Module trimmainmenu
             ' Save Target
             ' Includes (unavailable when not including)
             ' Excludes (unavailable when not excluding)
-            Case fileOpts.Contains(input)
+            Case fileNums.Contains(input)
 
-                Dim i = CType(input, Integer) - 2 - toggleOpts.Count
+                Dim i = CType(input, Integer) - 2 - toggles.Count
 
-                If i > baseFileOpts.Count - 1 Then setHeaderText(invInpStr, True) : Return
-
-                Dim fileName = baseFileOpts.Keys(i)
-                Dim fileObj = baseFileOpts(fileName)
+                Dim fileName = fileOpts.Keys(i)
+                Dim fileObj = fileOpts(fileName)
 
                 changeFileParams(fileObj, TrimModuleSettingsChanged, NameOf(Trim), fileName, NameOf(TrimModuleSettingsChanged))
 
@@ -165,14 +163,14 @@ Module trimmainmenu
     ''' Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
     Private Function getToggleOpts() As Dictionary(Of String, String)
 
-        Dim baseToggles As New Dictionary(Of String, String)
+        Dim toggles As New Dictionary(Of String, String)
 
-        If Not isOffline Then baseToggles.Add("Downloading", NameOf(DownloadFileToTrim))
+        If Not isOffline Then toggles.Add("Downloading", NameOf(DownloadFileToTrim))
 
-        baseToggles.Add("Includes", NameOf(UseTrimIncludes))
-        baseToggles.Add("Excludes", NameOf(UseTrimExcludes))
+        toggles.Add("Includes", NameOf(UseTrimIncludes))
+        toggles.Add("Excludes", NameOf(UseTrimExcludes))
 
-        Return baseToggles
+        Return toggles
 
     End Function
 
@@ -210,16 +208,16 @@ Module trimmainmenu
     ''' Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
     Private Function getFileOpts() As Dictionary(Of String, iniFile)
 
-        Dim baseFileOpts As New Dictionary(Of String, iniFile)
+        Dim selectors As New Dictionary(Of String, iniFile)
 
-        If Not DownloadFileToTrim Then baseFileOpts.Add(NameOf(TrimFile1), TrimFile1)
+        If Not DownloadFileToTrim Then selectors.Add(NameOf(TrimFile1), TrimFile1)
 
-        baseFileOpts.Add(NameOf(TrimFile3), TrimFile3)
+        selectors.Add(NameOf(TrimFile3), TrimFile3)
 
-        If UseTrimIncludes Then baseFileOpts.Add(NameOf(TrimFile2), TrimFile2)
-        If UseTrimExcludes Then baseFileOpts.Add(NameOf(TrimFile4), TrimFile4)
+        If UseTrimIncludes Then selectors.Add(NameOf(TrimFile2), TrimFile2)
+        If UseTrimExcludes Then selectors.Add(NameOf(TrimFile4), TrimFile4)
 
-        Return baseFileOpts
+        Return selectors
 
     End Function
 
