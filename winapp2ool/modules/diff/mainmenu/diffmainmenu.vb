@@ -31,56 +31,38 @@ Module diffmainmenu
     ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
     Public Sub printDiffMainMenu()
 
-        Dim newerFileText = If(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))
-        Dim DiffDesc = "Observes the differences between two ini files"
-        Dim RunOptionText = "Run (default)"
-        Dim RunOptionDesc = "Run the diff tool"
-        Dim OlderFileOptionText = "Select Older/Local File:"
-        Dim FileChooserText = "File Chooser"
-        Dim OlderFileOptionDesc = "Choose a new name or location for your older ini file"
-        Dim NewerFileOptionText = "Select Newer/Remote File:"
-        Dim NewerFileOptionDesc = "Choose a new name or location for your newer ini file"
-        Dim LogSettingsOptionText = "Log Settings"
-        Dim ToggleLogOptionText = "Toggle Log Saving"
-        Dim ToggleLogOptionDesc = "automatic saving of the Diff output"
-        Dim RemoteFileTrimmingOptionText = "Remote File Trimming"
-        Dim RemoteFileTrimmingOptionDesc = "trimming the remote winapp2.ini before diffing"
-        Dim RemoteDiffOptionText = GetNameFromDL(True)
-        Dim RemoteDiffOptionDesc = "diffing against the latest winapp2.ini version on GitHub"
-        Dim LogLocationOptionDesc = "Change where Diff save its log"
-        Dim VerboseModeOptionText = "Verbose Mode"
-        Dim VerboseModeOptionDesc = "printing full entries in the diff output"
-        Dim OlderFileName = $"Older file: {replDir(DiffFile1.Path)}"
-        Dim NewerFileName = $"Newer file: {newerFileText}"
-        Dim LogFileName = $"Log   file: {replDir(DiffFile3.Path)}"
-        Dim ModuleName = "Diff"
-        Dim LogViewerOptionText = "Log Viewer"
-        Dim LogViewerOptionDesc = "View the most recent Diff log"
+        Dim newFileHasName = Not (DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile)
+        Dim newerFileText = If(Not newFileHasName, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path)))
+        Dim olderFileText = If(DownloadDiffFile, "Local", "Older")
+        Dim menuDesc = {"Observes the differences between two ini files"}
 
         Dim noLog = MostRecentDiffLog.Length = 0
         Dim SettingsUnchangedAndNoLog = Not DiffModuleSettingsChanged AndAlso noLog
 
         If isOffline Then DownloadDiffFile = False
 
-        Console.WindowHeight = If(DiffModuleSettingsChanged, 36, 34)
+        Console.WindowHeight = 36
 
-        printMenuTop({DiffDesc})
-        print(1, RunOptionText, RunOptionDesc, enStrCond:=Not (DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile), colorLine:=True)
-        print(0, OlderFileOptionText, leadingBlank:=True)
-        print(1, FileChooserText, OlderFileOptionDesc)
-        print(0, NewerFileOptionText, leadingBlank:=True)
-        print(5, RemoteDiffOptionText, RemoteDiffOptionDesc, cond:=Not isOffline, enStrCond:=DownloadDiffFile, leadingBlank:=True)
-        print(5, RemoteFileTrimmingOptionText, RemoteFileTrimmingOptionDesc, cond:=DownloadDiffFile, enStrCond:=TrimRemoteFile, trailingBlank:=True)
-        print(1, FileChooserText, NewerFileOptionDesc, Not DownloadDiffFile, isOffline, True)
-        print(0, LogSettingsOptionText)
-        print(5, ToggleLogOptionText, ToggleLogOptionDesc, leadingBlank:=True, trailingBlank:=Not SaveDiffLog, enStrCond:=SaveDiffLog)
-        print(1, FileChooserText, LogLocationOptionDesc, SaveDiffLog, trailingBlank:=True)
-        print(5, VerboseModeOptionText, VerboseModeOptionDesc, enStrCond:=ShowFullEntries, trailingBlank:=True)
-        print(0, OlderFileName)
-        print(0, NewerFileName, closeMenu:=Not SaveDiffLog AndAlso SettingsUnchangedAndNoLog)
-        print(0, LogFileName, cond:=SaveDiffLog, closeMenu:=SettingsUnchangedAndNoLog)
-        print(2, ModuleName, cond:=DiffModuleSettingsChanged, closeMenu:=noLog)
-        print(1, LogViewerOptionText, LogViewerOptionDesc, cond:=Not noLog, closeMenu:=True, leadingBlank:=True)
+        Dim menu As New MenuSection
+        menu = MenuSection.CreateCompleteMenu(NameOf(Diff), menuDesc, ConsoleColor.DarkCyan)
+        menu.AddColoredOption("Run (default)", "Perform a Diff operation", GetRedGreen(Not newFileHasName)) _
+            .AddToggle("Toggle diffing against GitHub", "performing the Diff operation against the newest file on GitHub", DownloadDiffFile, Not isOffline) _
+            .AddToggle("Toggle remote file trim", "trimming the remote file before diffing for a more bespoke diff", TrimRemoteFile, DownloadDiffFile) _
+            .AddToggle("Toggle log saving", "saving of the diff output to disk", SaveDiffLog) _
+            .AddToggle("Toggle verbose mode", "printing full entries in the diff output", ShowFullEntries) _
+            .AddBlank() _
+            .AddOption("Choose older/local file", "Select the older version of the file against which to diff") _
+            .AddOption("Choose newer file", "Select the newer version of the file to see what has changed", Not DownloadDiffFile) _
+            .AddOption("Choose save target", "Select where to save the diff output", SaveDiffLog).AddBlank() _
+            .AddBlank(Not MostRecentDiffLog = "") _
+            .AddColoredOption("Log Viewer", "View the most recent Diff log", ConsoleColor.Yellow, Not MostRecentDiffLog = "").AddBlank() _
+            .AddColoredLine($"{olderFileText} file: {replDir(DiffFile1.Path)}", ConsoleColor.DarkYellow) _
+            .AddColoredLine($"Newer file: {newerFileText}", ConsoleColor.Magenta) _
+            .AddColoredLine($"Save target: {replDir(DiffFile3.Path)}", ConsoleColor.Cyan, condition:=SaveDiffLog) _
+            .AddBlank(DiffModuleSettingsChanged) _
+            .AddResetOpt(NameOf(Diff), DiffModuleSettingsChanged)
+
+        menu.Print()
 
     End Sub
 
@@ -93,107 +75,71 @@ Module diffmainmenu
     ''' </param>
     ''' 
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Sub handleDiffMainMenuUserInput(input As String)
+    Public Sub handleDiffUserInput(input As String)
+
+        Dim toggleOpts = getToggleOpts()
+        Dim toggleNums = getMenuNumbering(toggleOpts, 2)
+
+        Dim fileOpts = getFileOpts()
+        Dim fileNums = getMenuNumbering(fileOpts, 2 + toggleNums.Count)
 
         Select Case True
 
-            ' Option Name:                                 Exit
-            ' Option States:
-            ' Default                                      -> 0 (default)
+            ' Exit 
+            ' Notes: Always 0
             Case input = "0"
 
                 exitModule()
 
-            ' Option Name:                                 Run (default)
-            ' Option States:
-            ' Default                                      -> 1 (default)
+            ' Run (default)
+            ' Notes: Always "1", also triggered by no input if run conditions are otherwise satisfied 
             Case input = "1" OrElse input.Length = 0
 
                 If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then ConductDiff()
 
-            ' Option Name:                                 File Chooser (Older File)
-            ' Option States:
-            ' Default                                      -> 2 (default)
-            Case input = "2"
+            ' Toggles
+            '
+            ' Remote Diffing (unavailable when offline)
+            ' Remote file trimming (unavailable when not remote diffing)
+            ' Log saving
+            ' Verbose mode
+            Case toggleNums.Contains(input)
 
-                changeFileParams(DiffFile1, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))
+                Dim i = CType(input, Integer) - 2
 
-            ' Option Name:                                 Online
-            ' Option States:
-            ' Offline                                      -> Unavailable (not displayed)
-            ' Online                                       -> 3 (default) 
-            Case input = "3" AndAlso Not isOffline
+                Dim toggleMenuText = toggleOpts.Keys(i)
+                Dim toggleName = toggleOpts(toggleMenuText)
 
-                If Not denySettingOffline() Then
-                    toggleSettingParam(DownloadDiffFile, "Downloading", DiffModuleSettingsChanged, NameOf(Diff), NameOf(DownloadDiffFile), NameOf(DiffModuleSettingsChanged))
-                End If
-                DiffFile2.Name = GetNameFromDL(DownloadDiffFile)
+                toggleModuleSetting(toggleMenuText, NameOf(Diff), GetType(diffsettings),
+                                    toggleName, NameOf(DiffModuleSettingsChanged))
 
-            ' Option Name:                                 Remote file trimming
-            ' Option States:
-            ' Offline                                      -> Unavailable (not displayed) 
-            ' Online, not downloading                      -> Unavailable (not displayed)
-            ' Online                                       -> 4 (default) 
-            Case input = "4" AndAlso DownloadDiffFile
+            ' File Selectors
+            ' 
+            ' Older/Local file
+            ' Newer file (not available when remote diffing)
+            ' Save target (not available when not saving log)
+            Case fileNums.Contains(input)
 
-                toggleSettingParam(TrimRemoteFile, "Trimming", DiffModuleSettingsChanged, NameOf(Diff), NameOf(TrimRemoteFile), NameOf(DiffModuleSettingsChanged))
+                Dim i = CType(input, Integer) - 2 - toggleOpts.Count
 
-            ' Option Name:                                 File Chooser (Newer File)
-            ' Option States:
-            ' Downloading                                  -> Unavailable (not displayed) 
-            ' Offline (-1)                                 -> 3
-            ' Online, not downloading                      -> 4 (default)
-            Case input = computeMenuNumber(4, {isOffline}, {-1})
+                Dim fileName = fileOpts.Keys(i)
+                Dim fileObj = fileOpts(fileName)
 
-                changeFileParams(DiffFile2, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged))
+                changeFileParams(fileObj, DiffModuleSettingsChanged, NameOf(Diff), fileName, NameOf(DiffModuleSettingsChanged))
 
-            ' Option Name:                                 Toggle Log Saving
-            ' Option States:
-            ' Offline (-1)                                 -> 4 
-            ' Online                                       -> 5 (default)
-            Case input = computeMenuNumber(5, {isOffline}, {-1})
-
-                toggleSettingParam(SaveDiffLog, "Log Saving", DiffModuleSettingsChanged, NameOf(Diff), NameOf(SaveDiffLog), NameOf(DiffModuleSettingsChanged))
-
-            ' Option Name:                                 File Chooser (log)
-            ' Option States:
-            ' Not Saving Log                               -> Unavailable (not displayed) 
-            ' Offline (-1)                                 -> 5 
-            ' Online                                       -> 6 (default)
-            Case SaveDiffLog AndAlso input = computeMenuNumber(6, {isOffline}, {-1})
-
-                changeFileParams(DiffFile3, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile3), NameOf(DiffModuleSettingsChanged))
-
-            ' Option Name:                                 Verbose Mode
-            ' Option States:
-            ' Offline (-1), not saving log                 -> 5
-            ' Online, not saving log                       -> 6 (default)
-            ' Offline (-1), saving log (+1)                -> 6
-            Case input = computeMenuNumber(6, {isOffline, SaveDiffLog}, {-1, 1})
-
-                toggleSettingParam(ShowFullEntries, "Verbose Mode", DiffModuleSettingsChanged, NameOf(Diff), NameOf(ShowFullEntries), NameOf(DiffModuleSettingsChanged))
-
-            ' Option Name:                                 Reset Settings
-            ' Option States:
-            ' DiffModuleSettingsChanged = False            -> Unavailable (not displayed) 
-            ' Offline (-1), not saving log                 -> 6
-            ' Online, Not saving log                       -> 7 (default)
-            ' Offline (-1), saving log (+1)                -> 7
-            ' Online, saving log (+1)                      -> 8 
-
-            Case DiffModuleSettingsChanged AndAlso input = computeMenuNumber(7, {isOffline, SaveDiffLog}, {-1, 1})
-                resetModuleSettings(NameOf(Diff), AddressOf InitDefaultDiffSettings)
-
-            ' Option Name:                                 Log Viewer
-            ' Option States
-            ' Offline (-1), not saving log                 -> 7
-            ' Online, not saving log                       -> 8 (default)
-            ' Offline (-1), saving log (+1)                -> 8
-            ' Online, saving log (+1)                      -> 9
-            Case Not MostRecentDiffLog.Length = 0 AndAlso input = computeMenuNumber(8, {isOffline, SaveDiffLog}, {-1, 1})
+            ' Log Viewer
+            ' Notes: Only available after Diff has been run at least once during the current session 
+            ' Appears between toggles and selectors when available
+            Case MostRecentDiffLog.Length > 0 AndAlso CInt(input) = 2 + toggleOpts.Count + fileOpts.Count
 
                 MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
                 printSlice(MostRecentDiffLog)
+
+            ' Reset settings
+            ' Note: Only available after a setting has been changed, always comes last in the option list
+            Case DiffModuleSettingsChanged AndAlso CInt(input) = fileOpts.Count + toggleOpts.Count + 2 + If(MostRecentDiffLog = "", 0, 1)
+
+                resetModuleSettings(NameOf(Diff), AddressOf InitDefaultDiffSettings)
 
             Case Else
 
@@ -202,5 +148,88 @@ Module diffmainmenu
         End Select
 
     End Sub
+
+    ''' <summary>
+    ''' Determines the current set of toggles displayed on the menu and returns a Dictionary 
+    ''' of those options and their respective toggle names <br />
+    ''' <br />
+    ''' The set of possible toggles includes:
+    ''' <list type="bullet">
+    '''     
+    '''     <item>
+    '''     Remote diffinng (unavailable when offline)
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Remote file trimming (unavailable when not downloading)
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Excludes
+    '''     </item>
+    '''     
+    ''' </list>
+    '''  
+    ''' </summary>
+    ''' 
+    ''' <returns>
+    ''' The set of available toggles for the Trim module, with their names on the 
+    ''' menu as keys and the respective property names as values
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
+    Private Function getToggleOpts() As Dictionary(Of String, String)
+
+        Dim baseToggles As New Dictionary(Of String, String)
+
+        If Not isOffline Then baseToggles.Add("Remote Diffing", NameOf(DownloadDiffFile))
+        If DownloadDiffFile Then baseToggles.Add("Remote file trimming", NameOf(TrimRemoteFile))
+
+        baseToggles.Add("Log saving", NameOf(SaveDiffLog))
+        baseToggles.Add("Verbose mode", NameOf(ShowFullEntries))
+
+        Return baseToggles
+
+    End Function
+
+    ''' <summary>
+    ''' Determines the current set of file selectors displayed on the menu and returns a Dictionary 
+    ''' of those options and their respective files <br />
+    ''' <br />
+    ''' The set of possible files includes:
+    ''' <list type="bullet">
+    '''     
+    '''     <item>
+    '''     Older/Local file
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Newer file (not available when downloading)
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Save target (not available when not saving log)
+    '''     </item>
+    '''     
+    ''' </list>
+    ''' 
+    ''' </summary>
+    ''' 
+    ''' <returns> 
+    ''' The set of <c> iniFile </c> properties currently displayed on the menu
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2028-08-12 | Code last updated: 2025-08-12
+    Private Function getFileOpts() As Dictionary(Of String, iniFile)
+
+        Dim baseFileOpts As New Dictionary(Of String, iniFile)
+
+        baseFileOpts.Add(NameOf(DiffFile1), DiffFile1)
+        If Not DownloadDiffFile Then baseFileOpts.Add(NameOf(DiffFile2), DiffFile2)
+        If SaveDiffLog Then baseFileOpts.Add(NameOf(DiffFile3), DiffFile3)
+
+        Return baseFileOpts
+
+    End Function
 
 End Module

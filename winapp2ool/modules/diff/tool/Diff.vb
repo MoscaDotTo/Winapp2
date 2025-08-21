@@ -144,7 +144,7 @@ Module Diff
     ''' </summary>
     ''' 
     ''' Docs last updated: 2022-06-08 | Code last updated: 2022-07-14
-    Public MostRecentDiffLog As String = ""
+    Public Property MostRecentDiffLog As String = ""
 
     ''' <summary>
     ''' A list of Regex characters that need to be escaped when using Regex.Match
@@ -409,7 +409,7 @@ Module Diff
 
         crl()
 
-        MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "")
+        MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
         DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
         setHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
 
@@ -1454,9 +1454,9 @@ Module Diff
     ''' Docs last updated: 2023-06-13 | Code last updated: 2023-06-13
     Private Sub SetMergeCandidate(count As Integer,
                                   newSectionName As String,
-                                  ByRef highestCount As Integer,
-                                  ByRef newNameCandidate As String,
-                                  ByRef mergeTracker As Boolean)
+                            ByRef highestCount As Integer,
+                            ByRef newNameCandidate As String,
+                            ByRef mergeTracker As Boolean)
 
         If count <= highestCount Then Return
 
@@ -1525,7 +1525,7 @@ Module Diff
             If changeWasRecorded Then Return True
 
             ' Just skip this next check on the browser sections, they all share the same detections 
-            If oldWa2Section.LangSecRef.KeyCount > 0 AndAlso BrowserSecRefs.Contains(oldWa2Section.LangSecRef.Keys(0).Value) Then Continue For
+            ' If oldWa2Section.LangSecRef.KeyCount > 0 AndAlso BrowserSecRefs.Contains(oldWa2Section.LangSecRef.Keys(0).Value) Then Continue For
 
             Dim detectMatches = 0
             Dim detectFileMatches = 0
@@ -1539,6 +1539,7 @@ Module Diff
         If Not entryWasRenamedOrMerged Then Return False
 
         trackMerger(oldSectionVersion, DiffFile2.Sections(newMergedOrRenamedName))
+
         Return True
 
     End Function
