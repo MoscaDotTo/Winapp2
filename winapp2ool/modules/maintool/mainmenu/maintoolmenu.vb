@@ -39,7 +39,7 @@ Module maintoolmenu
 
         Dim headerColor = If(UpdatesAvailable, ConsoleColor.Green, ConsoleColor.Cyan)
 
-        Dim menu = MenuSection.CreateCompleteMenu(MenuHeaderText, menuDesc, headerColor, True)
+        Dim menu = MenuSection.CreateCompleteMenu($"{NameOf(Winapp2ool)} v{currentVersion}", menuDesc, headerColor, True)
 
         ' User warnings for limited feature availability
         If isOffline OrElse DotNetFrameworkOutOfDate OrElse cantDownloadExecutable Then
@@ -55,7 +55,6 @@ Module maintoolmenu
         getUpdateNotification(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver, menu)
         getUpdateNotification(updateIsAvail, "Winapp2ool", currentVersion, latestVersion, menu)
 
-        ' Core tools section
         menu.AddBlank() _
             .AddOption("WinappDebug", "Check For And correct errors In winapp2.ini") _
             .AddOption("Trim", "Debloat winapp2.ini For your system") _
@@ -137,13 +136,13 @@ Module maintoolmenu
 
                 ' Downloader requires an internet connection to launch 
                 Dim isDownloader = modules.Keys(i) = NameOf(Downloader)
-                Dim canLaunch = isDownloader AndAlso Not denySettingOffline() OrElse Not isDownloader
+                Dim canLaunch = (isDownloader AndAlso Not denySettingOffline()) OrElse Not isDownloader
 
                 If canLaunch Then initModule(modules.Keys(i), modules.Values(i).Key, modules.Values(i).Value)
 
             ' Go online
             ' Notes: Only available if offline 
-            ' Always appears after the standars suite of options 
+            ' Always appears after the standard suite of options 
             Case input = "10" AndAlso isOffline
 
                 chkOfflineMode()
@@ -249,7 +248,7 @@ Module maintoolmenu
 
         menu.AddColoredLine($"A new version of {updName} is available!", ConsoleColor.Green, True) _
             .AddColoredLine($"Current: v{oldVer}", ConsoleColor.Green, True) _
-            .AddColoredLine($"Available: v{newVer}", ConsoleColor.Green, True).AddBlank().Print()
+            .AddColoredLine($"Available: v{newVer}", ConsoleColor.Green, True).AddBlank()
 
     End Sub
 
