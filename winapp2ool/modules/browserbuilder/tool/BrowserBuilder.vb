@@ -234,8 +234,8 @@ Public Module BrowserBuilder
     ''' 
     ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
     Private Sub buildScaffolds(rulesetFile As iniFile,
-                              isGecko As Boolean,
-                        ByRef outputFile As iniFile)
+                               isGecko As Boolean,
+                         ByRef outputFile As iniFile)
 
         Dim browsers As New List(Of BrowserInfo)
         Dim scaffoldSections As New List(Of iniSection)
@@ -426,8 +426,8 @@ Public Module BrowserBuilder
     ''' Docs last updated: 2025-07-31 | Code last updated: 2025-07-31
     Private Function processOperaGX(browserName As String,
                                     fileKeyBase As String,
-                                    ByRef fileKeyNum As Integer,
-                                    ByRef newSection As iniSection,
+                              ByRef fileKeyNum As Integer,
+                              ByRef newSection As iniSection,
                                     userDataPath As String) As Boolean
 
         If Not browserName.Equals("Opera GX") Then Return False
