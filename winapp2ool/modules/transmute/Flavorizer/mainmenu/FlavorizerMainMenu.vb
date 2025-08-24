@@ -1,5 +1,4 @@
-﻿Option Strict On
-'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -16,11 +15,13 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
+Option Strict On
+
 ''' <summary>
 ''' Displays the Flavorizer main menu to the user and handles their input accordingly
 ''' </summary>
 ''' 
-''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
+''' Docs last updated: 2025-08-01
 Public Module FlavorizerMainMenu
 
     ''' <summary>
@@ -64,8 +65,9 @@ Public Module FlavorizerMainMenu
             .AddColoredLine($"Key replacement: {getFileMenuName(FlavorizerFile7)}", getFileMenuColor(FlavorizerFile7)) _
             .AddColoredLine($"Additions: {getFileMenuName(FlavorizerFile8)}", getFileMenuColor(FlavorizerFile8)) _
             .AddBlank(FlavorizerModuleSettingsChanged) _
-            .AddResetOpt(NameOf(Flavorizer), FlavorizerModuleSettingsChanged) _
-            .Print(False)
+            .AddResetOpt(NameOf(Flavorizer), FlavorizerModuleSettingsChanged)
+
+        menu.Print()
 
     End Sub
 
@@ -77,10 +79,135 @@ Public Module FlavorizerMainMenu
     ''' The user's input
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
+    ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-23
     Public Sub handleFlavorizerMainMenuUserInput(input As String)
 
-        Dim flavorFiles As New Dictionary(Of String, iniFile) From {
+        Dim fileOpts = getFileOpts()
+        Dim fileNums = getMenuNumbering(fileOpts, 4)
+
+        Dim resetNum = CType(4 + fileOpts.Count + 1, String)
+
+        Select Case True
+
+            ' Exit 
+            ' Notes: Always "0"
+            Case input = "0"
+
+                exitModule()
+
+            ' Run (default)
+            ' Notes: Always "1", also triggered by no input if run conditions are otherwise satisfied 
+            Case input = "1" OrElse input.Length = 0
+
+                If Not denyActionWithHeader(FlavorizerFile1.Name.Length = 0, "You must select a base file") Then initFlavorizer()
+
+            ' Detect Flavor Files
+            ' Notes: Always "2"
+            Case input = "2"
+
+                DetectFlavorFiles(FlavorizerFile9.Dir)
+
+            ' Toggle winapp2.ini formatting 
+            ' Notes: Always "3"
+            Case input = "3"
+
+                toggleSettingParam(FlavorizeAsWinapp, "Winapp2.ini formatting", FlavorizerModuleSettingsChanged,
+                                   NameOf(Flavorizer), NameOf(FlavorizeAsWinapp), NameOf(FlavorizerModuleSettingsChanged))
+
+            ' File selectors
+            ' Base file 
+            ' Save target
+            ' Target directory
+            ' Section removals
+            ' Key name removals
+            ' Key value removals
+            ' Section replacements
+            ' Key replacements
+            ' Additions
+            Case fileNums.Contains(input)
+
+                Dim i = CType(input, Integer) - 4
+
+                Dim fileName = fileOpts.Keys(i)
+                Dim fileObj = fileOpts(fileName)
+
+                changeFileParams(fileObj, FlavorizerModuleSettingsChanged, NameOf(Flavorize),
+                                 fileName, NameOf(FlavorizerModuleSettingsChanged))
+
+
+                ' This file is used only to hold the Target directory and never holds a name 
+                FlavorizerFile9.Name = ""
+                updateSettings(NameOf(Flavorizer), $"{NameOf(FlavorizerFile9)}_Name", "")
+
+            ' Reset settings
+            ' Notes: Only available after a setting has been changed, always comes last in the option list
+            Case FlavorizerModuleSettingsChanged AndAlso input = resetNum
+
+                resetModuleSettings(NameOf(Flavorizer), AddressOf initDefaultFlavorizerSettings)
+
+            Case Else
+
+                setHeaderText(invInpStr, True)
+
+        End Select
+
+    End Sub
+
+    ''' <summary>
+    ''' Determines the current set of file selectors displayed on the menu and returns a Dictionary 
+    ''' of those options and their respective files <br />
+    ''' <br />
+    ''' The set of possible files includes:
+    ''' <list type="bullet">
+    '''     
+    ''' <item>
+    ''' Base file
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' Save target
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' Target directory
+    ''' </item>
+    '''     
+    ''' <item>
+    ''' Section removals
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' Key name removals
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' Key value removals
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' Section replacements
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' Key replacements
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' Additions
+    ''' </item>
+    ''' 
+    ''' </list>
+    ''' 
+    ''' </summary>
+    ''' 
+    ''' <returns> 
+    ''' The set of <c> iniFile </c> properties currently displayed on the menu
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+    Private Function getFileOpts() As Dictionary(Of String, iniFile)
+
+        Dim selectors As New Dictionary(Of String, iniFile) From {
             {NameOf(FlavorizerFile1), FlavorizerFile1},
             {NameOf(FlavorizerFile2), FlavorizerFile2},
             {NameOf(FlavorizerFile9), FlavorizerFile9},
@@ -92,79 +219,8 @@ Public Module FlavorizerMainMenu
             {NameOf(FlavorizerFile8), FlavorizerFile8}
         }
 
-        Dim fileOpts = {"4", "5", "6", "7", "8", "9", "10", "11", "12"}
+        Return selectors
 
-        Select Case True
-
-            ' Option Name:                                 Exit 
-            ' Option States:
-            ' Default                                      -> 0 (Default)
-            Case input = "0"
-
-                exitModule()
-
-            ' Option Name:                                 Run 
-            ' Option States:
-            ' Default                                      -> 1 (Default)
-            Case input = "1" OrElse input.Length = 0
-
-                If Not denyActionWithHeader(FlavorizerFile1.Name.Length = 0, "You must select a base file") Then initFlavorizer()
-
-
-            ' Option Name:                                 Detect Flavor Files
-            ' Option States:
-            ' Default                                      -> 11 (Default)
-            Case input = "2"
-
-                DetectFlavorFiles(FlavorizerFile9.Dir)
-
-            ' Option Name:                                 Toggle winapp2.ini formatting 
-            ' Option States:
-            ' Default                                      -> 10 (Default)
-            Case input = "3"
-
-                toggleSettingParam(FlavorizeAsWinapp, "Winapp2.ini formatting", FlavorizerModuleSettingsChanged,
-                                   NameOf(Flavorizer), NameOf(FlavorizeAsWinapp), NameOf(FlavorizerModuleSettingsChanged))
-
-            ' Option Name:                                 File Choosers
-            ' Option States:
-            ' Change base file                             -> 4 
-            ' Change save target                           -> 5
-            ' Change target directory                      -> 6
-            ' Section removal                              -> 7
-            ' Key name removal                             -> 8
-            ' Key value removal                            -> 9
-            ' Section replacement                          -> 10
-            ' Key replacement                              -> 11
-            ' Additions                                    -> 12
-            Case fileOpts.Contains(input)
-
-                Dim i = CType(input, Integer) - 4
-                changeFileParams(flavorFiles(flavorFiles.Keys(i)), FlavorizerModuleSettingsChanged,
-                                 NameOf(Flavorizer), flavorFiles.Keys(i), NameOf(FlavorizerModuleSettingsChanged))
-
-                ' This file is used only to hold the Target directory and never holds a name 
-                If input = "6" Then
-
-                    FlavorizerFile9.Name = ""
-                    updateSettings(NameOf(Flavorizer), $"{NameOf(FlavorizerFile9)}_Name", "")
-
-                End If
-
-            ' Option Name:                                 Reset Flavorizer Settings
-            ' Option States:
-            ' FlavorizerModuleSettingsChanged = False     -> Unavailable (not displayed)
-            ' FlavorizerModuleSettingsChanged = True      -> 13 (Default)
-            Case input = "13" AndAlso FlavorizerModuleSettingsChanged
-
-                resetModuleSettings(NameOf(Flavorizer), AddressOf initDefaultFlavorizerSettings)
-
-            Case Else
-
-                setHeaderText(invInpStr, True)
-
-        End Select
-
-    End Sub
+    End Function
 
 End Module
