@@ -220,7 +220,7 @@ Module diffmainmenu
     ''' The set of <c> iniFile </c> properties currently displayed on the menu
     ''' </returns>
     ''' 
-    ''' Docs last updated: 2028-08-12 | Code last updated: 2025-08-12
+    ''' Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
     Private Function getFileOpts() As Dictionary(Of String, iniFile)
 
         Dim selectors As New Dictionary(Of String, iniFile)
