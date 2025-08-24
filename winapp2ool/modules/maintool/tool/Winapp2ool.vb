@@ -141,18 +141,19 @@ Module Winapp2ool
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Determines the color of a file selector based on whether or not a file has been selected
     ''' </summary>
     ''' 
-    ''' <param name="flavorFile">
-    ''' 
+    ''' <param name="menuFile">
+    ''' An <c> iniFile </c> with influence on a menu option's coloring
     ''' </param>
     ''' 
     ''' <returns>
-    ''' 
+    ''' <c> Green </c> if <c> <paramref name="menuFile"/> </c> has a name, <br />
+    ''' <c> Red </c> otherwise
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
+    '''
+    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-06
     Public Function getFileMenuColor(menuFile As iniFile) As ConsoleColor
 
         Return If(menuFile.Name.Length > 0, ConsoleColor.Green, ConsoleColor.Red)
@@ -160,15 +161,17 @@ Module Winapp2ool
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Returns the display information for a file selector in a menu
     ''' </summary>
     ''' 
     ''' <param name="menuFile">
-    ''' 
+    ''' An <c> iniFile </c> whose path will be displayed if it has valid <c> Name </c>
     ''' </param>
     ''' 
     ''' <returns>
-    ''' 
+    ''' A print friendly version of the file's path if it has a valid <c> Name </c>, with the 
+    ''' current directory replaced with ..\ <br />
+    ''' "Not specified" otherwise
     ''' </returns>
     ''' 
     ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
