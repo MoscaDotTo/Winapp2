@@ -103,8 +103,8 @@ Module SettingsManager
                                         settingChangedName As String)
 
         gLog($"Toggling {paramText} from {setting} to {Not setting}", indent:=True)
-        'setHeaderText($"{paramText} {enStr(setting)}d", True, True, If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
-        setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
+        setHeaderText($"{paramText} {enStr(setting)}d", True, True, If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
+        'setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
         setting = Not setting
         mSettingsChanged = True
 
@@ -113,6 +113,36 @@ Module SettingsManager
 
         Dim isSaveReadSetting = settingName = NameOf(saveSettingsToDisk) OrElse settingName = NameOf(readSettingsFromDisk)
         settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso isSaveReadSetting)
+
+    End Sub
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="paramText"></param>
+    ''' <param name="callingModule"></param>
+    ''' <param name="settingsModule"></param>
+    ''' <param name="settingName"></param>
+    ''' <param name="settingChangedName"></param>
+    Public Sub toggleModuleSetting(paramText As String,
+                                   callingModule As String,
+                                   settingsModule As Type,
+                                   settingName As String,
+                                   settingChangedName As String)
+
+        Dim setting = CBool(settingsModule.GetProperty(settingName).GetValue(Nothing, Nothing))
+
+        gLog($"Toggling {paramText} from {setting} to {Not setting}", indent:=True)
+        setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=GetRedGreen(setting))
+
+        setting = Not setting
+
+        settingsModule.GetProperty(settingName).SetValue(settingName, setting)
+        settingsModule.GetProperty(settingChangedName).SetValue(settingChangedName, True)
+        updateSettings(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
+        updateSettings(callingModule, settingChangedName, True.ToString)
+
+        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso saveSettingsToDisk)
 
     End Sub
 
@@ -205,5 +235,20 @@ Module SettingsManager
         updateSettings(callingModule, mSettingsChangedText, tsInvariant(mSettingsChanged))
 
     End Sub
+
+    Public Function getMenuNumbering(Of T)(optionsDict As Dictionary(Of String, T),
+                                     baseNum As Integer) As List(Of String)
+
+        Dim optNums = New List(Of String)
+        For i = 0 To optionsDict.Count - 1
+
+            Dim curNum = baseNum + i
+            optNums.Add(curNum.ToString)
+
+        Next
+
+        Return optNums
+
+    End Function
 
 End Module
