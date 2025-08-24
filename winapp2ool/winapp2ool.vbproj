@@ -132,6 +132,9 @@
     <Compile Include="modules\ccdebug\tool\CCiniDebug.vb" />
     <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
     <Compile Include="modules\ccdebug\settingshandler\ccdebugsettinghandler.vb" />
+    <Compile Include="modules\combine\mainmenu\combinemainmenu.vb" />
+    <Compile Include="modules\combine\settingshandler\combinesettings.vb" />
+    <Compile Include="modules\combine\settingshandler\combinesettingshandler.vb" />
     <Compile Include="modules\combine\tool\Combine.vb" />
     <Compile Include="modules\diff\settingshandler\diffsettings.vb" />
     <Compile Include="modules\diff\tool\Diff.vb" />
@@ -252,11 +255,6 @@
   <ItemGroup>
     <Folder Include="handlers\ini\comments\" />
     <Folder Include="helpers\filesystem\" />
-    <Folder Include="modules\assemble\mainmenu\" />
-    <Folder Include="modules\assemble\settingshandler\" />
-    <Folder Include="modules\assemble\tool\" />
-    <Folder Include="modules\combine\mainmenu\" />
-    <Folder Include="modules\combine\settingshandler\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
