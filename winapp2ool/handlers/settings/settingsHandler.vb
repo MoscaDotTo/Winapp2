@@ -92,7 +92,9 @@ Public Module settingsHandler
     ''' </param>
     ''' 
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
-    Public Sub updateSettings(targetModule As String, settingName As String, newVal As String)
+    Public Sub updateSettings(targetModule As String,
+                              settingName As String,
+                              newVal As String)
 
         settingsDict(targetModule)(settingName) = newVal
 
@@ -189,7 +191,8 @@ Public Module settingsHandler
         {NameOf(CCiniDebug), New KeyValuePair(Of Action, Action)(AddressOf createCCDBSettingsSection, AddressOf getSerializedDebugSettings)},
         {NameOf(Downloader), New KeyValuePair(Of Action, Action)(AddressOf createDownloadSettingsSection, AddressOf getSerializedDownloaderSettings)},
         {NameOf(BrowserBuilder), New KeyValuePair(Of Action, Action)(AddressOf createBrowserBuilderSettingsSection, AddressOf getSerializedBrowserBuilderSettings)},
-        {NameOf(Flavorizer), New KeyValuePair(Of Action, Action)(AddressOf createFlavorizerSettingsSection, AddressOf getSerializedFlavorizerSettings)}
+        {NameOf(Flavorizer), New KeyValuePair(Of Action, Action)(AddressOf createFlavorizerSettingsSection, AddressOf getSerializedFlavorizerSettings)},
+        {NameOf(Combine), New KeyValuePair(Of Action, Action)(AddressOf createCombineSettingsSection, AddressOf getSerializedCombineSettings)}
     }
 
         Dim readSettingsFromDisk = DetermineReadSettingsBehavior()
