@@ -19,7 +19,8 @@ Option Strict On
 
 ''' <summary>
 ''' Holds the settings for the CCiniDebug module, which is responsible for debugging ccleaner.ini files.
-''' This module contains properties that define the input and output files, as well as flags to prune stale entries, sort the file, and save the debugged file.
+''' This module contains properties that define the input and output files, as well as flags to 
+''' prune stale entries, sort the file, and save the debugged file.
 ''' It also tracks whether the module settings have been modified from their defaults.
 ''' </summary>
 ''' 

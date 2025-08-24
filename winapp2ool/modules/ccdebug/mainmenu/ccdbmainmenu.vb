@@ -33,8 +33,7 @@ Module ccdbmainmenu
 
         Dim menuDescriptionLines As String() = {"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"}
 
-        Dim menu As New MenuSection
-        menu = MenuSection.CreateCompleteMenu(NameOf(CCiniDebug), menuDescriptionLines, ConsoleColor.Red)
+        Dim menu = MenuSection.CreateCompleteMenu(NameOf(CCiniDebug), menuDescriptionLines, ConsoleColor.Red)
 
         menu.AddColoredOption("Run (default)", "Debug ccleaner.ini", GetRedGreen(Not (PruneStaleEntries OrElse SaveDebuggedFile OrElse SortFileForOutput))).AddBlank _
         .AddToggle("Toggle pruning", "removal of orphaned winapp2.ini settings", isEnabled:=PruneStaleEntries) _
