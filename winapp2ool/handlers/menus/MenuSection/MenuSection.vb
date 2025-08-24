@@ -69,11 +69,20 @@ Public Class MenuSection
     End Sub
 
     ''' <summary>
-    ''' Indicates if this MenuSection represents a complete menu with header
+    ''' Indicates whether or not this MenuSection represents a complete menu with header
     ''' </summary>
     ''' 
     ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Private _isCompleteMenu As Boolean = False
+
+    ''' <summary>
+    ''' Indicates whether or not this MenuSection is the root menu of an application 
+    ''' (as opposed to a submenu) <br />
+    ''' This affects certain printing behaviors, such as the phrasing of the exit option in the menu
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
+    Private _isRootMenu As Boolean = False
 
     ''' <summary>
     ''' The main header text for a complete menu
@@ -129,38 +138,49 @@ Public Class MenuSection
     ''' </summary>
     ''' 
     ''' <param name="menuHeader">
-    ''' 
+    ''' The text to appear in the header of the menu. The header 
+    ''' visually approximates a window title bar within the MenuMaker system
     ''' </param>
     ''' 
     ''' <param name="descriptionLines">
+    ''' A set of text lines that describe the menu's purpose, printed 
+    ''' under the header but before any menu items
     ''' 
     ''' </param>
     ''' 
     ''' <param name="headerColor">
-    ''' 
+    ''' The color with which the header of the complete menu should be printed to the user 
+    ''' <br />
+    ''' Optional, Default: <c> Nothing </c> (prints in default console color)
     ''' </param>
     ''' 
-    ''' <param name="includeExit">
-    ''' 
+    ''' <param name="isRootMenu">
+    ''' Indicates whether or not this MenuSection is the root menu of an application 
+    ''' (as opposed to a submenu) <br />
+    ''' This affects certain printing behaviors, such as the phrasing of the exit option in the menu <br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     ''' 
-    ''' <returns></returns>
+    ''' <returns>
+    ''' A MenuSection configured as a complete menu with the provided header and descriptions, 
+    ''' ready to be populated with options, toggles, and other menu items
+    ''' </returns>
     ''' 
     ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Public Shared Function CreateCompleteMenu(menuHeader As String,
-                                             descriptionLines As String(),
-                                             Optional headerColor As ConsoleColor? = Nothing,
-                                             Optional includeExit As Boolean = True) As MenuSection
-
-        Dim section As New MenuSection()
-
-        section._isCompleteMenu = True
+                                              descriptionLines As String(),
+                                              Optional headerColor As ConsoleColor? = Nothing,
+                                              Optional isRootMenu As Boolean = False) As MenuSection
 
         ' MenuMaker stores a replacement header text as a form of menu output for the user 
         ' If this exists, we should show it instead of the module name which is the typical
         ' menu header 
-        section._menuHeader = If(MenuHeaderText = "", menuHeader, MenuHeaderText)
-        section._menuHeaderColor = If(MenuHeaderText = "", headerColor, MenuHeaderTextColor)
+        Dim section As New MenuSection With {
+            ._isCompleteMenu = True,
+            ._isRootMenu = isRootMenu,
+            ._menuHeader = If(MenuHeaderText = "", menuHeader, MenuHeaderText),
+            ._menuHeaderColor = If(MenuHeaderText = "", headerColor, MenuHeaderTextColor)
+        }
         MenuHeaderText = ""
 
         section._descriptionLines.AddRange(descriptionLines)
@@ -283,29 +303,31 @@ Public Class MenuSection
                                   Optional condition As Boolean = True) As MenuSection
 
         _items.Add(Sub() MenuMaker.PrintColored(text, color, centered, condition))
+
         Return Me
 
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Adds a Reset Module Settings option to the current menu 
     ''' </summary>
     ''' 
     ''' <param name="moduleName">
-    ''' 
+    ''' The name of the module whose reset settings option will be created
     ''' </param>
     ''' 
     ''' <param name="condition">
-    ''' 
+    ''' Indicates whether or not the option should be printed (i.e. whether settings have been changed)
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-06
     Public Function AddResetOpt(moduleName As String,
                                 condition As Boolean) As MenuSection
 
         If Not condition Then Return Me
 
         _items.Add(Sub() MenuMaker.PrintOption("Reset Settings", $"Restore {moduleName}'s settings to their default state", condition))
+
         Return Me
 
     End Function
@@ -315,34 +337,37 @@ Public Class MenuSection
     ''' </summary>
     ''' 
     ''' <param name="name">
-    ''' The name of the option
+    ''' The name of the menu option (left text)
     ''' </param>
     ''' 
     ''' <param name="description">
-    ''' The description of the option
+    ''' A description of the menu option's function (right text)
     ''' </param>
     ''' 
     ''' <param name="color">
-    ''' The color to display the option in
+    ''' The color with which the option should be printed to the user
     ''' </param>
     ''' 
     ''' <param name="condition">
     ''' Whether the option should be printed
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-06
     Public Function AddColoredOption(name As String,
                                    description As String,
                                    color As ConsoleColor,
                                    Optional condition As Boolean = True) As MenuSection
 
-        _items.Add(Sub() MenuItem(name, description).WithColor(color).Print())
+        If Not condition Then Return Me
+
+        _items.Add(Sub() MenuItem(name, description, condition).WithColor(color).Print())
+
         Return Me
 
     End Function
 
     ''' <summary>
-    ''' Adds a warning line (yellow text with /!\ markers) to the menu section
+    ''' Adds a warning line (yellow text with /!\ markers /!\) to the menu section
     ''' </summary>
     ''' 
     ''' <param name="text">
@@ -355,9 +380,77 @@ Public Class MenuSection
     ''' 
     ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Function AddWarning(text As String,
-                               Optional condition As Boolean = True) As MenuSection
+                      Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
 
         _items.Add(Sub() MenuMaker.PrintWarning(text, condition))
+
+        Return Me
+
+    End Function
+
+    Public Function AddBoxWithText(text As String,
+                          Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
+
+        Me.AddTopBorder()
+        Me.AddLine(text, centered:=True, condition)
+        Me.AddBottomBorder()
+
+        Return Me
+
+    End Function
+
+    Public Function AddTopBorder(Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
+
+        _items.Add(Sub() MenuMaker.BeginMenu())
+
+        Return Me
+
+    End Function
+
+    Public Function AddBottomBorder(Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
+
+        _items.Add(Sub() MenuMaker.EndMenu())
+
+        Return Me
+
+    End Function
+
+    Public Function AddDivider(Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
+
+        _items.Add(Sub() MenuMaker.PrintDivider())
+
+        Return Me
+
+    End Function
+
+    Public Function AddNewLine(Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
+
+        _items.Add(Sub() MenuMaker.PrintNewLine(condition))
+
+        Return Me
+
+    End Function
+
+    Public Function AddAnyKeyPrompt(Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
+
+        Me.AddNewLine()
+        _items.Add(Sub() MenuMaker.cwl(anyKeyStr))
+        Me.AddNewLine()
+
         Return Me
 
     End Function
@@ -444,11 +537,13 @@ Public Class MenuSection
 
         Next
 
+        Dim exitText = If(_isRootMenu, "Exit the application", "Return to the previous menu")
+
         PrintBlank()
         PrintLine("Menu: Enter a number to select", centered:=True)
         PrintBlank()
         resetMenuNumbering()
-        PrintOption("Exit", "Return to the menu")
+        PrintOption("Exit", exitText)
 
         For Each item In _items
 

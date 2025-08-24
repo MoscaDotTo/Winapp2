@@ -16,6 +16,7 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
+Imports System.Text
 
 ''' <summary> 
 ''' MenuMaker is a driver module for powering dynamic finite 
@@ -23,53 +24,6 @@ Option Strict On
 ''' </summary>
 ''' Docs last updated: 2023-07-19
 Module MenuMaker
-
-    ''' <summary>
-    ''' Defines the types of menu content that can be printed
-    ''' </summary>
-    Public Enum PrintType
-
-        ''' <summary>
-        ''' 
-        ''' </summary>
-        Line = 0
-
-        ''' <summary>
-        ''' 
-        ''' </summary>
-        Opt = 1
-
-        ''' <summary>
-        ''' 
-        ''' </summary>
-        ResetOpt = 2
-
-        ''' <summary>
-        ''' 
-        ''' </summary>
-        CenteredBox = 3
-
-        ''' <summary>
-        ''' 
-        ''' </summary>
-        Header = 4
-
-        ''' <summary>
-        ''' 
-        ''' </summary>
-        ToggleOpt = 5
-
-        ''' <summary>
-        ''' 
-        ''' </summary>
-        HeaderWithConjoin = 6
-
-        ''' <summary>
-        ''' 
-        ''' </summary>
-        WarningLine = 7
-
-    End Enum
 
     ''' <summary>
     ''' Defines the types of menu frames available
@@ -273,7 +227,7 @@ Module MenuMaker
     Public Sub initModule(name As String,
                           showMenu As Action,
                           handleInput As Action(Of String),
-                          Optional itmLen As Integer = 35)
+                 Optional itmLen As Integer = 35)
 
         gLog("", ascend:=True)
         gLog($"Loading module {name}")
@@ -566,6 +520,20 @@ Module MenuMaker
         If colorLine Then Console.ResetColor()
 
         cwl(cond:=trailr)
+
+    End Sub
+
+    ''' <summary>
+    ''' Prints a new line to the console
+    ''' </summary>
+    ''' 
+    ''' <param name="condition">
+    ''' Indicates whether the new line should be printed
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    Public Sub PrintNewLine(Optional condition As Boolean = True)
+
+        If condition Then Console.WriteLine()
 
     End Sub
 
@@ -1100,17 +1068,21 @@ Module MenuMaker
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private Sub padToEnd(ByRef out As String,
-                         targetLen As Integer,
-                         endline As String,
-                         Optional padStr As String = " ")
+                               targetLen As Integer,
+                               endline As String,
+                      Optional padStr As String = " ")
 
-        While out.Length < targetLen
+        Dim sb As New StringBuilder(out)
 
-            out += padStr
+        While sb.Length < targetLen
+
+            sb.Append(padStr)
 
         End While
 
-        If targetLen = GetConsoleWidth() - 2 Then out += endline
+        If targetLen = GetConsoleWidth() - 2 Then sb.Append(endline)
+
+        out = sb.ToString()
 
     End Sub
 
@@ -1175,45 +1147,65 @@ Module MenuMaker
     ''' <summary>
     ''' Prints a simple menu line with text
     ''' </summary>
-    Public Sub PrintLine(text As String, Optional centered As Boolean = False, Optional condition As Boolean = True)
+    Public Sub PrintLine(text As String,
+                Optional centered As Boolean = False,
+                Optional condition As Boolean = True)
+
         print(0, text, isCentered:=centered, cond:=condition)
+
     End Sub
 
     ''' <summary>
     ''' Prints a blank menu line
     ''' </summary>
     Public Sub PrintBlank(Optional condition As Boolean = True)
+
         print(0, Nothing, cond:=condition)
+
     End Sub
 
     ''' <summary>
     ''' Prints a numbered menu option
     ''' </summary>
-    Public Sub PrintOption(name As String, description As String, Optional condition As Boolean = True)
+    Public Sub PrintOption(name As String,
+                           description As String,
+                  Optional condition As Boolean = True)
+
         print(1, name, description, cond:=condition)
+
     End Sub
 
     ''' <summary>
     ''' Prints a toggle option (Enable/Disable)
     ''' </summary>
-    Public Sub PrintToggle(name As String, description As String, isEnabled As Boolean, Optional condition As Boolean = True)
+    Public Sub PrintToggle(name As String,
+                           description As String,
+                           isEnabled As Boolean,
+                  Optional condition As Boolean = True)
+
         print(5, name, description, enStrCond:=isEnabled, cond:=condition)
+
     End Sub
 
     ''' <summary>
     ''' Prints a colored warning line
     ''' </summary>
-    Public Sub PrintWarning(text As String, Optional condition As Boolean = True)
+    Public Sub PrintWarning(text As String,
+                   Optional condition As Boolean = True)
+
         print(7, text, cond:=condition)
+
     End Sub
-
-
 
     ''' <summary>
     ''' Prints colored text
     ''' </summary>
-    Public Sub PrintColored(text As String, color As ConsoleColor, Optional centered As Boolean = False, Optional condition As Boolean = True)
+    Public Sub PrintColored(text As String, color As ConsoleColor,
+                   Optional centered As Boolean = False,
+                   Optional condition As Boolean = True)
+
         print(0, text, isCentered:=centered, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=color, cond:=condition)
+
     End Sub
 
     ''' <summary>
@@ -1234,7 +1226,8 @@ Module MenuMaker
 
     Public Sub OpenMenu(moduleName As String,
                         headerColor As ConsoleColor,
-                        Optional centeredMenuText As String() = Nothing)
+               Optional centeredMenuText As String() = Nothing)
+
         BeginMenu()
         PrintColored(moduleName, headerColor, True)
         PrintDivider()
@@ -1292,7 +1285,8 @@ Module MenuMaker
     ''' 
     ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Function MenuItem(name As String,
-                             description As String) As MenuItemBuilder
+                             description As String,
+                             condition As Boolean) As MenuItemBuilder
 
         Return New MenuItemBuilder(name, description)
 
