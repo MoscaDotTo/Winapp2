@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,29 +14,43 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
-''' <summary> Syncs settings for the Download module to and from the disk </summary>
-''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+
+''' <summary> 
+''' Provides methods for managing the Downloader module settings, including support methods for syncing to disk
+''' </summary>
+''' 
+''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
 Module downloadsettingshandler
 
-    ''' <summary> Loads values from disk into memory for the Downloader module settings </summary>
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+    ''' <summary>
+    ''' Assigns the module settings to Downloader based on the current disk-writable settings representation
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
     Public Sub getSerializedDownloaderSettings()
-        For Each kvp In settingsDict(NameOf(Downloader))
-            Select Case kvp.Key
-                Case NameOf(downloadFile) & "_Dir"
-                    downloadFile.Dir = kvp.Value
-                Case NameOf(DownloadModuleSettingsChanged)
-                    DownloadModuleSettingsChanged = CBool(kvp.Value)
-            End Select
-        Next
+
+        LoadModuleSettingsFromDict(NameOf(Downloader), GetType(downloadersettings))
+
     End Sub
 
-    ''' <summary> Adds the current (typically default) state of the module's settings into the disk-writable settings representation </summary>
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+    ''' <summary>
+    ''' Adds the current state of the module's settings into the disk-writable settings representation 
+    ''' </summary>
+    ''' 
+    ''' <remarks>
+    ''' Most often, this is the default state of these settings 
+    ''' </remarks>
+    ''' 
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2025-08-05
     Public Sub createDownloadSettingsSection()
-        Dim downloadSettingTuple As New List(Of String) From {NameOf(DownloadModuleSettingsChanged), tsInvariant(DownloadModuleSettingsChanged), NameOf(downloadFile), "", downloadFile.Dir}
-        createModuleSettingsSection(NameOf(Downloader), downloadSettingTuple, 1, 1)
+
+        Dim settingsModule = GetType(downloadersettings)
+        Dim moduleName = NameOf(Downloader)
+
+        createModuleSettingsSection(moduleName, settingsModule)
+
     End Sub
 
 End Module

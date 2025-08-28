@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2023 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -24,13 +24,6 @@ Option Strict On
 ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
 Module Winapp2ool
 
-    ''' <summary>
-    ''' Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
-    Public Property RemoteWinappIsNonCC As Boolean = False
-
     ''' <summary> 
     ''' Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)
     ''' </summary>
@@ -46,13 +39,6 @@ Module Winapp2ool
     Public Property isOffline As Boolean = False
 
     ''' <summary> 
-    ''' Indicates that this build is beta and should check the beta branch link for updates 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
-    Public Property isBeta As Boolean = False
-
-    ''' <summary> 
     ''' Indicates that we're unable to download the executable 
     ''' </summary>
     ''' 
@@ -65,13 +51,6 @@ Module Winapp2ool
     ''' 
     ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Property alreadyDownloadedExecutable As Boolean = False
-
-    ''' <summary> 
-    ''' Indicates that the module's settings have been changed
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
-    Public Property toolSettingsHaveChanged As Boolean = False
 
     ''' <summary> 
     ''' Checks the version of Windows on the current system and returns it as a Double 
@@ -158,6 +137,47 @@ Module Winapp2ool
     Public Function tsInvariant(bool As Boolean) As String
 
         Return bool.ToString(System.Globalization.CultureInfo.InvariantCulture)
+
+    End Function
+
+    ''' <summary>
+    ''' Determines the color of a file selector based on whether or not a file has been selected
+    ''' </summary>
+    ''' 
+    ''' <param name="menuFile">
+    ''' An <c> iniFile </c> with influence on a menu option's coloring
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' <c> Green </c> if <c> <paramref name="menuFile"/> </c> has a name, <br />
+    ''' <c> Red </c> otherwise
+    ''' </returns>
+    '''
+    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-06
+    Public Function getFileMenuColor(menuFile As iniFile) As ConsoleColor
+
+        Return If(menuFile.Name.Length > 0, ConsoleColor.Green, ConsoleColor.Red)
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the display information for a file selector in a menu
+    ''' </summary>
+    ''' 
+    ''' <param name="menuFile">
+    ''' An <c> iniFile </c> whose path will be displayed if it has valid <c> Name </c>
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' A print friendly version of the file's path if it has a valid <c> Name </c>, with the 
+    ''' current directory replaced with ..\ <br />
+    ''' "Not specified" otherwise
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
+    Public Function getFileMenuName(menuFile As iniFile) As String
+
+        Return If(menuFile.Name.Length > 0, replDir(menuFile.Path), "Not specified")
 
     End Function
 

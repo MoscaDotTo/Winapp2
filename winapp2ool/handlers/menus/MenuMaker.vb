@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2023 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -16,11 +16,41 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
+Imports System.Text
+
 ''' <summary> 
-''' MenuMaker is a driver module for powering dynamic finite state console applications with variable numbered menus 
+''' MenuMaker is a driver module for powering dynamic finite 
+''' state console applications with variable numbered menus 
 ''' </summary>
 ''' Docs last updated: 2023-07-19
 Module MenuMaker
+
+    ''' <summary>
+    ''' Defines the types of menu frames available
+    ''' </summary>
+    Public Enum FrameType
+
+        ''' <summary>
+        ''' 
+        ''' </summary>
+        Vertical = 0
+
+        ''' <summary>
+        ''' 
+        ''' </summary>
+        Top = 1
+
+        ''' <summary>
+        ''' 
+        ''' </summary>
+        Bottom = 2
+
+        ''' <summary>
+        ''' 
+        ''' </summary>
+        Conjoin = 3
+
+    End Enum
 
     ''' <summary>
     ''' An instruction to press the Enter button to continue 
@@ -51,7 +81,8 @@ Module MenuMaker
     Public ReadOnly Property promptStr As String = "Enter a number, or leave blank to run the default: "
 
     ''' <summary> 
-    ''' The maximum length of the 'Name' half of a '#. Name - Description' style menu option
+    ''' The maximum length of the 'Name' half of a 
+    ''' '#. Name - Description' style menu option
     ''' </summary>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
@@ -65,14 +96,16 @@ Module MenuMaker
     Public Property ColorHeader As Boolean
 
     ''' <summary> 
-    ''' The color with which the next header should be printed if <c> ColorHeader </c> is <c> True </c> 
+    ''' The color with which the next header should be 
+    ''' printed if <c> ColorHeader </c> is <c> True </c>
     ''' </summary>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Property HeaderColor As ConsoleColor
 
     ''' <summary> 
-    ''' Indicates that the application should not output or ask input from the user except when encountering exceptions
+    ''' Indicates that the application should not output or ask
+    ''' input from the user except when encountering exceptions
     ''' <br/> Default: <c> False </c>
     ''' </summary>
     ''' 
@@ -94,7 +127,14 @@ Module MenuMaker
     Public Property MenuHeaderText As String
 
     ''' <summary>
-    ''' The number associated with the next <c> Menu Option </c> that will be printed (if any)
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property MenuHeaderTextColor As ConsoleColor = ConsoleColor.Red
+
+    ''' <summary>
+    ''' The number associated with the next
+    ''' <c> Menu Option </c> that will be printed (if any)
     ''' </summary>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
@@ -114,14 +154,60 @@ Module MenuMaker
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private ReadOnly Property Closers As String() = {"║", "╗", "╝", "╣"}
 
+    ''' <summary>
+    ''' The cached console window width, used to 
+    ''' avoid unneeded calls to <c> Console.WindowWidth </c>
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-06-26 | Code last updated: 2025-06-26
+    Private _cachedWindowWidth As Integer = Console.WindowWidth
+
+    ''' <summary>
+    ''' The time at which the console window width was last checked
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-06-26 | Code last updated: 2025-06-26
+    Private _lastWidthCheckTime As DateTime = DateTime.Now
+
+    ''' <summary>
+    ''' Returns the current console window width, caching it for
+    ''' 500 milliseconds at a time so as to avoid unneeded calls
+    ''' </summary>
+    ''' 
+    ''' <returns>
+    ''' The current console window width if not within the timeout
+    ''' <br/> Otherwise, the cached console window width
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-06-26 | Code last updated: 2025-06-26
+    Private Function GetConsoleWidth() As Integer
+
+        ' The width is extremely unlikely to change during the printing process
+        ' if ever, so only check it every 500 milliseconds at the most frequent
+        If DateTime.Now.Subtract(_lastWidthCheckTime).TotalMilliseconds > 500 Then
+
+            _cachedWindowWidth = Console.WindowWidth
+            _lastWidthCheckTime = DateTime.Now
+
+        End If
+
+        Return _cachedWindowWidth
+
+    End Function
+
     ''' <summary> 
-    ''' Displays a menu to and passes the user's input over to be handled until the exit command is given 
-    ''' <br/> Exiting a menu returns exactly one level up in the stack to the menu that called it 
-    ''' <br/> Effectively the main event loop for anything built with <c> MenuMaker </c>
+    ''' Displays a menu to and passes the user's input
+    ''' over to be handled until the exit command is given 
+    ''' 
+    ''' <br/> Exiting a menu returns exactly one level 
+    ''' up in the stack to the menu that called it 
+    ''' 
+    ''' <br/> Effectively the main event loop 
+    ''' for anything built with <c> MenuMaker </c>
     ''' </summary>
     ''' 
     ''' <param name="name"> 
-    ''' The name of the module as it will be displayed to the user 
+    ''' The name of the module as it will be displayed to the user
     ''' </param>
     ''' 
     ''' <param name="showMenu">
@@ -138,7 +224,10 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub initModule(name As String, showMenu As Action, handleInput As Action(Of String), Optional itmLen As Integer = 35)
+    Public Sub initModule(name As String,
+                          showMenu As Action,
+                          handleInput As Action(Of String),
+                 Optional itmLen As Integer = 35)
 
         gLog("", ascend:=True)
         gLog($"Loading module {name}")
@@ -163,24 +252,76 @@ Module MenuMaker
 
     End Sub
 
-    ''' <summary> Prints menu lines, options, and frames fit to the current console window width </summary>
+    ''' <summary> 
+    ''' Prints menu lines, options, and frames
+    ''' fit to the current console window width
+    ''' </summary>
     ''' 
     ''' <param name="printType"> 
     ''' The type of menu information to print <br/> 
+    ''' 
     ''' <list type="bullet">
-    ''' <item> <description> <c> 0 </c>: Line </description> </item>
-    ''' <item> <description> <c> 1 </c>: Option </description> </item>
-    ''' <item> <description> <c> 2 </c>: Option with a "Reset Settings" prompt </description> </item>
-    ''' <item> <description> <c> 3 </c>: Box with centered text </description> </item>
-    ''' <item> <description> <c> 4 </c>: Menu top </description> </item>
-    ''' <item> <description> <c> 5 </c>: Option with an Enable/Disable prompt </description> </item>
+    ''' 
+    ''' <item>
+    ''' <description>
+    ''' <c> 0 </c>: Line 
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item> 
+    ''' <description>
+    ''' <c> 1 </c>: Option 
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' <c> 2 </c>: Option with a "Reset Settings" prompt 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' <c> 3 </c>: Box with centered text 
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item> 
+    ''' <description>
+    ''' <c> 4 </c>: Menu top 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item> 
+    ''' <description> 
+    ''' <c> 5 </c>: Option with an Enable/Disable prompt
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description>
+    ''' <c> 6 </c>: Menu header with trailing conjoiner 
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description>
+    ''' <c> 7 </c>: Yellow menu line with /!\ warning text /!\
+    ''' </description>
+    ''' </item>
     ''' </list>
     ''' </param>
     ''' 
     ''' <param name="menuText">
     ''' The text to be printed <br/> <br/> 
-    ''' When <c> <paramref name="printType"/> </c> is <c> 1 </c> or <c>5</c>, <c> <paramref name="menuText"/> </c> contains the name of the menu option 
-    ''' <br/> When <c> <paramref name="printType"/> </c> is <c> 3 </c>, <c> <paramref name="menuText"/> </c> contains the name of the module whose settings are being reset
+    ''' When <c> <paramref name="printType"/> </c> 
+    ''' is <c> 1 </c> or <c>5</c>, 
+    ''' <c> <paramref name="menuText"/> </c>
+    ''' contains the name of the menu option 
+    ''' 
+    ''' <br/> When <c> <paramref name="printType"/> </c> is <c> 3 </c>,
+    ''' <c> <paramref name="menuText"/> </c> contains the name
+    ''' of the module whose settings are being reset
     ''' </param>
     ''' 
     ''' <param name="optString"> 
@@ -194,22 +335,28 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' <param name="leadingBlank"> 
-    ''' Indicates that a blank menu line should be printed immediately before the printed line
+    ''' Indicates that a blank menu line should be 
+    ''' printed immediately before the printed line
+    ''' 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
     ''' <param name="trailingBlank"> 
-    ''' Indicates that a blank menu line should be printed immediately after the printed line
+    ''' Indicates that a blank menu line should be
+    ''' printed immediately after the printed line
+    ''' 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
     ''' <param name="isCentered"> 
     ''' Indicates that the printed text should be centered
+    ''' 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
     ''' <param name="closeMenu"> 
     ''' Indicates that the bottom menu frame should be printed 
+    ''' 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
@@ -219,9 +366,13 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' <param name="enStrCond"> 
-    ''' A module setting whose menu text will include an Enable/Disable toggle <br/> <br/>
-    ''' If lines are being colored without an <c> <paramref name="arbitraryColor"/> </c>, 
-    ''' they will be printed <c> Green </c> if <c> <paramref name="enStrCond"/> </c> is <c> True </c>,
+    ''' A module setting whose menu text will include
+    ''' an Enable/Disable toggle <br/> <br/>
+    ''' 
+    ''' If lines are being colored without an
+    ''' <c> <paramref name="arbitraryColor"/> </c>, 
+    ''' they will be printed <c> Green </c> if
+    ''' <c> <paramref name="enStrCond"/> </c> is <c> True </c>,
     ''' otherwise they will be printed <c> Red </c>
     ''' <br/> Optional, Default: <c> False (Red) </c> 
     ''' </param>
@@ -232,44 +383,73 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' <param name="useArbitraryColor"> 
-    ''' Indicates that the line should be colored using the value provided by <c> <paramref name="arbitraryColor"/> </c> 
+    ''' Indicates that the line should be colored using the 
+    ''' value provided by <c> <paramref name="arbitraryColor"/> </c>
+    ''' 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
     ''' <param name="arbitraryColor"> 
-    ''' Foreground <c> ConsoleColor </c> to be used when printing with when <c> <paramref name="colorLine"/> </c> is <c> True </c>, 
+    ''' Foreground <c> ConsoleColor </c> to be used when printing
+    ''' with when <c> <paramref name="colorLine"/> </c> is <c> True </c>, 
     ''' but wanting to use a color other than <c> Red </c> or <c> Green </c> 
+    ''' 
     ''' <br/> Optional, Default: <c> Nothing </c>
     ''' </param>
     '''
     ''' <param name="buffr"> 
-    ''' Indicates that a leading newline should be printed before the menu lines 
+    ''' Indicates that a leading newline should
+    ''' be printed before the menu lines
+    ''' 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     '''
     ''' <param name="trailr"> 
-    ''' Indicates that a trailing newline should be printed after the menu lines 
+    ''' Indicates that a trailing newline should 
+    ''' be printed after the menu lines
+    ''' 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
     ''' <param name="conjoin"> 
-    ''' Indicates that a conjoining menu frame should be printed after the printed lines 
+    ''' Indicates that a conjoining menu frame should
+    ''' be printed after the printed lines 
+    ''' 
     ''' <br/> Optional, Default: <c> False </c>
     ''' </param>
     ''' 
     ''' <param name="fillBorder"> 
-    ''' Indicates whether or not any menu frames should be filled or be empty 
+    ''' Indicates whether or not any menu frames should be filled or be empty
+    ''' 
     ''' <br /> Optional, Default: <c> True (filled) </c>
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub print(printType As Integer, menuText As String, Optional optString As String = "", Optional cond As Boolean = True,
-                     Optional leadingBlank As Boolean = False, Optional trailingBlank As Boolean = False, Optional isCentered As Boolean = False,
-                     Optional closeMenu As Boolean = False, Optional openMenu As Boolean = False, Optional enStrCond As Boolean = False,
-                     Optional colorLine As Boolean = False, Optional useArbitraryColor As Boolean = False, Optional arbitraryColor As ConsoleColor = Nothing,
-                     Optional buffr As Boolean = False, Optional trailr As Boolean = False, Optional conjoin As Boolean = False, Optional fillBorder As Boolean = True)
+    Public Sub print(printType As Integer,
+                     menuText As String,
+                     Optional optString As String = "",
+                     Optional cond As Boolean = True,
+                     Optional leadingBlank As Boolean = False,
+                     Optional trailingBlank As Boolean = False,
+                     Optional isCentered As Boolean = False,
+                     Optional closeMenu As Boolean = False,
+                     Optional openMenu As Boolean = False,
+                     Optional enStrCond As Nullable(Of Boolean) = Nothing,
+                     Optional colorLine As Boolean = False,
+                     Optional useArbitraryColor As Boolean = False,
+                     Optional arbitraryColor As ConsoleColor = Nothing,
+                     Optional buffr As Boolean = False,
+                     Optional trailr As Boolean = False,
+                     Optional conjoin As Boolean = False,
+                     Optional fillBorder As Boolean = True)
 
         If Not cond Then Return
+
+        ' Having a color to print suggests we'll be printing in color
+        If Not arbitraryColor = Nothing Then colorLine = True : useArbitraryColor = True
+
+        ' Enable/Disable is always printed in color
+        If Not enStrCond Is Nothing Then colorLine = True
 
         cwl(cond:=buffr)
 
@@ -319,6 +499,11 @@ Module MenuMaker
                 ' Prints a menu header with a trailing conjoiner 
                 print(0, menuText, conjoin:=True, isCentered:=True, openMenu:=True)
 
+            Case 7
+
+                ' Prints a yellow colored menu line with warning text 
+                print(0, $"/!\ {menuText} /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+
         End Select
 
         ' Overload enStrCond when printing with printType 6 to enable the conjoiner to be unfilled when the top frame is filled 
@@ -338,8 +523,23 @@ Module MenuMaker
 
     End Sub
 
+    ''' <summary>
+    ''' Prints a new line to the console
+    ''' </summary>
+    ''' 
+    ''' <param name="condition">
+    ''' Indicates whether the new line should be printed
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    Public Sub PrintNewLine(Optional condition As Boolean = True)
+
+        If condition Then Console.WriteLine()
+
+    End Sub
+
     ''' <summary> 
-    ''' Determines which color should be used when printing. If no color is to be used, the print colors are reset to their defaults 
+    ''' Determines which color should be used when printing. If no color 
+    ''' is to be used, the print colors are reset to their defaults
     ''' </summary>
     ''' 
     ''' <param name="colorLine"> 
@@ -347,7 +547,8 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' <param name="useArbColor"> 
-    ''' Indicates that the value provided by <c> <paramref name="arbColor"/> </c> should be used 
+    ''' Indicates that the value provided by
+    ''' <c> <paramref name="arbColor"/> </c> should be used
     ''' </param>
     ''' 
     ''' <param name="arbColor"> 
@@ -355,70 +556,91 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' <param name="enStrCond"> 
-    ''' Determines Red/Green coloring when not using an <c> <paramref name="arbColor"/> </c>
+    ''' Determines Red/Green coloring when not using an 
+    ''' <c> <paramref name="arbColor"/> </c>
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub determinePrintColor(colorLine As Boolean, useArbColor As Boolean, arbColor As ConsoleColor, enStrCond As Boolean)
+    Private Sub determinePrintColor(colorLine As Boolean,
+                                    useArbColor As Boolean,
+                                    arbColor As ConsoleColor,
+                                    enStrCond As Nullable(Of Boolean))
 
-        If colorLine Then Console.ForegroundColor = If(useArbColor, arbColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red)) Else Console.ResetColor()
+        If Not colorLine Then Console.ResetColor() : Return
+
+        Console.ForegroundColor = If(useArbColor, arbColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red))
 
     End Sub
 
     ''' <summary> 
-    ''' Prints a line to the console window if output is not currently being suppressed and the given <c> <paramref name="cond"/> </c> is met 
+    ''' Prints a line to the console window if output is not currently being
+    ''' suppressed and the given <c> <paramref name="cond"/> </c> is met
     ''' </summary>
     ''' 
     ''' <param name="msg"> 
     ''' The string to be printed
+    ''' 
     ''' <br/> Optional, Default: <c> Nothing </c> 
     ''' </param>
     ''' 
     ''' <param name="cond"> 
     ''' Indicates the line should be printed 
+    ''' 
     ''' <br/> Optional, Default: <c> True </c> 
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub cwl(Optional msg As String = Nothing, Optional cond As Boolean = True)
+    Public Sub cwl(Optional msg As String = Nothing,
+                   Optional cond As Boolean = True)
 
-        If cond AndAlso Not SuppressOutput Then Console.WriteLine(msg)
+        If Not cond OrElse SuppressOutput Then Return
+
+        Console.WriteLine(msg)
 
     End Sub
 
     ''' <summary>
-    ''' Waits for the user to press a key if output is not currently being suppressed
+    ''' Waits for the user to press a key if output
+    ''' is not currently being suppressed
     ''' </summary>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Sub crk()
 
-        If Not SuppressOutput Then Console.ReadKey()
+        If SuppressOutput Then Return
+
+        Console.ReadKey()
 
     End Sub
 
     ''' <summary> 
-    ''' Waits for the users to press Enter if output is not currently being suppressed 
+    ''' Waits for the users to press Enter if output
+    ''' is not currently being suppressed 
     ''' </summary>
     ''' 
     ''' Docs last updated: 2020-08-31 | Code last updated: 2020-08-31
     Public Sub crl()
 
-        If Not SuppressOutput Then Console.ReadLine()
+        If SuppressOutput Then Return
+
+        Console.ReadLine()
 
     End Sub
 
     ''' <summary> 
-    ''' Clears the console when the given <c> <paramref name="cond"/> </c> is <c> True </c> and we're not unit testing 
+    ''' Clears the console when the given <c> <paramref name="cond"/> </c>
+    ''' is <c> True </c> and we're not unit testing 
     ''' </summary>
     ''' 
     ''' <param name="cond">
     ''' Indicates that the console should be cleared
+    ''' 
     ''' <br/> Optional, Default: <c> True </c> 
     ''' </param>
     ''' 
     ''' <remarks> 
-    ''' When unit testing, the console window doesn't belong to us and trying to clear the console throws an IO Exception, so we don't do that 
+    ''' When unit testing, the console window doesn't belong to us and trying
+    ''' to clear the console throws an IO Exception, so we don't do that 
     ''' </remarks>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
@@ -434,27 +656,54 @@ Module MenuMaker
     ''' 
     ''' <param name="frameNum"> 
     ''' Indicates which frame should be returned <br/>
+    ''' 
     ''' <list type="bullet">
-    ''' <item> <description> 0: Vertical frames <c> ║     ║ </c> </description> </item>
-    ''' <item> <description> 1: Downward opening 90° angle frames <c> ╔ ═ ═ ═ ═ ═╗ </c> </description> </item>
-    ''' <item> <description> 2: Upward opening 90° angle frames <c> ╚ ═ ═ ═ ═ ═╝ </c> </description> </item>
-    ''' <item> <description> 3: Inward facing T-frames <c> ╠ ═ ═ ═ ═ ═ ╣ </c> </description> </item> </list>
+    ''' 
+    ''' <item>
+    ''' <description>
+    ''' 0: Vertical frames <c> ║     ║ </c>
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 1: Downward opening 90° angle frames <c> ╔ ═ ═ ═ ═ ═╗ </c>
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 2: Upward opening 90° angle frames <c> ╚ ═ ═ ═ ═ ═╝ </c>
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item> 
+    ''' <description> 
+    ''' 3: Inward facing T-frames <c> ╠ ═ ═ ═ ═ ═ ╣ </c> 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' </list>
+    ''' 
     ''' <br/> Optional, Default: <c> 0 </c>
     ''' </param>
     ''' 
     ''' <returns> 
-    ''' A String containing the menuFrame requested by <c> <paramref name="frameNum"/> </c>
+    ''' A String containing the menuFrame requested
+    ''' by <c> <paramref name="frameNum"/> </c>
     ''' </returns>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Function getFrame(Optional frameNum As Integer = 0, Optional fillFrame As Boolean = False) As String
+    Private Function getFrame(Optional frameNum As Integer = 0,
+                              Optional fillFrame As Nullable(Of Boolean) = False) As String
 
         Return mkMenuLine("", 2, frameNum, fillFrame)
 
     End Function
 
     ''' <summary> 
-    ''' Saves a menu header to be printed atop the next menu, optionally with color 
+    ''' Saves a menu header to be printed atop
+    ''' the next menu, optionally with color 
     ''' </summary>
     ''' 
     ''' <param name="txt">
@@ -462,32 +711,69 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' <param name="cHeader">
-    ''' Indicates that the header should be colored using the color given by <c> <paramref name="printColor"/> </c> 
+    ''' Indicates that the header should be colored using 
+    ''' the color given by <c> <paramref name="printColor"/> </c> 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
     ''' <param name="cond">
-    ''' Indicates that the header text should be assigned the value given by <c> <paramref name="txt"/> </c> 
+    ''' Indicates that the header text should be assigned 
+    ''' the value given by <c> <paramref name="txt"/> </c> 
     ''' <br/> Optional, Default: <c> True </c> 
     ''' </param>
     ''' 
     ''' <param name="printColor"> 
-    ''' <c> ConsoleColor </c> with which the header will be colored when <c> <paramref name="cHeader"/> </c> is <c> True </c> 
+    ''' <c> ConsoleColor </c> with which the header will be
+    ''' colored when <c> <paramref name="cHeader"/> </c> is <c> True </c>
     ''' <br/> Optional, Default: <c> Red </c> 
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub setHeaderText(txt As String, Optional cHeader As Boolean = False, Optional cond As Boolean = True, Optional printColor As ConsoleColor = ConsoleColor.Red)
+    Public Sub setHeaderText(txt As String,
+                             Optional cHeader As Boolean = False,
+                             Optional cond As Boolean = True,
+                             Optional printColor As ConsoleColor = Nothing)
 
         If Not cond Then Return
         MenuHeaderText = txt
+        If Not printColor = ConsoleColor.Black Then MenuHeaderTextColor = printColor
+
         ColorHeader = cHeader
         HeaderColor = printColor
 
     End Sub
 
+
+    ''' <summary>
+    ''' Overrides the next menu's default header with with <c> <paramref name="txt"/> </c>
+    ''' <br />
+    ''' Useful for delivering a status update or error message between menues or modules
+    ''' </summary>
+    ''' 
+    ''' <param name="txt">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="cond">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="printColor">
+    ''' 
+    ''' </param>
+    Public Sub setNextMenuHeaderText(txt As String,
+                            Optional cond As Boolean = True,
+                            Optional printColor As ConsoleColor = ConsoleColor.Black)
+
+        If Not cond Then Return
+        MenuHeaderText = txt
+        If Not printColor = ConsoleColor.Black Then MenuHeaderTextColor = printColor
+
+    End Sub
+
+
     ''' <summary> 
-    ''' Informs a user when an action is unable to proceed due to a condition 
+    ''' Informs a user when an action is unable to proceed due to a condition
     ''' </summary>
     ''' 
     ''' <param name="cond"> 
@@ -499,7 +785,8 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Function denyActionWithHeader(cond As Boolean, errText As String) As Boolean
+    Public Function denyActionWithHeader(cond As Boolean,
+                                         errText As String) As Boolean
 
         setHeaderText(errText, True, cond)
         Return cond
@@ -507,7 +794,7 @@ Module MenuMaker
     End Function
 
     ''' <summary> 
-    ''' Returns the inverse state of a given boolean as a String 
+    ''' Returns the inverse state of a given boolean as a String
     ''' </summary>
     ''' 
     ''' <param name="setting">
@@ -515,48 +802,80 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' <returns> 
-    ''' <c> "Disable" </c> if <c> <paramref name="setting"/> </c> is <c> True </c>, 
+    ''' <c> "Disable" </c> if
+    ''' <c> <paramref name="setting"/> </c> is
+    ''' <c> True </c>,
+    ''' 
     ''' <br/> <c> "Enable" </c> otherwise 
     ''' </returns>
     '''
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Function enStr(setting As Boolean) As String
+    Public Function enStr(setting As Nullable(Of Boolean)) As String
 
         Return If(setting, "Disable", "Enable")
 
     End Function
 
     ''' <summary> 
-    ''' Enforces that <c> initMenu </c> exit the current level in the stack on the next iteration of its loop 
+    ''' Enforces that <c> initMenu </c> exit the current 
+    ''' level in the stack on the next iteration of its loop
     ''' </summary>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Sub exitModule()
+
         ExitPending = True
+
+    End Sub
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    Public Sub resetMenuNumbering()
+
+        OptNum = 0
+
     End Sub
 
     ''' <summary> 
-    ''' Prints the top of the menu, the header, a conjoiner, any description text provided, the menu prompt, and the exit option 
+    ''' Prints the top of the menu, the header, a conjoiner,
+    ''' any description text provided, the menu prompt, and the exit option 
     ''' </summary>
     ''' 
     ''' <param name="descriptionItems"> 
-    ''' Text describing the current menu or module functions being presented to the user, each array will be displayed on a separate line 
+    ''' Text describing the current menu or module functions being presented
+    ''' to the user, each array will be displayed on a separate line
     ''' </param>
     ''' 
     ''' <param name="printExit"> 
-    ''' Indicates that an option to exit to the previous menu should be printed 
+    ''' Indicates that an option to exit to the previous menu should be printed
+    ''' 
     ''' <br/> Optional, Default: <c> True </c> 
     ''' </param>
     ''' 
     ''' <param name="fillConjoiner"> 
-    ''' Indicates that the conjoining frame at the bottom of the menu headed should be filled 
+    ''' Indicates that the conjoining frame at the
+    ''' bottom of the menu headed should be filled 
+    ''' 
     ''' <br /> Optional, Default: <c> True (Filled)</c>
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub printMenuTop(descriptionItems As String(), Optional printExit As Boolean = True, Optional fillConjoiner As Boolean = True)
+    Public Sub printMenuTop(descriptionItems As String(),
+                   Optional printExit As Boolean = True,
+                   Optional fillConjoiner As Boolean = True,
+                   Optional givenHeaderColor As ConsoleColor = Nothing)
+
+        If Not givenHeaderColor = Nothing Then
+
+            ColorHeader = True
+            HeaderColor = givenHeaderColor
+
+        End If
 
         print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=ColorHeader, arbitraryColor:=HeaderColor, conjoin:=True, fillBorder:=fillConjoiner)
+
+        ColorHeader = False
 
         For Each line In descriptionItems
 
@@ -572,21 +891,25 @@ Module MenuMaker
     End Sub
 
     ''' <summary> 
-    ''' Prints a line bounded by vertical menu frames, or an empty menu line if <c> <paramref name="lineString"/> </c> is <c> Nothing </c>
+    ''' Prints a line bounded by vertical menu frames, or an empty menu line
+    ''' if <c> <paramref name="lineString"/> </c> is <c> Nothing </c>
     ''' </summary>
     ''' 
     ''' <param name="lineString"> 
     ''' The text to be printed 
+    ''' 
     ''' <br/> Optional, Default: <c> Nothing </c> 
     ''' </param>
     ''' 
     ''' <param name="isCentered"> 
     ''' Indicates that the printed text should be centered 
+    ''' 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub printMenuLine(Optional lineString As String = Nothing, Optional isCentered As Boolean = False)
+    Private Sub printMenuLine(Optional lineString As String = Nothing,
+                              Optional isCentered As Boolean = False)
 
         If lineString = Nothing Then lineString = getFrame()
         cwl(mkMenuLine(lineString, If(isCentered, 0, 1)))
@@ -606,7 +929,8 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub printMenuOpt(lineString1 As String, lineString2 As String)
+    Private Sub printMenuOpt(lineString1 As String,
+                             lineString2 As String)
 
         lineString1 = $"{OptNum}. {lineString1}"
         padToEnd(lineString1, menuItemLength, "")
@@ -625,32 +949,77 @@ Module MenuMaker
     ''' 
     ''' <param name="align"> 
     ''' The alignment of the line to be printed: <br/> 
+    ''' 
     ''' <list type="bullet">
-    ''' <item> <description> 0: centers the string </description> </item>
-    ''' <item> <description> 1: leftaligns the string </description> </item>
-    ''' <item> <description> 2: prints a menu frame </description> </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 0: centers the string 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 1: leftaligns the string 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 2: prints a menu frame 
+    ''' </description> 
+    ''' </item>
+    ''' 
     ''' </list> 
     ''' </param>
     ''' 
     ''' <param name="borderInd"> 
-    ''' Determines which characters should create the border for the menuline: <br/>
+    ''' Determines which characters should
+    ''' create the border for the menuline: <br/>
+    ''' 
     ''' <list type="bullet">
-    ''' <item> <description> 0: Vertical lines </description> </item>
-    ''' <item> <description> 1: Ceiling brackets </description> </item>
-    ''' <item> <description> 2: Floor brackets </description> </item>
-    ''' <item> <description> 3: Conjoining brackets </description> </item> 
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 0: Vertical lines 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item> 
+    ''' <description> 
+    ''' 1: Ceiling brackets 
+    ''' </description> 
+    ''' </item>
+    ''' 
+    ''' <item> 
+    ''' <description> 
+    ''' 2: Floor brackets 
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <description> 
+    ''' 3: Conjoining brackets 
+    ''' </description> 
+    ''' </item> 
+    ''' 
     ''' </list>
+    ''' 
     ''' <br/> Optional, Default: <c> 0 </c> 
     ''' </param>
     ''' 
     ''' <param name="fillBorder"> 
-    ''' Indicates that top and bottom borders should be printed when printing menuframes
+    ''' Indicates that top and bottom borders 
+    ''' should be printed when printing menuframes
     ''' </param>
     '''
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Function mkMenuLine(line As String, align As Integer, Optional borderInd As Integer = 0, Optional fillBorder As Boolean = True) As String
+    Private Function mkMenuLine(line As String,
+                                align As Integer,
+                                Optional borderInd As Integer = 0,
+                                Optional fillBorder As Nullable(Of Boolean) = True) As String
 
-        If line.Length >= Console.WindowWidth - 1 Then Return line
+        If line.Length >= GetConsoleWidth() - 1 Then Return line
 
         Dim out = $" {Openers(borderInd)}"
 
@@ -658,17 +1027,17 @@ Module MenuMaker
 
             Case 0
 
-                padToEnd(out, CInt((((Console.WindowWidth - line.Length) / 2) + 2)), Closers(borderInd))
+                padToEnd(out, CInt((((GetConsoleWidth() - line.Length) / 2) + 2)), Closers(borderInd))
                 out += line
-                padToEnd(out, Console.WindowWidth - 2, Closers(borderInd))
+                padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd))
 
             Case 1
 
                 out += " " & line
-                padToEnd(out, Console.WindowWidth - 2, Closers(borderInd))
+                padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd))
 
             Case 2
-                padToEnd(out, Console.WindowWidth - 2, Closers(borderInd), If(fillBorder, "═", " "))
+                padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd), If(fillBorder, "═", " "))
 
         End Select
 
@@ -698,15 +1067,22 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub padToEnd(ByRef out As String, targetLen As Integer, endline As String, Optional padStr As String = " ")
+    Private Sub padToEnd(ByRef out As String,
+                               targetLen As Integer,
+                               endline As String,
+                      Optional padStr As String = " ")
 
-        While out.Length < targetLen
+        Dim sb As New StringBuilder(out)
 
-            out += padStr
+        While sb.Length < targetLen
+
+            sb.Append(padStr)
 
         End While
 
-        If targetLen = Console.WindowWidth - 2 Then out += endline
+        If targetLen = GetConsoleWidth() - 2 Then sb.Append(endline)
+
+        out = sb.ToString()
 
     End Sub
 
@@ -719,7 +1095,8 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' <returns> 
-    ''' <c> <paramref name="dirStr"/> </c> with instances of the current directory replaced with <c> ".." </c> 
+    ''' <c> <paramref name="dirStr"/> </c> with instances of the
+    ''' current directory replaced with <c> ".." </c> 
     ''' </returns>
     ''' 
     ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
@@ -730,23 +1107,29 @@ Module MenuMaker
     End Function
 
     ''' <summary> 
-    ''' Determines the number currently associated with a particular menu option
+    ''' Determines the number currently associated 
+    ''' with a particular menu option
     ''' </summary>
     '''
     ''' <param name="defaultNumber"> 
-    ''' The menu number associated with the option in winapp2ool's default, online configuration 
+    ''' The menu number associated with the option 
+    ''' in winapp2ool's default, online configuration
     ''' </param>
     '''
     ''' <param name="weightedComponents"> 
-    ''' A set of parameters which influence the position of a menu option in the menu 
+    ''' A set of parameters which influence the 
+    ''' position of a menu option in the menu 
     ''' </param>
     '''
     ''' <param name="weights"> 
-    ''' The weights correlating to each <c>Component</c> in <c><paramref name="weightedComponents"/> </c> 
+    ''' The weights correlating to each <c>Component</c>
+    ''' in <c><paramref name="weightedComponents"/> </c> 
     ''' </param>
     ''' 
     ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
-    Public Function computeMenuNumber(defaultNumber As Integer, weightedComponents As Boolean(), weights As Integer()) As String
+    Public Function computeMenuNumber(defaultNumber As Integer,
+                                      weightedComponents As Boolean(),
+                                      weights As Integer()) As String
 
         Dim out = defaultNumber
 
@@ -757,6 +1140,171 @@ Module MenuMaker
         Next
 
         Return out.ToString
+
+    End Function
+
+
+    ''' <summary>
+    ''' Prints a simple menu line with text
+    ''' </summary>
+    Public Sub PrintLine(text As String,
+                Optional centered As Boolean = False,
+                Optional condition As Boolean = True)
+
+        print(0, text, isCentered:=centered, cond:=condition)
+
+    End Sub
+
+    ''' <summary>
+    ''' Prints a blank menu line
+    ''' </summary>
+    Public Sub PrintBlank(Optional condition As Boolean = True)
+
+        print(0, Nothing, cond:=condition)
+
+    End Sub
+
+    ''' <summary>
+    ''' Prints a numbered menu option
+    ''' </summary>
+    Public Sub PrintOption(name As String,
+                           description As String,
+                  Optional condition As Boolean = True)
+
+        print(1, name, description, cond:=condition)
+
+    End Sub
+
+    ''' <summary>
+    ''' Prints a toggle option (Enable/Disable)
+    ''' </summary>
+    Public Sub PrintToggle(name As String,
+                           description As String,
+                           isEnabled As Boolean,
+                  Optional condition As Boolean = True)
+
+        print(5, name, description, enStrCond:=isEnabled, cond:=condition)
+
+    End Sub
+
+    ''' <summary>
+    ''' Prints a colored warning line
+    ''' </summary>
+    Public Sub PrintWarning(text As String,
+                   Optional condition As Boolean = True)
+
+        print(7, text, cond:=condition)
+
+    End Sub
+
+    ''' <summary>
+    ''' Prints colored text
+    ''' </summary>
+    Public Sub PrintColored(text As String, color As ConsoleColor,
+                   Optional centered As Boolean = False,
+                   Optional condition As Boolean = True)
+
+        print(0, text, isCentered:=centered, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=color, cond:=condition)
+
+    End Sub
+
+    ''' <summary>
+    ''' Opens a menu with top border
+    ''' </summary>
+    ''' 
+    ''' <param name="solid">
+    ''' Indicates whether the divider line should be solid
+    ''' Optional, Default: <c> True </c> (solid)
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+    Public Sub BeginMenu(Optional solid As Boolean = True)
+
+        print(0, getFrame(1, solid), cond:=True)
+
+    End Sub
+
+    Public Sub OpenMenu(moduleName As String,
+                        headerColor As ConsoleColor,
+               Optional centeredMenuText As String() = Nothing)
+
+        BeginMenu()
+        PrintColored(moduleName, headerColor, True)
+        PrintDivider()
+
+        For Each line In centeredMenuText
+
+            PrintLine(line, True)
+
+        Next
+
+        PrintBlank()
+        PrintLine("Menu: Enter a number to select", True)
+        PrintBlank()
+        OptNum = 0
+        PrintOption("Exit", "Return to the previous menu", True)
+
+    End Sub
+
+    ''' <summary>
+    ''' Closes a menu with bottom border
+    ''' </summary>
+    Public Sub EndMenu(Optional filled As Boolean = True)
+
+        print(0, getFrame(2, filled), cond:=True)
+
+    End Sub
+
+    ''' <summary>
+    ''' Prints a section divider
+    ''' </summary>
+    '''
+    ''' <param name="solid">
+    ''' Indicates whether the divider line should be solid
+    ''' Optional, Default: <c> True </c> (solid)
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+    Public Sub PrintDivider(Optional solid As Boolean = True)
+
+        print(0, getFrame(3, solid), cond:=True)
+
+    End Sub
+
+    ''' <summary>
+    ''' Creates a menu item through the new MenuItemBuilder system
+    ''' </summary>
+    ''' 
+    ''' <param name="name"> 
+    ''' The name of the menu item, shown to the left of the description
+    ''' </param>
+    ''' 
+    ''' <param name="description"> 
+    ''' The description of the menu item, shown to the right of the name
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+    Public Function MenuItem(name As String,
+                             description As String,
+                             condition As Boolean) As MenuItemBuilder
+
+        Return New MenuItemBuilder(name, description)
+
+    End Function
+
+
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' 
+    ''' <param name="cond">
+    ''' 
+    ''' </param>
+    ''' <returns></returns>
+    Public Function GetRedGreen(cond As Boolean) As ConsoleColor
+
+        Return If(cond, ConsoleColor.Red, ConsoleColor.Green)
 
     End Function
 

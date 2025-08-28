@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2023 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -18,49 +18,62 @@
 Option Strict On
 
 ''' <summary> 
-''' Displays the main winapp2ool menu to the user and handles input from that menu 
+''' Displays the main winapp2ool menu to the user and handles input from that menu accordingly
 ''' </summary>
 ''' 
-''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
 Module maintoolmenu
 
     ''' <summary> 
     ''' Prints the main winapp2ool menu to the user 
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+    ''' Docs last updated: 2023-07-19 | Code last updated: 2025-08-20
     Public Sub printToolMainMenu()
 
         checkUpdates(Not isOffline AndAlso Not checkedForUpdates)
         Dim UpdatesAvailable = Not isOffline AndAlso (waUpdateIsAvail OrElse updateIsAvail)
 
-        printMenuTop(Array.Empty(Of String)(), False)
-        print(0, "Winapp2ool is currently in offline mode", cond:=isOffline, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
-        print(0, "Your .NET Framework is out of date", cond:=DotNetFrameworkOutOfDate, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
-        print(0, "Winapp2ool is currently running from the temporary folder, some functions may be impacted", cond:=cantDownloadExecutable, colorLine:=True, enStrCond:=(False), isCentered:=True, trailingBlank:=True)
-        printUpdNotif(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver)
-        printUpdNotif(updateIsAvail, "Winapp2ool", currentVersion, latestVersion)
-        print(1, "Exit", "Exit the application")
-        print(1, "WinappDebug", "Check for and correct errors in winapp2.ini")
-        print(1, "Trim", "Debloat winapp2.ini for your system")
-        print(1, "Merge", "Merge the contents of an ini file into winapp2.ini")
-        print(1, "Diff", "Observe the changes between two winapp2.ini files")
-        print(1, "CCiniDebug", "Sort and trim ccleaner.ini", trailingBlank:=True)
-        print(1, "Downloader", "Download files from the Winapp2 GitHub")
-        print(1, "Settings", "Manage Winapp2ool's settings", closeMenu:=Not UpdatesAvailable, arbitraryColor:=ConsoleColor.Yellow, colorLine:=True, useArbitraryColor:=True)
+        ' User warnings for limited feature availability
+        Dim menuDesc = {"Welcome to Winapp2ool! Check out the ReadMe on GitHub for help!"}
 
-        If waUpdateIsAvail AndAlso Not isOffline Then
+        Dim headerColor = If(UpdatesAvailable, ConsoleColor.Green, ConsoleColor.Cyan)
 
-            print(1, "Update", "Update your local copy of winapp2.ini", leadingBlank:=True)
-            print(1, "Update & Trim", "Download and trim the latest winapp2.ini")
-            print(1, "Show update diff", "See the difference between your local file and the latest", closeMenu:=Not updateIsAvail)
+        Dim menu = MenuSection.CreateCompleteMenu($"{NameOf(Winapp2ool)} v{currentVersion}", menuDesc, headerColor, True)
+
+        menu.AddBlank() _
+            .AddOption("WinappDebug", "Check For And correct errors In winapp2.ini") _
+            .AddOption("Trim", "Debloat winapp2.ini for your system") _
+            .AddOption("Transmute", "Add, replace, or remove entire sections or individual keys from winapp2.ini") _
+            .AddOption("Diff", "Observe the changes between two winapp2.ini files") _
+            .AddOption("CCiniDebug", "Sort And trim ccleaner.ini") _
+            .AddOption("Browser Builder", "Generate winapp2.ini entries for web browsers") _
+            .AddOption("Combine", "Join together a collection of ini files into one").AddBlank() _
+            .AddOption("Downloader", "Download files from the Winapp2 GitHub") _
+            .AddColoredOption("Settings", "Manage Winapp2ool's settings", ConsoleColor.Yellow)
+
+        ' Update notifications
+        getUpdateNotification(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver, menu)
+        getUpdateNotification(updateIsAvail, "Winapp2ool", currentVersion, latestVersion, menu)
+        ' User warnings for limited feature availability
+        If isOffline OrElse DotNetFrameworkOutOfDate OrElse cantDownloadExecutable Then
+
+            menu.AddBlank() _
+                .AddColoredLine("Winapp2ool is currently in offline mode", ConsoleColor.Red, centered:=True, condition:=isOffline) _
+                .AddColoredLine("Your .NET Framework is out of date", ConsoleColor.Red, centered:=True, condition:=DotNetFrameworkOutOfDate) _
+                .AddColoredLine("Winapp2ool is unable to automatically update", ConsoleColor.Red, centered:=True, condition:=cantDownloadExecutable)
 
         End If
 
-        print(1, "Update", "Get the latest Winapp2ool.exe", updateIsAvail AndAlso Not DotNetFrameworkOutOfDate, True, closeMenu:=True)
-        print(1, "Go online", "Retry your internet connection", isOffline, True, closeMenu:=True)
+        menu.AddBlank(waUpdateIsAvail) _
+            .AddOption("Update", "Update your local copy of winapp2.ini", condition:=waUpdateIsAvail) _
+            .AddOption("Update & Trim", "Download and trim the latest winapp2.ini", condition:=waUpdateIsAvail) _
+            .AddOption("Show update diff", "See the difference between your local file and the latest", condition:=waUpdateIsAvail) _
+            .AddBlank(waUpdateIsAvail) _
+            .AddOption("Update", "Get the latest Winapp2ool.exe", condition:=updateIsAvail AndAlso Not DotNetFrameworkOutOfDate) _
+            .AddOption("Go online", "Retry your internet connection", condition:=isOffline)
 
-        Console.WindowHeight = If(waUpdateIsAvail AndAlso updateIsAvail, 34, 32)
+        menu.Print()
 
     End Sub
 
@@ -69,11 +82,26 @@ Module maintoolmenu
     ''' </summary>
     ''' 
     ''' <param name="input">
-    ''' The <c> String </c> containing the user's input 
+    ''' The user's input
     ''' </param>
     ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
     Public Sub handleToolMainUserInput(input As String)
+
+        Dim modules = New Dictionary(Of String, KeyValuePair(Of Action, Action(Of String))) From {
+        {NameOf(WinappDebug), New KeyValuePair(Of Action, Action(Of String))(AddressOf printLintMainMenu, AddressOf handleLintUserInput)},
+        {NameOf(Trim), New KeyValuePair(Of Action, Action(Of String))(AddressOf printTrimMenu, AddressOf handleTrimUserInput)},
+        {NameOf(Transmute), New KeyValuePair(Of Action, Action(Of String))(AddressOf printTransmuteMainMenu, AddressOf handleTransmuteUserInput)},
+        {NameOf(Diff), New KeyValuePair(Of Action, Action(Of String))(AddressOf printDiffMainMenu, AddressOf handleDiffUserInput)},
+        {NameOf(CCiniDebug), New KeyValuePair(Of Action, Action(Of String))(AddressOf printCCDBMainMenu, AddressOf handleCCDBMUserInput)},
+        {NameOf(BrowserBuilder), New KeyValuePair(Of Action, Action(Of String))(AddressOf printBrowserBuilderMenu, AddressOf handleBrowserBuilderInput)},
+        {NameOf(Combine), New KeyValuePair(Of Action, Action(Of String))(AddressOf printCombineMainMenu, AddressOf handleCombineUserInput)},
+        {NameOf(Downloader), New KeyValuePair(Of Action, Action(Of String))(AddressOf printDownloadMainMenu, AddressOf handleDownloadUserInput)},
+        {"Winapp2ool Settings", New KeyValuePair(Of Action, Action(Of String))(AddressOf printMainToolSettingsMenu, AddressOf handleMainToolSettingsInput)},
+        {"Minefield", New KeyValuePair(Of Action, Action(Of String))(AddressOf Minefield.printMenu, AddressOf Minefield.handleUserInput)}
+        }
+
+        Dim moduleOpts = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "m"}
 
         Select Case True
 
@@ -86,131 +114,90 @@ Module maintoolmenu
                 cwl("Exiting...")
                 Environment.Exit(0)
 
-            ' Option Name:                                 WinappDebug
+            ' Option Section:                             Open Module
             ' Option States:
-            ' Default                                      -> 1 (default)
-            Case input = "1"
+            ' WinappDebug                                  -> 1 
+            ' Trim                                         -> 2 
+            ' Transmute                                    -> 3 
+            ' Diff                                         -> 4 
+            ' CCiniDebug                                   -> 5 
+            ' Browser Builder                              -> 6 
+            ' Combine                                      -> 7
+            ' Downloader                                   -> 8 
+            ' Winapp2ool Settings                          -> 9 
+            ' Minefield                                    -> m
+            ' Notes: Minefield is a hidden option not listed on the menu
+            Case moduleOpts.Contains(input)
 
-                initModule(NameOf(WinappDebug), AddressOf printLintMainMenu, AddressOf handleLintUserInput)
+                ' secret minefield menu
+                If input = "m" Then input = "10"
 
-            ' Option Name:                                 Trim
-            ' Option States:
-            ' Default                                      -> 2 (default)
-            Case input = "2"
+                Dim i = CType(input, Integer) - 1
 
-                initModule(NameOf(Trim), AddressOf printTrimMenu, AddressOf handleTrimUserInput)
+                ' Downloader requires an internet connection to launch 
+                Dim isDownloader = modules.Keys(i) = NameOf(Downloader)
+                Dim canLaunch = (isDownloader AndAlso Not denySettingOffline()) OrElse Not isDownloader
 
-            ' Option Name:                                 Merge
-            ' Option States:
-            ' Default                                      -> 3 (default)
-            Case input = "3"
+                If canLaunch Then initModule(modules.Keys(i), modules.Values(i).Key, modules.Values(i).Value)
 
-                initModule(NameOf(Merge), AddressOf printMergeMainMenu, AddressOf handleMergeMainMenuUserInput)
-
-            ' Option Name:                                 Diff
-            ' Option States:
-            ' Default                                      -> 4 (default)
-            Case input = "4"
-
-                initModule(NameOf(Diff), AddressOf printDiffMainMenu, AddressOf handleDiffMainMenuUserInput)
-
-            ' Option Name:                                 CCiniDebug
-            ' Option States:
-            ' Default                                      -> 5 (default)
-            Case input = "5"
-
-                initModule(NameOf(CCiniDebug), AddressOf printCCDBMainMenu, AddressOf handleCCDBMainMenuUserInput)
-
-            ' Option Name:                                 Downloader
-            ' Option States:
-            ' Default                                      -> 6 (default)
-            Case input = "6"
-
-                If Not denySettingOffline() Then initModule("Downloader", AddressOf printDownloadMainMenu, AddressOf handleDownloadUserInput)
-
-            ' Option Name:                                 Winapp2ool Settings
-            ' Option States:
-            ' Default                                      -> 7 (default)
-            Case input = "7"
-
-                initModule("Winapp2ool Settings", AddressOf printMainToolSettingsMenu, AddressOf handleMainToolSettingsInput)
-
-            ' Option Name:                                 Go online
-            ' Option States:
-            ' Default                                      -> Unavailable (default)
-            ' Offline:                                    -> 8 
-            Case input = "8" AndAlso isOffline
+            ' Go online
+            ' Notes: Only available if offline 
+            ' Always appears after the standard suite of options 
+            Case input = "10" AndAlso isOffline
 
                 chkOfflineMode()
                 setHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", True, isOffline)
 
-            ' Option Name:                                 Update
-            ' Option States:
-            ' Default                                      -> Unavailable (default)
-            ' Winapp2.ini Update available:                -> 8
-            Case input = "8" AndAlso waUpdateIsAvail
+            ' Update (winapp2.ini)
+            ' Notes: Only available if an update to winapp2.ini is available
+            ' Always appears after the standard suite of options but before the tool updater
+            Case input = "10" AndAlso waUpdateIsAvail
 
                 clrConsole()
                 cwl("Downloading, this may take a moment...")
                 download(New iniFile(Environment.CurrentDirectory, "winapp2.ini"), winapp2link, False)
                 waUpdateIsAvail = False
 
-            ' Option Name:                                 Update & Trim
-            ' Option States:
-            ' Default                                      -> Unavailable (default)
-            ' Winapp2.ini Update available:                -> 9
-            Case input = "9" AndAlso waUpdateIsAvail
+            ' Update & Trim winapp2.ini
+            ' Notes: Only available if an update to winapp2.ini is available
+            Case input = "11" AndAlso waUpdateIsAvail
 
                 clrConsole()
                 cwl("Downloading & trimming, this may take a moment...")
                 remoteTrim(New iniFile(), New iniFile(Environment.CurrentDirectory, "winapp2.ini"), True)
                 waUpdateIsAvail = False
 
-            ' Option Name:                                 Show Update Diff
-            ' Option States:
-            ' Default                                      -> Unavailable (default)
-            ' Winapp2.ini Update available:                -> 10
-            Case input = "10" AndAlso waUpdateIsAvail
+            ' Show Update Diff
+            ' Notes: Only available if an update to winapp2.ini is available
+            Case input = "12" AndAlso waUpdateIsAvail
 
                 clrConsole()
                 cwl("Downloading & diffing, this may take a moment...")
                 DiffRemoteFile(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
                 setHeaderText("Diff Complete")
 
-            ' Option Name:                                 Trim
-            ' Option States:
-            ' Default                                      -> Unavailable (default)
-            ' Winapp2ool and Winapp2.ini Update available: -> 11
-            ' Winapp2ool Update available:                 -> 8
-            Case updateIsAvail AndAlso Not (DotNetFrameworkOutOfDate OrElse cantDownloadExecutable) AndAlso (input = "11" AndAlso waUpdateIsAvail) OrElse (input = "8" AndAlso (Not waUpdateIsAvail))
+            ' Update (winapp2ool.exe)
+            ' Notes: Only available if an update is available and the executable can be updated
+            ' Always appears as the last option in the menu when available
+            Case updateIsAvail AndAlso Not cantDownloadExecutable AndAlso input = computeMenuNumber(10, {waUpdateIsAvail}, {3})
 
                 cwl("Downloading and updating Winapp2ool.exe, this may take a moment...")
                 autoUpdate()
 
-            ' Option Name:                                 Minefield
-            ' Option States:
-            ' Default                                      -> m (default)
-            Case input = "m"
-
-                initModule("Minefield", AddressOf Minefield.printMenu, AddressOf Minefield.handleUserInput)
-
-            ' Option Name:                                 Save winapp2ool log 
-            ' Option States:
-            ' Default                                      -> savelog (default)
+            ' Save winapp2ool log 
+            ' Notes: hidden option not listed on menu, triggered by "savelog"
             Case input = "savelog"
 
                 GlobalLogFile.overwriteToFile(logger.toString)
 
-            ' Option Name:                                 Print winapp2ool log 
-            ' Option States:
-            ' Default                                      -> printlog (default)
+            ' Print winapp2ool log 
+            ' Notes: hidden option not listed on menu, triggered by "printlog"
             Case input = "printlog"
 
                 printLog()
 
-            ' Option Name:                                 Force winapp2ool update 
-            ' Option States:
-            ' Default                                      -> forceupdate
+            ' Force winapp2ool update 
+            ' Notes: hidden option not listed on menu, triggered by "forceupdate"
             Case input = "forceupdate"
 
                 autoUpdate()
@@ -220,6 +207,49 @@ Module maintoolmenu
                 setHeaderText(invInpStr, True)
 
         End Select
+
+    End Sub
+
+    ''' <summary> 
+    ''' Adds information to the menu indicating to the user that an 
+    ''' update is available for <see cref="winapp2ool"/> or winapp2.ini
+    ''' </summary>
+    ''' 
+    ''' <param name="cond"> 
+    ''' Indicates whether or not an update for <see cref="winapp2ool"/>
+    ''' or winapp2.ini is available <br />
+    ''' <c> True </c> if an update is available <br />
+    ''' <c> False </c> if no update is available 
+    ''' </param>
+    ''' 
+    ''' <param name="updName">
+    ''' The name of the file (winapp2.ini or <see cref="winapp2ool"/>) 
+    ''' for which there is a pending update
+    ''' </param>
+    ''' 
+    ''' <param name="oldVer">
+    ''' The old (currently in use) version 
+    ''' </param>
+    ''' 
+    ''' <param name="newVer"> 
+    ''' The updated version pending download
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
+    Private Sub getUpdateNotification(cond As Boolean,
+                                      updName As String,
+                                      oldVer As String,
+                                      newVer As String,
+                                      menu As MenuSection)
+
+        If Not cond Then Return
+
+        gLog($"Update available for {updName} from {oldVer} to {newVer}")
+
+        menu.AddBlank() _
+            .AddColoredLine($"A new version of {updName} is available!", ConsoleColor.Green, True) _
+            .AddColoredLine($"Current: v{oldVer}", ConsoleColor.Green, True) _
+            .AddColoredLine($"Available: v{newVer}", ConsoleColor.Green, True)
 
     End Sub
 

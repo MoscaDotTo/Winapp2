@@ -111,7 +111,7 @@ Option Strict On
         winapp2ool.WinappDebug.debug(test)
         Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.ErrorsFound)
         ' Enable repairs
-        winapp2ool.WinappDebug.RepairSomeErrsFound = True
+        winapp2ool.lintsettings.RepairSomeErrsFound = True
         winapp2ool.WinappDebug.debug(test)
         ' Confirm the errors are still found (ie. not erroneously corrected during the first test)
         Assert.AreEqual(expectedErrsWithoutRepair, winapp2ool.WinappDebug.ErrorsFound)
