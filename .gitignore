@@ -81,6 +81,7 @@
 /winapp2ool/.vs/winapp2ool/FileContentIndex
 *.pfx
 /winapp2ool/bin/Debug/winapp2-old.ini
+<<<<<<< HEAD
 /winapp2ool/.vs/winapp2ool/CopilotIndices/17.14.786.1071
 /winapp2ool/.vs/winapp2ool/copilot-chat/611f5803/sessions
 /winapp2ool/.vs/winapp2ool/CopilotIndices/17.14.794.21998/CodeChunks.db-shm
@@ -115,3 +116,6 @@
 /winapp2ool/.vs/winapp2ool/CopilotIndices/17.14.794.21998/SemanticSymbols.db
 /winapp2ool/.vs/winapp2ool/CopilotIndices/17.14.794.21998/CodeChunks.db
 /winapp2ool/.vs/winapp2ool/CopilotIndices
+=======
+Assembler/winapp2ool.exe
+>>>>>>> 0d7094a23737c5bbea7369a35992f4a52093fb29
