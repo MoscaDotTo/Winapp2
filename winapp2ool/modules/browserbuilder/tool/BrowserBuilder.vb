@@ -17,6 +17,8 @@
 
 Option Strict On
 
+Imports System.Text
+
 ''' <summary>
 ''' BrowserBuilder is a winapp2ool module which handles the generation of bespoke winapp2.ini 
 ''' entries for a very large number of web browsers. It provides a small scripting interface 
@@ -126,8 +128,30 @@ Public Module BrowserBuilder
 
     End Structure
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    Private Property totalChromiumCount As Integer = 0
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    Private Property totalGeckoCount As Integer = 0
+
+    ''' <summary>
+    ''' Handles the commandline arguments for <c> BrowserBuilder </c>
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
     Public Sub handleCmdLine()
 
+        getFileAndDirParams({BuilderFile1, BuilderFile2, BuilderFile3,
+                    BuilderFile4, BuilderFile5, BuilderFile6,
+                    BuilderFile7, BuilderFile8, BuilderFile9})
+
+        initBrowserBuilder()
 
     End Sub
 
@@ -135,7 +159,7 @@ Public Module BrowserBuilder
     ''' Initializes the browser builder process
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-08-05
+    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-08-27
     Public Sub initBrowserBuilder()
 
         clrConsole()
@@ -149,13 +173,20 @@ Public Module BrowserBuilder
         setHeaderText("No valid generative rulesets found", True, noRules)
         If noRules Then Return
 
-        LogAndPrint(4, "Building browser configuration entries", trailr:=True, leadr:=True, ascend:=True, closeMenu:=True)
+        Dim browserBuilderStartPhrase = "Building browser configuration entries"
+        Dim output As New MenuSection
+        output.AddBoxWithText(browserBuilderStartPhrase)
+        gLog(browserBuilderStartPhrase, buffr:=True, ascend:=True)
 
-        processBrowserBuilder()
+        processBrowserBuilder(output)
 
-        LogAndPrint(4, "Browser configuration entries built successfully", buffr:=True, descend:=True, conjoin:=True)
+        Dim browserBuilderEndPhrase = "Browser configuration entries built successfully"
+        output.AddBoxWithText(browserBuilderEndPhrase)
+        gLog(browserBuilderEndPhrase, descend:=True, buffr:=True)
 
-        print(0, anyKeyStr, closeMenu:=True)
+        output.AddAnyKeyPrompt()
+
+        If Not SuppressOutput Then output.Print()
         crk()
 
     End Sub
@@ -165,7 +196,7 @@ Public Module BrowserBuilder
     ''' </summary>
     ''' 
     ''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
-    Private Sub processBrowserBuilder()
+    Private Sub processBrowserBuilder(ByRef output As MenuSection)
 
         gLog("Processing browser builder files", ascend:=True, buffr:=True)
 
@@ -176,13 +207,15 @@ Public Module BrowserBuilder
         }
 
         ' Process each scaffold entry for Chromium
-        buildScaffolds(BuilderFile1, False, outputFile)
+        buildScaffolds(BuilderFile1, False, outputFile, output)
+        totalChromiumCount = outputFile.Sections.Count
 
         ' Process each scaffold entry for Gecko 
-        buildScaffolds(BuilderFile2, True, outputFile)
+        buildScaffolds(BuilderFile2, True, outputFile, output)
+        totalGeckoCount = outputFile.Sections.Count - totalChromiumCount
 
         ' Apply corrections to our generated output and save
-        Flavorize(outputFile, outputFile, BuilderFile4, BuilderFile5, BuilderFile6, BuilderFile9, BuilderFile8, BuilderFile7)
+        Flavorize(outputFile, outputFile, output, BuilderFile4, BuilderFile5, BuilderFile6, BuilderFile9, BuilderFile8, BuilderFile7)
 
         outputFile.Sections = remotedebug(outputFile, True).Sections
 
@@ -197,17 +230,18 @@ Public Module BrowserBuilder
             "; You can find the complete winapp2.ini file here: " & winapp2link()
         }
 
-        Dim out = ""
+        Dim sb As New StringBuilder()
+
         For Each comment In leadingComments
 
-            out &= comment & Environment.NewLine
+            sb.AppendLine(comment)
 
         Next
 
-        out &= Environment.NewLine
-        out &= outputFile.toString
+        sb.AppendLine()
+        sb.Append(outputFile.toString)
 
-        outputFile.overwriteToFile(out)
+        outputFile.overwriteToFile(sb.ToString())
 
         gLog("Browser builder files processed successfully", descend:=True)
 
@@ -235,7 +269,8 @@ Public Module BrowserBuilder
     ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
     Private Sub buildScaffolds(rulesetFile As iniFile,
                                isGecko As Boolean,
-                         ByRef outputFile As iniFile)
+                         ByRef outputFile As iniFile,
+                         ByRef menuOutput As MenuSection)
 
         Dim browsers As New List(Of BrowserInfo)
         Dim scaffoldSections As New List(Of iniSection)
@@ -246,7 +281,7 @@ Public Module BrowserBuilder
 
                 Case section.Name.StartsWith("BrowserInfo:", StringComparison.InvariantCulture)
 
-                    Dim browserInfo As BrowserInfo = parseBrowserInfo(section)
+                    Dim browserInfo As BrowserInfo = parseBrowserInfo(section, menuOutput)
                     If browserInfo.ShouldSkip Then Continue For
                     browsers.Add(browserInfo)
 
@@ -256,17 +291,20 @@ Public Module BrowserBuilder
 
                 Case Else
 
-                    LogAndPrint(7, $"Invalid section found and ignored: [{section.Name}]")
+                    Dim logMsg = $"Invalid section found and ignored: [{section.Name}]"
+                    gLog(logMsg)
+                    menuOutput.AddWarning(logMsg)
 
             End Select
 
         Next
-
-        gLog($"Found {browsers.Count} browser configurations", indent:=True)
+        Dim configCount = $"Found {browsers.Count} browser configurations"
+        menuOutput.AddColoredLine(configCount, ConsoleColor.Yellow)
+        gLog(configCount, indent:=True)
 
         For Each scaffoldSection In scaffoldSections
 
-            processEntryScaffold(scaffoldSection, browsers, isGecko, outputFile)
+            processEntryScaffold(scaffoldSection, browsers, isGecko, outputFile, menuOutput)
 
         Next
 
@@ -285,7 +323,8 @@ Public Module BrowserBuilder
     ''' </returns>
     ''' 
     ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
-    Private Function parseBrowserInfo(browserSection As iniSection) As BrowserInfo
+    Private Function parseBrowserInfo(browserSection As iniSection,
+                                      ByRef menuOutput As MenuSection) As BrowserInfo
 
         Dim browserName As String = browserSection.Name.Substring("BrowserInfo: ".Length)
         Dim browserInfo As New BrowserInfo(browserName)
@@ -317,7 +356,9 @@ Public Module BrowserBuilder
 
                 Case Else
 
-                    LogAndPrint(7, $"Unexpected KeyType in {browserSection.Name}: {key.KeyType}")
+                    Dim logMsg = $"Unexpected KeyType in {browserSection.Name}: {key.KeyType}"
+                    menuOutput.AddWarning(logMsg)
+                    gLog(logMsg)
 
             End Select
 
@@ -325,9 +366,13 @@ Public Module BrowserBuilder
 
         Dim noUserData = browserInfo.UserDataPaths.Count = 0
         Dim noSection = browserInfo.SectionName = ""
+        Dim noUserDataErr = $"No valid UserDataPath key found in {browserName}"
+        Dim noValidSectionErr = $"No valid Section key found in {browserName}"
 
-        LogAndPrint(7, $"No valid UserDataPath key found in {browserName}", logCond:=noUserData, cond:=noUserData)
-        LogAndPrint(7, $"No valid Section key found in {browserName}", logCond:=noSection, cond:=noSection)
+        menuOutput.AddWarning(noUserDataErr, condition:=noUserData)
+        menuOutput.AddWarning(noValidSectionErr, condition:=noSection)
+        gLog(noUserDataErr, cond:=noUserData)
+        gLog(noValidSectionErr, cond:=noSection)
 
         Return browserInfo
 
@@ -358,11 +403,14 @@ Public Module BrowserBuilder
     Private Sub processEntryScaffold(scaffoldSection As iniSection,
                                      browsers As List(Of BrowserInfo),
                                      isGecko As Boolean,
-                               ByRef outputFile As iniFile)
+                               ByRef outputFile As iniFile,
+                               ByRef menuOutput As MenuSection)
 
         Dim scaffoldName As String = scaffoldSection.Name.Substring("EntryScaffold: ".Length)
 
-        gLog($"Processing EntryScaffold: {scaffoldName}", ascend:=True)
+        Dim processingMsg = $"Processing EntryScaffold: {scaffoldName}"
+        menuOutput.AddColoredLine(processingMsg, ConsoleColor.Magenta)
+        gLog(processingMsg, ascend:=True)
 
         Dim fileKeyBases As New List(Of String)
         Dim regKeyBases As New List(Of String)
@@ -381,7 +429,9 @@ Public Module BrowserBuilder
 
                 Case Else
 
-                    gLog($"Unexpected KeyType in {scaffoldSection.Name}: {key.KeyType}")
+                    Dim errMsg = $"Unexpected KeyType in {scaffoldSection.Name}: {key.KeyType}"
+                    gLog(errMsg)
+                    menuOutput.AddWarning(errMsg)
 
             End Select
 
@@ -389,11 +439,13 @@ Public Module BrowserBuilder
 
         For Each browser In browsers
 
-            generateBrowserEntry(browser, scaffoldName, fileKeyBases, regKeyBases, outputFile, isGecko)
+            generateBrowserEntry(browser, scaffoldName, fileKeyBases, regKeyBases, outputFile, isGecko, menuOutput)
 
         Next
 
-        gLog($"Finished processing EntryScaffold: {scaffoldName}", descend:=True, buffr:=True)
+        Dim finishedMsg = $"Finished processing EntryScaffold: {scaffoldName}"
+        menuOutput.AddColoredLine(finishedMsg, ConsoleColor.Yellow)
+        gLog(finishedMsg, descend:=True, buffr:=True)
 
     End Sub
 
@@ -481,7 +533,8 @@ Public Module BrowserBuilder
 
             Case Else
 
-                LogAndPrint(7, $"Unsupported OperaGX path provided in {fileKeyBase}")
+                Dim errMsg = $"Unsupported OperaGX path provided in {fileKeyBase}"
+                gLog(errMsg)
 
         End Select
 
@@ -528,9 +581,12 @@ Public Module BrowserBuilder
                                      fileKeyBases As List(Of String),
                                      regKeyBases As List(Of String),
                                ByRef outputFile As iniFile,
-                                     isGecko As Boolean)
+                                     isGecko As Boolean,
+                               ByRef menuOutput As MenuSection)
 
-        gLog($"Generating entry for browser: {browserInfo.Name}", indent:=True)
+        Dim generatingMsg = $"Generating entry for browser: {browserInfo.Name}"
+        gLog(generatingMsg, indent:=True)
+        menuOutput.AddColoredLine(generatingMsg, ConsoleColor.Magenta)
 
         ' Create the new entry section
         Dim entryName As String = $"{browserInfo.Name} {scaffoldName} *"
@@ -545,7 +601,9 @@ Public Module BrowserBuilder
         ' Add the section to the output file
         outputFile.Sections.Add(entryName, newSection)
 
-        gLog($"Generated entry: {entryName}", indent:=True, indAmt:=4)
+        Dim generatedText = $"Generated entry: {entryName}"
+        menuOutput.AddColoredLine(generatedText, ConsoleColor.Yellow)
+        gLog(generatedText, indent:=True, indAmt:=4)
 
     End Sub
 

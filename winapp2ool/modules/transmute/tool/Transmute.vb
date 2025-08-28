@@ -403,7 +403,11 @@ Public Module Transmute
         clrConsole()
 
         If Not (enforceFileHasContent(TransmuteFile1) AndAlso enforceFileHasContent(TransmuteFile2)) Then Return
-        LogAndPrint(4, $"Applying changes to {TransmuteFile1.Name}")
+
+        Dim menuOutput As New MenuSection
+        Dim applyingChangesStr = $"Applying changes to {TransmuteFile1.Name}"
+        menuOutput.AddBoxWithText(applyingChangesStr)
+        gLog(applyingChangesStr)
 
         Dim remModeStr = $"{TransmuteRemoveMode}{If(TransmuteRemoveMode = RemoveMode.ByKey, $" - {TransmuteRemoveKeyMode}", "")}"
         Dim replaceModeStr = $"{TransmuteReplaceMode}"
@@ -411,12 +415,17 @@ Public Module Transmute
 
         Dim color = If(TransmuteModeIsAdd, ConsoleColor.Green, If(Transmutator = TransmuteMode.Remove, ConsoleColor.Red, ConsoleColor.Yellow))
 
-        LogAndPrint(0, xmuteModeStr, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=color)
+        menuOutput.AddColoredLine(xmuteModeStr, color)
+        gLog(xmuteModeStr)
 
-        transmute(TransmuteFile1, TransmuteFile2, TransmuteFile3, True)
+        transmute(TransmuteFile1, TransmuteFile2, TransmuteFile3, menuOutput, True)
 
-        print(0, "", closeMenu:=True)
-        print(3, $"Changes applied. {anyKeyStr}", arbitraryColor:=ConsoleColor.Yellow)
+        menuOutput.AddLine("") _
+                  .AddBottomBorder() _
+                  .AddAnyKeyPrompt()
+
+        menuOutput.Print()
+
         crk()
 
     End Sub
@@ -437,10 +446,11 @@ Public Module Transmute
     Private Sub transmute(ByRef baseFile As iniFile,
                           ByRef sourceFile As iniFile,
                           ByRef saveFile As iniFile,
+                          ByRef menuOutput As MenuSection,
                        Optional isWinapp2 As Boolean = True,
                        Optional sortBeforeSave As Boolean = True)
 
-        resolveConflicts(baseFile, sourceFile)
+        resolveConflicts(baseFile, sourceFile, menuOutput)
 
         If isWinapp2 Then
 
@@ -478,6 +488,10 @@ Public Module Transmute
     ''' Indicates that the <c> iniFile </c>s being worked with contain winapp2.ini syntax 
     ''' </param>
     ''' 
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' </param>
+    ''' 
     ''' <param name="transmuteMode"> 
     ''' Sets the primary <c> Transmutator </c> <br />
     ''' Optional, Default: <c> TransmuteMode.Add </c>
@@ -499,16 +513,16 @@ Public Module Transmute
     ''' Optional, Default: <c> RemoveKeyMode.ByName </c> 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Public Sub RemoteTransmute(ByRef baseFile As iniFile,
                                ByRef sourceFile As iniFile,
                                ByRef outputFile As iniFile,
                                      isWinapp As Boolean,
+                               ByRef menuOutput As MenuSection,
                             Optional transmuteMode As TransmuteMode = TransmuteMode.Add,
                             Optional replaceMode As ReplaceMode = ReplaceMode.ByKey,
                             Optional removeMode As RemoveMode = RemoveMode.ByKey,
-                            Optional removeKeyMode As RemoveKeyMode = RemoveKeyMode.ByName,
-                            Optional quiet As Boolean = True)
+                            Optional removeKeyMode As RemoveKeyMode = RemoveKeyMode.ByName)
 
         ' We're going to assume here that not every invocation of RemoteTransmute specifically
         ' through Flavorize() will necessarily include a defined source file. 
@@ -518,8 +532,6 @@ Public Module Transmute
 
         If sourceFile.Sections.Count = 0 Then sourceFile.init()
         gLog($"{sourceFile.Name} is empty!", sourceFile.Sections.Count = 0)
-
-        SuppressOutput = False
 
         Dim initTransmutator = Transmutator
         Dim initReplMode = TransmuteReplaceMode
@@ -531,14 +543,12 @@ Public Module Transmute
         TransmuteRemoveMode = removeMode
         TransmuteRemoveKeyMode = removeKeyMode
 
-        transmute(baseFile, sourceFile, outputFile, isWinapp)
+        transmute(baseFile, sourceFile, outputFile, menuOutput, isWinapp)
 
         Transmutator = initTransmutator
         TransmuteReplaceMode = initReplMode
         TransmuteRemoveMode = initRemMode
         TransmuteRemoveKeyMode = initRemKeyMode
-
-        SuppressOutput = False
 
     End Sub
 
@@ -557,9 +567,14 @@ Public Module Transmute
     '''  The <c> iniFile </c> providing the content modification criteria for <c> <paramref name="baseFile"/> </c>
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Private Sub resolveConflicts(ByRef baseFile As iniFile,
-                                 ByRef sourceFile As iniFile)
+                                 ByRef sourceFile As iniFile,
+                                 ByRef menuOutput As MenuSection)
 
         For Each sectionName In sourceFile.Sections.Keys
 
@@ -568,14 +583,17 @@ Public Module Transmute
             ' If we're not adding and the base file doesn't have a section of the same name, there's no conflicts to resolve 
             If Not baseFileHasSection AndAlso Not Transmutator = TransmuteMode.Add Then
 
-                LogAndPrint(7, $"Target section not found in base file: [{sectionName}] - no changes applied")
+                Dim notFoundMsg = $"Target section not found in base file: [{sectionName}] - no changes applied"
+                menuOutput.AddWarning(notFoundMsg)
+                gLog(notFoundMsg)
+
                 Continue For
 
             End If
 
             Dim baseSection = If(baseFileHasSection, baseFile.Sections.Item(sectionName), New iniSection)
 
-            processTransmutator(baseFile, sourceFile, sectionName, baseSection)
+            processTransmutator(baseFile, sourceFile, sectionName, baseSection, menuOutput)
 
         Next
 
@@ -606,11 +624,16 @@ Public Module Transmute
     ''' The <c> iniSection </c> which will be modified by the transmutation process
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-23 | Code last updated: 2025-07-23
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Private Sub processTransmutator(ByRef baseFile As iniFile,
                                     ByRef sourceFile As iniFile,
                                           sectionName As String,
-                                    ByRef baseSection As iniSection)
+                                    ByRef baseSection As iniSection,
+                                    ByRef menuOutput As MenuSection)
 
         Dim sourceSection = sourceFile.Sections.Item(sectionName)
 
@@ -618,15 +641,15 @@ Public Module Transmute
 
             Case TransmuteMode.Add
 
-                handleAddMode(baseSection, sourceSection, baseFile, sectionName)
+                handleAddMode(baseSection, sourceSection, baseFile, sectionName, menuOutput)
 
             Case TransmuteMode.Replace
 
-                handleReplaceMode(baseSection, sourceSection, baseFile, sectionName)
+                handleReplaceMode(baseSection, sourceSection, baseFile, sectionName, menuOutput)
 
             Case TransmuteMode.Remove
 
-                handleRemoveMode(baseSection, sourceSection, baseFile, sectionName)
+                handleRemoveMode(baseSection, sourceSection, baseFile, sectionName, menuOutput)
 
         End Select
 
@@ -659,16 +682,24 @@ Public Module Transmute
     ''' The name of the current section undergoing the Add operation 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Public Sub handleAddMode(ByRef baseSection As iniSection,
                              ByRef sourceSection As iniSection,
                              ByRef baseFile As iniFile,
-                                   sectionName As String)
+                                   sectionName As String,
+                             ByRef menuOutput As MenuSection)
 
-        If baseFile.Sections.ContainsKey(sectionName) Then addKeysToBase(baseSection, sourceSection) : Return
+        If baseFile.Sections.ContainsKey(sectionName) Then addKeysToBase(baseSection, sourceSection, menuOutput) : Return
 
         baseFile.Sections.Add(sectionName, sourceSection)
-        LogAndPrint(0, $"+§ Added new section: {sectionName}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Magenta)
+
+        Dim newSectionMsg = $"+§ Added new section: {sectionName}"
+        menuOutput.AddColoredLine(newSectionMsg, ConsoleColor.Green)
+        gLog(newSectionMsg)
 
     End Sub
 
@@ -687,16 +718,26 @@ Public Module Transmute
     ''' <c> <paramref name="baseSection"/> </c>
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Private Sub addKeysToBase(ByRef baseSection As iniSection,
-                              ByRef sourceSection As iniSection)
+                              ByRef sourceSection As iniSection,
+                              ByRef menuOutput As MenuSection)
 
-        LogAndPrint(0, $"Adding keys to {sourceSection.Name}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
+        Dim addKeysMsg = $"Adding keys to {sourceSection.Name}"
+        menuOutput.AddColoredLine(addKeysMsg, ConsoleColor.Cyan)
+        gLog(addKeysMsg)
 
         For Each sourceKey In sourceSection.Keys.Keys
 
             baseSection.Keys.add(sourceKey)
-            LogAndPrint(0, $"  += Added key: {sourceKey.Name}={sourceKey.Value}", colorLine:=True, enStrCond:=True)
+
+            Dim addedKeyMsg = $"  += Added key: {sourceKey.Name}={sourceKey.Value}"
+            menuOutput.AddColoredLine(addedKeyMsg, ConsoleColor.Green)
+            gLog(addedKeyMsg)
 
         Next
 
@@ -726,20 +767,27 @@ Public Module Transmute
     ''' and also <c> <paramref name="sourceSection"/> </c>
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Private Sub handleReplaceMode(ByRef baseSection As iniSection,
                                   ByRef sourceSection As iniSection,
                                   ByRef baseFile As iniFile,
-                                        sectionName As String)
+                                        sectionName As String,
+                                  ByRef menuOutput As MenuSection)
 
-        Dim logstr = $"Resolving collisons in {sectionName} ({Transmutator} - {TransmuteReplaceMode} mode)"
-        LogAndPrint(0, logstr, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
+        Dim ResolvingMsg = $"Resolving collisons in {sectionName} ({Transmutator} - {TransmuteReplaceMode} mode)"
+        menuOutput.AddColoredLine(ResolvingMsg, ConsoleColor.Cyan)
+        gLog(ResolvingMsg)
 
         ' if we're replacing by key, we can return immediately after
-        If TransmuteReplaceMode = ReplaceMode.ByKey Then replaceKeysInBase(baseSection, sourceSection) : Return
+        If TransmuteReplaceMode = ReplaceMode.ByKey Then replaceKeysInBase(baseSection, sourceSection, menuOutput) : Return
 
         baseFile.Sections(sectionName) = sourceSection
-        LogAndPrint(0, $"  *§ Replaced entire section: {sectionName}", colorLine:=True, enStrCond:=False)
+        Dim replMsg = $"  *§ Replaced entire section: {sectionName}"
+        menuOutput.AddColoredLine(replMsg, ConsoleColor.Yellow)
 
     End Sub
 
@@ -759,9 +807,14 @@ Public Module Transmute
     ''' <c> <paramref name="baseSection"/> </c>
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Private Sub replaceKeysInBase(ByRef baseSection As iniSection,
-                                  ByRef sourceSection As iniSection)
+                                  ByRef sourceSection As iniSection,
+                                  ByRef menuOutput As MenuSection)
 
         ' create lookup of source keys by name
         Dim sourceKeys As New Dictionary(Of String, iniKey)(StringComparer.InvariantCultureIgnoreCase)
@@ -779,7 +832,11 @@ Public Module Transmute
             If Not sourceKeys.ContainsKey(baseKey.Name) Then Continue For
 
             baseSection.Keys.Keys(i) = sourceKeys(baseKey.Name)
-            LogAndPrint(0, $"  * Replaced key: {baseKey.Name}", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
+
+            Dim replKeyMsg = $"  * Replaced key: {baseKey.Name}"
+            menuOutput.AddColoredLine(replKeyMsg, ConsoleColor.Yellow)
+            gLog(replKeyMsg)
+
             sourceKeys.Remove(baseKey.Name)
 
         Next
@@ -787,7 +844,9 @@ Public Module Transmute
         ' report any missed replacement targets
         For Each key In sourceKeys.Values
 
-            LogAndPrint(7, $"Replacement target not found: {key.Name} not found in {baseSection.Name}")
+            Dim errMsg = $"Replacement target not found: {key.Name} not found in {baseSection.Name}"
+            menuOutput.AddWarning(errMsg)
+            gLog(errMsg)
 
         Next
 
@@ -815,22 +874,30 @@ Public Module Transmute
     ''' and also <c> <paramref name="sourceSection"/> </c>
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Private Sub handleRemoveMode(ByRef baseSection As iniSection,
                                  ByRef sourceSection As iniSection,
                                  ByRef baseFile As iniFile,
-                                       sectionName As String)
+                                       sectionName As String,
+                                 ByRef menuOutput As MenuSection)
 
         Dim isKeyMode = TransmuteRemoveMode = RemoveMode.ByKey
 
-        Dim logstr = $"Resolving conflicts in {sectionName} ({Transmutator} - {TransmuteRemoveMode} - {If(isKeyMode, TransmuteRemoveKeyMode.ToString, "")})"
-        LogAndPrint(0, logstr, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
+        Dim conflictsStr = $"Resolving conflicts in {sectionName} ({Transmutator} - {TransmuteRemoveMode} - {If(isKeyMode, TransmuteRemoveKeyMode.ToString, "")})"
+        menuOutput.AddColoredLine(conflictsStr, ConsoleColor.Cyan)
+        gLog(conflictsStr)
 
         ' if we're removing keys we can immediately return when we're done 
-        If isKeyMode Then remKeys(baseSection, sourceSection) : Return
+        If isKeyMode Then remKeys(baseSection, sourceSection, menuOutput) : Return
 
         baseFile.Sections.Remove(sectionName)
-        LogAndPrint(0, $"  -§ Removed entire section: {sectionName}", colorLine:=True, enStrCond:=False)
+        Dim remMsg = $"  -§ Removed entire section: {sectionName}"
+        menuOutput.AddColoredLine(remMsg, ConsoleColor.Red)
+        gLog(remMsg)
 
     End Sub
 
@@ -848,9 +915,14 @@ Public Module Transmute
     ''' <c> <paramref name="baseSection"/> </c> <br />
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Private Sub remKeys(ByRef baseSection As iniSection,
-                              sourceSection As iniSection)
+                              sourceSection As iniSection,
+                        ByRef menuOutput As MenuSection)
 
         Dim sourceData As New HashSet(Of String)(StringComparer.InvariantCultureIgnoreCase)
         Dim isByName = TransmuteRemoveKeyMode = RemoveKeyMode.ByName
@@ -871,7 +943,10 @@ Public Module Transmute
             If Not sourceData.Contains(matchStr) Then Continue For
 
             baseSection.Keys.Keys.RemoveAt(i)
-            LogAndPrint(0, $"  -= Removed key by {If(isByName, "name", "value")}: {baseKey.toString}", colorLine:=True, enStrCond:=False)
+            Dim remKeyMsg = $"  -= Removed key by {If(isByName, "name", "value")}: {baseKey.toString}"
+            menuOutput.AddColoredLine(remKeyMsg, ConsoleColor.Red)
+            gLog(remKeyMsg)
+
             sourceData.Remove(matchStr)
 
         Next
@@ -904,6 +979,10 @@ Public Module Transmute
     ''' 
     ''' <param name="outputFile">
     ''' The location on disk to which the flavorized <c> baseFile </c> will be saved 
+    ''' </param>
+    ''' 
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
     ''' 
     ''' <param name="additionsFile">
@@ -959,25 +1038,21 @@ Public Module Transmute
     ''' 
     ''' </param>
     ''' 
-    ''' <param name="quiet">
-    ''' Indicates whether or not the output from the Flavorizer should be muted <br />
-    ''' Optional, Default: <c> False </c>
-    ''' 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Public Sub Flavorize(ByRef baseFile As iniFile,
                          ByRef outputFile As iniFile,
+                         ByRef menuOutput As MenuSection,
                       Optional additionsFile As iniFile = Nothing,
                       Optional sectionRemovalFile As iniFile = Nothing,
                       Optional keyNameRemovalFile As iniFile = Nothing,
                       Optional keyValueRemovalFile As iniFile = Nothing,
                       Optional sectionReplacementFile As iniFile = Nothing,
                       Optional keyReplacementFile As iniFile = Nothing,
-                      Optional isWinapp As Boolean = True,
-                      Optional quiet As Boolean = True)
+                      Optional isWinapp As Boolean = True)
 
-        LogAndPrint(0, $"Flavorizing {baseFile.Name}", cond:=Not quiet, arbitraryColor:=ConsoleColor.Magenta)
+        Dim flavorizingMsg = $"Flavorizing {baseFile.Name}"
+        menuOutput.AddColoredLine(flavorizingMsg, ConsoleColor.Magenta)
+        gLog(flavorizingMsg)
 
         Dim flavorOperations As New Dictionary(Of String, Object()) From {
             {"Removing sections", {sectionRemovalFile, TransmuteMode.Remove, ReplaceMode.ByKey, RemoveMode.BySection, RemoveKeyMode.ByName}},
@@ -998,13 +1073,16 @@ Public Module Transmute
             Dim curRemMode = DirectCast(config(3), RemoveMode)
             Dim curRemKMode = DirectCast(config(4), RemoveKeyMode)
 
-            LogAndPrint(0, description, cond:=Not quiet, arbitraryColor:=ConsoleColor.Cyan)
-            RemoteTransmute(baseFile, flavorFile, outputFile, isWinapp, curMode, curReplMode, curRemMode, curRemKMode, quiet)
+            menuOutput.AddColoredLine(description, ConsoleColor.Cyan)
+            gLog(description)
+
+            RemoteTransmute(baseFile, flavorFile, outputFile, isWinapp, menuOutput, curMode, curReplMode, curRemMode, curRemKMode)
 
         Next
 
-        LogAndPrint(0, $"{baseFile.Name} Flavorized", cond:=Not quiet, arbitraryColor:=ConsoleColor.Magenta)
-
+        Dim flavorizedMsg = $"{baseFile.Name} Flavorized"
+        menuOutput.AddColoredLine(flavorizedMsg, ConsoleColor.Magenta)
+        gLog(flavorizedMsg)
 
     End Sub
 

@@ -97,20 +97,31 @@ Public Module Flavorizer
 
         If Not enforceFileHasContent(FlavorizerFile1) Then Return
 
-        LogAndPrint(4, $"Applying flavor to {FlavorizerFile1.Name}", trailr:=True, leadr:=True, ascend:=True, closeMenu:=True, arbitraryColor:=ConsoleColor.Yellow)
+        Dim applyingTxt = $"Applying flavor to {FlavorizerFile1.Name}"
+        Dim output As New MenuSection
+        output.AddBoxWithText(applyingTxt)
+        gLog(applyingTxt, buffr:=True, ascend:=True)
 
         Dim correctionFiles As New List(Of iniFile) From {FlavorizerFile3, FlavorizerFile4, FlavorizerFile5, FlavorizerFile6, FlavorizerFile7, FlavorizerFile8}
         Dim validFiles = correctionFiles.Where(Function(f) f.exists).Count()
 
         Dim hasValidFiles = Not validFiles = 0
 
-        LogAndPrint(0, "No correction files specified - output will be identical to input", cond:=Not hasValidFiles, logCond:=Not hasValidFiles, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
-        LogAndPrint(0, $"Applying {validFiles} correction file(s)", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Cyan)
+        Dim noCorrectionsMsg = "No correction files specified - output will be identical to input"
+        output.AddWarning(noCorrectionsMsg, Not hasValidFiles)
+        gLog(noCorrectionsMsg, , Not hasValidFiles)
 
-        performFlavorization()
+        Dim numFilesApplyingMsg = $"Applying {validFiles} correction file(s)"
+        output.AddColoredLine(numFilesApplyingMsg, ConsoleColor.Cyan)
+        gLog(numFilesApplyingMsg)
 
-        LogAndPrint(4, "Flavorization completed successfully", buffr:=True, descend:=True, conjoin:=True, arbitraryColor:=ConsoleColor.Yellow)
-        print(0, anyKeyStr, closeMenu:=True)
+        performFlavorization(output)
+
+        Dim finishedMsg = "Flavorization completed successfully"
+        output.AddBoxWithText(finishedMsg)
+        output.AddAnyKeyPrompt()
+        gLog(finishedMsg)
+
         crk()
 
     End Sub
@@ -120,7 +131,7 @@ Public Module Flavorizer
     ''' </summary>
     ''' 
     ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
-    Private Sub performFlavorization()
+    Private Sub performFlavorization(ByRef menuOutput As MenuSection)
 
         gLog("Starting flavorization process", ascend:=True, buffr:=True)
 
@@ -133,11 +144,11 @@ Public Module Flavorizer
         Dim sectionReplacementFile = If(FlavorizerFile6.exists, FlavorizerFile6, Nothing)
         Dim keyReplacementFile = If(FlavorizerFile7.exists, FlavorizerFile7, Nothing)
 
-        Flavorize(baseFile, saveFile,
+        Flavorize(baseFile, saveFile, menuOutput,
                   additionsFile,
                   sectionRemovalFile, keyNameRemovalFile, keyValueRemovalFile,
                   sectionReplacementFile, keyReplacementFile,
-                  FlavorizeAsWinapp, SuppressOutput)
+                  FlavorizeAsWinapp)
 
         gLog("Flavorization process completed", descend:=True)
 
