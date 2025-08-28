@@ -76,9 +76,10 @@ Public Module commandLineHandler
         addModule("3", "transmute", 3, AddressOf Transmute.handleCmdLine)
         addModule("4", "diff", 3, AddressOf Diff.HandleCmdLine)
         addModule("5", "ccdebug", 3, AddressOf CCiniDebug.handleCmdlineArgs)
-        addModule("6", "download", 3, AddressOf Downloader.handleCmdLine)
-        addModule("7", "browserbuilder", 9, AddressOf BrowserBuilder.handleCmdLine)
-        addModule("8", "flavorizer", 8, AddressOf Flavorizer.handleCmdLine)
+        addModule("6", "browserbuilder", 9, AddressOf BrowserBuilder.handleCmdLine)
+        addModule("7", "combine", 2, AddressOf Combine.handleCmdLine)
+        addModule("8", "download", 3, AddressOf Downloader.handleCmdLine)
+        addModule("9", "flavorize", 8, AddressOf Flavorizer.handleCmdLine)
 
         Return configs
 
@@ -322,11 +323,14 @@ Public Module commandLineHandler
         file.Dir = If(arg.StartsWith("\", StringComparison.InvariantCulture), Environment.CurrentDirectory, "")
         Dim splitArg As String() = arg.Split(CChar("\"))
 
-        file.Name = splitArg.Last
+        ' Only set the name if the last part of the split contains a file extension
+        If splitArg.Last.Contains(".") Then file.Name = splitArg.Last
 
         If splitArg.Length < 2 Then Return
 
-        For i = 0 To splitArg.Length - 2
+        Dim terminus = If(splitArg.Last.Contains("."), splitArg.Length - 2, splitArg.Length - 1)
+
+        For i = 0 To terminus
 
             file.Dir += splitArg(i) & "\"
 
