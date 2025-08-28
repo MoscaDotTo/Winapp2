@@ -89,18 +89,18 @@ Public Module transmuteSettingsHandler
     ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub updateTransmuteEnumFlags()
 
-        TransmuteModeIsAdd = (Transmutator = TransmuteMode.Add)
-        TransmuteModeIsRemove = (Transmutator = TransmuteMode.Remove)
-        TransmuteModeIsReplace = (Transmutator = TransmuteMode.Replace)
+        TransmuteModeIsAdd = Transmutator = TransmuteMode.Add
+        TransmuteModeIsRemove = Transmutator = TransmuteMode.Remove
+        TransmuteModeIsReplace = Transmutator = TransmuteMode.Replace
 
-        ReplaceModeIsBySection = (TransmuteReplaceMode = ReplaceMode.BySection)
-        ReplaceModeIsByKey = (TransmuteReplaceMode = ReplaceMode.ByKey)
+        ReplaceModeIsBySection = TransmuteReplaceMode = ReplaceMode.BySection
+        ReplaceModeIsByKey = TransmuteReplaceMode = ReplaceMode.ByKey
 
-        RemoveModeIsBySection = (TransmuteRemoveMode = RemoveMode.BySection)
-        RemoveModeIsByKey = (TransmuteRemoveMode = RemoveMode.ByKey)
+        RemoveModeIsBySection = TransmuteRemoveMode = RemoveMode.BySection
+        RemoveModeIsByKey = TransmuteRemoveMode = RemoveMode.ByKey
 
-        RemoveKeyModeIsByName = (TransmuteRemoveKeyMode = RemoveKeyMode.ByName)
-        RemoveKeyModeIsByValue = (TransmuteRemoveKeyMode = RemoveKeyMode.ByValue)
+        RemoveKeyModeIsByName = TransmuteRemoveKeyMode = RemoveKeyMode.ByName
+        RemoveKeyModeIsByValue = TransmuteRemoveKeyMode = RemoveKeyMode.ByValue
 
     End Sub
 
@@ -113,7 +113,7 @@ Public Module transmuteSettingsHandler
     ''' The new <c> Name </c> for <c> TransmuteFile2 </c> 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub changeBaseFileName(newName As String)
 
         TransmuteFile2.Name = newName
@@ -123,8 +123,10 @@ Public Module transmuteSettingsHandler
     End Sub
 
     ''' <summary>
-    ''' 
+    ''' Updates the disk-writable representation of each of Transmute's enums 
     ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub updateAllTransmuteEnumSettings()
 
         updateTransmuteEnumFlags()
