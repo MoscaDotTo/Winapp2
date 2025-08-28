@@ -235,6 +235,15 @@ Public Module WinappDebug
     Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
 
     ''' <summary>
+    ''' commandline runtime parameter for creating winapp2.ini with a version string 
+    ''' reflecting the current date <br />
+    ''' Default: <c> True </c> - uses current date; <c> False </c> uses static version string
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
+    Private Property UseCurrentDate As Boolean = False
+
+    ''' <summary>
     ''' Handles the commandline args for <c> WinappDebug </c> <br />
     ''' WinappDebug commandline args: <br />
     ''' <c> -c </c> enable saving of changes made by the linter
@@ -245,6 +254,7 @@ Public Module WinappDebug
 
         InitDefaultLintSettings()
         invertSettingAndRemoveArg(SaveChanges, "-c")
+        invertSettingAndRemoveArg(UseCurrentDate, "-usedate")
         getFileAndDirParams({winappDebugFile1, New iniFile, winappDebugFile3})
 
         If Not cmdargs.Contains("UNIT_TESTING_HALT") Then InitDebug()
@@ -267,8 +277,10 @@ Public Module WinappDebug
             currentLine += 1
 
             For Each key In section.Keys.Keys
+
                 key.LineNumber = currentLine
                 currentLine += 1
+
             Next
 
             section.EndingLineNumber = currentLine
@@ -302,14 +314,14 @@ Public Module WinappDebug
         ' Browser builder would really like to not have to think
         ' too hard about the content of keys when applying the browser additions.
         If forceOpti Then
+
             lintOpti.ShouldScan = True
             lintOpti.ShouldRepair = True
+
         End If
 
         Dim wa2 As New winapp2file(givenIni)
-        SuppressOutput = True
         Debug(wa2)
-        SuppressOutput = False
         Return wa2.toIni
 
     End Function
@@ -324,7 +336,7 @@ Public Module WinappDebug
 
         If Not enforceFileHasContent(winappDebugFile1) Then Return
 
-        Dim wa2 As New winapp2file(winappDebugFile1)
+        Dim wa2 As New winapp2file(winappDebugFile1, UseCurrentDate)
 
         clrConsole()
 
