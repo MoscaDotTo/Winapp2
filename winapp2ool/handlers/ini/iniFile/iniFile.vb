@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -273,35 +273,83 @@ Public Class iniFile
         End Try
     End Sub
 
-    ''' <summary> Prints the menu for the <c> File Chooser </c> submodule, enabling the user to change the <c> Name </c>
-    ''' property or open the <c> Directory Chooser </c> sister submodule through a familiar MenuMaker interface </summary>
+    ''' <summary> 
+    ''' Prints the menu for the <c> File Chooser </c> submodule, enabling the user to change the 
+    ''' <c> Name </c> property or open the <c> Directory Chooser </c> sister submodule through 
+    ''' a familiar MenuMaker interface </summary>
+    ''' 
     Public Sub printFileChooserMenu()
+
         printMenuTop({"Choose a file name, or open the directory chooser to choose a directory"})
         print(1, InitName, "Use the default name", InitName.Length <> 0)
         print(1, SecondName, "Use the default rename", SecondName.Length <> 0)
         print(1, "Directory Chooser", "Choose a new directory", trailingBlank:=True)
         print(0, $"Current Directory: {replDir(Dir)}")
         print(0, $"Current File:      {Name}", closeMenu:=True)
+
     End Sub
 
-    ''' <summary> Handles the input for the <c> File Chooser </c> submodule </summary>
-    ''' <param name="input"> The user's input </param>
+    ''' <summary> 
+    ''' Handles the input for the <c> File Chooser </c> submodule 
+    ''' </summary>
+    ''' 
+    ''' <param name="input"> 
+    ''' The user's input 
+    ''' </param>
+    ''' 
     Public Sub handleFileChooserInput(input As String)
+
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
+
+        Dim hasInitName = InitName.Length <> 0
+        Dim hasSecondName = SecondName.Length <> 0
         Select Case True
+
+            ' Option Name:                                 Exit 
+            ' Option States:
+            ' Default                                      -> 0 (Default) 
             Case input = "0"
+
                 exitModule()
+
             Case input.Length = 0
+
                 exitIfExists()
-            Case input = "1" And InitName.Length <> 0
+
+
+            ' Option Name:                                 Use the default name 
+            ' Option States:
+            ' InitName = ""                                -> Unavailable (not displayed)
+            ' Default                                      -> 1 (Default)
+            Case hasInitName AndAlso input = "1"
+
                 reName(InitName)
-            Case (input = "1" And InitName.Length = 0) Or (input = "2" And SecondName.Length <> 0)
+
+            ' Option Name:                                 Use the default rename
+            ' Option States:
+            ' SecondName = ""                              -> Unavailable (not displayed)
+            ' InitName = "" (-1)                           -> 1 
+            ' InitName <> ""                               -> 2 (Default)
+            Case hasSecondName AndAlso input = computeMenuNumber(2, {Not hasInitName}, {-1})
+
                 reName(SecondName)
-            Case (input = "2" And SecondName.Length = 0) Or (input = "3" And InitName.Length <> 0 And SecondName.Length <> 0)
+
+            ' Option Name:                                 Directory Chooser
+            ' Option States:
+            ' InitName = "" (-1), SecondName = "" (-1)     -> 1 
+            ' InitName = "" (-1), SecondName <> ""         -> 2
+            ' InitName <> "", SecondName = "" (-1)         -> 2 
+            ' InitName <> "", SecondName <> ""             -> 3 (Default)
+            Case input = computeMenuNumber(3, {Not hasInitName, Not hasSecondName}, {-1, -1})
+
                 initModule("Directory Chooser", AddressOf printDirChooserMenu, AddressOf handleDirChooserInput)
+
             Case Else
+
                 reName(input)
+
         End Select
+
     End Sub
 
     ''' <summary> Assigns the <c> Name </c> of the <c> iniFile </c> to the given <c> <paramref name="nname"/> </c> and stores the previous <c> Name </c>

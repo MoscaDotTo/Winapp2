@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2023 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -19,110 +19,76 @@ Option Strict On
 Imports System.Globalization
 Imports System.Text.RegularExpressions
 
-''' <summary> 
+''' <summary>
+''' 
 ''' Compares two winapp2.ini format <c> iniFile </c>s and summarizes the changes to the user 
 ''' <br /> 
 ''' <br /> NOTE: to "exist" here means for an entry of the same exact name (case sensitive) to exist 
 ''' <br /> Changes fall three major categories:
+''' 
 ''' <list type="table">
+''' 
 ''' <item> 
 ''' <term> Added entries </term>
 ''' <description> exist in the new file and not in the old file </description>
 ''' </item>
+''' 
 ''' <item>
 ''' <term> Modified entries </term>
 ''' <description> exist in both the new file and the old file and have been changed in some way  </description>
 ''' </item>
+''' 
 ''' <item>
 ''' <term> Removed entries </term>
 ''' <description> exist in the old file but not in the new file  </description>
 ''' </item>
+''' 
 ''' </list> 
+''' 
 ''' <br />
 ''' <br /> Additionally, Removed entries have three sub categories: 
+''' 
 ''' <list type="table">
+''' 
 ''' <item> 
 ''' <term> Renamed entries </term>
 ''' <description> do not exist in the new file, but their content exists in some other entry in the file,
 ''' mostly unchanged from the old version (may contain minor changes) </description>
 ''' </item>
+''' 
 ''' <item>
 ''' <term> Merged entries </term>
 ''' <description> do not exist in the new file, but their content exists in some other entry in the new file 
 ''' which is substantially different from the old version </description>
 ''' </item>
+''' 
 ''' <item>
 ''' <term> Removed without replacement </term>
 ''' <description> do not exist in the new file and their content was not found in some other entry in the new file  </description>
 ''' </item>
+''' 
 ''' </list>
+''' 
 ''' <br /> 
 ''' <br /> Likewise, Merged entries themselves are broken into two categories 
 ''' <list type="table">
+''' 
 ''' <item>
 ''' <term> Modified </term>
 ''' <description> Entries that existed in the old file which have been modified to contain content from entries which have been removed  </description>
 ''' </item>
+''' 
 ''' <item>
 ''' <term> Added </term>
 ''' <description> Entries which did not exist in the old file but who contain content from entries which have been removed  </description>
 ''' </item>
+''' 
 ''' </list>
+''' 
 ''' </summary>
 ''' 
-''' Docs last updated: 2023-06-10
+''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 Module Diff
-
-    ''' <summary> 
-    ''' The "old" version of winapp2.ini, against which <c> DiffFile2 </c> will be compared 
-    ''' <br /> When downloading, this is the local version of winapp2.ini
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2022-06-07 | Code last updated: 2022-07-14
-    Public Property DiffFile1 As iniFile = New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
-
-    ''' <summary> 
-    ''' The "new" version of winapp2.ini against which <c> DiffFile1 </c> will be compared 
-    ''' <br /> When downloading, this is the remote version of winapp2.ini
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2022-06-07 | Code last updated: 2022-07-14
-    Public Property DiffFile2 As iniFile = New iniFile(Environment.CurrentDirectory, "", mExist:=True)
-
-    ''' <summary> 
-    ''' The path for the Diff log 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2022-06-07 | Code last updated: 2022-07-14
-    Public Property DiffFile3 As iniFile = New iniFile(Environment.CurrentDirectory, "diff.txt")
-
-    ''' <summary> 
-    ''' Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c> 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2022-06-07 | Code last updated: 2022-07-14
-    Public Property DownloadDiffFile As Boolean = Not isOffline
-
-    ''' <summary> 
-    ''' Indicates that the diff output from winapp2ool's global log should be saved to disk 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2022-06-07 | Code last updated: 2022-07-14
-    Public Property SaveDiffLog As Boolean = False
-
-    ''' <summary> 
-    ''' Indicates that the module settings have been modified from their defaults 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2022-06-07 | Code last updated: 2022-07-14
-    Public Property DiffModuleSettingsChanged As Boolean = False
-
-    ''' <summary> 
-    ''' Indicates that the remote (online) should be trimmed for the local system before beginning the Diff 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2022-06-07 | Code last updated: 2022-07-14
-    Public Property TrimRemoteFile As Boolean = Not isOffline
 
     ''' <summary> 
     ''' The number of removed entries whose content was detected in an added entry
@@ -174,18 +140,11 @@ Module Diff
     Private Property ModEntriesReplacedByUpdateTotal As Integer = 0
 
     ''' <summary> 
-    ''' Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
-    Public Property ShowFullEntries As Boolean = False
-
-    ''' <summary> 
     ''' Holds the slice of the winapp2ool global log containing the most recent Diff results 
     ''' </summary>
     ''' 
     ''' Docs last updated: 2022-06-08 | Code last updated: 2022-07-14
-    Public MostRecentDiffLog As String = ""
+    Public Property MostRecentDiffLog As String = ""
 
     ''' <summary>
     ''' A list of Regex characters that need to be escaped when using Regex.Match
@@ -206,7 +165,16 @@ Module Diff
     ''' </summary>
     ''' 
     ''' Docs last updated: 2022-06-08 | Code last updated: 2022-06-08
-    Private Property BrowserSecRefs As String() = {"3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001"}
+    Private Property BrowserSecRefs As String() = {
+                                                   "3029",
+                                                   "3006",
+                                                   "3033",
+                                                   "3034",
+                                                   "3027",
+                                                   "3026",
+                                                   "3030",
+                                                   "3001"
+                                                  }
 
     ''' <summary>
     ''' The names of removed entries determined to have been renamed 
@@ -292,9 +260,15 @@ Module Diff
     ''' </summary>
     ''' 
     ''' Docs last updated: 2022-06-08 | Code last updated: 2022-06-08
-    Private Property NewPaths As String() = {"%ProgramData%", "%UserProfile%\AppData\LocalLow", "*",
-                                            "%UserProfile%\Pictures", "%UserProfile%\Videos",
-                                            "%UserProfile%\Documents", "%UserProfile%\Music"}
+    Private Property NewPaths As String() = {
+                                             "%ProgramData%",
+                                             "%UserProfile%\AppData\LocalLow",
+                                             "*",
+                                             "%UserProfile%\Pictures",
+                                             "%UserProfile%\Videos",
+                                             "%UserProfile%\Documents",
+                                             "%UserProfile%\Music"
+                                            }
 
     ''' <summary>
     ''' Deprecated values that are no longer used or being phased out of winapp2.ini. 
@@ -303,18 +277,48 @@ Module Diff
     ''' </summary>
     ''' 
     ''' Docs last updated: 2022-06-08 | code last updated: 2022-06-08
-    Private Property OldPaths As String() = {"%CommonAppData%", "%LocalLowAppData%", "*.*", "%Pictures%", "%Video%", "%Documents%", "%Music%"}
+    Private Property OldPaths As String() = {
+                                             "%CommonAppData%",
+                                             "%LocalLowAppData%",
+                                             "*.*",
+                                             "%Pictures%",
+                                             "%Video%",
+                                             "%Documents%",
+                                             "%Music%"
+                                            }
 
     ''' <summary>
     ''' File system and registry locations which are considered too vague to be used to establish matching key content across entries on their own
     ''' </summary>
     ''' 
     ''' Docs last updated: 2022-06-08 | code last updated: 2022-06-08
-    Private Property Disallowed As New HashSet(Of String) From {"%Documents%\Add-in Express", "%UserProfile%\Desktop", "%LocalAppData%", "%WinDir%\System32",
-                                                              "%SystemDrive%", "%WinDir%", "%UserProfile%", "%Documents%", "%CommonAppData%", "%AppData%",
-                                                              "%Pictures%", "%Public%", "%Music%", "%Video%", "HKCU\Software\Microsoft\Windows",
-                                                              "HKLM\Software\Microsoft\Windows", "HKCU\Software\Microsoft\VisualStudio", "%LocalAppData%\Microsoft\Edge*",
-                                                              "HKCU\Software\Opera Software", "HKCU\Software\Vivaldi", "HKCU\Software\BraveSoftware"}
+    Private Property Disallowed As New HashSet(Of String) From {
+                                                                "%Documents%\Add-in Express",
+                                                                "%UserProfile%\Desktop",
+                                                                "%LocalAppData%",
+                                                                "%WinDir%\System32",
+                                                                "%SystemDrive%",
+                                                                "%WinDir%",
+                                                                "%UserProfile%",
+                                                                "%Documents%",
+                                                                "%CommonAppData%",
+                                                                "%AppData%",
+                                                                "%Pictures%",
+                                                                "%Public%",
+                                                                "%Music%",
+                                                                "%Video%",
+                                                                "HKCU\Software\Microsoft\Windows",
+                                                                "HKLM\Software\Microsoft\Windows",
+                                                                "HKCU\Software\Microsoft\VisualStudio",
+                                                                "%LocalAppData%\Microsoft\Edge*",
+                                                                "HKCU\Software\Opera Software",
+                                                                "HKCU\Software\Vivaldi",
+                                                                "HKCU\Software\BraveSoftware"
+                                                               }
+
+    Public Property DiffLogStartPhrase As String = "Beginning Diff"
+
+    Public Property DiffLogEndPhrase As String = "Diff complete"
 
     ''' <summary> 
     ''' Runs a diff using command line arguments, allowing Diff to be called programmatically 
@@ -338,9 +342,9 @@ Module Diff
         If DownloadDiffFile Then DiffFile2.Name = "Online winapp2.ini"
 
         invertSettingAndRemoveArg(SaveDiffLog, "-savelog")
-        getFileAndDirParams(DiffFile1, DiffFile2, DiffFile3)
+        getFileAndDirParams({DiffFile1, DiffFile2, DiffFile3})
 
-        If DiffFile2.Name.Length <> 0 Then conductDiff()
+        If DiffFile2.Name.Length <> 0 Then ConductDiff()
 
     End Sub
 
@@ -357,7 +361,7 @@ Module Diff
 
         DiffFile1 = firstFile
         DownloadDiffFile = True
-        conductDiff()
+        ConductDiff()
 
     End Sub
 
@@ -375,9 +379,11 @@ Module Diff
             Dim downloadedIniFile = getRemoteIniFile(winapp2link)
             DiffFile2.Sections = downloadedIniFile.Sections
 
-        End If
+        Else
 
-        If Not enforceFileHasContent(DiffFile2) Then Return
+            If Not enforceFileHasContent(DiffFile2) Then Return
+
+        End If
 
         If TrimRemoteFile AndAlso DownloadDiffFile Then
 
@@ -388,17 +394,22 @@ Module Diff
         End If
 
         clrConsole()
+
+        gLog(DiffLogStartPhrase)
+
         LogAndPrint(6, $"Changes between{GetVer(DiffFile1)} and{GetVer(DiffFile2)}", enStrCond:=False, ascend:=True)
 
         CompareFiles()
 
         LogPostDiff()
 
+        gLog(DiffLogEndPhrase)
+
         print(3, pressEnterStr)
 
         crl()
 
-        MostRecentDiffLog = If(SaveDiffLog, getLogSliceFromGlobal("Beginning diff", "Diff complete"), "hasBeenRun")
+        MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
         DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
         setHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
 
@@ -426,22 +437,29 @@ Module Diff
     End Function
 
     ''' <summary> Records the summary of the diff results and reports them to the user <br />
+    ''' output as follows: 
+    ''' 
     ''' Summary: <br />
+    ''' 
     ''' Net entry count change: <br />
+    ''' 
     ''' Modified Entries: total <br />
-    '''  added keys (if applicable) <br />
-    '''  removed keys (if applicable) <br />
-    '''  updated keys (if applicable) <br />
+    '''  Added keys (if applicable) <br />
+    '''  Removed keys (if applicable) <br />
+    '''  Updated keys (if applicable) <br />
+    ''' 
     ''' Removed entries: total <br />
     '''  Merged entries: total <br />
     '''  Removed without replacement: total <br />
+    ''' 
     ''' Added entries: total <br />
     '''  Added entries with no merged content: total <br />
     '''  Added entries with merged content: total <br />
     '''  Added entries determined renamed: total <br />
+    ''' 
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2023-05-29 | Code last updated: 2023-05-29
+    ''' Docs last updated: 2025-06-24 | Code last updated: 2023-05-29
     Private Sub LogPostDiff()
 
         Dim netDiff = DiffFile2.Sections.Count - DiffFile1.Sections.Count
@@ -527,7 +545,7 @@ Module Diff
 
         If Not matched Then Return False
 
-        Dim firstMatch = Regex.Match(oldVal, newVal)
+        Dim firstMatch = Regex.Match(oldVal, newVal, RegexOptions.IgnoreCase)
 
         ' There might be a better way to do this but due to the nature of regex matches, 
         ' we can match a sub string where we might not actually want to.
@@ -686,7 +704,7 @@ Module Diff
 
             If isLastPiece AndAlso (isDetect OrElse isDetectFile) Then Return CompareValues(newVal, oldVal)
 
-            If isLastPiece AndAlso isFileKey Then Return finalizeFileKeyEquivalence(oldVal, newVal, oldKeySplit, newKeySplit, matchedFileKeyHasMoreParams, possibleWildCardReduction)
+            If isLastPiece AndAlso isFileKey Then Return FinalizeFileKeyEquivalence(oldVal, newVal, oldKeySplit, newKeySplit, matchedFileKeyHasMoreParams, possibleWildCardReduction)
 
             If Not CompareValues(newVal, oldVal) Then Return False
 
@@ -868,17 +886,17 @@ Module Diff
 
         ProcessOldEntries()
 
-        processRemovals()
+        ProcessRemovals()
 
         SummarizeRenames()
 
         SummarizeMergers()
 
-        itemizeMergers()
+        ItemizeMergers()
 
-        itemizeModifications()
+        ItemizeModifications()
 
-        itemizeAdditions()
+        ItemizeAdditions()
 
         Dim ender = Now
 
@@ -936,7 +954,7 @@ Module Diff
 
             If DiffFile1.Sections.ContainsKey(section.Name) Then Continue For
 
-            trackEntry(AddedEntryTracker, section.Name)
+            TrackEntry(AddedEntryTracker, section.Name)
 
         Next
 
@@ -959,7 +977,7 @@ Module Diff
 
             End If
 
-            findModifications(section, DiffFile2.Sections(section.Name))
+            FindModifications(section, DiffFile2.Sections(section.Name))
 
         Next
 
@@ -1021,7 +1039,7 @@ Module Diff
             Next
 
             Dim mergedOldEntries = New iniSection(entryBuilder)
-            findModifications(mergedOldEntries, DiffFile2.Sections(entry))
+            FindModifications(mergedOldEntries, DiffFile2.Sections(entry))
 
         Next
 
@@ -1224,7 +1242,7 @@ Module Diff
     ''' 
     ''' Docs last updated: 2023-06-10 | Code last updated: 2023-06-10
     Private Sub ItemizeMergedEntries(entry As String,
-                                       isMerger As Boolean)
+                                     isMerger As Boolean)
 
         If Not MergeDict.ContainsKey(entry) Then Return
 
@@ -1436,9 +1454,9 @@ Module Diff
     ''' Docs last updated: 2023-06-13 | Code last updated: 2023-06-13
     Private Sub SetMergeCandidate(count As Integer,
                                   newSectionName As String,
-                                  ByRef highestCount As Integer,
-                                  ByRef newNameCandidate As String,
-                                  ByRef mergeTracker As Boolean)
+                            ByRef highestCount As Integer,
+                            ByRef newNameCandidate As String,
+                            ByRef mergeTracker As Boolean)
 
         If count <= highestCount Then Return
 
@@ -1493,7 +1511,7 @@ Module Diff
             assessKeyMatches(oldWa2Section.RegKeys, newWa2sSection.RegKeys, regKeyCountsMatch,
                              allRegKeysMatched, regKeyMatches, Disallowed)
 
-            setMergeCandidate(fileKeyMatches + regKeyMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
+            SetMergeCandidate(fileKeyMatches + regKeyMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
 
             If fileKeyMatches = 0 AndAlso regKeyMatches = 0 Then Continue For
 
@@ -1507,20 +1525,21 @@ Module Diff
             If changeWasRecorded Then Return True
 
             ' Just skip this next check on the browser sections, they all share the same detections 
-            If oldWa2Section.LangSecRef.KeyCount > 0 AndAlso BrowserSecRefs.Contains(oldWa2Section.LangSecRef.Keys(0).Value) Then Continue For
+            ' If oldWa2Section.LangSecRef.KeyCount > 0 AndAlso BrowserSecRefs.Contains(oldWa2Section.LangSecRef.Keys(0).Value) Then Continue For
 
             Dim detectMatches = 0
             Dim detectFileMatches = 0
 
             assessKeyMatches(oldWa2Section.Detects, newWa2sSection.Detects, True, False, detectMatches, Disallowed)
             assessKeyMatches(oldWa2Section.DetectFiles, newWa2sSection.DetectFiles, True, False, detectFileMatches, Disallowed)
-            setMergeCandidate(fileKeyMatches + regKeyMatches + detectFileMatches + detectMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
+            SetMergeCandidate(fileKeyMatches + regKeyMatches + detectFileMatches + detectMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
 
         Next
 
         If Not entryWasRenamedOrMerged Then Return False
 
         trackMerger(oldSectionVersion, DiffFile2.Sections(newMergedOrRenamedName))
+
         Return True
 
     End Function
@@ -1580,7 +1599,7 @@ Module Diff
     ''' 
     ''' Docs last updated: 2023-05-30 | Code last updated: 2023-05-30
     Private Sub trackMerger(oldSectionVersion As iniSection,
-                          newIniSectionVersion As iniSection)
+                            newIniSectionVersion As iniSection)
 
         Dim mergeName = newIniSectionVersion.Name
         MergedEntryTracker.Add(mergeName)
@@ -1636,14 +1655,13 @@ Module Diff
     ''' Docs last updated: 2023-04-20 | Code last updated: 2023-04-20
 
     Private Sub assessKeyMatches(oldKeyList As keyList,
-                                newKeyList As keyList,
-                                ByRef countTracker As Boolean,
-                                ByRef allKeysMatchedTracker As Boolean,
-                                ByRef MatchCount As Integer,
-                                Optional disallowedValues As HashSet(Of String) = Nothing,
-                                Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
-                                Optional ByRef possibleWildCardReduction As Boolean = False)
-
+                                 newKeyList As keyList,
+                                 ByRef countTracker As Boolean,
+                                 ByRef allKeysMatchedTracker As Boolean,
+                                 ByRef MatchCount As Integer,
+                                 Optional disallowedValues As HashSet(Of String) = Nothing,
+                                 Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
+                                 Optional ByRef possibleWildCardReduction As Boolean = False)
 
         For Each key In oldKeyList.Keys
 
@@ -1755,9 +1773,9 @@ Module Diff
     ''' 
     ''' Docs last updated: 2023-06-05 | Code last updated: 2023-06-05
     Private Sub ItemizeChangesFromList(kl As keyList,
-                                   wasAdded As Boolean,
-                                   ByRef ktList As List(Of String),
-                                   ByRef countList As List(Of Integer))
+                                       wasAdded As Boolean,
+                                       ByRef ktList As List(Of String),
+                                       ByRef countList As List(Of Integer))
 
         If kl.KeyCount = 0 Then Return
 
@@ -1855,7 +1873,6 @@ Module Diff
     ''' A list of <c> iniKeys </c> and their matched partners (in [new, old] KeyValuePairs) for the purpose of identifying "modified" keys 
     ''' </returns>
     ''' Docs last updated: 2023-06-12 | Code last updated: 2023-06-12
-
     Private Function DetermineModifiedKeys(ByRef removedKeys As keyList,
                                            ByRef addedKeys As keyList) As List(Of KeyValuePair(Of iniKey, iniKey))
 
@@ -1918,8 +1935,8 @@ Module Diff
     ''' 
     ''' Docs last updated: 2022-06-10 | Code last updated: 2022-06-10
     Private Sub MakeDiff(section As iniSection,
-                        changeType As Integer,
-                        Optional newSection As iniSection = Nothing)
+                         changeType As Integer,
+                         Optional newSection As iniSection = Nothing)
 
         Dim printColor As ConsoleColor = ConsoleColor.Cyan
         If changeType = 2 OrElse changeType = 3 Then printColor = If(changeType = 2, ConsoleColor.Yellow, ConsoleColor.Magenta)

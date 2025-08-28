@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2024 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -17,9 +17,11 @@
 
 Option Strict On
 
-''' <summary>
+''' <summary> 
 ''' Manages the settings of the WinappDebug module for the purpose of syncing to disk 
 ''' </summary>
+''' 
+''' Docs last updated: 2024-05-08
 Module lintsettingshandler
 
     ''' <summary>
@@ -27,21 +29,35 @@ Module lintsettingshandler
     ''' </summary>
     ''' 
     ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
-    Private Property Lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters",
-                                                        "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
-                                                        "Multiples", "Invalid Values", "Syntax Errors", "Path Validity",
-                                                        "Semicolons", "Optimizations", "Potential Duplicate Keys Between Entries"}
+    Private ReadOnly Property Lints As New List(Of String) From {
+        "Casing",
+        "Alphabetization",
+        "Improper Numbering",
+        "Parameters",
+        "Flags",
+        "Slashes",
+        "Defaults",
+        "Duplicates",
+        "Unneeded Numbering",
+        "Multiples",
+        "Invalid Values",
+        "Syntax Errors",
+        "Path Validity",
+        "Semicolons",
+        "Optimizations",
+        "Potential Duplicate Keys Between Entries"
+    }
 
     ''' <summary> 
-    ''' Restore the default state of all of the module's parameters, undoing any changes the user may have made to them 
+    ''' Restores the default state of the WinappDebug module's properties 
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2023-07-19
     Public Sub InitDefaultLintSettings()
 
         winappDebugFile1.resetParams()
         winappDebugFile3.resetParams()
-        ModuleSettingsChanged = False
+        LintModuleSettingsChanged = False
         RepairErrsFound = True
         SaveChanges = False
         overrideDefaultVal = False
@@ -54,70 +70,14 @@ Module lintsettingshandler
     End Sub
 
     ''' <summary> 
-    ''' Loads the WinappDebug settings from disk and loads them into memory, overriding the default settings 
+    ''' Assigns the module settings to WinappDebug based on the current disk-writable settings representation
     ''' </summary>
     ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Sub getSeralizedLintSettings()
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
+    Public Sub getSerializedLintSettings()
 
-        If Not readSettingsFromDisk Then Return
-
-        For Each kvp In settingsDict(NameOf(WinappDebug))
-
-            Select Case kvp.Key
-
-                Case NameOf(winappDebugFile1) & "_Dir"
-
-                    winappDebugFile1.Dir = kvp.Value
-
-                Case NameOf(winappDebugFile1) & "_Name"
-
-                    winappDebugFile1.Name = kvp.Value
-
-                Case NameOf(winappDebugFile3) & "_Dir"
-
-                    winappDebugFile3.Dir = kvp.Value
-
-                Case NameOf(winappDebugFile3) & "_Name"
-
-                    winappDebugFile3.Name = kvp.Value
-
-                Case NameOf(RepairSomeErrsFound)
-
-                    RepairSomeErrsFound = CBool(kvp.Value)
-
-                Case NameOf(ScanSettingsChanged)
-
-                    ScanSettingsChanged = CBool(kvp.Value)
-
-                Case NameOf(ModuleSettingsChanged)
-
-                    ModuleSettingsChanged = CBool(kvp.Value)
-
-                Case NameOf(SaveChanges)
-
-                    SaveChanges = CBool(kvp.Value)
-
-                Case NameOf(RepairErrsFound)
-
-                    RepairErrsFound = CBool(kvp.Value)
-
-                Case NameOf(overrideDefaultVal)
-
-                    overrideDefaultVal = CBool(kvp.Value)
-
-
-                Case NameOf(expectedDefaultValue)
-
-                    expectedDefaultValue = CBool(kvp.Value)
-
-                Case Else
-
-                    CheckScanRepair(kvp)
-
-            End Select
-
-        Next
+        loadLintRulesFromDict()
+        LoadModuleSettingsFromDict(NameOf(WinappDebug), GetType(lintsettings))
 
     End Sub
 
@@ -149,33 +109,55 @@ Module lintsettingshandler
 
     End Sub
 
-    '''<summary>
-    '''Adds the current (typically default) state of the module's settings into the disk-writable settings representation 
-    '''</summary>
-    '''
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' <summary>
+    ''' Adds the current state of the module's settings into the disk-writable settings representation 
+    ''' </summary>
+    ''' 
+    ''' <remarks>
+    ''' Most often, this is the default state of these settings 
+    ''' </remarks>
+    ''' 
+    ''' Docs last updated: 2024-05-08 | Code last updated: 2025-06-25
     Public Sub CreateLintSettingsSection()
 
-        Dim settingsKeys As New List(Of String) From {
-                                                      NameOf(RepairSomeErrsFound), tsInvariant(RepairSomeErrsFound),
-                                                      NameOf(ScanSettingsChanged), tsInvariant(ScanSettingsChanged),
-                                                      NameOf(ModuleSettingsChanged), tsInvariant(ModuleSettingsChanged),
-                                                      NameOf(SaveChanges), tsInvariant(SaveChanges),
-                                                      NameOf(RepairErrsFound), tsInvariant(RepairErrsFound),
-                                                      NameOf(overrideDefaultVal), tsInvariant(overrideDefaultVal),
-                                                      NameOf(expectedDefaultValue), tsInvariant(expectedDefaultValue)}
+        Dim settingsModule = GetType(lintsettings)
+        Dim moduleName = NameOf(WinappDebug)
 
+        Dim lintSettingsTuples = GetSettingsTupleWithReflection(settingsModule)
+
+        ' We add the individual lint scan settings to the tuple and provide it to the initalizer
         For i = 0 To Lints.Count - 1
 
-            settingsKeys.Add($"{Lints(i)}_Scan")
-            settingsKeys.Add(tsInvariant(Rules(i).ShouldScan))
-            settingsKeys.Add($"{Lints(i)}_Repair")
-            settingsKeys.Add(tsInvariant(Rules(i).ShouldRepair))
+            lintSettingsTuples.Add($"{Lints(i)}_Scan")
+            lintSettingsTuples.Add(tsInvariant(Rules(i).ShouldScan))
+            lintSettingsTuples.Add($"{Lints(i)}_Repair")
+            lintSettingsTuples.Add(tsInvariant(Rules(i).ShouldRepair))
 
         Next
 
-        settingsKeys.AddRange({NameOf(winappDebugFile1), winappDebugFile1.Name, winappDebugFile1.Dir, NameOf(winappDebugFile3), winappDebugFile3.Name, winappDebugFile3.Dir})
-        createModuleSettingsSection(NameOf(WinappDebug), settingsKeys, 39, 2)
+        Dim addlBools = Lints.Count * 2
+        createModuleSettingsSection(moduleName, settingsModule, lintSettingsTuples, addlBools)
+
+    End Sub
+
+    ''' <summary>
+    ''' Loads the <c>LintRule</c>s from the disk-writable settings representation into the module's settings
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
+    Private Sub loadLintRulesFromDict()
+
+        If Not settingsDict.ContainsKey("WinappDebug") Then Return
+
+        Dim ruleDict = settingsDict("WinappDebug")
+
+        For Each rule In Rules
+
+            If ruleDict.ContainsKey($"{rule.LintName}_Scan") Then rule.ShouldScan = CBool(ruleDict($"{rule.LintName}_Scan"))
+
+            If ruleDict.ContainsKey($"{rule.LintName}_Repair") Then rule.ShouldRepair = CBool(ruleDict($"{rule.LintName}_Repair"))
+
+        Next
 
     End Sub
 

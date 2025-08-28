@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2022 Hazel Ward
+﻿'    Copyright (C) 2018-2025 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -14,108 +14,110 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
-''' <summary> Contains the menu for CCiniDebug and handles the user input into that menu </summary>
+
+''' <summary> 
+''' Display's the CCiniDebug's main menu and handles their input accordingly 
+''' </summary>
+''' 
+''' Docs last updated: 2025-08-21
 Module ccdbmainmenu
 
-    ''' <summary> Prints the CCiniDebug menu to the user </summary>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+    ''' <summary> 
+    ''' Prints the CCiniDebug menu to the user 
+    ''' </summary>
+    ''' 
+    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
     Public Sub printCCDBMainMenu()
-        printMenuTop({"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"})
-        print(1, "Run (default)", "Debug ccleaner.ini", trailingBlank:=True, enStrCond:=PruneStaleEntries Or SaveDebuggedFile Or SortFileForOutput, colorLine:=True)
-        print(5, "Toggle Pruning", "removal of dead winapp2.ini settings", enStrCond:=PruneStaleEntries)
-        print(5, "Toggle Saving", "automatic saving of changes made by CCiniDebug", enStrCond:=SaveDebuggedFile)
-        print(5, "Toggle Sorting", "alphabetical sorting of ccleaner.ini", enStrCond:=SortFileForOutput, trailingBlank:=True)
-        print(1, "File Chooser (ccleaner.ini)", "Choose a new ccleaner.ini name or location")
-        print(1, "File Chooser (winapp2.ini)", "Choose a new winapp2.ini name or location", PruneStaleEntries, trailingBlank:=Not SaveDebuggedFile)
-        print(1, "File Chooser (save)", "Change where CCiniDebug saves its changes", SaveDebuggedFile, trailingBlank:=True)
-        print(0, $"Current ccleaner.ini:  {replDir(CCDebugFile2.Path)}")
-        print(0, $"Current winapp2.ini:   {replDir(CCDebugFile1.Path)}", cond:=PruneStaleEntries)
-        print(0, $"Current save location: {replDir(CCDebugFile3.Path)}", cond:=SaveDebuggedFile, closeMenu:=Not CCDBSettingsChanged)
-        print(2, NameOf(CCiniDebug), cond:=CCDBSettingsChanged, closeMenu:=True)
+
+        Dim menuDescriptionLines As String() = {"Sort alphabetically the contents of ccleaner.ini and prune stale winapp2.ini settings"}
+
+        Dim menu = MenuSection.CreateCompleteMenu(NameOf(CCiniDebug), menuDescriptionLines, ConsoleColor.Red)
+
+        menu.AddColoredOption("Run (default)", "Debug ccleaner.ini", GetRedGreen(Not (PruneStaleEntries OrElse SaveDebuggedFile OrElse SortFileForOutput))).AddBlank _
+        .AddToggle("Toggle pruning", "removal of orphaned winapp2.ini settings", isEnabled:=PruneStaleEntries) _
+        .AddToggle("Toggle saving", "automatic saving of changes made by CCiniDebug", isEnabled:=SaveDebuggedFile) _
+        .AddToggle("Toggle sorting", "alphabetical sorting of the contents of ccleaner.ini", isEnabled:=SortFileForOutput).AddBlank() _
+        .AddOption("Choose winapp2.ini", "Select a new supplemental winapp2.ini file", condition:=PruneStaleEntries) _
+        .AddOption("Choose ccleaner.ini", "Select a new ccleaner.ini file for debugging") _
+        .AddOption("Choose save target", "Select a new save target for the debugged ccleaner.ini", condition:=SaveDebuggedFile).AddBlank() _
+        .AddLine($"Current winapp2.ini:   {replDir(CCDebugFile1.Path)}", condition:=PruneStaleEntries) _
+        .AddLine($"Current ccleaner.ini:  {replDir(CCDebugFile2.Path)}") _
+        .AddLine($"Current save target:   {replDir(CCDebugFile3.Path)}", condition:=SaveDebuggedFile) _
+        .AddBlank(CCDBSettingsChanged) _
+        .AddResetOpt(NameOf(CCiniDebug), CCDBSettingsChanged)
+
+        menu.Print()
+
     End Sub
 
-    ''' <summary> Handles the user's input from the CCiniDebug main menu </summary>
-    ''' <param name="input"> The user's input </param>
-    ''' Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
-    Public Sub handleCCDBMainMenuUserInput(input As String)
+    ''' <summary> 
+    ''' Handles the user's input from the CCiniDebug main menu 
+    ''' </summary>
+    ''' 
+    ''' <param name="input"> 
+    ''' The user's input 
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2020-07-18 | Code last updated: 2025-08-21
+    Public Sub handleCCDBMUserInput(input As String)
+
+        Dim toggles = getToggleOpts()
+        Dim toggleNums = getMenuNumbering(toggles, 2)
+
+        Dim fileOpts = getFileOpts()
+        Dim fileNums = getMenuNumbering(fileOpts, 2 + toggles.Count)
+
+        Dim resetNum = CType(2 + toggles.Count + fileOpts.Count, String)
 
         Select Case True
 
-            ' Option Name:                                 Exit
-            ' Option States:
-            ' Default                                      -> 0 (default)
+            ' Exit
+            ' Notes: Always "0"
             Case input = "0"
 
                 exitModule()
 
-            ' Option Name:                                 Run (default)
-            ' Option States:
-            ' Default                                      -> 1 (default)
-            Case (input = "1" OrElse input.Length = 0) AndAlso (PruneStaleEntries OrElse SaveDebuggedFile OrElse SortFileForOutput)
+            ' Run (default)
+            ' Notes: Always "1", also triggered by no input if run conditions are otherwise satisfied
+            Case (input = "1" OrElse input.Length = 0)
 
-                initCCDebug()
+                Dim noOptionsSelected = Not (PruneStaleEntries OrElse SaveDebuggedFile OrElse SortFileForOutput)
+                If Not denyActionWithHeader(noOptionsSelected, "Please enable at least one options") Then initCCDebug()
 
-            ' Option Name:                                 Toggle Pruning
-            ' Option States:
-            ' Default                                      -> 2 (default)
-            Case input = "2"
+            ' Toggles
+            ' Pruning 
+            ' Saving 
+            ' Sorting 
+            Case toggleNums.Contains(input)
 
-                toggleSettingParam(PruneStaleEntries, "Pruning", CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(PruneStaleEntries), NameOf(CCDBSettingsChanged))
+                Dim i = CType(input, Integer) - 2
 
-            ' Option Name:                                 Toggle Saving
-            ' Option States:
-            ' Default                                      -> 3 (default)
-            Case input = "3"
+                Dim toggleMenuText = toggles.Keys(i)
+                Dim toggleName = toggles(toggleMenuText)
 
-                toggleSettingParam(SaveDebuggedFile, "Autosaving", CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(SaveDebuggedFile), NameOf(CCDBSettingsChanged))
+                toggleModuleSetting(toggleMenuText, NameOf(CCiniDebug), GetType(ccdebugsettings),
+                                    toggleName, NameOf(CCDBSettingsChanged))
 
-            ' Option Name:                                 Toggle Sorting
-            ' Option States:
-            ' Default                                      -> 4 (default)
-            Case input = "4"
+            ' File selectors 
+            ' winapp2.ini (unavailable when not pruning)
+            ' ccleaner.ini
+            ' Save target (unavailable when not saving)
+            Case fileNums.Contains(input)
 
-                toggleSettingParam(SortFileForOutput, "Sorting", CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(SortFileForOutput), NameOf(CCDBSettingsChanged))
+                Dim i = CType(input, Integer) - 2 - toggles.Count
 
-            ' Option Name:                                 File Chooser (ccleaner.ini)
-            ' Option States:
-            ' Default                                      -> 5 (default)
-            Case input = "5"
+                Dim fileName = fileOpts.Keys(i)
+                Dim fileObj = fileOpts(fileName)
 
-                changeFileParams(CCDebugFile2, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile2), NameOf(CCDBSettingsChanged))
+                changeFileParams(fileObj, CCDBSettingsChanged, NameOf(CCiniDebug), fileName, NameOf(CCDBSettingsChanged))
 
-            ' Option Name:                                 File Chooser (winapp2.ini)
-            ' Option States:
-            ' Not pruning                                  -> Unavailable (not displayed)
-            ' Default                                      -> 6 (default)
-            Case input = "6" AndAlso PruneStaleEntries
-
-                changeFileParams(CCDebugFile1, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile1), NameOf(CCDBSettingsChanged))
-
-            ' Option Name:                                 File Chooser (save)
-            ' Option States:
-            ' Not Saving                                   -> Unavailable (not displayed)
-            ' Saving, Not pruning (-1)                     -> 6 
-            ' Saving                                       -> 7 (default) 
-            Case SaveDebuggedFile AndAlso ((input = "6" AndAlso Not PruneStaleEntries) OrElse (input = "7" AndAlso PruneStaleEntries))
-
-                changeFileParams(CCDebugFile3, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile3), NameOf(CCDBSettingsChanged))
-
-            ' Option Name:                                 Reset Settings
-            ' Option States:
-            ' CCDBSettingsChanged = False                  -> Unavailable (not displayed)
-            ' Not saving (-1), not pruning (-1)            -> 6
-            ' Not Saving (-1), pruning                     -> 7
-            ' Saving, not pruning (-1)                     -> 7
-            ' Saving, pruning                              -> 8 (default)
-            Case CCDBSettingsChanged AndAlso input = computeMenuNumber(8, {Not SaveDebuggedFile, Not PruneStaleEntries}, {-1, -1})
+            ' Reset Settings
+            ' Notes: Only available after a setting has been changed, always comes last in the option list
+            Case CCDBSettingsChanged AndAlso input = resetNum
 
                 resetModuleSettings("CCiniDebug", AddressOf initDefaultCCDBSettings)
-
-            ' Reject attempts to run ccinidebug with no options selected 
-            Case Not (PruneStaleEntries OrElse SaveDebuggedFile OrElse SortFileForOutput)
-
-                setHeaderText("Please enable at least one option", True)
 
             Case Else
 
@@ -124,5 +126,88 @@ Module ccdbmainmenu
         End Select
 
     End Sub
+
+    ''' <summary>
+    ''' Determines the current set of toggles displayed on the menu and returns a Dictionary 
+    ''' of those options and their respective toggle names <br />
+    ''' <br />
+    ''' The set of possible toggles includes:
+    ''' <list type="bullet">
+    '''     
+    '''     <item>
+    '''     Pruning 
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Saving
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Sorting
+    '''     </item>
+    '''     
+    ''' </list>
+    '''  
+    ''' </summary>
+    ''' 
+    ''' <returns>
+    ''' The set of available toggles for the CCiniDebug module, with their names on the 
+    ''' menu as keys and the respective property names as values
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+    Private Function getToggleOpts() As Dictionary(Of String, String)
+
+        Dim toggles As New Dictionary(Of String, String)
+
+        toggles.Add("Pruning", NameOf(PruneStaleEntries))
+        toggles.Add("Saving", NameOf(SaveDebuggedFile))
+        toggles.Add("Sorting", NameOf(SortFileForOutput))
+
+        Return toggles
+
+    End Function
+
+    ''' <summary>
+    ''' Determines the current set of file selectors displayed on the menu and returns a Dictionary 
+    ''' of those options and their respective files <br />
+    ''' <br />
+    ''' The set of possible files includes:
+    ''' <list type="bullet">
+    '''     
+    '''     <item>
+    '''     winapp2.ini (unavailable when not pruning)
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     ccleaner.ini 
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Save target (unavailable when not saving)
+    '''     </item>
+    '''     
+    ''' </list>
+    ''' 
+    ''' </summary>
+    ''' 
+    ''' <returns> 
+    ''' The set of <c> iniFile </c> properties for an object currently displayed on the menu
+    ''' </returns>
+    ''' 
+    ''' Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+    Private Function getFileOpts() As Dictionary(Of String, iniFile)
+
+        Dim selectors As New Dictionary(Of String, iniFile)
+
+        If PruneStaleEntries Then selectors.Add(NameOf(CCDebugFile1), CCDebugFile1)
+
+        selectors.Add(NameOf(CCDebugFile2), CCDebugFile2)
+
+        If SaveDebuggedFile Then selectors.Add(NameOf(CCDebugFile3), CCDebugFile3)
+
+        Return selectors
+
+    End Function
 
 End Module
