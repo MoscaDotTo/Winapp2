@@ -62,8 +62,13 @@ Public Module Combine
     Public Sub handleCmdLine()
 
         initDefaultCombineSettings()
-        getFileAndDirParams({CombineFile1, New iniFile, CombineFile3})
-        If CombineFile1.Dir.Length > 0 Then initCombine()
+
+        Dim targetDir As New iniFile With {.Dir = CombineFile1.Dir, .Name = CombineFile1.Name}
+        Dim outputFile As New iniFile With {.Dir = CombineFile3.Dir, .Name = CombineFile3.Name}
+
+        getFileAndDirParams({targetDir, New iniFile, outputFile})
+
+        initCombine(targetDir.Dir, outputFile)
 
     End Sub
 
@@ -72,28 +77,28 @@ Public Module Combine
     ''' </summary>
     ''' 
     ''' Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
-    Public Sub initCombine()
+    Public Sub initCombine(targetDir As String,
+                           outputFile As iniFile)
 
         clrConsole()
 
+        If Not Directory.Exists(targetDir) Then
 
-        If Not Directory.Exists(CombineFile1.Dir) Then
-
-            setHeaderText($"Target directory not found: {CombineFile1.Dir}", True)
+            setHeaderText($"Target directory not found: {targetDir}", True)
             Return
 
         End If
 
-        Dim outputFile As New iniFile With {.Dir = CombineFile3.Dir, .Name = CombineFile3.Name}
+
         Dim CombineUserOutput As New MenuSection
 
-        Dim outputHeader = $"{CombineLogStartPhrase} {CombineFile1.Dir}"
+        Dim outputHeader = $"{CombineLogStartPhrase} {targetDir}"
         gLog(outputHeader, ascend:=True, leadr:=True)
         CombineUserOutput.AddTopBorder()
         CombineUserOutput.AddLine(outputHeader, centered:=True)
         CombineUserOutput.AddDivider()
 
-        processCombine(CombineUserOutput, CombineFile1.Dir, outputFile)
+        processCombine(CombineUserOutput, targetDir, outputFile)
 
         CombineUserOutput.AddAnyKeyPrompt()
 
@@ -256,6 +261,9 @@ Public Module Combine
 
         End If
 
+        Dim processingMsg = $"Processing: {Path.GetFileName(filepath)} ({currentFile.Sections.Count} sections)"
+        gLog(processingMsg, indent:=True)
+
         mergeFileIntoOutput(currentFile, outputFile)
 
         validFileCount += 1
@@ -351,6 +359,7 @@ Public Module Combine
             Dim keyExists = extantKeys.Contains($"{sourceKey.Name.ToLowerInvariant()}={sourceKey.Value.ToLowerInvariant()}")
 
             existingSection.Keys.add(sourceKey, Not keyExists)
+            gLog($"Added {sourceKey.Name} to {existingSection.Name}")
 
             If keyExists Then
 
@@ -362,7 +371,7 @@ Public Module Combine
 
             End If
 
-            gLog($"Skipped duplicate key: {sourceKey.Name}", indent:=True, indAmt:=6, cond:=keyExists)
+            gLog($"Skipped duplicate key in {sourceSection.Name}: {sourceKey.Name}", indent:=True, indAmt:=6, cond:=keyExists)
 
         Next
 

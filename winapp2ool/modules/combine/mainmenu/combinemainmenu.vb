@@ -81,7 +81,7 @@ Module combinemainmenu
             ' Notes: Always "1", also triggered by no input if run conditions are otherwise satisfied 
             Case (input = "1" Or input = "")
 
-                initCombine()
+                initCombine(CombineFile1.Dir, CombineFile3)
 
             ' File Selectors
             ' Target dir (dir only)
