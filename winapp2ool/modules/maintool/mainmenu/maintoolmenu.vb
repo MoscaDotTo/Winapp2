@@ -41,31 +41,31 @@ Module maintoolmenu
 
         Dim menu = MenuSection.CreateCompleteMenu($"{NameOf(Winapp2ool)} v{currentVersion}", menuDesc, headerColor, True)
 
-        ' User warnings for limited feature availability
-        If isOffline OrElse DotNetFrameworkOutOfDate OrElse cantDownloadExecutable Then
-
-            menu.AddLine("Winapp2ool is currently in offline mode", centered:=True, condition:=isOffline) _
-                .AddLine("Your .NET Framework is out of date", centered:=True, condition:=DotNetFrameworkOutOfDate) _
-                .AddLine("Winapp2ool is unable To automatically update", centered:=True, condition:=cantDownloadExecutable) _
-                .AddBlank()
-
-        End If
+        menu.AddBlank() _
+            .AddOption("WinappDebug", "Check For And correct errors In winapp2.ini") _
+            .AddOption("Trim", "Debloat winapp2.ini for your system") _
+            .AddOption("Transmute", "Add, replace, or remove entire sections or individual keys from winapp2.ini") _
+            .AddOption("Diff", "Observe the changes between two winapp2.ini files") _
+            .AddOption("CCiniDebug", "Sort And trim ccleaner.ini") _
+            .AddOption("Browser Builder", "Generate winapp2.ini entries for web browsers") _
+            .AddOption("Combine", "Join together a collection of ini files into one").AddBlank() _
+            .AddOption("Downloader", "Download files from the Winapp2 GitHub") _
+            .AddColoredOption("Settings", "Manage Winapp2ool's settings", ConsoleColor.Yellow)
 
         ' Update notifications
         getUpdateNotification(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver, menu)
         getUpdateNotification(updateIsAvail, "Winapp2ool", currentVersion, latestVersion, menu)
+        ' User warnings for limited feature availability
+        If isOffline OrElse DotNetFrameworkOutOfDate OrElse cantDownloadExecutable Then
 
-        menu.AddBlank() _
-            .AddOption("WinappDebug", "Check For And correct errors In winapp2.ini") _
-            .AddOption("Trim", "Debloat winapp2.ini For your system") _
-            .AddOption("Transmute", "Add, replace, Or remove entire sections Or individual keys from winapp2.ini") _
-            .AddOption("Diff", "Observe the changes between two winapp2.ini files") _
-            .AddOption("CCiniDebug", "Sort And trim ccleaner.ini") _
-            .AddOption("Browser Builder", "Generate winapp2.ini entries For web browsers") _
-            .AddOption("Combine", "Join together a collection Of ini files into one").AddBlank() _
-            .AddOption("Downloader", "Download files from the Winapp2 GitHub") _
-            .AddColoredOption("Settings", "Manage Winapp2ool's settings", ConsoleColor.Yellow) _
-            .AddBlank(waUpdateIsAvail) _
+            menu.AddBlank() _
+                .AddColoredLine("Winapp2ool is currently in offline mode", ConsoleColor.Red, centered:=True, condition:=isOffline) _
+                .AddColoredLine("Your .NET Framework is out of date", ConsoleColor.Red, centered:=True, condition:=DotNetFrameworkOutOfDate) _
+                .AddColoredLine("Winapp2ool is unable to automatically update", ConsoleColor.Red, centered:=True, condition:=cantDownloadExecutable)
+
+        End If
+
+        menu.AddBlank(waUpdateIsAvail) _
             .AddOption("Update", "Update your local copy of winapp2.ini", condition:=waUpdateIsAvail) _
             .AddOption("Update & Trim", "Download and trim the latest winapp2.ini", condition:=waUpdateIsAvail) _
             .AddOption("Show update diff", "See the difference between your local file and the latest", condition:=waUpdateIsAvail) _
@@ -246,9 +246,10 @@ Module maintoolmenu
 
         gLog($"Update available for {updName} from {oldVer} to {newVer}")
 
-        menu.AddColoredLine($"A new version of {updName} is available!", ConsoleColor.Green, True) _
+        menu.AddBlank() _
+            .AddColoredLine($"A new version of {updName} is available!", ConsoleColor.Green, True) _
             .AddColoredLine($"Current: v{oldVer}", ConsoleColor.Green, True) _
-            .AddColoredLine($"Available: v{newVer}", ConsoleColor.Green, True).AddBlank()
+            .AddColoredLine($"Available: v{newVer}", ConsoleColor.Green, True)
 
     End Sub
 
