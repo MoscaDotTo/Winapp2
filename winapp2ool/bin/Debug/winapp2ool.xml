@@ -22,6 +22,442 @@ winapp2ool
   resource lookups using this strongly typed resource class.
 </summary>
 </member>
+<member name="T:winapp2ool.MenuItemBuilder">
+ <summary>
+ MenuItemBuilder is a MenuMaker helper class that represents an individual option on the menu <br />
+ Can be a regular option or specifically a toggle <br />
+ Options are menu items presented in a #. Name - Description format and are generally used to 
+ access features within a module's settings or to access modules themselves
+ <br />
+ Toggles are a type of menu option that include specific handling for options which can
+ be enabled or disabled. This is provided to simplify creation of Options for managing Booleans
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuItemBuilder._name">
+ <summary>
+ The name of a menu option or toggle as it will be displayed to the user <br />
+ This is the text on the left side of a menu line, before the description
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuItemBuilder._description">
+ <summary>
+ The description of the menu option or toggle as it will be displayed to the user <br />
+ This is the text on the right side of a menu line, following the name 
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuItemBuilder._condition">
+ <summary>
+ Indicates whether or not this particular menu item should be printed to the user 
+ <br />
+ Default: <c> True </c>
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuItemBuilder._isToggle">
+ <summary>
+ Indicates whether or not this particular menu item should be printed as an enable/disable 
+ toggle for a particular setting. 
+ <br />
+ Default: <c> False </c>
+ </summary>
+ <remarks> 
+ Toggles differ from regular options in that they contain an 
+ Enable/Disable string as a hard coded feature 
+ </remarks>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuItemBuilder._toggleState">
+ <summary>
+ Indicates the Enabled/Disabled state of a toggle. <br />
+ Typically, this is provided in the form of the setting being toggled 
+ <br />
+ Default: <c> False </c>
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuItemBuilder._colored">
+ <summary>
+ Indicates whether or not the menu item should be printed in color 
+ <br />
+ Default: <c> False </c>
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuItemBuilder._color">
+ <summary>
+ The color which will be used to print when printing with color 
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="M:winapp2ool.MenuItemBuilder.#ctor(System.String,System.String,System.Boolean)">
+ <summary>
+ 
+ </summary>
+ Creates a new MenuITemBuilder with the provided <c> ><paramref name="name"/> </c> and 
+ <c> <paramref name="description"/> </c>
+ 
+ <param name="name">
+ The name of the menu option or toggle as it will appear to the user
+ </param>
+ 
+ <param name="description">
+ A description of the menu option or toggle as it will appear to the user
+ </param>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="M:winapp2ool.MenuItemBuilder.WithColor(System.ConsoleColor)">
+ <summary>
+ Enables printing in color for the menu item and sets the color with which to print
+ </summary>
+ 
+ <param name="color">
+ The color with which the menu item will be printed to the user 
+ </param>
+ 
+ <returns> 
+ An updates menu item with coloring enabled and configured 
+ </returns>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="M:winapp2ool.MenuItemBuilder.Print">
+ <summary>
+ Prints the menu item to the user 
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="T:winapp2ool.MenuSection">
+ <summary>
+ MenuSection is a MenuMaker helper class that represents a "section" of a menu 
+ It allows easy grouping of related menu options, toggles, and lines of text 
+ as well as enabling the simple creation of entire module menus with a more easily understood 
+ interface than the pre-2025 MenuMaker
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuSection._title">
+ <summary>
+ The title of the menu section. This is displayed above the set of items in this section
+ when printing. When it is blank, no title is printed
+ </summary>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="F:winapp2ool.MenuSection._items">
+ <summary>
+ The set of menu items in this section. Each item is an Action delegate that 
+ represents a menu option, toggle, or line of text to be printed to the user 
+ </summary>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="F:winapp2ool.MenuSection._titleColor">
+ <summary>
+ The color of the title when printed. If set, the title will be printed in this color. 
+ If not set, the title is printed in the default console color. 
+ This allows for easy setting of accent colors for modules
+ </summary>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.#ctor(System.String)">
+ <summary>
+ Initializes a new instance of the MenuSection class with the specified 
+ <c> <paramref name="title"/> </c>
+ </summary>
+ 
+ <param name="title">
+ The title of the menu section. If <c> "" </c>, no title is printed
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="F:winapp2ool.MenuSection._isCompleteMenu">
+ <summary>
+ Indicates whether or not this MenuSection represents a complete menu with header
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuSection._isRootMenu">
+ <summary>
+ Indicates whether or not this MenuSection is the root menu of an application 
+ (as opposed to a submenu) <br />
+ This affects certain printing behaviors, such as the phrasing of the exit option in the menu
+ </summary>
+ 
+ Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
+</member>
+<member name="F:winapp2ool.MenuSection._menuHeader">
+ <summary>
+ The main header text for a complete menu
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="F:winapp2ool.MenuSection._menuHeaderColor">
+ <summary>
+ The color for the main menu header
+ </summary>
+</member>
+<member name="F:winapp2ool.MenuSection._descriptionLines">
+ <summary>
+ Description lines that appear under the header
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="M:winapp2ool.MenuSection.AddOption(System.String,System.String,System.Boolean)">
+ <summary>
+ Adds an option to the menu section. <br />
+ Options comprise of a name and a description, and are printed as selectable (numbered) items 
+ in the menu. <br />
+ If the <c> <paramref name="condition"/> </c> is false, the option will not be printed
+ </summary>
+ 
+ <param name="name">
+ The name of the menu option, appears to the left of the description
+ </param>
+ 
+ <param name="description">
+ The description of the menu option, appears to the right of the name
+ </param>
+ 
+ <param name="condition">
+ Indicates whether or not the option should be printed <br />
+ Optional, Default: <c> True </c>
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.CreateCompleteMenu(System.String,System.String[],System.Nullable{System.ConsoleColor},System.Boolean)">
+ <summary>
+ Creates a MenuSection that represents a complete menu with header and descriptions
+ </summary>
+ 
+ <param name="menuHeader">
+ The text to appear in the header of the menu. The header 
+ visually approximates a window title bar within the MenuMaker system
+ </param>
+ 
+ <param name="descriptionLines">
+ A set of text lines that describe the menu's purpose, printed 
+ under the header but before any menu items
+ 
+ </param>
+ 
+ <param name="headerColor">
+ The color with which the header of the complete menu should be printed to the user 
+ <br />
+ Optional, Default: <c> Nothing </c> (prints in default console color)
+ </param>
+ 
+ <param name="isRootMenu">
+ Indicates whether or not this MenuSection is the root menu of an application 
+ (as opposed to a submenu) <br />
+ This affects certain printing behaviors, such as the phrasing of the exit option in the menu <br />
+ Optional, Default: <c> False </c>
+ </param>
+ 
+ <returns>
+ A MenuSection configured as a complete menu with the provided header and descriptions, 
+ ready to be populated with options, toggles, and other menu items
+ </returns>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="M:winapp2ool.MenuSection.AddToggle(System.String,System.String,System.Boolean,System.Boolean)">
+ <summary>
+ Adds an Enable/Disable toggle to the menu section <br />
+ Toggles are printed as an item with a name and a description, and colored based on their state  <br />
+ Toggles are printed <c> Green </c> when <c> <paramref name="isEnabled"/> </c>
+ is <c> True </c>, <c> Red </c> otherwise <br />
+ If the <c> <paramref name="condition"/> </c> is false, the toggle will not be printed
+ </summary>
+ 
+ <param name="name">
+ The name of the toggle, appears to the left of the description
+ </param>
+ 
+ <param name="description">
+ The description of the toggle, appears to the right of the name
+ </param>
+ 
+ <param name="isEnabled">
+ Indicates whether the setting the toggle controls is currently enabled or disabled. <br />
+ If <c> True </c>, the toggle is printed in green, indicating it is enabled. <br />
+ If <c> False </c>, the toggle is printed in red, indicating it is disabled.
+ </param>
+ 
+ <param name="condition">
+ Indicates whether or not the toggle should be printed <br />
+ Optional, Default: <c> True </c>
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.AddLine(System.String,System.Boolean,System.Boolean)">
+ <summary>
+ Adds a line of text to the menu section. <br />
+ The line is printed as a simple text line, optionally centered. <br />
+ If the <c> <paramref name="condition"/> </c> is false, the line will not be printed
+ </summary>
+ 
+ <param name="text">
+ The text to be added to the menu section
+ </param>
+ 
+ <param name="centered">
+ Indicates whether the text should be centered in the console window. <br />
+ Optional, Default: <c> False </c> (text is left-aligned)
+ </param>
+ 
+ <param name="condition">
+ Indicates whether or not the line should be printed <br />
+ Optional, Default: <c> True </c>
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.AddBlank(System.Boolean)">
+ <summary>
+ Adds a blank line to the menu section. <br />
+ A blank line is simply a line with no text, used for spacing in the menu. <br />
+ If the <c> <paramref name="condition"/> </c> is false, the blank line will not be printed
+ </summary>
+ 
+ <param name="condition">
+ Indicates whether or not the blank line should be printed <br />
+ Optional, Default: <c> True </c>
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.AddColoredLine(System.String,System.ConsoleColor,System.Boolean,System.Boolean)">
+ <summary>
+ Adds a colored line of text to the menu section
+ </summary>
+ 
+ <param name="text">
+ The text to be displayed
+ </param>
+ 
+ <param name="color">
+ The color to display the text in
+ </param>
+ 
+ <param name="centered">
+ Whether the text should be centered
+ </param>
+ 
+ <param name="condition">
+ Whether the line should be printed
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.AddResetOpt(System.String,System.Boolean)">
+ <summary>
+ Adds a Reset Module Settings option to the current menu 
+ </summary>
+ 
+ <param name="moduleName">
+ The name of the module whose reset settings option will be created
+ </param>
+ 
+ <param name="condition">
+ Indicates whether or not the option should be printed (i.e. whether settings have been changed)
+ </param>
+ 
+ Docs last updated: 2025-08-21 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.AddColoredOption(System.String,System.String,System.ConsoleColor,System.Boolean)">
+ <summary>
+ Adds a colored option to the menu section
+ </summary>
+ 
+ <param name="name">
+ The name of the menu option (left text)
+ </param>
+ 
+ <param name="description">
+ A description of the menu option's function (right text)
+ </param>
+ 
+ <param name="color">
+ The color with which the option should be printed to the user
+ </param>
+ 
+ <param name="condition">
+ Whether the option should be printed
+ </param>
+ 
+ Docs last updated: 2025-08-21 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.AddWarning(System.String,System.Boolean)">
+ <summary>
+ Adds a warning line (yellow text with /!\ markers /!\) to the menu section
+ </summary>
+ 
+ <param name="text">
+ The warning text to display
+ </param>
+ 
+ <param name="condition">
+ Whether the warning should be printed
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.Print(System.Boolean)">
+ <summary>
+ Hands off printing of the MenuSection to the appropriate function based on whether or not 
+ it is a complete menu 
+ </summary>
+ 
+ <param name="withDivider">
+ Indicates that the section should be printed with a solid border dividing it from its options
+ <br /> 
+ Optional, Default: <c> True </c>
+ </param>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="M:winapp2ool.MenuSection.PrintSection(System.Boolean)">
+ <summary>
+ Prints a menu section that isn't itself a complete menu
+ </summary>
+ 
+ <param name="withDivider">
+ Indicates that the section should be printed with a solid border dividing it from its options
+ <br />
+ </param>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
+<member name="M:winapp2ool.MenuSection.PrintCompleteMenu">
+ <summary>
+ Prints a complete menu with header, descriptions, and options beginning with an exit option
+ <br />
+ This is used for the main menus of modules that require a header and multiple options
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
+</member>
 <member name="T:winapp2ool.settingsHandler">
  <summary> 
  settingsHandler manages the disk-writable representation of winapp2ool
@@ -124,7 +560,7 @@ winapp2ool
  in the form of both an <c> iniFile </c> and a <c> Dictionary </c> 
  </summary>
  
- Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
+ Docs last updated: 2025-06-25 | Code last updated: 2025-08-04
 </member>
 <member name="M:winapp2ool.settingsHandler.clearAllModuleSettings(System.String)">
  <summary> 
@@ -139,7 +575,7 @@ winapp2ool
  
  Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
-<member name="M:winapp2ool.settingsHandler.serializeModuleSettings(System.String,System.Action,System.Action)">
+<member name="M:winapp2ool.settingsHandler.serializeModuleSettings(System.String,System.Action,System.Action,System.Boolean)">
  <summary> 
  Creates the disk-writable representation
  of a module's settings, either by generating
@@ -162,9 +598,25 @@ winapp2ool
  the current active session of a module's settings 
  </param>
  
+ <param name="shouldReadFromDisk">
+ Indicates whether or not the module settings should be read from disk and loaded 
+ <br /> If <c> False </c>, the default module settings will be loaded 
+ </param>
+ 
  Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
-<member name="M:winapp2ool.settingsHandler.createModuleSettingsSection(System.String,System.Collections.Generic.List{System.String},System.Int32,System.Int32)">
+<member name="M:winapp2ool.settingsHandler.DetermineReadSettingsBehavior">
+ <summary>
+ Determines whether or not we should be reading the winapp2ool settings from disk
+ </summary>
+ <returns> 
+ <c> True </c> if we should be reading from disk <br /> 
+ <c> False </c> otherwise 
+ </returns>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="M:winapp2ool.settingsHandler.createModuleSettingsSection(System.String,System.Type,System.Collections.Generic.List{System.String},System.Int32)">
  <summary> 
  Creates the <c> iniSection </c> containing the default values
  for variables associated with the calling module and adds 
@@ -172,20 +624,24 @@ winapp2ool
  </summary>
  
  <param name="callingModule"> 
- The name of the module whose settings are being created
+ The name of the module whose settings are being created.
+ This will be the Section name on disk inside winapp2ool.ini
  </param>
  
- <param name="settingTuples"> 
- The array of Strings containing the
- module's settings and their default values
+ <param name="winapp2Module">
+ The module containing the disk-writable settings for <c> <paramref name="callingModule"/> </c>
  </param>
  
- <param name="numBools"> 
- The number of boolean settings in the module 
+ <param name="settingsTuples">
+ A pre-computed set of tuples containing a module's settings <br />
+ Provided by modules which have to do some extra work to serialize complex datatypes <br />
+ Optional, Default: <c> Nothing </c>
  </param>
  
- <param name="numFiles"> 
- The number of <c> iniFile </c> settings in the module 
+ <param name="addlBools">
+ The number of additional <c> Boolean </c> properties provided in a given set of 
+ <c> <paramref name="settingsTuples"/> </c> in excess of what is provided in the 
+ <c> <paramref name="winapp2Module"/> </c>
  </param>
  
  <remarks>
@@ -194,7 +650,7 @@ winapp2ool
  (Name, Filename, Dir) triplets for <c> iniFile </c> settings
  </remarks>
  
- Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.settingsHandler.getSettingKeys(System.Collections.Generic.List{System.String},System.String,System.Int32,System.Int32)">
  <summary>
@@ -355,29 +811,165 @@ winapp2ool
  of module settings from the UI
  </summary>
  
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+ Docs last updated: 2025-07-30 
 </member>
 <member name="M:winapp2ool.browserbuildermainmenu.printBrowserBuilderMenu">
  <summary>
  Prints the BrowserBuilder main menu to the user
  </summary>
  
- Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
+ Docs last updated: 2025-07-02 | Code last updated: 2025-08-22
 </member>
 <member name="M:winapp2ool.browserbuildermainmenu.handleBrowserBuilderInput(System.String)">
  <summary>
  Handles the user input from the BrowserBuilder menu
  </summary>
  
- <param name="input">The String containing the user's input</param>
+ <param name="input">
+ The user's input 
+ </param>
  
- Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
+ Docs last updated: 2025-08-22 | Code last updated: 2025-08-22
+</member>
+<member name="M:winapp2ool.browserbuildermainmenu.getFileOpts">
+ <summary>
+ Determines the current set of file selectors displayed on the menu and returns a Dictionary 
+ of those options and their respective files <br />
+ <br />
+ The set of possible files includes:
+ <list type="bullet">
+     
+     <item>
+     chromium.ini
+     </item>
+     
+     <item>
+     gecko.ini
+     </item>
+     
+     <item>
+     save target
+     </item>
+     
+     <item>
+     Section removals
+     </item>
+     
+     <item>
+     Key name removals
+     </item>
+     
+     <item>
+     Key value removals
+     </item>
+     
+     <item>
+     Section replacements
+     </item>
+     
+     <item>
+     Key replacements
+     </item>
+     
+     <item>
+     Additions
+     </item>
+     
+ </list>
+ 
+ </summary>
+ 
+ <returns> 
+ The set of <c> iniFile </c> properties for an object currently displayed on the menu
+ </returns>
+ 
+ Docs last updated: 2025-08-22 | Code last updated: 2025-08-22
 </member>
 <member name="T:winapp2ool.browserbuildersettings">
  <summary>
  Holds the settings for the Browser Builder module, which allows winapp2ool to build bespoke entries
- for indivudal web browsers through a simple scripting interface 
+ for indivudal web browsers through a simple scripting interface <br /><br />
+ 
+ Summary of Browser Builder files and their expected content: 
+ 
+ <list>
+ <item>
+ <b><c> BuilderFile1 </c></b> 
+ <description> 
+ chromium.ini - the generative rulesets for Chromium-based browsers - either this or 
+ BuilderFile2 must be present in order for Browser Builder to run
+ </description>
+ </item>
+ 
+ <item>
+ <b><c> BuilderFile2 </c></b>
+ <description> 
+ gecko.ini - the generative rulesets for Gecko/Goanna-based browsers - either this or
+ BuilderFile1 must be present in order for Browser Builder to run
+ </description>
+ </item>
+ 
+ <item>
+ <b><c> BuilderFile3 </c> </b>
+ <description>
+ browsers.ini - Browser Builder saves its output here
+ </description>
+ </item>
+ 
+ <item>
+ <b> <c> BuilderFile4 </c> </b>
+ <description>
+ browser_additions.ini - The set of entries and keys to be added to browsers.ini after generation
+ </description>
+ </item>
+ 
+ <item>
+ <b> <c> BuilderFile5 </c> </b>
+ <description>
+ browser_section_removals.ini - The optional set of sections to be entirely removed from 
+ browsers.ini after generation
+ </description>
+ </item>
+ 
+ <item>
+ <b> <c> BuilderFile6 </c> </b>
+ <description>
+ browser_name_removals.ini - The optional set of individual keys to be removed by Name 
+ from browsers.ini after generation
+ </description>
+ </item>
+ 
+ <item>
+ <b> <c> BuilderFile7 </c></b>
+ <description>
+ browser_key_replacements.ini - The optional set of individual keys to have their values
+ replace the ones browsers.ini after generation
+ </description>
+ </item>
+ 
+ <item>
+ <b> <c> BuilderFile8 </c></b>
+ <description>
+ browser_section_replacements.ini - The optional set of sections to entirely replace sections 
+ of the same in browsers.ini after generation
+ </description>
+ </item>
+ 
+ <item>
+ <b> <c> BuilderFile9 </c></b>
+ <description>
+ browser_value_removals.ini - The optional set of individual keys to be removed by value 
+ from browsers.ini after generation
+ </description>
+ </item>
+ </list>
+ 
  </summary>
+ <remarks>
+ <b> Remarks: </b> <br /><br />
+ Only the generative rulesets need to be segregated by browser engine. All other files contain a 
+ mix of chromium, gecko, and/or any other extant browser engines or embedded runtimes
+ </remarks>
  
  Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
@@ -386,6 +978,7 @@ winapp2ool
  The <c> iniFile </c> containing the generative information for Chromium browser entries <br />
  This should include a set of <c> BrowserInfo </c> sections defining the individual web browsers and
  a set of <c> EntryScaffold </c> sections defining the structure of the individual entries 
+ <br/><br/>
  </summary>
  
  Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
@@ -503,12 +1096,13 @@ winapp2ool
  Most often, this is the default state of these settings 
  </remarks>
  
- Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
+ Docs last updated: 2025-07-02 | Code last updated: 2025-08-05
 </member>
 <member name="T:winapp2ool.ccdebugsettings">
  <summary>
  Holds the settings for the CCiniDebug module, which is responsible for debugging ccleaner.ini files.
- This module contains properties that define the input and output files, as well as flags to prune stale entries, sort the file, and save the debugged file.
+ This module contains properties that define the input and output files, as well as flags to 
+ prune stale entries, sort the file, and save the debugged file.
  It also tracks whether the module settings have been modified from their defaults.
  </summary>
  
@@ -571,44 +1165,151 @@ Indicates that the module's settings have been modified from their defaults
  Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="T:winapp2ool.CCiniDebug">
- <summary> This module performs housekeeping on ccleaner.ini to clean up leftovers from winapp2.ini </summary>
+ <summary> 
+ CCiniDebug is a winapp2ool module which performs housekeeping on the CCleaner configuration file
+ ccleaner.ini to clean up leftovers from winapp2.ini 
+ <br /> 
+ As entries are removed or renamed in winapp2.ini over time, stale configuration keys are 
+ leftover in ccleaner.ini. CCiniDebug processes a ccleaner.ini for its entry configuration keys
+ and checks them each against the names of entries in winapp2.ini. Any configuration keys found 
+ with the winapp2.ini indicator (*) in the name which do not have a corresponding entry by the 
+ same name in the most recent winapp2.ini can then be easily and automatically removed 
+ </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.CCiniDebug.handleCmdlineArgs">
- <summary> Handles the commandline args for CCiniDebug </summary>
-  CCiniDebug args:
+ <summary>
+ Handles the commandline args for CCiniDebug 
+ </summary>
+ 
+ <remarks>
+ CCiniDebug setting toggles:
  -noprune    : disable pruning of stale winapp2.ini entries
  -nosort     : disable sorting ccleaner.ini alphabetically
  -nosave     : disable saving the modified ccleaner.ini back to file
+ </remarks>
+ 
  Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="M:winapp2ool.CCiniDebug.ccDebug">
-<summary> Prunes, sorts, and/or saves ccleaner.ini </summary>
+<summary> 
+Prunes, sorts, and/or saves ccleaner.ini 
+</summary>
+
  Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="M:winapp2ool.CCiniDebug.initCCDebug">
- <summary> Sets up the debug and prints its results </summary>
- Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+ <summary>
+ Sets up the debug and prints its results 
+ </summary>
+ 
+ Docs last updated: 2020-07-18 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.CCiniDebug.prune(winapp2ool.iniSection@)">
- <summary> Scans for and removes stale winapp2.ini entry settings from given Options section of a ccleaner.ini file </summary>
- <param name="optionsSec"> The Options section from ccleaner.ini </param>
- Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+ <summary> 
+ Scans for and removes stale winapp2.ini entry settings 
+ from a given Options section of a ccleaner.ini file 
+ </summary>
+ 
+ <param name="optionsSec"> 
+ The Options section from ccleaner.ini 
+ </param>
+ 
+ Docs last updated: 2020-07-18 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.CCiniDebug.sortCC">
- <summary> Sorts the keys in the Options section of <c> CCiniDebugFile2 </c></summary>
+ <summary> 
+ Sorts the keys in the Options section of <c> CCiniDebugFile2 </c>
+ </summary>
+ 
  Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
 </member>
 <member name="T:winapp2ool.ccdbmainmenu">
- <summary> Contains the menu for CCiniDebug and handles the user input into that menu </summary>
+ <summary> 
+ Display's the CCiniDebug's main menu and handles their input accordingly 
+ </summary>
+ 
+ Docs last updated: 2025-08-21
 </member>
 <member name="M:winapp2ool.ccdbmainmenu.printCCDBMainMenu">
- <summary> Prints the CCiniDebug menu to the user </summary>
- Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+ <summary> 
+ Prints the CCiniDebug menu to the user 
+ </summary>
+ 
+ Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
 </member>
-<member name="M:winapp2ool.ccdbmainmenu.handleCCDBMainMenuUserInput(System.String)">
- <summary> Handles the user's input from the CCiniDebug main menu </summary>
- <param name="input"> The user's input </param>
- Docs last updated: 2020-07-18 | Code last updated: 2020-07-18
+<member name="M:winapp2ool.ccdbmainmenu.handleCCDBMUserInput(System.String)">
+ <summary> 
+ Handles the user's input from the CCiniDebug main menu 
+ </summary>
+ 
+ <param name="input"> 
+ The user's input 
+ </param>
+ 
+ Docs last updated: 2020-07-18 | Code last updated: 2025-08-21
+</member>
+<member name="M:winapp2ool.ccdbmainmenu.getToggleOpts">
+ <summary>
+ Determines the current set of toggles displayed on the menu and returns a Dictionary 
+ of those options and their respective toggle names <br />
+ <br />
+ The set of possible toggles includes:
+ <list type="bullet">
+     
+     <item>
+     Pruning 
+     </item>
+     
+     <item>
+     Saving
+     </item>
+     
+     <item>
+     Sorting
+     </item>
+     
+ </list>
+  
+ </summary>
+ 
+ <returns>
+ The set of available toggles for the CCiniDebug module, with their names on the 
+ menu as keys and the respective property names as values
+ </returns>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.ccdbmainmenu.getFileOpts">
+ <summary>
+ Determines the current set of file selectors displayed on the menu and returns a Dictionary 
+ of those options and their respective files <br />
+ <br />
+ The set of possible files includes:
+ <list type="bullet">
+     
+     <item>
+     winapp2.ini (unavailable when not pruning)
+     </item>
+     
+     <item>
+     ccleaner.ini 
+     </item>
+     
+     <item>
+     Save target (unavailable when not saving)
+     </item>
+     
+ </list>
+ 
+ </summary>
+ 
+ <returns> 
+ The set of <c> iniFile </c> properties for an object currently displayed on the menu
+ </returns>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
 </member>
 <member name="T:winapp2ool.ccdebugsettinghandler">
  <summary> 
@@ -640,7 +1341,316 @@ Indicates that the module's settings have been modified from their defaults
  Most often, this is the default state of these settings 
  </remarks>
  
- Docs last updated: 2024-05-08 | Code last updated: 2025-06-25
+ Docs last updated: 2024-05-08 | Code last updated: 2025-08-05
+</member>
+<member name="T:winapp2ool.combinemainmenu">
+ <summary>
+ Provides the user interface for the Combine module
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.combinemainmenu.printCombineMainMenu">
+ <summary>
+ Prints the Combine module menu to the user
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.combinemainmenu.handleCombineUserInput(System.String)">
+ <summary>
+ Handles the user input from the Combine menu
+ </summary>
+ 
+ <param name="input">
+ The user's input string
+ </param>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.combinemainmenu.getFileOpts">
+ <summary>
+ Determines the current set of file selectors displayed on the menu and returns a Dictionary 
+ of those options and their respective files <br />
+ <br />
+ The set of possible files includes:
+ <list type="bullet">
+     
+     <item>
+     Source files target directory 
+     </item>
+     
+     <item>
+     Save target
+     </item>
+     
+ </list>
+ 
+ </summary>
+ 
+ <returns> 
+ The set of <c> iniFile </c> properties currently displayed on the menu
+ </returns>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
+<member name="T:winapp2ool.combinesettings">
+ <summary>
+ Holds the settings for the Combine module, which is responsible for combining multiple ini files
+ potentially spread across numerous subdirectories into a single ini file <br />
+ This module contains properties that define the target directory containing files to be combined 
+ and the output file location for the combined ini file <br />
+ It also tracks whether the module settings have been modified from their defaults. 
+ </summary>
+ 
+ Docs last updated: 2025-08-23 
+</member>
+<member name="P:winapp2ool.combinesettings.CombineFile1">
+ <summary>
+ The target directory containing files to be combined <br />
+ Default: <c> current directory </c>
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="P:winapp2ool.combinesettings.CombineFile3">
+ <summary>
+ The output file location for the combined ini file <br />
+ Default: <c> combined.ini </c> in the <c> current directory </c>
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="P:winapp2ool.combinesettings.CombineModuleSettingsChanged">
+ <summary>
+ Indicates that the module settings have been modified from their defaults 
+ <br />
+ Default: <c> False </c>
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="T:winapp2ool.combinesettingshandler">
+ <summary>
+ Provides methods for managing the Combine module settings, including support methods for syncing to disk
+ Also provides the function which restores the default state of the Combine module's properties
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.combinesettingshandler.initDefaultCombineSettings">
+ <summary>
+ Restores the default state of the Combine module's properties
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.combinesettingshandler.getSerializedCombineSettings">
+ <summary>
+ Assigns the module settings to Combine based on the current disk-writable settings representation
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.combinesettingshandler.createCombineSettingsSection">
+ <summary>
+ Adds the current state of the module's settings into the disk-writable settings representation
+ </summary>
+ 
+ <remarks>
+ Most often, this is the default state of these settings
+ </remarks>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="T:winapp2ool.Combine">
+ <summary>
+ Combine is a winapp2ool module that takes all files with the ini extension within a target 
+ directory (including its subdirectories) and combines them into a single ini file. When 
+ duplicate section names are encountered, their unique keys are merged together into the output.
+ <br/> 
+ Files that cannot be parsed or have no sections are ignored.
+ <br/> <br/>
+ If the final combined output contains no sections, it will not be saved to disk
+ </summary>
+ 
+ Docs last updated: 2025-08-23 
+</member>
+<member name="P:winapp2ool.Combine.MostRecentCombineLog">
+ <summary>
+ Stores the most recent Combine operation log for display in the log viewer
+ </summary>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
+<member name="F:winapp2ool.Combine.CombineLogStartPhrase">
+ <summary>
+ The phrase that marks the beginning of a Combine operation in the global log
+ </summary>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
+<member name="F:winapp2ool.Combine.CombineLogEndPhrase">
+ <summary>
+ The phrase that marks the end of a Combine operation in the global log
+ </summary>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
+<member name="M:winapp2ool.Combine.handleCmdLine">
+ <summary>
+ Handles command line arguments for the Combine module
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.Combine.initCombine(System.String,winapp2ool.iniFile)">
+ <summary>
+ Initializes the combine process and validates the target directory
+ </summary>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.Combine.processCombine(winapp2ool.MenuSection,System.String,winapp2ool.iniFile@)">
+ <summary>
+ Processes all files in the target directory and combines them into a single INI file
+ </summary>
+ 
+ <param name="outputMenu">
+ The <c> MenuSection </c> containing the module's output to be displayed to the user
+ </param>
+ 
+ <param name="targetDir">
+ The parent directory potentially containing the ini files to combine
+ </param>
+ 
+ <param name="outputFile">
+ The <c> iniFile </c> into which all other ini files found in 
+ <c> <paramref name="targetDir"/> </c> will be merged 
+ </param>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.Combine.handleCombineException(System.String,winapp2ool.MenuSection@,System.Exception)">
+ <summary>
+ Handles logging of exceptions thrown during the Combine process
+ </summary>
+ 
+ <param name="filepath">
+ The path of the file during whose processing <c> <paramref name="ex"/> </c> was thrown
+ </param>
+ 
+ <param name="outputMenu">
+ The <c> MenuSection </c> containing the Combine module's output as it will be displayed
+ to the user
+ </param>
+ 
+ <param name="ex">The exception thrown while Combine was processing 
+ <c> <paramref name="filepath"/> </c>
+ </param>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
+<member name="M:winapp2ool.Combine.attemptCombine(System.String,winapp2ool.iniFile@,System.Int32@,System.Int32@,winapp2ool.MenuSection@)">
+ <summary>
+ Tries to combine a single ini file into the output file, logging the success of this operation
+ </summary>
+ 
+ <param name="filepath">
+ The path of a particular ini file to be combined 
+ </param>
+ 
+ <param name="outputFile">
+ The output file into which <c> <paramref name="filepath"/> </c> will be combined
+ </param>
+ 
+ <param name="processedCount">
+ The number of files that have been processed so far
+ </param>
+ 
+ <param name="validFileCount">
+ The number of files that have been successfully combined so far
+ </param>
+ 
+ <param name="outputMenu">
+ The <c> MenuSection </c> containing the Combine module's output as it will be displayed
+ to the user
+ </param>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
+<member name="M:winapp2ool.Combine.updateProgress(System.Int32,System.Int32)">
+ <summary>
+ Updates the console with the current progress of the combination process while it runs
+ </summary>
+ 
+ <param name="processedCount"> 
+ The number of files that have been processed so far 
+ </param>
+ 
+ <param name="totalCount">
+ The total number of files to be processed
+ </param>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
+<member name="M:winapp2ool.Combine.mergeFileIntoOutput(winapp2ool.iniFile,winapp2ool.iniFile@)">
+ <summary>
+ Merges the sections from a source file into the combined output file,
+ merging keys when sections with the same name already exist
+ </summary>
+ 
+ <param name="sourceFile">
+ The source file whose sections will be merged into the output
+ </param>
+ 
+ <param name="outputFile">
+ The combined output file that will receive the merged sections
+ </param>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
+</member>
+<member name="M:winapp2ool.Combine.AddUniqueKeys(winapp2ool.iniSection,winapp2ool.iniFile,System.String)">
+ <summary>
+ Merges keys from a source section into an existing section in the output file, preventing 
+ any keys with duplicate names and values from being added
+ <br />
+ Note: Matching values with unlike names will still be added
+ </summary>
+ 
+ <param name="sourceSection">
+ The <c> iniSection </c> whose contents will be merged into the output file
+ </param>
+ 
+ <param name="outputFile">
+ The combined output file into which keys from <c> sourceSection </c> will be merged
+ </param>
+ 
+ <param name="sectionName">
+ The name of the current section being processed
+ </param>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
+<member name="M:winapp2ool.Combine.RemoteCombine(System.String,winapp2ool.iniFile)">
+ <summary>
+ Facilitates combining files from outside the module's UI
+ </summary>
+ 
+ <param name="targetDirectory">
+ The directory containing files to be combined
+ </param>
+ 
+ <param name="outputFile">
+ The file location where the combined output will be saved
+ </param>
+ 
+ <returns>
+ The resulting combined output file if successful, or 
+ Empty <c> iniFile </c> if the target directory does not exist or otherwise lacks valid ini files
+ </returns>
+ 
+ Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
 </member>
 <member name="T:winapp2ool.diffsettings">
  <summary>
@@ -701,6 +1711,14 @@ Indicates that the module's settings have been modified from their defaults
  </summary>
  
  Docs last updated: 2022-06-07 | Code last updated: 2022-07-14
+</member>
+<member name="P:winapp2ool.diffsettings.ShowFullEntries">
+ <summary> 
+ Indicates that full entries should be printed in the Diff output. <br/> 
+ Called "verbose mode" in the menu 
+ </summary>
+ 
+ Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
 </member>
 <member name="T:winapp2ool.Diff">
  <summary>
@@ -794,13 +1812,6 @@ Indicates that the module's settings have been modified from their defaults
  
  Docs last updated: 2022-06-07 | Code last updated: 2022-07-14
 </member>
-<member name="P:winapp2ool.Diff.ShowFullEntries">
- <summary> 
- Indicates that full entries should be printed in the Diff output. <br/> <br/> Called "verbose mode" in the menu 
- </summary>
- 
- Docs last updated: 2022-07-14 | Code last updated: 2022-07-14
-</member>
 <member name="P:winapp2ool.Diff.ModEntriesAddedKeyTotal">
  <summary> 
  The total number of keys that were added to modified entries 
@@ -829,7 +1840,7 @@ Indicates that the module's settings have been modified from their defaults
  
  Docs last updated: 2023-06-07 | Code last updated: 2022-06-07
 </member>
-<member name="F:winapp2ool.Diff.MostRecentDiffLog">
+<member name="P:winapp2ool.Diff.MostRecentDiffLog">
  <summary> 
  Holds the slice of the winapp2ool global log containing the most recent Diff results 
  </summary>
@@ -1686,19 +2697,19 @@ Indicates that the module's settings have been modified from their defaults
 </member>
 <member name="T:winapp2ool.diffmainmenu">
  <summary>
- Displays the Diff main menu to the user and handles their input 
+ Displays the Diff main menu to the user and handles their input accordingly
  </summary>
  
- Docs last updated: 2020-08-30
+ Docs last updated: 2025-08-21
 </member>
 <member name="M:winapp2ool.diffmainmenu.printDiffMainMenu">
  <summary> 
  Prints the Diff main menu to the user 
  </summary>
  
- Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+ Docs last updated: 2023-07-19 | Code last updated: 2025-08-19
 </member>
-<member name="M:winapp2ool.diffmainmenu.handleDiffMainMenuUserInput(System.String)">
+<member name="M:winapp2ool.diffmainmenu.handleDiffUserInput(System.String)">
  <summary> 
  Handles the user input from the Diff main menu 
  </summary>
@@ -1707,7 +2718,68 @@ Indicates that the module's settings have been modified from their defaults
  The user's input 
  </param>
  
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+ Docs last updated: 2022-11-21 | Code last updated: 2025-08-21
+</member>
+<member name="M:winapp2ool.diffmainmenu.getToggleOpts">
+ <summary>
+ Determines the current set of toggles displayed on the menu and returns a Dictionary 
+ of those options and their respective toggle names <br />
+ <br />
+ The set of possible toggles includes:
+ <list type="bullet">
+     
+     <item>
+     Remote diffinng (unavailable when offline)
+     </item>
+     
+     <item>
+     Remote file trimming (unavailable when not downloading)
+     </item>
+     
+     <item>
+     Excludes
+     </item>
+     
+ </list>
+  
+ </summary>
+ 
+ <returns>
+ The set of available toggles for the Trim module, with their names on the 
+ menu as keys and the respective property names as values
+ </returns>
+ 
+ Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
+</member>
+<member name="M:winapp2ool.diffmainmenu.getFileOpts">
+ <summary>
+ Determines the current set of file selectors displayed on the menu and returns a Dictionary 
+ of those options and their respective files <br />
+ <br />
+ The set of possible files includes:
+ <list type="bullet">
+     
+     <item>
+     Older/Local file
+     </item>
+     
+     <item>
+     Newer file (not available when downloading)
+     </item>
+     
+     <item>
+     Save target (not available when not saving log)
+     </item>
+     
+ </list>
+ 
+ </summary>
+ 
+ <returns> 
+ The set of <c> iniFile </c> properties currently displayed on the menu
+ </returns>
+ 
+ Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
 </member>
 <member name="T:winapp2ool.diffsettingshandler">
  <summary> 
@@ -1740,7 +2812,7 @@ Indicates that the module's settings have been modified from their defaults
  Most often, this is the default state of these settings 
  </remarks>
  
- Docs last updated: 2023-06-12 | Code last updated: 2024-05-08
+ Docs last updated: 2023-06-12 | Code last updated: 2025-08-05
 </member>
 <member name="T:winapp2ool.downloadersettings">
  <summary>
@@ -1787,7 +2859,7 @@ Holds the path of any files to be saved by the Downloader
  Most often, this is the default state of these settings 
  </remarks>
  
- Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
+ Docs last updated: 2024-05-08 | Code last updated: 2025-08-05
 </member>
 <member name="T:winapp2ool.Downloader">
  <summary> 
@@ -1934,8 +3006,12 @@ Holds the path of any files to be saved by the Downloader
 </member>
 <member name="T:winapp2ool.commandLineHandler">
  <summary>
- This module helps handle any commandline arguments passed to winapp2ool
+ commandLineHandler is a winapp2ool module which handles the command line arguments passed to 
+ winapp2ool by the user. This allows winapp2ool to be called from scripting environments and 
+ enables the use of winapp2ool without having to interact with the UI
  </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="P:winapp2ool.commandLineHandler.cmdargs">
  <summary>
@@ -1943,6 +3019,35 @@ Holds the path of any files to be saved by the Downloader
  </summary>
  
  Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
+</member>
+<member name="P:winapp2ool.commandLineHandler.IsCommandLineMode">
+ <summary>
+ Indicates whether Winapp2ool was launched from the command line with module arguments
+ When True, prevents automatic saving of settings to preserve user's saved configuration
+ </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="F:winapp2ool.commandLineHandler.ModuleConfigs">
+ <summary>
+ Configuration for module file requirements and handlers
+ </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="M:winapp2ool.commandLineHandler.CreateModuleConfigs">
+ <summary>
+ Creates the module configuration dictionary with all aliases
+ </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="T:winapp2ool.commandLineHandler.ModuleConfig">
+ <summary>
+ Configuration data for a module's command line handling
+ </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.invertSettingAndRemoveArg(System.Boolean@,System.String,System.String@,System.String@)">
  <summary>
@@ -1954,7 +3059,8 @@ Holds the path of any files to be saved by the Downloader
  </param>
  
  <param name="arg">
- A commandline argument targeting <c> <paramref name="setting"/> </c>
+ A commandline argument targeting 
+ <c> <paramref name="setting"/> </c>
  </param>
  
  <param name="name">
@@ -1963,7 +3069,8 @@ Holds the path of any files to be saved by the Downloader
  </param>
  
  <param name="newname">
- The nenw name with which <c> <paramref name="name"/> </c> will be replaced if the arg is found 
+ The new name with which <c> <paramref name="name"/> </c>
+ will be replaced if the arg is found 
  <br /> Optional, default: <c> "" </c>
  </param>
  
@@ -1980,6 +3087,25 @@ Holds the path of any files to be saved by the Downloader
  
  Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
+<member name="M:winapp2ool.commandLineHandler.processCommandLineArgs">
+ <summary>
+ Initializes the processing of the commandline args and hands the 
+ remaining arguments off to the respective module's handler
+ </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="M:winapp2ool.commandLineHandler.getFileAndDirParams(winapp2ool.iniFile[]@)">
+ <summary>
+ Gets the directory and name info for the <c> iniFile </c> properties of a module 
+ </summary>
+ 
+ <param name="files">
+ The set of <c> iniFile </c> properties belonging to a particular module 
+ </param>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
 <member name="M:winapp2ool.commandLineHandler.getFileName(System.String,winapp2ool.iniFile@)">
  <summary>
  Renames or modifies the filename of an <c> iniFile </c> via the commandline 
@@ -1991,7 +3117,7 @@ Holds the path of any files to be saved by the Downloader
  </param>
  
  <param name="givenFile">
- An <c> iniFile </c> whose path will be modified 
+ An <c> iniFile </c> module property whose path will be modified 
  </param>
  
  <remarks> 
@@ -1999,7 +3125,7 @@ Holds the path of any files to be saved by the Downloader
  <br /> eg. -2f "\folder1\folder2\file.ini"
  </remarks>
  
- Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileNameAndDir(System.String,winapp2ool.iniFile@)">
  <summary>
@@ -2007,40 +3133,94 @@ Holds the path of any files to be saved by the Downloader
  </summary>
  
  <param name="flag">
- The flag preceeding the file/path parameter in the arg list
+ The flag preceding the file/path parameter in the arg list
  </param>
  
  <param name="file">
- The iniFile object to be modified
+ An <c> iniFile </c> module property whose path will be modified 
  </param>
  
- Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileParams(System.String@,winapp2ool.iniFile@)">
- <summary>Takes in a full form filepath with directory and assigns the directory and filename components to the given iniFile object</summary>
- <param name="arg">The filepath argument</param>
- <param name="file">The iniFile object to be modified</param>
-</member>
-<member name="M:winapp2ool.commandLineHandler.processCommandLineArgs">
- <summary>Initializes the processing of the commandline args and hands the remaining arguments off to the respective module's handler</summary>
-</member>
-<member name="M:winapp2ool.commandLineHandler.getFileAndDirParams(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile@)">
- <summary>Gets the directory and name info for each file given (if any)</summary>
- <param name="ff">The "first file" from a module</param>
- <param name="sf">The "second file" from a module</param>
- <param name="tf">The "third file" from a module</param>
+ <summary>
+ Takes in a full form filepath with directory and assigns the directory 
+ and filename components to the given <c> <paramref name="file"/> </c>
+ </summary>
+ 
+ <param name="arg">
+ A file path argument, eg. the location of a specific .ini file on disk 
+ </param>
+ 
+ <param name="file">
+ An <c> iniFile </c> module property whose path will be modified 
+ </param>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.getParams(System.Int32,winapp2ool.iniFile@)">
- <summary>Processes numerically ordered directory (d) and file (f) commandline args on a per-file basis</summary>
- <param name="someNumber">The number (1-indexed) of our current internal iniFile</param>
- <param name="someFile">A reference to the iniFile object being operated on</param>
+ <summary>
+ Processes numerically ordered directory (d) and file (f) commandline args on a per-file basis
+ </summary>
+ 
+ <param name="iniFilePropertyNumber">
+ The number (1-indexed) of the property associated with <c> <paramref name="someFile"/> </c>
+ </param>
+ 
+ <param name="someFile">
+ An <c> iniFile </c> module property whose path will be modified 
+ </param>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
-<member name="M:winapp2ool.commandLineHandler.validateArgs">
- <summary>Enforces that commandline args are properly formatted in {"-flag","data"} format</summary>
+<member name="M:winapp2ool.commandLineHandler.CleanFilePath(winapp2ool.iniFile@)">
+ <summary>
+ Cleans up file paths by removing double, leading, and trailing slashes
+ </summary>
+ 
+ <param name="file">
+ An <c> iniFile </c> module property whose path will be modified 
+ </param>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="M:winapp2ool.commandLineHandler.generateValidArgs(System.Int32)">
+ <summary>
+ Generates the list of valid file arguments based on the maximum number of files
+ </summary>
+ 
+ <param name="maxFiles">
+ The maximum number of <c> iniFiles </c> for which arguments should be generated
+ </param>
+ 
+ <returns>
+ Set of valid commandline arguments for file and directory parameters
+ <br /> eg. -1d, -1f, -2d, -2f, ..., -maxFilesd, -maxFilesf
+ </returns>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="M:winapp2ool.commandLineHandler.validateArgs(System.Int32)">
+ <summary>
+ Enforces that commandline args are properly formatted and paths exist
+ </summary>
+ 
+ <param name="maxFiles">
+ Maximum number of files to for which to validate the arguments 
+ </param>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.printErrExit(System.String)">
- <summary>Prints an error to the user and exits the application after they have pressed a key</summary>
- <param name="errTxt">The text to be printed to the user</param>
+ <summary>
+ Prints an error to the user and exits the application after they have pressed a key
+ </summary>
+ 
+ <param name="errTxt">
+ The text to be printed to the user
+ </param>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="T:winapp2ool.downloadr">
  <summary> Provides functions to download files to the rest of the application </summary>
@@ -2236,12 +3416,21 @@ Holds the path of any files to be saved by the Downloader
  <param name="lineTrackingList"> Line numbers associated with the lines in <c> <paramref name="sectionToBeBuilt"/> </c> </param>
 </member>
 <member name="M:winapp2ool.iniFile.printFileChooserMenu">
- <summary> Prints the menu for the <c> File Chooser </c> submodule, enabling the user to change the <c> Name </c>
- property or open the <c> Directory Chooser </c> sister submodule through a familiar MenuMaker interface </summary>
+ <summary> 
+ Prints the menu for the <c> File Chooser </c> submodule, enabling the user to change the 
+ <c> Name </c> property or open the <c> Directory Chooser </c> sister submodule through 
+ a familiar MenuMaker interface </summary>
+ 
 </member>
 <member name="M:winapp2ool.iniFile.handleFileChooserInput(System.String)">
- <summary> Handles the input for the <c> File Chooser </c> submodule </summary>
- <param name="input"> The user's input </param>
+ <summary> 
+ Handles the input for the <c> File Chooser </c> submodule 
+ </summary>
+ 
+ <param name="input"> 
+ The user's input 
+ </param>
+ 
 </member>
 <member name="M:winapp2ool.iniFile.reName(System.String)">
  <summary> Assigns the <c> Name </c> of the <c> iniFile </c> to the given <c> <paramref name="nname"/> </c> and stores the previous <c> Name </c>
@@ -2802,6 +3991,31 @@ The current indentation level of the global log.
  </summary>
  Docs last updated: 2023-07-19
 </member>
+<member name="T:winapp2ool.MenuMaker.FrameType">
+ <summary>
+ Defines the types of menu frames available
+ </summary>
+</member>
+<member name="F:winapp2ool.MenuMaker.FrameType.Vertical">
+ <summary>
+ 
+ </summary>
+</member>
+<member name="F:winapp2ool.MenuMaker.FrameType.Top">
+ <summary>
+ 
+ </summary>
+</member>
+<member name="F:winapp2ool.MenuMaker.FrameType.Bottom">
+ <summary>
+ 
+ </summary>
+</member>
+<member name="F:winapp2ool.MenuMaker.FrameType.Conjoin">
+ <summary>
+ 
+ </summary>
+</member>
 <member name="P:winapp2ool.MenuMaker.pressEnterStr">
  <summary>
  An instruction to press the Enter button to continue 
@@ -2875,6 +4089,12 @@ The current indentation level of the global log.
  </summary>
  
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
+</member>
+<member name="P:winapp2ool.MenuMaker.MenuHeaderTextColor">
+ <summary>
+ 
+ </summary>
+ <returns></returns>
 </member>
 <member name="P:winapp2ool.MenuMaker.OptNum">
  <summary>
@@ -2957,7 +4177,7 @@ The current indentation level of the global log.
  
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
-<member name="M:winapp2ool.MenuMaker.print(System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+<member name="M:winapp2ool.MenuMaker.print(System.Int32,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Nullable{System.Boolean},System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
  <summary> 
  Prints menu lines, options, and frames
  fit to the current console window width
@@ -3004,6 +4224,17 @@ The current indentation level of the global log.
  </description> 
  </item>
  
+ <item>
+ <description>
+ <c> 6 </c>: Menu header with trailing conjoiner 
+ </description>
+ </item>
+ 
+ <item>
+ <description>
+ <c> 7 </c>: Yellow menu line with /!\ warning text /!\
+ </description>
+ </item>
  </list>
  </param>
  
@@ -3121,7 +4352,17 @@ The current indentation level of the global log.
  
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
-<member name="M:winapp2ool.MenuMaker.determinePrintColor(System.Boolean,System.Boolean,System.ConsoleColor,System.Boolean)">
+<member name="M:winapp2ool.MenuMaker.PrintNewLine(System.Boolean)">
+ <summary>
+ Prints a new line to the console
+ </summary>
+ 
+ <param name="condition">
+ Indicates whether the new line should be printed
+ Optional, Default: <c> True </c>
+ </param>
+</member>
+<member name="M:winapp2ool.MenuMaker.determinePrintColor(System.Boolean,System.Boolean,System.ConsoleColor,System.Nullable{System.Boolean})">
  <summary> 
  Determines which color should be used when printing. If no color 
  is to be used, the print colors are reset to their defaults
@@ -3202,7 +4443,7 @@ The current indentation level of the global log.
  
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
-<member name="M:winapp2ool.MenuMaker.getFrame(System.Int32,System.Boolean)">
+<member name="M:winapp2ool.MenuMaker.getFrame(System.Int32,System.Nullable{System.Boolean})">
  <summary> 
  Returns an empty menu line, or a variety of filled menu lines 
  </summary>
@@ -3278,6 +4519,25 @@ The current indentation level of the global log.
  
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
+<member name="M:winapp2ool.MenuMaker.setNextMenuHeaderText(System.String,System.Boolean,System.ConsoleColor)">
+ <summary>
+ Overrides the next menu's default header with with <c> <paramref name="txt"/> </c>
+ <br />
+ Useful for delivering a status update or error message between menues or modules
+ </summary>
+ 
+ <param name="txt">
+ 
+ </param>
+ 
+ <param name="cond">
+ 
+ </param>
+ 
+ <param name="printColor">
+ 
+ </param>
+</member>
 <member name="M:winapp2ool.MenuMaker.denyActionWithHeader(System.Boolean,System.String)">
  <summary> 
  Informs a user when an action is unable to proceed due to a condition
@@ -3293,7 +4553,7 @@ The current indentation level of the global log.
  
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
-<member name="M:winapp2ool.MenuMaker.enStr(System.Boolean)">
+<member name="M:winapp2ool.MenuMaker.enStr(System.Nullable{System.Boolean})">
  <summary> 
  Returns the inverse state of a given boolean as a String
  </summary>
@@ -3320,7 +4580,12 @@ The current indentation level of the global log.
  
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
-<member name="M:winapp2ool.MenuMaker.printMenuTop(System.String[],System.Boolean,System.Boolean)">
+<member name="M:winapp2ool.MenuMaker.resetMenuNumbering">
+ <summary>
+ 
+ </summary>
+</member>
+<member name="M:winapp2ool.MenuMaker.printMenuTop(System.String[],System.Boolean,System.Boolean,System.ConsoleColor)">
  <summary> 
  Prints the top of the menu, the header, a conjoiner,
  any description text provided, the menu prompt, and the exit option 
@@ -3381,7 +4646,7 @@ The current indentation level of the global log.
  
  Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
 </member>
-<member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.Int32,System.Int32,System.Boolean)">
+<member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.Int32,System.Int32,System.Nullable{System.Boolean})">
  <summary> 
  Constructs a menu line fit to the width of the console 
  </summary>
@@ -3521,6 +4786,90 @@ The current indentation level of the global log.
  
  Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
 </member>
+<member name="M:winapp2ool.MenuMaker.PrintLine(System.String,System.Boolean,System.Boolean)">
+ <summary>
+ Prints a simple menu line with text
+ </summary>
+</member>
+<member name="M:winapp2ool.MenuMaker.PrintBlank(System.Boolean)">
+ <summary>
+ Prints a blank menu line
+ </summary>
+</member>
+<member name="M:winapp2ool.MenuMaker.PrintOption(System.String,System.String,System.Boolean)">
+ <summary>
+ Prints a numbered menu option
+ </summary>
+</member>
+<member name="M:winapp2ool.MenuMaker.PrintToggle(System.String,System.String,System.Boolean,System.Boolean)">
+ <summary>
+ Prints a toggle option (Enable/Disable)
+ </summary>
+</member>
+<member name="M:winapp2ool.MenuMaker.PrintWarning(System.String,System.Boolean)">
+ <summary>
+ Prints a colored warning line
+ </summary>
+</member>
+<member name="M:winapp2ool.MenuMaker.PrintColored(System.String,System.ConsoleColor,System.Boolean,System.Boolean)">
+ <summary>
+ Prints colored text
+ </summary>
+</member>
+<member name="M:winapp2ool.MenuMaker.BeginMenu(System.Boolean)">
+ <summary>
+ Opens a menu with top border
+ </summary>
+ 
+ <param name="solid">
+ Indicates whether the divider line should be solid
+ Optional, Default: <c> True </c> (solid)
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuMaker.EndMenu(System.Boolean)">
+ <summary>
+ Closes a menu with bottom border
+ </summary>
+</member>
+<member name="M:winapp2ool.MenuMaker.PrintDivider(System.Boolean)">
+ <summary>
+ Prints a section divider
+ </summary>
+
+ <param name="solid">
+ Indicates whether the divider line should be solid
+ Optional, Default: <c> True </c> (solid)
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuMaker.MenuItem(System.String,System.String,System.Boolean)">
+ <summary>
+ Creates a menu item through the new MenuItemBuilder system
+ </summary>
+ 
+ <param name="name"> 
+ The name of the menu item, shown to the left of the description
+ </param>
+ 
+ <param name="description"> 
+ The description of the menu item, shown to the right of the name
+ </param>
+ 
+ Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuMaker.GetRedGreen(System.Boolean)">
+ <summary>
+ 
+ </summary>
+ 
+ <param name="cond">
+ 
+ </param>
+ <returns></returns>
+</member>
 <member name="T:winapp2ool.RegistryHelper">
  <summary>
  This module holds any functions winapp2ool might require for accessing and manipulating the windows registry
@@ -3564,7 +4913,7 @@ The current indentation level of the global log.
  A pointer to the boolean indicating that a module's settings been modified from their default state 
  </param>
  
- Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
+ Docs last updated: 2025-07-22 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.SettingsManager.toggleSettingParam(System.Boolean@,System.String,System.Boolean@,System.String,System.String,System.String)">
  <summary>
@@ -3586,14 +4935,26 @@ The current indentation level of the global log.
  <param name="callingModule">
  The name of the module calling this function
  </param>
+ 
  <param name="settingName">
  The name of the setting being toggled
  </param>
+ 
  <param name="settingChangedName">
  The name of the settings changed flag
  </param>  
  
- Docs last updated: 2025-07-22 | Code last updated: 2025-07-22\
+ Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
+</member>
+<member name="M:winapp2ool.SettingsManager.toggleModuleSetting(System.String,System.String,System.Type,System.String,System.String)">
+ <summary>
+ 
+ </summary>
+ <param name="paramText"></param>
+ <param name="callingModule"></param>
+ <param name="settingsModule"></param>
+ <param name="settingName"></param>
+ <param name="settingChangedName"></param>
 </member>
 <member name="M:winapp2ool.SettingsManager.resetModuleSettings(System.String,System.Action)">
  <summary>
@@ -3694,16 +5055,6 @@ The current indentation level of the global log.
 </member>
 <member name="M:winapp2ool.updater.chkOfflineMode">
  <summary> Updates the offline status of winapp2ool </summary>
-</member>
-<member name="M:winapp2ool.updater.printUpdNotif(System.Boolean,System.String,System.String,System.String)">
- <summary> Informs the user when an update is available </summary>
- <param name="cond"> Indicates whether or not an update for winapp2ool or winapp2.ini is available <br />
- <c> True </c> if an update is available <br />
- <c> False </c> if no update is available 
- </param>
- <param name="updName"> The name of the file (winapp2.ini or winapp2ool) for which there is a pending update </param>
- <param name="oldVer"> The old (currently in use) version </param>
- <param name="newVer"> The updated version pending download </param>
 </member>
 <member name="M:winapp2ool.updater.autoUpdate">
  <summary> Replaces the currently running executable with the latest from GitHub before launching that new executable and closing the current one,
@@ -4076,21 +5427,21 @@ The version in YYMMDD format of the winapp2.ini file
  When run from the temporary folder, winapp2ool.exe update functionality is disabled
  </remarks>
  
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+ Docs last updated: 2020-07-14 | Code last updated: 2025-08-06
 </member>
 <member name="T:winapp2ool.maintoolmenu">
  <summary> 
- Displays the main winapp2ool menu to the user and handles input from that menu 
+ Displays the main winapp2ool menu to the user and handles input from that menu accordingly
  </summary>
  
- Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+ Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
 </member>
 <member name="M:winapp2ool.maintoolmenu.printToolMainMenu">
  <summary> 
  Prints the main winapp2ool menu to the user 
  </summary>
  
- Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+ Docs last updated: 2023-07-19 | Code last updated: 2025-08-20
 </member>
 <member name="M:winapp2ool.maintoolmenu.handleToolMainUserInput(System.String)">
  <summary> 
@@ -4098,10 +5449,38 @@ The version in YYMMDD format of the winapp2.ini file
  </summary>
  
  <param name="input">
- The <c> String </c> containing the user's input 
+ The user's input
  </param>
  
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+ Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
+</member>
+<member name="M:winapp2ool.maintoolmenu.getUpdateNotification(System.Boolean,System.String,System.String,System.String,winapp2ool.MenuSection)">
+ <summary> 
+ Adds information to the menu indicating to the user that an 
+ update is available for <see cref="T:winapp2ool.Winapp2ool"/> or winapp2.ini
+ </summary>
+ 
+ <param name="cond"> 
+ Indicates whether or not an update for <see cref="T:winapp2ool.Winapp2ool"/>
+ or winapp2.ini is available <br />
+ <c> True </c> if an update is available <br />
+ <c> False </c> if no update is available 
+ </param>
+ 
+ <param name="updName">
+ The name of the file (winapp2.ini or <see cref="T:winapp2ool.Winapp2ool"/>) 
+ for which there is a pending update
+ </param>
+ 
+ <param name="oldVer">
+ The old (currently in use) version 
+ </param>
+ 
+ <param name="newVer"> 
+ The updated version pending download
+ </param>
+ 
+ Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
 </member>
 <member name="T:winapp2ool.mainToolSettingsHandler">
  <summary> 
@@ -4126,7 +5505,7 @@ The version in YYMMDD format of the winapp2.ini file
  Most often, this is the default state of these settings 
  </remarks>
  
- Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
+ Docs last updated: 2024-05-08 | Code last updated: 2025-08-05
 </member>
 <member name="T:winapp2ool.maintoolsettings">
  <summary>
@@ -4175,6 +5554,321 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
+<member name="T:winapp2ool.FlavorizerMainMenu">
+ <summary>
+ Displays the Flavorizer main menu to the user and handles their input accordingly
+ </summary>
+ 
+ Docs last updated: 2025-08-01
+</member>
+<member name="M:winapp2ool.FlavorizerMainMenu.printFlavorizerMainMenu">
+ <summary>
+ Prints the Flavorizer menu to the user, showing all correction file options
+ and current settings
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.FlavorizerMainMenu.handleFlavorizerMainMenuUserInput(System.String)">
+ <summary>
+ Handles the user's input from the main menu
+ </summary>
+ 
+ <param name="input">
+ The user's input
+ </param>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-23
+</member>
+<member name="M:winapp2ool.FlavorizerMainMenu.getFileOpts">
+ <summary>
+ Determines the current set of file selectors displayed on the menu and returns a Dictionary 
+ of those options and their respective files <br />
+ <br />
+ The set of possible files includes:
+ <list type="bullet">
+     
+ <item>
+ Base file
+ </item>
+ 
+ <item>
+ Save target
+ </item>
+ 
+ <item>
+ Target directory
+ </item>
+     
+ <item>
+ Section removals
+ </item>
+ 
+ <item>
+ Key name removals
+ </item>
+ 
+ <item>
+ Key value removals
+ </item>
+ 
+ <item>
+ Section replacements
+ </item>
+ 
+ <item>
+ Key replacements
+ </item>
+ 
+ <item>
+ Additions
+ </item>
+ 
+ </list>
+ 
+ </summary>
+ 
+ <returns> 
+ The set of <c> iniFile </c> properties currently displayed on the menu
+ </returns>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
+<member name="T:winapp2ool.FlavorizerSettings">
+ <summary>
+ Holds the settings for the Flavorizer module, which provides a user interface
+ for applying "flavors" (sets of modifications) to ini files.
+ 
+ The flavorization process uses multiple correction files applied in this order:
+ 1. Section Removal (File3) -> Remove entire sections
+ 2. Key Name Removal (File4) -> Remove keys by name matching
+ 3. Key Value Removal (File5) -> Remove keys by value and keytype matching  
+ 4. Section Replacement (File6) -> Replace entire sections
+ 5. Key Replacement (File7) -> Replace individual key values
+ 6. Section and Key Additions (File8) -> Add new sections and keys
+ 
+ All correction files are optional - the flavorization will skip any that
+ are not specified or do not exist.
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerFile1">
+ <summary>
+ The base <c> iniFile </c> to which the flavor will be applied
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerFile2">
+ <summary>
+ The location to which the Flavorizer will save its output 
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerFile3">
+ <summary>
+ Section removal file - contains sections to be removed entirely from the base file. <br />
+ Sections will be removed regardless of their content. <br />
+ Applied in the first stage of flavorization.
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerFile4">
+ <summary>
+ Key name removal file - contains keys to be removed by name matching. <br />
+ Keys must be within sections that match exactly (case sensitive). <br/>
+ The values in this file are ignored - only key names matter. <br />
+ Applied in the second stage of flavorization.
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerFile5">
+ <summary>
+ Key value removal file - contains keys to be removed by keytype and value matching. <br />
+ Numbers in key names are ignored for matching purposes. <br />
+ Both the keytype (name without numbers) and value must match. <br />
+ Applied in the third stage of flavorization. 
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerFile6">
+ <summary>
+ Section replacement file - contains complete sections that will replace <br />
+ sections of the same name in the base file. <br />
+ Section names must match exactly (case sensitive). <br />
+ This completely replaces the section content. <br/>
+ Applied in the fourth stage of flavorization. <br />
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerFile7">
+ <summary>
+ Key replacement file - contains individual keys that will replace <br />
+ keys of the same name within matching sections in the base file. <br />
+ Both section names and key names must match exactly (case sensitive). <br />
+ Applied in the fifth stage of flavorization. 
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerFile8">
+ <summary>
+ Additions file - contains sections and keys to be added to the base file. <br />
+ New sections will be added as-is. <br />
+ Keys within existing sections will be added to those sections. <br />
+ Applied in the sixth and final stage of flavorization. <br />
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerFile9">
+ <summary>
+ Holds the "Target Directory" for the Flavorizer module which is used to automatically
+ detect the set of Flavor files. <br /> 
+ Never has a file name and is never saved to disk
+ </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizeAsWinapp">
+ <summary>
+ Indicates whether the output should be formatted as a winapp2.ini file <br/>
+ Default: <c> True </c>
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="P:winapp2ool.FlavorizerSettings.FlavorizerModuleSettingsChanged">
+ <summary>
+ Indicates that the module settings have been modified from their defaults <br />
+ Default: <c> False </c>
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="T:winapp2ool.FlavorizerSettingsHandler">
+ <summary>
+ Handles the loading, saving, and management of Flavorizer module settings.
+ 
+ This module manages the configuration for the Flavorizer, which provides
+ a user interface for applying "flavors" (sets of modifications) to ini files
+ using the Transmute.Flavorize() function.
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="M:winapp2ool.FlavorizerSettingsHandler.initDefaultFlavorizerSettings">
+ <summary>
+ Restores the default state of the Flavorizer module's properties
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="M:winapp2ool.FlavorizerSettingsHandler.getSerializedFlavorizerSettings">
+ <summary>
+ Assigns the module settings to Flavorizer based on the current disk-writable settings representation
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="M:winapp2ool.FlavorizerSettingsHandler.createFlavorizerSettingsSection">
+ <summary>
+ Adds the current state of the module's settings into the disk-writable settings representation 
+ </summary>
+ 
+ <remarks>
+ Most often, this is the default state of these settings 
+ </remarks>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="T:winapp2ool.Flavorizer">
+ <summary>
+ The Flavorizer module provides a user interface for applying "flavors" to ini files.
+ A flavor is a set of modifications that adapt a base ini file for specific use cases.
+ 
+ The flavorization process applies modifications in this specific order:
+ 1. Section Removal -> Remove entire sections
+ 2. Key Name Removal -> Remove keys by name matching
+ 3. Key Value Removal -> Remove keys by value and keytype matching  
+ 4. Section Replacement -> Replace entire sections
+ 5. Key Replacement -> Replace individual key values
+ 6. Section and Key Additions -> Add new sections and keys
+ 
+ If a modification file isn't present, that modification will be skipped 
+ 
+ This module wraps Transmute's Flavorize function with an intuitive UI for
+ managing the multiple correction files used in the flavorization process 
+ and also provides the ability to detect a group of flavor files within a 
+ particular directory for ease of configuration
+ 
+ </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="M:winapp2ool.Flavorizer.handleCmdLine">
+ <summary>
+ Handles command line arguments for the Flavorizer module <br />
+ Flavorizer args:
+ -nowinapp         : Disable processing as winapp2.ini format (default: true)
+ -autodetect       : Automatically detect a group of Flavor files in the target directory
+ </summary>
+ 
+ <remarks>
+ To refer -autodetect to a different directory than the current one, also provide 
+ -9d with the appropriate directory. <c> FlavorizerFile9 </c> holds the target directory 
+ for the auto detect function within its Dir property 
+ </remarks>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="M:winapp2ool.Flavorizer.initFlavorizer">
+ <summary>
+ Initializes the Flavorizer process and validates required files
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="M:winapp2ool.Flavorizer.performFlavorization(winapp2ool.MenuSection@)">
+ <summary>
+ Performs the actual flavorization using the Transmute.Flavorize function
+ </summary>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
+</member>
+<member name="M:winapp2ool.Flavorizer.DetectFlavorFiles(System.String)">
+ <summary>
+ Automatically detects and assigns flavor files based on standard naming conventions
+ </summary>
+ 
+ <param name="targetDirectory">
+ The directory to search for flavor files. If empty, uses the current directory.
+ </param>
+ 
+ <remarks>
+ - section_removals.ini -> FlavorizerFile3 (Section removal file)
+ - name_removals.ini -> FlavorizerFile4 (Key name removal file)  
+ - value_removals.ini -> FlavorizerFile5 (Key value removal file)
+ - section_replacements.ini -> FlavorizerFile6 (Section replacement file)
+ - key_replacements.ini -> FlavorizerFile7 (Key replacement file)
+ - additions.ini -> FlavorizerFile8 (Additions file)
+ </remarks>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="M:winapp2ool.Flavorizer.updateFlavorFileSettings">
+ <summary>
+ Updates the settings for all Flavorizer files that have been assigned
+ </summary>
+ 
+ Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
 <member name="T:winapp2ool.transmuteMainMenu">
  <summary>
  Displays the Transmute main menu to the user and handles their input accordingly
@@ -4197,7 +5891,7 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
-<member name="M:winapp2ool.transmuteMainMenu.handleTransmuteMainMenuUserInput(System.String)">
+<member name="M:winapp2ool.transmuteMainMenu.handleTransmuteUserInput(System.String)">
  <summary> 
  Handles the user's input from the main menu 
  </summary>
@@ -4385,18 +6079,29 @@ The version in YYMMDD format of the winapp2.ini file
  without numbers) must also match. Works best for numbered keys whose numbers may change 
  or be unclear when invoking Transmute
  </item>
- 
  </list>
  
+ <br /><br />
+ Additionally, Transmute provides an important function called Flavorize. Flavorize is used to 
+ apply "flavors" to an ini file. In the context on winapp2.ini, there has historically existed 
+ at least one flavor: the "non-ccleaner" file. Flavorize automates and also democratizes what has 
+ historically been a very labor intensive process: Maintaining a concise set of transformations
+ on the base winapp2.ini that can be used to adapt it to different purposes. The flavorization 
+ process always takes in a base ini file and then applies operations in the following order: <br />
+ <br />
+ Section Removal -> Key Name Removal -> Key Value Removal -> Section Replacement ->
+ Key Replacement -> Section and Key Additions
+ <br/>
  </summary>
  <remarks> 
+ <b> Remarks: </b> <br />
  Transmute replaces the Merge module and has has three modes which are wholly discrete from 
  one another. This is a breaking change from old versions of Merge prior to 2025, which 
  always add entries which don't exist and perform conflict resolution as part of that process.
- 
+ <br /><br />
  As the functionality of Merge evolved, it no longer felt appropriate to refer to its output as
  the result of a "merger" necessarily. We now consider the resulting output a Transmutation. 
- Nevertheless, this is still spiritually the Merge module
+ Nevertheless, this is still spiritually the Merge module 
  </remarks>
  
  Docs last updated: 2025-07-25 | Code last updated: 2025-07-25
@@ -4647,7 +6352,7 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
-<member name="M:winapp2ool.Transmute.transmute(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile@,System.Boolean,System.Boolean)">
+<member name="M:winapp2ool.Transmute.transmute(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.MenuSection@,System.Boolean,System.Boolean)">
  <summary> 
  Conducts the transmutation on the base file using the source file and saves the 
  output to the location provided within saveFile. <br /> Typically by default, the output is
@@ -4662,7 +6367,7 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
-<member name="M:winapp2ool.Transmute.RemoteTransmute(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile@,System.Boolean,winapp2ool.Transmute.TransmuteMode,winapp2ool.Transmute.ReplaceMode,winapp2ool.Transmute.RemoveMode,winapp2ool.Transmute.RemoveKeyMode,System.Boolean)">
+<member name="M:winapp2ool.Transmute.RemoteTransmute(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile@,System.Boolean,winapp2ool.MenuSection@,winapp2ool.Transmute.TransmuteMode,winapp2ool.Transmute.ReplaceMode,winapp2ool.Transmute.RemoveMode,winapp2ool.Transmute.RemoveKeyMode)">
  <summary> 
  Facilitates transmuting an <c> iniFile </c> from outside the module's UI
  </summary>
@@ -4681,6 +6386,10 @@ The version in YYMMDD format of the winapp2.ini file
  
  <param name="isWinapp"> 
  Indicates that the <c> iniFile </c>s being worked with contain winapp2.ini syntax 
+ </param>
+ 
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
  </param>
  
  <param name="transmuteMode"> 
@@ -4704,9 +6413,9 @@ The version in YYMMDD format of the winapp2.ini file
  Optional, Default: <c> RemoveKeyMode.ByName </c> 
  </param>
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.Transmute.resolveConflicts(winapp2ool.iniFile@,winapp2ool.iniFile@)">
+<member name="M:winapp2ool.Transmute.resolveConflicts(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.MenuSection@)">
  <summary> 
  Steps through the sections in the <c> <paramref name="sourceFile"/> </c> and applies the 
  transmutation to each. Sections found in the <c> <paramref name="sourceFile"/> </c> not 
@@ -4722,9 +6431,13 @@ The version in YYMMDD format of the winapp2.ini file
   The <c> iniFile </c> providing the content modification criteria for <c> <paramref name="baseFile"/> </c>
  </param>
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
+ </param>
+ 
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.Transmute.processTransmutator(winapp2ool.iniFile@,winapp2ool.iniFile@,System.String,winapp2ool.iniSection@)">
+<member name="M:winapp2ool.Transmute.processTransmutator(winapp2ool.iniFile@,winapp2ool.iniFile@,System.String,winapp2ool.iniSection@,winapp2ool.MenuSection@)">
  <summary>
  Hands off the processing of a section to the appropriate handler based on the 
  current <c> Transmutator </c> setting. <br />
@@ -4750,9 +6463,13 @@ The version in YYMMDD format of the winapp2.ini file
  The <c> iniSection </c> which will be modified by the transmutation process
  </param>
  
- Docs last updated: 2025-07-23 | Code last updated: 2025-07-23
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
+ </param>
+ 
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.Transmute.handleAddMode(winapp2ool.iniSection@,winapp2ool.iniSection@,winapp2ool.iniFile@,System.String)">
+<member name="M:winapp2ool.Transmute.handleAddMode(winapp2ool.iniSection@,winapp2ool.iniSection@,winapp2ool.iniFile@,System.String,winapp2ool.MenuSection@)">
  <summary>
  Handles the <c> Add Transmutator </c>, either adding the <c> <paramref name="sourceSection"/> </c>
  to the <c> <paramref name="baseFile"/> </c> or adding the keys from the 
@@ -4780,9 +6497,13 @@ The version in YYMMDD format of the winapp2.ini file
  The name of the current section undergoing the Add operation 
  </param>
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
+ </param>
+ 
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.Transmute.addKeysToBase(winapp2ool.iniSection@,winapp2ool.iniSection@)">
+<member name="M:winapp2ool.Transmute.addKeysToBase(winapp2ool.iniSection@,winapp2ool.iniSection@,winapp2ool.MenuSection@)">
  <summary>
  Adds keys from <c> <paramref name="sourceSection"/> </c> to 
  <c> <paramref name="baseSection"/> </c>
@@ -4798,9 +6519,13 @@ The version in YYMMDD format of the winapp2.ini file
  <c> <paramref name="baseSection"/> </c>
  </param>
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
+ </param>
+ 
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.Transmute.handleReplaceMode(winapp2ool.iniSection@,winapp2ool.iniSection@,winapp2ool.iniFile@,System.String)">
+<member name="M:winapp2ool.Transmute.handleReplaceMode(winapp2ool.iniSection@,winapp2ool.iniSection@,winapp2ool.iniFile@,System.String,winapp2ool.MenuSection@)">
  <summary>
  Handles the <c> Replace Transmutator </c>, replacing sections or keys based on the 
  current replaceMode setting
@@ -4825,9 +6550,13 @@ The version in YYMMDD format of the winapp2.ini file
  and also <c> <paramref name="sourceSection"/> </c>
  </param>
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
+ </param>
+ 
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.Transmute.replaceKeysInBase(winapp2ool.iniSection@,winapp2ool.iniSection@)">
+<member name="M:winapp2ool.Transmute.replaceKeysInBase(winapp2ool.iniSection@,winapp2ool.iniSection@,winapp2ool.MenuSection@)">
  <summary>
  Handles the Replace by Key mode for the <c> Replace Transmutator </c>, replacing the values
  of keys in <c> <paramref name="baseSection"/> </c> with the ones provided in 
@@ -4844,9 +6573,13 @@ The version in YYMMDD format of the winapp2.ini file
  <c> <paramref name="baseSection"/> </c>
  </param>
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
+ </param>
+ 
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.Transmute.handleRemoveMode(winapp2ool.iniSection@,winapp2ool.iniSection@,winapp2ool.iniFile@,System.String)">
+<member name="M:winapp2ool.Transmute.handleRemoveMode(winapp2ool.iniSection@,winapp2ool.iniSection@,winapp2ool.iniFile@,System.String,winapp2ool.MenuSection@)">
  <summary>
  Handles the <c> Remove Transmutator </c>, removing sections or keys based on the 
  current removeMode setting
@@ -4869,9 +6602,13 @@ The version in YYMMDD format of the winapp2.ini file
  and also <c> <paramref name="sourceSection"/> </c>
  </param>
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
+ </param>
+ 
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.Transmute.remKeys(winapp2ool.iniSection@,winapp2ool.iniSection)">
+<member name="M:winapp2ool.Transmute.remKeys(winapp2ool.iniSection@,winapp2ool.iniSection,winapp2ool.MenuSection@)">
  <summary>
  Removes individual keys from the <c> <paramref name="baseSection"/> </c>, obeying the 
  current <c> TransmuteRemoveMode </c> and <c> TransmuteRemoveKeyMode </c> settings. <br />
@@ -4886,9 +6623,13 @@ The version in YYMMDD format of the winapp2.ini file
  <c> <paramref name="baseSection"/> </c> <br />
  </param>
  
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
+ </param>
+ 
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.Transmute.Flavorize(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile,winapp2ool.iniFile,winapp2ool.iniFile,winapp2ool.iniFile,winapp2ool.iniFile,winapp2ool.iniFile,System.Boolean,System.Boolean)">
+<member name="M:winapp2ool.Transmute.Flavorize(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.MenuSection@,winapp2ool.iniFile,winapp2ool.iniFile,winapp2ool.iniFile,winapp2ool.iniFile,winapp2ool.iniFile,winapp2ool.iniFile,System.Boolean)">
  <summary>
  Applies a 'flavor' to an <c> iniFile </c>. A flavor is like a compatibility layer that
  allows a base file to be adjusted in slight ways to make it more suitable to a specific use
@@ -4908,6 +6649,10 @@ The version in YYMMDD format of the winapp2.ini file
  
  <param name="outputFile">
  The location on disk to which the flavorized <c> baseFile </c> will be saved 
+ </param>
+ 
+ <param name="menuOutput">
+ The <c> MenuSection </c> containing output to be displayed to the user 
  </param>
  
  <param name="additionsFile">
@@ -4963,13 +6708,7 @@ The version in YYMMDD format of the winapp2.ini file
  
  </param>
  
- <param name="quiet">
- Indicates whether or not the output from the Flavorizer should be muted <br />
- Optional, Default: <c> False </c>
- 
- </param>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
 </member>
 <member name="T:winapp2ool.transmuteSettingsHandler">
  <summary> 
@@ -5019,20 +6758,39 @@ The version in YYMMDD format of the winapp2.ini file
  The new <c> Name </c> for <c> TransmuteFile2 </c> 
  </param>
  
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
 <member name="M:winapp2ool.transmuteSettingsHandler.updateAllTransmuteEnumSettings">
  <summary>
- 
+ Updates the disk-writable representation of each of Transmute's enums 
  </summary>
+ 
+ Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
 <member name="T:winapp2ool.BrowserBuilder">
  <summary>
- The BrowserBuilder module handles management of three browser configuration files:
- chromium.ini, gecko.ini, and browsers.ini
+ BrowserBuilder is a winapp2ool module which handles the generation of bespoke winapp2.ini 
+ entries for a very large number of web browsers. It provides a small scripting interface 
+ which allows for the dynamic creation of entire groups of winapp2.ini entries using a limited
+ set of easily accessed information. <br /><br />
+ 
+ This module expects to interact with at least one of two specially formatted ini files. 
+ These files, chromium.ini and gecko.ini, provide the rulesets needed to generate entries for
+ web browsers running with these respective engines. Refer to these files for more specific 
+ documentation on how they are used by the user. BrowserBuilder is primarily intended as a 
+ small devops tool but end users might find it useful as it enables them to generate entries 
+ for non standard installation paths or portable applications while keeping winapp2.ini up
+ to date separately <br /><br />
+ 
+ Additionally, and because it is intended to simplify the devops, Browser Builder expects to 
+ "Flavorize" the browsers.ini that it produces. This is done so as to resolve over and under 
+ coverages by generated entries as well as resolve incompatibilities. Accordingly, it expects
+ but does not require a set of Flavor files (up to 1 "Add" file, up to 3 "Remove" files, and
+ up to 2 "Replace" files). Consult the Transmute documentation for more information about Flavors
+ <br/><br/> Unflavored browser.ini files may be broken or incomplete depending on use case
  </summary>
  
- Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
 </member>
 <member name="T:winapp2ool.BrowserBuilder.BrowserInfo">
  <summary>
@@ -5106,21 +6864,40 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
 </member>
+<member name="P:winapp2ool.BrowserBuilder.totalChromiumCount">
+ <summary>
+ 
+ </summary>
+ <returns></returns>
+</member>
+<member name="P:winapp2ool.BrowserBuilder.totalGeckoCount">
+ <summary>
+ 
+ </summary>
+ <returns></returns>
+</member>
+<member name="M:winapp2ool.BrowserBuilder.handleCmdLine">
+ <summary>
+ Handles the commandline arguments for <c> BrowserBuilder </c>
+ </summary>
+ 
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+</member>
 <member name="M:winapp2ool.BrowserBuilder.initBrowserBuilder">
  <summary>
  Initializes the browser builder process
  </summary>
  
- Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
+ Docs last updated: 2025-07-02 | Code last updated: 2025-08-27
 </member>
-<member name="M:winapp2ool.BrowserBuilder.processBrowserBuilder">
+<member name="M:winapp2ool.BrowserBuilder.processBrowserBuilder(winapp2ool.MenuSection@)">
  <summary>
  Processes the browser builder files and generates the output
  </summary>
  
  Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
 </member>
-<member name="M:winapp2ool.BrowserBuilder.buildScaffolds(winapp2ool.iniFile,System.Boolean,winapp2ool.iniFile@)">
+<member name="M:winapp2ool.BrowserBuilder.buildScaffolds(winapp2ool.iniFile,System.Boolean,winapp2ool.iniFile@,winapp2ool.MenuSection@)">
  <summary>
  Builds each <c> EntryScaffold </c> and then generates an appropriate entry for each 
  Browser provided in the <c> <paramref name="rulesetFile"/> </c>
@@ -5142,7 +6919,7 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
 </member>
-<member name="M:winapp2ool.BrowserBuilder.parseBrowserInfo(winapp2ool.iniSection)">
+<member name="M:winapp2ool.BrowserBuilder.parseBrowserInfo(winapp2ool.iniSection,winapp2ool.MenuSection@)">
  <summary>
  Parses a BrowserInfo section and returns a pre-computed BrowserInfo structure
  </summary>
@@ -5157,7 +6934,7 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
 </member>
-<member name="M:winapp2ool.BrowserBuilder.processEntryScaffold(winapp2ool.iniSection,System.Collections.Generic.List{winapp2ool.BrowserBuilder.BrowserInfo},System.Boolean,winapp2ool.iniFile@)">
+<member name="M:winapp2ool.BrowserBuilder.processEntryScaffold(winapp2ool.iniSection,System.Collections.Generic.List{winapp2ool.BrowserBuilder.BrowserInfo},System.Boolean,winapp2ool.iniFile@,winapp2ool.MenuSection@)">
  <summary>
  Processes an EntryScaffold section and generates entries for each browser
  </summary>
@@ -5194,6 +6971,7 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="fileKeyBase">
  A FileKey template to be transformed such that it is appropriate for Opera GX
  </param>
+ 
  <param name="fileKeyNum">
  The number of the current FileKey being generated
  </param>
@@ -5209,7 +6987,7 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-07-31 | Code last updated: 2025-07-31
 </member>
-<member name="M:winapp2ool.BrowserBuilder.generateBrowserEntry(winapp2ool.BrowserBuilder.BrowserInfo,System.String,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},winapp2ool.iniFile@,System.Boolean)">
+<member name="M:winapp2ool.BrowserBuilder.generateBrowserEntry(winapp2ool.BrowserBuilder.BrowserInfo,System.String,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},winapp2ool.iniFile@,System.Boolean,winapp2ool.MenuSection@)">
  <summary>
  Generates a browser entry using pre-computed browser information
  </summary>
@@ -5323,6 +7101,10 @@ The version in YYMMDD format of the winapp2.ini file
  The name of the Browser for which the current entry is being built
  </param>
  
+ <param name="isGecko">
+ Indicates whether or not the current browser is gecko-based 
+ </param>
+ 
  Docs last updated: 2025-07-31 | Code last updated: 2025-07-31
 </member>
 <member name="T:winapp2ool.JavaMaker">
@@ -5429,17 +7211,94 @@ The version in YYMMDD format of the winapp2.ini file
  Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="T:winapp2ool.trimmainmenu">
- <summary> Displays the trim main menu to the user and handles their input </summary>
- Docs last updated: 2020-11-24
+ <summary> 
+ Displays the Trim module's main menu to the user and handles their input accordingly
+ </summary>
+ 
+ Docs last updated: 2025-08-12 
 </member>
 <member name="M:winapp2ool.trimmainmenu.printTrimMenu">
- <summary> Prints the <c> Trim </c> menu to the user </summary>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+ <summary> 
+ Prints the <c> Trim </c> menu to the user 
+ </summary>
+ 
+ Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
 </member>
 <member name="M:winapp2ool.trimmainmenu.handleTrimUserInput(System.String)">
- <summary> Handles the user input from the menu </summary>
- <param name="input"> The String containing the user's input </param>
- Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
+ <summary> 
+ Handles the user input from the menu 
+ </summary>
+ 
+ <param name="input">
+ The user's input 
+ </param>
+ 
+ Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
+</member>
+<member name="M:winapp2ool.trimmainmenu.getToggleOpts">
+ <summary>
+ Determines the current set of toggles displayed on the menu and returns a Dictionary 
+ of those options and their respective toggle names <br />
+ <br />
+ The set of possible toggles includes:
+ <list type="bullet">
+     
+     <item>
+     Downloading (not available when offline)
+     </item>
+     
+     <item>
+     Includes
+     </item>
+     
+     <item>
+     Excludes
+     </item>
+     
+ </list>
+  
+ </summary>
+ 
+ <returns>
+ The set of available toggles for the Trim module, with their names on the 
+ menu as keys and the respective property names as values
+ </returns>
+ 
+ Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
+</member>
+<member name="M:winapp2ool.trimmainmenu.getFileOpts">
+ <summary>
+ Determines the current set of file selectors displayed on the menu and returns a Dictionary 
+ of those options and their respective files <br />
+ <br />
+ The set of possible files includes:
+ <list type="bullet">
+     
+     <item>
+     winapp2.ini (not available when downloading)
+     </item>
+     
+     <item>
+     Save target
+     </item>
+     
+     <item>
+     Includes file (not available when not using includes)
+     </item>
+     
+     <item>
+     Excludes file (not available when not using excludes)
+     </item>
+     
+ </list>
+ 
+ </summary>
+ 
+ <returns> 
+ The set of <c> iniFile </c> properties for an object currently displayed on the menu
+ </returns>
+ 
+ Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
 </member>
 <member name="T:winapp2ool.trimsettings">
  <summary>
@@ -6049,7 +7908,7 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2024-05-08 | Code last updated: 2023-07-19
 </member>
-<member name="M:winapp2ool.lintsettingshandler.getSeralizedLintSettings">
+<member name="M:winapp2ool.lintsettingshandler.getSerializedLintSettings">
  <summary> 
  Assigns the module settings to WinappDebug based on the current disk-writable settings representation
  </summary>
@@ -6282,6 +8141,15 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
 </member>
+<member name="P:winapp2ool.WinappDebug.UseCurrentDate">
+ <summary>
+ commandline runtime parameter for creating winapp2.ini with a version string 
+ reflecting the current date <br />
+ Default: <c> True </c> - uses current date; <c> False </c> uses static version string
+ </summary>
+ 
+ Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
+</member>
 <member name="M:winapp2ool.WinappDebug.HandleLintCmdLine">
  <summary>
  Handles the commandline args for <c> WinappDebug </c> <br />
@@ -6290,6 +8158,31 @@ The version in YYMMDD format of the winapp2.ini file
  </summary>
  
  Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+</member>
+<member name="M:winapp2ool.WinappDebug.assignLineNumbers(winapp2ool.iniFile@)">
+ <summary>
+ Ensures that an <c> iniFile </c> has a proper line number information for each key and section <br />
+ Useful when working with generated <c> iniFile</c>s
+ </summary>
+ 
+ Docs last updated: 2025-08-04 | Code last updated: 2025-08-04
+</member>
+<member name="M:winapp2ool.WinappDebug.remotedebug(winapp2ool.iniFile,System.Boolean)">
+ <summary>
+ Lints <c> <paramref name="givenIni"/> </c>'s winapp2.ini formatting from outside the module's UI <br />
+ Returns the linted <c> iniFile </c>
+ </summary>
+ 
+ <param name="givenIni">
+ The winapp2.ini syntax <c> iniFile to be linted </c>
+ </param>
+ 
+ <param name="forceOpti">
+ Indicates whether or not the linter should attempt to optimize entries <br />
+ Optional, Default: <c> False </c>
+ </param>
+ 
+ Docs last updated: 2025-08-04 | Code last updated: 2025-08-04
 </member>
 <member name="M:winapp2ool.WinappDebug.InitDebug">
  <summary> 
@@ -6820,6 +8713,39 @@ The version in YYMMDD format of the winapp2.ini file
  </param>
  
  Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+</member>
+<member name="M:winapp2ool.Winapp2ool.getFileMenuColor(winapp2ool.iniFile)">
+ <summary>
+ Determines the color of a file selector based on whether or not a file has been selected
+ </summary>
+ 
+ <param name="menuFile">
+ An <c> iniFile </c> with influence on a menu option's coloring
+ </param>
+ 
+ <returns>
+ <c> Green </c> if <c> <paramref name="menuFile"/> </c> has a name, <br />
+ <c> Red </c> otherwise
+ </returns>
+
+ Docs last updated: 2025-08-23 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.Winapp2ool.getFileMenuName(winapp2ool.iniFile)">
+ <summary>
+ Returns the display information for a file selector in a menu
+ </summary>
+ 
+ <param name="menuFile">
+ An <c> iniFile </c> whose path will be displayed if it has valid <c> Name </c>
+ </param>
+ 
+ <returns>
+ A print friendly version of the file's path if it has a valid <c> Name </c>, with the 
+ current directory replaced with ..\ <br />
+ "Not specified" otherwise
+ </returns>
+ 
+ Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
 </member>
 </members>
 </doc>
