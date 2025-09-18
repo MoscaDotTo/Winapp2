@@ -32,7 +32,7 @@ Public Module FlavorizerMainMenu
     ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
     Public Sub printFlavorizerMainMenu()
 
-        Console.WindowHeight = Console.LargestWindowHeight
+        Console.WindowHeight = 45
 
         Dim menuDescriptionLines = {"Apply a 'flavor' to an ini file using a collection of correction files",
                                     "Flavorization is applied in this order:",
@@ -41,7 +41,7 @@ Public Module FlavorizerMainMenu
 
         Dim menu = MenuSection.CreateCompleteMenu(NameOf(Flavorizer), menuDescriptionLines, ConsoleColor.Yellow)
 
-        menu.AddToggle("Run (default)", "Apply the flavor to the base file", FlavorizerFile1.Name.Length > 0).AddBlank() _
+        menu.AddColoredOption("Run (default)", "Apply the flavor to the base file", GetRedGreen(FlavorizerFile1.Name.Length = 0)).AddBlank() _
             .AddColoredOption("Auto detect Flavor", "Attempt to detect the flavor files by name", ConsoleColor.Yellow) _
             .AddColoredOption("winapp2.ini formatting", $"{enStr(FlavorizeAsWinapp)} formatting output as winapp2.ini", If(FlavorizeAsWinapp, ConsoleColor.Green, ConsoleColor.Red)).AddBlank() _
             .AddOption("Change base file", "Select the base file to be flavorized") _
