@@ -16,10 +16,10 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
+
 Imports System.Globalization
 Imports System.IO
 Imports System.Reflection
-Imports System.Runtime.InteropServices
 
 ''' <summary> 
 ''' settingsHandler manages the disk-writable representation of winapp2ool
