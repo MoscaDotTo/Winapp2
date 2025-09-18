@@ -35,6 +35,9 @@ Public Module launcher
     ''' Docs last updated: 2020-07-14 | Code last updated: 2025-08-06
     Public Sub main()
 
+        Console.WindowWidth = 130
+        Console.WindowHeight = 35
+
         gLog($"Starting application")
 
         chkOfflineMode()
@@ -53,8 +56,6 @@ Public Module launcher
 
         currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         Console.Title = $"Winapp2ool v{currentVersion}"
-        Console.WindowWidth = 126
-        Console.WindowHeight = 34
 
         initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
 
