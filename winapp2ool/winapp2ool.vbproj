@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="handlers\menus\builders\MenuItemBuilder\MenuItemBuilder.vb" />
+    <Compile Include="handlers\menus\MenuOption.vb" />
     <Compile Include="handlers\menus\MenuSection\MenuSection.vb" />
     <Compile Include="handlers\settings\settingsHandler.vb" />
     <Compile Include="modules\browserbuilder\mainmenu\browserbuildermainmenu.vb" />
