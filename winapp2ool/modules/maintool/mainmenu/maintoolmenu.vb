@@ -20,16 +20,14 @@ Option Strict On
 ''' <summary> 
 ''' Displays the main winapp2ool menu to the user and handles input from that menu accordingly
 ''' </summary>
-''' 
-''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
 Module maintoolmenu
 
     ''' <summary> 
     ''' Prints the main winapp2ool menu to the user 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2023-07-19 | Code last updated: 2025-08-20
     Public Sub printToolMainMenu()
+
+        If Console.WindowHeight < 35 Then Console.WindowWidth = 35
 
         checkUpdates(Not isOffline AndAlso Not checkedForUpdates)
         Dim UpdatesAvailable = Not isOffline AndAlso (waUpdateIsAvail OrElse updateIsAvail)
@@ -42,11 +40,11 @@ Module maintoolmenu
         Dim menu = MenuSection.CreateCompleteMenu($"{NameOf(Winapp2ool)} v{currentVersion}", menuDesc, headerColor, True)
 
         menu.AddBlank() _
-            .AddOption("WinappDebug", "Check For And correct errors In winapp2.ini") _
-            .AddOption("Trim", "Debloat winapp2.ini for your system") _
+            .AddOption("WinappDebug", "Scan for and correct style and syntax errors in winapp2.ini") _
+            .AddOption("Trim", "Optimize winapp2.ini for your system") _
             .AddOption("Transmute", "Add, replace, or remove entire sections or individual keys from winapp2.ini") _
-            .AddOption("Diff", "Observe the changes between two winapp2.ini files") _
-            .AddOption("CCiniDebug", "Sort And trim ccleaner.ini") _
+            .AddOption("Diff", "Generate a context-aware changelog between two winapp2.ini files") _
+            .AddOption("CCiniDebug", "Remove stale winapp2.ini configurations from ccleaner.ini") _
             .AddOption("Browser Builder", "Generate winapp2.ini entries for web browsers") _
             .AddOption("Combine", "Join together a collection of ini files into one").AddBlank() _
             .AddOption("Downloader", "Download files from the Winapp2 GitHub") _
@@ -66,11 +64,11 @@ Module maintoolmenu
         End If
 
         menu.AddBlank(waUpdateIsAvail) _
-            .AddOption("Update", "Update your local copy of winapp2.ini", condition:=waUpdateIsAvail) _
+            .AddOption("Update Winapp2.ini", "Update your local copy of winapp2.ini", condition:=waUpdateIsAvail) _
             .AddOption("Update & Trim", "Download and trim the latest winapp2.ini", condition:=waUpdateIsAvail) _
-            .AddOption("Show update diff", "See the difference between your local file and the latest", condition:=waUpdateIsAvail) _
+            .AddOption("Show winapp2.ini changelog", "See the difference between your local file and the latest", condition:=waUpdateIsAvail) _
             .AddBlank(waUpdateIsAvail) _
-            .AddOption("Update", "Get the latest Winapp2ool.exe", condition:=updateIsAvail AndAlso Not DotNetFrameworkOutOfDate) _
+            .AddOption("Update Winapp2ool", "Get the latest Winapp2ool.exe", condition:=updateIsAvail AndAlso Not DotNetFrameworkOutOfDate) _
             .AddOption("Go online", "Retry your internet connection", condition:=isOffline)
 
         menu.Print()
@@ -84,8 +82,6 @@ Module maintoolmenu
     ''' <param name="input">
     ''' The user's input
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
     Public Sub handleToolMainUserInput(input As String)
 
         Dim modules = New Dictionary(Of String, KeyValuePair(Of Action, Action(Of String))) From {
@@ -185,19 +181,19 @@ Module maintoolmenu
                 autoUpdate()
 
             ' Save winapp2ool log 
-            ' Notes: hidden option not listed on menu, triggered by "savelog"
+            ' Notes: hidden option not listed on menu
             Case input = "savelog"
 
                 GlobalLogFile.overwriteToFile(logger.toString)
 
             ' Print winapp2ool log 
-            ' Notes: hidden option not listed on menu, triggered by "printlog"
+            ' Notes: hidden option not listed on menu
             Case input = "printlog"
 
                 printLog()
 
             ' Force winapp2ool update 
-            ' Notes: hidden option not listed on menu, triggered by "forceupdate"
+            ' Notes: hidden option not listed on menu
             Case input = "forceupdate"
 
                 autoUpdate()
@@ -234,8 +230,6 @@ Module maintoolmenu
     ''' <param name="newVer"> 
     ''' The updated version pending download
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
     Private Sub getUpdateNotification(cond As Boolean,
                                       updName As String,
                                       oldVer As String,
