@@ -83,25 +83,30 @@ Public Module browserbuildermainmenu
 
         Dim resetNum = CType(fileOpts.Count + 2, String)
 
+        Dim fileDescs = {
+        "Chromium ruleset",
+        "Gecko ruleset",
+        "Save target",
+        "Section removal ruleset",
+        "Key name removal ruleset",
+        "Key value removal ruleset",
+        "Section replacement ruleset",
+        "Key value replacement ruleset",
+        "Additions ruleset"}
+
         Select Case True
 
             ' Exit
-            ' Notes: Always "0"
             Case input = "0"
 
                 exitModule()
 
-            ' Run (default) 
-            ' Notes: Always "1", also triggered by no input if run conditions are otherwise satisfied
+            ' Run (default)
             Case (input = "1" OrElse input.Length = 0)
 
                 initBrowserBuilder()
 
             ' File Selectors
-            ' chromium.ini
-            ' gecko.ini
-            ' save target
-            ' flavor files
             Case fileNums.Contains(input)
 
                 Dim i = CType(input, Integer) - 2
@@ -109,17 +114,16 @@ Public Module browserbuildermainmenu
                 Dim fileName = fileOpts.Keys(i)
                 Dim fileObj = fileOpts(fileName)
 
-                changeFileParams(fileObj, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), fileName, NameOf(BrowserBuilderModuleSettingsChanged))
+                changeFileParams(fileObj, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), fileName, NameOf(BrowserBuilderModuleSettingsChanged), fileDescs(i))
 
             ' Reset Settings       
-            ' Notes: Always the last option, only appears if settings have been changed
             Case BrowserBuilderModuleSettingsChanged AndAlso input = resetNum
 
                 resetModuleSettings(NameOf(BrowserBuilder), AddressOf initDefaultBrowserBuilderSettings)
 
             Case Else
 
-                setHeaderText(invInpStr, True)
+                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
         End Select
 
