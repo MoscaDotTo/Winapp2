@@ -181,6 +181,7 @@ Public Class MenuSection
             ._menuHeader = If(MenuHeaderText = "", menuHeader, MenuHeaderText),
             ._menuHeaderColor = If(MenuHeaderText = "", headerColor, MenuHeaderTextColor)
         }
+
         MenuHeaderText = ""
 
         section._descriptionLines.AddRange(descriptionLines)
@@ -222,7 +223,7 @@ Public Class MenuSection
                               isEnabled As Boolean,
                               Optional condition As Boolean = True) As MenuSection
 
-        _items.Add(Sub() MenuMaker.PrintToggle(name, description, isEnabled, condition))
+        _items.Add(Sub() MenuMaker.PrintToggle("Toggle " & name, description, isEnabled, condition))
         Return Me
 
     End Function
@@ -309,6 +310,62 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
+    ''' Adds a <c> MenuLine </c> containing information about a file (ie. its path) to the menu,
+    ''' colored based on the file's existence on disk. <br />
+    ''' <br /> The line will be displayed in <br />
+    ''' <c> Green </c> if the file exists, <br /> <c> Red </c> otherwise <br />
+    ''' <br />
+    ''' If the given <c> <paramref name="condition"/> 
+    ''' </c> is <c> False </c>, the file <c> MenuLine </c> will not be printed
+    ''' </summary>
+    ''' 
+    ''' <param name="text">
+    ''' A description of the file whose path is being displayed as it will appear to the user
+    ''' </param>
+    ''' 
+    ''' <param name="filePath">
+    ''' The path on disk to the file whose existence is being indicated by color
+    ''' <br />
+    ''' The path will be displayed in green if the file exists, red if it does not
+    ''' </param>
+    ''' 
+    ''' <param name="condition">
+    ''' The condition under which the file info line should be printed
+    ''' <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-09-02 | Code last updated: 2025-08-31
+    Public Function AddFileInfo(text As String,
+                                filePath As String,
+                       Optional condition As Boolean = True) As MenuSection
+
+
+        AddColoredLine(text & replDir(filePath), GetRedGreen(Not System.IO.File.Exists(filePath)), condition:=condition)
+
+        Return Me
+
+    End Function
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="text"></param>
+    ''' <param name="filePath"></param>
+    ''' <param name="color"></param>
+    ''' <param name="condition"></param>
+    ''' <returns></returns>
+    Public Function AddColoredFileInfo(text As String,
+                                filePath As String,
+                                color As ConsoleColor,
+                       Optional condition As Boolean = True) As MenuSection
+
+        AddColoredLine(text & replDir(filePath), color, condition:=condition)
+        Return Me
+
+    End Function
+
+    ''' <summary>
     ''' Adds a Reset Module Settings option to the current menu 
     ''' </summary>
     ''' 
@@ -390,6 +447,12 @@ Public Class MenuSection
 
     End Function
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="text"></param>
+    ''' <param name="condition"></param>
+    ''' <returns></returns>
     Public Function AddBoxWithText(text As String,
                           Optional condition As Boolean = True) As MenuSection
 
@@ -403,6 +466,18 @@ Public Class MenuSection
 
     End Function
 
+    ''' <summary>
+    ''' Adds a top border to the menu section. <br />
+    ''' Visually separates content within a section into a new box <br />
+    ''' If the given <c> <paramref name="condition"/> </c> is false, the border will not be printed
+    ''' </summary>
+    ''' 
+    ''' <param name="condition">
+    ''' Indicates whether or not the border should be printed <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    ''' 
+    ''' Docs last updated: 2025-09-01 | Code last updated: 2025-08-06
     Public Function AddTopBorder(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
@@ -413,6 +488,11 @@ Public Class MenuSection
 
     End Function
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="condition"></param>
+    ''' <returns></returns>
     Public Function AddBottomBorder(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
@@ -423,6 +503,11 @@ Public Class MenuSection
 
     End Function
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="condition"></param>
+    ''' <returns></returns>
     Public Function AddDivider(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
@@ -433,6 +518,11 @@ Public Class MenuSection
 
     End Function
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="condition"></param>
+    ''' <returns></returns>
     Public Function AddNewLine(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
@@ -443,13 +533,18 @@ Public Class MenuSection
 
     End Function
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="condition"></param>
+    ''' <returns></returns>
     Public Function AddAnyKeyPrompt(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
 
-        Me.AddNewLine()
+        AddNewLine()
         _items.Add(Sub() MenuMaker.cwl(anyKeyStr))
-        Me.AddNewLine()
+        AddNewLine()
 
         Return Me
 
