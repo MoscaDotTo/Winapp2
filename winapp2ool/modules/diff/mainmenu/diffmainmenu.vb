@@ -45,7 +45,7 @@ Module diffmainmenu
 
         Dim menu As New MenuSection
         menu = MenuSection.CreateCompleteMenu(NameOf(Diff), menuDesc, ConsoleColor.DarkCyan)
-        menu.AddColoredOption("Run (default)", "Perform a Diff operation", GetRedGreen(Not newFileHasName)) _
+        menu.AddColoredOption("Run (default)", "Perform a Diff operation", GetRedGreen(Not newFileHasName)).AddBlank() _
             .AddToggle("Toggle diffing against GitHub", "performing the Diff operation against the newest file on GitHub", DownloadDiffFile, Not isOffline) _
             .AddToggle("Toggle remote file trim", "trimming the remote file before diffing for a more bespoke diff", TrimRemoteFile, DownloadDiffFile) _
             .AddToggle("Toggle log saving", "saving of the diff output to disk", SaveDiffLog) _
@@ -56,9 +56,9 @@ Module diffmainmenu
             .AddOption("Choose save target", "Select where to save the diff output", SaveDiffLog).AddBlank() _
             .AddBlank(Not MostRecentDiffLog = "") _
             .AddColoredOption("Log Viewer", "View the most recent Diff log", ConsoleColor.Yellow, Not MostRecentDiffLog = "").AddBlank() _
-            .AddColoredLine($"{olderFileText} file: {replDir(DiffFile1.Path)}", ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo($"{olderFileText} file:", DiffFile1.Path, ConsoleColor.DarkYellow) _
             .AddColoredLine($"Newer file: {newerFileText}", ConsoleColor.Magenta) _
-            .AddColoredLine($"Save target: {replDir(DiffFile3.Path)}", ConsoleColor.Cyan, condition:=SaveDiffLog) _
+            .AddColoredFileInfo($"Save target: ", DiffFile3.Path, ConsoleColor.Cyan, condition:=SaveDiffLog) _
             .AddBlank(DiffModuleSettingsChanged) _
             .AddResetOpt(NameOf(Diff), DiffModuleSettingsChanged)
 
