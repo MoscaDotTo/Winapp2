@@ -27,7 +27,7 @@ Module maintoolmenu
     ''' </summary>
     Public Sub printToolMainMenu()
 
-        If Console.WindowHeight < 35 Then Console.WindowWidth = 35
+        If Console.WindowWidth < 130 Then Console.WindowWidth = 130
 
         checkUpdates(Not isOffline AndAlso Not checkedForUpdates)
         Dim UpdatesAvailable = Not isOffline AndAlso (waUpdateIsAvail OrElse updateIsAvail)
