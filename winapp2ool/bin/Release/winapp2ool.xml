@@ -370,6 +370,45 @@ winapp2ool
  
  Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
 </member>
+<member name="M:winapp2ool.MenuSection.AddFileInfo(System.String,System.String,System.Boolean)">
+ <summary>
+ Adds a <c> MenuLine </c> containing information about a file (ie. its path) to the menu,
+ colored based on the file's existence on disk. <br />
+ <br /> The line will be displayed in <br />
+ <c> Green </c> if the file exists, <br /> <c> Red </c> otherwise <br />
+ <br />
+ If the given <c> <paramref name="condition"/> 
+ </c> is <c> False </c>, the file <c> MenuLine </c> will not be printed
+ </summary>
+ 
+ <param name="text">
+ A description of the file whose path is being displayed as it will appear to the user
+ </param>
+ 
+ <param name="filePath">
+ The path on disk to the file whose existence is being indicated by color
+ <br />
+ The path will be displayed in green if the file exists, red if it does not
+ </param>
+ 
+ <param name="condition">
+ The condition under which the file info line should be printed
+ <br />
+ Optional, Default: <c> True </c>
+ </param>
+ 
+ Docs last updated: 2025-09-02 | Code last updated: 2025-08-31
+</member>
+<member name="M:winapp2ool.MenuSection.AddColoredFileInfo(System.String,System.String,System.ConsoleColor,System.Boolean)">
+ <summary>
+ 
+ </summary>
+ <param name="text"></param>
+ <param name="filePath"></param>
+ <param name="color"></param>
+ <param name="condition"></param>
+ <returns></returns>
+</member>
 <member name="M:winapp2ool.MenuSection.AddResetOpt(System.String,System.Boolean)">
  <summary>
  Adds a Reset Module Settings option to the current menu 
@@ -422,6 +461,56 @@ winapp2ool
  </param>
  
  Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.AddBoxWithText(System.String,System.Boolean)">
+ <summary>
+ 
+ </summary>
+ <param name="text"></param>
+ <param name="condition"></param>
+ <returns></returns>
+</member>
+<member name="M:winapp2ool.MenuSection.AddTopBorder(System.Boolean)">
+ <summary>
+ Adds a top border to the menu section. <br />
+ Visually separates content within a section into a new box <br />
+ If the given <c> <paramref name="condition"/> </c> is false, the border will not be printed
+ </summary>
+ 
+ <param name="condition">
+ Indicates whether or not the border should be printed <br />
+ Optional, Default: <c> True </c>
+ </param>
+ 
+ Docs last updated: 2025-09-01 | Code last updated: 2025-08-06
+</member>
+<member name="M:winapp2ool.MenuSection.AddBottomBorder(System.Boolean)">
+ <summary>
+ 
+ </summary>
+ <param name="condition"></param>
+ <returns></returns>
+</member>
+<member name="M:winapp2ool.MenuSection.AddDivider(System.Boolean)">
+ <summary>
+ 
+ </summary>
+ <param name="condition"></param>
+ <returns></returns>
+</member>
+<member name="M:winapp2ool.MenuSection.AddNewLine(System.Boolean)">
+ <summary>
+ 
+ </summary>
+ <param name="condition"></param>
+ <returns></returns>
+</member>
+<member name="M:winapp2ool.MenuSection.AddAnyKeyPrompt(System.Boolean)">
+ <summary>
+ 
+ </summary>
+ <param name="condition"></param>
+ <returns></returns>
 </member>
 <member name="M:winapp2ool.MenuSection.Print(System.Boolean)">
  <summary>
@@ -4900,7 +4989,7 @@ The current indentation level of the global log.
  
  Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
 </member>
-<member name="M:winapp2ool.SettingsManager.changeFileParams(winapp2ool.iniFile@,System.Boolean@,System.String,System.String,System.String)">
+<member name="M:winapp2ool.SettingsManager.changeFileParams(winapp2ool.iniFile@,System.Boolean@,System.String,System.String,System.String,System.String)">
  <summary>
  Prompts the user to change a file's parameters, marks both settings and the file as having been changed 
  </summary>
@@ -4950,11 +5039,26 @@ The current indentation level of the global log.
  <summary>
  
  </summary>
- <param name="paramText"></param>
- <param name="callingModule"></param>
- <param name="settingsModule"></param>
- <param name="settingName"></param>
- <param name="settingChangedName"></param>
+ 
+ <param name="paramText">
+ 
+ </param>
+ 
+ <param name="callingModule">
+ 
+ </param>
+ 
+ <param name="settingsModule">
+ 
+ </param>
+ 
+ <param name="settingName">
+ 
+ </param>
+ 
+ <param name="settingChangedName">
+ 
+ </param>
 </member>
 <member name="M:winapp2ool.SettingsManager.resetModuleSettings(System.String,System.Action)">
  <summary>
@@ -4968,46 +5072,66 @@ The current indentation level of the global log.
  <param name="setDefaultParams">
  The function that resets the module's settings to their default state
  </param>
- 
- Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
 </member>
 <member name="M:winapp2ool.SettingsManager.denySettingOffline">
  <summary>
  Denies the ability to access online-only functions if offline
  </summary>
- 
- Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
 </member>
-<member name="M:winapp2ool.SettingsManager.cycleEnumSetting``1(``0@,System.Type,System.String,System.Boolean@,System.String,System.String)">
+<member name="M:winapp2ool.SettingsManager.CycleEnumProperty(System.String,System.String,System.Type,System.String,System.Boolean@,System.String,System.ConsoleColor)">
  <summary>
- Cycles through enum values and updates the associated setting
+ Cycles an enum property to its next value, marks its settings changed flag,
+ and updates the disk-writable settings representation
  </summary>
  
- <param name="currentValue">
- The current enum value
+ <param name="propName">
+ The name of the Enum property as it appears in the codebase 
  </param>
  
- <param name="enumType">
- The type of the enum
+ <param name="displayName">
+ The name of the Enum property as it should be displayed to the user
  </param>
  
- <param name="paramText">
- Descriptive text for the setting
+ <param name="propertyType">
+ The <c> Type </c> containing the Enum property to be cycled 
+ </param>
+ 
+ <param name="moduleName">
+ The name of the module containing the Enum property
  </param>
  
  <param name="mSettingsChanged">
- Reference to the module's settings changed flag
+ Indicates that the calling modules settings have been changed
  </param>
  
- <param name="callingModule">
- The name of the calling module
+ <param name="settingsChangedName">
+ The name of <c> <paramref name="mSettingsChanged"/> </c> as it appears in the codebase
  </param>
  
- <param name="mSettingsChangedText">
- The name of the settings changed flag
+ <param name="printColor">
+ The color with which to print the success message
+ </param>
+</member>
+<member name="M:winapp2ool.SettingsManager.getMenuNumbering``1(System.Collections.Generic.Dictionary{System.String,``0},System.Int32)">
+ <summary>
+ Gets the set of menu numbers associated with a dictionary of options, starting from a specified base number
+ </summary>
+ 
+ <typeparam name="T">
+ The type of the dictionary's values
+ </typeparam>
+ 
+ <param name="optionsDict">
+ A dictionary of menu options for which to generate menu numbers
  </param>
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ <param name="baseNum">
+ The number from which to start numbering the options
+ </param>
+ 
+ <returns>
+ The set of numbers associated with the visible menu options in <c> <paramref name="optionsDict"/> </c>
+ </returns>
 </member>
 <member name="T:winapp2ool.updater">
  <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
@@ -5433,15 +5557,11 @@ The version in YYMMDD format of the winapp2.ini file
  <summary> 
  Displays the main winapp2ool menu to the user and handles input from that menu accordingly
  </summary>
- 
- Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
 </member>
 <member name="M:winapp2ool.maintoolmenu.printToolMainMenu">
  <summary> 
  Prints the main winapp2ool menu to the user 
  </summary>
- 
- Docs last updated: 2023-07-19 | Code last updated: 2025-08-20
 </member>
 <member name="M:winapp2ool.maintoolmenu.handleToolMainUserInput(System.String)">
  <summary> 
@@ -5451,8 +5571,6 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="input">
  The user's input
  </param>
- 
- Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
 </member>
 <member name="M:winapp2ool.maintoolmenu.getUpdateNotification(System.Boolean,System.String,System.String,System.String,winapp2ool.MenuSection)">
  <summary> 
@@ -5479,8 +5597,6 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="newVer"> 
  The updated version pending download
  </param>
- 
- Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
 </member>
 <member name="T:winapp2ool.mainToolSettingsHandler">
  <summary> 
@@ -5873,23 +5989,17 @@ The version in YYMMDD format of the winapp2.ini file
  <summary>
  Displays the Transmute main menu to the user and handles their input accordingly
  </summary>
- 
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
 <member name="M:winapp2ool.transmuteMainMenu.printTransmuteMainMenu">
  <summary> 
  Prints the <c> Transmute </c> menu to the user, includes predefined source files choices and sub mode options
  </summary>
- 
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
 <member name="M:winapp2ool.transmuteMainMenu.adjustTransmuteConsoleHeight">
  <summary>
  Once per run of the module, we'll set the console height to be large enough so as to 
  be able to display the largest number of options that we display 
  </summary>
- 
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
 <member name="M:winapp2ool.transmuteMainMenu.handleTransmuteUserInput(System.String)">
  <summary> 
@@ -5899,8 +6009,34 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="input"> 
  The user's input 
  </param>
+</member>
+<member name="M:winapp2ool.transmuteMainMenu.getEnumOpts">
+ <summary>
+ Determines the current set of enum options displayed on the menu and returns a Dictionary 
+ with the property names as keys and their descriptions as values
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ The set of possible enums includes:
+ <list type="bullet">
+     
+     <item>
+     Transmute mode
+     </item>
+     
+     <item>
+     Replace Mode (only available when Transmute mode is Replace)
+     </item>
+     
+     <item>
+     Remove Mode (only available when Transmute mode is Remove)
+     </item>
+     
+     <item>
+     Key Removal Mode (only available when Transmute mode is Remove and Remove mode is By Key)
+     </item>
+     
+ </list>
+ 
+ </summary>
 </member>
 <member name="T:winapp2ool.transmuteSettings">
  <summary>
@@ -5910,79 +6046,59 @@ The version in YYMMDD format of the winapp2.ini file
  the Transmutator and its sub modes, the file locations of the transmute files, 
  and whether the settings have been changed from their defaults.
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.TransmuteFile1">
  <summary> 
  The 'base' file for Transmute, the one whose content will be modified by the transmute process
  based on the contents of the 'source' file 
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.TransmuteFile2">
  <summary> 
  The 'source' file for Transmute, the one whose content will be used by the transmute process
  to make changes to the 'base' file
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.TransmuteFile3">
  <summary> 
  Stores the path to which the Transmuted file should be written back to disk 
  (overwrites <c> TransmuteFile1 </c> by default) 
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.TransmuteModuleSettingsChanged">
  <summary> 
  Indicates that module's settings have been modified from their defaults 
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.TransmuteModeIsAdd">
  <summary>
  Indicates the saved <c> Transmutator </c> is <c> Add </c> <br />
  Default: <c> False </c>
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.TransmuteModeIsRemove">
  <summary>
  Indicates the saved <c> Transmutator </c> is <c> Remove </c> <br />
  Default: <c> True </c>
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.TransmuteModeIsReplace">
  <summary>
  Indicates the saved <c> Transmutator </c> is <c> Replace </c> <br />
  Default: <c> False </c>
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.ReplaceModeIsBySection">
  <summary>
  Indicates the saved <c> Replace Transmutator </c> sub mode is by Section <br />
  Default: <c> False </c>
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.ReplaceModeIsByKey">
  <summary>
  Indicates the saved <c> Replace Transmutator </c> sub mode is by Key <br />
  Default: <c> True </c>
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.RemoveModeIsBySection">
  <summary>
@@ -5995,24 +6111,24 @@ The version in YYMMDD format of the winapp2.ini file
  Indicates the saved <c> Remove Transmutator </c> sub mode is by Key <br />
  Default: <c> True </c>
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.RemoveKeyModeIsByName">
  <summary>
  Indicates the saved <c> Remove by Key Transmutator </c> sub mode is by Name <br />
  Default: <c> True </c>
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.RemoveKeyModeIsByValue">
  <summary>
  Indicates the saved <c> Remove by Key Transmutator </c> sub mode is by Section <br />
  Default: <c> False </c>
  </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+</member>
+<member name="P:winapp2ool.transmuteSettings.UseWinapp2Syntax">
+ <summary>
+ Indicates that <c> <cref> TransmuteFile3 </cref> </c> should be saved with winapp2.ini formatting <br />
+ Default: <c> True </c>
+ </summary>
 </member>
 <member name="T:winapp2ool.Transmute">
  <summary>
@@ -6050,7 +6166,7 @@ The version in YYMMDD format of the winapp2.ini file
  Replace has two sub modes: BySection and ByKey <br/><br/>
 
  ByKey (Default replace mode): Replaces the value of keys in the base file with values from the
- source file based on their KeyType (KeyName with numbers removed) <br/><br/>
+ source file based on their Name <br/><br/>
 
  BySection: Replaces entire sections in the base file with the section of the same name 
  in the source file. <br/><br/>
@@ -6157,8 +6273,7 @@ The version in YYMMDD format of the winapp2.ini file
  Replace individual keys when collisions occur <br />
  
  This means that if a key exists in the base file, its value will be replaced with the
- value from the source file. The key must exist in both files and have the same KeyType
- (key name without numbers). Section names must match exactly (case sensitive)
+ value from the source file. The key must exist in both files and have the same Name 
  </summary>
 </member>
 <member name="T:winapp2ool.Transmute.RemoveMode">
@@ -6334,16 +6449,17 @@ The version in YYMMDD format of the winapp2.ini file
  -byname         : Remove keys by name (default) <br />
  -byvalue        : Remove keys by value <br />
  
+ Winapp2.ini syntax correction <br/>
+ -dontlint       : do not save output with winapp2.ini formatting 
+ 
  Preset base file choices <br />
  
  -r              : removed entries.ini  <br />
  -c              : custom.ini  <br />
  -w              : winapp3.ini <br />
  -a              : archived entries.ini <br /> 
- 
+ -b              : browsers.ini
  </remarks>
- 
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
 <member name="M:winapp2ool.Transmute.initTransmute">
  <summary> 
@@ -6352,20 +6468,33 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
-<member name="M:winapp2ool.Transmute.transmute(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.MenuSection@,System.Boolean,System.Boolean)">
+<member name="M:winapp2ool.Transmute.transmute(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.MenuSection@,System.Boolean)">
  <summary> 
  Conducts the transmutation on the base file using the source file and saves the 
  output to the location provided within saveFile. <br /> Typically by default, the output is
  saved to the base file, overwriting the original content. <br />
  If working on a winapp2.ini file, the output can be formatted accordingly 
- 
  </summary>
  
- <param name="isWinapp2"> 
- Indicates that base file is a winapp2.ini syntax file 
+ <param name="baseFile">
+ The <c> iniFile </c> whose content will be modified by the transmutation process
  </param>
  
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+ <param name="sourceFile">
+ The <c> iniFile </c> providing the transmutation data 
+ </param>
+ 
+ <param name="saveFile">
+ Contains the path to which the transmuted output will be written
+ </param>
+ 
+ <param name="menuOutput">
+ A <c> MenuSection </c> containing the Transmute output to be displayed to the user
+ </param>
+ 
+ <param name="isWinapp2">
+ Indicates that the <c> saveFile </c> should be formatted as a winapp2.ini file
+ </param>
 </member>
 <member name="M:winapp2ool.Transmute.RemoteTransmute(winapp2ool.iniFile@,winapp2ool.iniFile@,winapp2ool.iniFile@,System.Boolean,winapp2ool.MenuSection@,winapp2ool.Transmute.TransmuteMode,winapp2ool.Transmute.ReplaceMode,winapp2ool.Transmute.RemoveMode,winapp2ool.Transmute.RemoveKeyMode)">
  <summary> 
@@ -6745,18 +6874,6 @@ The version in YYMMDD format of the winapp2.ini file
  ensuring that they accurately reflect the current state of the module
  
  </summary>
- 
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
-</member>
-<member name="M:winapp2ool.transmuteSettingsHandler.changeBaseFileName(System.String)">
- <summary> 
- Changes the base file's <c> Name </c> without having to spin up a file chooser menu
- eg. the preset choices in the Transmute main menu
- </summary>
- 
- <param name="newName"> 
- The new <c> Name </c> for <c> TransmuteFile2 </c> 
- </param>
  
  Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
@@ -7214,15 +7331,11 @@ The version in YYMMDD format of the winapp2.ini file
  <summary> 
  Displays the Trim module's main menu to the user and handles their input accordingly
  </summary>
- 
- Docs last updated: 2025-08-12 
 </member>
 <member name="M:winapp2ool.trimmainmenu.printTrimMenu">
  <summary> 
  Prints the <c> Trim </c> menu to the user 
  </summary>
- 
- Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
 </member>
 <member name="M:winapp2ool.trimmainmenu.handleTrimUserInput(System.String)">
  <summary> 
@@ -7232,8 +7345,6 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="input">
  The user's input 
  </param>
- 
- Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
 </member>
 <member name="M:winapp2ool.trimmainmenu.getToggleOpts">
  <summary>
@@ -7263,8 +7374,6 @@ The version in YYMMDD format of the winapp2.ini file
  The set of available toggles for the Trim module, with their names on the 
  menu as keys and the respective property names as values
  </returns>
- 
- Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
 </member>
 <member name="M:winapp2ool.trimmainmenu.getFileOpts">
  <summary>
@@ -7272,7 +7381,7 @@ The version in YYMMDD format of the winapp2.ini file
  of those options and their respective files <br />
  <br />
  The set of possible files includes:
- <list type="bullet">
+ <list type="number">
      
      <item>
      winapp2.ini (not available when downloading)
@@ -7297,8 +7406,6 @@ The version in YYMMDD format of the winapp2.ini file
  <returns> 
  The set of <c> iniFile </c> properties for an object currently displayed on the menu
  </returns>
- 
- Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
 </member>
 <member name="T:winapp2ool.trimsettings">
  <summary>
