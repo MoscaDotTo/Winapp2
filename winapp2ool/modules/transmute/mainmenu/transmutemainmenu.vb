@@ -17,22 +17,20 @@
 
 Option Strict On
 
+Imports System.Reflection
+
 ''' <summary>
 ''' Displays the Transmute main menu to the user and handles their input accordingly
 ''' </summary>
-''' 
-''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 Public Module transmuteMainMenu
 
     ''' <summary> 
     ''' Prints the <c> Transmute </c> menu to the user, includes predefined source files choices and sub mode options
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub printTransmuteMainMenu()
 
         adjustTransmuteConsoleHeight()
-
+        updateAllTransmuteEnumSettings()
         Dim modeColor = If(Transmutator = TransmuteMode.Add, ConsoleColor.Green, If(Transmutator = TransmuteMode.Replace, ConsoleColor.Yellow, ConsoleColor.Red))
         Dim subModeColor = If(TransmuteModeIsReplace, ConsoleColor.Magenta, If(TransmuteRemoveMode = RemoveMode.BySection, ConsoleColor.Magenta, ConsoleColor.Cyan))
         Dim replaceModeDesc = $"Currently replacing {If(ReplaceModeIsByKey, "individual key values within particular", "entire")} sections in the base file"
@@ -41,16 +39,15 @@ Public Module transmuteMainMenu
         Dim keyRemovalModeDesc = $"Currently removing keys by {If(RemoveKeyModeIsByName, "name matching only", "name (numberless) and value pair matching")}"
 
         Dim menuDescriptionLines = {"Transmute an ini file with sections and keys provided by a second ini file",
-                      "Features by mode:",
-                      "Add entire sections or individual keys to specific sections",
-                      "Replace entire sections or individual keys within specific sections by Value",
-                      "Remove entire sections or individual keys within specific sections by Name or Value"}
+                                    "Add entire sections or individual keys to specific sections",
+                                    "Replace entire sections or individual keys Values within specific sections by Name",
+                                    "Remove entire sections or individual keys within specific sections by Name or Value"}
 
         Dim menu = MenuSection.CreateCompleteMenu("Transmute", menuDescriptionLines, ConsoleColor.Magenta)
 
-        menu.AddColoredOption("Run (default", "Perform the transmutation", GetRedGreen(TransmuteFile1.Name.Length = 0)) _
+        menu.AddColoredOption("Run (default)", "Perform the transmutation", GetRedGreen(TransmuteFile1.Name.Length = 0)) _
             .AddColoredOption("Open Flavorizer", "Apply a complex series of modifications to an ini file", ConsoleColor.Yellow).AddBlank() _
-            .AddLine("Preset source files") _
+            .AddLine("Preset source file names:") _
             .AddOption("Removed Entries", "Select 'Removed Entries.ini'") _
             .AddOption("Custom", "Select 'Custom.ini'") _
             .AddOption("winapp3.ini", "Select 'winapp3.ini'") _
@@ -58,6 +55,10 @@ Public Module transmuteMainMenu
             .AddOption("Change base file", "Select a new base file to be modified") _
             .AddOption("Change source file", "Select the source file providing modifications for the base file") _
             .AddOption("Change save target", "Select a save target for the output").AddBlank() _
+            .AddColoredFileInfo($"Base file:   ", TransmuteFile1.Path, ConsoleColor.Magenta) _
+            .AddColoredFileInfo($"Source file: ", TransmuteFile2.Path, ConsoleColor.Cyan) _
+            .AddColoredFileInfo($"Save target: ", TransmuteFile3.Path, ConsoleColor.Yellow).AddBlank _
+            .AddToggle("Syntax", "saving the output with winapp2.ini syntax", UseWinapp2Syntax).AddBlank() _
             .AddOption("Change transmute mode", "Cycle through primary transmute modes (Add/Replace/Remove)") _
             .AddColoredLine($"Transmute mode: {Transmutator}", modeColor) _
             .AddBlank(TransmuteModeIsReplace) _
@@ -79,13 +80,9 @@ Public Module transmuteMainMenu
     ''' Once per run of the module, we'll set the console height to be large enough so as to 
     ''' be able to display the largest number of options that we display 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Private Sub adjustTransmuteConsoleHeight()
 
-        If Console.WindowHeight > 42 Then Return
-
-        Console.WindowHeight = 43
+        If Console.WindowHeight <= 42 Then Console.WindowHeight = 43
 
     End Sub
 
@@ -96,133 +93,143 @@ Public Module transmuteMainMenu
     ''' <param name="input"> 
     ''' The user's input 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub handleTransmuteUserInput(input As String)
+
+        Dim intInput As Integer
+        If Not Integer.TryParse(input, intInput) Then
+
+            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Return
+
+        End If
 
         Dim presetFileNames As New Dictionary(Of String, String) From {
             {"3", "Removed Entries.ini"},
             {"4", "Custom.ini"},
             {"5", "winapp3.ini"},
-            {"6", "browsers.ini"}
-        }
+            {"6", "browsers.ini"}}
 
         Dim transmuteFiles As New Dictionary(Of String, iniFile) From {
             {NameOf(TransmuteFile1), TransmuteFile1},
             {NameOf(TransmuteFile2), TransmuteFile2},
-            {NameOf(TransmuteFile3), TransmuteFile3}
-        }
+            {NameOf(TransmuteFile3), TransmuteFile3}}
 
-        Dim fileOpts = {"7", "8", "9"}
+        Dim fileDescs = {
+                         "base file",
+                         "source file",
+                         "save target"}
+
+        Dim enumOpts = getEnumOpts()
+        Dim staticOpts = 3
+        Dim minPresetNum = staticOpts
+        Dim maxPresetNum = minPresetNum + presetFileNames.Count - 1
+        Dim minFileSelectNum = maxPresetNum + 1
+        Dim maxFileSelectNum = minFileSelectNum + transmuteFiles.Count - 1
+        Dim toggleOpt = maxFileSelectNum + 1
+        Dim minEnumNum = toggleOpt + 1
+        Dim maxEnumNum = minEnumNum + enumOpts.Count - 1
+        Dim resetNum = maxEnumNum + 1
 
         Select Case True
 
-            ' Option Name:                                 Exit 
-            ' Option States:
-            ' Default                                      -> 0 (Default)
-            Case input = "0"
+            ' Exit 
+            Case intInput = 0
+            exitModule()
 
-                exitModule()
+            ' Run (default)
+            Case intInput = 1 OrElse input.Length = 0
 
-            ' Option Name:                                 Run (default)
-            ' Option States:
-            ' Default                                      -> 1 (default)
-            Case input = "1" OrElse input.Length = 0
+                If Not denyActionWithHeader(TransmuteFile2.Name.Length = 0, "You must select a valid source file") Then initTransmute()
 
-                If Not denyActionWithHeader(TransmuteFile2.Name.Length = 0, "You must select a source file") Then initTransmute()
-
-            ' Option Name:                                 Open Flavorizer
-            ' Option States:
-            ' Default                                      -> 2 (default)
-            Case input = "2"
+            ' Open Flavorizer
+            Case intInput = 2
 
                 initModule("Flavorizer", AddressOf printFlavorizerMainMenu, AddressOf handleFlavorizerMainMenuUserInput)
 
-            ' Option Name:                                 Preset File Names
-            ' Option States:
-            ' Removed Entries.ini                          -> 3 (default)
-            ' Custom.ini                                   -> 4 (default)
-            ' winapp3.ini                                  -> 5 (default)
-            ' browsers.ini                                 -> 6 (default)
+            ' Preset Source File Names
+            Case intInput >= minPresetNum AndAlso intInput <= maxPresetNum
 
-            Case presetFileNames.ContainsKey(input)
+                TransmuteFile2.Name = presetFileNames(input)
+                updateSettings(NameOf(Transmute), NameOf(TransmuteFile2) & "_Name", presetFileNames(input))
+                updateSettings(NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged), True.ToString)
 
-                changeBaseFileName(presetFileNames(input))
+                setNextMenuHeaderText($"Source file name set to {TransmuteFile2.Name}", printColor:=ConsoleColor.Yellow)
 
-          ' Option Name:                                   File Selectors
-          ' Option States:
-          ' Change base file                              -> 7 (default)
-          ' Change source file                            -> 8 (default)
-          ' Change save target                            -> 9 (default)
-            Case fileOpts.Contains(input)
+          ' File Selectors
+            Case intInput >= minFileSelectNum AndAlso intInput <= maxFileSelectNum
 
-                Dim i = CType(input, Integer) - 7
+                Dim i = intInput - maxPresetNum - 1
                 changeFileParams(transmuteFiles(transmuteFiles.Keys(i)), TransmuteModuleSettingsChanged, NameOf(Transmute),
-                                 transmuteFiles.Keys(i), NameOf(TransmuteModuleSettingsChanged))
+                                 transmuteFiles.Keys(i), NameOf(TransmuteModuleSettingsChanged), fileDescs(i))
 
-            ' Option Name:                                 Change Transmute Mode 
-            ' Option States:
-            ' Default                                      -> 10 (default)
-            Case input = "10"
+            ' Toggles
+            Case intInput = toggleOpt
 
-                cycleEnumSetting(Transmutator, GetType(TransmuteMode), "Transmutator",
-                                 TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
+                toggleModuleSetting("Winapp2.ini Syntax", NameOf(Transmute), GetType(transmuteSettings),
+                                    NameOf(UseWinapp2Syntax), NameOf(TransmuteModuleSettingsChanged))
 
-                updateAllTransmuteEnumSettings()
+            ' Transmute Mode and sub modes
+            Case intInput >= minEnumNum AndAlso intInput <= maxEnumNum
 
-            ' Option Name:                                 Change Replace Mode
-            ' Option States:
-            ' TransmuteModeIsReplace = False               -> Unavailable (not displayed)
-            ' Default                                      -> 11 (default)
-            Case input = "11" AndAlso TransmuteModeIsReplace
-
-                cycleEnumSetting(TransmuteReplaceMode, GetType(ReplaceMode), "Replace Mode",
-                                 TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
+                Dim i = intInput - minEnumNum
+                Dim propName = enumOpts.Keys(i)
+                CycleEnumProperty(propName, enumOpts(propName), GetType(Transmute), NameOf(Transmute),
+                                  TransmuteModuleSettingsChanged, NameOf(TransmuteModuleSettingsChanged), ConsoleColor.Magenta)
 
                 updateAllTransmuteEnumSettings()
 
-            ' Option Name:                                 Change Remove Mode
-            ' Option States:
-            ' TransmuteModeIsRemove = False                -> Unavailable (not displayed)
-            ' Default                                      -> 12 (default)
-            Case input = "11" AndAlso TransmuteModeIsRemove
-
-                cycleEnumSetting(TransmuteRemoveMode, GetType(RemoveMode), "Remove Mode",
-                                 TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
-
-                updateAllTransmuteEnumSettings()
-
-            ' Option Name:                                 Change Remove Key Mode
-            ' Option States:
-            ' RemoveModeIsByKey = False                    -> Unavailable (not displayed)
-            ' Default                                      -> 11 (default)
-            Case input = "12" AndAlso TransmuteModeIsRemove AndAlso RemoveModeIsByKey
-
-                cycleEnumSetting(TransmuteRemoveKeyMode, GetType(RemoveKeyMode), "Remove Key Mode",
-                                 TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged))
-
-                updateAllTransmuteEnumSettings()
-
-            ' Option Name:                                  Reset Settings 
-            ' Option States: 
-            ' ModuleSettingsChanged = False                 -> Unavailable (not displayed) 
-            ' TransmuteModeIsAdd                            -> 11 (default)
-            ' TransmuteModeIsReplace (+1)                   -> 12  
-            ' TransmuteModeIsRemove (+1) and BySection (+0) -> 12
-            ' TransmuteModeIsRemove (+1) and ByKey (+1)     -> 13
-            Case TransmuteModuleSettingsChanged AndAlso
-                 input = computeMenuNumber(11, {TransmuteModeIsAdd, TransmuteModeIsReplace,
-                                               TransmuteModeIsRemove AndAlso RemoveModeIsBySection,
-                                               TransmuteModeIsRemove AndAlso RemoveModeIsByKey}, {0, 1, 1, 2})
+            ' Reset Settings 
+            Case TransmuteModuleSettingsChanged AndAlso intInput = resetNum
 
                 resetModuleSettings(NameOf(Transmute), AddressOf initDefaultTransmuteSettings)
 
-            Case Else
-
-                setHeaderText(invInpStr, True, printColor:=ConsoleColor.Red)
+            Case Else : setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
         End Select
 
     End Sub
+
+    ''' <summary>
+    ''' Determines the current set of enum options displayed on the menu and returns a Dictionary 
+    ''' with the property names as keys and their descriptions as values
+    ''' 
+    ''' The set of possible enums includes:
+    ''' <list type="bullet">
+    '''     
+    '''     <item>
+    '''     Transmute mode
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Replace Mode (only available when Transmute mode is Replace)
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Remove Mode (only available when Transmute mode is Remove)
+    '''     </item>
+    '''     
+    '''     <item>
+    '''     Key Removal Mode (only available when Transmute mode is Remove and Remove mode is By Key)
+    '''     </item>
+    '''     
+    ''' </list>
+    ''' 
+    ''' </summary>
+    Private Function getEnumOpts() As Dictionary(Of String, String)
+
+        Dim enumOpts As New Dictionary(Of String, String) From {{NameOf(Transmutator), "Transmute Mode"}}
+
+        If TransmuteModeIsReplace Then enumOpts.Add(NameOf(TransmuteReplaceMode), "Replace Mode")
+
+        If TransmuteModeIsRemove Then
+
+            enumOpts.Add(NameOf(TransmuteRemoveMode), "Remove Mode")
+            If RemoveModeIsByKey Then enumOpts.Add(NameOf(TransmuteRemoveKeyMode), "Key Removal Mode")
+
+        End If
+
+        Return enumOpts
+
+    End Function
 
 End Module
