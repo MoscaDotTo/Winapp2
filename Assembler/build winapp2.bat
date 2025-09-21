@@ -9,6 +9,8 @@ echo Joining base entries with browser entries
 winapp2ool -s -transmute -add -1f base-entries-combined.ini -2f browsers.ini -3f winapp2.ini
 echo Performing static analysis and saving corrections
 winapp2ool -s -debug -usedate -c -1f winapp2.ini -3f winapp2.ini
-move winapp2.ini ..
+copy winapp2.ini ..
+copy winapp2.ini ..\Non-CCleaner
 del base-entries-combined.ini
 del browsers.ini
+del winapp2.ini
