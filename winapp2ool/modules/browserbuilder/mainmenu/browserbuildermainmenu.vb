@@ -32,6 +32,7 @@ Public Module browserbuildermainmenu
     ''' Docs last updated: 2025-07-02 | Code last updated: 2025-08-22
     Public Sub printBrowserBuilderMenu()
 
+        Console.WindowHeight = 40
         Console.WindowWidth = 130
 
         Dim menuDesc = {"Generate winapp2.ini entries for web browsers and web views",
@@ -50,15 +51,15 @@ Public Module browserbuildermainmenu
             .AddOption("Choose section replacements", "Select a new flavor file for section replacements") _
             .AddOption("Choose key replacements", "Select a new flavor file for key value replacements") _
             .AddOption("Choose additions", "Select a new flavor file for section and key additions").AddBlank() _
-            .AddLine($"Current chromium.ini:       {replDir(BuilderFile1.Path)}") _
-            .AddLine($"Current gecko.ini:          {replDir(BuilderFile2.Path)}") _
-            .AddLine($"Current save target:        {replDir(BuilderFile3.Path)}").AddBlank() _
-            .AddLine($"Section removals rules:     {replDir(BuilderFile5.Path)}") _
-            .AddLine($"Key name removals rules:    {replDir(BuilderFile6.Path)}") _
-            .AddLine($"Key value removals rules:   {replDir(BuilderFile7.Path)}") _
-            .AddLine($"Section replacements rules: {replDir(BuilderFile8.Path)}") _
-            .AddLine($"Key replacement rules:      {replDir(BuilderFile9.Path)}") _
-            .AddLine($"Content addition rules      {replDir(BuilderFile4.Path)}") _
+            .AddColoredFileInfo($"Current chromium.ini:       ", BuilderFile1.Path, ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo($"Current gecko.ini:          ", BuilderFile2.Path, ConsoleColor.DarkRed) _
+            .AddColoredFileInfo($"Current save target:        ", BuilderFile3.Path, ConsoleColor.Yellow).AddBlank() _
+            .AddFileInfo($"Section removals rules:     ", BuilderFile5.Path) _
+            .AddFileInfo($"Key name removals rules:    ", BuilderFile6.Path) _
+            .AddFileInfo($"Key value removals rules:   ", BuilderFile7.Path) _
+            .AddFileInfo($"Section replacements rules: ", BuilderFile8.Path) _
+            .AddFileInfo($"Key replacement rules:      ", BuilderFile9.Path) _
+            .AddFileInfo($"Content addition rules      ", BuilderFile4.Path) _
             .AddBlank(BrowserBuilderModuleSettingsChanged) _
             .AddResetOpt(NameOf(BrowserBuilder), BrowserBuilderModuleSettingsChanged)
 
@@ -82,25 +83,30 @@ Public Module browserbuildermainmenu
 
         Dim resetNum = CType(fileOpts.Count + 2, String)
 
+        Dim fileDescs = {
+        "Chromium ruleset",
+        "Gecko ruleset",
+        "Save target",
+        "Section removal ruleset",
+        "Key name removal ruleset",
+        "Key value removal ruleset",
+        "Section replacement ruleset",
+        "Key value replacement ruleset",
+        "Additions ruleset"}
+
         Select Case True
 
             ' Exit
-            ' Notes: Always "0"
             Case input = "0"
 
                 exitModule()
 
-            ' Run (default) 
-            ' Notes: Always "1", also triggered by no input if run conditions are otherwise satisfied
+            ' Run (default)
             Case (input = "1" OrElse input.Length = 0)
 
                 initBrowserBuilder()
 
             ' File Selectors
-            ' chromium.ini
-            ' gecko.ini
-            ' save target
-            ' flavor files
             Case fileNums.Contains(input)
 
                 Dim i = CType(input, Integer) - 2
@@ -108,17 +114,16 @@ Public Module browserbuildermainmenu
                 Dim fileName = fileOpts.Keys(i)
                 Dim fileObj = fileOpts(fileName)
 
-                changeFileParams(fileObj, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), fileName, NameOf(BrowserBuilderModuleSettingsChanged))
+                changeFileParams(fileObj, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), fileName, NameOf(BrowserBuilderModuleSettingsChanged), fileDescs(i))
 
             ' Reset Settings       
-            ' Notes: Always the last option, only appears if settings have been changed
             Case BrowserBuilderModuleSettingsChanged AndAlso input = resetNum
 
                 resetModuleSettings(NameOf(BrowserBuilder), AddressOf initDefaultBrowserBuilderSettings)
 
             Case Else
 
-                setHeaderText(invInpStr, True)
+                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
         End Select
 

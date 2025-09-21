@@ -104,24 +104,6 @@ Public Module transmuteSettingsHandler
 
     End Sub
 
-    ''' <summary> 
-    ''' Changes the base file's <c> Name </c> without having to spin up a file chooser menu
-    ''' eg. the preset choices in the Transmute main menu
-    ''' </summary>
-    ''' 
-    ''' <param name="newName"> 
-    ''' The new <c> Name </c> for <c> TransmuteFile2 </c> 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
-    Public Sub changeBaseFileName(newName As String)
-
-        TransmuteFile2.Name = newName
-        TransmuteModuleSettingsChanged = True
-        setHeaderText("Base filename set")
-
-    End Sub
-
     ''' <summary>
     ''' Updates the disk-writable representation of each of Transmute's enums 
     ''' </summary>
@@ -137,9 +119,10 @@ Public Module transmuteSettingsHandler
         For Each prop In GetType(transmuteSettings).GetProperties()
 
             ' This will actually update all Booleans but that's probably fine
-            If prop.PropertyType.Name IsNot GetType(Boolean).Name Then Continue For
+            If prop.PropertyType IsNot GetType(Boolean) Then Continue For
 
-            updateSettings(NameOf(Transmute), prop.Name, prop.GetValue(prop).ToString)
+            Dim val = DirectCast(prop.GetValue(Nothing), Boolean)
+            updateSettings(NameOf(Transmute), prop.Name, val.ToString())
 
         Next
 

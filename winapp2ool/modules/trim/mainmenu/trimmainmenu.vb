@@ -20,15 +20,11 @@ Option Strict On
 ''' <summary> 
 ''' Displays the Trim module's main menu to the user and handles their input accordingly
 ''' </summary>
-''' 
-''' Docs last updated: 2025-08-12 
 Module trimmainmenu
 
     ''' <summary> 
     ''' Prints the <c> Trim </c> menu to the user 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Public Sub printTrimMenu()
 
         If isOffline Then DownloadFileToTrim = False
@@ -46,13 +42,14 @@ Module trimmainmenu
             .AddOption("Choose save target", "Select a save target for the optimized winapp2.ini file") _
             .AddOption("Choose includes file", "Select a file containing entry names which should never be trimmed", UseTrimIncludes) _
             .AddOption("Choose excludes file", "Select a file containing entry names which should always be trimmed", UseTrimExcludes).AddBlank() _
-            .AddLine($"Current winapp2.ini path: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}") _
-            .AddLine($"Current save path: {replDir(TrimFile3.Path)}") _
-            .AddLine($"Current includes path: {replDir(TrimFile2.Path)}", condition:=UseTrimIncludes) _
-            .AddLine($"Current excludes path: {replDir(TrimFile4.Path)}", condition:=UseTrimExcludes) _
+            .AddColoredLine($"winapp2.ini:   {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}", ConsoleColor.Magenta) _
+            .AddColoredFileInfo($"save target:   ", TrimFile3.Path, ConsoleColor.Yellow) _
+            .AddFileInfo($"Includes path: ", TrimFile2.Path, condition:=UseTrimIncludes) _
+            .AddFileInfo($"Excludes path: ", TrimFile4.Path, condition:=UseTrimExcludes) _
             .AddBlank(TrimModuleSettingsChanged) _
-            .AddResetOpt(NameOf(Trim), TrimModuleSettingsChanged) _
-            .Print()
+            .AddResetOpt(NameOf(Trim), TrimModuleSettingsChanged)
+
+        menu.Print()
 
     End Sub
 
@@ -63,8 +60,6 @@ Module trimmainmenu
     ''' <param name="input">
     ''' The user's input 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
     Public Sub handleTrimUserInput(input As String)
 
         If input Is Nothing Then argIsNull(NameOf(input)) : Return
@@ -159,8 +154,6 @@ Module trimmainmenu
     ''' The set of available toggles for the Trim module, with their names on the 
     ''' menu as keys and the respective property names as values
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
     Private Function getToggleOpts() As Dictionary(Of String, String)
 
         Dim toggles As New Dictionary(Of String, String)
@@ -179,7 +172,7 @@ Module trimmainmenu
     ''' of those options and their respective files <br />
     ''' <br />
     ''' The set of possible files includes:
-    ''' <list type="bullet">
+    ''' <list type="number">
     '''     
     '''     <item>
     '''     winapp2.ini (not available when downloading)
@@ -204,8 +197,6 @@ Module trimmainmenu
     ''' <returns> 
     ''' The set of <c> iniFile </c> properties for an object currently displayed on the menu
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-08-12 | Code last updated: 2025-08-12
     Private Function getFileOpts() As Dictionary(Of String, iniFile)
 
         Dim selectors As New Dictionary(Of String, iniFile)

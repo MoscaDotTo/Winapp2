@@ -16,7 +16,9 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
+
 Imports System.Globalization
+Imports System.Reflection
 
 ''' <summary>
 ''' Provides functions to manage winapp2ool module settings, including modifying file parameters, 
@@ -44,7 +46,8 @@ Module SettingsManager
                                 ByRef settingsChangedSetting As Boolean,
                                       callingModule As String,
                                       settingName As String,
-                                      settingChangedName As String)
+                                      settingChangedName As String,
+                             Optional fileDesc As String = "")
 
         Dim curName = someFile.Name
         Dim curDir = someFile.Dir
@@ -55,7 +58,7 @@ Module SettingsManager
         If Not settingsChangedSetting Then settingsChangedSetting = fileChanged
 
         setHeaderText($"{If(someFile.SecondName.Length = 0, someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
-
+        setNextMenuHeaderText($"{fileDesc} parameters update{If(Not fileChanged, " aborted", "d")}", printColor:=GetRedGreen(Not fileChanged))
         If Not fileChanged Then Return
 
         updateSettings(callingModule, $"{settingName}_Dir", someFile.Dir)
@@ -119,11 +122,26 @@ Module SettingsManager
     ''' <summary>
     ''' 
     ''' </summary>
-    ''' <param name="paramText"></param>
-    ''' <param name="callingModule"></param>
-    ''' <param name="settingsModule"></param>
-    ''' <param name="settingName"></param>
-    ''' <param name="settingChangedName"></param>
+    ''' 
+    ''' <param name="paramText">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="callingModule">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="settingsModule">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="settingName">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="settingChangedName">
+    ''' 
+    ''' </param>
     Public Sub toggleModuleSetting(paramText As String,
                                    callingModule As String,
                                    settingsModule As Type,
@@ -157,10 +175,8 @@ Module SettingsManager
     ''' <param name="setDefaultParams">
     ''' The function that resets the module's settings to their default state
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
     Public Sub resetModuleSettings(name As String,
-                                   setDefaultParams As Action)
+                                setDefaultParams As Action)
 
         gLog($"Restoring {name}'s module settings to their default states", indent:=True)
 
@@ -173,71 +189,95 @@ Module SettingsManager
     ''' <summary>
     ''' Denies the ability to access online-only functions if offline
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
-
     Public Function denySettingOffline() As Boolean
 
-        gLog("Action was unable to complete because winapp2ool is offline", isOffline)
-        setHeaderText("This option is unavailable while in offline mode", True, isOffline)
+        gLog("An action was unable to complete because winapp2ool is offline", isOffline)
+        setNextMenuHeaderText("This option is unavailable while in offline mode", printColor:=ConsoleColor.Red)
 
         Return isOffline
 
     End Function
 
     ''' <summary>
-    ''' Cycles through enum values and updates the associated setting
+    ''' Cycles an enum property to its next value, marks its settings changed flag,
+    ''' and updates the disk-writable settings representation
     ''' </summary>
     ''' 
-    ''' <param name="currentValue">
-    ''' The current enum value
+    ''' <param name="propName">
+    ''' The name of the Enum property as it appears in the codebase 
     ''' </param>
     ''' 
-    ''' <param name="enumType">
-    ''' The type of the enum
+    ''' <param name="displayName">
+    ''' The name of the Enum property as it should be displayed to the user
     ''' </param>
     ''' 
-    ''' <param name="paramText">
-    ''' Descriptive text for the setting
+    ''' <param name="propertyType">
+    ''' The <c> Type </c> containing the Enum property to be cycled 
+    ''' </param>
+    ''' 
+    ''' <param name="moduleName">
+    ''' The name of the module containing the Enum property
     ''' </param>
     ''' 
     ''' <param name="mSettingsChanged">
-    ''' Reference to the module's settings changed flag
+    ''' Indicates that the calling modules settings have been changed
     ''' </param>
     ''' 
-    ''' <param name="callingModule">
-    ''' The name of the calling module
+    ''' <param name="settingsChangedName">
+    ''' The name of <c> <paramref name="mSettingsChanged"/> </c> as it appears in the codebase
     ''' </param>
     ''' 
-    ''' <param name="mSettingsChangedText">
-    ''' The name of the settings changed flag
+    ''' <param name="printColor">
+    ''' The color with which to print the success message
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
-    Public Sub cycleEnumSetting(Of T As Structure)(ByRef currentValue As T,
-                                                     enumType As Type,
-                                                     paramText As String,
-                                               ByRef mSettingsChanged As Boolean,
-                                                     callingModule As String,
-                                                     mSettingsChangedText As String)
+    Public Sub CycleEnumProperty(propName As String,
+                                 displayName As String,
+                                 propertyType As Type,
+                                 moduleName As String,
+                           ByRef mSettingsChanged As Boolean,
+                                 settingsChangedName As String,
+                                 printColor As ConsoleColor)
 
+        Dim p = propertyType.GetProperty(propName)
+
+        Dim enumType = p.PropertyType
+        Dim curObj = p.GetValue(Nothing)
         Dim enumValues = [Enum].GetValues(enumType)
-        Dim currentIndex = Array.IndexOf(enumValues, currentValue)
+        Dim currentIndex = Array.IndexOf(enumValues, curObj)
         Dim nextIndex = (currentIndex + 1) Mod enumValues.Length
+        Dim nextValue = enumValues.GetValue(nextIndex)
 
-        Dim nextValue As Object = enumValues.GetValue(nextIndex)
-        currentValue = CType(nextValue, T)
-
-        gLog($"Cycling {paramText} to {currentValue}", indent:=True)
-        setHeaderText($"{paramText} set to {currentValue}", True, True, ConsoleColor.Green)
+        p.SetValue(Nothing, nextValue)
 
         mSettingsChanged = True
-        updateSettings(callingModule, mSettingsChangedText, tsInvariant(mSettingsChanged))
+        updateSettings(moduleName, settingsChangedName, True.ToString)
+
+        gLog()
+        setNextMenuHeaderText($"{displayName} set to {nextValue}", printColor:=printColor)
 
     End Sub
 
+    ''' <summary>
+    ''' Gets the set of menu numbers associated with a dictionary of options, starting from a specified base number
+    ''' </summary>
+    ''' 
+    ''' <typeparam name="T">
+    ''' The type of the dictionary's values
+    ''' </typeparam>
+    ''' 
+    ''' <param name="optionsDict">
+    ''' A dictionary of menu options for which to generate menu numbers
+    ''' </param>
+    ''' 
+    ''' <param name="baseNum">
+    ''' The number from which to start numbering the options
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' The set of numbers associated with the visible menu options in <c> <paramref name="optionsDict"/> </c>
+    ''' </returns>
     Public Function getMenuNumbering(Of T)(optionsDict As Dictionary(Of String, T),
-                                     baseNum As Integer) As List(Of String)
+                                           baseNum As Integer) As List(Of String)
 
         Dim optNums = New List(Of String)
         For i = 0 To optionsDict.Count - 1

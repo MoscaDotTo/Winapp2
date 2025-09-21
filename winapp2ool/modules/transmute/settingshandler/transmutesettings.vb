@@ -24,79 +24,59 @@ Option Strict On
 ''' the Transmutator and its sub modes, the file locations of the transmute files, 
 ''' and whether the settings have been changed from their defaults.
 ''' </summary>
-''' 
-''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 Public Module transmuteSettings
 
     ''' <summary> 
     ''' The 'base' file for Transmute, the one whose content will be modified by the transmute process
     ''' based on the contents of the 'source' file 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property TransmuteFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini")
 
     ''' <summary> 
     ''' The 'source' file for Transmute, the one whose content will be used by the transmute process
     ''' to make changes to the 'base' file
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property TransmuteFile2 As New iniFile(Environment.CurrentDirectory, "")
 
     ''' <summary> 
     ''' Stores the path to which the Transmuted file should be written back to disk 
     ''' (overwrites <c> TransmuteFile1 </c> by default) 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property TransmuteFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-transmuted.ini")
 
     ''' <summary> 
     ''' Indicates that module's settings have been modified from their defaults 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property TransmuteModuleSettingsChanged As Boolean = False
 
     ''' <summary>
     ''' Indicates the saved <c> Transmutator </c> is <c> Add </c> <br />
     ''' Default: <c> False </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property TransmuteModeIsAdd As Boolean = True
 
     ''' <summary>
     ''' Indicates the saved <c> Transmutator </c> is <c> Remove </c> <br />
     ''' Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property TransmuteModeIsRemove As Boolean = False
 
     ''' <summary>
     ''' Indicates the saved <c> Transmutator </c> is <c> Replace </c> <br />
     ''' Default: <c> False </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property TransmuteModeIsReplace As Boolean = False
 
     ''' <summary>
     ''' Indicates the saved <c> Replace Transmutator </c> sub mode is by Section <br />
     ''' Default: <c> False </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property ReplaceModeIsBySection As Boolean = False
 
     ''' <summary>
     ''' Indicates the saved <c> Replace Transmutator </c> sub mode is by Key <br />
     ''' Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property ReplaceModeIsByKey As Boolean = True
 
     ''' <summary>
@@ -109,24 +89,24 @@ Public Module transmuteSettings
     ''' Indicates the saved <c> Remove Transmutator </c> sub mode is by Key <br />
     ''' Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property RemoveModeIsByKey As Boolean = False
 
     ''' <summary>
     ''' Indicates the saved <c> Remove by Key Transmutator </c> sub mode is by Name <br />
     ''' Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property RemoveKeyModeIsByName As Boolean = True
 
     ''' <summary>
     ''' Indicates the saved <c> Remove by Key Transmutator </c> sub mode is by Section <br />
     ''' Default: <c> False </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
     Public Property RemoveKeyModeIsByValue As Boolean = False
+
+    ''' <summary>
+    ''' Indicates that <c> <cref> TransmuteFile3 </cref> </c> should be saved with winapp2.ini formatting <br />
+    ''' Default: <c> True </c>
+    ''' </summary>
+    Public Property UseWinapp2Syntax As Boolean = True
 
 End Module

@@ -52,7 +52,7 @@ Option Strict On
 ''' Replace has two sub modes: BySection and ByKey <br/><br/>
 '''
 ''' ByKey (Default replace mode): Replaces the value of keys in the base file with values from the
-''' source file based on their KeyType (KeyName with numbers removed) <br/><br/>
+''' source file based on their Name <br/><br/>
 '''
 ''' BySection: Replaces entire sections in the base file with the section of the same name 
 ''' in the source file. <br/><br/>
@@ -161,8 +161,7 @@ Public Module Transmute
         ''' Replace individual keys when collisions occur <br />
         ''' 
         ''' This means that if a key exists in the base file, its value will be replaced with the
-        ''' value from the source file. The key must exist in both files and have the same KeyType
-        ''' (key name without numbers). Section names must match exactly (case sensitive)
+        ''' value from the source file. The key must exist in both files and have the same Name 
         ''' </summary>
         ByKey = 1
 
@@ -344,49 +343,87 @@ Public Module Transmute
     ''' -byname         : Remove keys by name (default) <br />
     ''' -byvalue        : Remove keys by value <br />
     ''' 
+    ''' Winapp2.ini syntax correction <br/>
+    ''' -dontlint       : do not save output with winapp2.ini formatting 
+    ''' 
     ''' Preset base file choices <br />
     ''' 
     ''' -r              : removed entries.ini  <br />
     ''' -c              : custom.ini  <br />
     ''' -w              : winapp3.ini <br />
     ''' -a              : archived entries.ini <br /> 
-    ''' 
+    ''' -b              : browsers.ini
     ''' </remarks>
-    ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub handleCmdLine()
 
         initDefaultTransmuteSettings()
 
-        ' primary transmute mode 
-        Dim isAdd = False
-        Dim isReplace = False
-        Dim isRemove = False
-        invertSettingAndRemoveArg(isAdd, "-add")
-        invertSettingAndRemoveArg(isReplace, "-replace")
-        invertSettingAndRemoveArg(isRemove, "-remove")
-        Transmutator = If(isAdd, TransmuteMode.Add, If(isReplace, TransmuteMode.Replace, TransmuteMode.Remove))
+        ' Primary mode (Default: Add)
+        Dim mode As TransmuteMode = TransmuteMode.Add
+        ' Sub mode (Default: By Key)
+        Dim byKeyMode As Boolean = True
+        ' Key removal mode (Default: By Name)
+        Dim RemoveByName = True
+        ' Winapp2.ini style linting of output (Default: True)
+        Dim isWinapp = True
 
-        ' sub mode (shared remove/replace) 
-        Dim bySection = False
-        Dim byKey = True
-        invertSettingAndRemoveArg(bySection, "-bysection")
-        invertSettingAndRemoveArg(byKey, "-bykey")
-        TransmuteReplaceMode = If(byKey, ReplaceMode.ByKey, ReplaceMode.BySection)
-        TransmuteRemoveMode = If(byKey, RemoveMode.ByKey, RemoveMode.BySection)
+        ' Primary mode
+        Dim Modes = New Dictionary(Of String, TransmuteMode) From {
+            {"add", TransmuteMode.Add},
+            {"replace", TransmuteMode.Replace},
+            {"remove", TransmuteMode.Remove}
+        }
 
-        ' Remove key mode 
-        Dim byName = True
-        Dim byValue = False
-        invertSettingAndRemoveArg(byName, "-byname")
-        invertSettingAndRemoveArg(byValue, "-byvalue")
-        TransmuteRemoveKeyMode = If(byName, RemoveKeyMode.ByName, RemoveKeyMode.ByValue)
+        ' Preset source file choices
+        Dim PresetFileNames = New Dictionary(Of String, String) From {
+            {"r", "Removed Entries.ini"},
+            {"c", "Custom.ini"},
+            {"w", "winapp3.ini"},
+            {"a", "Archived Entries.ini"},
+            {"b", "browsers.ini"}
+        }
 
-        ' Preset file choices
-        invertSettingAndRemoveArg(False, "-r", TransmuteFile2.Name, "Removed Entries.ini")
-        invertSettingAndRemoveArg(False, "-c", TransmuteFile2.Name, "Custom.ini")
-        invertSettingAndRemoveArg(False, "-w", TransmuteFile2.Name, "winapp3.ini")
-        invertSettingAndRemoveArg(False, "-a", TransmuteFile2.Name, "Archived Entries.ini")
+        ' These flags modify the default behavior 
+        Dim Flags = New Dictionary(Of String, Boolean) From {
+            {"bysection", byKeyMode},
+            {"byvalue", RemoveByName},
+            {"dontlint", isWinapp}
+        }
+
+        For Each arg In cmdargs.ToList()
+
+            Dim trimmedArg = arg.ToLowerInvariant().TrimStart("-"c)
+
+            Select Case True
+
+                Case Modes.ContainsKey(trimmedArg)
+
+                    mode = Modes(trimmedArg)
+                    cmdargs.Remove(arg)
+
+                Case trimmedArg = "bykey" OrElse trimmedArg = "byname"
+
+                    ' This is the default behavior so we don't have to invert anything,
+                    ' We do have to remove the args though 
+                    invertSettingAndRemoveArg(False, arg)
+
+                Case Flags.ContainsKey(trimmedArg)
+
+                    invertSettingAndRemoveArg(Flags(trimmedArg), arg)
+
+                Case PresetFileNames.ContainsKey(trimmedArg)
+
+                    invertSettingAndRemoveArg(False, arg, TransmuteFile2.Name, PresetFileNames(trimmedArg))
+
+            End Select
+
+        Next
+
+        Transmutator = mode
+        TransmuteReplaceMode = If(byKeyMode, ReplaceMode.ByKey, ReplaceMode.BySection)
+        TransmuteRemoveMode = If(byKeyMode, RemoveMode.ByKey, RemoveMode.BySection)
+        TransmuteRemoveKeyMode = If(RemoveByName, RemoveKeyMode.ByName, RemoveKeyMode.ByValue)
+        UseWinapp2Syntax = isWinapp
 
         getFileAndDirParams({TransmuteFile1, TransmuteFile2, TransmuteFile3})
         If TransmuteFile2.Name.Length <> 0 Then initTransmute()
@@ -418,7 +455,7 @@ Public Module Transmute
         menuOutput.AddColoredLine(xmuteModeStr, color)
         gLog(xmuteModeStr)
 
-        transmute(TransmuteFile1, TransmuteFile2, TransmuteFile3, menuOutput, True)
+        transmute(TransmuteFile1, TransmuteFile2, TransmuteFile3, menuOutput, UseWinapp2Syntax)
 
         menuOutput.AddLine("") _
                   .AddBottomBorder() _
@@ -435,20 +472,32 @@ Public Module Transmute
     ''' output to the location provided within saveFile. <br /> Typically by default, the output is
     ''' saved to the base file, overwriting the original content. <br />
     ''' If working on a winapp2.ini file, the output can be formatted accordingly 
-    ''' 
     ''' </summary>
     ''' 
-    ''' <param name="isWinapp2"> 
-    ''' Indicates that base file is a winapp2.ini syntax file 
+    ''' <param name="baseFile">
+    ''' The <c> iniFile </c> whose content will be modified by the transmutation process
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
+    ''' <param name="sourceFile">
+    ''' The <c> iniFile </c> providing the transmutation data 
+    ''' </param>
+    ''' 
+    ''' <param name="saveFile">
+    ''' Contains the path to which the transmuted output will be written
+    ''' </param>
+    ''' 
+    ''' <param name="menuOutput">
+    ''' A <c> MenuSection </c> containing the Transmute output to be displayed to the user
+    ''' </param>
+    ''' 
+    ''' <param name="isWinapp2">
+    ''' Indicates that the <c> saveFile </c> should be formatted as a winapp2.ini file
+    ''' </param>
     Private Sub transmute(ByRef baseFile As iniFile,
                           ByRef sourceFile As iniFile,
                           ByRef saveFile As iniFile,
                           ByRef menuOutput As MenuSection,
-                       Optional isWinapp2 As Boolean = True,
-                       Optional sortBeforeSave As Boolean = True)
+                       Optional isWinapp2 As Boolean = True)
 
         resolveConflicts(baseFile, sourceFile, menuOutput)
 
