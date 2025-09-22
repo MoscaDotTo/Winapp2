@@ -122,6 +122,9 @@ Public Module Flavorizer
         output.AddAnyKeyPrompt()
         gLog(finishedMsg)
 
+        If SuppressOutput Then Return
+
+        output.Print()
         crk()
 
     End Sub
