@@ -245,6 +245,8 @@ Module maintoolmenu
             .AddColoredLine($"Current: v{oldVer}", ConsoleColor.Green, True) _
             .AddColoredLine($"Available: v{newVer}", ConsoleColor.Green, True)
 
+        Console.WindowHeight += 2
+
     End Sub
 
 End Module
