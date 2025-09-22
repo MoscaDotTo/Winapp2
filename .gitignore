@@ -236,3 +236,11 @@ Assembler/winapp2ool.exe
 /winapp2ool/bin/Debug/Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
 /winapp2ool/bin/Debug/Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
 /winapp2ool/bin/Debug/Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+/winapp2ool/bin/Debug/browser_additions.ini
+/winapp2ool/bin/Debug/browser_key_replacements.ini
+/winapp2ool/bin/Debug/browser_name_removals.ini
+/winapp2ool/bin/Debug/browser_section_removals.ini
+/winapp2ool/bin/Debug/browser_section_replacements.ini
+/winapp2ool/bin/Debug/browser_value_removals.ini
+/winapp2ool/bin/Debug/chromium.ini
+/winapp2ool/bin/Debug/gecko.ini

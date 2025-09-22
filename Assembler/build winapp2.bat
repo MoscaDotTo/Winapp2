@@ -9,8 +9,14 @@ echo Joining base entries with browser entries
 winapp2ool -s -transmute -add -1f base-entries-combined.ini -2f browsers.ini -3f winapp2.ini
 echo Performing static analysis and saving corrections
 winapp2ool -s -debug -usedate -c -1f winapp2.ini -3f winapp2.ini
-copy winapp2.ini ..
+echo winapp2.ini built 
 copy winapp2.ini ..\Non-CCleaner
+echo Creating CCleaner flavor
+winapp2ool -s -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9d \CCleaner
+echo Performing static analysis and saving corrections
+winapp2ool -s -debug -usedate -c -1f winapp2-ccleaner-flavor.ini 
+copy winapp2.ini ..
 del base-entries-combined.ini
 del browsers.ini
 del winapp2.ini
+del winapp2-ccleaner-flavor.ini
