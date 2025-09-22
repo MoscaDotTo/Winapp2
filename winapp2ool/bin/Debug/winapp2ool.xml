@@ -2952,116 +2952,69 @@ Holds the path of any files to be saved by the Downloader
 </member>
 <member name="T:winapp2ool.Downloader">
  <summary> 
- Allows users to download files from GitHub through a simple menu 
+ Downloader is a winapp2ool module which provides a very simple interface for downloading indvidual
+ files from the winapp2 GitHub in a way that can be automated through scripting
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.gitLink">
  <summary> 
  The web address of the winapp2.ini GitHub 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.wa2Link">
  <summary>
  The web address of the CCleaner version of winapp2.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.nonccLink">
  <summary>
  The web address of the Non-CCleaner version of winapp2.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.toolLink">
  <summary> 
  The web address of winapp2ool.exe 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.betaToolLink">
  <summary> 
  The web address of the beta build of winapp2ool.exe 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.toolVerLink">
  <summary> 
  The web address of version.txt (winapp2ool's public version identifer) 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="P:winapp2ool.Downloader.betaToolVerLink">
- <summary> 
- The web address of version.txt on the beta branch 
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="P:winapp2ool.Downloader.removedLink">
- <summary> 
- The web address of removed entries.ini
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.wa3link">
  <summary> 
  The web address of winapp3.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.archivedLink">
  <summary>
  The web address of archived entries.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="P:winapp2ool.Downloader.javaLink">
- <summary> 
- The web address of java.ini
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.readMeLink">
  <summary> 
- The web address of the winapp2ool ReadMe file, for 
- downloading the file itself to the local drive 
+ The web address of the winapp2ool ReadMe file 
  </summary>
- 
- Docs last updated: 2025-08-01 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.readMeUrl">
  <summary>
  The web address of the winapp2ool ReadMe for opening in web browsers
  </summary>
-
- Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
 </member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
  <summary> 
  Handles the commandline args for the Downloader 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Downloader.winapp2link">
  <summary> 
  Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Downloader.toolExeLink">
  <summary>
@@ -3078,20 +3031,25 @@ Holds the path of any files to be saved by the Downloader
  <param name="shouldDownload"> 
  Indicates that a module is configured to download a remote winapp2.ini 
  </param>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.advDownloads">
- <summary> A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo </summary>
+ <summary> 
+ A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo 
+ </summary>
 </member>
 <member name="M:winapp2ool.advDownloads.printAdvMenu">
- <summary> Prints the advanced downloads menu </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Prints the advanced downloads menu 
+ </summary>
 </member>
 <member name="M:winapp2ool.advDownloads.handleAdvInput(System.String)">
- <summary> Handles the user input for the advanced download menu </summary>
- <param name="input">The user's input </param>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary>
+ Handles the user input for the advanced download menu 
+ </summary>
+ 
+ <param name="input">
+ The user's input 
+ </param>
 </member>
 <member name="T:winapp2ool.commandLineHandler">
  <summary>
@@ -5519,21 +5477,28 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
 </member>
 <member name="T:winapp2ool.downloadmainmenu">
- <summary> Displays the Downloader Module main menu to the user and handles their input </summary>
- Docs last updated: 2020-09-14
+ <summary> 
+ Displays the Downloader Module main menu to the user and handles their input 
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadmainmenu.initDefaultSettings">
- <summary> Restores the default state of the module's parameters </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Restores the default state of the module's parameters 
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadmainmenu.printDownloadMainMenu">
- <summary> Prints the download menu to the user </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2021-11-16
+ <summary> 
+ Prints the download menu to the user 
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadmainmenu.handleDownloadUserInput(System.String)">
- <summary> Handles user input for the Downloader main menu </summary>
- <param name="input"> The user's input </param>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Handles user input for the Downloader main menu 
+ </summary>
+ 
+ <param name="input"> 
+ The user's input 
+ </param>
 </member>
 <member name="T:winapp2ool.launcher">
  <summary> 

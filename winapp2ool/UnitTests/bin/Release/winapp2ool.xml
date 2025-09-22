@@ -2952,116 +2952,69 @@ Holds the path of any files to be saved by the Downloader
 </member>
 <member name="T:winapp2ool.Downloader">
  <summary> 
- Allows users to download files from GitHub through a simple menu 
+ Downloader is a winapp2ool module which provides a very simple interface for downloading indvidual
+ files from the winapp2 GitHub in a way that can be automated through scripting
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.gitLink">
  <summary> 
  The web address of the winapp2.ini GitHub 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.wa2Link">
  <summary>
  The web address of the CCleaner version of winapp2.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.nonccLink">
  <summary>
  The web address of the Non-CCleaner version of winapp2.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.toolLink">
  <summary> 
  The web address of winapp2ool.exe 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.betaToolLink">
  <summary> 
  The web address of the beta build of winapp2ool.exe 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.toolVerLink">
  <summary> 
  The web address of version.txt (winapp2ool's public version identifer) 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="P:winapp2ool.Downloader.betaToolVerLink">
- <summary> 
- The web address of version.txt on the beta branch 
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="P:winapp2ool.Downloader.removedLink">
- <summary> 
- The web address of removed entries.ini
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.wa3link">
  <summary> 
  The web address of winapp3.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.archivedLink">
  <summary>
  The web address of archived entries.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="P:winapp2ool.Downloader.javaLink">
- <summary> 
- The web address of java.ini
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.readMeLink">
  <summary> 
- The web address of the winapp2ool ReadMe file, for 
- downloading the file itself to the local drive 
+ The web address of the winapp2ool ReadMe file 
  </summary>
- 
- Docs last updated: 2025-08-01 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.readMeUrl">
  <summary>
  The web address of the winapp2ool ReadMe for opening in web browsers
  </summary>
-
- Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
 </member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
  <summary> 
  Handles the commandline args for the Downloader 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Downloader.winapp2link">
  <summary> 
  Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Downloader.toolExeLink">
  <summary>
@@ -3078,20 +3031,25 @@ Holds the path of any files to be saved by the Downloader
  <param name="shouldDownload"> 
  Indicates that a module is configured to download a remote winapp2.ini 
  </param>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.advDownloads">
- <summary> A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo </summary>
+ <summary> 
+ A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo 
+ </summary>
 </member>
 <member name="M:winapp2ool.advDownloads.printAdvMenu">
- <summary> Prints the advanced downloads menu </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Prints the advanced downloads menu 
+ </summary>
 </member>
 <member name="M:winapp2ool.advDownloads.handleAdvInput(System.String)">
- <summary> Handles the user input for the advanced download menu </summary>
- <param name="input">The user's input </param>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary>
+ Handles the user input for the advanced download menu 
+ </summary>
+ 
+ <param name="input">
+ The user's input 
+ </param>
 </member>
 <member name="T:winapp2ool.commandLineHandler">
  <summary>
@@ -5519,21 +5477,28 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
 </member>
 <member name="T:winapp2ool.downloadmainmenu">
- <summary> Displays the Downloader Module main menu to the user and handles their input </summary>
- Docs last updated: 2020-09-14
+ <summary> 
+ Displays the Downloader Module main menu to the user and handles their input 
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadmainmenu.initDefaultSettings">
- <summary> Restores the default state of the module's parameters </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Restores the default state of the module's parameters 
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadmainmenu.printDownloadMainMenu">
- <summary> Prints the download menu to the user </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2021-11-16
+ <summary> 
+ Prints the download menu to the user 
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadmainmenu.handleDownloadUserInput(System.String)">
- <summary> Handles user input for the Downloader main menu </summary>
- <param name="input"> The user's input </param>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Handles user input for the Downloader main menu 
+ </summary>
+ 
+ <param name="input"> 
+ The user's input 
+ </param>
 </member>
 <member name="T:winapp2ool.launcher">
  <summary> 
@@ -7224,76 +7189,26 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-07-31 | Code last updated: 2025-07-31
 </member>
-<member name="T:winapp2ool.JavaMaker">
- <summary>
- This module was designed with the help of Fred de Vries. It produces a winapp2.ini entry to remove irrelevant registry keys generated by the Java Runtime Environment installer. 
- </summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.DownloadJavaDefs">
- <summary>Indicates that the java.ini file should be downloaded from GitHub</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.JavaMakerFile1">
-<summary>The winapp2.ini that may potentially be merged into</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.JavaMakerFile2">
-<summary>The local copy of the JRE definitions file</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.JavaMakerFile3">
-<summary>The default path for saving generated entries to disk</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.SaveGeneratedEntry">
-<summary>Indicates whether or not the JRE entry should be saved to disk</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.MergeGeneratedEntry">
-<summary>Indicates whether or not the JRE entry should be merged into another file</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.ModuleSettingsChanged">
-<summary>Indicates whether or not module settings have been modified</summary>
-</member>
-<member name="M:winapp2ool.JavaMaker.initDefaultParams">
- <summary>Restores the module parameters to their default states</summary>
-</member>
-<member name="M:winapp2ool.JavaMaker.printJMMenu">
- <summary>Prints the JavaMaker main menu</summary>
-</member>
-<member name="M:winapp2ool.JavaMaker.handleJMInput(System.String)">
- <summary>Handles the JavaMaker menu input</summary>
- <param name="input"></param>
-</member>
-<member name="M:winapp2ool.JavaMaker.mkEntry(winapp2ool.keyList[])">
- <summary>Generates the RegKeylist for the current system</summary>
- <param name="kls">An array of keylists containing the RegKeys that will be in the generated entry</param>
-</member>
-<member name="M:winapp2ool.JavaMaker.getRegKeys(Microsoft.Win32.RegistryKey,System.Collections.Generic.List{System.String})">
- <summary>Creates RegKeys conditionally based on their presence on the current system</summary>
- <param name="reg">The Registry key to observe subkeys of</param>
- <param name="searches">The strings to be searched for in the subkeys</param>
-</member>
-<member name="M:winapp2ool.JavaMaker.makeSomeJava">
- <summary>Creates a winapp2.ini entry to clean up after the Java installation process</summary>
-</member>
 <member name="T:winapp2ool.Minefield">
  <summary>
- This module serves as a simple interface for testing new ideas that don't fit neatly into an existing module
- The ideas here should be considered alpha and the code here should be considered spaghetti 
+ Minefield is a winapp2ool module which serves as a testing ground for new ideas and features
+ that don't fit into an existing module. It is not intended for general use, and the features 
+ here may be incomplete, experimental, or broken.
  </summary>
 </member>
 <member name="M:winapp2ool.Minefield.printMenu">
- <summary>Prints the main Minefield menu</summary>
-</member>
-<member name="M:winapp2ool.Minefield.printBabelMenu">
-<summary>Prints the main Babel menu</summary>
-</member>
-<member name="M:winapp2ool.Minefield.handleBabelInput(System.String)">
-<summary>Handles the user input for Babel</summary>
-<param name="input">The String containing the user's input</param>
+ <summary>
+ Prints the main Minefield menu
+ </summary>
 </member>
 <member name="M:winapp2ool.Minefield.handleUserInput(System.String)">
- <summary>Handles user input for the main Minefield menu</summary>
- <param name="input">The String containing the user's input</param>
-</member>
-<member name="T:winapp2ool.search">
-<summary></summary>
+ <summary>
+ Handles user input for the main Minefield menu
+ </summary>
+ 
+ <param name="input">
+ The user's input
+ </param>
 </member>
 <member name="T:winapp2ool.globalsettingsmenu">
  <summary>
