@@ -174,5 +174,7 @@ Variable       | Windows Vista-10 Path | WindowsXP Path
 
 ## Custom.ini
 
-Winapp2.ini does not support non-English system configurations or portable software natively. If you have need for these features, we recommend you utilize a "Custom.ini" file, and use Winapp2ool to merge it with the main file using the Add&Replace setting to override the existing entries.
+Winapp2.ini does not support non-English system configurations or portable software natively. If you have need for these features, we recommend you utilize a "Custom.ini" file, and use Winapp2ool's [Transmute](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool/modules/transmute) feature with the Transmute mode set to `Add` to add your custom configurations while keeping winapp2.ini up to date.
+
+Winapp2ool 1.6 removed the Merge feature and replaced it with Transmute. If you were previously using Custom.ini with Merge, please see [Migrating From Merge](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool/modules/transmute#migrating-from-merge) in the Transmute ReadMe.
 
