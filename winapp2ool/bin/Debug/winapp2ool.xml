@@ -6273,7 +6273,7 @@ The version in YYMMDD format of the winapp2.ini file
  Replace individual keys when collisions occur <br />
  
  This means that if a key exists in the base file, its value will be replaced with the
- value from the source file. The key must exist in both files and have the same Name (case sensitive) 
+ value from the source file. The key must exist in both files and have the same Name 
  </summary>
 </member>
 <member name="T:winapp2ool.Transmute.RemoveMode">
