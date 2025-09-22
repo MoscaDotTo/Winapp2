@@ -79,8 +79,12 @@ Kernel Number  | Windows Version
 LangSecRef     | Section
 :------------- | :-------------
 3001 | Internet Explorer
+3002 | Windows Explorer
+3003 | System
+3004 | Advanced 
 3005 | Microsoft Edge
 3006 | Edge Chromium
+3007 | Windows Downloads
 3021 | Applications
 3022 | Internet
 3023 | Multimedia
@@ -99,6 +103,11 @@ LangSecRef     | Section
 3036 | Spotify
 3037 | Avast Secure Browser
 3038 | AVG Secure Browser
+3039 | Arc Browser 
+3040 | iTunes
+3042 | WhatsApp 
+3043 | Norton Private Browser 
+3044 | Avira Secure Browser
 
 `Detect` or `DetectFile`
 * These keys specify the condition under which the key should be considered valid for a system.
