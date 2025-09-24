@@ -96,7 +96,7 @@ Public Module Trim
         ' Ensure we have an online connection before continuing if necessary 
         If DownloadFileToTrim Then If Not checkOnline() Then setHeaderText("Internet connection lost! Please check your network connection and try again", True) : Return
 
-        Dim winapp2 = If(DownloadFileToTrim, New winapp2file(getRemoteIniFile(winapp2link)), New winapp2file(TrimFile1))
+        Dim winapp2 = If(DownloadFileToTrim, New winapp2file(getRemoteIniFile(getWinappLink)), New winapp2file(TrimFile1))
 
         ' Spin up our include/excludes 
         If UseTrimIncludes Then TrimFile2.validate()
