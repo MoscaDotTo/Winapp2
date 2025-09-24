@@ -1,4 +1,3 @@
-
 # Winapp2.ini
 
 ### What is winapp2.ini? 
@@ -40,7 +39,6 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
    - [Variables](#variables)
 5. [Custom Content](#custom-content)
 
-
 ---
 
 # [Quick Start](#quick-start)
@@ -53,7 +51,7 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
 
 # [Files of interest](#files-of-interest)
 
-Name           		                                                                                                               | Purpose       
+Name           		                                                                                                            | Purpose       
 :-                                                                                                                               | :-
 [Winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe)                             | A robust tool that allows you to manage Winapp2.ini for your system, including automatic downloading and trimming. This tool has its own ReadMe [here](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool).
 [Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)                              | This is the base winapp2.ini file, it has no content removed or changed and includes and may overlap or conflict with CCleaner/BleachBit rules. 
@@ -67,7 +65,8 @@ Name           		                                                               
 
 It is strongly recommended you keep a copy of [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) in the same folder as winapp2.ini for the purpose of keeping it up-to-date irrespective of which application you are using. 
 
-## [[CCleaner](https://www.ccleaner.com/ccleaner)](#ccleaner)
+## [CCleaner](#ccleaner)
+###### [Download CCleaner](https://www.ccleaner.com/ccleaner)
 
 ### Flavor
 
@@ -86,7 +85,8 @@ CCleaner will display the set of winapp2.ini entries which it detects as valid f
 
 ###### Note: CCleaner 5.64.7577 is the last version to work on Windows XP and Vista (for non-SSE2 CPUs CCleaner 5.26.5937). Winapp2.ini and Winapp3.ini will continue to work with this version.
 
-## [[BleachBit](https://www.bleachbit.org)](#bleachbit)
+## [BleachBit](#bleachbit)
+###### [Download BleachBit](https://www.bleachbit.org)
 
 ### Flavor
 
@@ -108,7 +108,8 @@ BleachBit will display the set of winapp2.ini entries which it detects as both h
 
 ###### Note: BleachBit 2.2 is the last version to work on Windows XP. Winapp2.ini and Winapp3.ini will continue to work with this version. 
 
-## [[System Ninja](https://singularlabs.com/software/system-ninja)](#system-ninja)
+## [System Ninja](#system-ninja)
+###### [Download System Ninja](https://singularlabs.com/software/system-ninja)
 
 ### Flavor 
 You should use the [System Ninja Flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/SystemNinja/Winapp2.rules). This flavor is designed to improve compatibility with System Ninja by replacing keys with unsupported features, such that they become functional in System Ninja. It is not advised you use any other flavor with System Ninja. 
@@ -129,7 +130,8 @@ System Ninja does not provide an interface for individually configuring which wi
 
 ###### Note: System Ninja 3.2.7 is the last version to work on Windows XP and Vista. Winapp2.ini and Winapp3.ini will continue to work with this version.
 
-## [[Avira System Speedup](https://www.avira.com/en/avira-system-speedup-free)](#avira-system-speedup)
+## [Avira System Speedup](#avira-system-speedup)
+###### [Download System Speedup](https://www.avira.com/en/avira-system-speedup-free)
 
 ### Installation 
 Avira System Speedup ships with a copy Winapp2.ini by default, served by Avira, storing it in your `..\Avira\System Speedup\sdf` directory. You can replace or update this local copy without issue or changing any of the Avira System Speedup settings.
@@ -142,7 +144,8 @@ Avira System Speedup scans every winapp2.ini entry and displays the results of t
 
 ###### Note: Cleaning "Third Party Applications" is a paid feature of Avira System Speedup Pro. winapp2.ini is and always will be free, and supported by a variety of free applications.   
 
-## [[Tron](https://github.com/bmrf/tron)](#tron)
+## [Tron](#tron)
+###### [Tron GitHub](https://github.com/bmrf/tron)
 
 ### Flavor 
 
@@ -158,7 +161,8 @@ Likewise, there exists a [Tron flavor of winapp2.ini](https://raw.githubusercont
 
 Tron ships with its own configuration. You can modify it by opening the copy of CCleaner shipped with Tron.
 
-## [[R-Wipe & Clean](https://www.r-wipe.com)](#r-wipe--clean)
+## [R-Wipe & Clean](#r-wipe--clean)
+###### [Download R-Wipe&Clean](https://www.r-wipe.com)
 
 ### Installation 
 
