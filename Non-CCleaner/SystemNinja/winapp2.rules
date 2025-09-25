@@ -1,4 +1,4 @@
-; Version: 250923
+; Version: 250924
 ; # of entries: 3,510
 ;
 ; Winapp2.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2.ini: https://github.com/MoscaDotTo/Winapp2/blob/master/License.md
@@ -875,7 +875,7 @@ LangSecRef=3024
 Detect=HKCU\Software\Adaptec
 RegKey1=HKCU\Software\Adaptec\AUDIO_CD_INFO
 
-[Adaware Privacy*]
+[Adaware Privacy *]
 LangSecRef=3024
 DetectFile=%AppData%\Adaware\Adaware Privacy
 FileKey1=%AppData%\Adaware\Adaware Privacy|dcilog.txt
@@ -1405,10 +1405,10 @@ FileKey1=%ProgramFiles%\Aimersoft\Video Editor\log|*|RECURSE
 
 [AIMP *]
 LangSecRef=3023
-DetectFile=%AppData%\AIMP*
-FileKey1=%AppData%\AIMP*|*.bak
-FileKey2=%ProgramFiles%\AIMP*\!Backup|*|REMOVESELF
-FileKey3=%ProgramFiles%\AIMP*\Data|*.bak|RECURSE
+DetectFile=%AppData%\AIMP
+FileKey1=%AppData%\AIMP|*.bak
+FileKey2=%ProgramFiles%\AIMP\!Backup|*|REMOVESELF
+FileKey3=%ProgramFiles%\AIMP\Data|*.bak|RECURSE
 
 [AirBuccaneers *]
 Section=Games
@@ -9545,7 +9545,8 @@ FileKey2=%AppData%\SeriousBit\Enhanso\Backups|*|RECURSE
 [Enpass *]
 LangSecRef=3024
 DetectFile=%LocalAppData%\Sinew Software Systems Pvt Ltd\Enpass
-FileKey1=%LocalAppData%\Sinew Software Systems Pvt Ltd\Enpass\cache|*|RECURSE
+FileKey1=%AppData%\Sinew Software Systems Pvt Ltd\Enpass\Crashes|*
+FileKey2=%LocalAppData%\Sinew Software Systems Pvt Ltd\Enpass\cache|*|RECURSE
 
 [Epic Games Launcher *]
 Section=Games
@@ -11714,7 +11715,7 @@ FileKey1=%AppData%\Palaplay\GreenRanch_Survey|*.txt
 
 [Greenfish Icon Editor Pro *]
 LangSecRef=3021
-DetectFile=%LocalAppData%\gfie\recent.txt
+DetectFile=%LocalAppData%\gfie
 FileKey1=%LocalAppData%\gfie|recent.txt
 
 [Greenshot *]
@@ -12075,7 +12076,7 @@ FileKey1=%AppData%\Hide.me\Logs|*
 
 [HistoryKill *]
 LangSecRef=3024
-DetectFile=%ProgramFiles%\HistoryKill*
+DetectFile=%LocalAppData%\HistoryKill
 FileKey1=%LocalAppData%\HistoryKill|hk.dat;reseller.txt
 
 [HitmanPro *]
@@ -14425,10 +14426,10 @@ FileKey13=%ProgramFiles%\Logitech\Desktop Messenger|*.log;*.bak|RECURSE
 FileKey14=%ProgramFiles%\Logitech\LogiOptions\LogiBolt|*|REMOVESELF
 FileKey15=%WinDir%\System32|lvcoinst.log
 
-[Logitech G HUB - Window size/location]
+[Logitech G HUB - Window Size/Location]
 LangSecRef=3024
 Detect=HKCU\SOFTWARE\Logitech\LGHUB
-FileKey1=%AppData%\lghub\window-state.json
+FileKey1=%AppData%\lghub|window-state.json
 
 [Logitech G HUB *]
 LangSecRef=3024
