@@ -32,6 +32,7 @@ Module mainToolSettingsHandler
     Public Sub getSeralizedToolSettings()
 
         LoadModuleSettingsFromDict(NameOf(Winapp2ool), GetType(maintoolsettings))
+        CurrentWinappFlavor = getEnumSetting(Of WinappFlavor)(NameOf(Winapp2ool), NameOf(CurrentWinappFlavor), WinappFlavor.NonCCleaner)
 
     End Sub
 
@@ -50,6 +51,8 @@ Module mainToolSettingsHandler
         Dim moduleName = NameOf(Winapp2ool)
 
         createModuleSettingsSection(moduleName, settingsModule)
+        updateEnumSetting(Of WinappFlavor)(NameOf(Winapp2ool), NameOf(CurrentWinappFlavor), CurrentWinappFlavor)
+
 
     End Sub
 

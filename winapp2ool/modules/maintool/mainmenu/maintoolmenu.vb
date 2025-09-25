@@ -151,7 +151,7 @@ Module maintoolmenu
 
                 clrConsole()
                 cwl("Downloading, this may take a moment...")
-                download(New iniFile(Environment.CurrentDirectory, "winapp2.ini"), winapp2link, False)
+                download(New iniFile(Environment.CurrentDirectory, "winapp2.ini"), getWinappLink, False)
                 waUpdateIsAvail = False
 
             ' Update & Trim winapp2.ini
