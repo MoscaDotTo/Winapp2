@@ -182,7 +182,8 @@ Public Module commandLineHandler
 
         ' Process global flags
         invertSettingAndRemoveArg(SuppressOutput, "-s")
-        invertSettingAndRemoveArg(RemoteWinappIsNonCC, "-ncc")
+
+        processFlavorArgs()
 
         If cmdargs.Count = 0 Then Return
 
@@ -457,6 +458,47 @@ Public Module commandLineHandler
         Console.WriteLine($"{errTxt} Press any key to exit.")
         Console.ReadKey()
         Environment.Exit(0)
+
+    End Sub
+
+    ''' <summary>
+    ''' Handles flavor selection command line arguments and updates the current flavor setting
+    ''' </summary>
+    ''' 
+    ''' <param name="flavorArg">
+    ''' The command line argument for flavor selection
+    ''' </param>
+    ''' 
+    ''' <param name="flavorValue">
+    ''' The flavor to set
+    ''' </param>
+    Private Sub handleFlavorArg(flavorArg As String, flavorValue As WinappFlavor)
+
+        If cmdargs.Contains(flavorArg) Then
+
+            gLog($"Found flavor argument: {flavorArg}")
+
+            CurrentWinappFlavor = flavorValue
+            cmdargs.Remove(flavorArg)
+
+            gLog($"Flavor set to: {flavorValue}")
+
+        End If
+
+    End Sub
+
+    ''' <summary>
+    ''' Process flavor selection arguments
+    ''' This extends the existing processCommandLineArgs() method
+    ''' </summary>
+    Public Sub processFlavorArgs()
+
+        handleFlavorArg("-ccleaner", WinappFlavor.CCleaner)
+        handleFlavorArg("-bleachbit", WinappFlavor.BleachBit)
+        handleFlavorArg("-systemninja", WinappFlavor.SystemNinja)
+        handleFlavorArg("-tron", WinappFlavor.Tron)
+        handleFlavorArg("-base", WinappFlavor.NonCCleaner)
+        handleFlavorArg("-ncc", WinappFlavor.NonCCleaner)
 
     End Sub
 
