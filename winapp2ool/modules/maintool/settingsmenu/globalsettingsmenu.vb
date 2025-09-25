@@ -19,16 +19,12 @@ Option Strict On
 
 ''' <summary>
 ''' Displays the global settings menu to the user and handles input from that menu 
-''' </summary>
-''' 
-''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+''' </summary
 Module globalsettingsmenu
 
     ''' <summary> 
     ''' Initalizes the default state of the winapp2ool module settings 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Private Sub initDefaultSettings()
 
         GlobalLogFile.resetParams()
@@ -36,6 +32,7 @@ Module globalsettingsmenu
         saveSettingsToDisk = False
         readSettingsFromDisk = False
         toolSettingsHaveChanged = False
+        CurrentWinappFlavor = WinappFlavor.CCleaner
 
         restoreDefaultSettings(NameOf(Winapp2ool), AddressOf createToolSettingsSection)
 
@@ -44,23 +41,8 @@ Module globalsettingsmenu
     ''' <summary> 
     ''' Prints the winapp2ool settings menu to the user 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
     Public Sub printMainToolSettingsMenu()
 
-        Dim toolDesc = "Change some high level settings, including saving & reading settings from disk"
-        Dim toggleSavingSettingsName = "Toggle Saving Settings"
-        Dim toggleSavingSettingsDesc = "saving a copy of winapp2ool's settings to the disk"
-        Dim toggleReadingSettingsName = "Toggle Reading Settings"
-        Dim toggleReadingSettingsDesc = "overriding winapp2ool's default settings with those found in winapp2ool.ini"
-        Dim toggleNonCCleanerName = "Toggle Non-CCleaner Mode"
-        Dim toggleNonCCleanerDesc = "using the Non-CCleaner version of winapp2.ini by default"
-        Dim viewLogName = "View Log"
-        Dim viewLogDesc = "Print winapp2ool's internal log"
-        Dim fileChooserName = "File Chooser (log)"
-        Dim fileChooserDesc = "Change the filename or path to which the winapp2ool log should be saved"
-        Dim saveLogName = "Save Log"
-        Dim saveLogDesc = "Save winapp2ool's internal log to the disk"
         Dim currentLogTarget = $"Current log file target: {replDir(GlobalLogFile.Path)}"
         Dim VisitGitHubName = "Visit GitHub"
         Dim VisitGitHubDesc = "Open the Winapp2 GitHub page in your default web browser"
@@ -69,21 +51,58 @@ Module globalsettingsmenu
         Dim ToggleOfflineName = "Toggle Offline Mode"
         Dim ToggleOfflineDesc = "Force winapp2ool into offline mode"
 
-        printMenuTop({toolDesc})
-        print(5, toggleSavingSettingsName, toggleSavingSettingsDesc, enStrCond:=saveSettingsToDisk, leadingBlank:=True)
-        print(5, toggleReadingSettingsName, toggleReadingSettingsDesc, enStrCond:=readSettingsFromDisk, trailingBlank:=True)
-        print(5, toggleNonCCleanerName, toggleNonCCleanerDesc, enStrCond:=RemoteWinappIsNonCC, trailingBlank:=True)
-        print(1, viewLogName, viewLogDesc)
-        print(1, fileChooserName, fileChooserDesc)
-        print(1, saveLogName, saveLogDesc)
-        print(0, currentLogTarget, leadingBlank:=True, trailingBlank:=True)
-        print(1, VisitGitHubName, VisitGitHubDesc, trailingBlank:=True)
-        print(5, ToggleBetaName, ToggleBetaDesc, enStrCond:=isBeta)
-        print(5, ToggleOfflineName, ToggleOfflineDesc, enStrCond:=isOffline, closeMenu:=Not toolSettingsHaveChanged)
-        print(2, NameOf(Winapp2ool), cond:=toolSettingsHaveChanged, closeMenu:=True)
+        Dim menuDesc = {"Change high level settings for winapp2ool",
+                       "Enable reading and writing settings from disk to persist any changes made here"}
+
+        Dim menu = MenuSection.CreateCompleteMenu("Winapp2ool Global Settings", menuDesc, ConsoleColor.DarkGreen)
+        menu.AddBlank() _
+            .AddToggle("Saving Settings", "saving a copy of winapp2ool's settings to the disk", saveSettingsToDisk) _
+            .AddToggle("Reading settings", "overriding winapp2ool's default settings at launch using winapp2ool.ini", readSettingsFromDisk) _
+            .AddToggle("Beta Participation", "participating in the 'beta' builds of winapp2ool (requires a restart)", isBeta) _
+            .AddToggle("Offline Mode", "forcing winapp2ool into ofline mode", isOffline).AddBlank() _
+            .AddColoredOption("Change Flavor", "Cycle the current flavor of winapp2.ini to the next", ConsoleColor.DarkMagenta) _
+            .AddColoredLine($"Current Flavor: {CurrentWinappFlavor.ToString}", ConsoleColor.Magenta).AddBlank _
+            .AddColoredOption("View Log", "Print winapp2ool's current internal log", ConsoleColor.DarkYellow) _
+            .AddColoredOption("Save log", "Save winapp2ool's current internal log to disk", ConsoleColor.DarkYellow) _
+            .AddColoredOption("Change Save Target", "Select a new filename of path to which the winapp2ool log should be saved", ConsoleColor.DarkYellow).AddBlank _
+            .AddColoredFileInfo("Current save target: ", GlobalLogFile.Path, ConsoleColor.DarkYellow).AddBlank _
+            .AddOption("Visit GitHub", "Open the Winapp2 GitHub page in your default web browser").AddBlank() _
+            .AddResetOpt(NameOf(Winapp2ool), toolSettingsHaveChanged)
+
+        menu.Print()
 
     End Sub
 
+    ''' <summary>
+    ''' Returns the set of toggles in the winapp2ool settings menu
+    ''' </summary>
+    ''' <returns></returns>
+    Private Function getToggleOpts() As Dictionary(Of String, String)
+
+        Dim toggles As New Dictionary(Of String, String)
+
+        toggles.Add("Saving Settings", NameOf(saveSettingsToDisk))
+        toggles.Add("Reading settings", NameOf(readSettingsFromDisk))
+        toggles.Add("Beta Mode", NameOf(isBeta))
+        toggles.Add("Offline Mode", NameOf(isOffline))
+
+        Return toggles
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the set of enums in the winapp2ool settings menu
+    ''' </summary>
+    ''' <returns></returns>
+    Private Function getEnumOpts() As Dictionary(Of String, String)
+
+        Dim enums As New Dictionary(Of String, String)
+
+        enums.Add("Flavor", NameOf(CurrentWinappFlavor))
+
+        Return enums
+
+    End Function
     ''' <summary> 
     ''' Handles the user input for the winapp2ool settings menu 
     ''' </summary>
@@ -91,97 +110,89 @@ Module globalsettingsmenu
     ''' <param name="input">
     ''' The user's input
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Sub handleMainToolSettingsInput(input As String)
+
+        Dim intInput As Integer
+        If Not Integer.TryParse(input, intInput) Then
+
+            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Return
+
+        End If
+
+        Dim toggles = getToggleOpts()
+        Dim enums = getEnumOpts()
+
+        Dim staticOpts = 1
+        Dim minToggleNum = staticOpts
+        Dim maxToggleNum = minToggleNum + toggles.Count - 1
+        Dim minCycleNum = maxToggleNum + 1
+        Dim maxCycleNum = minCycleNum + enums.Count - 1
+        Dim minLogNum = maxCycleNum + 1
+        Dim maxLogNum = minLogNum + 2
+        Dim minGHNum = maxLogNum + 1
+        Dim maxGHNum = minGHNum
+        Dim resetNum = maxGHNum + 1
 
         Select Case True
 
-            ' Option Name:                                 Exit
-            ' Option States:
-            ' Default                                      -> 0 (default)
-            Case input = "0"
+            ' Exit
+            Case intInput = 0
 
                 exitModule()
 
-            ' Option Name:                                 Toggle Saving Settings
-            ' Option States:
-            ' Default                                      -> 1 (default)
-            Case input = "1"
+            ' Toggles
+            Case intInput >= minToggleNum AndAlso intInput <= maxToggleNum
 
-                toggleSettingParam(saveSettingsToDisk, "Saving settings to disk", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(saveSettingsToDisk), NameOf(toolSettingsHaveChanged))
+                Dim i = intInput - staticOpts
 
-            ' Option Name:                                 Toggle Reading Settings
-            ' Option States:
-            ' Default                                      -> 2 (default)
-            Case input = "2"
+                If toggles.Keys(i) = "Beta Mode" Then
 
-                toggleSettingParam(readSettingsFromDisk, "Reading settings from disk", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(readSettingsFromDisk), NameOf(toolSettingsHaveChanged))
+                    If denyActionWithHeader(DotNetFrameworkOutOfDate, "Winapp2ool beta requires .NET 4.6 or higher") Then Return
 
-            ' Option Name:                                 Toggle Non-CCleaner Mode
-            ' Option States:
-            ' Default                                      -> 3 (default)
-            Case input = "3"
-
-                toggleSettingParam(RemoteWinappIsNonCC, "Non-CCleaner mode", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(RemoteWinappIsNonCC), NameOf(toolSettingsHaveChanged))
-
-            ' Option Name:                                 View Log
-            ' Option States:
-            ' Default                                      -> 4 (default)
-            Case input = "4"
-
-                printLog()
-
-            ' Option Name:                                 File Chooser (log)
-            ' Option States:
-            ' Default                                      -> 5 (default)
-            Case input = "5"
-
-                changeFileParams(GlobalLogFile, toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(GlobalLogFile), NameOf(toolSettingsHaveChanged))
-
-            ' Option Name:                                 Save Log
-            ' Option States:
-            ' Default                                      -> 6 (default)
-            Case input = "6"
-
-                GlobalLogFile.overwriteToFile(logger.toString)
-
-            ' Option Name:                                 Visit GitHub
-            ' Option States:
-            ' Default                                      -> 7 (default)
-            Case input = "7"
-
-                Process.Start(gitLink)
-
-            ' Option Name:                                 Toggle Beta Participation
-            ' Option States:
-            ' Default                                      -> 8 (default)
-            Case input = "8"
-
-                If Not denyActionWithHeader(DotNetFrameworkOutOfDate, "Winapp2ool beta requires .NET 4.6 or higher") Then
-
-                    toggleSettingParam(isBeta, "Beta Participation", toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(isBeta), NameOf(toolSettingsHaveChanged))
+                    toggleModuleSetting(toggles.Keys(i), NameOf(Winapp2ool), GetType(maintoolsettings), toggles.Values(i), NameOf(toolSettingsHaveChanged))
                     autoUpdate()
 
                 End If
 
-            ' Option Name:                                 Toggle Offline Mode
-            ' Option States:
-            ' Default                                      -> 9 (default)
-            Case input = "9"
+                toggleModuleSetting(toggles.Keys(i), NameOf(Winapp2ool), GetType(maintoolsettings), toggles.Values(i), NameOf(toolSettingsHaveChanged))
 
-                isOffline = True
+            ' Enums 
+            Case intInput >= minCycleNum AndAlso intInput <= maxCycleNum
 
-            ' Option Name:                                 Reset Settings
-            ' Option States:
-            ' Default                                      -> 10 (default)
-            Case input = "10" And toolSettingsHaveChanged
+                Dim i = intInput - maxToggleNum - 1
+                CycleEnumProperty(enums.Values(i), "Flavor", GetType(maintoolsettings), NameOf(Winapp2ool), toolSettingsHaveChanged, NameOf(toolSettingsHaveChanged), ConsoleColor.DarkMagenta)
+
+
+            ' View Log
+            Case intInput = minLogNum
+
+                printLog()
+
+            ' Save Log
+            Case intInput = minLogNum + 1
+
+                GlobalLogFile.overwriteToFile(logger.toString)
+
+            ' File Selector
+            Case intInput = maxLogNum
+
+                changeFileParams(GlobalLogFile, toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(GlobalLogFile), NameOf(toolSettingsHaveChanged))
+
+
+            ' Visit GitHub
+            Case intInput = minGHNum
+
+                Process.Start(gitLink)
+
+            ' Reset Settings
+            Case intInput = resetNum AndAlso toolSettingsHaveChanged
 
                 initDefaultSettings()
 
             Case Else
 
-                setHeaderText(invInpStr, True)
+                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
         End Select
 
