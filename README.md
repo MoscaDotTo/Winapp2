@@ -239,7 +239,7 @@ These keys define where the entry will be displayed within the application UI. Y
 | 3040           | iTunes                            | Not available in BleachBit
 | 3042           | WhatsApp                          | Not available in BleachBit
 | 3043           | Norton Private Browser            | Not available in BleachBit
-| 3044           | Avira Secure Browser              | Norton Private Browser
+| 3044           | Avira Secure Browser              | Not available in BleachBit
 
 #### Examples 
 `LangSecRef=3026` will cause an entry to be displayed under CCleaner's built-in Firefox section. 
