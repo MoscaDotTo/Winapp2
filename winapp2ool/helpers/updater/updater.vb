@@ -62,7 +62,7 @@ Public Module updater
         ' If winapp2.ini doesn't exist, an update is necessarily available. Avoid downloading in this case 
         ' anti virus vendors don't seem to like the fact that winapp2ool downloads a configuration file, particularly one containing 
         ' commands pertaining to yet more anti virus. If we can avoid doing this by default, we may be able to more easily fly under the radar 
-        latestWa2Ver = getRemoteVersion(winapp2link)
+        latestWa2Ver = getRemoteVersion(getWinappLink)
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion.Length = 0 Or latestWa2Ver.Length = 0 Then updateCheckFailed("online", True) : Return
