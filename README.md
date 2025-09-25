@@ -42,23 +42,24 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
 ---
 
 # [Quick Start](#quick-start)
-1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) and your preferred flavor of winapp2.ini
-2. Follow the installation guide for your cleaner application below
-3. Use winapp2ool to keep your copy updated and trimmed for optimal performance
+1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) 
+    - If necessary, open the winapp2ool settings and select your preferred flavor. The default flavor is the CCleaner flavor.  
+2. Follow the installation guide for your cleaner application below.
+3. Use winapp2ool to keep your copy updated and trimmed for optimal performance.
 
 ---
 
 # [Files of interest](#files-of-interest)
 
-Name           		                                                                                                            | Purpose       
-:-                                                                                                                               | :-
-[Winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe)                             | A robust tool that allows you to manage Winapp2.ini for your system, including automatic downloading and trimming. This tool has its own ReadMe [here](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool).
-[Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)                              | This is the base winapp2.ini file, it has no content removed or changed and includes and may overlap or conflict with CCleaner/BleachBit rules. 
-[CCleaner Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini)                                  | The CCleaner flavor of winapp2.ini, designed to reduce overlap with CCleaner rules and better integrate with its UI.
-[BleachBit Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/BleachBit/Winapp2.ini)          | The BleachBit flavor of winapp2.ini, designed to remove unsupported rules and pass the sanity checker.
-[System Ninja winapp2.rules](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/SystemNinja/Winapp2.rules) | The System Ninja flavor of winapp2.ini, designed to replace unsupported rules with ones compatible with System Ninja. 
-[Tron winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Tron/Winapp2.ini)                    | The Tron flavor of winapp2.ini, designed to capture the downstream changes made by Tron to the CCleaner flavor.  
-[Winapp3.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini)                                   | An extension for an extension; contains entries for use by power users. *You should **not** use this file if you do not know what you are doing. Entries in this file can potentially be very aggressive/dangerous to your file system.*
+| Name           		                                                                                                           | Purpose       
+| :-                                                                                                                               | :-
+| [Winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe)                             | A robust tool that allows you to manage Winapp2.ini for your system, including automatic downloading and trimming. This tool has its own ReadMe [here](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool).
+| [Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)                              | This is the base winapp2.ini file, it has no content removed or changed and includes and may overlap or conflict with CCleaner/BleachBit rules. 
+| [CCleaner Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini)                                  | The CCleaner flavor of winapp2.ini, designed to reduce overlap with CCleaner rules and better integrate with its UI.
+| [BleachBit Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/BleachBit/Winapp2.ini)          | The BleachBit flavor of winapp2.ini, designed to remove unsupported rules and pass the sanity checker.
+| [System Ninja winapp2.rules](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/SystemNinja/Winapp2.rules) | The System Ninja flavor of winapp2.ini, designed to replace unsupported rules with ones compatible with System Ninja. 
+| [Tron winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Tron/Winapp2.ini)                    | The Tron flavor of winapp2.ini, designed to capture the downstream changes made by Tron to the CCleaner flavor.  
+| [Winapp3.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp3/Winapp3.ini)                                   | An extension for an extension; contains entries for use by power users. *You should **not** use this file if you do not know what you are doing. Entries in this file can potentially be very aggressive/dangerous to your file system.*
 
 # [Installation & Configuration](#installation--configuration) 
 
@@ -325,7 +326,7 @@ This key is used only by CCleaner and is used to limit the set of Windows versio
 | 6.1            | Windows 7, Windows Server 2008 R2, Windows Home Server 2011
 | 6.2            | Windows 8, Windows Server 2012
 | 6.3            | Windows 8.1, Windows Server 2012 R2
-|10.0            | Windows 10, Windows 11, Windows Server 2016, Windows Server 2019
+| 10.0           | Windows 10, Windows 11, Windows Server 2016, Windows Server 2019
 
 #### Examples 
   * `DetectOS=6.0|` will only run on versions of Windows including and newer than Windows Vista.
@@ -347,23 +348,23 @@ This key is used only by CCleaner and provides the same search patterns used by 
 These are all the possible variables that can be used for defining filesystem paths in Winapp2.ini.
 ##### Variables marked with a * natively check both 64bit and 32bit locations on 64bit systems.
 
-| Variable                | Windows Vista-11 Path                  | WindowsXP Path                                                         | Notes
-| :-                      | :-                                     | :-                                                                     |:-
-| `%AppData%`             | `C:\Users\%UserName%\AppData\Roaming`  | `C:\Documents and Settings\%UserName%\Application Data`                |
-| `%CommonAppData%`       | `C:\ProgramData`                       | `C:\Documents and Settings\All Users\Application Data`                 | CCleaner only 
-| `%CommonProgramFiles%`* | `C:\Program Files\Common Files`        | `C:\Program Files\Common Files`                                        | 
-| `%Documents%`           | `C:\Users\%UserName%\Documents`        | `C:\Documents and Settings\%UserName%\My Documents`                    | CCleaner only
-| `%LocalAppData%`        | `C:\Users\%UserName%\AppData\Local`    | `C:\Documents and Settings\%UserName%\Local Settings\Application Data` |
-| `%LocalLowAppData%`     | `C:\Users\%UserName%\AppData\LocalLow` | N/A                                                                    | CCleaner only
-| `%Music%`               | `C:\Users\%UserName%\Music`            | `C:\Documents and Settings\%UserName%\My Documents\My Music`           | CCleaner only
-| `%Pictures%`            | `C:\Users\%UserName%\Pictures`         | `C:\Documents and Settings\%UserName%\My Documents\My Pictures`        | CCleaner only 
-| `%ProgramData%`         | `C:\ProgramData`                       | N/A                                                                    |
-| `%ProgramFiles%`*       | `C:\Program Files`                     | `C:\Program Files`                                                     | 
-| `%Public%`              | `C:\Users\Public`                      | N/A                                                                    |
-| `%SystemDrive%`         | `C:`                                   | `C:`                                                                   | 
-| `%UserProfile%`         | `C:\Users\%UserName%`                  | `C:\Documents and Settings\%UserName%`                                 | 
-| `%Video%`               | `C:\Users\%UserName%\Videos`           | `C:\Documents and Settings\%UserName%\My Documents\My Videos`          | CCleaner only 
-| `%WinDir%`              | `C:\Windows`                           | `C:\Windows`                                                           |
+| Variable                 | Windows Vista-11 Path                  | WindowsXP Path                                                         | Notes
+| :-                       | :-                                     | :-                                                                     |:-
+| `%AppData%`              | `C:\Users\%UserName%\AppData\Roaming`  | `C:\Documents and Settings\%UserName%\Application Data`                |
+| `%CommonAppData%`        | `C:\ProgramData`                       | `C:\Documents and Settings\All Users\Application Data`                 | CCleaner only 
+| `%CommonProgramFiles%`\* | `C:\Program Files\Common Files`        | `C:\Program Files\Common Files`                                        | 
+| `%Documents%`            | `C:\Users\%UserName%\Documents`        | `C:\Documents and Settings\%UserName%\My Documents`                    | CCleaner only
+| `%LocalAppData%`         | `C:\Users\%UserName%\AppData\Local`    | `C:\Documents and Settings\%UserName%\Local Settings\Application Data` |
+| `%LocalLowAppData%`      | `C:\Users\%UserName%\AppData\LocalLow` | N/A                                                                    | CCleaner only
+| `%Music%`                | `C:\Users\%UserName%\Music`            | `C:\Documents and Settings\%UserName%\My Documents\My Music`           | CCleaner only
+| `%Pictures%`             | `C:\Users\%UserName%\Pictures`         | `C:\Documents and Settings\%UserName%\My Documents\My Pictures`        | CCleaner only 
+| `%ProgramData%`          | `C:\ProgramData`                       | N/A                                                                    |
+| `%ProgramFiles%`\*       | `C:\Program Files`                     | `C:\Program Files`                                                     | 
+| `%Public%`               | `C:\Users\Public`                      | N/A                                                                    |
+| `%SystemDrive%`          | `C:`                                   | `C:`                                                                   | 
+| `%UserProfile%`          | `C:\Users\%UserName%`                  | `C:\Documents and Settings\%UserName%`                                 | 
+| `%Video%`                | `C:\Users\%UserName%\Videos`           | `C:\Documents and Settings\%UserName%\My Documents\My Videos`          | CCleaner only 
+| `%WinDir%`               | `C:\Windows`                           | `C:\Windows`                                                           |
 
 ### Registry variables
 
