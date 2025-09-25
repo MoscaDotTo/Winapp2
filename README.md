@@ -212,29 +212,34 @@ These keys define where the entry will be displayed within the application UI. Y
 - If submitting an entry for a video game or related software, please use `Section=Games`.
 - For `LangSecRef`, CCleaner syntax is followed. Tables of valid values are below:
 
-LangSecRef     | CCleaner UI Header                | Notes 
-:-             | :-                                | :-
-3001           | Internet Explorer                 | No longer used in winapp2.ini 
-3005           | Microsoft Edge                    | No longer used in winapp2.ini 
-3006           | Edge Chromium                     | Called Microsoft Edge in BleachBit 
-3021           | Applications                      | 
-3022           | Internet                          |
-3023           | Multimedia                        | 
-3024           | Utilities                         |
-3025           | Windows                           | Called Microsoft Windows in BleachBit
-3026           | Firefox                           |
-3027           | Opera                             |
-3028           | Safari                            |
-3029           | Google Chrome                     |
-3030           | Thunderbird                       |
-3031           | Windows Store                     |
-3032           | CCleaner Browser                  | Not available in BleachBit 
-3033           | Vivaldi                           | 
-3034           | Brave                             |
-3035           | Opera GX                          | Not available in BleachBit
-3036           | Spotify                           | Not available in BleachBit
-3037           | Avast Secure Browser              | Not available in BleachBit
-3038           | AVG Secure Browser                | Not available in BleachBit
+| LangSecRef     | CCleaner UI Header                | Notes 
+| :-             | :-                                | :-
+| 3001           | Internet Explorer                 | No longer used in winapp2.ini 
+| 3005           | Microsoft Edge                    | No longer used in winapp2.ini 
+| 3006           | Edge Chromium                     | Called Microsoft Edge in BleachBit 
+| 3021           | Applications                      | 
+| 3022           | Internet                          |
+| 3023           | Multimedia                        | 
+| 3024           | Utilities                         |
+| 3025           | Windows                           | Called Microsoft Windows in BleachBit
+| 3026           | Firefox                           |
+| 3027           | Opera                             |
+| 3028           | Safari                            |
+| 3029           | Google Chrome                     |
+| 3030           | Thunderbird                       |
+| 3031           | Windows Store                     |
+| 3032           | CCleaner Browser                  | Not available in BleachBit 
+| 3033           | Vivaldi                           | 
+| 3034           | Brave                             |
+| 3035           | Opera GX                          | Not available in BleachBit
+| 3036           | Spotify                           | Not available in BleachBit
+| 3037           | Avast Secure Browser              | Not available in BleachBit
+| 3038           | AVG Secure Browser                | Not available in BleachBit
+| 3039           | Arc Browser                       | Not available in BleachBit
+| 3040           | iTunes                            | Not available in BleachBit
+| 3042           | WhatsApp                          | Not available in BleachBit
+| 3043           | Norton Private Browser            | Not available in BleachBit
+| 3044           | Avira Secure Browser              | Norton Private Browser
 
 #### Examples 
 `LangSecRef=3026` will cause an entry to be displayed under CCleaner's built-in Firefox section. 
