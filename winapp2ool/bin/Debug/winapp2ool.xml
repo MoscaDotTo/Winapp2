@@ -686,7 +686,6 @@ winapp2ool
  The function who assigns values from disk to
  the current active session of a module's settings 
  </param>
- 
  <param name="shouldReadFromDisk">
  Indicates whether or not the module settings should be read from disk and loaded 
  <br /> If <c> False </c>, the default module settings will be loaded 
@@ -2952,116 +2951,79 @@ Holds the path of any files to be saved by the Downloader
 </member>
 <member name="T:winapp2ool.Downloader">
  <summary> 
- Allows users to download files from GitHub through a simple menu 
+ Downloader is a winapp2ool module which provides a very simple interface for downloading indvidual
+ files from the winapp2 GitHub in a way that can be automated through scripting
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.gitLink">
  <summary> 
  The web address of the winapp2.ini GitHub 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
-<member name="P:winapp2ool.Downloader.wa2Link">
+<member name="P:winapp2ool.Downloader.baseFlavorLink">
+ <summary>
+ The web address of the base version winapp2.ini 
+ </summary>
+</member>
+<member name="P:winapp2ool.Downloader.ccFlavorLink">
  <summary>
  The web address of the CCleaner version of winapp2.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
-<member name="P:winapp2ool.Downloader.nonccLink">
+<member name="P:winapp2ool.Downloader.snFlavorLink">
  <summary>
- The web address of the Non-CCleaner version of winapp2.ini 
+ The web address of the System Ninja version of winapp2.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+</member>
+<member name="P:winapp2ool.Downloader.bbFlavorLink">
+ <summary>
+ The web address of the BleachBit version of winapp2.ini 
+ </summary>
+</member>
+<member name="P:winapp2ool.Downloader.tronFlavorLink">
+ <summary>
+ The web address of the Tron version of winapp2.ini 
+ </summary>
 </member>
 <member name="P:winapp2ool.Downloader.toolLink">
  <summary> 
  The web address of winapp2ool.exe 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.betaToolLink">
  <summary> 
  The web address of the beta build of winapp2ool.exe 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.toolVerLink">
  <summary> 
  The web address of version.txt (winapp2ool's public version identifer) 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="P:winapp2ool.Downloader.betaToolVerLink">
- <summary> 
- The web address of version.txt on the beta branch 
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="P:winapp2ool.Downloader.removedLink">
- <summary> 
- The web address of removed entries.ini
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.wa3link">
  <summary> 
  The web address of winapp3.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.archivedLink">
  <summary>
  The web address of archived entries.ini 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="P:winapp2ool.Downloader.javaLink">
- <summary> 
- The web address of java.ini
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.readMeLink">
  <summary> 
- The web address of the winapp2ool ReadMe file, for 
- downloading the file itself to the local drive 
+ The web address of the winapp2ool ReadMe file 
  </summary>
- 
- Docs last updated: 2025-08-01 | Code last updated: 2020-09-14
 </member>
 <member name="P:winapp2ool.Downloader.readMeUrl">
  <summary>
  The web address of the winapp2ool ReadMe for opening in web browsers
  </summary>
-
- Docs last updated: 2025-08-01 | Code last updated: 2025-08-01
 </member>
 <member name="M:winapp2ool.Downloader.handleCmdLine">
  <summary> 
  Handles the commandline args for the Downloader 
  </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-</member>
-<member name="M:winapp2ool.Downloader.winapp2link">
- <summary> 
- Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration 
- </summary>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="M:winapp2ool.Downloader.toolExeLink">
  <summary>
@@ -3069,6 +3031,11 @@ Holds the path of any files to be saved by the Downloader
  </summary>
  
  Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+</member>
+<member name="M:winapp2ool.Downloader.getWinappLink">
+ <summary>
+ Returns the link to the appropriate flavor of winapp2.ini based on the current Flavor configuration
+ </summary>
 </member>
 <member name="M:winapp2ool.Downloader.GetNameFromDL(System.Boolean)">
  <summary> 
@@ -3078,20 +3045,25 @@ Holds the path of any files to be saved by the Downloader
  <param name="shouldDownload"> 
  Indicates that a module is configured to download a remote winapp2.ini 
  </param>
- 
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
 </member>
 <member name="T:winapp2ool.advDownloads">
- <summary> A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo </summary>
+ <summary> 
+ A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo 
+ </summary>
 </member>
 <member name="M:winapp2ool.advDownloads.printAdvMenu">
- <summary> Prints the advanced downloads menu </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Prints the advanced downloads menu 
+ </summary>
 </member>
 <member name="M:winapp2ool.advDownloads.handleAdvInput(System.String)">
- <summary> Handles the user input for the advanced download menu </summary>
- <param name="input">The user's input </param>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary>
+ Handles the user input for the advanced download menu 
+ </summary>
+ 
+ <param name="input">
+ The user's input 
+ </param>
 </member>
 <member name="T:winapp2ool.commandLineHandler">
  <summary>
@@ -3310,6 +3282,25 @@ Holds the path of any files to be saved by the Downloader
  </param>
  
  Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+</member>
+<member name="M:winapp2ool.commandLineHandler.handleFlavorArg(System.String,winapp2ool.Winapp2ool.WinappFlavor)">
+ <summary>
+ Handles flavor selection command line arguments and updates the current flavor setting
+ </summary>
+ 
+ <param name="flavorArg">
+ The command line argument for flavor selection
+ </param>
+ 
+ <param name="flavorValue">
+ The flavor to set
+ </param>
+</member>
+<member name="M:winapp2ool.commandLineHandler.processFlavorArgs">
+ <summary>
+ Process flavor selection arguments
+ This extends the existing processCommandLineArgs() method
+ </summary>
 </member>
 <member name="T:winapp2ool.downloadr">
  <summary> Provides functions to download files to the rest of the application </summary>
@@ -5133,6 +5124,16 @@ The current indentation level of the global log.
  The set of numbers associated with the visible menu options in <c> <paramref name="optionsDict"/> </c>
  </returns>
 </member>
+<member name="M:winapp2ool.SettingsManager.updateEnumSetting``1(System.String,System.String,``0)">
+ <summary>
+ Updates an enum setting in the settings file
+ </summary>
+</member>
+<member name="M:winapp2ool.SettingsManager.getEnumSetting``1(System.String,System.String,``0)">
+ <summary>
+ Gets an enum setting from the settings file
+ </summary>
+</member>
 <member name="T:winapp2ool.updater">
  <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
 </member>
@@ -5519,21 +5520,28 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
 </member>
 <member name="T:winapp2ool.downloadmainmenu">
- <summary> Displays the Downloader Module main menu to the user and handles their input </summary>
- Docs last updated: 2020-09-14
+ <summary> 
+ Displays the Downloader Module main menu to the user and handles their input 
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadmainmenu.initDefaultSettings">
- <summary> Restores the default state of the module's parameters </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Restores the default state of the module's parameters 
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadmainmenu.printDownloadMainMenu">
- <summary> Prints the download menu to the user </summary>
- Docs last updated: 2020-09-14 | Code last updated: 2021-11-16
+ <summary> 
+ Prints the download menu to the user 
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadmainmenu.handleDownloadUserInput(System.String)">
- <summary> Handles user input for the Downloader main menu </summary>
- <param name="input"> The user's input </param>
- Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+ <summary> 
+ Handles user input for the Downloader main menu 
+ </summary>
+ 
+ <param name="input"> 
+ The user's input 
+ </param>
 </member>
 <member name="T:winapp2ool.launcher">
  <summary> 
@@ -5632,43 +5640,36 @@ The version in YYMMDD format of the winapp2.ini file
  <summary> 
  Holds the filesystem location to which the log file will optionally be saved.
  </summary>
-
- Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
 </member>
 <member name="P:winapp2ool.maintoolsettings.RemoteWinappIsNonCC">
  <summary>
  Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub 
  </summary>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.maintoolsettings.toolSettingsHaveChanged">
  <summary> 
  Indicates that the module's settings have been changed
  </summary>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.maintoolsettings.saveSettingsToDisk">
  <summary> 
  Indicates that changes to the application's settings should be serialized back to the disk 
  </summary>
-
- Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="P:winapp2ool.maintoolsettings.readSettingsFromDisk">
  <summary> 
  Indicates that settings who are read from the disk should override the corresponding default module settings 
  </summary>
- 
- Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 </member>
 <member name="P:winapp2ool.maintoolsettings.isBeta">
  <summary> 
  Indicates that this build is beta and should check the beta branch link for updates 
  </summary>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
+</member>
+<member name="P:winapp2ool.maintoolsettings.CurrentWinappFlavor">
+ <summary>
+ The currently selected winapp.ini flavor
+ </summary>
 </member>
 <member name="T:winapp2ool.FlavorizerMainMenu">
  <summary>
@@ -6070,59 +6071,119 @@ The version in YYMMDD format of the winapp2.ini file
  Indicates that module's settings have been modified from their defaults 
  </summary>
 </member>
-<member name="P:winapp2ool.transmuteSettings.TransmuteModeIsAdd">
+<member name="P:winapp2ool.transmuteSettings.Transmutator">
  <summary>
- Indicates the saved <c> Transmutator </c> is <c> Add </c> <br />
- Default: <c> False </c>
+ The primary transmutation mode for the Transmute module <br />
+ Default: <c> <b> Add </b> </c>
+ 
+ <list>
+ 
+ <item>
+ <c> <b> Add </b> </c>
+ <description> 
+ Adds sections from the source file to the base file. If a section exists already in the base
+ file, the keys from the source section will be added to the base section. Section names 
+ must match exactly (case sensitive)
+ </description>
+ </item>
+ 
+ <item>
+ <c> <b> Replace </b></c>
+ <description>
+ Contains two sub modes. Replaces sections or individual keys in the base file with content 
+ from the source file. Section names must match exactly (case sensitive)
+ </description>
+ </item>
+ 
+ <item>
+ <c> <b> Remove </b> </c>
+ <description>
+ Contains two sub modes one of which itself contains two sub modes. Removes sections or 
+ individual keys from the base file. Key removal can be performed by value 
+ (ignores key numbering but requires a key type) or by key name (works best for unnumbered
+ keys) 
+ </description>
+ </item>
+ </list>
+
  </summary>
 </member>
-<member name="P:winapp2ool.transmuteSettings.TransmuteModeIsRemove">
+<member name="P:winapp2ool.transmuteSettings.TransmuteReplaceMode">
  <summary>
- Indicates the saved <c> Transmutator </c> is <c> Remove </c> <br />
- Default: <c> True </c>
+ The granularity level for the <c> Replace Transmutator </c>, has two sub modes <br />
+ Default: ByKey 
+ <list> 
+ 
+ <item>
+ <c> <b> BySection </b></c>
+ <description>
+ Replaces entire sections when collisions occur
+ </description>
+ </item>
+ 
+ <item>
+ <c> <b> ByKey </b> </c>
+ <description>
+ Replaces individual keys when collisions occur 
+ </description>
+ </item>
+ </list>
+ 
  </summary>
+ 
+ Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
-<member name="P:winapp2ool.transmuteSettings.TransmuteModeIsReplace">
+<member name="P:winapp2ool.transmuteSettings.TransmuteRemoveMode">
  <summary>
- Indicates the saved <c> Transmutator </c> is <c> Replace </c> <br />
- Default: <c> False </c>
+ The granularity level for the <c> Remove Transmutator </c>, has two sub modes <br />
+ Default: ByKey 
+ <list> 
+ 
+ <item>
+ <c> <b> BySection </b></c>
+ <description>
+ Removes entire sections when collisions occur
+ </description>
+ </item>
+ 
+ <item>
+ <c> <b> ByKey </b> </c>
+ <description>
+ Removes individual keys when collisions occur 
+ </description>
+ </item>
+ </list>
+ 
  </summary>
+ 
+ Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
-<member name="P:winapp2ool.transmuteSettings.ReplaceModeIsBySection">
+<member name="P:winapp2ool.transmuteSettings.TransmuteRemoveKeyMode">
  <summary>
- Indicates the saved <c> Replace Transmutator </c> sub mode is by Section <br />
- Default: <c> False </c>
+ The granularity level for the <c> Remove by Key Transmutator </c>, has two sub modes <br />
+ Default: ByName
+ <list> 
+ 
+ <item>
+ <c> <b> ByName </b></c>
+ <description>
+ Removes keys from the base section if they have the same name as a key in the source section <br />
+ Ignores provided values
+ </description>
+ </item>
+ 
+ <item>
+ <c> <b> ByValue </b> </c>
+ <description>
+ Removes keys from the base section if they have the same KeyType and Value <br />
+ Ignores numbers in the Name of the <c> iniKey </c>
+ </description>
+ </item>
+ </list>
+ 
  </summary>
-</member>
-<member name="P:winapp2ool.transmuteSettings.ReplaceModeIsByKey">
- <summary>
- Indicates the saved <c> Replace Transmutator </c> sub mode is by Key <br />
- Default: <c> True </c>
- </summary>
-</member>
-<member name="P:winapp2ool.transmuteSettings.RemoveModeIsBySection">
- <summary>
- Indicates the saved <c> Remove Transmutator </c> sub mode is by Section <br />
- Default: <c> False </c>
- </summary>
-</member>
-<member name="P:winapp2ool.transmuteSettings.RemoveModeIsByKey">
- <summary>
- Indicates the saved <c> Remove Transmutator </c> sub mode is by Key <br />
- Default: <c> True </c>
- </summary>
-</member>
-<member name="P:winapp2ool.transmuteSettings.RemoveKeyModeIsByName">
- <summary>
- Indicates the saved <c> Remove by Key Transmutator </c> sub mode is by Name <br />
- Default: <c> True </c>
- </summary>
-</member>
-<member name="P:winapp2ool.transmuteSettings.RemoveKeyModeIsByValue">
- <summary>
- Indicates the saved <c> Remove by Key Transmutator </c> sub mode is by Section <br />
- Default: <c> False </c>
- </summary>
+ 
+ Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="P:winapp2ool.transmuteSettings.UseWinapp2Syntax">
  <summary>
@@ -6312,120 +6373,6 @@ The version in YYMMDD format of the winapp2.ini file
  <summary>
  Remove keys if they have the same KeyType (Name with numbers removed) and Value 
  </summary>
-</member>
-<member name="P:winapp2ool.Transmute.Transmutator">
- <summary>
- The primary transmutation mode for the Transmute module <br />
- Default: <c> <b> Add </b> </c>
- 
- <list>
- 
- <item>
- <c> <b> Add </b> </c>
- <description> 
- Adds sections from the source file to the base file. If a section exists already in the base
- file, the keys from the source section will be added to the base section. Section names 
- must match exactly (case sensitive)
- </description>
- </item>
- 
- <item>
- <c> <b> Replace </b></c>
- <description>
- Contains two sub modes. Replaces sections or individual keys in the base file with content 
- from the source file. Section names must match exactly (case sensitive)
- </description>
- </item>
- 
- <item>
- <c> <b> Remove </b> </c>
- <description>
- Contains two sub modes one of which itself contains two sub modes. Removes sections or 
- individual keys from the base file. Key removal can be performed by value 
- (ignores key numbering but requires a key type) or by key name (works best for unnumbered
- keys) 
- </description>
- </item>
- </list>
-
- </summary>
-</member>
-<member name="P:winapp2ool.Transmute.TransmuteReplaceMode">
- <summary>
- The granularity level for the <c> Replace Transmutator </c>, has two sub modes <br />
- Default: ByKey 
- <list> 
- 
- <item>
- <c> <b> BySection </b></c>
- <description>
- Replaces entire sections when collisions occur
- </description>
- </item>
- 
- <item>
- <c> <b> ByKey </b> </c>
- <description>
- Replaces individual keys when collisions occur 
- </description>
- </item>
- </list>
- 
- </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
-</member>
-<member name="P:winapp2ool.Transmute.TransmuteRemoveMode">
- <summary>
- The granularity level for the <c> Remove Transmutator </c>, has two sub modes <br />
- Default: ByKey 
- <list> 
- 
- <item>
- <c> <b> BySection </b></c>
- <description>
- Removes entire sections when collisions occur
- </description>
- </item>
- 
- <item>
- <c> <b> ByKey </b> </c>
- <description>
- Removes individual keys when collisions occur 
- </description>
- </item>
- </list>
- 
- </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
-</member>
-<member name="P:winapp2ool.Transmute.TransmuteRemoveKeyMode">
- <summary>
- The granularity level for the <c> Remove by Key Transmutator </c>, has two sub modes <br />
- Default: ByName
- <list> 
- 
- <item>
- <c> <b> ByName </b></c>
- <description>
- Removes keys from the base section if they have the same name as a key in the source section <br />
- Ignores provided values
- </description>
- </item>
- 
- <item>
- <c> <b> ByValue </b> </c>
- <description>
- Removes keys from the base section if they have the same KeyType and Value <br />
- Ignores numbers in the Name of the <c> iniKey </c>
- </description>
- </item>
- </list>
- 
- </summary>
- 
- Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 </member>
 <member name="M:winapp2ool.Transmute.handleCmdLine">
  <summary> 
@@ -6868,15 +6815,6 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
 </member>
-<member name="M:winapp2ool.transmuteSettingsHandler.updateTransmuteEnumFlags">
- <summary>
- Syncs the current state of the Transmute module's enums with their boolean representations
- ensuring that they accurately reflect the current state of the module
- 
- </summary>
- 
- Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
-</member>
 <member name="M:winapp2ool.transmuteSettingsHandler.updateAllTransmuteEnumSettings">
  <summary>
  Updates the disk-writable representation of each of Transmute's enums 
@@ -7224,97 +7162,48 @@ The version in YYMMDD format of the winapp2.ini file
  
  Docs last updated: 2025-07-31 | Code last updated: 2025-07-31
 </member>
-<member name="T:winapp2ool.JavaMaker">
- <summary>
- This module was designed with the help of Fred de Vries. It produces a winapp2.ini entry to remove irrelevant registry keys generated by the Java Runtime Environment installer. 
- </summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.DownloadJavaDefs">
- <summary>Indicates that the java.ini file should be downloaded from GitHub</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.JavaMakerFile1">
-<summary>The winapp2.ini that may potentially be merged into</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.JavaMakerFile2">
-<summary>The local copy of the JRE definitions file</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.JavaMakerFile3">
-<summary>The default path for saving generated entries to disk</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.SaveGeneratedEntry">
-<summary>Indicates whether or not the JRE entry should be saved to disk</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.MergeGeneratedEntry">
-<summary>Indicates whether or not the JRE entry should be merged into another file</summary>
-</member>
-<member name="P:winapp2ool.JavaMaker.ModuleSettingsChanged">
-<summary>Indicates whether or not module settings have been modified</summary>
-</member>
-<member name="M:winapp2ool.JavaMaker.initDefaultParams">
- <summary>Restores the module parameters to their default states</summary>
-</member>
-<member name="M:winapp2ool.JavaMaker.printJMMenu">
- <summary>Prints the JavaMaker main menu</summary>
-</member>
-<member name="M:winapp2ool.JavaMaker.handleJMInput(System.String)">
- <summary>Handles the JavaMaker menu input</summary>
- <param name="input"></param>
-</member>
-<member name="M:winapp2ool.JavaMaker.mkEntry(winapp2ool.keyList[])">
- <summary>Generates the RegKeylist for the current system</summary>
- <param name="kls">An array of keylists containing the RegKeys that will be in the generated entry</param>
-</member>
-<member name="M:winapp2ool.JavaMaker.getRegKeys(Microsoft.Win32.RegistryKey,System.Collections.Generic.List{System.String})">
- <summary>Creates RegKeys conditionally based on their presence on the current system</summary>
- <param name="reg">The Registry key to observe subkeys of</param>
- <param name="searches">The strings to be searched for in the subkeys</param>
-</member>
-<member name="M:winapp2ool.JavaMaker.makeSomeJava">
- <summary>Creates a winapp2.ini entry to clean up after the Java installation process</summary>
-</member>
 <member name="T:winapp2ool.Minefield">
  <summary>
- This module serves as a simple interface for testing new ideas that don't fit neatly into an existing module
- The ideas here should be considered alpha and the code here should be considered spaghetti 
+ Minefield is a winapp2ool module which serves as a testing ground for new ideas and features
+ that don't fit into an existing module. It is not intended for general use, and the features 
+ here may be incomplete, experimental, or broken.
  </summary>
 </member>
 <member name="M:winapp2ool.Minefield.printMenu">
- <summary>Prints the main Minefield menu</summary>
-</member>
-<member name="M:winapp2ool.Minefield.printBabelMenu">
-<summary>Prints the main Babel menu</summary>
-</member>
-<member name="M:winapp2ool.Minefield.handleBabelInput(System.String)">
-<summary>Handles the user input for Babel</summary>
-<param name="input">The String containing the user's input</param>
+ <summary>
+ Prints the main Minefield menu
+ </summary>
 </member>
 <member name="M:winapp2ool.Minefield.handleUserInput(System.String)">
- <summary>Handles user input for the main Minefield menu</summary>
- <param name="input">The String containing the user's input</param>
-</member>
-<member name="T:winapp2ool.search">
-<summary></summary>
-</member>
-<member name="T:winapp2ool.globalsettingsmenu">
  <summary>
- Displays the global settings menu to the user and handles input from that menu 
+ Handles user input for the main Minefield menu
  </summary>
  
- Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+ <param name="input">
+ The user's input
+ </param>
 </member>
 <member name="M:winapp2ool.globalsettingsmenu.initDefaultSettings">
  <summary> 
  Initalizes the default state of the winapp2ool module settings 
  </summary>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="M:winapp2ool.globalsettingsmenu.printMainToolSettingsMenu">
  <summary> 
  Prints the winapp2ool settings menu to the user 
  </summary>
- 
- Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+</member>
+<member name="M:winapp2ool.globalsettingsmenu.getToggleOpts">
+ <summary>
+ Returns the set of toggles in the winapp2ool settings menu
+ </summary>
+ <returns></returns>
+</member>
+<member name="M:winapp2ool.globalsettingsmenu.getEnumOpts">
+ <summary>
+ Returns the set of enums in the winapp2ool settings menu
+ </summary>
+ <returns></returns>
 </member>
 <member name="M:winapp2ool.globalsettingsmenu.handleMainToolSettingsInput(System.String)">
  <summary> 
@@ -7324,8 +7213,6 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="input">
  The user's input
  </param>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="T:winapp2ool.trimmainmenu">
  <summary> 
@@ -8737,36 +8624,56 @@ The version in YYMMDD format of the winapp2.ini file
  <summary> 
  This is the top level module for winapp2ool, through which all other user-facing modules are accessed. The "main menu" 
  </summary>
- 
- Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
+</member>
+<member name="T:winapp2ool.Winapp2ool.WinappFlavor">
+ <summary>
+ The different flavors of winapp2.ini that winapp2ool supports
+ </summary>
+</member>
+<member name="F:winapp2ool.Winapp2ool.WinappFlavor.CCleaner">
+ <summary>
+ Designed for use with CCleaner 
+ </summary>
+</member>
+<member name="F:winapp2ool.Winapp2ool.WinappFlavor.NonCCleaner">
+ <summary>
+ The base flavor of winapp2.ini from which all others are derived
+ </summary>
+</member>
+<member name="F:winapp2ool.Winapp2ool.WinappFlavor.BleachBit">
+ <summary>
+ Designed to pass BleachBit's santity checker 
+ </summary>
+</member>
+<member name="F:winapp2ool.Winapp2ool.WinappFlavor.SystemNinja">
+ <summary>
+ Designed to overcome Detection limitations in System Ninja
+ </summary>
+</member>
+<member name="F:winapp2ool.Winapp2ool.WinappFlavor.Tron">
+ <summary>
+ Captures upstream changes made by Tron to the CCleaner flavor 
+ </summary>
 </member>
 <member name="P:winapp2ool.Winapp2ool.DotNetFrameworkOutOfDate">
  <summary> 
  Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)
  </summary>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.Winapp2ool.isOffline">
  <summary> 
  Indicates that winapp2ool currently has access to the internet
  </summary>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.Winapp2ool.cantDownloadExecutable">
  <summary> 
  Indicates that we're unable to download the executable 
  </summary>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="P:winapp2ool.Winapp2ool.alreadyDownloadedExecutable">
  <summary>
  Indicates that winapp2ool.exe has already been downloaded during this session and prevents us from redownloading it 
  </summary>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="M:winapp2ool.Winapp2ool.getWinVer">
  <summary> 
@@ -8777,8 +8684,6 @@ The version in YYMMDD format of the winapp2.ini file
  The Windows version running on the machine, <br /> 
  <c> 0.0 </c> if the windows version cannot be determined 
  </returns>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="M:winapp2ool.Winapp2ool.getFirstDir(System.String)">
  <summary> 
@@ -8792,8 +8697,6 @@ The version in YYMMDD format of the winapp2.ini file
  <returns> 
  The root directory given by <paramref name="val"/> 
  </returns>
- 
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="M:winapp2ool.Winapp2ool.enforceFileHasContent(winapp2ool.iniFile)">
  <summary> 
@@ -8808,7 +8711,6 @@ The version in YYMMDD format of the winapp2.ini file
  <c> True </c> if the <c> iniFile </c> has content, 
  <br /> <c> False </c>otherwise
  </returns>
- Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
 </member>
 <member name="M:winapp2ool.Winapp2ool.tsInvariant(System.Boolean)">
  <summary> 
@@ -8818,8 +8720,6 @@ The version in YYMMDD format of the winapp2.ini file
  <param name="bool"> 
  A boolean value to return as a string 
  </param>
- 
- Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
 </member>
 <member name="M:winapp2ool.Winapp2ool.getFileMenuColor(winapp2ool.iniFile)">
  <summary>
@@ -8834,8 +8734,6 @@ The version in YYMMDD format of the winapp2.ini file
  <c> Green </c> if <c> <paramref name="menuFile"/> </c> has a name, <br />
  <c> Red </c> otherwise
  </returns>
-
- Docs last updated: 2025-08-23 | Code last updated: 2025-08-06
 </member>
 <member name="M:winapp2ool.Winapp2ool.getFileMenuName(winapp2ool.iniFile)">
  <summary>
@@ -8851,8 +8749,6 @@ The version in YYMMDD format of the winapp2.ini file
  current directory replaced with ..\ <br />
  "Not specified" otherwise
  </returns>
- 
- Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
 </member>
 </members>
 </doc>

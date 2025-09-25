@@ -227,7 +227,7 @@ Public Module BrowserBuilder
             "; They are utilized by winapp2ool to create the final winapp2.ini file for distribution",
             "; If you are not maintaining winapp2.ini for distribution, you probably don't need this file!",
             "; Refer to the Winapp2ool documentation for more information: " & readMeUrl,
-            "; You can find the complete winapp2.ini file here: " & winapp2link()
+            "; You can find the complete winapp2.ini file here: " & baseFlavorLink
         }
 
         Dim sb As New StringBuilder()

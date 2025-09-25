@@ -14,38 +14,60 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
-''' <summary> A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo </summary>
+
+''' <summary> 
+''' A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo 
+''' </summary>
 Public Module advDownloads
 
-    ''' <summary> Prints the advanced downloads menu </summary>
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+    ''' <summary> 
+    ''' Prints the advanced downloads menu 
+    ''' </summary>
     Public Sub printAdvMenu()
-        printMenuTop({"Warning!", "Files in this menu are not recommended for use by beginners."})
-        print(1, "Winapp3.ini", "Extended and/or potentially unsafe entries")
-        print(1, "Archived entries.ini", "Entries for old or discontinued software")
-        print(1, "Java.ini", "Used to generate a winapp2.ini entry that cleans up after the Java installer", closeMenu:=True)
+
+        Dim menuDesc = {"Warning!", "Files in this menu are not recommended for use by beginners!"}
+        Dim menu = MenuSection.CreateCompleteMenu("Advanced Downloads", menuDesc, ConsoleColor.DarkCyan)
+        menu.AddBlank _
+            .AddOption("Winapp3.ini", "Extended and/or potentially unsafe entries") _
+            .AddOption("Archived entries.ini", "Entries for old or discontinued software")
+
+        menu.Print()
+
     End Sub
 
-    ''' <summary> Handles the user input for the advanced download menu </summary>
-    ''' <param name="input">The user's input </param>
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+    ''' <summary>
+    ''' Handles the user input for the advanced download menu 
+    ''' </summary>
+    ''' 
+    ''' <param name="input">
+    ''' The user's input 
+    ''' </param>
     Public Sub handleAdvInput(input As String)
+
         Select Case input
+
             Case "0"
+
                 exitModule()
+
             Case "1"
+
                 downloadFile.Name = "winapp3.ini"
                 download(downloadFile, wa3link)
+
             Case "2"
+
                 downloadFile.Name = "Archived entries.ini"
                 download(downloadFile, archivedLink)
-            Case "3"
-                downloadFile.Name = "java.ini"
-                download(downloadFile, javaLink)
+
             Case Else
-                setHeaderText(invInpStr, True)
+
+                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+
         End Select
+
     End Sub
 
 End Module

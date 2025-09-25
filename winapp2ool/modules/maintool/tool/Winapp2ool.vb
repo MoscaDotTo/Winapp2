@@ -20,36 +20,58 @@ Option Strict On
 ''' <summary> 
 ''' This is the top level module for winapp2ool, through which all other user-facing modules are accessed. The "main menu" 
 ''' </summary>
-''' 
-''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
-Module Winapp2ool
+Public Module Winapp2ool
+
+    ''' <summary>
+    ''' The different flavors of winapp2.ini that winapp2ool supports
+    ''' </summary>
+    Public Enum WinappFlavor
+
+        ''' <summary>
+        ''' Designed for use with CCleaner 
+        ''' </summary>
+        CCleaner = 0
+
+        ''' <summary>
+        ''' The base flavor of winapp2.ini from which all others are derived
+        ''' </summary>
+        NonCCleaner = 1
+
+        ''' <summary>
+        ''' Designed to pass BleachBit's santity checker 
+        ''' </summary>
+        BleachBit = 2
+
+        ''' <summary>
+        ''' Designed to overcome Detection limitations in System Ninja
+        ''' </summary>
+        SystemNinja = 3
+
+        ''' <summary>
+        ''' Captures upstream changes made by Tron to the CCleaner flavor 
+        ''' </summary>
+        Tron = 4
+
+    End Enum
 
     ''' <summary> 
     ''' Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Property DotNetFrameworkOutOfDate As Boolean = False
 
     ''' <summary> 
     ''' Indicates that winapp2ool currently has access to the internet
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Property isOffline As Boolean = False
 
     ''' <summary> 
     ''' Indicates that we're unable to download the executable 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Property cantDownloadExecutable As Boolean = False
 
     ''' <summary>
     ''' Indicates that winapp2ool.exe has already been downloaded during this session and prevents us from redownloading it 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Property alreadyDownloadedExecutable As Boolean = False
 
     ''' <summary> 
@@ -60,8 +82,6 @@ Module Winapp2ool
     ''' The Windows version running on the machine, <br /> 
     ''' <c> 0.0 </c> if the windows version cannot be determined 
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Function getWinVer() As Double
 
         gLog("Checking Windows version")
@@ -87,8 +107,6 @@ Module Winapp2ool
     ''' <returns> 
     ''' The root directory given by <paramref name="val"/> 
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Function getFirstDir(val As String) As String
 
         Return val.Split(CChar("\"))(0)
@@ -107,7 +125,6 @@ Module Winapp2ool
     ''' <c> True </c> if the <c> iniFile </c> has content, 
     ''' <br /> <c> False </c>otherwise
     ''' </returns>
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Function enforceFileHasContent(iFile As iniFile) As Boolean
 
         iFile.validate()
@@ -132,8 +149,6 @@ Module Winapp2ool
     ''' <param name="bool"> 
     ''' A boolean value to return as a string 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2023-07-19 | Code last updated: 2023-07-19
     Public Function tsInvariant(bool As Boolean) As String
 
         Return bool.ToString(System.Globalization.CultureInfo.InvariantCulture)
@@ -152,8 +167,6 @@ Module Winapp2ool
     ''' <c> Green </c> if <c> <paramref name="menuFile"/> </c> has a name, <br />
     ''' <c> Red </c> otherwise
     ''' </returns>
-    '''
-    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-06
     Public Function getFileMenuColor(menuFile As iniFile) As ConsoleColor
 
         Return If(menuFile.Name.Length > 0, ConsoleColor.Green, ConsoleColor.Red)
@@ -173,8 +186,6 @@ Module Winapp2ool
     ''' current directory replaced with ..\ <br />
     ''' "Not specified" otherwise
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-08-01 | Code last updated: 2025-08-06
     Public Function getFileMenuName(menuFile As iniFile) As String
 
         Return If(menuFile.Name.Length > 0, replDir(menuFile.Path), "Not specified")

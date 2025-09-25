@@ -151,7 +151,7 @@ Module maintoolmenu
 
                 clrConsole()
                 cwl("Downloading, this may take a moment...")
-                download(New iniFile(Environment.CurrentDirectory, "winapp2.ini"), winapp2link, False)
+                download(New iniFile(Environment.CurrentDirectory, "winapp2.ini"), getWinappLink, False)
                 waUpdateIsAvail = False
 
             ' Update & Trim winapp2.ini
@@ -244,6 +244,8 @@ Module maintoolmenu
             .AddColoredLine($"A new version of {updName} is available!", ConsoleColor.Green, True) _
             .AddColoredLine($"Current: v{oldVer}", ConsoleColor.Green, True) _
             .AddColoredLine($"Available: v{newVer}", ConsoleColor.Green, True)
+
+        Console.WindowHeight += 2
 
     End Sub
 

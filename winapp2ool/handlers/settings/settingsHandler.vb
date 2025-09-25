@@ -243,7 +243,6 @@ Public Module settingsHandler
     ''' The function who assigns values from disk to
     ''' the current active session of a module's settings 
     ''' </param>
-    ''' 
     ''' <param name="shouldReadFromDisk">
     ''' Indicates whether or not the module settings should be read from disk and loaded 
     ''' <br /> If <c> False </c>, the default module settings will be loaded 
@@ -539,9 +538,20 @@ Public Module settingsHandler
             If Not dict.ContainsKey(prop.Name) Then Continue For
 
             Dim valueStr = dict(prop.Name)
-            Dim value = Convert.ChangeType(valueStr, prop.PropertyType, CultureInfo.InvariantCulture)
 
-            prop.SetValue(winapp2oolmodule, value)
+            ' Handle enum properties
+            If prop.PropertyType.IsEnum Then
+
+                Dim enumValue = [Enum].Parse(prop.PropertyType, valueStr)
+                prop.SetValue(winapp2oolmodule, enumValue)
+
+            Else
+
+                ' Handle other properties (Boolean, etc.)
+                Dim value = Convert.ChangeType(valueStr, prop.PropertyType, CultureInfo.InvariantCulture)
+                prop.SetValue(winapp2oolmodule, value)
+
+            End If
 
         Next
 
@@ -576,20 +586,18 @@ Public Module settingsHandler
             Dim value = prop.GetValue(Nothing)
             If value Is Nothing Then Continue For
 
-            ' Boolean Properties
-            If Not value.GetType().Name = "iniFile" Then
-
-                tuple.Add(prop.Name)
-                tuple.Add(value.ToString())
-                Continue For
-
-            End If
-
             ' iniFile properties
-            Dim ini As iniFile = CType(value, iniFile)
+            If value.GetType().Name = "iniFile" Then
+                Dim ini As iniFile = CType(value, iniFile)
             tuple.Add(prop.Name)
             tuple.Add($"{ini.Name}")
             tuple.Add($"{ini.Dir}")
+                Continue For
+            End If
+
+            ' Boolean and Enum Properties (treat both as name-value pairs)
+            tuple.Add(prop.Name)
+            tuple.Add(value.ToString())
 
         Next
 
@@ -646,7 +654,10 @@ Public Module settingsHandler
 
         For Each prop As PropertyInfo In winapp2oolModule.GetProperties()
 
-            If prop.PropertyType Is GetType(Boolean) Then numBools += 1
+            ' Count both Boolean and Enum properties as "boolean-like" settings
+            If prop.PropertyType Is GetType(Boolean) OrElse prop.PropertyType.IsEnum Then
+                numBools += 1
+            End If
 
         Next
 

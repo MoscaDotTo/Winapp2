@@ -50,58 +50,118 @@ Public Module transmuteSettings
     Public Property TransmuteModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Indicates the saved <c> Transmutator </c> is <c> Add </c> <br />
-    ''' Default: <c> False </c>
+    ''' The primary transmutation mode for the Transmute module <br />
+    ''' Default: <c> <b> Add </b> </c>
+    ''' 
+    ''' <list>
+    ''' 
+    ''' <item>
+    ''' <c> <b> Add </b> </c>
+    ''' <description> 
+    ''' Adds sections from the source file to the base file. If a section exists already in the base
+    ''' file, the keys from the source section will be added to the base section. Section names 
+    ''' must match exactly (case sensitive)
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <c> <b> Replace </b></c>
+    ''' <description>
+    ''' Contains two sub modes. Replaces sections or individual keys in the base file with content 
+    ''' from the source file. Section names must match exactly (case sensitive)
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <c> <b> Remove </b> </c>
+    ''' <description>
+    ''' Contains two sub modes one of which itself contains two sub modes. Removes sections or 
+    ''' individual keys from the base file. Key removal can be performed by value 
+    ''' (ignores key numbering but requires a key type) or by key name (works best for unnumbered
+    ''' keys) 
+    ''' </description>
+    ''' </item>
+    ''' </list>
+    '''
     ''' </summary>
-    Public Property TransmuteModeIsAdd As Boolean = True
+    Public Property Transmutator As TransmuteMode = TransmuteMode.Add
 
     ''' <summary>
-    ''' Indicates the saved <c> Transmutator </c> is <c> Remove </c> <br />
-    ''' Default: <c> True </c>
+    ''' The granularity level for the <c> Replace Transmutator </c>, has two sub modes <br />
+    ''' Default: ByKey 
+    ''' <list> 
+    ''' 
+    ''' <item>
+    ''' <c> <b> BySection </b></c>
+    ''' <description>
+    ''' Replaces entire sections when collisions occur
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <c> <b> ByKey </b> </c>
+    ''' <description>
+    ''' Replaces individual keys when collisions occur 
+    ''' </description>
+    ''' </item>
+    ''' </list>
+    ''' 
     ''' </summary>
-    Public Property TransmuteModeIsRemove As Boolean = False
+    ''' 
+    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+    Public Property TransmuteReplaceMode As ReplaceMode = ReplaceMode.ByKey
 
     ''' <summary>
-    ''' Indicates the saved <c> Transmutator </c> is <c> Replace </c> <br />
-    ''' Default: <c> False </c>
+    ''' The granularity level for the <c> Remove Transmutator </c>, has two sub modes <br />
+    ''' Default: ByKey 
+    ''' <list> 
+    ''' 
+    ''' <item>
+    ''' <c> <b> BySection </b></c>
+    ''' <description>
+    ''' Removes entire sections when collisions occur
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <c> <b> ByKey </b> </c>
+    ''' <description>
+    ''' Removes individual keys when collisions occur 
+    ''' </description>
+    ''' </item>
+    ''' </list>
+    ''' 
     ''' </summary>
-    Public Property TransmuteModeIsReplace As Boolean = False
+    ''' 
+    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+    Public Property TransmuteRemoveMode As RemoveMode = RemoveMode.ByKey
 
     ''' <summary>
-    ''' Indicates the saved <c> Replace Transmutator </c> sub mode is by Section <br />
-    ''' Default: <c> False </c>
+    ''' The granularity level for the <c> Remove by Key Transmutator </c>, has two sub modes <br />
+    ''' Default: ByName
+    ''' <list> 
+    ''' 
+    ''' <item>
+    ''' <c> <b> ByName </b></c>
+    ''' <description>
+    ''' Removes keys from the base section if they have the same name as a key in the source section <br />
+    ''' Ignores provided values
+    ''' </description>
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <c> <b> ByValue </b> </c>
+    ''' <description>
+    ''' Removes keys from the base section if they have the same KeyType and Value <br />
+    ''' Ignores numbers in the Name of the <c> iniKey </c>
+    ''' </description>
+    ''' </item>
+    ''' </list>
+    ''' 
     ''' </summary>
-    Public Property ReplaceModeIsBySection As Boolean = False
-
-    ''' <summary>
-    ''' Indicates the saved <c> Replace Transmutator </c> sub mode is by Key <br />
-    ''' Default: <c> True </c>
-    ''' </summary>
-    Public Property ReplaceModeIsByKey As Boolean = True
-
-    ''' <summary>
-    ''' Indicates the saved <c> Remove Transmutator </c> sub mode is by Section <br />
-    ''' Default: <c> False </c>
-    ''' </summary>
-    Public Property RemoveModeIsBySection As Boolean = False
-
-    ''' <summary>
-    ''' Indicates the saved <c> Remove Transmutator </c> sub mode is by Key <br />
-    ''' Default: <c> True </c>
-    ''' </summary>
-    Public Property RemoveModeIsByKey As Boolean = False
-
-    ''' <summary>
-    ''' Indicates the saved <c> Remove by Key Transmutator </c> sub mode is by Name <br />
-    ''' Default: <c> True </c>
-    ''' </summary>
-    Public Property RemoveKeyModeIsByName As Boolean = True
-
-    ''' <summary>
-    ''' Indicates the saved <c> Remove by Key Transmutator </c> sub mode is by Section <br />
-    ''' Default: <c> False </c>
-    ''' </summary>
-    Public Property RemoveKeyModeIsByValue As Boolean = False
+    ''' 
+    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
+    Public Property TransmuteRemoveKeyMode As RemoveKeyMode = RemoveKeyMode.ByName
 
     ''' <summary>
     ''' Indicates that <c> <cref> TransmuteFile3 </cref> </c> should be saved with winapp2.ini formatting <br />

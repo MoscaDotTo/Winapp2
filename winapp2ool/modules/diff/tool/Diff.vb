@@ -376,7 +376,7 @@ Module Diff
 
         If DownloadDiffFile Then
 
-            Dim downloadedIniFile = getRemoteIniFile(winapp2link)
+            Dim downloadedIniFile = getRemoteIniFile(getWinappLink)
             DiffFile2.Sections = downloadedIniFile.Sections
 
         Else

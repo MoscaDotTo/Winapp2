@@ -52,15 +52,6 @@ Public Module transmuteSettingsHandler
 
         LoadModuleSettingsFromDict(NameOf(Transmute), GetType(transmuteSettings))
 
-        Transmutator = If(TransmuteModeIsAdd, TransmuteMode.Add,
-                            If(TransmuteModeIsRemove, TransmuteMode.Remove, TransmuteMode.Replace))
-
-        TransmuteReplaceMode = If(ReplaceModeIsBySection, ReplaceMode.BySection, ReplaceMode.ByKey)
-
-        TransmuteRemoveMode = If(RemoveModeIsBySection, RemoveMode.BySection, RemoveMode.ByKey)
-
-        TransmuteRemoveKeyMode = If(RemoveKeyModeIsByName, RemoveKeyMode.ByName, RemoveKeyMode.ByValue)
-
     End Sub
 
     '''<summary>
@@ -71,36 +62,10 @@ Public Module transmuteSettingsHandler
     ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub createTransmuteSettingsSection()
 
-        updateTransmuteEnumFlags()
-
         Dim settingsModule = GetType(transmuteSettings)
         Dim moduleName = NameOf(Transmute)
 
         createModuleSettingsSection(moduleName, settingsModule)
-
-    End Sub
-
-    ''' <summary>
-    ''' Syncs the current state of the Transmute module's enums with their boolean representations
-    ''' ensuring that they accurately reflect the current state of the module
-    ''' 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
-    Public Sub updateTransmuteEnumFlags()
-
-        TransmuteModeIsAdd = Transmutator = TransmuteMode.Add
-        TransmuteModeIsRemove = Transmutator = TransmuteMode.Remove
-        TransmuteModeIsReplace = Transmutator = TransmuteMode.Replace
-
-        ReplaceModeIsBySection = TransmuteReplaceMode = ReplaceMode.BySection
-        ReplaceModeIsByKey = TransmuteReplaceMode = ReplaceMode.ByKey
-
-        RemoveModeIsBySection = TransmuteRemoveMode = RemoveMode.BySection
-        RemoveModeIsByKey = TransmuteRemoveMode = RemoveMode.ByKey
-
-        RemoveKeyModeIsByName = TransmuteRemoveKeyMode = RemoveKeyMode.ByName
-        RemoveKeyModeIsByValue = TransmuteRemoveKeyMode = RemoveKeyMode.ByValue
 
     End Sub
 
@@ -110,8 +75,6 @@ Public Module transmuteSettingsHandler
     ''' 
     ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
     Public Sub updateAllTransmuteEnumSettings()
-
-        updateTransmuteEnumFlags()
 
         Dim names As New List(Of String)
         Dim vals As New List(Of String)

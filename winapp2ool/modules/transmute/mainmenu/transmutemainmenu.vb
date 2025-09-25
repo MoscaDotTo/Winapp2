@@ -31,6 +31,13 @@ Public Module transmuteMainMenu
 
         adjustTransmuteConsoleHeight()
         updateAllTransmuteEnumSettings()
+
+        Dim TransmuteModeIsReplace = Transmutator = TransmuteMode.Replace
+        Dim ReplaceModeIsByKey = TransmuteReplaceMode = ReplaceMode.ByKey
+        Dim TransmuteModeIsRemove = Transmutator = TransmuteMode.Remove
+        Dim RemoveModeIsByKey = TransmuteRemoveMode = RemoveMode.ByKey
+        Dim RemoveKeyModeIsByName = TransmuteRemoveKeyMode = RemoveKeyMode.ByName
+
         Dim modeColor = If(Transmutator = TransmuteMode.Add, ConsoleColor.Green, If(Transmutator = TransmuteMode.Replace, ConsoleColor.Yellow, ConsoleColor.Red))
         Dim subModeColor = If(TransmuteModeIsReplace, ConsoleColor.Magenta, If(TransmuteRemoveMode = RemoveMode.BySection, ConsoleColor.Magenta, ConsoleColor.Cyan))
         Dim replaceModeDesc = $"Currently replacing {If(ReplaceModeIsByKey, "individual key values within particular", "entire")} sections in the base file"
@@ -173,7 +180,7 @@ Public Module transmuteMainMenu
 
                 Dim i = intInput - minEnumNum
                 Dim propName = enumOpts.Keys(i)
-                CycleEnumProperty(propName, enumOpts(propName), GetType(Transmute), NameOf(Transmute),
+                CycleEnumProperty(propName, enumOpts(propName), GetType(transmuteSettings), NameOf(Transmute),
                                   TransmuteModuleSettingsChanged, NameOf(TransmuteModuleSettingsChanged), ConsoleColor.Magenta)
 
                 updateAllTransmuteEnumSettings()
@@ -219,12 +226,12 @@ Public Module transmuteMainMenu
 
         Dim enumOpts As New Dictionary(Of String, String) From {{NameOf(Transmutator), "Transmute Mode"}}
 
-        If TransmuteModeIsReplace Then enumOpts.Add(NameOf(TransmuteReplaceMode), "Replace Mode")
+        If Transmutator = TransmuteMode.Replace Then enumOpts.Add(NameOf(TransmuteReplaceMode), "Replace Mode")
 
-        If TransmuteModeIsRemove Then
+        If Transmutator = TransmuteMode.Remove Then
 
             enumOpts.Add(NameOf(TransmuteRemoveMode), "Remove Mode")
-            If RemoveModeIsByKey Then enumOpts.Add(NameOf(TransmuteRemoveKeyMode), "Key Removal Mode")
+            If TransmuteRemoveMode = RemoveMode.ByKey Then enumOpts.Add(NameOf(TransmuteRemoveKeyMode), "Key Removal Mode")
 
         End If
 

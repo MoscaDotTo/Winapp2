@@ -250,6 +250,7 @@ Module SettingsManager
         p.SetValue(Nothing, nextValue)
 
         mSettingsChanged = True
+        updateSettings(moduleName, propName, nextValue.ToString())
         updateSettings(moduleName, settingsChangedName, True.ToString)
 
         gLog()
@@ -289,6 +290,36 @@ Module SettingsManager
 
         Return optNums
 
+    End Function
+
+    ''' <summary>
+    ''' Updates an enum setting in the settings file
+    ''' </summary>
+    Public Sub updateEnumSetting(Of T As Structure)(moduleName As String, settingName As String, enumValue As T)
+        updateSettings(moduleName, settingName, enumValue.ToString())
+    End Sub
+
+    ''' <summary>
+    ''' Gets an enum setting from the settings file
+    ''' </summary>
+    Public Function getEnumSetting(Of T As Structure)(moduleName As String, settingName As String, defaultValue As T) As T
+
+        Dim settingValue As String = ""
+
+        ' Try to get the value from settingsDict
+        If settingsDict.ContainsKey(moduleName) AndAlso
+       settingsDict(moduleName).ContainsKey(settingName) Then
+            settingValue = settingsDict(moduleName)(settingName)
+        Else
+            Return defaultValue
+        End If
+
+        Dim result As T
+        If [Enum].TryParse(settingValue, result) AndAlso [Enum].IsDefined(GetType(T), result) Then
+            Return result
+        End If
+
+        Return defaultValue
     End Function
 
 End Module

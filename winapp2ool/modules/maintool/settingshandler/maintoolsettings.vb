@@ -25,43 +25,36 @@ Public Module maintoolsettings
     ''' <summary> 
     ''' Holds the filesystem location to which the log file will optionally be saved.
     ''' </summary>
-    '''
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
     Public Property GlobalLogFile As New iniFile(Environment.CurrentDirectory, "winapp2ool.log")
 
     ''' <summary>
     ''' Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Property RemoteWinappIsNonCC As Boolean = False
 
     ''' <summary> 
     ''' Indicates that the module's settings have been changed
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Property toolSettingsHaveChanged As Boolean = False
 
     ''' <summary> 
     ''' Indicates that changes to the application's settings should be serialized back to the disk 
     ''' </summary>
-    '''
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Property saveSettingsToDisk As Boolean = False
 
     ''' <summary> 
     ''' Indicates that settings who are read from the disk should override the corresponding default module settings 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Property readSettingsFromDisk As Boolean = False
 
     ''' <summary> 
     ''' Indicates that this build is beta and should check the beta branch link for updates 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2020-07-14
     Public Property isBeta As Boolean = False
+
+    ''' <summary>
+    ''' The currently selected winapp.ini flavor
+    ''' </summary>
+    Public Property CurrentWinappFlavor As Winapp2ool.WinappFlavor = Winapp2ool.WinappFlavor.CCleaner
 
 End Module
