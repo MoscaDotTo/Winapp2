@@ -48,7 +48,6 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
 
 ---
 
-
 # [Files of interest](#files-of-interest)
 
 Name           		                                                                                                            | Purpose       
@@ -81,7 +80,6 @@ It is advised that you use the Trim function of winapp2ool when updating winapp2
 ### Configuration 
 
 CCleaner will display the set of winapp2.ini entries which it detects as valid for your system inside its Applications tab. In modern versions of CCleaner, this tab is found in the Custom Clean section of the application. All winapp2.ini entries are disabled by default in CCleaner, and must be enabled individually or in groups. To enable an entire group of entries, right click on the section header and select "Check all."
-
 
 ###### Note: CCleaner 5.64.7577 is the last version to work on Windows XP and Vista (for non-SSE2 CPUs CCleaner 5.26.5937). Winapp2.ini and Winapp3.ini will continue to work with this version.
 
@@ -313,7 +311,6 @@ This key is used by only by CCleaner to decide whether or not an entry is enable
 ### `DetectOS`
 This key is used only by CCleaner and is used to limit the set of Windows version for which an entry should be considered valid. `DetectOS` failure supercedes `Detect` and `DetectFile` successes in CCleaner and winapp2ool. Kernel version numbering is used, below is a table for reference. To specify a minimum version number, use `DetectOS=num|`. To specify a maximum version number, use `DetectOS=|num`. To limit an entry to a set of windows versions, use `DetectOS=num1|num2`. To strictly limit an entry to a particular Windows version, use `DetectOS=num|num`.
 
-
 | Kernel Number  | Windows Version
 | :-             | :-
 | 5.0            | Windows 2000
@@ -382,4 +379,3 @@ These are all the possible variables that can be used for defining registry path
 Winapp2.ini does not support non-English system configurations or portable software natively. If you have need for these features, we recommend you utilize a "Custom.ini" file, and use Winapp2ool's [Transmute](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool/modules/transmute) feature with the Transmute mode set to `Add` to add your custom configurations while keeping winapp2.ini up to date.
 
 Winapp2ool 1.6 removed the Merge feature and replaced it with Transmute. If you were previously using Custom.ini with Merge, please see [Migrating From Merge](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool/modules/transmute#migrating-from-merge) in the Transmute ReadMe.
-
