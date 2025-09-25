@@ -98,6 +98,7 @@ Module downloadmainmenu
                 If input = "3" Then downloadFile.Name = "winapp2.rules"
 
                 Dim link = fileOpts(input)
+                download(downloadFile, link)
                 checkedForUpdates = False
 
             Case "6"
