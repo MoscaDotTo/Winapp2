@@ -43,18 +43,37 @@ Module downloadmainmenu
         Dim menu = MenuSection.CreateCompleteMenu(NameOf(Downloader), MenuDesc, ConsoleColor.DarkGreen)
 
         menu.AddBlank _
-            .AddOption("Winapp2.ini", "Download the latest CCleaner-Flavor winapp2.ini") _
-            .AddOption("Non-CCleaner", "Download the latest winapp2.ini").AddBlank _
+            .AddColoredOption("Winapp2.ini", "Download the latest base winapp2.ini", ConsoleColor.Cyan) _
+            .AddColoredOption("CCleaner Winapp2.ini", "Download the latest CCleaner Flavor of winapp2.ini", ConsoleColor.DarkRed) _
+            .AddColoredOption("BleachBit Winapp2.ini", "Download the latest BleachBit Flavor of winapp2.ini", ConsoleColor.DarkCyan) _
+            .AddColoredOption("System Ninja Winapp2.rules", "Download the latest System Ninja Flavor of winapp2.ini", ConsoleColor.Blue) _
+            .AddColoredOption("Tron", "Download the latest Tron flavor of winapp2.ini", ConsoleColor.Red).AddBlank _
             .AddOption("Winapp2ool", "Download the latest winapp2ool.exe").AddBlank _
-            .AddOption("Directory", "Change the save directory").AddBlank _
+            .AddOption("ReadMe", "Download the top-level winapp2ool readme").AddBlank() _
             .AddOption("Advanced", "Additional downloads for power users").AddBlank _
-            .AddOption("ReadMe", "Download the top-level winapp2ool readme").AddBlank _
-            .AddColoredFileInfo("Save Directory: ", downloadFile.Dir, ConsoleColor.DarkYellow) _
+            .AddColoredOption("Change Save Directory", "Select a new target directory for Downloader", ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo("Save Directory: ", downloadFile.Dir, ConsoleColor.DarkYellow).AddBlank _
             .AddResetOpt(NameOf(Downloader), DownloadModuleSettingsChanged)
 
         menu.Print()
 
     End Sub
+
+    Private Function getFileOpts() As Dictionary(Of String, String)
+
+        Dim files As New Dictionary(Of String, String)
+
+        files.Add("1", baseFlavorLink)
+        files.Add("2", ccFlavorLink)
+        files.Add("3", bbFlavorLink)
+        files.Add("4", snFlavorLink)
+        files.Add("5", tronFlavorLink)
+        files.Add("6", toolExeLink)
+        files.Add("7", readMeLink)
+
+        Return files
+
+    End Function
 
     ''' <summary> 
     ''' Handles user input for the Downloader main menu 
@@ -65,20 +84,23 @@ Module downloadmainmenu
     ''' </param>
     Public Sub handleDownloadUserInput(input As String)
 
+        Dim fileOpts = getFileOpts()
+
         Select Case input
 
             Case "0"
 
                 exitModule()
 
-            Case "1", "2"
+            Case "1", "2", "3", "4", "5"
 
                 downloadFile.Name = "winapp2.ini"
-                Dim link = If(input = "1", wa2Link, nonccLink)
-                download(downloadFile, link)
-                If downloadFile.Dir = Environment.CurrentDirectory Then checkedForUpdates = False
+                If input = "3" Then downloadFile.Name = "winapp2.rules"
 
-            Case "3"
+                Dim link = fileOpts(input)
+                checkedForUpdates = False
+
+            Case "6"
 
                 ' Feature gate downloading the executable behind .NET 4.6+
                 If denyActionWithHeader(DotNetFrameworkOutOfDate, "This option requires a newer version of the .NET Framework") Then Return
@@ -95,7 +117,16 @@ Module downloadmainmenu
 
                 End If
 
-            Case "4"
+            Case "7"
+
+                downloadFile.Name = "readme.md"
+                download(downloadFile, readMeLink)
+
+            Case "8"
+
+                initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)
+
+            Case "9"
 
                 Dim tmp = downloadFile.Dir
 
@@ -107,22 +138,13 @@ Module downloadmainmenu
                 If tmp = downloadFile.Dir Then Return
 
                 headerTxt = "Save directory changed"
-                    setNextMenuHeaderText(headerTxt, printColor:=ConsoleColor.Green)
+                setNextMenuHeaderText(headerTxt, printColor:=ConsoleColor.Green)
 
-                    DownloadModuleSettingsChanged = True
-                    updateSettings(NameOf(Downloader), NameOf(downloadFile) & "_Dir", downloadFile.Dir)
-                    updateSettings(NameOf(Downloader), NameOf(DownloadModuleSettingsChanged), DownloadModuleSettingsChanged.ToString(System.Globalization.CultureInfo.InvariantCulture))
+                DownloadModuleSettingsChanged = True
+                updateSettings(NameOf(Downloader), NameOf(downloadFile) & "_Dir", downloadFile.Dir)
+                updateSettings(NameOf(Downloader), NameOf(DownloadModuleSettingsChanged), DownloadModuleSettingsChanged.ToString(System.Globalization.CultureInfo.InvariantCulture))
 
-            Case "5"
-
-                initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)
-
-            Case "6"
-
-                downloadFile.Name = "readme.md"
-                download(downloadFile, readMeLink)
-
-            Case "7"
+            Case "10"
 
                 If DownloadModuleSettingsChanged Then initDefaultSettings()
 

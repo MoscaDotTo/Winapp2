@@ -29,14 +29,29 @@ Module Downloader
     Public ReadOnly Property gitLink As String = "https://github.com/MoscaDotTo/Winapp2/"
 
     ''' <summary>
-    ''' The web address of the CCleaner version of winapp2.ini 
+    ''' The web address of the base version winapp2.ini 
     ''' </summary>
-    Public ReadOnly Property wa2Link As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
+    Public ReadOnly Property baseFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
 
     ''' <summary>
-    ''' The web address of the Non-CCleaner version of winapp2.ini 
+    ''' The web address of the CCleaner version of winapp2.ini 
     ''' </summary>
-    Public ReadOnly Property nonccLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini"
+    Public ReadOnly Property ccFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini"
+
+    ''' <summary>
+    ''' The web address of the System Ninja version of winapp2.ini 
+    ''' </summary>
+    Public ReadOnly Property snFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/SystemNinja/Winapp2.rules"
+
+    ''' <summary>
+    ''' The web address of the BleachBit version of winapp2.ini 
+    ''' </summary>
+    Public ReadOnly Property bbFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/BleachBit/Winapp2.ini"
+
+    ''' <summary>
+    ''' The web address of the Tron version of winapp2.ini 
+    ''' </summary>
+    Public ReadOnly Property tronFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Tron/Winapp2.ini"
 
     ''' <summary> 
     ''' The web address of winapp2ool.exe 
@@ -84,10 +99,10 @@ Module Downloader
 
             Select Case cmdargs(0).ToUpperInvariant
 
-                Case "1", "2", "WINAPP2"
+                Case "1", "WINAPP2"
 
-                    fileLink = If(cmdargs(0) <> "2", wa2Link, nonccLink)
-                    downloadFile.Name = "winapp2.ini"
+                    fileLink = getWinappLink()
+                    downloadFile.Name = If(fileLink.Contains("SystemNinja"), "winapp2.rules", "winapp2.ini")
 
                 Case "3", "WINAPP2OOL"
 
@@ -124,15 +139,6 @@ Module Downloader
 
     End Sub
 
-    ''' <summary> 
-    ''' Returns the link to winapp2.ini of the apprpriate flavor for the current tool configuration 
-    ''' </summary>
-    Public Function winapp2link() As String
-
-        Return If(RemoteWinappIsNonCC, nonccLink, wa2Link)
-
-    End Function
-
     ''' <summary>
     ''' Returns the link to winapp2ool.exe on the appropriate branch for the current tool configuration 
     ''' </summary>
@@ -141,6 +147,39 @@ Module Downloader
     Public Function toolExeLink() As String
 
         Return If(isBeta, betaToolLink, toolLink)
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the link to the appropriate flavor of winapp2.ini based on the current Flavor configuration
+    ''' </summary>
+    Public Function getWinappLink() As String
+
+        Select Case CurrentWinappFlavor
+
+            Case WinappFlavor.NonCCleaner
+
+                Return baseFlavorLink
+
+            Case WinappFlavor.CCleaner
+
+                Return ccFlavorLink
+
+            Case WinappFlavor.BleachBit
+
+                Return bbFlavorLink
+
+            Case WinappFlavor.SystemNinja
+
+                Return snFlavorLink
+
+            Case WinappFlavor.Tron
+
+                Return tronFlavorLink
+
+        End Select
+
+        Return baseFlavorLink
 
     End Function
 
