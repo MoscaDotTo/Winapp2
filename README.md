@@ -1,16 +1,18 @@
 # Winapp2.ini
 
-### What is winapp2.ini? 
+### What is Winapp2.ini? 
 
-**Winapp2.ini** is a massive community-driven database of extended cleaning routines for Microsoft Windows, compatible with CCleaner, BleachBit, System Ninja, R-Wipe&Clean, and HDCleaner. 
+**Winapp2.ini** is a massive, community-driven database of declarative cleaning routines for Microsoft Windows. It provides a comprehensive mapping of individual applications and system components to their transient files (temporary files, caches, logs, and more). With thousands of contributions spanning over a decade and a half, it is likely the most extensive dataset of its kind available on the internet. Winapp2.ini is compatible with CCleaner, BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, and HDCleaner.
 
-### Why winapp2.ini
+### Why Winapp2.ini
 
-Winapp2.ini is an extension of all of the applications with which it is compatible, which means it is able to update independently of them. This enables greater freedom of user choice to move between applications and particular versions of individual applications. Additionally, being a user extensible text file empowers individual users to further customize this already extensive set of cleaning routines to suit their needs as individuals, and to contribute them back to the community. 
+Winapp2.ini avoids the risks of overreach common in generic cleaning tools by adopting an exhaustive, declarative approach. Where many tools rely on sweeping file-type patterns applied across entire drives, Winapp2.ini demands explicitly defined target paths and conceptual linkage between those targets and their parent applications. This prioritizes clarity, specificity, and control over generalization, offering users an inspectable system that can be audited and safely customized to suit individual needs.
+
+Winapp2.ini functions as an extension of the applications with which it is compatible, enabling it to update independently of them. This decoupling grants users greater freedom to move between tools and versions without sacrificing functionality.
 
 ### What are flavors?
 
-Flavors are specific sets of modifications applied to each winapp2.ini update to produce variants which cater more closely to the specific features supported by particular applications. This is an automated process carried out when winapp2.ini is built for each update, so these flavors are always up to date with the latest version of winapp2.ini even if the copy shipped with the application is not. These are intended to function as drop-in replacements to the winapp2.ini shipped with each of these applications. 
+Flavors are the result of specific sets of modifications applied to each Winapp2.ini update to produce variants which cater more closely to the features supported by particular applications. This is an automated process carried out when Winapp2.ini is built for each update, so these flavors are always up to date with the latest version of Winapp2.ini even if the copy shipped with the application is not. Flavors are intended to function as drop-in replacements to the Winapp2.ini shipped with each of these applications. 
 
 ### Disclaimer 
 Winapp2.ini is provided as-is and without warranty. Understand that its intent is to enable you to delete files, folders, and registry keys off of your system in a way that is programmatic and potentially irreversible. Please exercise caution and take appropriate backups where relevant while using winapp2.ini. It is advised you use winapp2ool to manage your local copy of winapp2.ini, as it can provide bespoke changelogs which should be read carefully to fully understand the scope of changes made between versions.   
