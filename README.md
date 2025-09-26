@@ -2,7 +2,9 @@
 
 ### What is Winapp2.ini? 
 
-**Winapp2.ini** is a massive, community-driven database of declarative cleaning routines for Microsoft Windows. It provides a comprehensive mapping of individual applications and system components to their transient files (temporary files, caches, logs, and more). With thousands of contributions spanning over a decade and a half, it is likely the most extensive dataset of its kind available on the internet. Winapp2.ini is compatible with CCleaner, BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, and HDCleaner.
+**Winapp2.ini** is a massive, community-driven database of declarative cleaning routines for Microsoft Windows. It provides a comprehensive mapping of individual applications and system components to their transient files (temporary files, caches, logs, and more). With thousands of contributions spanning over a decade and a half, it is likely the most extensive dataset of its kind available on the internet. 
+
+Winapp2.ini is compatible with CCleaner, BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, and HDCleaner.
 
 ### Why Winapp2.ini
 
