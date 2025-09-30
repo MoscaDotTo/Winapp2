@@ -16,43 +16,34 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
+Imports System.Text
 
 ''' <summary>
 ''' commandLineHandler is a winapp2ool module which handles the command line arguments passed to 
 ''' winapp2ool by the user. This allows winapp2ool to be called from scripting environments and 
 ''' enables the use of winapp2ool without having to interact with the UI
 ''' </summary>
-''' 
-''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 Public Module commandLineHandler
 
     ''' <summary>
     ''' The current list of the command line args (mutable)
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
     Public Property cmdargs As List(Of String)
 
     ''' <summary>
     ''' Indicates whether Winapp2ool was launched from the command line with module arguments
     ''' When True, prevents automatic saving of settings to preserve user's saved configuration
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Public Property IsCommandLineMode As Boolean = False
 
     ''' <summary>
     ''' Configuration for module file requirements and handlers
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+    ''' </summary> 
     Private ReadOnly ModuleConfigs As Dictionary(Of String, ModuleConfig) = CreateModuleConfigs()
 
     ''' <summary>
     ''' Creates the module configuration dictionary with all aliases
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Function CreateModuleConfigs() As Dictionary(Of String, ModuleConfig)
 
         Dim configs As New Dictionary(Of String, ModuleConfig)
@@ -88,8 +79,6 @@ Public Module commandLineHandler
     ''' <summary>
     ''' Configuration data for a module's command line handling
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Structure ModuleConfig
 
         Public ReadOnly FileCount As Integer
@@ -128,8 +117,6 @@ Public Module commandLineHandler
     ''' will be replaced if the arg is found 
     ''' <br /> Optional, default: <c> "" </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
     Public Sub invertSettingAndRemoveArg(ByRef setting As Boolean,
                                                arg As String,
                                 Optional ByRef name As String = "",
@@ -151,8 +138,6 @@ Public Module commandLineHandler
     ''' <param name="download">
     ''' Indicates that winapp2.ini should be downloaded from GitHub 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
     Public Sub handleDownloadBools(ByRef download As Boolean)
 
         invertSettingAndRemoveArg(download, "-d")
@@ -166,23 +151,17 @@ Public Module commandLineHandler
     ''' Initializes the processing of the commandline args and hands the 
     ''' remaining arguments off to the respective module's handler
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Public Sub processCommandLineArgs()
 
-        cmdargs = Environment.GetCommandLineArgs.ToList
+        cmdargs = ReconstructArgs(Environment.GetCommandLineArgs())
         Dim argStr = String.Join(",", cmdargs)
         gLog($"Found commandline args: {argStr}")
-
-        ' 0th index holds the executable name, we don't need it. 
-        cmdargs.RemoveAt(0)
 
         checkUpdates(cmdargs.Contains("-autoupdate"))
         If updateIsAvail Then autoUpdate()
 
         ' Process global flags
         invertSettingAndRemoveArg(SuppressOutput, "-s")
-
         processFlavorArgs()
 
         If cmdargs.Count = 0 Then Return
@@ -200,7 +179,7 @@ Public Module commandLineHandler
 
         Else
 
-            gLog($"Invalid command line argument provided: {firstArg}")
+            gLog($"Invalid module argument provided: {firstArg}")
             printErrExit($"Unknown module identifier: {firstArg}")
 
         End If
@@ -214,8 +193,6 @@ Public Module commandLineHandler
     ''' <param name="files">
     ''' The set of <c> iniFile </c> properties belonging to a particular module 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Public Sub getFileAndDirParams(ByRef files() As iniFile)
 
         If files Is Nothing Then argIsNull(NameOf(files)) : Return
@@ -245,8 +222,6 @@ Public Module commandLineHandler
     ''' Supports appending child folders to the current directory 
     ''' <br /> eg. -2f "\folder1\folder2\file.ini"
     ''' </remarks>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Sub getFileName(arg As String,
                       ByRef givenFile As iniFile)
 
@@ -288,8 +263,6 @@ Public Module commandLineHandler
     ''' <param name="file">
     ''' An <c> iniFile </c> module property whose path will be modified 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Sub getFileNameAndDir(flag As String,
                             ByRef file As iniFile)
 
@@ -316,8 +289,6 @@ Public Module commandLineHandler
     ''' <param name="file">
     ''' An <c> iniFile </c> module property whose path will be modified 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Sub getFileParams(ByRef arg As String,
                               ByRef file As iniFile)
 
@@ -352,8 +323,6 @@ Public Module commandLineHandler
     ''' <param name="someFile">
     ''' An <c> iniFile </c> module property whose path will be modified 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Sub getParams(iniFilePropertyNumber As Integer,
                     ByRef someFile As iniFile)
 
@@ -374,8 +343,6 @@ Public Module commandLineHandler
     ''' <param name="file">
     ''' An <c> iniFile </c> module property whose path will be modified 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Sub CleanFilePath(ByRef file As iniFile)
 
         file.Dir = file.Dir.Replace("\\", "\")
@@ -398,8 +365,6 @@ Public Module commandLineHandler
     ''' Set of valid commandline arguments for file and directory parameters
     ''' <br /> eg. -1d, -1f, -2d, -2f, ..., -maxFilesd, -maxFilesf
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Function generateValidArgs(maxFiles As Integer) As String()
 
         Dim validArgs As New List(Of String)
@@ -422,8 +387,6 @@ Public Module commandLineHandler
     ''' <param name="maxFiles">
     ''' Maximum number of files to for which to validate the arguments 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Sub validateArgs(maxFiles As Integer)
 
         Dim vArgs As String() = generateValidArgs(maxFiles)
@@ -436,6 +399,31 @@ Public Module commandLineHandler
             If Not vArgs.Contains(cmdargs(i)) Then i += 1 : Continue While
 
             Dim pathArg = cmdargs(i + 1)
+
+            ' Validate that the path exists (for directory arguments) or parent directory exists (for file arguments)
+            If cmdargs(i).EndsWith("d") Then
+
+                If Not String.IsNullOrEmpty(pathArg) AndAlso Not System.IO.Directory.Exists(pathArg) Then
+
+                    gLog($"Warning: Directory does not exist: {pathArg}. If you are downloading, this path will be created.")
+
+                End If
+
+            ElseIf cmdargs(i).EndsWith("f") Then
+
+                If pathArg.Contains("\") Then
+
+                    Dim parentDir = System.IO.Path.GetDirectoryName(pathArg)
+
+                    If Not String.IsNullOrEmpty(parentDir) AndAlso Not System.IO.Directory.Exists(parentDir) Then
+
+                        gLog($"Warning: Parent directory does not exist: {parentDir}")
+
+                    End If
+
+                End If
+
+            End If
 
             ' Skip the next argument since we've already processed it
             i += 2
@@ -451,8 +439,6 @@ Public Module commandLineHandler
     ''' <param name="errTxt">
     ''' The text to be printed to the user
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Sub printErrExit(errTxt As String)
 
         Console.WriteLine($"{errTxt} Press any key to exit.")
@@ -474,22 +460,19 @@ Public Module commandLineHandler
     ''' </param>
     Private Sub handleFlavorArg(flavorArg As String, flavorValue As WinappFlavor)
 
-        If cmdargs.Contains(flavorArg) Then
+        If Not cmdargs.Contains(flavorArg) Then Return
 
-            gLog($"Found flavor argument: {flavorArg}")
+        gLog($"Found flavor argument: {flavorArg}")
 
-            CurrentWinappFlavor = flavorValue
-            cmdargs.Remove(flavorArg)
+        CurrentWinappFlavor = flavorValue
+        cmdargs.Remove(flavorArg)
 
-            gLog($"Flavor set to: {flavorValue}")
-
-        End If
+        gLog($"Flavor set to: {flavorValue}")
 
     End Sub
 
     ''' <summary>
-    ''' Process flavor selection arguments
-    ''' This extends the existing processCommandLineArgs() method
+    ''' Sets the winapp2 flavor appropriately based on commandline args 
     ''' </summary>
     Public Sub processFlavorArgs()
 
@@ -501,5 +484,71 @@ Public Module commandLineHandler
         handleFlavorArg("-ncc", WinappFlavor.NonCCleaner)
 
     End Sub
+
+    ''' <summary>
+    ''' Reconstructs commandline args to properly handle quoted arguments with spaces
+    ''' </summary>
+    ''' 
+    ''' <param name="args">
+    ''' The set of commandline arguments passed to the application
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' List of properly reconstructed arguments with quoted paths handled
+    ''' </returns>
+    Private Function ReconstructArgs(args As String()) As List(Of String)
+
+        Dim reconstructed As New List(Of String)
+        Dim i As Integer = 1
+
+        While i < args.Length
+
+            Dim currentArg = args(i)
+
+            If currentArg.StartsWith("""", StringComparison.InvariantCulture) Then
+
+                If currentArg.EndsWith("""", StringComparison.InvariantCulture) AndAlso currentArg.Length > 1 Then
+
+                    reconstructed.Add(currentArg.Trim(CChar("""")))
+
+                Else
+
+                    Dim quotedArg As New StringBuilder(currentArg.Substring(1))
+                    i += 1
+
+                    While i < args.Length
+
+                        If args(i).EndsWith("""", StringComparison.InvariantCulture) Then
+
+                            quotedArg.Append(" " & args(i).Substring(0, args(i).Length - 1))
+                            Exit While
+
+                        Else
+
+                            quotedArg.Append(" " & args(i))
+
+                        End If
+
+                        i += 1
+
+                    End While
+
+                    reconstructed.Add(quotedArg.ToString())
+
+                End If
+
+            Else
+
+                reconstructed.Add(currentArg)
+
+            End If
+
+            i += 1
+
+        End While
+
+        Return reconstructed
+
+    End Function
 
 End Module
