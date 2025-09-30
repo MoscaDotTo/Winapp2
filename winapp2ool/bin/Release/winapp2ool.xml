@@ -3071,44 +3071,32 @@ Holds the path of any files to be saved by the Downloader
  winapp2ool by the user. This allows winapp2ool to be called from scripting environments and 
  enables the use of winapp2ool without having to interact with the UI
  </summary>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="P:winapp2ool.commandLineHandler.cmdargs">
  <summary>
  The current list of the command line args (mutable)
  </summary>
- 
- Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
 <member name="P:winapp2ool.commandLineHandler.IsCommandLineMode">
  <summary>
  Indicates whether Winapp2ool was launched from the command line with module arguments
  When True, prevents automatic saving of settings to preserve user's saved configuration
  </summary>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="F:winapp2ool.commandLineHandler.ModuleConfigs">
  <summary>
  Configuration for module file requirements and handlers
- </summary>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
+ </summary> 
 </member>
 <member name="M:winapp2ool.commandLineHandler.CreateModuleConfigs">
  <summary>
  Creates the module configuration dictionary with all aliases
  </summary>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="T:winapp2ool.commandLineHandler.ModuleConfig">
  <summary>
  Configuration data for a module's command line handling
  </summary>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.invertSettingAndRemoveArg(System.Boolean@,System.String,System.String@,System.String@)">
  <summary>
@@ -3134,8 +3122,6 @@ Holds the path of any files to be saved by the Downloader
  will be replaced if the arg is found 
  <br /> Optional, default: <c> "" </c>
  </param>
- 
- Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
 <member name="M:winapp2ool.commandLineHandler.handleDownloadBools(System.Boolean@)">
  <summary>
@@ -3145,16 +3131,12 @@ Holds the path of any files to be saved by the Downloader
  <param name="download">
  Indicates that winapp2.ini should be downloaded from GitHub 
  </param>
- 
- Docs last updated: 2023-07-20 | Code last updated: 2023-07-20
 </member>
 <member name="M:winapp2ool.commandLineHandler.processCommandLineArgs">
  <summary>
  Initializes the processing of the commandline args and hands the 
  remaining arguments off to the respective module's handler
  </summary>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileAndDirParams(winapp2ool.iniFile[]@)">
  <summary>
@@ -3164,8 +3146,6 @@ Holds the path of any files to be saved by the Downloader
  <param name="files">
  The set of <c> iniFile </c> properties belonging to a particular module 
  </param>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileName(System.String,winapp2ool.iniFile@)">
  <summary>
@@ -3185,8 +3165,6 @@ Holds the path of any files to be saved by the Downloader
  Supports appending child folders to the current directory 
  <br /> eg. -2f "\folder1\folder2\file.ini"
  </remarks>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileNameAndDir(System.String,winapp2ool.iniFile@)">
  <summary>
@@ -3200,8 +3178,6 @@ Holds the path of any files to be saved by the Downloader
  <param name="file">
  An <c> iniFile </c> module property whose path will be modified 
  </param>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.getFileParams(System.String@,winapp2ool.iniFile@)">
  <summary>
@@ -3216,8 +3192,6 @@ Holds the path of any files to be saved by the Downloader
  <param name="file">
  An <c> iniFile </c> module property whose path will be modified 
  </param>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.getParams(System.Int32,winapp2ool.iniFile@)">
  <summary>
@@ -3231,8 +3205,6 @@ Holds the path of any files to be saved by the Downloader
  <param name="someFile">
  An <c> iniFile </c> module property whose path will be modified 
  </param>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.CleanFilePath(winapp2ool.iniFile@)">
  <summary>
@@ -3242,8 +3214,6 @@ Holds the path of any files to be saved by the Downloader
  <param name="file">
  An <c> iniFile </c> module property whose path will be modified 
  </param>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.generateValidArgs(System.Int32)">
  <summary>
@@ -3258,8 +3228,6 @@ Holds the path of any files to be saved by the Downloader
  Set of valid commandline arguments for file and directory parameters
  <br /> eg. -1d, -1f, -2d, -2f, ..., -maxFilesd, -maxFilesf
  </returns>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.validateArgs(System.Int32)">
  <summary>
@@ -3269,8 +3237,6 @@ Holds the path of any files to be saved by the Downloader
  <param name="maxFiles">
  Maximum number of files to for which to validate the arguments 
  </param>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.printErrExit(System.String)">
  <summary>
@@ -3280,8 +3246,6 @@ Holds the path of any files to be saved by the Downloader
  <param name="errTxt">
  The text to be printed to the user
  </param>
- 
- Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
 </member>
 <member name="M:winapp2ool.commandLineHandler.handleFlavorArg(System.String,winapp2ool.Winapp2ool.WinappFlavor)">
  <summary>
@@ -3298,47 +3262,124 @@ Holds the path of any files to be saved by the Downloader
 </member>
 <member name="M:winapp2ool.commandLineHandler.processFlavorArgs">
  <summary>
- Process flavor selection arguments
- This extends the existing processCommandLineArgs() method
+ Sets the winapp2 flavor appropriately based on commandline args 
  </summary>
 </member>
+<member name="M:winapp2ool.commandLineHandler.ReconstructArgs(System.String[])">
+ <summary>
+ Reconstructs commandline args to properly handle quoted arguments with spaces
+ </summary>
+ 
+ <param name="args">
+ The set of commandline arguments passed to the application
+ </param>
+ 
+ <returns>
+ List of properly reconstructed arguments with quoted paths handled
+ </returns>
+</member>
 <member name="T:winapp2ool.downloadr">
- <summary> Provides functions to download files to the rest of the application </summary>
+ <summary> 
+ Downloadr is a winapp2ool module which provides the ability to download files from the 
+ internet to the rest of the application
+ </summary>
 </member>
 <member name="M:winapp2ool.downloadr.dlFile(System.String,System.String)">
- <summary> Performs the download, returns a boolean indicating the success of the download </summary>
- <param name="link"> The URL from which we are downloading </param>
- <param name="path"> The path to which the downloaded file should be saved </param>
- <returns> <c> True </c> if the download is successful <c> False </c> otherwise </returns>
+ <summary> 
+ Attempts to download a file from the internet, returns a boolean indicating the success of the download 
+ </summary>
+ 
+ <param name="link">
+ A URL pointing to a file to be downloaded 
+ </param>
+ 
+ <param name="path">
+ The path on disk to which the downloaded file should be saved 
+ </param>
+ 
+ <returns> <c> True </c> if the download is successful, <br />
+ <c> False </c> otherwise 
+ </returns>
 </member>
 <member name="M:winapp2ool.downloadr.download(winapp2ool.iniFile,System.String,System.Boolean,System.Boolean)">
- <summary> Downloads a file from the internet, optionally prompting the user to rename the download or overwrite existing files using the default name </summary>
- <param name="link"> The URL from which we are downloading </param>
- <param name="prompt"> Indicates that a "rename file" prompt should be shown if the target path already exists <br /> Optional, Default: <c> True </c> </param>
- <param name="quietly"> Indicates that all downloading output should be suppressed <br /> Optional, Default: <c> False </c> </param>
+ <summary> 
+ Downloads a file from the internet, optionally prompting the user to rename the download or overwrite existing files using the default name 
+ </summary>
+ 
+ <param name="link"> 
+ A URL pointing to a file to be downloaded 
+ </param>
+ 
+ <param name="prompt"> 
+ Indicates that a "rename file" prompt should be shown if the target path already exists 
+ <br /> Optional, Default: <c> True </c> 
+ </param>
+ 
+ <param name="quietly"> 
+ Indicates that all downloading output should be suppressed 
+ <br /> Optional, Default: <c> False </c> 
+ </param>
 </member>
 <member name="M:winapp2ool.downloadr.getFileDataAtLineNum(System.String,System.Int32)">
- <summary> Reads a file until a specified line number, returns the contents of that line </summary>
- <param name="lineNum"> The line number to return from the file </param>
+ <summary> 
+ Reads a file until a specified line number, returns the contents of that line 
+ </summary>
+ 
+ <param name="lineNum"> 
+ The line number to return from the file 
+ </param>
+ 
 </member>
 <member name="M:winapp2ool.downloadr.checkOnline">
- <summary> Attempts to connect to the internet </summary>
- <returns> <c> True </c> If the connection is successful <c> False </c> otherwise </returns>
+ <summary> 
+ Attempts to connect to the internet 
+ </summary>
+ 
+ <returns> 
+ <c> True </c> If the connection is successful, <br />
+ <c> False </c> otherwise
+ </returns>
 </member>
 <member name="M:winapp2ool.downloadr.getTargetLine(System.IO.StreamReader,System.Int32)">
- <summary> Reads a file only until reaching a specific line and then returns that line as a String </summary>
- <param name="reader"> An open file stream </param>
- <param name="lineNum"> The target line number </param>
- <returns> The String on the line given by <paramref name="lineNum"/> </returns>
+ <summary> 
+ Reads a file only until reaching a specific line and then returns that line as a String 
+ </summary>
+ 
+ <param name="reader">
+ An open file stream 
+ </param>
+ 
+ <param name="lineNum">
+ The target line number 
+ </param>
+ 
+ <returns> 
+ The String on the line given by <paramref name="lineNum"/> 
+ </returns>
 </member>
 <member name="M:winapp2ool.downloadr.setDownloadedFileStage(System.String)">
- <summary> Downloads a file to the Windows temporary directory and returns its path. If the file already exists, it will be deleted and overwritten with the downloaded file </summary>
- <param name="remotelink"> A GitHub link to a file to be downloaded </param>
+ <summary> 
+ Downloads a file to the Windows temporary directory and returns its path. 
+ If the file already exists, it will be deleted and overwritten with the downloaded file 
+ </summary>
+ 
+ <param name="remotelink">
+ A URL pointing to a file to be downloaded 
+ </param>
 </member>
 <member name="M:winapp2ool.downloadr.getRemoteIniFile(System.String)">
- <summary> Attempts to create an <c> iniFile </c> using the data provided by <paramref name="address"/> </summary>
- <param name="address"> A URL pointing to an online .ini file </param>
- <returns> An <c> iniFile </c> created using the remote data if that data is properly formatted, <c> Nothing </c> otherwise </returns>
+ <summary> 
+ Attempts to create an <c> iniFile </c> using the data provided by <paramref name="address"/>
+ </summary>
+ 
+ <param name="address"> 
+ A URL pointing to a .ini file to be downloaded 
+ </param>
+ 
+ <returns> 
+ An <c> iniFile </c> created using the remote data if that data is properly formatted, <br/>
+ <c> Nothing </c> otherwise 
+ </returns>
 </member>
 <member name="T:winapp2ool.exceptionHandler">
  <summary> Handles the processing of errors caught throughout the operation of winapp2ool, hopefully gracefully. </summary>
