@@ -477,8 +477,11 @@ Public Module commandLineHandler
     Public Sub processFlavorArgs()
 
         handleFlavorArg("-ccleaner", WinappFlavor.CCleaner)
+        handleFlavorArg("-cc", WinappFlavor.CCleaner)
         handleFlavorArg("-bleachbit", WinappFlavor.BleachBit)
+        handleFlavorArg("-bb", WinappFlavor.BleachBit)
         handleFlavorArg("-systemninja", WinappFlavor.SystemNinja)
+        handleFlavorArg("-sn", WinappFlavor.SystemNinja)
         handleFlavorArg("-tron", WinappFlavor.Tron)
         handleFlavorArg("-base", WinappFlavor.NonCCleaner)
         handleFlavorArg("-ncc", WinappFlavor.NonCCleaner)
