@@ -28,37 +28,27 @@ Imports System.IO
 ''' <br/> <br/>
 ''' If the final combined output contains no sections, it will not be saved to disk
 ''' </summary>
-''' 
-''' Docs last updated: 2025-08-23 
 Public Module Combine
 
     ''' <summary>
     ''' Stores the most recent Combine operation log for display in the log viewer
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
     Public Property MostRecentCombineLog As String = ""
 
     ''' <summary>
     ''' The phrase that marks the beginning of a Combine operation in the global log
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
+    ''' </summary> 
     Public Const CombineLogStartPhrase As String = "Combining files from"
 
     ''' <summary>
     ''' The phrase that marks the end of a Combine operation in the global log
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
     Public Const CombineLogEndPhrase As String = "Combination complete!"
 
 
     ''' <summary>
     ''' Handles command line arguments for the Combine module
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
     Public Sub handleCmdLine()
 
         initDefaultCombineSettings()
@@ -75,8 +65,6 @@ Public Module Combine
     ''' <summary>
     ''' Initializes the combine process and validates the target directory
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
     Public Sub initCombine(targetDir As String,
                            outputFile As iniFile)
 
@@ -125,8 +113,6 @@ Public Module Combine
     ''' The <c> iniFile </c> into which all other ini files found in 
     ''' <c> <paramref name="targetDir"/> </c> will be merged 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
     Private Sub processCombine(outputMenu As MenuSection,
                                targetDir As String,
                          ByRef outputFile As iniFile)
@@ -202,8 +188,6 @@ Public Module Combine
     ''' <param name="ex">The exception thrown while Combine was processing 
     ''' <c> <paramref name="filepath"/> </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
     Private Sub handleCombineException(filepath As String,
                                  ByRef outputMenu As MenuSection,
                                        ex As Exception)
@@ -242,8 +226,6 @@ Public Module Combine
     ''' The <c> MenuSection </c> containing the Combine module's output as it will be displayed
     ''' to the user
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
     Private Sub attemptCombine(filepath As String,
                          ByRef outputFile As iniFile,
                          ByRef processedCount As Integer,
@@ -285,8 +267,6 @@ Public Module Combine
     ''' <param name="totalCount">
     ''' The total number of files to be processed
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
     Private Sub updateProgress(processedCount As Integer,
                                totalCount As Integer)
 
@@ -307,8 +287,6 @@ Public Module Combine
     ''' <param name="outputFile">
     ''' The combined output file that will receive the merged sections
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
     Private Sub mergeFileIntoOutput(sourceFile As iniFile, ByRef outputFile As iniFile)
 
         For Each sectionName In sourceFile.Sections.Keys
@@ -342,8 +320,6 @@ Public Module Combine
     ''' <param name="sectionName">
     ''' The name of the current section being processed
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-23 | Code last updated: 2025-08-23
     Private Sub AddUniqueKeys(sourceSection As iniSection,
                               outputFile As iniFile,
                               sectionName As String)
@@ -393,8 +369,6 @@ Public Module Combine
     ''' The resulting combined output file if successful, or 
     ''' Empty <c> iniFile </c> if the target directory does not exist or otherwise lacks valid ini files
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-08-20 | Code last updated: 2025-08-20
     Public Function RemoteCombine(targetDirectory As String,
                                   outputFile As iniFile) As iniFile
 
