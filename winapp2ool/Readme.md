@@ -129,7 +129,7 @@ The first argument provided should always refer to the module you would like to 
 | Arg                     | Effect                                                                              | Notes                                                                   | 
 | :-                      | :-                                                                                  | :-                                                                      |
 | `-s`  			      | Enables "silent mode" - muting almost all output and prompts for input.             | Some exceptions and errors may not be shown when silent mode is enabled |
-| `-1d`, `-2d`, ... `-9d` | Defines a new file name and/or path for the module's respectively numbered file. \* |                                                                         | 
+| `-1d`, `-2d`, ... `-9d` | Defines a new file name and/or path for the module's respectively numbered file. \* | Paths with spaces must be provided in quotes, eg. `-1d "C:\New Folder"` | 
 | `-1f`, `-2f`, ... `-9f` | Defines a new file name for the module's respectively numbered file **              |                                                                         |
 | `-ncc` or `-base` 	  | Sets the Flavor to Non-CCleaner (base) when downloading                             |                                                                         |            
 | `-ccleaner` or `-cc`    | Sets the Flavor to CCleaner when downloading                                        | Default                                                                 | 
