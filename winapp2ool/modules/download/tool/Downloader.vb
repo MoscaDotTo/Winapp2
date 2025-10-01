@@ -104,26 +104,31 @@ Module Downloader
                     fileLink = getWinappLink()
                     downloadFile.Name = If(fileLink.Contains("SystemNinja"), "winapp2.rules", "winapp2.ini")
 
-                Case "3", "WINAPP2OOL"
+                Case "2", "WINAPP2OOL"
 
                     fileLink = toolLink
                     downloadFile.Name = "winapp2ool.exe"
 
-                Case "4", "README"
+                Case "3", "README"
 
                     fileLink = readMeLink
                     downloadFile.Name = "readme.txt"
 
-
-                Case "5", "WINAPP3"
+                Case "4", "WINAPP3"
 
                     fileLink = wa3link
                     downloadFile.Name = "winapp3.ini"
 
-                Case "6", "ARCHIVED"
+                Case "5", "ARCHIVED"
 
                     fileLink = archivedLink
                     downloadFile.Name = "Archived Entries.ini"
+
+                Case Else
+
+                    cwl($"Unknown argument: {cmdargs(0)}", True)
+                    cwl("Valid arguments are: winapp2, winapp2ool, readme, winapp3, archived", True)
+                    Environment.Exit(1)
 
             End Select
 
@@ -133,7 +138,7 @@ Module Downloader
 
         getFileAndDirParams({downloadFile, New iniFile, New iniFile})
 
-        If downloadFile.Dir = Environment.CurrentDirectory And downloadFile.Name = "winapp2ool.exe" Then autoUpdate()
+        If downloadFile.Name = "winapp2ool.exe" AndAlso downloadFile.Dir = Environment.CurrentDirectory Then autoUpdate()
 
         download(downloadFile, fileLink)
 

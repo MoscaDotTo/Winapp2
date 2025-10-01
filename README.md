@@ -59,7 +59,7 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
 | Name           		                                                                                                           | Purpose       
 | :-                                                                                                                               | :-
 | [Winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe)                             | A robust tool that allows you to manage Winapp2.ini for your system, including automatic downloading and trimming. This tool has its own ReadMe [here](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool).
-| [Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)                              | This is the base winapp2.ini file, it has no content removed or changed and includes and may overlap or conflict with CCleaner/BleachBit rules. 
+| [Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)                              | This is the base winapp2.ini file, it has no content removed or changed, and includes rules which may overlap or conflict with CCleaner/BleachBit rules. 
 | [CCleaner Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini)                                  | The CCleaner flavor of winapp2.ini, designed to reduce overlap with CCleaner rules and better integrate with its UI.
 | [BleachBit Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/BleachBit/Winapp2.ini)          | The BleachBit flavor of winapp2.ini, designed to remove unsupported rules and pass the sanity checker.
 | [System Ninja winapp2.rules](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/SystemNinja/Winapp2.rules) | The System Ninja flavor of winapp2.ini, designed to replace unsupported rules with ones compatible with System Ninja. 
@@ -94,7 +94,7 @@ CCleaner will display the set of winapp2.ini entries which it detects as valid f
 
 ### Flavor
 
-You should use the [BleachBit flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/BleachBit/Winapp2.ini). This flavor is designed to improve compatbility with BleachBit by eliminating errors thrown by BleachBit's sanity checker when using the base winapp2.ini. Use of any other flavor will throw a small number of errors and not allow you to run any entries which contain them, but will otherwise function correctly. 
+You should use the [BleachBit flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/BleachBit/Winapp2.ini). This flavor is designed to improve compatibility with BleachBit by eliminating errors thrown by BleachBit's sanity checker when using the base winapp2.ini. Use of any other flavor will throw a small number of errors and not allow you to run any entries which contain them, but will otherwise function correctly. 
 
 ### Installation
 
@@ -282,7 +282,7 @@ These keys define where the entry will be displayed within the application UI. Y
 ### Detect or DetectFile
 
  These keys specify the condition under which the entry should be considered valid for a system.
- If the target of at least one ofthese keys exists, the entry will be shown to the user. Otherwise, it won't. `Detect` keys point to Windows Registry paths and `DetectFile` keys point to Windows Filesystem paths. You should select a detection criteria that is only valid to the scope of a particular application's installation for best results, however you can use any key. You can define as many detection criteria as is necessary.  
+ If the target of at least one of these keys exists, the entry will be shown to the user. Otherwise, it won't. `Detect` keys point to Windows Registry paths and `DetectFile` keys point to Windows Filesystem paths. You should select a detection criteria that is only valid to the scope of a particular application's installation for best results, however you can use any key. You can define as many detection criteria as is necessary.  
 
  ###### Notes:
  - **System Ninja does not support wildcards anywhere in the DetectFile**
@@ -343,10 +343,10 @@ These keys specify a file (or files), directory, or registry path to be excluded
 The following are functions that are not used in the official Winapp2.ini file, but are valid syntax. 
 
 ### `Default`
-This key is used by only by CCleaner to decide whether or not an entry is enabled by default when it is loaded for the first time. `Default=True` causes an entry to be enabled by default, `Default=False` will not. CCleaner assumes `Default=False` when no `Default` key is provied.
+This key is used by only by CCleaner to decide whether or not an entry is enabled by default when it is loaded for the first time. `Default=True` causes an entry to be enabled by default, `Default=False` will not. CCleaner assumes `Default=False` when no `Default` key is provided.
 
 ### `DetectOS`
-This key is used only by CCleaner and is used to limit the set of Windows version for which an entry should be considered valid. `DetectOS` failure supercedes `Detect` and `DetectFile` successes in CCleaner and winapp2ool. Kernel version numbering is used, below is a table for reference. To specify a minimum version number, use `DetectOS=num|`. To specify a maximum version number, use `DetectOS=|num`. To limit an entry to a set of windows versions, use `DetectOS=num1|num2`. To strictly limit an entry to a particular Windows version, use `DetectOS=num|num`.
+This key is used only by CCleaner and is used to limit the set of Windows version for which an entry should be considered valid. `DetectOS` failure supersedes `Detect` and `DetectFile` successes in CCleaner and winapp2ool. Kernel version numbering is used, below is a table for reference. To specify a minimum version number, use `DetectOS=num|`. To specify a maximum version number, use `DetectOS=|num`. To limit an entry to a set of windows versions, use `DetectOS=num1|num2`. To strictly limit an entry to a particular Windows version, use `DetectOS=num|num`.
 
 | Kernel Number  | Windows Version
 | :-             | :-
@@ -366,7 +366,7 @@ This key is used only by CCleaner and is used to limit the set of Windows versio
   * `DetectOS=5.1|5.1` will only run on WindowsXP.
 
 ### `SpecialDetect`
-This key is used only by CCleaner and provides the same search patterns used by some of the internal CCleaner rules for detection. Like `DetectOS`, this key superecedes successes or failures from `Detect` or `DetectFile` keys. 
+This key is used only by CCleaner and provides the same search patterns used by some of the internal CCleaner rules for detection. Like `DetectOS`, this key supersedes successes or failures from `Detect` or `DetectFile` keys. 
 
 #### Examples 
 
