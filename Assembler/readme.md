@@ -14,7 +14,7 @@ Contributions to Winapp2.ini or its flavors should be made to the files in folde
 
 # Files and Folders 
 
-| Name                                                                                                                        | Description                                                                                                                   | 
+| Name | Description | 
 | :-                                                                                                                          | :-                                                                                                                            |
 | [`build winapp2.bat`](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/build%20winapp2.bat) | The build script for Winapp2.ini, Creates the base winapp2.ini and each of the flavors                                        |  
 | [BleachBit](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BleachBit)                                          | Contains the set of Transmutation rules for the BleachBit flavor                                                              |
