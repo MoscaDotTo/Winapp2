@@ -783,12 +783,11 @@ Module MenuMaker
     ''' <param name="errText"> 
     ''' The error text to be printed in the menu header 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Function denyActionWithHeader(cond As Boolean,
                                          errText As String) As Boolean
 
-        setHeaderText(errText, True, cond)
+        setNextMenuHeaderText(errText, cond)
+
         Return cond
 
     End Function
@@ -808,8 +807,6 @@ Module MenuMaker
     ''' 
     ''' <br/> <c> "Enable" </c> otherwise 
     ''' </returns>
-    '''
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Function enStr(setting As Nullable(Of Boolean)) As String
 
         Return If(setting, "Disable", "Enable")
@@ -820,8 +817,6 @@ Module MenuMaker
     ''' Enforces that <c> initMenu </c> exit the current 
     ''' level in the stack on the next iteration of its loop
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Sub exitModule()
 
         ExitPending = True
