@@ -110,11 +110,11 @@ Public Module transmuteMainMenu
 
         End If
 
-        Dim presetFileNames As New Dictionary(Of String, String) From {
-            {"3", "Removed Entries.ini"},
-            {"4", "Custom.ini"},
-            {"5", "winapp3.ini"},
-            {"6", "browsers.ini"}}
+        Dim presetFileNames As New List(Of String) From {
+            "Removed Entries.ini",
+            "Custom.ini",
+            "winapp3.ini",
+            "browsers.ini"}
 
         Dim transmuteFiles As New Dictionary(Of String, iniFile) From {
             {NameOf(TransmuteFile1), TransmuteFile1},
@@ -156,8 +156,9 @@ Public Module transmuteMainMenu
             ' Preset Source File Names
             Case intInput >= minPresetNum AndAlso intInput <= maxPresetNum
 
-                TransmuteFile2.Name = presetFileNames(input)
-                updateSettings(NameOf(Transmute), NameOf(TransmuteFile2) & "_Name", presetFileNames(input))
+                Dim i = intInput - staticOpts
+                TransmuteFile2.Name = presetFileNames(i)
+                updateSettings(NameOf(Transmute), NameOf(TransmuteFile2) & "_Name", presetFileNames(i))
                 updateSettings(NameOf(Transmute), NameOf(TransmuteModuleSettingsChanged), True.ToString)
 
                 setNextMenuHeaderText($"Source file name set to {TransmuteFile2.Name}", printColor:=ConsoleColor.Yellow)
@@ -190,7 +191,9 @@ Public Module transmuteMainMenu
 
                 resetModuleSettings(NameOf(Transmute), AddressOf initDefaultTransmuteSettings)
 
-            Case Else : setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Case Else
+
+                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
         End Select
 
