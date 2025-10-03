@@ -26,30 +26,22 @@ Public Module WinappDebug
 
     ''' <summary> 
     ''' The number of errors found during the lint 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' </summary> 
     Public Property ErrorsFound As Integer = 0
 
     ''' <summary> 
     ''' The list of all entry names found during the lint, used to check for duplicates 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property allEntryNames As New strList
 
     ''' <summary> 
     ''' The winapp2ool logslice from the most recent Lint run 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Public Property MostRecentLintLog As String = ""
 
     ''' <summary> 
     ''' The current rules for scans and repairs 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Public Property Rules As New List(Of lintRule) From {
         New lintRule(True, True, "Casing", "improper CamelCasing", "fixing improper CamelCasing"),
         New lintRule(True, True, "Alphabetization", "improper alphabetization", "fixing improper alphabetization"),
@@ -73,24 +65,18 @@ Public Module WinappDebug
     ''' Controls scan/repairs for CamelCasing issues 
     ''' <br /> Default: <c> True </c> 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintCasing As lintRule = Rules(0)
 
     ''' <summary> 
     ''' Controls scan/repairs for alphabetization issues 
     ''' <br /> Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintAlpha As lintRule = Rules(1)
 
     ''' <summary> 
     ''' Controls scan/repairs for incorrectly numbered keys 
     ''' <br /> Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintWrongNums As lintRule = Rules(2)
 
 
@@ -98,8 +84,6 @@ Public Module WinappDebug
     ''' Controls scan/repairs for parameters inside of FileKeys 
     ''' <br /> Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintParams As lintRule = Rules(3)
 
 
@@ -107,131 +91,97 @@ Public Module WinappDebug
     ''' Controls scan/repairs for flags in ExcludeKeys and FileKeys 
     ''' <br /> Default: <c> True </c> 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintFlags As lintRule = Rules(4)
 
     ''' <summary> 
     ''' Controls scan/repairs for improper slash usage 
     ''' <br /> Default: <c> True </c> 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintSlashes As lintRule = Rules(5)
 
     ''' <summary> 
     ''' Controls scan/repairs for missing or True Default values 
     ''' <br /> Default: <c> True </c> 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintDefaults As lintRule = Rules(6)
 
     ''' <summary>
     ''' Controls scan/repairs for duplicate values 
     ''' <br /> Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintDupes As lintRule = Rules(7)
 
     ''' <summary> 
     ''' Controls scan/repairs for keys with numbers they shouldn't have 
     ''' <br /> Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintExtraNums As lintRule = Rules(8)
 
     ''' <summary> 
     ''' Controls scan/repairs for keys which should only occur once 
     ''' <br /> Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintMulti As lintRule = Rules(9)
 
     ''' <summary> 
     ''' Controls scan/repairs for keys with invlaid values 
     ''' <br /> Default: <c> True </c> 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintInvalid As lintRule = Rules(10)
 
     ''' <summary> 
     ''' Controls scan/repairs for winapp2.ini syntax errors 
     ''' <br /> Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintSyntax As lintRule = Rules(11)
 
     ''' <summary> 
     ''' Controls scan/repairs for invalid file or regsitry paths 
     ''' <br /> Default: <c> True </c> 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintPathValidity As lintRule = Rules(12)
 
     ''' <summary> 
     ''' Controls scan/repairs for improper use of semicolons 
     ''' <br /> Default: <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property lintSemis As lintRule = Rules(13)
 
     ''' <summary> 
     ''' Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently) 
     ''' <br /> Default: <c> False </c> 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Public Property lintOpti As lintRule = Rules(14)
 
     ''' <summary> 
     ''' Controls scan/repairs for keys that may possibly exist in more than one entry 
     ''' <br /> Default: <c> False </c> 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' </summary> 
     Private Property lintMultiDupe As lintRule = Rules(15)
 
     ''' <summary> 
     ''' Regex to detect long form registry paths 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' </summary> 
     Private Property longReg As New Regex("HKEY_(C(URRENT_(USER$|CONFIG$)|LASSES_ROOT$)|LOCAL_MACHINE$|USERS$)")
 
     ''' <summary> 
     ''' Regex to detect short form registry paths 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property shortReg As New Regex("HK(C(C$|R$|U$)|LM$|U$)")
 
     ''' <summary> 
     ''' Regex to detect valid LangSecRef numbers 
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' </summary> 
     Private Property secRefNums As New Regex("30(0([1-6])|2([1-9])|3([0-8]))")
 
     ''' <summary> 
     ''' Regex to detect valid drive letter parameters 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property driveLtrs As New Regex("[a-zA-Z]:")
 
     ''' <summary> 
     ''' Regex to detect potential %EnvironmentVariables% 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
 
     ''' <summary>
@@ -239,8 +189,6 @@ Public Module WinappDebug
     ''' reflecting the current date <br />
     ''' Default: <c> True </c> - uses current date; <c> False </c> uses static version string
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-27 | Code last updated: 2025-08-27
     Private Property UseCurrentDate As Boolean = False
 
     ''' <summary>
@@ -248,8 +196,6 @@ Public Module WinappDebug
     ''' WinappDebug commandline args: <br />
     ''' <c> -c </c> enable saving of changes made by the linter
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Public Sub HandleLintCmdLine()
 
         InitDefaultLintSettings()
@@ -265,8 +211,6 @@ Public Module WinappDebug
     ''' Ensures that an <c> iniFile </c> has a proper line number information for each key and section <br />
     ''' Useful when working with generated <c> iniFile</c>s
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-04 | Code last updated: 2025-08-04
     Private Sub assignLineNumbers(ByRef outputFile As iniFile)
 
         Dim currentLine As Integer = 1
@@ -302,8 +246,6 @@ Public Module WinappDebug
     ''' Indicates whether or not the linter should attempt to optimize entries <br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-04 | Code last updated: 2025-08-04
     Public Function remotedebug(givenIni As iniFile,
                        Optional forceOpti As Boolean = False) As iniFile
 
@@ -330,8 +272,6 @@ Public Module WinappDebug
     ''' Validates winapp2.ini, then sets up the output window before sending it off to the linter.
     ''' After linting, reports the results of the lint to the user 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Public Sub InitDebug()
 
         If Not enforceFileHasContent(winappDebugFile1) Then Return
@@ -368,8 +308,6 @@ Public Module WinappDebug
     ''' <param name="fileToBeDebugged"> 
     ''' A <c> winapp2file </c> to be linted 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Public Sub Debug(ByRef fileToBeDebugged As winapp2file)
 
         If fileToBeDebugged Is Nothing Then argIsNull(NameOf(fileToBeDebugged)) : Return
@@ -398,8 +336,6 @@ Public Module WinappDebug
     ''' <param name="entry">
     ''' A <c> winapp2entry </c> to be audited for syntax errors
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2022-01-11
     Private Sub ProcessEntry(ByRef entry As winapp2entry)
 
         gLog($"Processing entry {entry.Name}", buffr:=True)
@@ -501,8 +437,6 @@ Public Module WinappDebug
     ''' <param name="entry"> 
     ''' A <c> winapp2entry </c> whose <c> iniKeys </c> will be audited for basic syntax correctness 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Sub ValidateKeys(ByRef entry As winapp2entry)
 
         For Each lst In entry.KeyListList
@@ -541,8 +475,6 @@ Public Module WinappDebug
     ''' <param name="winapp">
     ''' The <c> winapp2file </c> whose entries will be alphabetized 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Sub AlphabetizeEntries(ByRef winapp As winapp2file)
 
         For Each innerFile In winapp.EntrySections
@@ -562,9 +494,7 @@ Public Module WinappDebug
     ''' 
     ''' <param name="winapp2file">
     ''' The <c> winapp2file </c> that was linted 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' </param> 
     Private Sub RewriteChanges(ByRef winapp2file As winapp2file)
 
         If Not SaveChanges Then Return
@@ -601,9 +531,7 @@ Public Module WinappDebug
     ''' <param name="oopBool"> 
     ''' Tracking variable indicating that alphabetization errors have been found 
     ''' <br/>  Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2023-07-22 | Code last updated: 2021-11-13
+    ''' </param> 
     Private Sub findOutOfPlace(ByRef someList As strList,
                                ByRef sortedList As strList,
                                findType As String,
@@ -668,8 +596,6 @@ Public Module WinappDebug
     ''' Tracking variable indicating that there exist ExcludeKeys contain registry locations 
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Sub processKeyList(ByRef kl As keyList,
                                processKey As Func(Of iniKey, iniKey),
                                Optional ByRef hasF As Boolean = False,
@@ -747,7 +673,6 @@ Public Module WinappDebug
     ''' <param name="key"> 
     ''' An <c> iniKey </c> with which to do nothing 
     ''' </param>
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Function voidDelegate(key As iniKey) As iniKey
 
         Return key
@@ -777,8 +702,6 @@ Public Module WinappDebug
     ''' <param name="noNumbers"> 
     ''' Indicates that the current set of keys should not be numbered 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Sub cFormat(ByRef key As iniKey,
                         ByRef keyNumber As Integer,
                         ByRef keyValues As strList,
@@ -834,8 +757,6 @@ Public Module WinappDebug
     ''' <param name="cond"> 
     ''' The condition under which this scan should be run 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2024-04-22 | Code last updated: 2024-04-22
     Private Sub fixBrokenEnVars(ByRef key As iniKey, enVars As String(), cond As Boolean)
 
         If Not cond Then Return
@@ -897,8 +818,6 @@ Public Module WinappDebug
     ''' <param name="key">
     ''' The <c> iniKey </c> whose data will be audited for environment variable correctness 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
     Private Sub cEnVar(ByRef key As iniKey)
 
         ' Valid Environmental Variables for winapp2.ini
@@ -934,8 +853,6 @@ Public Module WinappDebug
     ''' <param name="cmds">
     ''' An array containing valid winapp2.ini <c> keyTypes </c> 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-05-03
     Private Function fixMissingEquals(ByRef key As iniKey,
                                       cmds As String()) As Boolean
 
@@ -995,8 +912,6 @@ Public Module WinappDebug
     ''' <param name="key"> 
     ''' A <c> iniKey </c> whose basic syntactic validity will be assessed 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2022-12-01
     Private Function cValidity(ByRef key As iniKey) As Boolean
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return False
@@ -1075,9 +990,7 @@ Public Module WinappDebug
     ''' 
     ''' <param name="strToChk"> 
     ''' A pointer to the value being audited 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2022-12-01
+    ''' </param> 
     Private Sub chkCasing(ByRef key As iniKey,
                           casedArray As String(),
                           strToChk As String)
@@ -1111,9 +1024,7 @@ Public Module WinappDebug
     ''' 
     ''' <param name="key"> 
     ''' A winapp2.ini FileKey format <c> iniKey </c> to be checked for correctness 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
+    ''' </param> 
     Public Function pFileKey(key As iniKey) As iniKey
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return key
@@ -1223,8 +1134,6 @@ Public Module WinappDebug
     ''' <param name="isRegistry"> 
     ''' Indicates that the given <c> <paramref name="key"/> </c> is expected to hold a registry path 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-05-03
     Private Sub chkPathFormatValidity(key As iniKey, isRegistry As Boolean)
 
         If Not lintPathValidity.ShouldScan Then Return
@@ -1253,9 +1162,7 @@ Public Module WinappDebug
     ''' 
     ''' <param name="hasR"> 
     ''' Indicates whether the entry excludes any registry locations 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-05-03
+    ''' </param> 
     Private Sub pExcludeKey(ByRef key As iniKey,
                             ByRef hasF As Boolean,
                             ByRef hasR As Boolean)
@@ -1299,8 +1206,6 @@ Public Module WinappDebug
     ''' <param name="key"> 
     ''' A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2024-05-03 | Code last updated: 2024-05-03
     Private Function checkExcludeFlags(ByRef key As iniKey) As Boolean
 
         Dim HasFlagRegex = New Regex("^(FILE|PATH|REG)")
@@ -1335,8 +1240,6 @@ Public Module WinappDebug
     ''' <param name="hadDuplicatesRemoved"> 
     ''' Indicates that keys have been removed from <c> <paramref name="kl"/> </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
     Private Sub sortKeys(ByRef kl As keyList,
                          hadDuplicatesRemoved As Boolean)
 
@@ -1380,8 +1283,6 @@ Public Module WinappDebug
     ''' Indicates that the error condition is present 
     ''' <br/> Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
     Private Sub inputMismatchErr(linecount As Integer,
                                  err As String,
                                  received As String,
@@ -1408,8 +1309,6 @@ Public Module WinappDebug
     ''' <param name="errTxt"> 
     ''' A description of the error as it will be displayed to the user 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-24
     Private Sub fullNameErr(cond As Boolean,
                             entry As winapp2entry,
                             errTxt As String)
@@ -1450,8 +1349,6 @@ Public Module WinappDebug
     ''' The incorrect value 
     ''' <br/> Optional, Default: <c> "" </c> 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
     Private Sub fullKeyErr(key As iniKey,
                            err As String,
                            Optional cond As Boolean = True,
@@ -1481,8 +1378,6 @@ Public Module WinappDebug
     ''' <param name="lines"> 
     ''' Any additional error information to be printed alongside the description 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Sub customErr(lineCount As Integer,
                           err As String,
                           lines As String())
@@ -1524,8 +1419,6 @@ Public Module WinappDebug
     ''' <param name="newValue">
     ''' The replacement value for <c> <paramref name="currentValue"/> </c> 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2024-04-22
     Private Sub fixStr(param As Boolean,
                        ByRef currentValue As String,
                        newValue As String)
