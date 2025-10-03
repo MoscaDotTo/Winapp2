@@ -172,7 +172,7 @@ Public Module WinappDebug
     ''' <summary> 
     ''' Regex to detect valid LangSecRef numbers 
     ''' </summary> 
-    Private Property secRefNums As New Regex("30(0([1-6])|2([1-9])|3([0-8]))")
+    Private Property secRefNums As New Regex("30(0([1-6])|2([1-9])|3([0-9])|4([0-4]))")
 
     ''' <summary> 
     ''' Regex to detect valid drive letter parameters 
@@ -1220,6 +1220,8 @@ Public Module WinappDebug
             Return False
 
         End If
+
+        fullKeyErr(key, "ExcludeKey contains REG flag", key.vHas("REG|") AndAlso CurrentWinappFlavor = WinappFlavor.BleachBit)
 
         Dim foundFlag = HasFlagRegex.Matches(key.Value)(0)
         Dim fixedValue = key.Value.Insert(foundFlag.Length, "|")
