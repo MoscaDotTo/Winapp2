@@ -23,24 +23,18 @@ Option Strict On
 ''' as well as enabling the simple creation of entire module menus with a more easily understood 
 ''' interface than the pre-2025 MenuMaker
 ''' </summary>
-''' 
-''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
 Public Class MenuSection
 
     ''' <summary>
     ''' The title of the menu section. This is displayed above the set of items in this section
     ''' when printing. When it is blank, no title is printed
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Private _title As String
 
     ''' <summary>
     ''' The set of menu items in this section. Each item is an Action delegate that 
     ''' represents a menu option, toggle, or line of text to be printed to the user 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Private _items As New List(Of Action)
 
     ''' <summary>
@@ -48,8 +42,6 @@ Public Class MenuSection
     ''' If not set, the title is printed in the default console color. 
     ''' This allows for easy setting of accent colors for modules
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Private _titleColor As ConsoleColor? = Nothing
 
     ''' <summary>
@@ -59,9 +51,7 @@ Public Class MenuSection
     ''' 
     ''' <param name="title">
     ''' The title of the menu section. If <c> "" </c>, no title is printed
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
+    ''' </param> 
     Public Sub New(Optional title As String = "")
 
         _title = title
@@ -71,24 +61,18 @@ Public Class MenuSection
     ''' <summary>
     ''' Indicates whether or not this MenuSection represents a complete menu with header
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Private _isCompleteMenu As Boolean = False
 
     ''' <summary>
     ''' Indicates whether or not this MenuSection is the root menu of an application 
     ''' (as opposed to a submenu) <br />
     ''' This affects certain printing behaviors, such as the phrasing of the exit option in the menu
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-21
+    ''' </summary> 
     Private _isRootMenu As Boolean = False
 
     ''' <summary>
     ''' The main header text for a complete menu
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Private _menuHeader As String = ""
 
     ''' <summary>
@@ -99,8 +83,6 @@ Public Class MenuSection
     ''' <summary>
     ''' Description lines that appear under the header
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Private _descriptionLines As New List(Of String)
 
     ''' <summary>
@@ -122,8 +104,6 @@ Public Class MenuSection
     ''' Indicates whether or not the option should be printed <br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Function AddOption(name As String,
                               description As String,
                      Optional condition As Boolean = True) As MenuSection
@@ -165,8 +145,6 @@ Public Class MenuSection
     ''' A MenuSection configured as a complete menu with the provided header and descriptions, 
     ''' ready to be populated with options, toggles, and other menu items
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Public Shared Function CreateCompleteMenu(menuHeader As String,
                                               descriptionLines As String(),
                                               Optional headerColor As ConsoleColor? = Nothing,
@@ -216,8 +194,6 @@ Public Class MenuSection
     ''' Indicates whether or not the toggle should be printed <br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Function AddToggle(name As String,
                               description As String,
                               isEnabled As Boolean,
@@ -247,8 +223,6 @@ Public Class MenuSection
     ''' Indicates whether or not the line should be printed <br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Function AddLine(text As String,
                    Optional centered As Boolean = False,
                    Optional condition As Boolean = True) As MenuSection
@@ -268,8 +242,6 @@ Public Class MenuSection
     ''' Indicates whether or not the blank line should be printed <br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Function AddBlank(Optional condition As Boolean = True) As MenuSection
 
         _items.Add(Sub() MenuMaker.PrintBlank(condition))
@@ -296,8 +268,6 @@ Public Class MenuSection
     ''' <param name="condition">
     ''' Whether the line should be printed
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Function AddColoredLine(text As String,
                                   color As ConsoleColor,
                                   Optional centered As Boolean = False,
@@ -334,8 +304,6 @@ Public Class MenuSection
     ''' <br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-09-02 | Code last updated: 2025-08-31
     Public Function AddFileInfo(text As String,
                                 filePath As String,
                        Optional condition As Boolean = True) As MenuSection
@@ -376,8 +344,6 @@ Public Class MenuSection
     ''' <param name="condition">
     ''' Indicates whether or not the option should be printed (i.e. whether settings have been changed)
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-06
     Public Function AddResetOpt(moduleName As String,
                                 condition As Boolean) As MenuSection
 
@@ -408,8 +374,6 @@ Public Class MenuSection
     ''' <param name="condition">
     ''' Whether the option should be printed
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-21 | Code last updated: 2025-08-06
     Public Function AddColoredOption(name As String,
                                    description As String,
                                    color As ConsoleColor,
@@ -434,8 +398,6 @@ Public Class MenuSection
     ''' <param name="condition">
     ''' Whether the warning should be printed
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Function AddWarning(text As String,
                       Optional condition As Boolean = True) As MenuSection
 
@@ -476,8 +438,6 @@ Public Class MenuSection
     ''' Indicates whether or not the border should be printed <br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-09-01 | Code last updated: 2025-08-06
     Public Function AddTopBorder(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
@@ -560,8 +520,6 @@ Public Class MenuSection
     ''' <br /> 
     ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Public Sub Print(Optional withDivider As Boolean = True)
 
         If _isCompleteMenu Then PrintCompleteMenu() : Return
@@ -578,8 +536,6 @@ Public Class MenuSection
     ''' Indicates that the section should be printed with a solid border dividing it from its options
     ''' <br />
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Private Sub PrintSection(withDivider As Boolean)
 
         Dim hasTitle = Not String.IsNullOrEmpty(_title)
@@ -608,8 +564,6 @@ Public Class MenuSection
     ''' <br />
     ''' This is used for the main menus of modules that require a header and multiple options
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-08-11 | Code last updated: 2025-08-11
     Private Sub PrintCompleteMenu()
 
         BeginMenu()

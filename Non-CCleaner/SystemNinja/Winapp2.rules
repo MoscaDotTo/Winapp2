@@ -1,5 +1,5 @@
-; Version: 251001
-; # of entries: 3,512
+; Version: 251002
+; # of entries: 3,519
 ;
 ; Winapp2.ini is fully licensed under the CC-BY-SA-4.0 license agreement. Please refer to our license agreement before using Winapp2.ini: https://github.com/MoscaDotTo/Winapp2/blob/master/License.md
 ; You may copy, modify, remix, share, show, and transmit Winapp2 but you must redistribute under the same license and you must attribute the original work to the winapp2 project
@@ -1718,7 +1718,7 @@ FileKey11=%UserProfile%\Documents\Amazon Music Importer\Logs|*|RECURSE
 
 [Amazon Prime Video *]
 LangSecRef=3023
-DetectFile=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*
+DetectFile=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_pwbj9vvecjh7j
 FileKey1=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\AppData\CacheStorage|*|RECURSE
 FileKey3=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\LocalState|*.log;*.tmp|RECURSE
@@ -4470,7 +4470,8 @@ FileKey3=%ProgramFiles%\Blue-Cloner|*.log;*.txt
 [Blue Prince *]
 Section=Games
 DetectFile=%UserProfile%\AppData\LocalLow\Dogubomb\BLUE PRINCE
-FileKey1=%UserProfile%\AppData\LocalLow\Dogubomb\BLUE PRINCE|*log
+FileKey1=%ProgramFiles%\Steam\steamapps\common\Blue Prince\MelonLoader|*.log|RECURSE
+FileKey2=%UserProfile%\AppData\LocalLow\Dogubomb\BLUE PRINCE|*log
 
 [BlueGriffon *]
 LangSecRef=3021
@@ -4529,7 +4530,12 @@ FileKey1=%ProgramFiles%\BOINC|stdout*.*;stderr*.*
 
 [Borderlands *]
 Section=Games
-DetectFile=%UserProfile%\Documents\My Games\Borderlands*
+DetectFile1=%UserProfile%\Documents\My Games\Borderlands
+DetectFile2=%UserProfile%\Documents\My Games\Borderlands 2
+DetectFile3=%UserProfile%\Documents\My Games\Borderlands 3
+DetectFile4=%UserProfile%\Documents\My Games\Borderlands 4
+DetectFile5=%UserProfile%\Documents\My Games\Borderlands Game of the Year
+DetectFile6=%UserProfile%\Documents\My Games\Borderlands The Pre-Sequel
 FileKey1=%UserProfile%\Documents\My Games\Borderlands*\WillowGame\Logs|*
 
 [Borland C++ Builder 5.0 *]
@@ -7756,6 +7762,11 @@ FileKey3=%AppData%\DC++\Logs|*
 FileKey4=%LocalAppData%\DC++|CrashLog.txt;FinishedTransfers.xml;Queue.xml.bak;Recents.xml
 FileKey5=%ProgramFiles%\DC++|CrashLog.txt;FinishedTransfers.xml;Queue.xml.bak;Recents.xml
 
+[Dead Cells *]
+Section=Games
+DetectFile=%ProgramFiles%\Steam\steamapps\common\Dead Cells
+FileKey1=%ProgramFiles%\Steam\steamapps\common\Dead Cells\logs|*.log
+
 [Dead Island *]
 Section=Games
 DetectFile=%UserProfile%\Documents\DeadIsland*
@@ -7873,7 +7884,7 @@ FileKey4=%LocalAppData%\Packages\DellInc.DellCustomerConnect_*\TempState|*|RECUR
 
 [Dell Digital Delivery *]
 LangSecRef=3024
-DetectFile=%LocalAppData%\Packages\DellInc.DellDigitalDelivery_*
+DetectFile=%LocalAppData%\Packages\DellInc.DellDigitalDelivery_htrsf667h5kn2
 FileKey1=%LocalAppData%\Packages\DellInc.DellDigitalDelivery_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\DellInc.DellDigitalDelivery_*\LocalState\serilog|*.txt
 FileKey3=%LocalAppData%\Packages\DellInc.DellDigitalDelivery_*\Settings|*.log*
@@ -7881,7 +7892,7 @@ FileKey4=%LocalAppData%\Packages\DellInc.DellDigitalDelivery_*\TempState|*|RECUR
 
 [Dell Help & Support *]
 LangSecRef=3024
-DetectFile=%LocalAppData%\Packages\DellInc.DellHelpSupport_*
+DetectFile=%LocalAppData%\Packages\DellInc.DellHelpSupport_htrsf667h5kn2
 FileKey1=%LocalAppData%\Packages\DellInc.DellHelpSupport_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\DellInc.DellHelpSupport_*\LocalCache\Local\Dell\DHSC\Logs|*.log
 FileKey3=%LocalAppData%\Packages\DellInc.DellHelpSupport_*\Settings|*.log*
@@ -7894,7 +7905,7 @@ FileKey1=%SystemDrive%\Dell|*|REMOVESELF
 
 [Dell Mobile Connect *]
 LangSecRef=3022
-DetectFile=%LocalAppData%\Packages\ScreenovateTechnologies.DellMobileConnect_*
+DetectFile=%LocalAppData%\Packages\ScreenovateTechnologies.DellMobileConnect_htrsf667h5kn2
 FileKey1=%LocalAppData%\Packages\ScreenovateTechnologies.DellMobileConnect_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\ScreenovateTechnologies.DellMobileConnect_*\LocalCache\Local\Dell\DellMobileConnect|*.log
 FileKey3=%LocalAppData%\Packages\ScreenovateTechnologies.DellMobileConnect_*\LocalCache\LocalLow\Microsoft\CryptnetUrlCache\*|*|RECURSE
@@ -7903,7 +7914,7 @@ FileKey5=%LocalAppData%\Packages\ScreenovateTechnologies.DellMobileConnect_*\Tem
 
 [Dell My Dell *]
 LangSecRef=3024
-DetectFile=%LocalAppData%\Packages\DellInc.MyDell_*
+DetectFile=%LocalAppData%\Packages\DellInc.MyDell_htrsf667h5kn2
 FileKey1=%LocalAppData%\Packages\DellInc.MyDell_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\DellInc.MyDell_*\LocalState\Logs|*
 FileKey3=%LocalAppData%\Packages\DellInc.MyDell_*\Settings|*.log*
@@ -7921,14 +7932,14 @@ FileKey6=%ProgramData%\PCDr\*\Snapshots\*|*
 
 [Dell Power Manager *]
 LangSecRef=3024
-DetectFile=%LocalAppData%\Packages\DellInc.DellPowerManager_*
+DetectFile=%LocalAppData%\Packages\DellInc.DellPowerManager_htrsf667h5kn2
 FileKey1=%LocalAppData%\Packages\DellInc.DellPowerManager_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\DellInc.DellPowerManager_*\Settings|*.log*
 FileKey3=%LocalAppData%\Packages\DellInc.DellPowerManager_*\TempState|*|RECURSE
 
 [Dell PremierColor *]
 LangSecRef=3023
-DetectFile=%LocalAppData%\Packages\PortraitDisplays.DellPremierColor_*
+DetectFile=%LocalAppData%\Packages\PortraitDisplays.DellPremierColor_2dgmkzkw4h30c
 FileKey1=%LocalAppData%\Packages\PortraitDisplays.DellPremierColor_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\PortraitDisplays.DellPremierColor_*\LocalCache\Local\Microsoft\Windows\Caches|*.db
 FileKey3=%LocalAppData%\Packages\PortraitDisplays.DellPremierColor_*\Settings|*.log*
@@ -7945,8 +7956,9 @@ FileKey5=%LocalAppData%\Packages\DellInc.DellProductRegistration_*\TempState|*|R
 
 [Dell Stage Suite *]
 LangSecRef=3023
-DetectFile1=%AppData%\Dell\*Stage
-DetectFile2=%LocalAppData%\Dell\*Stage
+DetectFile1=%AppData%\Dell\Dell Stage
+DetectFile2=%AppData%\Dell\MusicStage
+DetectFile3=%LocalAppData%\Dell\VideoStage
 FileKey1=%AppData%\Dell\Dell Stage|*.backup|RECURSE
 FileKey2=%AppData%\Dell\MusicStage\*\Album_Images|*
 FileKey3=%AppData%\Dell\MusicStage\*\Artist_Images|*
@@ -8538,7 +8550,8 @@ FileKey1=%ProgramData%\Hagel Technologies\DU Meter|*.csv;error.elf
 
 [DuckDuckGo Autofill Data *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|*Web Data
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\AutoFill*|*|REMOVESELF
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\AutoFill*|*|REMOVESELF
@@ -8548,25 +8561,29 @@ FileKey6=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviron
 
 [DuckDuckGo Autoplay Preferences *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\MEIPreload|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\MEIPreload|*|REMOVESELF
 
 [DuckDuckGo Bookmark Backups *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|Bookmarks.bak
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*|Bookmarks.bak
 
 [DuckDuckGo Bookmark Favicons *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|favicons*
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*|favicons*
 
 [DuckDuckGo Caches *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState|cached*
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView|*-journal|RECURSE
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView|Module Info Cache
@@ -8611,13 +8628,15 @@ FileKey41=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviro
 
 [DuckDuckGo Default App Handlers *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|PreferredApps
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*|PreferredApps
 
 [DuckDuckGo Download History *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|DownloadMetadata
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\shared_proto_db|*|REMOVESELF
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*|DownloadMetadata
@@ -8625,7 +8644,8 @@ FileKey4=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviron
 
 [DuckDuckGo DRM Data *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\MediaFoundationCdmStore|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\WidevineCdm|*|REMOVESELF
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\MediaFoundationCdmStore|*|REMOVESELF
@@ -8633,13 +8653,15 @@ FileKey4=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviron
 
 [DuckDuckGo Extension Cookies *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|Extension Cookies
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*|Extension Cookies
 
 [DuckDuckGo Privacy Sandbox *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView|*first_party_sets*
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|BrowsingTopics*;Conversions*;InterestGroups;MediaDeviceSalts;SharedStorage*;PrivateAggregation*
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Network|Trust Tokens*
@@ -8659,19 +8681,22 @@ FileKey16=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviro
 
 [DuckDuckGo Progressive Web Apps *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Web Applications|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\Web Applications|*|REMOVESELF
 
 [DuckDuckGo Saved Usernames & Passwords *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|Login Data*
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*|Login Data*
 
 [DuckDuckGo Security & Threat Detection *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|DIPS*
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\ClientCertificates|*|REMOVESELF
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Network|TransportSecurity*
@@ -8699,7 +8724,8 @@ FileKey24=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviro
 
 [DuckDuckGo Shopping Insights *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\chrome_cart_db|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\commerce_subscription_db|*|REMOVESELF
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\coupon_db|*|REMOVESELF
@@ -8713,14 +8739,15 @@ FileKey10=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviro
 
 [DuckDuckGo Storage Quota Manager *]
 Section=DuckDuckGo Web Browser
-DetectFile1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView
-DetectFile2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|QuotaManager
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*|QuotaManager
 
 [DuckDuckGo Telemetry *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\Application|debug.log
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\Application\SetupMetrics|*|REMOVESELF
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\Crashes|*|REMOVESELF
@@ -8767,19 +8794,22 @@ FileKey43=%ProgramFiles%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviro
 
 [DuckDuckGo Web Browsing Cookies *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Network|Cookies*;Device Bound Sessions*
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\Network|Cookies*;Device Bound Sessions*
 
 [DuckDuckGo Web Browsing History *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*|History*;Visited Links*;Top Sites*;Network Action Predictor*;shortcuts*
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*|History*;Visited Links*;Top Sites*;Network Action Predictor*;shortcuts*
 
 [DuckDuckGo Web Browsing Session *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Extension State|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Sessions|*|REMOVESELF
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\Extension State|*|REMOVESELF
@@ -8787,7 +8817,8 @@ FileKey4=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnviron
 
 [DuckDuckGo Web Storage *]
 Section=DuckDuckGo Web Browser
-DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+DetectFile1=%LocalAppData%\Packages\63909DuckDuckGoInc.DuckDuckGoPrivateBrowser_qzdjx70tn762j
+DetectFile2=%LocalAppData%\Packages\DuckDuckGo.DesktopBrowser_ya2fgkz3nks94
 FileKey1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\IndexedDB|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Local Storage\*\IndexedDB\https*|*
 FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Local Storage\*\Session Storage|*
@@ -9445,6 +9476,14 @@ FileKey6=%ProgramData%\elsterformular\log|*.log
 LangSecRef=3023
 DetectFile=%AppData%\Eltima Software\SWF Player
 FileKey1=%AppData%\Eltima Software\SWF Player|last_playlist;recent
+
+[Eluktronics Control Center *]
+LangSecRef=3024
+DetectFile1=%LocalAppData%\ControlCenter3_wrbgcf7aesyd8
+DetectFile2=%ProgramFiles%\OEM\Eluktronics Control Center
+FileKey1=%LocalAppData%\Packages\ControlCenter3_*\AC|*|RECURSE
+FileKey2=%ProgramData%\ControlCenter|*.log
+FileKey3=%UserProfile%\Logs|SystrayComponent.json
 
 [eM Client *]
 LangSecRef=3022
@@ -12846,46 +12885,43 @@ Detect3=HKLM\Software\RivetNetworks
 FileKey1=%AppData%\Intel\Wireless\CrashDumps|*
 FileKey2=%LocalAppData%\Intel\GCC|*log*
 FileKey3=%LocalAppData%\Intel\IGN\Logs|*.log
-FileKey4=%LocalAppData%\Intel\IntelGraphicsSoftware\EBWebView\*cache*|*|RECURSE
-FileKey5=%LocalAppData%\Intel\IntelGraphicsSoftware\EBWebView\Default|*.log;DIPS*;ExtensionActivity*;Favicons*;History*;Login Data;Network Action*;Top Sites*;Visited Links*;Web Data*
-FileKey6=%LocalAppData%\Intel\IntelGraphicsSoftware\EBWebView\Default\*cache*|*|RECURSE
-FileKey7=%LocalAppData%\Intel\SUR\QueenCreek\Collected Data|*error_stack-*.txt
-FileKey8=%LocalAppData%\Packages\AppUp.ThunderboltControlCenter_*\AC|*
-FileKey9=%LocalAppData%\Packages\AppUp.ThunderboltControlCenter_*\LocalCache|*
-FileKey10=%ProgramData%\Intel|*.log;*.bak;*Log*.txt|RECURSE
-FileKey11=%ProgramData%\Intel(R) Update Manager\AppData|ium.log
-FileKey12=%ProgramData%\Intel\*\Log*|*
-FileKey13=%ProgramData%\Intel\DSA\Logs|*.bak;*.log;*.txt
-FileKey14=%ProgramData%\Intel\GFXInstaller|*.dmp
-FileKey15=%ProgramData%\Intel\Intel Extreme Tuning Utility\Logs|*|RECURSE
-FileKey16=%ProgramData%\Intel\Logs|*|RECURSE
-FileKey17=%ProgramData%\Intel\Uploader\Intel Telemetry\uploader\*|*
-FileKey18=%ProgramData%\RivetNetworks\ImageCache|*
-FileKey19=%ProgramData%\RivetNetworks\Killer|*.log
-FileKey20=%ProgramFiles%\Intel\*|*.log;*Log.txt|RECURSE
-FileKey21=%ProgramFiles%\Intel\InfInst|*|REMOVESELF
-FileKey22=%SystemDrive%|IFRToolLog.txt
-FileKey23=%SystemDrive%\Driver_allOS\MEI\Drivers\MEI\INTERNAL|*.log|RECURSE
-FileKey24=%SystemDrive%\Intel|*.log|REMOVESELF
-FileKey25=%SystemDrive%\Intel\GfxCPLBatchFiles|*|REMOVESELF
-FileKey26=%SystemDrive%\Intel\Logs|*|REMOVESELF
-FileKey27=%UserProfile%|BullseyeCoverageError.txt
-FileKey28=%UserProfile%\AppData\LocalLow\Intel\ShaderCache|*
-FileKey29=%UserProfile%\Intel\Logs|*|REMOVESELF
-FileKey30=%WinDir%\debug\Intel\Logs|*|REMOVESELF
-FileKey31=%WinDir%\INF\Intel Storage Counters|*.tmp|RECURSE
-FileKey32=%WinDir%\System32|Default_error_Stack-*.txt;Gms.log
-FileKey33=%WinDir%\System32\config\systemprofile\AppData\Local\Intel\GCC|*.txt
-FileKey34=%WinDir%\System32\config\systemprofile\Intel\Logs|*|REMOVESELF
-FileKey35=%WinDir%\System32\drivers\RivetNetworks\Killer|*.log
-FileKey36=%WinDir%\SysWOW64|Gms.log
-FileKey37=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\GCC|*log*.txt
-FileKey38=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\collected_data\DebugLogs|*
-FileKey39=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\intermediate_data|*
-FileKey40=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData|*.log;*.bak
-FileKey41=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData\captured_logs|*
-FileKey42=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData\history|*
-FileKey43=%WinDir%\SysWOW64\config\systemprofile\Intel\Logs|*|REMOVESELF
+FileKey4=%LocalAppData%\Packages\AppUp.ThunderboltControlCenter_*\AC|*
+FileKey5=%LocalAppData%\Packages\AppUp.ThunderboltControlCenter_*\LocalCache|*
+FileKey6=%ProgramData%\Intel|*.log;*.bak;*Log*.txt|RECURSE
+FileKey7=%ProgramData%\Intel(R) Update Manager\AppData|ium.log
+FileKey8=%ProgramData%\Intel\*\Log*|*
+FileKey9=%ProgramData%\Intel\GFXInstaller|*.dmp
+FileKey10=%ProgramData%\Intel\Intel Extreme Tuning Utility\Logs|*|RECURSE
+FileKey11=%ProgramData%\Intel\Logs|*|RECURSE
+FileKey12=%ProgramData%\Intel\Uploader\Intel Telemetry\uploader\*|*
+FileKey13=%ProgramData%\RivetNetworks\ImageCache|*
+FileKey14=%ProgramData%\RivetNetworks\Killer|*.log
+FileKey15=%ProgramFiles%\Intel\*|*.log;*Log.txt|RECURSE
+FileKey16=%ProgramFiles%\Intel\InfInst|*|REMOVESELF
+FileKey17=%SystemDrive%|IFRToolLog.txt
+FileKey18=%SystemDrive%\Driver_allOS\MEI\Drivers\MEI\INTERNAL|*.log|RECURSE
+FileKey19=%SystemDrive%\Intel|*.log|REMOVESELF
+FileKey20=%SystemDrive%\Intel\GfxCPLBatchFiles|*|REMOVESELF
+FileKey21=%SystemDrive%\Intel\Logs|*|REMOVESELF
+FileKey22=%UserProfile%|BullseyeCoverageError.txt
+FileKey23=%UserProfile%\AppData\LocalLow\Intel\ShaderCache|*
+FileKey24=%UserProfile%\Intel\Logs|*|REMOVESELF
+FileKey25=%WinDir%\debug\Intel\Logs|*|REMOVESELF
+FileKey26=%WinDir%\INF\Intel Storage Counters|*.tmp|RECURSE
+FileKey27=%WinDir%\System32|Default_error_Stack-*.txt;Gms.log
+FileKey28=%WinDir%\System32\config\systemprofile\AppData\Local\Intel\GCC|*.txt
+FileKey29=%WinDir%\System32\config\systemprofile\Intel\Logs|*|REMOVESELF
+FileKey30=%WinDir%\System32\drivers\DriverData\Intel\GfxDriver|*.etl
+FileKey31=%WinDir%\System32\drivers\RivetNetworks\Killer|*.log
+FileKey32=%WinDir%\SysWOW64|Gms.log
+FileKey33=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\GCC|*log*.txt
+FileKey34=%WinDir%\SysWOW64\config\systemprofile\Intel\Logs|*|REMOVESELF
+
+[Intel Driver & Support Assistant *]
+LangSecRef=3024
+DetectFile=%ProgramData%\Intel\DSA
+FileKey1=%ProgramData%\Intel\DSA\Data|*
+FileKey2=%ProgramData%\Intel\DSA\Logs|*|RECURSE
 
 [Intel Graphics Command Center *]
 LangSecRef=3024
@@ -12912,6 +12948,17 @@ DetectFile1=%ProgramData%\Intel\ShaderCache
 DetectFile2=%UserProfile%\AppData\LocalLow\Intel\ShaderCache
 FileKey1=%ProgramData%\Intel\ShaderCache|*
 FileKey2=%UserProfile%\AppData\LocalLow\Intel\ShaderCache|*
+
+[Intel System Usage Report Service *]
+LangSecRef=3024
+DetectFile=%LocalAppData%\Intel\SUR
+FileKey1=%LocalAppData%\Intel\SUR\QueenCreek\Collected Data|*error_stack-*.txt
+FileKey2=%WinDir%\System32\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\intermediate_data|*
+FileKey3=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\collected_data\DebugLogs|*
+FileKey4=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\intermediate_data|*
+FileKey5=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData|*.log;*.bak
+FileKey6=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData\captured_logs|*
+FileKey7=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData\history|*
 
 [Inter-Tel Device *]
 LangSecRef=3022
@@ -13892,6 +13939,11 @@ LangSecRef=3024
 DetectFile=%AppData%\Kite
 FileKey1=%AppData%\Kite\*Cache|*
 
+[Kiwix JS *]
+LangSecRef=3022
+DetectFile=%LocalAppData%\Packages\Kiwix.KiwixJS_mc3511b08yc0e
+FileKey1=%LocalAppData%\Packages\Kiwix.KiwixJS_mc3511b08yc0e\LocalCache\Roaming\Kiwix JS Electron|*cache*|RECURSE
+
 [Kleaner *]
 LangSecRef=3024
 DetectFile=%ProgramFiles%\Skyler Lyon\Kleaner
@@ -14210,35 +14262,35 @@ FileKey7=%ProgramFiles%\LibreOffice*\program_old*|*|REMOVESELF
 [LibreWolf Autocomplete History *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|formhistory*
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*|formhistory*
 
 [LibreWolf Autofill Data *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|autofill-profiles.json
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*|autofill-profiles.json
 
 [LibreWolf Bookmark Backups *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*\bookmarkbackups|*
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*\bookmarkbackups|*
 
 [LibreWolf Bookmark Favicons *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|favicons*
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*|favicons*
 
 [LibreWolf Caches *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|*.corrupt|RECURSE
 FileKey2=%AppData%\librewolf\Profiles\*|AlternateServices.txt;notificationstore.json;parent.lock;serviceworker.txt;webappsstore.sqlite;cert9.db;ClientAuthRememberList.txt;SiteSecurityServiceState*
 FileKey3=%AppData%\librewolf\Profiles\*\notificationstore|*
@@ -14261,28 +14313,28 @@ FileKey18=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Pro
 [LibreWolf Privacy Sandbox *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|credentialstate.sqlite
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*|credentialstate.sqlite
 
 [LibreWolf Saved Usernames & Passwords *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|key4.db;logins.json
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*|key4.db;logins.json
 
 [LibreWolf Synced Tabs *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|synced-tabs.db*
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*|synced-tabs.db*
 
 [LibreWolf Telemetry *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf|*.log|RECURSE
 FileKey2=%AppData%\librewolf\Profiles\*|protections.sqlite;storage.sqlite;Telemetry.ShutdownTime.txt;times.json;targeting.snapshot.json;enumerate_devices.txt
 FileKey3=%AppData%\librewolf\Profiles\*\crashes|*
@@ -14303,35 +14355,35 @@ FileKey16=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Pro
 [LibreWolf Web Browsing Cookies *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|cookies*
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*|cookies*
 
 [LibreWolf Web Browsing Session *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|session*.json*
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*|session*.json*
 
 [LibreWolf Web Browsing Session Backups *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*\sessionstore-backups|*
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*\sessionstore-backups|*
 
 [LibreWolf Web Storage *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\storage\default\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\storage\default\http*|*|REMOVESELF
 
 [LibreWolf Website Permissions *]
 Section=LibreWolf Web Browser
 DetectFile1=%AppData%\librewolf\Profiles
-DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles
+DetectFile2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct
 FileKey1=%AppData%\librewolf\Profiles\*|permissions.sqlite
 FileKey2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles\*|permissions.sqlite
 
@@ -14440,7 +14492,7 @@ FileKey13=%ProgramFiles%\Logitech\Desktop Messenger|*.log;*.bak|RECURSE
 FileKey14=%ProgramFiles%\Logitech\LogiOptions\LogiBolt|*|REMOVESELF
 FileKey15=%WinDir%\System32|lvcoinst.log
 
-[Logitech G HUB - Window Size/Location]
+[Logitech G HUB - Window Size/Location *]
 LangSecRef=3024
 Detect=HKCU\SOFTWARE\Logitech\LGHUB
 FileKey1=%AppData%\lghub|window-state.json
@@ -15357,6 +15409,11 @@ LangSecRef=3025
 DetectFile=%WinDir%\System32\ntbackup.exe
 FileKey1=%LocalAppData%\Microsoft\Windows NT\NTBackup\Data|*.log
 
+[Microsoft Copilot *]
+LangSecRef=3025
+DetectFile=%LocalAppData%\Packages\Microsoft.Copilot_8wekyb3d8bbwe
+FileKey1=%LocalAppData%\Packages\Microsoft.Copilot_*\AC|*|RECURSE
+
 [Microsoft Deployment Toolkit *]
 LangSecRef=3024
 DetectFile=%ProgramFiles%\Microsoft Deployment Toolkit
@@ -15668,7 +15725,7 @@ FileKey2=%UserProfile%\Documents\MessageAnalyzer\Traces|*|RECURSE
 
 [Microsoft Messaging *]
 LangSecRef=3022
-DetectFile=%LocalAppData%\Packages\Microsoft.Messaging_*
+DetectFile=%LocalAppData%\Packages\Microsoft.Messaging_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.Messaging_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.Messaging_*\LocalCache|*.etl;*.xml
 FileKey3=%LocalAppData%\Packages\Microsoft.Messaging_*\LocalState\Cache|*|RECURSE
@@ -15677,7 +15734,7 @@ FileKey5=%LocalAppData%\Packages\Microsoft.Messaging_*\TempState|*|RECURSE
 
 [Microsoft Mixed Reality Portal *]
 LangSecRef=3023
-DetectFile=%LocalAppData%\Packages\Microsoft.MixedReality.Portal_*
+DetectFile=%LocalAppData%\Packages\Microsoft.MixedReality.Portal_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.MixedReality.Portal_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.MixedReality.Portal_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.MixedReality.Portal_*\LocalState\Cache|*|RECURSE
@@ -15694,14 +15751,14 @@ RegKey2=HKCU\Software\Microsoft\IntelliType Pro\AppSpecific
 
 [Microsoft Network Speed Test *]
 LangSecRef=3022
-DetectFile=%LocalAppData%\Packages\Microsoft.NetworkSpeedTest_*
+DetectFile=%LocalAppData%\Packages\Microsoft.NetworkSpeedTest_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.NetworkSpeedTest_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.NetworkSpeedTest_*\Settings|*.log*
 FileKey3=%LocalAppData%\Packages\Microsoft.NetworkSpeedTest_*\TempState|*|RECURSE
 
 [Microsoft News *]
 LangSecRef=3025
-DetectFile=%LocalAppData%\Packages\Microsoft.BingNews_*
+DetectFile=%LocalAppData%\Packages\Microsoft.BingNews_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.BingNews_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.BingNews_*\LocalState\Cache\Images|*
 FileKey3=%LocalAppData%\Packages\Microsoft.BingNews_*\LocalState\navigationHistory|*|RECURSE
@@ -15712,7 +15769,7 @@ RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentV
 [Microsoft Office *]
 LangSecRef=3021
 Detect=HKCU\Software\Microsoft\Office
-DetectFile=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_*
+DetectFile=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe
 FileKey1=%AppData%\Microsoft\Clip Organizer|mstore*.mgc;Offic*.MGC
 FileKey2=%AppData%\Microsoft\Document Building Blocks|*|RECURSE
 FileKey3=%AppData%\Microsoft\Office|*.tmp|RECURSE
@@ -15737,12 +15794,16 @@ FileKey21=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_*\AC|*|RECURSE
 FileKey22=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_*\LocalCache|*|RECURSE
 FileKey23=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_*\LocalState\AppData\Local\Office\*\WebServiceCache|*|RECURSE
 FileKey24=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_*\LocalState\Cache|*|RECURSE
-FileKey25=%LocalAppData%\Packages\oice_*\AC|*|RECURSE
-FileKey26=%LocalAppData%\TempOffice*|*|REMOVESELF
-FileKey27=%SystemDrive%|propfix.log
-FileKey28=%UserProfile%\Documents|~*.ppt*;~*.doc*|RECURSE
-FileKey29=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Office\OTele|*|RECURSE
-FileKey30=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\Office\OTele|*|RECURSE
+FileKey25=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView|*.pma|RECURSE
+FileKey26=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\*cache*|*
+FileKey27=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\Crashpad|*|RECURSE
+FileKey28=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\Default\*cache*|*|RECURSE
+FileKey29=%LocalAppData%\Packages\oice_*\AC|*|RECURSE
+FileKey30=%LocalAppData%\TempOffice*|*|REMOVESELF
+FileKey31=%SystemDrive%|propfix.log
+FileKey32=%UserProfile%\Documents|~*.ppt*;~*.doc*|RECURSE
+FileKey33=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Office\OTele|*|RECURSE
+FileKey34=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\Office\OTele|*|RECURSE
 RegKey1=HKCU\Software\Microsoft\ClipArt Gallery\2.0\MRUDescription
 RegKey2=HKCU\Software\Microsoft\Office\11.0\Common\General|SymbolMRU
 RegKey3=HKCU\Software\Microsoft\Office\11.0\Excel|FontInfoCache
@@ -15841,7 +15902,7 @@ RegKey2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentV
 
 [Microsoft OneNote *]
 LangSecRef=3021
-DetectFile=%LocalAppData%\Packages\Microsoft.Office.OneNote_*
+DetectFile=%LocalAppData%\Packages\Microsoft.Office.OneNote_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\LocalState\AppData\Local|msodata*.dat
 FileKey3=%LocalAppData%\Packages\Microsoft.Office.OneNote_*\LocalState\AppData\Local\Office\16.0\WebServiceCache\AllUsers\office*client.microsoft.com|*|RECURSE
@@ -15984,7 +16045,7 @@ FileKey74=%ProgramFiles%\Microsoft\Olk\Application\SetupMetrics|*|REMOVESELF
 
 [Microsoft Paint 3D *]
 LangSecRef=3023
-DetectFile=%LocalAppData%\Packages\Microsoft.MSPaint_*
+DetectFile=%LocalAppData%\Packages\Microsoft.MSPaint_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.MSPaint_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.MSPaint_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.MSPaint_*\Settings|*.log*
@@ -15992,7 +16053,7 @@ FileKey4=%LocalAppData%\Packages\Microsoft.MSPaint_*\TempState|*|RECURSE
 
 [Microsoft People *]
 LangSecRef=3021
-DetectFile=%LocalAppData%\Packages\Microsoft.People*
+DetectFile=%LocalAppData%\Packages\Microsoft.People_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.People*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.People*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.People*\LocalState\Cache|*|RECURSE
@@ -16002,7 +16063,7 @@ FileKey6=%LocalAppData%\Packages\Microsoft.People*\TempState|*|RECURSE
 
 [Microsoft Phone Link *]
 LangSecRef=3022
-DetectFile=%LocalAppData%\Packages\Microsoft.YourPhone_*
+DetectFile=%LocalAppData%\Packages\Microsoft.YourPhone_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.YourPhone_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.YourPhone_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.YourPhone_*\LocalState\Cache|*|RECURSE
@@ -16017,7 +16078,7 @@ FileKey1=%AppData%\Microsoft\Picture It!*|piorg.db
 
 [Microsoft PlayReady *]
 LangSecRef=3025
-DetectFile1=%LocalAppData%\Packages\Microsoft.Media.PlayReadyClient*
+DetectFile1=%LocalAppData%\Packages\Microsoft.Media.PlayReadyClient_8wekyb3d8bbwe
 DetectFile2=%ProgramData%\Microsoft\Windows\DRM
 FileKey1=%LocalAppData%\Packages\Microsoft.Media.PlayReadyClient*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.Media.PlayReadyClient*\LocalState\Cache|*|RECURSE
@@ -16047,7 +16108,7 @@ FileKey11=%UserProfile%\AppData\LocalLow\Microsoft\PowerToys\logs|*.txt;*.log|RE
 
 [Microsoft Print 3D *]
 LangSecRef=3023
-DetectFile=%LocalAppData%\Packages\Microsoft.Print3D_*
+DetectFile=%LocalAppData%\Packages\Microsoft.Print3D_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.Print3D_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.Print3D_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.Print3D_*\LocalState\Cache|*|RECURSE
@@ -16083,7 +16144,7 @@ FileKey1=%LocalAppData%\SmallBasic|*
 
 [Microsoft Solitaire Collection *]
 Section=Games
-DetectFile=%LocalAppData%\Packages\Microsoft.MicrosoftSolitaireCollection_*
+DetectFile=%LocalAppData%\Packages\Microsoft.MicrosoftSolitaireCollection_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.MicrosoftSolitaireCollection_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.MicrosoftSolitaireCollection_*\Settings|*.log*
 FileKey3=%LocalAppData%\Packages\Microsoft.MicrosoftSolitaireCollection_*\TempState|*|RECURSE
@@ -16117,7 +16178,7 @@ FileKey1=%ProgramData%\Microsoft\Microsoft Standalone System Sweeper Tool\Suppor
 
 [Microsoft Sticky Notes *]
 LangSecRef=3025
-DetectFile=%LocalAppData%\Packages\Microsoft.MicrosoftStickyNotes_*
+DetectFile=%LocalAppData%\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.MicrosoftStickyNotes_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.MicrosoftStickyNotes_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.MicrosoftStickyNotes_*\LocalState|log*.txt|RECURSE
@@ -16126,8 +16187,8 @@ FileKey5=%LocalAppData%\Packages\Microsoft.MicrosoftStickyNotes_*\TempState|*|RE
 
 [Microsoft Store *]
 LangSecRef=3025
-DetectFile1=%LocalAppData%\Packages\Microsoft.WindowsStore_*
-DetectFile2=%LocalAppData%\Packages\winstore_*
+DetectFile1=%LocalAppData%\Packages\Microsoft.WindowsStore_8wekyb3d8bbwe
+DetectFile2=%LocalAppData%\Packages\winstore_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.StorePurchaseApp_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.StorePurchaseApp_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.StorePurchaseApp_*\LocalState\Cache|*|RECURSE
@@ -16152,7 +16213,7 @@ FileKey2=%LocalAppData%\SaraResults|SaraResult_*.xml
 
 [Microsoft Sway *]
 LangSecRef=3021
-DetectFile=%LocalAppData%\Packages\Microsoft.Office.Sway_*
+DetectFile=%LocalAppData%\Packages\Microsoft.Office.Sway_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.Office.Sway_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.Office.Sway_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.Office.Sway_*\LocalState\Cache|*|RECURSE
@@ -16162,7 +16223,7 @@ FileKey5=%LocalAppData%\Packages\Microsoft.Office.Sway_*\TempState|*|RECURSE
 [Microsoft Teams *]
 LangSecRef=3021
 DetectFile1=%LocalAppData%\Microsoft\Teams
-DetectFile2=%LocalAppData%\Packages\MicrosoftTeams_*
+DetectFile2=%LocalAppData%\Packages\MicrosoftTeams_8wekyb3d8bbwe
 FileKey1=%AppData%\Microsoft Teams\Logs|*
 FileKey2=%AppData%\Microsoft\Teams|*.log;*logs*.txt;watchdog.txt;watchdog_*.json
 FileKey3=%AppData%\Microsoft\Teams\*Cache|*|RECURSE
@@ -16188,7 +16249,7 @@ FileKey22=%LocalAppData%\Packages\MicrosoftTeams_*\TempState|*|RECURSE
 
 [Microsoft Tips *]
 LangSecRef=3025
-DetectFile=%LocalAppData%\Packages\Microsoft.Getstarted_*
+DetectFile=%LocalAppData%\Packages\Microsoft.Getstarted_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.Getstarted_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.Getstarted_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.Getstarted_*\LocalState\Cache|*|RECURSE
@@ -16197,7 +16258,7 @@ FileKey5=%LocalAppData%\Packages\Microsoft.Getstarted_*\TempState|*|RECURSE
 
 [Microsoft To Do *]
 LangSecRef=3021
-DetectFile=%LocalAppData%\Packages\Microsoft.Todos_*
+DetectFile=%LocalAppData%\Packages\Microsoft.Todos_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.Todos_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.Todos_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.Todos_*\Settings|*.log*
@@ -16205,7 +16266,7 @@ FileKey4=%LocalAppData%\Packages\Microsoft.Todos_*\TempState|*|RECURSE
 
 [Microsoft Ultimate Word Games *]
 Section=Games
-DetectFile=%LocalAppData%\Packages\Microsoft.Studios.Wordament_*
+DetectFile=%LocalAppData%\Packages\Microsoft.Studios.Wordament_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.Studios.Wordament_*\Settings|*.log*
 FileKey2=%LocalAppData%\Packages\Microsoft.Studios.Wordament_*\TempState|*.log
 
@@ -16626,7 +16687,7 @@ FileKey1=%LocalAppData%\Microsoft\Web Platform Installer\logs\webpi|*.txt
 
 [Microsoft Whiteboard *]
 LangSecRef=3023
-DetectFile=%LocalAppData%\Packages\Microsoft.Whiteboard_*
+DetectFile=%LocalAppData%\Packages\Microsoft.Whiteboard_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.Whiteboard_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.Whiteboard_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.Whiteboard_*\LocalState\EBWebView|*.log
@@ -16947,7 +17008,7 @@ RegKey1=HKCU\Software\Meauxsoft\Mo-Search\Mo-Search v4.0.13\Last Position
 
 [Mobile Plans *]
 LangSecRef=3022
-DetectFile=%LocalAppData%\Packages\Microsoft.OneConnect_*
+DetectFile=%LocalAppData%\Packages\Microsoft.OneConnect_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.OneConnect_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.OneConnect_*\LocalCache|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.OneConnect_*\LocalState\Cache|*|RECURSE
@@ -17132,7 +17193,7 @@ FileKey2=%UserProfile%\Documents\Movie Collector\Images|*.tmp
 
 [Movies & TV *]
 LangSecRef=3023
-DetectFile=%LocalAppData%\Packages\Microsoft.ZuneVideo_*
+DetectFile=%LocalAppData%\Packages\Microsoft.ZuneVideo_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\LocalCache\PlayReady|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.ZuneVideo_*\LocalState\Database\anonymous|*.log
@@ -17148,35 +17209,35 @@ RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentV
 [Mozilla Firefox Autocomplete History *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|formhistory*
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|formhistory*
 
 [Mozilla Firefox Autofill Data *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|autofill-profiles.json
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|autofill-profiles.json
 
 [Mozilla Firefox Bookmark Backups *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\bookmarkbackups|*
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*\bookmarkbackups|*
 
 [Mozilla Firefox Bookmark Favicons *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|favicons*
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|favicons*
 
 [Mozilla Firefox Caches *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|*.corrupt|RECURSE
 FileKey2=%AppData%\Mozilla\Firefox\Profiles\*|AlternateServices.txt;notificationstore.json;parent.lock;serviceworker.txt;webappsstore.sqlite;cert9.db;ClientAuthRememberList.txt;SiteSecurityServiceState*
 FileKey3=%AppData%\Mozilla\Firefox\Profiles\*\notificationstore|*
@@ -17199,28 +17260,28 @@ FileKey18=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\F
 [Mozilla Firefox Privacy Sandbox *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|credentialstate.sqlite
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|credentialstate.sqlite
 
 [Mozilla Firefox Saved Usernames & Passwords *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|key4.db;logins.json
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|key4.db;logins.json
 
 [Mozilla Firefox Synced Tabs *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|synced-tabs.db*
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|synced-tabs.db*
 
 [Mozilla Firefox Telemetry *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox|*.log|RECURSE
 FileKey2=%AppData%\Mozilla\Firefox\Profiles\*|protections.sqlite;storage.sqlite;Telemetry.ShutdownTime.txt;times.json;targeting.snapshot.json;enumerate_devices.txt
 FileKey3=%AppData%\Mozilla\Firefox\Profiles\*\crashes|*
@@ -17241,35 +17302,35 @@ FileKey16=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\F
 [Mozilla Firefox Web Browsing Cookies *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|cookies*
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|cookies*
 
 [Mozilla Firefox Web Browsing Session *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|session*.json*
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|session*.json*
 
 [Mozilla Firefox Web Browsing Session Backups *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*\sessionstore-backups|*
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*\sessionstore-backups|*
 
 [Mozilla Firefox Web Storage *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\storage\default\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\storage\default\http*|*|REMOVESELF
 
 [Mozilla Firefox Website Permissions *]
 Section=Mozilla Firefox Web Browser
 DetectFile1=%AppData%\Mozilla\Firefox\Profiles
-DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2
 FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|permissions.sqlite
 FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|permissions.sqlite
 
@@ -17353,14 +17414,14 @@ FileKey1=%ProgramFiles%\MSI\MSI Remind Manager|Log_reminder.txt
 
 [MSN Money *]
 LangSecRef=3022
-DetectFile=%LocalAppData%\Packages\Microsoft.BingFinance_*
+DetectFile=%LocalAppData%\Packages\Microsoft.BingFinance_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.BingFinance_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.BingFinance_*\Settings|*.log*
 FileKey3=%LocalAppData%\Packages\Microsoft.BingFinance_*\TempState|*|RECURSE
 
 [MSN Weather *]
 LangSecRef=3022
-DetectFile=%LocalAppData%\Packages\Microsoft.BingWeather_*
+DetectFile=%LocalAppData%\Packages\Microsoft.BingWeather_8wekyb3d8bbwe
 FileKey1=%LocalAppData%\Packages\Microsoft.BingWeather_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.BingWeather_*\LocalState|*.tmp;UserActivity.json
 FileKey3=%LocalAppData%\Packages\Microsoft.BingWeather_*\LocalState\Cache|*|RECURSE
@@ -18721,16 +18782,32 @@ FileKey29=%ProgramFiles%\NVIDIA Corporation\NetworkAccessManager\Apache Group\Ap
 FileKey30=%ProgramFiles%\NVIDIA Corporation\NVIDIA GeForce Experience|*.log
 FileKey31=%SystemDrive%\NvidiaLogging\GFExperience|GridClientLog.log*|RECURSE
 FileKey32=%UserProfile%\AppData\LocalLow\NVIDIA\PerDriverVersion\DXCache|*
-FileKey33=%WinDir%\ServiceProfiles\LocalService\AppData\Local\NVIDIA\DXCache|*
-FileKey34=%WinDir%\System32\config\systemprofile\AppData\Local\NVIDIA\DXCache|*
-FileKey35=%WinDir%\System32\config\systemprofile\AppData\LocalLow\NVIDIA\PerDriverVersion\DXCache|*
+FileKey33=%WinDir%\ServiceProfiles\LocalService\AppData\Local\NVIDIA\*Cache|*|RECURSE
+FileKey34=%WinDir%\System32\config\systemprofile\AppData\Local\NVIDIA\*Cache|*
+FileKey35=%WinDir%\System32\config\systemprofile\AppData\LocalLow\NVIDIA\PerDriverVersion\*Cache|*
 FileKey36=%WinDir%\System32\config\systemprofile\AppData\Roaming\NVIDIA\ComputeCache|*|RECURSE
 ExcludeKey1=PATH|%LocalAppData%\NVIDIA Corporation\*\CefCache\IndexedDB\|*.log
 
 [NVIDIA Broadcast *]
 LangSecRef=3024
 DetectFile=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast
-FileKey1=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast|*.log;*.txt
+FileKey1=%AppData%\nvidia-broadcast\*Cache*|*|REMOVESELF
+FileKey2=%AppData%\nvidia-broadcast\logs|*.log
+FileKey3=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast|*.log;*.txt
+FileKey4=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast\logs|*.txt
+FileKey5=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast\NvBroadcastLogsZip|*.zip
+
+[NVIDIA Image Comparison Analysis Tool *]
+LangSecRef=3024
+DetectFile=%AppData%\icat
+FileKey1=%AppData%\icat\*cache*|*|REMOVESELF
+FileKey2=%LocalAppData%\icat-updater|*
+
+[NVIDIA Omniverse *]
+LangSecRef=3024
+DetectFile=%UserProfile%\.nvidia-omniverse
+FileKey1=%LocalAppData%\ov\cache|*|RECURSE
+FileKey2=%UserProfile%\.nvidia-omniverse\logs|*.log|RECURSE
 
 [O&O Defrag *]
 LangSecRef=3024
@@ -24608,35 +24685,35 @@ FileKey2=%ProgramFiles%\Thumbsplus *\Bin|*.log
 [Thunderbird Autocomplete History *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|formhistory*
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*|formhistory*
 
 [Thunderbird Autofill Data *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|autofill-profiles.json
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*|autofill-profiles.json
 
 [Thunderbird Bookmark Backups *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*\bookmarkbackups|*
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*\bookmarkbackups|*
 
 [Thunderbird Bookmark Favicons *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|favicons*
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*|favicons*
 
 [Thunderbird Caches *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|*.corrupt|RECURSE
 FileKey2=%AppData%\Thunderbird\Profiles\*|AlternateServices.txt;notificationstore.json;parent.lock;serviceworker.txt;webappsstore.sqlite;cert9.db;ClientAuthRememberList.txt;SiteSecurityServiceState*
 FileKey3=%AppData%\Thunderbird\Profiles\*\notificationstore|*
@@ -24659,28 +24736,28 @@ FileKey18=%LocalAppData%\Thunderbird\Profiles\*\thumbnails|*|REMOVESELF
 [Thunderbird Privacy Sandbox *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|credentialstate.sqlite
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*|credentialstate.sqlite
 
 [Thunderbird Saved Usernames & Passwords *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|key4.db;logins.json
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*|key4.db;logins.json
 
 [Thunderbird Synced Tabs *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|synced-tabs.db*
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*|synced-tabs.db*
 
 [Thunderbird Telemetry *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird|*.log|RECURSE
 FileKey2=%AppData%\Thunderbird\Profiles\*|protections.sqlite;storage.sqlite;Telemetry.ShutdownTime.txt;times.json;targeting.snapshot.json;enumerate_devices.txt
 FileKey3=%AppData%\Thunderbird\Profiles\*\crashes|*
@@ -24701,35 +24778,35 @@ FileKey16=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\T
 [Thunderbird Web Browsing Cookies *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|cookies*
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*|cookies*
 
 [Thunderbird Web Browsing Session *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|session*.json*
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*|session*.json*
 
 [Thunderbird Web Browsing Session Backups *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*\sessionstore-backups|*
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*\sessionstore-backups|*
 
 [Thunderbird Web Storage *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\storage\default\http*|*|REMOVESELF
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\storage\default\http*|*|REMOVESELF
 
 [Thunderbird Website Permissions *]
 Section=Thunderbird Email Client
 DetectFile1=%AppData%\Thunderbird\Profiles
-DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles
+DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca
 FileKey1=%AppData%\Thunderbird\Profiles\*|permissions.sqlite
 FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles\*|permissions.sqlite
 
@@ -25222,7 +25299,7 @@ FileKey6=%AppData%\Twitch\logs\*|*.json;*.log|REMOVESELF
 
 [Twitter *]
 LangSecRef=3022
-DetectFile=%LocalAppData%\Packages\9E2F88E3.Twitter_*
+DetectFile=%LocalAppData%\Packages\9E2F88E3.TWITTER_wgeqdkkx372wm
 FileKey1=%LocalAppData%\Packages\9E2F88E3.Twitter_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\9E2F88E3.Twitter_*\AppData\Indexed DB|*.log
 FileKey3=%LocalAppData%\Packages\9E2F88E3.Twitter_*\LocalState|*|RECURSE
@@ -25360,18 +25437,47 @@ FileKey1=%AppData%\ATViewer|ViewerHistory.ini
 [Universal Windows Platform *]
 LangSecRef=3025
 DetectFile=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*
-FileKey1=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\AC|*|RECURSE
-FileKey2=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\LocalCache|*|RECURSE
-FileKey3=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\LocalState|*|RECURSE
-FileKey4=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\Settings|*.log*
-FileKey5=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\TempState|*|RECURSE
-FileKey6=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\AC|*|RECURSE
-FileKey7=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\LocalState\Cache|*|RECURSE
-FileKey8=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\LocalState\navigationHistory|*|RECURSE
-FileKey9=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\Settings|*.log*
-FileKey10=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\TempState|*|RECURSE
-RegKey1=HKCU\Software\Microsoft\Phone\ShellUI\WindowSizing
-RegKey2=HKCU\Software\Microsoft\UserData\UninstallTimes
+FileKey1=%LocalAppData%\Microsoft\Internet Explorer|*.log;*.txt|RECURSE
+FileKey2=%LocalAppData%\Microsoft\Internet Explorer\CacheStorage|*|RECURSE
+FileKey3=%LocalAppData%\Microsoft\Internet Explorer\DOMStore|*|RECURSE
+FileKey4=%LocalAppData%\Microsoft\Internet Explorer\Recovery|*|RECURSE
+FileKey5=%LocalAppData%\Microsoft\Windows\INet*|*|RECURSE
+FileKey6=%LocalAppData%\Microsoft\Windows\PRICache|*|RECURSE
+FileKey7=%LocalAppData%\Microsoft\Windows\WebCache|*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\AC|*|RECURSE
+FileKey9=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\LocalCache|*|RECURSE
+FileKey10=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\LocalState|*|RECURSE
+FileKey11=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\Settings|*.log*
+FileKey12=%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\TempState|*|RECURSE
+FileKey13=%LocalAppData%\Packages\Microsoft.Win32WebViewHost_*\AC|*|RECURSE
+FileKey14=%LocalAppData%\Packages\Microsoft.Win32WebViewHost_*\Settings|*.log*
+FileKey15=%LocalAppData%\Packages\Microsoft.Win32WebViewHost_*\TempState|*|RECURSE
+FileKey16=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\AC|*|RECURSE
+FileKey17=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\LocalState\Cache|*|RECURSE
+FileKey18=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\LocalState\navigationHistory|*|RECURSE
+FileKey19=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\Settings|*.log*
+FileKey20=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\TempState|*|RECURSE
+FileKey21=%UserProfile%\AppData\LocalLow\Microsoft\Internet Explorer\DOMStore|*|REMOVESELF
+FileKey22=%UserProfile%\AppData\LocalLow\webviewdata\2\EBWebView\Crashpad\reports|*
+FileKey23=%UserProfile%\AppData\LocalLow\webviewdata\2\EBWebView\Crashpad\temp|*
+FileKey24=%WinDir%\ServiceProfiles\*\AppData\Local\Microsoft\Windows\History|*|RECURSE
+FileKey25=%WinDir%\ServiceProfiles\*\AppData\Local\Microsoft\Windows\INet*|*|RECURSE
+FileKey26=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Internet Explorer|*.log
+FileKey27=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\History|*|RECURSE
+FileKey28=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\INet*|*|RECURSE
+FileKey29=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\WebCache|*|RECURSE
+FileKey30=%WinDir%\System32\config\systemprofile\Cookies|*|RECURSE
+FileKey31=%WinDir%\System32\config\systemprofile\History|*|RECURSE
+FileKey32=%WinDir%\System32\config\systemprofile\Local Settings\Temporary Internet Files|*|RECURSE
+FileKey33=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\Windows\History|*|RECURSE
+FileKey34=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\Windows\INet*|*|RECURSE
+FileKey35=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\Windows\WebCache|*|RECURSE
+RegKey1=HKCU\Software\Microsoft\Internet Explorer\DOMStorage
+RegKey2=HKCU\Software\Microsoft\Internet Explorer\LowRegistry\DOMStorage
+RegKey3=HKCU\Software\Microsoft\Internet Explorer\Recovery\PendingDelete
+RegKey4=HKCU\Software\Microsoft\Phone\ShellUI\WindowSizing
+RegKey5=HKCU\Software\Microsoft\UserData\UninstallTimes
+RegKey6=HKCU\Software\Microsoft\Windows\CurrentVersion\Ext\Stats
 ExcludeKey1=FILE|%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\LocalState\|pinning.db
 ExcludeKey2=FILE|%LocalAppData%\Packages\Microsoft.DesktopAppInstaller_*\LocalState\|settings.json
 
@@ -26558,54 +26664,23 @@ RegKey6=HKCU\Software\Microsoft\Microsoft DVD Wizard Settings\MRU1
 RegKey7=HKCU\Software\Microsoft\Microsoft DVD Wizard Settings\MRU2
 RegKey8=HKCU\Software\Microsoft\Microsoft DVD Wizard Settings\MRU3
 
-[Windows EdgeHTML *]
-LangSecRef=3025
-Detect=HKCU\Software\Microsoft
-FileKey1=%LocalAppData%\Microsoft\Internet Explorer|*.log;*.txt|RECURSE
-FileKey2=%LocalAppData%\Microsoft\Internet Explorer\CacheStorage|*|RECURSE
-FileKey3=%LocalAppData%\Microsoft\Internet Explorer\DOMStore|*|RECURSE
-FileKey4=%LocalAppData%\Microsoft\Internet Explorer\Recovery|*|RECURSE
-FileKey5=%LocalAppData%\Microsoft\Windows\INet*|*|RECURSE
-FileKey6=%LocalAppData%\Microsoft\Windows\PRICache|*|RECURSE
-FileKey7=%LocalAppData%\Packages\Microsoft.Win32WebViewHost_*\AC|*|RECURSE
-FileKey8=%LocalAppData%\Packages\Microsoft.Win32WebViewHost_*\Settings|*.log*
-FileKey9=%LocalAppData%\Packages\Microsoft.Win32WebViewHost_*\TempState|*|RECURSE
-FileKey10=%UserProfile%\AppData\LocalLow\Microsoft\Internet Explorer\DOMStore|*|REMOVESELF
-FileKey11=%UserProfile%\AppData\LocalLow\webviewdata\2\EBWebView\Crashpad\reports|*
-FileKey12=%UserProfile%\AppData\LocalLow\webviewdata\2\EBWebView\Crashpad\temp|*
-FileKey13=%WinDir%\ServiceProfiles\*\AppData\Local\Microsoft\Windows\History|*|RECURSE
-FileKey14=%WinDir%\ServiceProfiles\*\AppData\Local\Microsoft\Windows\INet*|*|RECURSE
-FileKey15=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Internet Explorer|*.log
-FileKey16=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\History|*|RECURSE
-FileKey17=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\INet*|*|RECURSE
-FileKey18=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\WebCache|*|RECURSE
-FileKey19=%WinDir%\System32\config\systemprofile\Cookies|*|RECURSE
-FileKey20=%WinDir%\System32\config\systemprofile\History|*|RECURSE
-FileKey21=%WinDir%\System32\config\systemprofile\Local Settings\Temporary Internet Files|*|RECURSE
-FileKey22=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\Windows\History|*|RECURSE
-FileKey23=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\Windows\INet*|*|RECURSE
-FileKey24=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\Windows\WebCache|*|RECURSE
-RegKey1=HKCU\Software\Microsoft\Internet Explorer\DOMStorage
-RegKey2=HKCU\Software\Microsoft\Internet Explorer\LowRegistry\DOMStorage
-RegKey3=HKCU\Software\Microsoft\Internet Explorer\Recovery\PendingDelete
-RegKey4=HKCU\Software\Microsoft\Windows\CurrentVersion\Ext\Stats
-
 [Windows Error Reporting *]
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Windows\Windows Error Reporting
 FileKey1=%LocalAppData%\CrashDumps|*dmp*
 FileKey2=%LocalAppData%\PCHealth\ErrorRep\QSignoff|*
-FileKey3=%ProgramData%\Microsoft\Windows\WER\Temp|*|RECURSE
-FileKey4=%WinDir%\*LOCALAPPDATA*\CrashDumps|*dmp*
-FileKey5=%WinDir%\LiveKernelReports|*.dmp|RECURSE
-FileKey6=%WinDir%\pchealth\ERRORREP|*|RECURSE
-FileKey7=%WinDir%\pchealth\helpctr\DataColl|*.xml
-FileKey8=%WinDir%\pchealth\helpctr\OfflineCache|*|RECURSE
-FileKey9=%WinDir%\System32\config\systemprofile\AppData\Local\CrashDumps|*.dmp|RECURSE
-FileKey10=%WinDir%\System32\config\systemprofile\AppData\Local\CrashDumps|*dmp*
-FileKey11=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\CrashDumps|*.dmp|RECURSE
-FileKey12=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\CrashDumps|*.dmp|RECURSE
-FileKey13=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\CrashDumps|*.dmp|RECURSE
+FileKey3=%ProgramData%\Microsoft\Windows\WER\ReportArchive|*|REMOVESELF
+FileKey4=%ProgramData%\Microsoft\Windows\WER\Temp|*|RECURSE
+FileKey5=%WinDir%\*LOCALAPPDATA*\CrashDumps|*dmp*
+FileKey6=%WinDir%\LiveKernelReports|*.dmp|RECURSE
+FileKey7=%WinDir%\pchealth\ERRORREP|*|RECURSE
+FileKey8=%WinDir%\pchealth\helpctr\DataColl|*.xml
+FileKey9=%WinDir%\pchealth\helpctr\OfflineCache|*|RECURSE
+FileKey10=%WinDir%\System32\config\systemprofile\AppData\Local\CrashDumps|*.dmp|RECURSE
+FileKey11=%WinDir%\System32\config\systemprofile\AppData\Local\CrashDumps|*dmp*
+FileKey12=%WinDir%\System32\config\systemprofile\Local Settings\Application Data\CrashDumps|*.dmp|RECURSE
+FileKey13=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\CrashDumps|*.dmp|RECURSE
+FileKey14=%WinDir%\SysWOW64\config\systemprofile\Local Settings\Application Data\CrashDumps|*.dmp|RECURSE
 RegKey1=HKCU\Software\Microsoft\Windows\Windows Error Reporting\Debug|StoreLocation
 RegKey2=HKLM\Software\Microsoft\Windows\Windows Error Reporting\Debug|StoreLocation
 RegKey3=HKLM\Software\Microsoft\Windows\Windows Error Reporting\FullLiveKernelReports|LastFullLiveReport
@@ -26624,15 +26699,16 @@ FileKey4=%ProgramFiles%\CUAssistant\Logs|*.etl
 FileKey5=%ProgramFiles%\rempl\Logs|*.etl
 FileKey6=%WinDir%\INF|*.etl
 FileKey7=%WinDir%\Logs|*.etl|RECURSE
-FileKey8=%WinDir%\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Logs|*|RECURSE
-FileKey9=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\Explorer|ExplorerStartupLog.etl
-FileKey10=%WinDir%\System32\config\systemprofile\AppData\Local\Packages\Microsoft.GamingServices*\LocalState|*.etl
-FileKey11=%WinDir%\System32\Logs|*.etl
-FileKey12=%WinDir%\System32\NDF|*.etl
-FileKey13=%WinDir%\System32\SleepStudy|*.etl|RECURSE
-FileKey14=%WinDir%\System32\WDI\*|*.etl*|REMOVESELF
-FileKey15=%WinDir%\System32\winevt\logs|*
-FileKey16=%WinDir%\Temp|*.evt*
+FileKey8=%WinDir%\Panther|*.etl
+FileKey9=%WinDir%\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Logs|*|RECURSE
+FileKey10=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Windows\Explorer|ExplorerStartupLog.etl
+FileKey11=%WinDir%\System32\config\systemprofile\AppData\Local\Packages\Microsoft.GamingServices*\LocalState|*.etl
+FileKey12=%WinDir%\System32\Logs|*.etl
+FileKey13=%WinDir%\System32\NDF|*.etl
+FileKey14=%WinDir%\System32\SleepStudy|*.etl|RECURSE
+FileKey15=%WinDir%\System32\WDI\*|*.etl*|REMOVESELF
+FileKey16=%WinDir%\System32\winevt\logs|*
+FileKey17=%WinDir%\Temp|*.evt*
 
 [Windows Event Viewer *]
 LangSecRef=3025
@@ -26825,7 +26901,7 @@ FileKey22=%WinDir%\debug|*.log|RECURSE
 FileKey23=%WinDir%\INF|*.log*
 FileKey24=%WinDir%\Logs|*.log|RECURSE
 FileKey25=%WinDir%\Logs\CBS|*.cab
-FileKey26=%WinDir%\Panther|cbs.log;DDACLSys.log;miglog.xml;Migrep.html;*GatherPnPList.log;*.tmp
+FileKey26=%WinDir%\Panther|cbs.log;DDACLSys.log;miglog.xml;Migrep.html;*GatherPnPList.log;*.tmp;setup*.log
 FileKey27=%WinDir%\Panther\FastCleanup|*.log
 FileKey28=%WinDir%\Panther\Rollback|*.txt
 FileKey29=%WinDir%\Panther\UnattendGC|diag*.xml;setup*.log
@@ -26941,7 +27017,7 @@ RegKey7=HKCU\Software\Microsoft\MM20\Recent Document List
 LangSecRef=3025
 Detect=HKCU\Software\Microsoft\Notepad
 DetectFile=%LocalAppData%\Packages\Microsoft.WindowsNotepad_*
-FileKey1=%LocalAppData%\Packages\Microsoft.WindowsNotepad_*\SystemAppData\Helium|User.dat
+FileKey1=%LocalAppData%\Packages\Microsoft.WindowsNotepad_*\LocalState\*State|*.bin
 RegKey1=HKCU\Software\Microsoft\Notepad|iWindowPosDX
 RegKey2=HKCU\Software\Microsoft\Notepad|iWindowPosDY
 RegKey3=HKCU\Software\Microsoft\Notepad|iWindowPosX
@@ -27247,31 +27323,30 @@ FileKey1=%LocalAppData%\Microsoft\Windows Sidebar\Cache|*|RECURSE
 FileKey2=%LocalAppData%\Microsoft\Windows\AppCache|*|RECURSE
 FileKey3=%LocalAppData%\Microsoft\Windows\SettingSync\metastore|*.jrs
 FileKey4=%LocalAppData%\Microsoft\Windows\SettingSync\remotemetastore\*|*.jrs
-FileKey5=%LocalAppData%\Microsoft\Windows\WebCache|*|RECURSE
-FileKey6=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC|*|RECURSE
-FileKey7=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\LocalCache|*|RECURSE
-FileKey8=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\LocalState\Cache|*|RECURSE
-FileKey9=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\Settings|*.log*
-FileKey10=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\TempState|*|RECURSE
-FileKey11=%ProgramData%\Microsoft\RAC\PublishedData|*.log;*.jrs
-FileKey12=%ProgramData%\Microsoft\RAC\StateData|*.log;*.jrs
-FileKey13=%ProgramData%\Microsoft\RAC\Temp|*
-FileKey14=%ProgramData%\Microsoft\Windows\DeviceMetadataCache\dmrccache.bak|*|REMOVESELF
-FileKey15=%ProgramData%\Microsoft\Windows\Sqm\Manifest|*.bin
-FileKey16=%ProgramData%\Microsoft\Windows\Sqm\Sessions|*.psqm;*.sqm
-FileKey17=%SystemDrive%\Documents and Settings\LocalService\Application Data\PeerNetworking|*|RECURSE
-FileKey18=%UserProfile%\Documents\Remote Assistance Logs|*.xml
-FileKey19=%WinDir%\$regcmp$|*|REMOVESELF
-FileKey20=%WinDir%\ehome|PRDMOWrapper.log
-FileKey21=%WinDir%\msdownld.tmp|*|REMOVESELF
-FileKey22=%WinDir%\ServiceProfiles\LocalService\AppData\Local\Microsoft\Windows|qwavecache.dat
-FileKey23=%WinDir%\ServiceProfiles\LocalService\AppData\Roaming\PeerNetworking|*|RECURSE
-FileKey24=%WinDir%\ServiceProfiles\NetworkService\AppData\Local\PeerDist*|*.chk;*.jrs
-FileKey25=%WinDir%\System32|PRDMOWrapper.log;qwavecache.dat
-FileKey26=%WinDir%\System32\config\systemprofile\AppData\Local|*.tmp
-FileKey27=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Device Metadata\dmrccache\downloads|*.tmp
-FileKey28=%WinDir%\System32\config\systemprofile\AppData\Local\tw-*.tmp|empty.check|REMOVESELF
-FileKey29=%WinDir%\System32\sru|*|RECURSE
+FileKey5=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\AC|*|RECURSE
+FileKey6=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\LocalCache|*|RECURSE
+FileKey7=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\LocalState\Cache|*|RECURSE
+FileKey8=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\Settings|*.log*
+FileKey9=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\TempState|*|RECURSE
+FileKey10=%ProgramData%\Microsoft\RAC\PublishedData|*.log;*.jrs
+FileKey11=%ProgramData%\Microsoft\RAC\StateData|*.log;*.jrs
+FileKey12=%ProgramData%\Microsoft\RAC\Temp|*
+FileKey13=%ProgramData%\Microsoft\Windows\DeviceMetadataCache\dmrccache.bak|*|REMOVESELF
+FileKey14=%ProgramData%\Microsoft\Windows\Sqm\Manifest|*.bin
+FileKey15=%ProgramData%\Microsoft\Windows\Sqm\Sessions|*.psqm;*.sqm
+FileKey16=%SystemDrive%\Documents and Settings\LocalService\Application Data\PeerNetworking|*|RECURSE
+FileKey17=%UserProfile%\Documents\Remote Assistance Logs|*.xml
+FileKey18=%WinDir%\$regcmp$|*|REMOVESELF
+FileKey19=%WinDir%\ehome|PRDMOWrapper.log
+FileKey20=%WinDir%\msdownld.tmp|*|REMOVESELF
+FileKey21=%WinDir%\ServiceProfiles\LocalService\AppData\Local\Microsoft\Windows|qwavecache.dat
+FileKey22=%WinDir%\ServiceProfiles\LocalService\AppData\Roaming\PeerNetworking|*|RECURSE
+FileKey23=%WinDir%\ServiceProfiles\NetworkService\AppData\Local\PeerDist*|*.chk;*.jrs
+FileKey24=%WinDir%\System32|PRDMOWrapper.log;qwavecache.dat
+FileKey25=%WinDir%\System32\config\systemprofile\AppData\Local|*.tmp
+FileKey26=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\Device Metadata\dmrccache\downloads|*.tmp
+FileKey27=%WinDir%\System32\config\systemprofile\AppData\Local\tw-*.tmp|empty.check|REMOVESELF
+FileKey28=%WinDir%\System32\sru|*|RECURSE
 RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache
 RegKey2=HKCU\Software\Classes\MIME\Database\Content Type
 RegKey3=HKCU\Software\Local AppWizard-Generated Applications

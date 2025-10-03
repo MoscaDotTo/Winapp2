@@ -337,10 +337,13 @@ Module Diff
     Public Sub HandleCmdLine()
 
         InitDefaultDiffSettings()
+
+        ' Downloading the remote file is the default behavior, providing -d disables it 
         handleDownloadBools(DownloadDiffFile)
 
         If DownloadDiffFile Then DiffFile2.Name = "Online winapp2.ini"
 
+        invertSettingAndRemoveArg(TrimRemoteFile, "-donttrim")
         invertSettingAndRemoveArg(SaveDiffLog, "-savelog")
         getFileAndDirParams({DiffFile1, DiffFile2, DiffFile3})
 

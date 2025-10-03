@@ -1,0 +1,197 @@
+Beginning Diff
+  Changes between version 251001 and version 251002
+
+    Arc Pinned Tabs * has been removed
+
+    Logitech G HUB - Window Size/Location has been renamed to Logitech G HUB - Window Size/Location *
+
+    Windows EdgeHTML * has been merged into Universal Windows Platform *
+
+    Universal Windows Platform * has been modified
+    
+    Added 1 FileKey
+            FileKey7=%LocalAppData%\Microsoft\Windows\WebCache|*|RECURSE
+    
+    
+    Removed 1 Detect
+            Detect=HKCU\Software\Microsoft
+    
+    The above changes are measured against the following removed/old entries
+    Windows EdgeHTML *
+    Universal Windows Platform *
+
+    Mozilla Firefox Website Permissions * has been modified
+    
+    Modified 1 DetectFile
+
+      DetectFile2 has been modified, replacing 1 old key
+            New: DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+            Old: DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles
+    
+
+    Thunderbird Website Permissions * has been modified
+    
+    Modified 1 DetectFile
+
+      DetectFile2 has been modified, replacing 1 old key
+            New: DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
+            Old: DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles
+    
+
+    Blue Prince * has been modified
+    
+    Added 1 FileKey
+            FileKey1=%ProgramFiles%\Steam\steamapps\common\Blue Prince\MelonLoader|*.log|RECURSE
+    
+
+    DuckDuckGo Storage Quota Manager * has been modified
+    
+    Modified 1 DetectFile
+
+      DetectFile has been modified, replacing 2 old keys
+            New: DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
+            Old: DetectFile1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView
+            Old: DetectFile2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView
+    
+
+    Intel * has been modified
+    
+    Added 1 FileKey
+            FileKey30=%WinDir%\System32\drivers\DriverData\Intel\GfxDriver|*.etl
+    
+    
+    Removed 10 FileKeys
+            FileKey4=%LocalAppData%\Intel\IntelGraphicsSoftware\EBWebView\*cache*|*|RECURSE
+            FileKey5=%LocalAppData%\Intel\IntelGraphicsSoftware\EBWebView\Default|*.log;DIPS*;ExtensionActivity*;Favicons*;History*;Login Data;Network Action*;Top Sites*;Visited Links*;Web Data*
+            FileKey6=%LocalAppData%\Intel\IntelGraphicsSoftware\EBWebView\Default\*cache*|*|RECURSE
+            FileKey7=%LocalAppData%\Intel\SUR\QueenCreek\Collected Data|*error_stack-*.txt
+            FileKey13=%ProgramData%\Intel\DSA\Logs|*.bak;*.log;*.txt
+            FileKey38=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\collected_data\DebugLogs|*
+            FileKey39=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\intermediate_data|*
+            FileKey40=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData|*.log;*.bak
+            FileKey41=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData\captured_logs|*
+            FileKey42=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData\history|*
+    
+
+    LibreWolf Website Permissions * has been modified
+    
+    Modified 1 DetectFile
+
+      DetectFile2 has been modified, replacing 1 old key
+            New: DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
+            Old: DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles
+    
+
+    Microsoft Office * has been modified
+    
+    Added 4 FileKeys
+            FileKey25=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView|*.pma|RECURSE
+            FileKey26=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\*cache*|*
+            FileKey27=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\Crashpad|*|RECURSE
+            FileKey28=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\Default\*cache*|*|RECURSE
+    
+
+    Minecraft * has been modified
+    
+    Modified 1 DetectFile
+
+      DetectFile2 has been modified, replacing 1 old key
+            New: DetectFile2=%LocalAppData%\Packages\Microsoft.MinecraftUWP_*
+            Old: DetectFile2=%LocalAppData%\Packages\Microsoft.MinecraftUWP_8wekyb3d8bbwe
+    
+
+    NVIDIA * has been modified
+    
+    Modified 3 FileKeys
+
+      FileKey33 has been modified, replacing 1 old key
+            New: FileKey33=%WinDir%\ServiceProfiles\LocalService\AppData\Local\NVIDIA\*Cache|*|RECURSE
+            Old: FileKey33=%WinDir%\ServiceProfiles\LocalService\AppData\Local\NVIDIA\DXCache|*
+      FileKey34 has been modified, replacing 1 old key
+            New: FileKey34=%WinDir%\System32\config\systemprofile\AppData\Local\NVIDIA\*Cache|*
+            Old: FileKey34=%WinDir%\System32\config\systemprofile\AppData\Local\NVIDIA\DXCache|*
+      FileKey35 has been modified, replacing 1 old key
+            New: FileKey35=%WinDir%\System32\config\systemprofile\AppData\LocalLow\NVIDIA\PerDriverVersion\*Cache|*
+            Old: FileKey35=%WinDir%\System32\config\systemprofile\AppData\LocalLow\NVIDIA\PerDriverVersion\DXCache|*
+    
+
+    NVIDIA Broadcast * has been modified
+    
+    Added 4 FileKeys
+            FileKey1=%AppData%\nvidia-broadcast\*Cache*|*|REMOVESELF
+            FileKey2=%AppData%\nvidia-broadcast\logs|*.log
+            FileKey4=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast\logs|*.txt
+            FileKey5=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast\NvBroadcastLogsZip|*.zip
+    
+
+    Windows Error Reporting * has been modified
+    
+    Added 1 FileKey
+            FileKey3=%ProgramData%\Microsoft\Windows\WER\ReportArchive|*|REMOVESELF
+    
+
+    Windows Event Logs * has been modified
+    
+    Added 1 FileKey
+            FileKey8=%WinDir%\Panther|*.etl
+    
+
+    Windows Logs * has been modified
+    
+    Modified 1 FileKey
+
+      FileKey26 has been modified, replacing 1 old key
+            New: FileKey26=%WinDir%\Panther|cbs.log;DDACLSys.log;miglog.xml;Migrep.html;*GatherPnPList.log;*.tmp;setup*.log
+            Old: FileKey26=%WinDir%\Panther|cbs.log;DDACLSys.log;miglog.xml;Migrep.html;*GatherPnPList.log;*.tmp
+    
+
+    Windows Notepad * has been modified
+    
+    Added 1 FileKey
+            FileKey1=%LocalAppData%\Packages\Microsoft.WindowsNotepad_*\LocalState\*State|*.bin
+    
+    
+    Removed 1 FileKey
+            FileKey1=%LocalAppData%\Packages\Microsoft.WindowsNotepad_*\SystemAppData\Helium|User.dat
+    
+
+    Windows Subsystems * has been modified
+    
+    Removed 1 FileKey
+            FileKey5=%LocalAppData%\Microsoft\Windows\WebCache|*|RECURSE
+    
+
+    Dead Cells * has been added
+
+    Eluktronics Control Center * has been added
+
+    Intel Driver & Support Assistant * has been added
+
+    Intel System Usage Report Service * has been added
+
+    Kiwix JS * has been added
+
+    Microsoft Copilot * has been added
+
+    NVIDIA Image Comparison Analysis Tool * has been added
+
+    NVIDIA Omniverse * has been added
+  00:00:00.0622556
+
+    Summary
+      Net entry count change: 6
+      Modified entries: 16
+       + -15 added keys across 8 entries 
+       - 13 removed keys across 4 entries 
+       ~ 9 updated keys replacing 8 keys across 7 entries 
+      Removed entries: 3
+       @ 1 removed entries have been merged into 1 modified entries 
+       + 0 removed entries have been merged into 0 added entries
+       & 1 removed entries have been renamed and may contain other minor changes 
+       - 1 entries have been removed without replacement
+      Added entries: 9
+       + 8 new entries without merged content
+       @ 0 added entries contain keys merged from 0 removed entries
+       & 1 added entries are renamed versions of removed entries and may contain other minor changes
+    
+  Diff complete
