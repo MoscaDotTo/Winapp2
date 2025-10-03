@@ -1187,8 +1187,6 @@ Public Module WinappDebug
     ''' <param name="key">
     ''' A winapp2.ini DetectFile format <c> iniKey </c> to be checked for correctness 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
     Private Function pDetectFile(key As iniKey) As iniKey
 
         ' Trailing Backslashes & nested wildcards
@@ -1197,13 +1195,13 @@ Public Module WinappDebug
 
         If key.vHas("*") Then
 
+            ' System Ninja doesn't support wildcards in DetectFile keys, so we won't when the Flavor is set to that
+            fullKeyErr(key, "Wildcard (*) found in DetectFile", CurrentWinappFlavor = WinappFlavor.SystemNinja)
+
             Dim splitDir = key.Value.Split(CChar("\"))
 
-            For i = 0 To splitDir.Length - 1
-
-                fullKeyErr(key, "Nested wildcard found in DetectFile", splitDir(i).Contains("*") AndAlso i <> splitDir.Length - 1)
-
-            Next
+            Dim hasNestedWildcard = splitDir.Take(splitDir.Length - 1).Any(Function(dir) dir.Contains("*"))
+            fullKeyErr(key, "Nested wildcard found in DetectFile", hasNestedWildcard)
 
         End If
 
