@@ -46,10 +46,10 @@ Module diffmainmenu
         Dim menu As New MenuSection
         menu = MenuSection.CreateCompleteMenu(NameOf(Diff), menuDesc, ConsoleColor.DarkCyan)
         menu.AddColoredOption("Run (default)", "Perform a Diff operation", GetRedGreen(Not newFileHasName)).AddBlank() _
-            .AddToggle("Toggle diffing against GitHub", "performing the Diff operation against the newest file on GitHub", DownloadDiffFile, Not isOffline) _
-            .AddToggle("Toggle remote file trim", "trimming the remote file before diffing for a more bespoke diff", TrimRemoteFile, DownloadDiffFile) _
-            .AddToggle("Toggle log saving", "saving of the diff output to disk", SaveDiffLog) _
-            .AddToggle("Toggle verbose mode", "printing full entries in the diff output", ShowFullEntries) _
+            .AddToggle("diffing against GitHub", "performing the Diff operation against the newest file on GitHub", DownloadDiffFile, Not isOffline) _
+            .AddToggle("remote file trim", "trimming the remote file before diffing for a more bespoke diff", TrimRemoteFile, DownloadDiffFile) _
+            .AddToggle("log saving", "saving of the diff output to disk", SaveDiffLog) _
+            .AddToggle("verbose mode", "printing full entries in the diff output", ShowFullEntries) _
             .AddBlank() _
             .AddOption("Choose older/local file", "Select the older version of the file against which to diff") _
             .AddOption("Choose newer file", "Select the newer version of the file to see what has changed", Not DownloadDiffFile) _
@@ -77,37 +77,48 @@ Module diffmainmenu
     ''' Docs last updated: 2022-11-21 | Code last updated: 2025-08-21
     Public Sub handleDiffUserInput(input As String)
 
+        Dim newFileEmpty = DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile
+        Dim emptyFileErr = "Please select a file against which to diff"
+
+        Dim intInput As Integer
+        If Not Integer.TryParse(input, intInput) Then
+
+            ' Allow an empty input to trigger a run if the run conditions are otherwise satisfied
+            If input.Length = 0 AndAlso Not denyActionWithHeader(newFileEmpty, emptyFileErr) Then ConductDiff() : Return
+
+            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+
+            Return
+
+        End If
+
         Dim toggleOpts = getToggleOpts()
-        Dim toggleNums = getMenuNumbering(toggleOpts, 2)
-
         Dim fileOpts = getFileOpts()
-        Dim fileNums = getMenuNumbering(fileOpts, 2 + toggleNums.Count)
 
-        Dim logViewerNum = CType(2 + toggleOpts.Count + fileOpts.Count, String)
-        Dim resetNum = CType(fileOpts.Count + toggleOpts.Count + 2 + If(MostRecentDiffLog = "", 0, 1), String)
+        Dim staticOpts = 2
+        Dim minToggleNum = staticOpts
+        Dim maxToggleNum = minToggleNum + toggleOpts.Count - 1
+        Dim minFileNum = maxToggleNum + 1
+        Dim maxFileNum = minFileNum + fileOpts.Count - 1
+        Dim logNum = If(MostRecentDiffLog.Length > 0, maxFileNum + 1, maxFileNum)
+        Dim resetNum = logNum + 1
 
         Select Case True
 
             ' Exit 
-            ' Notes: Always 0
-            Case input = "0"
+            Case intInput = 0
 
                 exitModule()
 
             ' Run (default)
-            ' Notes: Always "1", also triggered by no input if run conditions are otherwise satisfied 
-            Case input = "1" OrElse input.Length = 0
+            Case intInput = 1
 
-                If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then ConductDiff()
+                If Not denyActionWithHeader(newFileEmpty, emptyFileErr) Then ConductDiff()
 
             ' Toggles
-            ' Remote Diffing (unavailable when offline)
-            ' Remote file trimming (unavailable when not remote diffing)
-            ' Log saving
-            ' Verbose mode
-            Case toggleNums.Contains(input)
+            Case intInput >= minToggleNum AndAlso intInput <= maxToggleNum
 
-                Dim i = CType(input, Integer) - 2
+                Dim i = intInput - staticOpts
 
                 Dim toggleMenuText = toggleOpts.Keys(i)
                 Dim toggleName = toggleOpts(toggleMenuText)
@@ -116,12 +127,9 @@ Module diffmainmenu
                                     toggleName, NameOf(DiffModuleSettingsChanged))
 
             ' File Selectors
-            ' Older/Local file
-            ' Newer file (not available when remote diffing)
-            ' Save target (not available when not saving log)
-            Case fileNums.Contains(input)
+            Case intInput >= minFileNum AndAlso intInput <= maxFileNum
 
-                Dim i = CType(input, Integer) - 2 - toggleOpts.Count
+                Dim i = intInput - staticOpts - toggleOpts.Count
 
                 Dim fileName = fileOpts.Keys(i)
                 Dim fileObj = fileOpts(fileName)
@@ -129,22 +137,19 @@ Module diffmainmenu
                 changeFileParams(fileObj, DiffModuleSettingsChanged, NameOf(Diff), fileName, NameOf(DiffModuleSettingsChanged))
 
             ' Log Viewer
-            ' Notes: Only available after Diff has been run at least once during the current session 
-            ' Appears after all other options except Reset Settings
-            Case MostRecentDiffLog.Length > 0 AndAlso input = logViewerNum
+            Case MostRecentDiffLog.Length > 0 AndAlso intInput = logNum
 
                 MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
                 printSlice(MostRecentDiffLog)
 
             ' Reset settings
-            ' Notes: Only available after a setting has been changed, always comes last in the option list
-            Case DiffModuleSettingsChanged AndAlso input = resetNum
+            Case DiffModuleSettingsChanged AndAlso intInput = resetNum
 
                 resetModuleSettings(NameOf(Diff), AddressOf InitDefaultDiffSettings)
 
             Case Else
 
-                setHeaderText(invInpStr, True)
+                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
         End Select
 
