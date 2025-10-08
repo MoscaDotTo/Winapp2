@@ -6,7 +6,9 @@
 
 Winapp2.ini is compatible with CCleaner, BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, and HDCleaner.
 
-### Why Winapp2.ini
+There are also several tools which are build in part or in whole around Winapp2.ini including [SirCleaner](https://sirsoft.io/sircleaner/) and [WinSysClean](https://www.usro.net/winsysclean/). These applications are not compatible with drop-in replacement files.
+
+### Why Winapp2.ini?
 
 Winapp2.ini avoids the risks of overreach common in generic cleaning tools by adopting an exhaustive, declarative approach. Where many tools rely on sweeping file-type patterns applied across entire drives, Winapp2.ini demands explicitly defined target paths and conceptual linkage between those targets and their parent applications. This prioritizes clarity, specificity, and control over generalization, offering users an inspectable system that can be audited and safely customized to suit individual needs.
 
@@ -72,6 +74,8 @@ It is strongly recommended you keep a copy of [winapp2ool.exe](https://github.co
 
 ## [CCleaner](#ccleaner)
 ###### [Download CCleaner](https://www.ccleaner.com/ccleaner)
+
+### Note: CCleaner 7 is *not* currently compatible with winapp2.ini and it is unclear whether or not support will be implemented. Winapp2.ini is compatible with CCleaner up to version 6.39
 
 ### Flavor
 
