@@ -4988,7 +4988,7 @@ RegKey18=HKCU\Software\TechSmith\Camtasia Studio\18.0\Camtasia Studio\18.0|Recen
 
 [Canon *]
 LangSecRef=3021
-DetectFile=%ProgramData%\CanonBJ\IJPrinter\CNMWindows
+DetectFile=%ProgramData%\CanonBJ\IJPrinter\CNMWindows\*log*
 FileKey1=%ProgramData%\CanonBJ\IJPrinter\CNMWindows|*log*.*|RECURSE
 
 [Canon Digital Photo Professional 4 *]
@@ -26726,8 +26726,6 @@ FileKey4=%LocalAppData%\Packages\Microsoft.WindowsFeedback*\LocalState\DiagOutpu
 FileKey5=%LocalAppData%\Packages\Microsoft.WindowsFeedback*\Settings|*.log*
 FileKey6=%LocalAppData%\Packages\Microsoft.WindowsFeedback*\TempState|*|RECURSE
 
-
-
 [Windows File Manager *]
 LangSecRef=3024
 DetectFile1=%LocalAppData%\Packages\FileManager_*
@@ -26928,8 +26926,6 @@ Detect=HKCU\Software\Microsoft\Windows Mail
 FileKey1=%LocalAppData%\Microsoft\Windows Mail|*.log;*.jrs;*.chk|RECURSE
 FileKey2=%LocalAppData%\Microsoft\Windows Mail\Backup\Old|*|REMOVESELF
 
-
-
 [Windows Mail and Calendar *]
 LangSecRef=3025
 DetectFile=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*
@@ -26943,8 +26939,6 @@ FileKey7=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\LocalStat
 FileKey8=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\Settings|*.log*
 FileKey9=%LocalAppData%\Packages\microsoft.windowscommunicationsapps_*\TempState|*|RECURSE
 RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\microsoft.windowscommunicationsapps_8wekyb3d8bbwe\SearchHistory
-
-
 
 [Windows Maps *]
 LangSecRef=3025
@@ -27232,10 +27226,6 @@ FileKey35=%WinDir%\ServiceProfiles\NetworkService\AppData\Local\Temp|MpCmdRun.lo
 RegKey1=HKLM\Software\Microsoft\Windows NT\CurrentVersion\SecEdit|LastUsedDatabase
 RegKey2=HKU\.DEFAULT\Software\Classes\Local Settings\MrtCache
 
-
-
-
-
 [Windows Settings *]
 LangSecRef=3025
 DetectFile=%LocalAppData%\Packages\windows.immersivecontrolpanel_*
@@ -27308,8 +27298,7 @@ FileKey2=%LocalAppData%\Packages\Microsoft.ScreenSketch_*\AC\Temp|*|RECURSE
 FileKey3=%LocalAppData%\Packages\Microsoft.ScreenSketch_*\LocalCache|*|RECURSE
 FileKey4=%LocalAppData%\Packages\Microsoft.ScreenSketch_*\LocalState\Cache|*|RECURSE
 FileKey5=%LocalAppData%\Packages\Microsoft.ScreenSketch_*\TempState|*|RECURSE
-FileKey6=%LocalAppData%\Packages\Microsoft
-.*\TempState\ScreenClip|*
+FileKey6=%LocalAppData%\Packages\MicrosoftWindows.Client.*\TempState\ScreenClip|*
 RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.ScreenSketch_8wekyb3d8bbwe\PersistedPickerData\Microsoft.ScreenSketch_8wekyb3d8bbwe!App\AppSnipAndSketchFileSaveSettings|LastLocation
 RegKey2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.ScreenSketch_8wekyb3d8bbwe\PersistedPickerData\Microsoft.ScreenSketch_8wekyb3d8bbwe!App\DefaultOpenFileSingle|LastLocation
 
@@ -27416,8 +27405,6 @@ FileKey2=%LocalAppData%\MigWiz|*|REMOVESELF
 FileKey3=%LocalAppData%\Packages\MicrosoftWindows.Client*\AC|*|RECURSE
 FileKey4=%LocalAppData%\Packages\MicrosoftWindows.Client*\LocalCache|*|RECURSE
 FileKey5=%LocalAppData%\Packages\MicrosoftWindows.Client*\LocalState\EBWebview\*|LOG;LOG.old|RECURSE
-FileKey5=%LocalAppData%\Packages\MicrosoftWindows.Client*\LocalState\EBWebview\*cache*|*
-FileKey6=%LocalAppData%\Packages\MicrosoftWindows.Client*\LocalState\EBWebview\Default\*cache*|*|RECURSE
 FileKey6=%LocalAppData%\Packages\MicrosoftWindows.Client*\LocalState\EBWebview\Default\Service Worker\CacheStorage\*|*|RECURSE
 FileKey7=%LocalAppData%\Packages\MicrosoftWindows.Client*\Settings|*.log*
 FileKey8=%LocalAppData%\Packages\MicrosoftWindows.Client*\TempState|*|RECURSE
@@ -27430,11 +27417,8 @@ FileKey14=%WinDir%\SoftwareDistribution|*.log
 FileKey15=%WinDir%\SoftwareDistribution\DataStore\Logs|*|RECURSE
 FileKey16=%WinDir%\System32\MRT\*|*.log|REMOVESELF
 
-
-
 [Windows Voice Recorder *]
 LangSecRef=3025
-
 DetectFile=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*
 FileKey1=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\AC|*|RECURSE
 FileKey2=%LocalAppData%\Packages\Microsoft.WindowsSoundRecorder_*\LocalCache|*|RECURSE
@@ -27927,13 +27911,6 @@ RegKey1=HKCU\Software\Xara\WebDesigner\8.0\Workspace\MDI
 LangSecRef=3024
 Detect=HKCU\Software\Xara\WebDesigner
 FileKey1=%LocalAppData%\Xara\WebDesigner\*\Backups|*|RECURSE
-
-
-
-
-
-
-
 
 [Xbox *]
 Section=Games
