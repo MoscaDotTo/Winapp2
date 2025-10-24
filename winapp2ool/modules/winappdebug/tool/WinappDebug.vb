@@ -542,14 +542,14 @@ Public Module WinappDebug
         If someList.Count < 2 Then Return
 
         Dim misplacedEntries As New strList
-        Dim initialNeighbors = someList.getNeighborList
-        Dim sortedNeighbors = sortedList.getNeighborList
 
-        For i = 0 To someList.Count - 1
+        For i = 0 To someList.Count - 2
 
-            Dim HasSameNeighbor = initialNeighbors(i).Key = sortedNeighbors(sortedList.Items.IndexOf(someList.Items(i))).Key
-            Dim HasSamePosition = initialNeighbors(i).Value = sortedNeighbors(sortedList.Items.IndexOf(someList.Items(i))).Value
-            misplacedEntries.add(someList.Items(i), Not (HasSameNeighbor AndAlso HasSamePosition))
+            If String.Compare(someList.Items(i), someList.Items(i + 1), StringComparison.InvariantCulture) > 0 Then
+
+                misplacedEntries.add(someList.Items(i))
+
+            End If
 
         Next
 
@@ -943,7 +943,7 @@ Public Module WinappDebug
 
         End If
 
-        ' Remove any instances of double backlashes because we don't expect them 
+        ' Remove any instances of double backslashes because we don't expect them 
 
         If key.vHas("\\", True) Then
 
