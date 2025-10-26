@@ -448,7 +448,7 @@ Public Module WinappDebug
         For Each lst In entry.KeyListList
 
             Dim brokenKeys As New keyList
-            lst.Keys.ForEach(Sub(key) brokenKeys.add(key, Not cValidity(key)))
+            lst.Keys.Where(Function(key) Not cValidity(key)).ToList().ForEach(Sub(key) brokenKeys.add(key, True))
             lst.remove(brokenKeys.Keys)
             entry.ErrorKeys.remove(brokenKeys.Keys)
 
@@ -547,12 +547,17 @@ Public Module WinappDebug
 
         If someList.Count < 2 Then Return
 
+        Dim sortedIndices As New Dictionary(Of String, Integer)
+        For i = 0 To sortedList.Count - 1
+            sortedIndices(sortedList.Items(i)) = i
+        Next
+
         Dim misplacedEntries As New strList
 
         For Each entry In someList.Items
 
             Dim recInd = someList.indexOf(entry)
-            Dim sortInd = sortedList.indexOf(entry)
+            Dim sortInd = sortedIndices(entry)
 
             If recInd <> sortInd Then
 
@@ -565,7 +570,7 @@ Public Module WinappDebug
         For Each entry In misplacedEntries.Items
 
             Dim recInd = someList.indexOf(entry)
-            Dim sortInd = sortedList.indexOf(entry)
+            Dim sortInd = sortedIndices(entry)
             Dim curLine = LineCountList(recInd)
             Dim sortLine = LineCountList(sortInd)
 
@@ -1078,7 +1083,7 @@ Public Module WinappDebug
         ' Remove any duplicate arguments from the key parameters and reconstruct keys we've modified above
         If lintParams.fixFormat Then
 
-            dupeArgs.Items.ForEach(Sub(arg) keyParams.ArgsList.Remove(arg))
+            keyParams.ArgsList.RemoveAll(Function(arg) dupeArgs.Items.Contains(arg))
             keyParams.reconstructKey(key)
 
         End If
