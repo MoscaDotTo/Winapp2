@@ -186,6 +186,11 @@ Public Module WinappDebug
     Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
 
     ''' <summary>
+    ''' Regex to detect ExcludeKey flags
+    ''' </summary>
+    Private Property HasFlagRegex As New Regex("^(FILE|PATH|REG)")
+
+    ''' <summary>
     ''' commandline runtime parameter for creating winapp2.ini with a version string 
     ''' reflecting the current date <br />
     ''' Default: <c> True </c> - uses current date; <c> False </c> uses static version string
@@ -769,49 +774,40 @@ Public Module WinappDebug
 
             If Not key.vHas(enVar) Then Continue For
 
-            Dim trailingCharMissing As New Regex($"%{enVar}\\")
-            Dim leadingCharMissing As New Regex($"^{enVar}%")
-            Dim bothCharsMissing As New Regex($"^{enVar}\\")
-
             Dim msg = ""
             Dim replValue = ""
             Dim repairMade = False
 
-            Select Case True
-
-                Case trailingCharMissing.IsMatch(key.Value)
+            If key.Value.Contains($"%{enVar}\") AndAlso Not key.Value.Contains($"%{enVar}%") Then
 
                     msg = "Environment Variable is missing trailing %"
-                    replValue = key.Value.Replace($"%{enVar}", $"%{enVar}%")
+                replValue = key.Value.Replace($"%{enVar}\", $"%{enVar}%\")
                     repairMade = True
 
-                Case leadingCharMissing.IsMatch(key.Value)
+            ElseIf key.Value.StartsWith($"{enVar}%", StringComparison.InvariantCulture) AndAlso Not key.Value.Contains($"%{enVar}%") Then
 
                     msg = "Environment Variable is missing leading %"
                     replValue = key.Value.Replace($"{enVar}%", $"%{enVar}%")
                     repairMade = True
 
-                Case bothCharsMissing.IsMatch(key.Value)
+            ElseIf key.Value.StartsWith($"{enVar}\", StringComparison.InvariantCulture) AndAlso Not key.Value.Contains($"%{enVar}%") Then
 
                     msg = "Environment Variable is missing leading and trailing %"
                     replValue = key.Value.Replace($"{enVar}\", $"%{enVar}%\")
                     repairMade = True
 
-                Case Else
+            End If
 
-                    ' This only happens because "AppData" is a substring of "LocalAppData" and will result in this code path being hit 
-                    ' We can silently ignore this case 
+            If repairMade Then
 
-            End Select
+                fullKeyErr(key, msg, lintSyntax.ShouldScan, lintSyntax.ShouldRepair, key.Value, replValue)
+                Exit For
 
-            fullKeyErr(key, msg, lintSyntax.ShouldScan AndAlso repairMade, lintSyntax.ShouldRepair, key.Value, replValue)
-
-            If repairMade Then Exit For
+            End If
 
         Next
 
     End Sub
-
 
     ''' <summary> 
     ''' Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey </c>
@@ -1210,11 +1206,10 @@ Public Module WinappDebug
     ''' </param>
     Private Function checkExcludeFlags(ByRef key As iniKey) As Boolean
 
-        Dim HasFlagRegex = New Regex("^(FILE|PATH|REG)")
         Dim matches = HasFlagRegex.Matches(key.Value)
 
         ' If we're not checking flags, we should at least indicate whether or not valid ones are present 
-        If Not lintFlags.ShouldScan Then Return New Regex("^(FILE|PATH|REG)\|").IsMatch(key.Value)
+        If Not lintFlags.ShouldScan Then Return HasFlagRegex.IsMatch(key.Value)
 
         If matches.Count = 0 Then
 
@@ -1225,7 +1220,7 @@ Public Module WinappDebug
 
         fullKeyErr(key, "ExcludeKey contains REG flag", key.vHas("REG|") AndAlso CurrentWinappFlavor = WinappFlavor.BleachBit)
 
-        Dim foundFlag = HasFlagRegex.Matches(key.Value)(0)
+        Dim foundFlag = matches(0)
         Dim fixedValue = key.Value.Insert(foundFlag.Length, "|")
         fullKeyErr(key, "Missing pipe (|) after ExcludeKey flag", repCond:=lintFlags.ShouldRepair, repairVal:=key.Value, newVal:=fixedValue)
 
