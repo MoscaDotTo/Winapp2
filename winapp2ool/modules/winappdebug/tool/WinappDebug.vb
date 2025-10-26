@@ -17,6 +17,7 @@
 
 Option Strict On
 
+Imports System.Text
 Imports System.Text.RegularExpressions
 
 ''' <summary> 
@@ -37,7 +38,7 @@ Public Module WinappDebug
     ''' <summary> 
     ''' The winapp2ool logslice from the most recent Lint run 
     ''' </summary>
-    Public Property MostRecentLintLog As String = ""
+    Public Property MostRecentLintLog As New System.Text.StringBuilder
 
     ''' <summary> 
     ''' The current rules for scans and repairs 
@@ -283,7 +284,7 @@ Public Module WinappDebug
         print(3, "Beginning analysis of winapp2.ini", trailr:=True)
         gLog("Beginning lint", leadr:=True, ascend:=True)
 
-        MostRecentLintLog = ""
+        MostRecentLintLog.Clear()
 
         Debug(wa2)
 
@@ -543,11 +544,14 @@ Public Module WinappDebug
 
         Dim misplacedEntries As New strList
 
-        For i = 0 To someList.Count - 2
+        For Each entry In someList.Items
 
-            If String.Compare(someList.Items(i), someList.Items(i + 1), StringComparison.InvariantCulture) > 0 Then
+            Dim recInd = someList.indexOf(entry)
+            Dim sortInd = sortedList.indexOf(entry)
 
-                misplacedEntries.add(someList.Items(i))
+            If recInd <> sortInd Then
+
+                misplacedEntries.add(entry)
 
             End If
 
@@ -764,8 +768,6 @@ Public Module WinappDebug
         For Each enVar In enVars
 
             If Not key.vHas(enVar) Then Continue For
-
-            Dim tmpRegex As New Regex(enVar)
 
             Dim trailingCharMissing As New Regex($"%{enVar}\\")
             Dim leadingCharMissing As New Regex($"^{enVar}%")
@@ -1388,20 +1390,21 @@ Public Module WinappDebug
 
         Dim out = $"Line: {lineCount} - Error: {err}"
         cwl(out)
-        MostRecentLintLog += out & Environment.NewLine
+        MostRecentLintLog.AppendLine(out)
 
         For Each errStr In lines
 
             cwl(errStr)
             gLog(errStr, indent:=True)
-            MostRecentLintLog += errStr & Environment.NewLine
+            MostRecentLintLog.AppendLine(errStr)
 
         Next
 
         gLog(descend:=True)
         cwl()
 
-        MostRecentLintLog += Environment.NewLine
+        MostRecentLintLog.AppendLine()
+
         ErrorsFound += 1
 
     End Sub
