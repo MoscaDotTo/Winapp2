@@ -1,197 +1,3082 @@
 Beginning Diff
-  Changes between version 251001 and version 251002
+  Changes between version 251002 and version 251109
 
-    Arc Pinned Tabs * has been removed
+    Abylon Protection Manager * has been removed
 
-    Logitech G HUB - Window Size/Location has been renamed to Logitech G HUB - Window Size/Location *
+    Ace of Spades * has been removed
 
-    Windows EdgeHTML * has been merged into Universal Windows Platform *
+    Acebyte Utilities * has been removed
 
-    Universal Windows Platform * has been modified
+    Acer Arcade Deluxe * has been removed
+
+    Acer GameZone * has been removed
+
+    Advanced Grapher * has been removed
+
+    Agomo * has been removed
+
+    ALSee * has been removed
+
+    Always Right * has been removed
+
+    Amigabit Privacy Cleaner * has been removed
+
+    Amigabit Registry Cleaner * has been removed
+
+    aMSN * has been removed
+
+    Android Notifier Desktop * has been removed
+
+    Anfibia Switch * has been removed
+
+    Anomos * has been removed
+
+    Anvisoft Cloud System Booster * has been removed
+
+    AnyDVD * has been removed
+
+    AOMEI Dynamic Disk Manager * has been removed
+
+    ApHeMo * has been removed
+
+    Apowersoft iPhone Recorder * has been removed
+
+    Apowersoft Online Launcher * has been removed
+
+    ApowerSoft Screen Recorder * has been removed
+
+    ApowerSoft Streaming Audio Recorder * has been removed
+
+    Apowersoft Video Converter Studio * has been removed
+
+    Applet Password Wizard * has been removed
+
+    Appupdater * has been removed
+
+    AQQ * has been removed
+
+    AQQ Chat History * has been removed
+
+    ArcSoft MediaConverter * has been removed
+
+    ARO * has been removed
+
+    Atomic Cleaner * has been removed
+
+    AtomTime Pro * has been removed
+
+    Audio Sliders * has been removed
+
+    AudioGrail * has been removed
+
+    Aurigma Image Uploader * has been removed
+
+    Auslogics * has been removed
+
+    Auslogics System Information * has been removed
+
+    Auto Text Expander * has been removed
+
+    AvaFind * has been removed
+
+    AVI Toolbox * has been removed
+
+    Avira Privacy Pal * has been removed
+
+    Baidu PC Faster * has been removed
+
+    BATExpert * has been removed
+
+    BB FlashBack/TestAssistant * has been removed
+
+    BestBuy Software Installer * has been removed
+
+    Beyondo * has been removed
+
+    BlueGriffon * has been removed
+
+    BlueSky Interactive * has been removed
+
+    BlueSprig JetClean * has been removed
+
+    Blurity * has been removed
+
+    Boilsoft Video Utilities * has been removed
+
+    BOSS * has been removed
+
+    Bricks of Egypt * has been removed
+
+    Broken Shortcut Fixer * has been removed
+
+    BSD * has been removed
+
+    Buchstabenzoo BHV * has been removed
+
+    Bugs Tachy * has been removed
+
+    Conduit * has been removed
+
+    CounterSpy * has been removed
+
+    Digsby * has been removed
+
+    Digsby Chat Logs * has been removed
+
+    Double Vision Browser 3.0 * has been removed
+
+    Download Free Music * has been removed
+
+    Dr. Hardware 2014 Report * has been removed
+
+    DriverCure * has been removed
+
+    DriverRobot * has been removed
+
+    DUMo * has been removed
+
+    emesene2 * has been removed
+
+    Eudora * has been removed
+
+    Flipshare * has been removed
+
+    FolderShare * has been removed
+
+    Full Tilt Poker * has been removed
+
+    Garena Messenger * has been removed
+
+    Genieo * has been removed
+
+    Go!Zilla * has been removed
+
+    Google Calendar Sync * has been removed
+
+    Gotham City Impostors * has been removed
+
+    HDDExpert * has been removed
+
+    Hotbar * has been removed
+
+    HTC Sync * has been removed
+
+    IDPhotoStudio * has been removed
+
+    IE Toy * has been removed
+
+    Ignition * has been removed
+
+    Inky * has been removed
+
+    Jabbear * has been removed
+
+    Jabbear Chat History * has been removed
+
+    JustVoip * has been removed
+
+    KCleaner * has been removed
+
+    KFK * has been removed
+
+    LoL Replay * has been removed
+
+    LoL Summonerinfo * has been removed
+
+    Lunascape6 * has been removed
+
+    Lunascape6 Backups * has been removed
+
+    Lunascape6 History * has been removed
+
+    Mass Downloader * has been removed
+
+    Maxthon 5 Backups * has been removed
+
+    Maxthon 5 Cookies * has been removed
+
+    Maxthon 5 Internet Cache * has been removed
+
+    Maxthon 5 Internet History * has been removed
+
+    Maxthon 5 Saved Form Information and Passwords * has been removed
+
+    Mention * has been removed
+
+    Microsoft 3D Builder * has been removed
+
+    Microsoft Backup * has been removed
+
+    Microsoft File Transfer Manager * has been removed
+
+    Microsoft Network Speed Test * has been removed
+
+    Microsoft Picture It! * has been removed
+
+    Microsoft Search Helper Extension * has been removed
+
+    Microsoft Standalone System Sweeper Tool * has been removed
+
+    Microsoft Visual Studio Express * has been removed
+
+    Microsoft Visual Studio Express Backups * has been removed
+
+    Midori * has been removed
+
+    Mojo * has been removed
+
+    Morpheus * has been removed
+
+    Move Media Player * has been removed
+
+    MSI Remind Manager * has been removed
+
+    MSN Money * has been removed
+
+    MSN Weather * has been removed
+
+    MusicNet * has been removed
+
+    myTube! * has been removed
+
+    NateOn RemoteCall * has been removed
+
+    Net Vampire * has been removed
+
+    NetAnts * has been removed
+
+    Nokia Music Player * has been removed
+
+    Nokia Software Updater * has been removed
+
+    Nokia Suite * has been removed
+
+    Octoshape * has been removed
+
+    OneTeam * has been removed
+
+    OpenCandy * has been removed
+
+    OpenMG * has been removed
+
+    OpenMG Jukebox * has been removed
+
+    Optimizer Pro * has been removed
+
+    Orcs Must Die! Unchained * has been removed
+
+    PhotoToFilm * has been removed
+
+    Pokki * has been removed
+
+    PriceGong * has been removed
+
+    QIP 2012 * has been removed
+
+    QIP 2012 Chat History * has been removed
+
+    QIP Infium * has been removed
+
+    Qwest QuickCare * has been removed
+
+    RAMExpert * has been removed
+
+    RegCure Pro * has been removed
+
+    ReGet Deluxe * has been removed
+
+    Registry Life * has been removed
+
+    Registry Mechanic * has been removed
+
+    Registry Mighty * has been removed
+
+    Rosegarden * has been removed
+
+    SavingsBull * has been removed
+
+    Skype * has been removed
+
+    SkypeAlyzer * has been removed
+
+    SlimCleaner * has been removed
+
+    SlimComputer * has been removed
+
+    Slimware DriverUpdate * has been removed
+
+    Softonic * has been removed
+
+    SopCast * has been removed
+
+    SpyDefense * has been removed
+
+    Spyware Terminator * has been removed
+
+    Startup Sentinel * has been removed
+
+    SUMo * has been removed
+
+    Syncios Cell Phone Backup & Manage * has been removed
+
+    Tele2 Mobile Partner * has been removed
+
+    The Cleaner * has been removed
+
+    The Sims Resource Merlin * has been removed
+
+    The Weather Channel Desktop * has been removed
+
+    Thinstall Database * has been removed
+
+    Tinder++ * has been removed
+
+    TuneXP * has been removed
+
+    TVUPlayer * has been removed
+
+    TweakBit Internet Optimizer * has been removed
+
+    Ulead GIF Animator 5.05 * has been removed
+
+    Universal Share Downloader * has been removed
+
+    Unlockroot * has been removed
+
+    USPS Shipping Assistant * has been removed
+
+    Vampix * has been removed
+
+    VCast * has been removed
+
+    Verizon Download Manager * has been removed
+
+    Verizon In-Home Assistant * has been removed
+
+    VIA/S3G UniChrome Pro IGP * has been removed
+
+    VideoInspector * has been removed
+
+    Vopt 9 * has been removed
+
+    W3i * has been removed
+
+    Walgreens PhotoShow Express CD * has been removed
+
+    WallWatcher * has been removed
+
+    Weather It Up * has been removed
+
+    Web Sling Player * has been removed
+
+    WebMon * has been removed
+
+    WebPictures Downloader * has been removed
+
+    WebReaper * has been removed
+
+    Webroot Window Washer Backups * has been removed
+
+    WeFi * has been removed
+
+    Windows DVD Maker * has been removed
+
+    Windows Live Mail * has been removed
+
+    Windows Live Movie Maker * has been removed
+
+    Windows Live Photo Gallery * has been removed
+
+    Windows Live Setup * has been removed
+
+    Windows Live Writer * has been removed
+
+    Windows Maps * has been removed
+
+    Windows Media Center * has been removed
+
+    Windows Movie Maker * has been removed
+
+    Windows XP Add/Remove Programs * has been removed
+
+    Windows XP Driver Reinstall Backups * has been removed
+
+    Windows XP Help and Support Center * has been removed
+
+    WinGuides Tweak Manager * has been removed
+
+    WRAL Desktop Alert * has been removed
+
+    Xenocode Sandbox * has been removed
+
+    Yahoo Autosync * has been removed
+
+    Yet Another Cleaner! * has been removed
+
+    Your Freedom VPN * has been removed
+
+    YPOPs * has been removed
+
+    Zer0 * has been removed
+
+    Google Chrome Autofill Data * has been renamed to Google Chrome Autofill Data & Search Engine Preferences *
+
+    Microsoft Edge Autofill Data * has been renamed to Microsoft Edge Autofill Data & Search Engine Preferences *
+
+    Vivaldi Autofill Data * has been renamed to Vivaldi Autofill Data & Search Engine Preferences *
+
+    Brave Autofill Data * has been renamed to Brave Autofill Data & Search Engine Preferences *
+
+    Opera Autofill Data * has been renamed to Opera Autofill Data & Search Engine Preferences *
+
+    1Click DVD Copy Pro * has been renamed to LG Software Innovations 1Click DVD Copy Pro *
+
+    360 Secure Browser Autofill Data * has been renamed to 360 Secure Browser Autofill Data & Search Engine Preferences *
+
+    Acer eSupport * has been renamed to ASUS eSupport *
+
+    Actual Window Guard * has been renamed to Actual Tools Actual Window Guard *
+
+    Advanced IP Scanner * has been renamed to Famatech Advanced IP Scanner *
+
+    Advanced Port Scanner * has been renamed to Famatech Advanced Port Scanner *
+
+    Advanced Renamer 3 * has been renamed to Hulubulu Advanced Renamer *
+
+    AirPcap * has been renamed to Riverbed AirPcap *
+
+    Alwin 6 * has been renamed to Alcea Alwin 6 *
+
+    Amaya * has been renamed to W3C Amaya *
+
+    AOL Shield Autofill Data * has been renamed to AOL Shield Autofill Data & Search Engine Preferences *
+
+    Arc Autofill Data * has been renamed to Arc Autofill Data & Search Engine Preferences *
+
+    Atheros Driver * has been renamed to Qualcomm Atheros Driver *
+
+    Attribute Changer * has been renamed to Romain Petges Attribute Changer *
+
+    Audio Control * has been renamed to MBBSoftware Audio Control *
+
+    Avast Secure Browser Autofill Data * has been renamed to Avast Secure Browser Autofill Data & Search Engine Preferences *
+
+    AVG Secure Browser Autofill Data * has been renamed to AVG Secure Browser Autofill Data & Search Engine Preferences *
+
+    Avira Secure Browser Autofill Data * has been renamed to Avira Secure Browser Autofill Data & Search Engine Preferences *
+
+    BarcodeOK * has been renamed to SoftwareOK BarcodeOK *
+
+    Batch Purifier * has been renamed to Digital Confidence Batch Purifier *
+
+    Beyond Compare * has been renamed to Scooter Software Beyond Compare *
+
+    Blue-Cloner * has been renamed to OpenCloner Blue-Cloner *
+
+    BroadWave Streaming Audio * has been renamed to NCH Software BroadWave Streaming Audio *
+
+    Brother * has been renamed to Brother Printer Drivers *
+
+    Bulk Rename Utility * has been renamed to TGRMN Software Bulk Rename Utility *
+
+    CCleaner Browser Autofill Data * has been renamed to CCleaner Browser Autofill Data & Search Engine Preferences *
+
+    Cent Browser Autofill Data * has been renamed to Cent Browser Autofill Data & Search Engine Preferences *
+
+    Chromium Autofill Data * has been renamed to Chromium Autofill Data & Search Engine Preferences *
+
+    Coc Coc Autofill Data * has been renamed to Coc Coc Autofill Data & Search Engine Preferences *
+
+    Comet Autofill Data * has been renamed to Comet Autofill Data & Search Engine Preferences *
+
+    Comodo Dragon Autofill Data * has been renamed to Comodo Dragon Autofill Data & Search Engine Preferences *
+
+    Cromite Autofill Data * has been renamed to Cromite Autofill Data & Search Engine Preferences *
+
+    Dependency Walker * has been renamed to Microsoft Dependency Walker *
+
+    DuckDuckGo Autofill Data * has been renamed to DuckDuckGo Autofill Data & Search Engine Preferences *
+
+    Ecosia Browser Autofill Data * has been renamed to Ecosia Browser Autofill Data & Search Engine Preferences *
+
+    Epic Privacy Browser Autofill Data * has been renamed to Epic Privacy Browser Autofill Data & Search Engine Preferences *
+
+    Express Burn * has been renamed to NCH Software Express Burn *
+
+    Express Points * has been renamed to NCH Software Express Points *
+
+    Express Rip CD Ripper * has been renamed to NCH Software Express Rip CD Ripper *
+
+    Express Zip * has been renamed to NCH Software Express Zip *
+
+    FlashPeak SlimJet Autofill Data * has been renamed to FlashPeak SlimJet Autofill Data & Search Engine Preferences *
+
+    Golden Records * has been renamed to NCH Software Golden Records *
+
+    Iridium Autofill Data * has been renamed to Iridium Autofill Data & Search Engine Preferences *
+
+    iTunes * has been renamed to Apple iTunes *
+
+    Maxthon Autofill Data * has been renamed to Maxthon Autofill Data & Search Engine Preferences *
+
+    Media Center 18 * has been renamed to JRiver Media Center 18 *
+
+    MixPad Multitrack Mixer * has been renamed to NCH Software MixPad Multitrack Mixer *
+
+    Mo-Search * has been renamed to Meausoft Mo-Search *
+
+    Mobile Plans * has been renamed to Microsoft Mobile Plans *
+
+    Movie Collector - Collectorz * has been renamed to CLZ Movie Collector *
+
+    Movies & TV * has been renamed to Microsoft Movies & TV *
+
+    MSI Afterburner Hardware Monitoring * has been renamed to MSI Afterburner *
+
+    MultiViewInpaint * has been renamed to MultiView Inpaint *
+
+    NAVER Whale Autofill Data * has been renamed to NAVER Whale Autofill Data & Search Engine Preferences *
+
+    Norton Secure Browser Autofill Data * has been renamed to Norton Secure Browser Autofill Data & Search Engine Preferences *
+
+    Opera GX Autofill Data * has been renamed to Opera GX Autofill Data & Search Engine Preferences *
+
+    PhotoPad Photo Editor * has been renamed to NCH Software PhotoPad Photo Editor *
+
+    PicoPDF PDF Editor * has been renamed to NCH Software PicoPDF PDF Editor *
+
+    Pixillion Image Converter * has been renamed to NCH Software Pixillion Image Converter *
+
+    QQBrowser Autofill Data * has been renamed to QQBrowser Autofill Data & Search Engine Preferences *
+
+    RecordPad Sound Recorder * has been renamed to NCH Software RecordPad Sound Recorder *
+
+    Scribe * has been renamed to NCH Software Scribe *
+
+    Sleipnir Autofill Data * has been renamed to Sleipnir Autofill Data & Search Engine Preferences *
+
+    SoundTap Streaming Audio Recorder * has been renamed to NCH Software SoundTap Streaming Audio Recorder *
+
+    Supermium Autofill Data * has been renamed to Supermium Autofill Data & Search Engine Preferences *
+
+    Switch Audio-Converter * has been renamed to NCH Software Switch Audio-Converter *
+
+    Thorium Autofill Data * has been renamed to Thorium Autofill Data & Search Engine Preferences *
+
+    Tracks Eraser Pro * has been renamed to Acesoft Tracks Eraser Pro *
+
+    Trade Manager * has been renamed to Alibaba Trade Manager *
+
+    Ultimate Defrag * has been renamed to DiskTrix Ultimate Defrag *
+
+    UPnP Wizard * has been renamed to EurekaLog *
+
+    VideoPad Video Editor * has been renamed to NCH Software VideoPad Video Editor *
+
+    VSO ConvertXToDVD 5 * has been renamed to VSO ConvertXToDVD *
+
+    VSO Media Player 1 * has been renamed to VSO Media Player *
+
+    Warp Registry Cleaner * has been renamed to NCH Software Warp Registry Cleaner *
+
+    WavePad Sound Editor * has been renamed to NCH Software WavePad Sound Editor *
+
+    WinSweeper * has been renamed to Solvusoft WinSweeper *
+
+    WinThruster * has been renamed to Solvusoft WinThruster *
+
+    Wipe * has been renamed to PrivacyRoot Wipe *
+
+    Yandex Autofill Data * has been renamed to Yandex Autofill Data & Search Engine Preferences *
+
+    Abelssoft PCFresh Backups * has been merged into Abelssoft PCFresh *
+
+    Abelssoft SSD Fresh Backups * has been merged into Abelssoft SSD Fresh *
+
+    Ability Office * has been merged into Ability Office PhotoPaint *
+
+    Acoustica Premium Edition 6 * has been merged into Acon Digital Acoustica *
+
+    Adobe CC * has been merged into Adobe Creative Cloud *
+
+    AnyMusic * has been merged into AmoyShare AnyMusic *
+
+    Ashampoo * has been merged into Ashampoo App *
+
+    Autobahn * has been merged into Deutsche Bank Autobahn Toolbar *
+
+    Avast TuneUp * has been merged into Avast Cleanup *
+
+    Behringer Neutron * has been merged into Behringer SYNTHTRIBE *
+
+    Better Explorer * has been merged into Gainedge Better Explorer *
+
+    BIMx Desktop Viewer * has been merged into Graphisoft BIMx *
+
+    Boinc * has been merged into BOINC Manager *
+
+    Doremi * has been merged into AmoyShare Doremi *
+
+    Logitech * has been merged into Logitech SetPoint *
+
+    Microsoft Visio 2010 * has been merged into Microsoft Visio *
+
+    NVIDIA * has been merged into NVIDIA Shader Cache *
+
+    OBS * has been merged into OBS Studio *
+
+    VirtualBox * has been merged into Oracle VirtualBox *
+
+    Zend Studio 10 * has been merged into Zend Studio *
+
+    Abelssoft PCFresh * has been modified
     
     Added 1 FileKey
-            FileKey7=%LocalAppData%\Microsoft\Windows\WebCache|*|RECURSE
+            FileKey1=%LocalAppData%\Abelssoft\PCFresh|*.log
+    
+    The above changes are measured against the following removed/old entries
+    Abelssoft PCFresh Backups *
+
+    Abelssoft SSD Fresh * has been modified
+    
+    Modified 1 FileKey
+
+      FileKey1 has been modified, replacing 1 old key
+            New: FileKey1=%LocalAppData%\Abelssoft\SSD Fresh|backup.*;*.log
+            Old: FileKey1=%LocalAppData%\Abelssoft\SSD Fresh|backup.*
+    
+    The above changes are measured against the following removed/old entries
+    Abelssoft SSD Fresh Backups *
+
+    Ability Office PhotoPaint * has been modified
+    
+    Added 6 Detects
+    Added 16 RegKeys
+            Detect1=HKCU\Software\Ability 6.0\Ability PhotoPaint
+            Detect2=HKCU\Software\Ability 6.0\Ability PhotoPaint Studio
+            Detect3=HKCU\Software\Ability 7.0\Ability PhotoPaint
+            Detect4=HKCU\Software\Ability 7.0\Ability PhotoPaint Studio
+            Detect5=HKCU\Software\Ability 11.0\Ability PhotoPaint
+            Detect6=HKCU\Software\Ability 11.0\Ability PhotoPaint Studio
+            RegKey1=HKCU\Software\Ability 6.0\Ability PhotoPaint Studio\Dirs
+            RegKey2=HKCU\Software\Ability 6.0\Ability PhotoPaint Studio\Files
+            RegKey4=HKCU\Software\Ability 6.0\Ability PhotoPaint\Dirs
+            RegKey5=HKCU\Software\Ability 6.0\Ability PhotoPaint\Files
+            RegKey7=HKCU\Software\Ability 7.0\Ability PhotoPaint Studio\Dirs
+            RegKey8=HKCU\Software\Ability 7.0\Ability PhotoPaint Studio\Files
+            RegKey9=HKCU\Software\Ability 7.0\Ability PhotoPaint Studio\Recent File List
+            RegKey10=HKCU\Software\Ability 7.0\Ability PhotoPaint\Dirs
+            RegKey11=HKCU\Software\Ability 7.0\Ability PhotoPaint\Files
+            RegKey12=HKCU\Software\Ability 7.0\Ability PhotoPaint\Recent File List
+            RegKey13=HKCU\Software\Ability 11.0\Ability PhotoPaint Studio\Dirs
+            RegKey14=HKCU\Software\Ability 11.0\Ability PhotoPaint Studio\Files
+            RegKey15=HKCU\Software\Ability 11.0\Ability PhotoPaint Studio\Recent File List
+            RegKey16=HKCU\Software\Ability 11.0\Ability PhotoPaint\Dirs
+            RegKey17=HKCU\Software\Ability 11.0\Ability PhotoPaint\Files
+            RegKey18=HKCU\Software\Ability 11.0\Ability PhotoPaint\Recent File List
     
     
     Removed 1 Detect
-            Detect=HKCU\Software\Microsoft
+    Removed 1 FileKey
+    Removed 3 RegKeys
+            Detect=HKCU\Software\Ability 6.0
+            FileKey1=%UserProfile%\Documents\My Ability Files|*|RECURSE
+            RegKey1=HKCU\Software\Ability 6.0\Ability Database\Recent File List
+            RegKey4=HKCU\Software\Ability 6.0\Ability Spreadsheet\Recent File List
+            RegKey5=HKCU\Software\Ability 6.0\Ability Write\Files
     
     The above changes are measured against the following removed/old entries
-    Windows EdgeHTML *
-    Universal Windows Platform *
+    Ability Office *
 
-    Mozilla Firefox Website Permissions * has been modified
+    Acon Digital Acoustica * has been modified
     
-    Modified 1 DetectFile
-
-      DetectFile2 has been modified, replacing 1 old key
-            New: DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
-            Old: DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles
+    Added 3 Detects
+    Added 3 RegKeys
+            Detect1=HKCU\Software\Acon Digital\Acoustica Basic Edition 6
+            Detect3=HKCU\Software\Acon Digital\Acoustica Premium Edition 7
+            Detect4=HKCU\Software\Acon Digital\Acoustica Standard Edition 6
+            RegKey4=HKCU\Software\Acon Digital\Acoustica Premium Edition 7\General|BrowserFolder
+            RegKey5=HKCU\Software\Acon Digital\Acoustica Premium Edition 7\General|LastAudioDir
+            RegKey6=HKCU\Software\Acon Digital\Acoustica Premium Edition 7\Recent File List
     
+    The above changes are measured against the following removed/old entries
+    Acoustica Premium Edition 6 *
 
-    Thunderbird Website Permissions * has been modified
+    Adobe Creative Cloud * has been modified
     
-    Modified 1 DetectFile
-
-      DetectFile2 has been modified, replacing 1 old key
-            New: DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*
-            Old: DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MZLA_*\LocalCache\Roaming\Thunderbird\Profiles
+    Added 3 DetectFiles
+    Added 15 FileKeys
+            DetectFile1=%AppData%\com.adobe.dunamis
+            DetectFile2=%CommonProgramFiles%\Adobe\Creative Cloud Libraries
+            DetectFile3=%ProgramFiles%\Adobe\Adobe Creative Cloud Experience
+            FileKey2=%AppData%\Adobe\CCX Welcome\*\clientLogs|*
+            FileKey5=%AppData%\Adobe\dynamiclinkmediaserver\*|*.log
+            FileKey6=%AppData%\Adobe\dynamiclinkmediaserver\*\logs|*
+            FileKey7=%AppData%\Adobe\ExtensibilityLibrary\Log|*
+            FileKey10=%AppData%\Adobe\GPUSniffer\*\logs|*
+            FileKey11=%AppData%\Adobe\GUDE|*.log
+            FileKey14=%AppData%\Adobe\Team Projects Local Hub\*\logs|*
+            FileKey15=%AppData%\com.adobe.dunamis|*|REMOVESELF
+            FileKey16=%CommonProgramFiles%\Adobe\Creative Cloud Libraries|*.log|RECURSE
+            FileKey17=%CommonProgramFiles%\Adobe\Installers|*.log
+            FileKey18=%ProgramData%\Adobe\UPI\Log|*
+            FileKey19=%ProgramFiles%\Adobe\Adobe Creative Cloud Experience\js\node_modules\table-parser\test\output|*.log
+            FileKey20=%UserProfile%\AppData\LocalLow\Adobe\CRLogs\*logs|*
+            FileKey21=%UserProfile%\AppData\LocalLow\Adobe\CRLogs\AdobeCRCommon\Logs|*
+            FileKey22=%UserProfile%\AppData\LocalLow\Adobe\CRLogs\dumps|*
     
+    
+    Removed 2 Detects
+    Removed 10 FileKeys
+            Detect1=HKCU\Software\Adobe\CreativeCloud
+            Detect2=HKCU\Software\Adobe\Photoshop
+            FileKey2=%AppData%\Adobe\Adobe Photoshop*\Adobe Photoshop*Settings|PSErrorLog.txt;sniffer-*.txt
+            FileKey3=%AppData%\Adobe\Adobe Photoshop*\Adobe Photoshop*Settings\CrashLogs|*|RECURSE
+            FileKey4=%AppData%\Adobe\Adobe Photoshop*\Adobe Photoshop*Settings\web-cache-temp|*|RECURSE
+            FileKey5=%AppData%\Adobe\Adobe Photoshop*\CT Font Cache|*.lst
+            FileKey6=%AppData%\Adobe\Adobe Photoshop*\FontFeatureCache|*|RECURSE
+            FileKey7=%AppData%\Adobe\Adobe Photoshop*\Logs|*|RECURSE
+            FileKey8=%AppData%\Adobe\CameraRaw\Logs|*
+            FileKey15=%AppData%\Adobe\Premiere Pro\*\logs|*|RECURSE
+            FileKey16=%LocalAppData%\Adobe\CameraRaw\Cache*|*
+            FileKey19=%UserProfile%\Documents\Adobe\Premiere Pro\*|Plugin Loading.log
+    
+  Modified 1 FileKey
 
-    Blue Prince * has been modified
+    FileKey4 has been modified, replacing 1 old key
+          New: FileKey4=%AppData%\Adobe\dynamiclinkmanager\*\logs|*
+          Old: FileKey10=%AppData%\Adobe\dynamiclinkmanager\*\logs|*|RECURSE
+    The above changes are measured against the following removed/old entries
+    Adobe CC *
+
+    AmoyShare AnyMusic * has been modified
+    
+    Added 4 FileKeys
+            FileKey1=%LocalAppData%\AnyMusic\Cache|*.log
+            FileKey2=%LocalAppData%\AnyMusic\Cache|*.pma|RECURSE
+            FileKey3=%LocalAppData%\AnyMusic\Cache\*Cache|*|RECURSE
+            FileKey4=%LocalAppData%\AnyMusic\Cache\Default\*Cache|*|RECURSE
+    
+  Modified 1 LangSecRef
+
+    LangSecRef has been modified, replacing 1 old key
+          New: LangSecRef=3023
+          Old: LangSecRef=3022
+    The above changes are measured against the following removed/old entries
+    AnyMusic *
+
+    Ashampoo App * has been modified
+    
+    Added 1 DetectFile
+    Added 5 FileKeys
+            DetectFile=%LocalAppData%\Ashampoo\Ashampoo App
+            FileKey1=%LocalAppData%\Ashampoo\Ashampoo App\libraryItems|*|RECURSE
+            FileKey2=%LocalAppData%\Ashampoo\Ashampoo App\logs|*
+            FileKey3=%LocalAppData%\Ashampoo\Ashampoo App\webview\EBWebView|*.pma
+            FileKey4=%LocalAppData%\Ashampoo\Ashampoo App\webview\EBWebView\*Cache|*|RECURSE
+            FileKey5=%LocalAppData%\Ashampoo\Ashampoo App\webview\EBWebView\Default\*Cache|*|RECURSE
+    
+    
+    Removed 1 Detect
+    Removed 2 FileKeys
+            Detect=HKCU\Software\Ashampoo
+            FileKey1=%AppData%\Ashampoo|*.log;*.txt;*.xml|RECURSE
+            FileKey2=%LocalAppData%\Ashampoo\BaNT|*|RECURSE
+    
+    The above changes are measured against the following removed/old entries
+    Ashampoo *
+
+    Deutsche Bank Autobahn Toolbar * has been modified
+    
+    Added 3 FileKeys
+            FileKey1=%LocalAppData%\Deutsche Bank\Autobahn Setup\*Logs|*|RECURSE
+            FileKey2=%LocalAppData%\Deutsche Bank\Autobahn\*Logs|*|RECURSE
+            FileKey3=%LocalAppData%\Deutsche Bank\Autobahn\Temp|*|RECURSE
+    
+    The above changes are measured against the following removed/old entries
+    Autobahn *
+
+    Avast Cleanup * has been modified
+    
+    Added 1 Detect
+    Added 1 DetectFile
+    Added 10 FileKeys
+            Detect2=HKLM\Software\AVAST Software\Tuneup
+            DetectFile=%ProgramData%\Avast Software\Cleanup
+            FileKey1=%AppData%\Avast Software\Cleanup\Cache|*|RECURSE
+            FileKey2=%AppData%\Avast Software\Cleanup\log|*|RECURSE
+            FileKey3=%ProgramData%\Avast Software|notiylimit.lock
+            FileKey4=%ProgramData%\Avast Software\Cleanup|crl_cache.json
+            FileKey5=%ProgramData%\Avast Software\Cleanup\Cache|*|RECURSE
+            FileKey6=%ProgramData%\Avast Software\Cleanup\log|*|RECURSE
+            FileKey7=%ProgramData%\Avast Software\Cleanup\Software Updater|state_cache.json
+            FileKey8=%ProgramData%\Avast Software\Cleanup\StateHistory|*.dat
+            FileKey9=%ProgramData%\Avast Software\Icarus|*.lck
+            FileKey10=%ProgramData%\Avast Software\Icarus\Logs|*|RECURSE
+    
+    The above changes are measured against the following removed/old entries
+    Avast TuneUp *
+
+    Behringer SYNTHTRIBE * has been modified
+    
+    Added 1 DetectFile
+            DetectFile=%LocalAppData%\Behringer\Synthtribe
+    
+    
+    Removed 1 DetectFile
+    Removed 2 FileKeys
+            DetectFile=%AppData%\Neutron
+            FileKey1=%AppData%\Neutron\*Cache|*|RECURSE
+            FileKey2=%AppData%\Neutron\Logs|*
+    
+    The above changes are measured against the following removed/old entries
+    Behringer Neutron *
+
+    Gainedge Better Explorer * has been modified
+    
+    Added 1 DetectFile
+    Added 1 FileKey
+            DetectFile1=%AppData%\BExplorer
+            FileKey1=%AppData%\BExplorer|log.txt
+    
+    The above changes are measured against the following removed/old entries
+    Better Explorer *
+
+    Graphisoft BIMx * has been modified
+    
+    Added 1 DetectFile
+    Added 4 FileKeys
+            DetectFile1=%LocalAppData%\Packages\GraphisoftSE.21795B871412D_*
+            FileKey1=%LocalAppData%\Packages\GraphisoftSE.21795B871412D_ry7td4y6vfzjt\AC|*|RECURSE
+            FileKey2=%LocalAppData%\Packages\GraphisoftSE.21795B871412D_ry7td4y6vfzjt\LocalCache\Local\GRAPHISOFT\BIMx Desktop Viewer|open_recent.list
+            FileKey3=%LocalAppData%\Packages\GraphisoftSE.21795B871412D_ry7td4y6vfzjt\LocalCache\Roaming\BIMx\*Cache|*|RECURSE
+            FileKey4=%LocalAppData%\Packages\GraphisoftSE.21795B871412D_ry7td4y6vfzjt\SystemAppData\Helium|*.log*
+    
+    The above changes are measured against the following removed/old entries
+    BIMx Desktop Viewer *
+
+    BOINC Manager * has been modified
+    
+    Added 1 DetectFile
+    Added 4 FileKeys
+            DetectFile=%LocalAppData%\BOINC Manager
+            FileKey1=%LocalAppData%\BOINC Manager\EBWebView\*Cache|*|RECURSE
+            FileKey2=%LocalAppData%\BOINC Manager\EBWebView\crashpad|*|RECURSE
+            FileKey3=%LocalAppData%\BOINC Manager\EBWebView\Default\*Cache|*|RECURSE
+            FileKey4=%ProgramData%\BOINC|std*.txt;time_stats_log
+    
+    
+    Removed 1 Detect
+            Detect=HKCU\Software\Space Sciences Laboratory, U.C. Berkeley\BOINC Manager
+    
+    The above changes are measured against the following removed/old entries
+    Boinc *
+
+    AmoyShare Doremi * has been modified
+    
+    Added 4 FileKeys
+            FileKey1=%LocalAppData%\Doremi\Cache|*.log
+            FileKey2=%LocalAppData%\Doremi\Cache|*.pma|RECURSE
+            FileKey3=%LocalAppData%\Doremi\Cache\*Cache|*|RECURSE
+            FileKey4=%LocalAppData%\Doremi\Cache\Default\*Cache|*|RECURSE
+    
+    The above changes are measured against the following removed/old entries
+    Doremi *
+
+    Logitech SetPoint * has been modified
+    
+    Added 1 DetectFile
+            DetectFile=%ProgramFiles%\Logitech\SetPointP
+    
+    
+    Removed 2 Detects
+    Removed 13 FileKeys
+            Detect1=HKCU\Software\Logitech
+            Detect2=HKLM\Software\Logitech
+            FileKey1=%AppData%\Logishrd|*.log|RECURSE
+            FileKey3=%AppData%\Logishrd\Updater|UpdateList.csv
+            FileKey4=%AppData%\LogiTune|*.log;LOG.old|RECURSE
+            FileKey5=%CommonProgramFiles%\Logishrd|*.log|RECURSE
+            FileKey6=%LocalAppData%\LogiBolt|*|REMOVESELF
+            FileKey7=%LocalAppData%\Logishrd\Vid|*|RECURSE
+            FileKey8=%LocalAppData%\Logitech\Logi Bolt|*|REMOVESELF
+            FileKey9=%ProgramData%\Logishrd|*.log|RECURSE
+            FileKey10=%ProgramData%\Logishrd\LogiBolt|*|REMOVESELF
+            FileKey11=%ProgramData%\Logishrd\unifying|EngineLog.*;*.txt
+            FileKey13=%ProgramFiles%\Logitech\Desktop Messenger|*.log;*.bak|RECURSE
+            FileKey14=%ProgramFiles%\Logitech\LogiOptions\LogiBolt|*|REMOVESELF
+            FileKey15=%WinDir%\System32|lvcoinst.log
+    
+  Modified 1 FileKey
+
+    FileKey1 has been modified, replacing 1 old key
+          New: FileKey1=%AppData%\Logishrd\sp*_Log|*
+          Old: FileKey2=%AppData%\Logishrd\sp*_Log|*|REMOVESELF
+    The above changes are measured against the following removed/old entries
+    Logitech *
+
+    Microsoft Visio * has been modified
+    
+    Added 2 Detects
+    Added 40 RegKeys
+            Detect2=HKCU\Software\Microsoft\Office\15.0\Visio
+            Detect3=HKCU\Software\Microsoft\Office\16.0\Visio
+            RegKey21=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile1
+            RegKey22=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile2
+            RegKey23=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile3
+            RegKey24=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile4
+            RegKey25=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile5
+            RegKey26=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile6
+            RegKey27=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile7
+            RegKey28=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile8
+            RegKey29=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile9
+            RegKey30=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile10
+            RegKey31=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile11
+            RegKey32=HKCU\Software\Microsoft\Office\15.0\Visio\Application|LastFile12
+            RegKey33=HKCU\Software\Microsoft\Office\15.0\Visio\Recent Templates|Friendly1
+            RegKey34=HKCU\Software\Microsoft\Office\15.0\Visio\Recent Templates|Friendly2
+            RegKey35=HKCU\Software\Microsoft\Office\15.0\Visio\Recent Templates|Friendly3
+            RegKey36=HKCU\Software\Microsoft\Office\15.0\Visio\Recent Templates|Friendly4
+            RegKey37=HKCU\Software\Microsoft\Office\15.0\Visio\Recent Templates|Template1
+            RegKey38=HKCU\Software\Microsoft\Office\15.0\Visio\Recent Templates|Template2
+            RegKey39=HKCU\Software\Microsoft\Office\15.0\Visio\Recent Templates|Template3
+            RegKey40=HKCU\Software\Microsoft\Office\15.0\Visio\Recent Templates|Template4
+            RegKey41=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile1
+            RegKey42=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile2
+            RegKey43=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile3
+            RegKey44=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile4
+            RegKey45=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile5
+            RegKey46=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile6
+            RegKey47=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile7
+            RegKey48=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile8
+            RegKey49=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile9
+            RegKey50=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile10
+            RegKey51=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile11
+            RegKey52=HKCU\Software\Microsoft\Office\16.0\Visio\Application|LastFile12
+            RegKey53=HKCU\Software\Microsoft\Office\16.0\Visio\Recent Templates|Friendly1
+            RegKey54=HKCU\Software\Microsoft\Office\16.0\Visio\Recent Templates|Friendly2
+            RegKey55=HKCU\Software\Microsoft\Office\16.0\Visio\Recent Templates|Friendly3
+            RegKey56=HKCU\Software\Microsoft\Office\16.0\Visio\Recent Templates|Friendly4
+            RegKey57=HKCU\Software\Microsoft\Office\16.0\Visio\Recent Templates|Template1
+            RegKey58=HKCU\Software\Microsoft\Office\16.0\Visio\Recent Templates|Template2
+            RegKey59=HKCU\Software\Microsoft\Office\16.0\Visio\Recent Templates|Template3
+            RegKey60=HKCU\Software\Microsoft\Office\16.0\Visio\Recent Templates|Template4
+    
+    The above changes are measured against the following removed/old entries
+    Microsoft Visio 2010 *
+
+    NVIDIA Shader Cache * has been modified
+    
+    Added 2 FileKeys
+            FileKey1=%AppData%\NVIDIA\ComputeCache|*|RECURSE
+            FileKey8=%UserProfile%\AppData\LocalLow\NVIDIA\DXCache|*|RECURSE
+    
+    
+    Removed 25 FileKeys
+    Removed 1 ExcludeKey
+            FileKey1=%AppData%\NVIDIA\*Cache|*|RECURSE
+            FileKey2=%LocalAppData%\NVIDIA Corporation|*.log;*.bak;*.old|RECURSE
+            FileKey3=%LocalAppData%\NVIDIA Corporation\*\CefCache|Cookies*;QuotaManager*;Visited Links
+            FileKey4=%LocalAppData%\NVIDIA Corporation\*\CefCache\*Cache|*|RECURSE
+            FileKey6=%LocalAppData%\NVIDIA Corporation\NVIDIA App\gfe_backup\nvbackend\cefcache|*|RECURSE
+            FileKey8=%LocalAppData%\NVIDIA\GLCache|*|RECURSE
+            FileKey9=%LocalAppData%\NVIDIA\NvBackend|*.log;*.bak
+            FileKey13=%LocalAppData%\Packages\NVIDIACorp.*\AC|*|RECURSE
+            FileKey14=%LocalAppData%\Packages\NVIDIACorp.*\LocalCache|*|RECURSE
+            FileKey15=%LocalAppData%\Packages\NVIDIACorp.*\Settings|*.log*
+            FileKey16=%LocalAppData%\Packages\NVIDIACorp.*\SystemAppData\Helium|*.log*
+            FileKey17=%ProgramData%|DisplaySessionContainer*.log*;NvcDispCorePlugin.log*;NVDisplay.Container*.log*
+            FileKey18=%ProgramData%\NVIDIA|*.bak;Resource.old;*.log*|RECURSE
+            FileKey19=%ProgramData%\NVIDIA Corporation|*.log*;*.bak;*.old;*.stat|RECURSE
+            FileKey20=%ProgramData%\NVIDIA Corporation\CrashDumps|*
+            FileKey21=%ProgramData%\NVIDIA Corporation\Downloader|*|RECURSE
+            FileKey22=%ProgramData%\NVIDIA Corporation\GeForce Experience\Update|*|RECURSE
+            FileKey24=%ProgramData%\NVIDIA Corporation\NvFBCPlugin|log*.txt
+            FileKey25=%ProgramData%\NVIDIA Corporation\NVIDIA App\UpdateFramework\ota-artifacts|*|RECURSE
+            FileKey26=%ProgramData%\NVIDIA\NvBackend\Updatus\DownloadManager|*
+            FileKey27=%ProgramData%\NVIDIA\Updatus|*.bak;*.log
+            FileKey28=%ProgramData%\NVIDIA\Updatus\DownloadManager|*
+            FileKey29=%ProgramFiles%\NVIDIA Corporation\NetworkAccessManager\Apache Group\Apache2\logs|*
+            FileKey30=%ProgramFiles%\NVIDIA Corporation\NVIDIA GeForce Experience|*.log
+            FileKey31=%SystemDrive%\NvidiaLogging\GFExperience|GridClientLog.log*|RECURSE
+            ExcludeKey1=PATH|%LocalAppData%\NVIDIA Corporation\*\CefCache\IndexedDB\|*.log
+    
+  Modified 8 FileKeys
+
+    FileKey2 has been modified, replacing 1 old key
+          New: FileKey2=%LocalAppData%\NVIDIA Corporation\NV_Cache|*|RECURSE
+          Old: FileKey5=%LocalAppData%\NVIDIA Corporation\NV_Cache|*
+    FileKey4 has been modified, replacing 1 old key
+          New: FileKey4=%LocalAppData%\Packages\*\AC\*\NVIDIA Corporation\NV_Cache|*|RECURSE
+          Old: FileKey10=%LocalAppData%\Packages\*\AC\*\NVIDIA Corporation\NV_Cache|*
+    FileKey5 has been modified, replacing 1 old key
+          New: FileKey5=%LocalAppData%\Packages\*\AC\NVIDIA Corporation\NV_Cache|*|RECURSE
+          Old: FileKey11=%LocalAppData%\Packages\*\AC\NVIDIA Corporation\NV_Cache|*
+    FileKey6 has been modified, replacing 1 old key
+          New: FileKey6=%LocalAppData%\Packages\*\AC\NVIDIA\DXCache|*|RECURSE
+          Old: FileKey12=%LocalAppData%\Packages\*\AC\NVIDIA\DXCache|*|REMOVESELF
+    FileKey7 has been modified, replacing 1 old key
+          New: FileKey7=%ProgramData%\NVIDIA Corporation\NV_Cache|*|RECURSE
+          Old: FileKey23=%ProgramData%\NVIDIA Corporation\NV_Cache|*
+    FileKey9 has been modified, replacing 1 old key
+          New: FileKey9=%UserProfile%\AppData\LocalLow\NVIDIA\PerDriverVersion\DXCache|*|RECURSE
+          Old: FileKey32=%UserProfile%\AppData\LocalLow\NVIDIA\PerDriverVersion\DXCache|*
+    FileKey11 has been modified, replacing 1 old key
+          New: FileKey11=%WinDir%\System32\config\systemprofile\AppData\Local\NVIDIA\*Cache|*|RECURSE
+          Old: FileKey34=%WinDir%\System32\config\systemprofile\AppData\Local\NVIDIA\*Cache|*
+    FileKey12 has been modified, replacing 1 old key
+          New: FileKey12=%WinDir%\System32\config\systemprofile\AppData\LocalLow\NVIDIA\PerDriverVersion\*Cache|*|RECURSE
+          Old: FileKey35=%WinDir%\System32\config\systemprofile\AppData\LocalLow\NVIDIA\PerDriverVersion\*Cache|*
+    The above changes are measured against the following removed/old entries
+    NVIDIA *
+
+    OBS Studio * has been modified
+    
+    Added 2 DetectFiles
+    Added 3 FileKeys
+            DetectFile3=%AppData%\obs-studio-node-server
+            DetectFile4=%ProgramData%\obs-studio
+            FileKey7=%AppData%\obs-studio-node-server\attachments|*
+            FileKey8=%AppData%\obs-studio-node-server\reports|*
+            FileKey9=%ProgramData%\obs-studio\shader-cache|*
+    
+    The above changes are measured against the following removed/old entries
+    OBS *
+
+    Oracle VirtualBox * has been modified
     
     Added 1 FileKey
-            FileKey1=%ProgramFiles%\Steam\steamapps\common\Blue Prince\MelonLoader|*.log|RECURSE
+            FileKey4=%WinDir%\System32\config\systemprofile\AppData\Roaming\VirtualBox|*.log
+    
+    The above changes are measured against the following removed/old entries
+    VirtualBox *
+
+    Microsoft Edge Telemetry * has been modified
+    
+    Added 1 FileKey
+            FileKey27=%ProgramFiles%\Microsoft\EdgeWebView\Application\SetupMetrics|*.pma
     
 
-    DuckDuckGo Storage Quota Manager * has been modified
+    .NET Framework * has been modified
+    
+    Removed 1 FileKey
+            FileKey4=%LocalAppData%\Packages\*\AC\Microsoft\CLR_v4.0*|*|RECURSE
+    
+
+    //N.P.P.D. RUSH// - The Milk of Ultra Violet * has been modified
+    
+    Added 1 DetectFile
+            DetectFile=%LocalAppData%\NPPDRUSH
+    
+    
+    Removed 1 Detect
+            Detect=HKCU\Software\Valve\Steam\Apps\270090
+    
+
+    3 Stars of Destiny * has been modified
+    
+    Added 1 DetectFile
+            DetectFile=%AppData%\3Stars
+    
+    
+    Removed 1 Detect
+            Detect=HKCU\Software\Valve\Steam\Apps\278530
+    
+
+    3SwitcheD * has been modified
+    
+    Added 1 DetectFile
+            DetectFile=%LocalAppData%\3SwitcheD
+    
+    
+    Removed 1 Detect
+            Detect=HKCU\Software\Valve\Steam\Apps\206610
+    
+
+    4Team Sync2 * has been modified
+    
+    Added 2 FileKeys
+            FileKey2=%AppData%\4Team\Sync2\Logs|*
+            FileKey3=%LocalAppData%\4Team\Sync2Cloud|*.log
+    
+  Modified 1 FileKey
+
+    FileKey1 has been modified, replacing 1 old key
+          New: FileKey1=%AppData%\4Team\Sync2|*.log;*.err
+          Old: FileKey1=%AppData%\4Team\Sync2|*.log|RECURSE
+
+    7-Zip * has been modified
+    
+    Added 2 RegKeys
+            RegKey1=HKCU\Software\7-Zip\Compression|ArcHistory
+            RegKey2=HKCU\Software\7-Zip\FM|CopyHistory
+    
+
+    ABBYY FineReader * has been modified
+    
+    Added 4 FileKeys
+    Added 4 RegKeys
+            FileKey5=%LocalAppData%\ABBYY\FineReader\16\*\Morphology\CachedUserDictionaries|*
+            FileKey6=%LocalAppData%\ABBYY\FineReader\16\Morphology\CachedUserDictionaries|*
+            FileKey8=%ProgramData%\ABBYY\FineReader\*\*\*Cache|*|RECURSE
+            FileKey12=%ProgramData%\ABBYY\FineReader\*\Licenses|*.log
+            RegKey81=HKCU\Software\ABBYY\FineReader\16\PDFTransformer|LaunchCount
+            RegKey82=HKCU\Software\ABBYY\FineReader\16\Shell\RecentBatchList
+            RegKey83=HKCU\Software\ABBYY\FineReader\16\Shell\RecentCompareList
+            RegKey84=HKCU\Software\ABBYY\FineReader\16\Shell\RecentPdfList
+    
+    
+    Removed 1 FileKey
+            FileKey6=%ProgramData%\ABBYY\FineReader*\*\Licenses|*.log
+    
+  Modified 1 FileKey
+
+    FileKey10 has been modified, replacing 1 old key
+          New: FileKey10=%ProgramData%\ABBYY\FineReader\*\*Cache|*
+          Old: FileKey9=%ProgramData%\ABBYY\FineReader\*\PdfToolsCache|FontsCache*.dat
+
+    Abelssoft AntiBrowserSpy * has been modified
+    
+    Added 1 FileKey
+            FileKey2=%LocalAppData%\Abelssoft\AntiBrowserSpy\Backups|*
+    
+
+    Abelssoft GClean * has been modified
+    
+    Added 1 FileKey
+            FileKey2=%LocalAppData%\Abelssoft\GClean\Backups|*
+    
+
+    Abelssoft JetDrive * has been modified
+    
+    Modified 1 FileKey
+
+      FileKey1 has been modified, replacing 1 old key
+            New: FileKey1=%LocalAppData%\Abelssoft\JetDrive|JetDrive.reports.xml;*.log
+            Old: FileKey1=%LocalAppData%\Abelssoft\JetDrive|JetDrive.reports.xml
+    
+
+    Abelssoft StartupStar * has been modified
+    
+    Modified 1 FileKey
+
+      FileKey2 has been modified, replacing 1 old key
+            New: FileKey2=%LocalAppData%\Abelssoft\StartupStar|backup.xml;*.log
+            Old: FileKey2=%LocalAppData%\Abelssoft\StartupStar|backup.xml
+    
+
+    Abelssoft WashAndGo * has been modified
+    
+    Added 1 FileKey
+            FileKey2=%LocalAppData%\Abelssoft\WashAndGo|*.log|RECURSE
+    
+
+    Adobe * has been modified
+    
+    Removed 2 FileKeys
+            FileKey7=%CommonProgramFiles%\Adobe\Creative Cloud Libraries|*.log|RECURSE
+            FileKey12=%ProgramFiles%\Adobe\Adobe Creative Cloud Experience\js\node_modules\table-parser\test\output|*.log
+    
+
+    Adobe Bridge * has been modified
+    
+    Added 3 FileKeys
+            FileKey2=%AppData%\Adobe\Bridge*\*\Logs|*
+            FileKey3=%AppData%\Adobe\Bridge*\CT Font Cache|*
+            FileKey4=%AppData%\Adobe\Bridge*\Logs|*
+    
+    
+    Removed 1 FileKey
+            FileKey2=%AppData%\Adobe\Bridge*\Cache\*|*.jpg|RECURSE
+    
+  Modified 1 FileKey
+
+    FileKey1 has been modified, replacing 1 old key
+          New: FileKey1=%AppData%\Adobe\Bridge*|*.log
+          Old: FileKey1=%AppData%\Adobe\Bridge*|*Log.txt
+
+    Adobe Photoshop Elements * has been modified
+    
+    Added 3 RegKeys
+            RegKey4=HKCU\Software\Adobe\Photoshop Elements\12.0\common\settings\Elements MRU
+            RegKey5=HKCU\Software\Adobe\Photoshop Elements\12.0\CurrentMediaFilePath
+            RegKey6=HKCU\Software\Adobe\Photoshop Elements\12.0\VisitedDirs|STARTUPIMAGEDIRECTORY
+    
+
+    Advanced Uninstaller * has been modified
+    
+    Added 3 Detects
+    Added 1 DetectFile
+    Added 2 FileKeys
+    Added 3 RegKeys
+            Detect3=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\11
+            Detect4=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\12
+            Detect5=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\13
+            DetectFile=%ProgramData%\Innovative Solutions\Advanced Uninstaller PRO
+            FileKey1=%LocalAppData%\Innovative Solutions\Advanced Uninstaller PRO|*.dat;.ico
+            FileKey2=%ProgramData%\Innovative Solutions\Advanced Uninstaller PRO\HealthCheck|*|RECURSE
+            RegKey3=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\11\compress|listHistoryText
+            RegKey4=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\12\compress|listHistoryText
+            RegKey5=HKCU\Software\Innovative Solutions\Advanced Uninstaller PRO\13\compress|listHistoryText
+    
+
+    AdwCleaner * has been modified
+    
+    Removed 1 Detect
+    Removed 1 FileKey
+            Detect=HKLM\Software\AdwCleaner
+            FileKey2=%SystemDrive%\AdwCleaner|*.txt|RECURSE
+    
+
+    Amazon Music * has been modified
+    
+    Added 1 DetectFile
+    Added 7 FileKeys
+            DetectFile=%LocalAppData%\Packages\AmazonMobileLLC.AmazonMusic_kc6t79cpj4tp0
+            FileKey10=%LocalAppData%\Packages\AmazonMobileLLC.AmazonMusic_*\LocalCache\Local\Amazon Music\Data\App Cache\*Cache*|RECURSE
+            FileKey11=%LocalAppData%\Packages\AmazonMobileLLC.AmazonMusic_*\LocalCache\Local\Amazon Music\Data\Artwork Cache|*.jpg;*.png|RECURSE
+            FileKey12=%LocalAppData%\Packages\AmazonMobileLLC.AmazonMusic_*\LocalCache\Local\Amazon Music\Data\Hammer Cache|*
+            FileKey13=%LocalAppData%\Packages\AmazonMobileLLC.AmazonMusic_*\LocalCache\Local\Amazon Music\Data\S*Cache|*
+            FileKey14=%LocalAppData%\Packages\AmazonMobileLLC.AmazonMusic_*\LocalCache\Local\Amazon Music\Logs|*
+            FileKey15=%LocalAppData%\Packages\AmazonMobileLLC.AmazonMusic_*\LocalCache\Local\Amazon Music\User Data|*.pma
+            FileKey16=%LocalAppData%\Packages\AmazonMobileLLC.AmazonMusic_*\LocalCache\Local\Amazon Music\User Data\Crashpad\Reports|*
+    
+  Modified 1 FileKey
+
+    FileKey6 has been modified, replacing 1 old key
+          New: FileKey6=%LocalAppData%\Amazon Music\data\S*Cache|*
+          Old: FileKey6=%LocalAppData%\Amazon Music\data\Streaming Cache|cache.ini;*.stream
+
+    Amazon Prime Video * has been modified
+    
+    Added 6 FileKeys
+    Added 1 ExcludeKey
+            FileKey3=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\LocalCache|*|RECURSE
+            FileKey4=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\LocalState\EBWebView\*ShaderCache|*
+            FileKey5=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\LocalState\EBWebView\BrowserMetrics|*.pma
+            FileKey6=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\LocalState\EBWebView\Default\*cache*|*|RECURSE
+            FileKey7=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\LocalState\EBWebView\Default\Service Worker\*cache*|*|RECURSE
+            FileKey8=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\LocalState\Logs|*.log
+            ExcludeKey1=FILE|%LocalAppData%\Packages\AmazonVideo.PrimeVideo_pwbj9vvecjh7j\AC\INetCookies\ESE\|container.dat
+    
+    
+    Removed 1 FileKey
+            FileKey3=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\LocalState|*.log;*.tmp|RECURSE
+    
+  Modified 1 FileKey
+
+    FileKey2 has been modified, replacing 1 old key
+          New: FileKey2=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\AppData|*|RECURSE
+          Old: FileKey2=%LocalAppData%\Packages\AmazonVideo.PrimeVideo_*\AppData\CacheStorage|*|RECURSE
+
+    AnvSoft Any Video Converter * has been modified
+    
+    Added 4 FileKeys
+            FileKey4=%AppData%\Any Video Converter\*Cache|*|RECURSE
+            FileKey5=%AppData%\Any Video Converter\logs|*
+            FileKey6=%AppData%\Any Video Converter\Partitions\*\*Cache|*|RECURSE
+            FileKey7=%LocalAppData%\any video converter-updater|*|RECURSE
+    
+
+    Any.do * has been modified
+    
+    Added 1 FileKey
+            FileKey3=%LocalAppData%\@anydoelectron-app-updater|*
+    
+
+    AOMEI Backupper * has been modified
+    
+    Added 1 FileKey
+            FileKey1=%LocalAppData%\AOMEI Backupper\cache|*
+    
+
+    AOMEI Partition Assistant * has been modified
+    
+    Added 1 DetectFile
+            DetectFile=%ProgramFiles%\AOMEI Partition Assistant
+    
+    
+    Removed 1 Detect
+            Detect=HKCU\Software\Partition Assistant
+    
+
+    Apowersoft Photo Viewer * has been modified
+    
+    Modified 1 FileKey
+
+      FileKey1 has been modified, replacing 1 old key
+            New: FileKey1=%AppData%\Apowersoft\Apowersoft Photo Viewer|CommUtilities.Report.*
+            Old: FileKey1=%AppData%\Apowersoft\Apowersoft Photo Viewer|CommUtilities.Report.Data
+    
+
+    Apowersoft Video Download Capture * has been modified
+    
+    Added 1 FileKey
+            FileKey1=%AppData%\Apowersoft\Video Download Capture*\CefCache|*
+    
+
+    Apowersoft Video Editor * has been modified
+    
+    Added 1 FileKey
+            FileKey1=%AppData%\Apowersoft\Apowersoft Video Editor|CommUtilities.Report.*
+    
+
+    Ashampoo Burning Studio * has been modified
+    
+    Added 1 Detect
+    Added 9 RegKeys
+            Detect15=HKCU\Software\Ashampoo\Ashampoo Burning Studio 24
+            RegKey84=HKCU\Software\Ashampoo\Ashampoo Burning Studio 21\Logs
+            RegKey85=HKCU\Software\Ashampoo\Ashampoo Burning Studio 21\tempFiles
+            RegKey137=HKCU\Software\Ashampoo\Ashampoo Burning Studio 25\Logs
+            RegKey138=HKCU\Software\Ashampoo\Ashampoo Burning Studio 25\tempFiles
+            RegKey139=HKCU\Software\Ashampoo\Ashampoo Burning Studio 26\Logs
+            RegKey140=HKCU\Software\Ashampoo\Ashampoo Burning Studio 26\tempFiles
+            RegKey215=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2025\Logs
+            RegKey216=HKCU\Software\Ashampoo\Ashampoo Burning Studio 2025\tempFiles
+            RegKey217=HKCU\Software\Ashampoo\common\Ashampoo Burning Studio\Recent Projects
+    
+
+    Ashampoo PDF * has been modified
+    
+    Modified 1 LangSecRef
+    Modified 1 FileKey
+
+      LangSecRef has been modified, replacing 1 old key
+            New: LangSecRef=3024
+            Old: LangSecRef=3021
+      FileKey1 has been modified, replacing 1 old key
+            New: FileKey1=%LocalAppData%\Ashampoo PDF\*|lastFileOpenned.txt;fontcache
+            Old: FileKey1=%LocalAppData%\Ashampoo PDF\*|lastFileOpenned.txt
+    
+
+    aTube Catcher * has been modified
+    
+    Added 1 FileKey
+            FileKey1=%AppData%\aTubeCatcher_10\FavIcons|*
+    
+
+    Auslogics BoostSpeed * has been modified
+    
+    Added 1 DetectFile
+    Added 3 FileKeys
+            DetectFile=%ProgramData%\Auslogics\BoostSpeed
+            FileKey2=%ProgramData%\Auslogics\BoostSpeed\*\DeliveredAction|*
+            FileKey3=%ProgramData%\Auslogics\BoostSpeed\*\Logs|*
+            FileKey4=%ProgramData%\Auslogics\BoostSpeed\*\Reports|*
+    
+  Modified 1 FileKey
+
+    FileKey1 has been modified, replacing 1 old key
+          New: FileKey1=%ProgramData%\Auslogics\BoostSpeed\*.x|*.err
+          Old: FileKey1=%ProgramData%\Auslogics\BoostSpeed\*.x|*.err;*.htm*;*.log;*.rsc;*.sta;*.xml|RECURSE
+
+    Auslogics Disk Defrag * has been modified
+    
+    Added 1 DetectFile
+    Added 6 FileKeys
+            DetectFile=%ProgramData%\Auslogics\Disk Defrag*
+            FileKey1=%AppData%\Auslogics\Disk Defrag*\Reports|*|RECURSE
+            FileKey2=%ProgramData%\Auslogics\Disk Defrag*\*|*.err
+            FileKey3=%ProgramData%\Auslogics\Disk Defrag*\*\DeliveredAction|*
+            FileKey4=%ProgramData%\Auslogics\Disk Defrag*\*\Logs|*
+            FileKey5=%ProgramData%\Auslogics\Disk Defrag*\*\Reports|*
+            FileKey6=%ProgramFiles%\Auslogics\Disk Defrag*|ndefrg.log
+    
+    
+    Removed 5 FileKeys
+            FileKey1=%AppData%\Auslogics\*Disk*Defrag*\Reports|*|RECURSE
+            FileKey2=%ProgramData%\Auslogics\*Disk*Defrag*\*\*Reports|*|RECURSE
+            FileKey3=%ProgramData%\Auslogics\*Disk*Defrag*\*\DeliveredAction|*.tmp
+            FileKey4=%ProgramData%\Auslogics\*Disk*Defrag*\*\Logs|*
+            FileKey5=%ProgramFiles%\Auslogics\*Disk*Defrag*|ndefrg.log
+    
+
+    Auslogics Duplicate File Finder * has been modified
+    
+    Added 1 DetectFile
+    Added 4 FileKeys
+            DetectFile=%ProgramData%\Auslogics\Duplicate File Finder
+            FileKey1=%ProgramData%\Auslogics\Duplicate File Finder\*|*.err
+            FileKey2=%ProgramData%\Auslogics\Duplicate File Finder\*\DeliveredAction|*
+            FileKey3=%ProgramData%\Auslogics\Duplicate File Finder\*\Logs|*
+            FileKey4=%ProgramData%\Auslogics\Duplicate File Finder\*\Reports|*
+    
+    
+    Removed 1 DetectFile
+            DetectFile=%ProgramFiles%\Auslogics\Duplicate File Finder
+    
+
+    Auslogics Registry Cleaner * has been modified
+    
+    Added 1 DetectFile
+    Added 2 FileKeys
+            DetectFile=%ProgramData%\Auslogics\Registry Cleaner
+            FileKey1=%ProgramData%\Auslogics\Registry Cleaner\*|*.err
+            FileKey3=%ProgramData%\Auslogics\Registry Cleaner\*\Logs|*
+    
+    
+    Removed 4 Detects
+    Removed 1 FileKey
+            Detect1=HKCU\Software\Auslogics\Registry Cleaner
+            Detect2=HKLM\Software\Auslogics\Registry Cleaner\3.x
+            Detect3=HKLM\Software\Auslogics\Registry Cleaner\4.x
+            Detect4=HKLM\Software\Auslogics\Registry Cleaner\5.X
+            FileKey1=%ProgramData%\Auslogics\Registry Cleaner\*.x|*.htm*;*.log|RECURSE
+    
+  Modified 3 FileKeys
+
+    FileKey2 has been modified, replacing 1 old key
+          New: FileKey2=%ProgramData%\Auslogics\Registry Cleaner\*\DeliveredAction|*
+          Old: FileKey2=%ProgramData%\Auslogics\Registry Cleaner\*.x\DeliveredAction|*.tmp
+    FileKey4 has been modified, replacing 1 old key
+          New: FileKey4=%ProgramData%\Auslogics\Registry Cleaner\*\Reports|*
+          Old: FileKey3=%ProgramData%\Auslogics\Registry Cleaner\*.x\Reports|*|RECURSE
+    FileKey5 has been modified, replacing 1 old key
+          New: FileKey5=%ProgramData%\Auslogics\Registry Cleaner\*\Rescue\Auslogics Registry Cleaner|*.rsc
+          Old: FileKey4=%ProgramData%\Auslogics\Registry Cleaner\*.x\Rescue\Auslogics Registry Cleaner|*.rsc
+
+    Auslogics Registry Defrag * has been modified
+    
+    Added 2 FileKeys
+            FileKey3=%ProgramData%\Auslogics\Registry Defrag\*|*.err
+            FileKey5=%ProgramData%\Auslogics\Registry Defrag\*\Logs|*
+    
+  Modified 2 FileKeys
+
+    FileKey4 has been modified, replacing 1 old key
+          New: FileKey4=%ProgramData%\Auslogics\Registry Defrag\*\DeliveredAction|*
+          Old: FileKey3=%ProgramData%\Auslogics\Registry Defrag\*.x\DeliveredAction|*.tmp
+    FileKey6 has been modified, replacing 1 old key
+          New: FileKey6=%ProgramData%\Auslogics\Registry Defrag\*\Reports|*
+          Old: FileKey4=%ProgramData%\Auslogics\Registry Defrag\*.x\Reports|*
+
+    Auslogics Windows Slimmer * has been modified
+    
+    Added 1 FileKey
+            FileKey2=%ProgramData%\Auslogics\Windows Slimmer\*\DeliveredAction|*
+    
+  Modified 3 FileKeys
+
+    FileKey1 has been modified, replacing 1 old key
+          New: FileKey1=%ProgramData%\Auslogics\Windows Slimmer\*|*.err
+          Old: FileKey1=%ProgramData%\Auslogics\Windows Slimmer\*.x|*.err
+    FileKey3 has been modified, replacing 1 old key
+          New: FileKey3=%ProgramData%\Auslogics\Windows Slimmer\*\Logs|*
+          Old: FileKey2=%ProgramData%\Auslogics\Windows Slimmer\*.x\Logs|*
+    FileKey4 has been modified, replacing 1 old key
+          New: FileKey4=%ProgramData%\Auslogics\Windows Slimmer\*\Reports|*
+          Old: FileKey3=%ProgramData%\Auslogics\Windows Slimmer\*.x\Reports|*|RECURSE
+
+    AVS Audio Editor * has been modified
+    
+    Added 1 FileKey
+            FileKey2=%AppData%\AVS4YOU\AVSAudioEditor\Temp|*
+    
+
+    AVS Registry Cleaner * has been modified
+    
+    Added 1 FileKey
+            FileKey1=%AppData%\AVS4YOU\AVSRegistryCleaner\Logs|*.log
+    
+    
+    Removed 2 FileKeys
+            FileKey1=%AppData%\AVS4YOU\AVSRegistryCleaner*\Logs|*.log
+            FileKey3=%ProgramFiles%\AVS4YOU|*.rtf
+    
+
+    Axialis IconWorkshop * has been modified
+    
+    Added 1 RegKey
+            RegKey4=HKCU\Software\Axialis\IconWorkshop\folders|LibrarianLastPath
+    
+
+    Battle.net * has been modified
+    
+    Added 1 FileKey
+            FileKey13=%ProgramData%\Battle.net\Agent\data\*cache|*|RECURSE
+    
+
+    Benthic PLEdit * has been modified
+    
+    Removed 1 FileKey
+            FileKey1=%ProgramFiles%\Benthic|*.txt
+    
+
+    BlueStacks * has been modified
+    
+    Added 2 DetectFiles
+    Added 4 FileKeys
+            DetectFile1=%AppData%\bluestacks-services
+            DetectFile2=%ProgramData%\BlueStacks
+            FileKey1=%AppData%\bluestacks-services\*Cache|*|RECURSE
+            FileKey3=%LocalAppData%\bluestacks-services-updater|*
+            FileKey5=%LocalAppData%\HD-Player\cache|*|RECURSE
+            FileKey9=%ProgramData%\BlueStacks_nxt\Dumps|*|RECURSE
+    
+    
+    Removed 2 Detects
+            Detect1=HKCU\Software\BlueStacks
+            Detect2=HKLM\Software\BlueStacks
+    
+  Modified 1 FileKey
+
+    FileKey7 has been modified, replacing 1 old key
+          New: FileKey7=%ProgramData%\BlueStacks\Engine|*.log*|RECURSE
+          Old: FileKey4=%ProgramData%\BlueStacks\Engine\Android\Logs|*.log*
+
+    Breevy * has been modified
+    
+    Added 1 DetectFile
+    Added 1 FileKey
+            DetectFile1=%AppData%\aBreevy8
+            FileKey1=%AppData%\aBreevy8\Backups|*
+    
+
+    Canon * has been modified
     
     Modified 1 DetectFile
 
-      DetectFile has been modified, replacing 2 old keys
-            New: DetectFile=%LocalAppData%\Packages\*DuckDuckGo*Browser*
-            Old: DetectFile1=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView
-            Old: DetectFile2=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView
+      DetectFile has been modified, replacing 1 old key
+            New: DetectFile=%ProgramData%\CanonBJ\IJPrinter\CNMWindows
+            Old: DetectFile=%ProgramData%\CanonBJ\IJPrinter\CNMWindows\*log*
+    
+
+    CCleaner * has been modified
+    
+    Added 3 FileKeys
+            FileKey2=%ProgramData%\Piriform\Icarus\Logs|*|RECURSE
+            FileKey9=%ProgramFiles%\Piriform\CCleaner 7\data\log|*
+            FileKey10=%ProgramFiles%\Piriform\CCleaner 7\log|*
+    
+
+    Chocolatey * has been modified
+    
+    Added 1 FileKey
+            FileKey5=%UserProfile%\.chocolatey\http-cache|*|RECURSE
+    
+
+    Dungeon of the Endless * has been modified
+    
+    Added 1 DetectFile
+            DetectFile=%UserProfile%\Documents\Dungeon of the Endless
+    
+    
+    Removed 1 Detect
+            Detect=HKCU\Software\Valve\Steam\Apps\249050
+    
+
+    Dungeons - The Dark Lord * has been modified
+    
+    Added 1 DetectFile
+            DetectFile=%AppData%\Kalypso Media\Dungeons - The Dark Lord
+    
+    
+    Removed 1 Detect
+            Detect=HKCU\Software\Valve\Steam\Apps\200550
+    
+
+    Dying Light * has been modified
+    
+    Added 1 DetectFile
+    Added 2 FileKeys
+            DetectFile=%UserProfile%\Documents\DyingLight
+            FileKey1=%UserProfile%\Documents\DyingLight\Out\Logs|*
+            FileKey2=%UserProfile%\Documents\DyingLight\Out\Screenshots|screen_*.tga
+    
+    
+    Removed 1 Detect
+    Removed 1 DetectFile
+    Removed 2 FileKeys
+            Detect=HKCU\Software\Valve\Steam\Apps\239140
+            DetectFile=%UserProfile%\Documents\Dying*Light
+            FileKey1=%UserProfile%\Documents\Dying*Light\Out\Logs|*
+            FileKey2=%UserProfile%\Documents\Dying*Light\Out\Screenshots|screen_*.tga
+    
+
+    Epic Games Launcher * has been modified
+    
+    Added 4 FileKeys
+            FileKey2=%LocalAppData%\Epic Games\Epic Online Services\EOSInstaller\Logs|*
+            FileKey8=%ProgramData%\Epic\EpicOnlineServices\EpicOnlineServicesHost\Logs|*
+            FileKey9=%ProgramData%\Epic\EpicOnlineServices\InstallHelper\*Logs|*|RECURSE
+            FileKey10=%ProgramData%\Epic\EpicOnlineServices\MainService\Logs|*
+    
+
+    Fox Digital Copy * has been modified
+    
+    Added 1 DetectFile
+    Added 1 FileKey
+            DetectFile=%AppData%\Fox Digital Copy
+            FileKey1=%AppData%\Fox Digital Copy|data_*;f_*;index
+    
+    
+    Removed 1 DetectFile
+    Removed 1 FileKey
+            DetectFile=%AppData%\Fox Dgital Copy
+            FileKey1=%AppData%\Fox Dgital Copy|data_*;f_*;index
+    
+
+    Google App * has been modified
+    
+    Added 1 FileKey
+            FileKey1=%LocalAppData%\Google\Google\Crashpad|*|RECURSE
+    
+
+    Google Updater * has been modified
+    
+    Added 1 DetectFile
+    Added 3 FileKeys
+            DetectFile1=%LocalAppData%\Google\GoogleUpdater
+            FileKey1=%LocalAppData%\Google\GoogleUpdater|*.log*
+            FileKey4=%WinDir%\System32\config\systemprofile\AppData\Local\Google\GoogleUpdater|*.log
+            FileKey5=%WinDir%\System32\config\systemprofile\AppData\Local\Google\GoogleUpdater\*\Crashpad|*|RECURSE
+    
+
+    Hue Sync * has been modified
+    
+    Added 3 FileKeys
+            FileKey1=%AppData%\HueSync\attachments|*
+            FileKey2=%AppData%\HueSync\reports|*
+            FileKey3=%LocalAppData%\Packages\Signify.HueSync_*\AC|*|RECURSE
     
 
     Intel * has been modified
     
-    Added 1 FileKey
+    Removed 1 Detect
+    Removed 11 FileKeys
+            Detect3=HKLM\Software\RivetNetworks
+            FileKey1=%AppData%\Intel\Wireless\CrashDumps|*
+            FileKey2=%LocalAppData%\Intel\GCC|*log*
+            FileKey7=%ProgramData%\Intel(R) Update Manager\AppData|ium.log
+            FileKey9=%ProgramData%\Intel\GFXInstaller|*.dmp
+            FileKey13=%ProgramData%\RivetNetworks\ImageCache|*
+            FileKey14=%ProgramData%\RivetNetworks\Killer|*.log
+            FileKey23=%UserProfile%\AppData\LocalLow\Intel\ShaderCache|*
+            FileKey28=%WinDir%\System32\config\systemprofile\AppData\Local\Intel\GCC|*.txt
             FileKey30=%WinDir%\System32\drivers\DriverData\Intel\GfxDriver|*.etl
-    
-    
-    Removed 10 FileKeys
-            FileKey4=%LocalAppData%\Intel\IntelGraphicsSoftware\EBWebView\*cache*|*|RECURSE
-            FileKey5=%LocalAppData%\Intel\IntelGraphicsSoftware\EBWebView\Default|*.log;DIPS*;ExtensionActivity*;Favicons*;History*;Login Data;Network Action*;Top Sites*;Visited Links*;Web Data*
-            FileKey6=%LocalAppData%\Intel\IntelGraphicsSoftware\EBWebView\Default\*cache*|*|RECURSE
-            FileKey7=%LocalAppData%\Intel\SUR\QueenCreek\Collected Data|*error_stack-*.txt
-            FileKey13=%ProgramData%\Intel\DSA\Logs|*.bak;*.log;*.txt
-            FileKey38=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\collected_data\DebugLogs|*
-            FileKey39=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\intermediate_data|*
-            FileKey40=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData|*.log;*.bak
-            FileKey41=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData\captured_logs|*
-            FileKey42=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData\history|*
+            FileKey31=%WinDir%\System32\drivers\RivetNetworks\Killer|*.log
+            FileKey33=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\GCC|*log*.txt
     
 
-    LibreWolf Website Permissions * has been modified
+    Intel Driver & Support Assistant * has been modified
+    
+    Added 1 FileKey
+            FileKey3=%WinDir%\System32\config\systemprofile\AppData\Local\Intel\SUR\IDSA|*
+    
+
+    Intel Graphics Command Center * has been modified
+    
+    Removed 1 FileKey
+            FileKey1=%LocalAppData%\Intel\GCC|gcc*_log_*.txt
+    
+
+    Intel Shader Cache * has been modified
+    
+    Added 1 FileKey
+            FileKey3=%WinDir%\ServiceProfiles\LocalService\AppData\LocalLow\Intel\ShaderCache|*
+    
+
+    Intel System Usage Report Service * has been modified
+    
+    Added 3 FileKeys
+            FileKey2=%WinDir%\System32\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\collected_data|*.txt
+            FileKey3=%WinDir%\System32\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\collected_data\DebugLogs|*
+            FileKey9=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData\downloads\*|*
+    
+  Modified 1 FileKey
+
+    FileKey7 has been modified, replacing 1 old key
+          New: FileKey7=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData|*.log;*.bak;last_cfu.txt
+          Old: FileKey5=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Intel\SUR\QUEENCREEK\Updater\AppData|*.log;*.bak
+
+    IObit Advanced SystemCare * has been modified
+    
+    Added 1 Detect
+            Detect=HKLM\Software\IObit\Advanced SystemCare
+    
+    
+    Removed 3 DetectFiles
+            DetectFile1=%AppData%\IObit\Advanced SystemCare*
+            DetectFile2=%ProgramData%\IObit\Advanced SystemCare*
+            DetectFile3=%ProgramFiles%\IObit\Advanced SystemCare*
+    
+
+    Kiwix JS * has been modified
+    
+    Added 1 FileKey
+            FileKey1=%LocalAppData%\Packages\Kiwix.KiwixJS_mc3511b08yc0e\LocalCache\Roaming\Kiwix JS Electron\*cache*|*|RECURSE
+    
+    
+    Removed 1 FileKey
+            FileKey1=%LocalAppData%\Packages\Kiwix.KiwixJS_mc3511b08yc0e\LocalCache\Roaming\Kiwix JS Electron|*cache*|RECURSE
+    
+
+    LibreOffice * has been modified
+    
+    Added 1 FileKey
+            FileKey8=%ProgramFiles%\LibreOffice\program\logs|*
+    
+
+    Logitech G HUB * has been modified
+    
+    Added 5 FileKeys
+            FileKey5=%LocalAppData%\Logi\LogiPluginService|*.log;*.txt|RECURSE
+            FileKey6=%LocalAppData%\Logi\LogiPluginService\Temp|*|REMOVESELF
+            FileKey8=%ProgramData%\LogiShrd\LGHUB\analytics|*|REMOVESELF
+            FileKey9=%SystemDrive%\Users\Default\AppData\Local\Logi\LogiPluginService\Logs\installer_ca|*.log
+            FileKey10=%WinDir%\System32\config\systemprofile\AppData\Local\LGHUB\sentry_db_lghub_updater\*|__sentry-*;*.json
+    
+
+    Logitech LogiOptions+ * has been modified
+    
+    Added 5 FileKeys
+            FileKey1=%AppData%\logioptionsplus\*Cache*|*|RECURSE
+            FileKey2=%LocalAppData%\flutter_webview_windows\LogiAiPromptBuilder\EBWebView|DIPS*
+            FileKey3=%LocalAppData%\flutter_webview_windows\LogiAiPromptBuilder\EBWebView\*Cache*|*|RECURSE
+            FileKey4=%LocalAppData%\flutter_webview_windows\LogiAiPromptBuilder\EBWebView\Default\*Cache*|RECURSE
+            FileKey5=%LocalAppData%\LogiOptionsPlus\*_cache|*
+    
+
+    MATLAB * has been modified
     
     Modified 1 DetectFile
 
-      DetectFile2 has been modified, replacing 1 old key
-            New: DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*
-            Old: DetectFile2=%LocalAppData%\Packages\*.LibreWolf_*\LocalCache\Roaming\librewolf\Profiles
+      DetectFile has been modified, replacing 1 old key
+            New: DetectFile=%ProgramFiles%\MATLAB
+            Old: DetectFile=%ProgramFiles%\MATLAB\R20*
+    
+
+    Microsoft DirectX * has been modified
+    
+    Removed 2 FileKeys
+            FileKey1=%LocalAppData%\D3DSCache|*|REMOVESELF
+            FileKey2=%WinDir%\System32\config\systemprofile\AppData\Local\D3DSCache|*|RECURSE
     
 
     Microsoft Office * has been modified
     
+    Modified 4 FileKeys
+
+      FileKey25 has been modified, replacing 1 old key
+            New: FileKey25=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_*\LocalState\EBWebView|*.pma|RECURSE
+            Old: FileKey25=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView|*.pma|RECURSE
+      FileKey26 has been modified, replacing 1 old key
+            New: FileKey26=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_*\LocalState\EBWebView\*cache*|*
+            Old: FileKey26=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\*cache*|*
+      FileKey27 has been modified, replacing 1 old key
+            New: FileKey27=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_*\LocalState\EBWebView\Crashpad|*|RECURSE
+            Old: FileKey27=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\Crashpad|*|RECURSE
+      FileKey28 has been modified, replacing 1 old key
+            New: FileKey28=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_*\LocalState\EBWebView\Default\*cache*|*|RECURSE
+            Old: FileKey28=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\Default\*cache*|*|RECURSE
+    
+
+    Microsoft PowerToys * has been modified
+    
+    Added 2 FileKeys
+            FileKey1=%LocalAppData%\Microsoft\PowerToys\*Logs|*.log|REMOVESELF
+            FileKey2=%LocalAppData%\Microsoft\PowerToys\etw|PowerToys-*.etl
+    
+    
+    Removed 11 FileKeys
+            FileKey1=%LocalAppData%\Microsoft\PowerToys|*.log;*log*.txt;*-*-*.txt|RECURSE
+            FileKey2=%LocalAppData%\Microsoft\PowerToys\ColorPicker|colorHistory.json
+            FileKey3=%LocalAppData%\Microsoft\PowerToys\PowerToys Run\Cache|*
+            FileKey4=%UserProfile%\AppData\LocalLow\Microsoft\PowerToys\*\EBWebview\*Cache*|*|RECURSE
+            FileKey5=%UserProfile%\AppData\LocalLow\Microsoft\PowerToys\*\EBWebview\BrowserMetrics|*
+            FileKey6=%UserProfile%\AppData\LocalLow\Microsoft\PowerToys\*\EBWebview\Crashpad|*|RECURSE
+            FileKey7=%UserProfile%\AppData\LocalLow\Microsoft\PowerToys\*\EBWebView\Default|*.log
+            FileKey8=%UserProfile%\AppData\LocalLow\Microsoft\PowerToys\*\EBWebview\default|favicons*;history*;Web Data*
+            FileKey9=%UserProfile%\AppData\LocalLow\Microsoft\PowerToys\*\EBWebview\default\*cache*|*|RECURSE
+            FileKey10=%UserProfile%\AppData\LocalLow\Microsoft\PowerToys\FileExplorer_localLow\*\logs|*.txt|RECURSE
+            FileKey11=%UserProfile%\AppData\LocalLow\Microsoft\PowerToys\logs|*.txt;*.log|RECURSE
+    
+  Modified 1 LangSecRef
+
+    Section has been modified, replacing 1 old key
+          New: Section=Microsoft PowerToys
+          Old: LangSecRef=3024
+
+    Microsoft Visual Studio * has been modified
+    
     Added 4 FileKeys
-            FileKey25=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView|*.pma|RECURSE
-            FileKey26=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\*cache*|*
-            FileKey27=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\Crashpad|*|RECURSE
-            FileKey28=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\Default\*cache*|*|RECURSE
+            FileKey17=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\VisualStudio\17.*|*.log*
+            FileKey18=%WinDir%\System32\config\systemprofile\AppData\Local\Microsoft\VisualStudio\SettingsLogs|*
+            FileKey19=%WinDir%\System32\config\systemprofile\AppData\Roaming\Microsoft\VisualStudio\17.*|ActivityLog.Setup.xml
+            FileKey20=%WinDir%\SysWOW64\config\systemprofile\AppData\Local\Microsoft\VisualStudio\17.*|*.log*
+    
+    
+    Removed 2 FileKeys
+    Removed 203 RegKeys
+            FileKey15=%LocalAppData%\NuGet\*Cache|*|REMOVESELF
+            FileKey18=%UserProfile%\.nuget|*|RECURSE
+            RegKey1=HKCU\Software\Microsoft\DevStudio\6.0\Recent File List
+            RegKey2=HKCU\Software\Microsoft\Visual Studio\10.0\FileMRUList
+            RegKey3=HKCU\Software\Microsoft\Visual Studio\10.0\ProjectMRUList
+            RegKey4=HKCU\Software\Microsoft\VisualStudio\8.0\FileMRUList
+            RegKey5=HKCU\Software\Microsoft\VisualStudio\8.0\ProjectMRUList
+            RegKey6=HKCU\Software\Microsoft\VisualStudio\9.0\FileMRUList
+            RegKey7=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 0
+            RegKey8=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 1
+            RegKey9=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 2
+            RegKey10=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 3
+            RegKey11=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 4
+            RegKey12=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 5
+            RegKey13=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 6
+            RegKey14=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 7
+            RegKey15=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 8
+            RegKey16=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 9
+            RegKey17=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 10
+            RegKey18=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 11
+            RegKey19=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 12
+            RegKey20=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 13
+            RegKey21=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 14
+            RegKey22=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 15
+            RegKey23=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 16
+            RegKey24=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 17
+            RegKey25=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 18
+            RegKey26=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Find 19
+            RegKey27=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 0
+            RegKey28=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 1
+            RegKey29=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 2
+            RegKey30=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 3
+            RegKey31=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 4
+            RegKey32=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 5
+            RegKey33=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 6
+            RegKey34=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 7
+            RegKey35=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 8
+            RegKey36=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 9
+            RegKey37=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 10
+            RegKey38=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 11
+            RegKey39=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 12
+            RegKey40=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 13
+            RegKey41=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 14
+            RegKey42=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 15
+            RegKey43=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 16
+            RegKey44=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 17
+            RegKey45=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 18
+            RegKey46=HKCU\Software\Microsoft\VisualStudio\9.0\Find|Replace 19
+            RegKey47=HKCU\Software\Microsoft\VisualStudio\9.0\LastLoadedSolution
+            RegKey48=HKCU\Software\Microsoft\VisualStudio\9.0\ProjectMRUList
+            RegKey49=HKCU\Software\Microsoft\VisualStudio\10.0\FileMRUList
+            RegKey50=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 0
+            RegKey51=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 1
+            RegKey52=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 2
+            RegKey53=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 3
+            RegKey54=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 4
+            RegKey55=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 5
+            RegKey56=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 6
+            RegKey57=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 7
+            RegKey58=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 8
+            RegKey59=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 9
+            RegKey60=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 10
+            RegKey61=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 11
+            RegKey62=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 12
+            RegKey63=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 13
+            RegKey64=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 14
+            RegKey65=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 15
+            RegKey66=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 16
+            RegKey67=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 17
+            RegKey68=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 18
+            RegKey69=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Find 19
+            RegKey70=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 0
+            RegKey71=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 1
+            RegKey72=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 2
+            RegKey73=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 3
+            RegKey74=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 4
+            RegKey75=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 5
+            RegKey76=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 6
+            RegKey77=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 7
+            RegKey78=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 8
+            RegKey79=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 9
+            RegKey80=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 10
+            RegKey81=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 11
+            RegKey82=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 12
+            RegKey83=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 13
+            RegKey84=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 14
+            RegKey85=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 15
+            RegKey86=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 16
+            RegKey87=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 17
+            RegKey88=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 18
+            RegKey89=HKCU\Software\Microsoft\VisualStudio\10.0\Find|Replace 19
+            RegKey90=HKCU\Software\Microsoft\VisualStudio\10.0\LastLoadedSolution
+            RegKey91=HKCU\Software\Microsoft\VisualStudio\10.0\ProjectMRUList
+            RegKey92=HKCU\Software\Microsoft\VisualStudio\11.0\FileMRUList
+            RegKey93=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 0
+            RegKey94=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 1
+            RegKey95=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 2
+            RegKey96=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 3
+            RegKey97=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 4
+            RegKey98=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 5
+            RegKey99=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 6
+            RegKey100=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 7
+            RegKey101=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 8
+            RegKey102=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 9
+            RegKey103=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 10
+            RegKey104=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 11
+            RegKey105=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 12
+            RegKey106=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 13
+            RegKey107=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 14
+            RegKey108=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 15
+            RegKey109=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 16
+            RegKey110=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 17
+            RegKey111=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 18
+            RegKey112=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Find 19
+            RegKey113=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 0
+            RegKey114=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 1
+            RegKey115=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 2
+            RegKey116=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 3
+            RegKey117=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 4
+            RegKey118=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 5
+            RegKey119=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 6
+            RegKey120=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 7
+            RegKey121=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 8
+            RegKey122=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 9
+            RegKey123=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 10
+            RegKey124=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 11
+            RegKey125=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 12
+            RegKey126=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 13
+            RegKey127=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 14
+            RegKey128=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 15
+            RegKey129=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 16
+            RegKey130=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 17
+            RegKey131=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 18
+            RegKey132=HKCU\Software\Microsoft\VisualStudio\11.0\Find|Replace 19
+            RegKey133=HKCU\Software\Microsoft\VisualStudio\11.0\LastLoadedSolution
+            RegKey134=HKCU\Software\Microsoft\VisualStudio\11.0\ProjectMRUList
+            RegKey135=HKCU\Software\Microsoft\VisualStudio\12.0\FileMRUList
+            RegKey136=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find
+            RegKey137=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 0
+            RegKey138=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 1
+            RegKey139=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 2
+            RegKey140=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 3
+            RegKey141=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 4
+            RegKey142=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 5
+            RegKey143=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 6
+            RegKey144=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 7
+            RegKey145=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 8
+            RegKey146=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 9
+            RegKey147=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 10
+            RegKey148=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 11
+            RegKey149=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 12
+            RegKey150=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 13
+            RegKey151=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 14
+            RegKey152=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 15
+            RegKey153=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 16
+            RegKey154=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 17
+            RegKey155=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 18
+            RegKey156=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Find 19
+            RegKey157=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace
+            RegKey158=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 0
+            RegKey159=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 1
+            RegKey160=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 2
+            RegKey161=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 3
+            RegKey162=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 4
+            RegKey163=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 5
+            RegKey164=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 6
+            RegKey165=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 7
+            RegKey166=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 8
+            RegKey167=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 9
+            RegKey168=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 10
+            RegKey169=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 11
+            RegKey170=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 12
+            RegKey171=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 13
+            RegKey172=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 14
+            RegKey173=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 15
+            RegKey174=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 16
+            RegKey175=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 17
+            RegKey176=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 18
+            RegKey177=HKCU\Software\Microsoft\VisualStudio\12.0\Find|Replace 19
+            RegKey178=HKCU\Software\Microsoft\VisualStudio\12.0\LastLoadedSolution
+            RegKey179=HKCU\Software\Microsoft\VisualStudio\12.0\ProjectMRUList
+            RegKey180=HKCU\Software\Microsoft\VisualStudio\14.0\FileMRUList
+            RegKey181=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace
+            RegKey182=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 0
+            RegKey183=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 1
+            RegKey184=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 2
+            RegKey185=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 3
+            RegKey186=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 4
+            RegKey187=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 5
+            RegKey188=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 6
+            RegKey189=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 7
+            RegKey190=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 8
+            RegKey191=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 9
+            RegKey192=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 10
+            RegKey193=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 11
+            RegKey194=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 12
+            RegKey195=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 13
+            RegKey196=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 14
+            RegKey197=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 15
+            RegKey198=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 16
+            RegKey199=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 17
+            RegKey200=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 18
+            RegKey201=HKCU\Software\Microsoft\VisualStudio\14.0\Find|Replace 19
+            RegKey202=HKCU\Software\Microsoft\VisualStudio\14.0\LastLoadedSolution
+            RegKey203=HKCU\Software\Microsoft\VisualStudio\14.0\ProjectMRUList
     
 
-    Minecraft * has been modified
+    Notepad++ - Backups & Unsaved Files * has been modified
     
-    Modified 1 DetectFile
+    Modified 1 FileKey
 
-      DetectFile2 has been modified, replacing 1 old key
-            New: DetectFile2=%LocalAppData%\Packages\Microsoft.MinecraftUWP_*
-            Old: DetectFile2=%LocalAppData%\Packages\Microsoft.MinecraftUWP_8wekyb3d8bbwe
+      FileKey1 has been modified, replacing 1 old key
+            New: FileKey1=%AppData%\Notepad++\backup*|*
+            Old: FileKey1=%AppData%\Notepad++\backups|*
     
 
-    NVIDIA * has been modified
+    Notion * has been modified
     
-    Modified 3 FileKeys
-
-      FileKey33 has been modified, replacing 1 old key
-            New: FileKey33=%WinDir%\ServiceProfiles\LocalService\AppData\Local\NVIDIA\*Cache|*|RECURSE
-            Old: FileKey33=%WinDir%\ServiceProfiles\LocalService\AppData\Local\NVIDIA\DXCache|*
-      FileKey34 has been modified, replacing 1 old key
-            New: FileKey34=%WinDir%\System32\config\systemprofile\AppData\Local\NVIDIA\*Cache|*
-            Old: FileKey34=%WinDir%\System32\config\systemprofile\AppData\Local\NVIDIA\DXCache|*
-      FileKey35 has been modified, replacing 1 old key
-            New: FileKey35=%WinDir%\System32\config\systemprofile\AppData\LocalLow\NVIDIA\PerDriverVersion\*Cache|*
-            Old: FileKey35=%WinDir%\System32\config\systemprofile\AppData\LocalLow\NVIDIA\PerDriverVersion\DXCache|*
+    Added 4 FileKeys
+            FileKey1=%AppData%\Notion|DIPS*
+            FileKey3=%AppData%\Notion\logs|*
+            FileKey4=%AppData%\Notion\partitions|DIPS*
+            FileKey6=%LocalAppData%\notion-updater|*|REMOVESELF
+    
+    
+    Removed 2 FileKeys
+            FileKey1=%AppData%\Notion|*.log
+            FileKey3=%AppData%\Notion\partitions|*.old;LOG|RECURSE
     
 
     NVIDIA Broadcast * has been modified
     
-    Added 4 FileKeys
-            FileKey1=%AppData%\nvidia-broadcast\*Cache*|*|REMOVESELF
-            FileKey2=%AppData%\nvidia-broadcast\logs|*.log
-            FileKey4=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast\logs|*.txt
-            FileKey5=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast\NvBroadcastLogsZip|*.zip
+    Added 1 FileKey
+            FileKey6=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast\temp|*
+    
+  Modified 1 FileKey
+
+    FileKey4 has been modified, replacing 1 old key
+          New: FileKey4=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast\logs|*
+          Old: FileKey4=%ProgramData%\NVIDIA Corporation\NVIDIA Broadcast\logs|*.txt
+
+    NVIDIA Image Comparison Analysis Tool * has been modified
+    
+    Added 1 FileKey
+            FileKey3=%ProgramData%|DisplaySessionContainer*.log*;NvcDispCorePlugin.log*;NVDisplay.Container*.log*
+    
+
+    Opera GX Telemetry * has been modified
+    
+    Modified 2 FileKeys
+
+      FileKey4 has been modified, replacing 1 old key
+            New: FileKey4=%AppData%\Opera Software\Opera GX*|*_shutdown_ms.txt;Last Browser;Last Version;Breadcrumbs;BrowsingTopics*
+            Old: FileKey4=%AppData%\Opera Software\Opera GX*|*_shutdown_ms.txt;*.log;Last Browser;Last Version;Breadcrumbs;BrowsingTopics*
+      FileKey7 has been modified, replacing 1 old key
+            New: FileKey7=%AppData%\Opera Software\Opera GX*\_side_profiles\*|*_shutdown_ms.txt;Last Browser;Last Version;Breadcrumbs;BrowsingTopics*
+            Old: FileKey7=%AppData%\Opera Software\Opera GX*\_side_profiles\*|*_shutdown_ms.txt;*.log;Last Browser;Last Version;Breadcrumbs;BrowsingTopics*
+    
+
+    SMPlayer * has been modified
+    
+    Added 1 DetectFile
+    Added 1 FileKey
+            DetectFile1=%LocalAppData%\Packages\*RicardoVillalba.SMPlayerMediaPlayer_*
+            FileKey1=%LocalAppData%\Packages\*RicardoVillalba.SMPlayerMediaPlayer_*\AC|*|RECURSE
+    
+  Modified 1 DetectFile
+
+    DetectFile2 has been modified, replacing 1 old key
+          New: DetectFile2=%UserProfile%\.smplayer
+          Old: DetectFile=%UserProfile%\.smplayer\smplayer.ini
+
+    Universal Windows Platform * has been modified
+    
+    Added 1 FileKey
+            FileKey8=%LocalAppData%\Packages\*\AC\Microsoft\CLR_v4.0*|*|RECURSE
     
 
     Windows Error Reporting * has been modified
     
     Added 1 FileKey
-            FileKey3=%ProgramData%\Microsoft\Windows\WER\ReportArchive|*|REMOVESELF
+            FileKey10=%WinDir%\ServiceProfiles\NetworkService\AppData\Local\CrashDumps|*
     
 
-    Windows Event Logs * has been modified
+    Windows Font Cache * has been modified
     
     Added 1 FileKey
-            FileKey8=%WinDir%\Panther|*.etl
+            FileKey5=%WinDir%\ServiceProfiles\LocalService\AppData\Local\Fonts|*.tmp
     
 
     Windows Logs * has been modified
     
+    Added 2 FileKeys
+            FileKey13=%ProgramData%\Whesvc\sys_perf_summary\sys_perf_input_delays|*
+            FileKey37=%WinDir%\System32\config\systemprofile\AppData\Local\DataSharing\Storage|*.log
+    
+
+    Windows Update * has been modified
+    
+    Added 7 FileKeys
+            FileKey3=%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_*\AC|*|RECURSE
+            FileKey4=%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_*\AppData|*|RECURSE
+            FileKey5=%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_*\LocalCache|*|RECURSE
+            FileKey6=%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_*\LocalState\EBWebview|*|RECURSE
+            FileKey7=%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_*\Settings|*.log*
+            FileKey8=%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_*\TempState|*|RECURSE
+            FileKey14=%WinDir%\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\State|*.log*
+    
+    
+    Removed 6 FileKeys
+            FileKey3=%LocalAppData%\Packages\MicrosoftWindows.Client*\AC|*|RECURSE
+            FileKey4=%LocalAppData%\Packages\MicrosoftWindows.Client*\LocalCache|*|RECURSE
+            FileKey5=%LocalAppData%\Packages\MicrosoftWindows.Client*\LocalState\EBWebview\*|LOG;LOG.old|RECURSE
+            FileKey6=%LocalAppData%\Packages\MicrosoftWindows.Client*\LocalState\EBWebview\Default\Service Worker\CacheStorage\*|*|RECURSE
+            FileKey7=%LocalAppData%\Packages\MicrosoftWindows.Client*\Settings|*.log*
+            FileKey8=%LocalAppData%\Packages\MicrosoftWindows.Client*\TempState|*|RECURSE
+    
+
+    Hulubulu Advanced Renamer * has been modified
+    
+    Added 1 DetectFile
+            DetectFile2=%AppData%\Hulubulu\Advanced Renamer 4
+    
+  Modified 1 FileKey
+  Modified 1 Name
+
+    FileKey1 has been modified, replacing 1 old key
+          New: FileKey1=%AppData%\Hulubulu\Advanced Renamer *\Data\UndoLists|*
+          Old: FileKey1=%AppData%\Hulubulu\Advanced Renamer 3\Data\UndoLists|*
+    Entry Name has been modified
+          New: Hulubulu Advanced Renamer *
+          Old: Advanced Renamer 3 *
+
+    VSO ConvertXToDVD * has been modified
+    
+    Modified 1 Detect
     Modified 1 FileKey
+    Modified 1 Name
 
-      FileKey26 has been modified, replacing 1 old key
-            New: FileKey26=%WinDir%\Panther|cbs.log;DDACLSys.log;miglog.xml;Migrep.html;*GatherPnPList.log;*.tmp;setup*.log
-            Old: FileKey26=%WinDir%\Panther|cbs.log;DDACLSys.log;miglog.xml;Migrep.html;*GatherPnPList.log;*.tmp
+      Detect has been modified, replacing 1 old key
+            New: Detect=HKCU\Software\VSO\ConvertXtoDVD
+            Old: Detect=HKCU\Software\VSO\ConvertXtoDVD\5
+      FileKey1 has been modified, replacing 1 old key
+            New: FileKey1=%ProgramFiles%\VSO\ConvertX\*|*.log;*.rtf
+            Old: FileKey1=%ProgramFiles%\VSO\ConvertX\5|*.log;*.rtf
+      Entry Name has been modified
+            New: VSO ConvertXToDVD *
+            Old: VSO ConvertXToDVD 5 *
     
 
-    Windows Notepad * has been modified
+    VSO Media Player * has been modified
     
-    Added 1 FileKey
-            FileKey1=%LocalAppData%\Packages\Microsoft.WindowsNotepad_*\LocalState\*State|*.bin
-    
-    
-    Removed 1 FileKey
-            FileKey1=%LocalAppData%\Packages\Microsoft.WindowsNotepad_*\SystemAppData\Helium|User.dat
-    
+    Modified 1 Detect
+    Modified 1 Name
 
-    Windows Subsystems * has been modified
-    
-    Removed 1 FileKey
-            FileKey5=%LocalAppData%\Microsoft\Windows\WebCache|*|RECURSE
+      Detect has been modified, replacing 1 old key
+            New: Detect=HKCU\Software\VSO\VSO Media Player
+            Old: Detect=HKCU\Software\VSO\VSO Media Player\1
+      Entry Name has been modified
+            New: VSO Media Player *
+            Old: VSO Media Player 1 *
     
 
-    Dead Cells * has been added
+    .NET Platform * has been added
 
-    Eluktronics Control Center * has been added
+    4Team MOM * has been added
 
-    Intel Driver & Support Assistant * has been added
+    4Team OST2 * has been added
 
-    Intel System Usage Report Service * has been added
+    4Team Plug2Sync * has been added
 
-    Kiwix JS * has been added
+    4Team PSTMerger * has been added
 
-    Microsoft Copilot * has been added
+    4Team PSTMover * has been added
 
-    NVIDIA Image Comparison Analysis Tool * has been added
+    4Team PSTSplitter * has been added
 
-    NVIDIA Omniverse * has been added
-  00:00:00.0622556
+    4Team SafePSTBackup * has been added
+
+    4Team SyncWiz * has been added
+
+    4Team vCardWizard * has been added
+
+    4Team WorkgroupCalendar * has been added
+
+    Abelssoft AntiLogger * has been added
+
+    Abelssoft AntiRansomware * has been added
+
+    Abelssoft CheckDrive * has been added
+
+    Abelssoft CleverPrint * has been added
+
+    Abelssoft Converter4Video * has been added
+
+    Abelssoft CryptBox * has been added
+
+    Abelssoft Data2Pocket * has been added
+
+    Abelssoft Easy PDF * has been added
+
+    Abelssoft EasyBackup * has been added
+
+    Abelssoft EasyFirewall * has been added
+
+    Abelssoft EverDoc * has been added
+
+    Abelssoft FileCryptor * has been added
+
+    Abelssoft FileFusion * has been added
+
+    Abelssoft FileWing Shredder * has been added
+
+    Abelssoft FindMyFiles * has been added
+
+    Abelssoft FolderVisualizer * has been added
+
+    Abelssoft HackCheck * has been added
+
+    Abelssoft HappyCard * has been added
+
+    Abelssoft KeyDepot * has been added
+
+    Abelssoft MalwareTerminator * has been added
+
+    Abelssoft MovieCut * has been added
+
+    Abelssoft mp3schneiden * has been added
+
+    Abelssoft MyKeyFinder * has been added
+
+    Abelssoft PCFresh * has been added
+    This entry contains keys merged from the following removed entries:
+          Abelssoft PCFresh Backups *
+
+    Abelssoft Photastic * has been added
+
+    Abelssoft PhotoBoost * has been added
+
+    Abelssoft PhotoSort * has been added
+
+    Abelssoft Recordify * has been added
+
+    Abelssoft Registry Cleaner * has been added
+
+    Abelssoft RouterGuard * has been added
+
+    Abelssoft Schirmfoto * has been added
+
+    Abelssoft ScreenVideo * has been added
+
+    Abelssoft SendMe * has been added
+
+    Abelssoft SSD Fresh * has been added
+    This entry contains keys merged from the following removed entries:
+          Abelssoft SSD Fresh Backups *
+
+    Abelssoft SyncManager * has been added
+
+    Abelssoft Tagman * has been added
+
+    Abelssoft Undeleter * has been added
+
+    Abelssoft Win10PrivacyFix * has been added
+
+    Abelssoft Win11PrivacyFix * has been added
+
+    Abelssoft YouTube Song Downloader * has been added
+
+    Ability Office Database * has been added
+
+    Ability Office PhotoPaint * has been added
+    This entry contains keys merged from the following removed entries:
+          Ability Office *
+
+    Ability Office Presentation * has been added
+
+    Ability Office Spreadsheet * has been added
+
+    Ability Office Write * has been added
+
+    Acon Digital Acoustica * has been added
+    This entry contains keys merged from the following removed entries:
+          Acoustica Premium Edition 6 *
+
+    Actual Tools Actual Multiple Monitors * has been added
+
+    Actual Tools Actual Tabbed Explorer * has been added
+
+    Actual Tools Actual Title Buttons * has been added
+
+    Actual Tools Actual Transparent Window * has been added
+
+    Actual Tools Actual Virtual Desktops * has been added
+
+    Actual Tools Actual Window Manager * has been added
+
+    Actual Tools Actual Window Menu * has been added
+
+    Actual Tools Actual Window Rollup * has been added
+
+    Adobe After Effects * has been added
+
+    Adobe Audition * has been added
+
+    Adobe Camera Raw * has been added
+
+    Adobe Character Animator * has been added
+
+    Adobe Creative Cloud * has been added
+    This entry contains keys merged from the following removed entries:
+          Adobe CC *
+
+    Adobe Illustrator * has been added
+
+    Adobe InDesign * has been added
+
+    Adobe Lightroom * has been added
+
+    Adobe Media Encoder * has been added
+
+    Adobe Photoshop * has been added
+
+    Adobe Premiere Pro * has been added
+
+    Adobe Premiere Rush * has been added
+
+    Aiseesoft Video Editor * has been added
+
+    AmoyShare AnyEraser * has been added
+
+    AmoyShare AnyMusic * has been added
+    This entry contains keys merged from the following removed entries:
+          AnyMusic *
+
+    AmoyShare BeeConverter * has been added
+
+    AmoyShare DiReec * has been added
+
+    AmoyShare Doremi * has been added
+    This entry contains keys merged from the following removed entries:
+          Doremi *
+
+    AmoyShare DoremiAI * has been added
+
+    AmoyShare Pixeraser * has been added
+
+    AmoyShare TuneBer * has been added
+
+    AnvSoft AVCLabs Photo Enhancer AI * has been added
+
+    AnvSoft AVCLabs PhotoPro AI * has been added
+
+    AnvSoft AVCLabs Video Blur AI * has been added
+
+    AnvSoft AVCLabs Video Enhancer AI * has been added
+
+    AnvSoft PDFMate * has been added
+
+    AnvSoft Syncios D-Savior * has been added
+
+    AnvSoft Syncios Data Recovery * has been added
+
+    AnvSoft Syncios iOS Eraser Pro * has been added
+
+    AnvSoft Syncios Location Changer * has been added
+
+    AnvSoft Syncios Mobile Manager * has been added
+
+    AnvSoft Syncios Passcode Unlocker * has been added
+
+    AnvSoft Syncios Toolkit * has been added
+
+    AnvSoft Syncios WhatsApp Transfer * has been added
+
+    AnvSoft Syncios YouTube Video Downloader * has been added
+
+    AOMEI Cloner * has been added
+
+    AOMEI FastRecovery * has been added
+
+    Apowersoft ApowerCompress * has been added
+
+    Apowersoft ApowerManager * has been added
+
+    Apowersoft ApowerMirror * has been added
+
+    Apowersoft ApowerREC * has been added
+
+    Apowersoft ApowerRecover * has been added
+
+    Apowersoft ApowerRescue * has been added
+
+    Apowersoft ApowerShow * has been added
+
+    Apowersoft Background Easer * has been added
+
+    Apowersoft CAD Viewer * has been added
+
+    Apowersoft Casttingo * has been added
+
+    Apowersoft GIF * has been added
+
+    Apowersoft GitMind * has been added
+
+    Apowersoft HEIC Converter * has been added
+
+    Apowersoft RecCloud * has been added
+
+    Apowersoft Screen Capture Pro * has been added
+
+    Apowersoft Streaming Audio Recorder * has been added
+
+    Apple iCloud * has been added
+
+    Apple Music * has been added
+
+    Artipic * has been added
+
+    Ashampoo 3D CAD * has been added
+
+    Ashampoo Action Click * has been added
+
+    Ashampoo ActionCam * has been added
+
+    Ashampoo AI Filter * has been added
+
+    Ashampoo ANALOG * has been added
+
+    Ashampoo App * has been added
+    This entry contains keys merged from the following removed entries:
+          Ashampoo *
+
+    Ashampoo Backup * has been added
+
+    Ashampoo BLACK & WHITE * has been added
+
+    Ashampoo Cinemagraph * has been added
+
+    Ashampoo COLOR * has been added
+
+    Ashampoo DENOISE * has been added
+
+    Ashampoo Driver Updater * has been added
+
+    Ashampoo FOCUS * has been added
+
+    Ashampoo Foto 3D * has been added
+
+    Ashampoo HDR * has been added
+
+    Ashampoo Money * has been added
+
+    Ashampoo Movie Studio * has been added
+
+    Ashampoo NEAT * has been added
+
+    Ashampoo Photo Organizer * has been added
+
+    Ashampoo PhotoCommander * has been added
+
+    Ashampoo SHARPEN * has been added
+
+    Ashampoo SoundStage * has been added
+
+    Ashampoo Video Converter * has been added
+
+    Ashampoo Video Deflicker * has been added
+
+    Ashampoo Video Filters and Exposure * has been added
+
+    Ashampoo Video Fisheye Removal * has been added
+
+    Ashampoo Video Optimizer Pro * has been added
+
+    Ashampoo Video Stabilization * has been added
+
+    Ashampoo Video Tilt-Shift * has been added
+
+    Ashampoo Write * has been added
+
+    Ashampoo ZOOM * has been added
+
+    Auslogics BitReplica * has been added
+
+    Auslogics ChillMate * has been added
+
+    Auslogics Driver Updater * has been added
+
+    Auslogics SSD Optimizer * has been added
+
+    Auslogics Video Grabber * has been added
+
+    Avast Cleanup * has been added
+    This entry contains keys merged from the following removed entries:
+          Avast TuneUp *
+
+    Axialis CursorWorkshop * has been added
+
+    Axialis IconVectors * has been added
+
+    Axialis Screensaver Producer * has been added
+
+    Be My Eyes * has been added
+
+    Behringer SYNTHTRIBE * has been added
+    This entry contains keys merged from the following removed entries:
+          Behringer Neutron *
+
+    Blueberry Software Camigo * has been added
+
+    Blueberry Software FlashBack Express * has been added
+
+    Blueberry Software FlashbackSDK * has been added
+
+    Blueberry Software FlashbackVideoConverter * has been added
+
+    Boilsoft Video Joiner * has been added
+
+    Boilsoft Video Splitter * has been added
+
+    BOINC Manager * has been added
+    This entry contains keys merged from the following removed entries:
+          Boinc *
+
+    Box Drive * has been added
+
+    Bree AI * has been added
+
+    BriskBard Autofill Data & Search Engine Preferences * has been added
+
+    BriskBard Autoplay Preferences * has been added
+
+    BriskBard Bookmark Backups * has been added
+
+    BriskBard Bookmark Favicons * has been added
+
+    BriskBard Caches * has been added
+
+    BriskBard Default App Handlers * has been added
+
+    BriskBard Download History * has been added
+
+    BriskBard DRM Data * has been added
+
+    BriskBard Extension Cookies * has been added
+
+    BriskBard Privacy Sandbox * has been added
+
+    BriskBard Progressive Web Apps * has been added
+
+    BriskBard Saved Usernames & Passwords * has been added
+
+    BriskBard Security & Threat Detection * has been added
+
+    BriskBard Shopping Insights * has been added
+
+    BriskBard Storage Quota Manager * has been added
+
+    BriskBard Telemetry * has been added
+
+    BriskBard Web Browsing Cookies * has been added
+
+    BriskBard Web Browsing History * has been added
+
+    BriskBard Web Browsing Session * has been added
+
+    BriskBard Web Storage * has been added
+
+    Darksiders Genesis * has been added
+
+    Deep Java Library * has been added
+
+    Deutsche Bank Autobahn Toolbar * has been added
+    This entry contains keys merged from the following removed entries:
+          Autobahn *
+
+    Dynalist Obsidian * has been added
+
+    Eluktronics Bluetooth Device Firmware Update Tool * has been added
+
+    Gainedge Better Explorer * has been added
+    This entry contains keys merged from the following removed entries:
+          Better Explorer *
+
+    Gainedge Better Explorer Open Tabs * has been added
+
+    Gainedge Better Explorer Saved Tabs * has been added
+
+    Garena * has been added
+
+    GG * has been added
+
+    Ghost Browser Autofill Data & Search Engine Preferences * has been added
+
+    Ghost Browser Autoplay Preferences * has been added
+
+    Ghost Browser Bookmark Backups * has been added
+
+    Ghost Browser Bookmark Favicons * has been added
+
+    Ghost Browser Caches * has been added
+
+    Ghost Browser Default App Handlers * has been added
+
+    Ghost Browser Download History * has been added
+
+    Ghost Browser DRM Data * has been added
+
+    Ghost Browser Extension Cookies * has been added
+
+    Ghost Browser Pinned Tabs * has been added
+
+    Ghost Browser Privacy Sandbox * has been added
+
+    Ghost Browser Progressive Web Apps * has been added
+
+    Ghost Browser Saved Usernames & Passwords * has been added
+
+    Ghost Browser Security & Threat Detection * has been added
+
+    Ghost Browser Shopping Insights * has been added
+
+    Ghost Browser Storage Quota Manager * has been added
+
+    Ghost Browser Telemetry * has been added
+
+    Ghost Browser Web Browsing Cookies * has been added
+
+    Ghost Browser Web Browsing History * has been added
+
+    Ghost Browser Web Browsing Session * has been added
+
+    Ghost Browser Web Storage * has been added
+
+    Graphisoft BIMx * has been added
+    This entry contains keys merged from the following removed entries:
+          BIMx Desktop Viewer *
+
+    Helium Autofill Data & Search Engine Preferences * has been added
+
+    Helium Autoplay Preferences * has been added
+
+    Helium Bookmark Backups * has been added
+
+    Helium Bookmark Favicons * has been added
+
+    Helium Caches * has been added
+
+    Helium Default App Handlers * has been added
+
+    Helium Download History * has been added
+
+    Helium DRM Data * has been added
+
+    Helium Extension Cookies * has been added
+
+    Helium Privacy Sandbox * has been added
+
+    Helium Progressive Web Apps * has been added
+
+    Helium Saved Usernames & Passwords * has been added
+
+    Helium Security & Threat Detection * has been added
+
+    Helium Shopping Insights * has been added
+
+    Helium Storage Quota Manager * has been added
+
+    Helium Telemetry * has been added
+
+    Helium Web Browsing Cookies * has been added
+
+    Helium Web Browsing History * has been added
+
+    Helium Web Browsing Session * has been added
+
+    Helium Web Storage * has been added
+
+    Intel Graphics Driver * has been added
+
+    Intel Graphics Software * has been added
+
+    Intel NPU Driver * has been added
+
+    Intel Update Manager * has been added
+
+    Intel Wireless Wi-Fi Drivers * has been added
+
+    Lively Wallpaper * has been added
+
+    Logitech Alert Commander * has been added
+
+    Logitech ASTRO C40 TR Configuration Software * has been added
+
+    Logitech Astro Command Center * has been added
+
+    Logitech Capture * has been added
+
+    Logitech Firmware Update Tool * has been added
+
+    Logitech Gaming Software * has been added
+
+    Logitech Logi Bolt * has been added
+
+    Logitech Logi Tune * has been added
+
+    Logitech LogiOptions * has been added
+
+    Logitech MIXLINE * has been added
+
+    Logitech Presentation * has been added
+
+    Logitech SetPoint * has been added
+    This entry contains keys merged from the following removed entries:
+          Logitech *
+
+    Logitech Streamlabs Desktop * has been added
+
+    Logitech Unifying Software * has been added
+
+    Lunascape Phoebe Bookmark Favicons * has been added
+
+    Lunascape Phoebe Caches * has been added
+
+    Lunascape Phoebe Cookies * has been added
+
+    Lunascape Phoebe Crash Reports * has been added
+
+    Lunascape Phoebe Privacy Sandbox * has been added
+
+    Lunascape Phoebe Storage Quota Manager * has been added
+
+    Lunascape Phoebe Telemetry * has been added
+
+    Lunascape Phoebe Web Browsing History * has been added
+
+    Lunascape Phoebe Web Storage * has been added
+
+    Magicka 2 * has been added
+
+    Microsoft DirectX Shader Cache * has been added
+
+    Microsoft NuGet Package Cache * has been added
+
+    Microsoft PC Manager * has been added
+
+    Microsoft Power Automate * has been added
+
+    Microsoft PowerToys Advanced Paste * has been added
+
+    Microsoft PowerToys Always On Top * has been added
+
+    Microsoft PowerToys Awake * has been added
+
+    Microsoft PowerToys Color Picker * has been added
+
+    Microsoft PowerToys Command Not Found * has been added
+
+    Microsoft PowerToys Command Palette * has been added
+
+    Microsoft PowerToys Crop And Lock * has been added
+
+    Microsoft PowerToys Environment Variables * has been added
+
+    Microsoft PowerToys Fancy Zones * has been added
+
+    Microsoft PowerToys File Explorer Add-ons * has been added
+
+    Microsoft PowerToys File Locksmith * has been added
+
+    Microsoft PowerToys Hosts File Editor * has been added
+
+    Microsoft PowerToys Image Resizer * has been added
+
+    Microsoft PowerToys Keyboard Manager * has been added
+
+    Microsoft PowerToys Light Switch * has been added
+
+    Microsoft PowerToys Mouse Utilities * has been added
+
+    Microsoft PowerToys Mouse Without Borders * has been added
+
+    Microsoft PowerToys New+ * has been added
+
+    Microsoft PowerToys Peek * has been added
+
+    Microsoft PowerToys PowerRename * has been added
+
+    Microsoft PowerToys Quick Accent * has been added
+
+    Microsoft PowerToys Registry Preview * has been added
+
+    Microsoft PowerToys Run * has been added
+
+    Microsoft PowerToys Screen Ruler * has been added
+
+    Microsoft PowerToys Settings * has been added
+
+    Microsoft PowerToys Shortcut Guide * has been added
+
+    Microsoft PowerToys Text Extractor * has been added
+
+    Microsoft PowerToys Workspaces * has been added
+
+    Microsoft PowerToys ZoomIt * has been added
+
+    Microsoft Visio * has been added
+    This entry contains keys merged from the following removed entries:
+          Microsoft Visio 2010 *
+
+    Midori Autocomplete History * has been added
+
+    Midori Autofill Data * has been added
+
+    Midori Bookmark Backups * has been added
+
+    Midori Bookmark Favicons * has been added
+
+    Midori Caches * has been added
+
+    Midori Privacy Sandbox * has been added
+
+    Midori Saved Usernames & Passwords * has been added
+
+    Midori Synced Tabs * has been added
+
+    Midori Telemetry * has been added
+
+    Midori Web Browsing Cookies * has been added
+
+    Midori Web Browsing Session * has been added
+
+    Midori Web Browsing Session Backups * has been added
+
+    Midori Web Storage * has been added
+
+    Midori Website Permissions * has been added
+
+    Mullvad Autocomplete History * has been added
+
+    Mullvad Autofill Data * has been added
+
+    Mullvad Bookmark Backups * has been added
+
+    Mullvad Bookmark Favicons * has been added
+
+    Mullvad Caches * has been added
+
+    Mullvad Privacy Sandbox * has been added
+
+    Mullvad Saved Usernames & Passwords * has been added
+
+    Mullvad Synced Tabs * has been added
+
+    Mullvad Telemetry * has been added
+
+    Mullvad Web Browsing Cookies * has been added
+
+    Mullvad Web Browsing Session * has been added
+
+    Mullvad Web Browsing Session Backups * has been added
+
+    Mullvad Web Storage * has been added
+
+    Mullvad Website Permissions * has been added
+
+    Muse Group Muse Hub * has been added
+
+    Norton Neo Autofill Data & Search Engine Preferences * has been added
+
+    Norton Neo Autoplay Preferences * has been added
+
+    Norton Neo Bookmark Backups * has been added
+
+    Norton Neo Bookmark Favicons * has been added
+
+    Norton Neo Caches * has been added
+
+    Norton Neo Default App Handlers * has been added
+
+    Norton Neo Download History * has been added
+
+    Norton Neo DRM Data * has been added
+
+    Norton Neo Extension Cookies * has been added
+
+    Norton Neo Pinned Tabs * has been added
+
+    Norton Neo Privacy Sandbox * has been added
+
+    Norton Neo Progressive Web Apps * has been added
+
+    Norton Neo Saved Usernames & Passwords * has been added
+
+    Norton Neo Security & Threat Detection * has been added
+
+    Norton Neo Shopping Insights * has been added
+
+    Norton Neo Storage Quota Manager * has been added
+
+    Norton Neo Telemetry * has been added
+
+    Norton Neo Web Browsing Cookies * has been added
+
+    Norton Neo Web Browsing History * has been added
+
+    Norton Neo Web Browsing Session * has been added
+
+    Norton Neo Web Storage * has been added
+
+    NVIDIA App * has been added
+
+    NVIDIA Control Panel * has been added
+
+    NVIDIA ForceWare * has been added
+
+    NVIDIA FrameView * has been added
+
+    NVIDIA G-Assist * has been added
+
+    NVIDIA Geforce Experience * has been added
+
+    NVIDIA Graphics Drivers * has been added
+
+    NVIDIA Overlay * has been added
+
+    NVIDIA Shader Cache * has been added
+    This entry contains keys merged from the following removed entries:
+          NVIDIA *
+
+    NVIDIA Update Files * has been added
+
+    OBS Studio * has been added
+    This entry contains keys merged from the following removed entries:
+          OBS *
+
+    Oracle VirtualBox * has been added
+    This entry contains keys merged from the following removed entries:
+          VirtualBox *
+
+    TIDAL * has been added
+
+    UC Autofill Data & Search Engine Preferences * has been added
+
+    UC Autoplay Preferences * has been added
+
+    UC Bookmark Backups * has been added
+
+    UC Bookmark Favicons * has been added
+
+    UC Caches * has been added
+
+    UC Default App Handlers * has been added
+
+    UC Download History * has been added
+
+    UC DRM Data * has been added
+
+    UC Extension Cookies * has been added
+
+    UC Pinned Tabs * has been added
+
+    UC Privacy Sandbox * has been added
+
+    UC Progressive Web Apps * has been added
+
+    UC Saved Usernames & Passwords * has been added
+
+    UC Security & Threat Detection * has been added
+
+    UC Shopping Insights * has been added
+
+    UC Storage Quota Manager * has been added
+
+    UC Telemetry * has been added
+
+    UC Web Browsing Cookies * has been added
+
+    UC Web Browsing History * has been added
+
+    UC Web Browsing Session * has been added
+
+    UC Web Storage * has been added
+
+    Wavebox Autofill Data & Search Engine Preferences * has been added
+
+    Wavebox Autoplay Preferences * has been added
+
+    Wavebox Bookmark Backups * has been added
+
+    Wavebox Bookmark Favicons * has been added
+
+    Wavebox Caches * has been added
+
+    Wavebox Default App Handlers * has been added
+
+    Wavebox Download History * has been added
+
+    Wavebox DRM Data * has been added
+
+    Wavebox Extension Cookies * has been added
+
+    Wavebox Pinned Tabs * has been added
+
+    Wavebox Privacy Sandbox * has been added
+
+    Wavebox Progressive Web Apps * has been added
+
+    Wavebox Saved Usernames & Passwords * has been added
+
+    Wavebox Security & Threat Detection * has been added
+
+    Wavebox Shopping Insights * has been added
+
+    Wavebox Storage Quota Manager * has been added
+
+    Wavebox Telemetry * has been added
+
+    Wavebox Web Browsing Cookies * has been added
+
+    Wavebox Web Browsing History * has been added
+
+    Wavebox Web Browsing Session * has been added
+
+    Wavebox Web Storage * has been added
+
+    Windows Widgets * has been added
+
+    Winsome Technologies File Renamer * has been added
+
+    Winsome Technologies Find And Replace Tool For Excel * has been added
+
+    Winsome Technologies Find And Replace Tool For Word * has been added
+
+    Winsome Technologies Image to PDF Converter * has been added
+
+    Winsome Technologies PDF Combiner * has been added
+
+    Winsome Technologies PDF Security * has been added
+
+    Winsome Technologies PDF to Image Converter * has been added
+
+    Winsome Technologies Stamp And Number Pro * has been added
+
+    Winsome Technologies TIFF PDF Counter * has been added
+
+    Winsome Technologies TIFF Splitter * has been added
+
+    Zend Studio * has been added
+    This entry contains keys merged from the following removed entries:
+          Zend Studio 10 *
+  00:00:02.5301061
 
     Summary
-      Net entry count change: 6
-      Modified entries: 16
-       + -15 added keys across 8 entries 
-       - 13 removed keys across 4 entries 
-       ~ 9 updated keys replacing 8 keys across 7 entries 
-      Removed entries: 3
-       @ 1 removed entries have been merged into 1 modified entries 
-       + 0 removed entries have been merged into 0 added entries
-       & 1 removed entries have been renamed and may contain other minor changes 
-       - 1 entries have been removed without replacement
-      Added entries: 9
-       + 8 new entries without merged content
-       @ 0 added entries contain keys merged from 0 removed entries
-       & 1 added entries are renamed versions of removed entries and may contain other minor changes
+      Net entry count change: 196
+      Modified entries: 102
+       + 311 added keys across 83 entries 
+       - 344 removed keys across 36 entries 
+       ~ 52 updated keys replacing 52 keys across 31 entries 
+      Removed entries: 314
+       @ 0 removed entries have been merged into 0 modified entries 
+       + 20 removed entries have been merged into 20 added entries
+       & 85 removed entries have been renamed and may contain other minor changes 
+       - 209 entries have been removed without replacement
+      Added entries: 510
+       + 405 new entries without merged content
+       @ 20 added entries contain keys merged from 20 removed entries
+       & 85 added entries are renamed versions of removed entries and may contain other minor changes
     
   Diff complete

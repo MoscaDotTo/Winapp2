@@ -17,6 +17,7 @@
 
 Option Strict On
 
+Imports System.Text
 Imports System.Text.RegularExpressions
 
 ''' <summary> 
@@ -37,7 +38,7 @@ Public Module WinappDebug
     ''' <summary> 
     ''' The winapp2ool logslice from the most recent Lint run 
     ''' </summary>
-    Public Property MostRecentLintLog As String = ""
+    Public Property MostRecentLintLog As New System.Text.StringBuilder
 
     ''' <summary> 
     ''' The current rules for scans and repairs 
@@ -185,6 +186,11 @@ Public Module WinappDebug
     Private Property envVarRegex As New Regex("%[A-Za-z0-9]*%")
 
     ''' <summary>
+    ''' Regex to detect ExcludeKey flags
+    ''' </summary>
+    Private Property HasFlagRegex As New Regex("^(FILE|PATH|REG)")
+
+    ''' <summary>
     ''' commandline runtime parameter for creating winapp2.ini with a version string 
     ''' reflecting the current date <br />
     ''' Default: <c> True </c> - uses current date; <c> False </c> uses static version string
@@ -283,7 +289,7 @@ Public Module WinappDebug
         print(3, "Beginning analysis of winapp2.ini", trailr:=True)
         gLog("Beginning lint", leadr:=True, ascend:=True)
 
-        MostRecentLintLog = ""
+        MostRecentLintLog.Clear()
 
         Debug(wa2)
 
@@ -442,7 +448,7 @@ Public Module WinappDebug
         For Each lst In entry.KeyListList
 
             Dim brokenKeys As New keyList
-            lst.Keys.ForEach(Sub(key) brokenKeys.add(key, Not cValidity(key)))
+            lst.Keys.Where(Function(key) Not cValidity(key)).ToList().ForEach(Sub(key) brokenKeys.add(key, True))
             lst.remove(brokenKeys.Keys)
             entry.ErrorKeys.remove(brokenKeys.Keys)
 
@@ -541,22 +547,30 @@ Public Module WinappDebug
 
         If someList.Count < 2 Then Return
 
+        Dim sortedIndices As New Dictionary(Of String, Integer)
+        For i = 0 To sortedList.Count - 1
+            sortedIndices(sortedList.Items(i)) = i
+        Next
+
         Dim misplacedEntries As New strList
-        Dim initialNeighbors = someList.getNeighborList
-        Dim sortedNeighbors = sortedList.getNeighborList
 
-        For i = 0 To someList.Count - 1
+        For Each entry In someList.Items
 
-            Dim HasSameNeighbor = initialNeighbors(i).Key = sortedNeighbors(sortedList.Items.IndexOf(someList.Items(i))).Key
-            Dim HasSamePosition = initialNeighbors(i).Value = sortedNeighbors(sortedList.Items.IndexOf(someList.Items(i))).Value
-            misplacedEntries.add(someList.Items(i), Not (HasSameNeighbor AndAlso HasSamePosition))
+            Dim recInd = someList.indexOf(entry)
+            Dim sortInd = sortedIndices(entry)
+
+            If recInd <> sortInd Then
+
+                misplacedEntries.add(entry)
+
+            End If
 
         Next
 
         For Each entry In misplacedEntries.Items
 
             Dim recInd = someList.indexOf(entry)
-            Dim sortInd = sortedList.indexOf(entry)
+            Dim sortInd = sortedIndices(entry)
             Dim curLine = LineCountList(recInd)
             Dim sortLine = LineCountList(sortInd)
 
@@ -765,51 +779,40 @@ Public Module WinappDebug
 
             If Not key.vHas(enVar) Then Continue For
 
-            Dim tmpRegex As New Regex(enVar)
-
-            Dim trailingCharMissing As New Regex($"%{enVar}\\")
-            Dim leadingCharMissing As New Regex($"^{enVar}%")
-            Dim bothCharsMissing As New Regex($"^{enVar}\\")
-
             Dim msg = ""
             Dim replValue = ""
             Dim repairMade = False
 
-            Select Case True
-
-                Case trailingCharMissing.IsMatch(key.Value)
+            If key.Value.Contains($"%{enVar}\") AndAlso Not key.Value.Contains($"%{enVar}%") Then
 
                     msg = "Environment Variable is missing trailing %"
-                    replValue = key.Value.Replace($"%{enVar}", $"%{enVar}%")
+                replValue = key.Value.Replace($"%{enVar}\", $"%{enVar}%\")
                     repairMade = True
 
-                Case leadingCharMissing.IsMatch(key.Value)
+            ElseIf key.Value.StartsWith($"{enVar}%", StringComparison.InvariantCulture) AndAlso Not key.Value.Contains($"%{enVar}%") Then
 
                     msg = "Environment Variable is missing leading %"
                     replValue = key.Value.Replace($"{enVar}%", $"%{enVar}%")
                     repairMade = True
 
-                Case bothCharsMissing.IsMatch(key.Value)
+            ElseIf key.Value.StartsWith($"{enVar}\", StringComparison.InvariantCulture) AndAlso Not key.Value.Contains($"%{enVar}%") Then
 
                     msg = "Environment Variable is missing leading and trailing %"
                     replValue = key.Value.Replace($"{enVar}\", $"%{enVar}%\")
                     repairMade = True
 
-                Case Else
+            End If
 
-                    ' This only happens because "AppData" is a substring of "LocalAppData" and will result in this code path being hit 
-                    ' We can silently ignore this case 
+            If repairMade Then
 
-            End Select
+                fullKeyErr(key, msg, lintSyntax.ShouldScan, lintSyntax.ShouldRepair, key.Value, replValue)
+                Exit For
 
-            fullKeyErr(key, msg, lintSyntax.ShouldScan AndAlso repairMade, lintSyntax.ShouldRepair, key.Value, replValue)
-
-            If repairMade Then Exit For
+            End If
 
         Next
 
     End Sub
-
 
     ''' <summary> 
     ''' Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey </c>
@@ -943,7 +946,7 @@ Public Module WinappDebug
 
         End If
 
-        ' Remove any instances of double backlashes because we don't expect them 
+        ' Remove any instances of double backslashes because we don't expect them 
 
         If key.vHas("\\", True) Then
 
@@ -1080,7 +1083,7 @@ Public Module WinappDebug
         ' Remove any duplicate arguments from the key parameters and reconstruct keys we've modified above
         If lintParams.fixFormat Then
 
-            dupeArgs.Items.ForEach(Sub(arg) keyParams.ArgsList.Remove(arg))
+            keyParams.ArgsList.RemoveAll(Function(arg) dupeArgs.Items.Contains(arg))
             keyParams.reconstructKey(key)
 
         End If
@@ -1208,11 +1211,10 @@ Public Module WinappDebug
     ''' </param>
     Private Function checkExcludeFlags(ByRef key As iniKey) As Boolean
 
-        Dim HasFlagRegex = New Regex("^(FILE|PATH|REG)")
         Dim matches = HasFlagRegex.Matches(key.Value)
 
         ' If we're not checking flags, we should at least indicate whether or not valid ones are present 
-        If Not lintFlags.ShouldScan Then Return New Regex("^(FILE|PATH|REG)\|").IsMatch(key.Value)
+        If Not lintFlags.ShouldScan Then Return HasFlagRegex.IsMatch(key.Value)
 
         If matches.Count = 0 Then
 
@@ -1223,7 +1225,7 @@ Public Module WinappDebug
 
         fullKeyErr(key, "ExcludeKey contains REG flag", key.vHas("REG|") AndAlso CurrentWinappFlavor = WinappFlavor.BleachBit)
 
-        Dim foundFlag = HasFlagRegex.Matches(key.Value)(0)
+        Dim foundFlag = matches(0)
         Dim fixedValue = key.Value.Insert(foundFlag.Length, "|")
         fullKeyErr(key, "Missing pipe (|) after ExcludeKey flag", repCond:=lintFlags.ShouldRepair, repairVal:=key.Value, newVal:=fixedValue)
 
@@ -1388,20 +1390,21 @@ Public Module WinappDebug
 
         Dim out = $"Line: {lineCount} - Error: {err}"
         cwl(out)
-        MostRecentLintLog += out & Environment.NewLine
+        MostRecentLintLog.AppendLine(out)
 
         For Each errStr In lines
 
             cwl(errStr)
             gLog(errStr, indent:=True)
-            MostRecentLintLog += errStr & Environment.NewLine
+            MostRecentLintLog.AppendLine(errStr)
 
         Next
 
         gLog(descend:=True)
         cwl()
 
-        MostRecentLintLog += Environment.NewLine
+        MostRecentLintLog.AppendLine()
+
         ErrorsFound += 1
 
     End Sub

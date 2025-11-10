@@ -2,15 +2,26 @@
 
 ### What is Winapp2.ini? 
 
-**Winapp2.ini** is a massive, community-driven database of declarative cleaning routines for Microsoft Windows. It provides a comprehensive mapping of individual applications and system components to their transient files (temporary files, caches, logs, and more). With thousands of contributions spanning over a decade and a half, it is likely the most extensive dataset of its kind available on the internet. 
+**Winapp2.ini** is a massive, community-driven database of declarative cleaning routines for Microsoft Windows. It provides a comprehensive mapping of individual applications and system components to their transient data (temporary files, caches, logs, recently used lists, and more). With thousands of contributions spanning over a decade and a half, it is likely the most extensive dataset of its kind available on the internet.
 
 Winapp2.ini is compatible with CCleaner, BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, and HDCleaner.
 
-### Why Winapp2.ini
+### Why Winapp2.ini?
 
 Winapp2.ini avoids the risks of overreach common in generic cleaning tools by adopting an exhaustive, declarative approach. Where many tools rely on sweeping file-type patterns applied across entire drives, Winapp2.ini demands explicitly defined target paths and conceptual linkage between those targets and their parent applications. This prioritizes clarity, specificity, and control over generalization, offering users an inspectable system that can be audited and safely customized to suit individual needs.
 
 Winapp2.ini functions as an extension of the applications with which it is compatible, enabling it to update independently of them. This decoupling grants users greater freedom to move between tools and versions without sacrificing functionality.
+
+### Will this help make my computer faster?
+**Probably not.** On modern systems, there's little performance incentive for this kind of system hygiene. In fact, over-cleaning caches can potentially *reduce* your performance by forcing apps to rebuild data they could have reused. 
+
+That said, there are still plenty of good reasons to clean: 
+
+* Troubleshooting app issues
+* Reclaiming disk space
+* Minimizing the size of system backups
+* Enhancing privacy
+* Or simply because tidying up feels good sometimes
 
 ### What are flavors?
 
@@ -71,7 +82,12 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
 It is strongly recommended you keep a copy of [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) in the same folder as winapp2.ini for the purpose of keeping it up-to-date irrespective of which application you are using. 
 
 ## [CCleaner](#ccleaner)
+<details>
+<summary>CCleaner Installation and Configuration</summary>
+
 ###### [Download CCleaner](https://www.ccleaner.com/ccleaner)
+
+### Note: CCleaner 7 is *not* currently compatible with winapp2.ini and it is unclear whether or not support will be implemented. Winapp2.ini is compatible with CCleaner up to version 6.39
 
 ### Flavor
 
@@ -88,8 +104,12 @@ It is advised that you use the Trim function of winapp2ool when updating winapp2
 CCleaner will display the set of winapp2.ini entries which it detects as valid for your system inside its Applications tab. In modern versions of CCleaner, this tab is found in the Custom Clean section of the application. All winapp2.ini entries are disabled by default in CCleaner, and must be enabled individually or in groups. To enable an entire group of entries, right click on the section header and select "Check all."
 
 ###### Note: CCleaner 5.64.7577 is the last version to work on Windows XP and Vista (for non-SSE2 CPUs CCleaner 5.26.5937). Winapp2.ini and Winapp3.ini will continue to work with this version.
+</details>
 
 ## [BleachBit](#bleachbit)
+<details>
+<summary>BleachBit Installation and Configuration</summary>
+
 ###### [Download BleachBit](https://www.bleachbit.org)
 
 ### Flavor
@@ -111,8 +131,12 @@ Likewise, BleachBit maintains their own [customized version of winapp2.ini](http
 BleachBit will display the set of winapp2.ini entries which it detects as both having valid syntax and also as being valid for your system in its sidebar. All winapp2.ini entries are disabled by default in BleachBit, and must be enabled individually or in groups. To enable an entire group of entries, select the check box next to the section header. 
 
 ###### Note: BleachBit 2.2 is the last version to work on Windows XP. Winapp2.ini and Winapp3.ini will continue to work with this version. 
+</details>
 
 ## [System Ninja](#system-ninja)
+<details>
+<summary>System Ninja Installation and Configuration</summary>
+
 ###### [Download System Ninja](https://singularlabs.com/software/system-ninja)
 
 ### Flavor 
@@ -133,8 +157,12 @@ This will prevent System Ninja from overwriting your local winapp2.rules file on
 System Ninja does not provide an interface for individually configuring which winapp2.ini entries run, they are all run and their output is displayed in the Junk Scanner window. The "Type" column in System Ninja displays the name of the entry as it appears in winapp2.ini 
 
 ###### Note: System Ninja 3.2.7 is the last version to work on Windows XP and Vista. Winapp2.ini and Winapp3.ini will continue to work with this version.
+</details>
 
 ## [Avira System Speedup](#avira-system-speedup)
+<details>
+<summary>Avira System Speedup Installation and Configuration</summary>
+
 ###### [Download System Speedup](https://www.avira.com/en/avira-system-speedup-free)
 
 ### Flavor
@@ -149,8 +177,12 @@ Avira System Speedup ships with a copy Winapp2.ini by default, served by Avira, 
 Avira System Speedup scans every winapp2.ini entry and displays the results of that scan in a panel labeled Third Party Applications. You can manually enable/disable items within this menu before activating the clean function. 
 
 ###### Note: Cleaning "Third Party Applications" is a paid feature of Avira System Speedup Pro. winapp2.ini is and always will be free, and supported by a variety of free applications.   
+</details>
 
 ## [Tron](#tron)
+<details>
+<summary>Tron Installation and Configuration</summary>
+
 ###### [Tron GitHub](https://github.com/bmrf/tron)
 
 ### Flavor 
@@ -164,8 +196,12 @@ Tron maintains and ships their own [customized version of Winapp2.ini](https://r
 ### Configuration 
 
 Tron ships with its own configuration. You can modify it by opening the copy of CCleaner or modifying the `ccleaner.ini` file shipped with Tron.
+</details>
 
 ## [R-Wipe & Clean](#r-wipe--clean)
+<details>
+<summary>R-Wipe & Clean Installation and Configuration</summary>
+
 ###### [Download R-Wipe&Clean](https://www.r-wipe.com)
 
 ### Flavor 
@@ -196,8 +232,12 @@ R-Wipe & Clean has unofficial support for Winapp2.ini. The steps below are adapt
 ### Configuration 
 
 Configure the imported wipe lists individually just as you would R-Wipe & Clean's native wipe lists
+</details>
 
 ## [HDCleaner](#hdcleaner)
+<details>
+<summary>HDCleaner Installation and Configuration</summary>
+
 ###### [Download HDCleaner](https://kurtzimmermann.com/index_en.html)
 
 ### Flavor
@@ -218,24 +258,33 @@ After placing winapp2.ini in the same directory as `HDCleaner.exe`, you must con
 4. Change the setting "If using Winapp2.ini" to "Ignore duplicate entries in HDCleaner resource file" 
 
 This will override the built in HDCleaner entries with your drop-in replacement
+</details>
 
 ---
 
 # [Creating Entries](#creating-entries)
 
 ## [Styling](#styling) 
+<details>
+<summary>Styling Guidelines</summary>
 
 Winapp2.ini entries are organized alphabetically, between both sections in the files and individual key values in those sections. Alphabetically, numbers and symbols have precedence over letters. Entries should be ordered with their keys in the same order the appear in this guide (that is, categorization, detection, and deletion). You can use winapp2ool's WinappDebug module to ensure your style and syntax are correct. 
+</details>
 
 ## [Naming](#naming) 
+<details>
+<summary>Naming Conventions</summary>
 
 Entry names are displayed in the application UI to indicate the name of a set of cleaning rules. They appear exactly in the UI exactly as they are written between the `[brackets]`. 
 
 `[Entry Name *]`
 
  Please include the space between the name and the \* when submitting as this is how we visually indicate that Winapp2.ini entries are not built into CCleaner. The * is not displayed in BleachBit or System Ninja 
+</details>
 
 ## [Categorization](#categorization)
+<details>
+<summary>Categorization Keys</summary>
 
 ### `LangSecRef` or `Section`
 
@@ -276,8 +325,11 @@ These keys define where the entry will be displayed within the application UI. Y
 #### Examples 
 `LangSecRef=3026` will cause an entry to be displayed under CCleaner's built-in Firefox section. 
 `Section=Games` will cause an entry to be displayed in a new section called Games at the bottom of the CCleaner application tab or in the BleachBit side panel. 
+</details>
 
 ## [Detection Criteria](#detection-criteria)
+<details>
+<summary>Detection Criteria Keys</summary>
 
 ### Detect or DetectFile
 
@@ -299,14 +351,20 @@ To set a Detection criteria using the registry, simply point a `Detect` key at a
 To set a Detection criteria using the file system, simply point a `DetectFile` key at a valid file or path on the system
 - `DetectFile=%WinDir%` will return as valid on every copy of windows 
 - `DetectFile=%LocalAppData%\Packages\9E2F88E3.Twitter_*` will return as valid on systems which have Twitter installed from the Microsoft Store 
+</details>
 
 ## [Warnings](#warnings)
+<details>
+<summary>Warning Keys</summary>
 
 ### `Warning`
 
 This key provides a notice to the user with important information about the entry. It should be provided when running an entry may have unforeseen consequences for the user. This information is only displayed when an option is elected (which is effectively only once for most users), so it is wise to keep warnings short and concise so users may read and fully understand them. This key is only supported by CCleaner and BleachBit. 
+</details>
 
 ## [Deletion Routines](#deletion-routines) 
+<details>
+<summary>Deletion Routine Keys</summary>
 
 ### `FileKey`
 
@@ -337,8 +395,11 @@ These keys specify a file (or files), directory, or registry path to be excluded
 * `ExcludeKey2=PATH|C:\Temp\|*.*` excludes all of the files located in the `C:\Temp` directory and all sub directories from being deleted.
 * `ExcludeKey3=PATH|%WinDir%\System32\LogFiles\SCM\|*-*-*-*.*` excludes all of the files whose name matches the pattern  `*-*-*-*.*` in the `%WinDir%\System32\LogFiles\SCM` directory from being deleted.
 * `ExcludeKey2=REG|HKCU\Software\Piriform` will prevent registry keys in `HKEY_CURRENT_USER\Software\Piriform` from being deleted. 
-  
+</details>
+
 ## [Unsupported functions](#unsupported-functions)
+<details>
+<summary>Unsupported Functions</summary>
 
 The following are functions that are not used in the official Winapp2.ini file, but are valid syntax. 
 
@@ -371,8 +432,11 @@ This key is used only by CCleaner and provides the same search patterns used by 
 #### Examples 
 
 `SpecialDetect=DET_CHROME` will return valid on any system for which CCleaner detects chrome
+</details>
 
 ## [Variables](#variables)
+<details>
+<summary>Environment Variables</summary>
 
 ### Environment variables:
 
@@ -391,11 +455,15 @@ These are all the possible variables that can be used for defining filesystem pa
 | `%Pictures%`             | `C:\Users\%UserName%\Pictures`         | `C:\Documents and Settings\%UserName%\My Documents\My Pictures`        | CCleaner only 
 | `%ProgramData%`          | `C:\ProgramData`                       | N/A                                                                    |
 | `%ProgramFiles%`\*       | `C:\Program Files`                     | `C:\Program Files`                                                     | 
-| `%Public%`               | `C:\Users\Public`                      | N/A                                                                    |
+| `%Public%`               | `C:\Users\%UserName%\Public`           | N/A                                                                    |
 | `%SystemDrive%`          | `C:`                                   | `C:`                                                                   | 
 | `%UserProfile%`          | `C:\Users\%UserName%`                  | `C:\Documents and Settings\%UserName%`                                 | 
 | `%Video%`                | `C:\Users\%UserName%\Videos`           | `C:\Documents and Settings\%UserName%\My Documents\My Videos`          | CCleaner only 
 | `%WinDir%`               | `C:\Windows`                           | `C:\Windows`                                                           |
+</details>
+
+<details>
+<summary>Registry Variables</summary>
 
 ### Registry variables
 
@@ -408,6 +476,7 @@ These are all the possible variables that can be used for defining registry path
 | HKLM           | HKEY_LOCAL_MACHINE 
 | HKU            | HKEY_USERS
 | HKCC           | HKEY_CURRENT_CONFIG
+</details>
 
 ---
 
