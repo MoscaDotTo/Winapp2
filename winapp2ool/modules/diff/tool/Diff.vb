@@ -19,6 +19,7 @@ Option Strict On
 
 Imports System.Globalization
 Imports System.Text.RegularExpressions
+Imports System.Threading.Tasks
 
 ''' <summary>
 ''' 
@@ -190,6 +191,13 @@ Module Diff
     Private Property MergeDict As New Dictionary(Of String, List(Of String))
 
     ''' <summary>
+    ''' Maps removed entries to all new/modified entries they were merged into
+    ''' Key: Old (removed) entry name
+    ''' Value: List of new entry names that contain keys from the old entry
+    ''' </summary>
+    Private Property OldToNewMergeDict As New Dictionary(Of String, List(Of String))
+
+    ''' <summary>
     ''' The values of all modified keys for each entry detected as containing modified keys
     ''' </summary>
     Private Property ModifiedKeyTracker As New Dictionary(Of String, Dictionary(Of iniKey, keyList))
@@ -269,6 +277,21 @@ Module Diff
     Public Property DiffLogStartPhrase As String = "Beginning Diff"
 
     Public Property DiffLogEndPhrase As String = "Diff complete"
+
+    Private Property CachedNewEntries As New Dictionary(Of String, winapp2entry)
+    Private Property CachedOldEntries As New Dictionary(Of String, winapp2entry)
+
+    Private Property UpperNameCache As New Dictionary(Of String, String)
+
+    Private Function GetUpperName(name As String) As String
+
+        If Not UpperNameCache.ContainsKey(name) Then UpperNameCache(name) = name.ToUpperInvariant()
+
+        Return UpperNameCache(name)
+
+    End Function
+
+
 
     ''' <summary> 
     ''' Runs a diff using command line arguments, allowing Diff to be called programmatically 
@@ -455,31 +478,21 @@ Module Diff
         out.AddTopBorder()
         out.AddColoredLine("Diff Summary", ConsoleColor.DarkGreen, centered:=True)
         out.AddDivider()
-
         out.AddColoredLine(netChange, ConsoleColor.White)
-
         out.AddColoredLine(modifiedSummaryOpener, ConsoleColor.Yellow)
         out.AddColoredLine(modifiedAdded, ConsoleColor.Green, condition:=modEntriesHaveRemovals)
         out.AddColoredLine(modifiedRemoved, ConsoleColor.Red, condition:=modEntriesHaveRemovals)
         out.AddColoredLine(modifiedUpdated, ConsoleColor.Yellow, condition:=modEntriesHaveUpdates)
-
         out.AddColoredLine(removedSummary, ConsoleColor.Cyan)
         out.AddColoredLine(removedMergedAdded, ConsoleColor.Cyan, condition:=Not totalOldEntriesMerged = 0)
         out.AddColoredLine(removedReadded, ConsoleColor.Green, condition:=Not RemovedByAdditionCount = 0)
         out.AddColoredLine(removedRenamed, ConsoleColor.Magenta, condition:=hasRenames)
         out.AddColoredLine(removedNoReplacement, ConsoleColor.Red)
-
         out.AddColoredLine(added, ConsoleColor.Green)
         out.AddColoredLine(addedNew, ConsoleColor.Green, condition:=newNoMerged > 0)
-
-        out.AddBottomBorder(Not addedKeysHaveMergedContent)
         out.AddColoredLine(addedMerged, ConsoleColor.DarkCyan, condition:=hasRenames)
-
-        out.AddBottomBorder(Not hasRenames)
         out.AddColoredLine(addedRenamed, ConsoleColor.Magenta, condition:=hasAddedMergers)
-
-        out.AddBottomBorder(addedKeysHaveMergedContent AndAlso hasRenames)
-
+        out.AddBottomBorder()
 
         gLog("Diff Summary", ascend:=True, leadr:=True, ascAmt:=2)
         gLog(netChange)
@@ -496,7 +509,7 @@ Module Diff
         gLog(addedNew)
         gLog(addedMerged)
         gLog(addedRenamed)
-        gLog("", descend:=True)
+        gLog("", descend:=True, descAmt:=2)
         gLog("Diff complete", descend:=True)
 
         Return out
@@ -785,8 +798,8 @@ Module Diff
     ''' </remarks>
     Public Function MatchParameters(flags As String,
                                     oldFlags As String,
-                                    ByRef matchedFileKeyHasMoreParams As Boolean,
-                                    ByRef possibleWildCardReduction As Boolean) As Boolean
+                              ByRef matchedFileKeyHasMoreParams As Boolean,
+                              ByRef possibleWildCardReduction As Boolean) As Boolean
 
         Dim delimiter = CChar(";")
         Dim splitParams = flags.Split(delimiter)
@@ -847,10 +860,14 @@ Module Diff
         AddedEntryTracker.Clear()
         RemovedEntryTracker.Clear()
         MergeDict.Clear()
+        OldToNewMergeDict.Clear()
         ModifiedKeyTracker.Clear()
         RemovedKeyTracker.Clear()
         AddedKeyTracker.Clear()
         PotentialMatches.Clear()
+        CachedNewEntries.Clear()
+        CachedOldEntries.Clear()
+        UpperNameCache.Clear()
 
         SnuffNoisyChanges(DiffFile1)
         SnuffNoisyChanges(DiffFile2)
@@ -891,18 +908,70 @@ Module Diff
 
         Dim out As New List(Of MenuSection)
 
-        For Each entry In MergeDict
+        For Each oldEntry In OldToNewMergeDict
 
-            For Each oldEntry In entry.Value
+            Dim oldName = oldEntry.Key
+            Dim newTargets = oldEntry.Value
 
-                MergedEntryCount += 1
-                out.Add(MakeDiff(DiffFile1.Sections(oldEntry), 4, DiffFile2.Sections(entry.Key)))
+            MergedEntryCount += 1
 
-            Next
+            Dim result As MenuSection
+
+            result = If(newTargets.Count = 1,
+                                  MakeDiff(DiffFile1.Sections(oldName), 4, DiffFile2.Sections(newTargets(0))),
+                                  MakeDiffMultiTarget(DiffFile1.Sections(oldName), newTargets))
+
+            out.Add(result)
 
         Next
 
         Return out
+
+    End Function
+
+    ''' <summary>
+    ''' Creates a diff section for an entry that was split/merged into multiple new entries
+    ''' </summary>
+    ''' 
+    ''' <param name="oldSection">
+    ''' The removed entry
+    ''' </param>
+    ''' 
+    ''' <param name="newTargets">
+    ''' List of new entry names that contain keys from the old entry
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' A MenuSection showing the split merger
+    ''' </returns>
+    Private Function MakeDiffMultiTarget(oldSection As iniSection,
+                                         newTargets As List(Of String)) As MenuSection
+
+        Dim result = New MenuSection
+        Dim changeStr = $"{oldSection.Name} has been split/merged into {newTargets.Count} entries"
+
+        result.AddColoredLine(changeStr, color:=ConsoleColor.Cyan, centered:=True)
+        gLog(changeStr, indent:=True, leadr:=True)
+
+        result.AddColoredLine("Merged into:", color:=ConsoleColor.Yellow, centered:=True)
+
+        For Each target In newTargets
+
+            result.AddColoredLine($"  • {target}", color:=ConsoleColor.Magenta, centered:=True)
+            gLog($"  • {target}", indent:=True)
+
+        Next
+
+        If ShowFullEntries Then
+
+            result.AddBlank()
+            result.AddColoredLine("Old entry:", color:=ConsoleColor.DarkRed, centered:=True)
+            gLog("Old entry:", leadr:=True)
+            BuildEntrySection(result, oldSection.ToString)
+
+        End If
+
+        Return result
 
     End Function
 
@@ -978,8 +1047,8 @@ Module Diff
     ''' An entry which has been merged and will have its unique keys diffed against the new entry 
     ''' </param>
     Private Sub BuildMergedOldEntry(ByRef uniqueKeyValues As HashSet(Of String),
-                                  ByRef entryBuilder As List(Of String),
-                                  oldEntry As iniSection)
+                                    ByRef entryBuilder As List(Of String),
+                                          oldEntry As iniSection)
 
         For Each key In oldEntry.Keys.Keys
 
@@ -998,22 +1067,40 @@ Module Diff
     ''' </summary>
     Private Function ItemizeMergers() As List(Of MenuSection)
 
-        For Each entry In MergedEntryTracker
+        Dim processedOldEntries As New HashSet(Of String)
+
+        For Each oldEntry In OldToNewMergeDict
+
+            Dim oldName = oldEntry.Key
+            Dim newTargets = oldEntry.Value
+
+            If processedOldEntries.Contains(oldName) Then Continue For
+            processedOldEntries.Add(oldName)
+
+            ' For split-mergers, we DON'T process modifications here
+            ' because the individual keys are distributed across multiple entries
+            ' The modifications will be shown when we process each target entry individually
+            If newTargets.Count > 1 Then Continue For
+
+            Dim targetEntry = newTargets(0)
+
+            If Not MergeDict.ContainsKey(targetEntry) Then Continue For
 
             Dim uniqueKeyValues = New HashSet(Of String)
-            Dim entryBuilder As New List(Of String) From {$"[{entry}]"}
-            If DiffFile1.Sections.ContainsKey(entry) Then MergeDict(entry).Add(entry)
+            Dim entryBuilder As New List(Of String) From {$"[{targetEntry}]"}
 
-            For i = 0 To MergeDict(entry).Count - 1
+            If DiffFile1.Sections.ContainsKey(targetEntry) Then MergeDict(targetEntry).Add(targetEntry)
 
-                Dim oldEnt = DiffFile1.Sections(MergeDict(entry)(i))
+            For i = 0 To MergeDict(targetEntry).Count - 1
 
+                Dim oldEnt = DiffFile1.Sections(MergeDict(targetEntry)(i))
                 BuildMergedOldEntry(uniqueKeyValues, entryBuilder, oldEnt)
+                processedOldEntries.Add(MergeDict(targetEntry)(i))
 
             Next
 
             Dim mergedOldEntries = New iniSection(entryBuilder)
-            FindModifications(mergedOldEntries, DiffFile2.Sections(entry))
+            FindModifications(mergedOldEntries, DiffFile2.Sections(targetEntry))
 
         Next
 
@@ -1031,21 +1118,54 @@ Module Diff
 
         Dim out As New List(Of MenuSection)
 
-        For Each entry In RemovedEntryTracker
+        Dim results = New Concurrent.ConcurrentBag(Of MenuSection)()
 
-            Dim oldSectionVersion = DiffFile1.getSection(entry)
+        Dim potentialMatchesSnapshot = PotentialMatches.ToList()
 
-            Dim probableMatches = FindProbableMatches(entry.Split(CChar(" ")), entry)
+        Parallel.ForEach(RemovedEntryTracker,
+                         Sub(entry)
 
-            Dim changesRecorded = AssessRenamesAndMergers(probableMatches, oldSectionVersion)
+                             Dim oldSectionVersion = DiffFile1.getSection(entry)
 
-            If changesRecorded Then Continue For
+                             SyncLock CachedOldEntries
 
-            changesRecorded = AssessRenamesAndMergers(PotentialMatches, oldSectionVersion)
+                                 If Not CachedOldEntries.ContainsKey(oldSectionVersion.Name) Then CachedOldEntries.Add(oldSectionVersion.Name, New winapp2entry(oldSectionVersion))
 
-            If Not changesRecorded Then out.Add(MakeDiff(oldSectionVersion, 1))
+                             End SyncLock
 
-        Next
+                             Dim oldWa2Section = CachedOldEntries(oldSectionVersion.Name)
+
+                             If oldWa2Section.FileKeys.KeyCount = 0 AndAlso oldWa2Section.RegKeys.KeyCount = 0 Then results.Add(MakeDiff(oldSectionVersion, 1)) : Return
+
+                             Dim probableMatches = FindProbableMatches(entry.Split(CChar(" ")), entry, potentialMatchesSnapshot)
+                             Dim allCandidates As New HashSet(Of String)
+
+                             For Each section In probableMatches
+
+                                 allCandidates.Add(section.Name)
+
+                             Next
+
+                             For Each section In potentialMatchesSnapshot
+
+                                 allCandidates.Add(section.Name)
+
+                             Next
+
+                             Dim combinedMatches As New List(Of iniSection)
+                             For Each candidateName In allCandidates
+
+                                 If AddedEntryTracker.Contains(candidateName) OrElse ModifiedEntryTracker.Contains(candidateName) Then combinedMatches.Add(DiffFile2.Sections(candidateName))
+
+                             Next
+
+                             Dim changesRecorded = AssessRenamesAndMergers(combinedMatches, oldSectionVersion)
+
+                             If Not changesRecorded Then results.Add(MakeDiff(oldSectionVersion, 1))
+
+                         End Sub)
+
+        out.AddRange(results)
 
         Return out
 
@@ -1164,10 +1284,10 @@ Module Diff
     ''' Tracking variable recording the number of each type of modification detected for the purposes of the user summary
     ''' </param>
     Private Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey, keyList),
-                                   addedKeys As keyList,
-                                   removedKeys As keyList,
-                                   modKeyTypes As List(Of String),
-                                   modCounts As List(Of Integer)) As List(Of MenuSection)
+                                        addedKeys As keyList,
+                                        removedKeys As keyList,
+                                        modKeyTypes As List(Of String),
+                                        modCounts As List(Of Integer)) As List(Of MenuSection)
 
         Dim result As New List(Of MenuSection)
 
@@ -1234,7 +1354,7 @@ Module Diff
     ''' Indicates that the current Diff is operating on an entry which is "Merged" and not "New" 
     ''' </param>
     Private Function ItemizeMergedEntries(entry As String,
-                                     isMerger As Boolean) As MenuSection
+                                          isMerger As Boolean) As MenuSection
 
         Dim out As New MenuSection
         If Not MergeDict.ContainsKey(entry) Then Return out
@@ -1250,6 +1370,8 @@ Module Diff
             gLog(mergedEntry, indent:=True)
 
         Next
+
+        out.AddBlank()
 
         Return out
 
@@ -1371,23 +1493,26 @@ Module Diff
     ''' A <c> List(Of iniSection) </c> either falling into the same <c> LangSecRef </c> or matching a component of the name of the "old" iniSection 
     ''' </returns>
     Private Function FindProbableMatches(oldNameBroken As String(),
-                                         entry As String) As List(Of iniSection)
+                                         entry As String,
+                                         potentialMatchesList As List(Of iniSection)) As List(Of iniSection)
 
         Dim out = New List(Of iniSection)
 
-        For Each newName In PotentialMatches
+        Dim oldVerUpper = DiffFile1.Sections(entry).ToString.ToUpperInvariant()
+
+        For Each newName In potentialMatchesList
 
             Dim upperNewName = newName.Name.ToUpperInvariant()
-
             Dim matched = False
-            Dim newVer = newName.ToString.ToUpperInvariant
+
+            Dim newVerUpper As String = Nothing
 
             For Each browser In BrowserSecRefs
 
-                If Not newVer.Contains(browser) Then Continue For
+                If newVerUpper Is Nothing Then newVerUpper = newName.ToString.ToUpperInvariant()
 
-                Dim oldVer = DiffFile1.Sections(entry).ToString
-                If Not oldVer.Contains(browser) Then Continue For
+                If Not newVerUpper.Contains(browser) Then Continue For
+                If Not oldVerUpper.Contains(browser) Then Continue For
 
                 out.Add(newName)
                 matched = True
@@ -1399,12 +1524,9 @@ Module Diff
 
             For Each oldNamePiece In oldNameBroken
 
-                ' This'll be the last entry in any given list here 
                 If String.Equals(oldNamePiece, "*", StringComparison.InvariantCultureIgnoreCase) Then Exit For
 
-                If Not upperNewName.Contains($"{oldNamePiece.ToUpperInvariant} ") Then Continue For
-                out.Add(newName)
-                Exit For
+                If upperNewName.IndexOf($"{oldNamePiece.ToUpperInvariant()} ", StringComparison.Ordinal) >= 0 Then out.Add(newName) : Exit For
 
             Next
 
@@ -1465,67 +1587,114 @@ Module Diff
     ''' <param name="oldSectionVersion"> 
     ''' An old (removed) winapp2.ini entry
     ''' </param>
-
     Private Function AssessRenamesAndMergers(ByRef entriesAddedOrModified As List(Of iniSection),
-                                         ByRef oldSectionVersion As iniSection) As Boolean
+                                             ByRef oldSectionVersion As iniSection) As Boolean
+
+        If entriesAddedOrModified.Count = 0 Then Return False
 
         Dim highestMatchCount = 0
         Dim newMergedOrRenamedName = ""
         Dim entryWasRenamedOrMerged = False
+        Dim foundMerger = False
+
+        SyncLock CachedOldEntries
+
+            If Not CachedOldEntries.ContainsKey(oldSectionVersion.Name) Then CachedOldEntries.Add(oldSectionVersion.Name, New winapp2entry(oldSectionVersion))
+
+        End SyncLock
+
+        Dim oldWa2Section = CachedOldEntries(oldSectionVersion.Name)
+
+        Dim oldHasFileKeys = oldWa2Section.FileKeys.KeyCount > 0
+        Dim oldHasRegKeys = oldWa2Section.RegKeys.KeyCount > 0
 
         For Each section In entriesAddedOrModified
 
-            If Not AddedEntryTracker.Contains(section.Name) AndAlso Not ModifiedEntryTracker.Contains(section.Name) Then Continue For
+            Dim sectionName = section.Name
+
+            SyncLock CachedNewEntries
+
+                If Not CachedNewEntries.ContainsKey(sectionName) Then CachedNewEntries.Add(sectionName, New winapp2entry(section))
+
+            End SyncLock
+
+            Dim newWa2sSection = CachedNewEntries(sectionName)
 
             Dim allFileKeysMatched = False
             Dim allRegKeysMatched = False
             Dim regKeyCountsMatch = False
             Dim fileKeyCountsMatch = False
-            Dim newWa2sSection As New winapp2entry(section)
-            Dim oldWa2Section As New winapp2entry(oldSectionVersion)
             Dim fileKeyMatches = 0
             Dim regKeyMatches = 0
             Dim matchHadMoreParams = False
             Dim possibleWildCardReduction = False
-            Dim newSectionName = section.Name
 
-            ' ✅ ADD Disallowed parameter here!
-            assessKeyMatches(oldWa2Section.FileKeys, newWa2sSection.FileKeys, fileKeyCountsMatch,
-                  allFileKeysMatched, fileKeyMatches, Disallowed, matchHadMoreParams, possibleWildCardReduction)
+            If oldHasFileKeys Then
 
-            assessKeyMatches(oldWa2Section.RegKeys, newWa2sSection.RegKeys, regKeyCountsMatch,
-                         allRegKeysMatched, regKeyMatches, Disallowed)
+                assessKeyMatches(oldWa2Section.FileKeys, newWa2sSection.FileKeys, fileKeyCountsMatch, allFileKeysMatched,
+                                 fileKeyMatches, Disallowed, matchHadMoreParams, possibleWildCardReduction)
 
-            SetMergeCandidate(fileKeyMatches + regKeyMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
+            Else
+
+                allFileKeysMatched = True
+                fileKeyCountsMatch = True
+
+            End If
+
+            If oldHasRegKeys Then
+
+                assessKeyMatches(oldWa2Section.RegKeys, newWa2sSection.RegKeys, regKeyCountsMatch, allRegKeysMatched, regKeyMatches, Disallowed)
+
+            Else
+
+                allRegKeysMatched = True
+                regKeyCountsMatch = True
+
+            End If
+
+            Dim totalMatches = fileKeyMatches + regKeyMatches
+
+            SetMergeCandidate(totalMatches, sectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
 
             If fileKeyMatches = 0 AndAlso regKeyMatches = 0 Then Continue For
 
-            Dim hasNotBeenObserved = Not (RenamedEntryTracker.Contains(newMergedOrRenamedName) OrElse MergedEntryTracker.Contains(newMergedOrRenamedName))
+            Dim thisEntryNotObserved = Not (RenamedEntryTracker.Contains(sectionName) OrElse MergedEntryTracker.Contains(sectionName))
             Dim countsMatched = fileKeyCountsMatch AndAlso regKeyCountsMatch
             Dim allKeysMatched = allFileKeysMatched AndAlso allRegKeysMatched
             Dim paramsUnchanged = Not (matchHadMoreParams OrElse possibleWildCardReduction)
-            Dim entryWasRenamed = hasNotBeenObserved AndAlso countsMatched AndAlso paramsUnchanged
+            Dim entryWasRenamed = thisEntryNotObserved AndAlso countsMatched AndAlso paramsUnchanged
 
-            Dim changeWasRecorded = allKeysMatched AndAlso ConfirmRenameOrMerger(newMergedOrRenamedName, entryWasRenamed, oldSectionVersion)
-            If changeWasRecorded Then Return True
+            If allKeysMatched AndAlso entryWasRenamed Then
 
-            Dim detectMatches = 0
-            Dim detectFileMatches = 0
+                ConfirmRenameOrMerger(sectionName, True, oldSectionVersion)
+                Return True
 
-            assessKeyMatches(oldWa2Section.Detects, newWa2sSection.Detects, True, False, detectMatches, Disallowed)
-            assessKeyMatches(oldWa2Section.DetectFiles, newWa2sSection.DetectFiles, True, False, detectFileMatches, Disallowed)
-            SetMergeCandidate(fileKeyMatches + regKeyMatches + detectFileMatches + detectMatches, newSectionName, highestMatchCount, newMergedOrRenamedName, entryWasRenamedOrMerged)
+            End If
+
+            Dim meetsThreshold = totalMatches >= 1
+            Dim isCompleteMerger = allKeysMatched AndAlso Not entryWasRenamed
+
+            If meetsThreshold OrElse isCompleteMerger Then
+
+                trackMerger(oldSectionVersion, section)
+                foundMerger = True
+
+            End If
 
         Next
 
-        If Not entryWasRenamedOrMerged Then Return False
+        If foundMerger Then Return True
 
-        trackMerger(oldSectionVersion, DiffFile2.Sections(newMergedOrRenamedName))
+        If Not String.IsNullOrEmpty(newMergedOrRenamedName) AndAlso highestMatchCount > 0 AndAlso highestMatchCount < 1 Then
 
-        Return True
+            trackMerger(oldSectionVersion, DiffFile2.Sections(newMergedOrRenamedName))
+            Return True
+
+        End If
+
+        Return False
 
     End Function
-
 
     ''' <summary>
     ''' Tracks a merger or finds modifications between two entries as appropriate 
@@ -1555,9 +1724,14 @@ Module Diff
 
         If Not entryWasRenamed Then trackMerger(oldSectionVersion, section) : Return True
 
-        RenamedEntryTracker.Add(newMergedOrRenamedName)
-        RenamedEntryPairs.Add(newMergedOrRenamedName)
-        RenamedEntryPairs.Add(oldSectionVersion.Name)
+        SyncLock RenamedEntryTracker
+
+            RenamedEntryTracker.Add(newMergedOrRenamedName)
+            RenamedEntryPairs.Add(newMergedOrRenamedName)
+            RenamedEntryPairs.Add(oldSectionVersion.Name)
+
+        End SyncLock
+
         FindModifications(oldSectionVersion, section)
 
         Return True
@@ -1577,23 +1751,38 @@ Module Diff
     ''' An <c> iniSection </c> from the new version of the file containing keys merged from <c> <paramref name="oldSectionVersion"/> </c>
     ''' </param>
     Private Sub trackMerger(oldSectionVersion As iniSection,
-                            newIniSectionVersion As iniSection)
+                    newIniSectionVersion As iniSection)
 
         Dim mergeName = newIniSectionVersion.Name
-        MergedEntryTracker.Add(mergeName)
+        Dim oldName = oldSectionVersion.Name
 
-        If Not MergeDict.ContainsKey(mergeName) Then MergeDict.Add(mergeName, New List(Of String))
+        SyncLock MergeDict
+            MergedEntryTracker.Add(mergeName)
 
-        MergeDict(mergeName).Add(oldSectionVersion.Name)
+            If Not MergeDict.ContainsKey(mergeName) Then MergeDict.Add(mergeName, New List(Of String))
 
-        If Not RenamedEntryTracker.Contains(mergeName) Then Return
+            If Not MergeDict(mergeName).Contains(oldName) Then MergeDict(mergeName).Add(oldName)
 
-        Dim ind = RenamedEntryPairs.IndexOf(mergeName)
-        Dim renameHolder = RenamedEntryPairs(ind + 1)
-        MergeDict(mergeName).Add(renameHolder)
-        RenamedEntryPairs.RemoveAt(ind + 1)
-        RenamedEntryPairs.RemoveAt(ind)
-        RenamedEntryTracker.Remove(mergeName)
+            If Not OldToNewMergeDict.ContainsKey(oldName) Then OldToNewMergeDict.Add(oldName, New List(Of String))
+
+            If Not OldToNewMergeDict(oldName).Contains(mergeName) Then OldToNewMergeDict(oldName).Add(mergeName)
+
+            If Not RenamedEntryTracker.Contains(mergeName) Then Return
+
+            Dim ind = RenamedEntryPairs.IndexOf(mergeName)
+            Dim renameHolder = RenamedEntryPairs(ind + 1)
+
+            If Not MergeDict(mergeName).Contains(renameHolder) Then MergeDict(mergeName).Add(renameHolder)
+
+            If Not OldToNewMergeDict.ContainsKey(renameHolder) Then OldToNewMergeDict.Add(renameHolder, New List(Of String))
+
+            If Not OldToNewMergeDict(renameHolder).Contains(mergeName) Then OldToNewMergeDict(renameHolder).Add(mergeName)
+
+            RenamedEntryPairs.RemoveAt(ind + 1)
+            RenamedEntryPairs.RemoveAt(ind)
+            RenamedEntryTracker.Remove(mergeName)
+
+        End SyncLock
 
     End Sub
 
@@ -1631,42 +1820,52 @@ Module Diff
     ''' </param>
 
     Private Sub assessKeyMatches(oldKeyList As keyList,
-                             newKeyList As keyList,
-                             ByRef countTracker As Boolean,
-                             ByRef allKeysMatchedTracker As Boolean,
-                             ByRef MatchCount As Integer,
-                             Optional disallowedValues As HashSet(Of String) = Nothing,
-                             Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
-                             Optional ByRef possibleWildCardReduction As Boolean = False)
+                                 newKeyList As keyList,
+                           ByRef countTracker As Boolean,
+                           ByRef allKeysMatchedTracker As Boolean,
+                           ByRef MatchCount As Integer,
+                        Optional disallowedValues As HashSet(Of String) = Nothing,
+                  Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
+                  Optional ByRef possibleWildCardReduction As Boolean = False)
+
+        Dim newKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim newKeysByValue As New Dictionary(Of String, iniKey)(StringComparer.OrdinalIgnoreCase)
+
+        For Each newKey In newKeyList.Keys
+
+            If newKeyValues.Contains(newKey.Value) Then Continue For
+
+            newKeyValues.Add(newKey.Value)
+            newKeysByValue(newKey.Value) = newKey
+
+        Next
 
         For Each key In oldKeyList.Keys
 
+            If disallowedValues IsNot Nothing AndAlso disallowedValues.Contains(key.Value) Then Continue For
+
+            If newKeyValues.Contains(key.Value) Then MatchCount += 1 : Continue For
+
             For Each newKey In newKeyList.Keys
 
-                Dim matched = String.Equals(newKey.Value, key.Value, StringComparison.InvariantCultureIgnoreCase)
-
-                If matched AndAlso disallowedValues IsNot Nothing AndAlso disallowedValues.Contains(key.Value) Then Exit For
-
-                If Not matched Then matched = CheckKeyValueEquivalence(newKey, key, matchedFileKeyHasMoreParams, possibleWildCardReduction)
+                Dim matched = CheckKeyValueEquivalence(newKey, key, matchedFileKeyHasMoreParams, possibleWildCardReduction)
 
                 If matched AndAlso disallowedValues IsNot Nothing Then
 
                     Dim newKeyPath = newKey.Value
-
                     If newKeyPath.Contains("|") Then newKeyPath = newKeyPath.Substring(0, newKeyPath.IndexOf("|", StringComparison.InvariantCultureIgnoreCase))
 
                     If disallowedValues.Contains(newKeyPath) Then matched = False
 
                 End If
 
-                If matched Then MatchCount += 1
+                If matched Then MatchCount += 1 : Exit For
 
             Next
 
         Next
 
         allKeysMatchedTracker = MatchCount = oldKeyList.KeyCount
-
         countTracker = allKeysMatchedTracker AndAlso Not newKeyList.KeyCount > MatchCount
 
     End Sub
@@ -1718,8 +1917,8 @@ Module Diff
     ''' The type of change being summarized 
     ''' </param>
     Private Function summarizeEntryUpdate(keyTypeList As List(Of String),
-                                     countList As List(Of Integer),
-                                     changeType As String) As MenuSection
+                                          countList As List(Of Integer),
+                                          changeType As String) As MenuSection
 
         Dim result As New MenuSection
 
@@ -1729,7 +1928,7 @@ Module Diff
             result.AddColoredLine(out, ConsoleColor.Yellow, centered:=True)
             result.AddBlank(i = keyTypeList.Count - 1)
 
-            gLog(out, indent:=True)
+            gLog(out, indent:=True, leadr:=i = 0)
 
         Next
 
@@ -1758,8 +1957,8 @@ Module Diff
     ''' </param>
     Private Function ItemizeChangesFromList(kl As keyList,
                                        wasAdded As Boolean,
-                                       ByRef ktList As List(Of String),
-                                       ByRef countList As List(Of Integer)) As List(Of MenuSection)
+                                 ByRef ktList As List(Of String),
+                                 ByRef countList As List(Of Integer)) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
 
@@ -1791,7 +1990,6 @@ Module Diff
 
         result.AddBlank()
         out.Add(result)
-        'LogAndPrint(0, Nothing, logCond:=False, fillBorder:=False)
 
         gLog(descend:=True)
 
