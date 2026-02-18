@@ -197,7 +197,7 @@ Public Class iniFile
             buildIniFromStream(reader)
             reader.Close()
         Catch ex As FileNotFoundException
-
+            handleFileNotFoundException(ex)
         End Try
     End Sub
 

@@ -74,7 +74,6 @@ Public Class strList
     ''' <param name="givenValue">A value to search the list for</param>
     ''' <param name="ignoreCase">The optional condition specifying whether string casing should be ignored</param>
     Public Function contains(givenValue As String, Optional ignoreCase As Boolean = False) As Boolean
-        Items.Contains(givenValue, StringComparer.InvariantCultureIgnoreCase)
         Return If(ignoreCase, Items.Contains(givenValue, StringComparer.InvariantCultureIgnoreCase), Items.Contains(givenValue, StringComparer.InvariantCulture))
     End Function
 

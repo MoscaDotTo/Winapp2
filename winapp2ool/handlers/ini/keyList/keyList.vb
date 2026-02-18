@@ -40,6 +40,7 @@ Public Class keyList
     ''' <param name="kl"> A list of <c> iniKeys </c> to be inserted into the <c> keylist </c> </param>
     Public Sub New(kl As List(Of iniKey))
         If kl Is Nothing Then argIsNull(NameOf(kl)) : Return
+        Keys = New List(Of iniKey)(kl)
         KeyType = If(kl.Count > 0, kl(0).KeyType, "")
     End Sub
 
@@ -79,7 +80,11 @@ Public Class keyList
     ''' <summary> Returns a <c> Boolean </c> indicating whether or not the <c> keyType  </c>of the list matches the <c> keyType </c> provided by <c> <paramref name="type"/> </c> </summary>
     ''' <param name="type"> The String against which to match the <c> keylist's keyType </c> </param>
     Public Function typeIs(type As String) As Boolean
-        Return If(KeyType.Length = 0, Keys(0).KeyType, KeyType) = type
+        If KeyType.Length = 0 Then
+            If Keys.Count = 0 Then Return False
+            Return Keys(0).KeyType = type
+        End If
+        Return KeyType = type
     End Function
 
     ''' <summary> Returns a <c> keyList </c> as a <c> strList </c> </summary>
