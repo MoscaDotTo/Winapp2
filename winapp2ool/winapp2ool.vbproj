@@ -179,10 +179,15 @@
     <Compile Include="helpers\registry\RegistryHelper.vb" />
     <Compile Include="helpers\settings\SettingsManager.vb" />
     <Compile Include="helpers\updater\updater.vb" />
+    <Compile Include="handlers\winapp2\excludeKeyParams2\excludeKeyParams2.vb" />
+    <Compile Include="handlers\winapp2\fileKeyParams2\fileKeyParams2.vb" />
+    <Compile Include="handlers\winapp2\regKeyParams2\regKeyParams2.vb" />
     <Compile Include="handlers\winapp2\changeDict.vb" />
     <Compile Include="handlers\winapp2\winapp2file.vb" />
     <Compile Include="handlers\winapp2\winapp2keyparameters.vb" />
     <Compile Include="handlers\winapp2\winapp2entry.vb" />
+    <Compile Include="handlers\winapp2\winapp2entry2\winapp2entry2.vb" />
+    <Compile Include="handlers\winapp2\winapp2file2\winapp2file2.vb" />
     <Compile Include="handlers\winapp2\winapp2handler.vb" />
     <Compile Include="modules\download\mainmenu\downloadmainmenu.vb" />
     <Compile Include="modules\launcher\launcher.vb" />
