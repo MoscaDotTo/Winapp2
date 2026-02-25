@@ -485,6 +485,8 @@ Public Module commandLineHandler
         handleFlavorArg("-tron", WinappFlavor.Tron)
         handleFlavorArg("-base", WinappFlavor.NonCCleaner)
         handleFlavorArg("-ncc", WinappFlavor.NonCCleaner)
+        handleFlavorArg("-ccleaner7", WinappFlavor.CCleaner7)
+        handleFlavorArg("-cc7", WinappFlavor.CCleaner7)
 
     End Sub
 
