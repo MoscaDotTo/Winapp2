@@ -52,6 +52,11 @@ Public Module Winapp2ool
         ''' </summary>
         Tron = 4
 
+        ''' <summary>
+        ''' Designed for use with CCleaner 7.x and later
+        ''' </summary>
+        CCleaner7 = 5
+
     End Enum
 
     ''' <summary> 

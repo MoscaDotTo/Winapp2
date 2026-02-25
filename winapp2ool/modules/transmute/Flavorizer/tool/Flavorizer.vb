@@ -82,6 +82,19 @@ Public Module Flavorizer
 
         End If
 
+        Dim cc7ify = False
+        invertSettingAndRemoveArg(cc7ify, "-cc7ify")
+
+        If cc7ify Then
+
+            gLog("Applying baseline CCleaner 7 flavorization")
+            ApplyBaselineCC7Flavor()
+
+            Return
+
+        End If
+
+
         If FlavorizerFile1.Name.Length > 0 Then initFlavorizer()
 
     End Sub
@@ -128,6 +141,81 @@ Public Module Flavorizer
         crk()
 
     End Sub
+
+    ''' <summary>
+    ''' The CCleaner 7 flavorization process is implemented in winapp2ool to avoid the pitfalls 
+    ''' that would inevitably arise from trying to shoehorn it into Transmute's Flavorize function
+    ''' 
+    ''' Every single entry needs to be modified in some way and this function will handle that process
+    ''' 
+    ''' Additional changes will be required to fully implement the new features in CCleaner 7's 
+    ''' scripting language. The process carried out here only makes the winapp2.ini entries visible
+    ''' in CCleaner7
+    ''' </summary>
+    Private Sub ApplyBaselineCC7Flavor()
+
+        If Not enforceFileHasContent(FlavorizerFile1) Then Return
+
+        For Each section In FlavorizerFile1.Sections.Values
+
+            Dim IDKey = New iniKey($"ID={section.Name}")
+            Dim AuthorKey = New iniKey("Author=Winapp2.ini Project")
+
+            Dim tag = getTagFromCategory(section)
+
+            Dim TagsKey = New iniKey($"Tags={tag}")
+
+            section.Keys.add(IDKey)
+            section.Keys.add(AuthorKey)
+            section.Keys.add(TagsKey)
+
+        Next
+
+        Dim wa2file As New winapp2file(FlavorizerFile1)
+        FlavorizerFile2.overwriteToFile(wa2file.winapp2string)
+
+    End Sub
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="section"></param>
+    ''' <returns></returns>
+    Private Function getTagFromCategory(ByRef section As iniSection) As String
+
+        Dim wa2 As New winapp2entry(section)
+        Dim out = ""
+
+        Dim oldSections = {"3021", "games", "3022", "3023", "3024", "3025", "3026", "3027", "3029", "3030", "3031", "3032", "3033", "3034", "3035",
+                           "3037", "3038", "3039", "3043", "3044", "3005", "3006"}
+        Dim newSections = {"ccapps", "ccapps", "ccinternet", "ccmedia", "ccutil", "ccwindows", "Mozilla,FireFox,Browser",
+                           "Opera,Browser", "Google,Chrome,Browser", "Thunderbird,Email", "ccwinstore", "CCleaner,Browser", "Vivaldi,Browser",
+                           "Brave,Browser", "OperaGX,Browser", "Avast,Browser", "AVG,Browser", "ARC,Browser", "Norton,Browser", "Avira,Browser",
+                           "Microsoft,Browser,Edge", "Microsoft,Browser,Edge"}
+
+        Select Case True
+
+            Case wa2.SectionKey.KeyCount = 1 AndAlso oldSections.Contains(wa2.SectionKey.Keys(0).Value.ToLowerInvariant)
+
+                Dim index = Array.IndexOf(oldSections, wa2.SectionKey.Keys(0).Value.ToLowerInvariant)
+                out = newSections(index)
+                section.Keys.remove(wa2.SectionKey.Keys(0))
+
+            Case wa2.LangSecRef.KeyCount = 1 AndAlso oldSections.Contains(wa2.LangSecRef.Keys(0).Value.ToLowerInvariant)
+
+                Dim index = Array.IndexOf(oldSections, wa2.LangSecRef.Keys(0).Value.ToLowerInvariant)
+                out = newSections(index)
+                section.Keys.remove(wa2.LangSecRef.Keys(0))
+
+            Case Else
+
+                out = "ccapps"
+
+        End Select
+
+        Return out
+
+    End Function
 
     ''' <summary>
     ''' Performs the actual flavorization using the Transmute.Flavorize function

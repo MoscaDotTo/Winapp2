@@ -53,6 +53,11 @@ Module Downloader
     ''' </summary>
     Public ReadOnly Property tronFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Tron/Winapp2.ini"
 
+    ''' <summary>
+    ''' The web address of the CCleaner 7 version of winapp2.ini
+    ''' </summary>
+    Public ReadOnly Property cc7FlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/CCleaner7/Winapp2.ini"
+
     ''' <summary> 
     ''' The web address of winapp2ool.exe 
     ''' </summary>
@@ -147,8 +152,6 @@ Module Downloader
     ''' <summary>
     ''' Returns the link to winapp2ool.exe on the appropriate branch for the current tool configuration 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Function toolExeLink() As String
 
         Return If(isBeta, betaToolLink, toolLink)
@@ -197,7 +200,7 @@ Module Downloader
     ''' </param>
     Public Function GetNameFromDL(shouldDownload As Boolean) As String
 
-        Return If(shouldDownload, If(RemoteWinappIsNonCC, "Online (Non-CCleaner)", "Online"), "")
+        Return If(shouldDownload, $"Online ({CurrentWinappFlavor.ToString} flavor)", "")
 
     End Function
 

@@ -46,7 +46,8 @@ Module maintoolmenu
             .AddOption("Diff", "Generate a context-aware changelog between two winapp2.ini files") _
             .AddOption("CCiniDebug", "Remove stale winapp2.ini configurations from ccleaner.ini") _
             .AddOption("Browser Builder", "Generate winapp2.ini entries for web browsers") _
-            .AddOption("Combine", "Join together a collection of ini files into one").AddBlank() _
+            .AddOption("Combine", "Join together a collection of ini files into one") _
+            .AddOption("CC7Patcher", "Install winapp2.ini for CCleaner 7").AddBlank() _
             .AddOption("Downloader", "Download files from the Winapp2 GitHub") _
             .AddColoredOption("Settings", "Manage Winapp2ool's settings", ConsoleColor.Yellow)
 
@@ -92,12 +93,13 @@ Module maintoolmenu
         {NameOf(CCiniDebug), New KeyValuePair(Of Action, Action(Of String))(AddressOf printCCDBMainMenu, AddressOf handleCCDBMUserInput)},
         {NameOf(BrowserBuilder), New KeyValuePair(Of Action, Action(Of String))(AddressOf printBrowserBuilderMenu, AddressOf handleBrowserBuilderInput)},
         {NameOf(Combine), New KeyValuePair(Of Action, Action(Of String))(AddressOf printCombineMainMenu, AddressOf handleCombineUserInput)},
+        {NameOf(CC7Patcher), New KeyValuePair(Of Action, Action(Of String))(AddressOf printCC7PatcherMenu, AddressOf handleCC7PatcherInput)},
         {NameOf(Downloader), New KeyValuePair(Of Action, Action(Of String))(AddressOf printDownloadMainMenu, AddressOf handleDownloadUserInput)},
         {"Winapp2ool Settings", New KeyValuePair(Of Action, Action(Of String))(AddressOf printMainToolSettingsMenu, AddressOf handleMainToolSettingsInput)},
         {"Minefield", New KeyValuePair(Of Action, Action(Of String))(AddressOf Minefield.printMenu, AddressOf Minefield.handleUserInput)}
         }
 
-        Dim moduleOpts = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "m"}
+        Dim moduleOpts = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "m"}
 
         Select Case True
 
@@ -119,14 +121,15 @@ Module maintoolmenu
             ' CCiniDebug                                   -> 5 
             ' Browser Builder                              -> 6 
             ' Combine                                      -> 7
-            ' Downloader                                   -> 8 
-            ' Winapp2ool Settings                          -> 9 
+            ' CC7Patcher                                   -> 8
+            ' Downloader                                   -> 9
+            ' Winapp2ool Settings                          -> 10 
             ' Minefield                                    -> m
             ' Notes: Minefield is a hidden option not listed on the menu
             Case moduleOpts.Contains(input)
 
                 ' secret minefield menu
-                If input = "m" Then input = "10"
+                If input = "m" Then input = CStr(moduleOpts.Length)
 
                 Dim i = CType(input, Integer) - 1
 
@@ -139,7 +142,7 @@ Module maintoolmenu
             ' Go online
             ' Notes: Only available if offline 
             ' Always appears after the standard suite of options 
-            Case input = "10" AndAlso isOffline
+            Case input = CStr(moduleOpts.Length) AndAlso isOffline
 
                 chkOfflineMode()
                 setHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", True, isOffline)
@@ -147,7 +150,7 @@ Module maintoolmenu
             ' Update (winapp2.ini)
             ' Notes: Only available if an update to winapp2.ini is available
             ' Always appears after the standard suite of options but before the tool updater
-            Case input = "10" AndAlso waUpdateIsAvail
+            Case input = CStr(moduleOpts.Length) AndAlso waUpdateIsAvail
 
                 clrConsole()
                 cwl("Downloading, this may take a moment...")
@@ -156,7 +159,7 @@ Module maintoolmenu
 
             ' Update & Trim winapp2.ini
             ' Notes: Only available if an update to winapp2.ini is available
-            Case input = "11" AndAlso waUpdateIsAvail
+            Case input = CStr(moduleOpts.Length + 1) AndAlso waUpdateIsAvail
 
                 clrConsole()
                 cwl("Downloading & trimming, this may take a moment...")
@@ -165,17 +168,17 @@ Module maintoolmenu
 
             ' Show Update Diff
             ' Notes: Only available if an update to winapp2.ini is available
-            Case input = "12" AndAlso waUpdateIsAvail
+            Case input = CStr(moduleOpts.Length + 2) AndAlso waUpdateIsAvail
 
                 clrConsole()
                 cwl("Downloading & diffing, this may take a moment...")
                 DiffRemoteFile(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
-                setHeaderText("Diff Complete")
+                setNextMenuHeaderText("Diff Complete", printColor:=ConsoleColor.Green)
 
             ' Update (winapp2ool.exe)
             ' Notes: Only available if an update is available and the executable can be updated
             ' Always appears as the last option in the menu when available
-            Case updateIsAvail AndAlso Not cantDownloadExecutable AndAlso input = computeMenuNumber(10, {waUpdateIsAvail}, {3})
+            Case updateIsAvail AndAlso Not cantDownloadExecutable AndAlso input = computeMenuNumber(moduleOpts.Length, {waUpdateIsAvail}, {3})
 
                 cwl("Downloading and updating Winapp2ool.exe, this may take a moment...")
                 autoUpdate()
