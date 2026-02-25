@@ -70,6 +70,43 @@ Module SettingsManager
     End Sub
 
     ''' <summary>
+    ''' Prompts the user to change an <c>iniFileChooser</c>'s parameters, marks both settings and the chooser as having been changed
+    ''' </summary>
+    '''
+    ''' <param name="chooser">
+    ''' The <c>iniFileChooser</c> whose parameters will be changed
+    ''' </param>
+    '''
+    ''' <param name="settingsChangedSetting">
+    ''' A pointer to the boolean indicating that a module's settings have been modified from their default state
+    ''' </param>
+    Public Sub changeFile2Params(ByRef chooser As iniFileChooser,
+                                  ByRef settingsChangedSetting As Boolean,
+                                        callingModule As String,
+                                        settingName As String,
+                                        settingChangedName As String,
+                               Optional fileDesc As String = "")
+
+        Dim curName = chooser.Name
+        Dim curDir = chooser.Dir
+
+        initModule("File Chooser", AddressOf chooser.PrintMenu, AddressOf chooser.HandleInput)
+
+        Dim fileChanged = Not chooser.Name = curName OrElse Not chooser.Dir = curDir
+        If Not settingsChangedSetting Then settingsChangedSetting = fileChanged
+
+        setNextMenuHeaderText($"{fileDesc} parameters update{If(Not fileChanged, " aborted", "d")}", printColor:=GetRedGreen(Not fileChanged))
+        If Not fileChanged Then Return
+
+        updateSettings(callingModule, $"{settingName}_Dir", chooser.Dir)
+        updateSettings(callingModule, $"{settingName}_Name", chooser.Name)
+        updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
+
+        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso saveSettingsToDisk)
+
+    End Sub
+
+    ''' <summary>
     ''' Toggles a setting's boolean state and marks its tracker true
     ''' </summary>
     ''' 
