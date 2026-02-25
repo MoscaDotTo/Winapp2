@@ -168,7 +168,13 @@
     <Compile Include="handlers\ini\keyList\keyList.vb" />
     <Compile Include="handlers\ini\iniFile\iniKey\iniKey.vb" />
     <Compile Include="handlers\ini\iniFile\components\strList\strList.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniComment2\iniComment2.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniKey2\iniKey2.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniKeyCollection\iniKeyCollection.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniSection2\iniSection2.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniFile2.vb" />
     <Compile Include="handlers\logger\logger.vb" />
+    <Compile Include="handlers\menus\iniFileChooser\iniFileChooser.vb" />
     <Compile Include="handlers\menus\MenuMaker.vb" />
     <Compile Include="helpers\registry\RegistryHelper.vb" />
     <Compile Include="helpers\settings\SettingsManager.vb" />
