@@ -279,6 +279,9 @@
   <ItemGroup>
     <Folder Include="handlers\ini\comments\" />
     <Folder Include="helpers\filesystem\" />
+    <Folder Include="modules\uwpbuilder\mainmenu\" />
+    <Folder Include="modules\uwpbuilder\settingshandler\" />
+    <Folder Include="modules\uwpbuilder\tool\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
