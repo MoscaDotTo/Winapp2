@@ -28,7 +28,6 @@ Module globalsettingsmenu
     Private Sub initDefaultSettings()
 
         GlobalLogFile.resetParams()
-        RemoteWinappIsNonCC = False
         saveSettingsToDisk = False
         readSettingsFromDisk = False
         toolSettingsHaveChanged = False

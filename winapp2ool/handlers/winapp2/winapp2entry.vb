@@ -63,7 +63,6 @@ Public Class winapp2entry
         If section Is Nothing Then argIsNull(NameOf(section)) : Return
         FullName = section.getFullName
         Name = section.Name
-        updKeyListList()
         LineNum = section.StartingLineNumber
         DetectOS = New keyList("DetectOS")
         LangSecRef = New keyList("LangSecRef")

@@ -44,7 +44,7 @@ Public Class winapp2KeyParameters
                 If splitKey.Length > 1 Then
                     PathString = splitKey(0)
                     ArgsList.AddRange(splitKey(1).Split(CChar(";")))
-                    FlagString = If(splitKey.Length >= 3, splitKey.Last, "None")
+                    FlagString = If(splitKey.Length >= 3, splitKey.Last, "")
                 Else
                     PathString = key.Value
                 End If
@@ -82,7 +82,7 @@ Public Class winapp2KeyParameters
             Next
         End If
         If ArgsList.Count > 0 Then out += ArgsList.Last
-        If Not FlagString = "None" Then out += "|" & FlagString
+        If FlagString.Length > 0 Then out += "|" & FlagString
         ' Small edgecase for when empty parameters lead the pipe, resulting in the above loop leaving a single one for expectation of a next element
         out = out.Replace(";|", "|")
         key.Value = out

@@ -25,20 +25,14 @@ Imports System.Text
 ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
 Public Module logger
 
-    ''' <summary> 
-    ''' The global Winapp2ool log, containing everything logged during the current session 
+    ''' <summary>
+    ''' The global Winapp2ool log, containing everything logged during the current session
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
     Public Property GlobalLog As New strList
 
-
-
-    '''<summary> 
+    '''<summary>
     '''The current indentation level of the global log.
     '''</summary>
-    '''
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
     Public Property nestCount As Integer = 0
 
     ''' <summary> 
@@ -108,15 +102,17 @@ Public Module logger
 
         If Not cond Then Return
 
-
         If leadr Then GlobalLog.add("")
         If indent Then nestCount += indAmt
         If ascend Then nestCount += ascAmt
 
-        Dim buffer = New String(" "c, nestCount * 2)
+        If logstr IsNot Nothing Then
 
-        logstr = buffer + logstr
-        GlobalLog.add(logstr)
+            Dim buffer = New String(" "c, nestCount * 2)
+            logstr = buffer + logstr
+            GlobalLog.add(logstr)
+
+        End If
 
         If indent Then nestCount -= indAmt
         If descend Then nestCount -= descAmt

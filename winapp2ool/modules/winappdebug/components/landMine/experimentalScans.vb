@@ -92,7 +92,7 @@ Module experimentalScans
                         keyToMergeInto.addArgs(mergeKeyStr)
                         tmpWa2.ArgsList.ForEach(Sub(arg) mergeKeyStr += $";{arg}")
 
-                        If tmpWa2.FlagString <> "None" Then mergeKeyStr += $"|{tmpWa2.FlagString}"
+                        If tmpWa2.FlagString.Length > 0 Then mergeKeyStr += $"|{tmpWa2.FlagString}"
                         dupes.add(kl.Keys(i))
                         gLog($"Key will be merged and have the new value: {mergeKeyStr}")
 

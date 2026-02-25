@@ -103,10 +103,8 @@ Public Module winapp2handler
     ''' <param name="key"> An ExcludeKey <c> iniKey </c></param>
     Public Function pathFromExcludeKey(key As iniKey) As String
         If key Is Nothing Then argIsNull(NameOf(key)) : Return Nothing
-        Dim pathFromKey = key.Value.TrimStart(CType("FILE|", Char()))
-        pathFromKey = pathFromKey.TrimStart(CType("PATH|", Char()))
-        pathFromKey = pathFromKey.TrimStart(CType("REG|", Char()))
-        Return pathFromKey
+        Dim pipePos = key.Value.IndexOf("|"c)
+        Return If(pipePos >= 0, key.Value.Substring(pipePos + 1), key.Value)
     End Function
 
     ''' <summary> Pads a given number to a given length by prepending it with zeros (0's), returns the padded number </summary>

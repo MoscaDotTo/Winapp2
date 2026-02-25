@@ -196,6 +196,8 @@ Public Class winapp2file
 
         If hasVersionComment Then Return file.Comments.Values(0).Comment
 
+        Return Version
+
     End Function
 
     ''' <summary>

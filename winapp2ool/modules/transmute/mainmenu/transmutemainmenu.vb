@@ -141,7 +141,8 @@ Public Module transmuteMainMenu
 
             ' Exit 
             Case intInput = 0
-            exitModule()
+
+                exitModule()
 
             ' Run (default)
             Case intInput = 1 OrElse input.Length = 0

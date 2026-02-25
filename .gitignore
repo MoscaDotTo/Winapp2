@@ -254,3 +254,6 @@ Assembler/winapp2ool.exe
 /winapp2ool/handlers/settings/CLAUDE.md
 /winapp2ool/handlers/winapp2/CLAUDE.md
 /winapp2ool/modules/CLAUDE.md
+/winapp2ool/bin/Debug/diff-old.txt
+/winapp2ool/bin/Debug/diff-test-new.ini
+/winapp2ool/bin/Debug/diff-test-old.ini

@@ -59,7 +59,7 @@ Public Module browserbuildermainmenu
             .AddFileInfo($"Key value removals rules:   ", BuilderFile7.Path) _
             .AddFileInfo($"Section replacements rules: ", BuilderFile8.Path) _
             .AddFileInfo($"Key replacement rules:      ", BuilderFile9.Path) _
-            .AddFileInfo($"Content addition rules      ", BuilderFile4.Path) _
+            .AddFileInfo($"Content addition rules:     ", BuilderFile4.Path) _
             .AddBlank(BrowserBuilderModuleSettingsChanged) _
             .AddResetOpt(NameOf(BrowserBuilder), BrowserBuilderModuleSettingsChanged)
 
