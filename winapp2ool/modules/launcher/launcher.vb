@@ -59,6 +59,9 @@ Public Module launcher
 
         initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
 
+        ' Ensure any pending settings changes are saved before exiting
+        FlushSettingsIfDirty()
+
     End Sub
 
 End Module

@@ -247,6 +247,9 @@ Module MenuMaker
 
         ExitPending = False
 
+        ' Flush any pending settings changes to disk when exiting a module
+        FlushSettingsIfDirty()
+
         setHeaderText($"{name} closed")
         gLog($"Exiting {name}", descend:=True, leadr:=True)
 

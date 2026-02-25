@@ -39,14 +39,20 @@ Imports System.Reflection
 ''' Docs last updated: 2025-06-25 | Code last updated 2025-06-25
 Public Module settingsHandler
 
-    ''' <summary> 
-    ''' A copy of winapp2ool's current set of user configurable settings that
-    ''' can be read from or written to disk in a familiar ini format <br /> 
-    ''' 
-    ''' If <c> saveSettingsToDisk </c> is <c> True </c>, then this file will 
-    ''' be overwritten on disk every time a setting is updated 
+    ''' <summary>
+    ''' Tracks whether settings have been modified since the last save.
+    ''' Used to defer disk writes until necessary (application exit or explicit flush).
     ''' </summary>
-    ''' 
+    Private _settingsAreDirty As Boolean = False
+
+    ''' <summary>
+    ''' A copy of winapp2ool's current set of user configurable settings that
+    ''' can be read from or written to disk in a familiar ini format <br />
+    '''
+    ''' If <c> saveSettingsToDisk </c> is <c> True </c>, then this file will
+    ''' be overwritten on disk when settings are flushed
+    ''' </summary>
+    '''
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Property settingsFile As New iniFile(Environment.CurrentDirectory, "winapp2ool.ini")
 
@@ -62,15 +68,39 @@ Public Module settingsHandler
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Property settingsDict As New Dictionary(Of String, Dictionary(Of String, String))
 
-    ''' <summary> 
+    ''' <summary>
     ''' If saving is enabled, saves the current state of winapp2ool's
-    ''' settings to disk, overwriting any existing settings 
+    ''' settings to disk, overwriting any existing settings
     ''' </summary>
-    ''' 
+    '''
     ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Sub saveSettingsFile()
 
         settingsFile.overwriteToFile(settingsFile.toString, saveSettingsToDisk)
+        _settingsAreDirty = False
+
+    End Sub
+
+    ''' <summary>
+    ''' Saves settings to disk only if they have been modified since the last save.
+    ''' Call this at application exit or module transitions to ensure settings are persisted.
+    ''' </summary>
+    '''
+    ''' Docs last updated: 2026-02-06 | Code last updated: 2026-02-06
+    Public Sub FlushSettingsIfDirty()
+
+        If _settingsAreDirty Then
+            saveSettingsFile()
+        End If
+
+    End Sub
+
+    ''' <summary>
+    ''' Marks settings as modified, deferring the disk write until FlushSettingsIfDirty is called.
+    ''' </summary>
+    Private Sub MarkSettingsDirty()
+
+        _settingsAreDirty = True
 
     End Sub
 
@@ -91,7 +121,7 @@ Public Module settingsHandler
     ''' The updated value held by the setting 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
+    ''' Docs last updated: 2025-06-25 | Code last updated: 2026-02-06
     Public Sub updateSettings(targetModule As String,
                               settingName As String,
                               newVal As String)
@@ -107,7 +137,8 @@ Public Module settingsHandler
 
         Next
 
-        saveSettingsFile()
+        ' Defer disk write - settings will be saved when FlushSettingsIfDirty is called
+        MarkSettingsDirty()
 
     End Sub
 
