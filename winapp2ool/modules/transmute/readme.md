@@ -83,18 +83,23 @@ Transmute allows you to modify one ini file (the "base" file) using instructions
 
 # [Menu Options](#menu-options)
 
-|Option|Effect|Notes|
-|:-|:-|:-| 
-| Run (default)           | Apply the current transmutation settings              |                                     |
-| Open Flavorizer         | Opens the Flavorizer sub-modules                      | Provides a UI for chain operations  |
-| Change Transmute mode   | Cycles through Add → Replace → Remove                 | Default: `Add`                      |
-| Change Replace mode     | Switches the Replace mode between BySection ↔ ByKey   | Only visible in `Replace` mode      |
-| Change Remove mode      | Switches the Remove mode between BySection ↔ ByKey    | Only visible in `Remove` mode       |
-| Change Key Removal Mode | Switches between ByName ↔ ByValue                     | Only visible in `Remove` ByKey mode |  
-| Toggle Syntax           | Toggles formatting the output as winapp2.ini \*       | Default: `True`                     |
-| Choose base file        | Select the file to be modified                        | Default: `winapp2.ini`              | 
-| Choose source file      | Select the file containing modifications              |                                     |
-| Choose save target      | Select output location                                | Default: `winapp2.ini`              |
+| Option | Effect | Notes |
+|:-|:-|:-|
+| Run (default) | Apply the current transmutation settings | |
+| Open Flavorizer | Open the Flavorizer sub-module | Provides a UI for chain operations |
+| Removed Entries | Set the source file name to `Removed Entries.ini` | Preset shortcut |
+| Custom | Set the source file name to `Custom.ini` | Preset shortcut |
+| winapp3.ini | Set the source file name to `winapp3.ini` | Preset shortcut |
+| browsers.ini | Set the source file name to `browsers.ini` | Preset shortcut |
+| Change base file | Select the file to be modified | Default: `winapp2.ini` |
+| Change source file | Select the file containing modifications | |
+| Change save target | Select the output location | Default: `winapp2-transmuted.ini` |
+| Toggle Syntax | Toggle formatting the output as winapp2.ini \* | Default: `True` |
+| Change Transmute mode | Cycle through Add → Replace → Remove | Default: `Add` |
+| Change Replace mode | Switch the Replace mode between BySection ↔ ByKey | Only visible in `Replace` mode |
+| Change Remove mode | Switch the Remove mode between BySection ↔ ByKey | Only visible in `Remove` mode |
+| Change Key Removal Mode | Switch between ByName ↔ ByValue | Only visible in `Remove` ByKey mode |
+| Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
 \* winapp2.ini formatting means respecting the winapp2.ini ordering of sections and leading comments/information within in the output file. Transmute does **not** run WinappDebug on its output. If you are working with winapp2.ini, you should separately run your transmute output through WinappDebug to ensure style/syntax correctness.  
 
@@ -334,7 +339,7 @@ Comments included in your source file will not be placed in the base file.
 # [Troubleshooting](#troubleshooting)
 |Error Message|Cause
 |:-|:-
-|"Target section not found in the base file: [section]"|Source file references a section not in base file (only affects Replace/Remove)
+|"Target section not found in base file: [section] - no changes applied"|Source file references a section not in base file (only affects Replace/Remove)
 |"Replacement target not found in [section]"|Source key doesn't exist in the base section (Replace mode)
 |"Removal target not found: {key} not found in [section]"|Source key doesn't exist in the base section (Remove mode)
 ---
@@ -631,7 +636,7 @@ FileKey8=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\
 
 #
 
-### [Example 5: Remove Keys By Name(#example-5-remove-keys-by-name)
+### [Example 5: Remove Keys By Name](#example-5-remove-keys-by-name)
 
 **Context**
 
@@ -1177,9 +1182,7 @@ winapp2ool -transmute -remove -bykey -byvalue -1f browsers.ini -2f browser_value
 winapp2ool -transmute -add -1f browsers.ini -2f browser_additions.ini -3f browsers.ini 
 ```
 
-###### Note: `By Key` is the default remove mode and technically the `-bykey` argument could be omitted here but is provided for the utmost clarity 
-
-###### Note
+###### Note: `By Key` is the default remove mode and technically the `-bykey` argument could be omitted here but is provided for the utmost clarity
 
 **Output**
 
