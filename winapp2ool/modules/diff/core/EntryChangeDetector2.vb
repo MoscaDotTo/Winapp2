@@ -30,7 +30,7 @@ Public Class EntryChangeDetector2
     Private ReadOnly _file2 As iniFile2
     Private ReadOnly _mergeDetector As MergeDetector2
     Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer2
-    Private ReadOnly _renderer As DiffOutputRenderer
+    Private ReadOnly _renderer As DiffOutputRenderer2
 
     ''' <summary>
     ''' Initializes a new instance of <c>EntryChangeDetector2</c>
@@ -46,7 +46,7 @@ Public Class EntryChangeDetector2
                    file2 As iniFile2,
                    mergeDetector As MergeDetector2,
                    keyAnalyzer As KeyModificationAnalyzer2,
-                   renderer As DiffOutputRenderer)
+                   renderer As DiffOutputRenderer2)
 
         _state = state
         _file1 = file1
@@ -127,15 +127,13 @@ Public Class EntryChangeDetector2
         Next
 
         ' Pre-populate old entry cache and pre-compute section text for removed entries.
-        ' Storing the converted iniSection avoids re-converting inside the parallel lambda.
+        ' winapp2entry still requires a legacy iniSection; the conversion is isolated here
+        ' so the parallel lambda works only with iniFile2/iniSection2.
         Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
-        Dim oldSectionCache As New Dictionary(Of String, iniSection)(StringComparer.OrdinalIgnoreCase)
         For Each entryName In _state.ModifiedEntries.RemovedEntryNames
             Dim oldSection2 = _file1.GetSection(entryName)
-            Dim oldSection = DiffFileBridge.ToIniSection(oldSection2)
-            oldSectionCache(entryName) = oldSection
             If Not _state.Caches.CachedOldEntries.ContainsKey(oldSection2.Name) Then
-                _state.Caches.CachedOldEntries.Add(oldSection2.Name, New winapp2entry(oldSection))
+                _state.Caches.CachedOldEntries.Add(oldSection2.Name, New winapp2entry(DiffFileBridge.ToIniSection(oldSection2)))
             End If
             oldEntryTextMap(entryName) = oldSection2.ToString().ToUpperInvariant()
         Next
@@ -148,7 +146,7 @@ Public Class EntryChangeDetector2
 
                      If oldWa2Section.FileKeys.KeyCount = 0 AndAlso oldWa2Section.RegKeys.KeyCount = 0 Then
 
-                         results(entry) = _renderer.MakeDiff(oldSectionCache(entry), 1)
+                         results(entry) = _renderer.MakeDiff(oldSection2, 1)
                          Return
 
                      End If
@@ -180,7 +178,7 @@ Public Class EntryChangeDetector2
 
                      Dim changesRecorded = _mergeDetector.AssessRenamesAndMergers(combinedMatches, oldSection2)
 
-                     If Not changesRecorded Then results(entry) = _renderer.MakeDiff(oldSectionCache(entry), 1)
+                     If Not changesRecorded Then results(entry) = _renderer.MakeDiff(oldSection2, 1)
 
                  End Sub)
 

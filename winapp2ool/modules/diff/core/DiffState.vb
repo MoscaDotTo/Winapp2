@@ -176,12 +176,14 @@ End Class
 Public Class DiffStatistics
 
     ''' <summary>
-    ''' Counts entries removed due to being superseded by additions
+    ''' Counts the number of entries that were merged into newly added entries <br />
+    ''' ie. entries that were removed but which had all of their contents merged into entries that were added
     ''' </summary>
     Public Property RemovedByAdditionCount As Integer = 0
 
     ''' <summary>
-    ''' Counts entries that were merged
+    ''' Counts the total number of entries that were merged <br /> ie. entries that were 
+    ''' removed but which had some or all of their contents merged into other entries 
     ''' </summary>
     Public Property MergedEntryCount As Integer = 0
 
@@ -240,11 +242,23 @@ Public Class DiffStatistics
     ''' </summary>
     Public Property ModEntriesUpdatedKeyEntryCount As Integer = 0
 
-    ' Entry-level counts
+    ''' <summary>
+    ''' Counts entries that were added with mergers (i.e., entries that were
+    ''' added and also had one or more old entries merged into them)
+    ''' </summary>
     Public Property AddedWithMergersEntryCount As Integer = 0
+
+    ''' <summary>
+    ''' Counts entries that were merged into added entries (ie. old entries
+    ''' that were merged into entries which were added)
+    ''' </summary>
     Public Property AddedWithMergersSourceEntryCount As Integer = 0
 
     ' Novel keys (new keys not from merged sources)
+    ''' <summary>
+    ''' Counts total novel keys added in entries that were added with mergers <br /> ie. keys 
+    ''' that were added in entries that had mergers, but were not part of the merged old entries)
+    ''' </summary>
     Public Property AddedWithMergersNovelKeysTotal As Integer = 0
     Public Property AddedWithMergersNovelKeysEntryCount As Integer = 0
 
@@ -369,7 +383,8 @@ Public Class KeyMovementInfo
     ''' <param name="target">
     ''' Target entry name
     ''' </param>
-    Public Sub New(source As String, target As String)
+    Public Sub New(source As String,
+                   target As String)
 
         SourceEntry = source
         TargetEntry = target

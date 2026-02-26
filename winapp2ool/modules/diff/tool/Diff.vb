@@ -106,6 +106,20 @@ Module Diff
     Private Property keyAnalyzer As KeyModificationAnalyzer
     Private Property renderer As DiffOutputRenderer
 
+    Private _spinIdx As Integer = 0
+    Private ReadOnly _spinChars As Char() = {"|"c, "/"c, "-"c, "\"c}
+
+    ''' <summary>
+    ''' Overwrites the current console line with a spinner and step label.
+    ''' No-ops in silent mode (<see cref="SuppressOutput"/>).
+    ''' </summary>
+    Private Sub Diff2Progress(curStep As String)
+        If SuppressOutput Then Return
+        Dim spin = _spinChars(_spinIdx Mod 4)
+        _spinIdx += 1
+        Console.Write(($"{vbCr}[Diff2] {spin} {curStep}").PadRight(79))
+    End Sub
+
     ''' <summary>
     ''' Runs a diff using command line arguments, allowing Diff to be called programmatically
     ''' <list type="table">
@@ -245,6 +259,12 @@ Module Diff
 
     End Function
 
+
+    Private Function getStepSpeed(startTime As DateTime) As String
+
+        Return (Now - startTime).ToString
+
+    End Function
     ''' <summary>
     ''' Runs the diff pipeline using the new <c>iniFile2</c>-based core classes.
     ''' Writes output to gLog for comparison against the legacy path. Results are not printed.
@@ -256,46 +276,91 @@ Module Diff
 
         Dim state2 As New DiffState()
         state2.Clear()
-        Dim start = Now
 
         Dim keyAnalyzer2 = New KeyModificationAnalyzer2(state2)
         Dim mergeDetector2 = New MergeDetector2(state2, file2As2, AddressOf keyAnalyzer2.FindModifications)
-
-        ' Renderer and stats calc still need legacy iniFile objects
-        Dim file1AsOld = DiffFileBridge.ToIniFile(file1As2)
-        Dim file2AsOld = DiffFileBridge.ToIniFile(file2As2)
-
-        ' Separate KeyModificationAnalyzer (legacy) for renderer merger analysis — shares state2
-        Dim keyAnalyzerForRenderer = New KeyModificationAnalyzer(state2)
-        Dim renderer2 = New DiffOutputRenderer(state2, file1AsOld, file2AsOld, keyAnalyzerForRenderer)
+        Dim renderer2 = New DiffOutputRenderer2(state2, file1As2, file2As2, keyAnalyzer2)
         Dim detector2 = New EntryChangeDetector2(state2, file1As2, file2As2, mergeDetector2, keyAnalyzer2, renderer2)
-        Dim statsCalc2 = New DiffStatisticsCalculator(state2, file1AsOld, file2AsOld)
+        Dim statsCalc2 = New DiffStatisticsCalculator2(state2, file1As2, file2As2)
+
+        Dim start = Now
+        Dim stepStart = Now
 
         ' Phase 1: Gather raw changes
+        Diff2Progress("Phase 1 · processing new entries (step 1/14)")
         detector2.ProcessNewEntries()
+        gLog($"Step 1: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress("Phase 1 · processing old entries (step 2/14)")
         detector2.ProcessOldEntries()
+        gLog($"Step 2: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress($"Phase 1 · processing {state2.ModifiedEntries.RemovedEntryNames.Count} removals (step 3/14)")
         detector2.ProcessRemovals()
+        gLog($"Step 3: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress("Phase 1 · calculating initial statistics (step 4/14)")
         statsCalc2.CalculateInitialStatistics()
+        gLog($"Step 4: {getStepSpeed(stepStart)}")
 
         ' Phase 2: Detect cross-entry movements
+        stepStart = Now
+        Diff2Progress("Phase 2 · detecting cross-entry key movements (step 5/14)")
         statsCalc2.DetectCrossEntryMovements()
+        gLog($"Step 5: {getStepSpeed(stepStart)}")
 
-        ' Phase 3: Generate output (writes to gLog for comparison)
+        ' Phase 3: Generate output
+        stepStart = Now
+        Diff2Progress("Phase 3 · processing renames (step 6/14)")
         renderer2.SummarizeRenames()
-        renderer2.SummarizeMergers()
-        renderer2.ItemizeMergers()
-        renderer2.ItemizeKeyMovements()
-        renderer2.ItemizeModifications()
-        renderer2.ItemizeAddedEntriesWithMergers()
-        renderer2.ItemizeAdditions()
+        gLog($"Step 6: {getStepSpeed(stepStart)}")
 
+        stepStart = Now
+        Diff2Progress("Phase 3 · processing mergers (step 7/14)")
+        renderer2.SummarizeMergers()
+        gLog($"Step 7: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress("Phase 3 · itemizing mergers into existing entries (step 8/14)")
+        renderer2.ItemizeMergers()
+        gLog($"Step 8: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress("Phase 3 · itemizing cross-entry key movements (step 9/14)")
+        renderer2.ItemizeKeyMovements()
+        gLog($"Step 9: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress("Phase 3 · itemizing entry modifications (step 10/14)")
+        renderer2.ItemizeModifications()
+        gLog($"Step 10: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress("Phase 3 · itemizing mergers into newly added entries (step 11/14)")
+        renderer2.ItemizeAddedEntriesWithMergers()
+        gLog($"Step 11: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress("Phase 3 · itemizing additions (step 12/14)")
+        renderer2.ItemizeAdditions()
+        gLog($"Step 12: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress("Phase 3 · calculating added-with-mergers statistics (step 13/14)")
         statsCalc2.CalculateAddedWithMergersStatistics()
+        gLog($"Step 13: {getStepSpeed(stepStart)}")
+
+        stepStart = Now
+        Diff2Progress("Phase 3 · calculating summary statistics (step 4/14)")
+        renderer2.LogPostDiff()
+        gLog($"Step 14: {getStepSpeed(stepStart)}")
 
         Dim ender = Now
         Dim timeSpan = ender - start
-        gLog(timeSpan.ToString)
-
-        renderer2.LogPostDiff()
+        gLog($"Total time: {timeSpan.ToString}")
 
     End Sub
 
