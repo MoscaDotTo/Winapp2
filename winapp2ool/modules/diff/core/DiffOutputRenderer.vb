@@ -162,7 +162,7 @@ Public Class DiffOutputRenderer
 
         Dim out As New List(Of MenuSection)
 
-        For Each oldEntry In _state.MergedEntries.OldToNewMergeDict
+        For Each oldEntry In _state.MergedEntries.OldToNewMergeDict.OrderBy(Function(kvp) kvp.Key, StringComparer.OrdinalIgnoreCase)
 
             Dim oldName = oldEntry.Key
             Dim newTargets = oldEntry.Value
@@ -232,7 +232,7 @@ Public Class DiffOutputRenderer
 
         Dim out As New List(Of MenuSection)
 
-        For Each entry In _state.MergedEntries.RenamedEntryNames
+        For Each entry In _state.MergedEntries.RenamedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
             Dim ind = _state.MergedEntries.RenamedEntryPairs.IndexOf(entry)
             Dim oldName = _state.MergedEntries.RenamedEntryPairs(ind + 1)
@@ -251,7 +251,7 @@ Public Class DiffOutputRenderer
 
         Dim processedOldEntries As New HashSet(Of String)
 
-        For Each oldEntry In _state.MergedEntries.OldToNewMergeDict
+        For Each oldEntry In _state.MergedEntries.OldToNewMergeDict.OrderBy(Function(kvp) kvp.Key, StringComparer.OrdinalIgnoreCase)
 
             Dim oldName = oldEntry.Key
             Dim newTargets = oldEntry.Value
@@ -313,7 +313,7 @@ Public Class DiffOutputRenderer
         Dim results As New List(Of MenuSection)
         Dim lastEntryHadMergers = False
 
-        For Each entry In _state.ModifiedEntries.AddedEntryNames.ToList
+        For Each entry In _state.ModifiedEntries.AddedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
             If _state.MergedEntries.RenamedEntryNames.Contains(entry) Then Continue For
 
@@ -364,7 +364,7 @@ Public Class DiffOutputRenderer
 
         Dim results = New List(Of MenuSection)
 
-        For Each entry In _state.ModifiedEntries.ModifiedEntryNames.ToList
+        For Each entry In _state.ModifiedEntries.ModifiedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
             If Not isMerger AndAlso _state.MergedEntries.MergedEntryNames.Contains(entry) Then Continue For
             If isMerger AndAlso Not _state.MergedEntries.MergedEntryNames.Contains(entry) Then Continue For
@@ -640,7 +640,7 @@ Public Class DiffOutputRenderer
         Next
 
         ' Output movements grouped by source entry
-        For Each sourceEntry In movementsBySource
+        For Each sourceEntry In movementsBySource.OrderBy(Function(kvp) kvp.Key, StringComparer.OrdinalIgnoreCase)
 
             Dim out As New MenuSection
             out.AddColoredLine($"{sourceEntry.Key} - Keys moved to other entries:", ConsoleColor.Cyan, centered:=True)
@@ -672,7 +672,7 @@ Public Class DiffOutputRenderer
         Dim results As New List(Of MenuSection)
         Dim processedOldEntries As New HashSet(Of String)
 
-        For Each entry In _state.ModifiedEntries.AddedEntryNames.ToList
+        For Each entry In _state.ModifiedEntries.AddedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
             ' Skip renames - they're handled separately
             If _state.MergedEntries.RenamedEntryNames.Contains(entry) Then Continue For

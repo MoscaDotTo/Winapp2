@@ -144,13 +144,17 @@
     <Compile Include="modules\combine\settingshandler\combinesettingshandler.vb" />
     <Compile Include="modules\combine\tool\Combine.vb" />
     <Compile Include="modules\diff\core\DiffConfiguration.vb" />
+    <Compile Include="modules\diff\core\DiffFileBridge.vb" />
     <Compile Include="modules\diff\core\DiffOutputRenderer.vb" />
     <Compile Include="modules\diff\core\DiffState.vb" />
     <Compile Include="modules\diff\core\DiffStatisticsCalculator.vb" />
     <Compile Include="modules\diff\core\EntryChangeDetector.vb" />
+    <Compile Include="modules\diff\core\EntryChangeDetector2.vb" />
     <Compile Include="modules\diff\core\KeyComparisonStrategy.vb" />
     <Compile Include="modules\diff\core\KeyModificationAnalyzer.vb" />
+    <Compile Include="modules\diff\core\KeyModificationAnalyzer2.vb" />
     <Compile Include="modules\diff\core\MergeDetector.vb" />
+    <Compile Include="modules\diff\core\MergeDetector2.vb" />
     <Compile Include="modules\diff\settingshandler\diffsettings.vb" />
     <Compile Include="modules\diff\tool\Diff.vb" />
     <Compile Include="modules\diff\mainmenu\diffmainmenu.vb" />

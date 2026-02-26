@@ -107,7 +107,7 @@ Public Class EntryChangeDetector
     Public Function ProcessRemovals() As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
-        Dim results = New Concurrent.ConcurrentBag(Of MenuSection)()
+        Dim results = New Concurrent.ConcurrentDictionary(Of String, MenuSection)(StringComparer.OrdinalIgnoreCase)
         Dim potentialMatchesSnapshot = _state.ModifiedEntries.PotentialMatches.ToList()
 
         ' Pre-populate new entry cache and pre-compute section text for potential matches
@@ -137,7 +137,7 @@ Public Class EntryChangeDetector
 
                      If oldWa2Section.FileKeys.KeyCount = 0 AndAlso oldWa2Section.RegKeys.KeyCount = 0 Then
 
-                         results.Add(_renderer.MakeDiff(oldSectionVersion, 1))
+                         results(entry) = _renderer.MakeDiff(oldSectionVersion, 1)
                          Return
 
                      End If
@@ -171,11 +171,13 @@ Public Class EntryChangeDetector
 
                      Dim changesRecorded = _mergeDetector.AssessRenamesAndMergers(combinedMatches, oldSectionVersion)
 
-                     If Not changesRecorded Then results.Add(_renderer.MakeDiff(oldSectionVersion, 1))
+                     If Not changesRecorded Then results(entry) = _renderer.MakeDiff(oldSectionVersion, 1)
 
                  End Sub)
 
-        out.AddRange(results)
+        For Each key In results.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
+            out.Add(results(key))
+        Next
         Return out
 
     End Function

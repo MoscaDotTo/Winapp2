@@ -99,6 +99,9 @@ Module Diff
 
     Public Property DiffLogEndPhrase As String = "Diff complete"
 
+    Private Const Diff2StartPhrase As String = "Beginning Diff2"
+    Private Const Diff2EndPhrase As String = "Diff2 complete"
+
     Private Property mergeDetector As MergeDetector
     Private Property keyAnalyzer As KeyModificationAnalyzer
     Private Property renderer As DiffOutputRenderer
@@ -202,10 +205,23 @@ Module Diff
         diffOutput.Add(out3)
         diffOutput.ForEach(Sub(section) section.Print())
 
-        crl()
-
         MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
         DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
+
+        ' Run comparison pass with new iniFile2 implementation
+        Dim file1As2 = DiffFileBridge.ToIniFile2(DiffFile1)
+        Dim file2As2 = DiffFileBridge.ToIniFile2(DiffFile2)
+
+        gLog(Diff2StartPhrase)
+        gLog("", ascend:=True)
+        CompareFiles2(file1As2, file2As2)
+        gLog(Diff2EndPhrase)
+
+        Dim newLog = getLogSliceFromGlobal(Diff2StartPhrase, Diff2EndPhrase)
+
+        DiffFile3.Name = "Diff-inifile2.txt"
+        DiffFile3.overwriteToFile(newLog, SaveDiffLog)
+
         setNextMenuHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
 
     End Sub
@@ -228,6 +244,60 @@ Module Diff
         Return If(ver.Contains("VERSION"), ver.TrimStart(CChar(";")).Replace("VERSION:", "version"), " version not given")
 
     End Function
+
+    ''' <summary>
+    ''' Runs the diff pipeline using the new <c>iniFile2</c>-based core classes.
+    ''' Writes output to gLog for comparison against the legacy path. Results are not printed.
+    ''' </summary>
+    '''
+    ''' <param name="file1As2">The already-snuffed old version of winapp2.ini as an <c>iniFile2</c></param>
+    ''' <param name="file2As2">The already-snuffed new version of winapp2.ini as an <c>iniFile2</c></param>
+    Private Sub CompareFiles2(file1As2 As iniFile2, file2As2 As iniFile2)
+
+        Dim state2 As New DiffState()
+        state2.Clear()
+        Dim start = Now
+
+        Dim keyAnalyzer2 = New KeyModificationAnalyzer2(state2)
+        Dim mergeDetector2 = New MergeDetector2(state2, file2As2, AddressOf keyAnalyzer2.FindModifications)
+
+        ' Renderer and stats calc still need legacy iniFile objects
+        Dim file1AsOld = DiffFileBridge.ToIniFile(file1As2)
+        Dim file2AsOld = DiffFileBridge.ToIniFile(file2As2)
+
+        ' Separate KeyModificationAnalyzer (legacy) for renderer merger analysis — shares state2
+        Dim keyAnalyzerForRenderer = New KeyModificationAnalyzer(state2)
+        Dim renderer2 = New DiffOutputRenderer(state2, file1AsOld, file2AsOld, keyAnalyzerForRenderer)
+        Dim detector2 = New EntryChangeDetector2(state2, file1As2, file2As2, mergeDetector2, keyAnalyzer2, renderer2)
+        Dim statsCalc2 = New DiffStatisticsCalculator(state2, file1AsOld, file2AsOld)
+
+        ' Phase 1: Gather raw changes
+        detector2.ProcessNewEntries()
+        detector2.ProcessOldEntries()
+        detector2.ProcessRemovals()
+        statsCalc2.CalculateInitialStatistics()
+
+        ' Phase 2: Detect cross-entry movements
+        statsCalc2.DetectCrossEntryMovements()
+
+        ' Phase 3: Generate output (writes to gLog for comparison)
+        renderer2.SummarizeRenames()
+        renderer2.SummarizeMergers()
+        renderer2.ItemizeMergers()
+        renderer2.ItemizeKeyMovements()
+        renderer2.ItemizeModifications()
+        renderer2.ItemizeAddedEntriesWithMergers()
+        renderer2.ItemizeAdditions()
+
+        statsCalc2.CalculateAddedWithMergersStatistics()
+
+        Dim ender = Now
+        Dim timeSpan = ender - start
+        gLog(timeSpan.ToString)
+
+        renderer2.LogPostDiff()
+
+    End Sub
 
     ''' <summary>
     ''' Compares two winapp2.ini format <c>iniFiles</c>, itemizes, and summarizes the differences to the user
