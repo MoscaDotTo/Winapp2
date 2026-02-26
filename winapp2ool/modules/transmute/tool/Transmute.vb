@@ -662,7 +662,7 @@ Public Module Transmute
                               ByRef sourceSection As iniSection,
                               ByRef menuOutput As MenuSection)
 
-        Dim addKeysMsg = $"Adding keys to {sourceSection.Name}"
+        Dim addKeysMsg = $"Adding keys to {baseSection.Name}"
         menuOutput.AddColoredLine(addKeysMsg, ConsoleColor.Cyan)
         gLog(addKeysMsg)
 

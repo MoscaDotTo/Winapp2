@@ -70,18 +70,12 @@ Public Module transmuteSettingsHandler
     End Sub
 
     ''' <summary>
-    ''' Updates the disk-writable representation of each of Transmute's enums 
+    ''' Updates the disk-writable representation of each of Transmute's Boolean settings
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-15 | Code last updated: 2025-07-15
-    Public Sub updateAllTransmuteEnumSettings()
-
-        Dim names As New List(Of String)
-        Dim vals As New List(Of String)
+    Public Sub updateAllTransmuteBoolSettings()
 
         For Each prop In GetType(transmuteSettings).GetProperties()
 
-            ' This will actually update all Booleans but that's probably fine
             If prop.PropertyType IsNot GetType(Boolean) Then Continue For
 
             Dim val = DirectCast(prop.GetValue(Nothing), Boolean)

@@ -30,7 +30,7 @@ Public Module transmuteMainMenu
     Public Sub printTransmuteMainMenu()
 
         adjustTransmuteConsoleHeight()
-        updateAllTransmuteEnumSettings()
+        updateAllTransmuteBoolSettings()
 
         Dim TransmuteModeIsReplace = Transmutator = TransmuteMode.Replace
         Dim ReplaceModeIsByKey = TransmuteReplaceMode = ReplaceMode.ByKey
@@ -185,7 +185,7 @@ Public Module transmuteMainMenu
                 CycleEnumProperty(propName, enumOpts(propName), GetType(transmuteSettings), NameOf(Transmute),
                                   TransmuteModuleSettingsChanged, NameOf(TransmuteModuleSettingsChanged), ConsoleColor.Magenta)
 
-                updateAllTransmuteEnumSettings()
+                updateAllTransmuteBoolSettings()
 
             ' Reset Settings 
             Case TransmuteModuleSettingsChanged AndAlso intInput = resetNum
