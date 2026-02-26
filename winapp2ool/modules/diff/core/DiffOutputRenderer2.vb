@@ -374,16 +374,16 @@ Public Class DiffOutputRenderer2
             Dim modKeyTypes, addKeyTypes, remKeyTypes As New List(Of String)
             Dim newSectionVer = _file2.GetSection(entry)
 
-            Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker.ContainsKey(entry),
-                          _state.ModifiedEntries.AddedKeyTracker(entry), New keyList)
+            Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(entry),
+                          _state.ModifiedEntries.AddedKeyTracker2(entry), New List(Of iniKey2))
 
-            Dim removedKeys = If(_state.ModifiedEntries.RemovedKeyTracker.ContainsKey(entry),
-                            _state.ModifiedEntries.RemovedKeyTracker(entry), New keyList)
+            Dim removedKeys = If(_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(entry),
+                            _state.ModifiedEntries.RemovedKeyTracker2(entry), New List(Of iniKey2))
 
-            Dim updatedKeysDict = If(_state.ModifiedEntries.ModifiedKeyTracker.ContainsKey(entry),
-                                 _state.ModifiedEntries.ModifiedKeyTracker(entry), New Dictionary(Of iniKey, keyList))
+            Dim updatedKeysDict = If(_state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(entry),
+                                 _state.ModifiedEntries.ModifiedKeyTracker2(entry), New Dictionary(Of iniKey2, List(Of iniKey2)))
 
-            If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeysDict.Count = 0 Then Continue For
+            If removedKeys.Count + addedKeys.Count + updatedKeysDict.Count = 0 Then Continue For
 
             results.Add(MakeDiff(newSectionVer, 2))
             results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, addCounts))
@@ -402,9 +402,9 @@ Public Class DiffOutputRenderer2
     ''' <summary>
     ''' Outputs the changes made to the keys within an entry to the user
     ''' </summary>
-    Public Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey, keyList),
-                                       addedKeys As keyList,
-                                       removedKeys As keyList,
+    Public Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey2, List(Of iniKey2)),
+                                       addedKeys As List(Of iniKey2),
+                                       removedKeys As List(Of iniKey2),
                                        modKeyTypes As List(Of String),
                                        modCounts As List(Of Integer),
                               Optional sourceEntryMap As Dictionary(Of String, String) = Nothing) As List(Of MenuSection)
@@ -413,11 +413,11 @@ Public Class DiffOutputRenderer2
 
         If updatedKeysDict.Count = 0 Then Return result
 
-        gLog("", ascend:=True, cond:=addedKeys.KeyCount + removedKeys.KeyCount = 0)
+        gLog("", ascend:=True, cond:=addedKeys.Count + removedKeys.Count = 0)
 
         For Each changeList In updatedKeysDict.Values
 
-            recordModification(modKeyTypes, modCounts, changeList.Keys(0).KeyType)
+            recordModification(modKeyTypes, modCounts, changeList(0).KeyType)
 
         Next
 
@@ -427,16 +427,16 @@ Public Class DiffOutputRenderer2
 
             Dim output As New MenuSection
             Dim newKey = updatedKeysDict.Keys(i)
-            Dim oldKeys = updatedKeysDict.Values(i).Keys
+            Dim oldKeys = updatedKeysDict.Values(i)
             Dim isRename = newKey.typeIs("Name")
-            Dim count = updatedKeysDict.Values(i).Keys.Count
+            Dim count = updatedKeysDict.Values(i).Count
 
             Dim outTxt1 = $"{If(isRename, "Entry Name", newKey.Name)} has been modified{If(Not isRename, $", replacing {count} old key{If(count > 1, "s", "")}", "")}"
 
             output.AddColoredLine(outTxt1, ConsoleColor.Yellow)
             gLog(outTxt1, indent:=True, indAmt:=1, leadr:=i = 0)
 
-            Dim outTxt2 = $" + New: {If(isRename, newKey.Name, newKey.toString)}"
+            Dim outTxt2 = $" + New: {If(isRename, newKey.Value, newKey.ToString())}"
 
             output.AddColoredLine(outTxt2, ConsoleColor.Green)
             gLog(outTxt2, indent:=True, indAmt:=4)
@@ -448,7 +448,7 @@ Public Class DiffOutputRenderer2
                     sourceInfo = $" (from [{sourceEntryMap(oldKey.Value)}])"
                 End If
 
-                Dim old = $" - Old: {If(isRename, oldKey.toString.TrimEnd(CChar("=")), oldKey.toString)}{sourceInfo}"
+                Dim old = $" - Old: {If(isRename, oldKey.Value, oldKey.ToString())}{sourceInfo}"
 
                 output.AddColoredLine(old, ConsoleColor.Red)
                 gLog(old, indent:=True, indAmt:=4)
@@ -461,7 +461,7 @@ Public Class DiffOutputRenderer2
 
         Next
 
-        gLog(descend:=True, cond:=addedKeys.KeyCount + removedKeys.KeyCount = 0)
+        gLog(descend:=True, cond:=addedKeys.Count + removedKeys.Count = 0)
 
         Return result
 
@@ -695,29 +695,28 @@ Public Class DiffOutputRenderer2
             results.Add(mergedListSection)
 
             ' Show key changes from tracked data
-            Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker.ContainsKey(entry),
-                          _state.ModifiedEntries.AddedKeyTracker(entry), New keyList)
+            Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(entry),
+                          _state.ModifiedEntries.AddedKeyTracker2(entry), New List(Of iniKey2))
 
-            Dim removedKeys = If(_state.ModifiedEntries.RemovedKeyTracker.ContainsKey(entry),
-                            _state.ModifiedEntries.RemovedKeyTracker(entry), New keyList)
+            Dim removedKeys = If(_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(entry),
+                            _state.ModifiedEntries.RemovedKeyTracker2(entry), New List(Of iniKey2))
 
-            Dim updatedKeysDict = If(_state.ModifiedEntries.ModifiedKeyTracker.ContainsKey(entry),
-                                 _state.ModifiedEntries.ModifiedKeyTracker(entry),
-                                 New Dictionary(Of iniKey, keyList))
+            Dim updatedKeysDict = If(_state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(entry),
+                                 _state.ModifiedEntries.ModifiedKeyTracker2(entry),
+                                 New Dictionary(Of iniKey2, List(Of iniKey2)))
 
-            ' Build value+type sets for membership checks — tracker keys are iniKey (converted copies),
-            ' not the same object references as the iniKey2 objects in _file2 sections
+            ' Build value+type sets for membership checks
             Dim addedKeyIds As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-            For Each k In addedKeys.Keys
+            For Each k In addedKeys
                 addedKeyIds.Add($"{k.KeyType}|{k.Value}")
             Next
 
             Dim removedKeyIds As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-            For Each k In removedKeys.Keys
+            For Each k In removedKeys
                 removedKeyIds.Add($"{k.KeyType}|{k.Value}")
             Next
 
-            Dim carriedOverKeys As New keyList
+            Dim carriedOverKeys As New List(Of iniKey2)
             For Each key In _file2.GetSection(entry).Keys
 
                 Dim keyId = $"{key.KeyType}|{key.Value}"
@@ -734,26 +733,22 @@ Public Class DiffOutputRenderer2
                 If isUpdated Then Continue For
 
                 ' If it's in sourceEntryMap, it was carried over from a merged source
-                If sourceEntryMap.ContainsKey(key.Value) Then carriedOverKeys.add(DiffFileBridge.ToIniKey(key))
+                If sourceEntryMap.ContainsKey(key.Value) Then carriedOverKeys.Add(key)
 
             Next
 
-            For Each key In carriedOverKeys.Keys
+            addedKeys.AddRange(carriedOverKeys)
 
-                addedKeys.add(key)
-
-            Next
-
-            If addedKeys.KeyCount + removedKeys.KeyCount + updatedKeysDict.Count > 0 Then
+            If addedKeys.Count + removedKeys.Count + updatedKeysDict.Count > 0 Then
 
                 Dim addKeyTypes, remKeyTypes, modKeyTypes As New List(Of String)
                 Dim addCounts, remCounts, modCounts As New List(Of Integer)
 
                 ' New keys in the added entry (not from merged sources)
-                If addedKeys.KeyCount > 0 Then
+                If addedKeys.Count > 0 Then
 
                     Dim newKeysSection As New MenuSection
-                    Dim novelKeysMsg = $"{addedKeys.KeyCount} keys added or carried over from merged sources:"
+                    Dim novelKeysMsg = $"{addedKeys.Count} keys added or carried over from merged sources:"
                     newKeysSection.AddColoredLine(novelKeysMsg, ConsoleColor.Green, centered:=True)
                     gLog()
                     gLog(novelKeysMsg, indent:=True)
@@ -763,11 +758,11 @@ Public Class DiffOutputRenderer2
                 End If
 
                 ' Keys from merged entries that were not carried over into this added entry
-                If removedKeys.KeyCount > 0 Then
+                If removedKeys.Count > 0 Then
 
                     Dim droppedSection As New MenuSection
 
-                    Dim KeysNotMergedMsg = $"{removedKeys.KeyCount} keys from merged entries not in this entry:"
+                    Dim KeysNotMergedMsg = $"{removedKeys.Count} keys from merged entries not in this entry:"
                     droppedSection.AddColoredLine(KeysNotMergedMsg, ConsoleColor.DarkYellow, centered:=True)
                     gLog()
                     gLog(KeysNotMergedMsg, indent:=True)
@@ -845,7 +840,7 @@ Public Class DiffOutputRenderer2
     ''' <summary>
     ''' Prints any added or removed keys from an updated entry to the user
     ''' </summary>
-    Private Function ItemizeChangesFromList(kl As keyList,
+    Private Function ItemizeChangesFromList(kl As List(Of iniKey2),
                                         wasAdded As Boolean,
                                   ByRef ktList As List(Of String),
                                   ByRef countList As List(Of Integer),
@@ -853,7 +848,7 @@ Public Class DiffOutputRenderer2
 
         Dim out As New List(Of MenuSection)
 
-        If kl.KeyCount = 0 Then Return out
+        If kl.Count = 0 Then Return out
 
         gLog(Nothing, ascend:=True)
 
@@ -861,7 +856,7 @@ Public Class DiffOutputRenderer2
         Dim tmpKtList = ktList
         Dim tmpCountList = countList
 
-        kl.Keys.ForEach(Sub(key) recordModification(tmpKtList, tmpCountList, key.KeyType))
+        kl.ForEach(Sub(key) recordModification(tmpKtList, tmpCountList, key.KeyType))
 
         ktList = tmpKtList
         countList = tmpCountList
@@ -870,15 +865,15 @@ Public Class DiffOutputRenderer2
 
         Dim result As New MenuSection
 
-        For i = 0 To kl.KeyCount - 1
+        For i = 0 To kl.Count - 1
 
-            Dim key = kl.Keys(i).toString
+            Dim key = kl(i).ToString()
             Dim color = If(wasAdded, ConsoleColor.Green, ConsoleColor.Red)
 
             ' Added keys either come from a source (mergers, renames) or are novel
             Dim sourceInfo = ""
-            If sourceEntryMap IsNot Nothing AndAlso sourceEntryMap.ContainsKey(kl.Keys(i).Value) Then
-                sourceInfo = $" (from [{sourceEntryMap(kl.Keys(i).Value)}])"
+            If sourceEntryMap IsNot Nothing AndAlso sourceEntryMap.ContainsKey(kl(i).Value) Then
+                sourceInfo = $" (from [{sourceEntryMap(kl(i).Value)}])"
             ElseIf wasAdded AndAlso sourceEntryMap IsNot Nothing Then
                 sourceInfo = " (novel)"
             End If

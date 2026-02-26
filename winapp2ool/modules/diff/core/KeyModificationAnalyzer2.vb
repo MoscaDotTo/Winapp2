@@ -20,7 +20,7 @@ Option Strict On
 ''' <summary>
 ''' Adapts <c>KeyModificationAnalyzer</c> for use with <c>iniSection2</c>/<c>iniKey2</c>.
 ''' Section comparison is implemented directly rather than via <c>iniSection.compareTo</c>.
-''' All <c>DiffState</c> writes use <c>iniKey</c>/<c>keyList</c> (converted at the boundary).
+''' All <c>DiffState</c> writes use the <c>*2</c> tracker fields with native <c>iniKey2</c> objects.
 ''' </summary>
 Public Class KeyModificationAnalyzer2
 
@@ -66,7 +66,7 @@ Public Class KeyModificationAnalyzer2
     Private Sub AnalyzeAndTrackSectionDiff2WithKeyList(oldKeys As List(Of iniKey2), newSection As iniSection2,
                                                        addToModified As Boolean, clearExisting As Boolean)
 
-        Dim addedKeys, removedKeys As New keyList
+        Dim addedKeys, removedKeys As New List(Of iniKey2)
 
         If CompareSections2FromKeyList(oldKeys, newSection, removedKeys, addedKeys) Then Return
 
@@ -74,9 +74,9 @@ Public Class KeyModificationAnalyzer2
 
             If clearExisting Then
 
-                _state.ModifiedEntries.AddedKeyTracker.Remove(newSection.Name)
-                _state.ModifiedEntries.RemovedKeyTracker.Remove(newSection.Name)
-                _state.ModifiedEntries.ModifiedKeyTracker.Remove(newSection.Name)
+                _state.ModifiedEntries.AddedKeyTracker2.Remove(newSection.Name)
+                _state.ModifiedEntries.RemovedKeyTracker2.Remove(newSection.Name)
+                _state.ModifiedEntries.ModifiedKeyTracker2.Remove(newSection.Name)
 
             ElseIf _state.ModifiedEntries.ModifiedEntryNames.Contains(newSection.Name) Then
 
@@ -85,10 +85,10 @@ Public Class KeyModificationAnalyzer2
             End If
 
             Dim updatedKeys = DetermineModifiedKeys(removedKeys, addedKeys)
-            If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Return
+            If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Return
 
-            updateTrackingDictionary(_state.ModifiedEntries.RemovedKeyTracker, removedKeys, newSection.Name)
-            updateTrackingDictionary(_state.ModifiedEntries.AddedKeyTracker, addedKeys, newSection.Name)
+            updateTrackingDictionary(_state.ModifiedEntries.RemovedKeyTracker2, removedKeys, newSection.Name)
+            updateTrackingDictionary(_state.ModifiedEntries.AddedKeyTracker2, addedKeys, newSection.Name)
 
             If addToModified AndAlso Not _state.ModifiedEntries.AddedEntryNames.Contains(newSection.Name) Then
                 _state.ModifiedEntries.ModifiedEntryNames.Add(newSection.Name)
@@ -96,15 +96,15 @@ Public Class KeyModificationAnalyzer2
 
             If updatedKeys.Count = 0 Then Return
 
-            If Not clearExisting AndAlso _state.ModifiedEntries.ModifiedKeyTracker.ContainsKey(newSection.Name) Then
+            If Not clearExisting AndAlso _state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(newSection.Name) Then
 
                 For Each kvp In BuildModifications(updatedKeys)
-                    If Not _state.ModifiedEntries.ModifiedKeyTracker(newSection.Name).ContainsKey(kvp.Key) Then _state.ModifiedEntries.ModifiedKeyTracker(newSection.Name).Add(kvp.Key, kvp.Value)
+                    If Not _state.ModifiedEntries.ModifiedKeyTracker2(newSection.Name).ContainsKey(kvp.Key) Then _state.ModifiedEntries.ModifiedKeyTracker2(newSection.Name).Add(kvp.Key, kvp.Value)
                 Next
 
             Else
 
-                _state.ModifiedEntries.ModifiedKeyTracker(newSection.Name) = BuildModifications(updatedKeys)
+                _state.ModifiedEntries.ModifiedKeyTracker2(newSection.Name) = BuildModifications(updatedKeys)
 
             End If
 
@@ -117,8 +117,8 @@ Public Class KeyModificationAnalyzer2
     ''' allowing duplicate key names (e.g. two FileKey1 from different source entries).
     ''' </summary>
     Private Function CompareSections2FromKeyList(oldKeys As List(Of iniKey2), new2 As iniSection2,
-                                                 ByRef removedKeys As keyList,
-                                                 ByRef addedKeys As keyList) As Boolean
+                                                 ByRef removedKeys As List(Of iniKey2),
+                                                 ByRef addedKeys As List(Of iniKey2)) As Boolean
 
         Dim newKeyList = new2.Keys.ToList()
         Dim matched As New HashSet(Of Integer)
@@ -142,22 +142,22 @@ Public Class KeyModificationAnalyzer2
 
             Next
 
-            If Not foundMatch Then removedKeys.add(DiffFileBridge.ToIniKey(oldKey))
+            If Not foundMatch Then removedKeys.Add(oldKey)
 
         Next
 
         For i = 0 To newKeyList.Count - 1
-            If Not matched.Contains(i) Then addedKeys.add(DiffFileBridge.ToIniKey(newKeyList(i)))
+            If Not matched.Contains(i) Then addedKeys.Add(newKeyList(i))
         Next
 
-        Return removedKeys.KeyCount = 0 AndAlso addedKeys.KeyCount = 0
+        Return removedKeys.Count = 0 AndAlso addedKeys.Count = 0
 
     End Function
 
     Private Sub AnalyzeAndTrackSectionDiff2(oldSection As iniSection2, newSection As iniSection2,
                                              addToModified As Boolean, clearExisting As Boolean)
 
-        Dim addedKeys, removedKeys As New keyList
+        Dim addedKeys, removedKeys As New List(Of iniKey2)
 
         If CompareSections2(oldSection, newSection, removedKeys, addedKeys) Then Return
 
@@ -165,9 +165,9 @@ Public Class KeyModificationAnalyzer2
 
             If clearExisting Then
 
-                _state.ModifiedEntries.AddedKeyTracker.Remove(newSection.Name)
-                _state.ModifiedEntries.RemovedKeyTracker.Remove(newSection.Name)
-                _state.ModifiedEntries.ModifiedKeyTracker.Remove(newSection.Name)
+                _state.ModifiedEntries.AddedKeyTracker2.Remove(newSection.Name)
+                _state.ModifiedEntries.RemovedKeyTracker2.Remove(newSection.Name)
+                _state.ModifiedEntries.ModifiedKeyTracker2.Remove(newSection.Name)
 
             ElseIf _state.ModifiedEntries.ModifiedEntryNames.Contains(newSection.Name) Then
 
@@ -176,10 +176,10 @@ Public Class KeyModificationAnalyzer2
             End If
 
             Dim updatedKeys = DetermineModifiedKeys(removedKeys, addedKeys)
-            If removedKeys.KeyCount + addedKeys.KeyCount + updatedKeys.Count = 0 Then Return
+            If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Return
 
-            updateTrackingDictionary(_state.ModifiedEntries.RemovedKeyTracker, removedKeys, newSection.Name)
-            updateTrackingDictionary(_state.ModifiedEntries.AddedKeyTracker, addedKeys, newSection.Name)
+            updateTrackingDictionary(_state.ModifiedEntries.RemovedKeyTracker2, removedKeys, newSection.Name)
+            updateTrackingDictionary(_state.ModifiedEntries.AddedKeyTracker2, addedKeys, newSection.Name)
 
             If addToModified Then
 
@@ -187,9 +187,9 @@ Public Class KeyModificationAnalyzer2
 
                 If Not oldSection.Name.Equals(newSection.Name, StringComparison.InvariantCultureIgnoreCase) Then
 
-                    Dim oldName = New iniKey(oldSection.Name) With {.KeyType = "Name"}
-                    Dim newName = New iniKey(newSection.Name) With {.KeyType = "Name"}
-                    updatedKeys.Add(New KeyValuePair(Of iniKey, iniKey)(newName, oldName))
+                    Dim oldName = New iniKey2($"Name={oldSection.Name}")
+                    Dim newName = New iniKey2($"Name={newSection.Name}")
+                    updatedKeys.Add(New KeyValuePair(Of iniKey2, iniKey2)(newName, oldName))
 
                 End If
 
@@ -197,15 +197,15 @@ Public Class KeyModificationAnalyzer2
 
             If updatedKeys.Count = 0 Then Return
 
-            If Not clearExisting AndAlso _state.ModifiedEntries.ModifiedKeyTracker.ContainsKey(newSection.Name) Then
+            If Not clearExisting AndAlso _state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(newSection.Name) Then
 
                 For Each kvp In BuildModifications(updatedKeys)
-                    If Not _state.ModifiedEntries.ModifiedKeyTracker(newSection.Name).ContainsKey(kvp.Key) Then _state.ModifiedEntries.ModifiedKeyTracker(newSection.Name).Add(kvp.Key, kvp.Value)
+                    If Not _state.ModifiedEntries.ModifiedKeyTracker2(newSection.Name).ContainsKey(kvp.Key) Then _state.ModifiedEntries.ModifiedKeyTracker2(newSection.Name).Add(kvp.Key, kvp.Value)
                 Next
 
             Else
 
-                _state.ModifiedEntries.ModifiedKeyTracker(newSection.Name) = BuildModifications(updatedKeys)
+                _state.ModifiedEntries.ModifiedKeyTracker2(newSection.Name) = BuildModifications(updatedKeys)
 
             End If
 
@@ -215,14 +215,14 @@ Public Class KeyModificationAnalyzer2
 
     ''' <summary>
     ''' Compares two <c>iniSection2</c> objects by <c>KeyType</c> and <c>Value</c>, populating
-    ''' <paramref name="removedKeys"/> and <paramref name="addedKeys"/> with the differences (as <c>iniKey</c>).
+    ''' <paramref name="removedKeys"/> and <paramref name="addedKeys"/> with the differences (as <c>iniKey2</c>).
     ''' Each new key is consumed at most once, so renumbered keys with the same type and value
     ''' (e.g. FileKey1 → FileKey2) are treated as equivalent, matching <c>iniSection.compareTo</c> behavior.
     ''' </summary>
     ''' <returns><c>True</c> if the sections are identical</returns>
     Private Function CompareSections2(old As iniSection2, new2 As iniSection2,
-                                      ByRef removedKeys As keyList,
-                                      ByRef addedKeys As keyList) As Boolean
+                                      ByRef removedKeys As List(Of iniKey2),
+                                      ByRef addedKeys As List(Of iniKey2)) As Boolean
 
         Dim newKeyList = new2.Keys.ToList()
         Dim matched As New HashSet(Of Integer)
@@ -246,37 +246,37 @@ Public Class KeyModificationAnalyzer2
 
             Next
 
-            If Not foundMatch Then removedKeys.add(DiffFileBridge.ToIniKey(oldKey))
+            If Not foundMatch Then removedKeys.Add(oldKey)
 
         Next
 
         For i = 0 To newKeyList.Count - 1
-            If Not matched.Contains(i) Then addedKeys.add(DiffFileBridge.ToIniKey(newKeyList(i)))
+            If Not matched.Contains(i) Then addedKeys.Add(newKeyList(i))
         Next
 
-        Return removedKeys.KeyCount = 0 AndAlso addedKeys.KeyCount = 0
+        Return removedKeys.Count = 0 AndAlso addedKeys.Count = 0
 
     End Function
 
     Private Sub RollBackPreviouslyObservedChanges(sectionName As String)
 
         _state.ModifiedEntries.ModifiedEntryNames.Remove(sectionName)
-        _state.ModifiedEntries.AddedKeyTracker.Remove(sectionName)
-        _state.ModifiedEntries.RemovedKeyTracker.Remove(sectionName)
-        _state.ModifiedEntries.ModifiedKeyTracker.Remove(sectionName)
+        _state.ModifiedEntries.AddedKeyTracker2.Remove(sectionName)
+        _state.ModifiedEntries.RemovedKeyTracker2.Remove(sectionName)
+        _state.ModifiedEntries.ModifiedKeyTracker2.Remove(sectionName)
 
     End Sub
 
-    Private Sub updateTrackingDictionary(ByRef keyTracker As Dictionary(Of String, keyList),
-                                         keys As keyList,
+    Private Sub updateTrackingDictionary(ByRef keyTracker As Dictionary(Of String, List(Of iniKey2)),
+                                         keys As List(Of iniKey2),
                                          newSectionName As String)
 
-        If keys.KeyCount = 0 Then Return
+        If keys.Count = 0 Then Return
 
         If keyTracker.ContainsKey(newSectionName) Then
 
-            For Each key In keys.Keys
-                If Not keyTracker(newSectionName).Keys.Contains(key) Then keyTracker(newSectionName).add(key)
+            For Each key In keys
+                If Not keyTracker(newSectionName).Contains(key) Then keyTracker(newSectionName).Add(key)
             Next
 
         Else
@@ -287,13 +287,13 @@ Public Class KeyModificationAnalyzer2
 
     End Sub
 
-    Private Function BuildModifications(ByRef updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey))) As Dictionary(Of iniKey, keyList)
+    Private Function BuildModifications(ByRef updatedKeys As List(Of KeyValuePair(Of iniKey2, iniKey2))) As Dictionary(Of iniKey2, List(Of iniKey2))
 
-        Dim modifications As New Dictionary(Of iniKey, keyList)
+        Dim modifications As New Dictionary(Of iniKey2, List(Of iniKey2))
 
         For Each kvpair In updatedKeys
 
-            Dim existingKey As iniKey = Nothing
+            Dim existingKey As iniKey2 = Nothing
 
             For Each k In modifications.Keys
 
@@ -309,12 +309,12 @@ Public Class KeyModificationAnalyzer2
 
             If existingKey Is Nothing Then
 
-                modifications.Add(kvpair.Key, New keyList)
-                modifications(kvpair.Key).add(kvpair.Value)
+                modifications.Add(kvpair.Key, New List(Of iniKey2))
+                modifications(kvpair.Key).Add(kvpair.Value)
 
             Else
 
-                modifications(existingKey).add(kvpair.Value)
+                modifications(existingKey).Add(kvpair.Value)
 
             End If
 
@@ -324,19 +324,19 @@ Public Class KeyModificationAnalyzer2
 
     End Function
 
-    Private Function DetermineModifiedKeys(ByRef removedKeys As keyList,
-                                           ByRef addedKeys As keyList) As List(Of KeyValuePair(Of iniKey, iniKey))
+    Private Function DetermineModifiedKeys(ByRef removedKeys As List(Of iniKey2),
+                                           ByRef addedKeys As List(Of iniKey2)) As List(Of KeyValuePair(Of iniKey2, iniKey2))
 
-        Dim updatedKeys As New List(Of KeyValuePair(Of iniKey, iniKey))
+        Dim updatedKeys As New List(Of KeyValuePair(Of iniKey2, iniKey2))
         Dim classifiers = {"LangSecRef", "Section"}
         Dim defunctSingletonKeys = {"Warning", "DetectOS", "SpecialDetect"}
         Dim matchedOldKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
-        For Each key In addedKeys.Keys
+        For Each key In addedKeys
 
             Dim newKeyType = key.KeyType
 
-            For Each sKey In removedKeys.Keys
+            For Each sKey In removedKeys
 
                 If matchedOldKeyValues.Contains(sKey.Value) Then Continue For
 
@@ -350,7 +350,7 @@ Public Class KeyModificationAnalyzer2
 
                 If Not (shouldExistOnce OrElse newCapturesOld OrElse oldCapturesNew) Then Continue For
 
-                updatedKeys.Add(New KeyValuePair(Of iniKey, iniKey)(key, sKey))
+                updatedKeys.Add(New KeyValuePair(Of iniKey2, iniKey2)(key, sKey))
                 matchedOldKeyValues.Add(sKey.Value)
 
             Next
@@ -358,8 +358,8 @@ Public Class KeyModificationAnalyzer2
         Next
 
         For Each pair In updatedKeys
-            addedKeys.remove(pair.Key)
-            removedKeys.remove(pair.Value)
+            addedKeys.Remove(pair.Key)
+            removedKeys.Remove(pair.Value)
         Next
 
         Return updatedKeys

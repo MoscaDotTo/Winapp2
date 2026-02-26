@@ -19,15 +19,14 @@ Option Strict On
 
 ''' <summary>
 ''' Adapts <c>MergeDetector</c> for use with <c>iniFile2</c>/<c>iniSection2</c>.
-''' Public API takes <c>iniSection2</c>; internal matching logic uses legacy <c>iniSection</c>/<c>winapp2entry</c>
-''' after conversion at the boundary via <c>DiffFileBridge</c>.
+''' Public API takes <c>iniSection2</c>; all internal matching logic uses <c>iniSection2</c>/<c>iniKey2</c>
+''' natively without any legacy type conversion.
 ''' </summary>
 Public Class MergeDetector2
 
     Private ReadOnly _state As DiffState
     Private ReadOnly _diffFile2 As iniFile2
     Private ReadOnly _findModificationsCallback As Action(Of iniSection2, iniSection2)
-    Private ReadOnly _newSectionCache As New Dictionary(Of String, iniSection)(StringComparer.OrdinalIgnoreCase)
 
     ''' <summary>
     ''' Initializes a new instance of <c>MergeDetector2</c>
@@ -43,37 +42,30 @@ Public Class MergeDetector2
         _diffFile2 = newFile
         _findModificationsCallback = findModsCallback
 
-        For Each section In _diffFile2
-            _newSectionCache(section.Name) = DiffFileBridge.ToIniSection(section)
-        Next
-
     End Sub
 
-    ''' <summary>
-    ''' Determines if a removed entry was renamed into or merged with one or more added or modified entries.
-    ''' Converts <c>iniSection2</c> inputs to <c>iniSection</c> for internal matching logic.
-    ''' </summary>
     Public Function AssessRenamesAndMergers(candidates As List(Of iniSection2),
                                             oldSection2 As iniSection2) As Boolean
 
         If candidates.Count = 0 Then Return False
 
-        Dim oldSection = DiffFileBridge.ToIniSection(oldSection2)
-        Dim convertedCandidates As New List(Of iniSection)
+        Dim cachedOld = GetOrCreateCachedSection2(oldSection2)
+        Dim bestMatch = FindBestMatch(candidates, cachedOld)
 
-        For Each c In candidates
-            Dim cached As iniSection = Nothing
-            If _newSectionCache.TryGetValue(c.Name, cached) Then convertedCandidates.Add(cached)
-        Next
+        If bestMatch.IsRename Then
 
-        Dim oldEntry = GetOrCreateCachedEntry(oldSection)
-        Dim bestMatch = FindBestMatch(convertedCandidates, oldEntry, oldSection)
+            If ConfirmRename(bestMatch.TargetName, oldSection2) Then Return True
 
-        If bestMatch.IsRename Then Return ConfirmRename(bestMatch.TargetName, oldSection2)
+            ' Rename rejected — target already renamed from another entry.
+            ' Treat this as a merger instead so the entry isn't silently dropped.
+            TrackBestMatches(False, bestMatch, oldSection2)
+            Return True
+
+        End If
 
         If bestMatch.IsMerge OrElse bestMatch.HasPartialMatch Then
 
-            TrackBestMatches(bestMatch.IsMerge, bestMatch, oldSection)
+            TrackBestMatches(bestMatch.IsMerge, bestMatch, oldSection2)
             Return True
 
         End If
@@ -82,40 +74,77 @@ Public Class MergeDetector2
 
     End Function
 
-    Private Sub TrackBestMatches(isMerge As Boolean, bestMatch As MatchResult, oldSection As iniSection)
+    ''' <summary>
+    ''' Determines if a removed entry was renamed into or merged with one or more added or modified entries.
+    ''' Works entirely with <c>iniSection2</c> — no legacy type conversion.
+    ''' </summary>
+    Public Function AssessRenamesAndMergersOLD(candidates As List(Of iniSection2),
+                                            oldSection2 As iniSection2) As Boolean
 
-        Dim isIntoAddedEntry = _state.ModifiedEntries.AddedEntryNames.Contains(bestMatch.TargetName)
+        If candidates.Count = 0 Then Return False
+
+        Dim cachedOld = GetOrCreateCachedSection2(oldSection2)
+        Dim bestMatch = FindBestMatch(candidates, cachedOld)
+
+        If bestMatch.IsRename Then Return ConfirmRename(bestMatch.TargetName, oldSection2)
+
+        If bestMatch.IsMerge OrElse bestMatch.HasPartialMatch Then
+
+            TrackBestMatches(bestMatch.IsMerge, bestMatch, oldSection2)
+            Return True
+
+        End If
+
+        Return False
+
+    End Function
+
+    Private Sub TrackBestMatches(isMerge As Boolean, bestMatch As MatchResult, oldSection2 As iniSection2)
 
         If Not isMerge Then
 
-            Dim singleTarget As iniSection = Nothing
-            If _newSectionCache.TryGetValue(bestMatch.TargetName, singleTarget) Then TrackMerger(oldSection, singleTarget)
+            Dim singleTarget = _diffFile2.GetSection(bestMatch.TargetName)
+            If singleTarget IsNot Nothing Then TrackMerger(oldSection2, singleTarget)
+
             Return
 
         End If
 
         For Each targetName In bestMatch.AllTargetNames
-            Dim mergeTarget As iniSection = Nothing
-            If _newSectionCache.TryGetValue(targetName, mergeTarget) Then TrackMerger(oldSection, mergeTarget)
+
+            Dim mergeTarget = _diffFile2.GetSection(targetName)
+            If mergeTarget IsNot Nothing Then TrackMerger(oldSection2, mergeTarget)
+
         Next
 
     End Sub
 
-    Private Function GetOrCreateCachedEntry(section As iniSection) As winapp2entry
+    Private Function GetOrCreateCachedSection2(section2 As iniSection2) As iniSection2
 
-        SyncLock _state.Caches.CachedOldEntries
+        SyncLock _state.Caches.CachedOldEntries2
 
-            If Not _state.Caches.CachedOldEntries.ContainsKey(section.Name) Then _state.Caches.CachedOldEntries.Add(section.Name, New winapp2entry(section))
+            If Not _state.Caches.CachedOldEntries2.ContainsKey(section2.Name) Then _state.Caches.CachedOldEntries2.Add(section2.Name, section2)
 
-            Return _state.Caches.CachedOldEntries(section.Name)
+            Return _state.Caches.CachedOldEntries2(section2.Name)
 
         End SyncLock
 
     End Function
 
-    Private Function FindBestMatch(candidates As List(Of iniSection),
-                                   oldEntry As winapp2entry,
-                                   oldSection As iniSection) As MatchResult
+    Private Function GetOrCreateNewCachedSection2(section2 As iniSection2) As iniSection2
+
+        SyncLock _state.Caches.CachedNewEntries2
+
+            If Not _state.Caches.CachedNewEntries2.ContainsKey(section2.Name) Then _state.Caches.CachedNewEntries2.Add(section2.Name, section2)
+
+            Return _state.Caches.CachedNewEntries2(section2.Name)
+
+        End SyncLock
+
+    End Function
+
+    Private Function FindBestMatch(candidates As List(Of iniSection2),
+                                   oldSection2 As iniSection2) As MatchResult
 
         Dim result As New MatchResult()
         Dim highestMatchCount = 0
@@ -123,16 +152,18 @@ Public Class MergeDetector2
         Dim foundMerger = False
         Dim qualifyingMergeTargets As New List(Of String)
 
-        Dim oldHasFileKeys = oldEntry.FileKeys.KeyCount > 0
-        Dim oldHasRegKeys = oldEntry.RegKeys.KeyCount > 0
+        Dim oldFileKeys = oldSection2.Keys.Where(Function(k) k.KeyType.StartsWith("FileKey", StringComparison.OrdinalIgnoreCase)).ToList()
+        Dim oldRegKeys = oldSection2.Keys.Where(Function(k) k.KeyType.StartsWith("RegKey", StringComparison.OrdinalIgnoreCase)).ToList()
 
-        Dim totalOldKeys = oldEntry.FileKeys.KeyCount + oldEntry.RegKeys.KeyCount
-        result.TotalOldKeys = totalOldKeys
+        Dim oldHasFileKeys = oldFileKeys.Count > 0
+        Dim oldHasRegKeys = oldRegKeys.Count > 0
+
+        result.TotalOldKeys = oldFileKeys.Count + oldRegKeys.Count
 
         For Each candidateSection In candidates
 
-            Dim newEntry = GetOrCreateNewCachedEntry(candidateSection)
-            Dim matchInfo = GetOrComputeMatchInfo(oldSection.Name, candidateSection.Name, oldEntry, newEntry, oldHasFileKeys, oldHasRegKeys)
+            Dim newSection2 = GetOrCreateNewCachedSection2(candidateSection)
+            Dim matchInfo = GetOrComputeMatchInfo(oldSection2.Name, candidateSection.Name, newSection2, oldFileKeys, oldRegKeys, oldHasFileKeys, oldHasRegKeys)
 
             If matchInfo.TotalMatches > highestMatchCount Then
                 highestMatchCount = matchInfo.TotalMatches
@@ -145,7 +176,7 @@ Public Class MergeDetector2
             SyncLock _state.MergedEntries
 
                 thisSpecificPairIsRename = _state.MergedEntries.RenamedEntryNames.Contains(candidateSection.Name) AndAlso
-                                           IsRenamedFrom(candidateSection.Name, oldSection.Name)
+                                           IsRenamedFrom(candidateSection.Name, oldSection2.Name)
 
             End SyncLock
             If thisSpecificPairIsRename Then Continue For
@@ -210,48 +241,41 @@ Public Class MergeDetector2
 
     Private Function GetOrComputeMatchInfo(oldName As String,
                                            newName As String,
-                                           oldEntry As winapp2entry,
-                                           newEntry As winapp2entry,
+                                           newSection2 As iniSection2,
+                                           oldFileKeys As List(Of iniKey2),
+                                           oldRegKeys As List(Of iniKey2),
                                            oldHasFileKeys As Boolean,
-                                           oldHasRegKeys As Boolean) As KeyMatchInfo
+                                           oldHasRegKeys As Boolean) As KeyMatchInfo2
 
         Dim cacheKey = $"{oldName}|{newName}"
-        Dim cachedResult As KeyMatchInfo = Nothing
-        If _state.Caches.MatchInfoCache.TryGetValue(cacheKey, cachedResult) Then Return cachedResult
+        Dim cachedResult As KeyMatchInfo2 = Nothing
+        If _state.Caches.MatchInfoCache2.TryGetValue(cacheKey, cachedResult) Then Return cachedResult
 
-        Dim matchInfo = AssessKeyMatches(oldEntry, newEntry, oldHasFileKeys, oldHasRegKeys)
-        _state.Caches.MatchInfoCache.TryAdd(cacheKey, matchInfo)
+        Dim matchInfo = AssessKeyMatches(newSection2, oldFileKeys, oldRegKeys, oldHasFileKeys, oldHasRegKeys)
+        _state.Caches.MatchInfoCache2.TryAdd(cacheKey, matchInfo)
         Return matchInfo
 
     End Function
 
-    Private Function GetOrCreateNewCachedEntry(section As iniSection) As winapp2entry
-
-        SyncLock _state.Caches.CachedNewEntries
-
-            If Not _state.Caches.CachedNewEntries.ContainsKey(section.Name) Then _state.Caches.CachedNewEntries.Add(section.Name, New winapp2entry(section))
-
-            Return _state.Caches.CachedNewEntries(section.Name)
-
-        End SyncLock
-
-    End Function
-
-    Private Function AssessKeyMatches(oldEntry As winapp2entry,
-                                      newEntry As winapp2entry,
+    Private Function AssessKeyMatches(newSection2 As iniSection2,
+                                      oldFileKeys As List(Of iniKey2),
+                                      oldRegKeys As List(Of iniKey2),
                                       oldHasFileKeys As Boolean,
-                                      oldHasRegKeys As Boolean) As KeyMatchInfo
+                                      oldHasRegKeys As Boolean) As KeyMatchInfo2
 
-        Dim info As New KeyMatchInfo()
+        Dim info As New KeyMatchInfo2()
+
+        Dim newFileKeys = newSection2.Keys.Where(Function(k) k.KeyType.StartsWith("FileKey", StringComparison.OrdinalIgnoreCase)).ToList()
+        Dim newRegKeys = newSection2.Keys.Where(Function(k) k.KeyType.StartsWith("RegKey", StringComparison.OrdinalIgnoreCase)).ToList()
 
         If oldHasFileKeys Then
 
-            info.FileKeyMatches = CountMatches(oldEntry.FileKeys, newEntry.FileKeys, DisallowedPaths,
+            info.FileKeyMatches = CountMatches(oldFileKeys, newFileKeys, DisallowedPaths,
                                                info.MatchHadMoreParams, info.PossibleWildCardReduction,
                                                info.MatchedOldFileKeys)
 
-            info.AllFileKeysMatched = info.FileKeyMatches = oldEntry.FileKeys.KeyCount
-            info.FileKeyCountsMatch = info.AllFileKeysMatched AndAlso newEntry.FileKeys.KeyCount = oldEntry.FileKeys.KeyCount
+            info.AllFileKeysMatched = info.FileKeyMatches = oldFileKeys.Count
+            info.FileKeyCountsMatch = info.AllFileKeysMatched AndAlso newFileKeys.Count = oldFileKeys.Count
 
         Else
 
@@ -262,11 +286,11 @@ Public Class MergeDetector2
 
         If oldHasRegKeys Then
 
-            info.RegKeyMatches = CountMatches(oldEntry.RegKeys, newEntry.RegKeys, DisallowedPaths, info.MatchHadMoreParams,
+            info.RegKeyMatches = CountMatches(oldRegKeys, newRegKeys, DisallowedPaths, info.MatchHadMoreParams,
                                               info.PossibleWildCardReduction, info.MatchedOldRegKeys)
 
-            info.AllRegKeysMatched = info.RegKeyMatches = oldEntry.RegKeys.KeyCount
-            info.RegKeyCountsMatch = info.AllRegKeysMatched AndAlso newEntry.RegKeys.KeyCount = oldEntry.RegKeys.KeyCount
+            info.AllRegKeysMatched = info.RegKeyMatches = oldRegKeys.Count
+            info.RegKeyCountsMatch = info.AllRegKeysMatched AndAlso newRegKeys.Count = oldRegKeys.Count
 
         Else
 
@@ -283,21 +307,22 @@ Public Class MergeDetector2
 
     End Function
 
-    Private Function CountMatches(oldKeys As keyList,
-                                  newKeys As keyList,
+    Private Function CountMatches(oldKeys As IEnumerable(Of iniKey2),
+                                  newKeys As IEnumerable(Of iniKey2),
                                   disallowedValues As HashSet(Of String),
                             ByRef matchHadMoreParams As Boolean,
                             ByRef possibleWildCardReduction As Boolean,
-                                  matchedKeys As HashSet(Of iniKey)) As Integer
+                                  matchedKeys As HashSet(Of iniKey2)) As Integer
 
         Dim matchCount = 0
+        Dim newKeysList = newKeys.ToList()
         Dim newKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
-        For Each newKey In newKeys.Keys
+        For Each newKey In newKeysList
             If Not newKeyValues.Contains(newKey.Value) Then newKeyValues.Add(newKey.Value)
         Next
 
-        For Each oldKey In oldKeys.Keys
+        For Each oldKey In oldKeys
 
             If disallowedValues IsNot Nothing AndAlso disallowedValues.Contains(oldKey.Value) Then Continue For
 
@@ -309,7 +334,7 @@ Public Class MergeDetector2
 
             Else
 
-                For Each newKey In newKeys.Keys
+                For Each newKey In newKeysList
 
                     Dim keyMatched = KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey, matchHadMoreParams, possibleWildCardReduction)
                     If keyMatched AndAlso disallowedValues IsNot Nothing Then
@@ -365,10 +390,10 @@ Public Class MergeDetector2
 
     End Function
 
-    Private Sub TrackMerger(oldSection As iniSection, newSection As iniSection)
+    Private Sub TrackMerger(oldSection2 As iniSection2, newSection2 As iniSection2)
 
-        Dim mergeName = newSection.Name
-        Dim oldName = oldSection.Name
+        Dim mergeName = newSection2.Name
+        Dim oldName = oldSection2.Name
 
         SyncLock _state.MergedEntries
 

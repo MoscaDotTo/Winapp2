@@ -67,7 +67,7 @@ Public Class EntryChangeDetector2
             If _file1.Contains(section.Name) Then Continue For
 
             _state.ModifiedEntries.AddedEntryNames.Add(section.Name)
-            _state.ModifiedEntries.PotentialMatches.Add(DiffFileBridge.ToIniSection(section))
+            _state.ModifiedEntries.PotentialMatches2.Add(section)
 
         Next
 
@@ -93,7 +93,7 @@ Public Class EntryChangeDetector2
         Next
 
         For Each modifiedEntryName In _state.ModifiedEntries.ModifiedEntryNames
-            _state.ModifiedEntries.PotentialMatches.Add(DiffFileBridge.ToIniSection(_file2.GetSection(modifiedEntryName)))
+            _state.ModifiedEntries.PotentialMatches2.Add(_file2.GetSection(modifiedEntryName))
         Next
 
     End Sub
@@ -108,32 +108,23 @@ Public Class EntryChangeDetector2
 
         Dim out As New List(Of MenuSection)
         Dim results = New Concurrent.ConcurrentDictionary(Of String, MenuSection)(StringComparer.OrdinalIgnoreCase)
-        Dim potentialMatchesSnapshot = _state.ModifiedEntries.PotentialMatches.ToList()
-
-        ' Build an iniSection2 lookup for potential matches (for FindProbableMatches2)
-        Dim potentialMatchesSnapshot2 As New List(Of iniSection2)
-        For Each section In potentialMatchesSnapshot
-            Dim s2 = _file2.GetSection(section.Name)
-            If s2 IsNot Nothing Then potentialMatchesSnapshot2.Add(s2)
-        Next
+        Dim potentialMatchesSnapshot2 = _state.ModifiedEntries.PotentialMatches2.ToList()
 
         ' Pre-populate new entry cache and pre-compute section text for potential matches
         Dim snapshotTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
         For Each section In potentialMatchesSnapshot2
-            If Not _state.Caches.CachedNewEntries.ContainsKey(section.Name) Then
-                _state.Caches.CachedNewEntries.Add(section.Name, New winapp2entry(DiffFileBridge.ToIniSection(section)))
+            If Not _state.Caches.CachedNewEntries2.ContainsKey(section.Name) Then
+                _state.Caches.CachedNewEntries2.Add(section.Name, section)
             End If
             snapshotTextMap(section.Name) = section.ToString().ToUpperInvariant()
         Next
 
         ' Pre-populate old entry cache and pre-compute section text for removed entries.
-        ' winapp2entry still requires a legacy iniSection; the conversion is isolated here
-        ' so the parallel lambda works only with iniFile2/iniSection2.
         Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
         For Each entryName In _state.ModifiedEntries.RemovedEntryNames
             Dim oldSection2 = _file1.GetSection(entryName)
-            If Not _state.Caches.CachedOldEntries.ContainsKey(oldSection2.Name) Then
-                _state.Caches.CachedOldEntries.Add(oldSection2.Name, New winapp2entry(DiffFileBridge.ToIniSection(oldSection2)))
+            If Not _state.Caches.CachedOldEntries2.ContainsKey(oldSection2.Name) Then
+                _state.Caches.CachedOldEntries2.Add(oldSection2.Name, oldSection2)
             End If
             oldEntryTextMap(entryName) = oldSection2.ToString().ToUpperInvariant()
         Next
@@ -142,9 +133,9 @@ Public Class EntryChangeDetector2
                  Sub(entry)
 
                      Dim oldSection2 = _file1.GetSection(entry)
-                     Dim oldWa2Section = _state.Caches.CachedOldEntries(oldSection2.Name)
 
-                     If oldWa2Section.FileKeys.KeyCount = 0 AndAlso oldWa2Section.RegKeys.KeyCount = 0 Then
+                     If Not oldSection2.Keys.Any(Function(k) k.KeyType.StartsWith("FileKey", StringComparison.OrdinalIgnoreCase) OrElse
+                                                              k.KeyType.StartsWith("RegKey", StringComparison.OrdinalIgnoreCase)) Then
 
                          results(entry) = _renderer.MakeDiff(oldSection2, 1)
                          Return

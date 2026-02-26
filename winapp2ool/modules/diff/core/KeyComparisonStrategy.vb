@@ -501,7 +501,7 @@ Public Class KeyComparisonStrategyFactory
     ''' <summary>
     ''' Compares two keys using the appropriate strategy
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="newKey">
     ''' The key from the new version
     ''' </param>
@@ -528,6 +528,38 @@ Public Class KeyComparisonStrategyFactory
 
         Dim strategy = GetStrategy(newKey)
         Return strategy.Compare(newKey, oldKey, matchedFileKeyHasMoreParams, possibleWildCardReduction)
+
+    End Function
+
+    ''' <summary>
+    ''' Gets the appropriate strategy for the given <c>iniKey2</c> key type
+    ''' </summary>
+    Public Shared Function GetStrategy(key As iniKey2) As KeyComparisonStrategy
+
+        Select Case key.KeyType
+
+            Case "FileKey", "DetectFile" : Return pathStrategy
+
+            Case "Detect", "RegKey" : Return detectStrategy
+
+            Case Else : Return simpleStrategy
+
+        End Select
+
+    End Function
+
+    ''' <summary>
+    ''' Compares two <c>iniKey2</c> keys using the appropriate strategy.
+    ''' Converts to <c>iniKey</c> at the strategy boundary via <c>DiffFileBridge</c>.
+    ''' </summary>
+    Public Shared Function CompareKeys(newKey As iniKey2,
+                                       oldKey As iniKey2,
+                        Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
+                        Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
+
+        Dim strategy = GetStrategy(newKey)
+        Return strategy.Compare(DiffFileBridge.ToIniKey(newKey), DiffFileBridge.ToIniKey(oldKey),
+                                matchedFileKeyHasMoreParams, possibleWildCardReduction)
 
     End Function
 
@@ -621,5 +653,52 @@ Public Class KeyComparisonStrategyFactory
         Public Property PossibleWildCardReduction As Boolean
 
     End Class
+
+End Class
+
+''' <summary>
+''' Information about key matches between two <c>iniSection2</c> entries.
+''' Mirrors <c>KeyMatchInfo</c> using <c>iniKey2</c> matched key sets.
+''' </summary>
+Public Class KeyMatchInfo2
+
+    ''' <summary>Number of FileKey values from the old entry matched in the new entry</summary>
+    Public Property FileKeyMatches As Integer
+
+    ''' <summary>Number of RegKey values from the old entry matched in the new entry</summary>
+    Public Property RegKeyMatches As Integer
+
+    ''' <summary>Sum of FileKey and RegKey match counts</summary>
+    Public Property TotalMatches As Integer
+
+    ''' <summary>Whether all FileKeys from the old entry were matched in the new entry</summary>
+    Public Property AllFileKeysMatched As Boolean = True
+
+    ''' <summary>Whether all RegKeys from the old entry were matched in the new entry</summary>
+    Public Property AllRegKeysMatched As Boolean = True
+
+    ''' <summary>Whether every FileKey and RegKey from the old entry was matched</summary>
+    Public Property AllKeysMatched As Boolean
+
+    ''' <summary>Whether the count of FileKeys is the same in both old and new entries</summary>
+    Public Property FileKeyCountsMatch As Boolean = True
+
+    ''' <summary>Whether the count of RegKeys is the same in both old and new entries</summary>
+    Public Property RegKeyCountsMatch As Boolean = True
+
+    ''' <summary>Whether FileKey and RegKey counts both match between old and new entries</summary>
+    Public Property CountsMatch As Boolean
+
+    ''' <summary>Whether any matched new key has more pipe-delimited parameters than its old counterpart</summary>
+    Public Property MatchHadMoreParams As Boolean
+
+    ''' <summary>Whether any matched key appears to have reduced wildcard specificity</summary>
+    Public Property PossibleWildCardReduction As Boolean
+
+    ''' <summary>Set of old FileKey objects that were matched in the new entry</summary>
+    Public Property MatchedOldFileKeys As New HashSet(Of iniKey2)
+
+    ''' <summary>Set of old RegKey objects that were matched in the new entry</summary>
+    Public Property MatchedOldRegKeys As New HashSet(Of iniKey2)
 
 End Class
