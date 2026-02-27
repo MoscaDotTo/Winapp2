@@ -269,6 +269,44 @@ Public Class iniFile2
         Loop
     End Sub
 
+    ''' <summary>
+    ''' Writes the given text to disk at this file's <c>Path</c>, creating directories as needed.
+    ''' No-ops when <paramref name="condition"/> is <c>False</c>.
+    ''' </summary>
+    '''
+    ''' <param name="text">The text to write</param>
+    ''' <param name="condition">When <c>False</c>, the write is skipped</param>
+    Public Sub OverwriteToFile(text As String, Optional condition As Boolean = True)
+
+        If Not condition Then Return
+
+        gLog($"Saving {Name}")
+
+        Try
+
+            If Not IO.File.Exists(Path()) Then
+                gLog($"Target file doesn't exist")
+                gLog($"Creating {Dir}")
+                IO.Directory.CreateDirectory(Dir)
+                gLog($"Creating {Path()}")
+                Dim sw = IO.File.CreateText(Path())
+                sw.Dispose()
+            End If
+
+            Dim file As New IO.StreamWriter(Path())
+            file.Write(text)
+            file.Close()
+            gLog("Save complete", indent:=True)
+
+        Catch ex As IO.IOException
+
+            gLog("Save failed", indent:=True)
+            handleIOException(ex)
+
+        End Try
+
+    End Sub
+
     ''' <summary>Returns the file as it would appear on disk</summary>
     Public Overrides Function ToString() As String
         If _ordered.Count = 0 Then Return ""

@@ -134,26 +134,6 @@ Public Class ModifiedEntryTracker
     Public Property RemovedEntryNames As New HashSet(Of String)
 
     ''' <summary>
-    ''' Tracks modified keys per entry: EntryName -> (KeyType -> List(Of Keys))
-    ''' </summary>
-    Public Property ModifiedKeyTracker As New Dictionary(Of String, Dictionary(Of iniKey, keyList))
-
-    ''' <summary>
-    ''' Tracks removed keys per entry: EntryName -> List(Of Keys)
-    ''' </summary>
-    Public Property RemovedKeyTracker As New Dictionary(Of String, keyList)
-
-    ''' <summary>
-    ''' Tracks added keys per entry: EntryName -> List(Of Keys)
-    ''' </summary>
-    Public Property AddedKeyTracker As New Dictionary(Of String, keyList)
-
-    ''' <summary>
-    ''' Tracks potential matching sections for modified entries
-    ''' </summary>
-    Public Property PotentialMatches As New List(Of iniSection)
-
-    ''' <summary>
     ''' Tracks modified keys per entry (iniKey2 variant): EntryName -> (NewKey -> List(Of OldKeys))
     ''' </summary>
     Public Property ModifiedKeyTracker2 As New Dictionary(Of String, Dictionary(Of iniKey2, List(Of iniKey2)))
@@ -181,10 +161,6 @@ Public Class ModifiedEntryTracker
         ModifiedEntryNames.Clear()
         AddedEntryNames.Clear()
         RemovedEntryNames.Clear()
-        ModifiedKeyTracker.Clear()
-        RemovedKeyTracker.Clear()
-        AddedKeyTracker.Clear()
-        PotentialMatches.Clear()
         ModifiedKeyTracker2.Clear()
         RemovedKeyTracker2.Clear()
         AddedKeyTracker2.Clear()
@@ -328,21 +304,6 @@ End Class
 Public Class DiffCaches
 
     ''' <summary>
-    ''' Caches old entries by name for quick lookup
-    ''' </summary>
-    Public Property CachedOldEntries As New Dictionary(Of String, winapp2entry)
-
-    ''' <summary>
-    ''' Caches new entries by name for quick lookup
-    ''' </summary>
-    Public Property CachedNewEntries As New Dictionary(Of String, winapp2entry)
-
-    ''' <summary>
-    ''' Caches key match information to avoid redundant computations
-    ''' </summary>
-    Public Property MatchInfoCache As New ConcurrentDictionary(Of String, KeyMatchInfo)
-
-    ''' <summary>
     ''' Caches old entries by name for quick lookup (iniSection2 variant)
     ''' </summary>
     Public Property CachedOldEntries2 As New Dictionary(Of String, iniSection2)
@@ -362,9 +323,6 @@ Public Class DiffCaches
     ''' </summary>
     Public Sub Clear()
 
-        CachedOldEntries.Clear()
-        CachedNewEntries.Clear()
-        MatchInfoCache.Clear()
         CachedOldEntries2.Clear()
         CachedNewEntries2.Clear()
         MatchInfoCache2.Clear()

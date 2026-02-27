@@ -227,8 +227,8 @@ Public Class PathKeyComparisonStrategy
 
         If String.Equals(newKey.Value, oldKey.Value, StringComparison.InvariantCultureIgnoreCase) Then Return True
 
-        Dim newKeySplit = newKey.Value.Split(CChar("\"))
-        Dim oldKeySplit = oldKey.Value.Split(CChar("\"))
+        Dim newKeySplit = newKey.BackslashSplit
+        Dim oldKeySplit = oldKey.BackslashSplit
 
         If newKeySplit.Length > oldKeySplit.Length Then Return False
 
@@ -533,8 +533,8 @@ Public Class DetectKeyComparisonStrategy
 
         If isRegKey Then
 
-            Dim newSplit = newKey.Value.Split(CChar("|"))
-            Dim oldSplit = oldKey.Value.Split(CChar("|"))
+            Dim newSplit = newKey.PipeSplit
+            Dim oldSplit = oldKey.PipeSplit
             newPath = newSplit(0)
             oldPath = oldSplit(0)
             If newSplit.Length > 1 Then newFlags = newSplit(1)

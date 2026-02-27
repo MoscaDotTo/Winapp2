@@ -16,7 +16,6 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
-Imports System.Text.RegularExpressions
 
 ''' <summary>
 ''' An object representing a name=value pair from an ini file
@@ -25,6 +24,9 @@ Public Class iniKey2
 
     Private _name As String
     Private _keyType As String
+    Private _value As String
+    Private _pipeSplit As String()
+    Private _backslashSplit As String()
 
     ''' <summary>
     ''' The name of the key: any text on the left side of the '='.
@@ -36,14 +38,24 @@ Public Class iniKey2
         End Get
         Set(value As String)
             _name = value
-            _keyType = stripNums(value)
+            _keyType = StripNums(value)
         End Set
     End Property
 
     ''' <summary>
-    ''' The value of the key: any text on the right side of the '='
+    ''' The value of the key: any text on the right side of the '='.
+    ''' Setting this invalidates the cached <c>PipeSplit</c> and <c>BackslashSplit</c>.
     ''' </summary>
     Public Property Value As String
+        Get
+            Return _value
+        End Get
+        Set(v As String)
+            _value = v
+            _pipeSplit = Nothing
+            _backslashSplit = Nothing
+        End Set
+    End Property
 
     ''' <summary>
     ''' The type of the key: the Name with digits removed. Updated automatically when Name is set.
@@ -56,6 +68,28 @@ Public Class iniKey2
 
     ''' <summary>The line number from which this key was originally read</summary>
     Public ReadOnly Property LineNumber As Integer
+
+    ''' <summary>
+    ''' The key's Value split on '|', cached after first access and invalidated when Value changes.
+    ''' The returned array is shared — do not mutate its elements.
+    ''' </summary>
+    Public ReadOnly Property PipeSplit As String()
+        Get
+            If _pipeSplit Is Nothing Then _pipeSplit = _value.Split(CChar("|"))
+            Return _pipeSplit
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' The key's Value split on '\', cached after first access and invalidated when Value changes.
+    ''' Returns a fresh copy each time so callers may mutate the returned array freely.
+    ''' </summary>
+    Public ReadOnly Property BackslashSplit As String()
+        Get
+            If _backslashSplit Is Nothing Then _backslashSplit = _value.Split(CChar("\"))
+            Return DirectCast(_backslashSplit.Clone(), String())
+        End Get
+    End Property
 
     ''' <summary>Returns whether the key's Name equals the given string</summary>
     ''' <param name="n">The string to compare against</param>
@@ -96,8 +130,13 @@ Public Class iniKey2
         Return If(ignoreCase, Value.Equals(txt, StringComparison.InvariantCultureIgnoreCase), Value = txt)
     End Function
 
-    Private Function stripNums(keyName As String) As String
-        Return New Regex("[\d]").Replace(keyName, "")
+    ''' <summary>Returns the key name with all digit characters removed</summary>
+    Private Shared Function StripNums(keyName As String) As String
+        Dim sb As New System.Text.StringBuilder(keyName.Length)
+        For Each c As Char In keyName
+            If Not Char.IsDigit(c) Then sb.Append(c)
+        Next
+        Return sb.ToString()
     End Function
 
     ''' <summary>Returns whether this key's Name matches the given key's Name (case-insensitive)</summary>

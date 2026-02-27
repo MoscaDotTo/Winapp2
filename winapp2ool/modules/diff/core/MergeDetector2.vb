@@ -127,8 +127,8 @@ Public Class MergeDetector2
         Dim foundMerger = False
         Dim qualifyingMergeTargets As New List(Of String)
 
-        Dim oldFileKeys = oldSection2.Keys.Where(Function(k) k.KeyType.StartsWith("FileKey", StringComparison.OrdinalIgnoreCase)).ToList()
-        Dim oldRegKeys = oldSection2.Keys.Where(Function(k) k.KeyType.StartsWith("RegKey", StringComparison.OrdinalIgnoreCase)).ToList()
+        Dim oldFileKeys = oldSection2.Keys.GetByType("FileKey")
+        Dim oldRegKeys = oldSection2.Keys.GetByType("RegKey")
 
         Dim oldHasFileKeys = oldFileKeys.Count > 0
         Dim oldHasRegKeys = oldRegKeys.Count > 0
@@ -217,8 +217,8 @@ Public Class MergeDetector2
     Private Function GetOrComputeMatchInfo(oldName As String,
                                            newName As String,
                                            newSection2 As iniSection2,
-                                           oldFileKeys As List(Of iniKey2),
-                                           oldRegKeys As List(Of iniKey2),
+                                           oldFileKeys As IReadOnlyList(Of iniKey2),
+                                           oldRegKeys As IReadOnlyList(Of iniKey2),
                                            oldHasFileKeys As Boolean,
                                            oldHasRegKeys As Boolean) As KeyMatchInfo2
 
@@ -233,15 +233,15 @@ Public Class MergeDetector2
     End Function
 
     Private Function AssessKeyMatches(newSection2 As iniSection2,
-                                      oldFileKeys As List(Of iniKey2),
-                                      oldRegKeys As List(Of iniKey2),
+                                      oldFileKeys As IReadOnlyList(Of iniKey2),
+                                      oldRegKeys As IReadOnlyList(Of iniKey2),
                                       oldHasFileKeys As Boolean,
                                       oldHasRegKeys As Boolean) As KeyMatchInfo2
 
         Dim info As New KeyMatchInfo2()
 
-        Dim newFileKeys = newSection2.Keys.Where(Function(k) k.KeyType.StartsWith("FileKey", StringComparison.OrdinalIgnoreCase)).ToList()
-        Dim newRegKeys = newSection2.Keys.Where(Function(k) k.KeyType.StartsWith("RegKey", StringComparison.OrdinalIgnoreCase)).ToList()
+        Dim newFileKeys = newSection2.Keys.GetByType("FileKey")
+        Dim newRegKeys = newSection2.Keys.GetByType("RegKey")
 
         If oldHasFileKeys Then
 
@@ -402,5 +402,33 @@ Public Class MergeDetector2
         End SyncLock
 
     End Sub
+
+End Class
+
+''' <summary>
+''' Result of matching a removed entry against candidates
+''' </summary>
+Public Class MatchResult
+
+    ''' <summary>Whether the match is a rename (all keys matched, counts equal, no structural changes)</summary>
+    Public Property IsRename As Boolean
+
+    ''' <summary>Whether the old entry was merged into one or more new entries</summary>
+    Public Property IsMerge As Boolean
+
+    ''' <summary>Whether a best candidate was found but no full merge threshold was met</summary>
+    Public Property HasPartialMatch As Boolean
+
+    ''' <summary>The primary target entry name (rename target or best merge target)</summary>
+    Public Property TargetName As String
+
+    ''' <summary>All target entry names; may contain multiple entries in the case of a split merger</summary>
+    Public Property AllTargetNames As New List(Of String)
+
+    ''' <summary>Number of old keys matched in the best candidate entry</summary>
+    Public Property TotalMatchedKeys As Integer
+
+    ''' <summary>Total number of old FileKeys and RegKeys in the entry being assessed</summary>
+    Public Property TotalOldKeys As Integer
 
 End Class

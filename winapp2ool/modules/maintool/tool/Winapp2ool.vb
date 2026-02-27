@@ -197,4 +197,34 @@ Public Module Winapp2ool
 
     End Function
 
+    ''' <summary>
+    ''' Ensures that an <c>iniFile2</c> has content and informs the user if it does not.
+    ''' Unlike the <c>iniFile</c> overload, this does not trigger validation or the File Chooser;
+    ''' the caller is responsible for loading the file before calling this.
+    ''' </summary>
+    '''
+    ''' <param name="iFile">
+    ''' An <c>iniFile2</c> to be checked for content
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c>True</c> if the <c>iniFile2</c> has content,
+    ''' <br /><c>False</c> otherwise
+    ''' </returns>
+    Public Function enforceFileHasContent(iFile As iniFile2) As Boolean
+
+        If iFile Is Nothing OrElse iFile.Count = 0 Then
+
+            Dim fileName = If(iFile?.Name, "File")
+            setHeaderText($"{fileName} was empty or not found", True)
+            gLog($"{fileName} was empty or not found", indent:=True)
+
+            Return False
+
+        End If
+
+        Return True
+
+    End Function
+
 End Module

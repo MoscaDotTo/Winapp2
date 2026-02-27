@@ -166,8 +166,8 @@ Public Class EntryChangeDetector2
 
                      Dim oldSection2 = _file1.GetSection(entry)
 
-                     If Not oldSection2.Keys.Any(Function(k) k.KeyType.StartsWith("FileKey", StringComparison.OrdinalIgnoreCase) OrElse
-                                                              k.KeyType.StartsWith("RegKey", StringComparison.OrdinalIgnoreCase)) Then
+                     If oldSection2.Keys.GetByType("FileKey").Count = 0 AndAlso
+                        oldSection2.Keys.GetByType("RegKey").Count = 0 Then
 
                          results(entry) = _renderer.MakeDiff(oldSection2, 1)
                          Return

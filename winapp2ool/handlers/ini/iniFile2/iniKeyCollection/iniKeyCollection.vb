@@ -21,6 +21,9 @@ Public Class iniKeyCollection
 
     Private ReadOnly _ordered As New List(Of iniKey2)
     Private ReadOnly _byName As New Dictionary(Of String, iniKey2)(StringComparer.OrdinalIgnoreCase)
+    Private ReadOnly _byType As New Dictionary(Of String, List(Of iniKey2))(StringComparer.OrdinalIgnoreCase)
+
+    Private Shared ReadOnly EmptyKeyList As IReadOnlyList(Of iniKey2) = New List(Of iniKey2)().AsReadOnly()
 
     ''' <summary>The number of keys in the collection</summary>
     Public ReadOnly Property Count As Integer
@@ -39,6 +42,12 @@ Public Class iniKeyCollection
         If _byName.ContainsKey(key.Name) Then Return
         _ordered.Add(key)
         _byName.Add(key.Name, key)
+        Dim bucket As List(Of iniKey2) = Nothing
+        If Not _byType.TryGetValue(key.KeyType, bucket) Then
+            bucket = New List(Of iniKey2)
+            _byType.Add(key.KeyType, bucket)
+        End If
+        bucket.Add(key)
     End Sub
 
     ''' <summary>Returns whether a key with the given name exists in the collection</summary>
@@ -58,9 +67,22 @@ Public Class iniKeyCollection
     End Function
 
     ''' <summary>
+    ''' Returns all keys whose <c>KeyType</c> equals <paramref name="keyType"/> (case-insensitive).
+    ''' Returns an empty read-only list if no keys of that type exist.
+    ''' The returned list is the live internal bucket — do not mutate it.
+    ''' </summary>
+    ''' <param name="keyType">The key type to look up, e.g. "FileKey" or "RegKey"</param>
+    Public Function GetByType(keyType As String) As IReadOnlyList(Of iniKey2)
+        If keyType Is Nothing Then argIsNull(NameOf(keyType)) : Return EmptyKeyList
+        Dim result As List(Of iniKey2) = Nothing
+        If _byType.TryGetValue(keyType, result) Then Return result
+        Return EmptyKeyList
+    End Function
+
+    ''' <summary>
     ''' Removes the given key from the collection
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="key">
     ''' The key to remove
     ''' </param>
@@ -69,6 +91,8 @@ Public Class iniKeyCollection
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
         _ordered.Remove(key)
         _byName.Remove(key.Name)
+        Dim bucket As List(Of iniKey2) = Nothing
+        If _byType.TryGetValue(key.KeyType, bucket) Then bucket.Remove(key)
 
     End Sub
 
@@ -91,7 +115,7 @@ Public Class iniKeyCollection
     ''' <summary>
     ''' Creates a collection pre-populated from the given sequence
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="keys">
     ''' The keys to add (first-write-wins for duplicate names)
     ''' </param>

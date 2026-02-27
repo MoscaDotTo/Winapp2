@@ -160,32 +160,38 @@ Module Diff
 
         If Not enforceFileHasContent(DiffFile1) Then Return
 
+        Dim file1As2 As iniFile2
+        Dim file2As2 As iniFile2
+
         If DownloadDiffFile Then
 
-            Dim downloadedIniFile = getRemoteIniFile(getWinappLink)
-            DiffFile2.Sections = downloadedIniFile.Sections
-            DiffFile2.Comments = downloadedIniFile.Comments
+            file2As2 = getRemoteIniFile2(getWinappLink)
+            If file2As2 Is Nothing Then Return
 
         Else
 
             If Not enforceFileHasContent(DiffFile2) Then Return
+            file2As2 = iniFile2.FromFile(DiffFile2.Path())
 
         End If
+
+        file1As2 = iniFile2.FromFile(DiffFile1.Path())
 
         If TrimRemoteFile AndAlso DownloadDiffFile Then
 
-            Dim tmp As New winapp2file(DiffFile2)
+            ' Trim still uses the old winapp2file model — bridge until Trim is migrated
+            Dim tmp As New winapp2file(getRemoteIniFile(getWinappLink))
             Trim.trimFile(tmp)
-            DiffFile2.Sections = tmp.toIni.Sections
+            file2As2 = DiffFileBridge.ToIniFile2(tmp.toIni)
 
         End If
+
+        If Not enforceFileHasContent(file1As2) Then Return
+        If Not enforceFileHasContent(file2As2) Then Return
 
         clrConsole()
 
         gLog(DiffLogStartPhrase)
-
-        Dim file1As2 = DiffFileBridge.ToIniFile2(DiffFile1)
-        Dim file2As2 = DiffFileBridge.ToIniFile2(DiffFile2)
 
         Dim diffOutput As New List(Of MenuSection)
 
@@ -210,8 +216,10 @@ Module Diff
         diffOutput.Add(out3)
         diffOutput.ForEach(Sub(section) section.Print())
 
-        DiffFile3.overwriteToFile(MostRecentDiffLog, SaveDiffLog)
         MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
+
+        Dim logFile = iniFile2.Empty(DiffFile3.Dir, DiffFile3.Name)
+        logFile.OverwriteToFile(MostRecentDiffLog, SaveDiffLog)
 
         setNextMenuHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
 
@@ -293,9 +301,9 @@ Module Diff
         doStep("Phase 3 · calculating added-with-mergers statistics", Sub() statsCalc2.CalculateAddedWithMergersStatistics())
 
         Dim timeSpan = Now - start
+        gLog($"Total diff time: {timeSpan}")
 
         doStep("Phase 3 · calculating summary statistics", Sub() out.Add(renderer2.LogPostDiff()))
-        gLog($"Total diff time: {timeSpan.ToString}")
 
         Return out
 

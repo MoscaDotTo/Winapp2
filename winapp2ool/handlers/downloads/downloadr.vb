@@ -264,4 +264,35 @@ Module downloadr
 
     End Function
 
+    ''' <summary>
+    ''' Attempts to create an <c>iniFile2</c> using the data provided by <paramref name="address"/>
+    ''' </summary>
+    '''
+    ''' <param name="address">
+    ''' A URL pointing to a .ini file to be downloaded
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' An <c>iniFile2</c> created using the remote data if that data is properly formatted, <br/>
+    ''' <c>Nothing</c> otherwise
+    ''' </returns>
+    Public Function getRemoteIniFile2(address As String) As iniFile2
+
+        Try
+
+            Dim path = setDownloadedFileStage(address)
+
+            If Not File.Exists(path) Then Throw New WebException : Return Nothing
+
+            Return iniFile2.FromFile(path)
+
+        Catch ex As WebException
+
+            handleWebException(ex)
+            Return Nothing
+
+        End Try
+
+    End Function
+
 End Module
