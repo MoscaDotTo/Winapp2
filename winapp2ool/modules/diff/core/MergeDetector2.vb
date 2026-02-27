@@ -74,31 +74,6 @@ Public Class MergeDetector2
 
     End Function
 
-    ''' <summary>
-    ''' Determines if a removed entry was renamed into or merged with one or more added or modified entries.
-    ''' Works entirely with <c>iniSection2</c> — no legacy type conversion.
-    ''' </summary>
-    Public Function AssessRenamesAndMergersOLD(candidates As List(Of iniSection2),
-                                            oldSection2 As iniSection2) As Boolean
-
-        If candidates.Count = 0 Then Return False
-
-        Dim cachedOld = GetOrCreateCachedSection2(oldSection2)
-        Dim bestMatch = FindBestMatch(candidates, cachedOld)
-
-        If bestMatch.IsRename Then Return ConfirmRename(bestMatch.TargetName, oldSection2)
-
-        If bestMatch.IsMerge OrElse bestMatch.HasPartialMatch Then
-
-            TrackBestMatches(bestMatch.IsMerge, bestMatch, oldSection2)
-            Return True
-
-        End If
-
-        Return False
-
-    End Function
-
     Private Sub TrackBestMatches(isMerge As Boolean, bestMatch As MatchResult, oldSection2 As iniSection2)
 
         If Not isMerge Then

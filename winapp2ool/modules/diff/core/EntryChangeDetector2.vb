@@ -58,6 +58,38 @@ Public Class EntryChangeDetector2
     End Sub
 
     ''' <summary>
+    ''' Replaces deprecated path values in all keys of a winapp2.ini <c>iniFile2</c>
+    ''' to suppress false-positive diff entries caused by known path renames
+    ''' </summary>
+    Public Sub SnuffNoisyChanges(winapp As iniFile2)
+
+        For Each section In winapp
+
+            For Each key In section.Keys
+
+                CleanKeyValue(key)
+
+            Next
+
+        Next
+
+    End Sub
+
+    Private Sub CleanKeyValue(key As iniKey2)
+
+        For i = 0 To PathReplacements.Count - 1
+
+            Dim oldPath = PathReplacements.Keys(i)
+
+            If Not key.Value.Contains(oldPath) Then Continue For
+
+            key.Value = key.Value.Replace(oldPath, PathReplacements.Values(i))
+
+        Next
+
+    End Sub
+
+    ''' <summary>
     ''' Records entries present in the new file but not the old file as added
     ''' </summary>
     Public Sub ProcessNewEntries()

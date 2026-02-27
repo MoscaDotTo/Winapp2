@@ -18,9 +18,7 @@
 Option Strict On
 
 ''' <summary>
-''' Converts between the legacy ini layer (<c>iniFile</c>/<c>iniSection</c>/<c>iniKey</c>)
-''' and the new ini layer (<c>iniFile2</c>/<c>iniSection2</c>/<c>iniKey2</c>).
-''' Used by the diff migration comparison harness.
+''' Converts an <c>iniFile</c> to an <c>iniFile2</c> for use by the Diff2 pipeline.
 ''' </summary>
 Module DiffFileBridge
 
@@ -28,6 +26,10 @@ Module DiffFileBridge
     Public Function ToIniFile2(f As iniFile) As iniFile2
 
         Dim out = iniFile2.Empty(f.Dir, f.Name)
+
+        For Each comment In f.Comments.Values
+            out.Comments.Add(New iniComment2(comment.Comment, comment.LineNumber))
+        Next
 
         For Each section In f.Sections.Values
 
@@ -43,37 +45,6 @@ Module DiffFileBridge
 
         Return out
 
-    End Function
-
-    ''' <summary>Converts an <c>iniFile2</c> to an <c>iniFile</c></summary>
-    Public Function ToIniFile(f As iniFile2) As iniFile
-
-        Dim out As New iniFile()
-
-        For Each section In f
-            out.Sections.Add(section.Name, ToIniSection(section))
-        Next
-
-        Return out
-
-    End Function
-
-    ''' <summary>Converts an <c>iniSection2</c> to an <c>iniSection</c></summary>
-    Public Function ToIniSection(s As iniSection2) As iniSection
-
-        Dim lines As New List(Of String) From {s.GetFullName()}
-
-        For Each key In s.Keys
-            lines.Add(key.ToString())
-        Next
-
-        Return New iniSection(lines)
-
-    End Function
-
-    ''' <summary>Converts an <c>iniKey2</c> to an <c>iniKey</c></summary>
-    Public Function ToIniKey(k As iniKey2) As iniKey
-        Return New iniKey(k.ToString())
     End Function
 
 End Module

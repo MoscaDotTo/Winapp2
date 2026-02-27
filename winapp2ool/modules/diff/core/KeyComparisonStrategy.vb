@@ -59,6 +59,14 @@ Public MustInherit Class KeyComparisonStrategy
                           Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                           Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
+    ''' <summary>
+    ''' Compares two iniKey2 objects for equivalence
+    ''' </summary>
+    Public MustOverride Function Compare(newKey As iniKey2,
+                                         oldKey As iniKey2,
+                          Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
+                          Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
+
 
     ''' <summary>
     ''' Checks the equivalence of two strings using regex. Regex matches must capture the 0th 
@@ -147,6 +155,17 @@ Public Class SimpleKeyComparisonStrategy
 
     End Function
 
+    Public Overrides Function Compare(newKey As iniKey2,
+                                      oldKey As iniKey2,
+                       Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
+                       Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
+
+        If Not newKey.compareTypes(oldKey) Then Return False
+
+        Return String.Equals(newKey.Value, oldKey.Value, StringComparison.InvariantCultureIgnoreCase)
+
+    End Function
+
 End Class
 
 ''' <summary>
@@ -183,7 +202,46 @@ Public Class PathKeyComparisonStrategy
         For i = 0 To newKeySplit.Length - 1
 
             ' Sanitize regex characters after matching first path component
-            If Not isSanitized AndAlso (i >= 1 OrElse newKeySplit.Length - 1 = 0) Then SanitizePath(newKey, newKeySplit, oldKeySplit) : isSanitized = True
+            If Not isSanitized AndAlso (i >= 1 OrElse newKeySplit.Length - 1 = 0) Then SanitizePath(newKey.Value, newKeySplit, oldKeySplit) : isSanitized = True
+
+            Dim newVal = newKeySplit(i)
+            Dim oldVal = oldKeySplit(i)
+            Dim isLastPiece = i = newKeySplit.Length - 1
+
+            If isLastPiece AndAlso isFileKey Then Return FinalizeFileKeyEquivalence(oldVal, newVal, oldKeySplit, newKeySplit,
+                                                                                    matchedFileKeyHasMoreParams, possibleWildCardReduction)
+            If Not CompareValues(newVal, oldVal) Then Return False
+
+        Next
+
+        Return True
+
+    End Function
+
+    Public Overrides Function Compare(newKey As iniKey2,
+                                      oldKey As iniKey2,
+                       Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
+                       Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
+
+        If Not newKey.compareTypes(oldKey) Then Return False
+
+        If String.Equals(newKey.Value, oldKey.Value, StringComparison.InvariantCultureIgnoreCase) Then Return True
+
+        Dim newKeySplit = newKey.Value.Split(CChar("\"))
+        Dim oldKeySplit = oldKey.Value.Split(CChar("\"))
+
+        If newKeySplit.Length > oldKeySplit.Length Then Return False
+
+        Dim isFileKey = newKey.typeIs("FileKey")
+        Dim isRecurse = isFileKey AndAlso (newKey.Value.Contains("RECURSE") OrElse newKey.Value.Contains("REMOVESELF"))
+
+        If isFileKey AndAlso Not isRecurse AndAlso newKeySplit.Length < oldKeySplit.Length Then Return False
+
+        Dim isSanitized = False
+
+        For i = 0 To newKeySplit.Length - 1
+
+            If Not isSanitized AndAlso (i >= 1 OrElse newKeySplit.Length - 1 = 0) Then SanitizePath(newKey.Value, newKeySplit, oldKeySplit) : isSanitized = True
 
             Dim newVal = newKeySplit(i)
             Dim oldVal = oldKeySplit(i)
@@ -202,14 +260,14 @@ Public Class PathKeyComparisonStrategy
     ''' <summary>
     ''' Escapes regex special characters in path components
     ''' </summary>
-    Private Sub SanitizePath(key As iniKey,
+    Private Sub SanitizePath(keyValue As String,
                        ByRef newKeySplit As String(),
                        ByRef oldKeySplit As String())
 
-        Dim firstWildcardIndex = key.Value.IndexOf("*", StringComparison.InvariantCultureIgnoreCase)
+        Dim firstWildcardIndex = keyValue.IndexOf("*", StringComparison.InvariantCultureIgnoreCase)
         If firstWildcardIndex = -1 Then Return
 
-        Dim pipeIndex = key.Value.IndexOf("|", StringComparison.InvariantCultureIgnoreCase)
+        Dim pipeIndex = keyValue.IndexOf("|", StringComparison.InvariantCultureIgnoreCase)
         Dim wildcardIsBeforePipe = firstWildcardIndex < pipeIndex
 
         If wildcardIsBeforePipe OrElse pipeIndex = -1 Then
@@ -457,6 +515,58 @@ Public Class DetectKeyComparisonStrategy
 
     End Function
 
+    Public Overrides Function Compare(newKey As iniKey2,
+                                      oldKey As iniKey2,
+                       Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
+                       Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
+
+        If Not newKey.compareTypes(oldKey) Then Return False
+
+        If String.Equals(newKey.Value, oldKey.Value, StringComparison.InvariantCultureIgnoreCase) Then Return True
+
+        Dim isRegKey = newKey.typeIs("RegKey")
+
+        Dim newPath As String
+        Dim oldPath As String
+        Dim newFlags As String = ""
+        Dim oldFlags As String = ""
+
+        If isRegKey Then
+
+            Dim newSplit = newKey.Value.Split(CChar("|"))
+            Dim oldSplit = oldKey.Value.Split(CChar("|"))
+            newPath = newSplit(0)
+            oldPath = oldSplit(0)
+            If newSplit.Length > 1 Then newFlags = newSplit(1)
+            If oldSplit.Length > 1 Then oldFlags = oldSplit(1)
+
+        Else
+
+            newPath = newKey.Value
+            oldPath = oldKey.Value
+
+        End If
+
+        If String.Equals(newPath, oldPath, StringComparison.InvariantCultureIgnoreCase) Then
+
+            If isRegKey AndAlso newFlags.Length > 0 Then Return CompareValues(newFlags, oldFlags)
+
+            Return True
+
+        End If
+
+        If oldPath.StartsWith(newPath & "\", StringComparison.InvariantCultureIgnoreCase) Then
+
+            If isRegKey AndAlso newFlags.Length > 0 Then Return CompareValues(newFlags, oldFlags)
+
+            Return True
+
+        End If
+
+        Return False
+
+    End Function
+
 End Class
 
 ''' <summary>
@@ -550,7 +660,6 @@ Public Class KeyComparisonStrategyFactory
 
     ''' <summary>
     ''' Compares two <c>iniKey2</c> keys using the appropriate strategy.
-    ''' Converts to <c>iniKey</c> at the strategy boundary via <c>DiffFileBridge</c>.
     ''' </summary>
     Public Shared Function CompareKeys(newKey As iniKey2,
                                        oldKey As iniKey2,
@@ -558,8 +667,7 @@ Public Class KeyComparisonStrategyFactory
                         Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
         Dim strategy = GetStrategy(newKey)
-        Return strategy.Compare(DiffFileBridge.ToIniKey(newKey), DiffFileBridge.ToIniKey(oldKey),
-                                matchedFileKeyHasMoreParams, possibleWildCardReduction)
+        Return strategy.Compare(newKey, oldKey, matchedFileKeyHasMoreParams, possibleWildCardReduction)
 
     End Function
 
