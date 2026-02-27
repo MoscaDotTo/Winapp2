@@ -91,6 +91,7 @@ Public Module settingsHandler
 
         If _settingsAreDirty Then
             saveSettingsFile()
+            FlushIfDirty2(saveSettingsToDisk)
         End If
 
     End Sub
@@ -139,6 +140,7 @@ Public Module settingsHandler
 
         ' Defer disk write - settings will be saved when FlushSettingsIfDirty is called
         MarkSettingsDirty()
+        SetValue2(targetModule, settingName, newVal)
 
     End Sub
 
@@ -199,6 +201,7 @@ Public Module settingsHandler
         ' lets assume the user wanted to reset their settings to default
         settingsFile.init()
         loadAllModuleSettings()
+        Load2()
 
         gLog(descend:=True)
         gLog("Settings loaded")

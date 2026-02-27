@@ -128,6 +128,7 @@
     <Compile Include="handlers\menus\builders\MenuItemBuilder\MenuItemBuilder.vb" />
     <Compile Include="handlers\menus\MenuSection\MenuSection.vb" />
     <Compile Include="handlers\settings\settingsHandler.vb" />
+    <Compile Include="handlers\settings\SettingsHandler2.vb" />
     <Compile Include="modules\browserbuilder\mainmenu\browserbuildermainmenu.vb" />
     <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettings.vb" />
     <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettingshandler.vb" />
