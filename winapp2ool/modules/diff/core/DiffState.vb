@@ -94,9 +94,9 @@ Public Class MergedEntryTracker
     Public Property RenamedEntryNames As New HashSet(Of String)
 
     ''' <summary>
-    ''' Tracks renamed entry pairs: OldName, NewName, OldName, NewName, ...
+    ''' Maps each renamed entry's new name to its old name.
     ''' </summary>
-    Public Property RenamedEntryPairs As New List(Of String)
+    Public Property RenamedEntryPairs As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
 
     ''' <summary>
     ''' Clears all tracking data

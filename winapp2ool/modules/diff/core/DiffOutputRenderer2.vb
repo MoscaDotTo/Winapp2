@@ -28,13 +28,32 @@ Public Class DiffOutputRenderer2
     Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer2
 
     ''' <summary>
+    ''' Maps merged target entry name → (key value → source old entry name).
+    ''' Built by <c>ItemizeMergers</c> and consumed by <c> ItemizeModifications </c>
+    ''' to attribute old keys to their source entries in merger output.
+    ''' </summary>
+    Private ReadOnly _mergerSourceMaps As New Dictionary(Of String, Dictionary(Of String, String))(StringComparer.OrdinalIgnoreCase)
+
+
+    ''' <summary>
     ''' Initializes a new instance of <c>DiffOutputRenderer2</c>
     ''' </summary>
     '''
-    ''' <param name="state">Shared diff state tracking all entry changes</param>
-    ''' <param name="file1">The old version of winapp2.ini as an <c>iniFile2</c></param>
-    ''' <param name="file2">The new version of winapp2.ini as an <c>iniFile2</c></param>
-    ''' <param name="keyAnalyzer">Used to compute key-level changes for merger and added-with-merger entries</param>
+    ''' <param name="state">
+    ''' Shared diff state tracking all entry changes
+    ''' </param>
+    ''' 
+    ''' <param name="file1">
+    ''' The old version of winapp2.ini as an <c>iniFile2</c>
+    ''' </param>
+    ''' 
+    ''' <param name="file2">
+    ''' The new version of winapp2.ini as an <c>iniFile2</c>
+    ''' </param>
+    ''' 
+    ''' <param name="keyAnalyzer">
+    ''' Used to compute key-level changes for merger and added-with-merger entries
+    ''' </param>
     Public Sub New(state As DiffState,
                    file1 As iniFile2,
                    file2 As iniFile2,
@@ -94,8 +113,8 @@ Public Class DiffOutputRenderer2
         Dim plainAddedCount = modified.AddedEntryNames.Count - merged.RenamedEntryNames.Count - stats.AddedWithMergersEntryCount
 
         Dim added = $"Added entries: {modified.AddedEntryNames.Count}"
-        Dim addedPlain = $"Added entries (without merged content): {plainAddedCount}"
-        Dim addedRenamed = $" & {merged.RenamedEntryNames.Count} added entries are renamed versions Of removed entries And may contain other minor changes"
+        Dim addedPlain = $" + {plainAddedCount} novel entries (without merged content)"
+        Dim addedRenamed = $" & {merged.RenamedEntryNames.Count} added entries are renamed versions of removed entries and may contain other minor changes"
 
         Dim modifiedEntriesHaveAdditions = stats.ModEntriesAddedKeyTotal > 0
         Dim modEntriesHaveRemovals = stats.ModEntriesRemovedKeysWithoutReplacementTotal > 0
@@ -156,7 +175,8 @@ Public Class DiffOutputRenderer2
     End Function
 
     ''' <summary>
-    ''' Records each removed entry from the old version which has been merged into an entry in the new version
+    ''' Records each removed entry from the old version which 
+    ''' has been merged into an entry in the new version
     ''' </summary>
     Public Function SummarizeMergers() As List(Of MenuSection)
 
@@ -184,7 +204,8 @@ Public Class DiffOutputRenderer2
     End Function
 
     ''' <summary>
-    ''' Creates a diff section for an entry that was split/merged into multiple new entries
+    ''' Creates a diff section for an entry that was 
+    ''' split/merged into multiple new entries
     ''' </summary>
     '''
     ''' <param name="oldSection">
@@ -212,21 +233,20 @@ Public Class DiffOutputRenderer2
 
         Next
 
-        If ShowFullEntries Then
+        If Not ShowFullEntries Then Return result
 
-            result.AddBlank()
-            result.AddColoredLine("Old entry:", color:=ConsoleColor.DarkRed, centered:=True)
-            gLog("Old entry:", leadr:=True)
-            BuildEntrySection(result, oldSection.ToString)
-
-        End If
+        result.AddBlank()
+        result.AddColoredLine("Old entry:", color:=ConsoleColor.DarkRed, centered:=True)
+        gLog("Old entry:", leadr:=True)
+        BuildEntrySection(result, oldSection.ToString)
 
         Return result
 
     End Function
 
     ''' <summary>
-    ''' Records each removed entry from the old version which has been given a new name in the new version
+    ''' Records each removed entry from the old version
+    ''' which has been given a new name in the new version
     ''' </summary>
     Public Function SummarizeRenames() As List(Of MenuSection)
 
@@ -234,8 +254,7 @@ Public Class DiffOutputRenderer2
 
         For Each entry In _state.MergedEntries.RenamedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
-            Dim ind = _state.MergedEntries.RenamedEntryPairs.IndexOf(entry)
-            Dim oldName = _state.MergedEntries.RenamedEntryPairs(ind + 1)
+            Dim oldName = _state.MergedEntries.RenamedEntryPairs(entry)
             out.Add(MakeDiff(_file1.GetSection(oldName), 3, _file2.GetSection(entry)))
 
         Next
@@ -270,27 +289,26 @@ Public Class DiffOutputRenderer2
             If _state.ModifiedEntries.AddedEntryNames.Contains(targetEntry) Then Continue For
 
             ' Skip if this was already processed as a rename
-            If _state.MergedEntries.RenamedEntryNames.Contains(targetEntry) Then
-                Continue For
-            End If
+            If _state.MergedEntries.RenamedEntryNames.Contains(targetEntry) Then Continue For
 
             Dim uniqueKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
             Dim combinedOldKeys As New List(Of iniKey2)
+            Dim sourceEntryMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
 
-            If _file1.Contains(targetEntry) Then
-                _state.MergedEntries.MergeDict(targetEntry).Add(targetEntry)
-            End If
+            If _file1.Contains(targetEntry) Then _state.MergedEntries.MergeDict(targetEntry).Add(targetEntry)
 
             For i = 0 To _state.MergedEntries.MergeDict(targetEntry).Count - 1
 
-                Dim oldEnt = _file1.GetSection(_state.MergedEntries.MergeDict(targetEntry)(i))
+                Dim oldEntryName = _state.MergedEntries.MergeDict(targetEntry)(i)
+                Dim oldEnt = _file1.GetSection(oldEntryName)
 
                 For Each key In oldEnt.Keys
 
-                    If Not uniqueKeyValues.Contains(key.Value) Then
-                        combinedOldKeys.Add(key)
-                        uniqueKeyValues.Add(key.Value)
-                    End If
+                    If uniqueKeyValues.Contains(key.Value) Then Continue For
+
+                    combinedOldKeys.Add(key)
+                    uniqueKeyValues.Add(key.Value)
+                    sourceEntryMap(key.Value) = oldEntryName
 
                 Next
 
@@ -298,6 +316,7 @@ Public Class DiffOutputRenderer2
 
             Next
 
+            _mergerSourceMaps(targetEntry) = sourceEntryMap
             _keyAnalyzer.FindModificationsFromCombinedKeys(combinedOldKeys, _file2.GetSection(targetEntry))
 
         Next
@@ -370,8 +389,7 @@ Public Class DiffOutputRenderer2
             If Not isMerger AndAlso _state.MergedEntries.MergedEntryNames.Contains(entry) Then Continue For
             If isMerger AndAlso Not _state.MergedEntries.MergedEntryNames.Contains(entry) Then Continue For
 
-            Dim modCounts, addCounts, remCounts As New List(Of Integer)
-            Dim modKeyTypes, addKeyTypes, remKeyTypes As New List(Of String)
+            Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
             Dim newSectionVer = _file2.GetSection(entry)
 
             Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(entry),
@@ -385,11 +403,15 @@ Public Class DiffOutputRenderer2
 
             If removedKeys.Count + addedKeys.Count + updatedKeysDict.Count = 0 Then Continue For
 
-            results.Add(MakeDiff(newSectionVer, 2))
-            results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, addCounts))
-            results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, remCounts))
+            ' Look up source attribution map for merger entries
+            Dim sourceMap As Dictionary(Of String, String) = Nothing
+            If isMerger Then _mergerSourceMaps.TryGetValue(entry, sourceMap)
 
-            results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, addedKeys, removedKeys, modKeyTypes, modCounts))
+            results.Add(MakeDiff(newSectionVer, 2))
+            results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, sourceMap))
+            results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, sourceMap))
+
+            results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, addedKeys, removedKeys, modKeyTypes, sourceMap))
 
             results.Add(ItemizeMergedEntries(entry, isMerger))
 
@@ -405,8 +427,7 @@ Public Class DiffOutputRenderer2
     Public Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey2, List(Of iniKey2)),
                                        addedKeys As List(Of iniKey2),
                                        removedKeys As List(Of iniKey2),
-                                       modKeyTypes As List(Of String),
-                                       modCounts As List(Of Integer),
+                                       modKeyTypes As Dictionary(Of String, Integer),
                               Optional sourceEntryMap As Dictionary(Of String, String) = Nothing) As List(Of MenuSection)
 
         Dim result As New List(Of MenuSection)
@@ -417,11 +438,11 @@ Public Class DiffOutputRenderer2
 
         For Each changeList In updatedKeysDict.Values
 
-            recordModification(modKeyTypes, modCounts, changeList(0).KeyType)
+            recordModification(modKeyTypes, changeList(0).KeyType)
 
         Next
 
-        result.Add(summarizeEntryUpdate(modKeyTypes, modCounts, "Modified"))
+        result.Add(summarizeEntryUpdate(modKeyTypes, "Modified"))
 
         For i = 0 To updatedKeysDict.Count - 1
 
@@ -654,13 +675,11 @@ Public Class DiffOutputRenderer2
 
                 For Each key In oldEnt.Keys
 
-                    If Not uniqueKeyValues.Contains(key.Value) Then
+                    If uniqueKeyValues.Contains(key.Value) Then Continue For
 
-                        combinedOldKeys.Add(key)
-                        uniqueKeyValues.Add(key.Value)
-                        sourceEntryMap(key.Value) = oldEntryName
-
-                    End If
+                    combinedOldKeys.Add(key)
+                    uniqueKeyValues.Add(key.Value)
+                    sourceEntryMap(key.Value) = oldEntryName
 
                 Next
 
@@ -707,14 +726,11 @@ Public Class DiffOutputRenderer2
 
             ' Build value+type sets for membership checks
             Dim addedKeyIds As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-            For Each k In addedKeys
-                addedKeyIds.Add($"{k.KeyType}|{k.Value}")
-            Next
+            For Each k In addedKeys : addedKeyIds.Add($"{k.KeyType}|{k.Value}") : Next
+
 
             Dim removedKeyIds As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-            For Each k In removedKeys
-                removedKeyIds.Add($"{k.KeyType}|{k.Value}")
-            Next
+            For Each k In removedKeys : removedKeyIds.Add($"{k.KeyType}|{k.Value}") : Next
 
             Dim carriedOverKeys As New List(Of iniKey2)
             For Each key In _file2.GetSection(entry).Keys
@@ -741,8 +757,7 @@ Public Class DiffOutputRenderer2
 
             If addedKeys.Count + removedKeys.Count + updatedKeysDict.Count > 0 Then
 
-                Dim addKeyTypes, remKeyTypes, modKeyTypes As New List(Of String)
-                Dim addCounts, remCounts, modCounts As New List(Of Integer)
+                Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
 
                 ' New keys in the added entry (not from merged sources)
                 If addedKeys.Count > 0 Then
@@ -753,7 +768,7 @@ Public Class DiffOutputRenderer2
                     gLog()
                     gLog(novelKeysMsg, indent:=True)
                     results.Add(newKeysSection)
-                    results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, addCounts, sourceEntryMap))
+                    results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, sourceEntryMap))
 
                 End If
 
@@ -767,7 +782,7 @@ Public Class DiffOutputRenderer2
                     gLog()
                     gLog(KeysNotMergedMsg, indent:=True)
                     results.Add(droppedSection)
-                    results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, remCounts, sourceEntryMap))
+                    results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, sourceEntryMap))
 
                 End If
 
@@ -780,7 +795,7 @@ Public Class DiffOutputRenderer2
                     gLog()
                     gLog(capturedMsg, indent:=True)
                     results.Add(capturedSection)
-                    results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, addedKeys, removedKeys, modKeyTypes, modCounts, sourceEntryMap))
+                    results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, addedKeys, removedKeys, modKeyTypes, sourceEntryMap))
 
                 End If
 
@@ -799,37 +814,51 @@ Public Class DiffOutputRenderer2
     ''' <summary>
     ''' Records the number of changes made in a modified entry
     ''' </summary>
-    Private Sub recordModification(ByRef ktList As List(Of String),
-                                   ByRef countsList As List(Of Integer),
-                                   ByRef keyType As String)
+    Private Sub recordModification(ktDict As Dictionary(Of String, Integer), keyType As String)
 
-        If Not ktList.Contains(keyType) Then
-
-            ktList.Add(keyType)
-            countsList.Add(0)
-
-        End If
-
-        countsList(ktList.IndexOf(keyType)) += 1
+        If Not ktDict.ContainsKey(keyType) Then ktDict(keyType) = 0
+        ktDict(keyType) += 1
 
     End Sub
 
+
+
+
     ''' <summary>
-    ''' Creates and outputs summaries for entry modifications
+    ''' Creates a summary section for a modified entry detailing the number of
+    ''' added, removed, or updated keys of each type
     ''' </summary>
-    Private Function summarizeEntryUpdate(keyTypeList As List(Of String),
-                                          countList As List(Of Integer),
-                                          changeType As String) As MenuSection
+    ''' 
+    ''' <param name="keyTypeList">
+    ''' List of key types which have been changed in the current entry
+    ''' </param>
+    ''' 
+    ''' <param name="countList">
+    ''' Parallel list to <c>keyTypeList</c> which tracks the number of changes 
+    ''' for each key type for the modification summary
+    ''' </param>
+    ''' 
+    ''' <param name="changeType">
+    ''' The type of change being summarized (e.g., "Added", "Removed", "Updated")
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' A <c>MenuSection</c> containing the summary of changes for the entry
+    ''' </returns>
+    Private Function summarizeEntryUpdate(ktDict As Dictionary(Of String, Integer), changeType As String) As MenuSection
 
         Dim result As New MenuSection
+        Dim total = ktDict.Count
+        Dim i = 0
 
-        For i = 0 To keyTypeList.Count - 1
+        For Each kvp In ktDict
 
-            Dim out = $"{changeType} {countList(i)} {keyTypeList(i)}{If(countList(i) > 1, "s", "")}"
+            Dim out = $"{changeType} {kvp.Value} {kvp.Key}{If(kvp.Value > 1, "s", "")}"
             result.AddColoredLine(out, ConsoleColor.Yellow, centered:=True)
-            result.AddBlank(i = keyTypeList.Count - 1)
+            result.AddBlank(i = total - 1)
 
             gLog(out, indent:=True, leadr:=i = 0)
+            i += 1
 
         Next
 
@@ -840,11 +869,28 @@ Public Class DiffOutputRenderer2
     ''' <summary>
     ''' Prints any added or removed keys from an updated entry to the user
     ''' </summary>
+    ''' 
+    ''' <param name="kl">
+    ''' List of added or removed keys to itemize
+    ''' </param>
+    '''
+    ''' <param name="wasAdded">
+    ''' Whether the keys in <c>kl</c> were added or removed
+    ''' </param>
+    '''
+    ''' <param name="ktList">
+    ''' List of key types which have been changed in the current entry,
+    ''' used to track counts for the modification summary
+    ''' </param>
+    '''
+    ''' <param name="countList">
+    ''' Parallel list to <c>ktList</c> which tracks the number of changes 
+    ''' for each key type for the modification summary
+    ''' </param>
     Private Function ItemizeChangesFromList(kl As List(Of iniKey2),
-                                        wasAdded As Boolean,
-                                  ByRef ktList As List(Of String),
-                                  ByRef countList As List(Of Integer),
-                               Optional sourceEntryMap As Dictionary(Of String, String) = Nothing) As List(Of MenuSection)
+                                            wasAdded As Boolean,
+                                            ktDict As Dictionary(Of String, Integer),
+                                   Optional sourceEntryMap As Dictionary(Of String, String) = Nothing) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
 
@@ -853,15 +899,10 @@ Public Class DiffOutputRenderer2
         gLog(Nothing, ascend:=True)
 
         Dim changeTxt = If(wasAdded, "Added", "Removed")
-        Dim tmpKtList = ktList
-        Dim tmpCountList = countList
 
-        kl.ForEach(Sub(key) recordModification(tmpKtList, tmpCountList, key.KeyType))
+        kl.ForEach(Sub(key) recordModification(ktDict, key.KeyType))
 
-        ktList = tmpKtList
-        countList = tmpCountList
-
-        out.Add(summarizeEntryUpdate(ktList, countList, changeTxt))
+        out.Add(summarizeEntryUpdate(ktDict, changeTxt))
 
         Dim result As New MenuSection
 
@@ -897,15 +938,36 @@ Public Class DiffOutputRenderer2
     ''' </summary>
     Private Class KeyMovementDetail
 
-        ''' <summary>The name portion of the moved key (the part before '=' on disk)</summary>
+        ''' <summary>
+        ''' The name portion of the moved key (the part before '=' on disk)
+        ''' </summary>
         Public Property KeyName As String
 
-        ''' <summary>The value of the moved key (everything after the '=' on disk)</summary>
+        ''' <summary>
+        ''' The value of the moved key (everything after the '=' on disk)
+        ''' </summary>
         Public Property KeyValue As String
 
-        ''' <summary>The name of the entry this key was moved into</summary>
+        ''' <summary>
+        ''' The name of the entry this key was moved into
+        ''' </summary>
         Public Property Target As String
 
+        ''' <summary>
+        ''' Creates a new KeyMovementDetail with the given key name, value, and target entry
+        ''' </summary>
+        ''' 
+        ''' <param name="name">
+        ''' The name portion of the moved key (the part before '=' on disk)
+        ''' </param>
+        ''' 
+        ''' <param name="value">
+        ''' The value of the moved key (everything after the '=' on disk)
+        ''' </param>
+        ''' 
+        ''' <param name="target">
+        ''' 
+        ''' </param>
         Public Sub New(name As String, value As String, target As String)
 
             KeyName = name

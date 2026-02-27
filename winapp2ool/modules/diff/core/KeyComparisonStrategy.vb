@@ -30,6 +30,8 @@ Public MustInherit Class KeyComparisonStrategy
     Protected ReadOnly regexCharsIn As String() = {"*", "+", "{", "}", "[", "]", "$", "(", ")"}
     Protected ReadOnly regexCharsOut As String() = {".*", "\+", "\{", "\}", "\[", "\]", "\$", "\(", "\)"}
 
+    Private Shared ReadOnly _regexCache As New Concurrent.ConcurrentDictionary(Of String, Regex)(StringComparer.Ordinal)
+
 
     ''' <summary>
     ''' Compares two iniKey objects for equivalence
@@ -124,9 +126,9 @@ Public MustInherit Class KeyComparisonStrategy
 
         End If
 
-        ' For other wildcard patterns, use regex matching
-        ' Single Match call: .Success replaces the redundant IsMatch, .Value replaces .ToString
-        Dim firstMatch = Regex.Match(oldVal, newVal, RegexOptions.IgnoreCase)
+        ' For other wildcard patterns, use compiled regex matching (cached per pattern)
+        Dim compiled = _regexCache.GetOrAdd(newVal, Function(p) New Regex(p, RegexOptions.IgnoreCase))
+        Dim firstMatch = compiled.Match(oldVal)
         If Not firstMatch.Success Then Return False
 
         ' Ensure we captured from the beginning to avoid false positives
@@ -174,9 +176,6 @@ End Class
 Public Class PathKeyComparisonStrategy
 
     Inherits KeyComparisonStrategy
-
-    Private ReadOnly regexCharsIn As String() = {"*", "+", "{", "}", "[", "]", "$", "(", ")"}
-    Private ReadOnly regexCharsOut As String() = {".*", "\+", "\{", "\}", "\[", "\]", "\$", "\(", "\)"}
 
     Public Overrides Function Compare(newKey As iniKey,
                                       oldKey As iniKey,
@@ -300,6 +299,7 @@ Public Class PathKeyComparisonStrategy
                 If splitPath(k).Contains(regexCharsIn(j)) Then splitPath(k) = splitPath(k).Replace(regexCharsIn(j), regexCharsOut(j))
 
             Next
+
         Next
 
     End Sub
@@ -470,7 +470,7 @@ Public Class DetectKeyComparisonStrategy
 
         If isRegKey Then
 
-            ' RegKey format: HKCU\Path|*.* 
+            ' RegKey format: HKCU\Path|Key
             Dim newSplit = newKey.Value.Split(CChar("|"))
             Dim oldSplit = oldKey.Value.Split(CChar("|"))
             newPath = newSplit(0)
@@ -497,7 +497,7 @@ Public Class DetectKeyComparisonStrategy
 
         End If
 
-        ' ✅ Registry path hierarchy: parent captures children
+        ' Registry path hierarchy: parent captures children
         ' HKCU\Software\App captures HKCU\Software\App\1.0
         ' HKCU\Software\App captures HKCU\Software\App\1.0\SubKey
         If oldPath.StartsWith(newPath & "\", StringComparison.InvariantCultureIgnoreCase) Then
@@ -574,13 +574,22 @@ End Class
 ''' </summary>
 Public Class KeyComparisonStrategyFactory
 
-    ''' <summary>Singleton instance of <c>SimpleKeyComparisonStrategy</c> for non-path key types</summary>
+    ''' <summary>
+    ''' Singleton instance of <c>SimpleKeyComparisonStrategy</c> 
+    ''' for non-path key types
+    ''' </summary>
     Private Shared ReadOnly simpleStrategy As New SimpleKeyComparisonStrategy()
 
-    ''' <summary>Singleton instance of <c>PathKeyComparisonStrategy</c> for FileKey and DetectFile key types</summary>
+    ''' <summary>
+    ''' Singleton instance of <c>PathKeyComparisonStrategy</c>
+    ''' for FileKey and DetectFile key types
+    ''' </summary>
     Private Shared ReadOnly pathStrategy As New PathKeyComparisonStrategy()
 
-    ''' <summary>Singleton instance of <c>DetectKeyComparisonStrategy</c> for Detect and RegKey key types</summary>
+    ''' <summary>
+    ''' Singleton instance of <c>DetectKeyComparisonStrategy</c>
+    ''' for Detect and RegKey key types
+    ''' </summary>
     Private Shared ReadOnly detectStrategy As New DetectKeyComparisonStrategy()
 
     ''' <summary>
@@ -661,6 +670,24 @@ Public Class KeyComparisonStrategyFactory
     ''' <summary>
     ''' Compares two <c>iniKey2</c> keys using the appropriate strategy.
     ''' </summary>
+    ''' 
+    ''' <param name="newKey">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="oldKey">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="matchedFileKeyHasMoreParams">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <param name="possibleWildCardReduction">
+    ''' 
+    ''' </param>
+    ''' 
+    ''' <returns></returns>
     Public Shared Function CompareKeys(newKey As iniKey2,
                                        oldKey As iniKey2,
                         Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,

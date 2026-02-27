@@ -330,32 +330,47 @@ Public Class DiffStatisticsCalculator2
 
     End Function
 
-    ''' <summary>
-    ''' Determines which keys from each old entry were captured by any new entry
-    ''' </summary>
     Private Sub ComputeKeyCaptureRates(oldEntryCaptures As Dictionary(Of String, OldEntryKeyTracking))
 
-        Dim allAddedEntries = _state.ModifiedEntries.AddedEntryNames.Where(
-            Function(e) Not _state.MergedEntries.RenamedEntryNames.Contains(e)
-        ).ToList()
+        ' Build reverse lookup: oldEntryName -> Set(Of newEntryNames) it was merged into
+        Dim targetsForOld As New Dictionary(Of String, HashSet(Of String))(StringComparer.OrdinalIgnoreCase)
+        For Each kvp In _state.MergedEntries.MergeDict
+            For Each oldName In kvp.Value
+                If Not targetsForOld.ContainsKey(oldName) Then targetsForOld(oldName) = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+                targetsForOld(oldName).Add(kvp.Key)
+            Next
+        Next
 
         For Each oldEntryKvp In oldEntryCaptures
 
             Dim tracking = oldEntryKvp.Value
             Dim oldSection = _file1.GetSection(oldEntryKvp.Key)
 
-            For Each newEntryName In allAddedEntries
+            ' Only check the specific new entries this old entry was merged into
+            Dim relevantTargets As HashSet(Of String) = Nothing
+            If Not targetsForOld.TryGetValue(oldEntryKvp.Key, relevantTargets) Then Continue For
+
+            For Each newEntryName In relevantTargets
 
                 Dim newSection = _file2.GetSection(newEntryName)
+
+                Dim newKeyValues = New HashSet(Of String)(newSection.Keys.Select(Function(k) k.Value), StringComparer.OrdinalIgnoreCase)
 
                 For Each oldKey In oldSection.Keys
 
                     If tracking.CapturedKeyValues.Contains(oldKey.Value) Then Continue For
 
+                    ' Fast path: exact value match avoids CompareKeys entirely
+                    If newKeyValues.Contains(oldKey.Value) Then
+                        tracking.CapturedKeyValues.Add(oldKey.Value)
+                        If oldKey.KeyType = "FileKey" OrElse oldKey.KeyType = "RegKey" Then tracking.CapturedContentKeyValues.Add(oldKey.Value)
+                        Continue For
+                    End If
+
+                    ' Slow path: wildcard / regex comparison
                     For Each newKey In newSection.Keys
 
-                        If String.Equals(newKey.Value, oldKey.Value, StringComparison.OrdinalIgnoreCase) OrElse
-                           KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey) Then
+                        If KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey) Then
 
                             tracking.CapturedKeyValues.Add(oldKey.Value)
                             If oldKey.KeyType = "FileKey" OrElse oldKey.KeyType = "RegKey" Then tracking.CapturedContentKeyValues.Add(oldKey.Value)

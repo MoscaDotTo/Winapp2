@@ -98,9 +98,12 @@ Public Class MergeDetector2
 
         SyncLock _state.Caches.CachedOldEntries2
 
-            If Not _state.Caches.CachedOldEntries2.ContainsKey(section2.Name) Then _state.Caches.CachedOldEntries2.Add(section2.Name, section2)
-
-            Return _state.Caches.CachedOldEntries2(section2.Name)
+            Dim cached As iniSection2 = Nothing
+            If Not _state.Caches.CachedOldEntries2.TryGetValue(section2.Name, cached) Then
+                cached = section2
+                _state.Caches.CachedOldEntries2(section2.Name) = cached
+            End If
+            Return cached
 
         End SyncLock
 
@@ -110,9 +113,12 @@ Public Class MergeDetector2
 
         SyncLock _state.Caches.CachedNewEntries2
 
-            If Not _state.Caches.CachedNewEntries2.ContainsKey(section2.Name) Then _state.Caches.CachedNewEntries2.Add(section2.Name, section2)
-
-            Return _state.Caches.CachedNewEntries2(section2.Name)
+            Dim cached As iniSection2 = Nothing
+            If Not _state.Caches.CachedNewEntries2.TryGetValue(section2.Name, cached) Then
+                cached = section2
+                _state.Caches.CachedNewEntries2(section2.Name) = cached
+            End If
+            Return cached
 
         End SyncLock
 
@@ -208,9 +214,9 @@ Public Class MergeDetector2
 
     Private Function IsRenamedFrom(newName As String, oldName As String) As Boolean
 
-        Dim idx = _state.MergedEntries.RenamedEntryPairs.IndexOf(newName)
-        If idx < 0 OrElse idx + 1 >= _state.MergedEntries.RenamedEntryPairs.Count Then Return False
-        Return _state.MergedEntries.RenamedEntryPairs(idx + 1).Equals(oldName, StringComparison.InvariantCultureIgnoreCase)
+        Dim storedOldName As String = Nothing
+        If Not _state.MergedEntries.RenamedEntryPairs.TryGetValue(newName, storedOldName) Then Return False
+        Return storedOldName.Equals(oldName, StringComparison.InvariantCultureIgnoreCase)
 
     End Function
 
@@ -343,18 +349,16 @@ Public Class MergeDetector2
 
         SyncLock _state.MergedEntries
 
-            Dim ind = _state.MergedEntries.RenamedEntryPairs.IndexOf(newName)
+            Dim storedOldName As String = Nothing
 
-            If ind >= 0 Then
+            If _state.MergedEntries.RenamedEntryPairs.TryGetValue(newName, storedOldName) Then
 
-                Return ind + 1 < _state.MergedEntries.RenamedEntryPairs.Count AndAlso
-                       _state.MergedEntries.RenamedEntryPairs(ind + 1).Equals(oldSection2.Name, StringComparison.InvariantCultureIgnoreCase)
+                Return storedOldName.Equals(oldSection2.Name, StringComparison.InvariantCultureIgnoreCase)
 
             End If
 
             _state.MergedEntries.RenamedEntryNames.Add(newName)
-            _state.MergedEntries.RenamedEntryPairs.Add(newName)
-            _state.MergedEntries.RenamedEntryPairs.Add(oldSection2.Name)
+            _state.MergedEntries.RenamedEntryPairs.Add(newName, oldSection2.Name)
             newSection2 = _diffFile2.GetSection(newName)
 
         End SyncLock
@@ -384,10 +388,8 @@ Public Class MergeDetector2
 
             If Not _state.MergedEntries.RenamedEntryNames.Contains(mergeName) Then Return
 
-            Dim ind = _state.MergedEntries.RenamedEntryPairs.IndexOf(mergeName)
-            If ind < 0 OrElse ind + 1 >= _state.MergedEntries.RenamedEntryPairs.Count Then Return
-
-            Dim renameHolder = _state.MergedEntries.RenamedEntryPairs(ind + 1)
+            Dim renameHolder As String = Nothing
+            If Not _state.MergedEntries.RenamedEntryPairs.TryGetValue(mergeName, renameHolder) Then Return
 
             If Not _state.MergedEntries.MergeDict(mergeName).Contains(renameHolder) Then _state.MergedEntries.MergeDict(mergeName).Add(renameHolder)
 
@@ -395,8 +397,7 @@ Public Class MergeDetector2
 
             If Not _state.MergedEntries.OldToNewMergeDict(renameHolder).Contains(mergeName) Then _state.MergedEntries.OldToNewMergeDict(renameHolder).Add(mergeName)
 
-            _state.MergedEntries.RenamedEntryPairs.RemoveAt(ind + 1)
-            _state.MergedEntries.RenamedEntryPairs.RemoveAt(ind)
+            _state.MergedEntries.RenamedEntryPairs.Remove(mergeName)
             _state.MergedEntries.RenamedEntryNames.Remove(mergeName)
 
         End SyncLock
@@ -410,25 +411,40 @@ End Class
 ''' </summary>
 Public Class MatchResult
 
-    ''' <summary>Whether the match is a rename (all keys matched, counts equal, no structural changes)</summary>
+    ''' <summary>
+    ''' Whether the match is a rename
+    ''' (all keys matched, counts equal, no structural changes)
+    ''' </summary>
     Public Property IsRename As Boolean
 
-    ''' <summary>Whether the old entry was merged into one or more new entries</summary>
+    ''' <summary>
+    ''' Whether the old entry was merged into one or more new entries
+    ''' </summary>
     Public Property IsMerge As Boolean
 
-    ''' <summary>Whether a best candidate was found but no full merge threshold was met</summary>
+    ''' <summary>
+    ''' Whether a best candidate was found but no full merge threshold was met
+    ''' </summary>
     Public Property HasPartialMatch As Boolean
 
-    ''' <summary>The primary target entry name (rename target or best merge target)</summary>
+    ''' <summary>
+    ''' The primary target entry name (rename target or best merge target)
+    ''' </summary>
     Public Property TargetName As String
 
-    ''' <summary>All target entry names; may contain multiple entries in the case of a split merger</summary>
+    ''' <summary>
+    ''' All target entry names; may contain multiple entries in the case of a split merger
+    ''' </summary>
     Public Property AllTargetNames As New List(Of String)
 
-    ''' <summary>Number of old keys matched in the best candidate entry</summary>
+    ''' <summary>
+    ''' Number of old keys matched in the best candidate entry
+    ''' </summary>
     Public Property TotalMatchedKeys As Integer
 
-    ''' <summary>Total number of old FileKeys and RegKeys in the entry being assessed</summary>
+    ''' <summary>
+    ''' Total number of old FileKeys and RegKeys in the entry being assessed
+    ''' </summary>
     Public Property TotalOldKeys As Integer
 
 End Class

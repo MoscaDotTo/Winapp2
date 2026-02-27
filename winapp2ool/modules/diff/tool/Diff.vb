@@ -223,6 +223,8 @@ Module Diff
 
         setNextMenuHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
 
+        crl()
+
     End Sub
 
     ''' <summary>
