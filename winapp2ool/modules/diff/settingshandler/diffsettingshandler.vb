@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -21,15 +21,11 @@ Option Strict On
 ''' Provides methods for managing the Diff module settings, including support methods for syncing to disk
 ''' Also provides the function which restores the default state of the Diff module's properties
 ''' </summary>
-''' 
-''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 Module diffsettingshandler
 
     ''' <summary> 
     ''' Restores the default state of the Diff module's properties 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-06-10 | Code last updated: 2020-06-10
     Public Sub InitDefaultDiffSettings()
 
         DownloadDiffFile = Not isOffline
@@ -37,39 +33,28 @@ Module diffsettingshandler
         ShowFullEntries = False
         SaveDiffLog = False
         DiffModuleSettingsChanged = False
-        DiffFile3.resetParams()
-        DiffFile2.resetParams()
-        DiffFile1.resetParams()
-        restoreDefaultSettings(NameOf(Diff), AddressOf CreateDiffSettingsSection)
-
-    End Sub
-
-    ''' <summary> 
-    ''' Assigns the module settings to Diff based on the current disk-writable settings representation
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2024-05-08 | Code last updated: 2024-05-08
-    Public Sub GetSerializedDiffSettings()
-
-        LoadModuleSettingsFromDict(NameOf(Diff), GetType(diffsettings))
+        DiffFile1 = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2-old.ini", mustExist:=True)
+        DiffFile2 = New iniFileChooser(Environment.CurrentDirectory, "", "winapp2.ini", mustExist:=True)
+        DiffFile3 = New iniFileChooser(Environment.CurrentDirectory, "diff.txt", "diff.txt", mustExist:=False)
+        SaveModule2(NameOf(Diff), GetType(diffsettings))
 
     End Sub
 
     ''' <summary>
-    ''' Adds the current state of the module's settings into the disk-writable settings representation 
+    ''' Loads the Diff module's settings from <c>SettingsFile2</c> into the module's properties.
     ''' </summary>
-    ''' 
-    ''' <remarks>
-    ''' Most often, this is the default state of these settings 
-    ''' </remarks>
-    ''' 
-    ''' Docs last updated: 2023-06-12 | Code last updated: 2025-08-05
+    Public Sub GetSerializedDiffSettings()
+
+        LoadModule2(NameOf(Diff), GetType(diffsettings))
+
+    End Sub
+
+    ''' <summary>
+    ''' Writes the Diff module's current property values into <c>SettingsFile2</c>.
+    ''' </summary>
     Public Sub CreateDiffSettingsSection()
 
-        Dim settingsModule = GetType(diffsettings)
-        Dim moduleName = NameOf(Diff)
-
-        createModuleSettingsSection(moduleName, settingsModule)
+        SaveModule2(NameOf(Diff), GetType(diffsettings))
 
     End Sub
 
