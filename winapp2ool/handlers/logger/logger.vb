@@ -26,6 +26,11 @@ Imports System.Text
 Public Module logger
 
     ''' <summary>
+    ''' 
+    ''' </summary>
+    Private ReadOnly _logLock As New Object
+
+    ''' <summary>
     ''' The global Winapp2ool log, containing everything logged during the current session
     ''' </summary>
     Public Property GlobalLog As New strList
@@ -87,8 +92,6 @@ Public Module logger
     ''' <param name="leadr"> 
     ''' Indicates that an empty line should be added into the log before <c> <paramref name="logstr"/> </c> 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-24 | Code last updated: 2025-06-19
     Public Sub gLog(Optional logstr As String = "",
                     Optional cond As Boolean = True,
                     Optional ascend As Boolean = False,
@@ -102,21 +105,25 @@ Public Module logger
 
         If Not cond Then Return
 
-        If leadr Then GlobalLog.add("")
-        If indent Then nestCount += indAmt
-        If ascend Then nestCount += ascAmt
+        SyncLock _logLock
 
-        If logstr IsNot Nothing Then
+            If leadr Then GlobalLog.add("")
+            If indent Then nestCount += indAmt
+            If ascend Then nestCount += ascAmt
 
-            Dim buffer = New String(" "c, nestCount * 2)
-            logstr = buffer + logstr
-            GlobalLog.add(logstr)
+            If logstr IsNot Nothing Then
 
-        End If
+                Dim buffer = New String(" "c, Math.Max(nestCount * 2, 0))
+                logstr = buffer + logstr
+                GlobalLog.add(logstr)
 
-        If indent Then nestCount -= indAmt
-        If descend Then nestCount -= descAmt
-        If buffr Then GlobalLog.add("")
+            End If
+
+            If indent Then nestCount -= indAmt
+            If descend Then nestCount -= descAmt
+            If buffr Then GlobalLog.add("")
+
+        End SyncLock
 
     End Sub
 
@@ -376,7 +383,8 @@ Public Module logger
 
         For i = GlobalLog.Items.Count - 1 To 0 Step -1
 
-            If Not GlobalLog.Items(i).Contains(startingPhrase) Then Continue For
+
+            If GlobalLog.Items(i) Is Nothing OrElse Not GlobalLog.Items(i).Contains(startingPhrase) Then Continue For
 
             startInd = i
             Exit For
