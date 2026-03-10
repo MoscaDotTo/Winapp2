@@ -102,7 +102,9 @@ Module SettingsManager
         updateSettings(callingModule, $"{settingName}_Name", chooser.Name)
         updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
 
-        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso saveSettingsToDisk)
+        Dim shouldWrite = Not IsCommandLineMode AndAlso saveSettingsToDisk
+        settingsFile.overwriteToFile(settingsFile.toString, shouldWrite)
+        FlushIfDirty2(shouldWrite)
 
     End Sub
 
@@ -197,7 +199,9 @@ Module SettingsManager
         updateSettings(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
         updateSettings(callingModule, settingChangedName, True.ToString)
 
-        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso saveSettingsToDisk)
+        Dim shouldWrite = Not IsCommandLineMode AndAlso saveSettingsToDisk
+        settingsFile.overwriteToFile(settingsFile.toString, shouldWrite)
+        FlushIfDirty2(shouldWrite)
 
     End Sub
 

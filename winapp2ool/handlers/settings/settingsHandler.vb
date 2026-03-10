@@ -89,10 +89,22 @@ Public Module settingsHandler
     ''' Docs last updated: 2026-02-06 | Code last updated: 2026-02-06
     Public Sub FlushSettingsIfDirty()
 
-        If _settingsAreDirty Then
-            saveSettingsFile()
-            FlushIfDirty2(saveSettingsToDisk)
-        End If
+        If _settingsAreDirty Then saveSettingsFile()
+
+        ' Before flushing SettingsFile2, ensure it contains every section that the legacy
+        ' backend knows about. Without this, SettingsFile2.ToString() would only contain
+        ' sections explicitly set via SetValue2 (e.g. just [Diff] on a fresh install),
+        ' overwriting the full file and losing all other modules' saved settings.
+        For Each section In settingsFile.Sections.Values
+            If SettingsFile2.Contains(section.Name) Then Continue For
+            Dim s2 As New iniSection2(section.Name)
+            For Each key In section.Keys.Keys
+                s2.AddKey(New iniKey2(key.toString()))
+            Next
+            SettingsFile2.AddSection(s2)
+        Next
+
+        FlushIfDirty2(saveSettingsToDisk)
 
     End Sub
 
@@ -127,19 +139,25 @@ Public Module settingsHandler
                               settingName As String,
                               newVal As String)
 
-        settingsDict(targetModule)(settingName) = newVal
+        ' Legacy path: update settingsDict + settingsFile only if module is still registered there
+        If settingsDict.ContainsKey(targetModule) Then
 
-        For Each key In settingsFile.getSection(targetModule).Keys.Keys
+            settingsDict(targetModule)(settingName) = newVal
 
-            If Not key.Name = settingName Then Continue For
+            For Each key In settingsFile.getSection(targetModule).Keys.Keys
 
-            key.Value = newVal
-            Exit For
+                If Not key.Name = settingName Then Continue For
 
-        Next
+                key.Value = newVal
+                Exit For
 
-        ' Defer disk write - settings will be saved when FlushSettingsIfDirty is called
-        MarkSettingsDirty()
+            Next
+
+            MarkSettingsDirty()
+
+        End If
+
+        ' New path: always sync SettingsFile2
         SetValue2(targetModule, settingName, newVal)
 
     End Sub
@@ -202,6 +220,7 @@ Public Module settingsHandler
         settingsFile.init()
         loadAllModuleSettings()
         Load2()
+        loadAllModuleSettings2()
 
         gLog(descend:=True)
         gLog("Settings loaded")
@@ -221,7 +240,6 @@ Public Module settingsHandler
         {NameOf(WinappDebug), New KeyValuePair(Of Action, Action)(AddressOf CreateLintSettingsSection, AddressOf getSerializedLintSettings)},
         {NameOf(Trim), New KeyValuePair(Of Action, Action)(AddressOf createTrimSettingsSection, AddressOf getSerializedTrimSettings)},
         {NameOf(Transmute), New KeyValuePair(Of Action, Action)(AddressOf createTransmuteSettingsSection, AddressOf getSerializedTransmuteSettings)},
-        {NameOf(Diff), New KeyValuePair(Of Action, Action)(AddressOf CreateDiffSettingsSection, AddressOf GetSerializedDiffSettings)},
         {NameOf(CCiniDebug), New KeyValuePair(Of Action, Action)(AddressOf createCCDBSettingsSection, AddressOf getSerializedDebugSettings)},
         {NameOf(Downloader), New KeyValuePair(Of Action, Action)(AddressOf createDownloadSettingsSection, AddressOf getSerializedDownloaderSettings)},
         {NameOf(BrowserBuilder), New KeyValuePair(Of Action, Action)(AddressOf createBrowserBuilderSettingsSection, AddressOf getSerializedBrowserBuilderSettings)},
@@ -236,10 +254,19 @@ Public Module settingsHandler
     End Sub
 
 
-    ''' <summary> 
+    ''' <summary>
+    ''' Loads settings for modules that have migrated to <c>SettingsHandler2</c>.
+    ''' Each migrated module's <c>LoadModule2</c> call is added here as modules migrate.
+    ''' </summary>
+    Private Sub loadAllModuleSettings2()
+        If readSettingsFromDisk Then LoadModule2(NameOf(Diff), GetType(diffsettings))
+        If readSettingsFromDisk Then LoadModule2(NameOf(UWPBuilder), GetType(uwpbuildersettings))
+    End Sub
+
+    ''' <summary>
     ''' Clears the settings belonging to the <c> <paramref name="moduleName"/>
     ''' </c> given from the settingsDict and from the respective
-    ''' <c> iniSection </c> in the settingsFile 
+    ''' <c> iniSection </c> in the settingsFile
     ''' </summary>
     ''' 
     ''' <param name="moduleName"> 
