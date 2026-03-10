@@ -45,7 +45,7 @@ Module maintoolmenu
             .AddOption("Transmute", "Add, replace, or remove entire sections or individual keys from winapp2.ini") _
             .AddOption("Diff", "Generate a context-aware changelog between two winapp2.ini files") _
             .AddOption("CCiniDebug", "Remove stale winapp2.ini configurations from ccleaner.ini") _
-            .AddOption("Browser Builder", "Generate winapp2.ini entries for web browsers") _
+            .AddOption("Entry Lab", "Generate winapp2.ini entries from templates") _
             .AddOption("Combine", "Join together a collection of ini files into one") _
             .AddOption("CC7Patcher", "Install winapp2.ini for CCleaner 7").AddBlank() _
             .AddOption("Downloader", "Download files from the Winapp2 GitHub") _
@@ -91,7 +91,7 @@ Module maintoolmenu
         {NameOf(Transmute), New KeyValuePair(Of Action, Action(Of String))(AddressOf printTransmuteMainMenu, AddressOf handleTransmuteUserInput)},
         {NameOf(Diff), New KeyValuePair(Of Action, Action(Of String))(AddressOf printDiffMainMenu, AddressOf handleDiffUserInput)},
         {NameOf(CCiniDebug), New KeyValuePair(Of Action, Action(Of String))(AddressOf printCCDBMainMenu, AddressOf handleCCDBMUserInput)},
-        {NameOf(BrowserBuilder), New KeyValuePair(Of Action, Action(Of String))(AddressOf printBrowserBuilderMenu, AddressOf handleBrowserBuilderInput)},
+        {"Entry Lab", New KeyValuePair(Of Action, Action(Of String))(AddressOf printEntryLabMenu, AddressOf handleEntryLabInput)},
         {NameOf(Combine), New KeyValuePair(Of Action, Action(Of String))(AddressOf printCombineMainMenu, AddressOf handleCombineUserInput)},
         {NameOf(CC7Patcher), New KeyValuePair(Of Action, Action(Of String))(AddressOf printCC7PatcherMenu, AddressOf handleCC7PatcherInput)},
         {NameOf(Downloader), New KeyValuePair(Of Action, Action(Of String))(AddressOf printDownloadMainMenu, AddressOf handleDownloadUserInput)},
@@ -119,7 +119,7 @@ Module maintoolmenu
             ' Transmute                                    -> 3 
             ' Diff                                         -> 4 
             ' CCiniDebug                                   -> 5 
-            ' Browser Builder                              -> 6 
+            ' Entry Lab                                    -> 6
             ' Combine                                      -> 7
             ' CC7Patcher                                   -> 8
             ' Downloader                                   -> 9
