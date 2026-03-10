@@ -18,9 +18,10 @@
 Option Strict On
 
 ''' <summary>
-''' Adapts <c>MergeDetector</c> for use with <c>iniFile2</c>/<c>iniSection2</c>.
-''' Public API takes <c>iniSection2</c>; all internal matching logic uses <c>iniSection2</c>/<c>iniKey2</c>
-''' natively without any legacy type conversion.
+''' Detects when a removed entry has been renamed to or merged into one or more new entries.
+''' Matches candidates by comparing <c>iniKey2</c> values, records confirmed renames and
+''' mergers in <c>DiffState</c>, and invokes a callback for key-level change tracking
+''' when a match is confirmed.
 ''' </summary>
 Public Class MergeDetector2
 
@@ -31,9 +32,18 @@ Public Class MergeDetector2
     ''' <summary>
     ''' Initializes a new instance of <c>MergeDetector2</c>
     ''' </summary>
-    ''' <param name="diffState">Shared diff state tracking all entry changes</param>
-    ''' <param name="newFile">The new version of winapp2.ini as an <c>iniFile2</c></param>
-    ''' <param name="findModsCallback">Callback invoked to track key-level changes when a rename or merger is confirmed</param>
+    ''' 
+    ''' <param name="diffState">
+    ''' Shared diff state tracking all entry changes
+    ''' </param>
+    ''' 
+    ''' <param name="newFile">
+    ''' The new version of winapp2.ini
+    ''' </param>
+    ''' 
+    ''' <param name="findModsCallback">
+    ''' Callback invoked to track key-level changes when a rename or merger is confirmed
+    ''' </param>
     Public Sub New(diffState As DiffState,
                    newFile As iniFile2,
                    findModsCallback As Action(Of iniSection2, iniSection2))
@@ -44,6 +54,22 @@ Public Class MergeDetector2
 
     End Sub
 
+    ''' <summary>
+    ''' Determines whether a removed entry has been renamed or merged into one or more new entries.
+    ''' Updates <c>DiffState</c> tracking collections accordingly.
+    ''' </summary>
+    '''
+    ''' <param name="candidates">
+    ''' New entries (added or modified) that are potential rename or merger targets for <paramref name="oldSection2"/>
+    ''' </param>
+    '''
+    ''' <param name="oldSection2">
+    ''' The removed entry being assessed
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c>True</c> if a rename or merger was recorded; <c>False</c> if no match was found
+    ''' </returns>
     Public Function AssessRenamesAndMergers(candidates As List(Of iniSection2),
                                             oldSection2 As iniSection2) As Boolean
 
@@ -74,7 +100,27 @@ Public Class MergeDetector2
 
     End Function
 
-    Private Sub TrackBestMatches(isMerge As Boolean, bestMatch As MatchResult, oldSection2 As iniSection2)
+    ''' <summary>
+    ''' Dispatches merger tracking for all qualifying targets in <paramref name="bestMatch"/>.
+    ''' When <paramref name="isMerge"/> is <c>False</c>, only the primary target is tracked
+    ''' (used when a rename was rejected and the entry is reclassified as a merger).
+    ''' </summary>
+    ''' 
+    ''' <param name="isMerge">
+    ''' <c>True</c> to track all targets in <c>AllTargetNames</c> <br />
+    ''' <c>False</c> to track only <c>TargetName</c>
+    ''' </param>
+    ''' 
+    ''' <param name="bestMatch">
+    ''' The match result from <c>FindBestMatch</c>
+    ''' </param>
+    ''' 
+    ''' <param name="oldSection2">
+    ''' The removed entry being tracked
+    ''' </param>
+    Private Sub TrackBestMatches(isMerge As Boolean,
+                                 bestMatch As MatchResult,
+                                 oldSection2 As iniSection2)
 
         If Not isMerge Then
 
@@ -94,36 +140,81 @@ Public Class MergeDetector2
 
     End Sub
 
+    ''' <summary>
+    ''' Returns the cached <c>iniSection2</c> for the given old entry, inserting it on first access
+    ''' </summary>
+    ''' 
+    ''' <param name="section2">
+    ''' The old entry to cache
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' The cached instance (always the same object for a given entry name)
+    ''' </returns>
     Private Function GetOrCreateCachedSection2(section2 As iniSection2) As iniSection2
 
         SyncLock _state.Caches.CachedOldEntries2
 
             Dim cached As iniSection2 = Nothing
             If Not _state.Caches.CachedOldEntries2.TryGetValue(section2.Name, cached) Then
+
                 cached = section2
                 _state.Caches.CachedOldEntries2(section2.Name) = cached
+
             End If
+
             Return cached
 
         End SyncLock
 
     End Function
 
+    ''' <summary>
+    ''' Returns the cached <c>iniSection2</c> for the given new entry, inserting it on first access
+    ''' </summary>
+    ''' 
+    ''' <param name="section2">
+    ''' The new entry to cache
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' The cached instance (always the same object for a given entry name)
+    ''' </returns>
     Private Function GetOrCreateNewCachedSection2(section2 As iniSection2) As iniSection2
 
         SyncLock _state.Caches.CachedNewEntries2
 
             Dim cached As iniSection2 = Nothing
             If Not _state.Caches.CachedNewEntries2.TryGetValue(section2.Name, cached) Then
+
                 cached = section2
                 _state.Caches.CachedNewEntries2(section2.Name) = cached
+
             End If
+
             Return cached
 
         End SyncLock
 
     End Function
 
+    ''' <summary>
+    ''' Scores each candidate against the old entry's FileKeys and RegKeys and returns
+    ''' the best-fitting <c>MatchResult</c>. Evaluates rename (all keys matched, counts equal,
+    ''' no structural changes), merger (one or more keys matched), and partial-match outcomes.
+    ''' </summary>
+    ''' 
+    ''' <param name="candidates">
+    ''' New entries to score against <paramref name="oldSection2"/>
+    ''' </param>
+    ''' 
+    ''' <param name="oldSection2">
+    ''' The removed entry whose keys are used as the match baseline
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' A <c>MatchResult</c> describing the best outcome found; all flags <c>False</c> if no match qualifies
+    ''' </returns>
     Private Function FindBestMatch(candidates As List(Of iniSection2),
                                    oldSection2 As iniSection2) As MatchResult
 
@@ -212,6 +303,20 @@ Public Class MergeDetector2
 
     End Function
 
+    ''' <summary>
+    ''' Returns <c>True</c> if <paramref name="newName"/> is already recorded as a rename of <paramref name="oldName"/>
+    ''' </summary>
+    ''' 
+    ''' <param name="newName">
+    ''' The new entry name to look up in <c>RenamedEntryPairs</c>
+    ''' </param>
+    ''' 
+    ''' <param name="oldName">
+    ''' The expected old entry name to match against the stored value</param>
+    ''' 
+    ''' <returns>
+    ''' <c>True</c> if the pair is an exact match; <c>False</c> otherwise
+    ''' </returns>
     Private Function IsRenamedFrom(newName As String, oldName As String) As Boolean
 
         Dim storedOldName As String = Nothing
@@ -220,6 +325,42 @@ Public Class MergeDetector2
 
     End Function
 
+    ''' <summary>
+    ''' Returns a cached <c>KeyMatchInfo2</c> for the old/new entry pair, computing and caching it on first access.
+    ''' The cache key is <c>"{oldName}|{newName}"</c>.
+    ''' </summary>
+    ''' 
+    ''' <param name="oldName">
+    ''' Name of the old (removed) entry; forms the cache key prefix
+    ''' </param>
+    ''' 
+    ''' <param name="newName">
+    ''' Name of the new (candidate) entry; forms the cache key suffix
+    ''' </param>
+    ''' 
+    ''' <param name="newSection2">
+    ''' The candidate section whose keys are matched against the old entry's keys
+    ''' </param>
+    ''' 
+    ''' <param name="oldFileKeys">
+    ''' Pre-computed FileKey list from the old entry
+    ''' </param>
+    ''' 
+    ''' <param name="oldRegKeys">
+    ''' Pre-computed RegKey list from the old entry
+    ''' </param>
+    ''' 
+    ''' <param name="oldHasFileKeys">
+    ''' Whether the old entry has any FileKeys
+    ''' </param>
+    ''' 
+    ''' <param name="oldHasRegKeys">
+    ''' Whether the old entry has any RegKeys
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' A <c>KeyMatchInfo2</c> with match counts and flags for the old/new pair
+    ''' </returns>
     Private Function GetOrComputeMatchInfo(oldName As String,
                                            newName As String,
                                            newSection2 As iniSection2,
@@ -238,6 +379,35 @@ Public Class MergeDetector2
 
     End Function
 
+    ''' <summary>
+    ''' Compares the old entry's FileKeys and RegKeys against the corresponding lists in
+    ''' <paramref name="newSection2"/> and returns a fully populated <c>KeyMatchInfo2</c>.
+    ''' Key types absent from the old entry are treated as fully matched.
+    ''' </summary>
+    ''' 
+    ''' <param name="newSection2">
+    ''' The candidate new entry to match against
+    ''' </param>
+    ''' 
+    ''' <param name="oldFileKeys">
+    ''' FileKeys from the old entry
+    ''' </param>
+    ''' 
+    ''' <param name="oldRegKeys">
+    ''' RegKeys from the old entry
+    ''' </param>
+    ''' 
+    ''' <param name="oldHasFileKeys">
+    ''' Whether the old entry has any FileKeys
+    ''' </param>
+    ''' 
+    ''' <param name="oldHasRegKeys">
+    ''' Whether the old entry has any RegKeys
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' A <c>KeyMatchInfo2</c> populated with per-type match counts, flags, and matched key sets
+    ''' </returns>
     Private Function AssessKeyMatches(newSection2 As iniSection2,
                                       oldFileKeys As IReadOnlyList(Of iniKey2),
                                       oldRegKeys As IReadOnlyList(Of iniKey2),
@@ -288,6 +458,39 @@ Public Class MergeDetector2
 
     End Function
 
+    ''' <summary>
+    ''' Counts how many keys in <paramref name="oldKeys"/> are matched by at least one key in
+    ''' <paramref name="newKeys"/>, using exact-value fast-path and wildcard/regex fallback.
+    ''' Keys whose values appear in <paramref name="disallowedValues"/> are skipped.
+    ''' </summary>
+    ''' 
+    ''' <param name="oldKeys">
+    ''' Keys from the old entry to match
+    ''' </param>
+    ''' 
+    ''' <param name="newKeys">
+    ''' Keys from the new entry to match against
+    ''' </param>
+    ''' 
+    ''' <param name="disallowedValues">
+    ''' Path values too broad to count as meaningful matches; may be <c>Nothing</c>
+    ''' </param>
+    ''' 
+    ''' <param name="matchHadMoreParams">
+    ''' Set to <c>True</c> if any matched new key has more pipe-delimited parameters than its old 
+    ''' </param>
+    ''' 
+    ''' <param name="possibleWildCardReduction">
+    ''' Set to <c>True</c> if any match appears to reduce wildcard coverage
+    ''' </param>
+    ''' 
+    ''' <param name="matchedKeys">
+    ''' Populated with each old key that was successfully matched
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' The number of old keys that were matched by at least one new key
+    ''' </returns>
     Private Function CountMatches(oldKeys As IEnumerable(Of iniKey2),
                                   newKeys As IEnumerable(Of iniKey2),
                                   disallowedValues As HashSet(Of String),
@@ -339,10 +542,42 @@ Public Class MergeDetector2
 
     End Function
 
+    ''' <summary>
+    ''' Returns the path portion of a key value, stripping any pipe-delimited flags
+    ''' </summary>
+    ''' 
+    ''' <param name="value">
+    ''' The raw key value string, optionally containing a <c>|</c> separator
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' The substring before the first <c>|</c>, or the full string if no pipe is present
+    ''' </returns>
     Private Function GetPathWithoutFlags(value As String) As String
+
         Return If(value.Contains("|"), value.Substring(0, value.IndexOf("|", StringComparison.InvariantCultureIgnoreCase)), value)
+
     End Function
 
+    ''' <summary>
+    ''' Attempts to record a rename from <paramref name="oldSection2"/> to <paramref name="newName"/>.
+    ''' If <paramref name="newName"/> is already registered as a rename target from a different entry,
+    ''' the registration is rejected and the caller should fall back to merger tracking.
+    ''' On success, invokes the modifications callback to record key-level changes.
+    ''' </summary>
+    ''' 
+    ''' <param name="newName">
+    ''' The candidate new entry name
+    ''' </param>
+    ''' 
+    ''' <param name="oldSection2">
+    ''' The removed entry being renamed
+    ''' </param>
+    ''' 
+    ''' <returns>
+    ''' <c>True</c> if the rename was accepted or was already registered for this exact pair <br/>
+    ''' <c>False</c> if <paramref name="newName"/> is already a rename target from a different old entry
+    ''' </returns>
     Private Function ConfirmRename(newName As String, oldSection2 As iniSection2) As Boolean
 
         Dim newSection2 As iniSection2 = Nothing
@@ -369,6 +604,19 @@ Public Class MergeDetector2
 
     End Function
 
+    ''' <summary>
+    ''' Records a merger relationship between <paramref name="oldSection2"/> and <paramref name="newSection2"/>
+    ''' in <c>MergeDict</c> and <c>OldToNewMergeDict</c>. If <paramref name="newSection2"/> was previously
+    ''' recorded as a rename target, the rename is demoted to a merger and its source is folded in.
+    ''' 
+    ''' </summary>
+    ''' <param name="oldSection2">
+    ''' The removed entry that was merged
+    ''' </param>
+    ''' 
+    ''' <param name="newSection2">
+    ''' The new entry that received content from <paramref name="oldSection2"/>
+    ''' </param>
     Private Sub TrackMerger(oldSection2 As iniSection2, newSection2 As iniSection2)
 
         Dim mergeName = newSection2.Name

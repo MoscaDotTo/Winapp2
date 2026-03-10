@@ -1,4 +1,4 @@
-'    Copyright (C) 2018-2025 Hazel Ward
+'    Copyright (C) 2018-2026 Hazel Ward
 '
 '    This file is a part of Winapp2ool
 '
@@ -91,8 +91,16 @@ Module Diff
     ''' </summary>
     Public Property MostRecentDiffLog As String = ""
 
+    ''' <summary>
+    ''' Phrase written to the global log to mark the beginning of a Diff run,
+    ''' used to slice the relevant portion of the log afterwards
+    ''' </summary>
     Public Property DiffLogStartPhrase As String = "Beginning Diff"
 
+    ''' <summary>
+    ''' Phrase written to the global log to mark the end of a Diff run,
+    ''' used to slice the relevant portion of the log afterwards
+    ''' </summary>
     Public Property DiffLogEndPhrase As String = "Diff complete"
 
     Private _spinIdx As Integer = 0
@@ -102,11 +110,17 @@ Module Diff
     ''' Overwrites the current console line with a spinner and step label.
     ''' No-ops in silent mode (<see cref="SuppressOutput"/>).
     ''' </summary>
+    ''' 
+    ''' <param name="curStep">
+    ''' Human-readable label for the current pipeline step
+    ''' </param>
     Private Sub Diff2Progress(curStep As String)
+
         If SuppressOutput Then Return
         Dim spin = _spinChars(_spinIdx Mod 4)
         _spinIdx += 1
-        Console.Write(($"{vbCr}[Diff2] {spin} {curStep}").PadRight(79))
+        Console.Write(($"{vbCr}[Diff] {spin} {curStep}"))
+
     End Sub
 
     ''' <summary>
@@ -146,7 +160,8 @@ Module Diff
     ''' </param>
     Public Sub DiffRemoteFile(firstFile As iniFile)
 
-        DiffFile1 = firstFile
+        DiffFile1.Dir = firstFile.Dir
+        DiffFile1.Name = firstFile.Name
         DownloadDiffFile = True
         ConductDiff()
 
@@ -158,10 +173,11 @@ Module Diff
     ''' </summary>
     Public Sub ConductDiff()
 
-        If Not enforceFileHasContent(DiffFile1) Then Return
-
         Dim file1As2 As iniFile2
         Dim file2As2 As iniFile2
+
+        file1As2 = DiffFile1.Load()
+        If Not enforceFileHasContent(file1As2) Then Return
 
         If DownloadDiffFile Then
 
@@ -170,12 +186,10 @@ Module Diff
 
         Else
 
-            If Not enforceFileHasContent(DiffFile2) Then Return
-            file2As2 = iniFile2.FromFile(DiffFile2.Path())
+            file2As2 = DiffFile2.Load()
+            If Not enforceFileHasContent(file2As2) Then Return
 
         End If
-
-        file1As2 = iniFile2.FromFile(DiffFile1.Path())
 
         If TrimRemoteFile AndAlso DownloadDiffFile Then
 
@@ -204,10 +218,6 @@ Module Diff
 
         diffOutput.AddRange(CompareFiles2(file1As2, file2As2))
 
-        Dim out2 As New MenuSection
-        out2.AddBottomBorder()
-        diffOutput.Add(out2)
-
         gLog(DiffLogEndPhrase)
 
         Dim out3 As New MenuSection
@@ -228,8 +238,13 @@ Module Diff
     End Sub
 
     ''' <summary>
-    ''' Gets the version from winapp2.ini
+    ''' Gets the version string from the first comment of a winapp2.ini file
     ''' </summary>
+    ''' 
+    ''' <param name="someFile">The <c>iniFile2</c> whose first comment is inspected for a version tag</param>
+    ''' <returns>
+    ''' A human-readable version string, or <c>" version not given"</c> if no version comment is present
+    ''' </returns>
     Private Function GetVer(someFile As iniFile2) As String
 
         Dim ver = If(someFile.Comments.Count > 0, someFile.Comments(0).Text.ToUpperInvariant(), "000000")
@@ -245,10 +260,14 @@ Module Diff
     ''' <param name="file1As2">
     ''' The old version of winapp2.ini as an <c>iniFile2</c>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="file2As2">
     ''' The new version of winapp2.ini as an <c>iniFile2</c>
     ''' </param>
+    '''
+    ''' <returns>
+    ''' All <c>MenuSection</c>s produced by the diff pipeline, in display order
+    ''' </returns>
     Private Function CompareFiles2(file1As2 As iniFile2,
                                    file2As2 As iniFile2) As List(Of MenuSection)
 
@@ -267,7 +286,7 @@ Module Diff
         detector2.SnuffNoisyChanges(file2As2)
 
         Dim stepNum = 0
-        Const totalSteps = 14
+        Const totalSteps = 16
 
         Dim doStep = Sub(label As String, action As Action)
                          stepNum += 1
@@ -291,10 +310,12 @@ Module Diff
 
         ' Phase 2: Detect cross-entry movements
         doStep("Phase 2 · detecting cross-entry key movements", Sub() statsCalc2.DetectCrossEntryMovements())
+        doStep("Phase 2 · calculating rename statistics", Sub() statsCalc2.CalculateRenameStatistics())
 
         ' Phase 3: Generate output
         collectStep("Phase 3 · processing renames", Function() renderer2.SummarizeRenames())
         collectStep("Phase 3 · processing mergers", Function() renderer2.SummarizeMergers())
+        collectStep("Phase 3 · itemizing rename key changes", Function() renderer2.ItemizeRenameChanges())
         collectStep("Phase 3 · itemizing mergers into existing entries", Function() renderer2.ItemizeMergers())
         collectStep("Phase 3 · itemizing cross-entry key movements", Function() renderer2.ItemizeKeyMovements())
         collectStep("Phase 3 · itemizing entry modifications", Function() renderer2.ItemizeModifications())

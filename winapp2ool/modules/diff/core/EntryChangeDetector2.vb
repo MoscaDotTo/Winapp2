@@ -20,39 +20,18 @@ Option Strict On
 Imports System.Threading.Tasks
 
 ''' <summary>
-''' Adapts <c>EntryChangeDetector</c> for use with <c>iniFile2</c>/<c>iniSection2</c>.
 ''' Categorizes entries as added, removed, or modified between two versions of winapp2.ini.
+''' Normalizes deprecated path values to suppress false-positive diffs, delegates rename
+''' and merger detection to <c>MergeDetector2</c>, and coordinates key-level analysis
+''' via <c>KeyModificationAnalyzer2</c>.
 ''' </summary>
 Public Class EntryChangeDetector2
 
-    ''' <summary>
-    ''' 
-    ''' </summary>
     Private ReadOnly _state As DiffState
-
-    ''' <summary>
-    ''' 
-    ''' </summary>
     Private ReadOnly _file1 As iniFile2
-
-    ''' <summary>
-    ''' 
-    ''' </summary>
     Private ReadOnly _file2 As iniFile2
-
-    ''' <summary>
-    ''' 
-    ''' </summary>
     Private ReadOnly _mergeDetector As MergeDetector2
-
-    ''' <summary>
-    ''' 
-    ''' </summary>
     Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer2
-
-    ''' <summary>
-    ''' 
-    ''' </summary>
     Private ReadOnly _renderer As DiffOutputRenderer2
 
     ''' <summary>
@@ -102,6 +81,10 @@ Public Class EntryChangeDetector2
     ''' Replaces deprecated path values in all keys of a winapp2.ini <c>iniFile2</c>
     ''' to suppress false-positive diff entries caused by known path renames
     ''' </summary>
+    '''
+    ''' <param name="winapp">
+    ''' The file whose key values will be normalized in place
+    ''' </param>
     Public Sub SnuffNoisyChanges(winapp As iniFile2)
 
         For Each section In winapp
@@ -112,6 +95,13 @@ Public Class EntryChangeDetector2
 
     End Sub
 
+    ''' <summary>
+    ''' Replaces deprecated path values in a single key's value in-place
+    ''' </summary>
+    ''' 
+    ''' <param name="key">
+    ''' The key whose value is normalized against <c>PathReplacements</c>
+    ''' </param>
     Private Sub CleanKeyValue(key As iniKey2)
 
         For i = 0 To PathReplacements.Count - 1
@@ -143,8 +133,9 @@ Public Class EntryChangeDetector2
     End Sub
 
     ''' <summary>
-    ''' Processes the entries in the old file. If an entry is not present in the new file, it is recorded as removed.
-    ''' If an entry is present in both files, it is compared against the new version for modifications.
+    ''' Processes the entries in the old file. If an entry is not present in the new file,
+    ''' it is recorded as removed. If an entry is present in both files, it is compared 
+    ''' against the new version for modifications.
     ''' </summary>
     Public Sub ProcessOldEntries()
 
@@ -169,44 +160,103 @@ Public Class EntryChangeDetector2
 
     ''' <summary>
     ''' Processes the entries determined to have been "Removed" and categorizes them into 3 bins: <br />
-    ''' Entries which have been renamed: all FileKeys / RegKeys match, but there may be minor changes <br />
-    ''' Entries which have been merged: all or most FileKeys / RegKeys / Detects / DetectFiles match, but there may be major changes <br />
+    ''' Entries which have been renamed: all FileKeys / RegKeys match, but there may be minor changes <br />  <br />
+    ''' Entries which have been merged: all or most FileKeys / RegKeys / Detects / DetectFiles match,
+    ''' but there may be major changes <br /> <br />
     ''' Entries which have actually been removed: key values not found in any new entries <br />
     ''' </summary>
     Public Function ProcessRemovals() As List(Of MenuSection)
 
-        Dim out As New List(Of MenuSection)
         Dim results = New Concurrent.ConcurrentDictionary(Of String, MenuSection)(StringComparer.OrdinalIgnoreCase)
         Dim potentialMatchesSnapshot2 = _state.ModifiedEntries.PotentialMatches2.ToList()
 
-        ' Pre-populate new entry cache and pre-compute section text for potential matches
         Dim snapshotTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
-        For Each section In potentialMatchesSnapshot2
+        Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+        PrePopulateCachesAndTextMaps(potentialMatchesSnapshot2, snapshotTextMap, oldEntryTextMap)
+
+        Dim contentIndexes = BuildContentIndexes(potentialMatchesSnapshot2)
+        Dim eligibleNames = BuildEligibleNameSet(potentialMatchesSnapshot2)
+
+        Parallel.ForEach(_state.ModifiedEntries.RemovedEntryNames,
+                 Sub(entry)
+
+                     Dim result = ProcessSingleRemoval(entry, potentialMatchesSnapshot2, snapshotTextMap, oldEntryTextMap, contentIndexes, eligibleNames)
+                     If result IsNot Nothing Then results(entry) = result
+
+                 End Sub)
+
+        ReconcileRenamesAndMergers()
+
+        Dim out As New List(Of MenuSection)
+
+        For Each key In results.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
+            out.Add(results(key))
+        Next
+
+        Return out
+
+    End Function
+
+    ''' <summary>
+    ''' Populates the new/old entry caches and pre-computes uppercased section text
+    ''' for each potential match and removed entry
+    ''' </summary>
+    '''
+    ''' <param name="potentialMatches">
+    ''' Snapshot of added and modified entries to cache
+    ''' </param>
+    '''
+    ''' <param name="snapshotTextMap">
+    ''' Populated with uppercased text for each potential match, keyed by section name
+    ''' </param>
+    '''
+    ''' <param name="oldEntryTextMap">
+    ''' Populated with uppercased text for each removed entry, keyed by entry name
+    ''' </param>
+    Private Sub PrePopulateCachesAndTextMaps(potentialMatches As List(Of iniSection2),
+                                             snapshotTextMap As Dictionary(Of String, String),
+                                             oldEntryTextMap As Dictionary(Of String, String))
+
+        For Each section In potentialMatches
             _state.Caches.CachedNewEntries2(section.Name) = section
             snapshotTextMap(section.Name) = section.ToString().ToUpperInvariant()
         Next
 
-        ' Pre-populate old entry cache and pre-compute section text for removed entries.
-        Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
         For Each entryName In _state.ModifiedEntries.RemovedEntryNames
             Dim oldSection2 = _file1.GetSection(entryName)
             _state.Caches.CachedOldEntries2(oldSection2.Name) = oldSection2
             oldEntryTextMap(entryName) = oldSection2.ToString().ToUpperInvariant()
         Next
 
-        ' Build reverse index: key value -> set of section names that contain that value.
-        ' Also index path roots (first two components) to catch wildcard pattern changes
-        ' where the path root stays the same (e.g. %AppData%\Foo\*.log -> %AppData%\Foo\*).
-        Dim keyValueIndex As New Dictionary(Of String, HashSet(Of String))(StringComparer.OrdinalIgnoreCase)
-        Dim pathRootIndex As New Dictionary(Of String, HashSet(Of String))(StringComparer.OrdinalIgnoreCase)
+    End Sub
 
-        ' Wildcard prefix index: for new keys whose path root contains *, stores the prefix
-        ' (everything before *) grouped by first path component for efficient lookup.
-        ' E.g. %AppData%\GetRight* -> prefix "%AppData%\GetRight" under group "%AppData%"
-        ' This lets us find that %AppData%\GetRightToGo would be captured by the wildcard.
-        Dim wildcardPrefixes As New Dictionary(Of String, List(Of KeyValuePair(Of String, String)))(StringComparer.OrdinalIgnoreCase)
+    ''' <summary>
+    ''' Builds reverse indexes over the FileKey and RegKey values in <paramref name="potentialMatches"/>
+    ''' to enable fast content-aware candidate lookup during removal processing.
+    ''' <list type="bullet">
+    '''   <item><term>KeyValueIndex</term>
+    '''     <description>Exact key value → set of section names containing that value</description></item>
+    '''   <item><term>PathRootIndex</term>
+    '''     <description>First two backslash components → set of section names, catching
+    '''     wildcard pattern changes where the path root stays the same</description></item>
+    '''   <item><term>WildcardPrefixes</term>
+    '''     <description>For roots containing <c>*</c>, the prefix before <c>*</c> grouped
+    '''     by first path component for efficient lookup</description></item>
+    ''' </list>
+    ''' </summary>
+    '''
+    ''' <param name="potentialMatches">
+    ''' Snapshot of added and modified entries whose keys are indexed
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A <c>ContentIndexes</c> instance containing all three reverse indexes
+    ''' </returns>
+    Private Shared Function BuildContentIndexes(potentialMatches As List(Of iniSection2)) As ContentIndexes
 
-        For Each section In potentialMatchesSnapshot2
+        Dim indexes As New ContentIndexes()
+
+        For Each section In potentialMatches
 
             For Each key In section.Keys
 
@@ -214,16 +264,16 @@ Public Class EntryChangeDetector2
                    Not key.KeyType.Equals("RegKey", StringComparison.OrdinalIgnoreCase) Then Continue For
 
                 ' Index exact value
-                If Not keyValueIndex.ContainsKey(key.Value) Then keyValueIndex(key.Value) = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-                keyValueIndex(key.Value).Add(section.Name)
+                If Not indexes.KeyValueIndex.ContainsKey(key.Value) Then indexes.KeyValueIndex(key.Value) = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+                indexes.KeyValueIndex(key.Value).Add(section.Name)
 
                 ' Index path root (first two backslash components) for wildcard resilience
                 Dim root = GetPathRoot(key.Value)
 
                 If root Is Nothing Then Continue For
 
-                If Not pathRootIndex.ContainsKey(root) Then pathRootIndex(root) = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-                pathRootIndex(root).Add(section.Name)
+                If Not indexes.PathRootIndex.ContainsKey(root) Then indexes.PathRootIndex(root) = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+                indexes.PathRootIndex(root).Add(section.Name)
 
                 ' If root has wildcard, also index the prefix before * grouped by first component
                 Dim starIdx = root.IndexOf("*"c)
@@ -235,8 +285,8 @@ Public Class EntryChangeDetector2
 
                 If firstComp IsNot Nothing Then
 
-                    If Not wildcardPrefixes.ContainsKey(firstComp) Then wildcardPrefixes(firstComp) = New List(Of KeyValuePair(Of String, String))
-                    wildcardPrefixes(firstComp).Add(New KeyValuePair(Of String, String)(prefix, section.Name))
+                    If Not indexes.WildcardPrefixes.ContainsKey(firstComp) Then indexes.WildcardPrefixes(firstComp) = New List(Of KeyValuePair(Of String, String))
+                    indexes.WildcardPrefixes(firstComp).Add(New KeyValuePair(Of String, String)(prefix, section.Name))
 
                 End If
 
@@ -244,109 +294,223 @@ Public Class EntryChangeDetector2
 
         Next
 
-        ' Pre-compute the set of names eligible for candidacy (added or modified)
+        Return indexes
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the set of section names from <paramref name="potentialMatches"/> that are
+    ''' eligible for candidacy (i.e. present in <c>AddedEntryNames</c> or <c>ModifiedEntryNames</c>)
+    ''' </summary>
+    '''
+    ''' <param name="potentialMatches">
+    ''' Snapshot of added and modified entries to filter
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A <c>HashSet</c> of section names eligible for rename/merger matching
+    ''' </returns>
+    Private Function BuildEligibleNameSet(potentialMatches As List(Of iniSection2)) As HashSet(Of String)
+
         Dim eligibleNames As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-        For Each section In potentialMatchesSnapshot2
+
+        For Each section In potentialMatches
 
             If _state.ModifiedEntries.AddedEntryNames.Contains(section.Name) OrElse
                _state.ModifiedEntries.ModifiedEntryNames.Contains(section.Name) Then eligibleNames.Add(section.Name)
 
         Next
 
-        Parallel.ForEach(_state.ModifiedEntries.RemovedEntryNames,
-                 Sub(entry)
+        Return eligibleNames
 
-                     Dim oldSection2 = _file1.GetSection(entry)
+    End Function
 
-                     If oldSection2.Keys.GetByType("FileKey").Count = 0 AndAlso
-                        oldSection2.Keys.GetByType("RegKey").Count = 0 Then
+    ''' <summary>
+    ''' Processes a single removed entry: gathers rename/merger candidates from name heuristics
+    ''' and content-aware index lookups, filters to eligible entries, and delegates to
+    ''' <c>MergeDetector2.AssessRenamesAndMergers</c>. Returns a <c>MenuSection</c> for entries
+    ''' that were truly removed (no rename or merger found), or <c>Nothing</c> if a rename/merger
+    ''' was recorded.
+    ''' </summary>
+    '''
+    ''' <param name="entryName">
+    ''' The name of the removed entry being processed
+    ''' </param>
+    '''
+    ''' <param name="potentialMatches">
+    ''' Snapshot of added and modified entries for name-based heuristic matching
+    ''' </param>
+    '''
+    ''' <param name="snapshotTextMap">
+    ''' Pre-computed uppercased text for each potential match section
+    ''' </param>
+    '''
+    ''' <param name="oldEntryTextMap">
+    ''' Pre-computed uppercased text for each removed entry
+    ''' </param>
+    '''
+    ''' <param name="indexes">
+    ''' Reverse content indexes built by <c>BuildContentIndexes</c>
+    ''' </param>
+    '''
+    ''' <param name="eligibleNames">
+    ''' Set of section names eligible for candidacy (added or modified)
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A <c>MenuSection</c> describing the removal if no rename/merger was found;
+    ''' <c>Nothing</c> if a rename or merger was recorded in <c>DiffState</c>
+    ''' </returns>
+    Private Function ProcessSingleRemoval(entryName As String,
+                                           potentialMatches As List(Of iniSection2),
+                                           snapshotTextMap As Dictionary(Of String, String),
+                                           oldEntryTextMap As Dictionary(Of String, String),
+                                           indexes As ContentIndexes,
+                                           eligibleNames As HashSet(Of String)) As MenuSection
 
-                         results(entry) = _renderer.MakeDiff(oldSection2, 1)
-                         Return
+        Dim oldSection2 = _file1.GetSection(entryName)
 
-                     End If
+        If oldSection2.Keys.GetByType("FileKey").Count = 0 AndAlso
+           oldSection2.Keys.GetByType("RegKey").Count = 0 Then
 
-                     ' Gather candidates from all three heuristics
-                     Dim allCandidates As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+            Return _renderer.MakeDiff(oldSection2, 1)
 
-                     ' 1. Name / browser-ref heuristic (existing logic)
-                     Dim probableMatches = FindProbableMatches2(entry.Split(CChar(" ")), potentialMatchesSnapshot2, snapshotTextMap, oldEntryTextMap(entry))
-                     For Each section In probableMatches : allCandidates.Add(section.Name) : Next
+        End If
 
-                     ' 2. Content-aware: look up each old key value in the reverse index
-                     For Each key In oldSection2.Keys
+        Dim allCandidates = GatherCandidateNames(entryName, oldSection2, potentialMatches, snapshotTextMap, oldEntryTextMap, indexes)
+        Dim combinedMatches = FilterToEligibleSections(allCandidates, eligibleNames)
+        Dim changesRecorded = _mergeDetector.AssessRenamesAndMergers(combinedMatches, oldSection2)
 
-                         If Not key.KeyType.Equals("FileKey", StringComparison.OrdinalIgnoreCase) AndAlso
-                            Not key.KeyType.Equals("RegKey", StringComparison.OrdinalIgnoreCase) Then Continue For
+        Return If(changesRecorded, Nothing, _renderer.MakeDiff(oldSection2, 1))
 
-                         Dim exactHits As HashSet(Of String) = Nothing
-                         If keyValueIndex.TryGetValue(key.Value, exactHits) Then For Each hit In exactHits : allCandidates.Add(hit) : Next
+    End Function
 
-                         ' Path root lookup catches same-root changes (e.g. flag or pattern changes)
-                         Dim root = GetPathRoot(key.Value)
+    ''' <summary>
+    ''' Gathers candidate section names for a removed entry using all three heuristics:
+    ''' name/browser-ref matching, exact key value index lookup, path root index lookup,
+    ''' and wildcard prefix index lookup
+    ''' </summary>
+    '''
+    ''' <param name="entryName">
+    ''' The name of the removed entry
+    ''' </param>
+    '''
+    ''' <param name="oldSection2">
+    ''' The removed entry's section from the old file
+    ''' </param>
+    '''
+    ''' <param name="potentialMatches">
+    ''' Snapshot of added and modified entries for name-based heuristic matching
+    ''' </param>
+    '''
+    ''' <param name="snapshotTextMap">
+    ''' Pre-computed uppercased text for each potential match section
+    ''' </param>
+    '''
+    ''' <param name="oldEntryTextMap">
+    ''' Pre-computed uppercased text for each removed entry
+    ''' </param>
+    '''
+    ''' <param name="indexes">
+    ''' Reverse content indexes for value, path root, and wildcard prefix lookups
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A set of all candidate section names found across all heuristics
+    ''' </returns>
+    Private Function GatherCandidateNames(entryName As String,
+                                           oldSection2 As iniSection2,
+                                           potentialMatches As List(Of iniSection2),
+                                           snapshotTextMap As Dictionary(Of String, String),
+                                           oldEntryTextMap As Dictionary(Of String, String),
+                                           indexes As ContentIndexes) As HashSet(Of String)
 
-                         If root Is Nothing Then Continue For
+        Dim allCandidates As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
+        ' 1. Name / browser-ref heuristic
+        Dim probableMatches = FindProbableMatches2(entryName.Split(CChar(" ")), potentialMatches, snapshotTextMap, oldEntryTextMap(entryName))
+        For Each section In probableMatches : allCandidates.Add(section.Name) : Next
 
-                         Dim rootHits As HashSet(Of String) = Nothing
-                         If pathRootIndex.TryGetValue(root, rootHits) Then For Each hit In rootHits : allCandidates.Add(hit) : Next
+        ' 2. Content-aware: look up each old key value in the reverse indexes
+        For Each key In oldSection2.Keys
 
-                         ' Wildcard prefix lookup: check if this old key's path root
-                         ' would be captured by a new entry's wildcard root.
-                         ' e.g. %AppData%\GetRightToGo starts with prefix %AppData%\GetRight
-                         '      from new entry GetRight * whose root is %AppData%\GetRight*
-                         ' Also handles wildcarded old roots: %AppData%\GetRight* is compared
-                         ' as %AppData%\GetRight so it matches a new prefix %AppData%\GetRigh
-                         ' (from %AppData%\GetRigh*, a wildcard reduction).
-                         Dim comparableRoot = root
-                         Dim rootStarIdx = root.IndexOf("*"c)
-                         If rootStarIdx > 0 Then comparableRoot = root.Substring(0, rootStarIdx)
+            If Not key.KeyType.Equals("FileKey", StringComparison.OrdinalIgnoreCase) AndAlso
+               Not key.KeyType.Equals("RegKey", StringComparison.OrdinalIgnoreCase) Then Continue For
 
-                         Dim firstComp = GetFirstComponent(root)
+            Dim exactHits As HashSet(Of String) = Nothing
+            If indexes.KeyValueIndex.TryGetValue(key.Value, exactHits) Then For Each hit In exactHits : allCandidates.Add(hit) : Next
 
-                         If firstComp Is Nothing Then Continue For
+            ' Path root lookup catches same-root changes (e.g. flag or pattern changes)
+            Dim root = GetPathRoot(key.Value)
 
-                         Dim prefixList As List(Of KeyValuePair(Of String, String)) = Nothing
+            If root Is Nothing Then Continue For
 
-                         If Not wildcardPrefixes.TryGetValue(firstComp, prefixList) Then Continue For
+            Dim rootHits As HashSet(Of String) = Nothing
+            If indexes.PathRootIndex.TryGetValue(root, rootHits) Then For Each hit In rootHits : allCandidates.Add(hit) : Next
 
-                         For Each wp In prefixList
+            ' Wildcard prefix lookup: check if this old key's path root
+            ' would be captured by a new entry's wildcard root.
+            ' e.g. %AppData%\GetRightToGo starts with prefix %AppData%\GetRight
+            '      from new entry GetRight * whose root is %AppData%\GetRight*
+            ' Also handles wildcarded old roots: %AppData%\GetRight* is compared
+            ' as %AppData%\GetRight so it matches a new prefix %AppData%\GetRigh
+            ' (from %AppData%\GetRigh*, a wildcard reduction).
+            Dim comparableRoot = root
+            Dim rootStarIdx = root.IndexOf("*"c)
+            If rootStarIdx > 0 Then comparableRoot = root.Substring(0, rootStarIdx)
 
-                             If comparableRoot.StartsWith(wp.Key, StringComparison.OrdinalIgnoreCase) Then allCandidates.Add(wp.Value)
+            Dim firstComp = GetFirstComponent(root)
 
-                         Next
+            If firstComp Is Nothing Then Continue For
 
+            Dim prefixList As List(Of KeyValuePair(Of String, String)) = Nothing
 
-                     Next
+            If Not indexes.WildcardPrefixes.TryGetValue(firstComp, prefixList) Then Continue For
 
-                     ' Filter to only eligible (added/modified) entries
-                     Dim combinedMatches As New List(Of iniSection2)
+            For Each wp In prefixList
 
-                     For Each candidateName In allCandidates
+                If comparableRoot.StartsWith(wp.Key, StringComparison.OrdinalIgnoreCase) Then allCandidates.Add(wp.Value)
 
-                         If Not eligibleNames.Contains(candidateName) Then Continue For
+            Next
 
-                         Dim s2 = _file2.GetSection(candidateName)
-                         If s2 IsNot Nothing Then combinedMatches.Add(s2)
-
-                     Next
-
-                     Dim changesRecorded = _mergeDetector.AssessRenamesAndMergers(combinedMatches, oldSection2)
-
-                     If Not changesRecorded Then results(entry) = _renderer.MakeDiff(oldSection2, 1)
-
-                 End Sub)
-
-        ' Post-parallel reconciliation: convert any rename whose target also received
-        ' merger content back to a merger. This handles the race where TrackMerger ran
-        ' before ConfirmRename registered the rename, so the in-flight cleanup was skipped.
-        ReconcileRenamesAndMergers()
-
-        For Each key In results.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
-            out.Add(results(key))
         Next
 
-        Return out
+        Return allCandidates
+
+    End Function
+
+    ''' <summary>
+    ''' Filters a set of candidate section names to only those present in
+    ''' <paramref name="eligibleNames"/> and resolves each to its <c>iniSection2</c>
+    ''' from the new file
+    ''' </summary>
+    '''
+    ''' <param name="candidateNames">
+    ''' All candidate section names gathered by the heuristics
+    ''' </param>
+    '''
+    ''' <param name="eligibleNames">
+    ''' Set of section names eligible for candidacy (added or modified)
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A list of <c>iniSection2</c> instances from the new file for each eligible candidate
+    ''' </returns>
+    Private Function FilterToEligibleSections(candidateNames As HashSet(Of String),
+                                               eligibleNames As HashSet(Of String)) As List(Of iniSection2)
+
+        Dim combinedMatches As New List(Of iniSection2)
+
+        For Each candidateName In candidateNames
+
+            If Not eligibleNames.Contains(candidateName) Then Continue For
+
+            Dim s2 = _file2.GetSection(candidateName)
+            If s2 IsNot Nothing Then combinedMatches.Add(s2)
+
+        Next
+
+        Return combinedMatches
 
     End Function
 
@@ -393,8 +557,15 @@ Public Class EntryChangeDetector2
     ''' first two (e.g. <c>%AppData%\SomeApp</c>). For paths with exactly 2 components,
     ''' returns the full directory path (e.g. <c>%AppData%\GetRight*</c> from
     ''' <c>%AppData%\GetRight*|GetRight.lst;*.data|RECURSE</c>).
-    ''' Returns <c>Nothing</c> if the value has no backslash.
     ''' </summary>
+    '''
+    ''' <param name="value">
+    ''' The raw key value string, optionally containing pipe-delimited flags
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The first one or two backslash-delimited path components, or <c>Nothing</c> if the value has no backslash
+    ''' </returns>
     Private Shared Function GetPathRoot(value As String) As String
 
         ' Strip pipe-delimited flags (e.g. "|GetRight.lst;*.data|RECURSE")
@@ -414,6 +585,14 @@ Public Class EntryChangeDetector2
     ''' variable or drive root), or <c>Nothing</c> if the path has no backslash.
     ''' E.g. <c>%AppData%\GetRight*</c> → <c>%AppData%</c>
     ''' </summary>
+    '''
+    ''' <param name="pathRoot">
+    ''' The path string to extract the first component from
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The substring before the first <c>\</c>, or <c>Nothing</c> if no backslash is present
+    ''' </returns>
     Private Shared Function GetFirstComponent(pathRoot As String) As String
 
         Dim idx = pathRoot.IndexOf("\"c)
@@ -425,6 +604,26 @@ Public Class EntryChangeDetector2
     ''' Produces a list of <c>iniSection2</c>s who may potentially be merger/rename candidates
     ''' based on traits such as section and name similarities
     ''' </summary>
+    '''
+    ''' <param name="oldNameBroken">
+    ''' Space-split word tokens from the removed entry's name, used for substring matching
+    ''' </param>
+    '''
+    ''' <param name="potentialMatchesList">
+    ''' Snapshot of added and modified entries to search for candidates
+    ''' </param>
+    '''
+    ''' <param name="snapshotTextMap">
+    ''' Pre-computed uppercased string representations of each candidate section, keyed by name
+    ''' </param>
+    '''
+    ''' <param name="oldEntryTextUpper">
+    ''' Uppercased string representation of the removed entry, used for browser SecRef matching
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A list of candidate <c>iniSection2</c>s whose name or browser SecRef overlaps with the removed entry
+    ''' </returns>
     Private Function FindProbableMatches2(oldNameBroken As String(),
                                           potentialMatchesList As List(Of iniSection2),
                                           snapshotTextMap As Dictionary(Of String, String),
@@ -468,5 +667,30 @@ Public Class EntryChangeDetector2
         Return out
 
     End Function
+
+    ''' <summary>
+    ''' Bundles the three reverse indexes built over potential match FileKey and RegKey values
+    ''' for content-aware candidate lookup during removal processing
+    ''' </summary>
+    Private Class ContentIndexes
+
+        ''' <summary>
+        ''' Exact key value → set of section names that contain that value
+        ''' </summary>
+        Public ReadOnly KeyValueIndex As New Dictionary(Of String, HashSet(Of String))(StringComparer.OrdinalIgnoreCase)
+
+        ''' <summary>
+        ''' Path root (first two backslash components) → set of section names,
+        ''' catching wildcard pattern changes where the root stays the same
+        ''' </summary>
+        Public ReadOnly PathRootIndex As New Dictionary(Of String, HashSet(Of String))(StringComparer.OrdinalIgnoreCase)
+
+        ''' <summary>
+        ''' First path component → list of (prefix before *, section name) pairs
+        ''' for wildcard prefix matching
+        ''' </summary>
+        Public ReadOnly WildcardPrefixes As New Dictionary(Of String, List(Of KeyValuePair(Of String, String)))(StringComparer.OrdinalIgnoreCase)
+
+    End Class
 
 End Class

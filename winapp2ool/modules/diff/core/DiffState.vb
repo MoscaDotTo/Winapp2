@@ -134,22 +134,22 @@ Public Class ModifiedEntryTracker
     Public Property RemovedEntryNames As New HashSet(Of String)
 
     ''' <summary>
-    ''' Tracks modified keys per entry (iniKey2 variant): EntryName -> (NewKey -> List(Of OldKeys))
+    ''' Tracks modified keys per entry: EntryName -> (NewKey -> List(Of OldKeys))
     ''' </summary>
     Public Property ModifiedKeyTracker2 As New Dictionary(Of String, Dictionary(Of iniKey2, List(Of iniKey2)))
 
     ''' <summary>
-    ''' Tracks removed keys per entry (iniKey2 variant): EntryName -> List(Of Keys)
+    ''' Tracks removed keys per entry: EntryName -> List(Of Keys)
     ''' </summary>
     Public Property RemovedKeyTracker2 As New Dictionary(Of String, List(Of iniKey2))
 
     ''' <summary>
-    ''' Tracks added keys per entry (iniKey2 variant): EntryName -> List(Of Keys)
+    ''' Tracks added keys per entry: EntryName -> List(Of Keys)
     ''' </summary>
     Public Property AddedKeyTracker2 As New Dictionary(Of String, List(Of iniKey2))
 
     ''' <summary>
-    ''' Tracks potential matching sections for modified entries (iniSection2 variant)
+    ''' Tracks potential matching sections for modified entries: EntryName -> List(Of iniSection2)
     ''' </summary>
     Public Property PotentialMatches2 As New List(Of iniSection2)
 
@@ -238,7 +238,7 @@ Public Class DiffStatistics
     Public Property ModEntriesMovedKeysTargetCount As Integer = 0
 
     ''' <summary>
-    ''' Counts total keys added in modified entries
+    ''' Counts modified entries that have at least one updated key
     ''' </summary>
     Public Property ModEntriesUpdatedKeyEntryCount As Integer = 0
 
@@ -256,24 +256,93 @@ Public Class DiffStatistics
 
     ' Novel keys (new keys not from merged sources)
     ''' <summary>
-    ''' Counts total novel keys added in entries that were added with mergers <br /> ie. keys 
+    ''' Counts total novel keys added in entries that were added with mergers <br /> ie. keys
     ''' that were added in entries that had mergers, but were not part of the merged old entries)
     ''' </summary>
     Public Property AddedWithMergersNovelKeysTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts added-with-merger entries that contain at least one novel key (a key not from any merged source)
+    ''' </summary>
     Public Property AddedWithMergersNovelKeysEntryCount As Integer = 0
 
     ' Capturing keys (new keys that capture old keys)
+    ''' <summary>
+    ''' Counts total keys in added-with-merger entries that capture (i.e. match or subsume) one or more old keys from merged sources
+    ''' </summary>
     Public Property AddedWithMergersCapturingKeysTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts total old keys from merged source entries that were captured by a key in an added-with-merger entry
+    ''' </summary>
     Public Property AddedWithMergersCapturedKeysTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts added-with-merger entries that contain at least one capturing key
+    ''' </summary>
     Public Property AddedWithMergersCapturingEntryCount As Integer = 0
 
     ' Dropped keys (keys from merged entries not carried over)
+    ''' <summary>
+    ''' Counts total keys from merged source entries that were not carried over into the added-with-merger entry
+    ''' </summary>
     Public Property AddedWithMergersDroppedKeysTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts added-with-merger entries that dropped at least one key from a merged source entry
+    ''' </summary>
     Public Property AddedWithMergersDroppedEntryCount As Integer = 0
 
     ' Carried over keys (keys from merged entries that were carried over to the added entry)
+    ''' <summary>
+    ''' Counts total keys from merged source entries that were carried over unchanged into the added-with-merger entry
+    ''' </summary>
     Public Property AddedWithMergersCarriedOverKeysTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts added-with-merger entries that contain at least one key carried over unchanged from a merged source entry
+    ''' </summary>
     Public Property AddedWithMergersCarriedOverKeysEntryCount As Integer = 0
+
+    ''' <summary>
+    ''' Counts total keys added in renamed entries
+    ''' </summary>
+    Public Property RenamedEntriesAddedKeyTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts renamed entries that have at least one added key
+    ''' </summary>
+    Public Property RenamedEntriesAddedKeyEntryCount As Integer = 0
+
+    ''' <summary>
+    ''' Counts total keys removed in renamed entries
+    ''' </summary>
+    Public Property RenamedEntriesRemovedKeyTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts renamed entries that have at least one removed key
+    ''' </summary>
+    Public Property RenamedEntriesRemovedKeyEntryCount As Integer = 0
+
+    ''' <summary>
+    ''' Counts total keys updated in renamed entries
+    ''' </summary>
+    Public Property RenamedEntriesUpdatedKeyTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts total old keys replaced by updates in renamed entries
+    ''' </summary>
+    Public Property RenamedEntriesReplacedByUpdateTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts renamed entries that have at least one updated key
+    ''' </summary>
+    Public Property RenamedEntriesUpdatedKeyEntryCount As Integer = 0
+
+    ''' <summary>
+    ''' Counts renamed entries that are name-only changes (no key differences)
+    ''' </summary>
+    Public Property RenamedEntriesNameOnlyCount As Integer = 0
 
     ''' <summary>
     ''' Resets all counters to zero
@@ -293,6 +362,14 @@ Public Class DiffStatistics
         ModEntriesMovedKeysSourceCount = 0
         ModEntriesMovedKeysTargetCount = 0
         ModEntriesUpdatedKeyEntryCount = 0
+        RenamedEntriesAddedKeyTotal = 0
+        RenamedEntriesAddedKeyEntryCount = 0
+        RenamedEntriesRemovedKeyTotal = 0
+        RenamedEntriesRemovedKeyEntryCount = 0
+        RenamedEntriesUpdatedKeyTotal = 0
+        RenamedEntriesReplacedByUpdateTotal = 0
+        RenamedEntriesUpdatedKeyEntryCount = 0
+        RenamedEntriesNameOnlyCount = 0
 
     End Sub
 

@@ -22,22 +22,29 @@ Option Strict On
 ''' </summary>
 Module DiffFileBridge
 
-    ''' <summary>Converts an <c>iniFile</c> to an <c>iniFile2</c></summary>
+    ''' <summary>
+    ''' Converts an <c>iniFile</c> to an <c>iniFile2</c>
+    ''' </summary>
+    '''
+    ''' <param name="f">
+    ''' The <c>iniFile</c> to convert
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' An <c> iniFile2 </c> containing equivalent sections,
+    ''' keys, and comments as <c> <paramref name="f"/> </c>
+    ''' </returns>
     Public Function ToIniFile2(f As iniFile) As iniFile2
 
         Dim out = iniFile2.Empty(f.Dir, f.Name)
 
-        For Each comment In f.Comments.Values
-            out.Comments.Add(New iniComment2(comment.Comment, comment.LineNumber))
-        Next
+        For Each comment In f.Comments.Values : out.Comments.Add(New iniComment2(comment.Comment, comment.LineNumber)) : Next
 
         For Each section In f.Sections.Values
 
             Dim s2 As New iniSection2(section.Name)
 
-            For Each key In section.Keys.Keys
-                s2.AddKey(New iniKey2(key.toString()))
-            Next
+            For Each key In section.Keys.Keys : s2.AddKey(New iniKey2(key.toString())) : Next
 
             out.AddSection(s2)
 

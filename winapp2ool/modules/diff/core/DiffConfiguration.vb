@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -18,7 +18,8 @@
 Option Strict On
 
 ''' <summary>
-''' Shared constants and lookup tables used across the Diff module's detection and comparison logic
+''' Shared constants and lookup tables used across
+''' the Diff module's detection and comparison logic
 ''' </summary>
 Public Module DiffConfiguration
 
@@ -47,7 +48,8 @@ Public Module DiffConfiguration
     }
 
     ''' <summary>
-    ''' File system and registry locations which are considered too vague to be used to establish matching key content across entries on their own
+    ''' File system and registry locations which are considered too vague 
+    ''' to be used to establish matching key content across entries on their own
     ''' </summary>
 
     Public ReadOnly Property DisallowedPaths As New HashSet(Of String) From {
@@ -61,20 +63,25 @@ Public Module DiffConfiguration
     }
 
     ''' <summary>
-    ''' LangSecRef values associated with browsers
+    ''' LangSecRef values associated with web browsers
     ''' </summary>
     Public ReadOnly Property BrowserSecRefs As String() = {
         "3029", "3006", "3033", "3034", "3027", "3026", "3030", "3001"
     }
 
     ''' <summary>
-    ''' Separator character used in movement key signatures stored in <c>KeyMovementTracker.MovedKeys</c>.
-    ''' Null character (Chr(0)) cannot appear in ini file key values, making it unambiguous as a delimiter.
+    ''' Separator character used in movement key signatures stored
+    ''' in <c>KeyMovementTracker.MovedKeys</c>. <br /> Null character
+    ''' (Chr(0)) cannot appear in ini file key values, making it unambiguous as a delimiter
     ''' </summary>
     Public ReadOnly Property MovementKeySeparator As Char
+
         Get
+
             Return Chr(0)
+
         End Get
+
     End Property
 
 End Module

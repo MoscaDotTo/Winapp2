@@ -18,7 +18,9 @@
 Option Strict On
 
 ''' <summary>
-''' Adapts <c>DiffStatisticsCalculator</c> for use with <c>iniFile2</c>/<c>iniSection2</c>.
+''' Aggregates raw key-change trackers from <c>DiffState</c> into summary statistics
+''' (added, removed, updated, and replaced key counts per entry category) and detects
+''' cross-entry key movements after all entry-level analysis is complete.
 ''' </summary>
 Public Class DiffStatisticsCalculator2
 
@@ -30,10 +32,20 @@ Public Class DiffStatisticsCalculator2
     ''' Initializes a new instance of <c>DiffStatisticsCalculator2</c>
     ''' </summary>
     '''
-    ''' <param name="state">Shared diff state tracking all entry changes</param>
-    ''' <param name="file1">The old version of winapp2.ini as an <c>iniFile2</c></param>
-    ''' <param name="file2">The new version of winapp2.ini as an <c>iniFile2</c></param>
-    Public Sub New(state As DiffState, file1 As iniFile2, file2 As iniFile2)
+    ''' <param name="state">
+    ''' Shared diff state tracking all entry changes
+    ''' </param>
+    ''' 
+    ''' <param name="file1">
+    ''' The old version of winapp2.ini as an <c>iniFile2</c>
+    ''' </param>
+    ''' 
+    ''' <param name="file2">
+    ''' The new version of winapp2.ini as an <c>iniFile2</c>
+    ''' </param>
+    Public Sub New(state As DiffState,
+                   file1 As iniFile2,
+                   file2 As iniFile2)
 
         _state = state
         _file1 = file1
@@ -43,8 +55,9 @@ Public Class DiffStatisticsCalculator2
 
     ''' <summary>
     ''' Calculates statistics from raw trackers before movement detection.
-    ''' Filters to <c>ModifiedEntryNames</c> only — the tracker dictionaries also contain added-merger
-    ''' entries populated by <c>FindModificationsForAddedEntry</c> which must not be counted here.
+    ''' Filters to <c> ModifiedEntryNames </c> only — the tracker dictionaries 
+    ''' also contain added-merger entries populated by 
+    ''' <c> FindModificationsForAddedEntry</c> which must not be counted here.
     ''' </summary>
     Public Sub CalculateInitialStatistics()
 
@@ -64,9 +77,9 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
-        ' Count updated/replaced keys
-        ' ModEntriesUpdatedKeyTotal = number of NEW keys that replaced old keys
-        ' ModEntriesReplacedByUpdateTotal = number of OLD keys that were replaced
+        ' Count updated/replaced keys:
+        ' ModEntriesUpdatedKeyTotal = number of new keys that replaced old keys
+        ' ModEntriesReplacedByUpdateTotal = number of old keys that were replaced
         ' ModEntriesUpdatedKeyEntryCount = number of entries with key updates
         For Each kvp In _state.ModifiedEntries.ModifiedKeyTracker2
 
@@ -75,16 +88,80 @@ Public Class DiffStatisticsCalculator2
             _state.Statistics.ModEntriesUpdatedKeyEntryCount += 1
 
             ' kvp.Value is Dictionary(Of iniKey2, List(Of iniKey2))
-            ' Each key in this dictionary is a NEW key
+            ' Each key in this dictionary is a new key
             _state.Statistics.ModEntriesUpdatedKeyTotal += kvp.Value.Count
 
-            ' Count how many OLD keys were replaced
+            ' Count how many old keys were replaced
             For Each updateKvp In kvp.Value
 
-                ' updateKvp.Value is List(Of iniKey2) of OLD keys replaced by this NEW key
+                ' updateKvp.Value is List(Of iniKey2) of old keys replaced by this new key
                 _state.Statistics.ModEntriesReplacedByUpdateTotal += updateKvp.Value.Count
 
             Next
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Calculates key-level statistics for renamed entries by reading
+    ''' the tracker dictionaries keyed by each rename's new name
+    ''' </summary>
+    Public Sub CalculateRenameStatistics()
+
+        For Each newName In _state.MergedEntries.RenamedEntryNames
+
+            Dim hasAdded = _state.ModifiedEntries.AddedKeyTracker2.ContainsKey(newName) AndAlso
+                       _state.ModifiedEntries.AddedKeyTracker2(newName).Count > 0
+
+            Dim hasRemoved = _state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(newName) AndAlso
+                         _state.ModifiedEntries.RemovedKeyTracker2(newName).Count > 0
+
+            ' Count only non-Name updated keys
+            Dim realUpdateCount = 0
+            Dim realReplacedCount = 0
+
+            If _state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(newName) Then
+
+                For Each updateKvp In _state.ModifiedEntries.ModifiedKeyTracker2(newName)
+
+                    If updateKvp.Key.typeIs("Name") Then Continue For
+
+                    realUpdateCount += 1
+                    realReplacedCount += updateKvp.Value.Count
+
+                Next
+
+            End If
+
+            If Not hasAdded AndAlso Not hasRemoved AndAlso realUpdateCount = 0 Then
+
+                _state.Statistics.RenamedEntriesNameOnlyCount += 1
+                Continue For
+
+            End If
+
+            If hasAdded Then
+
+                _state.Statistics.RenamedEntriesAddedKeyTotal += _state.ModifiedEntries.AddedKeyTracker2(newName).Count
+                _state.Statistics.RenamedEntriesAddedKeyEntryCount += 1
+
+            End If
+
+            If hasRemoved Then
+
+                _state.Statistics.RenamedEntriesRemovedKeyTotal += _state.ModifiedEntries.RemovedKeyTracker2(newName).Count
+                _state.Statistics.RenamedEntriesRemovedKeyEntryCount += 1
+
+            End If
+
+            If realUpdateCount > 0 Then
+
+                _state.Statistics.RenamedEntriesUpdatedKeyTotal += realUpdateCount
+                _state.Statistics.RenamedEntriesReplacedByUpdateTotal += realReplacedCount
+                _state.Statistics.RenamedEntriesUpdatedKeyEntryCount += 1
+
+            End If
 
         Next
 
@@ -100,19 +177,21 @@ Public Class DiffStatisticsCalculator2
 
         ' Build lookup of all added keys
         For Each kvp In _state.ModifiedEntries.AddedKeyTracker2
+
             Dim entryName = kvp.Key
             Dim keyList2 = kvp.Value
 
-            For Each key In keyList2
-                addedKeyInfo.Add(New AddedKeyInfo(entryName, key))
-            Next
+            For Each key In keyList2 : addedKeyInfo.Add(New AddedKeyInfo(entryName, key)) : Next
+
         Next
 
         ' Pre-group added keys by KeyType to skip cross-type comparisons in the inner loop
         Dim addedByType As New Dictionary(Of String, List(Of AddedKeyInfo))(StringComparer.OrdinalIgnoreCase)
         For Each info In addedKeyInfo
+
             If Not addedByType.ContainsKey(info.Key.KeyType) Then addedByType(info.Key.KeyType) = New List(Of AddedKeyInfo)
             addedByType(info.Key.KeyType).Add(info)
+
         Next
 
         ' Track keys to remove from trackers after detection
@@ -121,6 +200,7 @@ Public Class DiffStatisticsCalculator2
 
         ' Check each removed key to see if it was added elsewhere
         For Each kvp In _state.ModifiedEntries.RemovedKeyTracker2
+
             Dim sourceEntry = kvp.Key
             Dim removedKeyList = kvp.Value
 
@@ -132,6 +212,7 @@ Public Class DiffStatisticsCalculator2
 
                 ' Look for matching added keys
                 For Each addedInfo In sameTypeAdded
+
                     Dim targetEntry = addedInfo.EntryName
                     Dim addedKey = addedInfo.Key
 
@@ -176,11 +257,7 @@ Public Class DiffStatisticsCalculator2
         For Each kvp In keysToRemoveFromRemoved
 
             Dim sourceEntry = kvp.Key
-            For Each key In kvp.Value
-
-                _state.ModifiedEntries.RemovedKeyTracker2(sourceEntry).Remove(key)
-
-            Next
+            For Each key In kvp.Value : _state.ModifiedEntries.RemovedKeyTracker2(sourceEntry).Remove(key) : Next
 
             ' Clean up empty lists
             If _state.ModifiedEntries.RemovedKeyTracker2(sourceEntry).Count = 0 Then _state.ModifiedEntries.RemovedKeyTracker2.Remove(sourceEntry)
@@ -190,11 +267,7 @@ Public Class DiffStatisticsCalculator2
         For Each kvp In keysToRemoveFromAdded
 
             Dim targetEntry = kvp.Key
-            For Each key In kvp.Value
-
-                _state.ModifiedEntries.AddedKeyTracker2(targetEntry).Remove(key)
-
-            Next
+            For Each key In kvp.Value : _state.ModifiedEntries.AddedKeyTracker2(targetEntry).Remove(key) : Next
 
             ' Clean up empty lists
             If _state.ModifiedEntries.AddedKeyTracker2(targetEntry).Count = 0 Then _state.ModifiedEntries.AddedKeyTracker2.Remove(targetEntry)
@@ -206,8 +279,10 @@ Public Class DiffStatisticsCalculator2
         Dim targetEntries As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
         For Each movementInfo In _state.KeyMovements.MovedKeys.Values
+
             sourceEntries.Add(movementInfo.SourceEntry)
             targetEntries.Add(movementInfo.TargetEntry)
+
         Next
 
         _state.Statistics.ModEntriesMovedKeysSourceCount = sourceEntries.Count
@@ -242,11 +317,12 @@ Public Class DiffStatisticsCalculator2
             Dim allMergedKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
             For Each oldEntryName In _state.MergedEntries.MergeDict(newEntryName)
-                If oldEntryCaptures.ContainsKey(oldEntryName) Then
-                    For Each v In oldEntryCaptures(oldEntryName).AllKeyValues
-                        allMergedKeyValues.Add(v)
-                    Next
-                End If
+
+
+                If Not oldEntryCaptures.ContainsKey(oldEntryName) Then Continue For
+
+                For Each v In oldEntryCaptures(oldEntryName).AllKeyValues : allMergedKeyValues.Add(v) : Next
+
             Next
 
             Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(newEntryName),
@@ -260,27 +336,32 @@ Public Class DiffStatisticsCalculator2
             Dim novelCount = 0
             Dim carriedOverCount = 0
             For Each k In addedKeys
+
                 If allMergedKeyValues.Contains(k.Value) Then carriedOverCount += 1 Else novelCount += 1
+
             Next
 
             If novelCount > 0 Then
+
                 _state.Statistics.AddedWithMergersNovelKeysTotal += novelCount
                 _state.Statistics.AddedWithMergersNovelKeysEntryCount += 1
+
             End If
 
             If carriedOverCount > 0 Then
+
                 _state.Statistics.AddedWithMergersCarriedOverKeysTotal += carriedOverCount
                 _state.Statistics.AddedWithMergersCarriedOverKeysEntryCount += 1
+
             End If
 
-            If removedKeys.Count > 0 Then
-                _state.Statistics.AddedWithMergersDroppedEntryCount += 1
-            End If
+            If removedKeys.Count > 0 Then _state.Statistics.AddedWithMergersDroppedEntryCount += 1
 
-            If updatedKeysDict.Count > 0 Then
-                _state.Statistics.AddedWithMergersCapturingKeysTotal += updatedKeysDict.Count
-                _state.Statistics.AddedWithMergersCapturingEntryCount += 1
-            End If
+
+            If updatedKeysDict.Count = 0 Then Continue For
+
+            _state.Statistics.AddedWithMergersCapturingKeysTotal += updatedKeysDict.Count
+            _state.Statistics.AddedWithMergersCapturingEntryCount += 1
 
         Next
 
@@ -289,6 +370,15 @@ Public Class DiffStatisticsCalculator2
     ''' <summary>
     ''' Initializes capture tracking for all old entries involved in mergers
     ''' </summary>
+    '''
+    ''' <param name="entriesWithMergers">
+    ''' List populated by this method with the names of added entries that contain merged content
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A dictionary mapping each old entry name to its <c>OldEntryKeyTracking</c> instance,
+    ''' pre-populated with all key values from that entry
+    ''' </returns>
     Private Function BuildOldEntryCaptureTracking(entriesWithMergers As List(Of String)) As Dictionary(Of String, OldEntryKeyTracking)
 
         Dim oldEntryCaptures As New Dictionary(Of String, OldEntryKeyTracking)(StringComparer.OrdinalIgnoreCase)
@@ -330,15 +420,27 @@ Public Class DiffStatisticsCalculator2
 
     End Function
 
+    ''' <summary>
+    ''' For each old entry in <paramref name="oldEntryCaptures"/>, checks which of its keys are present
+    ''' in the new entries it was merged into and marks them as captured in the tracking record
+    ''' </summary>
+    '''
+    ''' <param name="oldEntryCaptures">
+    ''' Tracking dictionary built by <c>BuildOldEntryCaptureTracking</c>; capture sets are updated in place
+    ''' </param>
     Private Sub ComputeKeyCaptureRates(oldEntryCaptures As Dictionary(Of String, OldEntryKeyTracking))
 
         ' Build reverse lookup: oldEntryName -> Set(Of newEntryNames) it was merged into
         Dim targetsForOld As New Dictionary(Of String, HashSet(Of String))(StringComparer.OrdinalIgnoreCase)
         For Each kvp In _state.MergedEntries.MergeDict
+
             For Each oldName In kvp.Value
+
                 If Not targetsForOld.ContainsKey(oldName) Then targetsForOld(oldName) = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
                 targetsForOld(oldName).Add(kvp.Key)
+
             Next
+
         Next
 
         For Each oldEntryKvp In oldEntryCaptures
@@ -362,21 +464,22 @@ Public Class DiffStatisticsCalculator2
 
                     ' Fast path: exact value match avoids CompareKeys entirely
                     If newKeyValues.Contains(oldKey.Value) Then
+
                         tracking.CapturedKeyValues.Add(oldKey.Value)
                         If oldKey.KeyType = "FileKey" OrElse oldKey.KeyType = "RegKey" Then tracking.CapturedContentKeyValues.Add(oldKey.Value)
+
                         Continue For
+
                     End If
 
                     ' Slow path: wildcard / regex comparison
                     For Each newKey In newSection.Keys
 
-                        If KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey) Then
+                        If Not KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey) Then Continue For
 
-                            tracking.CapturedKeyValues.Add(oldKey.Value)
-                            If oldKey.KeyType = "FileKey" OrElse oldKey.KeyType = "RegKey" Then tracking.CapturedContentKeyValues.Add(oldKey.Value)
-                            Exit For
-
-                        End If
+                        tracking.CapturedKeyValues.Add(oldKey.Value)
+                        If oldKey.KeyType = "FileKey" OrElse oldKey.KeyType = "RegKey" Then tracking.CapturedContentKeyValues.Add(oldKey.Value)
+                        Exit For
 
                     Next
 
@@ -389,8 +492,17 @@ Public Class DiffStatisticsCalculator2
     End Sub
 
     ''' <summary>
-    ''' Calculates and logs overall capture rate statistics. Returns key count totals.
+    ''' Sums key count totals across all old entry tracking records
     ''' </summary>
+    '''
+    ''' <param name="oldEntryCaptures">
+    ''' Tracking dictionary whose values supply the per-entry key counts to aggregate
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A <c>KeyCaptureTotals</c> with aggregate counts
+    ''' for all keys and content keys (FileKey/RegKey)
+    ''' </returns>
     Private Function SummarizeCaptureStatistics(oldEntryCaptures As Dictionary(Of String, OldEntryKeyTracking)) As KeyCaptureTotals
 
         Dim totals As New KeyCaptureTotals
@@ -412,6 +524,10 @@ Public Class DiffStatisticsCalculator2
     ''' Logs per-entry key status showing captured and dropped keys together,
     ''' followed by a summary displaying totals and capture rates by type
     ''' </summary>
+    '''
+    ''' <param name="oldEntryCaptures">
+    ''' Tracking dictionary whose entries are enumerated to produce the per-entry log output
+    ''' </param>
     Private Sub LogSourceEntryKeyStatus(oldEntryCaptures As Dictionary(Of String, OldEntryKeyTracking))
 
         If oldEntryCaptures.Count = 0 Then Return
@@ -421,8 +537,10 @@ Public Class DiffStatisticsCalculator2
         Dim capByCategory As New Dictionary(Of String, Integer)
 
         For Each cat In categories
+
             totByCategory(cat) = 0
             capByCategory(cat) = 0
+
         Next
 
         gLog("SOURCE ENTRY KEY STATUS REPORT:")
@@ -488,6 +606,14 @@ Public Class DiffStatisticsCalculator2
     ''' <summary>
     ''' Returns a category marker string for a given key type
     ''' </summary>
+    '''
+    ''' <param name="key">
+    ''' The key whose type is mapped to a category label
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' One of <c>[DELETION]</c>, <c>[DETECTION]</c>, <c>[CATEGORY]</c>, or <c>[OTHER]</c>
+    ''' </returns>
     Private Function getMarker(key As iniKey2) As String
 
         Dim isDelete = (key.KeyType = "FileKey" OrElse key.KeyType = "RegKey")
@@ -504,13 +630,29 @@ Public Class DiffStatisticsCalculator2
     ''' </summary>
     Private Class AddedKeyInfo
 
-        ''' <summary>The name of the entry this key was added to</summary>
+        ''' <summary>
+        ''' The name of the entry to which the <c> Key </c> was added
+        ''' </summary>
         Public Property EntryName As String
 
-        ''' <summary>The added key</summary>
+        ''' <summary>
+        ''' The added key
+        ''' </summary>
         Public Property Key As iniKey2
 
-        Public Sub New(entry As String, k As iniKey2)
+        ''' <summary>
+        ''' Creates a new <c>AddedKeyInfo</c> instance
+        ''' </summary>
+        ''' 
+        ''' <param name="entry">
+        ''' The name of the entry to which the key was added 
+        ''' </param>
+        ''' 
+        ''' <param name="k">
+        ''' The added key
+        ''' </param>
+        Public Sub New(entry As String,
+                       k As iniKey2)
 
             EntryName = entry
             Key = k
@@ -524,16 +666,24 @@ Public Class DiffStatisticsCalculator2
     ''' </summary>
     Private Class KeyCaptureTotals
 
-        ''' <summary>Total number of keys across all old entries (all types)</summary>
+        ''' <summary>
+        ''' Total number of keys across all old entries (all types)
+        ''' </summary>
         Public Property Total As Integer
 
-        ''' <summary>Number of keys captured by any new entry (all types)</summary>
+        ''' <summary>
+        ''' Number of keys captured by any new entry (all types)
+        ''' </summary>
         Public Property Captured As Integer
 
-        ''' <summary>Total number of FileKey and RegKey values across all old entries</summary>
+        ''' <summary>
+        ''' Total number of FileKey and RegKey values across all old entries
+        ''' </summary>
         Public Property TotalContent As Integer
 
-        ''' <summary>Number of FileKey and RegKey values captured by any new entry</summary>
+        ''' <summary>
+        ''' Number of FileKey and RegKey values captured by any new entry
+        ''' </summary>
         Public Property CapturedContent As Integer
 
     End Class
@@ -553,10 +703,15 @@ Public Class DiffStatisticsCalculator2
         ''' </summary>
         Public Property CapturedKeyValues As HashSet(Of String)
 
-        ''' <summary>Values of FileKey and RegKey keys in the old entry</summary>
+        ''' <summary>
+        ''' Values of FileKey and RegKey keys in the old entry
+        ''' </summary>
         Public Property AllContentKeyValues As HashSet(Of String)
 
-        ''' <summary>Values of FileKey and RegKey keys from the old entry that were captured by any new entry</summary>
+        ''' <summary>
+        ''' Values of FileKey and RegKey keys from the 
+        ''' old entry that were captured by any new entry
+        ''' </summary>
         Public Property CapturedContentKeyValues As HashSet(Of String)
 
     End Class
