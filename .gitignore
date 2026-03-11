@@ -257,3 +257,5 @@ Assembler/winapp2ool.exe
 /winapp2ool/bin/Debug/diff-old.txt
 /winapp2ool/bin/Debug/diff-test-new.ini
 /winapp2ool/bin/Debug/diff-test-old.ini
+/winapp2ool/GLOBAL_STATE.md
+/winapp2ool/handlers/ini/OBJECT_MODEL_DESIGN.md
