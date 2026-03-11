@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -31,12 +31,14 @@ Public Module launcher
     ''' .NET 4.6 or higher is required to update the executable 
     ''' When run from the temporary folder, winapp2ool.exe update functionality is disabled
     ''' </remarks>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2025-08-06
     Public Sub main()
 
-        Console.WindowWidth = 130
-        Console.WindowHeight = 35
+        If Not SuppressOutput Then
+
+            Console.WindowWidth = 130
+            Console.WindowHeight = 35
+
+        End If
 
         gLog($"Starting application")
 
@@ -52,7 +54,7 @@ Public Module launcher
 
         processCommandLineArgs()
 
-        If SuppressOutput Then Environment.Exit(1)
+        If SuppressOutput Then Environment.Exit(0)
 
         currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         Console.Title = $"Winapp2ool v{currentVersion}"
