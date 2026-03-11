@@ -33,15 +33,15 @@ Public Class iniKeyCollection
     End Property
 
     ''' <summary>
-    ''' Adds a key to the collection. If a key with the same Name already exists,
-    ''' the new key is silently ignored (first-write-wins).
+    ''' Adds a key to the collection. Duplicate names are allowed — all occurrences appear
+    ''' in enumeration order and in <c>GetByType</c> results. <c>GetKey</c> returns the
+    ''' first occurrence for any given name.
     ''' </summary>
     ''' <param name="key">The key to add</param>
     Public Sub Add(key As iniKey2)
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
-        If _byName.ContainsKey(key.Name) Then Return
         _ordered.Add(key)
-        _byName.Add(key.Name, key)
+        If Not _byName.ContainsKey(key.Name) Then _byName.Add(key.Name, key)
         Dim bucket As List(Of iniKey2) = Nothing
         If Not _byType.TryGetValue(key.KeyType, bucket) Then
             bucket = New List(Of iniKey2)
@@ -80,7 +80,8 @@ Public Class iniKeyCollection
     End Function
 
     ''' <summary>
-    ''' Removes the given key from the collection
+    ''' Removes the given key from the collection. If this key was the <c>GetKey</c>-indexed
+    ''' occurrence for its name, the index is updated to the next remaining key with that name.
     ''' </summary>
     '''
     ''' <param name="key">
@@ -90,7 +91,18 @@ Public Class iniKeyCollection
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
         _ordered.Remove(key)
-        _byName.Remove(key.Name)
+
+        Dim indexed As iniKey2 = Nothing
+        If _byName.TryGetValue(key.Name, indexed) AndAlso ReferenceEquals(indexed, key) Then
+            _byName.Remove(key.Name)
+            For Each remaining In _ordered
+                If remaining.Name.Equals(key.Name, StringComparison.OrdinalIgnoreCase) Then
+                    _byName.Add(remaining.Name, remaining)
+                    Exit For
+                End If
+            Next
+        End If
+
         Dim bucket As List(Of iniKey2) = Nothing
         If _byType.TryGetValue(key.KeyType, bucket) Then bucket.Remove(key)
 
