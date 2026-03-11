@@ -18,12 +18,17 @@
 Option Strict On
 
 ''' <summary>
-''' Converts an <c>iniFile</c> to an <c>iniFile2</c> for use by the Diff2 pipeline.
+''' Provides in-memory conversion between the legacy <c>iniFile</c> type hierarchy and the
+''' new <c>iniFile2</c> type hierarchy. Used at explicit layer boundaries while individual
+''' modules migrate from the legacy layer to the new layer.
+''' <br /><br />
+''' Comments are not preserved across conversions — same tradeoff as general round-trip in
+''' both layers. Use only at layer boundaries, not inside module core logic.
 ''' </summary>
-Module DiffFileBridge
+Public Module IniFileBridge
 
     ''' <summary>
-    ''' Converts an <c>iniFile</c> to an <c>iniFile2</c>
+    ''' Converts a legacy <c>iniFile</c> to an <c>iniFile2</c>
     ''' </summary>
     '''
     ''' <param name="f">
@@ -31,8 +36,7 @@ Module DiffFileBridge
     ''' </param>
     '''
     ''' <returns>
-    ''' An <c> iniFile2 </c> containing equivalent sections,
-    ''' keys, and comments as <c> <paramref name="f"/> </c>
+    ''' An <c>iniFile2</c> containing equivalent sections and keys
     ''' </returns>
     Public Function ToIniFile2(f As iniFile) As iniFile2
 
@@ -47,6 +51,35 @@ Module DiffFileBridge
             For Each key In section.Keys.Keys : s2.AddKey(New iniKey2(key.toString())) : Next
 
             out.AddSection(s2)
+
+        Next
+
+        Return out
+
+    End Function
+
+    ''' <summary>
+    ''' Converts an <c>iniFile2</c> to a legacy <c>iniFile</c>
+    ''' </summary>
+    '''
+    ''' <param name="f">
+    ''' The <c>iniFile2</c> to convert
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' An <c>iniFile</c> containing equivalent sections and keys
+    ''' </returns>
+    Public Function ToIniFile(f As iniFile2) As iniFile
+
+        Dim out As New iniFile With {.Dir = f.Dir, .Name = f.Name}
+
+        For Each section In f
+
+            Dim s As New iniSection With {.Name = section.Name}
+
+            For Each key In section.Keys : s.Keys.add(New iniKey(key.ToString())) : Next
+
+            out.Sections.Add(section.Name, s)
 
         Next
 

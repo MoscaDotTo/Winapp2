@@ -196,7 +196,7 @@ Module Diff
             ' Trim still uses the old winapp2file model — bridge until Trim is migrated
             Dim tmp As New winapp2file(getRemoteIniFile(getWinappLink))
             Trim.trimFile(tmp)
-            file2As2 = DiffFileBridge.ToIniFile2(tmp.toIni)
+            file2As2 = IniFileBridge.ToIniFile2(tmp.toIni)
 
         End If
 

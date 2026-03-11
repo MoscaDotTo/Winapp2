@@ -149,7 +149,7 @@
     <Compile Include="modules\combine\settingshandler\combinesettingshandler.vb" />
     <Compile Include="modules\combine\tool\Combine.vb" />
     <Compile Include="modules\diff\core\DiffConfiguration.vb" />
-    <Compile Include="modules\diff\core\DiffFileBridge.vb" />
+    <Compile Include="handlers\ini\iniFileBridge.vb" />
     <Compile Include="modules\diff\core\DiffOutputRenderer2.vb" />
     <Compile Include="modules\diff\core\DiffState.vb" />
     <Compile Include="modules\diff\core\DiffStatisticsCalculator2.vb" />
