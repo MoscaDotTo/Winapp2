@@ -525,7 +525,7 @@ Public Module UWPBuilder
         End If
 
         ' 4. Scaffold template FileKeys — applied to all packages
-        For Each scaffoldKey In scaffoldKeys
+        For Each scaffoldKey In scaffoldFileKeys
 
             For Each expanded In expandPackageKey(scaffoldKey, app.Packages)
 
