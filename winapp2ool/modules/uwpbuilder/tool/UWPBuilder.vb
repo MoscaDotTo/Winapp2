@@ -36,9 +36,10 @@ Imports System.Text
 '''
 ''' <item>
 ''' <c> UWP.ini </c> <br /> The scaffold template with one or more
-''' <c> [EntryScaffold: ...] </c> sections. Each scaffold's <c> FileKeyBase= </c>
-''' lines are applied to every application, generating a consistent baseline
-''' set of cleaning targets.
+''' <c> [EntryScaffold: ...] </c> sections. Each scaffold's <c> DetectFileBase= </c>
+''' lines are expanded per package to produce the entry's detection paths, and its
+''' <c> FileKeyBase= </c> lines are applied to every application as a consistent
+''' baseline set of cleaning targets.
 ''' </item>
 '''
 ''' <item>
@@ -96,7 +97,7 @@ Public Module UWPBuilder
 
         ''' <summary>
         ''' Additional DetectFile= values in their original file order, appended after the
-        ''' package-generated DetectFile keys. Supports hybrid win32+UWP entries that need
+        ''' scaffold-generated DetectFile keys. Supports hybrid win32+UWP entries that need
         ''' file system detection for the win32 installation alongside package detection.
         ''' </summary>
         Public DetectFileKeys As List(Of String)
@@ -231,14 +232,15 @@ Public Module UWPBuilder
 
         gLog("Processing UWP builder files", ascend:=True, buffr:=True)
 
-        Dim scaffoldKeys As New List(Of String)
+        Dim scaffoldFileKeys As New List(Of String)
+        Dim scaffoldDetectFiles As New List(Of String)
         Dim apps As New List(Of UWPAppInfo)
 
         For Each section In templateIni
 
             If section.Name.StartsWith("EntryScaffold:", StringComparison.InvariantCulture) Then
 
-                parseScaffold(section, scaffoldKeys, menuOutput)
+                parseScaffold(section, scaffoldFileKeys, scaffoldDetectFiles, menuOutput)
 
             Else
 
@@ -250,7 +252,7 @@ Public Module UWPBuilder
 
         Next
 
-        Dim scaffoldMsg = $"Loaded {scaffoldKeys.Count} scaffold FileKey template(s)"
+        Dim scaffoldMsg = $"Loaded {scaffoldDetectFiles.Count} scaffold DetectFile template(s), {scaffoldFileKeys.Count} scaffold FileKey template(s)"
         menuOutput.AddColoredLine(scaffoldMsg, ConsoleColor.Yellow)
         gLog(scaffoldMsg, indent:=True)
 
@@ -269,7 +271,7 @@ Public Module UWPBuilder
 
         For Each app In apps
 
-            Dim entrySection = generateUWPEntry(app, scaffoldKeys, menuOutput)
+            Dim entrySection = generateUWPEntry(app, scaffoldFileKeys, scaffoldDetectFiles, menuOutput)
             outputFile.AddSection(entrySection)
 
         Next
@@ -297,7 +299,8 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Parses an <c> [EntryScaffold: ...] </c> section from the template file, collecting
-    ''' its <c> FileKeyBase= </c> values into <paramref name="scaffoldKeys"/>.
+    ''' its <c> DetectFileBase= </c> values into <paramref name="scaffoldDetectFiles"/> and
+    ''' its <c> FileKeyBase= </c> values into <paramref name="scaffoldFileKeys"/>.
     ''' Warns on any unrecognised key types.
     ''' </summary>
     '''
@@ -305,15 +308,20 @@ Public Module UWPBuilder
     ''' The <c> [EntryScaffold: ...] </c> section to parse
     ''' </param>
     '''
-    ''' <param name="scaffoldKeys">
+    ''' <param name="scaffoldFileKeys">
     ''' The accumulator list to which parsed <c> FileKeyBase= </c> values are appended
+    ''' </param>
+    '''
+    ''' <param name="scaffoldDetectFiles">
+    ''' The accumulator list to which parsed <c> DetectFileBase= </c> values are appended
     ''' </param>
     '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving progress lines and warnings for display
     ''' </param>
     Private Sub parseScaffold(scaffoldSection As iniSection2,
-                               scaffoldKeys As List(Of String),
+                               scaffoldFileKeys As List(Of String),
+                               scaffoldDetectFiles As List(Of String),
                                menuOutput As MenuSection)
 
         Dim scaffoldName = scaffoldSection.Name.Substring("EntryScaffold:".Length).Trim()
@@ -323,16 +331,19 @@ Public Module UWPBuilder
 
         For Each key In scaffoldSection.Keys
 
-            If key.KeyType.Equals("FileKeyBase", StringComparison.OrdinalIgnoreCase) Then
+            Select Case key.KeyType.ToUpperInvariant()
 
-                scaffoldKeys.Add(key.Value)
-                Continue For
+                Case "DETECTFILEBASE" : scaffoldDetectFiles.Add(key.Value)
 
-            End If
+                Case "FILEKEYBASE" : scaffoldFileKeys.Add(key.Value)
 
-            Dim errMsg = $"Unexpected key in scaffold [{scaffoldSection.Name}]: {key.Name}"
-            gLog(errMsg)
-            menuOutput.AddWarning(errMsg)
+                Case Else
+
+                    Dim errMsg = $"Unexpected key in scaffold [{scaffoldSection.Name}]: {key.Name}"
+                    gLog(errMsg)
+                    menuOutput.AddWarning(errMsg)
+
+            End Select
 
         Next
 
@@ -440,8 +451,13 @@ Public Module UWPBuilder
     ''' The parsed app definition to generate an entry for
     ''' </param>
     '''
-    ''' <param name="scaffoldKeys">
+    ''' <param name="scaffoldFileKeys">
     ''' The <c> FileKeyBase= </c> templates from <c> UWP.ini </c>, applied to every app
+    ''' </param>
+    '''
+    ''' <param name="scaffoldDetectFiles">
+    ''' The <c> DetectFileBase= </c> templates from <c> UWP.ini </c>, expanded per package
+    ''' to produce the entry's detection paths
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -452,7 +468,8 @@ Public Module UWPBuilder
     ''' A fully populated <c> iniSection2 </c> ready to be added to the output file
     ''' </returns>
     Private Function generateUWPEntry(app As UWPAppInfo,
-                                      scaffoldKeys As List(Of String),
+                                      scaffoldFileKeys As List(Of String),
+                                      scaffoldDetectFiles As List(Of String),
                                       menuOutput As MenuSection) As iniSection2
 
         Dim generatingMsg = $"Generating entry: {app.Name}"
@@ -486,11 +503,11 @@ Public Module UWPBuilder
 
         End If
 
-        ' 3. DetectFile keys — package paths first, then imported, unnumbered if only one total
+        ' 3. DetectFile keys — scaffold templates expanded per package first, then app-specific, unnumbered if only one total
         Dim allDetectFiles As New List(Of String)
-        For Each pkg In app.Packages
+        For Each template In scaffoldDetectFiles
 
-            allDetectFiles.Add($"%LocalAppData%\Packages\{pkg}")
+            allDetectFiles.AddRange(expandPackageKey(template, app.Packages))
 
         Next
         allDetectFiles.AddRange(app.DetectFileKeys)
