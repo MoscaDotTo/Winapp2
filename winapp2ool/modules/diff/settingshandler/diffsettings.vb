@@ -64,10 +64,27 @@ Public Module diffsettings
     ''' </summary>
     Public Property TrimRemoteFile As Boolean = Not isOffline
 
-    ''' <summary> 
-    ''' Indicates that full entries should be printed in the Diff output. <br/> 
-    ''' Called "verbose mode" in the menu 
+    ''' <summary>
+    ''' Indicates that full entries should be printed in the Diff output. <br/>
+    ''' Called "verbose mode" in the menu
     ''' </summary>
     Public Property ShowFullEntries As Boolean = False
+
+    ''' <summary>
+    ''' Restores all Diff settings to their defaults and persists the reset to disk
+    ''' </summary>
+    Public Sub InitDefaultDiffSettings()
+
+        DownloadDiffFile = Not isOffline
+        TrimRemoteFile = Not isOffline
+        ShowFullEntries = False
+        SaveDiffLog = False
+        DiffModuleSettingsChanged = False
+        DiffFile1 = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2-old.ini", mustExist:=True)
+        DiffFile2 = New iniFileChooser(Environment.CurrentDirectory, "", "winapp2.ini", mustExist:=True)
+        DiffFile3 = New iniFileChooser(Environment.CurrentDirectory, "diff.txt", "diff.txt", mustExist:=False)
+        SaveModule2(NameOf(Diff), GetType(diffsettings))
+
+    End Sub
 
 End Module
