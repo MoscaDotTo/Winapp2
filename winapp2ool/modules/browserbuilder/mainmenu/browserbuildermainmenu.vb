@@ -1,7 +1,7 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
-' 
+'    Copyright (C) 2018-2026 Hazel Ward
+'
 '    This file is a part of Winapp2ool
-' 
+'
 '    Winapp2ool is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
 '    the Free Software Foundation, either version 3 of the License, or
@@ -21,183 +21,73 @@ Option Strict On
 ''' Displays the Browser Builder main menu and handles user input, allowing user configuration
 ''' of module settings from the UI
 ''' </summary>
-''' 
-''' Docs last updated: 2025-07-30 
 Public Module browserbuildermainmenu
 
     ''' <summary>
-    ''' Prints the BrowserBuilder main menu to the user
+    ''' Builds the BrowserBuilder main menu with all options and their dispatch handlers registered inline
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-08-22
-    Public Sub printBrowserBuilderMenu()
-
-        Console.WindowHeight = 40
-        Console.WindowWidth = 130
+    '''
+    ''' <returns>
+    ''' A fully configured <c>MenuSection</c> ready to print or dispatch
+    ''' </returns>
+    Private Function buildBrowserBuilderMenu() As MenuSection
 
         Dim menuDesc = {"Generate winapp2.ini entries for web browsers and web views",
                         "Supports both Chromium-based and Gecko-based entry generation",
                         "Consult the winapp2ool ReadMe before using this module!"}
 
-        Dim menu = MenuSection.CreateCompleteMenu(NameOf(BrowserBuilder), menuDesc, ConsoleColor.DarkMagenta)
-
-        menu.AddOption("Run (default)", "Generate web browser winapp2.ini entries").AddBlank() _
-            .AddOption("Choose chromium ruleset", "Select a new generative ruleset for chromium browsers") _
-            .AddOption("Choose gecko ruleset", "Select a new generative ruleset for gecko browsers").AddBlank _
-            .AddOption("Choose save target", "Select a new location on disk to which generated entries should be saved").AddBlank _
-            .AddOption("Choose section removals", "Select a new flavor file for section removals") _
-            .AddOption("Choose key name removals", "Select a new flavor file for key removals by name") _
-            .AddOption("Choose key value removals", "Select a new flavor file for key removals by value") _
-            .AddOption("Choose section replacements", "Select a new flavor file for section replacements") _
-            .AddOption("Choose key replacements", "Select a new flavor file for key value replacements") _
-            .AddOption("Choose additions", "Select a new flavor file for section and key additions").AddBlank() _
-            .AddColoredFileInfo($"Current chromium.ini:       ", BuilderFile1.Path, ConsoleColor.DarkYellow) _
-            .AddColoredFileInfo($"Current gecko.ini:          ", BuilderFile2.Path, ConsoleColor.DarkRed) _
-            .AddColoredFileInfo($"Current save target:        ", BuilderFile3.Path, ConsoleColor.Yellow).AddBlank() _
-            .AddFileInfo($"Section removals rules:     ", BuilderFile5.Path) _
-            .AddFileInfo($"Key name removals rules:    ", BuilderFile6.Path) _
-            .AddFileInfo($"Key value removals rules:   ", BuilderFile7.Path) _
-            .AddFileInfo($"Section replacements rules: ", BuilderFile8.Path) _
-            .AddFileInfo($"Key replacement rules:      ", BuilderFile9.Path) _
-            .AddFileInfo($"Content addition rules:     ", BuilderFile4.Path) _
+        Return MenuSection.CreateCompleteMenu(NameOf(BrowserBuilder), menuDesc, ConsoleColor.DarkMagenta) _
+            .AddDispatchedOption("Run (default)", "Generate web browser winapp2.ini entries",
+                Sub() initBrowserBuilder()) _
+            .AddBlank() _
+            .AddDispatchedOption("Choose source directory", "Select the directory containing chromium.ini, gecko.ini, and flavor correction files",
+                Sub() changeFile2Params(BuilderFile1, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderFile1), NameOf(BrowserBuilderModuleSettingsChanged), "Source directory")) _
+            .AddDispatchedOption("Choose save target", "Select a new location on disk to which generated entries should be saved",
+                Sub() changeFile2Params(BuilderFile2, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderFile2), NameOf(BrowserBuilderModuleSettingsChanged), "Save target")) _
+            .AddBlank() _
+            .AddColoredFileInfo("Current source directory: ", BuilderFile1.Dir, ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo("Current save target:      ", BuilderFile2.Path(), ConsoleColor.Yellow) _
             .AddBlank(BrowserBuilderModuleSettingsChanged) _
-            .AddResetOpt(NameOf(BrowserBuilder), BrowserBuilderModuleSettingsChanged)
+            .AddDispatchedResetOpt(NameOf(BrowserBuilder), BrowserBuilderModuleSettingsChanged,
+                Sub() resetModuleSettings(NameOf(BrowserBuilder), AddressOf InitDefaultBrowserBuilderSettings))
 
-        menu.Print()
+    End Function
+
+    ''' <summary>
+    ''' Prints the BrowserBuilder main menu to the user
+    ''' </summary>
+    Public Sub printBrowserBuilderMenu()
+
+        Console.WindowHeight = 40
+        Console.WindowWidth = 130
+        buildBrowserBuilderMenu().Print()
 
     End Sub
 
     ''' <summary>
     ''' Handles the user input from the BrowserBuilder menu
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="input">
-    ''' The user's input 
+    ''' The user's input
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-22 | Code last updated: 2025-08-22
     Public Sub handleBrowserBuilderInput(input As String)
 
-        Dim fileOpts = getFileOpts()
-        Dim fileNums = getMenuNumbering(fileOpts, 2)
+        Dim intInput As Integer
 
-        Dim resetNum = CType(fileOpts.Count + 2, String)
+        If Not Integer.TryParse(input, intInput) Then
 
-        Dim fileDescs = {
-        "Chromium ruleset",
-        "Gecko ruleset",
-        "Save target",
-        "Section removal ruleset",
-        "Key name removal ruleset",
-        "Key value removal ruleset",
-        "Section replacement ruleset",
-        "Key value replacement ruleset",
-        "Additions ruleset"}
+            If input.Length = 0 Then initBrowserBuilder() : Return
 
-        Select Case True
+            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Return
 
-            ' Exit
-            Case input = "0"
+        End If
 
-                exitModule()
+        If intInput = 0 Then exitModule() : Return
 
-            ' Run (default)
-            Case (input = "1" OrElse input.Length = 0)
-
-                initBrowserBuilder()
-
-            ' File Selectors
-            Case fileNums.Contains(input)
-
-                Dim i = CType(input, Integer) - 2
-
-                Dim fileName = fileOpts.Keys(i)
-                Dim fileObj = fileOpts(fileName)
-
-                changeFileParams(fileObj, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), fileName, NameOf(BrowserBuilderModuleSettingsChanged), fileDescs(i))
-
-            ' Reset Settings       
-            Case BrowserBuilderModuleSettingsChanged AndAlso input = resetNum
-
-                resetModuleSettings(NameOf(BrowserBuilder), AddressOf initDefaultBrowserBuilderSettings)
-
-            Case Else
-
-                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-        End Select
+        If Not buildBrowserBuilderMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
     End Sub
-
-    ''' <summary>
-    ''' Determines the current set of file selectors displayed on the menu and returns a Dictionary 
-    ''' of those options and their respective files <br />
-    ''' <br />
-    ''' The set of possible files includes:
-    ''' <list type="bullet">
-    '''     
-    '''     <item>
-    '''     chromium.ini
-    '''     </item>
-    '''     
-    '''     <item>
-    '''     gecko.ini
-    '''     </item>
-    '''     
-    '''     <item>
-    '''     save target
-    '''     </item>
-    '''     
-    '''     <item>
-    '''     Section removals
-    '''     </item>
-    '''     
-    '''     <item>
-    '''     Key name removals
-    '''     </item>
-    '''     
-    '''     <item>
-    '''     Key value removals
-    '''     </item>
-    '''     
-    '''     <item>
-    '''     Section replacements
-    '''     </item>
-    '''     
-    '''     <item>
-    '''     Key replacements
-    '''     </item>
-    '''     
-    '''     <item>
-    '''     Additions
-    '''     </item>
-    '''     
-    ''' </list>
-    ''' 
-    ''' </summary>
-    ''' 
-    ''' <returns> 
-    ''' The set of <c> iniFile </c> properties for an object currently displayed on the menu
-    ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-08-22 | Code last updated: 2025-08-22
-    Private Function getFileOpts() As Dictionary(Of String, iniFile)
-
-        Dim selectors As New Dictionary(Of String, iniFile)
-
-        selectors.Add(NameOf(BuilderFile1), BuilderFile1)
-        selectors.Add(NameOf(BuilderFile2), BuilderFile2)
-        selectors.Add(NameOf(BuilderFile3), BuilderFile3)
-
-        selectors.Add(NameOf(BuilderFile5), BuilderFile5)
-        selectors.Add(NameOf(BuilderFile6), BuilderFile6)
-        selectors.Add(NameOf(BuilderFile9), BuilderFile9)
-        selectors.Add(NameOf(BuilderFile7), BuilderFile7)
-        selectors.Add(NameOf(BuilderFile8), BuilderFile8)
-        selectors.Add(NameOf(BuilderFile4), BuilderFile4)
-
-        Return selectors
-
-    End Function
 
 End Module
