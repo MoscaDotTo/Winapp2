@@ -71,6 +71,7 @@ Public Module commandLineHandler
         addModule("7", "combine", 2, AddressOf Combine.handleCmdLine)
         addModule("8", "download", 3, AddressOf Downloader.handleCmdLine)
         addModule("9", "flavorize", 8, AddressOf Flavorizer.handleCmdLine)
+        addModule("10", "uwpbuilder", 2, AddressOf UWPBuilder.handleCmdLine)
 
         Return configs
 
@@ -194,6 +195,25 @@ Public Module commandLineHandler
     ''' The set of <c> iniFile </c> properties belonging to a particular module 
     ''' </param>
     Public Sub getFileAndDirParams(ByRef files() As iniFile)
+
+        If files Is Nothing Then argIsNull(NameOf(files)) : Return
+
+        For i = 0 To files.Length - 1
+
+            getParams(i + 1, files(i))
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Gets the directory and name info for the <c>iniFileChooser</c> properties of a module.
+    ''' </summary>
+    '''
+    ''' <param name="files">
+    ''' The set of <c>iniFileChooser</c> properties belonging to a particular module
+    ''' </param>
+    Public Sub getFileAndDirParams(ByRef files() As iniFileChooser)
 
         If files Is Nothing Then argIsNull(NameOf(files)) : Return
 
@@ -339,11 +359,100 @@ Public Module commandLineHandler
     ''' <summary>
     ''' Cleans up file paths by removing double, leading, and trailing slashes
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="file">
-    ''' An <c> iniFile </c> module property whose path will be modified 
+    ''' An <c> iniFile </c> module property whose path will be modified
     ''' </param>
     Private Sub CleanFilePath(ByRef file As iniFile)
+
+        file.Dir = file.Dir.Replace("\\", "\")
+
+        If file.Name.StartsWith("\", StringComparison.InvariantCulture) Then file.Name = file.Name.TrimStart(CChar("\"))
+
+        If file.Dir.EndsWith("\", StringComparison.InvariantCulture) Then file.Dir = file.Dir.TrimEnd(CChar("\"))
+
+    End Sub
+
+    Private Sub getParams(iniFilePropertyNumber As Integer,
+                    ByRef someFile As iniFileChooser)
+
+        Dim argStr As String = $"-{iniFilePropertyNumber}"
+
+        If cmdargs.Contains($"{argStr}d") Then getFileNameAndDir($"{argStr}d", someFile)
+
+        If cmdargs.Contains($"{argStr}f") Then getFileName($"{argStr}f", someFile)
+
+        CleanFilePath(someFile)
+
+    End Sub
+
+    Private Sub getFileName(arg As String,
+                      ByRef givenFile As iniFileChooser)
+
+        If cmdargs.Count < 2 Then Return
+
+        Dim ind = cmdargs.IndexOf(arg)
+        If ind = -1 OrElse ind >= cmdargs.Count - 1 Then Return
+
+        Dim curArg = cmdargs(ind + 1)
+        givenFile.Name = curArg
+
+        If curArg.StartsWith("\", StringComparison.InvariantCulture) AndAlso Not curArg.LastIndexOf("\", StringComparison.InvariantCulture) = 0 Then
+
+            Dim split = curArg.Split(CChar("\"))
+
+            For i As Integer = 1 To split.Length - 2
+
+                givenFile.Dir += $"\{split(i)}"
+
+            Next
+
+            givenFile.Name = split.Last
+
+        End If
+
+        cmdargs.RemoveAt(ind)
+        cmdargs.RemoveAt(ind)
+
+    End Sub
+
+    Private Sub getFileNameAndDir(flag As String,
+                            ByRef file As iniFileChooser)
+
+        If cmdargs.Count < 2 Then Return
+
+        Dim ind = cmdargs.IndexOf(flag)
+        If ind = -1 OrElse ind >= cmdargs.Count - 1 Then Return
+
+        getFileParams(cmdargs(ind + 1), file)
+        cmdargs.RemoveAt(ind)
+        cmdargs.RemoveAt(ind)
+
+    End Sub
+
+    Private Sub getFileParams(ByRef arg As String,
+                              ByRef file As iniFileChooser)
+
+        file.Dir = If(arg.StartsWith("\", StringComparison.InvariantCulture), Environment.CurrentDirectory, "")
+        Dim splitArg As String() = arg.Split(CChar("\"))
+
+        If splitArg.Last.Contains(".") Then file.Name = splitArg.Last
+
+        If splitArg.Length < 2 Then Return
+
+        Dim terminus = If(splitArg.Last.Contains("."), splitArg.Length - 2, splitArg.Length - 1)
+
+        For i = 0 To terminus
+
+            file.Dir += splitArg(i) & "\"
+
+        Next
+
+        CleanFilePath(file)
+
+    End Sub
+
+    Private Sub CleanFilePath(ByRef file As iniFileChooser)
 
         file.Dir = file.Dir.Replace("\\", "\")
 

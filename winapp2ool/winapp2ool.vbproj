@@ -132,6 +132,10 @@
     <Compile Include="modules\browserbuilder\mainmenu\browserbuildermainmenu.vb" />
     <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettings.vb" />
     <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettingshandler.vb" />
+    <Compile Include="modules\entrylab\mainmenu\entryLabMainMenu.vb" />
+    <Compile Include="modules\uwpbuilder\mainmenu\uwpbuildermainmenu.vb" />
+    <Compile Include="modules\uwpbuilder\settingshandler\uwpbuildersettings.vb" />
+    <Compile Include="modules\uwpbuilder\tool\UWPBuilder.vb" />
     <Compile Include="modules\cc7patcher\mainmenu\cc7patchermainmenu.vb" />
     <Compile Include="modules\cc7patcher\settingshandler\cc7patchersettings.vb" />
     <Compile Include="modules\cc7patcher\settingshandler\cc7patchersettingshandler.vb" />
@@ -280,9 +284,7 @@
   <ItemGroup>
     <Folder Include="handlers\ini\comments\" />
     <Folder Include="helpers\filesystem\" />
-    <Folder Include="modules\uwpbuilder\mainmenu\" />
-    <Folder Include="modules\uwpbuilder\settingshandler\" />
-    <Folder Include="modules\uwpbuilder\tool\" />
+    <Folder Include="modules\entrylab\mainmenu\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
