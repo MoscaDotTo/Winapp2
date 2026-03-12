@@ -111,9 +111,7 @@ function Build-MainFile {
         -ErrorMessage "Failed to combine base entries")) { return $false }
     
     Write-Step "Generating browser entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-browserbuilder', '-1d', '\BrowserBuilder', '-2d', '\BrowserBuilder', `
-        '-3f', 'browsers.ini', '-4d', '\BrowserBuilder', '-5d', '\BrowserBuilder', '-6d', '\BrowserBuilder', `
-        '-7d', '\BrowserBuilder', '-8d', '\BrowserBuilder', '-9d', '\BrowserBuilder' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-browserbuilder', '-1d', '\BrowserBuilder', '-2d', '\BrowserBuilder', '-2f', 'browsers.ini' `
         -ErrorMessage "Failed to generate browser entries")) { return $false }
 
     Write-Step "Generating UWP entries"

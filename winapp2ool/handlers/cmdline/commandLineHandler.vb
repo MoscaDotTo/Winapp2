@@ -67,7 +67,7 @@ Public Module commandLineHandler
         addModule("3", "transmute", 3, AddressOf Transmute.handleCmdLine)
         addModule("4", "diff", 3, AddressOf Diff.HandleCmdLine)
         addModule("5", "ccdebug", 3, AddressOf CCiniDebug.handleCmdlineArgs)
-        addModule("6", "browserbuilder", 9, AddressOf BrowserBuilder.handleCmdLine)
+        addModule("6", "browserbuilder", 2, AddressOf BrowserBuilder.handleCmdLine)
         addModule("7", "combine", 2, AddressOf Combine.handleCmdLine)
         addModule("8", "download", 3, AddressOf Downloader.handleCmdLine)
         addModule("9", "flavorize", 8, AddressOf Flavorizer.handleCmdLine)

@@ -242,7 +242,6 @@ Public Module settingsHandler
         {NameOf(Transmute), New KeyValuePair(Of Action, Action)(AddressOf createTransmuteSettingsSection, AddressOf getSerializedTransmuteSettings)},
         {NameOf(CCiniDebug), New KeyValuePair(Of Action, Action)(AddressOf createCCDBSettingsSection, AddressOf getSerializedDebugSettings)},
         {NameOf(Downloader), New KeyValuePair(Of Action, Action)(AddressOf createDownloadSettingsSection, AddressOf getSerializedDownloaderSettings)},
-        {NameOf(BrowserBuilder), New KeyValuePair(Of Action, Action)(AddressOf createBrowserBuilderSettingsSection, AddressOf getSerializedBrowserBuilderSettings)},
         {NameOf(Flavorizer), New KeyValuePair(Of Action, Action)(AddressOf createFlavorizerSettingsSection, AddressOf getSerializedFlavorizerSettings)},
         {NameOf(Combine), New KeyValuePair(Of Action, Action)(AddressOf createCombineSettingsSection, AddressOf getSerializedCombineSettings)}
     }
@@ -259,8 +258,12 @@ Public Module settingsHandler
     ''' Each migrated module's <c>LoadModule2</c> call is added here as modules migrate.
     ''' </summary>
     Private Sub loadAllModuleSettings2()
-        If readSettingsFromDisk Then LoadModule2(NameOf(Diff), GetType(diffsettings))
-        If readSettingsFromDisk Then LoadModule2(NameOf(UWPBuilder), GetType(uwpbuildersettings))
+        If Not readSettingsFromDisk Then Return
+
+        LoadModule2(NameOf(Diff), GetType(diffsettings))
+        LoadModule2(NameOf(UWPBuilder), GetType(uwpbuildersettings))
+        LoadModule2(NameOf(BrowserBuilder), GetType(browserbuildersettings))
+
     End Sub
 
     ''' <summary>

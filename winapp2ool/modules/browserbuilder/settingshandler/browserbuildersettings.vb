@@ -1,7 +1,7 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
-' 
+'    Copyright (C) 2018-2026 Hazel Ward
+'
 '    This file is a part of Winapp2ool
-' 
+'
 '    Winapp2ool is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
 '    the Free Software Foundation, either version 3 of the License, or
@@ -19,186 +19,68 @@ Option Strict On
 
 ''' <summary>
 ''' Holds the settings for the Browser Builder module, which allows winapp2ool to build bespoke entries
-''' for indivudal web browsers through a simple scripting interface <br /><br />
-''' 
-''' Summary of Browser Builder files and their expected content: 
-''' 
-''' <list>
+''' for individual web browsers through a simple scripting interface. <br /><br />
+'''
+''' Browser Builder reads all of its input files from a single source directory:
+'''
+''' <list type="bullet">
 ''' <item>
-''' <b><c> BuilderFile1 </c></b> 
-''' <description> 
-''' chromium.ini - the generative rulesets for Chromium-based browsers - either this or 
-''' BuilderFile2 must be present in order for Browser Builder to run
-''' </description>
+''' <b><c>chromium.ini</c></b> - Generative rulesets for Chromium-based browsers
+''' (BrowserInfo + EntryScaffold sections). Either this or gecko.ini must be present.
 ''' </item>
-''' 
 ''' <item>
-''' <b><c> BuilderFile2 </c></b>
-''' <description> 
-''' gecko.ini - the generative rulesets for Gecko/Goanna-based browsers - either this or
-''' BuilderFile1 must be present in order for Browser Builder to run
-''' </description>
+''' <b><c>gecko.ini</c></b> - Generative rulesets for Gecko/Goanna-based browsers
+''' (BrowserInfo + EntryScaffold sections). Either this or chromium.ini must be present.
 ''' </item>
-''' 
 ''' <item>
-''' <b><c> BuilderFile3 </c> </b>
-''' <description>
-''' browsers.ini - Browser Builder saves its output here
-''' </description>
+''' <b><c>browser_additions.ini</c></b> - Sections and keys to add after generation (optional)
 ''' </item>
-''' 
 ''' <item>
-''' <b> <c> BuilderFile4 </c> </b>
-''' <description>
-''' browser_additions.ini - The set of entries and keys to be added to browsers.ini after generation
-''' </description>
+''' <b><c>browser_section_removals.ini</c></b> - Sections to remove after generation (optional)
 ''' </item>
-''' 
 ''' <item>
-''' <b> <c> BuilderFile5 </c> </b>
-''' <description>
-''' browser_section_removals.ini - The optional set of sections to be entirely removed from 
-''' browsers.ini after generation
-''' </description>
+''' <b><c>browser_name_removals.ini</c></b> - Keys to remove by name after generation (optional)
 ''' </item>
-''' 
 ''' <item>
-''' <b> <c> BuilderFile6 </c> </b>
-''' <description>
-''' browser_name_removals.ini - The optional set of individual keys to be removed by Name 
-''' from browsers.ini after generation
-''' </description>
+''' <b><c>browser_value_removals.ini</c></b> - Keys to remove by value after generation (optional)
 ''' </item>
-''' 
 ''' <item>
-''' <b> <c> BuilderFile7 </c></b>
-''' <description>
-''' browser_key_replacements.ini - The optional set of individual keys to have their values
-''' replace the ones browsers.ini after generation
-''' </description>
+''' <b><c>browser_section_replacements.ini</c></b> - Sections to replace after generation (optional)
 ''' </item>
-''' 
 ''' <item>
-''' <b> <c> BuilderFile8 </c></b>
-''' <description>
-''' browser_section_replacements.ini - The optional set of sections to entirely replace sections 
-''' of the same in browsers.ini after generation
-''' </description>
-''' </item>
-''' 
-''' <item>
-''' <b> <c> BuilderFile9 </c></b>
-''' <description>
-''' browser_value_removals.ini - The optional set of individual keys to be removed by value 
-''' from browsers.ini after generation
-''' </description>
+''' <b><c>browser_key_replacements.ini</c></b> - Keys to replace by value after generation (optional)
 ''' </item>
 ''' </list>
-''' 
+'''
 ''' </summary>
-''' <remarks>
-''' <b> Remarks: </b> <br /><br />
-''' Only the generative rulesets need to be segregated by browser engine. All other files contain a 
-''' mix of chromium, gecko, and/or any other extant browser engines or embedded runtimes
-''' </remarks>
-''' 
-''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
 Public Module browserbuildersettings
 
     ''' <summary>
-    ''' The <c> iniFile </c> containing the generative information for Chromium browser entries <br />
-    ''' This should include a set of <c> BrowserInfo </c> sections defining the individual web browsers and
-    ''' a set of <c> EntryScaffold </c> sections defining the structure of the individual entries 
-    ''' <br/><br/>
+    ''' The source directory containing <c>chromium.ini</c>, <c>gecko.ini</c>, and all
+    ''' optional flavor correction files. Only the <c>Dir</c> property is used; <c>Name</c> is ignored.
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
-    Public Property BuilderFile1 As New iniFile(Environment.CurrentDirectory, "chromium.ini")
+    Public Property BuilderFile1 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 
     ''' <summary>
-    ''' The <c> iniFile </c> containing the generative information for Gecko-based browser entries <br />
-    ''' This should include a set of <c> BrowserInfo </c> sections defining the individual web browsers and
-    ''' a set of <c> EntryScaffold </c> sections defining the structure of the individual entries
+    ''' The output file to which Browser Builder saves its generated browser entries.
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
-    Public Property BuilderFile2 As New iniFile(Environment.CurrentDirectory, "gecko.ini")
-
-    ''' <summary>
-    ''' The location to which the generative output of Browser Builder will be saved to disk
-    ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
-    Public Property BuilderFile3 As New iniFile(Environment.CurrentDirectory, "browsers.ini")
-
-    ''' <summary>
-    ''' The <c> iniFile </c> containing the set of sections and keys to be added to the browser entries 
-    ''' generated by Browser Builder. This file should contain winapp2.ini syntax ini sections
-    ''' <br/><br/>
-    ''' This file is used to reduce under-coverage caused by the nature of Browser Builder
-    ''' eg. vendor-unique browser features or additional data payloads 
-    ''' </summary>
-    '''
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
-    Public Property BuilderFile4 As New iniFile(Environment.CurrentDirectory, "browser_additions.ini")
-
-    ''' <summary>
-    ''' The <c> iniFile </c> containing the set of sections to be entirely removed from the 
-    ''' browser entries generated by Browser Builder. This file need not contain any keys, just sections. 
-    ''' <br /> <br />
-    ''' This file is used to reduce over-coverage caused by the nature of Browser Builder
-    ''' eg. features not supported by a particular browser 
-    ''' </summary>
-    '''
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
-    Public Property BuilderFile5 As New iniFile(Environment.CurrentDirectory, "browser_section_removals.ini")
-
-    ''' <summary>
-    ''' The <c> iniFile </c> containing the set of individual keys to be removed by Name 
-    ''' from the browser entries generated by Browser Builder. 
-    ''' <br /> <br />
-    ''' This file is used to reduce over-coverage caused by the nature of Browser Builder 
-    ''' eg. features not supported by a particular browser 
-    ''' </summary>
-    '''
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
-
-    Public Property BuilderFile6 As New iniFile(Environment.CurrentDirectory, "browser_name_removals.ini")
-
-    ''' <summary>
-    ''' The <c> iniFile </c> containing the set of individual keys to have their values replace 
-    ''' the values of browser entries generated by Browser Builder <br /><br />
-    ''' </summary>
-    '''
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
-    Public Property BuilderFile7 As New iniFile(Environment.CurrentDirectory, "browser_key_replacements.ini")
-
-    ''' <summary>
-    ''' The <c> iniFile </c> containing the set of complete sections to have all of their keys
-    ''' replace the keys of the matching section generated by Browser Builder. <br /><br/>
-    ''' Support for this file is provided for the sake of completeness, although at the time 
-    ''' of creation there is no known use case for it
-    ''' </summary>
-    '''
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
-    Public Property BuilderFile8 As New iniFile(Environment.CurrentDirectory, "browser_section_replacements.ini")
-
-    ''' <summary>
-    ''' The <c> iniFile </c> containing the set of individual keys to be removed by Value
-    ''' from the browser entries generated by Browser Builder. 
-    ''' <br /> <br />
-    ''' This file is used to reduce over-coverage caused by the nature of Browser Builder 
-    ''' eg. features not supported by a particular browser 
-    ''' </summary>
-    '''
-    ''' Docs last updated: 2025-07-30 | Code last updated: 2025-07-30
-    Public Property BuilderFile9 As New iniFile(Environment.CurrentDirectory, "browser_value_removals.ini")
+    Public Property BuilderFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "browsers.ini", "browsers.ini", mustExist:=False)
 
     ''' <summary>
     ''' Indicates that the module settings have been modified from their defaults
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-07-02 | Code last updated: 2025-07-02
     Public Property BrowserBuilderModuleSettingsChanged As Boolean = False
+
+    ''' <summary>
+    ''' Restores all BrowserBuilder settings to their defaults and persists the reset to disk
+    ''' </summary>
+    Public Sub InitDefaultBrowserBuilderSettings()
+
+        BuilderFile1 = New iniFileChooser(Environment.CurrentDirectory, "", "")
+        BuilderFile2 = New iniFileChooser(Environment.CurrentDirectory, "browsers.ini", "browsers.ini", mustExist:=False)
+        BrowserBuilderModuleSettingsChanged = False
+        SaveModule2(NameOf(BrowserBuilder), GetType(browserbuildersettings))
+
+    End Sub
 
 End Module
