@@ -193,7 +193,7 @@ Module Diff
 
         If TrimRemoteFile AndAlso DownloadDiffFile Then
 
-            ' Trim still uses the old winapp2file model — bridge until Trim is migrated
+            ' Trim still uses the old winapp2file model - bridge until Trim is migrated
             Dim tmp As New winapp2file(getRemoteIniFile(getWinappLink))
             Trim.trimFile(tmp)
             file2As2 = IniFileBridge.ToIniFile2(tmp.toIni)

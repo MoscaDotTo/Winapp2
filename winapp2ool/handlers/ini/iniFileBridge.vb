@@ -22,7 +22,7 @@ Option Strict On
 ''' new <c>iniFile2</c> type hierarchy. Used at explicit layer boundaries while individual
 ''' modules migrate from the legacy layer to the new layer.
 ''' <br /><br />
-''' Comments are not preserved across conversions — same tradeoff as general round-trip in
+''' Comments are not preserved across conversions - same tradeoff as general round-trip in
 ''' both layers. Use only at layer boundaries, not inside module core logic.
 ''' </summary>
 Public Module IniFileBridge
