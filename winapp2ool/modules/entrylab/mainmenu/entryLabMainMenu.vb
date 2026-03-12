@@ -26,19 +26,29 @@ Option Strict On
 Module entryLabMainMenu
 
     ''' <summary>
-    ''' Prints the Entry Lab menu to the user
+    ''' Builds the Entry Lab menu with all options and their dispatch handlers registered inline.
+    ''' Called by both <c> printEntryLabMenu </c> (to render) and <c> handleEntryLabInput </c>
+    ''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
     ''' </summary>
-    Public Sub printEntryLabMenu()
+    Private Function buildEntryLabMenu() As MenuSection
 
         Dim menuDesc = {"Entry Lab is a collection of tools that generate winapp2.ini entries from templates",
                         "Select a tool below to get started"}
 
-        Dim menu = MenuSection.CreateCompleteMenu("Entry Lab", menuDesc, ConsoleColor.Cyan).AddBlank
+        Return MenuSection.CreateCompleteMenu("Entry Lab", menuDesc, ConsoleColor.Cyan).AddBlank() _
+            .AddDispatchedColoredOption(NameOf(BrowserBuilder), "Generate winapp2.ini entries for web browsers", ConsoleColor.DarkYellow,
+                Sub() initModule(NameOf(BrowserBuilder), AddressOf printBrowserBuilderMenu, AddressOf handleBrowserBuilderInput)) _
+            .AddDispatchedColoredOption(NameOf(UWPBuilder), "Generate winapp2.ini entries for Universal Windows Platform apps", ConsoleColor.Blue,
+                Sub() initModule(NameOf(UWPBuilder), AddressOf printUWPBuilderMenu, AddressOf handleUWPBuilderInput))
 
-        menu.AddColoredOption(NameOf(BrowserBuilder), "Generate winapp2.ini entries for web browsers", ConsoleColor.DarkYellow) _
-            .AddColoredOption(NameOf(UWPBuilder), "Generate winapp2.ini entries for Universal Windows Platform apps", ConsoleColor.Blue)
+    End Function
 
-        menu.Print()
+    ''' <summary>
+    ''' Prints the Entry Lab menu to the user
+    ''' </summary>
+    Public Sub printEntryLabMenu()
+
+        buildEntryLabMenu().Print()
 
     End Sub
 
@@ -51,30 +61,21 @@ Module entryLabMainMenu
     ''' </param>
     Public Sub handleEntryLabInput(input As String)
 
-        Dim modules = New Dictionary(Of String, KeyValuePair(Of Action, Action(Of String))) From {
-            {NameOf(BrowserBuilder), New KeyValuePair(Of Action, Action(Of String))(AddressOf printBrowserBuilderMenu, AddressOf handleBrowserBuilderInput)},
-            {NameOf(UWPBuilder), New KeyValuePair(Of Action, Action(Of String))(AddressOf printUWPBuilderMenu, AddressOf handleUWPBuilderInput)}
-        }
+        Dim intInput As Integer
 
-        Dim moduleOpts As String() = {"1", "2"}
+        If Not Integer.TryParse(input, intInput) Then
 
-        Select Case True
+            ' Allow an empty input to default to BrowserBuilder (option 1)
+            If input.Length = 0 Then initModule(NameOf(BrowserBuilder), AddressOf printBrowserBuilderMenu, AddressOf handleBrowserBuilderInput) : Return
 
-            Case input = "0"
+            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Return
 
-                exitModule()
+        End If
 
-            Case moduleOpts.Contains(input) OrElse input.Length = 0
+        If intInput = 0 Then exitModule() : Return
 
-                If input.Length = 0 Then input = "1"
-                Dim i = CType(input, Integer) - 1
-                initModule(modules.Keys(i), modules.Values(i).Key, modules.Values(i).Value)
-
-            Case Else
-
-                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-        End Select
+        If Not buildEntryLabMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
     End Sub
 
