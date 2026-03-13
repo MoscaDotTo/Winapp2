@@ -4,11 +4,14 @@
 
 .DESCRIPTION
     This script requires winapp2ool v1.7 or newer.
-    Creates backups, combines entries, generates browser entries, and builds multiple flavors.
+    Creates backups, combines base entries, generates and corrects browser entries, 
+    generates UWP entries, combines these into the base flavor, generates tool flavors,
+    and creates a diff for each generated flavor.
 
 .NOTES
     Author: Hazel Ward
-    Most recent update: 2026-03-11
+    Version 20260313
+    Copyright 2026
 #>
 
 [CmdletBinding()]
@@ -19,7 +22,8 @@ $script:Winapp2oolPath = $null
 
 function Write-Step {
     param([string]$Message)
-    Write-Host $Message -ForegroundColor Cyan
+    # Adding a clear newline before each major step
+    Write-Host "`n>> $Message" -ForegroundColor Cyan
 }
 
 function Write-ErrorMsg {
@@ -71,9 +75,20 @@ function Invoke-Winapp2ool {
     )
     
     try {
-        $process = Start-Process -FilePath $script:Winapp2oolPath -ArgumentList $Arguments -NoNewWindow -Wait -PassThru
-        if ($process.ExitCode -ne 0) {
-            Write-ErrorMsg "$ErrorMessage (Exit Code: $($process.ExitCode))"
+        # Dropping -NoNewWindow and using -WindowStyle Hidden
+        # This isolates the tool in an invisible window, which can prevent
+        # errors from being obviously observed. Revert to -NoNewWindow
+        # if you need/want to see the console output 
+        $process = Start-Process -FilePath $script:Winapp2oolPath `
+                                 -ArgumentList $Arguments `
+                                 -WindowStyle Hidden `
+                                 -Wait `
+                                 -PassThru
+        
+        $exitCode = $process.ExitCode
+
+        if ($exitCode -ne 0) {
+            Write-ErrorMsg "$ErrorMessage (Exit Code: $exitCode)"
             return $false
         }
         return $true
@@ -111,7 +126,7 @@ function Build-MainFile {
         -ErrorMessage "Failed to combine base entries")) { return $false }
     
     Write-Step "Generating browser entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-browserbuilder', '-1d', '\BrowserBuilder', '-2d', '\BrowserBuilder', '-2f', 'browsers.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-browserbuilder', '-1d', '\BrowserBuilder', '-2f', 'browsers.ini' `
         -ErrorMessage "Failed to generate browser entries")) { return $false }
 
     Write-Step "Generating UWP entries"
