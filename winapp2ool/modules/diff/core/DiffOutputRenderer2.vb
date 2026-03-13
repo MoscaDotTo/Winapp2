@@ -82,20 +82,20 @@ Public Class DiffOutputRenderer2
         Dim modified = _state.ModifiedEntries
 
         Dim netDiff = _file2.Count - _file1.Count
-        Dim totalOldEntriesMerged = stats.MergedEntryCount + merged.RenamedEntryNames.Count
         Dim oldRemovedNoRepl = modified.RemovedEntryNames.Count - stats.MergedEntryCount - merged.RenamedEntryNames.Count
 
-        Dim mergedIntoModified = Math.Max(0, stats.MergedEntryCount - stats.RemovedByAdditionCount)
         Dim modifiedEntriesWithMergers = merged.MergedEntryNames.Where(Function(e) Not modified.AddedEntryNames.Contains(e)).Count()
 
-        Dim oldEntriesMergedIntoModified = 0
+        Dim mergedIntoModifiedSources As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
         For Each entryName In merged.MergedEntryNames
 
             If modified.AddedEntryNames.Contains(entryName) OrElse Not merged.MergeDict.ContainsKey(entryName) Then Continue For
-            oldEntriesMergedIntoModified += merged.MergeDict(entryName).Count
+
+            For Each oldName In merged.MergeDict(entryName) : mergedIntoModifiedSources.Add(oldName) : Next
 
         Next
 
+        Dim oldEntriesMergedIntoModified = mergedIntoModifiedSources.Count
         Dim netChange = $"Net entry count change: {netDiff}"
 
         Dim modifiedSummaryOpener = $"Modified entries: {modified.ModifiedEntryNames.Count}"
@@ -129,7 +129,7 @@ Public Class DiffOutputRenderer2
         Dim modEntriesHaveUpdates = stats.ModEntriesUpdatedKeyTotal > 0
         Dim hasRenames = merged.RenamedEntryNames.Count > 0
         Dim hasMergedIntoAdded = stats.AddedWithMergersSourceEntryCount > 0
-        Dim hasMergedIntoModified = mergedIntoModified > 0
+        Dim hasMergedIntoModified = modifiedEntriesWithMergers > 0
 
         Dim renameStats = stats
         Dim renamedNameOnly = $"    = {renameStats.RenamedEntriesNameOnlyCount} are name-only changes (no key differences)"
@@ -201,7 +201,9 @@ Public Class DiffOutputRenderer2
     ''' has been merged into an entry in the new version
     ''' </summary>
     '''
-    ''' <returns>One <c>MenuSection</c> per merged old entry</returns>
+    ''' <returns>
+    ''' One <c>MenuSection</c> per merged old entry
+    ''' </returns>
     Public Function SummarizeMergers() As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
@@ -327,37 +329,20 @@ Public Class DiffOutputRenderer2
     ''' </returns>
     Public Function ItemizeMergers() As List(Of MenuSection)
 
-        Dim processedOldEntries As New HashSet(Of String)
-
-        For Each oldEntry In _state.MergedEntries.OldToNewMergeDict.OrderBy(Function(kvp) kvp.Key, StringComparer.OrdinalIgnoreCase)
-
-            Dim oldName = oldEntry.Key
-            Dim newTargets = oldEntry.Value
-
-            If processedOldEntries.Contains(oldName) Then Continue For
-            processedOldEntries.Add(oldName)
-
-            If newTargets.Count > 1 Then Continue For
-
-            Dim targetEntry = newTargets(0)
-
-            If Not _state.MergedEntries.MergeDict.ContainsKey(targetEntry) Then Continue For
+        For Each targetEntry In _state.MergedEntries.MergeDict.Keys _
+                                    .OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
 
             If _state.ModifiedEntries.AddedEntryNames.Contains(targetEntry) Then Continue For
-
-            ' Skip if this was already processed as a rename
             If _state.MergedEntries.RenamedEntryNames.Contains(targetEntry) Then Continue For
 
             Dim uniqueKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
             Dim combinedOldKeys As New List(Of iniKey2)
             Dim sourceEntryMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
 
-            If _file1.Contains(targetEntry) Then _state.MergedEntries.MergeDict(targetEntry).Add(targetEntry)
+            For Each oldEntryName In _state.MergedEntries.MergeDict(targetEntry)
 
-            For i = 0 To _state.MergedEntries.MergeDict(targetEntry).Count - 1
-
-                Dim oldEntryName = _state.MergedEntries.MergeDict(targetEntry)(i)
                 Dim oldEnt = _file1.GetSection(oldEntryName)
+                If oldEnt Is Nothing Then Continue For
 
                 For Each key In oldEnt.Keys
 
@@ -369,9 +354,24 @@ Public Class DiffOutputRenderer2
 
                 Next
 
-                processedOldEntries.Add(_state.MergedEntries.MergeDict(targetEntry)(i))
-
             Next
+
+            ' Include the target's own old keys if it existed in file1 and wasn't already
+            ' listed as a merge source (avoids mutating MergeDict as the old code did)
+            If _file1.Contains(targetEntry) AndAlso
+               Not _state.MergedEntries.MergeDict(targetEntry).Contains(targetEntry) Then
+
+                For Each key In _file1.GetSection(targetEntry).Keys
+
+                    If uniqueKeyValues.Contains(key.Value) Then Continue For
+
+                    combinedOldKeys.Add(key)
+                    uniqueKeyValues.Add(key.Value)
+                    sourceEntryMap(key.Value) = targetEntry
+
+                Next
+
+            End If
 
             _mergerSourceMaps(targetEntry) = sourceEntryMap
             _keyAnalyzer.FindModificationsFromCombinedKeys(combinedOldKeys, _file2.GetSection(targetEntry))
@@ -455,6 +455,7 @@ Public Class DiffOutputRenderer2
 
             If Not isMerger AndAlso _state.MergedEntries.MergedEntryNames.Contains(entry) Then Continue For
             If isMerger AndAlso Not _state.MergedEntries.MergedEntryNames.Contains(entry) Then Continue For
+            If _state.MergedEntries.RenamedEntryNames.Contains(entry) Then Continue For
 
             Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
             Dim newSectionVer = _file2.GetSection(entry)
