@@ -133,19 +133,23 @@ Module Diff
     ''' <br /> -d           : download the latest winapp2.ini
     ''' <br /> -donttrim    : download the latest non-ccleaner winapp2.ini (implies -d)
     ''' <br /> -savelog     : save diff.txt to disk on exit
+    ''' <br /> -verbose     : enable verbose output
     ''' </summary>
     Public Sub HandleCmdLine()
 
         InitDefaultDiffSettings()
 
-        ' Downloading the remote file is the default behavior, providing -d disables it
-        handleDownloadBools(DownloadDiffFile)
+        Dim spec As New CliArgSpec("diff")
+        spec.WithFile(1, DiffFile1, "old") _
+            .WithFile(2, DiffFile2, "new") _
+            .WithFile(3, DiffFile3, "log") _
+            .WithDownload(Sub() DownloadDiffFile = Not DownloadDiffFile) _
+            .WithFlag("-donttrim", Sub() TrimRemoteFile = Not TrimRemoteFile) _
+            .WithFlag("-savelog", Sub() SaveDiffLog = Not SaveDiffLog) _
+            .WithFlag("-verbose", Sub() SuppressOutput = Not SuppressOutput) _
+            .Parse()
 
         If DownloadDiffFile Then DiffFile2.Name = "Online winapp2.ini"
-
-        invertSettingAndRemoveArg(TrimRemoteFile, "-donttrim")
-        invertSettingAndRemoveArg(SaveDiffLog, "-savelog")
-        getFileAndDirParams({DiffFile1, DiffFile2, DiffFile3})
 
         If DiffFile2.Name.Length <> 0 Then ConductDiff()
 
@@ -241,7 +245,10 @@ Module Diff
     ''' Gets the version string from the first comment of a winapp2.ini file
     ''' </summary>
     ''' 
-    ''' <param name="someFile">The <c>iniFile2</c> whose first comment is inspected for a version tag</param>
+    ''' <param name="someFile">
+    ''' The <c>iniFile2</c> whose first comment is inspected for a version tag
+    ''' </param>
+    ''' 
     ''' <returns>
     ''' A human-readable version string, or <c>" version not given"</c> if no version comment is present
     ''' </returns>
