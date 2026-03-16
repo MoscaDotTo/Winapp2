@@ -33,13 +33,6 @@ Public Module launcher
     ''' </remarks>
     Public Sub main()
 
-        If Not SuppressOutput Then
-
-            Console.WindowWidth = 130
-            Console.WindowHeight = 35
-
-        End If
-
         gLog($"Starting application")
 
         chkOfflineMode()
@@ -55,6 +48,9 @@ Public Module launcher
         processCommandLineArgs()
 
         If SuppressOutput Then Environment.Exit(0)
+
+        Console.WindowWidth = 130
+        Console.WindowHeight = 35
 
         currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         Console.Title = $"Winapp2ool v{currentVersion}"
