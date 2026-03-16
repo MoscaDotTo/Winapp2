@@ -153,11 +153,13 @@ Public Module UWPBuilder
     End Structure
 
     ''' <summary>
-    ''' Handles the command-line arguments for <c>UWPBuilder</c>
+    ''' Handles the command-line arguments for <c> UWPBuilder </c>
     ''' </summary>
     Public Sub handleCmdLine()
 
-        getFileAndDirParams({UWPFile1, UWPFile2})
+        Dim spec As New CliArgSpec("uwpbuilder")
+        spec.WithFile(1, UWPFile1).WithFile(2, UWPFile2).Parse()
+
         initUWPBuilder()
 
     End Sub
@@ -204,7 +206,9 @@ Public Module UWPBuilder
 
         output.AddAnyKeyPrompt()
 
-        If Not SuppressOutput Then output.Print()
+        If SuppressOutput Then Return
+
+        output.Print()
         crk()
 
     End Sub
