@@ -136,7 +136,7 @@ Public Module Winapp2ool
 
         If iFile.Sections.Count = 0 Then
 
-            setHeaderText($"{iFile.Name} was empty or not found", True)
+            setNextMenuHeaderText($"{iFile.Name} was empty or not found", True)
             gLog($"{iFile.Name} was empty or not found", indent:=True)
 
             Return False
@@ -216,7 +216,7 @@ Public Module Winapp2ool
         If iFile Is Nothing OrElse iFile.Count = 0 Then
 
             Dim fileName = If(iFile?.Name, "File")
-            setHeaderText($"{fileName} was empty or not found", True)
+            setNextMenuHeaderText($"{fileName} was empty or not found", True)
             gLog($"{fileName} was empty or not found", indent:=True)
 
             Return False
