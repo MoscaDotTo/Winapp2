@@ -139,7 +139,6 @@
     <Compile Include="modules\uwpbuilder\tool\UWPBuilder.vb" />
     <Compile Include="modules\cc7patcher\mainmenu\cc7patchermainmenu.vb" />
     <Compile Include="modules\cc7patcher\settingshandler\cc7patchersettings.vb" />
-    <Compile Include="modules\cc7patcher\settingshandler\cc7patchersettingshandler.vb" />
     <Compile Include="modules\cc7patcher\tool\CC7Patcher.vb" />
     <Compile Include="modules\ccdebug\settingshandler\ccdebugsettings.vb" />
     <Compile Include="modules\ccdebug\tool\CCiniDebug.vb" />
