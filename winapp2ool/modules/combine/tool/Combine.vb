@@ -72,7 +72,7 @@ Public Module Combine
 
         If Not Directory.Exists(targetDir) Then
 
-            setHeaderText($"Target directory not found: {targetDir}", True)
+            setNextMenuHeaderText("Target directory not found. Please select a valid directory.", printColor:=ConsoleColor.Red)
             Return
 
         End If
