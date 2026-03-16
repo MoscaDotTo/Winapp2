@@ -165,6 +165,7 @@
     <Compile Include="modules\download\settingshandler\downloadsettingshandler.vb" />
     <Compile Include="modules\download\tool\Downloader.vb" />
     <Compile Include="modules\download\tool\advDownloads.vb" />
+    <Compile Include="handlers\cmdline\CliArgSpec.vb" />
     <Compile Include="handlers\cmdline\commandLineHandler.vb" />
     <Compile Include="handlers\downloads\downloadr.vb" />
     <Compile Include="handlers\exceptions\exceptionHandler.vb" />
