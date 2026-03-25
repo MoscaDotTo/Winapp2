@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -295,7 +295,7 @@ Public Module WinappDebug
 
         gLog(descend:=True)
         gLog("Lint complete")
-        setHeaderText("Lint complete")
+        setNextMenuHeaderText("Lint complete", printColor:=ConsoleColor.Green)
         print(4, "Completed analysis of winapp2.ini", conjoin:=True)
         print(0, $"{ErrorsFound} possible errors were detected.")
         print(0, $"Number of entries {winappDebugFile1.Sections.Count}", trailingBlank:=True)

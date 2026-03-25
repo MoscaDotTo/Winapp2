@@ -68,13 +68,13 @@ Public Module advSettings
                 If Rules(ind).ShouldRepair Then Rules(ind).turnOn()
             Case intInput = 2 * Rules.Count + 1 And ScanSettingsChanged
                 resetScanSettings()
-                setHeaderText("Settings Reset")
+                setNextMenuHeaderText("Settings Reset", printColor:=ConsoleColor.Yellow)
         ' This isn't documented anywhere and is mostly intended as a debugging shortcut
             Case input = "alloff"
                 Rules.ForEach(Sub(rule) rule.turnOff())
                 ScanSettingsChanged = True
             Case Else
-                setHeaderText(invInpStr, True)
+                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
         End Select
     End Sub
 

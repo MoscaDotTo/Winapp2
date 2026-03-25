@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -151,7 +151,7 @@ Module lintmainmenu
 
             Case Else
 
-                setHeaderText(invInpStr, True)
+                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
         End Select
 
