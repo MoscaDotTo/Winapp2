@@ -143,7 +143,6 @@
     <Compile Include="modules\ccdebug\settingshandler\ccdebugsettings.vb" />
     <Compile Include="modules\ccdebug\tool\CCiniDebug.vb" />
     <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
-    <Compile Include="modules\ccdebug\settingshandler\ccdebugsettinghandler.vb" />
     <Compile Include="modules\combine\mainmenu\combinemainmenu.vb" />
     <Compile Include="modules\combine\settingshandler\combinesettings.vb" />
     <Compile Include="modules\combine\settingshandler\combinesettingshandler.vb" />
