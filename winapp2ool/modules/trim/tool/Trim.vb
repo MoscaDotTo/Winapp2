@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 '
 '    This file is a part of Winapp2ool
 '
@@ -16,59 +16,177 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
+
 Imports System.IO
 
-'''    <summary>
-'''    Checks the detection criteria of each entry in a winapp2.ini file against the current system 
-'''    Any entries whose criteria do not match the current system are then removed from the final output file
-'''   </summary>
-'''   Docs last updated 2022-11-21
+''' <summary>
+''' <c> Trim </c> is a winapp2ool module that evaluates the detection criteria of each entry in
+''' a winapp2.ini file against the current machine and removes any entries whose detection criteria
+''' are not satisfied, producing a system-specific subset of the full database. <br /><br />
+'''
+''' The full winapp2.ini database contains entries for thousands of applications, the vast majority
+''' of which will not be installed on any given machine. Trimming eliminates those irrelevant entries,
+''' reducing load time for cleaning software (particularly CCleaner) and avoiding spurious scans. <br /><br />
+'''
+''' Detection criteria and evaluation order: <br /><br />
+'''
+''' <list type="table">
+'''
+''' <item>
+''' <term> DetectOS </term>
+''' <description>
+''' Evaluated first. If present and not satisfied by the current Windows version, the entry is
+''' immediately discarded without checking any other criteria. <br />
+''' If satisfied and no other detection keys are present, the entry is retained. <br />
+''' DetectOS values take the form <c> VERSION| </c> (minimum), <c> |VERSION </c> (maximum),
+''' or <c> VERSION1|VERSION2 </c> (range), where version numbers are major.minor doubles
+''' (e.g. <c> 6.1 </c> for Windows 7, <c> 10.0 </c> for Windows 10).
+''' </description>
+''' </item>
+'''
+''' <item>
+''' <term> Detect </term>
+''' <description>
+''' Registry paths checked for existence. If any Detect key matches a registry key
+''' present on the current system, the entry is retained.
+''' </description>
+''' </item>
+'''
+''' <item>
+''' <term> DetectFile </term>
+''' <description>
+''' Filesystem paths (supporting wildcards) checked for existence. If any DetectFile key
+''' matches a file or directory present on the current system, the entry is retained.
+''' </description>
+''' </item>
+'''
+''' <item>
+''' <term> SpecialDetect </term>
+''' <description>
+''' Deprecated CCleaner variable checked against a hardcoded list of well-known browser/application
+''' install locations. Supported values: <c> DET_CHROME </c>, <c> DET_MOZILLA </c>,
+''' <c> DET_THUNDERBIRD </c>, <c> DET_OPERA </c>. If the corresponding application is
+''' detected, the entry is retained. Parsing for this is left only to support very old 
+''' versions of winapp2.ini. 
+''' </description>
+''' </item>
+'''
+''' </list>
+'''
+''' <br />
+''' Entries with no detection keys of any kind are always retained. <br /><br />
+'''
+''' Include and exclude overrides: <br /><br />
+'''
+''' When enabled, the includes file (<c> TrimFile2 </c>) and excludes file (<c> TrimFile4 </c>)
+''' each contain a list of entry names (one per ini section header) that unconditionally override
+''' the normal detection evaluation. An entry whose name appears in the includes file is always
+''' retained regardless of whether its detection criteria are satisfied. An entry whose name
+''' appears in the excludes file is always removed regardless of whether its detection criteria
+''' are satisfied. Include and exclude checks run before any detection evaluation. <br /><br />
+'''
+''' Environment variable expansion: <br /><br />
+'''
+''' In addition to standard Windows environment variables, Trim resolves several CCleaner-specific
+''' variables that do not exist natively in the Windows environment:
+'''
+''' <list type="table">
+'''
+''' <item>
+''' <term> %Documents% </term>
+''' <description> <c> %UserProfile%\My Documents </c> on XP; <c> %UserProfile%\Documents </c> on Vista+ </description>
+''' </item>
+'''
+''' <item>
+''' <term> %CommonAppData% </term>
+''' <description> <c> %AllUsersProfile%\Application Data </c> on XP; <c> %AllUsersProfile%\ </c> on Vista+ </description>
+''' </item>
+'''
+''' <item>
+''' <term> %LocalLowAppData% </term>
+''' <description> <c> %UserProfile%\AppData\LocalLow </c> </description>
+''' </item>
+'''
+''' <item>
+''' <term> %Pictures% </term>
+''' <description> <c> %UserProfile%\My Documents\My Pictures </c> on XP; <c> %UserProfile%\Pictures </c> on Vista+ </description>
+''' </item>
+'''
+''' <item>
+''' <term> %Music% </term>
+''' <description> <c> %UserProfile%\My Documents\My Music </c> on XP; <c> %UserProfile%\Music </c> on Vista+ </description>
+''' </item>
+'''
+''' <item>
+''' <term> %Video% </term>
+''' <description> <c> %UserProfile%\My Documents\My Videos </c> on XP; <c> %UserProfile%\Videos </c> on Vista+ </description>
+''' </item>
+'''
+''' </list>
+'''
+''' <br />
+''' %ProgramFiles% receives special handling: paths under %ProgramFiles% are checked against both
+''' the native-bitness Program Files directory and the 32-bit Program Files (x86) directory on
+''' 64-bit systems, so entries covering 32-bit applications installed on 64-bit Windows are
+''' retained correctly. <br /><br />
+'''
+''' VirtualStore augmentation: <br /><br />
+'''
+''' For entries that pass detection, Trim inspects the entry's FileKeys, RegKeys, and ExcludeKeys
+''' and generates additional keys covering VirtualStore locations that correspond to paths found
+''' under <c> %ProgramFiles% </c>, <c> %CommonAppData% </c>, <c> %CommonProgramFiles% </c>,
+''' and <c> HKLM\Software </c>. VirtualStore keys are only appended when the corresponding
+''' VirtualStore path actually exists on the current system, ensuring the output remains
+''' accurate to the machine.
+''' </summary>
 Public Module Trim
 
-    ''' <summary> 
-    ''' The major/minor version number on the current system 
+    ''' <summary>
+    ''' The major/minor version number on the current system
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Property winVer As Double
 
-    ''' <summary> 
-    ''' Handles the commandline args for Trim 
+    Private _includes2 As iniFile2 = Nothing
+    Private _excludes2 As iniFile2 = Nothing
+
+    ''' <summary>
+    ''' Handles command-line arguments for <c> Trim </c>
     ''' </summary>
-    ''' 
+    '''
     ''' <remarks>
     ''' Trim args:
     ''' -d          : download the latest winapp2.ini
     ''' </remarks>
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Public Sub handleCmdLine()
 
-        initDefaultTrimSettings()
-        handleDownloadBools(DownloadFileToTrim)
-        getFileAndDirParams({TrimFile1, New iniFile, TrimFile3})
+        InitDefaultTrimSettings()
+
+        Dim spec As New CliArgSpec(NameOf(Trim))
+        spec.WithFile(1, TrimFile1).WithFile(2, TrimFile2).WithFile(3, TrimFile3).WithFile(4, TrimFile4) _
+            .WithDownload(Sub() DownloadFileToTrim = Not DownloadFileToTrim, Function() DownloadFileToTrim) _
+            .Parse()
+
         initTrim()
 
     End Sub
 
-    ''' <summary> 
-    ''' Trims an <c> iniFile </c> from outside the module 
+    ''' <summary>
+    ''' Trims a winapp2.ini from outside the module
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="firstFile">
-    ''' The winapp2.ini file to be trimmed 
+    ''' The winapp2.ini file to be trimmed
     ''' </param>
-    ''' 
+    '''
     ''' <param name="thirdFile">
-    ''' <c> iniFile </c> containing the path on disk to which the trimmed file will be saved 
+    ''' The path on disk to which the trimmed file will be saved
     ''' </param>
-    ''' 
-    ''' <param name="d"> 
-    ''' Indicates that the input winapp2.ini should be downloaded from GitHub 
+    '''
+    ''' <param name="d">
+    ''' Whether the input winapp2.ini should be downloaded from GitHub
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
-    Public Sub remoteTrim(firstFile As iniFile,
-                          thirdFile As iniFile,
+    Public Sub remoteTrim(firstFile As iniFileChooser,
+                          thirdFile As iniFileChooser,
                           d As Boolean)
 
         TrimFile1 = firstFile
@@ -78,73 +196,83 @@ Public Module Trim
 
     End Sub
 
-    Public Function getTrimmedIni(firstFile As iniFile,
-                                  thirdFile As iniFile) As iniFile
-
-    End Function
-
-    ''' <summary> 
-    ''' Initiates the <c> Trim </c> process from the main menu or commandline 
+    ''' <summary>
+    ''' Initiates the <c> Trim </c> process from the main menu or commandline
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Public Sub initTrim()
 
-        ' Don't try to trim an empty file 
-        If Not DownloadFileToTrim Then If Not enforceFileHasContent(TrimFile1) Then Return
+        ' Don't try to trim an empty file
+        If Not DownloadFileToTrim Then
 
-        ' Ensure we have an online connection before continuing if necessary 
-        If DownloadFileToTrim Then If Not checkOnline() Then setHeaderText("Internet connection lost! Please check your network connection and try again", True) : Return
+            Dim winapp = TrimFile1.Load
+            If Not enforceFileHasContent(winapp) Then Return
 
-        Dim winapp2 = If(DownloadFileToTrim, New winapp2file(getRemoteIniFile(getWinappLink)), New winapp2file(TrimFile1))
+        End If
 
-        ' Spin up our include/excludes 
-        If UseTrimIncludes Then TrimFile2.validate()
-        If UseTrimExcludes Then TrimFile4.validate()
+        ' Ensure we have an online connection before continuing if necessary
+        Dim noNtwk = "Internet connection lost! Please check your network connection and try again"
+        If denyActionWithHeader(DownloadFileToTrim AndAlso Not checkOnline(), noNtwk) Then Return
+
+        Dim winapp2 = If(DownloadFileToTrim,
+            New winapp2file(getRemoteIniFile(getWinappLink)),
+            New winapp2file(New iniFile(TrimFile1.Dir, TrimFile1.Name)))
 
         clrConsole()
-        print(3, "Trimming... Please wait, this may take a moment...")
+        Dim progress As New MenuSection
+        progress.AddTopBorder() _
+                .AddColoredLine("Trimming... Please wait, this may take a moment...", ConsoleColor.DarkCyan, centered:=True) _
+                .AddBottomBorder()
+        progress.Print()
 
         Dim entryCountBeforeTrim = winapp2.count
 
-        ' Perform the trim 
+        ' Perform the trim
         trimFile(winapp2)
 
-        ' Print trim summary to the user 
-        clrConsole()
-        print(4, "Trim Complete", conjoin:=True)
-        print(0, "Entry Count", isCentered:=True, trailingBlank:=True)
-        print(0, $"Initial: {entryCountBeforeTrim}")
-        print(0, $"Trimmed: {winapp2.count}")
         Dim difference = entryCountBeforeTrim - winapp2.count
-        print(0, $"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
-        print(0, anyKeyStr, leadingBlank:=True, closeMenu:=True)
-        gLog($"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
+        Dim pct = Math.Round((difference / entryCountBeforeTrim) * 100)
+
+        gLog($"{difference} entries trimmed from winapp2.ini from a total of {entryCountBeforeTrim} ({pct}%)")
         gLog($"{winapp2.count} entries remain.")
 
-        ' Save the trimmed file back to disk 
-        TrimFile3.overwriteToFile(winapp2.winapp2string)
+        ' Print trim summary to the user
+        clrConsole()
+        Dim out As New MenuSection
+        out.AddTopBorder() _
+           .AddColoredLine("Trim Complete", ConsoleColor.DarkCyan, centered:=True) _
+           .AddDivider() _
+           .AddLine($"Initial entry count: {entryCountBeforeTrim}") _
+           .AddLine($"Trimmed entry count: {winapp2.count}") _
+           .AddLine($"{difference} entries trimmed from winapp2.ini ({pct}%)") _
+           .AddDivider() _
+           .AddLine(anyKeyStr, centered:=True) _
+           .AddBottomBorder()
+        out.Print()
 
-        ' If we downloaded the latest file, then we probably can mark winapp2 as having been updated 
+        ' Save the trimmed file back to disk
+        iniFile2.Empty(TrimFile3.Dir, TrimFile3.Name).OverwriteToFile(winapp2.winapp2string)
+
+        ' If we downloaded the latest file, then we probably can mark winapp2 as having been updated
         If DownloadFileToTrim Then waUpdateIsAvail = False
-        setHeaderText($"{TrimFile3.Name} saved")
+        setNextMenuHeaderText($"{TrimFile3.Name} saved")
 
         crk()
 
     End Sub
 
-    ''' <summary> 
-    ''' Trims a <c> winapp2file </c>, removing entries not relevant to the current system 
+    ''' <summary>
+    ''' Trims a <c> winapp2file </c>, removing entries not relevant to the current system
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="winapp2">
-    ''' A <c> winapp2file </c> to be trimmed to fit the current system 
+    ''' A <c> winapp2file </c> to be trimmed to fit the current system
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Public Sub trimFile(winapp2 As winapp2file)
 
         If winapp2 Is Nothing Then argIsNull(NameOf(winapp2)) : Return
+
+        _includes2 = If(UseTrimIncludes, iniFile2.FromFile(TrimFile2.Path()), Nothing)
+        _excludes2 = If(UseTrimExcludes, iniFile2.FromFile(TrimFile4.Path()), Nothing)
 
         ' Winapp2.ini is composed of multiple entry lists representing the different top-level sections that we separate from the rest of the entries
         ' Pass them off individually and in-order for processing
@@ -172,7 +300,6 @@ Public Module Trim
     ''' The <c> function </c> that evaluates the detection criteria in <c> <paramref name="kl"/> </c> 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkExistence(ByRef kl As keyList,
                                     chkExist As Func(Of String, Boolean)) As Boolean
 
@@ -203,14 +330,15 @@ Public Module Trim
     ''' A <c> winapp2entry </c> to whose detection criteria will be audited 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
 
         gLog($"Processing entry: {entry.Name}", ascend:=True, buffr:=True, leadr:=True)
 
-        ' Respect the include/excludes 
-        If UseTrimIncludes AndAlso TrimFile2.hasSection(entry.Name) Then gLog("Retaining entry: " & entry.Name, indent:=True, indAmt:=2, leadr:=True, buffr:=True) : Return True
-        If UseTrimExcludes AndAlso TrimFile4.hasSection(entry.Name) Then gLog("Discarding entry: " & entry.Name, leadr:=True, indent:=True, buffr:=True) : Return False
+        ' Respect the include/excludes
+        Dim IsInIncludes = UseTrimIncludes AndAlso _includes2 IsNot Nothing AndAlso _includes2.Contains(entry.Name)
+        If IsInIncludes Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+        Dim isInExcludes = UseTrimExcludes AndAlso _excludes2 IsNot Nothing AndAlso _excludes2.Contains(entry.Name)
+        If isInExcludes Then gLog("    Discarding entry: " & entry.Name, leadr:=True, buffr:=True) : Return False
 
         ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         Dim hasMetDetOS = False
@@ -220,32 +348,32 @@ Public Module Trim
             If winVer = Nothing Then winVer = getWinVer()
 
             hasMetDetOS = checkExistence(entry.DetectOS, AddressOf checkDetOS)
-            gLog($"Met DetectOS criteria. {winVer} satisfies {entry.DetectOS.Keys.First.Value}", hasMetDetOS, indent:=True)
-            gLog($"Did not meet DetectOS criteria. {winVer} does not satisfy {entry.DetectOS.Keys.First.Value}", Not hasMetDetOS, descend:=True, indent:=True)
+            gLog($"  Met DetectOS criteria. {winVer} satisfies {entry.DetectOS.Keys.First.Value}", hasMetDetOS)
+            gLog($"  Did not meet DetectOS criteria. {winVer} does not satisfy {entry.DetectOS.Keys.First.Value}", Not hasMetDetOS, descend:=True)
 
             If Not hasMetDetOS Then Return False
 
         End If
 
         ' Process any other Detect criteria we have
-        If checkExistence(entry.Detects, AddressOf checkRegExist) Then gLog("Retaining entry: " & entry.Name, indent:=True, leadr:=True, buffr:=True, indAmt:=2) : Return True
-        If checkExistence(entry.DetectFiles, AddressOf checkPathExist) Then gLog("Retaining entry: " & entry.Name, indent:=True, leadr:=True, buffr:=True, indAmt:=2) : Return True
-        If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then gLog("Retaining entry: " & entry.Name, indent:=True, leadr:=True, buffr:=True, indAmt:=2) : Return True
+        If checkExistence(entry.Detects, AddressOf checkRegExist) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+        If checkExistence(entry.DetectFiles, AddressOf checkPathExist) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+        If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
 
         ' Return true for the case where we have only a DetectOS and we meet its criteria
         Dim onlyHasDetOS = entry.SpecialDetect.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount = 0
         gLog("No other detection keys found than DetectOS", onlyHasDetOS AndAlso hasMetDetOS, descend:=True)
-        If onlyHasDetOS AndAlso hasMetDetOS Then gLog("Retaining entry: " & entry.Name, leadr:=True, indent:=True, buffr:=True, indAmt:=2) : Return True
+        If onlyHasDetOS AndAlso hasMetDetOS Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
 
         ' Return true for the case where we have no valid detect criteria
         Dim hasNoDetectKeys = entry.DetectOS.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount + entry.SpecialDetect.KeyCount = 0
         gLog("No detect keys found, entry will be retained.", hasNoDetectKeys, descend:=True)
-        If hasNoDetectKeys Then gLog("Retaining entry: " & entry.Name, leadr:=True, indent:=True, buffr:=True, indAmt:=2) : Return True
+        If hasNoDetectKeys Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
 
-        gLog("Discarding entry: " & entry.Name, descend:=True, leadr:=True, buffr:=True, indent:=True)
+        gLog("  Discarding entry: " & entry.Name, descend:=True, leadr:=True, buffr:=True)
         Return False
 
-    End Function
+        End Function
 
     ''' <summary> 
     ''' Audits the given entry for legacy codepaths in the machine's VirtualStore 
@@ -255,7 +383,6 @@ Public Module Trim
     ''' The <c> winapp2entry </c> to audit
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
 
         gLog("Attempting to generate any neccessary VirtualStore keys for " & entry.Name, indent:=True, buffr:=True, ascend:=True)
@@ -274,7 +401,6 @@ Public Module Trim
     ''' The <c> keyList </c> of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Sub vsKeyChecker(ByRef kl As keyList)
 
         If kl.KeyCount = 0 Then Return
@@ -313,7 +439,6 @@ Public Module Trim
     ''' The <c> keylist </c> to be processed 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Sub mkVsKeys(findStrs As String(),
                          replStrs As String(),
                          ByRef kl As keyList)
@@ -360,7 +485,6 @@ Public Module Trim
     ''' The <c> iniKey </c> to processed into a VirtualStore key 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function createVSKey(findStr As String,
                                  replStr As String,
                                  key As iniKey) As iniKey
@@ -377,7 +501,6 @@ Public Module Trim
     ''' The list of <c> winapp2entries </c> who detection criteria will be audited 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
 
         ' If the entry's Detect criteria doesn't return true, prune it
@@ -395,7 +518,6 @@ Public Module Trim
     ''' A SpecialDetect format <c> iniKey </c> 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkSpecialDetects(ByVal key As String) As Boolean
 
         Select Case key
@@ -464,7 +586,6 @@ Public Module Trim
     ''' A filesystem or registry path whose existence will be audited 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkExist(path As String) As Boolean
 
         Return If(path.StartsWith("HK", StringComparison.InvariantCulture), checkRegExist(path), checkPathExist(path))
@@ -479,7 +600,6 @@ Public Module Trim
     ''' A registry path to be audited for existence 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkRegExist(path As String) As Boolean
 
         Dim dir = path
@@ -504,7 +624,6 @@ Public Module Trim
     ''' The path of the key whose existence will be audited
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function getRegExists(root As String,
                                   dir As String) As Boolean
 
@@ -568,7 +687,6 @@ Public Module Trim
     ''' <c> True </c>c> if an error occurred <br /> <c> False </c> otherwise 
     ''' </returns>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2024-03-26
     Private Function processEnvDirs(ByRef dir As String,
                                     ByRef isProgramFiles As Boolean) As Boolean
 
@@ -655,7 +773,6 @@ Public Module Trim
     ''' A filesystem path 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkPathExist(key As String) As Boolean
 
         ' Make sure we get the proper path for environment variables
@@ -726,7 +843,6 @@ Public Module Trim
     ''' The original state of the path 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Sub swapDir(ByRef dir As String,
                         key As String)
 
@@ -747,7 +863,6 @@ Public Module Trim
     ''' Indicates that the path is a filesystem path, <c> False </c> if it is a registry path
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function expandWildcard(dir As String,
                                     isFileSystem As Boolean) As Boolean
 
@@ -857,7 +972,6 @@ Public Module Trim
     ''' The DetectOS criteria to be checked 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2022-11-21
     Private Function checkDetOS(value As String) As Boolean
 
         Dim splitKey = value.Split(CChar("|"))
