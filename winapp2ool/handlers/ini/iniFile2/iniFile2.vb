@@ -134,9 +134,29 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
+    ''' Removes the section with the given name from the file.
+    ''' Does nothing if the section is not present.
+    ''' </summary>
+    '''
+    ''' <param name="name">
+    ''' The section name to remove (case-insensitive)
+    ''' </param>
+    Public Sub RemoveSection(name As String)
+
+        If name Is Nothing Then argIsNull(NameOf(name)) : Return
+
+        Dim s = GetSection(name)
+        If s Is Nothing Then Return
+
+        _ordered.Remove(s)
+        _byName.Remove(name)
+
+    End Sub
+
+    ''' <summary>
     ''' Adds a section to the file. Duplicate names (case-insensitive) are silently ignored.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="section">
     ''' The section to add
     ''' </param>

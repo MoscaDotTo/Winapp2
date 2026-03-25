@@ -30,6 +30,9 @@ Public Class iniFileChooser
     ''' <summary>The default filename offered as a numbered option</summary>
     Public ReadOnly Property InitName As String
 
+    ''' <summary>The starting directory, saved at construction time for use by <c> ResetParams </c></summary>
+    Public ReadOnly Property InitDir As String
+
     ''' <summary>An optional alternate default filename offered as a numbered option</summary>
     Public ReadOnly Property SecondName As String
 
@@ -52,6 +55,7 @@ Public Class iniFileChooser
                    Optional mustExist As Boolean = True)
         Me.Dir = dir
         Me.Name = name
+        Me.InitDir = dir
         Me.InitName = initName
         Me.SecondName = secondName
         Me.MustExist = mustExist
@@ -145,6 +149,16 @@ Public Class iniFileChooser
         Else
             exitModule()
         End If
+    End Sub
+
+    ''' <summary>
+    ''' Restores the <c> Dir </c> and <c> Name </c> properties to the values used at construction time
+    ''' </summary>
+    Public Sub ResetParams()
+
+        Dir = InitDir
+        Name = InitName
+
     End Sub
 
 End Class
