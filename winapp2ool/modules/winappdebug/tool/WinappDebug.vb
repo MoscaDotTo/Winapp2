@@ -740,7 +740,7 @@ Public Module WinappDebug
         Dim numberingErrStr = If(noNumbers, "Detected unnecessary numbering.", $"{key.KeyType} entry is incorrectly numbered.")
         Dim fixedStr = If(noNumbers, key.KeyType, key.KeyType & keyNumber)
 
-        gLog($"Input mismatch error in {key.toString}", hasNumberingError, indent:=True)
+        gLog($"  Input mismatch error in {key.toString}", hasNumberingError)
         inputMismatchErr(key.LineNumber, numberingErrStr, key.Name, fixedStr, If(noNumbers, lintExtraNums.ShouldScan, lintWrongNums.ShouldScan) And hasNumberingError)
         fixStr(If(noNumbers, lintExtraNums.fixFormat, lintWrongNums.fixFormat) And hasNumberingError, key.Name, fixedStr)
 
@@ -891,7 +891,7 @@ Public Module WinappDebug
 
             End Select
 
-            gLog($"Repair complete. Result: {key.toString}", indent:=True, descend:=True)
+            gLog($"  Repair complete. Result: {key.toString}", descend:=True)
 
             ' Don't allow valueless keys in winapp2.ini 
 
@@ -935,7 +935,7 @@ Public Module WinappDebug
         ' Attempt to fix the case where keys are missing an equal sign to delineate name and value 
         If key.typeIs("DeleteMe") Then
 
-            gLog($"Broken Key Found: {key.Name}", indent:=True, ascend:=True)
+            gLog($"  Broken Key Found: {key.Name}", ascend:=True)
 
             ' If we didn't find a fixable situation, delete the key
             Dim fixedMsngEq = fixMissingEquals(key, validCmds)
@@ -1395,7 +1395,7 @@ Public Module WinappDebug
         For Each errStr In lines
 
             cwl(errStr)
-            gLog(errStr, indent:=True)
+            gLog($"  {errStr}")
             MostRecentLintLog.AppendLine(errStr)
 
         Next
@@ -1430,7 +1430,7 @@ Public Module WinappDebug
 
         If Not param Then Return
 
-        gLog($"Changing '{currentValue}' to '{newValue}'", ascend:=True, descend:=True, indent:=True, buffr:=True)
+        gLog($"  Changing '{currentValue}' to '{newValue}'", ascend:=True, descend:=True, buffr:=True)
         currentValue = newValue
 
     End Sub
