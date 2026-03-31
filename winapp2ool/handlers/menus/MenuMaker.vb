@@ -233,7 +233,8 @@ Module MenuMaker
         gLog($"Loading module {name}")
 
         ExitPending = False
-        setHeaderText(name)
+        setNextMenuHeaderText(name)
+
         menuItemLength = itmLen
 
         Do Until ExitPending
@@ -250,7 +251,7 @@ Module MenuMaker
         ' Flush any pending settings changes to disk when exiting a module
         FlushSettingsIfDirty()
 
-        setHeaderText($"{name} closed")
+        setNextMenuHeaderText($"{name} closed")
         gLog($"Exiting {name}", descend:=True, leadr:=True)
 
     End Sub
@@ -768,9 +769,12 @@ Module MenuMaker
                             Optional cond As Boolean = True,
                             Optional printColor As ConsoleColor = ConsoleColor.Black)
 
-        If Not cond Then Return
+        If Not cond OrElse printColor = ConsoleColor.Black Then Return
+
         MenuHeaderText = txt
-        If Not printColor = ConsoleColor.Black Then MenuHeaderTextColor = printColor
+        MenuHeaderTextColor = printColor
+        ColorHeader = True
+        HeaderColor = printColor
 
     End Sub
 

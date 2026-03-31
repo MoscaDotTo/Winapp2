@@ -80,7 +80,7 @@ Public Module updater
         gLog("Remote: " & latestWa2Ver, indent:=True)
         Dim bothUpdatesAreAvail = waUpdateIsAvail And updateIsAvail
         Dim updHeader = $"Update{If(bothUpdatesAreAvail, "s", "")} available for {If(updateIsAvail, "winapp2ool ", "")}{If(bothUpdatesAreAvail, "and ", "")}{If(waUpdateIsAvail, "winapp2.ini", "")}"
-        setHeaderText(updHeader, True, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
+        setNextMenuHeaderText(updHeader, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
     End Sub
 
     '''<summary> Performs the version checking for winapp2ool.exe </summary>
@@ -113,7 +113,7 @@ Public Module updater
     ''' <param name="name"> The name of the component whose update check failed </param>
     ''' <param name="chkOnline"> A flag specifying that the internet connection should be retested </param>
     Private Sub updateCheckFailed(name As String, Optional chkOnline As Boolean = False)
-        setHeaderText($"/!\ {name} update check failed. /!\", True)
+        setNextMenuHeaderText($"/!\ {name} update check failed. /!\", printColor:=ConsoleColor.Red)
         localWa2Ver = "000000"
         If chkOnline Then chkOfflineMode()
     End Sub

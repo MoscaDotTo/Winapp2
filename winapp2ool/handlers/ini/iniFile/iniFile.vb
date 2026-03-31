@@ -365,7 +365,7 @@ Public Class iniFile
     ''' <param name="undoPendingRename"> Indicates that there's a pending rename that should be reverted if the renamed file doesn't exist <br/> Optional, Default: <c> False </c> </param>
     Private Sub exitIfExists(Optional undoPendingRename As Boolean = False)
         If Not exists() And mustExist Then
-            setHeaderText($"{Name} does not exist", True)
+            setNextMenuHeaderText($"{Name} does not exist", printColor:=ConsoleColor.Red)
             If undoPendingRename Then Name = tmpRename
         Else
             exitModule()
@@ -401,7 +401,7 @@ Public Class iniFile
                 Dim tmpDir = Dir
                 Dir = input
                 If Not exists(False) Then
-                    setHeaderText($"{Dir} does not exist", cHeader:=True)
+                    setNextMenuHeaderText($"{Dir} does not exist", printColor:=ConsoleColor.Red)
                     Dir = tmpDir
                 Else
                     exitModule()

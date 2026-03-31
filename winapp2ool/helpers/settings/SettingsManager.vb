@@ -57,7 +57,6 @@ Module SettingsManager
         Dim fileChanged = Not someFile.Name = curName OrElse Not someFile.Dir = curDir
         If Not settingsChangedSetting Then settingsChangedSetting = fileChanged
 
-        setHeaderText($"{If(someFile.SecondName.Length = 0, someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
         setNextMenuHeaderText($"{fileDesc} parameters update{If(Not fileChanged, " aborted", "d")}", printColor:=GetRedGreen(Not fileChanged))
         If Not fileChanged Then Return
 
@@ -145,8 +144,7 @@ Module SettingsManager
                                         settingChangedName As String)
 
         gLog($"Toggling {paramText} from {setting} to {Not setting}", indent:=True)
-        setHeaderText($"{paramText} {enStr(setting)}d", True, True, If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
-        'setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
+        setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
         setting = Not setting
         mSettingsChanged = True
 
@@ -223,7 +221,7 @@ Module SettingsManager
 
         setDefaultParams()
 
-        setHeaderText($"{name} settings have been reset to their defaults.")
+        setNextMenuHeaderText($"{name} settings have been reset to their defaults.")
 
     End Sub
 

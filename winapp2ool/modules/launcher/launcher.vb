@@ -35,6 +35,8 @@ Public Module launcher
 
         gLog($"Starting application")
 
+        If Not SuppressOutput Then Console.WindowWidth = 130 : Console.WindowHeight = 35
+
         chkOfflineMode()
 
         If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
@@ -49,13 +51,11 @@ Public Module launcher
 
         If SuppressOutput Then Environment.Exit(0)
 
-        Console.WindowWidth = 130
-        Console.WindowHeight = 35
-
         currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
         Console.Title = $"Winapp2ool v{currentVersion}"
-
-        initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
+        Dim launchHeader = $"Winapp2ool v{currentVersion} - A multitool for winapp2.ini"
+        setNextMenuHeaderText(launchHeader, printColor:=ConsoleColor.Cyan)
+        initModule(launchHeader, AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
 
         ' Ensure any pending settings changes are saved before exiting
         FlushSettingsIfDirty()
