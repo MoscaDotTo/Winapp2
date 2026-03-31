@@ -63,6 +63,28 @@ Public Module DiffConfiguration
     }
 
     ''' <summary>
+    ''' Key types that are silently excluded from all diff comparisons.
+    ''' These keys carry no semantic information independent of the entry name
+    ''' and would produce only noise in diff output.
+    ''' <br /> <br />
+    ''' Currently: <c> ID </c> (CCleaner 7 format, duplicates the section name)
+    ''' </summary>
+    Public ReadOnly Property IgnoredKeyTypes As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
+        "ID"
+    }
+
+    ''' <summary>
+    ''' Key types that classify an entry into a category.
+    ''' At most one of these should appear per entry, so when
+    ''' the old and new key both belong to this set they are
+    ''' treated as an update rather than a remove + add.
+    ''' <br /> <br />
+    ''' <c> LangSecRef </c> and <c> Section </c> are the base format classifiers;
+    ''' <c> Tags </c> is the CCleaner 7 equivalent.
+    ''' </summary>
+    Public ReadOnly Property ClassifierKeyTypes As String() = {"LangSecRef", "Section", "Tags"}
+
+    ''' <summary>
     ''' LangSecRef values associated with web browsers
     ''' </summary>
     Public ReadOnly Property BrowserSecRefs As String() = {

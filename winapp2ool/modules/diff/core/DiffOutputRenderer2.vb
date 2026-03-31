@@ -252,14 +252,14 @@ Public Class DiffOutputRenderer2
         Dim changeStr = $"{oldSection.Name} has been split/merged into {newTargets.Count} entries"
 
         result.AddColoredLine(changeStr, color:=ConsoleColor.Cyan, centered:=True)
-        gLog(changeStr, indent:=True, leadr:=True)
+        gLog($"  {changeStr}", leadr:=True)
 
         result.AddColoredLine("Merged into:", color:=ConsoleColor.Yellow, centered:=True)
 
         For Each target In newTargets
 
             result.AddColoredLine($"  • {target}", color:=ConsoleColor.Magenta, centered:=True)
-            gLog($"  • {target}", indent:=True)
+            gLog($"    • {target}")
 
         Next
 
@@ -414,13 +414,13 @@ Public Class DiffOutputRenderer2
             Dim out = "This entry contains keys merged from the following removed entries:  "
 
             diffSection.AddColoredLine(out, color:=ConsoleColor.Yellow, centered:=True)
-            gLog(out, indent:=True)
+            gLog($"  {out}")
 
             For Each mergedEntry In _state.MergedEntries.MergeDict(section.Name)
 
                 _state.Statistics.RemovedByAdditionCount += 1
                 diffSection.AddColoredLine(mergedEntry, color:=ConsoleColor.DarkCyan, centered:=True)
-                gLog(mergedEntry, indent:=True, indAmt:=4)
+                gLog($"        {mergedEntry}")
 
             Next
 
@@ -550,27 +550,28 @@ Public Class DiffOutputRenderer2
             Dim isRename = newKey.typeIs("Name")
             Dim count = updatedKeysDict.Values(i).Count
 
-            Dim outTxt1 = $"{If(isRename, "Entry Name", newKey.Name)} has been modified{If(Not isRename, $", replacing {count} old key{If(count > 1, "s", "")}", "")}"
+            Dim outText1EntryName = If(isRename, "Entry Name", newKey.Name)
+
+            Dim outTxt1 = $"{outText1EntryName} has been modified{If(Not isRename, $", replacing {count} old key{If(count > 1, "s", "")}", "")}"
 
             output.AddColoredLine(outTxt1, ConsoleColor.Yellow)
-            gLog(outTxt1, indent:=True, indAmt:=1, leadr:=i = 0)
+            gLog($"  {outTxt1}", leadr:=i = 0)
 
             Dim outTxt2 = $" + New: {If(isRename, newKey.Value, newKey.ToString())}"
 
             output.AddColoredLine(outTxt2, ConsoleColor.Green)
-            gLog(outTxt2, indent:=True, indAmt:=4)
+            gLog($"        {outTxt2}")
 
             For Each oldKey In oldKeys
 
                 Dim sourceInfo = ""
-                If sourceEntryMap IsNot Nothing AndAlso sourceEntryMap.ContainsKey(oldKey.Value) Then
-                    sourceInfo = $" (from [{sourceEntryMap(oldKey.Value)}])"
-                End If
+                Dim hasSourceInfo = sourceEntryMap IsNot Nothing AndAlso sourceEntryMap.ContainsKey(oldKey.Value)
+                If hasSourceInfo Then sourceInfo = $" (from [{sourceEntryMap(oldKey.Value)}])"
 
                 Dim old = $" - Old: {If(isRename, oldKey.Value, oldKey.ToString())}{sourceInfo}"
 
                 output.AddColoredLine(old, ConsoleColor.Red)
-                gLog(old, indent:=True, indAmt:=4)
+                gLog($"        {old}")
 
             Next
 
@@ -613,12 +614,12 @@ Public Class DiffOutputRenderer2
 
         out.AddColoredLine(outTxt, ConsoleColor.Yellow, centered:=True)
         gLog()
-        gLog(outTxt, indent:=True)
+        gLog($"  {outTxt}")
 
         For Each mergedEntry In _state.MergedEntries.MergeDict(entry)
 
             out.AddColoredLine(mergedEntry, ConsoleColor.DarkCyan, centered:=True)
-            gLog(mergedEntry, indent:=True)
+            gLog($"  {mergedEntry}")
 
         Next
 
@@ -709,12 +710,11 @@ Public Class DiffOutputRenderer2
         Dim changeStr = $"{section.Name} has been {changeTypeStrs(changeType)}{renamedOrMergedEntryName}"
 
         result.AddColoredLine(changeStr, color:=If(changeType >= 2, printColor, If(changeType < 1, ConsoleColor.Green, ConsoleColor.Red)), centered:=True)
-        gLog(changeStr, indent:=True, leadr:=True)
+        gLog($"  {changeStr}", leadr:=True)
 
         If Not ShowFullEntries Then Return result
 
         ' Everything below this point prints to the user only if Verbose Mode is enabled
-        ' in the Diff settings
         Dim isMergeOrRenamed = changeType >= 3 AndAlso changeType < 5
 
         If isMergeOrRenamed Then
@@ -809,13 +809,13 @@ Public Class DiffOutputRenderer2
 
             Dim out As New MenuSection
             out.AddColoredLine($"{sourceEntry.Key} - Keys moved to other entries:", ConsoleColor.Cyan, centered:=True)
-            gLog($"{sourceEntry.Key} - Keys moved to other entries:", indent:=True, leadr:=True)
+            gLog($"  {sourceEntry.Key} - Keys moved to other entries:", leadr:=True)
 
             For Each movement In sourceEntry.Value
 
                 Dim line = $"  → {movement.KeyName}={movement.KeyValue} moved to [{movement.Target}]"
                 out.AddColoredLine(line, ConsoleColor.DarkCyan)
-                gLog(line, indent:=True, indAmt:=4)
+                gLog($"        {line}")
 
             Next
 
@@ -891,18 +891,18 @@ Public Class DiffOutputRenderer2
             Dim headerText = $"{entry} has been added (consolidating {mergedCount} removed entr{If(mergedCount = 1, "y", "ies")})"
 
             headerSection.AddColoredLine(headerText, ConsoleColor.Green, centered:=True)
-            gLog(headerText, indent:=True, leadr:=True)
+            gLog($"  {headerText}", leadr:=True)
             results.Add(headerSection)
 
             ' List merged entries
             Dim mergedListSection As New MenuSection
             mergedListSection.AddColoredLine("Merged from:", ConsoleColor.Yellow, centered:=True)
-            gLog("Merged from:", indent:=True)
+            gLog("  Merged from:")
 
             For Each mergedEntry In _state.MergedEntries.MergeDict(entry)
 
                 mergedListSection.AddColoredLine($"{mergedEntry}", ConsoleColor.DarkCyan, centered:=True)
-                gLog($"  • {mergedEntry}", indent:=True, indAmt:=4)
+                gLog($"          • {mergedEntry}")
 
             Next
 
@@ -962,7 +962,7 @@ Public Class DiffOutputRenderer2
                     Dim novelKeysMsg = $"{addedKeys.Count} keys added or carried over from merged sources:"
                     newKeysSection.AddColoredLine(novelKeysMsg, ConsoleColor.Green, centered:=True)
                     gLog()
-                    gLog(novelKeysMsg, indent:=True)
+                    gLog($"  {novelKeysMsg}")
                     results.Add(newKeysSection)
                     results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, sourceEntryMap))
 
@@ -976,7 +976,7 @@ Public Class DiffOutputRenderer2
                     Dim KeysNotMergedMsg = $"{removedKeys.Count} keys from merged entries not in this entry:"
                     droppedSection.AddColoredLine(KeysNotMergedMsg, ConsoleColor.DarkYellow, centered:=True)
                     gLog()
-                    gLog(KeysNotMergedMsg, indent:=True)
+                    gLog($"  {KeysNotMergedMsg}")
                     results.Add(droppedSection)
                     results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, sourceEntryMap))
 
@@ -989,7 +989,7 @@ Public Class DiffOutputRenderer2
                     Dim capturedMsg = $"{updatedKeysDict.Count} keys capturing content from merged entries"
                     capturedSection.AddColoredLine(capturedMsg, ConsoleColor.Yellow, centered:=True)
                     gLog()
-                    gLog(capturedMsg, indent:=True)
+                    gLog($"  {capturedMsg}")
                     results.Add(capturedSection)
                     results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, addedKeys, removedKeys, modKeyTypes, sourceEntryMap))
 
@@ -1048,7 +1048,7 @@ Public Class DiffOutputRenderer2
             result.AddColoredLine(out, ConsoleColor.Yellow, centered:=True)
             result.AddBlank(i = total - 1)
 
-            gLog(out, indent:=True, leadr:=i = 0)
+            gLog($"  {out}", leadr:=i = 0)
             i += 1
 
         Next
@@ -1116,7 +1116,7 @@ Public Class DiffOutputRenderer2
             End If
 
             result.AddColoredLine(key & sourceInfo, color)
-            gLog(key & sourceInfo, indent:=True, indAmt:=4)
+            gLog($"        {key & sourceInfo}")
 
         Next
 

@@ -223,10 +223,11 @@ Public Class KeyModificationAnalyzer2
                                       ByRef removedKeys As List(Of iniKey2),
                                       ByRef addedKeys As List(Of iniKey2)) As Boolean
 
-        Dim newKeyList = newKeys.ToList()
+        Dim newKeyList = newKeys.Where(Function(k) Not IgnoredKeyTypes.Contains(k.KeyType)).ToList()
+        Dim filteredOldKeys = oldKeys.Where(Function(k) Not IgnoredKeyTypes.Contains(k.KeyType))
         Dim matched As New HashSet(Of Integer)
 
-        For Each oldKey In oldKeys
+        For Each oldKey In filteredOldKeys
 
             Dim foundMatch = False
 
@@ -508,7 +509,7 @@ Public Class KeyModificationAnalyzer2
                                            ByRef addedKeys As List(Of iniKey2)) As List(Of KeyValuePair(Of iniKey2, iniKey2))
 
         Dim updatedKeys As New List(Of KeyValuePair(Of iniKey2, iniKey2))
-        Dim classifiers = {"LangSecRef", "Section"}
+        Dim classifiers = ClassifierKeyTypes
         Dim defunctSingletonKeys = {"Warning", "DetectOS", "SpecialDetect"}
         Dim matchedOldKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
