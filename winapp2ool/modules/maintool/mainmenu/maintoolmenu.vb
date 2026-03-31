@@ -145,7 +145,8 @@ Module maintoolmenu
             Case input = CStr(moduleOpts.Length) AndAlso isOffline
 
                 chkOfflineMode()
-                setHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", True, isOffline)
+                Dim err = "Winapp2ool was unable to establish a network connection. You are still in offline mode."
+                setNextMenuHeaderText(err, printColor:=ConsoleColor.Red)
 
             ' Update (winapp2.ini)
             ' Notes: Only available if an update to winapp2.ini is available
@@ -203,7 +204,7 @@ Module maintoolmenu
 
             Case Else
 
-                setHeaderText(invInpStr, True)
+                setNextMenuHeaderText(invInpStr)
 
         End Select
 
