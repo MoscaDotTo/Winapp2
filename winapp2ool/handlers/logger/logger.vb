@@ -317,7 +317,7 @@ Public Module logger
     ''' Docs last updated: 2025-06-19 | Code last updated: 2024-05-18
     Public Sub saveGlobalLog(Optional cond As Boolean = True)
 
-        GlobalLogFile.overwriteToFile(logger.toString, cond)
+        If cond Then IO.File.WriteAllText(GlobalLogFile.Path(), logger.toString)
 
     End Sub
 

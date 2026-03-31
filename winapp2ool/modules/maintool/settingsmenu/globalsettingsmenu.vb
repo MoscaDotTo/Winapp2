@@ -42,7 +42,7 @@ Module globalsettingsmenu
     ''' </summary>
     Public Sub printMainToolSettingsMenu()
 
-        Dim currentLogTarget = $"Current log file target: {replDir(GlobalLogFile.Path)}"
+        Dim currentLogTarget = $"Current log file target: {replDir(GlobalLogFile.Path())}"
         Dim VisitGitHubName = "Visit GitHub"
         Dim VisitGitHubDesc = "Open the Winapp2 GitHub page in your default web browser"
         Dim ToggleBetaName = "Toggle Beta Participation"
@@ -171,7 +171,7 @@ Module globalsettingsmenu
             ' Save Log
             Case intInput = minLogNum + 1
 
-                GlobalLogFile.overwriteToFile(logger.toString)
+                IO.File.WriteAllText(GlobalLogFile.Path(), logger.toString)
 
             ' File Selector
             Case intInput = maxLogNum

@@ -25,7 +25,7 @@ Public Module maintoolsettings
     ''' <summary> 
     ''' Holds the filesystem location to which the log file will optionally be saved.
     ''' </summary>
-    Public Property GlobalLogFile As New iniFile(Environment.CurrentDirectory, "winapp2ool.log")
+    Public Property GlobalLogFile As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "winapp2ool.log", mustExist:=False)
 
     ''' <summary>
     ''' Indicates that winapp2ool is in "Non-CCleaner" mode and should collect the appropriate ini from GitHub 

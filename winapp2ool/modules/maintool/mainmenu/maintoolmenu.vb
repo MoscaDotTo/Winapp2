@@ -187,7 +187,7 @@ Module maintoolmenu
             ' Notes: hidden option not listed on menu
             Case input = "savelog"
 
-                GlobalLogFile.overwriteToFile(logger.toString)
+                IO.File.WriteAllText(GlobalLogFile.Path(), logger.toString)
 
             ' Print winapp2ool log 
             ' Notes: hidden option not listed on menu
