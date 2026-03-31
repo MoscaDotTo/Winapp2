@@ -281,7 +281,6 @@
   <ItemGroup>
     <Folder Include="handlers\ini\comments\" />
     <Folder Include="helpers\filesystem\" />
-    <Folder Include="modules\entrylab\mainmenu\" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.6\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
