@@ -259,7 +259,10 @@ Public Class iniFileChooser
     ''' </param>
     Private Sub ExitIfExists(Optional undoPendingRename As Boolean = False)
 
-        If Not MustExist OrElse Exists() Then exitModule()
+        If Not MustExist OrElse Exists() Then
+            exitModule()
+            Return
+        End If
 
         setNextMenuHeaderText($"{Name} does not exist", printColor:=ConsoleColor.Red)
         If undoPendingRename Then Name = _tmpRename
