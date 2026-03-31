@@ -145,7 +145,6 @@
     <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
     <Compile Include="modules\combine\mainmenu\combinemainmenu.vb" />
     <Compile Include="modules\combine\settingshandler\combinesettings.vb" />
-    <Compile Include="modules\combine\settingshandler\combinesettingshandler.vb" />
     <Compile Include="modules\combine\tool\Combine.vb" />
     <Compile Include="modules\diff\core\DiffConfiguration.vb" />
     <Compile Include="handlers\ini\iniFileBridge.vb" />
