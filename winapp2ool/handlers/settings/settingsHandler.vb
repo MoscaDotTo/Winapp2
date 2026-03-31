@@ -217,10 +217,8 @@ Public Module settingsHandler
     Private Sub loadAllModuleSettings()
 
         Dim modules = New Dictionary(Of String, KeyValuePair(Of Action, Action)) From {
-        {NameOf(Winapp2ool), New KeyValuePair(Of Action, Action)(AddressOf createToolSettingsSection, AddressOf getSeralizedToolSettings)},
+        {NameOf(WinappDebug), New KeyValuePair(Of Action, Action)(AddressOf CreateLintSettingsSection, AddressOf getSerializedLintSettings)}
         {NameOf(WinappDebug), New KeyValuePair(Of Action, Action)(AddressOf CreateLintSettingsSection, AddressOf getSerializedLintSettings)},
-        {NameOf(Flavorizer), New KeyValuePair(Of Action, Action)(AddressOf createFlavorizerSettingsSection, AddressOf getSerializedFlavorizerSettings)},
-        {NameOf(Combine), New KeyValuePair(Of Action, Action)(AddressOf createCombineSettingsSection, AddressOf getSerializedCombineSettings)}
     }
 
         Dim readSettingsFromDisk = DetermineReadSettingsBehavior()
@@ -235,6 +233,10 @@ Public Module settingsHandler
     ''' Each migrated module's <c>LoadModule2</c> call is added here as modules migrate.
     ''' </summary>
     Private Sub loadAllModuleSettings2()
+
+        ' Winapp2ool is loaded first so readSettingsFromDisk is populated before other modules load
+        LoadModule2(NameOf(Winapp2ool), GetType(maintoolsettings))
+
         If Not readSettingsFromDisk Then Return
 
         LoadModule2(NameOf(Diff), GetType(diffsettings))
@@ -242,6 +244,8 @@ Public Module settingsHandler
         LoadModule2(NameOf(BrowserBuilder), GetType(browserbuildersettings))
         LoadModule2(NameOf(CC7Patcher), GetType(cc7patchersettings))
         LoadModule2(NameOf(CCiniDebug), GetType(ccdebugsettings))
+        LoadModule2(NameOf(Combine), GetType(combinesettings))
+        LoadModule2(NameOf(Flavorizer), GetType(FlavorizerSettings))
         LoadModule2(NameOf(Transmute), GetType(transmuteSettings))
         LoadModule2(NameOf(Trim), GetType(trimsettings))
         LoadModule2(NameOf(Downloader), GetType(downloadersettings))
