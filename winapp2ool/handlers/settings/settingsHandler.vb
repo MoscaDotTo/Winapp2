@@ -238,7 +238,6 @@ Public Module settingsHandler
         Dim modules = New Dictionary(Of String, KeyValuePair(Of Action, Action)) From {
         {NameOf(Winapp2ool), New KeyValuePair(Of Action, Action)(AddressOf createToolSettingsSection, AddressOf getSeralizedToolSettings)},
         {NameOf(WinappDebug), New KeyValuePair(Of Action, Action)(AddressOf CreateLintSettingsSection, AddressOf getSerializedLintSettings)},
-        {NameOf(Transmute), New KeyValuePair(Of Action, Action)(AddressOf createTransmuteSettingsSection, AddressOf getSerializedTransmuteSettings)},
         {NameOf(Downloader), New KeyValuePair(Of Action, Action)(AddressOf createDownloadSettingsSection, AddressOf getSerializedDownloaderSettings)},
         {NameOf(Flavorizer), New KeyValuePair(Of Action, Action)(AddressOf createFlavorizerSettingsSection, AddressOf getSerializedFlavorizerSettings)},
         {NameOf(Combine), New KeyValuePair(Of Action, Action)(AddressOf createCombineSettingsSection, AddressOf getSerializedCombineSettings)}
@@ -263,6 +262,7 @@ Public Module settingsHandler
         LoadModule2(NameOf(BrowserBuilder), GetType(browserbuildersettings))
         LoadModule2(NameOf(CC7Patcher), GetType(cc7patchersettings))
         LoadModule2(NameOf(CCiniDebug), GetType(ccdebugsettings))
+        LoadModule2(NameOf(Transmute), GetType(transmuteSettings))
         LoadModule2(NameOf(Trim), GetType(trimsettings))
 
     End Sub
