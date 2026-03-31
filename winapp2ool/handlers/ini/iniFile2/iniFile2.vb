@@ -17,6 +17,24 @@
 
 Option Strict On
 Imports System.IO
+Imports System.Text
+
+''' <summary>
+''' Controls the order in which sections are emitted when serializing an <c>iniFile2</c>
+''' </summary>
+Public Enum IniFileWriteFormat
+
+    ''' <summary>
+    ''' Sections are written in the order they were added (default behaviour)
+    ''' </summary>
+    Insertion = 0
+
+    ''' <summary>
+    ''' Sections are written in case-insensitive alphabetical order by section name
+    ''' </summary>
+    Alphabetical = 1
+
+End Enum
 
 ''' <summary>
 ''' An object representing a parsed .ini file with O(1) section lookup
@@ -329,14 +347,50 @@ Public Class iniFile2
 
     ''' <summary>Returns the file as it would appear on disk</summary>
     Public Overrides Function ToString() As String
-        If _ordered.Count = 0 Then Return ""
-        If _ordered.Count = 1 Then Return _ordered(0).ToString()
-        Dim out As String = ""
-        For i = 0 To _ordered.Count - 2
-            out += _ordered(i).ToString() & Environment.NewLine
+        Return Serialize(_ordered)
+    End Function
+
+    ''' <summary>
+    ''' Returns the file as it would appear on disk, with sections ordered
+    ''' according to <paramref name="format"/>
+    ''' </summary>
+    '''
+    ''' <param name="format">
+    ''' Controls the section emission order. <see cref="IniFileWriteFormat.Insertion"/>
+    ''' delegates to <see cref="ToString()"/>; <see cref="IniFileWriteFormat.Alphabetical"/>
+    ''' sorts sections by name (case-insensitive, ordinal) before serializing
+    ''' </param>
+    Public Overloads Function ToString(format As IniFileWriteFormat) As String
+
+        If format = IniFileWriteFormat.Insertion Then Return ToString()
+
+        Return Serialize(_ordered.OrderBy(Function(s) s.Name, StringComparer.InvariantCultureIgnoreCase))
+
+    End Function
+
+    ''' <summary>
+    ''' Serializes a sequence of <c>iniSection2</c> objects into ini file text,
+    ''' with a blank line between each section and no trailing newline
+    ''' </summary>
+    '''
+    ''' <param name="sections">
+    ''' The sections to serialize, in the order they should appear
+    ''' </param>
+    Private Shared Function Serialize(sections As IEnumerable(Of iniSection2)) As String
+
+        Dim sb As New StringBuilder()
+        Dim first = True
+
+        For Each section In sections
+
+            If Not first Then sb.Append(Environment.NewLine)
+            sb.Append(section.ToString())
+            first = False
+
         Next
-        out += _ordered.Last.ToString()
-        Return out
+
+        Return sb.ToString()
+
     End Function
 
     Public Function GetEnumerator() As IEnumerator(Of iniSection2) Implements IEnumerable(Of iniSection2).GetEnumerator
