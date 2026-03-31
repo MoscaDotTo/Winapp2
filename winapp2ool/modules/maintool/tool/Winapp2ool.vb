@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -137,7 +137,7 @@ Public Module Winapp2ool
         If iFile.Sections.Count = 0 Then
 
             setNextMenuHeaderText($"{iFile.Name} was empty or not found", True)
-            gLog($"{iFile.Name} was empty or not found", indent:=True)
+            gLog($"  {iFile.Name} was empty or not found")
 
             Return False
 
@@ -213,17 +213,13 @@ Public Module Winapp2ool
     ''' </returns>
     Public Function enforceFileHasContent(iFile As iniFile2) As Boolean
 
-        If iFile Is Nothing OrElse iFile.Count = 0 Then
+        If iFile IsNot Nothing AndAlso iFile.Count > 0 Then Return True
 
-            Dim fileName = If(iFile?.Name, "File")
-            setNextMenuHeaderText($"{fileName} was empty or not found", True)
-            gLog($"{fileName} was empty or not found", indent:=True)
+        Dim fileName = If(iFile?.Name, "File")
+        setNextMenuHeaderText($"{fileName} was empty or not found", True)
+        gLog($"  {fileName} was empty or not found")
 
-            Return False
-
-        End If
-
-        Return True
+        Return False
 
     End Function
 
