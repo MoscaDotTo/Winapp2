@@ -35,8 +35,6 @@ Imports System.Reflection
 ''' alongside the dictionary, for on-disk formatting purposes and 
 ''' can be read from or written to disk as needed
 ''' </summary>
-''' 
-''' Docs last updated: 2025-06-25 | Code last updated 2025-06-25
 Public Module settingsHandler
 
     ''' <summary>
@@ -52,8 +50,6 @@ Public Module settingsHandler
     ''' If <c> saveSettingsToDisk </c> is <c> True </c>, then this file will
     ''' be overwritten on disk when settings are flushed
     ''' </summary>
-    '''
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Property settingsFile As New iniFile(Environment.CurrentDirectory, "winapp2ool.ini")
 
     ''' <summary> 
@@ -64,16 +60,12 @@ Public Module settingsHandler
     ''' are simple key value pairs where the key is the name of a setting 
     ''' and the value is the value of the setting
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Property settingsDict As New Dictionary(Of String, Dictionary(Of String, String))
 
     ''' <summary>
     ''' If saving is enabled, saves the current state of winapp2ool's
     ''' settings to disk, overwriting any existing settings
     ''' </summary>
-    '''
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Sub saveSettingsFile()
 
         settingsFile.overwriteToFile(settingsFile.toString, saveSettingsToDisk)
@@ -85,8 +77,6 @@ Public Module settingsHandler
     ''' Saves settings to disk only if they have been modified since the last save.
     ''' Call this at application exit or module transitions to ensure settings are persisted.
     ''' </summary>
-    '''
-    ''' Docs last updated: 2026-02-06 | Code last updated: 2026-02-06
     Public Sub FlushSettingsIfDirty()
 
         If _settingsAreDirty Then saveSettingsFile()
@@ -133,8 +123,6 @@ Public Module settingsHandler
     ''' <param name="newVal"> 
     ''' The updated value held by the setting 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2026-02-06
     Public Sub updateSettings(targetModule As String,
                               settingName As String,
                               newVal As String)
@@ -157,7 +145,6 @@ Public Module settingsHandler
 
         End If
 
-        ' New path: always sync SettingsFile2
         SetValue2(targetModule, settingName, newVal)
 
     End Sub
@@ -176,8 +163,6 @@ Public Module settingsHandler
     ''' The <c> iniSection </c> containing <c> iniKey </c> 
     ''' format serialized winapp2ool settings 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 
     Private Sub addToSettingsDict(targetModule As String, settings As iniSection)
 
@@ -192,8 +177,6 @@ Public Module settingsHandler
     ''' and attempts to load it from disk. If the <c> settingsFile </c>
     ''' is empty, settings will be loaded from their default configuration 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Sub loadSettings()
 
         gLog("Loading settings")
@@ -231,8 +214,6 @@ Public Module settingsHandler
     ''' Loads all module settings into disk-writable representation
     ''' in the form of both an <c> iniFile </c> and a <c> Dictionary </c> 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-08-04
     Private Sub loadAllModuleSettings()
 
         Dim modules = New Dictionary(Of String, KeyValuePair(Of Action, Action)) From {
@@ -276,8 +257,6 @@ Public Module settingsHandler
     ''' <param name="moduleName"> 
     ''' The name of the module whose settings are being cleared 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Sub clearAllModuleSettings(moduleName As String)
 
         gLog($"Clearing {moduleName}'s settings")
@@ -312,8 +291,6 @@ Public Module settingsHandler
     ''' Indicates whether or not the module settings should be read from disk and loaded 
     ''' <br /> If <c> False </c>, the default module settings will be loaded 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Private Sub serializeModuleSettings(moduleName As String,
                                         createModuleSettings As Action,
                                         getSerializedSettings As Action,
@@ -334,8 +311,6 @@ Public Module settingsHandler
     ''' <c> True </c> if we should be reading from disk <br /> 
     ''' <c> False </c> otherwise 
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Private Function DetermineReadSettingsBehavior() As Boolean
 
         Dim rdSttngsName = NameOf(readSettingsFromDisk)
@@ -385,8 +360,6 @@ Public Module settingsHandler
     ''' (Name, Value) pairs for <c> Boolean </c>settings and 
     ''' (Name, Filename, Dir) triplets for <c> iniFile </c> settings
     ''' </remarks>
-    ''' 
-    ''' Docs last updated: 2025-08-05 | Code last updated: 2025-08-05
     Public Sub createModuleSettingsSection(callingModule As String,
                                            winapp2Module As Type,
                                   Optional settingsTuples As List(Of String) = Nothing,
@@ -440,8 +413,6 @@ Public Module settingsHandler
     ''' A list of iniKeys representing the settings
     ''' for the specified module to be written to disk
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Private Function getSettingKeys(settingsTuples As List(Of String),
                                     moduleName As String,
                                     numBools As Integer,
@@ -512,8 +483,6 @@ Public Module settingsHandler
     ''' A string representing the iniKey or an empty 
     ''' string if the setting already exists in the dictionary
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Private Function getSettingIniKey(moduleName As String,
                                       settingName As String,
                                       settingValue As String,
@@ -543,8 +512,6 @@ Public Module settingsHandler
     ''' <param name="createSection"> 
     ''' The subroutine that creates the module's disk-writable settings 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Sub restoreDefaultSettings(callingModule As String,
                                       createSection As Action)
 
@@ -571,8 +538,6 @@ Public Module settingsHandler
     ''' A module containing the set of disk-writable properties for 
     ''' <c> <paramref name="moduleName"/> </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Sub LoadModuleSettingsFromDict(moduleName As String,
                                           winapp2oolmodule As Type)
 
@@ -638,8 +603,6 @@ Public Module settingsHandler
     ''' A <c> List (Of String) </c> containing
     ''' the disk-writable key/value pair names
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Function GetSettingsTupleWithReflection(moduleType As Type) As List(Of String)
 
         Dim tuple As New List(Of String)
@@ -683,8 +646,6 @@ Public Module settingsHandler
     ''' The number of <c> iniFile> </c>
     ''' properties in the specified module type
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Function getNumFiles(winapp2oolModule As Type) As Integer
 
         Dim numFiles = 0
@@ -711,8 +672,6 @@ Public Module settingsHandler
     ''' <returns> 
     ''' The number of <c> Boolean </c> properties in the specified module type
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
     Public Function getNumBools(winapp2oolModule As Type) As Integer
 
         Dim numBools = 0
