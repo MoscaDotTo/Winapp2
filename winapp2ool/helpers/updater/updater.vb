@@ -66,6 +66,10 @@ Public Module updater
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion.Length = 0 Or latestWa2Ver.Length = 0 Then updateCheckFailed("online", True) : Return
+        ' Pad both versions before comparing so that a short last segment (e.g. a build time shortly after midnight)
+        ' does not produce a numerically shorter string and cause a false positive or false negative update result
+        padVersionNum(latestVersion)
+        padVersionNum(currentVersion)
         ' Observe whether or not updates are available, using val to avoid conversion mistakes
         updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
         localWa2Ver = getVersionFromLocalFile()
@@ -98,10 +102,6 @@ Public Module updater
                     alreadyDownloadedExecutable = True
                     ' This places a lock on winapp2ool.exe in the tmp folder that will remain until we close the application
                     latestVersion = FileVersionInfo.GetVersionInfo(tmpPath).FileVersion
-                    ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
-                    ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
-                    padVersionNum(latestVersion)
-                    padVersionNum(currentVersion)
                 Catch ex As FileNotFoundException
                     handleFileNotFoundException(ex)
                 End Try
