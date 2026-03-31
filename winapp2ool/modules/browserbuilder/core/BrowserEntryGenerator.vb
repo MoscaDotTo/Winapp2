@@ -153,7 +153,7 @@ Friend Module BrowserEntryGenerator
                               ByRef menuOutput As MenuSection)
 
         Dim generatingMsg = $"Generating entry for browser: {browserInfo.Name}"
-        gLog(generatingMsg, indent:=True)
+        gLog($"  {generatingMsg}")
         menuOutput.AddColoredLine(generatingMsg, ConsoleColor.Magenta)
 
         Dim entryName As String = $"{browserInfo.Name} {scaffoldName} *"
@@ -168,7 +168,7 @@ Friend Module BrowserEntryGenerator
 
         Dim generatedText = $"Generated entry: {entryName}"
         menuOutput.AddColoredLine(generatedText, ConsoleColor.Yellow)
-        gLog(generatedText, indent:=True, indAmt:=4)
+        gLog($"        {generatedText}")
 
     End Sub
 

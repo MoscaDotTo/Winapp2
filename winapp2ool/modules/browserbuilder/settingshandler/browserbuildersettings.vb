@@ -24,21 +24,29 @@ Option Strict On
 ''' Browser Builder reads all of its input files from a single source directory:
 '''
 ''' <list type="bullet">
+''' 
 ''' <item>
-''' <b><c>chromium.ini</c></b> - Generative rulesets for Chromium-based browsers
+''' <b> <c> chromium.ini </c> </b>: 
+''' Generative rulesets for Chromium-based browsers
 ''' (BrowserInfo + EntryScaffold sections). Either this or gecko.ini must be present.
 ''' </item>
+''' 
 ''' <item>
-''' <b><c>gecko.ini</c></b> - Generative rulesets for Gecko/Goanna-based browsers
+''' <b> <c> gecko.ini </c> </b>: 
+''' Generative rulesets for Gecko/Goanna-based browsers
 ''' (BrowserInfo + EntryScaffold sections). Either this or chromium.ini must be present.
 ''' </item>
+''' 
 ''' <item>
-''' <b><c>browser_additions.ini</c></b> - Sections and keys to add after generation (optional)
+''' <b> <c> browser_additions.ini </c> </b>: 
+''' Sections and keys to add after generation (optional)
 ''' </item>
+''' 
 ''' <item>
 ''' <b><c>browser_section_removals.ini</c></b> - Sections to remove after generation (optional)
 ''' </item>
 ''' <item>
+''' 
 ''' <b><c>browser_name_removals.ini</c></b> - Keys to remove by name after generation (optional)
 ''' </item>
 ''' <item>
@@ -64,7 +72,7 @@ Public Module browserbuildersettings
     ''' <summary>
     ''' The output file to which Browser Builder saves its generated browser entries.
     ''' </summary>
-    Public Property BuilderFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "browsers.ini", "browsers.ini", mustExist:=False)
+    Public Property BuilderFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "browsers.ini", mustExist:=False)
 
     ''' <summary>
     ''' Indicates that the module settings have been modified from their defaults
@@ -76,8 +84,8 @@ Public Module browserbuildersettings
     ''' </summary>
     Public Sub InitDefaultBrowserBuilderSettings()
 
-        BuilderFile1 = New iniFileChooser(Environment.CurrentDirectory, "", "")
-        BuilderFile2 = New iniFileChooser(Environment.CurrentDirectory, "browsers.ini", "browsers.ini", mustExist:=False)
+        BuilderFile1.ResetParams()
+        BuilderFile2.ResetParams()
         BrowserBuilderModuleSettingsChanged = False
         SaveModule2(NameOf(BrowserBuilder), GetType(browserbuildersettings))
 
