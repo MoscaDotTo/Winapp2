@@ -57,4 +57,19 @@ Public Module maintoolsettings
     ''' </summary>
     Public Property CurrentWinappFlavor As Winapp2ool.WinappFlavor = Winapp2ool.WinappFlavor.CCleaner
 
+    ''' <summary>
+    ''' Restores all <c> Winapp2ool </c> settings to their defaults and persists the reset to disk
+    ''' </summary>
+    Public Sub InitDefaultToolSettings()
+
+        GlobalLogFile.ResetParams()
+        toolSettingsHaveChanged = False
+        saveSettingsToDisk = False
+        readSettingsFromDisk = False
+        isBeta = False
+        CurrentWinappFlavor = WinappFlavor.CCleaner
+        SaveModule2(NameOf(Winapp2ool), GetType(maintoolsettings))
+
+    End Sub
+
 End Module
