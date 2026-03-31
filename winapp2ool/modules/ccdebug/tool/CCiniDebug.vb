@@ -62,14 +62,14 @@ Module CCiniDebug
     ''' </summary>
     Public Sub initCCDebug()
 
-        Dim ccIni = iniFile2.FromFile(CCDebugFile2.Path())
+        Dim ccIni = CCDebugFile2.Load
         If Not enforceFileHasContent(ccIni) Then Return
 
         Dim winapp2 As iniFile2 = Nothing
 
         If PruneStaleEntries Then
 
-            winapp2 = iniFile2.FromFile(CCDebugFile1.Path())
+            winapp2 = CCDebugFile1.Load
             If Not enforceFileHasContent(winapp2) Then Return
 
         End If
