@@ -164,7 +164,9 @@ Module maintoolmenu
 
                 clrConsole()
                 cwl("Downloading & trimming, this may take a moment...")
-                remoteTrim(New iniFile(), New iniFile(Environment.CurrentDirectory, "winapp2.ini"), True)
+                remoteTrim(New iniFileChooser(Environment.CurrentDirectory, ""),
+                           New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2.ini"),
+                           True)
                 waUpdateIsAvail = False
 
             ' Show Update Diff
