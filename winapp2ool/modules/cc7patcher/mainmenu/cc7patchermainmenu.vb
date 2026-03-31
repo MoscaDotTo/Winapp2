@@ -23,14 +23,11 @@ Option Strict On
 ''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
 ''' </summary>
 '''
-''' Docs last updated: 2026-03-12 | Code last updated: 2026-03-12
 Public Module cc7patchermainmenu
 
     ''' <summary>
     ''' Builds the CC7Patcher main menu with all options and their dispatch handlers registered inline
     ''' </summary>
-    '''
-    ''' Docs last updated: 2026-03-12 | Code last updated: 2026-03-12
     Private Function buildCC7PatcherMenu() As MenuSection
 
         Dim menuDescLines = {"Patch ccleaner.ini with winapp2.ini entries compatible with CCleaner 7"}
@@ -70,8 +67,6 @@ Public Module cc7patchermainmenu
     ''' <summary>
     ''' Prints the CC7Patcher menu to the user
     ''' </summary>
-    '''
-    ''' Docs last updated: 2026-03-12 | Code last updated: 2026-03-12
     Public Sub printCC7PatcherMenu()
 
         buildCC7PatcherMenu().Print()
@@ -85,8 +80,6 @@ Public Module cc7patchermainmenu
     ''' <param name="input">
     ''' The user's input
     ''' </param>
-    '''
-    ''' Docs last updated: 2026-03-12 | Code last updated: 2026-03-12
     Public Sub handleCC7PatcherInput(input As String)
 
         Dim intInput As Integer

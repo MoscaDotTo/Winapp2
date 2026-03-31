@@ -67,7 +67,7 @@ Public Module CC7Patcher
         End If
 
         ' Handle winapp2.ini acquisition
-        Dim winapp2Input As iniFile
+        Dim winapp2Input As iniFile2
 
         If DownloadWinapp2 Then
 
@@ -79,7 +79,7 @@ Public Module CC7Patcher
             End If
 
             gLog("Downloading winapp2.ini from GitHub")
-            winapp2Input = getRemoteIniFile(getWinappLink())
+            winapp2Input = getRemoteIniFile2(getWinappLink())
 
             If winapp2Input Is Nothing Then
 
@@ -99,7 +99,7 @@ Public Module CC7Patcher
 
             Dim loaded = CC7PatcherFile1.Load()
             If loaded Is Nothing Then Return
-            winapp2Input = IniFileBridge.ToIniFile(loaded)
+            winapp2Input = loaded
 
         End If
 
@@ -116,9 +116,13 @@ Public Module CC7Patcher
             menuOutput.AddColoredLine(trimMsg, ConsoleColor.Cyan)
             gLog(trimMsg)
 
-            Dim wa2file As New winapp2file(winapp2Input)
+            Dim legacyForTrim = IniFileBridge.ToIniFile(winapp2Input)
+            Dim wa2file As New winapp2file(legacyForTrim)
             Trim.trimFile(wa2file)
-            winapp2Input = wa2file.toIni
+            Dim trimmed = wa2file.toIni
+            trimmed.Dir = legacyForTrim.Dir
+            trimmed.Name = legacyForTrim.Name
+            winapp2Input = IniFileBridge.ToIniFile2(trimmed)
 
             Dim trimCompleteMsg = $"Trimming complete: {wa2file.count} entries remain"
             menuOutput.AddColoredLine(trimCompleteMsg, ConsoleColor.Green)
@@ -151,17 +155,15 @@ Public Module CC7Patcher
     ''' <param name="menuOutput">
     ''' The menu output section for logging
     ''' </param>
-    Private Sub patchCCleaner(winapp2Input As iniFile,
-                        ByRef menuOutput As MenuSection)
+    Private Sub patchCCleaner(winapp2Input As iniFile2,
+                              ByRef menuOutput As MenuSection)
 
         gLog("Beginning ccleaner.ini patching process", ascend:=True)
 
-        ' Bridge iniFileChooser → iniFile at the Transmute boundary
-        Dim cc2Loaded = CC7PatcherFile2.Load()
-        If cc2Loaded Is Nothing Then Return
-        Dim baseFile As iniFile = IniFileBridge.ToIniFile(cc2Loaded)
+        Dim baseFile = CC7PatcherFile2.Load()
+        If baseFile Is Nothing Then Return
 
-        Dim outputFile As New iniFile(CC7PatcherFile3.Dir, CC7PatcherFile3.Name)
+        Dim outputFile = iniFile2.Empty(CC7PatcherFile3.Dir, CC7PatcherFile3.Name)
 
         Dim patchMsg = $"Patching {CC7PatcherFile2.Name} with entries from winapp2.ini"
         menuOutput.AddColoredLine(patchMsg, ConsoleColor.Yellow)
