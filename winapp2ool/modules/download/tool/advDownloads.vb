@@ -1,7 +1,7 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
-' 
+'    Copyright (C) 2018-2026 Hazel Ward
+'
 '    This file is a part of Winapp2ool
-' 
+'
 '    Winapp2ool is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
 '    the Free Software Foundation, either version 3 of the License, or
@@ -17,56 +17,62 @@
 
 Option Strict On
 
-''' <summary> 
-''' A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo 
+''' <summary>
+''' A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo
 ''' </summary>
 Public Module advDownloads
 
-    ''' <summary> 
-    ''' Prints the advanced downloads menu 
+    ''' <summary>
+    ''' Builds the advanced downloads menu with all options and their dispatch handlers registered inline
+    ''' </summary>
+    Private Function buildAdvMenu() As MenuSection
+
+        Dim menuDesc = {"Warning!", "Files in this menu are not recommended for use by beginners!"}
+
+        Return MenuSection.CreateCompleteMenu("Advanced Downloads", menuDesc, ConsoleColor.DarkCyan) _
+            .AddDispatchedOption("Winapp3.ini", "Extended and/or potentially unsafe entries",
+                Sub()
+                    downloadFile.Name = "winapp3.ini"
+                    download(downloadFile, wa3link)
+                End Sub) _
+            .AddDispatchedOption("Archived entries.ini", "Entries for old or discontinued software",
+                Sub()
+                    downloadFile.Name = "Archived entries.ini"
+                    download(downloadFile, archivedLink)
+                End Sub)
+
+    End Function
+
+    ''' <summary>
+    ''' Prints the advanced downloads menu to the user
     ''' </summary>
     Public Sub printAdvMenu()
 
-        Dim menuDesc = {"Warning!", "Files in this menu are not recommended for use by beginners!"}
-        Dim menu = MenuSection.CreateCompleteMenu("Advanced Downloads", menuDesc, ConsoleColor.DarkCyan)
-        menu.AddBlank _
-            .AddOption("Winapp3.ini", "Extended and/or potentially unsafe entries") _
-            .AddOption("Archived entries.ini", "Entries for old or discontinued software")
-
-        menu.Print()
+        buildAdvMenu().Print()
 
     End Sub
 
     ''' <summary>
-    ''' Handles the user input for the advanced download menu 
+    ''' Handles user input for the advanced downloads menu
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="input">
-    ''' The user's input 
+    ''' The user's input
     ''' </param>
     Public Sub handleAdvInput(input As String)
 
-        Select Case input
+        Dim intInput As Integer
 
-            Case "0"
+        If Not Integer.TryParse(input, intInput) Then
 
-                exitModule()
+            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Return
 
-            Case "1"
+        End If
 
-                downloadFile.Name = "winapp3.ini"
-                download(downloadFile, wa3link)
+        If intInput = 0 Then exitModule() : Return
 
-            Case "2"
-
-                downloadFile.Name = "Archived entries.ini"
-                download(downloadFile, archivedLink)
-
-            Case Else
-
-                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-        End Select
+        If Not buildAdvMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
     End Sub
 

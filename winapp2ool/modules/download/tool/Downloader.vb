@@ -17,8 +17,8 @@
 
 Option Strict On
 
-''' <summary> 
-''' Downloader is a winapp2ool module which provides a very simple interface for downloading indvidual
+''' <summary>
+''' Downloader is a winapp2ool module which provides a very simple interface for downloading individual
 ''' files from the winapp2 GitHub in a way that can be automated through scripting
 ''' </summary>
 Module Downloader
@@ -93,57 +93,59 @@ Module Downloader
     ''' </summary>
     Public ReadOnly Property readMeUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md"
 
-    ''' <summary> 
-    ''' Handles the commandline args for the Downloader 
+    ''' <summary>
+    ''' Handles command line arguments for the Downloader module
     ''' </summary>
+    '''
+    ''' <remarks>
+    ''' File arguments:
+    ''' <list type="bullet">
+    ''' <item><c> -1d path </c> — Set the save directory</item>
+    ''' <item><c> -1f name </c> — Set the save filename</item>
+    ''' </list>
+    '''
+    ''' Positional arguments (select the file to download):
+    ''' <list type="bullet">
+    ''' <item><c> 1 </c> or <c> winapp2 </c> — winapp2.ini (flavor-aware)</item>
+    ''' <item><c> 2 </c> or <c> winapp2ool </c> — winapp2ool.exe</item>
+    ''' <item><c> 3 </c> or <c> readme </c> — readme.txt</item>
+    ''' <item><c> 4 </c> or <c> winapp3 </c> — winapp3.ini</item>
+    ''' <item><c> 5 </c> or <c> archived </c> — Archived entries.ini</item>
+    ''' </list>
+    ''' </remarks>
     Public Sub handleCmdLine()
 
         Dim fileLink = ""
 
-        If cmdargs.Count > 0 Then
+        Dim spec As New CliArgSpec(NameOf(Downloader))
+        spec.WithFile(1, downloadFile) _
+            .WithPositional(
+                Sub(arg)
+                    Select Case arg.ToUpperInvariant
+                        Case "1", "WINAPP2"
+                            fileLink = getWinappLink()
+                            downloadFile.Name = If(fileLink.Contains("SystemNinja"), "winapp2.rules", "winapp2.ini")
+                        Case "2", "WINAPP2OOL"
+                            fileLink = toolExeLink()
+                            downloadFile.Name = "winapp2ool.exe"
+                        Case "3", "README"
+                            fileLink = readMeLink
+                            downloadFile.Name = "readme.txt"
+                        Case "4", "WINAPP3"
+                            fileLink = wa3link
+                            downloadFile.Name = "winapp3.ini"
+                        Case "5", "ARCHIVED"
+                            fileLink = archivedLink
+                            downloadFile.Name = "Archived entries.ini"
+                        Case Else
+                            cwl($"Unknown argument: {arg}", True)
+                            cwl("Valid arguments are: winapp2, winapp2ool, readme, winapp3, archived", True)
+                            Environment.Exit(1)
+                    End Select
+                End Sub) _
+            .Parse()
 
-            Select Case cmdargs(0).ToUpperInvariant
-
-                Case "1", "WINAPP2"
-
-                    fileLink = getWinappLink()
-                    downloadFile.Name = If(fileLink.Contains("SystemNinja"), "winapp2.rules", "winapp2.ini")
-
-                Case "2", "WINAPP2OOL"
-
-                    fileLink = toolLink
-                    downloadFile.Name = "winapp2ool.exe"
-
-                Case "3", "README"
-
-                    fileLink = readMeLink
-                    downloadFile.Name = "readme.txt"
-
-                Case "4", "WINAPP3"
-
-                    fileLink = wa3link
-                    downloadFile.Name = "winapp3.ini"
-
-                Case "5", "ARCHIVED"
-
-                    fileLink = archivedLink
-                    downloadFile.Name = "Archived Entries.ini"
-
-                Case Else
-
-                    cwl($"Unknown argument: {cmdargs(0)}", True)
-                    cwl("Valid arguments are: winapp2, winapp2ool, readme, winapp3, archived", True)
-                    Environment.Exit(1)
-
-            End Select
-
-            cmdargs.RemoveAt(0)
-
-        End If
-
-        getFileAndDirParams({downloadFile, New iniFile, New iniFile})
-
-        If downloadFile.Name = "winapp2ool.exe" AndAlso downloadFile.Dir = Environment.CurrentDirectory Then autoUpdate()
+        If downloadFile.Name = "winapp2ool.exe" AndAlso downloadFile.Dir = Environment.CurrentDirectory Then autoUpdate() : Return
 
         download(downloadFile, fileLink)
 
@@ -184,6 +186,10 @@ Module Downloader
             Case WinappFlavor.Tron
 
                 Return tronFlavorLink
+
+            Case WinappFlavor.CCleaner7
+
+                Return cc7FlavorLink
 
         End Select
 
