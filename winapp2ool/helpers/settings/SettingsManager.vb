@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -296,69 +296,5 @@ Module SettingsManager
         setNextMenuHeaderText($"{displayName} set to {nextValue}", printColor:=printColor)
 
     End Sub
-
-    ''' <summary>
-    ''' Gets the set of menu numbers associated with a dictionary of options, starting from a specified base number
-    ''' </summary>
-    ''' 
-    ''' <typeparam name="T">
-    ''' The type of the dictionary's values
-    ''' </typeparam>
-    ''' 
-    ''' <param name="optionsDict">
-    ''' A dictionary of menu options for which to generate menu numbers
-    ''' </param>
-    ''' 
-    ''' <param name="baseNum">
-    ''' The number from which to start numbering the options
-    ''' </param>
-    ''' 
-    ''' <returns>
-    ''' The set of numbers associated with the visible menu options in <c> <paramref name="optionsDict"/> </c>
-    ''' </returns>
-    Public Function getMenuNumbering(Of T)(optionsDict As Dictionary(Of String, T),
-                                           baseNum As Integer) As List(Of String)
-
-        Dim optNums = New List(Of String)
-        For i = 0 To optionsDict.Count - 1
-
-            Dim curNum = baseNum + i
-            optNums.Add(curNum.ToString)
-
-        Next
-
-        Return optNums
-
-    End Function
-
-    ''' <summary>
-    ''' Updates an enum setting in the settings file
-    ''' </summary>
-    Public Sub updateEnumSetting(Of T As Structure)(moduleName As String, settingName As String, enumValue As T)
-        updateSettings(moduleName, settingName, enumValue.ToString())
-    End Sub
-
-    ''' <summary>
-    ''' Gets an enum setting from the settings file
-    ''' </summary>
-    Public Function getEnumSetting(Of T As Structure)(moduleName As String, settingName As String, defaultValue As T) As T
-
-        Dim settingValue As String = ""
-
-        ' Try to get the value from settingsDict
-        If settingsDict.ContainsKey(moduleName) AndAlso
-       settingsDict(moduleName).ContainsKey(settingName) Then
-            settingValue = settingsDict(moduleName)(settingName)
-        Else
-            Return defaultValue
-        End If
-
-        Dim result As T
-        If [Enum].TryParse(settingValue, result) AndAlso [Enum].IsDefined(GetType(T), result) Then
-            Return result
-        End If
-
-        Return defaultValue
-    End Function
 
 End Module
