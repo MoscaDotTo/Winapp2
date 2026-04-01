@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -218,7 +218,6 @@ Public Module settingsHandler
 
         Dim modules = New Dictionary(Of String, KeyValuePair(Of Action, Action)) From {
         {NameOf(WinappDebug), New KeyValuePair(Of Action, Action)(AddressOf CreateLintSettingsSection, AddressOf getSerializedLintSettings)}
-        {NameOf(WinappDebug), New KeyValuePair(Of Action, Action)(AddressOf CreateLintSettingsSection, AddressOf getSerializedLintSettings)},
     }
 
         Dim readSettingsFromDisk = DetermineReadSettingsBehavior()
@@ -317,18 +316,10 @@ Public Module settingsHandler
     ''' </returns>
     Private Function DetermineReadSettingsBehavior() As Boolean
 
-        Dim rdSttngsName = NameOf(readSettingsFromDisk)
-
-        addToSettingsDict(NameOf(Winapp2ool), settingsFile.getSection(NameOf(Winapp2ool)))
-
-        If Not settingsDict(NameOf(Winapp2ool)).ContainsKey(rdSttngsName) Then
-
-            clearAllModuleSettings(NameOf(Winapp2ool))
-            Return False
-
-        End If
-
-        Return CBool(settingsDict(NameOf(Winapp2ool))(rdSttngsName))
+        Dim section = settingsFile.getSection(NameOf(Winapp2ool))
+        Dim rdKey = section.Keys.Keys.Find(Function(k) k.Name = NameOf(readSettingsFromDisk))
+        If rdKey Is Nothing Then Return False
+        Return CBool(rdKey.Value)
 
     End Function
 
@@ -621,9 +612,9 @@ Public Module settingsHandler
             ' iniFile properties
             If value.GetType().Name = "iniFile" Then
                 Dim ini As iniFile = CType(value, iniFile)
-            tuple.Add(prop.Name)
-            tuple.Add($"{ini.Name}")
-            tuple.Add($"{ini.Dir}")
+                tuple.Add(prop.Name)
+                tuple.Add($"{ini.Name}")
+                tuple.Add($"{ini.Dir}")
                 Continue For
             End If
 
