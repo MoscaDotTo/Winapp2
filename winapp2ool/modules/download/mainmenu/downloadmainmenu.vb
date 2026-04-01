@@ -47,13 +47,13 @@ Module downloadmainmenu
                 End Sub) _
             .AddDispatchedColoredOption("BleachBit Winapp2.ini", "Download the latest BleachBit Flavor of winapp2.ini", ConsoleColor.DarkCyan,
                 Sub()
-                    downloadFile.Name = "winapp2.rules"
+                    downloadFile.Name = "winapp2.ini"
                     download(downloadFile, bbFlavorLink)
                     checkedForUpdates = False
                 End Sub) _
             .AddDispatchedColoredOption("System Ninja Winapp2.rules", "Download the latest System Ninja Flavor of winapp2.ini", ConsoleColor.Blue,
                 Sub()
-                    downloadFile.Name = "winapp2.ini"
+                    downloadFile.Name = "winapp2.rules"
                     download(downloadFile, snFlavorLink)
                     checkedForUpdates = False
                 End Sub) _
