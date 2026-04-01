@@ -134,6 +134,29 @@ Public Class winapp2entry2
     End Property
 
     ''' <summary>
+    ''' Whether this entry has any detection key (DetectOS, Detect, DetectFile, or SpecialDetect).
+    ''' Entries with no detection keys are always retained by Trim.
+    ''' </summary>
+    Public ReadOnly Property HasDetectionKey As Boolean
+        Get
+            Return _detectOS.Count > 0 OrElse _detects.Count > 0 OrElse
+                   _detectFiles.Count > 0 OrElse _specialDetect.Count > 0
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Whether DetectOS is the only detection key type present.
+    ''' When True and DetectOS is satisfied, the entry is retained without evaluating
+    ''' Detect or DetectFile.
+    ''' </summary>
+    Public ReadOnly Property HasOnlyDetectOS As Boolean
+        Get
+            Return _detectOS.Count > 0 AndAlso
+                   _detects.Count = 0 AndAlso _detectFiles.Count = 0 AndAlso _specialDetect.Count = 0
+        End Get
+    End Property
+
+    ''' <summary>
     ''' All key lists in winapp2.ini declaration order, mirroring <c>KeyListList</c>
     ''' on the legacy <c>winapp2entry</c>
     ''' </summary>
@@ -242,5 +265,32 @@ Public Class winapp2entry2
         Return s
 
     End Function
+
+    ''' <summary>
+    ''' Renumbers the deletion key buckets (FileKey, RegKey, ExcludeKey) sequentially from 1,
+    ''' sorted by value within each bucket.
+    ''' Called after VirtualStore augmentation inserts keys that may share names with existing keys.
+    ''' </summary>
+    Public Sub RenumberKeys()
+
+        RenumberBucket(_fileKeys)
+        RenumberBucket(_regKeys)
+        RenumberBucket(_excludeKeys)
+
+    End Sub
+
+    Private Shared Sub RenumberBucket(bucket As List(Of iniKey2))
+
+        If bucket.Count = 0 Then Return
+
+        Dim keyType = bucket(0).KeyType
+
+        bucket.Sort(Function(a, b) String.Compare(a.Value, b.Value, StringComparison.OrdinalIgnoreCase))
+
+        For i = 0 To bucket.Count - 1
+            bucket(i).Name = keyType & CStr(i + 1)
+        Next
+
+    End Sub
 
 End Class

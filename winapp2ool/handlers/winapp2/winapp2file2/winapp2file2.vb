@@ -201,6 +201,20 @@ Public Class winapp2file2
     End Sub
 
     ''' <summary>
+    ''' Sorts entries within each category alphabetically by name.
+    ''' Mirrors <c>winapp2file.sortInneriniFiles()</c>.
+    ''' </summary>
+    Public Sub SortEntries()
+
+        For Each cat In _categories
+            cat.Sort(Function(a, b) String.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase))
+        Next
+
+        _entriesDirty = True
+
+    End Sub
+
+    ''' <summary>
     ''' Builds and returns the complete winapp2.ini text including preamble comments,
     ''' replicating the output of the legacy <c>winapp2file.winapp2string()</c>
     ''' </summary>
