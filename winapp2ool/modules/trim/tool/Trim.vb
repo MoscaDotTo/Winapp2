@@ -213,9 +213,7 @@ Public Module Trim
         Dim noNtwk = "Internet connection lost! Please check your network connection and try again"
         If denyActionWithHeader(DownloadFileToTrim AndAlso Not checkOnline(), noNtwk) Then Return
 
-        Dim winapp2 = If(DownloadFileToTrim,
-            New winapp2file(getRemoteIniFile(getWinappLink)),
-            New winapp2file(New iniFile(TrimFile1.Dir, TrimFile1.Name)))
+        Dim winapp2 As New winapp2file2(If(DownloadFileToTrim, getRemoteIniFile2(getWinappLink), TrimFile1.Load))
 
         clrConsole()
         Dim progress As New MenuSection
@@ -224,16 +222,16 @@ Public Module Trim
                 .AddBottomBorder()
         progress.Print()
 
-        Dim entryCountBeforeTrim = winapp2.count
+        Dim entryCountBeforeTrim = winapp2.Count
 
         ' Perform the trim
         trimFile(winapp2)
 
-        Dim difference = entryCountBeforeTrim - winapp2.count
+        Dim difference = entryCountBeforeTrim - winapp2.Count
         Dim pct = Math.Round((difference / entryCountBeforeTrim) * 100)
 
         gLog($"{difference} entries trimmed from winapp2.ini from a total of {entryCountBeforeTrim} ({pct}%)")
-        gLog($"{winapp2.count} entries remain.")
+        gLog($"{winapp2.Count} entries remain.")
 
         ' Print trim summary to the user
         clrConsole()
@@ -242,7 +240,7 @@ Public Module Trim
            .AddColoredLine("Trim Complete", ConsoleColor.DarkCyan, centered:=True) _
            .AddDivider() _
            .AddLine($"Initial entry count: {entryCountBeforeTrim}") _
-           .AddLine($"Trimmed entry count: {winapp2.count}") _
+           .AddLine($"Trimmed entry count: {winapp2.Count}") _
            .AddLine($"{difference} entries trimmed from winapp2.ini ({pct}%)") _
            .AddDivider() _
            .AddLine(anyKeyStr, centered:=True) _
@@ -250,7 +248,7 @@ Public Module Trim
         out.Print()
 
         ' Save the trimmed file back to disk
-        iniFile2.Empty(TrimFile3.Dir, TrimFile3.Name).OverwriteToFile(winapp2.winapp2string)
+        iniFile2.Empty(TrimFile3.Dir, TrimFile3.Name).OverwriteToFile(winapp2.ToWinapp2String())
 
         ' If we downloaded the latest file, then we probably can mark winapp2 as having been updated
         If DownloadFileToTrim Then waUpdateIsAvail = False
@@ -261,76 +259,86 @@ Public Module Trim
     End Sub
 
     ''' <summary>
-    ''' Trims a <c> winapp2file </c>, removing entries not relevant to the current system
+    ''' Trims a <c> winapp2file2 </c>, removing entries not relevant to the current system
     ''' </summary>
     '''
     ''' <param name="winapp2">
-    ''' A <c> winapp2file </c> to be trimmed to fit the current system
+    ''' A <c> winapp2file2 </c> to be trimmed to fit the current system
     ''' </param>
-    Public Sub trimFile(winapp2 As winapp2file)
+    Public Sub trimFile(winapp2 As winapp2file2)
 
         If winapp2 Is Nothing Then argIsNull(NameOf(winapp2)) : Return
 
         _includes2 = If(UseTrimIncludes, iniFile2.FromFile(TrimFile2.Path()), Nothing)
         _excludes2 = If(UseTrimExcludes, iniFile2.FromFile(TrimFile4.Path()), Nothing)
 
-        ' Winapp2.ini is composed of multiple entry lists representing the different top-level sections that we separate from the rest of the entries
-        ' Pass them off individually and in-order for processing
-        For i = 0 To winapp2.Winapp2entries.Count - 1
+        Dim toRemove As New List(Of winapp2entry2)
 
-            Dim entryList = winapp2.Winapp2entries(i)
-            processEntryList(entryList)
+        For Each entry In winapp2.Entries
+
+            If Not processEntryExistence(entry) Then
+
+                toRemove.Add(entry)
+
+            Else
+
+                virtualStoreChecker(entry)
+
+            End If
 
         Next
 
-        winapp2.rebuildWinapp2ChangesToIniFiles()
-        winapp2.sortInneriniFiles()
+        For Each entry In toRemove : winapp2.RemoveEntry(entry) : Next
+
+        winapp2.SortEntries()
 
     End Sub
 
-    ''' <summary> 
-    ''' Evaluates a <c> keyList </c> to observe whether they exist on the current machine 
+    ''' <summary>
+    ''' Evaluates a list of detection keys to observe whether they exist on the current machine
     ''' </summary>
-    ''' 
-    ''' <param name="kl">
-    ''' The <c> keyList </c> containing detection criteria to be evaluated 
+    '''
+    ''' <param name="keys">
+    ''' The detection keys to be evaluated
     ''' </param>
-    ''' 
+    '''
+    ''' <param name="keyType">
+    ''' The key type string, used to suppress the descend log on DetectOS
+    ''' </param>
+    '''
     ''' <param name="chkExist">
-    ''' The <c> function </c> that evaluates the detection criteria in <c> <paramref name="kl"/> </c> 
+    ''' The <c> function </c> that evaluates each key value
     ''' </param>
-    ''' 
-    Private Function checkExistence(ByRef kl As keyList,
+    '''
+    Private Function checkExistence(keys As IReadOnlyList(Of iniKey2),
+                                    keyType As String,
                                     chkExist As Func(Of String, Boolean)) As Boolean
 
-        ' If there's no keys then their content cannot exist 
-        If kl.KeyCount = 0 Then Return False
+        If keys.Count = 0 Then Return False
 
-        ' Process each key individually, if any exist return true 
-        For Each key In kl.Keys
+        For Each key In keys
 
             If Not chkExist(key.Value) Then Continue For
 
-            gLog($"{key.Value} matched a path on the system", Not kl.KeyType = "DetectOS", descend:=True, indent:=True, buffr:=True)
+            gLog($"  {key.Value} matched a path on the system", Not keyType = "DetectOS", descend:=True, buffr:=True)
             Return True
 
         Next
 
-        ' If we make it this far, no keys existed, so return false 
         Return False
 
     End Function
 
-    ''' <summary> 
-    ''' Audits the detection criteria in a given <c> winapp2entry </c> against the current system <br/> <br/>
-    ''' Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise 
+    ''' <summary>
+    ''' Audits the detection criteria in a given <c> winapp2entry2 </c> against the current system <br/> <br/>
+    ''' Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="entry">
-    ''' A <c> winapp2entry </c> to whose detection criteria will be audited 
+    ''' A <c> winapp2entry2 </c> whose detection criteria will be audited
     ''' </param>
-    ''' 
-    Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
+    '''
+    Private Function processEntryExistence(entry As winapp2entry2) As Boolean
 
         gLog($"Processing entry: {entry.Name}", ascend:=True, buffr:=True, leadr:=True)
 
@@ -343,172 +351,153 @@ Public Module Trim
         ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
         Dim hasMetDetOS = False
 
-        If Not entry.DetectOS.KeyCount = 0 Then
+        If Not entry.DetectOS.Count = 0 Then
 
             If winVer = Nothing Then winVer = getWinVer()
 
-            hasMetDetOS = checkExistence(entry.DetectOS, AddressOf checkDetOS)
-            gLog($"  Met DetectOS criteria. {winVer} satisfies {entry.DetectOS.Keys.First.Value}", hasMetDetOS)
-            gLog($"  Did not meet DetectOS criteria. {winVer} does not satisfy {entry.DetectOS.Keys.First.Value}", Not hasMetDetOS, descend:=True)
+            hasMetDetOS = checkExistence(entry.DetectOS, "DetectOS", AddressOf checkDetOS)
+            gLog($"  Met DetectOS criteria. {winVer} satisfies {entry.DetectOS(0).Value}", hasMetDetOS)
+            gLog($"  Did not meet DetectOS criteria. {winVer} does not satisfy {entry.DetectOS(0).Value}", Not hasMetDetOS, descend:=True)
 
             If Not hasMetDetOS Then Return False
 
         End If
 
         ' Process any other Detect criteria we have
-        If checkExistence(entry.Detects, AddressOf checkRegExist) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
-        If checkExistence(entry.DetectFiles, AddressOf checkPathExist) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
-        If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+        If checkExistence(entry.Detects, "Detect", AddressOf checkRegExist) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+        If checkExistence(entry.DetectFiles, "DetectFile", AddressOf checkPathExist) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+        If checkExistence(entry.SpecialDetect, "SpecialDetect", AddressOf checkSpecialDetects) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
 
         ' Return true for the case where we have only a DetectOS and we meet its criteria
-        Dim onlyHasDetOS = entry.SpecialDetect.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount = 0
-        gLog("No other detection keys found than DetectOS", onlyHasDetOS AndAlso hasMetDetOS, descend:=True)
-        If onlyHasDetOS AndAlso hasMetDetOS Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+        gLog("No other detection keys found than DetectOS", entry.HasOnlyDetectOS AndAlso hasMetDetOS, descend:=True)
+        If entry.HasOnlyDetectOS AndAlso hasMetDetOS Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
 
         ' Return true for the case where we have no valid detect criteria
-        Dim hasNoDetectKeys = entry.DetectOS.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount + entry.SpecialDetect.KeyCount = 0
-        gLog("No detect keys found, entry will be retained.", hasNoDetectKeys, descend:=True)
-        If hasNoDetectKeys Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+        gLog("No detect keys found, entry will be retained.", Not entry.HasDetectionKey, descend:=True)
+        If Not entry.HasDetectionKey Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
 
         gLog("  Discarding entry: " & entry.Name, descend:=True, leadr:=True, buffr:=True)
         Return False
 
-        End Function
+    End Function
 
-    ''' <summary> 
-    ''' Audits the given entry for legacy codepaths in the machine's VirtualStore 
+    ''' <summary>
+    ''' Audits the given entry for legacy codepaths in the machine's VirtualStore
     ''' </summary>
-    ''' 
-    ''' <param name="entry"> 
-    ''' The <c> winapp2entry </c> to audit
+    '''
+    ''' <param name="entry">
+    ''' The <c> winapp2entry2 </c> to audit
     ''' </param>
-    ''' 
-    Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
+    '''
+    Private Sub virtualStoreChecker(entry As winapp2entry2)
 
-        gLog("Attempting to generate any neccessary VirtualStore keys for " & entry.Name, indent:=True, buffr:=True, ascend:=True)
-        vsKeyChecker(entry.FileKeys)
-        vsKeyChecker(entry.RegKeys)
-        vsKeyChecker(entry.ExcludeKeys)
-        gLog("VirtualStore audit complete ", leadr:=True, indent:=True, descend:=True)
+        gLog("  Attempting to generate any neccessary VirtualStore keys for " & entry.Name, buffr:=True, ascend:=True)
+
+        Dim newKeys As New List(Of iniKey2)
+        collectVsKeys(entry.FileKeys, "FileKey", newKeys)
+        collectVsKeys(entry.RegKeys, "RegKey", newKeys)
+        collectVsKeys(entry.ExcludeKeys, "ExcludeKey", newKeys)
+
+        For Each key In newKeys
+            entry.AddKey(key)
+        Next
+
+        If newKeys.Count > 0 Then entry.RenumberKeys()
+
+        gLog("  VirtualStore audit complete ", leadr:=True, descend:=True)
 
     End Sub
 
-    ''' <summary> 
-    ''' Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list 
+    ''' <summary>
+    ''' Collects new VirtualStore counterpart keys for the given key list and appends them to
+    ''' <paramref name="newKeys"/>. Only keys whose corresponding VirtualStore path exists on
+    ''' the current system are included.
     ''' </summary>
-    ''' 
-    ''' <param name="kl"> 
-    ''' The <c> keyList </c> of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore 
+    '''
+    ''' <param name="keys">
+    ''' The FileKey, RegKey, or ExcludeKey collection to scan
     ''' </param>
-    ''' 
-    Private Sub vsKeyChecker(ByRef kl As keyList)
+    '''
+    ''' <param name="keyType">
+    ''' The key type string ("FileKey", "RegKey", or "ExcludeKey")
+    ''' </param>
+    '''
+    ''' <param name="newKeys">
+    ''' Accumulator list — new VirtualStore keys are appended here
+    ''' </param>
+    '''
+    Private Sub collectVsKeys(keys As IReadOnlyList(Of iniKey2),
+                               keyType As String,
+                               newKeys As List(Of iniKey2))
 
-        If kl.KeyCount = 0 Then Return
+        If keys.Count = 0 Then Return
 
-        Dim starterCount = kl.KeyCount
+        Dim findStrs() As String
+        Dim replStrs() As String
 
-        Select Case kl.KeyType
+        Select Case keyType
 
             Case "FileKey", "ExcludeKey"
-
-                mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files", "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
+                findStrs = {"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}
+                replStrs = {"%LocalAppData%\VirtualStore\Program Files*",
+                            "%LocalAppData%\VirtualStore\ProgramData",
+                            "%LocalAppData%\VirtualStore\Program Files*\Common Files",
+                            "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}
 
             Case "RegKey"
+                findStrs = {"HKLM\Software"}
+                replStrs = {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}
 
-                mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
+            Case Else
+                Return
 
         End Select
 
-        If Not starterCount = kl.KeyCount Then kl.renumberKeys(replaceAndSort(kl.toStrLst(True), "|", " \ \"))
+        Dim initVals = keys.Select(Function(k) k.Value).ToList()
+        Dim keysToAdd As New List(Of iniKey2)
 
-    End Sub
-
-    ''' <summary> 
-    ''' Creates <c> iniKeys </c> to handle VirtualStore locations that correspond to paths given in <c> <paramref name="kl"/> </c> 
-    ''' </summary>
-    ''' 
-    ''' <param name="findStrs"> 
-    ''' An array of Strings to seek for in the key value 
-    ''' </param>
-    ''' 
-    ''' <param name="replStrs"> 
-    ''' An array of strings to replace the sought after key values
-    ''' </param>
-    ''' 
-    ''' <param name="kl">
-    ''' The <c> keylist </c> to be processed 
-    ''' </param>
-    ''' 
-    Private Sub mkVsKeys(findStrs As String(),
-                         replStrs As String(),
-                         ByRef kl As keyList)
-
-        Dim initVals = kl.toStrLst(True)
-        Dim keysToAdd As New keyList(kl.KeyType)
-
-        For Each key In kl.Keys
+        ' Pass 1: collect candidate VS keys
+        For Each key In keys
 
             If Not key.vHasAny(findStrs, True) Then Continue For
 
             For i = 0 To findStrs.Length - 1
-
-                Dim keyToAdd = createVSKey(findStrs(i), replStrs(i), key)
-
-                ' Don't recreate keys that already exist
-                If initVals.contains(keyToAdd.Value) Then Continue For
-
-                keysToAdd.add(keyToAdd, Not key.Value = keyToAdd.Value)
-
+                Dim newVal = key.Value.Replace(findStrs(i), replStrs(i))
+                If initVals.Contains(newVal) Then Continue For
+                If key.Value = newVal Then Continue For
+                keysToAdd.Add(New iniKey2($"{key.Name}={newVal}"))
             Next
 
         Next
 
-        Dim kl2 = kl
-        keysToAdd.Keys.ForEach(Sub(key) kl2.add(key, checkExist(New winapp2KeyParameters(key).PathString)))
-        kl = kl2
+        ' Pass 2: filter by system existence
+        For Each key In keysToAdd
+            If checkExist(getPathFromValue(key.Value, keyType)) Then newKeys.Add(key)
+        Next
 
     End Sub
 
-    ''' <summary> 
-    ''' Creates the VirtualStore version of a given <c> iniKey </c>
+    ''' <summary>
+    ''' Extracts the filesystem or registry path from a key value string for use in an existence check
     ''' </summary>
-    ''' 
-    ''' <param name="findStr"> 
-    ''' The normal filesystem path 
+    '''
+    ''' <param name="value">
+    ''' The raw value of a FileKey, RegKey, or ExcludeKey
     ''' </param>
-    ''' 
-    ''' <param name="replStr"> 
-    ''' The VirtualStore path 
+    '''
+    ''' <param name="keyType">
+    ''' The key type string ("FileKey", "RegKey", or "ExcludeKey")
     ''' </param>
-    ''' 
-    ''' <param name="key"> 
-    ''' The <c> iniKey </c> to processed into a VirtualStore key 
-    ''' </param>
-    ''' 
-    Private Function createVSKey(findStr As String,
-                                 replStr As String,
-                                 key As iniKey) As iniKey
+    '''
+    Private Function getPathFromValue(value As String, keyType As String) As String
 
-        Return New iniKey($"{key.Name}={key.Value.Replace(findStr, replStr)}")
+        Select Case keyType
+            Case "FileKey" : Return New fileKeyParams2(value).Path
+            Case "ExcludeKey" : Return New excludeKeyParams2(value).Path
+            Case Else : Return value
+        End Select
 
     End Function
-
-    ''' <summary> 
-    ''' Processes a list of <c> winapp2entries </c> and removes any from the list that wouldn't be detected by CCleaner
-    ''' </summary>
-    ''' 
-    ''' <param name="entryList"> 
-    ''' The list of <c> winapp2entries </c> who detection criteria will be audited 
-    ''' </param>
-    ''' 
-    Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
-
-        ' If the entry's Detect criteria doesn't return true, prune it
-        Dim sectionsToBePruned As New List(Of winapp2entry)
-        entryList.ForEach(Sub(entry) If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else virtualStoreChecker(entry))
-        removeEntries(entryList, sectionsToBePruned)
-
-    End Sub
 
     ''' <summary> 
     ''' Returns <c> True </c> if a SpecialDetect location exists, <c> False </c> otherwise 
@@ -606,7 +595,7 @@ Public Module Trim
         Dim root = getFirstDir(path)
         dir = dir.Replace(root & "\", "")
         Dim exists = getRegExists(root, dir)
-        gLog($"{root}\{dir} exists", exists, indent:=True, buffr:=True)
+        gLog($"  {root}\{dir} exists", exists, buffr:=True)
         ' If we didn't return anything above, registry location probably doesn't exist
         Return exists
 
@@ -655,7 +644,7 @@ Public Module Trim
                 Case Else
 
                     ' Reject malformated keys
-                    gLog($"Your key seems to be malformatted (bad root? - root: {root} - expected 'HKCU','HKLM','HKU' or 'HKCR')", indent:=True)
+                    gLog($"  Your key seems to be malformatted (bad root? - root: {root} - expected 'HKCU','HKLM','HKU' or 'HKCR')")
                     Return False
 
             End Select
@@ -887,7 +876,7 @@ Public Module Trim
                     ' Query the existence of child paths for each current path we hold
                     If isFileSystem Then
 
-                        gLog("Investigating: " & pathPart & " as a subdir of " & currentPath, indent:=True)
+                        gLog("  Investigating: " & pathPart & " as a subdir of " & currentPath)
 
                         Try
 
