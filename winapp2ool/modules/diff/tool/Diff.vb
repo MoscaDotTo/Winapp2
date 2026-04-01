@@ -177,35 +177,24 @@ Module Diff
     ''' </summary>
     Public Sub ConductDiff()
 
-        Dim file1As2 As iniFile2
-        Dim file2As2 As iniFile2
+        Dim oldFile As iniFile2
+        Dim newFile As iniFile2
 
-        file1As2 = DiffFile1.Load()
-        If Not enforceFileHasContent(file1As2) Then Return
+        oldFile = DiffFile1.Load()
+        If Not enforceFileHasContent(oldFile) Then Return
 
-        If DownloadDiffFile Then
-
-            file2As2 = getRemoteIniFile2(getWinappLink)
-            If file2As2 Is Nothing Then Return
-
-        Else
-
-            file2As2 = DiffFile2.Load()
-            If Not enforceFileHasContent(file2As2) Then Return
-
-        End If
+        newFile = If(DownloadDiffFile, getRemoteIniFile2(getWinappLink), DiffFile2.Load)
+        If Not enforceFileHasContent(newFile) Then Return
 
         If TrimRemoteFile AndAlso DownloadDiffFile Then
 
-            ' Trim still uses the old winapp2file model - bridge until Trim is migrated
-            Dim tmp As New winapp2file(getRemoteIniFile(getWinappLink))
+            Dim tmp As New winapp2file2(getRemoteIniFile2(getWinappLink))
+
             Trim.trimFile(tmp)
-            file2As2 = IniFileBridge.ToIniFile2(tmp.toIni)
+            newFile = tmp.ToIni()
+            If Not enforceFileHasContent(newFile) Then Return
 
         End If
-
-        If Not enforceFileHasContent(file1As2) Then Return
-        If Not enforceFileHasContent(file2As2) Then Return
 
         clrConsole()
 
@@ -214,13 +203,13 @@ Module Diff
         Dim diffOutput As New List(Of MenuSection)
 
         Dim out = New MenuSection
-        Dim headerText = $"Diff: {GetVer(file1As2)} -> {GetVer(file2As2)}"
+        Dim headerText = $"Diff: {GetVer(oldFile)} -> {GetVer(newFile)}"
         out.AddTopBorder().AddColoredLine(headerText, color:=ConsoleColor.DarkGreen, centered:=True).AddDivider()
 
         gLog(headerText, ascend:=True)
         diffOutput.Add(out)
 
-        diffOutput.AddRange(CompareFiles2(file1As2, file2As2))
+        diffOutput.AddRange(CompareFiles2(oldFile, newFile))
 
         gLog(DiffLogEndPhrase)
 

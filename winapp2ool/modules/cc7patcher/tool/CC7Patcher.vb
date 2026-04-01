@@ -116,15 +116,11 @@ Public Module CC7Patcher
             menuOutput.AddColoredLine(trimMsg, ConsoleColor.Cyan)
             gLog(trimMsg)
 
-            Dim legacyForTrim = IniFileBridge.ToIniFile(winapp2Input)
-            Dim wa2file As New winapp2file(legacyForTrim)
+            Dim wa2file As New winapp2file2(winapp2Input)
             Trim.trimFile(wa2file)
-            Dim trimmed = wa2file.toIni
-            trimmed.Dir = legacyForTrim.Dir
-            trimmed.Name = legacyForTrim.Name
-            winapp2Input = IniFileBridge.ToIniFile2(trimmed)
+            winapp2Input = wa2file.ToIni()
 
-            Dim trimCompleteMsg = $"Trimming complete: {wa2file.count} entries remain"
+            Dim trimCompleteMsg = $"Trimming complete: {wa2file.Count} entries remain"
             menuOutput.AddColoredLine(trimCompleteMsg, ConsoleColor.Green)
             gLog(trimCompleteMsg)
 
