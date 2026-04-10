@@ -216,8 +216,9 @@ Public Module Winapp2ool
         If iFile IsNot Nothing AndAlso iFile.Count > 0 Then Return True
 
         Dim fileName = If(iFile?.Name, "File")
-        setNextMenuHeaderText($"{fileName} was empty or not found", True)
-        gLog($"  {fileName} was empty or not found")
+        Dim out = $"{fileName} was empty or not found"
+        setNextMenuHeaderText(out, printColor:=ConsoleColor.DarkRed)
+        gLog($"  {out}")
 
         Return False
 
