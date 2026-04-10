@@ -705,47 +705,6 @@ Module MenuMaker
 
     End Function
 
-    ''' <summary> 
-    ''' Saves a menu header to be printed atop
-    ''' the next menu, optionally with color 
-    ''' </summary>
-    ''' 
-    ''' <param name="txt">
-    ''' The text to appear in the header 
-    ''' </param>
-    ''' 
-    ''' <param name="cHeader">
-    ''' Indicates that the header should be colored using 
-    ''' the color given by <c> <paramref name="printColor"/> </c> 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="cond">
-    ''' Indicates that the header text should be assigned 
-    ''' the value given by <c> <paramref name="txt"/> </c> 
-    ''' <br/> Optional, Default: <c> True </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="printColor"> 
-    ''' <c> ConsoleColor </c> with which the header will be
-    ''' colored when <c> <paramref name="cHeader"/> </c> is <c> True </c>
-    ''' <br/> Optional, Default: <c> Red </c> 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub setHeaderText(txt As String,
-                             Optional cHeader As Boolean = False,
-                             Optional cond As Boolean = True,
-                             Optional printColor As ConsoleColor = Nothing)
-
-        If Not cond Then Return
-        MenuHeaderText = txt
-        If Not printColor = ConsoleColor.Black Then MenuHeaderTextColor = printColor
-
-        ColorHeader = cHeader
-        HeaderColor = printColor
-
-    End Sub
 
 
     ''' <summary>
