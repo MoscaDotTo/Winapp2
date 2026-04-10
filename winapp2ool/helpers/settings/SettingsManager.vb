@@ -143,7 +143,7 @@ Module SettingsManager
                                         settingName As String,
                                         settingChangedName As String)
 
-        gLog($"Toggling {paramText} from {setting} to {Not setting}", indent:=True)
+        gLog($"  Toggling {paramText} from {setting} to {Not setting}")
         setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
         setting = Not setting
         mSettingsChanged = True
@@ -187,7 +187,7 @@ Module SettingsManager
 
         Dim setting = CBool(settingsModule.GetProperty(settingName).GetValue(Nothing, Nothing))
 
-        gLog($"Toggling {paramText} from {setting} to {Not setting}", indent:=True)
+        gLog($"  Toggling {paramText} from {setting} to {Not setting}")
         setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=GetRedGreen(setting))
 
         setting = Not setting
@@ -217,7 +217,7 @@ Module SettingsManager
     Public Sub resetModuleSettings(name As String,
                                 setDefaultParams As Action)
 
-        gLog($"Restoring {name}'s module settings to their default states", indent:=True)
+        gLog($"  Restoring {name}'s module settings to their default states")
 
         setDefaultParams()
 

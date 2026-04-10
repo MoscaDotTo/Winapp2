@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -77,14 +77,15 @@ Public Module updater
         checkedForUpdates = True
         gLog("Update check complete:")
         gLog($"Winapp2ool:")
-        gLog("Local: " & currentVersion, indent:=True)
-        gLog("Remote: " & latestVersion, indent:=True)
+        gLog("  Local: " & currentVersion)
+        gLog("  Remote: " & latestVersion)
         gLog("Winapp2.ini:")
-        gLog("Local: " & localWa2Ver, indent:=True)
-        gLog("Remote: " & latestWa2Ver, indent:=True)
+        gLog("  Local: " & localWa2Ver)
+        gLog("  Remote: " & latestWa2Ver)
         Dim bothUpdatesAreAvail = waUpdateIsAvail And updateIsAvail
         Dim updHeader = $"Update{If(bothUpdatesAreAvail, "s", "")} available for {If(updateIsAvail, "winapp2ool ", "")}{If(bothUpdatesAreAvail, "and ", "")}{If(waUpdateIsAvail, "winapp2.ini", "")}"
         setNextMenuHeaderText(updHeader, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
+
     End Sub
 
     '''<summary> Performs the version checking for winapp2ool.exe </summary>

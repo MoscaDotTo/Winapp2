@@ -334,11 +334,11 @@ Public Class iniFile2
             Dim file As New IO.StreamWriter(Path())
             file.Write(text)
             file.Close()
-            gLog("Save complete", indent:=True)
+            gLog("  Save complete")
 
         Catch ex As IO.IOException
 
-            gLog("Save failed", indent:=True)
+            gLog("  Save failed")
             handleIOException(ex)
 
         End Try

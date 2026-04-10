@@ -231,7 +231,7 @@ Public Module BrowserBuilder
 
         Dim configCount = $"Found {browsers.Count} browser configurations"
         menuOutput.AddColoredLine(configCount, ConsoleColor.Yellow)
-        gLog(configCount, indent:=True)
+        gLog($"  {configCount}")
 
         For Each scaffoldSection In scaffoldSections
 
@@ -304,6 +304,25 @@ Public Module BrowserBuilder
     End Function
 
     ''' <summary>
+    ''' Returns an <c> iniFile2 </c> loaded from the given directory and filename,
+    ''' or <c> Nothing </c> if the file does not exist
+    ''' </summary>
+    '''
+    ''' <param name="dir">The directory containing the file</param>
+    '''
+    ''' <param name="name">The filename</param>
+    '''
+    ''' <returns>
+    ''' A loaded <c> iniFile2 </c>, or <c> Nothing </c> if the file is absent
+    ''' </returns>
+    Private Function loadFlavorFile(dir As String, name As String) As iniFile2
+
+        Dim path = $"{dir}\{name}"
+        Return If(IO.File.Exists(path), iniFile2.FromFile(path), Nothing)
+
+    End Function
+
+    ''' <summary>
     ''' Processes an EntryScaffold section and generates entries for each browser
     ''' </summary>
     '''
@@ -326,25 +345,6 @@ Public Module BrowserBuilder
     ''' <param name="menuOutput">
     ''' The <c>MenuSection</c> accumulating user-visible output for this run
     ''' </param>
-    ''' <summary>
-    ''' Returns an <c> iniFile2 </c> loaded from the given directory and filename,
-    ''' or <c> Nothing </c> if the file does not exist
-    ''' </summary>
-    '''
-    ''' <param name="dir">The directory containing the file</param>
-    '''
-    ''' <param name="name">The filename</param>
-    '''
-    ''' <returns>
-    ''' A loaded <c> iniFile2 </c>, or <c> Nothing </c> if the file is absent
-    ''' </returns>
-    Private Function loadFlavorFile(dir As String, name As String) As iniFile2
-
-        Dim path = $"{dir}\{name}"
-        Return If(IO.File.Exists(path), iniFile2.FromFile(path), Nothing)
-
-    End Function
-
     Private Sub processEntryScaffold(scaffoldSection As iniSection2,
                                      browsers As List(Of BrowserInfo),
                                      isGecko As Boolean,

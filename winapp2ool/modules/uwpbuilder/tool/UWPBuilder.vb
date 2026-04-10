@@ -282,7 +282,7 @@ Public Module UWPBuilder
 
         Dim generatedMsg = $"Generated {outputFile.Count} UWP entries"
         menuOutput.AddColoredLine(generatedMsg, ConsoleColor.Yellow)
-        gLog(generatedMsg, indent:=True)
+        gLog($" {generatedMsg}")
 
         Dim sb As New StringBuilder()
         sb.AppendLine($"; Version {DateTime.Now.ToString("yyMMdd")}")
@@ -331,7 +331,7 @@ Public Module UWPBuilder
         Dim scaffoldName = scaffoldSection.Name.Substring("EntryScaffold:".Length).Trim()
         Dim scaffoldMsg = $"Processing scaffold: {scaffoldName}"
         menuOutput.AddColoredLine(scaffoldMsg, ConsoleColor.Magenta)
-        gLog(scaffoldMsg, indent:=True)
+        gLog($"  {scaffoldMsg}")
 
         For Each key In scaffoldSection.Keys
 
@@ -478,7 +478,7 @@ Public Module UWPBuilder
 
         Dim generatingMsg = $"Generating entry: {app.Name}"
         menuOutput.AddColoredLine(generatingMsg, ConsoleColor.Magenta)
-        gLog(generatingMsg, indent:=True)
+        gLog($"  {generatingMsg}")
 
         Dim section As New iniSection2(app.Name)
         Dim fileKeyNum As Integer = 1
@@ -502,7 +502,9 @@ Public Module UWPBuilder
         Else
 
             For i = 0 To app.DetectKeys.Count - 1
+
                 section.AddKey(New iniKey2($"Detect{i + 1}={app.DetectKeys(i)}"))
+
             Next
 
         End If
@@ -523,12 +525,14 @@ Public Module UWPBuilder
         Else
 
             For i = 0 To allDetectFiles.Count - 1
+
                 section.AddKey(New iniKey2($"DetectFile{i + 1}={allDetectFiles(i)}"))
+
             Next
 
         End If
 
-        ' 4. Scaffold template FileKeys — applied to all packages
+        ' 4. Scaffold template FileKeys  applied to all packages
         For Each scaffoldKey In scaffoldFileKeys
 
             For Each expanded In expandPackageKey(scaffoldKey, app.Packages)
@@ -552,7 +556,7 @@ Public Module UWPBuilder
 
         Next
 
-        ' 6. RegKeys — passed through verbatim, renumbered from 1
+        ' 6. RegKeys passed through verbatim, renumbered from 1
         Dim regKeyNum As Integer = 1
         For Each regKey In app.RegKeys
 
@@ -561,7 +565,7 @@ Public Module UWPBuilder
 
         Next
 
-        ' 7. ExcludeKeys — expanded for %Package% / %PackageN%, renumbered from 1
+        ' 7. ExcludeKeys expanded for %Package% / %PackageN%, renumbered from 1
         Dim exclNum As Integer = 1
         For Each exclKey In app.ExcludeKeys
 
@@ -576,7 +580,7 @@ Public Module UWPBuilder
 
         Dim generatedMsg = $"Generated entry: {app.Name}"
         menuOutput.AddColoredLine(generatedMsg, ConsoleColor.Yellow)
-        gLog(generatedMsg, indent:=True, indAmt:=4)
+        gLog($"        {generatedMsg}")
 
         Return section
 

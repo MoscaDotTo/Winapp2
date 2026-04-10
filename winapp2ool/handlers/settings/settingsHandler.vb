@@ -489,7 +489,7 @@ Public Module settingsHandler
 
         Dim settingInDict = settingsDict(moduleName).ContainsKey(settingName)
 
-        gLog($"{settingName} was not found in {settingsFile.Name}", Not settingInDict, indent:=True)
+        gLog($"  {settingName} was not found in {settingsFile.Name}", Not settingInDict)
 
         Return If(Not settingInDict, $"{settingName}={settingValue}", "")
 
