@@ -739,8 +739,9 @@ Public Class MenuSection
         If Not String.IsNullOrEmpty(_menuHeader) Then
 
             Dim hasColor = _menuHeaderColor.HasValue
+            Dim headerColor = If(hasColor, CType(_menuHeaderColor.Value, ConsoleColor), ConsoleColor.White)
 
-            MenuMaker.PrintColored(_menuHeader, _menuHeaderColor.Value, centered:=True, hasColor)
+            MenuMaker.PrintColored(_menuHeader, headerColor, centered:=True, hasColor)
 
             MenuMaker.PrintLine(_menuHeader, centered:=True, Not hasColor)
 
