@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -868,9 +868,15 @@ Module MenuMaker
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
+    ''' <param name="cond">
+    ''' Indicates that the line should be printed <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
     Private Sub printMenuLine(Optional lineString As String = Nothing,
-                              Optional isCentered As Boolean = False)
+                              Optional isCentered As Boolean = False,
+                              Optional cond As Boolean = True)
+
+        If Not cond Then Return
 
         If lineString = Nothing Then lineString = getFrame()
         cwl(mkMenuLine(lineString, If(isCentered, 0, 1)))
@@ -889,13 +895,19 @@ Module MenuMaker
     ''' The description of the menu option 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
+    ''' <param name="cond">
+    ''' Indicates that the option should be printed <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
     Private Sub printMenuOpt(lineString1 As String,
-                             lineString2 As String)
+                             lineString2 As String,
+                    Optional cond As Boolean = True)
 
-        lineString1 = $"{OptNum}. {lineString1}"
-        padToEnd(lineString1, menuItemLength, "")
-        cwl(mkMenuLine($"{lineString1}- {lineString2}", 1))
+        If Not cond Then Return
+
+        Dim sb As New StringBuilder($"{OptNum}. {lineString1}")
+        padToEnd(sb, menuItemLength, "")
+        cwl(mkMenuLine($"{sb}- {lineString2}", 1))
         OptNum += 1
 
     End Sub
@@ -973,36 +985,34 @@ Module MenuMaker
     ''' Indicates that top and bottom borders 
     ''' should be printed when printing menuframes
     ''' </param>
-    '''
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private Function mkMenuLine(line As String,
                                 align As Integer,
                                 Optional borderInd As Integer = 0,
                                 Optional fillBorder As Nullable(Of Boolean) = True) As String
 
         If line.Length >= GetConsoleWidth() - 1 Then Return line
-
-        Dim out = $" {Openers(borderInd)}"
+        Dim out As New StringBuilder($" {Openers(borderInd)}")
 
         Select Case align
 
             Case 0
 
                 padToEnd(out, CInt((((GetConsoleWidth() - line.Length) / 2) + 2)), Closers(borderInd))
-                out += line
+                out.Append(line)
                 padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd))
 
             Case 1
 
-                out += " " & line
+                out.Append(" " & line)
                 padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd))
 
             Case 2
+
                 padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd), If(fillBorder, "═", " "))
 
         End Select
 
-        Return out
+        Return out.ToString
 
     End Function
 
@@ -1026,24 +1036,19 @@ Module MenuMaker
     ''' The character(s) with which to pad the text 
     ''' <br/> Default: <c> " " </c> (space character)
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub padToEnd(ByRef out As String,
+
+    Private Sub padToEnd(ByRef out As StringBuilder,
                                targetLen As Integer,
                                endline As String,
                       Optional padStr As String = " ")
 
-        Dim sb As New StringBuilder(out)
+        While out.Length < targetLen
 
-        While sb.Length < targetLen
-
-            sb.Append(padStr)
+            out.Append(padStr)
 
         End While
 
-        If targetLen = GetConsoleWidth() - 2 Then sb.Append(endline)
-
-        out = sb.ToString()
+        If targetLen = GetConsoleWidth() - 2 Then out.Append(endline)
 
     End Sub
 
