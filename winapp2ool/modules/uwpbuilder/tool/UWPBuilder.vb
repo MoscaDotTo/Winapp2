@@ -67,7 +67,7 @@ Public Module UWPBuilder
     Private Structure UWPAppInfo
 
         ''' <summary>
-        ''' The entry name — used verbatim as the section header in the output
+        ''' The entry name used verbatim as the section header in the output
         ''' </summary>
         Public Name As String
 
@@ -412,32 +412,22 @@ Public Module UWPBuilder
         Dim noCategory = app.LangSecRef.Length = 0 AndAlso app.SectionName.Length = 0
         Dim bothCategories = app.LangSecRef.Length > 0 AndAlso app.SectionName.Length > 0
 
-        If noPackage Then
+        Dim msgs = {$"No Package key in [{app.Name}], skipping",
+                    $"No LangSecRef or Section in [{app.Name}], skipping",
+                    $"Both LangSecRef and Section present in [{app.Name}], using LangSecRef"}
 
-            Dim msg = $"No Package key in [{app.Name}] — skipping"
-            gLog(msg)
-            menuOutput.AddWarning(msg)
+        Dim bools = {noPackage, noCategory, bothCategories}
+        For i = 0 To bools.Count - 1
+
+            If Not bools(i) Then Continue For
+
+            gLog(msgs(i))
+            menuOutput.AddWarning(msgs(i))
             app.ShouldSkip = True
 
-        End If
+        Next
 
-        If noCategory Then
-
-            Dim msg = $"No LangSecRef or Section in [{app.Name}] — skipping"
-            gLog(msg)
-            menuOutput.AddWarning(msg)
-            app.ShouldSkip = True
-
-        End If
-
-        If bothCategories Then
-
-            Dim msg = $"Both LangSecRef and Section present in [{app.Name}] — using LangSecRef"
-            gLog(msg)
-            menuOutput.AddWarning(msg)
-            app.SectionName = ""
-
-        End If
+        If bothCategories Then app.SectionName = ""
 
         Return app
 
@@ -494,7 +484,7 @@ Public Module UWPBuilder
 
         End Select
 
-        ' 2. Detect keys — unnumbered if single, numbered from 1 if multiple
+        ' 2. Detect keys, unnumbered if single, numbered from 1 if multiple
         If app.DetectKeys.Count = 1 Then
 
             section.AddKey(New iniKey2($"Detect={app.DetectKeys(0)}"))
@@ -509,7 +499,7 @@ Public Module UWPBuilder
 
         End If
 
-        ' 3. DetectFile keys — scaffold templates expanded per package first, then app-specific, unnumbered if only one total
+        ' 3. DetectFile keys, scaffold templates expanded per package first, then app-specific, unnumbered if only one total
         Dim allDetectFiles As New List(Of String)
         For Each template In scaffoldDetectFiles
 
@@ -629,17 +619,17 @@ Public Module UWPBuilder
     ''' <list type="bullet">
     ''' 
     ''' <item>
-    ''' <c> %PackageN% </c> (numbered) — expands exactly once using the Nth package;
+    ''' <c> %PackageN% </c> (numbered): expands exactly once using the Nth package;
     ''' any other packages are ignored
     ''' </item>
     ''' 
     ''' <item>
-    ''' <c> %Package% </c> (unnumbered) — expands once per package, producing one
+    ''' <c> %Package% </c> (unnumbered): expands once per package, producing one
     ''' output string per package in order
     ''' </item>
     ''' 
     ''' <item>
-    ''' No package variable — returned verbatim as a single-element list
+    ''' No package variable: returned verbatim as a single-element list
     ''' </item>
     ''' 
     ''' </list>
@@ -664,7 +654,7 @@ Public Module UWPBuilder
         Dim result As New List(Of String)
 
         ' Check for numbered package references (%Package1%, %Package2%, …)
-        ' These appear only in AppInfo FileKey values as package selectors — scaffold templates
+        ' These appear only in AppInfo FileKey values as package selectors. scaffold templates
         ' always use unnumbered %Package%. A numbered reference selects exactly one package by position.
         For i = 1 To packages.Count
 
@@ -676,7 +666,7 @@ Public Module UWPBuilder
 
         Next
 
-        ' Unnumbered %Package% — expand for every package
+        ' Unnumbered %Package%, expand for every package
         If template.Contains("%Package%") Then
 
             For Each pkg In packages
@@ -687,7 +677,7 @@ Public Module UWPBuilder
 
         End If
 
-        ' No package variable — pass through verbatim
+        ' No package variable, pass through verbatim
         result.Add(template)
         Return result
 
