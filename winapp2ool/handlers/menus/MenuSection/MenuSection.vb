@@ -490,7 +490,7 @@ Public Class MenuSection
 
         If Not condition Then Return Me
 
-        _items.Add(Sub() MenuMaker.PrintDivider())
+        _items.Add(Sub() MenuMaker.PrintDivider(solid))
 
         Return Me
 
