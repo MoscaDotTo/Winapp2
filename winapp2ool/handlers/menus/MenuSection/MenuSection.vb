@@ -388,7 +388,7 @@ Public Class MenuSection
 
         If Not condition Then Return Me
 
-        _items.Add(Sub() MenuItem(name, description, condition).WithColor(color).Print())
+        _items.Add(Sub() MenuMaker.PrintColoredOption(name, description, color))
 
         Return Me
 
@@ -471,11 +471,22 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Adds a T-frame conjoiner divider to the menu section. <br />
+    ''' A conjoiner uses frame type 3 (<c> ╠ ╣ </c>), by default filled with <c> ═ </c>. <br />
     ''' </summary>
-    ''' <param name="condition"></param>
+    ''' 
+    ''' <param name="condition">
+    ''' Indicates whether the divider should be printed <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    ''' 
+    ''' <param name="solid">
+    ''' Indicates whether the divider should be filled with <c> = </c> or left empty <br />
+    ''' Optional, Default: <c> True </c> (filled) 
+    ''' </param>
     ''' <returns></returns>
-    Public Function AddDivider(Optional condition As Boolean = True) As MenuSection
+    Public Function AddDivider(Optional condition As Boolean = True,
+                               Optional solid As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
 
