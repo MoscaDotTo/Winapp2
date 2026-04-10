@@ -531,7 +531,7 @@ Public Class MenuSection
     ''' <summary>
     ''' Adds a numbered option, registers a dispatch handler, and returns <c> Me </c> for chaining. <br />
     ''' When <c> <paramref name="condition"/> </c> is <c> False </c>, neither the option nor the
-    ''' handler is registered — the option number sequence is unaffected.
+    ''' handler is registered, the option number sequence is unaffected.
     ''' </summary>
     '''
     ''' <param name="name">
@@ -666,7 +666,7 @@ Public Class MenuSection
 
     ''' <summary>
     ''' Dispatches the user's integer input to the registered handler for the selected option. <br />
-    ''' Option 0 (Exit) is NOT dispatched — the caller handles it. <br />
+    ''' Option 0 (Exit) is NOT dispatched, the caller handles it. <br />
     ''' Options 1..N map to handlers registered via <c> AddDispatched* </c> calls in order.
     ''' </summary>
     '''

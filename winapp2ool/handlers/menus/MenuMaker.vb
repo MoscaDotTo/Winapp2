@@ -1123,56 +1123,6 @@ Module MenuMaker
 
     End Sub
 
-    ''' <summary>
-    ''' Prints a T-frame conjoiner divider — frame type 3 (<c> ╠ ╣ </c>)
-    ''' with configurable fill
-    ''' </summary>
-    '''
-    ''' <param name="solid">
-    ''' Indicates whether the conjoiner should be filled with <c> ═ </c> or left empty <br />
-    ''' Optional, Default: <c> False </c> (empty, matching legacy print type 6 behavior)
-    ''' </param>
-    '''
-    ''' <param name="cond">
-    ''' Indicates whether the conjoiner should be printed <br />
-    ''' Optional, Default: <c> True </c>
-    ''' </param>
-    Public Sub PrintConjoiner(Optional solid As Boolean = False,
-                              Optional cond As Boolean = True)
-
-        printMenuLine(getFrame(3, solid), cond:=cond)
-
-    End Sub
-
-    ''' <summary>
-    ''' Prints a centered header line followed by a T-frame conjoiner —
-    ''' the MenuMaker equivalent of the legacy <c> print(6, ...) </c>. <br />
-    ''' Does NOT open a new menu box; intended for use inside an already-open frame
-    ''' </summary>
-    '''
-    ''' <param name="text">
-    ''' The header text to print, centered within the menu frame
-    ''' </param>
-    '''
-    ''' <param name="solid">
-    ''' Indicates whether the trailing conjoiner should be filled with <c> ═ </c> or left empty <br />
-    ''' Optional, Default: <c> False </c> (empty, matching legacy print type 6 behavior)
-    ''' </param>
-    '''
-    ''' <param name="cond">
-    ''' Indicates whether the header and conjoiner should be printed <br />
-    ''' Optional, Default: <c> True </c>
-    ''' </param>
-    Public Sub PrintConjoinedHeader(text As String,
-                           Optional solid As Boolean = False,
-                           Optional cond As Boolean = True)
-
-        If Not cond Then Return
-
-        printMenuLine(text, True)
-        PrintDivider(solid)
-
-    End Sub
 
     ''' <summary>
     ''' Prints a toggle option (Enable/Disable)
