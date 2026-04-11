@@ -161,43 +161,6 @@ Public Module Winapp2ool
     End Function
 
     ''' <summary>
-    ''' Determines the color of a file selector based on whether or not a file has been selected
-    ''' </summary>
-    ''' 
-    ''' <param name="menuFile">
-    ''' An <c> iniFile </c> with influence on a menu option's coloring
-    ''' </param>
-    ''' 
-    ''' <returns>
-    ''' <c> Green </c> if <c> <paramref name="menuFile"/> </c> has a name, <br />
-    ''' <c> Red </c> otherwise
-    ''' </returns>
-    Public Function getFileMenuColor(menuFile As iniFile) As ConsoleColor
-
-        Return If(menuFile.Name.Length > 0, ConsoleColor.Green, ConsoleColor.Red)
-
-    End Function
-
-    ''' <summary>
-    ''' Returns the display information for a file selector in a menu
-    ''' </summary>
-    ''' 
-    ''' <param name="menuFile">
-    ''' An <c> iniFile </c> whose path will be displayed if it has valid <c> Name </c>
-    ''' </param>
-    ''' 
-    ''' <returns>
-    ''' A print friendly version of the file's path if it has a valid <c> Name </c>, with the 
-    ''' current directory replaced with ..\ <br />
-    ''' "Not specified" otherwise
-    ''' </returns>
-    Public Function getFileMenuName(menuFile As iniFile) As String
-
-        Return If(menuFile.Name.Length > 0, replDir(menuFile.Path), "Not specified")
-
-    End Function
-
-    ''' <summary>
     ''' Ensures that an <c>iniFile2</c> has content and informs the user if it does not.
     ''' Unlike the <c>iniFile</c> overload, this does not trigger validation or the File Chooser;
     ''' the caller is responsible for loading the file before calling this.

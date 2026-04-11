@@ -69,13 +69,6 @@ Public Class iniFile
         Return Sections.ContainsKey(sectionName)
     End Function
 
-    ''' <summary> Returns the <c> iniSection bearing the given <c> <paramref name="sectionName"/> </c></c>, otherwise,
-    ''' returns a <c> New iniSection </c> object with the requested <c> <paramref name="sectionName"/> </c> </summary>
-    ''' <param name="sectionName"> The <c> Name </c> of the <c> iniSection </c> to be Returned </param>
-    Public Function getSection(sectionName As String) As iniSection
-        Return If(hasSection(sectionName), Sections(sectionName), New iniSection With {.Name = sectionName})
-    End Function
-
     ''' <summary> Creates an uninitialized <c> iniFile </c> </summary>
     ''' <param name="directory"> The filesystem directory expected to contain an ini file <br /> Optional, Default: <c>""</c> </param>
     ''' <param name="filename"> The name of the file on disk expected to be contained in <c> <paramref name="directory"/> </c> <br /> Optional, Default: <c>""</c> </param>
@@ -127,12 +120,6 @@ Public Class iniFile
         End Try
     End Sub
 
-    ''' <summary> Restores the <c> Directory </c> and <c> Name </c> properties used to instantiate the <c> iniFile </c> object </summary>
-    Public Sub resetParams()
-        Dir = InitDir
-        Name = InitName
-    End Sub
-
     ''' <summary> Returns the starting line number of each <c> iniSection </c> in the <c> iniFile </c> as a list of integers </summary>
     Public Function getLineNumsFromSections() As List(Of Integer)
         Dim outList As New List(Of Integer)
@@ -141,15 +128,6 @@ Public Class iniFile
         Next
         Return outList
     End Function
-
-    ''' <summary> Constructs an <c> iniFile </c> from a text stream </summary>
-    ''' <param name="r"> A StreamReader object containing a Stream of an iniFile, remote or local </param>
-    Public Sub New(r As StreamReader)
-        Sections = New Dictionary(Of String, iniSection)
-        Comments = New Dictionary(Of Integer, iniComment)
-        LineCount = 1
-        buildIniFromStream(r)
-    End Sub
 
     ''' <summary> Processes a line in a ini file and updates the <c> iniFile </c> object meta data accordingly </summary>
     ''' <param name="currentLine"> The current line in the stream being read </param>
