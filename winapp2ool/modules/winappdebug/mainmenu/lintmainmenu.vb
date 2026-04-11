@@ -38,7 +38,7 @@ Module lintmainmenu
                 Sub() changeFile2Params(winappDebugFile1, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(LintModuleSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedToggle("Saving", "saving the file after correcting errors", SaveChanges,
-                Sub() toggleSettingParam(SaveChanges, "Saving", LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(SaveChanges), NameOf(LintModuleSettingsChanged))) _
+                Sub() toggleModuleSetting("Saving", NameOf(WinappDebug), GetType(lintsettings), NameOf(SaveChanges), NameOf(LintModuleSettingsChanged))) _
             .AddDispatchedOption("File Chooser (save)", "Save a copy of changes made to a new file instead of overwriting winapp2.ini", condition:=SaveChanges,
                 handler:=Sub() changeFile2Params(winappDebugFile3, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(LintModuleSettingsChanged))) _
             .AddBlank() _
@@ -49,9 +49,9 @@ Module lintmainmenu
                 End Sub) _
             .AddBlank() _
             .AddDispatchedToggle("Default Value Audit", "enforcing a specific value for Default keys", overrideDefaultVal,
-                Sub() toggleSettingParam(overrideDefaultVal, "Default Value Overriding", LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(overrideDefaultVal), NameOf(LintModuleSettingsChanged))) _
+                Sub() toggleModuleSetting("Default Value Overriding", NameOf(WinappDebug), GetType(lintsettings), NameOf(overrideDefaultVal), NameOf(LintModuleSettingsChanged))) _
             .AddDispatchedOption("Toggle Expected Default", $"Currently enforcing that Default keys have a value of: {expectedDefaultValue}",
-                Sub() toggleSettingParam(expectedDefaultValue, "Expected Default Value", LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(expectedDefaultValue), NameOf(LintModuleSettingsChanged)),
+                Sub() toggleModuleSetting("Expected Default Value", NameOf(WinappDebug), GetType(lintsettings), NameOf(expectedDefaultValue), NameOf(LintModuleSettingsChanged)),
                 overrideDefaultVal) _
             .AddBlank() _
             .AddFileInfo("Current winapp2.ini:  ", winappDebugFile1.Path) _
