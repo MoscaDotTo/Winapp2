@@ -171,8 +171,8 @@ Public Module Flavorizer
         Next
 
         Dim wa2file As New winapp2file(legacyBase)
-        Dim saveFile As New iniFile(FlavorizerFile2.Dir, FlavorizerFile2.Name)
-        saveFile.overwriteToFile(wa2file.winapp2string)
+        Dim saveFile2 = iniFile2.Empty(FlavorizerFile2.Dir, FlavorizerFile2.Name)
+        saveFile2.OverwriteToFile(wa2file.winapp2string)
 
     End Sub
 
