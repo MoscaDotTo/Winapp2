@@ -5,14 +5,14 @@
     ''' </summary>
     ''' 
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property winappDebugFile1 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", mExist:=True)
+    Public Property winappDebugFile1 As New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", mustExist:=True)
 
-    ''' <summary> 
-    ''' The save path for the linted file. Overwrites the input file by default 
+    ''' <summary>
+    ''' The save path for the linted file. Overwrites the input file by default
     ''' </summary>
-    ''' 
+    '''
     ''' Docs last updated: 2021-11-13 | Code last updated: 2021-11-13
-    Public Property winappDebugFile3 As New iniFile(Environment.CurrentDirectory, "winapp2.ini", "winapp2-debugged.ini")
+    Public Property winappDebugFile3 As New iniFileChooser(Environment.CurrentDirectory, "winapp2-debugged.ini", "winapp2-debugged.ini", mustExist:=False)
 
     ''' <summary> 
     ''' Indicates that some but not all repairs will run 

@@ -192,7 +192,7 @@ Public Module settingsHandler
             ' of the settings so create the settingsFile and settingsDict
             ' using the default winapp2ool configuration
             gLog("No settings file Found - loading default settings")
-            loadAllModuleSettings()
+            loadAllModuleSettings2()
 
             Return
 
@@ -201,7 +201,6 @@ Public Module settingsHandler
         ' Otherwise, try to load the file. If it's empty,
         ' lets assume the user wanted to reset their settings to default
         settingsFile.init()
-        loadAllModuleSettings()
         Load2()
         loadAllModuleSettings2()
 
@@ -210,21 +209,7 @@ Public Module settingsHandler
 
     End Sub
 
-    ''' <summary>
-    ''' Loads all module settings into disk-writable representation
-    ''' in the form of both an <c> iniFile </c> and a <c> Dictionary </c> 
-    ''' </summary>
-    Private Sub loadAllModuleSettings()
 
-        Dim modules = New Dictionary(Of String, KeyValuePair(Of Action, Action)) From {
-        {NameOf(WinappDebug), New KeyValuePair(Of Action, Action)(AddressOf CreateLintSettingsSection, AddressOf getSerializedLintSettings)}
-    }
-
-        Dim readSettingsFromDisk = DetermineReadSettingsBehavior()
-
-        modules.ToList().ForEach(Sub(m) serializeModuleSettings(m.Key, m.Value.Key, m.Value.Value, readSettingsFromDisk))
-
-    End Sub
 
 
     ''' <summary>
@@ -248,6 +233,8 @@ Public Module settingsHandler
         LoadModule2(NameOf(Transmute), GetType(transmuteSettings))
         LoadModule2(NameOf(Trim), GetType(trimsettings))
         LoadModule2(NameOf(Downloader), GetType(downloadersettings))
+        LoadModule2(NameOf(WinappDebug), GetType(lintsettings))
+        LoadLintRulesFromSettings2()
 
     End Sub
 

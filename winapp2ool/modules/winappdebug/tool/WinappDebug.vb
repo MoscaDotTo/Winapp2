@@ -198,16 +198,26 @@ Public Module WinappDebug
     Private Property UseCurrentDate As Boolean = False
 
     ''' <summary>
-    ''' Handles the commandline args for <c> WinappDebug </c> <br />
-    ''' WinappDebug commandline args: <br />
-    ''' <c> -c </c> enable saving of changes made by the linter
+    ''' Handles the commandline args for <c> WinappDebug </c>
     ''' </summary>
+    '''
+    ''' <remarks>
+    ''' Supported args: <br />
+    ''' <c> -1f </c> / <c> -1d </c> — input winapp2.ini (slot 1) <br />
+    ''' <c> -3f </c> / <c> -3d </c> — save target (slot 3) <br />
+    ''' <c> -c </c> — enable saving of changes made by the linter <br />
+    ''' <c> -usedate </c> — use current date in version string
+    ''' </remarks>
     Public Sub HandleLintCmdLine()
 
         InitDefaultLintSettings()
-        invertSettingAndRemoveArg(SaveChanges, "-c")
-        invertSettingAndRemoveArg(UseCurrentDate, "-usedate")
-        getFileAndDirParams({winappDebugFile1, New iniFile, winappDebugFile3})
+
+        Dim spec As New CliArgSpec(NameOf(WinappDebug))
+        spec.WithFile(1, winappDebugFile1) _
+            .WithFile(3, winappDebugFile3) _
+            .WithFlag("-c", Sub() SaveChanges = Not SaveChanges) _
+            .WithFlag("-usedate", Sub() UseCurrentDate = Not UseCurrentDate) _
+            .Parse()
 
         If Not cmdargs.Contains("UNIT_TESTING_HALT") Then InitDebug()
 
@@ -280,9 +290,11 @@ Public Module WinappDebug
     ''' </summary>
     Public Sub InitDebug()
 
-        If Not enforceFileHasContent(winappDebugFile1) Then Return
+        Dim inputFile As New iniFile(winappDebugFile1.Dir, winappDebugFile1.Name, mExist:=True)
 
-        Dim wa2 As New winapp2file(winappDebugFile1, UseCurrentDate)
+        If Not enforceFileHasContent(inputFile) Then Return
+
+        Dim wa2 As New winapp2file(inputFile, UseCurrentDate)
 
         clrConsole()
 
@@ -298,7 +310,7 @@ Public Module WinappDebug
         setNextMenuHeaderText("Lint complete", printColor:=ConsoleColor.Green)
         print(4, "Completed analysis of winapp2.ini", conjoin:=True)
         print(0, $"{ErrorsFound} possible errors were detected.")
-        print(0, $"Number of entries {winappDebugFile1.Sections.Count}", trailingBlank:=True)
+        print(0, $"Number of entries {inputFile.Sections.Count}", trailingBlank:=True)
 
         RewriteChanges(wa2)
 
@@ -506,7 +518,8 @@ Public Module WinappDebug
         If Not SaveChanges Then Return
 
         print(0, "Saving changes, do not close winapp2ool or data loss may occur...", leadingBlank:=True)
-        winappDebugFile3.overwriteToFile(winapp2file.winapp2string)
+        Dim outputFile As New iniFile(winappDebugFile3.Dir, winappDebugFile3.Name)
+        outputFile.overwriteToFile(winapp2file.winapp2string)
         print(0, "Finished saving changes.", trailingBlank:=True)
 
     End Sub
