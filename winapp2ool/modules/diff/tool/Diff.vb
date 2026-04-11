@@ -221,7 +221,10 @@ Module Diff
         out3.AddBoxWithText(pressEnterStr)
 
         diffOutput.Add(out3)
-        diffOutput.ForEach(Sub(section) section.Print())
+
+        Console.Clear()
+
+        If Not SuppressOutput Then diffOutput.ForEach(Sub(section) section.Print())
 
         MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
 
@@ -286,7 +289,7 @@ Module Diff
         detector2.SnuffNoisyChanges(file2As2)
 
         Dim stepNum = 0
-        Const totalSteps = 16
+        Const totalSteps = 18
 
         Dim doStep = Sub(label As String, action As Action)
                          stepNum += 1
@@ -298,35 +301,33 @@ Module Diff
                               stepNum += 1
                               Diff2Progress($"{label} (step {stepNum}/{totalSteps})")
                               out.AddRange(fn())
+                              out.Add(New MenuSection().AddDivider(solid:=False))
                           End Sub
 
         Dim start = Now
 
-        ' Phase 1: Gather raw changes
-        doStep("Phase 1 · processing new entries", Sub() detector2.ProcessNewEntries())
-        doStep("Phase 1 · processing old entries", Sub() detector2.ProcessOldEntries())
-        collectStep($"Phase 1 · processing {state2.ModifiedEntries.RemovedEntryNames.Count} removals", Function() detector2.ProcessRemovals())
-        doStep("Phase 1 · calculating initial statistics", Sub() statsCalc2.CalculateInitialStatistics())
-
-        ' Phase 2: Detect cross-entry movements
-        doStep("Phase 2 · detecting cross-entry key movements", Sub() statsCalc2.DetectCrossEntryMovements())
-        doStep("Phase 2 · calculating rename statistics", Sub() statsCalc2.CalculateRenameStatistics())
-
-        ' Phase 3: Generate output
-        collectStep("Phase 3 · processing renames", Function() renderer2.SummarizeRenames())
-        collectStep("Phase 3 · processing mergers", Function() renderer2.SummarizeMergers())
-        collectStep("Phase 3 · itemizing rename key changes", Function() renderer2.ItemizeRenameChanges())
-        collectStep("Phase 3 · itemizing mergers into existing entries", Function() renderer2.ItemizeMergers())
-        collectStep("Phase 3 · itemizing cross-entry key movements", Function() renderer2.ItemizeKeyMovements())
-        collectStep("Phase 3 · itemizing entry modifications", Function() renderer2.ItemizeModifications())
-        collectStep("Phase 3 · itemizing mergers into newly added entries", Function() renderer2.ItemizeAddedEntriesWithMergers())
-        collectStep("Phase 3 · itemizing additions", Function() renderer2.ItemizeAdditions())
-        doStep("Phase 3 · calculating added-with-mergers statistics", Sub() statsCalc2.CalculateAddedWithMergersStatistics())
+        doStep("· processing new entries ", Sub() detector2.ProcessNewEntries())
+        doStep("· processing old entries ", Sub() detector2.ProcessOldEntries())
+        doStep("· detecting new browsers ", Sub() statsCalc2.DetectNewBrowserSupport())
+        collectStep("· itemizing new browsers ", Function() renderer2.ItemizeNewBrowsers())
+        collectStep($"· itemizing {state2.ModifiedEntries.RemovedEntryNames.Count} removals ", Function() detector2.ProcessRemovals())
+        doStep("· calculating initial statistics ", Sub() statsCalc2.CalculateInitialStatistics())
+        doStep("· tracking keys across entries   ", Sub() statsCalc2.DetectCrossEntryMovements())
+        doStep("· calculating rename statistics  ", Sub() statsCalc2.CalculateRenameStatistics())
+        collectStep("· tracking renamed entries      ", Function() renderer2.SummarizeRenames())
+        collectStep("· tracking splits and mergers   ", Function() renderer2.SummarizeMergers())
+        collectStep("· diffing renamed entries       ", Function() renderer2.ItemizeRenameChanges())
+        collectStep("· diffing merged entries        ", Function() renderer2.ItemizeMergers())
+        collectStep("· itemizing key movement info   ", Function() renderer2.ItemizeKeyMovements())
+        collectStep("· diffing modified entries      ", Function() renderer2.ItemizeModifications())
+        collectStep("· itemizing added-with-mergers  ", Function() renderer2.ItemizeAddedEntriesWithMergers())
+        collectStep("· itemizing novel entries       ", Function() renderer2.ItemizeAdditions())
+        doStep("· calculating final statistics  ", Sub() statsCalc2.CalculateAddedWithMergersStatistics())
 
         Dim timeSpan = Now - start
         gLog($"Total diff time: {timeSpan}")
 
-        doStep("Phase 3 · calculating summary statistics", Sub() out.Add(renderer2.LogPostDiff()))
+        doStep("· calculating summary statistics ", Sub() out.Add(renderer2.LogPostDiff()))
 
         Return out
 

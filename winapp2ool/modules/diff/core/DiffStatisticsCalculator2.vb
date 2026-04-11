@@ -54,9 +54,55 @@ Public Class DiffStatisticsCalculator2
     End Sub
 
     ''' <summary>
+    ''' Compares <c> Section </c> key values containing <c> "Web Browser" </c> between the two
+    ''' files and records any values present in the new file but absent from the old file in
+    ''' <c> DiffStatistics.NewBrowserSectionValues </c>.
+    ''' <br /><br />
+    ''' Each browser supported by BrowserBuilder receives a unique Section value
+    ''' (e.g. <c> "Brave Web Browser" </c>). A novel value therefore represents a newly
+    ''' added browser, not merely new entries for an existing one.
+    ''' </summary>
+    Public Sub DetectNewBrowserSupport()
+
+        Dim oldSectionValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+        For Each section In _file1
+
+            For Each key In section.Keys
+
+                If Not key.typeIs("Section") Then Continue For
+                If key.Value.IndexOf(BrowserSectionSubstring, StringComparison.OrdinalIgnoreCase) < 0 Then Continue For
+
+                oldSectionValues.Add(key.Value)
+
+            Next
+
+        Next
+
+        Dim novelValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+        For Each section In _file2
+
+
+            For Each key In section.Keys
+
+                If Not key.typeIs("Section") Then Continue For
+                If key.Value.IndexOf(BrowserSectionSubstring, StringComparison.OrdinalIgnoreCase) < 0 Then Continue For
+                If oldSectionValues.Contains(key.Value) Then Continue For
+                If novelValues.Add(key.Value) Then _state.Statistics.NewBrowserSectionValues.Add(key.Value)
+
+            Next
+
+        Next
+
+        _state.Statistics.NewBrowserSectionValues.Sort(StringComparer.OrdinalIgnoreCase)
+
+    End Sub
+
+    ''' <summary>
     ''' Calculates statistics from raw trackers before movement detection.
-    ''' Filters to <c> ModifiedEntryNames </c> only — the tracker dictionaries 
-    ''' also contain added-merger entries populated by 
+    ''' Filters to <c> ModifiedEntryNames </c> only — the tracker dictionaries
+    ''' also contain added-merger entries populated by
     ''' <c> FindModificationsForAddedEntry</c> which must not be counted here.
     ''' </summary>
     Public Sub CalculateInitialStatistics()

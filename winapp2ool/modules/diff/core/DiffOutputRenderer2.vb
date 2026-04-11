@@ -124,6 +124,9 @@ Public Class DiffOutputRenderer2
         Dim addedPlain = $" + {plainAddedCount} novel entries (without merged content)"
         Dim addedRenamed = $" & {merged.RenamedEntryNames.Count} added entries are renamed versions of removed entries and may contain other minor changes"
 
+        Dim hasNewBrowsers = stats.NewBrowserSectionValues.Count > 0
+        Dim newBrowserSummary = $" · {stats.NewBrowserSectionValues.Count} new browser{If(stats.NewBrowserSectionValues.Count > 1, "s", "")} added"
+
         Dim modifiedEntriesHaveAdditions = stats.ModEntriesAddedKeyTotal > 0
         Dim modEntriesHaveRemovals = stats.ModEntriesRemovedKeysWithoutReplacementTotal > 0
         Dim modEntriesHaveUpdates = stats.ModEntriesUpdatedKeyTotal > 0
@@ -141,6 +144,7 @@ Public Class DiffOutputRenderer2
 
         out.AddTopBorder().AddColoredLine("Diff Summary", ConsoleColor.DarkGreen, centered:=True).AddDivider() _
            .AddColoredLine(netChange, ConsoleColor.White) _
+           .AddColoredLine(newBrowserSummary, ConsoleColor.Cyan, condition:=hasNewBrowsers) _
            .AddColoredLine(modifiedSummaryOpener, ConsoleColor.Yellow) _
            .AddColoredLine(modifiedAdded, ConsoleColor.Green, condition:=modifiedEntriesHaveAdditions) _
            .AddColoredLine(modifiedRemoved, ConsoleColor.Red, condition:=modEntriesHaveRemovals) _
@@ -167,6 +171,7 @@ Public Class DiffOutputRenderer2
 
         gLog("Diff Summary", ascend:=True, leadr:=True, ascAmt:=2)
         gLog(netChange)
+        gLog(newBrowserSummary, cond:=hasNewBrowsers)
         gLog(modifiedSummaryOpener)
         gLog(modifiedAdded, cond:=modifiedEntriesHaveAdditions)
         gLog(modifiedRemoved, cond:=modEntriesHaveRemovals)
@@ -652,7 +657,7 @@ Public Class DiffOutputRenderer2
             Dim rawUpdatedDict = If(_state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(newName),
                                  _state.ModifiedEntries.ModifiedKeyTracker2(newName), New Dictionary(Of iniKey2, List(Of iniKey2)))
 
-            ' Strip the Name sentinel — the MakeDiff header already shows the rename
+            ' Strip the Name sentinel, the MakeDiff header already shows the rename
             Dim updatedKeysDict As New Dictionary(Of iniKey2, List(Of iniKey2))
             For Each kvp In rawUpdatedDict
 
@@ -855,7 +860,7 @@ Public Class DiffOutputRenderer2
             Dim section = _file2.GetSection(entry)
             Dim mergedCount = _state.MergedEntries.MergeDict(entry).Count
 
-            ' Build combined old key list directly — avoids iniKeyCollection name deduplication
+            ' Build combined old key list directly, avoids iniKeyCollection name deduplication
             ' dropping keys that share a name across different source entries (e.g. two FileKey1 values)
             Dim uniqueKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
             Dim combinedOldKeys As New List(Of iniKey2)
@@ -934,7 +939,7 @@ Public Class DiffOutputRenderer2
                 Dim keyId = $"{key.KeyType}|{key.Value}"
                 If addedKeyIds.Contains(keyId) OrElse removedKeyIds.Contains(keyId) Then Continue For
 
-                ' Skip if it's in updated keys (modified) — compare by value
+                ' Skip if it's in updated keys (modified), compare by value
                 Dim isUpdated = False
                 For Each kvp In updatedKeysDict
 
@@ -1003,6 +1008,47 @@ Public Class DiffOutputRenderer2
 
         Next
 
+        Return results
+
+    End Function
+
+    ''' <summary>
+    ''' Outputs a summary section listing Section values that represent newly added browser
+    ''' support i.e. <c> Section </c> key values containing <c> "Web Browser" </c> that
+    ''' appear in the new file but not the old file.
+    ''' Returns an empty list when no new browser support was detected.
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' Zero or one <c> MenuSection </c> summarising new browser support
+    ''' </returns>
+    Public Function ItemizeNewBrowsers() As List(Of MenuSection)
+
+        Dim results As New List(Of MenuSection)
+        Dim novelValues = _state.Statistics.NewBrowserSectionValues
+
+        If novelValues.Count = 0 Then Return results
+
+        Dim plural = If(novelValues.Count = 1, "browser", "browsers")
+        Dim header = $"New Web Browser Support ({novelValues.Count} {plural})"
+
+        Dim out As New MenuSection
+        out.AddColoredLine(header, ConsoleColor.Cyan, centered:=True) _
+           .AddDivider(False)
+
+        gLog(header, ascend:=True)
+
+        For Each sectionValue In novelValues
+
+            out.AddColoredLine(sectionValue, ConsoleColor.Green, True)
+            gLog($"  {sectionValue}")
+
+        Next
+
+        gLog("", descend:=True)
+
+        out.AddDivider(False)
+        results.Add(out)
         Return results
 
     End Function

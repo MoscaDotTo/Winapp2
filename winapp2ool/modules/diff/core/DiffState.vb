@@ -345,6 +345,13 @@ Public Class DiffStatistics
     Public Property RenamedEntriesNameOnlyCount As Integer = 0
 
     ''' <summary>
+    ''' Section key values (e.g. <c> "Brave Web Browser" </c>) that appear in the new file
+    ''' but not in the old file, indicating newly added browser support.
+    ''' Populated by <c> DiffStatisticsCalculator2.DetectNewBrowserSupport </c>.
+    ''' </summary>
+    Public Property NewBrowserSectionValues As New List(Of String)
+
+    ''' <summary>
     ''' Resets all counters to zero
     ''' </summary>
     Public Sub Reset()
@@ -370,6 +377,7 @@ Public Class DiffStatistics
         RenamedEntriesReplacedByUpdateTotal = 0
         RenamedEntriesUpdatedKeyEntryCount = 0
         RenamedEntriesNameOnlyCount = 0
+        NewBrowserSectionValues.Clear()
 
     End Sub
 
