@@ -103,8 +103,10 @@ Public Module Flavorizer
 
         clrConsole()
 
-        Dim baseFile2 = iniFile2.FromFile(FlavorizerFile1.Path())
-        If Not enforceFileHasContent(baseFile2) Then Return
+        Dim baseFile = FlavorizerFile1.Load()
+
+        ' Ordinarily, we would gate this but it's actually probably fine if the base file is empty 
+        ' If Not enforceFileHasContent(baseFile) Then Return
 
         Dim applyingTxt = $"Applying flavor to {FlavorizerFile1.Name}"
         Dim output As New MenuSection
@@ -153,26 +155,17 @@ Public Module Flavorizer
         Dim baseFile2 = iniFile2.FromFile(FlavorizerFile1.Path())
         If Not enforceFileHasContent(baseFile2) Then Return
 
-        Dim legacyBase = IniFileBridge.ToIniFile(baseFile2)
+        For Each section In baseFile2
 
-        For Each section In legacyBase.Sections.Values
-
-            Dim IDKey = New iniKey($"ID={section.Name}")
-            Dim AuthorKey = New iniKey("Author=Winapp2.ini Project")
-
-            Dim tag = getTagFromCategory(section)
-
-            Dim TagsKey = New iniKey($"Tags={tag}")
-
-            section.Keys.add(IDKey)
-            section.Keys.add(AuthorKey)
-            section.Keys.add(TagsKey)
+            section.AddKey(New iniKey2($"ID={section.Name}"))
+            section.AddKey(New iniKey2("Author=Winapp2.ini Project"))
+            section.AddKey(New iniKey2($"Tags={getTagFromCategory(section)}"))
 
         Next
 
-        Dim wa2file As New winapp2file(legacyBase)
+        Dim wf2 As New winapp2file2(baseFile2)
         Dim saveFile2 = iniFile2.Empty(FlavorizerFile2.Dir, FlavorizerFile2.Name)
-        saveFile2.OverwriteToFile(wa2file.winapp2string)
+        saveFile2.OverwriteToFile(wf2.ToWinapp2String())
 
     End Sub
 
@@ -188,10 +181,7 @@ Public Module Flavorizer
     ''' <returns>
     ''' The CCleaner 7 tag string mapped from the section's category value, or <c> "ccapps" </c> if unmapped
     ''' </returns>
-    Private Function getTagFromCategory(ByRef section As iniSection) As String
-
-        Dim wa2 As New winapp2entry(section)
-        Dim out = ""
+    Private Function getTagFromCategory(section As iniSection2) As String
 
         Dim oldSections = {"3021", "games", "3022", "3023", "3024", "3025", "3026", "3027", "3029", "3030", "3031", "3032", "3033", "3034", "3035",
                            "3037", "3038", "3039", "3043", "3044", "3005", "3006"}
@@ -200,27 +190,16 @@ Public Module Flavorizer
                            "Brave,Browser", "OperaGX,Browser", "Avast,Browser", "AVG,Browser", "ARC,Browser", "Norton,Browser", "Avira,Browser",
                            "Microsoft,Browser,Edge", "Microsoft,Browser,Edge"}
 
-        Select Case True
+        Dim catKey = section.Keys.GetKey("Section")
+        If catKey Is Nothing Then catKey = section.Keys.GetKey("LangSecRef")
 
-            Case wa2.SectionKey.KeyCount = 1 AndAlso oldSections.Contains(wa2.SectionKey.Keys(0).Value.ToLowerInvariant)
+        If catKey Is Nothing Then Return "ccapps"
 
-                Dim index = Array.IndexOf(oldSections, wa2.SectionKey.Keys(0).Value.ToLowerInvariant)
-                out = newSections(index)
-                section.Keys.remove(wa2.SectionKey.Keys(0))
+        Dim index = Array.IndexOf(oldSections, catKey.Value.ToLowerInvariant)
+        section.Keys.Remove(catKey)
+        If index >= 0 Then Return newSections(index)
 
-            Case wa2.LangSecRef.KeyCount = 1 AndAlso oldSections.Contains(wa2.LangSecRef.Keys(0).Value.ToLowerInvariant)
-
-                Dim index = Array.IndexOf(oldSections, wa2.LangSecRef.Keys(0).Value.ToLowerInvariant)
-                out = newSections(index)
-                section.Keys.remove(wa2.LangSecRef.Keys(0))
-
-            Case Else
-
-                out = "ccapps"
-
-        End Select
-
-        Return out
+        Return "ccapps"
 
     End Function
 

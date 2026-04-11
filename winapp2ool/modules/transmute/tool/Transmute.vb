@@ -368,14 +368,10 @@ Public Module Transmute
 
         If isWinapp2 Then
 
-            Dim legacy = IniFileBridge.ToIniFile(baseFile)
-            Dim tmp As New winapp2file(legacy)
-            tmp.sortInneriniFiles()
-            Dim sorted = tmp.toIni
-            sorted.Dir = legacy.Dir
-            sorted.Name = legacy.Name
-            baseFile = IniFileBridge.ToIniFile2(sorted)
-            saveFile.OverwriteToFile(tmp.winapp2string)
+            Dim wf2 As New winapp2file2(baseFile)
+            wf2.SortEntries()
+            saveFile.OverwriteToFile(wf2.ToWinapp2String())
+            baseFile = wf2.ToIni()
 
         Else
 
