@@ -17,20 +17,15 @@
 
 Option Strict On
 
+Imports System.Diagnostics.Eventing.Reader
 Imports System.Reflection
 
 ''' <summary>
-''' A parallel settings backend powered by <c>iniFile2</c>.
+''' The sole settings backend, powered by <c>iniFile2</c>.
 ''' <br />
-''' <c>SettingsFile2</c> is the single authoritative in-memory representation
-''' for modules that have been migrated away from the legacy
-''' <c>settingsDict</c> + <c>settingsFile</c> dual-representation.
-''' <br />
-''' During the transition period, <c>settingsHandler</c> keeps <c>SettingsFile2</c>
-''' up to date via <c>Load2</c> (called from <c>loadSettings</c>) and
-''' <c>SetValue2</c> (called from <c>updateSettings</c>).
-''' Migrated modules call <c>LoadModule2</c> / <c>SaveModule2</c> instead of the
-''' legacy <c>LoadModuleSettingsFromDict</c> / <c>createModuleSettingsSection</c>.
+''' <c>SettingsFile2</c> is the single authoritative in-memory representation of
+''' <c>winapp2ool.ini</c>. All modules are registered in <c>loadAllModuleSettings</c>
+''' and use <c>LoadModule2</c> / <c>SaveModule2</c> for persistence.
 ''' </summary>
 Public Module SettingsHandler2
 
@@ -170,37 +165,43 @@ Public Module SettingsHandler2
         Dim section = SettingsFile2.GetSection(moduleName)
         If section Is Nothing Then Return
 
+        gLog($"Loading settings for {moduleName}")
+
         For Each prop As PropertyInfo In moduleType.GetProperties()
 
             If Not prop.CanWrite Then Continue For
 
+            If prop.PropertyType Is GetType(iniFileChooser) Then
+
+                Dim nameKey = section.Keys.GetKey(prop.Name & "_Name")
+                Dim dirKey = section.Keys.GetKey(prop.Name & "_Dir")
+                If nameKey Is Nothing OrElse dirKey Is Nothing Then Continue For
+
+                Dim chooser = TryCast(prop.GetValue(Nothing), iniFileChooser)
+                If chooser Is Nothing Then Continue For
+
+                chooser.Name = nameKey.Value
+                chooser.Dir = dirKey.Value
+                gLog($"    {prop.Name}'s parameters successfully read from disk")
+                Continue For
+
+            End If
+
             Dim k = section.Keys.GetKey(prop.Name)
-            If k Is Nothing Then Continue For
+            If k Is Nothing Then gLog($"Could not load {prop.Name} from disk") : Continue For
 
-            Select Case True
+            If prop.PropertyType Is GetType(Boolean) Then
 
-                Case prop.PropertyType Is GetType(iniFileChooser)
+                Dim bVal As Boolean
+                If Boolean.TryParse(k.Value, bVal) Then prop.SetValue(Nothing, bVal)
 
-                    Dim nameKey = section.Keys.GetKey(prop.Name & "_Name")
-                    Dim dirKey = section.Keys.GetKey(prop.Name & "_Dir")
-                    If nameKey Is Nothing OrElse dirKey Is Nothing Then Continue For
+            Else
 
-                    Dim chooser = TryCast(prop.GetValue(Nothing), iniFileChooser)
-                    If chooser Is Nothing Then Continue For
+                prop.SetValue(Nothing, [Enum].Parse(prop.PropertyType, k.Value))
 
-                    chooser.Name = nameKey.Value
-                    chooser.Dir = dirKey.Value
+            End If
 
-                Case prop.PropertyType.IsEnum
-
-                    prop.SetValue(Nothing, [Enum].Parse(prop.PropertyType, k.Value))
-
-                Case prop.PropertyType Is GetType(Boolean)
-
-                    Dim bVal As Boolean
-                    If Boolean.TryParse(k.Value, bVal) Then prop.SetValue(Nothing, bVal)
-
-            End Select
+            gLog($"    {prop.Name}'s value successfully read from disk")
 
         Next
 
