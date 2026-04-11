@@ -155,19 +155,23 @@ Module Diff
 
     End Sub
 
-    ''' <summary>
-    ''' Runs a Diff between a local file and the most recent winapp2.ini from GitHub
-    ''' </summary>
-    '''
-    ''' <param name="firstFile">
-    ''' The local winapp2.ini file to diff against the master GitHub copy
-    ''' </param>
-    Public Sub DiffRemoteFile(firstFile As iniFile)
+
+    Public Sub DiffRemoteFile(firstFile As iniFileChooser,
+                     Optional trimFile As Boolean = False)
 
         DiffFile1.Dir = firstFile.Dir
         DiffFile1.Name = firstFile.Name
+
+        Dim initDDF = DownloadDiffFile
+        Dim initTrimRemote = TrimRemoteFile
+
         DownloadDiffFile = True
+        TrimRemoteFile = trimFile
+
         ConductDiff()
+
+        DownloadDiffFile = initDDF
+        TrimRemoteFile = initTrimRemote
 
     End Sub
 

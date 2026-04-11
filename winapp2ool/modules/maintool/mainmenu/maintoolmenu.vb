@@ -94,9 +94,16 @@ Module maintoolmenu
                 Sub()
                     clrConsole()
                     cwl("Downloading & diffing, this may take a moment...")
-                    DiffRemoteFile(New iniFile(Environment.CurrentDirectory, "winapp2.ini"))
+                    DiffRemoteFile(New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini"))
                     setNextMenuHeaderText("Diff Complete", printColor:=ConsoleColor.Green)
                 End Sub, condition:=waUpdateIsAvail) _
+            .AddDispatchedOption("Show trimmed changelog", "See the difference between your trimmed local file and the latest",
+                                 Sub()
+                                     clrConsole()
+                                     cwl("Downloading, trimming, & diffing, this may take a moment...")
+                                     DiffRemoteFile(New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini"), True)
+                                     setNextMenuHeaderText("Diff Complete", printColor:=ConsoleColor.Green)
+                                 End Sub, condition:=waUpdateIsAvail) _
             .AddBlank(waUpdateIsAvail) _
             .AddDispatchedOption("Update Winapp2ool", "Get the latest Winapp2ool.exe",
                 Sub()
