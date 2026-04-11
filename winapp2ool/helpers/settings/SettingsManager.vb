@@ -30,45 +30,6 @@ Imports System.Reflection
 Module SettingsManager
 
     ''' <summary>
-    ''' Prompts the user to change a file's parameters, marks both settings and the file as having been changed 
-    ''' </summary>
-    ''' 
-    ''' <param name="someFile">
-    ''' A pointer to an iniFile whose parameters will be changed
-    ''' </param>
-    ''' 
-    ''' <param name="settingsChangedSetting">
-    ''' A pointer to the boolean indicating that a module's settings been modified from their default state 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-08-05
-    Public Sub changeFileParams(ByRef someFile As iniFile,
-                                ByRef settingsChangedSetting As Boolean,
-                                      callingModule As String,
-                                      settingName As String,
-                                      settingChangedName As String,
-                             Optional fileDesc As String = "")
-
-        Dim curName = someFile.Name
-        Dim curDir = someFile.Dir
-
-        initModule("File Chooser", AddressOf someFile.printFileChooserMenu, AddressOf someFile.handleFileChooserInput)
-
-        Dim fileChanged = Not someFile.Name = curName OrElse Not someFile.Dir = curDir
-        If Not settingsChangedSetting Then settingsChangedSetting = fileChanged
-
-        setNextMenuHeaderText($"{fileDesc} parameters update{If(Not fileChanged, " aborted", "d")}", printColor:=GetRedGreen(Not fileChanged))
-        If Not fileChanged Then Return
-
-        updateSettings(callingModule, $"{settingName}_Dir", someFile.Dir)
-        updateSettings(callingModule, $"{settingName}_Name", someFile.Name)
-        updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
-
-        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso saveSettingsToDisk)
-
-    End Sub
-
-    ''' <summary>
     ''' Prompts the user to change an <c>iniFileChooser</c>'s parameters, marks both settings and the chooser as having been changed
     ''' </summary>
     '''
@@ -102,57 +63,7 @@ Module SettingsManager
         updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
 
         Dim shouldWrite = Not IsCommandLineMode AndAlso saveSettingsToDisk
-        settingsFile.overwriteToFile(settingsFile.toString, shouldWrite)
         FlushIfDirty2(shouldWrite)
-
-    End Sub
-
-    ''' <summary>
-    ''' Toggles a setting's boolean state and marks its tracker true
-    ''' </summary>
-    ''' 
-    ''' <param name="setting">
-    ''' A pointer to the boolean representing a module setting to be toggled
-    ''' </param>
-    ''' 
-    ''' <param name="paramText">
-    ''' A string explaining the setting being toggled
-    ''' </param>
-    ''' 
-    ''' <param name="mSettingsChanged">
-    ''' A pointer to the boolean indicating that a module's settings been modified from their default state
-    ''' </param>
-    ''' 
-    ''' <param name="callingModule">
-    ''' The name of the module calling this function
-    ''' </param>
-    ''' 
-    ''' <param name="settingName">
-    ''' The name of the setting being toggled
-    ''' </param>
-    ''' 
-    ''' <param name="settingChangedName">
-    ''' The name of the settings changed flag
-    ''' </param>  
-    ''' 
-    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
-    Public Sub toggleSettingParam(ByRef setting As Boolean,
-                                        paramText As String,
-                                  ByRef mSettingsChanged As Boolean,
-                                        callingModule As String,
-                                        settingName As String,
-                                        settingChangedName As String)
-
-        gLog($"  Toggling {paramText} from {setting} to {Not setting}")
-        setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
-        setting = Not setting
-        mSettingsChanged = True
-
-        updateSettings(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
-        updateSettings(callingModule, settingChangedName, mSettingsChanged.ToString(CultureInfo.InvariantCulture))
-
-        Dim isSaveReadSetting = settingName = NameOf(saveSettingsToDisk) OrElse settingName = NameOf(readSettingsFromDisk)
-        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso isSaveReadSetting)
 
     End Sub
 
@@ -198,7 +109,6 @@ Module SettingsManager
         updateSettings(callingModule, settingChangedName, True.ToString)
 
         Dim shouldWrite = Not IsCommandLineMode AndAlso saveSettingsToDisk
-        settingsFile.overwriteToFile(settingsFile.toString, shouldWrite)
         FlushIfDirty2(shouldWrite)
 
     End Sub

@@ -37,7 +37,13 @@ Public Module advSettings
             Dim r = rule
             menu.AddDispatchedToggle(r.LintName, r.ScanText, r.ShouldScan,
                 Sub()
-                    toggleSettingParam(r.ShouldScan, "Scan", ScanSettingsChanged, NameOf(WinappDebug), r.LintName & "_Scan", NameOf(ScanSettingsChanged))
+                    Dim prev = r.ShouldScan
+                    gLog($"  Toggling Scan from {prev} to {Not prev}")
+                    setNextMenuHeaderText($"Scan {enStr(prev)}d", printColor:=If(Not prev, ConsoleColor.Green, ConsoleColor.Red))
+                    r.ShouldScan = Not prev
+                    ScanSettingsChanged = True
+                    SetValue2(NameOf(WinappDebug), r.LintName & "_Scan", tsInvariant(r.ShouldScan))
+                    FlushIfDirty2(Not IsCommandLineMode AndAlso saveSettingsToDisk)
                     If Not r.ShouldScan Then r.turnOff()
                 End Sub)
 
@@ -52,7 +58,13 @@ Public Module advSettings
             Dim r = rule
             menu.AddDispatchedToggle(r.LintName, r.RepairText, r.ShouldRepair,
                 Sub()
-                    toggleSettingParam(r.ShouldRepair, "Repair", ScanSettingsChanged, NameOf(WinappDebug), r.LintName & "_Repair", NameOf(ScanSettingsChanged))
+                    Dim prev = r.ShouldRepair
+                    gLog($"  Toggling Repair from {prev} to {Not prev}")
+                    setNextMenuHeaderText($"Repair {enStr(prev)}d", printColor:=If(Not prev, ConsoleColor.Green, ConsoleColor.Red))
+                    r.ShouldRepair = Not prev
+                    ScanSettingsChanged = True
+                    SetValue2(NameOf(WinappDebug), r.LintName & "_Repair", tsInvariant(r.ShouldRepair))
+                    FlushIfDirty2(Not IsCommandLineMode AndAlso saveSettingsToDisk)
                     If r.ShouldRepair Then r.turnOn()
                 End Sub)
 
