@@ -45,7 +45,7 @@ Public Module launcher
         Dim curDirIsTemp As Boolean = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
         cantDownloadExecutable = curDirIsTemp OrElse DotNetFrameworkOutOfDate
 
-        loadSettings()
+        LoadWinapp2oolsettings()
 
         processCommandLineArgs()
 
@@ -57,8 +57,7 @@ Public Module launcher
         setNextMenuHeaderText(launchHeader, printColor:=ConsoleColor.Cyan)
         initModule(launchHeader, AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
 
-        ' Ensure any pending settings changes are saved before exiting
-        FlushSettingsIfDirty()
+        FlushIfDirty2()
 
     End Sub
 

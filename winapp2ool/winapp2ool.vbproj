@@ -126,7 +126,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="handlers\menus\MenuSection\MenuSection.vb" />
-    <Compile Include="handlers\settings\settingsHandler.vb" />
     <Compile Include="handlers\settings\SettingsHandler2.vb" />
     <Compile Include="modules\browserbuilder\core\BrowserInfo.vb" />
     <Compile Include="modules\browserbuilder\core\BrowserEntryGenerator.vb" />

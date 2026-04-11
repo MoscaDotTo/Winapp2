@@ -41,11 +41,11 @@ Module SettingsManager
     ''' A pointer to the boolean indicating that a module's settings have been modified from their default state
     ''' </param>
     Public Sub changeFile2Params(ByRef chooser As iniFileChooser,
-                                  ByRef settingsChangedSetting As Boolean,
-                                        callingModule As String,
-                                        settingName As String,
-                                        settingChangedName As String,
-                               Optional fileDesc As String = "")
+                                 ByRef settingsChangedSetting As Boolean,
+                                       callingModule As String,
+                                       settingName As String,
+                                       settingChangedName As String,
+                              Optional fileDesc As String = "")
 
         Dim curName = chooser.Name
         Dim curDir = chooser.Dir
@@ -58,9 +58,9 @@ Module SettingsManager
         setNextMenuHeaderText($"{fileDesc} parameters update{If(Not fileChanged, " aborted", "d")}", printColor:=GetRedGreen(Not fileChanged))
         If Not fileChanged Then Return
 
-        updateSettings(callingModule, $"{settingName}_Dir", chooser.Dir)
-        updateSettings(callingModule, $"{settingName}_Name", chooser.Name)
-        updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
+        SetSetting(callingModule, $"{settingName}_Dir", chooser.Dir)
+        SetSetting(callingModule, $"{settingName}_Name", chooser.Name)
+        SetSetting(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
 
         Dim shouldWrite = Not IsCommandLineMode AndAlso saveSettingsToDisk
         FlushIfDirty2(shouldWrite)
@@ -105,8 +105,8 @@ Module SettingsManager
 
         settingsModule.GetProperty(settingName).SetValue(settingName, setting)
         settingsModule.GetProperty(settingChangedName).SetValue(settingChangedName, True)
-        updateSettings(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
-        updateSettings(callingModule, settingChangedName, True.ToString)
+        SetSetting(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
+        SetSetting(callingModule, settingChangedName, True.ToString)
 
         Dim shouldWrite = Not IsCommandLineMode AndAlso saveSettingsToDisk
         FlushIfDirty2(shouldWrite)
@@ -199,8 +199,8 @@ Module SettingsManager
         p.SetValue(Nothing, nextValue)
 
         mSettingsChanged = True
-        updateSettings(moduleName, propName, nextValue.ToString())
-        updateSettings(moduleName, settingsChangedName, True.ToString)
+        SetSetting(moduleName, propName, nextValue.ToString())
+        SetSetting(moduleName, settingsChangedName, True.ToString)
 
         gLog()
         setNextMenuHeaderText($"{displayName} set to {nextValue}", printColor:=printColor)

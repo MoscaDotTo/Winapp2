@@ -50,8 +50,8 @@ Module lintsettingshandler
         SaveModule2(NameOf(WinappDebug), GetType(lintsettings))
 
         For Each rule In Rules
-            SetValue2(NameOf(WinappDebug), rule.LintName & "_Scan", tsInvariant(rule.ShouldScan))
-            SetValue2(NameOf(WinappDebug), rule.LintName & "_Repair", tsInvariant(rule.ShouldRepair))
+            SetSetting(NameOf(WinappDebug), rule.LintName & "_Scan", tsInvariant(rule.ShouldScan))
+            SetSetting(NameOf(WinappDebug), rule.LintName & "_Repair", tsInvariant(rule.ShouldRepair))
         Next
 
     End Sub
@@ -62,9 +62,9 @@ Module lintsettingshandler
     Public Sub LoadLintRulesFromSettings2()
 
         For Each rule In Rules
-            Dim scanVal = GetValue2(NameOf(WinappDebug), rule.LintName & "_Scan")
+            Dim scanVal = GetSetting(NameOf(WinappDebug), rule.LintName & "_Scan")
             If scanVal <> "" Then rule.ShouldScan = CBool(scanVal)
-            Dim repairVal = GetValue2(NameOf(WinappDebug), rule.LintName & "_Repair")
+            Dim repairVal = GetSetting(NameOf(WinappDebug), rule.LintName & "_Repair")
             If repairVal <> "" Then rule.ShouldRepair = CBool(repairVal)
         Next
 

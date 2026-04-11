@@ -32,27 +32,70 @@ Imports System.Reflection
 ''' Migrated modules call <c>LoadModule2</c> / <c>SaveModule2</c> instead of the
 ''' legacy <c>LoadModuleSettingsFromDict</c> / <c>createModuleSettingsSection</c>.
 ''' </summary>
-'''
-''' Docs last updated: 2026-02-26 | Code last updated: 2026-02-26
 Public Module SettingsHandler2
 
     Private _dirty2 As Boolean = False
 
     ''' <summary>
-    ''' The <c>iniFile2</c>-backed representation of winapp2ool's settings.
-    ''' This is the single source of truth for modules that have been migrated
-    ''' to the new settings backend.
+    ''' The <c> iniFile2 </c>-backed representation of winapp2ool's settings.
     ''' </summary>
     Public Property SettingsFile2 As iniFile2 = iniFile2.Empty(Environment.CurrentDirectory, "winapp2ool.ini")
 
     ''' <summary>
-    ''' Reads <c>winapp2ool.ini</c> from disk into <c>SettingsFile2</c>.
-    ''' No-ops if the file does not exist.
+    ''' Reads <c>winapp2ool.ini</c> from disk into <c> SettingsFile2 </c>.
     ''' </summary>
-    Public Sub Load2()
+    Public Sub LoadWinapp2oolsettings()
 
-        If Not IO.File.Exists(SettingsFile2.Path()) Then Return
+        gLog("Loading settings")
+        gLog(ascend:=True)
+
+        ' Handle the default case where winapp2ool.ini doesn't exist  
+        If Not System.IO.File.Exists(SettingsFile2.Path) Then
+
+            readSettingsFromDisk = False
+            saveSettingsToDisk = False
+
+            ' We still need to maintain an internal representation
+            ' of the settings so create the settingsFile and settingsDict
+            ' using the default winapp2ool configuration
+            gLog("No settings file Found - loading default settings")
+            loadAllModuleSettings()
+
+            Return
+
+        End If
+
         SettingsFile2 = iniFile2.FromFile(SettingsFile2.Path())
+        loadAllModuleSettings()
+
+        gLog(descend:=True)
+        gLog("Settings loaded")
+
+    End Sub
+
+    ''' <summary>
+    ''' Loads settings for modules that have migrated to <c>SettingsHandler2</c>.
+    ''' Each migrated module's <c>LoadModule2</c> call is added here as modules migrate.
+    ''' </summary>
+    Private Sub loadAllModuleSettings()
+
+        ' Winapp2ool is loaded first so readSettingsFromDisk is populated before other modules load
+        LoadModule2(NameOf(Winapp2ool), GetType(maintoolsettings))
+
+        If Not readSettingsFromDisk Then Return
+
+        LoadModule2(NameOf(Diff), GetType(diffsettings))
+        LoadModule2(NameOf(UWPBuilder), GetType(uwpbuildersettings))
+        LoadModule2(NameOf(BrowserBuilder), GetType(browserbuildersettings))
+        LoadModule2(NameOf(CC7Patcher), GetType(cc7patchersettings))
+        LoadModule2(NameOf(CCiniDebug), GetType(ccdebugsettings))
+        LoadModule2(NameOf(Combine), GetType(combinesettings))
+        LoadModule2(NameOf(Flavorizer), GetType(FlavorizerSettings))
+        LoadModule2(NameOf(Transmute), GetType(transmuteSettings))
+        LoadModule2(NameOf(Trim), GetType(trimsettings))
+        LoadModule2(NameOf(Downloader), GetType(downloadersettings))
+        LoadModule2(NameOf(WinappDebug), GetType(lintsettings))
+        LoadLintRulesFromSettings2()
 
     End Sub
 
@@ -60,10 +103,12 @@ Public Module SettingsHandler2
     ''' Returns the value of a setting from <c>SettingsFile2</c>,
     ''' or <c>""</c> if the module section or key is not found.
     ''' </summary>
-    Public Function GetValue2(moduleName As String, settingName As String) As String
+    Public Function GetSetting(moduleName As String,
+                               settingName As String) As String
 
         Dim section = SettingsFile2.GetSection(moduleName)
         If section Is Nothing Then Return ""
+
         Dim key = section.Keys.GetKey(settingName)
         Return If(key Is Nothing, "", key.Value)
 
@@ -74,15 +119,21 @@ Public Module SettingsHandler2
     ''' creating the module section and/or key if absent.
     ''' Marks the backend dirty; the write is deferred to <c>FlushIfDirty2</c>.
     ''' </summary>
-    Public Sub SetValue2(moduleName As String, settingName As String, value As String)
+    Public Sub SetSetting(moduleName As String,
+                         settingName As String,
+                         value As String)
 
         Dim section = SettingsFile2.GetOrCreateSection(moduleName)
         Dim key = section.Keys.GetKey(settingName)
 
         If key Is Nothing Then
+
             section.AddKey(New iniKey2($"{settingName}={value}"))
+
         Else
+
             key.Value = value
+
         End If
 
         _dirty2 = True
@@ -92,7 +143,7 @@ Public Module SettingsHandler2
     ''' <summary>
     ''' Writes <c>SettingsFile2</c> to disk, subject to <paramref name="condition"/>.
     ''' </summary>
-    Public Sub Save2(Optional condition As Boolean = True)
+    Public Sub SaveSettings(Optional condition As Boolean = True)
 
         SettingsFile2.OverwriteToFile(SettingsFile2.ToString(), condition)
         _dirty2 = False
@@ -104,7 +155,7 @@ Public Module SettingsHandler2
     ''' </summary>
     Public Sub FlushIfDirty2(Optional condition As Boolean = True)
 
-        If _dirty2 Then Save2(condition)
+        If _dirty2 Then SaveSettings(condition)
 
     End Sub
 
@@ -123,35 +174,33 @@ Public Module SettingsHandler2
 
             If Not prop.CanWrite Then Continue For
 
-            If prop.PropertyType Is GetType(iniFileChooser) Then
-
-                Dim nameKey = section.Keys.GetKey(prop.Name & "_Name")
-                Dim dirKey = section.Keys.GetKey(prop.Name & "_Dir")
-                If nameKey Is Nothing OrElse dirKey Is Nothing Then Continue For
-
-                Dim chooser = TryCast(prop.GetValue(Nothing), iniFileChooser)
-                If chooser Is Nothing Then Continue For
-
-                chooser.Name = nameKey.Value
-                chooser.Dir = dirKey.Value
-
-                Continue For
-
-            End If
-
             Dim k = section.Keys.GetKey(prop.Name)
             If k Is Nothing Then Continue For
 
-            If prop.PropertyType.IsEnum Then
+            Select Case True
 
-                prop.SetValue(Nothing, [Enum].Parse(prop.PropertyType, k.Value))
+                Case prop.PropertyType Is GetType(iniFileChooser)
 
-            ElseIf prop.PropertyType Is GetType(Boolean) Then
+                    Dim nameKey = section.Keys.GetKey(prop.Name & "_Name")
+                    Dim dirKey = section.Keys.GetKey(prop.Name & "_Dir")
+                    If nameKey Is Nothing OrElse dirKey Is Nothing Then Continue For
 
-                Dim bVal As Boolean
-                If Boolean.TryParse(k.Value, bVal) Then prop.SetValue(Nothing, bVal)
+                    Dim chooser = TryCast(prop.GetValue(Nothing), iniFileChooser)
+                    If chooser Is Nothing Then Continue For
 
-            End If
+                    chooser.Name = nameKey.Value
+                    chooser.Dir = dirKey.Value
+
+                Case prop.PropertyType.IsEnum
+
+                    prop.SetValue(Nothing, [Enum].Parse(prop.PropertyType, k.Value))
+
+                Case prop.PropertyType Is GetType(Boolean)
+
+                    Dim bVal As Boolean
+                    If Boolean.TryParse(k.Value, bVal) Then prop.SetValue(Nothing, bVal)
+
+            End Select
 
         Next
 
@@ -171,19 +220,15 @@ Public Module SettingsHandler2
             Dim value = prop.GetValue(Nothing)
             If value Is Nothing Then Continue For
 
-            If prop.PropertyType Is GetType(iniFileChooser) Then
-
-                Dim chooser = DirectCast(value, iniFileChooser)
-                SetValue2(moduleName, prop.Name & "_Name", chooser.Name)
-                SetValue2(moduleName, prop.Name & "_Dir", chooser.Dir)
-
-                Continue For
+            If prop.PropertyType IsNot GetType(iniFileChooser) Then
 
             End If
 
-            If prop.PropertyType Is GetType(Boolean) OrElse prop.PropertyType.IsEnum Then
-                SetValue2(moduleName, prop.Name, value.ToString())
-            End If
+            If prop.PropertyType IsNot GetType(iniFileChooser) Then SetSetting(moduleName, prop.Name, value.ToString()) : Continue For
+
+            Dim chooser = DirectCast(value, iniFileChooser)
+            SetSetting(moduleName, prop.Name & "_Name", chooser.Name)
+            SetSetting(moduleName, prop.Name & "_Dir", chooser.Dir)
 
         Next
 

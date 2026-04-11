@@ -42,7 +42,7 @@ Public Module advSettings
                     setNextMenuHeaderText($"Scan {enStr(prev)}d", printColor:=If(Not prev, ConsoleColor.Green, ConsoleColor.Red))
                     r.ShouldScan = Not prev
                     ScanSettingsChanged = True
-                    SetValue2(NameOf(WinappDebug), r.LintName & "_Scan", tsInvariant(r.ShouldScan))
+                    SetSetting(NameOf(WinappDebug), r.LintName & "_Scan", tsInvariant(r.ShouldScan))
                     FlushIfDirty2(Not IsCommandLineMode AndAlso saveSettingsToDisk)
                     If Not r.ShouldScan Then r.turnOff()
                 End Sub)
@@ -63,7 +63,7 @@ Public Module advSettings
                     setNextMenuHeaderText($"Repair {enStr(prev)}d", printColor:=If(Not prev, ConsoleColor.Green, ConsoleColor.Red))
                     r.ShouldRepair = Not prev
                     ScanSettingsChanged = True
-                    SetValue2(NameOf(WinappDebug), r.LintName & "_Repair", tsInvariant(r.ShouldRepair))
+                    SetSetting(NameOf(WinappDebug), r.LintName & "_Repair", tsInvariant(r.ShouldRepair))
                     FlushIfDirty2(Not IsCommandLineMode AndAlso saveSettingsToDisk)
                     If r.ShouldRepair Then r.turnOn()
                 End Sub)
