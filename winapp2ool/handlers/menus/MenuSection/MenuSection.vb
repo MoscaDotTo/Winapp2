@@ -555,8 +555,11 @@ Public Class MenuSection
                                         handler As Action,
                                Optional condition As Boolean = True) As MenuSection
 
-        AddOption(name, description, condition)
-        If condition Then _actions.Add(handler)
+        If Not condition Then Return Me
+
+        AddOption(name, description)
+        _actions.Add(handler)
+
         Return Me
 
     End Function
@@ -593,8 +596,11 @@ Public Class MenuSection
                                         handler As Action,
                                Optional condition As Boolean = True) As MenuSection
 
-        AddToggle(name, description, isEnabled, condition)
-        If condition Then _actions.Add(handler)
+        If Not condition Then Return Me
+
+        AddToggle(name, description, isEnabled)
+        _actions.Add(handler)
+
         Return Me
 
     End Function
@@ -631,8 +637,11 @@ Public Class MenuSection
                                                handler As Action,
                                       Optional condition As Boolean = True) As MenuSection
 
-        AddColoredOption(name, description, color, condition)
-        If condition Then _actions.Add(handler)
+        If Not condition Then Return Me
+
+        AddColoredOption(name, description, color)
+        _actions.Add(handler)
+
         Return Me
 
     End Function
@@ -657,9 +666,11 @@ Public Class MenuSection
     Public Function AddDispatchedResetOpt(moduleName As String,
                                           condition As Boolean,
                                           handler As Action) As MenuSection
+        If Not condition Then Return Me
 
-        AddResetOpt(moduleName, condition)
-        If condition Then _actions.Add(handler)
+        AddResetOpt(moduleName, True)
+        _actions.Add(handler)
+
         Return Me
 
     End Function
