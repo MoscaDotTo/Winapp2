@@ -141,7 +141,7 @@ Module SettingsManager
     Public Function denySettingOffline() As Boolean
 
         gLog("An action was unable to complete because winapp2ool is offline", isOffline)
-        setNextMenuHeaderText("This option is unavailable while in offline mode", printColor:=ConsoleColor.Red)
+        setNextMenuHeaderText("This option is unavailable while in offline mode", cond:=isOffline, printColor:=ConsoleColor.Red)
 
         Return isOffline
 
