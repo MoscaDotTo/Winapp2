@@ -65,56 +65,6 @@ Module downloadr
 
     End Function
 
-    ''' <summary> 
-    ''' Downloads a file from the internet, optionally prompting the user to rename the download or overwrite existing files using the default name 
-    ''' </summary>
-    ''' 
-    ''' <param name="link"> 
-    ''' A URL pointing to a file to be downloaded 
-    ''' </param>
-    ''' 
-    ''' <param name="prompt"> 
-    ''' Indicates that a "rename file" prompt should be shown if the target path already exists 
-    ''' <br /> Optional, Default: <c> True </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="quietly"> 
-    ''' Indicates that all downloading output should be suppressed 
-    ''' <br /> Optional, Default: <c> False </c> 
-    ''' </param>
-    Public Sub download(pathHolder As iniFile,
-                        link As String,
-               Optional prompt As Boolean = True,
-               Optional quietly As Boolean = False)
-
-        Dim givenName = pathHolder.Name
-
-        ' Don't try to download to a directory that doesn't exist
-        If Not Directory.Exists(pathHolder.Dir) Then Directory.CreateDirectory(pathHolder.Dir)
-
-        ' If the file exists and we're prompting for overwrites, do that.
-        If prompt AndAlso File.Exists(pathHolder.Path) AndAlso Not SuppressOutput AndAlso Not quietly Then
-            cwl($"{pathHolder.Name} already exists in the target directory.")
-            Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
-            Dim nfilename = Console.ReadLine()
-            If Not nfilename.Trim.Length = 0 Then pathHolder.Name = nfilename
-        End If
-
-        If Not prompt Then fDelete(pathHolder.Path)
-
-        cwl($"Downloading {givenName}...", Not quietly)
-
-        Dim success = dlFile(link, pathHolder.Path)
-
-        cwl($"Download {If(success, "Complete.", "Failed.")}", Not quietly)
-        cwl(If(success, "Downloaded ", $"Unable to download {pathHolder.Name} to {pathHolder.Dir}"), Not quietly)
-
-        setNextMenuHeaderText($"Download {If(success, "", "in")}complete: {pathHolder.Name}", Not success AndAlso Not quietly, ConsoleColor.Red)
-
-        If Not success Then Console.ReadLine()
-
-    End Sub
-
     ''' <summary>
     ''' Downloads a file from the internet to the path described by an <c>iniFileChooser</c>,
     ''' optionally prompting the user to rename the download or overwrite existing files

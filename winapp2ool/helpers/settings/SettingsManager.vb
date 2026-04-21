@@ -18,7 +18,6 @@
 Option Strict On
 
 Imports System.Globalization
-Imports System.Reflection
 
 ''' <summary>
 ''' Provides functions to manage winapp2ool module settings, including modifying file parameters, 
@@ -125,7 +124,7 @@ Module SettingsManager
     ''' The function that resets the module's settings to their default state
     ''' </param>
     Public Sub resetModuleSettings(name As String,
-                                setDefaultParams As Action)
+                                   setDefaultParams As Action)
 
         gLog($"  Restoring {name}'s module settings to their default states")
 
