@@ -25,6 +25,12 @@ Option Strict On
 ''' </summary>
 Public Class regKeyParams2
 
+    Private Shared ReadOnly ValidRoots As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
+        "HKCU", "HKLM", "HKCR", "HKU", "HKCC",
+        "HKEY_CURRENT_USER", "HKEY_LOCAL_MACHINE", "HKEY_CLASSES_ROOT",
+        "HKEY_USERS", "HKEY_CURRENT_CONFIG"
+    }
+
     ''' <summary>The registry path — everything before the pipe, or the whole value if no pipe</summary>
     Public ReadOnly Property Path As String
 
@@ -38,6 +44,24 @@ Public Class regKeyParams2
     Public ReadOnly Property HasSubkey As Boolean
         Get
             Return Subkey.Length > 0
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' The registry hive — the segment of <c>Path</c> before the first backslash,
+    ''' or <c>Path</c> itself when no backslash is present.
+    ''' </summary>
+    Public ReadOnly Property Root As String
+        Get
+            Dim backslash = Path.IndexOf("\"c)
+            Return If(backslash < 0, Path, Path.Substring(0, backslash))
+        End Get
+    End Property
+
+    ''' <summary>Whether <c>Root</c> is a recognized registry hive (short or long form).</summary>
+    Public ReadOnly Property HasValidRoot As Boolean
+        Get
+            Return ValidRoots.Contains(Root)
         End Get
     End Property
 

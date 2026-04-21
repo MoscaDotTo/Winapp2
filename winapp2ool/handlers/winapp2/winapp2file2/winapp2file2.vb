@@ -215,6 +215,23 @@ Public Class winapp2file2
     End Sub
 
     ''' <summary>
+    ''' Returns the name of every entry that appears more than once (case-insensitive).
+    ''' An empty list means no duplicate entry names exist.
+    ''' </summary>
+    Public Function FindDuplicateEntryNames() As IReadOnlyList(Of String)
+
+        Dim seen As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim dupes As New List(Of String)
+
+        For Each entry In Entries
+            If Not seen.Add(entry.Name) Then dupes.Add(entry.Name)
+        Next
+
+        Return dupes
+
+    End Function
+
+    ''' <summary>
     ''' Builds and returns the complete winapp2.ini text including preamble comments,
     ''' replicating the output of the legacy <c>winapp2file.winapp2string()</c>
     ''' </summary>

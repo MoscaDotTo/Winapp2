@@ -19,12 +19,14 @@ Option Strict On
 
 ''' <summary>The optional deletion behavior flag on a FileKey</summary>
 Public Enum fileKeyFlag
-    ''' <summary>No flag — delete only matching files, non-recursively</summary>
+    ''' <summary>No flag, delete only matching files, non-recursively</summary>
     None = 0
-    ''' <summary>RECURSE — delete matching files in subdirectories too</summary>
+    ''' <summary>RECURSE,  delete matching files in subdirectories too</summary>
     Recurse = 1
     ''' <summary>REMOVESELF — delete matching files and the containing folder; implies RECURSE</summary>
     RemoveSelf = 2
+    ''' <summary>Unknown, flag value not recognized; stored verbatim in <c>RawFlag</c> for round-trip fidelity</summary>
+    Unknown = 3
 End Enum
 
 ''' <summary>
@@ -47,8 +49,14 @@ Public Class fileKeyParams2
         End Get
     End Property
 
-    ''' <summary>The deletion behavior flag — <c>None</c> if absent or unrecognized</summary>
+    ''' <summary>The deletion behavior flag — <c>Unknown</c> when present but not recognized</summary>
     Public ReadOnly Property Flag As fileKeyFlag
+
+    ''' <summary>
+    ''' The raw flag text as it appeared in the file.
+    ''' Populated only when <c>Flag = fileKeyFlag.Unknown</c>; otherwise empty.
+    ''' </summary>
+    Public ReadOnly Property RawFlag As String
 
     ''' <summary>
     ''' Parses a raw FileKey value string into its structured components
@@ -76,13 +84,18 @@ Public Class fileKeyParams2
 
         _patterns.AddRange(afterPipe1.Substring(0, pipe2).Split(CChar(";")))
 
-        Select Case afterPipe1.Substring(pipe2 + 1).ToUpperInvariant()
+        Dim flagStr = afterPipe1.Substring(pipe2 + 1)
+
+        Select Case flagStr.ToUpperInvariant()
             Case "RECURSE"
                 Flag = fileKeyFlag.Recurse
+                RawFlag = ""
             Case "REMOVESELF"
                 Flag = fileKeyFlag.RemoveSelf
+                RawFlag = ""
             Case Else
-                Flag = fileKeyFlag.None
+                Flag = fileKeyFlag.Unknown
+                RawFlag = flagStr
         End Select
 
     End Sub
@@ -99,12 +112,29 @@ Public Class fileKeyParams2
             out &= "|" & String.Join(";", _patterns)
         End If
 
-        If Flag <> fileKeyFlag.None Then
+        If Flag = fileKeyFlag.Unknown Then
+            out &= "|" & RawFlag
+        ElseIf Flag <> fileKeyFlag.None Then
             out &= "|" & Flag.ToString().ToUpperInvariant()
         End If
 
         Return out
 
     End Function
+
+    ''' <summary>Whether any pattern appears more than once (case-insensitive).</summary>
+    Public ReadOnly Property HasDuplicatePatterns As Boolean
+        Get
+            Return _patterns.Count <>
+                   _patterns.Distinct(StringComparer.OrdinalIgnoreCase).Count()
+        End Get
+    End Property
+
+    ''' <summary>Whether any pattern is empty or whitespace-only.</summary>
+    Public ReadOnly Property HasEmptyPatterns As Boolean
+        Get
+            Return _patterns.Any(Function(p) String.IsNullOrWhiteSpace(p))
+        End Get
+    End Property
 
 End Class

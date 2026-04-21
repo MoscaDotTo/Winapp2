@@ -156,6 +156,65 @@ Public Class winapp2entry2
         End Get
     End Property
 
+    ''' <summary>Whether the entry name ends with the required " *" suffix.</summary>
+    Public ReadOnly Property HasValidNameSuffix As Boolean
+        Get
+            Return Name.EndsWith(" *", StringComparison.InvariantCulture)
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Whether the entry has exactly one categorization key — either a LangSecRef or a Section,
+    ''' but not both and not neither.
+    ''' </summary>
+    Public ReadOnly Property HasValidCategorization As Boolean
+        Get
+            Return (_langSecRef.Count > 0) Xor (_sectionKey.Count > 0)
+        End Get
+    End Property
+
+    ''' <summary>Whether the entry has at least one FileKey or RegKey.</summary>
+    Public ReadOnly Property HasDeletionKey As Boolean
+        Get
+            Return _fileKeys.Count > 0 OrElse _regKeys.Count > 0
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' All extra keys in singleton buckets — every key after index 0 in DetectOS,
+    ''' LangSecRef, Section, SpecialDetect, Default, and Warning.
+    ''' An empty list means no singleton violations exist.
+    ''' </summary>
+    Public ReadOnly Property SingletonViolations As IReadOnlyList(Of iniKey2)
+        Get
+            Dim result As New List(Of iniKey2)
+            For Each lst In {_detectOS, _langSecRef, _sectionKey, _specialDetect, _defaultKey, _warningKey}
+                If lst.Count > 1 Then result.AddRange(lst.Skip(1))
+            Next
+            Return result
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Whether ExcludeKeys are consistent with the deletion keys present.
+    ''' False when FILE or PATH ExcludeKeys exist without FileKeys,
+    ''' or when REG ExcludeKeys exist without RegKeys.
+    ''' </summary>
+    Public ReadOnly Property HasConsistentExcludeKeys As Boolean
+        Get
+            Dim hasFileExcludes = _excludeKeys.Any(Function(k)
+                Dim p As New excludeKeyParams2(k.Value)
+                Return p.Flag = excludeKeyFlag.File OrElse p.Flag = excludeKeyFlag.Path
+            End Function)
+            Dim hasRegExcludes = _excludeKeys.Any(Function(k)
+                Dim p As New excludeKeyParams2(k.Value)
+                Return p.Flag = excludeKeyFlag.Reg
+            End Function)
+            Return (Not hasFileExcludes OrElse _fileKeys.Count > 0) AndAlso
+                   (Not hasRegExcludes OrElse _regKeys.Count > 0)
+        End Get
+    End Property
+
     ''' <summary>
     ''' All key lists in winapp2.ini declaration order, mirroring <c>KeyListList</c>
     ''' on the legacy <c>winapp2entry</c>
