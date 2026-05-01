@@ -131,7 +131,7 @@ Module MenuMaker
     ''' The cached console window width, used to 
     ''' avoid unneeded calls to <c> Console.WindowWidth </c>
     ''' </summary>
-    Private _cachedWindowWidth As Integer = Console.WindowWidth
+    Private _cachedWindowWidth As Integer = 120
 
     ''' <summary>
     ''' The time at which the console window width was last checked
@@ -153,7 +153,10 @@ Module MenuMaker
         ' if ever, so only check it every 500 milliseconds at the most frequent
         If DateTime.Now.Subtract(_lastWidthCheckTime).TotalMilliseconds > 500 Then
 
-            _cachedWindowWidth = Console.WindowWidth
+            Try
+                _cachedWindowWidth = Console.WindowWidth
+            Catch e As IO.IOException
+            End Try
             _lastWidthCheckTime = DateTime.Now
 
         End If
