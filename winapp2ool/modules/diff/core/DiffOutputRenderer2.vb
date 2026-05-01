@@ -1,3 +1,4 @@
+Option Strict On
 '    Copyright (C) 2018-2026 Hazel Ward
 '
 '    This file is a part of Winapp2ool
@@ -15,7 +16,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
-Option Strict On
+Imports System.Linq.Expressions
 
 ''' <summary>
 ''' Formats and renders diff results as <c>MenuSection</c> output for display and logging.
@@ -82,7 +83,7 @@ Public Class DiffOutputRenderer2
         Dim modified = _state.ModifiedEntries
 
         Dim netDiff = _file2.Count - _file1.Count
-        Dim oldRemovedNoRepl = modified.RemovedEntryNames.Count - stats.MergedEntryCount - merged.RenamedEntryNames.Count
+        Dim oldRemovedNoRepl = modified.RemovedEntryNames.Count - merged.OldToNewMergeDict.Count - merged.RenamedEntryNames.Count
 
         Dim modifiedEntriesWithMergers = merged.MergedEntryNames.Where(Function(e) Not modified.AddedEntryNames.Contains(e)).Count()
 
@@ -96,21 +97,24 @@ Public Class DiffOutputRenderer2
         Next
 
         Dim oldEntriesMergedIntoModified = mergedIntoModifiedSources.Count
-        Dim netChange = $"Net entry count change: {netDiff}"
+        Dim netChange = $"Net entry count change: {_file1.Count} → {_file2.Count} ({If(netDiff >= 0, "+", "")}{netDiff})"
 
         Dim modifiedSummaryOpener = $"Modified entries: {modified.ModifiedEntryNames.Count}"
         Dim modifiedAdded = $" + {stats.ModEntriesAddedKeyTotal} added keys across {stats.ModEntriesAddedKeyEntryCount} entries "
         Dim modifiedRemoved = $" - {stats.ModEntriesRemovedKeysWithoutReplacementTotal} removed keys without replacement across {stats.ModEntriesRemovedKeyEntryCount} entries "
         Dim modifiedUpdated = $" ~ {stats.ModEntriesUpdatedKeyTotal} updated keys replaced {stats.ModEntriesReplacedByUpdateTotal} old keys across {stats.ModEntriesUpdatedKeyEntryCount} entries"
+        Dim movedKeys = $" ~ {stats.ModEntriesMovedKeysTotal} keys moved from {stats.ModEntriesMovedKeysSourceCount} entr{If(stats.ModEntriesMovedKeysSourceCount = 1, "y", "ies")} into {stats.ModEntriesMovedKeysTargetCount} entr{If(stats.ModEntriesMovedKeysTargetCount = 1, "y", "ies")}"
+        Dim modifiedMergerNote = $" + {modifiedEntriesWithMergers} entries also received merged content from removed entries (see merged entries below)"
 
         Dim removedSummary = $"Removed entries: {modified.RemovedEntryNames.Count}"
-        Dim removedMergedIntoModified = $" @ {oldEntriesMergedIntoModified} removed entries have been merged into {modifiedEntriesWithMergers} modified entries "
-        Dim removedMergedIntoAdded = $" + {stats.AddedWithMergersSourceEntryCount} removed entries have been merged into {stats.AddedWithMergersEntryCount} added entries"
+        Dim removedMergedTotal = merged.OldToNewMergeDict.Count
+        Dim removedMergedSummary = $" @ {removedMergedTotal} removed entries have been merged into other entries"
+        Dim removedMergedIntoModified = $"    @ {oldEntriesMergedIntoModified} merged into {modifiedEntriesWithMergers} modified entries"
+        Dim removedMergedIntoAdded = $"    + {stats.AddedWithMergersSourceEntryCount} merged into {stats.AddedWithMergersEntryCount} added entries"
         Dim removedRenamed = $" & {merged.RenamedEntryNames.Count} removed entries have been renamed"
         Dim removedNoReplacement = $" - {oldRemovedNoRepl} entries have been removed without replacement"
-        Dim removedReadded = $" + {stats.RemovedByAdditionCount} removed entries have been merged into {stats.AddedEntryWithMergerCount} added entries"
-
         Dim hasAddedWithMergers = stats.AddedWithMergersEntryCount > 0
+        Dim hasMerged = removedMergedTotal > 0
 
         Dim addedMergersSource = $" @ {stats.AddedWithMergersEntryCount} entries consolidate content from {stats.AddedWithMergersSourceEntryCount} removed entries"
         Dim addedMergersNovel = $"    + {stats.AddedWithMergersNovelKeysEntryCount} entries contain {stats.AddedWithMergersNovelKeysTotal} novel keys (not from merged sources)"
@@ -118,18 +122,24 @@ Public Class DiffOutputRenderer2
         Dim addedMergersDropped = $"    - {stats.AddedWithMergersDroppedEntryCount} entries dropped {stats.AddedWithMergersDroppedKeysTotal} keys from merged sources"
         Dim addedMergersCarriedOver = $"    = {stats.AddedWithMergersCarriedOverKeysEntryCount} entries contain {stats.AddedWithMergersCarriedOverKeysTotal} keys carried over unchanged from merged sources"
 
-        Dim plainAddedCount = modified.AddedEntryNames.Count - merged.RenamedEntryNames.Count - stats.AddedWithMergersEntryCount
+        Dim plainAddedCount = modified.AddedEntryNames.Where(
+            Function(e) Not merged.RenamedEntryNames.Contains(e) AndAlso
+                        Not merged.MergeDict.ContainsKey(e)).Count()
 
         Dim added = $"Added entries: {modified.AddedEntryNames.Count}"
         Dim addedPlain = $" + {plainAddedCount} novel entries (without merged content)"
-        Dim addedRenamed = $" & {merged.RenamedEntryNames.Count} added entries are renamed versions of removed entries and may contain other minor changes"
+        Dim renamedInAddedCount = merged.RenamedEntryNames.Where(Function(e) modified.AddedEntryNames.Contains(e)).Count()
+        Dim addedRenamed = $" & {renamedInAddedCount} added entries are renamed versions of removed entries and may contain other minor changes"
 
         Dim hasNewBrowsers = stats.NewBrowserSectionValues.Count > 0
         Dim newBrowserSummary = $" · {stats.NewBrowserSectionValues.Count} new browser{If(stats.NewBrowserSectionValues.Count > 1, "s", "")} added"
+        Dim hasRemovedBrowsers = stats.RemovedBrowserSectionValues.Count > 0
+        Dim removedBrowserSummary = $" · {stats.RemovedBrowserSectionValues.Count} browser{If(stats.RemovedBrowserSectionValues.Count > 1, "s", "")} removed"
 
         Dim modifiedEntriesHaveAdditions = stats.ModEntriesAddedKeyTotal > 0
         Dim modEntriesHaveRemovals = stats.ModEntriesRemovedKeysWithoutReplacementTotal > 0
         Dim modEntriesHaveUpdates = stats.ModEntriesUpdatedKeyTotal > 0
+        Dim hasMovedKeys = stats.ModEntriesMovedKeysTotal > 0
         Dim hasRenames = merged.RenamedEntryNames.Count > 0
         Dim hasMergedIntoAdded = stats.AddedWithMergersSourceEntryCount > 0
         Dim hasMergedIntoModified = modifiedEntriesWithMergers > 0
@@ -141,59 +151,38 @@ Public Class DiffOutputRenderer2
         Dim renamedUpdated = $"    ~ {renameStats.RenamedEntriesUpdatedKeyTotal} updated keys replaced {renameStats.RenamedEntriesReplacedByUpdateTotal} old keys across {renameStats.RenamedEntriesUpdatedKeyEntryCount} entries"
 
         Dim out As New MenuSection
-
-        out.AddTopBorder().AddColoredLine("Diff Summary", ConsoleColor.DarkGreen, centered:=True).AddDivider() _
-           .AddColoredLine(netChange, ConsoleColor.White) _
-           .AddColoredLine(newBrowserSummary, ConsoleColor.Cyan, condition:=hasNewBrowsers) _
-           .AddColoredLine(modifiedSummaryOpener, ConsoleColor.Yellow) _
-           .AddColoredLine(modifiedAdded, ConsoleColor.Green, condition:=modifiedEntriesHaveAdditions) _
-           .AddColoredLine(modifiedRemoved, ConsoleColor.Red, condition:=modEntriesHaveRemovals) _
-           .AddColoredLine(modifiedUpdated, ConsoleColor.Yellow, condition:=modEntriesHaveUpdates) _
-           .AddColoredLine(removedSummary, ConsoleColor.Cyan) _
-           .AddColoredLine(removedMergedIntoModified, ConsoleColor.Cyan, condition:=hasMergedIntoModified) _
-           .AddColoredLine(removedMergedIntoAdded, ConsoleColor.Green, condition:=hasMergedIntoAdded) _
-           .AddColoredLine(removedReadded, ConsoleColor.Green, condition:=stats.RemovedByAdditionCount > 0) _
-           .AddColoredLine(removedRenamed, ConsoleColor.Magenta, condition:=hasRenames) _
-           .AddColoredLine(renamedNameOnly, ConsoleColor.Magenta, condition:=hasRenames AndAlso renameStats.RenamedEntriesNameOnlyCount > 0) _
-           .AddColoredLine(renamedAdded, ConsoleColor.Green, condition:=hasRenames AndAlso renameStats.RenamedEntriesAddedKeyTotal > 0) _
-           .AddColoredLine(renamedRemoved, ConsoleColor.Red, condition:=hasRenames AndAlso renameStats.RenamedEntriesRemovedKeyTotal > 0) _
-           .AddColoredLine(renamedUpdated, ConsoleColor.Yellow, condition:=hasRenames AndAlso renameStats.RenamedEntriesUpdatedKeyTotal > 0) _
-           .AddColoredLine(removedNoReplacement, ConsoleColor.Red) _
-           .AddColoredLine(added, ConsoleColor.DarkGreen) _
-           .AddColoredLine(addedMergersSource, ConsoleColor.DarkCyan, condition:=hasAddedWithMergers) _
-           .AddColoredLine(addedMergersNovel, ConsoleColor.Green, condition:=stats.AddedWithMergersNovelKeysTotal > 0) _
-           .AddColoredLine(addedMergersCarriedOver, ConsoleColor.Cyan, condition:=stats.AddedWithMergersCarriedOverKeysTotal > 0) _
-           .AddColoredLine(addedMergersCapturing, ConsoleColor.Yellow, condition:=stats.AddedWithMergersCapturingKeysTotal > 0) _
-           .AddColoredLine(addedMergersDropped, ConsoleColor.Red, condition:=stats.AddedWithMergersDroppedKeysTotal > 0) _
-           .AddColoredLine(addedPlain, ConsoleColor.Green, condition:=plainAddedCount > 0) _
-           .AddColoredLine(addedRenamed, ConsoleColor.Magenta, condition:=hasRenames) _
-           .AddBottomBorder()
-
+        out.AddTopBorder().AddColoredLine("Diff Summary", ConsoleColor.DarkGreen, centered:=True).AddDivider()
         gLog("Diff Summary", ascend:=True, leadr:=True, ascAmt:=2)
-        gLog(netChange)
-        gLog(newBrowserSummary, cond:=hasNewBrowsers)
-        gLog(modifiedSummaryOpener)
-        gLog(modifiedAdded, cond:=modifiedEntriesHaveAdditions)
-        gLog(modifiedRemoved, cond:=modEntriesHaveRemovals)
-        gLog(modifiedUpdated, cond:=modEntriesHaveUpdates)
-        gLog(removedSummary)
-        gLog(removedMergedIntoModified, cond:=hasMergedIntoModified)
-        gLog(removedMergedIntoAdded, cond:=hasMergedIntoAdded)
-        gLog(removedReadded, cond:=stats.RemovedByAdditionCount > 0)
-        gLog(removedRenamed, cond:=hasRenames)
-        gLog(renamedNameOnly, cond:=hasRenames AndAlso renameStats.RenamedEntriesNameOnlyCount > 0)
-        gLog(renamedAdded, cond:=hasRenames AndAlso renameStats.RenamedEntriesAddedKeyTotal > 0)
-        gLog(renamedRemoved, cond:=hasRenames AndAlso renameStats.RenamedEntriesRemovedKeyTotal > 0)
-        gLog(renamedUpdated, cond:=hasRenames AndAlso renameStats.RenamedEntriesUpdatedKeyTotal > 0)
-        gLog(removedNoReplacement)
-        gLog(added)
-        gLog(addedMergersSource, cond:=hasAddedWithMergers)
-        gLog(addedMergersNovel, cond:=stats.AddedWithMergersNovelKeysTotal > 0)
-        gLog(addedMergersCarriedOver, cond:=stats.AddedWithMergersCarriedOverKeysTotal > 0)
-        gLog(addedMergersCapturing, cond:=stats.AddedWithMergersCapturingKeysTotal > 0)
-        gLog(addedMergersDropped, cond:=stats.AddedWithMergersDroppedKeysTotal > 0)
-        gLog(addedPlain, cond:=plainAddedCount > 0)
-        gLog(addedRenamed, cond:=hasRenames)
+
+        Emit(out, netChange, ConsoleColor.White)
+        Emit(out, newBrowserSummary, ConsoleColor.Cyan, hasNewBrowsers)
+        Emit(out, removedBrowserSummary, ConsoleColor.Red, hasRemovedBrowsers)
+        Emit(out, modifiedSummaryOpener, ConsoleColor.Yellow)
+        Emit(out, modifiedAdded, ConsoleColor.Green, modifiedEntriesHaveAdditions)
+        Emit(out, modifiedRemoved, ConsoleColor.Red, modEntriesHaveRemovals)
+        Emit(out, modifiedUpdated, ConsoleColor.Yellow, modEntriesHaveUpdates)
+        Emit(out, movedKeys, ConsoleColor.Cyan, hasMovedKeys)
+        Emit(out, modifiedMergerNote, ConsoleColor.DarkCyan, hasMergedIntoModified)
+        Emit(out, removedSummary, ConsoleColor.Cyan)
+        Emit(out, removedMergedSummary, ConsoleColor.Cyan, hasMerged)
+        Emit(out, removedMergedIntoModified, ConsoleColor.Cyan, hasMerged AndAlso hasMergedIntoModified)
+        Emit(out, removedMergedIntoAdded, ConsoleColor.Green, hasMerged AndAlso hasMergedIntoAdded)
+        Emit(out, removedRenamed, ConsoleColor.Magenta, hasRenames)
+        Emit(out, renamedNameOnly, ConsoleColor.Magenta, hasRenames AndAlso renameStats.RenamedEntriesNameOnlyCount > 0)
+        Emit(out, renamedAdded, ConsoleColor.Green, hasRenames AndAlso renameStats.RenamedEntriesAddedKeyTotal > 0)
+        Emit(out, renamedRemoved, ConsoleColor.Red, hasRenames AndAlso renameStats.RenamedEntriesRemovedKeyTotal > 0)
+        Emit(out, renamedUpdated, ConsoleColor.Yellow, hasRenames AndAlso renameStats.RenamedEntriesUpdatedKeyTotal > 0)
+        Emit(out, removedNoReplacement, ConsoleColor.Red)
+        Emit(out, added, ConsoleColor.DarkGreen)
+        Emit(out, addedMergersSource, ConsoleColor.DarkCyan, hasAddedWithMergers)
+        Emit(out, addedMergersNovel, ConsoleColor.Green, stats.AddedWithMergersNovelKeysTotal > 0)
+        Emit(out, addedMergersCarriedOver, ConsoleColor.Cyan, stats.AddedWithMergersCarriedOverKeysTotal > 0)
+        Emit(out, addedMergersCapturing, ConsoleColor.Yellow, stats.AddedWithMergersCapturingKeysTotal > 0)
+        Emit(out, addedMergersDropped, ConsoleColor.Red, stats.AddedWithMergersDroppedKeysTotal > 0)
+        Emit(out, addedPlain, ConsoleColor.Green, plainAddedCount > 0)
+        Emit(out, addedRenamed, ConsoleColor.Magenta, renamedInAddedCount > 0)
+
+        out.AddBottomBorder()
         gLog("", descend:=True, descAmt:=2)
         gLog("Diff complete", descend:=True)
 
@@ -212,13 +201,18 @@ Public Class DiffOutputRenderer2
     Public Function SummarizeMergers() As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
+        Dim mergeCount = _state.MergedEntries.OldToNewMergeDict.Count
+
+        If mergeCount = 0 Then Return out
+        Dim mergeHeader = $"{mergeCount} {If(mergeCount = 1, "entry", "entries")} merged or split into other entries"
+        Dim mergeHeaderSection As New MenuSection
+        mergeHeaderSection.AddColoredLine(mergeHeader, ConsoleColor.Cyan, centered:=True).AddDivider(solid:=False)
+        out.Add(mergeHeaderSection)
 
         For Each oldEntry In _state.MergedEntries.OldToNewMergeDict.OrderBy(Function(kvp) kvp.Key, StringComparer.OrdinalIgnoreCase)
 
             Dim oldName = oldEntry.Key
             Dim newTargets = oldEntry.Value
-
-            _state.Statistics.MergedEntryCount += 1
 
             Dim result As MenuSection
 
@@ -229,6 +223,8 @@ Public Class DiffOutputRenderer2
             out.Add(result)
 
         Next
+
+        gLog(mergeHeader, leadr:=True)
 
         Return out
 
@@ -263,7 +259,7 @@ Public Class DiffOutputRenderer2
 
         For Each target In newTargets
 
-            result.AddColoredLine($"  • {target}", color:=ConsoleColor.Magenta, centered:=True)
+            result.AddColoredLine($"{target}", color:=ConsoleColor.Magenta, centered:=True)
             gLog($"    • {target}")
 
         Next
@@ -274,6 +270,18 @@ Public Class DiffOutputRenderer2
         result.AddColoredLine("Old entry:", color:=ConsoleColor.DarkRed, centered:=True)
         gLog("Old entry:", leadr:=True)
         BuildEntrySection(result, oldSection.ToString)
+
+        For Each target In newTargets
+
+            Dim targetSection = _file2.GetSection(target)
+            If targetSection Is Nothing Then Continue For
+
+            result.AddBlank()
+            result.AddColoredLine($"Merged entry: {target}", color:=ConsoleColor.Magenta, centered:=True)
+            gLog($"Merged entry: {target}", leadr:=True)
+            BuildEntrySection(result, targetSection.ToString)
+
+        Next
 
         Return result
 
@@ -292,6 +300,7 @@ Public Class DiffOutputRenderer2
     Public Function SummarizeRenames() As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
+        Dim qualifyingCount = 0
 
         For Each entry In _state.MergedEntries.RenamedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
@@ -300,7 +309,6 @@ Public Class DiffOutputRenderer2
                              (_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(entry) AndAlso
                               _state.ModifiedEntries.RemovedKeyTracker2(entry).Count > 0)
 
-            ' Only count non-Name updated keys as real changes
             If Not hasChanges AndAlso _state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(entry) Then
 
                 For Each kvp In _state.ModifiedEntries.ModifiedKeyTracker2(entry)
@@ -313,10 +321,20 @@ Public Class DiffOutputRenderer2
 
             If hasChanges Then Continue For
 
+            qualifyingCount += 1
             Dim oldName = _state.MergedEntries.RenamedEntryPairs(entry)
             out.Add(MakeDiff(_file1.GetSection(oldName), 3, _file2.GetSection(entry)))
 
         Next
+
+        If qualifyingCount = 0 Then Return out
+
+        Dim header = $"{qualifyingCount} {If(qualifyingCount = 1, "entry", "entries")} renamed (name-only changes)"
+        Dim headerSection As New MenuSection
+        headerSection.AddColoredLine(header, ConsoleColor.Magenta, centered:=True).AddDivider(solid:=False)
+        gLog(descend:=True)
+        gLog(header, ascend:=True)
+        out.Insert(0, headerSection)
 
         Return out
 
@@ -334,56 +352,32 @@ Public Class DiffOutputRenderer2
     ''' </returns>
     Public Function ItemizeMergers() As List(Of MenuSection)
 
+        Dim qualifyingCount = 0
+
         For Each targetEntry In _state.MergedEntries.MergeDict.Keys _
                                     .OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
 
             If _state.ModifiedEntries.AddedEntryNames.Contains(targetEntry) Then Continue For
             If _state.MergedEntries.RenamedEntryNames.Contains(targetEntry) Then Continue For
 
-            Dim uniqueKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-            Dim combinedOldKeys As New List(Of iniKey2)
-            Dim sourceEntryMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
-
-            For Each oldEntryName In _state.MergedEntries.MergeDict(targetEntry)
-
-                Dim oldEnt = _file1.GetSection(oldEntryName)
-                If oldEnt Is Nothing Then Continue For
-
-                For Each key In oldEnt.Keys
-
-                    If uniqueKeyValues.Contains(key.Value) Then Continue For
-
-                    combinedOldKeys.Add(key)
-                    uniqueKeyValues.Add(key.Value)
-                    sourceEntryMap(key.Value) = oldEntryName
-
-                Next
-
-            Next
-
-            ' Include the target's own old keys if it existed in file1 and wasn't already
-            ' listed as a merge source (avoids mutating MergeDict as the old code did)
-            If _file1.Contains(targetEntry) AndAlso
-               Not _state.MergedEntries.MergeDict(targetEntry).Contains(targetEntry) Then
-
-                For Each key In _file1.GetSection(targetEntry).Keys
-
-                    If uniqueKeyValues.Contains(key.Value) Then Continue For
-
-                    combinedOldKeys.Add(key)
-                    uniqueKeyValues.Add(key.Value)
-                    sourceEntryMap(key.Value) = targetEntry
-
-                Next
-
-            End If
-
-            _mergerSourceMaps(targetEntry) = sourceEntryMap
-            _keyAnalyzer.FindModificationsFromCombinedKeys(combinedOldKeys, _file2.GetSection(targetEntry))
+            qualifyingCount += 1
+            Dim combined = BuildCombinedOldKeys(_state.MergedEntries.MergeDict(targetEntry), targetEntry)
+            _mergerSourceMaps(targetEntry) = combined.SourceEntryMap
+            _keyAnalyzer.FindModificationsFromCombinedKeys(combined.Keys, _file2.GetSection(targetEntry))
 
         Next
 
-        Return ItemizeModifications(True)
+        Dim results = ItemizeModifications(True)
+
+        If qualifyingCount = 0 Then Return results
+
+        Dim header = $"{qualifyingCount} modified {If(qualifyingCount = 1, "entry", "entries")} incorporating merged content"
+        Dim headerSection As New MenuSection
+        headerSection.AddColoredLine(header, ConsoleColor.DarkCyan, centered:=True).AddDivider(solid:=False)
+        gLog(header, leadr:=True)
+        results.Insert(0, headerSection)
+
+        Return results
 
     End Function
 
@@ -397,7 +391,7 @@ Public Class DiffOutputRenderer2
     Public Function ItemizeAdditions() As List(Of MenuSection)
 
         Dim results As New List(Of MenuSection)
-        Dim lastEntryHadMergers = False
+        Dim qualifyingCount = 0
 
         For Each entry In _state.ModifiedEntries.AddedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
@@ -405,35 +399,21 @@ Public Class DiffOutputRenderer2
 
             If _state.MergedEntries.MergeDict.ContainsKey(entry) Then Continue For
 
-            Dim section = _file2.GetSection(entry)
-            Dim diffSection = MakeDiff(section, 0)
+            qualifyingCount += 1
 
-            diffSection.AddLine("", condition:=Not lastEntryHadMergers AndAlso
-                                          _state.MergedEntries.MergeDict.ContainsKey(section.Name))
-
-            lastEntryHadMergers = _state.MergedEntries.MergeDict.ContainsKey(section.Name)
-
-            If Not lastEntryHadMergers Then results.Add(diffSection) : Continue For
-
-            _state.Statistics.AddedEntryWithMergerCount += 1
-            Dim out = "This entry contains keys merged from the following removed entries:  "
-
-            diffSection.AddColoredLine(out, color:=ConsoleColor.Yellow, centered:=True)
-            gLog($"  {out}")
-
-            For Each mergedEntry In _state.MergedEntries.MergeDict(section.Name)
-
-                _state.Statistics.RemovedByAdditionCount += 1
-                diffSection.AddColoredLine(mergedEntry, color:=ConsoleColor.DarkCyan, centered:=True)
-                gLog($"        {mergedEntry}")
-
-            Next
-
-            diffSection.AddBlank()
-
-            results.Add(diffSection)
+            results.Add(MakeDiff(_file2.GetSection(entry), 0))
 
         Next
+
+        If qualifyingCount > 0 Then
+
+            Dim addHeader = $"{qualifyingCount} novel {If(qualifyingCount = 1, "entry", "entries")} added"
+            Dim addHeaderSection As New MenuSection
+            addHeaderSection.AddColoredLine(addHeader, ConsoleColor.DarkGreen, centered:=True).AddDivider(solid:=False)
+            gLog(addHeader, leadr:=True)
+            results.Insert(0, addHeaderSection)
+
+        End If
 
         Return results
 
@@ -455,6 +435,7 @@ Public Class DiffOutputRenderer2
     Public Function ItemizeModifications(Optional isMerger As Boolean = False) As List(Of MenuSection)
 
         Dim results = New List(Of MenuSection)
+        Dim qualifyingCount = 0
 
         For Each entry In _state.ModifiedEntries.ModifiedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
@@ -464,19 +445,15 @@ Public Class DiffOutputRenderer2
 
             Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
             Dim newSectionVer = _file2.GetSection(entry)
-
-            Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(entry),
-                          _state.ModifiedEntries.AddedKeyTracker2(entry), New List(Of iniKey2))
-
-            Dim removedKeys = If(_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(entry),
-                            _state.ModifiedEntries.RemovedKeyTracker2(entry), New List(Of iniKey2))
-
-            Dim updatedKeysDict = If(_state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(entry),
-                                 _state.ModifiedEntries.ModifiedKeyTracker2(entry), New Dictionary(Of iniKey2, List(Of iniKey2)))
+            Dim changes = GetKeyChanges(entry)
+            Dim addedKeys = changes.AddedKeys
+            Dim removedKeys = changes.RemovedKeys
+            Dim updatedKeysDict = changes.UpdatedKeysDict
 
             If removedKeys.Count + addedKeys.Count + updatedKeysDict.Count = 0 Then Continue For
 
-            ' Look up source attribution map for merger entries
+            qualifyingCount += 1
+
             Dim sourceMap As Dictionary(Of String, String) = Nothing
             If isMerger Then _mergerSourceMaps.TryGetValue(entry, sourceMap)
 
@@ -489,6 +466,16 @@ Public Class DiffOutputRenderer2
             results.Add(ItemizeMergedEntries(entry, isMerger))
 
         Next
+
+        If Not isMerger AndAlso qualifyingCount > 0 Then
+
+            Dim modHeader = $"{qualifyingCount} modified {If(qualifyingCount = 1, "entry", "entries")}"
+            Dim modHeaderSection As New MenuSection
+            modHeaderSection.AddColoredLine(modHeader, ConsoleColor.Yellow, centered:=True).AddDivider(solid:=False)
+            gLog(modHeader, leadr:=True)
+            results.Insert(0, modHeaderSection)
+
+        End If
 
         Return results
 
@@ -537,7 +524,7 @@ Public Class DiffOutputRenderer2
 
         If updatedKeysDict.Count = 0 Then Return result
 
-        gLog("", ascend:=True, cond:=addedKeys.Count + removedKeys.Count = 0)
+        gLog(Nothing, ascend:=True)
 
         For Each changeList In updatedKeysDict.Values
 
@@ -559,7 +546,7 @@ Public Class DiffOutputRenderer2
 
             Dim outTxt1 = $"{outText1EntryName} has been modified{If(Not isRename, $", replacing {count} old key{If(count > 1, "s", "")}", "")}"
 
-            output.AddColoredLine(outTxt1, ConsoleColor.Yellow)
+            output.AddColoredLine(outTxt1, ConsoleColor.DarkYellow)
             gLog($"  {outTxt1}", leadr:=i = 0)
 
             Dim outTxt2 = $" + New: {If(isRename, newKey.Value, newKey.ToString())}"
@@ -580,13 +567,11 @@ Public Class DiffOutputRenderer2
 
             Next
 
-            output.AddBlank()
-
             result.Add(output)
 
         Next
 
-        gLog(descend:=True, cond:=addedKeys.Count + removedKeys.Count = 0)
+        gLog(Nothing, descend:=True)
 
         Return result
 
@@ -617,6 +602,7 @@ Public Class DiffOutputRenderer2
         Dim outTxt = If(Not isMerger, "This entry contains keys merged from the following removed entries",
                                    "The above changes are measured against the following removed/old entries")
 
+        out.AddBlank()
         out.AddColoredLine(outTxt, ConsoleColor.Yellow, centered:=True)
         gLog()
         gLog($"  {outTxt}")
@@ -627,9 +613,6 @@ Public Class DiffOutputRenderer2
             gLog($"  {mergedEntry}")
 
         Next
-
-        out.AddBlank()
-
         Return out
 
     End Function
@@ -645,19 +628,15 @@ Public Class DiffOutputRenderer2
     Public Function ItemizeRenameChanges() As List(Of MenuSection)
 
         Dim results As New List(Of MenuSection)
+        Dim qualifyingCount = 0
 
         For Each newName In _state.MergedEntries.RenamedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
-            Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(newName),
-                           _state.ModifiedEntries.AddedKeyTracker2(newName), New List(Of iniKey2))
+            Dim changes = GetKeyChanges(newName)
+            Dim addedKeys = changes.AddedKeys
+            Dim removedKeys = changes.RemovedKeys
+            Dim rawUpdatedDict = changes.UpdatedKeysDict
 
-            Dim removedKeys = If(_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(newName),
-                             _state.ModifiedEntries.RemovedKeyTracker2(newName), New List(Of iniKey2))
-
-            Dim rawUpdatedDict = If(_state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(newName),
-                                 _state.ModifiedEntries.ModifiedKeyTracker2(newName), New Dictionary(Of iniKey2, List(Of iniKey2)))
-
-            ' Strip the Name sentinel, the MakeDiff header already shows the rename
             Dim updatedKeysDict As New Dictionary(Of iniKey2, List(Of iniKey2))
             For Each kvp In rawUpdatedDict
 
@@ -667,15 +646,24 @@ Public Class DiffOutputRenderer2
 
             If removedKeys.Count + addedKeys.Count + updatedKeysDict.Count = 0 Then Continue For
 
+            qualifyingCount += 1
             Dim oldName = _state.MergedEntries.RenamedEntryPairs(newName)
             Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
 
-            results.Add(MakeDiff(_file1.GetSection(oldName), 3, _file2.GetSection(newName)))
+            results.Add(MakeDiff(_file1.GetSection(oldName), 2, _file2.GetSection(newName)))
             results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, Nothing))
             results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, Nothing))
             results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, addedKeys, removedKeys, modKeyTypes))
 
         Next
+
+        If qualifyingCount = 0 Then Return results
+
+        Dim msg = $"Minor changes to {qualifyingCount} renamed {If(qualifyingCount = 1, "entry", "entries")}"
+        Dim headerSection As New MenuSection
+        headerSection.AddColoredLine(msg, ConsoleColor.Magenta, centered:=True).AddDivider(solid:=False)
+        gLog(msg, leadr:=True)
+        results.Insert(0, headerSection)
 
         Return results
 
@@ -708,13 +696,14 @@ Public Class DiffOutputRenderer2
         Dim result = New MenuSection
         Dim printColor As ConsoleColor = ConsoleColor.Cyan
 
-        If changeType = 2 OrElse changeType = 3 Then printColor = If(changeType = 2, ConsoleColor.Yellow, ConsoleColor.Magenta)
+        If changeType = 2 OrElse changeType = 3 Then printColor = If(changeType = 2, ConsoleColor.DarkYellow, ConsoleColor.Magenta)
 
-        Dim renamedOrMergedEntryName = If(newSection IsNot Nothing, newSection.Name, "")
+        Dim renamedOrMergedEntryName = If((changeType = 3 OrElse changeType = 4) AndAlso newSection IsNot Nothing, newSection.Name, "")
         Dim changeTypeStrs = {"added", "removed", "modified", "renamed to ", "merged into "}
         Dim changeStr = $"{section.Name} has been {changeTypeStrs(changeType)}{renamedOrMergedEntryName}"
 
-        result.AddColoredLine(changeStr, color:=If(changeType >= 2, printColor, If(changeType < 1, ConsoleColor.Green, ConsoleColor.Red)), centered:=True)
+        result.AddBlank(changeType = 2)
+        result.AddColoredLine(changeStr, color:=If(changeType >= 2, printColor, GetRedGreen(changeType = 1)), centered:=True)
         gLog($"  {changeStr}", leadr:=True)
 
         If Not ShowFullEntries Then Return result
@@ -728,7 +717,7 @@ Public Class DiffOutputRenderer2
             result.AddColoredLine("Old entry:", color:=ConsoleColor.DarkRed, centered:=True)
 
             gLog()
-            gLog("Old entry:", leadr:=True)
+            gLog("    Old entry:", leadr:=True)
 
         End If
 
@@ -739,7 +728,7 @@ Public Class DiffOutputRenderer2
         Dim out = If(changeType = 3, "Renamed entry: ", "Merged entry: ")
 
         result.AddBlank()
-        result.AddColoredLine(out, color:=printColor)
+        result.AddColoredLine(out, color:=printColor, centered:=True)
 
         gLog(out, leadr:=True)
         BuildEntrySection(result, newSection.ToString)
@@ -768,7 +757,7 @@ Public Class DiffOutputRenderer2
 
             Dim line = splitEntry(i).Replace(vbLf, "")
             section.AddLine(line)
-            gLog(line, indAmt:=4)
+            gLog($"        {line}")
 
         Next
 
@@ -789,7 +778,6 @@ Public Class DiffOutputRenderer2
 
         If _state.KeyMovements.MovedKeys.Count = 0 Then Return results
 
-        ' Group movements by source entry
         Dim movementsBySource As New Dictionary(Of String, List(Of KeyMovementDetail))(StringComparer.OrdinalIgnoreCase)
 
         For Each kvp In _state.KeyMovements.MovedKeys
@@ -808,6 +796,12 @@ Public Class DiffOutputRenderer2
             movementsBySource(source).Add(New KeyMovementDetail(keyName, keyValue, target))
 
         Next
+
+        Dim sourceCount = movementsBySource.Count
+        Dim movHeader = $"Keys moved between entries ({sourceCount} source {If(sourceCount = 1, "entry", "entries")})"
+        Dim movHeaderSection As New MenuSection
+        movHeaderSection.AddColoredLine(movHeader, ConsoleColor.Cyan, centered:=True).AddDivider(solid:=False)
+        results.Add(movHeaderSection)
 
         ' Output movements grouped by source entry
         For Each sourceEntry In movementsBySource.OrderBy(Function(kvp) kvp.Key, StringComparer.OrdinalIgnoreCase)
@@ -829,6 +823,8 @@ Public Class DiffOutputRenderer2
 
         Next
 
+        gLog(movHeader, leadr:=True)
+
         Return results
 
     End Function
@@ -847,7 +843,7 @@ Public Class DiffOutputRenderer2
     Public Function ItemizeAddedEntriesWithMergers() As List(Of MenuSection)
 
         Dim results As New List(Of MenuSection)
-        Dim processedOldEntries As New HashSet(Of String)
+        Dim qualifyingCount = 0
 
         For Each entry In _state.ModifiedEntries.AddedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
@@ -857,41 +853,16 @@ Public Class DiffOutputRenderer2
             ' Skip entries without merged content - handled by ItemizeAdditions
             If Not _state.MergedEntries.MergeDict.ContainsKey(entry) Then Continue For
 
+            qualifyingCount += 1
+
             Dim section = _file2.GetSection(entry)
             Dim mergedCount = _state.MergedEntries.MergeDict(entry).Count
 
-            ' Build combined old key list directly, avoids iniKeyCollection name deduplication
-            ' dropping keys that share a name across different source entries (e.g. two FileKey1 values)
-            Dim uniqueKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-            Dim combinedOldKeys As New List(Of iniKey2)
+            Dim combined = BuildCombinedOldKeys(_state.MergedEntries.MergeDict(entry), "")
+            Dim sourceEntryMap = combined.SourceEntryMap
 
-            Dim sourceEntryMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+            _keyAnalyzer.FindModificationsForAddedEntryFromKeys(combined.Keys, _file2.GetSection(entry))
 
-            For i = 0 To _state.MergedEntries.MergeDict(entry).Count - 1
-
-                Dim oldEntryName = _state.MergedEntries.MergeDict(entry)(i)
-                If Not _file1.Contains(oldEntryName) Then Continue For
-
-                Dim oldEnt = _file1.GetSection(oldEntryName)
-
-                For Each key In oldEnt.Keys
-
-                    If uniqueKeyValues.Contains(key.Value) Then Continue For
-
-                    combinedOldKeys.Add(key)
-                    uniqueKeyValues.Add(key.Value)
-                    sourceEntryMap(key.Value) = oldEntryName
-
-                Next
-
-                processedOldEntries.Add(oldEntryName)
-
-            Next
-
-            ' Compute the modifications between combined old entry and new entry
-            _keyAnalyzer.FindModificationsForAddedEntryFromKeys(combinedOldKeys, _file2.GetSection(entry))
-
-            ' Header: Entry added with merged content
             Dim headerSection As New MenuSection
             Dim headerText = $"{entry} has been added (consolidating {mergedCount} removed entr{If(mergedCount = 1, "y", "ies")})"
 
@@ -899,7 +870,6 @@ Public Class DiffOutputRenderer2
             gLog($"  {headerText}", leadr:=True)
             results.Add(headerSection)
 
-            ' List merged entries
             Dim mergedListSection As New MenuSection
             mergedListSection.AddColoredLine("Merged from:", ConsoleColor.Yellow, centered:=True)
             gLog("  Merged from:")
@@ -914,18 +884,11 @@ Public Class DiffOutputRenderer2
             mergedListSection.AddBlank()
             results.Add(mergedListSection)
 
-            ' Show key changes from tracked data
-            Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(entry),
-                          _state.ModifiedEntries.AddedKeyTracker2(entry), New List(Of iniKey2))
+            Dim entryChanges = GetKeyChanges(entry)
+            Dim addedKeys = entryChanges.AddedKeys
+            Dim removedKeys = entryChanges.RemovedKeys
+            Dim updatedKeysDict = entryChanges.UpdatedKeysDict
 
-            Dim removedKeys = If(_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(entry),
-                            _state.ModifiedEntries.RemovedKeyTracker2(entry), New List(Of iniKey2))
-
-            Dim updatedKeysDict = If(_state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(entry),
-                                 _state.ModifiedEntries.ModifiedKeyTracker2(entry),
-                                 New Dictionary(Of iniKey2, List(Of iniKey2)))
-
-            ' Build value+type sets for membership checks
             Dim addedKeyIds As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
             For Each k In addedKeys : addedKeyIds.Add($"{k.KeyType}|{k.Value}") : Next
 
@@ -939,7 +902,6 @@ Public Class DiffOutputRenderer2
                 Dim keyId = $"{key.KeyType}|{key.Value}"
                 If addedKeyIds.Contains(keyId) OrElse removedKeyIds.Contains(keyId) Then Continue For
 
-                ' Skip if it's in updated keys (modified), compare by value
                 Dim isUpdated = False
                 For Each kvp In updatedKeysDict
 
@@ -949,7 +911,6 @@ Public Class DiffOutputRenderer2
 
                 If isUpdated Then Continue For
 
-                ' If it's in sourceEntryMap, it was carried over from a merged source
                 If sourceEntryMap.ContainsKey(key.Value) Then carriedOverKeys.Add(key)
 
             Next
@@ -960,7 +921,6 @@ Public Class DiffOutputRenderer2
 
                 Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
 
-                ' New keys in the added entry (not from merged sources)
                 If addedKeys.Count > 0 Then
 
                     Dim newKeysSection As New MenuSection
@@ -973,7 +933,6 @@ Public Class DiffOutputRenderer2
 
                 End If
 
-                ' Keys from merged entries that were not carried over into this added entry
                 If removedKeys.Count > 0 Then
 
                     Dim droppedSection As New MenuSection
@@ -987,7 +946,6 @@ Public Class DiffOutputRenderer2
 
                 End If
 
-                ' Keys that captured/replaced multiple old keys
                 If updatedKeysDict.Count > 0 Then
 
                     Dim capturedSection As New MenuSection
@@ -1002,11 +960,19 @@ Public Class DiffOutputRenderer2
 
             End If
 
-            Dim spacer As New MenuSection
-            spacer.AddBlank()
-            results.Add(spacer)
+            results.Add(New MenuSection().AddBlank)
 
         Next
+
+        If qualifyingCount > 0 Then
+
+            Dim awmHeader = $"{qualifyingCount} added {If(qualifyingCount = 1, "entry", "entries")} consolidating removed content"
+            Dim awmHeaderSection As New MenuSection
+            awmHeaderSection.AddColoredLine(awmHeader, ConsoleColor.Green, centered:=True).AddDivider(solid:=False)
+            gLog(awmHeader, leadr:=True)
+            results.Insert(0, awmHeaderSection)
+
+        End If
 
         Return results
 
@@ -1030,22 +996,62 @@ Public Class DiffOutputRenderer2
         If novelValues.Count = 0 Then Return results
 
         Dim plural = If(novelValues.Count = 1, "browser", "browsers")
-        Dim header = $"New Web Browser Support ({novelValues.Count} {plural})"
+        Dim header = $"{novelValues.Count} New web {plural}"
 
         Dim out As New MenuSection
         out.AddColoredLine(header, ConsoleColor.Cyan, centered:=True) _
-           .AddDivider(False)
+           .AddDivider(solid:=False)
 
-        gLog(header, ascend:=True)
+        gLog(ascend:=True)
 
         For Each sectionValue In novelValues
 
             out.AddColoredLine(sectionValue, ConsoleColor.Green, True)
-            gLog($"  {sectionValue}")
+            gLog($"  {sectionValue}", buffr:=True)
 
         Next
 
-        gLog("", descend:=True)
+        gLog(header, descend:=True)
+
+        out.AddDivider(False)
+        results.Add(out)
+        Return results
+
+    End Function
+
+    ''' <summary>
+    ''' Produces one <c>MenuSection</c> listing all web browsers whose support was
+    ''' removed in the new file, or an empty list if none were removed.
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' A list containing a single <c>MenuSection</c> with the removed browser header and
+    ''' one line per removed browser value, or an empty list if there are no removed browsers
+    ''' </returns>
+    Public Function ItemizeRemovedBrowsers() As List(Of MenuSection)
+
+        Dim results As New List(Of MenuSection)
+        Dim removedValues = _state.Statistics.RemovedBrowserSectionValues
+
+        If removedValues.Count = 0 Then Return results
+
+        Dim plural = If(removedValues.Count = 1, "browser", "browsers")
+        Dim header = $"{removedValues.Count} Removed web {plural}"
+
+        Dim out As New MenuSection
+        out.AddColoredLine(header, ConsoleColor.Red, centered:=True) _
+           .AddDivider(solid:=False)
+
+        gLog(ascend:=True)
+
+        For Each sectionValue In removedValues
+
+            out.AddColoredLine(sectionValue, ConsoleColor.Red, True)
+            gLog($"  {sectionValue}", buffr:=True)
+
+        Next
+
+        gLog(header, descend:=True)
 
         out.AddDivider(False)
         results.Add(out)
@@ -1149,7 +1155,6 @@ Public Class DiffOutputRenderer2
             Dim key = kl(i).ToString()
             Dim color = If(wasAdded, ConsoleColor.Green, ConsoleColor.Red)
 
-            ' Added keys either come from a source (mergers, renames) or are novel
             Dim sourceInfo = ""
             If sourceEntryMap IsNot Nothing AndAlso sourceEntryMap.ContainsKey(kl(i).Value) Then
 
@@ -1172,6 +1177,124 @@ Public Class DiffOutputRenderer2
         gLog(Nothing, descend:=True)
 
         Return out
+
+    End Function
+
+    Private Sub Emit(section As MenuSection, text As String, color As ConsoleColor, Optional condition As Boolean = True)
+        section.AddColoredLine(text, color, condition:=condition)
+        gLog(text, cond:=condition)
+    End Sub
+
+    Private Class EntryKeyChanges
+
+        Public ReadOnly AddedKeys As List(Of iniKey2)
+        Public ReadOnly RemovedKeys As List(Of iniKey2)
+        Public ReadOnly UpdatedKeysDict As Dictionary(Of iniKey2, List(Of iniKey2))
+
+        Public Sub New(added As List(Of iniKey2),
+                       removed As List(Of iniKey2),
+                       updated As Dictionary(Of iniKey2, List(Of iniKey2)))
+
+            AddedKeys = added
+            RemovedKeys = removed
+            UpdatedKeysDict = updated
+
+        End Sub
+
+    End Class
+
+    Private Function GetKeyChanges(entry As String) As EntryKeyChanges
+
+        Dim added = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(entry),
+                       _state.ModifiedEntries.AddedKeyTracker2(entry), New List(Of iniKey2))
+
+        Dim removed = If(_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(entry),
+                         _state.ModifiedEntries.RemovedKeyTracker2(entry), New List(Of iniKey2))
+
+        Dim updated = If(_state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(entry),
+                         _state.ModifiedEntries.ModifiedKeyTracker2(entry),
+                         New Dictionary(Of iniKey2, List(Of iniKey2)))
+
+        Return New EntryKeyChanges(added, removed, updated)
+
+    End Function
+
+    Private Class CombinedOldKeyResult
+
+        Public ReadOnly Keys As List(Of iniKey2)
+        Public ReadOnly SourceEntryMap As Dictionary(Of String, String)
+
+        Public Sub New(keys As List(Of iniKey2), sourceMap As Dictionary(Of String, String))
+
+            Me.Keys = keys
+            SourceEntryMap = sourceMap
+
+        End Sub
+
+    End Class
+
+    ''' <summary>
+    ''' Builds a deduplicated list of <c>iniKey2</c> objects from all old entries
+    ''' named in <paramref name="mergeSourceNames"/>, plus optionally from
+    ''' <paramref name="targetEntry"/> itself if it existed in file1 and is not
+    ''' already a named merge source.
+    ''' </summary>
+    '''
+    ''' <param name="mergeSourceNames">
+    ''' Names of the old entries whose keys are to be combined
+    ''' </param>
+    '''
+    ''' <param name="targetEntry">
+    ''' The entry receiving the merged content; when non-empty,
+    ''' its own file1 keys are appended if it existed in file1
+    ''' and is not listed as a source. Pass an empty string to skip this step.
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A <c>CombinedOldKeyResult</c> with the deduplicated key list
+    ''' and the value → source-entry attribution map
+    ''' </returns>
+    Private Function BuildCombinedOldKeys(mergeSourceNames As IEnumerable(Of String),
+                                          targetEntry As String) As CombinedOldKeyResult
+
+        Dim uniqueKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim combinedKeys As New List(Of iniKey2)
+        Dim sourceMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+
+        For Each oldEntryName In mergeSourceNames
+
+            Dim oldEnt = _file1.GetSection(oldEntryName)
+            If oldEnt Is Nothing Then Continue For
+
+            For Each key In oldEnt.Keys
+
+                If uniqueKeyValues.Contains(key.Value) Then Continue For
+
+                combinedKeys.Add(key)
+                uniqueKeyValues.Add(key.Value)
+                sourceMap(key.Value) = oldEntryName
+
+            Next
+
+        Next
+
+        If targetEntry <> "" AndAlso
+           _file1.Contains(targetEntry) AndAlso
+           Not mergeSourceNames.Contains(targetEntry) Then
+
+            For Each key In _file1.GetSection(targetEntry).Keys
+
+                If uniqueKeyValues.Contains(key.Value) Then Continue For
+
+                combinedKeys.Add(key)
+                uniqueKeyValues.Add(key.Value)
+                sourceMap(key.Value) = targetEntry
+
+            Next
+
+        End If
+
+        Return New CombinedOldKeyResult(combinedKeys, sourceMap)
 
     End Function
 

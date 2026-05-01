@@ -56,7 +56,8 @@ Public Class DiffStatisticsCalculator2
     ''' <summary>
     ''' Compares <c> Section </c> key values containing <c> "Web Browser" </c> between the two
     ''' files and records any values present in the new file but absent from the old file in
-    ''' <c> DiffStatistics.NewBrowserSectionValues </c>.
+    ''' <c> DiffStatistics.NewBrowserSectionValues </c>, and any values present in the old file
+    ''' but absent from the new file in <c> DiffStatistics.RemovedBrowserSectionValues </c>.
     ''' <br /><br />
     ''' Each browser supported by BrowserBuilder receives a unique Section value
     ''' (e.g. <c> "Brave Web Browser" </c>). A novel value therefore represents a newly
@@ -79,15 +80,17 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
+        Dim newSectionValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
         Dim novelValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
         For Each section In _file2
-
 
             For Each key In section.Keys
 
                 If Not key.typeIs("Section") Then Continue For
                 If key.Value.IndexOf(BrowserSectionSubstring, StringComparison.OrdinalIgnoreCase) < 0 Then Continue For
+
+                newSectionValues.Add(key.Value)
                 If oldSectionValues.Contains(key.Value) Then Continue For
                 If novelValues.Add(key.Value) Then _state.Statistics.NewBrowserSectionValues.Add(key.Value)
 
@@ -95,13 +98,23 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
+        Dim removedValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+        For Each oldValue In oldSectionValues
+
+            If newSectionValues.Contains(oldValue) Then Continue For
+            If removedValues.Add(oldValue) Then _state.Statistics.RemovedBrowserSectionValues.Add(oldValue)
+
+        Next
+
         _state.Statistics.NewBrowserSectionValues.Sort(StringComparer.OrdinalIgnoreCase)
+        _state.Statistics.RemovedBrowserSectionValues.Sort(StringComparer.OrdinalIgnoreCase)
 
     End Sub
 
     ''' <summary>
     ''' Calculates statistics from raw trackers before movement detection.
-    ''' Filters to <c> ModifiedEntryNames </c> only — the tracker dictionaries
+    ''' Filters to <c> ModifiedEntryNames </c> only. the tracker dictionaries
     ''' also contain added-merger entries populated by
     ''' <c> FindModificationsForAddedEntry</c> which must not be counted here.
     ''' </summary>
@@ -123,7 +136,6 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
-        ' Count updated/replaced keys:
         ' ModEntriesUpdatedKeyTotal = number of new keys that replaced old keys
         ' ModEntriesReplacedByUpdateTotal = number of old keys that were replaced
         ' ModEntriesUpdatedKeyEntryCount = number of entries with key updates
@@ -132,15 +144,10 @@ Public Class DiffStatisticsCalculator2
             If Not _state.ModifiedEntries.ModifiedEntryNames.Contains(kvp.Key) Then Continue For
 
             _state.Statistics.ModEntriesUpdatedKeyEntryCount += 1
-
-            ' kvp.Value is Dictionary(Of iniKey2, List(Of iniKey2))
-            ' Each key in this dictionary is a new key
             _state.Statistics.ModEntriesUpdatedKeyTotal += kvp.Value.Count
 
-            ' Count how many old keys were replaced
             For Each updateKvp In kvp.Value
 
-                ' updateKvp.Value is List(Of iniKey2) of old keys replaced by this new key
                 _state.Statistics.ModEntriesReplacedByUpdateTotal += updateKvp.Value.Count
 
             Next
@@ -158,12 +165,11 @@ Public Class DiffStatisticsCalculator2
         For Each newName In _state.MergedEntries.RenamedEntryNames
 
             Dim hasAdded = _state.ModifiedEntries.AddedKeyTracker2.ContainsKey(newName) AndAlso
-                       _state.ModifiedEntries.AddedKeyTracker2(newName).Count > 0
+                           _state.ModifiedEntries.AddedKeyTracker2(newName).Count > 0
 
             Dim hasRemoved = _state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(newName) AndAlso
-                         _state.ModifiedEntries.RemovedKeyTracker2(newName).Count > 0
+                             _state.ModifiedEntries.RemovedKeyTracker2(newName).Count > 0
 
-            ' Count only non-Name updated keys
             Dim realUpdateCount = 0
             Dim realReplacedCount = 0
 
@@ -220,8 +226,6 @@ Public Class DiffStatisticsCalculator2
     Public Sub DetectCrossEntryMovements()
 
         Dim addedKeyInfo As New List(Of AddedKeyInfo)()
-
-        ' Build lookup of all added keys
         For Each kvp In _state.ModifiedEntries.AddedKeyTracker2
 
             Dim entryName = kvp.Key
@@ -231,7 +235,6 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
-        ' Pre-group added keys by KeyType to skip cross-type comparisons in the inner loop
         Dim addedByType As New Dictionary(Of String, List(Of AddedKeyInfo))(StringComparer.OrdinalIgnoreCase)
         For Each info In addedKeyInfo
 
@@ -240,45 +243,31 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
-        ' Track keys to remove from trackers after detection
         Dim keysToRemoveFromAdded As New Dictionary(Of String, List(Of iniKey2))
         Dim keysToRemoveFromRemoved As New Dictionary(Of String, List(Of iniKey2))
-
-        ' Check each removed key to see if it was added elsewhere
         For Each kvp In _state.ModifiedEntries.RemovedKeyTracker2
 
             Dim sourceEntry = kvp.Key
             Dim removedKeyList = kvp.Value
-
             For Each removedKey In removedKeyList.ToList()
 
-                ' Only compare against added keys of the same type
                 Dim sameTypeAdded As List(Of AddedKeyInfo) = Nothing
                 If Not addedByType.TryGetValue(removedKey.KeyType, sameTypeAdded) Then Continue For
 
-                ' Look for matching added keys
                 For Each addedInfo In sameTypeAdded
 
                     Dim targetEntry = addedInfo.EntryName
                     Dim addedKey = addedInfo.Key
 
-                    ' Same entry = not a movement
                     If String.Equals(sourceEntry, targetEntry, StringComparison.OrdinalIgnoreCase) Then Continue For
 
-                    ' Use the same comparison logic as DetermineModifiedKeys
-                    ' Check both directions: new captures old OR old captures new
                     Dim newCapturesOld = KeyComparisonStrategyFactory.CompareKeys(addedKey, removedKey)
                     Dim oldCapturesNew = KeyComparisonStrategyFactory.CompareKeys(removedKey, addedKey)
 
-                    ' For a movement, we need an exact match (bidirectional equivalence)
-                    If Not (newCapturesOld AndAlso oldCapturesNew) Then Continue For
-
-                    ' Track the movement
+                    If Not (newCapturesOld OrElse oldCapturesNew) Then Continue For
                     Dim movementKey = $"{removedKey.Name}{MovementKeySeparator}{removedKey.Value}{MovementKeySeparator}{sourceEntry}"
                     _state.KeyMovements.MovedKeys(movementKey) = New KeyMovementInfo(sourceEntry, targetEntry)
                     _state.Statistics.ModEntriesMovedKeysTotal += 1
-
-                    ' Mark keys for removal from trackers
                     If Not keysToRemoveFromRemoved.ContainsKey(sourceEntry) Then keysToRemoveFromRemoved(sourceEntry) = New List(Of iniKey2)
 
                     keysToRemoveFromRemoved(sourceEntry).Add(removedKey)
@@ -286,12 +275,10 @@ Public Class DiffStatisticsCalculator2
                     If Not keysToRemoveFromAdded.ContainsKey(targetEntry) Then keysToRemoveFromAdded(targetEntry) = New List(Of iniKey2)
 
                     keysToRemoveFromAdded(targetEntry).Add(addedKey)
-
-                    ' Decrement added/removed statistics
                     _state.Statistics.ModEntriesAddedKeyTotal -= 1
                     _state.Statistics.ModEntriesRemovedKeysWithoutReplacementTotal -= 1
 
-                    Exit For ' Only match once per removed key
+                    Exit For
 
                 Next
 
@@ -299,13 +286,11 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
-        ' Actually remove moved keys from trackers
         For Each kvp In keysToRemoveFromRemoved
 
             Dim sourceEntry = kvp.Key
             For Each key In kvp.Value : _state.ModifiedEntries.RemovedKeyTracker2(sourceEntry).Remove(key) : Next
 
-            ' Clean up empty lists
             If _state.ModifiedEntries.RemovedKeyTracker2(sourceEntry).Count = 0 Then _state.ModifiedEntries.RemovedKeyTracker2.Remove(sourceEntry)
 
         Next
@@ -315,12 +300,10 @@ Public Class DiffStatisticsCalculator2
             Dim targetEntry = kvp.Key
             For Each key In kvp.Value : _state.ModifiedEntries.AddedKeyTracker2(targetEntry).Remove(key) : Next
 
-            ' Clean up empty lists
             If _state.ModifiedEntries.AddedKeyTracker2(targetEntry).Count = 0 Then _state.ModifiedEntries.AddedKeyTracker2.Remove(targetEntry)
 
         Next
 
-        ' Count unique source and target entries
         Dim sourceEntries As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
         Dim targetEntries As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
@@ -403,7 +386,6 @@ Public Class DiffStatisticsCalculator2
 
             If removedKeys.Count > 0 Then _state.Statistics.AddedWithMergersDroppedEntryCount += 1
 
-
             If updatedKeysDict.Count = 0 Then Continue For
 
             _state.Statistics.AddedWithMergersCapturingKeysTotal += updatedKeysDict.Count
@@ -476,7 +458,6 @@ Public Class DiffStatisticsCalculator2
     ''' </param>
     Private Sub ComputeKeyCaptureRates(oldEntryCaptures As Dictionary(Of String, OldEntryKeyTracking))
 
-        ' Build reverse lookup: oldEntryName -> Set(Of newEntryNames) it was merged into
         Dim targetsForOld As New Dictionary(Of String, HashSet(Of String))(StringComparer.OrdinalIgnoreCase)
         For Each kvp In _state.MergedEntries.MergeDict
 
@@ -494,7 +475,6 @@ Public Class DiffStatisticsCalculator2
             Dim tracking = oldEntryKvp.Value
             Dim oldSection = _file1.GetSection(oldEntryKvp.Key)
 
-            ' Only check the specific new entries this old entry was merged into
             Dim relevantTargets As HashSet(Of String) = Nothing
             If Not targetsForOld.TryGetValue(oldEntryKvp.Key, relevantTargets) Then Continue For
 
@@ -508,7 +488,6 @@ Public Class DiffStatisticsCalculator2
 
                     If tracking.CapturedKeyValues.Contains(oldKey.Value) Then Continue For
 
-                    ' Fast path: exact value match avoids CompareKeys entirely
                     If newKeyValues.Contains(oldKey.Value) Then
 
                         tracking.CapturedKeyValues.Add(oldKey.Value)
@@ -518,7 +497,6 @@ Public Class DiffStatisticsCalculator2
 
                     End If
 
-                    ' Slow path: wildcard / regex comparison
                     For Each newKey In newSection.Keys
 
                         If Not KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey) Then Continue For
@@ -590,8 +568,7 @@ Public Class DiffStatisticsCalculator2
         Next
 
         gLog("SOURCE ENTRY KEY STATUS REPORT:")
-        gLog("✓ = Captured, ✗ = Dropped")
-        gLog("")
+        gLog("✓ = Captured, ✗ = Dropped", buffr:=True)
 
         For Each kvp In oldEntryCaptures
 
@@ -620,7 +597,10 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
-        Dim labels() = {"DELETION  (FileKey/RegKey):", "DETECTION (Detect/DetectFile):", "CATEGORY  (Section/LangSecRef):", "OTHER     (Warning etc.):"}
+        Dim labels() = {"DELETION  (FileKey/RegKey):",
+                        "DETECTION (Detect/DetectFile):",
+                        "CATEGORY  (Section/LangSecRef):",
+                        "OTHER     (Warning etc.):"}
 
         gLog(String.Format("{0,-34}{1,7}{2,10}{3,9}{4,8}", "KEY STATUS SUMMARY:", "Total", "Captured", "Dropped", "Capture Rate"))
 
@@ -662,7 +642,7 @@ Public Class DiffStatisticsCalculator2
     ''' </returns>
     Private Function getMarker(key As iniKey2) As String
 
-        Dim isDelete = (key.KeyType = "FileKey" OrElse key.KeyType = "RegKey")
+        Dim isDelete = key.KeyType = "FileKey" OrElse key.KeyType = "RegKey"
         Dim isDetect = key.KeyType = "Detect" OrElse key.KeyType = "DetectFile"
         Dim isCategory = key.KeyType = "Section" OrElse key.KeyType = "LangSecRef"
         Dim marker = If(isDelete, "[DELETION]", If(isDetect, "[DETECTION]", If(isCategory, "[CATEGORY]", "[OTHER]")))

@@ -189,9 +189,29 @@ Public Class EntryChangeDetector2
 
         Dim out As New List(Of MenuSection)
 
+        Dim totalRemoved = _state.ModifiedEntries.RemovedEntryNames.Count
+        Dim renamedCount = _state.MergedEntries.RenamedEntryNames.Count
+        Dim mergedCount = _state.MergedEntries.OldToNewMergeDict.Count
+        Dim noReplacementCount = totalRemoved - renamedCount - mergedCount
+
+        Dim header As New MenuSection
+        header.AddColoredLine($"{totalRemoved} entries removed", ConsoleColor.DarkRed, True)
+        If renamedCount > 0 Then header.AddColoredLine($"  & {renamedCount} renamed", ConsoleColor.Magenta, True)
+        If mergedCount > 0 Then header.AddColoredLine($"  @ {mergedCount} merged into other entries", ConsoleColor.Cyan, True)
+        header.AddColoredLine($"  - {noReplacementCount} removed without replacement", ConsoleColor.Red, True)
+        header.AddDivider(solid:=False)
+        out.Add(header)
+
         For Each key In results.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
+
             out.Add(results(key))
+
         Next
+
+        gLog($"{totalRemoved} entries removed", leadr:=True)
+        gLog($"  & {renamedCount} renamed", cond:=renamedCount > 0)
+        gLog($"  @ {mergedCount} merged into other entries", cond:=mergedCount > 0)
+        gLog($"  - {noReplacementCount} removed without replacement")
 
         Return out
 
@@ -218,14 +238,18 @@ Public Class EntryChangeDetector2
                                              oldEntryTextMap As Dictionary(Of String, String))
 
         For Each section In potentialMatches
+
             _state.Caches.CachedNewEntries2(section.Name) = section
             snapshotTextMap(section.Name) = section.ToString().ToUpperInvariant()
+
         Next
 
         For Each entryName In _state.ModifiedEntries.RemovedEntryNames
+
             Dim oldSection2 = _file1.GetSection(entryName)
             _state.Caches.CachedOldEntries2(oldSection2.Name) = oldSection2
             oldEntryTextMap(entryName) = oldSection2.ToString().ToUpperInvariant()
+
         Next
 
     End Sub
@@ -431,7 +455,7 @@ Public Class EntryChangeDetector2
         Dim probableMatches = FindProbableMatches2(entryName.Split(CChar(" ")), potentialMatches, snapshotTextMap, oldEntryTextMap(entryName))
         For Each section In probableMatches : allCandidates.Add(section.Name) : Next
 
-        ' 2. Content-aware: look up each old key value in the reverse indexes
+        ' 2. Content-aware: look up each old key value in the reverse indicies
         For Each key In oldSection2.Keys
 
             If Not key.KeyType.Equals("FileKey", StringComparison.OrdinalIgnoreCase) AndAlso

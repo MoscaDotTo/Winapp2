@@ -289,7 +289,7 @@ Module Diff
         detector2.SnuffNoisyChanges(file2As2)
 
         Dim stepNum = 0
-        Const totalSteps = 18
+        Const totalSteps = 19
 
         Dim doStep = Sub(label As String, action As Action)
                          stepNum += 1
@@ -308,9 +308,10 @@ Module Diff
 
         doStep("· processing new entries ", Sub() detector2.ProcessNewEntries())
         doStep("· processing old entries ", Sub() detector2.ProcessOldEntries())
-        doStep("· detecting new browsers ", Sub() statsCalc2.DetectNewBrowserSupport())
-        collectStep("· itemizing new browsers ", Function() renderer2.ItemizeNewBrowsers())
-        collectStep($"· itemizing {state2.ModifiedEntries.RemovedEntryNames.Count} removals ", Function() detector2.ProcessRemovals())
+        doStep("· detecting browser changes ", Sub() statsCalc2.DetectNewBrowserSupport())
+        collectStep("· itemizing new browsers    ", Function() renderer2.ItemizeNewBrowsers())
+        collectStep("· itemizing removed browsers", Function() renderer2.ItemizeRemovedBrowsers())
+        collectStep($"· itemizing removals            ", Function() detector2.ProcessRemovals())
         doStep("· calculating initial statistics ", Sub() statsCalc2.CalculateInitialStatistics())
         doStep("· tracking keys across entries   ", Sub() statsCalc2.DetectCrossEntryMovements())
         doStep("· calculating rename statistics  ", Sub() statsCalc2.CalculateRenameStatistics())
@@ -326,6 +327,8 @@ Module Diff
 
         Dim timeSpan = Now - start
         gLog($"Total diff time: {timeSpan}")
+
+        out.Add(New MenuSection().AddBottomBorder)
 
         doStep("· calculating summary statistics ", Sub() out.Add(renderer2.LogPostDiff()))
 

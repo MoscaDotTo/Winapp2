@@ -176,23 +176,6 @@ End Class
 Public Class DiffStatistics
 
     ''' <summary>
-    ''' Counts the number of entries that were merged into newly added entries <br />
-    ''' ie. entries that were removed but which had all of their contents merged into entries that were added
-    ''' </summary>
-    Public Property RemovedByAdditionCount As Integer = 0
-
-    ''' <summary>
-    ''' Counts the total number of entries that were merged <br /> ie. entries that were 
-    ''' removed but which had some or all of their contents merged into other entries 
-    ''' </summary>
-    Public Property MergedEntryCount As Integer = 0
-
-    ''' <summary>
-    ''' Counts entries that were added with mergers
-    ''' </summary>
-    Public Property AddedEntryWithMergerCount As Integer = 0
-
-    ''' <summary>
     ''' Counts total keys added in modified entries
     ''' </summary>
     Public Property ModEntriesAddedKeyTotal As Integer = 0
@@ -254,7 +237,6 @@ Public Class DiffStatistics
     ''' </summary>
     Public Property AddedWithMergersSourceEntryCount As Integer = 0
 
-    ' Novel keys (new keys not from merged sources)
     ''' <summary>
     ''' Counts total novel keys added in entries that were added with mergers <br /> ie. keys
     ''' that were added in entries that had mergers, but were not part of the merged old entries)
@@ -266,7 +248,6 @@ Public Class DiffStatistics
     ''' </summary>
     Public Property AddedWithMergersNovelKeysEntryCount As Integer = 0
 
-    ' Capturing keys (new keys that capture old keys)
     ''' <summary>
     ''' Counts total keys in added-with-merger entries that capture (i.e. match or subsume) one or more old keys from merged sources
     ''' </summary>
@@ -282,7 +263,6 @@ Public Class DiffStatistics
     ''' </summary>
     Public Property AddedWithMergersCapturingEntryCount As Integer = 0
 
-    ' Dropped keys (keys from merged entries not carried over)
     ''' <summary>
     ''' Counts total keys from merged source entries that were not carried over into the added-with-merger entry
     ''' </summary>
@@ -293,7 +273,6 @@ Public Class DiffStatistics
     ''' </summary>
     Public Property AddedWithMergersDroppedEntryCount As Integer = 0
 
-    ' Carried over keys (keys from merged entries that were carried over to the added entry)
     ''' <summary>
     ''' Counts total keys from merged source entries that were carried over unchanged into the added-with-merger entry
     ''' </summary>
@@ -352,13 +331,17 @@ Public Class DiffStatistics
     Public Property NewBrowserSectionValues As New List(Of String)
 
     ''' <summary>
+    ''' Section key values (e.g. <c> "Internet Explorer" </c>) that appear in the old file
+    ''' but not in the new file, indicating removed browser support.
+    ''' Populated by <c> DiffStatisticsCalculator2.DetectNewBrowserSupport </c>.
+    ''' </summary>
+    Public Property RemovedBrowserSectionValues As New List(Of String)
+
+    ''' <summary>
     ''' Resets all counters to zero
     ''' </summary>
     Public Sub Reset()
 
-        RemovedByAdditionCount = 0
-        MergedEntryCount = 0
-        AddedEntryWithMergerCount = 0
         ModEntriesAddedKeyTotal = 0
         ModEntriesAddedKeyEntryCount = 0
         ModEntriesRemovedKeyEntryCount = 0
@@ -378,6 +361,7 @@ Public Class DiffStatistics
         RenamedEntriesUpdatedKeyEntryCount = 0
         RenamedEntriesNameOnlyCount = 0
         NewBrowserSectionValues.Clear()
+        RemovedBrowserSectionValues.Clear()
 
     End Sub
 
