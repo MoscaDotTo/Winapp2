@@ -78,7 +78,7 @@ Module maintoolmenu
                 Sub()
                     clrConsole()
                     cwl("Downloading, this may take a moment...")
-                    download(New iniFile(Environment.CurrentDirectory, "winapp2.ini"), getWinappLink, False)
+                    download(New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini"), getWinappLink, False)
                     waUpdateIsAvail = False
                 End Sub, condition:=waUpdateIsAvail) _
             .AddDispatchedOption("Update & Trim", "Download and trim the latest winapp2.ini",
