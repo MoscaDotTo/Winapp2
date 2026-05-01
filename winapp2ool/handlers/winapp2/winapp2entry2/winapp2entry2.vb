@@ -112,6 +112,19 @@ Public Class winapp2entry2
         End Get
     End Property
 
+    ''' <summary>
+    ''' Replaces the FileKey collection with <paramref name="newKeys"/>, renumbered in order.
+    ''' Used by optimization repairs that merge keys together.
+    ''' </summary>
+    '''
+    ''' <param name="newKeys">
+    ''' The replacement FileKey sequence
+    ''' </param>
+    Public Sub ReplaceFileKeys(newKeys As IEnumerable(Of iniKey2))
+        _fileKeys.Clear()
+        _fileKeys.AddRange(newKeys)
+    End Sub
+
     ''' <summary>Keys with KeyType "RegKey"</summary>
     Public ReadOnly Property RegKeys As IReadOnlyList(Of iniKey2)
         Get
@@ -281,6 +294,53 @@ Public Class winapp2entry2
             Case Else            : _errorKeys.Add(key)
         End Select
 
+    End Sub
+
+    ''' <summary>
+    ''' Returns the 0-based index into <c>KeyLists</c> for the given key type name, or -1 if unrecognised.
+    ''' </summary>
+    ''' <param name="keyType">The key type name, e.g. "FileKey"</param>
+    Public Shared Function GetBucketIndex(keyType As String) As Integer
+        Select Case keyType.ToUpperInvariant()
+            Case "DETECTOS"      : Return 0
+            Case "LANGSECREF"    : Return 1
+            Case "SECTION"       : Return 2
+            Case "SPECIALDETECT" : Return 3
+            Case "DETECT"        : Return 4
+            Case "DETECTFILE"    : Return 5
+            Case "DEFAULT"       : Return 6
+            Case "WARNING"       : Return 7
+            Case "FILEKEY"       : Return 8
+            Case "REGKEY"        : Return 9
+            Case "EXCLUDEKEY"    : Return 10
+            Case "ERROR"         : Return 11
+            Case Else            : Return -1
+        End Select
+    End Function
+
+    ''' <summary>
+    ''' Removes a key from the error bucket directly, bypassing <c>KeyType</c> routing.
+    ''' Required when <c>cValidity</c> has partially repaired a key's Name before deciding
+    ''' it cannot be salvaged, leaving the key's <c>KeyType</c> in an inconsistent state.
+    ''' </summary>
+    ''' <param name="key">The key to remove from the error bucket</param>
+    Public Sub ForceRemoveErrorKey(key As iniKey2)
+        _errorKeys.Remove(key)
+    End Sub
+
+    ''' <summary>
+    ''' Moves any error key whose <c>KeyType</c> is now a recognised winapp2.ini type
+    ''' into the appropriate typed bucket. Called after <c>cValidity</c> has had a chance
+    ''' to repair broken keys (e.g. fixing a missing "=" restores a valid KeyType).
+    ''' </summary>
+    Public Sub ReclassifyErrorKeys()
+        Dim toMove = _errorKeys.Where(Function(k)
+            Return GetBucketIndex(k.KeyType) >= 0 AndAlso GetBucketIndex(k.KeyType) <= 10
+        End Function).ToList()
+        For Each k In toMove
+            _errorKeys.Remove(k)
+            AddKey(k)
+        Next
     End Sub
 
     ''' <summary>

@@ -86,6 +86,16 @@ Public Class winapp2file2
     End Property
 
     ''' <summary>
+    ''' The 12 per-category entry lists in <c>FileSectionHeaders</c> order.
+    ''' Each inner list corresponds to one winapp2.ini section (index 11 is the unlabelled main section).
+    ''' </summary>
+    Public ReadOnly Property Categories As IReadOnlyList(Of IReadOnlyList(Of winapp2entry2))
+        Get
+            Return _categories.Select(Function(c) DirectCast(c, IReadOnlyList(Of winapp2entry2))).ToList()
+        End Get
+    End Property
+
+    ''' <summary>
     ''' Creates a <c>winapp2file2</c> from an <c>iniFile2</c>
     ''' </summary>
     ''' <param name="file">A winapp2.ini format <c>iniFile2</c></param>
