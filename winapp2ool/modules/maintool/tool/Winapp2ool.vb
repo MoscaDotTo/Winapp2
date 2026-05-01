@@ -119,35 +119,6 @@ Public Module Winapp2ool
     End Function
 
     ''' <summary> 
-    ''' Ensures that an <c> iniFile </c> has content and informs the user if it does not.
-    ''' </summary>
-    ''' 
-    ''' <param name="iFile">
-    ''' An <c> iniFile </c> to be checked for content 
-    ''' </param>
-    ''' 
-    ''' <returns> 
-    ''' <c> True </c> if the <c> iniFile </c> has content, 
-    ''' <br /> <c> False </c>otherwise
-    ''' </returns>
-    Public Function enforceFileHasContent(iFile As iniFile) As Boolean
-
-        iFile.validate()
-
-        If iFile.Sections.Count = 0 Then
-
-            setNextMenuHeaderText($"{iFile.Name} was empty or not found", True)
-            gLog($"  {iFile.Name} was empty or not found")
-
-            Return False
-
-        End If
-
-        Return True
-
-    End Function
-
-    ''' <summary> 
     ''' Returns an invariant string representation of a boolean 
     ''' </summary>
     ''' 
