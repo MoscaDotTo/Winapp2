@@ -66,7 +66,10 @@ Public Module BrowserBuilder
     ''' </remarks>
     Public Sub handleCmdLine()
 
-        getFileAndDirParams({BuilderFile1, BuilderFile2})
+        Dim spec As New CliArgSpec(NameOf(BrowserBuilder))
+        spec.WithFile(1, BuilderFile1) _
+            .WithFile(2, BuilderFile2) _
+            .Parse()
 
         initBrowserBuilder()
 
