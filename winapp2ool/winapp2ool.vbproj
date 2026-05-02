@@ -162,7 +162,6 @@
     <Compile Include="handlers\cmdline\commandLineHandler.vb" />
     <Compile Include="handlers\downloads\downloadr.vb" />
     <Compile Include="handlers\exceptions\exceptionHandler.vb" />
-    <Compile Include="handlers\ini\iniFile\iniFile.vb" />
     <Compile Include="handlers\ini\iniFile\iniSection\iniSection.vb" />
     <Compile Include="handlers\ini\iniFile\iniComment\iniComment.vb" />
     <Compile Include="handlers\ini\keyList\keyList.vb" />
@@ -183,8 +182,6 @@
     <Compile Include="handlers\winapp2\fileKeyParams2\fileKeyParams2.vb" />
     <Compile Include="handlers\winapp2\regKeyParams2\regKeyParams2.vb" />
     <Compile Include="handlers\winapp2\changeDict.vb" />
-    <Compile Include="handlers\winapp2\winapp2file.vb" />
-    <Compile Include="handlers\winapp2\winapp2keyparameters.vb" />
     <Compile Include="handlers\winapp2\winapp2entry.vb" />
     <Compile Include="handlers\winapp2\winapp2entry2\winapp2entry2.vb" />
     <Compile Include="handlers\winapp2\winapp2file2\winapp2file2.vb" />

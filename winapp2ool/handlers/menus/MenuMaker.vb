@@ -224,275 +224,6 @@ Module MenuMaker
 
     End Sub
 
-    ''' <summary> 
-    ''' Prints menu lines, options, and frames
-    ''' fit to the current console window width
-    ''' </summary>
-    ''' 
-    ''' <param name="printType"> 
-    ''' The type of menu information to print <br/> 
-    ''' 
-    ''' <list type="bullet">
-    ''' 
-    ''' <item>
-    ''' <description>
-    ''' <c> 0 </c>: Line 
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item> 
-    ''' <description>
-    ''' <c> 1 </c>: Option 
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description> 
-    ''' <c> 2 </c>: Option with a "Reset Settings" prompt 
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description> 
-    ''' <c> 3 </c>: Box with centered text 
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item> 
-    ''' <description>
-    ''' <c> 4 </c>: Menu top 
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item> 
-    ''' <description> 
-    ''' <c> 5 </c>: Option with an Enable/Disable prompt
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description>
-    ''' <c> 6 </c>: Menu header with trailing conjoiner 
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description>
-    ''' <c> 7 </c>: Yellow menu line with /!\ warning text /!\
-    ''' </description>
-    ''' </item>
-    ''' </list>
-    ''' </param>
-    ''' 
-    ''' <param name="menuText">
-    ''' The text to be printed <br/> <br/> 
-    ''' When <c> <paramref name="printType"/> </c> 
-    ''' is <c> 1 </c> or <c>5</c>, 
-    ''' <c> <paramref name="menuText"/> </c>
-    ''' contains the name of the menu option 
-    ''' 
-    ''' <br/> When <c> <paramref name="printType"/> </c> is <c> 3 </c>,
-    ''' <c> <paramref name="menuText"/> </c> contains the name
-    ''' of the module whose settings are being reset
-    ''' </param>
-    ''' 
-    ''' <param name="optString"> 
-    ''' The description of the menu option
-    ''' <br/> Optional, Default: <c> "" </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="cond"> 
-    ''' Indicates that the line should be printed 
-    ''' <br/> Optional, Default: <c> True </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="leadingBlank"> 
-    ''' Indicates that a blank menu line should be 
-    ''' printed immediately before the printed line
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="trailingBlank"> 
-    ''' Indicates that a blank menu line should be
-    ''' printed immediately after the printed line
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="isCentered"> 
-    ''' Indicates that the printed text should be centered
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="closeMenu"> 
-    ''' Indicates that the bottom menu frame should be printed 
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="openMenu"> 
-    ''' Indicates that the top menu frame should be printed 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="enStrCond"> 
-    ''' A module setting whose menu text will include
-    ''' an Enable/Disable toggle <br/> <br/>
-    ''' 
-    ''' If lines are being colored without an
-    ''' <c> <paramref name="arbitraryColor"/> </c>, 
-    ''' they will be printed <c> Green </c> if
-    ''' <c> <paramref name="enStrCond"/> </c> is <c> True </c>,
-    ''' otherwise they will be printed <c> Red </c>
-    ''' <br/> Optional, Default: <c> False (Red) </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="colorLine">
-    ''' Indicates that lines should be printed using color 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="useArbitraryColor"> 
-    ''' Indicates that the line should be colored using the 
-    ''' value provided by <c> <paramref name="arbitraryColor"/> </c>
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="arbitraryColor"> 
-    ''' Foreground <c> ConsoleColor </c> to be used when printing
-    ''' with when <c> <paramref name="colorLine"/> </c> is <c> True </c>, 
-    ''' but wanting to use a color other than <c> Red </c> or <c> Green </c> 
-    ''' 
-    ''' <br/> Optional, Default: <c> Nothing </c>
-    ''' </param>
-    '''
-    ''' <param name="buffr"> 
-    ''' Indicates that a leading newline should
-    ''' be printed before the menu lines
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    '''
-    ''' <param name="trailr"> 
-    ''' Indicates that a trailing newline should 
-    ''' be printed after the menu lines
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="conjoin"> 
-    ''' Indicates that a conjoining menu frame should
-    ''' be printed after the printed lines 
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c>
-    ''' </param>
-    ''' 
-    ''' <param name="fillBorder"> 
-    ''' Indicates whether or not any menu frames should be filled or be empty
-    ''' 
-    ''' <br /> Optional, Default: <c> True (filled) </c>
-    ''' </param>
-    Public Sub print(printType As Integer,
-                     menuText As String,
-                     Optional optString As String = "",
-                     Optional cond As Boolean = True,
-                     Optional leadingBlank As Boolean = False,
-                     Optional trailingBlank As Boolean = False,
-                     Optional isCentered As Boolean = False,
-                     Optional closeMenu As Boolean = False,
-                     Optional openMenu As Boolean = False,
-                     Optional enStrCond As Nullable(Of Boolean) = Nothing,
-                     Optional colorLine As Boolean = False,
-                     Optional useArbitraryColor As Boolean = False,
-                     Optional arbitraryColor As ConsoleColor = Nothing,
-                     Optional buffr As Boolean = False,
-                     Optional trailr As Boolean = False,
-                     Optional conjoin As Boolean = False,
-                     Optional fillBorder As Boolean = True)
-
-        If Not cond Then Return
-
-        ' Having a color to print suggests we'll be printing in color
-        If Not arbitraryColor = Nothing Then colorLine = True : useArbitraryColor = True
-
-        ' Enable/Disable is always printed in color
-        If Not enStrCond Is Nothing Then colorLine = True
-
-        cwl(cond:=buffr)
-
-        determinePrintColor(colorLine, useArbitraryColor, arbitraryColor, enStrCond)
-
-        Dim printColor = Console.ForegroundColor
-
-        print(0, Nothing, cond:=leadingBlank, colorLine:=False)
-
-        Console.ForegroundColor = printColor
-
-        print(0, getFrame(1, fillBorder), cond:=openMenu)
-
-        Console.ForegroundColor = printColor
-
-        Select Case printType
-
-            Case 0
-
-                printMenuLine(menuText, isCentered)
-
-            Case 1
-
-                printMenuOpt(menuText, optString)
-
-            Case 2
-
-                print(1, "Reset Settings", $"Restore {menuText}'s settings to their default state", leadingBlank:=True)
-
-            Case 3
-
-                ' Prints a box with centered text
-                print(4, menuText, closeMenu:=True, fillBorder:=fillBorder)
-
-            Case 4
-
-                ' The top of a menu with a header
-                print(0, menuText, isCentered:=True, openMenu:=True, colorLine:=colorLine, arbitraryColor:=arbitraryColor, useArbitraryColor:=useArbitraryColor)
-
-            Case 5
-
-                ' Colored line printing for enable/disable menu options
-                print(1, menuText, $"{enStr(enStrCond)} {optString}", colorLine:=True, enStrCond:=enStrCond)
-
-            Case 6
-
-                ' Prints a menu header with a trailing conjoiner 
-                print(0, menuText, conjoin:=True, isCentered:=True, openMenu:=True)
-
-            Case 7
-
-                ' Prints a yellow colored menu line with warning text 
-                print(0, $"/!\ {menuText} /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
-
-        End Select
-
-        ' Overload enStrCond when printing with printType 6 to enable the conjoiner to be unfilled when the top frame is filled 
-        print(0, getFrame(3, If(openMenu AndAlso conjoin, enStrCond, fillBorder)), cond:=conjoin)
-
-        Console.ForegroundColor = printColor
-
-        print(0, Nothing, cond:=trailingBlank, colorLine:=False)
-
-        Console.ForegroundColor = printColor
-
-        print(0, getFrame(2, fillBorder), cond:=closeMenu)
-
-        If colorLine Then Console.ResetColor()
-
-        cwl(cond:=trailr)
-
-    End Sub
-
     ''' <summary>
     ''' Prints a new line to the console
     ''' </summary>
@@ -504,39 +235,6 @@ Module MenuMaker
     Public Sub PrintNewLine(Optional condition As Boolean = True)
 
         If condition Then Console.WriteLine()
-
-    End Sub
-
-    ''' <summary> 
-    ''' Determines which color should be used when printing. If no color 
-    ''' is to be used, the print colors are reset to their defaults
-    ''' </summary>
-    ''' 
-    ''' <param name="colorLine"> 
-    ''' Indicates that the line should be printed in color 
-    ''' </param>
-    ''' 
-    ''' <param name="useArbColor"> 
-    ''' Indicates that the value provided by
-    ''' <c> <paramref name="arbColor"/> </c> should be used
-    ''' </param>
-    ''' 
-    ''' <param name="arbColor"> 
-    ''' A console color with which to print 
-    ''' </param>
-    ''' 
-    ''' <param name="enStrCond"> 
-    ''' Determines Red/Green coloring when not using an 
-    ''' <c> <paramref name="arbColor"/> </c>
-    ''' </param>
-    Private Sub determinePrintColor(colorLine As Boolean,
-                                    useArbColor As Boolean,
-                                    arbColor As ConsoleColor,
-                                    enStrCond As Nullable(Of Boolean))
-
-        If Not colorLine Then Console.ResetColor() : Return
-
-        Console.ForegroundColor = If(useArbColor, arbColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red))
 
     End Sub
 
@@ -749,58 +447,6 @@ Module MenuMaker
     Public Sub resetMenuNumbering()
 
         OptNum = 0
-
-    End Sub
-
-    ''' <summary> 
-    ''' Prints the top of the menu, the header, a conjoiner,
-    ''' any description text provided, the menu prompt, and the exit option 
-    ''' </summary>
-    ''' 
-    ''' <param name="descriptionItems"> 
-    ''' Text describing the current menu or module functions being presented
-    ''' to the user, each array will be displayed on a separate line
-    ''' </param>
-    ''' 
-    ''' <param name="printExit"> 
-    ''' Indicates that an option to exit to the previous menu should be printed
-    ''' 
-    ''' <br/> Optional, Default: <c> True </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="fillConjoiner"> 
-    ''' Indicates that the conjoining frame at the
-    ''' bottom of the menu headed should be filled 
-    ''' 
-    ''' <br /> Optional, Default: <c> True (Filled)</c>
-    ''' </param>
-    Public Sub printMenuTop(descriptionItems As String(),
-                   Optional printExit As Boolean = True,
-                   Optional fillConjoiner As Boolean = True,
-                   Optional givenHeaderColor As ConsoleColor = Nothing)
-
-        If Not givenHeaderColor = Nothing Then
-
-            ColorHeader = True
-            HeaderColor = givenHeaderColor
-
-        End If
-
-        print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=ColorHeader, arbitraryColor:=HeaderColor, conjoin:=True, fillBorder:=fillConjoiner)
-
-        ColorHeader = False
-
-        For Each line In descriptionItems
-
-            printMenuLine(line, True)
-
-        Next
-
-        PrintBlank()
-        printMenuLine("Menu: Enter a number to select", True)
-        PrintBlank()
-        OptNum = 0
-        printMenuOpt("Exit", "Return to the menu", printExit)
 
     End Sub
 
@@ -1135,7 +781,7 @@ Module MenuMaker
                            isEnabled As Boolean,
                   Optional condition As Boolean = True)
 
-        print(5, name, description, enStrCond:=isEnabled, cond:=condition)
+        PrintColoredOption(name, enStr(isEnabled) & " " & description, GetRedGreen(Not isEnabled), condition)
 
     End Sub
 
@@ -1164,8 +810,6 @@ Module MenuMaker
         Return Console.ForegroundColor
 
     End Function
-
-
 
     ''' <summary>
     ''' Prints colored text
@@ -1237,11 +881,9 @@ Module MenuMaker
     ''' Indicates whether the divider line should be solid
     ''' Optional, Default: <c> True </c> (solid)
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Sub PrintDivider(Optional solid As Boolean = True)
 
-        print(0, getFrame(3, solid), cond:=True)
+        printMenuLine(getFrame(3, solid))
 
     End Sub
 

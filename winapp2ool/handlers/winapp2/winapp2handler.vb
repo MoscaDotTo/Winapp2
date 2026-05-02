@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -99,14 +99,6 @@ Public Module winapp2handler
         Next
     End Sub
 
-    ''' <summary> Returns the path from an ExcludeKey with the <c> Flag </c> parameter removed, as a <c> String </c></summary>
-    ''' <param name="key"> An ExcludeKey <c> iniKey </c></param>
-    Public Function pathFromExcludeKey(key As iniKey) As String
-        If key Is Nothing Then argIsNull(NameOf(key)) : Return Nothing
-        Dim pipePos = key.Value.IndexOf("|"c)
-        Return If(pipePos >= 0, key.Value.Substring(pipePos + 1), key.Value)
-    End Function
-
     ''' <summary> Pads a given number to a given length by prepending it with zeros (0's), returns the padded number </summary>
     ''' <param name="longestNumLen"> The desired maximum length of a number </param>
     ''' <param name="num"> The given number </param>
@@ -118,22 +110,4 @@ Public Module winapp2handler
         Return replMatch & num
     End Function
 
-    ''' <summary> Removes <c> winapp2entry </c> objects from a given <c> winapp2file's </c> <c> sectionList </c></summary>
-    ''' <param name="sectionList">The list of <c> winapp2entrys </c> representing a given "section" in the file </param>
-    ''' <param name="removalList">The list of <c> winapp2entrys </c> to be removed from a section </param>
-    Public Sub removeEntries(ByRef sectionList As List(Of winapp2entry), ByRef removalList As List(Of winapp2entry))
-        If removalList Is Nothing Then argIsNull(NameOf(removalList)) : Return
-        If sectionList Is Nothing Then argIsNull(NameOf(sectionList)) : Return
-        For Each item In removalList
-            sectionList.Remove(item)
-        Next
-        removalList.Clear()
-    End Sub
-
-    ''' <summary> Returns the <c> Names </c> of the <c> iniSections </c> in an <c> iniFile </c> sorted in winapp2.ini order as a <c> strList </c></summary>
-    ''' <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
-    Public Function sortEntryNames(ByVal file As iniFile) As strList
-        If file Is Nothing Then argIsNull(NameOf(file)) : Return Nothing
-        Return replaceAndSort(file.namesToStrList, "-", "  ")
-    End Function
 End Module
