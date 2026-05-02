@@ -34,10 +34,6 @@ Option Strict On
 '''     .Parse()
 ''' </code>
 ''' 
-''' The old <c> getFileAndDirParams </c> / <c> invertSettingAndRemoveArg </c> helpers
-''' remain in <c> commandLineHandler </c> for modules that have not yet migrated.
-''' Only modules whose file properties are <c> iniFileChooser </c> instances
-''' should adopt this class.
 ''' </remarks>
 Public Class CliArgSpec
 
