@@ -16,9 +16,6 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
-
-Imports System.Globalization
-Imports System.Text
 Imports System.Text.RegularExpressions
 
 ''' <summary>
@@ -254,41 +251,62 @@ Public Module WinappDebug
         Dim wa2 As New winapp2file2(inputFile, UseCurrentDate)
 
         clrConsole()
-
-        print(3, "Beginning analysis of winapp2.ini", trailr:=True)
         gLog("Beginning lint", leadr:=True, ascend:=True)
-
         MostRecentLintLog.Clear()
 
-        Debug(wa2)
+        Dim output As New List(Of MenuSection)
+
+        Dim header As New MenuSection()
+        header.AddTopBorder() _
+              .AddColoredLine("Linting winapp2.ini", ConsoleColor.Cyan, centered:=True) _
+              .AddDivider(solid:=False)
+        output.Add(header)
+
+        output.AddRange(Debug(wa2))
 
         gLog(descend:=True)
         gLog("Lint complete")
         setNextMenuHeaderText("Lint complete", printColor:=ConsoleColor.Green)
-        print(4, "Completed analysis of winapp2.ini", conjoin:=True)
-        print(0, $"{ErrorsFound} possible errors were detected.")
-        print(0, $"Number of entries {wa2.Count}", trailingBlank:=True)
 
-        RewriteChanges(wa2)
+        Dim errColor = If(ErrorsFound = 0, ConsoleColor.Green, If(ErrorsFound < 10, ConsoleColor.DarkYellow, ConsoleColor.DarkRed))
+        Dim summary As New MenuSection()
+        summary.AddDivider(solid:=False) _
+               .AddColoredLine("Lint Complete!", ConsoleColor.Green, centered:=True) _
+               .AddDivider(solid:=False) _
+               .AddLine($"Entry count: {wa2.Count}", centered:=True) _
+               .AddColoredLine($"{ErrorsFound} possible errors detected.", errColor, centered:=True)
 
-        print(0, anyKeyStr, closeMenu:=True)
+        If SaveChanges Then
+            iniFile2.Empty(winappDebugFile3.Dir, winappDebugFile3.Name).OverwriteToFile(wa2.ToWinapp2String())
+            summary.AddColoredLine($"{winappDebugFile3.Name} saved with any corrections made", ConsoleColor.DarkGreen, centered:=True)
+
+        End If
+
+        summary.AddBlank.AddColoredLine(anyKeyStr, ConsoleColor.Cyan, centered:=True)
+        summary.AddBottomBorder()
+
+        output.Add(summary)
+
+        Console.Clear()
+        output.ForEach(Sub(s) s.Print(withDivider:=False))
+
         crk()
 
     End Sub
 
     ''' <summary>
-    ''' Sends the entries in a winapp2.ini format <c>iniFile2</c> into specific format and syntax checking routines
+    ''' Sends the entries in a winapp2.ini format <c>iniFile2</c> into specific format and syntax checking routines.
+    ''' Returns a list of <c>MenuSection</c>s containing all output to be rendered.
     ''' </summary>
     '''
     ''' <param name="fileToBeDebugged">
     ''' A <c> winapp2file2 </c> to be linted
     ''' </param>
-    Public Sub Debug(ByRef fileToBeDebugged As winapp2file2)
+    Public Function Debug(ByRef fileToBeDebugged As winapp2file2) As List(Of MenuSection)
 
-        If fileToBeDebugged Is Nothing Then argIsNull(NameOf(fileToBeDebugged)) : Return
+        If fileToBeDebugged Is Nothing Then argIsNull(NameOf(fileToBeDebugged)) : Return New List(Of MenuSection)
 
         ErrorsFound = 0
-        MostRecentLintLog.Clear()
         gLog(ascend:=True)
 
         Dim duplicateNames = FindDuplicateEntryNames(fileToBeDebugged)
@@ -299,14 +317,16 @@ Public Module WinappDebug
             .Select(Function(entry) ProcessEntry(entry, duplicateNames)) _
             .ToList()
 
-        For Each result In results
-            EmitEntryResult(result)
-        Next
+        Dim output As New List(Of MenuSection)
+
+        For Each result In results : output.AddRange(EmitEntryResult(result)) : Next
 
         resetKeyTrackers()
         AlphabetizeEntries(fileToBeDebugged)
 
-    End Sub
+        Return output
+
+    End Function
 
     ''' <summary>
     ''' Returns the set of entry names that appear more than once in a <c>winapp2file2</c>
@@ -329,38 +349,54 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Writes the errors from an <c>EntryLintResult</c> to the console and the lint log,
-    ''' and adds its error count to <c>ErrorsFound</c>
+    ''' Collects the errors from an <c>EntryLintResult</c> into <c>MenuSection</c>s, logs them,
+    ''' and adds its error count to <c>ErrorsFound</c>. Returns sections for deferred rendering.
     ''' </summary>
     '''
     ''' <param name="result">
-    ''' The <c>EntryLintResult</c> whose errors will be emitted
+    ''' The <c>EntryLintResult</c> whose errors will be collected
     ''' </param>
-    Private Sub EmitEntryResult(result As EntryLintResult)
+    Private Function EmitEntryResult(result As EntryLintResult) As List(Of MenuSection)
 
-        For Each Errr In result.Errors
-
-            gLog(Errr.Message, ascend:=True)
-
-            Dim out = $"Error in {result.EntryName}: {Errr.Message}"
-            cwl(out)
-            MostRecentLintLog.AppendLine(out)
-
-            For Each detail In Errr.Details
-                cwl(detail)
-                gLog($"  {detail}")
-                MostRecentLintLog.AppendLine(detail)
-            Next
-
-            gLog(descend:=True)
-            cwl()
-            MostRecentLintLog.AppendLine()
-
-        Next
+        Dim sections As New List(Of MenuSection)
 
         ErrorsFound += result.ErrorCount
 
-    End Sub
+        For Each line In result.DiagLines
+            gLog(line)
+        Next
+
+        If result.ErrorCount > 0 Then
+
+            Dim section As New MenuSection()
+
+            For Each Errr In result.Errors
+
+                Dim out = $"Error in {result.EntryName}:"
+                Dim out2 = $"{Errr.Message}"
+                gLog(out)
+                gLog(out2)
+                gLog(Errr.Message, ascend:=True)
+                section.AddColoredLine(out, ConsoleColor.Red).AddColoredLine(out2, ConsoleColor.DarkYellow)
+
+                For Each detail In Errr.Details
+                    gLog($"{detail}")
+                    section.AddColoredLine($"{detail}", ConsoleColor.Yellow)
+                Next
+
+                gLog(descend:=True)
+                section.AddBlank()
+
+            Next
+
+            sections.Add(section)
+
+        End If
+
+        sections.AddRange(result.DeferredSections)
+        Return sections
+
+    End Function
 
     ''' <summary>
     ''' Validates the basic structure of a <c> winapp2entry2 </c> and sends off its individual keys for more specific analysis
@@ -372,7 +408,6 @@ Public Module WinappDebug
     Private Function ProcessEntry(entry As winapp2entry2, duplicateNames As HashSet(Of String)) As EntryLintResult
 
         Dim result As New EntryLintResult(entry.FullName)
-        gLog($"Processing entry {entry.Name}", buffr:=True)
 
         Dim hasFileExcludes = False
         Dim hasRegExcludes = False
@@ -382,28 +417,22 @@ Public Module WinappDebug
 
         ValidateKeys(result, entry)
 
-        Dim keyTypes = {"DetectOS", "LangSecRef", "Section", "SpecialDetect", "Detect", "DetectFile",
-                        "Default", "Warning", "FileKey", "RegKey", "ExcludeKey"}
+        Dim bc = Function(typeName As String) As Integer
+                     Dim idx = winapp2entry2.GetBucketIndex(typeName)
+                     Return If(idx >= 0, entry.KeyLists(idx).Count, 0)
+                 End Function
 
-        For Each keyType In keyTypes
-
-            Select Case keyType
-
-                Case "DetectFile"
-
-                    processKeyList(result, entry, keyType, Function(k) pDetectFile(result, k))
-
-                Case "FileKey"
-
-                    processKeyList(result, entry, keyType, Function(k) pFileKey(result, k))
-
-                Case Else
-
-                    processKeyList(result, entry, keyType, AddressOf voidDelegate, hasFileExcludes, hasRegExcludes)
-
-            End Select
-
-        Next
+        processKeyList(result, entry, New KeyListSpec("DetectOS", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
+        processKeyList(result, entry, New KeyListSpec("LangSecRef", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
+        processKeyList(result, entry, New KeyListSpec("Section", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
+        processKeyList(result, entry, New KeyListSpec("SpecialDetect", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
+        processKeyList(result, entry, New KeyListSpec("Detect", noNumbers:=(bc("Detect") = 1), checkPathValidity:=True, isRegistryPath:=True), AddressOf voidDelegate)
+        processKeyList(result, entry, New KeyListSpec("DetectFile", noNumbers:=(bc("DetectFile") = 1)), Function(k) pDetectFile(result, k))
+        processKeyList(result, entry, New KeyListSpec("Default", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
+        processKeyList(result, entry, New KeyListSpec("Warning", noNumbers:=True, oneOnly:=True), AddressOf voidDelegate)
+        processKeyList(result, entry, New KeyListSpec("FileKey"), Function(k) pFileKey(result, k))
+        processKeyList(result, entry, New KeyListSpec("RegKey", checkPathValidity:=True, isRegistryPath:=True), AddressOf voidDelegate)
+        processKeyList(result, entry, New KeyListSpec("ExcludeKey", isExcludeKey:=True), AddressOf voidDelegate, hasFileExcludes, hasRegExcludes)
 
         Dim hasSectionKey = entry.SectionKey.Count <> 0
         Dim hasLangSecRef = entry.LangSecRef.Count <> 0
@@ -425,12 +454,12 @@ Public Module WinappDebug
         result.RecordError("Entry has a Default key where there should be none", Array.Empty(Of String)(), lintDefaults.ShouldScan AndAlso hasDefaultKey AndAlso Not overrideDefaultVal)
 
         If lintDefaults.fixFormat AndAlso hasDefaultKey AndAlso Not overrideDefaultVal Then
-            For Each k In entry.DefaultKey.ToList()
-                entry.RemoveKey(k)
-            Next
+
+            For Each k In entry.DefaultKey.ToList() : entry.RemoveKey(k) : Next
+
         End If
 
-        If Not overrideDefaultVal Then gLog($"Finished processing {entry.Name}", buffr:=True) : Return result
+        If Not overrideDefaultVal Then Return result
 
         Dim expected = tsInvariant(expectedDefaultValue)
 
@@ -445,7 +474,6 @@ Public Module WinappDebug
         result.RecordError("No Default Key found", Array.Empty(Of String)())
         entry.AddKey(New iniKey2($"Default={expected}"))
 
-        gLog($"Finished processing {entry.Name}", buffr:=True)
         Return result
 
     End Function
@@ -507,23 +535,6 @@ Public Module WinappDebug
         Next
 
         If lintAlpha.fixFormat Then winapp.SortEntries()
-
-    End Sub
-
-    ''' <summary>
-    ''' Writes any changes made during the lint back to disk, correcting any errors that were found and repaired
-    ''' </summary>
-    '''
-    ''' <param name="winapp2file">
-    ''' The <c> winapp2file2 </c> that was linted
-    ''' </param>
-    Private Sub RewriteChanges(winapp2file As winapp2file2)
-
-        If Not SaveChanges Then Return
-
-        print(0, "Saving changes, do not close winapp2ool or data loss may occur...", leadingBlank:=True)
-        iniFile2.Empty(winappDebugFile3.Dir, winappDebugFile3.Name).OverwriteToFile(winapp2file.ToWinapp2String())
-        print(0, "Finished saving changes.", trailingBlank:=True)
 
     End Sub
 
@@ -596,9 +607,15 @@ Public Module WinappDebug
             entry = contextStr
             oopBool = True
 
-            customErr(contextStr, $"{findType} alphabetization",
-                                  {$"{entry} appears to be out of place",
-                                   $"Expected position: {sortInd + 1}"})
+            gLog($"{findType} alphabetization", ascend:=True)
+            cwl($"Error in {contextStr}: {Environment.NewLine} {findType} alphabetization")
+            cwl($"{entry} appears to be out of place")
+            gLog($"  {entry} appears to be out of place")
+            cwl($"Expected position: {sortInd + 1}")
+            gLog($"  Expected position: {sortInd + 1}")
+            gLog(descend:=True)
+            cwl()
+            ErrorsFound += 1
 
         Next
 
@@ -660,6 +677,35 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
+    ''' Per-call configuration for <c>processKeyList</c>, encoding the type-specific
+    ''' behaviour that was formerly dispatched via a <c>Select Case keyType</c> string comparison.
+    ''' </summary>
+    Private Structure KeyListSpec
+
+        Public ReadOnly Property TypeName As String
+        Public ReadOnly Property NoNumbers As Boolean
+        Public ReadOnly Property OneOnly As Boolean
+        Public ReadOnly Property CheckPathValidity As Boolean
+        Public ReadOnly Property IsRegistryPath As Boolean
+        Public ReadOnly Property IsExcludeKey As Boolean
+
+        Public Sub New(typeName As String,
+                       Optional noNumbers As Boolean = False,
+                       Optional oneOnly As Boolean = False,
+                       Optional checkPathValidity As Boolean = False,
+                       Optional isRegistryPath As Boolean = False,
+                       Optional isExcludeKey As Boolean = False)
+            Me.TypeName = typeName
+            Me.NoNumbers = noNumbers
+            Me.OneOnly = oneOnly
+            Me.CheckPathValidity = checkPathValidity
+            Me.IsRegistryPath = isRegistryPath
+            Me.IsExcludeKey = isExcludeKey
+        End Sub
+
+    End Structure
+
+    ''' <summary>
     ''' Hands off each <c>iniKey2</c> in a winapp2.ini format typed bucket to be audited for correctness
     ''' </summary>
     '''
@@ -667,8 +713,8 @@ Public Module WinappDebug
     ''' The <c>winapp2entry2</c> whose keys are being processed
     ''' </param>
     '''
-    ''' <param name="keyType">
-    ''' The <c>KeyType</c> name of the bucket to process
+    ''' <param name="spec">
+    ''' Configuration encoding the type-specific behaviour for this bucket
     ''' </param>
     '''
     ''' <param name="processKey">
@@ -687,19 +733,17 @@ Public Module WinappDebug
     ''' </param>
     Private Sub processKeyList(result As EntryLintResult,
                                entry As winapp2entry2,
-                               keyType As String,
+                               spec As KeyListSpec,
                                processKey As Func(Of iniKey2, iniKey2),
                                Optional ByRef hasF As Boolean = False,
                                Optional ByRef hasR As Boolean = False)
 
-        Dim bucketIdx = winapp2entry2.GetBucketIndex(keyType)
+        Dim bucketIdx = winapp2entry2.GetBucketIndex(spec.TypeName)
         If bucketIdx < 0 Then Return
 
         Dim bucket = entry.KeyLists(bucketIdx)
 
         If bucket.Count = 0 Then Return
-
-        gLog($"Processing {keyType}s", buffr:=True)
 
         Dim curNum = 1
         Dim seenValues As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
@@ -707,42 +751,20 @@ Public Module WinappDebug
 
         For Each key In bucket.ToList()
 
-            Select Case keyType
+            If spec.CheckPathValidity Then chkPathFormatValidity(result, key, spec.IsRegistryPath)
 
-                Case "ExcludeKey"
+            If spec.OneOnly AndAlso curNum > 1 AndAlso lintMulti.ShouldScan Then
+                fullKeyErr(result, key, $"Multiple {key.KeyType} detected.")
+                If lintMulti.fixFormat Then dupeKeys.Add(key)
+            End If
 
-                    cFormat(result, key, curNum, seenValues, dupeKeys)
-                    pExcludeKey(result, key, hasF, hasR)
+            cFormat(result, key, curNum, seenValues, dupeKeys, spec.NoNumbers)
 
-                Case "Detect", "DetectFile"
+            ' SpecialDetect and LangSecRef carry additional per-key checks; key.typeIs() guards them
+            If key.typeIs("SpecialDetect") Then chkCasing(result, key, {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}, key.Value)
+            fullKeyErr(result, key, "LangSecRef holds an invalid value.", lintInvalid.ShouldScan AndAlso key.typeIs("LangSecRef") AndAlso Not secRefNums.IsMatch(key.Value))
 
-                    If key.typeIs("Detect") Then chkPathFormatValidity(result, key, True)
-                    cFormat(result, key, curNum, seenValues, dupeKeys, bucket.Count = 1)
-
-                Case "RegKey"
-
-                    chkPathFormatValidity(result, key, True)
-                    cFormat(result, key, curNum, seenValues, dupeKeys)
-
-                Case "Warning", "DetectOS", "SpecialDetect", "LangSecRef", "Section", "Default"
-
-                    If curNum > 1 AndAlso lintMulti.ShouldScan Then
-
-                        fullKeyErr(result, key, $"Multiple {key.KeyType} detected.")
-                        If lintMulti.fixFormat Then dupeKeys.Add(key)
-
-                    End If
-
-                    cFormat(result, key, curNum, seenValues, dupeKeys, True)
-
-                    If key.typeIs("SpecialDetect") Then chkCasing(result, key, {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}, key.Value)
-                    fullKeyErr(result, key, "LangSecRef holds an invalid value.", lintInvalid.ShouldScan AndAlso key.typeIs("LangSecRef") AndAlso Not secRefNums.IsMatch(key.Value))
-
-                Case Else
-
-                    cFormat(result, key, curNum, seenValues, dupeKeys)
-
-            End Select
+            If spec.IsExcludeKey Then pExcludeKey(result, key, hasF, hasR)
 
             key = processKey(key)
 
@@ -752,9 +774,9 @@ Public Module WinappDebug
             entry.RemoveKey(dupe)
         Next
 
-        sortKeys2(entry, keyType, dupeKeys.Count > 0)
+        sortKeys2(entry, spec.TypeName, dupeKeys.Count > 0)
 
-        If keyType = "FileKey" AndAlso lintOpti.ShouldScan Then cOptimization(entry)
+        If spec.TypeName = "FileKey" AndAlso lintOpti.ShouldScan Then cOptimization(result, entry)
 
     End Sub
 
@@ -823,9 +845,9 @@ Public Module WinappDebug
         inputMismatchErr(result, numberingErrStr, key.Name, fixedStr, If(noNumbers, lintExtraNums.ShouldScan, lintWrongNums.ShouldScan) And hasNumberingError)
         fixStr(If(noNumbers, lintExtraNums.fixFormat, lintWrongNums.fixFormat) And hasNumberingError, key.Name, fixedStr)
 
-        ' Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
+        ' Scan for and fix any use of incorrect slashes or trailing semicolons
         Dim fwdSlashErr = "Forward slash (/) detected in lieu of backslash (\)."
-        fullKeyErr(result, key, fwdSlashErr, Not (key.typeIs("RegKey") OrElse key.typeIs("Section") OrElse key.typeIs("Warning")) AndAlso lintSlashes.ShouldScan AndAlso key.vHas("/"),
+        fullKeyErr(result, key, fwdSlashErr, Not ({"RegKey", "Section", "Warning"}.Contains(key.KeyType)) AndAlso lintSlashes.ShouldScan AndAlso key.vHas("/"),
                                              lintSlashes.fixFormat, key.Value, key.Value.Replace("/", "\"))
         If key.typeIs("RegKey") AndAlso lintSlashes.ShouldScan AndAlso key.vHas("/") Then
             Dim pipeIdx = key.Value.IndexOf("|"c)
@@ -940,6 +962,10 @@ Public Module WinappDebug
     '''  successful, <c> False </c> otherwise
     '''  </summary>
     '''
+    ''' <param name="result">
+    ''' The <c>EntryLintResult</c> to collect diagnostic messages into
+    ''' </param>
+    '''
     ''' <param name="key">
     ''' A misformatted <c>iniKey2</c> to attempt to repair
     ''' </param>
@@ -947,10 +973,11 @@ Public Module WinappDebug
     ''' <param name="cmds">
     ''' An array containing valid winapp2.ini <c> keyTypes </c>
     ''' </param>
-    Private Function fixMissingEquals(key As iniKey2,
+    Private Function fixMissingEquals(result As EntryLintResult,
+                                      key As iniKey2,
                                       cmds As String()) As Boolean
 
-        gLog("Attempting missing equals repair")
+        result.LogDiag("Attempting missing equals repair")
 
         For Each cmd In cmds
 
@@ -980,18 +1007,18 @@ Public Module WinappDebug
 
             End Select
 
-            gLog($"  Repair complete. Result: {key.ToString()}")
+            result.LogDiag($"  Repair complete. Result: {key.ToString()}")
 
             ' Don't allow valueless keys in winapp2.ini
 
-            If key.Value.Length = 0 Then gLog("Repair failed, key will be removed.") : Return False
+            If key.Value.Length = 0 Then result.LogDiag("Repair failed, key will be removed.") : Return False
 
             Return True
 
         Next
 
         ' Return false if no valid command is found
-        gLog("Repair failed, key will be removed.")
+        result.LogDiag("Repair failed, key will be removed.")
         Return False
 
     End Function
@@ -1024,31 +1051,29 @@ Public Module WinappDebug
         ' Attempt to fix the case where keys are missing an equal sign to delineate name and value
         If key.typeIs("DeleteMe") Then
 
-            gLog($"  Broken Key Found: {key.Name}")
+            result.LogDiag($"  Broken Key Found: {key.Name}")
 
             ' If we didn't find a fixable situation, delete the key
-            Dim fixedMsngEq = fixMissingEquals(key, validCmds)
+            Dim fixedMsngEq = fixMissingEquals(result, key, validCmds)
 
             fullKeyErr(result, key, "Missing '=' detected and repaired in key.", fixedMsngEq)
 
             If Not fixedMsngEq Then
+
                 result.RecordError($"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", Array.Empty(Of String)())
                 Return False
+
             End If
 
         End If
 
         ' Remove any instances of double backslashes because we don't expect them
 
-        If key.vHas("\\", True) Then
+        If key.vHas("\\") Then
 
             fullKeyErr(result, key, "Extraneous backslashes (\\) detected", lintSlashes.ShouldScan)
 
-            While (key.Value.Contains("\\") And lintSlashes.fixFormat)
-
-                key.Value = key.Value.Replace("\\", "\")
-
-            End While
+            While (key.Value.Contains("\\") And lintSlashes.fixFormat) : key.Value = key.Value.Replace("\\", "\") : End While
 
         End If
 
@@ -1403,7 +1428,6 @@ Public Module WinappDebug
         If Not (keysOutOfPlace OrElse hadDuplicatesRemoved) AndAlso
                (lintAlpha.fixFormat OrElse lintWrongNums.fixFormat OrElse lintExtraNums.fixFormat) Then Return
 
-        ' Reassign values and renumber, mirroring keyList.renumberKeys semantics
         For i = 0 To bucket.Count - 1
             bucket(i).Value = sortedKeyValues.Items(i)
             bucket(i).Name = keyType & CStr(i + 1)
@@ -1414,11 +1438,7 @@ Public Module WinappDebug
     ''' <summary>
     ''' Prints an error when data is received that does not match an expected value
     ''' </summary>
-    '''
-    ''' <param name="context">
-    ''' The key or entry that contains the error, used to identify the error location in output
-    ''' </param>
-    '''
+    ''' 
     ''' <param name="err">
     ''' A description of the error as it will be displayed to the user
     ''' </param>
@@ -1442,29 +1462,6 @@ Public Module WinappDebug
                                  Optional cond As Boolean = True)
 
         result.RecordError(err, {$"Expected: {expected}", $"Found:    {received}"}, cond)
-
-    End Sub
-
-    ''' <summary>
-    ''' Prints an error followed by the [Full Name *] of the entry to which it belongs
-    ''' </summary>
-    '''
-    ''' <param name="cond">
-    ''' Indicates that the error condition is present
-    ''' </param>
-    '''
-    ''' <param name="entry">
-    ''' The <c>winapp2entry2</c> containing an error
-    ''' </param>
-    '''
-    ''' <param name="errTxt">
-    ''' A description of the error as it will be displayed to the user
-    ''' </param>
-    Private Sub fullNameErr(result As EntryLintResult,
-                            cond As Boolean,
-                            errTxt As String)
-
-        result.RecordError(errTxt, Array.Empty(Of String)(), cond)
 
     End Sub
 
@@ -1516,48 +1513,6 @@ Public Module WinappDebug
 
     ''' <summary>
     ''' Prints arbitrarily defined errors without a precondition
-    ''' </summary>
-    '''
-    ''' <param name="context">
-    ''' The entry name or key string identifying where the error was found
-    ''' </param>
-    '''
-    ''' <param name="err">
-    ''' A description of the error as it will be displayed to the user
-    ''' </param>
-    '''
-    ''' <param name="lines">
-    ''' Any additional error information to be printed alongside the description
-    ''' </param>
-    Private Sub customErr(context As String,
-                          err As String,
-                          lines As String())
-
-        gLog(err, ascend:=True)
-
-        Dim out = $"Error in {context}: {Environment.NewLine} {err}"
-        cwl(out)
-        MostRecentLintLog.AppendLine(out)
-
-        For Each errStr In lines
-
-            cwl(errStr)
-            gLog($"  {errStr}")
-            MostRecentLintLog.AppendLine(errStr)
-
-        Next
-
-        gLog(descend:=True)
-        cwl()
-
-        MostRecentLintLog.AppendLine()
-
-        ErrorsFound += 1
-
-    End Sub
-
-    ''' <summary>
-    ''' Replace a given string with a new value if the fix condition is met
     ''' </summary>
     '''
     ''' <param name="param">

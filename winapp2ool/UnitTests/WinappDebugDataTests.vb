@@ -264,14 +264,14 @@ Imports System.Reflection
             Dim testFile = buildTestFile(sections)
 
             ' First pass: scan without repairs to assert error count
-            winapp2ool.WinappDebug.Debug(testFile)
+            winapp2ool.WinappDebug.Debug(testFile).ForEach(Sub(s) s.Print(withDivider:=False))
 
             If expectedErrors >= 0 Then Assert.AreEqual(expectedErrors, winapp2ool.WinappDebug.ErrorsFound, "Wrong error count on initial scan")
 
             ' Second pass: apply repairs (skipped for ScanOnly tests)
             If Not scanOnly Then
                 winapp2ool.lintsettings.RepairSomeErrsFound = True
-                winapp2ool.WinappDebug.Debug(testFile)
+                winapp2ool.WinappDebug.Debug(testFile).ForEach(Sub(s) s.Print(withDivider:=False))
             End If
 
             ' Assert each expected section against its matching repaired entry (matched by name)

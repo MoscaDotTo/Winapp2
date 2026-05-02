@@ -98,4 +98,48 @@ Public Class EntryLintResult
         _errors.Add(New LintError(message, details))
     End Sub
 
+    Private ReadOnly _diagLines As New List(Of String)
+
+    ''' <summary>
+    ''' Diagnostic log lines collected during parallel processing, to be flushed sequentially
+    ''' </summary>
+    Public ReadOnly Property DiagLines As IReadOnlyList(Of String)
+        Get
+            Return _diagLines
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Records a diagnostic log line to be emitted when this result is rendered
+    ''' </summary>
+    '''
+    ''' <param name="message">
+    ''' The diagnostic message
+    ''' </param>
+    Public Sub LogDiag(message As String)
+        _diagLines.Add(message)
+    End Sub
+
+    Private ReadOnly _deferredSections As New List(Of MenuSection)
+
+    ''' <summary>
+    ''' <c>MenuSection</c>s built during parallel processing to be rendered sequentially
+    ''' </summary>
+    Public ReadOnly Property DeferredSections As IReadOnlyList(Of MenuSection)
+        Get
+            Return _deferredSections
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Queues a <c>MenuSection</c> to be rendered when this result is emitted
+    ''' </summary>
+    '''
+    ''' <param name="section">
+    ''' The <c>MenuSection</c> to defer
+    ''' </param>
+    Public Sub DeferSection(section As MenuSection)
+        _deferredSections.Add(section)
+    End Sub
+
 End Class

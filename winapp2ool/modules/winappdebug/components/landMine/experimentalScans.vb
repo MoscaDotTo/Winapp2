@@ -52,7 +52,7 @@ Module experimentalScans
     ''' <param name="entry">
     ''' The <c> winapp2entry2 </c> whose FileKeys will be assessed for merge opportunities
     ''' </param>
-    Public Sub cOptimization(entry As winapp2entry2)
+    Public Sub cOptimization(result As EntryLintResult, entry As winapp2entry2)
 
         If entry.FileKeys.Count < 2 Then Return
 
@@ -85,8 +85,7 @@ Module experimentalScans
 
             If matchIdx < 0 Then Continue For
 
-            gLog($"{entry.FileKeys(i)} has a path that matches another key")
-            gLog($"Matching key has index {matchIdx} in the unique path list")
+            result.LogDiag($"{entry.FileKeys(i)} has a path that matches another key")
 
             ' Append current key's patterns to the surviving key's value
             Dim mergeTarget = New fileKeyParams2(mergedValues(matchIdx))
@@ -102,7 +101,7 @@ Module experimentalScans
 
             mergedValues(matchIdx) = newValue
             removedIndices.Add(i)
-            gLog($"Key will be merged and have the new value: {newValue}")
+            result.LogDiag($"Key will be merged and have the new value: {newValue}")
 
         Next
 
@@ -121,22 +120,26 @@ Module experimentalScans
                 keyNum += 1
             End If
         Next
-
-        printOptiSect("Optimization opportunity detected", entry.FileKeys)
-        printOptiSect("The following keys can be merged into other keys:", removedKeys)
-        printOptiSect("The resulting key list will be reduced to:", resultKeys)
+        result.DeferSection(New MenuSection().AddColoredLine(result.EntryName & " has keys which can be merged", ConsoleColor.Magenta, centered:=True))
+        result.DeferSection(buildOptiSect(removedKeys, resultKeys))
 
         If lintOpti.ShouldRepair Then entry.ReplaceFileKeys(resultKeys)
 
     End Sub
 
-    ''' <summary>Prints a labeled section of keys for optimization output</summary>
-    Private Sub printOptiSect(boxStr As String, keys As IEnumerable(Of iniKey2))
-        print(3, boxStr, buffr:=True, trailr:=True)
-        For Each key In keys
-            cwl(key.ToString())
-        Next
-        cwl()
-    End Sub
+    ''' <summary>Builds a labeled section of keys for optimization output</summary>
+    Private Function buildOptiSect(Remkeys As IEnumerable(Of iniKey2),
+                                   resultKeys As IEnumerable(Of iniKey2)) As MenuSection
+
+        Dim out As New MenuSection
+        out.AddDivider(solid:=False).AddLine("The following keys can be merged into other keys:", True).AddDivider(solid:=False)
+        For Each key In Remkeys : out.AddLine(key.ToString) : Next
+        out.AddDivider(solid:=False)
+        out.AddLine("The resulting key list will be reduced to:", True).AddDivider(solid:=False)
+        For Each key In resultKeys : out.AddLine(key.ToString) : Next
+        out.AddBlank()
+        Return out
+
+    End Function
 
 End Module

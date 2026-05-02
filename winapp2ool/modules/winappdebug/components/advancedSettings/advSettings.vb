@@ -30,7 +30,7 @@ Public Module advSettings
 
         menu.AddBlank()
         menu.AddLine("Scan Options", centered:=True)
-        menu.AddDivider()
+        menu.AddDivider(solid:=False)
 
         For Each rule In Rules
 
@@ -51,7 +51,7 @@ Public Module advSettings
 
         menu.AddBlank()
         menu.AddLine("Repair Options", centered:=True)
-        menu.AddDivider()
+        menu.AddDivider(solid:=False)
 
         For Each rule In Rules
 
