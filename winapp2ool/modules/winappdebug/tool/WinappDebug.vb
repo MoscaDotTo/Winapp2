@@ -293,8 +293,14 @@ Public Module WinappDebug
 
         Dim duplicateNames = FindDuplicateEntryNames(fileToBeDebugged)
 
-        For Each entry In fileToBeDebugged.Entries
-            EmitEntryResult(ProcessEntry(entry, duplicateNames))
+        Dim results = fileToBeDebugged.Entries _
+            .AsParallel() _
+            .AsOrdered() _
+            .Select(Function(entry) ProcessEntry(entry, duplicateNames)) _
+            .ToList()
+
+        For Each result In results
+            EmitEntryResult(result)
         Next
 
         resetKeyTrackers()
@@ -693,7 +699,7 @@ Public Module WinappDebug
 
         If bucket.Count = 0 Then Return
 
-        gLog($"Processing {keyType}s", ascend:=True, buffr:=True)
+        gLog($"Processing {keyType}s", buffr:=True)
 
         Dim curNum = 1
         Dim seenValues As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
@@ -749,8 +755,6 @@ Public Module WinappDebug
         sortKeys2(entry, keyType, dupeKeys.Count > 0)
 
         If keyType = "FileKey" AndAlso lintOpti.ShouldScan Then cOptimization(entry)
-
-        gLog(descend:=True)
 
     End Sub
 
@@ -946,7 +950,7 @@ Public Module WinappDebug
     Private Function fixMissingEquals(key As iniKey2,
                                       cmds As String()) As Boolean
 
-        gLog("Attempting missing equals repair", ascend:=True)
+        gLog("Attempting missing equals repair")
 
         For Each cmd In cmds
 
@@ -976,18 +980,18 @@ Public Module WinappDebug
 
             End Select
 
-            gLog($"  Repair complete. Result: {key.ToString()}", descend:=True)
+            gLog($"  Repair complete. Result: {key.ToString()}")
 
             ' Don't allow valueless keys in winapp2.ini
 
-            If key.Value.Length = 0 Then gLog("Repair failed, key will be removed.", descend:=True) : Return False
+            If key.Value.Length = 0 Then gLog("Repair failed, key will be removed.") : Return False
 
             Return True
 
         Next
 
         ' Return false if no valid command is found
-        gLog("Repair failed, key will be removed.", descend:=True)
+        gLog("Repair failed, key will be removed.")
         Return False
 
     End Function
@@ -1020,7 +1024,7 @@ Public Module WinappDebug
         ' Attempt to fix the case where keys are missing an equal sign to delineate name and value
         If key.typeIs("DeleteMe") Then
 
-            gLog($"  Broken Key Found: {key.Name}", ascend:=True)
+            gLog($"  Broken Key Found: {key.Name}")
 
             ' If we didn't find a fixable situation, delete the key
             Dim fixedMsngEq = fixMissingEquals(key, validCmds)
