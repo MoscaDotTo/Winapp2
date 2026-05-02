@@ -32,11 +32,6 @@ Public Module WinappDebug
     Public Property ErrorsFound As Integer = 0
 
     ''' <summary>
-    ''' The list of all entry names found during the lint, used to check for duplicates
-    ''' </summary>
-    Private Property allEntryNames As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-
-    ''' <summary>
     ''' The winapp2ool logslice from the most recent Lint run
     ''' </summary>
     Public Property MostRecentLintLog As New System.Text.StringBuilder
@@ -293,15 +288,71 @@ Public Module WinappDebug
         If fileToBeDebugged Is Nothing Then argIsNull(NameOf(fileToBeDebugged)) : Return
 
         ErrorsFound = 0
-        allEntryNames = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        MostRecentLintLog.Clear()
         gLog(ascend:=True)
 
+        Dim duplicateNames = FindDuplicateEntryNames(fileToBeDebugged)
+
         For Each entry In fileToBeDebugged.Entries
-            ProcessEntry(entry)
+            EmitEntryResult(ProcessEntry(entry, duplicateNames))
         Next
 
         resetKeyTrackers()
         AlphabetizeEntries(fileToBeDebugged)
+
+    End Sub
+
+    ''' <summary>
+    ''' Returns the set of entry names that appear more than once in a <c>winapp2file2</c>
+    ''' </summary>
+    '''
+    ''' <param name="winapp">
+    ''' The <c>winapp2file2</c> whose entries will be scanned for duplicate names
+    ''' </param>
+    Private Function FindDuplicateEntryNames(winapp As winapp2file2) As HashSet(Of String)
+
+        Dim seen As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim duplicates As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+        For Each entry In winapp.Entries
+            If Not seen.Add(entry.Name) Then duplicates.Add(entry.Name)
+        Next
+
+        Return duplicates
+
+    End Function
+
+    ''' <summary>
+    ''' Writes the errors from an <c>EntryLintResult</c> to the console and the lint log,
+    ''' and adds its error count to <c>ErrorsFound</c>
+    ''' </summary>
+    '''
+    ''' <param name="result">
+    ''' The <c>EntryLintResult</c> whose errors will be emitted
+    ''' </param>
+    Private Sub EmitEntryResult(result As EntryLintResult)
+
+        For Each Errr In result.Errors
+
+            gLog(Errr.Message, ascend:=True)
+
+            Dim out = $"Error in {result.EntryName}: {Errr.Message}"
+            cwl(out)
+            MostRecentLintLog.AppendLine(out)
+
+            For Each detail In Errr.Details
+                cwl(detail)
+                gLog($"  {detail}")
+                MostRecentLintLog.AppendLine(detail)
+            Next
+
+            gLog(descend:=True)
+            cwl()
+            MostRecentLintLog.AppendLine()
+
+        Next
+
+        ErrorsFound += result.ErrorCount
 
     End Sub
 
@@ -312,20 +363,18 @@ Public Module WinappDebug
     ''' <param name="entry">
     ''' A <c> winapp2entry2 </c> to be audited for syntax errors
     ''' </param>
-    Private Sub ProcessEntry(entry As winapp2entry2)
+    Private Function ProcessEntry(entry As winapp2entry2, duplicateNames As HashSet(Of String)) As EntryLintResult
 
+        Dim result As New EntryLintResult(entry.FullName)
         gLog($"Processing entry {entry.Name}", buffr:=True)
 
         Dim hasFileExcludes = False
         Dim hasRegExcludes = False
 
-        fullNameErr(Not allEntryNames.Add(entry.Name), entry,
-                    "Duplicate entry name detected")
+        result.RecordError("Duplicate entry name detected", Array.Empty(Of String)(), duplicateNames.Contains(entry.Name))
+        result.RecordError("All entries must end in ' *'", Array.Empty(Of String)(), Not entry.HasValidNameSuffix)
 
-        fullNameErr(Not entry.HasValidNameSuffix, entry,
-                    "All entries must end in ' *'")
-
-        ValidateKeys(entry)
+        ValidateKeys(result, entry)
 
         Dim keyTypes = {"DetectOS", "LangSecRef", "Section", "SpecialDetect", "Detect", "DetectFile",
                         "Default", "Warning", "FileKey", "RegKey", "ExcludeKey"}
@@ -336,15 +385,15 @@ Public Module WinappDebug
 
                 Case "DetectFile"
 
-                    processKeyList(entry, keyType, AddressOf pDetectFile)
+                    processKeyList(result, entry, keyType, Function(k) pDetectFile(result, k))
 
                 Case "FileKey"
 
-                    processKeyList(entry, keyType, AddressOf pFileKey)
+                    processKeyList(result, entry, keyType, Function(k) pFileKey(result, k))
 
                 Case Else
 
-                    processKeyList(entry, keyType, AddressOf voidDelegate, hasFileExcludes, hasRegExcludes)
+                    processKeyList(result, entry, keyType, AddressOf voidDelegate, hasFileExcludes, hasRegExcludes)
 
             End Select
 
@@ -360,29 +409,14 @@ Public Module WinappDebug
         Dim hasRegKeys = entry.RegKeys.Count <> 0
         Dim hasDefaultKey = entry.DefaultKey.Count > 0
 
-        fullNameErr(lintSyntax.ShouldScan AndAlso hasSectionKey AndAlso hasLangSecRef, entry,
-                    "Section key found alongside LangSecRef key, but only one should be present")
-
-        fullNameErr(lintSyntax.ShouldScan AndAlso Not (hasSectionKey OrElse hasLangSecRef), entry,
-                    "Entry has no valid classifier key (LangSecRef, Section)")
-
-        fullNameErr(Not (hasDetectFiles OrElse hasDetects OrElse hasDetectOS OrElse hasSpecialDetect), entry,
-                    "Entry has no valid detection keys (Detect, DetectFile, DetectOS, SpecialDetect)")
-
-        fullNameErr(lintSyntax.ShouldScan AndAlso Not (hasFileKeys OrElse hasRegKeys), entry,
-                    "Entry has no valid deletion keys (FileKey, RegKey)")
-
-        fullNameErr(lintSyntax.ShouldScan AndAlso hasFileExcludes AndAlso Not (hasFileKeys OrElse hasRegKeys), entry,
-                    "Entry has ExcludeKeys but no valid FileKeys or RegKeys")
-
-        fullNameErr(hasFileExcludes AndAlso Not hasFileKeys, entry,
-                    "Entry has ExcludeKeys pointing to file system locations but no FileKeys")
-
-        fullNameErr(hasRegExcludes AndAlso Not hasRegKeys, entry,
-                    "Entry has ExcludeKeys pointing to registry locations but no RegKeys")
-
-        fullNameErr(lintDefaults.ShouldScan AndAlso hasDefaultKey AndAlso Not overrideDefaultVal, entry,
-                    "Entry has a Default key where there should be none")
+        result.RecordError("Section key found alongside LangSecRef key, but only one should be present", Array.Empty(Of String)(), lintSyntax.ShouldScan AndAlso hasSectionKey AndAlso hasLangSecRef)
+        result.RecordError("Entry has no valid classifier key (LangSecRef, Section)", Array.Empty(Of String)(), lintSyntax.ShouldScan AndAlso Not (hasSectionKey OrElse hasLangSecRef))
+        result.RecordError("Entry has no valid detection keys (Detect, DetectFile, DetectOS, SpecialDetect)", Array.Empty(Of String)(), Not (hasDetectFiles OrElse hasDetects OrElse hasDetectOS OrElse hasSpecialDetect))
+        result.RecordError("Entry has no valid deletion keys (FileKey, RegKey)", Array.Empty(Of String)(), lintSyntax.ShouldScan AndAlso Not (hasFileKeys OrElse hasRegKeys))
+        result.RecordError("Entry has ExcludeKeys but no valid FileKeys or RegKeys", Array.Empty(Of String)(), lintSyntax.ShouldScan AndAlso hasFileExcludes AndAlso Not (hasFileKeys OrElse hasRegKeys))
+        result.RecordError("Entry has ExcludeKeys pointing to file system locations but no FileKeys", Array.Empty(Of String)(), hasFileExcludes AndAlso Not hasFileKeys)
+        result.RecordError("Entry has ExcludeKeys pointing to registry locations but no RegKeys", Array.Empty(Of String)(), hasRegExcludes AndAlso Not hasRegKeys)
+        result.RecordError("Entry has a Default key where there should be none", Array.Empty(Of String)(), lintDefaults.ShouldScan AndAlso hasDefaultKey AndAlso Not overrideDefaultVal)
 
         If lintDefaults.fixFormat AndAlso hasDefaultKey AndAlso Not overrideDefaultVal Then
             For Each k In entry.DefaultKey.ToList()
@@ -390,24 +424,25 @@ Public Module WinappDebug
             Next
         End If
 
-        If Not overrideDefaultVal Then gLog($"Finished processing {entry.Name}", buffr:=True) : Return
+        If Not overrideDefaultVal Then gLog($"Finished processing {entry.Name}", buffr:=True) : Return result
 
         Dim expected = tsInvariant(expectedDefaultValue)
 
         If entry.DefaultKey.Count > 0 Then
 
             Dim key = entry.DefaultKey(0)
-            fullKeyErr(key, "Incorrect value for Default Key found", lintDefaults.ShouldScan AndAlso Not key.Value = expected, lintDefaults.fixFormat, key.Value, expected)
-            Return
+            fullKeyErr(result, key, "Incorrect value for Default Key found", lintDefaults.ShouldScan AndAlso Not key.Value = expected, lintDefaults.fixFormat, key.Value, expected)
+            Return result
 
         End If
 
-        fullNameErr(True, entry, "No Default Key found")
+        result.RecordError("No Default Key found", Array.Empty(Of String)())
         entry.AddKey(New iniKey2($"Default={expected}"))
 
         gLog($"Finished processing {entry.Name}", buffr:=True)
+        Return result
 
-    End Sub
+    End Function
 
     ''' <summary>
     ''' Checks the basic structure of all <c>iniKey2</c>s in a <c>winapp2entry2</c>,
@@ -418,18 +453,18 @@ Public Module WinappDebug
     ''' <param name="entry">
     ''' A <c>winapp2entry2</c> whose <c>iniKey2</c>s will be audited for basic syntax correctness
     ''' </param>
-    Private Sub ValidateKeys(entry As winapp2entry2)
+    Private Sub ValidateKeys(result As EntryLintResult, entry As winapp2entry2)
 
         ' Run cValidity on all non-error buckets; remove failures
         For i = 0 To entry.KeyLists.Count - 2
-            For Each key In entry.KeyLists(i).Where(Function(k) Not cValidity(k)).ToList()
+            For Each key In entry.KeyLists(i).Where(Function(k) Not cValidity(result, k)).ToList()
                 entry.RemoveKey(key)
             Next
         Next
 
         ' Run cValidity on error keys; force-remove failures
         ' (KeyType may have changed during partial repair, so normal routing would be wrong)
-        For Each key In entry.ErrorKeys.Where(Function(k) Not cValidity(k)).ToList()
+        For Each key In entry.ErrorKeys.Where(Function(k) Not cValidity(result, k)).ToList()
             entry.ForceRemoveErrorKey(key)
         Next
 
@@ -452,16 +487,16 @@ Public Module WinappDebug
             If category.Count < 2 Then Continue For
 
             Dim unsortedNames As New strList
-            Dim lineNums As New List(Of Integer)
+            Dim indices As New List(Of Integer)
 
-            For Each entry In category
-                unsortedNames.add(entry.Name)
-                lineNums.Add(entry.LineNum)
+            For i = 0 To category.Count - 1
+                unsortedNames.add(category(i).Name)
+                indices.Add(i)
             Next
 
             Dim sortedNames = replaceAndSort(unsortedNames, "-", "  ")
 
-            If lintAlpha.ShouldScan Then findOutOfPlace(unsortedNames, sortedNames, "Entry", lineNums)
+            If lintAlpha.ShouldScan Then findOutOfPlace(unsortedNames, sortedNames, "Entry", indices)
 
         Next
 
@@ -505,8 +540,8 @@ Public Module WinappDebug
     ''' <paramref name="findType"/> contains a <c> keyType </c>
     ''' </param>
     '''
-    ''' <param name="LineCountList">
-    ''' The line numbers associated with the lines in <c> <paramref name="someList"/> </c>
+    ''' <param name="indices">
+    ''' The 0-based positions of the items in <c> <paramref name="someList"/> </c> within their containing collection
     ''' </param>
     '''
     ''' <param name="oopBool">
@@ -516,7 +551,7 @@ Public Module WinappDebug
     Private Sub findOutOfPlace(ByRef someList As strList,
                                ByRef sortedList As strList,
                                findType As String,
-                               ByRef LineCountList As List(Of Integer),
+                               ByRef indices As List(Of Integer),
                                Optional ByRef oopBool As Boolean = False)
 
         If someList.Count < 2 Then Return
@@ -548,18 +583,16 @@ Public Module WinappDebug
 
             Dim recInd = someList.indexOf(entry)
             Dim sortInd = sortedIndices(entry)
-            Dim curLine = LineCountList(recInd)
-            Dim sortLine = LineCountList(sortInd)
 
-            If (recInd = sortInd OrElse curLine = sortLine) Then Continue For
+            If recInd = sortInd Then Continue For
 
-            entry = If(findType = "Entry", entry, $"{findType & (recInd + 1)}={entry}")
+            Dim contextStr = If(findType = "Entry", entry, $"{findType}{recInd + 1}={entry}")
+            entry = contextStr
             oopBool = True
 
-            customErr(LineCountList(recInd), $"{findType} alphabetization",
-                                            {$"{entry} appears to be out of place",
-                                             $"Current line: {curLine}",
-                                             $"Expected line: {sortLine}"})
+            customErr(contextStr, $"{findType} alphabetization",
+                                  {$"{entry} appears to be out of place",
+                                   $"Expected position: {sortInd + 1}"})
 
         Next
 
@@ -646,7 +679,8 @@ Public Module WinappDebug
     ''' Tracking variable indicating that there exist ExcludeKeys contain registry locations
     ''' <br/> Optional, Default: <c> False </c>
     ''' </param>
-    Private Sub processKeyList(entry As winapp2entry2,
+    Private Sub processKeyList(result As EntryLintResult,
+                               entry As winapp2entry2,
                                keyType As String,
                                processKey As Func(Of iniKey2, iniKey2),
                                Optional ByRef hasF As Boolean = False,
@@ -662,7 +696,7 @@ Public Module WinappDebug
         gLog($"Processing {keyType}s", ascend:=True, buffr:=True)
 
         Dim curNum = 1
-        Dim curStrings As New strList
+        Dim seenValues As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
         Dim dupeKeys As New List(Of iniKey2)
 
         For Each key In bucket.ToList()
@@ -671,36 +705,36 @@ Public Module WinappDebug
 
                 Case "ExcludeKey"
 
-                    cFormat(key, curNum, curStrings, dupeKeys)
-                    pExcludeKey(key, hasF, hasR)
+                    cFormat(result, key, curNum, seenValues, dupeKeys)
+                    pExcludeKey(result, key, hasF, hasR)
 
                 Case "Detect", "DetectFile"
 
-                    If key.typeIs("Detect") Then chkPathFormatValidity(key, True)
-                    cFormat(key, curNum, curStrings, dupeKeys, bucket.Count = 1)
+                    If key.typeIs("Detect") Then chkPathFormatValidity(result, key, True)
+                    cFormat(result, key, curNum, seenValues, dupeKeys, bucket.Count = 1)
 
                 Case "RegKey"
 
-                    chkPathFormatValidity(key, True)
-                    cFormat(key, curNum, curStrings, dupeKeys)
+                    chkPathFormatValidity(result, key, True)
+                    cFormat(result, key, curNum, seenValues, dupeKeys)
 
                 Case "Warning", "DetectOS", "SpecialDetect", "LangSecRef", "Section", "Default"
 
                     If curNum > 1 AndAlso lintMulti.ShouldScan Then
 
-                        fullKeyErr(key, $"Multiple {key.KeyType} detected.")
+                        fullKeyErr(result, key, $"Multiple {key.KeyType} detected.")
                         If lintMulti.fixFormat Then dupeKeys.Add(key)
 
                     End If
 
-                    cFormat(key, curNum, curStrings, dupeKeys, True)
+                    cFormat(result, key, curNum, seenValues, dupeKeys, True)
 
-                    If key.typeIs("SpecialDetect") Then chkCasing(key, {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}, key.Value)
-                    fullKeyErr(key, "LangSecRef holds an invalid value.", lintInvalid.ShouldScan AndAlso key.typeIs("LangSecRef") AndAlso Not secRefNums.IsMatch(key.Value))
+                    If key.typeIs("SpecialDetect") Then chkCasing(result, key, {"DET_CHROME", "DET_MOZILLA", "DET_THUNDERBIRD", "DET_OPERA"}, key.Value)
+                    fullKeyErr(result, key, "LangSecRef holds an invalid value.", lintInvalid.ShouldScan AndAlso key.typeIs("LangSecRef") AndAlso Not secRefNums.IsMatch(key.Value))
 
                 Case Else
 
-                    cFormat(key, curNum, curStrings, dupeKeys)
+                    cFormat(result, key, curNum, seenValues, dupeKeys)
 
             End Select
 
@@ -746,8 +780,8 @@ Public Module WinappDebug
     ''' The current expected key number for numbered keys
     ''' </param>
     '''
-    ''' <param name="keyValues">
-    ''' The current list of observed <c>iniKey2</c> values
+    ''' <param name="seenValues">
+    ''' A map of already-observed key values to their first-seen key string, used to detect duplicates
     ''' </param>
     '''
     ''' <param name="dupeKeys">
@@ -757,22 +791,22 @@ Public Module WinappDebug
     ''' <param name="noNumbers">
     ''' Indicates that the current set of keys should not be numbered
     ''' </param>
-    Private Sub cFormat(key As iniKey2,
+    Private Sub cFormat(result As EntryLintResult,
+                        key As iniKey2,
                         ByRef keyNumber As Integer,
-                        ByRef keyValues As strList,
+                        ByRef seenValues As Dictionary(Of String, String),
                         dupeKeys As List(Of iniKey2),
                         Optional noNumbers As Boolean = False)
 
         ' Check for duplicates
-        If keyValues.contains(key.Value, True) Then
+        If seenValues.ContainsKey(key.Value) Then
 
-            Dim dupeKeyStr = $"{key.KeyType}{If(Not noNumbers, (keyValues.Items.IndexOf(key.Value) + 1).ToString(CultureInfo.InvariantCulture), "")}={key.Value}"
-            If lintDupes.ShouldScan Then customErr(key.LineNumber, "Duplicate key value found", {$"Key:            {key.ToString()}", $"Duplicates:     {dupeKeyStr}"})
+            result.RecordError("Duplicate key value found", {$"Key:            {key.ToString()}", $"Duplicates:     {seenValues(key.Value)}"}, lintDupes.ShouldScan)
             If lintDupes.fixFormat Then dupeKeys.Add(key)
 
         Else
 
-            keyValues.add(key.Value)
+            seenValues(key.Value) = key.ToString()
 
         End If
 
@@ -782,25 +816,25 @@ Public Module WinappDebug
         Dim fixedStr = If(noNumbers, key.KeyType, key.KeyType & keyNumber)
 
         gLog($"  Input mismatch error in {key.ToString()}", hasNumberingError)
-        inputMismatchErr(key.LineNumber, numberingErrStr, key.Name, fixedStr, If(noNumbers, lintExtraNums.ShouldScan, lintWrongNums.ShouldScan) And hasNumberingError)
+        inputMismatchErr(result, numberingErrStr, key.Name, fixedStr, If(noNumbers, lintExtraNums.ShouldScan, lintWrongNums.ShouldScan) And hasNumberingError)
         fixStr(If(noNumbers, lintExtraNums.fixFormat, lintWrongNums.fixFormat) And hasNumberingError, key.Name, fixedStr)
 
         ' Scan for and fix any use of incorrect slashes (except in Warning keys) or trailing semicolons
         Dim fwdSlashErr = "Forward slash (/) detected in lieu of backslash (\)."
-        fullKeyErr(key, fwdSlashErr, Not (key.typeIs("RegKey") OrElse key.typeIs("Section") OrElse key.typeIs("Warning")) AndAlso lintSlashes.ShouldScan AndAlso key.vHas("/"),
-                                                                                                        lintSlashes.fixFormat, key.Value, key.Value.Replace("/", "\"))
+        fullKeyErr(result, key, fwdSlashErr, Not (key.typeIs("RegKey") OrElse key.typeIs("Section") OrElse key.typeIs("Warning")) AndAlso lintSlashes.ShouldScan AndAlso key.vHas("/"),
+                                             lintSlashes.fixFormat, key.Value, key.Value.Replace("/", "\"))
         If key.typeIs("RegKey") AndAlso lintSlashes.ShouldScan AndAlso key.vHas("/") Then
             Dim pipeIdx = key.Value.IndexOf("|"c)
             Dim pathPart = If(pipeIdx >= 0, key.Value.Substring(0, pipeIdx), key.Value)
             If pathPart.Contains("/") Then
-                fullKeyErr(key, fwdSlashErr, True, lintSlashes.fixFormat, key.Value,
+                fullKeyErr(result, key, fwdSlashErr, True, lintSlashes.fixFormat, key.Value,
                            pathPart.Replace("/", "\") & If(pipeIdx >= 0, key.Value.Substring(pipeIdx), ""))
             End If
         End If
-        fullKeyErr(key, "Trailing semicolon (;).", key.ToString().Last = CChar(";") AndAlso lintSemis.ShouldScan, lintSemis.fixFormat, key.Value, key.Value.TrimEnd(CChar(";")))
+        fullKeyErr(result, key, "Trailing semicolon (;).", key.ToString().Last = CChar(";") AndAlso lintSemis.ShouldScan, lintSemis.fixFormat, key.Value, key.Value.TrimEnd(CChar(";")))
 
         ' Do some formatting checks for environment variables if needed
-        If {"FileKey", "ExcludeKey", "DetectFile"}.Contains(key.KeyType) Then cEnVar(key)
+        If {"FileKey", "ExcludeKey", "DetectFile"}.Contains(key.KeyType) Then cEnVar(result, key)
         keyNumber += 1
 
     End Sub
@@ -821,7 +855,7 @@ Public Module WinappDebug
     ''' <param name="cond">
     ''' The condition under which this scan should be run
     ''' </param>
-    Private Sub fixBrokenEnVars(key As iniKey2, enVars As String(), cond As Boolean)
+    Private Sub fixBrokenEnVars(result As EntryLintResult, key As iniKey2, enVars As String(), cond As Boolean)
 
         If Not cond Then Return
 
@@ -860,7 +894,7 @@ Public Module WinappDebug
             If Not repairMade Then Continue For
 
             Dim fixedValue = If(pipeInd >= 0, key.Value.Substring(0, pipeInd + 1) & fixedPath, fixedPath)
-            fullKeyErr(key, msg, lintSyntax.ShouldScan, lintSyntax.ShouldRepair, key.Value, fixedValue)
+            fullKeyErr(result, key, msg, lintSyntax.ShouldScan, lintSyntax.ShouldRepair, key.Value, fixedValue)
             Exit For
 
         Next
@@ -874,26 +908,26 @@ Public Module WinappDebug
     ''' <param name="key">
     ''' The <c>iniKey2</c> whose data will be audited for environment variable correctness
     ''' </param>
-    Private Sub cEnVar(key As iniKey2)
+    Private Sub cEnVar(result As EntryLintResult, key As iniKey2)
 
         ' Valid Environmental Variables for winapp2.ini
         Dim enVars = {"AllUsersProfile", "AppData", "CommonAppData", "CommonProgramFiles",
         "Documents", "HomeDrive", "LocalAppData", "LocalLowAppData", "Music", "Pictures", "ProgramData", "ProgramFiles", "Public",
         "RootDir", "SystemDrive", "SystemRoot", "Temp", "Tmp", "UserName", "UserProfile", "Video", "WinDir"}
 
-        fullKeyErr(key, "Double '%' found in environment variable", key.vHas("%%"), lintSyntax.ShouldRepair, key.Value, key.Value.Replace("%%", "%"))
+        fullKeyErr(result, key, "Double '%' found in environment variable", key.vHas("%%"), lintSyntax.ShouldRepair, key.Value, key.Value.Replace("%%", "%"))
 
-        fixBrokenEnVars(key, enVars, lintSyntax.ShouldScan AndAlso key.vHas("%") AndAlso envVarRegex.Matches(key.Value).Count = 0 OrElse key.vHasAny(enVars) AndAlso Not key.vHas("%"))
+        fixBrokenEnVars(result, key, enVars, lintSyntax.ShouldScan AndAlso key.vHas("%") AndAlso envVarRegex.Matches(key.Value).Count = 0 OrElse key.vHasAny(enVars) AndAlso Not key.vHas("%"))
 
         For Each m As Match In envVarRegex.Matches(key.Value)
 
             Dim strippedText = m.ToString.Trim(CChar("%"))
-            chkCasing(key, enVars, strippedText)
+            chkCasing(result, key, enVars, strippedText)
 
         Next
 
         ' Environment variables should be trailed by a backslash
-        fullKeyErr(key, "Missing backslash (\) after %EnvironmentVariable%.", lintSlashes.ShouldScan And key.vHas("%") And Not key.vHasAny({"%|", "%\"}))
+        fullKeyErr(result, key, "Missing backslash (\) after %EnvironmentVariable%.", lintSlashes.ShouldScan And key.vHas("%") And Not key.vHasAny({"%|", "%\"}))
 
     End Sub
 
@@ -966,7 +1000,7 @@ Public Module WinappDebug
     ''' <param name="key">
     ''' An <c>iniKey2</c> whose basic syntactic validity will be assessed
     ''' </param>
-    Private Function cValidity(key As iniKey2) As Boolean
+    Private Function cValidity(result As EntryLintResult, key As iniKey2) As Boolean
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return False
 
@@ -991,9 +1025,12 @@ Public Module WinappDebug
             ' If we didn't find a fixable situation, delete the key
             Dim fixedMsngEq = fixMissingEquals(key, validCmds)
 
-            fullKeyErr(key, "Missing '=' detected and repaired in key.", fixedMsngEq)
+            fullKeyErr(result, key, "Missing '=' detected and repaired in key.", fixedMsngEq)
 
-            If Not fixedMsngEq Then customErr(key.LineNumber, $"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", Array.Empty(Of String)()) : Return False
+            If Not fixedMsngEq Then
+                result.RecordError($"{key.Name} is missing a '=' or was not provided with a value. It will be deleted.", Array.Empty(Of String)())
+                Return False
+            End If
 
         End If
 
@@ -1001,7 +1038,7 @@ Public Module WinappDebug
 
         If key.vHas("\\", True) Then
 
-            fullKeyErr(key, "Extraneous backslashes (\\) detected", lintSlashes.ShouldScan)
+            fullKeyErr(result, key, "Extraneous backslashes (\\) detected", lintSlashes.ShouldScan)
 
             While (key.Value.Contains("\\") And lintSlashes.fixFormat)
 
@@ -1015,14 +1052,14 @@ Public Module WinappDebug
         If key.Name.StartsWith(" ", StringComparison.InvariantCulture) OrElse key.Name.EndsWith(" ", StringComparison.InvariantCulture) OrElse
             key.Value.StartsWith(" ", StringComparison.InvariantCulture) OrElse key.Value.EndsWith(" ", StringComparison.InvariantCulture) Then
 
-            fullKeyErr(key, "Detected unwanted whitespace in iniKey", True)
+            fullKeyErr(result, key, "Detected unwanted whitespace in iniKey", True)
             fixStr(True, key.Value, key.Value.Trim)
             fixStr(True, key.Name, key.Name.Trim)
 
         End If
 
         ' Make sure the keyType is valid
-        chkCasing(key, validCmds, key.KeyType)
+        chkCasing(result, key, validCmds, key.KeyType)
 
         Return True
 
@@ -1044,7 +1081,8 @@ Public Module WinappDebug
     ''' <param name="strToChk">
     ''' A pointer to the value being audited
     ''' </param>
-    Private Sub chkCasing(key As iniKey2,
+    Private Sub chkCasing(result As EntryLintResult,
+                          key As iniKey2,
                           casedArray As String(),
                           strToChk As String)
 
@@ -1061,12 +1099,12 @@ Public Module WinappDebug
         Dim validData = String.Join(", ", casedArray)
 
         ' Inform the user if there are casing errors and fix them
-        fullKeyErr(key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, False, "", "")
+        fullKeyErr(result, key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, False, "", "")
         fixStr(hasCasingErr AndAlso key.Value.Contains(strToChk), key.Value, key.Value.Replace(strToChk, casedString))
         fixStr(hasCasingErr AndAlso key.Name.Contains(strToChk), key.Name, key.Name.Replace(key.KeyType, casedString))
 
         ' Inform the user about invalid data
-        fullKeyErr(key, $"Invalid data provided: {strToChk} in {key.ToString()}{Environment.NewLine}Valid data: {validData}", Not casedArray.Contains(casedString) And lintInvalid.ShouldScan)
+        fullKeyErr(result, key, $"Invalid data provided: {strToChk} in {key.ToString()}{Environment.NewLine}Valid data: {validData}", Not casedArray.Contains(casedString) And lintInvalid.ShouldScan)
 
     End Sub
 
@@ -1077,7 +1115,7 @@ Public Module WinappDebug
     ''' <param name="key">
     ''' A winapp2.ini FileKey format <c>iniKey2</c> to be checked for correctness
     ''' </param>
-    Public Function pFileKey(key As iniKey2) As iniKey2
+    Public Function pFileKey(result As EntryLintResult, key As iniKey2) As iniKey2
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return key
 
@@ -1089,7 +1127,7 @@ Public Module WinappDebug
             Dim rawFlag = iteratorCheckerList.Last
             Dim upperFlag = rawFlag.ToUpperInvariant()
             If rawFlag <> upperFlag AndAlso (upperFlag = "RECURSE" OrElse upperFlag = "REMOVESELF") Then
-                fullKeyErr(key, $"{upperFlag} has a casing error.", lintCasing.ShouldScan, lintCasing.fixFormat,
+                fullKeyErr(result, key, $"{upperFlag} has a casing error.", lintCasing.ShouldScan, lintCasing.fixFormat,
                            key.Value, key.Value.Substring(0, key.Value.Length - rawFlag.Length) & upperFlag)
             End If
 
@@ -1097,26 +1135,26 @@ Public Module WinappDebug
 
         End If
 
-        fullKeyErr(key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
+        fullKeyErr(result, key, "Missing pipe (|) in FileKey.", Not key.vHas("|"))
 
         ' The driveLtr check to allow entries that contain hard coded drive letters to contain colons. Since this is an edge case only likely to pop up in winapp3.ini (as far as official releases go)
         ' We'll assume that if the path contains a hard coded drive letter, any colon use is intentional and disable this check.
-        fullKeyErr(key, "Colon (:) found where there should be a semicolon (;)", key.Value.Contains(":") And Not driveLtrs.IsMatch(getFirstDir(key.Value)), lintSemis.fixFormat, key.Value, key.Value.Replace(":", ";"))
+        fullKeyErr(result, key, "Colon (:) found where there should be a semicolon (;)", key.Value.Contains(":") And Not driveLtrs.IsMatch(getFirstDir(key.Value)), lintSemis.fixFormat, key.Value, key.Value.Replace(":", ";"))
 
         ' Trailing semicolon check only applies to the parameters section (after the first pipe)
         Dim firstPipe = key.Value.IndexOf("|"c)
         Dim afterFirstPipe = If(firstPipe >= 0, key.Value.Substring(firstPipe), "")
-        fullKeyErr(key, "Trailing semicolon (;) in parameters", lintSemis.ShouldScan And afterFirstPipe.Contains(";|"), lintSemis.fixFormat, key.Value, key.Value.Replace(";|", "|"))
+        fullKeyErr(result, key, "Trailing semicolon (;) in parameters", lintSemis.ShouldScan And afterFirstPipe.Contains(";|"), lintSemis.fixFormat, key.Value, key.Value.Replace(";|", "|"))
 
         ' Check for incorrect spellings of RECURSE or REMOVESELF
-        If iteratorCheckerList.Length > 2 Then fullKeyErr(key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Equals("RECURSE", StringComparison.OrdinalIgnoreCase) And Not iteratorCheckerList(2).Equals("REMOVESELF", StringComparison.OrdinalIgnoreCase))
+        If iteratorCheckerList.Length > 2 Then fullKeyErr(result, key, "RECURSE or REMOVESELF is incorrectly spelled, or there are too many pipe (|) symbols.", Not iteratorCheckerList(2).Equals("RECURSE", StringComparison.OrdinalIgnoreCase) And Not iteratorCheckerList(2).Equals("REMOVESELF", StringComparison.OrdinalIgnoreCase))
 
         ' Check for missing pipe symbol on recurse and removeself, fix them if detected
         Dim flags As New List(Of String) From {"RECURSE", "REMOVESELF"}
-        flags.ForEach(Sub(flagStr) fullKeyErr(key, $"Missing pipe (|) before {flagStr}.", lintFlags.ShouldScan And key.vHas(flagStr) And Not key.vHas($"|{flagStr}"), lintFlags.fixFormat, key.Value, key.Value.Replace(flagStr, $"|{flagStr}")))
+        flags.ForEach(Sub(flagStr) fullKeyErr(result, key, $"Missing pipe (|) before {flagStr}.", lintFlags.ShouldScan And key.vHas(flagStr) And Not key.vHas($"|{flagStr}"), lintFlags.fixFormat, key.Value, key.Value.Replace(flagStr, $"|{flagStr}")))
 
         ' Backslash checks, fix if detected
-        fullKeyErr(key, "Backslash (\) found before pipe (|).", lintSlashes.ShouldScan And key.vHas("\|"), lintSlashes.fixFormat, key.Value, key.Value.Replace("\|", "|"))
+        fullKeyErr(result, key, "Backslash (\) found before pipe (|).", lintSlashes.ShouldScan And key.vHas("\|"), lintSlashes.fixFormat, key.Value, key.Value.Replace("\|", "|"))
 
         ' Check for duplicate or empty parameters using fileKeyParams2
         Dim keyParams As New fileKeyParams2(key.Value)
@@ -1126,8 +1164,7 @@ Public Module WinappDebug
         For Each arg In keyParams.Patterns
 
             If seenArgs.Add(arg) Then Continue For
-            If Not lintParams.ShouldScan Then Continue For
-            customErr(key.LineNumber, $"{If(arg.Length = 0, "Empty", "Duplicate")} FileKey parameter found", {$"Command: {arg}"})
+            result.RecordError($"{If(arg.Length = 0, "Empty", "Duplicate")} FileKey parameter found", {$"Key:     {key.ToString()}", $"Command: {arg}"}, lintParams.ShouldScan)
             dupedArgs.Add(arg)
 
         Next
@@ -1149,7 +1186,7 @@ Public Module WinappDebug
         End If
 
         ' Make sure that FileKey paths point to a filesystem location
-        chkPathFormatValidity(key, False)
+        chkPathFormatValidity(result, key, False)
 
         Return key
 
@@ -1162,26 +1199,26 @@ Public Module WinappDebug
     ''' <param name="key">
     ''' A winapp2.ini DetectFile format <c>iniKey2</c> to be checked for correctness
     ''' </param>
-    Private Function pDetectFile(key As iniKey2) As iniKey2
+    Private Function pDetectFile(result As EntryLintResult, key As iniKey2) As iniKey2
 
         ' Trailing Backslashes & nested wildcards
-        fullKeyErr(key, "Trailing backslash (\) found in DetectFile",
+        fullKeyErr(result, key, "Trailing backslash (\) found in DetectFile",
                    lintSlashes.ShouldScan AndAlso key.Value.Last = CChar("\"), lintSlashes.fixFormat, key.Value, key.Value.TrimEnd(CChar("\")))
 
         If key.vHas("*") Then
 
             ' System Ninja doesn't support wildcards in DetectFile keys, so we won't when the Flavor is set to that
-            fullKeyErr(key, "Wildcard (*) found in DetectFile", CurrentWinappFlavor = WinappFlavor.SystemNinja)
+            fullKeyErr(result, key, "Wildcard (*) found in DetectFile", CurrentWinappFlavor = WinappFlavor.SystemNinja)
 
             Dim splitDir = key.Value.Split(CChar("\"))
 
             Dim hasNestedWildcard = splitDir.Take(splitDir.Length - 1).Any(Function(dir) dir.Contains("*"))
-            fullKeyErr(key, "Nested wildcard found in DetectFile", hasNestedWildcard)
+            fullKeyErr(result, key, "Nested wildcard found in DetectFile", hasNestedWildcard)
 
         End If
 
         ' Make sure that DetectFile paths point to a filesystem location
-        chkPathFormatValidity(key, False)
+        chkPathFormatValidity(result, key, False)
 
         Return key
 
@@ -1198,7 +1235,7 @@ Public Module WinappDebug
     ''' <param name="isRegistry">
     ''' Indicates that the given <paramref name="key"/> is expected to hold a registry path
     ''' </param>
-    Private Sub chkPathFormatValidity(key As iniKey2, isRegistry As Boolean)
+    Private Sub chkPathFormatValidity(result As EntryLintResult, key As iniKey2, isRegistry As Boolean)
 
         If Not (lintPathValidity.ShouldScan OrElse lintCasing.ShouldScan) Then Return
 
@@ -1216,17 +1253,17 @@ Public Module WinappDebug
             If correctHive IsNot Nothing Then
                 Dim idx = key.Value.IndexOf(rootStr)
                 Dim fixedValue = key.Value.Remove(idx, rootStr.Length).Insert(idx, correctHive)
-                fullKeyErr(key, "Incorrect registry root casing.", lintCasing.ShouldScan, lintCasing.fixFormat, key.Value, fixedValue)
+                fullKeyErr(result, key, "Incorrect registry root casing.", lintCasing.ShouldScan, lintCasing.fixFormat, key.Value, fixedValue)
             Else
-                fullKeyErr(key, "Invalid registry path detected.", lintPathValidity.ShouldScan)
+                fullKeyErr(result, key, "Invalid registry path detected.", lintPathValidity.ShouldScan)
             End If
 
         End If
 
-        fullKeyErr(key, "Invalid file system path detected.",
+        fullKeyErr(result, key, "Invalid file system path detected.",
                    Not isRegistry AndAlso lintPathValidity.ShouldScan AndAlso Not (rootStr.StartsWith("%", StringComparison.InvariantCultureIgnoreCase) OrElse driveLtrs.IsMatch(rootStr)))
 
-        fullKeyErr(key, "Illegal characters (< > "") detected in filesystem path.",
+        fullKeyErr(result, key, "Illegal characters (< > "") detected in filesystem path.",
                    Not isRegistry AndAlso lintPathValidity.ShouldScan AndAlso pathPortion.IndexOfAny({CChar("<"), CChar(">"), CChar("""")}) >= 0)
 
     End Sub
@@ -1246,14 +1283,15 @@ Public Module WinappDebug
     ''' <param name="hasR">
     ''' Indicates whether the entry excludes any registry locations
     ''' </param>
-    Private Sub pExcludeKey(key As iniKey2,
+    Private Sub pExcludeKey(result As EntryLintResult,
+                            key As iniKey2,
                             ByRef hasF As Boolean,
                             ByRef hasR As Boolean)
 
         Dim hasValidFlags = key.vHasAny({"FILE|", "PATH|", "REG|"})
-        If Not hasValidFlags Then hasValidFlags = checkExcludeFlags(key)
+        If Not hasValidFlags Then hasValidFlags = checkExcludeFlags(result, key)
 
-        fullKeyErr(key, "ExcludeKey has too many flags", lintFlags.ShouldScan AndAlso If(key.vHas("REG|"), key.Value.Split(CChar("|")).Length > 2, key.Value.Split(CChar("|")).Length > 3))
+        fullKeyErr(result, key, "ExcludeKey has too many flags", lintFlags.ShouldScan AndAlso If(key.vHas("REG|"), key.Value.Split(CChar("|")).Length > 2, key.Value.Split(CChar("|")).Length > 3))
 
 
         If Not ((lintPathValidity.ShouldScan OrElse lintCasing.ShouldScan) AndAlso hasValidFlags) Then Return
@@ -1264,11 +1302,11 @@ Public Module WinappDebug
 
                 hasF = True
 
-                chkPathFormatValidity(key, False)
+                chkPathFormatValidity(result, key, False)
 
                 Dim flagPipe = key.Value.IndexOf("|"c)
                 Dim patternPipe = If(flagPipe >= 0, key.Value.IndexOf("|"c, flagPipe + 1), -1)
-                fullKeyErr(key, "Missing backslash (\) before pipe (|) in ExcludeKey.",
+                fullKeyErr(result, key, "Missing backslash (\) before pipe (|) in ExcludeKey.",
                            lintPathValidity.ShouldScan AndAlso Not key.vHas("\|"),
                            lintPathValidity.fixFormat AndAlso patternPipe >= 0,
                            key.Value, If(patternPipe >= 0, key.Value.Insert(patternPipe, "\"), ""))
@@ -1277,12 +1315,12 @@ Public Module WinappDebug
 
                 hasR = True
 
-                chkPathFormatValidity(key, True)
-                fullKeyErr(key, "ExcludeKey contains REG flag in BleachBit flavor", CurrentWinappFlavor = WinappFlavor.BleachBit)
+                chkPathFormatValidity(result, key, True)
+                fullKeyErr(result, key, "ExcludeKey contains REG flag in BleachBit flavor", CurrentWinappFlavor = WinappFlavor.BleachBit)
 
             Case Else
 
-                checkExcludeFlags(key)
+                checkExcludeFlags(result, key)
 
         End Select
 
@@ -1297,7 +1335,7 @@ Public Module WinappDebug
     ''' <param name="key">
     ''' A winapp2.ini ExcludeKey format <c>iniKey2</c> to be checked for correctness
     ''' </param>
-    Private Function checkExcludeFlags(key As iniKey2) As Boolean
+    Private Function checkExcludeFlags(result As EntryLintResult, key As iniKey2) As Boolean
 
         Dim matches = HasFlagRegex.Matches(key.Value)
 
@@ -1306,14 +1344,14 @@ Public Module WinappDebug
 
         If matches.Count = 0 Then
 
-            fullKeyErr(key, "No valid exclude flag (FILE, PATH, or REG) found in ExcludeKey.")
+            fullKeyErr(result, key, "No valid exclude flag (FILE, PATH, or REG) found in ExcludeKey.")
             Return False
 
         End If
 
         Dim foundFlag = matches(0)
         Dim fixedValue = key.Value.Insert(foundFlag.Length, "|")
-        fullKeyErr(key, "Missing pipe (|) after ExcludeKey flag", repCond:=lintFlags.ShouldRepair, repairVal:=key.Value, newVal:=fixedValue)
+        fullKeyErr(result, key, "Missing pipe (|) after ExcludeKey flag", repCond:=lintFlags.ShouldRepair, repairVal:=key.Value, newVal:=fixedValue)
 
         Return True
 
@@ -1346,17 +1384,17 @@ Public Module WinappDebug
         If bucket.Count <= 1 OrElse Not lintAlpha.ShouldScan Then Return
 
         Dim keyValues As New strList
-        Dim lineNums As New List(Of Integer)
+        Dim indices As New List(Of Integer)
 
-        For Each key In bucket
-            keyValues.add(key.Value)
-            lineNums.Add(key.LineNumber)
+        For i = 0 To bucket.Count - 1
+            keyValues.add(bucket(i).Value)
+            indices.Add(i)
         Next
 
         Dim sortedKeyValues = replaceAndSort(keyValues, "|", " \ \")
 
         Dim keysOutOfPlace = False
-        findOutOfPlace(keyValues, sortedKeyValues, keyType, lineNums, keysOutOfPlace)
+        findOutOfPlace(keyValues, sortedKeyValues, keyType, indices, keysOutOfPlace)
 
         If Not (keysOutOfPlace OrElse hadDuplicatesRemoved) AndAlso
                (lintAlpha.fixFormat OrElse lintWrongNums.fixFormat OrElse lintExtraNums.fixFormat) Then Return
@@ -1373,8 +1411,8 @@ Public Module WinappDebug
     ''' Prints an error when data is received that does not match an expected value
     ''' </summary>
     '''
-    ''' <param name="linecount">
-    ''' The line number on which the error was detected
+    ''' <param name="context">
+    ''' The key or entry that contains the error, used to identify the error location in output
     ''' </param>
     '''
     ''' <param name="err">
@@ -1393,14 +1431,13 @@ Public Module WinappDebug
     ''' Indicates that the error condition is present
     ''' <br/> Optional, Default: <c> True </c>
     ''' </param>
-    Private Sub inputMismatchErr(linecount As Integer,
+    Private Sub inputMismatchErr(result As EntryLintResult,
                                  err As String,
                                  received As String,
                                  expected As String,
                                  Optional cond As Boolean = True)
 
-        If Not cond Then Return
-        customErr(linecount, err, {$"Expected: {expected}", $"Found: {received}"})
+        result.RecordError(err, {$"Expected: {expected}", $"Found:    {received}"}, cond)
 
     End Sub
 
@@ -1419,12 +1456,11 @@ Public Module WinappDebug
     ''' <param name="errTxt">
     ''' A description of the error as it will be displayed to the user
     ''' </param>
-    Private Sub fullNameErr(cond As Boolean,
-                            entry As winapp2entry2,
+    Private Sub fullNameErr(result As EntryLintResult,
+                            cond As Boolean,
                             errTxt As String)
 
-        If Not cond Then Return
-        customErr(entry.LineNum, errTxt, {$"Entry Name: {entry.FullName}"})
+        result.RecordError(errTxt, Array.Empty(Of String)(), cond)
 
     End Sub
 
@@ -1459,7 +1495,8 @@ Public Module WinappDebug
     ''' The incorrect value
     ''' <br/> Optional, Default: <c> "" </c>
     ''' </param>
-    Private Sub fullKeyErr(key As iniKey2,
+    Private Sub fullKeyErr(result As EntryLintResult,
+                           key As iniKey2,
                            err As String,
                            Optional cond As Boolean = True,
                            Optional repCond As Boolean = False,
@@ -1468,7 +1505,7 @@ Public Module WinappDebug
 
         If Not cond Then Return
 
-        customErr(key.LineNumber, err, {$"Key: {key.ToString()}"})
+        result.RecordError(err, {$"Key: {key.ToString()}"})
         fixStr(cond And repCond, repairVal, newVal)
 
     End Sub
@@ -1477,8 +1514,8 @@ Public Module WinappDebug
     ''' Prints arbitrarily defined errors without a precondition
     ''' </summary>
     '''
-    ''' <param name="lineCount">
-    ''' The line number on which the error was detected
+    ''' <param name="context">
+    ''' The entry name or key string identifying where the error was found
     ''' </param>
     '''
     ''' <param name="err">
@@ -1488,13 +1525,13 @@ Public Module WinappDebug
     ''' <param name="lines">
     ''' Any additional error information to be printed alongside the description
     ''' </param>
-    Private Sub customErr(lineCount As Integer,
+    Private Sub customErr(context As String,
                           err As String,
                           lines As String())
 
         gLog(err, ascend:=True)
 
-        Dim out = $"Line: {lineCount} - Error: {err}"
+        Dim out = $"Error in {context}: {Environment.NewLine} {err}"
         cwl(out)
         MostRecentLintLog.AppendLine(out)
 

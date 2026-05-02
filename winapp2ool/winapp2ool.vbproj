@@ -211,6 +211,7 @@
     <Compile Include="modules\winappdebug\mainmenu\lintmainmenu.vb" />
     <Compile Include="modules\winappdebug\settingshandler\lintsettings.vb" />
     <Compile Include="modules\winappdebug\settingshandler\lintsettingshandler.vb" />
+    <Compile Include="modules\winappdebug\tool\EntryLintResult.vb" />
     <Compile Include="modules\winappdebug\tool\WinappDebug.vb" />
     <Compile Include="modules\maintool\tool\Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
