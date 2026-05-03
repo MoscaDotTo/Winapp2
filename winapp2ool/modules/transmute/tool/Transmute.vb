@@ -362,9 +362,12 @@ Public Module Transmute
                           ByRef sourceFile As iniFile2,
                                 saveFile As iniFile2,
                           ByRef menuOutput As MenuSection,
-                       Optional isWinapp2 As Boolean = True)
+                       Optional isWinapp2 As Boolean = True,
+                       Optional skipFormat As Boolean = False)
 
         resolveConflicts(baseFile, sourceFile, menuOutput)
+
+        If skipFormat Then Return
 
         If isWinapp2 Then
 
@@ -421,9 +424,16 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="removeKeyMode">
-    ''' Sets the sub mode for key removal operations when <c> removeMode </c> is 
+    ''' Sets the sub mode for key removal operations when <c> removeMode </c> is
     ''' <c> RemoveMode.ByKey </c> <br />
-    ''' Optional, Default: <c> RemoveKeyMode.ByName </c> 
+    ''' Optional, Default: <c> RemoveKeyMode.ByName </c>
+    ''' </param>
+    '''
+    ''' <param name="skipFormat">
+    ''' When <c> True </c>, skips the post-transmutation sort, format, and disk write. <br />
+    ''' Use this when chaining multiple transmutations against the same base file so that
+    ''' only the final step pays the cost of constructing a <c> winapp2file2 </c> and writing to disk. <br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     Public Sub RemoteTransmute(ByRef baseFile As iniFile2,
@@ -434,7 +444,8 @@ Public Module Transmute
                             Optional transmuteMode As TransmuteMode = TransmuteMode.Add,
                             Optional replaceMode As ReplaceMode = ReplaceMode.ByKey,
                             Optional removeMode As RemoveMode = RemoveMode.ByKey,
-                            Optional removeKeyMode As RemoveKeyMode = RemoveKeyMode.ByName)
+                            Optional removeKeyMode As RemoveKeyMode = RemoveKeyMode.ByName,
+                            Optional skipFormat As Boolean = False)
 
         If sourceFile Is Nothing Then gLog("Source file not provided, skipping!") : Return
 
@@ -455,7 +466,7 @@ Public Module Transmute
         TransmuteRemoveMode = removeMode
         TransmuteRemoveKeyMode = removeKeyMode
 
-        transmute(baseFile, sourceFile, outputFile, menuOutput, isWinapp)
+        transmute(baseFile, sourceFile, outputFile, menuOutput, isWinapp, skipFormat)
 
         Transmutator = initTransmutator
         TransmuteReplaceMode = initReplMode
@@ -960,9 +971,22 @@ Public Module Transmute
             menuOutput.AddColoredLine(description, ConsoleColor.Cyan)
             gLog(description)
 
-            RemoteTransmute(baseFile, flavorFile, outputFile, isWinapp, menuOutput, curMode, curReplMode, curRemMode, curRemKMode)
+            RemoteTransmute(baseFile, flavorFile, outputFile, isWinapp, menuOutput, curMode, curReplMode, curRemMode, curRemKMode, skipFormat:=True)
 
         Next
+
+        If isWinapp Then
+
+            Dim wf2 As New winapp2file2(baseFile)
+            wf2.SortEntries()
+            outputFile.OverwriteToFile(wf2.ToWinapp2String())
+            baseFile = wf2.ToIni()
+
+        Else
+
+            outputFile.OverwriteToFile(baseFile.ToString(IniFileWriteFormat.Alphabetical))
+
+        End If
 
         Dim flavorizedMsg = $"{baseFile.Name} Flavorized"
         menuOutput.AddColoredLine(flavorizedMsg, ConsoleColor.Magenta)
