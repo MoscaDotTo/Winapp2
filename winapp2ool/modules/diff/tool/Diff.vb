@@ -146,7 +146,7 @@ Module Diff
             .WithDownload(Sub() DownloadDiffFile = Not DownloadDiffFile) _
             .WithFlag("-donttrim", Sub() TrimRemoteFile = Not TrimRemoteFile) _
             .WithFlag("-savelog", Sub() SaveDiffLog = Not SaveDiffLog) _
-            .WithFlag("-verbose", Sub() SuppressOutput = Not SuppressOutput) _
+            .WithFlag("-verbose", Sub() ShowFullEntries = Not ShowFullEntries) _
             .Parse()
 
         If DownloadDiffFile Then DiffFile2.Name = "Online winapp2.ini"
@@ -215,6 +215,7 @@ Module Diff
 
         diffOutput.AddRange(CompareFiles2(oldFile, newFile))
 
+        gLog(descend:=True)
         gLog(DiffLogEndPhrase)
 
         Dim out3 As New MenuSection
@@ -222,7 +223,7 @@ Module Diff
 
         diffOutput.Add(out3)
 
-        Console.Clear()
+        clrConsole()
 
         If Not SuppressOutput Then diffOutput.ForEach(Sub(section) section.Print())
 
