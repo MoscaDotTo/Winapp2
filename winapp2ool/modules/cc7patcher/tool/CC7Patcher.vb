@@ -58,7 +58,6 @@ Public Module CC7Patcher
 
         clrConsole()
 
-        ' Validate ccleaner.ini exists before proceeding
         If Not CC7PatcherFile2.Exists() Then
 
             setNextMenuHeaderText("ccleaner.ini not found. Please select a valid file.", printColor:=ConsoleColor.Red)
@@ -66,7 +65,6 @@ Public Module CC7Patcher
 
         End If
 
-        ' Handle winapp2.ini acquisition
         Dim winapp2Input As iniFile2
 
         If DownloadWinapp2 Then
@@ -78,8 +76,8 @@ Public Module CC7Patcher
 
             End If
 
-            gLog("Downloading winapp2.ini from GitHub")
-            winapp2Input = getRemoteIniFile2(getWinappLink())
+            gLog("Downloading CCleaner7 winapp2.ini from GitHub")
+            winapp2Input = getRemoteIniFile2(cc7FlavorLink)
 
             If winapp2Input Is Nothing Then
 
@@ -103,13 +101,11 @@ Public Module CC7Patcher
 
         End If
 
-        ' Initialize menu output
         Dim menuOutput As New MenuSection
         Dim headerMsg = "CCleaner 7 Patcher"
         menuOutput.AddBoxWithText(headerMsg)
         gLog(headerMsg, buffr:=True, ascend:=True)
 
-        ' Optionally trim winapp2.ini
         If TrimBeforePatching Then
 
             Dim trimMsg = "Trimming winapp2.ini..."
@@ -126,7 +122,6 @@ Public Module CC7Patcher
 
         End If
 
-        ' Perform the patching
         patchCCleaner(winapp2Input, menuOutput)
 
         Dim completeMsg = "CCleaner 7 patching complete"

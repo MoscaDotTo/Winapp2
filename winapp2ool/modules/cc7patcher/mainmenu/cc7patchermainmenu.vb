@@ -31,36 +31,31 @@ Public Module cc7patchermainmenu
     Private Function buildCC7PatcherMenu() As MenuSection
 
         Dim menuDescLines = {"Patch ccleaner.ini with winapp2.ini entries compatible with CCleaner 7"}
+        Dim settingsChangeName = NameOf(CC7PatcherModuleSettingsChanged)
+        Dim moduleName = NameOf(CC7Patcher)
 
-        Return MenuSection.CreateCompleteMenu(NameOf(CC7Patcher), menuDescLines, ConsoleColor.Yellow) _
+        Return MenuSection.CreateCompleteMenu(moduleName, menuDescLines, ConsoleColor.Yellow) _
             .AddDispatchedColoredOption("Run (default)", "Install winapp2.ini for CCleaner 7", ConsoleColor.Yellow,
                 Sub() initCC7Patcher()) _
             .AddBlank() _
             .AddDispatchedToggle("Trim", "trimming winapp2.ini before installation", TrimBeforePatching,
-                Sub() toggleModuleSetting("Trim", NameOf(CC7Patcher), GetType(cc7patchersettings),
-                                          NameOf(TrimBeforePatching), NameOf(CC7PatcherModuleSettingsChanged))) _
-            .AddDispatchedToggle("Download", "downloading the latest winapp2.ini from GitHub", DownloadWinapp2,
-                Sub() toggleModuleSetting("Download", NameOf(CC7Patcher), GetType(cc7patchersettings),
-                                          NameOf(DownloadWinapp2), NameOf(CC7PatcherModuleSettingsChanged)),
-                Not isOffline) _
+                Sub() toggleModuleSetting("Trim", moduleName, GetType(cc7patchersettings), NameOf(TrimBeforePatching), settingsChangeName)) _
+            .AddDispatchedToggle("Download", "downloading the latest winapp2.ini from GitHub", DownloadWinapp2, condition:=Not isOffline,
+                handler:=Sub() toggleModuleSetting("Download", moduleName, GetType(cc7patchersettings), NameOf(DownloadWinapp2), settingsChangeName)) _
             .AddBlank() _
-            .AddDispatchedOption("Change winapp2.ini", "Select the winapp2.ini file to install",
-                Sub() changeFile2Params(CC7PatcherFile1, CC7PatcherModuleSettingsChanged, NameOf(CC7Patcher),
-                                        NameOf(CC7PatcherFile1), NameOf(CC7PatcherModuleSettingsChanged)),
-                Not DownloadWinapp2) _
+            .AddDispatchedOption("Change winapp2.ini", "Select the winapp2.ini file to install", condition:=Not DownloadWinapp2,
+                handler:=Sub() changeFile2Params(CC7PatcherFile1, CC7PatcherModuleSettingsChanged, moduleName, NameOf(CC7PatcherFile1), settingsChangeName)) _
             .AddDispatchedOption("Change ccleaner.ini", "Select the ccleaner.ini file to be patched",
-                Sub() changeFile2Params(CC7PatcherFile2, CC7PatcherModuleSettingsChanged, NameOf(CC7Patcher),
-                                        NameOf(CC7PatcherFile2), NameOf(CC7PatcherModuleSettingsChanged))) _
+                Sub() changeFile2Params(CC7PatcherFile2, CC7PatcherModuleSettingsChanged, moduleName, NameOf(CC7PatcherFile2), settingsChangeName)) _
             .AddDispatchedOption("Change output file", "Select where to save the patched ccleaner.ini",
-                Sub() changeFile2Params(CC7PatcherFile3, CC7PatcherModuleSettingsChanged, NameOf(CC7Patcher),
-                                        NameOf(CC7PatcherFile3), NameOf(CC7PatcherModuleSettingsChanged))) _
+                Sub() changeFile2Params(CC7PatcherFile3, CC7PatcherModuleSettingsChanged, moduleName, NameOf(CC7PatcherFile3), settingsChangeName)) _
             .AddBlank() _
             .AddColoredFileInfo("Current winapp2.ini:  ", If(DownloadWinapp2, "Online", CC7PatcherFile1.Path()), ConsoleColor.Green) _
             .AddColoredFileInfo("Current ccleaner.ini: ", CC7PatcherFile2.Path(), ConsoleColor.Red) _
             .AddColoredFileInfo("Output file:          ", CC7PatcherFile3.Path(), ConsoleColor.Cyan) _
             .AddBlank(CC7PatcherModuleSettingsChanged) _
-            .AddDispatchedResetOpt(NameOf(CC7Patcher), CC7PatcherModuleSettingsChanged,
-                Sub() resetModuleSettings(NameOf(CC7Patcher), AddressOf InitDefaultCC7PatcherSettings))
+            .AddDispatchedResetOpt(moduleName, CC7PatcherModuleSettingsChanged,
+                Sub() resetModuleSettings(moduleName, AddressOf InitDefaultCC7PatcherSettings))
 
     End Function
 
@@ -86,12 +81,14 @@ Public Module cc7patchermainmenu
 
         If Not Integer.TryParse(input, intInput) Then
 
+            If input.Length = 0 AndAlso Not denyActionWithHeader(Not CC7PatcherFile2.Exists(), "CCleaner.ini not found") Then initCC7Patcher()
+
             setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
+                Return
 
-        End If
+            End If
 
-        If intInput = 0 Then exitModule() : Return
+            If intInput = 0 Then exitModule() : Return
 
         If Not buildCC7PatcherMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
