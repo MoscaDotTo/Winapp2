@@ -85,7 +85,7 @@ Module experimentalScans
 
             If matchIdx < 0 Then Continue For
 
-            result.LogDiag($"{entry.FileKeys(i)} has a path that matches another key")
+            gLog($"{entry.FileKeys(i)} has a path that matches another key")
 
             ' Append current key's patterns to the surviving key's value
             Dim mergeTarget = New fileKeyParams2(mergedValues(matchIdx))
@@ -101,7 +101,7 @@ Module experimentalScans
 
             mergedValues(matchIdx) = newValue
             removedIndices.Add(i)
-            result.LogDiag($"Key will be merged and have the new value: {newValue}")
+            gLog($"Key will be merged and have the new value: {newValue}")
 
         Next
 

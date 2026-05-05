@@ -98,27 +98,17 @@ Public Class EntryLintResult
         _errors.Add(New LintError(message, details))
     End Sub
 
-    Private ReadOnly _diagLines As New List(Of String)
-
     ''' <summary>
-    ''' Diagnostic log lines collected during parallel processing, to be flushed sequentially
-    ''' </summary>
-    Public ReadOnly Property DiagLines As IReadOnlyList(Of String)
-        Get
-            Return _diagLines
-        End Get
-    End Property
-
-    ''' <summary>
-    ''' Records a diagnostic log line to be emitted when this result is rendered
+    ''' Log lines captured by <c>gLogCapture</c> during parallel processing of this entry.
+    ''' Flushed in deterministic order via <c>EmitCaptured</c> when the result is rendered.
     ''' </summary>
     '''
-    ''' <param name="message">
-    ''' The diagnostic message
-    ''' </param>
-    Public Sub LogDiag(message As String)
-        _diagLines.Add(message)
-    End Sub
+    ''' <remarks>
+    ''' The producer (<c>WinappDebug.ProcessEntry</c>) opens a capture scope, runs the entry's
+    ''' lint pipeline, then assigns the captured <c>Lines</c> here. The consumer
+    ''' (<c>WinappDebug.EmitEntryResult</c>) flushes them under the calling thread's depth.
+    ''' </remarks>
+    Public Property LogLines As IReadOnlyList(Of String) = New List(Of String)()
 
     Private ReadOnly _deferredSections As New List(Of MenuSection)
 
