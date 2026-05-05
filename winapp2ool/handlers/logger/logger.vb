@@ -21,12 +21,11 @@ Imports System.Text
 ''' Maintains the global log for winapp2ool, which is used to track internal operations and errors.
 ''' Provides methods for adding to the log, saving it to disk, and printing it to the console.
 ''' </summary>
-''' 
-''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
 Public Module logger
 
     ''' <summary>
-    ''' 
+    ''' Synchronizes writes to <c> GlobalLog </c>. Per-thread paths
+    ''' (capture buffers) bypass this lock since they touch only thread-local state.
     ''' </summary>
     Private ReadOnly _logLock As New Object
 
@@ -35,10 +34,40 @@ Public Module logger
     ''' </summary>
     Public Property GlobalLog As New strList
 
-    '''<summary>
-    '''The current indentation level of the global log.
-    '''</summary>
-    Public Property nestCount As Integer = 0
+    ''' <summary>
+    ''' Per-thread indentation depth. Each thread sees its own counter so that
+    ''' parallel work cannot corrupt the indentation of unrelated threads.
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' <c> ThreadStatic </c> fields default to zero on every thread that has not
+    ''' yet written to them, exactly the desired initial state. Threads spawned
+    ''' inside a parallel section start at depth zero regardless of the calling
+    ''' thread's depth; use <c> gLogCapture </c> to record those threads' output
+    ''' for later flush under the parent's depth.
+    ''' </remarks>
+    <ThreadStatic>
+    Private _nestCount As Integer
+
+    ''' <summary>
+    ''' When non-<c> Nothing </c>, <c> gLog </c> writes go to this thread-local
+    ''' buffer instead of <c> GlobalLog </c>. Set by <c> gLogCapture </c> and
+    ''' restored on dispose.
+    ''' </summary>
+    <ThreadStatic>
+    Private _captureBuffer As List(Of String)
+
+    ''' <summary>
+    ''' The current indentation level of the global log on the calling thread.
+    ''' </summary>
+    Public Property nestCount As Integer
+        Get
+            Return _nestCount
+        End Get
+        Set(value As Integer)
+            _nestCount = value
+        End Set
+    End Property
 
     ''' <summary> 
     ''' Adds an item into the global log 
@@ -105,27 +134,221 @@ Public Module logger
 
         If Not cond Then Return
 
-        SyncLock _logLock
+        Dim capture = _captureBuffer
 
-            If leadr Then GlobalLog.add("")
-            If indent Then nestCount += indAmt
-            If ascend Then nestCount += ascAmt
+        If capture IsNot Nothing Then
+
+            ' Thread-local capture path — no lock needed since the buffer is per-thread
+            If leadr Then capture.Add("")
+            If indent Then _nestCount += indAmt
+            If ascend Then _nestCount += ascAmt
 
             If logstr IsNot Nothing Then
 
-                Dim buffer = New String(" "c, Math.Max(nestCount * 2, 0))
-                logstr = buffer + logstr
-                GlobalLog.add(logstr)
+                Dim pad = New String(" "c, Math.Max(_nestCount * 2, 0))
+                capture.Add(pad & logstr)
 
             End If
 
-            If indent Then nestCount -= indAmt
-            If descend Then nestCount -= descAmt
+            If indent Then _nestCount -= indAmt
+            If descend Then _nestCount -= descAmt
+            If buffr Then capture.Add("")
+
+            Return
+
+        End If
+
+        SyncLock _logLock
+
+            If leadr Then GlobalLog.add("")
+            If indent Then _nestCount += indAmt
+            If ascend Then _nestCount += ascAmt
+
+            If logstr IsNot Nothing Then
+
+                Dim pad = New String(" "c, Math.Max(_nestCount * 2, 0))
+                GlobalLog.add(pad & logstr)
+
+            End If
+
+            If indent Then _nestCount -= indAmt
+            If descend Then _nestCount -= descAmt
             If buffr Then GlobalLog.add("")
 
         End SyncLock
 
     End Sub
+
+    ''' <summary>
+    ''' Opens a nested logging scope. The optional <paramref name="message"/> is logged at the
+    ''' current depth, then the depth is increased by <paramref name="amount"/> until the
+    ''' returned <c> IDisposable </c> is disposed. Use with <c> Using </c> to make
+    ''' ascend/descend imbalance impossible by construction.
+    ''' </summary>
+    '''
+    ''' <param name="message">
+    ''' Optional header line written before ascending. Pass <c> "" </c> for an anonymous scope
+    ''' </param>
+    '''
+    ''' <param name="amount">
+    ''' Number of indentation levels to ascend. Optional, default: <c> 1 </c>
+    ''' </param>
+    '''
+    ''' <example>
+    ''' <code>
+    ''' Using gLogScope("Beginning lint")
+    '''     ' nested gLog calls are indented one level deeper here
+    ''' End Using
+    ''' </code>
+    ''' </example>
+    Public Function gLogScope(Optional message As String = "",
+                              Optional amount As Integer = 1) As IDisposable
+
+        If message IsNot Nothing AndAlso message.Length > 0 Then gLog(message)
+
+        Return New LogScope(amount)
+
+    End Function
+
+    ''' <summary>
+    ''' Redirects the calling thread's <c> gLog </c> writes into a thread-local buffer
+    ''' until the returned object is disposed. Captured lines preserve their relative
+    ''' indentation (depth resets to zero on entry and restores on exit), so they can
+    ''' be replayed later under any parent depth via <c> EmitCaptured </c>.
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' A <c> LogCapture </c> whose <c> Lines </c> contains the buffered output. The capture
+    ''' is active until <c> Dispose </c> is called (typically via <c> Using </c>)
+    ''' </returns>
+    '''
+    ''' <remarks>
+    ''' Designed for parallel sections: each parallel task captures its own log slice,
+    ''' and the orchestrating thread emits the slices in deterministic order after the
+    ''' parallel work finishes. This eliminates the need for per-module deferred-log
+    ''' workarounds (see <c> EntryLintResult.DiagLines </c>).
+    ''' </remarks>
+    Public Function gLogCapture() As LogCapture
+
+        Return New LogCapture()
+
+    End Function
+
+    ''' <summary>
+    ''' Appends previously-captured lines to <c> GlobalLog </c>, indented at the calling
+    ''' thread's current depth. Acquires the log lock once for the whole batch.
+    ''' </summary>
+    '''
+    ''' <param name="lines">
+    ''' The captured lines, as returned by <c> LogCapture.Lines </c>. <c> Nothing </c> is a no-op
+    ''' </param>
+    Public Sub EmitCaptured(lines As IEnumerable(Of String))
+
+        If lines Is Nothing Then Return
+
+        Dim pad = New String(" "c, Math.Max(_nestCount * 2, 0))
+        Dim target = _captureBuffer
+
+        If target IsNot Nothing Then
+
+            For Each line In lines
+                target.Add(pad & line)
+            Next
+
+            Return
+
+        End If
+
+        SyncLock _logLock
+
+            For Each line In lines
+                GlobalLog.add(pad & line)
+            Next
+
+        End SyncLock
+
+    End Sub
+
+    ''' <summary>
+    ''' Disposable handle returned by <c> gLogScope </c>. On dispose, restores the
+    ''' nesting depth that was in effect at construction.
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' Created and disposed on the same thread. Passing the handle to another thread
+    ''' for disposal would corrupt that thread's depth — don't do it.
+    ''' </remarks>
+    Public NotInheritable Class LogScope
+
+        Implements IDisposable
+
+        Private ReadOnly _amount As Integer
+        Private _disposed As Boolean
+
+        Friend Sub New(amount As Integer)
+
+            _amount = amount
+            _nestCount += amount
+
+        End Sub
+
+        Public Sub Dispose() Implements IDisposable.Dispose
+
+            If _disposed Then Return
+            _disposed = True
+            _nestCount -= _amount
+
+        End Sub
+
+    End Class
+
+    ''' <summary>
+    ''' Disposable handle returned by <c> gLogCapture </c>. While alive, redirects the
+    ''' calling thread's <c> gLog </c> writes into <c> Lines </c>. Restores the previous
+    ''' capture buffer and nesting depth on dispose.
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' Captures nest correctly: an inner capture saves and restores the outer capture's
+    ''' buffer, so its lines flow back to the outer buffer rather than to <c> GlobalLog </c>.
+    ''' </remarks>
+    Public NotInheritable Class LogCapture
+
+        Implements IDisposable
+
+        Private ReadOnly _previousBuffer As List(Of String)
+        Private ReadOnly _previousNest As Integer
+        Private ReadOnly _buffer As New List(Of String)
+        Private _disposed As Boolean
+
+        Friend Sub New()
+
+            _previousBuffer = _captureBuffer
+            _previousNest = _nestCount
+            _captureBuffer = _buffer
+            _nestCount = 0
+
+        End Sub
+
+        ''' <summary>
+        ''' The captured lines, with relative indentation preserved.
+        ''' </summary>
+        Public ReadOnly Property Lines As IReadOnlyList(Of String)
+            Get
+                Return _buffer
+            End Get
+        End Property
+
+        Public Sub Dispose() Implements IDisposable.Dispose
+
+            If _disposed Then Return
+            _disposed = True
+            _captureBuffer = _previousBuffer
+            _nestCount = _previousNest
+
+        End Sub
+
+    End Class
 
     ''' <summary> 
     ''' Saves the global log to disk if the given <c> <paramref name="cond"/> </c> is met 
@@ -135,8 +358,6 @@ Public Module logger
     ''' Indicates that the global log should be saved to disk 
     ''' <br /> Optional, Default: <c> False </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2024-05-18
     Public Sub saveGlobalLog(Optional cond As Boolean = True)
 
         If cond Then IO.File.WriteAllText(GlobalLogFile.Path(), logger.toString)
@@ -146,8 +367,6 @@ Public Module logger
     ''' <summary>
     ''' Returns the log as a single <c> String </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-19  | Code last updated: 2024-05-18
     Public Function toString() As String
 
         Dim sb As New StringBuilder()
@@ -161,8 +380,6 @@ Public Module logger
     ''' <summary> 
     ''' Prints the winapp2ool log to the user and waits for the 'enter' key to be pressed before returning to the calling menu 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2024-05-18
     Public Sub printLog()
 
         cwl("Printing the winapp2ool log, this may take a moment")
@@ -196,8 +413,6 @@ Public Module logger
     ''' <returns> 
     ''' The set of log lines between the most recent incidences of the provided phrases from the log 
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
     Public Function getLogSliceFromGlobal(startingPhrase As String, endingPhrase As String) As String
 
         Dim startInd = -1
@@ -262,8 +477,6 @@ Public Module logger
     ''' <param name="slice">
     ''' A portion of the global log to be printed to the user 
     ''' </param>
-    '''
-    ''' Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
     Public Sub printSlice(slice As String)
 
         clrConsole()
