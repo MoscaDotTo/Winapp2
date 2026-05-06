@@ -211,13 +211,32 @@ Public Class winapp2file2
     End Sub
 
     ''' <summary>
-    ''' Sorts entries within each category alphabetically by name.
-    ''' Mirrors <c>winapp2file.sortInneriniFiles()</c>.
+    ''' Sorts entries within each category using winapp2 ordering:
+    ''' <c>-</c> is treated as whitespace and embedded numbers are padded so that
+    ''' <c>Item2</c> sorts before <c>Item10</c>. 
     ''' </summary>
     Public Sub SortEntries()
 
         For Each cat In _categories
-            cat.Sort(Function(a, b) String.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase))
+
+            If cat.Count < 2 Then Continue For
+
+            Dim names As New strList
+            For Each entry In cat : names.add(entry.Name) : Next
+
+            Dim sortedNames = replaceAndSort(names, "-", "  ")
+
+            Dim nameToEntries As New Dictionary(Of String, Queue(Of winapp2entry2))(StringComparer.OrdinalIgnoreCase)
+            For Each entry In cat
+
+                If Not nameToEntries.ContainsKey(entry.Name) Then nameToEntries(entry.Name) = New Queue(Of winapp2entry2)
+                nameToEntries(entry.Name).Enqueue(entry)
+
+            Next
+
+            cat.Clear()
+            For Each entryName In sortedNames.Items : cat.Add(nameToEntries(entryName).Dequeue()) : Next
+
         Next
 
         _entriesDirty = True

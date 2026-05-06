@@ -328,9 +328,9 @@ Public Module WinappDebug
         For Each result In results : output.AddRange(EmitEntryResult(result)) : Next
 
             resetKeyTrackers()
-            AlphabetizeEntries(fileToBeDebugged)
+        output.AddRange(AlphabetizeEntries(fileToBeDebugged))
 
-            Return output
+        Return output
 
     End Function
 
@@ -543,33 +543,107 @@ Public Module WinappDebug
     ''' <param name="winapp">
     ''' The <c>winapp2file2</c> whose entries will be alphabetized
     ''' </param>
-    Private Sub AlphabetizeEntries(winapp As winapp2file2)
+    Private Function AlphabetizeEntries(winapp As winapp2file2) As List(Of MenuSection)
+
+        Dim sections As New List(Of MenuSection)
 
         For Each category In winapp.Categories
 
             If category.Count < 2 Then Continue For
 
             Dim unsortedNames As New strList
-            Dim indices As New List(Of Integer)
-
             For i = 0 To category.Count - 1
                 unsortedNames.add(category(i).Name)
-                indices.Add(i)
             Next
 
             Dim sortedNames = replaceAndSort(unsortedNames, "-", "  ")
 
-            If lintAlpha.ShouldScan Then findOutOfPlace(unsortedNames, sortedNames, "Entry", indices)
+            If lintAlpha.ShouldScan Then sections.AddRange(EmitEntryAlphabetizationErrors(findOutOfPlace(unsortedNames, sortedNames)))
 
         Next
 
         If lintAlpha.fixFormat Then winapp.SortEntries()
 
-    End Sub
+        Return sections
+
+    End Function
 
     ''' <summary>
-    ''' Assess a list and its sorted state to observe changes in neighboring strings,
-    ''' such as the changes made while sorting the strings alphabetically
+    ''' Renders entry-level alphabetization misplacements into <c>MenuSection</c>s and the global log,
+    ''' incrementing <c>ErrorsFound</c> for each
+    ''' </summary>
+    '''
+    ''' <param name="misplacements">
+    ''' The misplaced entries, as returned by <c>findOutOfPlace</c>
+    ''' </param>
+    Private Function EmitEntryAlphabetizationErrors(misplacements As List(Of AlphaMisplacement)) As List(Of MenuSection)
+
+        Dim sections As New List(Of MenuSection)
+        If misplacements.Count = 0 Then Return sections
+
+        Dim section As New MenuSection()
+
+        For Each m In misplacements
+
+            ErrorsFound += 1
+
+            Dim out = $"Error in {m.Item}:"
+            Dim out2 = "Entry alphabetization"
+            gLog(out)
+            section.AddColoredLine(out, ConsoleColor.Red).AddColoredLine(out2, ConsoleColor.DarkYellow)
+
+            Using gLogScope(out2)
+
+                Dim d1 = $"{m.Item} appears to be out of place"
+                Dim d2 = $"Expected position: {m.ExpectedPos + 1}"
+                gLog(d1)
+                gLog(d2)
+                section.AddColoredLine(d1, ConsoleColor.Yellow).AddColoredLine(d2, ConsoleColor.Yellow)
+
+            End Using
+
+            section.AddBlank()
+
+        Next
+
+        sections.Add(section)
+        Return sections
+
+    End Function
+
+    ''' <summary>
+    ''' One out-of-place item discovered by <c>findOutOfPlace</c>
+    ''' </summary>
+    Private Structure AlphaMisplacement
+
+        ''' <summary>
+        ''' The raw item value (entry name or key value) that is out of place
+        ''' </summary>
+        Public ReadOnly Property Item As String
+
+        ''' <summary>
+        ''' The 0-based index of the item in the unsorted list
+        ''' </summary>
+        Public ReadOnly Property ActualPos As Integer
+
+        ''' <summary>
+        ''' The 0-based index the item should occupy in the sorted list
+        ''' </summary>
+        Public ReadOnly Property ExpectedPos As Integer
+
+        '''
+        Public Sub New(item As String, actualPos As Integer, expectedPos As Integer)
+            Me.Item = item
+            Me.ActualPos = actualPos
+            Me.ExpectedPos = expectedPos
+        End Sub
+
+    End Structure
+
+    ''' <summary>
+    ''' Returns the items from <paramref name="someList"/> that are out of order with respect
+    ''' to <paramref name="sortedList"/>, paired with their actual and expected positions.
+    ''' Reporting is the caller's responsibility.
     ''' </summary>
     '''
     ''' <param name="someList">
@@ -577,30 +651,13 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="sortedList">
-    ''' The sorted state of <c> <paramref name="someList"/> </c>
+    ''' The sorted state of <paramref name="someList"/>
     ''' </param>
-    '''
-    ''' <param name="findType">
-    ''' The type of neighbor checking
-    ''' <br/> <br/> When checking iniKeys (as opposed to entries),
-    ''' <paramref name="findType"/> contains a <c> keyType </c>
-    ''' </param>
-    '''
-    ''' <param name="indices">
-    ''' The 0-based positions of the items in <c> <paramref name="someList"/> </c> within their containing collection
-    ''' </param>
-    '''
-    ''' <param name="oopBool">
-    ''' Tracking variable indicating that alphabetization errors have been found
-    ''' <br/>  Optional, Default: <c> False </c>
-    ''' </param>
-    Private Sub findOutOfPlace(ByRef someList As strList,
-                               ByRef sortedList As strList,
-                               findType As String,
-                               ByRef indices As List(Of Integer),
-                               Optional ByRef oopBool As Boolean = False)
+    Private Function findOutOfPlace(someList As strList,
+                                    sortedList As strList) As List(Of AlphaMisplacement)
 
-        If someList.Count < 2 Then Return
+        Dim findings As New List(Of AlphaMisplacement)
+        If someList.Count < 2 Then Return findings
 
         Dim sortedIndices As New Dictionary(Of String, Integer)
         For i = 0 To sortedList.Count - 1
@@ -618,37 +675,23 @@ Public Module WinappDebug
 
         Dim lisIndices = FindLISIndices(sortedPosSequence)
 
-        Dim misplacedEntries As New strList
         For i = 0 To someList.Count - 1
-            If Not lisIndices.Contains(i) Then misplacedEntries.add(someList.Items(i))
-        Next
 
-        For Each entry In misplacedEntries.Items
+            If lisIndices.Contains(i) Then Continue For
 
-            Dim recInd = someList.indexOf(entry)
-            Dim sortInd = sortedIndices(entry)
+            Dim item = someList.Items(i)
+            Dim recInd = someList.indexOf(item)
+            Dim sortInd = sortedIndices(item)
 
             If recInd = sortInd Then Continue For
 
-            Dim contextStr = If(findType = "Entry", entry, $"{findType}{recInd + 1}={entry}")
-            entry = contextStr
-            oopBool = True
-
-            cwl($"Error in {contextStr}: {Environment.NewLine} {findType} alphabetization")
-            cwl($"{entry} appears to be out of place")
-            cwl($"Expected position: {sortInd + 1}")
-            cwl()
-
-            Using gLogScope($"{findType} alphabetization")
-                gLog($"{entry} appears to be out of place")
-                gLog($"Expected position: {sortInd + 1}")
-            End Using
-
-            ErrorsFound += 1
+            findings.Add(New AlphaMisplacement(item, recInd, sortInd))
 
         Next
 
-    End Sub
+        Return findings
+
+    End Function
 
     ''' <summary>
     ''' Returns the set of indices (into <paramref name="sequence"/>) that form its Longest Increasing Subsequence.
@@ -803,7 +846,7 @@ Public Module WinappDebug
             entry.RemoveKey(dupe)
         Next
 
-        sortKeys2(entry, spec.TypeName, dupeKeys.Count > 0)
+        sortKeys2(result, entry, spec.TypeName, dupeKeys.Count > 0)
 
         If spec.TypeName = "FileKey" AndAlso lintOpti.ShouldScan Then cOptimization(result, entry)
 
@@ -1428,7 +1471,8 @@ Public Module WinappDebug
     ''' <param name="hadDuplicatesRemoved">
     ''' Indicates that keys have been removed from the bucket
     ''' </param>
-    Private Sub sortKeys2(entry As winapp2entry2,
+    Private Sub sortKeys2(result As EntryLintResult,
+                          entry As winapp2entry2,
                           keyType As String,
                           hadDuplicatesRemoved As Boolean)
 
@@ -1440,19 +1484,26 @@ Public Module WinappDebug
         If bucket.Count <= 1 OrElse Not lintAlpha.ShouldScan Then Return
 
         Dim keyValues As New strList
-        Dim indices As New List(Of Integer)
 
         For i = 0 To bucket.Count - 1
             keyValues.add(bucket(i).Value)
-            indices.Add(i)
         Next
 
         Dim sortedKeyValues = replaceAndSort(keyValues, "|", " \ \")
 
-        Dim keysOutOfPlace = False
-        findOutOfPlace(keyValues, sortedKeyValues, keyType, indices, keysOutOfPlace)
+        Dim findings = findOutOfPlace(keyValues, sortedKeyValues)
 
-        If Not (keysOutOfPlace OrElse hadDuplicatesRemoved) AndAlso
+        For Each m In findings
+
+            Dim contextStr = $"{keyType}{m.ActualPos + 1}={m.Item}"
+            result.RecordError(
+                $"{keyType} alphabetization",
+                {$"{contextStr} appears to be out of place",
+                 $"Expected position: {m.ExpectedPos + 1}"})
+
+        Next
+
+        If Not (findings.Count > 0 OrElse hadDuplicatesRemoved) AndAlso
                (lintAlpha.fixFormat OrElse lintWrongNums.fixFormat OrElse lintExtraNums.fixFormat) Then Return
 
         For i = 0 To bucket.Count - 1
