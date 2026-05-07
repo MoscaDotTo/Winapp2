@@ -49,7 +49,6 @@ Public Module launcher
             ' don't bother checking checking the connection if we know we want to be offline
             If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase)) Then
                 isOffline = True
-                invertSettingAndRemoveArg(True, "-offline")
                 gLog("Found argument: -offline (skipping connection check)")
             Else
                 chkOfflineMode()
