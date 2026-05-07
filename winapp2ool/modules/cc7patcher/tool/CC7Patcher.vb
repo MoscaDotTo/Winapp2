@@ -104,29 +104,32 @@ Public Module CC7Patcher
         Dim menuOutput As New MenuSection
         Dim headerMsg = "CCleaner 7 Patcher"
         menuOutput.AddBoxWithText(headerMsg)
-        gLog(headerMsg, buffr:=True, ascend:=True)
 
-        If TrimBeforePatching Then
+        Using gLogScope(headerMsg)
 
-            Dim trimMsg = "Trimming winapp2.ini..."
-            menuOutput.AddColoredLine(trimMsg, ConsoleColor.Cyan)
-            gLog(trimMsg)
+            If TrimBeforePatching Then
 
-            Dim wa2file As New winapp2file2(winapp2Input)
-            Trim.trimFile(wa2file)
-            winapp2Input = wa2file.ToIni()
+                Dim trimMsg = "Trimming winapp2.ini..."
+                menuOutput.AddColoredLine(trimMsg, ConsoleColor.Cyan)
+                gLog(trimMsg)
 
-            Dim trimCompleteMsg = $"Trimming complete: {wa2file.Count} entries remain"
-            menuOutput.AddColoredLine(trimCompleteMsg, ConsoleColor.Green)
-            gLog(trimCompleteMsg)
+                Dim wa2file As New winapp2file2(winapp2Input)
+                Trim.trimFile(wa2file)
+                winapp2Input = wa2file.ToIni()
 
-        End If
+                Dim trimCompleteMsg = $"Trimming complete: {wa2file.Count} entries remain"
+                menuOutput.AddColoredLine(trimCompleteMsg, ConsoleColor.Green)
+                gLog(trimCompleteMsg)
 
-        patchCCleaner(winapp2Input, menuOutput)
+            End If
 
-        Dim completeMsg = "CCleaner 7 patching complete"
-        menuOutput.AddBoxWithText(completeMsg)
-        gLog(completeMsg, descend:=True, buffr:=True)
+            patchCCleaner(winapp2Input, menuOutput)
+
+            Dim completeMsg = "CCleaner 7 patching complete"
+            menuOutput.AddBoxWithText(completeMsg)
+            gLog(completeMsg)
+
+        End Using
 
         menuOutput.AddAnyKeyPrompt()
 
@@ -149,24 +152,24 @@ Public Module CC7Patcher
     Private Sub patchCCleaner(winapp2Input As iniFile2,
                               ByRef menuOutput As MenuSection)
 
-        gLog("Beginning ccleaner.ini patching process", ascend:=True)
+        Using gLogScope("Beginning ccleaner.ini patching process")
 
-        Dim baseFile = CC7PatcherFile2.Load()
-        If baseFile Is Nothing Then Return
+            Dim baseFile = CC7PatcherFile2.Load()
+            If baseFile Is Nothing Then Return
 
-        Dim outputFile = iniFile2.Empty(CC7PatcherFile3.Dir, CC7PatcherFile3.Name)
+            Dim outputFile = iniFile2.Empty(CC7PatcherFile3.Dir, CC7PatcherFile3.Name)
 
-        Dim patchMsg = $"Patching {CC7PatcherFile2.Name} with entries from winapp2.ini"
-        menuOutput.AddColoredLine(patchMsg, ConsoleColor.Yellow)
-        gLog(patchMsg)
+            Dim patchMsg = $"Patching {CC7PatcherFile2.Name} with entries from winapp2.ini"
+            menuOutput.AddColoredLine(patchMsg, ConsoleColor.Yellow)
+            gLog(patchMsg)
 
-        Transmute.RemoteTransmute(baseFile, winapp2Input, outputFile, False, menuOutput, Transmute.TransmuteMode.Add)
+            Transmute.RemoteTransmute(baseFile, winapp2Input, outputFile, False, menuOutput, Transmute.TransmuteMode.Add)
 
-        gLog("Patching process complete", descend:=True)
+            Dim savedMsg = $"Patched file saved to {CC7PatcherFile3.Path()}"
+            menuOutput.AddColoredLine(savedMsg, ConsoleColor.Green)
+            gLog(savedMsg)
 
-        Dim savedMsg = $"Patched file saved to {CC7PatcherFile3.Path()}"
-        menuOutput.AddColoredLine(savedMsg, ConsoleColor.Green)
-        gLog(savedMsg)
+        End Using
 
     End Sub
 
