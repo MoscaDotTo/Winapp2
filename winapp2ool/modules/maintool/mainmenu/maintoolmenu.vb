@@ -207,8 +207,8 @@ Module maintoolmenu
 
         menu.AddBlank() _
             .AddColoredLine($"A new version of {updName} is available!", ConsoleColor.Green, True) _
-            .AddColoredLine($"Current: v{oldVer}", ConsoleColor.Green, True) _
-            .AddColoredLine($"Available: v{newVer}", ConsoleColor.Green, True)
+            .AddColoredLine($"Current: v{oldVer}", ConsoleColor.DarkYellow, True) _
+            .AddColoredLine($"Available: v{newVer}", ConsoleColor.DarkGreen, True)
 
         Console.WindowHeight += 2
 
