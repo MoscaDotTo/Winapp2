@@ -329,7 +329,9 @@ Public Module BrowserBuilder
     End Function
 
     ''' <summary>
-    ''' Processes an EntryScaffold section and generates entries for each browser
+    ''' Processes an EntryScaffold section and generates entries for each browser.
+    ''' Browsers with no <c>RegistryRoot</c> are skipped when the scaffold contains
+    ''' a <c>RequiresRegistryRoot</c> key.
     ''' </summary>
     '''
     ''' <param name="scaffoldSection">
@@ -367,6 +369,8 @@ Public Module BrowserBuilder
             Dim fileKeyBases As New List(Of String)
             Dim regKeyBases As New List(Of String)
 
+            Dim requiresRegistryRoot As Boolean = False
+
             For Each key In scaffoldSection.Keys
 
                 Select Case key.KeyType.ToUpperInvariant()
@@ -374,6 +378,8 @@ Public Module BrowserBuilder
                     Case "FILEKEYBASE" : fileKeyBases.Add(key.Value)
 
                     Case "REGKEYBASE" : regKeyBases.Add(key.Value)
+
+                    Case "REQUIRESREGISTRYROOT" : requiresRegistryRoot = True
 
                     Case Else
 
@@ -386,6 +392,15 @@ Public Module BrowserBuilder
             Next
 
             For Each browser In browsers
+
+                If requiresRegistryRoot AndAlso browser.RegistryRoots.Count = 0 Then
+
+                    Dim skipMsg = $"Skipping {browser.Name} for {scaffoldName}: scaffold requires RegistryRoot"
+                    gLog(skipMsg)
+                    menuOutput.AddWarning(skipMsg)
+                    Continue For
+
+                End If
 
                 generateBrowserEntry(browser, scaffoldName, fileKeyBases, regKeyBases, outputFile, isGecko, menuOutput)
 
