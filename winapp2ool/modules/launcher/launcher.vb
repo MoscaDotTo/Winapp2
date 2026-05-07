@@ -33,38 +33,53 @@ Public Module launcher
     ''' </remarks>
     Public Sub main()
 
+        AddHandler AppDomain.CurrentDomain.UnhandledException,
+            Sub(sender As Object, e As UnhandledExceptionEventArgs)
+                Dim ex = TryCast(e.ExceptionObject, Exception)
+                If ex IsNot Nothing Then exc(ex)
+                saveGlobalLog()
+            End Sub
+
         gLog($"Starting application")
 
-        If Not SuppressOutput Then Console.WindowWidth = 130 : Console.WindowHeight = 35
+        Try
 
-        ' don't bother checking checking the connection if we know we want to be offline
-        If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase)) Then
-            isOffline = True
-            invertSettingAndRemoveArg(True, "-offline")
-            gLog("Found argument: -offline (skipping connection check)")
-        Else
-            chkOfflineMode()
-        End If
+            If Not SuppressOutput Then Console.WindowWidth = 130 : Console.WindowHeight = 35
 
-        If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
-        gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
+            ' don't bother checking checking the connection if we know we want to be offline
+            If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase)) Then
+                isOffline = True
+                invertSettingAndRemoveArg(True, "-offline")
+                gLog("Found argument: -offline (skipping connection check)")
+            Else
+                chkOfflineMode()
+            End If
 
-        Dim curDirIsTemp As Boolean = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
-        cantDownloadExecutable = curDirIsTemp OrElse DotNetFrameworkOutOfDate
+            If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
+            gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
 
-        LoadWinapp2oolsettings()
+            Dim curDirIsTemp As Boolean = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
+            cantDownloadExecutable = curDirIsTemp OrElse DotNetFrameworkOutOfDate
 
-        processCommandLineArgs()
+            LoadWinapp2oolsettings()
 
-        If SuppressOutput Then Environment.Exit(0)
+            processCommandLineArgs()
 
-        currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
-        Console.Title = $"Winapp2ool v{currentVersion}"
-        Dim launchHeader = $"Winapp2ool v{currentVersion} - A multitool for winapp2.ini"
-        setNextMenuHeaderText(launchHeader, printColor:=ConsoleColor.Cyan)
-        initModule(launchHeader, AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
+            If SuppressOutput Then Environment.Exit(0)
 
-        FlushIfDirty2()
+            currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
+            Console.Title = $"Winapp2ool v{currentVersion}"
+            Dim launchHeader = $"Winapp2ool v{currentVersion} - A multitool for winapp2.ini"
+            setNextMenuHeaderText(launchHeader, printColor:=ConsoleColor.Cyan)
+            initModule(launchHeader, AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
+
+            FlushIfDirty2()
+
+        Catch ex As Exception
+
+            exc(ex)
+
+        End Try
 
     End Sub
 
