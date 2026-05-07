@@ -83,37 +83,6 @@ Public Module logger
     ''' Optional, Default: <c> True </c> 
     ''' </param>
     ''' 
-    ''' <param name="ascend">
-    ''' Indicates that the line should be indented. (Generally) requires a corresponding <c> <paramref name="descend"/></c> 
-    ''' to "undo." Useful for blocking groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each 
-    ''' <br /> Optional, Default: <c> False </c>
-    ''' </param>
-    ''' 
-    ''' <param name="descend">
-    ''' Indicates that the line should be unindented. (Generally) follows a corresponding <c> <paramref name="ascend"/> </c>. 
-    ''' Useful for blocking groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each 
-    ''' <br /> Optional, Default: <c> False </c> 
-    ''' </param>
-    '''  
-    ''' <param name="indent">
-    ''' Indicates that the line should be indented individually, without affecting the indentation of following lines 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="indAmt">
-    ''' The number of times by which the line should be indented given <c> <paramref name="indent"/> </c> is <c> True </c> 
-    ''' <br /> Optional, Default: <c> 1 </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="descAmt">
-    ''' The number of times *fewer* by which following lines should be indented 
-    ''' <br /> Optional, Default: <c> 1 </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="ascAmt"> The number of times by which this and following lines should be indented 
-    ''' <br /> Optional, Default: <c> 1 </c> 
-    ''' </param>
-    ''' 
     ''' <param name="buffr"> 
     ''' Indicates that an empty line should be added into the log following <c> <paramref name="logstr"/> </c> 
     ''' </param>
@@ -123,12 +92,6 @@ Public Module logger
     ''' </param>
     Public Sub gLog(Optional logstr As String = "",
                     Optional cond As Boolean = True,
-                    Optional ascend As Boolean = False,
-                    Optional descend As Boolean = False,
-                    Optional indent As Boolean = False,
-                    Optional indAmt As Integer = 1,
-                    Optional descAmt As Integer = 1,
-                    Optional ascAmt As Integer = 1,
                     Optional buffr As Boolean = False,
                     Optional leadr As Boolean = False)
 
@@ -139,8 +102,6 @@ Public Module logger
         If capture IsNot Nothing Then
 
             If leadr Then capture.Add("")
-            If indent Then _nestCount += indAmt
-            If ascend Then _nestCount += ascAmt
 
             If logstr IsNot Nothing Then
 
@@ -149,8 +110,6 @@ Public Module logger
 
             End If
 
-            If indent Then _nestCount -= indAmt
-            If descend Then _nestCount -= descAmt
             If buffr Then capture.Add("")
 
             Return
@@ -160,8 +119,6 @@ Public Module logger
         SyncLock _logLock
 
             If leadr Then GlobalLog.add("")
-            If indent Then _nestCount += indAmt
-            If ascend Then _nestCount += ascAmt
 
             If logstr IsNot Nothing Then
 
@@ -170,8 +127,6 @@ Public Module logger
 
             End If
 
-            If indent Then _nestCount -= indAmt
-            If descend Then _nestCount -= descAmt
             If buffr Then GlobalLog.add("")
 
         End SyncLock
