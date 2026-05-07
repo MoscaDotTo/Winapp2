@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -455,14 +455,19 @@ Public Module logger
         Dim sb As New StringBuilder()
         For i = startInd To endInd
 
-            If GlobalLog.Items(i).Length <= toTrim Then
+            Dim line = GlobalLog.Items(i)
 
-                sb.AppendLine("")
-                Continue For
 
-            End If
+            Dim leadingSpaces = 0
+            For Each ch In line
 
-            sb.AppendLine(GlobalLog.Items(i).Substring(toTrim))
+                If ch <> " "c Then Exit For
+                leadingSpaces += 1
+                If leadingSpaces >= toTrim Then Exit For
+
+            Next
+
+            sb.AppendLine(line.Substring(leadingSpaces))
 
         Next
 
