@@ -225,9 +225,9 @@ Public Class iniFile2
 
         Try
 
-            Dim reader As New StreamReader(path)
-            f.ParseStream(reader)
-            reader.Close()
+            Using reader As New StreamReader(path)
+                f.ParseStream(reader)
+            End Using
 
         Catch ex As FileNotFoundException
 
@@ -327,13 +327,12 @@ Public Class iniFile2
                 gLog($"Creating {Dir}")
                 IO.Directory.CreateDirectory(Dir)
                 gLog($"Creating {Path()}")
-                Dim sw = IO.File.CreateText(Path())
-                sw.Dispose()
+                Using IO.File.CreateText(Path()) : End Using
             End If
 
-            Dim file As New IO.StreamWriter(Path())
-            file.Write(text)
-            file.Close()
+            Using file As New IO.StreamWriter(Path())
+                file.Write(text)
+            End Using
             gLog("  Save complete")
 
         Catch ex As IO.IOException
