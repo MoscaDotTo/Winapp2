@@ -210,12 +210,14 @@ Module Diff
         Dim headerText = $"Diff: {GetVer(oldFile)} -> {GetVer(newFile)}"
         out.AddTopBorder().AddColoredLine(headerText, color:=ConsoleColor.DarkGreen, centered:=True).AddDivider()
 
-        gLog(headerText, ascend:=True)
         diffOutput.Add(out)
 
-        diffOutput.AddRange(CompareFiles2(oldFile, newFile))
+        Using gLogScope(headerText)
 
-        gLog(descend:=True)
+            diffOutput.AddRange(CompareFiles2(oldFile, newFile))
+
+        End Using
+
         gLog(DiffLogEndPhrase)
 
         Dim out3 As New MenuSection

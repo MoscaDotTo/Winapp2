@@ -167,51 +167,70 @@ Public Class EntryChangeDetector2
     ''' </summary>
     Public Function ProcessRemovals() As List(Of MenuSection)
 
-        Dim results = New Concurrent.ConcurrentDictionary(Of String, MenuSection)(StringComparer.OrdinalIgnoreCase)
-        Dim potentialMatchesSnapshot2 = _state.ModifiedEntries.PotentialMatches2.ToList()
-
-        Dim snapshotTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
-        Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
-        PrePopulateCachesAndTextMaps(potentialMatchesSnapshot2, snapshotTextMap, oldEntryTextMap)
-
-        Dim contentIndexes = BuildContentIndexes(potentialMatchesSnapshot2)
-        Dim eligibleNames = BuildEligibleNameSet(potentialMatchesSnapshot2)
-
-        Parallel.ForEach(_state.ModifiedEntries.RemovedEntryNames,
-                 Sub(entry)
-
-                     Dim result = ProcessSingleRemoval(entry, potentialMatchesSnapshot2, snapshotTextMap, oldEntryTextMap, contentIndexes, eligibleNames)
-                     If result IsNot Nothing Then results(entry) = result
-
-                 End Sub)
-
-        ReconcileRenamesAndMergers()
+        Dim totalRemoved = _state.ModifiedEntries.RemovedEntryNames.Count
+        Dim removedHeader = $"{totalRemoved} total entries removed"
 
         Dim out As New List(Of MenuSection)
 
-        Dim totalRemoved = _state.ModifiedEntries.RemovedEntryNames.Count
-        Dim renamedCount = _state.MergedEntries.RenamedEntryNames.Count
-        Dim mergedCount = _state.MergedEntries.OldToNewMergeDict.Count
-        Dim noReplacementCount = totalRemoved - renamedCount - mergedCount
+        gLog(Nothing, leadr:=True)
 
-        Dim header As New MenuSection
-        header.AddColoredLine($"{totalRemoved} entries removed", ConsoleColor.DarkRed, True)
-        If renamedCount > 0 Then header.AddColoredLine($"  & {renamedCount} renamed", ConsoleColor.Magenta, True)
-        If mergedCount > 0 Then header.AddColoredLine($"  @ {mergedCount} merged into other entries", ConsoleColor.Cyan, True)
-        header.AddColoredLine($"  - {noReplacementCount} removed without replacement", ConsoleColor.Red, True)
-        header.AddDivider(solid:=False)
-        out.Add(header)
+        Dim noReplacementCount = 0
 
-        For Each key In results.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
+        Using gLogScope("Entry removals:")
 
-            out.Add(results(key))
+            Dim results = New Concurrent.ConcurrentDictionary(Of String, MenuSection)(StringComparer.OrdinalIgnoreCase)
+            Dim entryLogs = New Concurrent.ConcurrentDictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
+            Dim potentialMatchesSnapshot2 = _state.ModifiedEntries.PotentialMatches2.ToList()
 
-        Next
+            Dim snapshotTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+            Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+            PrePopulateCachesAndTextMaps(potentialMatchesSnapshot2, snapshotTextMap, oldEntryTextMap)
 
-        gLog($"{totalRemoved} entries removed", leadr:=True)
-        gLog($"  & {renamedCount} renamed", cond:=renamedCount > 0)
-        gLog($"  @ {mergedCount} merged into other entries", cond:=mergedCount > 0)
-        gLog($"  - {noReplacementCount} removed without replacement")
+            Dim contentIndexes = BuildContentIndexes(potentialMatchesSnapshot2)
+            Dim eligibleNames = BuildEligibleNameSet(potentialMatchesSnapshot2)
+
+            Parallel.ForEach(_state.ModifiedEntries.RemovedEntryNames,
+                     Sub(entry)
+
+                         Dim result As MenuSection = Nothing
+                         Dim capturedLines As New List(Of String)
+
+                         Using cap = gLogCapture()
+
+                             result = ProcessSingleRemoval(entry, potentialMatchesSnapshot2, snapshotTextMap, oldEntryTextMap, contentIndexes, eligibleNames)
+                             capturedLines.AddRange(cap.Lines)
+
+                         End Using
+
+                         If result IsNot Nothing Then results(entry) = result
+                         If capturedLines.Count > 0 Then entryLogs(entry) = capturedLines
+
+                     End Sub)
+
+            ReconcileRenamesAndMergers()
+
+            Dim renamedCount = _state.MergedEntries.RenamedEntryNames.Count
+            Dim mergedCount = _state.MergedEntries.OldToNewMergeDict.Count
+            noReplacementCount = totalRemoved - renamedCount - mergedCount
+
+            Dim header As New MenuSection
+            header.AddColoredLine(removedHeader, ConsoleColor.DarkRed, True)
+            header.AddBlank()
+            header.AddColoredLine($"  - {noReplacementCount} entries removed without replacement", ConsoleColor.Red, True)
+            header.AddDivider(solid:=False)
+            out.Add(header)
+
+            For Each key In results.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
+
+                Dim logLines As List(Of String) = Nothing
+                If entryLogs.TryGetValue(key, logLines) Then EmitCaptured(logLines)
+                out.Add(results(key))
+
+            Next
+
+        End Using
+
+        gLog($"- {noReplacementCount} removed without replacement", leadr:=True)
 
         Return out
 
@@ -451,11 +470,9 @@ Public Class EntryChangeDetector2
 
         Dim allCandidates As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
-        ' 1. Name / browser-ref heuristic
         Dim probableMatches = FindProbableMatches2(entryName.Split(CChar(" ")), potentialMatches, snapshotTextMap, oldEntryTextMap(entryName))
         For Each section In probableMatches : allCandidates.Add(section.Name) : Next
 
-        ' 2. Content-aware: look up each old key value in the reverse indicies
         For Each key In oldSection2.Keys
 
             If Not key.KeyType.Equals("FileKey", StringComparison.OrdinalIgnoreCase) AndAlso
@@ -548,7 +565,6 @@ Public Class EntryChangeDetector2
     ''' </summary>
     Private Sub ReconcileRenamesAndMergers()
 
-        ' Snapshot the set — we'll mutate the underlying collections during iteration
         Dim renamesToConvert As New List(Of String)
 
         For Each renamedTarget In _state.MergedEntries.RenamedEntryNames
@@ -560,14 +576,12 @@ Public Class EntryChangeDetector2
             Dim renameHolder As String = Nothing
             If Not _state.MergedEntries.RenamedEntryPairs.TryGetValue(target, renameHolder) Then Continue For
 
-            ' Add the rename holder into the merge dict alongside any existing merge sources
             If Not _state.MergedEntries.MergeDict.ContainsKey(target) Then _state.MergedEntries.MergeDict.Add(target, New List(Of String))
             If Not _state.MergedEntries.MergeDict(target).Contains(renameHolder) Then _state.MergedEntries.MergeDict(target).Add(renameHolder)
 
             If Not _state.MergedEntries.OldToNewMergeDict.ContainsKey(renameHolder) Then _state.MergedEntries.OldToNewMergeDict.Add(renameHolder, New List(Of String))
             If Not _state.MergedEntries.OldToNewMergeDict(renameHolder).Contains(target) Then _state.MergedEntries.OldToNewMergeDict(renameHolder).Add(target)
 
-            ' Remove the rename
             _state.MergedEntries.RenamedEntryPairs.Remove(target)
             _state.MergedEntries.RenamedEntryNames.Remove(target)
 
