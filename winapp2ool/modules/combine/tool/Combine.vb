@@ -96,12 +96,6 @@ Public Module Combine
         Dim CombineUserOutput As New MenuSection
         Dim combinedOutput As iniFile2 = iniFile2.Empty(outputFile.Dir, outputFile.Name)
 
-        Dim outputHeader = $"{CombineLogStartPhrase} {targetDir}"
-        gLog(outputHeader, ascend:=True, leadr:=True)
-        CombineUserOutput.AddTopBorder()
-        CombineUserOutput.AddLine(outputHeader, centered:=True)
-        CombineUserOutput.AddDivider()
-
         processCombine(CombineUserOutput, targetDir, combinedOutput)
 
         CombineUserOutput.AddAnyKeyPrompt()
@@ -136,53 +130,64 @@ Public Module Combine
         Dim allINIFiles = Directory.GetFiles(targetDir, "*.ini", SearchOption.AllDirectories).ToList()
         allINIFiles.Sort()
 
-        Dim foundMsg = $"Found {allINIFiles.Count} files with ini extension in {targetDir}"
-        gLog(foundMsg, indent:=True)
-        outputMenu.AddLine(foundMsg)
+        Dim outputHeader = $"{CombineLogStartPhrase} {targetDir}"
+        Using gLogScope(outputHeader)
 
-        Dim processedCount = 0
-        Dim validFileCount = 0
+            outputMenu.AddTopBorder()
+            outputMenu.AddLine(outputHeader, centered:=True)
+            outputMenu.AddDivider()
 
-        For Each filePath In allINIFiles
+            Dim foundMsg = $"Found {allINIFiles.Count} files with ini extension in {targetDir}"
+            Using gLogScope(foundMsg)
+                outputMenu.AddLine(foundMsg)
 
-            updateProgress(processedCount, allINIFiles.Count)
+                Dim processedCount = 0
+                Dim validFileCount = 0
 
-            ' Don't process the output file if it's in the target directory
-            If filePath = combinedOutput.Path() Then gLog($"Output file found in target directory, skipping: {filePath}", indent:=True) : Continue For
+                For Each filePath In allINIFiles
 
-            Try
+                    updateProgress(processedCount, allINIFiles.Count)
 
-                attemptCombine(filePath, combinedOutput, processedCount, validFileCount, outputMenu)
+                    ' Don't process the output file if it's in the target directory
+                    If filePath = combinedOutput.Path() Then gLog($"Output file found in target directory, skipping: {filePath}") : Continue For
 
-            Catch ex As Exception
+                    Try
 
-                handleCombineException(filePath, outputMenu, ex)
+                        attemptCombine(filePath, combinedOutput, processedCount, validFileCount, outputMenu)
 
-            End Try
+                    Catch ex As Exception
 
-            processedCount += 1
+                        handleCombineException(filePath, outputMenu, ex)
 
-        Next
+                    End Try
 
-        gLog($"Processed {processedCount} files, {validFileCount} contained combinable sections", indent:=True)
+                    processedCount += 1
 
-        Dim outputIsEmpty = combinedOutput.Count = 0
+                Next
 
-        Dim emptyOutputMsg = $"No valid sections found to combine - {combinedOutput.Name} will not be saved"
-        gLog(emptyOutputMsg, indent:=True, cond:=outputIsEmpty)
-        outputMenu.AddWarning(emptyOutputMsg, condition:=outputIsEmpty)
+                gLog($"Processed {processedCount} files, {validFileCount} contained combinable sections")
 
-        combinedOutput.OverwriteToFile(combinedOutput.ToString(), Not outputIsEmpty)
+                Dim outputIsEmpty = combinedOutput.Count = 0
 
-        Dim combinedCountMsg = $"Combined {validFileCount} files into {combinedOutput.Name} with {combinedOutput.Count} sections"
-        gLog(combinedCountMsg, indent:=True, cond:=Not outputIsEmpty)
-        outputMenu.AddBlank()
-        outputMenu.AddColoredLine(combinedCountMsg, ConsoleColor.Green, centered:=True, condition:=Not outputIsEmpty)
-        outputMenu.AddBottomBorder()
+                Dim emptyOutputMsg = $"No valid sections found to combine - {combinedOutput.Name} will not be saved"
+                gLog(emptyOutputMsg, cond:=outputIsEmpty)
+                outputMenu.AddWarning(emptyOutputMsg, condition:=outputIsEmpty)
 
-        outputMenu.AddNewLine()
-        outputMenu.AddBoxWithText(CombineLogEndPhrase)
-        gLog(CombineLogEndPhrase, descend:=True)
+                combinedOutput.OverwriteToFile(combinedOutput.ToString(), Not outputIsEmpty)
+
+                Dim combinedCountMsg = $"Combined {validFileCount} files into {combinedOutput.Name} with {combinedOutput.Count} sections"
+                gLog(combinedCountMsg, cond:=Not outputIsEmpty)
+                outputMenu.AddBlank()
+                outputMenu.AddColoredLine(combinedCountMsg, ConsoleColor.Green, centered:=True, condition:=Not outputIsEmpty)
+                outputMenu.AddBottomBorder()
+
+            End Using
+
+            outputMenu.AddNewLine()
+            outputMenu.AddBoxWithText(CombineLogEndPhrase)
+            gLog(CombineLogEndPhrase)
+
+        End Using
 
         MostRecentCombineLog = getLogSliceFromGlobal(CombineLogStartPhrase, CombineLogEndPhrase)
 
@@ -212,7 +217,7 @@ Public Module Combine
 
         Dim errMsg = $"Error processing file: {filepath}"
 
-        gLog($"{errMsg}: {ex.Message}", indent:=True)
+        gLog($"{errMsg}: {ex.Message}")
         outputMenu.AddWarning(errMsg)
         outputMenu.AddWarning($"Check the winapp2ool log for more information: {GlobalLogFile.Path()}")
 
@@ -254,21 +259,25 @@ Public Module Combine
 
         If currentFile.Count = 0 Then
 
-            gLog($"Skipping file with no sections: {Path.GetFileName(filepath)}", indent:=True)
+            gLog($"Skipping file with no sections: {Path.GetFileName(filepath)}", buffr:=True)
             processedCount += 1
             Return
 
         End If
 
         Dim processingMsg = $"Processing: {Path.GetFileName(filepath)} ({currentFile.Count} sections)"
-        gLog(processingMsg, indent:=True)
 
-        mergeFileIntoOutput(currentFile, combinedOutput)
+        Using gLogScope(processingMsg)
 
-        validFileCount += 1
+            mergeFileIntoOutput(currentFile, combinedOutput)
+
+            validFileCount += 1
+
+
+        End Using
 
         Dim processedMsg = $"Processed: {Path.GetFileName(filepath)} ({currentFile.Count} sections)"
-        gLog(processedMsg, indent:=True)
+        gLog(processedMsg, buffr:=True)
         outputMenu.AddLine(processedMsg)
 
     End Sub
@@ -311,7 +320,7 @@ Public Module Combine
             If combinedOutput.Contains(sourceSection.Name) Then AddUniqueKeys(sourceSection, combinedOutput, sourceSection.Name) : Continue For
 
             combinedOutput.AddSection(sourceSection)
-            gLog($"Added new section: [{sourceSection.Name}] ({sourceSection.Keys.Count} keys)", indent:=True, indAmt:=4)
+            gLog($"Added new section: [{sourceSection.Name}] ({sourceSection.Keys.Count} keys)")
 
         Next
 
@@ -348,20 +357,18 @@ Public Module Combine
 
             Dim keyExists = extantKeys.Contains($"{sourceKey.Name.ToLowerInvariant()}={sourceKey.Value.ToLowerInvariant()}")
 
-            If Not keyExists Then existingSection.AddKey(sourceKey)
-            gLog($"Added {sourceKey.Name} to {existingSection.Name}")
+            If Not keyExists Then
 
-            If keyExists Then
-
-                skippedKeyCount += 1
+                existingSection.AddKey(sourceKey)
+                addedKeyCount += 1
+                gLog($"Added {sourceKey.Name} to {existingSection.GetFullName}")
 
             Else
 
-                addedKeyCount += 1
+                skippedKeyCount += 1
+                gLog($"Skipped duplicate key in {sourceSection.GetFullName}: {sourceKey.Name}")
 
             End If
-
-            gLog($"Skipped duplicate key in {sourceSection.Name}: {sourceKey.Name}", indent:=True, indAmt:=6, cond:=keyExists)
 
         Next
 
