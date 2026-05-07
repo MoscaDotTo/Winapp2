@@ -138,7 +138,6 @@ Public Module logger
 
         If capture IsNot Nothing Then
 
-            ' Thread-local capture path — no lock needed since the buffer is per-thread
             If leadr Then capture.Add("")
             If indent Then _nestCount += indAmt
             If ascend Then _nestCount += ascAmt
@@ -440,8 +439,6 @@ Public Module logger
         Next
 
         If endInd = -1 OrElse endInd < startInd Then Return ""
-
-        ' The global log has nesting based on the depth of the winapp2ool fsm, we trim this to make the requested slice depth=0 
 
         Dim toTrim = 0
 
