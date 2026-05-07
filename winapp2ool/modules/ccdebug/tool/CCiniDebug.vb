@@ -74,12 +74,14 @@ Module CCiniDebug
 
         End If
 
-        gLog($"Analyzing {CCDebugFile2.Name}", ascend:=True)
+        Dim orphans As List(Of String)
 
-        Dim orphans = ccDebug(winapp2, ccIni)
+        Using gLogScope($"Analyzing {CCDebugFile2.Name}")
+            orphans = ccDebug(winapp2, ccIni)
+        End Using
 
         Dim completionText = $"Analysis complete{If(SaveDebuggedFile, $" — {CCDebugFile3.Name} saved", "")}."
-        gLog(completionText, descend:=True)
+        gLog(completionText)
 
         Dim out As New MenuSection
         out.AddTopBorder() _
@@ -159,29 +161,31 @@ Module CCiniDebug
     Private Function prune(optionsSec As iniSection2,
                            wa2file As iniFile2) As List(Of String)
 
-        gLog($"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries", ascend:=True)
-
         Dim tbTrimmed As New List(Of iniKey2)
         Dim orphanNames As New List(Of String)
 
-        For Each key In optionsSec.Keys
+        Using gLogScope($"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries")
 
-            Dim isValid = key.Name.StartsWith("(App)", StringComparison.InvariantCulture) AndAlso key.Name.Contains("*")
-            If Not isValid Then Continue For
+            For Each key In optionsSec.Keys
 
-            Dim entryName = key.Name.Replace("(App)", "").Trim()
+                Dim isValid = key.Name.StartsWith("(App)", StringComparison.InvariantCulture) AndAlso key.Name.Contains("*")
+                If Not isValid Then Continue For
 
-            If wa2file.Contains(entryName) Then Continue For
+                Dim entryName = key.Name.Replace("(App)", "").Trim()
 
-            tbTrimmed.Add(key)
-            orphanNames.Add(entryName)
-            gLog($"Orphaned entry detected: {entryName}", indent:=True)
+                If wa2file.Contains(entryName) Then Continue For
 
-        Next
+                tbTrimmed.Add(key)
+                orphanNames.Add(entryName)
+                gLog($"Orphaned entry detected: {entryName}")
 
-        gLog($"{tbTrimmed.Count} orphaned settings detected", indent:=True, descend:=True)
+            Next
 
-        For Each k In tbTrimmed : optionsSec.Keys.Remove(k) : Next
+            For Each k In tbTrimmed : optionsSec.Keys.Remove(k) : Next
+
+        End Using
+
+        gLog($"  {tbTrimmed.Count} orphaned settings detected")
 
         Return orphanNames
 
@@ -196,19 +200,19 @@ Module CCiniDebug
     ''' </param>
     Private Sub sortCC(ccinifile As iniFile2)
 
-        gLog($"Sorting {CCDebugFile2.Name}", indent:=True)
+        Using gLogScope($"Sorting {CCDebugFile2.Name}")
 
-        Dim optSec = ccinifile.GetSection("Options")
-        If optSec Is Nothing Then Return
+            Dim optSec = ccinifile.GetSection("Options")
+            If optSec Is Nothing Then Return
 
-        Dim sorted = optSec.Keys.ToList()
-        sorted.Sort(Function(a, b) String.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase))
+            Dim sorted = optSec.Keys.ToList()
+            sorted.Sort(Function(a, b) String.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase))
 
-        Dim all = optSec.Keys.ToList()
-        For Each k In all : optSec.Keys.Remove(k) : Next
-        For Each k In sorted : optSec.Keys.Add(k) : Next
+            Dim all = optSec.Keys.ToList()
+            For Each k In all : optSec.Keys.Remove(k) : Next
+            For Each k In sorted : optSec.Keys.Add(k) : Next
 
-        gLog("Done", indent:=True, ascend:=True, descend:=True)
+        End Using
 
     End Sub
 
