@@ -215,6 +215,7 @@ Public Module SettingsHandler2
     ''' Writes a module's public static properties into <c>SettingsFile2</c>.
     ''' <br />
     ''' Handles <c>Boolean</c>, <c>Enum</c>, and <c>iniFileChooser</c> property types.
+    ''' Logs a warning and skips properties of any other type.
     ''' </summary>
     Public Sub SaveModule2(moduleName As String, moduleType As Type)
 
@@ -225,15 +226,23 @@ Public Module SettingsHandler2
             Dim value = prop.GetValue(Nothing)
             If value Is Nothing Then Continue For
 
-            If prop.PropertyType IsNot GetType(iniFileChooser) Then
+            If prop.PropertyType Is GetType(iniFileChooser) Then
+
+                Dim chooser = DirectCast(value, iniFileChooser)
+                SetSetting(moduleName, prop.Name & "_Name", chooser.Name)
+                SetSetting(moduleName, prop.Name & "_Dir", chooser.Dir)
+                Continue For
 
             End If
 
-            If prop.PropertyType IsNot GetType(iniFileChooser) Then SetSetting(moduleName, prop.Name, value.ToString()) : Continue For
+            If prop.PropertyType IsNot GetType(Boolean) AndAlso Not prop.PropertyType.IsEnum Then
 
-            Dim chooser = DirectCast(value, iniFileChooser)
-            SetSetting(moduleName, prop.Name & "_Name", chooser.Name)
-            SetSetting(moduleName, prop.Name & "_Dir", chooser.Dir)
+                gLog($"SaveModule2: unhandled property type '{prop.PropertyType.Name}' for '{prop.Name}' in {moduleName}. skipping.")
+                Continue For
+
+            End If
+
+            SetSetting(moduleName, prop.Name, value.ToString())
 
         Next
 
