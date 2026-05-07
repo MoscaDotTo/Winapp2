@@ -276,15 +276,18 @@ Public Module Trim
 
         For Each entry In winapp2.Entries
 
-            If Not processEntryExistence(entry) Then
+            Dim retained As Boolean
+            Dim entryLog As IReadOnlyList(Of String) = Nothing
 
-                toRemove.Add(entry)
+            Using cap = gLogCapture()
 
-            Else
+                retained = processEntryExistence(entry)
+                If retained Then virtualStoreChecker(entry)
+                entryLog = cap.Lines
 
-                virtualStoreChecker(entry)
+            End Using
 
-            End If
+            If retained Then EmitCaptured(entryLog) Else toRemove.Add(entry)
 
         Next
 
@@ -302,16 +305,11 @@ Public Module Trim
     ''' The detection keys to be evaluated
     ''' </param>
     '''
-    ''' <param name="keyType">
-    ''' The key type string, used to suppress the descend log on DetectOS
-    ''' </param>
-    '''
     ''' <param name="chkExist">
     ''' The <c> function </c> that evaluates each key value
     ''' </param>
     '''
     Private Function checkExistence(keys As IReadOnlyList(Of iniKey2),
-                                    keyType As String,
                                     chkExist As Func(Of String, Boolean)) As Boolean
 
         If keys.Count = 0 Then Return False
@@ -320,7 +318,7 @@ Public Module Trim
 
             If Not chkExist(key.Value) Then Continue For
 
-            gLog($"  {key.Value} matched a path on the system", Not keyType = "DetectOS", descend:=True, buffr:=True)
+            gLog($"{key.Value} matched a path on the system", Not key.KeyType = "DetectOS", buffr:=True)
             Return True
 
         Next
@@ -340,44 +338,53 @@ Public Module Trim
     '''
     Private Function processEntryExistence(entry As winapp2entry2) As Boolean
 
-        gLog($"Processing entry: {entry.Name}", ascend:=True, buffr:=True, leadr:=True)
+        gLog("", leadr:=True)
 
-        ' Respect the include/excludes
-        Dim IsInIncludes = UseTrimIncludes AndAlso _includes2 IsNot Nothing AndAlso _includes2.Contains(entry.Name)
-        If IsInIncludes Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
-        Dim isInExcludes = UseTrimExcludes AndAlso _excludes2 IsNot Nothing AndAlso _excludes2.Contains(entry.Name)
-        If isInExcludes Then gLog("    Discarding entry: " & entry.Name, leadr:=True, buffr:=True) : Return False
+        Using gLogScope($"Processing entry: {entry.Name}")
 
-        ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
-        Dim hasMetDetOS = False
+            ' Respect the include/excludes
+            Dim IsInIncludes = UseTrimIncludes AndAlso _includes2 IsNot Nothing AndAlso _includes2.Contains(entry.Name)
+            If IsInIncludes Then gLog("Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+            Dim isInExcludes = UseTrimExcludes AndAlso _excludes2 IsNot Nothing AndAlso _excludes2.Contains(entry.Name)
+            If isInExcludes Then gLog("Discarding entry: " & entry.Name, leadr:=True, buffr:=True) : Return False
 
-        If Not entry.DetectOS.Count = 0 Then
+            ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
+            Dim hasMetDetOS = False
 
-            If winVer = Nothing Then winVer = getWinVer()
+            If Not entry.DetectOS.Count = 0 Then
 
-            hasMetDetOS = checkExistence(entry.DetectOS, "DetectOS", AddressOf checkDetOS)
-            gLog($"  Met DetectOS criteria. {winVer} satisfies {entry.DetectOS(0).Value}", hasMetDetOS)
-            gLog($"  Did not meet DetectOS criteria. {winVer} does not satisfy {entry.DetectOS(0).Value}", Not hasMetDetOS, descend:=True)
+                If winVer = Nothing Then winVer = getWinVer()
 
-            If Not hasMetDetOS Then Return False
+                hasMetDetOS = checkExistence(entry.DetectOS, AddressOf checkDetOS)
+                gLog($"Met DetectOS criteria. {winVer} satisfies {entry.DetectOS(0).Value}", hasMetDetOS)
+                gLog($"Did not meet DetectOS criteria. {winVer} does not satisfy {entry.DetectOS(0).Value}", Not hasMetDetOS)
 
-        End If
+                If Not hasMetDetOS Then Return False
 
-        ' Process any other Detect criteria we have
-        If checkExistence(entry.Detects, "Detect", AddressOf checkRegExist) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
-        If checkExistence(entry.DetectFiles, "DetectFile", AddressOf checkPathExist) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
-        If checkExistence(entry.SpecialDetect, "SpecialDetect", AddressOf checkSpecialDetects) Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+            End If
 
-        ' Return true for the case where we have only a DetectOS and we meet its criteria
-        gLog("No other detection keys found than DetectOS", entry.HasOnlyDetectOS AndAlso hasMetDetOS, descend:=True)
-        If entry.HasOnlyDetectOS AndAlso hasMetDetOS Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+            ' Process any other Detect criteria we have
+            Dim DetectExists = checkExistence(entry.Detects, AddressOf checkRegExist)
+            Dim DetectFileExists = DetectExists OrElse checkExistence(entry.DetectFiles, AddressOf checkPathExist)
+            Dim Detected = DetectFileExists OrElse checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects)
 
-        ' Return true for the case where we have no valid detect criteria
-        gLog("No detect keys found, entry will be retained.", Not entry.HasDetectionKey, descend:=True)
-        If Not entry.HasDetectionKey Then gLog("    Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+            If Detected Then
+                gLog("Retaining entry: " & entry.Name, cond:=Detected, leadr:=True, buffr:=True)
+                Return True
+            End If
 
-        gLog("  Discarding entry: " & entry.Name, descend:=True, leadr:=True, buffr:=True)
-        Return False
+            ' Return true for the case where we have only a DetectOS and we meet its criteria
+            gLog("No other detection keys found than DetectOS", entry.HasOnlyDetectOS AndAlso hasMetDetOS)
+            If entry.HasOnlyDetectOS AndAlso hasMetDetOS Then gLog("Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+
+            ' Return true for the case where we have no valid detect criteria
+            gLog("No detect keys found, entry will be retained.", Not entry.HasDetectionKey)
+            If Not entry.HasDetectionKey Then gLog("Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
+
+            gLog("Discarding entry: " & entry.Name, leadr:=True, buffr:=True)
+            Return False
+
+        End Using
 
     End Function
 
@@ -391,20 +398,18 @@ Public Module Trim
     '''
     Private Sub virtualStoreChecker(entry As winapp2entry2)
 
-        gLog("  Attempting to generate any neccessary VirtualStore keys for " & entry.Name, buffr:=True, ascend:=True)
+        Using gLogScope("Attempting to generate any neccessary VirtualStore keys for " & entry.Name)
 
-        Dim newKeys As New List(Of iniKey2)
-        collectVsKeys(entry.FileKeys, "FileKey", newKeys)
-        collectVsKeys(entry.RegKeys, "RegKey", newKeys)
-        collectVsKeys(entry.ExcludeKeys, "ExcludeKey", newKeys)
+            Dim newKeys As New List(Of iniKey2)
+            collectVsKeys(entry.FileKeys, newKeys)
+            collectVsKeys(entry.RegKeys, newKeys)
+            collectVsKeys(entry.ExcludeKeys, newKeys)
 
-        For Each key In newKeys
-            entry.AddKey(key)
-        Next
+            For Each key In newKeys : entry.AddKey(key) : Next
 
-        If newKeys.Count > 0 Then entry.RenumberKeys()
+            If newKeys.Count > 0 Then entry.RenumberKeys()
 
-        gLog("  VirtualStore audit complete ", leadr:=True, descend:=True)
+        End Using
 
     End Sub
 
@@ -417,25 +422,19 @@ Public Module Trim
     ''' <param name="keys">
     ''' The FileKey, RegKey, or ExcludeKey collection to scan
     ''' </param>
-    '''
-    ''' <param name="keyType">
-    ''' The key type string ("FileKey", "RegKey", or "ExcludeKey")
-    ''' </param>
-    '''
     ''' <param name="newKeys">
-    ''' Accumulator list — new VirtualStore keys are appended here
+    ''' New VirtualStore keys are appended here
     ''' </param>
     '''
     Private Sub collectVsKeys(keys As IReadOnlyList(Of iniKey2),
-                               keyType As String,
-                               newKeys As List(Of iniKey2))
+                              newKeys As List(Of iniKey2))
 
         If keys.Count = 0 Then Return
 
         Dim findStrs() As String
         Dim replStrs() As String
 
-        Select Case keyType
+        Select Case keys(0).KeyType
 
             Case "FileKey", "ExcludeKey"
                 findStrs = {"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}
@@ -472,7 +471,7 @@ Public Module Trim
 
         ' Pass 2: filter by system existence
         For Each key In keysToAdd
-            If checkExist(getPathFromValue(key.Value, keyType)) Then newKeys.Add(key)
+            If checkExist(getPathFromValue(key.Value, key.KeyType)) Then newKeys.Add(key)
         Next
 
     End Sub
@@ -595,7 +594,7 @@ Public Module Trim
         Dim root = getFirstDir(path)
         dir = dir.Replace(root & "\", "")
         Dim exists = getRegExists(root, dir)
-        gLog($"  {root}\{dir} exists", exists, buffr:=True)
+        gLog($"{root}\{dir} exists", exists, buffr:=True)
         ' If we didn't return anything above, registry location probably doesn't exist
         Return exists
 
@@ -644,7 +643,7 @@ Public Module Trim
                 Case Else
 
                     ' Reject malformated keys
-                    gLog($"  Your key seems to be malformatted (bad root? - root: {root} - expected 'HKCU','HKLM','HKU' or 'HKCR')")
+                    gLog($"Your key seems to be malformatted (bad root? - root: {root} - expected 'HKCU','HKLM','HKU' or 'HKCR')")
                     Return False
 
             End Select
@@ -855,71 +854,72 @@ Public Module Trim
     Private Function expandWildcard(dir As String,
                                     isFileSystem As Boolean) As Boolean
 
-        gLog("Expanding Wildcard: " & dir, ascend:=True)
+        Using gLogScope("Expanding Wildcard: " & dir)
 
-        ' This will handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
-        Dim possibleDirs As New strList
-        Dim currentPaths As New strList
+            ' This will handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
+            Dim possibleDirs As New strList
+            Dim currentPaths As New strList
 
-        ' Split the given string into sections by directory
-        Dim splitDir = dir.Split(CChar("\"))
-        For Each pathPart In splitDir
+            ' Split the given string into sections by directory
+            Dim splitDir = dir.Split(CChar("\"))
+            For Each pathPart In splitDir
 
-            ' If this directory parameterization includes a wildcard, expand it appropriately
-            ' This probably wont work if a string for some reason starts with a *
-            If pathPart.Contains("*") Then
+                ' If this directory parameterization includes a wildcard, expand it appropriately
+                ' This probably wont work if a string for some reason starts with a *
+                If pathPart.Contains("*") Then
 
-                For Each currentPath In currentPaths.Items
+                    For Each currentPath In currentPaths.Items
 
-                    If currentPath.Length = 0 Then gLog(NameOf(currentPath) & " is empty, aborting wildcard expansion", descend:=True) : Return False
+                        If currentPath.Length = 0 Then gLog(NameOf(currentPath) & " is empty, aborting wildcard expansion") : Return False
 
-                    ' Query the existence of child paths for each current path we hold
-                    If isFileSystem Then
+                        ' Query the existence of child paths for each current path we hold
+                        If isFileSystem Then
 
-                        gLog("  Investigating: " & pathPart & " as a subdir of " & currentPath)
+                            gLog("Investigating: " & pathPart & " as a subdir of " & currentPath)
 
-                        Try
+                            Try
 
-                            ' If there are any possibilities, add them to our possibility list
-                            Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
-                            possibleDirs.add(possibilities, possibilities.Any)
+                                ' If there are any possibilities, add them to our possibility list
+                                Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
+                                possibleDirs.add(possibilities, possibilities.Any)
 
-                        Catch ex As ArgumentException
+                            Catch ex As ArgumentException
 
-                            ' These are thrown by currentPaths containing illegal characters, we'll assume this means the target doesn't exist
-                            Return False
+                                ' These are thrown by currentPaths containing illegal characters, we'll assume this means the target doesn't exist
+                                Return False
 
-                        Catch ex As UnauthorizedAccessException
+                            Catch ex As UnauthorizedAccessException
 
-                            ' Assume that if there's some directory we don't have access to, the target exists and we just can't see it 
-                            Return True
+                                ' Assume that if there's some directory we don't have access to, the target exists and we just can't see it
+                                Return True
 
-                        End Try
+                            End Try
 
-                    Else
+                        Else
 
-                        ' Registry Query here
+                            ' Registry Query here
 
-                    End If
+                        End If
 
-                Next
+                    Next
 
-                ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
+                    ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
 
-                If possibleDirs.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True, buffr:=True) : Return False
+                    If possibleDirs.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", buffr:=True) : Return False
 
-                ' Otherwise, clear the current paths and repopulate them with the possible paths
-                currentPaths.clear()
-                currentPaths.add(possibleDirs)
-                possibleDirs.clear()
-
-            Else
-
-                If currentPaths.Count = 0 Then
-
-                    currentPaths.add($"{pathPart}")
+                    ' Otherwise, clear the current paths and repopulate them with the possible paths
+                    currentPaths.clear()
+                    currentPaths.add(possibleDirs)
+                    possibleDirs.clear()
 
                 Else
+
+                    If currentPaths.Count = 0 Then
+
+                        currentPaths.add($"{pathPart}")
+                        Continue For
+
+                    End If
 
                     Dim newCurPaths As New strList
 
@@ -931,25 +931,23 @@ Public Module Trim
                     Next
 
                     currentPaths = newCurPaths
-                    If currentPaths.Items.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", descend:=True) : Return False
+                    If currentPaths.Items.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths") : Return False
 
                 End If
 
-            End If
+            Next
 
-        Next
+            ' If any file/path exists, return true
+            For Each currDir In currentPaths.Items
 
-        ' If any file/path exists, return true
-        For Each currDir In currentPaths.Items
+                If Directory.Exists(currDir) OrElse File.Exists(currDir) Then gLog($"Wildcard parameterization returned a valid path: {currDir}", buffr:=True) : Return True
 
-            If Directory.Exists(currDir) OrElse File.Exists(currDir) Then gLog($"Wildcard parameterization returned a valid path: {currDir}", descend:=True, buffr:=True) : Return True
+            Next
 
-        Next
+            ' If we make it this far, the path does not exist
+            Return False
 
-        gLog(descend:=True)
-
-        ' If we make it this far, the path does not exist 
-        Return False
+        End Using
 
     End Function
 
