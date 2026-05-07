@@ -272,23 +272,21 @@ Public Module Trim
         _includes2 = If(UseTrimIncludes, iniFile2.FromFile(TrimFile2.Path()), Nothing)
         _excludes2 = If(UseTrimExcludes, iniFile2.FromFile(TrimFile4.Path()), Nothing)
 
+        If winVer = Nothing Then winVer = getWinVer()
+
         Dim toRemove As New List(Of winapp2entry2)
 
-        For Each entry In winapp2.Entries
+        Dim results = winapp2.Entries.AsParallel().AsOrdered().Select(
+            Function(entry)
+                Using cap = gLogCapture()
+                    Dim retained = processEntryExistence(entry)
+                    If retained Then virtualStoreChecker(entry)
+                    Return New With {.Entry = entry, .Retained = retained, .Log = cap.Lines}
+                End Using
+            End Function).ToList()
 
-            Dim retained As Boolean
-            Dim entryLog As IReadOnlyList(Of String) = Nothing
-
-            Using cap = gLogCapture()
-
-                retained = processEntryExistence(entry)
-                If retained Then virtualStoreChecker(entry)
-                entryLog = cap.Lines
-
-            End Using
-
-            If retained Then EmitCaptured(entryLog) Else toRemove.Add(entry)
-
+        For Each r In results
+            If r.Retained Then EmitCaptured(r.Log) Else toRemove.Add(r.Entry)
         Next
 
         For Each entry In toRemove : winapp2.RemoveEntry(entry) : Next
