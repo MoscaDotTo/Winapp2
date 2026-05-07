@@ -41,30 +41,29 @@ Public Module SettingsHandler2
     ''' </summary>
     Public Sub LoadWinapp2oolsettings()
 
-        gLog("Loading settings")
-        gLog(ascend:=True)
+        Using gLogScope("Loading settings")
 
-        ' Handle the default case where winapp2ool.ini doesn't exist  
-        If Not System.IO.File.Exists(SettingsFile2.Path) Then
+            ' Handle the default case where winapp2ool.ini doesn't exist
+            If Not System.IO.File.Exists(SettingsFile2.Path) Then
 
-            readSettingsFromDisk = False
-            saveSettingsToDisk = False
+                readSettingsFromDisk = False
+                saveSettingsToDisk = False
 
-            ' We still need to maintain an internal representation
-            ' of the settings so create the settingsFile and settingsDict
-            ' using the default winapp2ool configuration
-            gLog("No settings file Found - loading default settings")
+                ' We still need to maintain an internal representation
+                ' of the settings so create the settingsFile and settingsDict
+                ' using the default winapp2ool configuration
+                gLog("No settings file Found - loading default settings")
+                loadAllModuleSettings()
+                Return
+
+            End If
+
+            SettingsFile2 = iniFile2.FromFile(SettingsFile2.Path())
             loadAllModuleSettings()
 
-            Return
+        End Using
 
-        End If
-
-        SettingsFile2 = iniFile2.FromFile(SettingsFile2.Path())
-        loadAllModuleSettings()
-
-        gLog(descend:=True)
-        gLog("Settings loaded")
+        gLog("Settings loaded", buffr:=True)
 
     End Sub
 
@@ -165,46 +164,51 @@ Public Module SettingsHandler2
         Dim section = SettingsFile2.GetSection(moduleName)
         If section Is Nothing Then Return
 
-        gLog($"Loading settings for {moduleName}")
+        Using gLogScope($"Loading settings for {moduleName}")
 
-        For Each prop As PropertyInfo In moduleType.GetProperties()
+            gLog("")
 
-            If Not prop.CanWrite Then Continue For
+            For Each prop As PropertyInfo In moduleType.GetProperties()
 
-            If prop.PropertyType Is GetType(iniFileChooser) Then
+                If Not prop.CanWrite Then Continue For
 
-                Dim nameKey = section.Keys.GetKey(prop.Name & "_Name")
-                Dim dirKey = section.Keys.GetKey(prop.Name & "_Dir")
-                If nameKey Is Nothing OrElse dirKey Is Nothing Then Continue For
+                If prop.PropertyType Is GetType(iniFileChooser) Then
 
-                Dim chooser = TryCast(prop.GetValue(Nothing), iniFileChooser)
-                If chooser Is Nothing Then Continue For
+                    Dim nameKey = section.Keys.GetKey(prop.Name & "_Name")
+                    Dim dirKey = section.Keys.GetKey(prop.Name & "_Dir")
+                    If nameKey Is Nothing OrElse dirKey Is Nothing Then Continue For
 
-                chooser.Name = nameKey.Value
-                chooser.Dir = dirKey.Value
-                gLog($"    {prop.Name}'s parameters successfully read from disk")
-                Continue For
+                    Dim chooser = TryCast(prop.GetValue(Nothing), iniFileChooser)
+                    If chooser Is Nothing Then Continue For
 
-            End If
+                    chooser.Name = nameKey.Value
+                    chooser.Dir = dirKey.Value
+                    gLog($"{prop.Name}'s parameters successfully read from disk")
+                    Continue For
 
-            Dim k = section.Keys.GetKey(prop.Name)
-            If k Is Nothing Then gLog($"Could not load {prop.Name} from disk") : Continue For
+                End If
 
-            If prop.PropertyType Is GetType(Boolean) Then
+                Dim k = section.Keys.GetKey(prop.Name)
+                If k Is Nothing Then gLog($"Could not load {prop.Name} from disk") : Continue For
 
-                Dim bVal As Boolean
-                If Boolean.TryParse(k.Value, bVal) Then prop.SetValue(Nothing, bVal)
+                If prop.PropertyType Is GetType(Boolean) Then
 
-            Else
+                    Dim bVal As Boolean
+                    If Boolean.TryParse(k.Value, bVal) Then prop.SetValue(Nothing, bVal)
 
-                prop.SetValue(Nothing, [Enum].Parse(prop.PropertyType, k.Value))
+                Else
 
-            End If
+                    prop.SetValue(Nothing, [Enum].Parse(prop.PropertyType, k.Value))
 
-            gLog($"    {prop.Name}'s value successfully read from disk")
+                End If
 
-        Next
+                gLog($"{prop.Name}'s value successfully read from disk")
 
+            Next
+
+        End Using
+
+        gLog("")
     End Sub
 
     ''' <summary>
