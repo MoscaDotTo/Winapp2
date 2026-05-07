@@ -111,27 +111,30 @@ Public Module Flavorizer
         Dim applyingTxt = $"Applying flavor to {FlavorizerFile1.Name}"
         Dim output As New MenuSection
         output.AddBoxWithText(applyingTxt)
-        gLog(applyingTxt, buffr:=True, ascend:=True)
 
-        Dim correctionFiles As New List(Of iniFileChooser) From {FlavorizerFile3, FlavorizerFile4, FlavorizerFile5, FlavorizerFile6, FlavorizerFile7, FlavorizerFile8}
-        Dim validFiles = correctionFiles.Where(Function(f) f.Name.Length > 0 AndAlso f.Exists()).Count()
+        Using gLogScope(applyingTxt)
 
-        Dim hasValidFiles = Not validFiles = 0
+            Dim correctionFiles As New List(Of iniFileChooser) From {FlavorizerFile3, FlavorizerFile4, FlavorizerFile5, FlavorizerFile6, FlavorizerFile7, FlavorizerFile8}
+            Dim validFiles = correctionFiles.Where(Function(f) f.Name.Length > 0 AndAlso f.Exists()).Count()
 
-        Dim noCorrectionsMsg = "No correction files specified - output will be identical to input"
-        output.AddWarning(noCorrectionsMsg, Not hasValidFiles)
-        gLog(noCorrectionsMsg, , Not hasValidFiles)
+            Dim hasValidFiles = Not validFiles = 0
 
-        Dim numFilesApplyingMsg = $"Applying {validFiles} correction file(s)"
-        output.AddColoredLine(numFilesApplyingMsg, ConsoleColor.Cyan)
-        gLog(numFilesApplyingMsg)
+            Dim noCorrectionsMsg = "No correction files specified - output will be identical to input"
+            output.AddWarning(noCorrectionsMsg, Not hasValidFiles)
+            gLog(noCorrectionsMsg, , Not hasValidFiles)
 
-        performFlavorization(output)
+            Dim numFilesApplyingMsg = $"Applying {validFiles} correction file(s)"
+            output.AddColoredLine(numFilesApplyingMsg, ConsoleColor.Cyan)
+            gLog(numFilesApplyingMsg)
 
-        Dim finishedMsg = "Flavorization completed successfully"
-        output.AddBoxWithText(finishedMsg)
-        output.AddAnyKeyPrompt()
-        gLog(finishedMsg)
+            performFlavorization(output)
+
+            Dim finishedMsg = "Flavorization completed successfully"
+            output.AddBoxWithText(finishedMsg)
+            output.AddAnyKeyPrompt()
+            gLog(finishedMsg)
+
+        End Using
 
         If SuppressOutput Then Return
 
@@ -210,8 +213,6 @@ Public Module Flavorizer
     ''' <param name="menuOutput">The <c> MenuSection </c> to which flavorization output lines are appended</param>
     Private Sub performFlavorization(ByRef menuOutput As MenuSection)
 
-        gLog("Starting flavorization process", ascend:=True, buffr:=True)
-
         Dim baseFile = iniFile2.FromFile(FlavorizerFile1.Path())
         Dim saveFile = iniFile2.Empty(FlavorizerFile2.Dir, FlavorizerFile2.Name)
 
@@ -222,13 +223,17 @@ Public Module Flavorizer
         Dim sectionReplacementFile = If(FlavorizerFile6.Name.Length > 0 AndAlso FlavorizerFile6.Exists(), iniFile2.FromFile(FlavorizerFile6.Path()), Nothing)
         Dim keyReplacementFile = If(FlavorizerFile7.Name.Length > 0 AndAlso FlavorizerFile7.Exists(), iniFile2.FromFile(FlavorizerFile7.Path()), Nothing)
 
-        Flavorize(baseFile, saveFile, menuOutput,
-                  additionsFile,
-                  sectionRemovalFile, keyNameRemovalFile, keyValueRemovalFile,
-                  sectionReplacementFile, keyReplacementFile,
-                  FlavorizeAsWinapp)
+        Using gLogScope("Flavorizing")
 
-        gLog("Flavorization process completed", descend:=True)
+            Flavorize(baseFile, saveFile, menuOutput,
+                      additionsFile,
+                      sectionRemovalFile, keyNameRemovalFile, keyValueRemovalFile,
+                      sectionReplacementFile, keyReplacementFile,
+                      FlavorizeAsWinapp)
+
+        End Using
+
+        gLog("Flavorization complete!")
 
     End Sub
 
@@ -250,41 +255,41 @@ Public Module Flavorizer
     ''' </remarks>
     Public Sub DetectFlavorFiles(Optional targetDirectory As String = "")
 
-        gLog("Starting automatic flavor file detection", ascend:=True)
-
         If String.IsNullOrWhiteSpace(targetDirectory) Then targetDirectory = Environment.CurrentDirectory
 
-        gLog($"Searching for flavor files in: {targetDirectory}")
+        Using gLogScope("Starting automatic flavor file detection")
 
-        Dim flavorFiles As New Dictionary(Of String, iniFileChooser) From {
-            {"section_removals.ini", FlavorizerFile3},
-            {"name_removals.ini", FlavorizerFile4},
-            {"value_removals.ini", FlavorizerFile5},
-            {"section_replacements.ini", FlavorizerFile6},
-            {"key_replacements.ini", FlavorizerFile7},
-            {"additions.ini", FlavorizerFile8}
-        }
+            gLog($"Searching for flavor files in: {targetDirectory}")
 
-        Dim filesInTargetDir = My.Computer.FileSystem.GetFiles(targetDirectory)
+            Dim flavorFiles As New Dictionary(Of String, iniFileChooser) From {
+                {"section_removals.ini", FlavorizerFile3},
+                {"name_removals.ini", FlavorizerFile4},
+                {"value_removals.ini", FlavorizerFile5},
+                {"section_replacements.ini", FlavorizerFile6},
+                {"key_replacements.ini", FlavorizerFile7},
+                {"additions.ini", FlavorizerFile8}
+            }
 
-        For Each kvp In flavorFiles
+            Dim filesInTargetDir = My.Computer.FileSystem.GetFiles(targetDirectory)
 
-            For Each file In filesInTargetDir
+            For Each kvp In flavorFiles
 
-                If Not file.Contains(kvp.Key) Then Continue For
+                For Each file In filesInTargetDir
 
-                kvp.Value.Dir = targetDirectory
-                kvp.Value.Name = file.Replace(targetDirectory & "\", "")
-                Exit For
+                    If Not file.Contains(kvp.Key) Then Continue For
+
+                    kvp.Value.Dir = targetDirectory
+                    kvp.Value.Name = file.Replace(targetDirectory & "\", "")
+                    Exit For
+
+                Next
 
             Next
 
-        Next
+            FlavorizerModuleSettingsChanged = True
+            SaveModule2(NameOf(Flavorizer), GetType(FlavorizerSettings))
 
-        FlavorizerModuleSettingsChanged = True
-        SaveModule2(NameOf(Flavorizer), GetType(FlavorizerSettings))
-
-        gLog("Flavor file detection completed", descend:=True)
+        End Using
 
     End Sub
 
