@@ -122,33 +122,33 @@ function Build-MainFile {
     Write-Step "Building winapp2.ini, please wait"
     
     Write-Step "Combining base entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-combine', '-1d', '\Entries', '-3f', 'base-entries-combined.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-combine', '-1d', '\Entries', '-3f', 'base-entries-combined.ini' `
         -ErrorMessage "Failed to combine base entries")) { return $false }
     
     Write-Step "Generating browser entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-browserbuilder', '-1d', '\BrowserBuilder', '-2f', 'browsers.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-browserbuilder', '-1d', '\BrowserBuilder', '-2f', 'browsers.ini' `
         -ErrorMessage "Failed to generate browser entries")) { return $false }
 
     Write-Step "Generating UWP entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-uwpbuilder', '-1d', '\UWP', '-2f', 'uwp.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-1d', '\UWP', '-2f', 'uwp.ini' `
         -ErrorMessage "Failed to generate UWP entries")) { return $false }
 
     Write-Step "Joining base entries with browser entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-transmute', '-add', '-1f', 'base-entries-combined.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-transmute', '-add', '-1f', 'base-entries-combined.ini', `
         '-2f', 'browsers.ini', '-3f', 'Winapp2.ini' `
         -ErrorMessage "Failed to join entries")) { return $false }
 
     Write-Step "Joining UWP entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-transmute', '-add', '-1f', 'Winapp2.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-transmute', '-add', '-1f', 'Winapp2.ini', `
         '-2f', 'uwp.ini', '-3f', 'Winapp2.ini' `
         -ErrorMessage "Failed to join UWP entries")) { return $false }
     
     Write-Step "Performing static analysis and saving corrections"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-debug', '-usedate', '-c', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
         -ErrorMessage "Failed static analysis")) { return $false }
     
     Write-Step "Creating changelog"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-diff', '-d', '-savelog', '-1f', 'winapp2.old', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2.old', `
         '-2f', 'Winapp2.ini', '-3f', 'diff.txt' `
         -ErrorMessage "Failed to create changelog")) { return $false }
     
@@ -162,28 +162,28 @@ function Build-MainFile {
 function Build-CCCleanerFlavor {
     Write-Step "Creating CCleaner flavor"
     
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-flavorize', '-autodetect', '-2f', 'winapp2-ccleaner-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-2f', 'winapp2-ccleaner-flavor.ini', `
         '-9d', '\CCleaner' -ErrorMessage "Failed to create CCleaner flavor")) { return $false }
     
     Write-Step "Creating BleachBit flavor"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-flavorize', '-autodetect', '-2f', 'winapp2-bleachbit-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-2f', 'winapp2-bleachbit-flavor.ini', `
         '-9d', '\BleachBit' -ErrorMessage "Failed to create BleachBit flavor")) { return $false }
     
     Write-Step "Creating Tron flavor"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
         '-2f', 'winapp2-tron-flavor.ini', '-9d', '\Tron' `
         -ErrorMessage "Failed to create Tron flavor")) { return $false }
     
     Write-Step "Creating System Ninja flavor"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-flavorize', '-autodetect', '-2f', 'winapp2-systemninja-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-2f', 'winapp2-systemninja-flavor.ini', `
         '-9d', '\SystemNinja' -ErrorMessage "Failed to create System Ninja flavor")) { return $false }
     
     Write-Step "Performing static analysis and saving corrections"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-debug', '-usedate', '-c', '-1f', 'winapp2-ccleaner-flavor.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-ccleaner-flavor.ini' `
         -ErrorMessage "Failed CCleaner flavor analysis")) { return $false }
     
     Write-Step "Creating changelog"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-diff', '-d', '-savelog', '-1f', 'winapp2-cc.old', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-cc.old', `
         '-2f', 'Winapp2.ini', '-3f', 'diff.txt' `
         -ErrorMessage "Failed to create CCleaner changelog")) { return $false }
     
@@ -198,11 +198,11 @@ function Build-CCCleanerFlavor {
 function Build-CCleaner7Flavor {
     Write-Step "Creating CCleaner7 flavor"
     
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-flavorize', '-cc7ify', '-2f', 'winapp2-cc7.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-cc7ify', '-2f', 'winapp2-cc7.ini' `
         -ErrorMessage "Failed to create CCleaner7 flavor")) { return $false }
     
     Write-Step "Creating changelog"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-diff', '-d', '-savelog', '-1f', 'winapp2-cc7.old', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-cc7.old', `
         '-2f', 'winapp2-cc7.ini', '-3f', 'diff.txt' `
         -ErrorMessage "Failed to create CCleaner7 changelog")) { return $false }
     
@@ -214,11 +214,11 @@ function Build-CCleaner7Flavor {
 }
 
 function Build-BleachBitFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-debug', '-usedate', '-c', '-1f', 'winapp2-bleachbit-flavor.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-bleachbit-flavor.ini' `
         -ErrorMessage "Failed BleachBit flavor analysis")) { return $false }
     
     Write-Step "Creating changelog"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-diff', '-d', '-savelog', '-1f', 'winapp2-bb.old', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-bb.old', `
         '-2f', 'Winapp2.ini', '-3f', 'diff.txt' `
         -ErrorMessage "Failed to create BleachBit changelog")) { return $false }
     
@@ -230,11 +230,11 @@ function Build-BleachBitFlavor {
 }
 
 function Build-TronFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-debug', '-usedate', '-c', '-1f', 'winapp2-tron-flavor.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-tron-flavor.ini' `
         -ErrorMessage "Failed Tron flavor analysis")) { return $false }
     
     Write-Step "Creating changelog"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-diff', '-d', '-savelog', '-1f', 'winapp2-tron.old', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-tron.old', `
         '-2f', 'Winapp2.ini', '-3f', 'diff.txt' `
         -ErrorMessage "Failed to create Tron changelog")) { return $false }
     
@@ -246,11 +246,11 @@ function Build-TronFlavor {
 }
 
 function Build-SystemNinjaFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-debug', '-usedate', '-c', '-1f', 'winapp2-systemninja-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-systemninja-flavor.ini', `
         '-3f', 'Winapp2.rules' -ErrorMessage "Failed System Ninja flavor analysis")) { return $false }
     
     Write-Step "Creating changelog"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-diff', '-d', '-savelog', '-1f', 'winapp2-sn.old', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-sn.old', `
         '-2f', 'Winapp2.rules', '-3f', 'diff.txt' `
         -ErrorMessage "Failed to create System Ninja changelog")) { return $false }
     
