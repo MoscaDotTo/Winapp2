@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -48,7 +48,6 @@ Public Module commandLineHandler
 
         Dim configs As New Dictionary(Of String, ModuleConfig)
 
-        ' Helper method to add a module configuration
         Dim addModule = Sub(number As String,
                             name As String,
                             fileCount As Integer,
@@ -107,28 +106,14 @@ Public Module commandLineHandler
     ''' A commandline argument targeting 
     ''' <c> <paramref name="setting"/> </c>
     ''' </param>
-    ''' 
-    ''' <param name="name">
-    ''' A File name to be modified if the arg is found
-    ''' <br /> Optional, default: <c> "" </c>
-    ''' </param>
-    ''' 
-    ''' <param name="newname">
-    ''' The new name with which <c> <paramref name="name"/> </c>
-    ''' will be replaced if the arg is found 
-    ''' <br /> Optional, default: <c> "" </c>
-    ''' </param>
     Public Sub invertSettingAndRemoveArg(ByRef setting As Boolean,
-                                               arg As String,
-                                Optional ByRef name As String = "",
-                                Optional ByRef newname As String = "")
+                                               arg As String)
 
         If Not cmdargs.Contains(arg) Then Return
 
         gLog($"Found argument: {arg}")
         setting = Not setting
         cmdargs.Remove(arg)
-        name = newname
 
     End Sub
 
@@ -142,10 +127,12 @@ Public Module commandLineHandler
         Dim argStr = String.Join(",", cmdargs)
         gLog($"Found commandline args: {argStr}")
 
+
+        cmdargs.RemoveAll(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase))
+
         checkUpdates(cmdargs.Contains("-autoupdate"))
         If updateIsAvail Then autoUpdate()
 
-        ' Process global flags
         invertSettingAndRemoveArg(SuppressOutput, "-s")
         processFlavorArgs()
 
@@ -233,11 +220,7 @@ Public Module commandLineHandler
 
                     Dim parentDir = System.IO.Path.GetDirectoryName(pathArg)
 
-                    If Not String.IsNullOrEmpty(parentDir) AndAlso Not System.IO.Directory.Exists(parentDir) Then
-
-                        gLog($"Warning: Parent directory does not exist: {parentDir}")
-
-                    End If
+                    gLog($"Warning: Parent directory does not exist: {parentDir}", Not String.IsNullOrEmpty(parentDir) AndAlso Not System.IO.Directory.Exists(parentDir))
 
                 End If
 

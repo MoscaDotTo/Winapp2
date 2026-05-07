@@ -37,7 +37,14 @@ Public Module launcher
 
         If Not SuppressOutput Then Console.WindowWidth = 130 : Console.WindowHeight = 35
 
-        chkOfflineMode()
+        ' don't bother checking checking the connection if we know we want to be offline
+        If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase)) Then
+            isOffline = True
+            invertSettingAndRemoveArg(True, "-offline")
+            gLog("Found argument: -offline (skipping connection check)")
+        Else
+            chkOfflineMode()
+        End If
 
         If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
         gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
