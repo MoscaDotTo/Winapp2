@@ -79,7 +79,7 @@ Module RegistryHelper
                 out.add(Registry.Users.OpenSubKey(trimmed).GetSubKeyNames)
             Case "HKCU", "HKEY_CURRENT_USER"
                 out.add(Registry.CurrentUser.OpenSubKey(trimmed).GetSubKeyNames)
-            Case "HKLM""HKEY_LOCAL_MACHINE"
+            Case "HKLM", "HKEY_LOCAL_MACHINE"
                 out.add(Registry.LocalMachine.OpenSubKey(trimmed).GetSubKeyNames)
             Case "HKCC", "HKEY_CURRENT_CONFIG"
                 out.add(Registry.CurrentConfig.OpenSubKey(trimmed).GetSubKeyNames)
