@@ -197,30 +197,31 @@ Module MenuMaker
                           handleInput As Action(Of String),
                  Optional itmLen As Integer = 35)
 
-        gLog("", ascend:=True)
-        gLog($"Loading module {name}")
+        Using gLogScope($"Loading module {name}")
 
-        ExitPending = False
-        setNextMenuHeaderText(name)
+            ExitPending = False
+            setNextMenuHeaderText(name)
 
-        menuItemLength = itmLen
+            menuItemLength = itmLen
 
-        Do Until ExitPending
+            Do Until ExitPending
 
-            clrConsole()
-            showMenu()
-            Console.Write(Environment.NewLine & promptStr)
-            handleInput(Console.ReadLine)
+                clrConsole()
+                showMenu()
+                Console.Write(Environment.NewLine & promptStr)
+                handleInput(Console.ReadLine)
 
-        Loop
+            Loop
 
-        ExitPending = False
+            ExitPending = False
 
-        ' Flush any pending settings changes to disk when exiting a module
-        FlushIfDirty2()
+            FlushIfDirty2()
 
-        setNextMenuHeaderText($"{name} closed")
-        gLog($"Exiting {name}", descend:=True, leadr:=True)
+            setNextMenuHeaderText($"{name} closed")
+
+        End Using
+
+        gLog($"Exited {name}", leadr:=True)
 
     End Sub
 
