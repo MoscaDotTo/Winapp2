@@ -227,6 +227,9 @@ Public Module WinappDebug
 
         If givenIni Is Nothing Then argIsNull(NameOf(givenIni)) : Return Nothing
 
+        Dim prevScan = lintOpti.ShouldScan
+        Dim prevRepair = lintOpti.ShouldRepair
+
         If forceOpti Then
             lintOpti.ShouldScan = True
             lintOpti.ShouldRepair = True
@@ -234,6 +237,10 @@ Public Module WinappDebug
 
         Dim wa2 As New winapp2file2(givenIni)
         Debug(wa2)
+
+        lintOpti.ShouldScan = prevScan
+        lintOpti.ShouldRepair = prevRepair
+
         Return wa2.ToIni()
 
     End Function
