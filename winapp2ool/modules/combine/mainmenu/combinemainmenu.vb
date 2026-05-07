@@ -75,6 +75,8 @@ Public Module combinemainmenu
 
         If Not Integer.TryParse(input, intInput) Then
 
+            If input.Length = 0 Then initCombine(CombineFile1.Dir, CombineFile3) : Return
+
             setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
             Return
 
