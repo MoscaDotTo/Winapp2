@@ -712,9 +712,19 @@ Public Class MenuSection
     ''' </param>
     Public Sub Print(Optional withDivider As Boolean = True)
 
-        If _isCompleteMenu Then PrintCompleteMenu() : Return
+        MenuMaker.BeginBuffered()
 
-        PrintSection(withDivider)
+        Try
+
+            If _isCompleteMenu Then PrintCompleteMenu() : Return
+
+            PrintSection(withDivider)
+
+        Finally
+
+            MenuMaker.FlushBuffered()
+
+        End Try
 
     End Sub
 

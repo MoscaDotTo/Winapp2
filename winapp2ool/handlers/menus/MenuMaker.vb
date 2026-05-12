@@ -128,7 +128,7 @@ Module MenuMaker
     Private ReadOnly Property Closers As String() = {"║", "╗", "╝", "╣"}
 
     ''' <summary>
-    ''' The cached console window width, used to 
+    ''' The cached console window width, used to
     ''' avoid unneeded calls to <c> Console.WindowWidth </c>
     ''' </summary>
     Private _cachedWindowWidth As Integer = 120
@@ -137,6 +137,21 @@ Module MenuMaker
     ''' The time at which the console window width was last checked
     ''' </summary>
     Private _lastWidthCheckTime As DateTime = DateTime.Now
+
+    ''' <summary>
+    ''' When non-<c> Nothing </c>, <c> cwl </c> writes are appended to this buffer
+    ''' instead of going to <c> Console.Out </c> directly. The buffer is flushed
+    ''' as a single <c> Write </c> at the end of a render pass, and also flushed
+    ''' on color changes so colored runs still apply to the right characters.
+    ''' </summary>
+    Private _outputBuffer As StringBuilder = Nothing
+
+    ''' <summary>
+    ''' Master switch for the buffered render path. When <c> False </c>, <c> BeginBuffered </c>
+    ''' is a no-op and rendering reverts to the legacy per-line <c> Console.WriteLine </c> path.
+    ''' Used by benchmarks and as a kill switch.
+    ''' </summary>
+    Public Property BufferingEnabled As Boolean = True
 
     ''' <summary>
     ''' Returns the current console window width, caching it for
@@ -260,7 +275,60 @@ Module MenuMaker
 
         If Not cond OrElse SuppressOutput Then Return
 
+        If _outputBuffer IsNot Nothing Then
+
+            If msg IsNot Nothing Then _outputBuffer.Append(msg)
+            _outputBuffer.Append(Environment.NewLine)
+            Return
+
+        End If
+
         Console.WriteLine(msg)
+
+    End Sub
+
+    ''' <summary>
+    ''' Begins a buffered render pass. Subsequent <c> cwl </c> calls append to an
+    ''' in-memory buffer instead of going to <c> Console.Out </c>. The buffer is
+    ''' emitted as one <c> Write </c> when <c> FlushBuffered </c> is called, with
+    ''' intermediate flushes around color changes so colored runs still apply to
+    ''' the intended characters.
+    ''' </summary>
+    Public Sub BeginBuffered()
+
+        If Not BufferingEnabled OrElse SuppressOutput Then Return
+        If _outputBuffer IsNot Nothing Then Return
+
+        _outputBuffer = New StringBuilder(4096)
+
+    End Sub
+
+    ''' <summary>
+    ''' Ends a buffered render pass, writing the accumulated buffer to
+    ''' <c> Console.Out </c> in a single call.
+    ''' </summary>
+    Public Sub FlushBuffered()
+
+        If _outputBuffer Is Nothing Then Return
+
+        Dim sb = _outputBuffer
+        _outputBuffer = Nothing
+
+        If sb.Length > 0 Then Console.Out.Write(sb.ToString())
+
+    End Sub
+
+    ''' <summary>
+    ''' Flushes the in-flight buffer (if any) without ending the buffered pass.
+    ''' Used so that subsequent state changes (color, cursor) apply to the
+    ''' correct terminal position.
+    ''' </summary>
+    Private Sub FlushBufferIfActive()
+
+        If _outputBuffer Is Nothing OrElse _outputBuffer.Length = 0 Then Return
+
+        Console.Out.Write(_outputBuffer.ToString())
+        _outputBuffer.Length = 0
 
     End Sub
 
@@ -288,24 +356,68 @@ Module MenuMaker
 
     End Sub
 
-    ''' <summary> 
-    ''' Clears the console when the given <c> <paramref name="cond"/> </c>
-    ''' is <c> True </c> and we're not unit testing 
+    ''' <summary>
+    ''' VT escape that homes the cursor and erases the entire screen. One
+    ''' atomic write to a VT-capable terminal replaces the three Win32 calls
+    ''' (<c> SetConsoleCursorPosition </c>, <c> FillConsoleOutputCharacter </c>,
+    ''' <c> FillConsoleOutputAttribute </c>) that <c> Console.Clear </c>
+    ''' performs internally.
     ''' </summary>
-    ''' 
+    Private ReadOnly VtClearScreen As String = ChrW(&H1B) & "[H" & ChrW(&H1B) & "[2J"
+
+    ''' <summary>
+    ''' Clears the console when the given <c> <paramref name="cond"/> </c>
+    ''' is <c> True </c>, output is not redirected, and output is not suppressed.
+    ''' </summary>
+    '''
     ''' <param name="cond">
     ''' Indicates that the console should be cleared
-    ''' 
-    ''' <br/> Optional, Default: <c> True </c> 
+    '''
+    ''' <br/> Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' <remarks> 
-    ''' When unit testing, the console window doesn't belong to us and trying
-    ''' to clear the console throws an IO Exception, so we don't do that 
+    '''
+    ''' <remarks>
+    ''' On a VT-capable terminal (Windows 10 1607+ conhost, Windows Terminal,
+    ''' anything UNIX-ish) this emits the VT clear escape, which is a single
+    ''' write. If a buffered render is active, the escape is appended to the
+    ''' buffer so the clear and the new menu arrive at the terminal in one
+    ''' atomic write — no flicker.
+    '''
+    ''' On legacy consoles (XP / Vista / 7 / pre-1607 Win10) falls back to
+    ''' <c> Console.Clear </c>. When output is redirected (test runner,
+    ''' pipeline silent mode, piped to a file) the call is a no-op — clearing
+    ''' a non-console sink would corrupt downstream output.
     ''' </remarks>
     Public Sub clrConsole(Optional cond As Boolean = True)
 
-        If cond AndAlso Not SuppressOutput AndAlso Not Console.Title.Contains("testhost.x86") Then Console.Clear()
+        If Not cond OrElse SuppressOutput Then Return
+
+        ' VT path: an escape sequence written through Console.Out is safe even
+        ' if output happens to be redirected to a pipe/file — the caller opted
+        ' in to VT by virtue of HasVT being True (which the production probe
+        ' only sets when stdout is a real VT-capable console).
+        If TerminalCapabilities.HasVT Then
+
+            If _outputBuffer IsNot Nothing Then
+                _outputBuffer.Append(VtClearScreen)
+            Else
+                Console.Out.Write(VtClearScreen)
+            End If
+
+            Return
+
+        End If
+
+        ' Legacy path: Console.Clear writes nowhere meaningful when stdout
+        ' isn't a real console (test runners, pipelines, redirection) and will
+        ' usually throw IOException. Skip it outright in that case.
+        If Console.IsOutputRedirected Then Return
+
+        Try
+            Console.Clear()
+        Catch e As IO.IOException
+            ' Belt-and-braces — IsOutputRedirected should already cover this.
+        End Try
 
     End Sub
 
@@ -800,15 +912,94 @@ Module MenuMaker
 
     End Sub
 
+    ''' <summary>
+    ''' VT foreground color codes indexed by <c> ConsoleColor </c>'s underlying
+    ''' integer value (0..15). Windows' "Dark" variants map to ANSI 30-37
+    ''' (the base 8); the non-dark variants map to 90-97 (bright). Note that
+    ''' Windows' <c> ConsoleColor.Yellow </c> is the bright variant — ANSI 93 —
+    ''' so what looks "yellow" on Windows comes out yellow on a VT terminal too.
+    ''' </summary>
+    Private ReadOnly VtForegroundCodes As Integer() = {
+        30, 34, 32, 36, 31, 35, 33, 37,
+        90, 94, 92, 96, 91, 95, 93, 97
+    }
+
+    ''' <summary>
+    ''' VT escape that resets the foreground color to the terminal's default.
+    ''' </summary>
+    Private ReadOnly VtResetForeground As String = ChrW(&H1B) & "[39m"
+
+    ''' <summary>
+    ''' Tracked current foreground color. On the VT path we cannot read it
+    ''' back from the terminal, so we mirror the state ourselves. On the
+    ''' legacy path this also avoids a <c> Console.ForegroundColor </c> read
+    ''' (one P/Invoke into <c> GetConsoleScreenBufferInfo </c>) per save call.
+    ''' </summary>
+    Private _currentForeground As ConsoleColor = ConsoleColor.Gray
+    Private _currentForegroundInitialized As Boolean = False
+
+    Private Sub ensureForegroundInitialized()
+
+        If _currentForegroundInitialized Then Return
+
+        Try
+            _currentForeground = Console.ForegroundColor
+        Catch ex As IO.IOException
+            ' Reading ForegroundColor can fail when stdout isn't a real
+            ' console; fall back to the assumed default.
+        End Try
+
+        _currentForegroundInitialized = True
+
+    End Sub
+
+    ''' <summary>
+    ''' Builds the VT foreground escape for a given <c> ConsoleColor </c>.
+    ''' Returns the default-foreground reset when the color is the sentinel
+    ''' <c> -1 </c> used to indicate "restore default."
+    ''' </summary>
+    Private Function VtForegroundEscape(color As ConsoleColor) As String
+
+        Dim idx = CInt(color)
+        If idx < 0 OrElse idx > 15 Then Return VtResetForeground
+        Return ChrW(&H1B) & "[" & VtForegroundCodes(idx).ToString() & "m"
+
+    End Function
+
     Private Sub setForegroundColor(color As ConsoleColor)
 
+        ensureForegroundInitialized()
+        _currentForeground = color
+
+        If TerminalCapabilities.HasVT Then
+
+            ' Inline VT escape — no flush, no syscall. Sits between the
+            ' surrounding text in the active buffer (or in Console.Out
+            ' directly when buffering is off).
+            Dim escape = VtForegroundEscape(color)
+
+            If _outputBuffer IsNot Nothing Then
+                _outputBuffer.Append(escape)
+            Else
+                Console.Out.Write(escape)
+            End If
+
+            Return
+
+        End If
+
+        ' Legacy path: real Win32 attribute set. Must flush any buffered
+        ' output first so the attribute applies to characters yet to come,
+        ' not characters already in the in-memory buffer.
+        FlushBufferIfActive()
         Console.ForegroundColor = color
 
     End Sub
 
     Private Function getForegroundColor() As ConsoleColor
 
-        Return Console.ForegroundColor
+        ensureForegroundInitialized()
+        Return _currentForeground
 
     End Function
 
