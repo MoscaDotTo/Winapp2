@@ -134,6 +134,40 @@ Public Module logger
     End Sub
 
     ''' <summary>
+    ''' Lazy overload of <c> gLog </c>. The <paramref name="messageFactory"/> lambda is invoked
+    ''' only when <paramref name="cond"/> is <c> True </c>, avoiding allocations from
+    ''' string interpolation when the log call would have been suppressed.
+    ''' </summary>
+    '''
+    ''' <param name="messageFactory">
+    ''' Factory invoked to produce the log line. Not called when <paramref name="cond"/> is
+    ''' <c> False </c>
+    ''' </param>
+    '''
+    ''' <param name="cond">
+    ''' Indicates that the message should be added into the log
+    ''' </param>
+    '''
+    ''' <param name="buffr">
+    ''' Indicates that an empty line should be added into the log following the message
+    ''' </param>
+    '''
+    ''' <param name="leadr">
+    ''' Indicates that an empty line should be added into the log before the message
+    ''' </param>
+    Public Sub gLog(messageFactory As Func(Of String),
+                    cond As Boolean,
+                    Optional buffr As Boolean = False,
+                    Optional leadr As Boolean = False)
+
+        If Not cond Then Return
+        If messageFactory Is Nothing Then Return
+
+        gLog(messageFactory(), True, buffr, leadr)
+
+    End Sub
+
+    ''' <summary>
     ''' Opens a nested logging scope. The optional <paramref name="message"/> is logged at the
     ''' current depth, then the depth is increased by <paramref name="amount"/> until the
     ''' returned <c> IDisposable </c> is disposed. Use with <c> Using </c> to make
