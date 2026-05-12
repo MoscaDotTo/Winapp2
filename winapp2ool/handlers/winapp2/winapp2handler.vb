@@ -21,6 +21,20 @@ Imports System.Text.RegularExpressions
 ''' Provides an object model and some helpful functions for working with winapp2.ini format .ini files
 ''' </summary>
 Public Module winapp2handler
+
+    ''' <summary>
+    ''' Matches a run of digits, optionally followed by ".digits" segments
+    ''' (e.g. "12", "1.2.3"). Compiled once and shared across all callers.
+    ''' </summary>
+    Private ReadOnly numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*",
+                                                    RegexOptions.Compiled Or RegexOptions.CultureInvariant)
+
+    ''' <summary>
+    ''' Matches a run of digits. Used by <c> findLongestNumLength </c>.
+    ''' </summary>
+    Private ReadOnly digitRun As New Regex("[\d]+",
+                                           RegexOptions.Compiled Or RegexOptions.CultureInvariant)
+
     ''' <summary> Sorts a list of <c> Strings </c> after performing some mutations on the data (if necessary). Returns the sorted list of strings. </summary>
     ''' <param name="ListToBeSorted"> A <c> list (of String)s </c> to be sorted </param>
     ''' <param name="textToBeReplaced"> The <c> String </c> data that will be replaced during mutations </param>
@@ -37,7 +51,7 @@ Public Module winapp2handler
                 ListToBeSorted.Items(i) = renamedItem
             End If
         Next
-        ' Pad numbers if necessary 
+        ' Pad numbers if necessary
         findAndReplaceNumbers(ListToBeSorted, changes)
         ' Copy the modified list to be sorted and sort it
         Dim sortedEntryList As New strList
@@ -53,7 +67,7 @@ Public Module winapp2handler
     Private Function findLongestNumLength(ByRef lst As strList) As Integer
         Dim out = 0
         For Each item In lst.Items
-            For Each mtch As Match In Regex.Matches(item, "[\d]+")
+            For Each mtch As Match In digitRun.Matches(item)
                 If mtch.Length > out Then out = mtch.Length
             Next
         Next
@@ -61,36 +75,26 @@ Public Module winapp2handler
     End Function
 
     ''' <summary> Detects the length (number of digits) in the "longest" integer in a given <c> list (of String)s </c> and prepends all shorter integers with zeros such that all the integers in all Strings are the same length </summary>
-    ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. 
+    ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers.
     ''' <param name="listToBeSorted"> The list to be modified and sorted </param>
     ''' <param name="changes"> Dictonary of the changes made to the Strings in <c> <paramref name="listToBeSorted"/> </c></param>
     Private Sub findAndReplaceNumbers(ByRef listToBeSorted As strList, ByRef changes As changeDict)
         Dim longestNumLen = findLongestNumLength(listToBeSorted)
         If longestNumLen < 2 Then Exit Sub
+        Dim padTo = longestNumLen
+        Dim evaluator As MatchEvaluator =
+            Function(m As Match) As String
+                Dim s = m.Value
+                If s.IndexOf("."c) < 0 Then Return padNumberStr(padTo, s)
+                Dim parts = s.Split("."c)
+                For p = 0 To parts.Length - 1
+                    parts(p) = padNumberStr(padTo, parts(p))
+                Next
+                Return String.Join(".", parts)
+            End Function
         For i = 0 To listToBeSorted.Count - 1
             Dim baseString = listToBeSorted.Items(i)
-            Dim paddedString = baseString
-            Dim numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*")
-            For Each m As Match In numberAndDecimals.Matches(baseString)
-                ' Special procedure for numbers with any amount of decimal points in them
-                Dim currentMatch = m.ToString
-                If currentMatch.Contains(".") Then
-                    Dim out = ""
-                    Dim tStr = currentMatch.Split(CChar("."))
-                    For p = 0 To tStr.Length - 1
-                        out += padNumberStr(longestNumLen, tStr(p))
-                        If p < tStr.Length - 1 Then out += "."
-                    Next
-                    paddedString = paddedString.Replace(currentMatch, out)
-                Else
-                    ' Grab characters from both sides so that we don't have to worry about duplicate m matches 
-                    Dim numsPlusReplBits As New Regex($"([^\d]|\b){currentMatch}([^\d]|\b)")
-                    For Each mm As Match In numsPlusReplBits.Matches(paddedString)
-                        Dim replacementText = mm.ToString.Replace(currentMatch, padNumberStr(longestNumLen, currentMatch))
-                        paddedString = paddedString.Replace(mm.ToString, replacementText)
-                    Next
-                End If
-            Next
+            Dim paddedString = numberAndDecimals.Replace(baseString, evaluator)
             ' Don't rename if we didn't change anything
             If baseString.Equals(paddedString, StringComparison.InvariantCulture) Then Continue For
             ' Rename and track changes appropriately
@@ -103,11 +107,9 @@ Public Module winapp2handler
     ''' <param name="longestNumLen"> The desired maximum length of a number </param>
     ''' <param name="num"> The given number </param>
     Private Function padNumberStr(longestNumLen As Integer, num As String) As String
-        Dim replMatch = ""
-        While replMatch.Length < longestNumLen - num.Length
-            replMatch += "0"
-        End While
-        Return replMatch & num
+        Dim deficit = longestNumLen - num.Length
+        If deficit <= 0 Then Return num
+        Return New String("0"c, deficit) & num
     End Function
 
 End Module

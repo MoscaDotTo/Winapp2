@@ -18,36 +18,43 @@
 Option Strict On
 
 ''' <summary>
+''' One survivor in the FileKey merge pass. Holds the parsed components of the
+''' first-seen key for a given (path, flag) combination and the running list of
+''' merged patterns from any subsequent keys that get folded into it.
+''' </summary>
+Friend Class fileKeySurvivor
+
+    ''' <summary>The parsed components of the first-seen key in this group</summary>
+    Public ReadOnly Property Params As fileKeyParams2
+
+    ''' <summary>Accumulated patterns; seeded from <c>Params.Patterns</c> and appended to on each merge</summary>
+    Public ReadOnly Property Patterns As List(Of String)
+
+    Public Sub New(parsed As fileKeyParams2)
+        Me.Params = parsed
+        Me.Patterns = New List(Of String)(parsed.Patterns)
+    End Sub
+
+End Class
+
+''' <summary>
 ''' Holds scans and repairs for <c> WinappDebug </c> that are disabled by default —
 ''' either incomplete or out of scope for the normal lint process.
 ''' </summary>
 Module experimentalScans
-
-    ''' <summary>Holds the full text of every RegKey seen during cross-entry duplicate checks</summary>
-    Private Property regKeyTracker As New HashSet(Of String)
-
-    ''' <summary>Holds the path of every FileKey seen during cross-entry duplicate checks</summary>
-    Private Property fileKeyTracker As New HashSet(Of String)
-
-    ''' <summary>Holds the path of every Detect seen during cross-entry duplicate checks</summary>
-    Private Property detectTracker As New HashSet(Of String)
-
-    ''' <summary>Holds the path of every DetectFile seen during cross-entry duplicate checks</summary>
-    Private Property detectFileTracker As New HashSet(Of String)
-
-    ''' <summary>Clears all cross-entry key trackers between lint runs</summary>
-    Public Sub resetKeyTrackers()
-        regKeyTracker.Clear()
-        fileKeyTracker.Clear()
-        detectFileTracker.Clear()
-        detectTracker.Clear()
-    End Sub
 
     ''' <summary>
     ''' Attempts to merge FileKeys with identical paths and flags into a single key.
     ''' When two FileKeys share the same path and deletion flag, their patterns are
     ''' combined into the earlier key and the later key is removed.
     ''' </summary>
+    '''
+    ''' <remarks>
+    ''' Each FileKey value is parsed exactly once via <c>fileKeyParams2</c>. Match
+    ''' lookup is O(1) by (path, flag) — chained merges into the same survivor do
+    ''' not rebuild or re-parse the running value. The merged value string is
+    ''' constructed once per survivor at the end, when output keys are emitted.
+    ''' </remarks>
     '''
     ''' <param name="entry">
     ''' The <c> winapp2entry2 </c> whose FileKeys will be assessed for merge opportunities
@@ -56,70 +63,56 @@ Module experimentalScans
 
         If entry.FileKeys.Count < 2 Then Return
 
-        ' seenPaths(i)/seenFlags(i)/mergedValues(i) track the state of each FileKey
-        ' as it is processed; mergedValues(i) is updated in place when another key merges into it.
-        Dim seenPaths As New List(Of String)
-        Dim seenFlags As New List(Of fileKeyFlag)
-        Dim mergedValues As New List(Of String)
-        Dim removedIndices As New HashSet(Of Integer)
+        Dim survivors As New List(Of fileKeySurvivor)
+        Dim indexByKey As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
+        Dim removedKeys As New List(Of iniKey2)
 
-        For i = 0 To entry.FileKeys.Count - 1
+        For Each key In entry.FileKeys
 
-            Dim current = New fileKeyParams2(entry.FileKeys(i).Value)
-            seenPaths.Add(current.Path)
-            seenFlags.Add(current.Flag)
-            mergedValues.Add(entry.FileKeys(i).Value)
+            Dim parsed As New fileKeyParams2(key.Value)
+            Dim hashKey = parsed.Path & ChrW(0) & CInt(parsed.Flag).ToString()
 
-            If i = 0 Then Continue For
+            Dim idx As Integer
 
-            ' Find the earliest surviving key with the same path and flag
-            Dim matchIdx = -1
-            For j = 0 To i - 1
-                If Not removedIndices.Contains(j) AndAlso
-                   seenPaths(j).Equals(current.Path, StringComparison.OrdinalIgnoreCase) AndAlso
-                   seenFlags(j) = current.Flag Then
-                    matchIdx = j
-                    Exit For
-                End If
-            Next
+            If indexByKey.TryGetValue(hashKey, idx) Then
 
-            If matchIdx < 0 Then Continue For
+                ' Path+flag match: fold this key's patterns into the survivor and
+                ' record the original key for removal.
+                survivors(idx).Patterns.AddRange(parsed.Patterns)
+                removedKeys.Add(key)
+                gLog($"{key} has a path that matches another key")
 
-            gLog($"{entry.FileKeys(i)} has a path that matches another key")
+            Else
 
-            ' Append current key's patterns to the surviving key's value
-            Dim mergeTarget = New fileKeyParams2(mergedValues(matchIdx))
-            Dim combined = New List(Of String)(mergeTarget.Patterns)
-            combined.AddRange(current.Patterns)
+                indexByKey(hashKey) = survivors.Count
+                survivors.Add(New fileKeySurvivor(parsed))
 
-            Dim newValue = mergeTarget.Path & "|" & String.Join(";", combined)
-            Select Case current.Flag
+            End If
+
+        Next
+
+        If removedKeys.Count = 0 Then Return
+
+        ' Build output keys once per survivor, renumbering from 1.
+        Dim resultKeys As New List(Of iniKey2)
+
+        For i = 0 To survivors.Count - 1
+
+            Dim s = survivors(i)
+            Dim newValue = s.Params.Path
+
+            If s.Patterns.Count > 0 Then newValue &= "|" & String.Join(";", s.Patterns)
+
+            Select Case s.Params.Flag
                 Case fileKeyFlag.Recurse : newValue &= "|RECURSE"
                 Case fileKeyFlag.RemoveSelf : newValue &= "|REMOVESELF"
-                Case fileKeyFlag.Unknown : newValue &= "|" & current.RawFlag
+                Case fileKeyFlag.Unknown : newValue &= "|" & s.Params.RawFlag
             End Select
 
-            mergedValues(matchIdx) = newValue
-            removedIndices.Add(i)
-            gLog($"Key will be merged and have the new value: {newValue}")
+            resultKeys.Add(New iniKey2($"FileKey{i + 1}={newValue}"))
 
         Next
 
-        If removedIndices.Count = 0 Then Return
-
-        ' Build the merged result and the list of keys being removed, renumbering from 1
-        Dim resultKeys As New List(Of iniKey2)
-        Dim removedKeys As New List(Of iniKey2)
-        Dim keyNum = 1
-
-        For i = 0 To entry.FileKeys.Count - 1
-            If removedIndices.Contains(i) Then
-                removedKeys.Add(entry.FileKeys(i))
-            Else
-                resultKeys.Add(New iniKey2($"FileKey{keyNum}={mergedValues(i)}"))
-                keyNum += 1
-            End If
-        Next
         result.DeferSection(New MenuSection().AddColoredLine(result.EntryName & " has keys which can be merged", ConsoleColor.Magenta, centered:=True))
         result.DeferSection(buildOptiSect(removedKeys, resultKeys))
 
