@@ -44,7 +44,11 @@ Public Module launcher
 
         Try
 
-            If Not SuppressOutput Then Console.WindowWidth = 130 : Console.WindowHeight = 35
+            If Not SuppressOutput Then
+                Console.WindowWidth = 130
+                Console.WindowHeight = 35
+                tryExpandScrollback()
+            End If
 
             ' don't bother checking checking the connection if we know we want to be offline
             If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase)) Then
@@ -78,6 +82,33 @@ Public Module launcher
 
             exc(ex)
 
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Attempts to enlarge the console scrollback buffer so long output isn't truncated
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' Only effective on classic conhost. Windows Terminal, VS Code's integrated terminal,
+    ''' and other modern hosts control their own scrollback and will throw <c> IOException </c>
+    ''' or <c> PlatformNotSupportedException </c>; in those cases we silently fall through
+    ''' since the host's own scrollback is already in effect
+    ''' </remarks>
+    Private Sub tryExpandScrollback()
+
+        Try
+
+            Dim targetHeight = Math.Max(Console.WindowHeight, 32000)
+            Console.SetBufferSize(Console.BufferWidth, targetHeight)
+
+        Catch ex As IO.IOException
+            ' Modern terminal host buffer is host-controlled, nothing to do
+        Catch ex As PlatformNotSupportedException
+            ' Non-Windows or hosted environment without a conhost buffer
+        Catch ex As ArgumentOutOfRangeException
+            ' Window is already larger than the requested buffer; not fatal
         End Try
 
     End Sub
