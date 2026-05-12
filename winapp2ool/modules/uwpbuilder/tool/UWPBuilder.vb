@@ -128,6 +128,14 @@ Public Module UWPBuilder
         Public ShouldSkip As Boolean
 
         ''' <summary>
+        ''' When True, the scaffold <c> FileKeyBase= </c> templates from <c> UWP.ini </c>
+        ''' are not emitted for this entry. Detection keys are unaffected.
+        ''' Use this when defining a secondary entry for an application that shares packages
+        ''' with a primary entry, to avoid duplicating the baseline cleaning targets.
+        ''' </summary>
+        Public SkipUWPFileKeys As Boolean
+
+        ''' <summary>
         ''' Creates a new <c> UWPAppInfo </c> for an entry with the given name,
         ''' initialising all list fields to empty collections
         ''' </summary>
@@ -147,6 +155,7 @@ Public Module UWPBuilder
             RegKeys = New List(Of String)
             ExcludeKeys = New List(Of String)
             ShouldSkip = False
+            SkipUWPFileKeys = False
 
         End Sub
 
@@ -401,6 +410,8 @@ Public Module UWPBuilder
 
                 Case "SKIP" : app.ShouldSkip = True
 
+                Case "SKIPUWPFILEKEYS" : app.SkipUWPFileKeys = True
+
                 Case Else
 
                     Dim errMsg = $"Unexpected key type in [{app.Name}]: {key.Name}"
@@ -525,17 +536,27 @@ Public Module UWPBuilder
 
         End If
 
-        ' 4. Scaffold template FileKeys  applied to all packages
-        For Each scaffoldKey In scaffoldFileKeys
+        ' 4. Scaffold template FileKeys applied to all packages (suppressed when SkipUWPFileKeys is set)
+        If app.SkipUWPFileKeys Then
 
-            For Each expanded In expandPackageKey(scaffoldKey, app.Packages)
+            Dim skipMsg = $"Skipping scaffold FileKeys for: {app.Name}"
+            menuOutput.AddColoredLine(skipMsg, ConsoleColor.DarkYellow)
+            gLog($"  {skipMsg}")
 
-                section.AddKey(New iniKey2($"FileKey{fileKeyNum}={expanded}"))
-                fileKeyNum += 1
+        Else
+
+            For Each scaffoldKey In scaffoldFileKeys
+
+                For Each expanded In expandPackageKey(scaffoldKey, app.Packages)
+
+                    section.AddKey(New iniKey2($"FileKey{fileKeyNum}={expanded}"))
+                    fileKeyNum += 1
+
+                Next
 
             Next
 
-        Next
+        End If
 
         ' 5. App-specific FileKey / FileKeyBase values in document order
         For Each appKey In app.AppKeys
