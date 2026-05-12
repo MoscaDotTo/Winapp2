@@ -10,7 +10,7 @@
 
 .NOTES
     Author: Hazel Ward
-    Version 20260508
+    Version 20260512
     Copyright 2026
 #>
 
@@ -165,7 +165,7 @@ function Build-MainFile {
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2.old', `
+        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2.old', `
             '-2f', 'Winapp2.ini', '-3f', 'diff.txt' `
             -ErrorMessage "Failed to create changelog")) { return $false }
     } else {
@@ -199,21 +199,21 @@ function Build-CCCleanerFlavor {
         '-9d', '\SystemNinja' -ErrorMessage "Failed to create System Ninja flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'SystemNinja'))) { return $false }
 
     Write-Step "Performing static analysis and saving corrections"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-ccleaner-flavor.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-ccleaner-flavor.ini', `
+        '-3f', 'winapp2-ccleaner-flavor.ini' `
         -ErrorMessage "Failed CCleaner flavor analysis")) { return $false }
 
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-cc.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-cc.old', `
-            '-2f', 'Winapp2.ini', '-3f', 'diff.txt' `
+        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-cc.old', `
+            '-2f', 'winapp2-ccleaner-flavor.ini', '-3f', 'diff.txt' `
             -ErrorMessage "Failed to create CCleaner changelog")) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    Copy-Item 'Winapp2.ini' '..' -Force
-    Copy-Item 'Winapp2.ini' 'winapp2-cc7base.ini' -Force
+    Copy-Item 'winapp2-ccleaner-flavor.ini' '..\Winapp2.ini' -Force
     if ($haveDiff) { Copy-Item 'diff.txt' '..' -Force }
     Write-Host "CCleaner flavor built" -ForegroundColor Green
 
@@ -223,13 +223,14 @@ function Build-CCCleanerFlavor {
 function Build-CCleaner7Flavor {
     Write-Step "Creating CCleaner7 flavor"
 
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-cc7ify', '-2f', 'winapp2-cc7.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-cc7ify', '-1f', 'winapp2-ccleaner-flavor.ini', `
+        '-2f', 'winapp2-cc7.ini' `
         -ErrorMessage "Failed to create CCleaner7 flavor")) { return $false }
 
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-cc7.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-cc7.old', `
+        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-cc7.old', `
             '-2f', 'winapp2-cc7.ini', '-3f', 'diff.txt' `
             -ErrorMessage "Failed to create CCleaner7 changelog")) { return $false }
     } else {
@@ -244,20 +245,21 @@ function Build-CCleaner7Flavor {
 }
 
 function Build-BleachBitFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-bleachbit-flavor.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-bleachbit-flavor.ini', `
+        '-3f', 'winapp2-bleachbit-flavor.ini' `
         -ErrorMessage "Failed BleachBit flavor analysis")) { return $false }
 
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-bb.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-bb.old', `
-            '-2f', 'Winapp2.ini', '-3f', 'diff.txt' `
+        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-bb.old', `
+            '-2f', 'winapp2-bleachbit-flavor.ini', '-3f', 'diff.txt' `
             -ErrorMessage "Failed to create BleachBit changelog")) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    Copy-Item 'Winapp2.ini' '..\Non-CCleaner\BleachBit' -Force
+    Copy-Item 'winapp2-bleachbit-flavor.ini' '..\Non-CCleaner\BleachBit\Winapp2.ini' -Force
     if ($haveDiff) { Copy-Item 'diff.txt' '..\Non-CCleaner\BleachBit' -Force }
     Write-Host "BleachBit flavor built" -ForegroundColor Green
 
@@ -265,20 +267,21 @@ function Build-BleachBitFlavor {
 }
 
 function Build-TronFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-tron-flavor.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-tron-flavor.ini', `
+        '-3f', 'winapp2-tron-flavor.ini' `
         -ErrorMessage "Failed Tron flavor analysis")) { return $false }
 
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-tron.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-tron.old', `
-            '-2f', 'Winapp2.ini', '-3f', 'diff.txt' `
+        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-tron.old', `
+            '-2f', 'winapp2-tron-flavor.ini', '-3f', 'diff.txt' `
             -ErrorMessage "Failed to create Tron changelog")) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
 
-    Copy-Item 'Winapp2.ini' '..\Non-CCleaner\Tron' -Force
+    Copy-Item 'winapp2-tron-flavor.ini' '..\Non-CCleaner\Tron\Winapp2.ini' -Force
     if ($haveDiff) { Copy-Item 'diff.txt' '..\Non-CCleaner\Tron' -Force }
     Write-Host "Tron flavor built" -ForegroundColor Green
 
@@ -292,7 +295,7 @@ function Build-SystemNinjaFlavor {
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-sn.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-d', '-savelog', '-1f', 'winapp2-sn.old', `
+        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-sn.old', `
             '-2f', 'Winapp2.rules', '-3f', 'diff.txt' `
             -ErrorMessage "Failed to create System Ninja changelog")) { return $false }
     } else {
