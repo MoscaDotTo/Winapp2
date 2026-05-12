@@ -1,7 +1,11 @@
 ﻿Imports System.Resources
 Imports System
 Imports System.Reflection
+Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
+
+' Expose Friend members to the unit test project so it can drive internal APIs
+<Assembly: InternalsVisibleTo("UnitTests")>
 
 ' General Information about an assembly is controlled through the following 
 ' set of attributes. Change these attribute values to modify the information
