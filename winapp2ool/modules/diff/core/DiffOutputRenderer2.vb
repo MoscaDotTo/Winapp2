@@ -31,6 +31,13 @@ Public Class DiffOutputRenderer2
     Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer2
 
     ''' <summary>
+    ''' Label used in place of a key type when itemizing a detection-criteria modification —
+    ''' a change to an entry's <c>Detect</c>/<c>DetectFile</c> keys, which are reported as a
+    ''' single conceptual "detection criteria" change rather than by individual key type
+    ''' </summary>
+    Private Const DetectionCriteriaLabel As String = "Detection criteria"
+
+    ''' <summary>
     ''' Maps merged target entry name → (key value → source old entry name).
     ''' Built by <c>ItemizeMergers</c> and consumed by <c> ItemizeModifications </c>
     ''' to attribute old keys to their source entries in merger output.
@@ -570,9 +577,10 @@ Public Class DiffOutputRenderer2
 
         If updatedKeysDict.Count = 0 Then Return result
 
-        For Each changeList In updatedKeysDict.Values
+        For Each kvp In updatedKeysDict
 
-            recordModification(modKeyTypes, changeList(0).KeyType)
+            Dim bucket = If(DetectionKeyTypes.Contains(kvp.Key.KeyType), DetectionCriteriaLabel, kvp.Value(0).KeyType)
+            recordModification(modKeyTypes, bucket)
 
         Next
 
@@ -586,11 +594,21 @@ Public Class DiffOutputRenderer2
                 Dim newKey = updatedKeysDict.Keys(i)
                 Dim oldKeys = updatedKeysDict.Values(i)
                 Dim isRename = newKey.typeIs("Name")
+                Dim isDetection = Not isRename AndAlso DetectionKeyTypes.Contains(newKey.KeyType)
                 Dim count = updatedKeysDict.Values(i).Count
 
-                Dim outText1EntryName = If(isRename, "Entry Name", newKey.Name)
+                Dim outTxt1 As String
 
-                Dim outTxt1 = $"{outText1EntryName} has been modified{If(Not isRename, $", replacing {count} old key{If(count > 1, "s", "")}", "")}"
+                If isDetection Then
+
+                    outTxt1 = $"{DetectionCriteriaLabel} modified{If(count > 1, $", replacing {count} old keys", "")}"
+
+                Else
+
+                    Dim outText1EntryName = If(isRename, "Entry Name", newKey.Name)
+                    outTxt1 = $"{outText1EntryName} has been modified{If(Not isRename, $", replacing {count} old key{If(count > 1, "s", "")}", "")}"
+
+                End If
 
                 output.AddColoredLine(outTxt1, ConsoleColor.DarkYellow)
                 gLog($"  {outTxt1}", leadr:=i = 0)
@@ -1078,7 +1096,7 @@ Public Class DiffOutputRenderer2
     ''' Indicates that the current assessment is for newly added browsers
     ''' </param>
     ''' <returns></returns>
-    Public Function ItemizeBrowserChanges(ByRef ObservedValues As List(Of String),
+    Public Shared Function ItemizeBrowserChanges(ByRef ObservedValues As List(Of String),
                                                 wasAdded As Boolean) As List(Of MenuSection)
 
         Dim results As New List(Of MenuSection)
@@ -1167,7 +1185,8 @@ Public Class DiffOutputRenderer2
 
         For Each kvp In ktDict
 
-            Dim out = $"{changeType} {kvp.Value} {kvp.Key}{If(kvp.Value > 1, "s", "")}"
+            Dim suffix = If(kvp.Value > 1 AndAlso kvp.Key <> DetectionCriteriaLabel, "s", "")
+            Dim out = $"{changeType} {kvp.Value} {kvp.Key}{suffix}"
             result.AddColoredLine(out, ConsoleColor.Yellow, centered:=True)
             result.AddBlank(i = total - 1)
 

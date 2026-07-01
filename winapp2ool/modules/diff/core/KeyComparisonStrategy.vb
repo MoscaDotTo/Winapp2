@@ -441,7 +441,9 @@ Public Class DetectKeyComparisonStrategy
     ''' </param>
     '''
     ''' <returns>
-    ''' <c>True</c> if the keys are equivalent or <paramref name="newKey"/> is a parent path of <paramref name="oldKey"/>
+    ''' <c>True</c> if the keys are equivalent, or <paramref name="newKey"/> is a parent path of
+    ''' <paramref name="oldKey"/> — except a value-targeted RegKey, which requires an exact path match
+    ''' since a value deletion beneath one key is not subsumed by a parent path
     ''' </returns>
     Public Overrides Function Compare(newKey As iniKey2,
                                       oldKey As iniKey2,
@@ -485,7 +487,10 @@ Public Class DetectKeyComparisonStrategy
 
         If oldPath.StartsWith(newPath & "\", StringComparison.InvariantCultureIgnoreCase) Then
 
-            If isRegKey AndAlso newFlags.Length > 0 Then Return CompareValues(newFlags, oldFlags)
+            ' A value-targeted RegKey deletes a value beneath one specific key, so a parent path does
+            ' not subsume it: A|V and A\B|V delete the same value from different keys, not the same key.
+            ' Parent capture remains valid only for whole-key deletions (newFlags empty) and Detect keys.
+            If isRegKey AndAlso newFlags.Length > 0 Then Return False
 
             Return True
 

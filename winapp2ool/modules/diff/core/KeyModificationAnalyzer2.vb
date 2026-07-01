@@ -486,10 +486,13 @@ Public Class KeyModificationAnalyzer2
     End Function
 
     ''' <summary>
-    ''' Promotes (new key, old key) pairs from <paramref name="addedKeys"/> and 
-    ''' <paramref name="removedKeys"/> into an "updated" list when the keys are equivalent 
+    ''' Promotes (new key, old key) pairs from <paramref name="addedKeys"/> and
+    ''' <paramref name="removedKeys"/> into an "updated" list when the keys are equivalent
     ''' under the comparison strategy, share a singleton key type (e.g. LangSecRef), or represent
-    ''' a known defunct singleton replacement. Matched keys are removed from 
+    ''' a known defunct singleton replacement. Two further passes then pair RegKeys that share a
+    ''' registry path but target different value-names (see <see cref="PairRegKeysBySharedPath"/>)
+    ''' and one-for-one Detect/DetectFile detection-criteria swaps (same-type first, then cross-type;
+    ''' see <see cref="PairDetectionCriteria"/>). Matched keys are removed from
     ''' <paramref name="addedKeys"/> and <paramref name="removedKeys"/> in place.
     ''' </summary>
     ''' 
@@ -545,7 +548,180 @@ Public Class KeyModificationAnalyzer2
 
         Next
 
+        updatedKeys.AddRange(PairRegKeysBySharedPath(removedKeys, addedKeys))
+        updatedKeys.AddRange(PairDetectionCriteria(removedKeys, addedKeys))
+
         Return updatedKeys
+
+    End Function
+
+    ''' <summary>
+    ''' Pairs detection-criteria changes as modifications, preferring the least ambiguous reading.
+    ''' An entry's detection criteria (its <c>Detect</c> and <c>DetectFile</c> keys) is a single
+    ''' conceptual role: how winapp2ool decides the target application is present. <br /> <br />
+    ''' Two passes run over the still-unmatched detection keys. First, any detection key type with
+    ''' exactly one added and one removed key is paired same-type — e.g. one <c>DetectFile</c>
+    ''' replaced by another at a different path. Then, if exactly one added and one removed detection
+    ''' key remain (necessarily of different types), they are paired as a cross-type swap — e.g. a
+    ''' <c>Detect</c> becoming a <c>DetectFile</c>. Any detection key that cannot be paired one-for-one
+    ''' this way is left as a plain add/remove, so a lone removed <c>Detect</c> alongside a matched
+    ''' <c>DetectFile</c> swap stays reported as removed.
+    ''' </summary>
+    '''
+    ''' <param name="removedKeys">
+    ''' The still-unmatched removed keys; paired detection keys are removed in place
+    ''' </param>
+    '''
+    ''' <param name="addedKeys">
+    ''' The still-unmatched added keys; paired detection keys are removed in place
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' Pairs of (new <c>iniKey2</c>, old <c>iniKey2</c>) for each one-for-one detection swap found,
+    ''' or an empty list if none qualify
+    ''' </returns>
+    Private Shared Function PairDetectionCriteria(ByRef removedKeys As List(Of iniKey2),
+                                                  ByRef addedKeys As List(Of iniKey2)) As List(Of KeyValuePair(Of iniKey2, iniKey2))
+
+        Dim pairs As New List(Of KeyValuePair(Of iniKey2, iniKey2))
+
+        ' Same-type swaps first (least ambiguous), so a DetectFile↔DetectFile change is preferred
+        ' over consuming an unrelated Detect that should remain a removal.
+        For Each detectionType In DetectionKeyTypes
+
+            Dim dt = detectionType
+            PairSingleSwap(removedKeys, addedKeys, pairs, Function(k) k.typeIs(dt, ignoreCase:=True))
+
+        Next
+
+        ' Then a single remaining detection key on each side (necessarily cross-type) is a swap too.
+        PairSingleSwap(removedKeys, addedKeys, pairs, Function(k) DetectionKeyTypes.Contains(k.KeyType))
+
+        Return pairs
+
+    End Function
+
+    ''' <summary>
+    ''' If exactly one added key and exactly one removed key satisfy <paramref name="predicate"/>,
+    ''' records them as a (new, old) pair in <paramref name="pairs"/> and removes both from
+    ''' <paramref name="addedKeys"/> and <paramref name="removedKeys"/>. Does nothing otherwise,
+    ''' so an ambiguous many-to-one or one-sided change is left untouched.
+    ''' </summary>
+    '''
+    ''' <param name="removedKeys">
+    ''' The still-unmatched removed keys; the matched key is removed in place
+    ''' </param>
+    '''
+    ''' <param name="addedKeys">
+    ''' The still-unmatched added keys; the matched key is removed in place
+    ''' </param>
+    '''
+    ''' <param name="pairs">
+    ''' The accumulator the matched (new, old) pair is appended to
+    ''' </param>
+    '''
+    ''' <param name="predicate">
+    ''' Selects which keys participate in this swap (e.g. a specific detection key type)
+    ''' </param>
+    Private Shared Sub PairSingleSwap(ByRef removedKeys As List(Of iniKey2),
+                                      ByRef addedKeys As List(Of iniKey2),
+                                      pairs As List(Of KeyValuePair(Of iniKey2, iniKey2)),
+                                      predicate As Func(Of iniKey2, Boolean))
+
+        Dim removedMatches = removedKeys.Where(predicate).ToList()
+        Dim addedMatches = addedKeys.Where(predicate).ToList()
+
+        If removedMatches.Count <> 1 OrElse addedMatches.Count <> 1 Then Return
+
+        pairs.Add(New KeyValuePair(Of iniKey2, iniKey2)(addedMatches(0), removedMatches(0)))
+
+        addedKeys.Remove(addedMatches(0))
+        removedKeys.Remove(removedMatches(0))
+
+    End Sub
+
+    ''' <summary>
+    ''' Pairs RegKeys that share an identical registry path (the portion before the first <c> | </c>)
+    ''' but target different value-names, promoting each such pair to an updated key. <br /> <br />
+    ''' Because the winapp2.ini format permits at most one value-name per RegKey, the registry path
+    ''' uniquely groups the value-names cleaned beneath it: a path with exactly one removed and one
+    ''' added RegKey is an unambiguous change to that key's cleaning rule rather than an independent
+    ''' removal and addition. Paths with more than one removed or added RegKey are left untouched,
+    ''' since which removal pairs with which addition cannot be determined.
+    ''' </summary>
+    '''
+    ''' <param name="removedKeys">
+    ''' The still-unmatched removed keys; promoted RegKeys are removed in place
+    ''' </param>
+    '''
+    ''' <param name="addedKeys">
+    ''' The still-unmatched added keys; promoted RegKeys are removed in place
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' Pairs of (new <c>iniKey2</c>, old <c>iniKey2</c>) for every registry path carrying
+    ''' exactly one removed and one added RegKey
+    ''' </returns>
+    Private Shared Function PairRegKeysBySharedPath(ByRef removedKeys As List(Of iniKey2),
+                                                    ByRef addedKeys As List(Of iniKey2)) As List(Of KeyValuePair(Of iniKey2, iniKey2))
+
+        Dim pairs As New List(Of KeyValuePair(Of iniKey2, iniKey2))
+
+        Dim removedByPath = GroupRegKeysByPath(removedKeys)
+        Dim addedByPath = GroupRegKeysByPath(addedKeys)
+
+        For Each path In removedByPath.Keys
+
+            If removedByPath(path).Count <> 1 Then Continue For
+
+            Dim addedForPath As List(Of iniKey2) = Nothing
+            If Not addedByPath.TryGetValue(path, addedForPath) Then Continue For
+            If addedForPath.Count <> 1 Then Continue For
+
+            pairs.Add(New KeyValuePair(Of iniKey2, iniKey2)(addedForPath(0), removedByPath(path)(0)))
+
+        Next
+
+        For Each pair In pairs
+
+            addedKeys.Remove(pair.Key)
+            removedKeys.Remove(pair.Value)
+
+        Next
+
+        Return pairs
+
+    End Function
+
+    ''' <summary>
+    ''' Groups RegKeys by their registry path (the portion before the first <c> | </c>),
+    ''' skipping any non-RegKey entries. Path matching is case-insensitive, consistent with
+    ''' the key comparison strategies.
+    ''' </summary>
+    '''
+    ''' <param name="keys">
+    ''' The keys to group; entries whose type is not RegKey are ignored
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A dictionary mapping each registry path to the RegKeys that target a value beneath it
+    ''' </returns>
+    Private Shared Function GroupRegKeysByPath(keys As List(Of iniKey2)) As Dictionary(Of String, List(Of iniKey2))
+
+        Dim grouped As New Dictionary(Of String, List(Of iniKey2))(StringComparer.InvariantCultureIgnoreCase)
+
+        For Each key In keys
+
+            If Not key.typeIs("RegKey") Then Continue For
+
+            Dim path = key.PipeSplit(0)
+
+            If Not grouped.ContainsKey(path) Then grouped.Add(path, New List(Of iniKey2))
+            grouped(path).Add(key)
+
+        Next
+
+        Return grouped
 
     End Function
 
