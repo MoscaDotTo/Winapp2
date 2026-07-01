@@ -106,10 +106,29 @@ Public Class fileKeyParams2
     ''' </summary>
     Public Function Reconstruct() As String
 
+        Return Reconstruct(_patterns)
+
+    End Function
+
+    ''' <summary>
+    ''' Reconstructs the FileKey value string using <paramref name="patternsOverride"/> in place of
+    ''' the parsed patterns, retaining this object's <c> Path </c> and flag. Produces <c>path|pat1;pat2[|FLAG]</c>.
+    ''' Used by the linter to write back a de-duplicated and/or alphabetized pattern list without
+    ''' mutating the (immutable) parsed components.
+    ''' </summary>
+    '''
+    ''' <param name="patternsOverride">
+    ''' The pattern list to serialize between the first and optional second pipe
+    ''' </param>
+    Public Function Reconstruct(patternsOverride As IEnumerable(Of String)) As String
+
+        If patternsOverride Is Nothing Then argIsNull(NameOf(patternsOverride)) : Return Nothing
+
         Dim out = Path
 
-        If _patterns.Count > 0 Then
-            out &= "|" & String.Join(";", _patterns)
+        Dim pats = patternsOverride.ToList()
+        If pats.Count > 0 Then
+            out &= "|" & String.Join(";", pats)
         End If
 
         If Flag = fileKeyFlag.Unknown Then

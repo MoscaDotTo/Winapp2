@@ -1387,21 +1387,22 @@ Public Module WinappDebug
 
         Next
 
-        If lintParams.fixFormat AndAlso dupedArgs.Count > 0 Then
+        Dim seen As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim deduped = keyParams.Patterns.Where(Function(p) p.Length > 0 AndAlso seen.Add(p)).ToList()
+        Dim sortedPatterns = deduped _
+            .OrderBy(Function(p) p, StringComparer.OrdinalIgnoreCase) _
+            .ThenBy(Function(p) p, StringComparer.Ordinal) _
+            .ToList()
 
-            Dim seen As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-            Dim deduped = keyParams.Patterns.Where(Function(p) p.Length > 0 AndAlso seen.Add(p)).ToList()
-            key.Value = keyParams.Path
-
-            If deduped.Count > 0 Then key.Value &= "|" & String.Join(";", deduped)
-
-            Select Case keyParams.Flag
-                Case fileKeyFlag.Recurse : key.Value &= "|RECURSE"
-                Case fileKeyFlag.RemoveSelf : key.Value &= "|REMOVESELF"
-                Case fileKeyFlag.Unknown : key.Value &= "|" & keyParams.RawFlag
-            End Select
-
+        Dim outOfOrder = Not deduped.SequenceEqual(sortedPatterns, StringComparer.Ordinal)
+        If outOfOrder Then
+            result.RecordError("FileKey parameters are not in alphabetical order",
+                               {$"Key:      {key.ToString()}",
+                                $"Current:  {String.Join(";", deduped)}",
+                                $"Sorted:   {String.Join(";", sortedPatterns)}"}, lintParams.ShouldScan)
         End If
+
+        If lintParams.fixFormat AndAlso (dupedArgs.Count > 0 OrElse outOfOrder) Then key.Value = keyParams.Reconstruct(sortedPatterns)
 
         ' Make sure that FileKey paths point to a filesystem location
         chkPathFormatValidity(result, key, False)
