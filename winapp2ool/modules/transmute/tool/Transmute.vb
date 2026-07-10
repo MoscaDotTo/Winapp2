@@ -150,17 +150,18 @@ Public Module Transmute
 
         ''' <summary>
         ''' Replaces entire sections when collisions occur <br />
-        ''' 
+        '''
         ''' This means that if a section exists in the base file, it will be replaced entirely
-        ''' with the section from the source file. Section names must match exactly (case sensitive)
+        ''' with the section from the source file. Section names are matched case-insensitively
         ''' </summary>
         BySection = 0
 
         ''' <summary>
         ''' Replace individual keys when collisions occur <br />
-        ''' 
+        '''
         ''' This means that if a key exists in the base file, its value will be replaced with the
-        ''' value from the source file. The key must exist in both files and have the same Name 
+        ''' value from the source file. The key must exist in both files and have the same Name
+        ''' (case-insensitive). Only the Value is replaced — the base key's Name is untouched
         ''' </summary>
         ByKey = 1
 
@@ -173,18 +174,18 @@ Public Module Transmute
 
         ''' <summary>
         ''' Remove entire sections when collisions occur <br />
-        ''' 
+        '''
         ''' This means that if a section exists in the base file, it will be removed entirely
-        ''' if it also exists in the source file. Section names must match exactly (case sensitive)
+        ''' if it also exists in the source file. Section names are matched case-insensitively
         ''' </summary>
         BySection = 0
 
         ''' <summary>
         ''' Remove individual keys when collisions occur <br />
-        ''' 
+        '''
         ''' This means that if a key exists in the base file, it will be removed if it also exists
         ''' in the source file. The key must exist in both files and have the same KeyType (key name
-        ''' without numbers). Section names must match exactly (case sensitive)
+        ''' without numbers). Section names are matched case-insensitively
         ''' </summary>
         ByKey = 1
 
@@ -237,7 +238,8 @@ Public Module Transmute
     ''' -c              : custom.ini  <br />
     ''' -w              : winapp3.ini <br />
     ''' -a              : archived entries.ini <br />
-    ''' -b              : browsers.ini
+    ''' -b              : browsers.ini <br />
+    ''' -u              : uwp.ini
     ''' </remarks>
     Public Sub handleCmdLine()
 
@@ -275,7 +277,7 @@ Public Module Transmute
             .WithFlag("-byvalue", Sub() RemoveByName = Not RemoveByName) _
             .WithFlag("-dontlint", Sub() isWinapp = Not isWinapp) _
             .WithFileAlias("-r", TransmuteFile2, "Removed Entries.ini") _
-            .WithFileAlias("-c", TransmuteFile2, "Custom.ini") _
+            .WithFileAlias("-c", TransmuteFile2, "custom.ini") _
             .WithFileAlias("-w", TransmuteFile2, "winapp3.ini") _
             .WithFileAlias("-a", TransmuteFile2, "Archived Entries.ini") _
             .WithFileAlias("-b", TransmuteFile2, "browsers.ini") _
@@ -288,7 +290,16 @@ Public Module Transmute
         TransmuteRemoveKeyMode = If(RemoveByName, RemoveKeyMode.ByName, RemoveKeyMode.ByValue)
         UseWinapp2Syntax = isWinapp
 
-        If TransmuteFile2.Name.Length <> 0 Then initTransmute()
+        If TransmuteFile2.Name.Length = 0 Then
+
+            Dim noSourceMsg = "Transmute requires a source file. Provide one with -2f <name> or a preset flag (-r, -c, -w, -a, -b, -u)"
+            gLog(noSourceMsg)
+            cwl(noSourceMsg)
+            Return
+
+        End If
+
+        initTransmute()
 
     End Sub
 
@@ -332,11 +343,11 @@ Public Module Transmute
 
     End Sub
 
-    ''' <summary> 
-    ''' Conducts the transmutation on the base file using the source file and saves the 
-    ''' output to the location provided within saveFile. <br /> Typically by default, the output is
-    ''' saved to the base file, overwriting the original content. <br />
-    ''' If working on a winapp2.ini file, the output can be formatted accordingly 
+    ''' <summary>
+    ''' Conducts the transmutation on the base file using the source file and saves the
+    ''' output to the location provided within saveFile. <br /> By default, the output is saved
+    ''' to winapp2-transmuted.ini alongside the base file, which is left untouched. <br />
+    ''' If working on a winapp2.ini file, the output can be formatted accordingly
     ''' </summary>
     ''' 
     ''' <param name="baseFile">
@@ -702,8 +713,10 @@ Public Module Transmute
 
     ''' <summary>
     ''' Handles the Replace by Key mode for the <c> Replace Transmutator </c>, replacing the values
-    ''' of keys in <c> <paramref name="baseSection"/> </c> with the ones provided in 
-    ''' <c> <paramref name="sourceSection"/> </c> iff they have the same Name 
+    ''' of keys in <c> <paramref name="baseSection"/> </c> with the ones provided in
+    ''' <c> <paramref name="sourceSection"/> </c> iff they have the same Name (case-insensitive) <br />
+    ''' Every base key sharing a source key's Name receives the replacement value, so duplicate
+    ''' key names in the base section are all updated
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
@@ -728,6 +741,8 @@ Public Module Transmute
 
         For Each sourceKey In sourceSection.Keys : sourceKeys(sourceKey.Name) = sourceKey : Next
 
+        Dim matched As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
         For Each baseKey In baseSection.Keys
 
             If Not sourceKeys.ContainsKey(baseKey.Name) Then Continue For
@@ -738,11 +753,13 @@ Public Module Transmute
             menuOutput.AddColoredLine(replKeyMsg, ConsoleColor.Yellow)
             gLog(replKeyMsg)
 
-            sourceKeys.Remove(baseKey.Name)
+            matched.Add(baseKey.Name)
 
         Next
 
         For Each key In sourceKeys.Values
+
+            If matched.Contains(key.Name) Then Continue For
 
             Dim errMsg = $"Replacement target not found: {key.Name} not found in {baseSection.Name}"
             menuOutput.AddWarning(errMsg)
@@ -800,8 +817,10 @@ Public Module Transmute
     End Sub
 
     ''' <summary>
-    ''' Removes individual keys from the <c> <paramref name="baseSection"/> </c>, obeying the 
+    ''' Removes individual keys from the <c> <paramref name="baseSection"/> </c>, obeying the
     ''' current <c> TransmuteRemoveMode </c> and <c> TransmuteRemoveKeyMode </c> settings. <br />
+    ''' Every base key matching a removal criterion is removed, so duplicate key names
+    ''' (ByName) or duplicate KeyType/Value pairs (ByValue) in the base section are all removed
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
@@ -827,13 +846,14 @@ Public Module Transmute
         For Each key In sourceSection.Keys : sourceData.Add(If(isByName, key.Name, $"{key.KeyType}={key.Value}")) : Next
 
         Dim toRemove As New List(Of iniKey2)
+        Dim matched As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
         For Each baseKey In baseSection.Keys
 
             Dim matchStr = If(isByName, baseKey.Name, $"{baseKey.KeyType}={baseKey.Value}")
             If Not sourceData.Contains(matchStr) Then Continue For
             toRemove.Add(baseKey)
-            sourceData.Remove(matchStr)
+            matched.Add(matchStr)
 
         Next
 
@@ -847,6 +867,8 @@ Public Module Transmute
         Next
 
         For Each key In sourceData
+
+            If matched.Contains(key) Then Continue For
 
             Dim err = $"Removal target not found: {key} not found in {baseSection.Name}"
             menuOutput.AddColoredLine(err, ConsoleColor.Red)
@@ -912,20 +934,20 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="sectionReplacementFile">
-    ''' The <c> iniFile2 </c> containing the set of sections to replace entire sections of an
-    ''' exactly matching (case sensitive) name in the <c> <paramref name="baseFile"/> </c> 
+    ''' The <c> iniFile2 </c> containing the set of sections to replace entire sections of a
+    ''' matching (case-insensitive) name in the <c> <paramref name="baseFile"/> </c>
     ''' to create the flavor <br />
     ''' This will not preserve non-overlapping content from the base key <br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="keyReplacementFile">
     ''' The <c> iniFile2 </c> containing the set of individual keys to replace within a matching
     ''' section within <c> <paramref name="baseFile"/> </c> to create the flavor <br />
     ''' Keys in this file will only replace keys in the base file if both their Section and Key
-    ''' names match exactly (case sensitive) <br />
+    ''' names match (case-insensitive) <br />
     ''' Optional, Default: <c> Nothing </c>
-    ''' 
+    '''
     ''' </param>
     ''' 
     ''' <param name="isWinapp">

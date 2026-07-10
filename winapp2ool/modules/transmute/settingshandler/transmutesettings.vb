@@ -39,8 +39,8 @@ Public Module transmuteSettings
     Public Property TransmuteFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "", mustExist:=False)
 
     ''' <summary>
-    ''' Stores the path to which the Transmuted file should be written back to disk
-    ''' (overwrites <c> TransmuteFile1 </c> by default)
+    ''' Stores the path to which the Transmuted file should be written back to disk <br />
+    ''' Default: <c> winapp2-transmuted.ini </c> alongside the base file, which is left untouched
     ''' </summary>
     Public Property TransmuteFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "winapp2-transmuted.ini", "winapp2.ini", mustExist:=False)
 
@@ -60,7 +60,7 @@ Public Module transmuteSettings
     ''' <description>
     ''' Adds sections from the source file to the base file. If a section exists already in the base
     ''' file, the keys from the source section will be added to the base section. Section names
-    ''' must match exactly (case sensitive)
+    ''' are matched case-insensitively
     ''' </description>
     ''' </item>
     '''
@@ -68,7 +68,7 @@ Public Module transmuteSettings
     ''' <c> Replace </c>
     ''' <description>
     ''' Contains two sub modes. Replaces sections or individual keys in the base file with content
-    ''' from the source file. Section names must match exactly (case sensitive)
+    ''' from the source file. Section names are matched case-insensitively
     ''' </description>
     ''' </item>
     '''
