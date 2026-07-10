@@ -135,6 +135,9 @@
     <Compile Include="modules\uwpbuilder\mainmenu\uwpbuildermainmenu.vb" />
     <Compile Include="modules\uwpbuilder\settingshandler\uwpbuildersettings.vb" />
     <Compile Include="modules\uwpbuilder\tool\UWPBuilder.vb" />
+    <Compile Include="modules\entrybuilder\mainmenu\entryBuilderMainMenu.vb" />
+    <Compile Include="modules\entrybuilder\settingshandler\entryBuilderSettings.vb" />
+    <Compile Include="modules\entrybuilder\tool\EntryBuilder.vb" />
     <Compile Include="modules\cc7patcher\mainmenu\cc7patchermainmenu.vb" />
     <Compile Include="modules\cc7patcher\settingshandler\cc7patchersettings.vb" />
     <Compile Include="modules\cc7patcher\tool\CC7Patcher.vb" />
@@ -172,6 +175,8 @@
     <Compile Include="handlers\menus\iniFileChooser\iniFileChooser.vb" />
     <Compile Include="handlers\menus\MenuMaker.vb" />
     <Compile Include="handlers\menus\TerminalCapabilities.vb" />
+    <Compile Include="handlers\webview\WebViewScaffolds.vb" />
+    <Compile Include="handlers\expansion\VariableExpander.vb" />
     <Compile Include="helpers\registry\RegistryHelper.vb" />
     <Compile Include="helpers\settings\SettingsManager.vb" />
     <Compile Include="helpers\updater\updater.vb" />
@@ -232,6 +237,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include=".editorconfig" />
     <None Include="app.config" />
     <None Include="modules\transmute\readme.md" />
     <None Include="My Project\app.manifest">

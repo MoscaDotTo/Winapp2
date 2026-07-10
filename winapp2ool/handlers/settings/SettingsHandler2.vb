@@ -80,6 +80,7 @@ Public Module SettingsHandler2
 
         LoadModule2(NameOf(Diff), GetType(diffsettings))
         LoadModule2(NameOf(UWPBuilder), GetType(uwpbuildersettings))
+        LoadModule2(NameOf(EntryBuilder), GetType(entryBuilderSettings))
         LoadModule2(NameOf(BrowserBuilder), GetType(browserbuildersettings))
         LoadModule2(NameOf(CC7Patcher), GetType(cc7patchersettings))
         LoadModule2(NameOf(CCiniDebug), GetType(ccdebugsettings))
