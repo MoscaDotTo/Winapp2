@@ -136,6 +136,73 @@ Public Module UWPBuilder
         Public SkipUWPFileKeys As Boolean
 
         ''' <summary>
+        ''' Root paths of embedded WebView2 (EBWebView) data folders associated with this app.
+        ''' Each entry is a path template that may contain <c> %Package% </c> or
+        ''' <c> %PackageN% </c> references, expanded per package at generation time.
+        ''' Declaring any path here opts the entry into <c> WebViewScaffold </c> emission;
+        ''' an empty list disables WebView scaffolding entirely for this entry.
+        ''' </summary>
+        Public WebViewPaths As List(Of String)
+
+        ''' <summary>
+        ''' Explicit <c> WebViewScaffold </c> names selected for this entry. When non-empty,
+        ''' this list replaces <see cref="WebViewScaffolds.DefaultScaffolds"/>. Names are matched
+        ''' against the <c> [WebViewScaffold: ...] </c> sections in the shared catalog at
+        ''' <c> Assembler\Scaffolds\webview.ini </c>.
+        ''' <br /><br />
+        '''
+        ''' The sentinel value <c> All </c> (case-insensitive) expands to every scaffold
+        ''' currently in the catalog, including host-risk categories. Any other names
+        ''' listed alongside <c> All </c> are redundant and emit a warning. <c> All </c>
+        ''' is reserved and must not be used as an actual scaffold name in the catalog.
+        ''' </summary>
+        Public WebViewScaffoldNames As List(Of String)
+
+        ''' <summary>
+        ''' <c> WebViewScaffold </c> names to subtract from the active selection (either
+        ''' <see cref="WebViewScaffoldNames"/> when set, or
+        ''' <see cref="WebViewScaffolds.DefaultScaffolds"/> otherwise). Unknown names are ignored.
+        ''' </summary>
+        Public ExcludedWebViewScaffolds As List(Of String)
+
+        ''' <summary>
+        ''' Tracks whether the AppInfo entry declared <c> WebViewScaffolds= </c> at all,
+        ''' separately from whether the resulting list is empty. Distinguishes
+        ''' "key absent → use <see cref="WebViewScaffolds.DefaultScaffolds"/>" from
+        ''' "key present but empty → emit no scaffold FileKeys despite having a
+        ''' <see cref="WebViewPaths"/> declaration."
+        ''' </summary>
+        Public WebViewScaffoldsKeyPresent As Boolean
+
+        ''' <summary>
+        ''' Root paths of embedded QtWebEngine data folders associated with this app. Each
+        ''' entry is a path template that may contain <c> %Package% </c> / <c> %PackageN% </c>
+        ''' references, expanded per package at generation time, then substituted for
+        ''' <c> %QtWebEngineRoot% </c> in QtWebEngine scaffold templates. Declaring any path
+        ''' here opts the entry into <c> QtWebEngineScaffold </c> emission.
+        ''' </summary>
+        Public QtWebEnginePaths As List(Of String)
+
+        ''' <summary>
+        ''' Explicit <c> QtWebEngineScaffold </c> names selected for this entry. When non-empty,
+        ''' this list replaces <see cref="WebViewScaffolds.QtWebEngineDefaultScaffolds"/>. The
+        ''' <c> All </c> sentinel expands to every scaffold in the QtWebEngine catalog.
+        ''' </summary>
+        Public QtWebEngineScaffoldNames As List(Of String)
+
+        ''' <summary>
+        ''' <c> QtWebEngineScaffold </c> names to subtract from the active selection. Unknown
+        ''' names are ignored.
+        ''' </summary>
+        Public ExcludedQtWebEngineScaffolds As List(Of String)
+
+        ''' <summary>
+        ''' Tracks whether the AppInfo entry declared <c> QtWebEngineScaffolds= </c> at all
+        ''' (mirrors <see cref="WebViewScaffoldsKeyPresent"/> for the QtWebEngine family).
+        ''' </summary>
+        Public QtWebEngineScaffoldsKeyPresent As Boolean
+
+        ''' <summary>
         ''' Creates a new <c> UWPAppInfo </c> for an entry with the given name,
         ''' initialising all list fields to empty collections
         ''' </summary>
@@ -156,6 +223,14 @@ Public Module UWPBuilder
             ExcludeKeys = New List(Of String)
             ShouldSkip = False
             SkipUWPFileKeys = False
+            WebViewPaths = New List(Of String)
+            WebViewScaffoldNames = New List(Of String)
+            ExcludedWebViewScaffolds = New List(Of String)
+            WebViewScaffoldsKeyPresent = False
+            QtWebEnginePaths = New List(Of String)
+            QtWebEngineScaffoldNames = New List(Of String)
+            ExcludedQtWebEngineScaffolds = New List(Of String)
+            QtWebEngineScaffoldsKeyPresent = False
 
         End Sub
 
@@ -167,7 +242,7 @@ Public Module UWPBuilder
     Public Sub handleCmdLine()
 
         Dim spec As New CliArgSpec("uwpbuilder")
-        spec.WithFile(1, UWPFile1).WithFile(2, UWPFile2).Parse()
+        spec.WithFile(1, UWPFile1).WithFile(2, UWPFile2).WithFile(3, UWPFile3).WithFile(4, UWPFile4).Parse()
 
         initUWPBuilder()
 
@@ -202,12 +277,19 @@ Public Module UWPBuilder
 
         End If
 
+        ' Shared scaffold catalog paths are configured via UWPFile3 (WebView2, typically
+        ' Assembler\Scaffolds\webview.ini) and UWPFile4 (QtWebEngine, typically
+        ' Assembler\Scaffolds\qtwebengine.ini). Missing/empty catalogs warn and yield zero
+        ' scaffold FileKeys for that family rather than aborting the run.
+        Dim webViewCatalogPath = UWPFile3.Path()
+        Dim qtCatalogPath = UWPFile4.Path()
+
         Dim output As New MenuSection
         output.AddBoxWithText("Building UWP app entries")
 
         Using gLogScope("Building UWP app entries")
 
-            processUWPBuilder(templateIni, appsIni, output)
+            processUWPBuilder(templateIni, appsIni, webViewCatalogPath, qtCatalogPath, output)
 
             output.AddBoxWithText("UWP app entries built successfully")
             gLog("UWP app entries built successfully")
@@ -237,38 +319,66 @@ Public Module UWPBuilder
     ''' The combined AppInfo sections from all per-letter source files
     ''' </param>
     '''
+    ''' <param name="webViewCatalogPath">
+    ''' Absolute path to the shared WebView scaffold catalog (typically
+    ''' <c> Assembler\Scaffolds\webview.ini </c>). Loaded once per run via
+    ''' <see cref="WebViewScaffolds.LoadCatalog"/> and consumed by per-entry
+    ''' WebView scaffolding.
+    ''' </param>
+    '''
+    ''' <param name="qtCatalogPath">
+    ''' Absolute path to the shared QtWebEngine scaffold catalog (typically
+    ''' <c> Assembler\Scaffolds\qtwebengine.ini </c>). Loaded once per run via
+    ''' <see cref="WebViewScaffolds.LoadCatalog"/> with the <c> QtWebEngineScaffold: </c>
+    ''' prefix and consumed by per-entry QtWebEngine scaffolding.
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving progress lines and warnings for display
     ''' </param>
     Private Sub processUWPBuilder(templateIni As iniFile2,
                                    appsIni As iniFile2,
+                                   webViewCatalogPath As String,
+                                   qtCatalogPath As String,
                                    menuOutput As MenuSection)
 
         Using gLogScope("Processing UWP builder files")
 
             Dim scaffoldFileKeys As New List(Of String)
             Dim scaffoldDetectFiles As New List(Of String)
+            Dim webViewCatalog = WebViewScaffolds.LoadCatalog(webViewCatalogPath, menuOutput)
+            Dim qtCatalog = WebViewScaffolds.LoadCatalog(qtCatalogPath, menuOutput, "QtWebEngineScaffold:")
             Dim apps As New List(Of UWPAppInfo)
 
             For Each section In templateIni
 
-                If section.Name.StartsWith("EntryScaffold:", StringComparison.InvariantCulture) Then
+                Select Case True
 
-                    parseScaffold(section, scaffoldFileKeys, scaffoldDetectFiles, menuOutput)
+                    Case section.Name.StartsWith("EntryScaffold:", StringComparison.InvariantCulture)
 
-                Else
+                        parseScaffold(section, scaffoldFileKeys, scaffoldDetectFiles, menuOutput)
 
-                    Dim logMsg = $"Unexpected section in template file: [{section.Name}]"
-                    gLog(logMsg)
-                    menuOutput.AddWarning(logMsg)
+                    Case Else
 
-                End If
+                        Dim logMsg = $"Unexpected section in template file: [{section.Name}]"
+                        gLog(logMsg)
+                        menuOutput.AddWarning(logMsg)
+
+                End Select
 
             Next
 
             Dim scaffoldMsg = $"Loaded {scaffoldDetectFiles.Count} scaffold DetectFile template(s), {scaffoldFileKeys.Count} scaffold FileKey template(s)"
             menuOutput.AddColoredLine(scaffoldMsg, ConsoleColor.Yellow)
             gLog(scaffoldMsg)
+
+            Dim webViewMsg = $"Loaded {webViewCatalog.Count} WebView scaffold(s) from {webViewCatalogPath}"
+            menuOutput.AddColoredLine(webViewMsg, ConsoleColor.Yellow)
+            gLog(webViewMsg)
+
+            Dim qtMsg = $"Loaded {qtCatalog.Count} QtWebEngine scaffold(s) from {qtCatalogPath}"
+            menuOutput.AddColoredLine(qtMsg, ConsoleColor.Yellow)
+            gLog(qtMsg)
 
             For Each section In appsIni
 
@@ -285,7 +395,7 @@ Public Module UWPBuilder
 
             For Each app In apps
 
-                Dim entrySection = generateUWPEntry(app, scaffoldFileKeys, scaffoldDetectFiles, menuOutput)
+                Dim entrySection = generateUWPEntry(app, scaffoldFileKeys, scaffoldDetectFiles, webViewCatalog, qtCatalog, menuOutput)
                 outputFile.AddSection(entrySection)
 
             Next
@@ -293,6 +403,8 @@ Public Module UWPBuilder
             Dim generatedMsg = $"Generated {outputFile.Count} UWP entries"
             menuOutput.AddColoredLine(generatedMsg, ConsoleColor.Yellow)
             gLog($" {generatedMsg}")
+
+            outputFile = remotedebug(outputFile, True)
 
             Dim sb As New StringBuilder()
             sb.AppendLine($"; Version {DateTime.Now.ToString("yyMMdd")}")
@@ -366,6 +478,28 @@ Public Module UWPBuilder
     End Sub
 
     ''' <summary>
+    ''' Splits a comma-separated value into a trimmed, non-empty list of tokens.
+    ''' Used by the WebView scaffold AppInfo keys to parse <c> WebViewScaffolds= </c>
+    ''' and <c> ExcludeWebViewScaffolds= </c>. An empty input yields an empty list.
+    ''' </summary>
+    '''
+    ''' <param name="value">
+    ''' The raw key value to split on commas
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' Each non-empty, trimmed token from <paramref name="value"/>, in original order
+    ''' </returns>
+    Private Function splitCsv(value As String) As List(Of String)
+
+        Return value.Split(","c) _
+                    .Select(Function(s) s.Trim()) _
+                    .Where(Function(s) s.Length > 0) _
+                    .ToList()
+
+    End Function
+
+    ''' <summary>
     ''' Parses an AppInfo section and returns a populated <c> UWPAppInfo </c> structure.
     ''' Issues warnings and sets <c> ShouldSkip </c> for entries that are structurally
     ''' invalid (missing package, missing category, or conflicting categories).
@@ -412,6 +546,24 @@ Public Module UWPBuilder
 
                 Case "SKIPUWPFILEKEYS" : app.SkipUWPFileKeys = True
 
+                Case "WEBVIEWPATH", "WEBVIEWROOT" : app.WebViewPaths.Add(key.Value)
+
+                Case "WEBVIEWSCAFFOLDS"
+
+                    app.WebViewScaffoldNames = splitCsv(key.Value)
+                    app.WebViewScaffoldsKeyPresent = True
+
+                Case "EXCLUDEWEBVIEWSCAFFOLDS" : app.ExcludedWebViewScaffolds = splitCsv(key.Value)
+
+                Case "QTWEBENGINEPATH", "QTWEBENGINEROOT" : app.QtWebEnginePaths.Add(key.Value)
+
+                Case "QTWEBENGINESCAFFOLDS"
+
+                    app.QtWebEngineScaffoldNames = splitCsv(key.Value)
+                    app.QtWebEngineScaffoldsKeyPresent = True
+
+                Case "EXCLUDEQTWEBENGINESCAFFOLDS" : app.ExcludedQtWebEngineScaffolds = splitCsv(key.Value)
+
                 Case Else
 
                     Dim errMsg = $"Unexpected key type in [{app.Name}]: {key.Name}"
@@ -448,6 +600,92 @@ Public Module UWPBuilder
     End Function
 
     ''' <summary>
+    ''' Selects the set of <c> WebViewScaffold </c> names that should be emitted for the given app.
+    ''' Resolution order:
+    ''' <list type="bullet">
+    ''' <item>
+    ''' If the AppInfo declared <c> WebViewScaffolds= </c> (regardless of value), use that
+    ''' explicit list — a present-but-empty value yields no scaffolds, distinct from the
+    ''' "key absent → use defaults" case.
+    ''' </item>
+    ''' <item>
+    ''' If the explicit list contains the sentinel <c> All </c> (case-insensitive), it is
+    ''' replaced with every scaffold name in <paramref name="available"/>. Any other names
+    ''' listed alongside <c> All </c> are redundant and emit a warning.
+    ''' </item>
+    ''' <item>
+    ''' Otherwise, use <see cref="WebViewScaffolds.DefaultScaffolds"/>.
+    ''' </item>
+    ''' </list>
+    ''' Any names in <see cref="UWPAppInfo.ExcludedWebViewScaffolds"/> are then subtracted, and
+    ''' unknown names (not present in <paramref name="available"/>) are dropped with a warning.
+    ''' Combining <c> WebViewScaffolds= </c> and <c> ExcludeWebViewScaffolds= </c> warns when
+    ''' the explicit list is anything other than <c> All </c>, since exclusions usually pair
+    ''' with the implicit defaults. <c> All </c> + exclusions is the natural idiom for
+    ''' "everything except these" and does not warn.
+    ''' </summary>
+    '''
+    ''' <param name="app">
+    ''' The parsed app definition whose scaffold selection is being resolved
+    ''' </param>
+    '''
+    ''' <param name="available">
+    ''' The catalog of known scaffolds, keyed by name, loaded from
+    ''' <c> Assembler\Scaffolds\webview.ini </c>
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> receiving warnings for display
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The ordered list of scaffold names to emit for this app, with unknowns removed
+    ''' </returns>
+    Private Function resolveWebViewScaffolds(app As UWPAppInfo,
+                                              available As Dictionary(Of String, List(Of String)),
+                                              menuOutput As MenuSection) As List(Of String)
+
+        Return WebViewScaffolds.ResolveScaffolds(app.WebViewScaffoldNames, app.WebViewScaffoldsKeyPresent,
+                                                 app.ExcludedWebViewScaffolds, available,
+                                                 WebViewScaffolds.DefaultScaffolds, "WebView", app.Name, menuOutput)
+
+    End Function
+
+    ''' <summary>
+    ''' Selects the set of <c> QtWebEngineScaffold </c> names to emit for the given app,
+    ''' following the same resolution grammar as <see cref="resolveWebViewScaffolds"/> but
+    ''' driven by the app's <c> QtWebEngineScaffolds= </c> / <c> ExcludeQtWebEngineScaffolds= </c>
+    ''' keys and the QtWebEngine default set. Delegates to
+    ''' <see cref="WebViewScaffolds.ResolveScaffolds"/>.
+    ''' </summary>
+    '''
+    ''' <param name="app">
+    ''' The parsed app definition whose QtWebEngine scaffold selection is being resolved
+    ''' </param>
+    '''
+    ''' <param name="available">
+    ''' The catalog of known QtWebEngine scaffolds, keyed by name, loaded from
+    ''' <c> Assembler\Scaffolds\qtwebengine.ini </c>
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> receiving warnings for display
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The ordered list of QtWebEngine scaffold names to emit for this app, with unknowns removed
+    ''' </returns>
+    Private Function resolveQtWebEngineScaffolds(app As UWPAppInfo,
+                                                 available As Dictionary(Of String, List(Of String)),
+                                                 menuOutput As MenuSection) As List(Of String)
+
+        Return WebViewScaffolds.ResolveScaffolds(app.QtWebEngineScaffoldNames, app.QtWebEngineScaffoldsKeyPresent,
+                                                 app.ExcludedQtWebEngineScaffolds, available,
+                                                 WebViewScaffolds.QtWebEngineDefaultScaffolds, "QtWebEngine", app.Name, menuOutput)
+
+    End Function
+
+    ''' <summary>
     ''' Generates a winapp2.ini entry section for the given <c> UWPAppInfo </c> by applying
     ''' the scaffold template keys and app-specific keys, expanding any
     ''' <c> %Package% </c> / <c> %PackageN% </c> variables along the way.
@@ -468,6 +706,18 @@ Public Module UWPBuilder
     ''' to produce the entry's detection paths
     ''' </param>
     '''
+    ''' <param name="webViewScaffolds">
+    ''' The shared <c> WebViewScaffold </c> catalog. Apps declaring <c> WebViewPath= </c>
+    ''' draw their additional FileKeys from here, with <c> %WebViewRoot% </c> substituted
+    ''' per declared path.
+    ''' </param>
+    '''
+    ''' <param name="qtWebEngineScaffolds">
+    ''' The shared <c> QtWebEngineScaffold </c> catalog. Apps declaring <c> QtWebEnginePath= </c>
+    ''' draw their additional FileKeys from here, with <c> %QtWebEngineRoot% </c> substituted
+    ''' per declared path.
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving progress lines for display
     ''' </param>
@@ -478,6 +728,8 @@ Public Module UWPBuilder
     Private Function generateUWPEntry(app As UWPAppInfo,
                                       scaffoldFileKeys As List(Of String),
                                       scaffoldDetectFiles As List(Of String),
+                                      webViewScaffolds As Dictionary(Of String, List(Of String)),
+                                      qtWebEngineScaffolds As Dictionary(Of String, List(Of String)),
                                       menuOutput As MenuSection) As iniSection2
 
         Dim generatingMsg = $"Generating entry: {app.Name}"
@@ -569,6 +821,64 @@ Public Module UWPBuilder
             Next
 
         Next
+
+        ' 5b. WebView scaffold FileKeys: one expansion per declared WebViewPath, per selected
+        '     scaffold, per FileKeyBase= template. Templates contain %WebViewRoot% which is
+        '     substituted with each fully-package-expanded WebView root path.
+        If app.WebViewPaths.Count > 0 Then
+
+            Dim selectedScaffolds = resolveWebViewScaffolds(app, webViewScaffolds, menuOutput)
+
+            For Each pathTemplate In app.WebViewPaths
+
+                For Each expandedRoot In expandPackageKey(pathTemplate, app.Packages)
+
+                    For Each scaffoldName In selectedScaffolds
+
+                        For Each scaffoldTemplate In webViewScaffolds(scaffoldName)
+
+                            Dim emitted = scaffoldTemplate.Replace("%WebViewRoot%", expandedRoot)
+                            section.AddKey(New iniKey2($"FileKey{fileKeyNum}={emitted}"))
+                            fileKeyNum += 1
+
+                        Next
+
+                    Next
+
+                Next
+
+            Next
+
+        End If
+
+        ' 5c. QtWebEngine scaffold FileKeys: same shape as the WebView block, driven by the
+        '     entry's QtWebEnginePath= declarations and the QtWebEngine catalog. Templates
+        '     contain %QtWebEngineRoot% which is substituted with each package-expanded root.
+        If app.QtWebEnginePaths.Count > 0 Then
+
+            Dim selectedQtScaffolds = resolveQtWebEngineScaffolds(app, qtWebEngineScaffolds, menuOutput)
+
+            For Each pathTemplate In app.QtWebEnginePaths
+
+                For Each expandedRoot In expandPackageKey(pathTemplate, app.Packages)
+
+                    For Each scaffoldName In selectedQtScaffolds
+
+                        For Each scaffoldTemplate In qtWebEngineScaffolds(scaffoldName)
+
+                            Dim emitted = scaffoldTemplate.Replace("%QtWebEngineRoot%", expandedRoot)
+                            section.AddKey(New iniKey2($"FileKey{fileKeyNum}={emitted}"))
+                            fileKeyNum += 1
+
+                        Next
+
+                    Next
+
+                Next
+
+            Next
+
+        End If
 
         ' 6. RegKeys passed through verbatim, renumbered from 1
         Dim regKeyNum As Integer = 1

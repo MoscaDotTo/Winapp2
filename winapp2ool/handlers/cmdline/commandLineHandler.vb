@@ -70,7 +70,7 @@ Public Module commandLineHandler
         addModule("7", "combine", 2, AddressOf Combine.handleCmdLine)
         addModule("8", "download", 3, AddressOf Downloader.handleCmdLine)
         addModule("9", "flavorize", 8, AddressOf Flavorizer.handleCmdLine)
-        addModule("10", "uwpbuilder", 2, AddressOf UWPBuilder.handleCmdLine)
+        addModule("10", "uwpbuilder", 4, AddressOf UWPBuilder.handleCmdLine)
 
         Return configs
 

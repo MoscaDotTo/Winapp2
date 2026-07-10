@@ -44,6 +44,26 @@ Option Strict On
 ''' </description>
 ''' </item>
 '''
+''' <item>
+''' <b><c> UWPFile3 </c></b>
+''' <description>
+''' Shared WebView scaffold catalog (typically <c> Assembler\Scaffolds\webview.ini </c>).
+''' Source for <c> [WebViewScaffold: ...] </c> sections consumed when an AppInfo entry
+''' declares <c> WebViewPath= </c>. If the file is missing or empty, generation continues
+''' with zero WebView FileKeys emitted and a warning logged.
+''' </description>
+''' </item>
+'''
+''' <item>
+''' <b><c> UWPFile4 </c></b>
+''' <description>
+''' Shared QtWebEngine scaffold catalog (typically <c> Assembler\Scaffolds\qtwebengine.ini </c>).
+''' Source for <c> [QtWebEngineScaffold: ...] </c> sections consumed when an AppInfo entry
+''' declares <c> QtWebEnginePath= </c>. If the file is missing or empty, generation continues
+''' with zero QtWebEngine FileKeys emitted and a warning logged.
+''' </description>
+''' </item>
+'''
 ''' </list>
 '''
 ''' </summary>
@@ -63,6 +83,18 @@ Public Module uwpbuildersettings
     Public Property UWPFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "uwp.ini", "uwp.ini", mustExist:=False)
 
     ''' <summary>
+    ''' The shared WebView scaffold catalog file consumed by both UWPBuilder and
+    ''' EntryBuilder. Typically <c> Assembler\Scaffolds\webview.ini </c>.
+    ''' </summary>
+    Public Property UWPFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "webview.ini", "webview.ini", mustExist:=False)
+
+    ''' <summary>
+    ''' The shared QtWebEngine scaffold catalog file consumed by both UWPBuilder and
+    ''' EntryBuilder. Typically <c> Assembler\Scaffolds\qtwebengine.ini </c>.
+    ''' </summary>
+    Public Property UWPFile4 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
+
+    ''' <summary>
     ''' Indicates that the module settings have been modified from their defaults
     ''' </summary>
     Public Property UWPBuilderModuleSettingsChanged As Boolean = False
@@ -74,6 +106,8 @@ Public Module uwpbuildersettings
 
         UWPFile1 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         UWPFile2 = New iniFileChooser(Environment.CurrentDirectory, "uwp.ini", "uwp.ini", mustExist:=False)
+        UWPFile3 = New iniFileChooser(Environment.CurrentDirectory, "webview.ini", "webview.ini", mustExist:=False)
+        UWPFile4 = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
         UWPBuilderModuleSettingsChanged = False
         SaveModule2(NameOf(UWPBuilder), GetType(uwpbuildersettings))
 
