@@ -260,3 +260,11 @@ Assembler/winapp2ool.exe
 /winapp2ool/GLOBAL_STATE.md
 /winapp2ool/handlers/ini/OBJECT_MODEL_DESIGN.md
 /winapp2ool/XMLDOC.md
+/winapp2ool/.editorconfig
+/winapp2ool/bin/Debug/browsers.ini
+/winapp2ool/bin/Debug/entrybuilder.before.ini
+/winapp2ool/bin/Debug/entrybuilder.ini
+/winapp2ool/bin/Debug/old-A.ini
+/winapp2ool/bin/Debug/uwp.ini
+/winapp2ool/bin/Debug/winapp2-debugged.ini
+/winapp2ool/bin/Debug/winapp2-trimmed.ini
