@@ -44,11 +44,7 @@ Public Module launcher
 
         Try
 
-            If Not SuppressOutput Then
-                Console.WindowWidth = 130
-                Console.WindowHeight = 35
-                tryExpandScrollback()
-            End If
+            tryResizeWindow()
 
             ' don't bother checking checking the connection if we know we want to be offline
             If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase)) Then
@@ -82,6 +78,42 @@ Public Module launcher
 
             exc(ex)
 
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Sizes the console window for interactive use, then enlarges its scrollback buffer
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' When stdout is redirected (piped output, the build pipeline's silent mode, etc.) there is
+    ''' no resizable console window, so <c> Console.WindowWidth </c> would throw <c> IOException </c>.
+    ''' We detect that case via <c> Console.IsOutputRedirected </c> and skip resizing entirely.
+    ''' This runs before the command line (and therefore <c> SuppressOutput </c>) is parsed, so we
+    ''' also pre-scan the raw args for <c> -s </c> mirroring the <c> -offline </c> pre-scan in
+    ''' <see cref="main"/> to avoid briefly resizing a window that silent mode is about to abandon.
+    ''' The target width/height are clamped to the host's largest permitted window so a small terminal
+    ''' can't trip <c> ArgumentOutOfRangeException </c>, and the assignment is wrapped defensively for
+    ''' hosts that report a window but still reject sizing
+    ''' </remarks>
+    Private Sub tryResizeWindow()
+
+        If Console.IsOutputRedirected Then Return
+        If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-s", StringComparison.OrdinalIgnoreCase)) Then Return
+
+        Try
+
+            Console.WindowWidth = Math.Min(130, Console.LargestWindowWidth)
+            Console.WindowHeight = Math.Min(35, Console.LargestWindowHeight)
+            tryExpandScrollback()
+
+        Catch ex As IO.IOException
+            ' Host reports a window but won't accept sizing; nothing to do
+        Catch ex As PlatformNotSupportedException
+            ' Non-Windows or hosted environment without a conhost window
+        Catch ex As ArgumentOutOfRangeException
+            ' Requested size is out of the host's allowed range; not fatal
         End Try
 
     End Sub
