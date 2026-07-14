@@ -283,7 +283,9 @@ Public Module Combine
     End Sub
 
     ''' <summary>
-    ''' Updates the console with the current progress of the combination process while it runs
+    ''' Updates the console with the current progress of the combination process while it runs. <br />
+    ''' Does nothing in silent mode or when output is redirected. cursor positioning requires a real
+    ''' console buffer and throws <c> IOException </c> against a pipe or file
     ''' </summary>
     '''
     ''' <param name="processedCount">
@@ -295,6 +297,8 @@ Public Module Combine
     ''' </param>
     Private Sub updateProgress(processedCount As Integer,
                                totalCount As Integer)
+
+        If SuppressOutput OrElse Console.IsOutputRedirected Then Return
 
         Console.SetCursorPosition(0, 0)
         cwl($"Combining files... ({processedCount}/{totalCount})")
