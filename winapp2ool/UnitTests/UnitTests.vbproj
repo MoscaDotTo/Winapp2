@@ -84,6 +84,7 @@
     <Import Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TransmuteTests.vb" />
     <Compile Include="UnitTools.vb" />
     <Compile Include="VariableExpanderTests.vb" />
     <Compile Include="WinappDebugDataTests.vb" />

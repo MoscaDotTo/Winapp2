@@ -164,6 +164,17 @@ Public Module transmuteSettings
     Public Property UseWinapp2Syntax As Boolean = True
 
     ''' <summary>
+    ''' Indicates that source file sections named <c> [*] </c> should be treated as global
+    ''' operations applying to every section in the base file, and that sections whose names
+    ''' begin with <c> *Map: </c> should be treated as key mapping rules during
+    ''' Replace ByKey operations <br />
+    ''' When <c> False </c>, these sentinel names fall through to normal section name matching,
+    ''' for generic ini files where they could be real section names <br />
+    ''' Default: <c> True </c>
+    ''' </summary>
+    Public Property RecognizeGlobalSections As Boolean = True
+
+    ''' <summary>
     ''' Restores the default state of the module's properties and persists them via <c> SaveModule2 </c>
     ''' </summary>
     Public Sub initDefaultTransmuteSettings()
@@ -176,6 +187,7 @@ Public Module transmuteSettings
         TransmuteRemoveMode = RemoveMode.ByKey
         TransmuteRemoveKeyMode = RemoveKeyMode.ByName
         UseWinapp2Syntax = True
+        RecognizeGlobalSections = True
         TransmuteModuleSettingsChanged = False
         SaveModule2(NameOf(Transmute), GetType(transmuteSettings))
 

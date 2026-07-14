@@ -74,6 +74,8 @@ Public Module transmuteMainMenu
             .AddBlank() _
             .AddDispatchedToggle("Syntax", "saving the output with winapp2.ini syntax", UseWinapp2Syntax,
                 Sub() toggleModuleSetting("Winapp2.ini Syntax", NameOf(Transmute), GetType(transmuteSettings), NameOf(UseWinapp2Syntax), NameOf(TransmuteModuleSettingsChanged))) _
+            .AddDispatchedToggle("Global sections", "treating [*] and [*Map:] source sections as global operations", RecognizeGlobalSections,
+                Sub() toggleModuleSetting("Global Sections", NameOf(Transmute), GetType(transmuteSettings), NameOf(RecognizeGlobalSections), NameOf(TransmuteModuleSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedOption("Change transmute mode", "Cycle through primary transmute modes (Add/Replace/Remove)",
                 Sub() CycleEnumProperty(NameOf(Transmutator), "Transmute Mode", GetType(transmuteSettings), NameOf(Transmute),
@@ -128,7 +130,7 @@ Public Module transmuteMainMenu
     ''' </summary>
     Private Sub adjustTransmuteConsoleHeight()
 
-        If Console.WindowHeight <= 42 Then Console.WindowHeight = 43
+        If Console.WindowHeight <= 43 Then Console.WindowHeight = 44
 
     End Sub
 

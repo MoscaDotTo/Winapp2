@@ -232,6 +232,9 @@ Public Module Transmute
     ''' Winapp2.ini syntax correction <br />
     ''' -dontlint       : do not save output with winapp2.ini formatting
     '''
+    ''' Global section handling <br />
+    ''' -noglobal       : treat [*] and [*Map:] source sections as ordinary section names
+    '''
     ''' Preset source file choices <br />
     '''
     ''' -r              : removed entries.ini  <br />
@@ -253,6 +256,8 @@ Public Module Transmute
         Dim RemoveByName As Boolean = True
         ' Winapp2.ini style linting of output
         Dim isWinapp As Boolean = True
+        ' Global mappings
+        Dim recognizeGlobals As Boolean = True
 
         ' Mode selection must precede spec construction (not boolean toggles)
         For Each arg In cmdargs.ToList()
@@ -276,6 +281,7 @@ Public Module Transmute
             .WithFlag("-bysection", Sub() byKeyMode = Not byKeyMode) _
             .WithFlag("-byvalue", Sub() RemoveByName = Not RemoveByName) _
             .WithFlag("-dontlint", Sub() isWinapp = Not isWinapp) _
+            .WithFlag("-noglobal", Sub() recognizeGlobals = Not recognizeGlobals) _
             .WithFileAlias("-r", TransmuteFile2, "Removed Entries.ini") _
             .WithFileAlias("-c", TransmuteFile2, "custom.ini") _
             .WithFileAlias("-w", TransmuteFile2, "winapp3.ini") _
@@ -289,6 +295,7 @@ Public Module Transmute
         TransmuteRemoveMode = If(byKeyMode, RemoveMode.ByKey, RemoveMode.BySection)
         TransmuteRemoveKeyMode = If(RemoveByName, RemoveKeyMode.ByName, RemoveKeyMode.ByValue)
         UseWinapp2Syntax = isWinapp
+        RecognizeGlobalSections = recognizeGlobals
 
         If TransmuteFile2.Name.Length = 0 Then
 
@@ -486,30 +493,62 @@ Public Module Transmute
 
     End Sub
 
-    ''' <summary> 
-    ''' Steps through the sections in the <c> <paramref name="sourceFile"/> </c> and applies the 
-    ''' transmutation to each. Sections found in the <c> <paramref name="sourceFile"/> </c> not 
+    ''' <summary>
+    ''' Steps through the sections in the <c> <paramref name="sourceFile"/> </c> and applies the
+    ''' transmutation to each. Sections found in the <c> <paramref name="sourceFile"/> </c> not
     ''' found in the <c> <paramref name="baseFile"/> </c> when the transmutator is not <c> Add </c>
-    ''' will be ignored with an error message 
+    ''' will be ignored with an error message <br /> <br />
+    '''
+    ''' When <c> RecognizeGlobalSections </c> is enabled, two sentinel section names are processed
+    ''' before any named sections, so that specific per-section operations can refine the result
+    ''' of global ones: <br />
+    ''' <c> [*Map: label] </c> sections define key mapping rules (Replace ByKey mode only) <br />
+    ''' A <c> [*] </c> section applies its keys to every section of the base file
     ''' </summary>
-    ''' 
-    ''' <param name="baseFile"> 
+    '''
+    ''' <param name="baseFile">
     ''' The <c> iniFile2 </c> whose content is being modified by the transmutation process
     ''' </param>
-    ''' 
-    ''' <param name="sourceFile"> 
+    '''
+    ''' <param name="sourceFile">
     '''  The <c> iniFile2 </c> providing the content modification criteria for <c> <paramref name="baseFile"/> </c>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="menuOutput">
-    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
     Private Sub resolveConflicts(ByRef baseFile As iniFile2,
                                        sourceFile As iniFile2,
                                  ByRef menuOutput As MenuSection)
 
+        Dim globalSection As iniSection2 = Nothing
+        Dim mapSections As New List(Of iniSection2)
+        Dim namedSections As New List(Of iniSection2)
+
         For Each sourceSection In sourceFile
+
+            If RecognizeGlobalSections AndAlso sourceSection.Name = "*" Then
+
+                globalSection = sourceSection
+
+            ElseIf RecognizeGlobalSections AndAlso sourceSection.Name.StartsWith(MapSectionPrefix, StringComparison.OrdinalIgnoreCase) Then
+
+                mapSections.Add(sourceSection)
+
+            Else
+
+                namedSections.Add(sourceSection)
+
+            End If
+
+        Next
+
+        applyKeyMapRules(baseFile, mapSections, menuOutput)
+
+        If globalSection IsNot Nothing Then applyGlobalSection(baseFile, globalSection, menuOutput)
+
+        For Each sourceSection In namedSections
 
             Dim baseFileHasSection = baseFile.Contains(sourceSection.Name)
 
@@ -528,6 +567,132 @@ Public Module Transmute
             processTransmutator(baseFile, sourceSection, baseSection, menuOutput)
 
         Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Applies the keys of a <c> [*] </c> sentinel section to every section in the
+    ''' <c> <paramref name="baseFile"/> </c> under the current transmute mode. <br /> <br />
+    '''
+    ''' Section-level modes are refused with a warning: Remove BySection would empty the file
+    ''' and Replace BySection is incoherent as a global operation. Numbered keys are refused
+    ''' in Add mode because adding them to every section creates instant duplicates. <br /> <br />
+    '''
+    ''' Unlike named-section operations, a global operation expects most sections not to match,
+    ''' so per-section misses are silent: the menu receives one summary line per source key and
+    ''' per-hit detail is written to the log
+    ''' </summary>
+    '''
+    ''' <param name="baseFile">
+    ''' The <c> iniFile2 </c> whose sections will all receive the global operation
+    ''' </param>
+    '''
+    ''' <param name="sourceSection">
+    ''' The <c> [*] </c> section providing the keys to apply globally
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user
+    ''' </param>
+    '''
+    Private Sub applyGlobalSection(ByRef baseFile As iniFile2,
+                                         sourceSection As iniSection2,
+                                   ByRef menuOutput As MenuSection)
+
+        If Transmutator = TransmuteMode.Remove AndAlso TransmuteRemoveMode = RemoveMode.BySection Then
+
+            Dim refuseRemMsg = "[*] cannot be used with Remove BySection (this would remove every section) - skipping"
+            menuOutput.AddWarning(refuseRemMsg)
+            gLog(refuseRemMsg)
+            Return
+
+        End If
+
+        If Transmutator = TransmuteMode.Replace AndAlso TransmuteReplaceMode = ReplaceMode.BySection Then
+
+            Dim refuseReplMsg = "[*] cannot be used with Replace BySection (a global section replacement is incoherent) - skipping"
+            menuOutput.AddWarning(refuseReplMsg)
+            gLog(refuseReplMsg)
+            Return
+
+        End If
+
+        Dim totalSections = baseFile.Count
+
+        Using gLogScope($"Applying global section [*] ({Transmutator}) to {totalSections} sections")
+
+            For Each sourceKey In sourceSection.Keys
+
+                If Transmutator = TransmuteMode.Add AndAlso Not sourceKey.Name.Equals(sourceKey.KeyType, StringComparison.OrdinalIgnoreCase) Then
+
+                    Dim refuseKeyMsg = $"[*] Refusing to add numbered key {sourceKey.Name} to every section - global adds must be unnumbered"
+                    menuOutput.AddWarning(refuseKeyMsg)
+                    gLog(refuseKeyMsg)
+                    Continue For
+
+                End If
+
+                Dim singleKeySource As New iniSection2(sourceSection.Name)
+                singleKeySource.AddKey(sourceKey)
+
+                Dim sectionsHit = 0
+
+                For Each baseSection In baseFile
+
+                    Dim hits = 0
+
+                    Select Case Transmutator
+
+                        Case TransmuteMode.Add
+
+                            hits = addKeysToBase(baseSection, singleKeySource, menuOutput, quiet:=True)
+
+                        Case TransmuteMode.Replace
+
+                            hits = replaceKeysInBase(baseSection, singleKeySource, menuOutput, quiet:=True)
+
+                        Case TransmuteMode.Remove
+
+                            hits = remKeys(baseSection, singleKeySource, menuOutput, quiet:=True)
+
+                    End Select
+
+                    If hits = 0 Then Continue For
+
+                    sectionsHit += 1
+                    gLog($"{baseSection.Name}: {sourceKey}{If(hits > 1, $" (x{hits})", "")}")
+
+                Next
+
+                Dim summary As String
+                Dim summaryColor As ConsoleColor
+
+                Select Case Transmutator
+
+                    Case TransmuteMode.Add
+
+                        summary = $"+[*] Added {sourceKey} to {sectionsHit} of {totalSections} sections"
+                        summaryColor = ConsoleColor.Green
+
+                    Case TransmuteMode.Replace
+
+                        summary = $"*[*] Replaced {sourceKey.Name} in {sectionsHit} of {totalSections} sections"
+                        summaryColor = ConsoleColor.Yellow
+
+                    Case Else
+
+                        Dim keyDesc = If(TransmuteRemoveKeyMode = RemoveKeyMode.ByName, sourceKey.Name, $"{sourceKey.KeyType}={sourceKey.Value}")
+                        summary = $"-[*] Removed {keyDesc} from {sectionsHit} of {totalSections} sections"
+                        summaryColor = ConsoleColor.Red
+
+                End Select
+
+                menuOutput.AddColoredLine(summary, summaryColor)
+                gLog(summary)
+
+            Next
+
+        End Using
 
     End Sub
 
@@ -640,20 +805,39 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="menuOutput">
-    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
-    Private Sub addKeysToBase(baseSection As iniSection2,
-                                    sourceSection As iniSection2,
-                              ByRef menuOutput As MenuSection)
+    ''' <param name="quiet">
+    ''' When <c> True </c>, suppresses all menu and log output, leaving reporting to the caller.
+    ''' Used by global operations, which aggregate per-section results into summary lines <br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The number of keys added to <c> <paramref name="baseSection"/> </c>
+    ''' </returns>
+    Private Function addKeysToBase(baseSection As iniSection2,
+                                         sourceSection As iniSection2,
+                                   ByRef menuOutput As MenuSection,
+                                Optional quiet As Boolean = False) As Integer
 
-        Dim addKeysMsg = $"Adding keys to {baseSection.Name}"
-        menuOutput.AddColoredLine(addKeysMsg, ConsoleColor.Cyan)
-        gLog(addKeysMsg)
+        If Not quiet Then
+
+            Dim addKeysMsg = $"Adding keys to {baseSection.Name}"
+            menuOutput.AddColoredLine(addKeysMsg, ConsoleColor.Cyan)
+            gLog(addKeysMsg)
+
+        End If
+
+        Dim hits = 0
 
         For Each sourceKey In sourceSection.Keys
 
             baseSection.AddKey(New iniKey2(sourceKey.ToString()))
+            hits += 1
+
+            If quiet Then Continue For
 
             Dim addedKeyMsg = $"  += Added key: {sourceKey.Name}={sourceKey.Value}"
             menuOutput.AddColoredLine(addedKeyMsg, ConsoleColor.Green)
@@ -661,7 +845,9 @@ Public Module Transmute
 
         Next
 
-    End Sub
+        Return hits
+
+    End Function
 
     ''' <summary>
     ''' Handles the <c> Replace Transmutator </c>, replacing sections or keys based on the 
@@ -730,32 +916,48 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="menuOutput">
-    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
-    Private Sub replaceKeysInBase(baseSection As iniSection2,
-                                  sourceSection As iniSection2,
-                            ByRef menuOutput As MenuSection)
+    ''' <param name="quiet">
+    ''' When <c> True </c>, suppresses all menu and log output, including the
+    ''' "replacement target not found" warnings, leaving reporting to the caller.
+    ''' Used by global operations, which expect most sections not to match <br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The number of keys in <c> <paramref name="baseSection"/> </c> whose values were replaced
+    ''' </returns>
+    Private Function replaceKeysInBase(baseSection As iniSection2,
+                                       sourceSection As iniSection2,
+                                 ByRef menuOutput As MenuSection,
+                              Optional quiet As Boolean = False) As Integer
 
         Dim sourceKeys As New Dictionary(Of String, iniKey2)(StringComparer.OrdinalIgnoreCase)
 
         For Each sourceKey In sourceSection.Keys : sourceKeys(sourceKey.Name) = sourceKey : Next
 
         Dim matched As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim hits = 0
 
         For Each baseKey In baseSection.Keys
 
             If Not sourceKeys.ContainsKey(baseKey.Name) Then Continue For
 
             baseKey.Value = sourceKeys(baseKey.Name).Value
+            hits += 1
+            matched.Add(baseKey.Name)
+
+            If quiet Then Continue For
 
             Dim replKeyMsg = $"  * Replaced key: {baseKey.Name}"
             menuOutput.AddColoredLine(replKeyMsg, ConsoleColor.Yellow)
             gLog(replKeyMsg)
 
-            matched.Add(baseKey.Name)
-
         Next
+
+        If quiet Then Return hits
 
         For Each key In sourceKeys.Values
 
@@ -767,7 +969,9 @@ Public Module Transmute
 
         Next
 
-    End Sub
+        Return hits
+
+    End Function
 
     ''' <summary>
     ''' Handles the <c> Remove Transmutator </c>, removing sections or keys based on the 
@@ -833,12 +1037,23 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="menuOutput">
-    ''' The <c> MenuSection </c> containing output to be displayed to the user 
+    ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
-    Private Sub remKeys(baseSection As iniSection2,
-                              sourceSection As iniSection2,
-                        ByRef menuOutput As MenuSection)
+    ''' <param name="quiet">
+    ''' When <c> True </c>, suppresses all menu and log output, including the
+    ''' "removal target not found" warnings, leaving reporting to the caller.
+    ''' Used by global operations, which expect most sections not to match <br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The number of keys removed from <c> <paramref name="baseSection"/> </c>
+    ''' </returns>
+    Private Function remKeys(baseSection As iniSection2,
+                                   sourceSection As iniSection2,
+                             ByRef menuOutput As MenuSection,
+                          Optional quiet As Boolean = False) As Integer
 
         Dim sourceData As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
         Dim isByName = TransmuteRemoveKeyMode = RemoveKeyMode.ByName
@@ -860,11 +1075,16 @@ Public Module Transmute
         For Each key In toRemove
 
             baseSection.Keys.Remove(key)
+
+            If quiet Then Continue For
+
             Dim remKeyMsg = $"  -= Removed key by {If(isByName, "name", "value")}: {key.ToString()}"
             menuOutput.AddColoredLine(remKeyMsg, ConsoleColor.Red)
             gLog(remKeyMsg)
 
         Next
+
+        If quiet Then Return toRemove.Count
 
         For Each key In sourceData
 
@@ -876,7 +1096,9 @@ Public Module Transmute
 
         Next
 
-    End Sub
+        Return toRemove.Count
+
+    End Function
 
     ''' <summary>
     ''' Applies a 'flavor' to an <c> iniFile2 </c>. A flavor is like a compatibility layer that

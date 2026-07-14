@@ -109,6 +109,56 @@ Public Class iniKeyCollection
     End Sub
 
     ''' <summary>
+    ''' Replaces <paramref name="oldKey"/> with <paramref name="newKey"/> at the same ordinal
+    ''' position, preserving the collection's key order. The name and type indices are rebuilt,
+    ''' so the replacement key may have a different Name or KeyType than the key it replaces.
+    ''' Does nothing if <paramref name="oldKey"/> is not present in the collection
+    ''' </summary>
+    '''
+    ''' <param name="oldKey">
+    ''' The key currently in the collection to be replaced (matched by reference)
+    ''' </param>
+    '''
+    ''' <param name="newKey">
+    ''' The key to insert in its place
+    ''' </param>
+    Public Sub Replace(oldKey As iniKey2, newKey As iniKey2)
+
+        If oldKey Is Nothing Then argIsNull(NameOf(oldKey)) : Return
+        If newKey Is Nothing Then argIsNull(NameOf(newKey)) : Return
+
+        Dim index = _ordered.IndexOf(oldKey)
+        If index = -1 Then Return
+
+        _ordered(index) = newKey
+        RebuildIndices()
+
+    End Sub
+
+    ''' <summary>
+    ''' Rebuilds the name and type lookup indices from the ordered key list
+    ''' </summary>
+    Private Sub RebuildIndices()
+
+        _byName.Clear()
+        _byType.Clear()
+
+        For Each key In _ordered
+
+            If Not _byName.ContainsKey(key.Name) Then _byName.Add(key.Name, key)
+
+            Dim bucket As List(Of iniKey2) = Nothing
+            If Not _byType.TryGetValue(key.KeyType, bucket) Then
+                bucket = New List(Of iniKey2)
+                _byType.Add(key.KeyType, bucket)
+            End If
+            bucket.Add(key)
+
+        Next
+
+    End Sub
+
+    ''' <summary>
     ''' Returns a copy of the ordered key list
     ''' </summary>
     Public Function ToList() As List(Of iniKey2)

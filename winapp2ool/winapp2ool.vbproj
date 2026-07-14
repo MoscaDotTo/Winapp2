@@ -197,6 +197,7 @@
     <Compile Include="modules\transmute\mainmenu\transmutemainmenu.vb" />
     <Compile Include="modules\transmute\settingshandler\transmutesettings.vb" />
     <Compile Include="modules\transmute\tool\Transmute.vb" />
+    <Compile Include="modules\transmute\tool\TransmuteKeyMap.vb" />
     <Compile Include="modules\browserbuilder\tool\BrowserBuilder.vb" />
     <Compile Include="modules\minefield\tool\Minefield.vb" />
     <Compile Include="modules\maintool\settingsmenu\globalsettingsmenu.vb" />
