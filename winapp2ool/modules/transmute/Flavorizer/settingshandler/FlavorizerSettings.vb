@@ -56,7 +56,7 @@ Public Module FlavorizerSettings
 
     ''' <summary>
     ''' Key name removal file - contains keys to be removed by name matching. <br />
-    ''' Keys must be within sections that match exactly (case sensitive). <br />
+    ''' Section and key name matching is case-insensitive. <br />
     ''' The values in this file are ignored - only key names matter. <br />
     ''' Applied in the second stage of flavorization.
     ''' </summary>
@@ -73,7 +73,7 @@ Public Module FlavorizerSettings
     ''' <summary>
     ''' Section replacement file - contains complete sections that will replace <br />
     ''' sections of the same name in the base file. <br />
-    ''' Section names must match exactly (case sensitive). <br />
+    ''' Section name matching is case-insensitive. <br />
     ''' This completely replaces the section content. <br />
     ''' Applied in the fourth stage of flavorization.
     ''' </summary>
@@ -82,7 +82,7 @@ Public Module FlavorizerSettings
     ''' <summary>
     ''' Key replacement file - contains individual keys that will replace <br />
     ''' keys of the same name within matching sections in the base file. <br />
-    ''' Both section names and key names must match exactly (case sensitive). <br />
+    ''' Section and key name matching is case-insensitive. <br />
     ''' Applied in the fifth stage of flavorization.
     ''' </summary>
     Public Property FlavorizerFile7 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "", mustExist:=False)
