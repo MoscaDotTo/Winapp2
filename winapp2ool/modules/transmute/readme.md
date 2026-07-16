@@ -41,7 +41,6 @@ Transmute allows you to modify one ini file (the "base" file) using instructions
     - [Safety First](#safety-first)
     - [Effective Source Files](#effective-source-files)
     - [Mode Selection](#mode-selection)
-    - [Key Removal Strategy](#key-removal-strategy)
 11. [Troubleshooting](#troubleshooting)
 12. [Usage Examples](#usage-examples)
     - [Adding Content](#adding-content)
@@ -142,9 +141,11 @@ None
 - Keys are *not* renumbered; normalize later with WinappDebug if needed (winapp2.ini only)
 - Keys are appended to the end of the matched section; when Syntax is enabled (the default), keys are then regrouped by type on save (see [Output Formatting](#output-formatting))
 
-### Example use cases
+### When to use
 - Maintaining a set of customizations to winapp2.ini while also keeping it up to date 
 - Merging multiple configuration files into one
+- Adding keys to existing entries (eg. a FileKey covering a location the entry misses)
+- Adding entirely new entries which exist only in your configuration
 
 ---
 
@@ -165,15 +166,19 @@ Overwrites existing content in the base file with content from the source file.
 - Sections from the source file which are found in the base file replace entirely the section in the base file as they are written  
 - Sections from the source file not found in the base file are ignored 
 
+##### When to use
+- Providing a substantially revised version of an entry that is easier to rewrite than to patch key by key
+- Maintaining a local version of an entry (eg. one adapted to your installation) while keeping the rest of the file up to date
+
 #### By Key
 - Keys from sections in the source file which are found in the base file provide replacement *values* for keys of the same name in the base file
 - Only the key's Value is replaced — the base file's key name (including its casing) is untouched
 - Sections and keys from the source file not found in the base file are ignored 
 
-### Example use cases
- 
-- Correcting errors in generated entries
-- Supporting local configurations in winapp2.ini while also keeping it up to date 
+##### When to use
+- Correcting specific key values in generated entries without rewriting the entire section
+- Updating a known key to a new value as part of keeping a configuration current
+- For numbered keys whose numbering may shift as entries are updated, it can be more reliable to Remove the old value (ByValue) and Add the new one instead
 
 ---
 
@@ -200,18 +205,26 @@ Removes content from the base file based on matches in the source file.
 - Sections from the source file not found in the base file are ignored 
 - Key values are ignored in this mode 
 
+##### When to use
+- Removing entries which are entirely unsupported in the target context while keeping the rest of the file up to date
+- Pruning incomplete or non-viable generated entries
+
 #### By Key - By Name
 - Keys from sections in the source file which are found in the base file are removed if they have the same name 
 - The values provided for keys in the source file are ignored — matching is by name alone
 - Keys from the source file not found in the base file are ignored
 
+##### When to use
+- Removing unnumbered keys (eg. `Section`, `LangSecRef`) when you know their exact names
+- Removing a numbered key when you know its exact number
+
 #### By Key - By Value
 - Keys from sections in the source file which are found in the base file are removed if they have the same name (ignoring numbers) and value 
 - Keys from the source file not found in the base file are ignored 
 
-### Example use cases
-- Automatically Removing unwanted content from winapp2.ini while also keeping it up to date 
-- Automatically removing generated entries which are non-viable for a purpose 
+##### When to use
+- Removing numbered keys (eg. `FileKey`, `DetectFile`) whose exact numbers may differ between files or change as entries are updated
+- Removing a specific known value without needing to track its current key number
 
 ---
 
@@ -445,12 +458,7 @@ Comments are welcome in your source files for your own reference, but they will 
 - Use Add for supplements and extensions
 - Use Replace for updates and corrections
 - Use Remove for cleanup and simplification
-- It may be easier to remove a key and add a new one with a different value than it is to replace a key by value under certain circumstances
-
-### Key Removal Strategy
-
-- Use ByName for unnumbered keys or when you know exact names
-- Use ByValue for numbered keys where numbering might vary 
+- Each sub-mode's "When to use" list under [Transmute (Primary) Modes](#transmute-primary-modes) gives finer-grained guidance for choosing within a mode
 
 ---
 
