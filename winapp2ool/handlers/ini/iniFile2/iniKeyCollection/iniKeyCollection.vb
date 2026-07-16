@@ -136,6 +136,39 @@ Public Class iniKeyCollection
     End Sub
 
     ''' <summary>
+    ''' Replaces <paramref name="oldKey"/> with the keys in <paramref name="newKeys"/>, the first
+    ''' of which takes <paramref name="oldKey"/>'s ordinal position with the rest following it in
+    ''' sequence order. The name and type indices are rebuilt, so the replacement keys may have
+    ''' different Names or KeyTypes than the key they replace. Does nothing if
+    ''' <paramref name="oldKey"/> is not present in the collection
+    ''' </summary>
+    '''
+    ''' <param name="oldKey">
+    ''' The key currently in the collection to be replaced (matched by reference)
+    ''' </param>
+    '''
+    ''' <param name="newKeys">
+    ''' The keys to insert in its place (must contain at least one key — replacing a key
+    ''' with nothing is a removal, which is <c> Remove </c>'s job)
+    ''' </param>
+    Public Sub Replace(oldKey As iniKey2, newKeys As IEnumerable(Of iniKey2))
+
+        If oldKey Is Nothing Then argIsNull(NameOf(oldKey)) : Return
+        If newKeys Is Nothing Then argIsNull(NameOf(newKeys)) : Return
+
+        Dim replacements As New List(Of iniKey2)(newKeys)
+        If replacements.Count = 0 Then argIsInvalid(NameOf(newKeys)) : Return
+
+        Dim index = _ordered.IndexOf(oldKey)
+        If index = -1 Then Return
+
+        _ordered.RemoveAt(index)
+        _ordered.InsertRange(index, replacements)
+        RebuildIndices()
+
+    End Sub
+
+    ''' <summary>
     ''' Rebuilds the name and type lookup indices from the ordered key list
     ''' </summary>
     Private Sub RebuildIndices()

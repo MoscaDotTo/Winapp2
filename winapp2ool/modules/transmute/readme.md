@@ -268,7 +268,7 @@ Each rule section contains:
 | Key | Meaning | Notes |
 |:-|:-|:-|
 | `Match=<Name>=<Value>` | A match criteria | Repeatable as `Match1=`, `Match2=`, ... for many-to-one mappings. KeyTypes are compared with numbers stripped from both sides, so `Match=FileKey=...` matches any `FileKeyN` with that value |
-| `Replace=<Name>=<Value>` | The full replacement key line | Exactly one per rule |
+| `Replace=<Name>=<Value>` | The full replacement key line | Repeatable as `Replace1=`, `Replace2=`, ... for one-to-many mappings. The first replacement takes the matched key's ordinal position; any remaining replacements are inserted immediately after it in file order |
 
 ##### Example
 
@@ -284,17 +284,25 @@ Match1=LangSecRef=3005
 Match2=LangSecRef=3021
 Match3=LangSecRef=3022
 Replace=Tags=ccapps
+
+; One-to-many: de-abstract a wildcard detection into hardcoded variants
+[*Map: Brave DetectFile]
+Match=DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*
+Replace1=DetectFile1=%LocalAppData%\BraveSoftware\Brave-Browser
+Replace2=DetectFile2=%LocalAppData%\BraveSoftware\Brave-Browser-Beta
+Replace3=DetectFile3=%LocalAppData%\BraveSoftware\Brave-Browser-Nightly
 ```
 
 ### Rule behavior
 
-- Rules are applied in a single pass in file order with first-match-wins semantics: each base key is evaluated against its *original* value only, so a key replaced by an earlier rule is never re-matched by a later rule in the same run
+- Rules are applied in a single pass in file order with first-match-wins semantics: each base key is evaluated against its *original* value only, so a key replaced by an earlier rule is never re-matched by a later rule in the same run, and keys inserted by a one-to-many rule are never evaluated at all
+- Replacement key numbering is the rule author's responsibility — replacement keys are written exactly as given, consistent with Add mode. Note that the [default output formatting](#output-formatting) renumbers keys anyway
 - A rule which matches nothing anywhere in the base file emits a warning. This can be a sign that the rule has gone stale and the values it targets no longer exist in the base file
-- A malformed rule is skipped with a warning while the remaining rules still apply. A rule is malformed if it has no `Match=` keys, a missing or duplicate `Replace=` key, an unrecognized key, or a `Match=`/`Replace=` value which is not itself a `Name=Value` pair
+- A malformed rule is skipped with a warning while the remaining rules still apply. A rule is malformed if it has no `Match=` keys, no `Replace=` keys, an unrecognized key, or a `Match=`/`Replace=` value which is not itself a `Name=Value` pair
 
 ### Example use cases
 - Maintaining the browser category mapping (`Section=` → `LangSecRef=`) for the CCleaner flavor as ~14 rules instead of hundreds of per-entry cohort sections that must be kept in lockstep across two files
-- Stripping a detection key from every generated entry of a browser family in the System Ninja flavor, so new entries added by BrowserBuilder are covered automatically
+- De-abstracting wildcard `DetectFile` paths into hardcoded variants for the System Ninja flavor (which does not support wildcards in detection) as one rule per wildcard, instead of a remove + add lockstep spanning two files and one section per affected entry. New entries carrying the same wildcards are covered automatically
 
 ---
 

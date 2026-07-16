@@ -20,7 +20,7 @@ Option Strict On
 ''' <summary>
 ''' Implements Transmute's <c> [*Map: label] </c> key mapping rules: source-file sections which
 ''' match keys anywhere in the base file by KeyType and Value, and replace the whole key —
-''' including its Name — with a replacement key line. This is the only Transmute operation able
+''' including its Name — with one or more replacement key lines. This is the only Transmute operation able
 ''' to change a key's Name, which makes data-driven category conversions possible
 ''' (eg. <c> Section=Google Chrome Web Browser </c> → <c> LangSecRef=3029 </c>) <br /> <br />
 '''
@@ -28,12 +28,17 @@ Option Strict On
 ''' <c> Match=&lt;Name&gt;=&lt;Value&gt; </c> — repeatable (as <c> Match1= </c>, <c> Match2= </c>, ...).
 ''' A base key matches when its KeyType (Name with numbers stripped) and Value both equal the
 ''' match key's, case-insensitively — consistent with Remove ByValue matching <br />
-''' <c> Replace=&lt;Name&gt;=&lt;Value&gt; </c> — exactly one. The full replacement key line <br /> <br />
+''' <c> Replace=&lt;Name&gt;=&lt;Value&gt; </c> — repeatable (as <c> Replace1= </c>, <c> Replace2= </c>, ...).
+''' The full replacement key line(s). The first replacement takes the matched key's ordinal
+''' position and any remaining replacements are inserted immediately after it in file order,
+''' so a single rule can de-abstract one key into several (eg. a wildcard
+''' <c> DetectFile </c> into hardcoded per-variant paths). Replacement key numbering is the
+''' rule author's responsibility — keys are written as given, consistent with Add mode <br /> <br />
 '''
 ''' Rules are applied in a single pass in file order with first-match-wins semantics: each base
 ''' key is evaluated against its original value only, so a key replaced by an earlier rule is
-''' never re-matched by a later rule in the same run. Replacement happens in place, preserving
-''' the section's key order
+''' never re-matched by a later rule in the same run, and inserted replacement keys are never
+''' evaluated at all. Replacement happens in place, preserving the section's key order
 ''' </summary>
 Public Module TransmuteKeyMap
 
@@ -54,8 +59,8 @@ Public Module TransmuteKeyMap
         ''' <summary> The match criteria, each parsed into an <c> iniKey2 </c> for KeyType+Value comparison </summary>
         Public Property Matches As New List(Of iniKey2)
 
-        ''' <summary> The replacement key line, cloned for each hit </summary>
-        Public Property Replacement As iniKey2
+        ''' <summary> The replacement key lines in file order, cloned for each hit </summary>
+        Public Property Replacements As New List(Of iniKey2)
 
         ''' <summary> The total number of keys replaced by this rule </summary>
         Public Property Hits As Integer
@@ -131,12 +136,13 @@ Public Module TransmuteKeyMap
 
                         If Not ruleMatches(rule, baseKey) Then Continue For
 
-                        Dim newKey As New iniKey2(rule.Replacement.ToString())
-                        baseSection.Keys.Replace(baseKey, newKey)
+                        Dim newKeys As New List(Of iniKey2)
+                        For Each replacement In rule.Replacements : newKeys.Add(New iniKey2(replacement.ToString())) : Next
+                        baseSection.Keys.Replace(baseKey, newKeys)
 
                         rule.Hits += 1
                         rulesHitInSection.Add(rule)
-                        gLog($"{baseSection.Name}: {baseKey} -> {newKey}")
+                        gLog($"{baseSection.Name}: {baseKey} -> {String.Join(" | ", newKeys)}")
 
                         Exit For
 
@@ -162,7 +168,8 @@ Public Module TransmuteKeyMap
             End If
 
             Dim matchDesc = String.Join(" | ", rule.Matches)
-            Dim summary = $"*[Map: {rule.Label}] {matchDesc} -> {rule.Replacement} ({rule.SectionsHit} sections)"
+            Dim replaceDesc = String.Join(" | ", rule.Replacements)
+            Dim summary = $"*[Map: {rule.Label}] {matchDesc} -> {replaceDesc} ({rule.SectionsHit} sections)"
             menuOutput.AddColoredLine(summary, ConsoleColor.Yellow)
             gLog(summary)
 
@@ -201,7 +208,7 @@ Public Module TransmuteKeyMap
     ''' <summary>
     ''' Parses a <c> [*Map: label] </c> section into a <c> TransmuteMapRule </c>, emitting a
     ''' warning and returning <c> Nothing </c> when the section is malformed: no <c> Match= </c>
-    ''' keys, no (or multiple) <c> Replace= </c> keys, an unrecognized key, or a match/replace
+    ''' keys, no <c> Replace= </c> keys, an unrecognized key, or a match/replace
     ''' value which does not itself contain a <c> Name=Value </c> pair
     ''' </summary>
     '''
@@ -240,23 +247,16 @@ Public Module TransmuteKeyMap
 
                 Case key.KeyType.Equals("Replace", StringComparison.OrdinalIgnoreCase)
 
-                    If rule.Replacement IsNot Nothing Then
-
-                        warnMalformedRule(label, "more than one Replace= key was provided", menuOutput)
-                        Return Nothing
-
-                    End If
-
                     Dim replacementKey = parseKeyLine(key.Value)
 
                     If replacementKey Is Nothing Then
 
-                        warnMalformedRule(label, $"Replace value '{key.Value}' is not a Name=Value pair", menuOutput)
+                        warnMalformedRule(label, $"{key.Name} value '{key.Value}' is not a Name=Value pair", menuOutput)
                         Return Nothing
 
                     End If
 
-                    rule.Replacement = replacementKey
+                    rule.Replacements.Add(replacementKey)
 
                 Case Else
 
@@ -274,7 +274,7 @@ Public Module TransmuteKeyMap
 
         End If
 
-        If rule.Replacement Is Nothing Then
+        If rule.Replacements.Count = 0 Then
 
             warnMalformedRule(label, "no Replace= key was provided", menuOutput)
             Return Nothing

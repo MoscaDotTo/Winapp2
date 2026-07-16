@@ -22,10 +22,11 @@ Imports System.Text
 ''' <summary>
 ''' Tests for Transmute's global operations: the <c> [*] </c> sentinel section (global
 ''' add / remove / replace of keys across every base section) and <c> [*Map: label] </c>
-''' key mapping rules (KeyType+Value match → whole-key replacement, including the Name). <br />
+''' key mapping rules (KeyType+Value match → whole-key replacement, including the Name,
+''' one-to-many via numbered Replace keys). <br />
 ''' Covers the mode refusal table, numbered-key add refusal, first-match-wins/no-re-match
-''' semantics, in-place ordering, malformed and zero-hit rules, global-then-named processing
-''' order, and the <c> RecognizeGlobalSections </c> opt-out
+''' semantics, in-place ordering, one-to-many expansion, malformed and zero-hit rules,
+''' global-then-named processing order, and the <c> RecognizeGlobalSections </c> opt-out
 ''' </summary>
 <TestClass()> Public Class TransmuteTests
 
@@ -376,6 +377,154 @@ Imports System.Text
 
         Assert.AreEqual("Games", result.GetSection("Alpha *").GetKey("Section").Value)
         Assert.IsFalse(result.GetSection("Alpha *").HasKey("LangSecRef"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A [*Map:] rule with numbered Replace keys (Replace1=, Replace2=, ...) expands one
+    ''' matched key into several: the first replacement takes the matched key's ordinal
+    ''' position, the rest follow it immediately, and later keys shift down intact
+    ''' </summary>
+    <TestMethod()> Public Sub Map_OneToMany_ExpandsKeyInPlace()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "Section=Games" & vbCrLf & "DetectFile=%UserProfile%\Documents\My Games\Borderlands*" & vbCrLf & "FileKey1=%UserProfile%\Documents\My Games\Borderlands|*.log" & vbCrLf,
+            "[*Map: Borderlands DetectFile]" & vbCrLf &
+            "Match=DetectFile=%UserProfile%\Documents\My Games\Borderlands*" & vbCrLf &
+            "Replace1=DetectFile1=%UserProfile%\Documents\My Games\Borderlands" & vbCrLf &
+            "Replace2=DetectFile2=%UserProfile%\Documents\My Games\Borderlands 2" & vbCrLf &
+            "Replace3=DetectFile3=%UserProfile%\Documents\My Games\Borderlands 3" & vbCrLf,
+            winapp2ool.TransmuteMode.Replace,
+            replaceMode:=winapp2ool.ReplaceMode.ByKey)
+
+        Dim alpha = result.GetSection("Alpha *")
+        Dim keys = alpha.Keys.ToList()
+
+        ' 3 original keys - 1 matched + 3 replacements = 5
+        Assert.AreEqual(5, keys.Count)
+
+        ' First replacement at the matched key's ordinal, the rest immediately after
+        Assert.AreEqual("DetectFile1", keys(1).Name)
+        Assert.AreEqual("%UserProfile%\Documents\My Games\Borderlands", keys(1).Value)
+        Assert.AreEqual("DetectFile2", keys(2).Name)
+        Assert.AreEqual("%UserProfile%\Documents\My Games\Borderlands 2", keys(2).Value)
+        Assert.AreEqual("DetectFile3", keys(3).Name)
+        Assert.AreEqual("%UserProfile%\Documents\My Games\Borderlands 3", keys(3).Value)
+
+        ' Keys following the matched key shift down intact
+        Assert.AreEqual("FileKey1", keys(4).Name)
+
+        ' The type index reflects the expansion
+        Assert.AreEqual(3, alpha.Keys.GetByType("DetectFile").Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' Replacement keys inserted by a one-to-many rule are never evaluated in the same
+    ''' run: a later rule matching an inserted key's KeyType+Value must not fire
+    ''' </summary>
+    <TestMethod()> Public Sub Map_OneToMany_InsertedKeysNotReMatched()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "DetectFile=%LocalAppData%\Google\Chrome*" & vbCrLf,
+            "[*Map: expand]" & vbCrLf &
+            "Match=DetectFile=%LocalAppData%\Google\Chrome*" & vbCrLf &
+            "Replace1=DetectFile1=%LocalAppData%\Google\Chrome" & vbCrLf &
+            "Replace2=DetectFile2=%LocalAppData%\Google\Chrome Beta" & vbCrLf &
+            "[*Map: would re-match]" & vbCrLf &
+            "Match=DetectFile=%LocalAppData%\Google\Chrome Beta" & vbCrLf &
+            "Replace=Tags=must-not-appear" & vbCrLf,
+            winapp2ool.TransmuteMode.Replace,
+            replaceMode:=winapp2ool.ReplaceMode.ByKey)
+
+        Dim alpha = result.GetSection("Alpha *")
+
+        ' The inserted DetectFile2 survives untouched; the second rule never fired
+        Assert.AreEqual("%LocalAppData%\Google\Chrome Beta", alpha.GetKey("DetectFile2").Value)
+        Assert.IsFalse(alpha.HasKey("Tags"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A single one-to-many rule expands the same matched wildcard independently in
+    ''' every section that carries it
+    ''' </summary>
+    <TestMethod()> Public Sub Map_OneToMany_ExpandsInMultipleSections()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*" & vbCrLf &
+            "[Beta *]" & vbCrLf & "DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*" & vbCrLf &
+            "[Gamma *]" & vbCrLf & "DetectFile=%AppData%\Unrelated" & vbCrLf,
+            "[*Map: Brave DetectFile]" & vbCrLf &
+            "Match=DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*" & vbCrLf &
+            "Replace1=DetectFile1=%LocalAppData%\BraveSoftware\Brave-Browser" & vbCrLf &
+            "Replace2=DetectFile2=%LocalAppData%\BraveSoftware\Brave-Browser-Beta" & vbCrLf &
+            "Replace3=DetectFile3=%LocalAppData%\BraveSoftware\Brave-Browser-Nightly" & vbCrLf,
+            winapp2ool.TransmuteMode.Replace,
+            replaceMode:=winapp2ool.ReplaceMode.ByKey)
+
+        For Each name In {"Alpha *", "Beta *"}
+            Dim section = result.GetSection(name)
+            Assert.AreEqual(3, section.Keys.Count)
+            Assert.AreEqual(3, section.Keys.GetByType("DetectFile").Count)
+            Assert.AreEqual("%LocalAppData%\BraveSoftware\Brave-Browser-Nightly", section.GetKey("DetectFile3").Value)
+        Next
+
+        ' Non-matching sections are untouched
+        Assert.AreEqual(1, result.GetSection("Gamma *").Keys.Count)
+        Assert.AreEqual("%AppData%\Unrelated", result.GetSection("Gamma *").GetKey("DetectFile").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' Two one-to-many rules firing on different keys of the same section expand
+    ''' independently without disturbing each other's insertions (the Dell Stage Suite
+    ''' shape: two wildcards under different roots in one entry)
+    ''' </summary>
+    <TestMethod()> Public Sub Map_TwoOneToManyRules_SameSection()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "Section=Games" & vbCrLf & "DetectFile1=%AppData%\Dell\*Stage" & vbCrLf & "DetectFile2=%LocalAppData%\Dell\*Stage" & vbCrLf,
+            "[*Map: Dell roaming]" & vbCrLf &
+            "Match=DetectFile=%AppData%\Dell\*Stage" & vbCrLf &
+            "Replace1=DetectFile1=%AppData%\Dell\Dell Stage" & vbCrLf &
+            "Replace2=DetectFile2=%AppData%\Dell\MusicStage" & vbCrLf &
+            "[*Map: Dell local]" & vbCrLf &
+            "Match=DetectFile=%LocalAppData%\Dell\*Stage" & vbCrLf &
+            "Replace=DetectFile3=%LocalAppData%\Dell\VideoStage" & vbCrLf,
+            winapp2ool.TransmuteMode.Replace,
+            replaceMode:=winapp2ool.ReplaceMode.ByKey)
+
+        Dim keys = result.GetSection("Alpha *").Keys.ToList()
+
+        Assert.AreEqual(4, keys.Count)
+        Assert.AreEqual("Section", keys(0).Name)
+        Assert.AreEqual("%AppData%\Dell\Dell Stage", keys(1).Value)
+        Assert.AreEqual("%AppData%\Dell\MusicStage", keys(2).Value)
+        Assert.AreEqual("%LocalAppData%\Dell\VideoStage", keys(3).Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' A numbered Replace key whose value is not a Name=Value pair makes the rule
+    ''' malformed: it is skipped whole while a well-formed sibling rule still applies
+    ''' </summary>
+    <TestMethod()> Public Sub Map_MalformedNumberedReplace_SkippedIndividually()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "Section=Games" & vbCrLf & "LangSecRef=3021" & vbCrLf,
+            "[*Map: bad numbered replace]" & vbCrLf & "Match=Section=Games" & vbCrLf & "Replace1=Tags=ok" & vbCrLf & "Replace2=NotAKeyValuePair" & vbCrLf &
+            "[*Map: good]" & vbCrLf & "Match=LangSecRef=3021" & vbCrLf & "Replace=Tags=ccapps" & vbCrLf,
+            winapp2ool.TransmuteMode.Replace,
+            replaceMode:=winapp2ool.ReplaceMode.ByKey)
+
+        Dim alpha = result.GetSection("Alpha *")
+
+        ' The malformed rule changed nothing - not even its well-formed Replace1
+        Assert.AreEqual("Games", alpha.GetKey("Section").Value)
+        ' The well-formed sibling rule still applied
+        Assert.AreEqual("ccapps", alpha.GetKey("Tags").Value)
+        Assert.IsFalse(alpha.HasKey("LangSecRef"))
 
     End Sub
 
