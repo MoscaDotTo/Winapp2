@@ -735,7 +735,7 @@ Public Class DiffOutputRenderer2
                 Dim oldName = _state.MergedEntries.RenamedEntryPairs(newName)
                 Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
 
-                results.Add(MakeDiff(_file1.GetSection(oldName), 2, _file2.GetSection(newName)))
+                results.Add(MakeDiff(_file1.GetSection(oldName), 3, _file2.GetSection(newName)))
                 results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, Nothing))
                 results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, Nothing))
                 results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, addedKeys, removedKeys, modKeyTypes))

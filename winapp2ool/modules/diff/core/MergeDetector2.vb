@@ -200,8 +200,9 @@ Public Class MergeDetector2
 
     ''' <summary>
     ''' Scores each candidate against the old entry's FileKeys and RegKeys and returns
-    ''' the best-fitting <c>MatchResult</c>. Evaluates rename (all keys matched, counts equal,
-    ''' no structural changes), merger (one or more keys matched), and partial-match outcomes.
+    ''' the best-fitting <c>MatchResult</c>. Evaluates rename (target is a newly added entry,
+    ''' all keys matched, counts equal, no structural changes), merger (one or more keys
+    ''' matched), and partial-match outcomes.
     ''' </summary>
     ''' 
     ''' <param name="candidates">
@@ -253,7 +254,12 @@ Public Class MergeDetector2
             End SyncLock
             If thisSpecificPairIsRename Then Continue For
 
-            Dim isRename = matchInfo.AllKeysMatched AndAlso
+            ' A rename target must be a name that didn't exist in the old file; matching onto a
+            ' pre-existing (modified) entry means the old entry was absorbed into it - a merger
+            Dim candidateIsAdded = _state.ModifiedEntries.AddedEntryNames.Contains(candidateSection.Name)
+
+            Dim isRename = candidateIsAdded AndAlso
+                      matchInfo.AllKeysMatched AndAlso
                       matchInfo.CountsMatch AndAlso
                       Not matchInfo.MatchHadMoreParams AndAlso
                       Not matchInfo.PossibleWildCardReduction
