@@ -70,7 +70,7 @@ Use **Go online** from the main menu (visible when in offline mode) to retry the
 
 # [Log Management](#log-management)
 
-winapp2ool maintains an internal log (`gLog`) throughout its runtime, recording both diagnostic output and a record of operations performed. The log grows over the course of a session.
+winapp2ool maintains an internal log throughout its runtime, recording both diagnostic output and a record of operations performed. The log grows over the course of a session.
 
 - **View Log** prints the current log to the console
 - **Save Log** writes the log to disk at the configured save target
