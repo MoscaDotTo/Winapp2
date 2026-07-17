@@ -143,17 +143,18 @@ Public Module Combine
 
                 Dim processedCount = 0
                 Dim validFileCount = 0
+                Dim outputFullPath = Path.GetFullPath(combinedOutput.Path())
 
                 For Each filePath In allINIFiles
 
                     updateProgress(processedCount, allINIFiles.Count)
 
                     ' Don't process the output file if it's in the target directory
-                    If filePath = combinedOutput.Path() Then gLog($"Output file found in target directory, skipping: {filePath}") : Continue For
+                    If Path.GetFullPath(filePath).Equals(outputFullPath, StringComparison.OrdinalIgnoreCase) Then gLog($"Output file found in target directory, skipping: {filePath}") : Continue For
 
                     Try
 
-                        attemptCombine(filePath, combinedOutput, processedCount, validFileCount, outputMenu)
+                        attemptCombine(filePath, combinedOutput, validFileCount, outputMenu)
 
                     Catch ex As Exception
 
@@ -237,10 +238,6 @@ Public Module Combine
     ''' The output file into which <paramref name="filepath"/> will be combined
     ''' </param>
     '''
-    ''' <param name="processedCount">
-    ''' The number of files that have been processed so far
-    ''' </param>
-    '''
     ''' <param name="validFileCount">
     ''' The number of files that have been successfully combined so far
     ''' </param>
@@ -251,7 +248,6 @@ Public Module Combine
     ''' </param>
     Private Sub attemptCombine(filepath As String,
                          ByRef combinedOutput As iniFile2,
-                         ByRef processedCount As Integer,
                          ByRef validFileCount As Integer,
                          ByRef outputMenu As MenuSection)
 
@@ -260,7 +256,6 @@ Public Module Combine
         If currentFile.Count = 0 Then
 
             gLog($"Skipping file with no sections: {Path.GetFileName(filepath)}", buffr:=True)
-            processedCount += 1
             Return
 
         End If
