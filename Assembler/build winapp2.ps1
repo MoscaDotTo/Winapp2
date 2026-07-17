@@ -10,7 +10,7 @@
 
 .NOTES
     Author: Hazel Ward
-    Version 20260512
+    Version 20260716
     Copyright 2026
 #>
 
@@ -223,9 +223,9 @@ function Build-CCCleanerFlavor {
 function Build-CCleaner7Flavor {
     Write-Step "Creating CCleaner7 flavor"
 
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-cc7ify', '-1f', 'winapp2-ccleaner-flavor.ini', `
-        '-2f', 'winapp2-cc7.ini' `
-        -ErrorMessage "Failed to create CCleaner7 flavor")) { return $false }
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-1f', 'winapp2-ccleaner-flavor.ini', `
+        '-2f', 'winapp2-cc7.ini', '-9d', '\CCleaner7' `
+        -ErrorMessage "Failed to create CCleaner7 flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'CCleaner7'))) { return $false }
 
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-cc7.old'
