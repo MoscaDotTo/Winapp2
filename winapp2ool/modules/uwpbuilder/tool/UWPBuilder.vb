@@ -502,7 +502,8 @@ Public Module UWPBuilder
     ''' <summary>
     ''' Parses an AppInfo section and returns a populated <c> UWPAppInfo </c> structure.
     ''' Issues warnings and sets <c> ShouldSkip </c> for entries that are structurally
-    ''' invalid (missing package, missing category, or conflicting categories).
+    ''' invalid (missing package or missing category). An entry declaring both
+    ''' <c> LangSecRef= </c> and <c> Section= </c> warns and keeps <c> LangSecRef </c>.
     ''' </summary>
     '''
     ''' <param name="appSection">
@@ -579,10 +580,9 @@ Public Module UWPBuilder
         Dim bothCategories = app.LangSecRef.Length > 0 AndAlso app.SectionName.Length > 0
 
         Dim msgs = {$"No Package key in [{app.Name}], skipping",
-                    $"No LangSecRef or Section in [{app.Name}], skipping",
-                    $"Both LangSecRef and Section present in [{app.Name}], using LangSecRef"}
+                    $"No LangSecRef or Section in [{app.Name}], skipping"}
 
-        Dim bools = {noPackage, noCategory, bothCategories}
+        Dim bools = {noPackage, noCategory}
         For i = 0 To bools.Count - 1
 
             If Not bools(i) Then Continue For
@@ -593,7 +593,12 @@ Public Module UWPBuilder
 
         Next
 
-        If bothCategories Then app.SectionName = ""
+        If Not bothCategories Then Return app
+
+        Dim bothMsg = $"Both LangSecRef and Section present in [{app.Name}], using LangSecRef"
+        gLog(bothMsg)
+        menuOutput.AddWarning(bothMsg)
+        app.SectionName = ""
 
         Return app
 
