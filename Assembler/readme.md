@@ -8,6 +8,8 @@ This folder contains the build script for Winapp2.ini and everything required by
 
 To build Winapp2.ini, simply place a copy of Winapp2ool 1.7 or newer in this folder and run `& '.\build winapp2.ps1'` from PowerShell
 
+The script combines the base entries from [Entries](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Entries), generates entries with BrowserBuilder, UWPBuilder, and EntryBuilder (the generators read the shared cleaning-pattern catalogs from [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Scaffolds)), merges everything into the base Winapp2.ini, and then produces each flavor from it
+
 ### Contributions
 
 Contributions to Winapp2.ini or its flavors should be made to the files in this folder and its children, not to individual Winapp2.ini files. See the [contributor guidelines](https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md) for how to write and submit changes

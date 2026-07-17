@@ -5,8 +5,10 @@
 .DESCRIPTION
     This script requires winapp2ool v1.7 or newer.
     Creates backups, combines base entries, generates and corrects browser entries,
-    generates UWP entries, combines these into the base flavor, generates tool flavors,
-    and creates a diff for each generated flavor.
+    generates UWP entries, generates entries from EntryBuilder shorthand, combines
+    these into the base flavor, generates tool flavors, and creates a diff for each
+    generated flavor. Generator stages read the shared scaffold catalogs from
+    the Scaffolds directory.
 
 .NOTES
     Author: Hazel Ward
@@ -145,8 +147,16 @@ function Build-MainFile {
         -ErrorMessage "Failed to generate browser entries" -RequiredDirs @(Join-Path $PSScriptRoot 'BrowserBuilder'))) { return $false }
 
     Write-Step "Generating UWP entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-1d', '\UWP', '-2f', 'uwp.ini' `
-        -ErrorMessage "Failed to generate UWP entries" -RequiredDirs @(Join-Path $PSScriptRoot 'UWP'))) { return $false }
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-1d', '\UWP', '-2f', 'uwp.ini', `
+        '-3d', '\Scaffolds', '-4d', '\Scaffolds' `
+        -ErrorMessage "Failed to generate UWP entries" `
+        -RequiredDirs @((Join-Path $PSScriptRoot 'UWP'), (Join-Path $PSScriptRoot 'Scaffolds')))) { return $false }
+
+    Write-Step "Generating entries from EntryBuilder shorthand"
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-1d', '\EntryBuilder', '-2f', 'entrybuilder.ini', `
+        '-3d', '\Scaffolds', '-4d', '\Scaffolds' `
+        -ErrorMessage "Failed to generate EntryBuilder entries" `
+        -RequiredDirs @((Join-Path $PSScriptRoot 'EntryBuilder'), (Join-Path $PSScriptRoot 'Scaffolds')))) { return $false }
 
     Write-Step "Joining base entries with browser entries"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-transmute', '-add', '-1f', 'base-entries-combined.ini', `
@@ -157,6 +167,11 @@ function Build-MainFile {
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-transmute', '-add', '-1f', 'Winapp2.ini', `
         '-2f', 'uwp.ini', '-3f', 'Winapp2.ini' `
         -ErrorMessage "Failed to join UWP entries")) { return $false }
+
+    Write-Step "Joining EntryBuilder entries"
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-transmute', '-add', '-1f', 'Winapp2.ini', `
+        '-2f', 'entrybuilder.ini', '-3f', 'Winapp2.ini' `
+        -ErrorMessage "Failed to join EntryBuilder entries")) { return $false }
 
     Write-Step "Performing static analysis and saving corrections"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
@@ -318,6 +333,7 @@ function Remove-TemporaryFiles {
         'base-entries-combined.ini',
         'browsers.ini',
         'uwp.ini',
+        'entrybuilder.ini',
         'winapp2.rules',
         'diff.txt'
     )
