@@ -241,7 +241,7 @@ Option Strict On
         Assert.AreEqual(1, result.Diagnostics.Count)
         Assert.AreEqual(winapp2ool.DiagnosticSeverity.Warning, result.Diagnostics(0).Severity)
         StringAssert.Contains(result.Diagnostics(0).Message, "<v>")
-        StringAssert.Contains(result.Diagnostics(0).Message, "empty value list")
+        StringAssert.Contains(result.Diagnostics(0).Message, "has no values")
 
     End Sub
 
