@@ -293,7 +293,8 @@ Public Module WinappDebug
     ''' <c> -1f </c> / <c> -1d </c> input winapp2.ini (slot 1) <br />
     ''' <c> -3f </c> / <c> -3d </c> save target (slot 3) <br />
     ''' <c> -c </c> enable saving of changes made by the linter <br />
-    ''' <c> -usedate </c> use current date in version string
+    ''' <c> -usedate </c> use current date in version string <br />
+    ''' <c> -opti </c> enable the experimental Optimizations rule (FileKey merger) for this run
     ''' </remarks>
     Public Sub HandleLintCmdLine()
 
@@ -304,6 +305,7 @@ Public Module WinappDebug
             .WithFile(3, winappDebugFile3) _
             .WithFlag("-c", Sub() SaveChanges = Not SaveChanges) _
             .WithFlag("-usedate", Sub() UseCurrentDate = Not UseCurrentDate) _
+            .WithFlag("-opti", Sub() lintOpti.turnOn()) _
             .Parse()
 
         If cmdargs.Contains("UNIT_TESTING_HALT") Then Return
