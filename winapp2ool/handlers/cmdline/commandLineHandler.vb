@@ -62,7 +62,7 @@ Public Module commandLineHandler
                         End Sub
 
         addModule("1", "debug", 3, AddressOf WinappDebug.HandleLintCmdLine)
-        addModule("2", "trim", 3, AddressOf Trim.handleCmdLine)
+        addModule("2", "trim", 4, AddressOf Trim.handleCmdLine)
         addModule("3", "transmute", 3, AddressOf Transmute.handleCmdLine)
         addModule("4", "diff", 3, AddressOf Diff.HandleCmdLine)
         addModule("5", "ccdebug", 3, AddressOf CCiniDebug.handleCmdlineArgs)

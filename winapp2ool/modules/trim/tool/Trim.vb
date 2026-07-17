@@ -156,6 +156,8 @@ Public Module Trim
     ''' <remarks>
     ''' Trim args:
     ''' -d          : download the latest winapp2.ini
+    ''' -includes   : enable the includes file (entries listed within are never trimmed)
+    ''' -excludes   : enable the excludes file (entries listed within are always trimmed)
     ''' </remarks>
     Public Sub handleCmdLine()
 
@@ -163,6 +165,8 @@ Public Module Trim
 
         Dim spec As New CliArgSpec(NameOf(Trim))
         spec.WithFile(1, TrimFile1).WithFile(2, TrimFile2).WithFile(3, TrimFile3).WithFile(4, TrimFile4) _
+            .WithFlag("-includes", Sub() UseTrimIncludes = Not UseTrimIncludes) _
+            .WithFlag("-excludes", Sub() UseTrimExcludes = Not UseTrimExcludes) _
             .WithDownload(Sub() DownloadFileToTrim = Not DownloadFileToTrim, Function() DownloadFileToTrim) _
             .Parse()
 
@@ -715,21 +719,21 @@ Public Module Trim
                 ' %Pictures% is a CCleaner-only variable which points to two paths depending on system 
                 ' Windows XP:       %UserProfile%\My Documents\My Pictures
                 ' Windows Vista+:   %UserProfile%\Pictures
-                Case "%Pictures%"
+                Case "Pictures"
 
                     envDir = $"{userProfileDir}\{If(isWinXP, "My Documents\My ", "")}Pictures"
 
                 ' %Music% is a CCleaner-only variable which points to two paths depending on system 
                 ' Windows XP:       %UserProfile%\My Documents\My Music
                 ' Windows Vista+:   %UserProfile%\Music
-                Case "%Music%"
+                Case "Music"
 
                     envDir = $"{userProfileDir}\{If(isWinXP, "My Documents\My ", "")}Music"
 
                 ' %Video% is a CCleaner-only variable which points to two paths depending on system 
                 ' Windows XP:       %UserProfile%\My Documents\My Videos
                 ' Windows Vista+:   %UserProfile%\Videos
-                Case "%Video%"
+                Case "Video"
 
                     envDir = $"{userProfileDir}\{If(isWinXP, "My Documents\My ", "")}Videos"
 
@@ -961,10 +965,10 @@ Public Module Trim
 
         Dim splitKey = value.Split(CChar("|"))
 
-        ' There's three cases here: 
-        ' |VERSION                  -> winVer > VERSION 
-        ' VERSION|                  -> winver < VERSION 
-        ' VERSION1|VERSION2         -> VERSION1 <= winVer <= VERSION2 
+        ' There's three cases here:
+        ' |VERSION                  -> winVer <= VERSION (maximum)
+        ' VERSION|                  -> winVer >= VERSION (minimum)
+        ' VERSION1|VERSION2         -> VERSION1 <= winVer <= VERSION2
         Select Case True
 
             Case value.StartsWith("|", StringComparison.InvariantCultureIgnoreCase)
