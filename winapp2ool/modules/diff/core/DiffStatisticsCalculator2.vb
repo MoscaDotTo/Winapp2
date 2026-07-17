@@ -602,7 +602,7 @@ Public Class DiffStatisticsCalculator2
                         "CATEGORY  (Section/LangSecRef):",
                         "OTHER     (Warning etc.):"}
 
-        gLog(String.Format("{0,-34}{1,7}{2,10}{3,9}{4,8}", "KEY STATUS SUMMARY:", "Total", "Captured", "Dropped", "Capture Rate"))
+        gLog(String.Format("{0,-34}{1,7}{2,10}{3,9}{4,14}", "KEY STATUS SUMMARY:", "Total", "Captured", "Dropped", "Capture Rate"))
 
         For i = 0 To categories.Length - 1
 
@@ -611,7 +611,7 @@ Public Class DiffStatisticsCalculator2
             Dim drp = tot - cap
             Dim rate = If(tot > 0, String.Format("{0:F1}%", cap / CDbl(tot) * 100), "N/A")
 
-            gLog(String.Format("{0,-34}{1,7}{2,10}{3,9}{4,8}", labels(i), tot, cap, drp, rate))
+            gLog(String.Format("{0,-34}{1,7}{2,10}{3,9}{4,14}", labels(i), tot, cap, drp, rate))
 
         Next
 
@@ -624,7 +624,7 @@ Public Class DiffStatisticsCalculator2
         Next
 
         Dim grandRate = If(grandTot > 0, String.Format("{0:F1}%", grandCap / CDbl(grandTot) * 100), "N/A")
-        gLog(String.Format("{0,-34}{1,7}{2,10}{3,9}{4,8}", "All keys:", grandTot, grandCap, grandTot - grandCap, grandRate))
+        gLog(String.Format("{0,-34}{1,7}{2,10}{3,9}{4,14}", "All keys:", grandTot, grandCap, grandTot - grandCap, grandRate))
         gLog("")
 
     End Sub

@@ -125,15 +125,12 @@ Module Diff
 
     ''' <summary>
     ''' Runs a diff using command line arguments, allowing Diff to be called programmatically
-    ''' <list type="table">
-    ''' <item> -d </item>
-    ''' </list>
     '''
     ''' <br /> Valid Diff args:
-    ''' <br /> -d           : download the latest winapp2.ini
-    ''' <br /> -donttrim    : download the latest non-ccleaner winapp2.ini (implies -d)
-    ''' <br /> -savelog     : save diff.txt to disk on exit
-    ''' <br /> -verbose     : enable verbose output
+    ''' <br /> -d           : disable downloading (compare two local files)
+    ''' <br /> -donttrim    : disable trimming the downloaded file before diffing
+    ''' <br /> -savelog     : save the diff output to disk on exit
+    ''' <br /> -verbose     : print the full text of changed entries in the diff output
     ''' </summary>
     Public Sub HandleCmdLine()
 
