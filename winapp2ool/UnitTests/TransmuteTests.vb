@@ -26,7 +26,8 @@ Imports System.Text
 ''' one-to-many via numbered Replace keys). <br />
 ''' Covers the mode refusal table, numbered-key add refusal, first-match-wins/no-re-match
 ''' semantics, in-place ordering, one-to-many expansion, malformed and zero-hit rules,
-''' global-then-named processing order, and the <c> RecognizeGlobalSections </c> opt-out
+''' global-then-named processing order, the <c> %EntryName% </c> token, wildcard
+''' <c> Match=...=* </c> fallback rules, and the <c> RecognizeGlobalSections </c> opt-out
 ''' </summary>
 <TestClass()> Public Class TransmuteTests
 
@@ -547,6 +548,135 @@ Imports System.Text
         Assert.IsTrue(result.Contains("*Map: Chrome"))
         ' And no global application took place
         Assert.IsFalse(result.GetSection("Alpha *").HasKey("Author"))
+
+    End Sub
+
+    ''' <summary>
+    ''' The %EntryName% token in a [*] key value is replaced with each receiving section's
+    ''' name — including the trailing " *" of winapp2 entry names — so a single global key
+    ''' yields a distinct value per section
+    ''' </summary>
+    <TestMethod()> Public Sub GlobalAdd_EntryNameToken_SubstitutesSectionName()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "Detect=HKCU\Software\Alpha" & vbCrLf &
+            "[Beta *]" & vbCrLf & "Detect=HKCU\Software\Beta" & vbCrLf,
+            "[*]" & vbCrLf & "ID=%EntryName%" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Assert.AreEqual("Alpha *", result.GetSection("Alpha *").GetKey("ID").Value)
+        Assert.AreEqual("Beta *", result.GetSection("Beta *").GetKey("ID").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' The token is recognized case-insensitively, consistent with all other Transmute matching
+    ''' </summary>
+    <TestMethod()> Public Sub GlobalAdd_EntryNameToken_CaseInsensitive()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "Detect=HKCU\Software\Alpha" & vbCrLf,
+            "[*]" & vbCrLf & "ID=%entryname%" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Assert.AreEqual("Alpha *", result.GetSection("Alpha *").GetKey("ID").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' The token is only interpreted by [*] global sections: a named-section Add leaves
+    ''' it as a literal value
+    ''' </summary>
+    <TestMethod()> Public Sub NamedAdd_EntryNameToken_StaysLiteral()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "Detect=HKCU\Software\Alpha" & vbCrLf,
+            "[Alpha *]" & vbCrLf & "ID=%EntryName%" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Assert.AreEqual("%EntryName%", result.GetSection("Alpha *").GetKey("ID").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' Token-bearing and token-free keys coexist in the same [*] section: the token-free
+    ''' key follows the original build-once path and applies identically everywhere
+    ''' </summary>
+    <TestMethod()> Public Sub GlobalAdd_MixedTokenAndPlainKeys_BothApplied()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "Detect=HKCU\Software\Alpha" & vbCrLf &
+            "[Beta *]" & vbCrLf & "Detect=HKCU\Software\Beta" & vbCrLf,
+            "[*]" & vbCrLf & "ID=%EntryName%" & vbCrLf & "Author=Winapp2.ini Project" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        For Each name In {"Alpha *", "Beta *"}
+            Assert.AreEqual(name, result.GetSection(name).GetKey("ID").Value)
+            Assert.AreEqual("Winapp2.ini Project", result.GetSection(name).GetKey("Author").Value)
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' A [*Map:] match Value of exactly * matches any value of the named KeyType,
+    ''' leaving keys of other KeyTypes untouched
+    ''' </summary>
+    <TestMethod()> Public Sub Map_WildcardMatch_MatchesAnyValueOfKeyType()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "LangSecRef=3021" & vbCrLf &
+            "[Beta *]" & vbCrLf & "LangSecRef=9999" & vbCrLf &
+            "[Gamma *]" & vbCrLf & "Section=Games" & vbCrLf & "Detect=HKCU\Software\Gamma" & vbCrLf,
+            "[*Map: any LangSecRef]" & vbCrLf & "Match=LangSecRef=*" & vbCrLf & "Replace=Tags=ccapps" & vbCrLf,
+            winapp2ool.TransmuteMode.Replace,
+            replaceMode:=winapp2ool.ReplaceMode.ByKey)
+
+        Assert.AreEqual("ccapps", result.GetSection("Alpha *").GetKey("Tags").Value)
+        Assert.AreEqual("ccapps", result.GetSection("Beta *").GetKey("Tags").Value)
+
+        ' Other KeyTypes are not matched by the LangSecRef wildcard
+        Dim gamma = result.GetSection("Gamma *")
+        Assert.IsFalse(gamma.HasKey("Tags"))
+        Assert.AreEqual("Games", gamma.GetKey("Section").Value)
+        Assert.AreEqual("HKCU\Software\Gamma", gamma.GetKey("Detect").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' A specific rule listed before a wildcard fallback wins for its value while the
+    ''' fallback catches everything else — the CC7 category-to-tag shape in miniature
+    ''' </summary>
+    <TestMethod()> Public Sub Map_SpecificRuleBeforeWildcardFallback_Wins()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "LangSecRef=3029" & vbCrLf &
+            "[Beta *]" & vbCrLf & "LangSecRef=3001" & vbCrLf &
+            "[Gamma *]" & vbCrLf & "Section=Custom Category" & vbCrLf,
+            "[*Map: Chrome tag]" & vbCrLf & "Match=LangSecRef=3029" & vbCrLf & "Replace=Tags=Google,Chrome,Browser" & vbCrLf &
+            "[*Map: tag fallback]" & vbCrLf & "Match1=LangSecRef=*" & vbCrLf & "Match2=Section=*" & vbCrLf & "Replace=Tags=ccapps" & vbCrLf,
+            winapp2ool.TransmuteMode.Replace,
+            replaceMode:=winapp2ool.ReplaceMode.ByKey)
+
+        Assert.AreEqual("Google,Chrome,Browser", result.GetSection("Alpha *").GetKey("Tags").Value)
+        Assert.AreEqual("ccapps", result.GetSection("Beta *").GetKey("Tags").Value)
+        Assert.AreEqual("ccapps", result.GetSection("Gamma *").GetKey("Tags").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' Wildcard rules obey the same mode gate as every other [*Map:] rule: outside
+    ''' Replace ByKey they are skipped without touching the base file
+    ''' </summary>
+    <TestMethod()> Public Sub Map_Wildcard_OutsideReplaceByKey_IsSkipped()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "LangSecRef=3021" & vbCrLf,
+            "[*Map: any LangSecRef]" & vbCrLf & "Match=LangSecRef=*" & vbCrLf & "Replace=Tags=ccapps" & vbCrLf,
+            winapp2ool.TransmuteMode.Remove,
+            removeKeyMode:=winapp2ool.RemoveKeyMode.ByName)
+
+        Assert.AreEqual("3021", result.GetSection("Alpha *").GetKey("LangSecRef").Value)
+        Assert.IsFalse(result.GetSection("Alpha *").HasKey("Tags"))
 
     End Sub
 

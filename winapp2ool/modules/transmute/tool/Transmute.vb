@@ -111,6 +111,13 @@ Option Strict On
 Public Module Transmute
 
     ''' <summary>
+    ''' The token in a <c> [*] </c> global section key value which is replaced with each
+    ''' receiving section's name as the key is applied (case-insensitive). Named-section
+    ''' operations leave the token literal
+    ''' </summary>
+    Public Const EntryNameToken As String = "%EntryName%"
+
+    ''' <summary>
     ''' Enum representing the different primary modes of modifying the base file
     ''' </summary>
     '''
@@ -578,6 +585,11 @@ Public Module Transmute
     ''' and Replace BySection is incoherent as a global operation. Numbered keys are refused
     ''' in Add mode because adding them to every section creates instant duplicates. <br /> <br />
     '''
+    ''' Key values containing the <c> %EntryName% </c> token (case-insensitive) have the token
+    ''' replaced with each receiving section's name as the key is applied, enabling per-section
+    ''' values from a single global key (eg. <c> ID=%EntryName% </c>). The token is only
+    ''' recognized here — named-section operations leave it literal. <br /> <br />
+    '''
     ''' Unlike named-section operations, a global operation expects most sections not to match,
     ''' so per-section misses are silent: the menu receives one summary line per source key and
     ''' per-hit detail is written to the log
@@ -632,12 +644,25 @@ Public Module Transmute
 
                 End If
 
+                Dim hasEntryNameToken = sourceKey.Value.IndexOf(EntryNameToken, StringComparison.OrdinalIgnoreCase) >= 0
+
                 Dim singleKeySource As New iniSection2(sourceSection.Name)
-                singleKeySource.AddKey(sourceKey)
+                If Not hasEntryNameToken Then singleKeySource.AddKey(sourceKey)
 
                 Dim sectionsHit = 0
 
                 For Each baseSection In baseFile
+
+                    Dim appliedKey = sourceKey
+                    Dim appliedSource = singleKeySource
+
+                    If hasEntryNameToken Then
+
+                        appliedKey = New iniKey2($"{sourceKey.Name}={expandEntryNameToken(sourceKey.Value, baseSection.Name)}")
+                        appliedSource = New iniSection2(sourceSection.Name)
+                        appliedSource.AddKey(appliedKey)
+
+                    End If
 
                     Dim hits = 0
 
@@ -645,22 +670,22 @@ Public Module Transmute
 
                         Case TransmuteMode.Add
 
-                            hits = addKeysToBase(baseSection, singleKeySource, menuOutput, quiet:=True)
+                            hits = addKeysToBase(baseSection, appliedSource, menuOutput, quiet:=True)
 
                         Case TransmuteMode.Replace
 
-                            hits = replaceKeysInBase(baseSection, singleKeySource, menuOutput, quiet:=True)
+                            hits = replaceKeysInBase(baseSection, appliedSource, menuOutput, quiet:=True)
 
                         Case TransmuteMode.Remove
 
-                            hits = remKeys(baseSection, singleKeySource, menuOutput, quiet:=True)
+                            hits = remKeys(baseSection, appliedSource, menuOutput, quiet:=True)
 
                     End Select
 
                     If hits = 0 Then Continue For
 
                     sectionsHit += 1
-                    gLog($"{baseSection.Name}: {sourceKey}{If(hits > 1, $" (x{hits})", "")}")
+                    gLog($"{baseSection.Name}: {appliedKey}{If(hits > 1, $" (x{hits})", "")}")
 
                 Next
 
@@ -697,7 +722,41 @@ Public Module Transmute
     End Sub
 
     ''' <summary>
-    ''' Hands off the processing of a section to the appropriate handler based on the 
+    ''' Replaces every occurrence of <c> EntryNameToken </c> in
+    ''' <c> <paramref name="value"/> </c> with <c> <paramref name="sectionName"/> </c>,
+    ''' matching the token case-insensitively
+    ''' </summary>
+    '''
+    ''' <param name="value">
+    ''' The global section key value containing the token
+    ''' </param>
+    '''
+    ''' <param name="sectionName">
+    ''' The name of the section receiving the key
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> <paramref name="value"/> </c> with all token occurrences replaced
+    ''' </returns>
+    Private Function expandEntryNameToken(value As String, sectionName As String) As String
+
+        Dim result = ""
+        Dim pos = 0
+
+        Do
+            Dim tokenPos = value.IndexOf(EntryNameToken, pos, StringComparison.OrdinalIgnoreCase)
+            If tokenPos = -1 Then Exit Do
+
+            result &= value.Substring(pos, tokenPos - pos) & sectionName
+            pos = tokenPos + EntryNameToken.Length
+        Loop
+
+        Return result & value.Substring(pos)
+
+    End Function
+
+    ''' <summary>
+    ''' Hands off the processing of a section to the appropriate handler based on the
     ''' current <c> Transmutator </c> setting. <br />
     ''' </summary>
     ''' 

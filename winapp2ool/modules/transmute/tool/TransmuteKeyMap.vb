@@ -27,7 +27,9 @@ Option Strict On
 ''' Rule sections contain: <br />
 ''' <c> Match=&lt;Name&gt;=&lt;Value&gt; </c> — repeatable (as <c> Match1= </c>, <c> Match2= </c>, ...).
 ''' A base key matches when its KeyType (Name with numbers stripped) and Value both equal the
-''' match key's, case-insensitively — consistent with Remove ByValue matching <br />
+''' match key's, case-insensitively — consistent with Remove ByValue matching. A match Value of
+''' exactly <c> * </c> matches any value of that KeyType; because rules are first-match-wins,
+''' a wildcard rule placed last serves as a fallback behind more specific rules <br />
 ''' <c> Replace=&lt;Name&gt;=&lt;Value&gt; </c> — repeatable (as <c> Replace1= </c>, <c> Replace2= </c>, ...).
 ''' The full replacement key line(s). The first replacement takes the matched key's ordinal
 ''' position and any remaining replacements are inserted immediately after it in file order,
@@ -181,7 +183,12 @@ Public Module TransmuteKeyMap
     ''' Determines whether <c> <paramref name="baseKey"/> </c> satisfies any of the match criteria
     ''' of <c> <paramref name="rule"/> </c>: KeyType and Value must both match, case-insensitively.
     ''' Comparing KeyTypes strips numbers from both sides, so <c> Match=FileKey=... </c> matches
-    ''' any <c> FileKeyN </c> with that value
+    ''' any <c> FileKeyN </c> with that value. <br /> <br />
+    '''
+    ''' A match Value of exactly <c> * </c> is a wildcard which matches any value of that KeyType.
+    ''' Combined with first-match-wins rule ordering, a wildcard rule placed last in the source
+    ''' file acts as a fallback: specific rules listed before it take precedence and the wildcard
+    ''' catches everything else
     ''' </summary>
     '''
     ''' <param name="rule">
@@ -197,7 +204,7 @@ Public Module TransmuteKeyMap
         For Each matchKey In rule.Matches
 
             If baseKey.KeyType.Equals(matchKey.KeyType, StringComparison.OrdinalIgnoreCase) AndAlso
-               baseKey.Value.Equals(matchKey.Value, StringComparison.OrdinalIgnoreCase) Then Return True
+               (matchKey.Value = "*" OrElse baseKey.Value.Equals(matchKey.Value, StringComparison.OrdinalIgnoreCase)) Then Return True
 
         Next
 

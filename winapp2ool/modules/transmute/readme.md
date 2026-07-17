@@ -249,12 +249,24 @@ A source section literally named `[*]` applies its keys to every section of the 
 
 ###### Note: Numbered keys will be rejected in Add mode. 
 
+### The %EntryName% token
+
+A key value in a `[*]` section may contain the token `%EntryName%` (case-insensitive). As the key is applied, the token is replaced with each receiving section's name (including the trailing ` *` of winapp2.ini entries) so a single global key produces a distinct value per section. The token is only interpreted inside `[*]` sections; named-section operations leave it as a literal value.
+
 ##### Example
 
 ```ini
 ; Remove Edge's DetectFile from every entry that carries it (Remove - ByKey - ByValue)
 [*]
 DetectFile=%LocalAppData%\Microsoft\Edge*
+```
+
+```ini
+; Give every entry a unique ID and a shared Author (Add mode)
+; In [Adobe Flash Player *], ID=%EntryName% becomes ID=Adobe Flash Player *
+[*]
+ID=%EntryName%
+Author=Winapp2.ini Project
 ```
 
 ## Key Mapping Rules ([*Map:])
@@ -267,7 +279,7 @@ Each rule section contains:
 
 | Key | Meaning | Notes |
 |:-|:-|:-|
-| `Match=<Name>=<Value>` | A match criteria | Repeatable as `Match1=`, `Match2=`, ... for many-to-one mappings. KeyTypes are compared with numbers stripped from both sides, so `Match=FileKey=...` matches any `FileKeyN` with that value |
+| `Match=<Name>=<Value>` | A match criteria | Repeatable as `Match1=`, `Match2=`, ... for many-to-one mappings. KeyTypes are compared with numbers stripped from both sides, so `Match=FileKey=...` matches any `FileKeyN` with that value. A Value of exactly `*` is a wildcard matching any value of that KeyType |
 | `Replace=<Name>=<Value>` | The full replacement key line | Repeatable as `Replace1=`, `Replace2=`, ... for one-to-many mappings. The first replacement takes the matched key's ordinal position; any remaining replacements are inserted immediately after it in file order |
 
 ##### Example
@@ -291,6 +303,17 @@ Match=DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*
 Replace1=DetectFile1=%LocalAppData%\BraveSoftware\Brave-Browser
 Replace2=DetectFile2=%LocalAppData%\BraveSoftware\Brave-Browser-Beta
 Replace3=DetectFile3=%LocalAppData%\BraveSoftware\Brave-Browser-Nightly
+
+; Wildcard fallback: specific rules first, the wildcard catches everything else.
+; Because rules are first-match-wins in file order, place the fallback LAST
+[*Map: Chrome tag]
+Match=LangSecRef=3029
+Replace=Tags=Google,Chrome,Browser
+
+[*Map: Category fallback]
+Match1=LangSecRef=*
+Match2=Section=*
+Replace=Tags=ccapps
 ```
 
 ### Rule behavior
@@ -303,6 +326,7 @@ Replace3=DetectFile3=%LocalAppData%\BraveSoftware\Brave-Browser-Nightly
 ### Example use cases
 - Maintaining the browser category mapping (`Section=` → `LangSecRef=`) for the CCleaner flavor as ~14 rules instead of hundreds of per-entry cohort sections that must be kept in lockstep across two files
 - De-abstracting wildcard `DetectFile` paths into hardcoded variants for the System Ninja flavor (which does not support wildcards in detection) as one rule per wildcard, instead of a remove + add lockstep spanning two files and one section per affected entry. New entries carrying the same wildcards are covered automatically
+- Converting every entry's `LangSecRef`/`Section` category key into its CCleaner 7 `Tags=` value: specific rules map each known category and a wildcard fallback rule (placed last) funnels every remaining category into `Tags=ccapps`. Combined with a `[*]` section adding `ID=%EntryName%` and `Author=`, this expresses the entire CCleaner 7 format conversion as data
 
 ---
 

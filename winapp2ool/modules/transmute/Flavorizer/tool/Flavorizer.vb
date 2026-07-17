@@ -45,7 +45,6 @@ Public Module Flavorizer
     ''' Flavorizer args:
     ''' -nowinapp         : Disable processing as winapp2.ini format (default: true)
     ''' -autodetect       : Automatically detect a group of Flavor files in the target directory
-    ''' -cc7ify           : Apply the baseline CCleaner 7 flavorization instead of normal flavorization
     ''' </summary>
     '''
     ''' <remarks>
@@ -59,16 +58,10 @@ Public Module Flavorizer
 
         ' Detect mode flags first — they affect which file slots are bound
         Dim autoDetect = False
-        Dim cc7ify = False
 
         If cmdargs.Contains("-autodetect") Then
             autoDetect = True
             cmdargs.Remove("-autodetect")
-        End If
-
-        If cmdargs.Contains("-cc7ify") Then
-            cc7ify = True
-            cmdargs.Remove("-cc7ify")
         End If
 
         Dim spec As New CliArgSpec("flavorize")
@@ -85,12 +78,6 @@ Public Module Flavorizer
         spec.Parse()
 
         If autoDetect Then DetectFlavorFiles(FlavorizerFile9.Dir)
-
-        If cc7ify Then
-            gLog("Applying baseline CCleaner 7 flavorization")
-            ApplyBaselineCC7Flavor()
-            Return
-        End If
 
         If FlavorizerFile1.Name.Length > 0 Then initFlavorizer()
 
@@ -142,69 +129,6 @@ Public Module Flavorizer
         crk()
 
     End Sub
-
-    ''' <summary>
-    ''' The CCleaner 7 flavorization process is implemented in winapp2ool to avoid the pitfalls
-    ''' that would inevitably arise from trying to shoehorn it into Transmute's Flavorize function
-    '''
-    ''' Every single entry needs to be modified in some way and this function will handle that process
-    '''
-    ''' Additional changes will be required to fully implement the new features in CCleaner 7's
-    ''' scripting language. The process carried out here only makes the winapp2.ini entries visible
-    ''' in CCleaner7
-    ''' </summary>
-    Private Sub ApplyBaselineCC7Flavor()
-
-        Dim baseFile2 = iniFile2.FromFile(FlavorizerFile1.Path())
-        If Not enforceFileHasContent(baseFile2) Then Return
-
-        For Each section In baseFile2
-
-            section.AddKey(New iniKey2($"ID={section.Name}"))
-            section.AddKey(New iniKey2("Author=Winapp2.ini Project"))
-            section.AddKey(New iniKey2($"Tags={getTagFromCategory(section)}"))
-
-        Next
-
-        Dim wf2 As New winapp2file2(baseFile2)
-        Dim saveFile2 = iniFile2.Empty(FlavorizerFile2.Dir, FlavorizerFile2.Name)
-        saveFile2.OverwriteToFile(wf2.ToWinapp2String())
-
-    End Sub
-
-    ''' <summary>
-    ''' Returns the CCleaner 7 tag string for the given section by reading and removing
-    ''' the section's <c> LangSecRef </c> or <c> Section </c> key
-    ''' </summary>
-    '''
-    ''' <param name="section">
-    ''' The section whose category key will be read and removed
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' The CCleaner 7 tag string mapped from the section's category value, or <c> "ccapps" </c> if unmapped
-    ''' </returns>
-    Private Function getTagFromCategory(section As iniSection2) As String
-
-        Dim oldSections = {"3021", "games", "3022", "3023", "3024", "3025", "3026", "3027", "3029", "3030", "3031", "3032", "3033", "3034", "3035",
-                           "3037", "3038", "3039", "3043", "3044", "3005", "3006"}
-        Dim newSections = {"ccapps", "ccapps", "ccinternet", "ccmedia", "ccutil", "ccwindows", "Mozilla,FireFox,Browser",
-                           "Opera,Browser", "Google,Chrome,Browser", "Thunderbird,Email", "ccwinstore", "CCleaner,Browser", "Vivaldi,Browser",
-                           "Brave,Browser", "OperaGX,Browser", "Avast,Browser", "AVG,Browser", "ARC,Browser", "Norton,Browser", "Avira,Browser",
-                           "Microsoft,Browser,Edge", "Microsoft,Browser,Edge"}
-
-        Dim catKey = section.Keys.GetKey("Section")
-        If catKey Is Nothing Then catKey = section.Keys.GetKey("LangSecRef")
-
-        If catKey Is Nothing Then Return "ccapps"
-
-        Dim index = Array.IndexOf(oldSections, catKey.Value.ToLowerInvariant)
-        section.Keys.Remove(catKey)
-        If index >= 0 Then Return newSections(index)
-
-        Return "ccapps"
-
-    End Function
 
     ''' <summary>
     ''' Performs the actual flavorization using the Transmute.Flavorize function

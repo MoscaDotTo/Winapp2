@@ -255,14 +255,6 @@ winapp2ool -flavorize [options]
 | `-nowinapp` | Save output without winapp2.ini formatting | Formatting is enabled by default |
 | `-autodetect` | Automatically detect correction files in the target directory | See [Auto-Detection](#auto-detection) |
 
-### CCleaner 7 Conversion
-
-| Arg | Effect |
-|:-|:-|
-| `-cc7ify` | Apply the baseline CCleaner 7 conversion instead of normal flavorization |
-
-`-cc7ify` bypasses the six-stage process entirely. Every entry in the base file (`-1f`) receives `ID=<entry name>`, `Author=Winapp2.ini Project`, and a `Tags=` value mapped from its `LangSecRef` or `Section` key (which is removed in the process); the result is written to the save target (`-2f`). This is the conversion the build pipeline uses to produce the CCleaner 7 flavor of winapp2.ini. End users who want winapp2.ini working inside CCleaner 7 should use the [CC7Patcher](../../cc7patcher/readme.md) module instead.
-
 ### File Selection
 
 Each file slot has a corresponding index for use with the `-Nd` (directory) and `-Nf` (file name) argument pattern:
