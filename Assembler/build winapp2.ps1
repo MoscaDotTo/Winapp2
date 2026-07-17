@@ -174,7 +174,7 @@ function Build-MainFile {
         -ErrorMessage "Failed to join EntryBuilder entries")) { return $false }
 
     Write-Step "Performing static analysis and saving corrections"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
         -ErrorMessage "Failed static analysis")) { return $false }
 
     Write-Step "Creating changelog"
@@ -214,7 +214,7 @@ function Build-CCCleanerFlavor {
         '-9d', '\SystemNinja' -ErrorMessage "Failed to create System Ninja flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'SystemNinja'))) { return $false }
 
     Write-Step "Performing static analysis and saving corrections"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-ccleaner-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-ccleaner-flavor.ini', `
         '-3f', 'winapp2-ccleaner-flavor.ini' `
         -ErrorMessage "Failed CCleaner flavor analysis")) { return $false }
 
@@ -260,7 +260,7 @@ function Build-CCleaner7Flavor {
 }
 
 function Build-BleachBitFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-bleachbit-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-bleachbit-flavor.ini', `
         '-3f', 'winapp2-bleachbit-flavor.ini' `
         -ErrorMessage "Failed BleachBit flavor analysis")) { return $false }
 
@@ -282,7 +282,7 @@ function Build-BleachBitFlavor {
 }
 
 function Build-TronFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-tron-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-tron-flavor.ini', `
         '-3f', 'winapp2-tron-flavor.ini' `
         -ErrorMessage "Failed Tron flavor analysis")) { return $false }
 
@@ -304,7 +304,7 @@ function Build-TronFlavor {
 }
 
 function Build-SystemNinjaFlavor {
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-1f', 'winapp2-systemninja-flavor.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-systemninja-flavor.ini', `
         '-3f', 'Winapp2.rules' -ErrorMessage "Failed System Ninja flavor analysis")) { return $false }
 
     Write-Step "Creating changelog"
