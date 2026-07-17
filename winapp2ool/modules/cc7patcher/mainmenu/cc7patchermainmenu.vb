@@ -81,14 +81,19 @@ Public Module cc7patchermainmenu
 
         If Not Integer.TryParse(input, intInput) Then
 
-            If input.Length = 0 AndAlso Not denyActionWithHeader(Not CC7PatcherFile2.Exists(), "CCleaner.ini not found") Then initCC7Patcher()
+            If input.Length = 0 Then
 
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+                If Not denyActionWithHeader(Not CC7PatcherFile2.Exists(), "CCleaner.ini not found") Then initCC7Patcher()
                 Return
 
             End If
 
-            If intInput = 0 Then exitModule() : Return
+            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Return
+
+        End If
+
+        If intInput = 0 Then exitModule() : Return
 
         If Not buildCC7PatcherMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
