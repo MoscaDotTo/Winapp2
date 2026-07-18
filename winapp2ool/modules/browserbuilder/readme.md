@@ -2,7 +2,7 @@
 
 **BrowserBuilder** is a winapp2ool module that generates winapp2.ini entries for web browsers using a small scripting interface. Rather than writing individual entries for every browser and every entry type by hand, you define browser metadata and entry templates once. BrowserBuilder then cross-applies them to produce a consistent set of entries for every supported browser automatically.
 
-BrowserBuilder is primarily an internal devops tool used to maintain the browser sections of the winapp2.ini distribution. End users with browsers installed in non-standard locations or using portable installations can also use it to generate entries for those scenarios (s ee [Example 8](#example-8-generating-entries-for-a-portable-browser))
+BrowserBuilder is primarily an internal devops tool used to maintain the browser sections of the winapp2.ini distribution. End users with browsers installed in non-standard locations or using portable installations can also use it to generate entries for those scenarios (see [Example 8](#example-8-generating-entries-for-a-portable-browser)).
 
 ### What does BrowserBuilder do?
 
@@ -51,7 +51,7 @@ BrowserBuilder reads two DSL files (`chromium.ini` and `gecko.ini`) from a singl
 - A source directory containing at least one of `chromium.ini` or `gecko.ini` with valid `BrowserInfo` and `EntryScaffold` sections
 - Optionally, [flavor correction files](#post-generation-flavorizing) in the same directory, resolved by their fixed names
 
-All input files are read from the single source directory. The individual files are not separately configurable, pointing BrowserBuilder at a directory is the entire configuration.
+All input files are read from the single source directory. The individual files are not separately configurable; pointing BrowserBuilder at a directory is the entire configuration.
 
 ---
 
@@ -61,7 +61,7 @@ All input files are read from the single source directory. The individual files 
 
 1. Place `chromium.ini` and/or `gecko.ini` (and any flavor correction files) in one directory
 2. From the winapp2ool main menu, select Entry Lab, and then select BrowserBuilder 
-3. Set the source directory to that location (or launch winapp2ool from it, the default is the current directory)
+3. Set the source directory to that location (or launch winapp2ool from it; the default is the current directory)
 4. Run: BrowserBuilder generates entries for all browsers defined in the rulesets, applies any flavor corrections found next to them, and saves the result to `browsers.ini`
 
 ---
@@ -150,7 +150,7 @@ Any other key in an `EntryScaffold` section produces a warning and is otherwise 
 | `%LocalDataPath%` | `UserDataPath` with `%AppData%` swapped for `%LocalAppData%` | `FileKeyBase` (Gecko only) |
 | `%RegistryRoot%` | A registry root path from `BrowserInfo` | `RegKeyBase` |
 
-**A `FileKeyBase` which contains none of these variables generates nothing.** There is no warning, the template is silently skipped for every browser. Likewise, `%LocalDataPath%` used in `chromium.ini` is silently skipped. If an expected FileKey is missing from your output, check the template's variable first.
+**A `FileKeyBase` which contains none of these variables generates nothing.** There is no warning; the template is silently skipped for every browser. Likewise, `%LocalDataPath%` used in `chromium.ini` is silently skipped. If an expected FileKey is missing from your output, check the template's variable first.
 
 ### Variable behavior details
 
@@ -183,7 +183,7 @@ The flavor files are read from the source directory. The names are not configura
 | 5 | Key replacements | `browser_key_replacements.ini` |
 | 6 | Additions | `browser_additions.ini` |
 
-All flavor files are optional, missing files are silently skipped. 
+All flavor files are optional; missing files are silently skipped.
 
 For additional context, see the [Flavorizer README](../transmute/Flavorizer/readme.md) and the [Transmute README's Usage Examples](../transmute/readme.md#usage-examples).
 
@@ -262,7 +262,7 @@ Use `TruncateDetect` when `UserDataPath` contains a wildcard in its direct paren
 | Symptom | Cause |
 |:-|:-|
 | "No valid generative rulesets found" | Neither `chromium.ini` nor `gecko.ini` in the source directory contains any parseable sections; check the source directory setting |
-| Warning: "Invalid section found and ignored: [section]" | A section's name does not start with exactly `BrowserInfo:` or `EntryScaffold:` the prefixes are case-sensitive |
+| Warning: "Invalid section found and ignored: [section]" | A section's name does not start with exactly `BrowserInfo:` or `EntryScaffold:`; the prefixes are case-sensitive |
 | Warning: "Unexpected KeyType in [section]: [key]" | A `BrowserInfo` or `EntryScaffold` section contains a key name the module doesn't recognize; the key is ignored |
 | Warning: "No valid UserDataPath key found in [browser]" | The `BrowserInfo` section is missing its `UserDataPath` key; the browser's entries will have no `DetectFile` and no FileKeys |
 | Warning: "No valid Section key found in [browser]" | The `BrowserInfo` section is missing its `Section` key; generated entries will carry an empty `Section=` |
@@ -462,7 +462,7 @@ We want the generated `DetectFile` to point at the wildcarded parent directory i
 
 **Files**
 
-###### **Ruleset (`chromium.ini`) **
+###### **Ruleset (`chromium.ini`)**
 
 ```ini
 [BrowserInfo: Brave]
@@ -485,7 +485,7 @@ winapp2ool -browserbuilder -1d C:\rulesets
 
 **Output**
 
-###### **Output file (`browsers.ini`) **
+###### **Output file (`browsers.ini`)**
 
 ```ini
 [Brave Bookmark Backups *]
@@ -568,7 +568,7 @@ Skipping Arc for Pinned Tabs: scaffold requires RegistryRoot
 
 **Context**
 
-Some browser files live *outside* the user data directory (eg. installer logs, setup metrics.) When a Chromium browser is installed "for all users", those application files live under `%ProgramFiles%` instead of the per-user location.
+Some browser files live *outside* the user data directory (e.g. installer logs, setup metrics). When a Chromium browser is installed "for all users", those application files live under `%ProgramFiles%` instead of the per-user location.
 
 **Intent**
 
