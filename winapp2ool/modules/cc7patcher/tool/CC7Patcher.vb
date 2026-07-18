@@ -27,6 +27,14 @@ Option Strict On
 Public Module CC7Patcher
 
     ''' <summary>
+    ''' The <c> Author </c> key value stamped onto every entry by the CCleaner7 flavor
+    ''' (<c> cc7_additions.ini </c>). It uniquely identifies winapp2-authored sections in a
+    ''' previously-patched <c> ccleaner.ini </c>, so they can be pruned before re-patching to
+    ''' keep patching idempotent. Kept in sync with the value in <c> cc7_additions.ini </c>
+    ''' </summary>
+    Private Const CC7AuthorStamp As String = "Winapp2.ini Project"
+
+    ''' <summary>
     ''' Handles the command line arguments for CC7Patcher
     ''' </summary>
     '''
@@ -157,6 +165,8 @@ Public Module CC7Patcher
             Dim baseFile = CC7PatcherFile2.Load()
             If baseFile Is Nothing Then Return
 
+            pruneWinapp2Sections(baseFile, menuOutput)
+
             Dim outputFile = iniFile2.Empty(CC7PatcherFile3.Dir, CC7PatcherFile3.Name)
 
             Dim patchMsg = $"Patching {CC7PatcherFile2.Name} with entries from winapp2.ini"
@@ -172,5 +182,64 @@ Public Module CC7Patcher
         End Using
 
     End Sub
+
+    ''' <summary>
+    ''' Removes every winapp2-authored section from <c> <paramref name="baseFile"/> </c> in place,
+    ''' so that the subsequent Transmute Add starts from a clean slate rather than duplicating keys
+    ''' into sections a previous patch already created. This makes patching idempotent and lets a
+    ''' dirty <c> ccleaner.ini </c> be updated to a newer winapp2.ini, including dropping entries
+    ''' that no longer exist upstream. <br /> <br />
+    '''
+    ''' winapp2 sections are identified by the <c> Author=Winapp2.ini Project </c> stamp the
+    ''' CCleaner7 flavor applies to every entry (see <c> CC7AuthorStamp </c>); sections without it
+    ''' (CCleaner's own settings, user-authored customs) are left untouched
+    ''' </summary>
+    '''
+    ''' <param name="baseFile">
+    ''' The loaded <c> ccleaner.ini </c> to prune winapp2 sections from
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> containing output to be displayed to the user
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The number of sections pruned
+    ''' </returns>
+    Private Function pruneWinapp2Sections(ByRef baseFile As iniFile2,
+                                          ByRef menuOutput As MenuSection) As Integer
+
+        Using gLogScope("Pruning existing winapp2 entries from ccleaner.ini")
+
+            Dim toRemove As New List(Of String)
+
+            For Each section In baseFile
+
+                Dim authorKey = section.Keys.GetKey("Author")
+
+                If authorKey IsNot Nothing AndAlso authorKey.Value.Equals(CC7AuthorStamp, StringComparison.OrdinalIgnoreCase) Then
+
+                    toRemove.Add(section.Name)
+
+                End If
+
+            Next
+
+            For Each name In toRemove
+
+                baseFile.RemoveSection(name)
+
+            Next
+
+            Dim entryWord = If(toRemove.Count = 1, "entry", "entries")
+            Dim prunedMsg = $"Pruned {toRemove.Count} existing winapp2 {entryWord} before patching"
+            menuOutput.AddColoredLine(prunedMsg, ConsoleColor.Yellow)
+            gLog(prunedMsg)
+
+            Return toRemove.Count
+
+        End Using
+
+    End Function
 
 End Module
