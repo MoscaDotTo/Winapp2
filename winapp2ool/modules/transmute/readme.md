@@ -1123,9 +1123,9 @@ FileKey=%AppData%\360se6\User Data\*|360Bookmarks*
 **Command**
 ```
 winapp2ool -transmute -add -1f browsers.ini -2f browser_additions.ini -3f browsers.ini 
-winapp2ool -debug -c -1f browsers.ini -3f browsers.ini
+winapp2ool -debug -c -opti -1f browsers.ini -3f browsers.ini
 ```
-###### Note: WinappDebug does not by default perform the optimization shown below, you must manually enable the "Optimizations" lint rule in the WinappDebug Scan Settings first
+###### Note: WinappDebug does not perform the optimization shown below by default. The `-opti` flag enables its experimental Optimizations rule (FileKey merger) for this run. See the [WinappDebug readme](../winappdebug/README.md) for details
 
 **Output**
 
@@ -1135,7 +1135,7 @@ winapp2ool -debug -c -1f browsers.ini -3f browsers.ini
 [360 Secure Browser Bookmarked Websites *]
 Section=.360 Secure Browser Web Browser
 DetectFile=%AppData%\360se6\User Data
-FileKey1=%AppData%\360se6\User Data\*|360Bookmarks*;bookmarks;BookmarkMergedSurfaceOrdering
+FileKey1=%AppData%\360se6\User Data\*|360Bookmarks*;BookmarkMergedSurfaceOrdering;bookmarks
 FileKey2=%AppData%\360se6\User Data\*\power_bookmarks|*|REMOVESELF
 ```
 
@@ -1149,6 +1149,7 @@ FileKey2=%AppData%\360se6\User Data\*\power_bookmarks|*|REMOVESELF
 - The input file is browsers.ini 
 - The output file is browsers.ini (overwriting the input file)
 - WinappDebug detects that the added `FileKey` points to the same location as the existing `FileKey1` and merges its parameters into the existing key and removes the now-unneeded `FileKey` which was just added
+- The merged parameter list is sorted alphabetically, like any other FileKey parameter repair
 - The style and syntax of the entry is corrected if there are any additional issues
 
 ---
