@@ -16,7 +16,7 @@ EntryBuilder reads every `*.ini` file in its source directory, combines them in-
 - **Shorthand DSL**: Replaces 20-line repetitive entries with a few list-variable declarations and templated keys. 
 - **Shared scaffold catalogs**: One catalog of Chromium cleaning patterns covers every embedded WebView2 host. Discord, Slack, VS Code, Teams, and dozens of small Electron apps get consistent baseline coverage without per-app duplication. A second catalog does the same for QtWebEngine hosts.
 - **Pass-through compatible**: Any standard winapp2 key passes through unchanged. You can paste a raw entry in and incrementally enrich it with shorthand, or leave it untouched.
-- **Consistent DSL surface**: The same `<Name>` variable syntax and scaffold key names work across winapp2ool's builder modules, so knowledge transfers between them.
+- **Consistent DSL surface**: The same `<Name>` variable syntax and scaffold key names work across winapp2ool's builder modules.
 
 ---
 
