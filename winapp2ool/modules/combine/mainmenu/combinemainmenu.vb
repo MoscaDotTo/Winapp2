@@ -42,6 +42,9 @@ Public Module combinemainmenu
                 Sub() changeFile2Params(CombineFile3, CombineModuleSettingsChanged, NameOf(Combine),
                                         NameOf(CombineFile3), NameOf(CombineModuleSettingsChanged))) _
             .AddBlank() _
+            .AddDispatchedToggle("Strict Mode", "failing the build instead of merging when processing duplicate section names", CombineStrictNames,
+                Sub() toggleModuleSetting("Strict name checking", NameOf(Combine), GetType(combinesettings), NameOf(CombineStrictNames), NameOf(CombineModuleSettingsChanged))) _
+            .AddBlank() _
             .AddDispatchedColoredOption("Log Viewer", "View the detailed Combine log", ConsoleColor.Yellow,
                 Sub() printSlice(MostRecentCombineLog), Not noLog) _
             .AddBlank(Not noLog) _

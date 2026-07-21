@@ -22,7 +22,11 @@ Imports System.IO
 ''' <summary>
 ''' Combine is a winapp2ool module that takes all files with the ini extension within a target
 ''' directory (including its subdirectories) and combines them into a single ini file. When
-''' duplicate section names are encountered, their unique keys are merged together into the output.
+''' duplicate section names are encountered, their unique keys are merged together into the
+''' output and a warning lists the collisions; with strict name checking enabled
+''' (<see cref="combinesettings.CombineStrictNames"/>, <c> -strict </c> on the CLI), collisions
+''' instead fail the run — the output is not saved and a nonzero exit code is set — since the
+''' build pipeline's staged inputs are expected to be disjoint.
 ''' <br />
 ''' Files that cannot be parsed or have no sections are ignored.
 ''' <br /><br />
@@ -56,6 +60,11 @@ Public Module Combine
     ''' <item><c> -3d path </c> — Set the output directory</item>
     ''' <item><c> -3f name </c> — Set the output file name</item>
     ''' </list>
+    ''' Flags:
+    ''' <list type="bullet">
+    ''' <item><c> -strict </c> — toggles strict name checking: a section name appearing in
+    ''' more than one input file fails the run instead of being merged</item>
+    ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
 
@@ -64,6 +73,7 @@ Public Module Combine
         Dim spec As New CliArgSpec(NameOf(Combine))
         spec.WithFile(1, CombineFile1, "targetdir") _
             .WithFile(3, CombineFile3, "output") _
+            .WithFlag("-strict", Sub() CombineStrictNames = Not CombineStrictNames) _
             .Parse()
 
         initCombine(CombineFile1.Dir, CombineFile3)
@@ -144,6 +154,7 @@ Public Module Combine
                 Dim processedCount = 0
                 Dim validFileCount = 0
                 Dim outputFullPath = Path.GetFullPath(combinedOutput.Path())
+                Dim collisions As New List(Of String)
 
                 For Each filePath In allINIFiles
 
@@ -154,7 +165,7 @@ Public Module Combine
 
                     Try
 
-                        attemptCombine(filePath, combinedOutput, validFileCount, outputMenu)
+                        attemptCombine(filePath, combinedOutput, validFileCount, outputMenu, collisions)
 
                     Catch ex As Exception
 
@@ -168,13 +179,41 @@ Public Module Combine
 
                 gLog($"Processed {processedCount} files, {validFileCount} contained combinable sections")
 
+                Dim strictNamesViolated = CombineStrictNames AndAlso collisions.Count > 0
+
+                If collisions.Count > 0 Then
+
+                    Dim collisionMsg = $"{collisions.Count} section name(s) appeared in more than one input file:"
+                    gLog(collisionMsg)
+                    outputMenu.AddWarning(collisionMsg)
+
+                    For Each collision In collisions
+
+                        gLog($"  {collision}")
+                        outputMenu.AddWarning($"  {collision}")
+
+                    Next
+
+                    If strictNamesViolated Then
+
+                        Dim strictMsg = $"Strict name checking is enabled - {combinedOutput.Name} will not be saved"
+                        gLog(strictMsg)
+                        outputMenu.AddWarning(strictMsg)
+
+                        ' Nonzero exit fails the scripted build pipeline
+                        Environment.ExitCode = 1
+
+                    End If
+
+                End If
+
                 Dim outputIsEmpty = combinedOutput.Count = 0
 
                 Dim emptyOutputMsg = $"No valid sections found to combine - {combinedOutput.Name} will not be saved"
                 gLog(emptyOutputMsg, cond:=outputIsEmpty)
                 outputMenu.AddWarning(emptyOutputMsg, condition:=outputIsEmpty)
 
-                combinedOutput.OverwriteToFile(combinedOutput.ToString(), Not outputIsEmpty)
+                combinedOutput.OverwriteToFile(combinedOutput.ToString(), Not outputIsEmpty AndAlso Not strictNamesViolated)
 
                 Dim combinedCountMsg = $"Combined {validFileCount} files into {combinedOutput.Name} with {combinedOutput.Count} sections"
                 gLog(combinedCountMsg, cond:=Not outputIsEmpty)
@@ -246,10 +285,16 @@ Public Module Combine
     ''' The <c> MenuSection </c> containing the Combine module's output as it will be displayed
     ''' to the user
     ''' </param>
+    '''
+    ''' <param name="collisions">
+    ''' Accumulates a description of every section whose name was already present in the
+    ''' output when this file contributed it (a cross-file name collision)
+    ''' </param>
     Private Sub attemptCombine(filepath As String,
                          ByRef combinedOutput As iniFile2,
                          ByRef validFileCount As Integer,
-                         ByRef outputMenu As MenuSection)
+                         ByRef outputMenu As MenuSection,
+                               collisions As List(Of String))
 
         Dim currentFile As iniFile2 = iniFile2.FromFile(filepath)
 
@@ -264,7 +309,7 @@ Public Module Combine
 
         Using gLogScope(processingMsg)
 
-            mergeFileIntoOutput(currentFile, combinedOutput)
+            mergeFileIntoOutput(currentFile, combinedOutput, Path.GetFileName(filepath), collisions)
 
             validFileCount += 1
 
@@ -312,11 +357,28 @@ Public Module Combine
     ''' <param name="combinedOutput">
     ''' The combined output file that will receive the merged sections
     ''' </param>
-    Private Sub mergeFileIntoOutput(sourceFile As iniFile2, ByRef combinedOutput As iniFile2)
+    '''
+    ''' <param name="sourceFileName">
+    ''' The file name of <paramref name="sourceFile"/>, recorded in collision reports
+    ''' </param>
+    '''
+    ''' <param name="collisions">
+    ''' Accumulates a description of every cross-file section name collision encountered
+    ''' </param>
+    Private Sub mergeFileIntoOutput(sourceFile As iniFile2,
+                              ByRef combinedOutput As iniFile2,
+                                    sourceFileName As String,
+                                    collisions As List(Of String))
 
         For Each sourceSection In sourceFile
 
-            If combinedOutput.Contains(sourceSection.Name) Then AddUniqueKeys(sourceSection, combinedOutput, sourceSection.Name) : Continue For
+            If combinedOutput.Contains(sourceSection.Name) Then
+
+                collisions.Add($"[{sourceSection.Name}] contributed again by {sourceFileName}")
+                AddUniqueKeys(sourceSection, combinedOutput, sourceSection.Name)
+                Continue For
+
+            End If
 
             combinedOutput.AddSection(sourceSection)
             gLog($"Added new section: [{sourceSection.Name}] ({sourceSection.Keys.Count} keys)")

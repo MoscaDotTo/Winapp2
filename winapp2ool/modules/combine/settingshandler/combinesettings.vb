@@ -60,6 +60,17 @@ Public Module combinesettings
     Public Property CombineFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "combined.ini", "combined.ini", mustExist:=False)
 
     ''' <summary>
+    ''' When <c> True </c>, a section name appearing in more than one input file is
+    ''' treated as an error: the collisions are reported, the output is not saved, and
+    ''' a nonzero process exit code is set so scripted builds fail. When <c> False </c>
+    ''' (the default), same-named sections are merged key-wise as before, with a
+    ''' warning listing the collisions. Intended for the winapp2.ini build pipeline,
+    ''' where the staged input files are expected to be disjoint and any collision is a
+    ''' maintainer error. CLI: <c> -strict </c>
+    ''' </summary>
+    Public Property CombineStrictNames As Boolean = False
+
+    ''' <summary>
     ''' Indicates that the module settings have been modified from their defaults
     ''' </summary>
     Public Property CombineModuleSettingsChanged As Boolean = False
@@ -71,6 +82,7 @@ Public Module combinesettings
 
         CombineFile1.ResetParams()
         CombineFile3.ResetParams()
+        CombineStrictNames = False
         CombineModuleSettingsChanged = False
         SaveModule2(NameOf(Combine), GetType(combinesettings))
 
