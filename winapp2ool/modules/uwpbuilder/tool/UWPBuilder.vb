@@ -404,7 +404,7 @@ Public Module UWPBuilder
             menuOutput.AddColoredLine(generatedMsg, ConsoleColor.Yellow)
             gLog($" {generatedMsg}")
 
-            outputFile = remotedebug(outputFile, True)
+            outputFile = remotedebugGuarded(outputFile, NameOf(UWPBuilder), menuOutput)
 
             Dim sb As New StringBuilder()
             sb.AppendLine($"; # of entries: {outputFile.Count:#,###}")

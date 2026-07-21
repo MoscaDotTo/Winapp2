@@ -156,7 +156,7 @@ Public Module BrowserBuilder
 
             Flavorize(outputFile, outputFile, output, flavorAdd, flavorSecRem, flavorNameRem, flavorValRem, flavorSecRep, flavorKeyRep)
 
-            outputFile = remotedebug(outputFile, True)
+            outputFile = remotedebugGuarded(outputFile, NameOf(BrowserBuilder), output)
 
             Dim leadingComments As New List(Of String) From {
                 $"; # of entries: {outputFile.Count:#,###}",

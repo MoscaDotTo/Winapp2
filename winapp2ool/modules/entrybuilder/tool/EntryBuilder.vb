@@ -703,7 +703,7 @@ Public Module EntryBuilder
 
             renderStats(stats, menuOutput)
 
-            outputFile = remotedebug(outputFile, True)
+            outputFile = remotedebugGuarded(outputFile, NameOf(EntryBuilder), menuOutput)
 
             Dim sb As New StringBuilder()
             sb.AppendLine($"; # of entries: {outputFile.Count:#,###}")
