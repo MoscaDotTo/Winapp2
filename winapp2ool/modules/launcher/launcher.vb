@@ -64,7 +64,7 @@ Public Module launcher
 
             processCommandLineArgs()
 
-            If SuppressOutput Then Environment.Exit(0)
+            If SuppressOutput Then Environment.Exit(Environment.ExitCode)
 
             currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
             Console.Title = $"Winapp2ool v{currentVersion}"
