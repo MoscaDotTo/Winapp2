@@ -30,8 +30,10 @@ Imports System.Text
 ''' Each section in a source file describes one application and corresponds to exactly
 ''' one output winapp2.ini entry: the section header is the entry name
 ''' (e.g. <c> [Discord *] </c>) and is round-tripped verbatim into the output. Any
-''' valid winapp2 key passes through unchanged, so a raw entry can be pasted into a
-''' source file and incrementally enriched with shorthand. <br /><br />
+''' valid winapp2 key passes through unchanged, so a raw entry can be pasted into a 
+''' source file and incrementally enriched with shorthand. 
+''' The deprecated <c> SpecialDetect= </c> is refused: the key is dropped with a
+''' warning rather than passed through or misparsed as a variable declaration. <br /><br />
 '''
 ''' Scaffold families are the first shorthand category. An entry opts into a family by
 ''' declaring one or more root paths for it: <c> WebViewRoot= </c> (one per WebView2 /
@@ -97,13 +99,13 @@ Public Module EntryBuilder
     Private ReadOnly ReservedKeys As String() = {
         "SECTION", "LANGSECREF",
         "WEBVIEWROOT", "QTWEBENGINEROOT",
-        "DETECT", "DETECTFILE", "DETECTOS",
+        "DETECT", "DETECTFILE", "DETECTOS", "SPECIALDETECT",
         "FILEKEY", "FILEKEYBASE",
         "REGKEY", "REGKEYBASE",
         "EXCLUDEKEY", "EXCLUDEKEYBASE",
         "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
         "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
-        "SKIP", "DEFAULT"
+        "SKIP", "DEFAULT", "WARNING"
     }
 
     ''' <summary>
@@ -150,6 +152,13 @@ Public Module EntryBuilder
         ''' The <c> DetectOS= </c> value, or empty if not declared
         ''' </summary>
         Public DetectOS As String
+
+        ''' <summary>
+        ''' Pass-through <c> Warning= </c> values in file order, emitted verbatim between
+        ''' detection and deletion keys per canonical winapp2 key order. Prose text is
+        ''' never subject to variable expansion
+        ''' </summary>
+        Public Warnings As List(Of String)
 
         ''' <summary>
         ''' <c> FileKeyBase= </c> templates (the generative form) in file order, appended
@@ -293,6 +302,7 @@ Public Module EntryBuilder
             DetectFiles = New List(Of String)
             Detects = New List(Of String)
             DetectOS = ""
+            Warnings = New List(Of String)
             FileKeyBases = New List(Of String)
             FileKeys = New List(Of String)
             RegKeyBases = New List(Of String)
@@ -420,6 +430,9 @@ Public Module EntryBuilder
         ''' <summary> <c> DetectOS </c> keys emitted </summary>
         Public DetectOSKeys As Integer
 
+        ''' <summary> <c> Warning </c> keys emitted (pass-through, verbatim) </summary>
+        Public WarningKeys As Integer
+
         ''' <summary> <c> FileKey </c> keys produced by WebView scaffold catalog expansion (generated) </summary>
         Public ScaffoldFileKeys As Integer
 
@@ -497,7 +510,7 @@ Public Module EntryBuilder
         ''' <summary> Total keys emitted across every generated entry (sum of the per-category counters) </summary>
         Public ReadOnly Property TotalKeys As Integer
             Get
-                Return CategoryKeys + DetectKeys + DetectFileKeys + DetectOSKeys +
+                Return CategoryKeys + DetectKeys + DetectFileKeys + DetectOSKeys + WarningKeys +
                        GeneratedContentKeys + PassThroughContentKeys
             End Get
         End Property
@@ -780,6 +793,7 @@ Public Module EntryBuilder
         menuOutput.AddColoredLine(statLine("Detect:", stats.DetectKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("DetectFile:", stats.DetectFileKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("DetectOS:", stats.DetectOSKeys), ConsoleColor.White)
+        menuOutput.AddColoredLine(statLine("Warning:", stats.WarningKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKey (WebView scaffold):", stats.ScaffoldFileKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKey (Qt scaffold):", stats.QtScaffoldFileKeys), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKey (base):", stats.FileKeyBaseKeys), ConsoleColor.White)
@@ -896,7 +910,13 @@ Public Module EntryBuilder
 
                 Case "DETECT" : spec.Detects.Add(key.Value)
 
-                Case "DETECTOS" : spec.DetectOS = key.Value
+                Case "DETECTOS", "SPECIALDETECT"
+
+                    Dim sdMsg = $"DetectOS and SpecialDetect are deprecated; key dropped from [{entrySection.Name}]. Replace with Detect or DetectFile"
+                    gLog(sdMsg)
+                    menuOutput.AddWarning(sdMsg)
+
+                Case "WARNING" : spec.Warnings.Add(key.Value)
 
                 Case "FILEKEYBASE" : spec.FileKeyBases.Add(key.Value)
 
@@ -1205,9 +1225,9 @@ Public Module EntryBuilder
 
     ''' <summary>
     ''' Generates one winapp2.ini section for the given entry. Emits keys in winapp2
-    ''' canonical order: category, Detect, DetectFile, DetectOS, FileKey (scaffold
-    ''' expansion followed by entry-level FileKeyBase), RegKey, ExcludeKey. Never emits
-    ''' <c> Default= </c>.
+    ''' canonical order: category, Detect, DetectFile, DetectOS, Warning, FileKey
+    ''' (scaffold expansion followed by entry-level FileKeyBase), RegKey, ExcludeKey.
+    ''' Never emits <c> Default= </c>.
     ''' </summary>
     '''
     ''' <param name="spec">
@@ -1296,7 +1316,15 @@ Public Module EntryBuilder
         ' 4. DetectOS
         If spec.DetectOS.Length > 0 Then section.AddKey(New iniKey2($"DetectOS={spec.DetectOS}")) : stats.DetectOSKeys += 1
 
-        ' 5. FileKeys, emitted in four provenance tiers: WebView scaffold expansion (generated),
+        ' 5. Warnings (pass-through, verbatim — prose is never variable-expanded)
+        For Each w In spec.Warnings
+
+            section.AddKey(New iniKey2($"Warning={w}"))
+            stats.WarningKeys += 1
+
+        Next
+
+        ' 6. FileKeys, emitted in four provenance tiers: WebView scaffold expansion (generated),
         ' QtWebEngine scaffold expansion (generated), then FileKeyBase= templates (generated),
         ' then literal FileKey= (pass-through). Each tier is phase-2 expanded against the entry's
         ' variables and counted separately. Order does not survive remotedebug's per-bucket
@@ -1339,7 +1367,7 @@ Public Module EntryBuilder
 
         Next
 
-        ' 6. RegKeys with %WebViewRoot% / %QtWebEngineRoot% + variable expansion (Registry domain),
+        ' 7. RegKeys with %WebViewRoot% / %QtWebEngineRoot% + variable expansion (Registry domain),
         ' renumbered from 1: RegKeyBase= templates (generated) first, then literal RegKey= (pass-through).
         Dim regKeyValues As New List(Of String)
         For Each rkb In spec.RegKeyBases : regKeyValues.AddRange(expandFully(rkb, spec, ExpansionDomain.Registry, "RegKey", stats, menuOutput)) : Next
@@ -1357,7 +1385,7 @@ Public Module EntryBuilder
 
         Next
 
-        ' 7. ExcludeKeys with %WebViewRoot% / %QtWebEngineRoot% expansion, renumbered from 1 after fan-out:
+        ' 8. ExcludeKeys with %WebViewRoot% / %QtWebEngineRoot% expansion, renumbered from 1 after fan-out:
         ' ExcludeKeyBase= templates (generated) first, then literal ExcludeKey= (pass-through).
         Dim excludeKeyValues As New List(Of String)
 

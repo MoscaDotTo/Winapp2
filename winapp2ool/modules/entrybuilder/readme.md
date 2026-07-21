@@ -174,6 +174,7 @@ Any of the following standard winapp2 keys passes through into the output, subje
 | `LangSecRef` | See above |
 | `Detect` | Multiple values (after fan-out) produce numbered `Detect1`, `Detect2`, ...; a single value is emitted as bare `Detect` |
 | `DetectFile` | Same numbering rule as `Detect` |
+| `Warning` | Emitted verbatim; never subject to variable expansion |
 | `FileKey` | Same treatment as `FileKeyBase`, including root substitution; renumbered after expansion |
 | `RegKey` | Same treatment as `RegKeyBase`; renumbered after expansion |
 | `ExcludeKey` | Same treatment as `ExcludeKeyBase`; renumbered after expansion |
@@ -377,6 +378,7 @@ Warnings are shown in the menu output after a run and recorded in the winapp2ool
 | No root keys and no FileKey/RegKey content in any form | Entry **skipped** | `[Entry] declares no WebViewRoot, QtWebEngineRoot, FileKeyBase, or RegKeyBase - nothing to emit, skipping` |
 | No detection (after `Root` inference) | Entry emitted, always-on | `[Entry] declares no detection (Detect / DetectFile / DetectOS); generated entry will be always-on` |
 | `Default=` declared | Key dropped | `Default= declared in [Entry]; EntryBuilder never emits Default, ignoring` |
+| `SpecialDetect=` or `DetectOS` declared | Key dropped | `DetectOS and SpecialDetect are deprecated; key dropped from [Entry]. Replace with Detect or DetectFile` |
 | `All` mixed with other scaffold names | Extras ignored | `WebViewScaffolds=All in [Entry] with redundant additional names (X, Y); ignoring` |
 | Explicit scaffold list mixed with exclusions | Exclusions applied | `Both WebViewScaffolds and ExcludeWebViewScaffolds set in [Entry]; applying exclusions to explicit list` |
 | Unknown scaffold name requested | Scaffold dropped | `Unknown WebView scaffold 'X' requested by [Entry], skipping` |
