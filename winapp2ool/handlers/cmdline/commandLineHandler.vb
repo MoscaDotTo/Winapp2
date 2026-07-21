@@ -246,7 +246,7 @@ Public Module commandLineHandler
 
         Console.WriteLine($"{errTxt} Press any key to exit.")
         Console.ReadKey()
-        Environment.Exit(0)
+        Environment.Exit(1)
 
     End Sub
 
