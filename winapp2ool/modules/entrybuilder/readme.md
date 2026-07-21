@@ -444,6 +444,12 @@ Each file slot has a corresponding index for use with the `-Nd` (directory) and 
 | `-Nf name` | Set file name for file slot N |
 | `-Nf subdir\name` | Set file name within a subdirectory of its path |
 
+### Toggles
+
+| Arg | Effect |
+|:-|:-|
+| `-split` | Write per-letter artifact files (`#.ini`, `A.ini` ... `Z.ini`) into the save target's directory instead of a single output file. Entries are bucketed by the first character of their name (non-letters go to `#.ini`); all 27 files are always written, each with a do-not-edit header |
+
 ### Examples
 
 | Command | Effect |
@@ -452,6 +458,7 @@ Each file slot has a corresponding index for use with the `-Nd` (directory) and 
 | `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder` | Read sources from the assembler folder, save `entrybuilder.ini` in the current directory |
 | `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds -4d ..\..\Assembler\Scaffolds -s` | Full build-pipeline invocation: source and both catalogs from sibling folders, silent mode |
 | `winapp2ool -entrybuilder -2f test-output.ini` | Override the save target file name |
+| `winapp2ool -entrybuilder -split -2d ..\..\Assembler\Entries` | Write per-letter files into `Assembler\Entries` |
 
 ---
 
