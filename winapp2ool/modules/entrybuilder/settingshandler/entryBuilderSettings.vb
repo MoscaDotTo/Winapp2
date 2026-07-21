@@ -97,6 +97,15 @@ Public Module entryBuilderSettings
     Public Property EntryBuilderFile4 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
 
     ''' <summary>
+    ''' When <c> True </c>, output is written as per-letter artifact files
+    ''' (<c> #.ini </c>, <c> A.ini </c> ... <c> Z.ini </c>) in the save target's directory,
+    ''' bucketed by each entry name's first character, instead of a single output file.
+    ''' Used by the build pipeline to produce the committed <c> Assembler\Entries </c>
+    ''' artifacts. CLI: <c> -split </c>
+    ''' </summary>
+    Public Property EntryBuilderSplitOutput As Boolean = False
+
+    ''' <summary>
     ''' Indicates that the module settings have been modified from their defaults
     ''' </summary>
     Public Property EntryBuilderModuleSettingsChanged As Boolean = False
@@ -110,6 +119,7 @@ Public Module entryBuilderSettings
         EntryBuilderFile2 = New iniFileChooser(Environment.CurrentDirectory, "entrybuilder.ini", "entrybuilder.ini", mustExist:=False)
         EntryBuilderFile3 = New iniFileChooser(Environment.CurrentDirectory, "webview.ini", "webview.ini", mustExist:=False)
         EntryBuilderFile4 = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
+        EntryBuilderSplitOutput = False
         EntryBuilderModuleSettingsChanged = False
         SaveModule2(NameOf(EntryBuilder), GetType(entryBuilderSettings))
 

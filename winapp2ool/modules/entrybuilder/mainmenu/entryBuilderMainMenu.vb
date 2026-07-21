@@ -48,11 +48,14 @@ Public Module entryBuilderMainMenu
                 Sub() changeFile2Params(EntryBuilderFile3, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile3), NameOf(EntryBuilderModuleSettingsChanged), "WebView scaffolds")) _
             .AddDispatchedOption("Choose QtWebEngine scaffolds", "Select the shared QtWebEngine scaffold catalog",
                 Sub() changeFile2Params(EntryBuilderFile4, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile4), NameOf(EntryBuilderModuleSettingsChanged), "QtWebEngine scaffolds")) _
+                .AddBlank() _
+            .AddDispatchedToggle("output splitting", "writing per-letter files into the save target's directory", EntryBuilderSplitOutput,
+                Sub() toggleModuleSetting("Split output", NameOf(EntryBuilder), GetType(entryBuilderSettings), NameOf(EntryBuilderSplitOutput), NameOf(EntryBuilderModuleSettingsChanged))) _
             .AddBlank() _
-            .AddColoredFileInfo("Current source directory:    ", EntryBuilderFile1.Dir, ConsoleColor.DarkYellow) _
-            .AddColoredFileInfo("Current save target:         ", EntryBuilderFile2.Path(), ConsoleColor.Yellow) _
-            .AddColoredFileInfo("Current WebView catalog:     ", EntryBuilderFile3.Path(), ConsoleColor.DarkYellow) _
-            .AddColoredFileInfo("Current QtWebEngine catalog: ", EntryBuilderFile4.Path(), ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo("Current source directory:            ", EntryBuilderFile1.Dir, ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo("Current save target:                 ", EntryBuilderFile2.Path(), ConsoleColor.Yellow) _
+            .AddColoredFileInfo("Current WebView catalog:             ", EntryBuilderFile3.Path(), ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo("Current QtWebEngine catalog:         ", EntryBuilderFile4.Path(), ConsoleColor.DarkYellow) _
             .AddBlank(EntryBuilderModuleSettingsChanged) _
             .AddDispatchedResetOpt(NameOf(EntryBuilder), EntryBuilderModuleSettingsChanged,
                 Sub() resetModuleSettings(NameOf(EntryBuilder), AddressOf InitDefaultEntryBuilderSettings))
