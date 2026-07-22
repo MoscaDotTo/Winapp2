@@ -3,21 +3,32 @@
     Builds winapp2.ini and its various flavors using winapp2ool.
 
 .DESCRIPTION
-    This script requires winapp2ool v1.7 or newer.
-    Creates backups, combines base entries, generates and corrects browser entries,
-    generates UWP entries, generates entries from EntryBuilder shorthand, combines
-    these into the base flavor, generates tool flavors, and creates a diff for each
-    generated flavor. Generator stages read the shared scaffold catalogs from
-    the Scaffolds directory.
+    This script requires winapp2ool v1.7 or newer
+    Creates backups, regenerates the committed build artifacts under Entries\
+    (base entries from EntryBuilder sources, browser entries into Entries\Browsers,
+    UWP entries into Entries\UWP), merges them with a single strict-mode Combine
+    pass, generates tool flavors, and creates a diff for each generated flavor.
+    Generator stages read the shared scaffold catalogs from the Scaffolds directory.
+
+    With -Verify, no build is performed: all artifacts are instead regenerated into
+    a scratch directory and byte-compared against the committed Entries\ artifacts,
+    exiting nonzero on any drift. This is the characteristic test used to prove the
+    committed artifacts match their sources
+
+.PARAMETER Verify
+    Regenerate all artifacts into Verify\ and byte-compare them against the
+    committed artifacts under Entries\ instead of building. Exits 0 when every
+    artifact matches, 1 on any drift (the scratch output is retained for
+    inspection on failure).
 
 .NOTES
     Author: Hazel Ward
-    Version 20260716
+    Version 20260721
     Copyright 2026
 #>
 
 [CmdletBinding()]
-param()
+param([switch]$Verify)
 
 $ErrorActionPreference = 'Stop'
 $script:Winapp2oolPath = $null
@@ -135,43 +146,39 @@ function Backup-Files {
     }
 }
 
-function Build-MainFile {
-    Write-Step "Building winapp2.ini, please wait"
-
-    Write-Step "Combining base entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-combine', '-1d', '\Entries', '-3f', 'base-entries-combined.ini' `
-        -ErrorMessage "Failed to combine base entries" -RequiredDirs @(Join-Path $PSScriptRoot 'Entries'))) { return $false }
+function Build-Artifacts {
+    param([string]$OutputRoot)
 
     Write-Step "Generating browser entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-browserbuilder', '-1d', '\BrowserBuilder', '-2f', 'browsers.ini' `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-browserbuilder', '-1d', '\BrowserBuilder', `
+        '-2d', "$OutputRoot\Browsers", '-2f', 'browsers.ini' `
         -ErrorMessage "Failed to generate browser entries" -RequiredDirs @(Join-Path $PSScriptRoot 'BrowserBuilder'))) { return $false }
 
     Write-Step "Generating UWP entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-1d', '\UWP', '-2f', 'uwp.ini', `
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-1d', '\UWP', `
+        '-2d', "$OutputRoot\UWP", '-2f', 'uwp.ini', `
         '-3d', '\Scaffolds', '-4d', '\Scaffolds' `
         -ErrorMessage "Failed to generate UWP entries" `
         -RequiredDirs @((Join-Path $PSScriptRoot 'UWP'), (Join-Path $PSScriptRoot 'Scaffolds')))) { return $false }
 
-    Write-Step "Generating entries from EntryBuilder shorthand"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-1d', '\EntryBuilder', '-2f', 'entrybuilder.ini', `
+    Write-Step "Generating base entries from EntryBuilder sources"
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-split', '-1d', '\EntryBuilder', `
+        '-2d', $OutputRoot, `
         '-3d', '\Scaffolds', '-4d', '\Scaffolds' `
         -ErrorMessage "Failed to generate EntryBuilder entries" `
         -RequiredDirs @((Join-Path $PSScriptRoot 'EntryBuilder'), (Join-Path $PSScriptRoot 'Scaffolds')))) { return $false }
 
-    Write-Step "Joining base entries with browser entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-transmute', '-add', '-1f', 'base-entries-combined.ini', `
-        '-2f', 'browsers.ini', '-3f', 'Winapp2.ini' `
-        -ErrorMessage "Failed to join entries")) { return $false }
+    return $true
+}
 
-    Write-Step "Joining UWP entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-transmute', '-add', '-1f', 'Winapp2.ini', `
-        '-2f', 'uwp.ini', '-3f', 'Winapp2.ini' `
-        -ErrorMessage "Failed to join UWP entries")) { return $false }
+function Build-MainFile {
+    Write-Step "Building winapp2.ini, please wait"
 
-    Write-Step "Joining EntryBuilder entries"
-    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-transmute', '-add', '-1f', 'Winapp2.ini', `
-        '-2f', 'entrybuilder.ini', '-3f', 'Winapp2.ini' `
-        -ErrorMessage "Failed to join EntryBuilder entries")) { return $false }
+    if (-not (Build-Artifacts -OutputRoot '\Entries')) { return $false }
+
+    Write-Step "Merging entry artifacts"
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-combine', '-strict', '-1d', '\Entries', '-3f', 'Winapp2.ini' `
+        -ErrorMessage "Failed to merge entry artifacts" -RequiredDirs @(Join-Path $PSScriptRoot 'Entries'))) { return $false }
 
     Write-Step "Performing static analysis and saving corrections"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
@@ -324,16 +331,56 @@ function Build-SystemNinjaFlavor {
     return $true
 }
 
+function Test-Artifacts {
+    Write-Step "Regenerating artifacts into scratch for characteristic testing"
+
+    $scratch = Join-Path $PSScriptRoot 'Verify'
+    if (Test-Path $scratch) { Remove-Item $scratch -Recurse -Force }
+
+    if (-not (Build-Artifacts -OutputRoot '\Verify')) { return $false }
+
+    Write-Step "Comparing regenerated artifacts against committed Entries"
+
+    $entriesDir = Join-Path $PSScriptRoot 'Entries'
+    $drift = @()
+
+    foreach ($file in Get-ChildItem $entriesDir -Filter '*.ini' -Recurse -File) {
+        $rel = $file.FullName.Substring($entriesDir.Length + 1)
+        $counterpart = Join-Path $scratch $rel
+        if (-not (Test-Path $counterpart)) {
+            $drift += "missing from regeneration: $rel"
+            continue
+        }
+        if ((Get-FileHash $file.FullName).Hash -ne (Get-FileHash $counterpart).Hash) {
+            $drift += "content drift: $rel"
+        }
+    }
+
+    foreach ($file in Get-ChildItem $scratch -Filter '*.ini' -Recurse -File) {
+        $rel = $file.FullName.Substring($scratch.Length + 1)
+        if (-not (Test-Path (Join-Path $entriesDir $rel))) {
+            $drift += "not present in committed artifacts: $rel"
+        }
+    }
+
+    if ($drift.Count -gt 0) {
+        Write-ErrorMsg "Artifact drift detected - committed Entries do not match their sources"
+        $drift | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+        Write-Host "Regenerated artifacts retained in $scratch for inspection" -ForegroundColor Yellow
+        return $false
+    }
+
+    Remove-Item $scratch -Recurse -Force
+    Write-Host "All committed artifacts match their sources" -ForegroundColor Green
+    return $true
+}
+
 function Remove-TemporaryFiles {
     Write-Step "Cleaning up"
 
     $filesToRemove = @(
         'winapp2*.old',
         'winapp2*.ini',
-        'base-entries-combined.ini',
-        'browsers.ini',
-        'uwp.ini',
-        'entrybuilder.ini',
         'winapp2.rules',
         'diff.txt'
     )
@@ -349,6 +396,12 @@ try {
     if (-not $script:Winapp2oolPath) {
         Write-ErrorMsg "Cannot continue without winapp2ool.exe"
         exit 1
+    }
+
+    if ($Verify) {
+        if (-not (Test-Artifacts)) { exit 1 }
+        Write-Host "`nCharacteristic test passed" -ForegroundColor Green
+        exit 0
     }
 
     Backup-Files
