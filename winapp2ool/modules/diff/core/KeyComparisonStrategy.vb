@@ -230,7 +230,22 @@ Public Class PathKeyComparisonStrategy
 
             If isLastPiece AndAlso isFileKey Then Return FinalizeFileKeyEquivalence(oldVal, newVal, oldKeySplit, newKeySplit,
                                                                                     matchedFileKeyHasMoreParams, possibleWildCardReduction)
-            If Not CompareValues(newVal, oldVal) Then Return False
+
+            If CompareValues(newVal, oldVal) Then Continue For
+
+            If IsPackageMonikerComponent(oldKeySplit, i) AndAlso oldVal.Contains("*") Then
+
+                Dim pristineOldSplit = oldKey.BackslashSplit
+                Dim monikerPattern = {pristineOldSplit(i)}
+                SanitizeRegex(monikerPattern)
+
+                If monikerPattern(0).Equals(".*") Then Return False
+
+                If CompareValues(monikerPattern(0), newVal) Then Continue For
+
+            End If
+
+            Return False
 
         Next
 
@@ -297,6 +312,31 @@ Public Class PathKeyComparisonStrategy
         Next
 
     End Sub
+
+    ''' <summary>
+    ''' Returns <c> True </c> when the backslash component at <paramref name="index"/> is a UWP
+    ''' package-family folder — i.e. it directly follows a <c> Packages </c> component — so a scoped
+    ''' reverse-wildcard match may be applied to it
+    ''' </summary>
+    '''
+    ''' <param name="keySplit">
+    ''' Backslash-split components of a key value
+    ''' </param>
+    '''
+    ''' <param name="index">
+    ''' Index of the component under consideration
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> if the preceding component is <c> Packages </c> <br />
+    ''' <c> False </c> otherwise
+    ''' </returns>
+    Private Shared Function IsPackageMonikerComponent(keySplit As String(),
+                                                      index As Integer) As Boolean
+
+        Return index >= 1 AndAlso keySplit(index - 1).Equals("Packages", StringComparison.InvariantCultureIgnoreCase)
+
+    End Function
 
     ''' <summary>
     ''' Compares the final parameter components for FileKeys

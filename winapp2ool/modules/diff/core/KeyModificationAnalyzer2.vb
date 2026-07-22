@@ -236,7 +236,7 @@ Public Class KeyModificationAnalyzer2
                 If matched.Contains(i) Then Continue For
 
                 If oldKey.KeyType.Equals(newKeyList(i).KeyType, StringComparison.InvariantCultureIgnoreCase) AndAlso
-                   oldKey.Value.Equals(newKeyList(i).Value, StringComparison.InvariantCultureIgnoreCase) Then
+                   KeyValuesAreEquivalent(oldKey, newKeyList(i)) Then
 
                     matched.Add(i)
                     foundMatch = True
@@ -255,6 +255,79 @@ Public Class KeyModificationAnalyzer2
         Next
 
         Return removedKeys.Count = 0 AndAlso addedKeys.Count = 0
+
+    End Function
+
+    ''' <summary>
+    ''' Determines whether two same-type keys have equivalent values for the purpose of the identical-key
+    ''' match. Exact case-insensitive equality is tried first; for <c>FileKey</c>s that are not string-equal,
+    ''' an order-insensitive comparison follows, since a FileKey's semicolon-delimited pattern list is an
+    ''' unordered OR-set (WinappDebug alphabetizes it), so a pure reordering is not a change.
+    ''' </summary>
+    '''
+    ''' <param name="oldKey">
+    ''' The key from the old version
+    ''' </param>
+    '''
+    ''' <param name="newKey">
+    ''' The key from the new version
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c>True</c> if the two values are equal, or are FileKeys differing only in pattern order
+    ''' </returns>
+    Private Shared Function KeyValuesAreEquivalent(oldKey As iniKey2,
+                                                   newKey As iniKey2) As Boolean
+
+        If oldKey.Value.Equals(newKey.Value, StringComparison.InvariantCultureIgnoreCase) Then Return True
+
+        If oldKey.typeIs("FileKey") Then Return FileKeysEqualIgnoringOrder(oldKey.Value, newKey.Value)
+
+        Return False
+
+    End Function
+
+    ''' <summary>
+    ''' Compares two <c>FileKey</c> values treating the pattern list as an unordered multiset. Two values
+    ''' are equivalent when their paths and flags match and their patterns are equal as sorted,
+    ''' case-insensitive sequences. A duplicated, added, or removed pattern therefore remains a real change;
+    ''' only reordering is absorbed.
+    ''' </summary>
+    '''
+    ''' <param name="oldValue">
+    ''' The old FileKey value
+    ''' </param>
+    '''
+    ''' <param name="newValue">
+    ''' The new FileKey value
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c>True</c> if the two FileKeys differ only in pattern ordering
+    ''' </returns>
+    Private Shared Function FileKeysEqualIgnoringOrder(oldValue As String,
+                                                       newValue As String) As Boolean
+
+        Dim oldParams As New fileKeyParams2(oldValue)
+        Dim newParams As New fileKeyParams2(newValue)
+
+        If Not oldParams.Path.Equals(newParams.Path, StringComparison.InvariantCultureIgnoreCase) Then Return False
+
+        If oldParams.Flag <> newParams.Flag Then Return False
+
+        If oldParams.Flag = fileKeyFlag.Unknown AndAlso
+           Not oldParams.RawFlag.Equals(newParams.RawFlag, StringComparison.InvariantCultureIgnoreCase) Then Return False
+
+        If oldParams.Patterns.Count <> newParams.Patterns.Count Then Return False
+
+        Dim oldSorted = oldParams.Patterns.OrderBy(Function(p) p, StringComparer.InvariantCultureIgnoreCase).ToList()
+        Dim newSorted = newParams.Patterns.OrderBy(Function(p) p, StringComparer.InvariantCultureIgnoreCase).ToList()
+
+        For i = 0 To oldSorted.Count - 1
+            If Not oldSorted(i).Equals(newSorted(i), StringComparison.InvariantCultureIgnoreCase) Then Return False
+        Next
+
+        Return True
 
     End Function
 
