@@ -245,8 +245,16 @@ Public Module commandLineHandler
     ''' </param>
     Private Sub printErrExit(errTxt As String)
 
-        Console.WriteLine($"{errTxt} Press any key to exit.")
-        Console.ReadKey()
+        gLog(errTxt)
+
+        If Not SuppressOutput Then
+
+            Console.WriteLine($"{errTxt} Press any key to exit.")
+            crk()
+
+        End If
+
+        saveGlobalLog(SuppressOutput OrElse SaveGlobalLogOnExit)
         Environment.Exit(1)
 
     End Sub

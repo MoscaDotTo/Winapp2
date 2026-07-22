@@ -388,7 +388,7 @@ Public Module logger
         cwl()
         cwl($"End of log. {pressEnterStr}")
 
-        Console.ReadLine()
+        crl()
 
     End Sub
 
@@ -480,7 +480,7 @@ Public Module logger
 
         clrConsole()
         cwl(slice)
-        Console.ReadLine()
+        crl()
 
     End Sub
 

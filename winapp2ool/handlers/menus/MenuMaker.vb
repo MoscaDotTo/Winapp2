@@ -214,6 +214,15 @@ Module MenuMaker
 
         Using gLogScope($"Loading module {name}")
 
+
+            If SuppressOutput Then
+
+                gLog($"Interactive menu '{name}' cannot run in silent mode (no input available); aborting")
+                saveGlobalLog()
+                Environment.Exit(1)
+
+            End If
+
             ExitPending = False
             setNextMenuHeaderText(name)
 
