@@ -1,0 +1,95 @@
+# Probe workflow: proves the winapp2.ini build substrate runs headless on a
+# GitHub-hosted Windows runner. It answers one question cheaply — does the exe
+# launch without elevation, and does `build winapp2.ps1 -Verify` pass on hosted
+# infra — before we invest in the real PR-verify and build-orchestration workflows.
+#
+# It is intentionally minimal and disposable. It does NOT commit, tag, publish,
+# or diff branches; it only regenerates the committed artifacts into a scratch
+# dir and byte-compares them against Assembler/Entries, exiting nonzero on drift.
+name: winapp2.ini build verify (probe)
+
+on:
+  # Manual button (appears once this file is on the default branch).
+  workflow_dispatch:
+  # Also auto-run on push so the probe can be exercised from a feature branch
+  # without merging to master first. Scoped to the inputs that affect the build.
+  push:
+    paths:
+      - '.github/workflows/verify-probe.yml'
+      - 'Assembler/**'
+      - 'winapp2ool/**'
+
+# Read-only: the probe never writes back to the repo.
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: windows-latest
+
+    env:
+      # Deterministic override of the exe's `requireAdministrator` manifest: the
+      # Windows loader runs winapp2ool under the runner's own (unelevated) token
+      # instead of requesting elevation. The build modules touch only ini files in
+      # a working directory and need no admin, so this is the correct token — and
+      # it sidesteps any UAC/elevation behavior on the hosted runner. Child
+      # processes (msbuild spawns, and the build script's Start-Process calls)
+      # inherit this from the job environment.
+      __COMPAT_LAYER: RunAsInvoker
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Old-style (packages.config) .NET Framework solution: build with MSBuild,
+      # restore with the NuGet CLI. `dotnet build` cannot restore packages.config.
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore winapp2ool/winapp2ool.sln
+
+      - name: Build winapp2ool (Release)
+        run: msbuild winapp2ool/winapp2ool.sln /p:Configuration=Release /m
+
+      # The build script (`build winapp2.ps1`) finds the exe via $PSScriptRoot
+      # first, i.e. beside itself in Assembler/. The exe is gitignored, so stage
+      # the freshly built one there. It is a standalone single-file console app.
+      - name: Stage the built exe for the build script
+        shell: pwsh
+        run: |
+          $exe = 'winapp2ool/bin/Release/winapp2ool.exe'
+          if (-not (Test-Path $exe)) { throw "Build did not produce $exe" }
+          Copy-Item $exe 'Assembler/winapp2ool.exe' -Force
+          $bytes = (Get-Item 'Assembler/winapp2ool.exe').Length
+          Write-Host "Staged $bytes bytes to Assembler/winapp2ool.exe"
+
+      # The characteristic test. -Verify regenerates every artifact into
+      # Assembler/Verify and byte-compares against the committed Assembler/Entries,
+      # exiting 0 on a clean match and 1 on drift (retaining the scratch dir).
+      # Run it as a child process so the script's `exit N` propagates cleanly to
+      # $LASTEXITCODE regardless of call-operator exit semantics.
+      - name: Characteristic test (build winapp2.ps1 -Verify)
+        shell: pwsh
+        working-directory: Assembler
+        run: |
+          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler' }
+          pwsh -File './build winapp2.ps1' -Verify
+          exit $LASTEXITCODE
+
+      # On any failure, keep the drift scratch and the flushed diagnostic log
+      # (winapp2ool.log now persists on a nonzero silent-mode exit) for inspection.
+      - name: Upload drift scratch + log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-failure-artifacts
+          path: |
+            Assembler/Verify/**
+            Assembler/winapp2ool.log
+          if-no-files-found: ignore
+          retention-days: 7
