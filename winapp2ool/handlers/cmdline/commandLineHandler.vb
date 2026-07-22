@@ -136,6 +136,7 @@ Public Module commandLineHandler
         If updateIsAvail Then autoUpdate()
 
         invertSettingAndRemoveArg(SuppressOutput, "-s")
+        invertSettingAndRemoveArg(SaveGlobalLogOnExit, "-writelog")
         processFlavorArgs()
 
         If cmdargs.Count = 0 Then Return

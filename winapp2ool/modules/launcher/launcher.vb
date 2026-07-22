@@ -64,7 +64,15 @@ Public Module launcher
 
             processCommandLineArgs()
 
-            If SuppressOutput Then Environment.Exit(Environment.ExitCode)
+            If SuppressOutput Then
+
+                ' A nonzero exit code (e.g. a generator's lint-reconciliation gate trip) or an
+                ' explicit -writelog persists the global log to disk before exiting, so headless
+                ' and CI runs retain diagnostics that otherwise live only in memory
+                saveGlobalLog(Environment.ExitCode <> 0 OrElse SaveGlobalLogOnExit)
+                Environment.Exit(Environment.ExitCode)
+
+            End If
 
             currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
             Console.Title = $"Winapp2ool v{currentVersion}"
@@ -73,6 +81,9 @@ Public Module launcher
             initModule(launchHeader, AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
 
             FlushIfDirty2()
+
+            ' Honor -writelog for interactive runs too; silent mode has already exited above
+            saveGlobalLog(SaveGlobalLogOnExit)
 
         Catch ex As Exception
 

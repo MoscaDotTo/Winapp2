@@ -35,6 +35,14 @@ Public Module logger
     Public Property GlobalLog As New strList
 
     ''' <summary>
+    ''' When <c> True </c>, the global log is written to disk as the application exits, even
+    ''' on a clean silent-mode run. Set by the global <c> -writelog </c> command line flag.
+    ''' A nonzero process exit code saves the log independently of this flag, so scripted and
+    ''' CI runs always retain the diagnostics from a failed build.
+    ''' </summary>
+    Public Property SaveGlobalLogOnExit As Boolean = False
+
+    ''' <summary>
     ''' Per-thread indentation depth. Each thread sees its own counter so that
     ''' parallel work cannot corrupt the indentation of unrelated threads.
     ''' </summary>
