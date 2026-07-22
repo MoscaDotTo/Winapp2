@@ -94,6 +94,18 @@ Module Downloader
     Public ReadOnly Property readMeUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md"
 
     ''' <summary>
+    ''' The web address of the winapp2.ini contribution guidelines 
+    ''' </summary>
+    ''' <returns></returns>
+    Public ReadOnly Property contributionsUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md"
+
+    ''' <summary>
+    ''' The web address of the winapp2.ini license 
+    ''' </summary>
+    ''' <returns></returns>
+    Public ReadOnly Property winapp2licenceUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"
+
+    ''' <summary>
     ''' Handles command line arguments for the Downloader module
     ''' </summary>
     '''
