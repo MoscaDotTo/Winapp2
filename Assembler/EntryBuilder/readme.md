@@ -2,7 +2,11 @@
 
 ### What is this?
 
-This folder contains the alphabetically-split source files used by winapp2ool's [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md) module to generate winapp2.ini entries from a shorthand DSL. During the build, all 27 files are combined in-memory, the shorthand is expanded into standard winapp2.ini syntax, and the output (`entrybuilder.ini`) is merged into the base Winapp2.ini alongside the other generated content.
+This folder contains the source files for all of the base entries in winapp2.ini. Every entry that isn't a generated browser or UWP entry lives in one of these 27 alphabetically-split files. This is where contributions to base entries are made; see the [contributor guidelines](https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md).
+
+During the build, winapp2ool's [EntryBuilder](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/entrybuilder/readme.md) module combines all 27 files in-memory, expands any shorthand into standard winapp2.ini syntax, normalizes the result, and writes it back out as the per-letter artifacts in [`Assembler/Entries/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Entries), which are then merged into the base Winapp2.ini alongside the other generated content. Comments written here survive permanently in the sources but are stripped from the generated artifacts.
+
+**You do not need to learn the shorthand to contribute.** Standard winapp2.ini syntax is valid here as-is and passes through generation unchanged.
 
 ### Why a shorthand?
 
@@ -43,7 +47,7 @@ The complete DSL is documented in the [EntryBuilder readme](https://github.com/M
 
 ### Which entries live here?
 
-Base entries which have been migrated to the EntryBuilder shorthand. 
+The full set of non-browser, non-UWP winapp2.ini entries. Most are written in plain winapp2.ini syntax; some have been converted to the shorthand DSL.
 
 # Files
 
