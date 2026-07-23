@@ -1,0 +1,95 @@
+# PR-verify (comment job): the trusted half of the split pattern. It runs on
+# workflow_run *after* the untrusted "winapp2.ini PR verify" build finishes, in the
+# base repo's context, so it may hold write permissions safely -- it NEVER checks
+# out or executes any PR code. It only downloads the text report artifact the build
+# job produced and posts/updates a single sticky PR comment from it.
+#
+# Because this job is write-capable and reads an artifact written by untrusted code,
+# it treats every byte of that artifact as data (never executed) and does not trust
+# the PR number blindly -- see the validation in the github-script step.
+name: winapp2.ini PR verify comment
+
+on:
+  workflow_run:
+    workflows: ["winapp2.ini PR verify"]
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  actions: read
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download report bundle from the build run
+        uses: actions/download-artifact@v4
+        with:
+          name: pr-verify-report
+          path: report
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post or update the sticky PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- winapp2-pr-verify -->';
+
+            // Read the bundle written by the (untrusted) build job -- text only.
+            let body, fileNumber;
+            try {
+              body = fs.readFileSync('report/report.md', 'utf8');
+              fileNumber = fs.readFileSync('report/pr-number.txt', 'utf8').trim();
+            } catch (e) {
+              core.info('No report bundle to comment on; nothing to do.');
+              return;
+            }
+
+            const run = context.payload.workflow_run;
+
+            // Resolve the target PR. Same-repo runs carry the association directly;
+            // trust that. Fork runs don't, so fall back to the number the build job
+            // wrote -- but only after confirming that PR's head SHA matches the
+            // commit this run actually built, so a PR can't target someone else's.
+            let prNumber = null;
+            if (run.pull_requests && run.pull_requests.length > 0) {
+              prNumber = run.pull_requests[0].number;
+            } else {
+              const candidate = parseInt(fileNumber, 10);
+              if (!Number.isInteger(candidate)) {
+                core.setFailed(`report pr-number.txt is not a valid number: "${fileNumber}"`);
+                return;
+              }
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner, repo: context.repo.repo, pull_number: candidate,
+              });
+              if (pr.head.sha !== run.head_sha) {
+                core.setFailed(
+                  `refusing to comment: PR #${candidate} head ${pr.head.sha} ` +
+                  `does not match the built commit ${run.head_sha}`);
+                return;
+              }
+              prNumber = candidate;
+            }
+
+            const fullBody = `${marker}\n${body}`;
+
+            // Upsert: update our existing sticky comment if present, else create one.
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body: fullBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: prNumber, body: fullBody,
+              });
+            }
+            core.info(`Posted PR-verify result to #${prNumber}.`);
