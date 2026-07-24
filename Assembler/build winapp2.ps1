@@ -23,7 +23,7 @@
 
 .NOTES
     Author: Hazel Ward
-    Version 20260721
+    Version 20260724
     Copyright 2026
 #>
 
@@ -103,10 +103,7 @@ function Invoke-Winapp2ool {
     }
 
     try {
-        # Dropping -NoNewWindow and using -WindowStyle Hidden
-        # This isolates the tool in an invisible window, which can prevent
-        # errors from being obviously observed. Revert to -NoNewWindow
-        # if you need/want to see the console output
+        # Use -NoNewWindow to see the console output
         $process = Start-Process -FilePath $script:Winapp2oolPath `
                                  -ArgumentList $Arguments `
                                  -WindowStyle Hidden `
@@ -135,6 +132,7 @@ function Backup-Files {
         @{Source = "..\Non-CCleaner\Winapp2.ini"; Dest = "winapp2.old"}
         @{Source = "..\Non-CCleaner\BleachBit\Winapp2.ini"; Dest = "winapp2-bb.old"}
         @{Source = "..\Non-CCleaner\CCleaner7\Winapp2.ini"; Dest = "winapp2-cc7.old"}
+        @{Source = "..\Non-CCleaner\FluentCleaner\Winapp2.ini"; Dest = "winapp2-fc.old"}
         @{Source = "..\Non-CCleaner\SystemNinja\Winapp2.rules"; Dest = "winapp2-sn.old"}
         @{Source = "..\Non-CCleaner\Tron\Winapp2.ini"; Dest = "winapp2-tron.old"}
     )
@@ -262,6 +260,45 @@ function Build-CCleaner7Flavor {
     Copy-Item 'winapp2-cc7.ini' '..\Non-CCleaner\CCleaner7\Winapp2.ini' -Force
     if ($haveDiff) { Copy-Item 'diff.txt' '..\Non-CCleaner\CCleaner7' -Force }
     Write-Host "CCleaner7 flavor built" -ForegroundColor Green
+
+    return $true
+}
+
+function Build-FluentCleanerFlavor {
+    Write-Step "Creating FluentCleaner flavor"
+
+    # FluentCleaner is designed around the CCleaner flavor, so we'll make some
+    # changes to the base file that are pulled from the downstream 
+    # FluentCleaner winapp2.ini and then apply the CCleaner flavor on top of that 
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-1f', 'Winapp2.ini', `
+        '-2f', 'winapp2-fluentcleaner-pre.ini', '-9d', '\FluentCleaner' `
+        -ErrorMessage "Failed to create FluentCleaner pre-pass" -RequiredDirs @(Join-Path $PSScriptRoot 'FluentCleaner'))) { return $false }
+
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-flavorize', '-autodetect', '-1f', 'winapp2-fluentcleaner-pre.ini', `
+        '-2f', 'winapp2-fluentcleaner.ini', '-9d', '\CCleaner' `
+        -ErrorMessage "Failed to categorize FluentCleaner flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'CCleaner'))) { return $false }
+
+    # -keepdefaults preserves FluentCleaner's Default=False keys through the linter 
+    Write-Step "Performing static analysis and saving corrections"
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-keepdefaults', '-1f', 'winapp2-fluentcleaner.ini', `
+        '-3f', 'winapp2-fluentcleaner.ini' `
+        -ErrorMessage "Failed FluentCleaner flavor analysis")) { return $false }
+
+    Write-Step "Creating changelog"
+    $haveDiff = Test-Path 'winapp2-fc.old'
+    if ($haveDiff) {
+        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-fc.old', `
+            '-2f', 'winapp2-fluentcleaner.ini', '-3f', 'diff.txt' `
+            -ErrorMessage "Failed to create FluentCleaner changelog")) { return $false }
+    } else {
+        Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
+    }
+
+    $publishDir = '..\Non-CCleaner\FluentCleaner'
+    if (-not (Test-Path $publishDir)) { New-Item -ItemType Directory -Force -Path $publishDir | Out-Null }
+    Copy-Item 'winapp2-fluentcleaner.ini' "$publishDir\Winapp2.ini" -Force
+    if ($haveDiff) { Copy-Item 'diff.txt' $publishDir -Force }
+    Write-Host "FluentCleaner flavor built" -ForegroundColor Green
 
     return $true
 }
@@ -409,6 +446,7 @@ try {
     if (-not (Build-MainFile)) { exit 1 }
     if (-not (Build-CCCleanerFlavor)) { exit 1 }
     if (-not (Build-CCleaner7Flavor)) { exit 1 }
+    if (-not (Build-FluentCleanerFlavor)) { exit 1 }
     if (-not (Build-BleachBitFlavor)) { exit 1 }
     if (-not (Build-TronFlavor)) { exit 1 }
     if (-not (Build-SystemNinjaFlavor)) { exit 1 }
