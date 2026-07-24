@@ -92,8 +92,6 @@ Module downloadr
                Optional prompt As Boolean = True,
                Optional quietly As Boolean = False)
 
-        Dim givenName = pathHolder.Name
-
         If Not Directory.Exists(pathHolder.Dir) Then Directory.CreateDirectory(pathHolder.Dir)
 
         If prompt AndAlso File.Exists(pathHolder.Path()) AndAlso Not SuppressOutput AndAlso Not quietly Then
@@ -105,12 +103,12 @@ Module downloadr
 
         If Not prompt Then fDelete(pathHolder.Path())
 
-        cwl($"Downloading {givenName}...", Not quietly)
+        cwl($"Downloading {pathHolder.Name}...", Not quietly)
 
         Dim success = dlFile(link, pathHolder.Path())
 
         cwl($"Download {If(success, "Complete.", "Failed.")}", Not quietly)
-        cwl(If(success, "Downloaded ", $"Unable to download {pathHolder.Name} to {pathHolder.Dir}"), Not quietly)
+        cwl($"{If(success, "Downloaded", "Unable to download")} {pathHolder.Name} to {pathHolder.Dir}", Not quietly)
 
         setNextMenuHeaderText($"Download {If(success, "", "in")}complete: {pathHolder.Name}", Not success AndAlso Not quietly, ConsoleColor.Red)
 
