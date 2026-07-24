@@ -294,7 +294,9 @@ Public Module WinappDebug
     ''' <c> -3f </c> / <c> -3d </c> save target (slot 3) <br />
     ''' <c> -c </c> enable saving of changes made by the linter <br />
     ''' <c> -usedate </c> use current date in version string <br />
-    ''' <c> -opti </c> enable the experimental Optimizations rule (FileKey merger) for this run
+    ''' <c> -opti </c> enable the experimental Optimizations rule (FileKey merger) for this run <br />
+    ''' <c> -keepdefaults </c> preserve existing Default keys instead of removing them (for flavors
+    ''' that deliberately set Default values, eg. FluentCleaner)
     ''' </remarks>
     Public Sub HandleLintCmdLine()
 
@@ -306,6 +308,7 @@ Public Module WinappDebug
             .WithFlag("-c", Sub() SaveChanges = Not SaveChanges) _
             .WithFlag("-usedate", Sub() UseCurrentDate = Not UseCurrentDate) _
             .WithFlag("-opti", Sub() lintOpti.turnOn()) _
+            .WithFlag("-keepdefaults", Sub() PreserveDefaultKeys = True) _
             .Parse()
 
         If cmdargs.Contains("UNIT_TESTING_HALT") Then Return
@@ -589,9 +592,9 @@ Public Module WinappDebug
             result.RecordError("Entry has ExcludeKeys but no valid FileKeys or RegKeys", Array.Empty(Of String)(), lintSyntax.ShouldScan AndAlso hasFileExcludes AndAlso Not (hasFileKeys OrElse hasRegKeys))
             result.RecordError("Entry has ExcludeKeys pointing to file system locations but no FileKeys", Array.Empty(Of String)(), hasFileExcludes AndAlso Not hasFileKeys)
             result.RecordError("Entry has ExcludeKeys pointing to registry locations but no RegKeys", Array.Empty(Of String)(), hasRegExcludes AndAlso Not hasRegKeys)
-            result.RecordError("Entry has a Default key where there should be none", Array.Empty(Of String)(), lintDefaults.ShouldScan AndAlso hasDefaultKey AndAlso Not overrideDefaultVal)
+            result.RecordError("Entry has a Default key where there should be none", Array.Empty(Of String)(), lintDefaults.ShouldScan AndAlso hasDefaultKey AndAlso Not overrideDefaultVal AndAlso Not PreserveDefaultKeys)
 
-            If lintDefaults.fixFormat AndAlso hasDefaultKey AndAlso Not overrideDefaultVal Then
+            If lintDefaults.fixFormat AndAlso hasDefaultKey AndAlso Not overrideDefaultVal AndAlso Not PreserveDefaultKeys Then
 
                 For Each k In entry.DefaultKey.ToList() : entry.RemoveKey(k) : Next
 

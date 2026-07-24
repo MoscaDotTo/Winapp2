@@ -34,6 +34,7 @@ Module lintsettingshandler
         SaveChanges = False
         overrideDefaultVal = False
         expectedDefaultValue = False
+        PreserveDefaultKeys = False
 
         resetScanSettings()
 

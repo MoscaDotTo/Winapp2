@@ -70,4 +70,14 @@ Public Module lintsettings
     ''' </summary>
     Public Property expectedDefaultValue As Boolean = False
 
+    ''' <summary>
+    ''' Indicates that existing Default keys should be preserved as-is rather than removed by the
+    ''' Defaults rule. Set by the <c> -keepdefaults </c> CLI flag for flavors that deliberately
+    ''' manage Default values (eg. FluentCleaner, which adds <c> Default=False </c> to browser
+    ''' scaffolds). Independent of <c> overrideDefaultVal </c>: this only suppresses removal of and
+    ''' complaints about existing keys, it does not audit their values or require them to exist
+    ''' <br/> Default: <c> False </c>
+    ''' </summary>
+    Public Property PreserveDefaultKeys As Boolean = False
+
 End Module
