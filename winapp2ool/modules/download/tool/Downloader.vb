@@ -150,16 +150,35 @@ Module Downloader
                             fileLink = archivedLink
                             downloadFile.Name = "Archived entries.ini"
                         Case Else
-                            cwl($"Unknown argument: {arg}", True)
-                            cwl("Valid arguments are: winapp2, winapp2ool, readme, winapp3, archived", True)
-                            Environment.Exit(1)
+                            printValidArgsExit($"Unknown argument: {arg}")
                     End Select
                 End Sub) _
             .Parse()
 
+        If fileLink.Length = 0 Then printValidArgsExit("No file was specified for download")
+
         If downloadFile.Name = "winapp2ool.exe" AndAlso downloadFile.Dir = Environment.CurrentDirectory Then autoUpdate() : Return
 
         download(downloadFile, fileLink)
+
+    End Sub
+
+    ''' <summary>
+    ''' Informs the user that no download could be performed, lists the valid positional
+    ''' arguments, and exits with a nonzero code
+    ''' </summary>
+    '''
+    ''' <param name="reason">
+    ''' The explanation of why no file could be downloaded
+    ''' </param>
+    Private Sub printValidArgsExit(reason As String)
+
+        gLog(reason)
+
+        cwl(reason, True)
+        cwl("Valid arguments are: winapp2, winapp2ool, readme, winapp3, archived", True)
+
+        Environment.Exit(1)
 
     End Sub
 
