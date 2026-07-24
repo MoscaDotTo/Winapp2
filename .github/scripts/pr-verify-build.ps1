@@ -5,9 +5,9 @@
     changes in the output.
 
 .DESCRIPTION
-    Drives Assembler\build winapp2.ps1 twice around a merge. 
-    Preserve the six committed build outputs after the baseline build, hard
-    reset, merge the PR head, restore those six as the "previous" baseline, then
+    Drives Assembler\build winapp2.ps1 twice around a merge.
+    Preserve the seven committed build outputs after the baseline build, hard
+    reset, merge the PR head, restore those seven as the "previous" baseline, then
     build again. The build script's own Backup-Files stage copies each committed
     output to a .old file and its changelog stage diffs .old vs the freshly built
     file, so the second build's diff.txt is exactly what the PR changes.
@@ -62,7 +62,7 @@ if (-not (Test-Path $Exe)) { throw "winapp2ool.exe missing from Assembler -- the
 New-Item -ItemType Directory -Force -Path $ReportDir | Out-Null
 Set-Content -Path (Join-Path $ReportDir 'pr-number.txt') -Value $PrNumber -NoNewline
 
-# The six committed build outputs, relative to the repo root, paired with the flavor
+# The seven committed build outputs, relative to the repo root, paired with the flavor
 # label and the location the build script drops each flavor's diff.txt. Order matches
 # build winapp2.ps1's Backup-Files / changelog stages.
 $Outputs = @(
@@ -70,6 +70,7 @@ $Outputs = @(
     @{ Flavor = 'CCleaner';    Output = 'Winapp2.ini';                            Diff = 'diff.txt' }
     @{ Flavor = 'BleachBit';   Output = 'Non-CCleaner\BleachBit\Winapp2.ini';     Diff = 'Non-CCleaner\BleachBit\diff.txt' }
     @{ Flavor = 'CCleaner7';   Output = 'Non-CCleaner\CCleaner7\Winapp2.ini';     Diff = 'Non-CCleaner\CCleaner7\diff.txt' }
+    @{ Flavor = 'FluentCleaner'; Output = 'Non-CCleaner\FluentCleaner\Winapp2.ini'; Diff = 'Non-CCleaner\FluentCleaner\diff.txt' }
     @{ Flavor = 'Tron';        Output = 'Non-CCleaner\Tron\Winapp2.ini';          Diff = 'Non-CCleaner\Tron\diff.txt' }
     @{ Flavor = 'SystemNinja'; Output = 'Non-CCleaner\SystemNinja\Winapp2.rules'; Diff = 'Non-CCleaner\SystemNinja\diff.txt' }
 )
