@@ -26,6 +26,7 @@ Transmute allows you to modify one ini file (the "base" file) using instructions
 5. [Global Operations](#global-operations)
    - [The [*] Section](#the--section)
    - [Key Mapping Rules ([*Map:])](#key-mapping-rules-map)
+   - [Name-Filtered Rules ([*Name:])](#name-filtered-rules-name)
 6. [Output Formatting](#output-formatting)
 7. [Flavorization](#flavorization)
 8. [Command-Line Arguments](#command-line-arguments)
@@ -327,6 +328,44 @@ Replace=Tags=ccapps
 - Maintaining the browser category mapping (`Section=` → `LangSecRef=`) for the CCleaner flavor as ~14 rules instead of hundreds of per-entry cohort sections that must be kept in lockstep across two files
 - De-abstracting wildcard `DetectFile` paths into hardcoded variants for the System Ninja flavor (which does not support wildcards in detection) as one rule per wildcard, instead of a remove + add lockstep spanning two files and one section per affected entry. New entries carrying the same wildcards are covered automatically
 - Converting every entry's `LangSecRef`/`Section` category key into its CCleaner 7 `Tags=` value: specific rules map each known category and a wildcard fallback rule (placed last) funnels every remaining category into `Tags=ccapps`. Combined with a `[*]` section adding `ID=%EntryName%` and `Author=`, this expresses the entire CCleaner 7 format conversion as data
+
+## Name-Filtered Rules ([*Name:])
+
+A `[*Name: <scaffold>]` section applies its keys under the current mode like `[*]`, but only to the base sections it selects instead of every section. Where `[*]` is unconditional and `[*Map:]` matches by key content alone, `[*Name:]` selects by the entry name plus optional key content. 
+
+A base section is selected when both conditions hold:
+
+1. **Anchored name suffix**: the section name ends with `" <scaffold> *"` (case-insensitive), where `<scaffold>` is the label after `*Name:`. The engine appends the ` *` for winapp2.ini entries to prevent entry name substring collision: `[*Name: Web Browsing Session]` selects `[Firefox Web Browsing Session *]` but **not** `[Firefox Web Browsing Session Backups *]`.
+2. **Key Content**: an optional set of `Match=` keys. With none, the name suffix alone decides. Otherwise the section must contain at least one key satisfying any a `Match=` criteria. 
+
+Each rule section contains:
+
+| Key | Meaning | Notes |
+|:-|:-|:-|
+| `Match=<Name>=<Value>` | Key content matching criteria | Optional, repeatable as `Match1=`, `Match2=`, ..., KeyTypes compared with numbers stripped. The value supports wildcards; eg. `Section=* Web Browser` matches `AVG Secure Web Browser`.  |
+| *(any other key)* | Content applied to each selected section | In `Add` mode, duplicate keys will not be re-added |
+
+##### Value-glob vs `[*Map:]`
+
+`[*Map:]` only understands a whole-value `*` (the entire value is a wildcard or nothing is). `[*Name:]` predicates understand a **partial** glob anywhere in the value (`* Web Browser`, `Brave*`), which is why it can match the messy real Section values (`.360 Secure Browser Web Browser`, `AVG Secure Web Browser`). A bare `*` still reduces to "match anything", so the two are compatible.
+
+##### Refusals
+
+Mirroring `[*]`: **Remove BySection** and **Replace BySection** do not support this mapping and numbered keys are not permitted in `Add` mode 
+
+##### Example
+
+```ini
+; FluentCleaner: mark the cookies scaffold of every browser Default=False (Add mode).
+; Selects any entry named "... Web Browsing Cookies *" that is a browser, and skips
+; the key where it already exists. New BrowserBuilder browsers are covered automatically.
+[*Name: Web Browsing Cookies]
+Match1=Section=* Web Browser
+Match2=Section=* Email Client
+Default=False
+```
+
+A rule which selects no sections emits a warning. 
 
 ---
 

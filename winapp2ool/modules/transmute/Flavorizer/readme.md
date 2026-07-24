@@ -111,7 +111,7 @@ Flavorizer always applies its correction files in the following fixed order, reg
 
 Stages for which no file has been provided make no changes (each stage still prints its progress line, see [Troubleshooting](#troubleshooting)). The order is significant: for example, removing a key before adding its replacement ensures the result contains exactly one copy of the new value.
 
-Every stage also honors Transmute's [global operations](../README.md#global-operations): a `[*]` section in a correction file applies its keys to every section of the base file under that stage's mode, and the Key Replacement stage additionally recognizes `[*Map: label]` key mapping rules. Global sections are processed before the named sections in the same file. See [Example 4](#example-4-global-operations-in-flavor-files).
+Every stage also honors Transmute's [global operations](../README.md#global-operations): a `[*]` section in a correction file applies its keys to every section of the base file under that stage's mode, the Key Replacement stage additionally recognizes `[*Map: label]` key mapping rules, and every stage recognizes `[*Name: scaffold]` name-filtered rules that apply their changes to only the base sections whose name and content match. Global sections are processed before the named sections in the same file. See [Example 4](#example-4-global-operations-in-flavor-files).
 
 ## How Matching Works
 
