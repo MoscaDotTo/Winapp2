@@ -240,7 +240,7 @@ Public Module Transmute
     ''' -dontlint       : do not save output with winapp2.ini formatting
     '''
     ''' Global section handling <br />
-    ''' -noglobal       : treat [*] and [*Map:] source sections as ordinary section names
+    ''' -noglobal       : treat [*], [*Map:] and [*Name:] source sections as ordinary section names
     '''
     ''' Preset source file choices <br />
     '''
@@ -510,7 +510,10 @@ Public Module Transmute
     ''' before any named sections, so that specific per-section operations can refine the result
     ''' of global ones: <br />
     ''' <c> [*Map: label] </c> sections define key mapping rules (Replace ByKey mode only) <br />
-    ''' A <c> [*] </c> section applies its keys to every section of the base file
+    ''' A <c> [*] </c> section applies its keys to every section of the base file <br />
+    ''' <c> [*Name: scaffold] </c> sections apply their payload keys to every base section whose
+    ''' name ends with <c> " scaffold *" </c> and which satisfies the section's <c> Match= </c>
+    ''' predicates (engine in <c> tool/TransmuteNameFilter.vb </c>)
     ''' </summary>
     '''
     ''' <param name="baseFile">
@@ -531,6 +534,7 @@ Public Module Transmute
 
         Dim globalSection As iniSection2 = Nothing
         Dim mapSections As New List(Of iniSection2)
+        Dim nameSections As New List(Of iniSection2)
         Dim namedSections As New List(Of iniSection2)
 
         For Each sourceSection In sourceFile
@@ -543,6 +547,10 @@ Public Module Transmute
 
                 mapSections.Add(sourceSection)
 
+            ElseIf RecognizeGlobalSections AndAlso sourceSection.Name.StartsWith(NameSectionPrefix, StringComparison.OrdinalIgnoreCase) Then
+
+                nameSections.Add(sourceSection)
+
             Else
 
                 namedSections.Add(sourceSection)
@@ -554,6 +562,8 @@ Public Module Transmute
         applyKeyMapRules(baseFile, mapSections, menuOutput)
 
         If globalSection IsNot Nothing Then applyGlobalSection(baseFile, globalSection, menuOutput)
+
+        transmutenamefilter.applyNameFilterSections(baseFile, nameSections, menuOutput)
 
         For Each sourceSection In namedSections
 
@@ -738,7 +748,7 @@ Public Module Transmute
     ''' <returns>
     ''' <c> <paramref name="value"/> </c> with all token occurrences replaced
     ''' </returns>
-    Private Function expandEntryNameToken(value As String, sectionName As String) As String
+    Friend Function expandEntryNameToken(value As String, sectionName As String) As String
 
         Dim result = ""
         Dim pos = 0
@@ -988,7 +998,7 @@ Public Module Transmute
     ''' <returns>
     ''' The number of keys in <c> <paramref name="baseSection"/> </c> whose values were replaced
     ''' </returns>
-    Private Function replaceKeysInBase(baseSection As iniSection2,
+    Friend Function replaceKeysInBase(baseSection As iniSection2,
                                        sourceSection As iniSection2,
                                  ByRef menuOutput As MenuSection,
                               Optional quiet As Boolean = False) As Integer
@@ -1109,7 +1119,7 @@ Public Module Transmute
     ''' <returns>
     ''' The number of keys removed from <c> <paramref name="baseSection"/> </c>
     ''' </returns>
-    Private Function remKeys(baseSection As iniSection2,
+    Friend Function remKeys(baseSection As iniSection2,
                                    sourceSection As iniSection2,
                              ByRef menuOutput As MenuSection,
                           Optional quiet As Boolean = False) As Integer

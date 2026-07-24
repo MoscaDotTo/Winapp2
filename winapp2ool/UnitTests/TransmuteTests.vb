@@ -680,4 +680,206 @@ Imports System.Text
 
     End Sub
 
+    ''' <summary>
+    ''' A [*Name: scaffold] Add applies its payload to every section whose name ends with
+    ''' " scaffold *", and the anchored suffix does not catch a longer scaffold sharing the
+    ''' same prefix words (Web Browsing Session must not select Web Browsing Session Backups)
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_AnchoredSuffix_SelectsScaffoldNotItsSuperstring()
+
+        Dim result = RunTransmute(
+            "[Google Chrome Web Browsing Session *]" & vbCrLf & "Section=Google Chrome Web Browser" & vbCrLf &
+            "[Mozilla Firefox Web Browsing Session *]" & vbCrLf & "Section=Mozilla Firefox Web Browser" & vbCrLf &
+            "[Mozilla Firefox Web Browsing Session Backups *]" & vbCrLf & "Section=Mozilla Firefox Web Browser" & vbCrLf,
+            "[*Name: Web Browsing Session]" & vbCrLf & "Default=False" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Assert.AreEqual("False", result.GetSection("Google Chrome Web Browsing Session *").GetKey("Default").Value)
+        Assert.AreEqual("False", result.GetSection("Mozilla Firefox Web Browsing Session *").GetKey("Default").Value)
+        ' The Backups superstring scaffold is NOT selected
+        Assert.IsFalse(result.GetSection("Mozilla Firefox Web Browsing Session Backups *").HasKey("Default"))
+
+    End Sub
+
+    ''' <summary>
+    ''' The OR'd Match= predicate set confirms entry kind: a section selected by name is only
+    ''' modified when it also satisfies a predicate, so a same-named non-browser entry is skipped
+    ''' while both a Web Browser and an Email Client (Thunderbird) are covered
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_MatchPredicateSet_ConfirmsEntryKind()
+
+        Dim result = RunTransmute(
+            "[Google Chrome Bookmark Backups *]" & vbCrLf & "Section=Google Chrome Web Browser" & vbCrLf &
+            "[Thunderbird Bookmark Backups *]" & vbCrLf & "Section=Thunderbird Email Client" & vbCrLf &
+            "[Some App Bookmark Backups *]" & vbCrLf & "Section=Productivity" & vbCrLf,
+            "[*Name: Bookmark Backups]" & vbCrLf & "Match1=Section=* Web Browser" & vbCrLf & "Match2=Section=* Email Client" & vbCrLf & "Default=False" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Assert.AreEqual("False", result.GetSection("Google Chrome Bookmark Backups *").GetKey("Default").Value)
+        Assert.AreEqual("False", result.GetSection("Thunderbird Bookmark Backups *").GetKey("Default").Value)
+        ' The non-browser entry matched the name suffix but failed both predicates
+        Assert.IsFalse(result.GetSection("Some App Bookmark Backups *").HasKey("Default"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A Match= value glob with a leading wildcard matches the messy real-world Section values
+    ''' (leading dots, "Secure", "Origin") that a fixed enumeration would miss
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_ValueGlob_MatchesMessySectionValues()
+
+        Dim result = RunTransmute(
+            "[.360 Secure Browser Web Browsing Cookies *]" & vbCrLf & "Section=.360 Secure Browser Web Browser" & vbCrLf &
+            "[AVG Secure Browser Web Browsing Cookies *]" & vbCrLf & "Section=AVG Secure Web Browser" & vbCrLf &
+            "[Brave Origin Web Browsing Cookies *]" & vbCrLf & "Section=Brave Origin Web Browser" & vbCrLf,
+            "[*Name: Web Browsing Cookies]" & vbCrLf & "Match=Section=* Web Browser" & vbCrLf & "Default=False" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        For Each name In {".360 Secure Browser Web Browsing Cookies *", "AVG Secure Browser Web Browsing Cookies *", "Brave Origin Web Browsing Cookies *"}
+            Assert.AreEqual("False", result.GetSection(name).GetKey("Default").Value)
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' With no Match= predicates the name suffix alone decides selection
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_NoPredicates_NameSuffixAloneSelects()
+
+        Dim result = RunTransmute(
+            "[Anything Pinned Tabs *]" & vbCrLf & "Section=Whatever" & vbCrLf &
+            "[Unrelated Entry *]" & vbCrLf & "Section=Whatever" & vbCrLf,
+            "[*Name: Pinned Tabs]" & vbCrLf & "Default=False" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Assert.AreEqual("False", result.GetSection("Anything Pinned Tabs *").GetKey("Default").Value)
+        Assert.IsFalse(result.GetSection("Unrelated Entry *").HasKey("Default"))
+
+    End Sub
+
+    ''' <summary>
+    ''' In Add mode a payload key already present in a selected section is skipped, so the
+    ''' operation never duplicates or overwrites an existing key
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_Add_SkipsKeyAlreadyPresent()
+
+        Dim result = RunTransmute(
+            "[Chrome Download History *]" & vbCrLf & "Section=Chrome Web Browser" & vbCrLf & "Default=True" & vbCrLf &
+            "[Edge Download History *]" & vbCrLf & "Section=Edge Web Browser" & vbCrLf,
+            "[*Name: Download History]" & vbCrLf & "Match=Section=* Web Browser" & vbCrLf & "Default=False" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Dim chrome = result.GetSection("Chrome Download History *")
+        ' Pre-existing Default is left untouched and not duplicated
+        Assert.AreEqual("True", chrome.GetKey("Default").Value)
+        Assert.AreEqual(1, chrome.Keys.GetByType("Default").Count)
+        ' The section that lacked Default receives it
+        Assert.AreEqual("False", result.GetSection("Edge Download History *").GetKey("Default").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' A [*Name:] payload can also drive Replace ByKey: it sets the value of the payload key
+    ''' in selected sections that already have it, and does not create it where absent
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_ReplaceByKey_ReplacesOnlyWherePresent()
+
+        Dim result = RunTransmute(
+            "[Chrome Extension Cookies *]" & vbCrLf & "Section=Chrome Web Browser" & vbCrLf & "Default=True" & vbCrLf &
+            "[Edge Extension Cookies *]" & vbCrLf & "Section=Edge Web Browser" & vbCrLf,
+            "[*Name: Extension Cookies]" & vbCrLf & "Match=Section=* Web Browser" & vbCrLf & "Default=False" & vbCrLf,
+            winapp2ool.TransmuteMode.Replace,
+            replaceMode:=winapp2ool.ReplaceMode.ByKey)
+
+        Assert.AreEqual("False", result.GetSection("Chrome Extension Cookies *").GetKey("Default").Value)
+        ' Replace never creates a key that was absent
+        Assert.IsFalse(result.GetSection("Edge Extension Cookies *").HasKey("Default"))
+
+    End Sub
+
+    ''' <summary>
+    ''' The %EntryName% token is expanded per selected section in a [*Name:] payload
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_EntryNameToken_SubstitutesSectionName()
+
+        Dim result = RunTransmute(
+            "[Chrome Autofill Data *]" & vbCrLf & "Section=Chrome Web Browser" & vbCrLf &
+            "[Edge Autofill Data *]" & vbCrLf & "Section=Edge Web Browser" & vbCrLf,
+            "[*Name: Autofill Data]" & vbCrLf & "Match=Section=* Web Browser" & vbCrLf & "ID=%EntryName%" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Assert.AreEqual("Chrome Autofill Data *", result.GetSection("Chrome Autofill Data *").GetKey("ID").Value)
+        Assert.AreEqual("Edge Autofill Data *", result.GetSection("Edge Autofill Data *").GetKey("ID").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' Numbered payload keys are refused by a [*Name:] Add for the same reason [*] refuses
+    ''' them; an unnumbered payload key in the same rule still applies
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_Add_RefusesNumberedPayloadKey()
+
+        Dim result = RunTransmute(
+            "[Chrome Web Browsing Cookies *]" & vbCrLf & "Section=Chrome Web Browser" & vbCrLf,
+            "[*Name: Web Browsing Cookies]" & vbCrLf & "Match=Section=* Web Browser" & vbCrLf & "FileKey1=%AppData%\X|*.log" & vbCrLf & "Default=False" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Dim section = result.GetSection("Chrome Web Browsing Cookies *")
+        Assert.IsFalse(section.HasKey("FileKey1"))
+        Assert.AreEqual("False", section.GetKey("Default").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' Section-level modes are refused: a [*Name:] under Remove BySection or Replace BySection
+    ''' leaves the base file untouched (the payload keys would be ignored)
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_BySectionModes_AreRefused()
+
+        Dim baseText = "[Chrome Pinned Tabs *]" & vbCrLf & "Section=Chrome Web Browser" & vbCrLf & "Default=True" & vbCrLf
+        Dim source = "[*Name: Pinned Tabs]" & vbCrLf & "Default=False" & vbCrLf
+
+        Dim removed = RunTransmute(baseText, source, winapp2ool.TransmuteMode.Remove, removeMode:=winapp2ool.RemoveMode.BySection)
+        Assert.AreEqual(1, removed.Count)
+        Assert.AreEqual("True", removed.GetSection("Chrome Pinned Tabs *").GetKey("Default").Value)
+
+        Dim replaced = RunTransmute(baseText, source, winapp2ool.TransmuteMode.Replace, replaceMode:=winapp2ool.ReplaceMode.BySection)
+        Assert.AreEqual("True", replaced.GetSection("Chrome Pinned Tabs *").GetKey("Default").Value)
+
+    End Sub
+
+    ''' <summary>
+    ''' A [*Name:] rule that selects no section leaves the file untouched and does not throw
+    ''' (it emits a stale-rule warning)
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_ZeroSelected_LeavesFileUntouched()
+
+        Dim result = RunTransmute(
+            "[Chrome Web Browsing Cookies *]" & vbCrLf & "Section=Chrome Web Browser" & vbCrLf,
+            "[*Name: No Such Scaffold]" & vbCrLf & "Match=Section=* Web Browser" & vbCrLf & "Default=False" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Assert.IsFalse(result.GetSection("Chrome Web Browsing Cookies *").HasKey("Default"))
+
+    End Sub
+
+    ''' <summary>
+    ''' With RecognizeGlobalSections disabled, [*Name:] falls through to normal section name
+    ''' matching: in Add mode it is added to the base file as a literal section
+    ''' </summary>
+    <TestMethod()> Public Sub NameFilter_NoGlobal_TreatedAsOrdinarySection()
+
+        winapp2ool.transmuteSettings.RecognizeGlobalSections = False
+
+        Dim result = RunTransmute(
+            "[Chrome Pinned Tabs *]" & vbCrLf & "Section=Chrome Web Browser" & vbCrLf,
+            "[*Name: Pinned Tabs]" & vbCrLf & "Default=False" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        ' Added as a literal section instead of being interpreted
+        Assert.IsTrue(result.Contains("*Name: Pinned Tabs"))
+        Assert.IsFalse(result.GetSection("Chrome Pinned Tabs *").HasKey("Default"))
+
+    End Sub
+
 End Class
