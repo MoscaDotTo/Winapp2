@@ -154,7 +154,8 @@ Public Module Combine
                 Dim processedCount = 0
                 Dim validFileCount = 0
                 Dim outputFullPath = Path.GetFullPath(combinedOutput.Path())
-                Dim collisions As New List(Of String)
+                Dim sectionOrigins As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+                Dim collisions As New Dictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
 
                 For Each filePath In allINIFiles
 
@@ -165,7 +166,7 @@ Public Module Combine
 
                     Try
 
-                        attemptCombine(filePath, combinedOutput, validFileCount, outputMenu, collisions)
+                        attemptCombine(filePath, combinedOutput, validFileCount, outputMenu, sectionOrigins, collisions)
 
                     Catch ex As Exception
 
@@ -189,8 +190,10 @@ Public Module Combine
 
                     For Each collision In collisions
 
-                        gLog($"  {collision}")
-                        outputMenu.AddWarning($"  {collision}")
+                        Dim collisionLine = $"  [{collision.Key}] first defined in {sectionOrigins(collision.Key)}, contributed again by {String.Join(", ", collision.Value)}"
+
+                        gLog(collisionLine)
+                        outputMenu.AddWarning(collisionLine)
 
                     Next
 
@@ -213,12 +216,14 @@ Public Module Combine
                 gLog(emptyOutputMsg, cond:=outputIsEmpty)
                 outputMenu.AddWarning(emptyOutputMsg, condition:=outputIsEmpty)
 
-                combinedOutput.OverwriteToFile(combinedOutput.ToString(), Not outputIsEmpty AndAlso Not strictNamesViolated)
+                Dim outputWasSaved = Not outputIsEmpty AndAlso Not strictNamesViolated
+
+                combinedOutput.OverwriteToFile(combinedOutput.ToString(), outputWasSaved)
 
                 Dim combinedCountMsg = $"Combined {validFileCount} files into {combinedOutput.Name} with {combinedOutput.Count} sections"
-                gLog(combinedCountMsg, cond:=Not outputIsEmpty)
+                gLog(combinedCountMsg, cond:=outputWasSaved)
                 outputMenu.AddBlank()
-                outputMenu.AddColoredLine(combinedCountMsg, ConsoleColor.Green, centered:=True, condition:=Not outputIsEmpty)
+                outputMenu.AddColoredLine(combinedCountMsg, ConsoleColor.Green, centered:=True, condition:=outputWasSaved)
                 outputMenu.AddBottomBorder()
 
             End Using
@@ -286,15 +291,21 @@ Public Module Combine
     ''' to the user
     ''' </param>
     '''
+    ''' <param name="sectionOrigins">
+    ''' Records the name of the file which first contributed each section name, keyed by
+    ''' section name (case-insensitive, matching <c> iniFile2 </c> section lookup)
+    ''' </param>
+    '''
     ''' <param name="collisions">
-    ''' Accumulates a description of every section whose name was already present in the
-    ''' output when this file contributed it (a cross-file name collision)
+    ''' Accumulates, per section name, the names of every subsequent file which contributed a
+    ''' section of that name (a cross-file name collision)
     ''' </param>
     Private Sub attemptCombine(filepath As String,
                          ByRef combinedOutput As iniFile2,
                          ByRef validFileCount As Integer,
                          ByRef outputMenu As MenuSection,
-                               collisions As List(Of String))
+                               sectionOrigins As Dictionary(Of String, String),
+                               collisions As Dictionary(Of String, List(Of String)))
 
         Dim currentFile As iniFile2 = iniFile2.FromFile(filepath)
 
@@ -309,7 +320,7 @@ Public Module Combine
 
         Using gLogScope(processingMsg)
 
-            mergeFileIntoOutput(currentFile, combinedOutput, Path.GetFileName(filepath), collisions)
+            mergeFileIntoOutput(currentFile, combinedOutput, Path.GetFileName(filepath), sectionOrigins, collisions)
 
             validFileCount += 1
 
@@ -362,25 +373,34 @@ Public Module Combine
     ''' The file name of <paramref name="sourceFile"/>, recorded in collision reports
     ''' </param>
     '''
+    ''' <param name="sectionOrigins">
+    ''' Records the name of the file which first contributed each section name
+    ''' </param>
+    '''
     ''' <param name="collisions">
-    ''' Accumulates a description of every cross-file section name collision encountered
+    ''' Accumulates, per section name, the names of every subsequent file which contributed a
+    ''' section of that name
     ''' </param>
     Private Sub mergeFileIntoOutput(sourceFile As iniFile2,
                               ByRef combinedOutput As iniFile2,
                                     sourceFileName As String,
-                                    collisions As List(Of String))
+                                    sectionOrigins As Dictionary(Of String, String),
+                                    collisions As Dictionary(Of String, List(Of String)))
 
         For Each sourceSection In sourceFile
 
             If combinedOutput.Contains(sourceSection.Name) Then
 
-                collisions.Add($"[{sourceSection.Name}] contributed again by {sourceFileName}")
+                If Not collisions.ContainsKey(sourceSection.Name) Then collisions.Add(sourceSection.Name, New List(Of String))
+
+                collisions(sourceSection.Name).Add(sourceFileName)
                 AddUniqueKeys(sourceSection, combinedOutput, sourceSection.Name)
                 Continue For
 
             End If
 
             combinedOutput.AddSection(sourceSection)
+            sectionOrigins(sourceSection.Name) = sourceFileName
             gLog($"Added new section: [{sourceSection.Name}] ({sourceSection.Keys.Count} keys)")
 
         Next
@@ -411,8 +431,6 @@ Public Module Combine
         Dim existingSection = combinedOutput.GetSection(sectionName)
 
         Dim extantKeys As New HashSet(Of String)(existingSection.Keys.Select(Function(k) $"{k.Name.ToLowerInvariant()}={k.Value.ToLowerInvariant()}"))
-        Dim addedKeyCount = 0
-        Dim skippedKeyCount = 0
 
         For Each sourceKey In sourceSection.Keys
 
@@ -421,12 +439,10 @@ Public Module Combine
             If Not keyExists Then
 
                 existingSection.AddKey(sourceKey)
-                addedKeyCount += 1
                 gLog($"Added {sourceKey.Name} to {existingSection.GetFullName}")
 
             Else
 
-                skippedKeyCount += 1
                 gLog($"Skipped duplicate key in {sourceSection.GetFullName}: {sourceKey.Name}")
 
             End If
