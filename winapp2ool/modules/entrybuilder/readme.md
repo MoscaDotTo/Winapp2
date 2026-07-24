@@ -2,7 +2,7 @@
 
 **EntryBuilder** is a winapp2ool module that generates winapp2.ini entries from a shorthand DSL. You write one ini section per application: anything that is already valid winapp2 syntax passes through unchanged, and a small set of winapp2ool-private keys expand into standard winapp2 form at generation time. Think of it as a preprocessor for winapp2.ini: declare the repetitive parts once and let the tool write them out.
 
-EntryBuilder is a devops module used to maintain the base entries of the winapp2.ini distribution. Source files at `Assembler\EntryBuilder\{letter}.ini` are combined at runtime and processed alongside the shared scaffold catalogs in `Assembler\Scaffolds` to produce a single intermediate `entrybuilder.ini`, which the build pipeline then merges into the final database.
+EntryBuilder is a devops module used to maintain the base entries of the winapp2.ini distribution. Every non-browser, non-UWP entry lives in its source files. Source files at `Assembler\EntryBuilder\{letter}.ini` are combined and processed alongside the shared scaffold catalogs in `Assembler\Scaffolds` to produce either a single `entrybuilder.ini` (the default) or, with `-split`, the 27 per-letter artifact files the build pipeline commits at `Assembler\Entries\` and merges into the final database.
 
 ### What does EntryBuilder do?
 
