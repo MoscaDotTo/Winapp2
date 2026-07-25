@@ -265,7 +265,7 @@ You should use the [FluentCleaner flavor](https://raw.githubusercontent.com/Mosc
 
 ### Installation
 
-FluentCleaner ships with a copy winapp2.ini in the same folder as `FCleaner.exe`. You can update winapp2.ini by replacing this file. 
+FluentCleaner ships with a copy winapp2.ini in the same folder as `FCleaner.exe` or `FluentCleaner.Classic.exe`. You can update winapp2.ini by replacing this file. 
 
 ### Configuration
 
