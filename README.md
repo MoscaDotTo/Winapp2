@@ -4,7 +4,7 @@
 
 **Winapp2.ini** is a massive, community-driven database of declarative cleaning routines for Microsoft Windows. It provides a comprehensive mapping of individual applications and system components to their transient data (temporary files, caches, logs, recently used lists, and more). With thousands of contributions spanning over a decade and a half, it is likely the most extensive dataset of its kind available on the internet.
 
-Winapp2.ini is compatible with CCleaner, BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, and HDCleaner.
+Winapp2.ini is compatible with CCleaner, BleachBit, System Ninja, Avira System Speedup, R-Wipe&Clean, HDCleaner, and FluentCleaner.
 
 ### Why Winapp2.ini?
 
@@ -44,6 +44,7 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
    - [Tron](#tron)
    - [R-Wipe & Clean](#r-wipe--clean)
    - [HDCleaner](#hdcleaner)
+   - [FluentCleaner](#fluentcleaner)
 4. [Contributing](#contributing)
 5. [Custom Content](#custom-content)
 
@@ -250,6 +251,26 @@ After placing winapp2.ini in the same directory as `HDCleaner.exe`, you must con
 4. Change the setting "If using Winapp2.ini" to "Ignore duplicate entries in HDCleaner resource file" 
 
 This will override the built in HDCleaner entries with your drop-in replacement
+</details>
+
+## [FluentCleaner](#fluentcleaner)
+<details>
+<summary>FluentCleaner Installation and Configuration</summary>
+
+###### [Download FluentCleaner](https://github.com/builtbybel/FluentCleaner/releases)
+
+### Flavor
+
+You should use the [FluentCleaner flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/FluentCleaner/Winapp2.ini). This flavor is designed to catch the downstream changes made by FluentCleaner to their winapp2.ini.
+
+### Installation
+
+FluentCleaner ships with a copy winapp2.ini in the same folder as `FCleaner.exe`. You can update winapp2.ini by replacing this file. 
+
+### Configuration
+
+Almost all winapp2.ini entries are enabled by default in FluentCleaner when using their winapp2.ini or the FluentCleaner flavor. Click their checkbox to disable. 
+
 </details>
 
 ---
