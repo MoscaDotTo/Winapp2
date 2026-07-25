@@ -25,16 +25,15 @@ A "flavor" is a collection of modifications that adapts a base ini file for a sp
 4. [Flavor Files](#flavor-files)
    - [Operation Order](#operation-order)
    - [How Matching Works](#how-matching-works)
-   - [Stage 1: Section Removal](#stage-1--section-removal)
-   - [Stage 2: Key Name Removal](#stage-2--key-name-removal)
-   - [Stage 3: Key Value Removal](#stage-3--key-value-removal)
-   - [Stage 4: Section Replacement](#stage-4--section-replacement)
-   - [Stage 5: Key Replacement](#stage-5--key-replacement)
-   - [Stage 6: Additions](#stage-6--additions)
+   - [Stage 1: Section Removal](#stage-1-section-removal)
+   - [Stage 2: Key Name Removal](#stage-2-key-name-removal)
+   - [Stage 3: Key Value Removal](#stage-3-key-value-removal)
+   - [Stage 4: Section Replacement](#stage-4-section-replacement)
+   - [Stage 5: Key Replacement](#stage-5-key-replacement)
+   - [Stage 6: Additions](#stage-6-additions)
 5. [Auto-Detection](#auto-detection)
 6. [Command-Line Arguments](#command-line-arguments)
    - [Toggles](#toggles)
-   - [CCleaner 7 Conversion](#ccleaner-7-conversion)
    - [File Selection](#file-selection)
    - [Examples](#examples)
 7. [Source File Format](#source-file-format)
@@ -111,11 +110,11 @@ Flavorizer always applies its correction files in the following fixed order, reg
 
 Stages for which no file has been provided make no changes (each stage still prints its progress line, see [Troubleshooting](#troubleshooting)). The order is significant: for example, removing a key before adding its replacement ensures the result contains exactly one copy of the new value.
 
-Every stage also honors Transmute's [global operations](../README.md#global-operations): a `[*]` section in a correction file applies its keys to every section of the base file under that stage's mode, the Key Replacement stage additionally recognizes `[*Map: label]` key mapping rules, and every stage recognizes `[*Name: scaffold]` name-filtered rules that apply their changes to only the base sections whose name and content match. Global sections are processed before the named sections in the same file. See [Example 4](#example-4-global-operations-in-flavor-files).
+Every stage also honors Transmute's [global operations](../readme.md#global-operations): a `[*]` section in a correction file applies its keys to every section of the base file under that stage's mode, the Key Replacement stage additionally recognizes `[*Map: label]` key mapping rules, and every stage recognizes `[*Name: scaffold]` name-filtered rules that apply their changes to only the base sections whose name and content match. Global sections are processed before the named sections in the same file. See [Example 4](#example-4-global-operations-in-flavor-files).
 
 ## How Matching Works
 
-**All matching is case-insensitive**: section names, key names, key types, and key values alike, exactly as in Transmute. Each stage matches sections in its correction file to sections in the base file by name; content the base file doesn't contain is ignored with a warning. See [How Matching Works](../README.md#how-matching-works) in the Transmute readme for the full matching table, including the rule that a criterion applies to *every* matching key in a base section.
+**All matching is case-insensitive**: section names, key names, key types, and key values alike, exactly as in Transmute. Each stage matches sections in its correction file to sections in the base file by name; content the base file doesn't contain is ignored with a warning. See [How Matching Works](../readme.md#how-matching-works) in the Transmute readme for the full matching table, including the rule that a criterion applies to *every* matching key in a base section.
 
 ---
 
@@ -197,7 +196,7 @@ Replaces individual key values within sections. This uses Transmute's **Replace 
 
 ### Key mapping rules
 
-This stage is the one that recognizes `[*Map: label]` sections: global rules that match keys anywhere in the base file by KeyType and Value and replace the whole key, *including its Name*. The CCleaner flavor uses these to convert generated browser categories (`Section=Google Chrome Web Browser` → `LangSecRef=3029`) across every entry with ~14 rules instead of hundreds of per-entry cohort sections. See [Key Mapping Rules](../README.md#key-mapping-rules-map) in the Transmute readme for the full semantics, and [Example 4](#example-4-global-operations-in-flavor-files) below.
+This stage is the one that recognizes `[*Map: label]` sections: global rules that match keys anywhere in the base file by KeyType and Value and replace the whole key, *including its Name*. The CCleaner flavor uses these to convert generated browser categories (`Section=Google Chrome Web Browser` → `LangSecRef=3029`) across every entry with ~14 rules instead of hundreds of per-entry cohort sections. See [Key Mapping Rules](../readme.md#key-mapping-rules-map) in the Transmute readme for the full semantics, and [Example 4](#example-4-global-operations-in-flavor-files) below.
 
 ---
 
@@ -350,7 +349,7 @@ Key1=Value1
 
 During a run, every stage prints its progress line in order: *"Removing sections"*, *"Removing keys by name"*, *"Removing keys by value"*, *"Replacing sections"*, *"Replacing keys by name"*, *"Adding keys and sections"*  whether or not a file is assigned to it. A stage header with no changes beneath it is normal for unassigned stages.
 
-Warnings produced by `[*]` and `[*Map:]` sections (refusals, malformed rules, stale rules) are Transmute's. See its [Troubleshooting](../README.md#troubleshooting) table for the full list.
+Warnings produced by `[*]` and `[*Map:]` sections (refusals, malformed rules, stale rules) are Transmute's. See its [Troubleshooting](../readme.md#troubleshooting) table for the full list.
 
 ---
 
@@ -423,9 +422,9 @@ A single transformation like this can equally be done with Transmute directly (`
 
 **Context**
 
-The base winapp2.ini categorizes generated browser entries with `Section=<browser name> Web Browser`. CCleaner instead groups browser entries under its built-in `LangSecRef` categories. Adapting the Vivaldi entries for CCleaner means removing the `Section` key from every Vivaldi entry and adding `LangSecRef=3033` (Vivaldi's CCleaner category) in its place. In the Transmute readme this takes two chained invocations ([Example 8](../README.md#example-8-chaining-operations-together-2)); Flavorizer does it in one.
+The base winapp2.ini categorizes generated browser entries with `Section=<browser name> Web Browser`. CCleaner instead groups browser entries under its built-in `LangSecRef` categories. Adapting the Vivaldi entries for CCleaner means removing the `Section` key from every Vivaldi entry and adding `LangSecRef=3033` (Vivaldi's CCleaner category) in its place. In the Transmute readme this takes two chained invocations ([Example 8](../readme.md#example-8-chaining-operations-together-2)); Flavorizer does it in one.
 
-###### This is actually best achieved with a [global operation](../README.md#global-operations), but this example was written before global operations were implemented. It is left here for the purposes of the readme. 
+###### This is actually best achieved with a [global operation](../readme.md#global-operations), but this example was written before global operations were implemented. It is left here for the purposes of the readme. 
 
 **Intent**
 
@@ -585,11 +584,11 @@ winapp2ool -s -offline -flavorize -autodetect -2f winapp2-ccleaner-flavor.ini -9
 
 **Context**
 
-Correction files normally match base sections by name, so covering the 22 Vivaldi entries in Example 2 takes 22 sections in *each* correction file — and every new browser entry generated by BrowserBuilder needs the cohorts extended in lockstep. Transmute's [global operations](../README.md#global-operations) remove that maintenance burden, and flavor files inherit them: the CCleaner flavor's Stage 5 file carries one `[*Map:]` rule per browser, and the System Ninja flavor's Stage 5 file carries one-to-many `[*Map:]` rules that de-abstract each wildcard `DetectFile` into its hardcoded variants (System Ninja does not support wildcards in detection).
+Correction files normally match base sections by name, so covering the 22 Vivaldi entries in Example 2 takes 22 sections in *each* correction file — and every new browser entry generated by BrowserBuilder needs the cohorts extended in lockstep. Transmute's [global operations](../readme.md#global-operations) remove that maintenance burden, and flavor files inherit them: the CCleaner flavor's Stage 5 file carries one `[*Map:]` rule per browser, and the System Ninja flavor's Stage 5 file carries one-to-many `[*Map:]` rules that de-abstract each wildcard `DetectFile` into its hardcoded variants (System Ninja does not support wildcards in detection).
 
 **Files**
 
-###### **Key replacement file (`cc_key_replacements.ini`, Stage 5), 3 of its ~14 rules**
+###### **Key replacement file (`cc_key_replacements.ini`, Stage 5)**
 ```ini
 [*Map: Brave]
 Match=Section=Brave Web Browser
@@ -604,7 +603,7 @@ Match=Section=Vivaldi Web Browser
 Replace=LangSecRef=3033
 ```
 
-###### **Key replacement file (`sn_key_replacements.ini`, Stage 5) — 2 of the System Ninja flavor's one-to-many rules**
+###### **Key replacement file (`sn_key_replacements.ini`, Stage 5)**
 ```ini
 [*Map: Brave DetectFile]
 Match=DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*
