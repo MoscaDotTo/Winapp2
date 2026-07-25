@@ -506,7 +506,7 @@ Public Module Transmute
     ''' found in the <c> <paramref name="baseFile"/> </c> when the transmutator is not <c> Add </c>
     ''' will be ignored with an error message <br /> <br />
     '''
-    ''' When <c> RecognizeGlobalSections </c> is enabled, two sentinel section names are processed
+    ''' When <c> RecognizeGlobalSections </c> is enabled, three sentinel section names are processed
     ''' before any named sections, so that specific per-section operations can refine the result
     ''' of global ones: <br />
     ''' <c> [*Map: label] </c> sections define key mapping rules (Replace ByKey mode only) <br />
