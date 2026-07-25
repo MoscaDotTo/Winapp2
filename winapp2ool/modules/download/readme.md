@@ -45,12 +45,12 @@ Downloader resolves a short name (`winapp2`, `readme`, `winapp3`, etc) to a URL 
      - [Example 4: Renaming the download](#example-4-renaming-the-download)
    - [Scripting](#scripting)
      - [Example 5: Silent, scriptable downloads](#example-5-silent-scriptable-downloads)
-     - [Example 6: Downloading over a file that already exists](#example-7-downloading-over-a-file-that-already-exists)
+     - [Example 6: Downloading over a file that already exists](#example-6-downloading-over-a-file-that-already-exists)
    - [Updating Winapp2ool](#updating-winapp2ool-1)
-     - [Example 7: Updating winapp2ool in place](#example-8-updating-winapp2ool-in-place)
-     - [Example 8: Downloading winapp2ool.exe without updating](#example-9-downloading-winapp2oolexe-without-updating)
+     - [Example 7: Updating winapp2ool in place](#example-7-updating-winapp2ool-in-place)
+     - [Example 8: Downloading winapp2ool.exe without updating](#example-8-downloading-winapp2oolexe-without-updating)
    - [Advanced Downloads](#advanced-downloads-1)
-     - [Example 9: winapp3.ini and Archived entries.ini](#example-10-winapp3ini-and-archived-entriesini)
+     - [Example 9: winapp3.ini and Archived entries.ini](#example-9-winapp3ini-and-archived-entriesini)
 
 ---
 
@@ -461,7 +461,7 @@ C:\Tools\winapp2\
 **Notes**
 
 - `1` and `winapp2` are interchangeable
-`-1f` also accepts a leading subdirectory: `-1f "\archive\winapp3.ini"` saves into `archive\` beneath the save directory, creating it if needed. See [Example 10](#example-10-winapp3ini-and-archived-entriesini)
+`-1f` also accepts a leading subdirectory: `-1f "\archive\winapp3.ini"` saves into `archive\` beneath the save directory, creating it if needed. See [Example 9](#example-9-winapp3ini-and-archived-entriesini)
 
 ---
 
