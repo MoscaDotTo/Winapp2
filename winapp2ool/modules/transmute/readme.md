@@ -98,7 +98,7 @@ Transmute allows you to modify one ini file (the "base" file) using instructions
 | Change source file | Select the file containing modifications | |
 | Change save target | Select the output location | Default: `winapp2-transmuted.ini` |
 | Toggle Syntax | Toggle formatting the output as winapp2.ini \* | Default: `True` |
-| Toggle Global sections | Toggle treating `[*]` and `[*Map:]` source sections as [global operations](#global-operations) | Default: `True` |
+| Toggle Global sections | Toggle treating `[*]`, `[*Map:]`, and `[*Name:]` source sections as [global operations](#global-operations) | Default: `True` |
 | Change Transmute mode | Cycle through Add → Replace → Remove | Default: `Add` |
 | Change Replace mode | Switch the Replace mode between BySection ↔ ByKey | Only visible in `Replace` mode |
 | Change Remove mode | Switch the Remove mode between BySection ↔ ByKey | Only visible in `Remove` mode |
@@ -231,9 +231,9 @@ Removes content from the base file based on matches in the source file.
 
 # Global Operations
 
-Transmute is capable of performing operations over every section in the base file rather than to a single section matched by name. These operations are processed before any named sections in the same source file, and `[*Map:]` rules are applied before the `[*]` section. This ordering means specific per-section operations can refine the result of global ones.  
+Transmute is capable of performing operations over every section in the base file rather than to a single section matched by name. These operations are processed before any named sections in the same source file, in the order `[*Map:]` → `[*]` → `[*Name:]`. This ordering means specific per-section operations can refine the result of global ones.  
 
-Both operations are controlled by the Global sections toggle (`-noglobal` via the command line). When disabled, `[*]` and `[*Map: ...]` are treated as ordinary named sections. 
+All three are controlled by the Global sections toggle (`-noglobal` via the command line). When disabled, `[*]`, `[*Map: ...]`, and `[*Name: ...]` are treated as ordinary named sections. 
 
 ## The [*] Section
 
@@ -464,7 +464,7 @@ Sets the source file name to one of the pre-defined defaults, most of which are 
 |Arg|Effect|
 |:-|:-
 | -dontlint | Save the output without winapp2.ini formatting. Sections are written in alphabetical order with no preamble (see [Output Formatting](#output-formatting))
-| -noglobal | Treat `[*]` and `[*Map:]` source sections as ordinary section names instead of [global operations](#global-operations)
+| -noglobal | Treat `[*]`, `[*Map:]`, and `[*Name:]` source sections as ordinary section names instead of [global operations](#global-operations)
 
 ### File Selection
 | Arg | Effect | Default Value
