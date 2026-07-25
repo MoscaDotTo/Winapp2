@@ -38,7 +38,7 @@ The result is a `ccleaner.ini` that contains both CCleaner's own cleaning defini
 9. [Usage Examples](#usage-examples)
     - [Example 1: Patching a ccleaner.ini](#example-1-patching-a-ccleanerini)
     - [Example 2: Trimming before patching](#example-2-trimming-before-patching)
-    - [Example 3: The default workflow (download and deploy)](#example-3-the-default-workflow-download-and-deploy)
+    - [Example 3: The default workflow (download and patch)](#example-3-the-default-workflow-download-and-patch)
     - [Example 4: Review before deploying](#example-4-review-before-deploying)
     - [Example 5: Re-patching in place](#example-5-re-patching-in-place)
 
@@ -119,7 +119,7 @@ The winapp2.ini project publishes a ready-made [CCleaner 7 flavor](https://githu
 
 # How Patching Works
 
-CC7Patcher first prunes the target `ccleaner.ini` by removing any entry with a `Author=Winapp2.ini Project` key. It then uses [Transmute's](../transmute/README.md) **Add** mode to add the winapp2.ini entries into the pruned file. This makes patching idempotent: running it again, or running it to update to a newer winapp2.ini, produces the same result as patching a clean `ccleaner.ini`. See [Example 5](#example-5-re-patching-in-place).
+CC7Patcher first prunes the target `ccleaner.ini` by removing any entry with a `Author=Winapp2.ini Project` key. It then uses [Transmute's](../transmute/readme.md) **Add** mode to add the winapp2.ini entries into the pruned file. This makes patching idempotent: running it again, or running it to update to a newer winapp2.ini, produces the same result as patching a clean `ccleaner.ini`. See [Example 5](#example-5-re-patching-in-place).
 
 ### Notes
 
