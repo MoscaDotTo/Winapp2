@@ -183,7 +183,6 @@
     <Compile Include="handlers\winapp2\excludeKeyParams2\excludeKeyParams2.vb" />
     <Compile Include="handlers\winapp2\fileKeyParams2\fileKeyParams2.vb" />
     <Compile Include="handlers\winapp2\regKeyParams2\regKeyParams2.vb" />
-    <Compile Include="handlers\winapp2\changeDict.vb" />
     <Compile Include="handlers\winapp2\winapp2entry2\winapp2entry2.vb" />
     <Compile Include="handlers\winapp2\winapp2file2\winapp2file2.vb" />
     <Compile Include="handlers\winapp2\winapp2handler.vb" />

@@ -1321,8 +1321,8 @@ Public Module WinappDebug
 
         ' Inform the user if there are casing errors and fix them
         fullKeyErr(result, key, $"{casedString} has a casing error.", hasCasingErr And lintCasing.ShouldScan, False, "", "")
-        fixStr(hasCasingErr AndAlso key.Value.Contains(strToChk), key.Value, Function() key.Value.Replace(strToChk, casedString))
-        fixStr(hasCasingErr AndAlso key.Name.Contains(strToChk), key.Name, Function() key.Name.Replace(key.KeyType, casedString))
+        fixStr(hasCasingErr AndAlso lintCasing.fixFormat AndAlso key.Value.Contains(strToChk), key.Value, Function() key.Value.Replace(strToChk, casedString))
+        fixStr(hasCasingErr AndAlso lintCasing.fixFormat AndAlso key.Name.Contains(strToChk), key.Name, Function() key.Name.Replace(key.KeyType, casedString))
 
         ' Inform the user about invalid data
         If Not found AndAlso lintInvalid.ShouldScan Then

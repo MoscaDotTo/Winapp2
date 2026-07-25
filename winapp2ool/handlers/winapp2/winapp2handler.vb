@@ -35,30 +35,37 @@ Public Module winapp2handler
     Private ReadOnly digitRun As New Regex("[\d]+",
                                            RegexOptions.Compiled Or RegexOptions.CultureInvariant)
 
-    ''' <summary> Sorts a list of <c> Strings </c> after performing some mutations on the data (if necessary). Returns the sorted list of strings. </summary>
-    ''' <param name="ListToBeSorted"> A <c> list (of String)s </c> to be sorted </param>
-    ''' <param name="textToBeReplaced"> The <c> String </c> data that will be replaced during mutations </param>
+    ''' <summary> Sorts a list of <c> Strings </c> against mutated sort keys built from the data, without modifying the
+    ''' data itself. Returns the original strings in their sorted order. </summary>
+    ''' <param name="ListToBeSorted"> A <c> list (of String)s </c> to be sorted. Left unmodified by this function </param>
+    ''' <param name="textToBeReplaced"> The <c> String </c> data that will be replaced when building sort keys </param>
     ''' <param name="replacementText">The data with which <c> <paramref name="textToBeReplaced"/> </c> will be replaced </param>
     Public Function replaceAndSort(ListToBeSorted As strList, textToBeReplaced As String, replacementText As String) As strList
         If ListToBeSorted Is Nothing Then argIsNull(NameOf(ListToBeSorted)) : Return Nothing
-        Dim changes As New changeDict
-        ' Replace our target characters if they exist
-        For i = 0 To ListToBeSorted.Items.Count - 1
-            Dim item = ListToBeSorted.Items(i)
-            If item.Contains(textToBeReplaced) Then
-                Dim renamedItem = item.Replace(textToBeReplaced, replacementText)
-                changes.trackChanges(item, renamedItem)
-                ListToBeSorted.Items(i) = renamedItem
-            End If
+        ' Sort keys are built alongside the originals rather than over them. Duplicate values are legal in both of the
+        ' things sorted here (entry names within a category, key values within an entry), so two items may well produce
+        ' the same sort key. Keeping each key beside its own index is what stops a collision from losing an original
+        Dim sortKeys As New strList
+        For Each item In ListToBeSorted.Items
+            sortKeys.add(If(item.Contains(textToBeReplaced), item.Replace(textToBeReplaced, replacementText), item))
         Next
         ' Pad numbers if necessary
-        findAndReplaceNumbers(ListToBeSorted, changes)
-        ' Copy the modified list to be sorted and sort it
+        padNumbers(sortKeys)
+        ' Sort a permutation of the indices so that every sorted position still knows which original it came from.
+        ' Equal sort keys break the tie on the original index, which keeps the sort stable and the output deterministic
+        Dim order As New List(Of Integer)
+        For i = 0 To ListToBeSorted.Count - 1
+            order.Add(i)
+        Next
+        order.Sort(Function(a, b)
+                       Dim cmp = sortKeys.Items(a).CompareTo(sortKeys.Items(b))
+                       If cmp <> 0 Then Return cmp
+                       Return a.CompareTo(b)
+                   End Function)
         Dim sortedEntryList As New strList
-        sortedEntryList.Items.AddRange(ListToBeSorted.Items)
-        sortedEntryList.Items.Sort()
-        ' Restore the original state of our data
-        changes.undoChanges({ListToBeSorted, sortedEntryList})
+        For Each idx In order
+            sortedEntryList.add(ListToBeSorted.Items(idx))
+        Next
         Return sortedEntryList
     End Function
 
@@ -74,12 +81,12 @@ Public Module winapp2handler
         Return out
     End Function
 
-    ''' <summary> Detects the length (number of digits) in the "longest" integer in a given <c> list (of String)s </c> and prepends all shorter integers with zeros such that all the integers in all Strings are the same length </summary>
-    ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers.
-    ''' <param name="listToBeSorted"> The list to be modified and sorted </param>
-    ''' <param name="changes"> Dictonary of the changes made to the Strings in <c> <paramref name="listToBeSorted"/> </c></param>
-    Private Sub findAndReplaceNumbers(ByRef listToBeSorted As strList, ByRef changes As changeDict)
-        Dim longestNumLen = findLongestNumLength(listToBeSorted)
+    ''' <summary> Detects the length (number of digits) in the "longest" integer in a given list of sort keys and prepends
+    ''' all shorter integers with zeros such that all the integers in all Strings are the same length.
+    ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. </summary>
+    ''' <param name="sortKeys"> The list of sort keys to be padded in place </param>
+    Private Sub padNumbers(sortKeys As strList)
+        Dim longestNumLen = findLongestNumLength(sortKeys)
         If longestNumLen < 2 Then Exit Sub
         Dim padTo = longestNumLen
         Dim evaluator As MatchEvaluator =
@@ -92,14 +99,10 @@ Public Module winapp2handler
                 Next
                 Return String.Join(".", parts)
             End Function
-        For i = 0 To listToBeSorted.Count - 1
-            Dim baseString = listToBeSorted.Items(i)
-            Dim paddedString = numberAndDecimals.Replace(baseString, evaluator)
-            ' Don't rename if we didn't change anything
-            If baseString.Equals(paddedString, StringComparison.InvariantCulture) Then Continue For
-            ' Rename and track changes appropriately
-            changes.trackChanges(baseString, paddedString)
-            listToBeSorted.replaceStrAtIndexOf(baseString, paddedString)
+        ' Assigned by index rather than by value lookup: duplicate sort keys are expected here, and a
+        ' lookup would repeatedly find the first of them instead of the one being padded
+        For i = 0 To sortKeys.Count - 1
+            sortKeys.Items(i) = numberAndDecimals.Replace(sortKeys.Items(i), evaluator)
         Next
     End Sub
 
