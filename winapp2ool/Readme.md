@@ -1,33 +1,59 @@
 # Winapp2ool
 
-Winapp2ool is a domain-specific companion utility for Winapp2.ini, offering a suite of functions tailored to its structure and purpose, while remaining simple to use. It is designed for use as either a CLI application with a simple menu system, or to be called silently from scripting environments to allow for automation.   
+Winapp2ool is a domain-specific companion utility for Winapp2.ini, offering a suite of functions tailored to its structure and purpose, while remaining simple to use. It is designed for use as either a CLI application with a simple menu system, or to be called silently from scripting environments to allow for automation.
 
 ### What is winapp2.ini?
-Winapp2.ini is a massive, community-driven database of declarative cleaning routines for Microsoft Windows, compatible CCleaner, BleachBit, System Ninja, R-Wipe&Clean, and HDCleaner. Winapp2.ini has its own readme [here](https://github.com/MoscaDotTo/Winapp2/blob/master/README.md).
+
+Winapp2.ini is a massive, community-driven database of declarative cleaning routines for Microsoft Windows, compatible with CCleaner, BleachBit, System Ninja, R-Wipe&Clean, HDCleaner, and FluentCleaner. Winapp2.ini has its own readme [here](../README.md).
 
 ### Why winapp2ool?
+
 Winapp2ool was created to help automate otherwise complex or time consuming tasks for maintainers, contributors, and end users of Winapp2.ini. It provides several tools:
 
-* WinappDebug: Performs static analysis and corrects style and syntax errors. 
-* Trim: Reduces the database to entries relevant to the current system.
-* Transmute: Applies individual structured patches to ini files.
-* Flavorize: Applies batches of structured patches to ini files. 
-* Diff: Generates changelogs between any two Winapp2.ini versions using context-aware abstraction tracking.
-* CCiniDebug: Removes stale Winapp2.ini configurations from the CCleaner settings. 
-* Browser Builder: Generates web browser entries for entire families of web browsers.
-* Combine: Merges folders (including subfolders) of ini files into a single file. 
+* [WinappDebug](modules/winappdebug/README.md): Performs static analysis and corrects style and syntax errors
+* [Trim](modules/trim/README.md): Reduces the database to entries relevant to the current system
+* [Transmute](modules/transmute/readme.md): Applies individual structured patches to ini files
+* [Flavorizer](modules/transmute/Flavorizer/readme.md): Applies batches of structured patches to ini files
+* [Diff](modules/diff/readme.md): Generates changelogs between any two Winapp2.ini versions using context-aware abstraction tracking
+* [CCiniDebug](modules/ccdebug/readme.md): Removes stale Winapp2.ini configurations from the CCleaner settings
+* [Entry Lab](modules/entrylab/readme.md): Hub for the entry generators: [Browser Builder](modules/browserbuilder/readme.md), [UWP Builder](modules/uwpbuilder/readme.md), and [Entry Builder](modules/entrybuilder/readme.md)
+* [Combine](modules/combine/readme.md): Merges folders (including subfolders) of ini files into a single file
+* [CC7Patcher](modules/cc7patcher/readme.md): Installs winapp2.ini entries into CCleaner 7's ccleaner.ini
+* [Downloader](modules/download/readme.md): Downloads winapp2.ini and related files from GitHub
 
-Winapp2ool is not just a helper utility: it actively facilitates the build process for Winapp2.ini by assembling the [base entries](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Entries), [generating and correcting web browser entries](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/BrowserBuilder), and generating each of the [Flavors](https://github.com/MoscaDotTo/Winapp2/tree/master?tab=readme-ov-file#what-are-flavors) of Winapp2.ini.
+Winapp2ool is not just an end-user helper utility: it is used to automatically verify incoming PRs on this repo, and orchestrates the build process for Winapp2.ini by generating the [base entries](../Assembler/EntryBuilder), [web browser entries](../Assembler/BrowserBuilder), and [UWP app entries](../Assembler/UWP) into committed, auditable [build artifacts](../Assembler/Entries), merging them,  generating each of the [Flavors](../README.md#what-are-flavors) of Winapp2.ini, along with all their contextual diffs. 
 
 ---
 
-# Requirements 
+# Table of Contents
+
+1. [Requirements](#requirements)
+2. [Installation](#installation)
+3. [Quick Start](#quick-start)
+4. [Menu Options](#menu-options)
+5. [Command-Line Arguments](#command-line-arguments)
+   - [Module Args](#module-args)
+   - [Global Args](#global-args)
+   - [Flavor Args](#flavor-args)
+   - [File Selection Args](#file-selection-args)
+6. [Usage Examples](#usage-examples)
+   - [Example 1: First run — updating and trimming from the menu](#example-1-first-run--updating-and-trimming-from-the-menu)
+   - [Example 2: Scripted download](#example-2-scripted-download)
+   - [Example 3: Downloading and trimming in one command](#example-3-downloading-and-trimming-in-one-command)
+   - [Example 4: Choosing a Flavor](#example-4-choosing-a-flavor)
+   - [Example 5: Fully offline maintenance chain](#example-5-fully-offline-maintenance-chain)
+7. [Troubleshooting](#troubleshooting)
+8. [Notes](#notes)
+
+---
+
+# Requirements
 
 ### Minimum
 
 * Windows Vista SP2
 * .NET Framework 4.5
-* Administrative permissions (see notes)
+* Administrative permissions (see [Notes](#notes))
 
 ### Suggested
 
@@ -38,117 +64,343 @@ Winapp2ool is not just a helper utility: it actively facilitates the build proce
 ---
 
 # Installation
-Download the latest winapp2ool.exe from the [Releases page](https://github.com/MoscaDotTo/Winapp2/releases/) or from the [Release directory](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool/bin/Release).
+
+Download the latest winapp2ool.exe from the [Releases page](https://github.com/MoscaDotTo/Winapp2/releases/) or from the [Release directory](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool/bin/Release) and place it in the folder where you keep (or would like to keep) winapp2.ini.
 
 ### Updates
+
 Winapp2ool will prompt you to update it from within the application whenever an update is available. The application will create a backup of itself with the `.bak` extension when doing this. Rename to `.exe` to restore the backed up version.
 
-### Beta builds 
-Beta builds are occasionally made available to the public while features are in development. To access the beta build, open the winapp2ool settings and enable beta participation. The newest beta build will automatically be downloaded and launched. 
+### Beta builds
+
+Beta builds are occasionally made available to the public while features are in development. To access the beta build, open the [winapp2ool settings](modules/maintool/readme.md) and enable beta participation. The newest beta build will automatically be downloaded and launched. Beta participation requires .NET Framework 4.6 or higher. Beta builds live on [Branch1](https://github.com/MoscaDotTo/Winapp2/tree/Branch1).
+
+---
+
+# Quick Start
+
+Place winapp2ool.exe in an empty folder and run it. On first launch with a network connection, winapp2ool detects that you have no local copy of winapp2.ini and presents download options directly on the main menu:
+
+```
+ ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ ║                                                 Update available for winapp2.ini                                             ║
+ ╠══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+ ║                                  Welcome to Winapp2ool! Check out the ReadMe on GitHub for help!                             ║
+ ║                                                                                                                              ║
+ ║                                                  Menu: Enter a number to select                                              ║
+ ║                                                                                                                              ║
+ ║ 0. Exit                            - Exit the application                                                                    ║
+ ║                                                                                                                              ║
+ ║ 1. WinappDebug                     - Scan for and correct style and syntax errors in winapp2.ini                             ║
+ ║ 2. Trim                            - Optimize winapp2.ini for your system                                                    ║
+ ║ 3. Transmute                       - Add, replace, or remove entire sections or individual keys from winapp2.ini             ║
+ ║ 4. Diff                            - Generate a context-aware changelog between two winapp2.ini files                        ║
+ ║ 5. CCiniDebug                      - Remove stale winapp2.ini configurations from ccleaner.ini                               ║
+ ║ 6. Entry Lab                       - Generate winapp2.ini entries from templates                                             ║
+ ║ 7. Combine                         - Join together a collection of ini files into one                                        ║
+ ║ 8. CC7Patcher                      - Install winapp2.ini for CCleaner 7                                                      ║
+ ║                                                                                                                              ║
+ ║ 9. Downloader                      - Download files from the Winapp2 GitHub                                                  ║
+ ║ 10. Settings                       - Manage Winapp2ool's settings                                                            ║
+ ║                                                                                                                              ║
+ ║                                            A new version of winapp2.ini is available!                                        ║
+ ║                                                Current: v000000 (file not found)                                             ║
+ ║                                                        Available: v251109                                                    ║
+ ║                                                                                                                              ║
+ ║ 11. Update Winapp2.ini             - Update your local copy of winapp2.ini                                                   ║
+ ║ 12. Update & Trim                  - Download and trim the latest winapp2.ini                                                ║
+ ║ 13. Show winapp2.ini changelog     - See the difference between your local file and the latest                               ║
+ ║ 14. Show trimmed changelog         - See the difference between your trimmed local file and the latest                       ║
+ ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+Enter a number, or leave blank to run the default:
+```
+
+###### Note: This menu was captured from a real first run in an empty folder. `Current: v000000 (file not found)` reflects that no local winapp2.ini exists yet; once you have one, its version number is shown instead. The update options at the bottom only appear while an update is available.
+
+From here, the most common tasks are one keypress away:
+
+1. **Download the latest winapp2.ini:** Choose `Update Winapp2.ini`
+2. **Optimize the latest winapp2.ini for your system:** Choose `Update & Trim`
+3. **See the changelog between your local version and the latest:** Choose `Show winapp2.ini changelog`
+4. **Update winapp2ool itself:** Choose `Update Winapp2ool` (shown when a new version of the tool is available)
+
+---
+
+# Menu Options
+
+Click a linked option name to see the readme for that module.
+
+| Option | Effect | Notes |
+|:-|:-|:-|
+| Exit | Exits the application | |
+| [WinappDebug](modules/winappdebug/README.md) | Scan for and correct style and syntax errors in winapp2.ini | Enforces the winapp2.ini style and syntax guidelines |
+| [Trim](modules/trim/README.md) | Optimize winapp2.ini for your system | Removes entries not relevant to your machine, greatly speeding load times in tools like CCleaner |
+| [Transmute](modules/transmute/readme.md) | Add, replace, or remove entire sections or individual keys from winapp2.ini | Precise "patching" of ini files with granular conflict resolution |
+| [Diff](modules/diff/readme.md) | Generate a context-aware changelog between two winapp2.ini files | |
+| [CCiniDebug](modules/ccdebug/readme.md) | Remove stale winapp2.ini configurations from ccleaner.ini | For CCleaner 6 and earlier only |
+| [Entry Lab](modules/entrylab/readme.md) | Generate winapp2.ini entries from templates | Hub for [Browser Builder](modules/browserbuilder/readme.md), [UWP Builder](modules/uwpbuilder/readme.md), and [Entry Builder](modules/entrybuilder/readme.md) |
+| [Combine](modules/combine/readme.md) | Join together a collection of ini files into one | Includes subfolders |
+| [CC7Patcher](modules/cc7patcher/readme.md) | Install winapp2.ini for CCleaner 7 | Appends winapp2.ini entries into CCleaner 7's ccleaner.ini |
+| [Downloader](modules/download/readme.md) | Download files from the Winapp2 GitHub | **Unavailable in offline mode** |
+| [Settings](modules/maintool/readme.md) | Manage Winapp2ool's settings | Application-level settings: saving settings to disk, beta participation, offline mode, the active [Flavor](#flavor-args), and log management |
+| Update Winapp2.ini | Update your local copy of winapp2.ini | **Only shown while a winapp2.ini update is available; unavailable in offline mode** |
+| Update & Trim | Download and trim the latest winapp2.ini | **Only shown while a winapp2.ini update is available; unavailable in offline mode** |
+| Show winapp2.ini changelog | See the difference between your local file and the latest | **Only shown while a winapp2.ini update is available; unavailable in offline mode** |
+| Show trimmed changelog | See the difference between your trimmed local file and the latest | **Only shown while a winapp2.ini update is available; unavailable in offline mode** |
+| Update Winapp2ool | Get the latest Winapp2ool.exe | **Only shown while a winapp2ool update is available. Unavailable in offline mode and on machines with .NET Framework 4.5 or lower (ie. Winapp2oolXP)** |
+| Go online | Retry your internet connection | **Only available in offline mode** |
+
+###### Note: The main menu also accepts the hidden commands `printlog` (print winapp2ool's internal log to the console) and `savelog` (write the log to disk). See [Log Management](modules/maintool/readme.md#log-management) in the settings readme.
+
+---
+
+# Command-Line Arguments
+
+Winapp2ool supports command line arguments ("args"). These allow Winapp2ool to be used from a scripting environment (such as a shell script) without having to interact with the UI. There are several top level args which apply settings globally, and then there are tool specific args which are defined in each tool's own readme.
+
+The first argument provided should always refer to the module you would like to use, as below. Modules can be selected by number or by name, with or without a leading `-` — `1`, `-1`, `debug`, and `-debug` are all equivalent.
+
+### Module Args
+
+| Arg | Effect |
+|:-|:-|
+| `1` or `debug` | Launches [WinappDebug](modules/winappdebug/README.md) |
+| `2` or `trim` | Launches [Trim](modules/trim/README.md) |
+| `3` or `transmute` | Launches [Transmute](modules/transmute/readme.md) |
+| `4` or `diff` | Launches [Diff](modules/diff/readme.md) |
+| `5` or `ccdebug` | Launches [CCiniDebug](modules/ccdebug/readme.md) |
+| `6` or `browserbuilder` | Launches [Browser Builder](modules/browserbuilder/readme.md) |
+| `7` or `combine` | Launches [Combine](modules/combine/readme.md) |
+| `8` or `download` | Launches [Downloader](modules/download/readme.md) |
+| `9` or `flavorize` | Launches [Flavorizer](modules/transmute/Flavorizer/readme.md) |
+| `10` or `uwpbuilder` | Launches [UWP Builder](modules/uwpbuilder/readme.md) |
+| `11` or `entrybuilder` | Launches [Entry Builder](modules/entrybuilder/readme.md) |
+| `12` or `cc7patcher` | Launches [CC7Patcher](modules/cc7patcher/readme.md) |
+
+### Global Args
+
+| Arg | Effect | Notes |
+|:-|:-|:-|
+| `-s` | Enables silent mode, muting almost all output and prompts for input | Some exceptions and errors may not be shown when silent mode is enabled |
+| `-offline` | Skips the network connection check at startup and runs in offline mode |  |
+| `-autoupdate` | Checks for and applies a winapp2ool update before running the requested module | Requires .NET Framework 4.6 or higher |
+
+### Flavor Args
+
+The active [Flavor](../README.md#what-are-flavors) determines which variant of winapp2.ini is downloaded by any module that downloads one (Downloader, Trim, Diff, CC7Patcher).
+
+| Arg | Effect | Notes |
+|:-|:-|:-|
+| `-ccleaner` or `-cc` | Sets the Flavor to CCleaner | Default |
+| `-ncc` or `-base` | Sets the Flavor to Non-CCleaner (base) | |
+| `-bleachbit` or `-bb` | Sets the Flavor to BleachBit | |
+| `-systemninja` or `-sn` | Sets the Flavor to System Ninja | |
+| `-tron` | Sets the Flavor to Tron | |
+| `-ccleaner7` or `-cc7` | Sets the Flavor to CCleaner 7 | |
+| `-fluentcleaner` or `-fc` | Sets the Flavor to FluentCleaner | |
+
+### File Selection Args
+
+Every module numbers the files it works with. Two argument types override where a numbered file lives:
+
+| Arg | Effect | Notes |
+|:-|:-|:-|
+| `-1d`, `-2d`, ... | Defines a new directory (and optionally file name) for the module's respectively numbered file | Paths with spaces must be provided in quotes, eg. `-1d "C:\New Folder"` |
+| `-1f`, `-2f`, ... | Defines a new file name for the module's respectively numbered file | Subdirectories can be given through the file name, eg. `-1f \subdir\winapp2.ini` |
+
+###### Note: In most modules the "first file" (`-1d`/`-1f`) is the winapp2.ini being read and the "third file" (`-3d`/`-3f`) is the output file, but there are exceptions. Refer to a specific module's readme for its file numbering.
+
+---
+
+# Usage Examples
+
+The outputs below were captured from real winapp2ool runs. Winapp2.ini version numbers and entry counts reflect the day and the machine on which the examples were recorded. 
+
+## Example 1: First run (updating and trimming from the menu)
+
+**Context**
+
+You have just downloaded winapp2ool.exe into an empty folder and want a copy of winapp2.ini optimized for your machine.
+
+**Steps**
+
+1. Run winapp2ool.exe.
+2. Because there is no local winapp2.ini, the main menu opens with the update options shown in [Quick Start](#quick-start)
+3. Choose `Update & Trim`. Winapp2ool prints `Downloading & trimming, this may take a moment...`, downloads the latest CCleaner flavor winapp2.ini, removes the entries that do not apply to your system, and saves the result as `winapp2.ini` in the current folder.
+4. The update options disappear from the menu because your local copy is now current.
+
+---
+
+## Example 2: Scripted download
+
+**Context**
+
+A maintenance script needs the latest winapp2.ini without any user interaction.
+
+**Command**
+
+```
+winapp2ool download winapp2 -s
+```
+
+**Output**
+
+Nothing is printed to the console. `winapp2.ini` is downloaded from github and saved in the current directory
+
+```ini
+; Version: 251109
+; # of entries: 3,715
+```
+
+**Explanation**
+
+- `download` launches the Downloader module
+- `winapp2` is the Downloader's file selector for winapp2.ini
+- `-s` suppresses all output and prompts, allowing the command to run unattended
+- No Flavor arg is given, so the default CCleaner Flavor is downloaded
+
+---
+
+## Example 3: Downloading and trimming in one command
+
+**Context**
+
+The same maintenance script should instead produce a winapp2.ini already optimized for the machine it runs on. This is the scripted equivalent of Example 1's `Update & Trim`.
+
+**Command**
+
+```
+winapp2ool -2 -d -s
+```
+
+**Output**
+
+Nothing is printed to the console. `winapp2.ini` appears in the working directory. 
+
+```ini
+; Version: 251109
+; # of entries: 349
+```
+
+**Explanation**
+
+- `-2` launches Trim 
+- `-d` is Trim's flag for downloading the file to trim 
+- The full database contained 3,715 entries; 349 survived trimming on this machine. 
+
+---
+
+## Example 4: Choosing a Flavor
+
+**Context**
+
+A BleachBit user wants the BleachBit variant of winapp2.ini instead of the default CCleaner one.
+
+**Command**
+
+```
+winapp2ool -bleachbit download winapp2 -s
+```
+
+**Output**
+
+The BleachBit flavor of `winapp2.ini` is downloaded and saved to the current directory 
+
+**Explanation**
+
+- Flavor args are global: they affect any module that downloads winapp2.ini
+
+---
+
+## Example 5: Fully offline maintenance chain
+
+**Context**
+
+You maintain personal additions to winapp2.ini in a `custom.ini` file. A script applies them to your local winapp2.ini and then corrects the style and syntax of the result. Your network connection is bad, and you notice that winapp2ool lags on startup while it tries to connect to GitHub. 
+
+**Files**
+
+###### **Base file (`winapp2.ini`)**
+
+```ini
+[My App Logs *]
+Section=Custom Entries
+DetectFile=%AppData%\MyApp
+FileKey1=%AppData%\MyApp\Logs|*.log
+```
+
+###### **Source file (`custom.ini`)**
+
+```ini
+; Personal additions maintained separately from the official winapp2.ini
+[My App Logs *]
+FileKey=%AppData%\MyApp\CrashDumps|*.dmp
+
+[My Other App *]
+Section=Custom Entries
+DetectFile=%AppData%\MyOtherApp
+FileKey1=%AppData%\MyOtherApp\Cache|*.tmp
+```
+
+**Commands**
+
+```
+winapp2ool -transmute -add -2f custom.ini -3f winapp2.ini -s -offline
+winapp2ool -debug -c -1f winapp2.ini -3f winapp2.ini -s -offline
+```
+
+**Output**
+
+###### **`winapp2.ini` after both commands**
+
+```ini
+[My App Logs *]
+Section=Custom Entries
+DetectFile=%AppData%\MyApp
+FileKey1=%AppData%\MyApp\CrashDumps|*.dmp
+FileKey2=%AppData%\MyApp\Logs|*.log
+
+[My Other App *]
+Section=Custom Entries
+DetectFile=%AppData%\MyOtherApp
+FileKey1=%AppData%\MyOtherApp\Cache|*.tmp
+```
+
+**Explanation**
+
+- The first command adds the new key and the new entry from `custom.ini` into `winapp2.ini` (Transmute Add mode, writing back over the base file via `-3f`)
+- The second command lints the result with WinappDebug (`-c` saves its corrections): the unnumbered `FileKey` added by Transmute has been renumbered and the keys alphabetized
+- `-s -offline` on both commands makes the chain silent and skips the startup network check. 
+
+---
+
+# Troubleshooting
+
+| Message | Cause |
+|:-|:-|
+| "Winapp2ool is currently in offline mode" | Winapp2ool could not reach GitHub at startup (or was launched with `-offline`). All functions not directly related to downloading still work on local files. Use `Go online` from the main menu to retry the connection |
+| "Winapp2ool was unable to establish a network connection. You are still in offline mode." | A `Go online` retry failed |
+| "A new version of winapp2.ini is available!" | Informational: your local winapp2.ini is older than the latest release. `Current: v000000 (file not found)` means no winapp2.ini exists in winapp2ool's folder |
+| "Your .NET Framework is out of date" | The machine has .NET Framework 4.5 or lower.  |
+| "Winapp2ool is unable to automatically update" | Winapp2ool was launched from the `%tmp%` directory or the .NET Framework is out of date |
+| "Invalid input. Please try again." | The menu received input it doesn't recognize |
+| "Please report this error on GitHub. It will be saved to winapp2ool.log in the same folder as winapp2ool." | An unexpected error occurred; the log written next to winapp2ool.exe contains the details to include in a [GitHub issue](https://github.com/MoscaDotTo/Winapp2/issues) |
 
 ---
 
 # Notes
 
 ### General
-.NET Framework 4.5 (or newer) comes pre-installed by default on Windows 8 and newer.   
 
-By default, each tool in the application assumes that local files it is looking for are in the same folder as the executable. 
+.NET Framework 4.5 (or newer) comes pre-installed by default on Windows 8 and newer.
 
-The parent directory of the current directory is abbreviated in the menu as ".."
+By default, each tool in the application assumes that local files it is looking for are in the same folder as the executable. File paths displayed in menus abbreviate the current directory as `..`
 
-Winapp2ool performs queries against protected system areas such as the Program Files and Windows directories and will return invalid results if run without administrative permissions.
+Winapp2ool performs queries against protected system areas such as the Program Files and Windows directories and may return invalid results if run without administrative permissions.
 
-Winapp2ool does not perform any automatic backup of ini files before modifying them. Data loss may be possible when misconfigured. 
+Winapp2ool does not perform any automatic backup of ini files before modifying them. 
 
 ### Windows XP
-WindowsXP users should use winapp2oolXP. 
-Winapp2oolXP is no longer maintained and no longer receives updates, but retains the ability to download and trim the latest winapp2.ini for users on that platform. We are unable to provide application support for users of Winapp2oolXP. 
 
-### Limited functionality
-All functions not directly related to downloading files will work without a network connection by acting on local files.
-
-If launched without a network connection, a prompt will be displayed to the user to retry their connection. Some menu options are unavailable without a network connection 
-
-Winapp2ool requires .NET 4.6 or newer to provide updates to itself. A warning will be displayed in the main menu when .NET 4.6 or higher is not detected.
-
-Winapp2ool uses the %tmp% directory as a staging ground for its downloads and updates, when launched from this directory, the executable will not update itself. A warning will be displayed in the main menu when launched from %tmp%
-
----
-
-# Quick Start
-The main menu presents some options when an update is available for either Winapp2ool or winapp2.ini 
-1. Download the latest winapp2.ini: Choose "Update winapp2.ini"
-2. Optimize the latest winapp2.ini for your system: Choose "Update & Trim"
-3. See the changelog between your local version and the latest: Choose "Show update Diff"
-4. Download the latest Winapp2ool: Choose "Update Winapp2ool" 
-
-# Menu Options
-
-Click on the link in the Options column to see the ReadMe for a particular module 
-
-| Option                                                                                                | Effect                                                                                                          |  Notes                                                                                                                                                       |
-|:-                                                                                                     | :-                                                                                                              | :-                                                                                                                                                           |
-| Exit        																				            | Exits the application 				 																		  |                                                                                                                                                              |
-| WinappDebug																			                | Opens WinappDebug     				 																		  | Enforces thewinapp2.ini style and syntax guidelines                                                                                                          |
-| Trim        																				            | Opens Trim            				 																		  | Reduces winapp2.ini to only the set of entries valid for the system at runtime, greatly speeding application load times for tools like CCleaner              |
-| [Transmute](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/transmute/readme.md) | Opens Transmute       				 																	 	  | Provides precise control over modifying configuration files through three primary operations with granular conflict resolution                               |
-| Diff																						            | Opens Diff            				 																 		  | Provides context-aware changelogs between any two versions of winapp2.ini                                                                                    |
-| CCiniDebug                         														            | Opens CCiniDebug	  				 																	     	  | Removes outdated winapp2.ini rules from ccleaner.ini                                                                                                         |
-| Browser Builder 																			            | Opens Browser Builder 				 																		  | Generates winapp2.ini entries for software built on Gecko or Chromium                                                                                        |
-| Combine 																				                | Opens Combine         				 																		  | Joins together every ini file in a folder and its subfolders into a single ini file                                                                          |
-| Downloader																				            | Opens Downloader     			     																		      | Downloads files from the winapp2 GitHub. **Unavailable in offline mode**                                                                                     |
-| Settings 																					            | Opens the winapp2ool global settings            															      | Contains application-level settings for beta mode, saving settings to disk, and more                                                                         |
-| Go Online																					            | Attempts to reestablish your network connection 														 	      | **Only available in offline mode**                                                                                                                           |
-| Update winapp2.ini																		            | Downloads the latest winapp2.ini from GitHub to the current folder 											  | **Only available alongside a winapp2.ini update, unavailable in offline mode**                                                                               |
-| Update & Trim																				            | Downloads the latest winapp2.ini to the current folder and trims it 										      | **Only available alongside a winapp2.ini update, unavailable in offline mode**                                                                               |
-| Show winapp2.ini changelog 																            | Diffs your local copy of winapp2.ini against the latest version hosted on GitHub in order to show a changelog   | **Only available alongside a winapp2.ini update, unavailable in offline mode**                                                                               |
-| Update Winapp2ool																			            | Attempts to automatically update winapp2ool.exe to the latest version from GitHub  							  | **Only available alongside a winapp2ool update. Unavailable in offline mode, and on machines with .NET Framework 4.5 or lower installed (ie. Winapp2oolXP)** |
-# Command-line arguments
-
-Winapp2ool supports command line arguments ("args"). These allow Winapp2ool to be used from a scripting environment (such as a shell script) without having to interact with the UI. There are several top level args which apply settings globally, and then there are tool specific args which will be defined in the respective section for those tools.
-
-The first argument provided should always refer to the module you would like to use, as below. Use of `-` before these args is not required, but it is supported.
-
-### Module args
-
-| Arg                     | Effect                   |
-| :-                      | :-                       |
-| `1` or `debug` 		  | Launches WinappDebug     |
-| `2` or `trim`    		  | Launches Trim            |
-| `3` or `transmute`	  | Launches Transmute       |
-| `4` or `diff`			  | Launches Diff            |
-| `5` or `ccdebug` 		  | Launches CCiniDebug      |
-| `6` or `browserbuilder` | Launches Browser Builder |
-| `7` or `combine` 		  | Launches Combine         |
-| `8` or `download` 	  | Launches Downloader      |
-| `9` or `flavorize` 	  | Launches Flavorizer      |
-
-### Global args
-
-| Arg                     | Effect                                                                              | Notes                                                                   | 
-| :-                      | :-                                                                                  | :-                                                                      |
-| `-s`  			      | Enables "silent mode" - muting almost all output and prompts for input.             | Some exceptions and errors may not be shown when silent mode is enabled |
-| `-1d`, `-2d`, ... `-9d` | Defines a new file name and/or path for the module's respectively numbered file. \* | Paths with spaces must be provided in quotes, eg. `-1d "C:\New Folder"` | 
-| `-1f`, `-2f`, ... `-9f` | Defines a new file name for the module's respectively numbered file **              |                                                                         |
-| `-ncc` or `-base` 	  | Sets the Flavor to Non-CCleaner (base) when downloading                             |                                                                         |            
-| `-ccleaner` or `-cc`    | Sets the Flavor to CCleaner when downloading                                        | Default                                                                 | 
-| `-bleachbit` or `-bb`   | Sets the Flavor to BleachBit when downloading                                       |                                                                         |  
-| `-systemninja` or `-sn` | Sets the Flavor to System Ninja when downloading                                    |                                                                         |
-| `-tron`                 | Sets the Flavor to Tron when downloading                                            |                                                                         |
-
-##### Notes
-
-\* The "first file" (`-1d` or `-1f`) in all modules is winapp2.ini. The "third file" (`-3d` or `-3f`) is typically the output file, if one exists. Refer to a specific module's documentation for information on its file configuration
-
-\** You can easily define subdirectories by using the `-f` flag for your file and providing the directory before the file name, eg `-1f \subdir\winapp2.ini`
-
-### Examples
-
-| Args                                                                     | Effect                                                                                                                                                                                       |
-| :-                                                                       | :-                                                                                                                                                                                           |
-| `winapp2ool.exe -1 -c`												   | Opens and runs WinappDebug with saving of changes enabled                                                                                                                                    |
-| `winapp2ool.exe -2 -d -s` 											   | Silently downloads and trims the latest winapp2.ini of your selected flavor (default: `ccleaner`) from GitHub                                                                                |
-| `winapp2ool.exe -bleachbit -2 -d -s`                                     | Silently downloads and trims the latest BleachBit flavor of winapp2.ini from GitHub                                                                                                          |                                                                           
-| `winapp2ool download winapp2 -s`										   | Silently opens Downloader and downloads the latest winapp2.ini                                                                                                                               |
-| `winapp2ool -transmute -remove -bykey -byname -2f key_name_removals.ini` | Sets the Transmute mode to `Remove`, the Removal mode to `By Key`, and the Key Removal mode to `By Name`. Sets the source file name to `key_name_removals.ini` and applies the Transmutation |
+Windows XP users should use winapp2oolXP. Winapp2oolXP is no longer maintained and no longer receives updates, but retains the ability to download and trim the latest winapp2.ini for users on that platform. We no longer able to provide application support or updates for users of Winapp2oolXP.
