@@ -1,6 +1,6 @@
 # Winapp2ool
 
-Winapp2ool is a domain-specific companion utility for Winapp2.ini, offering a suite of functions tailored to its structure and purpose, while remaining simple to use. It is designed for use as either a CLI application with a simple menu system, or to be called silently from scripting environments to allow for automation.
+Winapp2ool is the tool that builds winapp2.ini, and a companion utility for the people who use it. The published winapp2.ini files (the base file, each of its [flavors](../README.md#what-are-flavors), and the changelog shipped alongside each one) are generated from source by winapp2ool rather than edited by hand. It is a menu-driven console application for end users, and can be driven run from a scripting environment for automation.
 
 ### What is winapp2.ini?
 
@@ -14,14 +14,27 @@ Winapp2ool was created to help automate otherwise complex or time consuming task
 * [Trim](modules/trim/README.md): Reduces the database to entries relevant to the current system
 * [Transmute](modules/transmute/readme.md): Applies individual structured patches to ini files
 * [Flavorizer](modules/transmute/Flavorizer/readme.md): Applies batches of structured patches to ini files
-* [Diff](modules/diff/readme.md): Generates changelogs between any two Winapp2.ini versions using context-aware abstraction tracking
+* [Diff](modules/diff/readme.md): Generates changelogs between any two Winapp2.ini versions, tracking additions, removals, renames, mergers, and key movements between entries using context-aware abstraction tracking
 * [CCiniDebug](modules/ccdebug/readme.md): Removes stale Winapp2.ini configurations from the CCleaner settings
 * [Entry Lab](modules/entrylab/readme.md): Hub for the entry generators: [Browser Builder](modules/browserbuilder/readme.md), [UWP Builder](modules/uwpbuilder/readme.md), and [Entry Builder](modules/entrybuilder/readme.md)
 * [Combine](modules/combine/readme.md): Merges folders (including subfolders) of ini files into a single file
 * [CC7Patcher](modules/cc7patcher/readme.md): Installs winapp2.ini entries into CCleaner 7's ccleaner.ini
 * [Downloader](modules/download/readme.md): Downloads winapp2.ini and related files from GitHub
 
-Winapp2ool is not just an end-user helper utility: it is used to automatically verify incoming PRs on this repo, and orchestrates the build process for Winapp2.ini by generating the [base entries](../Assembler/EntryBuilder), [web browser entries](../Assembler/BrowserBuilder), and [UWP app entries](../Assembler/UWP) into committed, auditable [build artifacts](../Assembler/Entries), merging them,  generating each of the [Flavors](../README.md#what-are-flavors) of Winapp2.ini, along with all their contextual diffs. 
+### How winapp2.ini gets built
+
+The published winapp2.ini is not assembled by hand. Its sources live in [Assembler](../Assembler), and winapp2ool performs every stage that turns them into the published files. 
+
+1. [Entry Builder](modules/entrybuilder/readme.md), [Browser Builder](modules/browserbuilder/readme.md), and [UWP Builder](modules/uwpbuilder/readme.md) expand the [base entry](../Assembler/EntryBuilder), [browser](../Assembler/BrowserBuilder), and [Microsoft Store app](../Assembler/UWP) sources into the committed [build artifacts](../Assembler/Entries)
+2. [Combine](modules/combine/readme.md) joins those artifacts into one file in strict mode
+3. [WinappDebug](modules/winappdebug/README.md) applies the style and syntax rules to the merged file and saves its corrections
+4. [Flavorizer](modules/transmute/Flavorizer/readme.md) applies each flavor's ruleset to produce the CCleaner, CCleaner 7, BleachBit, FluentCleaner, Tron, and System Ninja variants
+5. [Diff](modules/diff/readme.md) creates the changelog for the base file and for each flavor against the previously version
+
+Because the artifacts under [Entries](../Assembler/Entries) are committed to the repository rather than existing only transiently during a build, the build can be checked against itself: `build winapp2.ps1 -Verify` regenerates all of them, byte-compares against what is committed, and exits nonzero on any drift. That check runs in GitHub Actions, alongside:
+
+* Pull request verification: A pull request touching the build sources is built twice: master alone, then master with the pull request merged. A bot comment reports either the changelog the change produces or the stage at which it broke the build
+* Scheduled builds: Sources are rebuilt daily. When the output changes, it is committed back and a release is cut with every flavor and changelog attached
 
 ---
 
@@ -135,8 +148,8 @@ Click a linked option name to see the readme for that module.
 |:-|:-|:-|
 | Exit | Exits the application | |
 | [WinappDebug](modules/winappdebug/README.md) | Scan for and correct style and syntax errors in winapp2.ini | Enforces the winapp2.ini style and syntax guidelines |
-| [Trim](modules/trim/README.md) | Optimize winapp2.ini for your system | Removes entries not relevant to your machine, greatly speeding load times in tools like CCleaner |
-| [Transmute](modules/transmute/readme.md) | Add, replace, or remove entire sections or individual keys from winapp2.ini | Precise "patching" of ini files with granular conflict resolution |
+| [Trim](modules/trim/README.md) | Optimize winapp2.ini for your system | Removes entries not relevant to your machine, reducing load times in tools like CCleaner |
+| [Transmute](modules/transmute/readme.md) | Add, replace, or remove entire sections or individual keys from winapp2.ini | Patches ini files at whole-section or individual-key granularity. [Flavorizer](modules/transmute/Flavorizer/readme.md), which applies these patches in batches, is opened from this menu |
 | [Diff](modules/diff/readme.md) | Generate a context-aware changelog between two winapp2.ini files | |
 | [CCiniDebug](modules/ccdebug/readme.md) | Remove stale winapp2.ini configurations from ccleaner.ini | For CCleaner 6 and earlier only |
 | [Entry Lab](modules/entrylab/readme.md) | Generate winapp2.ini entries from templates | Hub for [Browser Builder](modules/browserbuilder/readme.md), [UWP Builder](modules/uwpbuilder/readme.md), and [Entry Builder](modules/entrybuilder/readme.md) |
@@ -178,6 +191,8 @@ The first argument provided should always refer to the module you would like to 
 | `11` or `entrybuilder` | Launches [Entry Builder](modules/entrybuilder/readme.md) |
 | `12` or `cc7patcher` | Launches [CC7Patcher](modules/cc7patcher/readme.md) |
 
+###### Note: These numbers are not the same as the numbers on the main menu. 
+
 ### Global Args
 
 | Arg | Effect | Notes |
@@ -185,6 +200,7 @@ The first argument provided should always refer to the module you would like to 
 | `-s` | Enables silent mode, muting almost all output and prompts for input | Some exceptions and errors may not be shown when silent mode is enabled |
 | `-offline` | Skips the network connection check at startup and runs in offline mode |  |
 | `-autoupdate` | Checks for and applies a winapp2ool update before running the requested module | Requires .NET Framework 4.6 or higher |
+| `-writelog` | Writes winapp2ool's internal log to `winapp2ool.log` on exit | A run that exits with a nonzero code saves the log whether or not this arg is provided |
 
 ### Flavor Args
 
