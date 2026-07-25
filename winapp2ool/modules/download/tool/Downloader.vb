@@ -58,6 +58,11 @@ Module Downloader
     ''' </summary>
     Public ReadOnly Property cc7FlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/CCleaner7/Winapp2.ini"
 
+    ''' <summary>
+    ''' The web address of the FluentCleaner version of winapp2.ini
+    ''' </summary>
+    Public ReadOnly Property fcFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/FluentCleaner/Winapp2.ini"
+
     ''' <summary> 
     ''' The web address of winapp2ool.exe 
     ''' </summary>
@@ -221,6 +226,10 @@ Module Downloader
             Case WinappFlavor.CCleaner7
 
                 Return cc7FlavorLink
+
+            Case WinappFlavor.FluentCleaner
+
+                Return fcFlavorLink
 
         End Select
 

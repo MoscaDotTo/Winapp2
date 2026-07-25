@@ -57,6 +57,11 @@ Public Module Winapp2ool
         ''' </summary>
         CCleaner7 = 5
 
+        ''' <summary>
+        ''' Designed for use with FluentCleaner, whose cleaners default to enabled
+        ''' </summary>
+        FluentCleaner = 6
+
     End Enum
 
     ''' <summary> 

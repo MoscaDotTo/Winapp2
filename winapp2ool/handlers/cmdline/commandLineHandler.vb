@@ -299,6 +299,8 @@ Public Module commandLineHandler
         handleFlavorArg("-ncc", WinappFlavor.NonCCleaner)
         handleFlavorArg("-ccleaner7", WinappFlavor.CCleaner7)
         handleFlavorArg("-cc7", WinappFlavor.CCleaner7)
+        handleFlavorArg("-fluentcleaner", WinappFlavor.FluentCleaner)
+        handleFlavorArg("-fc", WinappFlavor.FluentCleaner)
 
     End Sub
 

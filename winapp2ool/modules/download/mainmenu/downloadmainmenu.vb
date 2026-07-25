@@ -45,10 +45,22 @@ Module downloadmainmenu
                     download(downloadFile, ccFlavorLink)
                     checkedForUpdates = False
                 End Sub) _
+            .AddDispatchedColoredOption("CCleaner 7 Winapp2.ini", "Download the latest CCleaner 7 Flavor of winapp2.ini", ConsoleColor.Magenta,
+                Sub()
+                    downloadFile.Name = "winapp2.ini"
+                    download(downloadFile, cc7FlavorLink)
+                    checkedForUpdates = False
+                End Sub) _
             .AddDispatchedColoredOption("BleachBit Winapp2.ini", "Download the latest BleachBit Flavor of winapp2.ini", ConsoleColor.DarkCyan,
                 Sub()
                     downloadFile.Name = "winapp2.ini"
                     download(downloadFile, bbFlavorLink)
+                    checkedForUpdates = False
+                End Sub) _
+            .AddDispatchedColoredOption("FluentCleaner Winapp2.ini", "Download the latest FluentCleaner Flavor of winapp2.ini", ConsoleColor.Green,
+                Sub()
+                    downloadFile.Name = "winapp2.ini"
+                    download(downloadFile, fcFlavorLink)
                     checkedForUpdates = False
                 End Sub) _
             .AddDispatchedColoredOption("System Ninja Winapp2.rules", "Download the latest System Ninja Flavor of winapp2.ini", ConsoleColor.Blue,
