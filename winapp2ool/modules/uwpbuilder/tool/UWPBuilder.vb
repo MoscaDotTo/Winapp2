@@ -175,9 +175,13 @@ Public Module UWPBuilder
         Public WebViewScaffoldsKeyPresent As Boolean
 
         ''' <summary>
-        ''' Root paths of embedded QtWebEngine data folders associated with this app. Each
-        ''' entry is a path template that may contain <c> %Package% </c> / <c> %PackageN% </c>
-        ''' references, expanded per package at generation time, then substituted for
+        ''' Paths of embedded QtWebEngine profile directories associated with this app — the
+        ''' storage folder itself, profile segment included (e.g. <c> ...\QtWebEngine\Default </c>),
+        ''' unlike <see cref="WebViewPaths"/> which names the parent of <c> Default\ </c>. The
+        ''' QtWebEngine catalog does not bake the profile segment into its templates, so a host
+        ''' running several profiles declares one path per profile. Each entry is a path
+        ''' template that may contain <c> %Package% </c> / <c> %PackageN% </c> references,
+        ''' expanded per package at generation time, then substituted for
         ''' <c> %QtWebEngineRoot% </c> in QtWebEngine scaffold templates. Declaring any path
         ''' here opts the entry into <c> QtWebEngineScaffold </c> emission.
         ''' </summary>

@@ -62,7 +62,7 @@ EntryBuilder reads every `*.ini` file in its source directory, combines them in-
     - [Scaffold Families](#scaffold-families)
       - [Example 8: Default WebView scaffolds](#example-8-default-webview-scaffolds)
       - [Example 9: Everything except All with exclusions](#example-9-everything-except-all-with-exclusions)
-      - [Example 10: QtWebEngine and a non-Default profile](#example-10-qtwebengine-and-a-non-default-profile)
+      - [Example 10: QtWebEngine across several profiles](#example-10-qtwebengine-across-several-profiles)
     - [Housekeeping](#housekeeping)
       - [Example 11: Skipping a defunct entry](#example-11-skipping-a-defunct-entry)
 
@@ -234,16 +234,21 @@ QtWebEngine is a second, independent scaffold family for apps that embed Qt's We
 | `%WebViewRoot%` placeholder | `%QtWebEngineRoot%` placeholder |
 | `webview.ini` catalog | `qtwebengine.ini` catalog |
 
-The default set is the same (`Caches`, `Telemetry`), the `All` sentinel and exclusion idiom work identically, and a single entry may declare **both** families (each expands against its own catalog and placeholder). The QtWebEngine catalog is smaller: `Caches`, `Telemetry`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`.
+The `All` value for scaffolds and exclusion format work identically, and a single entry may declare both families . The QtWebEngine catalog is smaller: `Caches`, `StorageQuota`, `Telemetry`, `VisitedLinks`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`.
 
-Two QtWebEngine-specific notes:
+The default set is: `Caches`, `StorageQuota`, `Telemetry` and `VisitedLinks`.
 
-- **Root points at the `QtWebEngine` folder**, not a profile inside it. The catalog templates bake the `\Default\` profile segment in, because the overwhelming majority of QtWebEngine hosts use the Default profile. So `QtWebEngineRoot=%LocalAppData%\AppName\QtWebEngine` is correct; do not append `\Default`.
-- **Non-`Default` profiles** (e.g. calibre's `OffTheRecord` / `viewer-lookup`) are not covered by the scaffolds. Use `FileKeyBase=%QtWebEngineRoot%\OffTheRecord\...` for those. The placeholder substitutes in any content key.
+- `QtWebEngineRoot=` names one profile directory, profile segment included. Use`QtWebEngineRoot=%LocalAppData%\AppName\QtWebEngine\Default`, not the `QtWebEngine` folder above it. 
+
+
+```ini
+QtRoot=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine
+QtWebEngineRoot=<QtRoot>\<Default,OffTheRecord,viewer-lookup>
+```
 
 ## FileKeyBase / RegKeyBase / ExcludeKeyBase
 
-Non-scaffold templates, applied **in addition to** the catalog scaffolds. Each behaves exactly like its plain-form counterpart (`FileKey=` etc. see [Pass-Through Keys](#pass-through-keys)): root substitution, then token expansion, then renumbering from 1. Use these for app-specific cleaning targets outside the catalog scaffolds: application logs, crash dumps, version-numbered paths, non-`Default` QtWebEngine profiles, etc.
+Non-scaffold templates, applied **in addition to** the catalog scaffolds. Each behaves exactly like its plain-form counterpart (`FileKey=` etc. see [Pass-Through Keys](#pass-through-keys)): root substitution, then token expansion, then renumbering from 1. Use these for app-specific cleaning targets outside the catalog scaffolds: application logs, crash dumps, version-numbered paths, etc.
 
 ## Skip
 
@@ -503,7 +508,6 @@ When the same declared variable appears multiple times in a single key, referenc
 | Output is missing expected scaffold FileKeys | Catalog failed to load (`...catalog at <path> is empty or missing`), scaffold name misspelled (`Unknown WebView scaffold 'X'...`), or scaffold excluded by `Exclude*Scaffolds=` | Check the `Loaded N WebView scaffold(s)` / `Loaded N QtWebEngine scaffold(s)` lines and the warnings |
 | Output key contains a literal `%WebViewRoot%` / `%QtWebEngineRoot%` | The matching root key wasn't declared on the entry - or the placeholder was used in a `Detect`/`DetectFile`, where it is never substituted | Declare the root key, or write the path / a `<Variable>` directly in detection keys |
 | Entry gained a `Detect`/`DetectFile` you didn't write | The entry declares a variable named `Root` - detection inference is automatic | Intended? Delete your redundant hand-written detection. Not intended? Rename the variable (`DiskRoot`, `AppRoot`, ...) |
-| QtWebEngine scaffold FileKeys point at a wrong/empty `Default` folder | `QtWebEngineRoot=` was pointed at a profile (e.g. `...\QtWebEngine\Default`) instead of the `QtWebEngine` folder, double-baking `\Default\` | Point `QtWebEngineRoot=` at the `QtWebEngine` folder; use `FileKeyBase=` for non-`Default` profiles |
 | Output RegKey contains a literal `<Name>` | The variable wasn't declared - the registry domain emits literal text and logs `...emitted as literal` as an advisory | Declare the variable, or accept the literal if intentional |
 | Output is missing a FileKey/DetectFile entirely | An undeclared `<Name>` token dropped the key (`...dropping key`), or a referenced variable had no values | Fix the typo, or declare the variable |
 | `Variable 'X=' declared ... but never referenced` warning | The declaration is unused - usually a typo in a `<X>` reference somewhere | Search the entry for the intended reference and correct it |
@@ -962,15 +966,15 @@ FileKey82=%AppData%\Adobe\Adobe Photoshop *\Logs|*
 
 ---
 
-### Example 10: QtWebEngine and a non-Default profile
+### Example 10: QtWebEngine across several profiles
 
 **Context**
 
-calibre embeds QtWebEngine. Its main profile residue is covered by the QtWebEngine catalog, but calibre also creates `OffTheRecord` and `viewer-lookup` profiles the catalog's `Default`-profile templates can't reach.
+calibre embeds QtWebEngine, and unusually it runs three profiles: the standard `Default`, plus `OffTheRecord` and `viewer-lookup` for the ebook viewer. Each profile is just another root, and an inline list can declare all three at once.
 
 **Intent**
 
-We want the default QtWebEngine scaffolds plus two hand-written keys reaching the non-`Default` profiles, reusing the root declaration for all of it.
+We want the default QtWebEngine scaffolds applied to every profile, plus calibre's own cache directory, without repeating the long path three times.
 
 **Files**
 
@@ -978,11 +982,11 @@ We want the default QtWebEngine scaffolds plus two hand-written keys reaching th
 
 ```ini
 [Calibre *]
-QtWebEngineRoot=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine
+QtRoot=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine
+QtWebEngineRoot=<QtRoot>\<Default,OffTheRecord,viewer-lookup>
 LangSecRef=3023
 DetectFile=%LocalAppData%\calibre-ebook.com
-FileKeyBase=%QtWebEngineRoot%\OffTheRecord\GPUCache|*|RECURSE
-FileKeyBase=%QtWebEngineRoot%\viewer-lookup\blob_storage|*|REMOVESELF
+FileKeyBase=%LocalAppData%\calibre-cache|*|RECURSE
 ```
 
 **Command**
@@ -999,24 +1003,36 @@ winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -4d ..\..\Assembler\Sc
 [Calibre *]
 LangSecRef=3023
 DetectFile=%LocalAppData%\calibre-ebook.com
-FileKey1=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\*Cache|*|RECURSE
-FileKey2=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\GPUCache|*|REMOVESELF
-FileKey3=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\blob_storage|*|REMOVESELF
-FileKey4=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\File System|*|REMOVESELF
-FileKey5=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\Platform Notifications|*|REMOVESELF
-FileKey6=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\Service Worker|*|REMOVESELF
-FileKey7=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default|*-journal;*.log;*.old;LOG;LOG.old;Network Persistent State
+FileKey1=%LocalAppData%\calibre-cache|*|RECURSE
+FileKey2=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default|*-journal;*.log;*.old;LOG;LOG.old;Network Persistent State;Origin Bound Certs|RECURSE
+FileKey3=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default|QuotaManager*;Visited Links
+FileKey4=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\*Cache*|*|REMOVESELF
+FileKey5=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\blob_storage|*|REMOVESELF
+FileKey6=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\Platform Notifications|*|REMOVESELF
+FileKey7=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\Service Worker\*Cache*|*|REMOVESELF
 FileKey8=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\VideoDecodeStats|*|REMOVESELF
-FileKey9=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\GPUCache|*|RECURSE
-FileKey10=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\blob_storage|*|REMOVESELF
+FileKey9=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord|*-journal;*.log;*.old;LOG;LOG.old;Network Persistent State;Origin Bound Certs|RECURSE
+FileKey10=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord|QuotaManager*;Visited Links
+FileKey11=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\*Cache*|*|REMOVESELF
+FileKey12=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\blob_storage|*|REMOVESELF
+FileKey13=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\Platform Notifications|*|REMOVESELF
+FileKey14=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\Service Worker\*Cache*|*|REMOVESELF
+FileKey15=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\VideoDecodeStats|*|REMOVESELF
+FileKey16=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup|*-journal;*.log;*.old;LOG;LOG.old;Network Persistent State;Origin Bound Certs|RECURSE
+FileKey17=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup|QuotaManager*;Visited Links
+FileKey18=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\*Cache*|*|REMOVESELF
+FileKey19=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\blob_storage|*|REMOVESELF
+FileKey20=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\Platform Notifications|*|REMOVESELF
+FileKey21=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\Service Worker\*Cache*|*|REMOVESELF
+FileKey22=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\VideoDecodeStats|*|REMOVESELF
 ```
 
 **Explanation**
 
-- `QtWebEngineRoot=` points at the `QtWebEngine` **folder**: the catalog templates bake the `\Default\` profile segment in themselves (FileKey1–8: the default `Caches` + `Telemetry` sets)
-- The two `FileKeyBase=` lines reach the non-`Default` profiles by reusing `%QtWebEngineRoot%`, the escape hatch for anything outside the catalog's `Default` assumption
-- Pointing the root at `..\QtWebEngine\Default` instead would double-bake the profile segment and clean nothing
-- Host-risk scaffolds (`WebCookies`, `WebHistory`, `WebSession`, `WebStorage`) would require `QtWebEngineScaffolds=All` or an explicit list, exactly as in the WebView family
+- One `QtWebEngineRoot=` line produced three roots. Root substitution happens before token expansion, so the `<Default,OffTheRecord,viewer-lookup>` inline list inside the root value fans out normally and `<QtRoot>` resolves in the same pass
+- Each root got keys for all the default scaffolds (`Caches`, `StorageQuota`, `Telemetry`, `VisitedLinks`)
+- FileKey3, 10 and 17 are each the merged product of two scaffolds, this is caused by the optimization pass through WinappDebug
+- `WebCookies`, `WebHistory`, `WebSession`, `WebStorage` would require `QtWebEngineScaffolds=All` or an explicit list
 
 ---
 

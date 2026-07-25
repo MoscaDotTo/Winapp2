@@ -37,7 +37,7 @@ Imports System.Text
 '''
 ''' Scaffold families are the first shorthand category. An entry opts into a family by
 ''' declaring one or more root paths for it: <c> WebViewRoot= </c> (one per WebView2 /
-''' EBWebView data root) or <c> QtWebEngineRoot= </c> (one per QtWebEngine data folder).
+''' EBWebView data root) or <c> QtWebEngineRoot= </c> (one per QtWebEngine profile directory).
 ''' The module then expands the selected scaffolds — <c> WebViewScaffolds= </c> /
 ''' <c> ExcludeWebViewScaffolds= </c> for WebView2, <c> QtWebEngineScaffolds= </c> /
 ''' <c> ExcludeQtWebEngineScaffolds= </c> for QtWebEngine — into <c> FileKey </c> lines,
@@ -228,10 +228,14 @@ Public Module EntryBuilder
         Public ExcludedWebViewScaffolds As List(Of String)
 
         ''' <summary>
-        ''' Root paths of the application's QtWebEngine data folders (the folder literally
-        ''' named <c> QtWebEngine </c>). Each entry is a literal path string substituted for
-        ''' <c> %QtWebEngineRoot% </c> in QtWebEngine scaffold and base templates. Declaring
-        ''' any root opts the entry into QtWebEngine scaffold emission.
+        ''' Paths of the application's QtWebEngine profile directories — the storage folder
+        ''' itself, profile segment included (e.g. <c> ...\QtWebEngine\Default </c>), unlike
+        ''' <see cref="WebViewRoots"/> which names the parent of <c> Default\ </c>. The
+        ''' QtWebEngine catalog does not bake the profile segment into its templates, so a
+        ''' host running several profiles declares one root per profile. Each entry is a
+        ''' literal path string substituted for <c> %QtWebEngineRoot% </c> in QtWebEngine
+        ''' scaffold and base templates. Declaring any root opts the entry into QtWebEngine
+        ''' scaffold emission.
         ''' </summary>
         Public QtWebEngineRoots As List(Of String)
 

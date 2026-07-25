@@ -64,11 +64,16 @@ Public Module WebViewScaffolds
 
     ''' <summary>
     ''' Default scaffold names emitted when a caller requests QtWebEngine scaffolding
-    ''' without an explicit selection list. Mirrors <see cref="DefaultScaffolds"/> — the
-    ''' same low-risk Caches + Telemetry baseline — but kept as a separate constant so the
-    ''' two families can diverge as QtWebEngine's catalog evolves independently.
+    ''' without an explicit selection list. Broader than <see cref="DefaultScaffolds"/>:
+    ''' QtWebEngine's catalog splits two low-risk targets into their own scaffolds that
+    ''' the WebView2 catalog leaves bundled behind host-risk gates — <c> StorageQuota </c>
+    ''' (a rebuildable quota accounting file) and <c> VisitedLinks </c> (a link-coloring
+    ''' bloom filter, which QtWebEngine-hosting application shells have no UI for). Both
+    ''' are default-on here because the hand-written entries this catalog replaces treated
+    ''' them as routine cleaning. Host-risk categories (cookies, history, session, site
+    ''' storage) still require explicit opt-in.
     ''' </summary>
-    Public ReadOnly QtWebEngineDefaultScaffolds As String() = {"Caches", "Telemetry"}
+    Public ReadOnly QtWebEngineDefaultScaffolds As String() = {"Caches", "StorageQuota", "Telemetry", "VisitedLinks"}
 
     ''' <summary>
     ''' Parses a <c> [{prefix} ...] </c> scaffold section, collecting its
