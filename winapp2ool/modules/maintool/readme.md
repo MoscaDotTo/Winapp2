@@ -55,6 +55,7 @@ The active flavor determines which version of winapp2.ini is used when modules d
 | SystemNinja | The System Ninja-compatible variant |
 | Tron | The Tron-compatible variant |
 | CCleaner7 | The CCleaner 7-compatible variant |
+| FluentCleaner | The FluentCleaner-compatible variant |
 
 The current flavor is shown on the Settings menu. Modules that download winapp2.ini (Diff, Trim, CC7Patcher when downloading) use this setting to determine which file to fetch.
 
