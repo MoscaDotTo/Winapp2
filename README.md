@@ -37,7 +37,8 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
 1. [Quick Start](#quick-start)
 2. [Files of Interest](#files-of-interest)
 3. [Installation & Configuration](#installation--configuration)
-   - [CCleaner](#ccleaner)
+   - [CCleaner Classic](#ccleaner)
+   - [CCleaner 7](#ccleaner-7)
    - [BleachBit](#bleachbit)
    - [System Ninja](#system-ninja)
    - [Avira System Speedup](#avira-system-speedup)
@@ -65,6 +66,7 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
 | [Winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe)                             | A robust tool that allows you to manage Winapp2.ini for your system, including automatic downloading and trimming. This tool has its own ReadMe [here](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool).
 | [Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)                              | This is the base winapp2.ini file, it has no content removed or changed, and includes rules which may overlap or conflict with CCleaner/BleachBit rules. 
 | [CCleaner Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini)                                  | The CCleaner flavor of winapp2.ini, designed to reduce overlap with CCleaner rules and better integrate with its UI.
+| [CCleaner 7 Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/CCleaner7/Winapp2.ini)         | The CCleaner 7 flavor of winapp2.ini, converted to the entry format CCleaner 7 requires. This file is not installed by hand; winapp2ool downloads it for you and patches it into `ccleaner.ini`. See [CCleaner 7](#ccleaner-7).
 | [BleachBit Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/BleachBit/Winapp2.ini)          | The BleachBit flavor of winapp2.ini, designed to remove unsupported rules and pass the sanity checker.
 | [System Ninja winapp2.rules](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/SystemNinja/Winapp2.rules) | The System Ninja flavor of winapp2.ini, designed to replace unsupported rules with ones compatible with System Ninja. 
 | [Tron winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Tron/Winapp2.ini)                    | The Tron flavor of winapp2.ini, designed to capture the downstream changes made by Tron to the CCleaner flavor.  
@@ -74,13 +76,13 @@ Winapp2.ini is provided as-is and without warranty. Understand that its intent i
 
 It is strongly recommended you keep a copy of [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) in the same folder as winapp2.ini for the purpose of keeping it up-to-date irrespective of which application you are using. 
 
-## [CCleaner](#ccleaner)
+## [CCleaner Classic](#ccleaner)
 <details>
 <summary>CCleaner Installation and Configuration</summary>
 
-###### [Download CCleaner](https://www.ccleaner.com/ccleaner)
+###### [Download CCleaner](https://www.filepuma.com/download/ccleaner_6.23.11010-38881/)
 
-### Note: CCleaner 7 is *not* currently compatible with winapp2.ini and it is unclear whether or not support will be implemented. Winapp2.ini is compatible with CCleaner up to version 6.39
+### Note: The instructions below apply to CCleaner 6.39 and earlier. CCleaner 7 dropped support for loading a standalone winapp2.ini and is installed differently, see [CCleaner 7](#ccleaner-7)
 
 ### Flavor
 
@@ -97,6 +99,49 @@ It is advised that you use the Trim function of winapp2ool when updating winapp2
 CCleaner will display the set of winapp2.ini entries which it detects as valid for your system inside its Applications tab. In modern versions of CCleaner, this tab is found in the Custom Clean section of the application. All winapp2.ini entries are disabled by default in CCleaner, and must be enabled individually or in groups. To enable an entire group of entries, right click on the section header and select "Check all."
 
 ###### Note: CCleaner 5.64.7577 is the last version to work on Windows XP and Vista (for non-SSE2 CPUs CCleaner 5.26.5937). Winapp2.ini and Winapp3.ini will continue to work with this version.
+</details>
+
+## [CCleaner 7](#ccleaner-7)
+<details>
+<summary>CCleaner 7 Installation and Configuration</summary>
+
+###### [Download CCleaner](https://www.ccleaner.com/ccleaner)
+
+CCleaner 7 no longer loads a separate winapp2.ini. Its cleaning definitions live inside `ccleaner.ini` alongside CCleaner's own, in a modified entry format. Installation is therefore not a matter of dropping a file next to `ccleaner.exe`; the entries have to be patched into `ccleaner.ini`. Winapp2ool's CC7Patcher does this, and it is the only installation method we endorse.
+
+### Flavor
+
+You should use the [CCleaner 7 flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/CCleaner7/Winapp2.ini), which CC7Patcher downloads for you by default. You do not need to download or place this file yourself. If you choose to supply your own local copy instead, it must be in the CCleaner 7 format; no other flavor will produce functional entries.
+
+### Installation
+
+Back up your `ccleaner.ini` before your first run. Patching rewrites the file in place, which reorders its sections and strips its comments.
+
+1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) and run it
+2. Select **CC7Patcher** from the main menu
+3. Use **Change ccleaner.ini** to point at CCleaner 7's `ccleaner.ini`, typically found in `..\Program Files\Piriform\CCleaner 7`
+4. Optionally enable **Toggle Trim** to install only the entries relevant to your system, which reduces CCleaner's startup time
+5. Select **Run**
+
+The same install can be performed in one command:
+
+```
+winapp2ool -cc7patcher -2d "%ProgramFiles%\Piriform\CCleaner 7" -3d "%ProgramFiles%\Piriform\CCleaner 7"
+```
+
+Add `-trim` to trim before patching. CC7Patcher has its own ReadMe [here](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool/modules/cc7patcher).
+
+### Updating
+
+Run CC7Patcher again over your existing `ccleaner.ini`. It removes the entries left by the previous patch before installing the current ones, so nothing is duplicated and entries removed from winapp2.ini are cleared out. There is no need to restore a clean `ccleaner.ini` first.
+
+You will also need to run it again after every CCleaner 7 update, as updating overwrites `ccleaner.ini` and removes the winapp2.ini entries with it.
+
+### Configuration
+
+CCleaner 7 will display the winapp2.ini entries it detects as valid for your system alongside its own cleaning options. All winapp2.ini entries are disabled by default and must be enabled individually or in groups.
+
+###### Note: CC7Patcher identifies the entries it installed by their `Author=Winapp2.ini Project` key, and removes them on the next run. If you customize a winapp2.ini entry inside `ccleaner.ini`, delete that key from your copy so your changes survive updating.
 </details>
 
 ## [BleachBit](#bleachbit)
