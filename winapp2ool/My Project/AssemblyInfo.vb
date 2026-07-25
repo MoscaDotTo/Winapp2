@@ -17,7 +17,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("A multitool for use with winapp2.ini")>
 <Assembly: AssemblyCompany("https://github.com/MoscaDotTo/Winapp2")>
 <Assembly: AssemblyProduct("winapp2ool")>
-<Assembly: AssemblyCopyright("Hazel Ward ©  2018-2025")>
+<Assembly: AssemblyCopyright("Hazel Ward ©  2018-2026")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
@@ -36,5 +36,5 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.6.*")>
+<Assembly: AssemblyVersion("1.7.*")>
 <Assembly: NeutralResourcesLanguage("en-US")>
