@@ -1,0 +1,92 @@
+# Artifact drift check: does the committed contents of Assembler/Entries still
+# match what the generators produce from their sources, and does the committed
+# winapp2ool.exe still generate byte-identical output?
+#
+# This is the only workflow that runs `build winapp2.ps1 -Verify`. A *full* build
+# (pr-verify.yml, build-on-merge.yml) regenerates Entries in place before combining,
+# so it never notices drift -- build-on-merge silently repairs it and commits the
+# repair. Only -Verify regenerates into a scratch dir and byte-compares, which is
+# what turns an unrequested change in generator output into a red X instead of a
+# surprise line in tomorrow's changelog.
+#
+# Scope, deliberately: it does NOT commit, tag, publish, or diff branches, and it is
+# NOT a gate on contributor PRs. A PR that edits an EntryBuilder source without
+# regenerating Entries is a perfectly good PR -- pr-verify.yml regenerates and reports
+# the real diff. Drift-checking PRs would demand contributors run winapp2ool, which
+# cuts against the entry-data-only contribution model. This runs on pushes only.
+#
+# It runs the *committed* winapp2ool.exe (staged into Assembler\ by the Release
+# post-build step) rather than compiling from source, so it needs no MSBuild, NuGet
+# restore, or .NET Framework targeting packs on the runner -- hosted runners ship
+# only the 4.8/4.8.1 targeting packs, not the 4.6/4.6.1 these projects target.
+# Tradeoff accepted: this exercises the shipped binary, it does not prove source compiles.
+name: winapp2.ini artifact drift check
+
+on:
+  # Manual button (appears once this file is on the default branch).
+  workflow_dispatch:
+  # Push is what gives this workflow its reach: pull_request and schedule triggers
+  # don't fire on feature branches, so this is the only CI a branch gets before it
+  # merges. Scoped to the inputs that affect the run -- the committed exe and the
+  # entries both live under Assembler/. An exe commit is the highest-value run here:
+  # it asks whether a new build of the tool still generates identical output.
+  #
+  # No feedback loop: build-on-merge.yml commits Assembler/Entries with the
+  # GITHUB_TOKEN, and token pushes do not fire push events.
+  push:
+    paths:
+      - '.github/workflows/artifact-drift.yml'
+      - 'Assembler/**'
+      - '!Assembler/**.md'
+
+# Read-only: this never writes back to the repo.
+permissions:
+  contents: read
+
+concurrency:
+  group: artifact-drift-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: windows-latest
+
+    env:
+      # Deterministic override of the exe's `requireAdministrator` manifest: the
+      # Windows loader runs winapp2ool under the runner's own (unelevated) token
+      # instead of requesting elevation. The build modules touch only ini files in
+      # a working directory and need no admin, so this is the correct token -- and
+      # it sidesteps any UAC/elevation behavior on the hosted runner. Child
+      # processes (the build script's Start-Process calls) inherit this from the
+      # job environment.
+      __COMPAT_LAYER: RunAsInvoker
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The characteristic test. -Verify regenerates every artifact into
+      # Assembler/Verify and byte-compares against the committed Assembler/Entries,
+      # exiting 0 on a clean match and 1 on drift (retaining the scratch dir).
+      # Run it as a child process so the script's `exit N` propagates cleanly to
+      # $LASTEXITCODE regardless of call-operator exit semantics.
+      - name: Characteristic test (build winapp2.ps1 -Verify)
+        shell: pwsh
+        working-directory: Assembler
+        run: |
+          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler -- the committed Release build should stage it there' }
+          pwsh -File './build winapp2.ps1' -Verify
+          exit $LASTEXITCODE
+
+      # On any failure, keep the drift scratch and the flushed diagnostic log
+      # (winapp2ool.log now persists on a nonzero silent-mode exit) for inspection.
+      - name: Upload drift scratch + log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-drift-failure
+          path: |
+            Assembler/Verify/**
+            Assembler/winapp2ool.log
+          if-no-files-found: ignore
+          retention-days: 7

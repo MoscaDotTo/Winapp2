@@ -18,7 +18,7 @@
 # fire release.yml via a push event; release.yml chains off this workflow's completion
 # (workflow_run) instead.
 #
-# Like the probe, it runs the committed Assembler\winapp2ool.exe (hosted runners
+# Like artifact-drift.yml, it runs the committed Assembler\winapp2ool.exe (hosted runners
 # lack the .NET 4.6 targeting packs, so the tool is never compiled) under an
 # unelevated token.
 name: winapp2.ini build on merge

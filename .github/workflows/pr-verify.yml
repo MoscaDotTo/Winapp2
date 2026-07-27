@@ -13,11 +13,15 @@ name: winapp2.ini PR verify
 
 on:
   # Only fires on changes to the winapp2.ini build sources under Assembler/,
-  # matching verify-probe.yml's scope -- unrelated repo edits don't trigger a build.
+  # matching artifact-drift.yml's scope -- unrelated repo edits don't trigger a build.
   pull_request:
     types: [opened, synchronize, reopened]
+    branches:
+      - master
+      - Branch1
     paths:
       - 'Assembler/**'
+      - '!Assembler/**.md'
       - '.github/workflows/pr-verify.yml'
       - '.github/scripts/pr-verify-build.ps1'
   # Manual button for testing: supply the two SHAs and a PR number directly.
@@ -46,7 +50,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      # Same unelevated-token override the probe uses so winapp2ool runs headless
+      # Same unelevated-token override artifact-drift.yml uses so winapp2ool runs headless
       # without requesting elevation; child build processes inherit it.
       __COMPAT_LAYER: RunAsInvoker
       BASE_SHA: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
