@@ -44,6 +44,90 @@ Public Class DiffOutputRenderer2
     ''' </summary>
     Private ReadOnly _mergerSourceMaps As New Dictionary(Of String, Dictionary(Of String, String))(StringComparer.OrdinalIgnoreCase)
 
+    ''' <summary>
+    ''' Renders a count alongside its noun, selecting the singular or plural form to match
+    ''' </summary>
+    '''
+    ''' <param name="count">
+    ''' The number being reported
+    ''' </param>
+    '''
+    ''' <param name="singular">
+    ''' The singular form of the noun, used when <paramref name="count"/> is exactly <c> 1 </c>
+    ''' </param>
+    '''
+    ''' <param name="pluralForm">
+    ''' The plural form of the noun, used for every other count including <c> 0 </c>
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The count and the correctly inflected noun, separated by a space
+    ''' </returns>
+    Private Shared Function Plural(count As Integer,
+                                   singular As String,
+                                   pluralForm As String) As String
+
+        Return $"{count} {If(count = 1, singular, pluralForm)}"
+
+    End Function
+
+    ''' <summary>
+    ''' Renders a count alongside a regularly inflected noun, appending <c> s </c> to pluralize it.
+    ''' Use the three-parameter overload for irregular nouns such as entry/entries
+    ''' </summary>
+    '''
+    ''' <param name="count">
+    ''' The number being reported
+    ''' </param>
+    '''
+    ''' <param name="singular">
+    ''' The singular form of the noun
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The count and the correctly inflected noun, separated by a space
+    ''' </returns>
+    Private Shared Function Plural(count As Integer,
+                                   singular As String) As String
+
+        Return Plural(count, singular, $"{singular}s")
+
+    End Function
+
+    ''' <summary>
+    ''' Renders a count of entries, selecting entry/entries to match
+    ''' </summary>
+    '''
+    ''' <param name="count">
+    ''' The number of entries being reported
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The count followed by either <c> entry </c> or <c> entries </c>
+    ''' </returns>
+    Private Shared Function Entries(count As Integer) As String
+
+        Return Plural(count, "entry", "entries")
+
+    End Function
+
+    ''' <summary>
+    ''' Selects the form of <c> to have </c> agreeing with a subject of the given count,
+    ''' so summary lines reporting a single item read as prose rather than as a template
+    ''' </summary>
+    '''
+    ''' <param name="count">
+    ''' The number of items forming the subject of the clause
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> has </c> when <paramref name="count"/> is exactly <c> 1 </c>, otherwise <c> have </c>
+    ''' </returns>
+    Private Shared Function HasHave(count As Integer) As String
+
+        Return If(count = 1, "has", "have")
+
+    End Function
 
     ''' <summary>
     ''' Initializes a new instance of <c>DiffOutputRenderer2</c>
@@ -107,41 +191,41 @@ Public Class DiffOutputRenderer2
         Dim netChange = $"Net entry count change: {_file1.Count} → {_file2.Count} ({If(netDiff >= 0, "+", "")}{netDiff})"
 
         Dim modifiedSummaryOpener = $"Modified entries: {modified.ModifiedEntryNames.Count}"
-        Dim modifiedAdded = $" + {stats.ModEntriesAddedKeyTotal} added keys across {stats.ModEntriesAddedKeyEntryCount} entries "
-        Dim modifiedRemoved = $" - {stats.ModEntriesRemovedKeysWithoutReplacementTotal} removed keys without replacement across {stats.ModEntriesRemovedKeyEntryCount} entries "
-        Dim modifiedUpdated = $" ~ {stats.ModEntriesUpdatedKeyTotal} updated keys replaced {stats.ModEntriesReplacedByUpdateTotal} old keys across {stats.ModEntriesUpdatedKeyEntryCount} entries"
-        Dim movedKeys = $" ~ {stats.ModEntriesMovedKeysTotal} keys moved from {stats.ModEntriesMovedKeysSourceCount} entr{If(stats.ModEntriesMovedKeysSourceCount = 1, "y", "ies")} into {stats.ModEntriesMovedKeysTargetCount} entr{If(stats.ModEntriesMovedKeysTargetCount = 1, "y", "ies")}"
-        Dim modifiedMergerNote = $" + {modifiedEntriesWithMergers} entries also received merged content from removed entries (see merged entries below)"
+        Dim modifiedAdded = $" + {Plural(stats.ModEntriesAddedKeyTotal, "added key")} across {Entries(stats.ModEntriesAddedKeyEntryCount)}"
+        Dim modifiedRemoved = $" - {Plural(stats.ModEntriesRemovedKeysWithoutReplacementTotal, "removed key")} without replacement across {Entries(stats.ModEntriesRemovedKeyEntryCount)}"
+        Dim modifiedUpdated = $" ~ {Plural(stats.ModEntriesUpdatedKeyTotal, "updated key")} replaced {Plural(stats.ModEntriesReplacedByUpdateTotal, "old key")} across {Entries(stats.ModEntriesUpdatedKeyEntryCount)}"
+        Dim movedKeys = $" ~ {Plural(stats.ModEntriesMovedKeysTotal, "key")} moved from {Entries(stats.ModEntriesMovedKeysSourceCount)} into {Entries(stats.ModEntriesMovedKeysTargetCount)}"
+        Dim modifiedMergerNote = $" + {Entries(modifiedEntriesWithMergers)} also received merged content from removed entries (see merged entries below)"
 
         Dim removedSummary = $"Removed entries: {modified.RemovedEntryNames.Count}"
         Dim removedMergedTotal = merged.OldToNewMergeDict.Count
-        Dim removedMergedSummary = $" @ {removedMergedTotal} removed entries have been merged into other entries"
-        Dim removedMergedIntoModified = $"    @ {oldEntriesMergedIntoModified} merged into {modifiedEntriesWithMergers} modified entries"
-        Dim removedMergedIntoAdded = $"    + {stats.AddedWithMergersSourceEntryCount} merged into {stats.AddedWithMergersEntryCount} added entries"
-        Dim removedRenamed = $" & {merged.RenamedEntryNames.Count} removed entries have been renamed"
-        Dim removedNoReplacement = $" - {oldRemovedNoRepl} entries have been removed without replacement"
+        Dim removedMergedSummary = $" @ {Plural(removedMergedTotal, "removed entry", "removed entries")} {HasHave(removedMergedTotal)} been merged into other entries"
+        Dim removedMergedIntoModified = $"    @ {oldEntriesMergedIntoModified} merged into {Plural(modifiedEntriesWithMergers, "modified entry", "modified entries")}"
+        Dim removedMergedIntoAdded = $"    + {stats.AddedWithMergersSourceEntryCount} merged into {Plural(stats.AddedWithMergersEntryCount, "added entry", "added entries")}"
+        Dim removedRenamed = $" & {Plural(merged.RenamedEntryNames.Count, "removed entry", "removed entries")} {HasHave(merged.RenamedEntryNames.Count)} been renamed"
+        Dim removedNoReplacement = $" - {Entries(oldRemovedNoRepl)} {HasHave(oldRemovedNoRepl)} been removed without replacement"
         Dim hasAddedWithMergers = stats.AddedWithMergersEntryCount > 0
         Dim hasMerged = removedMergedTotal > 0
 
-        Dim addedMergersSource = $" @ {stats.AddedWithMergersEntryCount} entries consolidate content from {stats.AddedWithMergersSourceEntryCount} removed entries"
-        Dim addedMergersNovel = $"    + {stats.AddedWithMergersNovelKeysEntryCount} entries contain {stats.AddedWithMergersNovelKeysTotal} novel keys (not from merged sources)"
-        Dim addedMergersCapturing = $"    ~ {stats.AddedWithMergersCapturingEntryCount} entries contain {stats.AddedWithMergersCapturingKeysTotal} keys capturing {stats.AddedWithMergersCapturedKeysTotal} removed keys"
-        Dim addedMergersDropped = $"    - {stats.AddedWithMergersDroppedEntryCount} entries dropped {stats.AddedWithMergersDroppedKeysTotal} keys from merged sources"
-        Dim addedMergersCarriedOver = $"    = {stats.AddedWithMergersCarriedOverKeysEntryCount} entries contain {stats.AddedWithMergersCarriedOverKeysTotal} keys carried over unchanged from merged sources"
+        Dim addedMergersSource = $" @ {Entries(stats.AddedWithMergersEntryCount)} consolidate content from {Plural(stats.AddedWithMergersSourceEntryCount, "removed entry", "removed entries")}"
+        Dim addedMergersNovel = $"    + {Entries(stats.AddedWithMergersNovelKeysEntryCount)} contain {Plural(stats.AddedWithMergersNovelKeysTotal, "novel key")} (not from merged sources)"
+        Dim addedMergersCapturing = $"    ~ {Entries(stats.AddedWithMergersCapturingEntryCount)} contain {Plural(stats.AddedWithMergersCapturingKeysTotal, "key")} capturing {Plural(stats.AddedWithMergersCapturedKeysTotal, "removed key")}"
+        Dim addedMergersDropped = $"    - {Entries(stats.AddedWithMergersDroppedEntryCount)} dropped {Plural(stats.AddedWithMergersDroppedKeysTotal, "key")} from merged sources"
+        Dim addedMergersCarriedOver = $"    = {Entries(stats.AddedWithMergersCarriedOverKeysEntryCount)} contain {Plural(stats.AddedWithMergersCarriedOverKeysTotal, "key")} carried over unchanged from merged sources"
 
         Dim plainAddedCount = modified.AddedEntryNames.Where(
             Function(e) Not merged.RenamedEntryNames.Contains(e) AndAlso
                         Not merged.MergeDict.ContainsKey(e)).Count()
 
         Dim added = $"Added entries: {modified.AddedEntryNames.Count}"
-        Dim addedPlain = $" + {plainAddedCount} novel entries (without merged content)"
+        Dim addedPlain = $" + {Plural(plainAddedCount, "novel entry", "novel entries")} (without merged content)"
         Dim renamedInAddedCount = merged.RenamedEntryNames.Where(Function(e) modified.AddedEntryNames.Contains(e)).Count()
-        Dim addedRenamed = $" & {renamedInAddedCount} added entries are renamed versions of removed entries and may contain other minor changes"
+        Dim addedRenamed = $" & {Plural(renamedInAddedCount, "added entry", "added entries")} {If(renamedInAddedCount = 1, "is a renamed version", "are renamed versions")} of removed entries and may contain other minor changes"
 
         Dim hasNewBrowsers = stats.NewBrowserSectionValues.Count > 0
-        Dim newBrowserSummary = $" + {stats.NewBrowserSectionValues.Count} new browser{If(stats.NewBrowserSectionValues.Count > 1, "s", "")} added"
+        Dim newBrowserSummary = $" + {Plural(stats.NewBrowserSectionValues.Count, "new browser")} added"
         Dim hasRemovedBrowsers = stats.RemovedBrowserSectionValues.Count > 0
-        Dim removedBrowserSummary = $" - {stats.RemovedBrowserSectionValues.Count} browser{If(stats.RemovedBrowserSectionValues.Count > 1, "s", "")} removed"
+        Dim removedBrowserSummary = $" - {Plural(stats.RemovedBrowserSectionValues.Count, "browser")} removed"
 
         Dim modifiedEntriesHaveAdditions = stats.ModEntriesAddedKeyTotal > 0
         Dim modEntriesHaveRemovals = stats.ModEntriesRemovedKeysWithoutReplacementTotal > 0
@@ -152,10 +236,10 @@ Public Class DiffOutputRenderer2
         Dim hasMergedIntoModified = modifiedEntriesWithMergers > 0
 
         Dim renameStats = stats
-        Dim renamedNameOnly = $"    = {renameStats.RenamedEntriesNameOnlyCount} are name-only changes (no key differences)"
-        Dim renamedAdded = $"    + {renameStats.RenamedEntriesAddedKeyTotal} added keys across {renameStats.RenamedEntriesAddedKeyEntryCount} entries"
-        Dim renamedRemoved = $"    - {renameStats.RenamedEntriesRemovedKeyTotal} removed keys across {renameStats.RenamedEntriesRemovedKeyEntryCount} entries"
-        Dim renamedUpdated = $"    ~ {renameStats.RenamedEntriesUpdatedKeyTotal} updated keys replaced {renameStats.RenamedEntriesReplacedByUpdateTotal} old keys across {renameStats.RenamedEntriesUpdatedKeyEntryCount} entries"
+        Dim renamedNameOnly = $"    = {renameStats.RenamedEntriesNameOnlyCount} {If(renameStats.RenamedEntriesNameOnlyCount = 1, "is a name-only change", "are name-only changes")} (no key differences)"
+        Dim renamedAdded = $"    + {Plural(renameStats.RenamedEntriesAddedKeyTotal, "added key")} across {Entries(renameStats.RenamedEntriesAddedKeyEntryCount)}"
+        Dim renamedRemoved = $"    - {Plural(renameStats.RenamedEntriesRemovedKeyTotal, "removed key")} across {Entries(renameStats.RenamedEntriesRemovedKeyEntryCount)}"
+        Dim renamedUpdated = $"    ~ {Plural(renameStats.RenamedEntriesUpdatedKeyTotal, "updated key")} replaced {Plural(renameStats.RenamedEntriesReplacedByUpdateTotal, "old key")} across {Entries(renameStats.RenamedEntriesUpdatedKeyEntryCount)}"
 
         Dim out As New MenuSection
         out.AddTopBorder().AddColoredLine("Diff Summary", ConsoleColor.DarkGreen, centered:=True).AddDivider()
@@ -879,7 +963,8 @@ Public Class DiffOutputRenderer2
         Next
 
         Dim sourceCount = movementsBySource.Count
-        Dim movHeader = $"keys moved between entries ({sourceCount} source {If(sourceCount = 1, "entry", "entries")})"
+        Dim movSources = $"({sourceCount} source {If(sourceCount = 1, "entry", "entries")})"
+        Dim movHeader = $"keys moved between entries {movSources}"
         Dim movHeaderSection As New MenuSection
         movHeaderSection.AddColoredLine(movHeader, ConsoleColor.Cyan, centered:=True).AddDivider(solid:=False)
         results.Add(movHeaderSection)
@@ -910,7 +995,7 @@ Public Class DiffOutputRenderer2
 
         End Using
 
-        gLog($"{totKeys} {movHeader}", leadr:=True)
+        gLog($"{Plural(totKeys, "key")} moved between entries {movSources}", leadr:=True)
 
         Return results
 
@@ -1019,7 +1104,7 @@ Public Class DiffOutputRenderer2
                     If addedKeys.Count > 0 Then
 
                         Dim newKeysSection As New MenuSection
-                        Dim novelKeysMsg = $"{addedKeys.Count} keys added or carried over from merged sources:"
+                        Dim novelKeysMsg = $"{Plural(addedKeys.Count, "key")} added or carried over from merged sources:"
                         newKeysSection.AddColoredLine(novelKeysMsg, ConsoleColor.Green, centered:=True)
                         gLog()
                         gLog(novelKeysMsg)
@@ -1032,7 +1117,7 @@ Public Class DiffOutputRenderer2
 
                         Dim droppedSection As New MenuSection
 
-                        Dim KeysNotMergedMsg = $"{removedKeys.Count} keys from merged entries not in this entry:"
+                        Dim KeysNotMergedMsg = $"{Plural(removedKeys.Count, "key")} from merged entries not in this entry:"
                         droppedSection.AddColoredLine(KeysNotMergedMsg, ConsoleColor.DarkYellow, centered:=True)
                         gLog()
                         gLog(KeysNotMergedMsg)
@@ -1044,7 +1129,7 @@ Public Class DiffOutputRenderer2
                     If updatedKeysDict.Count > 0 Then
 
                         Dim capturedSection As New MenuSection
-                        Dim capturedMsg = $"{updatedKeysDict.Count} keys capturing content from merged entries"
+                        Dim capturedMsg = $"{Plural(updatedKeysDict.Count, "key")} capturing content from merged entries"
                         capturedSection.AddColoredLine(capturedMsg, ConsoleColor.Yellow, centered:=True)
                         gLog()
                         gLog(capturedMsg)
