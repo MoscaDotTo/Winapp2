@@ -48,6 +48,13 @@ Public Class winapp2file2
         "Language Files", "Dangerous Long", "Dangerous"
     }
 
+    ' The preamble substring by which a non-CCleaner winapp2.ini identifies itself
+    Private Const NCCMarkerText As String = "This is the non-CCleaner version of Winapp2"
+
+    ' The full preamble line carrying that marker, written by both ToWinapp2String and ToIni
+    Private Const NCCMarkerComment As String = "; " & NCCMarkerText &
+        " that contains extra entries that were removed due to them being added to CCleaner."
+
     ' 12 category lists (index matches FileSectionHeaders)
     Private ReadOnly _categories As New List(Of List(Of winapp2entry2))
 
@@ -111,8 +118,7 @@ Public Class winapp2file2
             _categories.Add(New List(Of winapp2entry2))
         Next
 
-        IsNCC = file.Comments.Any(Function(c) c.Text.Contains(
-            "This is the non-CCleaner version of Winapp2"))
+        IsNCC = file.Comments.Any(Function(c) c.Text.Contains(NCCMarkerText))
 
         Version = DetermineVersionString(file, useTodaysDate)
 
@@ -165,11 +171,23 @@ Public Class winapp2file2
     End Function
 
     ''' <summary>
-    ''' Returns all entries as a single <c>iniFile2</c> in winapp2.ini order
+    ''' Returns all entries as a single <c>iniFile2</c> in winapp2.ini order. <br /> <br />
+    '''
+    ''' The two pieces of preamble state this class carries — the version string and the
+    ''' non-CCleaner marker — are re-emitted as comments on the returned file. Without them
+    ''' a round trip through the winapp2 layer silently resets the version to
+    ''' <c> 000000 </c> and the file's identity to the CCleaner variant, since both are read
+    ''' back off <c>iniFile2.Comments</c> by this class' own constructor and by Diff
     ''' </summary>
     Public Function ToIni() As iniFile2
 
         Dim out = iniFile2.Empty(Dir, Name)
+
+        out.Comments.Add(New iniComment2(Version, 1))
+
+        If IsNCC Then
+            out.Comments.Add(New iniComment2(NCCMarkerComment, 2))
+        End If
 
         For Each entry In Entries
             out.AddSection(entry.ToIniSection())
@@ -280,7 +298,7 @@ Public Class winapp2file2
         builder.AppendLine(";")
 
         If IsNCC Then
-            builder.AppendLine("; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner.")
+            builder.AppendLine(NCCMarkerComment)
             builder.AppendLine("; Do not use this file for CCleaner as the extra cleaners may cause conflicts with CCleaner.")
         End If
 
