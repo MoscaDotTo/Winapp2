@@ -16,7 +16,7 @@ The **Global Settings** menu provides high-level controls for winapp2ool's appli
 
 ---
 
-# [Menu Options](#menu-options)
+# Menu Options
 
 | Option | Effect | Notes |
 |:-|:-|:-|
@@ -33,7 +33,7 @@ The **Global Settings** menu provides high-level controls for winapp2ool's appli
 
 ---
 
-# [Settings Persistence](#settings-persistence)
+# Settings Persistence
 
 By default, winapp2ool starts with factory defaults every time it runs. Changes to module settings (file paths, toggles, etc.) made during a session are lost when winapp2ool exits.
 
@@ -43,7 +43,7 @@ The two are kept separate so you can read a fixed settings file without having r
 
 ---
 
-# [Winapp2.ini Flavor](#winapp2ini-flavor)
+# Winapp2.ini Flavor
 
 The active flavor determines which version of winapp2.ini is used when modules download a remote copy. **Change Flavor** cycles through the available flavors in order:
 
@@ -61,7 +61,7 @@ The current flavor is shown on the Settings menu. Modules that download winapp2.
 
 ---
 
-# [Offline Mode](#offline-mode)
+# Offline Mode
 
 Offline mode disables all network operations. Modules and menu options that require an internet connection become unavailable. winapp2ool enters offline mode automatically if it cannot establish a network connection at startup; you can also force it on manually via **Toggle Offline Mode**.
 
@@ -69,7 +69,7 @@ Use **Go online** from the main menu (visible when in offline mode) to retry the
 
 ---
 
-# [Log Management](#log-management)
+# Log Management
 
 winapp2ool maintains an internal log throughout its runtime, recording both diagnostic output and a record of operations performed. The log grows over the course of a session.
 
@@ -81,13 +81,13 @@ The log save target defaults to `winapp2ool.log` in the current directory. The g
 
 ---
 
-# [Beta Participation](#beta-participation)
+# Beta Participation
 
 Enabling beta participation switches winapp2ool to the beta release track and immediately triggers a self-update to download the latest beta build. Beta builds may contain experimental features or unstable code. Requires .NET Framework 4.6 or later.
 
 ---
 
-# [Troubleshooting](#troubleshooting)
+# Troubleshooting
 
 | Symptom | Cause |
 |:-|:-|
