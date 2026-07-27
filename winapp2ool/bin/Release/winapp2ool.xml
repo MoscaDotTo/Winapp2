@@ -3273,6 +3273,72 @@ winapp2ool
  to attribute old keys to their source entries in merger output.
  </summary>
 </member>
+<member name="M:winapp2ool.DiffOutputRenderer2.Plural(System.Int32,System.String,System.String)">
+ <summary>
+ Renders a count alongside its noun, selecting the singular or plural form to match
+ </summary>
+
+ <param name="count">
+ The number being reported
+ </param>
+
+ <param name="singular">
+ The singular form of the noun, used when <paramref name="count"/> is exactly <c> 1 </c>
+ </param>
+
+ <param name="pluralForm">
+ The plural form of the noun, used for every other count including <c> 0 </c>
+ </param>
+
+ <returns>
+ The count and the correctly inflected noun, separated by a space
+ </returns>
+</member>
+<member name="M:winapp2ool.DiffOutputRenderer2.Plural(System.Int32,System.String)">
+ <summary>
+ Renders a count alongside a regularly inflected noun, appending <c> s </c> to pluralize it.
+ Use the three-parameter overload for irregular nouns such as entry/entries
+ </summary>
+
+ <param name="count">
+ The number being reported
+ </param>
+
+ <param name="singular">
+ The singular form of the noun
+ </param>
+
+ <returns>
+ The count and the correctly inflected noun, separated by a space
+ </returns>
+</member>
+<member name="M:winapp2ool.DiffOutputRenderer2.Entries(System.Int32)">
+ <summary>
+ Renders a count of entries, selecting entry/entries to match
+ </summary>
+
+ <param name="count">
+ The number of entries being reported
+ </param>
+
+ <returns>
+ The count followed by either <c> entry </c> or <c> entries </c>
+ </returns>
+</member>
+<member name="M:winapp2ool.DiffOutputRenderer2.HasHave(System.Int32)">
+ <summary>
+ Selects the form of <c> to have </c> agreeing with a subject of the given count,
+ so summary lines reporting a single item read as prose rather than as a template
+ </summary>
+
+ <param name="count">
+ The number of items forming the subject of the clause
+ </param>
+
+ <returns>
+ <c> has </c> when <paramref name="count"/> is exactly <c> 1 </c>, otherwise <c> have </c>
+ </returns>
+</member>
 <member name="M:winapp2ool.DiffOutputRenderer2.#ctor(winapp2ool.DiffState,winapp2ool.iniFile2,winapp2ool.iniFile2,winapp2ool.KeyModificationAnalyzer2)">
  <summary>
  Initializes a new instance of <c>DiffOutputRenderer2</c>
@@ -9220,7 +9286,13 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.winapp2file2.ToIni">
  <summary>
- Returns all entries as a single <c>iniFile2</c> in winapp2.ini order
+ Returns all entries as a single <c>iniFile2</c> in winapp2.ini order. <br /> <br />
+
+ The two pieces of preamble state this class carries — the version string and the
+ non-CCleaner marker — are re-emitted as comments on the returned file. Without them
+ a round trip through the winapp2 layer silently resets the version to
+ <c> 000000 </c> and the file's identity to the CCleaner variant, since both are read
+ back off <c>iniFile2.Comments</c> by this class' own constructor and by Diff
  </summary>
 </member>
 <member name="M:winapp2ool.winapp2file2.AddEntry(winapp2ool.winapp2entry2)">
