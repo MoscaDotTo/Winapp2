@@ -49,7 +49,6 @@ By default, **Diff** compares a local winapp2.ini against the latest version ava
      - [Removed Without Replacement](#removed-without-replacement)
 5. [How Classification Works](#how-classification-works)
    - [Value Normalization](#value-normalization)
-   - [Ignored Key Types](#ignored-key-types)
    - [Candidate Selection](#candidate-selection)
    - [Matching Basis](#matching-basis)
    - [Vague Paths](#vague-paths)
