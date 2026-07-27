@@ -50,7 +50,7 @@ Because the artifacts under [Entries](../Assembler/Entries) are committed to the
    - [Flavor Args](#flavor-args)
    - [File Selection Args](#file-selection-args)
 6. [Usage Examples](#usage-examples)
-   - [Example 1: First run — updating and trimming from the menu](#example-1-first-run--updating-and-trimming-from-the-menu)
+   - [Example 1: First run (updating and trimming from the menu)](#example-1-first-run-updating-and-trimming-from-the-menu)
    - [Example 2: Scripted download](#example-2-scripted-download)
    - [Example 3: Downloading and trimming in one command](#example-3-downloading-and-trimming-in-one-command)
    - [Example 4: Choosing a Flavor](#example-4-choosing-a-flavor)
