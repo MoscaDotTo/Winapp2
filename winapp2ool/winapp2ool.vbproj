@@ -125,66 +125,84 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="handlers\menus\builders\MenuItemBuilder\MenuItemBuilder.vb" />
     <Compile Include="handlers\menus\MenuSection\MenuSection.vb" />
-    <Compile Include="handlers\settings\settingsHandler.vb" />
+    <Compile Include="handlers\settings\SettingsHandler2.vb" />
+    <Compile Include="modules\browserbuilder\core\BrowserInfo.vb" />
+    <Compile Include="modules\browserbuilder\core\BrowserEntryGenerator.vb" />
     <Compile Include="modules\browserbuilder\mainmenu\browserbuildermainmenu.vb" />
     <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettings.vb" />
-    <Compile Include="modules\browserbuilder\settingshandler\browserbuildersettingshandler.vb" />
+    <Compile Include="modules\entrylab\mainmenu\entryLabMainMenu.vb" />
+    <Compile Include="modules\uwpbuilder\mainmenu\uwpbuildermainmenu.vb" />
+    <Compile Include="modules\uwpbuilder\settingshandler\uwpbuildersettings.vb" />
+    <Compile Include="modules\uwpbuilder\tool\UWPBuilder.vb" />
+    <Compile Include="modules\entrybuilder\mainmenu\entryBuilderMainMenu.vb" />
+    <Compile Include="modules\entrybuilder\settingshandler\entryBuilderSettings.vb" />
+    <Compile Include="modules\entrybuilder\tool\EntryBuilder.vb" />
+    <Compile Include="modules\cc7patcher\mainmenu\cc7patchermainmenu.vb" />
+    <Compile Include="modules\cc7patcher\settingshandler\cc7patchersettings.vb" />
+    <Compile Include="modules\cc7patcher\tool\CC7Patcher.vb" />
     <Compile Include="modules\ccdebug\settingshandler\ccdebugsettings.vb" />
     <Compile Include="modules\ccdebug\tool\CCiniDebug.vb" />
     <Compile Include="modules\ccdebug\mainmenu\ccdbmainmenu.vb" />
-    <Compile Include="modules\ccdebug\settingshandler\ccdebugsettinghandler.vb" />
     <Compile Include="modules\combine\mainmenu\combinemainmenu.vb" />
     <Compile Include="modules\combine\settingshandler\combinesettings.vb" />
-    <Compile Include="modules\combine\settingshandler\combinesettingshandler.vb" />
     <Compile Include="modules\combine\tool\Combine.vb" />
+    <Compile Include="modules\diff\core\DiffConfiguration.vb" />
+    <Compile Include="modules\diff\core\DiffOutputRenderer2.vb" />
+    <Compile Include="modules\diff\core\DiffState.vb" />
+    <Compile Include="modules\diff\core\DiffStatisticsCalculator2.vb" />
+    <Compile Include="modules\diff\core\EntryChangeDetector2.vb" />
+    <Compile Include="modules\diff\core\KeyComparisonStrategy.vb" />
+    <Compile Include="modules\diff\core\KeyModificationAnalyzer2.vb" />
+    <Compile Include="modules\diff\core\MergeDetector2.vb" />
     <Compile Include="modules\diff\settingshandler\diffsettings.vb" />
     <Compile Include="modules\diff\tool\Diff.vb" />
     <Compile Include="modules\diff\mainmenu\diffmainmenu.vb" />
-    <Compile Include="modules\diff\settingshandler\diffsettingshandler.vb" />
     <Compile Include="modules\download\settingshandler\downloadersettings.vb" />
-    <Compile Include="modules\download\settingshandler\downloadsettingshandler.vb" />
     <Compile Include="modules\download\tool\Downloader.vb" />
     <Compile Include="modules\download\tool\advDownloads.vb" />
+    <Compile Include="handlers\cmdline\CliArgSpec.vb" />
     <Compile Include="handlers\cmdline\commandLineHandler.vb" />
     <Compile Include="handlers\downloads\downloadr.vb" />
     <Compile Include="handlers\exceptions\exceptionHandler.vb" />
-    <Compile Include="handlers\ini\iniFile\iniFile.vb" />
-    <Compile Include="handlers\ini\iniFile\iniSection\iniSection.vb" />
-    <Compile Include="handlers\ini\iniFile\iniComment\iniComment.vb" />
-    <Compile Include="handlers\ini\keyList\keyList.vb" />
-    <Compile Include="handlers\ini\iniFile\iniKey\iniKey.vb" />
     <Compile Include="handlers\ini\iniFile\components\strList\strList.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniComment2\iniComment2.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniKey2\iniKey2.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniKeyCollection\iniKeyCollection.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniSection2\iniSection2.vb" />
+    <Compile Include="handlers\ini\iniFile2\iniFile2.vb" />
     <Compile Include="handlers\logger\logger.vb" />
+    <Compile Include="handlers\menus\iniFileChooser\iniFileChooser.vb" />
     <Compile Include="handlers\menus\MenuMaker.vb" />
+    <Compile Include="handlers\menus\TerminalCapabilities.vb" />
+    <Compile Include="handlers\webview\WebViewScaffolds.vb" />
+    <Compile Include="handlers\expansion\VariableExpander.vb" />
     <Compile Include="helpers\registry\RegistryHelper.vb" />
     <Compile Include="helpers\settings\SettingsManager.vb" />
     <Compile Include="helpers\updater\updater.vb" />
-    <Compile Include="handlers\winapp2\changeDict.vb" />
-    <Compile Include="handlers\winapp2\winapp2file.vb" />
-    <Compile Include="handlers\winapp2\winapp2keyparameters.vb" />
-    <Compile Include="handlers\winapp2\winapp2entry.vb" />
+    <Compile Include="handlers\winapp2\excludeKeyParams2\excludeKeyParams2.vb" />
+    <Compile Include="handlers\winapp2\fileKeyParams2\fileKeyParams2.vb" />
+    <Compile Include="handlers\winapp2\regKeyParams2\regKeyParams2.vb" />
+    <Compile Include="handlers\winapp2\winapp2entry2\winapp2entry2.vb" />
+    <Compile Include="handlers\winapp2\winapp2file2\winapp2file2.vb" />
     <Compile Include="handlers\winapp2\winapp2handler.vb" />
     <Compile Include="modules\download\mainmenu\downloadmainmenu.vb" />
     <Compile Include="modules\launcher\launcher.vb" />
     <Compile Include="modules\maintool\mainmenu\maintoolmenu.vb" />
-    <Compile Include="modules\maintool\settingshandler\maintoolsettinghandler.vb" />
     <Compile Include="modules\maintool\settingshandler\maintoolsettings.vb" />
     <Compile Include="modules\transmute\Flavorizer\mainmenu\FlavorizerMainMenu.vb" />
     <Compile Include="modules\transmute\Flavorizer\settingshandler\FlavorizerSettings.vb" />
-    <Compile Include="modules\transmute\Flavorizer\settingshandler\FlavorizerSettingsHandler.vb" />
     <Compile Include="modules\transmute\Flavorizer\tool\Flavorizer.vb" />
     <Compile Include="modules\transmute\mainmenu\transmutemainmenu.vb" />
     <Compile Include="modules\transmute\settingshandler\transmutesettings.vb" />
     <Compile Include="modules\transmute\tool\Transmute.vb" />
-    <Compile Include="modules\transmute\settingshandler\transmutesettingshandler.vb" />
+    <Compile Include="modules\transmute\tool\TransmuteNameFilter.vb" />
+    <Compile Include="modules\transmute\tool\TransmuteKeyMap.vb" />
     <Compile Include="modules\browserbuilder\tool\BrowserBuilder.vb" />
     <Compile Include="modules\minefield\tool\Minefield.vb" />
     <Compile Include="modules\maintool\settingsmenu\globalsettingsmenu.vb" />
     <Compile Include="modules\trim\mainmenu\trimmainmenu.vb" />
     <Compile Include="modules\trim\settingshandler\trimsettings.vb" />
-    <Compile Include="modules\trim\settingshandler\trimsettingshandler.vb" />
     <Compile Include="modules\trim\tool\Trim.vb" />
     <Compile Include="modules\winappdebug\components\advancedSettings\advSettings.vb" />
     <Compile Include="modules\winappdebug\components\landMine\experimentalScans.vb" />
@@ -192,6 +210,8 @@
     <Compile Include="modules\winappdebug\mainmenu\lintmainmenu.vb" />
     <Compile Include="modules\winappdebug\settingshandler\lintsettings.vb" />
     <Compile Include="modules\winappdebug\settingshandler\lintsettingshandler.vb" />
+    <Compile Include="modules\winappdebug\tool\EntryLintResult.vb" />
+    <Compile Include="modules\winappdebug\tool\LintReconciler.vb" />
     <Compile Include="modules\winappdebug\tool\WinappDebug.vb" />
     <Compile Include="modules\maintool\tool\Winapp2ool.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -219,6 +239,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include=".editorconfig" />
     <None Include="app.config" />
     <None Include="modules\transmute\readme.md" />
     <None Include="My Project\app.manifest">
@@ -291,9 +312,10 @@
     <Error Condition="!Exists('packages\MSTest.TestAdapter.1.3.2\build\net45\MSTest.TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MSTest.TestAdapter.1.3.2\build\net45\MSTest.TestAdapter.props'))" />
     <Error Condition="!Exists('packages\MSTest.TestAdapter.1.3.2\build\net45\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MSTest.TestAdapter.1.3.2\build\net45\MSTest.TestAdapter.targets'))" />
   </Target>
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+  <!-- Release builds copy the exe's FileVersion into version.txt, and stage the freshly built exe into Assembler\ -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <PostBuildEvent>powershell -NoProfile -ExecutionPolicy Bypass -Command "[IO.File]::WriteAllText('$(ProjectDir)version.txt', (Get-Item '$(TargetPath)').VersionInfo.FileVersion)"
+copy /Y "$(TargetPath)" "$(ProjectDir)..\Assembler\winapp2ool.exe"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\MSTest.TestAdapter.1.3.2\build\net45\MSTest.TestAdapter.targets" Condition="Exists('packages\MSTest.TestAdapter.1.3.2\build\net45\MSTest.TestAdapter.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

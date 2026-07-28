@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -22,7 +22,6 @@ Imports System.Text
 ''' MenuMaker is a driver module for powering dynamic finite 
 ''' state console applications with variable numbered menus 
 ''' </summary>
-''' Docs last updated: 2023-07-19
 Module MenuMaker
 
     ''' <summary>
@@ -55,52 +54,38 @@ Module MenuMaker
     ''' <summary>
     ''' An instruction to press the Enter button to continue 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public ReadOnly Property pressEnterStr As String = "Press Enter to continue"
 
     ''' <summary>
     ''' An instruction to press any key to return to the previous menu 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public ReadOnly Property anyKeyStr As String = "Press any key to return to the menu."
 
     ''' <summary> 
     ''' An error message informing the user their input was invalid 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public ReadOnly Property invInpStr As String = "Invalid input. Please try again."
 
     ''' <summary> 
     ''' An instruction for the user to provide input
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public ReadOnly Property promptStr As String = "Enter a number, or leave blank to run the default: "
 
     ''' <summary> 
     ''' The maximum length of the 'Name' half of a 
     ''' '#. Name - Description' style menu option
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private Property menuItemLength As Integer
 
     ''' <summary> 
     ''' Indicates that the menu header should be printed with color
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Property ColorHeader As Boolean
 
     ''' <summary> 
     ''' The color with which the next header should be 
     ''' printed if <c> ColorHeader </c> is <c> True </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Property HeaderColor As ConsoleColor
 
     ''' <summary> 
@@ -108,22 +93,16 @@ Module MenuMaker
     ''' input from the user except when encountering exceptions
     ''' <br/> Default: <c> False </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Property SuppressOutput As Boolean = False
 
     ''' <summary> 
     ''' Indicates that an exit from the current menu is pending 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Property ExitPending As Boolean
 
     ''' <summary> 
     ''' The text that appears in the top block of the menu 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Property MenuHeaderText As String
 
     ''' <summary>
@@ -136,38 +115,43 @@ Module MenuMaker
     ''' The number associated with the next
     ''' <c> Menu Option </c> that will be printed (if any)
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private Property OptNum As Integer = 0
 
     ''' <summary>
     ''' Frame characters used to open a menu line 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private ReadOnly Property Openers As String() = {"║", "╔", "╚", "╠"}
 
     ''' <summary> 
     ''' Frame characters used to close a menu line 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private ReadOnly Property Closers As String() = {"║", "╗", "╝", "╣"}
 
     ''' <summary>
-    ''' The cached console window width, used to 
+    ''' The cached console window width, used to
     ''' avoid unneeded calls to <c> Console.WindowWidth </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-26 | Code last updated: 2025-06-26
-    Private _cachedWindowWidth As Integer = Console.WindowWidth
+    Private _cachedWindowWidth As Integer = 120
 
     ''' <summary>
     ''' The time at which the console window width was last checked
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-26 | Code last updated: 2025-06-26
     Private _lastWidthCheckTime As DateTime = DateTime.Now
+
+    ''' <summary>
+    ''' When non-<c> Nothing </c>, <c> cwl </c> writes are appended to this buffer
+    ''' instead of going to <c> Console.Out </c> directly. The buffer is flushed
+    ''' as a single <c> Write </c> at the end of a render pass, and also flushed
+    ''' on color changes so colored runs still apply to the right characters.
+    ''' </summary>
+    Private _outputBuffer As StringBuilder = Nothing
+
+    ''' <summary>
+    ''' Master switch for the buffered render path. When <c> False </c>, <c> BeginBuffered </c>
+    ''' is a no-op and rendering reverts to the legacy per-line <c> Console.WriteLine </c> path.
+    ''' Used by benchmarks and as a kill switch.
+    ''' </summary>
+    Public Property BufferingEnabled As Boolean = True
 
     ''' <summary>
     ''' Returns the current console window width, caching it for
@@ -178,15 +162,16 @@ Module MenuMaker
     ''' The current console window width if not within the timeout
     ''' <br/> Otherwise, the cached console window width
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-06-26 | Code last updated: 2025-06-26
     Private Function GetConsoleWidth() As Integer
 
         ' The width is extremely unlikely to change during the printing process
         ' if ever, so only check it every 500 milliseconds at the most frequent
         If DateTime.Now.Subtract(_lastWidthCheckTime).TotalMilliseconds > 500 Then
 
-            _cachedWindowWidth = Console.WindowWidth
+            Try
+                _cachedWindowWidth = Console.WindowWidth
+            Catch e As IO.IOException
+            End Try
             _lastWidthCheckTime = DateTime.Now
 
         End If
@@ -222,304 +207,45 @@ Module MenuMaker
     ''' Indicates the maximum length of menu option names
     ''' <br/> Optional, Default: <c> 35 </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Sub initModule(name As String,
                           showMenu As Action,
                           handleInput As Action(Of String),
                  Optional itmLen As Integer = 35)
 
-        gLog("", ascend:=True)
-        gLog($"Loading module {name}")
+        Using gLogScope($"Loading module {name}")
 
-        ExitPending = False
-        setHeaderText(name)
-        menuItemLength = itmLen
 
-        Do Until ExitPending
+            If SuppressOutput Then
 
-            clrConsole()
-            showMenu()
-            Console.Write(Environment.NewLine & promptStr)
-            handleInput(Console.ReadLine)
+                gLog($"Interactive menu '{name}' cannot run in silent mode (no input available); aborting")
+                saveGlobalLog()
+                Environment.Exit(1)
 
-        Loop
+            End If
 
-        ExitPending = False
+            ExitPending = False
+            setNextMenuHeaderText(name)
 
-        setHeaderText($"{name} closed")
-        gLog($"Exiting {name}", descend:=True, leadr:=True)
+            menuItemLength = itmLen
 
-    End Sub
+            Do Until ExitPending
 
-    ''' <summary> 
-    ''' Prints menu lines, options, and frames
-    ''' fit to the current console window width
-    ''' </summary>
-    ''' 
-    ''' <param name="printType"> 
-    ''' The type of menu information to print <br/> 
-    ''' 
-    ''' <list type="bullet">
-    ''' 
-    ''' <item>
-    ''' <description>
-    ''' <c> 0 </c>: Line 
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item> 
-    ''' <description>
-    ''' <c> 1 </c>: Option 
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description> 
-    ''' <c> 2 </c>: Option with a "Reset Settings" prompt 
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description> 
-    ''' <c> 3 </c>: Box with centered text 
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item> 
-    ''' <description>
-    ''' <c> 4 </c>: Menu top 
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item> 
-    ''' <description> 
-    ''' <c> 5 </c>: Option with an Enable/Disable prompt
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description>
-    ''' <c> 6 </c>: Menu header with trailing conjoiner 
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description>
-    ''' <c> 7 </c>: Yellow menu line with /!\ warning text /!\
-    ''' </description>
-    ''' </item>
-    ''' </list>
-    ''' </param>
-    ''' 
-    ''' <param name="menuText">
-    ''' The text to be printed <br/> <br/> 
-    ''' When <c> <paramref name="printType"/> </c> 
-    ''' is <c> 1 </c> or <c>5</c>, 
-    ''' <c> <paramref name="menuText"/> </c>
-    ''' contains the name of the menu option 
-    ''' 
-    ''' <br/> When <c> <paramref name="printType"/> </c> is <c> 3 </c>,
-    ''' <c> <paramref name="menuText"/> </c> contains the name
-    ''' of the module whose settings are being reset
-    ''' </param>
-    ''' 
-    ''' <param name="optString"> 
-    ''' The description of the menu option
-    ''' <br/> Optional, Default: <c> "" </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="cond"> 
-    ''' Indicates that the line should be printed 
-    ''' <br/> Optional, Default: <c> True </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="leadingBlank"> 
-    ''' Indicates that a blank menu line should be 
-    ''' printed immediately before the printed line
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="trailingBlank"> 
-    ''' Indicates that a blank menu line should be
-    ''' printed immediately after the printed line
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="isCentered"> 
-    ''' Indicates that the printed text should be centered
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="closeMenu"> 
-    ''' Indicates that the bottom menu frame should be printed 
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="openMenu"> 
-    ''' Indicates that the top menu frame should be printed 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="enStrCond"> 
-    ''' A module setting whose menu text will include
-    ''' an Enable/Disable toggle <br/> <br/>
-    ''' 
-    ''' If lines are being colored without an
-    ''' <c> <paramref name="arbitraryColor"/> </c>, 
-    ''' they will be printed <c> Green </c> if
-    ''' <c> <paramref name="enStrCond"/> </c> is <c> True </c>,
-    ''' otherwise they will be printed <c> Red </c>
-    ''' <br/> Optional, Default: <c> False (Red) </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="colorLine">
-    ''' Indicates that lines should be printed using color 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="useArbitraryColor"> 
-    ''' Indicates that the line should be colored using the 
-    ''' value provided by <c> <paramref name="arbitraryColor"/> </c>
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="arbitraryColor"> 
-    ''' Foreground <c> ConsoleColor </c> to be used when printing
-    ''' with when <c> <paramref name="colorLine"/> </c> is <c> True </c>, 
-    ''' but wanting to use a color other than <c> Red </c> or <c> Green </c> 
-    ''' 
-    ''' <br/> Optional, Default: <c> Nothing </c>
-    ''' </param>
-    '''
-    ''' <param name="buffr"> 
-    ''' Indicates that a leading newline should
-    ''' be printed before the menu lines
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    '''
-    ''' <param name="trailr"> 
-    ''' Indicates that a trailing newline should 
-    ''' be printed after the menu lines
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="conjoin"> 
-    ''' Indicates that a conjoining menu frame should
-    ''' be printed after the printed lines 
-    ''' 
-    ''' <br/> Optional, Default: <c> False </c>
-    ''' </param>
-    ''' 
-    ''' <param name="fillBorder"> 
-    ''' Indicates whether or not any menu frames should be filled or be empty
-    ''' 
-    ''' <br /> Optional, Default: <c> True (filled) </c>
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub print(printType As Integer,
-                     menuText As String,
-                     Optional optString As String = "",
-                     Optional cond As Boolean = True,
-                     Optional leadingBlank As Boolean = False,
-                     Optional trailingBlank As Boolean = False,
-                     Optional isCentered As Boolean = False,
-                     Optional closeMenu As Boolean = False,
-                     Optional openMenu As Boolean = False,
-                     Optional enStrCond As Nullable(Of Boolean) = Nothing,
-                     Optional colorLine As Boolean = False,
-                     Optional useArbitraryColor As Boolean = False,
-                     Optional arbitraryColor As ConsoleColor = Nothing,
-                     Optional buffr As Boolean = False,
-                     Optional trailr As Boolean = False,
-                     Optional conjoin As Boolean = False,
-                     Optional fillBorder As Boolean = True)
+                clrConsole()
+                showMenu()
+                Console.Write(Environment.NewLine & promptStr)
+                handleInput(Console.ReadLine)
 
-        If Not cond Then Return
+            Loop
 
-        ' Having a color to print suggests we'll be printing in color
-        If Not arbitraryColor = Nothing Then colorLine = True : useArbitraryColor = True
+            ExitPending = False
 
-        ' Enable/Disable is always printed in color
-        If Not enStrCond Is Nothing Then colorLine = True
+            FlushIfDirty2()
 
-        cwl(cond:=buffr)
+            setNextMenuHeaderText($"{name} closed")
 
-        determinePrintColor(colorLine, useArbitraryColor, arbitraryColor, enStrCond)
+        End Using
 
-        Dim printColor = Console.ForegroundColor
-
-        print(0, Nothing, cond:=leadingBlank, colorLine:=False)
-
-        Console.ForegroundColor = printColor
-
-        print(0, getFrame(1, fillBorder), cond:=openMenu)
-
-        Console.ForegroundColor = printColor
-
-        Select Case printType
-
-            Case 0
-
-                printMenuLine(menuText, isCentered)
-
-            Case 1
-
-                printMenuOpt(menuText, optString)
-
-            Case 2
-
-                print(1, "Reset Settings", $"Restore {menuText}'s settings to their default state", leadingBlank:=True)
-
-            Case 3
-
-                ' Prints a box with centered text
-                print(4, menuText, closeMenu:=True, fillBorder:=fillBorder)
-
-            Case 4
-
-                ' The top of a menu with a header
-                print(0, menuText, isCentered:=True, openMenu:=True, colorLine:=colorLine, arbitraryColor:=arbitraryColor, useArbitraryColor:=useArbitraryColor)
-
-            Case 5
-
-                ' Colored line printing for enable/disable menu options
-                print(1, menuText, $"{enStr(enStrCond)} {optString}", colorLine:=True, enStrCond:=enStrCond)
-
-            Case 6
-
-                ' Prints a menu header with a trailing conjoiner 
-                print(0, menuText, conjoin:=True, isCentered:=True, openMenu:=True)
-
-            Case 7
-
-                ' Prints a yellow colored menu line with warning text 
-                print(0, $"/!\ {menuText} /!\", colorLine:=True, useArbitraryColor:=True, arbitraryColor:=ConsoleColor.Yellow)
-
-        End Select
-
-        ' Overload enStrCond when printing with printType 6 to enable the conjoiner to be unfilled when the top frame is filled 
-        print(0, getFrame(3, If(openMenu AndAlso conjoin, enStrCond, fillBorder)), cond:=conjoin)
-
-        Console.ForegroundColor = printColor
-
-        print(0, Nothing, cond:=trailingBlank, colorLine:=False)
-
-        Console.ForegroundColor = printColor
-
-        print(0, getFrame(2, fillBorder), cond:=closeMenu)
-
-        If colorLine Then Console.ResetColor()
-
-        cwl(cond:=trailr)
+        gLog($"Exited {name}", leadr:=True)
 
     End Sub
 
@@ -534,41 +260,6 @@ Module MenuMaker
     Public Sub PrintNewLine(Optional condition As Boolean = True)
 
         If condition Then Console.WriteLine()
-
-    End Sub
-
-    ''' <summary> 
-    ''' Determines which color should be used when printing. If no color 
-    ''' is to be used, the print colors are reset to their defaults
-    ''' </summary>
-    ''' 
-    ''' <param name="colorLine"> 
-    ''' Indicates that the line should be printed in color 
-    ''' </param>
-    ''' 
-    ''' <param name="useArbColor"> 
-    ''' Indicates that the value provided by
-    ''' <c> <paramref name="arbColor"/> </c> should be used
-    ''' </param>
-    ''' 
-    ''' <param name="arbColor"> 
-    ''' A console color with which to print 
-    ''' </param>
-    ''' 
-    ''' <param name="enStrCond"> 
-    ''' Determines Red/Green coloring when not using an 
-    ''' <c> <paramref name="arbColor"/> </c>
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub determinePrintColor(colorLine As Boolean,
-                                    useArbColor As Boolean,
-                                    arbColor As ConsoleColor,
-                                    enStrCond As Nullable(Of Boolean))
-
-        If Not colorLine Then Console.ResetColor() : Return
-
-        Console.ForegroundColor = If(useArbColor, arbColor, If(enStrCond, ConsoleColor.Green, ConsoleColor.Red))
 
     End Sub
 
@@ -588,14 +279,65 @@ Module MenuMaker
     ''' 
     ''' <br/> Optional, Default: <c> True </c> 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Sub cwl(Optional msg As String = Nothing,
                    Optional cond As Boolean = True)
 
         If Not cond OrElse SuppressOutput Then Return
 
+        If _outputBuffer IsNot Nothing Then
+
+            If msg IsNot Nothing Then _outputBuffer.Append(msg)
+            _outputBuffer.Append(Environment.NewLine)
+            Return
+
+        End If
+
         Console.WriteLine(msg)
+
+    End Sub
+
+    ''' <summary>
+    ''' Begins a buffered render pass. Subsequent <c> cwl </c> calls append to an
+    ''' in-memory buffer instead of going to <c> Console.Out </c>. The buffer is
+    ''' emitted as one <c> Write </c> when <c> FlushBuffered </c> is called, with
+    ''' intermediate flushes around color changes so colored runs still apply to
+    ''' the intended characters.
+    ''' </summary>
+    Public Sub BeginBuffered()
+
+        If Not BufferingEnabled OrElse SuppressOutput Then Return
+        If _outputBuffer IsNot Nothing Then Return
+
+        _outputBuffer = New StringBuilder(4096)
+
+    End Sub
+
+    ''' <summary>
+    ''' Ends a buffered render pass, writing the accumulated buffer to
+    ''' <c> Console.Out </c> in a single call.
+    ''' </summary>
+    Public Sub FlushBuffered()
+
+        If _outputBuffer Is Nothing Then Return
+
+        Dim sb = _outputBuffer
+        _outputBuffer = Nothing
+
+        If sb.Length > 0 Then Console.Out.Write(sb.ToString())
+
+    End Sub
+
+    ''' <summary>
+    ''' Flushes the in-flight buffer (if any) without ending the buffered pass.
+    ''' Used so that subsequent state changes (color, cursor) apply to the
+    ''' correct terminal position.
+    ''' </summary>
+    Private Sub FlushBufferIfActive()
+
+        If _outputBuffer Is Nothing OrElse _outputBuffer.Length = 0 Then Return
+
+        Console.Out.Write(_outputBuffer.ToString())
+        _outputBuffer.Length = 0
 
     End Sub
 
@@ -603,8 +345,6 @@ Module MenuMaker
     ''' Waits for the user to press a key if output
     ''' is not currently being suppressed
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Sub crk()
 
         If SuppressOutput Then Return
@@ -617,8 +357,6 @@ Module MenuMaker
     ''' Waits for the users to press Enter if output
     ''' is not currently being suppressed 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-08-31 | Code last updated: 2020-08-31
     Public Sub crl()
 
         If SuppressOutput Then Return
@@ -627,26 +365,68 @@ Module MenuMaker
 
     End Sub
 
-    ''' <summary> 
-    ''' Clears the console when the given <c> <paramref name="cond"/> </c>
-    ''' is <c> True </c> and we're not unit testing 
+    ''' <summary>
+    ''' VT escape that homes the cursor and erases the entire screen. One
+    ''' atomic write to a VT-capable terminal replaces the three Win32 calls
+    ''' (<c> SetConsoleCursorPosition </c>, <c> FillConsoleOutputCharacter </c>,
+    ''' <c> FillConsoleOutputAttribute </c>) that <c> Console.Clear </c>
+    ''' performs internally.
     ''' </summary>
-    ''' 
+    Private ReadOnly VtClearScreen As String = ChrW(&H1B) & "[H" & ChrW(&H1B) & "[2J"
+
+    ''' <summary>
+    ''' Clears the console when the given <c> <paramref name="cond"/> </c>
+    ''' is <c> True </c>, output is not redirected, and output is not suppressed.
+    ''' </summary>
+    '''
     ''' <param name="cond">
     ''' Indicates that the console should be cleared
-    ''' 
-    ''' <br/> Optional, Default: <c> True </c> 
+    '''
+    ''' <br/> Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' <remarks> 
-    ''' When unit testing, the console window doesn't belong to us and trying
-    ''' to clear the console throws an IO Exception, so we don't do that 
+    '''
+    ''' <remarks>
+    ''' On a VT-capable terminal (Windows 10 1607+ conhost, Windows Terminal,
+    ''' anything UNIX-ish) this emits the VT clear escape, which is a single
+    ''' write. If a buffered render is active, the escape is appended to the
+    ''' buffer so the clear and the new menu arrive at the terminal in one
+    ''' atomic write — no flicker.
+    '''
+    ''' On legacy consoles (XP / Vista / 7 / pre-1607 Win10) falls back to
+    ''' <c> Console.Clear </c>. When output is redirected (test runner,
+    ''' pipeline silent mode, piped to a file) the call is a no-op — clearing
+    ''' a non-console sink would corrupt downstream output.
     ''' </remarks>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Sub clrConsole(Optional cond As Boolean = True)
 
-        If cond AndAlso Not SuppressOutput AndAlso Not Console.Title.Contains("testhost.x86") Then Console.Clear()
+        If Not cond OrElse SuppressOutput Then Return
+
+        ' VT path: an escape sequence written through Console.Out is safe even
+        ' if output happens to be redirected to a pipe/file — the caller opted
+        ' in to VT by virtue of HasVT being True (which the production probe
+        ' only sets when stdout is a real VT-capable console).
+        If TerminalCapabilities.HasVT Then
+
+            If _outputBuffer IsNot Nothing Then
+                _outputBuffer.Append(VtClearScreen)
+            Else
+                Console.Out.Write(VtClearScreen)
+            End If
+
+            Return
+
+        End If
+
+        ' Legacy path: Console.Clear writes nowhere meaningful when stdout
+        ' isn't a real console (test runners, pipelines, redirection) and will
+        ' usually throw IOException. Skip it outright in that case.
+        If Console.IsOutputRedirected Then Return
+
+        Try
+            Console.Clear()
+        Catch e As IO.IOException
+            ' Belt-and-braces — IsOutputRedirected should already cover this.
+        End Try
 
     End Sub
 
@@ -692,8 +472,6 @@ Module MenuMaker
     ''' A String containing the menuFrame requested
     ''' by <c> <paramref name="frameNum"/> </c>
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private Function getFrame(Optional frameNum As Integer = 0,
                               Optional fillFrame As Nullable(Of Boolean) = False) As String
 
@@ -701,47 +479,6 @@ Module MenuMaker
 
     End Function
 
-    ''' <summary> 
-    ''' Saves a menu header to be printed atop
-    ''' the next menu, optionally with color 
-    ''' </summary>
-    ''' 
-    ''' <param name="txt">
-    ''' The text to appear in the header 
-    ''' </param>
-    ''' 
-    ''' <param name="cHeader">
-    ''' Indicates that the header should be colored using 
-    ''' the color given by <c> <paramref name="printColor"/> </c> 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="cond">
-    ''' Indicates that the header text should be assigned 
-    ''' the value given by <c> <paramref name="txt"/> </c> 
-    ''' <br/> Optional, Default: <c> True </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="printColor"> 
-    ''' <c> ConsoleColor </c> with which the header will be
-    ''' colored when <c> <paramref name="cHeader"/> </c> is <c> True </c>
-    ''' <br/> Optional, Default: <c> Red </c> 
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub setHeaderText(txt As String,
-                             Optional cHeader As Boolean = False,
-                             Optional cond As Boolean = True,
-                             Optional printColor As ConsoleColor = Nothing)
-
-        If Not cond Then Return
-        MenuHeaderText = txt
-        If Not printColor = ConsoleColor.Black Then MenuHeaderTextColor = printColor
-
-        ColorHeader = cHeader
-        HeaderColor = printColor
-
-    End Sub
 
 
     ''' <summary>
@@ -763,11 +500,14 @@ Module MenuMaker
     ''' </param>
     Public Sub setNextMenuHeaderText(txt As String,
                             Optional cond As Boolean = True,
-                            Optional printColor As ConsoleColor = ConsoleColor.Black)
+                            Optional printColor As ConsoleColor = ConsoleColor.White)
 
         If Not cond Then Return
+
         MenuHeaderText = txt
-        If Not printColor = ConsoleColor.Black Then MenuHeaderTextColor = printColor
+        MenuHeaderTextColor = printColor
+        ColorHeader = True
+        HeaderColor = printColor
 
     End Sub
 
@@ -833,59 +573,6 @@ Module MenuMaker
     End Sub
 
     ''' <summary> 
-    ''' Prints the top of the menu, the header, a conjoiner,
-    ''' any description text provided, the menu prompt, and the exit option 
-    ''' </summary>
-    ''' 
-    ''' <param name="descriptionItems"> 
-    ''' Text describing the current menu or module functions being presented
-    ''' to the user, each array will be displayed on a separate line
-    ''' </param>
-    ''' 
-    ''' <param name="printExit"> 
-    ''' Indicates that an option to exit to the previous menu should be printed
-    ''' 
-    ''' <br/> Optional, Default: <c> True </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="fillConjoiner"> 
-    ''' Indicates that the conjoining frame at the
-    ''' bottom of the menu headed should be filled 
-    ''' 
-    ''' <br /> Optional, Default: <c> True (Filled)</c>
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Public Sub printMenuTop(descriptionItems As String(),
-                   Optional printExit As Boolean = True,
-                   Optional fillConjoiner As Boolean = True,
-                   Optional givenHeaderColor As ConsoleColor = Nothing)
-
-        If Not givenHeaderColor = Nothing Then
-
-            ColorHeader = True
-            HeaderColor = givenHeaderColor
-
-        End If
-
-        print(4, MenuHeaderText, colorLine:=ColorHeader, useArbitraryColor:=ColorHeader, arbitraryColor:=HeaderColor, conjoin:=True, fillBorder:=fillConjoiner)
-
-        ColorHeader = False
-
-        For Each line In descriptionItems
-
-            print(0, line, isCentered:=True)
-
-        Next
-
-        print(0, "Menu: Enter a number to select", leadingBlank:=True, trailingBlank:=True, isCentered:=True)
-
-        OptNum = 0
-        print(1, "Exit", "Return to the menu", printExit)
-
-    End Sub
-
-    ''' <summary> 
     ''' Prints a line bounded by vertical menu frames, or an empty menu line
     ''' if <c> <paramref name="lineString"/> </c> is <c> Nothing </c>
     ''' </summary>
@@ -902,9 +589,15 @@ Module MenuMaker
     ''' <br/> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
+    ''' <param name="cond">
+    ''' Indicates that the line should be printed <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
     Private Sub printMenuLine(Optional lineString As String = Nothing,
-                              Optional isCentered As Boolean = False)
+                              Optional isCentered As Boolean = False,
+                              Optional cond As Boolean = True)
+
+        If Not cond Then Return
 
         If lineString = Nothing Then lineString = getFrame()
         cwl(mkMenuLine(lineString, If(isCentered, 0, 1)))
@@ -923,13 +616,19 @@ Module MenuMaker
     ''' The description of the menu option 
     ''' </param>
     ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
+    ''' <param name="cond">
+    ''' Indicates that the option should be printed <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
     Private Sub printMenuOpt(lineString1 As String,
-                             lineString2 As String)
+                             lineString2 As String,
+                    Optional cond As Boolean = True)
 
-        lineString1 = $"{OptNum}. {lineString1}"
-        padToEnd(lineString1, menuItemLength, "")
-        cwl(mkMenuLine($"{lineString1}- {lineString2}", 1))
+        If Not cond Then Return
+
+        Dim sb As New StringBuilder($"{OptNum}. {lineString1}")
+        padToEnd(sb, menuItemLength, "")
+        cwl(mkMenuLine($"{sb}- {lineString2}", 1))
         OptNum += 1
 
     End Sub
@@ -1007,36 +706,34 @@ Module MenuMaker
     ''' Indicates that top and bottom borders 
     ''' should be printed when printing menuframes
     ''' </param>
-    '''
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Private Function mkMenuLine(line As String,
                                 align As Integer,
                                 Optional borderInd As Integer = 0,
                                 Optional fillBorder As Nullable(Of Boolean) = True) As String
 
         If line.Length >= GetConsoleWidth() - 1 Then Return line
-
-        Dim out = $" {Openers(borderInd)}"
+        Dim out As New StringBuilder($" {Openers(borderInd)}")
 
         Select Case align
 
             Case 0
 
                 padToEnd(out, CInt((((GetConsoleWidth() - line.Length) / 2) + 2)), Closers(borderInd))
-                out += line
+                out.Append(line)
                 padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd))
 
             Case 1
 
-                out += " " & line
+                out.Append(" " & line)
                 padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd))
 
             Case 2
+
                 padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd), If(fillBorder, "═", " "))
 
         End Select
 
-        Return out
+        Return out.ToString
 
     End Function
 
@@ -1060,24 +757,19 @@ Module MenuMaker
     ''' The character(s) with which to pad the text 
     ''' <br/> Default: <c> " " </c> (space character)
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
-    Private Sub padToEnd(ByRef out As String,
+
+    Private Sub padToEnd(ByRef out As StringBuilder,
                                targetLen As Integer,
                                endline As String,
                       Optional padStr As String = " ")
 
-        Dim sb As New StringBuilder(out)
+        While out.Length < targetLen
 
-        While sb.Length < targetLen
-
-            sb.Append(padStr)
+            out.Append(padStr)
 
         End While
 
-        If targetLen = GetConsoleWidth() - 2 Then sb.Append(endline)
-
-        out = sb.ToString()
+        If targetLen = GetConsoleWidth() - 2 Then out.Append(endline)
 
     End Sub
 
@@ -1146,7 +838,7 @@ Module MenuMaker
                 Optional centered As Boolean = False,
                 Optional condition As Boolean = True)
 
-        print(0, text, isCentered:=centered, cond:=condition)
+        printMenuLine(text, centered, condition)
 
     End Sub
 
@@ -1155,7 +847,7 @@ Module MenuMaker
     ''' </summary>
     Public Sub PrintBlank(Optional condition As Boolean = True)
 
-        print(0, Nothing, cond:=condition)
+        printMenuLine(Nothing, cond:=condition)
 
     End Sub
 
@@ -1166,9 +858,42 @@ Module MenuMaker
                            description As String,
                   Optional condition As Boolean = True)
 
-        print(1, name, description, cond:=condition)
+        printMenuOpt(name, description, condition)
 
     End Sub
+
+    ''' <summary>
+    ''' Prints a numbered menu option in a specific color
+    ''' </summary>
+    '''
+    ''' <param name="name">
+    ''' The name of the menu option
+    ''' </param>
+    '''
+    ''' <param name="description">
+    ''' The description of the menu option
+    ''' </param>
+    '''
+    ''' <param name="color">
+    ''' The color with which to print the option
+    ''' </param>
+    '''
+    ''' <param name="condition">
+    ''' Indicates whether the option should be printed <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    Public Sub PrintColoredOption(name As String,
+                                  description As String,
+                                  color As ConsoleColor,
+                         Optional condition As Boolean = True)
+
+        Dim startingColor = getForegroundColor()
+        setForegroundColor(color)
+        printMenuOpt(name, description, condition)
+        setForegroundColor(startingColor)
+
+    End Sub
+
 
     ''' <summary>
     ''' Prints a toggle option (Enable/Disable)
@@ -1178,7 +903,7 @@ Module MenuMaker
                            isEnabled As Boolean,
                   Optional condition As Boolean = True)
 
-        print(5, name, description, enStrCond:=isEnabled, cond:=condition)
+        PrintColoredOption(name, enStr(isEnabled) & " " & description, GetRedGreen(Not isEnabled), condition)
 
     End Sub
 
@@ -1188,18 +913,117 @@ Module MenuMaker
     Public Sub PrintWarning(text As String,
                    Optional condition As Boolean = True)
 
-        print(7, text, cond:=condition)
+
+        Dim startingColor = getForegroundColor()
+        setForegroundColor(ConsoleColor.Yellow)
+        printMenuLine(text, condition)
+        setForegroundColor(startingColor)
 
     End Sub
 
     ''' <summary>
+    ''' VT foreground color codes indexed by <c> ConsoleColor </c>'s underlying
+    ''' integer value (0..15). Windows' "Dark" variants map to ANSI 30-37
+    ''' (the base 8); the non-dark variants map to 90-97 (bright). Note that
+    ''' Windows' <c> ConsoleColor.Yellow </c> is the bright variant — ANSI 93 —
+    ''' so what looks "yellow" on Windows comes out yellow on a VT terminal too.
+    ''' </summary>
+    Private ReadOnly VtForegroundCodes As Integer() = {
+        30, 34, 32, 36, 31, 35, 33, 37,
+        90, 94, 92, 96, 91, 95, 93, 97
+    }
+
+    ''' <summary>
+    ''' VT escape that resets the foreground color to the terminal's default.
+    ''' </summary>
+    Private ReadOnly VtResetForeground As String = ChrW(&H1B) & "[39m"
+
+    ''' <summary>
+    ''' Tracked current foreground color. On the VT path we cannot read it
+    ''' back from the terminal, so we mirror the state ourselves. On the
+    ''' legacy path this also avoids a <c> Console.ForegroundColor </c> read
+    ''' (one P/Invoke into <c> GetConsoleScreenBufferInfo </c>) per save call.
+    ''' </summary>
+    Private _currentForeground As ConsoleColor = ConsoleColor.Gray
+    Private _currentForegroundInitialized As Boolean = False
+
+    Private Sub ensureForegroundInitialized()
+
+        If _currentForegroundInitialized Then Return
+
+        Try
+            _currentForeground = Console.ForegroundColor
+        Catch ex As IO.IOException
+            ' Reading ForegroundColor can fail when stdout isn't a real
+            ' console; fall back to the assumed default.
+        End Try
+
+        _currentForegroundInitialized = True
+
+    End Sub
+
+    ''' <summary>
+    ''' Builds the VT foreground escape for a given <c> ConsoleColor </c>.
+    ''' Returns the default-foreground reset when the color is the sentinel
+    ''' <c> -1 </c> used to indicate "restore default."
+    ''' </summary>
+    Private Function VtForegroundEscape(color As ConsoleColor) As String
+
+        Dim idx = CInt(color)
+        If idx < 0 OrElse idx > 15 Then Return VtResetForeground
+        Return ChrW(&H1B) & "[" & VtForegroundCodes(idx).ToString() & "m"
+
+    End Function
+
+    Private Sub setForegroundColor(color As ConsoleColor)
+
+        ensureForegroundInitialized()
+        _currentForeground = color
+
+        If TerminalCapabilities.HasVT Then
+
+            ' Inline VT escape — no flush, no syscall. Sits between the
+            ' surrounding text in the active buffer (or in Console.Out
+            ' directly when buffering is off).
+            Dim escape = VtForegroundEscape(color)
+
+            If _outputBuffer IsNot Nothing Then
+                _outputBuffer.Append(escape)
+            Else
+                Console.Out.Write(escape)
+            End If
+
+            Return
+
+        End If
+
+        ' Legacy path: real Win32 attribute set. Must flush any buffered
+        ' output first so the attribute applies to characters yet to come,
+        ' not characters already in the in-memory buffer.
+        FlushBufferIfActive()
+        Console.ForegroundColor = color
+
+    End Sub
+
+    Private Function getForegroundColor() As ConsoleColor
+
+        ensureForegroundInitialized()
+        Return _currentForeground
+
+    End Function
+
+    ''' <summary>
     ''' Prints colored text
     ''' </summary>
-    Public Sub PrintColored(text As String, color As ConsoleColor,
+    Public Sub PrintColored(text As String,
+                            color As ConsoleColor,
                    Optional centered As Boolean = False,
                    Optional condition As Boolean = True)
 
-        print(0, text, isCentered:=centered, colorLine:=True, useArbitraryColor:=True, arbitraryColor:=color, cond:=condition)
+        Dim startingColor = getForegroundColor()
+        setForegroundColor(color)
+        printMenuLine(text, centered, condition)
+        setForegroundColor(startingColor)
 
     End Sub
 
@@ -1215,7 +1039,7 @@ Module MenuMaker
     ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Sub BeginMenu(Optional solid As Boolean = True)
 
-        print(0, getFrame(1, solid), cond:=True)
+        printMenuLine(getFrame(1, solid), cond:=True)
 
     End Sub
 
@@ -1246,7 +1070,7 @@ Module MenuMaker
     ''' </summary>
     Public Sub EndMenu(Optional filled As Boolean = True)
 
-        print(0, getFrame(2, filled), cond:=True)
+        printMenuLine(getFrame(2, filled), cond:=True)
 
     End Sub
 
@@ -1258,39 +1082,14 @@ Module MenuMaker
     ''' Indicates whether the divider line should be solid
     ''' Optional, Default: <c> True </c> (solid)
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Sub PrintDivider(Optional solid As Boolean = True)
 
-        print(0, getFrame(3, solid), cond:=True)
+        printMenuLine(getFrame(3, solid))
 
     End Sub
 
     ''' <summary>
-    ''' Creates a menu item through the new MenuItemBuilder system
-    ''' </summary>
-    ''' 
-    ''' <param name="name"> 
-    ''' The name of the menu item, shown to the left of the description
-    ''' </param>
-    ''' 
-    ''' <param name="description"> 
-    ''' The description of the menu item, shown to the right of the name
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
-    Public Function MenuItem(name As String,
-                             description As String,
-                             condition As Boolean) As MenuItemBuilder
-
-        Return New MenuItemBuilder(name, description)
-
-    End Function
-
-
-
-    ''' <summary>
-    ''' 
+    '''
     ''' </summary>
     ''' 
     ''' <param name="cond">

@@ -1,7 +1,7 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
-' 
+'    Copyright (C) 2018-2026 Hazel Ward
+'
 '    This file is a part of Winapp2ool
-' 
+'
 '    Winapp2ool is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
 '    the Free Software Foundation, either version 3 of the License, or
@@ -18,87 +18,153 @@ Option Strict On
 ''' <summary> This module holds some methods for managing WinappDebug's scan/repair states </summary>
 Public Module advSettings
 
-    ''' <summary> Prints the scan/repair management menu to the user </summary>
-    Public Sub printMenu()
-        Console.WindowHeight = 52
-        printMenuTop({"Enable or disable specific scans or repairs"})
-        print(0, "Scan Options", leadingBlank:=True, trailingBlank:=True)
-        Rules.ForEach(Sub(rule) print(5, rule.LintName, rule.ScanText, enStrCond:=rule.ShouldScan))
-        ' Print all repairs except the last one
-        print(0, "Repair Options", leadingBlank:=True, trailingBlank:=True)
-        For i = 0 To Rules.Count - 2
-            Dim rule = Rules(i)
-            print(5, rule.LintName, rule.RepairText, enStrCond:=rule.ShouldRepair)
+    ''' <summary>
+    ''' Builds the scan/repair settings menu with all toggles and their dispatch handlers registered inline.
+    ''' Called by both <c> printMenu </c> (to render) and <c> handleUserInput </c>
+    ''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
+    ''' </summary>
+    Private Function buildAdvSettingsMenu() As MenuSection
+
+        Dim menu = MenuSection.CreateCompleteMenu("Scan Settings",
+                                                {"Enable or disable specific scans or repairs"})
+
+        menu.AddBlank()
+        menu.AddLine("Scan Options", centered:=True)
+        menu.AddDivider(solid:=False)
+
+        For Each rule In Rules
+
+            Dim r = rule
+            menu.AddDispatchedToggle(r.LintName, r.ScanText, r.ShouldScan,
+                Sub()
+                    Dim prev = r.ShouldScan
+                    gLog($"  Toggling Scan from {prev} to {Not prev}")
+                    setNextMenuHeaderText($"Scan {enStr(prev)}d", printColor:=If(Not prev, ConsoleColor.Green, ConsoleColor.Red))
+                    r.ShouldScan = Not prev
+                    ScanSettingsChanged = True
+                    SetSetting(NameOf(WinappDebug), r.LintName & "_Scan", tsInvariant(r.ShouldScan))
+                    FlushIfDirty2()
+                    If Not r.ShouldScan Then r.turnOff()
+                End Sub)
+
         Next
-        ' Special case for the last repair option (closemenu flag)
-        Dim lastRule = Rules.Last
-        print(5, lastRule.LintName, lastRule.RepairText, closeMenu:=Not ScanSettingsChanged, enStrCond:=lastRule.ShouldRepair)
-        print(2, "Scan And Repair", cond:=ScanSettingsChanged, closeMenu:=True)
-    End Sub
 
-    ''' <summary> Handles the user input for the scan/repair management menu </summary>
-    ''' <param name="input"> The String containing the user's input </param>
-    Public Sub handleUserInput(input As String)
-        Dim lints As New List(Of String) From {"Casing", "Alphabetization", "Improper Numbering", "Parameters", "Flags", "Slashes", "Defaults", "Duplicates", "Unneeded Numbering",
-                "Multiples", "Invalid Values", "Syntax Errors", "Path Validity", "Semicolons", "Optimizations", "Potential Duplicate Keys Between Entries"}
-        ' Determine the current state of the lint rules
-        determineScanSettings()
-        ' Get the input as an integer so we can index it against our rules
-        Dim intInput = -1
-        If Not Integer.TryParse(input, intInput) Then
-            ' This isn't an error since we have the "alloff" command, but the compiler throws a warning if we don't check that this is successful
-            ' If the "alloff" debugging command is removed though, this will be a case of an invalid input since there is no default option in this menu
-        End If
-        ' The index of the rule assoicated with the user's input
-        Dim ind = intInput - 1
-        Select Case True
-            Case input = "0"
-                If ScanSettingsChanged Then LintModuleSettingsChanged = True
-                exitModule()
-        ' Enable/Disable individual scans
-            Case intInput > 0 And intInput <= Rules.Count
-                toggleSettingParam(Rules(ind).ShouldScan, "Scan", ScanSettingsChanged, NameOf(WinappDebug), lints(ind) & "_Scan", NameOf(ScanSettingsChanged))
-                ' Force repair off if the scan is off
-                If Not Rules(ind).ShouldScan Then Rules(ind).turnOff()
-        ' Enable/Disable individual repairs
-            Case intInput > Rules.Count And intInput <= 2 * Rules.Count
-                ind -= (Rules.Count)
-                toggleSettingParam(Rules(ind).ShouldRepair, "Repair", ScanSettingsChanged, NameOf(WinappDebug), lints(ind) & "_Repair", NameOf(ScanSettingsChanged))
-                ' Force scan on if the repair is on
-                If Rules(ind).ShouldRepair Then Rules(ind).turnOn()
-            Case intInput = 2 * Rules.Count + 1 And ScanSettingsChanged
+        menu.AddBlank()
+        menu.AddLine("Repair Options", centered:=True)
+        menu.AddDivider(solid:=False)
+
+        For Each rule In Rules
+
+            Dim r = rule
+            menu.AddDispatchedToggle(r.LintName, r.RepairText, r.ShouldRepair,
+                Sub()
+                    Dim prev = r.ShouldRepair
+                    gLog($"  Toggling Repair from {prev} to {Not prev}")
+                    setNextMenuHeaderText($"Repair {enStr(prev)}d", printColor:=If(Not prev, ConsoleColor.Green, ConsoleColor.Red))
+                    r.ShouldRepair = Not prev
+                    ScanSettingsChanged = True
+                    SetSetting(NameOf(WinappDebug), r.LintName & "_Repair", tsInvariant(r.ShouldRepair))
+                    FlushIfDirty2()
+                    If r.ShouldRepair Then r.turnOn()
+                End Sub)
+
+        Next
+
+        menu.AddBlank(ScanSettingsChanged)
+        menu.AddDispatchedResetOpt("Scan And Repair", ScanSettingsChanged,
+            Sub()
                 resetScanSettings()
-                setHeaderText("Settings Reset")
-        ' This isn't documented anywhere and is mostly intended as a debugging shortcut
-            Case input = "alloff"
-                Rules.ForEach(Sub(rule) rule.turnOff())
-                ScanSettingsChanged = True
-            Case Else
-                setHeaderText(invInpStr, True)
-        End Select
+                setNextMenuHeaderText("Settings Reset", printColor:=ConsoleColor.Yellow)
+            End Sub)
+
+        Return menu
+
+    End Function
+
+    ''' <summary> 
+    ''' Prints the scan/repair management menu to the user 
+    ''' </summary>
+    Public Sub printMenu()
+
+        Console.WindowHeight = 52
+        buildAdvSettingsMenu().Print()
+
     End Sub
 
-    ''' <summary> Determines which if any lint rules have been modified and whether or not only some repairs are scheduled to run </summary>
+    ''' <summary> 
+    ''' Handles the user input for the scan/repair management menu 
+    ''' </summary>
+    ''' 
+    ''' <param name="input">
+    ''' The String containing the user's input 
+    ''' </param>
+    Public Sub handleUserInput(input As String)
+
+        determineScanSettings()
+
+        If input = "alloff" Then
+
+            Rules.ForEach(Sub(rule) rule.turnOff())
+            ScanSettingsChanged = True
+            Return
+
+        End If
+
+        Dim intInput As Integer
+
+        If Not Integer.TryParse(input, intInput) Then
+
+            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Return
+
+        End If
+
+        If intInput = 0 Then
+
+            If ScanSettingsChanged Then LintModuleSettingsChanged = True
+            exitModule()
+            Return
+
+        End If
+
+        If Not buildAdvSettingsMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+
+    End Sub
+
+    ''' <summary> 
+    ''' Determines which if any lint rules have been modified and whether or not only some repairs are scheduled to run 
+    ''' </summary>
     Private Sub determineScanSettings()
+
         Dim repairAll = True
         Dim repairAny = False
+
         For Each rule In Rules
+
             If rule.hasBeenChanged Then
+
                 ScanSettingsChanged = True
                 If Not rule.ShouldRepair Then repairAll = False
+
             End If
+
             If rule.ShouldRepair Then repairAny = True
         Next
-        If Not repairAll And repairAny Then
-            RepairErrsFound = False
-            RepairSomeErrsFound = True
-        End If
+
+        RepairErrsFound = repairAll
+        RepairSomeErrsFound = repairAny
+
     End Sub
 
-    ''' <summary> Resets the individual scan/repair settings to their defaults </summary>
+    ''' <summary>
+    ''' Resets the individual scan/repair settings to their defaults 
+    ''' </summary>
     Public Sub resetScanSettings()
+
         Rules.ForEach(Sub(rule) rule.resetParams())
         ScanSettingsChanged = False
         RepairSomeErrsFound = False
+
     End Sub
+
 End Module

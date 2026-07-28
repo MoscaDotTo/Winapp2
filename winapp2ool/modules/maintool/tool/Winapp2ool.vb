@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -51,6 +51,16 @@ Public Module Winapp2ool
         ''' Captures upstream changes made by Tron to the CCleaner flavor 
         ''' </summary>
         Tron = 4
+
+        ''' <summary>
+        ''' Designed for use with CCleaner 7.x and later
+        ''' </summary>
+        CCleaner7 = 5
+
+        ''' <summary>
+        ''' Designed for use with FluentCleaner, whose cleaners default to enabled
+        ''' </summary>
+        FluentCleaner = 6
 
     End Enum
 
@@ -114,35 +124,6 @@ Public Module Winapp2ool
     End Function
 
     ''' <summary> 
-    ''' Ensures that an <c> iniFile </c> has content and informs the user if it does not.
-    ''' </summary>
-    ''' 
-    ''' <param name="iFile">
-    ''' An <c> iniFile </c> to be checked for content 
-    ''' </param>
-    ''' 
-    ''' <returns> 
-    ''' <c> True </c> if the <c> iniFile </c> has content, 
-    ''' <br /> <c> False </c>otherwise
-    ''' </returns>
-    Public Function enforceFileHasContent(iFile As iniFile) As Boolean
-
-        iFile.validate()
-
-        If iFile.Sections.Count = 0 Then
-
-            setHeaderText($"{iFile.Name} was empty or not found", True)
-            gLog($"{iFile.Name} was empty or not found", indent:=True)
-
-            Return False
-
-        End If
-
-        Return True
-
-    End Function
-
-    ''' <summary> 
     ''' Returns an invariant string representation of a boolean 
     ''' </summary>
     ''' 
@@ -156,39 +137,29 @@ Public Module Winapp2ool
     End Function
 
     ''' <summary>
-    ''' Determines the color of a file selector based on whether or not a file has been selected
+    ''' Ensures that an <c>iniFile2</c> has content and informs the user if it does not.
+    ''' Unlike the <c>iniFile</c> overload, this does not trigger validation or the File Chooser;
+    ''' the caller is responsible for loading the file before calling this.
     ''' </summary>
-    ''' 
-    ''' <param name="menuFile">
-    ''' An <c> iniFile </c> with influence on a menu option's coloring
+    '''
+    ''' <param name="iFile">
+    ''' An <c>iniFile2</c> to be checked for content
     ''' </param>
-    ''' 
+    '''
     ''' <returns>
-    ''' <c> Green </c> if <c> <paramref name="menuFile"/> </c> has a name, <br />
-    ''' <c> Red </c> otherwise
+    ''' <c>True</c> if the <c>iniFile2</c> has content,
+    ''' <br /><c>False</c> otherwise
     ''' </returns>
-    Public Function getFileMenuColor(menuFile As iniFile) As ConsoleColor
+    Public Function enforceFileHasContent(iFile As iniFile2) As Boolean
 
-        Return If(menuFile.Name.Length > 0, ConsoleColor.Green, ConsoleColor.Red)
+        If iFile IsNot Nothing AndAlso iFile.Count > 0 Then Return True
 
-    End Function
+        Dim fileName = If(iFile?.Name, "File")
+        Dim out = $"{fileName} was empty or not found"
+        setNextMenuHeaderText(out, printColor:=ConsoleColor.DarkRed)
+        gLog($"  {out}")
 
-    ''' <summary>
-    ''' Returns the display information for a file selector in a menu
-    ''' </summary>
-    ''' 
-    ''' <param name="menuFile">
-    ''' An <c> iniFile </c> whose path will be displayed if it has valid <c> Name </c>
-    ''' </param>
-    ''' 
-    ''' <returns>
-    ''' A print friendly version of the file's path if it has a valid <c> Name </c>, with the 
-    ''' current directory replaced with ..\ <br />
-    ''' "Not specified" otherwise
-    ''' </returns>
-    Public Function getFileMenuName(menuFile As iniFile) As String
-
-        Return If(menuFile.Name.Length > 0, replDir(menuFile.Path), "Not specified")
+        Return False
 
     End Function
 

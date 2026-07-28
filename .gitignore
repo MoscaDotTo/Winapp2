@@ -81,7 +81,6 @@
 /winapp2ool/.vs/winapp2ool/FileContentIndex
 *.pfx
 /winapp2ool/bin/Debug/winapp2-old.ini
-<<<<<<< HEAD
 /winapp2ool/.vs/winapp2ool/CopilotIndices/17.14.786.1071
 /winapp2ool/.vs/winapp2ool/copilot-chat/611f5803/sessions
 /winapp2ool/.vs/winapp2ool/CopilotIndices/17.14.794.21998/CodeChunks.db-shm
@@ -116,9 +115,6 @@
 /winapp2ool/.vs/winapp2ool/CopilotIndices/17.14.794.21998/SemanticSymbols.db
 /winapp2ool/.vs/winapp2ool/CopilotIndices/17.14.794.21998/CodeChunks.db
 /winapp2ool/.vs/winapp2ool/CopilotIndices
-=======
-Assembler/winapp2ool.exe
->>>>>>> 0d7094a23737c5bbea7369a35992f4a52093fb29
 /winapp2ool/packages
 /winapp2ool/UnitTests/bin/Debug/cs
 /winapp2ool/UnitTests/bin/Debug/Microsoft.Win32.Primitives.dll
@@ -247,3 +243,27 @@ Assembler/winapp2ool.exe
 /winapp2ool/.vs/winapp2ool/v18/.suo
 /winapp2ool/.vs/CopilotSnapshots/1292F72889D7814AB6EA17AF18894830
 /winapp2ool/.vs
+/winapp2ool/CLAUDE.md
+/winapp2ool/handlers/cmdline/CLAUDE.md
+/winapp2ool/handlers/ini/CLAUDE.md
+/winapp2ool/handlers/menus/CLAUDE.md
+/winapp2ool/handlers/settings/CLAUDE.md
+/winapp2ool/handlers/winapp2/CLAUDE.md
+/winapp2ool/modules/CLAUDE.md
+/winapp2ool/bin/Debug/diff-old.txt
+/winapp2ool/bin/Debug/diff-test-new.ini
+/winapp2ool/bin/Debug/diff-test-old.ini
+/winapp2ool/GLOBAL_STATE.md
+/winapp2ool/handlers/ini/OBJECT_MODEL_DESIGN.md
+/winapp2ool/XMLDOC.md
+/winapp2ool/.editorconfig
+/winapp2ool/bin/Debug/browsers.ini
+/winapp2ool/bin/Debug/entrybuilder.before.ini
+/winapp2ool/bin/Debug/entrybuilder.ini
+/winapp2ool/bin/Debug/old-A.ini
+/winapp2ool/bin/Debug/uwp.ini
+/winapp2ool/bin/Debug/winapp2-debugged.ini
+/winapp2ool/bin/Debug/winapp2-trimmed.ini
+/winapp2ool/modules/entrybuilder/CLAUDE.md
+/winapp2ool/My Project/Settings.Designer.vb
+/winapp2ool/My Project/Resources.Designer.vb

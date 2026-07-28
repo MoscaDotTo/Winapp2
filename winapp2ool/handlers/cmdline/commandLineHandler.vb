@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -48,7 +48,6 @@ Public Module commandLineHandler
 
         Dim configs As New Dictionary(Of String, ModuleConfig)
 
-        ' Helper method to add a module configuration
         Dim addModule = Sub(number As String,
                             name As String,
                             fileCount As Integer,
@@ -63,14 +62,17 @@ Public Module commandLineHandler
                         End Sub
 
         addModule("1", "debug", 3, AddressOf WinappDebug.HandleLintCmdLine)
-        addModule("2", "trim", 3, AddressOf Trim.handleCmdLine)
+        addModule("2", "trim", 4, AddressOf Trim.handleCmdLine)
         addModule("3", "transmute", 3, AddressOf Transmute.handleCmdLine)
         addModule("4", "diff", 3, AddressOf Diff.HandleCmdLine)
         addModule("5", "ccdebug", 3, AddressOf CCiniDebug.handleCmdlineArgs)
-        addModule("6", "browserbuilder", 9, AddressOf BrowserBuilder.handleCmdLine)
-        addModule("7", "combine", 2, AddressOf Combine.handleCmdLine)
+        addModule("6", "browserbuilder", 2, AddressOf BrowserBuilder.handleCmdLine)
+        addModule("7", "combine", 3, AddressOf Combine.handleCmdLine)
         addModule("8", "download", 3, AddressOf Downloader.handleCmdLine)
-        addModule("9", "flavorize", 8, AddressOf Flavorizer.handleCmdLine)
+        addModule("9", "flavorize", 9, AddressOf Flavorizer.handleCmdLine)
+        addModule("10", "uwpbuilder", 4, AddressOf UWPBuilder.handleCmdLine)
+        addModule("11", "entrybuilder", 4, AddressOf EntryBuilder.handleCmdLine)
+        addModule("12", "cc7patcher", 3, AddressOf CC7Patcher.handleCmdLine)
 
         Return configs
 
@@ -106,44 +108,14 @@ Public Module commandLineHandler
     ''' A commandline argument targeting 
     ''' <c> <paramref name="setting"/> </c>
     ''' </param>
-    ''' 
-    ''' <param name="name">
-    ''' A File name to be modified if the arg is found
-    ''' <br /> Optional, default: <c> "" </c>
-    ''' </param>
-    ''' 
-    ''' <param name="newname">
-    ''' The new name with which <c> <paramref name="name"/> </c>
-    ''' will be replaced if the arg is found 
-    ''' <br /> Optional, default: <c> "" </c>
-    ''' </param>
     Public Sub invertSettingAndRemoveArg(ByRef setting As Boolean,
-                                               arg As String,
-                                Optional ByRef name As String = "",
-                                Optional ByRef newname As String = "")
+                                               arg As String)
 
         If Not cmdargs.Contains(arg) Then Return
 
         gLog($"Found argument: {arg}")
         setting = Not setting
         cmdargs.Remove(arg)
-        name = newname
-
-    End Sub
-
-    ''' <summary>
-    ''' Processes whether to download and which file to download
-    ''' </summary>
-    ''' 
-    ''' <param name="download">
-    ''' Indicates that winapp2.ini should be downloaded from GitHub 
-    ''' </param>
-    Public Sub handleDownloadBools(ByRef download As Boolean)
-
-        invertSettingAndRemoveArg(download, "-d")
-
-        Dim networkErr = "Winapp2ool is currently in offline mode, but you have issued commands that require a network connection. Please try again with a network connection."
-        If download And isOffline Then printErrExit(networkErr)
 
     End Sub
 
@@ -157,11 +129,14 @@ Public Module commandLineHandler
         Dim argStr = String.Join(",", cmdargs)
         gLog($"Found commandline args: {argStr}")
 
+
+        cmdargs.RemoveAll(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase))
+
         checkUpdates(cmdargs.Contains("-autoupdate"))
         If updateIsAvail Then autoUpdate()
 
-        ' Process global flags
         invertSettingAndRemoveArg(SuppressOutput, "-s")
+        invertSettingAndRemoveArg(SaveGlobalLogOnExit, "-writelog")
         processFlavorArgs()
 
         If cmdargs.Count = 0 Then Return
@@ -183,173 +158,6 @@ Public Module commandLineHandler
             printErrExit($"Unknown module identifier: {firstArg}")
 
         End If
-
-    End Sub
-
-    ''' <summary>
-    ''' Gets the directory and name info for the <c> iniFile </c> properties of a module 
-    ''' </summary>
-    ''' 
-    ''' <param name="files">
-    ''' The set of <c> iniFile </c> properties belonging to a particular module 
-    ''' </param>
-    Public Sub getFileAndDirParams(ByRef files() As iniFile)
-
-        If files Is Nothing Then argIsNull(NameOf(files)) : Return
-
-        For i = 0 To files.Length - 1
-
-            getParams(i + 1, files(i))
-
-        Next
-
-    End Sub
-
-    ''' <summary>
-    ''' Renames or modifies the filename of an <c> iniFile </c> via the commandline 
-    ''' </summary>
-    ''' 
-    ''' <param name="arg">
-    ''' Commandline arg pointing to some particular file in a module 
-    ''' <br /> eg. -2f or -1d 
-    ''' </param>
-    ''' 
-    ''' <param name="givenFile">
-    ''' An <c> iniFile </c> module property whose path will be modified 
-    ''' </param>
-    ''' 
-    ''' <remarks> 
-    ''' Supports appending child folders to the current directory 
-    ''' <br /> eg. -2f "\folder1\folder2\file.ini"
-    ''' </remarks>
-    Private Sub getFileName(arg As String,
-                      ByRef givenFile As iniFile)
-
-        If cmdargs.Count < 2 Then Return
-
-        Dim ind = cmdargs.IndexOf(arg)
-        If ind = -1 OrElse ind >= cmdargs.Count - 1 Then Return
-
-        Dim curArg = cmdargs(ind + 1)
-        givenFile.Name = curArg
-
-        If curArg.StartsWith("\", StringComparison.InvariantCulture) AndAlso Not curArg.LastIndexOf("\", StringComparison.InvariantCulture) = 0 Then
-
-            Dim split = curArg.Split(CChar("\"))
-
-            For i As Integer = 1 To split.Length - 2
-
-                givenFile.Dir += $"\{split(i)}"
-
-            Next
-
-            givenFile.Name = split.Last
-
-        End If
-
-        cmdargs.RemoveAt(ind)
-        cmdargs.RemoveAt(ind)
-
-    End Sub
-
-    ''' <summary>
-    ''' Applies a new directory and name to an iniFile object
-    ''' </summary>
-    ''' 
-    ''' <param name="flag">
-    ''' The flag preceding the file/path parameter in the arg list
-    ''' </param>
-    ''' 
-    ''' <param name="file">
-    ''' An <c> iniFile </c> module property whose path will be modified 
-    ''' </param>
-    Private Sub getFileNameAndDir(flag As String,
-                            ByRef file As iniFile)
-
-        If cmdargs.Count < 2 Then Return
-
-        Dim ind = cmdargs.IndexOf(flag)
-        If ind = -1 OrElse ind >= cmdargs.Count - 1 Then Return
-
-        getFileParams(cmdargs(ind + 1), file)
-        cmdargs.RemoveAt(ind)
-        cmdargs.RemoveAt(ind)
-
-    End Sub
-
-    ''' <summary>
-    ''' Takes in a full form filepath with directory and assigns the directory 
-    ''' and filename components to the given <c> <paramref name="file"/> </c>
-    ''' </summary>
-    ''' 
-    ''' <param name="arg">
-    ''' A file path argument, eg. the location of a specific .ini file on disk 
-    ''' </param>
-    ''' 
-    ''' <param name="file">
-    ''' An <c> iniFile </c> module property whose path will be modified 
-    ''' </param>
-    Private Sub getFileParams(ByRef arg As String,
-                              ByRef file As iniFile)
-
-        file.Dir = If(arg.StartsWith("\", StringComparison.InvariantCulture), Environment.CurrentDirectory, "")
-        Dim splitArg As String() = arg.Split(CChar("\"))
-
-        ' Only set the name if the last part of the split contains a file extension
-        If splitArg.Last.Contains(".") Then file.Name = splitArg.Last
-
-        If splitArg.Length < 2 Then Return
-
-        Dim terminus = If(splitArg.Last.Contains("."), splitArg.Length - 2, splitArg.Length - 1)
-
-        For i = 0 To terminus
-
-            file.Dir += splitArg(i) & "\"
-
-        Next
-
-        CleanFilePath(file)
-
-    End Sub
-
-    ''' <summary>
-    ''' Processes numerically ordered directory (d) and file (f) commandline args on a per-file basis
-    ''' </summary>
-    ''' 
-    ''' <param name="iniFilePropertyNumber">
-    ''' The number (1-indexed) of the property associated with <c> <paramref name="someFile"/> </c>
-    ''' </param>
-    ''' 
-    ''' <param name="someFile">
-    ''' An <c> iniFile </c> module property whose path will be modified 
-    ''' </param>
-    Private Sub getParams(iniFilePropertyNumber As Integer,
-                    ByRef someFile As iniFile)
-
-        Dim argStr As String = $"-{iniFilePropertyNumber}"
-
-        If cmdargs.Contains($"{argStr}d") Then getFileNameAndDir($"{argStr}d", someFile)
-
-        If cmdargs.Contains($"{argStr}f") Then getFileName($"{argStr}f", someFile)
-
-        CleanFilePath(someFile)
-
-    End Sub
-
-    ''' <summary>
-    ''' Cleans up file paths by removing double, leading, and trailing slashes
-    ''' </summary>
-    ''' 
-    ''' <param name="file">
-    ''' An <c> iniFile </c> module property whose path will be modified 
-    ''' </param>
-    Private Sub CleanFilePath(ByRef file As iniFile)
-
-        file.Dir = file.Dir.Replace("\\", "\")
-
-        If file.Name.StartsWith("\", StringComparison.InvariantCulture) Then file.Name = file.Name.TrimStart(CChar("\"))
-
-        If file.Dir.EndsWith("\", StringComparison.InvariantCulture) Then file.Dir = file.Dir.TrimEnd(CChar("\"))
 
     End Sub
 
@@ -415,11 +223,7 @@ Public Module commandLineHandler
 
                     Dim parentDir = System.IO.Path.GetDirectoryName(pathArg)
 
-                    If Not String.IsNullOrEmpty(parentDir) AndAlso Not System.IO.Directory.Exists(parentDir) Then
-
-                        gLog($"Warning: Parent directory does not exist: {parentDir}")
-
-                    End If
+                    gLog($"Warning: Parent directory does not exist: {parentDir}", Not String.IsNullOrEmpty(parentDir) AndAlso Not System.IO.Directory.Exists(parentDir))
 
                 End If
 
@@ -441,9 +245,17 @@ Public Module commandLineHandler
     ''' </param>
     Private Sub printErrExit(errTxt As String)
 
-        Console.WriteLine($"{errTxt} Press any key to exit.")
-        Console.ReadKey()
-        Environment.Exit(0)
+        gLog(errTxt)
+
+        If Not SuppressOutput Then
+
+            Console.WriteLine($"{errTxt} Press any key to exit.")
+            crk()
+
+        End If
+
+        saveGlobalLog(SuppressOutput OrElse SaveGlobalLogOnExit)
+        Environment.Exit(1)
 
     End Sub
 
@@ -485,6 +297,10 @@ Public Module commandLineHandler
         handleFlavorArg("-tron", WinappFlavor.Tron)
         handleFlavorArg("-base", WinappFlavor.NonCCleaner)
         handleFlavorArg("-ncc", WinappFlavor.NonCCleaner)
+        handleFlavorArg("-ccleaner7", WinappFlavor.CCleaner7)
+        handleFlavorArg("-cc7", WinappFlavor.CCleaner7)
+        handleFlavorArg("-fluentcleaner", WinappFlavor.FluentCleaner)
+        handleFlavorArg("-fc", WinappFlavor.FluentCleaner)
 
     End Sub
 

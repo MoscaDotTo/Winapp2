@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -18,7 +18,6 @@
 Option Strict On
 
 Imports System.Globalization
-Imports System.Reflection
 
 ''' <summary>
 ''' Provides functions to manage winapp2ool module settings, including modifying file parameters, 
@@ -30,92 +29,76 @@ Imports System.Reflection
 Module SettingsManager
 
     ''' <summary>
-    ''' Prompts the user to change a file's parameters, marks both settings and the file as having been changed 
+    ''' Prompts the user to change an <c>iniFileChooser</c>'s parameters, marks both settings and the chooser as having been changed
     ''' </summary>
-    ''' 
-    ''' <param name="someFile">
-    ''' A pointer to an iniFile whose parameters will be changed
+    '''
+    ''' <param name="chooser">
+    ''' The <c>iniFileChooser</c> whose parameters will be changed
     ''' </param>
-    ''' 
+    '''
     ''' <param name="settingsChangedSetting">
-    ''' A pointer to the boolean indicating that a module's settings been modified from their default state 
+    ''' A pointer to the boolean indicating that a module's settings have been modified from their default state
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-08-05
-    Public Sub changeFileParams(ByRef someFile As iniFile,
-                                ByRef settingsChangedSetting As Boolean,
-                                      callingModule As String,
-                                      settingName As String,
-                                      settingChangedName As String,
-                             Optional fileDesc As String = "")
+    Public Sub changeFile2Params(ByRef chooser As iniFileChooser,
+                                 ByRef settingsChangedSetting As Boolean,
+                                       callingModule As String,
+                                       settingName As String,
+                                       settingChangedName As String,
+                              Optional fileDesc As String = "")
 
-        Dim curName = someFile.Name
-        Dim curDir = someFile.Dir
+        Dim curName = chooser.Name
+        Dim curDir = chooser.Dir
 
-        initModule("File Chooser", AddressOf someFile.printFileChooserMenu, AddressOf someFile.handleFileChooserInput)
+        initModule("File Chooser", AddressOf chooser.PrintMenu, AddressOf chooser.HandleInput)
 
-        Dim fileChanged = Not someFile.Name = curName OrElse Not someFile.Dir = curDir
-        If Not settingsChangedSetting Then settingsChangedSetting = fileChanged
+        Dim fileChanged = Not chooser.Name = curName OrElse Not chooser.Dir = curDir
 
-        setHeaderText($"{If(someFile.SecondName.Length = 0, someFile.InitName, "save file")} parameters update{If(Not fileChanged, " aborted", "d")}", Not fileChanged)
         setNextMenuHeaderText($"{fileDesc} parameters update{If(Not fileChanged, " aborted", "d")}", printColor:=GetRedGreen(Not fileChanged))
         If Not fileChanged Then Return
 
-        updateSettings(callingModule, $"{settingName}_Dir", someFile.Dir)
-        updateSettings(callingModule, $"{settingName}_Name", someFile.Name)
-        updateSettings(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
-
-        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso saveSettingsToDisk)
+        saveChooserParams(chooser, settingsChangedSetting, callingModule, settingName, settingChangedName)
 
     End Sub
 
     ''' <summary>
-    ''' Toggles a setting's boolean state and marks its tracker true
+    ''' Persists an <c> iniFileChooser </c>'s current parameters into the settings file, marking the
+    ''' owning module's settings as having been changed
+    ''' <br /> Called by every path which lets the user pick a file, including
+    ''' <c> iniFileChooser.Load </c>'s missing-file prompt
     ''' </summary>
-    ''' 
-    ''' <param name="setting">
-    ''' A pointer to the boolean representing a module setting to be toggled
+    '''
+    ''' <param name="chooser">
+    ''' The <c> iniFileChooser </c> whose parameters will be saved
     ''' </param>
-    ''' 
-    ''' <param name="paramText">
-    ''' A string explaining the setting being toggled
+    '''
+    ''' <param name="settingsChangedSetting">
+    ''' A pointer to the boolean indicating that a module's settings have been modified from their default state
     ''' </param>
-    ''' 
-    ''' <param name="mSettingsChanged">
-    ''' A pointer to the boolean indicating that a module's settings been modified from their default state
-    ''' </param>
-    ''' 
+    '''
     ''' <param name="callingModule">
-    ''' The name of the module calling this function
+    ''' The name of the module owning <paramref name="chooser"/> as it appears in the settings file
     ''' </param>
-    ''' 
+    '''
     ''' <param name="settingName">
-    ''' The name of the setting being toggled
+    ''' The name of <paramref name="chooser"/> as it appears in the codebase
     ''' </param>
-    ''' 
+    '''
     ''' <param name="settingChangedName">
-    ''' The name of the settings changed flag
-    ''' </param>  
-    ''' 
-    ''' Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
-    Public Sub toggleSettingParam(ByRef setting As Boolean,
-                                        paramText As String,
-                                  ByRef mSettingsChanged As Boolean,
-                                        callingModule As String,
-                                        settingName As String,
-                                        settingChangedName As String)
+    ''' The name of <c> <paramref name="settingsChangedSetting"/> </c> as it appears in the codebase
+    ''' </param>
+    Public Sub saveChooserParams(chooser As iniFileChooser,
+                           ByRef settingsChangedSetting As Boolean,
+                                 callingModule As String,
+                                 settingName As String,
+                                 settingChangedName As String)
 
-        gLog($"Toggling {paramText} from {setting} to {Not setting}", indent:=True)
-        setHeaderText($"{paramText} {enStr(setting)}d", True, True, If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
-        'setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=If(Not setting, ConsoleColor.Green, ConsoleColor.Red))
-        setting = Not setting
-        mSettingsChanged = True
+        settingsChangedSetting = True
 
-        updateSettings(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
-        updateSettings(callingModule, settingChangedName, mSettingsChanged.ToString(CultureInfo.InvariantCulture))
+        SetSetting(callingModule, $"{settingName}_Dir", chooser.Dir)
+        SetSetting(callingModule, $"{settingName}_Name", chooser.Name)
+        SetSetting(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
 
-        Dim isSaveReadSetting = settingName = NameOf(saveSettingsToDisk) OrElse settingName = NameOf(readSettingsFromDisk)
-        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso isSaveReadSetting)
+        FlushIfDirty2()
 
     End Sub
 
@@ -150,17 +133,17 @@ Module SettingsManager
 
         Dim setting = CBool(settingsModule.GetProperty(settingName).GetValue(Nothing, Nothing))
 
-        gLog($"Toggling {paramText} from {setting} to {Not setting}", indent:=True)
+        gLog($"  Toggling {paramText} from {setting} to {Not setting}")
         setNextMenuHeaderText($"{paramText} {enStr(setting)}d", printColor:=GetRedGreen(setting))
 
         setting = Not setting
 
         settingsModule.GetProperty(settingName).SetValue(settingName, setting)
         settingsModule.GetProperty(settingChangedName).SetValue(settingChangedName, True)
-        updateSettings(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
-        updateSettings(callingModule, settingChangedName, True.ToString)
+        SetSetting(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
+        SetSetting(callingModule, settingChangedName, True.ToString)
 
-        settingsFile.overwriteToFile(settingsFile.toString, Not IsCommandLineMode AndAlso saveSettingsToDisk)
+        FlushIfDirty2()
 
     End Sub
 
@@ -176,13 +159,13 @@ Module SettingsManager
     ''' The function that resets the module's settings to their default state
     ''' </param>
     Public Sub resetModuleSettings(name As String,
-                                setDefaultParams As Action)
+                                   setDefaultParams As Action)
 
-        gLog($"Restoring {name}'s module settings to their default states", indent:=True)
+        gLog($"  Restoring {name}'s module settings to their default states")
 
         setDefaultParams()
 
-        setHeaderText($"{name} settings have been reset to their defaults.")
+        setNextMenuHeaderText($"{name} settings have been reset to their defaults.")
 
     End Sub
 
@@ -192,7 +175,7 @@ Module SettingsManager
     Public Function denySettingOffline() As Boolean
 
         gLog("An action was unable to complete because winapp2ool is offline", isOffline)
-        setNextMenuHeaderText("This option is unavailable while in offline mode", printColor:=ConsoleColor.Red)
+        setNextMenuHeaderText("This option is unavailable while in offline mode", cond:=isOffline, printColor:=ConsoleColor.Red)
 
         Return isOffline
 
@@ -250,76 +233,12 @@ Module SettingsManager
         p.SetValue(Nothing, nextValue)
 
         mSettingsChanged = True
-        updateSettings(moduleName, propName, nextValue.ToString())
-        updateSettings(moduleName, settingsChangedName, True.ToString)
+        SetSetting(moduleName, propName, nextValue.ToString())
+        SetSetting(moduleName, settingsChangedName, True.ToString)
 
         gLog()
         setNextMenuHeaderText($"{displayName} set to {nextValue}", printColor:=printColor)
 
     End Sub
-
-    ''' <summary>
-    ''' Gets the set of menu numbers associated with a dictionary of options, starting from a specified base number
-    ''' </summary>
-    ''' 
-    ''' <typeparam name="T">
-    ''' The type of the dictionary's values
-    ''' </typeparam>
-    ''' 
-    ''' <param name="optionsDict">
-    ''' A dictionary of menu options for which to generate menu numbers
-    ''' </param>
-    ''' 
-    ''' <param name="baseNum">
-    ''' The number from which to start numbering the options
-    ''' </param>
-    ''' 
-    ''' <returns>
-    ''' The set of numbers associated with the visible menu options in <c> <paramref name="optionsDict"/> </c>
-    ''' </returns>
-    Public Function getMenuNumbering(Of T)(optionsDict As Dictionary(Of String, T),
-                                           baseNum As Integer) As List(Of String)
-
-        Dim optNums = New List(Of String)
-        For i = 0 To optionsDict.Count - 1
-
-            Dim curNum = baseNum + i
-            optNums.Add(curNum.ToString)
-
-        Next
-
-        Return optNums
-
-    End Function
-
-    ''' <summary>
-    ''' Updates an enum setting in the settings file
-    ''' </summary>
-    Public Sub updateEnumSetting(Of T As Structure)(moduleName As String, settingName As String, enumValue As T)
-        updateSettings(moduleName, settingName, enumValue.ToString())
-    End Sub
-
-    ''' <summary>
-    ''' Gets an enum setting from the settings file
-    ''' </summary>
-    Public Function getEnumSetting(Of T As Structure)(moduleName As String, settingName As String, defaultValue As T) As T
-
-        Dim settingValue As String = ""
-
-        ' Try to get the value from settingsDict
-        If settingsDict.ContainsKey(moduleName) AndAlso
-       settingsDict(moduleName).ContainsKey(settingName) Then
-            settingValue = settingsDict(moduleName)(settingName)
-        Else
-            Return defaultValue
-        End If
-
-        Dim result As T
-        If [Enum].TryParse(settingValue, result) AndAlso [Enum].IsDefined(GetType(T), result) Then
-            Return result
-        End If
-
-        Return defaultValue
-    End Function
 
 End Module

@@ -32,10 +32,17 @@ Public Class MenuSection
     Private _title As String
 
     ''' <summary>
-    ''' The set of menu items in this section. Each item is an Action delegate that 
-    ''' represents a menu option, toggle, or line of text to be printed to the user 
+    ''' The set of menu items in this section. Each item is an Action delegate that
+    ''' represents a menu option, toggle, or line of text to be printed to the user
     ''' </summary>
     Private _items As New List(Of Action)
+
+    ''' <summary>
+    ''' Registered handlers for dispatching user input. Each entry corresponds to one
+    ''' numbered option in the order it was added (index 0 = option 1, the first selectable
+    ''' item after Exit). Non-numbered items (blanks, lines, file info) are not registered here.
+    ''' </summary>
+    Private _actions As New List(Of Action)
 
     ''' <summary>
     ''' The color of the title when printed. If set, the title will be printed in this color. 
@@ -381,7 +388,7 @@ Public Class MenuSection
 
         If Not condition Then Return Me
 
-        _items.Add(Sub() MenuItem(name, description, condition).WithColor(color).Print())
+        _items.Add(Sub() MenuMaker.PrintColoredOption(name, description, color))
 
         Return Me
 
@@ -464,15 +471,26 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Adds a T-frame conjoiner divider to the menu section. <br />
+    ''' A conjoiner uses frame type 3 (<c> ╠ ╣ </c>), by default filled with <c> ═ </c>. <br />
     ''' </summary>
-    ''' <param name="condition"></param>
+    ''' 
+    ''' <param name="condition">
+    ''' Indicates whether the divider should be printed <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    ''' 
+    ''' <param name="solid">
+    ''' Indicates whether the divider should be filled with <c> = </c> or left empty <br />
+    ''' Optional, Default: <c> True </c> (filled) 
+    ''' </param>
     ''' <returns></returns>
-    Public Function AddDivider(Optional condition As Boolean = True) As MenuSection
+    Public Function AddDivider(Optional condition As Boolean = True,
+                               Optional solid As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
 
-        _items.Add(Sub() MenuMaker.PrintDivider())
+        _items.Add(Sub() MenuMaker.PrintDivider(solid))
 
         Return Me
 
@@ -511,8 +529,180 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Hands off printing of the MenuSection to the appropriate function based on whether or not 
-    ''' it is a complete menu 
+    ''' Adds a numbered option, registers a dispatch handler, and returns <c> Me </c> for chaining. <br />
+    ''' When <c> <paramref name="condition"/> </c> is <c> False </c>, neither the option nor the
+    ''' handler is registered, the option number sequence is unaffected.
+    ''' </summary>
+    '''
+    ''' <param name="name">
+    ''' The name of the option as it appears on the menu
+    ''' </param>
+    '''
+    ''' <param name="description">
+    ''' A description of what the option does
+    ''' </param>
+    '''
+    ''' <param name="handler">
+    ''' The action to invoke when the user selects this option
+    ''' </param>
+    '''
+    ''' <param name="condition">
+    ''' Whether the option should be shown and dispatched <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    Public Function AddDispatchedOption(name As String,
+                                        description As String,
+                                        handler As Action,
+                               Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
+
+        AddOption(name, description)
+        _actions.Add(handler)
+
+        Return Me
+
+    End Function
+
+    ''' <summary>
+    ''' Adds a toggle option, registers a dispatch handler, and returns <c> Me </c> for chaining. <br />
+    ''' When <c> <paramref name="condition"/> </c> is <c> False </c>, neither the toggle nor the
+    ''' handler is registered.
+    ''' </summary>
+    '''
+    ''' <param name="name">
+    ''' The name of the toggle as it appears on the menu
+    ''' </param>
+    '''
+    ''' <param name="description">
+    ''' A description of what the toggle controls
+    ''' </param>
+    '''
+    ''' <param name="isEnabled">
+    ''' The current state of the setting this toggle controls
+    ''' </param>
+    '''
+    ''' <param name="handler">
+    ''' The action to invoke when the user selects this toggle
+    ''' </param>
+    '''
+    ''' <param name="condition">
+    ''' Whether the toggle should be shown and dispatched <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    Public Function AddDispatchedToggle(name As String,
+                                        description As String,
+                                        isEnabled As Boolean,
+                                        handler As Action,
+                               Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
+
+        AddToggle(name, description, isEnabled)
+        _actions.Add(handler)
+
+        Return Me
+
+    End Function
+
+    ''' <summary>
+    ''' Adds a colored option, registers a dispatch handler, and returns <c> Me </c> for chaining. <br />
+    ''' When <c> <paramref name="condition"/> </c> is <c> False </c>, neither the option nor the
+    ''' handler is registered.
+    ''' </summary>
+    '''
+    ''' <param name="name">
+    ''' The name of the option as it appears on the menu
+    ''' </param>
+    '''
+    ''' <param name="description">
+    ''' A description of what the option does
+    ''' </param>
+    '''
+    ''' <param name="color">
+    ''' The color to print this option in
+    ''' </param>
+    '''
+    ''' <param name="handler">
+    ''' The action to invoke when the user selects this option
+    ''' </param>
+    '''
+    ''' <param name="condition">
+    ''' Whether the option should be shown and dispatched <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    Public Function AddDispatchedColoredOption(name As String,
+                                               description As String,
+                                               color As ConsoleColor,
+                                               handler As Action,
+                                      Optional condition As Boolean = True) As MenuSection
+
+        If Not condition Then Return Me
+
+        AddColoredOption(name, description, color)
+        _actions.Add(handler)
+
+        Return Me
+
+    End Function
+
+    ''' <summary>
+    ''' Adds a Reset Settings option, registers a dispatch handler, and returns <c> Me </c> for chaining. <br />
+    ''' When <c> <paramref name="condition"/> </c> is <c> False </c>, the option is not shown and
+    ''' no handler is registered.
+    ''' </summary>
+    '''
+    ''' <param name="moduleName">
+    ''' The name of the module whose settings will be reset
+    ''' </param>
+    '''
+    ''' <param name="condition">
+    ''' Whether the option should be shown (i.e. whether settings have been changed)
+    ''' </param>
+    '''
+    ''' <param name="handler">
+    ''' The action to invoke when the user selects this option
+    ''' </param>
+    Public Function AddDispatchedResetOpt(moduleName As String,
+                                          condition As Boolean,
+                                          handler As Action) As MenuSection
+        If Not condition Then Return Me
+
+        AddResetOpt(moduleName, True)
+        _actions.Add(handler)
+
+        Return Me
+
+    End Function
+
+    ''' <summary>
+    ''' Dispatches the user's integer input to the registered handler for the selected option. <br />
+    ''' Option 0 (Exit) is NOT dispatched, the caller handles it. <br />
+    ''' Options 1..N map to handlers registered via <c> AddDispatched* </c> calls in order.
+    ''' </summary>
+    '''
+    ''' <param name="intInput">
+    ''' The integer the user entered at the menu prompt
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> if a handler was found and invoked; <c> False </c> if the input
+    ''' was out of range (caller should show an invalid-input error)
+    ''' </returns>
+    Public Function Dispatch(intInput As Integer) As Boolean
+
+        Dim idx = intInput - 1
+
+        If idx < 0 OrElse idx >= _actions.Count Then Return False
+
+        _actions(idx)()
+        Return True
+
+    End Function
+
+    ''' <summary>
+    ''' Hands off printing of the MenuSection to the appropriate function based on whether or not
+    ''' it is a complete menu
     ''' </summary>
     ''' 
     ''' <param name="withDivider">
@@ -522,9 +712,19 @@ Public Class MenuSection
     ''' </param>
     Public Sub Print(Optional withDivider As Boolean = True)
 
-        If _isCompleteMenu Then PrintCompleteMenu() : Return
+        MenuMaker.BeginBuffered()
 
-        PrintSection(withDivider)
+        Try
+
+            If _isCompleteMenu Then PrintCompleteMenu() : Return
+
+            PrintSection(withDivider)
+
+        Finally
+
+            MenuMaker.FlushBuffered()
+
+        End Try
 
     End Sub
 
@@ -571,8 +771,9 @@ Public Class MenuSection
         If Not String.IsNullOrEmpty(_menuHeader) Then
 
             Dim hasColor = _menuHeaderColor.HasValue
+            Dim headerColor = If(hasColor, CType(_menuHeaderColor.Value, ConsoleColor), ConsoleColor.White)
 
-            MenuMaker.PrintColored(_menuHeader, _menuHeaderColor.Value, centered:=True, hasColor)
+            MenuMaker.PrintColored(_menuHeader, headerColor, centered:=True, hasColor)
 
             MenuMaker.PrintLine(_menuHeader, centered:=True, Not hasColor)
 

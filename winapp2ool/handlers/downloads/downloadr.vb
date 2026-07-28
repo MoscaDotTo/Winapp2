@@ -65,58 +65,59 @@ Module downloadr
 
     End Function
 
-    ''' <summary> 
-    ''' Downloads a file from the internet, optionally prompting the user to rename the download or overwrite existing files using the default name 
+    ''' <summary>
+    ''' Downloads a file from the internet to the path described by an <c>iniFileChooser</c>,
+    ''' optionally prompting the user to rename the download or overwrite existing files
     ''' </summary>
-    ''' 
-    ''' <param name="link"> 
-    ''' A URL pointing to a file to be downloaded 
+    '''
+    ''' <param name="pathHolder">
+    ''' The <c>iniFileChooser</c> describing the save location
     ''' </param>
-    ''' 
-    ''' <param name="prompt"> 
-    ''' Indicates that a "rename file" prompt should be shown if the target path already exists 
-    ''' <br /> Optional, Default: <c> True </c> 
+    '''
+    ''' <param name="link">
+    ''' A URL pointing to a file to be downloaded
     ''' </param>
-    ''' 
-    ''' <param name="quietly"> 
-    ''' Indicates that all downloading output should be suppressed 
-    ''' <br /> Optional, Default: <c> False </c> 
+    '''
+    ''' <param name="prompt">
+    ''' Indicates that a "rename file" prompt should be shown if the target path already exists
+    ''' <br /> Optional, Default: <c> True </c>
     ''' </param>
-    Public Sub download(pathHolder As iniFile,
+    '''
+    ''' <param name="quietly">
+    ''' Indicates that all downloading output should be suppressed
+    ''' <br /> Optional, Default: <c> False </c>
+    ''' </param>
+    Public Sub download(pathHolder As iniFileChooser,
                         link As String,
                Optional prompt As Boolean = True,
                Optional quietly As Boolean = False)
 
-        Dim givenName = pathHolder.Name
-
-        ' Don't try to download to a directory that doesn't exist
         If Not Directory.Exists(pathHolder.Dir) Then Directory.CreateDirectory(pathHolder.Dir)
 
-        ' If the file exists and we're prompting for overwrites, do that.
-        If prompt AndAlso File.Exists(pathHolder.Path) AndAlso Not SuppressOutput AndAlso Not quietly Then
+        If prompt AndAlso File.Exists(pathHolder.Path()) AndAlso Not SuppressOutput AndAlso Not quietly Then
             cwl($"{pathHolder.Name} already exists in the target directory.")
             Console.Write("Enter a new file name, or leave blank to overwrite the existing file: ")
             Dim nfilename = Console.ReadLine()
             If Not nfilename.Trim.Length = 0 Then pathHolder.Name = nfilename
         End If
 
-        If Not prompt Then fDelete(pathHolder.Path)
+        If Not prompt Then fDelete(pathHolder.Path())
 
-        cwl($"Downloading {givenName}...", Not quietly)
+        cwl($"Downloading {pathHolder.Name}...", Not quietly)
 
-        Dim success = dlFile(link, pathHolder.Path)
+        Dim success = dlFile(link, pathHolder.Path())
 
         cwl($"Download {If(success, "Complete.", "Failed.")}", Not quietly)
-        cwl(If(success, "Downloaded ", $"Unable to download {pathHolder.Name} to {pathHolder.Dir}"), Not quietly)
+        cwl($"{If(success, "Downloaded", "Unable to download")} {pathHolder.Name} to {pathHolder.Dir}", Not quietly)
 
-        setHeaderText($"Download {If(success, "", "in")}complete: {pathHolder.Name}", Not success, Not quietly)
+        setNextMenuHeaderText($"Download {If(success, "", "in")}complete: {pathHolder.Name}", Not success AndAlso Not quietly, ConsoleColor.Red)
 
-        If Not success Then Console.ReadLine()
+        If Not success Then crl()
 
     End Sub
 
-    ''' <summary> 
-    ''' Reads a file until a specified line number, returns the contents of that line 
+    ''' <summary>
+    ''' Reads a file until a specified line number, returns the contents of that line
     ''' </summary>
     ''' 
     ''' <param name="lineNum"> 
@@ -230,30 +231,27 @@ Module downloadr
 
     End Function
 
-    ''' <summary> 
-    ''' Attempts to create an <c> iniFile </c> using the data provided by <paramref name="address"/>
+    ''' <summary>
+    ''' Attempts to create an <c>iniFile2</c> using the data provided by <paramref name="address"/>
     ''' </summary>
-    ''' 
-    ''' <param name="address"> 
-    ''' A URL pointing to a .ini file to be downloaded 
+    '''
+    ''' <param name="address">
+    ''' A URL pointing to a .ini file to be downloaded
     ''' </param>
-    ''' 
-    ''' <returns> 
-    ''' An <c> iniFile </c> created using the remote data if that data is properly formatted, <br/>
-    ''' <c> Nothing </c> otherwise 
+    '''
+    ''' <returns>
+    ''' An <c>iniFile2</c> created using the remote data if that data is properly formatted, <br/>
+    ''' <c>Nothing</c> otherwise
     ''' </returns>
-    Public Function getRemoteIniFile(address As String) As iniFile
+    Public Function getRemoteIniFile2(address As String) As iniFile2
 
         Try
 
             Dim path = setDownloadedFileStage(address)
-            Dim out = New iniFile(path)
 
             If Not File.Exists(path) Then Throw New WebException : Return Nothing
 
-            out.init()
-
-            Return out
+            Return iniFile2.FromFile(path)
 
         Catch ex As WebException
 

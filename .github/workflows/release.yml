@@ -1,0 +1,110 @@
+# Release: whenever build-on-merge.yml produces an updated winapp2.ini, cut a
+# GitHub Release tagged with that build's date version and attach the winapp2.ini
+# family plus the current winapp2ool.exe.
+#
+# One release per build. The tag is v<date>. build-on-merge runs at most once a day (a
+# daily schedule, not per-push), so normally each day has exactly one build and the tag
+# is simply v<date>. The only way to get a second build the same day is a manual
+# workflow_dispatch re-run; because that build's changelog covers only the delta since
+# the day's earlier build, its release is tagged v<date>.2 (.3, ...) and kept ALONGSIDE
+# the earlier one, so the sequence of per-release changelogs stays complete and gap-free
+# rather than one release silently overwriting an earlier day-part's diff.
+#
+# It chains off build-on-merge via workflow_run (not a push trigger) because that
+# workflow commits with the GITHUB_TOKEN, and token pushes don't fire push events.
+# The build job hands everything over as the "release-bundle" artifact; if that
+# artifact is absent, the build made no changes and there is nothing to release.
+name: winapp2.ini release
+
+on:
+  workflow_run:
+    workflows: ["winapp2.ini build on merge"]
+    types: [completed]
+
+# Needed to create tags and releases.
+permissions:
+  contents: write
+
+concurrency:
+  group: winapp2-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Only when the build succeeded; a failed build has nothing to publish.
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Download the release bundle from the build run
+        id: download
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: release-bundle
+          path: bundle
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Decide whether there is anything to release
+        id: gate
+        shell: bash
+        run: |
+          if [ ! -f bundle/version.txt ]; then
+            echo "No release bundle -> the build produced no artifact changes. Skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$(cat bundle/version.txt)" >> "$GITHUB_OUTPUT"
+            echo "sha=$(cat bundle/commit.txt)" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Tag is v<date>. Normally free (one build/day). A manual same-day re-run collides,
+      # so suffix .2, .3, ... and keep the earlier release -- each release then carries a
+      # distinct, sequential slice of the changelog (see the header note).
+      - name: Compute a free tag
+        id: tag
+        if: steps.gate.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = require('fs').readFileSync('bundle/version.txt', 'utf8').trim();
+            const base = `v${version}`;
+            let tag = base, n = 1;
+            while (true) {
+              try {
+                await github.rest.git.getRef({
+                  owner: context.repo.owner, repo: context.repo.repo, ref: `tags/${tag}`,
+                });
+                n += 1; tag = `${base}.${n}`;   // taken -> try next suffix
+              } catch (e) {
+                if (e.status === 404) break;     // free
+                throw e;
+              }
+            }
+            core.setOutput('tag', tag);
+
+      - name: Create the GitHub Release
+        if: steps.gate.outputs.skip != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          SHA: ${{ steps.gate.outputs.sha }}
+          VERSION: ${{ steps.gate.outputs.version }}
+        run: |
+          set -euo pipefail
+          # Release notes = the base changelog this build produced.
+          {
+            echo "winapp2.ini \`${VERSION}\` — automated build."
+            echo
+            echo '```'
+            cat bundle/changelog-base.txt 2>/dev/null || echo '(no base changelog produced)'
+            echo '```'
+          } > notes.md
+
+          # Attach every asset except the internal metadata files.
+          mapfile -t assets < <(find bundle -type f ! -name version.txt ! -name commit.txt | sort)
+
+          gh release create "$TAG" "${assets[@]}" \
+            --title "winapp2.ini $TAG" \
+            --notes-file notes.md \
+            --target "$SHA"

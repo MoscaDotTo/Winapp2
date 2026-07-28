@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -21,25 +21,61 @@ Imports System.Text
 ''' Maintains the global log for winapp2ool, which is used to track internal operations and errors.
 ''' Provides methods for adding to the log, saving it to disk, and printing it to the console.
 ''' </summary>
-''' 
-''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
 Public Module logger
 
-    ''' <summary> 
-    ''' The global Winapp2ool log, containing everything logged during the current session 
+    ''' <summary>
+    ''' Synchronizes writes to <c> GlobalLog </c>. Per-thread paths
+    ''' (capture buffers) bypass this lock since they touch only thread-local state.
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
+    Private ReadOnly _logLock As New Object
+
+    ''' <summary>
+    ''' The global Winapp2ool log, containing everything logged during the current session
+    ''' </summary>
     Public Property GlobalLog As New strList
 
+    ''' <summary>
+    ''' When <c> True </c>, the global log is written to disk as the application exits, even
+    ''' on a clean silent-mode run. Set by the global <c> -writelog </c> command line flag.
+    ''' A nonzero process exit code saves the log independently of this flag, so scripted and
+    ''' CI runs always retain the diagnostics from a failed build.
+    ''' </summary>
+    Public Property SaveGlobalLogOnExit As Boolean = False
 
-
-    '''<summary> 
-    '''The current indentation level of the global log.
-    '''</summary>
+    ''' <summary>
+    ''' Per-thread indentation depth. Each thread sees its own counter so that
+    ''' parallel work cannot corrupt the indentation of unrelated threads.
+    ''' </summary>
     '''
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
-    Public Property nestCount As Integer = 0
+    ''' <remarks>
+    ''' <c> ThreadStatic </c> fields default to zero on every thread that has not
+    ''' yet written to them, exactly the desired initial state. Threads spawned
+    ''' inside a parallel section start at depth zero regardless of the calling
+    ''' thread's depth; use <c> gLogCapture </c> to record those threads' output
+    ''' for later flush under the parent's depth.
+    ''' </remarks>
+    <ThreadStatic>
+    Private _nestCount As Integer
+
+    ''' <summary>
+    ''' When non-<c> Nothing </c>, <c> gLog </c> writes go to this thread-local
+    ''' buffer instead of <c> GlobalLog </c>. Set by <c> gLogCapture </c> and
+    ''' restored on dispose.
+    ''' </summary>
+    <ThreadStatic>
+    Private _captureBuffer As List(Of String)
+
+    ''' <summary>
+    ''' The current indentation level of the global log on the calling thread.
+    ''' </summary>
+    Public Property nestCount As Integer
+        Get
+            Return _nestCount
+        End Get
+        Set(value As Integer)
+            _nestCount = value
+        End Set
+    End Property
 
     ''' <summary> 
     ''' Adds an item into the global log 
@@ -55,37 +91,6 @@ Public Module logger
     ''' Optional, Default: <c> True </c> 
     ''' </param>
     ''' 
-    ''' <param name="ascend">
-    ''' Indicates that the line should be indented. (Generally) requires a corresponding <c> <paramref name="descend"/></c> 
-    ''' to "undo." Useful for blocking groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each 
-    ''' <br /> Optional, Default: <c> False </c>
-    ''' </param>
-    ''' 
-    ''' <param name="descend">
-    ''' Indicates that the line should be unindented. (Generally) follows a corresponding <c> <paramref name="ascend"/> </c>. 
-    ''' Useful for blocking groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each 
-    ''' <br /> Optional, Default: <c> False </c> 
-    ''' </param>
-    '''  
-    ''' <param name="indent">
-    ''' Indicates that the line should be indented individually, without affecting the indentation of following lines 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="indAmt">
-    ''' The number of times by which the line should be indented given <c> <paramref name="indent"/> </c> is <c> True </c> 
-    ''' <br /> Optional, Default: <c> 1 </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="descAmt">
-    ''' The number of times *fewer* by which following lines should be indented 
-    ''' <br /> Optional, Default: <c> 1 </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="ascAmt"> The number of times by which this and following lines should be indented 
-    ''' <br /> Optional, Default: <c> 1 </c> 
-    ''' </param>
-    ''' 
     ''' <param name="buffr"> 
     ''' Indicates that an empty line should be added into the log following <c> <paramref name="logstr"/> </c> 
     ''' </param>
@@ -93,214 +98,253 @@ Public Module logger
     ''' <param name="leadr"> 
     ''' Indicates that an empty line should be added into the log before <c> <paramref name="logstr"/> </c> 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-24 | Code last updated: 2025-06-19
     Public Sub gLog(Optional logstr As String = "",
                     Optional cond As Boolean = True,
-                    Optional ascend As Boolean = False,
-                    Optional descend As Boolean = False,
-                    Optional indent As Boolean = False,
-                    Optional indAmt As Integer = 1,
-                    Optional descAmt As Integer = 1,
-                    Optional ascAmt As Integer = 1,
                     Optional buffr As Boolean = False,
                     Optional leadr As Boolean = False)
 
         If Not cond Then Return
 
+        Dim capture = _captureBuffer
 
-        If leadr Then GlobalLog.add("")
-        If indent Then nestCount += indAmt
-        If ascend Then nestCount += ascAmt
+        If capture IsNot Nothing Then
 
-        Dim buffer = New String(" "c, nestCount * 2)
+            If leadr Then capture.Add("")
 
-        logstr = buffer + logstr
-        GlobalLog.add(logstr)
+            If logstr IsNot Nothing Then
 
-        If indent Then nestCount -= indAmt
-        If descend Then nestCount -= descAmt
-        If buffr Then GlobalLog.add("")
+                Dim pad = New String(" "c, Math.Max(_nestCount * 2, 0))
+                capture.Add(pad & logstr)
+
+            End If
+
+            If buffr Then capture.Add("")
+
+            Return
+
+        End If
+
+        SyncLock _logLock
+
+            If leadr Then GlobalLog.add("")
+
+            If logstr IsNot Nothing Then
+
+                Dim pad = New String(" "c, Math.Max(_nestCount * 2, 0))
+                GlobalLog.add(pad & logstr)
+
+            End If
+
+            If buffr Then GlobalLog.add("")
+
+        End SyncLock
 
     End Sub
 
     ''' <summary>
-    ''' Adds a given message to the global log and also prints it to the console, this is just a wrapper function to avoid having to call both 
-    ''' glog and print for the same message sometimes 
+    ''' Lazy overload of <c> gLog </c>. The <paramref name="messageFactory"/> lambda is invoked
+    ''' only when <paramref name="cond"/> is <c> True </c>, avoiding allocations from
+    ''' string interpolation when the log call would have been suppressed.
     ''' </summary>
-    ''' 
-    ''' <param name="menuText"> 
-    ''' The <c> String </c> to be added into the log and also printed to the user <br /> 
-    ''' Optional, Default: <c> ""</c> 
-    ''' </param>
-    ''' 
-    ''' <param name="cond"> 
-    ''' Indicates that the <c> <paramref name="menuText"/> </c> should be printed to the user <br /> 
-    ''' Optional, Default: <c> True </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="ascend">
-    ''' Indicates that the line should be indented. (Generally) requires a corresponding <c> <paramref name="descend"/></c> 
-    ''' to "undo." Useful for blocking groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each 
-    ''' <br /> Optional, Default: <c> False </c>
-    ''' </param>
-    ''' 
-    ''' <param name="descend">
-    ''' Indicates that the line should be unindented. (Generally) follows a corresponding <c> <paramref name="ascend"/> </c>. 
-    ''' Useful for blocking groups of related log items without needing to call <c> <paramref name="indent"/> </c> on each 
-    ''' <br /> Optional, Default: <c> False </c> 
-    ''' </param>
-    '''  
-    ''' <param name="indent">
-    ''' Indicates that the line should be indented individually, without affecting the indentation of following lines 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="indAmt">
-    ''' The number of times by which the line should be indented given <c> <paramref name="indent"/> </c> is <c> True </c> 
-    ''' <br /> Optional, Default: <c> 1 </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="descAmt">
-    ''' The number of times *fewer* by which following lines should be indented 
-    ''' <br /> Optional, Default: <c> 1 </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="ascAmt"> The number of times by which this and following lines should be indented 
-    ''' <br /> Optional, Default: <c> 1 </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="buffr"> 
-    ''' Indicates that an empty line should be added into the log following <c> <paramref name="menuText"/> </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="leadr"> 
-    ''' Indicates that an empty line should be added into the log before <c> <paramref name="menuText"/> </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="printType"> 
-    ''' The type of menu information to print <br/> 
-    ''' <list type="bullet">
-    ''' <item> <description> <c> 0 </c>: Line </description> </item>
-    ''' <item> <description> <c> 1 </c>: Option </description> </item>
-    ''' <item> <description> <c> 2 </c>: Option with a "Reset Settings" prompt </description> </item>
-    ''' <item> <description> <c> 3 </c>: Box with centered text </description> </item>
-    ''' <item> <description> <c> 4 </c>: Menu top </description> </item>
-    ''' <item> <description> <c> 5 </c>: Option with an Enable/Disable prompt </description> </item>
-    ''' </list>
-    ''' </param>
-    ''' 
-    ''' <param name="optString"> 
-    ''' The description of the menu option
-    ''' <br/> Optional, Default: <c> "" </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="leadingBlank"> 
-    ''' Indicates that a blank menu line should be printed immediately before the printed line
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="trailingBlank"> 
-    ''' Indicates that a blank menu line should be printed immediately after the printed line
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="isCentered"> 
-    ''' Indicates that the printed text should be centered
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="closeMenu"> 
-    ''' Indicates that the bottom menu frame should be printed 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="openMenu"> 
-    ''' Indicates that the top menu frame should be printed 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="enStrCond"> 
-    ''' A module setting whose menu text will include an Enable/Disable toggle <br/> <br/>
-    ''' If lines are being colored without an <c> <paramref name="arbitraryColor"/> </c>, 
-    ''' they will be printed <c> Green </c> if <c> <paramref name="enStrCond"/> </c> is <c> True </c>,
-    ''' otherwise they will be printed <c> Red </c>
-    ''' <br/> Optional, Default: <c> False (Red) </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="colorLine">
-    ''' Indicates that lines should be printed using color 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="useArbitraryColor"> 
-    ''' Indicates that the line should be colored using the value provided by <c> <paramref name="arbitraryColor"/> </c> 
-    ''' <br/> Optional, Default: <c> False </c> 
-    ''' </param>
-    ''' 
-    ''' <param name="arbitraryColor"> 
-    ''' Foreground <c> ConsoleColor </c> to be used when printing with when <c> <paramref name="colorLine"/> </c> is <c> True </c>, 
-    ''' but wanting to use a color other than <c> Red </c> or <c> Green </c> 
-    ''' <br/> Optional, Default: <c> Nothing </c>
+    '''
+    ''' <param name="messageFactory">
+    ''' Factory invoked to produce the log line. Not called when <paramref name="cond"/> is
+    ''' <c> False </c>
     ''' </param>
     '''
-    ''' <param name="trailr"> 
-    ''' Indicates that a trailing newline should be printed after the menu lines 
-    ''' <br/> Optional, Default: <c> False </c> 
+    ''' <param name="cond">
+    ''' Indicates that the message should be added into the log
     ''' </param>
-    ''' 
-    ''' <param name="conjoin"> 
-    ''' Indicates that a conjoining menu frame should be printed after the printed lines 
-    ''' <br/> Optional, Default: <c> False </c>
+    '''
+    ''' <param name="buffr">
+    ''' Indicates that an empty line should be added into the log following the message
     ''' </param>
-    ''' 
-    ''' <param name="fillBorder"> 
-    ''' Indicates whether or not any menu frames should be filled or be empty 
-    ''' <br /> Optional, Default: <c> True (filled) </c>
+    '''
+    ''' <param name="leadr">
+    ''' Indicates that an empty line should be added into the log before the message
     ''' </param>
-    ''' 
-    ''' <param name="logBuffr"> 
-    ''' Indicates whether to log buffered messages
-    ''' <br/> Optional, Default: <c> False </c>
-    ''' </param>
-    ''' 
-    ''' <param name="logCond">
-    ''' Indicates that the <c> <paramref name="menuText"/> </c> should be added into the global log 
-    ''' <br /> Optional, Default: <c> True </c>
-    ''' </param>
-    ''' 
-    ''' Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
-    Public Sub LogAndPrint(printType As Integer,
-                           menuText As String,
-                           Optional logCond As Boolean = True,
-                           Optional ascend As Boolean = False,
-                           Optional descend As Boolean = False,
-                           Optional indent As Boolean = False,
-                           Optional indAmt As Integer = 1,
-                           Optional descAmt As Integer = 1,
-                           Optional ascAmt As Integer = 1,
-                           Optional logBuffr As Boolean = False,
-                           Optional leadr As Boolean = False,
-                           Optional optString As String = "",
-                           Optional cond As Boolean = True,
-                           Optional leadingBlank As Boolean = False,
-                           Optional trailingBlank As Boolean = False,
-                           Optional isCentered As Boolean = False,
-                           Optional closeMenu As Boolean = False,
-                           Optional openMenu As Boolean = False,
-                           Optional enStrCond As Boolean = False,
-                           Optional colorLine As Boolean = False,
-                           Optional useArbitraryColor As Boolean = False,
-                           Optional arbitraryColor As ConsoleColor = Nothing,
-                           Optional buffr As Boolean = False,
-                           Optional trailr As Boolean = False,
-                           Optional conjoin As Boolean = False,
-                           Optional fillBorder As Boolean = True)
+    Public Sub gLog(messageFactory As Func(Of String),
+                    cond As Boolean,
+                    Optional buffr As Boolean = False,
+                    Optional leadr As Boolean = False)
 
-        gLog(menuText, logCond, ascend, descend, indent, indAmt, descAmt, ascAmt, logBuffr, leadr)
-        print(printType, menuText, optString, cond, leadingBlank, trailingBlank, isCentered, closeMenu, openMenu, enStrCond, colorLine, useArbitraryColor, arbitraryColor, buffr, trailr, conjoin, fillBorder)
+        If Not cond Then Return
+        If messageFactory Is Nothing Then Return
+
+        gLog(messageFactory(), True, buffr, leadr)
 
     End Sub
+
+    ''' <summary>
+    ''' Opens a nested logging scope. The optional <paramref name="message"/> is logged at the
+    ''' current depth, then the depth is increased by <paramref name="amount"/> until the
+    ''' returned <c> IDisposable </c> is disposed. Use with <c> Using </c> to make
+    ''' ascend/descend imbalance impossible by construction.
+    ''' </summary>
+    '''
+    ''' <param name="message">
+    ''' Optional header line written before ascending. Pass <c> "" </c> for an anonymous scope
+    ''' </param>
+    '''
+    ''' <param name="amount">
+    ''' Number of indentation levels to ascend. Optional, default: <c> 1 </c>
+    ''' </param>
+    '''
+    ''' <example>
+    ''' <code>
+    ''' Using gLogScope("Beginning lint")
+    '''     ' nested gLog calls are indented one level deeper here
+    ''' End Using
+    ''' </code>
+    ''' </example>
+    Public Function gLogScope(Optional message As String = "",
+                              Optional amount As Integer = 1) As IDisposable
+
+        If message IsNot Nothing AndAlso message.Length > 0 Then gLog(message)
+
+        Return New LogScope(amount)
+
+    End Function
+
+    ''' <summary>
+    ''' Redirects the calling thread's <c> gLog </c> writes into a thread-local buffer
+    ''' until the returned object is disposed. Captured lines preserve their relative
+    ''' indentation (depth resets to zero on entry and restores on exit), so they can
+    ''' be replayed later under any parent depth via <c> EmitCaptured </c>.
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' A <c> LogCapture </c> whose <c> Lines </c> contains the buffered output. The capture
+    ''' is active until <c> Dispose </c> is called (typically via <c> Using </c>)
+    ''' </returns>
+    '''
+    ''' <remarks>
+    ''' Designed for parallel sections: each parallel task captures its own log slice,
+    ''' and the orchestrating thread emits the slices in deterministic order after the
+    ''' parallel work finishes. This eliminates the need for per-module deferred-log
+    ''' workarounds (see <c> EntryLintResult.DiagLines </c>).
+    ''' </remarks>
+    Public Function gLogCapture() As LogCapture
+
+        Return New LogCapture()
+
+    End Function
+
+    ''' <summary>
+    ''' Appends previously-captured lines to <c> GlobalLog </c>, indented at the calling
+    ''' thread's current depth. Acquires the log lock once for the whole batch.
+    ''' </summary>
+    '''
+    ''' <param name="lines">
+    ''' The captured lines, as returned by <c> LogCapture.Lines </c>. <c> Nothing </c> is a no-op
+    ''' </param>
+    Public Sub EmitCaptured(lines As IEnumerable(Of String))
+
+        If lines Is Nothing Then Return
+
+        Dim pad = New String(" "c, Math.Max(_nestCount * 2, 0))
+        Dim target = _captureBuffer
+
+        If target IsNot Nothing Then
+
+            For Each line In lines
+                target.Add(pad & line)
+            Next
+
+            Return
+
+        End If
+
+        SyncLock _logLock
+
+            For Each line In lines
+                GlobalLog.add(pad & line)
+            Next
+
+        End SyncLock
+
+    End Sub
+
+    ''' <summary>
+    ''' Disposable handle returned by <c> gLogScope </c>. On dispose, restores the
+    ''' nesting depth that was in effect at construction.
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' Created and disposed on the same thread. Passing the handle to another thread
+    ''' for disposal would corrupt that thread's depth — don't do it.
+    ''' </remarks>
+    Public NotInheritable Class LogScope
+
+        Implements IDisposable
+
+        Private ReadOnly _amount As Integer
+        Private _disposed As Boolean
+
+        Friend Sub New(amount As Integer)
+
+            _amount = amount
+            _nestCount += amount
+
+        End Sub
+
+        Public Sub Dispose() Implements IDisposable.Dispose
+
+            If _disposed Then Return
+            _disposed = True
+            _nestCount -= _amount
+
+        End Sub
+
+    End Class
+
+    ''' <summary>
+    ''' Disposable handle returned by <c> gLogCapture </c>. While alive, redirects the
+    ''' calling thread's <c> gLog </c> writes into <c> Lines </c>. Restores the previous
+    ''' capture buffer and nesting depth on dispose.
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' Captures nest correctly: an inner capture saves and restores the outer capture's
+    ''' buffer, so its lines flow back to the outer buffer rather than to <c> GlobalLog </c>.
+    ''' </remarks>
+    Public NotInheritable Class LogCapture
+
+        Implements IDisposable
+
+        Private ReadOnly _previousBuffer As List(Of String)
+        Private ReadOnly _previousNest As Integer
+        Private ReadOnly _buffer As New List(Of String)
+        Private _disposed As Boolean
+
+        Friend Sub New()
+
+            _previousBuffer = _captureBuffer
+            _previousNest = _nestCount
+            _captureBuffer = _buffer
+            _nestCount = 0
+
+        End Sub
+
+        ''' <summary>
+        ''' The captured lines, with relative indentation preserved.
+        ''' </summary>
+        Public ReadOnly Property Lines As IReadOnlyList(Of String)
+            Get
+                Return _buffer
+            End Get
+        End Property
+
+        Public Sub Dispose() Implements IDisposable.Dispose
+
+            If _disposed Then Return
+            _disposed = True
+            _captureBuffer = _previousBuffer
+            _nestCount = _previousNest
+
+        End Sub
+
+    End Class
 
     ''' <summary> 
     ''' Saves the global log to disk if the given <c> <paramref name="cond"/> </c> is met 
@@ -310,19 +354,15 @@ Public Module logger
     ''' Indicates that the global log should be saved to disk 
     ''' <br /> Optional, Default: <c> False </c>
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2024-05-18
     Public Sub saveGlobalLog(Optional cond As Boolean = True)
 
-        GlobalLogFile.overwriteToFile(logger.toString, cond)
+        If cond Then IO.File.WriteAllText(GlobalLogFile.Path(), logger.toString)
 
     End Sub
 
     ''' <summary>
     ''' Returns the log as a single <c> String </c>
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-19  | Code last updated: 2024-05-18
     Public Function toString() As String
 
         Dim sb As New StringBuilder()
@@ -336,8 +376,6 @@ Public Module logger
     ''' <summary> 
     ''' Prints the winapp2ool log to the user and waits for the 'enter' key to be pressed before returning to the calling menu 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2024-05-18
     Public Sub printLog()
 
         cwl("Printing the winapp2ool log, this may take a moment")
@@ -350,7 +388,7 @@ Public Module logger
         cwl()
         cwl($"End of log. {pressEnterStr}")
 
-        Console.ReadLine()
+        crl()
 
     End Sub
 
@@ -371,8 +409,6 @@ Public Module logger
     ''' <returns> 
     ''' The set of log lines between the most recent incidences of the provided phrases from the log 
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2025-06-19 | Code last updated: 2025-06-19
     Public Function getLogSliceFromGlobal(startingPhrase As String, endingPhrase As String) As String
 
         Dim startInd = -1
@@ -380,7 +416,8 @@ Public Module logger
 
         For i = GlobalLog.Items.Count - 1 To 0 Step -1
 
-            If Not GlobalLog.Items(i).Contains(startingPhrase) Then Continue For
+
+            If GlobalLog.Items(i) Is Nothing OrElse Not GlobalLog.Items(i).Contains(startingPhrase) Then Continue For
 
             startInd = i
             Exit For
@@ -400,8 +437,6 @@ Public Module logger
 
         If endInd = -1 OrElse endInd < startInd Then Return ""
 
-        ' The global log has nesting based on the depth of the winapp2ool fsm, we trim this to make the requested slice depth=0 
-
         Dim toTrim = 0
 
         For Each c In GlobalLog.Items(startInd)
@@ -414,14 +449,19 @@ Public Module logger
         Dim sb As New StringBuilder()
         For i = startInd To endInd
 
-            If GlobalLog.Items(i).Length <= toTrim Then
+            Dim line = GlobalLog.Items(i)
 
-                sb.AppendLine("")
-                Continue For
 
-            End If
+            Dim leadingSpaces = 0
+            For Each ch In line
 
-            sb.AppendLine(GlobalLog.Items(i).Substring(toTrim))
+                If ch <> " "c Then Exit For
+                leadingSpaces += 1
+                If leadingSpaces >= toTrim Then Exit For
+
+            Next
+
+            sb.AppendLine(line.Substring(leadingSpaces))
 
         Next
 
@@ -436,13 +476,11 @@ Public Module logger
     ''' <param name="slice">
     ''' A portion of the global log to be printed to the user 
     ''' </param>
-    '''
-    ''' Docs last updated: 2024-05-18 | Code last updated: 2024-05-18
     Public Sub printSlice(slice As String)
 
         clrConsole()
         cwl(slice)
-        Console.ReadLine()
+        crl()
 
     End Sub
 

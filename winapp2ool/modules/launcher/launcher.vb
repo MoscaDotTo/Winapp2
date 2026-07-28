@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -31,33 +31,128 @@ Public Module launcher
     ''' .NET 4.6 or higher is required to update the executable 
     ''' When run from the temporary folder, winapp2ool.exe update functionality is disabled
     ''' </remarks>
-    ''' 
-    ''' Docs last updated: 2020-07-14 | Code last updated: 2025-08-06
     Public Sub main()
 
-        Console.WindowWidth = 130
-        Console.WindowHeight = 35
+        AddHandler AppDomain.CurrentDomain.UnhandledException,
+            Sub(sender As Object, e As UnhandledExceptionEventArgs)
+                Dim ex = TryCast(e.ExceptionObject, Exception)
+                If ex IsNot Nothing Then exc(ex)
+                saveGlobalLog()
+            End Sub
 
         gLog($"Starting application")
 
-        chkOfflineMode()
+        Try
 
-        If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
-        gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
+            tryResizeWindow()
 
-        Dim curDirIsTemp As Boolean = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
-        cantDownloadExecutable = curDirIsTemp OrElse DotNetFrameworkOutOfDate
+            ' don't bother checking checking the connection if we know we want to be offline
+            If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase)) Then
+                isOffline = True
+                gLog("Found argument: -offline (skipping connection check)")
+            Else
+                chkOfflineMode()
+            End If
 
-        loadSettings()
+            If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
+            gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
 
-        processCommandLineArgs()
+            Dim curDirIsTemp As Boolean = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
+            cantDownloadExecutable = curDirIsTemp OrElse DotNetFrameworkOutOfDate
 
-        If SuppressOutput Then Environment.Exit(1)
+            LoadWinapp2oolsettings()
 
-        currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
-        Console.Title = $"Winapp2ool v{currentVersion}"
+            processCommandLineArgs()
 
-        initModule($"Winapp2ool v{currentVersion} - A multitool for winapp2.ini", AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
+            If SuppressOutput Then
+
+                ' A nonzero exit code (e.g. a generator's lint-reconciliation gate trip) or an
+                ' explicit -writelog persists the global log to disk before exiting, so headless
+                ' and CI runs retain diagnostics that otherwise live only in memory
+                saveGlobalLog(Environment.ExitCode <> 0 OrElse SaveGlobalLogOnExit)
+                Environment.Exit(Environment.ExitCode)
+
+            End If
+
+            currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
+            Console.Title = $"Winapp2ool v{currentVersion}"
+            Dim launchHeader = $"Winapp2ool v{currentVersion} - A multitool for winapp2.ini"
+            setNextMenuHeaderText(launchHeader, printColor:=ConsoleColor.Cyan)
+            initModule(launchHeader, AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
+
+            FlushIfDirty2()
+
+            ' Honor -writelog for interactive runs too; silent mode has already exited above
+            saveGlobalLog(SaveGlobalLogOnExit)
+
+        Catch ex As Exception
+
+            exc(ex)
+
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Sizes the console window for interactive use, then enlarges its scrollback buffer
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' When stdout is redirected (piped output, the build pipeline's silent mode, etc.) there is
+    ''' no resizable console window, so <c> Console.WindowWidth </c> would throw <c> IOException </c>.
+    ''' We detect that case via <c> Console.IsOutputRedirected </c> and skip resizing entirely.
+    ''' This runs before the command line (and therefore <c> SuppressOutput </c>) is parsed, so we
+    ''' also pre-scan the raw args for <c> -s </c> mirroring the <c> -offline </c> pre-scan in
+    ''' <see cref="main"/> to avoid briefly resizing a window that silent mode is about to abandon.
+    ''' The target width/height are clamped to the host's largest permitted window so a small terminal
+    ''' can't trip <c> ArgumentOutOfRangeException </c>, and the assignment is wrapped defensively for
+    ''' hosts that report a window but still reject sizing
+    ''' </remarks>
+    Private Sub tryResizeWindow()
+
+        If Console.IsOutputRedirected Then Return
+        If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-s", StringComparison.OrdinalIgnoreCase)) Then Return
+
+        Try
+
+            Console.WindowWidth = Math.Min(130, Console.LargestWindowWidth)
+            Console.WindowHeight = Math.Min(35, Console.LargestWindowHeight)
+            tryExpandScrollback()
+
+        Catch ex As IO.IOException
+            ' Host reports a window but won't accept sizing; nothing to do
+        Catch ex As PlatformNotSupportedException
+            ' Non-Windows or hosted environment without a conhost window
+        Catch ex As ArgumentOutOfRangeException
+            ' Requested size is out of the host's allowed range; not fatal
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Attempts to enlarge the console scrollback buffer so long output isn't truncated
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' Only effective on classic conhost. Windows Terminal, VS Code's integrated terminal,
+    ''' and other modern hosts control their own scrollback and will throw <c> IOException </c>
+    ''' or <c> PlatformNotSupportedException </c>; in those cases we silently fall through
+    ''' since the host's own scrollback is already in effect
+    ''' </remarks>
+    Private Sub tryExpandScrollback()
+
+        Try
+
+            Dim targetHeight = Math.Max(Console.WindowHeight, 32000)
+            Console.SetBufferSize(Console.BufferWidth, targetHeight)
+
+        Catch ex As IO.IOException
+            ' Modern terminal host buffer is host-controlled, nothing to do
+        Catch ex As PlatformNotSupportedException
+            ' Non-Windows or hosted environment without a conhost buffer
+        Catch ex As ArgumentOutOfRangeException
+            ' Window is already larger than the requested buffer; not fatal
+        End Try
 
     End Sub
 

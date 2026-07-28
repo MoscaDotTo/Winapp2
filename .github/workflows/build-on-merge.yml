@@ -1,0 +1,165 @@
+# Daily build: once a day, regenerate winapp2.ini + all flavors + their changelogs
+# from the current master sources and commit them back to master, so the published
+# files never drift from their sources. This automates the build-and-commit step.
+# The companion release.yml then cuts a GitHub Release from what this produced.
+#
+# Why a daily schedule and NOT a per-push trigger: the changelog (diff.txt) is
+# computed by the build against the currently committed winapp2.ini, so each release's
+# changelog describes only the delta since the previous commit. If we rebuilt on every
+# source push, several same-day builds would each commit and advance that baseline, and
+# the day's single release would show only the last hop's diff, losing the earlier
+# changes. Building at most once a day keeps commit and release 1:1 over a full day's
+# worth of source changes, so every release's changelog is the complete, sequential
+# diff from the previous release. (winapp2.ini rarely changes more than once a day; the
+# workflow_dispatch button is there when an out-of-cycle build is genuinely wanted.)
+#
+# Loop safety: there is no push trigger, so this workflow's own commit back to master
+# cannot retrigger it -- nothing watches those pushes. The commit likewise does not
+# fire release.yml via a push event; release.yml chains off this workflow's completion
+# (workflow_run) instead.
+#
+# Like artifact-drift.yml, it runs the committed Assembler\winapp2ool.exe (hosted runners
+# lack the .NET 4.6 targeting packs, so the tool is never compiled) under an
+# unelevated token.
+name: winapp2.ini build on merge
+
+on:
+  # At most one build per day (see the changelog rationale above). If master's sources
+  # did not change since the last build, the rebuild is byte-identical, nothing is
+  # staged, and the run is a cheap no-op that neither commits nor releases.
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC daily (11PM MST)
+  # Out-of-cycle build button. A manual re-run on a day that already released produces
+  # a v<date>.2 release carrying just the delta since that day's earlier build, kept
+  # alongside it so the changelog sequence stays complete (see release.yml).
+  workflow_dispatch:
+
+# Write access is safe here (unlike PR-verify): this runs only on already-merged,
+# trusted master content, never on untrusted PR code.
+permissions:
+  contents: write
+
+# Serialize builds so two never race to commit master; don't cancel a build that
+# may be mid-commit.
+concurrency:
+  group: winapp2-build-on-merge
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      __COMPAT_LAYER: RunAsInvoker
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        # persist-credentials (default true) leaves the GITHUB_TOKEN wired up so the
+        # commit step can push back to master.
+
+      - name: Build winapp2.ini (full, all flavors)
+        shell: pwsh
+        working-directory: Assembler
+        run: |
+          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler -- the committed Release build should stage it there' }
+          pwsh -File './build winapp2.ps1'
+          exit $LASTEXITCODE
+
+      # A broken build on master is a real problem -- fail loudly and keep the log.
+      - name: Upload winapp2ool log on build failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-on-merge-log
+          path: Assembler/winapp2ool.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Commit regenerated artifacts and stage the release bundle
+        id: commit
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # git diff --cached --quiet returns exit 1 when there ARE staged changes --
+          # that's expected control flow, so keep PS 7.3+ from throwing on it.
+          $PSNativeCommandUseErrorActionPreference = $false
+
+          # Exactly the tracked build outputs (never the log or scratch). Order is
+          # irrelevant; missing paths are harmless to `git add`.
+          $outputs = @(
+            'Assembler/Entries'
+            'Winapp2.ini'; 'diff.txt'
+            'Non-CCleaner/Winapp2.ini'; 'Non-CCleaner/diff.txt'
+            'Non-CCleaner/BleachBit/Winapp2.ini'; 'Non-CCleaner/BleachBit/diff.txt'
+            'Non-CCleaner/CCleaner7/Winapp2.ini'; 'Non-CCleaner/CCleaner7/diff.txt'
+            'Non-CCleaner/FluentCleaner/Winapp2.ini'; 'Non-CCleaner/FluentCleaner/diff.txt'
+            'Non-CCleaner/Tron/Winapp2.ini'; 'Non-CCleaner/Tron/diff.txt'
+            'Non-CCleaner/SystemNinja/Winapp2.rules'; 'Non-CCleaner/SystemNinja/diff.txt'
+          )
+          git add -- @outputs
+
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host 'No artifact changes; nothing to commit or release.'
+            "released=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            exit 0
+          }
+
+          # Version is the date stamp in the built winapp2.ini header: "; Version: 260723".
+          $verMatch = Select-String -Path 'Non-CCleaner/Winapp2.ini' -Pattern '^;\s*Version:\s*(\d+)' | Select-Object -First 1
+          $version = if ($verMatch) { $verMatch.Matches.Groups[1].Value } else { $null }
+          if (-not $version) { throw 'could not parse the winapp2.ini version line' }
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "ci: rebuild winapp2.ini artifacts (v$version)"
+          if ($LASTEXITCODE -ne 0) { throw 'commit failed' }
+          git push origin HEAD:refs/heads/master
+          if ($LASTEXITCODE -ne 0) { throw 'push to master failed -- is the branch protected against the Actions token?' }
+          $sha = (git rev-parse HEAD).Trim()
+
+          # Stage the release assets under distinct names (release asset names must be
+          # unique -- there are seven "Winapp2.ini"/"diff.txt" files across the tree).
+          # Mapping (edit here to rename assets): the base (Non-CCleaner) build is the
+          # single source of truth and ships as the primary winapp2.ini; the root
+          # Winapp2.ini is the CCleaner flavor.
+          $assets = @(
+            @{ Src = 'Non-CCleaner/Winapp2.ini';               Name = 'winapp2.ini' }
+            @{ Src = 'Winapp2.ini';                            Name = 'winapp2-ccleaner.ini' }
+            @{ Src = 'Non-CCleaner/BleachBit/Winapp2.ini';     Name = 'winapp2-bleachbit.ini' }
+            @{ Src = 'Non-CCleaner/CCleaner7/Winapp2.ini';     Name = 'winapp2-ccleaner7.ini' }
+            @{ Src = 'Non-CCleaner/FluentCleaner/Winapp2.ini'; Name = 'winapp2-fluentcleaner.ini' }
+            @{ Src = 'Non-CCleaner/Tron/Winapp2.ini';          Name = 'winapp2-tron.ini' }
+            @{ Src = 'Non-CCleaner/SystemNinja/Winapp2.rules'; Name = 'winapp2-systemninja.rules' }
+            @{ Src = 'diff.txt';                               Name = 'changelog-ccleaner.txt' }
+            @{ Src = 'Non-CCleaner/diff.txt';                  Name = 'changelog-base.txt' }
+            @{ Src = 'Non-CCleaner/BleachBit/diff.txt';        Name = 'changelog-bleachbit.txt' }
+            @{ Src = 'Non-CCleaner/CCleaner7/diff.txt';        Name = 'changelog-ccleaner7.txt' }
+            @{ Src = 'Non-CCleaner/FluentCleaner/diff.txt';    Name = 'changelog-fluentcleaner.txt' }
+            @{ Src = 'Non-CCleaner/Tron/diff.txt';             Name = 'changelog-tron.txt' }
+            @{ Src = 'Non-CCleaner/SystemNinja/diff.txt';      Name = 'changelog-systemninja.txt' }
+            @{ Src = 'Assembler/winapp2ool.exe';               Name = 'winapp2ool.exe' }
+          )
+          $bundle = Join-Path $env:RUNNER_TEMP 'release-bundle'
+          New-Item -ItemType Directory -Force -Path $bundle | Out-Null
+          foreach ($a in $assets) {
+            if (Test-Path $a.Src) { Copy-Item $a.Src (Join-Path $bundle $a.Name) -Force }
+          }
+          Set-Content -Path (Join-Path $bundle 'version.txt') -Value $version -NoNewline
+          Set-Content -Path (Join-Path $bundle 'commit.txt') -Value $sha -NoNewline
+
+          "released=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Committed rebuild v$version ($sha); staged release bundle."
+
+      # Only present when a commit happened. release.yml consumes this; its absence
+      # means "no change, no release."
+      - name: Upload release bundle
+        if: steps.commit.outputs.released == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle
+          path: ${{ runner.temp }}/release-bundle/**
+          if-no-files-found: error
+          retention-days: 7

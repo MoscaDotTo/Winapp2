@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -21,30 +21,51 @@ Imports System.Text.RegularExpressions
 ''' Provides an object model and some helpful functions for working with winapp2.ini format .ini files
 ''' </summary>
 Public Module winapp2handler
-    ''' <summary> Sorts a list of <c> Strings </c> after performing some mutations on the data (if necessary). Returns the sorted list of strings. </summary>
-    ''' <param name="ListToBeSorted"> A <c> list (of String)s </c> to be sorted </param>
-    ''' <param name="textToBeReplaced"> The <c> String </c> data that will be replaced during mutations </param>
+
+    ''' <summary>
+    ''' Matches a run of digits, optionally followed by ".digits" segments
+    ''' (e.g. "12", "1.2.3"). Compiled once and shared across all callers.
+    ''' </summary>
+    Private ReadOnly numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*",
+                                                    RegexOptions.Compiled Or RegexOptions.CultureInvariant)
+
+    ''' <summary>
+    ''' Matches a run of digits. Used by <c> findLongestNumLength </c>.
+    ''' </summary>
+    Private ReadOnly digitRun As New Regex("[\d]+",
+                                           RegexOptions.Compiled Or RegexOptions.CultureInvariant)
+
+    ''' <summary> Sorts a list of <c> Strings </c> against mutated sort keys built from the data, without modifying the
+    ''' data itself. Returns the original strings in their sorted order. </summary>
+    ''' <param name="ListToBeSorted"> A <c> list (of String)s </c> to be sorted. Left unmodified by this function </param>
+    ''' <param name="textToBeReplaced"> The <c> String </c> data that will be replaced when building sort keys </param>
     ''' <param name="replacementText">The data with which <c> <paramref name="textToBeReplaced"/> </c> will be replaced </param>
     Public Function replaceAndSort(ListToBeSorted As strList, textToBeReplaced As String, replacementText As String) As strList
         If ListToBeSorted Is Nothing Then argIsNull(NameOf(ListToBeSorted)) : Return Nothing
-        Dim changes As New changeDict
-        ' Replace our target characters if they exist
-        For i = 0 To ListToBeSorted.Items.Count - 1
-            Dim item = ListToBeSorted.Items(i)
-            If item.Contains(textToBeReplaced) Then
-                Dim renamedItem = item.Replace(textToBeReplaced, replacementText)
-                changes.trackChanges(item, renamedItem)
-                ListToBeSorted.Items(i) = renamedItem
-            End If
+        ' Sort keys are built alongside the originals rather than over them. Duplicate values are legal in both of the
+        ' things sorted here (entry names within a category, key values within an entry), so two items may well produce
+        ' the same sort key. Keeping each key beside its own index is what stops a collision from losing an original
+        Dim sortKeys As New strList
+        For Each item In ListToBeSorted.Items
+            sortKeys.add(If(item.Contains(textToBeReplaced), item.Replace(textToBeReplaced, replacementText), item))
         Next
-        ' Pad numbers if necessary 
-        findAndReplaceNumbers(ListToBeSorted, changes)
-        ' Copy the modified list to be sorted and sort it
+        ' Pad numbers if necessary
+        padNumbers(sortKeys)
+        ' Sort a permutation of the indices so that every sorted position still knows which original it came from.
+        ' Equal sort keys break the tie on the original index, which keeps the sort stable and the output deterministic
+        Dim order As New List(Of Integer)
+        For i = 0 To ListToBeSorted.Count - 1
+            order.Add(i)
+        Next
+        order.Sort(Function(a, b)
+                       Dim cmp = sortKeys.Items(a).CompareTo(sortKeys.Items(b))
+                       If cmp <> 0 Then Return cmp
+                       Return a.CompareTo(b)
+                   End Function)
         Dim sortedEntryList As New strList
-        sortedEntryList.Items.AddRange(ListToBeSorted.Items)
-        sortedEntryList.Items.Sort()
-        ' Restore the original state of our data
-        changes.undoChanges({ListToBeSorted, sortedEntryList})
+        For Each idx In order
+            sortedEntryList.add(ListToBeSorted.Items(idx))
+        Next
         Return sortedEntryList
     End Function
 
@@ -53,89 +74,45 @@ Public Module winapp2handler
     Private Function findLongestNumLength(ByRef lst As strList) As Integer
         Dim out = 0
         For Each item In lst.Items
-            For Each mtch As Match In Regex.Matches(item, "[\d]+")
+            For Each mtch As Match In digitRun.Matches(item)
                 If mtch.Length > out Then out = mtch.Length
             Next
         Next
         Return out
     End Function
 
-    ''' <summary> Detects the length (number of digits) in the "longest" integer in a given <c> list (of String)s </c> and prepends all shorter integers with zeros such that all the integers in all Strings are the same length </summary>
-    ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. 
-    ''' <param name="listToBeSorted"> The list to be modified and sorted </param>
-    ''' <param name="changes"> Dictonary of the changes made to the Strings in <c> <paramref name="listToBeSorted"/> </c></param>
-    Private Sub findAndReplaceNumbers(ByRef listToBeSorted As strList, ByRef changes As changeDict)
-        Dim longestNumLen = findLongestNumLength(listToBeSorted)
+    ''' <summary> Detects the length (number of digits) in the "longest" integer in a given list of sort keys and prepends
+    ''' all shorter integers with zeros such that all the integers in all Strings are the same length.
+    ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. </summary>
+    ''' <param name="sortKeys"> The list of sort keys to be padded in place </param>
+    Private Sub padNumbers(sortKeys As strList)
+        Dim longestNumLen = findLongestNumLength(sortKeys)
         If longestNumLen < 2 Then Exit Sub
-        For i = 0 To listToBeSorted.Count - 1
-            Dim baseString = listToBeSorted.Items(i)
-            Dim paddedString = baseString
-            Dim numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*")
-            For Each m As Match In numberAndDecimals.Matches(baseString)
-                ' Special procedure for numbers with any amount of decimal points in them
-                Dim currentMatch = m.ToString
-                If currentMatch.Contains(".") Then
-                    Dim out = ""
-                    Dim tStr = currentMatch.Split(CChar("."))
-                    For p = 0 To tStr.Length - 1
-                        out += padNumberStr(longestNumLen, tStr(p))
-                        If p < tStr.Length - 1 Then out += "."
-                    Next
-                    paddedString = paddedString.Replace(currentMatch, out)
-                Else
-                    ' Grab characters from both sides so that we don't have to worry about duplicate m matches 
-                    Dim numsPlusReplBits As New Regex($"([^\d]|\b){currentMatch}([^\d]|\b)")
-                    For Each mm As Match In numsPlusReplBits.Matches(paddedString)
-                        Dim replacementText = mm.ToString.Replace(currentMatch, padNumberStr(longestNumLen, currentMatch))
-                        paddedString = paddedString.Replace(mm.ToString, replacementText)
-                    Next
-                End If
-            Next
-            ' Don't rename if we didn't change anything
-            If baseString.Equals(paddedString, StringComparison.InvariantCulture) Then Continue For
-            ' Rename and track changes appropriately
-            changes.trackChanges(baseString, paddedString)
-            listToBeSorted.replaceStrAtIndexOf(baseString, paddedString)
+        Dim padTo = longestNumLen
+        Dim evaluator As MatchEvaluator =
+            Function(m As Match) As String
+                Dim s = m.Value
+                If s.IndexOf("."c) < 0 Then Return padNumberStr(padTo, s)
+                Dim parts = s.Split("."c)
+                For p = 0 To parts.Length - 1
+                    parts(p) = padNumberStr(padTo, parts(p))
+                Next
+                Return String.Join(".", parts)
+            End Function
+        ' Assigned by index rather than by value lookup: duplicate sort keys are expected here, and a
+        ' lookup would repeatedly find the first of them instead of the one being padded
+        For i = 0 To sortKeys.Count - 1
+            sortKeys.Items(i) = numberAndDecimals.Replace(sortKeys.Items(i), evaluator)
         Next
     End Sub
-
-    ''' <summary> Returns the path from an ExcludeKey with the <c> Flag </c> parameter removed, as a <c> String </c></summary>
-    ''' <param name="key"> An ExcludeKey <c> iniKey </c></param>
-    Public Function pathFromExcludeKey(key As iniKey) As String
-        If key Is Nothing Then argIsNull(NameOf(key)) : Return Nothing
-        Dim pathFromKey = key.Value.TrimStart(CType("FILE|", Char()))
-        pathFromKey = pathFromKey.TrimStart(CType("PATH|", Char()))
-        pathFromKey = pathFromKey.TrimStart(CType("REG|", Char()))
-        Return pathFromKey
-    End Function
 
     ''' <summary> Pads a given number to a given length by prepending it with zeros (0's), returns the padded number </summary>
     ''' <param name="longestNumLen"> The desired maximum length of a number </param>
     ''' <param name="num"> The given number </param>
     Private Function padNumberStr(longestNumLen As Integer, num As String) As String
-        Dim replMatch = ""
-        While replMatch.Length < longestNumLen - num.Length
-            replMatch += "0"
-        End While
-        Return replMatch & num
+        Dim deficit = longestNumLen - num.Length
+        If deficit <= 0 Then Return num
+        Return New String("0"c, deficit) & num
     End Function
 
-    ''' <summary> Removes <c> winapp2entry </c> objects from a given <c> winapp2file's </c> <c> sectionList </c></summary>
-    ''' <param name="sectionList">The list of <c> winapp2entrys </c> representing a given "section" in the file </param>
-    ''' <param name="removalList">The list of <c> winapp2entrys </c> to be removed from a section </param>
-    Public Sub removeEntries(ByRef sectionList As List(Of winapp2entry), ByRef removalList As List(Of winapp2entry))
-        If removalList Is Nothing Then argIsNull(NameOf(removalList)) : Return
-        If sectionList Is Nothing Then argIsNull(NameOf(sectionList)) : Return
-        For Each item In removalList
-            sectionList.Remove(item)
-        Next
-        removalList.Clear()
-    End Sub
-
-    ''' <summary> Returns the <c> Names </c> of the <c> iniSections </c> in an <c> iniFile </c> sorted in winapp2.ini order as a <c> strList </c></summary>
-    ''' <param name="file"> The <c> iniFile </c> whose sections will be sorted </param>
-    Public Function sortEntryNames(ByVal file As iniFile) As strList
-        If file Is Nothing Then argIsNull(NameOf(file)) : Return Nothing
-        Return replaceAndSort(file.namesToStrList, "-", "  ")
-    End Function
 End Module

@@ -1,7 +1,7 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
-' 
+'    Copyright (C) 2018-2026 Hazel Ward
+'
 '    This file is a part of Winapp2ool
-' 
+'
 '    Winapp2ool is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
 '    the Free Software Foundation, either version 3 of the License, or
@@ -17,143 +17,125 @@
 
 Option Strict On
 
-''' <summary> 
-''' Displays the Downloader Module main menu to the user and handles their input 
+''' <summary>
+''' Displays the Downloader module main menu and handles user input.
+''' Called by both <c> printDownloadMainMenu </c> (to render) and <c> handleDownloadUserInput </c>
+''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
 ''' </summary>
 Module downloadmainmenu
 
-    ''' <summary> 
-    ''' Restores the default state of the module's parameters 
+    ''' <summary>
+    ''' Builds the Downloader main menu with all options and their dispatch handlers registered inline
     ''' </summary>
-    Private Sub initDefaultSettings()
+    Private Function buildDownloadMenu() As MenuSection
 
-        downloadFile.resetParams()
-        DownloadModuleSettingsChanged = False
-        restoreDefaultSettings(NameOf(Downloader), AddressOf createDownloadSettingsSection)
+        Dim menuDesc = {"Download files from the winapp2 GitHub"}
 
-    End Sub
-
-    ''' <summary> 
-    ''' Prints the download menu to the user 
-    ''' </summary>
-    Public Sub printDownloadMainMenu()
-
-        Dim MenuDesc = {"Download files from the winapp2 GitHub"}
-
-        Dim menu = MenuSection.CreateCompleteMenu(NameOf(Downloader), MenuDesc, ConsoleColor.DarkGreen)
-
-        menu.AddBlank _
-            .AddColoredOption("Winapp2.ini", "Download the latest base winapp2.ini", ConsoleColor.Cyan) _
-            .AddColoredOption("CCleaner Winapp2.ini", "Download the latest CCleaner Flavor of winapp2.ini", ConsoleColor.DarkRed) _
-            .AddColoredOption("BleachBit Winapp2.ini", "Download the latest BleachBit Flavor of winapp2.ini", ConsoleColor.DarkCyan) _
-            .AddColoredOption("System Ninja Winapp2.rules", "Download the latest System Ninja Flavor of winapp2.ini", ConsoleColor.Blue) _
-            .AddColoredOption("Tron", "Download the latest Tron flavor of winapp2.ini", ConsoleColor.Red).AddBlank _
-            .AddOption("Winapp2ool", "Download the latest winapp2ool.exe").AddBlank _
-            .AddOption("ReadMe", "Download the top-level winapp2ool readme").AddBlank() _
-            .AddOption("Advanced", "Additional downloads for power users").AddBlank _
-            .AddColoredOption("Change Save Directory", "Select a new target directory for Downloader", ConsoleColor.DarkYellow) _
-            .AddColoredFileInfo("Save Directory: ", downloadFile.Dir, ConsoleColor.DarkYellow).AddBlank _
-            .AddResetOpt(NameOf(Downloader), DownloadModuleSettingsChanged)
-
-        menu.Print()
-
-    End Sub
-
-    Private Function getFileOpts() As Dictionary(Of String, String)
-
-        Dim files As New Dictionary(Of String, String)
-
-        files.Add("1", baseFlavorLink)
-        files.Add("2", ccFlavorLink)
-        files.Add("3", bbFlavorLink)
-        files.Add("4", snFlavorLink)
-        files.Add("5", tronFlavorLink)
-        files.Add("6", toolExeLink)
-        files.Add("7", readMeLink)
-
-        Return files
+        Return MenuSection.CreateCompleteMenu(NameOf(Downloader), menuDesc, ConsoleColor.DarkGreen) _
+            .AddBlank() _
+            .AddDispatchedColoredOption("Winapp2.ini", "Download the latest base winapp2.ini", ConsoleColor.Cyan,
+                Sub()
+                    downloadFile.Name = "winapp2.ini"
+                    download(downloadFile, baseFlavorLink)
+                    checkedForUpdates = False
+                End Sub) _
+            .AddDispatchedColoredOption("CCleaner Winapp2.ini", "Download the latest CCleaner Flavor of winapp2.ini", ConsoleColor.DarkRed,
+                Sub()
+                    downloadFile.Name = "winapp2.ini"
+                    download(downloadFile, ccFlavorLink)
+                    checkedForUpdates = False
+                End Sub) _
+            .AddDispatchedColoredOption("CCleaner 7 Winapp2.ini", "Download the latest CCleaner 7 Flavor of winapp2.ini", ConsoleColor.Magenta,
+                Sub()
+                    downloadFile.Name = "winapp2.ini"
+                    download(downloadFile, cc7FlavorLink)
+                    checkedForUpdates = False
+                End Sub) _
+            .AddDispatchedColoredOption("BleachBit Winapp2.ini", "Download the latest BleachBit Flavor of winapp2.ini", ConsoleColor.DarkCyan,
+                Sub()
+                    downloadFile.Name = "winapp2.ini"
+                    download(downloadFile, bbFlavorLink)
+                    checkedForUpdates = False
+                End Sub) _
+            .AddDispatchedColoredOption("FluentCleaner Winapp2.ini", "Download the latest FluentCleaner Flavor of winapp2.ini", ConsoleColor.Green,
+                Sub()
+                    downloadFile.Name = "winapp2.ini"
+                    download(downloadFile, fcFlavorLink)
+                    checkedForUpdates = False
+                End Sub) _
+            .AddDispatchedColoredOption("System Ninja Winapp2.rules", "Download the latest System Ninja Flavor of winapp2.ini", ConsoleColor.Blue,
+                Sub()
+                    downloadFile.Name = "winapp2.rules"
+                    download(downloadFile, snFlavorLink)
+                    checkedForUpdates = False
+                End Sub) _
+            .AddDispatchedColoredOption("Tron", "Download the latest Tron flavor of winapp2.ini", ConsoleColor.Red,
+                Sub()
+                    downloadFile.Name = "winapp2.ini"
+                    download(downloadFile, tronFlavorLink)
+                    checkedForUpdates = False
+                End Sub) _
+            .AddBlank() _
+            .AddDispatchedOption("Winapp2ool", "Download the latest winapp2ool.exe",
+                Sub()
+                    If denyActionWithHeader(DotNetFrameworkOutOfDate, "This option requires a newer version of the .NET Framework") Then Return
+                    If denyActionWithHeader(cantDownloadExecutable And downloadFile.Dir = Environment.CurrentDirectory, "Unable to download winapp2ool to the current directory, choose another directory before trying again") Then Return
+                    If downloadFile.Dir = Environment.CurrentDirectory Then
+                        autoUpdate()
+                    Else
+                        downloadFile.Name = "winapp2ool.exe"
+                        download(downloadFile, toolExeLink())
+                    End If
+                End Sub) _
+            .AddBlank() _
+            .AddDispatchedOption("ReadMe", "Download the top-level winapp2ool readme",
+                Sub()
+                    downloadFile.Name = "readme.md"
+                    download(downloadFile, readMeLink)
+                End Sub) _
+            .AddBlank() _
+            .AddDispatchedOption("Advanced", "Additional downloads for power users",
+                Sub() initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)) _
+            .AddBlank() _
+            .AddDispatchedColoredOption("Change Save Directory", "Select a new target directory for Downloader", ConsoleColor.DarkYellow,
+                Sub() changeFile2Params(downloadFile, DownloadModuleSettingsChanged, NameOf(Downloader), NameOf(downloadFile), NameOf(DownloadModuleSettingsChanged))) _
+            .AddColoredFileInfo("Save Directory: ", downloadFile.Dir, ConsoleColor.DarkYellow) _
+            .AddBlank(DownloadModuleSettingsChanged) _
+            .AddDispatchedResetOpt(NameOf(Downloader), DownloadModuleSettingsChanged,
+                Sub() resetModuleSettings(NameOf(Downloader), AddressOf InitDefaultDownloadSettings))
 
     End Function
 
-    ''' <summary> 
-    ''' Handles user input for the Downloader main menu 
+    ''' <summary>
+    ''' Prints the Downloader menu to the user
     ''' </summary>
-    ''' 
-    ''' <param name="input"> 
-    ''' The user's input 
+    Public Sub printDownloadMainMenu()
+
+        buildDownloadMenu().Print()
+
+    End Sub
+
+    ''' <summary>
+    ''' Handles user input for the Downloader menu
+    ''' </summary>
+    '''
+    ''' <param name="input">
+    ''' The user's input
     ''' </param>
     Public Sub handleDownloadUserInput(input As String)
 
-        Dim fileOpts = getFileOpts()
+        Dim intInput As Integer
 
-        Select Case input
+        If Not Integer.TryParse(input, intInput) Then
 
-            Case "0"
+            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Return
 
-                exitModule()
+        End If
 
-            Case "1", "2", "3", "4", "5"
+        If intInput = 0 Then exitModule() : Return
 
-                downloadFile.Name = "winapp2.ini"
-                If input = "3" Then downloadFile.Name = "winapp2.rules"
-
-                Dim link = fileOpts(input)
-                download(downloadFile, link)
-                checkedForUpdates = False
-
-            Case "6"
-
-                ' Feature gate downloading the executable behind .NET 4.6+
-                If denyActionWithHeader(DotNetFrameworkOutOfDate, "This option requires a newer version of the .NET Framework") Then Return
-                If denyActionWithHeader(cantDownloadExecutable And downloadFile.Dir = Environment.CurrentDirectory, "Unable to download winapp2ool to the current directory, choose another directory before trying again") Then Return
-
-                If downloadFile.Dir = Environment.CurrentDirectory Then
-
-                    autoUpdate()
-
-                Else
-
-                    downloadFile.Name = "winapp2ool.exe"
-                    download(downloadFile, toolExeLink)
-
-                End If
-
-            Case "7"
-
-                downloadFile.Name = "readme.md"
-                download(downloadFile, readMeLink)
-
-            Case "8"
-
-                initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)
-
-            Case "9"
-
-                Dim tmp = downloadFile.Dir
-
-                initModule("Directory Chooser", AddressOf downloadFile.printDirChooserMenu, AddressOf downloadFile.handleDirChooserInput)
-
-                Dim headerTxt = "Directory change aborted"
-                setNextMenuHeaderText(headerTxt, printColor:=ConsoleColor.Red)
-
-                If tmp = downloadFile.Dir Then Return
-
-                headerTxt = "Save directory changed"
-                setNextMenuHeaderText(headerTxt, printColor:=ConsoleColor.Green)
-
-                DownloadModuleSettingsChanged = True
-                updateSettings(NameOf(Downloader), NameOf(downloadFile) & "_Dir", downloadFile.Dir)
-                updateSettings(NameOf(Downloader), NameOf(DownloadModuleSettingsChanged), DownloadModuleSettingsChanged.ToString(System.Globalization.CultureInfo.InvariantCulture))
-
-            Case "10"
-
-                If DownloadModuleSettingsChanged Then initDefaultSettings()
-
-            Case Else
-
-                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-        End Select
+        If Not buildDownloadMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
 
     End Sub
 

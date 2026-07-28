@@ -1,558 +1,607 @@
 # Trim
 
-Trim is designed to do as its name implies: trim winapp2.ini. It does this by processing the detection criteria provided in each entry and confirming their existence on the user's machine. Any entries whose detection criteria are invalid for the current system are pruned from the file, resulting in a much smaller file filled only with entries relevant to the current machine. The performance impact of this is most notable on CCleaner which sees a significant performance increase on loading the trimmed file vs. an untrimmed file
+**Trim** is a winapp2ool module that strips winapp2.ini down to the entries that apply to the machine it runs on. Every entry carries detection criteria (a registry key, a file path, a Windows version requirement) saying whether the software it targets is actually installed. Trim checks those criteria against the current system and drops the entries whose software isn't there.
 
-## Menu Options
+### What does Trim do?
 
-Option|Effect|Notes
-:-|:-|:-
-Exit|Returns you to the winapp2ool menu|
-Run|Trims winapp2.ini using your current settings|Default option
-Toggle Download|Enables/Disables downloading of the latest winapp2.ini from GitHub to use as input for the trimmer|Unavailable in offline mode
-File Chooser (winapp2.ini)|Opens the interface to choose a new local file path for winapp2.ini|Only shown when downloading is disabled
-File Chooser (save)|Opens the interface to select a new save location for the trimmed file|Suggests `"winapp2-trimmed.ini"` as the default renamed file
-Reset Settings|Restores the module's settings to their default state, undoing any changes the user has made|Only shown when settings have been modified
+Trim reads a winapp2.ini (off disk, or downloaded from GitHub), tests every entry against the machine it is running on, and saves a copy with only the entries that passed. 
 
-## Command-line args
+### Why Trim?
 
-|Arg|Effect|
-|:-|:-
-`-1f` or `-1d`|Defines the path for winapp2.ini
-`-3f` or `-3d`|Defines the path for the save file
-`-d`|Enables downloading
+- Performance: CCleaner evaluates every entry in winapp2.ini when it starts, and it is slow about it. Trimming typically removes around 90% of the file, so CCleaner starts faster
+- Automation: `winapp2ool -trim -d` downloads the latest database and gives you a machine-specific copy in one command
 
-### Code Documentation
+---
 
-Below is documentation for how Trim works under the hood
+# Table of Contents
 
-## Properties
+1. [Requirements](#requirements)
+2. [Quick Start](#quick-start)
+3. [Menu Options](#menu-options)
+4. [How Trimming Works](#how-trimming-works)
+   - [Evaluation Order](#evaluation-order)
+   - [DetectOS](#detectos)
+   - [Detect](#detect)
+   - [DetectFile](#detectfile)
+   - [SpecialDetect](#specialdetect)
+   - [Entries Without Detection Keys](#entries-without-detection-keys)
+   - [Includes and Excludes](#includes-and-excludes)
+   - [Environment Variables](#environment-variables)
+   - [VirtualStore Handling](#virtualstore-handling)
+5. [Output Formatting](#output-formatting)
+6. [Command-Line Arguments](#command-line-arguments)
+   - [Toggles](#toggles)
+   - [File Selection](#file-selection)
+   - [Examples](#examples)
+7. [Tips & Best Practices](#tips--best-practices)
+8. [Troubleshooting](#troubleshooting)
+9. [Usage Examples](#usage-examples)
+   - [Example 1: Anatomy of a Trim](#example-1-anatomy-of-a-trim)
+   - [Example 2: Trimming the Full Database](#example-2-trimming-the-full-database)
+   - [Example 3: Downloading and Trimming in One Step](#example-3-downloading-and-trimming-in-one-step)
+   - [Example 4: Never-Trim and Always-Trim Overrides](#example-4-never-trim-and-always-trim-overrides)
+   - [Example 5: VirtualStore Key Generation](#example-5-virtualstore-key-generation)
 
-*italicized* properties are *private*
+---
 
-|Name|Type|Default Value|Description|
-|:-|:-|:-|:-
-TrimFile1|`iniFile`|`winapp2.ini` in the current directory|The winapp2.ini that will be trimmed
-|TrimFile3|`iniFile`|`winapp2.ini` in the current directory|Holds the path where the output file will be saved to disk. Overwrites the input file by default
-*winVer*|`Double`|`Nothing`|The major/minor version number on the current system
-*ModuleSettingsChanged*|`Boolean`|`False`|Indicates that the module settings have been modified from their defaults
-*DownloadFileToTrim*|`Boolean`|`False`|Indicates that we are downloading a winapp2.ini from GitHub
+# Requirements
 
-## handleCmdLine
+- A `winapp2.ini` file to trim, **or** an internet connection with downloading enabled (`-d`)
 
-### Handles the commandline args for Trim
+---
 
-```vb
-Public Sub handleCmdLine()
-    initDefaultSettings()
-    handleDownloadBools(DownloadFileToTrim)
-    getFileAndDirParams(TrimFile1, New iniFile, TrimFile3)
-    initTrim()
-End Sub
+# Quick Start
+
+### Common Workflow (local file)
+
+1. Place your `winapp2.ini` in the same directory as winapp2ool
+2. Open Trim from the winapp2ool main menu
+3. Run. Trim evaluates every entry and saves the result
+
+By default, the trimmed file overwrites the input `winapp2.ini`. Use **Choose save target** to save to a different path first.
+
+### Common Workflow (download and trim)
+
+1. Open Trim
+2. Enable **Toggle downloading** to use the latest winapp2.ini from GitHub
+3. Run. Trim downloads and trims in one step
+
+---
+
+# Menu Options
+
+| Option | Effect | Notes |
+|:-|:-|:-|
+| Run (default) | Trim winapp2.ini using current settings | |
+| Toggle downloading | Enable or disable downloading the latest winapp2.ini from GitHub as the input | Default: `False`; unavailable in offline mode |
+| Toggle include list | Enable or disable the includes file override | Default: `False` |
+| Toggle exclude list | Enable or disable the excludes file override | Default: `False` |
+| Choose winapp2.ini | Select a different local winapp2.ini to trim | Only shown when downloading is disabled |
+| Choose save target | Select a different output file path | Default: overwrites the input file |
+| Choose includes file | Select the includes file | Only shown when include list is enabled |
+| Choose excludes file | Select the excludes file | Only shown when exclude list is enabled |
+| Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
+
+---
+
+# How Trimming Works
+
+## Evaluation Order
+
+Each entry is checked on its own, in this order, stopping at the first step that gives an answer.
+
+1. **Include list** (if enabled): entry name listed → **kept**
+2. **Exclude list** (if enabled): entry name listed → **removed**
+3. **DetectOS**: present, not satisfied → **removed**
+4. **Detect**: any Detect registry path exists → **kept**
+5. **DetectFile**: any DetectFile path exists → **kept**
+6. **SpecialDetect**: any matches → **kept**
+7. Entry has *only* a DetectOS key and it was satisfied in step 3 → **kept**
+8. Entry has no detection keys of any kind → **kept**
+9. Otherwise → **removed**
+
+## DetectOS
+
+`DetectOS` declares a Windows version requirement as a `major.minor` version number and takes one of three forms:
+
+| Form | Meaning | Entry is kept when |
+|:-|:-|:-|
+| `DetectOS=6.1\|` | Minimum version | Windows version ≥ 6.1 |
+| `DetectOS=\|6.1` | Maximum version | Windows version ≤ 6.1 |
+| `DetectOS=6.1\|10.0` | Version range | 6.1 ≤ Windows version ≤ 10.0 |
+
+A failed version check removes the entry on the spot; Trim never looks at its other detection keys. If the check passes and there are no other detection keys, the entry is kept.
+
+## Detect
+
+`Detect` names a registry path that Trim checks for existence.
+
+- Paths under `HKLM\Software` are also checked under `HKLM\SOFTWARE\WOW6432Node`, so 32-bit applications on 64-bit Windows are found 
+- If a key can't be read because of permissions, Trim assumes it exists and keeps the entry
+
+## DetectFile
+
+`DetectFile` names a path that Trim checks for existence. It can point at either a file or a folder.
+
+- Wildcards (`*`) work anywhere in the path. Trim expands each wildcard segment against the folders actually on disk, and keeps the entry if any expansion resolves to something that exists. 
+- Paths under `%ProgramFiles%` are checked in both the native Program Files directory and the 32-bit `Program Files (x86)` directory. See [Environment Variables](#environment-variables)
+- If a folder can't be read because of permissions, Trim assumes the target exists and keeps the entry
+
+## SpecialDetect
+
+`SpecialDetect` is a deprecated CCleaner variable. Trim still handles it so that very old winapp2.ini files work. Four values are recognized:
+
+| Value | What is checked |
+|:-|:-|
+| `DET_CHROME` | A hardcoded list of ~26 Chromium-family browser paths and registry keys |
+| `DET_MOZILLA` | `%AppData%\Mozilla\Firefox` |
+| `DET_THUNDERBIRD` | `%AppData%\Thunderbird` |
+| `DET_OPERA` | `%AppData%\Opera Software` |
+
+If any of the associated paths or keys exists on the system, the entry is kept.
+
+## Entries Without Detection Keys
+
+Entries with no detection keys of any type are always kept
+
+## Includes and Excludes
+
+Two optional override files let you overrule detection. Trim consults both before it looks at any detection key.
+
+**Include list** (`includes.ini` by default): Name an entry here and it is always kept, whether or not its detection criteria are satisfied. Turn it on with **Toggle include list** in the menu, or `-includes` on the command line.
+
+**Exclude list** (`excludes.ini` by default): Entries named here are always removed, even when their detection criteria pass. **Toggle exclude list** in the menu, `-excludes` on the command line.
+
+Each file is a plain ini file where section names are the entry names to match:
+
+```ini
+[Some Application *]
+[Another Application *]
 ```
 
-## initDefaultSettings
+Whatever keys those sections contain is ignored, so you can leave them empty. 
 
-### Restores the default state of the module's parameters
+See [Example 4](#example-4-never-trim-and-always-trim-overrides) 
 
-```vb
-Private Sub initDefaultSettings()
-    TrimFile1.resetParams()
-    TrimFile3.resetParams()
-    DownloadFileToTrim = False
-    ModuleSettingsChanged = False
-End Sub
+## Environment Variables
+
+Trim expands standard Windows environment variables in `DetectFile` paths, plus several CCleaner-specific variables that do not exist in the Windows environment:
+
+| Variable | Windows XP | Windows Vista and later |
+|:-|:-|:-|
+| `%Documents%` | `%UserProfile%\My Documents` | `%UserProfile%\Documents` |
+| `%CommonAppData%` | `%AllUsersProfile%\Application Data` | `%AllUsersProfile%` |
+| `%LocalLowAppData%` | `%UserProfile%\AppData\LocalLow` | `%UserProfile%\AppData\LocalLow` |
+| `%Pictures%` | `%UserProfile%\My Documents\My Pictures` | `%UserProfile%\Pictures` |
+| `%Music%` | `%UserProfile%\My Documents\My Music` | `%UserProfile%\Music` |
+| `%Video%` | `%UserProfile%\My Documents\My Videos` | `%UserProfile%\Videos` |
+
+On 64-bit systems, `%ProgramFiles%` covers both the native Program Files directory and `Program Files (x86)`. `HKLM\Software` registry paths get the same treatment through `WOW6432Node`.
+
+**Malformed variables:** a path whose environment variable is malformed (e.g. a value ending at the closing `%` with no path after it) prints an error and pauses:
+
+```
+Error: <path> contains a malformatted environment variable and has been ignored
+The associated entry will be retained in the final output file
+Press any key to continue
 ```
 
-## remoteTrim
+## VirtualStore Handling
 
-### Trims an `iniFile` from outside the module
+Pre-UAC applications that wrote to protected locations had those writes quietly redirected into the user's VirtualStore, and machines upgraded from older Windows versions still carry the leftovers. So for every entry that survives detection, Trim reads the `FileKey`, `RegKey`, and `ExcludeKey` values and adds keys for the matching VirtualStore locations, but only where those locations exist:
 
-```vb
-Public Sub remoteTrim(firstFile As iniFile, thirdFile As iniFile, d As Boolean)
-    TrimFile1 = firstFile
-    TrimFile3 = thirdFile
-    DownloadFileToTrim = d
-    initTrim()
-End Sub
+| Key type | Original location | VirtualStore counterpart |
+|:-|:-|:-|
+| FileKey / ExcludeKey | `%ProgramFiles%` | `%LocalAppData%\VirtualStore\Program Files*` |
+| FileKey / ExcludeKey | `%CommonAppData%` | `%LocalAppData%\VirtualStore\ProgramData` |
+| FileKey / ExcludeKey | `%CommonProgramFiles%` | `%LocalAppData%\VirtualStore\Program Files*\Common Files` |
+| FileKey / ExcludeKey / RegKey | `HKLM\Software` | `HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE` |
+
+On most systems no VirtualStore keys are generated at all. When keys are added, the entry's keys are renumbered. See [Example 5](#example-5-virtualstore-key-generation).
+
+---
+
+# Output Formatting
+
+Trim always writes its output as a fully formatted winapp2.ini file:
+
+- Entries are sorted alphabetically and grouped into the winapp2.ini ordering for the selected flavor 
+- The winapp2.ini preamble comments are regenerated at the top of the file: the `; Version:` line is carried over from the input file (or written as `; Version: 000000` if the input had none), and the `; # of entries:` line is updated to the post-trim count
+- **Comments are not preserved.** Comments in the input file do not appear in the output. Since the default save target overwrites the input file, trimming an annotated custom file in place will lose your comments
+- Key order within entries is unchanged, except that entries receiving [VirtualStore keys](#virtualstore-handling) have their keys renumbered
+
+---
+
+# Command-Line Arguments
+
+Invoke Trim from the command line with `winapp2ool -trim`.
+
+Command-line runs always start from Trim's defaults. Settings you saved from the menu, like alternate file paths or enabled include/exclude lists, do not carry over, so pass the flags you need on every invocation.
+
+### Toggles
+
+| Arg | Effect |
+|:-|:-|
+| `-d` | Download the latest winapp2.ini from GitHub as the input  |
+| `-includes` | Enable the includes file: entries named in it are never trimmed |
+| `-excludes` | Enable the excludes file: entries named in it are always trimmed |
+
+### File Selection
+
+| Arg | Effect | Default |
+|:-|:-|:-|
+| `-1d path` | Set the input winapp2.ini directory | Current directory |
+| `-1f name` | Set the input winapp2.ini file name | `winapp2.ini` |
+| `-2d path` | Set the includes file directory | Current directory |
+| `-2f name` | Set the includes file name | `includes.ini` |
+| `-3d path` | Set the output directory | Current directory |
+| `-3f name` | Set the output file name | `winapp2.ini` (overwrites input) |
+| `-4d path` | Set the excludes file directory | Current directory |
+| `-4f name` | Set the excludes file name | `excludes.ini` |
+
+### Examples
+
+| Command | Effect |
+|:-|:-|
+| `winapp2ool -trim` | Trim `winapp2.ini` in the current directory, overwriting it in place |
+| `winapp2ool -trim -3f winapp2-trimmed.ini` | Trim and save the result to a new file |
+| `winapp2ool -trim -d` | Download the latest winapp2.ini and trim it |
+| `winapp2ool -trim -d -3f winapp2-trimmed.ini` | Download, trim, and save to a named file |
+| `winapp2ool -trim -includes -2f keepers.ini` | Trim, but never remove entries named in `keepers.ini` |
+| `winapp2ool -trim -3f trimmed.ini -s` | Trim silently and exit |
+
+---
+
+# Tips & Best Practices
+
+### Save to a Different File First
+
+The default output overwrites the input `winapp2.ini`, and [comments are not preserved](#output-formatting). Save to a different file (e.g. `winapp2-trimmed.ini`) the first time so you can verify the results before replacing your working copy.
+
+### Re-trim After Changes
+
+A trimmed file only describes the winapp2.ini it came from and the software that was installed when it ran. Update winapp2.ini or install a new application and it is out of date, and an out of date trimmed file has no entries covering whatever you just installed. Re-trim after either kind of change.
+
+### Download and Trim 
+
+You can skip keeping a local copy of the database entirely. **Toggle downloading** in the menu, or `-d` on the command line, fetches the current winapp2.ini and trims it in one operation. 
+
+### Trimmed Files and CCleaner Performance
+
+CCleaner evaluates every entry in winapp2.ini when it starts, so a big file means a slow launch. If you are on CCleaner 7, CC7Patcher can trim the file for you before patching it in.
+
+---
+
+# Troubleshooting
+
+| Message | Cause |
+|:-|:-|
+| "Internet connection lost! Please check your network connection and try again" | Downloading is enabled but no connection is available |
+| File Chooser appears with header "winapp2.ini does not exist" | The input file was not found |
+| "winapp2.ini was empty or not found" (red menu header) | The input file exists but contains no entries |
+| "Error: \<path\> contains a malformatted environment variable and has been ignored" | A `DetectFile` value has a broken `%Variable%`; the entry is retained, and Trim pauses for a keypress |
+| "Your key seems to be malformatted (bad root? ...)" (log only) | A `Detect` key uses a registry root other than `HKCU`/`HKLM`/`HKU`/`HKCR` |
+
+| Symptom | Cause |
+|:-|:-|
+| An entry for installed software was removed | The `DetectFile`/`Detect` path doesn't match the actual installation location (e.g. a portable or non-standard install location) |
+| Download option is unavailable in the menu | winapp2ool is in offline mode |
+
+---
+
+# Usage Examples
+
+The outputs below were captured from real runs on a Windows 11 machine. Trim's results are machine-specific by design, so expect different counts and a different set of survivors on yours.
+
+## Example 1: Anatomy of a Trim
+
+**Context**
+
+Six entries are enough to watch every detection rule fire at once. Four of them are lifted verbatim from the current winapp2.ini; the other two exist for the demonstration. `[My Custom Cleanup *]` has no detection keys at all, and `[Windows XP Era Application *]` is here because the real database no longer ships a single `DetectOS` entry.
+
+The machine in question has 7-Zip, Firefox, Steam, and Windows Calculator installed.
+
+**Intent**
+
+We want to trim this file in place and observe which entries survive, and why.
+
+**Files**
+
+###### **Input file (`winapp2.ini`)**
+
+```ini
+[7-Zip ZS *]
+LangSecRef=3024
+Detect=HKCU\Software\7-Zip-Zstandard
+RegKey1=HKCU\Software\7-Zip-Zstandard\Compression|ArcHistory
+RegKey2=HKCU\Software\7-Zip-Zstandard\Extraction|PathHistory
+RegKey3=HKCU\Software\7-Zip-Zstandard\FM|CopyHistory
+RegKey4=HKCU\Software\7-Zip-Zstandard\FM|FolderHistory
+
+[Mozilla Firefox Autofill Data *]
+LangSecRef=3026
+DetectFile1=%AppData%\Mozilla\Firefox\Profiles
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|autofill-profiles.json
+FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|autofill-profiles.json
+
+[My Custom Cleanup *]
+Section=Custom Entries
+FileKey1=%UserProfile%\Downloads|*.partial
+
+[Steam Packages *]
+Section=Games
+Detect=HKCU\Software\Valve\Steam
+FileKey1=%ProgramFiles%\Steam\package|*.zip.*
+
+[Windows Calculator *]
+LangSecRef=3025
+DetectFile=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*
+FileKey1=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\AC|*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\LocalCache|*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\LocalState\Cache|*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\Settings|*.log*
+
+[Windows XP Era Application *]
+Section=Legacy Applications
+DetectOS=|5.2
+FileKey1=%WinDir%\Prefetch|*.pf
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-firstFile|`iniFile`|The winapp2.ini file to be trimmed
-thirdFile|`iniFile`|The `iniFile` containing the path on disk to which the trimmed file will be saved
-d|`Boolean`|Indicates that the input winapp2.ini should be downloaded from GitHub
+**Command**
 
-## printMenu
-
-### Prints the `Trim` menu to the user
-
-```vb
-Public Sub printMenu()
-    printMenuTop({"Trim winapp2.ini such that it contains only entries relevant to your machine,", "greatly reducing both application load time and the winapp2.ini file size."})
-    print(1, "Run (default)", "Trim winapp2.ini")
-    print(5, "Toggle Download", "using the latest winapp2.ini from GitHub as the input file", Not isOffline, True, enStrCond:=DownloadFileToTrim, trailingBlank:=True)
-    print(1, "File Chooser (winapp2.ini)", "Change the winapp2.ini name or location", Not DownloadFileToTrim, isOffline, True)
-    print(1, "File Chooser (save)", "Change the save file name or location", trailingBlank:=True)
-    print(0, $"Current winapp2.ini location: {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path))}")
-    print(0, $"Current save location: {replDir(TrimFile3.Path)}", closeMenu:=Not ModuleSettingsChanged)
-    print(2, "Trim", cond:=ModuleSettingsChanged, closeMenu:=True)
-End Sub
+```
+winapp2ool -trim
 ```
 
-## handleUserInput
+**Output**
 
-### Handles the user input from the menu
+###### **Console**
 
-```vb
-Public Sub handleUserInput(input As String)
-    Select Case True
-        Case input = "0"
-            exitModule()
-        Case (input = "1" Or input = "")
-            initTrim()
-        Case input = "2" And Not isOffline
-            toggleDownload(DownloadFileToTrim, ModuleSettingsChanged)
-        Case (input = "3" And Not DownloadFileToTrim And Not isOffline) Or (input = "2" And isOffline)
-            changeFileParams(TrimFile1, ModuleSettingsChanged)
-        Case (input = "4" And Not DownloadFileToTrim And Not isOffline) Or (input = "3" And (isOffline Or DownloadFileToTrim))
-            changeFileParams(TrimFile3, ModuleSettingsChanged)
-        Case ModuleSettingsChanged And ((input = "5" And Not DownloadFileToTrim) Or (input = "4" And (isOffline Or DownloadFileToTrim)))
-            resetModuleSettings("Trim", AddressOf initDefaultSettings)
-        Case Else
-            setHeaderText(invInpStr, True)
-    End Select
-End Sub
+```
+ ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ ║                                                      Trim Complete                                                 ║
+ ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+ ║ Initial entry count: 6                                                                                             ║
+ ║ Trimmed entry count: 4                                                                                             ║
+ ║ 2 entries trimmed from winapp2.ini (33%)                                                                           ║
+ ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+ ║                                          Press any key to return to the menu.                                      ║
+ ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-input|`String`|The `String` containing the user's input
+###### **Output file (`winapp2.ini`) after trimming **
 
-## initTrim
+```ini
+; Firefox/Mozilla based browsers (1)
 
-### Initiates the `Trim` process from the main menu or commandline
+[Mozilla Firefox Autofill Data *]
+LangSecRef=3026
+DetectFile1=%AppData%\Mozilla\Firefox\Profiles
+DetectFile2=%LocalAppData%\Packages\Mozilla.Firefox_*
+FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|autofill-profiles.json
+FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|autofill-profiles.json
 
-```vb
-Private Sub initTrim()
-    If Not DownloadFileToTrim Then If Not enforceFileHasContent(TrimFile1) Then Exit Sub
-    Dim winapp2 = If(Not DownloadFileToTrim, New winapp2file(TrimFile1), New winapp2file(getRemoteIniFile(winapp2link)))
-    clrConsole()
-    print(3, "Trimming... Please wait, this may take a moment...")
-    Dim entryCountBeforeTrim = winapp2.count
-    trim(winapp2)
-    clrConsole()
-    print(3, "Finished!")
-    clrConsole()
-    print(4, "Trim Complete", conjoin:=True)
-    print(0, "Entry Count", isCentered:=True, trailingBlank:=True)
-    print(0, $"Initial: {entryCountBeforeTrim}")
-    print(0, $"Trimmed: {winapp2.count}")
-    Dim difference = entryCountBeforeTrim - winapp2.count
-    print(0, $"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
-    print(0, anyKeyStr, leadingBlank:=True, closeMenu:=True)
-    gLog($"{difference} entries trimmed from winapp2.ini ({Math.Round((difference / entryCountBeforeTrim) * 100)}%)")
-    gLog($"{winapp2.count} entries remain.")
-    TrimFile3.overwriteToFile(winapp2.winapp2string)
-    setHeaderText($"{TrimFile3.Name} saved")
-    crk()
-End Sub
+; End of Firefox/Mozilla based browsers
+
+[My Custom Cleanup *]
+Section=Custom Entries
+FileKey1=%UserProfile%\Downloads|*.partial
+
+[Steam Packages *]
+Section=Games
+Detect=HKCU\Software\Valve\Steam
+FileKey1=%ProgramFiles%\Steam\package|*.zip.*
+
+[Windows Calculator *]
+LangSecRef=3025
+DetectFile=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*
+FileKey1=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\AC|*|RECURSE
+FileKey2=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\LocalCache|*|RECURSE
+FileKey3=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\LocalState\Cache|*|RECURSE
+FileKey4=%LocalAppData%\Packages\Microsoft.WindowsCalculator_*\Settings|*.log*
 ```
 
-## trim
+**Explanation**
 
-### Trims a `winapp2file`, removing entries not relevant to the current system
+| Entry | Result | Why |
+|:-|:-|:-|
+| `[7-Zip ZS *]` | Removed | `HKCU\Software\7-Zip-Zstandard` does not exist. Note that 7-Zip itself is installed, but this entry targets the Zstandard fork's exact registry key. |
+| `[Mozilla Firefox Autofill Data *]` | Kept | `DetectFile1` (`%AppData%\Mozilla\Firefox\Profiles`) exists |
+| `[My Custom Cleanup *]` | Kept | No detection keys, always retained |
+| `[Steam Packages *]` | Kept | `HKCU\Software\Valve\Steam` exists |
+| `[Windows Calculator *]` | Kept | The wildcard `DetectFile` expanded to the real package folder `Microsoft.WindowsCalculator_8wekyb3d8bbwe` |
+| `[Windows XP Era Application *]` | Removed | `DetectOS=\|5.2` requires Windows ≤ 5.2 (XP/Server 2003); this machine reports 10.0 |
 
-```vb
-Public Sub trim(winapp2 As winapp2file)
-    For Each entryList In winapp2.Winapp2entries
-        processEntryList(entryList)
-    Next
-    winapp2.rebuildToIniFiles()
-    winapp2.sortInneriniFiles()
-End Sub
+**Notes**
+
+You can see the [output formatting](#output-formatting) at work in the result: the Firefox entry came out wrapped in its browser-family comment block, the way the CCleaner flavor is formatted.
+
+---
+
+## Example 2: Trimming the Full Database
+
+**Context**
+
+This is the ordinary case, running Trim over the whole database to get a copy that fits one machine.
+
+**Intent**
+
+We want to trim the full 3,715-entry winapp2.ini, saving the result to a separate file so the original is preserved.
+
+**Command**
+
+```
+winapp2ool -trim -3f winapp2-trimmed.ini
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-winapp2|`winapp2file`|The `winapp2file` to be trimmed to fit the current system
+**Output**
 
-## checkExistence
+###### **Console**
 
-### Evaluates a `keyList` to observe whether they exist on the current machine
-
-```vb
-Private Function checkExistence(ByRef kl As keyList, chkExist As Func(Of String, Boolean)) As Boolean
-    If kl.KeyCount = 0 Then Return False
-    For Each key In kl.Keys
-        If chkExist(key.Value) Then
-            gLog($"{key.Value} matched a path on the system", Not kl.KeyType = "DetectOS", descend:=True, indent:=True)
-            Return True
-        End If
-    Next
-    Return False
-End Function
+```
+ ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ ║                                                      Trim Complete                                                 ║
+ ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+ ║ Initial entry count: 3715                                                                                          ║
+ ║ Trimmed entry count: 349                                                                                           ║
+ ║ 3366 entries trimmed from winapp2.ini (91%)                                                                        ║
+ ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+ ║                                          Press any key to return to the menu.                                      ║
+ ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-kl|`keyList`|The `keyList` containing detection criteria to be evaluated
-chkExist|`Func(Of String, Boolean)`|The `function` that evaluates the detection criteria in `kl`
+###### **Output file (`winapp2-trimmed.ini`), first lines**
 
-## processEntryExistence
-
-Returns `True` if any detection criteria are met, `False` otherwise
-
-### Audits the detection criteria in a given `winapp2entry` against the current system
-
-```vb
-Private Function processEntryExistence(ByRef entry As winapp2entry) As Boolean
-    gLog($"Processing entry: {entry.Name}", ascend:=True)
-    Dim hasMetDetOS = False
-    ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
-    If Not entry.DetectOS.KeyCount = 0 Then
-        If winVer = Nothing Then winVer = getWinVer()
-        hasMetDetOS = checkExistence(entry.DetectOS, AddressOf checkDetOS)
-        gLog($"Met DetectOS criteria. {winVer} satisfies {entry.DetectOS.Keys.First.Value}", hasMetDetOS, indent:=True)
-        gLog($"Did not meet DetectOS criteria. {winVer} does not satisfy {entry.DetectOS.Keys.First.Value}", Not hasMetDetOS, descend:=True, indent:=True)
-        If Not hasMetDetOS Then Return False
-    End If
-    ' Process any other Detect criteria we have
-    If checkExistence(entry.SpecialDetect, AddressOf checkSpecialDetects) Then Return True
-    If checkExistence(entry.Detects, AddressOf checkRegExist) Then Return True
-    If checkExistence(entry.DetectFiles, AddressOf checkPathExist) Then Return True
-    ' Return true for the case where we have only a DetectOS and we meet its criteria
-    Dim onlyHasDetOS = entry.SpecialDetect.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount = 0
-    gLog("No other detection keys found than DetectOS", onlyHasDetOS And hasMetDetOS, descend:=True)
-    If hasMetDetOS And onlyHasDetOS Then Return True
-    ' Return true for the case where we have no valid detect criteria
-    Dim hasNoDetectKeys = entry.DetectOS.KeyCount + entry.DetectFiles.KeyCount + entry.Detects.KeyCount + entry.SpecialDetect.KeyCount = 0
-    gLog("No detect keys found, entry will be retained.", hasNoDetectKeys, descend:=True)
-    If hasNoDetectKeys Then Return True
-    gLog("", descend:=True)
-    Return False
-End Function
+```ini
+; Version: 251109
+; # of entries: 349
+;
+; Winapp2.ini is fully licensed under the CC-BY-SA-4.0 license agreement. ...
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-entry|`winapp2entry`|A `winapp2entry` to whose detection criteria will be audited
+**Explanation**
 
-## virtualStoreChecker
+- The input file is `winapp2.ini` in the current directory (default)
+- The output file is `winapp2-trimmed.ini`; the input file is left untouched
+- 91% of the database was removed; the 349 survivors are the entries whose software was actually detected on this machine
+- The `; Version: 251109` line was carried over from the input file, and the entry count comment was updated to the post-trim count
 
-### Audits the given entry for legacy codepaths in the machine's VirtualStore
+---
 
-```vb
-Private Sub virtualStoreChecker(ByRef entry As winapp2entry)
-    vsKeyChecker(entry.FileKeys)
-    vsKeyChecker(entry.RegKeys)
-    vsKeyChecker(entry.ExcludeKeys)
-End Sub
+## Example 3: Downloading and Trimming in One Step
+
+**Context**
+
+If the trimmed file is all you keep, you never need the full database sitting on disk.
+
+**Intent**
+
+We want to download the latest winapp2.ini from GitHub and trim it in a single command, starting from an empty directory.
+
+**Command**
+
+```
+winapp2ool -trim -d -3f winapp2-trimmed.ini
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-entry|`winapp2entry`|The `winapp2entry` to audit
+**Output**
 
-## vsKeyChecker
+###### **Console**
 
-### Generates keys for VirtualStore locations that exist on the current system and inserts them into the given list
-
-```vb
-Private Sub vsKeyChecker(ByRef kl As keyList)
-    If kl.KeyCount = 0 Then Exit Sub
-    Dim starterCount = kl.KeyCount
-    Select Case kl.KeyType
-        Case "FileKey", "ExcludeKey"
-            mkVsKeys({"%ProgramFiles%", "%CommonAppData%", "%CommonProgramFiles%", "HKLM\Software"}, {"%LocalAppData%\VirtualStore\Program Files*", "%LocalAppData%\VirtualStore\ProgramData", "%LocalAppData%\VirtualStore\Program Files*\Common Files", "HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
-        Case "RegKey"
-            mkVsKeys({"HKLM\Software"}, {"HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE"}, kl)
-    End Select
-    If Not starterCount = kl.KeyCount Then kl.renumberKeys(replaceAndSort(kl.toStrLst(True), "|", " \ \"))
-End Sub
+```
+ ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+ ║                                                      Trim Complete                                                 ║
+ ╠════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+ ║ Initial entry count: 3715                                                                                          ║
+ ║ Trimmed entry count: 349                                                                                           ║
+ ║ 3366 entries trimmed from winapp2.ini (91%)                                                                        ║
+ ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-kl|`keyList`|The `keyList` of FileKey, RegKey, or ExcludeKeys to be checked against the VirtualStore
+**Explanation**
 
-## mkVsKeys
+- No local winapp2.ini is required: `-d` downloads the latest database and trims it directly
+- With `-d`, the `-1f`/`-1d` input file settings are ignored
+- The output is `winapp2-trimmed.ini` 
 
-### Creates `iniKeys` to handle VirtualStore locations that correspond to paths given in `kl`
+---
 
-```vb
-Private Sub mkVsKeys(findStrs As String(), replStrs As String(), ByRef kl As keyList)
-    Dim initVals = kl.toStrLst(True)
-    Dim keysToAdd As New keyList(kl.KeyType)
-    For Each key In kl.Keys
-        If Not key.vHasAny(findStrs, True) Then Continue For
-        For i = 0 To findStrs.Count - 1
-            Dim keyToAdd = createVSKey(findStrs(i), replStrs(i), key)
-            ' Don't recreate keys that already exist
-            If initVals.contains(keyToAdd.Value) Then Continue For
-            keysToAdd.add(keyToAdd, Not key.Value = keyToAdd.Value)
-        Next
-    Next
-    Dim kl2 = kl
-    keysToAdd.Keys.ForEach(Sub(key) kl2.add(key, checkExist(New winapp2KeyParameters(key).PathString)))
-    kl = kl2
-End Sub
+## Example 4: Never-Trim and Always-Trim Overrides
+
+**Context**
+
+Continuing from [Example 1](#example-1-anatomy-of-a-trim): suppose we plan to install 7-Zip Zstandard soon, so we want its entry to survive trimming even though it isn't detected yet. Meanwhile, we prefer Steam's own cleanup for its package cache and never want `[Steam Packages *]` in our output, even though Steam is installed.
+
+**Intent**
+
+We want to retain `[7-Zip ZS *]` despite its failing detection and remove `[Steam Packages *]` despite its passing detection.
+
+**Files**
+
+Using the same input file as Example 1, plus:
+
+###### **Includes file (`includes.ini`)**
+
+```ini
+[7-Zip ZS *]
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-findStrs|`String()`|An array of Strings to seek for in the key value
-replStrs|`String()`|An array of strings to replace the sought after key values
-kl|`keyList`|The `keylist` to be processed
+###### **Excludes file (`excludes.ini`)**
 
-## createVSKey
-
-### Creates the VirtualStore version of a given `iniKey`
-
-```vb
-Private Function createVSKey(findStr As String, replStr As String, key As iniKey) As iniKey
-    Return New iniKey($"{key.Name}={key.Value.Replace(findStr, replStr)}")
-End Function
+```ini
+[Steam Packages *]
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-findStr|`String`|The normal filesystem path
-replStr|`String`|The VirtualStore path
-key|`iniKey`|The `iniKey` to processed into a VirtualStore key
+**Command**
 
-## processEntryList
-
-### Processes a list of `winapp2entries` and removes any from the list that wouldn't be detected by CCleaner
-
-```vb
-Private Sub processEntryList(ByRef entryList As List(Of winapp2entry))
-    Dim sectionsToBePruned As New List(Of winapp2entry)
-    ' If the entry's Detect criteria doesn't return true, prune it
-    entryList.ForEach(Sub(entry) If Not processEntryExistence(entry) Then sectionsToBePruned.Add(entry) Else virtualStoreChecker(entry))
-    removeEntries(entryList, sectionsToBePruned)
-End Sub
+```
+winapp2ool -trim -includes -excludes -3f winapp2-trimmed.ini
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-entryList|`List(Of winapp2entry)`|The list of `winapp2entries` who detection criteria will be audited
+**Output**
 
-## checkSpecialDetects
-
-### Returns `True` if a SpecialDetect location exists, `False` otherwise
-
-```vb
-Private Function checkSpecialDetects(ByVal key As String) As Boolean
-    Select Case key
-        Case "DET_CHROME"
-            Dim detChrome As New List(Of String) _
-                        From {"%AppData%\ChromePlus\chrome.exe", "%LocalAppData%\Chromium\Application\chrome.exe", "%LocalAppData%\Chromium\chrome.exe",
-                        "%LocalAppData%\Flock\Application\flock.exe", "%LocalAppData%\Google\Chrome SxS\Application\chrome.exe", "%LocalAppData%\Google\Chrome\Application\chrome.exe",
-                        "%LocalAppData%\RockMelt\Application\rockmelt.exe", "%LocalAppData%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\Application\chrome.exe",
-                        "%ProgramFiles%\SRWare Iron\iron.exe", "%ProgramFiles%\Chromium\chrome.exe", "%ProgramFiles%\Flock\Application\flock.exe",
-                        "%ProgramFiles%\Google\Chrome SxS\Application\chrome.exe", "%ProgramFiles%\Google\Chrome\Application\chrome.exe", "%ProgramFiles%\RockMelt\Application\rockmelt.exe",
-                        "HKCU\Software\Chromium", "HKCU\Software\SuperBird", "HKCU\Software\Torch", "HKCU\Software\Vivaldi"}
-            For Each path As String In detChrome
-                If checkExist(path) Then Return True
-            Next
-        Case "DET_MOZILLA"
-            Return checkPathExist("%AppData%\Mozilla\Firefox")
-        Case "DET_THUNDERBIRD"
-            Return checkPathExist("%AppData%\Thunderbird")
-        Case "DET_OPERA"
-            Return checkPathExist("%AppData%\Opera Software")
-    End Select
-    ' If we didn't return above, SpecialDetect definitely doesn't exist
-    Return False
-End Function
+```ini
+[Mozilla Firefox Autofill Data *]
+[7-Zip ZS *]
+[My Custom Cleanup *]
+[Windows Calculator *]
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-key|`iniKey`|A SpecialDetect format `iniKey`
+**Explanation**
 
-## checkExist
+- `[7-Zip ZS *]` is now kept: the include list overrides its failing `Detect`
+- `[Steam Packages *]` is now removed: the exclude list overrides its passing `Detect`
+- `[Windows XP Era Application *]` is still removed 
 
-### Handles passing off checks from sources that may vary between file system and registry
+**Notes**
+- Both override checks run before any detection evaluation
+- If an entry appears in both files, the include list wins
+- The `-includes` and `-excludes` flags must be passed on each CLI run where they're required 
 
-```vb
-Private Function checkExist(path As String) As Boolean
-    Return If(path.StartsWith("HK"), checkRegExist(path), checkPathExist(path))
-End Function
+---
+
+## Example 5: VirtualStore Key Generation
+
+**Context**
+
+On systems upgraded through older versions of Windows, pre-UAC applications may have had writes to `Program Files` silently redirected into `%LocalAppData%\VirtualStore`. Clean only the original location and the redirected copy is missed. This machine has exactly that leftover: `%LocalAppData%\VirtualStore\Program Files (x86)\Steam\package` exists.
+
+**Intent**
+
+We want surviving entries to pick up coverage of their VirtualStore counterparts, but only where those locations really exist.
+
+**Files**
+
+The same input file as [Example 1](#example-1-anatomy-of-a-trim); the relevant entry:
+
+```ini
+[Steam Packages *]
+Section=Games
+Detect=HKCU\Software\Valve\Steam
+FileKey1=%ProgramFiles%\Steam\package|*.zip.*
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-path|`String`|A filesystem or registry path whose existence will be audited
+**Command**
 
-## checkRegExist
-
-### Returns `True` if a given key exists in the Windows Registry, `False` otherwise
-
-```vb
-Private Function checkRegExist(path As String) As Boolean
-    Dim dir = path
-    Dim root = getFirstDir(path)
-    dir = dir.Replace(root & "\", "")
-    Dim exists = getRegExists(root, dir)
-    ' If we didn't return anything above, registry location probably doesn't exist
-    Return exists
-End Function
+```
+winapp2ool -trim -3f winapp2-trimmed.ini
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-root|`String`|The registry hive that contains the key whose existence will be audited
-dir|`String`|The path of the key whose existence will be audited
+**Output**
 
-## processEnvDirs
+###### **The entry in `winapp2-trimmed.ini` after trimming**
 
-### Handles some CCleaner variables and logs if the current variable is ProgramFiles so the 32bit location can be checked later
-
-```vb
-Private Sub processEnvDirs(ByRef dir As String, ByRef isProgramFiles As Boolean)
-    If dir.Contains("%") Then
-        Dim splitDir = dir.Split(CChar("%"))
-        Dim var = splitDir(1)
-        Dim envDir = Environment.GetEnvironmentVariable(var)
-        Select Case var
-            Case "ProgramFiles"
-                isProgramFiles = True
-            Case "Documents"
-                envDir = $"{Environment.GetEnvironmentVariable("UserProfile")}\{If(winVer = 5.1, "My ", "")}Documents"
-            Case "CommonAppData"
-                envDir = Environment.GetEnvironmentVariable("ProgramData")
-        End Select
-        dir = envDir + splitDir(2)
-    End If
-End Sub
+```ini
+[Steam Packages *]
+Section=Games
+Detect=HKCU\Software\Valve\Steam
+FileKey1=%LocalAppData%\VirtualStore\Program Files*\Steam\package|*.zip.*
+FileKey2=%ProgramFiles%\Steam\package|*.zip.*
 ```
 
-|Parameter|Type|Description
-:-|:-|:-
-dir|`String`|A filesystem path to process for environment variables
-isProgramFiles|`Boolean`|Indicates that the %ProgramFiles% variable has been seen
+**Explanation**
 
-## checkPathExist
-
-### Returns `True` if a path exists on the file system, `False` otherwise
-
-```vb
-Private Function checkPathExist(key As String) As Boolean
-    Dim isProgramFiles = False
-    Dim dir = key
-    ' Make sure we get the proper path for environment variables
-    processEnvDirs(dir, isProgramFiles)
-    Try
-        ' Process wildcards appropriately if we have them
-        If dir.Contains("*") Then
-            Dim exists = expandWildcard(dir, True)
-            ' Small contingency for the isProgramFiles case
-            If Not exists And isProgramFiles Then
-                swapDir(dir, key)
-                exists = expandWildcard(dir, True)
-            End If
-            Return exists
-        End If
-        ' Check out those file/folder paths
-        If Directory.Exists(dir) Or File.Exists(dir) Then Return True
-        ' If we didn't find it and we're looking in Program Files, check the (x86) directory
-        If isProgramFiles Then
-            swapDir(dir, key)
-            Dim exists = Directory.Exists(dir) Or File.Exists(dir)
-            Return exists
-        End If
-    Catch ex As Exception
-        exc(ex)
-        Return True
-    End Try
-    Return False
-End Function
-```
-
-|Parameter|Type|Description
-:-|:-|:-
-key|`String`|A filesystem path
-
-## swapDir
-
-### Swaps out a directory with the ProgramFiles parameterization on 64bit computers
-
-```vb
-Private Sub swapDir(ByRef dir As String, key As String)
-    Dim envDir = Environment.GetEnvironmentVariable("ProgramFiles(x86)")
-    dir = envDir & key.Split(CChar("%"))(2)
-End Sub
-```
-
-|Parameter|Type|Description
-:-|:-|:-
-dir|`String`|The file system path to be modified
-key|`String`|The original state of the path
-
-## expandWildcard
-
-### Interprets parameterized wildcards for the current system
-
-```vb
-Private Function expandWildcard(dir As String, isFileSystem As Boolean) As Boolean
-    ' This should handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
-    Dim possibleDirs As New strList
-    Dim currentPaths As New strList
-    currentPaths.add("")
-    ' Split the given string into sections by directory
-    Dim splitDir = dir.Split(CChar("\"))
-    For Each pathPart In splitDir
-        ' If this directory parameterization includes a wildcard, expand it appropriately
-        ' This probably wont work if a string for some reason starts with a *
-        If pathPart.Contains("*") Then
-            For Each currentPath In currentPaths.Items
-                Try
-                    ' Query the existence of child paths for each current path we hold
-                    If isFileSystem Then
-                        Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
-                        ' If there are any, add them to our possibility list
-                        possibleDirs.add(possibilities, Not possibilities.Count = 0)
-                    Else
-                        ' Registry Query here
-                    End If
-                Catch
-                    ' The exception we encounter here is going to be the result of directories not existing.
-                    ' The exception will be thrown from the GetDirectories call and will prevent us from attempting to add new
-                    ' items to the possibility list. In this instance, we can silently fail (here).
-                End Try
-            Next
-            ' If no possibilities remain, the wildcard parameterization hasn't left us with any real paths on the system, so we may return false.
-            If possibleDirs.Count = 0 Then Return False
-            ' Otherwise, clear the current paths and repopulate them with the possible paths
-            currentPaths.clear()
-            currentPaths.add(possibleDirs)
-            possibleDirs.clear()
-        Else
-            If currentPaths.Count = 0 Then
-                currentPaths.add($"{pathPart}")
-            Else
-                Dim newCurPaths As New strList
-                For Each path In currentPaths.Items
-                    If Not path.EndsWith("\") And path <> "" Then path += "\"
-                    newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
-                Next
-                currentPaths = newCurPaths
-            End If
-        End If
-    Next
-    ' If any file/path exists, return true
-    For Each currDir In currentPaths.Items
-        If Directory.Exists(currDir) Or File.Exists(currDir) Then Return True
-    Next
-    Return False
-End Function
-```
-
-|Parameter|Type|Description
-:-|:-|:-
-dir|`String`|A path containing a wildcard
-
-## checkDetOS
-
-### Returns `True` if the system satisfies the DetectOS citeria, `False` otherwise
+- `[Steam Packages *]` passed detection, so Trim scanned its FileKeys for VirtualStore-eligible paths
+- `FileKey1=%ProgramFiles%\Steam\package|*.zip.*` produced the candidate `%LocalAppData%\VirtualStore\Program Files*\Steam\package`, which exists on this machine, so the key was added; the entry's FileKeys were then renumbered
+- On a machine without that VirtualStore path, the entry would pass through unchanged. Compare to Example 1, where the same input produced no VirtualStore keys 

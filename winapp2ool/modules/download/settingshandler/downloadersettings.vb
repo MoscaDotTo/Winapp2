@@ -1,7 +1,7 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
-' 
+'    Copyright (C) 2018-2026 Hazel Ward
+'
 '    This file is a part of Winapp2ool
-' 
+'
 '    Winapp2ool is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
 '    the Free Software Foundation, either version 3 of the License, or
@@ -18,25 +18,30 @@
 Option Strict On
 
 ''' <summary>
-''' Holds the settings for the Downloader module, which is responsible for downloading files.
-''' This module contains properties that define the file to be downloaded and whether the settings have been changed from their defaults.
+''' Holds the settings for the Downloader module, which provides a simple interface
+''' for downloading project files from the winapp2 GitHub.
 ''' </summary>
-''' 
-''' Docs last updated: 2025-06-25 | Code last updated: 2025-06-25
 Public Module downloadersettings
 
-    '''<summary> 
-    '''Holds the path of any files to be saved by the Downloader 
-    '''</summary>
-    '''
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
-    Public Property downloadFile As iniFile = New iniFile(Environment.CurrentDirectory, "")
+    ''' <summary>
+    ''' The directory in which downloaded files are saved
+    ''' </summary>
+    Public Property downloadFile As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=False)
 
-    ''' <summary> 
-    ''' Indicates that the Downloader module's settings have been changed from their defaults 
-    '''</summary>
-    '''
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
+    ''' <summary>
+    ''' Indicates that the Downloader module's settings have been changed from their defaults
+    ''' </summary>
     Public Property DownloadModuleSettingsChanged As Boolean = False
+
+    ''' <summary>
+    ''' Restores all Downloader settings to their defaults and persists the reset to disk
+    ''' </summary>
+    Public Sub InitDefaultDownloadSettings()
+
+        downloadFile = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=False)
+        DownloadModuleSettingsChanged = False
+        SaveModule2(NameOf(Downloader), GetType(downloadersettings))
+
+    End Sub
 
 End Module

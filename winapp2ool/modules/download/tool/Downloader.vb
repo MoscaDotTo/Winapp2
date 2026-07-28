@@ -17,8 +17,8 @@
 
 Option Strict On
 
-''' <summary> 
-''' Downloader is a winapp2ool module which provides a very simple interface for downloading indvidual
+''' <summary>
+''' Downloader is a winapp2ool module which provides a very simple interface for downloading individual
 ''' files from the winapp2 GitHub in a way that can be automated through scripting
 ''' </summary>
 Module Downloader
@@ -52,6 +52,16 @@ Module Downloader
     ''' The web address of the Tron version of winapp2.ini 
     ''' </summary>
     Public ReadOnly Property tronFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Tron/Winapp2.ini"
+
+    ''' <summary>
+    ''' The web address of the CCleaner 7 version of winapp2.ini
+    ''' </summary>
+    Public ReadOnly Property cc7FlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/CCleaner7/Winapp2.ini"
+
+    ''' <summary>
+    ''' The web address of the FluentCleaner version of winapp2.ini
+    ''' </summary>
+    Public ReadOnly Property fcFlavorLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/FluentCleaner/Winapp2.ini"
 
     ''' <summary> 
     ''' The web address of winapp2ool.exe 
@@ -88,67 +98,98 @@ Module Downloader
     ''' </summary>
     Public ReadOnly Property readMeUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md"
 
-    ''' <summary> 
-    ''' Handles the commandline args for the Downloader 
+    ''' <summary>
+    ''' The web address of the winapp2.ini contribution guidelines 
     ''' </summary>
+    ''' <returns></returns>
+    Public ReadOnly Property contributionsUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md"
+
+    ''' <summary>
+    ''' The web address of the winapp2.ini license 
+    ''' </summary>
+    ''' <returns></returns>
+    Public ReadOnly Property winapp2licenceUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"
+
+    ''' <summary>
+    ''' Handles command line arguments for the Downloader module
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' File arguments:
+    ''' <list type="bullet">
+    ''' <item><c> -1d path </c> — Set the save directory</item>
+    ''' <item><c> -1f name </c> — Set the save filename</item>
+    ''' </list>
+    '''
+    ''' Positional arguments (select the file to download):
+    ''' <list type="bullet">
+    ''' <item><c> 1 </c> or <c> winapp2 </c> — winapp2.ini (flavor-aware)</item>
+    ''' <item><c> 2 </c> or <c> winapp2ool </c> — winapp2ool.exe</item>
+    ''' <item><c> 3 </c> or <c> readme </c> — readme.txt</item>
+    ''' <item><c> 4 </c> or <c> winapp3 </c> — winapp3.ini</item>
+    ''' <item><c> 5 </c> or <c> archived </c> — Archived entries.ini</item>
+    ''' </list>
+    ''' </remarks>
     Public Sub handleCmdLine()
 
         Dim fileLink = ""
 
-        If cmdargs.Count > 0 Then
+        Dim spec As New CliArgSpec(NameOf(Downloader))
+        spec.WithFile(1, downloadFile) _
+            .WithPositional(
+                Sub(arg)
+                    Select Case arg.ToUpperInvariant
+                        Case "1", "WINAPP2"
+                            fileLink = getWinappLink()
+                            downloadFile.Name = If(fileLink.Contains("SystemNinja"), "winapp2.rules", "winapp2.ini")
+                        Case "2", "WINAPP2OOL"
+                            fileLink = toolExeLink()
+                            downloadFile.Name = "winapp2ool.exe"
+                        Case "3", "README"
+                            fileLink = readMeLink
+                            downloadFile.Name = "readme.txt"
+                        Case "4", "WINAPP3"
+                            fileLink = wa3link
+                            downloadFile.Name = "winapp3.ini"
+                        Case "5", "ARCHIVED"
+                            fileLink = archivedLink
+                            downloadFile.Name = "Archived entries.ini"
+                        Case Else
+                            printValidArgsExit($"Unknown argument: {arg}")
+                    End Select
+                End Sub) _
+            .Parse()
 
-            Select Case cmdargs(0).ToUpperInvariant
+        If fileLink.Length = 0 Then printValidArgsExit("No file was specified for download")
 
-                Case "1", "WINAPP2"
-
-                    fileLink = getWinappLink()
-                    downloadFile.Name = If(fileLink.Contains("SystemNinja"), "winapp2.rules", "winapp2.ini")
-
-                Case "2", "WINAPP2OOL"
-
-                    fileLink = toolLink
-                    downloadFile.Name = "winapp2ool.exe"
-
-                Case "3", "README"
-
-                    fileLink = readMeLink
-                    downloadFile.Name = "readme.txt"
-
-                Case "4", "WINAPP3"
-
-                    fileLink = wa3link
-                    downloadFile.Name = "winapp3.ini"
-
-                Case "5", "ARCHIVED"
-
-                    fileLink = archivedLink
-                    downloadFile.Name = "Archived Entries.ini"
-
-                Case Else
-
-                    cwl($"Unknown argument: {cmdargs(0)}", True)
-                    cwl("Valid arguments are: winapp2, winapp2ool, readme, winapp3, archived", True)
-                    Environment.Exit(1)
-
-            End Select
-
-            cmdargs.RemoveAt(0)
-
-        End If
-
-        getFileAndDirParams({downloadFile, New iniFile, New iniFile})
-
-        If downloadFile.Name = "winapp2ool.exe" AndAlso downloadFile.Dir = Environment.CurrentDirectory Then autoUpdate()
+        If downloadFile.Name = "winapp2ool.exe" AndAlso downloadFile.Dir = Environment.CurrentDirectory Then autoUpdate() : Return
 
         download(downloadFile, fileLink)
 
     End Sub
 
     ''' <summary>
+    ''' Informs the user that no download could be performed, lists the valid positional
+    ''' arguments, and exits with a nonzero code
+    ''' </summary>
+    '''
+    ''' <param name="reason">
+    ''' The explanation of why no file could be downloaded
+    ''' </param>
+    Private Sub printValidArgsExit(reason As String)
+
+        gLog(reason)
+
+        cwl(reason, True)
+        cwl("Valid arguments are: winapp2, winapp2ool, readme, winapp3, archived", True)
+
+        Environment.Exit(1)
+
+    End Sub
+
+    ''' <summary>
     ''' Returns the link to winapp2ool.exe on the appropriate branch for the current tool configuration 
     ''' </summary>
-    ''' 
-    ''' Docs last updated: 2020-09-14 | Code last updated: 2020-09-14
     Public Function toolExeLink() As String
 
         Return If(isBeta, betaToolLink, toolLink)
@@ -182,6 +223,14 @@ Module Downloader
 
                 Return tronFlavorLink
 
+            Case WinappFlavor.CCleaner7
+
+                Return cc7FlavorLink
+
+            Case WinappFlavor.FluentCleaner
+
+                Return fcFlavorLink
+
         End Select
 
         Return baseFlavorLink
@@ -197,7 +246,7 @@ Module Downloader
     ''' </param>
     Public Function GetNameFromDL(shouldDownload As Boolean) As String
 
-        Return If(shouldDownload, If(RemoteWinappIsNonCC, "Online (Non-CCleaner)", "Online"), "")
+        Return If(shouldDownload, $"Online ({CurrentWinappFlavor.ToString} flavor)", "")
 
     End Function
 

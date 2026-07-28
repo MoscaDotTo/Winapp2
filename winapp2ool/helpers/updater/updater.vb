@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -66,6 +66,10 @@ Public Module updater
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion.Length = 0 Or latestWa2Ver.Length = 0 Then updateCheckFailed("online", True) : Return
+        ' Pad both versions before comparing so that a short last segment (e.g. a build time shortly after midnight)
+        ' does not produce a numerically shorter string and cause a false positive or false negative update result
+        padVersionNum(latestVersion)
+        padVersionNum(currentVersion)
         ' Observe whether or not updates are available, using val to avoid conversion mistakes
         updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
         localWa2Ver = getVersionFromLocalFile()
@@ -73,14 +77,15 @@ Public Module updater
         checkedForUpdates = True
         gLog("Update check complete:")
         gLog($"Winapp2ool:")
-        gLog("Local: " & currentVersion, indent:=True)
-        gLog("Remote: " & latestVersion, indent:=True)
+        gLog("  Local: " & currentVersion)
+        gLog("  Remote: " & latestVersion)
         gLog("Winapp2.ini:")
-        gLog("Local: " & localWa2Ver, indent:=True)
-        gLog("Remote: " & latestWa2Ver, indent:=True)
+        gLog("  Local: " & localWa2Ver)
+        gLog("  Remote: " & latestWa2Ver)
         Dim bothUpdatesAreAvail = waUpdateIsAvail And updateIsAvail
         Dim updHeader = $"Update{If(bothUpdatesAreAvail, "s", "")} available for {If(updateIsAvail, "winapp2ool ", "")}{If(bothUpdatesAreAvail, "and ", "")}{If(waUpdateIsAvail, "winapp2.ini", "")}"
-        setHeaderText(updHeader, True, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
+        setNextMenuHeaderText(updHeader, waUpdateIsAvail Or updateIsAvail, ConsoleColor.Green)
+
     End Sub
 
     '''<summary> Performs the version checking for winapp2ool.exe </summary>
@@ -98,10 +103,6 @@ Public Module updater
                     alreadyDownloadedExecutable = True
                     ' This places a lock on winapp2ool.exe in the tmp folder that will remain until we close the application
                     latestVersion = FileVersionInfo.GetVersionInfo(tmpPath).FileVersion
-                    ' If the build time is earlier than 2:46am (10000 seconds), the last part of the version number will be one or more digits short 
-                    ' Pad it with 0s when this is the case to avoid telling users there's an update available when there is not 
-                    padVersionNum(latestVersion)
-                    padVersionNum(currentVersion)
                 Catch ex As FileNotFoundException
                     handleFileNotFoundException(ex)
                 End Try
@@ -113,7 +114,7 @@ Public Module updater
     ''' <param name="name"> The name of the component whose update check failed </param>
     ''' <param name="chkOnline"> A flag specifying that the internet connection should be retested </param>
     Private Sub updateCheckFailed(name As String, Optional chkOnline As Boolean = False)
-        setHeaderText($"/!\ {name} update check failed. /!\", True)
+        setNextMenuHeaderText($"/!\ {name} update check failed. /!\", printColor:=ConsoleColor.Red)
         localWa2Ver = "000000"
         If chkOnline Then chkOfflineMode()
     End Sub
