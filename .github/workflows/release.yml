@@ -87,6 +87,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           TAG: ${{ steps.tag.outputs.tag }}
           SHA: ${{ steps.gate.outputs.sha }}
           VERSION: ${{ steps.gate.outputs.version }}
