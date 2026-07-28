@@ -6,9 +6,11 @@ This guide covers how to add and update entries in winapp2.ini under the current
 
 ## How Winapp2.ini is maintained
 
-Winapp2.ini is no longer edited directly. Instead, it is assembled from the source files in the `Assembler/` directory by [winapp2ool](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md) whenever a maintainer runs the build script.
+Winapp2.ini is no longer edited directly. Instead, it is assembled from the source files in the `Assembler/` directory by [winapp2ool](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md).
 
 **All contributions must target those source files, not any `Winapp2.ini` file directly.**
+
+Building and publishing are automated. Once your change is merged, a scheduled GitHub Actions workflow rebuilds winapp2.ini and every flavor of it from the current sources, commits the results, and cuts a tagged release with each flavor and its changelog attached. Nobody runs the build by hand, and you never need to generate any output file yourself. Only edit the source files. In practice a merged entry appears in winapp2.ini, and in a release, within a day.
 
 ---
 
@@ -29,6 +31,7 @@ Winapp2.ini is no longer edited directly. Instead, it is assembled from the sour
 13. [How to submit](#how-to-submit)
     - [What to include in your PR](#what-to-include-in-your-pr)
     - [Verifying your work](#verifying-your-work)
+14. [What happens after you open a PR](#what-happens-after-you-open-a-pr)
 
 ---
 
@@ -48,7 +51,7 @@ Winapp2.ini is no longer edited directly. Instead, it is assembled from the sour
 
 All base entries live in `Assembler/EntryBuilder/<letter>.ini`. Standard winapp2.ini syntax is valid there. The folder name refers to the winapp2ool module that processes it, and an optional shorthand exists but is never required. The files under `Assembler/Entries/` are build artifacts regenerated from these sources on every build; do not edit them. See [EntryBuilder entries](#entrybuilder-entries).
 
-Editing a build artifact instead of its source is an easy mistake to make, but it is a mistake. Your committed changes will be silently destroyed when the next build regenerates the artifact from the unmodified source files. CI checks for this, and if your PR changes a file under `Assember/Entries`, or a published `winapp2.ini` or `diff.txt` file without also changing the source file that produces it, the **generated artifact guard** will fail. winapp2.ini is built through CI/CD via github actions; you never need to manually generate the output files, only modify the correct source files. 
+Editing a build artifact instead of its source is an easy mistake to make, but it is a mistake. Your committed changes will be silently destroyed when the next build regenerates the artifact from the unmodified source files. CI checks for this: if your PR changes a file under `Assembler/Entries/`, or a published `winapp2.ini` or `diff.txt` file, without also changing the source file that produces it, the **generated artifact guard** fails and names the source file you should have edited instead. See [What happens after you open a PR](#what-happens-after-you-open-a-pr).
 
 ---
 
@@ -82,7 +85,7 @@ When in doubt, write a standard entry and place it in the appropriate `<letter>.
 
 ### 2. Find what to clean
 
-Install the app, use it normally for a while, and do whatever produces the data you want gone: open files, browse around, sign in, run a few , etc. Identify the location of this data on disk. Be careful to make sure that this data isn't comingled with important data such as application configuration.
+Install the app, use it normally for a while, and do whatever produces the data you want gone: open files, browse around, sign in, run several times, etc. Identify the location of this data on disk. Be careful to make sure that this data isn't comingled with important data such as application configuration.
 
 ### 3. Write the entry
 
@@ -113,7 +116,7 @@ Open a PR against `master`.
 Entries for software that is no longer available are moved to the archive at `Winapp3/Archived entries.ini` rather than deleted, preserving them for users who still run the software.
 
 1. Remove the entry from its source file.
-2. Add it to `Winapp3/Archived entries.ini` in alphabetical order, written in standard winapp2.ini syntax. A base entry written in standard syntax can be moved as-is from its `Assembler/EntryBuilder/` source file. If the entry is generated (BrowserBuilder, UWPBuilder, or EntryBuilder shorthand), archive the generated form by copying it from the artifact under `Assembler/Entries/` and addding a `Skip=` key to its source section.
+2. Add it to `Winapp3/Archived entries.ini` in alphabetical order, written in standard winapp2.ini syntax. A base entry written in standard syntax can be moved as-is from its `Assembler/EntryBuilder/` source file. If the entry is generated (BrowserBuilder, UWPBuilder, or EntryBuilder shorthand), archive the generated form by copying it from the artifact under `Assembler/Entries/` and adding a `Skip=` key to its source section.
 3. In your PR, note why the software has been archived (e.g. the vendor site is gone or a live service has been discontinued).
 
 ---
@@ -378,7 +381,7 @@ To add a new Chromium-based browser, add a `[BrowserInfo: Browser Name]` section
 
 | Key | Purpose |
 | :- | :- |
-| `RegistryRoot=` | The registry root key for this browser. Multiple values can be provided on separate lines. If omitted, RegKeys wont be created and EntryScaffolds carrying a `RequiresRegistryRoot` key will skip this browser. |
+| `RegistryRoot=` | The registry root key for this browser. Multiple values can be provided on separate lines. If omitted, RegKeys won't be created and EntryScaffolds carrying a `RequiresRegistryRoot` key will skip this browser. |
 | `TruncateDetect=` | Provide this key (any value) to strip `\User Data\` from the generated `DetectFile`. Required when the `UserDataPath` contains a wildcard in the direct parent directory name. This value appears boolean but it is not, provide this key if and only if you want the DetectFile truncated.  |
 | `Skip=` | Provide this key (any value) to exclude this browser from generation. Used to retire support without losing the configuration. This value appears boolean but it is not, provide this key if and only if you want the entry skipped |
 
@@ -448,7 +451,7 @@ BrowserBuilder corrections use the same Flavorize winapp2ool module as the tool-
 | File | Use when |
 | :- | :- |
 | 1. `browser_section_removals.ini` | An entire generated entry does not apply to a specific browser.
-| 2. `browser_name_removals.ini` | A specific key name should be removed from a browser's entry. Number-sensitive match, key numbers must match. (eg. `FileKey3=` wont remove `FileKey1=`)|
+| 2. `browser_name_removals.ini` | A specific key name should be removed from a browser's entry. Number-sensitive match, key numbers must match. (eg. `FileKey3=` won't remove `FileKey1=`)|
 | 3. `browser_value_removals.ini` | A specific key value is wrong for a browser regardless of which numbered key it appears on. Write the key with the target value; the number you give it is irrelevant. (eg. FileKey=some\path|* will remove any FileKey whose value is some\path|*)|
 | 4. `browser_section_replacements.ini` | The generated entry for a browser is so different from the default that it needs to be replaced entirely. |
 | 5. `browser_key_replacements.ini` | A specific key needs a different value for a browser (exact name and section match). |
@@ -749,17 +752,31 @@ Some flavor files also contain sections named `[*]` or `[*Map: label]`. These ar
 
 ### What to include in your PR
 
-Commit source files only. Do not include regenerated build outputs:
+Commit source files only. Do not include build outputs:
 
-- any flavor of `winapp2.ini`
-- anything under `Assembler/Entries/` — every file there carries a generated-artifact header; maintainers regenerate the artifacts when your source change is merged
-- `winapp2ool.exe`
+- any flavor of `winapp2.ini`, or any `diff.txt`
+- anything under `Assembler/Entries/`: every file there opens with a header saying `DO NOT EDIT THIS FILE DIRECTLY` and naming its source
 
-Running the full build to verify your work regenerates every flavor of winapp2.ini and the artifacts under `Assembler/Entries/` in your working copy. Only commit the modified source files.
+The build regenerates all of these files from your source change after it merges.
+
+The reliable way to do this is to stage your source files by name:
+
+```
+git add "Assembler/EntryBuilder/A.ini"
+git commit -m "add an entry for Example App"
+```
+
+Avoid `git add -A` and `git add .`.
+
+If you [ran the full build](#verifying-your-work) to check your work, your working copy now contains 29 regenerated artifacts plus all seven rebuilt published outputs. 
+
+The [generated artifact guard](#what-happens-after-you-open-a-pr) will tell you, and `git restore` on the files it names will fix it
 
 ### Verifying your work
 
-Validation requires [downloading and running winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/refs/heads/master/winapp2ool/bin/Release/winapp2ool.exe) 
+This is entirely optional, and you can open a PR without doing any of it. CI builds your PR and reports back, and a maintainer reviews it either way. 
+
+Everything below requires [winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/refs/heads/master/winapp2ool/bin/Release/winapp2ool.exe). It is also attached to every [release](https://github.com/MoscaDotTo/Winapp2/releases).
 
 If you edited a generator's source files, regenerate its output before linting. In every case, finish by running WinappDebug on the file in the last column:
 
@@ -774,14 +791,46 @@ Each builder's README covers usage in depth.
 Launch Winapp2ool and input 1 to open [WinappDebug](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/winappdebug/README.md). Point it at the file from the table above. A single source file or generated output works directly; you do not need a built winapp2.ini. Make any corrections necessary (or allow WinappDebug to make them if possible) such that your entries do not cause any errors. 
 WinappDebug is a static analysis tool that catches and repairs a wide variety of style and syntax issues in winapp2.ini. See the WinappDebug README (linked above) for usage guidance.   
 
-If you can, run the full build:
+#### Running the full build
 
-1. Clone the repo. The build script is designed to run from the `Assembler/` directory and expects to find and place each flavor of winapp2.ini via relative paths. The build script will fail without the proper directory structure.
-2. Make your changes to the source files. 
-3. Place `winapp2ool.exe` 1.7+ in `Assembler/` or in your PATH variable. 
-4. Run `& '.\build winapp2.ps1'` from PowerShell in the `Assembler/` directory. If you get an execution policy error, run `Set-ExecutionPolicy -Scope Process RemoteSigned`
-5. Open the generated `winapp2.ini` (each flavor is placed in its home location as part of the build script) and check that your entry is there and looks the way you expected. If something is wrong, go back and re-edit it until it is correct.
-6. If you can go one step further: drop the built `winapp2.ini` into a cleaning tool and run its preview first (**Analyze** in CCleaner) to confirm your entry targets what you expected and nothing else. Then run the clean and verify that what should survive did.
-7. Before committing, revert or ignore the regenerated files the build produced: the flavor winapp2.ini files and the artifacts under `Assembler/Entries/`. See [What to include in your PR](#what-to-include-in-your-pr).
+CI runs this on every PR, but you can run it locally too
 
-Maintainers and CI can additionally run `& '.\build winapp2.ps1' -Verify` from `Assembler/`, which regenerates every artifact into a scratch folder and byte-compares it against the committed `Assembler/Entries/` files, failing on any mismatch.
+1. Clone the repo. The build script runs from the `Assembler/` directory and finds and places each flavor of winapp2.ini via relative paths; it will fail without the surrounding directory structure.
+2. Make your changes to the source files.
+3. Run `& '.\build winapp2.ps1'` from PowerShell in `Assembler/`. If you get an execution policy error, run `Set-ExecutionPolicy -Scope Process RemoteSigned`. A clone already contains the `winapp2ool.exe` the script needs.
+4. Open the built `winapp2.ini` (each flavor is written to its home location) and check that your entry is there and looks the way you expected.
+5. Optionally, drop the built `winapp2.ini` into a cleaning tool and scan with it to confirm your entry targets what you expected and nothing else. Then run the clean and verify that what should survive did.
+
+The build rewrites all 29 artifacts under `Assembler/Entries/` and all seven published output files in your working copy. Rather than cleaning that up afterwards, [stage your source files by name](#what-to-include-in-your-pr) and ignore the rest.
+
+`& '.\build winapp2.ps1' -Verify` is the maintainer-side variant: it builds nothing, regenerating every artifact into a scratch folder and byte-comparing against the committed `Assembler/Entries/` files instead, and failing on any mismatch. CI runs it automatically on every push to catch artifacts that have drifted from their sources (e.g. bad generator output).
+
+---
+
+## What happens after you open a PR
+
+Two automated checks run against your pull request. Neither needs anything from you beyond the PR itself, and a maintainer always reviews your change.
+
+### The generated artifact guard
+
+Runs on every PR. It checks one thing: that you edited sources rather than build output. It runs in a few seconds 
+
+It fails if your PR changes a generated file without changing the source that produces it. When it fails, it marks the offending files directly in the **Files changed** tab, each with a message naming the source file to edit instead:
+
+> `Assembler/Entries/A.ini` generated by EntryBuilder; edit `Assembler/EntryBuilder/A.ini` instead
+
+To fix it, move your edit into the named source file and `git restore` the generated one. You never need to run winapp2ool or regenerate anything to make this check pass.
+
+### The PR build
+
+If your PR touches anything under `Assembler/`, a bot builds winapp2.ini twice: once from `master` alone, then again with your change merged in, and posts a single comment that it updates on each push. It tells you one of:
+
+- **The PR builds cleanly**, followed by the changelog your change produces. Read it as a description of what your change does to the published file, and check it matches what you intended.
+- **The build failed**, with the output showing where. Usually a syntax error in an edited source file.
+- **The PR no longer merges cleanly** with `master`, which you fix by updating your branch.
+
+PRs that only touch `Winapp3/` get no build comment. `Winapp3.ini` is not assembled by the build, so there is nothing to build. That is expected, not a problem with your PR.
+
+### After merge
+
+You don't need to do anything else. A scheduled workflow rebuilds winapp2.ini and every flavor from the updated sources, commits the results, and publishes a tagged release with each flavor and its changelog attached. Typically, this is within a day of your merge.
