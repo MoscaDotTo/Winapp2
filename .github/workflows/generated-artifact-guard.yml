@@ -1,0 +1,173 @@
+# Generated-artifact guard: fail when a change edits a build OUTPUT without editing the
+# SOURCE that produces it.
+#
+# The failure mode this exists for: you edit Assembler/Entries/#.ini when you meant
+# Assembler/EntryBuilder/#.ini. Nothing complains. The file on disk says what you wanted.
+# Then the daily build regenerates Entries/ from the untouched EntryBuilder source 
+# This makes it a red X instead.
+#
+# How this differs from the two workflows that already build things:
+#   * artifact-drift.yml runs `-Verify` and byte-compares committed output against
+#     freshly generated output. It WOULD catch this, but it takes a full Windows build
+#     (minutes) and its scope is "is the committed output still correct", which is a
+#     different and more expensive question than "are these changed paths coherent".
+#   * pr-verify.yml builds the PR merged into master and reports the output delta. It
+#     regenerates Entries/ in place, so a hand-edit there is overwritten before it is
+#     ever noticed.
+# This guard runs no build at all
+# It is a cheap provenance check layered under both, not a replacement for either.
+#
+# Scope, deliberately: read-only, posts no comments, commits nothing. It is safe on
+# fork PRs because it never executes any repository content only `git diff --name-only`
+# and the checked-in classifier script, which is read from the BASE repo, never the PR.
+name: generated artifact guard
+
+on:
+  # PR gate. Unlike artifact-drift.yml (which is deliberately not a PR gate because it
+  # would demand contributors run winapp2ool), this one is safe to gate on: it asks only
+  # that the edit be in the right file, which is what a contributor should be doing
+  # anyway. It needs no tooling and cannot be satisfied by running a build.
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  # Push is what covers the pre-PR case: a commit straight onto a feature branch or
+  # master, which no pull_request event ever sees. Path-scoped to the only files that
+  # can trip either rule, so unrelated pushes do not spin up a runner.
+  #
+  # No feedback loop: build-on-merge.yml commits these exact artifacts, but it pushes
+  # with the GITHUB_TOKEN and token pushes do not fire push events. The actor guard on
+  # the job below is a second belt in case that ever changes.
+  push:
+    paths:
+      - 'Assembler/**'
+      - 'Winapp2.ini'
+      - 'diff.txt'
+      - 'Non-CCleaner/**'
+      - '.github/workflows/generated-artifact-guard.yml'
+      - '.github/scripts/check-generated-sources.sh'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: generated-artifact-guard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    # Never police the build's own artifact commits -- those are output-only BY DESIGN,
+    # which is precisely what rule 1 forbids for humans.
+    if: github.actor != 'github-actions[bot]'
+
+    steps:
+      # Full history: the check diffs against the merge base, which needs both sides.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # For a fork PR the head commit lives in the fork. fetch-depth 0 pulls
+      # refs/pull/<n>/merge, whose second parent IS that head, so it is normally present
+      # already -- but pr-verify.yml fetches it explicitly and this mirrors that, because
+      # a missing head object here would fail the run rather than degrade.
+      - name: Fetch PR head
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          git fetch --no-tags origin \
+            "+refs/pull/${{ github.event.number }}/head:refs/remotes/pr/head" || true
+
+      # Resolve the two refs to diff, per event. For a PR this is the base branch tip
+      # and the PR head; for a push it is the range that was pushed.
+      - name: Resolve diff range
+        id: range
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+
+          have() { git cat-file -e "$1^{commit}" 2>/dev/null; }
+
+          case "$EVENT" in
+            pull_request)
+              # actions/checkout leaves the PR head at refs/remotes/pull/<n>/merge's
+              # second parent; the head SHA itself is fetched by the full-depth clone.
+              base="$PR_BASE_SHA"; head="$PR_HEAD_SHA"
+              ;;
+            push)
+              base="$PUSH_BEFORE"; head="$PUSH_AFTER"
+              # A brand-new branch reports before=000...0, and a force-push can report a
+              # commit that is no longer reachable. Neither is diffable, so fall back to
+              # the merge base with the default branch: "what does this branch add".
+              if [ "$base" = "0000000000000000000000000000000000000000" ] || ! have "$base"; then
+                git fetch --no-tags origin "$DEFAULT_BRANCH" >/dev/null 2>&1 || true
+                base="origin/$DEFAULT_BRANCH"
+              fi
+              # A push straight to the default branch has no merge base to fall back on;
+              # if base and head are the same commit there is nothing to compare.
+              if [ "$(git rev-parse "$base")" = "$(git rev-parse "$head")" ]; then
+                echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+              fi
+              ;;
+            *)
+              base="origin/$DEFAULT_BRANCH"; head="$PUSH_AFTER"
+              if [ "$(git rev-parse "$base")" = "$(git rev-parse "$head")" ]; then
+                echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+              fi
+              ;;
+          esac
+
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "head=$head" >> "$GITHUB_OUTPUT"
+          echo "Comparing $base...$head"
+
+      # The escape hatch. Rule 1 cannot distinguish a hand-edit from a deliberate
+      # regeneration (see the script header), so the innocent case declares itself.
+      #
+      # Checked over EVERY commit message in the range, not just head_commit: a push of
+      # several commits should not need the token on whichever one happens to be last.
+      # Checked here rather than inside the script so the override is visible in the log
+      # even on runs that would have passed anyway.
+      #
+      # The PR title arrives via env, never interpolated into the script body -- it is
+      # attacker-controlled text on a fork PR. grep -F, no eval: it is only ever data.
+      #
+      # Case-folded via `tr` rather than `grep -i` deliberately: `grep -i` SIGABRTs on
+      # Git Bash's GNU grep 3.0 (with or without -F), so an -i here would be a flag that
+      # cannot be tested on the maintainer's machine -- it would appear to work in CI and
+      # be unverifiable locally. `tr '[:upper:]' '[:lower:]'` behaves identically in both.
+      - name: Check for the override token
+        id: skiptoken
+        if: steps.range.outputs.skip != 'true'
+        shell: bash
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE: ${{ steps.range.outputs.base }}
+          HEAD: ${{ steps.range.outputs.head }}
+        run: |
+          set -uo pipefail
+          {
+            printf '%s\n' "${PR_TITLE:-}"
+            git log --format=%B "$BASE..$HEAD" -- 2>/dev/null
+          } | tr '[:upper:]' '[:lower:]' \
+            | grep -qFe '[regen]' -e '[skip-generated-check]' && {
+            echo "Override token present; the guard will report but not fail this run."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          }
+          exit 0
+
+      - name: Are the changed paths coherent?
+        if: steps.range.outputs.skip != 'true' && steps.skiptoken.outputs.skip != 'true'
+        shell: bash
+        run: |
+          bash .github/scripts/check-generated-sources.sh \
+            '${{ steps.range.outputs.base }}' '${{ steps.range.outputs.head }}'

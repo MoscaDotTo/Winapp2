@@ -44,9 +44,11 @@ Winapp2.ini is no longer edited directly. Instead, it is assembled from the sour
 | Add, update, or remove an entry for a power-user or aggressive operation | `Winapp3/Winapp3.ini` |
 | Fix an entry that already exists in winapp2.ini | Find its source file first. See [Finding the source of an existing entry](#finding-the-source-of-an-existing-entry) |
 | Retire an entry for software that no longer exists | Move it from its source file to `Winapp3/Archived entries.ini`. See [Retiring an entry](#retiring-an-entry) |
-| Report a flavor-specific issue | Open an issue, or edit the appropriate flavor file in `Assembler/<FlavorName>`. The `<FlavorName>` is simply the name of the tool whose flavor you want to modify: `CCleaner`, `CCleaner7`, `BleachBit`, `SystemNinja`, or `Tron` |
+| Report a flavor-specific issue | Open an issue, or edit the appropriate flavor file in `Assembler/<FlavorName>`. The `<FlavorName>` is simply the name of the tool whose flavor you want to modify: `CCleaner`, `CCleaner7`, `BleachBit`, `SystemNinja`,`Tron`, or `FluentCleaner` |
 
 All base entries live in `Assembler/EntryBuilder/<letter>.ini`. Standard winapp2.ini syntax is valid there. The folder name refers to the winapp2ool module that processes it, and an optional shorthand exists but is never required. The files under `Assembler/Entries/` are build artifacts regenerated from these sources on every build; do not edit them. See [EntryBuilder entries](#entrybuilder-entries).
+
+Editing a build artifact instead of its source is an easy mistake to make, but it is a mistake. Your committed changes will be silently destroyed when the next build regenerates the artifact from the unmodified source files. CI checks for this, and if your PR changes a file under `Assember/Entries`, or a published `winapp2.ini` or `diff.txt` file without also changing the source file that produces it, the **generated artifact guard** will fail. winapp2.ini is built through CI/CD via github actions; you never need to manually generate the output files, only modify the correct source files. 
 
 ---
 
@@ -66,8 +68,6 @@ Winapp2.ini is assembled from several source file sets and generators, so many e
 ---
 
 ## Adding your first entry
-
-The path from "I want winapp2.ini to clean app X" to a merged PR.
 
 ### 1. Decide what kind of entry you're adding
 
