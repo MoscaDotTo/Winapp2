@@ -1,32 +1,6 @@
 Beginning Diff
 Diff:  version 251109 ->  version 260728
 
- Web Browser additions
-   
-   .1Browser Web Browser
-
-   Basilisk Web Browser
-
-   Brave Origin Web Browser
-
-   BrowserOS Web Browser
-
-   Genspark Web browser
-
-   Jatter Web Browser
-
-   Samsung Internet Web Browser
-
-   Shift Web Browser
-
-   Sigma Web Browser
-
-   UC Web Browser
-
-   Ulaa Web Browser
-
- 11 web browsers added
-
  Entry removals:
    
      Al Quran * has been removed
@@ -1596,11 +1570,11 @@ Diff:  version 251109 ->  version 260728
              FileKey5=%LocalAppData%\Packages\B9ECED6F.USBChargerPlus_qmba6cd70vzyy\TempState|*|REMOVESELF
              FileKey7=%ProgramData%\ASUS\USBChargerPlus|*.log
 
-       Modified 1 LangSecRef
+       Modified 1 Tags
 
-       LangSecRef has been modified, replacing 1 old key
-              + New: LangSecRef=3024
-              - Old: LangSecRef=3021
+       Tags has been modified, replacing 1 old key
+              + New: Tags=ccutil
+              - Old: Tags=ccapps
 
      Audacity * has been modified
 
@@ -3233,12 +3207,12 @@ Diff:  version 251109 ->  version 260728
              RegKey28=HKCU\Software\Microsoft\Office\16.0\Outlook\Office Finder|MRU 2
              RegKey29=HKCU\Software\Microsoft\Office\16.0\Outlook\Office Finder|MRU 3
 
-       Modified 1 LangSecRef
+       Modified 1 Tags
        Modified 1 Detection criteria
 
-       LangSecRef has been modified, replacing 1 old key
-              + New: LangSecRef=3022
-              - Old: LangSecRef=3021
+       Tags has been modified, replacing 1 old key
+              + New: Tags=ccinternet
+              - Old: Tags=ccapps
        Detection criteria modified
               + New: Detect2=HKCU\Software\Microsoft\Office\10.0\Outlook
               - Old: DetectFile=%LocalAppData%\Microsoft\Olk
@@ -4395,11 +4369,11 @@ Diff:  version 251109 ->  version 260728
 
      Samsung Kies * has been modified
 
-       Modified 1 LangSecRef
+       Modified 1 Tags
 
-       LangSecRef has been modified, replacing 1 old key
-              + New: LangSecRef=3024
-              - Old: LangSecRef=3023
+       Tags has been modified, replacing 1 old key
+              + New: Tags=ccutil
+              - Old: Tags=ccmedia
 
      ShareX * has been modified
 
@@ -4879,176 +4853,10 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey4=%LocalAppData%\Packages\9E2F88E3.TWITTER_wgeqdkkx372wm\Settings|*.log*
               - Old: FileKey4=%LocalAppData%\Packages\9E2F88E3.Twitter_*\Settings|*.log*
 
-     UC Autofill Data & Search Engine Preferences * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Autoplay Preferences * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Bookmark Backups * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Bookmark Favicons * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
      UC Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\UC\User Data\*\Sync Data|*|REMOVESELF
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Default App Handlers * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Download History * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC DRM Data * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Extension Cookies * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Pinned Tabs * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Privacy Sandbox * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Progressive Web Apps * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Saved Usernames & Passwords * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Security & Threat Detection * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Shopping Insights * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Storage Quota Manager * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Telemetry * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Web Browsing Cookies * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Web Browsing History * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Web Browsing Session * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
-
-     UC Web Storage * has been modified
-
-       Modified 1 Section
-
-       Section has been modified, replacing 1 old key
-              + New: Section=UC Web Browser
-              - Old: Section=UC Web Browsef
 
      Universal Windows Platform * has been modified
 
@@ -5941,7 +5749,7 @@ Diff:  version 251109 ->  version 260728
 
        Removed 1 FileKey
              FileKey18=%LocalAppData%\Yandex\YandexBrowser\User Data\*\Sync Data|*|REMOVESELF
- 307 modified entries
+ 287 modified entries
 
  Added entries containing merged content:
 
@@ -5949,9 +5757,10 @@ Diff:  version 251109 ->  version 260728
    Merged from:
      • Microsoft Outlook For Windows Embedded Browser Runtime *
    
-   29 keys added or carried over from merged sources:
+   30 keys added or carried over from merged sources:
 
        Added 29 FileKeys
+       Added 1 Author
              FileKey1=%LocalAppData%\Microsoft\Olk\Application|debug.log (novel)
              FileKey2=%LocalAppData%\Microsoft\Olk\Application\SetupMetrics|*|REMOVESELF (novel)
              FileKey7=%LocalAppData%\Microsoft\Olk\EBWebView\AutoFill*|*|REMOVESELF (novel)
@@ -5981,6 +5790,7 @@ Diff:  version 251109 ->  version 260728
              FileKey65=%LocalAppData%\Microsoft\Olk\EBWebView\WidevineCdm|*|REMOVESELF (from [Microsoft Outlook For Windows Embedded Browser Runtime *])
              FileKey66=%LocalAppData%\Microsoft\Olk\EBWebView\ZxcvbnData|*|REMOVESELF (from [Microsoft Outlook For Windows Embedded Browser Runtime *])
              FileKey67=%LocalAppData%\Microsoft\Olk\Logs|*|REMOVESELF (from [Microsoft Outlook For Windows Embedded Browser Runtime *])
+             Author=Winapp2.ini Project (from [Microsoft Outlook For Windows Embedded Browser Runtime *])
    
    11 keys from merged entries not in this entry:
 
@@ -5999,13 +5809,10 @@ Diff:  version 251109 ->  version 260728
    
    38 keys capturing content from merged entries
 
-       Modified 1 Section
        Modified 1 Detection criteria
        Modified 36 FileKeys
+       Modified 1 Tags
 
-       LangSecRef has been modified, replacing 1 old key
-              + New: LangSecRef=3022
-              - Old: Section=Microsoft Outlook For Windows (from [Microsoft Outlook For Windows Embedded Browser Runtime *])
        Detection criteria modified
               + New: DetectFile=%LocalAppData%\Microsoft\Olk
               - Old: DetectFile=%LocalAppData%\Microsoft\Olk\EBWebView (from [Microsoft Outlook For Windows Embedded Browser Runtime *])
@@ -6117,23 +5924,26 @@ Diff:  version 251109 ->  version 260728
        FileKey49 has been modified, replacing 1 old key
               + New: FileKey49=%LocalAppData%\Microsoft\Olk\EBWebView\Default\WebrtcVideoStats|*|REMOVESELF
               - Old: FileKey46=%LocalAppData%\Microsoft\Olk\EBWebView\*\WebrtcVideoStats|*|REMOVESELF (from [Microsoft Outlook For Windows Embedded Browser Runtime *])
+       Tags has been modified, replacing 1 old key
+              + New: Tags=ccinternet
+              - Old: Tags=ccapps (from [Microsoft Outlook For Windows Embedded Browser Runtime *])
 
    Microsoft Xbox * has been added (consolidating 1 removed entry)
    Merged from:
      • Xbox *
    
-   26 keys added or carried over from merged sources:
+   27 keys added or carried over from merged sources:
 
        Added 5 DetectFiles
-       Added 1 Section
        Added 19 FileKeys
        Added 1 RegKey
+       Added 1 Tags
+       Added 1 Author
              DetectFile2=%LocalAppData%\Packages\Microsoft.GamingServices_8wekyb3d8bbwe (novel)
              DetectFile4=%LocalAppData%\Packages\Microsoft.XboxDevices_8wekyb3d8bbwe (novel)
              DetectFile5=%LocalAppData%\Packages\Microsoft.XboxGamingOverlay_8wekyb3d8bbwe (novel)
              DetectFile6=%LocalAppData%\Packages\Microsoft.XboxIdentityProvider_8wekyb3d8bbwe (novel)
              DetectFile7=%LocalAppData%\Packages\Microsoft.XboxSpeechToTextOverlay_8wekyb3d8bbwe (novel)
-             Section=Games (from [Xbox *])
              FileKey1=%LocalAppData%\EAConnect_microsoft\Cache|*|RECURSE (from [Xbox *])
              FileKey2=%LocalAppData%\EAConnect_microsoft\QtWebEngine\Default|Network Persistent State;Visited Links (from [Xbox *])
              FileKey3=%LocalAppData%\EAConnect_microsoft\QtWebEngine\Default\GPUCache|* (from [Xbox *])
@@ -6154,6 +5964,8 @@ Diff:  version 251109 ->  version 260728
              FileKey21=%ProgramData%\Microsoft\Windows\WindowsApps\Microsoft.GamingServices*\Cache|*|REMOVESELF (from [Xbox *])
              FileKey22=%WinDir%\System32\config\systemprofile\AppData\Local\Packages\Microsoft.GamingServices_8wekyb3d8bbwe\LocalState|*|REMOVESELF (from [Xbox *])
              RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.XboxLIVEGames_8wekyb3d8bbwe\SearchHistory (from [Xbox *])
+             Tags=ccapps (from [Xbox *])
+             Author=Winapp2.ini Project (from [Xbox *])
    
    1 key from merged entries not in this entry:
 
@@ -6179,16 +5991,18 @@ Diff:  version 251109 ->  version 260728
    Merged from:
      • Lively Wallpaper *
    
-   5 keys added or carried over from merged sources:
+   6 keys added or carried over from merged sources:
 
        Added 3 FileKeys
-       Added 1 LangSecRef
        Added 1 DetectFile
+       Added 1 Tags
+       Added 1 Author
              FileKey5=%LocalAppData%\Packages\12030rocksdanister.LivelyWallpaper_97hta09mmv6hy\Settings|*.log* (novel)
              FileKey6=%LocalAppData%\Packages\12030rocksdanister.LivelyWallpaper_97hta09mmv6hy\SystemAppData\Helium|*.log* (novel)
              FileKey7=%LocalAppData%\Packages\12030rocksdanister.LivelyWallpaper_97hta09mmv6hy\TempState|*|REMOVESELF (novel)
-             LangSecRef=3021 (from [Lively Wallpaper *])
              DetectFile=%LocalAppData%\Packages\12030rocksdanister.LivelyWallpaper_97hta09mmv6hy (from [Lively Wallpaper *])
+             Tags=ccapps (from [Lively Wallpaper *])
+             Author=Winapp2.ini Project (from [Lively Wallpaper *])
    
    4 keys capturing content from merged entries
 
@@ -6211,11 +6025,12 @@ Diff:  version 251109 ->  version 260728
    Merged from:
      • TuneIn *
    
-   14 keys added or carried over from merged sources:
+   15 keys added or carried over from merged sources:
 
        Added 2 DetectFiles
        Added 11 FileKeys
-       Added 1 LangSecRef
+       Added 1 Tags
+       Added 1 Author
              DetectFile2=%LocalAppData%\Packages\TuneIn.TuneInRadio_6bhtb546zcxnj (novel)
              FileKey5=%LocalAppData%\Packages\TuneIn.TuneInRadio_6bhtb546zcxnj\AC|*|RECURSE (novel)
              FileKey6=%LocalAppData%\Packages\TuneIn.TuneInRadio_6bhtb546zcxnj\LocalCache\Cache|*|RECURSE (novel)
@@ -6223,13 +6038,14 @@ Diff:  version 251109 ->  version 260728
              FileKey8=%LocalAppData%\Packages\TuneIn.TuneInRadio_6bhtb546zcxnj\Settings|*.log* (novel)
              FileKey9=%LocalAppData%\Packages\TuneIn.TuneInRadio_6bhtb546zcxnj\SystemAppData\Helium|*.log* (novel)
              FileKey10=%LocalAppData%\Packages\TuneIn.TuneInRadio_6bhtb546zcxnj\TempState|*|REMOVESELF (novel)
-             LangSecRef=3023 (from [TuneIn *])
              DetectFile1=%AppData%\TuneIn (from [TuneIn *])
              FileKey1=%AppData%\TuneIn|*-journal;*.old;LOG;log.log;Network Persistent State;Origin Bound Certs|RECURSE (from [TuneIn *])
              FileKey2=%AppData%\TuneIn\*Cache|*|RECURSE (from [TuneIn *])
              FileKey3=%AppData%\TuneIn\blob_storage|*|RECURSE (from [TuneIn *])
              FileKey4=%AppData%\TuneIn\Logs|* (from [TuneIn *])
              FileKey11=%LocalAppData%\TuneIn-Updater|*|RECURSE (from [TuneIn *])
+             Tags=ccmedia (from [TuneIn *])
+             Author=Winapp2.ini Project (from [TuneIn *])
 
  4 added entries consolidating removed content
 
@@ -6937,8 +6753,7 @@ Diff:  version 251109 ->  version 260728
  SOURCE ENTRY KEY STATUS REPORT:
  ✓ = Captured, ✗ = Dropped
 
- [Microsoft Outlook For Windows Embedded Browser Runtime *] - 28 captured, 48 dropped
-     ✗ [CATEGORY] Section=Microsoft Outlook For Windows
+ [Microsoft Outlook For Windows Embedded Browser Runtime *] - 29 captured, 49 dropped
      ✓ [DETECTION] DetectFile=%LocalAppData%\Microsoft\Olk\EBWebView
      ✗ [DELETION] FileKey1=%LocalAppData%\Microsoft\Olk|*.log;*.txt
      ✓ [DELETION] FileKey2=%LocalAppData%\Microsoft\Olk\EBWebView|*.pma;LOG;LOG.old;*-journal|RECURSE
@@ -7014,9 +6829,11 @@ Diff:  version 251109 ->  version 260728
      ✓ [DELETION] FileKey72=%LocalAppData%\Microsoft\Olk\Logs|*|REMOVESELF
      ✗ [DELETION] FileKey73=%ProgramFiles%\Microsoft\Olk\Application|debug.log
      ✗ [DELETION] FileKey74=%ProgramFiles%\Microsoft\Olk\Application\SetupMetrics|*|REMOVESELF
+     ✗ [OTHER] ID=Microsoft Outlook For Windows Embedded Browser Runtime *
+     ✓ [OTHER] Author=Winapp2.ini Project
+     ✗ [OTHER] Tags=ccapps
  
- [Xbox *] - 26 captured, 1 dropped
-     ✓ [CATEGORY] Section=Games
+ [Xbox *] - 27 captured, 2 dropped
      ✓ [DETECTION] DetectFile1=%LocalAppData%\Packages\Microsoft.Gaming*
      ✓ [DETECTION] DetectFile2=%LocalAppData%\Packages\Microsoft.Xbox*
      ✓ [DELETION] FileKey1=%LocalAppData%\EAConnect_microsoft\Cache|*|RECURSE
@@ -7043,40 +6860,46 @@ Diff:  version 251109 ->  version 260728
      ✓ [DELETION] FileKey22=%ProgramData%\Microsoft\Windows\WindowsApps\Microsoft.GamingServices*\Cache|*|REMOVESELF
      ✓ [DELETION] FileKey23=%WinDir%\System32\config\systemprofile\AppData\Local\Packages\Microsoft.GamingServices_8wekyb3d8bbwe\LocalState|*|REMOVESELF
      ✓ [DELETION] RegKey1=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Microsoft.XboxLIVEGames_8wekyb3d8bbwe\SearchHistory
+     ✗ [OTHER] ID=Xbox *
+     ✓ [OTHER] Author=Winapp2.ini Project
+     ✓ [OTHER] Tags=ccapps
  
- [Lively Wallpaper *] - 6 captured, 0 dropped
-     ✓ [CATEGORY] LangSecRef=3021
+ [Lively Wallpaper *] - 7 captured, 1 dropped
      ✓ [DETECTION] DetectFile=%LocalAppData%\Packages\12030rocksdanister.LivelyWallpaper_97hta09mmv6hy
      ✓ [DELETION] FileKey1=%LocalAppData%\Packages\12030rocksdanister.LivelyWallpaper_*\AC|*|RECURSE
      ✓ [DELETION] FileKey2=%LocalAppData%\Packages\12030rocksdanister.LivelyWallpaper_*\LocalCache\Local\Lively Wallpaper\logs|*
      ✓ [DELETION] FileKey3=%LocalAppData%\Packages\12030rocksdanister.LivelyWallpaper_*\LocalCache\Local\Lively Wallpaper\UI|*.txt
      ✓ [DELETION] FileKey4=%LocalAppData%\Packages\12030rocksdanister.LivelyWallpaper_*\LocalCache\Local\Lively Wallpaper\WebView2|*|RECURSE
+     ✗ [OTHER] ID=Lively Wallpaper *
+     ✓ [OTHER] Author=Winapp2.ini Project
+     ✓ [OTHER] Tags=ccapps
  
- [TuneIn *] - 7 captured, 0 dropped
-     ✓ [CATEGORY] LangSecRef=3023
+ [TuneIn *] - 8 captured, 1 dropped
      ✓ [DETECTION] DetectFile=%AppData%\TuneIn
      ✓ [DELETION] FileKey1=%AppData%\TuneIn|*-journal;*.old;LOG;log.log;Network Persistent State;Origin Bound Certs|RECURSE
      ✓ [DELETION] FileKey2=%AppData%\TuneIn\*Cache|*|RECURSE
      ✓ [DELETION] FileKey3=%AppData%\TuneIn\blob_storage|*|RECURSE
      ✓ [DELETION] FileKey4=%AppData%\TuneIn\Logs|*
      ✓ [DELETION] FileKey5=%LocalAppData%\TuneIn-Updater|*|RECURSE
+     ✗ [OTHER] ID=TuneIn *
+     ✓ [OTHER] Author=Winapp2.ini Project
+     ✓ [OTHER] Tags=ccmedia
  
  KEY STATUS SUMMARY:                 Total  Captured  Dropped  Capture Rate
  DELETION  (FileKey/RegKey):           107        59       48         55.1%
  DETECTION (Detect/DetectFile):          5         5        0        100.0%
- CATEGORY  (Section/LangSecRef):         4         3        1         75.0%
- OTHER     (Warning etc.):               0         0        0           N/A
- All keys:                             116        67       49         57.8%
+ CATEGORY  (Section/LangSecRef):         0         0        0           N/A
+ OTHER     (Warning etc.):              12         7        5         58.3%
+ All keys:                             124        71       53         57.3%
  
- Total diff time: 00:00:01.3808638
+ Total diff time: 00:00:01.5588239
 
  Diff Summary
    Net entry count change: 3715 → 4058 (+343)
-    + 11 new browsers added
-   Modified entries: 310
+   Modified entries: 290
     + 1425 added keys across 177 entries
     - 148 removed keys without replacement across 84 entries
-    ~ 766 updated keys replaced 776 old keys across 228 entries
+    ~ 745 updated keys replaced 755 old keys across 207 entries
     ~ 17 keys moved from 3 entries into 5 entries
    Removed entries: 14
     @ 4 removed entries have been merged into other entries
@@ -7087,7 +6910,7 @@ Diff:  version 251109 ->  version 260728
    Added entries: 357
     @ 4 entries consolidate content from 4 removed entries
        + 4 entries contain 19 novel keys (not from merged sources)
-       = 4 entries contain 55 keys carried over unchanged from merged sources
+       = 4 entries contain 59 keys carried over unchanged from merged sources
        ~ 3 entries contain 45 keys capturing 59 removed keys
        - 2 entries dropped 48 keys from merged sources
     + 349 novel entries (without merged content)

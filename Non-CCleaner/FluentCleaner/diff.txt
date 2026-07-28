@@ -93,10 +93,50 @@ Diff:  version 251109 ->  version 260728
 
  Modified entries:
 
+     360 Secure Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     360 Secure Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      360 Secure Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey19=%AppData%\360se6\User Data\*\Sync Data|*|REMOVESELF
+
+     360 Secure Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     360 Secure Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     360 Secure Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     360 Secure Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     360 Secure Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     360 Secure Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      3DMark * has been modified
 
@@ -903,10 +943,50 @@ Diff:  version 251109 ->  version 260728
        Added 1 FileKey
              FileKey1=%AppData%\Syncios Toolkit|*.log
 
+     AOL Shield Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AOL Shield Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      AOL Shield Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\AOL\AOL Shield\User Data\*\Sync Data|*|REMOVESELF
+
+     AOL Shield Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AOL Shield Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AOL Shield Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AOL Shield Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AOL Shield Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AOL Shield Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      APC PowerChute Personal Edition * has been modified
 
@@ -1120,10 +1200,45 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey9=%LocalAppData%\Packages\AppleInc.AppleMusicWin_nzyj5cx40ttqa\SystemAppData\Helium|*.log*
               - Old: FileKey9=%LocalAppData%\Packages\AppleInc.AppleMusicWin_*\SystemAppData\Helium|*.log*
 
+     Arc Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Arc Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Arc Caches * has been modified
 
        Removed 1 FileKey
              FileKey18=%LocalAppData%\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\Arc\User Data\*\Sync Data|*|REMOVESELF
+
+     Arc Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Arc Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Arc Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Arc Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Arc Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Arcane Worlds * has been modified
 
@@ -1132,6 +1247,41 @@ Diff:  version 251109 ->  version 260728
        Detection criteria modified
               + New: DetectFile=%AppData%\ArcaneWorlds
               - Old: Detect=HKCU\Software\Valve\Steam\Apps\269610
+
+     ArtisBrowser Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     ArtisBrowser Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     ArtisBrowser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     ArtisBrowser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     ArtisBrowser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     ArtisBrowser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     ArtisBrowser Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      ASCOMP Cleaning Suite * has been modified
 
@@ -1658,10 +1808,50 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey10=%ProgramData%\AVAST Software\Avast\log|*|RECURSE
               - Old: FileKey10=%ProgramData%\AVAST Software\Avast\log|*
 
+     Avast Secure Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avast Secure Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Avast Secure Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Avast Software\Browser\User Data\*\Sync Data|*|REMOVESELF
+
+     Avast Secure Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avast Secure Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avast Secure Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avast Secure Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avast Secure Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avast Secure Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      AVG AntiVirus * has been modified
 
@@ -1721,10 +1911,50 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey35=%WinDir%\System32\config|*_tureg_new.LOG*;*_tureg_old
               - Old: FileKey35=%WinDir%\System32\config|*_tureg_new.LOG*;*_tureg_old;Software_tureg_new;SYSTEM_tureg_new
 
+     AVG Secure Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AVG Secure Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      AVG Secure Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\AVG\Browser\User Data\*\Sync Data|*|REMOVESELF
+
+     AVG Secure Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AVG Secure Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AVG Secure Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AVG Secure Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AVG Secure Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     AVG Secure Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Avira Launcher * has been modified
 
@@ -1734,10 +1964,50 @@ Diff:  version 251109 ->  version 260728
               + New: DetectFile=%ProgramData%\Avira\Launcher
               - Old: DetectFile=%ProgramFiles%\Avira\Launcher
 
+     Avira Secure Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avira Secure Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Avira Secure Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Avira\Browser\User Data\*\Sync Data|*|REMOVESELF
+
+     Avira Secure Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avira Secure Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avira Secure Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avira Secure Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avira Secure Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Avira Secure Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Avira System Speedup * has been modified
 
@@ -1858,10 +2128,50 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey68=%LocalAppData%\Packages\BeMyEyes.BeMyEyes_7yeb8xxw19svt\SystemAppData\Helium|*.log*
               - Old: FileKey6=%LocalAppData%\Packages\BeMyEyes.BeMyEyes_*\SystemAppData\Helium|*.log*
 
+     Brave Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Brave Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Brave Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\BraveSoftware\Brave-Browser*\User Data\*\Sync Data|*|REMOVESELF
+
+     Brave Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Brave Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Brave Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Brave Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Brave Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Brave Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Bree AI * has been modified
 
@@ -1887,11 +2197,46 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey4=%LocalAppData%\Packages\BREEAITECHPTE.LTD.BreeAI_z5nd0wyapdvva\SystemAppData\Helium|*.log*
               - Old: FileKey4=%LocalAppData%\Packages\BREEAITECHPTE.LTD.BreeAI_*\SystemAppData\Helium|*.log*
 
+     BriskBard Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     BriskBard Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      BriskBard Caches * has been modified
 
        Removed 2 FileKeys
              FileKey17=%LocalAppData%\BriskBard\*\Sync Data|*|REMOVESELF
              FileKey37=%LocalAppData%\BriskBard\WebView\UserData\EBWebView\*\Sync Data|*|REMOVESELF
+
+     BriskBard Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     BriskBard Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     BriskBard Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     BriskBard Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     BriskBard Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      CCleaner * has been modified
 
@@ -1907,40 +2252,280 @@ Diff:  version 251109 ->  version 260728
              FileKey7=%AppData%\CCleanr\EBWebView\Default\*Cache|*|RECURSE
              FileKey9=%ProgramData%\Piriform\CCleaner 7\log|*
 
+     CCleaner Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     CCleaner Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      CCleaner Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\CCleaner Browser\User Data\*\Sync Data|*|REMOVESELF
+
+     CCleaner Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     CCleaner Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     CCleaner Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     CCleaner Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     CCleaner Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     CCleaner Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cent Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cent Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      Cent Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\CentBrowser\User Data\*\Sync Data|*|REMOVESELF
 
+     Cent Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cent Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cent Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cent Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cent Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cent Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Chromium Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Chromium Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Chromium Caches * has been modified
 
        Removed 1 FileKey
              FileKey18=%LocalAppData%\Chromium\User Data\*\Sync Data|*|REMOVESELF
+
+     Chromium Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Chromium Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Chromium Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Chromium Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Chromium Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Chromium Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Cisco WebEx * has been modified
 
        Added 1 FileKey
              FileKey1=%LocalAppData%\CiscoSparkLauncher|*
 
+     Coc Coc Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Coc Coc Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Coc Coc Caches * has been modified
 
        Removed 1 FileKey
              FileKey18=%LocalAppData%\CocCoc\Browser\User Data\*\Sync Data|*|REMOVESELF
+
+     Coc Coc Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Coc Coc Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Coc Coc Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Coc Coc Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Coc Coc Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Coc Coc Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comet Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comet Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      Comet Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Perplexity\Comet\User Data\*\Sync Data|*|REMOVESELF
 
+     Comet Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comet Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comet Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comet Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comet Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comet Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comodo Dragon Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comodo Dragon Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Comodo Dragon Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Comodo\Dragon\User Data\*\Sync Data|*|REMOVESELF
+
+     Comodo Dragon Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comodo Dragon Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comodo Dragon Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comodo Dragon Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comodo Dragon Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Comodo Dragon Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Cortana * has been modified
 
@@ -1991,10 +2576,50 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey11=%LocalAppData%\Packages\Microsoft.Cortana_8wekyb3d8bbwe\TempState|*|REMOVESELF
               - Old: FileKey6=%LocalAppData%\Packages\Microsoft.*Cortana*\TempState|*|RECURSE
 
+     Cromite Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cromite Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Cromite Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Cromite\User Data\*\Sync Data|*|REMOVESELF
+
+     Cromite Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cromite Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cromite Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cromite Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cromite Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Cromite Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Dell Customer Connect * has been modified
 
@@ -2293,6 +2918,16 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey2=%AppData%\Dropbox\*Cache*|*|RECURSE
               - Old: FileKey3=%AppData%\Dropbox\Cache|*|RECURSE
 
+     DuckDuckGo Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     DuckDuckGo Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      DuckDuckGo Caches * has been modified
 
        Removed 3 FileKeys
@@ -2300,15 +2935,80 @@ Diff:  version 251109 ->  version 260728
              FileKey18=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\EBWebView\*\Sync Data|*|REMOVESELF
              FileKey38=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\internalEnvironment\EBWebView\*\Sync Data|*|REMOVESELF
 
+     DuckDuckGo Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     DuckDuckGo Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     DuckDuckGo Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
      DuckDuckGo Telemetry * has been modified
 
        Removed 1 FileKey
              FileKey3=%LocalAppData%\Packages\*DuckDuckGo*Browser*\LocalState\Crashes|*|REMOVESELF
 
+     DuckDuckGo Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     DuckDuckGo Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ecosia Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ecosia Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Ecosia Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\EcosiaBrowser\User Data\*\Sync Data|*|REMOVESELF
+
+     Ecosia Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ecosia Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ecosia Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ecosia Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ecosia Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ecosia Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Eluktronics Control Center * has been modified
 
@@ -2327,10 +3027,50 @@ Diff:  version 251109 ->  version 260728
               + New: DetectFile1=%LocalAppData%\Packages\ControlCenter3_wrbgcf7aesyd8
               - Old: DetectFile1=%LocalAppData%\ControlCenter3_*
 
+     Epic Privacy Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Epic Privacy Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Epic Privacy Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Epic Privacy Browser\User Data\*\Sync Data|*|REMOVESELF
+
+     Epic Privacy Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Epic Privacy Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Epic Privacy Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Epic Privacy Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Epic Privacy Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Epic Privacy Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Facebook * has been modified
 
@@ -2349,10 +3089,85 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey1=%LocalAppData%\Packages\FACEBOOK.FACEBOOK_8xx8rvfyw5nnt\AC|*|RECURSE
               - Old: FileKey1=%LocalAppData%\Packages\Facebook.Facebook_*\AC|*|RECURSE
 
+     FlashPeak SlimJet Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     FlashPeak SlimJet Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      FlashPeak SlimJet Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Slimjet\User Data\*\Sync Data|*|REMOVESELF
+
+     FlashPeak SlimJet Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     FlashPeak SlimJet Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     FlashPeak SlimJet Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     FlashPeak SlimJet Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     FlashPeak SlimJet Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     FlashPeak SlimJet Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Floorp Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Floorp Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Floorp Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Floorp Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Floorp Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Floorp Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Floorp Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      Foxit Reader * has been modified
 
@@ -2363,10 +3178,50 @@ Diff:  version 251109 ->  version 260728
               - Old: FileKey7=%LocalAppData%\Foxit Reader|*.TXT;*.zip;*.reg
               - Old: FileKey8=%LocalAppData%\Foxit Reader|*_old.DMP
 
+     Ghost Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ghost Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Ghost Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\GhostBrowser\User Data\*\Sync Data|*|REMOVESELF
+
+     Ghost Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ghost Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ghost Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ghost Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ghost Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Ghost Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      GOG Galaxy * has been modified
 
@@ -2384,10 +3239,50 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey6=%ProgramData%\GOG.com\Galaxy\webcache\*\gog|*|RECURSE
               - Old: FileKey5=%ProgramData%\GOG.com\Galaxy\webcache\*\gog|*|REMOVESELF
 
+     Google Chrome Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Google Chrome Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Google Chrome Caches * has been modified
 
        Removed 1 FileKey
              FileKey18=%LocalAppData%\Google\Chrome*\User Data\*\Sync Data|*|REMOVESELF
+
+     Google Chrome Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Google Chrome Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Google Chrome Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Google Chrome Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Google Chrome Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Google Chrome Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Google Quick Share * has been modified
 
@@ -2428,10 +3323,45 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey1=%LocalAppData%\Packages\Microsoft.HaloSpartanAssault_8wekyb3d8bbwe\AC|*|RECURSE
               - Old: FileKey1=%LocalAppData%\Packages\Microsoft.HaloSpartanAssault_*\AC|*|RECURSE
 
+     Helium Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Helium Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Helium Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\imput\Helium\User Data\*\Sync Data|*|REMOVESELF
+
+     Helium Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Helium Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Helium Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Helium Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Helium Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Hotspot Shield * has been modified
 
@@ -2527,6 +3457,41 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey5=%LocalAppData%\Packages\HULULLC.HULUPLUS_fphbd361v8tya\TempState|*|REMOVESELF
               - Old: FileKey4=%LocalAppData%\Packages\HuluLLC.HuluPlus_*\TempState|*|RECURSE
 
+     IceCat Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     IceCat Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     IceCat Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     IceCat Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     IceCat Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     IceCat Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     IceCat Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Intel * has been modified
 
        Removed 3 FileKeys
@@ -2578,10 +3543,50 @@ Diff:  version 251109 ->  version 260728
        Removed 1 FileKey
              FileKey5=%WinDir%\System32\config\systemprofile\AppData\Local\Intel\GCC|*.txt
 
+     Iridium Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Iridium Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Iridium Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Iridium\User Data\*\Sync Data|*|REMOVESELF
+
+     Iridium Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Iridium Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Iridium Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Iridium Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Iridium Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Iridium Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Kiwix JS * has been modified
 
@@ -2602,7 +3607,9 @@ Diff:  version 251109 ->  version 260728
 
      LibreWolf Autocomplete History * has been modified
 
+       Added 1 Default
        Added 1 FileKey
+             Default=False
              FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|formhistory*
 
        Removed 1 FileKey
@@ -2616,7 +3623,9 @@ Diff:  version 251109 ->  version 260728
 
      LibreWolf Autofill Data * has been modified
 
+       Added 1 Default
        Added 1 FileKey
+             Default=False
              FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|autofill-profiles.json
 
        Removed 1 FileKey
@@ -2630,7 +3639,9 @@ Diff:  version 251109 ->  version 260728
 
      LibreWolf Bookmark Backups * has been modified
 
+       Added 1 Default
        Added 1 FileKey
+             Default=False
              FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*\bookmarkbackups|*
 
        Removed 1 FileKey
@@ -2702,7 +3713,9 @@ Diff:  version 251109 ->  version 260728
 
      LibreWolf Saved Usernames & Passwords * has been modified
 
+       Added 1 Default
        Added 1 FileKey
+             Default=False
              FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|key4.db;logins.json
 
        Removed 1 FileKey
@@ -2758,7 +3771,9 @@ Diff:  version 251109 ->  version 260728
 
      LibreWolf Web Browsing Cookies * has been modified
 
+       Added 1 Default
        Added 1 FileKey
+             Default=False
              FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|cookies*
 
        Removed 1 FileKey
@@ -2772,7 +3787,9 @@ Diff:  version 251109 ->  version 260728
 
      LibreWolf Web Browsing Session * has been modified
 
+       Added 1 Default
        Added 1 FileKey
+             Default=False
              FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|session*.json*
 
        Removed 1 FileKey
@@ -2786,7 +3803,9 @@ Diff:  version 251109 ->  version 260728
 
      LibreWolf Web Browsing Session Backups * has been modified
 
+       Added 1 Default
        Added 1 FileKey
+             Default=False
              FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*\sessionstore-backups|*
 
        Removed 1 FileKey
@@ -2839,10 +3858,85 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey1=%LocalAppData%\Packages\AstroGaming.AstroCommandCenter_9cg1kgznx2mv2\AC|*|RECURSE
               - Old: FileKey1=%LocalAppData%\Packages\AstroGaming.AstroCommandCenter_*\AC|*|RECURSE
 
+     Maxthon Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Maxthon Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Maxthon Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Maxthon\User Data\*\Sync Data|*|REMOVESELF
+
+     Maxthon Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Maxthon Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Maxthon Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Maxthon Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Maxthon Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Maxthon Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mercury Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mercury Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mercury Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mercury Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mercury Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mercury Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mercury Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      Microsoft 3D Viewer * has been modified
 
@@ -2888,10 +3982,50 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey1=%LocalAppData%\Packages\Microsoft.Copilot_8wekyb3d8bbwe\AC|*|RECURSE
               - Old: FileKey1=%LocalAppData%\Packages\Microsoft.Copilot_*\AC|*|RECURSE
 
+     Microsoft Edge Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Microsoft Edge Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Microsoft Edge Caches * has been modified
 
        Removed 1 FileKey
              FileKey19=%LocalAppData%\Microsoft\Edge*\User Data\*\Sync Data|*|REMOVESELF
+
+     Microsoft Edge Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Microsoft Edge Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Microsoft Edge Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Microsoft Edge Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Microsoft Edge Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Microsoft Edge Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Microsoft Messaging * has been modified
 
@@ -3048,8 +4182,10 @@ Diff:  version 251109 ->  version 260728
 
      Microsoft Office * has been modified
 
+       Added 1 Warning
        Added 32 FileKeys
        Added 1 ExcludeKey
+             Warning=Heads up: this also clears your pinned/favorite files in Word, Excel and PowerPoint. Office stores pinned items in the same "recent files" list, so they get wiped along with the recent-documents history. Leave this unchecked if you rely on Office favorites.
              FileKey25=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version;Module Info Cache
              FileKey27=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\*BrowserMetrics|*|REMOVESELF
              FileKey29=%LocalAppData%\Packages\Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe\LocalState\EBWebView\Avatars|*|REMOVESELF
@@ -3941,6 +5077,41 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey70=%LocalAppData%\Packages\Microsoft.Whiteboard_8wekyb3d8bbwe\TempState|*|REMOVESELF
               - Old: FileKey12=%LocalAppData%\Packages\Microsoft.Whiteboard_*\TempState|*|RECURSE
 
+     Midori Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Midori Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Midori Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Midori Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Midori Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Midori Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Midori Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Minecraft * has been modified
 
        Added 1 FileKey
@@ -3970,6 +5141,9 @@ Diff:  version 251109 ->  version 260728
 
      Mozilla Firefox Autocomplete History * has been modified
 
+       Added 1 Default
+             Default=False
+
        Modified 1 Detection criteria
        Modified 1 FileKey
 
@@ -3982,6 +5156,9 @@ Diff:  version 251109 ->  version 260728
 
      Mozilla Firefox Autofill Data * has been modified
 
+       Added 1 Default
+             Default=False
+
        Modified 1 Detection criteria
        Modified 1 FileKey
 
@@ -3993,6 +5170,9 @@ Diff:  version 251109 ->  version 260728
               - Old: FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|autofill-profiles.json
 
      Mozilla Firefox Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
        Modified 1 Detection criteria
        Modified 1 FileKey
@@ -4067,6 +5247,9 @@ Diff:  version 251109 ->  version 260728
 
      Mozilla Firefox Saved Usernames & Passwords * has been modified
 
+       Added 1 Default
+             Default=False
+
        Modified 1 Detection criteria
        Modified 1 FileKey
 
@@ -4124,6 +5307,9 @@ Diff:  version 251109 ->  version 260728
 
      Mozilla Firefox Web Browsing Cookies * has been modified
 
+       Added 1 Default
+             Default=False
+
        Modified 1 Detection criteria
        Modified 1 FileKey
 
@@ -4136,6 +5322,9 @@ Diff:  version 251109 ->  version 260728
 
      Mozilla Firefox Web Browsing Session * has been modified
 
+       Added 1 Default
+             Default=False
+
        Modified 1 Detection criteria
        Modified 1 FileKey
 
@@ -4147,6 +5336,9 @@ Diff:  version 251109 ->  version 260728
               - Old: FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|session*.json*
 
      Mozilla Firefox Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
        Modified 1 Detection criteria
        Modified 1 FileKey
@@ -4182,6 +5374,21 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|permissions.sqlite
               - Old: FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|permissions.sqlite
 
+     Mullvad Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mullvad Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mullvad Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Mullvad Caches * has been modified
 
        Added 3 FileKeys
@@ -4194,10 +5401,105 @@ Diff:  version 251109 ->  version 260728
              FileKey4=%AppData%\Mullvad\MullvadBrowser\Profiles\*\chrome_debugger_profile|*|REMOVESELF
              FileKey9=%AppData%\Mullvad\MullvadBrowser\Profiles\*\thumbnails|*|REMOVESELF
 
+     Mullvad Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mullvad Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mullvad Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mullvad Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mypal Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mypal Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mypal Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mypal Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mypal Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mypal Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Mypal Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     NAVER Whale Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     NAVER Whale Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      NAVER Whale Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Naver\Naver Whale\User Data\*\Sync Data|*|REMOVESELF
+
+     NAVER Whale Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     NAVER Whale Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     NAVER Whale Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     NAVER Whale Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     NAVER Whale Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     NAVER Whale Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Netflix * has been modified
 
@@ -4243,15 +5545,95 @@ Diff:  version 251109 ->  version 260728
              FileKey2=%LocalAppData%\Newsbin\Logging|*.log
              FileKey3=%LocalAppData%\Newsbin\Nzbs\Temp|*.nzb
 
+     Norton Neo Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Neo Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Norton Neo Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\NEO\User Data\*\Sync Data|*|REMOVESELF
 
+     Norton Neo Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Neo Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Neo Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Neo Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Neo Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Neo Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Secure Browser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Secure Browser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Norton Secure Browser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Norton\Browser\User Data\*\Sync Data|*|REMOVESELF
+
+     Norton Secure Browser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Secure Browser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Secure Browser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Secure Browser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Secure Browser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Norton Secure Browser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      NVIDIA App * has been modified
 
@@ -4309,6 +5691,16 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey6=%LocalAppData%\Packages\Ookla.SpeedtestbyOokla_43tkc6nmykmb6\TempState|*|REMOVESELF
               - Old: FileKey5=%LocalAppData%\Packages\Ookla.SpeedtestbyOokla*\TempState|*|RECURSE
 
+     Opera Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Opera Caches * has been modified
 
        Added 1 FileKey
@@ -4322,6 +5714,26 @@ Diff:  version 251109 ->  version 260728
        FileKey21 has been modified, replacing 1 old key
               + New: FileKey21=%LocalAppData%\Opera Software\Opera*\*\*Cache*|*|REMOVESELF
               - Old: FileKey22=%LocalAppData%\Opera Software\Opera*|*|RECURSE
+
+     Opera Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera GX Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera GX Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      Opera GX Caches * has been modified
 
@@ -4338,6 +5750,21 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey35=%LocalAppData%\Opera Software\Opera*\*\*Cache*|*|REMOVESELF
               - Old: FileKey37=%LocalAppData%\Opera Software\Opera*|*|RECURSE
 
+     Opera GX Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera GX Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera GX Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
      Opera GX Telemetry * has been modified
 
        Modified 2 FileKeys
@@ -4348,6 +5775,66 @@ Diff:  version 251109 ->  version 260728
        FileKey6 has been modified, replacing 1 old key
               + New: FileKey6=%AppData%\Opera Software\Opera GX*\_side_profiles\*|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version
               - Old: FileKey7=%AppData%\Opera Software\Opera GX*\_side_profiles\*|*_shutdown_ms.txt;Last Browser;Last Version;Breadcrumbs;BrowsingTopics*
+
+     Opera GX Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera GX Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Opera Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Pale Moon Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Pale Moon Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Pale Moon Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Pale Moon Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Pale Moon Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Pale Moon Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Pale Moon Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      Proton VPN * has been modified
 
@@ -4360,10 +5847,50 @@ Diff:  version 251109 ->  version 260728
               + New: DetectFile=%LocalAppData%\Proton\Proton VPN
               - Old: DetectFile=%ProgramFiles%\Proton Technologies\ProtonVPN
 
+     QQBrowser Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     QQBrowser Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      QQBrowser Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Tencent\QQBrowser\User Data\*\Sync Data|*|REMOVESELF
+
+     QQBrowser Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     QQBrowser Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     QQBrowser Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     QQBrowser Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     QQBrowser Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     QQBrowser Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Reckless Racing * has been modified
 
@@ -4400,6 +5927,41 @@ Diff:  version 251109 ->  version 260728
        LangSecRef has been modified, replacing 1 old key
               + New: LangSecRef=3024
               - Old: LangSecRef=3023
+
+     SeaMonkey Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     SeaMonkey Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     SeaMonkey Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     SeaMonkey Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     SeaMonkey Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     SeaMonkey Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     SeaMonkey Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      ShareX * has been modified
 
@@ -4449,10 +6011,50 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey4=%LocalAppData%\Packages\Microsoft.ShuffleParty_8wekyb3d8bbwe\TempState|*|REMOVESELF
               - Old: FileKey3=%LocalAppData%\Packages\Microsoft.ShuffleParty_*\TempState|*|RECURSE
 
+     Sleipnir Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Sleipnir Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Sleipnir Caches * has been modified
 
        Removed 1 FileKey
              FileKey22=%AppData%\Fenrir Inc\Sleipnir5\setting\modules\ChromiumViewer\*\Sync Data|*|REMOVESELF
+
+     Sleipnir Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Sleipnir Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Sleipnir Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Sleipnir Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Sleipnir Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Sleipnir Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      SMPlayer * has been modified
 
@@ -4504,22 +6106,104 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey1=%LocalAppData%\Packages\SpotifyAB.SpotifyMusic_zpdnekdrzrea0\LocalState\Spotify\Storage|*|REMOVESELF
               - Old: FileKey1=%LocalAppData%\Packages\SpotifyAB.SpotifyMusic*\LocalState\Spotify\Storage|*|REMOVESELF
 
+     Supermium Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Supermium Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Supermium Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Supermium\User Data\*\Sync Data|*|REMOVESELF
+
+     Supermium Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Supermium Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Supermium Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Supermium Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Supermium Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Supermium Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Thorium Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Thorium Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
      Thorium Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Thorium\User Data\*\Sync Data|*|REMOVESELF
 
+     Thorium Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Thorium Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Thorium Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Thorium Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Thorium Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Thorium Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
      Thunderbird Autocomplete History * has been modified
 
        Added 2 DetectFiles
+       Added 1 Default
        Added 2 FileKeys
              DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
              DetectFile4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+             Default=False
              FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|formhistory*
              FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|formhistory*
 
@@ -4536,9 +6220,11 @@ Diff:  version 251109 ->  version 260728
      Thunderbird Autofill Data * has been modified
 
        Added 2 DetectFiles
+       Added 1 Default
        Added 2 FileKeys
              DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
              DetectFile4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+             Default=False
              FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|autofill-profiles.json
              FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|autofill-profiles.json
 
@@ -4555,9 +6241,11 @@ Diff:  version 251109 ->  version 260728
      Thunderbird Bookmark Backups * has been modified
 
        Added 2 DetectFiles
+       Added 1 Default
        Added 2 FileKeys
              DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
              DetectFile4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+             Default=False
              FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\bookmarkbackups|*
              FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\bookmarkbackups|*
 
@@ -4670,9 +6358,11 @@ Diff:  version 251109 ->  version 260728
      Thunderbird Saved Usernames & Passwords * has been modified
 
        Added 2 DetectFiles
+       Added 1 Default
        Added 2 FileKeys
              DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
              DetectFile4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+             Default=False
              FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|key4.db;logins.json
              FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|key4.db;logins.json
 
@@ -4762,9 +6452,11 @@ Diff:  version 251109 ->  version 260728
      Thunderbird Web Browsing Cookies * has been modified
 
        Added 2 DetectFiles
+       Added 1 Default
        Added 2 FileKeys
              DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
              DetectFile4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+             Default=False
              FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|cookies*
              FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|cookies*
 
@@ -4781,9 +6473,11 @@ Diff:  version 251109 ->  version 260728
      Thunderbird Web Browsing Session * has been modified
 
        Added 2 DetectFiles
+       Added 1 Default
        Added 2 FileKeys
              DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
              DetectFile4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+             Default=False
              FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|session*.json*
              FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|session*.json*
 
@@ -4800,9 +6494,11 @@ Diff:  version 251109 ->  version 260728
      Thunderbird Web Browsing Session Backups * has been modified
 
        Added 2 DetectFiles
+       Added 1 Default
        Added 2 FileKeys
              DetectFile2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
              DetectFile4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles
+             Default=False
              FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\sessionstore-backups|*
              FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\sessionstore-backups|*
 
@@ -4881,6 +6577,9 @@ Diff:  version 251109 ->  version 260728
 
      UC Autofill Data & Search Engine Preferences * has been modified
 
+       Added 1 Default
+             Default=False
+
        Modified 1 Section
 
        Section has been modified, replacing 1 old key
@@ -4896,6 +6595,9 @@ Diff:  version 251109 ->  version 260728
               - Old: Section=UC Web Browsef
 
      UC Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
 
        Modified 1 Section
 
@@ -4932,6 +6634,9 @@ Diff:  version 251109 ->  version 260728
 
      UC Download History * has been modified
 
+       Added 1 Default
+             Default=False
+
        Modified 1 Section
 
        Section has been modified, replacing 1 old key
@@ -4948,6 +6653,9 @@ Diff:  version 251109 ->  version 260728
 
      UC Extension Cookies * has been modified
 
+       Added 1 Default
+             Default=False
+
        Modified 1 Section
 
        Section has been modified, replacing 1 old key
@@ -4955,6 +6663,9 @@ Diff:  version 251109 ->  version 260728
               - Old: Section=UC Web Browsef
 
      UC Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
 
        Modified 1 Section
 
@@ -4979,6 +6690,9 @@ Diff:  version 251109 ->  version 260728
               - Old: Section=UC Web Browsef
 
      UC Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
 
        Modified 1 Section
 
@@ -5020,6 +6734,9 @@ Diff:  version 251109 ->  version 260728
 
      UC Web Browsing Cookies * has been modified
 
+       Added 1 Default
+             Default=False
+
        Modified 1 Section
 
        Section has been modified, replacing 1 old key
@@ -5035,6 +6752,9 @@ Diff:  version 251109 ->  version 260728
               - Old: Section=UC Web Browsef
 
      UC Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
        Modified 1 Section
 
@@ -5113,10 +6833,50 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey24=%LocalAppData%\Packages\microsoft.windows.authhost.sso_8wekyb3d8bbwe\TempState|*|REMOVESELF
               - Old: FileKey21=%LocalAppData%\Packages\microsoft.windows.authhost.sso_*\TempState|*|RECURSE
 
+     Vivaldi Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Vivaldi Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Vivaldi Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Vivaldi\User Data\*\Sync Data|*|REMOVESELF
+
+     Vivaldi Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Vivaldi Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Vivaldi Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Vivaldi Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Vivaldi Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Vivaldi Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      VLC Media Player * has been modified
 
@@ -5134,10 +6894,85 @@ Diff:  version 251109 ->  version 260728
        Removed 1 Detect
              Detect=HKLM\Software\VideoLAN\VLC
 
+     Waterfox Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Waterfox Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Waterfox Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Waterfox Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Waterfox Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Waterfox Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Waterfox Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Wavebox Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Wavebox Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Wavebox Caches * has been modified
 
        Removed 1 FileKey
              FileKey17=%LocalAppData%\Waveboxapp\User Data\*\Sync Data|*|REMOVESELF
+
+     Wavebox Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Wavebox Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Wavebox Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Wavebox Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Wavebox Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Wavebox Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
 
      Windows Calculator * has been modified
 
@@ -5696,6 +7531,11 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey1=%LocalAppData%\Packages\Windows.PrintDialog_cw5n1h2txyewy\AC|*|RECURSE
               - Old: FileKey1=%LocalAppData%\Packages\Windows.PrintDialog_*\AC|*|RECURSE
 
+     Windows Recent Documents * has been modified
+
+       Added 1 Warning
+             Warning=Clears the recent documents list for all user accounts on this machine, not just the current user.
+
      Windows Scan * has been modified
 
        Added 1 FileKey
@@ -5787,9 +7627,11 @@ Diff:  version 251109 ->  version 260728
      Windows Shell * has been modified
 
        Added 2 DetectFiles
+       Added 1 Warning
        Added 2 FileKeys
              DetectFile1=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_cw5n1h2txyewy
              DetectFile2=%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_cw5n1h2txyewy
+             Warning=Deletes Explorer\FileExts which stores your custom file type associations (e.g. which app opens .jpg or .png). After cleaning, Windows will no longer remember your chosen default apps for file types until you reassign them manually.
              FileKey11=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_cw5n1h2txyewy\SystemAppData\Helium|*.log*
              FileKey18=%LocalAppData%\Packages\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\SystemAppData\Helium|*.log*
 
@@ -5807,6 +7649,11 @@ Diff:  version 251109 ->  version 260728
        FileKey12 has been modified, replacing 1 old key
               + New: FileKey12=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_cw5n1h2txyewy\TempState|*|REMOVESELF
               - Old: FileKey11=%LocalAppData%\Packages\Microsoft.Windows.ShellExperienceHost_*\TempState|*|RECURSE
+
+     Windows Shell - Folder/Dialog Box View Settings * has been modified
+
+       Added 1 Warning
+             Warning=Resets all Explorer folder view preferences (icon/details/column layouts), window sizes, positions, and File Open/Save dialog history. All custom folder layouts will be lost permanently.
 
      Windows Snipping Tool * has been modified
 
@@ -5841,8 +7688,10 @@ Diff:  version 251109 ->  version 260728
      Windows Start Menu * has been modified
 
        Added 1 DetectFile
+       Added 1 Warning
        Added 2 FileKeys
              DetectFile=%LocalAppData%\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy
+             Warning=Resets the Start Menu program cache. The Start Menu may take a moment to rebuild on next login.
              FileKey2=%LocalAppData%\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\Settings|*.log*
              FileKey3=%LocalAppData%\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\SystemAppData\Helium|*.log*
 
@@ -5884,6 +7733,11 @@ Diff:  version 251109 ->  version 260728
        FileKey10 has been modified, replacing 1 old key
               + New: FileKey10=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_cw5n1h2txyewy\TempState|*|REMOVESELF
               - Old: FileKey9=%LocalAppData%\Packages\Microsoft.Windows.CloudExperienceHost_*\TempState|*|RECURSE
+
+     Windows Taskbar * has been modified
+
+       Added 1 Warning
+             Warning=Clears Jump Lists (recently used files shown per app on the taskbar). Pinned items are safe, but all recent file history will be removed.
 
      Windows Voice Recorder * has been modified
 
@@ -5937,11 +7791,86 @@ Diff:  version 251109 ->  version 260728
               + New: FileKey7=%LocalAppData%\Packages\MicrosoftWindows.Client.WebExperience_cw5n1h2txyewy\LocalState|*|RECURSE
               - Old: FileKey3=%LocalAppData%\Packages\MicrosoftWindows.Client.WebExperience_*\LocalState|*|RECURSE
 
+     Yandex Autofill Data & Search Engine Preferences * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Yandex Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
      Yandex Caches * has been modified
 
        Removed 1 FileKey
              FileKey18=%LocalAppData%\Yandex\YandexBrowser\User Data\*\Sync Data|*|REMOVESELF
- 307 modified entries
+
+     Yandex Download History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Yandex Extension Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Yandex Pinned Tabs * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Yandex Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Yandex Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Yandex Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Zen Autocomplete History * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Zen Autofill Data * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Zen Bookmark Backups * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Zen Saved Usernames & Passwords * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Zen Web Browsing Cookies * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Zen Web Browsing Session * has been modified
+
+       Added 1 Default
+             Default=False
+
+     Zen Web Browsing Session Backups * has been modified
+
+       Added 1 Default
+             Default=False
+ 677 modified entries
 
  Added entries containing merged content:
 
@@ -7068,13 +8997,13 @@ Diff:  version 251109 ->  version 260728
  OTHER     (Warning etc.):               0         0        0           N/A
  All keys:                             116        67       49         57.8%
  
- Total diff time: 00:00:01.3808638
+ Total diff time: 00:00:01.5607508
 
  Diff Summary
    Net entry count change: 3715 → 4058 (+343)
     + 11 new browsers added
-   Modified entries: 310
-    + 1425 added keys across 177 entries
+   Modified entries: 680
+    + 1827 added keys across 562 entries
     - 148 removed keys without replacement across 84 entries
     ~ 766 updated keys replaced 776 old keys across 228 entries
     ~ 17 keys moved from 3 entries into 5 entries
