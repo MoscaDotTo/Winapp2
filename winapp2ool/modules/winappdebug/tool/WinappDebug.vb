@@ -29,7 +29,11 @@ Public Module WinappDebug
     Public Property ErrorsFound As Integer = 0
 
     ''' <summary>
-    ''' The winapp2ool logslice from the most recent Lint run
+    ''' The error report from the most recent Lint run, as rendered to the console.
+    ''' Populated by <c> EmitEntryResult </c> and <c> EmitEntryAlphabetizationErrors </c>,
+    ''' both of which run on the orchestrating thread after the parallel per-entry pass,
+    ''' so no synchronization is required. Empty when the last run found no errors,
+    ''' which is what gates the Log Viewer option in the module's menu
     ''' </summary>
     Public Property MostRecentLintLog As New System.Text.StringBuilder
 
@@ -367,7 +371,6 @@ Public Module WinappDebug
 
         clrConsole()
         gLog("")
-        MostRecentLintLog.Clear()
 
         Dim output As New List(Of MenuSection)
 
@@ -434,6 +437,7 @@ Public Module WinappDebug
         If fileToBeDebugged Is Nothing Then argIsNull(NameOf(fileToBeDebugged)) : Return New List(Of MenuSection)
 
         ErrorsFound = 0
+        MostRecentLintLog.Clear()
 
         Dim output As New List(Of MenuSection)
 
@@ -509,17 +513,20 @@ Public Module WinappDebug
                     Dim out2 = $"{Errr.Message}"
                     gLog(out)
                     section.AddColoredLine(out, ConsoleColor.Red).AddColoredLine(out2, ConsoleColor.DarkYellow)
+                    MostRecentLintLog.AppendLine(out).AppendLine(out2)
 
                     Using gLogScope(out2)
 
                         For Each detail In Errr.Details
                             gLog($"{detail}")
                             section.AddColoredLine($"{detail}", ConsoleColor.Yellow)
+                            MostRecentLintLog.AppendLine(detail)
                         Next
 
                     End Using
 
                     section.AddBlank()
+                    MostRecentLintLog.AppendLine()
 
                 Next
 
@@ -719,6 +726,7 @@ Public Module WinappDebug
             Dim out2 = "Entry alphabetization"
             gLog(out)
             section.AddColoredLine(out, ConsoleColor.Red).AddColoredLine(out2, ConsoleColor.DarkYellow)
+            MostRecentLintLog.AppendLine(out).AppendLine(out2)
 
             Using gLogScope(out2)
 
@@ -727,10 +735,12 @@ Public Module WinappDebug
                 gLog(d1)
                 gLog(d2)
                 section.AddColoredLine(d1, ConsoleColor.Yellow).AddColoredLine(d2, ConsoleColor.Yellow)
+                MostRecentLintLog.AppendLine(d1).AppendLine(d2)
 
             End Using
 
             section.AddBlank()
+            MostRecentLintLog.AppendLine()
 
         Next
 
