@@ -556,13 +556,33 @@ winapp2ool
 </member>
 <member name="M:winapp2ool.SettingsHandler2.SaveSettings(System.Boolean)">
  <summary>
- Writes <c>SettingsFile2</c> to disk, subject to <paramref name="condition"/>.
+ Writes <c>SettingsFile2</c> to disk, subject to <paramref name="condition"/> and to the
+ global save gate (<c> saveSettingsToDisk </c>, and never during a command line run).
+ <br />
+ The gate lives here rather than at the call sites because <c>FlushIfDirty2</c> is also
+ invoked ungated whenever a menu or the application closes. Any <c>SetSetting</c> caller
+ which neglects to gate its own flush would otherwise have its changes persisted by one of
+ those, writing settings the user asked not to save.
  </summary>
+
+ <param name="condition">
+ An additional condition which must hold for the write to occur
+ <br /> Optional, Default: <c> True </c>
+ </param>
 </member>
 <member name="M:winapp2ool.SettingsHandler2.FlushIfDirty2(System.Boolean)">
  <summary>
  Writes <c>SettingsFile2</c> to disk only if it has been modified since the last save.
+ <br />
+ A flush suppressed by the save gate leaves the backend dirty, so enabling
+ <c> saveSettingsToDisk </c> later in the session still persists the changes made before it
+ was turned on.
  </summary>
+
+ <param name="condition">
+ An additional condition which must hold for the write to occur
+ <br /> Optional, Default: <c> True </c>
+ </param>
 </member>
 <member name="M:winapp2ool.SettingsHandler2.LoadModule2(System.String,System.Type)">
  <summary>
@@ -7407,11 +7427,34 @@ winapp2ool
  When True, checks the full file path; when False, checks only the directory
  </param>
 </member>
-<member name="M:winapp2ool.iniFileChooser.Load">
+<member name="M:winapp2ool.iniFileChooser.Load(System.Boolean@,System.String,System.String,System.String)">
  <summary>
  Validates the file, looping until it exists (or the user exits without selecting a valid file).
  Returns a loaded <c> iniFile2 </c>, or <c> Nothing </c> if the user exited without a valid selection.
+ <br /> When the caller identifies which setting this chooser backs, a file picked through the
+ prompt is persisted to the settings file so the choice survives the session
  </summary>
+
+ <param name="settingsChangedSetting">
+ A pointer to the boolean indicating that the owning module's settings have been modified from
+ their default state
+ <br /> Optional, Default: <c> False </c>
+ </param>
+
+ <param name="callingModule">
+ The name of the module owning this chooser as it appears in the settings file
+ <br /> Optional, Default: <c> "" </c>
+ </param>
+
+ <param name="settingName">
+ The name of this chooser as it appears in the codebase
+ <br /> Optional, Default: <c> "" </c>
+ </param>
+
+ <param name="settingChangedName">
+ The name of <c> <paramref name="settingsChangedSetting"/> </c> as it appears in the codebase
+ <br /> Optional, Default: <c> "" </c>
+ </param>
 </member>
 <member name="M:winapp2ool.iniFileChooser.Read">
  <summary>
@@ -8785,6 +8828,34 @@ winapp2ool
 
  <param name="settingsChangedSetting">
  A pointer to the boolean indicating that a module's settings have been modified from their default state
+ </param>
+</member>
+<member name="M:winapp2ool.SettingsManager.saveChooserParams(winapp2ool.iniFileChooser,System.Boolean@,System.String,System.String,System.String)">
+ <summary>
+ Persists an <c> iniFileChooser </c>'s current parameters into the settings file, marking the
+ owning module's settings as having been changed
+ <br /> Called by every path which lets the user pick a file, including
+ <c> iniFileChooser.Load </c>'s missing-file prompt
+ </summary>
+
+ <param name="chooser">
+ The <c> iniFileChooser </c> whose parameters will be saved
+ </param>
+
+ <param name="settingsChangedSetting">
+ A pointer to the boolean indicating that a module's settings have been modified from their default state
+ </param>
+
+ <param name="callingModule">
+ The name of the module owning <paramref name="chooser"/> as it appears in the settings file
+ </param>
+
+ <param name="settingName">
+ The name of <paramref name="chooser"/> as it appears in the codebase
+ </param>
+
+ <param name="settingChangedName">
+ The name of <c> <paramref name="settingsChangedSetting"/> </c> as it appears in the codebase
  </param>
 </member>
 <member name="M:winapp2ool.SettingsManager.toggleModuleSetting(System.String,System.String,System.Type,System.String,System.String)">
@@ -12242,7 +12313,11 @@ winapp2ool
 </member>
 <member name="P:winapp2ool.WinappDebug.MostRecentLintLog">
  <summary>
- The winapp2ool logslice from the most recent Lint run
+ The error report from the most recent Lint run, as rendered to the console.
+ Populated by <c> EmitEntryResult </c> and <c> EmitEntryAlphabetizationErrors </c>,
+ both of which run on the orchestrating thread after the parallel per-entry pass,
+ so no synchronization is required. Empty when the last run found no errors,
+ which is what gates the Log Viewer option in the module's menu
  </summary>
 </member>
 <member name="P:winapp2ool.WinappDebug.LastParallelElapsedMs">
