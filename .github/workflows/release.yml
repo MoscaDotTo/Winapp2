@@ -103,7 +103,9 @@ jobs:
           # Truncation is whole-lines-only: cutting at a byte offset can split a UTF-8
           # sequence mid-character and hand the API an invalid body.
           {
-            echo "winapp2.ini \`${VERSION}\` — automated build."
+            echo "winapp2.ini \`${VERSION}\` automated build."
+            echo "below is the base flavor's semantic changelog (diff.txt)"
+            echo "all flavors and their changelogs are attached at the bottom alongside a copy of the latest winapp2ool"            
             echo
             echo '```'
             if [ -f bundle/changelog-base.txt ]; then
