@@ -88,6 +88,7 @@
     <Compile Include="LintReconcilerTests.vb" />
     <Compile Include="TransmuteTests.vb" />
     <Compile Include="UnitTools.vb" />
+    <Compile Include="UWPBuilderTests.vb" />
     <Compile Include="VariableExpanderTests.vb" />
     <Compile Include="Winapp2FileVersionTests.vb" />
     <Compile Include="WinappDebugDataTests.vb" />

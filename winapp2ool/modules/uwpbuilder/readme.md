@@ -1,6 +1,6 @@
 # UWPBuilder
 
-**UWPBuilder** is a winapp2ool module that generates winapp2.ini entries for Universal Windows Platform (UWP) applications from a small templating DSL. Every UWP app stores its data under `%LocalAppData%\Packages\<PackageFolderName>`, and part of that layout is identical from app to app, so UWPBuilder applies a shared scaffold of baseline cleaning targets to every application entry.
+**UWPBuilder** is a winapp2ool module that generates winapp2.ini entries for Universal Windows Platform (UWP) applications from a small templating DSL. Every UWP app stores its data under `%LocalAppData%\Packages\PACKAGE_FOLDER`, and part of that layout is identical from app to app, so UWPBuilder applies a shared scaffold of baseline cleaning targets to every application entry.
 
 UWPBuilder is a build-pipeline module: its output is an intermediate file consumed by winapp2ool to produce the final winapp2.ini, and is not intended to be used directly with any cleaning software. If you are not maintaining winapp2.ini, you probably don't need this module.
 
@@ -28,6 +28,7 @@ UWPBuilder reads a source directory containing a scaffold template (`UWP.ini`) a
    - [Standard winapp2.ini keys](#standard-winapp2ini-keys)
    - [Winapp2ool-exclusive keys](#winapp2ool-exclusive-keys)
    - [Package variables](#package-variables)
+   - [Variables](#variables)
    - [Skip and SkipUWPFileKeys](#skip-and-skipuwpfilekeys)
 7. [WebView Scaffolds](#webview-scaffolds)
    - [Opting in](#opting-in)
@@ -161,15 +162,19 @@ These keys carry their normal winapp2.ini meaning and are passed into the genera
 | Key | Behavior | Notes |
 |:-|:-|:-|
 | `LangSecRef=` / `Section=` | Category of the generated entry | Exactly one is required. If both are present, a warning is issued and `LangSecRef` is used |
-| `Detect=` | Registry detection, passed through verbatim | Repeatable. Unnumbered in the output when only one is present |
-| `DetectFile=` | File system detection, passed through verbatim and appended after the scaffold-generated detection paths | Repeatable. Not `%Package%`-expanded. Use for hybrid apps that need win32 detection alongside package detection |
-| `FileKey=` | Cleaning target; equivalent to `FileKeyBase=` | `%Package%` variables are expanded; keys without variables pass through verbatim |
-| `RegKey=` | Registry cleaning target, passed through verbatim | Renumbered from 1 in the output |
-| `ExcludeKey=` | Exclusion; equivalent to `ExcludeKeyBase=` | `%Package%` variables are expanded |
+| `Detect=` | Registry detection | Repeatable. Unnumbered in the output when only one is present. `<>`-expanded |
+| `DetectFile=` | File system detection, appended after the scaffold-generated detection paths | Repeatable. Not `%Package%`-expanded, but `<>`-expanded. Use for hybrid apps that need win32 detection alongside package detection |
+| `DetectOS=` | Windows kernel version filter, e.g. `6.1\|10.0` | Emitted verbatim, never expanded |
+| `FileKey=` | Cleaning target; equivalent to `FileKeyBase=` | `%Package%` and `<>` are expanded; keys without either pass through verbatim |
+| `RegKey=` | Registry cleaning target | Renumbered from 1. Not `%Package%`-expanded, but `<>`-expanded |
+| `ExcludeKey=` | Exclusion; equivalent to `ExcludeKeyBase=` | `%Package%` and `<>` are expanded. |
+| `Warning=` | Warning shown to the user | Emitted verbatim, never expanded |
 
 ###### Note: Key numbers in the source are ignored: everything is renumbered during generation and normalized again by the lint pass.
 
-Any key type not listed on this page is reported with a warning and dropped: it does not appear in the output. UWPBuilder does not currently pass `Warning=` keys through.
+`SpecialDetect=` is deprecated and ignored with a warning. `Default=` is warned and ignored.
+
+Every other unrecognised key name is a [variable declaration](#variables). There is no longer an "unexpected key type" error
 
 ## Winapp2ool-exclusive keys
 
@@ -178,6 +183,7 @@ Any key type not listed on this page is reported with a warning and dropped: it 
 | `Package=` | The application's package folder name under `%LocalAppData%\Packages` | At least one is required. Repeatable as `Package1=`, `Package2=`, ... for multi-package entries |
 | `FileKeyBase=` | A FileKey template; equivalent to `FileKey=` | Convention: use `FileKeyBase=` for `%Package%`-relative keys and `FileKey=` for win32 paths |
 | `ExcludeKeyBase=` | An ExcludeKey template; equivalent to `ExcludeKey=` | |
+| `RegKeyBase=` | A RegKey template; equivalent to `RegKey=` | |
 | `Skip` | Omits this application from generation entirely | Presence-based: see below |
 | `SkipUWPFileKeys` | Suppresses the scaffold `FileKeyBase=` templates for this entry only | Presence-based: see below. Detection keys are unaffected |
 | `WebViewRoot=` (alias `WebViewPath=`) | Declares an embedded WebView2/EBWebView data root; opts the entry into [WebView scaffolds](#webview-scaffolds) | Repeatable (numbered or not). `%Package%` variables are expanded |
@@ -189,7 +195,7 @@ Any key type not listed on this page is reported with a warning and dropped: it 
 
 ## Package variables
 
-`%Package%` expands to `%LocalAppData%\Packages\<PackageFolderName>` and may be used in the value of any expanded key (`FileKeyBase=`/`FileKey=`, `ExcludeKeyBase=`/`ExcludeKey=`, `WebViewRoot=`, `QtWebEngineRoot=`):
+`%Package%` expands to `%LocalAppData%\Packages\PACKAGE_FOLDER` and may be used in the value of any expanded key (`FileKeyBase=`/`FileKey=`, `ExcludeKeyBase=`/`ExcludeKey=`, `WebViewRoot=`, `QtWebEngineRoot=`):
 
 - **Unnumbered `%Package%`** expands once per package: a key containing it produces one output key per declared package, in order
 - **Numbered `%PackageN%`** selects exactly one package by position: a key containing `%Package2%` produces a single output key using the second package
@@ -197,7 +203,57 @@ Any key type not listed on this page is reported with a warning and dropped: it 
 
 See [Example 4](#example-4-multi-package-applications) for both forms in action.
 
-Note that `Detect=`, `DetectFile=`, and `RegKey=` in an AppInfo section are **not** expanded: they pass through verbatim. `%Package%` in a `DetectFile=` reaches the output as a literal. Package detection comes from the scaffold's `DetectFileBase=`, so you should not need one.
+Note that `Detect=`, `DetectFile=`, and `RegKey=` in an AppInfo section are **not** `%Package%`-expanded: a `%Package%` in a `DetectFile=` reaches the output as a literal. Package detection comes from the scaffold's `DetectFileBase=`, so you should not need one. (These keys *are* `<>`-expanded: see [Variables](#variables).)
+
+## Variables
+
+Any key whose name UWPBuilder does not recognise is a variable declaration: a comma-delimited list of values, referenced elsewhere in the entry as `<Name>`. Each reference fans the containing key out into one key per value.
+
+```ini
+[Hazel Office *]
+Package=Hazel.Office_abc123
+LangSecRef=3021
+Version=11.0,16.0
+RegKeyBase=HKCU\Software\Hazel\<Version>\File MRU
+```
+
+generates
+
+```ini
+RegKey1=HKCU\Software\Hazel\11.0\File MRU
+RegKey2=HKCU\Software\Hazel\16.0\File MRU
+```
+
+This is the same engine EntryBuilder uses:
+
+- Two distinct variables in one template produce the **cartesian product** of their values
+- A repeated token in one template **co-varies** rather than multiplying
+- An **inline list** needs no declaration: `<Default,OffTheRecord>`
+- Variables may reference other variables; declarations are flattened before generation
+- Matching is case-insensitive
+
+### Undeclared tokens
+
+What happens to a `<Token>` with no declaration depends on where the key lands:
+
+| Domain | Keys | Behavior |
+|:-|:-|:-|
+| Registry | `Detect=`, `RegKey=`/`RegKeyBase=`, `REG` `ExcludeKey=` | Kept literally, advisory logged |
+| File system | `DetectFile=`, `FileKey=`/`FileKeyBase=`, all other `ExcludeKey=` | Dropped, warning logged |
+
+### What is never expanded
+
+- **`Package=`**: a fan-out would change the package list's length and silently shift the meaning of every `%PackageN%` selector in the entry. A `<` or `>` in a `Package=` value is warned about and used literally
+- **`Warning=`** and **`DetectOS=`**: prose and a version range respectively, not path templates
+
+### Typo backstops
+
+Because the vocabulary is open, a misspelled key name no longer errors; it becomes a variable. There are two checks for this:
+
+1. Undeclared-token diagnostics catch a misspelled *reference* (`<Verison>` against a `Version=` declaration)
+2. Unreferenced-declaration warnings catch a misspelled *declaration*: any variable that no `<Token>` references is reported as a probable typo after generation.
+
+###### Note: like every other diagnostic, these are invisible during a scripted build. See [Troubleshooting](#troubleshooting).
 
 ## Skip and SkipUWPFileKeys
 

@@ -1077,6 +1077,16 @@ winapp2ool
  <c> %Package1% </c> / <c> %Package2% </c> in key values.
  </summary>
 </member>
+<member name="F:winapp2ool.UWPBuilder.UWPReservedKeys">
+ <summary>
+ The AppInfo key names claimed by <see cref="M:winapp2ool.UWPBuilder.parseAppInfo(winapp2ool.iniSection2,winapp2ool.MenuSection)"/>. Any key whose name is
+ not in this set is treated as a variable declaration. Centralised here so the
+ parser's <c> Select Case </c> and the reserved-name collision check cannot drift
+ apart. Mirrors EntryBuilder's list of the same purpose, but carries UWPBuilder's own
+ vocabulary — <c> PACKAGE </c>, <c> SKIPUWPFILEKEYS </c> and the <c> ...PATH </c>
+ root spellings have no EntryBuilder counterpart
+ </summary>
+</member>
 <member name="T:winapp2ool.UWPBuilder.UWPAppInfo">
  <summary>
  Stores the parsed information for a single UWP application entry
@@ -1136,6 +1146,18 @@ winapp2ool
  <c> ExcludeKey= </c> and <c> ExcludeKeyBase= </c> values in their original file order.
  Values containing <c> %Package% </c> or <c> %PackageN% </c> are expanded
  during entry generation; all others are passed through verbatim.
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPAppInfo.Warnings">
+ <summary>
+ <c> Warning= </c> prose values in their original file order. Emitted verbatim and
+ never variable-expanded — the values are human-readable text, not path templates
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPAppInfo.DetectOS">
+ <summary>
+ The <c> DetectOS= </c> value, or empty when the entry declares no OS filter.
+ Emitted verbatim; the value is a kernel version range, not a path template
  </summary>
 </member>
 <member name="F:winapp2ool.UWPBuilder.UWPAppInfo.ShouldSkip">
@@ -1220,6 +1242,21 @@ winapp2ool
  <summary>
  Tracks whether the AppInfo entry declared <c> QtWebEngineScaffolds= </c> at all
  (mirrors <see cref="F:winapp2ool.UWPBuilder.UWPAppInfo.WebViewScaffoldsKeyPresent"/> for the QtWebEngine family).
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPAppInfo.Variables">
+ <summary>
+ The entry's open-vocabulary variable declarations — every key whose name is not
+ reserved by the parser's <c> Select Case </c>. Each declares a comma-separated
+ list of values fanned out at generation time by <see cref="T:winapp2ool.VariableExpander"/>,
+ driving <c> &lt;token&gt; </c> expansion across this entry's key templates
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPAppInfo.NestedVariableRefs">
+ <summary>
+ Count of nested <c> &lt;token&gt; </c> references between this entry's own variable
+ declarations, captured before <see cref="M:winapp2ool.VariableExpander.ResolveAll(winapp2ool.VariableSet)"/> flattens
+ the symbol table
  </summary>
 </member>
 <member name="M:winapp2ool.UWPBuilder.UWPAppInfo.#ctor(System.String)">
@@ -1465,7 +1502,7 @@ winapp2ool
  or contains no parseable sections
  </returns>
 </member>
-<member name="M:winapp2ool.UWPBuilder.expandPackageKey(System.String,System.Collections.Generic.List{System.String})">
+<member name="M:winapp2ool.UWPBuilder.expandPhase2(System.String,winapp2ool.UWPBuilder.UWPAppInfo,winapp2ool.ExpansionDomain,System.String,winapp2ool.MenuSection)">
  <summary>
  Expands <c>%Package%</c> and <c>%PackageN%</c> variables in a key value template,
  returning one expanded string per applicable package.
@@ -1503,6 +1540,97 @@ winapp2ool
  <returns>
  One expanded string per applicable package, or a single-element list containing
  <paramref name="template"/> verbatim if no package variable is present
+ </returns>
+ <summary>
+ Runs the phase-2 variable-expansion pass on <paramref name="template"/> and routes any
+ returned diagnostics onto <c> gLog </c> and <paramref name="menuOutput"/>. The caller is
+ responsible for phase-0 <c> %Package% </c> fan-out and phase-1 root substitution
+ beforehand — running last means a root value's own <c> &lt;token&gt; </c> references are
+ already inlined into <paramref name="template"/> and participate in the same cartesian
+ product as the surrounding template's tokens, matching EntryBuilder's semantics.
+ </summary>
+
+ <param name="template">
+ One key value with phases 0 and 1 already applied, possibly containing
+ <c> &lt;var&gt; </c> tokens
+ </param>
+
+ <param name="app">
+ The entry whose <see cref="F:winapp2ool.UWPBuilder.UWPAppInfo.Variables"/> set drives the expansion; tokens
+ observed update reference tracking for the post-generation typo backstop
+ </param>
+
+ <param name="domain">
+ The domain of the emitting key, determining undeclared-token behavior
+ </param>
+
+ <param name="keyLabel">
+ Short tag (e.g. <c> Detect </c>, <c> FileKey </c>) embedded into diagnostic messages
+ for source-of-warning localisation
+ </param>
+
+ <param name="menuOutput">
+ The <c> MenuSection </c> receiving Warning-severity diagnostics for display
+ </param>
+
+ <returns>
+ The fan-out values; empty when the template was dropped
+ </returns>
+</member>
+<member name="M:winapp2ool.UWPBuilder.expandPackageAndVars(System.Collections.Generic.List{System.String},winapp2ool.UWPBuilder.UWPAppInfo,winapp2ool.ExpansionDomain,System.String,winapp2ool.MenuSection)">
+ <summary>
+ Applies phase 0 (<c> %Package% </c> / <c> %PackageN% </c> fan-out) followed by phase 2
+ (<c> &lt;var&gt; </c> expansion) to every template in <paramref name="templates"/>,
+ returning the flattened result in fan-out order. Used for the key classes that carry no
+ root placeholder; the scaffold blocks interleave phase-1 substitution themselves.
+ </summary>
+
+ <param name="templates">
+ The key value templates to expand, in declaration order
+ </param>
+
+ <param name="app">
+ The entry supplying both the package list and the variable symbol table
+ </param>
+
+ <param name="domain">
+ The domain of the emitting key class
+ </param>
+
+ <param name="keyLabel">
+ Short tag embedded into diagnostic messages
+ </param>
+
+ <param name="menuOutput">
+ The <c> MenuSection </c> receiving Warning-severity diagnostics for display
+ </param>
+
+ <returns>
+ Every string produced by phase-0 × phase-2 expansion, in fan-out order
+ </returns>
+</member>
+<member name="M:winapp2ool.UWPBuilder.expandExcludeKeys(System.Collections.Generic.List{System.String},winapp2ool.UWPBuilder.UWPAppInfo,winapp2ool.MenuSection)">
+ <summary>
+ Expands ExcludeKey templates through phases 0 and 2, classifying the expansion domain
+ per phase-0 result rather than per template: an ExcludeKey's flag determines whether its
+ value lands in the registry or the file system, and a <c> %Package% </c> fan-out can in
+ principle yield values whose flags differ. Mirrors EntryBuilder's <c> expandExcludeKeys </c>.
+ </summary>
+
+ <param name="templates">
+ The ExcludeKey value templates to expand, in declaration order
+ </param>
+
+ <param name="app">
+ The entry supplying both the package list and the variable symbol table
+ </param>
+
+ <param name="menuOutput">
+ The <c> MenuSection </c> receiving Warning-severity diagnostics for display
+ </param>
+
+ <returns>
+ Every expanded ExcludeKey value, in fan-out order
  </returns>
 </member>
 <member name="T:winapp2ool.entryBuilderMainMenu">

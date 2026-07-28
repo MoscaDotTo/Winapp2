@@ -934,9 +934,11 @@ Public Module EntryBuilder
 
                 Case "DETECT" : spec.Detects.Add(key.Value)
 
-                Case "DETECTOS", "SPECIALDETECT"
+                Case "DETECTOS" : spec.DetectOS = key.Value
 
-                    Dim sdMsg = $"DetectOS and SpecialDetect are deprecated; key dropped from [{entrySection.Name}]. Replace with Detect or DetectFile"
+                Case "SPECIALDETECT"
+
+                    Dim sdMsg = $"SpecialDetect is deprecated; key dropped from [{entrySection.Name}]. Replace with Detect or DetectFile"
                     gLog(sdMsg)
                     menuOutput.AddWarning(sdMsg)
 
