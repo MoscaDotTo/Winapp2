@@ -52,10 +52,47 @@ Module SettingsManager
         initModule("File Chooser", AddressOf chooser.PrintMenu, AddressOf chooser.HandleInput)
 
         Dim fileChanged = Not chooser.Name = curName OrElse Not chooser.Dir = curDir
-        If Not settingsChangedSetting Then settingsChangedSetting = fileChanged
 
         setNextMenuHeaderText($"{fileDesc} parameters update{If(Not fileChanged, " aborted", "d")}", printColor:=GetRedGreen(Not fileChanged))
         If Not fileChanged Then Return
+
+        saveChooserParams(chooser, settingsChangedSetting, callingModule, settingName, settingChangedName)
+
+    End Sub
+
+    ''' <summary>
+    ''' Persists an <c> iniFileChooser </c>'s current parameters into the settings file, marking the
+    ''' owning module's settings as having been changed
+    ''' <br /> Called by every path which lets the user pick a file, including
+    ''' <c> iniFileChooser.Load </c>'s missing-file prompt
+    ''' </summary>
+    '''
+    ''' <param name="chooser">
+    ''' The <c> iniFileChooser </c> whose parameters will be saved
+    ''' </param>
+    '''
+    ''' <param name="settingsChangedSetting">
+    ''' A pointer to the boolean indicating that a module's settings have been modified from their default state
+    ''' </param>
+    '''
+    ''' <param name="callingModule">
+    ''' The name of the module owning <paramref name="chooser"/> as it appears in the settings file
+    ''' </param>
+    '''
+    ''' <param name="settingName">
+    ''' The name of <paramref name="chooser"/> as it appears in the codebase
+    ''' </param>
+    '''
+    ''' <param name="settingChangedName">
+    ''' The name of <c> <paramref name="settingsChangedSetting"/> </c> as it appears in the codebase
+    ''' </param>
+    Public Sub saveChooserParams(chooser As iniFileChooser,
+                           ByRef settingsChangedSetting As Boolean,
+                                 callingModule As String,
+                                 settingName As String,
+                                 settingChangedName As String)
+
+        settingsChangedSetting = True
 
         SetSetting(callingModule, $"{settingName}_Dir", chooser.Dir)
         SetSetting(callingModule, $"{settingName}_Name", chooser.Name)

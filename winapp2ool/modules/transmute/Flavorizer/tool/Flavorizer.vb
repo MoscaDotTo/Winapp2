@@ -90,7 +90,7 @@ Public Module Flavorizer
 
         clrConsole()
 
-        Dim baseFile = FlavorizerFile1.Load()
+        Dim baseFile = FlavorizerFile1.Load(FlavorizerModuleSettingsChanged, NameOf(Flavorizer), NameOf(FlavorizerFile1), NameOf(FlavorizerModuleSettingsChanged))
 
         ' Ordinarily, we would gate this but it's actually probably fine if the base file is empty 
         ' If Not enforceFileHasContent(baseFile) Then Return

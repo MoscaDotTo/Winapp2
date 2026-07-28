@@ -113,8 +113,37 @@ Public Class iniFileChooser
     ''' <summary>
     ''' Validates the file, looping until it exists (or the user exits without selecting a valid file).
     ''' Returns a loaded <c> iniFile2 </c>, or <c> Nothing </c> if the user exited without a valid selection.
+    ''' <br /> When the caller identifies which setting this chooser backs, a file picked through the
+    ''' prompt is persisted to the settings file so the choice survives the session
     ''' </summary>
-    Public Function Load() As iniFile2
+    '''
+    ''' <param name="settingsChangedSetting">
+    ''' A pointer to the boolean indicating that the owning module's settings have been modified from
+    ''' their default state
+    ''' <br /> Optional, Default: <c> False </c>
+    ''' </param>
+    '''
+    ''' <param name="callingModule">
+    ''' The name of the module owning this chooser as it appears in the settings file
+    ''' <br /> Optional, Default: <c> "" </c>
+    ''' </param>
+    '''
+    ''' <param name="settingName">
+    ''' The name of this chooser as it appears in the codebase
+    ''' <br /> Optional, Default: <c> "" </c>
+    ''' </param>
+    '''
+    ''' <param name="settingChangedName">
+    ''' The name of <c> <paramref name="settingsChangedSetting"/> </c> as it appears in the codebase
+    ''' <br /> Optional, Default: <c> "" </c>
+    ''' </param>
+    Public Function Load(Optional ByRef settingsChangedSetting As Boolean = False,
+                         Optional callingModule As String = "",
+                         Optional settingName As String = "",
+                         Optional settingChangedName As String = "") As iniFile2
+
+        Dim curName = Name
+        Dim curDir = Dir
 
         While Not Exists()
 
@@ -123,6 +152,16 @@ Public Class iniFileChooser
             If Not Exists() Then Return Nothing
 
         End While
+
+        Dim fileChanged = Not Name = curName OrElse Not Dir = curDir
+        Dim isSettingsBacked = callingModule.Length > 0 AndAlso settingName.Length > 0 AndAlso settingChangedName.Length > 0
+
+        If fileChanged AndAlso isSettingsBacked Then
+
+            gLog($"Saving {settingName}'s newly chosen parameters to disk")
+            saveChooserParams(Me, settingsChangedSetting, callingModule, settingName, settingChangedName)
+
+        End If
 
         Return iniFile2.FromFile(Path())
 

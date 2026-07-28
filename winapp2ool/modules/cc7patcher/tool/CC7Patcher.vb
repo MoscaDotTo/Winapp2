@@ -103,7 +103,7 @@ Public Module CC7Patcher
 
             End If
 
-            Dim loaded = CC7PatcherFile1.Load()
+            Dim loaded = CC7PatcherFile1.Load(CC7PatcherModuleSettingsChanged, NameOf(CC7Patcher), NameOf(CC7PatcherFile1), NameOf(CC7PatcherModuleSettingsChanged))
             If loaded Is Nothing Then Return
             winapp2Input = loaded
 
@@ -162,7 +162,7 @@ Public Module CC7Patcher
 
         Using gLogScope("Beginning ccleaner.ini patching process")
 
-            Dim baseFile = CC7PatcherFile2.Load()
+            Dim baseFile = CC7PatcherFile2.Load(CC7PatcherModuleSettingsChanged, NameOf(CC7Patcher), NameOf(CC7PatcherFile2), NameOf(CC7PatcherModuleSettingsChanged))
             If baseFile Is Nothing Then Return
 
             pruneWinapp2Sections(baseFile, menuOutput)

@@ -363,7 +363,7 @@ Public Module WinappDebug
     ''' </summary>
     Public Sub InitDebug()
 
-        Dim inputFile = winappDebugFile1.Load()
+        Dim inputFile = winappDebugFile1.Load(LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(LintModuleSettingsChanged))
 
         If Not enforceFileHasContent(inputFile) Then Return
 

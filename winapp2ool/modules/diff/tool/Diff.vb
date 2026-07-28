@@ -181,10 +181,10 @@ Module Diff
         Dim oldFile As iniFile2
         Dim newFile As iniFile2
 
-        oldFile = DiffFile1.Load()
+        oldFile = DiffFile1.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))
         If Not enforceFileHasContent(oldFile) Then Return
 
-        newFile = If(DownloadDiffFile, getRemoteIniFile2(getWinappLink), DiffFile2.Load)
+        newFile = If(DownloadDiffFile, getRemoteIniFile2(getWinappLink), DiffFile2.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged)))
         If Not enforceFileHasContent(newFile) Then Return
 
         If TrimRemoteFile AndAlso DownloadDiffFile Then

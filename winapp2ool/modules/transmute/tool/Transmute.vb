@@ -324,8 +324,8 @@ Public Module Transmute
 
         clrConsole()
 
-        Dim baseFile2 = TransmuteFile1.Load
-        Dim sourceFile2 = TransmuteFile2.Load
+        Dim baseFile2 = TransmuteFile1.Load(TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile1), NameOf(TransmuteModuleSettingsChanged))
+        Dim sourceFile2 = TransmuteFile2.Load(TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile2), NameOf(TransmuteModuleSettingsChanged))
 
         If Not (enforceFileHasContent(baseFile2) AndAlso enforceFileHasContent(sourceFile2)) Then Return
 

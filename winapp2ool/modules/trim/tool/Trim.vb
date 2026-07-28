@@ -208,7 +208,7 @@ Public Module Trim
         ' Don't try to trim an empty file
         If Not DownloadFileToTrim Then
 
-            Dim winapp = TrimFile1.Load
+            Dim winapp = TrimFile1.Load(TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged))
             If Not enforceFileHasContent(winapp) Then Return
 
         End If
@@ -217,7 +217,7 @@ Public Module Trim
         Dim noNtwk = "Internet connection lost! Please check your network connection and try again"
         If denyActionWithHeader(DownloadFileToTrim AndAlso Not checkOnline(), noNtwk) Then Return
 
-        Dim winapp2 As New winapp2file2(If(DownloadFileToTrim, getRemoteIniFile2(getWinappLink), TrimFile1.Load))
+        Dim winapp2 As New winapp2file2(If(DownloadFileToTrim, getRemoteIniFile2(getWinappLink), TrimFile1.Load(TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged))))
 
         clrConsole()
         Dim progress As New MenuSection
