@@ -218,14 +218,14 @@ foreach ($o in $Outputs) {
     $content = Get-Content $diffPath -Raw
     if ($o.Flavor -eq 'Base') { $baseDiffText = $content }
     $lineCount = (Get-Content $diffPath | Measure-Object -Line).Lines
-    $flavorLines.Add(("- **{0}** — {1} lines (see run artifacts)" -f $o.Flavor, $lineCount))
+    $flavorLines.Add(("- **{0}**: {1} lines (see run artifacts)" -f $o.Flavor, $lineCount))
 }
 
 if (-not $baseDiffText) { $baseDiffText = '(no base diff was produced)' }
 $truncNote = ''
 if ($baseDiffText.Length -gt $CommentCharBudget) {
     $baseDiffText = $baseDiffText.Substring(0, $CommentCharBudget)
-    $truncNote = "`n`n_…base diff truncated — full diff.txt files are attached to the workflow run._"
+    $truncNote = "`n`n_…base diff truncated: full diff.txt files are attached to the workflow run._"
 }
 
 $body = @"
