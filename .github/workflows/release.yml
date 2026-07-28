@@ -93,12 +93,29 @@ jobs:
           VERSION: ${{ steps.gate.outputs.version }}
         run: |
           set -euo pipefail
-          # Release notes = the base changelog this build produced.
+          # Release notes = the base changelog this build produced. GitHub caps a release
+          # body at 125,000 characters and rejects the whole create with a 422 if it is
+          # exceeded, so the changelog is inlined only up to a budget well under that; the
+          # complete text always ships as the changelog-base.txt asset regardless. A daily
+          # diff is nowhere near the cap, but a build whose baseline is months old (or a
+          # sweeping mechanical change across the database) easily is.
+          #
+          # Truncation is whole-lines-only: cutting at a byte offset can split a UTF-8
+          # sequence mid-character and hand the API an invalid body.
           {
             echo "winapp2.ini \`${VERSION}\` — automated build."
             echo
             echo '```'
-            cat bundle/changelog-base.txt 2>/dev/null || echo '(no base changelog produced)'
+            if [ -f bundle/changelog-base.txt ]; then
+              awk -v budget=100000 '
+                { total += length($0) + 1
+                  if (total > budget) { truncated = 1; exit }
+                  print }
+                END { if (truncated) printf "\n... changelog truncated here; see the attached changelog-base.txt for the full text.\n" }
+              ' bundle/changelog-base.txt
+            else
+              echo '(no base changelog produced)'
+            fi
             echo '```'
           } > notes.md
 
