@@ -98,8 +98,7 @@ Module SettingsManager
         SetSetting(callingModule, $"{settingName}_Name", chooser.Name)
         SetSetting(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
 
-        Dim shouldWrite = Not IsCommandLineMode AndAlso saveSettingsToDisk
-        FlushIfDirty2(shouldWrite)
+        FlushIfDirty2()
 
     End Sub
 
@@ -144,8 +143,7 @@ Module SettingsManager
         SetSetting(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
         SetSetting(callingModule, settingChangedName, True.ToString)
 
-        Dim shouldWrite = Not IsCommandLineMode AndAlso saveSettingsToDisk
-        FlushIfDirty2(shouldWrite)
+        FlushIfDirty2()
 
     End Sub
 

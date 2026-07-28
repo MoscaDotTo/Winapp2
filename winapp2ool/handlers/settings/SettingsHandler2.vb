@@ -136,18 +136,45 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Writes <c>SettingsFile2</c> to disk, subject to <paramref name="condition"/>.
+    ''' Writes <c>SettingsFile2</c> to disk, subject to <paramref name="condition"/> and to the
+    ''' global save gate (<c> saveSettingsToDisk </c>, and never during a command line run).
+    ''' <br />
+    ''' The gate lives here rather than at the call sites because <c>FlushIfDirty2</c> is also
+    ''' invoked ungated whenever a menu or the application closes. Any <c>SetSetting</c> caller
+    ''' which neglects to gate its own flush would otherwise have its changes persisted by one of
+    ''' those, writing settings the user asked not to save.
     ''' </summary>
+    '''
+    ''' <param name="condition">
+    ''' An additional condition which must hold for the write to occur
+    ''' <br /> Optional, Default: <c> True </c>
+    ''' </param>
     Public Sub SaveSettings(Optional condition As Boolean = True)
 
-        SettingsFile2.OverwriteToFile(SettingsFile2.ToString(), condition)
+        If Not condition OrElse IsCommandLineMode OrElse Not saveSettingsToDisk Then
+
+            gLog("Settings save skipped - saving to disk is disabled")
+            Return
+
+        End If
+
+        SettingsFile2.OverwriteToFile(SettingsFile2.ToString())
         _dirty2 = False
 
     End Sub
 
     ''' <summary>
     ''' Writes <c>SettingsFile2</c> to disk only if it has been modified since the last save.
+    ''' <br />
+    ''' A flush suppressed by the save gate leaves the backend dirty, so enabling
+    ''' <c> saveSettingsToDisk </c> later in the session still persists the changes made before it
+    ''' was turned on.
     ''' </summary>
+    '''
+    ''' <param name="condition">
+    ''' An additional condition which must hold for the write to occur
+    ''' <br /> Optional, Default: <c> True </c>
+    ''' </param>
     Public Sub FlushIfDirty2(Optional condition As Boolean = True)
 
         If _dirty2 Then SaveSettings(condition)

@@ -43,7 +43,7 @@ Public Module advSettings
                     r.ShouldScan = Not prev
                     ScanSettingsChanged = True
                     SetSetting(NameOf(WinappDebug), r.LintName & "_Scan", tsInvariant(r.ShouldScan))
-                    FlushIfDirty2(Not IsCommandLineMode AndAlso saveSettingsToDisk)
+                    FlushIfDirty2()
                     If Not r.ShouldScan Then r.turnOff()
                 End Sub)
 
@@ -64,7 +64,7 @@ Public Module advSettings
                     r.ShouldRepair = Not prev
                     ScanSettingsChanged = True
                     SetSetting(NameOf(WinappDebug), r.LintName & "_Repair", tsInvariant(r.ShouldRepair))
-                    FlushIfDirty2(Not IsCommandLineMode AndAlso saveSettingsToDisk)
+                    FlushIfDirty2()
                     If r.ShouldRepair Then r.turnOn()
                 End Sub)
 
