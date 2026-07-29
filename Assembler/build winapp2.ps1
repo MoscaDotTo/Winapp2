@@ -23,7 +23,7 @@
 
 .NOTES
     Author: Hazel Ward
-    Version 20260724
+    Version 20260729
     Copyright 2026
 #>
 
@@ -124,6 +124,81 @@ function Invoke-Winapp2ool {
     }
 }
 
+function Get-ComparableContent {
+    # Every lint pass restamps "; Version: <today>" via -usedate, so a rebuild whose sources did
+    # not move still differs from the published file on exactly that line. Drop it and what
+    # remains is the content we actually publish.
+    param([string]$Path)
+
+    return @(Get-Content -LiteralPath $Path | Where-Object { $_ -notmatch '^;\s*Version:' })
+}
+
+function Test-ContentChanged {
+    <#
+    .SYNOPSIS
+        Answers whether a freshly built artifact differs from the one it would replace.
+
+    .DESCRIPTION
+        The gate for republishing. This is deliberately a TEXTUAL comparison and not Diff's
+        verdict: Diff normalizes deprecated paths on both sides, cannot see comments outside the
+        preamble, and ignores ordering, so it can report "no changes" for a file that genuinely
+        changed. A false negative here would silently drop a real release, so the gate uses the
+        one comparison that has no false negatives and Diff supplies the human-readable detail.
+
+        A missing baseline counts as changed, the first build must always publish.
+    #>
+    param([string]$Built, [string]$Previous)
+
+    if (-not (Test-Path $Previous)) { return $true }
+
+    $new = Get-ComparableContent $Built
+    $old = Get-ComparableContent $Previous
+
+    if ($new.Count -ne $old.Count) { return $true }
+
+    for ($i = 0; $i -lt $new.Count; $i++) {
+        if ($new[$i] -cne $old[$i]) { return $true }
+    }
+
+    return $false
+}
+
+function Invoke-Changelog {
+    <#
+    .SYNOPSIS
+        Runs Diff over the old and new artifacts, writing the changelog and reporting what it found.
+
+    .DESCRIPTION
+        -4f asks Diff for its outcome as key=value lines alongside the prose changelog, which is
+        the only way this script can see inside a run it launched with a hidden window. The counts
+        are echoed into the build log so an unattended build says what changed, not merely that
+        something did.
+    #>
+    param([string]$Old, [string]$New, [string]$LogName = 'diff.txt')
+
+    $summary = 'diffsummary.txt'
+    Remove-Item $summary -Force -ErrorAction SilentlyContinue
+
+    if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', $Old, `
+        '-2f', $New, '-3f', $LogName, '-4f', $summary `
+        -ErrorMessage "Failed to create changelog for $New")) { return $false }
+
+    if (Test-Path $summary) {
+        $s = ConvertFrom-StringData (Get-Content -LiteralPath $summary -Raw)
+        Write-Host ("  changes: {0} added, {1} removed, {2} modified entries; {3} added, {4} removed, {5} updated, {6} moved keys" -f `
+            $s.addedentries, $s.removedentries, $s.modifiedentries, `
+            $s.addedkeys, $s.removedkeys, $s.updatedkeys, $s.movedkeys) -ForegroundColor Gray
+
+        # The textual gate already said the file changed. Diff disagreeing means the delta is
+        # something Diff normalizes away. never worth suppressing the release.
+        if ($s.haschanges -eq 'false') {
+            Write-Host "  note: the file changed but Diff reports no semantic changes (normalized paths, comments, or ordering)" -ForegroundColor Yellow
+        }
+    }
+
+    return $true
+}
+
 function Backup-Files {
     Write-Step "Creating backups of existing winapp2.ini files"
 
@@ -182,12 +257,15 @@ function Build-MainFile {
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'Winapp2.ini', '-3f', 'Winapp2.ini' `
         -ErrorMessage "Failed static analysis")) { return $false }
 
+    if (-not (Test-ContentChanged 'Winapp2.ini' 'winapp2.old')) {
+        Write-Host "Base winapp2.ini is unchanged since the last build - not republishing" -ForegroundColor Yellow
+        return $true
+    }
+
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2.old', `
-            '-2f', 'Winapp2.ini', '-3f', 'diff.txt' `
-            -ErrorMessage "Failed to create changelog")) { return $false }
+        if (-not (Invoke-Changelog -Old 'winapp2.old' -New 'Winapp2.ini')) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
@@ -223,12 +301,15 @@ function Build-CCCleanerFlavor {
         '-3f', 'winapp2-ccleaner-flavor.ini' `
         -ErrorMessage "Failed CCleaner flavor analysis")) { return $false }
 
+    if (-not (Test-ContentChanged 'winapp2-ccleaner-flavor.ini' 'winapp2-cc.old')) {
+        Write-Host "CCleaner flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
+        return $true
+    }
+
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-cc.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-cc.old', `
-            '-2f', 'winapp2-ccleaner-flavor.ini', '-3f', 'diff.txt' `
-            -ErrorMessage "Failed to create CCleaner changelog")) { return $false }
+        if (-not (Invoke-Changelog -Old 'winapp2-cc.old' -New 'winapp2-ccleaner-flavor.ini')) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
@@ -247,12 +328,15 @@ function Build-CCleaner7Flavor {
         '-2f', 'winapp2-cc7.ini', '-9d', '\CCleaner7' `
         -ErrorMessage "Failed to create CCleaner7 flavor" -RequiredDirs @(Join-Path $PSScriptRoot 'CCleaner7'))) { return $false }
 
+    if (-not (Test-ContentChanged 'winapp2-cc7.ini' 'winapp2-cc7.old')) {
+        Write-Host "CCleaner7 flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
+        return $true
+    }
+
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-cc7.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-cc7.old', `
-            '-2f', 'winapp2-cc7.ini', '-3f', 'diff.txt' `
-            -ErrorMessage "Failed to create CCleaner7 changelog")) { return $false }
+        if (-not (Invoke-Changelog -Old 'winapp2-cc7.old' -New 'winapp2-cc7.ini')) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
@@ -284,12 +368,15 @@ function Build-FluentCleanerFlavor {
         '-3f', 'winapp2-fluentcleaner.ini' `
         -ErrorMessage "Failed FluentCleaner flavor analysis")) { return $false }
 
+    if (-not (Test-ContentChanged 'winapp2-fluentcleaner.ini' 'winapp2-fc.old')) {
+        Write-Host "FluentCleaner flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
+        return $true
+    }
+
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-fc.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-fc.old', `
-            '-2f', 'winapp2-fluentcleaner.ini', '-3f', 'diff.txt' `
-            -ErrorMessage "Failed to create FluentCleaner changelog")) { return $false }
+        if (-not (Invoke-Changelog -Old 'winapp2-fc.old' -New 'winapp2-fluentcleaner.ini')) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
@@ -308,12 +395,15 @@ function Build-BleachBitFlavor {
         '-3f', 'winapp2-bleachbit-flavor.ini' `
         -ErrorMessage "Failed BleachBit flavor analysis")) { return $false }
 
+    if (-not (Test-ContentChanged 'winapp2-bleachbit-flavor.ini' 'winapp2-bb.old')) {
+        Write-Host "BleachBit flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
+        return $true
+    }
+
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-bb.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-bb.old', `
-            '-2f', 'winapp2-bleachbit-flavor.ini', '-3f', 'diff.txt' `
-            -ErrorMessage "Failed to create BleachBit changelog")) { return $false }
+        if (-not (Invoke-Changelog -Old 'winapp2-bb.old' -New 'winapp2-bleachbit-flavor.ini')) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
@@ -330,12 +420,15 @@ function Build-TronFlavor {
         '-3f', 'winapp2-tron-flavor.ini' `
         -ErrorMessage "Failed Tron flavor analysis")) { return $false }
 
+    if (-not (Test-ContentChanged 'winapp2-tron-flavor.ini' 'winapp2-tron.old')) {
+        Write-Host "Tron flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
+        return $true
+    }
+
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-tron.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-tron.old', `
-            '-2f', 'winapp2-tron-flavor.ini', '-3f', 'diff.txt' `
-            -ErrorMessage "Failed to create Tron changelog")) { return $false }
+        if (-not (Invoke-Changelog -Old 'winapp2-tron.old' -New 'winapp2-tron-flavor.ini')) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
@@ -351,12 +444,15 @@ function Build-SystemNinjaFlavor {
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-debug', '-usedate', '-c', '-opti', '-1f', 'winapp2-systemninja-flavor.ini', `
         '-3f', 'Winapp2.rules' -ErrorMessage "Failed System Ninja flavor analysis")) { return $false }
 
+    if (-not (Test-ContentChanged 'Winapp2.rules' 'winapp2-sn.old')) {
+        Write-Host "System Ninja flavor is unchanged since the last build - not republishing" -ForegroundColor Yellow
+        return $true
+    }
+
     Write-Step "Creating changelog"
     $haveDiff = Test-Path 'winapp2-sn.old'
     if ($haveDiff) {
-        if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-diff', '-savelog', '-1f', 'winapp2-sn.old', `
-            '-2f', 'Winapp2.rules', '-3f', 'diff.txt' `
-            -ErrorMessage "Failed to create System Ninja changelog")) { return $false }
+        if (-not (Invoke-Changelog -Old 'winapp2-sn.old' -New 'Winapp2.rules')) { return $false }
     } else {
         Write-Host "No previous build found, skipping changelog" -ForegroundColor Yellow
     }
@@ -419,7 +515,8 @@ function Remove-TemporaryFiles {
         'winapp2*.old',
         'winapp2*.ini',
         'winapp2.rules',
-        'diff.txt'
+        'diff.txt',
+        'diffsummary.txt'
     )
 
     foreach ($pattern in $filesToRemove) {
