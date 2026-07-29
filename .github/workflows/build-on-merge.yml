@@ -18,9 +18,10 @@
 # fire release.yml via a push event; release.yml chains off this workflow's completion
 # (workflow_run) instead.
 #
-# Like artifact-drift.yml, it runs the committed Assembler\winapp2ool.exe (hosted runners
-# lack the .NET 4.6 targeting packs, so the tool is never compiled) under an
-# unelevated token.
+# Like artifact-drift.yml, it runs the committed Assembler\winapp2ool.exe under an unelevated
+# token rather than compiling. This is no longer forced -- c495167e (2026-07-29) retargeted
+# the projects from .NET 4.6 to 4.8, which the hosted runners' targeting packs do cover -- but
+# publishing exactly what the shipped binary produces is what this workflow is for.
 name: winapp2.ini build on merge
 
 on:
@@ -147,10 +148,26 @@ jobs:
 
           Write-Host "Published artifacts changed:`n$($publishedChanged -join "`n")"
 
-          # Version is the date stamp in the built winapp2.ini header: "; Version: 260723".
-          $verMatch = Select-String -Path 'Non-CCleaner/Winapp2.ini' -Pattern '^;\s*Version:\s*(\d+)' | Select-Object -First 1
-          $version = if ($verMatch) { $verMatch.Matches.Groups[1].Value } else { $null }
-          if (-not $version) { throw 'could not parse the winapp2.ini version line' }
+          # Version is the date stamp in a published artifact's header: "; Version: 260723".
+          # Read it from the files actually being RELEASED, not unconditionally from the base
+          # build. build winapp2.ps1's content gate declines to republish an artifact whose
+          # content did not move, which deliberately leaves that file's stamp pinned to its
+          # last real change. So a flavor-only change (edit Assembler/Tron/ and nothing else)
+          # leaves Non-CCleaner/Winapp2.ini on the PREVIOUS date while Tron carries today's --
+          # sourcing the version from the base would then tag today's release with the previous
+          # release's date, and release.yml's free-tag loop would quietly suffix it .2 rather
+          # than fail, so the mistake would ship looking deliberate.
+          #
+          # Max across the changed files: picks today's stamp whenever anything was rebuilt,
+          # and naturally yields the base's value when the base is among them.
+          $versions = @(foreach ($p in $publishedChanged) {
+            $m = Select-String -Path $p -Pattern '^;\s*Version:\s*(\d+)' | Select-Object -First 1
+            if ($m) { [int]$m.Matches.Groups[1].Value }
+          })
+          if ($versions.Count -eq 0) {
+            throw "could not parse a version line from any changed published artifact: $($publishedChanged -join ', ')"
+          }
+          $version = ($versions | Sort-Object -Descending | Select-Object -First 1).ToString()
 
           git commit -m "ci: rebuild winapp2.ini artifacts (v$version)"
           if ($LASTEXITCODE -ne 0) { throw 'commit failed' }

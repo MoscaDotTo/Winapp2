@@ -29,11 +29,14 @@
 # Hand-edits of Entries\ itself -- the other thing a wide path list nominally covered --
 # are caught sooner and cheaper by generated-artifact-guard.yml, which runs no build.
 #
-# It runs the *committed* winapp2ool.exe (staged into Assembler\ by the Release
-# post-build step) rather than compiling from source, so it needs no MSBuild, NuGet
-# restore, or .NET Framework targeting packs on the runner -- hosted runners ship
-# only the 4.8/4.8.1 targeting packs, not the 4.6/4.6.1 these projects target.
-# Tradeoff accepted: this exercises the shipped binary, it does not prove source compiles.
+# It runs the *committed* winapp2ool.exe (staged into Assembler\ by the Release post-build
+# step) rather than compiling from source. Running the committed binary is
+# a choice here, no longer a constraint. 
+#
+# It stays the right choice for THIS workflow: Assembler\Entries was produced by the shipped
+# binary, and the question is whether that binary still reproduces it. Tradeoff unchanged --
+# this exercises the shipped binary, does not prove source compiles, and cannot tell you the
+# committed exe matches the committed source. 
 name: winapp2.ini artifact drift check
 
 on:
