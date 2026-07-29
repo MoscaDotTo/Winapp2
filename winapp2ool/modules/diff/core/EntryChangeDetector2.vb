@@ -213,12 +213,19 @@ Public Class EntryChangeDetector2
             Dim mergedCount = _state.MergedEntries.OldToNewMergeDict.Count
             noReplacementCount = totalRemoved - renamedCount - mergedCount
 
-            Dim header As New MenuSection
-            header.AddColoredLine(removedHeader, ConsoleColor.DarkRed, True)
-            header.AddBlank()
-            header.AddColoredLine($"  - {noReplacementCount} entries removed without replacement", ConsoleColor.Red, True)
-            header.AddDivider(solid:=False)
-            out.Add(header)
+            ' Nothing removed means nothing to announce — an "0 total entries removed" banner is
+            ' noise the Diff Summary already covers. The global log still records the count below,
+            ' so the saved changelog's shape is unchanged
+            If totalRemoved > 0 Then
+
+                Dim header As New MenuSection
+                header.AddColoredLine(removedHeader, ConsoleColor.DarkRed, True)
+                header.AddBlank()
+                header.AddColoredLine($"  - {noReplacementCount} entries removed without replacement", ConsoleColor.Red, True)
+                header.AddDivider(solid:=False)
+                out.Add(header)
+
+            End If
 
             For Each key In results.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
 

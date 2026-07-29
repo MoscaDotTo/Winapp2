@@ -161,6 +161,20 @@ Public Class DiffOutputRenderer2
     End Sub
 
     ''' <summary>
+    ''' Reduces the completed diff to its counts, for callers that need the bottom line
+    ''' rather than the narrative
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' A <c> DiffOutcome </c> describing everything this diff found
+    ''' </returns>
+    Public Function BuildOutcome() As DiffOutcome
+
+        Return New DiffOutcome(_state, _file1.Count, _file2.Count)
+
+    End Function
+
+    ''' <summary>
     ''' Records the summary of the diff results and reports them to the user
     ''' </summary>
     '''
@@ -168,6 +182,28 @@ Public Class DiffOutputRenderer2
     ''' A <c>MenuSection</c> containing the formatted diff summary
     ''' </returns>
     Public Function LogPostDiff() As MenuSection
+
+        Dim outcome = BuildOutcome()
+
+        ' An unchanged rebuild would otherwise render two dozen lines of zeroes, burying the
+        ' one fact the reader (or the build pipeline) wanted
+        If Not outcome.HasChanges Then
+
+            Dim nothingDoing As New MenuSection
+            nothingDoing.AddTopBorder().AddColoredLine("Diff Summary", ConsoleColor.DarkGreen, centered:=True).AddDivider()
+
+            gLog(Nothing, leadr:=True)
+
+            Using gLogScope("Diff Summary")
+
+                Emit(nothingDoing, $"No changes detected across {Entries(_file2.Count)}", ConsoleColor.White)
+                gLog("")
+
+            End Using
+
+            Return nothingDoing.AddBottomBorder()
+
+        End If
 
         Dim stats = _state.Statistics
         Dim merged = _state.MergedEntries

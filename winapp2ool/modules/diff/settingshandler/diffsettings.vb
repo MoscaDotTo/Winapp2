@@ -44,8 +44,15 @@ Public Module diffsettings
     ''' </summary>
     Public Property DiffFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "diff.txt", "diff.txt", mustExist:=False)
 
-    ''' <summary> 
-    ''' Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c> 
+    ''' <summary>
+    ''' The path for the machine-readable Diff outcome summary. Empty by default — the summary is
+    ''' written only when a caller names a path, which in practice means a scripted pipeline
+    ''' passing <c> -4f </c> / <c> -summaryf </c>
+    ''' </summary>
+    Public Property DiffFile4 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=False)
+
+    ''' <summary>
+    ''' Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c>
     ''' </summary>
     Public Property DownloadDiffFile As Boolean = Not isOffline
 
@@ -83,6 +90,7 @@ Public Module diffsettings
         DiffFile1 = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2-old.ini", mustExist:=True)
         DiffFile2 = New iniFileChooser(Environment.CurrentDirectory, "", "winapp2.ini", mustExist:=True)
         DiffFile3 = New iniFileChooser(Environment.CurrentDirectory, "diff.txt", "diff.txt", mustExist:=False)
+        DiffFile4 = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=False)
         SaveModule2(NameOf(Diff), GetType(diffsettings))
 
     End Sub
