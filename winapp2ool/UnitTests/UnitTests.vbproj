@@ -86,6 +86,7 @@
   <ItemGroup>
     <Compile Include="DiffKeyComparisonTests.vb" />
     <Compile Include="LintReconcilerTests.vb" />
+    <Compile Include="MenuLayoutTests.vb" />
     <Compile Include="TransmuteTests.vb" />
     <Compile Include="UnitTools.vb" />
     <Compile Include="UWPBuilderTests.vb" />

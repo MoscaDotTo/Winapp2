@@ -38,6 +38,16 @@ Public Class MenuSection
     Private _items As New List(Of Action)
 
     ''' <summary>
+    ''' Indicates that this section would render nothing, so a caller assembling sections can
+    ''' skip it rather than emitting a divider or a border around empty space
+    ''' </summary>
+    Public ReadOnly Property IsEmpty As Boolean
+        Get
+            Return _items.Count = 0
+        End Get
+    End Property
+
+    ''' <summary>
     ''' Registered handlers for dispatching user input. Each entry corresponds to one
     ''' numbered option in the order it was added (index 0 = option 1, the first selectable
     ''' item after Exit). Non-numbered items (blanks, lines, file info) are not registered here.
