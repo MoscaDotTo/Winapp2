@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2026 Hazel Ward
+'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -147,6 +147,13 @@ Module MenuMaker
     Private _outputBuffer As StringBuilder = Nothing
 
     ''' <summary>
+    ''' The console width held constant for the duration of a render pass, or <c> Nothing </c>
+    ''' when no pass is in progress. Set by <c> BeginBuffered </c> and cleared by
+    ''' <c> FlushBuffered </c> so every line of one box is measured against the same width
+    ''' </summary>
+    Private _pinnedWidth As Integer? = Nothing
+
+    ''' <summary>
     ''' Master switch for the buffered render path. When <c> False </c>, <c> BeginBuffered </c>
     ''' is a no-op and rendering reverts to the legacy per-line <c> Console.WriteLine </c> path.
     ''' Used by benchmarks and as a kill switch.
@@ -163,6 +170,11 @@ Module MenuMaker
     ''' <br/> Otherwise, the cached console window width
     ''' </returns>
     Private Function GetConsoleWidth() As Integer
+
+        ' A render pass pins the width for its whole duration. Without that, the 500ms refresh
+        ' below can land between two lines of the same box and leave it drawn at two different
+        ' widths -- the borders say one thing and the rows inside say another
+        If _pinnedWidth.HasValue Then Return _pinnedWidth.Value
 
         ' The width is extremely unlikely to change during the printing process
         ' if ever, so only check it every 500 milliseconds at the most frequent
@@ -305,6 +317,10 @@ Module MenuMaker
     ''' </summary>
     Public Sub BeginBuffered()
 
+        ' Pinned before the buffering guards below, so the width stays stable for the pass even
+        ' when buffering is switched off or output is suppressed
+        If Not _pinnedWidth.HasValue Then _pinnedWidth = GetConsoleWidth()
+
         If Not BufferingEnabled OrElse SuppressOutput Then Return
         If _outputBuffer IsNot Nothing Then Return
 
@@ -318,10 +334,11 @@ Module MenuMaker
     ''' </summary>
     Public Sub FlushBuffered()
 
-        If _outputBuffer Is Nothing Then Return
-
         Dim sb = _outputBuffer
         _outputBuffer = Nothing
+        _pinnedWidth = Nothing
+
+        If sb Is Nothing Then Return
 
         If sb.Length > 0 Then Console.Out.Write(sb.ToString())
 
@@ -599,8 +616,34 @@ Module MenuMaker
 
         If Not cond Then Return
 
-        If lineString = Nothing Then lineString = getFrame()
+        ' A blank row is already a finished full-width line, so it goes straight out. Feeding it
+        ' back through mkMenuLine would frame the frame
+        If lineString = Nothing Then printRenderedLine(getFrame()) : Return
+
         cwl(mkMenuLine(lineString, If(isCentered, 0, 1)))
+
+    End Sub
+
+    ''' <summary>
+    ''' Prints a line that <c> getFrame </c> already rendered to the full console width — a
+    ''' border, divider, or blank row. These bypass <c> mkMenuLine </c> because they are not
+    ''' content to be framed, they are the frame
+    ''' </summary>
+    '''
+    ''' <param name="line">
+    ''' A complete, already-rendered menu line
+    ''' </param>
+    '''
+    ''' <param name="cond">
+    ''' Indicates that the line should be printed <br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    Private Sub printRenderedLine(line As String,
+                         Optional cond As Boolean = True)
+
+        If Not cond Then Return
+
+        cwl(line)
 
     End Sub
 
@@ -706,19 +749,48 @@ Module MenuMaker
     ''' Indicates that top and bottom borders 
     ''' should be printed when printing menuframes
     ''' </param>
+    ''' <summary>
+    ''' The longest run of text that still fits between a menu line's two borders
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' The maximum framed line length, or <c> 0 </c> on a console too narrow to frame anything
+    ''' </returns>
+    '''
+    ''' <remarks>
+    ''' A left-aligned line spends two columns on the leading space and opener, one on the indent,
+    ''' and two more on the trailing space and closer — so the text itself may occupy at most
+    ''' <c> GetConsoleWidth() - 5 </c> columns
+    ''' </remarks>
+    Private Function MaxFramedLineLength() As Integer
+
+        Return Math.Max(0, GetConsoleWidth() - 5)
+
+    End Function
+
     Private Function mkMenuLine(line As String,
                                 align As Integer,
                                 Optional borderInd As Integer = 0,
                                 Optional fillBorder As Nullable(Of Boolean) = True) As String
 
-        If line.Length >= GetConsoleWidth() - 1 Then Return line
         Dim out As New StringBuilder($" {Openers(borderInd)}")
+
+        ' Text with nowhere to put a closing border still gets the opener and the standard
+        ' one-space indent, so an overlong line starts in the same column as every other line in
+        ' the box and the left edge stays unbroken. It simply runs past where the right border
+        ' would have been. Centering is meaningless at this width, so these fall back to the
+        ' left-aligned indent regardless of the requested alignment
+        If line.Length > MaxFramedLineLength() Then Return out.Append(" "c).Append(line).ToString()
 
         Select Case align
 
             Case 0
 
-                padToEnd(out, CInt((((GetConsoleWidth() - line.Length) / 2) + 2)), Closers(borderInd))
+                ' The interior spans the two columns after the opener through GetConsoleWidth() - 3,
+                ' so centering means starting the text at 2 + (interiorWidth - line.Length) \ 2 --
+                ' which reduces to the expression below. Integer division keeps odd-width cases
+                ' landing consistently one column left rather than alternating with CInt's rounding
+                padToEnd(out, (GetConsoleWidth() - line.Length) \ 2, Closers(borderInd))
                 out.Append(line)
                 padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd))
 
@@ -916,7 +988,9 @@ Module MenuMaker
 
         Dim startingColor = getForegroundColor()
         setForegroundColor(ConsoleColor.Yellow)
-        printMenuLine(text, condition)
+        ' Named, because positionally this lands on isCentered -- which silently turned a
+        ' suppressed warning into a centered one that printed anyway
+        printMenuLine(text, cond:=condition)
         setForegroundColor(startingColor)
 
     End Sub
@@ -1039,7 +1113,7 @@ Module MenuMaker
     ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Sub BeginMenu(Optional solid As Boolean = True)
 
-        printMenuLine(getFrame(1, solid), cond:=True)
+        printRenderedLine(getFrame(1, solid))
 
     End Sub
 
@@ -1070,7 +1144,7 @@ Module MenuMaker
     ''' </summary>
     Public Sub EndMenu(Optional filled As Boolean = True)
 
-        printMenuLine(getFrame(2, filled), cond:=True)
+        printRenderedLine(getFrame(2, filled))
 
     End Sub
 
@@ -1084,7 +1158,7 @@ Module MenuMaker
     ''' </param>
     Public Sub PrintDivider(Optional solid As Boolean = True)
 
-        printMenuLine(getFrame(3, solid))
+        printRenderedLine(getFrame(3, solid))
 
     End Sub
 

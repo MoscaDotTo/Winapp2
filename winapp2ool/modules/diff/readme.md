@@ -816,6 +816,8 @@ A diff run produces output in the following order. Only some sections have a des
 
 Section 8 is omitted when no cross-entry movements were detected. Section 12 is written only to the saved log; use log saving (`-savelog`) or the Log Viewer to see it.
 
+When a run finds nothing at all, section 13 is displayed instead as `No changes detected across N entries`
+
 ## Console Output vs. Saved Log
 
 The interactive console and the saved log render the same data in two different arrangements. The table above describes the **saved log**.
@@ -1099,8 +1101,12 @@ Diff's CLI resets all Diff settings to their defaults before applying arguments,
 | `-2f name` | Set the newer file name (local mode only) | None |
 | `-3d path` | Set the log save directory | Current directory |
 | `-3f name` | Set the log save file name | `diff.txt` |
+| `-4d path`, `-summaryd path` | Set the outcome summary directory | Current directory |
+| `-4f name`, `-summaryf name` | Set the outcome summary file name. saved only when named | None (no summary written) |
 
 With `-d` and no `-2f`, there is no newer file to against which to diff and the run exits silently without producing any output. Always pair `-d` with `-2f`.
+
+The summary file is saved if and only if it is assigned a name. It is intended for the build script.
 
 ## Flavor Selection
 
@@ -1127,6 +1133,7 @@ These are global winapp2ool arguments, not Diff-specific ones. They select which
 | `winapp2ool -diff -verbose` | Diff against GitHub, printing full entry text alongside each change |
 | `winapp2ool -diff -d -1f old.ini -2f new.ini` | Compare two specifically named local files |
 | `winapp2ool -diff -d -savelog -2f new.ini` | Compare two local files and save the output |
+| `winapp2ool -diff -d -2f new.ini -4f summary.txt` | Compare two local files and write only the machine-readable outcome |
 
 ---
 
@@ -1149,6 +1156,33 @@ winapp2ool -s -diff -donttrim -savelog -3f changelog.txt
 In silent mode nothing is written to the console; the log file is the only output. Diff is used this way in the winapp2.ini build pipeline, which generates a changelog for every flavor it publishes.
 
 Always invoke the flavor explicitly in any automated script, the CLI resets Diff's own settings but reads the flavor from the saved global configuration unless a flavor flag is passed.
+
+### Reading the outcome from a script
+
+The changelog is written for people. The summary is written for machines. `-4f` writes the same run's counts as `key=value` lines:
+
+```
+winapp2ool -s -offline -diff -savelog -1f old.ini -2f new.ini -3f diff.txt -4f summary.txt
+```
+
+```
+haschanges=false
+oldentrycount=4058
+newentrycount=4058
+addedentries=0
+removedentries=0
+modifiedentries=0
+renamedentries=0
+mergedentries=0
+addedkeys=0
+removedkeys=0
+updatedkeys=0
+movedkeys=0
+```
+
+Every value is an integer or `true`/`false`, so PowerShell can read the whole file with `ConvertFrom-StringData (Get-Content summary.txt -Raw)`. `haschanges` is true when any of the counts is nonzero or the entry counts differ.
+
+`haschanges=false` does not mean the two files are identical. It means that Diff didn't detect a semantic difference about which it cares.
 
 ---
 

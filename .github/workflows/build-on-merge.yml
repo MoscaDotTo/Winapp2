@@ -18,15 +18,22 @@
 # fire release.yml via a push event; release.yml chains off this workflow's completion
 # (workflow_run) instead.
 #
-# Like artifact-drift.yml, it runs the committed Assembler\winapp2ool.exe (hosted runners
-# lack the .NET 4.6 targeting packs, so the tool is never compiled) under an
-# unelevated token.
+# Like artifact-drift.yml, it runs the committed Assembler\winapp2ool.exe under an unelevated
+# token rather than compiling. 
 name: winapp2.ini build on merge
 
 on:
   # At most one build per day (see the changelog rationale above). If master's sources
   # did not change since the last build, the rebuild is byte-identical, nothing is
   # staged, and the run is a cheap no-op that neither commits nor releases.
+  #
+  # "Byte-identical" is not free: every lint pass restamps "; Version: <today>" via -usedate,
+  # so an untouched rebuild would still differ from the published file on that one line and
+  # would once have committed and released an empty changelog every single day (this is what
+  # v260729 was). build winapp2.ps1 now compares each freshly built artifact to the one it
+  # would replace, ignoring that stamp, and declines to republish when nothing else moved --
+  # so an unchanged day leaves the tree untouched and the version stamp stays pinned to the
+  # date of the last real content change, which is what it always meant to record.
   schedule:
     - cron: '0 6 * * *'   # 06:00 UTC daily (11PM MST)
   # Out-of-cycle build button. A manual re-run on a day that already released produces
@@ -106,13 +113,60 @@ jobs:
             exit 0
           }
 
-          # Version is the date stamp in the built winapp2.ini header: "; Version: 260723".
-          $verMatch = Select-String -Path 'Non-CCleaner/Winapp2.ini' -Pattern '^;\s*Version:\s*(\d+)' | Select-Object -First 1
-          $version = if ($verMatch) { $verMatch.Matches.Groups[1].Value } else { $null }
-          if (-not $version) { throw 'could not parse the winapp2.ini version line' }
+          # Committing and releasing are separate decisions. Regenerated Entries/ or a rewritten
+          # changelog must be committed so the tree never drifts from its sources, but neither is
+          # something to cut a release over -- only a change to a file end users actually download
+          # is. (build winapp2.ps1 already declines to republish an artifact whose content did not
+          # move, so reaching this branch means Entries/ or a diff.txt moved on its own.)
+          $published = @(
+            'Winapp2.ini'
+            'Non-CCleaner/Winapp2.ini'
+            'Non-CCleaner/BleachBit/Winapp2.ini'
+            'Non-CCleaner/CCleaner7/Winapp2.ini'
+            'Non-CCleaner/FluentCleaner/Winapp2.ini'
+            'Non-CCleaner/Tron/Winapp2.ini'
+            'Non-CCleaner/SystemNinja/Winapp2.rules'
+          )
+          $staged = @(git diff --cached --name-only)
+          $publishedChanged = @($staged | Where-Object { $published -contains $_ })
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          if ($publishedChanged.Count -eq 0) {
+            Write-Host "No published artifact changed; committing the regenerated files without releasing."
+            Write-Host ($staged -join "`n")
+            git commit -m 'ci: sync regenerated winapp2.ini artifacts (no published changes)'
+            if ($LASTEXITCODE -ne 0) { throw 'commit failed' }
+            git push origin HEAD:refs/heads/master
+            if ($LASTEXITCODE -ne 0) { throw 'push to master failed -- is the branch protected against the Actions token?' }
+            "released=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            exit 0
+          }
+
+          Write-Host "Published artifacts changed:`n$($publishedChanged -join "`n")"
+
+          # Version is the date stamp in a published artifact's header: "; Version: 260723".
+          # Read it from the files actually being RELEASED, not unconditionally from the base
+          # build. build winapp2.ps1's content gate declines to republish an artifact whose
+          # content did not move, which deliberately leaves that file's stamp pinned to its
+          # last real change. So a flavor-only change (edit Assembler/Tron/ and nothing else)
+          # leaves Non-CCleaner/Winapp2.ini on the PREVIOUS date while Tron carries today's --
+          # sourcing the version from the base would then tag today's release with the previous
+          # release's date, and release.yml's free-tag loop would quietly suffix it .2 rather
+          # than fail, so the mistake would ship looking deliberate.
+          #
+          # Max across the changed files: picks today's stamp whenever anything was rebuilt,
+          # and naturally yields the base's value when the base is among them.
+          $versions = @(foreach ($p in $publishedChanged) {
+            $m = Select-String -Path $p -Pattern '^;\s*Version:\s*(\d+)' | Select-Object -First 1
+            if ($m) { [int]$m.Matches.Groups[1].Value }
+          })
+          if ($versions.Count -eq 0) {
+            throw "could not parse a version line from any changed published artifact: $($publishedChanged -join ', ')"
+          }
+          $version = ($versions | Sort-Object -Descending | Select-Object -First 1).ToString()
+
           git commit -m "ci: rebuild winapp2.ini artifacts (v$version)"
           if ($LASTEXITCODE -ne 0) { throw 'commit failed' }
           git push origin HEAD:refs/heads/master

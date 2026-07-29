@@ -1,0 +1,152 @@
+# Binary parity: is the committed Assembler\winapp2ool.exe still the committed source?
+#
+# Assembler\winapp2ool.exe is a tracked binary refreshed by the Release post-build copy.
+# Nothing verified it corresponded to the source beside it. Rebuild locally, forget to
+# commit the exe, push source-only, and the daily build keeps generating with the OLD tool
+# indefinitely -- silently, no red X anywhere, every published artifact coming from code
+# that is not in the repo. This closes that hole.
+#
+# It compares BEHAVIOR, not bytes. Recompiling identical source yields a different binary
+# (fresh MVID and timestamps), so byte-comparing the two exes would fail every run and
+# prove nothing. Running both over the same sources and diffing the generated trees asks
+# the question that actually matters: does the shipped tool still do what the source says.
+#
+# This is the question artifact-drift.yml's header used to claim. It cannot answer it --
+# -Verify compares committed Entries against regenerated Entries, so a tool change and an
+# un-regenerated source edit collapse into the same boolean. Holding sources fixed and
+# varying only the exe is what separates them.
+#
+# Buildable on the runner only since c495167e retargeted the projects to .NET 4.8.
+name: winapp2ool binary parity
+
+on:
+  workflow_dispatch:
+  # Fires when either side of the equation moves: the binary, or the source it should
+  # have been built from. Docs excluded -- they cannot change generated output.
+  push:
+    paths:
+      - 'Assembler/winapp2ool.exe'
+      - 'winapp2ool/**'
+      - '!winapp2ool/**.md'
+      - '!winapp2ool/**/readme.md'
+      - '.github/workflows/exe-parity.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: exe-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity:
+    runs-on: windows-latest
+
+    env:
+      # Same unelevated-token override the other build workflows use; child processes
+      # (the build script's Start-Process calls) inherit it.
+      __COMPAT_LAYER: RunAsInvoker
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ORDER IS LOAD-BEARING: this runs BEFORE msbuild. The Release PostBuildEvent does
+      # `copy /Y "$(TargetPath)" "..\Assembler\winapp2ool.exe"`, so compiling first would
+      # overwrite the very baseline being measured and turn this into a tautology. The
+      # msbuild step also blanks that property, but generating first means the guarantee
+      # does not rest on one -p: flag continuing to work.
+      - name: Generate with the COMMITTED exe
+        shell: pwsh
+        working-directory: Assembler
+        run: |
+          if (-not (Test-Path 'winapp2ool.exe')) { throw 'winapp2ool.exe missing from Assembler -- the committed Release build should stage it there' }
+          pwsh -File './build winapp2.ps1' -GenerateTo '\Parity\Committed'
+          exit $LASTEXITCODE
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      # Non-fatal on purpose. Every package here is an FxCop analyzer or MSTest -- all
+      # diagnostics-only, none can change emitted behavior -- and the project has no
+      # EnsureNuGetPackageBuildImports guard, so a missing analyzer warns rather than
+      # errors. A restore outage should not block the parity answer.
+      - name: Restore packages (best effort)
+        shell: pwsh
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $false
+          if (-not (Get-Command nuget -ErrorAction SilentlyContinue)) {
+            Write-Host '::warning::nuget not on PATH; skipping restore'
+            exit 0
+          }
+          nuget restore winapp2ool\winapp2ool.sln
+          if ($LASTEXITCODE -ne 0) { Write-Host '::warning::nuget restore failed; continuing without analyzers' }
+          exit 0
+
+      # /p:PostBuildEvent= suppresses the copy into Assembler\ (and the version.txt
+      # rewrite). Belt to the ordering's suspenders -- see the generate step above.
+      - name: Build winapp2ool from source
+        shell: pwsh
+        run: |
+          msbuild winapp2ool\winapp2ool.vbproj /p:Configuration=Release /p:PostBuildEvent= /v:minimal /nologo
+          if ($LASTEXITCODE -ne 0) { throw 'source build failed' }
+          $built = 'winapp2ool\bin\Release\winapp2ool.exe'
+          if (-not (Test-Path $built)) { throw "build reported success but produced no exe at $built" }
+
+      # The freshly built binary can live in bin\Release: winapp2ool resolves a leading
+      # backslash in -1d/-2d/-3d/-4d against the WORKING directory, not its own location
+      # (CliArgSpec.vb ApplyDirArg), and working-directory pins that to Assembler.
+      - name: Generate with the SOURCE-built exe
+        shell: pwsh
+        working-directory: Assembler
+        run: |
+          pwsh -File './build winapp2.ps1' -GenerateTo '\Parity\Source' -ToolPath '..\winapp2ool\bin\Release\winapp2ool.exe'
+          exit $LASTEXITCODE
+
+      - name: Compare the two generated trees
+        shell: pwsh
+        working-directory: Assembler
+        run: |
+          $committed = (Resolve-Path 'Parity\Committed').Path
+          $source    = (Resolve-Path 'Parity\Source').Path
+          $drift = @()
+
+          foreach ($f in Get-ChildItem $committed -Filter '*.ini' -Recurse -File) {
+            $rel = $f.FullName.Substring($committed.Length + 1)
+            $counterpart = Join-Path $source $rel
+            if (-not (Test-Path $counterpart)) {
+              $drift += "only the committed exe produces: $rel"
+              continue
+            }
+            if ((Get-FileHash $f.FullName).Hash -ne (Get-FileHash $counterpart).Hash) {
+              $drift += "different content: $rel"
+            }
+          }
+          foreach ($f in Get-ChildItem $source -Filter '*.ini' -Recurse -File) {
+            $rel = $f.FullName.Substring($source.Length + 1)
+            if (-not (Test-Path (Join-Path $committed $rel))) {
+              $drift += "only the source-built exe produces: $rel"
+            }
+          }
+
+          if ($drift.Count -gt 0) {
+            Write-Host "::error::The committed winapp2ool.exe does not match the committed source"
+            $drift | ForEach-Object { Write-Host "  $_" }
+            Write-Host ''
+            Write-Host 'Rebuild winapp2ool in Release and commit Assembler/winapp2ool.exe.'
+            Write-Host 'The Release post-build step stages it there automatically.'
+            exit 1
+          }
+
+          Write-Host 'Committed exe and source-built exe generate identical artifacts.'
+
+      - name: Upload both trees on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exe-parity-failure
+          path: |
+            Assembler/Parity/**
+            Assembler/winapp2ool.log
+          if-no-files-found: ignore
+          retention-days: 7

@@ -92,6 +92,11 @@ Module Diff
     Public Property MostRecentDiffLog As String = ""
 
     ''' <summary>
+    ''' Holds the counts from the most recent Diff, or <c> Nothing </c> if no Diff has run
+    ''' </summary>
+    Public Property MostRecentDiffOutcome As DiffOutcome = Nothing
+
+    ''' <summary>
     ''' Phrase written to the global log to mark the beginning of a Diff run,
     ''' used to slice the relevant portion of the log afterwards
     ''' </summary>
@@ -131,6 +136,7 @@ Module Diff
     ''' <br /> -donttrim    : disable trimming the downloaded file before diffing
     ''' <br /> -savelog     : save the diff output to disk on exit
     ''' <br /> -verbose     : print the full text of changed entries in the diff output
+    ''' <br /> -4f/-summaryf: write the machine-readable outcome summary to this file
     ''' </summary>
     Public Sub HandleCmdLine()
 
@@ -140,6 +146,7 @@ Module Diff
         spec.WithFile(1, DiffFile1, "old") _
             .WithFile(2, DiffFile2, "new") _
             .WithFile(3, DiffFile3, "log") _
+            .WithFile(4, DiffFile4, "summary") _
             .WithDownload(Sub() DownloadDiffFile = Not DownloadDiffFile) _
             .WithFlag("-donttrim", Sub() TrimRemoteFile = Not TrimRemoteFile) _
             .WithFlag("-savelog", Sub() SaveDiffLog = Not SaveDiffLog) _
@@ -231,9 +238,27 @@ Module Diff
         Dim logFile = iniFile2.Empty(DiffFile3.Dir, DiffFile3.Name)
         logFile.OverwriteToFile(MostRecentDiffLog, SaveDiffLog)
 
+        WriteOutcomeSummary()
+
         setNextMenuHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
 
         crl()
+
+    End Sub
+
+    ''' <summary>
+    ''' Writes the most recent Diff's outcome to <c> DiffFile4 </c> as parseable
+    ''' <c> key=value </c> lines, so a calling script can act on what the Diff found without
+    ''' parsing the prose log. No-ops when no summary path was given
+    ''' </summary>
+    Private Sub WriteOutcomeSummary()
+
+        If DiffFile4.Name.Length = 0 OrElse MostRecentDiffOutcome Is Nothing Then Return
+
+        gLog($"Diff outcome: {MostRecentDiffOutcome}")
+
+        Dim summaryFile = iniFile2.Empty(DiffFile4.Dir, DiffFile4.Name)
+        summaryFile.OverwriteToFile(MostRecentDiffOutcome.ToSummaryText())
 
     End Sub
 
@@ -297,10 +322,15 @@ Module Diff
                          action()
                      End Sub
 
+        ' A step that found nothing contributes nothing — including its trailing divider. Adding
+        ' the divider unconditionally left a diff with few changes (and a diff with none at all)
+        ' rendering a stack of empty bordered rows with no content between them
         Dim collectStep = Sub(label As String, fn As Func(Of IEnumerable(Of MenuSection)))
                               stepNum += 1
                               Diff2Progress($"{label} (step {stepNum}/{totalSteps})")
-                              out.AddRange(fn())
+                              Dim produced = fn().Where(Function(section) Not section.IsEmpty).ToList()
+                              If produced.Count = 0 Then Return
+                              out.AddRange(produced)
                               out.Add(New MenuSection().AddDivider(solid:=False))
                           End Sub
 
@@ -331,6 +361,8 @@ Module Diff
         out.Add(New MenuSection().AddBottomBorder)
 
         doStep("· calculating summary statistics ", Sub() out.Add(renderer2.LogPostDiff()))
+
+        MostRecentDiffOutcome = renderer2.BuildOutcome()
 
         Return out
 

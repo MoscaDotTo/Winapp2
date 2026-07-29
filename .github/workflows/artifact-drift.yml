@@ -15,11 +15,28 @@
 # the real diff. Drift-checking PRs would demand contributors run winapp2ool, which
 # cuts against the entry-data-only contribution model. This runs on pushes only.
 #
-# It runs the *committed* winapp2ool.exe (staged into Assembler\ by the Release
-# post-build step) rather than compiling from source, so it needs no MSBuild, NuGet
-# restore, or .NET Framework targeting packs on the runner -- hosted runners ship
-# only the 4.8/4.8.1 targeting packs, not the 4.6/4.6.1 these projects target.
-# Tradeoff accepted: this exercises the shipped binary, it does not prove source compiles.
+# And it fires on exactly ONE path: the committed exe. That is the only input to the
+# build whose change is supposed to leave the output byte-identical, so it is the only
+# input whose change makes "committed Entries == regenerate(sources)" a question worth
+# asking. Everything else under Assembler\ (EntryBuilder\, UWP\, BrowserBuilder\, and
+# Scaffolds\, which reaches both builders as -3d/-4d) is a SOURCE: editing one is MEANT
+# to change the output, so Entries is legitimately stale from that push until
+# build-on-merge.yml's next daily rebuild commits the regeneration -- and note that
+# workflow is a 06:00 cron despite its name, so the stale window runs up to 24 hours.
+# Watching source paths therefore meant a guaranteed red X on every source push and on
+# the merge commit of every source-only PR (a UI merge fires a push on master): correct
+# every time, useless every time, because drift was the intended state at that moment.
+# Hand-edits of Entries\ itself -- the other thing a wide path list nominally covered --
+# are caught sooner and cheaper by generated-artifact-guard.yml, which runs no build.
+#
+# It runs the *committed* winapp2ool.exe (staged into Assembler\ by the Release post-build
+# step) rather than compiling from source. Running the committed binary is
+# a choice here, no longer a constraint. 
+#
+# It stays the right choice for THIS workflow: Assembler\Entries was produced by the shipped
+# binary, and the question is whether that binary still reproduces it. Tradeoff unchanged --
+# this exercises the shipped binary, does not prove source compiles, and cannot tell you the
+# committed exe matches the committed source. 
 name: winapp2.ini artifact drift check
 
 on:
@@ -27,17 +44,28 @@ on:
   workflow_dispatch:
   # Push is what gives this workflow its reach: pull_request and schedule triggers
   # don't fire on feature branches, so this is the only CI a branch gets before it
-  # merges. Scoped to the inputs that affect the run -- the committed exe and the
-  # entries both live under Assembler/. An exe commit is the highest-value run here:
-  # it asks whether a new build of the tool still generates identical output.
+  # merges. An exe commit is the highest-value run here and, per the scope note above,
+  # the only one: it asks whether a new build of the tool still generates identical
+  # output from unchanged sources. Red here is exactly the signal wanted -- the rebuild
+  # changed generator behavior, either on purpose (go regenerate Entries and commit it
+  # with [regen]) or by accident (go find out why before it reaches a release).
   #
   # No feedback loop: build-on-merge.yml commits Assembler/Entries with the
-  # GITHUB_TOKEN, and token pushes do not fire push events.
+  # GITHUB_TOKEN, and token pushes do not fire push events. It never commits the exe
+  # at all -- it only copies it into the release bundle -- so it cannot trip this path.
   push:
     paths:
+      - 'Assembler/winapp2ool.exe'
       - '.github/workflows/artifact-drift.yml'
-      - 'Assembler/**'
-      - '!Assembler/**.md'
+  # Post-build assertion on master. build-on-merge regenerates Entries in place and commits
+  # it, so immediately after that commit "committed Entries == regenerate(sources)" holds by
+  # construction. It is the only moment where drift is never the intended state, which makes
+  # it the only placement where red carries information: generator nondeterminism, an
+  # artifact the build writes that the commit step's hand-maintained path list never stages,
+  # or a push racing the build.
+  workflow_run:
+    workflows: ["winapp2.ini build on merge"]
+    types: [completed]
 
 # Read-only: this never writes back to the repo.
 permissions:
@@ -50,6 +78,10 @@ concurrency:
 jobs:
   verify:
     runs-on: windows-latest
+
+    # A failed build leaves a half-written tree; verifying it would report drift that says
+    # nothing about the invariant. Push and manual runs are unconditional.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
 
     env:
       # Deterministic override of the exe's `requireAdministrator` manifest: the
@@ -64,6 +96,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # workflow_run reports the commit the build STARTED from, not the artifact commit
+          # it created. Defaulting to it would verify the pre-rebuild tree and fail every
+          # time. Empty string keeps the normal behavior for push and dispatch.
+          ref: ${{ github.event_name == 'workflow_run' && 'master' || '' }}
 
       # The characteristic test. -Verify regenerates every artifact into
       # Assembler/Verify and byte-compares against the committed Assembler/Entries,
