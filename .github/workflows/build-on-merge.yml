@@ -19,9 +19,7 @@
 # (workflow_run) instead.
 #
 # Like artifact-drift.yml, it runs the committed Assembler\winapp2ool.exe under an unelevated
-# token rather than compiling. This is no longer forced -- c495167e (2026-07-29) retargeted
-# the projects from .NET 4.6 to 4.8, which the hosted runners' targeting packs do cover -- but
-# publishing exactly what the shipped binary produces is what this workflow is for.
+# token rather than compiling. 
 name: winapp2.ini build on merge
 
 on:
