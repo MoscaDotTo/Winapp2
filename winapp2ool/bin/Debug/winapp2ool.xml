@@ -42,6 +42,12 @@ winapp2ool
  represents a menu option, toggle, or line of text to be printed to the user
  </summary>
 </member>
+<member name="P:winapp2ool.MenuSection.IsEmpty">
+ <summary>
+ Indicates that this section would render nothing, so a caller assembling sections can
+ skip it rather than emitting a divider or a border around empty space
+ </summary>
+</member>
 <member name="F:winapp2ool.MenuSection._actions">
  <summary>
  Registered handlers for dispatching user input. Each entry corresponds to one
@@ -3400,6 +3406,119 @@ winapp2ool
  (Chr(0)) cannot appear in ini file key values, making it unambiguous as a delimiter
  </summary>
 </member>
+<member name="T:winapp2ool.DiffOutcome">
+ <summary>
+ The bottom line of a completed Diff, reduced to counts. Where the diff log narrates every
+ change at length, this answers only "did anything change, and how much" — the question a
+ scripted build pipeline asks when deciding whether the rebuild is worth publishing
+ </summary>
+
+ <remarks>
+ This is a semantic verdict, not a textual one. Diff normalizes deprecated paths on both
+ sides before comparing (see <c> PathReplacements </c>), does not see comments outside the
+ preamble, and ignores ordering, so <c> HasChanges </c> being <c> False </c> does NOT prove
+ the two files are textually identical. Callers gating on "should this build be published"
+ should compare the files themselves and use this for reporting
+ </remarks>
+</member>
+<member name="P:winapp2ool.DiffOutcome.AddedEntries">
+ <summary>
+ The number of entries present in the new file but not the old one
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.RemovedEntries">
+ <summary>
+ The number of entries present in the old file but not the new one, including
+ those accounted for by a rename or a merge
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.ModifiedEntries">
+ <summary>
+ The number of entries present in both files whose keys differ
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.RenamedEntries">
+ <summary>
+ The number of removed entries whose content reappeared under a new name
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.MergedEntries">
+ <summary>
+ The number of removed entries whose content was folded into some other entry
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.AddedKeys">
+ <summary>
+ The number of keys added across all modified entries
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.RemovedKeys">
+ <summary>
+ The number of keys removed without replacement across all modified entries
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.UpdatedKeys">
+ <summary>
+ The number of keys updated in place across all modified entries
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.MovedKeys">
+ <summary>
+ The number of keys that relocated from one entry to another
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.OldEntryCount">
+ <summary>
+ The number of entries in the old file
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.NewEntryCount">
+ <summary>
+ The number of entries in the new file
+ </summary>
+</member>
+<member name="P:winapp2ool.DiffOutcome.HasChanges">
+ <summary>
+ Indicates that the Diff observed at least one change of any kind
+ </summary>
+</member>
+<member name="M:winapp2ool.DiffOutcome.#ctor(winapp2ool.DiffState,System.Int32,System.Int32)">
+ <summary>
+ Collects the counts a completed Diff accumulated in its <c> DiffState </c>
+ </summary>
+
+ <param name="state">
+ The <c> DiffState </c> of a Diff run whose pipeline has completed
+ </param>
+
+ <param name="oldEntries">
+ The number of entries in the old file
+ </param>
+
+ <param name="newEntries">
+ The number of entries in the new file
+ </param>
+</member>
+<member name="M:winapp2ool.DiffOutcome.ToSummaryText">
+ <summary>
+ Renders the outcome as <c> key=value </c> lines for a calling script to parse.
+ Every value is an integer or <c> true </c>/<c> false </c>, so the text is safe to
+ read with PowerShell's <c> ConvertFrom-StringData </c>
+ </summary>
+
+ <returns>
+ The outcome as newline-separated <c> key=value </c> pairs
+ </returns>
+</member>
+<member name="M:winapp2ool.DiffOutcome.ToString">
+ <summary>
+ Renders the outcome as a single human-readable line for console and log output
+ </summary>
+
+ <returns>
+ A one-line description of everything the Diff found
+ </returns>
+</member>
 <member name="T:winapp2ool.DiffOutputRenderer2">
  <summary>
  Formats and renders diff results as <c>MenuSection</c> output for display and logging.
@@ -3507,6 +3626,16 @@ winapp2ool
  <param name="keyAnalyzer">
  Used to compute key-level changes for merger and added-with-merger entries
  </param>
+</member>
+<member name="M:winapp2ool.DiffOutputRenderer2.BuildOutcome">
+ <summary>
+ Reduces the completed diff to its counts, for callers that need the bottom line
+ rather than the narrative
+ </summary>
+
+ <returns>
+ A <c> DiffOutcome </c> describing everything this diff found
+ </returns>
 </member>
 <member name="M:winapp2ool.DiffOutputRenderer2.LogPostDiff">
  <summary>
@@ -5886,9 +6015,16 @@ winapp2ool
  The path for the Diff log
  </summary>
 </member>
+<member name="P:winapp2ool.diffsettings.DiffFile4">
+ <summary>
+ The path for the machine-readable Diff outcome summary. Empty by default — the summary is
+ written only when a caller names a path, which in practice means a scripted pipeline
+ passing <c> -4f </c> / <c> -summaryf </c>
+ </summary>
+</member>
 <member name="P:winapp2ool.diffsettings.DownloadDiffFile">
- <summary> 
- Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c> 
+ <summary>
+ Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c>
  </summary>
 </member>
 <member name="P:winapp2ool.diffsettings.SaveDiffLog">
@@ -5991,6 +6127,11 @@ winapp2ool
  Holds the slice of the winapp2ool global log containing the most recent Diff results
  </summary>
 </member>
+<member name="P:winapp2ool.Diff.MostRecentDiffOutcome">
+ <summary>
+ Holds the counts from the most recent Diff, or <c> Nothing </c> if no Diff has run
+ </summary>
+</member>
 <member name="P:winapp2ool.Diff.DiffLogStartPhrase">
  <summary>
  Phrase written to the global log to mark the beginning of a Diff run,
@@ -6022,12 +6163,20 @@ winapp2ool
  <br /> -donttrim    : disable trimming the downloaded file before diffing
  <br /> -savelog     : save the diff output to disk on exit
  <br /> -verbose     : print the full text of changed entries in the diff output
+ <br /> -4f/-summaryf: write the machine-readable outcome summary to this file
  </summary>
 </member>
 <member name="M:winapp2ool.Diff.ConductDiff">
  <summary>
  Ensures both files have content before kicking off the Diff
  and then summarizes the output from the Diff
+ </summary>
+</member>
+<member name="M:winapp2ool.Diff.WriteOutcomeSummary">
+ <summary>
+ Writes the most recent Diff's outcome to <c> DiffFile4 </c> as parseable
+ <c> key=value </c> lines, so a calling script can act on what the Diff found without
+ parsing the prose log. No-ops when no summary path was given
  </summary>
 </member>
 <member name="M:winapp2ool.Diff.GetVer(winapp2ool.iniFile2)">
@@ -7758,6 +7907,13 @@ winapp2ool
  on color changes so colored runs still apply to the right characters.
  </summary>
 </member>
+<member name="F:winapp2ool.MenuMaker._pinnedWidth">
+ <summary>
+ The console width held constant for the duration of a render pass, or <c> Nothing </c>
+ when no pass is in progress. Set by <c> BeginBuffered </c> and cleared by
+ <c> FlushBuffered </c> so every line of one box is measured against the same width
+ </summary>
+</member>
 <member name="P:winapp2ool.MenuMaker.BufferingEnabled">
  <summary>
  Master switch for the buffered render path. When <c> False </c>, <c> BeginBuffered </c>
@@ -8028,6 +8184,22 @@ winapp2ool
  Optional, Default: <c> True </c>
  </param>
 </member>
+<member name="M:winapp2ool.MenuMaker.printRenderedLine(System.String,System.Boolean)">
+ <summary>
+ Prints a line that <c> getFrame </c> already rendered to the full console width — a
+ border, divider, or blank row. These bypass <c> mkMenuLine </c> because they are not
+ content to be framed, they are the frame
+ </summary>
+
+ <param name="line">
+ A complete, already-rendered menu line
+ </param>
+
+ <param name="cond">
+ Indicates that the line should be printed <br />
+ Optional, Default: <c> True </c>
+ </param>
+</member>
 <member name="M:winapp2ool.MenuMaker.printMenuOpt(System.String,System.String,System.Boolean)">
  <summary> 
  Prints a numbered menu option after padding it to a set length 
@@ -8046,7 +8218,7 @@ winapp2ool
  Optional, Default: <c> True </c>
  </param>
 </member>
-<member name="M:winapp2ool.MenuMaker.mkMenuLine(System.String,System.Int32,System.Int32,System.Nullable{System.Boolean})">
+<member name="M:winapp2ool.MenuMaker.MaxFramedLineLength">
  <summary> 
  Constructs a menu line fit to the width of the console 
  </summary>
@@ -8120,6 +8292,19 @@ winapp2ool
  Indicates that top and bottom borders 
  should be printed when printing menuframes
  </param>
+ <summary>
+ The longest run of text that still fits between a menu line's two borders
+ </summary>
+
+ <returns>
+ The maximum framed line length, or <c> 0 </c> on a console too narrow to frame anything
+ </returns>
+
+ <remarks>
+ A left-aligned line spends two columns on the leading space and opener, one on the indent,
+ and two more on the trailing space and closer — so the text itself may occupy at most
+ <c> GetConsoleWidth() - 5 </c> columns
+ </remarks>
 </member>
 <member name="M:winapp2ool.MenuMaker.padToEnd(System.Text.StringBuilder@,System.Int32,System.String,System.String)">
  <summary> 
