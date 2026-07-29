@@ -1,54 +1,14 @@
 Beginning Diff
-Diff:  version 260728 ->  version 260728
+Diff:  version 260728 ->  version 260729
 
  Entry removals:
 
  - 0 removed without replacement
-
- Modified entries:
-
-     Microsoft Office * has been modified
-
-       Added 1 FileKey
-       Added 12 RegKeys
-       Added 2 ExcludeKeys
-             FileKey9=%AppData%\Microsoft\Windows\Recent\AutomaticDestinations|*a7fd3622d948815;*b711200c399477;*d006197d08ade86|RECURSE
-             RegKey38=HKCU\Software\Microsoft\Office\16.0\Excel\User MRU\ADAL_\File MRU
-             RegKey39=HKCU\Software\Microsoft\Office\16.0\Excel\User MRU\ADAL_\Place MRU
-             RegKey40=HKCU\Software\Microsoft\Office\16.0\Excel\User MRU\LiveId_\File MRU
-             RegKey41=HKCU\Software\Microsoft\Office\16.0\Excel\User MRU\LiveId_\Place MRU
-             RegKey48=HKCU\Software\Microsoft\Office\16.0\PowerPoint\User MRU\ADAL_\File MRU
-             RegKey49=HKCU\Software\Microsoft\Office\16.0\PowerPoint\User MRU\ADAL_\Place MRU
-             RegKey50=HKCU\Software\Microsoft\Office\16.0\PowerPoint\User MRU\LiveId_\File MRU
-             RegKey51=HKCU\Software\Microsoft\Office\16.0\PowerPoint\User MRU\LiveId_\Place MRU
-             RegKey59=HKCU\Software\Microsoft\Office\16.0\Word\User MRU\ADAL_\File MRU
-             RegKey60=HKCU\Software\Microsoft\Office\16.0\Word\User MRU\ADAL_\Place MRU
-             RegKey61=HKCU\Software\Microsoft\Office\16.0\Word\User MRU\LiveId_\File MRU
-             RegKey62=HKCU\Software\Microsoft\Office\16.0\Word\User MRU\LiveId_\Place MRU
-             ExcludeKey7=PATH|%UserProfile%\Documents\*\|~*.doc*
-             ExcludeKey8=PATH|%UserProfile%\Documents\*\|~*.ppt*
-
-     Microsoft Xbox * has been modified
-
-       Added 1 FileKey
-             FileKey19=%LocalAppData%\Packages\Microsoft.Xbox*\LocalState\SmartGlass|*.log
-
-     PDF-XChange * has been modified
-
-       Added 1 FileKey
-             FileKey2=%ProgramData%\PDF-XChange\Updater\InstallPackages|*
-
-       Removed 2 RegKeys
-             RegKey2=HKCU\Software\Tracker Software\PDFViewer\Documents\LatestView\Bars
-             RegKey3=HKCU\Software\Tracker Software\PDFViewer\Documents\LatestView\Panes
- 3 modified entries
- Total diff time: 00:00:00.1038752
+ Total diff time: 00:00:00.0871046
 
  Diff Summary
    Net entry count change: 4058 → 4058 (+0)
-   Modified entries: 3
-    + 17 added keys across 3 entries
-    - 2 removed keys without replacement across 1 entry
+   Modified entries: 0
    Removed entries: 0
     - 0 entries have been removed without replacement
    Added entries: 0
