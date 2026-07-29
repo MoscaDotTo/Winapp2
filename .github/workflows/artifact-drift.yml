@@ -57,6 +57,15 @@ on:
     paths:
       - 'Assembler/winapp2ool.exe'
       - '.github/workflows/artifact-drift.yml'
+  # Post-build assertion on master. build-on-merge regenerates Entries in place and commits
+  # it, so immediately after that commit "committed Entries == regenerate(sources)" holds by
+  # construction. It is the only moment where drift is never the intended state, which makes
+  # it the only placement where red carries information: generator nondeterminism, an
+  # artifact the build writes that the commit step's hand-maintained path list never stages,
+  # or a push racing the build.
+  workflow_run:
+    workflows: ["winapp2.ini build on merge"]
+    types: [completed]
 
 # Read-only: this never writes back to the repo.
 permissions:
@@ -69,6 +78,10 @@ concurrency:
 jobs:
   verify:
     runs-on: windows-latest
+
+    # A failed build leaves a half-written tree; verifying it would report drift that says
+    # nothing about the invariant. Push and manual runs are unconditional.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
 
     env:
       # Deterministic override of the exe's `requireAdministrator` manifest: the
@@ -83,6 +96,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # workflow_run reports the commit the build STARTED from, not the artifact commit
+          # it created. Defaulting to it would verify the pre-rebuild tree and fail every
+          # time. Empty string keeps the normal behavior for push and dispatch.
+          ref: ${{ github.event_name == 'workflow_run' && 'master' || '' }}
 
       # The characteristic test. -Verify regenerates every artifact into
       # Assembler/Verify and byte-compares against the committed Assembler/Entries,

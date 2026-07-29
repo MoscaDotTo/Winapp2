@@ -21,6 +21,17 @@
     artifact matches, 1 on any drift (the scratch output is retained for
     inspection on failure).
 
+.PARAMETER GenerateTo
+    Regenerate the three generator artifacts into the given root and stop -- no
+    combine, no flavors, no comparison. The root is winapp2ool-relative (leading
+    backslash, e.g. '\Parity\Source'). Paired with -ToolPath this is how CI runs
+    two different winapp2ool binaries over the same sources and diffs the results.
+
+.PARAMETER ToolPath
+    Use this winapp2ool.exe instead of the one beside this script. Directory args
+    resolve against the working directory, not the exe's location, so the binary
+    may live anywhere as long as the script is run from Assembler\.
+
 .NOTES
     Author: Hazel Ward
     Version 20260729
@@ -28,7 +39,11 @@
 #>
 
 [CmdletBinding()]
-param([switch]$Verify)
+param(
+    [switch]$Verify,
+    [string]$GenerateTo,
+    [string]$ToolPath
+)
 
 $ErrorActionPreference = 'Stop'
 $script:Winapp2oolPath = $null
@@ -45,6 +60,18 @@ function Write-ErrorMsg {
 }
 
 function Find-Winapp2ool {
+    # An explicit -ToolPath wins over everything, including the prompt: an unattended
+    # caller that named a binary wants that binary or a failure, never a question.
+    if ($ToolPath) {
+        if (-not (Test-Path $ToolPath -PathType Leaf)) {
+            Write-ErrorMsg "-ToolPath is not a file: $ToolPath"
+            return $null
+        }
+        $resolved = (Resolve-Path $ToolPath).Path
+        Write-Host "Using winapp2ool at $resolved (-ToolPath)" -ForegroundColor Green
+        return $resolved
+    }
+
     # Check current directory first
     $localPath = Join-Path $PSScriptRoot "winapp2ool.exe"
     if (Test-Path $localPath) {
@@ -530,6 +557,17 @@ try {
     if (-not $script:Winapp2oolPath) {
         Write-ErrorMsg "Cannot continue without winapp2ool.exe"
         exit 1
+    }
+
+    # Generate-and-stop. Deliberately does NOT compare against Entries\: the caller is
+    # diffing two generated trees against each other, so the committed artifacts are
+    # not part of the question and their staleness must not fail the run.
+    if ($GenerateTo) {
+        $target = Join-Path $PSScriptRoot $GenerateTo.TrimStart('\')
+        if (Test-Path $target) { Remove-Item $target -Recurse -Force }
+        if (-not (Build-Artifacts -OutputRoot $GenerateTo)) { exit 1 }
+        Write-Host "`nArtifacts generated into $target" -ForegroundColor Green
+        exit 0
     }
 
     if ($Verify) {
