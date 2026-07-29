@@ -101,13 +101,16 @@ function Invoke-Build {
 
 function Complete-Verification {
     # Write status + report body, copy the winapp2ool log if present, and stop.
-    param([string]$Status, [string]$ReportMarkdown)
+    # ExitCode stays 0 for every verdict about the PR itself (including a broken PR
+    # build) so the comment job treats the run as a completed verification. Pass 1
+    # only when the harness -- not the PR -- is what failed, so the run goes red.
+    param([string]$Status, [string]$ReportMarkdown, [int]$ExitCode = 0)
     Set-Content -Path (Join-Path $ReportDir 'status.txt') -Value $Status -NoNewline
     Set-Content -Path (Join-Path $ReportDir 'report.md') -Value $ReportMarkdown
     $log = Join-Path $Assembler 'winapp2ool.log'
     if (Test-Path $log) { Copy-Item $log (Join-Path $ReportDir 'winapp2ool.log') -Force }
     Write-Host "PR-verify status: $Status"
-    exit 0
+    exit $ExitCode
 }
 
 function Get-Tail {
@@ -156,15 +159,44 @@ foreach ($o in $Outputs) {
 Write-Host ">> Resetting tree and merging head $HeadSha"
 if ((Invoke-Git reset --hard $BaseSha) -ne 0) { throw 'cannot reset before merge' }
 Invoke-Git clean -fdx | Out-Null
-if ((Invoke-Git merge --no-edit --no-ff $HeadSha) -ne 0) {
-    Invoke-Git merge --abort | Out-Null
-    $body = @"
+# `merge --no-ff` writes a commit, and a fresh runner checkout has no committer
+# identity -- without one git refuses before it ever looks at the trees. Supply it
+# per-invocation with -c rather than mutating the repo's config, so this script
+# behaves identically when a maintainer runs it against a real local clone.
+$mergeOutput = (& git -c 'user.name=winapp2 pr-verify' `
+                      -c 'user.email=pr-verify@users.noreply.github.com' `
+                      merge --no-edit --no-ff $HeadSha 2>&1 | Out-String)
+$mergeExit = $LASTEXITCODE
+Write-Host $mergeOutput
+if ($mergeExit -ne 0) {
+    # Only a content conflict leaves a merge in progress. Every other failure (missing
+    # ref, unrelated histories, dirty tree, no identity) is a harness fault, and must
+    # not be reported to the contributor as "your branch conflicts".
+    & git rev-parse --verify --quiet MERGE_HEAD *> $null
+    $conflicted = ($LASTEXITCODE -eq 0)
+
+    if ($conflicted) {
+        Invoke-Git merge --abort | Out-Null
+        $body = @"
  **This PR does not merge cleanly into master.**
 
 The verify build was skipped. Rebase or merge the latest master into your branch to
 resolve the conflicts, then push again.
 "@
-    Complete-Verification -Status 'merge_conflict' -ReportMarkdown $body
+        Complete-Verification -Status 'merge_conflict' -ReportMarkdown $body
+    }
+
+    $body = @"
+🛠 **PR-verify could not merge this PR, and it is not a conflict.**
+
+The merge failed before git compared the branches, so this is a CI problem rather
+than something wrong with the PR. A maintainer needs to look at the run.
+
+``````
+$($mergeOutput.Trim())
+``````
+"@
+    Complete-Verification -Status 'merge_failed' -ReportMarkdown $body -ExitCode 1
 }
 
 # --- 4. Restore baselines so build #2 diffs against master ------------------------
