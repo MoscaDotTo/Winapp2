@@ -8,13 +8,13 @@ EntryBuilder is a devops module used to maintain the base entries of the winapp2
 
 EntryBuilder reads every `*.ini` file in its source directory, combines them in-memory, parses each section into an entry definition, expands the shorthand, normalizes the result via WinappDebug, and writes the output to `entrybuilder.ini`. The two main shorthand categories are:
 
-- **Scaffold families**: entries that declare a `WebViewRoot=` (embedded WebView2/EBWebView data folder) or `QtWebEngineRoot=` (embedded QtWebEngine data folder) receive baseline cleaning FileKeys drawn from a shared catalog, one set per declared root.
+- **Scaffold families**: entries that declare a `WebViewRoot=` (embedded WebView2/EBWebView data folder), `QtWebEngineRoot=` (embedded QtWebEngine data folder), or `ElectronRoot=` (an Electron app's `userData` folder) receive baseline cleaning FileKeys drawn from a shared catalog, one set per declared root.
 - **List variables**: entries can declare comma-separated lists (`Versions=10.0,11.0,12.0`) and reference them from any key with `<Versions>` tokens; each referencing key fans out into one output key per combination.
 
 ### Why EntryBuilder?
 
 - **Shorthand DSL**: Replaces 20-line repetitive entries with a few list-variable declarations and templated keys. 
-- **Shared scaffold catalogs**: One catalog of Chromium cleaning patterns covers every embedded WebView2 host. Discord, Slack, VS Code, Teams, and dozens of small Electron apps get consistent baseline coverage without per-app duplication. A second catalog does the same for QtWebEngine hosts.
+- **Shared scaffold catalogs**: One catalog of Chromium cleaning patterns covers every embedded WebView2 host, without per-app duplication. A second does the same for QtWebEngine hosts, and a third for Electron apps.
 - **Pass-through compatible**: Any standard winapp2 key passes through unchanged. You can paste a raw entry in and incrementally enrich it with shorthand, or leave it untouched.
 - **Consistent DSL surface**: The same `<Name>` variable syntax and scaffold key names work across winapp2ool's builder modules.
 
@@ -32,6 +32,7 @@ EntryBuilder reads every `*.ini` file in its source directory, combines them in-
    - [WebViewRoot](#webviewroot)
    - [WebViewScaffolds / ExcludeWebViewScaffolds](#webviewscaffolds--excludewebviewscaffolds)
    - [QtWebEngineRoot / QtWebEngineScaffolds](#qtwebengineroot--qtwebenginescaffolds)
+   - [ElectronRoot / ElectronUpdaterRoot / ElectronScaffolds](#electronroot--electronupdaterroot--electronscaffolds)
    - [FileKeyBase / RegKeyBase / ExcludeKeyBase](#filekeybase--regkeybase--excludekeybase)
    - [Skip](#skip)
 8. [List Variables and Token Expansion](#list-variables-and-token-expansion)
@@ -63,8 +64,10 @@ EntryBuilder reads every `*.ini` file in its source directory, combines them in-
       - [Example 8: Default WebView scaffolds](#example-8-default-webview-scaffolds)
       - [Example 9: Everything except All with exclusions](#example-9-everything-except-all-with-exclusions)
       - [Example 10: QtWebEngine across several profiles](#example-10-qtwebengine-across-several-profiles)
+      - [Example 11: An Electron app with an updater cache](#example-11-an-electron-app-with-an-updater-cache)
+      - [Example 12: An Electron app with session partitions](#example-12-an-electron-app-with-session-partitions)
     - [Housekeeping](#housekeeping)
-      - [Example 11: Skipping a defunct entry](#example-11-skipping-a-defunct-entry)
+      - [Example 13: Skipping a defunct entry](#example-13-skipping-a-defunct-entry)
 
 ---
 
@@ -73,6 +76,7 @@ EntryBuilder reads every `*.ini` file in its source directory, combines them in-
 - A source directory containing one or more `*.ini` files with at least one parseable section
 - The shared WebView scaffold catalog (typically `Assembler\Scaffolds\webview.ini`) if any entry declares `WebViewRoot=`
 - The shared QtWebEngine scaffold catalog (typically `Assembler\Scaffolds\qtwebengine.ini`) if any entry declares `QtWebEngineRoot=`
+- The shared Electron scaffold catalog (typically `Assembler\Scaffolds\electron.ini`) if any entry declares `ElectronRoot=` or `ElectronUpdaterRoot=`
 
 If the source directory is empty, missing, or contains no parseable sections, EntryBuilder reports `No EntryBuilder source definitions found in: <directory>` and writes no output. If a scaffold catalog is missing or empty, generation continues with zero scaffold FileKeys emitted from that catalog and a warning logged. Entries with no corresponding root key are unaffected.
 
@@ -86,7 +90,7 @@ If the source directory is empty, missing, or contains no parseable sections, En
 2. Open EntryBuilder from the **Entry Lab** main menu, or invoke `winapp2ool -entrybuilder` from the command line
 3. Run. EntryBuilder combines the files, expands the shorthand, and writes the result to `entrybuilder.ini`
 
-The default source directory and save target are both the current directory. The default scaffold catalogs are `webview.ini` and `qtwebengine.ini` in the current directory; in normal use, `entrybuilder.ini` and both catalogs live next to the winapp2ool executable, and the source directory points at `..\..\Assembler\EntryBuilder\`.
+The default source directory and save target are both the current directory. The default scaffold catalogs are `webview.ini`, `qtwebengine.ini` and `electron.ini` in the current directory; in normal use, `entrybuilder.ini` and all three catalogs live next to the winapp2ool executable, and the source directory points at `..\..\Assembler\EntryBuilder\`.
 
 ---
 
@@ -99,6 +103,7 @@ The default source directory and save target are both the current directory. The
 | Choose save target | Select where to save the generated entries | Default: `entrybuilder.ini` in current directory |
 | Choose webview scaffolds | Select the shared WebView scaffold catalog | Default: `webview.ini` in current directory |
 | Choose QtWebEngine scaffolds | Select the shared QtWebEngine scaffold catalog | Default: `qtwebengine.ini` in current directory |
+| Choose Electron scaffolds | Select the shared Electron scaffold catalog | Default: `electron.ini` in current directory |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
 ---
@@ -112,7 +117,7 @@ Each run proceeds through the same fixed steps:
 3. **Resolve variables**: variable values that reference other variables (`<Other>` tokens inside a declaration) are resolved so every value list is fully literal. Cyclic references are warned about and not expanded.
 4. **Infer detection**: if the entry declares a variable named `Root`, a `Detect=<Root>` or `DetectFile=<Root>` is generated automatically (see [The Reserved Root Variable](#the-reserved-root-variable)).
 5. **Validate**: structurally invalid entries are skipped with warnings; questionable ones are emitted with warnings (see [Validation and Warnings](#validation-and-warnings)).
-6. **Generate**: keys are emitted per entry in canonical winapp2 order. Each content key goes through, in order: scaffold expansion (catalog templates copied in for each selected scaffold and declared root), **root substitution** (`%WebViewRoot%` / `%QtWebEngineRoot%` replaced with each declared root), then **token expansion** (`<Name>` fan-out). Numbered key families are renumbered from 1.
+6. **Generate**: keys are emitted per entry in canonical winapp2 order. Each content key goes through, in order: scaffold expansion (catalog templates copied in for each selected scaffold and declared root), **root substitution** (`%WebViewRoot%` / `%QtWebEngineRoot%` / `%ElectronRoot%` replaced with each declared root), then **token expansion** (`<Name>` fan-out). Numbered key families are renumbered from 1.
 7. **Normalize**: the whole in-memory file is passed through WinappDebug with all repairs and optimizations enabled.
 8. **Save**: the output file is written with a generated comment header (see [Run Output](#run-output)).
 
@@ -129,7 +134,7 @@ Not every key family receives every processing step:
 | `ExcludeKey` / `ExcludeKeyBase` |  Yes | By flag: `REG` → Registry, otherwise Filesystem |
 | Scaffold catalog templates | Yes (their purpose) | Filesystem |
 
-The expansion domain matters when a `<Name>` token doesn't match any declared variable, see [Undeclared Tokens](#undeclared-tokens). Note that `%WebViewRoot%` / `%QtWebEngineRoot%` are **not** substituted in `Detect` / `DetectFile`. Write the path (or a `<Variable>`) directly in detection keys.
+The expansion domain matters when a `<Name>` token doesn't match any declared variable, see [Undeclared Tokens](#undeclared-tokens). Note that `%WebViewRoot%` / `%QtWebEngineRoot%` / `%ElectronRoot%` are **not** substituted in `Detect` / `DetectFile`. Write the path (or a `<Variable>`) directly in detection keys.
 
 ---
 
@@ -225,7 +230,7 @@ Scaffold names track the catalog, not this document. At the time of writing the 
 
 ## QtWebEngineRoot / QtWebEngineScaffolds
 
-QtWebEngine is a second, independent scaffold family for apps that embed Qt's WebEngine rather than WebView2. It behaves **exactly like the WebView family above**, with these substitutions:
+QtWebEngine is a second independent scaffold family for apps that embed Qt's WebEngine rather than WebView2. It behaves **exactly like the WebView family above**, with these substitutions:
 
 | WebView family | QtWebEngine family |
 |:-|:-|
@@ -245,6 +250,42 @@ The default set is: `Caches`, `StorageQuota`, `Telemetry` and `VisitedLinks`.
 ```ini
 QtRoot=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine
 QtWebEngineRoot=<QtRoot>\<Default,OffTheRecord,viewer-lookup>
+```
+
+## ElectronRoot / ElectronUpdaterRoot / ElectronScaffolds
+
+Electron is a third independent scaffold family, for apps that bundle their own Chromium via Electron rather than embedding a browser view. The grammar is identical WebView and QTWebEngine
+
+| WebView family | Electron family |
+|:-|:-|
+| `WebViewRoot=` | `ElectronRoot=` |
+| `WebViewScaffolds=` | `ElectronScaffolds=` |
+| `ExcludeWebViewScaffolds=` | `ExcludeElectronScaffolds=` |
+| `%WebViewRoot%` placeholder | `%ElectronRoot%` placeholder |
+| `webview.ini` catalog | `electron.ini` catalog |
+
+The default set is: `AppLogs`, `Caches`, `StorageQuota`, `Telemetry` and `UpdaterCache`. The full catalog adds `MediaDRM`, `PrivacySandbox`, `Security`, `TempFiles` (opt-in, safe) and `WebCookies`, `WebStorage` (opt-in, host-risk).
+
+`ElectronRoot=` declares the app's `userData` folder, which for Electron is the Chromium profile directory. Typically `%AppData%\<ProductName>`.
+
+```ini
+[Signal Messenger *]
+LangSecRef=3022
+DetectFile=%AppData%\Signal
+ElectronRoot=%AppData%\Signal
+```
+
+### ElectronUpdaterRoot
+
+Electron is the only family with a second root key: `ElectronUpdaterRoot=` names the electron-updater download cache, a sibling of `userData` under `%LocalAppData%` holding `installer.exe`, `package.7z` and a `pending\` folder. It must be declared separately.
+
+### Multiple roots
+
+Root keys are repeatable:
+
+```ini
+ElectronRoot1=%AppData%\Notion
+ElectronRoot2=%AppData%\Notion\partitions\*
 ```
 
 ## FileKeyBase / RegKeyBase / ExcludeKeyBase
@@ -443,6 +484,7 @@ Each file slot has a corresponding index for use with the `-Nd` (directory) and 
 | 2 | Save target | `entrybuilder.ini` in current directory |
 | 3 | WebView scaffold catalog | `webview.ini` in current directory |
 | 4 | QtWebEngine scaffold catalog | `qtwebengine.ini` in current directory |
+| 5 | Electron scaffold catalog | `electron.ini` in current directory |
 
 | Arg | Effect |
 |:-|:-|
@@ -462,7 +504,7 @@ Each file slot has a corresponding index for use with the `-Nd` (directory) and 
 |:-|:-|
 | `winapp2ool -entrybuilder` | Run with current settings |
 | `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder` | Read sources from the assembler folder, save `entrybuilder.ini` in the current directory |
-| `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds -4d ..\..\Assembler\Scaffolds -s` | Full build-pipeline invocation: source and both catalogs from sibling folders, silent mode |
+| `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds -4d ..\..\Assembler\Scaffolds -5d ..\..\Assembler\Scaffolds -s` | Full build-pipeline invocation: source and all three catalogs from sibling folders, silent mode |
 | `winapp2ool -entrybuilder -2f test-output.ini` | Override the save target file name |
 | `winapp2ool -entrybuilder -split -2d ..\..\Assembler\Entries` | Write per-letter files into `Assembler\Entries` |
 
@@ -507,7 +549,7 @@ When the same declared variable appears multiple times in a single key, referenc
 | `No EntryBuilder source definitions found in: <dir>` | Source directory is empty, missing, or contains no `*.ini` files with parseable sections | Verify the source directory in **Choose source directory** or via `-1d` |
 | Entry is silently absent from the output | `Skip=` is set, or the entry was skipped by validation (`No Section or LangSecRef...` / `...nothing to emit, skipping`), or a duplicate section name in an alphabetically-earlier file won | Check the run log for the corresponding message |
 | Output is missing expected scaffold FileKeys | Catalog failed to load (`...catalog at <path> is empty or missing`), scaffold name misspelled (`Unknown WebView scaffold 'X'...`), or scaffold excluded by `Exclude*Scaffolds=` | Check the `Loaded N WebView scaffold(s)` / `Loaded N QtWebEngine scaffold(s)` lines and the warnings |
-| Output key contains a literal `%WebViewRoot%` / `%QtWebEngineRoot%` | The matching root key wasn't declared on the entry - or the placeholder was used in a `Detect`/`DetectFile`, where it is never substituted | Declare the root key, or write the path / a `<Variable>` directly in detection keys |
+| Output key contains a literal `%WebViewRoot%` / `%QtWebEngineRoot%` / `%ElectronRoot%` | The matching root key wasn't declared on the entry - or the placeholder was used in a `Detect`/`DetectFile`, where it is never substituted | Declare the root key, or write the path / a `<Variable>` directly in detection keys |
 | Entry gained a `Detect`/`DetectFile` you didn't write | The entry declares a variable named `Root` - detection inference is automatic | Intended? Delete your redundant hand-written detection. Not intended? Rename the variable (`DiskRoot`, `AppRoot`, ...) |
 | Output RegKey contains a literal `<Name>` | The variable wasn't declared - the registry domain emits literal text and logs `...emitted as literal` as an advisory | Declare the variable, or accept the literal if intentional |
 | Output is missing a FileKey/DetectFile entirely | An undeclared `<Name>` token dropped the key (`...dropping key`), or a referenced variable had no values | Fix the typo, or declare the variable |
@@ -1037,9 +1079,135 @@ FileKey22=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\Vid
 
 ---
 
+### Example 11: An Electron app with an updater cache
+
+**Context**
+
+Signal Desktop is a typical Electron app: its `userData` folder is `%AppData%\Signal`, and electron-updater keeps downloaded installers in a sibling folder under `%LocalAppData%`. The hand-written form of this entry was seven FileKeys of Chromium boilerplate.
+
+**Intent**
+
+Take the default Electron scaffolds for both the app data and the updater cache, and add one app-specific target the catalog does not cover.
+
+**Files**
+
+###### **Source (`S.ini`)**
+
+```ini
+[Signal Messenger *]
+LangSecRef=3022
+DetectFile=%AppData%\Signal
+ElectronRoot=%AppData%\Signal
+ElectronUpdaterRoot=%LocalAppData%\Signal-Desktop-Updater
+FileKeyBase=%ElectronRoot%\Temp|*
+```
+
+**Command**
+
+```
+winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -5d ..\..\Assembler\Scaffolds
+```
+
+###### Note: `-5d` points file slot 5 (the Electron catalog, `electron.ini`) at the shared scaffolds folder
+
+**Output**
+
+```ini
+[Signal Messenger *]
+LangSecRef=3022
+DetectFile=%AppData%\Signal
+FileKey1=%AppData%\Signal|*.log;log.log;Network Persistent State*;Origin Bound Certs;Visited Links*;QuotaManager*
+FileKey2=%AppData%\Signal|*.old;LOG;LOG.old;*-journal|RECURSE
+FileKey3=%AppData%\Signal\*\*Logs|*|RECURSE
+FileKey4=%AppData%\Signal\*Cache*|*|REMOVESELF
+FileKey5=%AppData%\Signal\*Logs|*|RECURSE
+FileKey6=%AppData%\Signal\blob_storage|*|REMOVESELF
+FileKey7=%AppData%\Signal\Crashpad|*|REMOVESELF
+FileKey8=%AppData%\Signal\Network|Network Persistent State*;Reporting and NEL*;SCT Auditing Pending Reports*
+FileKey9=%AppData%\Signal\sentry|*|REMOVESELF
+FileKey10=%AppData%\Signal\Service Worker\*Cache*|*|REMOVESELF
+FileKey11=%AppData%\Signal\Shared Dictionary\cache|*|REMOVESELF
+FileKey12=%AppData%\Signal\shared_proto_db|*|REMOVESELF
+FileKey13=%AppData%\Signal\Temp|*
+FileKey14=%AppData%\Signal\VideoDecodeStats|*|REMOVESELF
+FileKey15=%AppData%\Signal\webrtc_event_logs|*|REMOVESELF
+FileKey16=%AppData%\Signal\WebStorage|QuotaManager*
+FileKey17=%LocalAppData%\Signal-Desktop-Updater|*.7z;*.exe
+FileKey18=%LocalAppData%\Signal-Desktop-Updater\pending|*|REMOVESELF
+```
+
+**Explanation**
+
+- Five source lines produced eighteen FileKeys, from the default set `AppLogs`, `Caches`, `StorageQuota`, `Telemetry`, `UpdaterCache`
+- FileKey1 is the merged product of several scaffolds' root-level pattern lists
+- FileKey17 and 18 came from `%ElectronUpdaterRoot%`. Had `ElectronUpdaterRoot=` been omitted, those two templates would not be generated
+- Note the placeholder in `FileKeyBase=` is `%ElectronRoot%`, not `<ElectronRoot>`. Root keys are not `<>` variables; writing `<ElectronRoot>` warns and drops the key
+
+---
+
+### Example 12: An Electron app with session partitions
+
+**Context**
+
+Notion uses partitions, so alongside its own profile it keeps a full Chromium profile per partition under `%AppData%\Notion\partitions\`. Each of those is a complete profile, and we want to ensure they're all cleaned.
+
+**Intent**
+
+Apply cache and log cleaning to the main profile and every partition.
+
+**Files**
+
+###### **Source (`N.ini`)**
+
+```ini
+[Notion *]
+Root=%AppData%\Notion
+LangSecRef=3021
+ElectronRoot1=<Root>
+ElectronRoot2=<Root>\partitions\*
+ElectronUpdaterRoot=%LocalAppData%\notion-updater
+ElectronScaffolds=Caches,AppLogs,UpdaterCache
+```
+
+**Output**
+
+```ini
+[Notion *]
+LangSecRef=3021
+DetectFile=%AppData%\Notion
+FileKey1=%AppData%\Notion|*.log;log.log
+FileKey2=%AppData%\Notion|*-journal|RECURSE
+FileKey3=%AppData%\Notion\*\*Logs|*|RECURSE
+FileKey4=%AppData%\Notion\*Cache*|*|REMOVESELF
+FileKey5=%AppData%\Notion\*Logs|*|RECURSE
+FileKey6=%AppData%\Notion\blob_storage|*|REMOVESELF
+FileKey7=%AppData%\Notion\partitions\*|*.log;log.log
+FileKey8=%AppData%\Notion\partitions\*|*-journal|RECURSE
+FileKey9=%AppData%\Notion\partitions\*\*\*Logs|*|RECURSE
+FileKey10=%AppData%\Notion\partitions\*\*Cache*|*|REMOVESELF
+FileKey11=%AppData%\Notion\partitions\*\*Logs|*|RECURSE
+FileKey12=%AppData%\Notion\partitions\*\blob_storage|*|REMOVESELF
+FileKey13=%AppData%\Notion\partitions\*\Service Worker\*Cache*|*|REMOVESELF
+FileKey14=%AppData%\Notion\partitions\*\Shared Dictionary\cache|*|REMOVESELF
+FileKey15=%AppData%\Notion\partitions\*\shared_proto_db|*|REMOVESELF
+FileKey16=%AppData%\Notion\Service Worker\*Cache*|*|REMOVESELF
+FileKey17=%AppData%\Notion\Shared Dictionary\cache|*|REMOVESELF
+FileKey18=%AppData%\Notion\shared_proto_db|*|REMOVESELF
+FileKey19=%LocalAppData%\notion-updater|*.7z;*.exe
+FileKey20=%LocalAppData%\notion-updater\pending|*|REMOVESELF
+```
+
+**Explanation**
+
+- Two numbered root keys each expanded against the selected scaffolds
+- `DetectFile=%AppData%\Notion` was inferred from the reserved `Root` variable (see [The Reserved Root Variable](#the-reserved-root-variable)); `ElectronRoot1=<Root>` reuses it so the path appears once in the source
+- `UpdaterCache` had to be named explicitly because `ElectronScaffolds=` replaces the default set rather than adding to it
+
+---
+
 ## Housekeeping
 
-### Example 11: Skipping a defunct entry
+### Example 13: Skipping a defunct entry
 
 **Context**
 

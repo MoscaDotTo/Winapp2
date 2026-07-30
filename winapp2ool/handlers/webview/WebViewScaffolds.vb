@@ -35,7 +35,23 @@ Option Strict On
 ''' Chromium with a flatter on-disk layout (no <c> Default\Network\ </c> subfolder, no
 ''' privacy-sandbox surface), so it warrants a separate catalog rather than reusing the
 ''' WebView2 paths.</item>
+''' <item><c> ElectronScaffold </c> — Electron layout (<c> Assembler\Scaffolds\electron.ini </c>),
+''' templates use <c> %ElectronRoot% </c> (the app's <c> userData </c> folder, which for
+''' Electron <em>is</em> the Chromium profile — no <c> Default\ </c> segment) and
+''' <c> %ElectronUpdaterRoot% </c> (the electron-updater download cache, whose directory name
+''' is not derivable from the userData path). This is the only family with two placeholders,
+''' so its consumer must bind both — see the multi-binding note below. It is a separate
+''' catalog because Electron collapses WebView2's user-data and profile levels into one
+''' directory <em>and</em> straddles the Chromium 89 network-service migration, needing both
+''' <c> Network\Cookies </c> and legacy root-level <c> Cookies </c>.</item>
 ''' </list>
+''' <br />
+'''
+''' A family may bind more than one placeholder. Consumers expand a template by chaining one
+''' substitution per (placeholder, roots) pair; a template whose placeholder has an empty root
+''' list is dropped rather than emitted with the placeholder left literal, which is what lets
+''' the Electron family's updater templates stay inert for an entry that declared only
+''' <c> ElectronRoot= </c>.
 ''' <br />
 '''
 ''' Source files contribute <c> [{Family}: Name] </c> sections whose <c> FileKeyBase= </c>
@@ -74,6 +90,24 @@ Public Module WebViewScaffolds
     ''' storage) still require explicit opt-in.
     ''' </summary>
     Public ReadOnly QtWebEngineDefaultScaffolds As String() = {"Caches", "StorageQuota", "Telemetry", "VisitedLinks"}
+
+    ''' <summary>
+    ''' Default scaffold names emitted when a caller requests Electron scaffolding without an
+    ''' explicit selection list. Wider than the other two families because an Electron
+    ''' <c> userData </c> folder holds application diagnostics alongside Chromium state:
+    ''' <c> AppLogs </c> covers electron-log's output (both the modern <c> logs\ </c> and the
+    ''' legacy <c> &lt;userData&gt;\&lt;ProductName&gt;\logs\ </c>), and <c> UpdaterCache </c>
+    ''' covers the electron-updater download cache — the latter costing nothing for an entry
+    ''' that declared no <c> ElectronUpdaterRoot= </c>, since its templates are then dropped.
+    ''' <br /><br />
+    '''
+    ''' Note the deliberate asymmetry with <see cref="QtWebEngineDefaultScaffolds"/>: there is
+    ''' no <c> VisitedLinks </c> scaffold here. A 21-installation disk survey found
+    ''' <c> Visited Links </c> in none of them, so the pattern rides in <c> Telemetry </c>'s
+    ''' legacy list rather than earning a scaffold of its own. Host-risk categories (cookies,
+    ''' site storage) still require explicit opt-in.
+    ''' </summary>
+    Public ReadOnly ElectronDefaultScaffolds As String() = {"AppLogs", "Caches", "StorageQuota", "Telemetry", "UpdaterCache"}
 
     ''' <summary>
     ''' Parses a <c> [{prefix} ...] </c> scaffold section, collecting its

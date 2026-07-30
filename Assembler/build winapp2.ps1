@@ -264,7 +264,7 @@ function Build-Artifacts {
     Write-Step "Generating base entries from EntryBuilder sources"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-split', '-1d', '\EntryBuilder', `
         '-2d', $OutputRoot, `
-        '-3d', '\Scaffolds', '-4d', '\Scaffolds' `
+        '-3d', '\Scaffolds', '-4d', '\Scaffolds', '-5d', '\Scaffolds' `
         -ErrorMessage "Failed to generate EntryBuilder entries" `
         -RequiredDirs @((Join-Path $PSScriptRoot 'EntryBuilder'), (Join-Path $PSScriptRoot 'Scaffolds')))) { return $false }
 

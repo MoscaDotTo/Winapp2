@@ -67,6 +67,17 @@ Option Strict On
 ''' </description>
 ''' </item>
 '''
+''' <item>
+''' <b><c> EntryBuilderFile5 </c></b>
+''' <description>
+''' Shared Electron scaffold catalog (typically <c> Assembler\Scaffolds\electron.ini </c>).
+''' Source for <c> [ElectronScaffold: ...] </c> sections consumed when expanding entries
+''' that declare <c> ElectronRoot= </c> or <c> ElectronUpdaterRoot= </c>. If the file is
+''' missing or empty, generation continues with zero Electron scaffold FileKeys emitted and
+''' a warning logged.
+''' </description>
+''' </item>
+'''
 ''' </list>
 '''
 ''' </summary>
@@ -97,6 +108,13 @@ Public Module entryBuilderSettings
     Public Property EntryBuilderFile4 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
 
     ''' <summary>
+    ''' The shared Electron scaffold catalog. Typically
+    ''' <c> Assembler\Scaffolds\electron.ini </c>. EntryBuilder is currently its only consumer;
+    ''' UWPBuilder has no Electron family yet.
+    ''' </summary>
+    Public Property EntryBuilderFile5 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "electron.ini", "electron.ini", mustExist:=False)
+
+    ''' <summary>
     ''' When <c> True </c>, output is written as per-letter artifact files
     ''' (<c> #.ini </c>, <c> A.ini </c> ... <c> Z.ini </c>) in the save target's directory,
     ''' bucketed by each entry name's first character, instead of a single output file.
@@ -119,6 +137,7 @@ Public Module entryBuilderSettings
         EntryBuilderFile2 = New iniFileChooser(Environment.CurrentDirectory, "entrybuilder.ini", "entrybuilder.ini", mustExist:=False)
         EntryBuilderFile3 = New iniFileChooser(Environment.CurrentDirectory, "webview.ini", "webview.ini", mustExist:=False)
         EntryBuilderFile4 = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
+        EntryBuilderFile5 = New iniFileChooser(Environment.CurrentDirectory, "electron.ini", "electron.ini", mustExist:=False)
         EntryBuilderSplitOutput = False
         EntryBuilderModuleSettingsChanged = False
         SaveModule2(NameOf(EntryBuilder), GetType(entryBuilderSettings))

@@ -91,6 +91,7 @@
     <Compile Include="UnitTools.vb" />
     <Compile Include="UWPBuilderTests.vb" />
     <Compile Include="VariableExpanderTests.vb" />
+    <Compile Include="WebViewScaffoldsTests.vb" />
     <Compile Include="Winapp2FileVersionTests.vb" />
     <Compile Include="WinappDebugDataTests.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />

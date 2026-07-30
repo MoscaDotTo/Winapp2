@@ -71,7 +71,7 @@ Public Module commandLineHandler
         addModule("8", "download", 3, AddressOf Downloader.handleCmdLine)
         addModule("9", "flavorize", 9, AddressOf Flavorizer.handleCmdLine)
         addModule("10", "uwpbuilder", 4, AddressOf UWPBuilder.handleCmdLine)
-        addModule("11", "entrybuilder", 4, AddressOf EntryBuilder.handleCmdLine)
+        addModule("11", "entrybuilder", 5, AddressOf EntryBuilder.handleCmdLine)
         addModule("12", "cc7patcher", 3, AddressOf CC7Patcher.handleCmdLine)
 
         Return configs

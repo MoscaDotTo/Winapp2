@@ -13,9 +13,17 @@ A scaffold is a named group of FileKey templates. Each catalog section defines o
 FileKeyBase=%WebViewRoot%\Default\Network|Cookies*;Device Bound Sessions*
 ```
 
-The section name format is `[WebViewScaffold: Name]` in `webview.ini` and `[QtWebEngineScaffold: Name]` in `qtwebengine.ini`. Each `FileKeyBase=` line is a FileKey template; the family placeholder (`%WebViewRoot%` or `%QtWebEngineRoot%`) is substituted by the consuming module once per root the entry declares.
+The section name format is `[WebViewScaffold: Name]` in `webview.ini`, `[QtWebEngineScaffold: Name]` in `qtwebengine.ini`, and `[ElectronScaffold: Name]` in `electron.ini`. Each `FileKeyBase=` line is a FileKey template; the family placeholder is substituted by the consuming module once per root the entry declares.
 
-The two families define a root differently. `%WebViewRoot%` is the folder containing the profile (`...\EBWebView`), because the WebView templates bake the `\Default\` segment in themselves. `%QtWebEngineRoot%` is one profile directory (`...\QtWebEngine\Default`), segment included.
+The three families each define a root differently, and getting this wrong is the most common way to write a scaffold that silently matches nothing:
+
+| Family | Placeholder | What the root names |
+| :- | :- | :- |
+| WebView2 | `%WebViewRoot%` | The folder containing the profile (`...\EBWebView`). These templates bake the `\Default\` segment in themselves |
+| QtWebEngine | `%QtWebEngineRoot%` | One profile directory, segment included (`...\QtWebEngine\Default`) |
+| Electron | `%ElectronRoot%` | One profile directory, which is the app's `userData` folder (`%AppData%\Signal`). |
+
+Electron is also the only family with a second placeholder: `%ElectronUpdaterRoot%`, the electron-updater download cache. It is declared separately, and cannot be inferred.A template whose placeholder has no declared root is dropped.
 
 ### How do entries select scaffolds?
 
@@ -24,11 +32,18 @@ An entry opts a family in by declaring its root key; without it, no scaffold key
 | Consumer     | Opt-in key                          | Selection keys                                                                                    |
 | :-           | :-                                  | :-                                                                                                |
 | UWPBuilder   | `WebViewPath=` / `QtWebEnginePath=` | `WebViewScaffolds=` / `ExcludeWebViewScaffolds=`, `QtWebEngineScaffolds=` / `ExcludeQtWebEngineScaffolds=` |
-| EntryBuilder | `WebViewRoot=` / `QtWebEngineRoot=` | Same selection key names as UWPBuilder                                                            |
+| EntryBuilder | `WebViewRoot=` / `QtWebEngineRoot=` / `ElectronRoot=` / `ElectronUpdaterRoot=` | Same selection key names as UWPBuilder, plus `ElectronScaffolds=` / `ExcludeElectronScaffolds=` |
 
-The selection contract is identical in both modules and both families:
+Root keys are repeatable. To declare several roots, number them:
 
-* With no selection keys, an opted-in entry receives the default set: **Caches** and **Telemetry**
+```ini
+ElectronRoot1=%AppData%\Notion
+ElectronRoot2=%AppData%\Notion\partitions\*
+```
+
+The selection contract is identical in every module and every family:
+
+* With no selection keys, an opted-in entry receives that family's default set (below)
 * `...Scaffolds=` **replaces** the default set with the listed scaffolds
 * `Exclude...Scaffolds=` **subtracts** from the selected set
 * The sentinel `All` (case-insensitive) expands to the entire catalog. `All` is reserved and cannot be used as a scaffold name
@@ -44,6 +59,8 @@ Defaults in **bold**
 
 `qtwebengine.ini` currently defines: **Caches**, **StorageQuota**, **Telemetry**, **VisitedLinks**, WebCookies, WebHistory, WebSession, WebStorage.
 
+`electron.ini` currently defines: **AppLogs**, **Caches**, MediaDRM, PrivacySandbox, Security, **StorageQuota**, **Telemetry**, TempFiles, **UpdaterCache**, WebCookies, WebStorage.
+
 Note that the QtWebEngine default set (bolded above) is wider than the WebView one. `StorageQuota` and `VisitedLinks` are separate default-on scaffolds there rather than members of the host-risk `WebStorage` / `WebHistory` sets, because the hand-written QtWebEngine entries the catalog replaces treated both as routine cleaning. The catalog header explains the reasoning for each tier decision.
 
 ### Notes for contributors
@@ -57,3 +74,4 @@ Note that the QtWebEngine default set (bolded above) is wider than the WebView o
 | :-                                                                                                                                | :-                                                                                   |
 | [webview.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Scaffolds/webview.ini)             | The scaffold catalog for embedded WebView2 / EBWebView data folders                  |
 | [qtwebengine.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Scaffolds/qtwebengine.ini)     | The scaffold catalog for embedded QtWebEngine data folders                           |
+| [electron.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Assembler/Scaffolds/electron.ini)           | The scaffold catalog for Electron application data folders                            |
