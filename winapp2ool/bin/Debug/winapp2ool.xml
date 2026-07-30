@@ -986,20 +986,13 @@ winapp2ool
  <item>
  <b><c> UWPFile3 </c></b>
  <description>
- Shared WebView scaffold catalog (typically <c> Assembler\Scaffolds\webview.ini </c>).
- Source for <c> [WebViewScaffold: ...] </c> sections consumed when an AppInfo entry
- declares <c> WebViewPath= </c>. If the file is missing or empty, generation continues
- with zero WebView FileKeys emitted and a warning logged.
- </description>
- </item>
-
- <item>
- <b><c> UWPFile4 </c></b>
- <description>
- Shared QtWebEngine scaffold catalog (typically <c> Assembler\Scaffolds\qtwebengine.ini </c>).
- Source for <c> [QtWebEngineScaffold: ...] </c> sections consumed when an AppInfo entry
- declares <c> QtWebEnginePath= </c>. If the file is missing or empty, generation continues
- with zero QtWebEngine FileKeys emitted and a warning logged.
+ Shared scaffold directory (typically <c> Assembler\Scaffolds </c>). Every
+ <c> *.ini </c> in it is loaded at once and each scaffold family is derived from its
+ section headers (<c> [WebViewScaffold: ...] </c>, <c> [QtWebEngineScaffold: ...] </c>,
+ <c> [ElectronScaffold: ...] </c>), so adding a family costs no new setting here. Only
+ the <c> Dir </c> of this chooser is used; the <c> Name </c> is ignored. A missing
+ directory or catalog file continues the run with zero scaffold FileKeys for the
+ affected families and a warning logged.
  </description>
  </item>
 
@@ -1022,14 +1015,9 @@ winapp2ool
 </member>
 <member name="P:winapp2ool.uwpbuildersettings.UWPFile3">
  <summary>
- The shared WebView scaffold catalog file consumed by both UWPBuilder and
- EntryBuilder. Typically <c> Assembler\Scaffolds\webview.ini </c>.
- </summary>
-</member>
-<member name="P:winapp2ool.uwpbuildersettings.UWPFile4">
- <summary>
- The shared QtWebEngine scaffold catalog file consumed by both UWPBuilder and
- EntryBuilder. Typically <c> Assembler\Scaffolds\qtwebengine.ini </c>.
+ The shared scaffold directory consumed by both UWPBuilder and EntryBuilder, holding
+ one catalog file per engine family. Typically <c> Assembler\Scaffolds </c>.
+ Only the <c> Dir </c> property is used; <c> Name </c> is ignored.
  </summary>
 </member>
 <member name="P:winapp2ool.uwpbuildersettings.UWPBuilderModuleSettingsChanged">
@@ -1081,6 +1069,16 @@ winapp2ool
  Apps with multiple packages use numbered variants:
  <c> Package1= </c> / <c> Package2= </c> in the source and
  <c> %Package1% </c> / <c> %Package2% </c> in key values.
+
+ <br /><br />
+
+ An entry may also draw scaffold FileKeys from the shared catalogs in
+ <c> Assembler\Scaffolds </c> by declaring a root for any family in
+ <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> — <c> WebViewPath= </c>,
+ <c> QtWebEnginePath= </c>, or <c> ElectronRoot= </c> / <c> ElectronUpdaterRoot= </c>.
+ Electron matters here despite MSIX packages rarely bundling it, because the
+ <b> hybrid win32+UWP </b> entries above carry the desktop install's paths too, and a
+ packaged app's desktop build is frequently Electron.
  </summary>
 </member>
 <member name="F:winapp2ool.UWPBuilder.UWPReservedKeys">
@@ -1091,6 +1089,11 @@ winapp2ool
  apart. Mirrors EntryBuilder's list of the same purpose, but carries UWPBuilder's own
  vocabulary — <c> PACKAGE </c>, <c> SKIPUWPFILEKEYS </c> and the <c> ...PATH </c>
  root spellings have no EntryBuilder counterpart
+ <br /><br />
+
+ <c> Friend </c> rather than <c> Private </c> so <c> ScaffoldParityTests </c> can walk
+ <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> and assert this parser knows every
+ family's key vocabulary — the guard against a family shipping to one builder only.
  </summary>
 </member>
 <member name="T:winapp2ool.UWPBuilder.UWPAppInfo">
@@ -1191,7 +1194,7 @@ winapp2ool
 <member name="F:winapp2ool.UWPBuilder.UWPAppInfo.WebViewScaffoldNames">
  <summary>
  Explicit <c> WebViewScaffold </c> names selected for this entry. When non-empty,
- this list replaces <see cref="F:winapp2ool.WebViewScaffolds.DefaultScaffolds"/>. Names are matched
+ this list replaces <see cref="F:winapp2ool.ScaffoldCatalogs.DefaultScaffolds"/>. Names are matched
  against the <c> [WebViewScaffold: ...] </c> sections in the shared catalog at
  <c> Assembler\Scaffolds\webview.ini </c>.
  <br /><br />
@@ -1206,14 +1209,14 @@ winapp2ool
  <summary>
  <c> WebViewScaffold </c> names to subtract from the active selection (either
  <see cref="F:winapp2ool.UWPBuilder.UWPAppInfo.WebViewScaffoldNames"/> when set, or
- <see cref="F:winapp2ool.WebViewScaffolds.DefaultScaffolds"/> otherwise). Unknown names are ignored.
+ <see cref="F:winapp2ool.ScaffoldCatalogs.DefaultScaffolds"/> otherwise). Unknown names are ignored.
  </summary>
 </member>
 <member name="F:winapp2ool.UWPBuilder.UWPAppInfo.WebViewScaffoldsKeyPresent">
  <summary>
  Tracks whether the AppInfo entry declared <c> WebViewScaffolds= </c> at all,
  separately from whether the resulting list is empty. Distinguishes
- "key absent → use <see cref="F:winapp2ool.WebViewScaffolds.DefaultScaffolds"/>" from
+ "key absent → use <see cref="F:winapp2ool.ScaffoldCatalogs.DefaultScaffolds"/>" from
  "key present but empty → emit no scaffold FileKeys despite having a
  <see cref="F:winapp2ool.UWPBuilder.UWPAppInfo.WebViewPaths"/> declaration."
  </summary>
@@ -1234,7 +1237,7 @@ winapp2ool
 <member name="F:winapp2ool.UWPBuilder.UWPAppInfo.QtWebEngineScaffoldNames">
  <summary>
  Explicit <c> QtWebEngineScaffold </c> names selected for this entry. When non-empty,
- this list replaces <see cref="F:winapp2ool.WebViewScaffolds.QtWebEngineDefaultScaffolds"/>. The
+ this list replaces <see cref="F:winapp2ool.ScaffoldCatalogs.QtWebEngineDefaultScaffolds"/>. The
  <c> All </c> sentinel expands to every scaffold in the QtWebEngine catalog.
  </summary>
 </member>
@@ -1248,6 +1251,49 @@ winapp2ool
  <summary>
  Tracks whether the AppInfo entry declared <c> QtWebEngineScaffolds= </c> at all
  (mirrors <see cref="F:winapp2ool.UWPBuilder.UWPAppInfo.WebViewScaffoldsKeyPresent"/> for the QtWebEngine family).
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPAppInfo.ElectronPaths">
+ <summary>
+ Paths of the application's Electron <c> userData </c> folders — for Electron this
+ folder <em>is</em> the Chromium profile, with no <c> Default\ </c> segment, unlike
+ <see cref="F:winapp2ool.UWPBuilder.UWPAppInfo.WebViewPaths"/>. Each entry is a path template that may contain
+ <c> %Package% </c> / <c> %PackageN% </c> references, expanded per package at
+ generation time, then substituted for <c> %ElectronRoot% </c>.
+ <br /><br />
+
+ Relevant to UWPBuilder because a <b> hybrid win32+UWP </b> entry carries the win32
+ install's paths alongside the package's, and the win32 half of a hybrid is where
+ Electron shows up — a packaged app whose desktop build is Electron needs this even
+ though nothing inside the MSIX container is.
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPAppInfo.ElectronUpdaterPaths">
+ <summary>
+ Paths of the application's electron-updater download caches. Declared separately from
+ <see cref="F:winapp2ool.UWPBuilder.UWPAppInfo.ElectronPaths"/> because the directory name is electron-builder's appId
+ slug and is not derivable from the userData path. Substituted for
+ <c> %ElectronUpdaterRoot% </c>; when empty, templates referencing that placeholder
+ are dropped rather than emitted with the placeholder literal.
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPAppInfo.ElectronScaffoldNames">
+ <summary>
+ Explicit <c> ElectronScaffold </c> names selected for this entry. When non-empty,
+ this list replaces <see cref="F:winapp2ool.ScaffoldCatalogs.ElectronDefaultScaffolds"/>. The
+ <c> All </c> sentinel expands to every scaffold in the Electron catalog.
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPAppInfo.ExcludedElectronScaffolds">
+ <summary>
+ <c> ElectronScaffold </c> names to subtract from the active selection. Unknown
+ names are ignored.
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPAppInfo.ElectronScaffoldsKeyPresent">
+ <summary>
+ Tracks whether the AppInfo entry declared <c> ElectronScaffolds= </c> at all
+ (mirrors <see cref="F:winapp2ool.UWPBuilder.UWPAppInfo.WebViewScaffoldsKeyPresent"/> for the Electron family).
  </summary>
 </member>
 <member name="F:winapp2ool.UWPBuilder.UWPAppInfo.Variables">
@@ -1287,7 +1333,7 @@ winapp2ool
  app definitions are missing.
  </summary>
 </member>
-<member name="M:winapp2ool.UWPBuilder.processUWPBuilder(winapp2ool.iniFile2,winapp2ool.iniFile2,System.String,System.String,winapp2ool.MenuSection)">
+<member name="M:winapp2ool.UWPBuilder.processUWPBuilder(winapp2ool.iniFile2,winapp2ool.iniFile2,System.String,winapp2ool.MenuSection)">
  <summary>
  Orchestrates the UWP builder process: parses scaffold templates and app definitions,
  generates one <c> iniSection2 </c> per app, serialises the result with a header
@@ -1302,18 +1348,11 @@ winapp2ool
  The combined AppInfo sections from all per-letter source files
  </param>
 
- <param name="webViewCatalogPath">
- Absolute path to the shared WebView scaffold catalog (typically
- <c> Assembler\Scaffolds\webview.ini </c>). Loaded once per run via
- <see cref="M:winapp2ool.WebViewScaffolds.LoadCatalog(System.String,winapp2ool.MenuSection,System.String)"/> and consumed by per-entry
- WebView scaffolding.
- </param>
-
- <param name="qtCatalogPath">
- Absolute path to the shared QtWebEngine scaffold catalog (typically
- <c> Assembler\Scaffolds\qtwebengine.ini </c>). Loaded once per run via
- <see cref="M:winapp2ool.WebViewScaffolds.LoadCatalog(System.String,winapp2ool.MenuSection,System.String)"/> with the <c> QtWebEngineScaffold: </c>
- prefix and consumed by per-entry QtWebEngine scaffolding.
+ <param name="scaffoldDir">
+ Absolute path to the shared scaffold directory (typically
+ <c> Assembler\Scaffolds </c>). Every catalog in it is loaded once per run via
+ <see cref="M:winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory(System.String,winapp2ool.MenuSection)"/>, which derives each family from its
+ section headers, and consumed by per-entry scaffolding.
  </param>
 
  <param name="menuOutput">
@@ -1380,40 +1419,116 @@ winapp2ool
  Check <c> ShouldSkip </c> before using the result.
  </returns>
 </member>
-<member name="M:winapp2ool.UWPBuilder.resolveWebViewScaffolds(winapp2ool.UWPBuilder.UWPAppInfo,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection)">
+<member name="T:winapp2ool.UWPBuilder.UWPScaffoldFamily">
  <summary>
- Selects the set of <c> WebViewScaffold </c> names that should be emitted for the given app.
- Resolution order:
- <list type="bullet">
- <item>
- If the AppInfo declared <c> WebViewScaffolds= </c> (regardless of value), use that
- explicit list — a present-but-empty value yields no scaffolds, distinct from the
- "key absent → use defaults" case.
- </item>
- <item>
- If the explicit list contains the sentinel <c> All </c> (case-insensitive), it is
- replaced with every scaffold name in <paramref name="available"/>. Any other names
- listed alongside <c> All </c> are redundant and emit a warning.
- </item>
- <item>
- Otherwise, use <see cref="F:winapp2ool.WebViewScaffolds.DefaultScaffolds"/>.
- </item>
- </list>
- Any names in <see cref="F:winapp2ool.UWPBuilder.UWPAppInfo.ExcludedWebViewScaffolds"/> are then subtracted, and
- unknown names (not present in <paramref name="available"/>) are dropped with a warning.
- Combining <c> WebViewScaffolds= </c> and <c> ExcludeWebViewScaffolds= </c> warns when
- the explicit list is anything other than <c> All </c>, since exclusions usually pair
- with the implicit defaults. <c> All </c> + exclusions is the natural idiom for
- "everything except these" and does not warn.
+ One scaffold family's per-entry state, gathered so <see cref="M:winapp2ool.UWPBuilder.generateUWPEntry(winapp2ool.UWPBuilder.UWPAppInfo,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},winapp2ool.ScaffoldCatalogSet,winapp2ool.MenuSection)"/> can
+ emit every family from a single loop instead of one hand-written block per family.
+ Adding a family becomes a case in <see cref="M:winapp2ool.UWPBuilder.scaffoldFamiliesFor(winapp2ool.UWPBuilder.UWPAppInfo)"/> rather than another
+ copy of the emission nesting — which is how Electron came to ship in EntryBuilder alone.
+ </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPScaffoldFamily.Label">
+ <summary> The family token, e.g. <c> Electron </c>; phrases diagnostics </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPScaffoldFamily.Selection">
+ <summary> Names from <c> {Family}Scaffolds= </c>, empty when undeclared </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPScaffoldFamily.Excluded">
+ <summary> Names from <c> Exclude{Family}Scaffolds= </c> </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPScaffoldFamily.KeyPresent">
+ <summary> Whether <c> {Family}Scaffolds= </c> was declared at all </summary>
+</member>
+<member name="F:winapp2ool.UWPBuilder.UWPScaffoldFamily.Bindings">
+ <summary>
+ The family's (placeholder, roots) pairs, roots already package-expanded to literals.
+ Electron carries two; the others one.
+ </summary>
+</member>
+<member name="P:winapp2ool.UWPBuilder.UWPScaffoldFamily.IsDeclared">
+ <summary>
+ Whether the entry opted into this family — true when it declared any root for any of
+ the family's placeholders. Electron opts in on either root, since an entry may want
+ only the updater cache.
+ </summary>
+</member>
+<member name="M:winapp2ool.UWPBuilder.UWPScaffoldFamily.#ctor(System.String,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding})">
+ <summary>
+ Creates a family's per-entry state
+ </summary>
+
+ <param name="label">
+ The family token
+ </param>
+
+ <param name="selection">
+ Names from the family's <c> {Family}Scaffolds= </c> key
+ </param>
+
+ <param name="excluded">
+ Names from the family's <c> Exclude{Family}Scaffolds= </c> key
+ </param>
+
+ <param name="keyPresent">
+ Whether <c> {Family}Scaffolds= </c> was declared
+ </param>
+
+ <param name="bindings">
+ The family's (placeholder, roots) pairs with roots already package-expanded
+ </param>
+</member>
+<member name="M:winapp2ool.UWPBuilder.scaffoldFamiliesFor(winapp2ool.UWPBuilder.UWPAppInfo)">
+ <summary>
+ Gathers every scaffold family declared on <paramref name="app"/>, package-expanding each
+ declared root so the resulting bindings hold literal paths. Every family in
+ <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> is represented here — that is the parity
+ contract, and <c> ScaffoldParityTests </c> asserts it against the reserved-key set.
+ <br /><br />
+
+ Package expansion (phase 0) must happen here, before placeholder substitution (phase 1),
+ because roots themselves reference <c> %Package% </c>
+ (<c> WebViewRoot=%Package%\LocalState\EBWebView </c>). Phase 2 (<c> &lt;&gt; </c>
+ expansion) then runs last on the merged string, so a token inside a root declaration
+ joins the same cartesian product as the scaffold template's own tokens.
  </summary>
 
  <param name="app">
- The parsed app definition whose scaffold selection is being resolved
+ The parsed app definition whose root declarations are being gathered
  </param>
 
- <param name="available">
- The catalog of known scaffolds, keyed by name, loaded from
- <c> Assembler\Scaffolds\webview.ini </c>
+ <returns>
+ One entry per scaffold family, in <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> order
+ </returns>
+</member>
+<member name="M:winapp2ool.UWPBuilder.expandScaffoldFamily(winapp2ool.UWPBuilder.UWPScaffoldFamily,winapp2ool.UWPBuilder.UWPAppInfo,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection)">
+ <summary>
+ Emits one scaffold family's FileKey values for an app. Resolution follows the shared
+ grammar in <see cref="M:winapp2ool.ScaffoldCatalogs.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)"/>: an explicit
+ <c> {Family}Scaffolds= </c> wins (a present-but-empty value yields nothing, distinct
+ from the key being absent), the <c> All </c> sentinel expands the whole catalog,
+ otherwise the family's default set applies; exclusions are then subtracted and unknown
+ names dropped with a warning. Substitution is delegated to
+ <see cref="M:winapp2ool.ScaffoldCatalogs.BindFamilyTemplates(System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}})"/>, so a template whose placeholder has
+ no declared root is dropped rather than emitted literally — which is what keeps
+ Electron's default-on <c> UpdaterCache </c> inert for an entry with no updater root.
+ <br /><br />
+
+ A non-empty scaffold that produced nothing warns only when the entry named its family's
+ scaffolds explicitly; a default-set member yielding nothing is by design and would
+ otherwise warn on nearly every Electron entry. Mirrors EntryBuilder's
+ <c> expandScaffoldFamily </c>.
+ </summary>
+
+ <param name="family">
+ The family's per-entry state, with roots already package-expanded
+ </param>
+
+ <param name="app">
+ The entry being generated, supplying the variable set for phase-2 expansion
+ </param>
+
+ <param name="catalog">
+ The family's scaffold catalog
  </param>
 
  <param name="menuOutput">
@@ -1421,36 +1536,10 @@ winapp2ool
  </param>
 
  <returns>
- The ordered list of scaffold names to emit for this app, with unknowns removed
+ Every expanded FileKey value produced by this family, in fan-out order
  </returns>
 </member>
-<member name="M:winapp2ool.UWPBuilder.resolveQtWebEngineScaffolds(winapp2ool.UWPBuilder.UWPAppInfo,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection)">
- <summary>
- Selects the set of <c> QtWebEngineScaffold </c> names to emit for the given app,
- following the same resolution grammar as <see cref="M:winapp2ool.UWPBuilder.resolveWebViewScaffolds(winapp2ool.UWPBuilder.UWPAppInfo,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection)"/> but
- driven by the app's <c> QtWebEngineScaffolds= </c> / <c> ExcludeQtWebEngineScaffolds= </c>
- keys and the QtWebEngine default set. Delegates to
- <see cref="M:winapp2ool.WebViewScaffolds.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)"/>.
- </summary>
-
- <param name="app">
- The parsed app definition whose QtWebEngine scaffold selection is being resolved
- </param>
-
- <param name="available">
- The catalog of known QtWebEngine scaffolds, keyed by name, loaded from
- <c> Assembler\Scaffolds\qtwebengine.ini </c>
- </param>
-
- <param name="menuOutput">
- The <c> MenuSection </c> receiving warnings for display
- </param>
-
- <returns>
- The ordered list of QtWebEngine scaffold names to emit for this app, with unknowns removed
- </returns>
-</member>
-<member name="M:winapp2ool.UWPBuilder.generateUWPEntry(winapp2ool.UWPBuilder.UWPAppInfo,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection)">
+<member name="M:winapp2ool.UWPBuilder.generateUWPEntry(winapp2ool.UWPBuilder.UWPAppInfo,System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},winapp2ool.ScaffoldCatalogSet,winapp2ool.MenuSection)">
  <summary>
  Generates a winapp2.ini entry section for the given <c> UWPAppInfo </c> by applying
  the scaffold template keys and app-specific keys, expanding any
@@ -1472,16 +1561,10 @@ winapp2ool
  to produce the entry's detection paths
  </param>
 
- <param name="webViewScaffolds">
- The shared <c> WebViewScaffold </c> catalog. Apps declaring <c> WebViewPath= </c>
- draw their additional FileKeys from here, with <c> %WebViewRoot% </c> substituted
- per declared path.
- </param>
-
- <param name="qtWebEngineScaffolds">
- The shared <c> QtWebEngineScaffold </c> catalog. Apps declaring <c> QtWebEnginePath= </c>
- draw their additional FileKeys from here, with <c> %QtWebEngineRoot% </c> substituted
- per declared path.
+ <param name="scaffoldSet">
+ The shared scaffold catalogs loaded from the scaffold directory. An app draws additional
+ FileKeys from every family it declared a root for, with that family's placeholders
+ substituted per declared path.
  </param>
 
  <param name="menuOutput">
@@ -1702,20 +1785,13 @@ winapp2ool
  <item>
  <b><c> EntryBuilderFile3 </c></b>
  <description>
- Shared WebView scaffold catalog (typically <c> Assembler\Scaffolds\webview.ini </c>).
- Source for <c> [WebViewScaffold: ...] </c> sections consumed when expanding
- entries that declare <c> WebViewRoot= </c>. If the file is missing or empty,
- generation continues with zero scaffold FileKeys emitted and a warning logged.
- </description>
- </item>
-
- <item>
- <b><c> EntryBuilderFile4 </c></b>
- <description>
- Shared QtWebEngine scaffold catalog (typically <c> Assembler\Scaffolds\qtwebengine.ini </c>).
- Source for <c> [QtWebEngineScaffold: ...] </c> sections consumed when expanding
- entries that declare <c> QtWebEngineRoot= </c>. If the file is missing or empty,
- generation continues with zero QtWebEngine scaffold FileKeys emitted and a warning logged.
+ Shared scaffold directory (typically <c> Assembler\Scaffolds </c>). Every
+ <c> *.ini </c> in it is loaded at once and each scaffold family is derived from its
+ section headers (<c> [WebViewScaffold: ...] </c>, <c> [QtWebEngineScaffold: ...] </c>,
+ <c> [ElectronScaffold: ...] </c>), consumed when expanding entries that declare the
+ matching root key. Only the <c> Dir </c> of this chooser is used; the <c> Name </c> is
+ ignored. A missing directory or catalog file continues the run with zero scaffold
+ FileKeys for the affected families and a warning logged.
  </description>
  </item>
 
@@ -1737,14 +1813,9 @@ winapp2ool
 </member>
 <member name="P:winapp2ool.entryBuilderSettings.EntryBuilderFile3">
  <summary>
- The shared WebView scaffold catalog consumed by both UWPBuilder and EntryBuilder.
- Typically <c> Assembler\Scaffolds\webview.ini </c>.
- </summary>
-</member>
-<member name="P:winapp2ool.entryBuilderSettings.EntryBuilderFile4">
- <summary>
- The shared QtWebEngine scaffold catalog consumed by both UWPBuilder and EntryBuilder.
- Typically <c> Assembler\Scaffolds\qtwebengine.ini </c>.
+ The shared scaffold directory consumed by both UWPBuilder and EntryBuilder, holding
+ one catalog file per engine family. Typically <c> Assembler\Scaffolds </c>.
+ Only the <c> Dir </c> property is used; <c> Name </c> is ignored.
  </summary>
 </member>
 <member name="P:winapp2ool.entryBuilderSettings.EntryBuilderSplitOutput">
@@ -1782,31 +1853,48 @@ winapp2ool
  The deprecated <c> SpecialDetect= </c> is refused: the key is dropped with a
  warning rather than passed through or misparsed as a variable declaration. <br /><br />
 
- Scaffold families are the first shorthand category. An entry opts into a family by
- declaring one or more root paths for it: <c> WebViewRoot= </c> (one per WebView2 /
- EBWebView data root) or <c> QtWebEngineRoot= </c> (one per QtWebEngine profile directory).
- The module then expands the selected scaffolds — <c> WebViewScaffolds= </c> /
- <c> ExcludeWebViewScaffolds= </c> for WebView2, <c> QtWebEngineScaffolds= </c> /
- <c> ExcludeQtWebEngineScaffolds= </c> for QtWebEngine — into <c> FileKey </c> lines,
- substituting the family's placeholder (<c> %WebViewRoot% </c> or
- <c> %QtWebEngineRoot% </c>) against each declared root. The two families are
- independent: an entry may declare either, both, or neither. Non-scaffold targets are
- written via <c> FileKeyBase= </c> / <c> RegKeyBase= </c> with the same substitution
- rule (either placeholder). An entry without any root declaration emits no scaffold
+ Scaffold families are the first shorthand category, and there are three. An entry opts into
+ a family by declaring one or more root paths for it: <c> WebViewRoot= </c> (one per WebView2 /
+ EBWebView data root), <c> QtWebEngineRoot= </c> (one per QtWebEngine profile directory), or
+ <c> ElectronRoot= </c> (one per Electron <c> userData </c> folder). The module then expands
+ the selected scaffolds — <c> WebViewScaffolds= </c> / <c> ExcludeWebViewScaffolds= </c>,
+ <c> QtWebEngineScaffolds= </c> / <c> ExcludeQtWebEngineScaffolds= </c>, and
+ <c> ElectronScaffolds= </c> / <c> ExcludeElectronScaffolds= </c> — into <c> FileKey </c>
+ lines, substituting the family's placeholder (<c> %WebViewRoot% </c>,
+ <c> %QtWebEngineRoot% </c> or <c> %ElectronRoot% </c>) against each declared root. The
+ families are independent: an entry may declare any combination, or none. Non-scaffold
+ targets are written via <c> FileKeyBase= </c> / <c> RegKeyBase= </c> with the same
+ substitution rule (any placeholder). An entry without any root declaration emits no scaffold
  output, which is the correct default for entries that just want pass-through plus
  future shorthand. The DSL is open to additional scaffold catalogs in future (each
  introduces its own opt-in trigger key). <br /><br />
 
+ The Electron family carries a <b>second</b> root key, <c> ElectronUpdaterRoot= </c>
+ (<c> %ElectronUpdaterRoot% </c>), naming the electron-updater download cache — a sibling of
+ the userData folder under <c> %LocalAppData% </c> whose directory name is electron-builder's
+ appId slug and therefore not derivable from the userData path. It is optional and orthogonal:
+ declaring it alone opts the entry into the updater scaffolds only. Templates whose placeholder
+ has no declared root are dropped rather than emitted with the placeholder left literal, so the
+ default-on <c> UpdaterCache </c> scaffold is inert for an entry that declared only
+ <c> ElectronRoot= </c>. Selecting a scaffold whose every template is dropped this way warns.
+ <br /><br />
+
  Recognised shorthand keys (stripped from output):
  <c> WebViewRoot= </c>, <c> WebViewScaffolds= </c>, <c> ExcludeWebViewScaffolds= </c>,
  <c> QtWebEngineRoot= </c>, <c> QtWebEngineScaffolds= </c>,
- <c> ExcludeQtWebEngineScaffolds= </c>, <c> FileKeyBase= </c>, <c> RegKeyBase= </c>,
+ <c> ExcludeQtWebEngineScaffolds= </c>, <c> ElectronRoot= </c>,
+ <c> ElectronUpdaterRoot= </c>, <c> ElectronScaffolds= </c>,
+ <c> ExcludeElectronScaffolds= </c>, <c> FileKeyBase= </c>, <c> RegKeyBase= </c>,
  <c> ExcludeKeyBase= </c>, <c> Skip= </c>. <br /><br />
 
- Scaffolds are loaded from two shared catalogs via <see cref="M:winapp2ool.WebViewScaffolds.LoadCatalog(System.String,winapp2ool.MenuSection,System.String)"/>:
- <c> Assembler\Scaffolds\webview.ini </c> (<c> %WebViewRoot% </c> templates) and
- <c> Assembler\Scaffolds\qtwebengine.ini </c> (<c> %QtWebEngineRoot% </c> templates),
- each substituted per declared root at generation time. <br /><br />
+ Scaffolds are loaded from one shared scaffold <em>directory</em> (typically
+ <c> Assembler\Scaffolds </c>) via <see cref="M:winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory(System.String,winapp2ool.MenuSection)"/>, which
+ discovers each family from its section headers rather than from a configured per-family
+ path: <c> webview.ini </c> (<c> %WebViewRoot% </c> templates), <c> qtwebengine.ini </c>
+ (<c> %QtWebEngineRoot% </c> templates), and <c> electron.ini </c> (<c> %ElectronRoot% </c> /
+ <c> %ElectronUpdaterRoot% </c> templates), each substituted per declared root at generation
+ time. UWPBuilder reads the same directory and binds the same families — see
+ <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> for the parity contract. <br /><br />
 
  Unlike <c> UWPBuilder </c>, this module never emits <c> Default= </c>. Generated
  entries are opt-in by design to keep the cleaning UI uncluttered as small Electron
@@ -1842,7 +1930,64 @@ winapp2ool
  variable declaration by <see cref="M:winapp2ool.EntryBuilder.parseEntrySpec(winapp2ool.iniSection2,winapp2ool.MenuSection)"/>. Centralised here so the
  parser's <c> Select Case </c> and the reserved-name collision check cannot
  drift apart.
+ <br /><br />
+
+ <c> Friend </c> rather than <c> Private </c> so <c> ScaffoldParityTests </c> can walk
+ <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> and assert this parser knows every
+ family's key vocabulary — the guard against a family shipping to one builder only.
  </summary>
+</member>
+<member name="M:winapp2ool.EntryBuilder.addScaffoldRoot(System.Collections.Generic.List{System.String},System.String,System.String,System.String,winapp2ool.MenuSection)">
+ <summary>
+ Records one scaffold-family root declaration, warning first if the value looks like the
+ author expected a comma-delimited list. Root keys are <em>repeatable</em>, not list-valued:
+ several roots are declared as <c> XRoot1= </c> / <c> XRoot2= </c>, or by putting a
+ <c> &lt;a,b&gt; </c> list inside the path where the alternatives differ. A bare comma in
+ the value is taken literally and yields a path containing a comma — almost always a silent
+ mistake, and the reason this guard exists.
+ <br /><br />
+ Commas inside a <c> &lt;...&gt; </c> group are legitimate list separators and are ignored,
+ so a declaration like
+ <c> %LocalAppData%\&lt;AMD\RadeonSoftware,RadeonSettings&gt;\QtWebEngine\Default </c>
+ does not warn. Note the <c> &lt;&gt; </c> engine drops empty alternatives, so
+ <c> Root&lt;,\Partitions\*&gt; </c> does <em>not</em> yield the bare root — use numbered
+ keys for "this folder and a subfolder of it".
+ </summary>
+
+ <param name="roots">
+ The spec's root list for this family, appended to
+ </param>
+
+ <param name="value">
+ The declared root path, taken verbatim
+ </param>
+
+ <param name="keyLabel">
+ The key name used in the diagnostic, e.g. <c> ElectronRoot </c>
+ </param>
+
+ <param name="entryName">
+ The entry name, embedded in the diagnostic for source localisation
+ </param>
+
+ <param name="menuOutput">
+ The <c> MenuSection </c> receiving the warning
+ </param>
+</member>
+<member name="M:winapp2ool.EntryBuilder.hasCommaOutsideAngles(System.String)">
+ <summary>
+ Reports whether <paramref name="value"/> contains a comma at bracket depth zero — that is,
+ outside every <c> &lt;...&gt; </c> group. Used to tell an author's mistaken comma-list from
+ the legitimate separators inside a <c> &lt;&gt; </c> expansion group.
+ </summary>
+
+ <param name="value">
+ The declared value to inspect
+ </param>
+
+ <returns>
+ <c> True </c> when a comma appears outside any <c> &lt;&gt; </c> group
+ </returns>
 </member>
 <member name="T:winapp2ool.EntryBuilder.EntrySpec">
  <summary>
@@ -1992,7 +2137,51 @@ winapp2ool
  <summary>
  QtWebEngine scaffold names to subtract from the active selection (either
  <see cref="F:winapp2ool.EntryBuilder.EntrySpec.QtWebEngineScaffoldNames"/> when set, or
- <see cref="F:winapp2ool.WebViewScaffolds.QtWebEngineDefaultScaffolds"/> otherwise).
+ <see cref="F:winapp2ool.ScaffoldCatalogs.QtWebEngineDefaultScaffolds"/> otherwise).
+ Unknown names are ignored.
+ </summary>
+</member>
+<member name="F:winapp2ool.EntryBuilder.EntrySpec.ElectronRoots">
+ <summary>
+ Paths of the application's Electron <c> userData </c> folders — typically
+ <c> %AppData%\&lt;ProductName&gt; </c>. For Electron this folder <em>is</em> the
+ Chromium profile directory, so unlike <see cref="F:winapp2ool.EntryBuilder.EntrySpec.WebViewRoots"/> there is no
+ <c> Default\ </c> segment above or below it. Each entry is a literal path string
+ substituted for <c> %ElectronRoot% </c>. An app using <c> session.fromPartition() </c>
+ declares its sub-profiles as additional roots (<c> ...\Partitions\* </c>), since each
+ partition directory is itself a complete profile. Declaring any root opts the entry
+ into Electron scaffold emission.
+ </summary>
+</member>
+<member name="F:winapp2ool.EntryBuilder.EntrySpec.ElectronUpdaterRoots">
+ <summary>
+ Paths of the application's electron-updater download caches — typically
+ <c> %LocalAppData%\&lt;slug&gt;-updater </c>. Declared separately from
+ <see cref="F:winapp2ool.EntryBuilder.EntrySpec.ElectronRoots"/> because the directory name is electron-builder's appId
+ slug and is not derivable from the userData path (<c> %AppData%\Humble App </c> pairs
+ with <c> %LocalAppData%\humble-client-updater </c>). Substituted for
+ <c> %ElectronUpdaterRoot% </c>; when empty, templates referencing that placeholder are
+ dropped.
+ </summary>
+</member>
+<member name="F:winapp2ool.EntryBuilder.EntrySpec.ElectronScaffoldNames">
+ <summary>
+ Electron scaffold names explicitly selected via <c> ElectronScaffolds= </c>.
+ The sentinel <c> All </c> (case-insensitive) expands to every scaffold in the
+ Electron catalog.
+ </summary>
+</member>
+<member name="F:winapp2ool.EntryBuilder.EntrySpec.ElectronScaffoldsKeyPresent">
+ <summary>
+ Tracks whether <c> ElectronScaffolds= </c> was declared at all, separately from
+ whether the resulting list is empty (mirrors <see cref="F:winapp2ool.EntryBuilder.EntrySpec.WebViewScaffoldsKeyPresent"/>).
+ </summary>
+</member>
+<member name="F:winapp2ool.EntryBuilder.EntrySpec.ExcludedElectronScaffolds">
+ <summary>
+ Electron scaffold names to subtract from the active selection (either
+ <see cref="F:winapp2ool.EntryBuilder.EntrySpec.ElectronScaffoldNames"/> when set, or
+ <see cref="F:winapp2ool.ScaffoldCatalogs.ElectronDefaultScaffolds"/> otherwise).
  Unknown names are ignored.
  </summary>
 </member>
@@ -2071,7 +2260,7 @@ winapp2ool
 <member name="T:winapp2ool.EntryBuilder.EntryBuilderStats">
  <summary>
  Mutable accumulator for a single EntryBuilder run's generation statistics. One
- instance is threaded through <see cref="M:winapp2ool.EntryBuilder.generateEntry(winapp2ool.EntryBuilder.EntrySpec,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)"/> and the expansion helpers
+ instance is threaded through <see cref="M:winapp2ool.EntryBuilder.generateEntry(winapp2ool.EntryBuilder.EntrySpec,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)"/> and the expansion helpers
  so every emitted key is tallied at its source, then rendered as a summary box by
  <see cref="M:winapp2ool.EntryBuilder.renderStats(winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)"/>. A reference type by design — sharing one instance across
  the whole run lets counts accumulate without <c> ByRef </c> plumbing.
@@ -2092,6 +2281,12 @@ winapp2ool
 <member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.EntriesWithQtScaffolds">
  <summary> Generated entries that declared at least one <c> QtWebEngineRoot= </c> </summary>
 </member>
+<member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.EntriesWithElectronScaffolds">
+ <summary>
+ Generated entries that declared at least one <c> ElectronRoot= </c> or
+ <c> ElectronUpdaterRoot= </c> — either root opts the entry into the family
+ </summary>
+</member>
 <member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.InferredRootEntries">
  <summary> Generated entries that received a synthesised <c> Root </c>-based detection </summary>
 </member>
@@ -2100,6 +2295,12 @@ winapp2ool
 </member>
 <member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.QtWebEngineRootDecls">
  <summary> Total <c> QtWebEngineRoot= </c> declarations across all generated entries </summary>
+</member>
+<member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.ElectronRootDecls">
+ <summary> Total <c> ElectronRoot= </c> declarations across all generated entries </summary>
+</member>
+<member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.ElectronUpdaterRootDecls">
+ <summary> Total <c> ElectronUpdaterRoot= </c> declarations across all generated entries </summary>
 </member>
 <member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.FileKeyBaseDecls">
  <summary> Total <c> FileKeyBase= </c> declarations (generative) across all generated entries </summary>
@@ -2139,6 +2340,9 @@ winapp2ool
 </member>
 <member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.QtScaffoldFileKeys">
  <summary> <c> FileKey </c> keys produced by QtWebEngine scaffold catalog expansion (generated) </summary>
+</member>
+<member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.ElectronScaffoldFileKeys">
+ <summary> <c> FileKey </c> keys produced by Electron scaffold catalog expansion (generated) </summary>
 </member>
 <member name="F:winapp2ool.EntryBuilder.EntryBuilderStats.FileKeyBaseKeys">
  <summary> <c> FileKey </c> keys produced from <c> FileKeyBase= </c> templates (generated) </summary>
@@ -2223,7 +2427,7 @@ winapp2ool
  contains no parseable sections.
  </summary>
 </member>
-<member name="M:winapp2ool.EntryBuilder.processEntryBuilder(winapp2ool.iniFile2,System.String,System.String,winapp2ool.MenuSection)">
+<member name="M:winapp2ool.EntryBuilder.processEntryBuilder(winapp2ool.iniFile2,System.String,winapp2ool.MenuSection)">
  <summary>
  Orchestrates the EntryBuilder pipeline: loads the scaffold catalog, parses each
  source section into an <c> EntrySpec </c>, generates one <c> iniSection2 </c>
@@ -2235,16 +2439,12 @@ winapp2ool
  The combined contents of every <c> *.ini </c> in the source directory
  </param>
 
- <param name="catalogPath">
- Absolute path to the shared WebView scaffold catalog (typically
- <c> Assembler\Scaffolds\webview.ini </c>). Loaded once per run via
- <see cref="M:winapp2ool.WebViewScaffolds.LoadCatalog(System.String,winapp2ool.MenuSection,System.String)"/>.
- </param>
-
- <param name="qtCatalogPath">
- Absolute path to the shared QtWebEngine scaffold catalog (typically
- <c> Assembler\Scaffolds\qtwebengine.ini </c>). Loaded once per run via
- <see cref="M:winapp2ool.WebViewScaffolds.LoadCatalog(System.String,winapp2ool.MenuSection,System.String)"/> with the <c> QtWebEngineScaffold: </c> prefix.
+ <param name="scaffoldDir">
+ Absolute path to the shared scaffold directory (typically
+ <c> Assembler\Scaffolds </c>). Every catalog in it is loaded once per run via
+ <see cref="M:winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory(System.String,winapp2ool.MenuSection)"/>, which derives each family from its
+ section headers — so a family whose catalog file is absent costs its scaffold keys and a
+ warning, never a failed run.
  </param>
 
  <param name="menuOutput">
@@ -2337,7 +2537,7 @@ winapp2ool
  by the leading path segment of the resolved value against the known registry hives via
  <see cref="P:winapp2ool.regKeyParams2.HasValidRoot"/>. The synthesised key is the literal
  <c> &lt;Root&gt; </c> token rather than the expanded value, so the normal phase-2 pass in
- <see cref="M:winapp2ool.EntryBuilder.generateEntry(winapp2ool.EntryBuilder.EntrySpec,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)"/> fans it out over multi-valued roots and marks <c> Root </c>
+ <see cref="M:winapp2ool.EntryBuilder.generateEntry(winapp2ool.EntryBuilder.EntrySpec,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)"/> fans it out over multi-valued roots and marks <c> Root </c>
  referenced for the unreferenced-variable typo backstop. <br /><br />
 
  Injection is idempotent and additive: if the target list already holds a
@@ -2420,7 +2620,7 @@ winapp2ool
  Selects the set of QtWebEngine scaffold names to emit for the given entry, following
  the same resolution grammar as <see cref="M:winapp2ool.EntryBuilder.resolveWebViewScaffolds(winapp2ool.EntryBuilder.EntrySpec,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection)"/> but driven by the
  entry's <c> QtWebEngineScaffolds= </c> / <c> ExcludeQtWebEngineScaffolds= </c> keys and
- the QtWebEngine default set. Delegates to <see cref="M:winapp2ool.WebViewScaffolds.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)"/>.
+ the QtWebEngine default set. Delegates to <see cref="M:winapp2ool.ScaffoldCatalogs.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)"/>.
  </summary>
 
  <param name="spec">
@@ -2440,7 +2640,37 @@ winapp2ool
  The ordered list of QtWebEngine scaffold names to emit for this entry, with unknowns removed
  </returns>
 </member>
-<member name="M:winapp2ool.EntryBuilder.generateEntry(winapp2ool.EntryBuilder.EntrySpec,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)">
+<member name="M:winapp2ool.EntryBuilder.resolveElectronScaffolds(winapp2ool.EntryBuilder.EntrySpec,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection)">
+ <summary>
+ Selects the set of Electron scaffold names to emit for the given entry, following the same
+ resolution grammar as <see cref="M:winapp2ool.EntryBuilder.resolveWebViewScaffolds(winapp2ool.EntryBuilder.EntrySpec,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection)"/> but driven by the entry's
+ <c> ElectronScaffolds= </c> / <c> ExcludeElectronScaffolds= </c> keys and the Electron
+ default set. Delegates to <see cref="M:winapp2ool.ScaffoldCatalogs.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)"/>.
+ <br /><br />
+
+ Selection is orthogonal to which roots the entry declared: a selected scaffold whose
+ templates all reference an undeclared root contributes nothing, and
+ <see cref="M:winapp2ool.EntryBuilder.expandScaffoldFamily(System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding},System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.EntryBuilder.EntrySpec,winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)"/> warns when that happens.
+ </summary>
+
+ <param name="spec">
+ The entry whose Electron scaffold selection is being resolved
+ </param>
+
+ <param name="available">
+ The catalog of known Electron scaffolds, keyed by name, loaded from
+ <c> Assembler\Scaffolds\electron.ini </c>
+ </param>
+
+ <param name="menuOutput">
+ The <c> MenuSection </c> receiving warnings for display
+ </param>
+
+ <returns>
+ The ordered list of Electron scaffold names to emit for this entry, with unknowns removed
+ </returns>
+</member>
+<member name="M:winapp2ool.EntryBuilder.generateEntry(winapp2ool.EntryBuilder.EntrySpec,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)">
  <summary>
  Generates one winapp2.ini section for the given entry. Emits keys in winapp2
  canonical order: category, Detect, DetectFile, DetectOS, Warning, FileKey
@@ -2454,6 +2684,14 @@ winapp2ool
 
  <param name="catalog">
  The shared WebView scaffold catalog
+ </param>
+
+ <param name="qtCatalog">
+ The shared QtWebEngine scaffold catalog
+ </param>
+
+ <param name="electronCatalog">
+ The shared Electron scaffold catalog
  </param>
 
  <param name="stats">
@@ -2605,55 +2843,47 @@ winapp2ool
  or a single-element list containing it verbatim when it contains neither
  </returns>
 </member>
-<member name="M:winapp2ool.EntryBuilder.fanOutPlaceholder(System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.List{System.String})">
+<member name="M:winapp2ool.EntryBuilder.expandScaffoldFamily(System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding},System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.EntryBuilder.EntrySpec,winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)">
  <summary>
- Replaces <paramref name="placeholder"/> in each input template with every root in
- <paramref name="roots"/>, producing one output per (template, root) pair. Templates
- that do not contain the placeholder pass through unchanged (one output each), so the
- helper can be chained per placeholder without dropping placeholder-free strings.
+ Expands one scaffold family for an entry: for each selected scaffold and each
+ <c> FileKeyBase= </c> template in it, substitutes every binding's placeholder with that
+ binding's roots and runs phase-2 variable expansion on each result. Shared by all three
+ scaffold tiers, which differ only in their bindings and catalog.
+ <br /><br />
+
+ Substitution is delegated to <see cref="M:winapp2ool.ScaffoldCatalogs.BindFamilyTemplates(System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}})"/>, which
+ chains one <c> FanOutPlaceholder </c> pass per binding, so a template referencing several
+ placeholders multiplies across all of their root lists, and a template referencing a
+ placeholder whose binding has no roots is <em>dropped</em> rather than emitted with the
+ placeholder left literal. That drop rule is what makes the Electron family's
+ two-placeholder catalog work: an entry declaring only <c> ElectronRoot= </c> silently
+ contributes nothing from the <c> UpdaterCache </c> scaffold. UWPBuilder drives the same
+ helper, so the substitution semantics cannot drift between the two builders.
+ <br /><br />
+
+ A scaffold that produced nothing at all warns only when the entry named its family's
+ scaffolds <em>explicitly</em>. A default-set member yielding nothing is by design — the
+ Electron defaults include <c> UpdaterCache </c> precisely because it costs nothing for the
+ majority of entries that declare no <c> ElectronUpdaterRoot= </c> — so warning there would
+ fire on nearly every entry and train the reader to ignore the diagnostic.
  </summary>
 
- <param name="templates">
- The current working set of (possibly already partially expanded) templates
- </param>
-
- <param name="placeholder">
- The literal placeholder token to substitute (e.g. <c> %WebViewRoot% </c>)
- </param>
-
- <param name="roots">
- The root paths to substitute for the placeholder
- </param>
-
- <returns>
- The expanded set; a template containing the placeholder is dropped when
- <paramref name="roots"/> is empty (matching the legacy behaviour of emitting nothing
- for a placeholder with no declared root)
- </returns>
-</member>
-<member name="M:winapp2ool.EntryBuilder.expandScaffoldFamily(System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String,winapp2ool.EntryBuilder.EntrySpec,winapp2ool.EntryBuilder.EntryBuilderStats,winapp2ool.MenuSection)">
- <summary>
- Expands one scaffold family for an entry: for each declared root, each selected
- scaffold, and each <c> FileKeyBase= </c> template in that scaffold, substitutes
- <paramref name="placeholder"/> with the root and runs phase-2 variable expansion.
- Shared by the WebView and QtWebEngine scaffold tiers, which differ only in their
- root list, catalog, and placeholder.
- </summary>
-
- <param name="roots">
- The entry's declared root paths for this family
+ <param name="bindings">
+ The family's (placeholder, roots) pairs — one for WebView and QtWebEngine, two for Electron
  </param>
 
  <param name="selectedScaffolds">
  The resolved scaffold names to emit (already filtered to catalog members)
  </param>
 
- <param name="catalog">
- The scaffold catalog for this family, keyed by scaffold name
+ <param name="selectionWasExplicit">
+ Whether the entry declared the family's <c> {Family}Scaffolds= </c> key. Gates the
+ produced-nothing warning: an explicit request that yields no keys is worth reporting, a
+ default-set member that yields none is not.
  </param>
 
- <param name="placeholder">
- The family's root placeholder (<c> %WebViewRoot% </c> or <c> %QtWebEngineRoot% </c>)
+ <param name="catalog">
+ The scaffold catalog for this family, keyed by scaffold name
  </param>
 
  <param name="spec">
@@ -8520,33 +8750,59 @@ winapp2ool
  after a forced override.
  </summary>
 </member>
-<member name="T:winapp2ool.WebViewScaffolds">
+<member name="T:winapp2ool.ScaffoldCatalogs">
  <summary>
  Shared, use-case-agnostic substrate for embedded-Chromium FileKey emission. Consumed
  by entry generators (UWPBuilder, EntryBuilder) that need a curated, consistent set of
- cleaning targets for an application's embedded WebView2 / EBWebView or QtWebEngine
- data folder.
+ cleaning targets for an application's embedded browser-engine data folder.
  <br /><br />
 
- The module is engine-family-neutral: a single section-prefix parameter selects which
- family of scaffold sections to read from a catalog, so multiple catalogs can be
- processed by the same loader. The shipping families are:
+ The module is engine-family-neutral: a family is identified by the text preceding
+ <c> Scaffold: </c> in a catalog section header, so one directory scan
+ (<see cref="M:winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory(System.String,winapp2ool.MenuSection)"/>) discovers every family present without any
+ per-family plumbing. <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> is the roster of families the
+ builders actually bind:
  <list type="bullet">
- <item><c> WebViewScaffold </c> — WebView2 / EBWebView layout (<c> Assembler\Scaffolds\webview.ini </c>),
+ <item><c> WebView </c> — WebView2 / EBWebView layout (<c> Assembler\Scaffolds\webview.ini </c>),
  templates use the <c> %WebViewRoot% </c> placeholder.</item>
- <item><c> QtWebEngineScaffold </c> — QtWebEngine layout (<c> Assembler\Scaffolds\qtwebengine.ini </c>),
+ <item><c> QtWebEngine </c> — QtWebEngine layout (<c> Assembler\Scaffolds\qtwebengine.ini </c>),
  templates use the <c> %QtWebEngineRoot% </c> placeholder. QtWebEngine bundles an older
  Chromium with a flatter on-disk layout (no <c> Default\Network\ </c> subfolder, no
  privacy-sandbox surface), so it warrants a separate catalog rather than reusing the
  WebView2 paths.</item>
+ <item><c> Electron </c> — Electron layout (<c> Assembler\Scaffolds\electron.ini </c>),
+ templates use <c> %ElectronRoot% </c> (the app's <c> userData </c> folder, which for
+ Electron <em>is</em> the Chromium profile — no <c> Default\ </c> segment) and
+ <c> %ElectronUpdaterRoot% </c> (the electron-updater download cache, whose directory name
+ is not derivable from the userData path). This is the only family with two placeholders,
+ so its consumers bind both — see <see cref="M:winapp2ool.ScaffoldCatalogs.BindFamilyTemplates(System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}})"/>. It is a separate
+ catalog because Electron collapses WebView2's user-data and profile levels into one
+ directory <em>and</em> straddles the Chromium 89 network-service migration, needing both
+ <c> Network\Cookies </c> and legacy root-level <c> Cookies </c>.</item>
  </list>
  <br />
 
- Source files contribute <c> [{Family}: Name] </c> sections whose <c> FileKeyBase= </c>
- values use a family-specific root placeholder. Callers parse their own source files,
- delegate scaffold sections to <see cref="M:winapp2ool.WebViewScaffolds.ParseSection(winapp2ool.iniSection2,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection,System.String)"/> (or load a whole catalog via
- <see cref="M:winapp2ool.WebViewScaffolds.LoadCatalog(System.String,winapp2ool.MenuSection,System.String)"/>), resolve the active selection via <see cref="M:winapp2ool.WebViewScaffolds.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)"/>,
- and later substitute their own host-specific root paths into the resulting templates.
+ <b> Parity contract: every family in <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> ships to every
+ consumer. </b> Electron originally shipped to EntryBuilder alone on the theory that MSIX
+ packages rarely bundle Electron, which overlooked that UWPBuilder's hybrid win32+UWP
+ entries carry the win32 install's paths too — and a hybrid's win32 half is precisely where
+ Electron turns up. A scaffold family lands in both builders or neither;
+ <c> ScaffoldParityTests </c> enforces it against both parsers' reserved-key sets.
+ <br /><br />
+
+ A family may bind more than one placeholder. Consumers expand a template by chaining one
+ substitution per (placeholder, roots) pair; a template whose placeholder has an empty root
+ list is dropped rather than emitted with the placeholder left literal, which is what lets
+ the Electron family's updater templates stay inert for an entry that declared only
+ <c> ElectronRoot= </c>.
+ <br />
+
+ Source files contribute <c> [{Family}Scaffold: Name] </c> sections whose
+ <c> FileKeyBase= </c> values use a family-specific root placeholder. Callers load a whole
+ scaffold directory via <see cref="M:winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory(System.String,winapp2ool.MenuSection)"/>, resolve the active selection
+ per entry via <see cref="M:winapp2ool.ScaffoldCatalogs.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)"/>, substitute their own host-specific root
+ paths via <see cref="M:winapp2ool.ScaffoldCatalogs.BindFamilyTemplates(System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}})"/>, and then apply whatever further expansion
+ their own DSL provides.
  <br /><br />
 
  The placeholder is implementation-neutral by name: a UWP consumer feeds it the
@@ -8557,7 +8813,30 @@ winapp2ool
  emitter.
  </summary>
 </member>
-<member name="F:winapp2ool.WebViewScaffolds.DefaultScaffolds">
+<member name="F:winapp2ool.ScaffoldCatalogs.FamilyMarker">
+ <summary>
+ The literal marker separating a family name from a scaffold name in a catalog section
+ header — <c> [WebViewScaffold: Caches] </c> yields family <c> WebView </c>, scaffold
+ <c> Caches </c>. Family identity therefore comes from the section header rather than
+ the filename, so a catalog may be split or merged across files freely.
+ </summary>
+</member>
+<member name="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies">
+ <summary>
+ The scaffold families the builders bind. A section in a scaffold directory naming a
+ family outside this roster is loaded but warned about, since nothing will consume it
+ — which is what catches a misspelled family (<c> [ElctronScaffold: …] </c>) and a
+ catalog file added ahead of the code that reads it.
+ <br /><br />
+
+ Adding a family here is not sufficient to ship it: each builder must also reserve the
+ family's key vocabulary (<c> {Family}Root= </c>, <c> {Family}Scaffolds= </c>,
+ <c> Exclude{Family}Scaffolds= </c>) and bind its placeholders. That is deliberately
+ load-bearing — the parity test walks this array and asserts both parsers know every
+ name in it.
+ </summary>
+</member>
+<member name="F:winapp2ool.ScaffoldCatalogs.DefaultScaffolds">
  <summary>
  Default scaffold names emitted when a caller requests WebView2 scaffolding without
  an explicit selection list. Limited to low-risk categories that are safe for any
@@ -8565,10 +8844,10 @@ winapp2ool
  web storage) require explicit opt-in by the caller.
  </summary>
 </member>
-<member name="F:winapp2ool.WebViewScaffolds.QtWebEngineDefaultScaffolds">
+<member name="F:winapp2ool.ScaffoldCatalogs.QtWebEngineDefaultScaffolds">
  <summary>
  Default scaffold names emitted when a caller requests QtWebEngine scaffolding
- without an explicit selection list. Broader than <see cref="F:winapp2ool.WebViewScaffolds.DefaultScaffolds"/>:
+ without an explicit selection list. Broader than <see cref="F:winapp2ool.ScaffoldCatalogs.DefaultScaffolds"/>:
  QtWebEngine's catalog splits two low-risk targets into their own scaffolds that
  the WebView2 catalog leaves bundled behind host-risk gates — <c> StorageQuota </c>
  (a rebuildable quota accounting file) and <c> VisitedLinks </c> (a link-coloring
@@ -8578,7 +8857,114 @@ winapp2ool
  storage) still require explicit opt-in.
  </summary>
 </member>
-<member name="M:winapp2ool.WebViewScaffolds.ParseSection(winapp2ool.iniSection2,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection,System.String)">
+<member name="F:winapp2ool.ScaffoldCatalogs.ElectronDefaultScaffolds">
+ <summary>
+ Default scaffold names emitted when a caller requests Electron scaffolding without an
+ explicit selection list. Wider than the other two families because an Electron
+ <c> userData </c> folder holds application diagnostics alongside Chromium state:
+ <c> AppLogs </c> covers electron-log's output (both the modern <c> logs\ </c> and the
+ legacy <c> &lt;userData&gt;\&lt;ProductName&gt;\logs\ </c>), and <c> UpdaterCache </c>
+ covers the electron-updater download cache — the latter costing nothing for an entry
+ that declared no <c> ElectronUpdaterRoot= </c>, since its templates are then dropped.
+ <br /><br />
+
+ Note the deliberate asymmetry with <see cref="F:winapp2ool.ScaffoldCatalogs.QtWebEngineDefaultScaffolds"/>: there is
+ no <c> VisitedLinks </c> scaffold here. A 21-installation disk survey found
+ <c> Visited Links </c> in none of them, so the pattern rides in <c> Telemetry </c>'s
+ legacy list rather than earning a scaffold of its own. Host-risk categories (cookies,
+ site storage) still require explicit opt-in.
+ </summary>
+</member>
+<member name="M:winapp2ool.ScaffoldCatalogs.DefaultsForFamily(System.String)">
+ <summary>
+ Returns the default scaffold set for <paramref name="familyLabel"/>, or an empty set
+ for a family with no defaults registered. Lets a consumer drive all of
+ <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> from one loop rather than a per-family
+ <c> Select Case </c> that can silently omit a family.
+ </summary>
+
+ <param name="familyLabel">
+ The family token, e.g. <c> WebView </c> or <c> Electron </c>
+ </param>
+
+ <returns>
+ The family's default scaffold names, or an empty array when the family is unknown
+ </returns>
+</member>
+<member name="T:winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding">
+ <summary>
+ One (placeholder, roots) pair for a scaffold family. WebView and QtWebEngine bind a
+ single pair each, Electron binds two (<c> %ElectronRoot% </c> and
+ <c> %ElectronUpdaterRoot% </c>), and <see cref="M:winapp2ool.ScaffoldCatalogs.BindFamilyTemplates(System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}})"/> chains a
+ substitution per binding so a template referencing several placeholders multiplies
+ across all of their root lists. Binding a placeholder to an empty root list is
+ meaningful: it is what keeps the Electron <c> UpdaterCache </c> scaffold inert for
+ entries that declared no <c> ElectronUpdaterRoot= </c> rather than emitting a literal
+ placeholder into a FileKey.
+ </summary>
+</member>
+<member name="F:winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding.Placeholder">
+ <summary> The literal placeholder token, e.g. <c> %ElectronRoot% </c> </summary>
+</member>
+<member name="F:winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding.Roots">
+ <summary> The roots substituted for the placeholder, possibly empty </summary>
+</member>
+<member name="M:winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding.#ctor(System.String,System.Collections.Generic.List{System.String})">
+ <summary>
+ Creates a binding pairing one placeholder with the roots that replace it
+ </summary>
+
+ <param name="placeholder">
+ The literal placeholder token appearing in the family's catalog templates
+ </param>
+
+ <param name="roots">
+ The declared roots for that placeholder, already fully resolved by the caller
+ </param>
+</member>
+<member name="T:winapp2ool.ScaffoldCatalogs.ScaffoldBindingResult">
+ <summary>
+ One scaffold's root-substituted templates, as produced by
+ <see cref="M:winapp2ool.ScaffoldCatalogs.BindFamilyTemplates(System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}})"/>. Results are returned per scaffold rather than as one
+ flat list so a consumer can run its own further expansion over each group and still
+ report which named scaffold produced nothing.
+ </summary>
+</member>
+<member name="F:winapp2ool.ScaffoldCatalogs.ScaffoldBindingResult.ScaffoldName">
+ <summary> The scaffold's name as it appears in the catalog </summary>
+</member>
+<member name="F:winapp2ool.ScaffoldCatalogs.ScaffoldBindingResult.TemplateCount">
+ <summary>
+ How many <c> FileKeyBase= </c> templates the scaffold declared, before substitution.
+ Zero means an empty scaffold — a legitimate no-op that consumers must not confuse
+ with a non-empty scaffold whose every template was dropped for want of a root.
+ </summary>
+</member>
+<member name="F:winapp2ool.ScaffoldCatalogs.ScaffoldBindingResult.Templates">
+ <summary>
+ The root-substituted templates. Shorter than <see cref="F:winapp2ool.ScaffoldCatalogs.ScaffoldBindingResult.TemplateCount"/> whenever a
+ template referenced a placeholder bound to no roots, and longer whenever a template
+ fanned out across several roots.
+ </summary>
+</member>
+<member name="M:winapp2ool.ScaffoldCatalogs.ScaffoldBindingResult.#ctor(System.String,System.Int32,System.Collections.Generic.List{System.String})">
+ <summary>
+ Creates a result pairing a scaffold with the templates its bindings produced
+ </summary>
+
+ <param name="scaffoldName">
+ The scaffold's catalog name
+ </param>
+
+ <param name="templateCount">
+ The count of templates the scaffold declared before substitution
+ </param>
+
+ <param name="templates">
+ The root-substituted templates
+ </param>
+</member>
+<member name="M:winapp2ool.ScaffoldCatalogs.ParseSection(winapp2ool.iniSection2,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection,System.String)">
  <summary>
  Parses a <c> [{prefix} ...] </c> scaffold section, collecting its
  <c> FileKeyBase= </c> values into <paramref name="scaffolds"/> keyed by the
@@ -8608,14 +8994,20 @@ winapp2ool
  header to derive the scaffold name and used as the human label in diagnostics.
  </param>
 </member>
-<member name="M:winapp2ool.WebViewScaffolds.LoadCatalog(System.String,winapp2ool.MenuSection,System.String)">
+<member name="M:winapp2ool.ScaffoldCatalogs.LoadCatalog(System.String,winapp2ool.MenuSection,System.String)">
  <summary>
  Loads a complete scaffold catalog from a stand-alone ini file. Each section whose
  header starts with <paramref name="sectionPrefix"/> in <paramref name="catalogPath"/>
- is parsed via <see cref="M:winapp2ool.WebViewScaffolds.ParseSection(winapp2ool.iniSection2,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection,System.String)"/>; any other section type is reported as
+ is parsed via <see cref="M:winapp2ool.ScaffoldCatalogs.ParseSection(winapp2ool.iniSection2,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection,System.String)"/>; any other section type is reported as
  unexpected. Missing or empty catalog files yield an empty dictionary and a warning
  rather than an exception, so callers can continue with no scaffolds rather than
  aborting the run.
+ <br /><br />
+
+ Single-family loading of one named file. The builders instead load a whole scaffold
+ directory via <see cref="M:winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory(System.String,winapp2ool.MenuSection)"/>, which discovers families rather than
+ being told one; this remains the primitive that does so and the entry point for a
+ caller that genuinely has one file and one family in hand.
  </summary>
 
  <param name="catalogPath">
@@ -8637,7 +9029,41 @@ winapp2ool
  with an empty template list — selecting them is a no-op rather than an error.
  </returns>
 </member>
-<member name="M:winapp2ool.WebViewScaffolds.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)">
+<member name="M:winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory(System.String,winapp2ool.MenuSection)">
+ <summary>
+ Loads every scaffold catalog in <paramref name="scaffoldDir"/> into one
+ <see cref="T:winapp2ool.ScaffoldCatalogSet"/>, routing each section to a family by the text
+ preceding <see cref="F:winapp2ool.ScaffoldCatalogs.FamilyMarker"/> in its header. Families are therefore discovered
+ from the source data rather than declared by the caller, so a new catalog file needs no
+ new setting, CLI slot, or build-script argument — dropping <c> tauri.ini </c> into the
+ directory registers a <c> Tauri </c> family, and the only remaining work is the
+ consuming builder's key vocabulary.
+ <br /><br />
+
+ Files are read in sorted order so the merge is deterministic, and several files may
+ contribute to one family — a family's catalog is the union of every
+ <c> [{Family}Scaffold: …] </c> section in the directory, with
+ <see cref="M:winapp2ool.ScaffoldCatalogs.ParseSection(winapp2ool.iniSection2,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},winapp2ool.MenuSection,System.String)"/>'s last-definition-wins rule spanning files.
+ <br /><br />
+
+ Nothing here is fatal. A missing directory, an unreadable section, or a family nothing
+ consumes all warn and continue, matching <see cref="M:winapp2ool.ScaffoldCatalogs.LoadCatalog(System.String,winapp2ool.MenuSection,System.String)"/>'s contract that a
+ catalog problem costs scaffold keys rather than aborting a build.
+ </summary>
+
+ <param name="scaffoldDir">
+ Absolute path to the scaffold directory (typically <c> Assembler\Scaffolds </c>)
+ </param>
+
+ <param name="menuOutput">
+ The <c> MenuSection </c> receiving progress lines and warnings for display
+ </param>
+
+ <returns>
+ The loaded families. Empty when the directory is missing or holds no catalogs.
+ </returns>
+</member>
+<member name="M:winapp2ool.ScaffoldCatalogs.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)">
  <summary>
  Resolves the set of scaffold names a caller should emit for one entry, applying the
  shared selection grammar used by every scaffold family: explicit selection, the
@@ -8686,6 +9112,111 @@ winapp2ool
 
  <returns>
  The ordered list of scaffold names to emit for this entry, with unknown names removed.
+ </returns>
+</member>
+<member name="M:winapp2ool.ScaffoldCatalogs.BindFamilyTemplates(System.Collections.Generic.List{winapp2ool.ScaffoldCatalogs.ScaffoldRootBinding},System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}})">
+ <summary>
+ Substitutes a family's declared roots into the catalog templates of every selected
+ scaffold, chaining one <see cref="M:winapp2ool.ScaffoldCatalogs.FanOutPlaceholder(System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.List{System.String})"/> pass per binding. A template
+ referencing several placeholders multiplies across all of their root lists; a template
+ referencing a placeholder whose binding has no roots is <em>dropped</em> rather than
+ emitted with the placeholder left literal. That drop rule is what makes the Electron
+ family's two-placeholder catalog work — an entry declaring only <c> ElectronRoot= </c>
+ silently contributes nothing from the <c> UpdaterCache </c> scaffold.
+ <br /><br />
+
+ Results are grouped per scaffold, carrying the pre-substitution template count, so a
+ consumer can run its own further expansion over each group and still tell an empty
+ scaffold (a legitimate no-op) from a non-empty one that produced nothing because its
+ templates all wanted a root the entry never declared. Consumers own that diagnostic
+ because only they know whether the selection was explicit — warning when a default-set
+ member yields nothing would fire on nearly every Electron entry.
+ </summary>
+
+ <param name="bindings">
+ The family's (placeholder, roots) pairs — one for WebView and QtWebEngine, two for Electron
+ </param>
+
+ <param name="selectedScaffolds">
+ The resolved scaffold names to emit, already filtered to catalog members by
+ <see cref="M:winapp2ool.ScaffoldCatalogs.ResolveScaffolds(System.Collections.Generic.List{System.String},System.Boolean,System.Collections.Generic.List{System.String},System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{System.String}},System.String[],System.String,System.String,winapp2ool.MenuSection)"/>
+ </param>
+
+ <param name="catalog">
+ The scaffold catalog for this family, keyed by scaffold name
+ </param>
+
+ <returns>
+ One result per selected scaffold, in selection order
+ </returns>
+</member>
+<member name="M:winapp2ool.ScaffoldCatalogs.FanOutPlaceholder(System.Collections.Generic.List{System.String},System.String,System.Collections.Generic.List{System.String})">
+ <summary>
+ Replaces <paramref name="placeholder"/> in each input template with every root in
+ <paramref name="roots"/>, producing one output per (template, root) pair. Templates
+ that do not contain the placeholder pass through unchanged (one output each), so the
+ helper can be chained per placeholder without dropping placeholder-free strings.
+ </summary>
+
+ <param name="templates">
+ The current working set of (possibly already partially expanded) templates
+ </param>
+
+ <param name="placeholder">
+ The literal placeholder token to substitute (e.g. <c> %WebViewRoot% </c>)
+ </param>
+
+ <param name="roots">
+ The root paths to substitute for the placeholder
+ </param>
+
+ <returns>
+ The expanded set; a template containing the placeholder is dropped when
+ <paramref name="roots"/> is empty (matching the legacy behaviour of emitting nothing
+ for a placeholder with no declared root)
+ </returns>
+</member>
+<member name="T:winapp2ool.ScaffoldCatalogSet">
+ <summary>
+ The scaffold catalogs loaded from one scaffold directory, partitioned by engine family.
+ Produced by <see cref="M:winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory(System.String,winapp2ool.MenuSection)"/> and consumed by the entry
+ generators, replacing the former arrangement where each family was a separate configured
+ file path — one per settings property, menu option, CLI slot, and build-script argument.
+ <br /><br />
+
+ Family lookup never fails. <see cref="M:winapp2ool.ScaffoldCatalogSet.ForFamily(System.String)"/> creates an empty catalog on first
+ request for a family the directory did not supply, so a builder that binds a family whose
+ catalog file is missing emits zero keys for it rather than throwing — the same
+ degrade-and-warn contract <c> LoadCatalog </c> has always had for a missing file.
+ </summary>
+</member>
+<member name="F:winapp2ool.ScaffoldCatalogSet._families">
+ <summary>
+ The per-family scaffold catalogs, keyed by family token (<c> WebView </c>,
+ <c> QtWebEngine </c>, <c> Electron </c>). Each value is that family's catalog, keyed by
+ scaffold name — the same shape <c> ScaffoldCatalogs.LoadCatalog </c> returns.
+ </summary>
+</member>
+<member name="P:winapp2ool.ScaffoldCatalogSet.Families">
+ <summary>
+ The family tokens present in this set, in first-seen order
+ </summary>
+</member>
+<member name="M:winapp2ool.ScaffoldCatalogSet.ForFamily(System.String)">
+ <summary>
+ Returns the catalog for <paramref name="familyLabel"/>, creating and registering an
+ empty one if the family is not yet present. Callers may mutate the returned dictionary
+ — that is how <see cref="M:winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory(System.String,winapp2ool.MenuSection)"/> accumulates sections
+ into it — so a consumer that only wants to read should treat it as read-only by
+ convention.
+ </summary>
+
+ <param name="familyLabel">
+ The family token, e.g. <c> Electron </c>. Matched case-insensitively.
+ </param>
+
+ <returns>
+ That family's catalog, keyed by scaffold name; empty when the family supplied none
  </returns>
 </member>
 <member name="T:winapp2ool.ExpansionDomain">
