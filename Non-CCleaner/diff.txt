@@ -1,16 +1,1514 @@
 Beginning Diff
-Diff:  version 260728 ->  version 260729
+Diff:  version 260729 ->  version 260730
 
  Entry removals:
 
  - 0 removed without replacement
- Total diff time: 00:00:00.0968421
+
+ Modified entries:
+
+     7-Zip * has been modified
+
+       Added 1 Detect
+       Added 5 RegKeys
+             Detect1=HKCU\Software\7-Zip
+             RegKey2=HKCU\Software\7-Zip\Compression\ArcHistory
+             RegKey3=HKCU\Software\7-Zip\Extraction|PathHistory
+             RegKey4=HKCU\Software\7-Zip\Extraction\PathHistory
+             RegKey6=HKCU\Software\7-Zip\FM|FolderHistory
+             RegKey7=HKCU\Software\7-Zip\FM|PanelPath0
+
+     Adobe * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Acrobat * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3021
+
+     Adobe Acrobat Distiller * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3021
+
+     Adobe Acrobat Reader * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3021
+
+     Adobe After Effects * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Air * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3024
+
+     Adobe Audition * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Bridge * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Camera Raw * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Character Animator * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Creative Cloud * has been modified
+
+       Removed 4 FileKeys
+             FileKey4=%AppData%\Adobe\CRLogs|*|RECURSE
+             FileKey22=%UserProfile%\AppData\LocalLow\Adobe\CRLogs\*logs|*
+             FileKey23=%UserProfile%\AppData\LocalLow\Adobe\CRLogs\AdobeCRCommon\Logs|*
+             FileKey24=%UserProfile%\AppData\LocalLow\Adobe\CRLogs\dumps|*
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Dreamweaver * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Elements Organizer * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Express Photos * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Flash Player * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Fresco * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Illustrator * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe InCopy * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe InDesign * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Lightroom * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Media Encoder * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Photoshop * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Photoshop Elements * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Premiere Elements * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Premiere Pro * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe Premiere Rush * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Adobe XD * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Amazon Music * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Amazon Prime Video * has been modified
+
+       Modified 1 LangSecRef
+
+       Section has been modified, replacing 1 old key
+              + New: Section=Adobe
+              - Old: LangSecRef=3023
+
+     Anthropic Claude * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%LocalAppData%\claude-cli-nodejs\Cache|*.jsonl|RECURSE
+             FileKey8=%UserProfile%\.claude\telemetry|*
+
+     ArtisBrowser Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\ArtistScope\ArtisBrowser\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\ArtistScope\ArtisBrowser\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     ArtisBrowser Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\ArtistScope\ArtisBrowser\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\ArtistScope\ArtisBrowser\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\ArtistScope\ArtisBrowser\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     ArtisBrowser Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\ArtistScope\ArtisBrowser\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\ArtistScope\ArtisBrowser\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\ArtistScope\ArtisBrowser\Profiles\storage\default\http*|*|REMOVESELF
+
+     ArtisBrowser Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\ArtistScope\ArtisBrowser\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\ArtistScope\ArtisBrowser\Profiles\*|permissions.sqlite
+
+     Basilisk Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Basilisk-Dev\Basilisk\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Basilisk-Dev\Basilisk\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Basilisk Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Basilisk-Dev\Basilisk\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Basilisk-Dev\Basilisk\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Basilisk-Dev\Basilisk\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Basilisk Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Basilisk-Dev\Basilisk\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Basilisk-Dev\Basilisk\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Basilisk-Dev\Basilisk\Profiles\storage\default\http*|*|REMOVESELF
+
+     Basilisk Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Basilisk-Dev\Basilisk\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Basilisk-Dev\Basilisk\Profiles\*|permissions.sqlite
+
+     Brave Origin Autofill Data & Search Engine Preferences * has been modified
+
+       Added 3 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|*Web Data
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\AutoFill*|*|REMOVESELF
+             FileKey3=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\AutoFill*|*|REMOVESELF
+
+       Removed 3 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|*Web Data
+             FileKey2=%LocalAppData%\Brave-Origin\User Data\*\AutoFill*|*|REMOVESELF
+             FileKey3=%LocalAppData%\Brave-Origin\User Data\AutoFill*|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Autoplay Preferences * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\MEIPreload|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\MEIPreload|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Bookmark Backups * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|Bookmarks.bak
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|Bookmarks.bak
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Bookmark Favicons * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|favicons*
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|favicons*
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Caches * has been modified
+
+       Added 19 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data|*-journal|RECURSE
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data|Module Info Cache
+             FileKey3=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|*.ldb;CURRENT;LOCK;MANIFEST-*;ServerCertificate
+             FileKey4=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\*Cache*|*|REMOVESELF
+             FileKey5=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\blob_storage|*|REMOVESELF
+             FileKey6=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\BudgetDatabase|*|REMOVESELF
+             FileKey7=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Download Service|*|REMOVESELF
+             FileKey8=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\File System|*|REMOVESELF
+             FileKey9=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\GCM Store|*|REMOVESELF
+             FileKey10=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\JumpListIcons*|*|REMOVESELF
+             FileKey11=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\optimization*|*|REMOVESELF
+             FileKey12=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Platform Notifications|*|REMOVESELF
+             FileKey13=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Service Worker|*|REMOVESELF
+             FileKey14=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Shared Dictionary\cache|*|REMOVESELF
+             FileKey15=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Storage\ext\*\def\*cache*|*|REMOVESELF
+             FileKey16=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Storage\ext\*\def\Platform Notifications|*|REMOVESELF
+             FileKey17=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*Cache*|*|REMOVESELF
+             FileKey18=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\Avatars|*|REMOVESELF
+             FileKey19=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\Optimization*|*|REMOVESELF
+
+       Removed 19 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\User Data|*-journal|RECURSE
+             FileKey2=%LocalAppData%\Brave-Origin\User Data|Module Info Cache
+             FileKey3=%LocalAppData%\Brave-Origin\User Data\*|*.ldb;CURRENT;LOCK;MANIFEST-*;ServerCertificate
+             FileKey4=%LocalAppData%\Brave-Origin\User Data\*\*Cache*|*|REMOVESELF
+             FileKey5=%LocalAppData%\Brave-Origin\User Data\*\blob_storage|*|REMOVESELF
+             FileKey6=%LocalAppData%\Brave-Origin\User Data\*\BudgetDatabase|*|REMOVESELF
+             FileKey7=%LocalAppData%\Brave-Origin\User Data\*\Download Service|*|REMOVESELF
+             FileKey8=%LocalAppData%\Brave-Origin\User Data\*\File System|*|REMOVESELF
+             FileKey9=%LocalAppData%\Brave-Origin\User Data\*\GCM Store|*|REMOVESELF
+             FileKey10=%LocalAppData%\Brave-Origin\User Data\*\JumpListIcons*|*|REMOVESELF
+             FileKey11=%LocalAppData%\Brave-Origin\User Data\*\optimization*|*|REMOVESELF
+             FileKey12=%LocalAppData%\Brave-Origin\User Data\*\Platform Notifications|*|REMOVESELF
+             FileKey13=%LocalAppData%\Brave-Origin\User Data\*\Service Worker|*|REMOVESELF
+             FileKey14=%LocalAppData%\Brave-Origin\User Data\*\Shared Dictionary\cache|*|REMOVESELF
+             FileKey15=%LocalAppData%\Brave-Origin\User Data\*\Storage\ext\*\def\*cache*|*|REMOVESELF
+             FileKey16=%LocalAppData%\Brave-Origin\User Data\*\Storage\ext\*\def\Platform Notifications|*|REMOVESELF
+             FileKey17=%LocalAppData%\Brave-Origin\User Data\*Cache*|*|REMOVESELF
+             FileKey18=%LocalAppData%\Brave-Origin\User Data\Avatars|*|REMOVESELF
+             FileKey19=%LocalAppData%\Brave-Origin\User Data\Optimization*|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Default App Handlers * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|PreferredApps
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|PreferredApps
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Download History * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|DownloadMetadata
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\shared_proto_db|*|REMOVESELF
+
+       Removed 2 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|DownloadMetadata
+             FileKey2=%LocalAppData%\Brave-Origin\User Data\*\shared_proto_db|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin DRM Data * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\MediaFoundationCdmStore|*|REMOVESELF
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\WidevineCdm|*|REMOVESELF
+
+       Removed 2 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*\MediaFoundationCdmStore|*|REMOVESELF
+             FileKey2=%LocalAppData%\Brave-Origin\User Data\WidevineCdm|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Extension Cookies * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|Extension Cookies
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|Extension Cookies
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Pinned Tabs * has been modified
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Privacy Sandbox * has been modified
+
+       Added 8 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data|*first_party_sets*
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|BrowsingTopics*;Conversions*;InterestGroups;MediaDeviceSalts;PrivateAggregation*;SharedStorage*
+             FileKey3=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Network|Trust Tokens*
+             FileKey4=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\CookieReadinessList|*|REMOVESELF
+             FileKey5=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\FirstPartySetsPreloaded|*|REMOVESELF
+             FileKey6=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\PrivacySandboxAttestationsPreloaded|*|REMOVESELF
+             FileKey7=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\ProbabilisticRevealTokenRegistry|*|REMOVESELF
+             FileKey8=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\TrustTokenKeyCommitments|*|REMOVESELF
+
+       Removed 8 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\User Data|*first_party_sets*
+             FileKey2=%LocalAppData%\Brave-Origin\User Data\*|BrowsingTopics*;Conversions*;InterestGroups;MediaDeviceSalts;PrivateAggregation*;SharedStorage*
+             FileKey3=%LocalAppData%\Brave-Origin\User Data\*\Network|Trust Tokens*
+             FileKey4=%LocalAppData%\Brave-Origin\User Data\CookieReadinessList|*|REMOVESELF
+             FileKey5=%LocalAppData%\Brave-Origin\User Data\FirstPartySetsPreloaded|*|REMOVESELF
+             FileKey6=%LocalAppData%\Brave-Origin\User Data\PrivacySandboxAttestationsPreloaded|*|REMOVESELF
+             FileKey7=%LocalAppData%\Brave-Origin\User Data\ProbabilisticRevealTokenRegistry|*|REMOVESELF
+             FileKey8=%LocalAppData%\Brave-Origin\User Data\TrustTokenKeyCommitments|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Progressive Web Apps * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Web Applications|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*\Web Applications|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Saved Usernames & Passwords * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|Login Data*
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|Login Data*
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Security & Threat Detection * has been modified
+
+       Added 12 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|DIPS*
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\ClientCertificates|*|REMOVESELF
+             FileKey3=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Network|TransportSecurity*
+             FileKey4=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Safe Browsing Network|*|REMOVESELF
+             FileKey5=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\CertificateRevocation|*|REMOVESELF
+             FileKey6=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\Crowd Deny|*|REMOVESELF
+             FileKey7=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\PKIMetadata|*|REMOVESELF
+             FileKey8=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\Safe Browsing|*|REMOVESELF
+             FileKey9=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\SafetyTips|*|REMOVESELF
+             FileKey10=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\SSLErrorAssistant|*|REMOVESELF
+             FileKey11=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\Subresource Filter|*|REMOVESELF
+             FileKey12=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\ZxcvbnData|*|REMOVESELF
+
+       Removed 12 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|DIPS*
+             FileKey2=%LocalAppData%\Brave-Origin\User Data\*\ClientCertificates|*|REMOVESELF
+             FileKey3=%LocalAppData%\Brave-Origin\User Data\*\Network|TransportSecurity*
+             FileKey4=%LocalAppData%\Brave-Origin\User Data\*\Safe Browsing Network|*|REMOVESELF
+             FileKey5=%LocalAppData%\Brave-Origin\User Data\CertificateRevocation|*|REMOVESELF
+             FileKey6=%LocalAppData%\Brave-Origin\User Data\Crowd Deny|*|REMOVESELF
+             FileKey7=%LocalAppData%\Brave-Origin\User Data\PKIMetadata|*|REMOVESELF
+             FileKey8=%LocalAppData%\Brave-Origin\User Data\Safe Browsing|*|REMOVESELF
+             FileKey9=%LocalAppData%\Brave-Origin\User Data\SafetyTips|*|REMOVESELF
+             FileKey10=%LocalAppData%\Brave-Origin\User Data\SSLErrorAssistant|*|REMOVESELF
+             FileKey11=%LocalAppData%\Brave-Origin\User Data\Subresource Filter|*|REMOVESELF
+             FileKey12=%LocalAppData%\Brave-Origin\User Data\ZxcvbnData|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Shopping Insights * has been modified
+
+       Added 5 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\chrome_cart_db|*|REMOVESELF
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\commerce_subscription_db|*|REMOVESELF
+             FileKey3=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\coupon_db|*|REMOVESELF
+             FileKey4=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\discount*_db|*|REMOVESELF
+             FileKey5=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\parcel_tracking_db|*|REMOVESELF
+
+       Removed 5 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*\chrome_cart_db|*|REMOVESELF
+             FileKey2=%LocalAppData%\Brave-Origin\User Data\*\commerce_subscription_db|*|REMOVESELF
+             FileKey3=%LocalAppData%\Brave-Origin\User Data\*\coupon_db|*|REMOVESELF
+             FileKey4=%LocalAppData%\Brave-Origin\User Data\*\discount*_db|*|REMOVESELF
+             FileKey5=%LocalAppData%\Brave-Origin\User Data\*\parcel_tracking_db|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Storage Quota Manager * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|QuotaManager
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|QuotaManager
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Sync Data * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Sync Data|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*\Sync Data|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Telemetry * has been modified
+
+       Added 21 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\Application|debug.log
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\Application\SetupMetrics|*|REMOVESELF
+             FileKey3=%LocalAppData%\BraveSoftware\Brave-Origin\User Data|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version
+             FileKey4=%LocalAppData%\BraveSoftware\Brave-Origin\User Data|*.pma;LOG;LOG.old|RECURSE
+             FileKey5=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|*.log
+             FileKey6=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\DataSharing|*|REMOVESELF
+             FileKey7=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Feature Engagement Tracker|*|REMOVESELF
+             FileKey8=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Network|Network Persistent State*;Reporting and NEL*;SCT Auditing Pending Reports*
+             FileKey9=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\PersistentOriginTrials|*|REMOVESELF
+             FileKey10=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Site Characteristics Database|*|REMOVESELF
+             FileKey11=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\VideoDecodeStats|*|REMOVESELF
+             FileKey12=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\WebRTC Logs|*|REMOVESELF
+             FileKey13=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\WebrtcVideoStats|*|REMOVESELF
+             FileKey14=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*BrowserMetrics|*|REMOVESELF
+             FileKey15=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\Crash Reports|*|REMOVESELF
+             FileKey16=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\Crashpad|*|REMOVESELF
+             FileKey17=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\Local Traces|*|REMOVESELF
+             FileKey18=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\OriginTrials|*|REMOVESELF
+             FileKey19=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\Stability|*|REMOVESELF
+             FileKey20=%ProgramFiles%\BraveSoftware\Brave-Origin\Application|debug.log
+             FileKey21=%ProgramFiles%\BraveSoftware\Brave-Origin\Application\SetupMetrics|*|REMOVESELF
+
+       Removed 21 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\Application|debug.log
+             FileKey2=%LocalAppData%\Brave-Origin\Application\SetupMetrics|*|REMOVESELF
+             FileKey3=%LocalAppData%\Brave-Origin\User Data|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version
+             FileKey4=%LocalAppData%\Brave-Origin\User Data|*.pma;LOG;LOG.old|RECURSE
+             FileKey5=%LocalAppData%\Brave-Origin\User Data\*|*.log
+             FileKey6=%LocalAppData%\Brave-Origin\User Data\*\DataSharing|*|REMOVESELF
+             FileKey7=%LocalAppData%\Brave-Origin\User Data\*\Feature Engagement Tracker|*|REMOVESELF
+             FileKey8=%LocalAppData%\Brave-Origin\User Data\*\Network|Network Persistent State*;Reporting and NEL*;SCT Auditing Pending Reports*
+             FileKey9=%LocalAppData%\Brave-Origin\User Data\*\PersistentOriginTrials|*|REMOVESELF
+             FileKey10=%LocalAppData%\Brave-Origin\User Data\*\Site Characteristics Database|*|REMOVESELF
+             FileKey11=%LocalAppData%\Brave-Origin\User Data\*\VideoDecodeStats|*|REMOVESELF
+             FileKey12=%LocalAppData%\Brave-Origin\User Data\*\WebRTC Logs|*|REMOVESELF
+             FileKey13=%LocalAppData%\Brave-Origin\User Data\*\WebrtcVideoStats|*|REMOVESELF
+             FileKey14=%LocalAppData%\Brave-Origin\User Data\*BrowserMetrics|*|REMOVESELF
+             FileKey15=%LocalAppData%\Brave-Origin\User Data\Crash Reports|*|REMOVESELF
+             FileKey16=%LocalAppData%\Brave-Origin\User Data\Crashpad|*|REMOVESELF
+             FileKey17=%LocalAppData%\Brave-Origin\User Data\Local Traces|*|REMOVESELF
+             FileKey18=%LocalAppData%\Brave-Origin\User Data\OriginTrials|*|REMOVESELF
+             FileKey19=%LocalAppData%\Brave-Origin\User Data\Stability|*|REMOVESELF
+             FileKey20=%ProgramFiles%\Brave-Origin\Application|debug.log
+             FileKey21=%ProgramFiles%\Brave-Origin\Application\SetupMetrics|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Web Browsing Cookies * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Network|Cookies*;Device Bound Sessions*
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*\Network|Cookies*;Device Bound Sessions*
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Web Browsing History * has been modified
+
+       Added 1 FileKey
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*|History*;Network Action Predictor*;shortcuts*;Top Sites*;Visited Links*
+
+       Removed 1 FileKey
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*|History*;Network Action Predictor*;shortcuts*;Top Sites*;Visited Links*
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Web Browsing Session * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Extension State|*|REMOVESELF
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Sessions|*|REMOVESELF
+
+       Removed 2 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*\Extension State|*|REMOVESELF
+             FileKey2=%LocalAppData%\Brave-Origin\User Data\*\Sessions|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Brave Origin Web Storage * has been modified
+
+       Added 8 FileKeys
+             FileKey1=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\IndexedDB|*|REMOVESELF
+             FileKey2=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Local Storage\*\IndexedDB\https*|*
+             FileKey3=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Local Storage\*\Session Storage|*
+             FileKey4=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
+             FileKey5=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Local Storage\*\WebStorage|*|RECURSE
+             FileKey6=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Local Storage\leveldb|*|REMOVESELF
+             FileKey7=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\Session Storage|*|REMOVESELF
+             FileKey8=%LocalAppData%\BraveSoftware\Brave-Origin\User Data\*\WebStorage|*|REMOVESELF
+
+       Removed 8 FileKeys
+             FileKey1=%LocalAppData%\Brave-Origin\User Data\*\IndexedDB|*|REMOVESELF
+             FileKey2=%LocalAppData%\Brave-Origin\User Data\*\Local Storage\*\IndexedDB\https*|*
+             FileKey3=%LocalAppData%\Brave-Origin\User Data\*\Local Storage\*\Session Storage|*
+             FileKey4=%LocalAppData%\Brave-Origin\User Data\*\Local Storage\*\Storage\ext\*\def\Session Storage|*
+             FileKey5=%LocalAppData%\Brave-Origin\User Data\*\Local Storage\*\WebStorage|*|RECURSE
+             FileKey6=%LocalAppData%\Brave-Origin\User Data\*\Local Storage\leveldb|*|REMOVESELF
+             FileKey7=%LocalAppData%\Brave-Origin\User Data\*\Session Storage|*|REMOVESELF
+             FileKey8=%LocalAppData%\Brave-Origin\User Data\*\WebStorage|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%LocalAppData%\BraveSoftware\Brave-Origin\User Data
+              - Old: DetectFile=%LocalAppData%\Brave-Origin\User Data
+
+     Broforce * has been modified
+
+       Added 2 FileKeys
+             FileKey2=%UserProfile%\AppData\LocalLow\Free Lives\Broforce\Crashes|*|REMOVESELF
+             FileKey3=%UserProfile%\AppData\LocalLow\Free Lives\Broforce\Unity|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%UserProfile%\AppData\LocalLow\Free Lives\Broforce
+              - Old: Detect=HKCU\Software\Valve\Steam\Apps\274190
+
+     Cult of the Lamb * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%UserProfile%\AppData\LocalLow\Massive Monster\Cult of the Lamb\Unity|*|REMOVESELF
+              - Old: FileKey2=%UserProfile%\AppData\LocalLow\Massive Monster\Cult of the Lamb\Unity|*|RECURSE
+
+     Floorp Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Floorp\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Floorp\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Floorp Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Floorp\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Floorp\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Floorp\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Floorp Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Floorp\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Floorp\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Floorp\Profiles\storage\default\http*|*|REMOVESELF
+
+     Floorp Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Floorp\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Floorp\Profiles\*|permissions.sqlite
+
+     Google App * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%LocalAppData%\Google\Google|*.log
+             FileKey3=%LocalAppData%\Google\Google\previous_for_*|*|REMOVESELF
+
+     Google Quick Share * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%LocalAppData%\Google\Nearby\Sharing\*log*|*|REMOVESELF
+             FileKey2=%LocalAppData%\Google\Nearby\Sharing\CrashDumps|*|REMOVESELF
+
+       Removed 1 DetectFile
+       Removed 2 FileKeys
+             DetectFile1=%LocalAppData%\Nearby
+             FileKey1=%LocalAppData%\Nearby\Sharing\*log*|*|REMOVESELF
+             FileKey2=%LocalAppData%\Nearby\Sharing\CrashDumps|*|REMOVESELF
+
+     Grammarly * has been modified
+
+       Added 60 FileKeys
+             FileKey1=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView|*.log;*first_party_sets*;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version;Module Info Cache
+             FileKey3=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\*BrowserMetrics|*|REMOVESELF
+             FileKey5=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\AutoFill*|*|REMOVESELF
+             FileKey6=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Avatars|*|REMOVESELF
+             FileKey7=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\CertificateRevocation|*|REMOVESELF
+             FileKey8=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\CookieReadinessList|*|REMOVESELF
+             FileKey9=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Crash Reports|*|REMOVESELF
+             FileKey10=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Crashpad|*|REMOVESELF
+             FileKey11=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Crowd Deny|*|REMOVESELF
+             FileKey14=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\AutoFill*|*|REMOVESELF
+             FileKey15=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\blob_storage|*|REMOVESELF
+             FileKey16=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\BudgetDatabase|*|REMOVESELF
+             FileKey17=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\chrome_cart_db|*|REMOVESELF
+             FileKey18=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\ClientCertificates|*|REMOVESELF
+             FileKey19=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\commerce_subscription_db|*|REMOVESELF
+             FileKey20=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\coupon_db|*|REMOVESELF
+             FileKey21=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\DataSharing|*|REMOVESELF
+             FileKey22=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\discount*_db|*|REMOVESELF
+             FileKey23=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Download Service|*|REMOVESELF
+             FileKey24=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Extension State|*|REMOVESELF
+             FileKey25=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Feature Engagement Tracker|*|REMOVESELF
+             FileKey26=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\File System|*|REMOVESELF
+             FileKey27=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\GCM Store|*|REMOVESELF
+             FileKey28=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\JumpListIcons*|*|REMOVESELF
+             FileKey29=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\MediaFoundationCdmStore|*|REMOVESELF
+             FileKey30=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Network|Cookies*;Device Bound Sessions*;Network Persistent State*;Reporting and NEL*;SCT Auditing Pending Reports*;TransportSecurity*;Trust Tokens*
+             FileKey31=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\optimization*|*|REMOVESELF
+             FileKey32=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\parcel_tracking_db|*|REMOVESELF
+             FileKey33=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\PersistentOriginTrials|*|REMOVESELF
+             FileKey34=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Platform Notifications|*|REMOVESELF
+             FileKey35=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Safe Browsing Network|*|REMOVESELF
+             FileKey36=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Service Worker|*|REMOVESELF
+             FileKey37=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Sessions|*|REMOVESELF
+             FileKey38=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Shared Dictionary\cache|*|REMOVESELF
+             FileKey39=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\shared_proto_db|*|REMOVESELF
+             FileKey40=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Site Characteristics Database|*|REMOVESELF
+             FileKey41=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Storage\ext\*\def\*cache*|*|REMOVESELF
+             FileKey42=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Storage\ext\*\def\Platform Notifications|*|REMOVESELF
+             FileKey43=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Sync Data|*|REMOVESELF
+             FileKey44=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\VideoDecodeStats|*|REMOVESELF
+             FileKey45=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\Web Applications|*|REMOVESELF
+             FileKey46=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\WebRTC Logs|*|REMOVESELF
+             FileKey47=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\WebrtcVideoStats|*|REMOVESELF
+             FileKey48=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\FirstPartySetsPreloaded|*|REMOVESELF
+             FileKey49=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Local Traces|*|REMOVESELF
+             FileKey50=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\MEIPreload|*|REMOVESELF
+             FileKey51=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Optimization*|*|REMOVESELF
+             FileKey52=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\OriginTrials|*|REMOVESELF
+             FileKey53=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\PKIMetadata|*|REMOVESELF
+             FileKey54=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\PrivacySandboxAttestationsPreloaded|*|REMOVESELF
+             FileKey55=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\ProbabilisticRevealTokenRegistry|*|REMOVESELF
+             FileKey56=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Safe Browsing|*|REMOVESELF
+             FileKey57=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\SafetyTips|*|REMOVESELF
+             FileKey58=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\SmartScreen|*|REMOVESELF
+             FileKey59=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\SSLErrorAssistant|*|REMOVESELF
+             FileKey60=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Stability|*|REMOVESELF
+             FileKey61=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Subresource Filter|*|REMOVESELF
+             FileKey62=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\TrustTokenKeyCommitments|*|REMOVESELF
+             FileKey63=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\WidevineCdm|*|REMOVESELF
+             FileKey64=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\ZxcvbnData|*|REMOVESELF
+
+       Modified 1 Detection criteria
+       Modified 4 FileKeys
+
+       Detection criteria modified
+              + New: DetectFile=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView
+              - Old: DetectFile=%AppData%\Grammarly
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView|*-journal;*.pma;LOG;LOG.old|RECURSE
+              - Old: FileKey1=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView|*.pma
+       FileKey4 has been modified, replacing 1 old key
+              + New: FileKey4=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\*Cache*|*|REMOVESELF
+              - Old: FileKey2=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\*Cache|*|RECURSE
+       FileKey12 has been modified, replacing 1 old key
+              + New: FileKey12=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default|*.ldb;*.log;*Web Data;Bookmarks.bak;BrowsingTopics*;Conversions*;CURRENT;DIPS*;DownloadMetadata;Extension Cookies;favicons*;History*;InterestGroups;LOCK;MANIFEST-*;MediaDeviceSalts;Network Action Predictor*;PreferredApps;PrivateAggregation*;QuotaManager;ServerCertificate;SharedStorage*;shortcuts*;Top Sites*;Visited Links*
+              - Old: FileKey3=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default|*.log
+       FileKey13 has been modified, replacing 1 old key
+              + New: FileKey13=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\*Cache*|*|REMOVESELF
+              - Old: FileKey4=%AppData%\Grammarly\DesktopIntegrations\WebViewUserDataFolder\EBWebView\Default\*Cache|*|RECURSE
+
+     IceCat Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Mozilla\icecat\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Mozilla\icecat\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     IceCat Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Mozilla\icecat\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Mozilla\icecat\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Mozilla\icecat\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     IceCat Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Mozilla\icecat\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Mozilla\icecat\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Mozilla\icecat\Profiles\storage\default\http*|*|REMOVESELF
+
+     IceCat Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Mozilla\icecat\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Mozilla\icecat\Profiles\*|permissions.sqlite
+
+     LibreWolf Caches * has been modified
+
+       Modified 2 FileKeys
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\librewolf\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\librewolf\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+       FileKey11 has been modified, replacing 1 old key
+              + New: FileKey11=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey11=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     LibreWolf Telemetry * has been modified
+
+       Added 2 FileKeys
+             FileKey2=%AppData%\librewolf\Crash Reports|*|REMOVESELF
+             FileKey11=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Crash Reports|*|REMOVESELF
+
+       Modified 2 FileKeys
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\librewolf\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\librewolf\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+       FileKey12 has been modified, replacing 1 old key
+              + New: FileKey12=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey10=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     LibreWolf Web Storage * has been modified
+
+       Added 4 FileKeys
+             FileKey1=%AppData%\librewolf\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\librewolf\Profiles\*\storage\default\http*|*|REMOVESELF
+             FileKey3=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey4=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 2 FileKeys
+             FileKey1=%AppData%\librewolf\Profiles\storage\default\http*|*|REMOVESELF
+             FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\storage\default\http*|*|REMOVESELF
+
+     LibreWolf Website Permissions * has been modified
+
+       Modified 2 FileKeys
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\librewolf\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\librewolf\Profiles\*|permissions.sqlite
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey2=%LocalAppData%\Packages\31856maltejur.LibreWolf_ssmwz6s360tct\LocalCache\Roaming\librewolf\Profiles\*|permissions.sqlite
+
+     Mercury Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\mercury\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\mercury\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Mercury Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\mercury\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\mercury\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\mercury\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Mercury Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\mercury\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\mercury\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\mercury\Profiles\storage\default\http*|*|REMOVESELF
+
+     Mercury Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\mercury\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\mercury\Profiles\*|permissions.sqlite
+
+     Microsoft Edge Caches * has been modified
+
+       Added 2 FileKeys
+             FileKey9=%LocalAppData%\Microsoft\Edge*\User Data\*\EdgePushStorageWithWinRt|*.log
+             FileKey13=%LocalAppData%\Microsoft\Edge*\User Data\*\Network|*.tmp
+
+     Microsoft OneDrive * has been modified
+
+       Added 2 FileKeys
+             FileKey12=%ProgramFiles%\Microsoft OneDrive\FileSyncHelper\logs|*.odl|RECURSE
+             FileKey14=%ProgramFiles%\Microsoft OneDrive\UpdaterService\logs|*.odl|RECURSE
+
+     Midori Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Midori\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Midori\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Midori Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Midori\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Midori\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Midori\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Midori Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Midori\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Midori\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Midori\Profiles\storage\default\http*|*|REMOVESELF
+
+     Midori Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Midori\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Midori\Profiles\*|permissions.sqlite
+
+     Mozilla Firefox Caches * has been modified
+
+       Modified 2 FileKeys
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Mozilla\Firefox\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Mozilla\Firefox\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+       FileKey11 has been modified, replacing 1 old key
+              + New: FileKey11=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey11=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Mozilla Firefox Telemetry * has been modified
+
+       Added 2 FileKeys
+             FileKey2=%AppData%\Mozilla\Firefox\Crash Reports|*|REMOVESELF
+             FileKey11=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Crash Reports|*|REMOVESELF
+
+       Modified 2 FileKeys
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Mozilla\Firefox\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Mozilla\Firefox\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+       FileKey12 has been modified, replacing 1 old key
+              + New: FileKey12=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey10=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Mozilla Firefox Web Storage * has been modified
+
+       Added 4 FileKeys
+             FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Mozilla\Firefox\Profiles\*\storage\default\http*|*|REMOVESELF
+             FileKey3=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey4=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 2 FileKeys
+             FileKey1=%AppData%\Mozilla\Firefox\Profiles\storage\default\http*|*|REMOVESELF
+             FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\storage\default\http*|*|REMOVESELF
+
+     Mozilla Firefox Website Permissions * has been modified
+
+       Modified 2 FileKeys
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Mozilla\Firefox\Profiles\*|permissions.sqlite
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey2=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|permissions.sqlite
+
+     Mullvad Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Mullvad\MullvadBrowser\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Mullvad\MullvadBrowser\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Mullvad Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Mullvad\MullvadBrowser\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Mullvad\MullvadBrowser\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Mullvad\MullvadBrowser\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Mullvad Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Mullvad\MullvadBrowser\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Mullvad\MullvadBrowser\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Mullvad\MullvadBrowser\Profiles\storage\default\http*|*|REMOVESELF
+
+     Mullvad Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Mullvad\MullvadBrowser\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Mullvad\MullvadBrowser\Profiles\*|permissions.sqlite
+
+     Mypal Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Mypal68\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Mypal68\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Mypal Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Mypal68\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Mypal68\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Mypal68\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Mypal Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Mypal68\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Mypal68\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Mypal68\Profiles\storage\default\http*|*|REMOVESELF
+
+     Mypal Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Mypal68\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Mypal68\Profiles\*|permissions.sqlite
+
+     Outer Wilds * has been modified
+
+       Added 1 FileKey
+             FileKey1=%UserProfile%\AppData\LocalLow\Mobius Digital\Outer Wilds|*.log
+
+       Removed 1 FileKey
+             FileKey1=%UserProfile%\AppData%\LocalLow\Mobius Digital\Outer Wilds|*.log
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%UserProfile%\AppData\LocalLow\Mobius Digital\Outer Wilds
+              - Old: DetectFile=%UserProfile%\AppData%\LocalLow\Mobius Digital\Outer Wilds
+
+     Pale Moon Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Moonchild Productions\Pale Moon\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Moonchild Productions\Pale Moon\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Pale Moon Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Moonchild Productions\Pale Moon\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Moonchild Productions\Pale Moon\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Moonchild Productions\Pale Moon\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Pale Moon Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Moonchild Productions\Pale Moon\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Moonchild Productions\Pale Moon\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Moonchild Productions\Pale Moon\Profiles\storage\default\http*|*|REMOVESELF
+
+     Pale Moon Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Moonchild Productions\Pale Moon\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Moonchild Productions\Pale Moon\Profiles\*|permissions.sqlite
+
+     Rust * has been modified
+
+       Added 1 FileKey
+             FileKey3=%UserProfile%\AppData\LocalLow\Facepunch Studios LTD\Rust\Unity|*|REMOVESELF
+
+       Modified 1 Detection criteria
+
+       Detection criteria modified
+              + New: DetectFile=%ProgramFiles%\Steam\SteamApps\Common\Rust
+              - Old: Detect=HKCU\Software\Valve\Steam\Apps\252490
+
+     SeaMonkey Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Mozilla\SeaMonkey\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Mozilla\SeaMonkey\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     SeaMonkey Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Mozilla\SeaMonkey\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Mozilla\SeaMonkey\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Mozilla\SeaMonkey\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     SeaMonkey Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Mozilla\SeaMonkey\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Mozilla\SeaMonkey\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Mozilla\SeaMonkey\Profiles\storage\default\http*|*|REMOVESELF
+
+     SeaMonkey Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Mozilla\SeaMonkey\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Mozilla\SeaMonkey\Profiles\*|permissions.sqlite
+
+     Thunderbird Caches * has been modified
+
+       Modified 4 FileKeys
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Thunderbird\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Thunderbird\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+       FileKey8 has been modified, replacing 1 old key
+              + New: FileKey8=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey8=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+       FileKey17 has been modified, replacing 1 old key
+              + New: FileKey17=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey17=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+       FileKey26 has been modified, replacing 1 old key
+              + New: FileKey26=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey26=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Thunderbird Telemetry * has been modified
+
+       Added 4 FileKeys
+             FileKey2=%AppData%\Thunderbird\Crash Reports|*|REMOVESELF
+             FileKey11=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Crash Reports|*|REMOVESELF
+             FileKey20=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Crash Reports|*|REMOVESELF
+             FileKey29=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Crash Reports|*|REMOVESELF
+
+       Modified 4 FileKeys
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Thunderbird\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Thunderbird\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+       FileKey12 has been modified, replacing 1 old key
+              + New: FileKey12=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey10=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+       FileKey21 has been modified, replacing 1 old key
+              + New: FileKey21=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey18=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+       FileKey30 has been modified, replacing 1 old key
+              + New: FileKey30=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey26=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Thunderbird Web Storage * has been modified
+
+       Added 8 FileKeys
+             FileKey1=%AppData%\Thunderbird\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Thunderbird\Profiles\*\storage\default\http*|*|REMOVESELF
+             FileKey3=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey4=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\storage\default\http*|*|REMOVESELF
+             FileKey5=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey6=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\storage\default\http*|*|REMOVESELF
+             FileKey7=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey8=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 4 FileKeys
+             FileKey1=%AppData%\Thunderbird\Profiles\storage\default\http*|*|REMOVESELF
+             FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\storage\default\http*|*|REMOVESELF
+             FileKey3=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\storage\default\http*|*|REMOVESELF
+             FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\storage\default\http*|*|REMOVESELF
+
+     Thunderbird Website Permissions * has been modified
+
+       Modified 4 FileKeys
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Thunderbird\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Thunderbird\Profiles\*|permissions.sqlite
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey2=%LocalAppData%\Packages\MozillaThunderbird.MozillaThunderbirdRelease_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|permissions.sqlite
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey3=%LocalAppData%\Packages\MozillaThunderbird.MZLA_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|permissions.sqlite
+       FileKey4 has been modified, replacing 1 old key
+              + New: FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey4=%LocalAppData%\Packages\MozillaThunderbird.ThunderbirdBeta_h5892qc0xkpca\LocalCache\Roaming\Thunderbird\Profiles\*|permissions.sqlite
+
+     Vortex * has been modified
+
+       Added 1 FileKey
+             FileKey10=%UserProfile%\AppData\LocalLow\MCC\Config|ModManifest.txt|REMOVESELF
+
+     Waterfox Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Waterfox\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Waterfox\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Waterfox Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Waterfox\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Waterfox\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Waterfox\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Waterfox Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Waterfox\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Waterfox\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Waterfox\Profiles\storage\default\http*|*|REMOVESELF
+
+     Waterfox Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Waterfox\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Waterfox\Profiles\*|permissions.sqlite
+
+     Zen Caches * has been modified
+
+       Modified 1 FileKey
+
+       FileKey2 has been modified, replacing 1 old key
+              + New: FileKey2=%AppData%\Zen\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*
+              - Old: FileKey2=%AppData%\Zen\Profiles\*|AlternateServices.txt;cert9.db;ClientAuthRememberList.txt;notificationstore.json;parent.lock;serviceworker.txt;SiteSecurityServiceState*;webappsstore.sqlite
+
+     Zen Telemetry * has been modified
+
+       Added 1 FileKey
+             FileKey2=%AppData%\Zen\Crash Reports|*|REMOVESELF
+
+       Modified 1 FileKey
+
+       FileKey3 has been modified, replacing 1 old key
+              + New: FileKey3=%AppData%\Zen\Profiles\*|enumerate_devices.txt;protections.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+              - Old: FileKey2=%AppData%\Zen\Profiles\*|enumerate_devices.txt;protections.sqlite;storage.sqlite;targeting.snapshot.json;Telemetry.ShutdownTime.txt;times.json
+
+     Zen Web Storage * has been modified
+
+       Added 2 FileKeys
+             FileKey1=%AppData%\Zen\Profiles\*|storage.sqlite;webappsstore.sqlite
+             FileKey2=%AppData%\Zen\Profiles\*\storage\default\http*|*|REMOVESELF
+
+       Removed 1 FileKey
+             FileKey1=%AppData%\Zen\Profiles\storage\default\http*|*|REMOVESELF
+
+     Zen Website Permissions * has been modified
+
+       Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%AppData%\Zen\Profiles\*|content-prefs.sqlite;permissions.sqlite
+              - Old: FileKey1=%AppData%\Zen\Profiles\*|permissions.sqlite
+ 123 modified entries
+
+ Added entries:
+
+     Adobe Crash Reporter * has been added
+
+     Adobe Experience Platform SDK * has been added
+
+     Erosion * has been added
+
+     GRIME * has been added
+
+     Nexus Mods App * has been added
+
+     Outer Wilds Mod Manager * has been added
+
+     Porcunipine * has been added
+
+     StarVaders * has been added
+
+     Synergy * has been added
+
+ 9 novel entries added
+ Total diff time: 00:00:00.2553933
 
  Diff Summary
-   Net entry count change: 4058 → 4058 (+0)
-   Modified entries: 0
+   Net entry count change: 4058 → 4067 (+9)
+   Modified entries: 123
+    + 234 added keys across 62 entries
+    - 121 removed keys without replacement across 39 entries
+    ~ 120 updated keys replaced 120 old keys across 101 entries
    Removed entries: 0
     - 0 entries have been removed without replacement
-   Added entries: 0
+   Added entries: 9
+    + 9 novel entries (without merged content)
    
 Diff complete
