@@ -47,20 +47,13 @@ Option Strict On
 ''' <item>
 ''' <b><c> UWPFile3 </c></b>
 ''' <description>
-''' Shared WebView scaffold catalog (typically <c> Assembler\Scaffolds\webview.ini </c>).
-''' Source for <c> [WebViewScaffold: ...] </c> sections consumed when an AppInfo entry
-''' declares <c> WebViewPath= </c>. If the file is missing or empty, generation continues
-''' with zero WebView FileKeys emitted and a warning logged.
-''' </description>
-''' </item>
-'''
-''' <item>
-''' <b><c> UWPFile4 </c></b>
-''' <description>
-''' Shared QtWebEngine scaffold catalog (typically <c> Assembler\Scaffolds\qtwebengine.ini </c>).
-''' Source for <c> [QtWebEngineScaffold: ...] </c> sections consumed when an AppInfo entry
-''' declares <c> QtWebEnginePath= </c>. If the file is missing or empty, generation continues
-''' with zero QtWebEngine FileKeys emitted and a warning logged.
+''' Shared scaffold directory (typically <c> Assembler\Scaffolds </c>). Every
+''' <c> *.ini </c> in it is loaded at once and each scaffold family is derived from its
+''' section headers (<c> [WebViewScaffold: ...] </c>, <c> [QtWebEngineScaffold: ...] </c>,
+''' <c> [ElectronScaffold: ...] </c>), so adding a family costs no new setting here. Only
+''' the <c> Dir </c> of this chooser is used; the <c> Name </c> is ignored. A missing
+''' directory or catalog file continues the run with zero scaffold FileKeys for the
+''' affected families and a warning logged.
 ''' </description>
 ''' </item>
 '''
@@ -83,16 +76,11 @@ Public Module uwpbuildersettings
     Public Property UWPFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "uwp.ini", "uwp.ini", mustExist:=False)
 
     ''' <summary>
-    ''' The shared WebView scaffold catalog file consumed by both UWPBuilder and
-    ''' EntryBuilder. Typically <c> Assembler\Scaffolds\webview.ini </c>.
+    ''' The shared scaffold directory consumed by both UWPBuilder and EntryBuilder, holding
+    ''' one catalog file per engine family. Typically <c> Assembler\Scaffolds </c>.
+    ''' Only the <c> Dir </c> property is used; <c> Name </c> is ignored.
     ''' </summary>
-    Public Property UWPFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "webview.ini", "webview.ini", mustExist:=False)
-
-    ''' <summary>
-    ''' The shared QtWebEngine scaffold catalog file consumed by both UWPBuilder and
-    ''' EntryBuilder. Typically <c> Assembler\Scaffolds\qtwebengine.ini </c>.
-    ''' </summary>
-    Public Property UWPFile4 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
+    Public Property UWPFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 
     ''' <summary>
     ''' Indicates that the module settings have been modified from their defaults
@@ -106,8 +94,7 @@ Public Module uwpbuildersettings
 
         UWPFile1 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         UWPFile2 = New iniFileChooser(Environment.CurrentDirectory, "uwp.ini", "uwp.ini", mustExist:=False)
-        UWPFile3 = New iniFileChooser(Environment.CurrentDirectory, "webview.ini", "webview.ini", mustExist:=False)
-        UWPFile4 = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
+        UWPFile3 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         UWPBuilderModuleSettingsChanged = False
         SaveModule2(NameOf(UWPBuilder), GetType(uwpbuildersettings))
 

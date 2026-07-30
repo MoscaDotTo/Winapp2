@@ -50,31 +50,13 @@ Option Strict On
 ''' <item>
 ''' <b><c> EntryBuilderFile3 </c></b>
 ''' <description>
-''' Shared WebView scaffold catalog (typically <c> Assembler\Scaffolds\webview.ini </c>).
-''' Source for <c> [WebViewScaffold: ...] </c> sections consumed when expanding
-''' entries that declare <c> WebViewRoot= </c>. If the file is missing or empty,
-''' generation continues with zero scaffold FileKeys emitted and a warning logged.
-''' </description>
-''' </item>
-'''
-''' <item>
-''' <b><c> EntryBuilderFile4 </c></b>
-''' <description>
-''' Shared QtWebEngine scaffold catalog (typically <c> Assembler\Scaffolds\qtwebengine.ini </c>).
-''' Source for <c> [QtWebEngineScaffold: ...] </c> sections consumed when expanding
-''' entries that declare <c> QtWebEngineRoot= </c>. If the file is missing or empty,
-''' generation continues with zero QtWebEngine scaffold FileKeys emitted and a warning logged.
-''' </description>
-''' </item>
-'''
-''' <item>
-''' <b><c> EntryBuilderFile5 </c></b>
-''' <description>
-''' Shared Electron scaffold catalog (typically <c> Assembler\Scaffolds\electron.ini </c>).
-''' Source for <c> [ElectronScaffold: ...] </c> sections consumed when expanding entries
-''' that declare <c> ElectronRoot= </c> or <c> ElectronUpdaterRoot= </c>. If the file is
-''' missing or empty, generation continues with zero Electron scaffold FileKeys emitted and
-''' a warning logged.
+''' Shared scaffold directory (typically <c> Assembler\Scaffolds </c>). Every
+''' <c> *.ini </c> in it is loaded at once and each scaffold family is derived from its
+''' section headers (<c> [WebViewScaffold: ...] </c>, <c> [QtWebEngineScaffold: ...] </c>,
+''' <c> [ElectronScaffold: ...] </c>), consumed when expanding entries that declare the
+''' matching root key. Only the <c> Dir </c> of this chooser is used; the <c> Name </c> is
+''' ignored. A missing directory or catalog file continues the run with zero scaffold
+''' FileKeys for the affected families and a warning logged.
 ''' </description>
 ''' </item>
 '''
@@ -96,23 +78,11 @@ Public Module entryBuilderSettings
     Public Property EntryBuilderFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "entrybuilder.ini", "entrybuilder.ini", mustExist:=False)
 
     ''' <summary>
-    ''' The shared WebView scaffold catalog consumed by both UWPBuilder and EntryBuilder.
-    ''' Typically <c> Assembler\Scaffolds\webview.ini </c>.
+    ''' The shared scaffold directory consumed by both UWPBuilder and EntryBuilder, holding
+    ''' one catalog file per engine family. Typically <c> Assembler\Scaffolds </c>.
+    ''' Only the <c> Dir </c> property is used; <c> Name </c> is ignored.
     ''' </summary>
-    Public Property EntryBuilderFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "webview.ini", "webview.ini", mustExist:=False)
-
-    ''' <summary>
-    ''' The shared QtWebEngine scaffold catalog consumed by both UWPBuilder and EntryBuilder.
-    ''' Typically <c> Assembler\Scaffolds\qtwebengine.ini </c>.
-    ''' </summary>
-    Public Property EntryBuilderFile4 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
-
-    ''' <summary>
-    ''' The shared Electron scaffold catalog. Typically
-    ''' <c> Assembler\Scaffolds\electron.ini </c>. EntryBuilder is currently its only consumer;
-    ''' UWPBuilder has no Electron family yet.
-    ''' </summary>
-    Public Property EntryBuilderFile5 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "electron.ini", "electron.ini", mustExist:=False)
+    Public Property EntryBuilderFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 
     ''' <summary>
     ''' When <c> True </c>, output is written as per-letter artifact files
@@ -135,9 +105,7 @@ Public Module entryBuilderSettings
 
         EntryBuilderFile1 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         EntryBuilderFile2 = New iniFileChooser(Environment.CurrentDirectory, "entrybuilder.ini", "entrybuilder.ini", mustExist:=False)
-        EntryBuilderFile3 = New iniFileChooser(Environment.CurrentDirectory, "webview.ini", "webview.ini", mustExist:=False)
-        EntryBuilderFile4 = New iniFileChooser(Environment.CurrentDirectory, "qtwebengine.ini", "qtwebengine.ini", mustExist:=False)
-        EntryBuilderFile5 = New iniFileChooser(Environment.CurrentDirectory, "electron.ini", "electron.ini", mustExist:=False)
+        EntryBuilderFile3 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         EntryBuilderSplitOutput = False
         EntryBuilderModuleSettingsChanged = False
         SaveModule2(NameOf(EntryBuilder), GetType(entryBuilderSettings))

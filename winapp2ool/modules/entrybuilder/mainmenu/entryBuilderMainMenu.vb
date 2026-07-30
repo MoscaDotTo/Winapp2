@@ -44,21 +44,15 @@ Public Module entryBuilderMainMenu
                 Sub() changeFile2Params(EntryBuilderFile1, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile1), NameOf(EntryBuilderModuleSettingsChanged), "Source directory")) _
             .AddDispatchedOption("Choose save target", "Select where to save the generated entries",
                 Sub() changeFile2Params(EntryBuilderFile2, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile2), NameOf(EntryBuilderModuleSettingsChanged), "Save target")) _
-            .AddDispatchedOption("Choose webview scaffolds", "Select the shared WebView scaffold catalog",
-                Sub() changeFile2Params(EntryBuilderFile3, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile3), NameOf(EntryBuilderModuleSettingsChanged), "WebView scaffolds")) _
-            .AddDispatchedOption("Choose QtWebEngine scaffolds", "Select the shared QtWebEngine scaffold catalog",
-                Sub() changeFile2Params(EntryBuilderFile4, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile4), NameOf(EntryBuilderModuleSettingsChanged), "QtWebEngine scaffolds")) _
-            .AddDispatchedOption("Choose Electron scaffolds", "Select the shared Electron scaffold catalog",
-                Sub() changeFile2Params(EntryBuilderFile5, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile5), NameOf(EntryBuilderModuleSettingsChanged), "Electron scaffolds")) _
-                .AddBlank() _
+            .AddDispatchedOption("Choose scaffolds directory", "Select the shared scaffold catalog directory",
+                Sub() changeFile2Params(EntryBuilderFile3, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile3), NameOf(EntryBuilderModuleSettingsChanged), "Scaffolds directory")) _
+            .AddBlank() _
             .AddDispatchedToggle("output splitting", "writing per-letter files into the save target's directory", EntryBuilderSplitOutput,
                 Sub() toggleModuleSetting("Split output", NameOf(EntryBuilder), GetType(entryBuilderSettings), NameOf(EntryBuilderSplitOutput), NameOf(EntryBuilderModuleSettingsChanged))) _
             .AddBlank() _
             .AddColoredFileInfo("Current source directory:            ", EntryBuilderFile1.Dir, ConsoleColor.DarkYellow) _
             .AddColoredFileInfo("Current save target:                 ", EntryBuilderFile2.Path(), ConsoleColor.Yellow) _
-            .AddColoredFileInfo("Current WebView catalog:             ", EntryBuilderFile3.Path(), ConsoleColor.DarkYellow) _
-            .AddColoredFileInfo("Current QtWebEngine catalog:         ", EntryBuilderFile4.Path(), ConsoleColor.DarkYellow) _
-            .AddColoredFileInfo("Current Electron catalog:            ", EntryBuilderFile5.Path(), ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo("Current scaffolds directory:         ", EntryBuilderFile3.Dir, ConsoleColor.DarkYellow) _
             .AddBlank(EntryBuilderModuleSettingsChanged) _
             .AddDispatchedResetOpt(NameOf(EntryBuilder), EntryBuilderModuleSettingsChanged,
                 Sub() resetModuleSettings(NameOf(EntryBuilder), AddressOf InitDefaultEntryBuilderSettings))

@@ -34,7 +34,7 @@
 
 .NOTES
     Author: Hazel Ward
-    Version 20260729
+    Version 20260730
     Copyright 2026
 #>
 
@@ -257,14 +257,14 @@ function Build-Artifacts {
     Write-Step "Generating UWP entries"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-uwpbuilder', '-1d', '\UWP', `
         '-2d', "$OutputRoot\UWP", '-2f', 'uwp.ini', `
-        '-3d', '\Scaffolds', '-4d', '\Scaffolds' `
+        '-3d', '\Scaffolds' `
         -ErrorMessage "Failed to generate UWP entries" `
         -RequiredDirs @((Join-Path $PSScriptRoot 'UWP'), (Join-Path $PSScriptRoot 'Scaffolds')))) { return $false }
 
     Write-Step "Generating base entries from EntryBuilder sources"
     if (-not (Invoke-Winapp2ool -Arguments '-s', '-offline', '-entrybuilder', '-split', '-1d', '\EntryBuilder', `
         '-2d', $OutputRoot, `
-        '-3d', '\Scaffolds', '-4d', '\Scaffolds', '-5d', '\Scaffolds' `
+        '-3d', '\Scaffolds' `
         -ErrorMessage "Failed to generate EntryBuilder entries" `
         -RequiredDirs @((Join-Path $PSScriptRoot 'EntryBuilder'), (Join-Path $PSScriptRoot 'Scaffolds')))) { return $false }
 

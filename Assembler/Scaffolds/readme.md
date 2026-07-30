@@ -31,8 +31,8 @@ An entry opts a family in by declaring its root key; without it, no scaffold key
 
 | Consumer     | Opt-in key                          | Selection keys                                                                                    |
 | :-           | :-                                  | :-                                                                                                |
-| UWPBuilder   | `WebViewPath=` / `QtWebEnginePath=` | `WebViewScaffolds=` / `ExcludeWebViewScaffolds=`, `QtWebEngineScaffolds=` / `ExcludeQtWebEngineScaffolds=` |
-| EntryBuilder | `WebViewRoot=` / `QtWebEngineRoot=` / `ElectronRoot=` / `ElectronUpdaterRoot=` | Same selection key names as UWPBuilder, plus `ElectronScaffolds=` / `ExcludeElectronScaffolds=` |
+| UWPBuilder   | `WebViewPath=` / `QtWebEnginePath=` / `ElectronRoot=` / `ElectronUpdaterRoot=` | `WebViewScaffolds=`, `QtWebEngineScaffolds=`, `ElectronScaffolds=`, each with a matching `Exclude...Scaffolds=` |
+| EntryBuilder | `WebViewRoot=` / `QtWebEngineRoot=` / `ElectronRoot=` / `ElectronUpdaterRoot=` | The same selection key names as UWPBuilder |
 
 Root keys are repeatable. To declare several roots, number them:
 
@@ -66,6 +66,7 @@ Note that the QtWebEngine default set (bolded above) is wider than the WebView o
 ### Notes for contributors
 
 * Adding a section to the catalog enables it in both modules automatically and it will automatically be included in scaffolds invoking `All`
+* A catalog's engine family is read from its section headers, not its filename, and both modules are pointed at this whole folder rather than at individual files. A section header whose family no module consumes triggers a warning.
 * Renaming a scaffold breaks every source entry that selects or excludes it by name
 
 # Files

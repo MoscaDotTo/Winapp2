@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\MSTest.TestAdapter.3.10.3\build\net462\MSTest.TestAdapter.props" Condition="Exists('..\packages\MSTest.TestAdapter.3.10.3\build\net462\MSTest.TestAdapter.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -91,7 +91,7 @@
     <Compile Include="UnitTools.vb" />
     <Compile Include="UWPBuilderTests.vb" />
     <Compile Include="VariableExpanderTests.vb" />
-    <Compile Include="WebViewScaffoldsTests.vb" />
+    <Compile Include="ScaffoldCatalogsTests.vb" />
     <Compile Include="Winapp2FileVersionTests.vb" />
     <Compile Include="WinappDebugDataTests.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />

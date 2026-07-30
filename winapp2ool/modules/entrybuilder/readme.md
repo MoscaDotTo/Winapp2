@@ -74,11 +74,9 @@ EntryBuilder reads every `*.ini` file in its source directory, combines them in-
 # Requirements
 
 - A source directory containing one or more `*.ini` files with at least one parseable section
-- The shared WebView scaffold catalog (typically `Assembler\Scaffolds\webview.ini`) if any entry declares `WebViewRoot=`
-- The shared QtWebEngine scaffold catalog (typically `Assembler\Scaffolds\qtwebengine.ini`) if any entry declares `QtWebEngineRoot=`
-- The shared Electron scaffold catalog (typically `Assembler\Scaffolds\electron.ini`) if any entry declares `ElectronRoot=` or `ElectronUpdaterRoot=`
+- The shared scaffold directory (typically `Assembler\Scaffolds`) if any entry declares a scaffold root. Every `*.ini` in it is read, and each catalog's engine family comes from its section headers rather than its filename: `webview.ini` (`[WebViewScaffold: ...]`) serves `WebViewRoot=`, `qtwebengine.ini` (`[QtWebEngineScaffold: ...]`) serves `QtWebEngineRoot=`, and `electron.ini` (`[ElectronScaffold: ...]`) serves `ElectronRoot=` / `ElectronUpdaterRoot=`
 
-If the source directory is empty, missing, or contains no parseable sections, EntryBuilder reports `No EntryBuilder source definitions found in: <directory>` and writes no output. If a scaffold catalog is missing or empty, generation continues with zero scaffold FileKeys emitted from that catalog and a warning logged. Entries with no corresponding root key are unaffected.
+If the source directory is empty, missing, or contains no parseable sections, EntryBuilder reports `No EntryBuilder source definitions found in: <directory>` and writes no output. If the scaffold directory or a catalog within it is missing or empty, generation continues with zero scaffold FileKeys emitted for the affected families and a warning logged. Entries with no corresponding root key are unaffected.
 
 ---
 
@@ -90,7 +88,7 @@ If the source directory is empty, missing, or contains no parseable sections, En
 2. Open EntryBuilder from the **Entry Lab** main menu, or invoke `winapp2ool -entrybuilder` from the command line
 3. Run. EntryBuilder combines the files, expands the shorthand, and writes the result to `entrybuilder.ini`
 
-The default source directory and save target are both the current directory. The default scaffold catalogs are `webview.ini`, `qtwebengine.ini` and `electron.ini` in the current directory; in normal use, `entrybuilder.ini` and all three catalogs live next to the winapp2ool executable, and the source directory points at `..\..\Assembler\EntryBuilder\`.
+The default source directory, save target, and scaffold directory are all the current directory; in normal use `entrybuilder.ini` lives next to the winapp2ool executable, the source directory points at `..\..\Assembler\EntryBuilder\`, and the scaffold directory at `..\..\Assembler\Scaffolds\`.
 
 ---
 
@@ -101,9 +99,7 @@ The default source directory and save target are both the current directory. The
 | Run (default) | Generate entries from the configured source directory | Does nothing if no parseable sections found |
 | Choose source directory | Select the directory containing per-letter source files | Only the directory is used; the file name is ignored |
 | Choose save target | Select where to save the generated entries | Default: `entrybuilder.ini` in current directory |
-| Choose webview scaffolds | Select the shared WebView scaffold catalog | Default: `webview.ini` in current directory |
-| Choose QtWebEngine scaffolds | Select the shared QtWebEngine scaffold catalog | Default: `qtwebengine.ini` in current directory |
-| Choose Electron scaffolds | Select the shared Electron scaffold catalog | Default: `electron.ini` in current directory |
+| Choose scaffolds directory | Select the folder holding the shared scaffold catalogs | Default: current directory |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
 ---
@@ -482,9 +478,7 @@ Each file slot has a corresponding index for use with the `-Nd` (directory) and 
 |:-|:-|:-|
 | 1 | Source directory | Current directory (directory only; file name is ignored) |
 | 2 | Save target | `entrybuilder.ini` in current directory |
-| 3 | WebView scaffold catalog | `webview.ini` in current directory |
-| 4 | QtWebEngine scaffold catalog | `qtwebengine.ini` in current directory |
-| 5 | Electron scaffold catalog | `electron.ini` in current directory |
+| 3 | Shared scaffold directory (only `.Dir` is read, so `-3f` has no effect) | Current directory |
 
 | Arg | Effect |
 |:-|:-|
@@ -504,7 +498,7 @@ Each file slot has a corresponding index for use with the `-Nd` (directory) and 
 |:-|:-|
 | `winapp2ool -entrybuilder` | Run with current settings |
 | `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder` | Read sources from the assembler folder, save `entrybuilder.ini` in the current directory |
-| `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds -4d ..\..\Assembler\Scaffolds -5d ..\..\Assembler\Scaffolds -s` | Full build-pipeline invocation: source and all three catalogs from sibling folders, silent mode |
+| `winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds -s` | Full build-pipeline invocation: source and every scaffold catalog from sibling folders, silent mode |
 | `winapp2ool -entrybuilder -2f test-output.ini` | Override the save target file name |
 | `winapp2ool -entrybuilder -split -2d ..\..\Assembler\Entries` | Write per-letter files into `Assembler\Entries` |
 
@@ -921,7 +915,7 @@ DetectFile=%AppData%\discord
 winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds
 ```
 
-###### Note: `-3d` points file slot 3 (the WebView catalog, `webview.ini`) at the shared scaffolds folder
+###### Note: `-3d` points file slot 3 (the scaffold directory) at the shared scaffolds folder, from which every family's catalog is loaded
 
 **Output**
 
@@ -1035,10 +1029,10 @@ FileKeyBase=%LocalAppData%\calibre-cache|*|RECURSE
 **Command**
 
 ```
-winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -4d ..\..\Assembler\Scaffolds
+winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds
 ```
 
-###### Note: `-4d` points file slot 4 (the QtWebEngine catalog, `qtwebengine.ini`) at the shared scaffolds folder
+###### Note: `-3d` points file slot 3 (the scaffold directory) at the shared scaffolds folder; `qtwebengine.ini` is discovered inside it by section header
 
 **Output**
 
@@ -1105,10 +1099,10 @@ FileKeyBase=%ElectronRoot%\Temp|*
 **Command**
 
 ```
-winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -5d ..\..\Assembler\Scaffolds
+winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Scaffolds
 ```
 
-###### Note: `-5d` points file slot 5 (the Electron catalog, `electron.ini`) at the shared scaffolds folder
+###### Note: `-3d` points file slot 3 (the scaffold directory) at the shared scaffolds folder; `electron.ini` is discovered inside it by section header
 
 **Output**
 

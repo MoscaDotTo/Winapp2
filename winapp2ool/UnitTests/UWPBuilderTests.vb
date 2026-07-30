@@ -71,23 +71,41 @@ Imports System.Text
                          Optional scaffoldFileKeys As List(Of String) = Nothing,
                          Optional scaffoldDetectFiles As List(Of String) = Nothing,
                          Optional webViewCatalog As Dictionary(Of String, List(Of String)) = Nothing,
-                         Optional qtCatalog As Dictionary(Of String, List(Of String)) = Nothing) As winapp2ool.iniSection2
+                         Optional qtCatalog As Dictionary(Of String, List(Of String)) = Nothing,
+                         Optional electronCatalog As Dictionary(Of String, List(Of String)) = Nothing) As winapp2ool.iniSection2
 
         Dim menu As New winapp2ool.MenuSection
         Using cap = winapp2ool.gLogCapture()
 
             Dim app = winapp2ool.UWPBuilder.parseAppInfo(FirstSection(text), menu)
 
+            Dim catalogs As New winapp2ool.ScaffoldCatalogSet
+            CopyCatalog(webViewCatalog, catalogs.ForFamily("WebView"))
+            CopyCatalog(qtCatalog, catalogs.ForFamily("QtWebEngine"))
+            CopyCatalog(electronCatalog, catalogs.ForFamily("Electron"))
+
             Return winapp2ool.UWPBuilder.generateUWPEntry(app,
                 If(scaffoldFileKeys, New List(Of String)),
                 If(scaffoldDetectFiles, New List(Of String)),
-                If(webViewCatalog, New Dictionary(Of String, List(Of String))),
-                If(qtCatalog, New Dictionary(Of String, List(Of String))),
+                catalogs,
                 menu)
 
         End Using
 
     End Function
+
+    ''' <summary>
+    ''' Helper: fill one family's catalog inside a <c> ScaffoldCatalogSet </c> from a plain
+    ''' dictionary, so tests can keep expressing catalogs as literals
+    ''' </summary>
+    Private Shared Sub CopyCatalog(source As Dictionary(Of String, List(Of String)),
+                                   target As Dictionary(Of String, List(Of String)))
+
+        If source Is Nothing Then Return
+
+        For Each pair In source : target(pair.Key) = pair.Value : Next
+
+    End Sub
 
     ''' <summary>
     ''' Helper: collect the values of every key of a given type from a generated section
@@ -305,6 +323,76 @@ Imports System.Text
                             qtCatalog:=catalog)
 
         Assert.AreEqual(2, ValuesOf(section, "FileKey").Count)
+
+    End Sub
+
+    ' ----- Electron family -----
+
+    ''' <summary>
+    ''' The Electron family emits for a hybrid entry — the case that motivated shipping it here at
+    ''' all. The root is a plain win32 path with no <c> %Package% </c> reference (Electron lives in
+    ''' the desktop half of a hybrid, not inside the MSIX container), and both placeholders bind
+    ''' independently.
+    ''' </summary>
+    <TestMethod()> Public Sub Electron_EmitsForHybridWin32Root()
+
+        Dim catalog As New Dictionary(Of String, List(Of String)) From {
+            {"Caches", New List(Of String) From {"%ElectronRoot%\Cache|*|RECURSE"}},
+            {"UpdaterCache", New List(Of String) From {"%ElectronUpdaterRoot%\pending|*"}}
+        }
+
+        Dim section = Build(Preamble &
+                            "ElectronRoot=%LocalAppData%\Amazon Music" & vbCrLf &
+                            "ElectronUpdaterRoot=%LocalAppData%\amazon-music-updater" & vbCrLf &
+                            "ElectronScaffolds=Caches,UpdaterCache" & vbCrLf,
+                            electronCatalog:=catalog)
+
+        CollectionAssert.AreEquivalent(
+            New List(Of String) From {
+                "%LocalAppData%\Amazon Music\Cache|*|RECURSE",
+                "%LocalAppData%\amazon-music-updater\pending|*"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' An entry declaring only <c> ElectronRoot= </c> drops the updater templates rather than
+    ''' emitting a literal <c> %ElectronUpdaterRoot% </c> into a FileKey — the drop rule that lets
+    ''' <c> UpdaterCache </c> stay in the default set at no cost
+    ''' </summary>
+    <TestMethod()> Public Sub Electron_NoUpdaterRoot_DropsUpdaterTemplates()
+
+        Dim catalog As New Dictionary(Of String, List(Of String)) From {
+            {"Caches", New List(Of String) From {"%ElectronRoot%\Cache|*|RECURSE"}},
+            {"UpdaterCache", New List(Of String) From {"%ElectronUpdaterRoot%\pending|*"}}
+        }
+
+        Dim section = Build(Preamble & "ElectronRoot=%AppData%\Signal" & vbCrLf,
+                            electronCatalog:=catalog)
+
+        Dim fileKeys = ValuesOf(section, "FileKey")
+
+        Assert.AreEqual(1, fileKeys.Count)
+        Assert.AreEqual("%AppData%\Signal\Cache|*|RECURSE", fileKeys(0))
+
+    End Sub
+
+    ''' <summary>
+    ''' Declaring only <c> ElectronUpdaterRoot= </c> still opts the entry into the family, since an
+    ''' entry may legitimately want the updater cache alone
+    ''' </summary>
+    <TestMethod()> Public Sub Electron_UpdaterRootAlone_OptsInToFamily()
+
+        Dim catalog As New Dictionary(Of String, List(Of String)) From {
+            {"UpdaterCache", New List(Of String) From {"%ElectronUpdaterRoot%\pending|*"}}
+        }
+
+        Dim section = Build(Preamble &
+                            "ElectronUpdaterRoot=%LocalAppData%\signal-updater" & vbCrLf &
+                            "ElectronScaffolds=UpdaterCache" & vbCrLf,
+                            electronCatalog:=catalog)
+
+        Assert.AreEqual(1, ValuesOf(section, "FileKey").Count)
 
     End Sub
 

@@ -43,15 +43,12 @@ Public Module uwpbuildermainmenu
                 Sub() changeFile2Params(UWPFile1, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile1), NameOf(UWPBuilderModuleSettingsChanged), "Source directory")) _
             .AddDispatchedOption("Choose save target", "Select where to save the generated entries",
                 Sub() changeFile2Params(UWPFile2, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile2), NameOf(UWPBuilderModuleSettingsChanged), "Save target")) _
-            .AddDispatchedOption("Choose webview scaffold", "Select the shared WebView scaffold catalog",
-                Sub() changeFile2Params(UWPFile3, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile3), NameOf(UWPBuilderModuleSettingsChanged), "WebView scaffolds")) _
-            .AddDispatchedOption("Choose QtWebEngine scaffold", "Select the shared QtWebEngine scaffold catalog",
-                Sub() changeFile2Params(UWPFile4, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile4), NameOf(UWPBuilderModuleSettingsChanged), "QtWebEngine scaffolds")) _
+            .AddDispatchedOption("Choose scaffolds directory", "Select the shared scaffold catalog directory",
+                Sub() changeFile2Params(UWPFile3, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile3), NameOf(UWPBuilderModuleSettingsChanged), "Scaffolds directory")) _
             .AddBlank() _
             .AddColoredFileInfo("Current source directory:    ", UWPFile1.Dir, ConsoleColor.DarkYellow) _
             .AddColoredFileInfo("Current save target:         ", UWPFile2.Path(), ConsoleColor.Yellow) _
-            .AddColoredFileInfo("Current WebView catalog:     ", UWPFile3.Path(), ConsoleColor.DarkYellow) _
-            .AddColoredFileInfo("Current QtWebEngine catalog: ", UWPFile4.Path(), ConsoleColor.DarkYellow) _
+            .AddColoredFileInfo("Current scaffolds directory: ", UWPFile3.Dir, ConsoleColor.DarkYellow) _
             .AddBlank(UWPBuilderModuleSettingsChanged) _
             .AddDispatchedResetOpt(NameOf(UWPBuilder), UWPBuilderModuleSettingsChanged,
                 Sub() resetModuleSettings(NameOf(UWPBuilder), AddressOf InitDefaultUWPBuilderSettings))

@@ -58,6 +58,16 @@ Imports System.Text
 ''' Apps with multiple packages use numbered variants:
 ''' <c> Package1= </c> / <c> Package2= </c> in the source and
 ''' <c> %Package1% </c> / <c> %Package2% </c> in key values.
+'''
+''' <br /><br />
+'''
+''' An entry may also draw scaffold FileKeys from the shared catalogs in
+''' <c> Assembler\Scaffolds </c> by declaring a root for any family in
+''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> — <c> WebViewPath= </c>,
+''' <c> QtWebEnginePath= </c>, or <c> ElectronRoot= </c> / <c> ElectronUpdaterRoot= </c>.
+''' Electron matters here despite MSIX packages rarely bundling it, because the
+''' <b> hybrid win32+UWP </b> entries above carry the desktop install's paths too, and a
+''' packaged app's desktop build is frequently Electron.
 ''' </summary>
 Public Module UWPBuilder
 
@@ -68,8 +78,13 @@ Public Module UWPBuilder
     ''' apart. Mirrors EntryBuilder's list of the same purpose, but carries UWPBuilder's own
     ''' vocabulary — <c> PACKAGE </c>, <c> SKIPUWPFILEKEYS </c> and the <c> ...PATH </c>
     ''' root spellings have no EntryBuilder counterpart
+    ''' <br /><br />
+    '''
+    ''' <c> Friend </c> rather than <c> Private </c> so <c> ScaffoldParityTests </c> can walk
+    ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> and assert this parser knows every
+    ''' family's key vocabulary — the guard against a family shipping to one builder only.
     ''' </summary>
-    Private ReadOnly UWPReservedKeys As String() = {
+    Friend ReadOnly UWPReservedKeys As String() = {
         "PACKAGE", "LANGSECREF", "SECTION",
         "DETECT", "DETECTFILE", "DETECTOS", "SPECIALDETECT",
         "FILEKEY", "FILEKEYBASE",
@@ -77,8 +92,11 @@ Public Module UWPBuilder
         "EXCLUDEKEY", "EXCLUDEKEYBASE",
         "WEBVIEWPATH", "WEBVIEWROOT",
         "QTWEBENGINEPATH", "QTWEBENGINEROOT",
+        "ELECTRONPATH", "ELECTRONROOT",
+        "ELECTRONUPDATERPATH", "ELECTRONUPDATERROOT",
         "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
         "QTWEBENGINESCAFFOLDS", "EXCLUDEQTWEBENGINESCAFFOLDS",
+        "ELECTRONSCAFFOLDS", "EXCLUDEELECTRONSCAFFOLDS",
         "SKIP", "SKIPUWPFILEKEYS", "DEFAULT", "WARNING"
     }
 
@@ -179,7 +197,7 @@ Public Module UWPBuilder
 
         ''' <summary>
         ''' Explicit <c> WebViewScaffold </c> names selected for this entry. When non-empty,
-        ''' this list replaces <see cref="WebViewScaffolds.DefaultScaffolds"/>. Names are matched
+        ''' this list replaces <see cref="ScaffoldCatalogs.DefaultScaffolds"/>. Names are matched
         ''' against the <c> [WebViewScaffold: ...] </c> sections in the shared catalog at
         ''' <c> Assembler\Scaffolds\webview.ini </c>.
         ''' <br /><br />
@@ -194,14 +212,14 @@ Public Module UWPBuilder
         ''' <summary>
         ''' <c> WebViewScaffold </c> names to subtract from the active selection (either
         ''' <see cref="WebViewScaffoldNames"/> when set, or
-        ''' <see cref="WebViewScaffolds.DefaultScaffolds"/> otherwise). Unknown names are ignored.
+        ''' <see cref="ScaffoldCatalogs.DefaultScaffolds"/> otherwise). Unknown names are ignored.
         ''' </summary>
         Public ExcludedWebViewScaffolds As List(Of String)
 
         ''' <summary>
         ''' Tracks whether the AppInfo entry declared <c> WebViewScaffolds= </c> at all,
         ''' separately from whether the resulting list is empty. Distinguishes
-        ''' "key absent → use <see cref="WebViewScaffolds.DefaultScaffolds"/>" from
+        ''' "key absent → use <see cref="ScaffoldCatalogs.DefaultScaffolds"/>" from
         ''' "key present but empty → emit no scaffold FileKeys despite having a
         ''' <see cref="WebViewPaths"/> declaration."
         ''' </summary>
@@ -222,7 +240,7 @@ Public Module UWPBuilder
 
         ''' <summary>
         ''' Explicit <c> QtWebEngineScaffold </c> names selected for this entry. When non-empty,
-        ''' this list replaces <see cref="WebViewScaffolds.QtWebEngineDefaultScaffolds"/>. The
+        ''' this list replaces <see cref="ScaffoldCatalogs.QtWebEngineDefaultScaffolds"/>. The
         ''' <c> All </c> sentinel expands to every scaffold in the QtWebEngine catalog.
         ''' </summary>
         Public QtWebEngineScaffoldNames As List(Of String)
@@ -238,6 +256,49 @@ Public Module UWPBuilder
         ''' (mirrors <see cref="WebViewScaffoldsKeyPresent"/> for the QtWebEngine family).
         ''' </summary>
         Public QtWebEngineScaffoldsKeyPresent As Boolean
+
+        ''' <summary>
+        ''' Paths of the application's Electron <c> userData </c> folders — for Electron this
+        ''' folder <em>is</em> the Chromium profile, with no <c> Default\ </c> segment, unlike
+        ''' <see cref="WebViewPaths"/>. Each entry is a path template that may contain
+        ''' <c> %Package% </c> / <c> %PackageN% </c> references, expanded per package at
+        ''' generation time, then substituted for <c> %ElectronRoot% </c>.
+        ''' <br /><br />
+        '''
+        ''' Relevant to UWPBuilder because a <b> hybrid win32+UWP </b> entry carries the win32
+        ''' install's paths alongside the package's, and the win32 half of a hybrid is where
+        ''' Electron shows up — a packaged app whose desktop build is Electron needs this even
+        ''' though nothing inside the MSIX container is.
+        ''' </summary>
+        Public ElectronPaths As List(Of String)
+
+        ''' <summary>
+        ''' Paths of the application's electron-updater download caches. Declared separately from
+        ''' <see cref="ElectronPaths"/> because the directory name is electron-builder's appId
+        ''' slug and is not derivable from the userData path. Substituted for
+        ''' <c> %ElectronUpdaterRoot% </c>; when empty, templates referencing that placeholder
+        ''' are dropped rather than emitted with the placeholder literal.
+        ''' </summary>
+        Public ElectronUpdaterPaths As List(Of String)
+
+        ''' <summary>
+        ''' Explicit <c> ElectronScaffold </c> names selected for this entry. When non-empty,
+        ''' this list replaces <see cref="ScaffoldCatalogs.ElectronDefaultScaffolds"/>. The
+        ''' <c> All </c> sentinel expands to every scaffold in the Electron catalog.
+        ''' </summary>
+        Public ElectronScaffoldNames As List(Of String)
+
+        ''' <summary>
+        ''' <c> ElectronScaffold </c> names to subtract from the active selection. Unknown
+        ''' names are ignored.
+        ''' </summary>
+        Public ExcludedElectronScaffolds As List(Of String)
+
+        ''' <summary>
+        ''' Tracks whether the AppInfo entry declared <c> ElectronScaffolds= </c> at all
+        ''' (mirrors <see cref="WebViewScaffoldsKeyPresent"/> for the Electron family).
+        ''' </summary>
+        Public ElectronScaffoldsKeyPresent As Boolean
 
         ''' <summary>
         ''' The entry's open-vocabulary variable declarations — every key whose name is not
@@ -285,6 +346,11 @@ Public Module UWPBuilder
             QtWebEngineScaffoldNames = New List(Of String)
             ExcludedQtWebEngineScaffolds = New List(Of String)
             QtWebEngineScaffoldsKeyPresent = False
+            ElectronPaths = New List(Of String)
+            ElectronUpdaterPaths = New List(Of String)
+            ElectronScaffoldNames = New List(Of String)
+            ExcludedElectronScaffolds = New List(Of String)
+            ElectronScaffoldsKeyPresent = False
             Variables = New VariableSet()
             NestedVariableRefs = 0
 
@@ -298,7 +364,7 @@ Public Module UWPBuilder
     Public Sub handleCmdLine()
 
         Dim spec As New CliArgSpec("uwpbuilder")
-        spec.WithFile(1, UWPFile1).WithFile(2, UWPFile2).WithFile(3, UWPFile3).WithFile(4, UWPFile4).Parse()
+        spec.WithFile(1, UWPFile1).WithFile(2, UWPFile2).WithFile(3, UWPFile3).Parse()
 
         initUWPBuilder()
 
@@ -333,19 +399,18 @@ Public Module UWPBuilder
 
         End If
 
-        ' Shared scaffold catalog paths are configured via UWPFile3 (WebView2, typically
-        ' Assembler\Scaffolds\webview.ini) and UWPFile4 (QtWebEngine, typically
-        ' Assembler\Scaffolds\qtwebengine.ini). Missing/empty catalogs warn and yield zero
-        ' scaffold FileKeys for that family rather than aborting the run.
-        Dim webViewCatalogPath = UWPFile3.Path()
-        Dim qtCatalogPath = UWPFile4.Path()
+        ' The shared scaffold directory is configured via UWPFile3 (typically
+        ' Assembler\Scaffolds). Every catalog in it is loaded at once and families are derived
+        ' from section headers, so a new family costs no new setting here. A missing directory
+        ' or catalog warns and yields zero scaffold FileKeys rather than aborting the run.
+        Dim scaffoldDir = UWPFile3.Dir
 
         Dim output As New MenuSection
         output.AddBoxWithText("Building UWP app entries")
 
         Using gLogScope("Building UWP app entries")
 
-            processUWPBuilder(templateIni, appsIni, webViewCatalogPath, qtCatalogPath, output)
+            processUWPBuilder(templateIni, appsIni, scaffoldDir, output)
 
             output.AddBoxWithText("UWP app entries built successfully")
             gLog("UWP app entries built successfully")
@@ -375,18 +440,11 @@ Public Module UWPBuilder
     ''' The combined AppInfo sections from all per-letter source files
     ''' </param>
     '''
-    ''' <param name="webViewCatalogPath">
-    ''' Absolute path to the shared WebView scaffold catalog (typically
-    ''' <c> Assembler\Scaffolds\webview.ini </c>). Loaded once per run via
-    ''' <see cref="WebViewScaffolds.LoadCatalog"/> and consumed by per-entry
-    ''' WebView scaffolding.
-    ''' </param>
-    '''
-    ''' <param name="qtCatalogPath">
-    ''' Absolute path to the shared QtWebEngine scaffold catalog (typically
-    ''' <c> Assembler\Scaffolds\qtwebengine.ini </c>). Loaded once per run via
-    ''' <see cref="WebViewScaffolds.LoadCatalog"/> with the <c> QtWebEngineScaffold: </c>
-    ''' prefix and consumed by per-entry QtWebEngine scaffolding.
+    ''' <param name="scaffoldDir">
+    ''' Absolute path to the shared scaffold directory (typically
+    ''' <c> Assembler\Scaffolds </c>). Every catalog in it is loaded once per run via
+    ''' <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which derives each family from its
+    ''' section headers, and consumed by per-entry scaffolding.
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -394,16 +452,14 @@ Public Module UWPBuilder
     ''' </param>
     Private Sub processUWPBuilder(templateIni As iniFile2,
                                    appsIni As iniFile2,
-                                   webViewCatalogPath As String,
-                                   qtCatalogPath As String,
+                                   scaffoldDir As String,
                                    menuOutput As MenuSection)
 
         Using gLogScope("Processing UWP builder files")
 
             Dim scaffoldFileKeys As New List(Of String)
             Dim scaffoldDetectFiles As New List(Of String)
-            Dim webViewCatalog = WebViewScaffolds.LoadCatalog(webViewCatalogPath, menuOutput)
-            Dim qtCatalog = WebViewScaffolds.LoadCatalog(qtCatalogPath, menuOutput, "QtWebEngineScaffold:")
+            Dim scaffoldSet = ScaffoldCatalogs.LoadCatalogDirectory(scaffoldDir, menuOutput)
             Dim apps As New List(Of UWPAppInfo)
 
             For Each section In templateIni
@@ -428,13 +484,13 @@ Public Module UWPBuilder
             menuOutput.AddColoredLine(scaffoldMsg, ConsoleColor.Yellow)
             gLog(scaffoldMsg)
 
-            Dim webViewMsg = $"Loaded {webViewCatalog.Count} WebView scaffold(s) from {webViewCatalogPath}"
-            menuOutput.AddColoredLine(webViewMsg, ConsoleColor.Yellow)
-            gLog(webViewMsg)
+            For Each family In ScaffoldCatalogs.ScaffoldFamilies
 
-            Dim qtMsg = $"Loaded {qtCatalog.Count} QtWebEngine scaffold(s) from {qtCatalogPath}"
-            menuOutput.AddColoredLine(qtMsg, ConsoleColor.Yellow)
-            gLog(qtMsg)
+                Dim familyMsg = $"Loaded {scaffoldSet.ForFamily(family).Count} {family} scaffold(s) from {scaffoldDir}"
+                menuOutput.AddColoredLine(familyMsg, ConsoleColor.Yellow)
+                gLog(familyMsg)
+
+            Next
 
             For Each section In appsIni
 
@@ -451,7 +507,7 @@ Public Module UWPBuilder
 
             For Each app In apps
 
-                Dim entrySection = generateUWPEntry(app, scaffoldFileKeys, scaffoldDetectFiles, webViewCatalog, qtCatalog, menuOutput)
+                Dim entrySection = generateUWPEntry(app, scaffoldFileKeys, scaffoldDetectFiles, scaffoldSet, menuOutput)
                 outputFile.AddSection(entrySection)
 
                 ' Typo backstop: variables declared on the entry but never referenced by any
@@ -662,6 +718,17 @@ Public Module UWPBuilder
 
                 Case "EXCLUDEQTWEBENGINESCAFFOLDS" : app.ExcludedQtWebEngineScaffolds = splitCsv(key.Value)
 
+                Case "ELECTRONPATH", "ELECTRONROOT" : app.ElectronPaths.Add(key.Value)
+
+                Case "ELECTRONUPDATERPATH", "ELECTRONUPDATERROOT" : app.ElectronUpdaterPaths.Add(key.Value)
+
+                Case "ELECTRONSCAFFOLDS"
+
+                    app.ElectronScaffoldNames = splitCsv(key.Value)
+                    app.ElectronScaffoldsKeyPresent = True
+
+                Case "EXCLUDEELECTRONSCAFFOLDS" : app.ExcludedElectronScaffolds = splitCsv(key.Value)
+
                 Case Else
 
                     ' Open-vocabulary: any unrecognised key is a list-variable declaration
@@ -732,72 +799,153 @@ Public Module UWPBuilder
     End Function
 
     ''' <summary>
-    ''' Selects the set of <c> WebViewScaffold </c> names that should be emitted for the given app.
-    ''' Resolution order:
-    ''' <list type="bullet">
-    ''' <item>
-    ''' If the AppInfo declared <c> WebViewScaffolds= </c> (regardless of value), use that
-    ''' explicit list — a present-but-empty value yields no scaffolds, distinct from the
-    ''' "key absent → use defaults" case.
-    ''' </item>
-    ''' <item>
-    ''' If the explicit list contains the sentinel <c> All </c> (case-insensitive), it is
-    ''' replaced with every scaffold name in <paramref name="available"/>. Any other names
-    ''' listed alongside <c> All </c> are redundant and emit a warning.
-    ''' </item>
-    ''' <item>
-    ''' Otherwise, use <see cref="WebViewScaffolds.DefaultScaffolds"/>.
-    ''' </item>
-    ''' </list>
-    ''' Any names in <see cref="UWPAppInfo.ExcludedWebViewScaffolds"/> are then subtracted, and
-    ''' unknown names (not present in <paramref name="available"/>) are dropped with a warning.
-    ''' Combining <c> WebViewScaffolds= </c> and <c> ExcludeWebViewScaffolds= </c> warns when
-    ''' the explicit list is anything other than <c> All </c>, since exclusions usually pair
-    ''' with the implicit defaults. <c> All </c> + exclusions is the natural idiom for
-    ''' "everything except these" and does not warn.
+    ''' One scaffold family's per-entry state, gathered so <see cref="generateUWPEntry"/> can
+    ''' emit every family from a single loop instead of one hand-written block per family.
+    ''' Adding a family becomes a case in <see cref="scaffoldFamiliesFor"/> rather than another
+    ''' copy of the emission nesting — which is how Electron came to ship in EntryBuilder alone.
+    ''' </summary>
+    Private Structure UWPScaffoldFamily
+
+        ''' <summary> The family token, e.g. <c> Electron </c>; phrases diagnostics </summary>
+        Public Label As String
+
+        ''' <summary> Names from <c> {Family}Scaffolds= </c>, empty when undeclared </summary>
+        Public Selection As List(Of String)
+
+        ''' <summary> Names from <c> Exclude{Family}Scaffolds= </c> </summary>
+        Public Excluded As List(Of String)
+
+        ''' <summary> Whether <c> {Family}Scaffolds= </c> was declared at all </summary>
+        Public KeyPresent As Boolean
+
+        ''' <summary>
+        ''' The family's (placeholder, roots) pairs, roots already package-expanded to literals.
+        ''' Electron carries two; the others one.
+        ''' </summary>
+        Public Bindings As List(Of ScaffoldCatalogs.ScaffoldRootBinding)
+
+        ''' <summary>
+        ''' Whether the entry opted into this family — true when it declared any root for any of
+        ''' the family's placeholders. Electron opts in on either root, since an entry may want
+        ''' only the updater cache.
+        ''' </summary>
+        Public ReadOnly Property IsDeclared As Boolean
+            Get
+                Return Bindings.Any(Function(b) b.Roots.Count > 0)
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Creates a family's per-entry state
+        ''' </summary>
+        '''
+        ''' <param name="label">
+        ''' The family token
+        ''' </param>
+        '''
+        ''' <param name="selection">
+        ''' Names from the family's <c> {Family}Scaffolds= </c> key
+        ''' </param>
+        '''
+        ''' <param name="excluded">
+        ''' Names from the family's <c> Exclude{Family}Scaffolds= </c> key
+        ''' </param>
+        '''
+        ''' <param name="keyPresent">
+        ''' Whether <c> {Family}Scaffolds= </c> was declared
+        ''' </param>
+        '''
+        ''' <param name="bindings">
+        ''' The family's (placeholder, roots) pairs with roots already package-expanded
+        ''' </param>
+        Public Sub New(label As String,
+                       selection As List(Of String),
+                       excluded As List(Of String),
+                       keyPresent As Boolean,
+                       bindings As List(Of ScaffoldCatalogs.ScaffoldRootBinding))
+
+            Me.Label = label
+            Me.Selection = selection
+            Me.Excluded = excluded
+            Me.KeyPresent = keyPresent
+            Me.Bindings = bindings
+
+        End Sub
+
+    End Structure
+
+    ''' <summary>
+    ''' Gathers every scaffold family declared on <paramref name="app"/>, package-expanding each
+    ''' declared root so the resulting bindings hold literal paths. Every family in
+    ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> is represented here — that is the parity
+    ''' contract, and <c> ScaffoldParityTests </c> asserts it against the reserved-key set.
+    ''' <br /><br />
+    '''
+    ''' Package expansion (phase 0) must happen here, before placeholder substitution (phase 1),
+    ''' because roots themselves reference <c> %Package% </c>
+    ''' (<c> WebViewRoot=%Package%\LocalState\EBWebView </c>). Phase 2 (<c> &lt;&gt; </c>
+    ''' expansion) then runs last on the merged string, so a token inside a root declaration
+    ''' joins the same cartesian product as the scaffold template's own tokens.
     ''' </summary>
     '''
     ''' <param name="app">
-    ''' The parsed app definition whose scaffold selection is being resolved
-    ''' </param>
-    '''
-    ''' <param name="available">
-    ''' The catalog of known scaffolds, keyed by name, loaded from
-    ''' <c> Assembler\Scaffolds\webview.ini </c>
-    ''' </param>
-    '''
-    ''' <param name="menuOutput">
-    ''' The <c> MenuSection </c> receiving warnings for display
+    ''' The parsed app definition whose root declarations are being gathered
     ''' </param>
     '''
     ''' <returns>
-    ''' The ordered list of scaffold names to emit for this app, with unknowns removed
+    ''' One entry per scaffold family, in <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> order
     ''' </returns>
-    Private Function resolveWebViewScaffolds(app As UWPAppInfo,
-                                              available As Dictionary(Of String, List(Of String)),
-                                              menuOutput As MenuSection) As List(Of String)
+    Private Function scaffoldFamiliesFor(app As UWPAppInfo) As List(Of UWPScaffoldFamily)
 
-        Return WebViewScaffolds.ResolveScaffolds(app.WebViewScaffoldNames, app.WebViewScaffoldsKeyPresent,
-                                                 app.ExcludedWebViewScaffolds, available,
-                                                 WebViewScaffolds.DefaultScaffolds, "WebView", app.Name, menuOutput)
+        Dim expandRoots = Function(templates As List(Of String)) templates _
+            .SelectMany(Function(t) expandPackageKey(t, app.Packages)) _
+            .ToList()
+
+        Return New List(Of UWPScaffoldFamily) From {
+            New UWPScaffoldFamily("WebView", app.WebViewScaffoldNames, app.ExcludedWebViewScaffolds,
+                                  app.WebViewScaffoldsKeyPresent,
+                                  New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%WebViewRoot%", expandRoots(app.WebViewPaths))}),
+            New UWPScaffoldFamily("QtWebEngine", app.QtWebEngineScaffoldNames, app.ExcludedQtWebEngineScaffolds,
+                                  app.QtWebEngineScaffoldsKeyPresent,
+                                  New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", expandRoots(app.QtWebEnginePaths))}),
+            New UWPScaffoldFamily("Electron", app.ElectronScaffoldNames, app.ExcludedElectronScaffolds,
+                                  app.ElectronScaffoldsKeyPresent,
+                                  New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronRoot%", expandRoots(app.ElectronPaths)),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronUpdaterRoot%", expandRoots(app.ElectronUpdaterPaths))})}
 
     End Function
 
     ''' <summary>
-    ''' Selects the set of <c> QtWebEngineScaffold </c> names to emit for the given app,
-    ''' following the same resolution grammar as <see cref="resolveWebViewScaffolds"/> but
-    ''' driven by the app's <c> QtWebEngineScaffolds= </c> / <c> ExcludeQtWebEngineScaffolds= </c>
-    ''' keys and the QtWebEngine default set. Delegates to
-    ''' <see cref="WebViewScaffolds.ResolveScaffolds"/>.
+    ''' Emits one scaffold family's FileKey values for an app. Resolution follows the shared
+    ''' grammar in <see cref="ScaffoldCatalogs.ResolveScaffolds"/>: an explicit
+    ''' <c> {Family}Scaffolds= </c> wins (a present-but-empty value yields nothing, distinct
+    ''' from the key being absent), the <c> All </c> sentinel expands the whole catalog,
+    ''' otherwise the family's default set applies; exclusions are then subtracted and unknown
+    ''' names dropped with a warning. Substitution is delegated to
+    ''' <see cref="ScaffoldCatalogs.BindFamilyTemplates"/>, so a template whose placeholder has
+    ''' no declared root is dropped rather than emitted literally — which is what keeps
+    ''' Electron's default-on <c> UpdaterCache </c> inert for an entry with no updater root.
+    ''' <br /><br />
+    '''
+    ''' A non-empty scaffold that produced nothing warns only when the entry named its family's
+    ''' scaffolds explicitly; a default-set member yielding nothing is by design and would
+    ''' otherwise warn on nearly every Electron entry. Mirrors EntryBuilder's
+    ''' <c> expandScaffoldFamily </c>.
     ''' </summary>
     '''
-    ''' <param name="app">
-    ''' The parsed app definition whose QtWebEngine scaffold selection is being resolved
+    ''' <param name="family">
+    ''' The family's per-entry state, with roots already package-expanded
     ''' </param>
     '''
-    ''' <param name="available">
-    ''' The catalog of known QtWebEngine scaffolds, keyed by name, loaded from
-    ''' <c> Assembler\Scaffolds\qtwebengine.ini </c>
+    ''' <param name="app">
+    ''' The entry being generated, supplying the variable set for phase-2 expansion
+    ''' </param>
+    '''
+    ''' <param name="catalog">
+    ''' The family's scaffold catalog
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -805,15 +953,43 @@ Public Module UWPBuilder
     ''' </param>
     '''
     ''' <returns>
-    ''' The ordered list of QtWebEngine scaffold names to emit for this app, with unknowns removed
+    ''' Every expanded FileKey value produced by this family, in fan-out order
     ''' </returns>
-    Private Function resolveQtWebEngineScaffolds(app As UWPAppInfo,
-                                                 available As Dictionary(Of String, List(Of String)),
-                                                 menuOutput As MenuSection) As List(Of String)
+    Private Function expandScaffoldFamily(family As UWPScaffoldFamily,
+                                          app As UWPAppInfo,
+                                          catalog As Dictionary(Of String, List(Of String)),
+                                          menuOutput As MenuSection) As List(Of String)
 
-        Return WebViewScaffolds.ResolveScaffolds(app.QtWebEngineScaffoldNames, app.QtWebEngineScaffoldsKeyPresent,
-                                                 app.ExcludedQtWebEngineScaffolds, available,
-                                                 WebViewScaffolds.QtWebEngineDefaultScaffolds, "QtWebEngine", app.Name, menuOutput)
+        Dim selected = ScaffoldCatalogs.ResolveScaffolds(family.Selection, family.KeyPresent,
+                                                         family.Excluded, catalog,
+                                                         ScaffoldCatalogs.DefaultsForFamily(family.Label),
+                                                         family.Label, app.Name, menuOutput)
+
+        Dim result As New List(Of String)
+
+        For Each bound In ScaffoldCatalogs.BindFamilyTemplates(family.Bindings, selected, catalog)
+
+            Dim scaffoldYield = 0
+
+            For Each expanded In bound.Templates
+
+                Dim produced = expandPhase2(expanded, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
+                scaffoldYield += produced.Count
+                result.AddRange(produced)
+
+            Next
+
+            If scaffoldYield = 0 AndAlso bound.TemplateCount > 0 AndAlso family.KeyPresent Then
+
+                Dim noRootMsg = $"Scaffold '{bound.ScaffoldName}' selected by [{app.Name}] produced no keys; its templates reference a root the entry did not declare"
+                gLog(noRootMsg)
+                menuOutput.AddWarning(noRootMsg)
+
+            End If
+
+        Next
+
+        Return result
 
     End Function
 
@@ -838,16 +1014,10 @@ Public Module UWPBuilder
     ''' to produce the entry's detection paths
     ''' </param>
     '''
-    ''' <param name="webViewScaffolds">
-    ''' The shared <c> WebViewScaffold </c> catalog. Apps declaring <c> WebViewPath= </c>
-    ''' draw their additional FileKeys from here, with <c> %WebViewRoot% </c> substituted
-    ''' per declared path.
-    ''' </param>
-    '''
-    ''' <param name="qtWebEngineScaffolds">
-    ''' The shared <c> QtWebEngineScaffold </c> catalog. Apps declaring <c> QtWebEnginePath= </c>
-    ''' draw their additional FileKeys from here, with <c> %QtWebEngineRoot% </c> substituted
-    ''' per declared path.
+    ''' <param name="scaffoldSet">
+    ''' The shared scaffold catalogs loaded from the scaffold directory. An app draws additional
+    ''' FileKeys from every family it declared a root for, with that family's placeholders
+    ''' substituted per declared path.
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -860,8 +1030,7 @@ Public Module UWPBuilder
     Friend Function generateUWPEntry(app As UWPAppInfo,
                                       scaffoldFileKeys As List(Of String),
                                       scaffoldDetectFiles As List(Of String),
-                                      webViewScaffolds As Dictionary(Of String, List(Of String)),
-                                      qtWebEngineScaffolds As Dictionary(Of String, List(Of String)),
+                                      scaffoldSet As ScaffoldCatalogSet,
                                       menuOutput As MenuSection) As iniSection2
 
         Dim generatingMsg = $"Generating entry: {app.Name}"
@@ -968,77 +1137,23 @@ Public Module UWPBuilder
 
         Next
 
-        ' 5b. WebView scaffold FileKeys: one expansion per declared WebViewPath, per selected
-        '     scaffold, per FileKeyBase= template. Templates contain %WebViewRoot% which is
-        '     substituted with each fully-package-expanded WebView root path.
-        If app.WebViewPaths.Count > 0 Then
+        ' 5b. Scaffold FileKeys for every family the entry opted into by declaring a root.
+        '     Phase 0 (%Package% fan-out) already ran in scaffoldFamiliesFor; expandScaffoldFamily
+        '     does phase 1 (root substitution) then phase 2 (<> expansion) on the merged string,
+        '     so a <token> inside a root declaration joins the same cartesian product as the
+        '     template's own tokens. A family with no declared root emits nothing.
+        For Each family In scaffoldFamiliesFor(app)
 
-            Dim selectedScaffolds = resolveWebViewScaffolds(app, webViewScaffolds, menuOutput)
+            If Not family.IsDeclared Then Continue For
 
-            For Each pathTemplate In app.WebViewPaths
+            For Each emitted In expandScaffoldFamily(family, app, scaffoldSet.ForFamily(family.Label), menuOutput)
 
-                For Each expandedRoot In expandPackageKey(pathTemplate, app.Packages)
-
-                    For Each scaffoldName In selectedScaffolds
-
-                        For Each scaffoldTemplate In webViewScaffolds(scaffoldName)
-
-                            ' Phase 1 then phase 2: substituting the root first means any
-                            ' <token> inside the root declaration is inlined here and joins the
-                            ' same cartesian product as the template's own tokens.
-                            Dim merged = scaffoldTemplate.Replace("%WebViewRoot%", expandedRoot)
-
-                            For Each emitted In expandPhase2(merged, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
-
-                                section.AddKey(New iniKey2($"FileKey{fileKeyNum}={emitted}"))
-                                fileKeyNum += 1
-
-                            Next
-
-                        Next
-
-                    Next
-
-                Next
+                section.AddKey(New iniKey2($"FileKey{fileKeyNum}={emitted}"))
+                fileKeyNum += 1
 
             Next
 
-        End If
-
-        ' 5c. QtWebEngine scaffold FileKeys: same shape as the WebView block, driven by the
-        '     entry's QtWebEnginePath= declarations and the QtWebEngine catalog. Templates
-        '     contain %QtWebEngineRoot% which is substituted with each package-expanded root.
-        If app.QtWebEnginePaths.Count > 0 Then
-
-            Dim selectedQtScaffolds = resolveQtWebEngineScaffolds(app, qtWebEngineScaffolds, menuOutput)
-
-            For Each pathTemplate In app.QtWebEnginePaths
-
-                For Each expandedRoot In expandPackageKey(pathTemplate, app.Packages)
-
-                    For Each scaffoldName In selectedQtScaffolds
-
-                        For Each scaffoldTemplate In qtWebEngineScaffolds(scaffoldName)
-
-                            ' Phase 1 then phase 2, as in the WebView block above
-                            Dim merged = scaffoldTemplate.Replace("%QtWebEngineRoot%", expandedRoot)
-
-                            For Each emitted In expandPhase2(merged, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
-
-                                section.AddKey(New iniKey2($"FileKey{fileKeyNum}={emitted}"))
-                                fileKeyNum += 1
-
-                            Next
-
-                        Next
-
-                    Next
-
-                Next
-
-            Next
-
-        End If
+        Next
 
         ' 6. RegKeys, variable-expanded in the Registry domain and renumbered from 1. Registry
         '    paths never reference %Package% (which resolves to a file system path), so phase 0

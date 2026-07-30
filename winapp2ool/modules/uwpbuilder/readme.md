@@ -11,7 +11,7 @@ UWPBuilder reads a source directory containing a scaffold template (`UWP.ini`) a
 - Consistency: every UWP entry receives the same baseline cleaning coverage, generated from a single template
 - Brevity: `Package=` + a category key is a complete entry; `%Package%` abstracts away verbose package folder paths everywhere else
 - Hybrid app support: apps with both a UWP package and a win32 installation can carry both sets of keys in one definition
-- Embedded browser coverage: apps using WebView2 (EBWebView) or QTWebEngine can generate FileKeys from a shared scaffold catalog
+- Embedded browser coverage: apps using WebView2 (EBWebView), QtWebEngine, or Electron can generate FileKeys from shared scaffold catalogs
 
 ---
 
@@ -35,14 +35,15 @@ UWPBuilder reads a source directory containing a scaffold template (`UWP.ini`) a
    - [Selecting scaffolds](#selecting-scaffolds)
    - [The scaffold catalog](#the-scaffold-catalog)
 8. [QtWebEngine Scaffolds](#qtwebengine-scaffolds)
-9. [Output Formatting](#output-formatting)
-   - [When the lint pass changes meaning](#when-the-lint-pass-changes-meaning)
-10. [Command-Line Arguments](#command-line-arguments)
+9. [Electron Scaffolds](#electron-scaffolds)
+10. [Output Formatting](#output-formatting)
+    - [When the lint pass changes meaning](#when-the-lint-pass-changes-meaning)
+11. [Command-Line Arguments](#command-line-arguments)
     - [File Selection](#file-selection)
     - [Examples](#examples)
-11. [Tips & Best Practices](#tips--best-practices)
-12. [Troubleshooting](#troubleshooting)
-13. [Usage Examples](#usage-examples)
+12. [Tips & Best Practices](#tips--best-practices)
+13. [Troubleshooting](#troubleshooting)
+14. [Usage Examples](#usage-examples)
 
 ---
 
@@ -51,13 +52,14 @@ UWPBuilder reads a source directory containing a scaffold template (`UWP.ini`) a
 - A source directory containing:
   - `UWP.ini`: the UWP scaffold template
   - An `AppInfo\` subdirectory of `*.ini` files defining the applications
-- Optionally, the shared scaffold catalogs consumed when entries opt into embedded-browser scaffolding:
-  - `webview.ini`: the WebView2/EBWebView catalog
-  - `qtwebengine.ini`: the QtWebEngine catalog
+- Optionally, a scaffold directory holding the shared catalogs consumed when entries opt into embedded-browser scaffolding. Every `*.ini` in it is read, and each catalog's engine family comes from its section headers rather than its filename:
+  - `webview.ini`: `[WebViewScaffold: ...]`, the WebView2/EBWebView catalog
+  - `qtwebengine.ini`: `[QtWebEngineScaffold: ...]`, the QtWebEngine catalog
+  - `electron.ini`: `[ElectronScaffold: ...]`, the Electron catalog
 
-The winapp2.ini project's source files live in [`Assembler/UWP/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/UWP) (source directory) and [`Assembler/Scaffolds/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Scaffolds) (catalogs)
+The winapp2.ini project's source files live in [`Assembler/UWP/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/UWP) (source directory) and [`Assembler/Scaffolds/`](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Scaffolds) (scaffold directory)
 
-###### Note: The scaffold catalogs are only required if an AppInfo entry declares a WebView or QtWebEngine root. A missing or empty catalog logs a warning and generation continues with zero scaffold FileKeys for that family.
+###### Note: The scaffold directory is only required if an AppInfo entry declares a scaffold root. A missing directory, or a missing catalog within it, logs a warning and generation continues with zero scaffold FileKeys for the affected families.
 
 ---
 
@@ -65,7 +67,7 @@ The winapp2.ini project's source files live in [`Assembler/UWP/`](https://github
 
 ### Common Workflow
 1. Point the source directory at your `UWP.ini` + `AppInfo\` folder
-2. Point the WebView and QtWebEngine catalog choosers at the shared `Scaffolds\` files
+2. Point the scaffolds directory chooser at the shared `Scaffolds\` folder
 3. Run UWPBuilder
 
 To add a new application, add a section to the appropriate `AppInfo\{letter}.ini` file
@@ -79,11 +81,10 @@ To add a new application, add a section to the appropriate `AppInfo\{letter}.ini
 | Run (default) | Generate UWP app winapp2.ini entries | |
 | Choose source directory | Select the directory containing `UWP.ini` and `AppInfo\` | Default: current directory |
 | Choose save target | Select where to save the generated entries | Default: `uwp.ini` |
-| Choose webview scaffold | Select the shared WebView scaffold catalog | Default: `webview.ini` |
-| Choose QtWebEngine scaffold | Select the shared QtWebEngine scaffold catalog | Default: `qtwebengine.ini` |
+| Choose scaffolds directory | Select the folder holding the shared scaffold catalogs | Default: current directory |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
-The menu also displays the current source directory, save target, and both catalog paths.
+The menu also displays the current source directory, save target, and scaffolds directory.
 
 ---
 
@@ -92,9 +93,9 @@ The menu also displays the current source directory, save target, and both catal
 | Stage | What happens |
 |:-|:-|
 | Combine | All `AppInfo\*.ini` files are combined in-memory, in alphabetical path order. No intermediate file is created |
-| Load scaffolds | `[EntryScaffold: ...]` sections are read from `UWP.ini`; the WebView and QtWebEngine catalogs are loaded from their configured paths |
+| Load scaffolds | `[EntryScaffold: ...]` sections are read from `UWP.ini`; every catalog in the scaffolds directory is loaded |
 | Validate | Each AppInfo section is checked: at least one `Package=` and at least one category key are required. Sections failing either check are skipped with a warning; a section declaring *both* category keys warns but is still generated, using `LangSecRef` |
-| Generate | One entry is generated per valid section: package detection, scaffold FileKeys, app-specific keys, and any selected WebView/QtWebEngine scaffold keys, with `%Package%` variables expanded throughout |
+| Generate | One entry is generated per valid section: package detection, scaffold FileKeys, app-specific keys, and any selected WebView/QtWebEngine/Electron scaffold keys, with `%Package%` variables expanded throughout |
 | Lint | The complete output is normalized by WinappDebug with optimizations force-enabled (see [Output Formatting](#output-formatting)) |
 | Write | The output file is written to disk |
 
@@ -192,6 +193,9 @@ Every other unrecognised key name is a [variable declaration](#variables). There
 | `QtWebEngineRoot=` (alias `QtWebEnginePath=`) | Declares one embedded QtWebEngine profile directory (profile segment included, e.g. `...\QtWebEngine\Default`); opts the entry into [QtWebEngine scaffolds](#qtwebengine-scaffolds) | Repeatable, one per profile. `%Package%` variables are expanded |
 | `QtWebEngineScaffolds=` | Scaffold selection for the QtWebEngine family | Same grammar as `WebViewScaffolds=` |
 | `ExcludeQtWebEngineScaffolds=` | Exclusions for the QtWebEngine family | |
+| `ElectronRoot=` (alias `ElectronPath=`) | Declares an Electron `userData` folder; opts the entry into [Electron scaffolds](#electron-scaffolds) | Repeatable. `%Package%` variables are expanded |
+| `ElectronScaffolds=` | Scaffold selection for the Electron family | Same grammar as `WebViewScaffolds=` |
+| `ExcludeElectronScaffolds=` | Exclusions for the Electron family | |
 
 ## Package variables
 
@@ -313,7 +317,7 @@ Only Caches and Telemetry are generated by default. The remaining scaffolds requ
 
 # QtWebEngine Scaffolds
 
-A second, structurally identical scaffold family covers applications embedding QtWebEngine (with its own catalog at `Assembler/Scaffolds/qtwebengine.ini`, configurable via `-4f`/`-4d`).
+A second, structurally identical scaffold family covers applications embedding QtWebEngine, from `qtwebengine.ini` in the scaffolds directory.
 
 The grammar mirrors the WebView family: `QtWebEngineRoot=` (alias `QtWebEnginePath=`) opts in, and `QtWebEngineScaffolds=` / `ExcludeQtWebEngineScaffolds=` select (with the same `All` value and warning behavior). Two things differ.
 
@@ -322,6 +326,26 @@ The root names a profile directory, profile segment included: `...\QtWebEngine\D
 The default selection is wider: Caches + StorageQuota + Telemetry + VisitedLinks. QtWebEngine's catalog breaks out two low-risk targets (`QuotaManager`, `Visited Links`) that the WebView catalog leaves inside host-risk scaffolds; see the [EntryBuilder readme](../entrybuilder/readme.md#qtwebengineroot--qtwebenginescaffolds) or the catalog header for why.
 
 The QtWebEngine catalog is smaller. The current set is: `Caches`, `StorageQuota`, `Telemetry`, `VisitedLinks`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`. The first four are generated by default; the remaining four require explicit opt-in.
+
+---
+
+# Electron Scaffolds
+
+A third family covers applications embedding Electron, from `electron.ini` in the scaffolds directory.
+
+`ElectronRoot=` (alias `ElectronPath=`) opts in, and `ElectronScaffolds=` / `ExcludeElectronScaffolds=` select, with the same `All` value and warning behavior as the other families. 
+
+This is the only family with a second root. `ElectronUpdaterRoot=` declares the electron-updater download cache. Either root alone opts the entry into the family. A template whose placeholder has no declared root is dropped.
+
+```ini
+[Hazel Music *]
+Package=Hazel.Music_abc123
+LangSecRef=3021
+ElectronRoot=%LocalAppData%\Hazel Music
+ElectronUpdaterRoot=%LocalAppData%\Hazel-music-updater
+```
+
+The default selection is `AppLogs`, `Caches`, `StorageQuota`, `Telemetry`, `UpdaterCache`; The full set adds `WebCookies` and `WebStorage`, which require explicit opt-in.
 
 ---
 
@@ -368,19 +392,18 @@ UWPBuilder supports command-line automation for scripting environments and is in
 | `-1d path` | Set the source directory (containing `UWP.ini` and `AppInfo\`) | Current directory |
 | `-2d path` | Set the output directory | Current directory |
 | `-2f name` | Set the output file name | `uwp.ini` |
-| `-3d path` / `-3f name` | Set the WebView scaffold catalog location | Current directory / `webview.ini` |
-| `-4d path` / `-4f name` | Set the QtWebEngine scaffold catalog location | Current directory / `qtwebengine.ini` |
+| `-3d path` | Set the shared scaffold directory | Current directory |
 
 Paths may be absolute, or relative to the working directory using a leading backslash (e.g. `-1d \UWP`).
 
-###### Note: If the catalogs are left at their defaults and no `webview.ini`/`qtwebengine.ini` exists in the working directory, generation still succeeds with a warning and zero scaffold FileKeys for the affected family. When scripting, always pass `-3d`/`-4d` explicitly.
+###### Note: Slot 3 reads only its directory, so `-3f` has no effect on it. If it is left at its default and the working directory holds no catalogs, generation still succeeds with a warning and zero scaffold FileKeys. When scripting, always pass `-3d` explicitly. 
 
 ### Examples
 
 | Command | Effect |
 |:-|:-|
-| `winapp2ool -uwpbuilder -1d \UWP -2f uwp.ini -3d \Scaffolds -4d \Scaffolds` | Generate entries from `.\UWP\` into `.\uwp.ini`, reading both catalogs from `.\Scaffolds\` |
-| `winapp2ool -s -offline -uwpbuilder -1d \UWP -2d \Entries\UWP -2f uwp.ini -3d \Scaffolds -4d \Scaffolds` | Silent, offline, output staged to the committed artifact location `Entries\UWP\uwp.ini`; this is the invocation used by the winapp2.ini build script |
+| `winapp2ool -uwpbuilder -1d \UWP -2f uwp.ini -3d \Scaffolds` | Generate entries from `.\UWP\` into `.\uwp.ini`, reading every scaffold catalog from `.\Scaffolds\` |
+| `winapp2ool -s -offline -uwpbuilder -1d \UWP -2d \Entries\UWP -2f uwp.ini -3d \Scaffolds` | Silent, offline, output staged to the committed artifact location `Entries\UWP\uwp.ini`; this is the invocation used by the winapp2.ini build script |
 
 ---
 
@@ -424,7 +447,7 @@ QtWebEngine-family messages are identical with `QtWebEngine` in place of `WebVie
 All examples below were generated with real runs of UWPBuilder against the scaffold template and catalogs shipped in `Assembler/`. The source files shown are AppInfo sections; the command for every example is the standard invocation:
 
 ```
-winapp2ool -uwpbuilder -1d \UWP -2f uwp.ini -3d \Scaffolds -4d \Scaffolds
+winapp2ool -uwpbuilder -1d \UWP -2f uwp.ini -3d \Scaffolds
 ```
 
 ###### Note: The generated header comment block (see [Output Formatting](#output-formatting)) is omitted from the outputs below for brevity.

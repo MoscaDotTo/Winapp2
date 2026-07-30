@@ -69,12 +69,14 @@ Imports System.Text
 ''' <c> ExcludeElectronScaffolds= </c>, <c> FileKeyBase= </c>, <c> RegKeyBase= </c>,
 ''' <c> ExcludeKeyBase= </c>, <c> Skip= </c>. <br /><br />
 '''
-''' Scaffolds are loaded from three shared catalogs via <see cref="WebViewScaffolds.LoadCatalog"/>:
-''' <c> Assembler\Scaffolds\webview.ini </c> (<c> %WebViewRoot% </c> templates),
-''' <c> Assembler\Scaffolds\qtwebengine.ini </c> (<c> %QtWebEngineRoot% </c> templates), and
-''' <c> Assembler\Scaffolds\electron.ini </c> (<c> %ElectronRoot% </c> /
+''' Scaffolds are loaded from one shared scaffold <em>directory</em> (typically
+''' <c> Assembler\Scaffolds </c>) via <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which
+''' discovers each family from its section headers rather than from a configured per-family
+''' path: <c> webview.ini </c> (<c> %WebViewRoot% </c> templates), <c> qtwebengine.ini </c>
+''' (<c> %QtWebEngineRoot% </c> templates), and <c> electron.ini </c> (<c> %ElectronRoot% </c> /
 ''' <c> %ElectronUpdaterRoot% </c> templates), each substituted per declared root at generation
-''' time. <br /><br />
+''' time. UWPBuilder reads the same directory and binds the same families — see
+''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> for the parity contract. <br /><br />
 '''
 ''' Unlike <c> UWPBuilder </c>, this module never emits <c> Default= </c>. Generated
 ''' entries are opt-in by design to keep the cleaning UI uncluttered as small Electron
@@ -110,8 +112,13 @@ Public Module EntryBuilder
     ''' variable declaration by <see cref="parseEntrySpec"/>. Centralised here so the
     ''' parser's <c> Select Case </c> and the reserved-name collision check cannot
     ''' drift apart.
+    ''' <br /><br />
+    '''
+    ''' <c> Friend </c> rather than <c> Private </c> so <c> ScaffoldParityTests </c> can walk
+    ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> and assert this parser knows every
+    ''' family's key vocabulary — the guard against a family shipping to one builder only.
     ''' </summary>
-    Private ReadOnly ReservedKeys As String() = {
+    Friend ReadOnly ReservedKeys As String() = {
         "SECTION", "LANGSECREF",
         "WEBVIEWROOT", "QTWEBENGINEROOT", "ELECTRONROOT", "ELECTRONUPDATERROOT",
         "DETECT", "DETECTFILE", "DETECTOS", "SPECIALDETECT",
@@ -211,47 +218,6 @@ Public Module EntryBuilder
         Return False
 
     End Function
-
-    ''' <summary>
-    ''' Binds one scaffold-family root placeholder to the roots an entry declared for it. A family
-    ''' supplies one binding per placeholder it uses — WebView and QtWebEngine pass a single
-    ''' binding each, Electron passes two (<c> %ElectronRoot% </c> and
-    ''' <c> %ElectronUpdaterRoot% </c>) — and <see cref="expandScaffoldFamily"/> chains a
-    ''' substitution per binding across every template.
-    ''' <br /><br />
-    '''
-    ''' A binding with an empty <see cref="Roots"/> list causes any template referencing its
-    ''' placeholder to be dropped (see <see cref="fanOutPlaceholder"/>), which is the mechanism
-    ''' that keeps the Electron <c> UpdaterCache </c> scaffold inert for entries that declared no
-    ''' <c> ElectronUpdaterRoot= </c> rather than emitting a literal placeholder into a FileKey.
-    ''' </summary>
-    Private Structure ScaffoldRootBinding
-
-        ''' <summary> The literal placeholder token, e.g. <c> %ElectronRoot% </c> </summary>
-        Public Placeholder As String
-
-        ''' <summary> The roots declared for this placeholder; empty drops referencing templates </summary>
-        Public Roots As List(Of String)
-
-        ''' <summary>
-        ''' Creates a binding pairing <paramref name="placeholder"/> with <paramref name="roots"/>
-        ''' </summary>
-        '''
-        ''' <param name="placeholder">
-        ''' The literal placeholder token to substitute
-        ''' </param>
-        '''
-        ''' <param name="roots">
-        ''' The roots the entry declared for that placeholder
-        ''' </param>
-        Public Sub New(placeholder As String, roots As List(Of String))
-
-            Me.Placeholder = placeholder
-            Me.Roots = roots
-
-        End Sub
-
-    End Structure
 
     ''' <summary>
     ''' Parsed state for a single source-file section. One section corresponds to exactly
@@ -400,7 +366,7 @@ Public Module EntryBuilder
         ''' <summary>
         ''' QtWebEngine scaffold names to subtract from the active selection (either
         ''' <see cref="QtWebEngineScaffoldNames"/> when set, or
-        ''' <see cref="WebViewScaffolds.QtWebEngineDefaultScaffolds"/> otherwise).
+        ''' <see cref="ScaffoldCatalogs.QtWebEngineDefaultScaffolds"/> otherwise).
         ''' Unknown names are ignored.
         ''' </summary>
         Public ExcludedQtWebEngineScaffolds As List(Of String)
@@ -444,7 +410,7 @@ Public Module EntryBuilder
         ''' <summary>
         ''' Electron scaffold names to subtract from the active selection (either
         ''' <see cref="ElectronScaffoldNames"/> when set, or
-        ''' <see cref="WebViewScaffolds.ElectronDefaultScaffolds"/> otherwise).
+        ''' <see cref="ScaffoldCatalogs.ElectronDefaultScaffolds"/> otherwise).
         ''' Unknown names are ignored.
         ''' </summary>
         Public ExcludedElectronScaffolds As List(Of String)
@@ -747,8 +713,6 @@ Public Module EntryBuilder
         spec.WithFile(1, EntryBuilderFile1) _
             .WithFile(2, EntryBuilderFile2) _
             .WithFile(3, EntryBuilderFile3) _
-            .WithFile(4, EntryBuilderFile4) _
-            .WithFile(5, EntryBuilderFile5) _
             .WithFlag("-split", Sub() EntryBuilderSplitOutput = Not EntryBuilderSplitOutput) _
             .Parse()
 
@@ -775,16 +739,14 @@ Public Module EntryBuilder
 
         End If
 
-        Dim catalogPath = EntryBuilderFile3.Path()
-        Dim qtCatalogPath = EntryBuilderFile4.Path()
-        Dim electronCatalogPath = EntryBuilderFile5.Path()
+        Dim scaffoldDir = EntryBuilderFile3.Dir
 
         Dim output As New MenuSection
         output.AddBoxWithText("Building shorthand-DSL entries")
 
         Using gLogScope("Building shorthand-DSL entries")
 
-            processEntryBuilder(sourceIni, catalogPath, qtCatalogPath, electronCatalogPath, output)
+            processEntryBuilder(sourceIni, scaffoldDir, output)
 
             output.AddBoxWithText("Entries built successfully")
             gLog("Entries built successfully")
@@ -811,52 +773,35 @@ Public Module EntryBuilder
     ''' The combined contents of every <c> *.ini </c> in the source directory
     ''' </param>
     '''
-    ''' <param name="catalogPath">
-    ''' Absolute path to the shared WebView scaffold catalog (typically
-    ''' <c> Assembler\Scaffolds\webview.ini </c>). Loaded once per run via
-    ''' <see cref="WebViewScaffolds.LoadCatalog"/>.
-    ''' </param>
-    '''
-    ''' <param name="qtCatalogPath">
-    ''' Absolute path to the shared QtWebEngine scaffold catalog (typically
-    ''' <c> Assembler\Scaffolds\qtwebengine.ini </c>). Loaded once per run via
-    ''' <see cref="WebViewScaffolds.LoadCatalog"/> with the <c> QtWebEngineScaffold: </c> prefix.
-    ''' </param>
-    '''
-    ''' <param name="electronCatalogPath">
-    ''' Absolute path to the shared Electron scaffold catalog (typically
-    ''' <c> Assembler\Scaffolds\electron.ini </c>). Loaded once per run via
-    ''' <see cref="WebViewScaffolds.LoadCatalog"/> with the <c> ElectronScaffold: </c> prefix.
+    ''' <param name="scaffoldDir">
+    ''' Absolute path to the shared scaffold directory (typically
+    ''' <c> Assembler\Scaffolds </c>). Every catalog in it is loaded once per run via
+    ''' <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which derives each family from its
+    ''' section headers — so a family whose catalog file is absent costs its scaffold keys and a
+    ''' warning, never a failed run.
     ''' </param>
     '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving progress lines and warnings for display
     ''' </param>
     Private Sub processEntryBuilder(sourceIni As iniFile2,
-                                     catalogPath As String,
-                                     qtCatalogPath As String,
-                                     electronCatalogPath As String,
+                                     scaffoldDir As String,
                                      menuOutput As MenuSection)
 
         Using gLogScope("Processing EntryBuilder source files")
 
-            Dim catalog = WebViewScaffolds.LoadCatalog(catalogPath, menuOutput)
+            Dim scaffoldSet = ScaffoldCatalogs.LoadCatalogDirectory(scaffoldDir, menuOutput)
+            Dim catalog = scaffoldSet.ForFamily("WebView")
+            Dim qtCatalog = scaffoldSet.ForFamily("QtWebEngine")
+            Dim electronCatalog = scaffoldSet.ForFamily("Electron")
 
-            Dim catalogMsg = $"Loaded {catalog.Count} WebView scaffold(s) from {catalogPath}"
-            menuOutput.AddColoredLine(catalogMsg, ConsoleColor.Yellow)
-            gLog(catalogMsg)
+            For Each family In ScaffoldCatalogs.ScaffoldFamilies
 
-            Dim qtCatalog = WebViewScaffolds.LoadCatalog(qtCatalogPath, menuOutput, "QtWebEngineScaffold:")
+                Dim familyMsg = $"Loaded {scaffoldSet.ForFamily(family).Count} {family} scaffold(s) from {scaffoldDir}"
+                menuOutput.AddColoredLine(familyMsg, ConsoleColor.Yellow)
+                gLog(familyMsg)
 
-            Dim qtCatalogMsg = $"Loaded {qtCatalog.Count} QtWebEngine scaffold(s) from {qtCatalogPath}"
-            menuOutput.AddColoredLine(qtCatalogMsg, ConsoleColor.Yellow)
-            gLog(qtCatalogMsg)
-
-            Dim electronCatalog = WebViewScaffolds.LoadCatalog(electronCatalogPath, menuOutput, "ElectronScaffold:")
-
-            Dim electronCatalogMsg = $"Loaded {electronCatalog.Count} Electron scaffold(s) from {electronCatalogPath}"
-            menuOutput.AddColoredLine(electronCatalogMsg, ConsoleColor.Yellow)
-            gLog(electronCatalogMsg)
+            Next
 
             Dim entries As New List(Of EntrySpec)
 
@@ -1453,7 +1398,7 @@ Public Module EntryBuilder
                                        available As Dictionary(Of String, List(Of String)),
                                        menuOutput As MenuSection) As List(Of String)
 
-        Return WebViewScaffolds.ResolveScaffolds(spec.WebViewScaffoldNames, spec.WebViewScaffoldsKeyPresent,
+        Return ScaffoldCatalogs.ResolveScaffolds(spec.WebViewScaffoldNames, spec.WebViewScaffoldsKeyPresent,
                                                  spec.ExcludedWebViewScaffolds, available,
                                                  DefaultScaffolds, "WebView", spec.Name, menuOutput)
 
@@ -1463,7 +1408,7 @@ Public Module EntryBuilder
     ''' Selects the set of QtWebEngine scaffold names to emit for the given entry, following
     ''' the same resolution grammar as <see cref="resolveWebViewScaffolds"/> but driven by the
     ''' entry's <c> QtWebEngineScaffolds= </c> / <c> ExcludeQtWebEngineScaffolds= </c> keys and
-    ''' the QtWebEngine default set. Delegates to <see cref="WebViewScaffolds.ResolveScaffolds"/>.
+    ''' the QtWebEngine default set. Delegates to <see cref="ScaffoldCatalogs.ResolveScaffolds"/>.
     ''' </summary>
     '''
     ''' <param name="spec">
@@ -1486,9 +1431,9 @@ Public Module EntryBuilder
                                                  available As Dictionary(Of String, List(Of String)),
                                                  menuOutput As MenuSection) As List(Of String)
 
-        Return WebViewScaffolds.ResolveScaffolds(spec.QtWebEngineScaffoldNames, spec.QtWebEngineScaffoldsKeyPresent,
+        Return ScaffoldCatalogs.ResolveScaffolds(spec.QtWebEngineScaffoldNames, spec.QtWebEngineScaffoldsKeyPresent,
                                                  spec.ExcludedQtWebEngineScaffolds, available,
-                                                 WebViewScaffolds.QtWebEngineDefaultScaffolds, "QtWebEngine", spec.Name, menuOutput)
+                                                 ScaffoldCatalogs.QtWebEngineDefaultScaffolds, "QtWebEngine", spec.Name, menuOutput)
 
     End Function
 
@@ -1496,7 +1441,7 @@ Public Module EntryBuilder
     ''' Selects the set of Electron scaffold names to emit for the given entry, following the same
     ''' resolution grammar as <see cref="resolveWebViewScaffolds"/> but driven by the entry's
     ''' <c> ElectronScaffolds= </c> / <c> ExcludeElectronScaffolds= </c> keys and the Electron
-    ''' default set. Delegates to <see cref="WebViewScaffolds.ResolveScaffolds"/>.
+    ''' default set. Delegates to <see cref="ScaffoldCatalogs.ResolveScaffolds"/>.
     ''' <br /><br />
     '''
     ''' Selection is orthogonal to which roots the entry declared: a selected scaffold whose
@@ -1524,9 +1469,9 @@ Public Module EntryBuilder
                                               available As Dictionary(Of String, List(Of String)),
                                               menuOutput As MenuSection) As List(Of String)
 
-        Return WebViewScaffolds.ResolveScaffolds(spec.ElectronScaffoldNames, spec.ElectronScaffoldsKeyPresent,
+        Return ScaffoldCatalogs.ResolveScaffolds(spec.ElectronScaffoldNames, spec.ElectronScaffoldsKeyPresent,
                                                  spec.ExcludedElectronScaffolds, available,
-                                                 WebViewScaffolds.ElectronDefaultScaffolds, "Electron", spec.Name, menuOutput)
+                                                 ScaffoldCatalogs.ElectronDefaultScaffolds, "Electron", spec.Name, menuOutput)
 
     End Function
 
@@ -1651,8 +1596,8 @@ Public Module EntryBuilder
         If spec.WebViewRoots.Count > 0 Then
 
             Dim selectedScaffolds = resolveWebViewScaffolds(spec, catalog, menuOutput)
-            Dim webViewBindings As New List(Of ScaffoldRootBinding) From {
-                New ScaffoldRootBinding("%WebViewRoot%", spec.WebViewRoots)
+            Dim webViewBindings As New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
+                New ScaffoldCatalogs.ScaffoldRootBinding("%WebViewRoot%", spec.WebViewRoots)
             }
             fileKeys.AddRange(expandScaffoldFamily(webViewBindings, selectedScaffolds, spec.WebViewScaffoldsKeyPresent, catalog, spec, stats, menuOutput))
 
@@ -1665,8 +1610,8 @@ Public Module EntryBuilder
         If spec.QtWebEngineRoots.Count > 0 Then
 
             Dim selectedQtScaffolds = resolveQtWebEngineScaffolds(spec, qtCatalog, menuOutput)
-            Dim qtBindings As New List(Of ScaffoldRootBinding) From {
-                New ScaffoldRootBinding("%QtWebEngineRoot%", spec.QtWebEngineRoots)
+            Dim qtBindings As New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
+                New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", spec.QtWebEngineRoots)
             }
             fileKeys.AddRange(expandScaffoldFamily(qtBindings, selectedQtScaffolds, spec.QtWebEngineScaffoldsKeyPresent, qtCatalog, spec, stats, menuOutput))
 
@@ -1680,9 +1625,9 @@ Public Module EntryBuilder
         If spec.ElectronRoots.Count > 0 OrElse spec.ElectronUpdaterRoots.Count > 0 Then
 
             Dim selectedElectronScaffolds = resolveElectronScaffolds(spec, electronCatalog, menuOutput)
-            Dim electronBindings As New List(Of ScaffoldRootBinding) From {
-                New ScaffoldRootBinding("%ElectronRoot%", spec.ElectronRoots),
-                New ScaffoldRootBinding("%ElectronUpdaterRoot%", spec.ElectronUpdaterRoots)
+            Dim electronBindings As New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
+                New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronRoot%", spec.ElectronRoots),
+                New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronUpdaterRoot%", spec.ElectronUpdaterRoots)
             }
             fileKeys.AddRange(expandScaffoldFamily(electronBindings, selectedElectronScaffolds, spec.ElectronScaffoldsKeyPresent, electronCatalog, spec, stats, menuOutput))
 
@@ -1949,60 +1894,10 @@ Public Module EntryBuilder
                                  spec As EntrySpec) As List(Of String)
 
         Dim result As New List(Of String) From {template}
-        result = fanOutPlaceholder(result, "%WebViewRoot%", spec.WebViewRoots)
-        result = fanOutPlaceholder(result, "%QtWebEngineRoot%", spec.QtWebEngineRoots)
-        result = fanOutPlaceholder(result, "%ElectronRoot%", spec.ElectronRoots)
-        result = fanOutPlaceholder(result, "%ElectronUpdaterRoot%", spec.ElectronUpdaterRoots)
-        Return result
-
-    End Function
-
-    ''' <summary>
-    ''' Replaces <paramref name="placeholder"/> in each input template with every root in
-    ''' <paramref name="roots"/>, producing one output per (template, root) pair. Templates
-    ''' that do not contain the placeholder pass through unchanged (one output each), so the
-    ''' helper can be chained per placeholder without dropping placeholder-free strings.
-    ''' </summary>
-    '''
-    ''' <param name="templates">
-    ''' The current working set of (possibly already partially expanded) templates
-    ''' </param>
-    '''
-    ''' <param name="placeholder">
-    ''' The literal placeholder token to substitute (e.g. <c> %WebViewRoot% </c>)
-    ''' </param>
-    '''
-    ''' <param name="roots">
-    ''' The root paths to substitute for the placeholder
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' The expanded set; a template containing the placeholder is dropped when
-    ''' <paramref name="roots"/> is empty (matching the legacy behaviour of emitting nothing
-    ''' for a placeholder with no declared root)
-    ''' </returns>
-    Private Function fanOutPlaceholder(templates As List(Of String),
-                                        placeholder As String,
-                                        roots As List(Of String)) As List(Of String)
-
-        Dim result As New List(Of String)
-
-        For Each t In templates
-
-            If t.Contains(placeholder) Then
-
-                For Each root In roots
-                    result.Add(t.Replace(placeholder, root))
-                Next
-
-            Else
-
-                result.Add(t)
-
-            End If
-
-        Next
-
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%WebViewRoot%", spec.WebViewRoots)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%QtWebEngineRoot%", spec.QtWebEngineRoots)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%ElectronRoot%", spec.ElectronRoots)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%ElectronUpdaterRoot%", spec.ElectronUpdaterRoots)
         Return result
 
     End Function
@@ -2014,12 +1909,14 @@ Public Module EntryBuilder
     ''' scaffold tiers, which differ only in their bindings and catalog.
     ''' <br /><br />
     '''
-    ''' Substitution is delegated to <see cref="fanOutPlaceholder"/> and chained one binding at a
-    ''' time, so a template referencing several placeholders multiplies across all of their root
-    ''' lists, and a template referencing a placeholder whose binding has no roots is <em>dropped</em>
-    ''' rather than emitted with the placeholder left literal. That drop rule is what makes the
-    ''' Electron family's two-placeholder catalog work: an entry declaring only
-    ''' <c> ElectronRoot= </c> silently contributes nothing from the <c> UpdaterCache </c> scaffold.
+    ''' Substitution is delegated to <see cref="ScaffoldCatalogs.BindFamilyTemplates"/>, which
+    ''' chains one <c> FanOutPlaceholder </c> pass per binding, so a template referencing several
+    ''' placeholders multiplies across all of their root lists, and a template referencing a
+    ''' placeholder whose binding has no roots is <em>dropped</em> rather than emitted with the
+    ''' placeholder left literal. That drop rule is what makes the Electron family's
+    ''' two-placeholder catalog work: an entry declaring only <c> ElectronRoot= </c> silently
+    ''' contributes nothing from the <c> UpdaterCache </c> scaffold. UWPBuilder drives the same
+    ''' helper, so the substitution semantics cannot drift between the two builders.
     ''' <br /><br />
     '''
     ''' A scaffold that produced nothing at all warns only when the entry named its family's
@@ -2062,7 +1959,7 @@ Public Module EntryBuilder
     ''' <returns>
     ''' Every expanded FileKey value produced by this family, in fan-out order
     ''' </returns>
-    Private Function expandScaffoldFamily(bindings As List(Of ScaffoldRootBinding),
+    Private Function expandScaffoldFamily(bindings As List(Of ScaffoldCatalogs.ScaffoldRootBinding),
                                            selectedScaffolds As List(Of String),
                                            selectionWasExplicit As Boolean,
                                            catalog As Dictionary(Of String, List(Of String)),
@@ -2072,28 +1969,15 @@ Public Module EntryBuilder
 
         Dim result As New List(Of String)
 
-        For Each scaffoldName In selectedScaffolds
+        For Each bound In ScaffoldCatalogs.BindFamilyTemplates(bindings, selectedScaffolds, catalog)
 
-            Dim templates = catalog(scaffoldName)
             Dim scaffoldYield = 0
 
-            For Each template In templates
+            For Each expanded In bound.Templates
 
-                Dim rootExpanded As New List(Of String) From {template}
-
-                For Each binding In bindings
-
-                    rootExpanded = fanOutPlaceholder(rootExpanded, binding.Placeholder, binding.Roots)
-
-                Next
-
-                For Each expanded In rootExpanded
-
-                    Dim produced = expandPhase2(expanded, spec, ExpansionDomain.Filesystem, "FileKey", stats, menuOutput)
-                    scaffoldYield += produced.Count
-                    result.AddRange(produced)
-
-                Next
+                Dim produced = expandPhase2(expanded, spec, ExpansionDomain.Filesystem, "FileKey", stats, menuOutput)
+                scaffoldYield += produced.Count
+                result.AddRange(produced)
 
             Next
 
@@ -2102,9 +1986,9 @@ Public Module EntryBuilder
             ' worth saying when the author asked for this scaffold by name: the Electron default
             ' set deliberately carries UpdaterCache for every entry, most of which declare no
             ' ElectronUpdaterRoot, so warning unconditionally would fire constantly.
-            If scaffoldYield = 0 AndAlso templates.Count > 0 AndAlso selectionWasExplicit Then
+            If scaffoldYield = 0 AndAlso bound.TemplateCount > 0 AndAlso selectionWasExplicit Then
 
-                Dim noRootMsg = $"Scaffold '{scaffoldName}' selected by [{spec.Name}] produced no keys; its templates reference a root the entry did not declare"
+                Dim noRootMsg = $"Scaffold '{bound.ScaffoldName}' selected by [{spec.Name}] produced no keys; its templates reference a root the entry did not declare"
                 gLog(noRootMsg)
                 menuOutput.AddWarning(noRootMsg)
 
