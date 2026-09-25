@@ -125,17 +125,16 @@ Imports System.Text
     End Function
 
     ''' <summary>
-    ''' Minimal valid AppInfo preamble — a package and a category, so the entry is not skipped
+    ''' Minimal valid AppInfo preamble: a package and a category, so the entry is not skipped
     ''' </summary>
     Private Const Preamble As String = "[Test App *]" & vbCrLf &
-                                       "Package=Contoso.App_8wekyb3d8bbwe" & vbCrLf &
+                                       "Package=Hazel.App_abc123" & vbCrLf &
                                        "LangSecRef=3021" & vbCrLf
 
     ' ----- Open vocabulary -----
 
     ''' <summary>
-    ''' An unrecognised key is a variable declaration, not an error. This is the change that
-    ''' replaces the parser's former "Unexpected key type" warning
+    ''' An unrecognised key is a variable declaration, not an error.
     ''' </summary>
     <TestMethod()> Public Sub UnknownKey_BecomesVariableDeclaration()
 
@@ -151,12 +150,12 @@ Imports System.Text
 
     ''' <summary>
     ''' A declared variable that nothing references is the typo backstop for a misspelled
-    ''' reserved key (e.g. Pakcage=), replacing the lost unknown-key warning
+    ''' reserved key (e.g. Pakcage=)
     ''' </summary>
     <TestMethod()> Public Sub UnreferencedVariable_IsReportable()
 
         Dim diags As List(Of String) = Nothing
-        Dim app = ParseApp(Preamble & "Pakcage=Contoso.Typo_8wekyb3d8bbwe" & vbCrLf, diags)
+        Dim app = ParseApp(Preamble & "Pakcage=Hazel.Typo_abc123" & vbCrLf, diags)
 
         Dim unused = app.Variables.UnreferencedNames()
 
@@ -393,6 +392,71 @@ Imports System.Text
                             electronCatalog:=catalog)
 
         Assert.AreEqual(1, ValuesOf(section, "FileKey").Count)
+
+    End Sub
+
+    ' ----- QtWebEngine cache root -----
+
+    ''' <summary>
+    ''' <c> QtWebEngineCachePath= </c> binds <c> %QtWebEngineCacheRoot% </c> independently of the
+    ''' profile root, and is package-expanded like every other root
+    ''' </summary>
+    <TestMethod()> Public Sub QtWebEngine_CacheRoot_BindsAndSubstitutes()
+
+        Dim catalog As New Dictionary(Of String, List(Of String)) From {
+            {"Caches", New List(Of String) From {"%QtWebEngineRoot%\GPUCache|*", "%QtWebEngineCacheRoot%\Cache|*|RECURSE"}}
+        }
+
+        Dim section = Build(Preamble &
+                            "QtWebEngineRoot=%Package%\LocalCache\QtWebEngine\Default" & vbCrLf &
+                            "QtWebEngineCachePath=%Package%\LocalCache\cache\QtWebEngine\Default" & vbCrLf &
+                            "QtWebEngineScaffolds=Caches" & vbCrLf,
+                            qtCatalog:=catalog)
+
+        CollectionAssert.AreEquivalent(
+            New List(Of String) From {
+                "%LocalAppData%\Packages\Contoso.App_8wekyb3d8bbwe\LocalCache\QtWebEngine\Default\GPUCache|*",
+                "%LocalAppData%\Packages\Contoso.App_8wekyb3d8bbwe\LocalCache\cache\QtWebEngine\Default\Cache|*|RECURSE"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' An entry declaring only <c> QtWebEngineRoot= </c> drops the cache templates rather than
+    ''' emitting a literal <c> %QtWebEngineCacheRoot% </c> into a FileKey
+    ''' </summary>
+    <TestMethod()> Public Sub QtWebEngine_NoCacheRoot_DropsCacheTemplates()
+
+        Dim catalog As New Dictionary(Of String, List(Of String)) From {
+            {"Caches", New List(Of String) From {"%QtWebEngineRoot%\GPUCache|*", "%QtWebEngineCacheRoot%\Cache|*|RECURSE"}}
+        }
+
+        Dim section = Build(Preamble & "QtWebEngineRoot=%LocalAppData%\VideoKeeper\QtWebEngine\Default" & vbCrLf,
+                            qtCatalog:=catalog)
+
+        Dim fileKeys = ValuesOf(section, "FileKey")
+
+        Assert.AreEqual(1, fileKeys.Count)
+        Assert.AreEqual("%LocalAppData%\VideoKeeper\QtWebEngine\Default\GPUCache|*", fileKeys(0))
+
+    End Sub
+
+    ''' <summary>
+    ''' Declaring only <c> QtWebEngineCacheRoot= </c> still opts the entry into the family
+    ''' </summary>
+    <TestMethod()> Public Sub QtWebEngine_CacheRootAlone_OptsInToFamily()
+
+        Dim catalog As New Dictionary(Of String, List(Of String)) From {
+            {"Caches", New List(Of String) From {"%QtWebEngineRoot%\GPUCache|*", "%QtWebEngineCacheRoot%\Cache|*|RECURSE"}}
+        }
+
+        Dim section = Build(Preamble &
+                            "QtWebEngineCacheRoot=%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default" & vbCrLf,
+                            qtCatalog:=catalog)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default\Cache|*|RECURSE"},
+            ValuesOf(section, "FileKey"))
 
     End Sub
 

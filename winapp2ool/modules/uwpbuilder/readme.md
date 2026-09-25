@@ -188,12 +188,14 @@ Every other unrecognised key name is a [variable declaration](#variables). There
 | `Skip` | Omits this application from generation entirely | Presence-based: see below |
 | `SkipUWPFileKeys` | Suppresses the scaffold `FileKeyBase=` templates for this entry only | Presence-based: see below. Detection keys are unaffected |
 | `WebViewRoot=` (alias `WebViewPath=`) | Declares an embedded WebView2/EBWebView data root; opts the entry into [WebView scaffolds](#webview-scaffolds) | Repeatable (numbered or not). `%Package%` variables are expanded |
-| `WebViewScaffolds=` | Comma-separated scaffold selection, replacing the default set | `All` sentinel expands to the whole catalog |
+| `WebViewScaffolds=` | Comma-separated scaffold selection, replacing the default set | `All` sentinel expands to the whole catalog except the legacy tier |
 | `ExcludeWebViewScaffolds=` | Comma-separated scaffold names subtracted from the active selection | |
 | `QtWebEngineRoot=` (alias `QtWebEnginePath=`) | Declares one embedded QtWebEngine profile directory (profile segment included, e.g. `...\QtWebEngine\Default`); opts the entry into [QtWebEngine scaffolds](#qtwebengine-scaffolds) | Repeatable, one per profile. `%Package%` variables are expanded |
+| `QtWebEngineCacheRoot=` (alias `QtWebEngineCachePath=`) | Declares a QtWebEngine HTTP cache directory for `%QtWebEngineCacheRoot%`; also opts the entry into QtWebEngine scaffolds | Repeatable. `%Package%` variables are expanded |
 | `QtWebEngineScaffolds=` | Scaffold selection for the QtWebEngine family | Same grammar as `WebViewScaffolds=` |
 | `ExcludeQtWebEngineScaffolds=` | Exclusions for the QtWebEngine family | |
 | `ElectronRoot=` (alias `ElectronPath=`) | Declares an Electron `userData` folder; opts the entry into [Electron scaffolds](#electron-scaffolds) | Repeatable. `%Package%` variables are expanded |
+| `ElectronUpdaterRoot=` (alias `ElectronUpdaterPath=`) | Declares an electron-updater download cache for `%ElectronUpdaterRoot%`; also opts the entry into Electron scaffolds | Repeatable. `%Package%` variables are expanded |
 | `ElectronScaffolds=` | Scaffold selection for the Electron family | Same grammar as `WebViewScaffolds=` |
 | `ExcludeElectronScaffolds=` | Exclusions for the Electron family | |
 
@@ -289,7 +291,7 @@ WebViewRoot=%Package%\LocalState\EBWebView
 LangSecRef=3021
 ```
 
-Each selected scaffold's templates are expanded once per declared root, with `%WebViewRoot%` substituted for the (package-expanded) root path. An app with two WebView folders declares two roots (`WebViewRoot1=`, `WebViewRoot2=`) and receives the full selection for each. The root does not have to be package-relative: a win32 path like `%AppData%\Microsoft\Teams` is equally valid.
+Each selected scaffold's templates are expanded once per declared root, with `%WebViewRoot%` substituted for the (package-expanded) root path. The root is the folder that holds the profiles; profile-scoped templates use `%WebViewRoot%\*\`, so `Default` and named profiles such as `WV2Profile_*` are all covered. An app with two WebView folders declares two roots (`WebViewRoot1=`, `WebViewRoot2=`) and receives the full selection for each. The root does not have to be package-relative: a win32 path like `%AppData%\Microsoft\Teams` is equally valid.
 
 ## Selecting scaffolds
 
@@ -298,20 +300,24 @@ Each selected scaffold's templates are expanded once per declared root, with `%W
 | No `WebViewScaffolds=` key | The default set: Caches, Telemetry |
 | `WebViewScaffolds=Name1,Name2` | Exactly the named scaffolds |
 | `WebViewScaffolds=` (present but empty) | Nothing  |
-| `WebViewScaffolds=All` | Every scaffold in the catalog, including host-risk categories |
+| `WebViewScaffolds=All` | Every scaffold in the catalog except the legacy tier, including host-risk categories |
+| `WebViewScaffolds=All,LegacyTelemetry` | `All`, plus the named legacy scaffold |
 | `ExcludeWebViewScaffolds=Name1,Name2` | Subtracted from whichever selection is active |
 
-- `All` is a reserved value and cannot be used as a catalog scaffold name. Naming additional scaffolds alongside `All` is redundant and warns
+- `All` is a reserved value and cannot be used as a catalog scaffold name. Naming a non-legacy scaffold alongside `All` is redundant and warns
+- A scaffold marked `Tier=Legacy` in the catalog is withheld from `All` and generated only when named, alone or beside `All`
 - `All` + `ExcludeWebViewScaffolds=` is "everything except these" and does not warn
-- Unknown names in `WebViewScaffolds=` are dropped with a warning
+- Unknown names in `WebViewScaffolds=` are dropped with a warning, including beside `All`
 - Unknown names in `ExcludeWebViewScaffolds=` are silent.
 - All scaffold name matching is case-insensitive
 
 ## The scaffold catalog
 
-The current set of scaffolds for WebView2 is: `Autofill`, `Autoplay`, `BookmarkBackups`, `BookmarkFavicons`, `Caches`, `DefaultApps`, `DownloadHistory`, `DRMData`, `ExtensionCookies`, `ProgressiveWebApps`, `PrivacySandbox`, `LoginData`, `Security`, `Shopping`, `StorageQuota`, `Sync Data`, `Telemetry`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`.
+The current set of scaffolds for WebView2 is: `Autofill`, `Autoplay`, `BookmarkFavicons`, `Caches`, `DefaultApps`, `DownloadHistory`, `DRMData`, `PrivacySandbox`, `LoginData`, `Security`, `Shopping`, `Sync Data`, `Telemetry`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`.
 
-Only Caches and Telemetry are generated by default. The remaining scaffolds require explicit opt-in.
+The legacy tier holds patterns that modern host don't write but an older ones may: `LegacyCaches`, `LegacyDownloadHistory`, `LegacyDRMData`, `LegacyExtensionCookies`, `LegacyProgressiveWebApps`, `LegacyStorageQuota`, `LegacyTelemetry`, `LegacyWebHistory`.
+
+Only Caches and Telemetry are generated by default. The remaining scaffolds require explicit opt-in, and legacy scaffolds must be named even when `All` is selected.
 
 ---
 
@@ -321,11 +327,11 @@ A second, structurally identical scaffold family covers applications embedding Q
 
 The grammar mirrors the WebView family: `QtWebEngineRoot=` (alias `QtWebEnginePath=`) opts in, and `QtWebEngineScaffolds=` / `ExcludeQtWebEngineScaffolds=` select (with the same `All` value and warning behavior). Two things differ.
 
-The root names a profile directory, profile segment included: `...\QtWebEngine\Default`, not the `QtWebEngine` folder above it.
+The root names a profile directory, profile segment included: `...\QtWebEngine\Default`, not the `QtWebEngine` folder above it. Qt keeps the HTTP cache outside that directory, so a second root, `QtWebEngineCacheRoot=` (alias `QtWebEngineCachePath=`), declares it for `%QtWebEngineCacheRoot%`. Either root alone opts the entry in, and a template whose placeholder has no declared root is dropped.
 
-The default selection is wider: Caches + StorageQuota + Telemetry + VisitedLinks. QtWebEngine's catalog breaks out two low-risk targets (`QuotaManager`, `Visited Links`) that the WebView catalog leaves inside host-risk scaffolds; see the [EntryBuilder readme](../entrybuilder/readme.md#qtwebengineroot--qtwebenginescaffolds) or the catalog header for why.
+The default selection is wider: Caches + StorageQuota + Telemetry + VisitedLinks. QtWebEngine's catalog breaks out two low-risk targets (`QuotaManager`, `Visited Links`) that the WebView catalog keeps out of its default set, in the legacy `LegacyStorageQuota` and the host-risk `WebHistory` respectively; see the [EntryBuilder readme](../entrybuilder/readme.md#qtwebengineroot--qtwebenginecacheroot--qtwebenginescaffolds) or the catalog header for why.
 
-The QtWebEngine catalog is smaller. The current set is: `Caches`, `StorageQuota`, `Telemetry`, `VisitedLinks`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`. The first four are generated by default; the remaining four require explicit opt-in.
+The QtWebEngine catalog is smaller. The current set is: `Caches`, `Favicons`, `PrivacySandbox`, `Security`, `StorageQuota`, `Telemetry`, `VisitedLinks`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, plus the legacy `LegacyTelemetry` and `LegacyWebStorage`. Caches, StorageQuota, Telemetry and VisitedLinks are generated by default; the rest require explicit opt-in.
 
 ---
 
@@ -335,7 +341,7 @@ A third family covers applications embedding Electron, from `electron.ini` in th
 
 `ElectronRoot=` (alias `ElectronPath=`) opts in, and `ElectronScaffolds=` / `ExcludeElectronScaffolds=` select, with the same `All` value and warning behavior as the other families. 
 
-This is the only family with a second root. `ElectronUpdaterRoot=` declares the electron-updater download cache. Either root alone opts the entry into the family. A template whose placeholder has no declared root is dropped.
+Like QtWebEngine, this family has a second root. `ElectronUpdaterRoot=` declares the electron-updater download cache. Either root alone opts the entry into the family. A template whose placeholder has no declared root is dropped.
 
 ```ini
 [Hazel Music *]
@@ -345,7 +351,7 @@ ElectronRoot=%LocalAppData%\Hazel Music
 ElectronUpdaterRoot=%LocalAppData%\Hazel-music-updater
 ```
 
-The default selection is `AppLogs`, `Caches`, `StorageQuota`, `Telemetry`, `UpdaterCache`; The full set adds `WebCookies` and `WebStorage`, which require explicit opt-in.
+The default selection is `AppLogs`, `Caches`, `StorageQuota`, `Telemetry`, `UpdaterCache`. The full set adds `MediaDRM`, `PrivacySandbox`, `Security` and `TempFiles`, plus the host-risk `WebCookies` and `WebStorage`, all of which require explicit opt-in. The Electron catalog has no legacy tier.
 
 ---
 
@@ -433,12 +439,13 @@ Paths may be absolute, or relative to the working directory using a leading back
 | "Skipping scaffold FileKeys for: {name}" | Informational; the entry declares `SkipUWPFileKeys` |
 | "WebViewScaffold catalog at {path} is empty or missing" | The catalog file wasn't found; generation continues with zero WebView scaffold FileKeys. |
 | "Unknown WebView scaffold '{name}' requested by [{entry}], skipping" | A `WebViewScaffolds=` name doesn't exist in the catalog. Note that unknown `ExcludeWebViewScaffolds=` names produce **no** message |
-| "WebViewScaffolds=All in [{entry}] with redundant additional names ({names}); ignoring" | `All` already selects everything |
+| "WebViewScaffolds=All in [{entry}] with redundant additional names ({names}); ignoring" | A non-legacy scaffold was named beside `All`, which already selects it |
 | "Both WebViewScaffolds and ExcludeWebViewScaffolds set in [{entry}]; applying exclusions to explicit list" | Exclusions usually pair with the implicit defaults or `All` |
 | "Duplicate WebViewScaffold name '{name}'; last definition wins" | The catalog defines the same scaffold twice |
 | "Unexpected section in WebViewScaffold catalog: [{name}]" | The catalog contains a section without the family prefix; it is ignored |
+| "Unknown tier '{value}' in WebViewScaffold [{section}]; the only tier is Legacy" | A catalog section has a `Tier=` value other than `Legacy`; the tier is ignored and the scaffold stays in `All` |
 
-QtWebEngine-family messages are identical with `QtWebEngine` in place of `WebView`.
+QtWebEngine- and Electron-family messages are identical with `QtWebEngine` or `Electron` in place of `WebView`. Each `All` expansion is also logged: `WebViewScaffolds=All in [{entry}]; expanded to N scaffold(s) from catalog, M legacy withheld`.
 
 ---
 
@@ -690,50 +697,43 @@ LangSecRef=3021
 LangSecRef=3021
 DetectFile=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry
 FileKey1=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\AC|*|RECURSE
-FileKey2=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version;Module Info Cache
+FileKey2=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version
 FileKey3=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView|*.pma;LOG;LOG.old;*-journal|RECURSE
-FileKey4=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*BrowserMetrics|*|REMOVESELF
-FileKey5=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*Cache*|*|REMOVESELF
-FileKey6=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Avatars|*|REMOVESELF
-FileKey7=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Crash Reports|*|REMOVESELF
-FileKey8=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Crashpad|*|REMOVESELF
-FileKey9=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default|*.ldb;CURRENT;LOCK;MANIFEST-*;ServerCertificate;*.log
-FileKey10=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\*Cache*|*|REMOVESELF
-FileKey11=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\blob_storage|*|REMOVESELF
-FileKey12=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\BudgetDatabase|*|REMOVESELF
-FileKey13=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\DataSharing|*|REMOVESELF
-FileKey14=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\Download Service|*|REMOVESELF
-FileKey15=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\Feature Engagement Tracker|*|REMOVESELF
-FileKey16=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\File System|*|REMOVESELF
-FileKey17=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\GCM Store|*|REMOVESELF
-FileKey18=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\JumpListIcons*|*|REMOVESELF
-FileKey19=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\Network|Network Persistent State*;Reporting and NEL*;SCT Auditing Pending Reports*
-FileKey20=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\optimization*|*|REMOVESELF
-FileKey21=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\PersistentOriginTrials|*|REMOVESELF
-FileKey22=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\Platform Notifications|*|REMOVESELF
-FileKey23=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\Service Worker|*|REMOVESELF
-FileKey24=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\Shared Dictionary\cache|*|REMOVESELF
-FileKey25=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\Site Characteristics Database|*|REMOVESELF
-FileKey26=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\Storage\ext\*\def\*cache*|*|REMOVESELF
-FileKey27=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\Storage\ext\*\def\Platform Notifications|*|REMOVESELF
-FileKey28=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\VideoDecodeStats|*|REMOVESELF
-FileKey29=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\WebRTC Logs|*|REMOVESELF
-FileKey30=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default\WebrtcVideoStats|*|REMOVESELF
-FileKey31=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Local Traces|*|REMOVESELF
-FileKey32=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Optimization*|*|REMOVESELF
-FileKey33=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\OriginTrials|*|REMOVESELF
-FileKey34=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Stability|*|REMOVESELF
-FileKey35=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\Settings|*.log*
-FileKey36=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\SystemAppData\Helium|*.log*
-FileKey37=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\TempState|*|REMOVESELF
+FileKey4=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*|*.ldb;CURRENT;LOCK;MANIFEST-*;ServerCertificate;*.log
+FileKey5=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\*Cache*|*|REMOVESELF
+FileKey6=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\blob_storage|*|REMOVESELF
+FileKey7=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\BudgetDatabase|*|REMOVESELF
+FileKey8=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\Download Service|*|REMOVESELF
+FileKey9=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\Feature Engagement Tracker|*|REMOVESELF
+FileKey10=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\File System|*|REMOVESELF
+FileKey11=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\GCM Store|*|REMOVESELF
+FileKey12=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\JumpListIcons*|*|REMOVESELF
+FileKey13=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\Network|Network Persistent State*;Reporting and NEL*;SCT Auditing Pending Reports*
+FileKey14=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\optimization*|*|REMOVESELF
+FileKey15=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\PersistentOriginTrials|*|REMOVESELF
+FileKey16=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\Platform Notifications|*|REMOVESELF
+FileKey17=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\Service Worker|*|REMOVESELF
+FileKey18=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\Shared Dictionary\cache|*|REMOVESELF
+FileKey19=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\Site Characteristics Database|*|REMOVESELF
+FileKey20=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\VideoDecodeStats|*|REMOVESELF
+FileKey21=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*\WebrtcVideoStats|*|REMOVESELF
+FileKey22=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*BrowserMetrics|*|REMOVESELF
+FileKey23=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*Cache*|*|REMOVESELF
+FileKey24=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Crashpad|*|REMOVESELF
+FileKey25=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Local Traces|*|REMOVESELF
+FileKey26=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Optimization*|*|REMOVESELF
+FileKey27=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\OriginTrials|*|REMOVESELF
+FileKey28=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\Settings|*.log*
+FileKey29=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\SystemAppData\Helium|*.log*
+FileKey30=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\TempState|*|REMOVESELF
 ```
 
 **Explanation**
 - Declaring `WebViewRoot=` opted the entry into scaffold emission
 - With no `WebViewScaffolds=` key, the default Caches + Telemetry selection applied
 - The catalog templates had `%WebViewRoot%` substituted with the package-expanded root path
-- 33 WebView FileKeys were generated from a single declaration line
-- The lint pass merged scaffold templates targeting the same folder (e.g. FileKey9 combines a Caches template and a Telemetry template both targeting `\Default`)
+- 26 WebView FileKeys were generated from a single declaration line
+- The lint pass merged scaffold templates targeting the same folder (e.g. FileKey4 combines a Caches template and a Telemetry template both targeting `EBWebView\*`)
 
 ---
 
@@ -745,7 +745,7 @@ For a dedicated single-purpose app like Acellus, the browsing data inside the We
 
 **Intent**
 
-We want every scaffold in the catalog *except* the two that remove primary user state. This is the variant of this entry actually shipped by the winapp2.ini project.
+We want every scaffold outside the legacy tier *except* the two that remove primary user state. This is the variant of this entry actually shipped by the winapp2.ini project.
 
 **Files**
 
@@ -761,38 +761,29 @@ LangSecRef=3021
 
 **Output**
 
-The full output carries **68 FileKeys**; the excerpt below shows the shape, with the middle trimmed for brevity:
+The full output carries **59 FileKeys**; the excerpt below shows the shape, with the middle trimmed for brevity:
 
 ```ini
 [GoldKey Acellus *]
 LangSecRef=3021
 DetectFile=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry
 FileKey1=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\AC|*|RECURSE
-FileKey2=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version;*first_party_sets*;Module Info Cache
+FileKey2=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version;*first_party_sets*
 FileKey3=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView|*.pma;LOG;LOG.old;*-journal|RECURSE
-FileKey4=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*BrowserMetrics|*|REMOVESELF
-FileKey5=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*Cache*|*|REMOVESELF
-FileKey6=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\AutoFill*|*|REMOVESELF
-FileKey7=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Avatars|*|REMOVESELF
-FileKey8=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\CertificateRevocation|*|REMOVESELF
-FileKey9=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\CookieReadinessList|*|REMOVESELF
-FileKey10=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Crash Reports|*|REMOVESELF
-FileKey11=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Crashpad|*|REMOVESELF
-FileKey12=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Crowd Deny|*|REMOVESELF
-FileKey13=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\Default|*.ldb;CURRENT;LOCK;MANIFEST-*;ServerCertificate;*.log;*Web Data;Bookmarks.bak;BrowsingTopics*;Conversions*;InterestGroups;MediaDeviceSalts;PrivateAggregation*;SharedStorage*;DIPS*;DownloadMetadata;Extension Cookies;favicons*;History*;Network Action Predictor*;shortcuts*;Top Sites*;Visited Links*;PreferredApps;QuotaManager
+FileKey4=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\LocalState\EBWebView\*|*.ldb;CURRENT;LOCK;MANIFEST-*;ServerCertificate;*.log;*Web Data;BrowsingTopics*;Conversions*;InterestGroups;MediaDeviceSalts;PrivateAggregation*;SharedStorage*;DIPS*;favicons*;History*;Network Action Predictor*;Top Sites*;Visited Links*;PreferredApps
 
-; ... FileKey14 through FileKey65: the remaining Autofill, Autoplay, BookmarkBackups, DownloadHistory,
-; DRMData, ProgressiveWebApps, PrivacySandbox, Security, Shopping, WebCookies, WebHistory and
-; WebSession scaffold keys, plus the rest of Caches and Telemetry ...
+; ... FileKey5 through FileKey56: the remaining Autofill, Autoplay, Caches, DownloadHistory, DRMData,
+; PrivacySandbox, Security, Shopping, Sync Data, Telemetry, WebCookies and WebSession scaffold keys ...
 
-FileKey66=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\Settings|*.log*
-FileKey67=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\SystemAppData\Helium|*.log*
-FileKey68=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\TempState|*|REMOVESELF
+FileKey57=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\Settings|*.log*
+FileKey58=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\SystemAppData\Helium|*.log*
+FileKey59=%LocalAppData%\Packages\GoldKeyCorporation.Acellus_v2rn50m687qry\TempState|*|REMOVESELF
 ```
 
 **Explanation**
-- `WebViewScaffolds=All` expanded to every scaffold in the catalog; `ExcludeWebViewScaffolds=WebStorage,LoginData` then removed those two from the selection
-- Compare FileKey13 with Example 5's FileKey9: the same `\Default` folder now aggregates parameters from many more scaffolds, merged into one key by the lint pass
+- `WebViewScaffolds=All` expanded to every scaffold outside the legacy tier, logged as `WebViewScaffolds=All in [GoldKey Acellus *]; expanded to 17 scaffold(s) from catalog, 8 legacy withheld`. `ExcludeWebViewScaffolds=WebStorage,LoginData` then removed those two from the selection
+- Compare FileKey4 with Example 5's FileKey4: the same `EBWebView\*` folder now aggregates parameters from many more scaffolds, merged into one key by the lint pass
+- No legacy scaffold was emitted. Adding one requires naming it: `WebViewScaffolds=All,LegacyTelemetry`
 
 ---
 

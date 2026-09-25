@@ -303,6 +303,111 @@ Option Strict On
     End Sub
 
     ''' <summary>
+    ''' Helper: build a tier-tracking catalog, marking the named scaffolds legacy
+    ''' </summary>
+    '''
+    ''' <param name="legacy">
+    ''' The scaffold names to mark <c> Tier=Legacy </c>
+    ''' </param>
+    '''
+    ''' <param name="names">
+    ''' Every scaffold name to register, legacy ones included
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A catalog shaped like <c> LoadCatalogDirectory </c>'s per-family result
+    ''' </returns>
+    Private Shared Function BuildTieredCatalog(legacy As String(), ParamArray names As String()) As winapp2ool.ScaffoldCatalog
+
+        Dim catalog As New winapp2ool.ScaffoldCatalog
+
+        For Each n In names
+
+            catalog(n) = New List(Of String) From {$"%Root%\{n}|*"}
+
+        Next
+
+        For Each n In legacy : catalog.Legacy.Add(n) : Next
+
+        Return catalog
+
+    End Function
+
+    ''' <summary>
+    ''' <c> All </c> withholds the legacy tier, so a retired pattern can stay on record without
+    ''' shipping to every entry that selects the whole catalog
+    ''' </summary>
+    <TestMethod()> Public Sub Resolve_AllSentinel_WithholdsLegacy()
+
+        Dim catalog = BuildTieredCatalog({"LegacyWebApps"}, "Caches", "Telemetry", "LegacyWebApps")
+        Dim result = Resolve({"All"}, True, {}, catalog, {"Caches"})
+
+        CollectionAssert.AreEquivalent({"Caches", "Telemetry"}, result)
+
+    End Sub
+
+    ''' <summary>
+    ''' Naming a legacy scaffold beside <c> All </c> adds it rather than being discarded as a
+    ''' redundant extra, which is how an entry for an old host opts in
+    ''' </summary>
+    <TestMethod()> Public Sub Resolve_AllPlusLegacyName_AddsLegacy()
+
+        Dim catalog = BuildTieredCatalog({"LegacyWebApps"}, "Caches", "Telemetry", "LegacyWebApps")
+        Dim result = Resolve({"All", "legacywebapps"}, True, {}, catalog, {"Caches"})
+
+        Assert.AreEqual(3, result.Count)
+        Assert.IsTrue(result.Contains("legacywebapps"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A legacy scaffold in an explicit list resolves like any other; the tier only changes what
+    ''' <c> All </c> means
+    ''' </summary>
+    <TestMethod()> Public Sub Resolve_ExplicitLegacyName_Resolves()
+
+        Dim catalog = BuildTieredCatalog({"LegacyWebApps"}, "Caches", "LegacyWebApps")
+        Dim result = Resolve({"LegacyWebApps"}, True, {}, catalog, {"Caches"})
+
+        CollectionAssert.AreEqual({"LegacyWebApps"}, result)
+
+    End Sub
+
+    ''' <summary>
+    ''' A plain dictionary has no tiers, so <c> All </c> still expands to every key — the contract
+    ''' callers relied on before tiers existed
+    ''' </summary>
+    <TestMethod()> Public Sub Resolve_AllOnUntieredCatalog_ExpandsEverything()
+
+        Dim catalog = BuildCatalog("Caches", "LegacyWebApps")
+        Dim result = Resolve({"All"}, True, {}, catalog, {"Caches"})
+
+        Assert.AreEqual(2, result.Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' A redefinition without <c> Tier= </c> clears the earlier legacy mark, so
+    ''' last-definition-wins covers the tier as well as the templates
+    ''' </summary>
+    <TestMethod()> Public Sub ParseSection_RedefinitionWithoutTier_ClearsLegacy()
+
+        Dim catalog As New winapp2ool.ScaffoldCatalog
+
+        Dim first As New winapp2ool.iniSection2("WebViewScaffold: WebApps")
+        first.AddKey(New winapp2ool.iniKey2("Tier=Legacy"))
+        first.AddKey(New winapp2ool.iniKey2("FileKeyBase=%WebViewRoot%\one|*"))
+        winapp2ool.ScaffoldCatalogs.ParseSection(first, catalog, New winapp2ool.MenuSection)
+        Assert.IsTrue(catalog.Legacy.Contains("WebApps"))
+
+        Dim second As New winapp2ool.iniSection2("WebViewScaffold: WebApps")
+        second.AddKey(New winapp2ool.iniKey2("FileKeyBase=%WebViewRoot%\two|*"))
+        winapp2ool.ScaffoldCatalogs.ParseSection(second, catalog, New winapp2ool.MenuSection)
+        Assert.IsFalse(catalog.Legacy.Contains("WebApps"))
+
+    End Sub
+
+    ''' <summary>
     ''' Helper: write catalog files into a fresh temp directory and load them
     ''' </summary>
     '''
@@ -361,6 +466,25 @@ Option Strict On
         Assert.AreEqual(1, loaded.ForFamily("Electron").Count)
         Assert.IsTrue(loaded.ForFamily("WebView").ContainsKey("Caches"))
         Assert.IsTrue(loaded.ForFamily("Electron").ContainsKey("AppLogs"))
+
+    End Sub
+
+    ''' <summary>
+    ''' <c> Tier=Legacy </c> is recorded on the family the section belongs to, and an unknown tier
+    ''' value warns instead of being taken as legacy
+    ''' </summary>
+    <TestMethod()> Public Sub LoadCatalogDirectory_TierLegacy_RecordedPerFamily()
+
+        Dim warnings As List(Of String) = Nothing
+
+        Dim loaded = LoadDir(New Dictionary(Of String, String) From {
+            {"webview.ini", "[WebViewScaffold: Caches]" & vbCrLf & "FileKeyBase=%WebViewRoot%\Cache|*" & vbCrLf & vbCrLf &
+                            "[WebViewScaffold: LegacyWebApps]" & vbCrLf & "Tier=Legacy" & vbCrLf & "FileKeyBase=%WebViewRoot%\Default\Web Applications|*" & vbCrLf & vbCrLf &
+                            "[WebViewScaffold: Odd]" & vbCrLf & "Tier=Retired" & vbCrLf & "FileKeyBase=%WebViewRoot%\Odd|*" & vbCrLf}}, warnings)
+
+        CollectionAssert.AreEqual({"LegacyWebApps"}, loaded.ForFamily("WebView").Legacy.ToList())
+        Assert.AreEqual(0, loaded.ForFamily("Electron").Legacy.Count)
+        Assert.IsTrue(warnings.Any(Function(w) w.Contains("Unknown tier 'Retired'")))
 
     End Sub
 

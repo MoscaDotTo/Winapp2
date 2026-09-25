@@ -61,9 +61,15 @@ Imports System.Text
 ''' <c> ElectronRoot= </c>. Selecting a scaffold whose every template is dropped this way warns.
 ''' <br /><br />
 '''
+''' The QtWebEngine family has a second root key on the same terms, <c> QtWebEngineCacheRoot= </c>
+''' (<c> %QtWebEngineCacheRoot% </c>), naming the profile's HTTP cache directory. Qt splits its
+''' CacheLocation from its AppDataLocation, so the cache sits outside the profile directory
+''' <c> QtWebEngineRoot= </c> names.
+''' <br /><br />
+'''
 ''' Recognised shorthand keys (stripped from output):
 ''' <c> WebViewRoot= </c>, <c> WebViewScaffolds= </c>, <c> ExcludeWebViewScaffolds= </c>,
-''' <c> QtWebEngineRoot= </c>, <c> QtWebEngineScaffolds= </c>,
+''' <c> QtWebEngineRoot= </c>, <c> QtWebEngineCacheRoot= </c>, <c> QtWebEngineScaffolds= </c>,
 ''' <c> ExcludeQtWebEngineScaffolds= </c>, <c> ElectronRoot= </c>,
 ''' <c> ElectronUpdaterRoot= </c>, <c> ElectronScaffolds= </c>,
 ''' <c> ExcludeElectronScaffolds= </c>, <c> FileKeyBase= </c>, <c> RegKeyBase= </c>,
@@ -73,8 +79,8 @@ Imports System.Text
 ''' <c> Assembler\Scaffolds </c>) via <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which
 ''' discovers each family from its section headers rather than from a configured per-family
 ''' path: <c> webview.ini </c> (<c> %WebViewRoot% </c> templates), <c> qtwebengine.ini </c>
-''' (<c> %QtWebEngineRoot% </c> templates), and <c> electron.ini </c> (<c> %ElectronRoot% </c> /
-''' <c> %ElectronUpdaterRoot% </c> templates), each substituted per declared root at generation
+''' (<c> %QtWebEngineRoot% </c> / <c> %QtWebEngineCacheRoot% </c> templates), and
+''' <c> electron.ini </c> (<c> %ElectronRoot% </c> / <c> %ElectronUpdaterRoot% </c> templates), each substituted per declared root at generation
 ''' time. UWPBuilder reads the same directory and binds the same families — see
 ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> for the parity contract. <br /><br />
 '''
@@ -120,7 +126,7 @@ Public Module EntryBuilder
     ''' </summary>
     Friend ReadOnly ReservedKeys As String() = {
         "SECTION", "LANGSECREF",
-        "WEBVIEWROOT", "QTWEBENGINEROOT", "ELECTRONROOT", "ELECTRONUPDATERROOT",
+        "WEBVIEWROOT", "QTWEBENGINEROOT", "QTWEBENGINECACHEROOT", "ELECTRONROOT", "ELECTRONUPDATERROOT",
         "DETECT", "DETECTFILE", "DETECTOS", "SPECIALDETECT",
         "FILEKEY", "FILEKEYBASE",
         "REGKEY", "REGKEYBASE",
@@ -223,7 +229,7 @@ Public Module EntryBuilder
     ''' Parsed state for a single source-file section. One section corresponds to exactly
     ''' one winapp2 output entry; the section header is the entry name.
     ''' </summary>
-    Private Structure EntrySpec
+    Friend Structure EntrySpec
 
         ''' <summary>
         ''' The entry name used verbatim as the section header in the output, taken
@@ -351,6 +357,15 @@ Public Module EntryBuilder
         Public QtWebEngineRoots As List(Of String)
 
         ''' <summary>
+        ''' Paths of the application's QtWebEngine HTTP cache directories, e.g.
+        ''' <c> %LocalAppData%\VideoKeeper\cache\QtWebEngine\Default </c>. Declared separately from
+        ''' <see cref="QtWebEngineRoots"/> because Qt keeps the cache under its CacheLocation, not
+        ''' inside the profile directory. Substituted for <c> %QtWebEngineCacheRoot% </c>; when
+        ''' empty, templates referencing that placeholder are dropped.
+        ''' </summary>
+        Public QtWebEngineCacheRoots As List(Of String)
+
+        ''' <summary>
         ''' QtWebEngine scaffold names explicitly selected via <c> QtWebEngineScaffolds= </c>.
         ''' The sentinel <c> All </c> (case-insensitive) expands to every scaffold in the
         ''' QtWebEngine catalog.
@@ -472,6 +487,7 @@ Public Module EntryBuilder
             WebViewScaffoldsKeyPresent = False
             ExcludedWebViewScaffolds = New List(Of String)
             QtWebEngineRoots = New List(Of String)
+            QtWebEngineCacheRoots = New List(Of String)
             QtWebEngineScaffoldNames = New List(Of String)
             QtWebEngineScaffoldsKeyPresent = False
             ExcludedQtWebEngineScaffolds = New List(Of String)
@@ -495,7 +511,7 @@ Public Module EntryBuilder
     ''' to judge whether the symbol table earns its indirection: how many variables it declares,
     ''' how deeply they nest, and how many output keys they ultimately produce.
     ''' </summary>
-    Private Structure TangledEntry
+    Friend Structure TangledEntry
 
         ''' <summary> The entry name (source section header) </summary>
         Public Name As String
@@ -538,7 +554,7 @@ Public Module EntryBuilder
     ''' <see cref="renderStats"/>. A reference type by design — sharing one instance across
     ''' the whole run lets counts accumulate without <c> ByRef </c> plumbing.
     ''' </summary>
-    Private NotInheritable Class EntryBuilderStats
+    Friend NotInheritable Class EntryBuilderStats
 
         ''' <summary> Total sections read from the combined source directory </summary>
         Public SourceSections As Integer
@@ -552,7 +568,10 @@ Public Module EntryBuilder
         ''' <summary> Generated entries that declared at least one <c> WebViewRoot= </c> </summary>
         Public EntriesWithScaffolds As Integer
 
-        ''' <summary> Generated entries that declared at least one <c> QtWebEngineRoot= </c> </summary>
+        ''' <summary>
+        ''' Generated entries that declared at least one <c> QtWebEngineRoot= </c> or
+        ''' <c> QtWebEngineCacheRoot= </c>
+        ''' </summary>
         Public EntriesWithQtScaffolds As Integer
 
         ''' <summary>
@@ -569,6 +588,9 @@ Public Module EntryBuilder
 
         ''' <summary> Total <c> QtWebEngineRoot= </c> declarations across all generated entries </summary>
         Public QtWebEngineRootDecls As Integer
+
+        ''' <summary> Total <c> QtWebEngineCacheRoot= </c> declarations across all generated entries </summary>
+        Public QtWebEngineCacheRootDecls As Integer
 
         ''' <summary> Total <c> ElectronRoot= </c> declarations across all generated entries </summary>
         Public ElectronRootDecls As Integer
@@ -828,6 +850,7 @@ Public Module EntryBuilder
 
                 stats.WebViewRootDecls += spec.WebViewRoots.Count
                 stats.QtWebEngineRootDecls += spec.QtWebEngineRoots.Count
+                stats.QtWebEngineCacheRootDecls += spec.QtWebEngineCacheRoots.Count
                 stats.ElectronRootDecls += spec.ElectronRoots.Count
                 stats.ElectronUpdaterRootDecls += spec.ElectronUpdaterRoots.Count
                 stats.FileKeyBaseDecls += spec.FileKeyBases.Count
@@ -837,7 +860,7 @@ Public Module EntryBuilder
                 stats.ExcludeKeyBaseDecls += spec.ExcludeKeyBases.Count
                 stats.ExcludeKeyDecls += spec.ExcludeKeys.Count
                 If spec.WebViewRoots.Count > 0 Then stats.EntriesWithScaffolds += 1
-                If spec.QtWebEngineRoots.Count > 0 Then stats.EntriesWithQtScaffolds += 1
+                If spec.QtWebEngineRoots.Count > 0 OrElse spec.QtWebEngineCacheRoots.Count > 0 Then stats.EntriesWithQtScaffolds += 1
                 If spec.ElectronRoots.Count > 0 OrElse spec.ElectronUpdaterRoots.Count > 0 Then stats.EntriesWithElectronScaffolds += 1
                 If spec.RootDetectionInferred Then stats.InferredRootEntries += 1
 
@@ -977,6 +1000,7 @@ Public Module EntryBuilder
         menuOutput.AddColoredLine("Shorthand input declarations", ConsoleColor.Cyan)
         menuOutput.AddColoredLine(statLine("WebViewRoot:", stats.WebViewRootDecls), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("QtWebEngineRoot:", stats.QtWebEngineRootDecls), ConsoleColor.White)
+        menuOutput.AddColoredLine(statLine("QtWebEngineCacheRoot:", stats.QtWebEngineCacheRootDecls), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("ElectronRoot:", stats.ElectronRootDecls), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("ElectronUpdaterRoot:", stats.ElectronUpdaterRootDecls), ConsoleColor.White)
         menuOutput.AddColoredLine(statLine("FileKeyBase (generated):", stats.FileKeyBaseDecls), ConsoleColor.White)
@@ -1089,7 +1113,7 @@ Public Module EntryBuilder
     ''' An <c> EntrySpec </c> populated from <paramref name="entrySection"/>.
     ''' Check <c> ShouldSkip </c> before using the result.
     ''' </returns>
-    Private Function parseEntrySpec(entrySection As iniSection2,
+    Friend Function parseEntrySpec(entrySection As iniSection2,
                                      menuOutput As MenuSection) As EntrySpec
 
         Dim spec As New EntrySpec(entrySection.Name)
@@ -1105,6 +1129,8 @@ Public Module EntryBuilder
                 Case "WEBVIEWROOT" : addScaffoldRoot(spec.WebViewRoots, key.Value, "WebViewRoot", entrySection.Name, menuOutput)
 
                 Case "QTWEBENGINEROOT" : addScaffoldRoot(spec.QtWebEngineRoots, key.Value, "QtWebEngineRoot", entrySection.Name, menuOutput)
+
+                Case "QTWEBENGINECACHEROOT" : addScaffoldRoot(spec.QtWebEngineCacheRoots, key.Value, "QtWebEngineCacheRoot", entrySection.Name, menuOutput)
 
                 Case "ELECTRONROOT" : addScaffoldRoot(spec.ElectronRoots, key.Value, "ElectronRoot", entrySection.Name, menuOutput)
 
@@ -1216,6 +1242,7 @@ Public Module EntryBuilder
         Dim bothCategories = spec.LangSecRef.Length > 0 AndAlso spec.SectionName.Length > 0
         Dim noCategory = spec.LangSecRef.Length = 0 AndAlso spec.SectionName.Length = 0
         Dim noContent = spec.WebViewRoots.Count = 0 AndAlso spec.QtWebEngineRoots.Count = 0 AndAlso
+                        spec.QtWebEngineCacheRoots.Count = 0 AndAlso
                         spec.ElectronRoots.Count = 0 AndAlso spec.ElectronUpdaterRoots.Count = 0 AndAlso
                         spec.FileKeyBases.Count = 0 AndAlso spec.FileKeys.Count = 0 AndAlso
                         spec.RegKeyBases.Count = 0 AndAlso spec.RegKeys.Count = 0
@@ -1510,7 +1537,7 @@ Public Module EntryBuilder
     ''' <returns>
     ''' A fully populated <c> iniSection2 </c> ready to be added to the output file
     ''' </returns>
-    Private Function generateEntry(spec As EntrySpec,
+    Friend Function generateEntry(spec As EntrySpec,
                                     catalog As Dictionary(Of String, List(Of String)),
                                     qtCatalog As Dictionary(Of String, List(Of String)),
                                     electronCatalog As Dictionary(Of String, List(Of String)),
@@ -1607,11 +1634,12 @@ Public Module EntryBuilder
         stats.ScaffoldFileKeys += fileKeys.Count
         Dim afterScaffold = fileKeys.Count
 
-        If spec.QtWebEngineRoots.Count > 0 Then
+        If spec.QtWebEngineRoots.Count > 0 OrElse spec.QtWebEngineCacheRoots.Count > 0 Then
 
             Dim selectedQtScaffolds = resolveQtWebEngineScaffolds(spec, qtCatalog, menuOutput)
             Dim qtBindings As New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", spec.QtWebEngineRoots)
+                New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", spec.QtWebEngineRoots),
+                New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineCacheRoot%", spec.QtWebEngineCacheRoots)
             }
             fileKeys.AddRange(expandScaffoldFamily(qtBindings, selectedQtScaffolds, spec.QtWebEngineScaffoldsKeyPresent, qtCatalog, spec, stats, menuOutput))
 
@@ -1896,6 +1924,7 @@ Public Module EntryBuilder
         Dim result As New List(Of String) From {template}
         result = ScaffoldCatalogs.FanOutPlaceholder(result, "%WebViewRoot%", spec.WebViewRoots)
         result = ScaffoldCatalogs.FanOutPlaceholder(result, "%QtWebEngineRoot%", spec.QtWebEngineRoots)
+        result = ScaffoldCatalogs.FanOutPlaceholder(result, "%QtWebEngineCacheRoot%", spec.QtWebEngineCacheRoots)
         result = ScaffoldCatalogs.FanOutPlaceholder(result, "%ElectronRoot%", spec.ElectronRoots)
         result = ScaffoldCatalogs.FanOutPlaceholder(result, "%ElectronUpdaterRoot%", spec.ElectronUpdaterRoots)
         Return result
@@ -1927,7 +1956,7 @@ Public Module EntryBuilder
     ''' </summary>
     '''
     ''' <param name="bindings">
-    ''' The family's (placeholder, roots) pairs — one for WebView and QtWebEngine, two for Electron
+    ''' The family's (placeholder, roots) pairs — one for WebView, two for QtWebEngine and Electron
     ''' </param>
     '''
     ''' <param name="selectedScaffolds">

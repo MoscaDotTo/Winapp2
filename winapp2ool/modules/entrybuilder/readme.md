@@ -31,7 +31,7 @@ EntryBuilder reads every `*.ini` file in its source directory, combines them in-
 7. [Shorthand Keys](#shorthand-keys)
    - [WebViewRoot](#webviewroot)
    - [WebViewScaffolds / ExcludeWebViewScaffolds](#webviewscaffolds--excludewebviewscaffolds)
-   - [QtWebEngineRoot / QtWebEngineScaffolds](#qtwebengineroot--qtwebenginescaffolds)
+   - [QtWebEngineRoot / QtWebEngineCacheRoot / QtWebEngineScaffolds](#qtwebengineroot--qtwebenginecacheroot--qtwebenginescaffolds)
    - [ElectronRoot / ElectronUpdaterRoot / ElectronScaffolds](#electronroot--electronupdaterroot--electronscaffolds)
    - [FileKeyBase / RegKeyBase / ExcludeKeyBase](#filekeybase--regkeybase--excludekeybase)
    - [Skip](#skip)
@@ -74,7 +74,7 @@ EntryBuilder reads every `*.ini` file in its source directory, combines them in-
 # Requirements
 
 - A source directory containing one or more `*.ini` files with at least one parseable section
-- The shared scaffold directory (typically `Assembler\Scaffolds`) if any entry declares a scaffold root. Every `*.ini` in it is read, and each catalog's engine family comes from its section headers rather than its filename: `webview.ini` (`[WebViewScaffold: ...]`) serves `WebViewRoot=`, `qtwebengine.ini` (`[QtWebEngineScaffold: ...]`) serves `QtWebEngineRoot=`, and `electron.ini` (`[ElectronScaffold: ...]`) serves `ElectronRoot=` / `ElectronUpdaterRoot=`
+- The shared scaffold directory (typically `Assembler\Scaffolds`) if any entry declares a scaffold root. Every `*.ini` in it is read, and each catalog's engine family comes from its section headers rather than its filename: `webview.ini` (`[WebViewScaffold: ...]`) serves `WebViewRoot=`, `qtwebengine.ini` (`[QtWebEngineScaffold: ...]`) serves `QtWebEngineRoot=` / `QtWebEngineCacheRoot=`, and `electron.ini` (`[ElectronScaffold: ...]`) serves `ElectronRoot=` / `ElectronUpdaterRoot=`
 
 If the source directory is empty, missing, or contains no parseable sections, EntryBuilder reports `No EntryBuilder source definitions found in: <directory>` and writes no output. If the scaffold directory or a catalog within it is missing or empty, generation continues with zero scaffold FileKeys emitted for the affected families and a warning logged. Entries with no corresponding root key are unaffected.
 
@@ -196,6 +196,7 @@ These are winapp2ool-private keys that are consumed during generation and never 
 
 The full path to a Chromium-data folder for this application, typically `%AppData%\<AppName>` or `%LocalAppData%\<AppName>\<Subfolder>\EBWebView`.
 
+- The root is the folder that holds the profiles, not a profile. Profile-scoped templates use `%WebViewRoot%\*\`, so `Default` and named profiles such as `WV2Profile_*` are all covered.
 - Multiple `WebViewRoot=` keys are permitted; each scaffold FileKey is generated once per root.
 - The literal string `%WebViewRoot%` can be used in any `FileKey` / `RegKey` / `ExcludeKey` value (`Base=` or plain form); it is substituted against each declared root at generation time, fanning the key out per root.
 - An entry with no roots and no FileKey/RegKey content is skipped with a warning.
@@ -209,7 +210,8 @@ The full path to a Chromium-data folder for this application, typically `%AppDat
 | Key absent | Default scaffold set is used: `Caches`, `Telemetry` |
 | Key present, value empty | No scaffold FileKeys are generated |
 | `WebViewScaffolds=Caches,Telemetry,DRMData` | Exactly the named scaffolds are applied |
-| `WebViewScaffolds=All` | Expands to every scaffold in the catalog, **including host-risk categories** (cookies, history, sessions, web storage, login data) |
+| `WebViewScaffolds=All` | Expands to every scaffold in the catalog except the legacy tier, **including host-risk categories** (cookies, history, sessions, web storage, login data) |
+| `WebViewScaffolds=All,LegacyTelemetry` | `All`, plus the named legacy scaffold |
 
 `ExcludeWebViewScaffolds=` is a comma-separated list of scaffold names to subtract from the active selection. The natural idiom for "everything except X":
 
@@ -220,11 +222,15 @@ WebViewScaffolds=All
 ExcludeWebViewScaffolds=WebStorage,LoginData
 ```
 
-Combining a non-`All` explicit `WebViewScaffolds=` list with `ExcludeWebViewScaffolds=` warns (`Both WebViewScaffolds and ExcludeWebViewScaffolds set in [Entry]; applying exclusions to explicit list`), since the same effect is usually more clearly expressed by listing only the desired scaffolds. Unknown scaffold names are dropped with a warning.
+Combining a non-`All` explicit `WebViewScaffolds=` list with `ExcludeWebViewScaffolds=` warns (`Both WebViewScaffolds and ExcludeWebViewScaffolds set in [Entry]; applying exclusions to explicit list`), since the same effect is usually more clearly expressed by listing only the desired scaffolds. Unknown scaffold names are dropped with a warning, whether or not they sit beside `All`.
 
-Scaffold names track the catalog, not this document. At the time of writing the WebView catalog defines: `Autofill`, `Autoplay`, `BookmarkBackups`, `BookmarkFavicons`, `Caches`, `DefaultApps`, `DownloadHistory`, `DRMData`, `ExtensionCookies`, `ProgressiveWebApps`, `PrivacySandbox`, `LoginData`, `Security`, `Shopping`, `StorageQuota`, `Telemetry`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`. Only `Caches` and `Telemetry` are default-on; scaffolds that can remove user-visible state (`WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, `LoginData`) always require explicit opt-in.
+Scaffold names track the catalog, not this document. At the time of writing the WebView catalog defines: `Autofill`, `Autoplay`, `BookmarkFavicons`, `Caches`, `DefaultApps`, `DownloadHistory`, `DRMData`, `PrivacySandbox`, `LoginData`, `Security`, `Shopping`, `Sync Data`, `Telemetry`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, and in the legacy tier `LegacyCaches`, `LegacyDownloadHistory`, `LegacyDRMData`, `LegacyExtensionCookies`, `LegacyProgressiveWebApps`, `LegacyStorageQuota`, `LegacyTelemetry`, `LegacyWebHistory`. Only `Caches` and `Telemetry` are default-on; scaffolds that can remove user-visible state (`WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, `LoginData`) always require explicit opt-in.
 
-## QtWebEngineRoot / QtWebEngineScaffolds
+### The legacy tier
+
+A catalog section carrying `Tier=Legacy` is withheld from `All`. It is emitted only when an entry names it, alone or beside `All`. Legacy scaffolds hold patterns that no current host writes but an older or unusual one may, and their names start with `Legacy` so the tier shows in a selection line. Naming a non-legacy scaffold beside `All` is redundant and warns; naming a legacy one is the only reason to list anything beside it.
+
+## QtWebEngineRoot / QtWebEngineCacheRoot / QtWebEngineScaffolds
 
 QtWebEngine is a second independent scaffold family for apps that embed Qt's WebEngine rather than WebView2. It behaves **exactly like the WebView family above**, with these substitutions:
 
@@ -236,7 +242,7 @@ QtWebEngine is a second independent scaffold family for apps that embed Qt's Web
 | `%WebViewRoot%` placeholder | `%QtWebEngineRoot%` placeholder |
 | `webview.ini` catalog | `qtwebengine.ini` catalog |
 
-The `All` value for scaffolds and exclusion format work identically, and a single entry may declare both families . The QtWebEngine catalog is smaller: `Caches`, `StorageQuota`, `Telemetry`, `VisitedLinks`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`.
+The `All` value for scaffolds, the legacy tier, and exclusion format work identically, and a single entry may declare both families. The QtWebEngine catalog is smaller: `Caches`, `Favicons`, `PrivacySandbox`, `Security`, `StorageQuota`, `Telemetry`, `VisitedLinks`, `WebCookies`, `WebHistory`, `WebSession`, `WebStorage`, and in the legacy tier `LegacyTelemetry`, `LegacyWebStorage`.
 
 The default set is: `Caches`, `StorageQuota`, `Telemetry` and `VisitedLinks`.
 
@@ -247,6 +253,17 @@ The default set is: `Caches`, `StorageQuota`, `Telemetry` and `VisitedLinks`.
 QtRoot=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine
 QtWebEngineRoot=<QtRoot>\<Default,OffTheRecord,viewer-lookup>
 ```
+
+### QtWebEngineCacheRoot
+
+`QtWebEngineCacheRoot=` names the profile's HTTP cache directory, bound to `%QtWebEngineCacheRoot%`. Qt keeps the cache under its CacheLocation rather than inside the profile directory, so `QtWebEngineRoot=` can't reach it:
+
+```ini
+QtWebEngineRoot=%LocalAppData%\VideoKeeper\QtWebEngine\Default
+QtWebEngineCacheRoot=%LocalAppData%\VideoKeeper\cache\QtWebEngine\Default
+```
+
+It works like `ElectronUpdaterRoot=` below: either root alone opts the entry into the family, and a template whose placeholder has no declared root is dropped.
 
 ## ElectronRoot / ElectronUpdaterRoot / ElectronScaffolds
 
@@ -273,7 +290,7 @@ ElectronRoot=%AppData%\Signal
 
 ### ElectronUpdaterRoot
 
-Electron is the only family with a second root key: `ElectronUpdaterRoot=` names the electron-updater download cache, a sibling of `userData` under `%LocalAppData%` holding `installer.exe`, `package.7z` and a `pending\` folder. It must be declared separately.
+Like QtWebEngine, Electron has a second root key: `ElectronUpdaterRoot=` names the electron-updater download cache, a sibling of `userData` under `%LocalAppData%` holding `installer.exe`, `package.7z` and a `pending\` folder. It must be declared separately.
 
 ### Multiple roots
 
@@ -422,10 +439,11 @@ Warnings are shown in the menu output after a run and recorded in the winapp2ool
 | No detection (after `Root` inference) | Entry emitted, always-on | `[Entry] declares no detection (Detect / DetectFile / DetectOS); generated entry will be always-on` |
 | `Default=` declared | Key dropped | `Default= declared in [Entry]; EntryBuilder never emits Default, ignoring` |
 | `SpecialDetect=` declared | Key dropped | `SpecialDetect is deprecated; key dropped from [Entry]. Replace with Detect or DetectFile` |
-| `All` mixed with other scaffold names | Extras ignored | `WebViewScaffolds=All in [Entry] with redundant additional names (X, Y); ignoring` |
+| `All` mixed with non-legacy scaffold names | Extras ignored | `WebViewScaffolds=All in [Entry] with redundant additional names (X, Y); ignoring` |
 | Explicit scaffold list mixed with exclusions | Exclusions applied | `Both WebViewScaffolds and ExcludeWebViewScaffolds set in [Entry]; applying exclusions to explicit list` |
 | Unknown scaffold name requested | Scaffold dropped | `Unknown WebView scaffold 'X' requested by [Entry], skipping` |
 | Scaffold catalog missing or empty | Zero scaffold keys from that catalog | `WebViewScaffold: catalog at <path> is empty or missing` |
+| Catalog section has a `Tier=` value other than `Legacy` | Tier ignored, scaffold stays in `All` | `Unknown tier 'X' in WebViewScaffold [WebViewScaffold: Name]; the only tier is Legacy` |
 | Undeclared `<X>` token, filesystem domain | Key dropped | `Undeclared variable <X> in filesystem-domain key [Entry].FileKey; dropping key` |
 | Undeclared `<X>` token, registry domain | Literal emitted *(advisory)* | `Undeclared variable <X> in registry-domain key [Entry].RegKey; emitted as literal` |
 | Referenced variable or inline list has no values | Key dropped | `Axis <X> has no values, referenced by [Entry].FileKey; dropping key` |
@@ -436,7 +454,7 @@ Warnings are shown in the menu output after a run and recorded in the winapp2ool
 | Declared variable never referenced | Warning only | `Variable 'X=' declared in [Entry] but never referenced by any <X> token; possible typo` |
 | Variable name collides with a reserved key | Warning only | `Variable declaration 'X=' in [Entry] shadows reserved key name; possible typo` |
 
-The scaffold-family messages appear with `QtWebEngine` in place of `WebView` for the QtWebEngine family.
+The scaffold-family messages appear with `QtWebEngine` or `Electron` in place of `WebView` for those families. The log also records each `All` expansion: `WebViewScaffolds=All in [Entry]; expanded to N scaffold(s) from catalog, M legacy withheld`.
 
 ---
 
@@ -528,7 +546,7 @@ When the same declared variable appears multiple times in a single key, referenc
 
 ### Default scaffold set is intentionally minimal
 
-`Caches` and `Telemetry` are the only opt-in-free scaffolds. Anything that could remove user-visible state (cookies, history, sessions, saved logins, web storage) requires explicit opt-in: either `Scaffolds=All` with selective exclusion, or an explicit list naming the desired host-risk scaffolds.
+`Caches` and `Telemetry` are the only opt-in-free WebView scaffolds. Anything that could remove user-visible state (cookies, history, sessions, saved logins, web storage) requires explicit opt-in: either `Scaffolds=All` with selective exclusion, or an explicit list naming the desired host-risk scaffolds. Legacy scaffolds are never selected implicitly, not even by `All`.
 
 ### Prefer `<Variable>` to numbered duplication
 
@@ -543,7 +561,7 @@ When the same declared variable appears multiple times in a single key, referenc
 | `No EntryBuilder source definitions found in: <dir>` | Source directory is empty, missing, or contains no `*.ini` files with parseable sections | Verify the source directory in **Choose source directory** or via `-1d` |
 | Entry is silently absent from the output | `Skip=` is set, or the entry was skipped by validation (`No Section or LangSecRef...` / `...nothing to emit, skipping`), or a duplicate section name in an alphabetically-earlier file won | Check the run log for the corresponding message |
 | Output is missing expected scaffold FileKeys | Catalog failed to load (`...catalog at <path> is empty or missing`), scaffold name misspelled (`Unknown WebView scaffold 'X'...`), or scaffold excluded by `Exclude*Scaffolds=` | Check the `Loaded N WebView scaffold(s)` / `Loaded N QtWebEngine scaffold(s)` lines and the warnings |
-| Output key contains a literal `%WebViewRoot%` / `%QtWebEngineRoot%` / `%ElectronRoot%` | The matching root key wasn't declared on the entry - or the placeholder was used in a `Detect`/`DetectFile`, where it is never substituted | Declare the root key, or write the path / a `<Variable>` directly in detection keys |
+| Output key contains a literal `%WebViewRoot%` / `%QtWebEngineRoot%` / `%QtWebEngineCacheRoot%` / `%ElectronRoot%` | The matching root key wasn't declared on the entry - or the placeholder was used in a `Detect`/`DetectFile`, where it is never substituted | Declare the root key, or write the path / a `<Variable>` directly in detection keys |
 | Entry gained a `Detect`/`DetectFile` you didn't write | The entry declares a variable named `Root` - detection inference is automatic | Intended? Delete your redundant hand-written detection. Not intended? Rename the variable (`DiskRoot`, `AppRoot`, ...) |
 | Output RegKey contains a literal `<Name>` | The variable wasn't declared - the registry domain emits literal text and logs `...emitted as literal` as an advisory | Declare the variable, or accept the literal if intentional |
 | Output is missing a FileKey/DetectFile entirely | An undeclared `<Name>` token dropped the key (`...dropping key`), or a referenced variable had no values | Fix the typo, or declare the variable |
@@ -888,6 +906,8 @@ This is why the unreferenced-variable backstop matters: if you declare `Versions
 
 ## Scaffold Families
 
+###### Note: Unlike the earlier examples, the scaffold examples show `entrybuilder.ini` exactly as written, after WinappDebug's normalization pass, so FileKeys are alphabetized and same-path keys are merged. Only the file header is omitted.
+
 ### Example 8: Default WebView scaffolds
 
 **Context**
@@ -923,21 +943,26 @@ winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Sc
 [Discord *]
 LangSecRef=3023
 DetectFile=%AppData%\discord
-FileKey1=%AppData%\discord|*-journal|RECURSE
-FileKey2=%AppData%\discord|Module Info Cache
-FileKey3=%AppData%\discord\Default|*.ldb;CURRENT;LOCK;MANIFEST-*;ServerCertificate
-FileKey4=%AppData%\discord\Default\*Cache*|*|REMOVESELF
-; ... 16 further Caches FileKeys ...
-FileKey21=%AppData%\discord|*.pma;LOG;LOG.old|RECURSE
-FileKey22=%AppData%\discord|*_shutdown_ms.txt;*.log;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version
-; ... 15 further Telemetry FileKeys, 37 scaffold FileKeys in total from the default set
+FileKey1=%AppData%\discord|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version
+FileKey2=%AppData%\discord|*.pma;LOG;LOG.old;*-journal|RECURSE
+FileKey3=%AppData%\discord\*|*.ldb;CURRENT;LOCK;MANIFEST-*;ServerCertificate;*.log
+FileKey4=%AppData%\discord\*\*Cache*|*|REMOVESELF
+FileKey5=%AppData%\discord\*\blob_storage|*|REMOVESELF
+; ... FileKey6 - FileKey20: the remaining profile-scoped Caches and Telemetry keys ...
+FileKey21=%AppData%\discord\*BrowserMetrics|*|REMOVESELF
+FileKey22=%AppData%\discord\*Cache*|*|REMOVESELF
+FileKey23=%AppData%\discord\Crashpad|*|REMOVESELF
+FileKey24=%AppData%\discord\Local Traces|*|REMOVESELF
+FileKey25=%AppData%\discord\Optimization*|*|REMOVESELF
+FileKey26=%AppData%\discord\OriginTrials|*|REMOVESELF
 ```
 
 **Explanation**
 
 - No `WebViewScaffolds=` key is present, so the default set applies: `Caches` + `Telemetry`
 - Every `FileKeyBase=` template in each selected catalog scaffold is copied in with `%WebViewRoot%` replaced by `%AppData%\discord`
-- The exact keys (and their count, 37 here) track the catalog: when the catalog gains a pattern, every entry that selects that scaffold gains the key on the next build, with no source edits
+- The lint pass merged templates that share a path: FileKey2 and FileKey3 each combine a Caches pattern list with a Telemetry one
+- The exact keys (and their count, 26 here) track the catalog: when the catalog gains a pattern, every entry that selects that scaffold gains the key on the next build, with no source edits
 
 **Notes**
 
@@ -953,7 +978,7 @@ Adobe Photoshop's embedded WebView is used for plugin UI; nearly all of its brow
 
 **Intent**
 
-We want every catalog scaffold **except** `WebStorage` and `LoginData`, plus one hand-written FileKey for Photoshop's own logs.
+We want every current catalog scaffold **except** `WebStorage` and `LoginData`, plus one hand-written FileKey for Photoshop's own logs.
 
 **Files**
 
@@ -982,24 +1007,29 @@ winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Sc
 [Adobe Photoshop *]
 LangSecRef=3023
 DetectFile=%AppData%\Adobe\Adobe Photoshop *
-FileKey1=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\Default|*Web Data
-FileKey2=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\Default\AutoFill*|*|REMOVESELF
-FileKey3=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\AutoFill*|*|REMOVESELF
-FileKey4=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\MEIPreload|*|REMOVESELF
-; ... FileKey5 – FileKey77: the remaining safe scaffold sets (Caches, Security, Telemetry, ...) ...
-FileKey78=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\Default\Network|Cookies*;Device Bound Sessions*
-FileKey79=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\Default|History*;Network Action Predictor*;Top Sites*;shortcuts*;Visited Links*
-FileKey80=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\Default\Extension State|*|REMOVESELF
-FileKey81=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\Default\Sessions|*|REMOVESELF
-FileKey82=%AppData%\Adobe\Adobe Photoshop *\Logs|*
+FileKey1=%AppData%\Adobe\Adobe Photoshop *\Logs|*
+FileKey2=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView|*.log;*_shutdown_ms.txt;Breadcrumbs;BrowsingTopics*;Last Browser;Last Version;*first_party_sets*
+FileKey3=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView|*.pma;LOG;LOG.old;*-journal|RECURSE
+FileKey4=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\*|*.ldb;CURRENT;LOCK;MANIFEST-*;ServerCertificate;*.log;*Web Data;BrowsingTopics*;Conversions*;InterestGroups;MediaDeviceSalts;PrivateAggregation*;SharedStorage*;DIPS*;favicons*;History*;Network Action Predictor*;Top Sites*;Visited Links*;PreferredApps
+FileKey5=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\*\*Cache*|*|REMOVESELF
+FileKey6=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\*\AutoFill*|*|REMOVESELF
+; ... FileKey7 - FileKey14 ...
+FileKey15=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\*\Extension State|*|REMOVESELF
+; ... FileKey16 - FileKey19 ...
+FileKey20=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\*\Network|Cookies*;Device Bound Sessions*;Network Persistent State*;Reporting and NEL*;SCT Auditing Pending Reports*;TransportSecurity*;Trust Tokens*
+; ... FileKey21 - FileKey26 ...
+FileKey27=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\*\Sessions|*|REMOVESELF
+; ... FileKey28 - FileKey55: the rest of the profile-scoped keys, then the root-level folders ...
+FileKey56=%AppData%\Adobe\UXP\PluginsStorage\PHSP\26\Shared\EBWebView\ZxcvbnData|*|REMOVESELF
 ```
 
 **Explanation**
 
-- `All` expands to every scaffold in the catalog (20 at the time of writing) and the log records it: `WebViewScaffolds=All in [Adobe Photoshop *]; expanded to 20 scaffold(s) from catalog`
-- The two exclusions subtract from that expansion, leaving 18 scaffolds and 81 scaffold FileKeys. That includes the host-risk sets `All` deliberately opts into: `WebCookies` (FileKey78), `WebHistory` (FileKey79), and `WebSession` (FileKey80–81)
+- `All` expands to every scaffold outside the legacy tier and the log records it: `WebViewScaffolds=All in [Adobe Photoshop *]; expanded to 17 scaffold(s) from catalog, 8 legacy withheld`
+- The two exclusions subtract from that expansion, leaving 15 scaffolds that produce 55 FileKeys after the lint pass merges same-path templates. That includes the host-risk sets `All` deliberately opts into: `WebCookies` (the `Cookies*;Device Bound Sessions*` patterns merged into FileKey20), `WebHistory` (the `History*` through `Visited Links*` patterns merged into FileKey4), and `WebSession` (FileKey15 and FileKey27)
 - `All` + `Exclude...` is the sanctioned idiom and does not warn; an explicit non-`All` list combined with exclusions does
-- The hand-written `FileKey=` is appended after all scaffold keys (FileKey82) and participates in the same renumbering
+- The hand-written `FileKey=` goes through the same normalization as the scaffold keys, so it sorts to FileKey1
+- A legacy scaffold would have to be named to be included, e.g. `WebViewScaffolds=All,LegacyTelemetry`
 
 ---
 
@@ -1047,21 +1077,21 @@ FileKey4=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\*Cache*|*|
 FileKey5=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\blob_storage|*|REMOVESELF
 FileKey6=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\Platform Notifications|*|REMOVESELF
 FileKey7=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\Service Worker\*Cache*|*|REMOVESELF
-FileKey8=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\VideoDecodeStats|*|REMOVESELF
+FileKey8=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\Default\Shared Dictionary\cache|*|REMOVESELF
 FileKey9=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord|*-journal;*.log;*.old;LOG;LOG.old;Network Persistent State;Origin Bound Certs|RECURSE
 FileKey10=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord|QuotaManager*;Visited Links
 FileKey11=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\*Cache*|*|REMOVESELF
 FileKey12=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\blob_storage|*|REMOVESELF
 FileKey13=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\Platform Notifications|*|REMOVESELF
 FileKey14=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\Service Worker\*Cache*|*|REMOVESELF
-FileKey15=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\VideoDecodeStats|*|REMOVESELF
+FileKey15=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\OffTheRecord\Shared Dictionary\cache|*|REMOVESELF
 FileKey16=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup|*-journal;*.log;*.old;LOG;LOG.old;Network Persistent State;Origin Bound Certs|RECURSE
 FileKey17=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup|QuotaManager*;Visited Links
 FileKey18=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\*Cache*|*|REMOVESELF
 FileKey19=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\blob_storage|*|REMOVESELF
 FileKey20=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\Platform Notifications|*|REMOVESELF
 FileKey21=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\Service Worker\*Cache*|*|REMOVESELF
-FileKey22=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\VideoDecodeStats|*|REMOVESELF
+FileKey22=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\Shared Dictionary\cache|*|REMOVESELF
 ```
 
 **Explanation**
@@ -1069,7 +1099,8 @@ FileKey22=%LocalAppData%\calibre-ebook.com\calibre\QtWebEngine\viewer-lookup\Vid
 - One `QtWebEngineRoot=` line produced three roots. Root substitution happens before token expansion, so the `<Default,OffTheRecord,viewer-lookup>` inline list inside the root value fans out normally and `<QtRoot>` resolves in the same pass
 - Each root got keys for all the default scaffolds (`Caches`, `StorageQuota`, `Telemetry`, `VisitedLinks`)
 - FileKey3, 10 and 17 are each the merged product of two scaffolds, this is caused by the optimization pass through WinappDebug
-- `WebCookies`, `WebHistory`, `WebSession`, `WebStorage` would require `QtWebEngineScaffolds=All` or an explicit list
+- The `%QtWebEngineCacheRoot%` template in `Caches` was dropped, since the entry declares no `QtWebEngineCacheRoot=`; calibre's own cache is covered by the hand-written FileKey1 instead
+- `Favicons`, `PrivacySandbox`, `Security` and the host-risk `WebCookies`, `WebHistory`, `WebSession`, `WebStorage` would require `QtWebEngineScaffolds=All` or an explicit list. The legacy `LegacyTelemetry` and `LegacyWebStorage` must be named even beside `All`
 
 ---
 
@@ -1110,7 +1141,7 @@ winapp2ool -entrybuilder -1d ..\..\Assembler\EntryBuilder -3d ..\..\Assembler\Sc
 [Signal Messenger *]
 LangSecRef=3022
 DetectFile=%AppData%\Signal
-FileKey1=%AppData%\Signal|*.log;log.log;Network Persistent State*;Origin Bound Certs;Visited Links*;QuotaManager*
+FileKey1=%AppData%\Signal|*.log;Network Persistent State*;Origin Bound Certs;Reporting and NEL*;Visited Links*;QuotaManager*
 FileKey2=%AppData%\Signal|*.old;LOG;LOG.old;*-journal|RECURSE
 FileKey3=%AppData%\Signal\*\*Logs|*|RECURSE
 FileKey4=%AppData%\Signal\*Cache*|*|REMOVESELF
@@ -1169,13 +1200,13 @@ ElectronScaffolds=Caches,AppLogs,UpdaterCache
 [Notion *]
 LangSecRef=3021
 DetectFile=%AppData%\Notion
-FileKey1=%AppData%\Notion|*.log;log.log
+FileKey1=%AppData%\Notion|*.log
 FileKey2=%AppData%\Notion|*-journal|RECURSE
 FileKey3=%AppData%\Notion\*\*Logs|*|RECURSE
 FileKey4=%AppData%\Notion\*Cache*|*|REMOVESELF
 FileKey5=%AppData%\Notion\*Logs|*|RECURSE
 FileKey6=%AppData%\Notion\blob_storage|*|REMOVESELF
-FileKey7=%AppData%\Notion\partitions\*|*.log;log.log
+FileKey7=%AppData%\Notion\partitions\*|*.log
 FileKey8=%AppData%\Notion\partitions\*|*-journal|RECURSE
 FileKey9=%AppData%\Notion\partitions\*\*\*Logs|*|RECURSE
 FileKey10=%AppData%\Notion\partitions\*\*Cache*|*|REMOVESELF

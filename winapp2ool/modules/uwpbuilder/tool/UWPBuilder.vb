@@ -64,7 +64,8 @@ Imports System.Text
 ''' An entry may also draw scaffold FileKeys from the shared catalogs in
 ''' <c> Assembler\Scaffolds </c> by declaring a root for any family in
 ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> — <c> WebViewPath= </c>,
-''' <c> QtWebEnginePath= </c>, or <c> ElectronRoot= </c> / <c> ElectronUpdaterRoot= </c>.
+''' <c> QtWebEnginePath= </c> / <c> QtWebEngineCachePath= </c>, or <c> ElectronRoot= </c> /
+''' <c> ElectronUpdaterRoot= </c>.
 ''' Electron matters here despite MSIX packages rarely bundling it, because the
 ''' <b> hybrid win32+UWP </b> entries above carry the desktop install's paths too, and a
 ''' packaged app's desktop build is frequently Electron.
@@ -92,6 +93,7 @@ Public Module UWPBuilder
         "EXCLUDEKEY", "EXCLUDEKEYBASE",
         "WEBVIEWPATH", "WEBVIEWROOT",
         "QTWEBENGINEPATH", "QTWEBENGINEROOT",
+        "QTWEBENGINECACHEPATH", "QTWEBENGINECACHEROOT",
         "ELECTRONPATH", "ELECTRONROOT",
         "ELECTRONUPDATERPATH", "ELECTRONUPDATERROOT",
         "WEBVIEWSCAFFOLDS", "EXCLUDEWEBVIEWSCAFFOLDS",
@@ -239,6 +241,15 @@ Public Module UWPBuilder
         Public QtWebEnginePaths As List(Of String)
 
         ''' <summary>
+        ''' Paths of the application's QtWebEngine HTTP cache directories. Declared separately
+        ''' from <see cref="QtWebEnginePaths"/> because Qt keeps the cache under its CacheLocation,
+        ''' not inside the profile directory. Substituted for <c> %QtWebEngineCacheRoot% </c>;
+        ''' when empty, templates referencing that placeholder are dropped rather than emitted
+        ''' with the placeholder literal.
+        ''' </summary>
+        Public QtWebEngineCachePaths As List(Of String)
+
+        ''' <summary>
         ''' Explicit <c> QtWebEngineScaffold </c> names selected for this entry. When non-empty,
         ''' this list replaces <see cref="ScaffoldCatalogs.QtWebEngineDefaultScaffolds"/>. The
         ''' <c> All </c> sentinel expands to every scaffold in the QtWebEngine catalog.
@@ -343,6 +354,7 @@ Public Module UWPBuilder
             ExcludedWebViewScaffolds = New List(Of String)
             WebViewScaffoldsKeyPresent = False
             QtWebEnginePaths = New List(Of String)
+            QtWebEngineCachePaths = New List(Of String)
             QtWebEngineScaffoldNames = New List(Of String)
             ExcludedQtWebEngineScaffolds = New List(Of String)
             QtWebEngineScaffoldsKeyPresent = False
@@ -711,6 +723,8 @@ Public Module UWPBuilder
 
                 Case "QTWEBENGINEPATH", "QTWEBENGINEROOT" : app.QtWebEnginePaths.Add(key.Value)
 
+                Case "QTWEBENGINECACHEPATH", "QTWEBENGINECACHEROOT" : app.QtWebEngineCachePaths.Add(key.Value)
+
                 Case "QTWEBENGINESCAFFOLDS"
 
                     app.QtWebEngineScaffoldNames = splitCsv(key.Value)
@@ -820,14 +834,14 @@ Public Module UWPBuilder
 
         ''' <summary>
         ''' The family's (placeholder, roots) pairs, roots already package-expanded to literals.
-        ''' Electron carries two; the others one.
+        ''' QtWebEngine and Electron carry two; WebView one.
         ''' </summary>
         Public Bindings As List(Of ScaffoldCatalogs.ScaffoldRootBinding)
 
         ''' <summary>
         ''' Whether the entry opted into this family — true when it declared any root for any of
-        ''' the family's placeholders. Electron opts in on either root, since an entry may want
-        ''' only the updater cache.
+        ''' the family's placeholders. QtWebEngine and Electron opt in on either root, since an
+        ''' entry may want only the cache or updater templates.
         ''' </summary>
         Public ReadOnly Property IsDeclared As Boolean
             Get
@@ -909,7 +923,8 @@ Public Module UWPBuilder
             New UWPScaffoldFamily("QtWebEngine", app.QtWebEngineScaffoldNames, app.ExcludedQtWebEngineScaffolds,
                                   app.QtWebEngineScaffoldsKeyPresent,
                                   New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", expandRoots(app.QtWebEnginePaths))}),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", expandRoots(app.QtWebEnginePaths)),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineCacheRoot%", expandRoots(app.QtWebEngineCachePaths))}),
             New UWPScaffoldFamily("Electron", app.ElectronScaffoldNames, app.ExcludedElectronScaffolds,
                                   app.ElectronScaffoldsKeyPresent,
                                   New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
