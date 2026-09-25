@@ -34,7 +34,7 @@ The `DetectFile` and the four baseline FileKeys come from the `[EntryScaffold: U
 
 ### Embedded browser data
 
-An AppInfo section may declare `WebViewPath=` (an embedded WebView2/EBWebView data folder) or `QtWebEnginePath=` (an embedded QtWebEngine data folder) to draw additional curated FileKeys from the shared catalogs in [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Scaffolds), selected per entry with `WebViewScaffolds=` / `ExcludeWebViewScaffolds=` (and their QtWebEngine equivalents). See the [Scaffolds readme](https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/Scaffolds/readme.md).
+An AppInfo section may declare `WebViewPath=` (an embedded WebView2/EBWebView data folder), `QtWebEnginePath=` (an embedded QtWebEngine data folder) or `ElectronPath=` (an Electron `userData` folder) to draw additional curated FileKeys from the shared catalogs in [Scaffolds](https://github.com/MoscaDotTo/Winapp2/tree/master/Assembler/Scaffolds), selected per entry with `WebViewScaffolds=` / `ExcludeWebViewScaffolds=` (and their QtWebEngine and Electron equivalents). See the [Scaffolds readme](https://github.com/MoscaDotTo/Winapp2/blob/master/Assembler/Scaffolds/readme.md).
 
 The complete UWPBuilder DSL is documented in the [UWPBuilder readme](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/modules/uwpbuilder/readme.md).
 
