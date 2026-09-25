@@ -37,13 +37,16 @@ Imports System.IO
 ''' templates use the <c> %QtWebEngineRoot% </c> placeholder. QtWebEngine bundles an older
 ''' Chromium with a flatter on-disk layout (no <c> Default\Network\ </c> subfolder, no
 ''' privacy-sandbox surface), so it warrants a separate catalog rather than reusing the
-''' WebView2 paths.</item>
+''' WebView2 paths. A second placeholder, <c> %QtWebEngineCacheRoot% </c>, names the profile's
+''' HTTP cache directory, which Qt keeps under its CacheLocation rather than beside the
+''' profile (<c> %LocalAppData%\App\cache\QtWebEngine\Default </c> against
+''' <c> %LocalAppData%\App\QtWebEngine\Default </c>).</item>
 ''' <item><c> Electron </c> — Electron layout (<c> Assembler\Scaffolds\electron.ini </c>),
 ''' templates use <c> %ElectronRoot% </c> (the app's <c> userData </c> folder, which for
 ''' Electron <em>is</em> the Chromium profile — no <c> Default\ </c> segment) and
 ''' <c> %ElectronUpdaterRoot% </c> (the electron-updater download cache, whose directory name
-''' is not derivable from the userData path). This is the only family with two placeholders,
-''' so its consumers bind both — see <see cref="BindFamilyTemplates"/>. It is a separate
+''' is not derivable from the userData path). Like QtWebEngine it has two placeholders, so its
+''' consumers bind both — see <see cref="BindFamilyTemplates"/>. It is a separate
 ''' catalog because Electron collapses WebView2's user-data and profile levels into one
 ''' directory <em>and</em> straddles the Chromium 89 network-service migration, needing both
 ''' <c> Network\Cookies </c> and legacy root-level <c> Cookies </c>.</item>
@@ -62,7 +65,8 @@ Imports System.IO
 ''' substitution per (placeholder, roots) pair; a template whose placeholder has an empty root
 ''' list is dropped rather than emitted with the placeholder left literal, which is what lets
 ''' the Electron family's updater templates stay inert for an entry that declared only
-''' <c> ElectronRoot= </c>.
+''' <c> ElectronRoot= </c>, and QtWebEngine's cache templates for one that declared only
+''' <c> QtWebEngineRoot= </c>.
 ''' <br />
 '''
 ''' Source files contribute <c> [{Family}Scaffold: Name] </c> sections whose
@@ -175,9 +179,9 @@ Public Module ScaffoldCatalogs
     End Function
 
     ''' <summary>
-    ''' One (placeholder, roots) pair for a scaffold family. WebView and QtWebEngine bind a
-    ''' single pair each, Electron binds two (<c> %ElectronRoot% </c> and
-    ''' <c> %ElectronUpdaterRoot% </c>), and <see cref="BindFamilyTemplates"/> chains a
+    ''' One (placeholder, roots) pair for a scaffold family. WebView binds a single pair,
+    ''' QtWebEngine binds two (<c> %QtWebEngineRoot% </c> and <c> %QtWebEngineCacheRoot% </c>),
+    ''' Electron binds two (<c> %ElectronRoot% </c> and <c> %ElectronUpdaterRoot% </c>), and <see cref="BindFamilyTemplates"/> chains a
     ''' substitution per binding so a template referencing several placeholders multiplies
     ''' across all of their root lists. Binding a placeholder to an empty root list is
     ''' meaningful: it is what keeps the Electron <c> UpdaterCache </c> scaffold inert for
@@ -268,6 +272,11 @@ Public Module ScaffoldCatalogs
     ''' scaffold's name (the portion of the section header after
     ''' <paramref name="sectionPrefix"/>, trimmed). Warns on unrecognised key types and on
     ''' duplicate scaffold names (last definition wins).
+    ''' <br /><br />
+    '''
+    ''' A <c> Tier=Legacy </c> key records the scaffold in the catalog's
+    ''' <see cref="ScaffoldCatalog.Legacy"/> set. A redefinition resets the tier along with the
+    ''' templates, so last-definition-wins covers both.
     ''' </summary>
     '''
     ''' <param name="scaffoldSection">
@@ -310,12 +319,37 @@ Public Module ScaffoldCatalogs
         End If
 
         Dim keys As New List(Of String)
+        Dim tiered = TryCast(scaffolds, ScaffoldCatalog)
+
+        If tiered IsNot Nothing Then tiered.Legacy.Remove(scaffoldName)
 
         For Each key In scaffoldSection.Keys
 
             Select Case key.KeyType.ToUpperInvariant()
 
                 Case "FILEKEYBASE" : keys.Add(key.Value)
+
+                Case "TIER"
+
+                    If Not String.Equals(key.Value.Trim(), "Legacy", StringComparison.InvariantCultureIgnoreCase) Then
+
+                        Dim tierMsg = $"Unknown tier '{key.Value}' in {sectionLabel} [{scaffoldSection.Name}]; the only tier is Legacy"
+                        gLog(tierMsg)
+                        menuOutput.AddWarning(tierMsg)
+
+                    ElseIf tiered Is Nothing Then
+
+                        ' Only reachable from a caller parsing into a plain dictionary. Ignoring the
+                        ' tier silently would let a legacy scaffold ship under All.
+                        Dim noTierMsg = $"Tier=Legacy in {sectionLabel} [{scaffoldSection.Name}] ignored: this catalog does not track tiers"
+                        gLog(noTierMsg)
+                        menuOutput.AddWarning(noTierMsg)
+
+                    Else
+
+                        tiered.Legacy.Add(scaffoldName)
+
+                    End If
 
                 Case Else
 
@@ -368,7 +402,7 @@ Public Module ScaffoldCatalogs
                                 menuOutput As MenuSection,
                                 Optional sectionPrefix As String = "WebViewScaffold:") As Dictionary(Of String, List(Of String))
 
-        Dim catalog As New Dictionary(Of String, List(Of String))(StringComparer.InvariantCultureIgnoreCase)
+        Dim catalog As New ScaffoldCatalog
         Dim sectionLabel = sectionPrefix.TrimEnd(":"c)
 
         Dim catalogIni = iniFile2.FromFile(catalogPath)
@@ -498,6 +532,12 @@ Public Module ScaffoldCatalogs
     ''' <c> All </c> sentinel, default fallback, exclusions, and unknown-name filtering.
     ''' Family-agnostic — callers supply the family's default set and a label used to phrase
     ''' diagnostics (e.g. <c> WebView </c> → <c> WebViewScaffolds=All </c>).
+    ''' <br /><br />
+    '''
+    ''' <c> All </c> expands to every scaffold except the catalog's legacy tier. A legacy
+    ''' scaffold is emitted only when named, either alone or beside <c> All </c>
+    ''' (<c> WebViewScaffolds=All,LegacyWebApps </c>). Naming a non-legacy scaffold beside
+    ''' <c> All </c> is redundant and warns.
     ''' </summary>
     '''
     ''' <param name="scaffoldNames">
@@ -560,17 +600,37 @@ Public Module ScaffoldCatalogs
 
             If usedAllSentinel Then
 
-                selected = New List(Of String)(available.Keys)
+                Dim tiered = TryCast(available, ScaffoldCatalog)
+                Dim legacy = If(tiered Is Nothing, New HashSet(Of String), tiered.Legacy)
 
-                Dim allMsg = $"{familyLabel}Scaffolds=All in [{specName}]; expanded to {selected.Count} scaffold(s) from catalog"
+                selected = available.Keys.Where(Function(k) Not legacy.Contains(k)).ToList()
+
+                Dim allMsg = $"{familyLabel}Scaffolds=All in [{specName}]; expanded to {selected.Count} scaffold(s) from catalog, {legacy.Count} legacy withheld"
                 gLog(allMsg)
 
-                Dim extras = scaffoldNames.Where(
-                    Function(s) Not String.Equals(s, "All", StringComparison.InvariantCultureIgnoreCase)).ToList()
+                Dim redundant As New List(Of String)
 
-                If extras.Count > 0 Then
+                For Each extra In scaffoldNames
 
-                    Dim extraMsg = $"{familyLabel}Scaffolds=All in [{specName}] with redundant additional names ({String.Join(", ", extras)}); ignoring"
+                    If String.Equals(extra, "All", StringComparison.InvariantCultureIgnoreCase) Then Continue For
+
+                    ' Legacy names are the point of naming anything beside All. Unknown names are
+                    ' kept too, so the filter below reports them rather than this warning hiding them.
+                    If legacy.Contains(extra) OrElse Not available.ContainsKey(extra) Then
+
+                        selected.Add(extra)
+
+                    Else
+
+                        redundant.Add(extra)
+
+                    End If
+
+                Next
+
+                If redundant.Count > 0 Then
+
+                    Dim extraMsg = $"{familyLabel}Scaffolds=All in [{specName}] with redundant additional names ({String.Join(", ", redundant)}); ignoring"
                     gLog(extraMsg)
                     menuOutput.AddWarning(extraMsg)
 
@@ -643,7 +703,7 @@ Public Module ScaffoldCatalogs
     ''' </summary>
     '''
     ''' <param name="bindings">
-    ''' The family's (placeholder, roots) pairs — one for WebView and QtWebEngine, two for Electron
+    ''' The family's (placeholder, roots) pairs — one for WebView, two for QtWebEngine and Electron
     ''' </param>
     '''
     ''' <param name="selectedScaffolds">

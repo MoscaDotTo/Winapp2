@@ -18,6 +18,32 @@
 Option Strict On
 
 ''' <summary>
+''' One family's scaffold catalog: scaffold name to its <c> FileKeyBase= </c> templates, plus
+''' the names of the scaffolds that declared <c> Tier=Legacy </c>. A legacy scaffold is kept in
+''' the catalog so it can be selected by name, but the <c> All </c> sentinel withholds it. That
+''' lets a pattern that only older engines write stay on record without shipping to every entry.
+''' <br /><br />
+'''
+''' It is still a <c> Dictionary </c>, so every consumer that only reads templates is unaffected.
+''' A plain dictionary has no tiers, and <see cref="ScaffoldCatalogs.ResolveScaffolds"/> treats it
+''' as having no legacy scaffolds.
+''' </summary>
+Public Class ScaffoldCatalog
+    Inherits Dictionary(Of String, List(Of String))
+
+    ''' <summary> Names of the scaffolds declaring <c> Tier=Legacy </c> </summary>
+    Public ReadOnly Property Legacy As HashSet(Of String) = New HashSet(Of String)(StringComparer.InvariantCultureIgnoreCase)
+
+    ''' <summary> Creates an empty catalog keyed case-insensitively by scaffold name </summary>
+    Public Sub New()
+
+        MyBase.New(StringComparer.InvariantCultureIgnoreCase)
+
+    End Sub
+
+End Class
+
+''' <summary>
 ''' The scaffold catalogs loaded from one scaffold directory, partitioned by engine family.
 ''' Produced by <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/> and consumed by the entry
 ''' generators, replacing the former arrangement where each family was a separate configured
@@ -36,7 +62,7 @@ Public Class ScaffoldCatalogSet
     ''' <c> QtWebEngine </c>, <c> Electron </c>). Each value is that family's catalog, keyed by
     ''' scaffold name — the same shape <c> ScaffoldCatalogs.LoadCatalog </c> returns.
     ''' </summary>
-    Private ReadOnly _families As New Dictionary(Of String, Dictionary(Of String, List(Of String)))(StringComparer.InvariantCultureIgnoreCase)
+    Private ReadOnly _families As New Dictionary(Of String, ScaffoldCatalog)(StringComparer.InvariantCultureIgnoreCase)
 
     ''' <summary>
     ''' The family tokens present in this set, in first-seen order
@@ -62,13 +88,13 @@ Public Class ScaffoldCatalogSet
     ''' <returns>
     ''' That family's catalog, keyed by scaffold name; empty when the family supplied none
     ''' </returns>
-    Public Function ForFamily(familyLabel As String) As Dictionary(Of String, List(Of String))
+    Public Function ForFamily(familyLabel As String) As ScaffoldCatalog
 
-        Dim catalog As Dictionary(Of String, List(Of String)) = Nothing
+        Dim catalog As ScaffoldCatalog = Nothing
 
         If Not _families.TryGetValue(familyLabel, catalog) Then
 
-            catalog = New Dictionary(Of String, List(Of String))(StringComparer.InvariantCultureIgnoreCase)
+            catalog = New ScaffoldCatalog
             _families.Add(familyLabel, catalog)
 
         End If
