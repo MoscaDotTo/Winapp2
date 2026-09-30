@@ -809,7 +809,11 @@ The build rewrites all 29 artifacts under `Assembler/Entries/` and all seven pub
 
 ## What happens after you open a PR
 
-Two automated checks run against your pull request. Neither needs anything from you beyond the PR itself, and a maintainer always reviews your change.
+Three automated checks run against your pull request. None needs anything from you beyond the PR itself, and a maintainer always reviews your change.
+
+### The maintainer-paths guard
+
+Runs on every PR. It fails if your PR changes a file that only the maintainer changes: anything under `winapp2ool/` except Markdown files, `Assembler/winapp2ool.exe`, the build script in `Assembler/`, or anything under `.github/`. Those files are either shipped to winapp2ool users or run by the build with write access, so they only change through the maintainer. Entry contributions live under `Assembler/` and `Winapp3/` and never trip it. If you think one of those files needs a change, open an issue describing it.
 
 ### The generated artifact guard
 
