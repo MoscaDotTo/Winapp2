@@ -1,0 +1,66 @@
+# Maintainer-paths guard: a pull request from a fork or a non-member must not change
+# winapp2ool's source or binaries, the build tooling, or the workflows. See
+# .github/scripts/check-maintainer-paths.sh for the list and why each is protected.
+#
+# Deployed winapp2ool clients download and run the committed exe with no verification, and
+# build-on-merge.yml runs the committed build tooling with a write token. An entry PR that
+# also swaps one of those files is easy to miss in review; this makes it a red X that no
+# commit message or PR title can clear.
+#
+# No path filter on purpose: if this becomes a required check, a filtered workflow that
+# never starts would block every PR that doesn't touch the filtered paths.
+#
+# Safe on fork PRs: read-only token, no secrets, and it runs only `git diff --name-only` and
+# the classifier script. The classifier is read from the base branch, never from the PR, so
+# a PR can't weaken the check it is being judged by.
+name: maintainer paths guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maintainer-paths-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      # The base branch, not the PR: this is where the classifier script comes from
+      - name: Checkout base
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+
+      - name: Fetch PR head
+        shell: bash
+        run: |
+          git fetch --no-tags origin \
+            "+refs/pull/${{ github.event.number }}/head:refs/remotes/pr/head"
+
+      # author_association and the head repo come from the event, never from anything the
+      # PR controls. OWNER, MEMBER and COLLABORATOR can push to this repo directly anyway.
+      - name: Check changed paths
+        shell: bash
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPO: ${{ github.repository }}
+          ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -uo pipefail
+          if [ "$HEAD_REPO" = "$BASE_REPO" ]; then
+            case "$ASSOCIATION" in
+              OWNER|MEMBER|COLLABORATOR)
+                echo "PR from $ASSOCIATION on a branch of $BASE_REPO; maintainer paths may change."
+                exit 0 ;;
+            esac
+          fi
+          echo "PR from $HEAD_REPO ($ASSOCIATION); checking for maintainer-only paths."
+          bash .github/scripts/check-maintainer-paths.sh "$BASE_SHA" "$HEAD_SHA"
