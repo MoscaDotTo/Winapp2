@@ -236,11 +236,12 @@ Module Diff
         MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
 
         Dim logFile = iniFile2.Empty(DiffFile3.Dir, DiffFile3.Name)
-        logFile.OverwriteToFile(MostRecentDiffLog, SaveDiffLog)
+        Dim logSaved = logFile.OverwriteToFile(MostRecentDiffLog, SaveDiffLog)
 
         WriteOutcomeSummary()
 
-        setNextMenuHeaderText(If(SaveDiffLog, DiffFile3.Name & " saved", "Diff complete"))
+        setNextMenuHeaderText(If(logSaved, DiffFile3.Name & " saved", "Diff complete"), Not SaveDiffLog OrElse logSaved)
+        setNextMenuHeaderText($"Diff complete, but {DiffFile3.Name} was not saved", SaveDiffLog AndAlso Not logSaved, ConsoleColor.Red)
 
         crl()
 

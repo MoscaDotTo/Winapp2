@@ -173,7 +173,14 @@ Public Module CC7Patcher
             menuOutput.AddColoredLine(patchMsg, ConsoleColor.Yellow)
             gLog(patchMsg)
 
-            Transmute.RemoteTransmute(baseFile, winapp2Input, outputFile, False, menuOutput, Transmute.TransmuteMode.Add)
+            If Not Transmute.RemoteTransmute(baseFile, winapp2Input, outputFile, False, menuOutput, Transmute.TransmuteMode.Add) Then
+
+                Dim failedMsg = $"Patched file was not saved to {CC7PatcherFile3.Path()}"
+                menuOutput.AddWarning(failedMsg)
+                gLog(failedMsg)
+                Return
+
+            End If
 
             Dim savedMsg = $"Patched file saved to {CC7PatcherFile3.Path()}"
             menuOutput.AddColoredLine(savedMsg, ConsoleColor.Green)

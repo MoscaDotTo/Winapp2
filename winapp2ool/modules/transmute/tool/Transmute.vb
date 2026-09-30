@@ -345,7 +345,7 @@ Public Module Transmute
 
         Dim saveFile = iniFile2.Empty(TransmuteFile3.Dir, TransmuteFile3.Name)
 
-        transmute(baseFile2, sourceFile2, saveFile, menuOutput, UseWinapp2Syntax)
+        If Not transmute(baseFile2, sourceFile2, saveFile, menuOutput, UseWinapp2Syntax) Then menuOutput.AddWarning($"{saveFile.Name} was not saved")
 
         menuOutput.AddLine("") _
                   .AddBottomBorder() _
@@ -383,31 +383,35 @@ Public Module Transmute
     ''' <param name="isWinapp2">
     ''' Indicates that the <c> saveFile </c> should be formatted as a winapp2.ini file
     ''' </param>
-    Private Sub transmute(ByRef baseFile As iniFile2,
+    '''
+    ''' <returns>
+    ''' <c> True </c> if the output was saved, <br />
+    ''' <c> False </c> if saving was skipped or failed
+    ''' </returns>
+    Private Function transmute(ByRef baseFile As iniFile2,
                           ByRef sourceFile As iniFile2,
                                 saveFile As iniFile2,
                           ByRef menuOutput As MenuSection,
                        Optional isWinapp2 As Boolean = True,
-                       Optional skipFormat As Boolean = False)
+                       Optional skipFormat As Boolean = False) As Boolean
 
         resolveConflicts(baseFile, sourceFile, menuOutput)
 
-        If skipFormat Then Return
+        If skipFormat Then Return False
 
         If isWinapp2 Then
 
             Dim wf2 As New winapp2file2(baseFile)
             wf2.SortEntries()
-            saveFile.OverwriteToFile(wf2.ToWinapp2String())
+            Dim saved = saveFile.OverwriteToFile(wf2.ToWinapp2String())
             baseFile = wf2.ToIni()
-
-        Else
-
-            saveFile.OverwriteToFile(baseFile.ToString(IniFileWriteFormat.Alphabetical))
+            Return saved
 
         End If
 
-    End Sub
+        Return saveFile.OverwriteToFile(baseFile.ToString(IniFileWriteFormat.Alphabetical))
+
+    End Function
 
     ''' <summary> 
     ''' Facilitates transmuting an <c> iniFile2 </c> from outside the module's UI
@@ -461,7 +465,11 @@ Public Module Transmute
     ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
-    Public Sub RemoteTransmute(ByRef baseFile As iniFile2,
+    ''' <returns>
+    ''' <c> True </c> if the output was saved, <br />
+    ''' <c> False </c> if there was nothing to transmute, <paramref name="skipFormat"/> skipped the write, or the save failed
+    ''' </returns>
+    Public Function RemoteTransmute(ByRef baseFile As iniFile2,
                                ByRef sourceFile As iniFile2,
                                      outputFile As iniFile2,
                                      isWinapp As Boolean,
@@ -470,16 +478,16 @@ Public Module Transmute
                             Optional replaceMode As ReplaceMode = ReplaceMode.ByKey,
                             Optional removeMode As RemoveMode = RemoveMode.ByKey,
                             Optional removeKeyMode As RemoveKeyMode = RemoveKeyMode.ByName,
-                            Optional skipFormat As Boolean = False)
+                            Optional skipFormat As Boolean = False) As Boolean
 
-        If sourceFile Is Nothing Then gLog("Source file not provided, skipping!") : Return
+        If sourceFile Is Nothing Then gLog("Source file not provided, skipping!") : Return False
 
         If baseFile Is Nothing OrElse baseFile.Count = 0 Then
             gLog("Base file is empty or not provided, skipping!")
-            Return
+            Return False
         End If
 
-        If sourceFile.Count = 0 Then gLog($"{sourceFile.Name} is empty!") : Return
+        If sourceFile.Count = 0 Then gLog($"{sourceFile.Name} is empty!") : Return False
 
         Dim initTransmutator = Transmutator
         Dim initReplMode = TransmuteReplaceMode
@@ -491,14 +499,16 @@ Public Module Transmute
         TransmuteRemoveMode = removeMode
         TransmuteRemoveKeyMode = removeKeyMode
 
-        transmute(baseFile, sourceFile, outputFile, menuOutput, isWinapp, skipFormat)
+        Dim saved = transmute(baseFile, sourceFile, outputFile, menuOutput, isWinapp, skipFormat)
 
         Transmutator = initTransmutator
         TransmuteReplaceMode = initReplMode
         TransmuteRemoveMode = initRemMode
         TransmuteRemoveKeyMode = initRemKeyMode
 
-    End Sub
+        Return saved
+
+    End Function
 
     ''' <summary>
     ''' Steps through the sections in the <c> <paramref name="sourceFile"/> </c> and applies the
@@ -1288,16 +1298,25 @@ Public Module Transmute
 
         Next
 
+        Dim saved As Boolean
+
         If isWinapp Then
 
             Dim wf2 As New winapp2file2(baseFile)
             wf2.SortEntries()
-            outputFile.OverwriteToFile(wf2.ToWinapp2String())
+            saved = outputFile.OverwriteToFile(wf2.ToWinapp2String())
             baseFile = wf2.ToIni()
 
         Else
 
-            outputFile.OverwriteToFile(baseFile.ToString(IniFileWriteFormat.Alphabetical))
+            saved = outputFile.OverwriteToFile(baseFile.ToString(IniFileWriteFormat.Alphabetical))
+
+        End If
+
+        If Not saved Then
+
+            menuOutput.AddWarning($"{outputFile.Name} was not saved")
+            Return
 
         End If
 

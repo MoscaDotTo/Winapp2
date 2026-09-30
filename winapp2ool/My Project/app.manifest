@@ -16,7 +16,8 @@
             Remove this element if your application requires this virtualization for backwards
             compatibility.
         -->
-        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+        <!-- winapp2ool elevates itself only when its working folder needs it, see helpers\elevation\ElevationHelper.vb -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
       <applicationRequestMinimum>
         <defaultAssemblyRequest permissionSetReference="Custom" />

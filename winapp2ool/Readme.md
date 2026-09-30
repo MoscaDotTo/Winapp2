@@ -64,14 +64,13 @@ Because the artifacts under [Entries](../Assembler/Entries) are committed to the
 
 ### Minimum
 
-* Windows Vista SP2
-* .NET Framework 4.5
-* Administrative permissions (see [Notes](#notes))
+* Windows 7 SP1
+* .NET Framework 4.8
+* Administrator rights only when saving into a protected folder such as Program Files (see [Notes](#notes))
 
 ### Suggested
 
-* Windows 7 or higher
-* .NET Framework 4.6 or higher (for automatically updating the executable)
+* Windows 10 or higher
 * Network connection for full functionality
 
 ---
@@ -409,11 +408,11 @@ FileKey1=%AppData%\MyOtherApp\Cache|*.tmp
 
 ### General
 
-.NET Framework 4.5 (or newer) comes pre-installed by default on Windows 8 and newer.
+.NET Framework 4.8 comes built in with Windows 10 (version 1903 and later) and Windows 11.
 
 By default, each tool in the application assumes that local files it is looking for are in the same folder as the executable. File paths displayed in menus abbreviate the current directory as `..`
 
-Winapp2ool performs queries against protected system areas such as the Program Files and Windows directories and may return invalid results if run without administrative permissions.
+Winapp2ool runs without administrator rights unless it needs them to save files. If the folder it runs from, or a folder passed with `-1d`, `-2d` and so on, is protected (such as `Program Files\CCleaner`), it restarts itself with administrator rights through a UAC prompt. If a save in the menu is refused, it offers the same restart. Declining the prompt leaves winapp2ool running without administrator rights, and saves to protected folders then fail with a message saying so.
 
 Winapp2ool does not perform any automatic backup of ini files before modifying them. 
 

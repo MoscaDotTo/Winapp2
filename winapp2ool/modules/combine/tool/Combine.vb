@@ -216,9 +216,12 @@ Public Module Combine
                 gLog(emptyOutputMsg, cond:=outputIsEmpty)
                 outputMenu.AddWarning(emptyOutputMsg, condition:=outputIsEmpty)
 
-                Dim outputWasSaved = Not outputIsEmpty AndAlso Not strictNamesViolated
+                Dim shouldSave = Not outputIsEmpty AndAlso Not strictNamesViolated
+                Dim outputWasSaved = combinedOutput.OverwriteToFile(combinedOutput.ToString(), shouldSave)
 
-                combinedOutput.OverwriteToFile(combinedOutput.ToString(), outputWasSaved)
+                Dim saveFailedMsg = $"{combinedOutput.Name} was not saved"
+                gLog(saveFailedMsg, cond:=shouldSave AndAlso Not outputWasSaved)
+                outputMenu.AddWarning(saveFailedMsg, condition:=shouldSave AndAlso Not outputWasSaved)
 
                 Dim combinedCountMsg = $"Combined {validFileCount} files into {combinedOutput.Name} with {combinedOutput.Count} sections"
                 gLog(combinedCountMsg, cond:=outputWasSaved)

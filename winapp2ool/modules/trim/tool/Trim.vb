@@ -252,11 +252,12 @@ Public Module Trim
         out.Print()
 
         ' Save the trimmed file back to disk
-        iniFile2.Empty(TrimFile3.Dir, TrimFile3.Name).OverwriteToFile(winapp2.ToWinapp2String())
+        Dim saved = iniFile2.Empty(TrimFile3.Dir, TrimFile3.Name).OverwriteToFile(winapp2.ToWinapp2String())
 
         ' If we downloaded the latest file, then we probably can mark winapp2 as having been updated
-        If DownloadFileToTrim Then waUpdateIsAvail = False
-        setNextMenuHeaderText($"{TrimFile3.Name} saved")
+        If DownloadFileToTrim AndAlso saved Then waUpdateIsAvail = False
+        setNextMenuHeaderText($"{TrimFile3.Name} saved", saved)
+        setNextMenuHeaderText($"{TrimFile3.Name} was not saved", Not saved, ConsoleColor.Red)
 
         crk()
 

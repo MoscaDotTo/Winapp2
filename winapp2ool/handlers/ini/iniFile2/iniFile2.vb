@@ -314,9 +314,14 @@ Public Class iniFile2
     '''
     ''' <param name="text">The text to write</param>
     ''' <param name="condition">When <c> False </c>, the write is skipped</param>
-    Public Sub OverwriteToFile(text As String, Optional condition As Boolean = True)
+    '''
+    ''' <returns>
+    ''' <c> True </c> if the file was written, <br />
+    ''' <c> False </c> if the write was skipped or failed
+    ''' </returns>
+    Public Function OverwriteToFile(text As String, Optional condition As Boolean = True) As Boolean
 
-        If Not condition Then Return
+        If Not condition Then Return False
 
         gLog($"Saving {Name}")
 
@@ -334,6 +339,7 @@ Public Class iniFile2
                 file.Write(text)
             End Using
             gLog("  Save complete")
+            Return True
 
         Catch ex As IO.IOException
 
@@ -344,10 +350,13 @@ Public Class iniFile2
 
             gLog("  Save failed")
             handleUnauthorizedAccessException(ex)
+            offerElevatedRestart(Dir)
 
         End Try
 
-    End Sub
+        Return False
+
+    End Function
 
     ''' <summary>Returns the file as it would appear on disk</summary>
     Public Overrides Function ToString() As String

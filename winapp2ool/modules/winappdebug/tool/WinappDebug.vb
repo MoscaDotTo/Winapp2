@@ -407,8 +407,15 @@ Public Module WinappDebug
 
         If SaveChanges Then
 
-            iniFile2.Empty(winappDebugFile3.Dir, winappDebugFile3.Name).OverwriteToFile(wa2.ToWinapp2String())
-            summary.AddColoredLine($"{winappDebugFile3.Name} saved with any corrections made", ConsoleColor.DarkGreen, centered:=True)
+            If iniFile2.Empty(winappDebugFile3.Dir, winappDebugFile3.Name).OverwriteToFile(wa2.ToWinapp2String()) Then
+
+                summary.AddColoredLine($"{winappDebugFile3.Name} saved with any corrections made", ConsoleColor.DarkGreen, centered:=True)
+
+            Else
+
+                summary.AddColoredLine($"{winappDebugFile3.Name} was not saved", ConsoleColor.Red, centered:=True)
+
+            End If
 
         End If
 

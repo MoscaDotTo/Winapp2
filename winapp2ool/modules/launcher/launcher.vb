@@ -46,6 +46,9 @@ Public Module launcher
 
             tryResizeWindow()
 
+            Dim elevatedExitCode = relaunchElevatedIfNeeded()
+            If elevatedExitCode.HasValue Then Environment.Exit(elevatedExitCode.Value)
+
             ' don't bother checking checking the connection if we know we want to be offline
             If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-offline", StringComparison.OrdinalIgnoreCase)) Then
                 isOffline = True

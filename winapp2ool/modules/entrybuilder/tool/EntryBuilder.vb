@@ -2084,6 +2084,8 @@ Public Module EntryBuilder
 
         Next
 
+        Dim written = 0
+
         For Each letter In letters
 
             Dim bucket = buckets(letter)
@@ -2105,12 +2107,12 @@ Public Module EntryBuilder
             sb.AppendLine()
             sb.Append(bucket.ToString())
 
-            bucket.OverwriteToFile(sb.ToString())
+            If bucket.OverwriteToFile(sb.ToString()) Then written += 1
 
         Next
 
-        Dim splitMsg = $"Wrote {letters.Count} per-letter artifact files to {EntryBuilderFile2.Dir}"
-        menuOutput.AddColoredLine(splitMsg, ConsoleColor.Green)
+        Dim splitMsg = $"Wrote {written} of {letters.Count} per-letter artifact files to {EntryBuilderFile2.Dir}"
+        menuOutput.AddColoredLine(splitMsg, If(written = letters.Count, ConsoleColor.Green, ConsoleColor.Red))
         gLog(splitMsg)
 
     End Sub
