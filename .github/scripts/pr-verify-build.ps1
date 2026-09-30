@@ -24,7 +24,8 @@
 .PARAMETER ReportDir
     Directory into which to write the report (created if absent). Receives
     status.txt, report.md, pr-number.txt, winapp2ool.log (when present), the
-    build transcripts, and the collected diff.txt files.
+    build transcripts, the collected diff.txt files, and a -verbose diff per flavor
+    that prints every added, removed and modified entry in full.
 
 .NOTES
     Always exits 0 on a completed verification (including a broken PR build)
@@ -111,6 +112,21 @@ function Complete-Verification {
     if (Test-Path $log) { Copy-Item $log (Join-Path $ReportDir 'winapp2ool.log') -Force }
     Write-Host "PR-verify status: $Status"
     exit $ExitCode
+}
+
+function Invoke-VerboseDiff {
+    # The build's changelog names added and removed entries without their contents, which
+    # leaves a reviewer nothing to audit. Rerun Diff with -verbose over the same pair.
+    # Full paths go through -Nd because -Nf treats its value as a bare file name.
+    param([string]$Old, [string]$New, [string]$OutFile)
+    $Old, $New, $OutFile = $Old, $New, $OutFile | ForEach-Object { [System.IO.Path]::GetFullPath($_) }
+    Remove-Item $OutFile -Force -ErrorAction SilentlyContinue
+    $diffArgs = '-s', '-offline', '-diff', '-verbose', '-savelog',
+                '-1d', "`"$Old`"", '-2d', "`"$New`"", '-3d', "`"$OutFile`""
+    # Start-Process rather than &: winapp2ool exits early when its stdout is redirected
+    $p = Start-Process -FilePath $Exe -ArgumentList $diffArgs -WorkingDirectory $Assembler `
+                       -WindowStyle Hidden -Wait -PassThru
+    return ($p.ExitCode -eq 0 -and (Test-Path $OutFile))
 }
 
 function Get-Tail {
@@ -242,6 +258,7 @@ $diffsDir = Join-Path $ReportDir 'diffs'
 New-Item -ItemType Directory -Force -Path $diffsDir | Out-Null
 
 $baseDiffText = $null
+$baseVerboseText = $null
 $flavorLines = New-Object System.Collections.Generic.List[string]
 foreach ($o in $Outputs) {
     $diffPath = Join-Path $RepoRoot $o.Diff
@@ -250,24 +267,45 @@ foreach ($o in $Outputs) {
     $content = Get-Content $diffPath -Raw
     if ($o.Flavor -eq 'Base') { $baseDiffText = $content }
     $lineCount = (Get-Content $diffPath | Measure-Object -Line).Lines
-    $flavorLines.Add(("- **{0}**: {1} lines (see run artifacts)" -f $o.Flavor, $lineCount))
+
+    # A missing verbose diff costs the reviewer detail, not the verdict, so it never fails the run
+    $verboseNote = 'no verbose diff'
+    $old = Join-Path $baselineSave $o.Output
+    $new = Join-Path $RepoRoot $o.Output
+    $verbosePath = Join-Path $diffsDir ("{0}-diff-verbose.txt" -f $o.Flavor)
+    if ((Test-Path $old) -and (Test-Path $new)) {
+        if (Invoke-VerboseDiff -Old $old -New $new -OutFile $verbosePath) {
+            $verboseNote = '{0} lines verbose' -f (Get-Content $verbosePath | Measure-Object -Line).Lines
+            if ($o.Flavor -eq 'Base') { $baseVerboseText = Get-Content $verbosePath -Raw }
+        } else {
+            $verboseNote = 'verbose diff failed'
+        }
+    }
+    $flavorLines.Add(("- **{0}**: {1} lines, {2} (see run artifacts)" -f $o.Flavor, $lineCount, $verboseNote))
+}
+
+# Show the verbose diff when it fits, since it's the one that lets a reviewer read added entries
+$shownKind = 'diff'
+if ($baseVerboseText -and $baseVerboseText.Length -le $CommentCharBudget) {
+    $baseDiffText = $baseVerboseText
+    $shownKind = 'verbose diff'
 }
 
 if (-not $baseDiffText) { $baseDiffText = '(no base diff was produced)' }
 $truncNote = ''
 if ($baseDiffText.Length -gt $CommentCharBudget) {
     $baseDiffText = $baseDiffText.Substring(0, $CommentCharBudget)
-    $truncNote = "`n`n_…base diff truncated: full diff.txt files are attached to the workflow run._"
+    $truncNote = "`n`n_…base diff truncated: full diff.txt files, and verbose ones showing every added and removed entry in full, are attached to the workflow run._"
 }
 
 $body = @"
 **This PR builds cleanly.** Below is the base winapp2.ini changelog it produces.
 
-Per-flavor changelogs (full text attached to the workflow run):
+Per-flavor changelogs (full text attached to the workflow run, with a verbose version that prints each changed entry in full):
 
 $($flavorLines -join "`n")
 
-<details><summary>Base winapp2.ini diff</summary>
+<details><summary>Base winapp2.ini $shownKind</summary>
 
 ``````
 $baseDiffText
