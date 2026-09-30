@@ -95,6 +95,7 @@
     <Compile Include="VariableExpanderTests.vb" />
     <Compile Include="ScaffoldCatalogsTests.vb" />
     <Compile Include="ElevationHelperTests.vb" />
+    <Compile Include="FrameworkCheckTests.vb" />
     <Compile Include="Winapp2FileVersionTests.vb" />
     <Compile Include="WinappDebugDataTests.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />

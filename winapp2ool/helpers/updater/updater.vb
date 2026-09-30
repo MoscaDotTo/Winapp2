@@ -38,22 +38,62 @@ Public Module updater
     ''' <summary> Indicates that an update check has been performed </summary>
     Public Property checkedForUpdates As Boolean = False
 
+    ''' <summary>
+    ''' Returns the version of a remote winapp2.ini, reading only its first line
+    ''' </summary>
+    '''
+    ''' <param name="remotelink">
+    ''' The URL of the winapp2.ini to check
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The version number, <br />
+    ''' <c> "000000 (version not found)" </c> if the file has no version line, <br />
+    ''' an empty string if the download fails
+    ''' </returns>
     Public Function getRemoteVersion(remotelink As String) As String
+
         If remotelink Is Nothing Then argIsNull(NameOf(remotelink)) : Return ""
-        Dim tmpPath = setDownloadedFileStage(remotelink)
-        Return getVersionFromLocalFile(tmpPath)
+
+        Dim firstLine = getRemoteFirstLine(remotelink)
+        If firstLine Is Nothing Then Return ""
+
+        Return versionFromHeader(firstLine)
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the version number from a winapp2.ini header line such as <c> ; Version: 260930 </c>
+    ''' </summary>
+    '''
+    ''' <param name="header">
+    ''' The first line of a winapp2.ini
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The version number, or <c> "000000 (version not found)" </c> if the line doesn't carry one
+    ''' </returns>
+    Private Function versionFromHeader(header As String) As String
+
+        Dim parts = header.Split(" "c)
+        Return If(header.ToUpperInvariant.Contains("VERSION") AndAlso parts.Length > 2, parts(2), "000000 (version not found)")
+
     End Function
 
     ''' <summary> Checks the versions of winapp2ool, .NET, and winapp2.ini and notes which, if any, are out of date </summary>
     ''' <param name="cond"> Indicates that the update check should be performed <br /> Optional, Default: <c> False </c> </param>
     Public Sub checkUpdates(Optional cond As Boolean = False)
         If checkedForUpdates Or Not cond Then Return
+
+        If isOffline Then
+            gLog("Skipping the update check because winapp2ool is offline")
+            Return
+        End If
+
         gLog("Checking for updates")
-        ' Query the latest winapp2ool.exe and winapp2.ini versions 
+        ' Query the latest winapp2ool.exe and winapp2.ini versions
         toolVersionCheck()
-        ' If winapp2.ini doesn't exist, an update is necessarily available. Avoid downloading in this case 
-        ' anti virus vendors don't seem to like the fact that winapp2ool downloads a configuration file, particularly one containing 
-        ' commands pertaining to yet more anti virus. If we can avoid doing this by default, we may be able to more easily fly under the radar 
+        ' Only the first line is read, so the check doesn't download the whole winapp2.ini
         latestWa2Ver = getRemoteVersion(getWinappLink)
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
@@ -245,12 +285,10 @@ Public Module updater
     ''' <summary> Attempts to return the version number from a file found on disk, returns <c> "000000" </c> if it's unable to do so </summary>
     ''' <param name="path"> The path of the file whose version number will be queried </param>
     Private Function getVersionFromLocalFile(Optional path As String = "") As String
-        ' Handle a special version.txt edge case
-        If path.EndsWith("version.txt", StringComparison.InvariantCultureIgnoreCase) Then Return getFileDataAtLineNum(path)
+        ' The main menu's winapp2.ini update downloads into the working folder, so that's the copy we compare
         If path.Length = 0 Then path = Environment.CurrentDirectory & "\winapp2.ini"
         If Not File.Exists(path) Then Return "000000 (file not found)"
-        Dim versionString = getFileDataAtLineNum(path)
-        Return If(versionString.ToUpperInvariant.Contains("VERSION"), versionString.Split(CChar(" "))(2), "000000 (version not found)")
+        Return versionFromHeader(getFileDataAtLineNum(path))
     End Function
 
     ''' <summary> Updates the offline status of winapp2ool </summary>
@@ -366,6 +404,16 @@ Public Module updater
         End If
 
         gLog("Update signature verified")
+
+        ' Installing a build this PC can't run would leave the user with an exe that won't start
+        Dim targetFramework = targetFrameworkOf(newExe)
+
+        If Not frameworkRequirementMet(targetFramework).GetValueOrDefault(False) Then
+
+            updateFailed($"The new winapp2ool needs {describeFramework(targetFramework)}, which isn't installed on this PC. Install it from Microsoft, then update again")
+            Return False
+
+        End If
 
         ' CreateNew refuses anything that reappears at the staged path after the delete, including a planted link
         File.Delete(stagedPath)

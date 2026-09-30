@@ -57,8 +57,8 @@ Public Module launcher
                 chkOfflineMode()
             End If
 
-            If Not Environment.Version.ToString = "4.0.30319.42000" Then DotNetFrameworkOutOfDate = True
-            gLog($".NET Framework is out of date. Found {Environment.Version}", DotNetFrameworkOutOfDate)
+            DotNetFrameworkOutOfDate = Not frameworkRequirementMet(runningTargetFramework()).GetValueOrDefault(True)
+            gLog($".NET Framework is out of date. Found release {installedFrameworkRelease()}", DotNetFrameworkOutOfDate)
 
             Dim curDirIsTemp As Boolean = Environment.CurrentDirectory.Equals(Environment.GetEnvironmentVariable("temp"), StringComparison.InvariantCultureIgnoreCase)
             cantDownloadExecutable = curDirIsTemp OrElse DotNetFrameworkOutOfDate

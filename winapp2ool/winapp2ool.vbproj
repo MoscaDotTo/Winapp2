@@ -181,6 +181,7 @@
     <Compile Include="helpers\elevation\ElevationHelper.vb" />
     <Compile Include="helpers\registry\RegistryHelper.vb" />
     <Compile Include="helpers\settings\SettingsManager.vb" />
+    <Compile Include="helpers\updater\FrameworkCheck.vb" />
     <Compile Include="helpers\updater\updater.vb" />
     <Compile Include="helpers\updater\UpdateSignature.vb" />
     <Compile Include="handlers\winapp2\excludeKeyParams2\excludeKeyParams2.vb" />

@@ -215,29 +215,49 @@ Module downloadr
 
     End Function
 
-    ''' <summary> 
-    ''' Downloads a file to the Windows temporary directory and returns its path. 
-    ''' If the file already exists, it will be deleted and overwritten with the downloaded file 
+    ''' <summary>
+    ''' Returns the first line of a remote text file, reading no further than that line
     ''' </summary>
-    ''' 
-    ''' <param name="remotelink">
-    ''' A URL pointing to a file to be downloaded 
+    '''
+    ''' <param name="link">
+    ''' A URL pointing to a text file
     ''' </param>
-    Public Function setDownloadedFileStage(remotelink As String) As String
+    '''
+    ''' <returns>
+    ''' The file's first line, or an empty string if the file is empty, <br />
+    ''' <c> Nothing </c> if the download fails
+    ''' </returns>
+    Public Function getRemoteFirstLine(link As String) As String
 
-        Dim tmpDir = Environment.GetEnvironmentVariable("temp")
-        Dim tmpName = remotelink.Split(CChar("/")).Last
-        Dim tmpPath = $"{tmpDir}\{tmpName}"
+        Try
 
-        fDelete(tmpPath)
-        dlFile(remotelink, tmpPath)
+            Using client As New WebClient
 
-        Return tmpPath
+                Using reader As New StreamReader(client.OpenRead(link))
+
+                    Return If(reader.ReadLine(), "")
+
+                End Using
+
+            End Using
+
+        Catch ex As WebException
+
+            handleWebException(ex)
+            Return Nothing
+
+        Catch ex As IOException
+
+            handleIOException(ex)
+            Return Nothing
+
+        End Try
 
     End Function
 
     ''' <summary>
-    ''' Attempts to create an <c> iniFile2 </c> using the data provided by <paramref name="address"/>
+    ''' Attempts to create an <c> iniFile2 </c> using the data provided by <paramref name="address"/>.
+    ''' The download is parsed straight from the network, without staging a copy on disk
     ''' </summary>
     '''
     ''' <param name="address">
@@ -252,15 +272,24 @@ Module downloadr
 
         Try
 
-            Dim path = setDownloadedFileStage(address)
+            Using client As New WebClient
 
-            If Not File.Exists(path) Then Throw New WebException : Return Nothing
+                Using reader As New StreamReader(client.OpenRead(address))
 
-            Return iniFile2.FromFile(path)
+                    Return iniFile2.FromStream(reader, Environment.GetEnvironmentVariable("temp"), address.Split("/"c).Last)
+
+                End Using
+
+            End Using
 
         Catch ex As WebException
 
             handleWebException(ex)
+            Return Nothing
+
+        Catch ex As IOException
+
+            handleIOException(ex)
             Return Nothing
 
         End Try
