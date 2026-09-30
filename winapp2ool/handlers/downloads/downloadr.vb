@@ -163,7 +163,7 @@ Module downloadr
             Dim wc As New WebClient
 
             gLog("Attempting to connect to GitHub")
-            wc.OpenRead("http://www.github.com").Close()
+            wc.OpenRead("https://github.com").Close()
             gLog("Established connection to GitHub")
             wc.Dispose()
 
