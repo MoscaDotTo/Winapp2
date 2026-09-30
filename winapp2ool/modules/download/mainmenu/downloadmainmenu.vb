@@ -79,8 +79,8 @@ Module downloadmainmenu
             .AddDispatchedOption("Winapp2ool", "Download the latest winapp2ool.exe",
                 Sub()
                     If denyActionWithHeader(DotNetFrameworkOutOfDate, "This option requires a newer version of the .NET Framework") Then Return
-                    If denyActionWithHeader(cantDownloadExecutable And downloadFile.Dir = Environment.CurrentDirectory, "Unable to download winapp2ool to the current directory, choose another directory before trying again") Then Return
-                    If downloadFile.Dir = Environment.CurrentDirectory Then
+                    If denyActionWithHeader(cantDownloadExecutable AndAlso isRunningExeDir(downloadFile.Dir), "Unable to download winapp2ool to the current directory, choose another directory before trying again") Then Return
+                    If isRunningExeDir(downloadFile.Dir) Then
                         autoUpdate()
                     Else
                         downloadFile.Name = "winapp2ool.exe"

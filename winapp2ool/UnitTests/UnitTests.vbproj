@@ -90,6 +90,7 @@
     <Compile Include="MenuLayoutTests.vb" />
     <Compile Include="TransmuteTests.vb" />
     <Compile Include="UnitTools.vb" />
+    <Compile Include="UpdateSignatureTests.vb" />
     <Compile Include="UWPBuilderTests.vb" />
     <Compile Include="VariableExpanderTests.vb" />
     <Compile Include="ScaffoldCatalogsTests.vb" />

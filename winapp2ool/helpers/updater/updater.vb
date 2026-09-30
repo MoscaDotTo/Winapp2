@@ -17,6 +17,9 @@
 Option Strict On
 Imports System.IO
 Imports System.Net
+Imports System.Reflection
+Imports System.Security.Cryptography
+Imports System.Text
 ''' <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
 Public Module updater
 
@@ -34,17 +37,6 @@ Public Module updater
     Public Property currentVersion As String = ""
     ''' <summary> Indicates that an update check has been performed </summary>
     Public Property checkedForUpdates As Boolean = False
-
-    ''' <summary> Pads the seconds portion of the version number, ensuring that it always have a length of 5 </summary>
-    ''' <param name="version"> A version number to pad </param>
-    Private Sub padVersionNum(ByRef version As String)
-        Dim tmp = version.Split(CChar("."))
-        Dim tmp1 = tmp.Last
-        While tmp1.Length < 5
-            tmp1 = "0" & tmp1
-        End While
-        version = version.Replace(tmp.Last, tmp1)
-    End Sub
 
     Public Function getRemoteVersion(remotelink As String) As String
         If remotelink Is Nothing Then argIsNull(NameOf(remotelink)) : Return ""
@@ -66,12 +58,19 @@ Public Module updater
         ' This should only be true if a user somehow has internet but cannot otherwise connect to the GitHub resources used to check for updates
         ' In this instance we should consider the update check to have failed and put the application into offline mode
         If latestVersion.Length = 0 Or latestWa2Ver.Length = 0 Then updateCheckFailed("online", True) : Return
-        ' Pad both versions before comparing so that a short last segment (e.g. a build time shortly after midnight)
-        ' does not produce a numerically shorter string and cause a false positive or false negative update result
-        padVersionNum(latestVersion)
-        padVersionNum(currentVersion)
-        ' Observe whether or not updates are available, using val to avoid conversion mistakes
-        updateIsAvail = Val(latestVersion.Replace(".", "")) > Val(currentVersion.Replace(".", ""))
+
+        ' The launcher only records currentVersion after the command line is processed, so -autoupdate arrives here without it
+        If currentVersion.Length = 0 Then currentVersion = runningToolVersion()
+
+        If parseToolVersion(latestVersion) Is Nothing OrElse parseToolVersion(currentVersion) Is Nothing Then
+
+            gLog($"Unable to compare winapp2ool versions. Local: {currentVersion} Remote: {latestVersion}")
+            updateCheckFailed("Winapp2ool")
+            Return
+
+        End If
+
+        updateIsAvail = IsNewerToolVersion(latestVersion, currentVersion)
         localWa2Ver = getVersionFromLocalFile()
         waUpdateIsAvail = Val(latestWa2Ver) > Val(localWa2Ver)
         checkedForUpdates = True
@@ -92,23 +91,147 @@ Public Module updater
     Private Sub toolVersionCheck()
         ' Let's just assume winapp2ool didn't update after we've checked for updates
         If Not latestVersion.Length = 0 Then Return
-        If Not isBeta Then
-            ' We use the txt file method for release builds to maintain support for update notifications on platforms that can't download executables
-            latestVersion = getRemoteVersion(toolVerLink)
-        Else
-            If cantDownloadExecutable Then latestVersion = "000000 (update check disabled)" : Return
-            If Not alreadyDownloadedExecutable Then
-                Try
-                    Dim tmpPath = setDownloadedFileStage(betaToolLink)
-                    alreadyDownloadedExecutable = True
-                    ' This places a lock on winapp2ool.exe in the tmp folder that will remain until we close the application
-                    latestVersion = FileVersionInfo.GetVersionInfo(tmpPath).FileVersion
-                Catch ex As FileNotFoundException
-                    handleFileNotFoundException(ex)
-                End Try
-            End If
-        End If
+        latestVersion = getRemoteToolVersion(toolVersionLink())
     End Sub
+
+    ''' <summary>
+    ''' Downloads a winapp2ool <c> version.txt </c> into memory and returns its first line
+    ''' </summary>
+    '''
+    ''' <param name="link">
+    ''' The URL of the <c> version.txt </c> to read
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The trimmed first line of the file, <br />
+    ''' an empty string if the download fails
+    ''' </returns>
+    Private Function getRemoteToolVersion(link As String) As String
+
+        Try
+
+            Using client As New WebClient
+
+                Using reader As New StringReader(client.DownloadString(link))
+
+                    Return If(reader.ReadLine(), "").Trim()
+
+                End Using
+
+            End Using
+
+        Catch ex As WebException
+
+            handleWebException(ex)
+            Return ""
+
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' Parses a winapp2ool version number such as <c> 1.7.9767.27788 </c>
+    ''' </summary>
+    '''
+    ''' <param name="text">
+    ''' The version text, surrounding whitespace allowed
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The parsed version, <br />
+    ''' <c> Nothing </c> if <paramref name="text"/> is missing or isn't a version number
+    ''' </returns>
+    Friend Function parseToolVersion(text As String) As Version
+
+        Dim parsed As Version = Nothing
+        If text Is Nothing OrElse Not Version.TryParse(text.Trim(), parsed) Then Return Nothing
+
+        Return parsed
+
+    End Function
+
+    ''' <summary>
+    ''' Reports whether <paramref name="candidate"/> is a strictly newer winapp2ool version than <paramref name="running"/>
+    ''' </summary>
+    '''
+    ''' <param name="candidate">
+    ''' The version on offer
+    ''' </param>
+    '''
+    ''' <param name="running">
+    ''' The version currently running
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> if both parse and <paramref name="candidate"/> is greater, <br />
+    ''' <c> False </c> otherwise
+    ''' </returns>
+    Friend Function IsNewerToolVersion(candidate As String,
+                                       running As String) As Boolean
+
+        Dim candidateVersion = parseToolVersion(candidate)
+        Dim runningVersion = parseToolVersion(running)
+        If candidateVersion Is Nothing OrElse runningVersion Is Nothing Then Return False
+
+        Return candidateVersion > runningVersion
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the absolute path of the running winapp2ool executable
+    ''' </summary>
+    Friend Function runningExePath() As String
+
+        Return Path.GetFullPath(Assembly.GetEntryAssembly().Location)
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the file version of the running winapp2ool executable
+    ''' </summary>
+    Private Function runningToolVersion() As String
+
+        Return FileVersionInfo.GetVersionInfo(runningExePath()).FileVersion
+
+    End Function
+
+    ''' <summary>
+    ''' Reports whether <paramref name="dir"/> is the folder that holds the running winapp2ool executable
+    ''' </summary>
+    '''
+    ''' <param name="dir">
+    ''' A folder path, absolute or relative to the current directory
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> if <paramref name="dir"/> resolves to the executable's folder, <br />
+    ''' <c> False </c> otherwise, including when <paramref name="dir"/> isn't a usable path
+    ''' </returns>
+    Public Function isRunningExeDir(dir As String) As Boolean
+
+        If String.IsNullOrWhiteSpace(dir) Then Return False
+
+        Dim exeDir = Path.GetDirectoryName(runningExePath()).TrimEnd(Path.DirectorySeparatorChar)
+
+        Try
+
+            Return String.Equals(Path.GetFullPath(dir).TrimEnd(Path.DirectorySeparatorChar), exeDir, StringComparison.OrdinalIgnoreCase)
+
+        Catch ex As ArgumentException
+
+            Return False
+
+        Catch ex As NotSupportedException
+
+            Return False
+
+        Catch ex As PathTooLongException
+
+            Return False
+
+        End Try
+
+    End Function
 
     ''' <summary> Handles the case where the update check has failed </summary>
     ''' <param name="name"> The name of the component whose update check failed </param>
@@ -136,40 +259,367 @@ Public Module updater
         isOffline = Not checkOnline()
     End Sub
 
-    ''' <summary> Replaces the currently running executable with the latest from GitHub before launching that new executable and closing the current one,
-    ''' ensures that this change can be undone by backing up the current version before replacing it </summary>
+    ''' <summary>
+    ''' Replaces the running winapp2ool executable with the latest signed build from GitHub, then relaunches it
+    ''' with the same arguments and exits. The running version is kept beside the new one as
+    ''' <c> winapp2ool v&lt;version&gt;.exe.bak </c>
+    ''' <br /><br />
+    '''
+    ''' The download stays in memory until its signature checks out against <see cref="TrustedUpdateKeys"/>.
+    ''' We then stage it next to the executable, confirm the staged copy is the bytes we verified, that it is
+    ''' winapp2ool, and that it is a newer version, since an old build carries a valid signature too.
+    ''' Any failure leaves the running executable in place and tells the user why
+    ''' </summary>
     Public Sub autoUpdate()
-        gLog("Starting auto update process")
-        ' The only time currentVersion will still be blank when we arrive at this line is if winapp2ool is launched with the -autoupdate flag 
-        If currentVersion = "" Then currentVersion = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs(0)).FileVersion
-        Dim backupName = $"winapp2ool v{currentVersion}.exe.bak"
-        Dim w2lName = "winapp2ool.exe"
-        Try
-            ' Ensure we always have the latest version
-            Dim tmpToolPath = setDownloadedFileStage(toolExeLink)
-            If Not File.Exists(tmpToolPath) Then Throw New WebException
-            ' Replace any existing backups of this version before backing it up
-            fDelete($"{Environment.CurrentDirectory}\{backupName}")
-            File.Move(Environment.GetCommandLineArgs(0), backupName)
-            ' Ensure that we don't have lingering winapp2ool.exes 
-            fDelete(w2lName)
-            ' Move the latest version to the current directory and launch it
-            File.Move(tmpToolPath, $"{Environment.CurrentDirectory}\{w2lName}")
-            Dim args = ""
-            ' Pass any args that were used to start this instance of winapp2ool over to the next instance 
-            If cmdargs.Count > 1 Then cmdargs.ForEach(Sub(arg) args += arg & ", ")
-            ' Remove the trailing comma 
-            If Not args.Length = 0 Then args = args.Remove(args.Length - 2)
-            Process.Start(w2lName, args)
-            Environment.Exit(0)
-        Catch ex As IOException
-            handleIOException(ex)
-            File.Move(backupName, w2lName)
-        Catch ex As WebException
-            handleWebException(ex)
-            File.Move(backupName, w2lName)
-        End Try
+
+        Using gLogScope("Starting auto update process")
+
+            If TrustedUpdateKeys.Count = 0 Then
+
+                updateFailed("This build of winapp2ool has no trusted update signing keys, so it can't verify an update. Download the latest winapp2ool.exe from GitHub instead")
+                Return
+
+            End If
+
+            Dim exePath = runningExePath()
+            Dim exeDir = Path.GetDirectoryName(exePath)
+            Dim stagedPath = Path.Combine(exeDir, "winapp2ool.exe.new")
+            Dim runningVersion = FileVersionInfo.GetVersionInfo(exePath).FileVersion
+            Dim backupPath = Path.Combine(exeDir, $"winapp2ool v{runningVersion}.exe.bak")
+            Dim installed = False
+
+            Try
+
+                installed = installVerifiedUpdate(exePath, stagedPath, backupPath, runningVersion)
+
+            Catch ex As WebException
+
+                handleWebException(ex)
+                updateFailed("Winapp2ool was unable to download the update")
+
+            Catch ex As UnauthorizedAccessException
+
+                handleUnauthorizedAccessException(ex)
+                updateFailed($"Winapp2ool doesn't have permission to replace itself in {exeDir}")
+
+            Catch ex As IOException
+
+                handleIOException(ex)
+                updateFailed($"Winapp2ool was unable to replace itself in {exeDir}")
+
+            Finally
+
+                If Not installed Then discardStagedUpdate(stagedPath)
+
+            End Try
+
+            If installed Then relaunch(exePath)
+
+        End Using
+
     End Sub
+
+    ''' <summary>
+    ''' Downloads, verifies, stages, and swaps in the latest winapp2ool executable
+    ''' </summary>
+    '''
+    ''' <param name="exePath">
+    ''' The absolute path of the running executable
+    ''' </param>
+    '''
+    ''' <param name="stagedPath">
+    ''' Where to write the new executable before it replaces the running one
+    ''' </param>
+    '''
+    ''' <param name="backupPath">
+    ''' Where to move the running executable
+    ''' </param>
+    '''
+    ''' <param name="runningVersion">
+    ''' The file version of the running executable
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> if the new executable now sits at <paramref name="exePath"/>, <br />
+    ''' <c> False </c> if a check refused it, in which case the user has already been told why
+    ''' </returns>
+    Private Function installVerifiedUpdate(exePath As String,
+                                           stagedPath As String,
+                                           backupPath As String,
+                                           runningVersion As String) As Boolean
+
+        Dim newExe As Byte()
+        Dim signatureText As String
+
+        Using client As New WebClient
+
+            newExe = client.DownloadData(toolExeLink())
+            signatureText = client.DownloadString(toolExeSigLink())
+
+        End Using
+
+        If Not VerifyUpdateSignature(newExe, signatureText, TrustedUpdateKeys) Then
+
+            updateFailed("The downloaded winapp2ool.exe doesn't carry a valid signature, so it was discarded")
+            Return False
+
+        End If
+
+        gLog("Update signature verified")
+
+        ' CreateNew refuses anything that reappears at the staged path after the delete, including a planted link
+        File.Delete(stagedPath)
+
+        Using staged As New FileStream(stagedPath, FileMode.CreateNew, FileAccess.Write, FileShare.None)
+
+            staged.Write(newExe, 0, newExe.Length)
+
+        End Using
+
+        Dim problem = checkStagedUpdate(stagedPath, newExe, runningVersion)
+
+        If problem.Length > 0 Then
+
+            updateFailed(problem)
+            Return False
+
+        End If
+
+        swapInStagedUpdate(exePath, stagedPath, backupPath)
+        gLog($"Installed the update at {exePath}")
+
+        Return True
+
+    End Function
+
+    ''' <summary>
+    ''' Checks that the staged executable is the verified download, is winapp2ool, and is newer than the running version
+    ''' </summary>
+    '''
+    ''' <param name="stagedPath">
+    ''' The path of the staged executable
+    ''' </param>
+    '''
+    ''' <param name="verifiedBytes">
+    ''' The bytes whose signature was verified
+    ''' </param>
+    '''
+    ''' <param name="runningVersion">
+    ''' The file version of the running executable
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' An empty string if the staged file passes, <br />
+    ''' otherwise a message for the user saying why it was refused
+    ''' </returns>
+    Private Function checkStagedUpdate(stagedPath As String,
+                                       verifiedBytes As Byte(),
+                                       runningVersion As String) As String
+
+        Using sha = SHA256.Create()
+
+            If Not sha.ComputeHash(File.ReadAllBytes(stagedPath)).SequenceEqual(sha.ComputeHash(verifiedBytes)) Then Return "The update written to disk doesn't match the verified download"
+
+        End Using
+
+        Try
+
+            If Not AssemblyName.GetAssemblyName(stagedPath).Name.Equals("winapp2ool", StringComparison.Ordinal) Then Return "The downloaded file isn't winapp2ool"
+
+        Catch ex As BadImageFormatException
+
+            Return "The downloaded file isn't a winapp2ool executable"
+
+        End Try
+
+        Dim stagedVersion = FileVersionInfo.GetVersionInfo(stagedPath).FileVersion
+
+        If Not IsNewerToolVersion(stagedVersion, runningVersion) Then Return $"The downloaded winapp2ool (v{stagedVersion}) isn't newer than this one (v{runningVersion}), so it was not installed"
+
+        Return ""
+
+    End Function
+
+    ''' <summary>
+    ''' Moves the running executable aside as a backup and puts the staged one in its place,
+    ''' restoring the backup if the second move fails
+    ''' </summary>
+    '''
+    ''' <param name="exePath">
+    ''' The absolute path of the running executable
+    ''' </param>
+    '''
+    ''' <param name="stagedPath">
+    ''' The path of the verified, staged executable
+    ''' </param>
+    '''
+    ''' <param name="backupPath">
+    ''' Where to move the running executable
+    ''' </param>
+    Private Sub swapInStagedUpdate(exePath As String,
+                                   stagedPath As String,
+                                   backupPath As String)
+
+        File.Delete(backupPath)
+        File.Move(exePath, backupPath)
+
+        Dim swapped = False
+
+        Try
+
+            File.Move(stagedPath, exePath)
+            swapped = True
+
+        Finally
+
+            If Not swapped AndAlso File.Exists(backupPath) AndAlso Not File.Exists(exePath) Then File.Move(backupPath, exePath)
+
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Deletes a staged update that was not installed, logging rather than throwing if it can't
+    ''' </summary>
+    '''
+    ''' <param name="stagedPath">
+    ''' The path of the staged executable
+    ''' </param>
+    Private Sub discardStagedUpdate(stagedPath As String)
+
+        Try
+
+            File.Delete(stagedPath)
+
+        Catch ex As IOException
+
+            gLog($"Unable to delete the staged update at {stagedPath}: {ex.Message}")
+
+        Catch ex As UnauthorizedAccessException
+
+            gLog($"Unable to delete the staged update at {stagedPath}: {ex.Message}")
+
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Starts the freshly installed executable with this process's original arguments and working directory,
+    ''' then exits
+    ''' </summary>
+    '''
+    ''' <param name="exePath">
+    ''' The absolute path of the new executable
+    ''' </param>
+    Private Sub relaunch(exePath As String)
+
+        Dim startInfo As New ProcessStartInfo(exePath) With {
+            .UseShellExecute = False,
+            .WorkingDirectory = Environment.CurrentDirectory,
+            .Arguments = BuildArgumentString(Environment.GetCommandLineArgs().Skip(1))
+        }
+
+        gLog($"Relaunching {exePath}")
+
+        Try
+
+            Using Process.Start(startInfo)
+            End Using
+
+        Catch ex As ComponentModel.Win32Exception
+
+            printAndLogExceptionForUser(ex.ToString, ex.GetType.ToString)
+            updateFailed("Winapp2ool updated itself but couldn't restart. Please start it again")
+            Return
+
+        End Try
+
+        Environment.Exit(0)
+
+    End Sub
+
+    ''' <summary>
+    ''' Tells the user why an update did not happen and records it in the log. Silent and command line
+    ''' runs also get a nonzero exit code
+    ''' </summary>
+    '''
+    ''' <param name="reason">
+    ''' The message for the user
+    ''' </param>
+    Private Sub updateFailed(reason As String)
+
+        ' -autoupdate runs before the command line handler has consumed -s, so SuppressOutput may not be set yet
+        Dim silent = SuppressOutput OrElse Environment.GetCommandLineArgs().Skip(1).Any(Function(a) a.Equals("-s", StringComparison.OrdinalIgnoreCase))
+
+        gLog($"Update aborted: {reason}")
+        cwl(reason, Not silent)
+        setNextMenuHeaderText(reason, printColor:=ConsoleColor.Red)
+
+        If silent OrElse IsCommandLineMode Then Environment.ExitCode = 1
+
+    End Sub
+
+    ''' <summary>
+    ''' Quotes a single command line argument so that <c> CommandLineToArgvW </c> and the .NET runtime
+    ''' read it back unchanged
+    ''' </summary>
+    '''
+    ''' <param name="arg">
+    ''' The argument to quote
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <paramref name="arg"/> as is when it needs no quoting, <br />
+    ''' otherwise <paramref name="arg"/> in double quotes with its quotes and the backslashes before them escaped
+    ''' </returns>
+    Friend Function QuoteArgument(arg As String) As String
+
+        If arg Is Nothing Then arg = ""
+
+        If arg.Length > 0 AndAlso arg.IndexOfAny({" "c, ControlChars.Tab, ControlChars.Lf, ControlChars.VerticalTab, """"c}) < 0 Then Return arg
+
+        Dim quoted As New StringBuilder("""")
+        Dim backslashes = 0
+
+        ' Backslashes are literal unless a quote follows them, in which case each one must be doubled
+        For Each ch In arg
+
+            If ch = "\"c Then
+
+                backslashes += 1
+
+            ElseIf ch = """"c Then
+
+                quoted.Append("\"c, backslashes * 2 + 1).Append(""""c)
+                backslashes = 0
+
+            Else
+
+                quoted.Append("\"c, backslashes).Append(ch)
+                backslashes = 0
+
+            End If
+
+        Next
+
+        quoted.Append("\"c, backslashes * 2).Append(""""c)
+
+        Return quoted.ToString()
+
+    End Function
+
+    ''' <summary>
+    ''' Joins arguments into a single command line string, quoting each with <see cref="QuoteArgument"/>
+    ''' </summary>
+    '''
+    ''' <param name="args">
+    ''' The arguments to join
+    ''' </param>
+    Friend Function BuildArgumentString(args As IEnumerable(Of String)) As String
+
+        Return String.Join(" ", args.Select(AddressOf QuoteArgument))
+
+    End Function
 
     '''<summary> Deletes a file from the disk if it exists </summary>
     Public Sub fDelete(path As String)

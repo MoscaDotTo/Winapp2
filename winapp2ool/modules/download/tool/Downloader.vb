@@ -73,10 +73,25 @@ Module Downloader
     ''' </summary>
     Public ReadOnly Property betaToolLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/Branch1/winapp2ool/bin/Release/winapp2ool.exe"
 
+    ''' <summary>
+    ''' The web address of the signature for <see cref="toolLink"/>
+    ''' </summary>
+    Public ReadOnly Property toolSigLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe.sig"
+
+    ''' <summary>
+    ''' The web address of the signature for <see cref="betaToolLink"/>
+    ''' </summary>
+    Public ReadOnly Property betaToolSigLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/Branch1/winapp2ool/bin/Release/winapp2ool.exe.sig"
+
     ''' <summary> 
     ''' The web address of version.txt (winapp2ool's public version identifer) 
     ''' </summary>
     Public ReadOnly Property toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
+
+    ''' <summary>
+    ''' The web address of the beta build's version.txt
+    ''' </summary>
+    Public ReadOnly Property betaToolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/Branch1/winapp2ool/version.txt"
 
     ''' <summary> 
     ''' The web address of winapp3.ini 
@@ -162,7 +177,7 @@ Module Downloader
 
         If fileLink.Length = 0 Then printValidArgsExit("No file was specified for download")
 
-        If downloadFile.Name = "winapp2ool.exe" AndAlso downloadFile.Dir = Environment.CurrentDirectory Then autoUpdate() : Return
+        If downloadFile.Name = "winapp2ool.exe" AndAlso isRunningExeDir(downloadFile.Dir) Then autoUpdate() : Return
 
         download(downloadFile, fileLink)
 
@@ -193,6 +208,24 @@ Module Downloader
     Public Function toolExeLink() As String
 
         Return If(isBeta, betaToolLink, toolLink)
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the link to the signature for <see cref="toolExeLink"/>
+    ''' </summary>
+    Public Function toolExeSigLink() As String
+
+        Return If(isBeta, betaToolSigLink, toolSigLink)
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the link to version.txt on the appropriate branch for the current tool configuration
+    ''' </summary>
+    Public Function toolVersionLink() As String
+
+        Return If(isBeta, betaToolVerLink, toolVerLink)
 
     End Function
 

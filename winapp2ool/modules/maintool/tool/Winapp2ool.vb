@@ -79,11 +79,6 @@ Public Module Winapp2ool
     ''' </summary>
     Public Property cantDownloadExecutable As Boolean = False
 
-    ''' <summary>
-    ''' Indicates that winapp2ool.exe has already been downloaded during this session and prevents us from redownloading it 
-    ''' </summary>
-    Public Property alreadyDownloadedExecutable As Boolean = False
-
     ''' <summary> 
     ''' Checks the version of Windows on the current system and returns it as a Double 
     ''' </summary>

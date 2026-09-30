@@ -199,7 +199,7 @@ The first argument provided should always refer to the module you would like to 
 |:-|:-|:-|
 | `-s` | Enables silent mode, muting almost all output and prompts for input | Some exceptions and errors may not be shown when silent mode is enabled |
 | `-offline` | Skips the network connection check at startup and runs in offline mode |  |
-| `-autoupdate` | Checks for and applies a winapp2ool update before running the requested module | Requires .NET Framework 4.6 or higher |
+| `-autoupdate` | Checks for and applies a winapp2ool update before running the requested module | Installs only a newer build whose signature verifies. A failed update exits with code 1 in silent mode |
 | `-writelog` | Writes winapp2ool's internal log to `winapp2ool.log` on exit | A run that exits with a nonzero code saves the log whether or not this arg is provided |
 
 ### Flavor Args

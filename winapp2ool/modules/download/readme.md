@@ -178,11 +178,16 @@ Entering a name saves under that name; leaving it blank overwrites. This prompt 
 
 ## Updating Winapp2ool
 
-Downloading `winapp2ool.exe` into the directory from which winapp2ool is currently running does not simply write a file. Instead, winapp2ool:
+Downloading `winapp2ool.exe` into the directory from which winapp2ool is currently running does not simply write a file. Instead, winapp2ool updates itself:
 
-1. Renames the running executable to `winapp2ool v<version>.exe.bak` in that directory
-2. Writes the freshly downloaded executable as `winapp2ool.exe`
-3. Launches the new executable and exits
+1. Downloads the new executable and its signature file, `winapp2ool.exe.sig`, without writing either to disk
+2. Checks the signature against the public keys built into winapp2ool, and discards the download if it doesn't match
+3. Writes the new executable beside the running one as `winapp2ool.exe.new`, then confirms it is winapp2ool and a newer version than the one running
+4. Renames the running executable to `winapp2ool v<version>.exe.bak`, puts the new one in its place, launches it with the same arguments, and exits
+
+If any step fails, the running executable stays where it is and winapp2ool says why. In silent mode a failed update exits with code 1.
+
+An update never installs an older version, even one with a valid signature. Turning off **Beta Participation** therefore doesn't roll a beta build back to an older release as of winapp2ool version 1.8
 ---
 
 # Command-Line Arguments
@@ -259,7 +264,7 @@ Processed before the module runs, and applied to that invocation only.
 
 ### Self-Updating
 
-- Downloading `winapp2ool.exe` into winapp2ool's own directory replaces the running executable and restarts it, leaving a `winapp2ool v<version>.exe.bak` behind
+- Downloading `winapp2ool.exe` into winapp2ool's own directory replaces the running executable and restarts it, leaving a `winapp2ool v<version>.exe.bak` behind. It only does so when the download's signature verifies and its version is newer
 - The `.bak` files persist; one per version replaced.
 - To keep a copy of the executable without updating, set the save directory somewhere else first
 
@@ -579,7 +584,8 @@ C:\Tools\winapp2\
 ```
 
 **Explanation**
-- The save directory was the directory from which winapp2ool was running , so winapp2ool performs an automatic update
+- The save directory was the directory from which winapp2ool was running, so winapp2ool performs an automatic update
+- The download's signature verified against a key built into winapp2ool, and its version was newer than the running one
 - The running executable was renamed to `winapp2ool v<version>.exe.bak` before the new one took its place
 - A new winapp2ool process was started and the old one exited
 
