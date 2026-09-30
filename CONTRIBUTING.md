@@ -8,9 +8,9 @@ This guide covers how to add and update entries in winapp2.ini under the current
 
 Winapp2.ini is no longer edited directly. It is assembled from the source files in the `Assembler/` directory by [winapp2ool](https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md), and building and publishing are automated. See [How Winapp2.ini is built](README.md#how-winapp2ini-is-built).
 
-**All contributions must target those source files, not any `Winapp2.ini` file directly.**
+**All contributions must target only those source files, not any `Winapp2.ini` file directly.**
 
-Nobody runs the build by hand, and you never need to generate any output file yourself. Only edit the source files. See [What happens after you open a PR](#what-happens-after-you-open-a-pr).
+See [What happens after you open a PR](#what-happens-after-you-open-a-pr).
 
 ---
 
@@ -825,7 +825,7 @@ To fix it, move your edit into the named source file and `git restore` the gener
 
 If your PR touches anything under `Assembler/`, a bot builds winapp2.ini twice: once from `master` alone, then again with your change merged in, and posts a single comment that it updates on each push. It tells you one of:
 
-- **The PR builds cleanly**, followed by the changelog your change produces. Read it as a description of what your change does to the published file, and check it matches what you intended.
+- **The PR builds cleanly**, followed by the changelog your change produces. When it fits in the comment, the changelog is the verbose one, which prints every added, removed and modified entry in full. Read it as a description of what your change does to the published file, and check it matches what you intended. The workflow run's `pr-verify-report` artifact holds the plain and verbose changelog for every flavor.
 - **The build failed**, with the output showing where. Usually a syntax error in an edited source file.
 - **The PR no longer merges cleanly** with `master`, which you fix by updating your branch.
 
