@@ -19,6 +19,17 @@ Imports System.IO
 ''' <summary> Handles the processing of errors caught throughout the operation of winapp2ool, hopefully gracefully. </summary>
 Module exceptionHandler
 
+    ''' <summary>
+    ''' Records that this run hit a failure, so that winapp2ool exits with code 1. Every handler that
+    ''' means the work didn't get done calls this, which keeps a silent build from reporting success
+    ''' over a file it couldn't read or write
+    ''' </summary>
+    Public Sub markRunFailed()
+
+        Environment.ExitCode = 1
+
+    End Sub
+
     ''' <summary> Catches general exceptions and logs them for debugging purposes  </summary>
     ''' <param name="ex"> Any given exception captured during winapp2ool's execution </param>
     Public Sub exc(ByRef ex As Exception)
@@ -43,6 +54,8 @@ Module exceptionHandler
     ''' <param name="ex"> An Exception of type <c> IOException </c> </param>
     Public Sub handleIOException(ex As IOException)
 
+        markRunFailed()
+
         Using gLogScope("Exception Captured: ")
 
             gLog("winapp2ool was unable to access a file and thus cannot complete its work. This is usually caused by another program accessing the file at the same time.", leadr:=True)
@@ -57,6 +70,8 @@ Module exceptionHandler
     ''' <summary> Enters Exceptions caused by being denied access to a file or folder into the global log </summary>
     ''' <param name="ex"> An Exception of type <c> UnauthorizedAccessException </c> </param>
     Public Sub handleUnauthorizedAccessException(ex As UnauthorizedAccessException)
+
+        markRunFailed()
 
         Using gLogScope("Exception Captured: ")
 
@@ -114,7 +129,10 @@ Module exceptionHandler
         gLog("The winapp2ool GitHub is https://github.com/MoscaDotTo/Winapp2")
         gLog("The old winapp2.ini website, https://www.winapp2.com also redirects to GitHub for your convenience")
         gLog("A link to our GitHub can be found in the winapp2ool settings as well!")
+
+        ' onlyLog marks a diagnostic the caller recovers from, so it isn't a failure
         If Not onlyLog Then
+            markRunFailed()
             cwl($"Error: {exType} Encountered")
             cwl(exTxt)
             cwl("Please report this error on GitHub. It will be saved to winapp2ool.log in the same folder as winapp2ool.")

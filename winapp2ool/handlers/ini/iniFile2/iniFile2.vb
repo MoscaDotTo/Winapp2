@@ -340,6 +340,11 @@ Public Class iniFile2
             gLog("  Save failed")
             handleIOException(ex)
 
+        Catch ex As UnauthorizedAccessException
+
+            gLog("  Save failed")
+            handleUnauthorizedAccessException(ex)
+
         End Try
 
     End Sub

@@ -112,7 +112,12 @@ Module downloadr
 
         setNextMenuHeaderText($"Download {If(success, "", "in")}complete: {pathHolder.Name}", Not success AndAlso Not quietly, ConsoleColor.Red)
 
-        If Not success Then crl()
+        If Not success Then
+
+            markRunFailed()
+            crl()
+
+        End If
 
     End Sub
 

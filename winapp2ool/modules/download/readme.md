@@ -259,7 +259,7 @@ Processed before the module runs, and applied to that invocation only.
 ### Scripts
 
 - Always pass `-s`. It suppresses output, skips the overwrite prompt that would otherwise block on input, and makes winapp2ool exit instead of opening its menu
-- The exit code reports argument validity, not download success: `1` when the file argument is missing or invalid, `0` otherwise
+- The exit code is `1` when the file argument is missing or invalid or the download fails, and `0` otherwise
 - Name the flavor explicitly on every call
 
 ### Self-Updating
@@ -499,12 +499,11 @@ winapp2ool -download winapp2 -s
 
 **Notes**
 
-The exit code reports argument validity, not download success: a bad argument exits `1`, but a download that fails still exits `0`. In a script, verify the file afterwards:
+A bad argument or a failed download exits `1`, so a script can check the exit code:
 
 ```powershell
 winapp2ool -download winapp2 -s -1d "C:\Tools\winapp2"
-$f = "C:\Tools\winapp2\winapp2.ini"
-if (-not (Test-Path $f) -or (Get-Item $f).Length -eq 0) { throw "winapp2.ini download failed" }
+if ($LASTEXITCODE -ne 0) { throw "winapp2.ini download failed" }
 ```
 
 ---

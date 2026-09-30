@@ -263,6 +263,7 @@ Public Module Combine
         Dim errMsg = $"Error processing file: {filepath}"
 
         gLog($"{errMsg}: {ex.Message}")
+        markRunFailed()
         outputMenu.AddWarning(errMsg)
         outputMenu.AddWarning($"Check the winapp2ool log for more information: {GlobalLogFile.Path()}")
 
