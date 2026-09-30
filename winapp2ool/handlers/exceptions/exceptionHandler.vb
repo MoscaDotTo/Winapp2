@@ -54,6 +54,21 @@ Module exceptionHandler
 
     End Sub
 
+    ''' <summary> Enters Exceptions caused by being denied access to a file or folder into the global log </summary>
+    ''' <param name="ex"> An Exception of type <c> UnauthorizedAccessException </c> </param>
+    Public Sub handleUnauthorizedAccessException(ex As UnauthorizedAccessException)
+
+        Using gLogScope("Exception Captured: ")
+
+            gLog("winapp2ool was denied access to a file or folder and thus cannot complete its work.", leadr:=True)
+            gLog("Make sure winapp2ool has permissions to write to that location and try again. If you feel this is an error, please report the following information on GitHub", buffr:=True)
+            gLog(ex.ToString, buffr:=True)
+            saveGlobalLog()
+
+        End Using
+
+    End Sub
+
     ''' <summary> Creates a new <c> ArgumentNullException </c> when a public member is passed a <c> Null </c> parameter </summary>
     ''' <param name="argName"> The name of the argument whose value is <c> Null </c> </param>
     Public Sub argIsNull(argName As String)
