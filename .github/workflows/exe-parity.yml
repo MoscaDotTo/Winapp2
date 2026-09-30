@@ -67,21 +67,14 @@ jobs:
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # Non-fatal on purpose. Every package here is an FxCop analyzer or MSTest -- all
-      # diagnostics-only, none can change emitted behavior -- and the project has no
-      # EnsureNuGetPackageBuildImports guard, so a missing analyzer warns rather than
-      # errors. A restore outage should not block the parity answer.
-      - name: Restore packages (best effort)
+      # The project's EnsureNuGetPackageBuildImports guard fails the build on any missing
+      # analyzer package, so a failed restore can only surface later as a confusing
+      # build error. Fail here instead.
+      - name: Restore packages
         shell: pwsh
         run: |
-          $PSNativeCommandUseErrorActionPreference = $false
-          if (-not (Get-Command nuget -ErrorAction SilentlyContinue)) {
-            Write-Host '::warning::nuget not on PATH; skipping restore'
-            exit 0
-          }
-          nuget restore winapp2ool\winapp2ool.sln
-          if ($LASTEXITCODE -ne 0) { Write-Host '::warning::nuget restore failed; continuing without analyzers' }
-          exit 0
+          msbuild winapp2ool\winapp2ool.sln -t:restore -p:RestorePackagesConfig=true /v:minimal /nologo
+          if ($LASTEXITCODE -ne 0) { throw 'package restore failed' }
 
       # /p:PostBuildEvent= suppresses the copy into Assembler\ (and the version.txt
       # rewrite). Belt to the ordering's suspenders -- see the generate step above.
