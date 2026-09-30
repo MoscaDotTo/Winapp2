@@ -6,17 +6,21 @@ TestResults/
 
 # Signing material
 *.pfx
+*.p8
 
-# Build output other than the .exe and .xml
-winapp2ool/bin/Debug/
-winapp2ool/bin/Release/
+# Build output. Deployed clients download winapp2ool.exe and its .sig from these
+# exact paths, so we track only those
+winapp2ool/bin/Debug/*
+!winapp2ool/bin/Debug/winapp2ool.exe
+winapp2ool/bin/Release/*
+!winapp2ool/bin/Release/winapp2ool.exe
+!winapp2ool/bin/Release/winapp2ool.exe.sig
 
-# Test binaries, but keep the .ini fixtures visible
-winapp2ool/UnitTests/bin/Debug/*
-!winapp2ool/UnitTests/bin/Debug/*.ini
-winapp2ool/UnitTests/bin/Release/
+# Test binaries
+winapp2ool/UnitTests/bin/
 
 # Local tooling config
+*.user
 .claude/
 .editorconfig
 
