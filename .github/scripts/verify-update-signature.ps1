@@ -3,7 +3,7 @@
     Checks that the published winapp2ool.exe carries a signature its clients will accept.
 
 .DESCRIPTION
-    Since 1.7 the self-updater installs winapp2ool\bin\Release\winapp2ool.exe only if
+    Since 1.8 the self-updater installs winapp2ool\bin\Release\winapp2ool.exe only if
     winapp2ool.exe.sig verifies against a key in TrustedUpdateKeys
     (winapp2ool\helpers\updater\UpdateSignature.vb). A rebuild that isn't re-signed leaves a
     stale .sig, and every updating client then refuses the update. Nothing breaks visibly; users
