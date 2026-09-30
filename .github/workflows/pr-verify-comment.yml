@@ -77,10 +77,15 @@ jobs:
             const fullBody = `${marker}\n${body}`;
 
             // Upsert: update our existing sticky comment if present, else create one.
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber,
+            // Every page, since a busy PR can push ours past the first 30. Only a comment this
+            // workflow wrote counts: anyone can paste the marker into their own comment, and
+            // matching that would have us overwrite a contributor's words with the report.
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber, per_page: 100,
             });
-            const existing = comments.find(c => c.body && c.body.includes(marker));
+            const existing = comments.find(c =>
+              c.user && c.user.type === 'Bot' && c.user.login === 'github-actions[bot]' &&
+              c.body && c.body.includes(marker));
             if (existing) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner, repo: context.repo.repo,
