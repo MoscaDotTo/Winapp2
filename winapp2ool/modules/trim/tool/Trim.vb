@@ -330,7 +330,7 @@ Public Module Trim
     End Function
 
     ''' <summary>
-    ''' Audits the detection criteria in a given <c> winapp2entry2 </c> against the current system <br/> <br/>
+    ''' Audits the detection criteria in a given <c> winapp2entry2 </c> against the current system <br /> <br />
     ''' Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise
     ''' </summary>
     '''

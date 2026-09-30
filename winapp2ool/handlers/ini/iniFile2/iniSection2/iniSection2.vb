@@ -38,7 +38,7 @@ Public Class iniSection2
         Return Keys.Contains(name)
     End Function
 
-    ''' <summary>Returns the key with the given name, or <c>Nothing</c> if not found</summary>
+    ''' <summary>Returns the key with the given name, or <c> Nothing </c> if not found</summary>
     ''' <param name="name">The key name to look up (case-insensitive)</param>
     Public Function GetKey(name As String) As iniKey2
         Return Keys.GetKey(name)

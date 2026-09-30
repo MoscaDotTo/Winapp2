@@ -72,7 +72,7 @@ Public Module diffsettings
     Public Property TrimRemoteFile As Boolean = Not isOffline
 
     ''' <summary>
-    ''' Indicates that full entries should be printed in the Diff output. <br/>
+    ''' Indicates that full entries should be printed in the Diff output. <br />
     ''' Called "verbose mode" in the menu
     ''' </summary>
     Public Property ShowFullEntries As Boolean = False

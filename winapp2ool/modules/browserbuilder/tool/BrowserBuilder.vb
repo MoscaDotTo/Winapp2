@@ -26,7 +26,7 @@ Imports System.Text
 ''' set of easily accessed information. <br /><br />
 '''
 ''' All input files are read from a single configurable source directory. At minimum, that
-''' directory must contain at least one of <c>chromium.ini</c> or <c>gecko.ini</c> - the
+''' directory must contain at least one of <c> chromium.ini </c> or <c> gecko.ini </c> - the
 ''' specially formatted ruleset files that drive entry generation. BrowserBuilder is primarily
 ''' intended as a small devops tool but end users might find it useful as it enables them to
 ''' generate entries for non-standard installation paths or portable applications while keeping
@@ -53,7 +53,7 @@ Public Module BrowserBuilder
     Private Property totalGeckoCount As Integer = 0
 
     ''' <summary>
-    ''' Handles the commandline arguments for <c>BrowserBuilder</c>
+    ''' Handles the commandline arguments for <c> BrowserBuilder </c>
     ''' </summary>
     '''
     ''' <remarks>
@@ -61,7 +61,7 @@ Public Module BrowserBuilder
     ''' <c> -1d </c> <br /> Source directory containing <c> chromium.ini </c>,
     ''' <c> gecko.ini </c>, and flavor correction files 
     ''' <br /> <br /> 
-    ''' <c>-2d</c> / <c>-2f</c> <br /> Output file path and name 
+    ''' <c> -2d </c> / <c> -2f </c> <br /> Output file path and name 
     ''' (default: <c> browsers.ini </c> in the current directory)
     ''' </remarks>
     Public Sub handleCmdLine()
@@ -129,7 +129,7 @@ Public Module BrowserBuilder
     ''' </param>
     '''
     ''' <param name="output">
-    ''' The <c>MenuSection</c> accumulating user-visible output for this run
+    ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
     Private Sub processBrowserBuilder(chromiumIni As iniFile2,
                                       geckoIni As iniFile2,
@@ -184,12 +184,12 @@ Public Module BrowserBuilder
     End Sub
 
     ''' <summary>
-    ''' Builds each <c>EntryScaffold</c> and then generates an appropriate entry for each
+    ''' Builds each <c> EntryScaffold </c> and then generates an appropriate entry for each
     ''' browser provided in <paramref name="rulesetFile"/>
     ''' </summary>
     '''
     ''' <param name="rulesetFile">
-    ''' The <c>iniFile2</c> containing the set of generative rules for a particular group
+    ''' The <c> iniFile2 </c> containing the set of generative rules for a particular group
     ''' of web browsers
     ''' </param>
     '''
@@ -202,7 +202,7 @@ Public Module BrowserBuilder
     ''' </param>
     '''
     ''' <param name="menuOutput">
-    ''' The <c>MenuSection</c> accumulating user-visible output for this run
+    ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
     Private Sub buildScaffolds(rulesetFile As iniFile2,
                                isGecko As Boolean,
@@ -251,15 +251,15 @@ Public Module BrowserBuilder
     ''' </summary>
     '''
     ''' <param name="browserSection">
-    ''' The <c>iniSection2</c> containing the BrowserInfo data
+    ''' The <c> iniSection2 </c> containing the BrowserInfo data
     ''' </param>
     '''
     ''' <param name="menuOutput">
-    ''' The <c>MenuSection</c> accumulating user-visible output for this run
+    ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>BrowserInfo</c> structure containing all parsed browser parameters
+    ''' A <c> BrowserInfo </c> structure containing all parsed browser parameters
     ''' </returns>
     Private Function parseBrowserInfo(browserSection As iniSection2,
                                 ByRef menuOutput As MenuSection) As BrowserInfo
@@ -329,12 +329,12 @@ Public Module BrowserBuilder
 
     ''' <summary>
     ''' Processes an EntryScaffold section and generates entries for each browser.
-    ''' Browsers with no <c>RegistryRoot</c> are skipped when the scaffold contains
-    ''' a <c>RequiresRegistryRoot</c> key.
+    ''' Browsers with no <c> RegistryRoot </c> are skipped when the scaffold contains
+    ''' a <c> RequiresRegistryRoot </c> key.
     ''' </summary>
     '''
     ''' <param name="scaffoldSection">
-    ''' A particular <c>EntryScaffold</c> section to be generated for each browser
+    ''' A particular <c> EntryScaffold </c> section to be generated for each browser
     ''' </param>
     '''
     ''' <param name="browsers">
@@ -350,7 +350,7 @@ Public Module BrowserBuilder
     ''' </param>
     '''
     ''' <param name="menuOutput">
-    ''' The <c>MenuSection</c> accumulating user-visible output for this run
+    ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
     Private Sub processEntryScaffold(scaffoldSection As iniSection2,
                                      browsers As List(Of BrowserInfo),

@@ -113,7 +113,7 @@ Public Module DiffConfiguration
 
     ''' <summary>
     ''' Separator character used in movement key signatures stored
-    ''' in <c>KeyMovementTracker.MovedKeys</c>. <br /> Null character
+    ''' in <c> KeyMovementTracker.MovedKeys </c>. <br /> Null character
     ''' (Chr(0)) cannot appear in ini file key values, making it unambiguous as a delimiter
     ''' </summary>
     Public ReadOnly Property MovementKeySeparator As Char

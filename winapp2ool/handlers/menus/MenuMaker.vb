@@ -91,7 +91,7 @@ Module MenuMaker
     ''' <summary> 
     ''' Indicates that the application should not output or ask
     ''' input from the user except when encountering exceptions
-    ''' <br/> Default: <c> False </c>
+    ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property SuppressOutput As Boolean = False
 
@@ -167,7 +167,7 @@ Module MenuMaker
     ''' 
     ''' <returns>
     ''' The current console window width if not within the timeout
-    ''' <br/> Otherwise, the cached console window width
+    ''' <br /> Otherwise, the cached console window width
     ''' </returns>
     Private Function GetConsoleWidth() As Integer
 
@@ -196,10 +196,10 @@ Module MenuMaker
     ''' Displays a menu to and passes the user's input
     ''' over to be handled until the exit command is given 
     ''' 
-    ''' <br/> Exiting a menu returns exactly one level 
+    ''' <br /> Exiting a menu returns exactly one level 
     ''' up in the stack to the menu that called it 
     ''' 
-    ''' <br/> Effectively the main event loop 
+    ''' <br /> Effectively the main event loop 
     ''' for anything built with <c> MenuMaker </c>
     ''' </summary>
     ''' 
@@ -217,7 +217,7 @@ Module MenuMaker
     ''' 
     ''' <param name="itmLen"> 
     ''' Indicates the maximum length of menu option names
-    ''' <br/> Optional, Default: <c> 35 </c>
+    ''' <br /> Optional, Default: <c> 35 </c>
     ''' </param>
     Public Sub initModule(name As String,
                           showMenu As Action,
@@ -283,13 +283,13 @@ Module MenuMaker
     ''' <param name="msg"> 
     ''' The string to be printed
     ''' 
-    ''' <br/> Optional, Default: <c> Nothing </c> 
+    ''' <br /> Optional, Default: <c> Nothing </c> 
     ''' </param>
     ''' 
     ''' <param name="cond"> 
     ''' Indicates the line should be printed 
     ''' 
-    ''' <br/> Optional, Default: <c> True </c> 
+    ''' <br /> Optional, Default: <c> True </c> 
     ''' </param>
     Public Sub cwl(Optional msg As String = Nothing,
                    Optional cond As Boolean = True)
@@ -399,7 +399,7 @@ Module MenuMaker
     ''' <param name="cond">
     ''' Indicates that the console should be cleared
     '''
-    ''' <br/> Optional, Default: <c> True </c>
+    ''' <br /> Optional, Default: <c> True </c>
     ''' </param>
     '''
     ''' <remarks>
@@ -452,7 +452,7 @@ Module MenuMaker
     ''' </summary>
     ''' 
     ''' <param name="frameNum"> 
-    ''' Indicates which frame should be returned <br/>
+    ''' Indicates which frame should be returned <br />
     ''' 
     ''' <list type="bullet">
     ''' 
@@ -482,7 +482,7 @@ Module MenuMaker
     ''' 
     ''' </list>
     ''' 
-    ''' <br/> Optional, Default: <c> 0 </c>
+    ''' <br /> Optional, Default: <c> 0 </c>
     ''' </param>
     ''' 
     ''' <returns> 
@@ -562,7 +562,7 @@ Module MenuMaker
     ''' <c> <paramref name="setting"/> </c> is
     ''' <c> True </c>,
     ''' 
-    ''' <br/> <c> "Enable" </c> otherwise 
+    ''' <br /> <c> "Enable" </c> otherwise 
     ''' </returns>
     Public Function enStr(setting As Nullable(Of Boolean)) As String
 
@@ -597,13 +597,13 @@ Module MenuMaker
     ''' <param name="lineString"> 
     ''' The text to be printed 
     ''' 
-    ''' <br/> Optional, Default: <c> Nothing </c> 
+    ''' <br /> Optional, Default: <c> Nothing </c> 
     ''' </param>
     ''' 
     ''' <param name="isCentered"> 
     ''' Indicates that the printed text should be centered 
     ''' 
-    ''' <br/> Optional, Default: <c> False </c> 
+    ''' <br /> Optional, Default: <c> False </c> 
     ''' </param>
     ''' 
     ''' <param name="cond">
@@ -676,6 +676,25 @@ Module MenuMaker
 
     End Sub
 
+    ''' <summary>
+    ''' The longest run of text that still fits between a menu line's two borders
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' The maximum framed line length, or <c> 0 </c> on a console too narrow to frame anything
+    ''' </returns>
+    '''
+    ''' <remarks>
+    ''' A left-aligned line spends two columns on the leading space and opener, one on the indent,
+    ''' and two more on the trailing space and closer — so the text itself may occupy at most
+    ''' <c> GetConsoleWidth() - 5 </c> columns
+    ''' </remarks>
+    Private Function MaxFramedLineLength() As Integer
+
+        Return Math.Max(0, GetConsoleWidth() - 5)
+
+    End Function
+
     ''' <summary> 
     ''' Constructs a menu line fit to the width of the console 
     ''' </summary>
@@ -685,7 +704,7 @@ Module MenuMaker
     ''' </param>
     ''' 
     ''' <param name="align"> 
-    ''' The alignment of the line to be printed: <br/> 
+    ''' The alignment of the line to be printed: <br /> 
     ''' 
     ''' <list type="bullet">
     ''' 
@@ -712,7 +731,7 @@ Module MenuMaker
     ''' 
     ''' <param name="borderInd"> 
     ''' Determines which characters should
-    ''' create the border for the menuline: <br/>
+    ''' create the border for the menuline: <br />
     ''' 
     ''' <list type="bullet">
     ''' 
@@ -742,32 +761,13 @@ Module MenuMaker
     ''' 
     ''' </list>
     ''' 
-    ''' <br/> Optional, Default: <c> 0 </c> 
+    ''' <br /> Optional, Default: <c> 0 </c> 
     ''' </param>
     ''' 
     ''' <param name="fillBorder"> 
     ''' Indicates that top and bottom borders 
     ''' should be printed when printing menuframes
     ''' </param>
-    ''' <summary>
-    ''' The longest run of text that still fits between a menu line's two borders
-    ''' </summary>
-    '''
-    ''' <returns>
-    ''' The maximum framed line length, or <c> 0 </c> on a console too narrow to frame anything
-    ''' </returns>
-    '''
-    ''' <remarks>
-    ''' A left-aligned line spends two columns on the leading space and opener, one on the indent,
-    ''' and two more on the trailing space and closer — so the text itself may occupy at most
-    ''' <c> GetConsoleWidth() - 5 </c> columns
-    ''' </remarks>
-    Private Function MaxFramedLineLength() As Integer
-
-        Return Math.Max(0, GetConsoleWidth() - 5)
-
-    End Function
-
     Private Function mkMenuLine(line As String,
                                 align As Integer,
                                 Optional borderInd As Integer = 0,
@@ -827,7 +827,7 @@ Module MenuMaker
     ''' 
     ''' <param name="padStr">
     ''' The character(s) with which to pad the text 
-    ''' <br/> Default: <c> " " </c> (space character)
+    ''' <br /> Default: <c> " " </c> (space character)
     ''' </param>
 
     Private Sub padToEnd(ByRef out As StringBuilder,
@@ -857,8 +857,6 @@ Module MenuMaker
     ''' <c> <paramref name="dirStr"/> </c> with instances of the
     ''' current directory replaced with <c> ".." </c> 
     ''' </returns>
-    ''' 
-    ''' Docs last updated: 2020-09-04 | Code last updated: 2020-09-04
     Public Function replDir(dirStr As String) As String
 
         Return dirStr.Replace(Environment.CurrentDirectory, "..")
@@ -881,11 +879,9 @@ Module MenuMaker
     ''' </param>
     '''
     ''' <param name="weights"> 
-    ''' The weights correlating to each <c>Component</c>
-    ''' in <c><paramref name="weightedComponents"/> </c> 
+    ''' The weights correlating to each <c> Component </c>
+    ''' in <c> <paramref name="weightedComponents"/> </c> 
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2022-11-21 | Code last updated: 2022-11-21
     Public Function computeMenuNumber(defaultNumber As Integer,
                                       weightedComponents As Boolean(),
                                       weights As Integer()) As String
@@ -1109,8 +1105,6 @@ Module MenuMaker
     ''' Indicates whether the divider line should be solid
     ''' Optional, Default: <c> True </c> (solid)
     ''' </param>
-    ''' 
-    ''' Docs last updated: 2025-08-06 | Code last updated: 2025-08-06
     Public Sub BeginMenu(Optional solid As Boolean = True)
 
         printRenderedLine(getFrame(1, solid))

@@ -65,7 +65,7 @@ Public Module trimsettings
     ''' <summary>
     ''' The winapp2.ini file to be trimmed.
     ''' Ignored when <c> DownloadFileToTrim </c> is <c> True </c>.
-    ''' <br/> Default: <c> winapp2.ini</c>
+    ''' <br /> Default: <c> winapp2.ini </c>
     ''' </summary>
     Public Property TrimFile1 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini")
 

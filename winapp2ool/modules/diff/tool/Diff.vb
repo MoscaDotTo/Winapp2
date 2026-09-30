@@ -267,11 +267,11 @@ Module Diff
     ''' </summary>
     ''' 
     ''' <param name="someFile">
-    ''' The <c>iniFile2</c> whose first comment is inspected for a version tag
+    ''' The <c> iniFile2 </c> whose first comment is inspected for a version tag
     ''' </param>
     ''' 
     ''' <returns>
-    ''' A human-readable version string, or <c>" version not given"</c> if no version comment is present
+    ''' A human-readable version string, or <c> " version not given" </c> if no version comment is present
     ''' </returns>
     Private Function GetVer(someFile As iniFile2) As String
 
@@ -281,20 +281,20 @@ Module Diff
     End Function
 
     ''' <summary>
-    ''' Runs the diff pipeline using the <c>iniFile2</c>-based core classes.
+    ''' Runs the diff pipeline using the <c> iniFile2 </c>-based core classes.
     ''' Returns all output sections for display and logging.
     ''' </summary>
     '''
     ''' <param name="file1As2">
-    ''' The old version of winapp2.ini as an <c>iniFile2</c>
+    ''' The old version of winapp2.ini as an <c> iniFile2 </c>
     ''' </param>
     '''
     ''' <param name="file2As2">
-    ''' The new version of winapp2.ini as an <c>iniFile2</c>
+    ''' The new version of winapp2.ini as an <c> iniFile2 </c>
     ''' </param>
     '''
     ''' <returns>
-    ''' All <c>MenuSection</c>s produced by the diff pipeline, in display order
+    ''' All <c> MenuSection </c>s produced by the diff pipeline, in display order
     ''' </returns>
     Private Function CompareFiles2(file1As2 As iniFile2,
                                    file2As2 As iniFile2) As List(Of MenuSection)

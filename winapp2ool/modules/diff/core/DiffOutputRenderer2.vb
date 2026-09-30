@@ -19,7 +19,7 @@ Option Strict On
 Imports System.Linq.Expressions
 
 ''' <summary>
-''' Formats and renders diff results as <c>MenuSection</c> output for display and logging.
+''' Formats and renders diff results as <c> MenuSection </c> output for display and logging.
 ''' Produces the post-diff summary, entry-level change descriptions (additions, removals,
 ''' renames, mergers), and key-level itemization of added, removed, and updated keys.
 ''' </summary>
@@ -32,14 +32,14 @@ Public Class DiffOutputRenderer2
 
     ''' <summary>
     ''' Label used in place of a key type when itemizing a detection-criteria modification —
-    ''' a change to an entry's <c>Detect</c>/<c>DetectFile</c> keys, which are reported as a
+    ''' a change to an entry's <c> Detect </c>/<c> DetectFile </c> keys, which are reported as a
     ''' single conceptual "detection criteria" change rather than by individual key type
     ''' </summary>
     Private Const DetectionCriteriaLabel As String = "Detection criteria"
 
     ''' <summary>
     ''' Maps merged target entry name → (key value → source old entry name).
-    ''' Built by <c>ItemizeMergers</c> and consumed by <c> ItemizeModifications </c>
+    ''' Built by <c> ItemizeMergers </c> and consumed by <c> ItemizeModifications </c>
     ''' to attribute old keys to their source entries in merger output.
     ''' </summary>
     Private ReadOnly _mergerSourceMaps As New Dictionary(Of String, Dictionary(Of String, String))(StringComparer.OrdinalIgnoreCase)
@@ -130,7 +130,7 @@ Public Class DiffOutputRenderer2
     End Function
 
     ''' <summary>
-    ''' Initializes a new instance of <c>DiffOutputRenderer2</c>
+    ''' Initializes a new instance of <c> DiffOutputRenderer2 </c>
     ''' </summary>
     '''
     ''' <param name="state">
@@ -138,11 +138,11 @@ Public Class DiffOutputRenderer2
     ''' </param>
     ''' 
     ''' <param name="file1">
-    ''' The old version of winapp2.ini as an <c>iniFile2</c>
+    ''' The old version of winapp2.ini as an <c> iniFile2 </c>
     ''' </param>
     ''' 
     ''' <param name="file2">
-    ''' The new version of winapp2.ini as an <c>iniFile2</c>
+    ''' The new version of winapp2.ini as an <c> iniFile2 </c>
     ''' </param>
     ''' 
     ''' <param name="keyAnalyzer">
@@ -179,7 +179,7 @@ Public Class DiffOutputRenderer2
     ''' </summary>
     '''
     ''' <returns>
-    ''' A <c>MenuSection</c> containing the formatted diff summary
+    ''' A <c> MenuSection </c> containing the formatted diff summary
     ''' </returns>
     Public Function LogPostDiff() As MenuSection
 
@@ -328,7 +328,7 @@ Public Class DiffOutputRenderer2
     ''' </summary>
     '''
     ''' <returns>
-    ''' One <c>MenuSection</c> per merged old entry
+    ''' One <c> MenuSection </c> per merged old entry
     ''' </returns>
     Public Function SummarizeMergers() As List(Of MenuSection)
 
@@ -382,7 +382,7 @@ Public Class DiffOutputRenderer2
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>MenuSection</c> listing the target entry names the old entry was split/merged into
+    ''' A <c> MenuSection </c> listing the target entry names the old entry was split/merged into
     ''' </returns>
     Public Function MakeDiffMultiTarget(oldSection As iniSection2,
                                         newTargets As List(Of String)) As MenuSection
@@ -429,11 +429,11 @@ Public Class DiffOutputRenderer2
     ''' Records each removed entry from the old version
     ''' which has been given a new name in the new version.
     ''' Only emits entries that are name-only changes (no key differences);
-    ''' entries with key-level changes are handled by <c>ItemizeRenameChanges</c>.
+    ''' entries with key-level changes are handled by <c> ItemizeRenameChanges </c>.
     ''' </summary>
     '''
     ''' <returns>
-    ''' One <c>MenuSection</c> per name-only renamed entry
+    ''' One <c> MenuSection </c> per name-only renamed entry
     ''' </returns>
     Public Function SummarizeRenames() As List(Of MenuSection)
 
@@ -490,8 +490,8 @@ Public Class DiffOutputRenderer2
 
     ''' <summary>
     ''' Conducts a Diff of each entry detected as containing merged content.
-    ''' Builds a combined <c>iniSection2</c> from all contributing old entries and passes it
-    ''' directly to <c>FindModifications</c> without any string serialization roundtrip.
+    ''' Builds a combined <c> iniSection2 </c> from all contributing old entries and passes it
+    ''' directly to <c> FindModifications </c> without any string serialization roundtrip.
     ''' </summary>
     '''
     ''' <returns>
@@ -542,7 +542,7 @@ Public Class DiffOutputRenderer2
     ''' </summary>
     '''
     ''' <returns>
-    ''' One <c>MenuSection</c> per added entry (excluding renames and added-with-merger entries)
+    ''' One <c> MenuSection </c> per added entry (excluding renames and added-with-merger entries)
     ''' </returns>
     Public Function ItemizeAdditions() As List(Of MenuSection)
 
@@ -589,7 +589,7 @@ Public Class DiffOutputRenderer2
     ''' </param>
     '''
     ''' <returns>
-    ''' <c>MenuSection</c>s itemizing added, removed, and 
+    ''' <c> MenuSection </c>s itemizing added, removed, and 
     ''' updated keys for each qualifying modified entry
     ''' </returns>
     Public Function ItemizeModifications(Optional isMerger As Boolean = False) As List(Of MenuSection)
@@ -660,7 +660,7 @@ Public Class DiffOutputRenderer2
     '''
     ''' <param name="updatedKeysDict">
     ''' Map of new key → list of old keys it replaced,
-    ''' as recorded by <c>KeyModificationAnalyzer2</c>
+    ''' as recorded by <c> KeyModificationAnalyzer2 </c>
     ''' </param>
     '''
     ''' <param name="addedKeys">
@@ -684,7 +684,7 @@ Public Class DiffOutputRenderer2
     ''' </param>
     '''
     ''' <returns>
-    ''' <c>MenuSection</c>s describing each key update
+    ''' <c> MenuSection </c>s describing each key update
     ''' (one header section plus one detail section per updated key)
     ''' </returns>
     Public Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey2, List(Of iniKey2)),
@@ -762,7 +762,7 @@ Public Class DiffOutputRenderer2
     End Function
 
     ''' <summary>
-    ''' Itemizes the names of any removed entries that were merged into <c><paramref name="entry"/></c>
+    ''' Itemizes the names of any removed entries that were merged into <c> <paramref name="entry"/> </c>
     ''' </summary>
     '''
     ''' <param name="entry">
@@ -770,12 +770,12 @@ Public Class DiffOutputRenderer2
     ''' </param>
     ''' 
     ''' <param name="isMerger">
-    ''' When <c>True</c>, the section label describes changes measured against old entries;
-    ''' when <c>False</c>, it names the removed entries whose content was merged in
+    ''' When <c> True </c>, the section label describes changes measured against old entries;
+    ''' when <c> False </c>, it names the removed entries whose content was merged in
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>MenuSection</c> listing the source entry names,
+    ''' A <c> MenuSection </c> listing the source entry names,
     ''' or an empty section if <paramref name="entry"/> has no merge sources
     ''' </returns>
     Public Function ItemizeMergedEntries(entry As String, isMerger As Boolean) As MenuSection
@@ -803,11 +803,11 @@ Public Class DiffOutputRenderer2
 
     ''' <summary>
     ''' Itemizes key-level changes for each renamed entry, pulling from
-    ''' the same trackers populated by the rename's <c>FindModifications</c> callback
+    ''' the same trackers populated by the rename's <c> FindModifications </c> callback
     ''' </summary>
     '''
     ''' <returns>
-    ''' <c>MenuSection</c>s describing added, removed, and updated keys for each rename
+    ''' <c> MenuSection </c>s describing added, removed, and updated keys for each rename
     ''' </returns>
     Public Function ItemizeRenameChanges() As List(Of MenuSection)
 
@@ -888,7 +888,7 @@ Public Class DiffOutputRenderer2
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>MenuSection</c> describing the entry's change
+    ''' A <c> MenuSection </c> describing the entry's change
     ''' </returns>
     Public Function MakeDiff(section As iniSection2,
                              changeType As Integer,
@@ -939,15 +939,15 @@ Public Class DiffOutputRenderer2
     End Function
 
     ''' <summary>
-    ''' Appends each line of an entry string to the given <c>MenuSection</c>
+    ''' Appends each line of an entry string to the given <c> MenuSection </c>
     ''' </summary>
     '''
     ''' <param name="section">
-    ''' The <c>MenuSection</c> to append lines to
+    ''' The <c> MenuSection </c> to append lines to
     ''' </param>
     ''' 
     ''' <param name="entry">
-    ''' The string representation of the entry, split on <c>vbCrLf</c>
+    ''' The string representation of the entry, split on <c> vbCrLf </c>
     ''' </param>
     Public Sub BuildEntrySection(ByRef section As MenuSection,
                                        entry As String)
@@ -969,7 +969,7 @@ Public Class DiffOutputRenderer2
     ''' </summary>
     '''
     ''' <returns>
-    ''' <c>MenuSection</c>s grouped by source entry, each listing
+    ''' <c> MenuSection </c>s grouped by source entry, each listing
     ''' the keys that moved and their destination entries;
     ''' empty if no movements were detected
     ''' </returns>
@@ -1041,11 +1041,11 @@ Public Class DiffOutputRenderer2
     ''' Outputs detailed information for added entries 
     ''' that contain merged content from removed entries.
     ''' Builds combined old entry sections directly from 
-    ''' <c>iniKey2</c> objects 
+    ''' <c> iniKey2 </c> objects 
     ''' </summary>
     '''
     ''' <returns>
-    ''' <c>MenuSection</c>s describing each added-with-merger entry:
+    ''' <c> MenuSection </c>s describing each added-with-merger entry:
     ''' header, source list, novel/dropped/capturing key breakdowns
     ''' </returns>
     Public Function ItemizeAddedEntriesWithMergers() As List(Of MenuSection)
@@ -1255,12 +1255,12 @@ Public Class DiffOutputRenderer2
     End Function
 
     ''' <summary>
-    ''' Produces one <c>MenuSection</c> listing all web browsers whose support was
+    ''' Produces one <c> MenuSection </c> listing all web browsers whose support was
     ''' removed in the new file, or an empty list if none were removed.
     ''' </summary>
     '''
     ''' <returns>
-    ''' A list containing a single <c>MenuSection</c> with the removed browser header and
+    ''' A list containing a single <c> MenuSection </c> with the removed browser header and
     ''' one line per removed browser value, or an empty list if there are no removed browsers
     ''' </returns>
     Public Function ItemizeRemovedBrowsers() As List(Of MenuSection)
@@ -1296,7 +1296,7 @@ Public Class DiffOutputRenderer2
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>MenuSection</c> containing one line per key type summarizing the count of changes
+    ''' A <c> MenuSection </c> containing one line per key type summarizing the count of changes
     ''' </returns>
     Private Function summarizeEntryUpdate(ktDict As Dictionary(Of String, Integer), changeType As String) As MenuSection
 
@@ -1329,8 +1329,8 @@ Public Class DiffOutputRenderer2
     ''' </param>
     '''
     ''' <param name="wasAdded">
-    ''' <c>True</c> if the keys in <paramref name="kl"/> were added; <br />
-    ''' <c>False</c> if they were removed
+    ''' <c> True </c> if the keys in <paramref name="kl"/> were added; <br />
+    ''' <c> False </c> if they were removed
     ''' </param>
     '''
     ''' <param name="ktDict">
@@ -1445,7 +1445,7 @@ Public Class DiffOutputRenderer2
     End Class
 
     ''' <summary>
-    ''' Builds a deduplicated list of <c>iniKey2</c> objects from all old entries
+    ''' Builds a deduplicated list of <c> iniKey2 </c> objects from all old entries
     ''' named in <paramref name="mergeSourceNames"/>, plus optionally from
     ''' <paramref name="targetEntry"/> itself if it existed in file1 and is not
     ''' already a named merge source.
@@ -1462,7 +1462,7 @@ Public Class DiffOutputRenderer2
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>CombinedOldKeyResult</c> with the deduplicated key list
+    ''' A <c> CombinedOldKeyResult </c> with the deduplicated key list
     ''' and the value → source-entry attribution map
     ''' </returns>
     Private Function BuildCombinedOldKeys(mergeSourceNames As IEnumerable(Of String),

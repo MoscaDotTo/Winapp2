@@ -252,7 +252,7 @@ Public Class VariableSet
     End Function
 
     ''' <summary>
-    ''' Reports whether <paramref name="name"/> was declared via <see cref="Declare"/>
+    ''' Reports whether <paramref name="name"/> was declared via <see cref="Add"/>
     ''' </summary>
     '''
     ''' <param name="name">

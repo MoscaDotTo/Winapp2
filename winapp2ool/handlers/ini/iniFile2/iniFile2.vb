@@ -20,7 +20,7 @@ Imports System.IO
 Imports System.Text
 
 ''' <summary>
-''' Controls the order in which sections are emitted when serializing an <c>iniFile2</c>
+''' Controls the order in which sections are emitted when serializing an <c> iniFile2 </c>
 ''' </summary>
 Public Enum IniFileWriteFormat
 
@@ -69,7 +69,7 @@ Public Class iniFile2
     ''' <summary>
     ''' All comment lines encountered during parsing, in the order they appeared in the file.
     ''' Comment text includes the leading semicolon.
-    ''' Comments are captured for reading only — they are not written back by <c>ToString</c>.
+    ''' Comments are captured for reading only — they are not written back by <c> ToString </c>.
     ''' </summary>
     Public ReadOnly Property Comments As List(Of iniComment2)
         Get
@@ -106,7 +106,7 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' Returns the section with the given name, or <c>Nothing</c> if not found. <br /> <br />
+    ''' Returns the section with the given name, or <c> Nothing </c> if not found. <br /> <br />
     ''' Unlike <c> iniFile.getSection </c>, this never returns a "phantom" empty section. <br /> <br />
     ''' 
     ''' Use <c> iniFile2.GetOfCreateSection </c> when get-or-create semantics are needed 
@@ -240,7 +240,7 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' Creates an empty <c>iniFile2</c> with the given path components,
+    ''' Creates an empty <c> iniFile2 </c> with the given path components,
     ''' for use when building an output file programmatically
     ''' </summary>
     ''' <param name="dir">The directory component of the file path</param>
@@ -308,12 +308,12 @@ Public Class iniFile2
     End Sub
 
     ''' <summary>
-    ''' Writes the given text to disk at this file's <c>Path</c>, creating directories as needed.
-    ''' No-ops when <paramref name="condition"/> is <c>False</c>.
+    ''' Writes the given text to disk at this file's <c> Path </c>, creating directories as needed.
+    ''' No-ops when <paramref name="condition"/> is <c> False </c>.
     ''' </summary>
     '''
     ''' <param name="text">The text to write</param>
-    ''' <param name="condition">When <c>False</c>, the write is skipped</param>
+    ''' <param name="condition">When <c> False </c>, the write is skipped</param>
     Public Sub OverwriteToFile(text As String, Optional condition As Boolean = True)
 
         If Not condition Then Return
@@ -368,7 +368,7 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' Serializes a sequence of <c>iniSection2</c> objects into ini file text,
+    ''' Serializes a sequence of <c> iniSection2 </c> objects into ini file text,
     ''' with a blank line between each section and no trailing newline
     ''' </summary>
     '''

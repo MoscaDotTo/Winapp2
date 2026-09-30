@@ -44,7 +44,7 @@ Public Module ccdebugsettings
 
     ''' <summary>
     ''' Indicates that stale winapp2.ini entries should be pruned from ccleaner.ini
-    ''' <br/> Default: <c> True </c>
+    ''' <br /> Default: <c> True </c>
     ''' </summary>
     '''
     ''' <remarks>
@@ -55,7 +55,7 @@ Public Module ccdebugsettings
 
     ''' <summary>
     ''' Indicates that the debugged file should be saved back to disk
-    ''' <br/> Default: <c> True </c>
+    ''' <br /> Default: <c> True </c>
     ''' </summary>
     Public Property SaveDebuggedFile As Boolean = True
 

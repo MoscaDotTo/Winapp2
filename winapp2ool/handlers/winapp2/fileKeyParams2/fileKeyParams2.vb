@@ -25,15 +25,15 @@ Public Enum fileKeyFlag
     Recurse = 1
     ''' <summary>REMOVESELF — delete matching files and the containing folder; implies RECURSE</summary>
     RemoveSelf = 2
-    ''' <summary>Unknown, flag value not recognized; stored verbatim in <c>RawFlag</c> for round-trip fidelity</summary>
+    ''' <summary>Unknown, flag value not recognized; stored verbatim in <c> RawFlag </c> for round-trip fidelity</summary>
     Unknown = 3
 End Enum
 
 ''' <summary>
 ''' Parses and represents the structured components of a FileKey value:
 ''' the path, the semicolon-delimited file patterns, and the optional deletion flag.
-''' <br/><br/>
-''' FileKey format: <c>path|pattern[;pattern...][|FLAG]</c>
+''' <br /><br />
+''' FileKey format: <c> path|pattern[;pattern...][|FLAG] </c>
 ''' </summary>
 Public Class fileKeyParams2
 
@@ -49,19 +49,19 @@ Public Class fileKeyParams2
         End Get
     End Property
 
-    ''' <summary>The deletion behavior flag — <c>Unknown</c> when present but not recognized</summary>
+    ''' <summary>The deletion behavior flag — <c> Unknown </c> when present but not recognized</summary>
     Public ReadOnly Property Flag As fileKeyFlag
 
     ''' <summary>
     ''' The raw flag text as it appeared in the file.
-    ''' Populated only when <c>Flag = fileKeyFlag.Unknown</c>; otherwise empty.
+    ''' Populated only when <c> Flag = fileKeyFlag.Unknown </c>; otherwise empty.
     ''' </summary>
     Public ReadOnly Property RawFlag As String
 
     ''' <summary>
     ''' Parses a raw FileKey value string into its structured components
     ''' </summary>
-    ''' <param name="value">The raw value from a FileKey, e.g. <c>%LocalAppData%\App|*.tmp;*.log|RECURSE</c></param>
+    ''' <param name="value">The raw value from a FileKey, e.g. <c> %LocalAppData%\App|*.tmp;*.log|RECURSE </c></param>
     Public Sub New(value As String)
 
         If value Is Nothing Then argIsNull(NameOf(value)) : Return
@@ -102,7 +102,7 @@ Public Class fileKeyParams2
 
     ''' <summary>
     ''' Reconstructs the FileKey value string from the parsed components.
-    ''' Produces <c>path|pat1;pat2[|FLAG]</c>.
+    ''' Produces <c> path|pat1;pat2[|FLAG] </c>.
     ''' </summary>
     Public Function Reconstruct() As String
 
@@ -112,7 +112,7 @@ Public Class fileKeyParams2
 
     ''' <summary>
     ''' Reconstructs the FileKey value string using <paramref name="patternsOverride"/> in place of
-    ''' the parsed patterns, retaining this object's <c> Path </c> and flag. Produces <c>path|pat1;pat2[|FLAG]</c>.
+    ''' the parsed patterns, retaining this object's <c> Path </c> and flag. Produces <c> path|pat1;pat2[|FLAG] </c>.
     ''' Used by the linter to write back a de-duplicated and/or alphabetized pattern list without
     ''' mutating the (immutable) parsed components.
     ''' </summary>

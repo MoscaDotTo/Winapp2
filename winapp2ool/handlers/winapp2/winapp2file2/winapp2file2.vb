@@ -21,7 +21,7 @@ Imports System.Text
 
 ''' <summary>
 ''' Represents a winapp2.ini file with a single flat entry list and no parallel structure.
-''' Built from an <c>iniFile2</c>.
+''' Built from an <c> iniFile2 </c>.
 ''' </summary>
 Public Class winapp2file2
 
@@ -93,7 +93,7 @@ Public Class winapp2file2
     End Property
 
     ''' <summary>
-    ''' The 12 per-category entry lists in <c>FileSectionHeaders</c> order.
+    ''' The 12 per-category entry lists in <c> FileSectionHeaders </c> order.
     ''' Each inner list corresponds to one winapp2.ini section (index 11 is the unlabelled main section).
     ''' </summary>
     Public ReadOnly Property Categories As IReadOnlyList(Of IReadOnlyList(Of winapp2entry2))
@@ -103,9 +103,9 @@ Public Class winapp2file2
     End Property
 
     ''' <summary>
-    ''' Creates a <c>winapp2file2</c> from an <c>iniFile2</c>
+    ''' Creates a <c> winapp2file2 </c> from an <c> iniFile2 </c>
     ''' </summary>
-    ''' <param name="file">A winapp2.ini format <c>iniFile2</c></param>
+    ''' <param name="file">A winapp2.ini format <c> iniFile2 </c></param>
     ''' <param name="useTodaysDate">When True, Version is set to today's date in YYMMDD format</param>
     Public Sub New(file As iniFile2, Optional useTodaysDate As Boolean = False)
 
@@ -171,13 +171,13 @@ Public Class winapp2file2
     End Function
 
     ''' <summary>
-    ''' Returns all entries as a single <c>iniFile2</c> in winapp2.ini order. <br /> <br />
+    ''' Returns all entries as a single <c> iniFile2 </c> in winapp2.ini order. <br /> <br />
     '''
     ''' The two pieces of preamble state this class carries — the version string and the
     ''' non-CCleaner marker — are re-emitted as comments on the returned file. Without them
     ''' a round trip through the winapp2 layer silently resets the version to
     ''' <c> 000000 </c> and the file's identity to the CCleaner variant, since both are read
-    ''' back off <c>iniFile2.Comments</c> by this class' own constructor and by Diff
+    ''' back off <c> iniFile2.Comments </c> by this class' own constructor and by Diff
     ''' </summary>
     Public Function ToIni() As iniFile2
 
@@ -230,8 +230,8 @@ Public Class winapp2file2
 
     ''' <summary>
     ''' Sorts entries within each category using winapp2 ordering:
-    ''' <c>-</c> is treated as whitespace and embedded numbers are padded so that
-    ''' <c>Item2</c> sorts before <c>Item10</c>. 
+    ''' <c> - </c> is treated as whitespace and embedded numbers are padded so that
+    ''' <c> Item2 </c> sorts before <c> Item10 </c>. 
     ''' </summary>
     Public Sub SortEntries()
 
@@ -280,7 +280,7 @@ Public Class winapp2file2
 
     ''' <summary>
     ''' Builds and returns the complete winapp2.ini text including preamble comments,
-    ''' replicating the output of the legacy <c>winapp2file.winapp2string()</c>
+    ''' replicating the output of the legacy <c> winapp2file.winapp2string() </c>
     ''' </summary>
     Public Function ToWinapp2String() As String
 
@@ -331,7 +331,7 @@ Public Class winapp2file2
     End Function
 
     ''' <summary>
-    ''' Serialises a list of entries to text, matching the legacy <c>iniFile.toString</c> output format:
+    ''' Serialises a list of entries to text, matching the legacy <c> iniFile.toString </c> output format:
     ''' each section ends with a trailing newline, sections separated by a blank line
     ''' </summary>
     Private Shared Function CategoriesToString(entries As List(Of winapp2entry2)) As String

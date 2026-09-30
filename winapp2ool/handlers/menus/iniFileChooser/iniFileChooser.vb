@@ -20,7 +20,7 @@ Option Strict On
 Imports System.IO
 
 ''' <summary>
-''' An interactive file chooser for <c>iniFile2</c> objects, using a single unified menu
+''' An interactive file chooser for <c> iniFile2 </c> objects, using a single unified menu
 ''' </summary>
 Public Class iniFileChooser
 
@@ -50,14 +50,14 @@ Public Class iniFileChooser
     Public ReadOnly Property SecondName As String
 
     ''' <summary>
-    ''' When True, <c>Load</c> will loop until the chosen file exists on disk
+    ''' When True, <c> Load </c> will loop until the chosen file exists on disk
     ''' </summary>
     Public ReadOnly Property MustExist As Boolean
 
     Private _tmpRename As String = ""
 
     ''' <summary>
-    ''' Creates an <c>iniFileChooser</c> with the given starting directory and filename
+    ''' Creates an <c> iniFileChooser </c> with the given starting directory and filename
     ''' </summary>
     ''' 
     ''' <param name="dir">

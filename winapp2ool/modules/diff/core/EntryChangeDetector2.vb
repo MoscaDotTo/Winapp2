@@ -22,8 +22,8 @@ Imports System.Threading.Tasks
 ''' <summary>
 ''' Categorizes entries as added, removed, or modified between two versions of winapp2.ini.
 ''' Normalizes deprecated path values to suppress false-positive diffs, delegates rename
-''' and merger detection to <c>MergeDetector2</c>, and coordinates key-level analysis
-''' via <c>KeyModificationAnalyzer2</c>.
+''' and merger detection to <c> MergeDetector2 </c>, and coordinates key-level analysis
+''' via <c> KeyModificationAnalyzer2 </c>.
 ''' </summary>
 Public Class EntryChangeDetector2
 
@@ -35,7 +35,7 @@ Public Class EntryChangeDetector2
     Private ReadOnly _renderer As DiffOutputRenderer2
 
     ''' <summary>
-    ''' Initializes a new instance of <c>EntryChangeDetector2</c>
+    ''' Initializes a new instance of <c> EntryChangeDetector2 </c>
     ''' </summary>
     ''' 
     ''' <param name="state">
@@ -43,11 +43,11 @@ Public Class EntryChangeDetector2
     ''' </param>
     ''' 
     ''' <param name="file1">
-    ''' The old version of winapp2.ini as an <c>iniFile2</c>
+    ''' The old version of winapp2.ini as an <c> iniFile2 </c>
     ''' </param>
     ''' 
     ''' <param name="file2">
-    ''' The new version of winapp2.ini as an <c>iniFile2</c>
+    ''' The new version of winapp2.ini as an <c> iniFile2 </c>
     ''' </param>
     ''' 
     ''' <param name="mergeDetector">
@@ -59,7 +59,7 @@ Public Class EntryChangeDetector2
     ''' </param>
     ''' 
     ''' <param name="renderer">
-    ''' Produces <c>MenuSection</c> output for removed entries with no key matches
+    ''' Produces <c> MenuSection </c> output for removed entries with no key matches
     ''' </param>
     Public Sub New(state As DiffState,
                    file1 As iniFile2,
@@ -78,7 +78,7 @@ Public Class EntryChangeDetector2
     End Sub
 
     ''' <summary>
-    ''' Replaces deprecated path values in all keys of a winapp2.ini <c>iniFile2</c>
+    ''' Replaces deprecated path values in all keys of a winapp2.ini <c> iniFile2 </c>
     ''' to suppress false-positive diff entries caused by known path renames
     ''' </summary>
     '''
@@ -100,7 +100,7 @@ Public Class EntryChangeDetector2
     ''' </summary>
     ''' 
     ''' <param name="key">
-    ''' The key whose value is normalized against <c>PathReplacements</c>
+    ''' The key whose value is normalized against <c> PathReplacements </c>
     ''' </param>
     Private Sub CleanKeyValue(key As iniKey2)
 
@@ -290,7 +290,7 @@ Public Class EntryChangeDetector2
     '''     <description>First two backslash components → set of section names, catching
     '''     wildcard pattern changes where the path root stays the same</description></item>
     '''   <item><term>WildcardPrefixes</term>
-    '''     <description>For roots containing <c>*</c>, the prefix before <c>*</c> grouped
+    '''     <description>For roots containing <c> * </c>, the prefix before <c> * </c> grouped
     '''     by first path component for efficient lookup</description></item>
     ''' </list>
     ''' </summary>
@@ -300,7 +300,7 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>ContentIndexes</c> instance containing all three reverse indexes
+    ''' A <c> ContentIndexes </c> instance containing all three reverse indexes
     ''' </returns>
     Private Shared Function BuildContentIndexes(potentialMatches As List(Of iniSection2)) As ContentIndexes
 
@@ -350,7 +350,7 @@ Public Class EntryChangeDetector2
 
     ''' <summary>
     ''' Returns the set of section names from <paramref name="potentialMatches"/> that are
-    ''' eligible for candidacy (i.e. present in <c>AddedEntryNames</c> or <c>ModifiedEntryNames</c>)
+    ''' eligible for candidacy (i.e. present in <c> AddedEntryNames </c> or <c> ModifiedEntryNames </c>)
     ''' </summary>
     '''
     ''' <param name="potentialMatches">
@@ -358,7 +358,7 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>HashSet</c> of section names eligible for rename/merger matching
+    ''' A <c> HashSet </c> of section names eligible for rename/merger matching
     ''' </returns>
     Private Function BuildEligibleNameSet(potentialMatches As List(Of iniSection2)) As HashSet(Of String)
 
@@ -378,8 +378,8 @@ Public Class EntryChangeDetector2
     ''' <summary>
     ''' Processes a single removed entry: gathers rename/merger candidates from name heuristics
     ''' and content-aware index lookups, filters to eligible entries, and delegates to
-    ''' <c>MergeDetector2.AssessRenamesAndMergers</c>. Returns a <c>MenuSection</c> for entries
-    ''' that were truly removed (no rename or merger found), or <c>Nothing</c> if a rename/merger
+    ''' <c> MergeDetector2.AssessRenamesAndMergers </c>. Returns a <c> MenuSection </c> for entries
+    ''' that were truly removed (no rename or merger found), or <c> Nothing </c> if a rename/merger
     ''' was recorded.
     ''' </summary>
     '''
@@ -400,7 +400,7 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <param name="indexes">
-    ''' Reverse content indexes built by <c>BuildContentIndexes</c>
+    ''' Reverse content indexes built by <c> BuildContentIndexes </c>
     ''' </param>
     '''
     ''' <param name="eligibleNames">
@@ -408,8 +408,8 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>MenuSection</c> describing the removal if no rename/merger was found;
-    ''' <c>Nothing</c> if a rename or merger was recorded in <c>DiffState</c>
+    ''' A <c> MenuSection </c> describing the removal if no rename/merger was found;
+    ''' <c> Nothing </c> if a rename or merger was recorded in <c> DiffState </c>
     ''' </returns>
     Private Function ProcessSingleRemoval(entryName As String,
                                            potentialMatches As List(Of iniSection2),
@@ -529,7 +529,7 @@ Public Class EntryChangeDetector2
 
     ''' <summary>
     ''' Filters a set of candidate section names to only those present in
-    ''' <paramref name="eligibleNames"/> and resolves each to its <c>iniSection2</c>
+    ''' <paramref name="eligibleNames"/> and resolves each to its <c> iniSection2 </c>
     ''' from the new file
     ''' </summary>
     '''
@@ -542,7 +542,7 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <returns>
-    ''' A list of <c>iniSection2</c> instances from the new file for each eligible candidate
+    ''' A list of <c> iniSection2 </c> instances from the new file for each eligible candidate
     ''' </returns>
     Private Function FilterToEligibleSections(candidateNames As HashSet(Of String),
                                                eligibleNames As HashSet(Of String)) As List(Of iniSection2)
@@ -563,11 +563,11 @@ Public Class EntryChangeDetector2
     End Function
 
     ''' <summary>
-    ''' Converts any remaining rename whose target is also in <c>MergedEntryNames</c>
-    ''' into a merger. When the <c>Parallel.ForEach</c> in <c>ProcessRemovals</c> runs,
-    ''' a merger's <c>TrackMerger</c> may execute before the competing rename's
-    ''' <c>ConfirmRename</c> has registered the rename, causing the cleanup branch
-    ''' (lines 385-400 of <c>TrackMerger</c>) to be skipped. This pass catches those
+    ''' Converts any remaining rename whose target is also in <c> MergedEntryNames </c>
+    ''' into a merger. When the <c> Parallel.ForEach </c> in <c> ProcessRemovals </c> runs,
+    ''' a merger's <c> TrackMerger </c> may execute before the competing rename's
+    ''' <c> ConfirmRename </c> has registered the rename, causing the cleanup branch
+    ''' (lines 385-400 of <c> TrackMerger </c>) to be skipped. This pass catches those
     ''' cases after all parallel work is complete.
     ''' </summary>
     Private Sub ReconcileRenamesAndMergers()
@@ -599,9 +599,9 @@ Public Class EntryChangeDetector2
     ''' <summary>
     ''' Returns the directory-level path root of a key value for indexing, stripping any
     ''' pipe-delimited flags first. For paths with 3+ backslash components, returns the
-    ''' first two (e.g. <c>%AppData%\SomeApp</c>). For paths with exactly 2 components,
-    ''' returns the full directory path (e.g. <c>%AppData%\GetRight*</c> from
-    ''' <c>%AppData%\GetRight*|GetRight.lst;*.data|RECURSE</c>).
+    ''' first two (e.g. <c> %AppData%\SomeApp </c>). For paths with exactly 2 components,
+    ''' returns the full directory path (e.g. <c> %AppData%\GetRight* </c> from
+    ''' <c> %AppData%\GetRight*|GetRight.lst;*.data|RECURSE </c>).
     ''' </summary>
     '''
     ''' <param name="value">
@@ -609,7 +609,7 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <returns>
-    ''' The first one or two backslash-delimited path components, or <c>Nothing</c> if the value has no backslash
+    ''' The first one or two backslash-delimited path components, or <c> Nothing </c> if the value has no backslash
     ''' </returns>
     Private Shared Function GetPathRoot(value As String) As String
 
@@ -627,8 +627,8 @@ Public Class EntryChangeDetector2
 
     ''' <summary>
     ''' Returns the first backslash-delimited component of a path (typically the environment
-    ''' variable or drive root), or <c>Nothing</c> if the path has no backslash.
-    ''' E.g. <c>%AppData%\GetRight*</c> → <c>%AppData%</c>
+    ''' variable or drive root), or <c> Nothing </c> if the path has no backslash.
+    ''' E.g. <c> %AppData%\GetRight* </c> → <c> %AppData% </c>
     ''' </summary>
     '''
     ''' <param name="pathRoot">
@@ -636,7 +636,7 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <returns>
-    ''' The substring before the first <c>\</c>, or <c>Nothing</c> if no backslash is present
+    ''' The substring before the first <c> \ </c>, or <c> Nothing </c> if no backslash is present
     ''' </returns>
     Private Shared Function GetFirstComponent(pathRoot As String) As String
 
@@ -646,7 +646,7 @@ Public Class EntryChangeDetector2
     End Function
 
     ''' <summary>
-    ''' Produces a list of <c>iniSection2</c>s who may potentially be merger/rename candidates
+    ''' Produces a list of <c> iniSection2 </c>s who may potentially be merger/rename candidates
     ''' based on traits such as section and name similarities
     ''' </summary>
     '''
@@ -667,7 +667,7 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <returns>
-    ''' A list of candidate <c>iniSection2</c>s whose name or browser SecRef overlaps with the removed entry
+    ''' A list of candidate <c> iniSection2 </c>s whose name or browser SecRef overlaps with the removed entry
     ''' </returns>
     Private Function FindProbableMatches2(oldNameBroken As String(),
                                           potentialMatchesList As List(Of iniSection2),

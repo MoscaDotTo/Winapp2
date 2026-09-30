@@ -18,7 +18,7 @@
 Option Strict On
 
 ''' <summary>
-''' Aggregates raw key-change trackers from <c>DiffState</c> into summary statistics
+''' Aggregates raw key-change trackers from <c> DiffState </c> into summary statistics
 ''' (added, removed, updated, and replaced key counts per entry category) and detects
 ''' cross-entry key movements after all entry-level analysis is complete.
 ''' </summary>
@@ -29,7 +29,7 @@ Public Class DiffStatisticsCalculator2
     Private ReadOnly _file2 As iniFile2
 
     ''' <summary>
-    ''' Initializes a new instance of <c>DiffStatisticsCalculator2</c>
+    ''' Initializes a new instance of <c> DiffStatisticsCalculator2 </c>
     ''' </summary>
     '''
     ''' <param name="state">
@@ -37,11 +37,11 @@ Public Class DiffStatisticsCalculator2
     ''' </param>
     ''' 
     ''' <param name="file1">
-    ''' The old version of winapp2.ini as an <c>iniFile2</c>
+    ''' The old version of winapp2.ini as an <c> iniFile2 </c>
     ''' </param>
     ''' 
     ''' <param name="file2">
-    ''' The new version of winapp2.ini as an <c>iniFile2</c>
+    ''' The new version of winapp2.ini as an <c> iniFile2 </c>
     ''' </param>
     Public Sub New(state As DiffState,
                    file1 As iniFile2,
@@ -116,7 +116,7 @@ Public Class DiffStatisticsCalculator2
     ''' Calculates statistics from raw trackers before movement detection.
     ''' Filters to <c> ModifiedEntryNames </c> only. the tracker dictionaries
     ''' also contain added-merger entries populated by
-    ''' <c> FindModificationsForAddedEntry</c> which must not be counted here.
+    ''' <c> FindModificationsForAddedEntry </c> which must not be counted here.
     ''' </summary>
     Public Sub CalculateInitialStatistics()
 
@@ -404,7 +404,7 @@ Public Class DiffStatisticsCalculator2
     ''' </param>
     '''
     ''' <returns>
-    ''' A dictionary mapping each old entry name to its <c>OldEntryKeyTracking</c> instance,
+    ''' A dictionary mapping each old entry name to its <c> OldEntryKeyTracking </c> instance,
     ''' pre-populated with all key values from that entry
     ''' </returns>
     Private Function BuildOldEntryCaptureTracking(entriesWithMergers As List(Of String)) As Dictionary(Of String, OldEntryKeyTracking)
@@ -454,7 +454,7 @@ Public Class DiffStatisticsCalculator2
     ''' </summary>
     '''
     ''' <param name="oldEntryCaptures">
-    ''' Tracking dictionary built by <c>BuildOldEntryCaptureTracking</c>; capture sets are updated in place
+    ''' Tracking dictionary built by <c> BuildOldEntryCaptureTracking </c>; capture sets are updated in place
     ''' </param>
     Private Sub ComputeKeyCaptureRates(oldEntryCaptures As Dictionary(Of String, OldEntryKeyTracking))
 
@@ -524,7 +524,7 @@ Public Class DiffStatisticsCalculator2
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c>KeyCaptureTotals</c> with aggregate counts
+    ''' A <c> KeyCaptureTotals </c> with aggregate counts
     ''' for all keys and content keys (FileKey/RegKey)
     ''' </returns>
     Private Function SummarizeCaptureStatistics(oldEntryCaptures As Dictionary(Of String, OldEntryKeyTracking)) As KeyCaptureTotals
@@ -638,7 +638,7 @@ Public Class DiffStatisticsCalculator2
     ''' </param>
     '''
     ''' <returns>
-    ''' One of <c>[DELETION]</c>, <c>[DETECTION]</c>, <c>[CATEGORY]</c>, or <c>[OTHER]</c>
+    ''' One of <c> [DELETION] </c>, <c> [DETECTION] </c>, <c> [CATEGORY] </c>, or <c> [OTHER] </c>
     ''' </returns>
     Private Function getMarker(key As iniKey2) As String
 
@@ -667,7 +667,7 @@ Public Class DiffStatisticsCalculator2
         Public Property Key As iniKey2
 
         ''' <summary>
-        ''' Creates a new <c>AddedKeyInfo</c> instance
+        ''' Creates a new <c> AddedKeyInfo </c> instance
         ''' </summary>
         ''' 
         ''' <param name="entry">

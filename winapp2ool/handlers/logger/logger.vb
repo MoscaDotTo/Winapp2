@@ -83,7 +83,7 @@ Public Module logger
     ''' 
     ''' <param name="logstr"> 
     ''' The <c> String </c> to be added into the log <br /> 
-    ''' Optional, Default: <c> ""</c> 
+    ''' Optional, Default: <c> "" </c> 
     ''' </param>
     ''' 
     ''' <param name="cond"> 

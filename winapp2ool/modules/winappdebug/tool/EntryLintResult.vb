@@ -18,7 +18,7 @@
 Option Strict On
 
 ''' <summary>
-''' A single error found while linting a <c>winapp2entry2</c>
+''' A single error found while linting a <c> winapp2entry2 </c>
 ''' </summary>
 Public Structure LintError
 
@@ -41,8 +41,8 @@ Public Structure LintError
 End Structure
 
 ''' <summary>
-''' Accumulates errors found while linting a single <c>winapp2entry2</c>. <br/>
-''' Every entry <c>WinappDebug</c> processes gets its own, so no part of the per-entry
+''' Accumulates errors found while linting a single <c> winapp2entry2 </c>. <br />
+''' Every entry <c> WinappDebug </c> processes gets its own, so no part of the per-entry
 ''' work has to reach for shared state.
 ''' </summary>
 Public Class EntryLintResult
@@ -99,22 +99,22 @@ Public Class EntryLintResult
     End Sub
 
     ''' <summary>
-    ''' Log lines <c>gLogCapture</c> picked up while this entry was being processed in
-    ''' parallel. <c>EmitCaptured</c> flushes them in a deterministic order when the result
+    ''' Log lines <c> gLogCapture </c> picked up while this entry was being processed in
+    ''' parallel. <c> EmitCaptured </c> flushes them in a deterministic order when the result
     ''' gets rendered.
     ''' </summary>
     '''
     ''' <remarks>
-    ''' <c>WinappDebug.ProcessEntry</c> opens a capture scope, runs the entry through the
-    ''' lint pipeline, then drops the captured <c>Lines</c> in here.
-    ''' <c>WinappDebug.EmitEntryResult</c> flushes them back out at the calling thread's depth.
+    ''' <c> WinappDebug.ProcessEntry </c> opens a capture scope, runs the entry through the
+    ''' lint pipeline, then drops the captured <c> Lines </c> in here.
+    ''' <c> WinappDebug.EmitEntryResult </c> flushes them back out at the calling thread's depth.
     ''' </remarks>
     Public Property LogLines As IReadOnlyList(Of String) = New List(Of String)()
 
     Private ReadOnly _deferredSections As New List(Of MenuSection)
 
     ''' <summary>
-    ''' <c>MenuSection</c>s built during parallel processing to be rendered sequentially
+    ''' <c> MenuSection </c>s built during parallel processing to be rendered sequentially
     ''' </summary>
     Public ReadOnly Property DeferredSections As IReadOnlyList(Of MenuSection)
         Get
@@ -123,11 +123,11 @@ Public Class EntryLintResult
     End Property
 
     ''' <summary>
-    ''' Queues a <c>MenuSection</c> to be rendered when this result is emitted
+    ''' Queues a <c> MenuSection </c> to be rendered when this result is emitted
     ''' </summary>
     '''
     ''' <param name="section">
-    ''' The <c>MenuSection</c> to defer
+    ''' The <c> MenuSection </c> to defer
     ''' </param>
     Public Sub DeferSection(section As MenuSection)
         _deferredSections.Add(section)

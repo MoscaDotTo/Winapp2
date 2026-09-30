@@ -28,7 +28,7 @@ Public Module browserbuildermainmenu
     ''' </summary>
     '''
     ''' <returns>
-    ''' A fully configured <c>MenuSection</c> ready to print or dispatch
+    ''' A fully configured <c> MenuSection </c> ready to print or dispatch
     ''' </returns>
     Private Function buildBrowserBuilderMenu() As MenuSection
 

@@ -20,8 +20,8 @@ Option Strict On
 ''' <summary>
 ''' Parses and represents the structured components of a RegKey value:
 ''' the registry path and the optional value name (subkey).
-''' <br/><br/>
-''' RegKey format: <c>registry_path[|value_name]</c>
+''' <br /><br />
+''' RegKey format: <c> registry_path[|value_name] </c>
 ''' </summary>
 Public Class regKeyParams2
 
@@ -40,7 +40,7 @@ Public Class regKeyParams2
     ''' </summary>
     Public ReadOnly Property Subkey As String
 
-    ''' <summary>Returns <c>True</c> when a specific value name is targeted rather than the whole key</summary>
+    ''' <summary>Returns <c> True </c> when a specific value name is targeted rather than the whole key</summary>
     Public ReadOnly Property HasSubkey As Boolean
         Get
             Return Subkey.Length > 0
@@ -48,8 +48,8 @@ Public Class regKeyParams2
     End Property
 
     ''' <summary>
-    ''' The registry hive — the segment of <c>Path</c> before the first backslash,
-    ''' or <c>Path</c> itself when no backslash is present.
+    ''' The registry hive — the segment of <c> Path </c> before the first backslash,
+    ''' or <c> Path </c> itself when no backslash is present.
     ''' </summary>
     Public ReadOnly Property Root As String
         Get
@@ -58,7 +58,7 @@ Public Class regKeyParams2
         End Get
     End Property
 
-    ''' <summary>Whether <c>Root</c> is a recognized registry hive (short or long form).</summary>
+    ''' <summary>Whether <c> Root </c> is a recognized registry hive (short or long form).</summary>
     Public ReadOnly Property HasValidRoot As Boolean
         Get
             Return ValidRoots.Contains(Root)
@@ -68,7 +68,7 @@ Public Class regKeyParams2
     ''' <summary>
     ''' Parses a raw RegKey value string into its structured components
     ''' </summary>
-    ''' <param name="value">The raw value from a RegKey, e.g. <c>HKCU\Software\App|SettingName</c></param>
+    ''' <param name="value">The raw value from a RegKey, e.g. <c> HKCU\Software\App|SettingName </c></param>
     Public Sub New(value As String)
 
         If value Is Nothing Then argIsNull(NameOf(value)) : Return
@@ -87,7 +87,7 @@ Public Class regKeyParams2
 
     ''' <summary>
     ''' Reconstructs the RegKey value string from the parsed components.
-    ''' Produces <c>path</c> or <c>path|value_name</c>.
+    ''' Produces <c> path </c> or <c> path|value_name </c>.
     ''' </summary>
     Public Function Reconstruct() As String
         Return If(HasSubkey, $"{Path}|{Subkey}", Path)

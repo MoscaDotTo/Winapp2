@@ -323,11 +323,11 @@ Public Module WinappDebug
 
     ''' <summary>
     ''' Lints <paramref name="givenIni"/>'s winapp2.ini formatting from outside the module's UI.
-    ''' Returns the linted <c>iniFile2</c>.
+    ''' Returns the linted <c> iniFile2 </c>.
     ''' </summary>
     '''
     ''' <param name="givenIni">
-    ''' The winapp2.ini syntax <c>iniFile2</c> to be linted
+    ''' The winapp2.ini syntax <c> iniFile2 </c> to be linted
     ''' </param>
     '''
     ''' <param name="forceOpti">
@@ -425,8 +425,8 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Sends the entries in a winapp2.ini format <c>iniFile2</c> into specific format and syntax checking routines.
-    ''' Returns a list of <c>MenuSection</c>s containing all output to be rendered.
+    ''' Sends the entries in a winapp2.ini format <c> iniFile2 </c> into specific format and syntax checking routines.
+    ''' Returns a list of <c> MenuSection </c>s containing all output to be rendered.
     ''' </summary>
     '''
     ''' <param name="fileToBeDebugged">
@@ -458,11 +458,11 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Returns the set of entry names that appear more than once in a <c>winapp2file2</c>
+    ''' Returns the set of entry names that appear more than once in a <c> winapp2file2 </c>
     ''' </summary>
     '''
     ''' <param name="winapp">
-    ''' The <c>winapp2file2</c> whose entries will be scanned for duplicate names
+    ''' The <c> winapp2file2 </c> whose entries will be scanned for duplicate names
     ''' </param>
     Private Function FindDuplicateEntryNames(winapp As winapp2file2) As HashSet(Of String)
 
@@ -478,13 +478,13 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Collects the errors from an <c>EntryLintResult</c> into <c>MenuSection</c>s, logs them,
-    ''' and adds its error count to <c>ErrorsFound</c>. The sections come back to be rendered
+    ''' Collects the errors from an <c> EntryLintResult </c> into <c> MenuSection </c>s, logs them,
+    ''' and adds its error count to <c> ErrorsFound </c>. The sections come back to be rendered
     ''' later.
     ''' </summary>
     '''
     ''' <param name="result">
-    ''' The <c>EntryLintResult</c> whose errors will be collected
+    ''' The <c> EntryLintResult </c> whose errors will be collected
     ''' </param>
     Private Function EmitEntryResult(result As EntryLintResult) As List(Of MenuSection)
 
@@ -635,13 +635,13 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Checks the basic structure of all <c>iniKey2</c>s in a <c>winapp2entry2</c>,
+    ''' Checks the basic structure of all <c> iniKey2 </c>s in a <c> winapp2entry2 </c>,
     ''' attempts to repair some keys and place them back into their appropriate typed bucket,
     ''' and removes any that are too problematic to continue with
     ''' </summary>
     '''
     ''' <param name="entry">
-    ''' A <c>winapp2entry2</c> whose <c>iniKey2</c>s will be audited for basic syntax correctness
+    ''' A <c> winapp2entry2 </c> whose <c> iniKey2 </c>s will be audited for basic syntax correctness
     ''' </param>
     Private Sub ValidateKeys(result As EntryLintResult, entry As winapp2entry2)
 
@@ -668,7 +668,7 @@ Public Module WinappDebug
     ''' </summary>
     '''
     ''' <param name="winapp">
-    ''' The <c>winapp2file2</c> whose entries will be alphabetized
+    ''' The <c> winapp2file2 </c> whose entries will be alphabetized
     ''' </param>
     Private Function AlphabetizeEntries(winapp As winapp2file2) As List(Of MenuSection)
 
@@ -705,12 +705,12 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Renders entry level alphabetization misplacements into <c>MenuSection</c>s and the
-    ''' global log, and bumps <c>ErrorsFound</c> for each one
+    ''' Renders entry level alphabetization misplacements into <c> MenuSection </c>s and the
+    ''' global log, and bumps <c> ErrorsFound </c> for each one
     ''' </summary>
     '''
     ''' <param name="misplacements">
-    ''' The misplaced entries, as returned by <c>findOutOfPlace</c>
+    ''' The misplaced entries, as returned by <c> findOutOfPlace </c>
     ''' </param>
     Private Function EmitEntryAlphabetizationErrors(misplacements As List(Of AlphaMisplacement)) As List(Of MenuSection)
 
@@ -751,7 +751,7 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' One out-of-place item discovered by <c>findOutOfPlace</c>
+    ''' One out-of-place item discovered by <c> findOutOfPlace </c>
     ''' </summary>
     Private Structure AlphaMisplacement
 
@@ -888,7 +888,7 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' The per-call configuration for <c>processKeyList</c>, holding the behaviour that
+    ''' The per-call configuration for <c> processKeyList </c>, holding the behaviour that
     ''' varies by key type.
     ''' </summary>
     Private Structure KeyListSpec
@@ -917,11 +917,11 @@ Public Module WinappDebug
     End Structure
 
     ''' <summary>
-    ''' Hands off each <c>iniKey2</c> in a winapp2.ini format typed bucket to be audited for correctness
+    ''' Hands off each <c> iniKey2 </c> in a winapp2.ini format typed bucket to be audited for correctness
     ''' </summary>
     '''
     ''' <param name="entry">
-    ''' The <c>winapp2entry2</c> whose keys are being processed
+    ''' The <c> winapp2entry2 </c> whose keys are being processed
     ''' </param>
     '''
     ''' <param name="spec">
@@ -929,18 +929,18 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="processKey">
-    ''' The <c> function </c> that audits the keys of the <c> KeyType </c> provided <br/>
+    ''' The <c> function </c> that audits the keys of the <c> KeyType </c> provided <br />
     ''' <c> voidDelegate </c> if no further operations are needed outside of the basic formatting checks
     ''' </param>
     '''
     ''' <param name="hasF">
     ''' Tracking variable indicating that there exist ExcludeKeys for file system locations
-    ''' <br/> Optional, Default: <c> False </c>
+    ''' <br /> Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <param name="hasR">
     ''' Tracking variable indicating that there exist ExcludeKeys contain registry locations
-    ''' <br/> Optional, Default: <c> False </c>
+    ''' <br /> Optional, Default: <c> False </c>
     ''' </param>
     Private Sub processKeyList(result As EntryLintResult,
                                entry As winapp2entry2,
@@ -1008,7 +1008,7 @@ Public Module WinappDebug
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c>iniKey2</c> with which to do nothing
+    ''' An <c> iniKey2 </c> with which to do nothing
     ''' </param>
     Private Function voidDelegate(key As iniKey2) As iniKey2
 
@@ -1017,11 +1017,11 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Does some basic formatting checks that apply to all winapp2.ini format <c>iniKey2</c>s
+    ''' Does some basic formatting checks that apply to all winapp2.ini format <c> iniKey2 </c>s
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c>iniKey2</c> whose format will be audited
+    ''' An <c> iniKey2 </c> whose format will be audited
     ''' </param>
     '''
     ''' <param name="keyNumber">
@@ -1034,7 +1034,7 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="dupeKeys">
-    ''' A tracking list of <c>iniKey2</c>s with duplicate values
+    ''' A tracking list of <c> iniKey2 </c>s with duplicate values
     ''' </param>
     '''
     ''' <param name="noNumbers">
@@ -1098,12 +1098,12 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Attempts to fix any broken environment variables in a given <c>iniKey2</c> <br/> <br/>
+    ''' Attempts to fix any broken environment variables in a given <c> iniKey2 </c> <br /> <br />
     ''' This function will attempt to repair any environment variables that are missing leading or trailing % characters
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c>iniKey2</c> whose value will be audited for syntax errors
+    ''' An <c> iniKey2 </c> whose value will be audited for syntax errors
     ''' </param>
     '''
     ''' <param name="enVars">
@@ -1150,11 +1150,11 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Validates the formatting of any %EnvironmentVariables% in a given <c>iniKey2</c>
+    ''' Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey2 </c>
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' The <c>iniKey2</c> whose data will be audited for environment variable correctness
+    ''' The <c> iniKey2 </c> whose data will be audited for environment variable correctness
     ''' </param>
     Private Sub cEnVar(result As EntryLintResult, key As iniKey2)
 
@@ -1176,16 +1176,16 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Attempts to insert missing equal signs (=) into <c>iniKey2</c>s <br/> <br/> Returns <c> True </c> if the repair is
+    ''' Attempts to insert missing equal signs (=) into <c> iniKey2 </c>s <br /> <br /> Returns <c> True </c> if the repair is
     '''  successful, <c> False </c> otherwise
     '''  </summary>
     '''
     ''' <param name="result">
-    ''' The <c>EntryLintResult</c> to collect diagnostic messages into
+    ''' The <c> EntryLintResult </c> to collect diagnostic messages into
     ''' </param>
     '''
     ''' <param name="key">
-    ''' A misformatted <c>iniKey2</c> to attempt to repair
+    ''' A misformatted <c> iniKey2 </c> to attempt to repair
     ''' </param>
     '''
     ''' <param name="cmds">
@@ -1245,7 +1245,7 @@ Public Module WinappDebug
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c>iniKey2</c> whose basic syntactic validity will be assessed
+    ''' An <c> iniKey2 </c> whose basic syntactic validity will be assessed
     ''' </param>
     Private Function cValidity(result As EntryLintResult, key As iniKey2) As Boolean
 
@@ -1298,20 +1298,28 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Checks the <c> Value </c> or the <c> KeyType </c> of an <c>iniKey2</c> against a given array of expected cased values, attempts
+    ''' Checks the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey2 </c> against a given array of expected cased values, attempts
     ''' to repair casing errors if possible
     ''' </summary>
     '''
-    ''' <param name="key">
-    ''' The <c>iniKey2</c> whose casing will be audited
+    ''' <param name="result">
+    ''' The <c> EntryLintResult </c> collecting errors for the entry being linted
     ''' </param>
     '''
-    ''' <param name="casedArray">
-    ''' The array of expected cased values
+    ''' <param name="key">
+    ''' The <c> iniKey2 </c> whose casing will be audited
+    ''' </param>
+    '''
+    ''' <param name="casedLookup">
+    ''' Maps each valid value, case-insensitively, to its properly cased form
+    ''' </param>
+    '''
+    ''' <param name="casedJoined">
+    ''' The valid values joined into one string for the invalid data error
     ''' </param>
     '''
     ''' <param name="strToChk">
-    ''' A pointer to the value being audited
+    ''' The text being audited, taken from either the key's value or its type
     ''' </param>
     Private Sub chkCasing(result As EntryLintResult,
                           key As iniKey2,
@@ -1339,11 +1347,11 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Processes a FileKey format winapp2.ini <c>iniKey2</c> and checks it for errors, correcting them where possible
+    ''' Processes a FileKey format winapp2.ini <c> iniKey2 </c> and checks it for errors, correcting them where possible
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' A winapp2.ini FileKey format <c>iniKey2</c> to be checked for correctness
+    ''' A winapp2.ini FileKey format <c> iniKey2 </c> to be checked for correctness
     ''' </param>
     Public Function pFileKey(result As EntryLintResult, key As iniKey2) As iniKey2
 
@@ -1424,11 +1432,11 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Processes a DetectFile format <c>iniKey2</c> and checks it for errors, correcting where possible
+    ''' Processes a DetectFile format <c> iniKey2 </c> and checks it for errors, correcting where possible
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' A winapp2.ini DetectFile format <c>iniKey2</c> to be checked for correctness
+    ''' A winapp2.ini DetectFile format <c> iniKey2 </c> to be checked for correctness
     ''' </param>
     Private Function pDetectFile(result As EntryLintResult, key As iniKey2) As iniKey2
 
@@ -1460,7 +1468,7 @@ Public Module WinappDebug
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c>iniKey2</c> containing a registry or filesystem path to have its syntax validated
+    ''' An <c> iniKey2 </c> containing a registry or filesystem path to have its syntax validated
     ''' </param>
     '''
     ''' <param name="isRegistry">
@@ -1502,11 +1510,11 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Processes a list of ExcludeKey format <c>iniKey2</c>s and checks them for errors, correcting where possible
+    ''' Processes a list of ExcludeKey format <c> iniKey2 </c>s and checks them for errors, correcting where possible
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' A winapp2.ini ExcludeKey format <c>iniKey2</c> to be checked for correctness
+    ''' A winapp2.ini ExcludeKey format <c> iniKey2 </c> to be checked for correctness
     ''' </param>
     '''
     ''' <param name="hasF">
@@ -1562,12 +1570,12 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Assesses the formatting of ExcludeKey format <c>iniKey2</c>s to see if the flag (FILE, PATH, REG)
+    ''' Assesses the formatting of ExcludeKey format <c> iniKey2 </c>s to see if the flag (FILE, PATH, REG)
     ''' is malformatted. Attempts to repair when possible.
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' A winapp2.ini ExcludeKey format <c>iniKey2</c> to be checked for correctness
+    ''' A winapp2.ini ExcludeKey format <c> iniKey2 </c> to be checked for correctness
     ''' </param>
     Private Function checkExcludeFlags(result As EntryLintResult, key As iniKey2) As Boolean
 
@@ -1596,7 +1604,7 @@ Public Module WinappDebug
     ''' </summary>
     '''
     ''' <param name="entry">
-    ''' The <c>winapp2entry2</c> whose bucket will be sorted
+    ''' The <c> winapp2entry2 </c> whose bucket will be sorted
     ''' </param>
     '''
     ''' <param name="keyType">
@@ -1678,7 +1686,7 @@ Public Module WinappDebug
     '''
     ''' <param name="cond">
     ''' Indicates that the error condition is present
-    ''' <br/> Optional, Default: <c> True </c>
+    ''' <br /> Optional, Default: <c> True </c>
     ''' </param>
     Private Sub inputMismatchErr(result As EntryLintResult,
                                  err As String,
@@ -1691,11 +1699,11 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Prints an error whose output text contains an <c>iniKey2</c> string, optionally correcting that value with one that is provided
+    ''' Prints an error whose output text contains an <c> iniKey2 </c> string, optionally correcting that value with one that is provided
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' The <c>iniKey2</c> containing an error
+    ''' The <c> iniKey2 </c> containing an error
     ''' </param>
     '''
     ''' <param name="err">
@@ -1704,22 +1712,22 @@ Public Module WinappDebug
     '''
     ''' <param name="cond">
     ''' Indicates that the error condition(s) are present (including any <c> lintRule.shouldScans </c>)
-    ''' <br/> Optional, Default: <c> True </c>
+    ''' <br /> Optional, Default: <c> True </c>
     ''' </param>
     '''
     ''' <param name="repCond">
     ''' Indicates that the repair function should run
-    ''' <br/> Optional, Default: <c> False </c>
+    ''' <br /> Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <param name="newVal">
     ''' The corrected value with which to replace the incorrect correct value held by <paramref name="repairVal"/>
-    ''' <br/> Optional, Default: <c> "" </c>
+    ''' <br /> Optional, Default: <c> "" </c>
     ''' </param>
     '''
     ''' <param name="repairVal">
     ''' The incorrect value
-    ''' <br/> Optional, Default: <c> "" </c>
+    ''' <br /> Optional, Default: <c> "" </c>
     ''' </param>
     Private Sub fullKeyErr(result As EntryLintResult,
                            key As iniKey2,

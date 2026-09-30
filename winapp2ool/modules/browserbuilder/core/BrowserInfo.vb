@@ -34,7 +34,7 @@ Friend Structure BrowserInfo
     Public UserDataPaths As List(Of String)
 
     ''' <summary>
-    ''' The set of parent paths to the <c>UserDataPaths</c>
+    ''' The set of parent paths to the <c> UserDataPaths </c>
     ''' </summary>
     Public UserDataParentPaths As List(Of String)
 

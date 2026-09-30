@@ -19,7 +19,7 @@ Option Strict On
 
 ''' <summary>
 ''' Represents a winapp2.ini entry with typed read-only key collections,
-''' built from an <c>iniSection2</c>
+''' built from an <c> iniSection2 </c>
 ''' </summary>
 Public Class winapp2entry2
 
@@ -229,15 +229,15 @@ Public Class winapp2entry2
     End Property
 
     ''' <summary>
-    ''' All key lists in winapp2.ini declaration order, mirroring <c>KeyListList</c>
-    ''' on the legacy <c>winapp2entry</c>
+    ''' All key lists in winapp2.ini declaration order, mirroring <c> KeyListList </c>
+    ''' on the legacy <c> winapp2entry </c>
     ''' </summary>
     Public ReadOnly Property KeyLists As IReadOnlyList(Of IReadOnlyList(Of iniKey2))
 
     ''' <summary>
-    ''' Creates a <c>winapp2entry2</c> from an <c>iniSection2</c>
+    ''' Creates a <c> winapp2entry2 </c> from an <c> iniSection2 </c>
     ''' </summary>
-    ''' <param name="section">A winapp2.ini format <c>iniSection2</c></param>
+    ''' <param name="section">A winapp2.ini format <c> iniSection2 </c></param>
     Public Sub New(section As iniSection2)
 
         If section Is Nothing Then argIsNull(NameOf(section)) : Return
@@ -297,7 +297,7 @@ Public Class winapp2entry2
     End Sub
 
     ''' <summary>
-    ''' Returns the 0-based index into <c>KeyLists</c> for the given key type name, or -1 if unrecognised.
+    ''' Returns the 0-based index into <c> KeyLists </c> for the given key type name, or -1 if unrecognised.
     ''' </summary>
     ''' <param name="keyType">The key type name, e.g. "FileKey"</param>
     Public Shared Function GetBucketIndex(keyType As String) As Integer
@@ -319,9 +319,9 @@ Public Class winapp2entry2
     End Function
 
     ''' <summary>
-    ''' Removes a key from the error bucket directly, bypassing <c>KeyType</c> routing.
-    ''' Required when <c>cValidity</c> has partially repaired a key's Name before deciding
-    ''' it cannot be salvaged, leaving the key's <c>KeyType</c> in an inconsistent state.
+    ''' Removes a key from the error bucket directly, bypassing <c> KeyType </c> routing.
+    ''' Required when <c> cValidity </c> has partially repaired a key's Name before deciding
+    ''' it cannot be salvaged, leaving the key's <c> KeyType </c> in an inconsistent state.
     ''' </summary>
     ''' <param name="key">The key to remove from the error bucket</param>
     Public Sub ForceRemoveErrorKey(key As iniKey2)
@@ -329,8 +329,8 @@ Public Class winapp2entry2
     End Sub
 
     ''' <summary>
-    ''' Moves any error key whose <c>KeyType</c> is now a recognised winapp2.ini type
-    ''' into the appropriate typed bucket. Called after <c>cValidity</c> has had a chance
+    ''' Moves any error key whose <c> KeyType </c> is now a recognised winapp2.ini type
+    ''' into the appropriate typed bucket. Called after <c> cValidity </c> has had a chance
     ''' to repair broken keys (e.g. fixing a missing "=" restores a valid KeyType).
     ''' </summary>
     Public Sub ReclassifyErrorKeys()
@@ -369,7 +369,7 @@ Public Class winapp2entry2
     End Sub
 
     ''' <summary>
-    ''' Reconstructs an <c>iniSection2</c> from the typed key buckets in winapp2.ini order
+    ''' Reconstructs an <c> iniSection2 </c> from the typed key buckets in winapp2.ini order
     ''' </summary>
     Public Function ToIniSection() As iniSection2
 

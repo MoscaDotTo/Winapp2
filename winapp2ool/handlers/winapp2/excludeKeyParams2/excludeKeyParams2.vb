@@ -32,8 +32,8 @@ End Enum
 ''' <summary>
 ''' Parses and represents the structured components of an ExcludeKey value:
 ''' the exclusion type flag, the path, and the optional semicolon-delimited patterns.
-''' <br/><br/>
-''' ExcludeKey format: <c>FLAG|path[|pattern[;pattern...]]</c>
+''' <br /><br />
+''' ExcludeKey format: <c> FLAG|path[|pattern[;pattern...]] </c>
 ''' </summary>
 Public Class excludeKeyParams2
 
@@ -42,7 +42,7 @@ Public Class excludeKeyParams2
 
     ''' <summary>
     ''' The raw flag text as it appeared in the file.
-    ''' Populated only when <c>Flag = excludeKeyFlag.Unknown</c> to preserve the original text for reconstruction.
+    ''' Populated only when <c> Flag = excludeKeyFlag.Unknown </c> to preserve the original text for reconstruction.
     ''' </summary>
     Public ReadOnly Property RawFlag As String
 
@@ -62,7 +62,7 @@ Public Class excludeKeyParams2
         End Get
     End Property
 
-    ''' <summary>Returns <c>True</c> when patterns are present (second pipe existed)</summary>
+    ''' <summary>Returns <c> True </c> when patterns are present (second pipe existed)</summary>
     Public ReadOnly Property HasPatterns As Boolean
         Get
             Return _patterns.Count > 0
@@ -72,7 +72,7 @@ Public Class excludeKeyParams2
     ''' <summary>
     ''' Parses a raw ExcludeKey value string into its structured components
     ''' </summary>
-    ''' <param name="value">The raw value from an ExcludeKey, e.g. <c>FILE|%LocalAppData%\App|important.dat</c></param>
+    ''' <param name="value">The raw value from an ExcludeKey, e.g. <c> FILE|%LocalAppData%\App|important.dat </c></param>
     Public Sub New(value As String)
 
         If value Is Nothing Then argIsNull(NameOf(value)) : Return
@@ -117,7 +117,7 @@ Public Class excludeKeyParams2
 
     ''' <summary>
     ''' Reconstructs the ExcludeKey value string from the parsed components.
-    ''' Produces <c>FLAG|path[|pat1;pat2]</c>.
+    ''' Produces <c> FLAG|path[|pat1;pat2] </c>.
     ''' </summary>
     Public Function Reconstruct() As String
 

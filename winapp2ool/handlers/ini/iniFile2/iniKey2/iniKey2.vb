@@ -30,7 +30,7 @@ Public Class iniKey2
 
     ''' <summary>
     ''' The name of the key: any text on the left side of the '='.
-    ''' Setting this also updates <c>KeyType</c>.
+    ''' Setting this also updates <c> KeyType </c>.
     ''' </summary>
     Public Property Name As String
         Get
@@ -44,7 +44,7 @@ Public Class iniKey2
 
     ''' <summary>
     ''' The value of the key: any text on the right side of the '='.
-    ''' Setting this invalidates the cached <c>PipeSplit</c> and <c>BackslashSplit</c>.
+    ''' Setting this invalidates the cached <c> PipeSplit </c> and <c> BackslashSplit </c>.
     ''' </summary>
     Public Property Value As String
         Get

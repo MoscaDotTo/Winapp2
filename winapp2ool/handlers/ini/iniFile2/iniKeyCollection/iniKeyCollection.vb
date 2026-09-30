@@ -15,7 +15,7 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary>An ordered, case-insensitive-keyed collection of <c>iniKey2</c> objects</summary>
+''' <summary>An ordered, case-insensitive-keyed collection of <c> iniKey2 </c> objects</summary>
 Public Class iniKeyCollection
     Implements IEnumerable(Of iniKey2)
 
@@ -34,7 +34,7 @@ Public Class iniKeyCollection
 
     ''' <summary>
     ''' Adds a key to the collection. Duplicate names are allowed — all occurrences appear
-    ''' in enumeration order and in <c>GetByType</c> results. <c>GetKey</c> returns the
+    ''' in enumeration order and in <c> GetByType </c> results. <c> GetKey </c> returns the
     ''' first occurrence for any given name.
     ''' </summary>
     ''' <param name="key">The key to add</param>
@@ -57,7 +57,7 @@ Public Class iniKeyCollection
         Return _byName.ContainsKey(name)
     End Function
 
-    ''' <summary>Returns the key with the given name, or <c>Nothing</c> if not found</summary>
+    ''' <summary>Returns the key with the given name, or <c> Nothing </c> if not found</summary>
     ''' <param name="name">The key name to look up (case-insensitive)</param>
     Public Function GetKey(name As String) As iniKey2
         If name Is Nothing Then argIsNull(NameOf(name)) : Return Nothing
@@ -67,7 +67,7 @@ Public Class iniKeyCollection
     End Function
 
     ''' <summary>
-    ''' Returns all keys whose <c>KeyType</c> equals <paramref name="keyType"/> (case-insensitive).
+    ''' Returns all keys whose <c> KeyType </c> equals <paramref name="keyType"/> (case-insensitive).
     ''' Returns an empty read-only list if no keys of that type exist.
     ''' The returned list is the live internal bucket — do not mutate it.
     ''' </summary>
@@ -80,7 +80,7 @@ Public Class iniKeyCollection
     End Function
 
     ''' <summary>
-    ''' Removes the given key from the collection. If this key was the <c>GetKey</c>-indexed
+    ''' Removes the given key from the collection. If this key was the <c> GetKey </c>-indexed
     ''' occurrence for its name, the index is updated to the next remaining key with that name.
     ''' </summary>
     '''

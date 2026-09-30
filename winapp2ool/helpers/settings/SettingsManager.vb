@@ -24,16 +24,14 @@ Imports System.Globalization
 ''' individual module settings (Boolean and Enum), resetting the state of a module's settings to
 ''' their defaults, and gating functions behind internet access
 ''' </summary>
-''' 
-''' Docs last updated: 2025-07-22 | Code last updated: 2025-07-22
 Module SettingsManager
 
     ''' <summary>
-    ''' Prompts the user to change an <c>iniFileChooser</c>'s parameters, marks both settings and the chooser as having been changed
+    ''' Prompts the user to change an <c> iniFileChooser </c>'s parameters, marks both settings and the chooser as having been changed
     ''' </summary>
     '''
     ''' <param name="chooser">
-    ''' The <c>iniFileChooser</c> whose parameters will be changed
+    ''' The <c> iniFileChooser </c> whose parameters will be changed
     ''' </param>
     '''
     ''' <param name="settingsChangedSetting">

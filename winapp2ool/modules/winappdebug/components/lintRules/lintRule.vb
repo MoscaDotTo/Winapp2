@@ -49,8 +49,8 @@ Public Class lintRule
     End Sub
 
     ''' <summary> Creates a new rule for the linter, retains the inital given parameters for later restoration </summary>
-    ''' <param name="scan"> The default state for scans <br/> <br/> <c> True </c> for Enabled <br/> <c> False </c> for Disabled </param>
-    ''' <param name="repair"> The default state for repairs <br/> <br/> <c> True </c> for Enabled <br/> <c> False </c> for Disabled </param>
+    ''' <param name="scan"> The default state for scans <br /> <br /> <c> True </c> for Enabled <br /> <c> False </c> for Disabled </param>
+    ''' <param name="repair"> The default state for repairs <br /> <br /> <c> True </c> for Enabled <br /> <c> False </c> for Disabled </param>
     ''' <param name="name"> The name of the rule as it will appear in menus </param>
     ''' <param name="scTxt"> The description of what the rule scans for as it will appear in menus </param>
     ''' <param name="rpTxt"> The description of what the the rule repairs as it will appear in menus </param>

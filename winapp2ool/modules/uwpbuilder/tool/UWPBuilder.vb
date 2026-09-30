@@ -1238,44 +1238,6 @@ Public Module UWPBuilder
     End Function
 
     ''' <summary>
-    ''' Expands <c>%Package%</c> and <c>%PackageN%</c> variables in a key value template,
-    ''' returning one expanded string per applicable package.
-    ''' <br /><br />
-    ''' 
-    ''' Rules:
-    ''' <list type="bullet">
-    ''' 
-    ''' <item>
-    ''' <c> %PackageN% </c> (numbered): expands exactly once using the Nth package;
-    ''' any other packages are ignored
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <c> %Package% </c> (unnumbered): expands once per package, producing one
-    ''' output string per package in order
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' No package variable: returned verbatim as a single-element list
-    ''' </item>
-    ''' 
-    ''' </list>
-    ''' </summary>
-    '''
-    ''' <param name="template">
-    ''' A key value string optionally containing <c> %Package% </c> or
-    ''' <c> %PackageN% </c> variable references
-    ''' </param>
-    '''
-    ''' <param name="packages">
-    ''' The ordered list of package folder names for the current app
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' One expanded string per applicable package, or a single-element list containing
-    ''' <paramref name="template"/> verbatim if no package variable is present
-    ''' </returns>
-    ''' <summary>
     ''' Runs the phase-2 variable-expansion pass on <paramref name="template"/> and routes any
     ''' returned diagnostics onto <c> gLog </c> and <paramref name="menuOutput"/>. The caller is
     ''' responsible for phase-0 <c> %Package% </c> fan-out and phase-1 root substitution
@@ -1428,6 +1390,44 @@ Public Module UWPBuilder
 
     End Function
 
+    ''' <summary>
+    ''' Expands <c> %Package% </c> and <c> %PackageN% </c> variables in a key value template,
+    ''' returning one expanded string per applicable package.
+    ''' <br /><br />
+    ''' 
+    ''' Rules:
+    ''' <list type="bullet">
+    ''' 
+    ''' <item>
+    ''' <c> %PackageN% </c> (numbered): expands exactly once using the Nth package;
+    ''' any other packages are ignored
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' <c> %Package% </c> (unnumbered): expands once per package, producing one
+    ''' output string per package in order
+    ''' </item>
+    ''' 
+    ''' <item>
+    ''' No package variable: returned verbatim as a single-element list
+    ''' </item>
+    ''' 
+    ''' </list>
+    ''' </summary>
+    '''
+    ''' <param name="template">
+    ''' A key value string optionally containing <c> %Package% </c> or
+    ''' <c> %PackageN% </c> variable references
+    ''' </param>
+    '''
+    ''' <param name="packages">
+    ''' The ordered list of package folder names for the current app
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' One expanded string per applicable package, or a single-element list containing
+    ''' <paramref name="template"/> verbatim if no package variable is present
+    ''' </returns>
     Friend Function expandPackageKey(template As String,
                                       packages As List(Of String)) As List(Of String)
 

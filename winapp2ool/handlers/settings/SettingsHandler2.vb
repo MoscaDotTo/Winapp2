@@ -21,11 +21,11 @@ Imports System.Diagnostics.Eventing.Reader
 Imports System.Reflection
 
 ''' <summary>
-''' The sole settings backend, powered by <c>iniFile2</c>.
+''' The sole settings backend, powered by <c> iniFile2 </c>.
 ''' <br />
-''' <c>SettingsFile2</c> is the single authoritative in-memory representation of
-''' <c>winapp2ool.ini</c>. All modules are registered in <c>loadAllModuleSettings</c>
-''' and use <c>LoadModule2</c> / <c>SaveModule2</c> for persistence.
+''' <c> SettingsFile2 </c> is the single authoritative in-memory representation of
+''' <c> winapp2ool.ini </c>. All modules are registered in <c> loadAllModuleSettings </c>
+''' and use <c> LoadModule2 </c> / <c> SaveModule2 </c> for persistence.
 ''' </summary>
 Public Module SettingsHandler2
 
@@ -37,7 +37,7 @@ Public Module SettingsHandler2
     Public Property SettingsFile2 As iniFile2 = iniFile2.Empty(Environment.CurrentDirectory, "winapp2ool.ini")
 
     ''' <summary>
-    ''' Reads <c>winapp2ool.ini</c> from disk into <c> SettingsFile2 </c>.
+    ''' Reads <c> winapp2ool.ini </c> from disk into <c> SettingsFile2 </c>.
     ''' </summary>
     Public Sub LoadWinapp2oolsettings()
 
@@ -68,8 +68,8 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Loads settings for modules that have migrated to <c>SettingsHandler2</c>.
-    ''' Each migrated module's <c>LoadModule2</c> call is added here as modules migrate.
+    ''' Loads settings for modules that have migrated to <c> SettingsHandler2 </c>.
+    ''' Each migrated module's <c> LoadModule2 </c> call is added here as modules migrate.
     ''' </summary>
     Private Sub loadAllModuleSettings()
 
@@ -95,8 +95,8 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Returns the value of a setting from <c>SettingsFile2</c>,
-    ''' or <c>""</c> if the module section or key is not found.
+    ''' Returns the value of a setting from <c> SettingsFile2 </c>,
+    ''' or <c> "" </c> if the module section or key is not found.
     ''' </summary>
     Public Function GetSetting(moduleName As String,
                                settingName As String) As String
@@ -110,9 +110,9 @@ Public Module SettingsHandler2
     End Function
 
     ''' <summary>
-    ''' Sets or creates a setting in <c>SettingsFile2</c>,
+    ''' Sets or creates a setting in <c> SettingsFile2 </c>,
     ''' creating the module section and/or key if absent.
-    ''' Marks the backend dirty; the write is deferred to <c>FlushIfDirty2</c>.
+    ''' Marks the backend dirty; the write is deferred to <c> FlushIfDirty2 </c>.
     ''' </summary>
     Public Sub SetSetting(moduleName As String,
                          settingName As String,
@@ -136,11 +136,11 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Writes <c>SettingsFile2</c> to disk, subject to <paramref name="condition"/> and to the
+    ''' Writes <c> SettingsFile2 </c> to disk, subject to <paramref name="condition"/> and to the
     ''' global save gate (<c> saveSettingsToDisk </c>, and never during a command line run).
     ''' <br />
-    ''' The gate lives here rather than at the call sites because <c>FlushIfDirty2</c> is also
-    ''' invoked ungated whenever a menu or the application closes. Any <c>SetSetting</c> caller
+    ''' The gate lives here rather than at the call sites because <c> FlushIfDirty2 </c> is also
+    ''' invoked ungated whenever a menu or the application closes. Any <c> SetSetting </c> caller
     ''' which neglects to gate its own flush would otherwise have its changes persisted by one of
     ''' those, writing settings the user asked not to save.
     ''' </summary>
@@ -164,7 +164,7 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Writes <c>SettingsFile2</c> to disk only if it has been modified since the last save.
+    ''' Writes <c> SettingsFile2 </c> to disk only if it has been modified since the last save.
     ''' <br />
     ''' A flush suppressed by the save gate leaves the backend dirty, so enabling
     ''' <c> saveSettingsToDisk </c> later in the session still persists the changes made before it
@@ -182,10 +182,10 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Populates a module's public static properties from <c>SettingsFile2</c>.
+    ''' Populates a module's public static properties from <c> SettingsFile2 </c>.
     ''' <br />
-    ''' Handles <c>Boolean</c>, <c>Enum</c>, and <c>iniFileChooser</c> property types.
-    ''' Silently skips properties whose keys are absent in <c>SettingsFile2</c>.
+    ''' Handles <c> Boolean </c>, <c> Enum </c>, and <c> iniFileChooser </c> property types.
+    ''' Silently skips properties whose keys are absent in <c> SettingsFile2 </c>.
     ''' </summary>
     Public Sub LoadModule2(moduleName As String, moduleType As Type)
 
@@ -240,9 +240,9 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Writes a module's public static properties into <c>SettingsFile2</c>.
+    ''' Writes a module's public static properties into <c> SettingsFile2 </c>.
     ''' <br />
-    ''' Handles <c>Boolean</c>, <c>Enum</c>, and <c>iniFileChooser</c> property types.
+    ''' Handles <c> Boolean </c>, <c> Enum </c>, and <c> iniFileChooser </c> property types.
     ''' Logs a warning and skips properties of any other type.
     ''' </summary>
     Public Sub SaveModule2(moduleName As String, moduleType As Type)

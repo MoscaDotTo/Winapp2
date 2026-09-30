@@ -66,12 +66,12 @@ Module downloadr
     End Function
 
     ''' <summary>
-    ''' Downloads a file from the internet to the path described by an <c>iniFileChooser</c>,
+    ''' Downloads a file from the internet to the path described by an <c> iniFileChooser </c>,
     ''' optionally prompting the user to rename the download or overwrite existing files
     ''' </summary>
     '''
     ''' <param name="pathHolder">
-    ''' The <c>iniFileChooser</c> describing the save location
+    ''' The <c> iniFileChooser </c> describing the save location
     ''' </param>
     '''
     ''' <param name="link">
@@ -232,7 +232,7 @@ Module downloadr
     End Function
 
     ''' <summary>
-    ''' Attempts to create an <c>iniFile2</c> using the data provided by <paramref name="address"/>
+    ''' Attempts to create an <c> iniFile2 </c> using the data provided by <paramref name="address"/>
     ''' </summary>
     '''
     ''' <param name="address">
@@ -240,8 +240,8 @@ Module downloadr
     ''' </param>
     '''
     ''' <returns>
-    ''' An <c>iniFile2</c> created using the remote data if that data is properly formatted, <br/>
-    ''' <c>Nothing</c> otherwise
+    ''' An <c> iniFile2 </c> created using the remote data if that data is properly formatted, <br />
+    ''' <c> Nothing </c> otherwise
     ''' </returns>
     Public Function getRemoteIniFile2(address As String) As iniFile2
 

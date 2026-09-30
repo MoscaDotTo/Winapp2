@@ -43,20 +43,20 @@ Option Strict On
 ''' </item>
 ''' 
 ''' <item>
-''' <b><c>browser_section_removals.ini</c></b> - Sections to remove after generation (optional)
+''' <b><c> browser_section_removals.ini </c></b> - Sections to remove after generation (optional)
 ''' </item>
 ''' <item>
 ''' 
-''' <b><c>browser_name_removals.ini</c></b> - Keys to remove by name after generation (optional)
+''' <b><c> browser_name_removals.ini </c></b> - Keys to remove by name after generation (optional)
 ''' </item>
 ''' <item>
-''' <b><c>browser_value_removals.ini</c></b> - Keys to remove by value after generation (optional)
+''' <b><c> browser_value_removals.ini </c></b> - Keys to remove by value after generation (optional)
 ''' </item>
 ''' <item>
-''' <b><c>browser_section_replacements.ini</c></b> - Sections to replace after generation (optional)
+''' <b><c> browser_section_replacements.ini </c></b> - Sections to replace after generation (optional)
 ''' </item>
 ''' <item>
-''' <b><c>browser_key_replacements.ini</c></b> - Keys to replace by value after generation (optional)
+''' <b><c> browser_key_replacements.ini </c></b> - Keys to replace by value after generation (optional)
 ''' </item>
 ''' </list>
 '''
@@ -64,8 +64,8 @@ Option Strict On
 Public Module browserbuildersettings
 
     ''' <summary>
-    ''' The source directory containing <c>chromium.ini</c>, <c>gecko.ini</c>, and all
-    ''' optional flavor correction files. Only the <c>Dir</c> property is used; <c>Name</c> is ignored.
+    ''' The source directory containing <c> chromium.ini </c>, <c> gecko.ini </c>, and all
+    ''' optional flavor correction files. Only the <c> Dir </c> property is used; <c> Name </c> is ignored.
     ''' </summary>
     Public Property BuilderFile1 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 

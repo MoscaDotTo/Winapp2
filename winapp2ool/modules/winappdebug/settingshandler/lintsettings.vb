@@ -42,19 +42,19 @@ Public Module lintsettings
 
     ''' <summary>
     ''' Indicates that the module settings have been modified from their defaults 
-    ''' <br/> Default: <c> False </c> 
+    ''' <br /> Default: <c> False </c> 
     ''' </summary>
     Public Property LintModuleSettingsChanged As Boolean = False
 
     ''' <summary> 
     ''' Indicates that the any changes made by the linter should be saved back to disk 
-    ''' <br/> Default: <c> False </c> 
+    ''' <br /> Default: <c> False </c> 
     ''' </summary>
     Public Property SaveChanges As Boolean = False
 
     ''' <summary> 
     ''' Indicates that the linter should attempt to repair errors it finds 
-    ''' <br/> Default: <c> True </c>
+    ''' <br /> Default: <c> True </c>
     ''' </summary>
     Public Property RepairErrsFound As Boolean = True
 
@@ -66,7 +66,7 @@ Public Module lintsettings
 
     ''' <summary>
     ''' The expected value for Default keys when auditing their values
-    ''' <br/> Default: <c> False </c>
+    ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property expectedDefaultValue As Boolean = False
 
@@ -76,7 +76,7 @@ Public Module lintsettings
     ''' their own Default values (eg. FluentCleaner). This has nothing to do with 
     ''' <c> overrideDefaultVal </c>. It only stops us removing or complaining about keys that
     ''' are already there, it doesn't check their values and it doesn't require them to exist
-    ''' <br/> Default: <c> False </c>
+    ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property PreserveDefaultKeys As Boolean = False
 

@@ -27,7 +27,7 @@ Friend Class fileKeySurvivor
     ''' <summary>The parsed components of the first-seen key in this group</summary>
     Public ReadOnly Property Params As fileKeyParams2
 
-    ''' <summary>Accumulated patterns; seeded from <c>Params.Patterns</c> and appended to on each merge</summary>
+    ''' <summary>Accumulated patterns; seeded from <c> Params.Patterns </c> and appended to on each merge</summary>
     Public ReadOnly Property Patterns As List(Of String)
 
     Public Sub New(parsed As fileKeyParams2)
@@ -49,7 +49,7 @@ Module experimentalScans
     ''' </summary>
     '''
     ''' <remarks>
-    ''' Every FileKey value is parsed once through <c>fileKeyParams2</c> and matched by
+    ''' Every FileKey value is parsed once through <c> fileKeyParams2 </c> and matched by
     ''' (path, flag) in O(1). Merging several keys into the same survivor never rebuilds or
     ''' re-parses the running value. Each survivor's merged value string gets built once at
     ''' the end, when the output keys are emitted.

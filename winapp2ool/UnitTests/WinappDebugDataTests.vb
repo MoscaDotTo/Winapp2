@@ -37,7 +37,7 @@ Imports System.Reflection
 '''   Only the FIRST section in a group carries <c> Rule= </c>, <c> ScanOnly= </c>,
 '''   <c> ExpectedErrors= </c>, and <c> Flavor= </c>; those keys are ignored on subsequent members.
 ''' - All other keys must appear in winapp2.ini declaration order
-''' - Name should end in <c> *] </c> for normal entries; omit <c> *</c> to test missing-star detection
+''' - Name should end in <c> *] </c> for normal entries; omit <c> * </c> to test missing-star detection
 '''
 ''' Output section conventions:
 ''' - Name matches the input section name exactly
