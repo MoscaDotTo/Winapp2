@@ -1,0 +1,44 @@
+# Update signature check: the published winapp2ool.exe must carry a .sig that its
+# clients accept, and version.txt must name that exe's version.
+#
+# Clients from 1.8 on install winapp2ool\bin\Release\winapp2ool.exe only if
+# winapp2ool.exe.sig verifies against a key in TrustedUpdateKeys. A rebuild that
+# isn't re-signed, or an exe committed without its .sig, doesn't break anything
+# visibly: every updating client just refuses the update. This makes it a red X.
+#
+# Read-only and executes nothing from the repository beyond the checked-in script,
+# so it is safe on fork PRs.
+name: update signature
+
+on:
+  push:
+    paths:
+      - 'winapp2ool/bin/Release/winapp2ool.exe'
+      - 'winapp2ool/bin/Release/winapp2ool.exe.sig'
+      - 'winapp2ool/version.txt'
+      - 'winapp2ool/helpers/updater/UpdateSignature.vb'
+      - '.github/workflows/update-signature.yml'
+      - '.github/scripts/verify-update-signature.ps1'
+  pull_request:
+    paths:
+      - 'winapp2ool/bin/Release/winapp2ool.exe'
+      - 'winapp2ool/bin/Release/winapp2ool.exe.sig'
+      - 'winapp2ool/version.txt'
+      - 'winapp2ool/helpers/updater/UpdateSignature.vb'
+      - '.github/workflows/update-signature.yml'
+      - '.github/scripts/verify-update-signature.ps1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    # Windows because FileVersionInfo reads the exe's version resource
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify the published exe's signature and version
+        shell: pwsh
+        run: ./.github/scripts/verify-update-signature.ps1 -RepoRoot $env:GITHUB_WORKSPACE
