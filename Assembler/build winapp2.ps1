@@ -3,7 +3,7 @@
     Builds winapp2.ini and its various flavors using winapp2ool.
 
 .DESCRIPTION
-    This script requires winapp2ool v1.7 or newer
+    This script requires winapp2ool v1.8 or newer, and refuses to run an older one:
     Creates backups, regenerates the committed build artifacts under Entries\
     (base entries from EntryBuilder sources, browser entries into Entries\Browsers,
     UWP entries into Entries\UWP), merges them with a single strict-mode Combine
@@ -34,7 +34,7 @@
 
 .NOTES
     Author: Hazel Ward
-    Version 20260730
+    Version 20260930
     Copyright 2026
 #>
 
@@ -47,6 +47,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $script:Winapp2oolPath = $null
+$script:MinimumToolVersion = [version]'1.8'
 
 function Write-Step {
     param([string]$Message)
@@ -57,6 +58,25 @@ function Write-Step {
 function Write-ErrorMsg {
     param([string]$Message)
     Write-Host "ERROR: $Message" -ForegroundColor Red
+}
+
+function Test-Winapp2oolVersion {
+    # Older builds exit 0 on a failed read or write, which every stage here trusts as success
+    param([string]$Path)
+
+    $raw = (Get-Item -LiteralPath $Path).VersionInfo.FileVersion
+    $version = $null
+    if (-not [version]::TryParse("$raw", [ref]$version)) {
+        Write-ErrorMsg "Could not read the version of $Path"
+        return $false
+    }
+
+    if ($version -lt $script:MinimumToolVersion) {
+        Write-ErrorMsg "$Path is winapp2ool v$version, but this script requires v$($script:MinimumToolVersion) or newer"
+        return $false
+    }
+
+    return $true
 }
 
 function Find-Winapp2ool {
@@ -88,7 +108,7 @@ function Find-Winapp2ool {
 
     # Prompt user for path
     Write-Host "`nwinapp2ool.exe not found in current directory or PATH" -ForegroundColor Yellow
-    Write-Host "This script requires winapp2ool v1.7 or newer`n" -ForegroundColor Yellow
+    Write-Host "This script requires winapp2ool v$($script:MinimumToolVersion) or newer`n" -ForegroundColor Yellow
 
     do {
         $userPath = Read-Host "Please enter the full path to winapp2ool.exe (or 'q' to quit)"
@@ -558,6 +578,7 @@ try {
         Write-ErrorMsg "Cannot continue without winapp2ool.exe"
         exit 1
     }
+    if (-not (Test-Winapp2oolVersion $script:Winapp2oolPath)) { exit 1 }
 
     # Generate-and-stop. Deliberately does NOT compare against Entries\: the caller is
     # diffing two generated trees against each other, so the committed artifacts are
