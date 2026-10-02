@@ -860,8 +860,8 @@ Public Module Trim
         Using gLogScope("Expanding Wildcard: " & dir)
 
             ' This will handle wildcards anywhere in a path even though CCleaner only supports them at the end for DetectFiles
-            Dim possibleDirs As New strList
-            Dim currentPaths As New strList
+            Dim possibleDirs As New List(Of String)
+            Dim currentPaths As New List(Of String)
 
             ' Split the given string into sections by directory
             Dim splitDir = dir.Split(CChar("\"))
@@ -871,7 +871,7 @@ Public Module Trim
                 ' This probably wont work if a string for some reason starts with a *
                 If pathPart.Contains("*") Then
 
-                    For Each currentPath In currentPaths.Items
+                    For Each currentPath In currentPaths
 
                         If currentPath.Length = 0 Then gLog(NameOf(currentPath) & " is empty, aborting wildcard expansion") : Return False
 
@@ -884,7 +884,7 @@ Public Module Trim
 
                                 ' If there are any possibilities, add them to our possibility list
                                 Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
-                                possibleDirs.add(possibilities, possibilities.Any)
+                                possibleDirs.AddRange(possibilities)
 
                             Catch ex As ArgumentException
 
@@ -911,37 +911,39 @@ Public Module Trim
                     If possibleDirs.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths", buffr:=True) : Return False
 
                     ' Otherwise, clear the current paths and repopulate them with the possible paths
-                    currentPaths.clear()
-                    currentPaths.add(possibleDirs)
-                    possibleDirs.clear()
+                    currentPaths.Clear()
+                    currentPaths.AddRange(possibleDirs)
+                    possibleDirs.Clear()
 
                 Else
 
                     If currentPaths.Count = 0 Then
 
-                        currentPaths.add($"{pathPart}")
+                        currentPaths.Add($"{pathPart}")
                         Continue For
 
                     End If
 
-                    Dim newCurPaths As New strList
+                    Dim newCurPaths As New List(Of String)
 
-                    For Each path In currentPaths.Items
+                    For Each path In currentPaths
 
                         If Not path.EndsWith("\", StringComparison.InvariantCulture) AndAlso Not path.Length = 0 Then path += "\"
-                        newCurPaths.add($"{path}{pathPart}\", Directory.Exists($"{path}{pathPart}\"))
+                        If Directory.Exists($"{path}{pathPart}\") Then
+                            newCurPaths.Add($"{path}{pathPart}\")
+                        End If
 
                     Next
 
                     currentPaths = newCurPaths
-                    If currentPaths.Items.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths") : Return False
+                    If currentPaths.Count = 0 Then gLog("Wildcard parameterization did not return any valid paths") : Return False
 
                 End If
 
             Next
 
             ' If any file/path exists, return true
-            For Each currDir In currentPaths.Items
+            For Each currDir In currentPaths
 
                 If Directory.Exists(currDir) OrElse File.Exists(currDir) Then gLog($"Wildcard parameterization returned a valid path: {currDir}", buffr:=True) : Return True
 

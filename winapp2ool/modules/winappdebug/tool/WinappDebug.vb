@@ -685,9 +685,9 @@ Public Module WinappDebug
 
             If category.Count < 2 Then Continue For
 
-            Dim unsortedNames As New strList
+            Dim unsortedNames As New List(Of String)
             For i = 0 To category.Count - 1
-                unsortedNames.add(category(i).Name)
+                unsortedNames.Add(category(i).Name)
             Next
 
             Dim sortedNames = replaceAndSort(unsortedNames, "-", "  ")
@@ -695,7 +695,7 @@ Public Module WinappDebug
             If lintAlpha.ShouldScan Then
                 Dim alreadySorted = True
                 For i = 0 To unsortedNames.Count - 1
-                    If Not unsortedNames.Items(i).Equals(sortedNames.Items(i), StringComparison.Ordinal) Then
+                    If Not unsortedNames(i).Equals(sortedNames(i), StringComparison.Ordinal) Then
                         alreadySorted = False
                         Exit For
                     End If
@@ -799,15 +799,15 @@ Public Module WinappDebug
     ''' <param name="sortedList">
     ''' The sorted state of <paramref name="someList"/>
     ''' </param>
-    Private Function findOutOfPlace(someList As strList,
-                                    sortedList As strList) As List(Of AlphaMisplacement)
+    Private Function findOutOfPlace(someList As List(Of String),
+                                    sortedList As List(Of String)) As List(Of AlphaMisplacement)
 
         Dim findings As New List(Of AlphaMisplacement)
         If someList.Count < 2 Then Return findings
 
         Dim sortedIndices As New Dictionary(Of String, Integer)
         For i = 0 To sortedList.Count - 1
-            sortedIndices(sortedList.Items(i)) = i
+            sortedIndices(sortedList(i)) = i
         Next
 
         ' Line up each item's position in the sorted list, then work out which of the
@@ -815,7 +815,7 @@ Public Module WinappDebug
         ' set of things actually out of place. Everything else is just getting shoved
         ' around by those, so there's no point reporting it.
         Dim sortedPosSequence As New List(Of Integer)
-        For Each item In someList.Items
+        For Each item In someList
             sortedPosSequence.Add(sortedIndices(item))
         Next
 
@@ -825,8 +825,8 @@ Public Module WinappDebug
 
             If lisIndices.Contains(i) Then Continue For
 
-            Dim item = someList.Items(i)
-            Dim recInd = someList.indexOf(item)
+            Dim item = someList(i)
+            Dim recInd = someList.IndexOf(item)
             Dim sortInd = sortedIndices(item)
 
             If recInd = sortInd Then Continue For
@@ -1633,10 +1633,10 @@ Public Module WinappDebug
 
         If bucket.Count <= 1 OrElse Not lintAlpha.ShouldScan Then Return
 
-        Dim keyValues As New strList
+        Dim keyValues As New List(Of String)
 
         For i = 0 To bucket.Count - 1
-            keyValues.add(bucket(i).Value)
+            keyValues.Add(bucket(i).Value)
         Next
 
         Dim sortedKeyValues = replaceAndSort(keyValues, "|", " \ \")
@@ -1645,7 +1645,7 @@ Public Module WinappDebug
         If Not hadDuplicatesRemoved Then
             Dim alreadySorted = True
             For i = 0 To keyValues.Count - 1
-                If Not keyValues.Items(i).Equals(sortedKeyValues.Items(i), StringComparison.Ordinal) Then
+                If Not keyValues(i).Equals(sortedKeyValues(i), StringComparison.Ordinal) Then
                     alreadySorted = False
                     Exit For
                 End If
@@ -1669,7 +1669,7 @@ Public Module WinappDebug
                (lintAlpha.fixFormat OrElse lintWrongNums.fixFormat OrElse lintExtraNums.fixFormat) Then Return
 
         For i = 0 To bucket.Count - 1
-            bucket(i).Value = sortedKeyValues.Items(i)
+            bucket(i).Value = sortedKeyValues(i)
             bucket(i).Name = keyType & CStr(i + 1)
         Next
 

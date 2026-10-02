@@ -165,7 +165,6 @@
     <Compile Include="handlers\cmdline\commandLineHandler.vb" />
     <Compile Include="handlers\downloads\downloadr.vb" />
     <Compile Include="handlers\exceptions\exceptionHandler.vb" />
-    <Compile Include="handlers\ini\iniFile\components\strList\strList.vb" />
     <Compile Include="handlers\ini\iniFile2\iniComment2\iniComment2.vb" />
     <Compile Include="handlers\ini\iniFile2\iniKey2\iniKey2.vb" />
     <Compile Include="handlers\ini\iniFile2\iniKeyCollection\iniKeyCollection.vb" />

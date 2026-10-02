@@ -44,14 +44,14 @@ Public Module winapp2handler
     ''' <param name="textToBeReplaced">The text to replace when building sort keys</param>
     '''
     ''' <param name="replacementText">The text that replaces <paramref name="textToBeReplaced"/> in the sort keys</param>
-    Public Function replaceAndSort(ListToBeSorted As strList, textToBeReplaced As String, replacementText As String) As strList
+    Public Function replaceAndSort(ListToBeSorted As List(Of String), textToBeReplaced As String, replacementText As String) As List(Of String)
         If ListToBeSorted Is Nothing Then argIsNull(NameOf(ListToBeSorted)) : Return Nothing
         ' Sort keys are built alongside the originals rather than over them. Duplicate values are legal in both of the
         ' things sorted here (entry names within a category, key values within an entry), so two items may well produce
         ' the same sort key. Keeping each key beside its own index is what stops a collision from losing an original
-        Dim sortKeys As New strList
-        For Each item In ListToBeSorted.Items
-            sortKeys.add(If(item.Contains(textToBeReplaced), item.Replace(textToBeReplaced, replacementText), item))
+        Dim sortKeys As New List(Of String)
+        For Each item In ListToBeSorted
+            sortKeys.Add(If(item.Contains(textToBeReplaced), item.Replace(textToBeReplaced, replacementText), item))
         Next
         ' Pad numbers if necessary
         padNumbers(sortKeys)
@@ -62,20 +62,20 @@ Public Module winapp2handler
             order.Add(i)
         Next
         order.Sort(Function(a, b)
-                       Dim cmp = sortKeys.Items(a).CompareTo(sortKeys.Items(b))
+                       Dim cmp = sortKeys(a).CompareTo(sortKeys(b))
                        If cmp <> 0 Then Return cmp
                        Return a.CompareTo(b)
                    End Function)
-        Dim sortedEntryList As New strList
+        Dim sortedEntryList As New List(Of String)
         For Each idx In order
-            sortedEntryList.add(ListToBeSorted.Items(idx))
+            sortedEntryList.Add(ListToBeSorted(idx))
         Next
         Return sortedEntryList
     End Function
 
-    Private Function findLongestNumLength(ByRef lst As strList) As Integer
+    Private Function findLongestNumLength(lst As List(Of String)) As Integer
         Dim out = 0
-        For Each item In lst.Items
+        For Each item In lst
             For Each mtch As Match In digitRun.Matches(item)
                 If mtch.Length > out Then out = mtch.Length
             Next
@@ -87,7 +87,7 @@ Public Module winapp2handler
     ''' all shorter integers with zeros such that all the integers in all Strings are the same length.
     ''' This is to maintain numerical precedence in string sorting, ie. larger numbers come alphabetically "after" smaller numbers. </summary>
     ''' <param name="sortKeys"> The list of sort keys to be padded in place </param>
-    Private Sub padNumbers(sortKeys As strList)
+    Private Sub padNumbers(sortKeys As List(Of String))
         Dim longestNumLen = findLongestNumLength(sortKeys)
         If longestNumLen < 2 Then Exit Sub
         Dim padTo = longestNumLen
@@ -104,7 +104,7 @@ Public Module winapp2handler
         ' Assigned by index rather than by value lookup: duplicate sort keys are expected here, and a
         ' lookup would repeatedly find the first of them instead of the one being padded
         For i = 0 To sortKeys.Count - 1
-            sortKeys.Items(i) = numberAndDecimals.Replace(sortKeys.Items(i), evaluator)
+            sortKeys(i) = numberAndDecimals.Replace(sortKeys(i), evaluator)
         Next
     End Sub
 

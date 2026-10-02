@@ -32,7 +32,7 @@ Public Module logger
     ''' <summary>
     ''' The global Winapp2ool log, containing everything logged during the current session
     ''' </summary>
-    Public Property GlobalLog As New strList
+    Public Property GlobalLog As New List(Of String)
 
     ''' <summary>
     ''' When <c> True </c>, the global log is written to disk as the application exits, even
@@ -126,16 +126,16 @@ Public Module logger
 
         SyncLock _logLock
 
-            If leadr Then GlobalLog.add("")
+            If leadr Then GlobalLog.Add("")
 
             If logstr IsNot Nothing Then
 
                 Dim pad = New String(" "c, Math.Max(_nestCount * 2, 0))
-                GlobalLog.add(pad & logstr)
+                GlobalLog.Add(pad & logstr)
 
             End If
 
-            If buffr Then GlobalLog.add("")
+            If buffr Then GlobalLog.Add("")
 
         End SyncLock
 
@@ -258,7 +258,7 @@ Public Module logger
         SyncLock _logLock
 
             For Each line In lines
-                GlobalLog.add(pad & line)
+                GlobalLog.Add(pad & line)
             Next
 
         End SyncLock
@@ -367,7 +367,7 @@ Public Module logger
 
         Dim sb As New StringBuilder()
 
-        GlobalLog.Items.ForEach(Sub(line) sb.AppendLine(line))
+        GlobalLog.ForEach(Sub(line) sb.AppendLine(line))
 
         Return sb.ToString()
 
@@ -414,10 +414,10 @@ Public Module logger
         Dim startInd = -1
         Dim endInd = -1
 
-        For i = GlobalLog.Items.Count - 1 To 0 Step -1
+        For i = GlobalLog.Count - 1 To 0 Step -1
 
 
-            If GlobalLog.Items(i) Is Nothing OrElse Not GlobalLog.Items(i).Contains(startingPhrase) Then Continue For
+            If GlobalLog(i) Is Nothing OrElse Not GlobalLog(i).Contains(startingPhrase) Then Continue For
 
             startInd = i
             Exit For
@@ -426,9 +426,9 @@ Public Module logger
 
         If startInd = -1 Then Return ""
 
-        For i = startInd To GlobalLog.Items.Count - 1
+        For i = startInd To GlobalLog.Count - 1
 
-            If Not GlobalLog.Items(i).EndsWith(endingPhrase, StringComparison.InvariantCultureIgnoreCase) Then Continue For
+            If Not GlobalLog(i).EndsWith(endingPhrase, StringComparison.InvariantCultureIgnoreCase) Then Continue For
 
             endInd = i
             Exit For
@@ -439,7 +439,7 @@ Public Module logger
 
         Dim toTrim = 0
 
-        For Each c In GlobalLog.Items(startInd)
+        For Each c In GlobalLog(startInd)
 
             If Not c = CChar(" ") Then Exit For
             toTrim += 1
@@ -449,7 +449,7 @@ Public Module logger
         Dim sb As New StringBuilder()
         For i = startInd To endInd
 
-            Dim line = GlobalLog.Items(i)
+            Dim line = GlobalLog(i)
 
 
             Dim leadingSpaces = 0

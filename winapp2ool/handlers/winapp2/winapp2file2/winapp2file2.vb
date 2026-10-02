@@ -251,8 +251,8 @@ Public Class winapp2file2
 
             If cat.Count < 2 Then Continue For
 
-            Dim names As New strList
-            For Each entry In cat : names.add(entry.Name) : Next
+            Dim names As New List(Of String)
+            For Each entry In cat : names.Add(entry.Name) : Next
 
             Dim sortedNames = replaceAndSort(names, "-", "  ")
 
@@ -265,7 +265,7 @@ Public Class winapp2file2
             Next
 
             cat.Clear()
-            For Each entryName In sortedNames.Items : cat.Add(nameToEntries(entryName).Dequeue()) : Next
+            For Each entryName In sortedNames : cat.Add(nameToEntries(entryName).Dequeue()) : Next
 
         Next
 
