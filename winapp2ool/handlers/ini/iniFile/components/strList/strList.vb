@@ -32,7 +32,7 @@ Public Class strList
         Return If(Items Is Nothing, 0, Items.Count)
     End Function
 
-    ''' <summary>Returns the index of the given String in the list if it exists. Else -1</summary>
+    ''' <summary>Returns the index of <paramref name="item"/> in the list, or -1 if it isn't there</summary>
     ''' <param name="item">A String to search for in the list</param>
     Public Function indexOf(item As String) As Integer
         Return Items.IndexOf(item)
@@ -40,14 +40,20 @@ Public Class strList
 
     ''' <summary>Conditionally adds an item to the list </summary>
     ''' <param name="item">A string value to add to the list</param>
-    ''' <param name="cond">The optional condition under which the value should be added (default: true)</param>
+    ''' <param name="cond">
+    ''' Indicates whether to add the item <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
     Public Sub add(item As String, Optional cond As Boolean = True)
         If cond Then Items.Add(item)
     End Sub
 
-    ''' <summary>Conditionally adds an array of items to the strlist</summary>>
+    ''' <summary>Conditionally adds an array of items to the strlist</summary>
     ''' <param name="items">An array of items to be added</param>
-    ''' <param name="cond">The optional condition under which the items should be added (default: true)</param>
+    ''' <param name="cond">
+    ''' Indicates whether to add the items <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
     Public Sub add(items As String(), Optional cond As Boolean = True)
         If items Is Nothing Then argIsNull(NameOf(items)) : Return
         For Each item In items
@@ -57,7 +63,10 @@ Public Class strList
 
     ''' <summary>Conditionally adds the contents of another strlist to the strlist</summary>
     ''' <param name="items">A strlist of items to be added</param>
-    ''' <param name="cond">The optional condition under which the items should be added (default: true)</param>
+    ''' <param name="cond">
+    ''' Indicates whether to add the items <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
     Public Sub add(items As strList, Optional cond As Boolean = True)
         If items Is Nothing Then argIsNull(NameOf(items)) : Return
         For Each item In items.Items
@@ -70,13 +79,20 @@ Public Class strList
         Items.Clear()
     End Sub
 
-    ''' <summary>Returns true if the list contains a given value. Case sensitive by default</summary>
+    ''' <summary>Returns whether the list contains <paramref name="givenValue"/></summary>
     ''' <param name="givenValue">A value to search the list for</param>
-    ''' <param name="ignoreCase">The optional condition specifying whether string casing should be ignored</param>
+    '''
+    ''' <param name="ignoreCase">
+    ''' Indicates whether to ignore case <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Function contains(givenValue As String, Optional ignoreCase As Boolean = False) As Boolean
         Return If(ignoreCase, Items.Contains(givenValue, StringComparer.InvariantCultureIgnoreCase), Items.Contains(givenValue, StringComparer.InvariantCulture))
     End Function
 
+    ''' <summary>Returns whether any of <paramref name="strLists"/> contains <paramref name="phrase"/> (case-sensitive)</summary>
+    ''' <param name="strLists">The lists to search</param>
+    ''' <param name="phrase">The value to search for</param>
     Public Shared Function IsInAny(strLists As strList(), phrase As String) As Boolean
         For i = 0 To strLists.Length - 1
             If strLists(i).contains(phrase) Then Return True
@@ -85,10 +101,16 @@ Public Class strList
     End Function
 
     ''' <summary>
-    ''' Checks whether the current value appears in the given list of strings (case insensitive). Returns true if there is a duplicate,
-    ''' otherwise, adds the current value to the list and returns false.
+    ''' Checks <paramref name="currentValue"/> against the list, ignoring case, and adds it
+    ''' if it isn't there yet
     ''' </summary>
+    '''
     ''' <param name="currentValue">The current value to be audited</param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> if the value was already in the list or is empty,
+    ''' <c> False </c> if we just added it
+    ''' </returns>
     Public Function chkDupes(currentValue As String) As Boolean
         If currentValue Is Nothing Then argIsNull(NameOf(currentValue)) : Return False
         If currentValue.Length = 0 Then Return True
@@ -99,7 +121,10 @@ Public Class strList
         Return False
     End Function
 
-    ''' <summary>Construct a list of neighbors for strings in a list</summary>
+    ''' <summary>
+    ''' Returns one pair per item holding the items before and after it, with <c> "first" </c>
+    ''' and <c> "last" </c> standing in at the ends. Throws when the list has fewer than two items.
+    ''' </summary>
     Public Function getNeighborList() As List(Of KeyValuePair(Of String, String))
         Dim neighborList As New List(Of KeyValuePair(Of String, String)) From {New KeyValuePair(Of String, String)("first", Items(1))}
         For i = 1 To Items.Count - 2
@@ -109,7 +134,10 @@ Public Class strList
         Return neighborList
     End Function
 
-    ''' <summary>Replaces an item in a list of strings at the index of another given item</summary>
+    ''' <summary>
+    ''' Replaces an item in a list of strings at the index of another given item.
+    ''' Throws if <paramref name="indexOfText"/> isn't in the list.
+    ''' </summary>
     ''' <param name="indexOfText">The text to be replaced</param>
     ''' <param name="newText">The replacement text</param>
     Public Sub replaceStrAtIndexOf(indexOfText As String, newText As String)

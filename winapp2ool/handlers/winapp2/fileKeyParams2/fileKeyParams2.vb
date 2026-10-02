@@ -19,13 +19,13 @@ Option Strict On
 
 ''' <summary>The optional deletion behavior flag on a FileKey</summary>
 Public Enum fileKeyFlag
-    ''' <summary>No flag, delete only matching files, non-recursively</summary>
+    ''' <summary>No flag: delete only matching files, non-recursively</summary>
     None = 0
-    ''' <summary>RECURSE,  delete matching files in subdirectories too</summary>
+    ''' <summary>RECURSE: delete matching files in subdirectories too</summary>
     Recurse = 1
-    ''' <summary>REMOVESELF — delete matching files and the containing folder; implies RECURSE</summary>
+    ''' <summary>REMOVESELF: delete matching files and the containing folder. Implies RECURSE</summary>
     RemoveSelf = 2
-    ''' <summary>Unknown, flag value not recognized; stored verbatim in <c> RawFlag </c> for round-trip fidelity</summary>
+    ''' <summary>A flag we don't recognize. We keep its text in <c> RawFlag </c> so the key round-trips</summary>
     Unknown = 3
 End Enum
 
@@ -37,24 +37,27 @@ End Enum
 ''' </summary>
 Public Class fileKeyParams2
 
-    ''' <summary>The filesystem path — everything before the first pipe</summary>
+    ''' <summary>The filesystem path: everything before the first pipe, or the whole value if there's no pipe</summary>
     Public ReadOnly Property Path As String
 
     Private ReadOnly _patterns As New List(Of String)
 
-    ''' <summary>The file patterns — everything between the first and optional second pipe, split on semicolons</summary>
+    ''' <summary>
+    ''' The file patterns: everything between the first and optional second pipe, split on
+    ''' semicolons. Empty when the value has no pipe.
+    ''' </summary>
     Public ReadOnly Property Patterns As IReadOnlyList(Of String)
         Get
             Return _patterns
         End Get
     End Property
 
-    ''' <summary>The deletion behavior flag — <c> Unknown </c> when present but not recognized</summary>
+    ''' <summary>The deletion behavior flag: <c> None </c> when absent, <c> Unknown </c> when present but not recognized</summary>
     Public ReadOnly Property Flag As fileKeyFlag
 
     ''' <summary>
-    ''' The raw flag text as it appeared in the file.
-    ''' Populated only when <c> Flag = fileKeyFlag.Unknown </c>; otherwise empty.
+    ''' The raw flag text as it appeared in the file, when <c> Flag = fileKeyFlag.Unknown </c>.
+    ''' Empty for a recognized flag, and <c> Nothing </c> when there's no flag at all.
     ''' </summary>
     Public ReadOnly Property RawFlag As String
 
@@ -100,10 +103,7 @@ Public Class fileKeyParams2
 
     End Sub
 
-    ''' <summary>
-    ''' Reconstructs the FileKey value string from the parsed components.
-    ''' Produces <c> path|pat1;pat2[|FLAG] </c>.
-    ''' </summary>
+    ''' <summary>Returns the FileKey value rebuilt from the parsed components: <c> path|pat1;pat2[|FLAG] </c></summary>
     Public Function Reconstruct() As String
 
         Return Reconstruct(_patterns)
@@ -111,10 +111,9 @@ Public Class fileKeyParams2
     End Function
 
     ''' <summary>
-    ''' Reconstructs the FileKey value string using <paramref name="patternsOverride"/> in place of
-    ''' the parsed patterns, retaining this object's <c> Path </c> and flag. Produces <c> path|pat1;pat2[|FLAG] </c>.
-    ''' Used by the linter to write back a de-duplicated and/or alphabetized pattern list without
-    ''' mutating the (immutable) parsed components.
+    ''' Returns the FileKey value rebuilt with <paramref name="patternsOverride"/> in place of the
+    ''' parsed patterns, keeping this object's <c> Path </c> and flag. When the override is empty we
+    ''' write no pattern section, so a flag lands right after the path.
     ''' </summary>
     '''
     ''' <param name="patternsOverride">
@@ -141,7 +140,7 @@ Public Class fileKeyParams2
 
     End Function
 
-    ''' <summary>Whether any pattern appears more than once (case-insensitive).</summary>
+    ''' <summary>Indicates whether any pattern appears more than once (case-insensitive)</summary>
     Public ReadOnly Property HasDuplicatePatterns As Boolean
         Get
             Return _patterns.Count <>
@@ -149,7 +148,7 @@ Public Class fileKeyParams2
         End Get
     End Property
 
-    ''' <summary>Whether any pattern is empty or whitespace-only.</summary>
+    ''' <summary>Indicates whether any pattern is empty or whitespace-only</summary>
     Public ReadOnly Property HasEmptyPatterns As Boolean
         Get
             Return _patterns.Any(Function(p) String.IsNullOrWhiteSpace(p))

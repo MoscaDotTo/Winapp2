@@ -18,28 +18,32 @@ Option Strict On
 Imports System.Text.RegularExpressions
 
 ''' <summary>
-''' Provides an object model and some helpful functions for working with winapp2.ini format .ini files
+''' Sorts strings the way winapp2.ini orders its entries and keys, with embedded numbers
+''' compared by value rather than digit by digit
 ''' </summary>
 Public Module winapp2handler
 
     ''' <summary>
     ''' Matches a run of digits, optionally followed by ".digits" segments
-    ''' (e.g. "12", "1.2.3"). Compiled once and shared across all callers.
+    ''' (e.g. "12", "1.2.3")
     ''' </summary>
     Private ReadOnly numberAndDecimals As New Regex("[\d]+(\.?[\d]+|\b)*",
                                                     RegexOptions.Compiled Or RegexOptions.CultureInvariant)
 
-    ''' <summary>
-    ''' Matches a run of digits. Used by <c> findLongestNumLength </c>.
-    ''' </summary>
     Private ReadOnly digitRun As New Regex("[\d]+",
                                            RegexOptions.Compiled Or RegexOptions.CultureInvariant)
 
-    ''' <summary> Sorts a list of <c> Strings </c> against mutated sort keys built from the data, without modifying the
-    ''' data itself. Returns the original strings in their sorted order. </summary>
-    ''' <param name="ListToBeSorted"> A <c> list (of String)s </c> to be sorted. Left unmodified by this function </param>
-    ''' <param name="textToBeReplaced"> The <c> String </c> data that will be replaced when building sort keys </param>
-    ''' <param name="replacementText">The data with which <c> <paramref name="textToBeReplaced"/> </c> will be replaced </param>
+    ''' <summary>
+    ''' Returns a sorted copy of <paramref name="ListToBeSorted"/>. We sort on keys built by
+    ''' replacing <paramref name="textToBeReplaced"/> and zero-padding numbers, so the originals
+    ''' come back unchanged. Keys compare using the current culture.
+    ''' </summary>
+    '''
+    ''' <param name="ListToBeSorted">The strings to sort. We don't modify it</param>
+    '''
+    ''' <param name="textToBeReplaced">The text to replace when building sort keys</param>
+    '''
+    ''' <param name="replacementText">The text that replaces <paramref name="textToBeReplaced"/> in the sort keys</param>
     Public Function replaceAndSort(ListToBeSorted As strList, textToBeReplaced As String, replacementText As String) As strList
         If ListToBeSorted Is Nothing Then argIsNull(NameOf(ListToBeSorted)) : Return Nothing
         ' Sort keys are built alongside the originals rather than over them. Duplicate values are legal in both of the
@@ -69,8 +73,6 @@ Public Module winapp2handler
         Return sortedEntryList
     End Function
 
-    ''' <summary> Searches the <c> <paramref name="lst"/> </c> for integers and returns the length of the longest integer found </summary>
-    ''' <param name="lst"> A list of strings to be searched </param>
     Private Function findLongestNumLength(ByRef lst As strList) As Integer
         Dim out = 0
         For Each item In lst.Items

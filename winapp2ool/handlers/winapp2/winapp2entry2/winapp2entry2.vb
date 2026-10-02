@@ -113,8 +113,8 @@ Public Class winapp2entry2
     End Property
 
     ''' <summary>
-    ''' Replaces the FileKey collection with <paramref name="newKeys"/>, renumbered in order.
-    ''' Used by optimization repairs that merge keys together.
+    ''' Replaces the FileKey bucket with <paramref name="newKeys"/> as given. We don't renumber or
+    ''' sort them; <see cref="RenumberKeys"/> does that.
     ''' </summary>
     '''
     ''' <param name="newKeys">
@@ -146,10 +146,7 @@ Public Class winapp2entry2
         End Get
     End Property
 
-    ''' <summary>
-    ''' Whether this entry has any detection key (DetectOS, Detect, DetectFile, or SpecialDetect).
-    ''' Entries with no detection keys are always retained by Trim.
-    ''' </summary>
+    ''' <summary>Indicates whether this entry has any detection key (DetectOS, Detect, DetectFile, or SpecialDetect)</summary>
     Public ReadOnly Property HasDetectionKey As Boolean
         Get
             Return _detectOS.Count > 0 OrElse _detects.Count > 0 OrElse
@@ -157,11 +154,7 @@ Public Class winapp2entry2
         End Get
     End Property
 
-    ''' <summary>
-    ''' Whether DetectOS is the only detection key type present.
-    ''' When True and DetectOS is satisfied, the entry is retained without evaluating
-    ''' Detect or DetectFile.
-    ''' </summary>
+    ''' <summary>Indicates whether DetectOS is the only detection key type present</summary>
     Public ReadOnly Property HasOnlyDetectOS As Boolean
         Get
             Return _detectOS.Count > 0 AndAlso
@@ -169,7 +162,7 @@ Public Class winapp2entry2
         End Get
     End Property
 
-    ''' <summary>Whether the entry name ends with the required " *" suffix.</summary>
+    ''' <summary>Indicates whether the entry name ends with the required " *" suffix</summary>
     Public ReadOnly Property HasValidNameSuffix As Boolean
         Get
             Return Name.EndsWith(" *", StringComparison.InvariantCulture)
@@ -177,8 +170,9 @@ Public Class winapp2entry2
     End Property
 
     ''' <summary>
-    ''' Whether the entry has exactly one categorization key — either a LangSecRef or a Section,
-    ''' but not both and not neither.
+    ''' Indicates whether the entry has one kind of categorization key, LangSecRef or Section,
+    ''' but not both and not neither. Several keys of the same kind still pass here;
+    ''' <see cref="SingletonViolations"/> reports those.
     ''' </summary>
     Public ReadOnly Property HasValidCategorization As Boolean
         Get
@@ -186,7 +180,7 @@ Public Class winapp2entry2
         End Get
     End Property
 
-    ''' <summary>Whether the entry has at least one FileKey or RegKey.</summary>
+    ''' <summary>Indicates whether the entry has at least one FileKey or RegKey</summary>
     Public ReadOnly Property HasDeletionKey As Boolean
         Get
             Return _fileKeys.Count > 0 OrElse _regKeys.Count > 0
@@ -194,7 +188,7 @@ Public Class winapp2entry2
     End Property
 
     ''' <summary>
-    ''' All extra keys in singleton buckets — every key after index 0 in DetectOS,
+    ''' All extra keys in singleton buckets: every key after index 0 in DetectOS,
     ''' LangSecRef, Section, SpecialDetect, Default, and Warning.
     ''' An empty list means no singleton violations exist.
     ''' </summary>
@@ -209,7 +203,7 @@ Public Class winapp2entry2
     End Property
 
     ''' <summary>
-    ''' Whether ExcludeKeys are consistent with the deletion keys present.
+    ''' Indicates whether ExcludeKeys are consistent with the deletion keys present.
     ''' False when FILE or PATH ExcludeKeys exist without FileKeys,
     ''' or when REG ExcludeKeys exist without RegKeys.
     ''' </summary>
@@ -229,14 +223,17 @@ Public Class winapp2entry2
     End Property
 
     ''' <summary>
-    ''' All key lists in winapp2.ini declaration order, mirroring <c> KeyListList </c>
-    ''' on the legacy <c> winapp2entry </c>
+    ''' Every key bucket in winapp2.ini key order, with <c> ErrorKeys </c> last.
+    ''' <see cref="GetBucketIndex"/> gives each key type's position.
     ''' </summary>
     Public ReadOnly Property KeyLists As IReadOnlyList(Of IReadOnlyList(Of iniKey2))
 
     ''' <summary>
-    ''' Creates a <c> winapp2entry2 </c> from an <c> iniSection2 </c>
+    ''' Creates a new <c> winapp2entry2 </c> from <paramref name="section"/>, sorting each key into
+    ''' its bucket by KeyType (case-insensitive). The entry shares the section's key objects, so
+    ''' changing a key here changes it in the section too.
     ''' </summary>
+    '''
     ''' <param name="section">A winapp2.ini format <c> iniSection2 </c></param>
     Public Sub New(section As iniSection2)
 
@@ -297,7 +294,7 @@ Public Class winapp2entry2
     End Sub
 
     ''' <summary>
-    ''' Returns the 0-based index into <c> KeyLists </c> for the given key type name, or -1 if unrecognised.
+    ''' Returns the 0-based index into <c> KeyLists </c> for the given key type name, or -1 if unrecognized.
     ''' </summary>
     ''' <param name="keyType">The key type name, e.g. "FileKey"</param>
     Public Shared Function GetBucketIndex(keyType As String) As Integer
@@ -329,7 +326,7 @@ Public Class winapp2entry2
     End Sub
 
     ''' <summary>
-    ''' Moves any error key whose <c> KeyType </c> is now a recognised winapp2.ini type
+    ''' Moves any error key whose <c> KeyType </c> is now a recognized winapp2.ini type
     ''' into the appropriate typed bucket. Called after <c> cValidity </c> has had a chance
     ''' to repair broken keys (e.g. fixing a missing "=" restores a valid KeyType).
     ''' </summary>
@@ -344,7 +341,9 @@ Public Class winapp2entry2
     End Sub
 
     ''' <summary>
-    ''' Removes a key from its typed bucket
+    ''' Removes a key from its typed bucket. We find the bucket from the key's current KeyType, so
+    ''' a key whose name changed since it was added won't be found. <see cref="ForceRemoveErrorKey"/>
+    ''' covers that case for error keys.
     ''' </summary>
     ''' <param name="key">The key to remove</param>
     Public Sub RemoveKey(key As iniKey2)
@@ -368,9 +367,7 @@ Public Class winapp2entry2
 
     End Sub
 
-    ''' <summary>
-    ''' Reconstructs an <c> iniSection2 </c> from the typed key buckets in winapp2.ini order
-    ''' </summary>
+    ''' <summary>Returns a new <c> iniSection2 </c> holding this entry's keys in winapp2.ini order</summary>
     Public Function ToIniSection() As iniSection2
 
         Dim s As New iniSection2(Name, LineNum)
@@ -387,8 +384,7 @@ Public Class winapp2entry2
 
     ''' <summary>
     ''' Renumbers the deletion key buckets (FileKey, RegKey, ExcludeKey) sequentially from 1,
-    ''' sorted by value within each bucket.
-    ''' Called after VirtualStore augmentation inserts keys that may share names with existing keys.
+    ''' after sorting each bucket by value (case-insensitive).
     ''' </summary>
     Public Sub RenumberKeys()
 

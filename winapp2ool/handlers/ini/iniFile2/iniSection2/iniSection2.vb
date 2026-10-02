@@ -53,7 +53,11 @@ Public Class iniSection2
 
     ''' <summary>Creates a new section with the given name</summary>
     ''' <param name="name">The section name (without brackets)</param>
-    ''' <param name="startingLineNumber">The line number of the section header</param>
+    '''
+    ''' <param name="startingLineNumber">
+    ''' The line number of the section header <br /><br />
+    ''' Optional, Default: <c> 0 </c>
+    ''' </param>
     Public Sub New(name As String, Optional startingLineNumber As Integer = 0)
         If name Is Nothing Then argIsNull(NameOf(name)) : Return
         Me.Name = name

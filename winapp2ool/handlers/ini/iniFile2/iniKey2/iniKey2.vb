@@ -59,6 +59,7 @@ Public Class iniKey2
 
     ''' <summary>
     ''' The type of the key: the Name with digits removed. Updated automatically when Name is set.
+    ''' For a malformed line the constructor sets <c> Error </c> or <c> DeleteMe </c> instead.
     ''' </summary>
     Public ReadOnly Property KeyType As String
         Get
@@ -71,7 +72,7 @@ Public Class iniKey2
 
     ''' <summary>
     ''' The key's Value split on '|', cached after first access and invalidated when Value changes.
-    ''' The returned array is shared — do not mutate its elements.
+    ''' Every caller gets the same array, so don't change its elements.
     ''' </summary>
     Public ReadOnly Property PipeSplit As String()
         Get
@@ -93,28 +94,40 @@ Public Class iniKey2
 
     ''' <summary>Returns whether the key's Name equals the given string</summary>
     ''' <param name="n">The string to compare against</param>
-    ''' <param name="ignoreCase">When True, comparison is case-insensitive</param>
+    ''' <param name="ignoreCase">
+    ''' Indicates whether to ignore case when comparing <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Function nameIs(n As String, Optional ignoreCase As Boolean = False) As Boolean
         Return If(ignoreCase, Name.Equals(n, StringComparison.InvariantCultureIgnoreCase), Name = n)
     End Function
 
     ''' <summary>Returns whether the key's KeyType equals the given string</summary>
     ''' <param name="t">The string to compare against</param>
-    ''' <param name="ignoreCase">When True, comparison is case-insensitive</param>
+    ''' <param name="ignoreCase">
+    ''' Indicates whether to ignore case when comparing <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Function typeIs(t As String, Optional ignoreCase As Boolean = False) As Boolean
         Return If(ignoreCase, KeyType.Equals(t, StringComparison.InvariantCultureIgnoreCase), KeyType = t)
     End Function
 
     ''' <summary>Returns whether the key's Value contains the given string</summary>
     ''' <param name="txt">The string to search for</param>
-    ''' <param name="ignoreCase">When True, search is case-insensitive</param>
+    ''' <param name="ignoreCase">
+    ''' Indicates whether to ignore case when searching <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Function vHas(txt As String, Optional ignoreCase As Boolean = False) As Boolean
         Return If(ignoreCase, Value.IndexOf(txt, 0, StringComparison.CurrentCultureIgnoreCase) > -1, Value.Contains(txt))
     End Function
 
     ''' <summary>Returns whether the key's Value contains any of the given strings</summary>
     ''' <param name="txts">The strings to search for</param>
-    ''' <param name="ignoreCase">When True, search is case-insensitive</param>
+    ''' <param name="ignoreCase">
+    ''' Indicates whether to ignore case when searching <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Function vHasAny(txts As String(), Optional ignoreCase As Boolean = False) As Boolean
         If txts Is Nothing Then argIsNull(NameOf(txts)) : Return False
         For Each txt In txts
@@ -125,12 +138,14 @@ Public Class iniKey2
 
     ''' <summary>Returns whether the key's Value equals the given string</summary>
     ''' <param name="txt">The string to compare against</param>
-    ''' <param name="ignoreCase">When True, comparison is case-insensitive</param>
+    ''' <param name="ignoreCase">
+    ''' Indicates whether to ignore case when comparing <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Function vIs(txt As String, Optional ignoreCase As Boolean = False) As Boolean
         Return If(ignoreCase, Value.Equals(txt, StringComparison.InvariantCultureIgnoreCase), Value = txt)
     End Function
 
-    ''' <summary>Returns the key name with all digit characters removed</summary>
     Private Shared Function StripNums(keyName As String) As String
         Dim sb As New System.Text.StringBuilder(keyName.Length)
         For Each c As Char In keyName
@@ -160,9 +175,19 @@ Public Class iniKey2
         Return typeIs(key.KeyType, True)
     End Function
 
-    ''' <summary>Creates an iniKey2 from a name=value string</summary>
+    ''' <summary>
+    ''' Creates a new <c> iniKey2 </c> from a <c> name=value </c> line, splitting on the first
+    ''' <c> = </c>. A line with no name gets the name <c> KeyTypeNotGiven </c> and the type
+    ''' <c> Error </c>. A line with no value, or no <c> = </c> at all, gets the type
+    ''' <c> DeleteMe </c>. A bare <c> = </c> leaves Name and KeyType as <c> Nothing </c>.
+    ''' </summary>
+    '''
     ''' <param name="line">A string in the format name=value</param>
-    ''' <param name="count">The line number for this key</param>
+    '''
+    ''' <param name="count">
+    ''' The line number for this key. We ignore it when the line has no <c> = </c>. <br /><br />
+    ''' Optional, Default: <c> 0 </c>
+    ''' </param>
     Public Sub New(ByVal line As String, Optional ByVal count As Integer = 0)
         If line Is Nothing Then argIsNull(NameOf(line)) : Return
         Dim eqPos = line.IndexOf("="c)

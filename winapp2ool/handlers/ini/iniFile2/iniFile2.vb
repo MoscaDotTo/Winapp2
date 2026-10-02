@@ -25,7 +25,7 @@ Imports System.Text
 Public Enum IniFileWriteFormat
 
     ''' <summary>
-    ''' Sections are written in the order they were added (default behaviour)
+    ''' Sections are written in the order they were added (default behavior)
     ''' </summary>
     Insertion = 0
 
@@ -37,7 +37,9 @@ Public Enum IniFileWriteFormat
 End Enum
 
 ''' <summary>
-''' An object representing a parsed .ini file with O(1) section lookup
+''' An object representing a parsed .ini file with O(1) section lookup. Section names are unique
+''' (case-insensitive): when a file repeats a section, we keep the first and drop the later one
+''' along with its keys.
 ''' </summary>
 Public Class iniFile2
 
@@ -69,7 +71,7 @@ Public Class iniFile2
     ''' <summary>
     ''' All comment lines encountered during parsing, in the order they appeared in the file.
     ''' Comment text includes the leading semicolon.
-    ''' Comments are captured for reading only — they are not written back by <c> ToString </c>.
+    ''' We capture comments for reading only. <see cref="ToString()"/> doesn't write them back.
     ''' </summary>
     Public ReadOnly Property Comments As List(Of iniComment2)
         Get
@@ -106,11 +108,8 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' Returns the section with the given name, or <c> Nothing </c> if not found. <br /> <br />
-    ''' Unlike <c> iniFile.getSection </c>, this never returns a "phantom" empty section. <br /> <br />
-    ''' 
-    ''' Use <c> iniFile2.GetOfCreateSection </c> when get-or-create semantics are needed 
-    ''' while replacing <c> iniFile.getSection </c>
+    ''' Returns the section with the given name, or <c> Nothing </c> if the file doesn't have one.
+    ''' Use <see cref="GetOrCreateSection"/> when a missing section should be created.
     ''' </summary>
     ''' 
     ''' <param name="name">
@@ -127,12 +126,7 @@ Public Class iniFile2
 
     End Function
 
-    ''' <summary>
-    ''' Returns the section with the given name, creating and adding it if absent. <br />
-    ''' 
-    ''' Use this instead of <c> iniFile2.GetSection </c> when get-or-create semantics are needed 
-    ''' while replacing <c> iniFile.getSection </c> 
-    ''' </summary>
+    ''' <summary>Returns the section with the given name, creating and adding it if the file doesn't have one</summary>
     ''' 
     ''' <param name="name">
     ''' The section name to look up or create (case-insensitive)
@@ -190,16 +184,9 @@ Public Class iniFile2
     End Sub
 
     ''' <summary>
-    ''' 
+    ''' Creates a new <c> iniFile2 </c> with no sections. Outside this class, use
+    ''' <see cref="FromFile"/>, <see cref="FromStream"/> or <see cref="Empty"/>.
     ''' </summary>
-    ''' 
-    ''' <param name="dir">
-    ''' 
-    ''' </param>
-    ''' 
-    ''' <param name="name">
-    ''' 
-    ''' </param>
     Private Sub New(dir As String, name As String)
 
         Me.Dir = dir
@@ -208,12 +195,17 @@ Public Class iniFile2
     End Sub
 
     ''' <summary>
-    ''' Parses an ini file from a filesystem path
+    ''' Parses an ini file from a filesystem path. A missing file is reported through
+    ''' <c> handleFileNotFoundException </c>. Any other read error, including a missing
+    ''' directory, goes uncaught to the caller.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="path">
-    ''' The absolute path to an ini file
+    ''' The path to an ini file. Everything after the last backslash becomes <c> Name </c>
+    ''' and everything before it becomes <c> Dir </c>.
     ''' </param>
+    '''
+    ''' <returns>The parsed file, or one with no sections if the file doesn't exist</returns>
     Public Shared Function FromFile(path As String) As iniFile2
 
         If path Is Nothing Then argIsNull(NameOf(path)) : Return New iniFile2("", "")
@@ -240,8 +232,8 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' Creates an empty <c> iniFile2 </c> with the given path components,
-    ''' for use when building an output file programmatically
+    ''' Returns a new <c> iniFile2 </c> with no sections and the given path components,
+    ''' for building an output file programmatically
     ''' </summary>
     ''' <param name="dir">The directory component of the file path</param>
     ''' <param name="name">The filename component</param>
@@ -250,19 +242,22 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' Parses an ini file from an already-open <c> StreamReader </c>
+    ''' Returns an ini file parsed from an already-open <c> StreamReader </c>.
+    ''' We read to the end of the stream but leave closing it to the caller.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="r">
     ''' A <c> StreamReader </c> containing ini file content
     ''' </param>
-    ''' 
+    '''
     ''' <param name="dir">
-    ''' The directory from which the stream originates 
+    ''' The directory from which the stream originates <br /><br />
+    ''' Optional, Default: <c> "" </c>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="name">
-    ''' The filename from which the stream originates 
+    ''' The filename from which the stream originates <br /><br />
+    ''' Optional, Default: <c> "" </c>
     ''' </param>
     Public Shared Function FromStream(r As StreamReader,
                                       Optional dir As String = "",
@@ -278,11 +273,10 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Reads <paramref name="r"/> line by line into sections, keys and comments. We skip blank
+    ''' lines and drop any key that appears before the first section header. A repeated section
+    ''' header starts a section that <see cref="AddSection"/> refuses, so its keys are lost too.
     ''' </summary>
-    ''' <param name="r">
-    ''' 
-    ''' </param>
     Private Sub ParseStream(r As StreamReader)
 
         Dim currentSection As iniSection2 = Nothing
@@ -308,12 +302,16 @@ Public Class iniFile2
     End Sub
 
     ''' <summary>
-    ''' Writes the given text to disk at this file's <c> Path </c>, creating directories as needed.
-    ''' No-ops when <paramref name="condition"/> is <c> False </c>.
+    ''' Writes <paramref name="text"/> to this file's <c> Path </c>, creating the directory and
+    ''' file if they don't exist. If access is denied, we offer to restart winapp2ool elevated.
     ''' </summary>
     '''
     ''' <param name="text">The text to write</param>
-    ''' <param name="condition">When <c> False </c>, the write is skipped</param>
+    '''
+    ''' <param name="condition">
+    ''' Indicates whether to write at all <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
     '''
     ''' <returns>
     ''' <c> True </c> if the file was written, <br />
@@ -382,8 +380,8 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' Serializes a sequence of <c> iniSection2 </c> objects into ini file text,
-    ''' with a blank line between each section and no trailing newline
+    ''' Serializes a sequence of <c> iniSection2 </c> objects into ini file text, with a blank
+    ''' line between sections. The text ends with the newline that closes the last section.
     ''' </summary>
     '''
     ''' <param name="sections">
@@ -406,6 +404,7 @@ Public Class iniFile2
 
     End Function
 
+    ''' <summary>Returns an enumerator over the sections in the order they were added</summary>
     Public Function GetEnumerator() As IEnumerator(Of iniSection2) Implements IEnumerable(Of iniSection2).GetEnumerator
         Return _ordered.GetEnumerator()
     End Function

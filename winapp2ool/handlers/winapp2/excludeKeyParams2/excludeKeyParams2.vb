@@ -19,13 +19,13 @@ Option Strict On
 
 ''' <summary>The exclusion type flag on an ExcludeKey</summary>
 Public Enum excludeKeyFlag
-    ''' <summary>FILE — exclude a specific file by exact path</summary>
+    ''' <summary>FILE: exclude a specific file by exact path</summary>
     File = 0
-    ''' <summary>PATH — exclude files matching a wildcard pattern under a path</summary>
+    ''' <summary>PATH: exclude files matching a wildcard pattern under a path</summary>
     Path = 1
-    ''' <summary>REG — exclude a registry path or value</summary>
+    ''' <summary>REG: exclude a registry path or value</summary>
     Reg = 2
-    ''' <summary>Unknown — flag value not recognized; stored verbatim for round-trip fidelity</summary>
+    ''' <summary>A flag we don't recognize. We keep its text in <c> RawFlag </c> so the key round-trips</summary>
     Unknown = 3
 End Enum
 
@@ -37,22 +37,22 @@ End Enum
 ''' </summary>
 Public Class excludeKeyParams2
 
-    ''' <summary>The exclusion type: FILE, PATH, or REG</summary>
+    ''' <summary>The exclusion type: FILE, PATH or REG, or <c> Unknown </c> for anything else, including a value with no pipe</summary>
     Public ReadOnly Property Flag As excludeKeyFlag
 
     ''' <summary>
-    ''' The raw flag text as it appeared in the file.
-    ''' Populated only when <c> Flag = excludeKeyFlag.Unknown </c> to preserve the original text for reconstruction.
+    ''' The raw flag text as it appeared in the file, when <c> Flag = excludeKeyFlag.Unknown </c>.
+    ''' Empty otherwise.
     ''' </summary>
     Public ReadOnly Property RawFlag As String
 
-    ''' <summary>The path — everything between the first and optional second pipe</summary>
+    ''' <summary>The path: everything between the first and optional second pipe, or the whole value if there's no pipe</summary>
     Public ReadOnly Property Path As String
 
     Private ReadOnly _patterns As New List(Of String)
 
     ''' <summary>
-    ''' The optional patterns — everything after the second pipe, split on semicolons.
+    ''' The optional patterns: everything after the second pipe, split on semicolons.
     ''' For FILE exclusions this is a filename; for PATH it is a wildcard; for REG it is a value name.
     ''' Empty when no second pipe was present.
     ''' </summary>
@@ -62,7 +62,7 @@ Public Class excludeKeyParams2
         End Get
     End Property
 
-    ''' <summary>Returns <c> True </c> when patterns are present (second pipe existed)</summary>
+    ''' <summary>Indicates whether the value has patterns after a second pipe</summary>
     Public ReadOnly Property HasPatterns As Boolean
         Get
             Return _patterns.Count > 0
@@ -116,8 +116,8 @@ Public Class excludeKeyParams2
     End Sub
 
     ''' <summary>
-    ''' Reconstructs the ExcludeKey value string from the parsed components.
-    ''' Produces <c> FLAG|path[|pat1;pat2] </c>.
+    ''' Returns the ExcludeKey value rebuilt from the parsed components: <c> FLAG|path[|pat1;pat2] </c>.
+    ''' A value that had no pipe comes back with one in front of it.
     ''' </summary>
     Public Function Reconstruct() As String
 

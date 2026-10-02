@@ -20,14 +20,14 @@ Imports System.Globalization
 Imports System.Text
 
 ''' <summary>
-''' Represents a winapp2.ini file with a single flat entry list and no parallel structure.
+''' Represents a winapp2.ini file, with its entries grouped into the file's sections.
 ''' Built from an <c> iniFile2 </c>.
 ''' </summary>
 Public Class winapp2file2
 
     ''' <summary>
     ''' The 12 section header labels in winapp2.ini order.
-    ''' Empty string is the unlabelled main section (last).
+    ''' Empty string is the unlabeled main section (last).
     ''' </summary>
     Public Shared ReadOnly Property FileSectionHeaders As New List(Of String) From {
         "Chrome/Chromium based browsers",
@@ -73,10 +73,13 @@ Public Class winapp2file2
         End Get
     End Property
 
-    ''' <summary>Whether this represents the Non-CCleaner variant of winapp2.ini</summary>
+    ''' <summary>Indicates whether this is the non-CCleaner variant of winapp2.ini</summary>
     Public ReadOnly Property IsNCC As Boolean
 
-    ''' <summary>The version comment string, e.g. "; Version: 260219"</summary>
+    ''' <summary>
+    ''' The version comment string, e.g. "; Version: 260219". It's <c> ; Version: 000000 </c>
+    ''' when the source file's first comment isn't a version line.
+    ''' </summary>
     Public ReadOnly Property Version As String
 
     ''' <summary>The directory from which the source file was loaded</summary>
@@ -94,7 +97,7 @@ Public Class winapp2file2
 
     ''' <summary>
     ''' The 12 per-category entry lists in <c> FileSectionHeaders </c> order.
-    ''' Each inner list corresponds to one winapp2.ini section (index 11 is the unlabelled main section).
+    ''' Each inner list corresponds to one winapp2.ini section (index 11 is the unlabeled main section).
     ''' </summary>
     Public ReadOnly Property Categories As IReadOnlyList(Of IReadOnlyList(Of winapp2entry2))
         Get
@@ -103,10 +106,19 @@ Public Class winapp2file2
     End Property
 
     ''' <summary>
-    ''' Creates a <c> winapp2file2 </c> from an <c> iniFile2 </c>
+    ''' Creates a new <c> winapp2file2 </c> from <paramref name="file"/>. Each entry goes to the
+    ''' section its LangSecRef, or failing that its Section key, names. Entries with neither, or
+    ''' with a category no section claims, go to the unlabeled main section. The exception is a
+    ''' category starting with "Dangerous", which goes to the Dangerous section.
     ''' </summary>
+    '''
     ''' <param name="file">A winapp2.ini format <c> iniFile2 </c></param>
-    ''' <param name="useTodaysDate">When True, Version is set to today's date in YYMMDD format</param>
+    '''
+    ''' <param name="useTodaysDate">
+    ''' Indicates whether to stamp <c> Version </c> with today's date (yyMMdd) instead of
+    ''' reading it from the file <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Sub New(file As iniFile2, Optional useTodaysDate As Boolean = False)
 
         If file Is Nothing Then argIsNull(NameOf(file)) : Return
@@ -173,8 +185,8 @@ Public Class winapp2file2
     ''' <summary>
     ''' Returns all entries as a single <c> iniFile2 </c> in winapp2.ini order. <br /> <br />
     '''
-    ''' The two pieces of preamble state this class carries — the version string and the
-    ''' non-CCleaner marker — are re-emitted as comments on the returned file. Without them
+    ''' We re-emit the two pieces of preamble state this class carries, the version string and
+    ''' the non-CCleaner marker, as comments on the returned file. Without them
     ''' a round trip through the winapp2 layer silently resets the version to
     ''' <c> 000000 </c> and the file's identity to the CCleaner variant, since both are read
     ''' back off <c> iniFile2.Comments </c> by this class' own constructor and by Diff
@@ -262,8 +274,9 @@ Public Class winapp2file2
     End Sub
 
     ''' <summary>
-    ''' Returns the name of every entry that appears more than once (case-insensitive).
-    ''' An empty list means no duplicate entry names exist.
+    ''' Returns each entry name that appears more than once (case-insensitive), once per extra
+    ''' copy. <c> iniFile2 </c> drops repeated sections while parsing, so only entries added
+    ''' through <see cref="AddEntry"/> can repeat.
     ''' </summary>
     Public Function FindDuplicateEntryNames() As IReadOnlyList(Of String)
 
@@ -279,8 +292,9 @@ Public Class winapp2file2
     End Function
 
     ''' <summary>
-    ''' Builds and returns the complete winapp2.ini text including preamble comments,
-    ''' replicating the output of the legacy <c> winapp2file.winapp2string() </c>
+    ''' Returns the complete winapp2.ini text: the license and links preamble, then each labeled
+    ''' section that has entries, wrapped in comments carrying its name and entry count, then
+    ''' the main section
     ''' </summary>
     Public Function ToWinapp2String() As String
 
@@ -331,8 +345,8 @@ Public Class winapp2file2
     End Function
 
     ''' <summary>
-    ''' Serialises a list of entries to text, matching the legacy <c> iniFile.toString </c> output format:
-    ''' each section ends with a trailing newline, sections separated by a blank line
+    ''' Serializes a list of entries with a blank line between each. Each entry's text ends
+    ''' with a newline, so the result does too.
     ''' </summary>
     Private Shared Function CategoriesToString(entries As List(Of winapp2entry2)) As String
 

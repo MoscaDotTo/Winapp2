@@ -33,9 +33,9 @@ Public Class iniKeyCollection
     End Property
 
     ''' <summary>
-    ''' Adds a key to the collection. Duplicate names are allowed — all occurrences appear
-    ''' in enumeration order and in <c> GetByType </c> results. <c> GetKey </c> returns the
-    ''' first occurrence for any given name.
+    ''' Adds a key to the collection. Duplicate names are allowed: every occurrence appears
+    ''' in enumeration order and in <see cref="GetByType"/> results, and <see cref="GetKey"/>
+    ''' returns the first.
     ''' </summary>
     ''' <param name="key">The key to add</param>
     Public Sub Add(key As iniKey2)
@@ -69,7 +69,7 @@ Public Class iniKeyCollection
     ''' <summary>
     ''' Returns all keys whose <c> KeyType </c> equals <paramref name="keyType"/> (case-insensitive).
     ''' Returns an empty read-only list if no keys of that type exist.
-    ''' The returned list is the live internal bucket — do not mutate it.
+    ''' The list is the collection's own bucket, so don't change it.
     ''' </summary>
     ''' <param name="keyType">The key type to look up, e.g. "FileKey" or "RegKey"</param>
     Public Function GetByType(keyType As String) As IReadOnlyList(Of iniKey2)
@@ -148,8 +148,8 @@ Public Class iniKeyCollection
     ''' </param>
     '''
     ''' <param name="newKeys">
-    ''' The keys to insert in its place (must contain at least one key — replacing a key
-    ''' with nothing is a removal, which is <c> Remove </c>'s job)
+    ''' The keys to insert in its place. It must hold at least one key: replacing a key
+    ''' with nothing is a removal, which is <see cref="Remove"/>'s job.
     ''' </param>
     Public Sub Replace(oldKey As iniKey2, newKeys As IEnumerable(Of iniKey2))
 
@@ -212,7 +212,7 @@ Public Class iniKeyCollection
     ''' </summary>
     '''
     ''' <param name="keys">
-    ''' The keys to add (first-write-wins for duplicate names)
+    ''' The keys to add. Duplicate names are kept, and <see cref="GetKey"/> returns the first.
     ''' </param>
     Public Sub New(keys As IEnumerable(Of iniKey2))
 
@@ -226,6 +226,7 @@ Public Class iniKeyCollection
 
     End Sub
 
+    ''' <summary>Returns an enumerator over the keys in the order they were added</summary>
     Public Function GetEnumerator() As IEnumerator(Of iniKey2) Implements IEnumerable(Of iniKey2).GetEnumerator
 
         Return _ordered.GetEnumerator()

@@ -26,7 +26,7 @@ Public Class iniComment2
     ''' <summary>The line number from which this comment was originally read</summary>
     Public ReadOnly Property LineNumber As Integer
 
-    ''' <summary>Creates an <c> iniComment2 </c> from a comment line and its line number</summary>
+    ''' <summary>Creates a new <c> iniComment2 </c> from a comment line and its line number</summary>
     ''' <param name="text">The raw comment text</param>
     ''' <param name="lineNumber">The line number in the source file</param>
     Public Sub New(text As String, lineNumber As Integer)

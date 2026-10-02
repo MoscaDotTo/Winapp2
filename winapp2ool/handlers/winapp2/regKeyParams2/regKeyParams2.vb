@@ -31,16 +31,16 @@ Public Class regKeyParams2
         "HKEY_USERS", "HKEY_CURRENT_CONFIG"
     }
 
-    ''' <summary>The registry path — everything before the pipe, or the whole value if no pipe</summary>
+    ''' <summary>The registry path: everything before the pipe, or the whole value if there's no pipe</summary>
     Public ReadOnly Property Path As String
 
     ''' <summary>
-    ''' The specific registry value name to delete — everything after the pipe.
-    ''' Empty string when absent: deleting the whole key rather than a single value.
+    ''' The specific registry value name to delete: everything after the pipe.
+    ''' Empty when absent, meaning we delete the whole key rather than a single value.
     ''' </summary>
     Public ReadOnly Property Subkey As String
 
-    ''' <summary>Returns <c> True </c> when a specific value name is targeted rather than the whole key</summary>
+    ''' <summary>Indicates whether a specific value name is targeted rather than the whole key</summary>
     Public ReadOnly Property HasSubkey As Boolean
         Get
             Return Subkey.Length > 0
@@ -48,8 +48,8 @@ Public Class regKeyParams2
     End Property
 
     ''' <summary>
-    ''' The registry hive — the segment of <c> Path </c> before the first backslash,
-    ''' or <c> Path </c> itself when no backslash is present.
+    ''' The registry hive: the segment of <c> Path </c> before the first backslash,
+    ''' or <c> Path </c> itself when there's no backslash.
     ''' </summary>
     Public ReadOnly Property Root As String
         Get
@@ -58,7 +58,7 @@ Public Class regKeyParams2
         End Get
     End Property
 
-    ''' <summary>Whether <c> Root </c> is a recognized registry hive (short or long form).</summary>
+    ''' <summary>Indicates whether <c> Root </c> is a recognized registry hive (short or long form)</summary>
     Public ReadOnly Property HasValidRoot As Boolean
         Get
             Return ValidRoots.Contains(Root)
@@ -85,10 +85,7 @@ Public Class regKeyParams2
 
     End Sub
 
-    ''' <summary>
-    ''' Reconstructs the RegKey value string from the parsed components.
-    ''' Produces <c> path </c> or <c> path|value_name </c>.
-    ''' </summary>
+    ''' <summary>Returns the RegKey value rebuilt from the parsed components: <c> path </c> or <c> path|value_name </c></summary>
     Public Function Reconstruct() As String
         Return If(HasSubkey, $"{Path}|{Subkey}", Path)
     End Function
