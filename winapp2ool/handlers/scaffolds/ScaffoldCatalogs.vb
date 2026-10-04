@@ -20,7 +20,7 @@ Option Strict On
 Imports System.IO
 
 ''' <summary>
-''' Shared, use-case-agnostic substrate for embedded-Chromium FileKey emission. Consumed
+''' Shared, use-case-agnostic substrate for embedded-Chromium FileKey generation. Consumed
 ''' by entry generators (UWPBuilder, EntryBuilder) that need a curated, consistent set of
 ''' cleaning targets for an application's embedded browser-engine data folder.
 ''' <br /><br />
@@ -31,39 +31,27 @@ Imports System.IO
 ''' per-family plumbing. <see cref="ScaffoldFamilies"/> is the roster of families the
 ''' builders actually bind:
 ''' <list type="bullet">
-''' <item><c> WebView </c> — WebView2 / EBWebView layout (<c> Assembler\Scaffolds\webview.ini </c>),
+''' <item><c> WebView </c>: WebView2 / EBWebView layout (<c> Assembler\Scaffolds\webview.ini </c>),
 ''' templates use the <c> %WebViewRoot% </c> placeholder.</item>
-''' <item><c> QtWebEngine </c> — QtWebEngine layout (<c> Assembler\Scaffolds\qtwebengine.ini </c>),
+''' <item><c> QtWebEngine </c>: QtWebEngine layout (<c> Assembler\Scaffolds\qtwebengine.ini </c>),
 ''' templates use the <c> %QtWebEngineRoot% </c> placeholder. QtWebEngine bundles an older
-''' Chromium with a flatter on-disk layout (no <c> Default\Network\ </c> subfolder, no
-''' privacy-sandbox surface), so it warrants a separate catalog rather than reusing the
-''' WebView2 paths. A second placeholder, <c> %QtWebEngineCacheRoot% </c>, names the profile's
+''' Chromium with a flatter on-disk layout. A second placeholder, <c> %QtWebEngineCacheRoot% </c>, names the profile's
 ''' HTTP cache directory, which Qt keeps under its CacheLocation rather than beside the
 ''' profile (<c> %LocalAppData%\App\cache\QtWebEngine\Default </c> against
 ''' <c> %LocalAppData%\App\QtWebEngine\Default </c>).</item>
-''' <item><c> Electron </c> — Electron layout (<c> Assembler\Scaffolds\electron.ini </c>),
+''' <item><c> Electron </c>: Electron layout (<c> Assembler\Scaffolds\electron.ini </c>),
 ''' templates use <c> %ElectronRoot% </c> (the app's <c> userData </c> folder, which for
-''' Electron <em>is</em> the Chromium profile — no <c> Default\ </c> segment) and
+''' Electron <em>is</em> the Chromium profile, with no <c> ProfileName\ </c> segment) and
 ''' <c> %ElectronUpdaterRoot% </c> (the electron-updater download cache, whose directory name
-''' is not derivable from the userData path). Like QtWebEngine it has two placeholders, so its
-''' consumers bind both — see <see cref="BindFamilyTemplates"/>. It is a separate
-''' catalog because Electron collapses WebView2's user-data and profile levels into one
-''' directory <em>and</em> straddles the Chromium 89 network-service migration, needing both
-''' <c> Network\Cookies </c> and legacy root-level <c> Cookies </c>.</item>
+''' is not derivable from the userData path). Like QtWebEngine it has two placeholders, and its
+''' consumers bind both through <see cref="BindFamilyTemplates"/>. </item>
 ''' </list>
 ''' <br />
-'''
-''' <b> Parity contract: every family in <see cref="ScaffoldFamilies"/> ships to every
-''' consumer. </b> Electron originally shipped to EntryBuilder alone on the theory that MSIX
-''' packages rarely bundle Electron, which overlooked that UWPBuilder's hybrid win32+UWP
-''' entries carry the win32 install's paths too — and a hybrid's win32 half is precisely where
-''' Electron turns up. A scaffold family lands in both builders or neither;
-''' <c> ScaffoldParityTests </c> enforces it against both parsers' reserved-key sets.
 ''' <br /><br />
 '''
 ''' A family may bind more than one placeholder. Consumers expand a template by chaining one
 ''' substitution per (placeholder, roots) pair; a template whose placeholder has an empty root
-''' list is dropped rather than emitted with the placeholder left literal, which is what lets
+''' list is dropped rather than generated with the placeholder left literal, which is what lets
 ''' the Electron family's updater templates stay inert for an entry that declared only
 ''' <c> ElectronRoot= </c>, and QtWebEngine's cache templates for one that declared only
 ''' <c> QtWebEngineRoot= </c>.
@@ -77,40 +65,44 @@ Imports System.IO
 ''' their own DSL provides.
 ''' <br /><br />
 '''
-''' The placeholder is implementation-neutral by name: a UWP consumer feeds it the
-''' <c> %LocalAppData%\Packages\...\EBWebView </c> form, while a win32 consumer would feed
-''' the host-relative data folder under <c> %LocalAppData% </c>, <c> %ProgramData% </c>, or
-''' wherever the host stores its data. The library is agnostic to root-path conventions;
-''' callers handle their own variable expansion before passing the resolved root to the
-''' emitter.
+''' The placeholder is implementation-neutral by name: UWPBuilder feeds it a root already
+''' resolved against the package (<c> %LocalAppData%\Packages\...\EBWebView </c>), while
+''' EntryBuilder feeds the host's data folder under <c> %LocalAppData% </c>,
+''' <c> %ProgramData% </c>, or wherever the host stores its data. We substitute a root as
+''' plain text, so a root may still carry <c> &lt;name&gt; </c> tokens
+''' (<c> WebViewRoot=&lt;Root&gt;\EBWebView </c>). The consumer's later
+''' <see cref="VariableExpander.Expand"/> pass fans those out along with the template's own.
 ''' </summary>
 Public Module ScaffoldCatalogs
 
     ''' <summary>
     ''' The literal marker separating a family name from a scaffold name in a catalog section
-    ''' header — <c> [WebViewScaffold: Caches] </c> yields family <c> WebView </c>, scaffold
+    ''' header: <c> [WebViewScaffold: Caches] </c> yields family <c> WebView </c>, scaffold
     ''' <c> Caches </c>. Family identity therefore comes from the section header rather than
     ''' the filename, so a catalog may be split or merged across files freely.
+    ''' <see cref="LoadCatalogDirectory"/> finds the marker case-insensitively.
     ''' </summary>
     Public Const FamilyMarker As String = "Scaffold:"
 
     ''' <summary>
     ''' The scaffold families the builders bind. A section in a scaffold directory naming a
-    ''' family outside this roster is loaded but warned about, since nothing will consume it
-    ''' — which is what catches a misspelled family (<c> [ElctronScaffold: …] </c>) and a
-    ''' catalog file added ahead of the code that reads it.
+    ''' family outside this roster is loaded but warned about, since nothing will consume it.
+    ''' That catches a misspelled family (<c> [ElctronScaffold: …] </c>) and a catalog file
+    ''' added ahead of the code that reads it.
     ''' <br /><br />
     '''
-    ''' Adding a family here is not sufficient to ship it: each builder must also reserve the
+    ''' Adding a family here is not enough to ship it: each builder must also reserve the
     ''' family's key vocabulary (<c> {Family}Root= </c>, <c> {Family}Scaffolds= </c>,
-    ''' <c> Exclude{Family}Scaffolds= </c>) and bind its placeholders. That is deliberately
-    ''' load-bearing — the parity test walks this array and asserts both parsers know every
-    ''' name in it.
+    ''' <c> Exclude{Family}Scaffolds= </c>) and bind its placeholders, and
+    ''' <see cref="DefaultsForFamily"/> must return a default set for it. The
+    ''' <c> ScaffoldFamilies_KeyVocabularyPresentInBothBuilders </c> test walks this array and
+    ''' checks the reserved keys in both parsers and the default set. Nothing checks the
+    ''' placeholder bindings.
     ''' </summary>
     Public ReadOnly ScaffoldFamilies As String() = {"WebView", "QtWebEngine", "Electron"}
 
     ''' <summary>
-    ''' Default scaffold names emitted when a caller requests WebView2 scaffolding without
+    ''' Default scaffold names generated when a caller requests WebView2 scaffolding without
     ''' an explicit selection list. Limited to low-risk categories that are safe for any
     ''' WebView-hosting application; host-risk categories (cookies, history, session,
     ''' web storage) require explicit opt-in by the caller.
@@ -118,33 +110,32 @@ Public Module ScaffoldCatalogs
     Public ReadOnly DefaultScaffolds As String() = {"Caches", "Telemetry"}
 
     ''' <summary>
-    ''' Default scaffold names emitted when a caller requests QtWebEngine scaffolding
+    ''' Default scaffold names generated when a caller requests QtWebEngine scaffolding
     ''' without an explicit selection list. Broader than <see cref="DefaultScaffolds"/>:
     ''' QtWebEngine's catalog splits two low-risk targets into their own scaffolds that
-    ''' the WebView2 catalog leaves bundled behind host-risk gates — <c> StorageQuota </c>
+    ''' the WebView2 catalog leaves bundled behind host-risk gates: <c> StorageQuota </c>
     ''' (a rebuildable quota accounting file) and <c> VisitedLinks </c> (a link-coloring
-    ''' bloom filter, which QtWebEngine-hosting application shells have no UI for). Both
-    ''' are default-on here because the hand-written entries this catalog replaces treated
-    ''' them as routine cleaning. Host-risk categories (cookies, history, session, site
-    ''' storage) still require explicit opt-in.
+    ''' bloom filter, which QtWebEngine-hosting application shells have no UI for).
+    ''' Host-risk categories (cookies, history, session, site storage) still require
+    ''' explicit opt-in.
     ''' </summary>
     Public ReadOnly QtWebEngineDefaultScaffolds As String() = {"Caches", "StorageQuota", "Telemetry", "VisitedLinks"}
 
     ''' <summary>
-    ''' Default scaffold names emitted when a caller requests Electron scaffolding without an
+    ''' Default scaffold names generated when a caller requests Electron scaffolding without an
     ''' explicit selection list. Wider than the other two families because an Electron
     ''' <c> userData </c> folder holds application diagnostics alongside Chromium state:
     ''' <c> AppLogs </c> covers electron-log's output (both the modern <c> logs\ </c> and the
-    ''' legacy <c> &lt;userData&gt;\&lt;ProductName&gt;\logs\ </c>), and <c> UpdaterCache </c>
-    ''' covers the electron-updater download cache — the latter costing nothing for an entry
-    ''' that declared no <c> ElectronUpdaterRoot= </c>, since its templates are then dropped.
+    ''' older <c> &lt;userData&gt;\&lt;ProductName&gt;\logs\ </c>), and <c> UpdaterCache </c>
+    ''' covers the electron-updater download cache. <c> UpdaterCache </c> costs nothing for an
+    ''' entry that declared no <c> ElectronUpdaterRoot= </c>, since its templates are then dropped.
     ''' <br /><br />
     '''
-    ''' Note the deliberate asymmetry with <see cref="QtWebEngineDefaultScaffolds"/>: there is
-    ''' no <c> VisitedLinks </c> scaffold here. A 21-installation disk survey found
-    ''' <c> Visited Links </c> in none of them, so the pattern rides in <c> Telemetry </c>'s
-    ''' legacy list rather than earning a scaffold of its own. Host-risk categories (cookies,
-    ''' site storage) still require explicit opt-in.
+    ''' Unlike <see cref="QtWebEngineDefaultScaffolds"/>, there is deliberately no
+    ''' <c> VisitedLinks </c> scaffold here. Electron apps rarely write <c> Visited Links </c>,
+    ''' so the pattern rides in one of <c> Telemetry </c>'s templates rather than earning a
+    ''' scaffold of its own. Host-risk
+    ''' categories (cookies, site storage) still require explicit opt-in.
     ''' </summary>
     Public ReadOnly ElectronDefaultScaffolds As String() = {"AppLogs", "Caches", "StorageQuota", "Telemetry", "UpdaterCache"}
 
@@ -152,11 +143,12 @@ Public Module ScaffoldCatalogs
     ''' Returns the default scaffold set for <paramref name="familyLabel"/>, or an empty set
     ''' for a family with no defaults registered. Lets a consumer drive all of
     ''' <see cref="ScaffoldFamilies"/> from one loop rather than a per-family
-    ''' <c> Select Case </c> that can silently omit a family.
+    ''' <c> Select Case </c> that can silently omit a family. A known family gets the shared
+    ''' default array itself, not a copy.
     ''' </summary>
     '''
     ''' <param name="familyLabel">
-    ''' The family token, e.g. <c> WebView </c> or <c> Electron </c>
+    ''' The family token, e.g. <c> WebView </c> or <c> Electron </c>. Matched case-insensitively.
     ''' </param>
     '''
     ''' <returns>
@@ -185,7 +177,7 @@ Public Module ScaffoldCatalogs
     ''' substitution per binding so a template referencing several placeholders multiplies
     ''' across all of their root lists. Binding a placeholder to an empty root list is
     ''' meaningful: it is what keeps the Electron <c> UpdaterCache </c> scaffold inert for
-    ''' entries that declared no <c> ElectronUpdaterRoot= </c> rather than emitting a literal
+    ''' entries that declared no <c> ElectronUpdaterRoot= </c> rather than generating a literal
     ''' placeholder into a FileKey.
     ''' </summary>
     Public Structure ScaffoldRootBinding
@@ -197,7 +189,8 @@ Public Module ScaffoldCatalogs
         Public Roots As List(Of String)
 
         ''' <summary>
-        ''' Creates a binding pairing one placeholder with the roots that replace it
+        ''' Creates a new <c> ScaffoldRootBinding </c> pairing one placeholder with the roots
+        ''' that replace it
         ''' </summary>
         '''
         ''' <param name="placeholder">
@@ -205,7 +198,8 @@ Public Module ScaffoldCatalogs
         ''' </param>
         '''
         ''' <param name="roots">
-        ''' The declared roots for that placeholder, already fully resolved by the caller
+        ''' The declared roots for that placeholder. Each is substituted as written, so a
+        ''' <c> &lt;name&gt; </c> token in a root survives for the caller's later expansion.
         ''' </param>
         Public Sub New(placeholder As String, roots As List(Of String))
 
@@ -229,7 +223,7 @@ Public Module ScaffoldCatalogs
 
         ''' <summary>
         ''' How many <c> FileKeyBase= </c> templates the scaffold declared, before substitution.
-        ''' Zero means an empty scaffold — a legitimate no-op that consumers must not confuse
+        ''' Zero means an empty scaffold, a legitimate no-op that consumers must not confuse
         ''' with a non-empty scaffold whose every template was dropped for want of a root.
         ''' </summary>
         Public TemplateCount As Integer
@@ -242,7 +236,8 @@ Public Module ScaffoldCatalogs
         Public Templates As List(Of String)
 
         ''' <summary>
-        ''' Creates a result pairing a scaffold with the templates its bindings produced
+        ''' Creates a new <c> ScaffoldBindingResult </c> pairing a scaffold with the templates
+        ''' its bindings produced
         ''' </summary>
         '''
         ''' <param name="scaffoldName">
@@ -270,24 +265,28 @@ Public Module ScaffoldCatalogs
     ''' Parses a <c> [{prefix} ...] </c> scaffold section, collecting its
     ''' <c> FileKeyBase= </c> values into <paramref name="scaffolds"/> keyed by the
     ''' scaffold's name (the portion of the section header after
-    ''' <paramref name="sectionPrefix"/>, trimmed). Warns on unrecognised key types and on
+    ''' <paramref name="sectionPrefix"/>, trimmed). Warns on unrecognized key types and on
     ''' duplicate scaffold names (last definition wins).
     ''' <br /><br />
     '''
     ''' A <c> Tier=Legacy </c> key records the scaffold in the catalog's
-    ''' <see cref="ScaffoldCatalog.Legacy"/> set. A redefinition resets the tier along with the
-    ''' templates, so last-definition-wins covers both.
+    ''' <see cref="ScaffoldCatalog.Legacy"/> set. Into a plain dictionary, which can't hold a
+    ''' tier, it warns and is dropped. Any other <c> Tier= </c> value warns and leaves the
+    ''' scaffold untiered. A redefinition resets the tier along with the templates, so
+    ''' last-definition-wins covers both.
     ''' </summary>
     '''
     ''' <param name="scaffoldSection">
-    ''' The scaffold section to parse. The caller is responsible for filtering sections by
-    ''' name prefix before invoking this routine.
+    ''' The scaffold section to parse. Its name must start with
+    ''' <paramref name="sectionPrefix"/>. We don't check that, and a name shorter than the
+    ''' prefix throws.
     ''' </param>
     '''
     ''' <param name="scaffolds">
-    ''' The accumulator dictionary, keyed by scaffold name (case-insensitive). The value is
-    ''' the ordered list of <c> FileKeyBase= </c> templates for that scaffold; templates
-    ''' may contain the family's root placeholder for later substitution by the caller.
+    ''' The catalog to add to, keyed by scaffold name. Pass a <see cref="ScaffoldCatalog"/>
+    ''' to record <c> Tier=Legacy </c>. The value is the ordered list of
+    ''' <c> FileKeyBase= </c> templates for that scaffold, still holding the family's root
+    ''' placeholders for later substitution by the caller.
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -297,7 +296,9 @@ Public Module ScaffoldCatalogs
     ''' <param name="sectionPrefix">
     ''' The section-header prefix that identifies this family's scaffolds (e.g.
     ''' <c> WebViewScaffold: </c> or <c> QtWebEngineScaffold: </c>). Stripped from the
-    ''' header to derive the scaffold name and used as the human label in diagnostics.
+    ''' header to derive the scaffold name, and used without its trailing colon as the label
+    ''' in diagnostics. <br /><br />
+    ''' Optional, Default: <c> WebViewScaffold: </c>
     ''' </param>
     Public Sub ParseSection(scaffoldSection As iniSection,
                             scaffolds As Dictionary(Of String, List(Of String)),
@@ -366,22 +367,21 @@ Public Module ScaffoldCatalogs
     End Sub
 
     ''' <summary>
-    ''' Loads a complete scaffold catalog from a stand-alone ini file. Each section whose
-    ''' header starts with <paramref name="sectionPrefix"/> in <paramref name="catalogPath"/>
-    ''' is parsed via <see cref="ParseSection"/>; any other section type is reported as
-    ''' unexpected. Missing or empty catalog files yield an empty dictionary and a warning
-    ''' rather than an exception, so callers can continue with no scaffolds rather than
-    ''' aborting the run.
+    ''' Loads one family's scaffold catalog from a single ini file. Each section whose
+    ''' header starts with <paramref name="sectionPrefix"/> (case-sensitive) is parsed via
+    ''' <see cref="ParseSection"/>; any other section warns as unexpected. A missing or empty
+    ''' file warns and yields an empty catalog. A missing file is also reported through
+    ''' <c> handleFileNotFoundException </c>, which marks the run failed. A missing directory
+    ''' or any other read error goes uncaught to the caller.
     ''' <br /><br />
     '''
-    ''' Single-family loading of one named file. The builders instead load a whole scaffold
-    ''' directory via <see cref="LoadCatalogDirectory"/>, which discovers families rather than
-    ''' being told one; this remains the primitive that does so and the entry point for a
-    ''' caller that genuinely has one file and one family in hand.
+    ''' The builders don't call this. They load a whole scaffold directory via
+    ''' <see cref="LoadCatalogDirectory"/>, which calls <see cref="ParseSection"/> itself and
+    ''' takes each section's family from its header.
     ''' </summary>
     '''
     ''' <param name="catalogPath">
-    ''' Absolute path to the catalog file (e.g. <c> Assembler\Scaffolds\webview.ini </c> or
+    ''' Path to the catalog file (e.g. <c> Assembler\Scaffolds\webview.ini </c> or
     ''' <c> Assembler\Scaffolds\qtwebengine.ini </c>)
     ''' </param>
     '''
@@ -390,13 +390,16 @@ Public Module ScaffoldCatalogs
     ''' </param>
     '''
     ''' <param name="sectionPrefix">
-    ''' The section-header prefix identifying this family's scaffolds. Defaults to
-    ''' <c> WebViewScaffold: </c>; QtWebEngine callers pass <c> QtWebEngineScaffold: </c>.
+    ''' The section-header prefix identifying this family's scaffolds, e.g.
+    ''' <c> QtWebEngineScaffold: </c> <br /><br />
+    ''' Optional, Default: <c> WebViewScaffold: </c>
     ''' </param>
     '''
     ''' <returns>
-    ''' A case-insensitive dictionary keyed by scaffold name. Empty scaffold sections register
-    ''' with an empty template list — selecting them is a no-op rather than an error.
+    ''' A case-insensitive dictionary keyed by scaffold name. It is a
+    ''' <see cref="ScaffoldCatalog"/>, so <see cref="ResolveScaffolds"/> still sees its legacy
+    ''' tier. Empty scaffold sections register with an empty template list, so selecting them
+    ''' is a no-op rather than an error.
     ''' </returns>
     Public Function LoadCatalog(catalogPath As String,
                                 menuOutput As MenuSection,
@@ -441,24 +444,25 @@ Public Module ScaffoldCatalogs
     ''' <see cref="ScaffoldCatalogSet"/>, routing each section to a family by the text
     ''' preceding <see cref="FamilyMarker"/> in its header. Families are therefore discovered
     ''' from the source data rather than declared by the caller, so a new catalog file needs no
-    ''' new setting, CLI slot, or build-script argument — dropping <c> tauri.ini </c> into the
-    ''' directory registers a <c> Tauri </c> family, and the only remaining work is the
-    ''' consuming builder's key vocabulary.
+    ''' new setting, CLI slot, or build-script argument. A file of
+    ''' <c> [TauriScaffold: …] </c> sections registers a <c> Tauri </c> family. It warns as
+    ''' unconsumed until it's named in <see cref="ScaffoldFamilies"/>, and the parity test then
+    ''' also requires its defaults and each builder's key vocabulary.
     ''' <br /><br />
     '''
-    ''' Files are read in sorted order so the merge is deterministic, and several files may
-    ''' contribute to one family — a family's catalog is the union of every
-    ''' <c> [{Family}Scaffold: …] </c> section in the directory, with
+    ''' We read only the top-level <c> *.ini </c> files, in sorted order so the merge is
+    ''' deterministic. Several files may contribute to one family: a family's catalog is the
+    ''' union of every <c> [{Family}Scaffold: …] </c> section in the directory, with
     ''' <see cref="ParseSection"/>'s last-definition-wins rule spanning files.
     ''' <br /><br />
     '''
-    ''' Nothing here is fatal. A missing directory, an unreadable section, or a family nothing
-    ''' consumes all warn and continue, matching <see cref="LoadCatalog"/>'s contract that a
-    ''' catalog problem costs scaffold keys rather than aborting a build.
+    ''' A missing directory, a section with no marker or no family before it, and a family
+    ''' nothing consumes all warn and continue, so a catalog problem costs scaffold keys rather
+    ''' than aborting a build. A file we can't read throws to the caller.
     ''' </summary>
     '''
     ''' <param name="scaffoldDir">
-    ''' Absolute path to the scaffold directory (typically <c> Assembler\Scaffolds </c>)
+    ''' Path to the scaffold directory (typically <c> Assembler\Scaffolds </c>)
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -475,7 +479,7 @@ Public Module ScaffoldCatalogs
 
         If Not Directory.Exists(scaffoldDir) Then
 
-            Dim missingMsg = $"Scaffold directory not found: {scaffoldDir}; no scaffold keys will be emitted"
+            Dim missingMsg = $"Scaffold directory not found: {scaffoldDir}; no scaffold keys will be generated"
             gLog(missingMsg)
             menuOutput.AddWarning(missingMsg)
             Return catalogs
@@ -527,17 +531,19 @@ Public Module ScaffoldCatalogs
     End Function
 
     ''' <summary>
-    ''' Resolves the set of scaffold names a caller should emit for one entry, applying the
+    ''' Resolves the set of scaffold names a caller should generate for one entry, applying the
     ''' shared selection grammar used by every scaffold family: explicit selection, the
     ''' <c> All </c> sentinel, default fallback, exclusions, and unknown-name filtering.
-    ''' Family-agnostic — callers supply the family's default set and a label used to phrase
-    ''' diagnostics (e.g. <c> WebView </c> → <c> WebViewScaffolds=All </c>).
+    ''' Family-agnostic: callers supply the family's default set and a label used to phrase
+    ''' diagnostics (e.g. <c> WebView </c> gives <c> WebViewScaffolds=All </c>).
     ''' <br /><br />
     '''
     ''' <c> All </c> expands to every scaffold except the catalog's legacy tier. A legacy
-    ''' scaffold is emitted only when named, either alone or beside <c> All </c>
-    ''' (<c> WebViewScaffolds=All,LegacyWebApps </c>). Naming a non-legacy scaffold beside
-    ''' <c> All </c> is redundant and warns.
+    ''' scaffold is generated only when named, either alone or beside <c> All </c>
+    ''' (<c> WebViewScaffolds=All,LegacyTelemetry </c>). Naming a non-legacy scaffold beside
+    ''' <c> All </c> is redundant and warns, and an unknown name beside it warns as unknown.
+    ''' Exclusions apply to every selection. Declaring them beside an explicit list, rather
+    ''' than <c> All </c> or the defaults, also warns. Names are matched case-insensitively.
     ''' </summary>
     '''
     ''' <param name="scaffoldNames">
@@ -546,9 +552,9 @@ Public Module ScaffoldCatalogs
     ''' </param>
     '''
     ''' <param name="keyPresent">
-    ''' Whether the entry declared <c> {Family}Scaffolds= </c> at all. Distinguishes
-    ''' "key absent → use <paramref name="defaultSet"/>" from "key present but empty → emit
-    ''' nothing".
+    ''' Indicates whether the entry declared <c> {Family}Scaffolds= </c> at all. When
+    ''' <c> False </c>, we use <paramref name="defaultSet"/>. When <c> True </c> with an empty
+    ''' <paramref name="scaffoldNames"/>, we generate nothing.
     ''' </param>
     '''
     ''' <param name="excluded">
@@ -557,7 +563,8 @@ Public Module ScaffoldCatalogs
     ''' </param>
     '''
     ''' <param name="available">
-    ''' The catalog of known scaffolds for this family, keyed by name.
+    ''' The catalog of known scaffolds for this family, keyed by name. Only a
+    ''' <see cref="ScaffoldCatalog"/> has a legacy tier for <c> All </c> to withhold.
     ''' </param>
     '''
     ''' <param name="defaultSet">
@@ -565,13 +572,14 @@ Public Module ScaffoldCatalogs
     ''' </param>
     '''
     ''' <param name="familyLabel">
-    ''' Family token used to phrase diagnostics — <c> WebView </c> or <c> QtWebEngine </c>.
+    ''' Family token used to phrase diagnostics: <c> WebView </c>, <c> QtWebEngine </c> or
+    ''' <c> Electron </c>.
     ''' Produces messages like <c> {familyLabel}Scaffolds=All </c> and
     ''' <c> Unknown {familyLabel} scaffold </c>.
     ''' </param>
     '''
     ''' <param name="specName">
-    ''' The entry name, embedded in diagnostics for source localisation.
+    ''' The entry name, embedded in diagnostics so a warning names the entry it came from.
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -579,7 +587,8 @@ Public Module ScaffoldCatalogs
     ''' </param>
     '''
     ''' <returns>
-    ''' The ordered list of scaffold names to emit for this entry, with unknown names removed.
+    ''' The scaffold names to generate for this entry, in selection order, with excluded and
+    ''' unknown names removed. A name listed twice is kept twice.
     ''' </returns>
     Public Function ResolveScaffolds(scaffoldNames As List(Of String),
                                      keyPresent As Boolean,
@@ -689,8 +698,8 @@ Public Module ScaffoldCatalogs
     ''' scaffold, chaining one <see cref="FanOutPlaceholder"/> pass per binding. A template
     ''' referencing several placeholders multiplies across all of their root lists; a template
     ''' referencing a placeholder whose binding has no roots is <em>dropped</em> rather than
-    ''' emitted with the placeholder left literal. That drop rule is what makes the Electron
-    ''' family's two-placeholder catalog work — an entry declaring only <c> ElectronRoot= </c>
+    ''' generated with the placeholder left literal. That drop rule is what makes the Electron
+    ''' family's two-placeholder catalog work: an entry declaring only <c> ElectronRoot= </c>
     ''' silently contributes nothing from the <c> UpdaterCache </c> scaffold.
     ''' <br /><br />
     '''
@@ -698,17 +707,17 @@ Public Module ScaffoldCatalogs
     ''' consumer can run its own further expansion over each group and still tell an empty
     ''' scaffold (a legitimate no-op) from a non-empty one that produced nothing because its
     ''' templates all wanted a root the entry never declared. Consumers own that diagnostic
-    ''' because only they know whether the selection was explicit — warning when a default-set
+    ''' because only they know whether the selection was explicit. Warning when a default-set
     ''' member yields nothing would fire on nearly every Electron entry.
     ''' </summary>
     '''
     ''' <param name="bindings">
-    ''' The family's (placeholder, roots) pairs — one for WebView, two for QtWebEngine and Electron
+    ''' The family's (placeholder, roots) pairs: one for WebView, two for QtWebEngine and Electron
     ''' </param>
     '''
     ''' <param name="selectedScaffolds">
-    ''' The resolved scaffold names to emit, already filtered to catalog members by
-    ''' <see cref="ResolveScaffolds"/>
+    ''' The resolved scaffold names to generate, already filtered to catalog members by
+    ''' <see cref="ResolveScaffolds"/>. A name missing from <paramref name="catalog"/> throws.
     ''' </param>
     '''
     ''' <param name="catalog">
@@ -753,9 +762,10 @@ Public Module ScaffoldCatalogs
 
     ''' <summary>
     ''' Replaces <paramref name="placeholder"/> in each input template with every root in
-    ''' <paramref name="roots"/>, producing one output per (template, root) pair. Templates
-    ''' that do not contain the placeholder pass through unchanged (one output each), so the
-    ''' helper can be chained per placeholder without dropping placeholder-free strings.
+    ''' <paramref name="roots"/>, producing one output per (template, root) pair. The match is
+    ''' case-sensitive. Templates that do not contain the placeholder pass through unchanged
+    ''' (one output each), so calls can be chained per placeholder without dropping
+    ''' placeholder-free strings.
     ''' </summary>
     '''
     ''' <param name="templates">
@@ -772,8 +782,7 @@ Public Module ScaffoldCatalogs
     '''
     ''' <returns>
     ''' The expanded set; a template containing the placeholder is dropped when
-    ''' <paramref name="roots"/> is empty (matching the legacy behaviour of emitting nothing
-    ''' for a placeholder with no declared root)
+    ''' <paramref name="roots"/> is empty
     ''' </returns>
     Public Function FanOutPlaceholder(templates As List(Of String),
                                       placeholder As String,

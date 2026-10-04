@@ -19,17 +19,22 @@ Option Strict On
 
 ''' <summary>
 ''' One survivor of the FileKey merge pass. Holds the parsed pieces of the first key seen
-''' for a given (path, flag) pair, plus the running pattern list from anything folded into
-''' it afterwards.
+''' for a given (path, flag) pair, with the path compared ignoring case, plus the running
+''' pattern list from anything folded into it afterwards.
 ''' </summary>
 Friend Class fileKeySurvivor
 
     ''' <summary>The parsed components of the first-seen key in this group</summary>
     Public ReadOnly Property Params As fileKeyParams
 
-    ''' <summary>Accumulated patterns; seeded from <c> Params.Patterns </c> and appended to on each merge</summary>
+    ''' <summary>
+    ''' Accumulated patterns, seeded from <c> Params.Patterns </c> and appended to on each merge.
+    ''' Duplicates are kept.
+    ''' </summary>
     Public ReadOnly Property Patterns As List(Of String)
 
+    ''' <summary>Creates a new <c> fileKeySurvivor </c> holding a copy of <paramref name="parsed"/>'s patterns</summary>
+    ''' <param name="parsed">The first key seen for this path and flag</param>
     Public Sub New(parsed As fileKeyParams)
         Me.Params = parsed
         Me.Patterns = New List(Of String)(parsed.Patterns)
@@ -38,14 +43,22 @@ Friend Class fileKeySurvivor
 End Class
 
 ''' <summary>
-''' Holds the scans and repairs for <c> WinappDebug </c> that are off by default.
+''' Holds the FileKey merge behind the Optimizations rule, the one <c> WinappDebug </c>
+''' rule that is off by default.
 ''' </summary>
 Module experimentalScans
 
     ''' <summary>
-    ''' Attempts to merge FileKeys with identical paths and flags into a single key.
-    ''' When two FileKeys share the same path and deletion flag, their patterns are
-    ''' combined into the earlier key and the later key is removed.
+    ''' Merges FileKeys that share a path (ignoring case) and flag. When any merge is possible,
+    ''' we queue a report block on <paramref name="result"/> listing the keys folded away and the
+    ''' resulting key list. <see cref="ErrorsFound"/> doesn't count it.
+    ''' <br /><br />
+    '''
+    ''' If the Optimizations rule's <c> ShouldRepair </c> is on (checked directly, not through
+    ''' <see cref="lintRule.fixFormat"/>), we replace the whole FileKey bucket with one new key per
+    ''' path and flag, in first-seen order and numbered from 1. Each holds the patterns of every
+    ''' key folded into it, in order and without removing duplicates. Every unrecognized flag
+    ''' counts as the same flag, and the merged key keeps the first one's text.
     ''' </summary>
     '''
     ''' <remarks>
@@ -54,6 +67,8 @@ Module experimentalScans
     ''' re-parses the running value. Each survivor's merged value string gets built once at
     ''' the end, when the output keys are emitted.
     ''' </remarks>
+    '''
+    ''' <param name="result">The lint result that receives the merge report</param>
     '''
     ''' <param name="entry">
     ''' The <c> winapp2entry </c> whose FileKeys will be assessed for merge opportunities

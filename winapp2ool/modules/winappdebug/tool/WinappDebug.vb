@@ -24,13 +24,15 @@ Imports System.Text.RegularExpressions
 Public Module WinappDebug
 
     ''' <summary>
-    ''' The number of errors found during the lint
+    ''' The number of errors found during the most recent <see cref="Debug"/> call. Optimization
+    ''' merge reports aren't counted.
     ''' </summary>
     Public Property ErrorsFound As Integer = 0
 
     ''' <summary>
-    ''' The error report from the most recent lint, as it was printed to the console.
-    ''' <c> EmitEntryResult </c> and <c> EmitEntryAlphabetizationErrors </c> both write here
+    ''' The error report from the most recent <see cref="Debug"/> call as plain text: each
+    ''' error's header, message and detail lines, without the optimization merge blocks.
+    ''' <see cref="EmitEntryResult"/> and <see cref="EmitEntryAlphabetizationErrors"/> both write here
     ''' from the orchestrating thread once the parallel pass is done, so this needs no
     ''' locking. Stays empty when the run found no errors, which is how the menu decides
     ''' whether to offer the Log Viewer option
@@ -38,25 +40,26 @@ Public Module WinappDebug
     Public Property MostRecentLintLog As New System.Text.StringBuilder
 
     ''' <summary>
-    ''' Elapsed time in milliseconds spent in the parallel per-entry processing block
-    ''' during the most recent <c> Debug </c> call. Populated for benchmarking.
+    ''' Meant to hold the milliseconds spent in the parallel per-entry block of the most recent
+    ''' <see cref="Debug"/> call. Nothing assigns it, so it stays <c> 0 </c>.
     ''' </summary>
     Public Property LastParallelElapsedMs As Long = 0
 
     ''' <summary>
-    ''' Elapsed time in milliseconds spent alphabetizing entries during the most recent
-    ''' <c> Debug </c> call. Populated for benchmarking.
+    ''' Meant to hold the milliseconds spent alphabetizing entries in the most recent
+    ''' <see cref="Debug"/> call. Nothing assigns it, so it stays <c> 0 </c>.
     ''' </summary>
     Public Property LastAlphabetizeElapsedMs As Long = 0
 
     ''' <summary>
-    ''' Total elapsed time in milliseconds for the most recent <c> Debug </c> call.
-    ''' Populated for benchmarking.
+    ''' Meant to hold the total milliseconds of the most recent <see cref="Debug"/> call.
+    ''' Nothing assigns it, so it stays <c> 0 </c>.
     ''' </summary>
     Public Property LastLintElapsedMs As Long = 0
 
     ''' <summary>
-    ''' The current rules for scans and repairs
+    ''' The lint rules, in Scan Settings menu order. Each <c> lint* </c> property below picks
+    ''' its rule from this list by index, so reordering the list reassigns them.
     ''' </summary>
     Public Property Rules As New List(Of lintRule) From {
         New lintRule(True, True, "Casing", "improper CamelCasing", "fixing improper CamelCasing"),
@@ -115,7 +118,8 @@ Public Module WinappDebug
     Private Property lintSlashes As lintRule = Rules(5)
 
     ''' <summary>
-    ''' Controls scan/repairs for missing or True Default values
+    ''' Controls scan/repairs for Default keys of any value, or for the value check when
+    ''' <see cref="overrideDefaultVal"/> is on
     ''' <br /> Default: <c> True </c>
     ''' </summary>
     Private Property lintDefaults As lintRule = Rules(6)
@@ -139,7 +143,7 @@ Public Module WinappDebug
     Private Property lintMulti As lintRule = Rules(9)
 
     ''' <summary>
-    ''' Controls scan/repairs for keys with invlaid values
+    ''' Controls scan/repairs for keys with invalid values
     ''' <br /> Default: <c> True </c>
     ''' </summary>
     Private Property lintInvalid As lintRule = Rules(10)
@@ -151,7 +155,7 @@ Public Module WinappDebug
     Private Property lintSyntax As lintRule = Rules(11)
 
     ''' <summary>
-    ''' Controls scan/repairs for invalid file or regsitry paths
+    ''' Controls scan/repairs for invalid file or registry paths
     ''' <br /> Default: <c> True </c>
     ''' </summary>
     Private Property lintPathValidity As lintRule = Rules(12)
@@ -163,7 +167,8 @@ Public Module WinappDebug
     Private Property lintSemis As lintRule = Rules(13)
 
     ''' <summary>
-    ''' Controls scan/repairs for keys that can be merged into eachother (FileKeys only currently)
+    ''' Controls the FileKey merge in <see cref="cOptimization"/>. The <c> -opti </c> flag and
+    ''' <see cref="remotedebug"/>'s <c> forceOpti </c> turn it on.
     ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property lintOpti As lintRule = Rules(14)
@@ -181,7 +186,8 @@ Public Module WinappDebug
                                            RegexOptions.Compiled Or RegexOptions.CultureInvariant)
 
     ''' <summary>
-    ''' Regex to detect valid LangSecRef numbers
+    ''' Regex to detect valid LangSecRef numbers. It isn't anchored, so it matches a valid
+    ''' number anywhere in the value.
     ''' </summary>
     Private ReadOnly secRefNums As New Regex("30(0([1-6])|2([1-9])|3([0-9])|4([0-4]))",
                                              RegexOptions.Compiled Or RegexOptions.CultureInvariant)
@@ -213,9 +219,9 @@ Public Module WinappDebug
 
     ''' <summary>
     ''' Case sensitive regex for an env var prefix that may be missing its percent signs:
-    ''' an optional <c> % </c>, the variable name, another optional <c> % </c>, then a <c> \ </c>.
-    ''' <c> fixBrokenEnVars </c> uses this so it can catch a missing leading or trailing %
-    ''' in one pass rather than looping over all 22 names.
+    ''' an optional <c> % </c>, the variable name, another optional <c> % </c>, then a <c> \ </c>,
+    ''' at the start of the text. <see cref="fixBrokenEnVars"/> uses this to catch a missing
+    ''' leading or trailing % in one pass.
     ''' </summary>
     Private ReadOnly enVarBrokenPrefix As New Regex(
         "^(%?)(" & String.Join("|", EnVars) & ")(%?)\\",
@@ -272,7 +278,8 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Key types for which forward-slash checks do not apply
+    ''' Key types the general forward-slash check skips. RegKeys get a separate check in
+    ''' <see cref="cFormat"/> that only looks at the path before the first pipe.
     ''' </summary>
     Private ReadOnly NoSlashCheckTypes As New HashSet(Of String)({"RegKey", "Section", "Warning"}, StringComparer.OrdinalIgnoreCase)
 
@@ -282,25 +289,26 @@ Public Module WinappDebug
     Private ReadOnly EnVarCheckTypes As New HashSet(Of String)({"FileKey", "ExcludeKey", "DetectFile"}, StringComparer.OrdinalIgnoreCase)
 
     ''' <summary>
-    ''' commandline runtime parameter for creating winapp2.ini with a version string
-    ''' reflecting the current date <br />
-    ''' Default: <c> True </c> - uses current date; <c> False </c> uses static version string
+    ''' Indicates whether <see cref="InitDebug"/> stamps the version line with today's date
+    ''' instead of keeping the file's own. The <c> -usedate </c> flag toggles it.
+    ''' <br /> Default: <c> False </c>
     ''' </summary>
     Private Property UseCurrentDate As Boolean = False
 
     ''' <summary>
-    ''' Handles the commandline args for <c> WinappDebug </c>
+    ''' Handles the commandline args for <c> WinappDebug </c>. We reset the module settings to
+    ''' their defaults first, so a command line run ignores the saved scan settings.
     ''' </summary>
     '''
     ''' <remarks>
     ''' Supported args: <br />
     ''' <c> -1f </c> / <c> -1d </c> input winapp2.ini (slot 1) <br />
     ''' <c> -3f </c> / <c> -3d </c> save target (slot 3) <br />
-    ''' <c> -c </c> enable saving of changes made by the linter <br />
-    ''' <c> -usedate </c> use current date in version string <br />
+    ''' <c> -c </c> toggle saving of changes made by the linter <br />
+    ''' <c> -usedate </c> toggle using the current date in the version string <br />
     ''' <c> -opti </c> enable the experimental Optimizations rule (FileKey merger) for this run <br />
     ''' <c> -keepdefaults </c> preserve existing Default keys instead of removing them (for flavors
-    ''' that deliberately set Default values, eg. FluentCleaner)
+    ''' that deliberately set Default values, such as FluentCleaner)
     ''' </remarks>
     Public Sub HandleLintCmdLine()
 
@@ -322,8 +330,14 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Lints <paramref name="givenIni"/>'s winapp2.ini formatting from outside the module's UI.
-    ''' Returns the linted <c> iniFile </c>.
+    ''' Lints <paramref name="givenIni"/>'s winapp2.ini formatting from outside the module's UI,
+    ''' with the current scan settings, and throws the report away. Like any
+    ''' <see cref="Debug"/> call, it resets <see cref="ErrorsFound"/> and
+    ''' <see cref="MostRecentLintLog"/>.
+    ''' <br /><br />
+    '''
+    ''' The lint edits <paramref name="givenIni"/>'s key objects in place, but keys it removes
+    ''' stay in <paramref name="givenIni"/>'s sections, so use the returned file afterwards.
     ''' </summary>
     '''
     ''' <param name="givenIni">
@@ -331,9 +345,15 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="forceOpti">
-    ''' Indicates whether or not the linter should attempt to optimize entries <br />
+    ''' Indicates whether to turn on the Optimizations scan and repair for this call. We restore
+    ''' their previous states afterwards <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
+    '''
+    ''' <returns>
+    ''' A new <c> iniFile </c> built from the linted entries, or <c> Nothing </c> if
+    ''' <paramref name="givenIni"/> is <c> Nothing </c>
+    ''' </returns>
     Public Function remotedebug(givenIni As iniFile,
                                 Optional forceOpti As Boolean = False) As iniFile
 
@@ -358,8 +378,10 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Validates winapp2.ini, then sets up the output window before sending it off to the linter.
-    ''' After linting, reports the results of the lint to the user
+    ''' Loads <see cref="winappDebugFile1"/>, lints it, and prints the report and a summary.
+    ''' When <see cref="SaveChanges"/> is on, writes the linted file to
+    ''' <see cref="winappDebugFile3"/>. Returns without linting when the file is missing or
+    ''' has no sections.
     ''' </summary>
     Public Sub InitDebug()
 
@@ -432,13 +454,19 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Sends the entries in a winapp2.ini format <c> iniFile </c> into specific format and syntax checking routines.
-    ''' Returns a list of <c> MenuSection </c>s containing all output to be rendered.
+    ''' Lints every entry of <paramref name="fileToBeDebugged"/> in parallel, then checks entry
+    ''' order within each category. Enabled repairs edit the entries in place. Resets
+    ''' <see cref="ErrorsFound"/> and <see cref="MostRecentLintLog"/> before counting this run.
     ''' </summary>
     '''
     ''' <param name="fileToBeDebugged">
-    ''' A <c> winapp2file </c> to be linted
+    ''' A <c> winapp2file </c> to be linted. It's passed <c> ByRef </c> but never reassigned
     ''' </param>
+    '''
+    ''' <returns>
+    ''' The report in render order: each entry's errors followed by its merge block, then the
+    ''' entry alphabetization errors. Empty if <paramref name="fileToBeDebugged"/> is <c> Nothing </c>
+    ''' </returns>
     Public Function Debug(ByRef fileToBeDebugged As winapp2file) As List(Of MenuSection)
 
         If fileToBeDebugged Is Nothing Then argIsNull(NameOf(fileToBeDebugged)) : Return New List(Of MenuSection)
@@ -465,7 +493,9 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Returns the set of entry names that appear more than once in a <c> winapp2file </c>
+    ''' Returns the set of entry names that appear more than once in a <c> winapp2file </c>,
+    ''' ignoring case. <c> iniFile </c> drops repeated sections while parsing, so a file read
+    ''' from disk never has any.
     ''' </summary>
     '''
     ''' <param name="winapp">
@@ -485,9 +515,10 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Collects the errors from an <c> EntryLintResult </c> into <c> MenuSection </c>s, logs them,
-    ''' and adds its error count to <c> ErrorsFound </c>. The sections come back to be rendered
-    ''' later.
+    ''' Collects the errors from an <c> EntryLintResult </c> into a <c> MenuSection </c>, logs them
+    ''' along with the result's captured log lines, appends them to <see cref="MostRecentLintLog"/>,
+    ''' and adds its error count to <see cref="ErrorsFound"/>. The error section comes back
+    ''' followed by the result's deferred sections, to be rendered later.
     ''' </summary>
     '''
     ''' <param name="result">
@@ -552,12 +583,23 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Validates the basic structure of a <c> winapp2entry </c> and sends off its individual keys for more specific analysis
+    ''' Lints one entry: its name, then every key (<see cref="ValidateKeys"/>), then each typed
+    ''' bucket in winapp2.ini key order (<see cref="processKeyList"/>), then the entry's overall
+    ''' structure and the Defaults rule. Edits <paramref name="entry"/> in place and captures
+    ''' the log lines it writes into the result.
+    ''' <br /><br />
+    '''
+    ''' A duplicate name, a name without the <c> * </c> suffix, and a missing detection key are
+    ''' reported whatever the scan settings say.
+    ''' While <see cref="overrideDefaultVal"/> is on, a missing Default key is reported and added
+    ''' whatever the Defaults rule says.
     ''' </summary>
     '''
     ''' <param name="entry">
     ''' A <c> winapp2entry </c> to be audited for syntax errors
     ''' </param>
+    '''
+    ''' <param name="duplicateNames">The entry names that appear more than once in the file</param>
     Private Function ProcessEntry(entry As winapp2entry,
                                   duplicateNames As HashSet(Of String)) As EntryLintResult
 
@@ -642,10 +684,12 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Checks the basic structure of all <c> iniKey </c>s in a <c> winapp2entry </c>,
-    ''' attempts to repair some keys and place them back into their appropriate typed bucket,
-    ''' and removes any that are too problematic to continue with
+    ''' Runs <see cref="cValidity"/> over every <c> iniKey </c> in a <c> winapp2entry </c>,
+    ''' removes the keys it rejects, and moves any unrecognized key whose type a repair made
+    ''' valid into its typed bucket. Unrecognized keys that stay unrecognized are kept.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="entry">
     ''' A <c> winapp2entry </c> whose <c> iniKey </c>s will be audited for basic syntax correctness
@@ -671,7 +715,9 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Alphabetizes all the entries in a winapp2.ini file and observes any that were out of place
+    ''' Reports entries that are out of alphabetical order within their category, under the
+    ''' Alphabetization scan, and sorts every category when the Alphabetization repair is on.
+    ''' Hyphens sort as spaces.
     ''' </summary>
     '''
     ''' <param name="winapp">
@@ -768,7 +814,7 @@ Public Module WinappDebug
         Public ReadOnly Property Item As String
 
         ''' <summary>
-        ''' The 0-based index of the item in the unsorted list
+        ''' The 0-based index of the first item in the unsorted list with this value
         ''' </summary>
         Public ReadOnly Property ActualPos As Integer
 
@@ -777,7 +823,10 @@ Public Module WinappDebug
         ''' </summary>
         Public ReadOnly Property ExpectedPos As Integer
 
-        '''
+        ''' <summary>Creates a new <c> AlphaMisplacement </c></summary>
+        ''' <param name="item">The out-of-place value</param>
+        ''' <param name="actualPos">Its 0-based index in the unsorted list</param>
+        ''' <param name="expectedPos">Its 0-based index in the sorted list</param>
         Public Sub New(item As String, actualPos As Integer, expectedPos As Integer)
             Me.Item = item
             Me.ActualPos = actualPos
@@ -895,18 +944,31 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' The per-call configuration for <c> processKeyList </c>, holding the behaviour that
+    ''' The per-call configuration for <see cref="processKeyList"/>, holding the behavior that
     ''' varies by key type.
     ''' </summary>
     Private Structure KeyListSpec
 
+        ''' <summary>The key type whose bucket is processed</summary>
         Public ReadOnly Property TypeName As String
+        ''' <summary>Indicates whether keys of this type should carry no number</summary>
         Public ReadOnly Property NoNumbers As Boolean
+        ''' <summary>Indicates whether an entry may hold only one key of this type</summary>
         Public ReadOnly Property OneOnly As Boolean
+        ''' <summary>Indicates whether each key's path goes through <see cref="chkPathFormatValidity"/></summary>
         Public ReadOnly Property CheckPathValidity As Boolean
+        ''' <summary>Indicates whether that path check expects a registry path</summary>
         Public ReadOnly Property IsRegistryPath As Boolean
+        ''' <summary>Indicates whether each key also goes through <see cref="pExcludeKey"/></summary>
         Public ReadOnly Property IsExcludeKey As Boolean
 
+        ''' <summary>Creates a new <c> KeyListSpec </c>. Every option defaults to <c> False </c>.</summary>
+        ''' <param name="typeName">The key type whose bucket is processed</param>
+        ''' <param name="noNumbers">Indicates whether keys of this type should carry no number</param>
+        ''' <param name="oneOnly">Indicates whether an entry may hold only one key of this type</param>
+        ''' <param name="checkPathValidity">Indicates whether to check each key's path</param>
+        ''' <param name="isRegistryPath">Indicates whether that path is a registry path</param>
+        ''' <param name="isExcludeKey">Indicates whether to run the ExcludeKey checks</param>
         Public Sub New(typeName As String,
                        Optional noNumbers As Boolean = False,
                        Optional oneOnly As Boolean = False,
@@ -924,30 +986,35 @@ Public Module WinappDebug
     End Structure
 
     ''' <summary>
-    ''' Hands off each <c> iniKey </c> in a winapp2.ini format typed bucket to be audited for correctness
+    ''' Runs the per-key checks over one typed bucket of <paramref name="entry"/>, removes the
+    ''' duplicates and multiples marked for removal, then hands the bucket to
+    ''' <see cref="sortKeys"/>. For the FileKey bucket, also runs the Optimizations merge
+    ''' while that scan is on.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="entry">
     ''' The <c> winapp2entry </c> whose keys are being processed
     ''' </param>
     '''
     ''' <param name="spec">
-    ''' Configuration encoding the type-specific behaviour for this bucket
+    ''' Configuration encoding the type-specific behavior for this bucket
     ''' </param>
     '''
     ''' <param name="processKey">
-    ''' The <c> function </c> that audits the keys of the <c> KeyType </c> provided <br />
-    ''' <c> voidDelegate </c> if no further operations are needed outside of the basic formatting checks
+    ''' The type-specific check for each key, or <see cref="voidDelegate"/> if there isn't one.
+    ''' We ignore what it returns, so it has to change the key in place.
     ''' </param>
     '''
     ''' <param name="hasF">
-    ''' Tracking variable indicating that there exist ExcludeKeys for file system locations
-    ''' <br /> Optional, Default: <c> False </c>
+    ''' Set to <c> True </c> if an ExcludeKey in the bucket excludes a file system location <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <param name="hasR">
-    ''' Tracking variable indicating that there exist ExcludeKeys contain registry locations
-    ''' <br /> Optional, Default: <c> False </c>
+    ''' Set to <c> True </c> if an ExcludeKey in the bucket excludes a registry location <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     Private Sub processKeyList(result As EntryLintResult,
                                entry As winapp2entry,
@@ -1010,8 +1077,8 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' This function does nothing by design, used when a method or function expects to be passed a function
-    ''' who modifies an iniKey on a KeyType where we don't want to modify the keys
+    ''' Returns <paramref name="key"/> unchanged, for the key types that have no type-specific
+    ''' check in <see cref="processKeyList"/>
     ''' </summary>
     '''
     ''' <param name="key">
@@ -1024,28 +1091,34 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Does some basic formatting checks that apply to all winapp2.ini format <c> iniKey </c>s
+    ''' Runs the checks every key in a typed bucket gets: a value that repeats an earlier key's,
+    ''' ignoring case (Duplicates), the key's number (Improper Numbering or Unneeded Numbering),
+    ''' forward slashes (Slashes), and a trailing semicolon (Semicolons). FileKeys, ExcludeKeys
+    ''' and DetectFiles also go through <see cref="cEnVar"/>.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="key">
     ''' An <c> iniKey </c> whose format will be audited
     ''' </param>
     '''
     ''' <param name="keyNumber">
-    ''' The current expected key number for numbered keys
+    ''' The number this key should carry. We increment it for the next key
     ''' </param>
     '''
     ''' <param name="seenValues">
     ''' A map of the key values we've seen so far to the first <c> iniKey </c> that held each
-    ''' one, used to spot duplicates.
+    ''' one, used to spot duplicates. <c> Nothing </c> skips the duplicate check
     ''' </param>
     '''
     ''' <param name="dupeKeys">
-    ''' A tracking list of <c> iniKey </c>s with duplicate values
+    ''' The keys marked for removal. We create it on the first duplicate if it's <c> Nothing </c>
     ''' </param>
     '''
     ''' <param name="noNumbers">
-    ''' Indicates that the current set of keys should not be numbered
+    ''' Indicates whether the current set of keys should not be numbered <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     Private Sub cFormat(result As EntryLintResult,
                         key As iniKey,
@@ -1105,20 +1178,24 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Attempts to fix any broken environment variables in a given <c> iniKey </c> <br /> <br />
-    ''' This function will attempt to repair any environment variables that are missing leading or trailing % characters
+    ''' Reports a known environment variable at the start of the key's path that is missing its
+    ''' leading <c> % </c>, its trailing one, or both, and adds them back. An ExcludeKey's path
+    ''' starts after its first pipe. The report follows the Syntax Errors scan, and the repair
+    ''' follows that rule's <c> ShouldRepair </c> directly rather than <see cref="lintRule.fixFormat"/>.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="key">
     ''' An <c> iniKey </c> whose value will be audited for syntax errors
     ''' </param>
     '''
     ''' <param name="enVars">
-    ''' The list of valid Environment Variables for Winapp2.ini
+    ''' Unused. The check goes through <see cref="enVarBrokenPrefix"/> instead
     ''' </param>
     '''
     ''' <param name="cond">
-    ''' The condition under which this scan should be run
+    ''' Indicates whether to run the check
     ''' </param>
     Private Sub fixBrokenEnVars(result As EntryLintResult, key As iniKey, enVars As String(), cond As Boolean)
 
@@ -1157,8 +1234,13 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey </c>
+    ''' Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey </c>: a
+    ''' doubled <c> %% </c> (reported always, repaired under Syntax Errors), missing percent signs
+    ''' (<see cref="fixBrokenEnVars"/>), the casing and validity of each variable name
+    ''' (<see cref="chkCasing"/>), and a variable with no backslash after it (Slashes, report only)
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="key">
     ''' The <c> iniKey </c> whose data will be audited for environment variable correctness
@@ -1183,12 +1265,18 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Attempts to insert missing equal signs (=) into <c> iniKey </c>s <br /> <br /> Returns <c> True </c> if the repair is
-    '''  successful, <c> False </c> otherwise
-    '''  </summary>
+    ''' Splits a key that has no <c> = </c> into a name and a value. The type is the first entry
+    ''' in <paramref name="cmds"/> that the key's name starts with, ignoring case. When the name
+    ''' spells the type with the same casing, the new name is the type plus any digits that
+    ''' follow it (none for types that take no number), and the rest becomes the value. The strip
+    ''' is case-sensitive and removes every occurrence, not just the prefix, so with different
+    ''' casing nothing is stripped: <c> filekey1%AppData%\Test </c> becomes
+    ''' <c> FileKey=filekey1%AppData%\Test </c>. Once a type matches, we change
+    ''' <paramref name="key"/> even if the repair then fails.
+    ''' </summary>
     '''
     ''' <param name="result">
-    ''' The <c> EntryLintResult </c> to collect diagnostic messages into
+    ''' Unused
     ''' </param>
     '''
     ''' <param name="key">
@@ -1198,6 +1286,11 @@ Public Module WinappDebug
     ''' <param name="cmds">
     ''' An array containing valid winapp2.ini <c> keyTypes </c>
     ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> if the key now has a value, <c> False </c> if no type matched or
+    ''' nothing was left for the value
+    ''' </returns>
     Private Function fixMissingEquals(result As EntryLintResult,
                                       key As iniKey,
                                       cmds As String()) As Boolean
@@ -1247,13 +1340,23 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Does basic syntax and formatting audits that apply across all keys, returns <c> False </c>
-    ''' if a key is malformed or if a null argument is given
+    ''' Runs the checks every key gets before bucket processing. A key with no <c> = </c> or no
+    ''' value goes through <see cref="fixMissingEquals"/>, whatever the scan settings say. Doubled
+    ''' backslashes are reported and collapsed under Slashes. Leading and trailing whitespace is
+    ''' reported and trimmed from the name and value whatever the settings say. Last,
+    ''' <see cref="chkCasing"/> checks the key type.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="key">
     ''' An <c> iniKey </c> whose basic syntactic validity will be assessed
     ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> False </c> if <paramref name="key"/> is <c> Nothing </c> or couldn't be given a
+    ''' value, which tells the caller to remove it, <c> True </c> otherwise
+    ''' </returns>
     Private Function cValidity(result As EntryLintResult, key As iniKey) As Boolean
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return False
@@ -1305,8 +1408,10 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Checks the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey </c> against a given array of expected cased values, attempts
-    ''' to repair casing errors if possible
+    ''' Checks text from the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey </c> against a
+    ''' lookup of properly cased values. A casing error is reported under Casing and repaired by
+    ''' replacing every occurrence of <paramref name="strToChk"/> in the value, or the key type in
+    ''' the name. Text missing from the lookup is reported under Invalid Values.
     ''' </summary>
     '''
     ''' <param name="result">
@@ -1354,12 +1459,22 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible
+    ''' Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting
+    ''' them where possible. Covers flag casing and spelling, missing pipes, colons used as
+    ''' semicolons (skipped when the path's first segment holds a drive letter), stray
+    ''' semicolons and backslashes before a pipe, and the path itself. Under Parameters, a
+    ''' pattern that repeats an earlier one (ignoring case), including a second empty one, is
+    ''' reported, and so is a pattern list out of order. When either turns up, the repair drops
+    ''' repeated and empty patterns and sorts the rest.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="key">
     ''' A winapp2.ini FileKey format <c> iniKey </c> to be checked for correctness
     ''' </param>
+    '''
+    ''' <returns><paramref name="key"/> itself, edited in place</returns>
     Public Function pFileKey(result As EntryLintResult, key As iniKey) As iniKey
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return key
@@ -1439,8 +1554,13 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Processes a DetectFile format <c> iniKey </c> and checks it for errors, correcting where possible
+    ''' Processes a DetectFile format <c> iniKey </c> and checks it for errors, correcting where
+    ''' possible. A trailing backslash is reported and removed under Slashes. A wildcard is
+    ''' reported only for the System Ninja flavor, and a wildcard before the last path segment
+    ''' is always reported. Both wildcard reports ignore the scan settings.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="key">
     ''' A winapp2.ini DetectFile format <c> iniKey </c> to be checked for correctness
@@ -1471,15 +1591,22 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Audits the syntax of file system and registry paths
+    ''' Audits the root of a file system or registry path, ignoring the key's patterns and an
+    ''' ExcludeKey's flag. A registry hive in the wrong case is reported and fixed under Casing,
+    ''' and an unknown hive is reported under Path Validity. A file system path must start with a <c> % </c> or
+    ''' contain a drive letter in its first segment, and must not contain <c> &lt; </c>,
+    ''' <c> &gt; </c> or <c> " </c>; both are report-only Path Validity checks. Does nothing
+    ''' while the Path Validity and Casing scans are both off.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="key">
     ''' An <c> iniKey </c> containing a registry or filesystem path to have its syntax validated
     ''' </param>
     '''
     ''' <param name="isRegistry">
-    ''' Indicates that the given <paramref name="key"/> is expected to hold a registry path
+    ''' Indicates whether <paramref name="key"/> is expected to hold a registry path
     ''' </param>
     Private Sub chkPathFormatValidity(result As EntryLintResult, key As iniKey, isRegistry As Boolean)
 
@@ -1517,19 +1644,28 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Processes a list of ExcludeKey format <c> iniKey </c>s and checks them for errors, correcting where possible
+    ''' Checks one ExcludeKey format <c> iniKey </c> for errors, correcting where possible: its
+    ''' flag (<see cref="checkExcludeFlags"/>) and flag count under Flags, then its path. A FILE or
+    ''' PATH key also needs a backslash before its pattern pipe (Path Validity), and a REG key is
+    ''' reported for the BleachBit flavor. Everything after the flag checks, the BleachBit report
+    ''' included, only runs while the Path Validity or Casing scan is on and the key has a valid
+    ''' flag.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="key">
     ''' A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness
     ''' </param>
     '''
     ''' <param name="hasF">
-    ''' Indicates whether the entry excludes any filesystem locations
+    ''' Set to <c> True </c> if the key excludes a file system location. Only set while the path
+    ''' checks run
     ''' </param>
     '''
     ''' <param name="hasR">
-    ''' Indicates whether the entry excludes any registry locations
+    ''' Set to <c> True </c> if the key excludes a registry location. Only set while the path
+    ''' checks run
     ''' </param>
     Private Sub pExcludeKey(result As EntryLintResult,
                             key As iniKey,
@@ -1577,13 +1713,20 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Assesses the formatting of ExcludeKey format <c> iniKey </c>s to see if the flag (FILE, PATH, REG)
-    ''' is malformatted. Attempts to repair when possible.
+    ''' Checks an ExcludeKey whose value has no <c> FILE| </c>, <c> PATH| </c> or <c> REG| </c>.
+    ''' While the Flags scan is on, a value that doesn't start with one of the flags is reported,
+    ''' and one that does is reported as missing the pipe after it. The pipe goes in when the
+    ''' Flags rule's <c> ShouldRepair </c> is on, checked directly rather than through
+    ''' <see cref="lintRule.fixFormat"/>.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="key">
     ''' A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness
     ''' </param>
+    '''
+    ''' <returns>Whether the value starts with <c> FILE </c>, <c> PATH </c> or <c> REG </c></returns>
     Private Function checkExcludeFlags(result As EntryLintResult, key As iniKey) As Boolean
 
         Dim matches = HasFlagRegex.Matches(key.Value)
@@ -1607,8 +1750,18 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Sorts a typed bucket alphabetically with winapp2.ini precedence applied to the key values
+    ''' Reports keys in a typed bucket that are out of alphabetical order, comparing values with
+    ''' each pipe swapped for <c> " \ \" </c> and numbers padded, and rewrites the bucket's values
+    ''' in sorted order, renamed <c> &lt;keyType&gt;1 </c> onward. The rewrite runs whenever a
+    ''' key is out of place or keys were removed, whatever the Alphabetization and numbering
+    ''' repairs say.
+    ''' <br /><br />
+    '''
+    ''' Does nothing while the Alphabetization scan is off or the bucket holds one key, so
+    ''' then nothing renumbers the bucket, even after a removal.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the errors</param>
     '''
     ''' <param name="entry">
     ''' The <c> winapp2entry </c> whose bucket will be sorted
@@ -1619,7 +1772,8 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="hadDuplicatesRemoved">
-    ''' Indicates that keys have been removed from the bucket
+    ''' Indicates whether keys have just been removed from the bucket, which forces the rewrite
+    ''' so the remaining keys get renumbered
     ''' </param>
     Private Sub sortKeys(result As EntryLintResult,
                           entry As winapp2entry,
@@ -1676,9 +1830,11 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Prints an error when data is received that does not match an expected value
+    ''' Records an error when data is received that does not match an expected value
     ''' </summary>
-    ''' 
+    '''
+    ''' <param name="result">The lint result that collects the error</param>
+    '''
     ''' <param name="err">
     ''' A description of the error as it will be displayed to the user
     ''' </param>
@@ -1692,8 +1848,8 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="cond">
-    ''' Indicates that the error condition is present
-    ''' <br /> Optional, Default: <c> True </c>
+    ''' Indicates whether the error condition is present <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
     Private Sub inputMismatchErr(result As EntryLintResult,
                                  err As String,
@@ -1706,8 +1862,13 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Prints an error whose output text contains an <c> iniKey </c> string, optionally correcting that value with one that is provided
+    ''' Records an error that names <paramref name="key"/> when <paramref name="cond"/> is
+    ''' <c> True </c>, and when <paramref name="repCond"/> is too, sets
+    ''' <paramref name="repairVal"/> to <paramref name="newVal"/>. Nothing is repaired while
+    ''' <paramref name="cond"/> is <c> False </c>.
     ''' </summary>
+    '''
+    ''' <param name="result">The lint result that collects the error</param>
     '''
     ''' <param name="key">
     ''' The <c> iniKey </c> containing an error
@@ -1718,23 +1879,24 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="cond">
-    ''' Indicates that the error condition(s) are present (including any <c> lintRule.shouldScans </c>)
-    ''' <br /> Optional, Default: <c> True </c>
+    ''' Indicates whether the error is present, with any scan setting already folded in <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
     '''
     ''' <param name="repCond">
-    ''' Indicates that the repair function should run
-    ''' <br /> Optional, Default: <c> False </c>
-    ''' </param>
-    '''
-    ''' <param name="newVal">
-    ''' The corrected value with which to replace the incorrect correct value held by <paramref name="repairVal"/>
-    ''' <br /> Optional, Default: <c> "" </c>
+    ''' Indicates whether to apply the repair <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <param name="repairVal">
-    ''' The incorrect value
-    ''' <br /> Optional, Default: <c> "" </c>
+    ''' The value to repair. Callers pass a property such as <c> key.Value </c>, which VB writes
+    ''' back when the call returns <br /><br />
+    ''' Optional, Default: <c> "" </c>
+    ''' </param>
+    '''
+    ''' <param name="newVal">
+    ''' The corrected value for <paramref name="repairVal"/> <br /><br />
+    ''' Optional, Default: <c> "" </c>
     ''' </param>
     Private Sub fullKeyErr(result As EntryLintResult,
                            key As iniKey,
@@ -1773,15 +1935,16 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Prints arbitrarily defined errors without a precondition
+    ''' Replaces <paramref name="currentValue"/> with <paramref name="newValue"/> and logs the
+    ''' change, when <paramref name="param"/> is <c> True </c>
     ''' </summary>
     '''
     ''' <param name="param">
-    ''' The condition under which the string should be replaced
+    ''' Indicates whether to replace the string
     ''' </param>
     '''
     ''' <param name="currentValue">
-    ''' A pointer to the string to be replaced
+    ''' The string to be replaced, passed by reference
     ''' </param>
     '''
     ''' <param name="newValue">

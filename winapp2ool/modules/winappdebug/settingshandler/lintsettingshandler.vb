@@ -23,7 +23,8 @@ Option Strict On
 Module lintsettingshandler
 
     ''' <summary>
-    ''' Restores the default state of the WinappDebug module's properties
+    ''' Restores the default state of the WinappDebug module's properties and every rule's scan
+    ''' and repair, then records them through <see cref="SaveLintSettings"/>
     ''' </summary>
     Public Sub InitDefaultLintSettings()
 
@@ -44,7 +45,8 @@ Module lintsettingshandler
 
     ''' <summary>
     ''' Saves all WinappDebug settings to <c> SettingsFile </c>,
-    ''' including the per-rule scan and repair flags.
+    ''' including the per-rule scan and repair flags. This only changes the copy in memory.
+    ''' <see cref="FlushIfDirty"/> writes it to disk.
     ''' </summary>
     Public Sub SaveLintSettings()
 
@@ -59,6 +61,8 @@ Module lintsettingshandler
 
     ''' <summary>
     ''' Loads per-rule scan and repair flags for WinappDebug from <c> SettingsFile </c>.
+    ''' A rule with no saved value keeps its current state. A saved value that isn't a Boolean
+    ''' throws <c> InvalidCastException </c> to the caller.
     ''' </summary>
     Public Sub LoadLintRulesFromSettings()
 

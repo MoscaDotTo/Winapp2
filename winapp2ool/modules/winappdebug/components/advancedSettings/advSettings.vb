@@ -15,11 +15,16 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary> This module holds some methods for managing WinappDebug's scan/repair states </summary>
+''' <summary>
+''' Runs WinappDebug's Scan Settings menu and turns its per-rule toggles into the
+''' <see cref="RepairErrsFound"/> and <see cref="RepairSomeErrsFound"/> flags that
+''' <see cref="lintRule.fixFormat"/> reads
+''' </summary>
 Public Module advSettings
 
     ''' <summary>
-    ''' Builds the scan/repair settings menu
+    ''' Builds the scan/repair settings menu. Turning a rule's scan off also turns its repair
+    ''' off, and turning a repair on also turns its scan on.
     ''' </summary>
     Private Function buildAdvSettingsMenu() As MenuSection
 
@@ -89,8 +94,11 @@ Public Module advSettings
 
     End Sub
 
-    ''' <summary> 
-    ''' Handles the user input for the scan/repair management menu 
+    ''' <summary>
+    ''' Handles the user input for the scan/repair management menu. We recompute the repair
+    ''' flags from the rules before acting on <paramref name="input"/>, so a toggle only reaches
+    ''' them on the next input, such as the <c> 0 </c> that leaves the menu. The hidden
+    ''' <c> alloff </c> command turns every scan and repair off.
     ''' </summary>
     ''' 
     ''' <param name="input">
@@ -129,8 +137,10 @@ Public Module advSettings
 
     End Sub
 
-    ''' <summary> 
-    ''' Determines which if any lint rules have been modified and whether or not only some repairs are scheduled to run 
+    ''' <summary>
+    ''' Sets <see cref="ScanSettingsChanged"/> when any rule differs from its defaults (it never
+    ''' clears it). Sets <see cref="RepairErrsFound"/> unless a changed rule has its repair off,
+    ''' and sets <see cref="RepairSomeErrsFound"/> when any rule has its repair on.
     ''' </summary>
     Private Sub determineScanSettings()
 
@@ -155,7 +165,9 @@ Public Module advSettings
     End Sub
 
     ''' <summary>
-    ''' Resets the individual scan/repair settings to their defaults 
+    ''' Resets the individual scan/repair settings to their defaults and clears
+    ''' <see cref="ScanSettingsChanged"/> and <see cref="RepairSomeErrsFound"/>.
+    ''' <see cref="RepairErrsFound"/> keeps its value until <see cref="determineScanSettings"/> next runs.
     ''' </summary>
     Public Sub resetScanSettings()
 

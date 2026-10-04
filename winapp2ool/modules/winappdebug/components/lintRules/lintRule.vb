@@ -22,13 +22,19 @@ Public Class lintRule
     ''' <summary> The repair state with which the rule was initially instantiated </summary>
     Private Property initRepairState As Boolean
 
-    ''' <summary> Indicates whether or not scans for this rule should run </summary>
+    ''' <summary>
+    ''' Indicates whether this rule's checks run. Most of its repairs only fire on an error the
+    ''' check reported, so turning this off usually stops them too.
+    ''' </summary>
     Public Property ShouldScan As Boolean
 
-    ''' <summary> Indicates whether or not repairs for this rule should run </summary>
+    ''' <summary>
+    ''' Indicates whether this rule's repairs should run. Most repairs go through
+    ''' <see cref="fixFormat"/>, which ignores this while <see cref="RepairErrsFound"/> is <c> True </c>.
+    ''' </summary>
     Public Property ShouldRepair As Boolean
 
-    ''' <summary> Describes to the user which type of scan routines this rule controls </summary>
+    ''' <summary> Describes to the user which type of scan routines this rule controls, starting with <c> detecting </c> </summary>
     Public Property ScanText As String
 
     ''' <summary> Describes to the user which type of repairs this rule controls </summary>
@@ -37,7 +43,7 @@ Public Class lintRule
     ''' <summary> The name of the rule as it will appear in menus </summary>
     Public Property LintName As String
 
-    ''' <summary> Returns <c> True </c> if the current scan/repair settings do not match their inital states </summary>
+    ''' <summary> Returns whether the current scan/repair settings differ from the ones the rule was created with </summary>
     Public Function hasBeenChanged() As Boolean
         Return Not ShouldScan = initScanState Or Not ShouldRepair = initRepairState
     End Function
@@ -48,12 +54,12 @@ Public Class lintRule
         ShouldRepair = initRepairState
     End Sub
 
-    ''' <summary> Creates a new rule for the linter, retains the inital given parameters for later restoration </summary>
-    ''' <param name="scan"> The default state for scans <br /> <br /> <c> True </c> for Enabled <br /> <c> False </c> for Disabled </param>
-    ''' <param name="repair"> The default state for repairs <br /> <br /> <c> True </c> for Enabled <br /> <c> False </c> for Disabled </param>
-    ''' <param name="name"> The name of the rule as it will appear in menus </param>
-    ''' <param name="scTxt"> The description of what the rule scans for as it will appear in menus </param>
-    ''' <param name="rpTxt"> The description of what the the rule repairs as it will appear in menus </param>
+    ''' <summary> Creates a new <c> lintRule </c> and keeps its scan and repair states for <see cref="resetParams"/> to restore </summary>
+    ''' <param name="scan"> Indicates whether the rule's scan is on by default </param>
+    ''' <param name="repair"> Indicates whether the rule's repair is on by default </param>
+    ''' <param name="name"> The name of the rule as it will appear in menus and in the saved settings </param>
+    ''' <param name="scTxt"> The description of what the rule scans for. We prefix it with <c> detecting </c> for the menu </param>
+    ''' <param name="rpTxt"> The description of what the rule repairs as it will appear in menus </param>
     Public Sub New(scan As Boolean, repair As Boolean, name As String, scTxt As String, rpTxt As String)
         ShouldScan = scan
         initScanState = scan
@@ -76,7 +82,11 @@ Public Class lintRule
         ShouldRepair = False
     End Sub
 
-    ''' <summary> Returns a Boolean indicating whether or not the repairs gated by this rule should be run </summary>
+    ''' <summary>
+    ''' Returns whether the repairs gated by this rule should run: always while
+    ''' <see cref="RepairErrsFound"/> is <c> True </c>, otherwise only when both
+    ''' <see cref="RepairSomeErrsFound"/> and <see cref="ShouldRepair"/> are
+    ''' </summary>
     Public Function fixFormat() As Boolean
         Return RepairErrsFound Or (RepairSomeErrsFound And ShouldRepair)
     End Function

@@ -24,9 +24,10 @@ Option Strict On
 ''' lets a pattern that only older engines write stay on record without shipping to every entry.
 ''' <br /><br />
 '''
-''' It is still a <c> Dictionary </c>, so every consumer that only reads templates is unaffected.
-''' A plain dictionary has no tiers, and <see cref="ScaffoldCatalogs.ResolveScaffolds"/> treats it
-''' as having no legacy scaffolds.
+''' It is still a <c> Dictionary </c>, so a consumer that only reads templates needn't know about
+''' tiers. A plain dictionary has no tiers: <see cref="ScaffoldCatalogs.ResolveScaffolds"/> treats
+''' it as having no legacy scaffolds, and <see cref="ScaffoldCatalogs.ParseSection"/> warns on a
+''' <c> Tier=Legacy </c> it can't record.
 ''' </summary>
 Public Class ScaffoldCatalog
     Inherits Dictionary(Of String, List(Of String))
@@ -46,26 +47,27 @@ End Class
 ''' <summary>
 ''' The scaffold catalogs loaded from one scaffold directory, partitioned by engine family.
 ''' Produced by <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/> and consumed by the entry
-''' generators, replacing the former arrangement where each family was a separate configured
-''' file path — one per settings property, menu option, CLI slot, and build-script argument.
+''' generators.
 ''' <br /><br />
 '''
 ''' Family lookup never fails. <see cref="ForFamily"/> creates an empty catalog on first
 ''' request for a family the directory did not supply, so a builder that binds a family whose
-''' catalog file is missing emits zero keys for it rather than throwing — the same
-''' degrade-and-warn contract <c> LoadCatalog </c> has always had for a missing file.
+''' catalog is missing emits zero keys for it rather than throwing. Loading doesn't warn about
+''' that case, but every entry that declares the family's root then warns once for each
+''' scaffold it requests, since none of them is in the empty catalog.
 ''' </summary>
 Public Class ScaffoldCatalogSet
 
     ''' <summary>
-    ''' The per-family scaffold catalogs, keyed by family token (<c> WebView </c>,
-    ''' <c> QtWebEngine </c>, <c> Electron </c>). Each value is that family's catalog, keyed by
-    ''' scaffold name — the same shape <c> ScaffoldCatalogs.LoadCatalog </c> returns.
+    ''' The per-family scaffold catalogs, keyed case-insensitively by family token
+    ''' (<c> WebView </c>, <c> QtWebEngine </c>, <c> Electron </c>). Each value is that family's
+    ''' catalog, keyed by scaffold name.
     ''' </summary>
     Private ReadOnly _families As New Dictionary(Of String, ScaffoldCatalog)(StringComparer.InvariantCultureIgnoreCase)
 
     ''' <summary>
-    ''' The family tokens present in this set, in first-seen order
+    ''' The family tokens present in this set, in first-seen order. This includes any family
+    ''' that <see cref="ForFamily"/> created empty because a caller asked for it.
     ''' </summary>
     Public ReadOnly Property Families As IEnumerable(Of String)
         Get
@@ -75,10 +77,9 @@ Public Class ScaffoldCatalogSet
 
     ''' <summary>
     ''' Returns the catalog for <paramref name="familyLabel"/>, creating and registering an
-    ''' empty one if the family is not yet present. Callers may mutate the returned dictionary
-    ''' — that is how <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/> accumulates sections
-    ''' into it — so a consumer that only wants to read should treat it as read-only by
-    ''' convention.
+    ''' empty one if the family is not yet present. Every caller gets the same catalog object,
+    ''' not a copy. <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/> fills it in place this
+    ''' way, so a consumer that only wants to read must not change it.
     ''' </summary>
     '''
     ''' <param name="familyLabel">

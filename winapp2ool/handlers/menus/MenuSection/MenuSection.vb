@@ -18,10 +18,9 @@
 Option Strict On
 
 ''' <summary>
-''' MenuSection is a MenuMaker helper class that represents a "section" of a menu 
-''' It allows easy grouping of related menu options, toggles, and lines of text 
-''' as well as enabling the simple creation of entire module menus with a more easily understood 
-''' interface than the pre-2025 MenuMaker
+''' A section of a MenuMaker menu: a list of options, toggles and lines of text that are
+''' printed together, or a complete module menu with a header. Items are stored as print
+''' actions and nothing reaches the console until <see cref="Print"/>.
 ''' </summary>
 Public Class MenuSection
 
@@ -38,8 +37,12 @@ Public Class MenuSection
     Private _items As New List(Of Action)
 
     ''' <summary>
-    ''' Indicates that this section would render nothing, so a caller assembling sections can
-    ''' skip it rather than emitting a divider or a border around empty space
+    ''' Indicates whether this section has no items, so a caller assembling sections can
+    ''' skip it rather than emitting a divider or a border around empty space. A title alone
+    ''' doesn't count as an item. <see cref="AddOption"/>, <see cref="AddToggle"/>,
+    ''' <see cref="AddLine"/>, <see cref="AddBlank"/>, <see cref="AddColoredLine"/>,
+    ''' <see cref="AddFileInfo"/> and <see cref="AddColoredFileInfo"/> keep their item when
+    ''' its condition is <c> False </c>, so a section of those isn't empty even when it prints nothing.
     ''' </summary>
     Public ReadOnly Property IsEmpty As Boolean
         Get
@@ -48,27 +51,27 @@ Public Class MenuSection
     End Property
 
     ''' <summary>
-    ''' Registered handlers for dispatching user input. Each entry corresponds to one
-    ''' numbered option in the order it was added (index 0 = option 1, the first selectable
-    ''' item after Exit). Non-numbered items (blanks, lines, file info) are not registered here.
+    ''' Registered handlers for dispatching user input, in the order they were added
+    ''' (index 0 = option 1, the first selectable item after Exit). Only the
+    ''' <c> AddDispatched* </c> methods register here, so the indexes match the printed numbers
+    ''' only when every numbered option in the menu was added through one of them.
     ''' </summary>
     Private _actions As New List(Of Action)
 
     ''' <summary>
-    ''' The color of the title when printed. If set, the title will be printed in this color. 
-    ''' If not set, the title is printed in the default console color. 
-    ''' This allows for easy setting of accent colors for modules
+    ''' The color of the title when printed, or <c> Nothing </c> for the default console color.
+    ''' Nothing in the class sets it, so titles always print in the default color.
     ''' </summary>
     Private _titleColor As ConsoleColor? = Nothing
 
     ''' <summary>
-    ''' Initializes a new instance of the MenuSection class with the specified 
-    ''' <c> <paramref name="title"/> </c>
+    ''' Creates a new <c> MenuSection </c> with the given <paramref name="title"/>
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="title">
-    ''' The title of the menu section. If <c> "" </c>, no title is printed
-    ''' </param> 
+    ''' The title of the menu section. If <c> "" </c>, no title is printed <br /><br />
+    ''' Optional, Default: <c> "" </c>
+    ''' </param>
     Public Sub New(Optional title As String = "")
 
         _title = title
@@ -76,15 +79,14 @@ Public Class MenuSection
     End Sub
 
     ''' <summary>
-    ''' Indicates whether or not this MenuSection represents a complete menu with header
+    ''' Indicates whether this MenuSection represents a complete menu with header
     ''' </summary>
     Private _isCompleteMenu As Boolean = False
 
     ''' <summary>
-    ''' Indicates whether or not this MenuSection is the root menu of an application 
-    ''' (as opposed to a submenu) <br />
-    ''' This affects certain printing behaviors, such as the phrasing of the exit option in the menu
-    ''' </summary> 
+    ''' Indicates whether this MenuSection is the root menu of the application rather than a
+    ''' submenu, which changes the wording of the Exit option
+    ''' </summary>
     Private _isRootMenu As Boolean = False
 
     ''' <summary>
@@ -104,9 +106,10 @@ Public Class MenuSection
 
     ''' <summary>
     ''' Adds an option to the menu section. <br />
-    ''' Options comprise of a name and a description, and are printed as selectable (numbered) items 
-    ''' in the menu. <br />
-    ''' If the <c> <paramref name="condition"/> </c> is false, the option will not be printed
+    ''' Options consist of a name and a description, and are printed as selectable (numbered) items
+    ''' in the menu. No handler is registered, so <see cref="Dispatch"/> can't reach it. <br />
+    ''' If <paramref name="condition"/> is <c> False </c>, the option is not printed and doesn't
+    ''' use up a number
     ''' </summary>
     ''' 
     ''' <param name="name">
@@ -118,9 +121,11 @@ Public Class MenuSection
     ''' </param>
     ''' 
     ''' <param name="condition">
-    ''' Indicates whether or not the option should be printed <br />
+    ''' Indicates whether the option should be printed <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddOption(name As String,
                               description As String,
                      Optional condition As Boolean = True) As MenuSection
@@ -131,30 +136,31 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Creates a MenuSection that represents a complete menu with header and descriptions
+    ''' Builds a MenuSection that represents a complete menu with header and descriptions.
+    ''' If <see cref="MenuMaker.MenuHeaderText"/> holds a pending header, we use it and its color
+    ''' in place of <paramref name="menuHeader"/> and <paramref name="headerColor"/>, then clear it.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="menuHeader">
-    ''' The text to appear in the header of the menu. The header 
+    ''' The text to appear in the header of the menu. The header
     ''' visually approximates a window title bar within the MenuMaker system
     ''' </param>
-    ''' 
+    '''
     ''' <param name="descriptionLines">
-    ''' A set of text lines that describe the menu's purpose, printed 
+    ''' A set of text lines that describe the menu's purpose, printed
     ''' under the header but before any menu items
-    ''' 
     ''' </param>
-    ''' 
+    '''
     ''' <param name="headerColor">
-    ''' The color with which the header of the complete menu should be printed to the user 
-    ''' <br />
-    ''' Optional, Default: <c> Nothing </c> (prints in default console color)
+    ''' The color with which the header of the complete menu should be printed to the user <br /><br />
+    ''' Optional, Default: <c> Nothing </c> <br />
+    ''' prints in the default console color
     ''' </param>
-    ''' 
+    '''
     ''' <param name="isRootMenu">
-    ''' Indicates whether or not this MenuSection is the root menu of an application 
-    ''' (as opposed to a submenu) <br />
-    ''' This affects certain printing behaviors, such as the phrasing of the exit option in the menu <br />
+    ''' Indicates whether this MenuSection is the root menu of the application rather than a
+    ''' submenu. When <c> True </c>, the Exit option reads "Exit the application" instead of
+    ''' "Return to the previous menu". <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     ''' 
@@ -167,9 +173,6 @@ Public Class MenuSection
                                               Optional headerColor As ConsoleColor? = Nothing,
                                               Optional isRootMenu As Boolean = False) As MenuSection
 
-        ' MenuMaker stores a replacement header text as a form of menu output for the user 
-        ' If this exists, we should show it instead of the module name which is the typical
-        ' menu header 
         Dim section As New MenuSection With {
             ._isCompleteMenu = True,
             ._isRootMenu = isRootMenu,
@@ -186,31 +189,33 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Adds an Enable/Disable toggle to the menu section <br />
-    ''' Toggles are printed as an item with a name and a description, and colored based on their state  <br />
-    ''' Toggles are printed <c> Green </c> when <c> <paramref name="isEnabled"/> </c>
-    ''' is <c> True </c>, <c> Red </c> otherwise <br />
-    ''' If the <c> <paramref name="condition"/> </c> is false, the toggle will not be printed
+    ''' Adds an Enable/Disable toggle to the menu section as a numbered option. We print the
+    ''' name as <c> "Toggle {name}" </c> and start the description with <c> "Disable" </c> when
+    ''' <paramref name="isEnabled"/> is <c> True </c> and <c> "Enable" </c> otherwise. <br />
+    ''' Toggles are printed <c> Green </c> when <paramref name="isEnabled"/>
+    ''' is <c> True </c>, <c> Red </c> otherwise. No handler is registered. <br />
+    ''' If <paramref name="condition"/> is <c> False </c>, the toggle is not printed and doesn't
+    ''' use up a number
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="name">
     ''' The name of the toggle, appears to the left of the description
     ''' </param>
-    ''' 
+    '''
     ''' <param name="description">
     ''' The description of the toggle, appears to the right of the name
     ''' </param>
-    ''' 
+    '''
     ''' <param name="isEnabled">
-    ''' Indicates whether the setting the toggle controls is currently enabled or disabled. <br />
-    ''' If <c> True </c>, the toggle is printed in green, indicating it is enabled. <br />
-    ''' If <c> False </c>, the toggle is printed in red, indicating it is disabled.
+    ''' Indicates whether the setting the toggle controls is currently enabled
     ''' </param>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' Indicates whether or not the toggle should be printed <br />
+    ''' Indicates whether the toggle should be printed <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddToggle(name As String,
                               description As String,
                               isEnabled As Boolean,
@@ -224,22 +229,25 @@ Public Class MenuSection
     ''' <summary>
     ''' Adds a line of text to the menu section. <br />
     ''' The line is printed as a simple text line, optionally centered. <br />
-    ''' If the <c> <paramref name="condition"/> </c> is false, the line will not be printed
+    ''' If <paramref name="condition"/> is <c> False </c>, the line will not be printed
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="text">
     ''' The text to be added to the menu section
     ''' </param>
-    ''' 
+    '''
     ''' <param name="centered">
-    ''' Indicates whether the text should be centered in the console window. <br />
-    ''' Optional, Default: <c> False </c> (text is left-aligned)
+    ''' Indicates whether the text should be centered in the console window <br /><br />
+    ''' Optional, Default: <c> False </c> <br />
+    ''' text is left-aligned
     ''' </param>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' Indicates whether or not the line should be printed <br />
+    ''' Indicates whether the line should be printed <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddLine(text As String,
                    Optional centered As Boolean = False,
                    Optional condition As Boolean = True) As MenuSection
@@ -250,15 +258,16 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Adds a blank line to the menu section. <br />
-    ''' A blank line is simply a line with no text, used for spacing in the menu. <br />
-    ''' If the <c> <paramref name="condition"/> </c> is false, the blank line will not be printed
+    ''' Adds a blank framed line to the menu section, for spacing. <br />
+    ''' If <paramref name="condition"/> is <c> False </c>, the blank line will not be printed
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' Indicates whether or not the blank line should be printed <br />
+    ''' Indicates whether the blank line should be printed <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddBlank(Optional condition As Boolean = True) As MenuSection
 
         _items.Add(Sub() MenuMaker.PrintBlank(condition))
@@ -279,12 +288,16 @@ Public Class MenuSection
     ''' </param>
     ''' 
     ''' <param name="centered">
-    ''' Whether the text should be centered
+    ''' Indicates whether the text should be centered <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' Whether the line should be printed
+    ''' Indicates whether the line should be printed <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddColoredLine(text As String,
                                   color As ConsoleColor,
                                   Optional centered As Boolean = False,
@@ -297,30 +310,27 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Adds a <c> MenuLine </c> containing information about a file (ie. its path) to the menu,
-    ''' colored based on the file's existence on disk. <br />
-    ''' <br /> The line will be displayed in <br />
-    ''' <c> Green </c> if the file exists, <br /> <c> Red </c> otherwise <br />
-    ''' <br />
-    ''' If the given <c> <paramref name="condition"/> 
-    ''' </c> is <c> False </c>, the file <c> MenuLine </c> will not be printed
+    ''' Adds a line showing <paramref name="text"/> followed by <paramref name="filePath"/>, with the
+    ''' current directory shortened to <c> .. </c>. The line is <c> Green </c> if the file exists
+    ''' and <c> Red </c> otherwise. We check the file when the line is added, not when it prints.
+    ''' <br /><br />
+    ''' If <paramref name="condition"/> is <c> False </c>, the line will not be printed
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="text">
-    ''' A description of the file whose path is being displayed as it will appear to the user
+    ''' A label printed directly before the path, with no separator added
     ''' </param>
-    ''' 
+    '''
     ''' <param name="filePath">
     ''' The path on disk to the file whose existence is being indicated by color
-    ''' <br />
-    ''' The path will be displayed in green if the file exists, red if it does not
     ''' </param>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' The condition under which the file info line should be printed
-    ''' <br />
+    ''' Indicates whether the line should be printed <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddFileInfo(text As String,
                                 filePath As String,
                        Optional condition As Boolean = True) As MenuSection
@@ -333,13 +343,23 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Adds a line showing <paramref name="text"/> followed by <paramref name="filePath"/>, with the
+    ''' current directory shortened to <c> .. </c>, in a fixed color. Unlike
+    ''' <see cref="AddFileInfo"/>, the color doesn't depend on whether the file exists.
     ''' </summary>
-    ''' <param name="text"></param>
-    ''' <param name="filePath"></param>
-    ''' <param name="color"></param>
-    ''' <param name="condition"></param>
-    ''' <returns></returns>
+    '''
+    ''' <param name="text">A label printed directly before the path, with no separator added</param>
+    '''
+    ''' <param name="filePath">The path to show</param>
+    '''
+    ''' <param name="color">The color of the line</param>
+    '''
+    ''' <param name="condition">
+    ''' Indicates whether the line should be printed <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddColoredFileInfo(text As String,
                                 filePath As String,
                                 color As ConsoleColor,
@@ -351,16 +371,19 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Adds a Reset Module Settings option to the current menu 
+    ''' Adds a numbered <c> Reset Settings </c> option to the current menu. No handler is
+    ''' registered. When <paramref name="condition"/> is <c> False </c>, nothing is added.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="moduleName">
     ''' The name of the module whose reset settings option will be created
     ''' </param>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' Indicates whether or not the option should be printed (i.e. whether settings have been changed)
+    ''' Indicates whether the option should be added, usually whether the settings have been changed
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddResetOpt(moduleName As String,
                                 condition As Boolean) As MenuSection
 
@@ -373,24 +396,28 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Adds a colored option to the menu section
+    ''' Adds a colored numbered option to the menu section. No handler is registered.
+    ''' When <paramref name="condition"/> is <c> False </c>, nothing is added.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="name">
     ''' The name of the menu option (left text)
     ''' </param>
-    ''' 
+    '''
     ''' <param name="description">
     ''' A description of the menu option's function (right text)
     ''' </param>
-    ''' 
+    '''
     ''' <param name="color">
     ''' The color with which the option should be printed to the user
     ''' </param>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' Whether the option should be printed
+    ''' Indicates whether the option should be added <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddColoredOption(name As String,
                                    description As String,
                                    color As ConsoleColor,
@@ -405,16 +432,20 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Adds a warning line (yellow text with /!\ markers /!\) to the menu section
+    ''' Adds a warning line, printed as left-aligned yellow text, to the menu section.
+    ''' When <paramref name="condition"/> is <c> False </c>, nothing is added.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="text">
     ''' The warning text to display
     ''' </param>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' Whether the warning should be printed
+    ''' Indicates whether the warning should be added <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddWarning(text As String,
                       Optional condition As Boolean = True) As MenuSection
 
@@ -427,11 +458,18 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Adds a box of three lines: a top border, <paramref name="text"/> centered, and a bottom
+    ''' border. When <paramref name="condition"/> is <c> False </c>, nothing is added.
     ''' </summary>
-    ''' <param name="text"></param>
-    ''' <param name="condition"></param>
-    ''' <returns></returns>
+    '''
+    ''' <param name="text">The text inside the box</param>
+    '''
+    ''' <param name="condition">
+    ''' Indicates whether the box should be added <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddBoxWithText(text As String,
                           Optional condition As Boolean = True) As MenuSection
 
@@ -448,13 +486,15 @@ Public Class MenuSection
     ''' <summary>
     ''' Adds a top border to the menu section. <br />
     ''' Visually separates content within a section into a new box <br />
-    ''' If the given <c> <paramref name="condition"/> </c> is false, the border will not be printed
+    ''' If <paramref name="condition"/> is <c> False </c>, nothing is added
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' Indicates whether or not the border should be printed <br />
+    ''' Indicates whether the border should be added <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddTopBorder(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
@@ -466,10 +506,16 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Adds a bottom border that closes the current box. If <paramref name="condition"/> is
+    ''' <c> False </c>, nothing is added.
     ''' </summary>
-    ''' <param name="condition"></param>
-    ''' <returns></returns>
+    '''
+    ''' <param name="condition">
+    ''' Indicates whether the border should be added <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddBottomBorder(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
@@ -482,19 +528,21 @@ Public Class MenuSection
 
     ''' <summary>
     ''' Adds a T-frame conjoiner divider to the menu section. <br />
-    ''' A conjoiner uses frame type 3 (<c> ╠ ╣ </c>), by default filled with <c> ═ </c>. <br />
+    ''' A conjoiner uses frame type 3 (<c> ╠ ╣ </c>), by default filled with <c> ═ </c>.
+    ''' If <paramref name="condition"/> is <c> False </c>, nothing is added.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="condition">
-    ''' Indicates whether the divider should be printed <br />
+    ''' Indicates whether the divider should be added <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="solid">
-    ''' Indicates whether the divider should be filled with <c> = </c> or left empty <br />
-    ''' Optional, Default: <c> True </c> (filled) 
+    ''' Indicates whether the divider should be filled with <c> ═ </c> rather than left empty <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' <returns></returns>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddDivider(Optional condition As Boolean = True,
                                Optional solid As Boolean = True) As MenuSection
 
@@ -507,10 +555,18 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Adds an unframed empty line, written by <see cref="MenuMaker.PrintNewLine"/>. That skips the
+    ''' render buffer, so during a buffered <see cref="Print"/> the line reaches the console ahead
+    ''' of the lines buffered before it. If <paramref name="condition"/> is <c> False </c>, nothing
+    ''' is added.
     ''' </summary>
-    ''' <param name="condition"></param>
-    ''' <returns></returns>
+    '''
+    ''' <param name="condition">
+    ''' Indicates whether the line should be added <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddNewLine(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
@@ -522,10 +578,18 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' 
+    ''' Adds the unframed line <c> "Press any key to return to the menu." </c> between two
+    ''' <see cref="AddNewLine"/> lines. During a buffered <c> Print </c>, both blank lines skip
+    ''' the buffer and reach the console ahead of the prompt. It only prints the prompt: waiting
+    ''' for the key is up to the caller. If <paramref name="condition"/> is <c> False </c>, nothing is added.
     ''' </summary>
-    ''' <param name="condition"></param>
-    ''' <returns></returns>
+    '''
+    ''' <param name="condition">
+    ''' Indicates whether the prompt should be added <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddAnyKeyPrompt(Optional condition As Boolean = True) As MenuSection
 
         If Not condition Then Return Me
@@ -540,8 +604,8 @@ Public Class MenuSection
 
     ''' <summary>
     ''' Adds a numbered option, registers a dispatch handler, and returns <c> Me </c> for chaining. <br />
-    ''' When <c> <paramref name="condition"/> </c> is <c> False </c>, neither the option nor the
-    ''' handler is registered, the option number sequence is unaffected.
+    ''' When <paramref name="condition"/> is <c> False </c>, neither the option nor the
+    ''' handler is registered, and the option number sequence is unaffected.
     ''' </summary>
     '''
     ''' <param name="name">
@@ -557,9 +621,11 @@ Public Class MenuSection
     ''' </param>
     '''
     ''' <param name="condition">
-    ''' Whether the option should be shown and dispatched <br />
+    ''' Indicates whether the option should be shown and dispatched <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddDispatchedOption(name As String,
                                         description As String,
                                         handler As Action,
@@ -576,7 +642,7 @@ Public Class MenuSection
 
     ''' <summary>
     ''' Adds a toggle option, registers a dispatch handler, and returns <c> Me </c> for chaining. <br />
-    ''' When <c> <paramref name="condition"/> </c> is <c> False </c>, neither the toggle nor the
+    ''' When <paramref name="condition"/> is <c> False </c>, neither the toggle nor the
     ''' handler is registered.
     ''' </summary>
     '''
@@ -589,7 +655,7 @@ Public Class MenuSection
     ''' </param>
     '''
     ''' <param name="isEnabled">
-    ''' The current state of the setting this toggle controls
+    ''' Indicates whether the setting this toggle controls is enabled
     ''' </param>
     '''
     ''' <param name="handler">
@@ -597,9 +663,11 @@ Public Class MenuSection
     ''' </param>
     '''
     ''' <param name="condition">
-    ''' Whether the toggle should be shown and dispatched <br />
+    ''' Indicates whether the toggle should be shown and dispatched <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddDispatchedToggle(name As String,
                                         description As String,
                                         isEnabled As Boolean,
@@ -617,7 +685,7 @@ Public Class MenuSection
 
     ''' <summary>
     ''' Adds a colored option, registers a dispatch handler, and returns <c> Me </c> for chaining. <br />
-    ''' When <c> <paramref name="condition"/> </c> is <c> False </c>, neither the option nor the
+    ''' When <paramref name="condition"/> is <c> False </c>, neither the option nor the
     ''' handler is registered.
     ''' </summary>
     '''
@@ -638,9 +706,11 @@ Public Class MenuSection
     ''' </param>
     '''
     ''' <param name="condition">
-    ''' Whether the option should be shown and dispatched <br />
+    ''' Indicates whether the option should be shown and dispatched <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddDispatchedColoredOption(name As String,
                                                description As String,
                                                color As ConsoleColor,
@@ -658,7 +728,7 @@ Public Class MenuSection
 
     ''' <summary>
     ''' Adds a Reset Settings option, registers a dispatch handler, and returns <c> Me </c> for chaining. <br />
-    ''' When <c> <paramref name="condition"/> </c> is <c> False </c>, the option is not shown and
+    ''' When <paramref name="condition"/> is <c> False </c>, the option is not shown and
     ''' no handler is registered.
     ''' </summary>
     '''
@@ -667,12 +737,14 @@ Public Class MenuSection
     ''' </param>
     '''
     ''' <param name="condition">
-    ''' Whether the option should be shown (i.e. whether settings have been changed)
+    ''' Indicates whether the option should be shown, usually whether the settings have been changed
     ''' </param>
     '''
     ''' <param name="handler">
     ''' The action to invoke when the user selects this option
     ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
     Public Function AddDispatchedResetOpt(moduleName As String,
                                           condition As Boolean,
                                           handler As Action) As MenuSection
@@ -688,7 +760,8 @@ Public Class MenuSection
     ''' <summary>
     ''' Dispatches the user's integer input to the registered handler for the selected option. <br />
     ''' Option 0 (Exit) is NOT dispatched, the caller handles it. <br />
-    ''' Options 1..N map to handlers registered via <c> AddDispatched* </c> calls in order.
+    ''' Options 1..N map to handlers registered via <c> AddDispatched* </c> calls in order, which
+    ''' matches the printed numbers only if no numbered option was added without a handler.
     ''' </summary>
     '''
     ''' <param name="intInput">
@@ -711,13 +784,12 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Hands off printing of the MenuSection to the appropriate function based on whether or not
-    ''' it is a complete menu
+    ''' Prints the section as one buffered render pass, as a complete menu or as a plain section
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="withDivider">
-    ''' Indicates that the section should be printed with a solid border dividing it from its options
-    ''' <br /> 
+    ''' Indicates whether a plain section's title is followed by a solid divider. Complete menus
+    ''' and untitled sections ignore it. <br /><br />
     ''' Optional, Default: <c> True </c>
     ''' </param>
     Public Sub Print(Optional withDivider As Boolean = True)
@@ -739,12 +811,12 @@ Public Class MenuSection
     End Sub
 
     ''' <summary>
-    ''' Prints a menu section that isn't itself a complete menu
+    ''' Prints a menu section that isn't itself a complete menu: its centered title, if it has one,
+    ''' and then its items. Option numbering carries on from whatever printed before.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="withDivider">
-    ''' Indicates that the section should be printed with a solid border dividing it from its options
-    ''' <br />
+    ''' Indicates whether to print a solid divider after the title
     ''' </param>
     Private Sub PrintSection(withDivider As Boolean)
 
@@ -770,9 +842,8 @@ Public Class MenuSection
     End Sub
 
     ''' <summary>
-    ''' Prints a complete menu with header, descriptions, and options beginning with an exit option
-    ''' <br />
-    ''' This is used for the main menus of modules that require a header and multiple options
+    ''' Prints a complete menu in one box: header, centered description lines, the menu prompt,
+    ''' then the items. We reset option numbering first, so Exit is option <c> 0 </c>.
     ''' </summary>
     Private Sub PrintCompleteMenu()
 

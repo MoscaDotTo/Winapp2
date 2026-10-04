@@ -25,7 +25,7 @@ Imports System.IO
 Public Class iniFileChooser
 
     ''' <summary>
-    ''' The current directory
+    ''' The directory of the chosen file. <see cref="Path"/> joins it to <see cref="Name"/> with a backslash.
     ''' </summary>
     Public Property Dir As String
 
@@ -35,12 +35,12 @@ Public Class iniFileChooser
     Public Property Name As String
 
     ''' <summary>
-    ''' The default filename offered as a numbered option
+    ''' The starting filename, offered as a numbered option and restored by <see cref="ResetParams"/>
     ''' </summary>
     Public ReadOnly Property InitName As String
 
     ''' <summary>
-    ''' The starting directory, saved at construction time for use by <c> ResetParams </c>
+    ''' The starting directory, saved at construction time for use by <see cref="ResetParams"/>
     ''' </summary>
     Public ReadOnly Property InitDir As String
 
@@ -50,31 +50,34 @@ Public Class iniFileChooser
     Public ReadOnly Property SecondName As String
 
     ''' <summary>
-    ''' When True, <c> Load </c> will loop until the chosen file exists on disk
+    ''' Indicates whether picking a filename that doesn't exist keeps the chooser open. When
+    ''' <c> False </c>, any name closes it, which suits output files.
     ''' </summary>
     Public ReadOnly Property MustExist As Boolean
 
     Private _tmpRename As String = ""
 
     ''' <summary>
-    ''' Creates an <c> iniFileChooser </c> with the given starting directory and filename
+    ''' Creates a new <c> iniFileChooser </c> with the given starting directory and filename
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="dir">
     ''' Initial directory
     ''' </param>
-    ''' 
+    '''
     ''' <param name="name">
     ''' Initial filename
     ''' </param>
-    ''' 
+    '''
     ''' <param name="secondName">
-    ''' Alternate default filename offered as a quick-select option
+    ''' Alternate default filename offered as a quick-select option <br /><br />
+    ''' Optional, Default: <c> "" </c> <br />
+    ''' no alternate is offered
     ''' </param>
-    ''' 
+    '''
     ''' <param name="mustExist">
-    ''' Indicates that this file must exist and forces Load() to loop until a file that exsits is chosen
-    ''' <br /> Optional, Default: <c> True </c>
+    ''' Indicates whether picking a filename that doesn't exist keeps the chooser open <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
     Public Sub New(dir As String, name As String,
                    Optional secondName As String = "",
@@ -97,12 +100,13 @@ Public Class iniFileChooser
     End Function
 
     ''' <summary>
-    ''' Returns whether the current file (or just directory, when 
-    ''' <paramref name="checkPath"/> is False) exists on disk
+    ''' Returns whether the current file (or just directory, when
+    ''' <paramref name="checkPath"/> is <c> False </c>) exists on disk
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="checkPath">
-    ''' When True, checks the full file path; when False, checks only the directory
+    ''' Indicates whether to check the full file path rather than only the directory <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
     Public Function Exists(Optional checkPath As Boolean = True) As Boolean
 
@@ -111,32 +115,39 @@ Public Class iniFileChooser
     End Function
 
     ''' <summary>
-    ''' Validates the file, looping until it exists (or the user exits without selecting a valid file).
-    ''' Returns a loaded <c> iniFile </c>, or <c> Nothing </c> if the user exited without a valid selection.
+    ''' Returns the chosen file as a parsed <c> iniFile </c>. If the file doesn't exist, we open the
+    ''' chooser menu once, and return <c> Nothing </c> if the user leaves it without an existing
+    ''' file. In silent mode that menu can't run, so a missing file ends the process instead.
     ''' <br /> When the caller identifies which setting this chooser backs, a file picked through the
     ''' prompt is persisted to the settings file so the choice survives the session
     ''' </summary>
     '''
     ''' <param name="settingsChangedSetting">
-    ''' A pointer to the boolean indicating that the owning module's settings have been modified from
-    ''' their default state
-    ''' <br /> Optional, Default: <c> False </c>
+    ''' The owning module's settings-changed flag. Set to <c> True </c> if we persist a newly
+    ''' chosen file <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <param name="callingModule">
-    ''' The name of the module owning this chooser as it appears in the settings file
-    ''' <br /> Optional, Default: <c> "" </c>
+    ''' The name of the module owning this chooser as it appears in the settings file <br /><br />
+    ''' Optional, Default: <c> "" </c>
     ''' </param>
     '''
     ''' <param name="settingName">
-    ''' The name of this chooser as it appears in the codebase
-    ''' <br /> Optional, Default: <c> "" </c>
+    ''' The name of this chooser as it appears in the codebase <br /><br />
+    ''' Optional, Default: <c> "" </c>
     ''' </param>
     '''
     ''' <param name="settingChangedName">
-    ''' The name of <c> <paramref name="settingsChangedSetting"/> </c> as it appears in the codebase
-    ''' <br /> Optional, Default: <c> "" </c>
+    ''' The name of <paramref name="settingsChangedSetting"/> as it appears in the codebase <br /><br />
+    ''' Optional, Default: <c> "" </c> <br />
+    ''' we persist a new choice only when all three names are given
     ''' </param>
+    '''
+    ''' <returns>
+    ''' The parsed file, or <c> Nothing </c> if the user left the chooser without picking a file
+    ''' that exists
+    ''' </returns>
     Public Function Load(Optional ByRef settingsChangedSetting As Boolean = False,
                          Optional callingModule As String = "",
                          Optional settingName As String = "",
@@ -168,9 +179,15 @@ Public Class iniFileChooser
     End Function
 
     ''' <summary>
-    ''' Reads and returns the file at the current path as an <c> iniFile </c> without showing the chooser menu.
-    ''' Use this when the file is known to exist. For interactive validation, use <c> Load </c> instead.
+    ''' Returns the file at the current path, parsed by <see cref="iniFile.FromFile"/>, without
+    ''' showing the chooser menu. Use this when the file is known to exist. For interactive
+    ''' validation, use <see cref="Load"/> instead.
     ''' </summary>
+    '''
+    ''' <returns>
+    ''' The parsed file, or one with no sections if the file doesn't exist. A missing directory
+    ''' throws instead.
+    ''' </returns>
     Public Function Read() As iniFile
 
         Return iniFile.FromFile(Path())
@@ -190,7 +207,7 @@ Public Class iniFileChooser
 
     ''' <summary>
     ''' Builds the File Chooser menu with all options and their dispatch handlers registered inline.
-    ''' Called by both <c> PrintMenu </c> (to render) and <c> HandleInput </c>
+    ''' Called by both <see cref="PrintMenu"/> (to render) and <see cref="HandleInput"/>
     ''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
     ''' </summary>
     Private Function buildMenu() As MenuSection
@@ -235,9 +252,13 @@ Public Class iniFileChooser
     End Sub
 
     ''' <summary>
-    ''' Handles user input for the file/directory chooser menu
+    ''' Handles user input for the file/directory chooser menu. A number selects an option and
+    ''' <c> 0 </c> leaves the chooser. Blank input leaves it too, subject to <see cref="MustExist"/>.
+    ''' Input containing a backslash becomes the new directory if that directory exists, and
+    ''' closes the chooser. Anything else becomes the new filename, except that with
+    ''' <see cref="MustExist"/> on, a name with no file behind it reverts to the old one.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="input">
     ''' The user's input string
     ''' </param>
@@ -289,12 +310,13 @@ Public Class iniFileChooser
     End Sub
 
     ''' <summary>
-    ''' 
+    ''' Closes the chooser if the file exists or <see cref="MustExist"/> is <c> False </c>.
+    ''' Otherwise we set a header saying the file doesn't exist and keep the chooser open.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="undoPendingRename">
-    ''' Indicates that the rename which called this sub should be rolled back if the renamed file doesn't exist on disk
-    ''' <br /> Optional, Default: <c> False </c>
+    ''' Indicates whether the rename which called this sub should be rolled back if the renamed file doesn't exist on disk <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     Private Sub ExitIfExists(Optional undoPendingRename As Boolean = False)
 
@@ -309,7 +331,7 @@ Public Class iniFileChooser
     End Sub
 
     ''' <summary>
-    ''' Restores the <c> Dir </c> and <c> Name </c> properties to the values used at construction time
+    ''' Restores the <see cref="Dir"/> and <see cref="Name"/> properties to the values used at construction time
     ''' </summary>
     Public Sub ResetParams()
 

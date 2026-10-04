@@ -32,7 +32,9 @@ Public Structure LintError
     ''' </summary>
     Public ReadOnly Property Details As IReadOnlyList(Of String)
 
-    '''
+    ''' <summary>Creates a new <c> LintError </c></summary>
+    ''' <param name="message">The error description shown to the user</param>
+    ''' <param name="details">Supporting detail lines shown below the description</param>
     Public Sub New(message As String, details As String())
         Me.Message = message
         Me.Details = details
@@ -42,13 +44,13 @@ End Structure
 
 ''' <summary>
 ''' Accumulates errors found while linting a single <c> winapp2entry </c>. <br />
-''' Every entry <c> WinappDebug </c> processes gets its own, so no part of the per-entry
-''' work has to reach for shared state.
+''' Every entry <c> WinappDebug </c> processes gets its own, so the per-entry work, which
+''' runs in parallel, never has to write to shared state.
 ''' </summary>
 Public Class EntryLintResult
 
     ''' <summary>
-    ''' The full name of the entry being linted, used as error context in output
+    ''' The full name of the entry being linted, brackets included, used as error context in output
     ''' </summary>
     Public ReadOnly Property EntryName As String
 
@@ -72,7 +74,8 @@ Public Class EntryLintResult
         End Get
     End Property
 
-    '''
+    ''' <summary>Creates a new <c> EntryLintResult </c> with no errors</summary>
+    ''' <param name="entryName">The entry's full name, brackets included</param>
     Public Sub New(entryName As String)
         Me.EntryName = entryName
     End Sub
@@ -90,8 +93,8 @@ Public Class EntryLintResult
     ''' </param>
     '''
     ''' <param name="cond">
-    ''' The condition under which the error should be recorded
-    ''' <br /> Optional, Default: <c> True </c>
+    ''' Indicates whether to record the error <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
     Public Sub RecordError(message As String, details As String(), Optional cond As Boolean = True)
         If Not cond Then Return
@@ -114,7 +117,7 @@ Public Class EntryLintResult
     Private ReadOnly _deferredSections As New List(Of MenuSection)
 
     ''' <summary>
-    ''' <c> MenuSection </c>s built during parallel processing to be rendered sequentially
+    ''' <c> MenuSection </c>s built during parallel processing, rendered after this entry's errors
     ''' </summary>
     Public ReadOnly Property DeferredSections As IReadOnlyList(Of MenuSection)
         Get

@@ -22,12 +22,13 @@ Imports System.Runtime.InteropServices
 ''' Probes whether the attached console supports virtual terminal (ANSI/VT)
 ''' escape sequences. On Windows 10 1607 (Aug 2016) and newer, conhost and
 ''' Windows Terminal both support VT once
-''' <c> ENABLE_VIRTUAL_TERMINAL_PROCESSING </c> is set on stdout. Older
-''' versions (XP / Vista / 7 / pre-1607 Win10) return failure from
-''' <c> SetConsoleMode </c> when the flag is requested
+''' <c> ENABLE_VIRTUAL_TERMINAL_PROCESSING </c> is set on stdout, and the probe
+''' sets it if it isn't already. Older versions (Windows 7, 8.1, Windows 10
+''' before 1607) return failure from <c> SetConsoleMode </c> when the flag is requested.
+''' A redirected stdout counts as unsupported.
 '''
-''' Result is cached after first probe. Tests may force a value via
-''' <c> SetHasVTForTesting </c> to exercise either code path.
+''' The result is cached after the first probe. Tests may force a value via
+''' <see cref="SetHasVTForTesting"/> to exercise either code path.
 ''' </summary>
 Friend Module TerminalCapabilities
 
@@ -39,9 +40,9 @@ Friend Module TerminalCapabilities
 
     ''' <summary>
     ''' Indicates whether the current console supports virtual terminal
-    ''' escape sequences. <c> True </c> means inline ANSI sequences (color,
-    ''' cursor positioning, clear) are safe to emit; <c> False </c> means the
-    ''' caller must fall back to the legacy Win32 console API.
+    ''' escape sequences, probing on first access. <c> True </c> means inline ANSI
+    ''' sequences (color, cursor positioning, clear) are safe to emit; <c> False </c>
+    ''' means the caller must fall back to the Win32 console API.
     ''' </summary>
     Public ReadOnly Property HasVT As Boolean
         Get
@@ -51,17 +52,19 @@ Friend Module TerminalCapabilities
     End Property
 
     ''' <summary>
-    ''' Forces the cached <c> HasVT </c> result to a specific value, bypassing
+    ''' Forces the cached <see cref="HasVT"/> result to a specific value, bypassing
     ''' the actual probe. Intended for tests and benchmarks that need to
     ''' exercise both code paths deterministically.
     ''' </summary>
+    '''
+    ''' <param name="value">The value <see cref="HasVT"/> reports until <see cref="ResetForTesting"/></param>
     Friend Sub SetHasVTForTesting(value As Boolean)
         _hasVT = value
         _probed = True
     End Sub
 
     ''' <summary>
-    ''' Resets the cached probe result so the next access to <c> HasVT </c>
+    ''' Resets the cached probe result so the next access to <see cref="HasVT"/>
     ''' re-probes. Intended for tests that want to restore real behavior
     ''' after a forced override.
     ''' </summary>
@@ -88,16 +91,10 @@ Friend Module TerminalCapabilities
             If Not GetConsoleMode(hOut, mode) Then Return
 
             ' Already enabled (Windows Terminal, recent conhost): nothing to do.
-            If (mode And ENABLE_VIRTUAL_TERMINAL_PROCESSING) <> 0 Then
-                _hasVT = True
-                Return
-            End If
-
+            If (mode And ENABLE_VIRTUAL_TERMINAL_PROCESSING) <> 0 Then _hasVT = True : Return
             ' Try to enable; failure means the OS doesn't understand the flag,
             ' which is our signal that this is a legacy console.
-            If SetConsoleMode(hOut, mode Or ENABLE_VIRTUAL_TERMINAL_PROCESSING) Then
-                _hasVT = True
-            End If
+            If SetConsoleMode(hOut, mode Or ENABLE_VIRTUAL_TERMINAL_PROCESSING) Then _hasVT = True
 
         Catch ex As Exception
             ' Defensive: capability detection must never crash the app.

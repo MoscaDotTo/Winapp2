@@ -74,7 +74,8 @@ Module lintmainmenu
     End Sub
 
     ''' <summary>
-    ''' Handles the user input for the <c> WinappDebug </c> main menu
+    ''' Handles the user input for the <c> WinappDebug </c> main menu. Empty input runs the
+    ''' linter and <c> 0 </c> exits the module.
     ''' </summary>
     '''
     ''' <param name="input">

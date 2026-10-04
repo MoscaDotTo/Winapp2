@@ -16,10 +16,15 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 
 Option Strict On
+''' <summary>
+''' Holds the WinappDebug module's settings. <see cref="SaveModule"/> stores every Boolean and
+''' file chooser property here under its own name.
+''' </summary>
 Public Module lintsettings
 
-    ''' <summary> 
-    ''' The winapp2.ini file that will be linted 
+    ''' <summary>
+    ''' The winapp2.ini file that will be linted
+    ''' <br /> Default: <c> winapp2.ini </c> in the current directory, which must exist
     ''' </summary>
     Public Property winappDebugFile1 As New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", mustExist:=True)
 
@@ -29,38 +34,44 @@ Public Module lintsettings
     ''' </summary>
     Public Property winappDebugFile3 As New iniFileChooser(Environment.CurrentDirectory, "winapp2-debugged.ini", "winapp2-debugged.ini", mustExist:=False)
 
-    ''' <summary> 
-    ''' Indicates that some but not all repairs will run 
+    ''' <summary>
+    ''' Indicates whether any rule had its repair on when <c> determineScanSettings </c> last
+    ''' ran (until then it holds the saved or default value). While <see cref="RepairErrsFound"/> is
+    ''' <c> False </c>, this is what lets each rule's own repair toggle apply.
+    ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property RepairSomeErrsFound As Boolean = False
 
     ''' <summary>
-    ''' Indicates that the scan settings have been modified from their defaults 
+    ''' Indicates whether the scan settings have been modified from their defaults
     ''' <br /> Default: <c> False </c> 
     ''' </summary>
     Public Property ScanSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Indicates that the module settings have been modified from their defaults 
+    ''' Indicates whether the module settings have been modified from their defaults
     ''' <br /> Default: <c> False </c> 
     ''' </summary>
     Public Property LintModuleSettingsChanged As Boolean = False
 
-    ''' <summary> 
-    ''' Indicates that the any changes made by the linter should be saved back to disk 
-    ''' <br /> Default: <c> False </c> 
+    ''' <summary>
+    ''' Indicates whether the linted file is written to <see cref="winappDebugFile3"/> after the lint
+    ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property SaveChanges As Boolean = False
 
-    ''' <summary> 
-    ''' Indicates that the linter should attempt to repair errors it finds 
+    ''' <summary>
+    ''' Indicates whether every rule repairs what it finds, whatever its own repair toggle says.
+    ''' The Scan Settings menu clears it when a changed rule has its repair off.
     ''' <br /> Default: <c> True </c>
     ''' </summary>
     Public Property RepairErrsFound As Boolean = True
 
-    ''' <summary> 
-    ''' Indicates that Default keys should have their values auited instead of being considered invalid for existing 
-    ''' <br /> Default: <c> False </c> 
+    ''' <summary>
+    ''' Indicates whether every entry must have a Default key holding <see cref="expectedDefaultValue"/>.
+    ''' When <c> True </c>, the Defaults rule stops removing Default keys and reports a wrong value
+    ''' instead, and a missing Default key is reported and added.
+    ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property overrideDefaultVal As Boolean = False
 
@@ -71,11 +82,10 @@ Public Module lintsettings
     Public Property expectedDefaultValue As Boolean = False
 
     ''' <summary>
-    ''' Indicates that existing Default keys should be left alone rather than removed by the
-    ''' Defaults rule. The <c> -keepdefaults </c> CLI flag sets it, for flavors that manage
-    ''' their own Default values (eg. FluentCleaner). This has nothing to do with 
-    ''' <c> overrideDefaultVal </c>. It only stops us removing or complaining about keys that
-    ''' are already there, it doesn't check their values and it doesn't require them to exist
+    ''' Indicates whether the Defaults rule leaves existing Default keys alone instead of
+    ''' reporting and removing them. The <c> -keepdefaults </c> CLI flag sets it, for flavors
+    ''' that manage their own Default values, such as FluentCleaner. Unlike
+    ''' <see cref="overrideDefaultVal"/>, it doesn't check their values or require them to exist.
     ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property PreserveDefaultKeys As Boolean = False

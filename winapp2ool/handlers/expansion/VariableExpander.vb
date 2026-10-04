@@ -20,26 +20,27 @@ Option Strict On
 Imports System.Text.RegularExpressions
 
 ''' <summary>
-''' The domain a key value lives in, used to decide how undeclared <c> &lt;token&gt; </c>
+''' The domain in which a key value lives, used to decide how undeclared <c> &lt;token&gt; </c>
 ''' references are resolved. Filesystem keys (FileKey, DetectFile, etc.) cannot contain
 ''' literal <c> &lt; </c> or <c> &gt; </c> because those are reserved Win32 path
-''' characters; registry keys can. The engine therefore drops filesystem keys that
-''' carry an undeclared token (hard error) and lets registry keys keep the literal
-''' bracket (advisory only).
+''' characters; registry keys can. The engine therefore drops a filesystem key that
+''' carries an undeclared token, with a Warning, and lets a registry key keep the literal
+''' brackets, with an Advisory.
 ''' </summary>
 Public Enum ExpansionDomain
 
     ''' <summary>
     ''' The key value will be written into a file system location (FileKey, FileKeyBase,
-    ''' DetectFile, ExcludeKey with File/Path flag, DetectOS, anything unclassified).
-    ''' Undeclared <c> &lt;token&gt; </c> references drop the key.
+    ''' DetectFile, ExcludeKey with a FILE or PATH flag). Undeclared
+    ''' <c> &lt;token&gt; </c> references drop the key.
     ''' </summary>
     Filesystem
 
     ''' <summary>
     ''' The key value will be written into a registry location (RegKey, RegKeyBase,
-    ''' Detect, ExcludeKey with Reg flag). Undeclared <c> &lt;token&gt; </c> references
+    ''' Detect, ExcludeKey with a REG flag). Undeclared <c> &lt;token&gt; </c> references
     ''' pass through verbatim with an advisory diagnostic.
+    ''' <see cref="VariableExpander.ResolveAll"/> also uses it for variable declarations.
     ''' </summary>
     Registry
 
@@ -52,15 +53,16 @@ End Enum
 Public Enum DiagnosticSeverity
 
     ''' <summary>
-    ''' A note worth surfacing but not indicative of a problem. Currently issued for
-    ''' undeclared tokens in registry-domain keys (could be a typo, could be a
-    ''' genuine literal-bracket registry path).
+    ''' A note worth surfacing but not indicative of a problem. Issued for an undeclared
+    ''' token in a registry-domain key (could be a typo, could be a genuine literal-bracket
+    ''' registry path) and for an identical inline list repeated in one template.
     ''' </summary>
     Advisory
 
     ''' <summary>
-    ''' A real problem that altered output: a key was dropped, or zero expansions
-    ''' were produced from a referenced variable that had no values.
+    ''' A real problem: a key was dropped (an undeclared token in a filesystem-domain key,
+    ''' or a referenced axis with no values), or a declaration was left unresolved because
+    ''' of a dependency cycle.
     ''' </summary>
     [Warning]
 
@@ -74,24 +76,25 @@ End Enum
 Public Structure ExpansionDiagnostic
 
     ''' <summary>
-    ''' The severity of this diagnostic — <see cref="DiagnosticSeverity.Advisory"/>
+    ''' The severity of this diagnostic: <see cref="DiagnosticSeverity.Advisory"/>
     ''' for informational notes, <see cref="DiagnosticSeverity.Warning"/> for actual
-    ''' problems that altered the produced output.
+    ''' problems.
     ''' </summary>
     Public Severity As DiagnosticSeverity
 
     ''' <summary>
     ''' Human-readable message describing the condition, with the caller-supplied
-    ''' context already embedded so the caller can log the string directly.
+    ''' context already embedded so the caller can log the string directly. Messages from
+    ''' <see cref="VariableExpander.ResolveAll"/> name the variable but not the entry.
     ''' </summary>
     Public Message As String
 
     ''' <summary>
-    ''' Creates a diagnostic with the given severity and message
+    ''' Creates a new <c> ExpansionDiagnostic </c> with the given severity and message
     ''' </summary>
     '''
     ''' <param name="severity">
-    ''' The severity level — see <see cref="DiagnosticSeverity"/>
+    ''' The severity level
     ''' </param>
     '''
     ''' <param name="message">
@@ -115,8 +118,8 @@ Public Structure ExpansionResult
 
     ''' <summary>
     ''' The expanded strings, one per cartesian combination. Empty when the template
-    ''' was dropped (filesystem-domain undeclared token, or a referenced variable
-    ''' had no values).
+    ''' was dropped (filesystem-domain undeclared token, or a referenced axis had no
+    ''' values).
     ''' </summary>
     Public Values As List(Of String)
 
@@ -128,15 +131,15 @@ Public Structure ExpansionResult
     Public Diagnostics As List(Of ExpansionDiagnostic)
 
     ''' <summary>
-    ''' Creates a result wrapping the given values and diagnostics lists
+    ''' Creates a new <c> ExpansionResult </c> wrapping the given values and diagnostics lists
     ''' </summary>
     '''
     ''' <param name="values">
-    ''' The expanded string set — empty when the template was dropped
+    ''' The expanded string set, empty when the template was dropped
     ''' </param>
     '''
     ''' <param name="diagnostics">
-    ''' The accompanying diagnostic notes — empty when expansion was clean
+    ''' The accompanying diagnostic notes, empty when expansion was clean
     ''' </param>
     Public Sub New(values As List(Of String), diagnostics As List(Of ExpansionDiagnostic))
 
@@ -164,22 +167,23 @@ Public Class VariableSet
 
     ''' <summary>
     ''' Set of declared variable names that have been observed as <c> &lt;name&gt; </c>
-    ''' tokens in at least one template, used to compute <see cref="UnreferencedNames"/>
-    ''' for the open-vocabulary typo backstop.
+    ''' tokens in at least one template or, during
+    ''' <see cref="VariableExpander.ResolveAll"/>, in another declaration. Used to compute
+    ''' <see cref="UnreferencedNames"/>.
     ''' </summary>
     Private ReadOnly _referenced As New HashSet(Of String)(StringComparer.InvariantCultureIgnoreCase)
 
     ''' <summary>
     ''' Adds a variable declaration with values parsed from a comma-separated list.
-    ''' Trimmed, non-empty tokens only. Re-adding an existing name replaces the
+    ''' Trimmed, non-empty tokens only, so a declaration with no values gives an empty list
+    ''' and any template referencing it is dropped. Re-adding an existing name replaces the
     ''' prior values.
     ''' <br /><br />
     '''
     ''' Splitting is bracket-aware: only commas at <c> &lt;&gt; </c> depth zero separate
-    ''' values, so an inline list inside a declaration — e.g.
-    ''' <c> Root=HKCU\...\&lt;6.0,7.0,11.0&gt;\... </c> — survives as a single value for
-    ''' the expander to fan out later, instead of being shredded into broken fragments
-    ''' at the inline list's commas.
+    ''' values, so an inline list inside a declaration, e.g.
+    ''' <c> Root=HKCU\...\&lt;6.0,7.0,11.0&gt;\... </c>, survives as a single value.
+    ''' <see cref="VariableExpander.ResolveAll"/> fans it out later.
     ''' </summary>
     '''
     ''' <param name="name">
@@ -201,8 +205,8 @@ Public Class VariableSet
     End Sub
 
     ''' <summary>
-    ''' Splits a declaration value on its top-level commas — those at <c> &lt;&gt; </c>
-    ''' bracket depth zero — leaving commas inside an inline <c> &lt;a,b,c&gt; </c> list
+    ''' Splits a declaration value on its top-level commas, those at <c> &lt;&gt; </c>
+    ''' bracket depth zero, leaving commas inside an inline <c> &lt;a,b,c&gt; </c> list
     ''' intact. <c> &lt;&gt; </c> nesting is forbidden by the token grammar, so a simple
     ''' depth counter suffices; an unbalanced <c> &lt; </c> keeps the remainder on one
     ''' value, which is harmless for the malformed input that would produce it.
@@ -252,7 +256,7 @@ Public Class VariableSet
     End Function
 
     ''' <summary>
-    ''' Reports whether <paramref name="name"/> was declared via <see cref="Add"/>
+    ''' Returns whether <paramref name="name"/> was declared via <see cref="Add"/>
     ''' </summary>
     '''
     ''' <param name="name">
@@ -271,7 +275,8 @@ Public Class VariableSet
     ''' <summary>
     ''' Returns the value list for a declared variable. Callers should check
     ''' <see cref="IsDeclared"/> first; this returns an empty list for unknown names
-    ''' rather than throwing.
+    ''' rather than throwing. For a declared name it returns the stored list itself, not
+    ''' a copy.
     ''' </summary>
     '''
     ''' <param name="name">
@@ -292,9 +297,9 @@ Public Class VariableSet
 
     ''' <summary>
     ''' Records that <paramref name="name"/> appeared as a <c> &lt;name&gt; </c> token
-    ''' in at least one template. Idempotent. Names not present in <see cref="_vars"/>
-    ''' are silently ignored, so callers can mark every token they see without first
-    ''' checking <see cref="IsDeclared"/>.
+    ''' in at least one template. Idempotent. Undeclared names are silently ignored, so
+    ''' callers can mark every token they see without first checking
+    ''' <see cref="IsDeclared"/>.
     ''' </summary>
     '''
     ''' <param name="name">
@@ -307,9 +312,10 @@ Public Class VariableSet
     End Sub
 
     ''' <summary>
-    ''' Lists declared variable names that were never observed as a <c> &lt;name&gt; </c>
-    ''' token in any template. Used by callers to surface the open-vocabulary typo
-    ''' backstop ("declared but never used; possible typo").
+    ''' Returns the declared variable names that were never observed as a
+    ''' <c> &lt;name&gt; </c> token, in a template or in another declaration. Callers
+    ''' report these as possible typos, since the parsers treat any key they don't recognize
+    ''' as a declaration.
     ''' </summary>
     '''
     ''' <returns>
@@ -322,11 +328,7 @@ Public Class VariableSet
 
     End Function
 
-    ''' <summary>
-    ''' Lists every declared variable name regardless of reference state. Used by
-    ''' <see cref="VariableExpander.ResolveAll"/> to walk the full set when building
-    ''' the dependency graph.
-    ''' </summary>
+    ''' <summary>Returns every declared variable name, in declaration order, regardless of reference state</summary>
     Public Function DeclaredNames() As List(Of String)
 
         Return _vars.Keys.ToList()
@@ -334,13 +336,12 @@ Public Class VariableSet
     End Function
 
     ''' <summary>
-    ''' Counts declared variables whose value references at least one <em>other</em>
-    ''' declared variable (an out-edge in the dependency graph). This is a proxy for the
-    ''' "topological-sort tax" a reader pays to follow a chain of nested declarations —
-    ''' the cost that makes a large symbol table noise rather than abstraction. Must be
-    ''' called <em>before</em> <see cref="VariableExpander.ResolveAll"/> flattens the
-    ''' values, since resolution replaces the <c> &lt;token&gt; </c> references with
-    ''' literals.
+    ''' Returns how many declared variables reference at least one <em>other</em>
+    ''' declared variable by name in their values. A self-reference doesn't count, and
+    ''' neither does an inline list. EntryBuilder reports it as a measure of how much
+    ''' nesting a reader has to follow. Call it <em>before</em>
+    ''' <see cref="VariableExpander.ResolveAll"/>, which replaces the
+    ''' <c> &lt;token&gt; </c> references with literals.
     ''' </summary>
     '''
     ''' <returns>
@@ -378,9 +379,10 @@ Public Class VariableSet
     End Function
 
     ''' <summary>
-    ''' Replaces the value list for an existing declaration. Used by
-    ''' <see cref="VariableExpander.ResolveAll"/> after nested-token expansion;
-    ''' callers other than the resolver should prefer <see cref="Add"/>.
+    ''' Replaces the value list for an existing declaration with
+    ''' <paramref name="newValues"/> as given, without splitting or trimming.
+    ''' <see cref="VariableExpander.ResolveAll"/> stores resolved values this way; other
+    ''' callers should prefer <see cref="Add"/>.
     ''' </summary>
     '''
     ''' <param name="name">
@@ -406,24 +408,25 @@ End Class
 ''' placeholders inside other key values; the engine returns one expanded string
 ''' per cartesian combination of the variables present in the template, with
 ''' leftmost-first occurrence varying slowest (outermost loop). A placeholder body
-''' containing a comma (<c> &lt;a,b,c&gt; </c>) is an inline ad-hoc list — an
+''' containing a comma (<c> &lt;a,b,c&gt; </c>) is an inline ad-hoc list: an
 ''' anonymous axis declared at its use site, for one-off leaf lists not worth a
 ''' named declaration.
 ''' <br /><br />
 '''
-''' The engine is string-generic — it knows nothing about winapp2 key types, ini
+''' The engine is string-generic. It knows nothing about winapp2 key types, ini
 ''' parsing, or output formatting. The caller passes one template at a time, tags
 ''' the call with an <see cref="ExpansionDomain"/> (so the engine can apply the
 ''' filesystem-vs-registry rule for undeclared tokens), and routes any returned
 ''' <see cref="ExpansionDiagnostic"/> values onto its own logging surface.
 ''' <br /><br />
 '''
-''' This module is the phase-2 pass in the two-phase builder DSL pipeline. Phase 1
-''' is each builder's own <c> %% </c> environment-style substitution (e.g.
-''' <c> %WebViewRoot% </c>, <c> %Package% </c>), which runs first and produces the
-''' templates fed to this engine. The two phases compose because their token
-''' domains are closed: <c> %% </c> expansion never emits <c> &lt;&gt; </c> tokens
-''' and this engine never emits <c> %% </c> tokens.
+''' This module is the phase-2 pass of the builder DSL pipeline. Before it, each builder
+''' runs its own percent-style substitution: root placeholders such as
+''' <c> %WebViewRoot% </c> in phase 1, preceded in UWPBuilder by <c> %Package% </c> in
+''' phase 0. We run last, on the merged string, so a <c> &lt;name&gt; </c> token that
+''' arrived inside a root (<c> WebViewRoot=&lt;Root&gt;\EBWebView </c>) joins the same
+''' cartesian product as the template's own tokens. This engine leaves
+''' <c> %...% </c> text alone.
 ''' </summary>
 Public Module VariableExpander
 
@@ -438,17 +441,18 @@ Public Module VariableExpander
     ''' <summary>
     ''' Expands a template into its fan-out over the declared list variables it
     ''' references. Returns one string per cartesian combination, with leftmost-first
-    ''' occurrence varying slowest. A template with no declared tokens returns a
-    ''' single-element list containing the template verbatim.
+    ''' occurrence varying slowest. A template with no tokens returns a single-element
+    ''' list containing the template verbatim. A declared name used several times in one
+    ''' template is one axis: every occurrence takes the same value in each combination.
     ''' <br /><br />
     '''
-    ''' A token whose body contains a comma is an inline ad-hoc list — e.g.
+    ''' A token whose body contains a comma is an inline ad-hoc list. For example,
     ''' <c> &lt;System32,SysWOW64&gt; </c> is an anonymous two-value axis, fanned out
-    ''' exactly like a declared variable but without a separate declaration. It is the
-    ''' natural form for a single-use leaf list. Two <em>different</em> inline lists in
+    ''' exactly like a declared variable but without a separate declaration. Its values
+    ''' are trimmed and empty ones dropped. Two <em>different</em> inline lists in
     ''' one template cross-product like any two axes; an <em>identical</em> inline list
     ''' repeated in one template co-varies (one axis) and emits an Advisory, because an
-    ''' anonymous list cannot state same-axis intent — declare a named variable when
+    ''' anonymous list cannot state same-axis intent. Declare a named variable when
     ''' co-variance across positions is wanted. Inline detection takes priority over the
     ''' declared-name lookup, but declared names never contain commas in practice so the
     ''' two never collide.
@@ -457,11 +461,12 @@ Public Module VariableExpander
     ''' Undeclared <c> &lt;name&gt; </c> tokens are resolved by <paramref name="domain"/>:
     ''' filesystem keys drop the template (empty <see cref="ExpansionResult.Values"/>
     ''' plus a Warning diagnostic), registry keys keep the literal text and emit an
-    ''' Advisory. A referenced variable with an empty value list also drops the
+    ''' Advisory. An axis with no values, whether a declared variable with an empty value
+    ''' list or an inline list that trims to nothing (<c> &lt;,&gt; </c>), also drops the
     ''' template with a Warning.
     ''' <br /><br />
     '''
-    ''' The engine itself produces no logging — every diagnostic is returned in
+    ''' The engine itself produces no logging. Every diagnostic is returned in
     ''' <see cref="ExpansionResult.Diagnostics"/> for the caller to route onto
     ''' <c> gLog </c> / <c> MenuSection.AddWarning </c>. <paramref name="context"/>
     ''' is embedded verbatim in diagnostic messages so the caller does not need to
@@ -477,7 +482,8 @@ Public Module VariableExpander
     ''' The entry's declared variable set. Tokens whose name is declared in
     ''' <paramref name="vars"/> are expanded; others are handled per
     ''' <paramref name="domain"/>. Each declared token observed is marked referenced
-    ''' on <paramref name="vars"/> for the caller's later typo backstop check.
+    ''' on <paramref name="vars"/> for the caller's later typo check, even when the
+    ''' template is then dropped.
     ''' </param>
     '''
     ''' <param name="domain">
@@ -505,12 +511,12 @@ Public Module VariableExpander
         ' value, spanning the '|'). A token whose body contains a comma is an INLINE
         ' ad-hoc list (e.g. <System32,SysWOW64>) whose axis key is the body itself and
         ' whose values are the comma-split body; otherwise the token is a declared-
-        ' variable reference or an undeclared token. Inline lists never touch 'vars' —
+        ' variable reference or an undeclared token. Inline lists never touch 'vars':
         ' keying their axis on the body text lets the existing name-keyed cartesian and
         ' SubstituteTokens machinery handle them unchanged. Axis keys are distinct: a
         ' repeated declared name co-varies silently (intended idiom), but a repeated
         ' identical inline list co-varies WITH an advisory, since an anonymous list
-        ' cannot express "the same axis as that other one" — the author who meant
+        ' cannot express "the same axis as that other one". Authors wanting
         ' co-variance should declare a named variable.
         Dim axisKeys As New List(Of String)
         Dim axisValues As New List(Of List(Of String))
@@ -535,7 +541,7 @@ Public Module VariableExpander
                 Else
 
                     diagnostics.Add(New ExpansionDiagnostic(DiagnosticSeverity.Advisory,
-                        $"Inline list <{body}> appears more than once in {context}; occurrences co-vary — declare a named variable if that is not intended"))
+                        $"Inline list <{body}> appears more than once in {context}; occurrences co-vary: declare a named variable if that is not intended"))
 
                 End If
 
@@ -577,7 +583,7 @@ Public Module VariableExpander
                 For Each name In undeclaredNames
 
                     diagnostics.Add(New ExpansionDiagnostic(DiagnosticSeverity.Advisory,
-                        $"Undeclared variable <{name}> in registry-domain key {context}; emitted as literal"))
+                        $"Undeclared variable <{name}> in registry-domain key {context}; passed through as literal"))
 
                 Next
 
@@ -586,7 +592,7 @@ Public Module VariableExpander
         End If
 
         ' Phase 3: any axis with no values yields an empty cartesian product, so the
-        ' template would expand to nothing — drop it with a Warning. Covers both a
+        ' template would expand to nothing, so we drop it with a Warning. Covers both a
         ' declared variable with an empty value list and a degenerate inline list
         ' (e.g. <,,> or < , >) whose body trims to nothing.
         For axisIdx = 0 To axisKeys.Count - 1
@@ -603,7 +609,7 @@ Public Module VariableExpander
         Next
 
         ' Phase 4: cartesian enumerate over the axes. Leftmost-first means the axis at
-        ' index 0 varies slowest (outermost loop) — decoded by walking the index
+        ' index 0 varies slowest (outermost loop). We decode it by walking the index
         ' dimensions back-to-front when computing the modulus.
         Dim totalCombinations = 1
         For Each lst In axisValues : totalCombinations *= lst.Count : Next
@@ -635,22 +641,26 @@ Public Module VariableExpander
     ''' Resolves nested <c> &lt;name&gt; </c> references inside the value lists of
     ''' <paramref name="vars"/> itself, before any user template is expanded. Each
     ''' variable's values are fanned out against the variables they reference, in
-    ''' topological order so each dependency resolves before its dependents. Cyclic
-    ''' dependencies are detected and left unresolved with a Warning.
+    ''' topological order so each dependency resolves before its dependents. A variable in
+    ''' a cycle, or one that depends on a cycle, is left unresolved with a Warning.
     ''' <br /><br />
     '''
-    ''' After this call returns, every variable's value list contains literal strings
-    ''' (or, for variables in a cycle, the original templated strings). User templates
-    ''' that reference these variables therefore receive fully-resolved substitution
-    ''' without the engine needing a second expansion pass.
+    ''' We expand each value in the registry domain, so an undeclared token in a
+    ''' declaration stays literal with an Advisory, and an inline list in a declaration
+    ''' fans out here. After this call returns, every variable's value list contains
+    ''' literal strings (or, for unresolved variables, the original templated strings).
+    ''' User templates that reference these variables therefore receive fully-resolved
+    ''' substitution without the engine needing a second expansion pass.
     ''' <br /><br />
     '''
-    ''' Reference tracking on <paramref name="vars"/> IS updated during resolution: a
+    ''' Reference tracking on <paramref name="vars"/> is updated during resolution: a
     ''' variable consumed only via a nested chain (e.g. <c> RegRoots=...&lt;HKLMVersions&gt;... </c>
     ''' with no template referencing <c> &lt;HKLMVersions&gt; </c> directly) still counts
     ''' as referenced, so the unreferenced-variable typo backstop does not false-positive
     ''' on it. A variable declared but reached by neither a user template nor a nested
     ''' chain remains unreferenced and is reported by <see cref="VariableSet.UnreferencedNames"/>.
+    ''' A variable referenced only from another declaration counts as referenced even when
+    ''' nothing references that declaration.
     ''' </summary>
     '''
     ''' <param name="vars">
@@ -658,9 +668,10 @@ Public Module VariableExpander
     ''' </param>
     '''
     ''' <returns>
-    ''' Diagnostics raised during resolution — cycle warnings, undeclared-token
-    ''' advisories inside variable definitions, etc. The caller routes them onto
-    ''' <c> gLog </c> / <c> MenuSection.AddWarning </c>.
+    ''' Diagnostics raised during resolution: cycle warnings, undeclared-token
+    ''' advisories inside variable definitions, and so on. Their messages don't name the
+    ''' entry, so the caller adds it when routing them onto <c> gLog </c> /
+    ''' <c> MenuSection.AddWarning </c>.
     ''' </returns>
     Public Function ResolveAll(vars As VariableSet) As List(Of ExpansionDiagnostic)
 

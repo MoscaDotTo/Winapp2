@@ -22,8 +22,8 @@ Imports System.IO
 ''' <summary>
 ''' Guards the generative modules' <see cref="WinappDebug.remotedebug"/> normalization pass.
 ''' The optimization pass is only allowed to change formatting: reordering and renumbering
-''' keys, alphabetizing a FileKey's pattern list, and merging FileKeys that share a path and
-''' flag. Anything that loses or rewrites real cleaning content, whether that's a dropped
+''' keys, alphabetizing a FileKey's pattern list, merging FileKeys that share a path and
+''' flag, dropping exact duplicates, and changing case. Anything that loses or rewrites real cleaning content, whether that's a dropped
 ''' entry, a discarded malformed key, or a rewritten value, means the generator emitted
 ''' invalid data and the linter quietly ate it. That's a bug in the generator or its sources
 ''' rather than a cleanup, so the gate reports every difference it finds, dumps the
@@ -34,9 +34,10 @@ Imports System.IO
 ''' one <c> path|pattern|flag </c> triple per semicolon-delimited pattern (via
 ''' <see cref="fileKeyParams"/>), and every other key gives its number-stripped
 ''' <c> KeyType=Value </c> pair. Units are compared case-insensitively as sets, which is why
-''' the three sanctioned optimizations don't show up here: reordering and renumbering leave
-''' set membership alone, sorting patterns leaves the triple set alone, and merging two
-''' same-path FileKeys gives exactly the union of their triples. Anything else gets reported,
+''' the sanctioned optimizations don't show up here: reordering and renumbering leave
+''' set membership alone, sorting patterns leaves the triple set alone, merging two
+''' same-path FileKeys gives exactly the union of their triples, and a set holds a
+''' duplicate only once. Anything else gets reported,
 ''' in either direction. The gate assumes the worst, so a future lint rule that changes
 ''' semantics will keep tripping it until somebody sits down and works out what it's
 ''' actually doing to the output. <br /><br />
@@ -55,12 +56,13 @@ Public Module LintReconciler
     ''' <c> remotedebug(givenIni, True) </c> does. If it changed anything semantic, the
     ''' pre-optimization content goes to <c> &lt;name&gt;.prelint.ini </c> beside the output,
     ''' every difference gets reported, and the process exit code goes nonzero so a scripted
-    ''' build fails.
+    ''' build fails. The exit code is set in interactive runs too.
     ''' </summary>
     '''
     ''' <param name="givenIni">
     ''' The generated <c> iniFile </c> to normalize. Its <c> Dir </c> and <c> Name </c> decide
-    ''' where the pre-lint dump lands when the gate fails
+    ''' where the pre-lint dump lands when the gate fails. The lint edits its keys in place, so
+    ''' use the returned file afterwards.
     ''' </param>
     '''
     ''' <param name="callingModule">
@@ -74,7 +76,8 @@ Public Module LintReconciler
     '''
     ''' <returns>
     ''' The normalized <c> iniFile </c>, exactly as <see cref="WinappDebug.remotedebug"/>
-    ''' returns it. The gate reports, it doesn't roll anything back
+    ''' returns it, or <c> Nothing </c> if <paramref name="givenIni"/> is <c> Nothing </c>.
+    ''' The gate reports, it doesn't roll anything back
     ''' </returns>
     Public Function remotedebugGuarded(givenIni As iniFile,
                                        callingModule As String,
@@ -143,7 +146,8 @@ Public Module LintReconciler
     ''' </param>
     '''
     ''' <returns>
-    ''' The per-entry semantic unit map for <paramref name="sourceFile"/>
+    ''' The per-entry semantic unit map for <paramref name="sourceFile"/>, or <c> Nothing </c>
+    ''' if <paramref name="sourceFile"/> is <c> Nothing </c>
     ''' </returns>
     Public Function CollectSemanticUnits(sourceFile As iniFile) As Dictionary(Of String, Dictionary(Of String, String))
 
@@ -157,13 +161,8 @@ Public Module LintReconciler
 
             For Each key In section.Keys
 
-                For Each unit In UnitsForKey(key)
+                For Each unit In UnitsForKey(key) : entryUnits(unit) = unit : Next
 
-                    ' Exact duplicates collapse here on purpose, since throwing them out
-                    ' is one of the optimizations we allow
-                    entryUnits(unit) = unit
-
-                Next
 
             Next
 
@@ -177,9 +176,9 @@ Public Module LintReconciler
 
     ''' <summary>
     ''' Compares the pre- and post-optimization unit maps and describes every semantic
-    ''' difference it finds: entries that were removed outright, units that were there
-    ''' before the pass but not after, and units that turned up afterwards without having
-    ''' been there to start with. Where a lost and a gained unit clearly correspond, they're
+    ''' difference it finds: entries that were removed outright or newly introduced, units
+    ''' that were there before the pass but not after, and units that turned up afterwards
+    ''' without having been there to start with. Where a lost and a gained unit clearly correspond, they're
     ''' reported as one <c> old → new </c> rewrite. Everything else is reported as a plain
     ''' loss or gain.
     ''' </summary>
@@ -194,7 +193,7 @@ Public Module LintReconciler
     '''
     ''' <returns>
     ''' One human-readable finding per semantic difference; empty when the pass was
-    ''' formatting-only
+    ''' formatting-only, and <c> Nothing </c> if either map is <c> Nothing </c>
     ''' </returns>
     Public Function FindSemanticLosses(preUnits As Dictionary(Of String, Dictionary(Of String, String)),
                                        postUnits As Dictionary(Of String, Dictionary(Of String, String))) As List(Of String)
@@ -421,15 +420,15 @@ Public Module LintReconciler
     ''' </param>
     '''
     ''' <param name="keepPath">
-    ''' Whether the path component participates in the bucket
+    ''' Indicates whether the path component participates in the bucket
     ''' </param>
     '''
     ''' <param name="keepPattern">
-    ''' Whether the pattern component participates in the bucket
+    ''' Indicates whether the pattern component participates in the bucket
     ''' </param>
     '''
     ''' <param name="keepFlag">
-    ''' Whether the flag component participates in the bucket
+    ''' Indicates whether the flag component participates in the bucket
     ''' </param>
     '''
     ''' <returns>
