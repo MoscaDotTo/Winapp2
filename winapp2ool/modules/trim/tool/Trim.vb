@@ -146,8 +146,8 @@ Public Module Trim
     ''' </summary>
     Private Property winVer As Double
 
-    Private _includes2 As iniFile2 = Nothing
-    Private _excludes2 As iniFile2 = Nothing
+    Private _includes As iniFile = Nothing
+    Private _excludes As iniFile = Nothing
 
     ''' <summary>
     ''' Handles command-line arguments for <c> Trim </c>
@@ -217,7 +217,7 @@ Public Module Trim
         Dim noNtwk = "Internet connection lost! Please check your network connection and try again"
         If denyActionWithHeader(DownloadFileToTrim AndAlso Not checkOnline(), noNtwk) Then Return
 
-        Dim winapp2 As New winapp2file2(If(DownloadFileToTrim, getRemoteIniFile2(getWinappLink), TrimFile1.Load(TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged))))
+        Dim winapp2 As New winapp2file(If(DownloadFileToTrim, getRemoteIniFile(getWinappLink), TrimFile1.Load(TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged))))
 
         clrConsole()
         Dim progress As New MenuSection
@@ -252,7 +252,7 @@ Public Module Trim
         out.Print()
 
         ' Save the trimmed file back to disk
-        Dim saved = iniFile2.Empty(TrimFile3.Dir, TrimFile3.Name).OverwriteToFile(winapp2.ToWinapp2String())
+        Dim saved = iniFile.Empty(TrimFile3.Dir, TrimFile3.Name).OverwriteToFile(winapp2.ToWinapp2String())
 
         ' If we downloaded the latest file, then we probably can mark winapp2 as having been updated
         If DownloadFileToTrim AndAlso saved Then waUpdateIsAvail = False
@@ -264,22 +264,22 @@ Public Module Trim
     End Sub
 
     ''' <summary>
-    ''' Trims a <c> winapp2file2 </c>, removing entries not relevant to the current system
+    ''' Trims a <c> winapp2file </c>, removing entries not relevant to the current system
     ''' </summary>
     '''
     ''' <param name="winapp2">
-    ''' A <c> winapp2file2 </c> to be trimmed to fit the current system
+    ''' A <c> winapp2file </c> to be trimmed to fit the current system
     ''' </param>
-    Public Sub trimFile(winapp2 As winapp2file2)
+    Public Sub trimFile(winapp2 As winapp2file)
 
         If winapp2 Is Nothing Then argIsNull(NameOf(winapp2)) : Return
 
-        _includes2 = If(UseTrimIncludes, iniFile2.FromFile(TrimFile2.Path()), Nothing)
-        _excludes2 = If(UseTrimExcludes, iniFile2.FromFile(TrimFile4.Path()), Nothing)
+        _includes = If(UseTrimIncludes, iniFile.FromFile(TrimFile2.Path()), Nothing)
+        _excludes = If(UseTrimExcludes, iniFile.FromFile(TrimFile4.Path()), Nothing)
 
         If winVer = Nothing Then winVer = getWinVer()
 
-        Dim toRemove As New List(Of winapp2entry2)
+        Dim toRemove As New List(Of winapp2entry)
 
         Dim results = winapp2.Entries.AsParallel().AsOrdered().Select(
             Function(entry)
@@ -312,7 +312,7 @@ Public Module Trim
     ''' The <c> function </c> that evaluates each key value
     ''' </param>
     '''
-    Private Function checkExistence(keys As IReadOnlyList(Of iniKey2),
+    Private Function checkExistence(keys As IReadOnlyList(Of iniKey),
                                     chkExist As Func(Of String, Boolean)) As Boolean
 
         If keys.Count = 0 Then Return False
@@ -331,24 +331,24 @@ Public Module Trim
     End Function
 
     ''' <summary>
-    ''' Audits the detection criteria in a given <c> winapp2entry2 </c> against the current system <br /> <br />
+    ''' Audits the detection criteria in a given <c> winapp2entry </c> against the current system <br /> <br />
     ''' Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise
     ''' </summary>
     '''
     ''' <param name="entry">
-    ''' A <c> winapp2entry2 </c> whose detection criteria will be audited
+    ''' A <c> winapp2entry </c> whose detection criteria will be audited
     ''' </param>
     '''
-    Private Function processEntryExistence(entry As winapp2entry2) As Boolean
+    Private Function processEntryExistence(entry As winapp2entry) As Boolean
 
         gLog("", leadr:=True)
 
         Using gLogScope($"Processing entry: {entry.Name}")
 
             ' Respect the include/excludes
-            Dim IsInIncludes = UseTrimIncludes AndAlso _includes2 IsNot Nothing AndAlso _includes2.Contains(entry.Name)
+            Dim IsInIncludes = UseTrimIncludes AndAlso _includes IsNot Nothing AndAlso _includes.Contains(entry.Name)
             If IsInIncludes Then gLog("Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
-            Dim isInExcludes = UseTrimExcludes AndAlso _excludes2 IsNot Nothing AndAlso _excludes2.Contains(entry.Name)
+            Dim isInExcludes = UseTrimExcludes AndAlso _excludes IsNot Nothing AndAlso _excludes.Contains(entry.Name)
             If isInExcludes Then gLog("Discarding entry: " & entry.Name, leadr:=True, buffr:=True) : Return False
 
             ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false
@@ -396,14 +396,14 @@ Public Module Trim
     ''' </summary>
     '''
     ''' <param name="entry">
-    ''' The <c> winapp2entry2 </c> to audit
+    ''' The <c> winapp2entry </c> to audit
     ''' </param>
     '''
-    Private Sub virtualStoreChecker(entry As winapp2entry2)
+    Private Sub virtualStoreChecker(entry As winapp2entry)
 
         Using gLogScope("Attempting to generate any neccessary VirtualStore keys for " & entry.Name)
 
-            Dim newKeys As New List(Of iniKey2)
+            Dim newKeys As New List(Of iniKey)
             collectVsKeys(entry.FileKeys, newKeys)
             collectVsKeys(entry.RegKeys, newKeys)
             collectVsKeys(entry.ExcludeKeys, newKeys)
@@ -429,8 +429,8 @@ Public Module Trim
     ''' New VirtualStore keys are appended here
     ''' </param>
     '''
-    Private Sub collectVsKeys(keys As IReadOnlyList(Of iniKey2),
-                              newKeys As List(Of iniKey2))
+    Private Sub collectVsKeys(keys As IReadOnlyList(Of iniKey),
+                              newKeys As List(Of iniKey))
 
         If keys.Count = 0 Then Return
 
@@ -456,7 +456,7 @@ Public Module Trim
         End Select
 
         Dim initVals = keys.Select(Function(k) k.Value).ToList()
-        Dim keysToAdd As New List(Of iniKey2)
+        Dim keysToAdd As New List(Of iniKey)
 
         ' Pass 1: collect candidate VS keys
         For Each key In keys
@@ -467,7 +467,7 @@ Public Module Trim
                 Dim newVal = key.Value.Replace(findStrs(i), replStrs(i))
                 If initVals.Contains(newVal) Then Continue For
                 If key.Value = newVal Then Continue For
-                keysToAdd.Add(New iniKey2($"{key.Name}={newVal}"))
+                keysToAdd.Add(New iniKey($"{key.Name}={newVal}"))
             Next
 
         Next
@@ -494,8 +494,8 @@ Public Module Trim
     Private Function getPathFromValue(value As String, keyType As String) As String
 
         Select Case keyType
-            Case "FileKey" : Return New fileKeyParams2(value).Path
-            Case "ExcludeKey" : Return New excludeKeyParams2(value).Path
+            Case "FileKey" : Return New fileKeyParams(value).Path
+            Case "ExcludeKey" : Return New excludeKeyParams(value).Path
             Case Else : Return value
         End Select
 

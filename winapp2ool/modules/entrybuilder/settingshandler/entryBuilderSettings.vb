@@ -108,7 +108,7 @@ Public Module entryBuilderSettings
         EntryBuilderFile3 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         EntryBuilderSplitOutput = False
         EntryBuilderModuleSettingsChanged = False
-        SaveModule2(NameOf(EntryBuilder), GetType(entryBuilderSettings))
+        SaveModule(NameOf(EntryBuilder), GetType(entryBuilderSettings))
 
     End Sub
 

@@ -91,7 +91,7 @@ Public Module diffsettings
         DiffFile2 = New iniFileChooser(Environment.CurrentDirectory, "", "winapp2.ini", mustExist:=True)
         DiffFile3 = New iniFileChooser(Environment.CurrentDirectory, "diff.txt", "diff.txt", mustExist:=False)
         DiffFile4 = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=False)
-        SaveModule2(NameOf(Diff), GetType(diffsettings))
+        SaveModule(NameOf(Diff), GetType(diffsettings))
 
     End Sub
 

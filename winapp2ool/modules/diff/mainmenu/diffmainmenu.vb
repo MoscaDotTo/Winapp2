@@ -54,12 +54,12 @@ Module diffmainmenu
                 Sub() toggleModuleSetting("Verbose mode", NameOf(Diff), GetType(diffsettings), NameOf(ShowFullEntries), NameOf(DiffModuleSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedOption("Choose older/local file", "Select the older version of the file against which to diff",
-                Sub() changeFile2Params(DiffFile1, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))) _
+                Sub() changeFileParams(DiffFile1, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))) _
             .AddDispatchedOption("Choose newer file", "Select the newer version of the file to see what has changed",
-                Sub() changeFile2Params(DiffFile2, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged)),
+                Sub() changeFileParams(DiffFile2, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged)),
                 Not DownloadDiffFile) _
             .AddDispatchedOption("Choose save target", "Select where to save the diff output",
-                Sub() changeFile2Params(DiffFile3, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile3), NameOf(DiffModuleSettingsChanged)),
+                Sub() changeFileParams(DiffFile3, DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile3), NameOf(DiffModuleSettingsChanged)),
                 SaveDiffLog) _
             .AddBlank() _
             .AddBlank(Not MostRecentDiffLog = "") _

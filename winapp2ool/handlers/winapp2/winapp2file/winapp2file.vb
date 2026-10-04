@@ -21,9 +21,9 @@ Imports System.Text
 
 ''' <summary>
 ''' Represents a winapp2.ini file, with its entries grouped into the file's sections.
-''' Built from an <c> iniFile2 </c>.
+''' Built from an <c> iniFile </c>.
 ''' </summary>
-Public Class winapp2file2
+Public Class winapp2file
 
     ''' <summary>
     ''' The 12 section header labels in winapp2.ini order.
@@ -56,14 +56,14 @@ Public Class winapp2file2
         " that contains extra entries that were removed due to them being added to CCleaner."
 
     ' 12 category lists (index matches FileSectionHeaders)
-    Private ReadOnly _categories As New List(Of List(Of winapp2entry2))
+    Private ReadOnly _categories As New List(Of List(Of winapp2entry))
 
     ' Dirty-cache for flat Entries view
-    Private _entriesCache As List(Of winapp2entry2) = Nothing
+    Private _entriesCache As List(Of winapp2entry) = Nothing
     Private _entriesDirty As Boolean = True
 
     ''' <summary>All entries in winapp2.ini order (categories in sequence, main section last)</summary>
-    Public ReadOnly Property Entries As IReadOnlyList(Of winapp2entry2)
+    Public ReadOnly Property Entries As IReadOnlyList(Of winapp2entry)
         Get
             If _entriesDirty OrElse _entriesCache Is Nothing Then
                 _entriesCache = _categories.SelectMany(Function(c) c).ToList()
@@ -99,27 +99,27 @@ Public Class winapp2file2
     ''' The 12 per-category entry lists in <c> FileSectionHeaders </c> order.
     ''' Each inner list corresponds to one winapp2.ini section (index 11 is the unlabeled main section).
     ''' </summary>
-    Public ReadOnly Property Categories As IReadOnlyList(Of IReadOnlyList(Of winapp2entry2))
+    Public ReadOnly Property Categories As IReadOnlyList(Of IReadOnlyList(Of winapp2entry))
         Get
-            Return _categories.Select(Function(c) DirectCast(c, IReadOnlyList(Of winapp2entry2))).ToList()
+            Return _categories.Select(Function(c) DirectCast(c, IReadOnlyList(Of winapp2entry))).ToList()
         End Get
     End Property
 
     ''' <summary>
-    ''' Creates a new <c> winapp2file2 </c> from <paramref name="file"/>. Each entry goes to the
+    ''' Creates a new <c> winapp2file </c> from <paramref name="file"/>. Each entry goes to the
     ''' section its LangSecRef, or failing that its Section key, names. Entries with neither, or
     ''' with a category no section claims, go to the unlabeled main section. The exception is a
     ''' category starting with "Dangerous", which goes to the Dangerous section.
     ''' </summary>
     '''
-    ''' <param name="file">A winapp2.ini format <c> iniFile2 </c></param>
+    ''' <param name="file">A winapp2.ini format <c> iniFile </c></param>
     '''
     ''' <param name="useTodaysDate">
     ''' Indicates whether to stamp <c> Version </c> with today's date (yyMMdd) instead of
     ''' reading it from the file <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
-    Public Sub New(file As iniFile2, Optional useTodaysDate As Boolean = False)
+    Public Sub New(file As iniFile, Optional useTodaysDate As Boolean = False)
 
         If file Is Nothing Then argIsNull(NameOf(file)) : Return
 
@@ -127,7 +127,7 @@ Public Class winapp2file2
         Name = file.Name
 
         For i = 0 To FileSectionHeaders.Count - 1
-            _categories.Add(New List(Of winapp2entry2))
+            _categories.Add(New List(Of winapp2entry))
         Next
 
         IsNCC = file.Comments.Any(Function(c) c.Text.Contains(NCCMarkerText))
@@ -135,14 +135,14 @@ Public Class winapp2file2
         Version = DetermineVersionString(file, useTodaysDate)
 
         For Each section In file
-            Dim entry As New winapp2entry2(section)
+            Dim entry As New winapp2entry(section)
             Dim ind = GetCategoryIndex(entry, LeadingCategories)
             _categories(ind).Add(entry)
         Next
 
     End Sub
 
-    Private Shared Function DetermineVersionString(file As iniFile2,
+    Private Shared Function DetermineVersionString(file As iniFile,
                                                    useTodaysDate As Boolean) As String
 
         If useTodaysDate Then
@@ -158,7 +158,7 @@ Public Class winapp2file2
 
     End Function
 
-    Private Shared Function GetCategoryIndex(entry As winapp2entry2,
+    Private Shared Function GetCategoryIndex(entry As winapp2entry,
                                              categoryValues As List(Of String)) As Integer
 
         If entry.LangSecRef.Count = 0 AndAlso entry.SectionKey.Count = 0 Then
@@ -183,22 +183,22 @@ Public Class winapp2file2
     End Function
 
     ''' <summary>
-    ''' Returns all entries as a single <c> iniFile2 </c> in winapp2.ini order. <br /> <br />
+    ''' Returns all entries as a single <c> iniFile </c> in winapp2.ini order. <br /> <br />
     '''
     ''' We re-emit the two pieces of preamble state this class carries, the version string and
     ''' the non-CCleaner marker, as comments on the returned file. Without them
     ''' a round trip through the winapp2 layer silently resets the version to
     ''' <c> 000000 </c> and the file's identity to the CCleaner variant, since both are read
-    ''' back off <c> iniFile2.Comments </c> by this class' own constructor and by Diff
+    ''' back off <c> iniFile.Comments </c> by this class' own constructor and by Diff
     ''' </summary>
-    Public Function ToIni() As iniFile2
+    Public Function ToIni() As iniFile
 
-        Dim out = iniFile2.Empty(Dir, Name)
+        Dim out = iniFile.Empty(Dir, Name)
 
-        out.Comments.Add(New iniComment2(Version, 1))
+        out.Comments.Add(New iniComment(Version, 1))
 
         If IsNCC Then
-            out.Comments.Add(New iniComment2(NCCMarkerComment, 2))
+            out.Comments.Add(New iniComment(NCCMarkerComment, 2))
         End If
 
         For Each entry In Entries
@@ -213,7 +213,7 @@ Public Class winapp2file2
     ''' Adds an entry to the appropriate category based on its LangSecRef or Section key
     ''' </summary>
     ''' <param name="entry">The entry to add</param>
-    Public Sub AddEntry(entry As winapp2entry2)
+    Public Sub AddEntry(entry As winapp2entry)
 
         If entry Is Nothing Then argIsNull(NameOf(entry)) : Return
 
@@ -227,7 +227,7 @@ Public Class winapp2file2
     ''' Removes an entry from the file. Searches all categories.
     ''' </summary>
     ''' <param name="entry">The entry to remove</param>
-    Public Sub RemoveEntry(entry As winapp2entry2)
+    Public Sub RemoveEntry(entry As winapp2entry)
 
         If entry Is Nothing Then argIsNull(NameOf(entry)) : Return
 
@@ -256,10 +256,10 @@ Public Class winapp2file2
 
             Dim sortedNames = replaceAndSort(names, "-", "  ")
 
-            Dim nameToEntries As New Dictionary(Of String, Queue(Of winapp2entry2))(StringComparer.OrdinalIgnoreCase)
+            Dim nameToEntries As New Dictionary(Of String, Queue(Of winapp2entry))(StringComparer.OrdinalIgnoreCase)
             For Each entry In cat
 
-                If Not nameToEntries.ContainsKey(entry.Name) Then nameToEntries(entry.Name) = New Queue(Of winapp2entry2)
+                If Not nameToEntries.ContainsKey(entry.Name) Then nameToEntries(entry.Name) = New Queue(Of winapp2entry)
                 nameToEntries(entry.Name).Enqueue(entry)
 
             Next
@@ -275,7 +275,7 @@ Public Class winapp2file2
 
     ''' <summary>
     ''' Returns each entry name that appears more than once (case-insensitive), once per extra
-    ''' copy. <c> iniFile2 </c> drops repeated sections while parsing, so only entries added
+    ''' copy. <c> iniFile </c> drops repeated sections while parsing, so only entries added
     ''' through <see cref="AddEntry"/> can repeat.
     ''' </summary>
     Public Function FindDuplicateEntryNames() As IReadOnlyList(Of String)
@@ -348,7 +348,7 @@ Public Class winapp2file2
     ''' Serializes a list of entries with a blank line between each. Each entry's text ends
     ''' with a newline, so the result does too.
     ''' </summary>
-    Private Shared Function CategoriesToString(entries As List(Of winapp2entry2)) As String
+    Private Shared Function CategoriesToString(entries As List(Of winapp2entry)) As String
 
         If entries.Count = 0 Then Return ""
         If entries.Count = 1 Then Return entries(0).ToIniSection().ToString()

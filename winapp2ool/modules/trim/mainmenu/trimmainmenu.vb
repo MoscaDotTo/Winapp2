@@ -49,15 +49,15 @@ Module trimmainmenu
                 Sub() toggleModuleSetting("Exclude list", NameOf(Trim), GetType(trimsettings), NameOf(UseTrimExcludes), NameOf(TrimModuleSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedOption("Choose winapp2.ini", "Select a new winapp2.ini file for optimization",
-                Sub() changeFile2Params(TrimFile1, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged)),
+                Sub() changeFileParams(TrimFile1, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged)),
                 Not DownloadFileToTrim) _
             .AddDispatchedOption("Choose save target", "Select a save target for the optimized winapp2.ini file",
-                Sub() changeFile2Params(TrimFile3, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(TrimModuleSettingsChanged))) _
+                Sub() changeFileParams(TrimFile3, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile3), NameOf(TrimModuleSettingsChanged))) _
             .AddDispatchedOption("Choose includes file", "Select a file containing entry names which should never be trimmed",
-                Sub() changeFile2Params(TrimFile2, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile2), NameOf(TrimModuleSettingsChanged)),
+                Sub() changeFileParams(TrimFile2, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile2), NameOf(TrimModuleSettingsChanged)),
                 UseTrimIncludes) _
             .AddDispatchedOption("Choose excludes file", "Select a file containing entry names which should always be trimmed",
-                Sub() changeFile2Params(TrimFile4, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile4), NameOf(TrimModuleSettingsChanged)),
+                Sub() changeFileParams(TrimFile4, TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile4), NameOf(TrimModuleSettingsChanged)),
                 UseTrimExcludes) _
             .AddBlank() _
             .AddColoredLine($"winapp2.ini:   {If(DownloadFileToTrim, GetNameFromDL(DownloadFileToTrim), replDir(TrimFile1.Path()))}", ConsoleColor.Magenta) _

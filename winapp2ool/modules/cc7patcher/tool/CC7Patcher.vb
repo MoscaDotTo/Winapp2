@@ -73,7 +73,7 @@ Public Module CC7Patcher
 
         End If
 
-        Dim winapp2Input As iniFile2
+        Dim winapp2Input As iniFile
 
         If DownloadWinapp2 Then
 
@@ -85,7 +85,7 @@ Public Module CC7Patcher
             End If
 
             gLog("Downloading CCleaner7 winapp2.ini from GitHub")
-            winapp2Input = getRemoteIniFile2(cc7FlavorLink)
+            winapp2Input = getRemoteIniFile(cc7FlavorLink)
 
             If winapp2Input Is Nothing Then
 
@@ -121,7 +121,7 @@ Public Module CC7Patcher
                 menuOutput.AddColoredLine(trimMsg, ConsoleColor.Cyan)
                 gLog(trimMsg)
 
-                Dim wa2file As New winapp2file2(winapp2Input)
+                Dim wa2file As New winapp2file(winapp2Input)
                 Trim.trimFile(wa2file)
                 winapp2Input = wa2file.ToIni()
 
@@ -157,7 +157,7 @@ Public Module CC7Patcher
     ''' <param name="menuOutput">
     ''' The menu output section for logging
     ''' </param>
-    Private Sub patchCCleaner(winapp2Input As iniFile2,
+    Private Sub patchCCleaner(winapp2Input As iniFile,
                               ByRef menuOutput As MenuSection)
 
         Using gLogScope("Beginning ccleaner.ini patching process")
@@ -167,7 +167,7 @@ Public Module CC7Patcher
 
             pruneWinapp2Sections(baseFile, menuOutput)
 
-            Dim outputFile = iniFile2.Empty(CC7PatcherFile3.Dir, CC7PatcherFile3.Name)
+            Dim outputFile = iniFile.Empty(CC7PatcherFile3.Dir, CC7PatcherFile3.Name)
 
             Dim patchMsg = $"Patching {CC7PatcherFile2.Name} with entries from winapp2.ini"
             menuOutput.AddColoredLine(patchMsg, ConsoleColor.Yellow)
@@ -213,7 +213,7 @@ Public Module CC7Patcher
     ''' <returns>
     ''' The number of sections pruned
     ''' </returns>
-    Private Function pruneWinapp2Sections(ByRef baseFile As iniFile2,
+    Private Function pruneWinapp2Sections(ByRef baseFile As iniFile,
                                           ByRef menuOutput As MenuSection) As Integer
 
         Using gLogScope("Pruning existing winapp2 entries from ccleaner.ini")

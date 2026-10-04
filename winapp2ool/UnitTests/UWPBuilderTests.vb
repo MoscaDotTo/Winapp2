@@ -31,12 +31,12 @@ Imports System.Text
     ''' <summary>
     ''' Helper: parse literal ini text and return its first section
     ''' </summary>
-    Private Shared Function FirstSection(text As String) As winapp2ool.iniSection2
+    Private Shared Function FirstSection(text As String) As winapp2ool.iniSection
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
         Using ms As New IO.MemoryStream(bytes)
             Using reader As New IO.StreamReader(ms)
-                Dim parsed = winapp2ool.iniFile2.FromStream(reader, "", "test.ini")
+                Dim parsed = winapp2ool.iniFile.FromStream(reader, "", "test.ini")
                 For Each section In parsed
                     Return section
                 Next
@@ -72,7 +72,7 @@ Imports System.Text
                          Optional scaffoldDetectFiles As List(Of String) = Nothing,
                          Optional webViewCatalog As Dictionary(Of String, List(Of String)) = Nothing,
                          Optional qtCatalog As Dictionary(Of String, List(Of String)) = Nothing,
-                         Optional electronCatalog As Dictionary(Of String, List(Of String)) = Nothing) As winapp2ool.iniSection2
+                         Optional electronCatalog As Dictionary(Of String, List(Of String)) = Nothing) As winapp2ool.iniSection
 
         Dim menu As New winapp2ool.MenuSection
         Using cap = winapp2ool.gLogCapture()
@@ -110,7 +110,7 @@ Imports System.Text
     ''' <summary>
     ''' Helper: collect the values of every key of a given type from a generated section
     ''' </summary>
-    Private Shared Function ValuesOf(section As winapp2ool.iniSection2, keyType As String) As List(Of String)
+    Private Shared Function ValuesOf(section As winapp2ool.iniSection, keyType As String) As List(Of String)
 
         Dim result As New List(Of String)
 

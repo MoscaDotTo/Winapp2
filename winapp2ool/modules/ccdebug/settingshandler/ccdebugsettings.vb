@@ -71,7 +71,7 @@ Public Module ccdebugsettings
     Public Property CCDBSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Resets the CCiniDebug module's settings to their defaults and persists them via <c> SaveModule2 </c>.
+    ''' Resets the CCiniDebug module's settings to their defaults and persists them via <c> SaveModule </c>.
     ''' </summary>
     Public Sub initDefaultCCDBSettings()
 
@@ -82,7 +82,7 @@ Public Module ccdebugsettings
         SaveDebuggedFile = True
         SortFileForOutput = True
         CCDBSettingsChanged = False
-        SaveModule2(NameOf(CCiniDebug), GetType(ccdebugsettings))
+        SaveModule(NameOf(CCiniDebug), GetType(ccdebugsettings))
 
     End Sub
 

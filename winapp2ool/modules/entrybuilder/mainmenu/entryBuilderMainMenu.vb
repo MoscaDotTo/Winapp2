@@ -41,11 +41,11 @@ Public Module entryBuilderMainMenu
                 Sub() initEntryBuilder()) _
             .AddBlank() _
             .AddDispatchedOption("Choose source directory", "Select the directory containing per-letter shorthand source files",
-                Sub() changeFile2Params(EntryBuilderFile1, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile1), NameOf(EntryBuilderModuleSettingsChanged), "Source directory")) _
+                Sub() changeFileParams(EntryBuilderFile1, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile1), NameOf(EntryBuilderModuleSettingsChanged), "Source directory")) _
             .AddDispatchedOption("Choose save target", "Select where to save the generated entries",
-                Sub() changeFile2Params(EntryBuilderFile2, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile2), NameOf(EntryBuilderModuleSettingsChanged), "Save target")) _
+                Sub() changeFileParams(EntryBuilderFile2, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile2), NameOf(EntryBuilderModuleSettingsChanged), "Save target")) _
             .AddDispatchedOption("Choose scaffolds directory", "Select the shared scaffold catalog directory",
-                Sub() changeFile2Params(EntryBuilderFile3, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile3), NameOf(EntryBuilderModuleSettingsChanged), "Scaffolds directory")) _
+                Sub() changeFileParams(EntryBuilderFile3, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile3), NameOf(EntryBuilderModuleSettingsChanged), "Scaffolds directory")) _
             .AddBlank() _
             .AddDispatchedToggle("output splitting", "writing per-letter files into the save target's directory", EntryBuilderSplitOutput,
                 Sub() toggleModuleSetting("Split output", NameOf(EntryBuilder), GetType(entryBuilderSettings), NameOf(EntryBuilderSplitOutput), NameOf(EntryBuilderModuleSettingsChanged))) _

@@ -83,7 +83,7 @@ Module globalsettingsmenu
             .AddDispatchedColoredOption("Save log", "Save winapp2ool's current internal log to disk", ConsoleColor.DarkYellow,
                 Sub() saveGlobalLog()) _
             .AddDispatchedColoredOption("Change Save Target", "Select a new filename or path to which the winapp2ool log should be saved", ConsoleColor.DarkYellow,
-                Sub() changeFile2Params(GlobalLogFile, toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(GlobalLogFile), NameOf(toolSettingsHaveChanged))).AddBlank() _
+                Sub() changeFileParams(GlobalLogFile, toolSettingsHaveChanged, NameOf(Winapp2ool), NameOf(GlobalLogFile), NameOf(toolSettingsHaveChanged))).AddBlank() _
             .AddColoredFileInfo("Current save target: ", GlobalLogFile.Path(), ConsoleColor.DarkYellow).AddBlank() _
             .AddDispatchedOption("Visit GitHub", "Open the Winapp2 GitHub page in your default web browser",
                 Sub() Process.Start(gitLink)) _

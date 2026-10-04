@@ -58,11 +58,11 @@ Public Module TransmuteKeyMap
         ''' <summary> The human-readable label from the section name, used in reporting </summary>
         Public Property Label As String
 
-        ''' <summary> The match criteria, each parsed into an <c> iniKey2 </c> for KeyType+Value comparison </summary>
-        Public Property Matches As New List(Of iniKey2)
+        ''' <summary> The match criteria, each parsed into an <c> iniKey </c> for KeyType+Value comparison </summary>
+        Public Property Matches As New List(Of iniKey)
 
         ''' <summary> The replacement key lines in file order, cloned for each hit </summary>
-        Public Property Replacements As New List(Of iniKey2)
+        Public Property Replacements As New List(Of iniKey)
 
         ''' <summary> The total number of keys replaced by this rule </summary>
         Public Property Hits As Integer
@@ -87,7 +87,7 @@ Public Module TransmuteKeyMap
     ''' </summary>
     '''
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> whose keys will be evaluated against the mapping rules
+    ''' The <c> iniFile </c> whose keys will be evaluated against the mapping rules
     ''' </param>
     '''
     ''' <param name="mapSections">
@@ -98,8 +98,8 @@ Public Module TransmuteKeyMap
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
-    Friend Sub applyKeyMapRules(ByRef baseFile As iniFile2,
-                                      mapSections As List(Of iniSection2),
+    Friend Sub applyKeyMapRules(ByRef baseFile As iniFile,
+                                      mapSections As List(Of iniSection),
                                 ByRef menuOutput As MenuSection)
 
         If mapSections.Count = 0 Then Return
@@ -138,8 +138,8 @@ Public Module TransmuteKeyMap
 
                         If Not ruleMatches(rule, baseKey) Then Continue For
 
-                        Dim newKeys As New List(Of iniKey2)
-                        For Each replacement In rule.Replacements : newKeys.Add(New iniKey2(replacement.ToString())) : Next
+                        Dim newKeys As New List(Of iniKey)
+                        For Each replacement In rule.Replacements : newKeys.Add(New iniKey(replacement.ToString())) : Next
                         baseSection.Keys.Replace(baseKey, newKeys)
 
                         rule.Hits += 1
@@ -199,7 +199,7 @@ Public Module TransmuteKeyMap
     ''' The base file key being evaluated
     ''' </param>
     '''
-    Private Function ruleMatches(rule As TransmuteMapRule, baseKey As iniKey2) As Boolean
+    Private Function ruleMatches(rule As TransmuteMapRule, baseKey As iniKey) As Boolean
 
         For Each matchKey In rule.Matches
 
@@ -227,7 +227,7 @@ Public Module TransmuteKeyMap
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
-    Private Function parseMapRule(mapSection As iniSection2,
+    Private Function parseMapRule(mapSection As iniSection,
                                   ByRef menuOutput As MenuSection) As TransmuteMapRule
 
         Dim label = mapSection.Name.Substring(MapSectionPrefix.Length).Trim()
@@ -293,7 +293,7 @@ Public Module TransmuteKeyMap
     End Function
 
     ''' <summary>
-    ''' Parses a <c> Name=Value </c> line into an <c> iniKey2 </c>, returning <c> Nothing </c>
+    ''' Parses a <c> Name=Value </c> line into an <c> iniKey </c>, returning <c> Nothing </c>
     ''' when the line has no <c> = </c> or an empty Name
     ''' </summary>
     '''
@@ -301,12 +301,12 @@ Public Module TransmuteKeyMap
     ''' The raw key line, ie. the value of a <c> Match= </c> or <c> Replace= </c> key
     ''' </param>
     '''
-    Private Function parseKeyLine(line As String) As iniKey2
+    Private Function parseKeyLine(line As String) As iniKey
 
         Dim eqPos = line.IndexOf("="c)
         If eqPos < 1 Then Return Nothing
 
-        Return New iniKey2(line)
+        Return New iniKey(line)
 
     End Function
 

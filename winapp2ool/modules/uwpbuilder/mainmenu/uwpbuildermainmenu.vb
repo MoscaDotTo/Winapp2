@@ -40,11 +40,11 @@ Public Module uwpbuildermainmenu
                 Sub() initUWPBuilder()) _
             .AddBlank() _
             .AddDispatchedOption("Choose source directory", "Select the directory containing UWP.ini and AppInfo\",
-                Sub() changeFile2Params(UWPFile1, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile1), NameOf(UWPBuilderModuleSettingsChanged), "Source directory")) _
+                Sub() changeFileParams(UWPFile1, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile1), NameOf(UWPBuilderModuleSettingsChanged), "Source directory")) _
             .AddDispatchedOption("Choose save target", "Select where to save the generated entries",
-                Sub() changeFile2Params(UWPFile2, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile2), NameOf(UWPBuilderModuleSettingsChanged), "Save target")) _
+                Sub() changeFileParams(UWPFile2, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile2), NameOf(UWPBuilderModuleSettingsChanged), "Save target")) _
             .AddDispatchedOption("Choose scaffolds directory", "Select the shared scaffold catalog directory",
-                Sub() changeFile2Params(UWPFile3, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile3), NameOf(UWPBuilderModuleSettingsChanged), "Scaffolds directory")) _
+                Sub() changeFileParams(UWPFile3, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile3), NameOf(UWPBuilderModuleSettingsChanged), "Scaffolds directory")) _
             .AddBlank() _
             .AddColoredFileInfo("Current source directory:    ", UWPFile1.Dir, ConsoleColor.DarkYellow) _
             .AddColoredFileInfo("Current save target:         ", UWPFile2.Path(), ConsoleColor.Yellow) _

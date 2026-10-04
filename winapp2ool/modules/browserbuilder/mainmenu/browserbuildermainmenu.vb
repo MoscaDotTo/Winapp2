@@ -41,9 +41,9 @@ Public Module browserbuildermainmenu
                 Sub() initBrowserBuilder()) _
             .AddBlank() _
             .AddDispatchedOption("Choose source directory", "Select the directory containing chromium.ini, gecko.ini, and flavor correction files",
-                Sub() changeFile2Params(BuilderFile1, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderFile1), NameOf(BrowserBuilderModuleSettingsChanged), "Source directory")) _
+                Sub() changeFileParams(BuilderFile1, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderFile1), NameOf(BrowserBuilderModuleSettingsChanged), "Source directory")) _
             .AddDispatchedOption("Choose save target", "Select a new location on disk to which generated entries should be saved",
-                Sub() changeFile2Params(BuilderFile2, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderFile2), NameOf(BrowserBuilderModuleSettingsChanged), "Save target")) _
+                Sub() changeFileParams(BuilderFile2, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderFile2), NameOf(BrowserBuilderModuleSettingsChanged), "Save target")) _
             .AddBlank() _
             .AddColoredFileInfo("Current source directory: ", BuilderFile1.Dir, ConsoleColor.DarkYellow) _
             .AddColoredFileInfo("Current save target:      ", BuilderFile2.Path(), ConsoleColor.Yellow) _

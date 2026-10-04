@@ -19,9 +19,9 @@ Option Strict On
 
 ''' <summary>
 ''' Represents a winapp2.ini entry with typed read-only key collections,
-''' built from an <c> iniSection2 </c>
+''' built from an <c> iniSection </c>
 ''' </summary>
-Public Class winapp2entry2
+Public Class winapp2entry
 
     ''' <summary>The name of the entry, without brackets</summary>
     Public Property Name As String
@@ -36,77 +36,77 @@ Public Class winapp2entry2
     ''' <summary>The starting line number of the source section</summary>
     Public ReadOnly Property LineNum As Integer
 
-    Private ReadOnly _detectOS      As New List(Of iniKey2)
-    Private ReadOnly _langSecRef    As New List(Of iniKey2)
-    Private ReadOnly _sectionKey    As New List(Of iniKey2)
-    Private ReadOnly _specialDetect As New List(Of iniKey2)
-    Private ReadOnly _detects       As New List(Of iniKey2)
-    Private ReadOnly _detectFiles   As New List(Of iniKey2)
-    Private ReadOnly _defaultKey    As New List(Of iniKey2)
-    Private ReadOnly _warningKey    As New List(Of iniKey2)
-    Private ReadOnly _fileKeys      As New List(Of iniKey2)
-    Private ReadOnly _regKeys       As New List(Of iniKey2)
-    Private ReadOnly _excludeKeys   As New List(Of iniKey2)
-    Private ReadOnly _errorKeys     As New List(Of iniKey2)
+    Private ReadOnly _detectOS      As New List(Of iniKey)
+    Private ReadOnly _langSecRef    As New List(Of iniKey)
+    Private ReadOnly _sectionKey    As New List(Of iniKey)
+    Private ReadOnly _specialDetect As New List(Of iniKey)
+    Private ReadOnly _detects       As New List(Of iniKey)
+    Private ReadOnly _detectFiles   As New List(Of iniKey)
+    Private ReadOnly _defaultKey    As New List(Of iniKey)
+    Private ReadOnly _warningKey    As New List(Of iniKey)
+    Private ReadOnly _fileKeys      As New List(Of iniKey)
+    Private ReadOnly _regKeys       As New List(Of iniKey)
+    Private ReadOnly _excludeKeys   As New List(Of iniKey)
+    Private ReadOnly _errorKeys     As New List(Of iniKey)
 
     ''' <summary>Keys with KeyType "DetectOS". Valid syntax: one key only.</summary>
-    Public ReadOnly Property DetectOS As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property DetectOS As IReadOnlyList(Of iniKey)
         Get
             Return _detectOS
         End Get
     End Property
 
     ''' <summary>Keys with KeyType "LangSecRef". Valid syntax: one key only.</summary>
-    Public ReadOnly Property LangSecRef As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property LangSecRef As IReadOnlyList(Of iniKey)
         Get
             Return _langSecRef
         End Get
     End Property
 
     ''' <summary>Keys with KeyType "Section". Valid syntax: one key only.</summary>
-    Public ReadOnly Property SectionKey As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property SectionKey As IReadOnlyList(Of iniKey)
         Get
             Return _sectionKey
         End Get
     End Property
 
     ''' <summary>Keys with KeyType "SpecialDetect" (deprecated)</summary>
-    Public ReadOnly Property SpecialDetect As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property SpecialDetect As IReadOnlyList(Of iniKey)
         Get
             Return _specialDetect
         End Get
     End Property
 
     ''' <summary>Keys with KeyType "Detect"</summary>
-    Public ReadOnly Property Detects As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property Detects As IReadOnlyList(Of iniKey)
         Get
             Return _detects
         End Get
     End Property
 
     ''' <summary>Keys with KeyType "DetectFile"</summary>
-    Public ReadOnly Property DetectFiles As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property DetectFiles As IReadOnlyList(Of iniKey)
         Get
             Return _detectFiles
         End Get
     End Property
 
     ''' <summary>Keys with KeyType "Default". Valid syntax: one key only.</summary>
-    Public ReadOnly Property DefaultKey As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property DefaultKey As IReadOnlyList(Of iniKey)
         Get
             Return _defaultKey
         End Get
     End Property
 
     ''' <summary>Keys with KeyType "Warning". Valid syntax: one key only.</summary>
-    Public ReadOnly Property WarningKey As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property WarningKey As IReadOnlyList(Of iniKey)
         Get
             Return _warningKey
         End Get
     End Property
 
     ''' <summary>Keys with KeyType "FileKey"</summary>
-    Public ReadOnly Property FileKeys As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property FileKeys As IReadOnlyList(Of iniKey)
         Get
             Return _fileKeys
         End Get
@@ -120,27 +120,27 @@ Public Class winapp2entry2
     ''' <param name="newKeys">
     ''' The replacement FileKey sequence
     ''' </param>
-    Public Sub ReplaceFileKeys(newKeys As IEnumerable(Of iniKey2))
+    Public Sub ReplaceFileKeys(newKeys As IEnumerable(Of iniKey))
         _fileKeys.Clear()
         _fileKeys.AddRange(newKeys)
     End Sub
 
     ''' <summary>Keys with KeyType "RegKey"</summary>
-    Public ReadOnly Property RegKeys As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property RegKeys As IReadOnlyList(Of iniKey)
         Get
             Return _regKeys
         End Get
     End Property
 
     ''' <summary>Keys with KeyType "ExcludeKey"</summary>
-    Public ReadOnly Property ExcludeKeys As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property ExcludeKeys As IReadOnlyList(Of iniKey)
         Get
             Return _excludeKeys
         End Get
     End Property
 
     ''' <summary>Keys with unrecognized KeyTypes</summary>
-    Public ReadOnly Property ErrorKeys As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property ErrorKeys As IReadOnlyList(Of iniKey)
         Get
             Return _errorKeys
         End Get
@@ -192,9 +192,9 @@ Public Class winapp2entry2
     ''' LangSecRef, Section, SpecialDetect, Default, and Warning.
     ''' An empty list means no singleton violations exist.
     ''' </summary>
-    Public ReadOnly Property SingletonViolations As IReadOnlyList(Of iniKey2)
+    Public ReadOnly Property SingletonViolations As IReadOnlyList(Of iniKey)
         Get
-            Dim result As New List(Of iniKey2)
+            Dim result As New List(Of iniKey)
             For Each lst In {_detectOS, _langSecRef, _sectionKey, _specialDetect, _defaultKey, _warningKey}
                 If lst.Count > 1 Then result.AddRange(lst.Skip(1))
             Next
@@ -210,11 +210,11 @@ Public Class winapp2entry2
     Public ReadOnly Property HasConsistentExcludeKeys As Boolean
         Get
             Dim hasFileExcludes = _excludeKeys.Any(Function(k)
-                Dim p As New excludeKeyParams2(k.Value)
+                Dim p As New excludeKeyParams(k.Value)
                 Return p.Flag = excludeKeyFlag.File OrElse p.Flag = excludeKeyFlag.Path
             End Function)
             Dim hasRegExcludes = _excludeKeys.Any(Function(k)
-                Dim p As New excludeKeyParams2(k.Value)
+                Dim p As New excludeKeyParams(k.Value)
                 Return p.Flag = excludeKeyFlag.Reg
             End Function)
             Return (Not hasFileExcludes OrElse _fileKeys.Count > 0) AndAlso
@@ -226,16 +226,16 @@ Public Class winapp2entry2
     ''' Every key bucket in winapp2.ini key order, with <c> ErrorKeys </c> last.
     ''' <see cref="GetBucketIndex"/> gives each key type's position.
     ''' </summary>
-    Public ReadOnly Property KeyLists As IReadOnlyList(Of IReadOnlyList(Of iniKey2))
+    Public ReadOnly Property KeyLists As IReadOnlyList(Of IReadOnlyList(Of iniKey))
 
     ''' <summary>
-    ''' Creates a new <c> winapp2entry2 </c> from <paramref name="section"/>, sorting each key into
+    ''' Creates a new <c> winapp2entry </c> from <paramref name="section"/>, sorting each key into
     ''' its bucket by KeyType (case-insensitive). The entry shares the section's key objects, so
     ''' changing a key here changes it in the section too.
     ''' </summary>
     '''
-    ''' <param name="section">A winapp2.ini format <c> iniSection2 </c></param>
-    Public Sub New(section As iniSection2)
+    ''' <param name="section">A winapp2.ini format <c> iniSection </c></param>
+    Public Sub New(section As iniSection)
 
         If section Is Nothing Then argIsNull(NameOf(section)) : Return
 
@@ -261,7 +261,7 @@ Public Class winapp2entry2
 
         Next
 
-        KeyLists = New List(Of IReadOnlyList(Of iniKey2)) From {
+        KeyLists = New List(Of IReadOnlyList(Of iniKey)) From {
             _detectOS, _langSecRef, _sectionKey, _specialDetect, _detects, _detectFiles,
             _defaultKey, _warningKey, _fileKeys, _regKeys, _excludeKeys, _errorKeys
         }
@@ -272,7 +272,7 @@ Public Class winapp2entry2
     ''' Adds a key to the appropriate typed bucket based on its KeyType
     ''' </summary>
     ''' <param name="key">The key to add</param>
-    Public Sub AddKey(key As iniKey2)
+    Public Sub AddKey(key As iniKey)
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
 
@@ -321,7 +321,7 @@ Public Class winapp2entry2
     ''' it cannot be salvaged, leaving the key's <c> KeyType </c> in an inconsistent state.
     ''' </summary>
     ''' <param name="key">The key to remove from the error bucket</param>
-    Public Sub ForceRemoveErrorKey(key As iniKey2)
+    Public Sub ForceRemoveErrorKey(key As iniKey)
         _errorKeys.Remove(key)
     End Sub
 
@@ -346,7 +346,7 @@ Public Class winapp2entry2
     ''' covers that case for error keys.
     ''' </summary>
     ''' <param name="key">The key to remove</param>
-    Public Sub RemoveKey(key As iniKey2)
+    Public Sub RemoveKey(key As iniKey)
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
 
@@ -367,10 +367,10 @@ Public Class winapp2entry2
 
     End Sub
 
-    ''' <summary>Returns a new <c> iniSection2 </c> holding this entry's keys in winapp2.ini order</summary>
-    Public Function ToIniSection() As iniSection2
+    ''' <summary>Returns a new <c> iniSection </c> holding this entry's keys in winapp2.ini order</summary>
+    Public Function ToIniSection() As iniSection
 
-        Dim s As New iniSection2(Name, LineNum)
+        Dim s As New iniSection(Name, LineNum)
 
         For Each lst In KeyLists
             For Each key In lst
@@ -394,7 +394,7 @@ Public Class winapp2entry2
 
     End Sub
 
-    Private Shared Sub RenumberBucket(bucket As List(Of iniKey2))
+    Private Shared Sub RenumberBucket(bucket As List(Of iniKey))
 
         If bucket.Count = 0 Then Return
 

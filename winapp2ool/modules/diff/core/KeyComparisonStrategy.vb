@@ -37,7 +37,7 @@ Public MustInherit Class KeyComparisonStrategy
     Private Shared ReadOnly _regexCache As New Concurrent.ConcurrentDictionary(Of String, Regex)(StringComparer.Ordinal)
 
     ''' <summary>
-    ''' Compares two <c> iniKey2 </c> objects for equivalence
+    ''' Compares two <c> iniKey </c> objects for equivalence
     ''' </summary>
     '''
     ''' <param name="newKey">
@@ -59,8 +59,8 @@ Public MustInherit Class KeyComparisonStrategy
     ''' <returns>
     ''' <c> True </c> if keys are equivalent
     ''' </returns>
-    Public MustOverride Function Compare(newKey As iniKey2,
-                                         oldKey As iniKey2,
+    Public MustOverride Function Compare(newKey As iniKey,
+                                         oldKey As iniKey,
                           Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                           Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
@@ -165,8 +165,8 @@ Public Class SimpleKeyComparisonStrategy
     ''' <returns>
     ''' <c> True </c> if the keys are of the same type and have equal values <br /> 
     ''' <c> False </c>, otherwise </returns>
-    Public Overrides Function Compare(newKey As iniKey2,
-                                      oldKey As iniKey2,
+    Public Overrides Function Compare(newKey As iniKey,
+                                      oldKey As iniKey,
                        Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                        Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
@@ -186,7 +186,7 @@ Public Class PathKeyComparisonStrategy
     Inherits KeyComparisonStrategy
 
     ''' <summary>
-    ''' Compares two FileKey or DetectFile <c> iniKey2 </c> objects by matching each backslash-delimited
+    ''' Compares two FileKey or DetectFile <c> iniKey </c> objects by matching each backslash-delimited
     ''' path component in turn, using wildcard/regex matching on non-root components and special
     ''' handling for the pipe-delimited file pattern and flags in the final component
     ''' </summary>
@@ -199,8 +199,8 @@ Public Class PathKeyComparisonStrategy
     ''' Set to <c> True </c> if the match appears to reduce wildcard coverage
     ''' </param>
     ''' <returns><c> True </c> if all path components and file parameters are considered equivalent</returns>
-    Public Overrides Function Compare(newKey As iniKey2,
-                                      oldKey As iniKey2,
+    Public Overrides Function Compare(newKey As iniKey,
+                                      oldKey As iniKey,
                        Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                        Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
@@ -461,7 +461,7 @@ Public Class DetectKeyComparisonStrategy
     Inherits KeyComparisonStrategy
 
     ''' <summary>
-    ''' Compares two Detect or RegKey <c> iniKey2 </c> objects, treating parent registry paths as capturing their children
+    ''' Compares two Detect or RegKey <c> iniKey </c> objects, treating parent registry paths as capturing their children
     ''' </summary>
     '''
     ''' <param name="newKey">
@@ -485,8 +485,8 @@ Public Class DetectKeyComparisonStrategy
     ''' <paramref name="oldKey"/> — except a value-targeted RegKey, which requires an exact path match
     ''' since a value deletion beneath one key is not subsumed by a parent path
     ''' </returns>
-    Public Overrides Function Compare(newKey As iniKey2,
-                                      oldKey As iniKey2,
+    Public Overrides Function Compare(newKey As iniKey,
+                                      oldKey As iniKey,
                        Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                        Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
@@ -566,7 +566,7 @@ Public Class KeyComparisonStrategyFactory
     Private Shared ReadOnly detectStrategy As New DetectKeyComparisonStrategy()
 
     ''' <summary>
-    ''' Gets the appropriate strategy for the given <c> iniKey2 </c> key type
+    ''' Gets the appropriate strategy for the given <c> iniKey </c> key type
     ''' </summary>
     '''
     ''' <param name="key">
@@ -576,7 +576,7 @@ Public Class KeyComparisonStrategyFactory
     ''' <returns>
     ''' The <c> KeyComparisonStrategy </c> appropriate for <paramref name="key"/>'s type
     ''' </returns>
-    Public Shared Function GetStrategy(key As iniKey2) As KeyComparisonStrategy
+    Public Shared Function GetStrategy(key As iniKey) As KeyComparisonStrategy
 
         Select Case key.KeyType
 
@@ -591,7 +591,7 @@ Public Class KeyComparisonStrategyFactory
     End Function
 
     ''' <summary>
-    ''' Compares two <c> iniKey2 </c> keys using the appropriate strategy.
+    ''' Compares two <c> iniKey </c> keys using the appropriate strategy.
     ''' </summary>
     '''
     ''' <param name="newKey">
@@ -613,8 +613,8 @@ Public Class KeyComparisonStrategyFactory
     ''' <returns>
     ''' <c> True </c> if the two keys are considered equivalent under the appropriate strategy
     ''' </returns>
-    Public Shared Function CompareKeys(newKey As iniKey2,
-                                       oldKey As iniKey2,
+    Public Shared Function CompareKeys(newKey As iniKey,
+                                       oldKey As iniKey,
                         Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                         Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
@@ -626,9 +626,9 @@ Public Class KeyComparisonStrategyFactory
 End Class
 
 ''' <summary>
-''' Information about key matches between two <c> iniSection2 </c> entries.
+''' Information about key matches between two <c> iniSection </c> entries.
 ''' </summary>
-Public Class KeyMatchInfo2
+Public Class KeyMatchInfo
 
     ''' <summary>
     ''' Number of FileKey values from the old entry matched in the new entry
@@ -688,11 +688,11 @@ Public Class KeyMatchInfo2
     ''' <summary>
     ''' Set of old FileKey objects that were matched in the new entry
     ''' </summary>
-    Public Property MatchedOldFileKeys As New HashSet(Of iniKey2)
+    Public Property MatchedOldFileKeys As New HashSet(Of iniKey)
 
     ''' <summary>
     ''' Set of old RegKey objects that were matched in the new entry
     ''' </summary>
-    Public Property MatchedOldRegKeys As New HashSet(Of iniKey2)
+    Public Property MatchedOldRegKeys As New HashSet(Of iniKey)
 
 End Class

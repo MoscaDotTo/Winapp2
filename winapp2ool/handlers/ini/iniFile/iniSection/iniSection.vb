@@ -16,7 +16,7 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 ''' <summary>An object representing a [SectionName] header and its child keys</summary>
-Public Class iniSection2
+Public Class iniSection
 
     ''' <summary>The name of the section, without brackets</summary>
     Public ReadOnly Property Name As String
@@ -40,13 +40,13 @@ Public Class iniSection2
 
     ''' <summary>Returns the key with the given name, or <c> Nothing </c> if not found</summary>
     ''' <param name="name">The key name to look up (case-insensitive)</param>
-    Public Function GetKey(name As String) As iniKey2
+    Public Function GetKey(name As String) As iniKey
         Return Keys.GetKey(name)
     End Function
 
     ''' <summary>Adds a key to this section</summary>
     ''' <param name="key">The key to add</param>
-    Public Sub AddKey(key As iniKey2)
+    Public Sub AddKey(key As iniKey)
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
         Keys.Add(key)
     End Sub

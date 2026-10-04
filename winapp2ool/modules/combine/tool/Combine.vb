@@ -104,7 +104,7 @@ Public Module Combine
         End If
 
         Dim CombineUserOutput As New MenuSection
-        Dim combinedOutput As iniFile2 = iniFile2.Empty(outputFile.Dir, outputFile.Name)
+        Dim combinedOutput As iniFile = iniFile.Empty(outputFile.Dir, outputFile.Name)
 
         processCombine(CombineUserOutput, targetDir, combinedOutput)
 
@@ -130,12 +130,12 @@ Public Module Combine
     ''' </param>
     '''
     ''' <param name="combinedOutput">
-    ''' The <c> iniFile2 </c> into which all other ini files found in
+    ''' The <c> iniFile </c> into which all other ini files found in
     ''' <paramref name="targetDir"/> will be merged
     ''' </param>
     Private Sub processCombine(outputMenu As MenuSection,
                                 targetDir As String,
-                          ByRef combinedOutput As iniFile2)
+                          ByRef combinedOutput As iniFile)
 
         Dim allINIFiles = Directory.GetFiles(targetDir, "*.ini", SearchOption.AllDirectories).ToList()
         allINIFiles.Sort()
@@ -297,7 +297,7 @@ Public Module Combine
     '''
     ''' <param name="sectionOrigins">
     ''' Records the name of the file which first contributed each section name, keyed by
-    ''' section name (case-insensitive, matching <c> iniFile2 </c> section lookup)
+    ''' section name (case-insensitive, matching <c> iniFile </c> section lookup)
     ''' </param>
     '''
     ''' <param name="collisions">
@@ -305,13 +305,13 @@ Public Module Combine
     ''' section of that name (a cross-file name collision)
     ''' </param>
     Private Sub attemptCombine(filepath As String,
-                         ByRef combinedOutput As iniFile2,
+                         ByRef combinedOutput As iniFile,
                          ByRef validFileCount As Integer,
                          ByRef outputMenu As MenuSection,
                                sectionOrigins As Dictionary(Of String, String),
                                collisions As Dictionary(Of String, List(Of String)))
 
-        Dim currentFile As iniFile2 = iniFile2.FromFile(filepath)
+        Dim currentFile As iniFile = iniFile.FromFile(filepath)
 
         If currentFile.Count = 0 Then
 
@@ -385,8 +385,8 @@ Public Module Combine
     ''' Accumulates, per section name, the names of every subsequent file which contributed a
     ''' section of that name
     ''' </param>
-    Private Sub mergeFileIntoOutput(sourceFile As iniFile2,
-                              ByRef combinedOutput As iniFile2,
+    Private Sub mergeFileIntoOutput(sourceFile As iniFile,
+                              ByRef combinedOutput As iniFile,
                                     sourceFileName As String,
                                     sectionOrigins As Dictionary(Of String, String),
                                     collisions As Dictionary(Of String, List(Of String)))
@@ -418,7 +418,7 @@ Public Module Combine
     ''' </summary>
     '''
     ''' <param name="sourceSection">
-    ''' The <c> iniSection2 </c> whose contents will be merged into the output
+    ''' The <c> iniSection </c> whose contents will be merged into the output
     ''' </param>
     '''
     ''' <param name="combinedOutput">
@@ -428,8 +428,8 @@ Public Module Combine
     ''' <param name="sectionName">
     ''' The name of the current section being processed
     ''' </param>
-    Private Sub AddUniqueKeys(sourceSection As iniSection2,
-                               combinedOutput As iniFile2,
+    Private Sub AddUniqueKeys(sourceSection As iniSection,
+                               combinedOutput As iniFile,
                                sectionName As String)
 
         Dim existingSection = combinedOutput.GetSection(sectionName)
@@ -457,7 +457,7 @@ Public Module Combine
 
     ''' <summary>
     ''' Facilitates combining files from outside the module's UI.
-    ''' Returns the combined <c> iniFile2 </c> after processing; the caller may inspect the
+    ''' Returns the combined <c> iniFile </c> after processing; the caller may inspect the
     ''' result but does not need to save it — <c> processCombine </c> writes to disk automatically.
     ''' </summary>
     '''
@@ -474,21 +474,21 @@ Public Module Combine
     ''' </param>
     '''
     ''' <returns>
-    ''' The resulting combined <c> iniFile2 </c> if successful, or an empty <c> iniFile2 </c>
+    ''' The resulting combined <c> iniFile </c> if successful, or an empty <c> iniFile </c>
     ''' if the target directory does not exist or otherwise lacks valid ini files
     ''' </returns>
     Public Function RemoteCombine(targetDirectory As String,
                                    outputDir As String,
-                                   outputName As String) As iniFile2
+                                   outputName As String) As iniFile
 
         If Not Directory.Exists(targetDirectory) Then
 
             gLog($"Target directory not found: {targetDirectory}")
-            Return iniFile2.Empty(outputDir, outputName)
+            Return iniFile.Empty(outputDir, outputName)
 
         End If
 
-        Dim combinedOutput As iniFile2 = iniFile2.Empty(outputDir, outputName)
+        Dim combinedOutput As iniFile = iniFile.Empty(outputDir, outputName)
         processCombine(New MenuSection, targetDirectory, combinedOutput)
 
         Return combinedOutput

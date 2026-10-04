@@ -23,7 +23,7 @@ Option Strict On
 ''' <br /><br />
 ''' RegKey format: <c> registry_path[|value_name] </c>
 ''' </summary>
-Public Class regKeyParams2
+Public Class regKeyParams
 
     Private Shared ReadOnly ValidRoots As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
         "HKCU", "HKLM", "HKCR", "HKU", "HKCC",

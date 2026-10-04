@@ -18,7 +18,7 @@
 Option Strict On
 
 ''' <summary>
-''' A single error found while linting a <c> winapp2entry2 </c>
+''' A single error found while linting a <c> winapp2entry </c>
 ''' </summary>
 Public Structure LintError
 
@@ -41,7 +41,7 @@ Public Structure LintError
 End Structure
 
 ''' <summary>
-''' Accumulates errors found while linting a single <c> winapp2entry2 </c>. <br />
+''' Accumulates errors found while linting a single <c> winapp2entry </c>. <br />
 ''' Every entry <c> WinappDebug </c> processes gets its own, so no part of the per-entry
 ''' work has to reach for shared state.
 ''' </summary>

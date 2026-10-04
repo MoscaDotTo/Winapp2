@@ -23,12 +23,12 @@ Imports System.Linq.Expressions
 ''' Produces the post-diff summary, entry-level change descriptions (additions, removals,
 ''' renames, mergers), and key-level itemization of added, removed, and updated keys.
 ''' </summary>
-Public Class DiffOutputRenderer2
+Public Class DiffOutputRenderer
 
     Private ReadOnly _state As DiffState
-    Private ReadOnly _file1 As iniFile2
-    Private ReadOnly _file2 As iniFile2
-    Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer2
+    Private ReadOnly _file1 As iniFile
+    Private ReadOnly _file2 As iniFile
+    Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer
 
     ''' <summary>
     ''' Label used in place of a key type when itemizing a detection-criteria modification —
@@ -130,7 +130,7 @@ Public Class DiffOutputRenderer2
     End Function
 
     ''' <summary>
-    ''' Initializes a new instance of <c> DiffOutputRenderer2 </c>
+    ''' Initializes a new instance of <c> DiffOutputRenderer </c>
     ''' </summary>
     '''
     ''' <param name="state">
@@ -138,20 +138,20 @@ Public Class DiffOutputRenderer2
     ''' </param>
     ''' 
     ''' <param name="file1">
-    ''' The old version of winapp2.ini as an <c> iniFile2 </c>
+    ''' The old version of winapp2.ini as an <c> iniFile </c>
     ''' </param>
     ''' 
     ''' <param name="file2">
-    ''' The new version of winapp2.ini as an <c> iniFile2 </c>
+    ''' The new version of winapp2.ini as an <c> iniFile </c>
     ''' </param>
     ''' 
     ''' <param name="keyAnalyzer">
     ''' Used to compute key-level changes for merger and added-with-merger entries
     ''' </param>
     Public Sub New(state As DiffState,
-                   file1 As iniFile2,
-                   file2 As iniFile2,
-                   keyAnalyzer As KeyModificationAnalyzer2)
+                   file1 As iniFile,
+                   file2 As iniFile,
+                   keyAnalyzer As KeyModificationAnalyzer)
 
         _state = state
         _file1 = file1
@@ -384,7 +384,7 @@ Public Class DiffOutputRenderer2
     ''' <returns>
     ''' A <c> MenuSection </c> listing the target entry names the old entry was split/merged into
     ''' </returns>
-    Public Function MakeDiffMultiTarget(oldSection As iniSection2,
+    Public Function MakeDiffMultiTarget(oldSection As iniSection,
                                         newTargets As List(Of String)) As MenuSection
 
         Dim result = New MenuSection
@@ -443,14 +443,14 @@ Public Class DiffOutputRenderer2
 
         For Each entry In _state.MergedEntries.RenamedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
-            Dim hasChanges = (_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(entry) AndAlso
-                              _state.ModifiedEntries.AddedKeyTracker2(entry).Count > 0) OrElse
-                             (_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(entry) AndAlso
-                              _state.ModifiedEntries.RemovedKeyTracker2(entry).Count > 0)
+            Dim hasChanges = (_state.ModifiedEntries.AddedKeyTracker.ContainsKey(entry) AndAlso
+                              _state.ModifiedEntries.AddedKeyTracker(entry).Count > 0) OrElse
+                             (_state.ModifiedEntries.RemovedKeyTracker.ContainsKey(entry) AndAlso
+                              _state.ModifiedEntries.RemovedKeyTracker(entry).Count > 0)
 
-            If Not hasChanges AndAlso _state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(entry) Then
+            If Not hasChanges AndAlso _state.ModifiedEntries.ModifiedKeyTracker.ContainsKey(entry) Then
 
-                For Each kvp In _state.ModifiedEntries.ModifiedKeyTracker2(entry)
+                For Each kvp In _state.ModifiedEntries.ModifiedKeyTracker(entry)
 
                     If Not kvp.Key.typeIs("Name") Then hasChanges = True : Exit For
 
@@ -490,7 +490,7 @@ Public Class DiffOutputRenderer2
 
     ''' <summary>
     ''' Conducts a Diff of each entry detected as containing merged content.
-    ''' Builds a combined <c> iniSection2 </c> from all contributing old entries and passes it
+    ''' Builds a combined <c> iniSection </c> from all contributing old entries and passes it
     ''' directly to <c> FindModifications </c> without any string serialization roundtrip.
     ''' </summary>
     '''
@@ -660,7 +660,7 @@ Public Class DiffOutputRenderer2
     '''
     ''' <param name="updatedKeysDict">
     ''' Map of new key → list of old keys it replaced,
-    ''' as recorded by <c> KeyModificationAnalyzer2 </c>
+    ''' as recorded by <c> KeyModificationAnalyzer </c>
     ''' </param>
     '''
     ''' <param name="addedKeys">
@@ -687,9 +687,9 @@ Public Class DiffOutputRenderer2
     ''' <c> MenuSection </c>s describing each key update
     ''' (one header section plus one detail section per updated key)
     ''' </returns>
-    Public Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey2, List(Of iniKey2)),
-                                       addedKeys As List(Of iniKey2),
-                                       removedKeys As List(Of iniKey2),
+    Public Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey, List(Of iniKey)),
+                                       addedKeys As List(Of iniKey),
+                                       removedKeys As List(Of iniKey),
                                        modKeyTypes As Dictionary(Of String, Integer),
                               Optional sourceEntryMap As Dictionary(Of String, String) = Nothing) As List(Of MenuSection)
 
@@ -813,7 +813,7 @@ Public Class DiffOutputRenderer2
 
         Dim results As New List(Of MenuSection)
 
-        Dim qualifying As New List(Of Tuple(Of String, List(Of iniKey2), List(Of iniKey2), Dictionary(Of iniKey2, List(Of iniKey2))))
+        Dim qualifying As New List(Of Tuple(Of String, List(Of iniKey), List(Of iniKey), Dictionary(Of iniKey, List(Of iniKey))))
 
         For Each newName In _state.MergedEntries.RenamedEntryNames.OrderBy(Function(s) s, StringComparer.OrdinalIgnoreCase)
 
@@ -822,7 +822,7 @@ Public Class DiffOutputRenderer2
             Dim removedKeys = changes.RemovedKeys
             Dim rawUpdatedDict = changes.UpdatedKeysDict
 
-            Dim updatedKeysDict As New Dictionary(Of iniKey2, List(Of iniKey2))
+            Dim updatedKeysDict As New Dictionary(Of iniKey, List(Of iniKey))
             For Each kvp In rawUpdatedDict
 
                 If Not kvp.Key.typeIs("Name") Then updatedKeysDict.Add(kvp.Key, kvp.Value)
@@ -890,9 +890,9 @@ Public Class DiffOutputRenderer2
     ''' <returns>
     ''' A <c> MenuSection </c> describing the entry's change
     ''' </returns>
-    Public Function MakeDiff(section As iniSection2,
+    Public Function MakeDiff(section As iniSection,
                              changeType As Integer,
-                    Optional newSection As iniSection2 = Nothing) As MenuSection
+                    Optional newSection As iniSection = Nothing) As MenuSection
 
         Dim result = New MenuSection
         Dim printColor As ConsoleColor = ConsoleColor.Cyan
@@ -1041,7 +1041,7 @@ Public Class DiffOutputRenderer2
     ''' Outputs detailed information for added entries 
     ''' that contain merged content from removed entries.
     ''' Builds combined old entry sections directly from 
-    ''' <c> iniKey2 </c> objects 
+    ''' <c> iniKey </c> objects 
     ''' </summary>
     '''
     ''' <returns>
@@ -1112,7 +1112,7 @@ Public Class DiffOutputRenderer2
                 Dim removedKeyIds As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
                 For Each k In removedKeys : removedKeyIds.Add($"{k.KeyType}|{k.Value}") : Next
 
-                Dim carriedOverKeys As New List(Of iniKey2)
+                Dim carriedOverKeys As New List(Of iniKey)
                 For Each key In _file2.GetSection(entry).Keys
 
                     Dim keyId = $"{key.KeyType}|{key.Value}"
@@ -1342,7 +1342,7 @@ Public Class DiffOutputRenderer2
     ''' Optional map of key value → source entry name used to annotate 
     ''' merger origin; novel keys are labeled "(novel)" when present
     ''' </param>
-    Private Function ItemizeChangesFromList(kl As List(Of iniKey2),
+    Private Function ItemizeChangesFromList(kl As List(Of iniKey),
                                             wasAdded As Boolean,
                                             ktDict As Dictionary(Of String, Integer),
                                    Optional sourceEntryMap As Dictionary(Of String, String) = Nothing) As List(Of MenuSection)
@@ -1398,13 +1398,13 @@ Public Class DiffOutputRenderer2
 
     Private Class EntryKeyChanges
 
-        Public ReadOnly AddedKeys As List(Of iniKey2)
-        Public ReadOnly RemovedKeys As List(Of iniKey2)
-        Public ReadOnly UpdatedKeysDict As Dictionary(Of iniKey2, List(Of iniKey2))
+        Public ReadOnly AddedKeys As List(Of iniKey)
+        Public ReadOnly RemovedKeys As List(Of iniKey)
+        Public ReadOnly UpdatedKeysDict As Dictionary(Of iniKey, List(Of iniKey))
 
-        Public Sub New(added As List(Of iniKey2),
-                       removed As List(Of iniKey2),
-                       updated As Dictionary(Of iniKey2, List(Of iniKey2)))
+        Public Sub New(added As List(Of iniKey),
+                       removed As List(Of iniKey),
+                       updated As Dictionary(Of iniKey, List(Of iniKey)))
 
             AddedKeys = added
             RemovedKeys = removed
@@ -1416,15 +1416,15 @@ Public Class DiffOutputRenderer2
 
     Private Function GetKeyChanges(entry As String) As EntryKeyChanges
 
-        Dim added = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(entry),
-                       _state.ModifiedEntries.AddedKeyTracker2(entry), New List(Of iniKey2))
+        Dim added = If(_state.ModifiedEntries.AddedKeyTracker.ContainsKey(entry),
+                       _state.ModifiedEntries.AddedKeyTracker(entry), New List(Of iniKey))
 
-        Dim removed = If(_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(entry),
-                         _state.ModifiedEntries.RemovedKeyTracker2(entry), New List(Of iniKey2))
+        Dim removed = If(_state.ModifiedEntries.RemovedKeyTracker.ContainsKey(entry),
+                         _state.ModifiedEntries.RemovedKeyTracker(entry), New List(Of iniKey))
 
-        Dim updated = If(_state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(entry),
-                         _state.ModifiedEntries.ModifiedKeyTracker2(entry),
-                         New Dictionary(Of iniKey2, List(Of iniKey2)))
+        Dim updated = If(_state.ModifiedEntries.ModifiedKeyTracker.ContainsKey(entry),
+                         _state.ModifiedEntries.ModifiedKeyTracker(entry),
+                         New Dictionary(Of iniKey, List(Of iniKey)))
 
         Return New EntryKeyChanges(added, removed, updated)
 
@@ -1432,10 +1432,10 @@ Public Class DiffOutputRenderer2
 
     Private Class CombinedOldKeyResult
 
-        Public ReadOnly Keys As List(Of iniKey2)
+        Public ReadOnly Keys As List(Of iniKey)
         Public ReadOnly SourceEntryMap As Dictionary(Of String, String)
 
-        Public Sub New(keys As List(Of iniKey2), sourceMap As Dictionary(Of String, String))
+        Public Sub New(keys As List(Of iniKey), sourceMap As Dictionary(Of String, String))
 
             Me.Keys = keys
             SourceEntryMap = sourceMap
@@ -1445,7 +1445,7 @@ Public Class DiffOutputRenderer2
     End Class
 
     ''' <summary>
-    ''' Builds a deduplicated list of <c> iniKey2 </c> objects from all old entries
+    ''' Builds a deduplicated list of <c> iniKey </c> objects from all old entries
     ''' named in <paramref name="mergeSourceNames"/>, plus optionally from
     ''' <paramref name="targetEntry"/> itself if it existed in file1 and is not
     ''' already a named merge source.
@@ -1469,7 +1469,7 @@ Public Class DiffOutputRenderer2
                                           targetEntry As String) As CombinedOldKeyResult
 
         Dim uniqueKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-        Dim combinedKeys As New List(Of iniKey2)
+        Dim combinedKeys As New List(Of iniKey)
         Dim sourceMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
 
         For Each oldEntryName In mergeSourceNames

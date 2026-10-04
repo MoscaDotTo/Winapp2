@@ -32,7 +32,7 @@ Imports System.IO
 '''
 ''' The comparison breaks each entry down into <em>semantic units</em>. Every FileKey gives
 ''' one <c> path|pattern|flag </c> triple per semicolon-delimited pattern (via
-''' <see cref="fileKeyParams2"/>), and every other key gives its number-stripped
+''' <see cref="fileKeyParams"/>), and every other key gives its number-stripped
 ''' <c> KeyType=Value </c> pair. Units are compared case-insensitively as sets, which is why
 ''' the three sanctioned optimizations don't show up here: reordering and renumbering leave
 ''' set membership alone, sorting patterns leaves the triple set alone, and merging two
@@ -59,7 +59,7 @@ Public Module LintReconciler
     ''' </summary>
     '''
     ''' <param name="givenIni">
-    ''' The generated <c> iniFile2 </c> to normalize. Its <c> Dir </c> and <c> Name </c> decide
+    ''' The generated <c> iniFile </c> to normalize. Its <c> Dir </c> and <c> Name </c> decide
     ''' where the pre-lint dump lands when the gate fails
     ''' </param>
     '''
@@ -73,12 +73,12 @@ Public Module LintReconciler
     ''' </param>
     '''
     ''' <returns>
-    ''' The normalized <c> iniFile2 </c>, exactly as <see cref="WinappDebug.remotedebug"/>
+    ''' The normalized <c> iniFile </c>, exactly as <see cref="WinappDebug.remotedebug"/>
     ''' returns it. The gate reports, it doesn't roll anything back
     ''' </returns>
-    Public Function remotedebugGuarded(givenIni As iniFile2,
+    Public Function remotedebugGuarded(givenIni As iniFile,
                                        callingModule As String,
-                                       menuOutput As MenuSection) As iniFile2
+                                       menuOutput As MenuSection) As iniFile
 
         If givenIni Is Nothing Then argIsNull(NameOf(givenIni)) : Return Nothing
 
@@ -106,7 +106,7 @@ Public Module LintReconciler
             Next
 
             Dim prelintName = Path.GetFileNameWithoutExtension(linted.Name) & ".prelint.ini"
-            Dim prelintDump = iniFile2.Empty(linted.Dir, prelintName)
+            Dim prelintDump = iniFile.Empty(linted.Dir, prelintName)
 
             Try
 
@@ -145,7 +145,7 @@ Public Module LintReconciler
     ''' <returns>
     ''' The per-entry semantic unit map for <paramref name="sourceFile"/>
     ''' </returns>
-    Public Function CollectSemanticUnits(sourceFile As iniFile2) As Dictionary(Of String, Dictionary(Of String, String))
+    Public Function CollectSemanticUnits(sourceFile As iniFile) As Dictionary(Of String, Dictionary(Of String, String))
 
         If sourceFile Is Nothing Then argIsNull(NameOf(sourceFile)) : Return Nothing
 
@@ -491,7 +491,7 @@ Public Module LintReconciler
     ''' The display-form unit strings for <paramref name="key"/>. The comparison runs through
     ''' a case-insensitive dictionary, so we don't normalize them separately
     ''' </returns>
-    Private Function UnitsForKey(key As iniKey2) As List(Of String)
+    Private Function UnitsForKey(key As iniKey) As List(Of String)
 
         Dim units As New List(Of String)
 
@@ -502,7 +502,7 @@ Public Module LintReconciler
 
         End If
 
-        Dim params As New fileKeyParams2(key.Value)
+        Dim params As New fileKeyParams(key.Value)
 
         If params.Patterns.Count = 0 Then
 
@@ -539,7 +539,7 @@ Public Module LintReconciler
     ''' <returns>
     ''' The flag text used in the unit's third component
     ''' </returns>
-    Private Function EffectiveFlagText(params As fileKeyParams2) As String
+    Private Function EffectiveFlagText(params As fileKeyParams) As String
 
         Select Case params.Flag
 

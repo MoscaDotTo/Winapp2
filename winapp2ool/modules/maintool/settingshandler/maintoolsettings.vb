@@ -63,7 +63,7 @@ Public Module maintoolsettings
         readSettingsFromDisk = False
         isBeta = False
         CurrentWinappFlavor = WinappFlavor.CCleaner
-        SaveModule2(NameOf(Winapp2ool), GetType(maintoolsettings))
+        SaveModule(NameOf(Winapp2ool), GetType(maintoolsettings))
 
     End Sub
 

@@ -22,20 +22,20 @@ Imports System.Threading.Tasks
 ''' <summary>
 ''' Categorizes entries as added, removed, or modified between two versions of winapp2.ini.
 ''' Normalizes deprecated path values to suppress false-positive diffs, delegates rename
-''' and merger detection to <c> MergeDetector2 </c>, and coordinates key-level analysis
-''' via <c> KeyModificationAnalyzer2 </c>.
+''' and merger detection to <c> MergeDetector </c>, and coordinates key-level analysis
+''' via <c> KeyModificationAnalyzer </c>.
 ''' </summary>
-Public Class EntryChangeDetector2
+Public Class EntryChangeDetector
 
     Private ReadOnly _state As DiffState
-    Private ReadOnly _file1 As iniFile2
-    Private ReadOnly _file2 As iniFile2
-    Private ReadOnly _mergeDetector As MergeDetector2
-    Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer2
-    Private ReadOnly _renderer As DiffOutputRenderer2
+    Private ReadOnly _file1 As iniFile
+    Private ReadOnly _file2 As iniFile
+    Private ReadOnly _mergeDetector As MergeDetector
+    Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer
+    Private ReadOnly _renderer As DiffOutputRenderer
 
     ''' <summary>
-    ''' Initializes a new instance of <c> EntryChangeDetector2 </c>
+    ''' Initializes a new instance of <c> EntryChangeDetector </c>
     ''' </summary>
     ''' 
     ''' <param name="state">
@@ -43,11 +43,11 @@ Public Class EntryChangeDetector2
     ''' </param>
     ''' 
     ''' <param name="file1">
-    ''' The old version of winapp2.ini as an <c> iniFile2 </c>
+    ''' The old version of winapp2.ini as an <c> iniFile </c>
     ''' </param>
     ''' 
     ''' <param name="file2">
-    ''' The new version of winapp2.ini as an <c> iniFile2 </c>
+    ''' The new version of winapp2.ini as an <c> iniFile </c>
     ''' </param>
     ''' 
     ''' <param name="mergeDetector">
@@ -62,11 +62,11 @@ Public Class EntryChangeDetector2
     ''' Produces <c> MenuSection </c> output for removed entries with no key matches
     ''' </param>
     Public Sub New(state As DiffState,
-                   file1 As iniFile2,
-                   file2 As iniFile2,
-                   mergeDetector As MergeDetector2,
-                   keyAnalyzer As KeyModificationAnalyzer2,
-                   renderer As DiffOutputRenderer2)
+                   file1 As iniFile,
+                   file2 As iniFile,
+                   mergeDetector As MergeDetector,
+                   keyAnalyzer As KeyModificationAnalyzer,
+                   renderer As DiffOutputRenderer)
 
         _state = state
         _file1 = file1
@@ -78,14 +78,14 @@ Public Class EntryChangeDetector2
     End Sub
 
     ''' <summary>
-    ''' Replaces deprecated path values in all keys of a winapp2.ini <c> iniFile2 </c>
+    ''' Replaces deprecated path values in all keys of a winapp2.ini <c> iniFile </c>
     ''' to suppress false-positive diff entries caused by known path renames
     ''' </summary>
     '''
     ''' <param name="winapp">
     ''' The file whose key values will be normalized in place
     ''' </param>
-    Public Sub SnuffNoisyChanges(winapp As iniFile2)
+    Public Sub SnuffNoisyChanges(winapp As iniFile)
 
         For Each section In winapp
 
@@ -102,7 +102,7 @@ Public Class EntryChangeDetector2
     ''' <param name="key">
     ''' The key whose value is normalized against <c> PathReplacements </c>
     ''' </param>
-    Private Sub CleanKeyValue(key As iniKey2)
+    Private Sub CleanKeyValue(key As iniKey)
 
         For i = 0 To PathReplacements.Count - 1
 
@@ -126,7 +126,7 @@ Public Class EntryChangeDetector2
             If _file1.Contains(section.Name) Then Continue For
 
             _state.ModifiedEntries.AddedEntryNames.Add(section.Name)
-            _state.ModifiedEntries.PotentialMatches2.Add(section)
+            _state.ModifiedEntries.PotentialMatches.Add(section)
 
         Next
 
@@ -153,7 +153,7 @@ Public Class EntryChangeDetector2
         Next
 
         For Each modifiedEntryName In _state.ModifiedEntries.ModifiedEntryNames
-            _state.ModifiedEntries.PotentialMatches2.Add(_file2.GetSection(modifiedEntryName))
+            _state.ModifiedEntries.PotentialMatches.Add(_file2.GetSection(modifiedEntryName))
         Next
 
     End Sub
@@ -180,14 +180,14 @@ Public Class EntryChangeDetector2
 
             Dim results = New Concurrent.ConcurrentDictionary(Of String, MenuSection)(StringComparer.OrdinalIgnoreCase)
             Dim entryLogs = New Concurrent.ConcurrentDictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
-            Dim potentialMatchesSnapshot2 = _state.ModifiedEntries.PotentialMatches2.ToList()
+            Dim potentialMatchesSnapshot = _state.ModifiedEntries.PotentialMatches.ToList()
 
             Dim snapshotTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
             Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
-            PrePopulateCachesAndTextMaps(potentialMatchesSnapshot2, snapshotTextMap, oldEntryTextMap)
+            PrePopulateCachesAndTextMaps(potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap)
 
-            Dim contentIndexes = BuildContentIndexes(potentialMatchesSnapshot2)
-            Dim eligibleNames = BuildEligibleNameSet(potentialMatchesSnapshot2)
+            Dim contentIndexes = BuildContentIndexes(potentialMatchesSnapshot)
+            Dim eligibleNames = BuildEligibleNameSet(potentialMatchesSnapshot)
 
             Parallel.ForEach(_state.ModifiedEntries.RemovedEntryNames,
                      Sub(entry)
@@ -197,7 +197,7 @@ Public Class EntryChangeDetector2
 
                          Using cap = gLogCapture()
 
-                             result = ProcessSingleRemoval(entry, potentialMatchesSnapshot2, snapshotTextMap, oldEntryTextMap, contentIndexes, eligibleNames)
+                             result = ProcessSingleRemoval(entry, potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap, contentIndexes, eligibleNames)
                              capturedLines.AddRange(cap.Lines)
 
                          End Using
@@ -259,22 +259,22 @@ Public Class EntryChangeDetector2
     ''' <param name="oldEntryTextMap">
     ''' Populated with uppercased text for each removed entry, keyed by entry name
     ''' </param>
-    Private Sub PrePopulateCachesAndTextMaps(potentialMatches As List(Of iniSection2),
+    Private Sub PrePopulateCachesAndTextMaps(potentialMatches As List(Of iniSection),
                                              snapshotTextMap As Dictionary(Of String, String),
                                              oldEntryTextMap As Dictionary(Of String, String))
 
         For Each section In potentialMatches
 
-            _state.Caches.CachedNewEntries2(section.Name) = section
+            _state.Caches.CachedNewEntries(section.Name) = section
             snapshotTextMap(section.Name) = section.ToString().ToUpperInvariant()
 
         Next
 
         For Each entryName In _state.ModifiedEntries.RemovedEntryNames
 
-            Dim oldSection2 = _file1.GetSection(entryName)
-            _state.Caches.CachedOldEntries2(oldSection2.Name) = oldSection2
-            oldEntryTextMap(entryName) = oldSection2.ToString().ToUpperInvariant()
+            Dim oldSection = _file1.GetSection(entryName)
+            _state.Caches.CachedOldEntries(oldSection.Name) = oldSection
+            oldEntryTextMap(entryName) = oldSection.ToString().ToUpperInvariant()
 
         Next
 
@@ -302,7 +302,7 @@ Public Class EntryChangeDetector2
     ''' <returns>
     ''' A <c> ContentIndexes </c> instance containing all three reverse indexes
     ''' </returns>
-    Private Shared Function BuildContentIndexes(potentialMatches As List(Of iniSection2)) As ContentIndexes
+    Private Shared Function BuildContentIndexes(potentialMatches As List(Of iniSection)) As ContentIndexes
 
         Dim indexes As New ContentIndexes()
 
@@ -360,7 +360,7 @@ Public Class EntryChangeDetector2
     ''' <returns>
     ''' A <c> HashSet </c> of section names eligible for rename/merger matching
     ''' </returns>
-    Private Function BuildEligibleNameSet(potentialMatches As List(Of iniSection2)) As HashSet(Of String)
+    Private Function BuildEligibleNameSet(potentialMatches As List(Of iniSection)) As HashSet(Of String)
 
         Dim eligibleNames As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
@@ -378,7 +378,7 @@ Public Class EntryChangeDetector2
     ''' <summary>
     ''' Processes a single removed entry: gathers rename/merger candidates from name heuristics
     ''' and content-aware index lookups, filters to eligible entries, and delegates to
-    ''' <c> MergeDetector2.AssessRenamesAndMergers </c>. Returns a <c> MenuSection </c> for entries
+    ''' <c> MergeDetector.AssessRenamesAndMergers </c>. Returns a <c> MenuSection </c> for entries
     ''' that were truly removed (no rename or merger found), or <c> Nothing </c> if a rename/merger
     ''' was recorded.
     ''' </summary>
@@ -412,26 +412,26 @@ Public Class EntryChangeDetector2
     ''' <c> Nothing </c> if a rename or merger was recorded in <c> DiffState </c>
     ''' </returns>
     Private Function ProcessSingleRemoval(entryName As String,
-                                           potentialMatches As List(Of iniSection2),
+                                           potentialMatches As List(Of iniSection),
                                            snapshotTextMap As Dictionary(Of String, String),
                                            oldEntryTextMap As Dictionary(Of String, String),
                                            indexes As ContentIndexes,
                                            eligibleNames As HashSet(Of String)) As MenuSection
 
-        Dim oldSection2 = _file1.GetSection(entryName)
+        Dim oldSection = _file1.GetSection(entryName)
 
-        If oldSection2.Keys.GetByType("FileKey").Count = 0 AndAlso
-           oldSection2.Keys.GetByType("RegKey").Count = 0 Then
+        If oldSection.Keys.GetByType("FileKey").Count = 0 AndAlso
+           oldSection.Keys.GetByType("RegKey").Count = 0 Then
 
-            Return _renderer.MakeDiff(oldSection2, 1)
+            Return _renderer.MakeDiff(oldSection, 1)
 
         End If
 
-        Dim allCandidates = GatherCandidateNames(entryName, oldSection2, potentialMatches, snapshotTextMap, oldEntryTextMap, indexes)
+        Dim allCandidates = GatherCandidateNames(entryName, oldSection, potentialMatches, snapshotTextMap, oldEntryTextMap, indexes)
         Dim combinedMatches = FilterToEligibleSections(allCandidates, eligibleNames)
-        Dim changesRecorded = _mergeDetector.AssessRenamesAndMergers(combinedMatches, oldSection2)
+        Dim changesRecorded = _mergeDetector.AssessRenamesAndMergers(combinedMatches, oldSection)
 
-        Return If(changesRecorded, Nothing, _renderer.MakeDiff(oldSection2, 1))
+        Return If(changesRecorded, Nothing, _renderer.MakeDiff(oldSection, 1))
 
     End Function
 
@@ -445,7 +445,7 @@ Public Class EntryChangeDetector2
     ''' The name of the removed entry
     ''' </param>
     '''
-    ''' <param name="oldSection2">
+    ''' <param name="oldSection">
     ''' The removed entry's section from the old file
     ''' </param>
     '''
@@ -469,18 +469,18 @@ Public Class EntryChangeDetector2
     ''' A set of all candidate section names found across all heuristics
     ''' </returns>
     Private Function GatherCandidateNames(entryName As String,
-                                           oldSection2 As iniSection2,
-                                           potentialMatches As List(Of iniSection2),
+                                           oldSection As iniSection,
+                                           potentialMatches As List(Of iniSection),
                                            snapshotTextMap As Dictionary(Of String, String),
                                            oldEntryTextMap As Dictionary(Of String, String),
                                            indexes As ContentIndexes) As HashSet(Of String)
 
         Dim allCandidates As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
-        Dim probableMatches = FindProbableMatches2(entryName.Split(CChar(" ")), potentialMatches, snapshotTextMap, oldEntryTextMap(entryName))
+        Dim probableMatches = FindProbableMatches(entryName.Split(CChar(" ")), potentialMatches, snapshotTextMap, oldEntryTextMap(entryName))
         For Each section In probableMatches : allCandidates.Add(section.Name) : Next
 
-        For Each key In oldSection2.Keys
+        For Each key In oldSection.Keys
 
             If Not key.KeyType.Equals("FileKey", StringComparison.OrdinalIgnoreCase) AndAlso
                Not key.KeyType.Equals("RegKey", StringComparison.OrdinalIgnoreCase) Then Continue For
@@ -529,7 +529,7 @@ Public Class EntryChangeDetector2
 
     ''' <summary>
     ''' Filters a set of candidate section names to only those present in
-    ''' <paramref name="eligibleNames"/> and resolves each to its <c> iniSection2 </c>
+    ''' <paramref name="eligibleNames"/> and resolves each to its <c> iniSection </c>
     ''' from the new file
     ''' </summary>
     '''
@@ -542,12 +542,12 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <returns>
-    ''' A list of <c> iniSection2 </c> instances from the new file for each eligible candidate
+    ''' A list of <c> iniSection </c> instances from the new file for each eligible candidate
     ''' </returns>
     Private Function FilterToEligibleSections(candidateNames As HashSet(Of String),
-                                               eligibleNames As HashSet(Of String)) As List(Of iniSection2)
+                                               eligibleNames As HashSet(Of String)) As List(Of iniSection)
 
-        Dim combinedMatches As New List(Of iniSection2)
+        Dim combinedMatches As New List(Of iniSection)
 
         For Each candidateName In candidateNames
 
@@ -646,7 +646,7 @@ Public Class EntryChangeDetector2
     End Function
 
     ''' <summary>
-    ''' Produces a list of <c> iniSection2 </c>s who may potentially be merger/rename candidates
+    ''' Produces a list of <c> iniSection </c>s who may potentially be merger/rename candidates
     ''' based on traits such as section and name similarities
     ''' </summary>
     '''
@@ -667,14 +667,14 @@ Public Class EntryChangeDetector2
     ''' </param>
     '''
     ''' <returns>
-    ''' A list of candidate <c> iniSection2 </c>s whose name or browser SecRef overlaps with the removed entry
+    ''' A list of candidate <c> iniSection </c>s whose name or browser SecRef overlaps with the removed entry
     ''' </returns>
-    Private Function FindProbableMatches2(oldNameBroken As String(),
-                                          potentialMatchesList As List(Of iniSection2),
+    Private Function FindProbableMatches(oldNameBroken As String(),
+                                          potentialMatchesList As List(Of iniSection),
                                           snapshotTextMap As Dictionary(Of String, String),
-                                          oldEntryTextUpper As String) As List(Of iniSection2)
+                                          oldEntryTextUpper As String) As List(Of iniSection)
 
-        Dim out = New List(Of iniSection2)
+        Dim out = New List(Of iniSection)
 
         For Each newSection In potentialMatchesList
 

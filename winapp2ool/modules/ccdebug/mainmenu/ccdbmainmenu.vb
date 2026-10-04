@@ -44,11 +44,11 @@ Module ccdbmainmenu
                 Sub() toggleModuleSetting("Toggle sorting", NameOf(CCiniDebug), GetType(ccdebugsettings), NameOf(SortFileForOutput), NameOf(CCDBSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedOption("Choose winapp2.ini", "Select a new supplemental winapp2.ini file", condition:=PruneStaleEntries,
-                handler:=Sub() changeFile2Params(CCDebugFile1, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile1), NameOf(CCDBSettingsChanged))) _
+                handler:=Sub() changeFileParams(CCDebugFile1, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile1), NameOf(CCDBSettingsChanged))) _
             .AddDispatchedOption("Choose ccleaner.ini", "Select a new ccleaner.ini file for debugging",
-                Sub() changeFile2Params(CCDebugFile2, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile2), NameOf(CCDBSettingsChanged))) _
+                Sub() changeFileParams(CCDebugFile2, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile2), NameOf(CCDBSettingsChanged))) _
             .AddDispatchedOption("Choose save target", "Select a new save target for the debugged ccleaner.ini", condition:=SaveDebuggedFile,
-                handler:=Sub() changeFile2Params(CCDebugFile3, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile3), NameOf(CCDBSettingsChanged))) _
+                handler:=Sub() changeFileParams(CCDebugFile3, CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile3), NameOf(CCDBSettingsChanged))) _
             .AddBlank() _
             .AddLine($"Current winapp2.ini:   {replDir(CCDebugFile1.Path())}", condition:=PruneStaleEntries) _
             .AddLine($"Current ccleaner.ini:  {replDir(CCDebugFile2.Path())}") _

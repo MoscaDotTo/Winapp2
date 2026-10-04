@@ -35,7 +35,7 @@ End Enum
 ''' <br /><br />
 ''' ExcludeKey format: <c> FLAG|path[|pattern[;pattern...]] </c>
 ''' </summary>
-Public Class excludeKeyParams2
+Public Class excludeKeyParams
 
     ''' <summary>The exclusion type: FILE, PATH or REG, or <c> Unknown </c> for anything else, including a value with no pipe</summary>
     Public ReadOnly Property Flag As excludeKeyFlag

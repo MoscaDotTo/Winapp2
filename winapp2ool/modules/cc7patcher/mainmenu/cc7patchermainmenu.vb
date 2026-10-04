@@ -44,11 +44,11 @@ Public Module cc7patchermainmenu
                 handler:=Sub() toggleModuleSetting("Download", moduleName, GetType(cc7patchersettings), NameOf(DownloadWinapp2), settingsChangeName)) _
             .AddBlank() _
             .AddDispatchedOption("Change winapp2.ini", "Select the winapp2.ini file to install", condition:=Not DownloadWinapp2,
-                handler:=Sub() changeFile2Params(CC7PatcherFile1, CC7PatcherModuleSettingsChanged, moduleName, NameOf(CC7PatcherFile1), settingsChangeName)) _
+                handler:=Sub() changeFileParams(CC7PatcherFile1, CC7PatcherModuleSettingsChanged, moduleName, NameOf(CC7PatcherFile1), settingsChangeName)) _
             .AddDispatchedOption("Change ccleaner.ini", "Select the ccleaner.ini file to be patched",
-                Sub() changeFile2Params(CC7PatcherFile2, CC7PatcherModuleSettingsChanged, moduleName, NameOf(CC7PatcherFile2), settingsChangeName)) _
+                Sub() changeFileParams(CC7PatcherFile2, CC7PatcherModuleSettingsChanged, moduleName, NameOf(CC7PatcherFile2), settingsChangeName)) _
             .AddDispatchedOption("Change output file", "Select where to save the patched ccleaner.ini",
-                Sub() changeFile2Params(CC7PatcherFile3, CC7PatcherModuleSettingsChanged, moduleName, NameOf(CC7PatcherFile3), settingsChangeName)) _
+                Sub() changeFileParams(CC7PatcherFile3, CC7PatcherModuleSettingsChanged, moduleName, NameOf(CC7PatcherFile3), settingsChangeName)) _
             .AddBlank() _
             .AddColoredFileInfo("Current winapp2.ini:  ", If(DownloadWinapp2, "Online", CC7PatcherFile1.Path()), ConsoleColor.Green) _
             .AddColoredFileInfo("Current ccleaner.ini: ", CC7PatcherFile2.Path(), ConsoleColor.Red) _

@@ -37,7 +37,7 @@ Module SettingsManager
     ''' <param name="settingsChangedSetting">
     ''' A pointer to the boolean indicating that a module's settings have been modified from their default state
     ''' </param>
-    Public Sub changeFile2Params(ByRef chooser As iniFileChooser,
+    Public Sub changeFileParams(ByRef chooser As iniFileChooser,
                                  ByRef settingsChangedSetting As Boolean,
                                        callingModule As String,
                                        settingName As String,
@@ -96,7 +96,7 @@ Module SettingsManager
         SetSetting(callingModule, $"{settingName}_Name", chooser.Name)
         SetSetting(callingModule, settingChangedName, settingsChangedSetting.ToString(CultureInfo.InvariantCulture))
 
-        FlushIfDirty2()
+        FlushIfDirty()
 
     End Sub
 
@@ -163,7 +163,7 @@ Module SettingsManager
         SetSetting(callingModule, settingName, setting.ToString(CultureInfo.InvariantCulture))
         SetSetting(callingModule, settingChangedName, True.ToString)
 
-        FlushIfDirty2()
+        FlushIfDirty()
 
     End Sub
 

@@ -32,14 +32,14 @@ Imports System.Text
 <TestClass()> Public Class TransmuteTests
 
     ''' <summary>
-    ''' Helper: parse an <c> iniFile2 </c> from literal ini text
+    ''' Helper: parse an <c> iniFile </c> from literal ini text
     ''' </summary>
-    Private Shared Function MakeIni(text As String) As winapp2ool.iniFile2
+    Private Shared Function MakeIni(text As String) As winapp2ool.iniFile
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
         Using ms As New IO.MemoryStream(bytes)
             Using reader As New IO.StreamReader(ms)
-                Return winapp2ool.iniFile2.FromStream(reader, "", "test.ini")
+                Return winapp2ool.iniFile.FromStream(reader, "", "test.ini")
             End Using
         End Using
 
@@ -54,11 +54,11 @@ Imports System.Text
                                          mode As winapp2ool.TransmuteMode,
                                 Optional replaceMode As winapp2ool.ReplaceMode = winapp2ool.ReplaceMode.ByKey,
                                 Optional removeMode As winapp2ool.RemoveMode = winapp2ool.RemoveMode.ByKey,
-                                Optional removeKeyMode As winapp2ool.RemoveKeyMode = winapp2ool.RemoveKeyMode.ByName) As winapp2ool.iniFile2
+                                Optional removeKeyMode As winapp2ool.RemoveKeyMode = winapp2ool.RemoveKeyMode.ByName) As winapp2ool.iniFile
 
         Dim baseFile = MakeIni(baseText)
         Dim sourceFile = MakeIni(sourceText)
-        Dim outputFile = winapp2ool.iniFile2.Empty("", "out.ini")
+        Dim outputFile = winapp2ool.iniFile.Empty("", "out.ini")
         Dim menuOutput As New winapp2ool.MenuSection
 
         winapp2ool.RemoteTransmute(baseFile, sourceFile, outputFile, False, menuOutput,

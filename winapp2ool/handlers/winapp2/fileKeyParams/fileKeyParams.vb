@@ -35,7 +35,7 @@ End Enum
 ''' <br /><br />
 ''' FileKey format: <c> path|pattern[;pattern...][|FLAG] </c>
 ''' </summary>
-Public Class fileKeyParams2
+Public Class fileKeyParams
 
     ''' <summary>The filesystem path: everything before the first pipe, or the whole value if there's no pipe</summary>
     Public ReadOnly Property Path As String

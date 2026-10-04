@@ -41,7 +41,7 @@ Public Module advSettings
                     r.ShouldScan = Not prev
                     ScanSettingsChanged = True
                     SetSetting(NameOf(WinappDebug), r.LintName & "_Scan", tsInvariant(r.ShouldScan))
-                    FlushIfDirty2()
+                    FlushIfDirty()
                     If Not r.ShouldScan Then r.turnOff()
                 End Sub)
 
@@ -62,7 +62,7 @@ Public Module advSettings
                     r.ShouldRepair = Not prev
                     ScanSettingsChanged = True
                     SetSetting(NameOf(WinappDebug), r.LintName & "_Repair", tsInvariant(r.ShouldRepair))
-                    FlushIfDirty2()
+                    FlushIfDirty()
                     If r.ShouldRepair Then r.turnOn()
                 End Sub)
 

@@ -115,7 +115,7 @@ Public Module FlavorizerSettings
     Public Property FlavorizerModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Restores the default state of the Flavorizer module's properties and persists them via <c> SaveModule2 </c>
+    ''' Restores the default state of the Flavorizer module's properties and persists them via <c> SaveModule </c>
     ''' </summary>
     Public Sub initDefaultFlavorizerSettings()
 
@@ -130,7 +130,7 @@ Public Module FlavorizerSettings
         FlavorizerFile9 = New iniFileChooser(Environment.CurrentDirectory, "", "", mustExist:=False)
         FlavorizeAsWinapp = True
         FlavorizerModuleSettingsChanged = False
-        SaveModule2(NameOf(Flavorizer), GetType(FlavorizerSettings))
+        SaveModule(NameOf(Flavorizer), GetType(FlavorizerSettings))
 
     End Sub
 

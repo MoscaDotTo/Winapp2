@@ -64,7 +64,7 @@ Imports System.IO
     ''' </summary>
     <TestMethod()> Public Sub TargetFramework_ReadFromBytes()
 
-        Dim exeBytes = File.ReadAllBytes(GetType(winapp2ool.iniFile2).Assembly.Location)
+        Dim exeBytes = File.ReadAllBytes(GetType(winapp2ool.iniFile).Assembly.Location)
 
         Assert.AreEqual(".NETFramework,Version=v4.8", winapp2ool.FrameworkCheck.targetFrameworkOf(exeBytes))
         Assert.IsNull(winapp2ool.FrameworkCheck.targetFrameworkOf({1, 2, 3, 4}))

@@ -132,19 +132,19 @@ Public Module Winapp2ool
     End Function
 
     ''' <summary>
-    ''' Ensures that an <c> iniFile2 </c> has content and informs the user if it does not.
+    ''' Ensures that an <c> iniFile </c> has content and informs the user if it does not.
     ''' This does not trigger validation or the File Chooser, so the caller loads the file first.
     ''' </summary>
     '''
     ''' <param name="iFile">
-    ''' An <c> iniFile2 </c> to be checked for content
+    ''' An <c> iniFile </c> to be checked for content
     ''' </param>
     '''
     ''' <returns>
-    ''' <c> True </c> if the <c> iniFile2 </c> has content,
+    ''' <c> True </c> if the <c> iniFile </c> has content,
     ''' <br /><c> False </c> otherwise
     ''' </returns>
-    Public Function enforceFileHasContent(iFile As iniFile2) As Boolean
+    Public Function enforceFileHasContent(iFile As iniFile) As Boolean
 
         If iFile IsNot Nothing AndAlso iFile.Count > 0 Then Return True
 

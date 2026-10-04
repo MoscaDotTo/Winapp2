@@ -20,7 +20,7 @@ Option Strict On
 Imports System.IO
 
 ''' <summary>
-''' An interactive file chooser for <c> iniFile2 </c> objects, using a single unified menu
+''' An interactive file chooser for <c> iniFile </c> objects, using a single unified menu
 ''' </summary>
 Public Class iniFileChooser
 
@@ -112,7 +112,7 @@ Public Class iniFileChooser
 
     ''' <summary>
     ''' Validates the file, looping until it exists (or the user exits without selecting a valid file).
-    ''' Returns a loaded <c> iniFile2 </c>, or <c> Nothing </c> if the user exited without a valid selection.
+    ''' Returns a loaded <c> iniFile </c>, or <c> Nothing </c> if the user exited without a valid selection.
     ''' <br /> When the caller identifies which setting this chooser backs, a file picked through the
     ''' prompt is persisted to the settings file so the choice survives the session
     ''' </summary>
@@ -140,7 +140,7 @@ Public Class iniFileChooser
     Public Function Load(Optional ByRef settingsChangedSetting As Boolean = False,
                          Optional callingModule As String = "",
                          Optional settingName As String = "",
-                         Optional settingChangedName As String = "") As iniFile2
+                         Optional settingChangedName As String = "") As iniFile
 
         Dim curName = Name
         Dim curDir = Dir
@@ -163,28 +163,28 @@ Public Class iniFileChooser
 
         End If
 
-        Return iniFile2.FromFile(Path())
+        Return iniFile.FromFile(Path())
 
     End Function
 
     ''' <summary>
-    ''' Reads and returns the file at the current path as an <c> iniFile2 </c> without showing the chooser menu.
+    ''' Reads and returns the file at the current path as an <c> iniFile </c> without showing the chooser menu.
     ''' Use this when the file is known to exist. For interactive validation, use <c> Load </c> instead.
     ''' </summary>
-    Public Function Read() As iniFile2
+    Public Function Read() As iniFile
 
-        Return iniFile2.FromFile(Path())
+        Return iniFile.FromFile(Path())
 
     End Function
 
     ''' <summary>
-    ''' Returns a loaded <c> iniFile2 </c> if <c> Name </c> is non-empty and the file exists on disk,
+    ''' Returns a loaded <c> iniFile </c> if <c> Name </c> is non-empty and the file exists on disk,
     ''' otherwise returns <c> Nothing </c>. Use for optional files that may not be configured.
     ''' </summary>
-    Public Function ReadIfSet() As iniFile2
+    Public Function ReadIfSet() As iniFile
 
         If Name.Length = 0 OrElse Not Exists() Then Return Nothing
-        Return iniFile2.FromFile(Path())
+        Return iniFile.FromFile(Path())
 
     End Function
 

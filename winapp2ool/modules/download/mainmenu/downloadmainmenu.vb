@@ -98,7 +98,7 @@ Module downloadmainmenu
                 Sub() initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)) _
             .AddBlank() _
             .AddDispatchedColoredOption("Change Save Directory", "Select a new target directory for Downloader", ConsoleColor.DarkYellow,
-                Sub() changeFile2Params(downloadFile, DownloadModuleSettingsChanged, NameOf(Downloader), NameOf(downloadFile), NameOf(DownloadModuleSettingsChanged))) _
+                Sub() changeFileParams(downloadFile, DownloadModuleSettingsChanged, NameOf(Downloader), NameOf(downloadFile), NameOf(DownloadModuleSettingsChanged))) _
             .AddColoredFileInfo("Save Directory: ", downloadFile.Dir, ConsoleColor.DarkYellow) _
             .AddBlank(DownloadModuleSettingsChanged) _
             .AddDispatchedResetOpt(NameOf(Downloader), DownloadModuleSettingsChanged,

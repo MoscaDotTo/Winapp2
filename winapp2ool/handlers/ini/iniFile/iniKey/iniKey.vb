@@ -20,7 +20,7 @@ Option Strict On
 ''' <summary>
 ''' An object representing a name=value pair from an ini file
 ''' </summary>
-Public Class iniKey2
+Public Class iniKey
 
     Private _name As String
     Private _keyType As String
@@ -156,27 +156,27 @@ Public Class iniKey2
 
     ''' <summary>Returns whether this key's Name matches the given key's Name (case-insensitive)</summary>
     ''' <param name="key">The key to compare against</param>
-    Public Function compareNames(key As iniKey2) As Boolean
+    Public Function compareNames(key As iniKey) As Boolean
         If key Is Nothing Then argIsNull(NameOf(key)) : Return False
         Return nameIs(key.Name, True)
     End Function
 
     ''' <summary>Returns whether this key's Value matches the given key's Value (case-insensitive)</summary>
     ''' <param name="key">The key to compare against</param>
-    Public Function compareValues(key As iniKey2) As Boolean
+    Public Function compareValues(key As iniKey) As Boolean
         If key Is Nothing Then argIsNull(NameOf(key)) : Return False
         Return vIs(key.Value, True)
     End Function
 
     ''' <summary>Returns whether this key's KeyType matches the given key's KeyType (case-insensitive)</summary>
     ''' <param name="key">The key to compare against</param>
-    Public Function compareTypes(key As iniKey2) As Boolean
+    Public Function compareTypes(key As iniKey) As Boolean
         If key Is Nothing Then argIsNull(NameOf(key)) : Return False
         Return typeIs(key.KeyType, True)
     End Function
 
     ''' <summary>
-    ''' Creates a new <c> iniKey2 </c> from a <c> name=value </c> line, splitting on the first
+    ''' Creates a new <c> iniKey </c> from a <c> name=value </c> line, splitting on the first
     ''' <c> = </c>. A line with no name gets the name <c> KeyTypeNotGiven </c> and the type
     ''' <c> Error </c>. A line with no value, or no <c> = </c> at all, gets the type
     ''' <c> DeleteMe </c>. A bare <c> = </c> leaves Name and KeyType as <c> Nothing </c>.

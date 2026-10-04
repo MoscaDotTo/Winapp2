@@ -48,51 +48,51 @@ Public Module FlavorizerMainMenu
             .AddBlank() _
             .AddDispatchedOption("Change base file", "Select the base file to be flavorized",
                 Sub()
-                    changeFile2Params(FlavorizerFile1, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
+                    changeFileParams(FlavorizerFile1, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
                                       NameOf(FlavorizerFile1), NameOf(FlavorizerModuleSettingsChanged))
                 End Sub) _
             .AddDispatchedOption("Change save target", "Select where to save the flavorized result",
                 Sub()
-                    changeFile2Params(FlavorizerFile2, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
+                    changeFileParams(FlavorizerFile2, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
                                       NameOf(FlavorizerFile2), NameOf(FlavorizerModuleSettingsChanged))
                 End Sub) _
             .AddBlank() _
             .AddDispatchedOption("Change target directory", "Change the directory within which to scan for Flavor files",
                 Sub()
-                    changeFile2Params(FlavorizerFile9, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
+                    changeFileParams(FlavorizerFile9, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
                                       NameOf(FlavorizerFile9), NameOf(FlavorizerModuleSettingsChanged))
                     FlavorizerFile9.Name = ""
-                    SaveModule2(NameOf(Flavorizer), GetType(FlavorizerSettings))
+                    SaveModule(NameOf(Flavorizer), GetType(FlavorizerSettings))
                 End Sub) _
             .AddBlank() _
             .AddDispatchedOption("Change section removal file", "Select the file containing sections to remove entirely",
                 Sub()
-                    changeFile2Params(FlavorizerFile3, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
+                    changeFileParams(FlavorizerFile3, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
                                       NameOf(FlavorizerFile3), NameOf(FlavorizerModuleSettingsChanged))
                 End Sub) _
             .AddDispatchedOption("Change key name removal file", "Select the file containing keys to remove by name",
                 Sub()
-                    changeFile2Params(FlavorizerFile4, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
+                    changeFileParams(FlavorizerFile4, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
                                       NameOf(FlavorizerFile4), NameOf(FlavorizerModuleSettingsChanged))
                 End Sub) _
             .AddDispatchedOption("Change key value removal file", "Select the file containing keys to remove by value",
                 Sub()
-                    changeFile2Params(FlavorizerFile5, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
+                    changeFileParams(FlavorizerFile5, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
                                       NameOf(FlavorizerFile5), NameOf(FlavorizerModuleSettingsChanged))
                 End Sub) _
             .AddDispatchedOption("Change section replacement file", "Select the file containing sections to replace entirely",
                 Sub()
-                    changeFile2Params(FlavorizerFile6, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
+                    changeFileParams(FlavorizerFile6, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
                                       NameOf(FlavorizerFile6), NameOf(FlavorizerModuleSettingsChanged))
                 End Sub) _
             .AddDispatchedOption("Change key replacement file", "Select the file containing keys to replace by name",
                 Sub()
-                    changeFile2Params(FlavorizerFile7, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
+                    changeFileParams(FlavorizerFile7, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
                                       NameOf(FlavorizerFile7), NameOf(FlavorizerModuleSettingsChanged))
                 End Sub) _
             .AddDispatchedOption("Change additions file", "Select the file containing sections/keys to add",
                 Sub()
-                    changeFile2Params(FlavorizerFile8, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
+                    changeFileParams(FlavorizerFile8, FlavorizerModuleSettingsChanged, NameOf(Flavorizer),
                                       NameOf(FlavorizerFile8), NameOf(FlavorizerModuleSettingsChanged))
                 End Sub) _
             .AddBlank() _

@@ -32,7 +32,7 @@ Imports System.Reflection
 ''' - May include an <c> ExpectedErrors= </c> metadata key to assert the initial scan error count
 ''' - May include a <c> Flavor= </c> metadata key to set the winapp2.ini flavor (default: <c> NonCCleaner </c>)
 ''' - May include a <c> Group=name </c> metadata key to combine multiple input sections into one
-'''   <c> winapp2file2 </c> for testing file-level checks (e.g. entry alphabetization).
+'''   <c> winapp2file </c> for testing file-level checks (e.g. entry alphabetization).
 '''   All sections sharing the same <c> Group= </c> value are combined into a single test.
 '''   Only the FIRST section in a group carries <c> Rule= </c>, <c> ScanOnly= </c>,
 '''   <c> ExpectedErrors= </c>, and <c> Flavor= </c>; those keys are ignored on subsequent members.
@@ -65,19 +65,19 @@ Imports System.Reflection
             Return
         End If
 
-        Dim inputFile = winapp2ool.iniFile2.FromFile(inputPath)
-        Dim outputFile = winapp2ool.iniFile2.FromFile(outputPath)
+        Dim inputFile = winapp2ool.iniFile.FromFile(inputPath)
+        Dim outputFile = winapp2ool.iniFile.FromFile(outputPath)
 
         ' Group accumulation — keyed by group name, preserving first-occurrence order
-        Dim pendingInputSections As New Dictionary(Of String, List(Of winapp2ool.iniSection2))
-        Dim pendingExpectedSections As New Dictionary(Of String, List(Of winapp2ool.iniSection2))
+        Dim pendingInputSections As New Dictionary(Of String, List(Of winapp2ool.iniSection))
+        Dim pendingExpectedSections As New Dictionary(Of String, List(Of winapp2ool.iniSection))
         Dim groupOrder As New List(Of String)
         Dim groupRuleIndex As New Dictionary(Of String, Integer)
         Dim groupExpectedErrors As New Dictionary(Of String, Integer)
         Dim groupFlavor As New Dictionary(Of String, winapp2ool.WinappFlavor)
         Dim groupScanOnly As New Dictionary(Of String, Boolean)
 
-        For Each section As winapp2ool.iniSection2 In inputFile
+        For Each section As winapp2ool.iniSection In inputFile
 
             Dim groupKey = section.Keys.GetKey("Group")
             Dim groupName As String = Nothing
@@ -144,8 +144,8 @@ Imports System.Reflection
                     Continue For
                 End If
 
-                pendingInputSections.Add(groupName, New List(Of winapp2ool.iniSection2) From {section})
-                pendingExpectedSections.Add(groupName, New List(Of winapp2ool.iniSection2) From {expectedSection})
+                pendingInputSections.Add(groupName, New List(Of winapp2ool.iniSection) From {section})
+                pendingExpectedSections.Add(groupName, New List(Of winapp2ool.iniSection) From {expectedSection})
                 groupOrder.Add(groupName)
                 groupRuleIndex.Add(groupName, ruleIndex)
                 groupExpectedErrors.Add(groupName, expectedErrors)
@@ -160,8 +160,8 @@ Imports System.Reflection
                     Continue For
                 End If
 
-                Yield {New winapp2ool.iniSection2() {section},
-                       New winapp2ool.iniSection2() {expectedSection},
+                Yield {New winapp2ool.iniSection() {section},
+                       New winapp2ool.iniSection() {expectedSection},
                        ruleIndex, expectedErrors, flavor, scanOnly, Nothing}
 
             End If
@@ -191,8 +191,8 @@ Imports System.Reflection
     End Function
 
     ''' <summary>Convenience helper for error-case yields where only a single input section is available</summary>
-    Private Shared Function SingleErrorCase(section As winapp2ool.iniSection2, msg As String) As Object()
-        Return {New winapp2ool.iniSection2() {section}, Nothing, 0, -1, winapp2ool.WinappFlavor.NonCCleaner, False, msg}
+    Private Shared Function SingleErrorCase(section As winapp2ool.iniSection, msg As String) As Object()
+        Return {New winapp2ool.iniSection() {section}, Nothing, 0, -1, winapp2ool.WinappFlavor.NonCCleaner, False, msg}
     End Function
 
     ''' <summary>
@@ -209,8 +209,8 @@ Imports System.Reflection
             Return
         End If
 
-        Dim inputFile = winapp2ool.iniFile2.FromFile(inputPath)
-        Dim outputFile = winapp2ool.iniFile2.FromFile(outputPath)
+        Dim inputFile = winapp2ool.iniFile.FromFile(inputPath)
+        Dim outputFile = winapp2ool.iniFile.FromFile(outputPath)
 
         Assert.IsTrue(inputFile.Count > 0, "WinappDebugInputs.ini has no sections")
         Assert.IsTrue(outputFile.Count > 0, "WinappDebugOutputs.ini has no sections")
@@ -220,11 +220,11 @@ Imports System.Reflection
     ''' <summary>Returns the first input section name as the displayed test name in the runner</summary>
     Public Shared Function GetRepairTestDisplayName(methodInfo As MethodInfo, data As Object()) As String
         If data(0) Is Nothing Then Return "No data files"
-        Return DirectCast(data(0), winapp2ool.iniSection2())(0).Name
+        Return DirectCast(data(0), winapp2ool.iniSection())(0).Name
     End Function
 
     ''' <summary>
-    ''' Runs WinappDebug on one or more input sections (combined into a single <c> winapp2file2 </c>)
+    ''' Runs WinappDebug on one or more input sections (combined into a single <c> winapp2file </c>)
     ''' with the specified rule selection, optionally applies repairs, and asserts that each
     ''' repaired entry matches its expected output section key-for-key.
     ''' When <paramref name="scanOnly"/> is <c> True </c>, the repair pass is skipped and
@@ -233,8 +233,8 @@ Imports System.Reflection
     <TestMethod()>
     <DynamicData(NameOf(GetRepairTestCases), DynamicDataSourceType.Method,
                  DynamicDataDisplayName:=NameOf(GetRepairTestDisplayName))>
-    Public Sub debug_Repair(sections As winapp2ool.iniSection2(),
-                            expectedSections As winapp2ool.iniSection2(),
+    Public Sub debug_Repair(sections As winapp2ool.iniSection(),
+                            expectedSections As winapp2ool.iniSection(),
                             ruleIndex As Integer,
                             expectedErrors As Integer,
                             flavor As winapp2ool.Winapp2ool.WinappFlavor,
@@ -276,7 +276,7 @@ Imports System.Reflection
 
             ' Assert each expected section against its matching repaired entry (matched by name)
             For Each expected In expectedSections
-                Dim match As winapp2ool.winapp2entry2 = Nothing
+                Dim match As winapp2ool.winapp2entry = Nothing
                 For Each e In testFile.Entries
                     If e.Name.Equals(expected.Name, StringComparison.OrdinalIgnoreCase) Then
                         match = e
@@ -321,13 +321,13 @@ Imports System.Reflection
 
     End Sub
 
-    Private Shared Function buildTestFile(sections As winapp2ool.iniSection2()) As winapp2ool.winapp2file2
+    Private Shared Function buildTestFile(sections As winapp2ool.iniSection()) As winapp2ool.winapp2file
 
-        Dim f = winapp2ool.iniFile2.Empty("", "")
+        Dim f = winapp2ool.iniFile.Empty("", "")
         For Each s In sections
             f.AddSection(s)
         Next
-        Return New winapp2ool.winapp2file2(f)
+        Return New winapp2ool.winapp2file(f)
 
     End Function
 

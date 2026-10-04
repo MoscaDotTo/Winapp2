@@ -21,30 +21,30 @@ Imports System.Diagnostics.Eventing.Reader
 Imports System.Reflection
 
 ''' <summary>
-''' The sole settings backend, powered by <c> iniFile2 </c>.
+''' The sole settings backend, powered by <c> iniFile </c>.
 ''' <br />
-''' <c> SettingsFile2 </c> is the single authoritative in-memory representation of
+''' <c> SettingsFile </c> is the single authoritative in-memory representation of
 ''' <c> winapp2ool.ini </c>. All modules are registered in <c> loadAllModuleSettings </c>
-''' and use <c> LoadModule2 </c> / <c> SaveModule2 </c> for persistence.
+''' and use <c> LoadModule </c> / <c> SaveModule </c> for persistence.
 ''' </summary>
-Public Module SettingsHandler2
+Public Module SettingsHandler
 
-    Private _dirty2 As Boolean = False
+    Private _dirty As Boolean = False
 
     ''' <summary>
-    ''' The <c> iniFile2 </c>-backed representation of winapp2ool's settings.
+    ''' The <c> iniFile </c>-backed representation of winapp2ool's settings.
     ''' </summary>
-    Public Property SettingsFile2 As iniFile2 = iniFile2.Empty(Environment.CurrentDirectory, "winapp2ool.ini")
+    Public Property SettingsFile As iniFile = iniFile.Empty(Environment.CurrentDirectory, "winapp2ool.ini")
 
     ''' <summary>
-    ''' Reads <c> winapp2ool.ini </c> from disk into <c> SettingsFile2 </c>.
+    ''' Reads <c> winapp2ool.ini </c> from disk into <c> SettingsFile </c>.
     ''' </summary>
     Public Sub LoadWinapp2oolsettings()
 
         Using gLogScope("Loading settings")
 
             ' Handle the default case where winapp2ool.ini doesn't exist
-            If Not System.IO.File.Exists(SettingsFile2.Path) Then
+            If Not System.IO.File.Exists(SettingsFile.Path) Then
 
                 readSettingsFromDisk = False
                 saveSettingsToDisk = False
@@ -58,7 +58,7 @@ Public Module SettingsHandler2
 
             End If
 
-            SettingsFile2 = iniFile2.FromFile(SettingsFile2.Path())
+            SettingsFile = iniFile.FromFile(SettingsFile.Path())
             loadAllModuleSettings()
 
         End Using
@@ -68,39 +68,39 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Loads the settings for every module. A new module adds its <c> LoadModule2 </c> call here.
+    ''' Loads the settings for every module. A new module adds its <c> LoadModule </c> call here.
     ''' </summary>
     Private Sub loadAllModuleSettings()
 
         ' Winapp2ool is loaded first so readSettingsFromDisk is populated before other modules load
-        LoadModule2(NameOf(Winapp2ool), GetType(maintoolsettings))
+        LoadModule(NameOf(Winapp2ool), GetType(maintoolsettings))
 
         If Not readSettingsFromDisk Then Return
 
-        LoadModule2(NameOf(Diff), GetType(diffsettings))
-        LoadModule2(NameOf(UWPBuilder), GetType(uwpbuildersettings))
-        LoadModule2(NameOf(EntryBuilder), GetType(entryBuilderSettings))
-        LoadModule2(NameOf(BrowserBuilder), GetType(browserbuildersettings))
-        LoadModule2(NameOf(CC7Patcher), GetType(cc7patchersettings))
-        LoadModule2(NameOf(CCiniDebug), GetType(ccdebugsettings))
-        LoadModule2(NameOf(Combine), GetType(combinesettings))
-        LoadModule2(NameOf(Flavorizer), GetType(FlavorizerSettings))
-        LoadModule2(NameOf(Transmute), GetType(transmuteSettings))
-        LoadModule2(NameOf(Trim), GetType(trimsettings))
-        LoadModule2(NameOf(Downloader), GetType(downloadersettings))
-        LoadModule2(NameOf(WinappDebug), GetType(lintsettings))
-        LoadLintRulesFromSettings2()
+        LoadModule(NameOf(Diff), GetType(diffsettings))
+        LoadModule(NameOf(UWPBuilder), GetType(uwpbuildersettings))
+        LoadModule(NameOf(EntryBuilder), GetType(entryBuilderSettings))
+        LoadModule(NameOf(BrowserBuilder), GetType(browserbuildersettings))
+        LoadModule(NameOf(CC7Patcher), GetType(cc7patchersettings))
+        LoadModule(NameOf(CCiniDebug), GetType(ccdebugsettings))
+        LoadModule(NameOf(Combine), GetType(combinesettings))
+        LoadModule(NameOf(Flavorizer), GetType(FlavorizerSettings))
+        LoadModule(NameOf(Transmute), GetType(transmuteSettings))
+        LoadModule(NameOf(Trim), GetType(trimsettings))
+        LoadModule(NameOf(Downloader), GetType(downloadersettings))
+        LoadModule(NameOf(WinappDebug), GetType(lintsettings))
+        LoadLintRulesFromSettings()
 
     End Sub
 
     ''' <summary>
-    ''' Returns the value of a setting from <c> SettingsFile2 </c>,
+    ''' Returns the value of a setting from <c> SettingsFile </c>,
     ''' or <c> "" </c> if the module section or key is not found.
     ''' </summary>
     Public Function GetSetting(moduleName As String,
                                settingName As String) As String
 
-        Dim section = SettingsFile2.GetSection(moduleName)
+        Dim section = SettingsFile.GetSection(moduleName)
         If section Is Nothing Then Return ""
 
         Dim key = section.Keys.GetKey(settingName)
@@ -109,20 +109,20 @@ Public Module SettingsHandler2
     End Function
 
     ''' <summary>
-    ''' Sets or creates a setting in <c> SettingsFile2 </c>,
+    ''' Sets or creates a setting in <c> SettingsFile </c>,
     ''' creating the module section and/or key if absent.
-    ''' Marks the backend dirty; the write is deferred to <c> FlushIfDirty2 </c>.
+    ''' Marks the backend dirty; the write is deferred to <c> FlushIfDirty </c>.
     ''' </summary>
     Public Sub SetSetting(moduleName As String,
                          settingName As String,
                          value As String)
 
-        Dim section = SettingsFile2.GetOrCreateSection(moduleName)
+        Dim section = SettingsFile.GetOrCreateSection(moduleName)
         Dim key = section.Keys.GetKey(settingName)
 
         If key Is Nothing Then
 
-            section.AddKey(New iniKey2($"{settingName}={value}"))
+            section.AddKey(New iniKey($"{settingName}={value}"))
 
         Else
 
@@ -130,15 +130,15 @@ Public Module SettingsHandler2
 
         End If
 
-        _dirty2 = True
+        _dirty = True
 
     End Sub
 
     ''' <summary>
-    ''' Writes <c> SettingsFile2 </c> to disk, subject to <paramref name="condition"/> and to the
+    ''' Writes <c> SettingsFile </c> to disk, subject to <paramref name="condition"/> and to the
     ''' global save gate (<c> saveSettingsToDisk </c>, and never during a command line run).
     ''' <br />
-    ''' The gate lives here rather than at the call sites because <c> FlushIfDirty2 </c> is also
+    ''' The gate lives here rather than at the call sites because <c> FlushIfDirty </c> is also
     ''' invoked ungated whenever a menu or the application closes. Any <c> SetSetting </c> caller
     ''' which neglects to gate its own flush would otherwise have its changes persisted by one of
     ''' those, writing settings the user asked not to save.
@@ -157,13 +157,13 @@ Public Module SettingsHandler2
 
         End If
 
-        SettingsFile2.OverwriteToFile(SettingsFile2.ToString())
-        _dirty2 = False
+        SettingsFile.OverwriteToFile(SettingsFile.ToString())
+        _dirty = False
 
     End Sub
 
     ''' <summary>
-    ''' Writes <c> SettingsFile2 </c> to disk only if it has been modified since the last save.
+    ''' Writes <c> SettingsFile </c> to disk only if it has been modified since the last save.
     ''' <br />
     ''' A flush suppressed by the save gate leaves the backend dirty, so enabling
     ''' <c> saveSettingsToDisk </c> later in the session still persists the changes made before it
@@ -174,21 +174,21 @@ Public Module SettingsHandler2
     ''' An additional condition which must hold for the write to occur
     ''' <br /> Optional, Default: <c> True </c>
     ''' </param>
-    Public Sub FlushIfDirty2(Optional condition As Boolean = True)
+    Public Sub FlushIfDirty(Optional condition As Boolean = True)
 
-        If _dirty2 Then SaveSettings(condition)
+        If _dirty Then SaveSettings(condition)
 
     End Sub
 
     ''' <summary>
-    ''' Populates a module's public static properties from <c> SettingsFile2 </c>.
+    ''' Populates a module's public static properties from <c> SettingsFile </c>.
     ''' <br />
     ''' Handles <c> Boolean </c>, <c> Enum </c>, and <c> iniFileChooser </c> property types.
-    ''' Silently skips properties whose keys are absent in <c> SettingsFile2 </c>.
+    ''' Silently skips properties whose keys are absent in <c> SettingsFile </c>.
     ''' </summary>
-    Public Sub LoadModule2(moduleName As String, moduleType As Type)
+    Public Sub LoadModule(moduleName As String, moduleType As Type)
 
-        Dim section = SettingsFile2.GetSection(moduleName)
+        Dim section = SettingsFile.GetSection(moduleName)
         If section Is Nothing Then Return
 
         Using gLogScope($"Loading settings for {moduleName}")
@@ -239,12 +239,12 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Writes a module's public static properties into <c> SettingsFile2 </c>.
+    ''' Writes a module's public static properties into <c> SettingsFile </c>.
     ''' <br />
     ''' Handles <c> Boolean </c>, <c> Enum </c>, and <c> iniFileChooser </c> property types.
     ''' Logs a warning and skips properties of any other type.
     ''' </summary>
-    Public Sub SaveModule2(moduleName As String, moduleType As Type)
+    Public Sub SaveModule(moduleName As String, moduleType As Type)
 
         For Each prop As PropertyInfo In moduleType.GetProperties()
 
@@ -264,7 +264,7 @@ Public Module SettingsHandler2
 
             If prop.PropertyType IsNot GetType(Boolean) AndAlso Not prop.PropertyType.IsEnum Then
 
-                gLog($"SaveModule2: unhandled property type '{prop.PropertyType.Name}' for '{prop.Name}' in {moduleName}. skipping.")
+                gLog($"SaveModule: unhandled property type '{prop.PropertyType.Name}' for '{prop.Name}' in {moduleName}. skipping.")
                 Continue For
 
             End If

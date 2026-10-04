@@ -119,7 +119,7 @@ Module Diff
     ''' <param name="curStep">
     ''' Human-readable label for the current pipeline step
     ''' </param>
-    Private Sub Diff2Progress(curStep As String)
+    Private Sub DiffProgress(curStep As String)
 
         If SuppressOutput Then Return
         Dim spin = _spinChars(_spinIdx Mod 4)
@@ -185,18 +185,18 @@ Module Diff
     ''' </summary>
     Public Sub ConductDiff()
 
-        Dim oldFile As iniFile2
-        Dim newFile As iniFile2
+        Dim oldFile As iniFile
+        Dim newFile As iniFile
 
         oldFile = DiffFile1.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))
         If Not enforceFileHasContent(oldFile) Then Return
 
-        newFile = If(DownloadDiffFile, getRemoteIniFile2(getWinappLink), DiffFile2.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged)))
+        newFile = If(DownloadDiffFile, getRemoteIniFile(getWinappLink), DiffFile2.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged)))
         If Not enforceFileHasContent(newFile) Then Return
 
         If TrimRemoteFile AndAlso DownloadDiffFile Then
 
-            Dim tmp As New winapp2file2(getRemoteIniFile2(getWinappLink))
+            Dim tmp As New winapp2file(getRemoteIniFile(getWinappLink))
 
             Trim.trimFile(tmp)
             newFile = tmp.ToIni()
@@ -218,7 +218,7 @@ Module Diff
 
         Using gLogScope(headerText)
 
-            diffOutput.AddRange(CompareFiles2(oldFile, newFile))
+            diffOutput.AddRange(CompareFiles(oldFile, newFile))
 
         End Using
 
@@ -235,7 +235,7 @@ Module Diff
 
         MostRecentDiffLog = getLogSliceFromGlobal(DiffLogStartPhrase, DiffLogEndPhrase)
 
-        Dim logFile = iniFile2.Empty(DiffFile3.Dir, DiffFile3.Name)
+        Dim logFile = iniFile.Empty(DiffFile3.Dir, DiffFile3.Name)
         Dim logSaved = logFile.OverwriteToFile(MostRecentDiffLog, SaveDiffLog)
 
         WriteOutcomeSummary()
@@ -258,7 +258,7 @@ Module Diff
 
         gLog($"Diff outcome: {MostRecentDiffOutcome}")
 
-        Dim summaryFile = iniFile2.Empty(DiffFile4.Dir, DiffFile4.Name)
+        Dim summaryFile = iniFile.Empty(DiffFile4.Dir, DiffFile4.Name)
         summaryFile.OverwriteToFile(MostRecentDiffOutcome.ToSummaryText())
 
     End Sub
@@ -268,13 +268,13 @@ Module Diff
     ''' </summary>
     ''' 
     ''' <param name="someFile">
-    ''' The <c> iniFile2 </c> whose first comment is inspected for a version tag
+    ''' The <c> iniFile </c> whose first comment is inspected for a version tag
     ''' </param>
     ''' 
     ''' <returns>
     ''' A human-readable version string, or <c> " version not given" </c> if no version comment is present
     ''' </returns>
-    Private Function GetVer(someFile As iniFile2) As String
+    Private Function GetVer(someFile As iniFile) As String
 
         Dim ver = If(someFile.Comments.Count > 0, someFile.Comments(0).Text.ToUpperInvariant(), "000000")
         Return If(ver.Contains("VERSION"), ver.TrimStart(CChar(";")).Replace("VERSION:", "version"), " version not given")
@@ -282,44 +282,44 @@ Module Diff
     End Function
 
     ''' <summary>
-    ''' Runs the diff pipeline using the <c> iniFile2 </c>-based core classes.
+    ''' Runs the diff pipeline using the <c> iniFile </c>-based core classes.
     ''' Returns all output sections for display and logging.
     ''' </summary>
     '''
-    ''' <param name="file1As2">
-    ''' The old version of winapp2.ini as an <c> iniFile2 </c>
+    ''' <param name="oldFile">
+    ''' The old version of winapp2.ini as an <c> iniFile </c>
     ''' </param>
     '''
-    ''' <param name="file2As2">
-    ''' The new version of winapp2.ini as an <c> iniFile2 </c>
+    ''' <param name="newFile">
+    ''' The new version of winapp2.ini as an <c> iniFile </c>
     ''' </param>
     '''
     ''' <returns>
     ''' All <c> MenuSection </c>s produced by the diff pipeline, in display order
     ''' </returns>
-    Private Function CompareFiles2(file1As2 As iniFile2,
-                                   file2As2 As iniFile2) As List(Of MenuSection)
+    Private Function CompareFiles(oldFile As iniFile,
+                                   newFile As iniFile) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
 
-        Dim state2 As New DiffState()
-        state2.Clear()
+        Dim state As New DiffState()
+        state.Clear()
 
-        Dim keyAnalyzer2 = New KeyModificationAnalyzer2(state2)
-        Dim mergeDetector2 = New MergeDetector2(state2, file2As2, AddressOf keyAnalyzer2.FindModifications)
-        Dim renderer2 = New DiffOutputRenderer2(state2, file1As2, file2As2, keyAnalyzer2)
-        Dim detector2 = New EntryChangeDetector2(state2, file1As2, file2As2, mergeDetector2, keyAnalyzer2, renderer2)
-        Dim statsCalc2 = New DiffStatisticsCalculator2(state2, file1As2, file2As2)
+        Dim keyAnalyzer = New KeyModificationAnalyzer(state)
+        Dim mergeDetector = New MergeDetector(state, newFile, AddressOf keyAnalyzer.FindModifications)
+        Dim renderer = New DiffOutputRenderer(state, oldFile, newFile, keyAnalyzer)
+        Dim detector = New EntryChangeDetector(state, oldFile, newFile, mergeDetector, keyAnalyzer, renderer)
+        Dim statsCalc = New DiffStatisticsCalculator(state, oldFile, newFile)
 
-        detector2.SnuffNoisyChanges(file1As2)
-        detector2.SnuffNoisyChanges(file2As2)
+        detector.SnuffNoisyChanges(oldFile)
+        detector.SnuffNoisyChanges(newFile)
 
         Dim stepNum = 0
         Const totalSteps = 19
 
         Dim doStep = Sub(label As String, action As Action)
                          stepNum += 1
-                         Diff2Progress($"{label} (step {stepNum}/{totalSteps})")
+                         DiffProgress($"{label} (step {stepNum}/{totalSteps})")
                          action()
                      End Sub
 
@@ -328,7 +328,7 @@ Module Diff
         ' rendering a stack of empty bordered rows with no content between them
         Dim collectStep = Sub(label As String, fn As Func(Of IEnumerable(Of MenuSection)))
                               stepNum += 1
-                              Diff2Progress($"{label} (step {stepNum}/{totalSteps})")
+                              DiffProgress($"{label} (step {stepNum}/{totalSteps})")
                               Dim produced = fn().Where(Function(section) Not section.IsEmpty).ToList()
                               If produced.Count = 0 Then Return
                               out.AddRange(produced)
@@ -337,33 +337,33 @@ Module Diff
 
         Dim start = Now
 
-        doStep("· processing new entries ", Sub() detector2.ProcessNewEntries())
-        doStep("· processing old entries ", Sub() detector2.ProcessOldEntries())
-        doStep("· detecting browser changes ", Sub() statsCalc2.DetectNewBrowserSupport())
-        collectStep("· itemizing new browsers    ", Function() renderer2.ItemizeNewBrowsers())
-        collectStep("· itemizing removed browsers", Function() renderer2.ItemizeRemovedBrowsers())
-        collectStep($"· itemizing removals            ", Function() detector2.ProcessRemovals())
-        doStep("· calculating initial statistics ", Sub() statsCalc2.CalculateInitialStatistics())
-        doStep("· tracking keys across entries   ", Sub() statsCalc2.DetectCrossEntryMovements())
-        doStep("· calculating rename statistics  ", Sub() statsCalc2.CalculateRenameStatistics())
-        collectStep("· tracking renamed entries      ", Function() renderer2.SummarizeRenames())
-        collectStep("· tracking splits and mergers   ", Function() renderer2.SummarizeMergers())
-        collectStep("· diffing renamed entries       ", Function() renderer2.ItemizeRenameChanges())
-        collectStep("· diffing merged entries        ", Function() renderer2.ItemizeMergers())
-        collectStep("· itemizing key movement info   ", Function() renderer2.ItemizeKeyMovements())
-        collectStep("· diffing modified entries      ", Function() renderer2.ItemizeModifications())
-        collectStep("· itemizing added-with-mergers  ", Function() renderer2.ItemizeAddedEntriesWithMergers())
-        collectStep("· itemizing novel entries       ", Function() renderer2.ItemizeAdditions())
-        doStep("· calculating final statistics  ", Sub() statsCalc2.CalculateAddedWithMergersStatistics())
+        doStep("· processing new entries ", Sub() detector.ProcessNewEntries())
+        doStep("· processing old entries ", Sub() detector.ProcessOldEntries())
+        doStep("· detecting browser changes ", Sub() statsCalc.DetectNewBrowserSupport())
+        collectStep("· itemizing new browsers    ", Function() renderer.ItemizeNewBrowsers())
+        collectStep("· itemizing removed browsers", Function() renderer.ItemizeRemovedBrowsers())
+        collectStep($"· itemizing removals            ", Function() detector.ProcessRemovals())
+        doStep("· calculating initial statistics ", Sub() statsCalc.CalculateInitialStatistics())
+        doStep("· tracking keys across entries   ", Sub() statsCalc.DetectCrossEntryMovements())
+        doStep("· calculating rename statistics  ", Sub() statsCalc.CalculateRenameStatistics())
+        collectStep("· tracking renamed entries      ", Function() renderer.SummarizeRenames())
+        collectStep("· tracking splits and mergers   ", Function() renderer.SummarizeMergers())
+        collectStep("· diffing renamed entries       ", Function() renderer.ItemizeRenameChanges())
+        collectStep("· diffing merged entries        ", Function() renderer.ItemizeMergers())
+        collectStep("· itemizing key movement info   ", Function() renderer.ItemizeKeyMovements())
+        collectStep("· diffing modified entries      ", Function() renderer.ItemizeModifications())
+        collectStep("· itemizing added-with-mergers  ", Function() renderer.ItemizeAddedEntriesWithMergers())
+        collectStep("· itemizing novel entries       ", Function() renderer.ItemizeAdditions())
+        doStep("· calculating final statistics  ", Sub() statsCalc.CalculateAddedWithMergersStatistics())
 
         Dim timeSpan = Now - start
         gLog($"Total diff time: {timeSpan}")
 
         out.Add(New MenuSection().AddBottomBorder)
 
-        doStep("· calculating summary statistics ", Sub() out.Add(renderer2.LogPostDiff()))
+        doStep("· calculating summary statistics ", Sub() out.Add(renderer.LogPostDiff()))
 
-        MostRecentDiffOutcome = renderer2.BuildOutcome()
+        MostRecentDiffOutcome = renderer.BuildOutcome()
 
         Return out
 

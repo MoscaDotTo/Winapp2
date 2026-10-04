@@ -175,7 +175,7 @@ Public Module transmuteSettings
     Public Property RecognizeGlobalSections As Boolean = True
 
     ''' <summary>
-    ''' Restores the default state of the module's properties and persists them via <c> SaveModule2 </c>
+    ''' Restores the default state of the module's properties and persists them via <c> SaveModule </c>
     ''' </summary>
     Public Sub initDefaultTransmuteSettings()
 
@@ -189,7 +189,7 @@ Public Module transmuteSettings
         UseWinapp2Syntax = True
         RecognizeGlobalSections = True
         TransmuteModuleSettingsChanged = False
-        SaveModule2(NameOf(Transmute), GetType(transmuteSettings))
+        SaveModule(NameOf(Transmute), GetType(transmuteSettings))
 
     End Sub
 

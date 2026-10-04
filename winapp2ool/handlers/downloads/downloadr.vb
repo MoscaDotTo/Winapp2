@@ -256,7 +256,7 @@ Module downloadr
     End Function
 
     ''' <summary>
-    ''' Attempts to create an <c> iniFile2 </c> using the data provided by <paramref name="address"/>.
+    ''' Attempts to create an <c> iniFile </c> using the data provided by <paramref name="address"/>.
     ''' The download is parsed straight from the network, without staging a copy on disk
     ''' </summary>
     '''
@@ -265,10 +265,10 @@ Module downloadr
     ''' </param>
     '''
     ''' <returns>
-    ''' An <c> iniFile2 </c> created using the remote data if that data is properly formatted, <br />
+    ''' An <c> iniFile </c> created using the remote data if that data is properly formatted, <br />
     ''' <c> Nothing </c> otherwise
     ''' </returns>
-    Public Function getRemoteIniFile2(address As String) As iniFile2
+    Public Function getRemoteIniFile(address As String) As iniFile
 
         Try
 
@@ -276,7 +276,7 @@ Module downloadr
 
                 Using reader As New StreamReader(client.OpenRead(address))
 
-                    Return iniFile2.FromStream(reader, Environment.GetEnvironmentVariable("temp"), address.Split("/"c).Last)
+                    Return iniFile.FromStream(reader, Environment.GetEnvironmentVariable("temp"), address.Split("/"c).Last)
 
                 End Using
 

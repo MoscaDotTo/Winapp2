@@ -20,7 +20,7 @@ Option Strict On
 Imports System.Text
 
 ''' <summary>
-''' Tests for the Diff module's key-level equivalence in <c> KeyModificationAnalyzer2 </c>.
+''' Tests for the Diff module's key-level equivalence in <c> KeyModificationAnalyzer </c>.
 ''' A FileKey's semicolon-delimited pattern list is an unordered OR-set, so a pure reordering
 ''' of its patterns must not be reported as a change; any genuine pattern, path, or flag
 ''' difference must still surface as a modification.
@@ -28,14 +28,14 @@ Imports System.Text
 <TestClass()> Public Class DiffKeyComparisonTests
 
     ''' <summary>
-    ''' Helper: parse an <c> iniFile2 </c> from literal ini text
+    ''' Helper: parse an <c> iniFile </c> from literal ini text
     ''' </summary>
-    Private Shared Function MakeIni(text As String) As winapp2ool.iniFile2
+    Private Shared Function MakeIni(text As String) As winapp2ool.iniFile
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
         Using ms As New IO.MemoryStream(bytes)
             Using reader As New IO.StreamReader(ms)
-                Return winapp2ool.iniFile2.FromStream(reader, "", "test.ini")
+                Return winapp2ool.iniFile.FromStream(reader, "", "test.ini")
             End Using
         End Using
 
@@ -44,7 +44,7 @@ Imports System.Text
     ''' <summary>
     ''' Helper: build a one-entry section named <c> [App *] </c> from a list of key lines
     ''' </summary>
-    Private Shared Function MakeSection(ParamArray keyLines As String()) As winapp2ool.iniSection2
+    Private Shared Function MakeSection(ParamArray keyLines As String()) As winapp2ool.iniSection
 
         Dim text = "[App *]" & vbCrLf & String.Join(vbCrLf, keyLines) & vbCrLf
         Return MakeIni(text).GetSection("App *")
@@ -55,11 +55,11 @@ Imports System.Text
     ''' Helper: run key-level modification analysis on a single entry present in both versions,
     ''' returning whether the entry was recorded as modified
     ''' </summary>
-    Private Shared Function EntryModified(oldSection As winapp2ool.iniSection2,
-                                          newSection As winapp2ool.iniSection2) As Boolean
+    Private Shared Function EntryModified(oldSection As winapp2ool.iniSection,
+                                          newSection As winapp2ool.iniSection) As Boolean
 
         Dim state As New winapp2ool.DiffState
-        Dim analyzer As New winapp2ool.KeyModificationAnalyzer2(state)
+        Dim analyzer As New winapp2ool.KeyModificationAnalyzer(state)
         analyzer.FindModifications(oldSection, newSection)
 
         Return state.ModifiedEntries.ModifiedEntryNames.Contains(newSection.Name)

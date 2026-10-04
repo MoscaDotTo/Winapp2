@@ -87,7 +87,7 @@ Public Module browserbuildersettings
         BuilderFile1.ResetParams()
         BuilderFile2.ResetParams()
         BrowserBuilderModuleSettingsChanged = False
-        SaveModule2(NameOf(BrowserBuilder), GetType(browserbuildersettings))
+        SaveModule(NameOf(BrowserBuilder), GetType(browserbuildersettings))
 
     End Sub
 

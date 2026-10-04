@@ -20,22 +20,22 @@ Option Strict On
 Imports System.Text
 
 ''' <summary>
-''' Tests for the version comment's survival across the <c> iniFile2 </c> to
-''' <c> winapp2file2 </c> round trip. Trim, Transmute, WinappDebug, and CC7Patcher all
+''' Tests for the version comment's survival across the <c> iniFile </c> to
+''' <c> winapp2file </c> round trip. Trim, Transmute, WinappDebug, and CC7Patcher all
 ''' pass files back through <c> ToIni </c>, and Diff reads the version off the resulting
 ''' file's first comment to build its header
 ''' </summary>
 <TestClass()> Public Class Winapp2FileVersionTests
 
     ''' <summary>
-    ''' Helper: parse an <c> iniFile2 </c> from literal ini text
+    ''' Helper: parse an <c> iniFile </c> from literal ini text
     ''' </summary>
-    Private Shared Function MakeIni(text As String) As winapp2ool.iniFile2
+    Private Shared Function MakeIni(text As String) As winapp2ool.iniFile
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
         Using ms As New IO.MemoryStream(bytes)
             Using reader As New IO.StreamReader(ms)
-                Return winapp2ool.iniFile2.FromStream(reader, "", "winapp2.ini")
+                Return winapp2ool.iniFile.FromStream(reader, "", "winapp2.ini")
             End Using
         End Using
 
@@ -56,12 +56,12 @@ Imports System.Text
         "FileKey1=%AppData%\TestB|*.log" & vbCrLf
 
     ''' <summary>
-    ''' A file's version comment must still be readable off the <c> iniFile2 </c> produced
+    ''' A file's version comment must still be readable off the <c> iniFile </c> produced
     ''' by <c> ToIni </c>, which is the form Diff receives when it trims the remote file
     ''' </summary>
     <TestMethod()> Public Sub ToIniPreservesVersionComment()
 
-        Dim wa2 As New winapp2ool.winapp2file2(MakeIni(VersionedFile))
+        Dim wa2 As New winapp2ool.winapp2file(MakeIni(VersionedFile))
         Dim roundTripped = wa2.ToIni()
 
         Assert.AreNotEqual(0, roundTripped.Comments.Count, "ToIni dropped the version comment entirely")
@@ -70,14 +70,14 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' The round trip must be idempotent: rebuilding a <c> winapp2file2 </c> from a
+    ''' The round trip must be idempotent: rebuilding a <c> winapp2file </c> from a
     ''' <c> ToIni </c> result must find the same version rather than falling back to 000000
     ''' </summary>
     <TestMethod()> Public Sub VersionSurvivesRepeatedRoundTrips()
 
-        Dim first As New winapp2ool.winapp2file2(MakeIni(VersionedFile))
-        Dim second As New winapp2ool.winapp2file2(first.ToIni())
-        Dim third As New winapp2ool.winapp2file2(second.ToIni())
+        Dim first As New winapp2ool.winapp2file(MakeIni(VersionedFile))
+        Dim second As New winapp2ool.winapp2file(first.ToIni())
+        Dim third As New winapp2ool.winapp2file(second.ToIni())
 
         Assert.AreEqual("; Version: 260219", third.Version)
 
@@ -90,7 +90,7 @@ Imports System.Text
     <TestMethod()> Public Sub UnversionedFileCarriesPlaceholder()
 
         Dim noVersion = VersionedFile.Replace("; Version: 260219" & vbCrLf, "")
-        Dim wa2 As New winapp2ool.winapp2file2(MakeIni(noVersion))
+        Dim wa2 As New winapp2ool.winapp2file(MakeIni(noVersion))
 
         Assert.AreEqual("; Version: 000000", wa2.ToIni().Comments(0).Text)
 
@@ -106,10 +106,10 @@ Imports System.Text
             "; # of entries: 2" & vbCrLf &
             "; This is the non-CCleaner version of Winapp2 that contains extra entries that were removed due to them being added to CCleaner." & vbCrLf)
 
-        Dim first As New winapp2ool.winapp2file2(MakeIni(nccText))
+        Dim first As New winapp2ool.winapp2file(MakeIni(nccText))
         Assert.IsTrue(first.IsNCC, "the fixture was not recognized as non-CCleaner")
 
-        Dim second As New winapp2ool.winapp2file2(first.ToIni())
+        Dim second As New winapp2ool.winapp2file(first.ToIni())
         Assert.IsTrue(second.IsNCC, "ToIni dropped the non-CCleaner marker")
         Assert.IsTrue(second.ToWinapp2String().Contains("Winapp2 (Non-CCleaner version)"))
 
@@ -120,8 +120,8 @@ Imports System.Text
     ''' </summary>
     <TestMethod()> Public Sub RoundTripDoesNotInventNCCMarker()
 
-        Dim first As New winapp2ool.winapp2file2(MakeIni(VersionedFile))
-        Dim second As New winapp2ool.winapp2file2(first.ToIni())
+        Dim first As New winapp2ool.winapp2file(MakeIni(VersionedFile))
+        Dim second As New winapp2ool.winapp2file(first.ToIni())
 
         Assert.IsFalse(first.IsNCC)
         Assert.IsFalse(second.IsNCC)
@@ -134,7 +134,7 @@ Imports System.Text
     ''' </summary>
     <TestMethod()> Public Sub VersionSurvivesEntryRemoval()
 
-        Dim wa2 As New winapp2ool.winapp2file2(MakeIni(VersionedFile))
+        Dim wa2 As New winapp2ool.winapp2file(MakeIni(VersionedFile))
 
         For Each entry In wa2.Entries.ToList()
             wa2.RemoveEntry(entry)

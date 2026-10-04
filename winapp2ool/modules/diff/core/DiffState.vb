@@ -136,22 +136,22 @@ Public Class ModifiedEntryTracker
     ''' <summary>
     ''' Tracks modified keys per entry: EntryName -> (NewKey -> List(Of OldKeys))
     ''' </summary>
-    Public Property ModifiedKeyTracker2 As New Dictionary(Of String, Dictionary(Of iniKey2, List(Of iniKey2)))
+    Public Property ModifiedKeyTracker As New Dictionary(Of String, Dictionary(Of iniKey, List(Of iniKey)))
 
     ''' <summary>
     ''' Tracks removed keys per entry: EntryName -> List(Of Keys)
     ''' </summary>
-    Public Property RemovedKeyTracker2 As New Dictionary(Of String, List(Of iniKey2))
+    Public Property RemovedKeyTracker As New Dictionary(Of String, List(Of iniKey))
 
     ''' <summary>
     ''' Tracks added keys per entry: EntryName -> List(Of Keys)
     ''' </summary>
-    Public Property AddedKeyTracker2 As New Dictionary(Of String, List(Of iniKey2))
+    Public Property AddedKeyTracker As New Dictionary(Of String, List(Of iniKey))
 
     ''' <summary>
-    ''' Tracks potential matching sections for modified entries: EntryName -> List(Of iniSection2)
+    ''' Tracks potential matching sections for modified entries: EntryName -> List(Of iniSection)
     ''' </summary>
-    Public Property PotentialMatches2 As New List(Of iniSection2)
+    Public Property PotentialMatches As New List(Of iniSection)
 
     ''' <summary>
     ''' Clears all tracking data
@@ -161,10 +161,10 @@ Public Class ModifiedEntryTracker
         ModifiedEntryNames.Clear()
         AddedEntryNames.Clear()
         RemovedEntryNames.Clear()
-        ModifiedKeyTracker2.Clear()
-        RemovedKeyTracker2.Clear()
-        AddedKeyTracker2.Clear()
-        PotentialMatches2.Clear()
+        ModifiedKeyTracker.Clear()
+        RemovedKeyTracker.Clear()
+        AddedKeyTracker.Clear()
+        PotentialMatches.Clear()
 
     End Sub
 
@@ -326,14 +326,14 @@ Public Class DiffStatistics
     ''' <summary>
     ''' Section key values (e.g. <c> "Brave Web Browser" </c>) that appear in the new file
     ''' but not in the old file, indicating newly added browser support.
-    ''' Populated by <c> DiffStatisticsCalculator2.DetectNewBrowserSupport </c>.
+    ''' Populated by <c> DiffStatisticsCalculator.DetectNewBrowserSupport </c>.
     ''' </summary>
     Public Property NewBrowserSectionValues As New List(Of String)
 
     ''' <summary>
     ''' Section key values (e.g. <c> "Internet Explorer" </c>) that appear in the old file
     ''' but not in the new file, indicating removed browser support.
-    ''' Populated by <c> DiffStatisticsCalculator2.DetectNewBrowserSupport </c>.
+    ''' Populated by <c> DiffStatisticsCalculator.DetectNewBrowserSupport </c>.
     ''' </summary>
     Public Property RemovedBrowserSectionValues As New List(Of String)
 
@@ -373,28 +373,28 @@ End Class
 Public Class DiffCaches
 
     ''' <summary>
-    ''' Caches old entries by name for quick lookup (iniSection2 variant)
+    ''' Caches old entries by name for quick lookup (iniSection variant)
     ''' </summary>
-    Public Property CachedOldEntries2 As New Dictionary(Of String, iniSection2)
+    Public Property CachedOldEntries As New Dictionary(Of String, iniSection)
 
     ''' <summary>
-    ''' Caches new entries by name for quick lookup (iniSection2 variant)
+    ''' Caches new entries by name for quick lookup (iniSection variant)
     ''' </summary>
-    Public Property CachedNewEntries2 As New Dictionary(Of String, iniSection2)
+    Public Property CachedNewEntries As New Dictionary(Of String, iniSection)
 
     ''' <summary>
-    ''' Caches key match information (KeyMatchInfo2 variant)
+    ''' Caches key match information (KeyMatchInfo variant)
     ''' </summary>
-    Public Property MatchInfoCache2 As New ConcurrentDictionary(Of String, KeyMatchInfo2)
+    Public Property MatchInfoCache As New ConcurrentDictionary(Of String, KeyMatchInfo)
 
     ''' <summary>
     ''' Clears all caches
     ''' </summary>
     Public Sub Clear()
 
-        CachedOldEntries2.Clear()
-        CachedNewEntries2.Clear()
-        MatchInfoCache2.Clear()
+        CachedOldEntries.Clear()
+        CachedNewEntries.Clear()
+        MatchInfoCache.Clear()
 
     End Sub
 

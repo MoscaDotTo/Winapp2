@@ -25,12 +25,12 @@ Option Strict On
 Friend Class fileKeySurvivor
 
     ''' <summary>The parsed components of the first-seen key in this group</summary>
-    Public ReadOnly Property Params As fileKeyParams2
+    Public ReadOnly Property Params As fileKeyParams
 
     ''' <summary>Accumulated patterns; seeded from <c> Params.Patterns </c> and appended to on each merge</summary>
     Public ReadOnly Property Patterns As List(Of String)
 
-    Public Sub New(parsed As fileKeyParams2)
+    Public Sub New(parsed As fileKeyParams)
         Me.Params = parsed
         Me.Patterns = New List(Of String)(parsed.Patterns)
     End Sub
@@ -49,26 +49,26 @@ Module experimentalScans
     ''' </summary>
     '''
     ''' <remarks>
-    ''' Every FileKey value is parsed once through <c> fileKeyParams2 </c> and matched by
+    ''' Every FileKey value is parsed once through <c> fileKeyParams </c> and matched by
     ''' (path, flag) in O(1). Merging several keys into the same survivor never rebuilds or
     ''' re-parses the running value. Each survivor's merged value string gets built once at
     ''' the end, when the output keys are emitted.
     ''' </remarks>
     '''
     ''' <param name="entry">
-    ''' The <c> winapp2entry2 </c> whose FileKeys will be assessed for merge opportunities
+    ''' The <c> winapp2entry </c> whose FileKeys will be assessed for merge opportunities
     ''' </param>
-    Public Sub cOptimization(result As EntryLintResult, entry As winapp2entry2)
+    Public Sub cOptimization(result As EntryLintResult, entry As winapp2entry)
 
         If entry.FileKeys.Count < 2 Then Return
 
         Dim survivors As New List(Of fileKeySurvivor)
         Dim indexByKey As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
-        Dim removedKeys As New List(Of iniKey2)
+        Dim removedKeys As New List(Of iniKey)
 
         For Each key In entry.FileKeys
 
-            Dim parsed As New fileKeyParams2(key.Value)
+            Dim parsed As New fileKeyParams(key.Value)
             Dim hashKey = parsed.Path & ChrW(0) & CInt(parsed.Flag).ToString()
 
             Dim idx As Integer
@@ -93,7 +93,7 @@ Module experimentalScans
         If removedKeys.Count = 0 Then Return
 
         ' Build output keys once per survivor, renumbering from 1.
-        Dim resultKeys As New List(Of iniKey2)
+        Dim resultKeys As New List(Of iniKey)
 
         For i = 0 To survivors.Count - 1
 
@@ -108,7 +108,7 @@ Module experimentalScans
                 Case fileKeyFlag.Unknown : newValue &= "|" & s.Params.RawFlag
             End Select
 
-            resultKeys.Add(New iniKey2($"FileKey{i + 1}={newValue}"))
+            resultKeys.Add(New iniKey($"FileKey{i + 1}={newValue}"))
 
         Next
 
@@ -120,8 +120,8 @@ Module experimentalScans
     End Sub
 
     ''' <summary>Builds a labeled section of keys for optimization output</summary>
-    Private Function buildOptiSect(Remkeys As IEnumerable(Of iniKey2),
-                                   resultKeys As IEnumerable(Of iniKey2)) As MenuSection
+    Private Function buildOptiSect(Remkeys As IEnumerable(Of iniKey),
+                                   resultKeys As IEnumerable(Of iniKey)) As MenuSection
 
         Dim out As New MenuSection
         out.AddDivider(solid:=False).AddLine("The following keys can be merged into other keys:", True).AddDivider(solid:=False)

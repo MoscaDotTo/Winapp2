@@ -65,7 +65,7 @@ Module CCiniDebug
         Dim ccIni = CCDebugFile2.Load(CCDBSettingsChanged, NameOf(CCiniDebug), NameOf(CCDebugFile2), NameOf(CCDBSettingsChanged))
         If Not enforceFileHasContent(ccIni) Then Return
 
-        Dim winapp2 As iniFile2 = Nothing
+        Dim winapp2 As iniFile = Nothing
 
         If PruneStaleEntries Then
 
@@ -122,8 +122,8 @@ Module CCiniDebug
     ''' A <c> List(Of String) </c> of orphaned entry names removed during pruning,
     ''' or <c> Nothing </c> if pruning was not performed.
     ''' </returns>
-    Private Function ccDebug(wa2file As iniFile2,
-                             ccinifile As iniFile2) As List(Of String)
+    Private Function ccDebug(wa2file As iniFile,
+                             ccinifile As iniFile) As List(Of String)
 
         Dim orphans As List(Of String) = Nothing
 
@@ -136,7 +136,7 @@ Module CCiniDebug
 
         If SortFileForOutput Then sortCC(ccinifile)
 
-        Dim outFile = iniFile2.Empty(CCDebugFile3.Dir, CCDebugFile3.Name)
+        Dim outFile = iniFile.Empty(CCDebugFile3.Dir, CCDebugFile3.Name)
         outFile.OverwriteToFile(ccinifile.ToString(), SaveDebuggedFile)
 
         Return orphans
@@ -158,10 +158,10 @@ Module CCiniDebug
     ''' <returns>
     ''' A <c> List(Of String) </c> of orphaned entry names that were removed
     ''' </returns>
-    Private Function prune(optionsSec As iniSection2,
-                           wa2file As iniFile2) As List(Of String)
+    Private Function prune(optionsSec As iniSection,
+                           wa2file As iniFile) As List(Of String)
 
-        Dim tbTrimmed As New List(Of iniKey2)
+        Dim tbTrimmed As New List(Of iniKey)
         Dim orphanNames As New List(Of String)
 
         Using gLogScope($"Scanning {CCDebugFile2.Name} for settings left over from removed winapp2.ini entries")
@@ -198,7 +198,7 @@ Module CCiniDebug
     ''' <param name="ccinifile">
     ''' The loaded ccleaner.ini whose Options section keys will be sorted
     ''' </param>
-    Private Sub sortCC(ccinifile As iniFile2)
+    Private Sub sortCC(ccinifile As iniFile)
 
         Using gLogScope($"Sorting {CCDebugFile2.Name}")
 

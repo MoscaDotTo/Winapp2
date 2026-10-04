@@ -43,12 +43,12 @@ Module lintsettingshandler
     End Sub
 
     ''' <summary>
-    ''' Saves all WinappDebug settings to <c> SettingsFile2 </c>,
+    ''' Saves all WinappDebug settings to <c> SettingsFile </c>,
     ''' including the per-rule scan and repair flags.
     ''' </summary>
     Public Sub SaveLintSettings()
 
-        SaveModule2(NameOf(WinappDebug), GetType(lintsettings))
+        SaveModule(NameOf(WinappDebug), GetType(lintsettings))
 
         For Each rule In Rules
             SetSetting(NameOf(WinappDebug), rule.LintName & "_Scan", tsInvariant(rule.ShouldScan))
@@ -58,9 +58,9 @@ Module lintsettingshandler
     End Sub
 
     ''' <summary>
-    ''' Loads per-rule scan and repair flags for WinappDebug from <c> SettingsFile2 </c>.
+    ''' Loads per-rule scan and repair flags for WinappDebug from <c> SettingsFile </c>.
     ''' </summary>
-    Public Sub LoadLintRulesFromSettings2()
+    Public Sub LoadLintRulesFromSettings()
 
         For Each rule In Rules
             Dim scanVal = GetSetting(NameOf(WinappDebug), rule.LintName & "_Scan")

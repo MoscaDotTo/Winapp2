@@ -60,11 +60,11 @@ Friend Module TransmuteNameFilter
         ''' <summary> The scaffold label from the section name, matched as an anchored name suffix </summary>
         Public Property Scaffold As String
 
-        ''' <summary> The content predicates, each parsed into an <c> iniKey2 </c> for KeyType+Value matching </summary>
-        Public Property Matches As New List(Of iniKey2)
+        ''' <summary> The content predicates, each parsed into an <c> iniKey </c> for KeyType+Value matching </summary>
+        Public Property Matches As New List(Of iniKey)
 
         ''' <summary> The keys to apply to each selected section under the current transmute mode </summary>
-        Public Property Payload As New List(Of iniKey2)
+        Public Property Payload As New List(Of iniKey)
 
     End Class
 
@@ -79,7 +79,7 @@ Friend Module TransmuteNameFilter
     ''' </summary>
     '''
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> whose sections will be filtered and modified
+    ''' The <c> iniFile </c> whose sections will be filtered and modified
     ''' </param>
     '''
     ''' <param name="nameSections">
@@ -90,8 +90,8 @@ Friend Module TransmuteNameFilter
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
-    Public Sub applyNameFilterSections(ByRef baseFile As iniFile2,
-                                             nameSections As List(Of iniSection2),
+    Public Sub applyNameFilterSections(ByRef baseFile As iniFile,
+                                             nameSections As List(Of iniSection),
                                        ByRef menuOutput As MenuSection)
 
         If nameSections.Count = 0 Then Return
@@ -224,17 +224,17 @@ Friend Module TransmuteNameFilter
     ''' <returns>
     ''' The number of payload keys applied to <c> <paramref name="baseSection"/> </c>
     ''' </returns>
-    Public Function applyPayload(baseSection As iniSection2,
-                                  payload As List(Of iniKey2),
+    Public Function applyPayload(baseSection As iniSection,
+                                  payload As List(Of iniKey),
                             ByRef menuOutput As MenuSection) As Integer
 
-        Dim payloadSource As New iniSection2(baseSection.Name)
+        Dim payloadSource As New iniSection(baseSection.Name)
 
         For Each payloadKey In payload
 
             Dim value = payloadKey.Value
             If value.IndexOf(EntryNameToken, StringComparison.OrdinalIgnoreCase) >= 0 Then value = expandEntryNameToken(value, baseSection.Name)
-            payloadSource.AddKey(New iniKey2($"{payloadKey.Name}={value}"))
+            payloadSource.AddKey(New iniKey($"{payloadKey.Name}={value}"))
 
         Next
 
@@ -248,7 +248,7 @@ Friend Module TransmuteNameFilter
 
                     If baseSection.HasKey(payloadKey.Name) Then Continue For
 
-                    baseSection.AddKey(New iniKey2(payloadKey.ToString()))
+                    baseSection.AddKey(New iniKey(payloadKey.ToString()))
                     hits += 1
                     gLog($"{baseSection.Name}: += {payloadKey}")
 
@@ -283,8 +283,8 @@ Friend Module TransmuteNameFilter
     ''' The rule's content predicates
     ''' </param>
     '''
-    Public Function sectionSatisfiesPredicates(baseSection As iniSection2,
-                                                matches As List(Of iniKey2)) As Boolean
+    Public Function sectionSatisfiesPredicates(baseSection As iniSection,
+                                                matches As List(Of iniKey)) As Boolean
 
         If matches.Count = 0 Then Return True
 
@@ -345,7 +345,7 @@ Friend Module TransmuteNameFilter
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
-    Private Function parseNameRule(nameSection As iniSection2,
+    Private Function parseNameRule(nameSection As iniSection,
                                    ByRef menuOutput As MenuSection) As TransmuteNameRule
 
         Dim scaffold = nameSection.Name.Substring(NameSectionPrefix.Length).Trim()
@@ -394,7 +394,7 @@ Friend Module TransmuteNameFilter
     End Function
 
     ''' <summary>
-    ''' Parses a <c> Name=Value </c> line into an <c> iniKey2 </c>, returning <c> Nothing </c>
+    ''' Parses a <c> Name=Value </c> line into an <c> iniKey </c>, returning <c> Nothing </c>
     ''' when the line has no <c> = </c> or an empty Name
     ''' </summary>
     '''
@@ -402,12 +402,12 @@ Friend Module TransmuteNameFilter
     ''' The raw key line, ie. the value of a <c> Match= </c> key
     ''' </param>
     '''
-    Public Function splitNameValue(line As String) As iniKey2
+    Public Function splitNameValue(line As String) As iniKey
 
         Dim eqPos = line.IndexOf("="c)
         If eqPos < 1 Then Return Nothing
 
-        Return New iniKey2(line)
+        Return New iniKey(line)
 
     End Function
 

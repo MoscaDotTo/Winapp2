@@ -15,15 +15,15 @@
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
-''' <summary>An ordered, case-insensitive-keyed collection of <c> iniKey2 </c> objects</summary>
+''' <summary>An ordered, case-insensitive-keyed collection of <c> iniKey </c> objects</summary>
 Public Class iniKeyCollection
-    Implements IEnumerable(Of iniKey2)
+    Implements IEnumerable(Of iniKey)
 
-    Private ReadOnly _ordered As New List(Of iniKey2)
-    Private ReadOnly _byName As New Dictionary(Of String, iniKey2)(StringComparer.OrdinalIgnoreCase)
-    Private ReadOnly _byType As New Dictionary(Of String, List(Of iniKey2))(StringComparer.OrdinalIgnoreCase)
+    Private ReadOnly _ordered As New List(Of iniKey)
+    Private ReadOnly _byName As New Dictionary(Of String, iniKey)(StringComparer.OrdinalIgnoreCase)
+    Private ReadOnly _byType As New Dictionary(Of String, List(Of iniKey))(StringComparer.OrdinalIgnoreCase)
 
-    Private Shared ReadOnly EmptyKeyList As IReadOnlyList(Of iniKey2) = New List(Of iniKey2)().AsReadOnly()
+    Private Shared ReadOnly EmptyKeyList As IReadOnlyList(Of iniKey) = New List(Of iniKey)().AsReadOnly()
 
     ''' <summary>The number of keys in the collection</summary>
     Public ReadOnly Property Count As Integer
@@ -38,13 +38,13 @@ Public Class iniKeyCollection
     ''' returns the first.
     ''' </summary>
     ''' <param name="key">The key to add</param>
-    Public Sub Add(key As iniKey2)
+    Public Sub Add(key As iniKey)
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
         _ordered.Add(key)
         If Not _byName.ContainsKey(key.Name) Then _byName.Add(key.Name, key)
-        Dim bucket As List(Of iniKey2) = Nothing
+        Dim bucket As List(Of iniKey) = Nothing
         If Not _byType.TryGetValue(key.KeyType, bucket) Then
-            bucket = New List(Of iniKey2)
+            bucket = New List(Of iniKey)
             _byType.Add(key.KeyType, bucket)
         End If
         bucket.Add(key)
@@ -59,9 +59,9 @@ Public Class iniKeyCollection
 
     ''' <summary>Returns the key with the given name, or <c> Nothing </c> if not found</summary>
     ''' <param name="name">The key name to look up (case-insensitive)</param>
-    Public Function GetKey(name As String) As iniKey2
+    Public Function GetKey(name As String) As iniKey
         If name Is Nothing Then argIsNull(NameOf(name)) : Return Nothing
-        Dim result As iniKey2 = Nothing
+        Dim result As iniKey = Nothing
         _byName.TryGetValue(name, result)
         Return result
     End Function
@@ -72,9 +72,9 @@ Public Class iniKeyCollection
     ''' The list is the collection's own bucket, so don't change it.
     ''' </summary>
     ''' <param name="keyType">The key type to look up, e.g. "FileKey" or "RegKey"</param>
-    Public Function GetByType(keyType As String) As IReadOnlyList(Of iniKey2)
+    Public Function GetByType(keyType As String) As IReadOnlyList(Of iniKey)
         If keyType Is Nothing Then argIsNull(NameOf(keyType)) : Return EmptyKeyList
-        Dim result As List(Of iniKey2) = Nothing
+        Dim result As List(Of iniKey) = Nothing
         If _byType.TryGetValue(keyType, result) Then Return result
         Return EmptyKeyList
     End Function
@@ -87,12 +87,12 @@ Public Class iniKeyCollection
     ''' <param name="key">
     ''' The key to remove
     ''' </param>
-    Public Sub Remove(key As iniKey2)
+    Public Sub Remove(key As iniKey)
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return
         _ordered.Remove(key)
 
-        Dim indexed As iniKey2 = Nothing
+        Dim indexed As iniKey = Nothing
         If _byName.TryGetValue(key.Name, indexed) AndAlso ReferenceEquals(indexed, key) Then
             _byName.Remove(key.Name)
             For Each remaining In _ordered
@@ -103,7 +103,7 @@ Public Class iniKeyCollection
             Next
         End If
 
-        Dim bucket As List(Of iniKey2) = Nothing
+        Dim bucket As List(Of iniKey) = Nothing
         If _byType.TryGetValue(key.KeyType, bucket) Then bucket.Remove(key)
 
     End Sub
@@ -122,7 +122,7 @@ Public Class iniKeyCollection
     ''' <param name="newKey">
     ''' The key to insert in its place
     ''' </param>
-    Public Sub Replace(oldKey As iniKey2, newKey As iniKey2)
+    Public Sub Replace(oldKey As iniKey, newKey As iniKey)
 
         If oldKey Is Nothing Then argIsNull(NameOf(oldKey)) : Return
         If newKey Is Nothing Then argIsNull(NameOf(newKey)) : Return
@@ -151,12 +151,12 @@ Public Class iniKeyCollection
     ''' The keys to insert in its place. It must hold at least one key: replacing a key
     ''' with nothing is a removal, which is <see cref="Remove"/>'s job.
     ''' </param>
-    Public Sub Replace(oldKey As iniKey2, newKeys As IEnumerable(Of iniKey2))
+    Public Sub Replace(oldKey As iniKey, newKeys As IEnumerable(Of iniKey))
 
         If oldKey Is Nothing Then argIsNull(NameOf(oldKey)) : Return
         If newKeys Is Nothing Then argIsNull(NameOf(newKeys)) : Return
 
-        Dim replacements As New List(Of iniKey2)(newKeys)
+        Dim replacements As New List(Of iniKey)(newKeys)
         If replacements.Count = 0 Then argIsInvalid(NameOf(newKeys)) : Return
 
         Dim index = _ordered.IndexOf(oldKey)
@@ -180,9 +180,9 @@ Public Class iniKeyCollection
 
             If Not _byName.ContainsKey(key.Name) Then _byName.Add(key.Name, key)
 
-            Dim bucket As List(Of iniKey2) = Nothing
+            Dim bucket As List(Of iniKey) = Nothing
             If Not _byType.TryGetValue(key.KeyType, bucket) Then
-                bucket = New List(Of iniKey2)
+                bucket = New List(Of iniKey)
                 _byType.Add(key.KeyType, bucket)
             End If
             bucket.Add(key)
@@ -194,9 +194,9 @@ Public Class iniKeyCollection
     ''' <summary>
     ''' Returns a copy of the ordered key list
     ''' </summary>
-    Public Function ToList() As List(Of iniKey2)
+    Public Function ToList() As List(Of iniKey)
 
-        Return New List(Of iniKey2)(_ordered)
+        Return New List(Of iniKey)(_ordered)
 
     End Function
 
@@ -214,7 +214,7 @@ Public Class iniKeyCollection
     ''' <param name="keys">
     ''' The keys to add. Duplicate names are kept, and <see cref="GetKey"/> returns the first.
     ''' </param>
-    Public Sub New(keys As IEnumerable(Of iniKey2))
+    Public Sub New(keys As IEnumerable(Of iniKey))
 
         If keys Is Nothing Then argIsNull(NameOf(keys)) : Return
 
@@ -227,7 +227,7 @@ Public Class iniKeyCollection
     End Sub
 
     ''' <summary>Returns an enumerator over the keys in the order they were added</summary>
-    Public Function GetEnumerator() As IEnumerator(Of iniKey2) Implements IEnumerable(Of iniKey2).GetEnumerator
+    Public Function GetEnumerator() As IEnumerator(Of iniKey) Implements IEnumerable(Of iniKey).GetEnumerator
 
         Return _ordered.GetEnumerator()
 

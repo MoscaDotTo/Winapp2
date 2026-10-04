@@ -251,7 +251,7 @@ Module MenuMaker
 
             ExitPending = False
 
-            FlushIfDirty2()
+            FlushIfDirty()
 
             setNextMenuHeaderText($"{name} closed")
 

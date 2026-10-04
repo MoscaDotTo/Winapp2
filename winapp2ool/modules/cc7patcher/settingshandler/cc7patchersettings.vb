@@ -63,7 +63,7 @@ Public Module cc7patchersettings
         CC7PatcherFile1 = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2.ini", mustExist:=True)
         CC7PatcherFile2 = New iniFileChooser(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner.ini", mustExist:=True)
         CC7PatcherFile3 = New iniFileChooser(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner.ini", mustExist:=False)
-        SaveModule2(NameOf(CC7Patcher), GetType(cc7patchersettings))
+        SaveModule(NameOf(CC7Patcher), GetType(cc7patchersettings))
 
     End Sub
 

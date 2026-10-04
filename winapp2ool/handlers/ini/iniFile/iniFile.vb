@@ -20,7 +20,7 @@ Imports System.IO
 Imports System.Text
 
 ''' <summary>
-''' Controls the order in which sections are emitted when serializing an <c> iniFile2 </c>
+''' Controls the order in which sections are emitted when serializing an <c> iniFile </c>
 ''' </summary>
 Public Enum IniFileWriteFormat
 
@@ -41,9 +41,9 @@ End Enum
 ''' (case-insensitive): when a file repeats a section, we keep the first and drop the later one
 ''' along with its keys.
 ''' </summary>
-Public Class iniFile2
+Public Class iniFile
 
-    Implements IEnumerable(Of iniSection2)
+    Implements IEnumerable(Of iniSection)
 
     ''' <summary>
     ''' The directory on the filesystem in which the file can be found
@@ -64,16 +64,16 @@ Public Class iniFile2
 
     End Function
 
-    Private ReadOnly _ordered As New List(Of iniSection2)
-    Private ReadOnly _byName As New Dictionary(Of String, iniSection2)(StringComparer.OrdinalIgnoreCase)
-    Private ReadOnly _comments As New List(Of iniComment2)
+    Private ReadOnly _ordered As New List(Of iniSection)
+    Private ReadOnly _byName As New Dictionary(Of String, iniSection)(StringComparer.OrdinalIgnoreCase)
+    Private ReadOnly _comments As New List(Of iniComment)
 
     ''' <summary>
     ''' All comment lines encountered during parsing, in the order they appeared in the file.
     ''' Comment text includes the leading semicolon.
     ''' We capture comments for reading only. <see cref="ToString()"/> doesn't write them back.
     ''' </summary>
-    Public ReadOnly Property Comments As List(Of iniComment2)
+    Public ReadOnly Property Comments As List(Of iniComment)
         Get
             Return _comments
         End Get
@@ -115,11 +115,11 @@ Public Class iniFile2
     ''' <param name="name">
     ''' The section name to look up (case-insensitive)
     ''' </param>
-    Public Function GetSection(name As String) As iniSection2
+    Public Function GetSection(name As String) As iniSection
 
         If name Is Nothing Then argIsNull(NameOf(name)) : Return Nothing
 
-        Dim result As iniSection2 = Nothing
+        Dim result As iniSection = Nothing
         _byName.TryGetValue(name, result)
 
         Return result
@@ -131,14 +131,14 @@ Public Class iniFile2
     ''' <param name="name">
     ''' The section name to look up or create (case-insensitive)
     ''' </param>
-    Public Function GetOrCreateSection(name As String) As iniSection2
+    Public Function GetOrCreateSection(name As String) As iniSection
 
         If name Is Nothing Then argIsNull(NameOf(name)) : Return Nothing
 
         Dim existing = GetSection(name)
         If existing IsNot Nothing Then Return existing
 
-        Dim s As New iniSection2(name)
+        Dim s As New iniSection(name)
         AddSection(s)
 
         Return s
@@ -172,7 +172,7 @@ Public Class iniFile2
     ''' <param name="section">
     ''' The section to add
     ''' </param>
-    Public Sub AddSection(section As iniSection2)
+    Public Sub AddSection(section As iniSection)
 
         If section Is Nothing Then argIsNull(NameOf(section)) : Return
 
@@ -184,7 +184,7 @@ Public Class iniFile2
     End Sub
 
     ''' <summary>
-    ''' Creates a new <c> iniFile2 </c> with no sections. Outside this class, use
+    ''' Creates a new <c> iniFile </c> with no sections. Outside this class, use
     ''' <see cref="FromFile"/>, <see cref="FromStream"/> or <see cref="Empty"/>.
     ''' </summary>
     Private Sub New(dir As String, name As String)
@@ -206,14 +206,14 @@ Public Class iniFile2
     ''' </param>
     '''
     ''' <returns>The parsed file, or one with no sections if the file doesn't exist</returns>
-    Public Shared Function FromFile(path As String) As iniFile2
+    Public Shared Function FromFile(path As String) As iniFile
 
-        If path Is Nothing Then argIsNull(NameOf(path)) : Return New iniFile2("", "")
+        If path Is Nothing Then argIsNull(NameOf(path)) : Return New iniFile("", "")
 
         Dim slashPos = path.LastIndexOf("\"c)
         Dim dir = If(slashPos >= 0, path.Substring(0, slashPos), "")
         Dim name = If(slashPos >= 0, path.Substring(slashPos + 1), path)
-        Dim f As New iniFile2(dir, name)
+        Dim f As New iniFile(dir, name)
 
         Try
 
@@ -232,13 +232,13 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' Returns a new <c> iniFile2 </c> with no sections and the given path components,
+    ''' Returns a new <c> iniFile </c> with no sections and the given path components,
     ''' for building an output file programmatically
     ''' </summary>
     ''' <param name="dir">The directory component of the file path</param>
     ''' <param name="name">The filename component</param>
-    Public Shared Function Empty(dir As String, name As String) As iniFile2
-        Return New iniFile2(If(dir Is Nothing, "", dir), If(name Is Nothing, "", name))
+    Public Shared Function Empty(dir As String, name As String) As iniFile
+        Return New iniFile(If(dir Is Nothing, "", dir), If(name Is Nothing, "", name))
     End Function
 
     ''' <summary>
@@ -261,11 +261,11 @@ Public Class iniFile2
     ''' </param>
     Public Shared Function FromStream(r As StreamReader,
                                       Optional dir As String = "",
-                                      Optional name As String = "") As iniFile2
+                                      Optional name As String = "") As iniFile
 
-        If r Is Nothing Then argIsNull(NameOf(r)) : Return New iniFile2(dir, name)
+        If r Is Nothing Then argIsNull(NameOf(r)) : Return New iniFile(dir, name)
 
-        Dim f As New iniFile2(dir, name)
+        Dim f As New iniFile(dir, name)
         f.ParseStream(r)
 
         Return f
@@ -279,7 +279,7 @@ Public Class iniFile2
     ''' </summary>
     Private Sub ParseStream(r As StreamReader)
 
-        Dim currentSection As iniSection2 = Nothing
+        Dim currentSection As iniSection = Nothing
         Dim lineNumber As Integer = 1
 
         Do While r.Peek() > -1
@@ -289,13 +289,13 @@ Public Class iniFile2
             If line.Length = 0 OrElse line.TrimStart().Length = 0 Then
                 ' skip blank lines
             ElseIf line.StartsWith(";", StringComparison.InvariantCulture) Then
-                _comments.Add(New iniComment2(line, lineNumber))
+                _comments.Add(New iniComment(line, lineNumber))
             ElseIf line.StartsWith("[", StringComparison.InvariantCulture) Then
                 Dim sectionName = line.TrimStart(CChar("[")).TrimEnd(CChar("]"))
-                currentSection = New iniSection2(sectionName, lineNumber)
+                currentSection = New iniSection(sectionName, lineNumber)
                 AddSection(currentSection)
             ElseIf currentSection IsNot Nothing Then
-                currentSection.AddKey(New iniKey2(line, lineNumber))
+                currentSection.AddKey(New iniKey(line, lineNumber))
             End If
             lineNumber += 1
         Loop
@@ -380,14 +380,14 @@ Public Class iniFile2
     End Function
 
     ''' <summary>
-    ''' Serializes a sequence of <c> iniSection2 </c> objects into ini file text, with a blank
+    ''' Serializes a sequence of <c> iniSection </c> objects into ini file text, with a blank
     ''' line between sections. The text ends with the newline that closes the last section.
     ''' </summary>
     '''
     ''' <param name="sections">
     ''' The sections to serialize, in the order they should appear
     ''' </param>
-    Private Shared Function Serialize(sections As IEnumerable(Of iniSection2)) As String
+    Private Shared Function Serialize(sections As IEnumerable(Of iniSection)) As String
 
         Dim sb As New StringBuilder()
         Dim first = True
@@ -405,7 +405,7 @@ Public Class iniFile2
     End Function
 
     ''' <summary>Returns an enumerator over the sections in the order they were added</summary>
-    Public Function GetEnumerator() As IEnumerator(Of iniSection2) Implements IEnumerable(Of iniSection2).GetEnumerator
+    Public Function GetEnumerator() As IEnumerator(Of iniSection) Implements IEnumerable(Of iniSection).GetEnumerator
         Return _ordered.GetEnumerator()
     End Function
 

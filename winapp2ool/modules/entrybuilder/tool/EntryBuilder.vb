@@ -786,7 +786,7 @@ Public Module EntryBuilder
 
     ''' <summary>
     ''' Orchestrates the EntryBuilder pipeline: loads the scaffold catalog, parses each
-    ''' source section into an <c> EntrySpec </c>, generates one <c> iniSection2 </c>
+    ''' source section into an <c> EntrySpec </c>, generates one <c> iniSection </c>
     ''' per non-skipped entry, and writes the result to the output file with a header
     ''' comment block.
     ''' </summary>
@@ -806,7 +806,7 @@ Public Module EntryBuilder
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving progress lines and warnings for display
     ''' </param>
-    Private Sub processEntryBuilder(sourceIni As iniFile2,
+    Private Sub processEntryBuilder(sourceIni As iniFile,
                                      scaffoldDir As String,
                                      menuOutput As MenuSection)
 
@@ -844,7 +844,7 @@ Public Module EntryBuilder
                 .EntriesSkipped = sourceIni.Count - entries.Count
             }
 
-            Dim outputFile = iniFile2.Empty(EntryBuilderFile2.Dir, EntryBuilderFile2.Name)
+            Dim outputFile = iniFile.Empty(EntryBuilderFile2.Dir, EntryBuilderFile2.Name)
 
             For Each spec In entries
 
@@ -1113,7 +1113,7 @@ Public Module EntryBuilder
     ''' An <c> EntrySpec </c> populated from <paramref name="entrySection"/>.
     ''' Check <c> ShouldSkip </c> before using the result.
     ''' </returns>
-    Friend Function parseEntrySpec(entrySection As iniSection2,
+    Friend Function parseEntrySpec(entrySection As iniSection,
                                      menuOutput As MenuSection) As EntrySpec
 
         Dim spec As New EntrySpec(entrySection.Name)
@@ -1292,7 +1292,7 @@ Public Module EntryBuilder
     ''' <c> Root= </c>, EntryBuilder guarantees a <c> Detect=&lt;Root&gt; </c> (registry-domain
     ''' root) or <c> DetectFile=&lt;Root&gt; </c> (filesystem-domain root) is present, classifying
     ''' by the leading path segment of the resolved value against the known registry hives via
-    ''' <see cref="regKeyParams2.HasValidRoot"/>. The synthesised key is the literal
+    ''' <see cref="regKeyParams.HasValidRoot"/>. The synthesised key is the literal
     ''' <c> &lt;Root&gt; </c> token rather than the expanded value, so the normal phase-2 pass in
     ''' <see cref="generateEntry"/> fans it out over multi-valued roots and marks <c> Root </c>
     ''' referenced for the unreferenced-variable typo backstop. <br /><br />
@@ -1338,9 +1338,9 @@ Public Module EntryBuilder
         ' routes to one Detect or DetectFile; a heterogeneous list is an authoring error — warn
         ' and classify by the first value (its <Root> token still fans out, surfacing the
         ' domain mismatch downstream in WinappDebug).
-        Dim firstIsRegistry = New regKeyParams2(rootValues(0)).HasValidRoot
+        Dim firstIsRegistry = New regKeyParams(rootValues(0)).HasValidRoot
 
-        If rootValues.Any(Function(v) New regKeyParams2(v).HasValidRoot <> firstIsRegistry) Then
+        If rootValues.Any(Function(v) New regKeyParams(v).HasValidRoot <> firstIsRegistry) Then
 
             Dim mixedMsg = $"[{spec.Name}] Root mixes registry and filesystem values; inferring detection from the first value's domain"
             gLog(mixedMsg)
@@ -1535,27 +1535,27 @@ Public Module EntryBuilder
     ''' </param>
     '''
     ''' <returns>
-    ''' A fully populated <c> iniSection2 </c> ready to be added to the output file
+    ''' A fully populated <c> iniSection </c> ready to be added to the output file
     ''' </returns>
     Friend Function generateEntry(spec As EntrySpec,
                                     catalog As Dictionary(Of String, List(Of String)),
                                     qtCatalog As Dictionary(Of String, List(Of String)),
                                     electronCatalog As Dictionary(Of String, List(Of String)),
                                     stats As EntryBuilderStats,
-                                    menuOutput As MenuSection) As iniSection2
+                                    menuOutput As MenuSection) As iniSection
 
         Dim generatingMsg = $"Generating entry: {spec.Name}"
         menuOutput.AddColoredLine(generatingMsg, ConsoleColor.Magenta)
         gLog($"  {generatingMsg}")
 
-        Dim section As New iniSection2(spec.Name)
+        Dim section As New iniSection(spec.Name)
 
         ' 1. Category
         Select Case True
 
-            Case spec.LangSecRef.Length > 0 : section.AddKey(New iniKey2($"LangSecRef={spec.LangSecRef}")) : stats.CategoryKeys += 1
+            Case spec.LangSecRef.Length > 0 : section.AddKey(New iniKey($"LangSecRef={spec.LangSecRef}")) : stats.CategoryKeys += 1
 
-            Case spec.SectionName.Length > 0 : section.AddKey(New iniKey2($"Section={spec.SectionName}")) : stats.CategoryKeys += 1
+            Case spec.SectionName.Length > 0 : section.AddKey(New iniKey($"Section={spec.SectionName}")) : stats.CategoryKeys += 1
 
             Case Else : gLog($"{spec.Name} has no category key")
 
@@ -1569,13 +1569,13 @@ Public Module EntryBuilder
 
         If detectValues.Count = 1 Then
 
-            section.AddKey(New iniKey2($"Detect={detectValues(0)}"))
+            section.AddKey(New iniKey($"Detect={detectValues(0)}"))
 
         Else
 
             For i = 0 To detectValues.Count - 1
 
-                section.AddKey(New iniKey2($"Detect{i + 1}={detectValues(i)}"))
+                section.AddKey(New iniKey($"Detect{i + 1}={detectValues(i)}"))
 
             Next
 
@@ -1589,25 +1589,25 @@ Public Module EntryBuilder
 
         If detectFileValues.Count = 1 Then
 
-            section.AddKey(New iniKey2($"DetectFile={detectFileValues(0)}"))
+            section.AddKey(New iniKey($"DetectFile={detectFileValues(0)}"))
 
         Else
 
             For i = 0 To detectFileValues.Count - 1
 
-                section.AddKey(New iniKey2($"DetectFile{i + 1}={detectFileValues(i)}"))
+                section.AddKey(New iniKey($"DetectFile{i + 1}={detectFileValues(i)}"))
 
             Next
 
         End If
 
         ' 4. DetectOS
-        If spec.DetectOS.Length > 0 Then section.AddKey(New iniKey2($"DetectOS={spec.DetectOS}")) : stats.DetectOSKeys += 1
+        If spec.DetectOS.Length > 0 Then section.AddKey(New iniKey($"DetectOS={spec.DetectOS}")) : stats.DetectOSKeys += 1
 
         ' 5. Warnings (pass-through, verbatim — prose is never variable-expanded)
         For Each w In spec.Warnings
 
-            section.AddKey(New iniKey2($"Warning={w}"))
+            section.AddKey(New iniKey($"Warning={w}"))
             stats.WarningKeys += 1
 
         Next
@@ -1675,7 +1675,7 @@ Public Module EntryBuilder
 
         For i = 0 To fileKeys.Count - 1
 
-            section.AddKey(New iniKey2($"FileKey{i + 1}={fileKeys(i)}"))
+            section.AddKey(New iniKey($"FileKey{i + 1}={fileKeys(i)}"))
 
         Next
 
@@ -1693,7 +1693,7 @@ Public Module EntryBuilder
 
         For i = 0 To regKeyValues.Count - 1
 
-            section.AddKey(New iniKey2($"RegKey{i + 1}={regKeyValues(i)}"))
+            section.AddKey(New iniKey($"RegKey{i + 1}={regKeyValues(i)}"))
 
         Next
 
@@ -1711,7 +1711,7 @@ Public Module EntryBuilder
 
         For i = 0 To excludeKeyValues.Count - 1
 
-            section.AddKey(New iniKey2($"ExcludeKey{i + 1}={excludeKeyValues(i)}"))
+            section.AddKey(New iniKey($"ExcludeKey{i + 1}={excludeKeyValues(i)}"))
 
         Next
 
@@ -1724,7 +1724,7 @@ Public Module EntryBuilder
     ''' <summary>
     ''' Expands a list of ExcludeKey templates against the entry's roots and variables,
     ''' classifying each phase-1 result's variable-expansion domain by its parsed
-    ''' <c> excludeKeyParams2.Flag </c> (REG → Registry; FILE, PATH, Unknown → Filesystem).
+    ''' <c> excludeKeyParams.Flag </c> (REG → Registry; FILE, PATH, Unknown → Filesystem).
     ''' Shared by the <c> ExcludeKeyBase= </c> (generated) and <c> ExcludeKey= </c>
     ''' (pass-through) tiers so both apply identical domain classification while being
     ''' counted separately by the caller.
@@ -1762,7 +1762,7 @@ Public Module EntryBuilder
 
             For Each rootExpanded In expandRoot(exclKey, spec)
 
-                Dim parsed As New excludeKeyParams2(rootExpanded)
+                Dim parsed As New excludeKeyParams(rootExpanded)
                 Dim exclDomain As ExpansionDomain = If(parsed.Flag = excludeKeyFlag.Reg,
                                                        ExpansionDomain.Registry,
                                                        ExpansionDomain.Filesystem)
@@ -2070,13 +2070,13 @@ Public Module EntryBuilder
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving the per-run summary line
     ''' </param>
-    Private Sub writeSplitOutput(outputFile As iniFile2,
+    Private Sub writeSplitOutput(outputFile As iniFile,
                                  menuOutput As MenuSection)
 
         Dim letters As New List(Of String) From {"#"}
         For c = AscW("A"c) To AscW("Z"c) : letters.Add(ChrW(c)) : Next
 
-        Dim buckets = letters.ToDictionary(Function(l) l, Function(l) iniFile2.Empty(EntryBuilderFile2.Dir, l & ".ini"))
+        Dim buckets = letters.ToDictionary(Function(l) l, Function(l) iniFile.Empty(EntryBuilderFile2.Dir, l & ".ini"))
 
         For Each section In outputFile
 
@@ -2119,7 +2119,7 @@ Public Module EntryBuilder
 
     ''' <summary>
     ''' Combines all <c> *.ini </c> files in <paramref name="sourceDir"/> into a single
-    ''' in-memory <c> iniFile2 </c>, processed in alphabetical order. Sections with
+    ''' in-memory <c> iniFile </c>, processed in alphabetical order. Sections with
     ''' duplicate names across files are silently ignored (first-file-wins). Returns
     ''' an empty file if the directory does not exist or contains no parseable sections.
     ''' </summary>
@@ -2129,11 +2129,11 @@ Public Module EntryBuilder
     ''' </param>
     '''
     ''' <returns>
-    ''' The merged <c> iniFile2 </c>, or an empty one if the directory is missing or empty
+    ''' The merged <c> iniFile </c>, or an empty one if the directory is missing or empty
     ''' </returns>
-    Private Function combineSourceDir(sourceDir As String) As iniFile2
+    Private Function combineSourceDir(sourceDir As String) As iniFile
 
-        Dim combined = iniFile2.Empty("", "")
+        Dim combined = iniFile.Empty("", "")
 
         If Not Directory.Exists(sourceDir) Then Return combined
 
@@ -2142,7 +2142,7 @@ Public Module EntryBuilder
 
         For Each filePath In files
 
-            Dim f = iniFile2.FromFile(filePath)
+            Dim f = iniFile.FromFile(filePath)
             For Each section In f : combined.AddSection(section) : Next
 
         Next

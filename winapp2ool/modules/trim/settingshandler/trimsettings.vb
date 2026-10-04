@@ -128,7 +128,7 @@ Public Module trimsettings
         UseTrimIncludes = False
         UseTrimExcludes = False
         TrimModuleSettingsChanged = False
-        SaveModule2(NameOf(Trim), GetType(trimsettings))
+        SaveModule(NameOf(Trim), GetType(trimsettings))
 
     End Sub
 

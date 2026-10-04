@@ -22,14 +22,14 @@ Option Strict On
 ''' (added, removed, updated, and replaced key counts per entry category) and detects
 ''' cross-entry key movements after all entry-level analysis is complete.
 ''' </summary>
-Public Class DiffStatisticsCalculator2
+Public Class DiffStatisticsCalculator
 
     Private ReadOnly _state As DiffState
-    Private ReadOnly _file1 As iniFile2
-    Private ReadOnly _file2 As iniFile2
+    Private ReadOnly _file1 As iniFile
+    Private ReadOnly _file2 As iniFile
 
     ''' <summary>
-    ''' Initializes a new instance of <c> DiffStatisticsCalculator2 </c>
+    ''' Initializes a new instance of <c> DiffStatisticsCalculator </c>
     ''' </summary>
     '''
     ''' <param name="state">
@@ -37,15 +37,15 @@ Public Class DiffStatisticsCalculator2
     ''' </param>
     ''' 
     ''' <param name="file1">
-    ''' The old version of winapp2.ini as an <c> iniFile2 </c>
+    ''' The old version of winapp2.ini as an <c> iniFile </c>
     ''' </param>
     ''' 
     ''' <param name="file2">
-    ''' The new version of winapp2.ini as an <c> iniFile2 </c>
+    ''' The new version of winapp2.ini as an <c> iniFile </c>
     ''' </param>
     Public Sub New(state As DiffState,
-                   file1 As iniFile2,
-                   file2 As iniFile2)
+                   file1 As iniFile,
+                   file2 As iniFile)
 
         _state = state
         _file1 = file1
@@ -120,7 +120,7 @@ Public Class DiffStatisticsCalculator2
     ''' </summary>
     Public Sub CalculateInitialStatistics()
 
-        For Each kvp In _state.ModifiedEntries.AddedKeyTracker2
+        For Each kvp In _state.ModifiedEntries.AddedKeyTracker
 
             If Not _state.ModifiedEntries.ModifiedEntryNames.Contains(kvp.Key) Then Continue For
             _state.Statistics.ModEntriesAddedKeyTotal += kvp.Value.Count
@@ -128,7 +128,7 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
-        For Each kvp In _state.ModifiedEntries.RemovedKeyTracker2
+        For Each kvp In _state.ModifiedEntries.RemovedKeyTracker
 
             If Not _state.ModifiedEntries.ModifiedEntryNames.Contains(kvp.Key) Then Continue For
             _state.Statistics.ModEntriesRemovedKeysWithoutReplacementTotal += kvp.Value.Count
@@ -139,7 +139,7 @@ Public Class DiffStatisticsCalculator2
         ' ModEntriesUpdatedKeyTotal = number of new keys that replaced old keys
         ' ModEntriesReplacedByUpdateTotal = number of old keys that were replaced
         ' ModEntriesUpdatedKeyEntryCount = number of entries with key updates
-        For Each kvp In _state.ModifiedEntries.ModifiedKeyTracker2
+        For Each kvp In _state.ModifiedEntries.ModifiedKeyTracker
 
             If Not _state.ModifiedEntries.ModifiedEntryNames.Contains(kvp.Key) Then Continue For
 
@@ -164,18 +164,18 @@ Public Class DiffStatisticsCalculator2
 
         For Each newName In _state.MergedEntries.RenamedEntryNames
 
-            Dim hasAdded = _state.ModifiedEntries.AddedKeyTracker2.ContainsKey(newName) AndAlso
-                           _state.ModifiedEntries.AddedKeyTracker2(newName).Count > 0
+            Dim hasAdded = _state.ModifiedEntries.AddedKeyTracker.ContainsKey(newName) AndAlso
+                           _state.ModifiedEntries.AddedKeyTracker(newName).Count > 0
 
-            Dim hasRemoved = _state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(newName) AndAlso
-                             _state.ModifiedEntries.RemovedKeyTracker2(newName).Count > 0
+            Dim hasRemoved = _state.ModifiedEntries.RemovedKeyTracker.ContainsKey(newName) AndAlso
+                             _state.ModifiedEntries.RemovedKeyTracker(newName).Count > 0
 
             Dim realUpdateCount = 0
             Dim realReplacedCount = 0
 
-            If _state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(newName) Then
+            If _state.ModifiedEntries.ModifiedKeyTracker.ContainsKey(newName) Then
 
-                For Each updateKvp In _state.ModifiedEntries.ModifiedKeyTracker2(newName)
+                For Each updateKvp In _state.ModifiedEntries.ModifiedKeyTracker(newName)
 
                     If updateKvp.Key.typeIs("Name") Then Continue For
 
@@ -195,14 +195,14 @@ Public Class DiffStatisticsCalculator2
 
             If hasAdded Then
 
-                _state.Statistics.RenamedEntriesAddedKeyTotal += _state.ModifiedEntries.AddedKeyTracker2(newName).Count
+                _state.Statistics.RenamedEntriesAddedKeyTotal += _state.ModifiedEntries.AddedKeyTracker(newName).Count
                 _state.Statistics.RenamedEntriesAddedKeyEntryCount += 1
 
             End If
 
             If hasRemoved Then
 
-                _state.Statistics.RenamedEntriesRemovedKeyTotal += _state.ModifiedEntries.RemovedKeyTracker2(newName).Count
+                _state.Statistics.RenamedEntriesRemovedKeyTotal += _state.ModifiedEntries.RemovedKeyTracker(newName).Count
                 _state.Statistics.RenamedEntriesRemovedKeyEntryCount += 1
 
             End If
@@ -226,12 +226,12 @@ Public Class DiffStatisticsCalculator2
     Public Sub DetectCrossEntryMovements()
 
         Dim addedKeyInfo As New List(Of AddedKeyInfo)()
-        For Each kvp In _state.ModifiedEntries.AddedKeyTracker2
+        For Each kvp In _state.ModifiedEntries.AddedKeyTracker
 
             Dim entryName = kvp.Key
-            Dim keyList2 = kvp.Value
+            Dim entryKeys = kvp.Value
 
-            For Each key In keyList2 : addedKeyInfo.Add(New AddedKeyInfo(entryName, key)) : Next
+            For Each key In entryKeys : addedKeyInfo.Add(New AddedKeyInfo(entryName, key)) : Next
 
         Next
 
@@ -243,9 +243,9 @@ Public Class DiffStatisticsCalculator2
 
         Next
 
-        Dim keysToRemoveFromAdded As New Dictionary(Of String, List(Of iniKey2))
-        Dim keysToRemoveFromRemoved As New Dictionary(Of String, List(Of iniKey2))
-        For Each kvp In _state.ModifiedEntries.RemovedKeyTracker2
+        Dim keysToRemoveFromAdded As New Dictionary(Of String, List(Of iniKey))
+        Dim keysToRemoveFromRemoved As New Dictionary(Of String, List(Of iniKey))
+        For Each kvp In _state.ModifiedEntries.RemovedKeyTracker
 
             Dim sourceEntry = kvp.Key
             Dim removedKeyList = kvp.Value
@@ -268,11 +268,11 @@ Public Class DiffStatisticsCalculator2
                     Dim movementKey = $"{removedKey.Name}{MovementKeySeparator}{removedKey.Value}{MovementKeySeparator}{sourceEntry}"
                     _state.KeyMovements.MovedKeys(movementKey) = New KeyMovementInfo(sourceEntry, targetEntry)
                     _state.Statistics.ModEntriesMovedKeysTotal += 1
-                    If Not keysToRemoveFromRemoved.ContainsKey(sourceEntry) Then keysToRemoveFromRemoved(sourceEntry) = New List(Of iniKey2)
+                    If Not keysToRemoveFromRemoved.ContainsKey(sourceEntry) Then keysToRemoveFromRemoved(sourceEntry) = New List(Of iniKey)
 
                     keysToRemoveFromRemoved(sourceEntry).Add(removedKey)
 
-                    If Not keysToRemoveFromAdded.ContainsKey(targetEntry) Then keysToRemoveFromAdded(targetEntry) = New List(Of iniKey2)
+                    If Not keysToRemoveFromAdded.ContainsKey(targetEntry) Then keysToRemoveFromAdded(targetEntry) = New List(Of iniKey)
 
                     keysToRemoveFromAdded(targetEntry).Add(addedKey)
                     _state.Statistics.ModEntriesAddedKeyTotal -= 1
@@ -289,18 +289,18 @@ Public Class DiffStatisticsCalculator2
         For Each kvp In keysToRemoveFromRemoved
 
             Dim sourceEntry = kvp.Key
-            For Each key In kvp.Value : _state.ModifiedEntries.RemovedKeyTracker2(sourceEntry).Remove(key) : Next
+            For Each key In kvp.Value : _state.ModifiedEntries.RemovedKeyTracker(sourceEntry).Remove(key) : Next
 
-            If _state.ModifiedEntries.RemovedKeyTracker2(sourceEntry).Count = 0 Then _state.ModifiedEntries.RemovedKeyTracker2.Remove(sourceEntry)
+            If _state.ModifiedEntries.RemovedKeyTracker(sourceEntry).Count = 0 Then _state.ModifiedEntries.RemovedKeyTracker.Remove(sourceEntry)
 
         Next
 
         For Each kvp In keysToRemoveFromAdded
 
             Dim targetEntry = kvp.Key
-            For Each key In kvp.Value : _state.ModifiedEntries.AddedKeyTracker2(targetEntry).Remove(key) : Next
+            For Each key In kvp.Value : _state.ModifiedEntries.AddedKeyTracker(targetEntry).Remove(key) : Next
 
-            If _state.ModifiedEntries.AddedKeyTracker2(targetEntry).Count = 0 Then _state.ModifiedEntries.AddedKeyTracker2.Remove(targetEntry)
+            If _state.ModifiedEntries.AddedKeyTracker(targetEntry).Count = 0 Then _state.ModifiedEntries.AddedKeyTracker.Remove(targetEntry)
 
         Next
 
@@ -354,13 +354,13 @@ Public Class DiffStatisticsCalculator2
 
             Next
 
-            Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker2.ContainsKey(newEntryName),
-                               _state.ModifiedEntries.AddedKeyTracker2(newEntryName), New List(Of iniKey2))
-            Dim removedKeys = If(_state.ModifiedEntries.RemovedKeyTracker2.ContainsKey(newEntryName),
-                                 _state.ModifiedEntries.RemovedKeyTracker2(newEntryName), New List(Of iniKey2))
-            Dim updatedKeysDict = If(_state.ModifiedEntries.ModifiedKeyTracker2.ContainsKey(newEntryName),
-                                     _state.ModifiedEntries.ModifiedKeyTracker2(newEntryName),
-                                     New Dictionary(Of iniKey2, List(Of iniKey2)))
+            Dim addedKeys = If(_state.ModifiedEntries.AddedKeyTracker.ContainsKey(newEntryName),
+                               _state.ModifiedEntries.AddedKeyTracker(newEntryName), New List(Of iniKey))
+            Dim removedKeys = If(_state.ModifiedEntries.RemovedKeyTracker.ContainsKey(newEntryName),
+                                 _state.ModifiedEntries.RemovedKeyTracker(newEntryName), New List(Of iniKey))
+            Dim updatedKeysDict = If(_state.ModifiedEntries.ModifiedKeyTracker.ContainsKey(newEntryName),
+                                     _state.ModifiedEntries.ModifiedKeyTracker(newEntryName),
+                                     New Dictionary(Of iniKey, List(Of iniKey)))
 
             Dim novelCount = 0
             Dim carriedOverCount = 0
@@ -640,7 +640,7 @@ Public Class DiffStatisticsCalculator2
     ''' <returns>
     ''' One of <c> [DELETION] </c>, <c> [DETECTION] </c>, <c> [CATEGORY] </c>, or <c> [OTHER] </c>
     ''' </returns>
-    Private Function getMarker(key As iniKey2) As String
+    Private Function getMarker(key As iniKey) As String
 
         Dim isDelete = key.KeyType = "FileKey" OrElse key.KeyType = "RegKey"
         Dim isDetect = key.KeyType = "Detect" OrElse key.KeyType = "DetectFile"
@@ -664,7 +664,7 @@ Public Class DiffStatisticsCalculator2
         ''' <summary>
         ''' The added key
         ''' </summary>
-        Public Property Key As iniKey2
+        Public Property Key As iniKey
 
         ''' <summary>
         ''' Creates a new <c> AddedKeyInfo </c> instance
@@ -678,7 +678,7 @@ Public Class DiffStatisticsCalculator2
         ''' The added key
         ''' </param>
         Public Sub New(entry As String,
-                       k As iniKey2)
+                       k As iniKey)
 
             EntryName = entry
             Key = k

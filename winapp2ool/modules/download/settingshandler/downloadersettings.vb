@@ -40,7 +40,7 @@ Public Module downloadersettings
 
         downloadFile = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=False)
         DownloadModuleSettingsChanged = False
-        SaveModule2(NameOf(Downloader), GetType(downloadersettings))
+        SaveModule(NameOf(Downloader), GetType(downloadersettings))
 
     End Sub
 

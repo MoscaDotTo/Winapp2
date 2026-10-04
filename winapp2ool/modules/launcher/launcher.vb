@@ -83,7 +83,7 @@ Public Module launcher
             setNextMenuHeaderText(launchHeader, printColor:=ConsoleColor.Cyan)
             initModule(launchHeader, AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
 
-            FlushIfDirty2()
+            FlushIfDirty()
 
             ' Honor -writelog for interactive runs too; silent mode has already exited above
             saveGlobalLog(SaveGlobalLogOnExit)

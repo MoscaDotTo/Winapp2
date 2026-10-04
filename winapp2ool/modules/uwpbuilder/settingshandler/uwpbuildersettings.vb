@@ -96,7 +96,7 @@ Public Module uwpbuildersettings
         UWPFile2 = New iniFileChooser(Environment.CurrentDirectory, "uwp.ini", "uwp.ini", mustExist:=False)
         UWPFile3 = New iniFileChooser(Environment.CurrentDirectory, "", "")
         UWPBuilderModuleSettingsChanged = False
-        SaveModule2(NameOf(UWPBuilder), GetType(uwpbuildersettings))
+        SaveModule(NameOf(UWPBuilder), GetType(uwpbuildersettings))
 
     End Sub
 

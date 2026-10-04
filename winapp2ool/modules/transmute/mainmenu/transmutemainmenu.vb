@@ -62,11 +62,11 @@ Public Module transmuteMainMenu
             .AddDispatchedOption("uwp.ini", "Select 'uwp.ini'", Sub() setSourceFileName("uwp.ini")) _
             .AddBlank() _
             .AddDispatchedOption("Change base file", "Select a new base file to be modified",
-                Sub() changeFile2Params(TransmuteFile1, TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile1), NameOf(TransmuteModuleSettingsChanged))) _
+                Sub() changeFileParams(TransmuteFile1, TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile1), NameOf(TransmuteModuleSettingsChanged))) _
             .AddDispatchedOption("Change source file", "Select the source file providing modifications for the base file",
-                Sub() changeFile2Params(TransmuteFile2, TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile2), NameOf(TransmuteModuleSettingsChanged))) _
+                Sub() changeFileParams(TransmuteFile2, TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile2), NameOf(TransmuteModuleSettingsChanged))) _
             .AddDispatchedOption("Change save target", "Select a save target for the output",
-                Sub() changeFile2Params(TransmuteFile3, TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile3), NameOf(TransmuteModuleSettingsChanged))) _
+                Sub() changeFileParams(TransmuteFile3, TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile3), NameOf(TransmuteModuleSettingsChanged))) _
             .AddBlank() _
             .AddColoredFileInfo($"Base file:   ", TransmuteFile1.Path(), ConsoleColor.Magenta) _
             .AddColoredFileInfo($"Source file: ", TransmuteFile2.Path(), ConsoleColor.Cyan) _
@@ -110,7 +110,7 @@ Public Module transmuteMainMenu
 
         TransmuteFile2.Name = fileName
         TransmuteModuleSettingsChanged = True
-        SaveModule2(NameOf(Transmute), GetType(transmuteSettings))
+        SaveModule(NameOf(Transmute), GetType(transmuteSettings))
         setNextMenuHeaderText($"Source file name set to {TransmuteFile2.Name}", printColor:=ConsoleColor.Yellow)
 
     End Sub

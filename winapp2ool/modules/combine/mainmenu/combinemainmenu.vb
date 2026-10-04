@@ -36,10 +36,10 @@ Public Module combinemainmenu
             .AddDispatchedOption("Run (default)", "Combine ini files", Sub() initCombine(CombineFile1.Dir, CombineFile3)) _
             .AddBlank() _
             .AddDispatchedOption("Change the target directory", "File Chooser (target)",
-                Sub() changeFile2Params(CombineFile1, CombineModuleSettingsChanged, NameOf(Combine),
+                Sub() changeFileParams(CombineFile1, CombineModuleSettingsChanged, NameOf(Combine),
                                         NameOf(CombineFile1), NameOf(CombineModuleSettingsChanged))) _
             .AddDispatchedOption("Change the save file location", "File Chooser (save)",
-                Sub() changeFile2Params(CombineFile3, CombineModuleSettingsChanged, NameOf(Combine),
+                Sub() changeFileParams(CombineFile3, CombineModuleSettingsChanged, NameOf(Combine),
                                         NameOf(CombineFile3), NameOf(CombineModuleSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedToggle("Strict Mode", "failing the build instead of merging when processing duplicate section names", CombineStrictNames,

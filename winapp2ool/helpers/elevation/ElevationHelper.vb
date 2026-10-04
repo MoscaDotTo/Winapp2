@@ -222,7 +222,7 @@ Module ElevationHelper
 
         End If
 
-        If saveSettingsToDisk Then FlushIfDirty2()
+        If saveSettingsToDisk Then FlushIfDirty()
 
         Try
 

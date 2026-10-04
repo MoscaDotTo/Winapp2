@@ -30,14 +30,14 @@ Imports System.Text
 <TestClass()> Public Class LintReconcilerTests
 
     ''' <summary>
-    ''' Helper: parse an <c> iniFile2 </c> from literal ini text
+    ''' Helper: parse an <c> iniFile </c> from literal ini text
     ''' </summary>
-    Private Shared Function MakeIni(text As String) As winapp2ool.iniFile2
+    Private Shared Function MakeIni(text As String) As winapp2ool.iniFile
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
         Using ms As New IO.MemoryStream(bytes)
             Using reader As New IO.StreamReader(ms)
-                Return winapp2ool.iniFile2.FromStream(reader, "", "test.ini")
+                Return winapp2ool.iniFile.FromStream(reader, "", "test.ini")
             End Using
         End Using
 

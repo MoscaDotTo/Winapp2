@@ -392,7 +392,7 @@ Public Module UWPBuilder
         clrConsole()
 
         Dim sourceDir = UWPFile1.Dir
-        Dim templateIni = iniFile2.FromFile($"{sourceDir}\UWP.ini")
+        Dim templateIni = iniFile.FromFile($"{sourceDir}\UWP.ini")
 
         If templateIni.Count = 0 Then
 
@@ -440,7 +440,7 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Orchestrates the UWP builder process: parses scaffold templates and app definitions,
-    ''' generates one <c> iniSection2 </c> per app, serialises the result with a header
+    ''' generates one <c> iniSection </c> per app, serialises the result with a header
     ''' comment block, and writes it to the output file.
     ''' </summary>
     '''
@@ -462,8 +462,8 @@ Public Module UWPBuilder
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving progress lines and warnings for display
     ''' </param>
-    Private Sub processUWPBuilder(templateIni As iniFile2,
-                                   appsIni As iniFile2,
+    Private Sub processUWPBuilder(templateIni As iniFile,
+                                   appsIni As iniFile,
                                    scaffoldDir As String,
                                    menuOutput As MenuSection)
 
@@ -515,7 +515,7 @@ Public Module UWPBuilder
             menuOutput.AddColoredLine(appsMsg, ConsoleColor.Yellow)
             gLog(appsMsg)
 
-            Dim outputFile = iniFile2.Empty(UWPFile2.Dir, UWPFile2.Name)
+            Dim outputFile = iniFile.Empty(UWPFile2.Dir, UWPFile2.Name)
 
             For Each app In apps
 
@@ -583,7 +583,7 @@ Public Module UWPBuilder
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving progress lines and warnings for display
     ''' </param>
-    Private Sub parseScaffold(scaffoldSection As iniSection2,
+    Private Sub parseScaffold(scaffoldSection As iniSection,
                                scaffoldFileKeys As List(Of String),
                                scaffoldDetectFiles As List(Of String),
                                menuOutput As MenuSection)
@@ -654,7 +654,7 @@ Public Module UWPBuilder
     ''' A <c> UWPAppInfo </c> populated from <paramref name="appSection"/>.
     ''' Check <c> ShouldSkip </c> before using the result.
     ''' </returns>
-    Friend Function parseAppInfo(appSection As iniSection2,
+    Friend Function parseAppInfo(appSection As iniSection,
                                   menuOutput As MenuSection) As UWPAppInfo
 
         Dim app As New UWPAppInfo(appSection.Name)
@@ -1040,27 +1040,27 @@ Public Module UWPBuilder
     ''' </param>
     '''
     ''' <returns>
-    ''' A fully populated <c> iniSection2 </c> ready to be added to the output file
+    ''' A fully populated <c> iniSection </c> ready to be added to the output file
     ''' </returns>
     Friend Function generateUWPEntry(app As UWPAppInfo,
                                       scaffoldFileKeys As List(Of String),
                                       scaffoldDetectFiles As List(Of String),
                                       scaffoldSet As ScaffoldCatalogSet,
-                                      menuOutput As MenuSection) As iniSection2
+                                      menuOutput As MenuSection) As iniSection
 
         Dim generatingMsg = $"Generating entry: {app.Name}"
         menuOutput.AddColoredLine(generatingMsg, ConsoleColor.Magenta)
         gLog($"  {generatingMsg}")
 
-        Dim section As New iniSection2(app.Name)
+        Dim section As New iniSection(app.Name)
         Dim fileKeyNum As Integer = 1
 
         ' 1. Category
         Select Case True
 
-            Case app.LangSecRef.Length > 0 : section.AddKey(New iniKey2($"LangSecRef={app.LangSecRef}"))
+            Case app.LangSecRef.Length > 0 : section.AddKey(New iniKey($"LangSecRef={app.LangSecRef}"))
 
-            Case app.SectionName.Length > 0 : section.AddKey(New iniKey2($"Section={app.SectionName}"))
+            Case app.SectionName.Length > 0 : section.AddKey(New iniKey($"Section={app.SectionName}"))
 
             Case Else : gLog($"{app.Name} has no category key")
 
@@ -1078,13 +1078,13 @@ Public Module UWPBuilder
 
         If detectValues.Count = 1 Then
 
-            section.AddKey(New iniKey2($"Detect={detectValues(0)}"))
+            section.AddKey(New iniKey($"Detect={detectValues(0)}"))
 
         Else
 
             For i = 0 To detectValues.Count - 1
 
-                section.AddKey(New iniKey2($"Detect{i + 1}={detectValues(i)}"))
+                section.AddKey(New iniKey($"Detect{i + 1}={detectValues(i)}"))
 
             Next
 
@@ -1104,25 +1104,25 @@ Public Module UWPBuilder
 
         If allDetectFiles.Count = 1 Then
 
-            section.AddKey(New iniKey2($"DetectFile={allDetectFiles(0)}"))
+            section.AddKey(New iniKey($"DetectFile={allDetectFiles(0)}"))
 
         Else
 
             For i = 0 To allDetectFiles.Count - 1
 
-                section.AddKey(New iniKey2($"DetectFile{i + 1}={allDetectFiles(i)}"))
+                section.AddKey(New iniKey($"DetectFile{i + 1}={allDetectFiles(i)}"))
 
             Next
 
         End If
 
         ' 3b. DetectOS, emitted verbatim — a kernel version range, not a path template
-        If app.DetectOS.Length > 0 Then section.AddKey(New iniKey2($"DetectOS={app.DetectOS}"))
+        If app.DetectOS.Length > 0 Then section.AddKey(New iniKey($"DetectOS={app.DetectOS}"))
 
         ' 3c. Warnings, emitted verbatim — prose is never variable-expanded
         For Each w In app.Warnings
 
-            section.AddKey(New iniKey2($"Warning={w}"))
+            section.AddKey(New iniKey($"Warning={w}"))
 
         Next
 
@@ -1137,7 +1137,7 @@ Public Module UWPBuilder
 
             For Each expanded In expandPackageAndVars(scaffoldFileKeys, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
 
-                section.AddKey(New iniKey2($"FileKey{fileKeyNum}={expanded}"))
+                section.AddKey(New iniKey($"FileKey{fileKeyNum}={expanded}"))
                 fileKeyNum += 1
 
             Next
@@ -1147,7 +1147,7 @@ Public Module UWPBuilder
         ' 5. App-specific FileKey / FileKeyBase values in document order
         For Each expanded In expandPackageAndVars(app.AppKeys, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
 
-            section.AddKey(New iniKey2($"FileKey{fileKeyNum}={expanded}"))
+            section.AddKey(New iniKey($"FileKey{fileKeyNum}={expanded}"))
             fileKeyNum += 1
 
         Next
@@ -1163,7 +1163,7 @@ Public Module UWPBuilder
 
             For Each emitted In expandScaffoldFamily(family, app, scaffoldSet.ForFamily(family.Label), menuOutput)
 
-                section.AddKey(New iniKey2($"FileKey{fileKeyNum}={emitted}"))
+                section.AddKey(New iniKey($"FileKey{fileKeyNum}={emitted}"))
                 fileKeyNum += 1
 
             Next
@@ -1178,7 +1178,7 @@ Public Module UWPBuilder
 
             For Each expanded In expandPhase2(regKey, app, ExpansionDomain.Registry, "RegKey", menuOutput)
 
-                section.AddKey(New iniKey2($"RegKey{regKeyNum}={expanded}"))
+                section.AddKey(New iniKey($"RegKey{regKeyNum}={expanded}"))
                 regKeyNum += 1
 
             Next
@@ -1190,7 +1190,7 @@ Public Module UWPBuilder
         Dim exclNum As Integer = 1
         For Each expanded In expandExcludeKeys(app.ExcludeKeys, app, menuOutput)
 
-            section.AddKey(New iniKey2($"ExcludeKey{exclNum}={expanded}"))
+            section.AddKey(New iniKey($"ExcludeKey{exclNum}={expanded}"))
             exclNum += 1
 
         Next
@@ -1205,7 +1205,7 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Combines all <c> *.ini </c> files in <paramref name="appInfoDir"/> into a single
-    ''' in-memory <c> iniFile2 </c>. Files are processed in alphabetical order.
+    ''' in-memory <c> iniFile </c>. Files are processed in alphabetical order.
     ''' Sections with duplicate names across files are silently ignored (first-file-wins).
     ''' </summary>
     '''
@@ -1214,12 +1214,12 @@ Public Module UWPBuilder
     ''' </param>
     '''
     ''' <returns>
-    ''' The merged <c> iniFile2 </c>, or an empty one if the directory does not exist
+    ''' The merged <c> iniFile </c>, or an empty one if the directory does not exist
     ''' or contains no parseable sections
     ''' </returns>
-    Private Function combineAppInfoDir(appInfoDir As String) As iniFile2
+    Private Function combineAppInfoDir(appInfoDir As String) As iniFile
 
-        Dim combined = iniFile2.Empty("", "")
+        Dim combined = iniFile.Empty("", "")
 
         If Not Directory.Exists(appInfoDir) Then Return combined
 
@@ -1228,7 +1228,7 @@ Public Module UWPBuilder
 
         For Each filePath In files
 
-            Dim f = iniFile2.FromFile(filePath)
+            Dim f = iniFile.FromFile(filePath)
             For Each section In f : combined.AddSection(section) : Next
 
         Next
@@ -1375,7 +1375,7 @@ Public Module UWPBuilder
 
             For Each packageExpanded In expandPackageKey(template, app.Packages)
 
-                Dim parsed As New excludeKeyParams2(packageExpanded)
+                Dim parsed As New excludeKeyParams(packageExpanded)
                 Dim exclDomain As ExpansionDomain = If(parsed.Flag = excludeKeyFlag.Reg,
                                                        ExpansionDomain.Registry,
                                                        ExpansionDomain.Filesystem)

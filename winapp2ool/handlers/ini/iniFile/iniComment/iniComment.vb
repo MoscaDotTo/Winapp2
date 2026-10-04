@@ -18,7 +18,7 @@
 Option Strict On
 
 ''' <summary>An object representing a comment line from an ini file</summary>
-Public Class iniComment2
+Public Class iniComment
 
     ''' <summary>The raw comment text, including the leading semicolon</summary>
     Public ReadOnly Property Text As String
@@ -26,7 +26,7 @@ Public Class iniComment2
     ''' <summary>The line number from which this comment was originally read</summary>
     Public ReadOnly Property LineNumber As Integer
 
-    ''' <summary>Creates a new <c> iniComment2 </c> from a comment line and its line number</summary>
+    ''' <summary>Creates a new <c> iniComment </c> from a comment line and its line number</summary>
     ''' <param name="text">The raw comment text</param>
     ''' <param name="lineNumber">The line number in the source file</param>
     Public Sub New(text As String, lineNumber As Integer)

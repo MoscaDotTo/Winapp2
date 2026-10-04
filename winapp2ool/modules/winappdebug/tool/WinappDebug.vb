@@ -323,19 +323,19 @@ Public Module WinappDebug
 
     ''' <summary>
     ''' Lints <paramref name="givenIni"/>'s winapp2.ini formatting from outside the module's UI.
-    ''' Returns the linted <c> iniFile2 </c>.
+    ''' Returns the linted <c> iniFile </c>.
     ''' </summary>
     '''
     ''' <param name="givenIni">
-    ''' The winapp2.ini syntax <c> iniFile2 </c> to be linted
+    ''' The winapp2.ini syntax <c> iniFile </c> to be linted
     ''' </param>
     '''
     ''' <param name="forceOpti">
     ''' Indicates whether or not the linter should attempt to optimize entries <br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
-    Public Function remotedebug(givenIni As iniFile2,
-                                Optional forceOpti As Boolean = False) As iniFile2
+    Public Function remotedebug(givenIni As iniFile,
+                                Optional forceOpti As Boolean = False) As iniFile
 
         If givenIni Is Nothing Then argIsNull(NameOf(givenIni)) : Return Nothing
 
@@ -347,7 +347,7 @@ Public Module WinappDebug
             lintOpti.ShouldRepair = True
         End If
 
-        Dim wa2 As New winapp2file2(givenIni)
+        Dim wa2 As New winapp2file(givenIni)
         Debug(wa2)
 
         lintOpti.ShouldScan = prevScan
@@ -367,7 +367,7 @@ Public Module WinappDebug
 
         If Not enforceFileHasContent(inputFile) Then Return
 
-        Dim wa2 As New winapp2file2(inputFile, UseCurrentDate)
+        Dim wa2 As New winapp2file(inputFile, UseCurrentDate)
 
         clrConsole()
         gLog("")
@@ -407,7 +407,7 @@ Public Module WinappDebug
 
         If SaveChanges Then
 
-            If iniFile2.Empty(winappDebugFile3.Dir, winappDebugFile3.Name).OverwriteToFile(wa2.ToWinapp2String()) Then
+            If iniFile.Empty(winappDebugFile3.Dir, winappDebugFile3.Name).OverwriteToFile(wa2.ToWinapp2String()) Then
 
                 summary.AddColoredLine($"{winappDebugFile3.Name} saved with any corrections made", ConsoleColor.DarkGreen, centered:=True)
 
@@ -432,14 +432,14 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Sends the entries in a winapp2.ini format <c> iniFile2 </c> into specific format and syntax checking routines.
+    ''' Sends the entries in a winapp2.ini format <c> iniFile </c> into specific format and syntax checking routines.
     ''' Returns a list of <c> MenuSection </c>s containing all output to be rendered.
     ''' </summary>
     '''
     ''' <param name="fileToBeDebugged">
-    ''' A <c> winapp2file2 </c> to be linted
+    ''' A <c> winapp2file </c> to be linted
     ''' </param>
-    Public Function Debug(ByRef fileToBeDebugged As winapp2file2) As List(Of MenuSection)
+    Public Function Debug(ByRef fileToBeDebugged As winapp2file) As List(Of MenuSection)
 
         If fileToBeDebugged Is Nothing Then argIsNull(NameOf(fileToBeDebugged)) : Return New List(Of MenuSection)
 
@@ -465,13 +465,13 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Returns the set of entry names that appear more than once in a <c> winapp2file2 </c>
+    ''' Returns the set of entry names that appear more than once in a <c> winapp2file </c>
     ''' </summary>
     '''
     ''' <param name="winapp">
-    ''' The <c> winapp2file2 </c> whose entries will be scanned for duplicate names
+    ''' The <c> winapp2file </c> whose entries will be scanned for duplicate names
     ''' </param>
-    Private Function FindDuplicateEntryNames(winapp As winapp2file2) As HashSet(Of String)
+    Private Function FindDuplicateEntryNames(winapp As winapp2file) As HashSet(Of String)
 
         Dim seen As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
         Dim duplicates As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
@@ -552,13 +552,13 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Validates the basic structure of a <c> winapp2entry2 </c> and sends off its individual keys for more specific analysis
+    ''' Validates the basic structure of a <c> winapp2entry </c> and sends off its individual keys for more specific analysis
     ''' </summary>
     '''
     ''' <param name="entry">
-    ''' A <c> winapp2entry2 </c> to be audited for syntax errors
+    ''' A <c> winapp2entry </c> to be audited for syntax errors
     ''' </param>
-    Private Function ProcessEntry(entry As winapp2entry2,
+    Private Function ProcessEntry(entry As winapp2entry,
                                   duplicateNames As HashSet(Of String)) As EntryLintResult
 
         Dim result As New EntryLintResult(entry.FullName)
@@ -574,7 +574,7 @@ Public Module WinappDebug
             ValidateKeys(result, entry)
 
             Dim bc = Function(typeName As String) As Integer
-                         Dim idx = winapp2entry2.GetBucketIndex(typeName)
+                         Dim idx = winapp2entry.GetBucketIndex(typeName)
                          Return If(idx >= 0, entry.KeyLists(idx).Count, 0)
                      End Function
 
@@ -627,7 +627,7 @@ Public Module WinappDebug
                 Else
 
                     result.RecordError("No Default Key found", Array.Empty(Of String)())
-                    entry.AddKey(New iniKey2($"Default={expected}"))
+                    entry.AddKey(New iniKey($"Default={expected}"))
 
                 End If
 
@@ -642,15 +642,15 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Checks the basic structure of all <c> iniKey2 </c>s in a <c> winapp2entry2 </c>,
+    ''' Checks the basic structure of all <c> iniKey </c>s in a <c> winapp2entry </c>,
     ''' attempts to repair some keys and place them back into their appropriate typed bucket,
     ''' and removes any that are too problematic to continue with
     ''' </summary>
     '''
     ''' <param name="entry">
-    ''' A <c> winapp2entry2 </c> whose <c> iniKey2 </c>s will be audited for basic syntax correctness
+    ''' A <c> winapp2entry </c> whose <c> iniKey </c>s will be audited for basic syntax correctness
     ''' </param>
-    Private Sub ValidateKeys(result As EntryLintResult, entry As winapp2entry2)
+    Private Sub ValidateKeys(result As EntryLintResult, entry As winapp2entry)
 
         ' Run cValidity over the normal buckets and drop anything that fails
         For i = 0 To entry.KeyLists.Count - 2
@@ -675,9 +675,9 @@ Public Module WinappDebug
     ''' </summary>
     '''
     ''' <param name="winapp">
-    ''' The <c> winapp2file2 </c> whose entries will be alphabetized
+    ''' The <c> winapp2file </c> whose entries will be alphabetized
     ''' </param>
-    Private Function AlphabetizeEntries(winapp As winapp2file2) As List(Of MenuSection)
+    Private Function AlphabetizeEntries(winapp As winapp2file) As List(Of MenuSection)
 
         Dim sections As New List(Of MenuSection)
 
@@ -924,11 +924,11 @@ Public Module WinappDebug
     End Structure
 
     ''' <summary>
-    ''' Hands off each <c> iniKey2 </c> in a winapp2.ini format typed bucket to be audited for correctness
+    ''' Hands off each <c> iniKey </c> in a winapp2.ini format typed bucket to be audited for correctness
     ''' </summary>
     '''
     ''' <param name="entry">
-    ''' The <c> winapp2entry2 </c> whose keys are being processed
+    ''' The <c> winapp2entry </c> whose keys are being processed
     ''' </param>
     '''
     ''' <param name="spec">
@@ -950,13 +950,13 @@ Public Module WinappDebug
     ''' <br /> Optional, Default: <c> False </c>
     ''' </param>
     Private Sub processKeyList(result As EntryLintResult,
-                               entry As winapp2entry2,
+                               entry As winapp2entry,
                                spec As KeyListSpec,
-                               processKey As Func(Of iniKey2, iniKey2),
+                               processKey As Func(Of iniKey, iniKey),
                                Optional ByRef hasF As Boolean = False,
                                Optional ByRef hasR As Boolean = False)
 
-        Dim bucketIdx = winapp2entry2.GetBucketIndex(spec.TypeName)
+        Dim bucketIdx = winapp2entry.GetBucketIndex(spec.TypeName)
         If bucketIdx < 0 Then Return
 
         Dim bucket = entry.KeyLists(bucketIdx)
@@ -967,10 +967,10 @@ Public Module WinappDebug
         ' Don't bother allocating the dupe tracker for a bucket holding one key, since there's
         ' nothing to duplicate, or when the user has turned off both the scan and the repair
         ' for duplicate values. 
-        Dim seenValues As Dictionary(Of String, iniKey2) = Nothing
-        Dim dupeKeys As List(Of iniKey2) = Nothing  ' lazily allocated on first duplicate
+        Dim seenValues As Dictionary(Of String, iniKey) = Nothing
+        Dim dupeKeys As List(Of iniKey) = Nothing  ' lazily allocated on first duplicate
         If bucket.Count > 1 AndAlso (lintDupes.ShouldScan OrElse lintDupes.fixFormat) Then
-            seenValues = New Dictionary(Of String, iniKey2)(StringComparer.OrdinalIgnoreCase)
+            seenValues = New Dictionary(Of String, iniKey)(StringComparer.OrdinalIgnoreCase)
         End If
 
         For Each key In bucket
@@ -980,7 +980,7 @@ Public Module WinappDebug
             If spec.OneOnly AndAlso curNum > 1 AndAlso lintMulti.ShouldScan Then
                 fullKeyErr(result, key, $"Multiple {key.KeyType} detected.")
                 If lintMulti.fixFormat Then
-                    If dupeKeys Is Nothing Then dupeKeys = New List(Of iniKey2)
+                    If dupeKeys Is Nothing Then dupeKeys = New List(Of iniKey)
                     dupeKeys.Add(key)
                 End If
             End If
@@ -1003,7 +1003,7 @@ Public Module WinappDebug
             Next
         End If
 
-        sortKeys2(result, entry, spec.TypeName, removedDupes)
+        sortKeys(result, entry, spec.TypeName, removedDupes)
 
         If spec.TypeName = "FileKey" AndAlso lintOpti.ShouldScan Then cOptimization(result, entry)
 
@@ -1011,24 +1011,24 @@ Public Module WinappDebug
 
     ''' <summary>
     ''' This function does nothing by design, used when a method or function expects to be passed a function
-    ''' who modifies an iniKey2 on a KeyType where we don't want to modify the keys
+    ''' who modifies an iniKey on a KeyType where we don't want to modify the keys
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c> iniKey2 </c> with which to do nothing
+    ''' An <c> iniKey </c> with which to do nothing
     ''' </param>
-    Private Function voidDelegate(key As iniKey2) As iniKey2
+    Private Function voidDelegate(key As iniKey) As iniKey
 
         Return key
 
     End Function
 
     ''' <summary>
-    ''' Does some basic formatting checks that apply to all winapp2.ini format <c> iniKey2 </c>s
+    ''' Does some basic formatting checks that apply to all winapp2.ini format <c> iniKey </c>s
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c> iniKey2 </c> whose format will be audited
+    ''' An <c> iniKey </c> whose format will be audited
     ''' </param>
     '''
     ''' <param name="keyNumber">
@@ -1036,32 +1036,32 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="seenValues">
-    ''' A map of the key values we've seen so far to the first <c> iniKey2 </c> that held each
+    ''' A map of the key values we've seen so far to the first <c> iniKey </c> that held each
     ''' one, used to spot duplicates.
     ''' </param>
     '''
     ''' <param name="dupeKeys">
-    ''' A tracking list of <c> iniKey2 </c>s with duplicate values
+    ''' A tracking list of <c> iniKey </c>s with duplicate values
     ''' </param>
     '''
     ''' <param name="noNumbers">
     ''' Indicates that the current set of keys should not be numbered
     ''' </param>
     Private Sub cFormat(result As EntryLintResult,
-                        key As iniKey2,
+                        key As iniKey,
                         ByRef keyNumber As Integer,
-                        ByRef seenValues As Dictionary(Of String, iniKey2),
-                        ByRef dupeKeys As List(Of iniKey2),
+                        ByRef seenValues As Dictionary(Of String, iniKey),
+                        ByRef dupeKeys As List(Of iniKey),
                         Optional noNumbers As Boolean = False)
 
         If seenValues IsNot Nothing Then
 
-            Dim firstSeen As iniKey2 = Nothing
+            Dim firstSeen As iniKey = Nothing
             If seenValues.TryGetValue(key.Value, firstSeen) Then
 
                 result.RecordError("Duplicate key value found", {$"Key:            {key.ToString()}", $"Duplicates:     {firstSeen.ToString()}"}, lintDupes.ShouldScan)
                 If lintDupes.fixFormat Then
-                    If dupeKeys Is Nothing Then dupeKeys = New List(Of iniKey2)
+                    If dupeKeys Is Nothing Then dupeKeys = New List(Of iniKey)
                     dupeKeys.Add(key)
                 End If
 
@@ -1105,12 +1105,12 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Attempts to fix any broken environment variables in a given <c> iniKey2 </c> <br /> <br />
+    ''' Attempts to fix any broken environment variables in a given <c> iniKey </c> <br /> <br />
     ''' This function will attempt to repair any environment variables that are missing leading or trailing % characters
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c> iniKey2 </c> whose value will be audited for syntax errors
+    ''' An <c> iniKey </c> whose value will be audited for syntax errors
     ''' </param>
     '''
     ''' <param name="enVars">
@@ -1120,7 +1120,7 @@ Public Module WinappDebug
     ''' <param name="cond">
     ''' The condition under which this scan should be run
     ''' </param>
-    Private Sub fixBrokenEnVars(result As EntryLintResult, key As iniKey2, enVars As String(), cond As Boolean)
+    Private Sub fixBrokenEnVars(result As EntryLintResult, key As iniKey, enVars As String(), cond As Boolean)
 
         If Not cond Then Return
 
@@ -1157,13 +1157,13 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey2 </c>
+    ''' Validates the formatting of any %EnvironmentVariables% in a given <c> iniKey </c>
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' The <c> iniKey2 </c> whose data will be audited for environment variable correctness
+    ''' The <c> iniKey </c> whose data will be audited for environment variable correctness
     ''' </param>
-    Private Sub cEnVar(result As EntryLintResult, key As iniKey2)
+    Private Sub cEnVar(result As EntryLintResult, key As iniKey)
 
         fullKeyErr(result, key, "Double '%' found in environment variable", key.vHas("%%"), lintSyntax.ShouldRepair, key.Value, Function() key.Value.Replace("%%", "%"))
 
@@ -1183,7 +1183,7 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Attempts to insert missing equal signs (=) into <c> iniKey2 </c>s <br /> <br /> Returns <c> True </c> if the repair is
+    ''' Attempts to insert missing equal signs (=) into <c> iniKey </c>s <br /> <br /> Returns <c> True </c> if the repair is
     '''  successful, <c> False </c> otherwise
     '''  </summary>
     '''
@@ -1192,14 +1192,14 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="key">
-    ''' A misformatted <c> iniKey2 </c> to attempt to repair
+    ''' A misformatted <c> iniKey </c> to attempt to repair
     ''' </param>
     '''
     ''' <param name="cmds">
     ''' An array containing valid winapp2.ini <c> keyTypes </c>
     ''' </param>
     Private Function fixMissingEquals(result As EntryLintResult,
-                                      key As iniKey2,
+                                      key As iniKey,
                                       cmds As String()) As Boolean
 
         gLog("Attempting missing equals repair")
@@ -1252,9 +1252,9 @@ Public Module WinappDebug
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c> iniKey2 </c> whose basic syntactic validity will be assessed
+    ''' An <c> iniKey </c> whose basic syntactic validity will be assessed
     ''' </param>
-    Private Function cValidity(result As EntryLintResult, key As iniKey2) As Boolean
+    Private Function cValidity(result As EntryLintResult, key As iniKey) As Boolean
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return False
 
@@ -1305,7 +1305,7 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Checks the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey2 </c> against a given array of expected cased values, attempts
+    ''' Checks the <c> Value </c> or the <c> KeyType </c> of an <c> iniKey </c> against a given array of expected cased values, attempts
     ''' to repair casing errors if possible
     ''' </summary>
     '''
@@ -1314,7 +1314,7 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="key">
-    ''' The <c> iniKey2 </c> whose casing will be audited
+    ''' The <c> iniKey </c> whose casing will be audited
     ''' </param>
     '''
     ''' <param name="casedLookup">
@@ -1329,7 +1329,7 @@ Public Module WinappDebug
     ''' The text being audited, taken from either the key's value or its type
     ''' </param>
     Private Sub chkCasing(result As EntryLintResult,
-                          key As iniKey2,
+                          key As iniKey,
                           casedLookup As Dictionary(Of String, String),
                           casedJoined As String,
                           strToChk As String)
@@ -1354,13 +1354,13 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Processes a FileKey format winapp2.ini <c> iniKey2 </c> and checks it for errors, correcting them where possible
+    ''' Processes a FileKey format winapp2.ini <c> iniKey </c> and checks it for errors, correcting them where possible
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' A winapp2.ini FileKey format <c> iniKey2 </c> to be checked for correctness
+    ''' A winapp2.ini FileKey format <c> iniKey </c> to be checked for correctness
     ''' </param>
-    Public Function pFileKey(result As EntryLintResult, key As iniKey2) As iniKey2
+    Public Function pFileKey(result As EntryLintResult, key As iniKey) As iniKey
 
         If key Is Nothing Then argIsNull(NameOf(key)) : Return key
 
@@ -1401,8 +1401,8 @@ Public Module WinappDebug
         ' Backslash checks, fix if detected
         fullKeyErr(result, key, "Backslash (\) found before pipe (|).", lintSlashes.ShouldScan And key.vHas("\|"), lintSlashes.fixFormat, key.Value, Function() key.Value.Replace("\|", "|"))
 
-        ' Check for duplicate or empty parameters using fileKeyParams2
-        Dim keyParams As New fileKeyParams2(key.Value)
+        ' Check for duplicate or empty parameters using fileKeyParams
+        Dim keyParams As New fileKeyParams(key.Value)
         Dim seenArgs As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
         Dim dupedArgs As New List(Of String)
 
@@ -1439,13 +1439,13 @@ Public Module WinappDebug
     End Function
 
     ''' <summary>
-    ''' Processes a DetectFile format <c> iniKey2 </c> and checks it for errors, correcting where possible
+    ''' Processes a DetectFile format <c> iniKey </c> and checks it for errors, correcting where possible
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' A winapp2.ini DetectFile format <c> iniKey2 </c> to be checked for correctness
+    ''' A winapp2.ini DetectFile format <c> iniKey </c> to be checked for correctness
     ''' </param>
-    Private Function pDetectFile(result As EntryLintResult, key As iniKey2) As iniKey2
+    Private Function pDetectFile(result As EntryLintResult, key As iniKey) As iniKey
 
         ' Trailing Backslashes & nested wildcards
         fullKeyErr(result, key, "Trailing backslash (\) found in DetectFile",
@@ -1475,18 +1475,18 @@ Public Module WinappDebug
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' An <c> iniKey2 </c> containing a registry or filesystem path to have its syntax validated
+    ''' An <c> iniKey </c> containing a registry or filesystem path to have its syntax validated
     ''' </param>
     '''
     ''' <param name="isRegistry">
     ''' Indicates that the given <paramref name="key"/> is expected to hold a registry path
     ''' </param>
-    Private Sub chkPathFormatValidity(result As EntryLintResult, key As iniKey2, isRegistry As Boolean)
+    Private Sub chkPathFormatValidity(result As EntryLintResult, key As iniKey, isRegistry As Boolean)
 
         If Not (lintPathValidity.ShouldScan OrElse lintCasing.ShouldScan) Then Return
 
         ' Strip the pattern suffix (everything after |) and ExcludeKey flags before inspecting the path
-        Dim pathPortion = If(Not key.typeIs("ExcludeKey"), key.Value.Split(CChar("|"))(0), New excludeKeyParams2(key.Value).Path)
+        Dim pathPortion = If(Not key.typeIs("ExcludeKey"), key.Value.Split(CChar("|"))(0), New excludeKeyParams(key.Value).Path)
         Dim rootStr = getFirstDir(pathPortion)
 
         ' Ensure that registry paths have a valid hive and file paths have either a variable or a drive letter
@@ -1517,11 +1517,11 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Processes a list of ExcludeKey format <c> iniKey2 </c>s and checks them for errors, correcting where possible
+    ''' Processes a list of ExcludeKey format <c> iniKey </c>s and checks them for errors, correcting where possible
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' A winapp2.ini ExcludeKey format <c> iniKey2 </c> to be checked for correctness
+    ''' A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness
     ''' </param>
     '''
     ''' <param name="hasF">
@@ -1532,7 +1532,7 @@ Public Module WinappDebug
     ''' Indicates whether the entry excludes any registry locations
     ''' </param>
     Private Sub pExcludeKey(result As EntryLintResult,
-                            key As iniKey2,
+                            key As iniKey,
                             ByRef hasF As Boolean,
                             ByRef hasR As Boolean)
 
@@ -1577,14 +1577,14 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Assesses the formatting of ExcludeKey format <c> iniKey2 </c>s to see if the flag (FILE, PATH, REG)
+    ''' Assesses the formatting of ExcludeKey format <c> iniKey </c>s to see if the flag (FILE, PATH, REG)
     ''' is malformatted. Attempts to repair when possible.
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' A winapp2.ini ExcludeKey format <c> iniKey2 </c> to be checked for correctness
+    ''' A winapp2.ini ExcludeKey format <c> iniKey </c> to be checked for correctness
     ''' </param>
-    Private Function checkExcludeFlags(result As EntryLintResult, key As iniKey2) As Boolean
+    Private Function checkExcludeFlags(result As EntryLintResult, key As iniKey) As Boolean
 
         Dim matches = HasFlagRegex.Matches(key.Value)
 
@@ -1611,7 +1611,7 @@ Public Module WinappDebug
     ''' </summary>
     '''
     ''' <param name="entry">
-    ''' The <c> winapp2entry2 </c> whose bucket will be sorted
+    ''' The <c> winapp2entry </c> whose bucket will be sorted
     ''' </param>
     '''
     ''' <param name="keyType">
@@ -1621,12 +1621,12 @@ Public Module WinappDebug
     ''' <param name="hadDuplicatesRemoved">
     ''' Indicates that keys have been removed from the bucket
     ''' </param>
-    Private Sub sortKeys2(result As EntryLintResult,
-                          entry As winapp2entry2,
+    Private Sub sortKeys(result As EntryLintResult,
+                          entry As winapp2entry,
                           keyType As String,
                           hadDuplicatesRemoved As Boolean)
 
-        Dim bucketIdx = winapp2entry2.GetBucketIndex(keyType)
+        Dim bucketIdx = winapp2entry.GetBucketIndex(keyType)
         If bucketIdx < 0 Then Return
 
         Dim bucket = entry.KeyLists(bucketIdx)
@@ -1706,11 +1706,11 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Prints an error whose output text contains an <c> iniKey2 </c> string, optionally correcting that value with one that is provided
+    ''' Prints an error whose output text contains an <c> iniKey </c> string, optionally correcting that value with one that is provided
     ''' </summary>
     '''
     ''' <param name="key">
-    ''' The <c> iniKey2 </c> containing an error
+    ''' The <c> iniKey </c> containing an error
     ''' </param>
     '''
     ''' <param name="err">
@@ -1737,7 +1737,7 @@ Public Module WinappDebug
     ''' <br /> Optional, Default: <c> "" </c>
     ''' </param>
     Private Sub fullKeyErr(result As EntryLintResult,
-                           key As iniKey2,
+                           key As iniKey,
                            err As String,
                   Optional cond As Boolean = True,
                   Optional repCond As Boolean = False,
@@ -1758,7 +1758,7 @@ Public Module WinappDebug
     ''' which would otherwise allocate for every key whether or not the repair fires.
     ''' </summary>
     Private Sub fullKeyErr(result As EntryLintResult,
-                           key As iniKey2,
+                           key As iniKey,
                            err As String,
                            cond As Boolean,
                            repCond As Boolean,

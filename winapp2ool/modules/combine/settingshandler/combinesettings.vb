@@ -84,7 +84,7 @@ Public Module combinesettings
         CombineFile3.ResetParams()
         CombineStrictNames = False
         CombineModuleSettingsChanged = False
-        SaveModule2(NameOf(Combine), GetType(combinesettings))
+        SaveModule(NameOf(Combine), GetType(combinesettings))
 
     End Sub
 

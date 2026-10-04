@@ -33,12 +33,12 @@ Module lintmainmenu
             .AddDispatchedOption("Run (Default)", "Run the debugger", Sub() InitDebug()) _
             .AddBlank() _
             .AddDispatchedOption("File Chooser (winapp2.ini)", "Choose a different file name or path for winapp2.ini",
-                Sub() changeFile2Params(winappDebugFile1, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(LintModuleSettingsChanged))) _
+                Sub() changeFileParams(winappDebugFile1, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(LintModuleSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedToggle("Saving", "saving the file after correcting errors", SaveChanges,
                 Sub() toggleModuleSetting("Saving", NameOf(WinappDebug), GetType(lintsettings), NameOf(SaveChanges), NameOf(LintModuleSettingsChanged))) _
             .AddDispatchedOption("File Chooser (save)", "Save a copy of changes made to a new file instead of overwriting winapp2.ini", condition:=SaveChanges,
-                handler:=Sub() changeFile2Params(winappDebugFile3, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(LintModuleSettingsChanged))) _
+                handler:=Sub() changeFileParams(winappDebugFile3, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(LintModuleSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedOption("Scan Settings", "Enable or disable individual scan and correction routines",
                 Sub()

@@ -299,7 +299,7 @@ Public Module ScaffoldCatalogs
     ''' <c> WebViewScaffold: </c> or <c> QtWebEngineScaffold: </c>). Stripped from the
     ''' header to derive the scaffold name and used as the human label in diagnostics.
     ''' </param>
-    Public Sub ParseSection(scaffoldSection As iniSection2,
+    Public Sub ParseSection(scaffoldSection As iniSection,
                             scaffolds As Dictionary(Of String, List(Of String)),
                             menuOutput As MenuSection,
                             Optional sectionPrefix As String = "WebViewScaffold:")
@@ -405,7 +405,7 @@ Public Module ScaffoldCatalogs
         Dim catalog As New ScaffoldCatalog
         Dim sectionLabel = sectionPrefix.TrimEnd(":"c)
 
-        Dim catalogIni = iniFile2.FromFile(catalogPath)
+        Dim catalogIni = iniFile.FromFile(catalogPath)
 
         If catalogIni.Count = 0 Then
 
@@ -487,7 +487,7 @@ Public Module ScaffoldCatalogs
 
         For Each filePath In files
 
-            For Each section In iniFile2.FromFile(filePath)
+            For Each section In iniFile.FromFile(filePath)
 
                 Dim markerAt = section.Name.IndexOf(FamilyMarker, StringComparison.InvariantCultureIgnoreCase)
 

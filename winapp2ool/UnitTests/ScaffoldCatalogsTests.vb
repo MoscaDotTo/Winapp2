@@ -250,9 +250,9 @@ Option Strict On
     ''' </summary>
     <TestMethod()> Public Sub ParseSection_CollectsTemplatesInOrder()
 
-        Dim section As New winapp2ool.iniSection2("ElectronScaffold: Caches")
-        section.AddKey(New winapp2ool.iniKey2("FileKeyBase=%ElectronRoot%\blob_storage|*|REMOVESELF"))
-        section.AddKey(New winapp2ool.iniKey2("FileKeyBase=%ElectronRoot%\*Cache*|*|REMOVESELF"))
+        Dim section As New winapp2ool.iniSection("ElectronScaffold: Caches")
+        section.AddKey(New winapp2ool.iniKey("FileKeyBase=%ElectronRoot%\blob_storage|*|REMOVESELF"))
+        section.AddKey(New winapp2ool.iniKey("FileKeyBase=%ElectronRoot%\*Cache*|*|REMOVESELF"))
 
         Dim catalog As New Dictionary(Of String, List(Of String))(StringComparer.InvariantCultureIgnoreCase)
         winapp2ool.ScaffoldCatalogs.ParseSection(section, catalog, New winapp2ool.MenuSection, "ElectronScaffold:")
@@ -270,7 +270,7 @@ Option Strict On
     ''' </summary>
     <TestMethod()> Public Sub ParseSection_EmptySection_RegistersEmptyList()
 
-        Dim section As New winapp2ool.iniSection2("ElectronScaffold: Placeholder")
+        Dim section As New winapp2ool.iniSection("ElectronScaffold: Placeholder")
 
         Dim catalog As New Dictionary(Of String, List(Of String))(StringComparer.InvariantCultureIgnoreCase)
         winapp2ool.ScaffoldCatalogs.ParseSection(section, catalog, New winapp2ool.MenuSection, "ElectronScaffold:")
@@ -288,12 +288,12 @@ Option Strict On
 
         Dim catalog As New Dictionary(Of String, List(Of String))(StringComparer.InvariantCultureIgnoreCase)
 
-        Dim first As New winapp2ool.iniSection2("ElectronScaffold: Caches")
-        first.AddKey(New winapp2ool.iniKey2("FileKeyBase=%ElectronRoot%\one|*"))
+        Dim first As New winapp2ool.iniSection("ElectronScaffold: Caches")
+        first.AddKey(New winapp2ool.iniKey("FileKeyBase=%ElectronRoot%\one|*"))
         winapp2ool.ScaffoldCatalogs.ParseSection(first, catalog, New winapp2ool.MenuSection, "ElectronScaffold:")
 
-        Dim second As New winapp2ool.iniSection2("ElectronScaffold: Caches")
-        second.AddKey(New winapp2ool.iniKey2("FileKeyBase=%ElectronRoot%\two|*"))
+        Dim second As New winapp2ool.iniSection("ElectronScaffold: Caches")
+        second.AddKey(New winapp2ool.iniKey("FileKeyBase=%ElectronRoot%\two|*"))
         winapp2ool.ScaffoldCatalogs.ParseSection(second, catalog, New winapp2ool.MenuSection, "ElectronScaffold:")
 
         Assert.AreEqual(1, catalog.Count)
@@ -394,14 +394,14 @@ Option Strict On
 
         Dim catalog As New winapp2ool.ScaffoldCatalog
 
-        Dim first As New winapp2ool.iniSection2("WebViewScaffold: WebApps")
-        first.AddKey(New winapp2ool.iniKey2("Tier=Legacy"))
-        first.AddKey(New winapp2ool.iniKey2("FileKeyBase=%WebViewRoot%\one|*"))
+        Dim first As New winapp2ool.iniSection("WebViewScaffold: WebApps")
+        first.AddKey(New winapp2ool.iniKey("Tier=Legacy"))
+        first.AddKey(New winapp2ool.iniKey("FileKeyBase=%WebViewRoot%\one|*"))
         winapp2ool.ScaffoldCatalogs.ParseSection(first, catalog, New winapp2ool.MenuSection)
         Assert.IsTrue(catalog.Legacy.Contains("WebApps"))
 
-        Dim second As New winapp2ool.iniSection2("WebViewScaffold: WebApps")
-        second.AddKey(New winapp2ool.iniKey2("FileKeyBase=%WebViewRoot%\two|*"))
+        Dim second As New winapp2ool.iniSection("WebViewScaffold: WebApps")
+        second.AddKey(New winapp2ool.iniKey("FileKeyBase=%WebViewRoot%\two|*"))
         winapp2ool.ScaffoldCatalogs.ParseSection(second, catalog, New winapp2ool.MenuSection)
         Assert.IsFalse(catalog.Legacy.Contains("WebApps"))
 

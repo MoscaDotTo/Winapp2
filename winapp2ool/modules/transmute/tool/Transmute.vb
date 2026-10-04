@@ -19,7 +19,7 @@ Option Strict On
 
 ''' <summary>
 ''' <c> Transmute </c> (formerly <c> Merge </c>) is a winapp2ool module which provides the ability
-''' to modify an <c> iniFile2 </c> object using the contents of a separate <c> iniFile2 </c> object
+''' to modify an <c> iniFile </c> object using the contents of a separate <c> iniFile </c> object
 ''' with conflict resolution at different levels of granularity. <br /><br />
 '''
 ''' In the parlance of Transmute, there are two files of interest: <br />
@@ -324,10 +324,10 @@ Public Module Transmute
 
         clrConsole()
 
-        Dim baseFile2 = TransmuteFile1.Load(TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile1), NameOf(TransmuteModuleSettingsChanged))
-        Dim sourceFile2 = TransmuteFile2.Load(TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile2), NameOf(TransmuteModuleSettingsChanged))
+        Dim baseFile = TransmuteFile1.Load(TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile1), NameOf(TransmuteModuleSettingsChanged))
+        Dim sourceFile = TransmuteFile2.Load(TransmuteModuleSettingsChanged, NameOf(Transmute), NameOf(TransmuteFile2), NameOf(TransmuteModuleSettingsChanged))
 
-        If Not (enforceFileHasContent(baseFile2) AndAlso enforceFileHasContent(sourceFile2)) Then Return
+        If Not (enforceFileHasContent(baseFile) AndAlso enforceFileHasContent(sourceFile)) Then Return
 
         Dim menuOutput As New MenuSection
         Dim applyingChangesStr = $"Applying changes to {TransmuteFile1.Name}"
@@ -343,9 +343,9 @@ Public Module Transmute
         menuOutput.AddColoredLine(xmuteModeStr, color)
         gLog(xmuteModeStr)
 
-        Dim saveFile = iniFile2.Empty(TransmuteFile3.Dir, TransmuteFile3.Name)
+        Dim saveFile = iniFile.Empty(TransmuteFile3.Dir, TransmuteFile3.Name)
 
-        If Not transmute(baseFile2, sourceFile2, saveFile, menuOutput, UseWinapp2Syntax) Then menuOutput.AddWarning($"{saveFile.Name} was not saved")
+        If Not transmute(baseFile, sourceFile, saveFile, menuOutput, UseWinapp2Syntax) Then menuOutput.AddWarning($"{saveFile.Name} was not saved")
 
         menuOutput.AddLine("") _
                   .AddBottomBorder() _
@@ -365,11 +365,11 @@ Public Module Transmute
     ''' </summary>
     ''' 
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> whose content will be modified by the transmutation process
+    ''' The <c> iniFile </c> whose content will be modified by the transmutation process
     ''' </param>
     ''' 
     ''' <param name="sourceFile">
-    ''' The <c> iniFile2 </c> providing the transmutation data 
+    ''' The <c> iniFile </c> providing the transmutation data 
     ''' </param>
     ''' 
     ''' <param name="saveFile">
@@ -388,9 +388,9 @@ Public Module Transmute
     ''' <c> True </c> if the output was saved, <br />
     ''' <c> False </c> if saving was skipped or failed
     ''' </returns>
-    Private Function transmute(ByRef baseFile As iniFile2,
-                          ByRef sourceFile As iniFile2,
-                                saveFile As iniFile2,
+    Private Function transmute(ByRef baseFile As iniFile,
+                          ByRef sourceFile As iniFile,
+                                saveFile As iniFile,
                           ByRef menuOutput As MenuSection,
                        Optional isWinapp2 As Boolean = True,
                        Optional skipFormat As Boolean = False) As Boolean
@@ -401,10 +401,10 @@ Public Module Transmute
 
         If isWinapp2 Then
 
-            Dim wf2 As New winapp2file2(baseFile)
-            wf2.SortEntries()
-            Dim saved = saveFile.OverwriteToFile(wf2.ToWinapp2String())
-            baseFile = wf2.ToIni()
+            Dim wf As New winapp2file(baseFile)
+            wf.SortEntries()
+            Dim saved = saveFile.OverwriteToFile(wf.ToWinapp2String())
+            baseFile = wf.ToIni()
             Return saved
 
         End If
@@ -414,23 +414,23 @@ Public Module Transmute
     End Function
 
     ''' <summary> 
-    ''' Facilitates transmuting an <c> iniFile2 </c> from outside the module's UI
+    ''' Facilitates transmuting an <c> iniFile </c> from outside the module's UI
     ''' </summary>
     ''' 
     ''' <param name="baseFile">
-    ''' An <c> iniFile2 </c> whose content will be modified by the transmutation process
+    ''' An <c> iniFile </c> whose content will be modified by the transmutation process
     ''' </param>
     ''' 
     ''' <param name="sourceFile">
-    ''' An <c> iniFile2 </c> whose content will be used to modify to <c> <paramref name="baseFile"/> </c> 
+    ''' An <c> iniFile </c> whose content will be used to modify to <c> <paramref name="baseFile"/> </c> 
     ''' </param>
     ''' 
     ''' <param name="outputFile">
-    ''' An <c> iniFile2 </c> which will be written to disk with the result of the transmutation process
+    ''' An <c> iniFile </c> which will be written to disk with the result of the transmutation process
     ''' </param>
     ''' 
     ''' <param name="isWinapp"> 
-    ''' Indicates that the <c> iniFile2 </c>s being worked with contain winapp2.ini syntax 
+    ''' Indicates that the <c> iniFile </c>s being worked with contain winapp2.ini syntax 
     ''' </param>
     ''' 
     ''' <param name="menuOutput">
@@ -461,7 +461,7 @@ Public Module Transmute
     ''' <param name="skipFormat">
     ''' When <c> True </c>, skips the post-transmutation sort, format, and disk write. <br />
     ''' Use this when chaining multiple transmutations against the same base file so that
-    ''' only the final step pays the cost of constructing a <c> winapp2file2 </c> and writing to disk. <br />
+    ''' only the final step pays the cost of constructing a <c> winapp2file </c> and writing to disk. <br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
@@ -469,9 +469,9 @@ Public Module Transmute
     ''' <c> True </c> if the output was saved, <br />
     ''' <c> False </c> if there was nothing to transmute, <paramref name="skipFormat"/> skipped the write, or the save failed
     ''' </returns>
-    Public Function RemoteTransmute(ByRef baseFile As iniFile2,
-                               ByRef sourceFile As iniFile2,
-                                     outputFile As iniFile2,
+    Public Function RemoteTransmute(ByRef baseFile As iniFile,
+                               ByRef sourceFile As iniFile,
+                                     outputFile As iniFile,
                                      isWinapp As Boolean,
                                ByRef menuOutput As MenuSection,
                             Optional transmuteMode As TransmuteMode = TransmuteMode.Add,
@@ -527,25 +527,25 @@ Public Module Transmute
     ''' </summary>
     '''
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> whose content is being modified by the transmutation process
+    ''' The <c> iniFile </c> whose content is being modified by the transmutation process
     ''' </param>
     '''
     ''' <param name="sourceFile">
-    '''  The <c> iniFile2 </c> providing the content modification criteria for <c> <paramref name="baseFile"/> </c>
+    '''  The <c> iniFile </c> providing the content modification criteria for <c> <paramref name="baseFile"/> </c>
     ''' </param>
     '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
-    Private Sub resolveConflicts(ByRef baseFile As iniFile2,
-                                       sourceFile As iniFile2,
+    Private Sub resolveConflicts(ByRef baseFile As iniFile,
+                                       sourceFile As iniFile,
                                  ByRef menuOutput As MenuSection)
 
-        Dim globalSection As iniSection2 = Nothing
-        Dim mapSections As New List(Of iniSection2)
-        Dim nameSections As New List(Of iniSection2)
-        Dim namedSections As New List(Of iniSection2)
+        Dim globalSection As iniSection = Nothing
+        Dim mapSections As New List(Of iniSection)
+        Dim nameSections As New List(Of iniSection)
+        Dim namedSections As New List(Of iniSection)
 
         For Each sourceSection In sourceFile
 
@@ -616,7 +616,7 @@ Public Module Transmute
     ''' </summary>
     '''
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> whose sections will all receive the global operation
+    ''' The <c> iniFile </c> whose sections will all receive the global operation
     ''' </param>
     '''
     ''' <param name="sourceSection">
@@ -627,8 +627,8 @@ Public Module Transmute
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
-    Private Sub applyGlobalSection(ByRef baseFile As iniFile2,
-                                         sourceSection As iniSection2,
+    Private Sub applyGlobalSection(ByRef baseFile As iniFile,
+                                         sourceSection As iniSection,
                                    ByRef menuOutput As MenuSection)
 
         If Transmutator = TransmuteMode.Remove AndAlso TransmuteRemoveMode = RemoveMode.BySection Then
@@ -666,7 +666,7 @@ Public Module Transmute
 
                 Dim hasEntryNameToken = sourceKey.Value.IndexOf(EntryNameToken, StringComparison.OrdinalIgnoreCase) >= 0
 
-                Dim singleKeySource As New iniSection2(sourceSection.Name)
+                Dim singleKeySource As New iniSection(sourceSection.Name)
                 If Not hasEntryNameToken Then singleKeySource.AddKey(sourceKey)
 
                 Dim sectionsHit = 0
@@ -678,8 +678,8 @@ Public Module Transmute
 
                     If hasEntryNameToken Then
 
-                        appliedKey = New iniKey2($"{sourceKey.Name}={expandEntryNameToken(sourceKey.Value, baseSection.Name)}")
-                        appliedSource = New iniSection2(sourceSection.Name)
+                        appliedKey = New iniKey($"{sourceKey.Name}={expandEntryNameToken(sourceKey.Value, baseSection.Name)}")
+                        appliedSource = New iniSection(sourceSection.Name)
                         appliedSource.AddKey(appliedKey)
 
                     End If
@@ -781,16 +781,16 @@ Public Module Transmute
     ''' </summary>
     ''' 
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> which will be modified by the transmutation process
+    ''' The <c> iniFile </c> which will be modified by the transmutation process
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
-    ''' The <c> iniSection2 </c> from the source file whose content will be used to modify
+    ''' The <c> iniSection </c> from the source file whose content will be used to modify
     ''' <c> <paramref name="baseFile"/> </c>
     ''' </param>
     '''
     ''' <param name="baseSection">
-    ''' The <c> iniSection2 </c> from <c> <paramref name="baseFile"/> </c> which will be modified,
+    ''' The <c> iniSection </c> from <c> <paramref name="baseFile"/> </c> which will be modified,
     ''' or <c> Nothing </c> if the section does not exist in the base file
     ''' </param>
     ''' 
@@ -798,9 +798,9 @@ Public Module Transmute
     ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
     '''
-    Private Sub processTransmutator(ByRef baseFile As iniFile2,
-                                          sourceSection As iniSection2,
-                                          baseSection As iniSection2,
+    Private Sub processTransmutator(ByRef baseFile As iniFile,
+                                          sourceSection As iniSection,
+                                          baseSection As iniSection,
                                     ByRef menuOutput As MenuSection)
 
         Select Case Transmutator
@@ -828,12 +828,12 @@ Public Module Transmute
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
-    ''' The <c> iniSection2 </c> from the <c> baseFile </c>, if it exists, which will have keys
+    ''' The <c> iniSection </c> from the <c> baseFile </c>, if it exists, which will have keys
     ''' from the <c> <paramref name="sourceSection"/> </c> added to it 
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
-    ''' The <c> iniSection2 </c> to either be added to <c> <paramref name="baseFile"/> </c> or 
+    ''' The <c> iniSection </c> to either be added to <c> <paramref name="baseFile"/> </c> or 
     ''' whose keys will be added to the <c> <paramref name="baseSection"/> </c> <br />
     ''' 
     ''' If the section exists in the base file, its keys will be added to the base section.
@@ -841,7 +841,7 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> whose content will be modified by the transmutation process
+    ''' The <c> iniFile </c> whose content will be modified by the transmutation process
     ''' </param>
     ''' 
     ''' <param name="sectionName">
@@ -852,9 +852,9 @@ Public Module Transmute
     ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
     '''
-    Private Sub handleAddMode(baseSection As iniSection2,
-                                    sourceSection As iniSection2,
-                              ByRef baseFile As iniFile2,
+    Private Sub handleAddMode(baseSection As iniSection,
+                                    sourceSection As iniSection,
+                              ByRef baseFile As iniFile,
                                     sectionName As String,
                               ByRef menuOutput As MenuSection)
 
@@ -874,12 +874,12 @@ Public Module Transmute
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
-    ''' The <c> iniSection2 </c> to which keys will be added from 
+    ''' The <c> iniSection </c> to which keys will be added from 
     ''' <c> <paramref name="sourceSection"/> </c>
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
-    ''' The <c> iniSection2 </c> providing the keys to be added to  
+    ''' The <c> iniSection </c> providing the keys to be added to  
     ''' <c> <paramref name="baseSection"/> </c>
     ''' </param>
     ''' 
@@ -896,8 +896,8 @@ Public Module Transmute
     ''' <returns>
     ''' The number of keys added to <c> <paramref name="baseSection"/> </c>
     ''' </returns>
-    Private Function addKeysToBase(baseSection As iniSection2,
-                                         sourceSection As iniSection2,
+    Private Function addKeysToBase(baseSection As iniSection,
+                                         sourceSection As iniSection,
                                    ByRef menuOutput As MenuSection,
                                 Optional quiet As Boolean = False) As Integer
 
@@ -913,7 +913,7 @@ Public Module Transmute
 
         For Each sourceKey In sourceSection.Keys
 
-            baseSection.AddKey(New iniKey2(sourceKey.ToString()))
+            baseSection.AddKey(New iniKey(sourceKey.ToString()))
             hits += 1
 
             If quiet Then Continue For
@@ -934,17 +934,17 @@ Public Module Transmute
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
-    ''' The <c> iniSection2 </c> which will have its content mutated based on 
+    ''' The <c> iniSection </c> which will have its content mutated based on 
     ''' <c> <paramref name="sourceSection"/> </c>
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
-    ''' The <c> iniSection2 </c> providing the replacement values for 
+    ''' The <c> iniSection </c> providing the replacement values for 
     ''' <c> <paramref name="baseSection"/> </c>
     ''' </param>
     ''' 
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> containing <c> <paramref name="baseSection"/> </c>
+    ''' The <c> iniFile </c> containing <c> <paramref name="baseSection"/> </c>
     ''' </param>
     ''' 
     ''' <param name="sectionName">
@@ -956,9 +956,9 @@ Public Module Transmute
     ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
     '''
-    Private Sub handleReplaceMode(baseSection As iniSection2,
-                                        sourceSection As iniSection2,
-                                  ByRef baseFile As iniFile2,
+    Private Sub handleReplaceMode(baseSection As iniSection,
+                                        sourceSection As iniSection,
+                                  ByRef baseFile As iniFile,
                                         sectionName As String,
                                   ByRef menuOutput As MenuSection)
 
@@ -985,12 +985,12 @@ Public Module Transmute
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
-    ''' The <c> iniSection2 </c> which will have its key values will be replaced with values
+    ''' The <c> iniSection </c> which will have its key values will be replaced with values
     ''' provided in <c> <paramref name="sourceSection"/> </c>
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
-    ''' The <c> iniSection2 </c> providing the replacement values for matching keys found within
+    ''' The <c> iniSection </c> providing the replacement values for matching keys found within
     ''' <c> <paramref name="baseSection"/> </c>
     ''' </param>
     ''' 
@@ -1008,12 +1008,12 @@ Public Module Transmute
     ''' <returns>
     ''' The number of keys in <c> <paramref name="baseSection"/> </c> whose values were replaced
     ''' </returns>
-    Friend Function replaceKeysInBase(baseSection As iniSection2,
-                                       sourceSection As iniSection2,
+    Friend Function replaceKeysInBase(baseSection As iniSection,
+                                       sourceSection As iniSection,
                                  ByRef menuOutput As MenuSection,
                               Optional quiet As Boolean = False) As Integer
 
-        Dim sourceKeys As New Dictionary(Of String, iniKey2)(StringComparer.OrdinalIgnoreCase)
+        Dim sourceKeys As New Dictionary(Of String, iniKey)(StringComparer.OrdinalIgnoreCase)
 
         For Each sourceKey In sourceSection.Keys : sourceKeys(sourceKey.Name) = sourceKey : Next
 
@@ -1058,15 +1058,15 @@ Public Module Transmute
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
-    ''' The <c> iniSection2 </c> which will be either removed or have keys removed from it
+    ''' The <c> iniSection </c> which will be either removed or have keys removed from it
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
-    ''' The <c> iniSection2 </c> providing the removal parameters 
+    ''' The <c> iniSection </c> providing the removal parameters 
     ''' </param>
     ''' 
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> which will be modified by the Transmutation process
+    ''' The <c> iniFile </c> which will be modified by the Transmutation process
     ''' </param>
     ''' 
     ''' <param name="sectionName">
@@ -1078,9 +1078,9 @@ Public Module Transmute
     ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
     '''
-    Private Sub handleRemoveMode(baseSection As iniSection2,
-                                 sourceSection As iniSection2,
-                           ByRef baseFile As iniFile2,
+    Private Sub handleRemoveMode(baseSection As iniSection,
+                                 sourceSection As iniSection,
+                           ByRef baseFile As iniFile,
                                  sectionName As String,
                            ByRef menuOutput As MenuSection)
 
@@ -1107,11 +1107,11 @@ Public Module Transmute
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
-    ''' The <c> iniSection2 </c> from which keys will be removed 
+    ''' The <c> iniSection </c> from which keys will be removed 
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
-    ''' The <c> iniSection2 </c> providing the keys to be removed from 
+    ''' The <c> iniSection </c> providing the keys to be removed from 
     ''' <c> <paramref name="baseSection"/> </c> <br />
     ''' </param>
     ''' 
@@ -1129,8 +1129,8 @@ Public Module Transmute
     ''' <returns>
     ''' The number of keys removed from <c> <paramref name="baseSection"/> </c>
     ''' </returns>
-    Friend Function remKeys(baseSection As iniSection2,
-                                   sourceSection As iniSection2,
+    Friend Function remKeys(baseSection As iniSection,
+                                   sourceSection As iniSection,
                              ByRef menuOutput As MenuSection,
                           Optional quiet As Boolean = False) As Integer
 
@@ -1139,7 +1139,7 @@ Public Module Transmute
 
         For Each key In sourceSection.Keys : sourceData.Add(If(isByName, key.Name, $"{key.KeyType}={key.Value}")) : Next
 
-        Dim toRemove As New List(Of iniKey2)
+        Dim toRemove As New List(Of iniKey)
         Dim matched As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
         For Each baseKey In baseSection.Keys
@@ -1180,7 +1180,7 @@ Public Module Transmute
     End Function
 
     ''' <summary>
-    ''' Applies a 'flavor' to an <c> iniFile2 </c>. A flavor is like a compatibility layer that
+    ''' Applies a 'flavor' to an <c> iniFile </c>. A flavor is like a compatibility layer that
     ''' allows a base file to be adjusted in slight ways to make it more suitable to a specific use
     ''' <br /><br /> 
     ''' In the context of winapp2.ini, we can use this to create different versions of winapp2.ini 
@@ -1193,7 +1193,7 @@ Public Module Transmute
     ''' </summary>
     ''' 
     ''' <param name="baseFile">
-    ''' The <c> iniFile2 </c> to whom a particular flavor will be applied
+    ''' The <c> iniFile </c> to whom a particular flavor will be applied
     ''' </param>
     ''' 
     ''' <param name="outputFile">
@@ -1205,20 +1205,20 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="additionsFile">
-    ''' The <c> iniFile2 </c> containing the set of sections and individual keys within sections
+    ''' The <c> iniFile </c> containing the set of sections and individual keys within sections
     ''' which should be added to <c> <paramref name="baseFile"/> </c> to create the flavor <br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     ''' 
     ''' <param name="sectionRemovalFile">
-    ''' The <c> iniFile2 </c> containing the set of sections to be removed from the 
+    ''' The <c> iniFile </c> containing the set of sections to be removed from the 
     ''' <c> <paramref name="baseFile"/> </c> to create the flavor <br /> 
     ''' Sections will be removed regardless of whether or not keys are provided <br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     ''' 
     ''' <param name="keyNameRemovalFile">
-    ''' The <c> iniFile2 </c> containing the set of individual keys to be removed 
+    ''' The <c> iniFile </c> containing the set of individual keys to be removed 
     ''' from the <c> <paramref name="baseFile"/> </c> when matched by their Name parameter 
     ''' to create the flavor <br />
     ''' The values provided for keys in this file do not matter and will not be used for matching <br />
@@ -1226,7 +1226,7 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="keyValueRemovalFile">
-    ''' The <c> iniFile2 </c> containing the set of individual keys to be removed from the 
+    ''' The <c> iniFile </c> containing the set of individual keys to be removed from the 
     ''' <c> <paramref name="baseFile"/> </c> when matched by their KeyName and Value pairs 
     ''' to create the flavor <br />
     ''' Numbers in key names will be ignored in this file and can be omitted. Numberless name
@@ -1235,7 +1235,7 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="sectionReplacementFile">
-    ''' The <c> iniFile2 </c> containing the set of sections to replace entire sections of a
+    ''' The <c> iniFile </c> containing the set of sections to replace entire sections of a
     ''' matching (case-insensitive) name in the <c> <paramref name="baseFile"/> </c>
     ''' to create the flavor <br />
     ''' This will not preserve non-overlapping content from the base key <br />
@@ -1243,7 +1243,7 @@ Public Module Transmute
     ''' </param>
     '''
     ''' <param name="keyReplacementFile">
-    ''' The <c> iniFile2 </c> containing the set of individual keys to replace within a matching
+    ''' The <c> iniFile </c> containing the set of individual keys to replace within a matching
     ''' section within <c> <paramref name="baseFile"/> </c> to create the flavor <br />
     ''' Keys in this file will only replace keys in the base file if both their Section and Key
     ''' names match (case-insensitive) <br />
@@ -1252,20 +1252,20 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="isWinapp">
-    ''' Indicates that the <c> iniFile2 </c> being flavorized has winapp2.ini syntax <br />
+    ''' Indicates that the <c> iniFile </c> being flavorized has winapp2.ini syntax <br />
     ''' Optional, Default: <c> True </c>
     ''' 
     ''' </param>
     '''
-    Public Sub Flavorize(ByRef baseFile As iniFile2,
-                               outputFile As iniFile2,
+    Public Sub Flavorize(ByRef baseFile As iniFile,
+                               outputFile As iniFile,
                          ByRef menuOutput As MenuSection,
-                      Optional additionsFile As iniFile2 = Nothing,
-                      Optional sectionRemovalFile As iniFile2 = Nothing,
-                      Optional keyNameRemovalFile As iniFile2 = Nothing,
-                      Optional keyValueRemovalFile As iniFile2 = Nothing,
-                      Optional sectionReplacementFile As iniFile2 = Nothing,
-                      Optional keyReplacementFile As iniFile2 = Nothing,
+                      Optional additionsFile As iniFile = Nothing,
+                      Optional sectionRemovalFile As iniFile = Nothing,
+                      Optional keyNameRemovalFile As iniFile = Nothing,
+                      Optional keyValueRemovalFile As iniFile = Nothing,
+                      Optional sectionReplacementFile As iniFile = Nothing,
+                      Optional keyReplacementFile As iniFile = Nothing,
                       Optional isWinapp As Boolean = True)
 
         Dim flavorizingMsg = $"Flavorizing {baseFile.Name}"
@@ -1285,7 +1285,7 @@ Public Module Transmute
 
             Dim description = operation.Key
             Dim config = operation.Value
-            Dim flavorFile = DirectCast(config(0), iniFile2)
+            Dim flavorFile = DirectCast(config(0), iniFile)
             Dim curMode = DirectCast(config(1), TransmuteMode)
             Dim curReplMode = DirectCast(config(2), ReplaceMode)
             Dim curRemMode = DirectCast(config(3), RemoveMode)
@@ -1302,10 +1302,10 @@ Public Module Transmute
 
         If isWinapp Then
 
-            Dim wf2 As New winapp2file2(baseFile)
-            wf2.SortEntries()
-            saved = outputFile.OverwriteToFile(wf2.ToWinapp2String())
-            baseFile = wf2.ToIni()
+            Dim wf As New winapp2file(baseFile)
+            wf.SortEntries()
+            saved = outputFile.OverwriteToFile(wf.ToWinapp2String())
+            baseFile = wf.ToIni()
 
         Else
 

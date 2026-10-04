@@ -84,8 +84,8 @@ Public Module BrowserBuilder
 
         Dim sourceDir = BuilderFile1.Dir
 
-        Dim chromiumIni = iniFile2.FromFile($"{sourceDir}\chromium.ini")
-        Dim geckoIni = iniFile2.FromFile($"{sourceDir}\gecko.ini")
+        Dim chromiumIni = iniFile.FromFile($"{sourceDir}\chromium.ini")
+        Dim geckoIni = iniFile.FromFile($"{sourceDir}\gecko.ini")
         Dim noRules = chromiumIni.Count + geckoIni.Count = 0
 
         If noRules Then
@@ -131,13 +131,13 @@ Public Module BrowserBuilder
     ''' <param name="output">
     ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
-    Private Sub processBrowserBuilder(chromiumIni As iniFile2,
-                                      geckoIni As iniFile2,
+    Private Sub processBrowserBuilder(chromiumIni As iniFile,
+                                      geckoIni As iniFile,
                                       ByRef output As MenuSection)
 
         Using gLogScope("Processing browser builder files")
 
-            Dim outputFile = iniFile2.Empty(BuilderFile2.Dir, BuilderFile2.Name)
+            Dim outputFile = iniFile.Empty(BuilderFile2.Dir, BuilderFile2.Name)
 
             buildScaffolds(chromiumIni, False, outputFile, output)
             totalChromiumCount = outputFile.Count
@@ -189,7 +189,7 @@ Public Module BrowserBuilder
     ''' </summary>
     '''
     ''' <param name="rulesetFile">
-    ''' The <c> iniFile2 </c> containing the set of generative rules for a particular group
+    ''' The <c> iniFile </c> containing the set of generative rules for a particular group
     ''' of web browsers
     ''' </param>
     '''
@@ -204,13 +204,13 @@ Public Module BrowserBuilder
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
-    Private Sub buildScaffolds(rulesetFile As iniFile2,
+    Private Sub buildScaffolds(rulesetFile As iniFile,
                                isGecko As Boolean,
-                         ByRef outputFile As iniFile2,
+                         ByRef outputFile As iniFile,
                          ByRef menuOutput As MenuSection)
 
         Dim browsers As New List(Of BrowserInfo)
-        Dim scaffoldSections As New List(Of iniSection2)
+        Dim scaffoldSections As New List(Of iniSection)
 
         For Each section In rulesetFile
 
@@ -251,7 +251,7 @@ Public Module BrowserBuilder
     ''' </summary>
     '''
     ''' <param name="browserSection">
-    ''' The <c> iniSection2 </c> containing the BrowserInfo data
+    ''' The <c> iniSection </c> containing the BrowserInfo data
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -261,7 +261,7 @@ Public Module BrowserBuilder
     ''' <returns>
     ''' A <c> BrowserInfo </c> structure containing all parsed browser parameters
     ''' </returns>
-    Private Function parseBrowserInfo(browserSection As iniSection2,
+    Private Function parseBrowserInfo(browserSection As iniSection,
                                 ByRef menuOutput As MenuSection) As BrowserInfo
 
         Dim browserName As String = browserSection.Name.Substring("BrowserInfo: ".Length)
@@ -309,7 +309,7 @@ Public Module BrowserBuilder
     End Function
 
     ''' <summary>
-    ''' Returns an <c> iniFile2 </c> loaded from the given directory and filename,
+    ''' Returns an <c> iniFile </c> loaded from the given directory and filename,
     ''' or <c> Nothing </c> if the file does not exist
     ''' </summary>
     '''
@@ -318,12 +318,12 @@ Public Module BrowserBuilder
     ''' <param name="name">The filename</param>
     '''
     ''' <returns>
-    ''' A loaded <c> iniFile2 </c>, or <c> Nothing </c> if the file is absent
+    ''' A loaded <c> iniFile </c>, or <c> Nothing </c> if the file is absent
     ''' </returns>
-    Private Function loadFlavorFile(dir As String, name As String) As iniFile2
+    Private Function loadFlavorFile(dir As String, name As String) As iniFile
 
         Dim path = $"{dir}\{name}"
-        Return If(IO.File.Exists(path), iniFile2.FromFile(path), Nothing)
+        Return If(IO.File.Exists(path), iniFile.FromFile(path), Nothing)
 
     End Function
 
@@ -352,10 +352,10 @@ Public Module BrowserBuilder
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
-    Private Sub processEntryScaffold(scaffoldSection As iniSection2,
+    Private Sub processEntryScaffold(scaffoldSection As iniSection,
                                      browsers As List(Of BrowserInfo),
                                      isGecko As Boolean,
-                               ByRef outputFile As iniFile2,
+                               ByRef outputFile As iniFile,
                                ByRef menuOutput As MenuSection)
 
         Dim scaffoldName As String = scaffoldSection.Name.Substring("EntryScaffold: ".Length)
