@@ -506,7 +506,7 @@ Public Module Trim
     ''' </summary>
     ''' 
     ''' <param name="key"> 
-    ''' A SpecialDetect format <c> iniKey </c> 
+    ''' A SpecialDetect value, such as <c> DET_CHROME </c>
     ''' </param>
     ''' 
     Private Function checkSpecialDetects(ByVal key As String) As Boolean

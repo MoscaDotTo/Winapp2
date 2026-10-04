@@ -125,7 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="handlers\menus\MenuSection\MenuSection.vb" />
-    <Compile Include="handlers\settings\SettingsHandler2.vb" />
+    <Compile Include="handlers\settings\SettingsHandler.vb" />
     <Compile Include="modules\browserbuilder\core\BrowserInfo.vb" />
     <Compile Include="modules\browserbuilder\core\BrowserEntryGenerator.vb" />
     <Compile Include="modules\browserbuilder\mainmenu\browserbuildermainmenu.vb" />
@@ -148,13 +148,13 @@
     <Compile Include="modules\combine\tool\Combine.vb" />
     <Compile Include="modules\diff\core\DiffConfiguration.vb" />
     <Compile Include="modules\diff\core\DiffOutcome.vb" />
-    <Compile Include="modules\diff\core\DiffOutputRenderer2.vb" />
+    <Compile Include="modules\diff\core\DiffOutputRenderer.vb" />
     <Compile Include="modules\diff\core\DiffState.vb" />
-    <Compile Include="modules\diff\core\DiffStatisticsCalculator2.vb" />
-    <Compile Include="modules\diff\core\EntryChangeDetector2.vb" />
+    <Compile Include="modules\diff\core\DiffStatisticsCalculator.vb" />
+    <Compile Include="modules\diff\core\EntryChangeDetector.vb" />
     <Compile Include="modules\diff\core\KeyComparisonStrategy.vb" />
-    <Compile Include="modules\diff\core\KeyModificationAnalyzer2.vb" />
-    <Compile Include="modules\diff\core\MergeDetector2.vb" />
+    <Compile Include="modules\diff\core\KeyModificationAnalyzer.vb" />
+    <Compile Include="modules\diff\core\MergeDetector.vb" />
     <Compile Include="modules\diff\settingshandler\diffsettings.vb" />
     <Compile Include="modules\diff\tool\Diff.vb" />
     <Compile Include="modules\diff\mainmenu\diffmainmenu.vb" />
@@ -165,11 +165,11 @@
     <Compile Include="handlers\cmdline\commandLineHandler.vb" />
     <Compile Include="handlers\downloads\downloadr.vb" />
     <Compile Include="handlers\exceptions\exceptionHandler.vb" />
-    <Compile Include="handlers\ini\iniFile2\iniComment2\iniComment2.vb" />
-    <Compile Include="handlers\ini\iniFile2\iniKey2\iniKey2.vb" />
-    <Compile Include="handlers\ini\iniFile2\iniKeyCollection\iniKeyCollection.vb" />
-    <Compile Include="handlers\ini\iniFile2\iniSection2\iniSection2.vb" />
-    <Compile Include="handlers\ini\iniFile2\iniFile2.vb" />
+    <Compile Include="handlers\ini\iniFile\iniComment\iniComment.vb" />
+    <Compile Include="handlers\ini\iniFile\iniKey\iniKey.vb" />
+    <Compile Include="handlers\ini\iniFile\iniKeyCollection\iniKeyCollection.vb" />
+    <Compile Include="handlers\ini\iniFile\iniSection\iniSection.vb" />
+    <Compile Include="handlers\ini\iniFile\iniFile.vb" />
     <Compile Include="handlers\logger\logger.vb" />
     <Compile Include="handlers\menus\iniFileChooser\iniFileChooser.vb" />
     <Compile Include="handlers\menus\MenuMaker.vb" />
@@ -183,11 +183,11 @@
     <Compile Include="helpers\updater\FrameworkCheck.vb" />
     <Compile Include="helpers\updater\updater.vb" />
     <Compile Include="helpers\updater\UpdateSignature.vb" />
-    <Compile Include="handlers\winapp2\excludeKeyParams2\excludeKeyParams2.vb" />
-    <Compile Include="handlers\winapp2\fileKeyParams2\fileKeyParams2.vb" />
-    <Compile Include="handlers\winapp2\regKeyParams2\regKeyParams2.vb" />
-    <Compile Include="handlers\winapp2\winapp2entry2\winapp2entry2.vb" />
-    <Compile Include="handlers\winapp2\winapp2file2\winapp2file2.vb" />
+    <Compile Include="handlers\winapp2\excludeKeyParams\excludeKeyParams.vb" />
+    <Compile Include="handlers\winapp2\fileKeyParams\fileKeyParams.vb" />
+    <Compile Include="handlers\winapp2\regKeyParams\regKeyParams.vb" />
+    <Compile Include="handlers\winapp2\winapp2entry\winapp2entry.vb" />
+    <Compile Include="handlers\winapp2\winapp2file\winapp2file.vb" />
     <Compile Include="handlers\winapp2\winapp2handler.vb" />
     <Compile Include="modules\download\mainmenu\downloadmainmenu.vb" />
     <Compile Include="modules\launcher\launcher.vb" />

@@ -68,8 +68,7 @@ Public Module SettingsHandler2
     End Sub
 
     ''' <summary>
-    ''' Loads settings for modules that have migrated to <c> SettingsHandler2 </c>.
-    ''' Each migrated module's <c> LoadModule2 </c> call is added here as modules migrate.
+    ''' Loads the settings for every module. A new module adds its <c> LoadModule2 </c> call here.
     ''' </summary>
     Private Sub loadAllModuleSettings()
 

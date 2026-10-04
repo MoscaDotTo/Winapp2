@@ -627,7 +627,6 @@ End Class
 
 ''' <summary>
 ''' Information about key matches between two <c> iniSection2 </c> entries.
-''' Mirrors <c> KeyMatchInfo </c> using <c> iniKey2 </c> matched key sets.
 ''' </summary>
 Public Class KeyMatchInfo2
 

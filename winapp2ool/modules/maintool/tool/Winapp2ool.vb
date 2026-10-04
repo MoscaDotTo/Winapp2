@@ -133,8 +133,7 @@ Public Module Winapp2ool
 
     ''' <summary>
     ''' Ensures that an <c> iniFile2 </c> has content and informs the user if it does not.
-    ''' Unlike the <c> iniFile </c> overload, this does not trigger validation or the File Chooser;
-    ''' the caller is responsible for loading the file before calling this.
+    ''' This does not trigger validation or the File Chooser, so the caller loads the file first.
     ''' </summary>
     '''
     ''' <param name="iFile">
