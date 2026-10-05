@@ -54,7 +54,7 @@ Public Module browserbuildermainmenu
     End Function
 
     ''' <summary>
-    ''' Prints the BrowserBuilder main menu to the user
+    ''' Resizes the console window to 130 by 40 and prints the BrowserBuilder main menu
     ''' </summary>
     Public Sub printBrowserBuilderMenu()
 
@@ -65,7 +65,9 @@ Public Module browserbuildermainmenu
     End Sub
 
     ''' <summary>
-    ''' Handles the user input from the BrowserBuilder menu
+    ''' Handles the user input from the BrowserBuilder menu. An empty input runs the build,
+    ''' <c> 0 </c> exits the module, and a number that matches an option runs it.
+    ''' Anything else reports invalid input.
     ''' </summary>
     '''
     ''' <param name="input">

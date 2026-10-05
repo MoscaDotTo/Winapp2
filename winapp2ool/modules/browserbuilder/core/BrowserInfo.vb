@@ -18,44 +18,51 @@
 Option Strict On
 
 ''' <summary>
-''' Stores the information required by EntryScaffold sections to
-''' generate individual browser entries
+''' Stores the information parsed from one <c> BrowserInfo: </c> section, which the
+''' EntryScaffold sections need to generate that browser's entries
 ''' </summary>
 Friend Structure BrowserInfo
 
     ''' <summary>
-    ''' The name of the browser, will be prepended to the name of each entry scaffold
+    ''' The name of the browser. Each generated entry is named
+    ''' <c> {Name} {scaffold name} * </c>.
     ''' </summary>
     Public Name As String
 
     ''' <summary>
-    ''' The set of provided user data (chromium) or profiles (gecko) paths
+    ''' The set of provided user data (chromium) or profiles (gecko) paths, substituted for
+    ''' <c> %UserDataPath% </c>
     ''' </summary>
     Public UserDataPaths As List(Of String)
 
     ''' <summary>
-    ''' The set of parent paths to the <c> UserDataPaths </c>
+    ''' The parent of each path in <see cref="UserDataPaths"/> (everything before its last
+    ''' backslash), at the same index. Substituted for <c> %BrowserPath% </c>, and used for
+    ''' the DetectFile keys when <see cref="TruncateDetect"/> is set.
     ''' </summary>
     Public UserDataParentPaths As List(Of String)
 
     ''' <summary>
-    ''' The name of the CCleaner "Section" that all entries for this browser will be grouped into
+    ''' The <c> Section= </c> value that all entries for this browser will be grouped into,
+    ''' or empty when the BrowserInfo has none
     ''' </summary>
     Public SectionName As String
 
     ''' <summary>
-    ''' Indicates that the User Data path should be truncated off for the DetectFile <br />
-    ''' Useful for easily supporting multiple versions of a single browser
+    ''' Indicates whether the DetectFile keys use <see cref="UserDataParentPaths"/> instead
+    ''' of <see cref="UserDataPaths"/>. Useful for easily supporting multiple versions of a
+    ''' single browser.
     ''' </summary>
     Public TruncateDetect As Boolean
 
     ''' <summary>
-    ''' The set of parent paths in the registry for the browser, used to generate RegKeys
+    ''' The set of parent paths in the registry for the browser, substituted for
+    ''' <c> %RegistryRoot% </c> to generate RegKeys
     ''' </summary>
     Public RegistryRoots As List(Of String)
 
     ''' <summary>
-    ''' Indicates whether or not the current browser should be omitted from the generation
+    ''' Indicates whether the current browser should be omitted from the generation
     ''' process <br /><br />
     ''' Allows the easy enabling and disabling of browser support over time without requiring
     ''' any information to be truly lost
@@ -63,7 +70,8 @@ Friend Structure BrowserInfo
     Public ShouldSkip As Boolean
 
     ''' <summary>
-    ''' Creates a new BrowserInfo object for a particular browser
+    ''' Creates a new <c> BrowserInfo </c> for a particular browser, with empty lists and
+    ''' no section
     ''' </summary>
     '''
     ''' <param name="name">

@@ -20,8 +20,12 @@ Option Strict On
 Friend Module BrowserEntryGenerator
 
     ''' <summary>
-    ''' Produces entries for the Opera GX browser by transforming the EntryScaffold template
-    ''' paths in accordance with the non-standard way Opera GX stores itself on the disk by default
+    ''' Produces FileKeys for the Opera GX browser by transforming the EntryScaffold template
+    ''' paths in accordance with the non-standard way Opera GX stores itself on the disk by default.
+    ''' Each supported template gives two FileKeys: one for the user data folder itself and one
+    ''' for its <c> _side_profiles\* </c> folders. Applies only when
+    ''' <paramref name="browserName"/> is exactly <c> Opera GX </c>. A template that doesn't
+    ''' start with <c> %UserDataPath%\ </c> or <c> %UserDataPath%| </c> is logged as unsupported, without a menu warning.
     ''' </summary>
     '''
     ''' <param name="browserName">
@@ -33,7 +37,7 @@ Friend Module BrowserEntryGenerator
     ''' </param>
     '''
     ''' <param name="fileKeyNum">
-    ''' The number of the current FileKey being generated
+    ''' The number of the next FileKey, advanced past both keys when we add them
     ''' </param>
     '''
     ''' <param name="newSection">
@@ -47,7 +51,8 @@ Friend Module BrowserEntryGenerator
     '''
     ''' <returns>
     ''' <see langword="True"/> if the current browser is Opera GX and FileKeys were generated;
-    ''' <see langword="False"/> if the browser is not Opera GX or the path pattern is unsupported
+    ''' <see langword="False"/> if the browser is not Opera GX or the path pattern is unsupported,
+    ''' in which case the caller substitutes the template normally
     ''' </returns>
     Private Function processOperaGX(browserName As String,
                                     fileKeyBase As String,
@@ -114,7 +119,10 @@ Friend Module BrowserEntryGenerator
     End Function
 
     ''' <summary>
-    ''' Generates a browser entry using pre-computed browser information
+    ''' Generates the entry <c> {browser} {scaffold} * </c> and adds it to
+    ''' <paramref name="outputFile"/>: a <c> Section= </c> key, the DetectFile and FileKey keys
+    ''' from <see cref="processUserDataPaths"/>, then the RegKeys. If the file already holds an
+    ''' entry of that name, the new one is silently dropped.
     ''' </summary>
     '''
     ''' <param name="browserInfo">
@@ -138,7 +146,7 @@ Friend Module BrowserEntryGenerator
     ''' </param>
     '''
     ''' <param name="isGecko">
-    ''' Indicates whether or not the Browser being processed is a Gecko-based browser
+    ''' Indicates whether the browser being processed is Gecko-based
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -173,8 +181,9 @@ Friend Module BrowserEntryGenerator
     End Sub
 
     ''' <summary>
-    ''' Generates any necessary RegKey entries based on the provided RegKeyBases
-    ''' and adds them into <paramref name="newSection"/>
+    ''' Adds one RegKey to <paramref name="newSection"/> for each template and registry root
+    ''' pair, numbered from 1, with <c> %RegistryRoot% </c> (case-sensitive) replaced by the root.
+    ''' A browser with no roots gets no RegKeys.
     ''' </summary>
     '''
     ''' <param name="regKeyBases">
@@ -239,7 +248,33 @@ Friend Module BrowserEntryGenerator
 
     ''' <summary>
     ''' Iterates through the user data paths and generates DetectFile and FileKey entries
-    ''' for each path, adding them to <paramref name="newSection"/>
+    ''' for each path, adding them to <paramref name="newSection"/>. The DetectFile is
+    ''' unnumbered when there is only one path. FileKeys are numbered on across all paths.
+    ''' <br /><br />
+    '''
+    ''' Each template is matched against the first placeholder it contains, in this order, and
+    ''' any other placeholder in it stays literal:
+    ''' <list type="bullet">
+    '''
+    ''' <item>
+    ''' <c> %UserDataPath% </c>: the user data path, or the Opera GX pair from
+    ''' <see cref="processOperaGX"/>
+    ''' </item>
+    '''
+    ''' <item>
+    ''' <c> %BrowserPath% </c>: the parent path. For Chromium we first add a copy with
+    ''' <c> %LocalAppData% </c> and <c> %AppData% </c> changed to <c> %ProgramFiles% </c>.
+    ''' </item>
+    '''
+    ''' <item>
+    ''' <c> %LocalDataPath% </c>, Gecko only: the user data path with <c> %AppData% </c>
+    ''' changed to <c> %LocalAppData% </c>
+    ''' </item>
+    '''
+    ''' </list>
+    '''
+    ''' A template matching none of these, including <c> %LocalDataPath% </c> for Chromium, is
+    ''' silently skipped. Matching is case-sensitive.
     ''' </summary>
     '''
     ''' <param name="newSection">
@@ -255,8 +290,7 @@ Friend Module BrowserEntryGenerator
     ''' </param>
     '''
     ''' <param name="truncate">
-    ''' Indicates that the parent path should be used instead of the user data path for the purpose
-    ''' of creating DetectFile keys
+    ''' Indicates whether the DetectFile keys use the parent path instead of the user data path
     ''' </param>
     '''
     ''' <param name="fileKeyBases">
@@ -268,7 +302,7 @@ Friend Module BrowserEntryGenerator
     ''' </param>
     '''
     ''' <param name="isGecko">
-    ''' Indicates whether or not the current browser is gecko-based
+    ''' Indicates whether the current browser is Gecko-based
     ''' </param>
     Private Sub processUserDataPaths(ByRef newSection As iniSection,
                                      ByRef userDataPaths As List(Of String),

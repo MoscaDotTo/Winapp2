@@ -26,8 +26,9 @@ Imports System.Text
 ''' set of easily accessed information. <br /><br />
 '''
 ''' All input files are read from a single configurable source directory. At minimum, that
-''' directory must contain at least one of <c> chromium.ini </c> or <c> gecko.ini </c> - the
-''' specially formatted ruleset files that drive entry generation. BrowserBuilder is primarily
+''' directory must contain at least one of <c> chromium.ini </c> or <c> gecko.ini </c>: the
+''' specially formatted ruleset files that drive entry generation. A missing one still fails
+''' the run, even when the other builds. BrowserBuilder is primarily
 ''' intended as a small devops tool but end users might find it useful as it enables them to
 ''' generate entries for non-standard installation paths or portable applications while keeping
 ''' winapp2.ini up to date separately <br /><br />
@@ -36,9 +37,9 @@ Imports System.Text
 ''' "Flavorize" the browsers.ini that it produces. This is done so as to resolve over and under
 ''' coverages by generated entries as well as resolve incompatibilities. Accordingly, it expects
 ''' but does not require a set of Flavor correction files in the source directory (up to 1 "Add"
-''' file, up to 3 "Remove" files, and up to 2 "Replace" files) - all resolved by canonical name.
+''' file, up to 3 "Remove" files, and up to 2 "Replace" files), each found by its fixed filename.
 ''' Consult the Transmute documentation for more information about Flavors <br /><br />
-''' Unflavored browser.ini files may be broken or incomplete depending on use case
+''' Unflavored <c> browsers.ini </c> output may be broken or incomplete depending on use case
 ''' </summary>
 Public Module BrowserBuilder
 
@@ -53,7 +54,8 @@ Public Module BrowserBuilder
     Private Property totalGeckoCount As Integer = 0
 
     ''' <summary>
-    ''' Handles the commandline arguments for <c> BrowserBuilder </c>
+    ''' Binds the command-line file arguments to <see cref="BuilderFile1"/> and
+    ''' <see cref="BuilderFile2"/>, then runs the build
     ''' </summary>
     '''
     ''' <remarks>
@@ -61,8 +63,8 @@ Public Module BrowserBuilder
     ''' <c> -1d </c> <br /> Source directory containing <c> chromium.ini </c>,
     ''' <c> gecko.ini </c>, and flavor correction files 
     ''' <br /> <br /> 
-    ''' <c> -2d </c> / <c> -2f </c> <br /> Output file path and name 
-    ''' (default: <c> browsers.ini </c> in the current directory)
+    ''' <c> -2d </c> / <c> -2f </c> <br /> Output file path and name.
+    ''' Defaults to <c> browsers.ini </c> in the current directory.
     ''' </remarks>
     Public Sub handleCmdLine()
 
@@ -76,7 +78,11 @@ Public Module BrowserBuilder
     End Sub
 
     ''' <summary>
-    ''' Initializes the browser builder process
+    ''' Reads <c> chromium.ini </c> and <c> gecko.ini </c> from <see cref="BuilderFile1"/>'s
+    ''' directory, builds and writes the output file, and displays the results unless
+    ''' <c> SuppressOutput </c> is set. When neither ruleset has any sections we set a header
+    ''' message and return without writing. A missing source directory throws from
+    ''' <see cref="iniFile.FromFile"/>.
     ''' </summary>
     Public Sub initBrowserBuilder()
 
@@ -117,7 +123,11 @@ Public Module BrowserBuilder
     End Sub
 
     ''' <summary>
-    ''' Processes the browser builder files and generates the output
+    ''' Generates the entries from both rulesets, Chromium first, then flavorizes them with
+    ''' whichever correction files exist in the source directory, lints the result through
+    ''' <see cref="remotedebugGuarded"/>, and writes it to <see cref="BuilderFile2"/> under a
+    ''' header comment block. <see cref="Flavorize"/> sorts the entries and writes the file
+    ''' once on its own, without the header, before we lint it and write it again.
     ''' </summary>
     '''
     ''' <param name="chromiumIni">
@@ -184,8 +194,10 @@ Public Module BrowserBuilder
     End Sub
 
     ''' <summary>
-    ''' Builds each <c> EntryScaffold </c> and then generates an appropriate entry for each
-    ''' browser provided in <paramref name="rulesetFile"/>
+    ''' Sorts the sections of <paramref name="rulesetFile"/> into <c> BrowserInfo: </c> and
+    ''' <c> EntryScaffold: </c> sections, then generates one entry per scaffold for each
+    ''' browser that isn't skipped. We parse every browser before any scaffold, so their order
+    ''' in the file doesn't matter. Any other section warns and is ignored.
     ''' </summary>
     '''
     ''' <param name="rulesetFile">
@@ -194,11 +206,11 @@ Public Module BrowserBuilder
     ''' </param>
     '''
     ''' <param name="isGecko">
-    ''' Indicates whether or not the current group of web browsers being operated on is gecko-based
+    ''' Indicates whether the browsers in <paramref name="rulesetFile"/> are Gecko-based
     ''' </param>
     '''
     ''' <param name="outputFile">
-    ''' The location to which the generative output of Browser Builder will be stored in memory
+    ''' The file receiving the generated entries. A generated name it already holds is dropped.
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -247,7 +259,11 @@ Public Module BrowserBuilder
     End Sub
 
     ''' <summary>
-    ''' Parses a BrowserInfo section and returns a pre-computed BrowserInfo structure
+    ''' Parses a BrowserInfo section into a <see cref="BrowserInfo"/>. The browser's name is
+    ''' the header after <c> BrowserInfo: </c> and its trailing space. A missing
+    ''' <c> UserDataPath= </c> or <c> Section= </c> warns but doesn't skip the browser, and an
+    ''' unknown key type warns. <c> TruncateDetect= </c> and <c> Skip= </c> take effect by being
+    ''' present, whatever their value. A <c> UserDataPath= </c> value with no backslash throws.
     ''' </summary>
     '''
     ''' <param name="browserSection">
@@ -329,8 +345,9 @@ Public Module BrowserBuilder
 
     ''' <summary>
     ''' Processes an EntryScaffold section and generates entries for each browser.
-    ''' Browsers with no <c> RegistryRoot </c> are skipped when the scaffold contains
-    ''' a <c> RequiresRegistryRoot </c> key.
+    ''' Browsers with no <c> RegistryRoot </c> are skipped, with a warning, when the scaffold
+    ''' contains a <c> RequiresRegistryRoot </c> key. Key types other than
+    ''' <c> FileKeyBase </c>, <c> RegKeyBase </c> and <c> RequiresRegistryRoot </c> warn.
     ''' </summary>
     '''
     ''' <param name="scaffoldSection">
@@ -342,11 +359,11 @@ Public Module BrowserBuilder
     ''' </param>
     '''
     ''' <param name="isGecko">
-    ''' Indicates whether or not the current browser is gecko-based
+    ''' Indicates whether the browsers are Gecko-based
     ''' </param>
     '''
     ''' <param name="outputFile">
-    ''' The location to which the generative output of Browser Builder will be stored in memory
+    ''' The file receiving the generated entries
     ''' </param>
     '''
     ''' <param name="menuOutput">

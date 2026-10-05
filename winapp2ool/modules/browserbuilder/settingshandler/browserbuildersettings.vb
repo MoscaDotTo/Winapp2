@@ -28,13 +28,14 @@ Option Strict On
 ''' <item>
 ''' <b> <c> chromium.ini </c> </b>: 
 ''' Generative rulesets for Chromium-based browsers
-''' (BrowserInfo + EntryScaffold sections). Either this or gecko.ini must be present.
+''' (BrowserInfo + EntryScaffold sections). The build runs when either this or
+''' <c> gecko.ini </c> has sections, but a missing one still fails the run.
 ''' </item>
 ''' 
 ''' <item>
 ''' <b> <c> gecko.ini </c> </b>: 
 ''' Generative rulesets for Gecko/Goanna-based browsers
-''' (BrowserInfo + EntryScaffold sections). Either this or chromium.ini must be present.
+''' (BrowserInfo + EntryScaffold sections). The same rule as <c> chromium.ini </c> applies.
 ''' </item>
 ''' 
 ''' <item>
@@ -43,20 +44,20 @@ Option Strict On
 ''' </item>
 ''' 
 ''' <item>
-''' <b><c> browser_section_removals.ini </c></b> - Sections to remove after generation (optional)
+''' <b><c> browser_section_removals.ini </c></b>: Sections to remove after generation (optional)
 ''' </item>
 ''' <item>
 ''' 
-''' <b><c> browser_name_removals.ini </c></b> - Keys to remove by name after generation (optional)
+''' <b><c> browser_name_removals.ini </c></b>: Keys to remove by name after generation (optional)
 ''' </item>
 ''' <item>
-''' <b><c> browser_value_removals.ini </c></b> - Keys to remove by value after generation (optional)
+''' <b><c> browser_value_removals.ini </c></b>: Keys to remove by value after generation (optional)
 ''' </item>
 ''' <item>
-''' <b><c> browser_section_replacements.ini </c></b> - Sections to replace after generation (optional)
+''' <b><c> browser_section_replacements.ini </c></b>: Sections to replace after generation (optional)
 ''' </item>
 ''' <item>
-''' <b><c> browser_key_replacements.ini </c></b> - Keys to replace by value after generation (optional)
+''' <b><c> browser_key_replacements.ini </c></b>: Keys to replace by value after generation (optional)
 ''' </item>
 ''' </list>
 '''
@@ -75,12 +76,14 @@ Public Module browserbuildersettings
     Public Property BuilderFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "browsers.ini", mustExist:=False)
 
     ''' <summary>
-    ''' Indicates that the module settings have been modified from their defaults
+    ''' Indicates whether the module settings have been modified from their defaults
     ''' </summary>
     Public Property BrowserBuilderModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Restores all BrowserBuilder settings to their defaults and persists the reset to disk
+    ''' Restores all BrowserBuilder settings to their defaults and records them in the settings
+    ''' file through <see cref="SaveModule"/>. Nothing is written to disk here.
+    ''' <see cref="FlushIfDirty"/> does that later, if the save gate allows it
     ''' </summary>
     Public Sub InitDefaultBrowserBuilderSettings()
 
