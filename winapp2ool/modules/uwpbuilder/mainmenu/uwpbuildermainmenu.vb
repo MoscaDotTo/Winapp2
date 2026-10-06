@@ -65,7 +65,9 @@ Public Module uwpbuildermainmenu
     End Sub
 
     ''' <summary>
-    ''' Handles the user input from the UWPBuilder menu
+    ''' Handles the user input from the UWPBuilder menu. An empty input runs the build,
+    ''' <c> 0 </c> exits the module, and a number that matches an option runs it.
+    ''' Anything else reports invalid input.
     ''' </summary>
     '''
     ''' <param name="input">

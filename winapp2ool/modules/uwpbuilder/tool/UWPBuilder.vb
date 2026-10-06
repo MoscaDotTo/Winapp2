@@ -38,8 +38,8 @@ Imports System.Text
 ''' <c> UWP.ini </c> <br /> The scaffold template with one or more
 ''' <c> [EntryScaffold: ...] </c> sections. Each scaffold's <c> DetectFileBase= </c>
 ''' lines are expanded per package to produce the entry's detection paths, and its
-''' <c> FileKeyBase= </c> lines are applied to every application as a consistent
-''' baseline set of cleaning targets.
+''' <c> FileKeyBase= </c> lines are applied to every application that doesn't set
+''' <c> SkipUWPFileKeys= </c>, as a consistent baseline set of cleaning targets.
 ''' </item>
 '''
 ''' <item>
@@ -54,18 +54,19 @@ Imports System.Text
 ''' </list>
 '''
 ''' The <c> %Package% </c> DSL variable expands to
-''' <c> %LocalAppData%\Packages\&lt;PACKAGE_FOLDER&gt; </c>.
-''' Apps with multiple packages use numbered variants:
-''' <c> Package1= </c> / <c> Package2= </c> in the source and
-''' <c> %Package1% </c> / <c> %Package2% </c> in key values.
+''' <c> %LocalAppData%\Packages\&lt;PACKAGE_FOLDER&gt; </c>, once per package for an app
+''' with several. <c> %Package1% </c> / <c> %Package2% </c> in a key value select one
+''' package by its position among the entry's <c> Package= </c> keys. The digit in a source
+''' key name (<c> Package2= </c>) is ignored, so only declaration order counts.
 '''
 ''' <br /><br />
 '''
 ''' An entry may also draw scaffold FileKeys from the shared catalogs in
 ''' <c> Assembler\Scaffolds </c> by declaring a root for any family in
-''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> — <c> WebViewPath= </c>,
-''' <c> QtWebEnginePath= </c> / <c> QtWebEngineCachePath= </c>, or <c> ElectronRoot= </c> /
-''' <c> ElectronUpdaterRoot= </c>.
+''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/>: <c> WebViewRoot= </c>,
+''' <c> QtWebEngineRoot= </c> / <c> QtWebEngineCacheRoot= </c>, or <c> ElectronRoot= </c> /
+''' <c> ElectronUpdaterRoot= </c>. Each <c> ...Root= </c> key also accepts a
+''' <c> ...Path= </c> spelling.
 ''' Electron matters here despite MSIX packages rarely bundling it, because the
 ''' <b> hybrid win32+UWP </b> entries above carry the desktop install's paths too, and a
 ''' packaged app's desktop build is frequently Electron.
@@ -73,17 +74,21 @@ Imports System.Text
 Public Module UWPBuilder
 
     ''' <summary>
-    ''' The AppInfo key names claimed by <see cref="parseAppInfo"/>. Any key whose name is
-    ''' not in this set is treated as a variable declaration. Centralised here so the
-    ''' parser's <c> Select Case </c> and the reserved-name collision check cannot drift
-    ''' apart. Mirrors EntryBuilder's list of the same purpose, but carries UWPBuilder's own
-    ''' vocabulary — <c> PACKAGE </c>, <c> SKIPUWPFILEKEYS </c> and the <c> ...PATH </c>
-    ''' root spellings have no EntryBuilder counterpart
+    ''' The AppInfo key types claimed by <see cref="parseAppInfo"/>. The parser's
+    ''' <c> Select Case </c> doesn't read this list: it has its own branch for each name, and
+    ''' any key type without a branch becomes a variable declaration. A name listed here but
+    ''' missing a branch warns as a shadowed reserved key. For the reverse (a branch with no
+    ''' list entry), only the scaffold family keys are guarded, by the test below.
+    ''' Mirrors EntryBuilder's list of the same purpose, but carries UWPBuilder's own
+    ''' vocabulary: <c> PACKAGE </c>, <c> SKIPUWPFILEKEYS </c> and the <c> ...PATH </c>
+    ''' root spellings have no EntryBuilder counterpart.
     ''' <br /><br />
     '''
-    ''' <c> Friend </c> rather than <c> Private </c> so <c> ScaffoldParityTests </c> can walk
-    ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> and assert this parser knows every
-    ''' family's key vocabulary — the guard against a family shipping to one builder only.
+    ''' <c> Friend </c> rather than <c> Private </c> so the
+    ''' <c> ScaffoldFamilies_KeyVocabularyPresentInBothBuilders </c> test can check that this
+    ''' list holds each family's <c> {Family}Root= </c>, <c> {Family}Scaffolds= </c> and
+    ''' <c> Exclude{Family}Scaffolds= </c> names. That test reads only this list, not the
+    ''' parser's branches.
     ''' </summary>
     Friend ReadOnly UWPReservedKeys As String() = {
         "PACKAGE", "LANGSECREF", "SECTION",
@@ -113,59 +118,63 @@ Public Module UWPBuilder
         Public Name As String
 
         ''' <summary>
-        ''' The package folder names under <c> %LocalAppData%\Packages </c>.
-        ''' Single-package apps use <c> Package= </c>; multi-package apps use
-        ''' <c> Package1= </c>, <c> Package2= </c>, etc.
+        ''' The package folder names under <c> %LocalAppData%\Packages </c>, in declaration
+        ''' order. Every <c> Package= </c> key adds one, and any digits in the key name
+        ''' (<c> Package1= </c>, <c> Package2= </c>) are ignored, so <c> %Package1% </c> names
+        ''' the first one declared.
         ''' </summary>
         Public Packages As List(Of String)
 
         ''' <summary>
-        ''' The LangSecRef= value, or empty if Section= is used
+        ''' The <c> LangSecRef= </c> value, or empty when the entry has none
         ''' </summary>
         Public LangSecRef As String
 
         ''' <summary>
-        ''' The Section= value, or empty if LangSecRef= is used
+        ''' The <c> Section= </c> value, or empty when the entry has none or also declares
+        ''' <c> LangSecRef= </c>
         ''' </summary>
         Public SectionName As String
 
         ''' <summary>
-        ''' Detect= registry key values in their original file order, passed through verbatim
-        ''' and renumbered from 1. Supports hybrid win32+UWP entries that need multiple
+        ''' <c> Detect= </c> registry key values in their original file order. Generation
+        ''' variable-expands them in the registry domain and numbers the results from 1, or
+        ''' leaves a lone result unnumbered. Supports hybrid win32+UWP entries that need multiple
         ''' detection conditions.
         ''' </summary>
         Public DetectKeys As List(Of String)
 
         ''' <summary>
-        ''' Additional DetectFile= values in their original file order, appended after the
-        ''' scaffold-generated DetectFile keys. Supports hybrid win32+UWP entries that need
-        ''' file system detection for the win32 installation alongside package detection.
+        ''' Additional <c> DetectFile= </c> values in their original file order, appended after
+        ''' the scaffold-generated DetectFile keys. Generation variable-expands them but doesn't
+        ''' expand <c> %Package% </c> in them. Supports hybrid win32+UWP entries that need file
+        ''' system detection for the win32 installation alongside package detection.
         ''' </summary>
         Public DetectFileKeys As List(Of String)
 
         ''' <summary>
         ''' App-specific FileKey and FileKeyBase values in their original file order.
-        ''' Values containing <c> %Package% </c> or <c> %PackageN% </c> are expanded
-        ''' during entry generation; all others are passed through verbatim.
+        ''' Generation expands <c> %Package% </c> / <c> %PackageN% </c> in them and then
+        ''' variable-expands every value.
         ''' </summary>
         Public AppKeys As List(Of String)
 
         ''' <summary>
-        ''' RegKey= values in their original file order, passed through verbatim
-        ''' and renumbered from 1
+        ''' <c> RegKey= </c> and <c> RegKeyBase= </c> values in their original file order.
+        ''' Generation variable-expands them in the registry domain and renumbers them from 1.
         ''' </summary>
         Public RegKeys As List(Of String)
 
         ''' <summary>
         ''' <c> ExcludeKey= </c> and <c> ExcludeKeyBase= </c> values in their original file order.
-        ''' Values containing <c> %Package% </c> or <c> %PackageN% </c> are expanded
-        ''' during entry generation; all others are passed through verbatim.
+        ''' Generation expands <c> %Package% </c> / <c> %PackageN% </c> in them and then
+        ''' variable-expands every value, in the domain its flag names.
         ''' </summary>
         Public ExcludeKeys As List(Of String)
 
         ''' <summary>
         ''' <c> Warning= </c> prose values in their original file order. Emitted verbatim and
-        ''' never variable-expanded — the values are human-readable text, not path templates
+        ''' never variable-expanded, since the values are human-readable text, not path templates
         ''' </summary>
         Public Warnings As List(Of String)
 
@@ -176,15 +185,17 @@ Public Module UWPBuilder
         Public DetectOS As String
 
         ''' <summary>
-        ''' When True, this entry is omitted from generation
+        ''' Indicates whether this entry is omitted from generation. Set by <c> Skip= </c>, or by
+        ''' <see cref="parseAppInfo"/> when the entry has no package or no category.
         ''' </summary>
         Public ShouldSkip As Boolean
 
         ''' <summary>
-        ''' When True, the scaffold <c> FileKeyBase= </c> templates from <c> UWP.ini </c>
-        ''' are not emitted for this entry. Detection keys are unaffected.
-        ''' Use this when defining a secondary entry for an application that shares packages
-        ''' with a primary entry, to avoid duplicating the baseline cleaning targets.
+        ''' Indicates whether to leave out the scaffold <c> FileKeyBase= </c> templates from
+        ''' <c> UWP.ini </c> for this entry. Scaffold DetectFile keys and the shared catalog
+        ''' families are unaffected. Use this when defining a secondary entry for an
+        ''' application that shares packages with a primary entry, to avoid duplicating the
+        ''' baseline cleaning targets.
         ''' </summary>
         Public SkipUWPFileKeys As Boolean
 
@@ -198,16 +209,16 @@ Public Module UWPBuilder
         Public WebViewPaths As List(Of String)
 
         ''' <summary>
-        ''' Explicit <c> WebViewScaffold </c> names selected for this entry. When non-empty,
-        ''' this list replaces <see cref="ScaffoldCatalogs.DefaultScaffolds"/>. Names are matched
-        ''' against the <c> [WebViewScaffold: ...] </c> sections in the shared catalog at
-        ''' <c> Assembler\Scaffolds\webview.ini </c>.
+        ''' Explicit <c> WebViewScaffold </c> names selected for this entry. When
+        ''' <see cref="WebViewScaffoldsKeyPresent"/> is set, this list replaces
+        ''' <see cref="ScaffoldCatalogs.DefaultScaffolds"/>. Names are matched against the
+        ''' <c> [WebViewScaffold: ...] </c> sections in the shared scaffold directory.
         ''' <br /><br />
         '''
-        ''' The sentinel value <c> All </c> (case-insensitive) expands to every scaffold
-        ''' currently in the catalog, including host-risk categories. Any other names
-        ''' listed alongside <c> All </c> are redundant and emit a warning. <c> All </c>
-        ''' is reserved and must not be used as an actual scaffold name in the catalog.
+        ''' The sentinel value <c> All </c> (case-insensitive) expands to every scaffold in the
+        ''' catalog except the legacy tier, including host-risk categories. A legacy scaffold
+        ''' named beside <c> All </c> is added, and any other known name beside it is redundant
+        ''' and warns. <see cref="ScaffoldCatalogs.ResolveScaffolds"/> has the full rules.
         ''' </summary>
         Public WebViewScaffoldNames As List(Of String)
 
@@ -219,16 +230,15 @@ Public Module UWPBuilder
         Public ExcludedWebViewScaffolds As List(Of String)
 
         ''' <summary>
-        ''' Tracks whether the AppInfo entry declared <c> WebViewScaffolds= </c> at all,
-        ''' separately from whether the resulting list is empty. Distinguishes
-        ''' "key absent → use <see cref="ScaffoldCatalogs.DefaultScaffolds"/>" from
-        ''' "key present but empty → emit no scaffold FileKeys despite having a
-        ''' <see cref="WebViewPaths"/> declaration."
+        ''' Indicates whether the AppInfo entry declared <c> WebViewScaffolds= </c> at all,
+        ''' separately from whether the resulting list is empty. When the key is absent we use
+        ''' <see cref="ScaffoldCatalogs.DefaultScaffolds"/>. When it is present but empty we emit
+        ''' no WebView scaffold FileKeys, even with a <see cref="WebViewPaths"/> declaration.
         ''' </summary>
         Public WebViewScaffoldsKeyPresent As Boolean
 
         ''' <summary>
-        ''' Paths of embedded QtWebEngine profile directories associated with this app — the
+        ''' Paths of embedded QtWebEngine profile directories associated with this app: the
         ''' storage folder itself, profile segment included (e.g. <c> ...\QtWebEngine\Default </c>),
         ''' unlike <see cref="WebViewPaths"/> which names the parent of <c> Default\ </c>. The
         ''' QtWebEngine catalog does not bake the profile segment into its templates, so a host
@@ -250,9 +260,10 @@ Public Module UWPBuilder
         Public QtWebEngineCachePaths As List(Of String)
 
         ''' <summary>
-        ''' Explicit <c> QtWebEngineScaffold </c> names selected for this entry. When non-empty,
-        ''' this list replaces <see cref="ScaffoldCatalogs.QtWebEngineDefaultScaffolds"/>. The
-        ''' <c> All </c> sentinel expands to every scaffold in the QtWebEngine catalog.
+        ''' Explicit <c> QtWebEngineScaffold </c> names selected for this entry. When
+        ''' <see cref="QtWebEngineScaffoldsKeyPresent"/> is set, this list replaces
+        ''' <see cref="ScaffoldCatalogs.QtWebEngineDefaultScaffolds"/>. The <c> All </c> sentinel
+        ''' works as it does for <see cref="WebViewScaffoldNames"/>.
         ''' </summary>
         Public QtWebEngineScaffoldNames As List(Of String)
 
@@ -263,13 +274,13 @@ Public Module UWPBuilder
         Public ExcludedQtWebEngineScaffolds As List(Of String)
 
         ''' <summary>
-        ''' Tracks whether the AppInfo entry declared <c> QtWebEngineScaffolds= </c> at all
+        ''' Indicates whether the AppInfo entry declared <c> QtWebEngineScaffolds= </c> at all
         ''' (mirrors <see cref="WebViewScaffoldsKeyPresent"/> for the QtWebEngine family).
         ''' </summary>
         Public QtWebEngineScaffoldsKeyPresent As Boolean
 
         ''' <summary>
-        ''' Paths of the application's Electron <c> userData </c> folders — for Electron this
+        ''' Paths of the application's Electron <c> userData </c> folders. For Electron this
         ''' folder <em>is</em> the Chromium profile, with no <c> Default\ </c> segment, unlike
         ''' <see cref="WebViewPaths"/>. Each entry is a path template that may contain
         ''' <c> %Package% </c> / <c> %PackageN% </c> references, expanded per package at
@@ -278,7 +289,7 @@ Public Module UWPBuilder
         '''
         ''' Relevant to UWPBuilder because a <b> hybrid win32+UWP </b> entry carries the win32
         ''' install's paths alongside the package's, and the win32 half of a hybrid is where
-        ''' Electron shows up — a packaged app whose desktop build is Electron needs this even
+        ''' Electron shows up. A packaged app whose desktop build is Electron needs this even
         ''' though nothing inside the MSIX container is.
         ''' </summary>
         Public ElectronPaths As List(Of String)
@@ -293,9 +304,10 @@ Public Module UWPBuilder
         Public ElectronUpdaterPaths As List(Of String)
 
         ''' <summary>
-        ''' Explicit <c> ElectronScaffold </c> names selected for this entry. When non-empty,
-        ''' this list replaces <see cref="ScaffoldCatalogs.ElectronDefaultScaffolds"/>. The
-        ''' <c> All </c> sentinel expands to every scaffold in the Electron catalog.
+        ''' Explicit <c> ElectronScaffold </c> names selected for this entry. When
+        ''' <see cref="ElectronScaffoldsKeyPresent"/> is set, this list replaces
+        ''' <see cref="ScaffoldCatalogs.ElectronDefaultScaffolds"/>. The <c> All </c> sentinel
+        ''' works as it does for <see cref="WebViewScaffoldNames"/>.
         ''' </summary>
         Public ElectronScaffoldNames As List(Of String)
 
@@ -306,29 +318,31 @@ Public Module UWPBuilder
         Public ExcludedElectronScaffolds As List(Of String)
 
         ''' <summary>
-        ''' Tracks whether the AppInfo entry declared <c> ElectronScaffolds= </c> at all
+        ''' Indicates whether the AppInfo entry declared <c> ElectronScaffolds= </c> at all
         ''' (mirrors <see cref="WebViewScaffoldsKeyPresent"/> for the Electron family).
         ''' </summary>
         Public ElectronScaffoldsKeyPresent As Boolean
 
         ''' <summary>
-        ''' The entry's open-vocabulary variable declarations — every key whose name is not
-        ''' reserved by the parser's <c> Select Case </c>. Each declares a comma-separated
-        ''' list of values fanned out at generation time by <see cref="VariableExpander"/>,
-        ''' driving <c> &lt;token&gt; </c> expansion across this entry's key templates
+        ''' The entry's open-vocabulary variable declarations: every key whose type (its name
+        ''' without digits) the parser's <c> Select Case </c> has no branch for. Each declares a
+        ''' comma-separated list of values fanned out at generation time by
+        ''' <see cref="VariableExpander"/>, driving <c> &lt;token&gt; </c> expansion across this
+        ''' entry's key templates
         ''' </summary>
         Public Variables As VariableSet
 
         ''' <summary>
-        ''' Count of nested <c> &lt;token&gt; </c> references between this entry's own variable
-        ''' declarations, captured before <see cref="VariableExpander.ResolveAll"/> flattens
-        ''' the symbol table
+        ''' How many of this entry's variable declarations reference another declared variable,
+        ''' from <see cref="VariableSet.NestedReferenceCount"/>, captured before
+        ''' <see cref="VariableExpander.ResolveAll"/> flattens the symbol table. UWPBuilder
+        ''' records it but doesn't report it.
         ''' </summary>
         Public NestedVariableRefs As Integer
 
         ''' <summary>
         ''' Creates a new <c> UWPAppInfo </c> for an entry with the given name,
-        ''' initialising all list fields to empty collections
+        ''' initializing all list fields to empty collections
         ''' </summary>
         '''
         ''' <param name="name">
@@ -371,7 +385,8 @@ Public Module UWPBuilder
     End Structure
 
     ''' <summary>
-    ''' Handles the command-line arguments for <c> UWPBuilder </c>
+    ''' Binds the <c> -1f </c> / <c> -1d </c> through <c> -3f </c> / <c> -3d </c> arguments to <see cref="UWPFile1"/>,
+    ''' <see cref="UWPFile2"/> and <see cref="UWPFile3"/>, then runs the build
     ''' </summary>
     Public Sub handleCmdLine()
 
@@ -384,8 +399,10 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Reads the source directory, runs the generation pipeline, writes the output file,
-    ''' and displays the results. Bails early with a header message if the template or
-    ''' app definitions are missing.
+    ''' and displays the results unless <c> SuppressOutput </c> is set. When <c> UWP.ini </c>
+    ''' is missing or empty, or <c> AppInfo\ </c> yields no sections, we set a header message
+    ''' and return without writing anything. Of those cases only a missing <c> UWP.ini </c>
+    ''' fails the run, and a missing source directory throws from <see cref="iniFile.FromFile"/>.
     ''' </summary>
     Public Sub initUWPBuilder()
 
@@ -440,8 +457,10 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Orchestrates the UWP builder process: parses scaffold templates and app definitions,
-    ''' generates one <c> iniSection </c> per app, serialises the result with a header
-    ''' comment block, and writes it to the output file.
+    ''' generates one <c> iniSection </c> per app that isn't skipped, warns about variables an
+    ''' entry declared but never referenced, lints the result through
+    ''' <see cref="remotedebugGuarded"/>, and writes it to <see cref="UWPFile2"/> under a header
+    ''' comment block.
     ''' </summary>
     '''
     ''' <param name="templateIni">
@@ -453,7 +472,7 @@ Public Module UWPBuilder
     ''' </param>
     '''
     ''' <param name="scaffoldDir">
-    ''' Absolute path to the shared scaffold directory (typically
+    ''' Path to the shared scaffold directory (typically
     ''' <c> Assembler\Scaffolds </c>). Every catalog in it is loaded once per run via
     ''' <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which derives each family from its
     ''' section headers, and consumed by per-entry scaffolding.
@@ -524,7 +543,7 @@ Public Module UWPBuilder
 
                 ' Typo backstop: variables declared on the entry but never referenced by any
                 ' <token> in any expanded key. This is what replaces the parser's former
-                ' "Unexpected key type" warning now that the vocabulary is open — a misspelled
+                ' "Unexpected key type" warning now that the vocabulary is open: a misspelled
                 ' reserved key (Pakcage=) lands here as an unreferenced declaration.
                 For Each unused In app.Variables.UnreferencedNames()
 
@@ -565,7 +584,7 @@ Public Module UWPBuilder
     ''' Parses an <c> [EntryScaffold: ...] </c> section from the template file, collecting
     ''' its <c> DetectFileBase= </c> values into <paramref name="scaffoldDetectFiles"/> and
     ''' its <c> FileKeyBase= </c> values into <paramref name="scaffoldFileKeys"/>.
-    ''' Warns on any unrecognised key types.
+    ''' Warns on any unrecognized key types.
     ''' </summary>
     '''
     ''' <param name="scaffoldSection">
@@ -615,8 +634,7 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Splits a comma-separated value into a trimmed, non-empty list of tokens.
-    ''' Used by the WebView scaffold AppInfo keys to parse <c> WebViewScaffolds= </c>
-    ''' and <c> ExcludeWebViewScaffolds= </c>. An empty input yields an empty list.
+    ''' An empty input yields an empty list.
     ''' </summary>
     '''
     ''' <param name="value">
@@ -640,6 +658,13 @@ Public Module UWPBuilder
     ''' Issues warnings and sets <c> ShouldSkip </c> for entries that are structurally
     ''' invalid (missing package or missing category). An entry declaring both
     ''' <c> LangSecRef= </c> and <c> Section= </c> warns and keeps <c> LangSecRef </c>.
+    ''' <br /><br />
+    '''
+    ''' <c> SpecialDetect= </c> and <c> Default= </c> warn and are dropped. Any key type
+    ''' without a branch here becomes a variable declaration, and we resolve the
+    ''' declarations' nested references through <see cref="VariableExpander.ResolveAll"/>
+    ''' before returning. A single-valued key that repeats (<c> DetectOS= </c>,
+    ''' <c> LangSecRef= </c>, a scaffold selection list) keeps its last value.
     ''' </summary>
     '''
     ''' <param name="appSection">
@@ -816,11 +841,14 @@ Public Module UWPBuilder
     ''' One scaffold family's per-entry state, gathered so <see cref="generateUWPEntry"/> can
     ''' emit every family from a single loop instead of one hand-written block per family.
     ''' Adding a family becomes a case in <see cref="scaffoldFamiliesFor"/> rather than another
-    ''' copy of the emission nesting — which is how Electron came to ship in EntryBuilder alone.
+    ''' copy of the emission nesting.
     ''' </summary>
     Private Structure UWPScaffoldFamily
 
-        ''' <summary> The family token, e.g. <c> Electron </c>; phrases diagnostics </summary>
+        ''' <summary>
+        ''' The family token, e.g. <c> Electron </c>. We look up the family's catalog and default
+        ''' set by it, and it phrases diagnostics.
+        ''' </summary>
         Public Label As String
 
         ''' <summary> Names from <c> {Family}Scaffolds= </c>, empty when undeclared </summary>
@@ -829,17 +857,18 @@ Public Module UWPBuilder
         ''' <summary> Names from <c> Exclude{Family}Scaffolds= </c> </summary>
         Public Excluded As List(Of String)
 
-        ''' <summary> Whether <c> {Family}Scaffolds= </c> was declared at all </summary>
+        ''' <summary> Indicates whether <c> {Family}Scaffolds= </c> was declared at all </summary>
         Public KeyPresent As Boolean
 
         ''' <summary>
-        ''' The family's (placeholder, roots) pairs, roots already package-expanded to literals.
-        ''' QtWebEngine and Electron carry two; WebView one.
+        ''' The family's (placeholder, roots) pairs, with <c> %Package% </c> already expanded in
+        ''' the roots. A root can still hold <c> &lt;token&gt; </c> references.
+        ''' QtWebEngine and Electron carry two pairs; WebView one.
         ''' </summary>
         Public Bindings As List(Of ScaffoldCatalogs.ScaffoldRootBinding)
 
         ''' <summary>
-        ''' Whether the entry opted into this family — true when it declared any root for any of
+        ''' Indicates whether the entry opted into this family by declaring a root for any of
         ''' the family's placeholders. QtWebEngine and Electron opt in on either root, since an
         ''' entry may want only the cache or updater templates.
         ''' </summary>
@@ -849,9 +878,7 @@ Public Module UWPBuilder
             End Get
         End Property
 
-        ''' <summary>
-        ''' Creates a family's per-entry state
-        ''' </summary>
+        ''' <summary>Creates a new <c> UWPScaffoldFamily </c> holding one family's per-entry state</summary>
         '''
         ''' <param name="label">
         ''' The family token
@@ -866,11 +893,12 @@ Public Module UWPBuilder
         ''' </param>
         '''
         ''' <param name="keyPresent">
-        ''' Whether <c> {Family}Scaffolds= </c> was declared
+        ''' Indicates whether <c> {Family}Scaffolds= </c> was declared
         ''' </param>
         '''
         ''' <param name="bindings">
-        ''' The family's (placeholder, roots) pairs with roots already package-expanded
+        ''' The family's (placeholder, roots) pairs with <c> %Package% </c> already expanded in
+        ''' the roots
         ''' </param>
         Public Sub New(label As String,
                        selection As List(Of String),
@@ -889,10 +917,11 @@ Public Module UWPBuilder
     End Structure
 
     ''' <summary>
-    ''' Gathers every scaffold family declared on <paramref name="app"/>, package-expanding each
-    ''' declared root so the resulting bindings hold literal paths. Every family in
-    ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> is represented here — that is the parity
-    ''' contract, and <c> ScaffoldParityTests </c> asserts it against the reserved-key set.
+    ''' Builds the per-entry state of every scaffold family for <paramref name="app"/>, whether
+    ''' or not the entry declared it, expanding <c> %Package% </c> in each declared root. This
+    ''' list has to cover every family in <see cref="ScaffoldCatalogs.ScaffoldFamilies"/>. The
+    ''' <c> ScaffoldFamilies_KeyVocabularyPresentInBothBuilders </c> test checks only
+    ''' <see cref="UWPReservedKeys"/>, so a family missing from this list would not fail it.
     ''' <br /><br />
     '''
     ''' Package expansion (phase 0) must happen here, before placeholder substitution (phase 1),
@@ -937,18 +966,20 @@ Public Module UWPBuilder
     ''' Emits one scaffold family's FileKey values for an app. Resolution follows the shared
     ''' grammar in <see cref="ScaffoldCatalogs.ResolveScaffolds"/>: an explicit
     ''' <c> {Family}Scaffolds= </c> wins (a present-but-empty value yields nothing, distinct
-    ''' from the key being absent), the <c> All </c> sentinel expands the whole catalog,
+    ''' from the key being absent), the <c> All </c> sentinel expands the catalog minus its
+    ''' <c> Tier=Legacy </c> scaffolds,
     ''' otherwise the family's default set applies; exclusions are then subtracted and unknown
     ''' names dropped with a warning. Substitution is delegated to
     ''' <see cref="ScaffoldCatalogs.BindFamilyTemplates"/>, so a template whose placeholder has
-    ''' no declared root is dropped rather than emitted literally — which is what keeps
-    ''' Electron's default-on <c> UpdaterCache </c> inert for an entry with no updater root.
+    ''' no declared root is dropped rather than emitted literally. That keeps Electron's
+    ''' default-on <c> UpdaterCache </c> inert for an entry with no updater root.
     ''' <br /><br />
     '''
-    ''' A non-empty scaffold that produced nothing warns only when the entry named its family's
-    ''' scaffolds explicitly; a default-set member yielding nothing is by design and would
-    ''' otherwise warn on nearly every Electron entry. Mirrors EntryBuilder's
-    ''' <c> expandScaffoldFamily </c>.
+    ''' A non-empty scaffold that produced nothing warns only when the entry declared
+    ''' <c> {Family}Scaffolds= </c>, <c> All </c> included; a default-set member yielding
+    ''' nothing is by design and would otherwise warn on nearly every Electron entry. The
+    ''' warning blames a missing root even when phase 2 dropped the keys instead. Mirrors
+    ''' EntryBuilder's <c> expandScaffoldFamily </c>.
     ''' </summary>
     '''
     ''' <param name="family">
@@ -1011,9 +1042,11 @@ Public Module UWPBuilder
     ''' <summary>
     ''' Generates a winapp2.ini entry section for the given <c> UWPAppInfo </c> by applying
     ''' the scaffold template keys and app-specific keys, expanding any
-    ''' <c> %Package% </c> / <c> %PackageN% </c> variables along the way.
-    ''' Keys are emitted in winapp2.ini order: category, Detect, DetectFile,
-    ''' FileKey, RegKey, ExcludeKey.
+    ''' <c> %Package% </c> / <c> %PackageN% </c> variables and <c> &lt;token&gt; </c>
+    ''' references along the way. Keys are emitted in this order: category, Detect,
+    ''' DetectFile, DetectOS, Warning, FileKey, RegKey, ExcludeKey. FileKeys run on from
+    ''' <c> UWP.ini </c>'s scaffold templates to the app's own keys and then the shared
+    ''' catalog families.
     ''' </summary>
     '''
     ''' <param name="app">
@@ -1036,7 +1069,7 @@ Public Module UWPBuilder
     ''' </param>
     '''
     ''' <param name="menuOutput">
-    ''' The <c> MenuSection </c> receiving progress lines for display
+    ''' The <c> MenuSection </c> receiving progress lines and warnings for display
     ''' </param>
     '''
     ''' <returns>
@@ -1066,7 +1099,7 @@ Public Module UWPBuilder
 
         End Select
 
-        ' 2. Detect keys (Registry domain — an undeclared token stays literal rather than
+        ' 2. Detect keys (Registry domain: an undeclared token stays literal rather than
         '    dropping the key), unnumbered if single, numbered from 1 if multiple.
         '    Detect values carry no %Package% reference, so phase 0 does not apply.
         Dim detectValues As New List(Of String)
@@ -1092,7 +1125,7 @@ Public Module UWPBuilder
 
         ' 3. DetectFile keys, scaffold templates expanded per package first, then app-specific,
         '    unnumbered if only one total. App-specific values are deliberately not phase-0
-        '    expanded — only the scaffold templates reference %Package%.
+        '    expanded, since only the scaffold templates reference %Package%.
         Dim allDetectFiles As New List(Of String)
         allDetectFiles.AddRange(expandPackageAndVars(scaffoldDetectFiles, app, ExpansionDomain.Filesystem, "DetectFile", menuOutput))
 
@@ -1116,10 +1149,10 @@ Public Module UWPBuilder
 
         End If
 
-        ' 3b. DetectOS, emitted verbatim — a kernel version range, not a path template
+        ' 3b. DetectOS, emitted verbatim: a kernel version range, not a path template
         If app.DetectOS.Length > 0 Then section.AddKey(New iniKey($"DetectOS={app.DetectOS}"))
 
-        ' 3c. Warnings, emitted verbatim — prose is never variable-expanded
+        ' 3c. Warnings, emitted verbatim: prose is never variable-expanded
         For Each w In app.Warnings
 
             section.AddKey(New iniKey($"Warning={w}"))
@@ -1205,8 +1238,9 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Combines all <c> *.ini </c> files in <paramref name="appInfoDir"/> into a single
-    ''' in-memory <c> iniFile </c>. Files are processed in alphabetical order.
-    ''' Sections with duplicate names across files are silently ignored (first-file-wins).
+    ''' in-memory <c> iniFile </c>. Files are processed in sorted order, top level only.
+    ''' A section whose name an earlier file already used is silently dropped (first file
+    ''' wins), and so is a repeated section within one file.
     ''' </summary>
     '''
     ''' <param name="appInfoDir">
@@ -1241,7 +1275,7 @@ Public Module UWPBuilder
     ''' Runs the phase-2 variable-expansion pass on <paramref name="template"/> and routes any
     ''' returned diagnostics onto <c> gLog </c> and <paramref name="menuOutput"/>. The caller is
     ''' responsible for phase-0 <c> %Package% </c> fan-out and phase-1 root substitution
-    ''' beforehand — running last means a root value's own <c> &lt;token&gt; </c> references are
+    ''' beforehand. Running last means a root value's own <c> &lt;token&gt; </c> references are
     ''' already inlined into <paramref name="template"/> and participate in the same cartesian
     ''' product as the surrounding template's tokens, matching EntryBuilder's semantics.
     ''' </summary>
@@ -1262,7 +1296,7 @@ Public Module UWPBuilder
     '''
     ''' <param name="keyLabel">
     ''' Short tag (e.g. <c> Detect </c>, <c> FileKey </c>) embedded into diagnostic messages
-    ''' for source-of-warning localisation
+    ''' so a warning names the key it came from
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -1399,8 +1433,10 @@ Public Module UWPBuilder
     ''' <list type="bullet">
     ''' 
     ''' <item>
-    ''' <c> %PackageN% </c> (numbered): expands exactly once using the Nth package;
-    ''' any other packages are ignored
+    ''' <c> %PackageN% </c> (numbered): expands exactly once using the Nth package.
+    ''' Only the lowest such N in the template is replaced, and any other package
+    ''' reference in it, numbered or not, stays literal. An N past the package count
+    ''' isn't recognized and stays literal too, without a warning.
     ''' </item>
     ''' 
     ''' <item>
@@ -1413,6 +1449,8 @@ Public Module UWPBuilder
     ''' </item>
     ''' 
     ''' </list>
+    '''
+    ''' Matching is case-sensitive, so <c> %package% </c> isn't expanded.
     ''' </summary>
     '''
     ''' <param name="template">

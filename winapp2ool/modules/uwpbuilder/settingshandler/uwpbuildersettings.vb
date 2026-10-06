@@ -29,8 +29,8 @@ Option Strict On
 ''' <item>
 ''' <b><c> UWPFile1 </c></b>
 ''' <description>
-''' Source directory — the root folder containing the UWP scaffold template
-''' (<c> UWP.ini </c>) and an <c> AppInfo\ </c> subdirectory whose per-letter
+''' Source directory: the root folder containing the UWP scaffold template
+''' (<c> UWP.ini </c>) and an <c> AppInfo\ </c> subdirectory whose top-level
 ''' <c> *.ini </c> files are combined at runtime to produce the full app list.
 ''' Only the <c> Dir </c> of this chooser is used; the <c> Name </c> is ignored.
 ''' </description>
@@ -39,7 +39,7 @@ Option Strict On
 ''' <item>
 ''' <b><c> UWPFile2 </c></b>
 ''' <description>
-''' Output file — where the generated UWP entries are written.
+''' Output file: where the generated UWP entries are written.
 ''' This file is consumed by the build pipeline to produce the final winapp2.ini.
 ''' </description>
 ''' </item>
@@ -52,8 +52,9 @@ Option Strict On
 ''' section headers (<c> [WebViewScaffold: ...] </c>, <c> [QtWebEngineScaffold: ...] </c>,
 ''' <c> [ElectronScaffold: ...] </c>), so adding a family costs no new setting here. Only
 ''' the <c> Dir </c> of this chooser is used; the <c> Name </c> is ignored. A missing
-''' directory or catalog file continues the run with zero scaffold FileKeys for the
-''' affected families and a warning logged.
+''' directory warns once and the run continues with zero catalog FileKeys. A missing
+''' catalog file isn't warned about at load, but each entry that declares that family's
+''' root then warns for every scaffold it requests.
 ''' </description>
 ''' </item>
 '''
@@ -76,19 +77,22 @@ Public Module uwpbuildersettings
     Public Property UWPFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "uwp.ini", "uwp.ini", mustExist:=False)
 
     ''' <summary>
-    ''' The shared scaffold directory consumed by both UWPBuilder and EntryBuilder, holding
-    ''' one catalog file per engine family. Typically <c> Assembler\Scaffolds </c>.
+    ''' The shared scaffold directory holding the engine-family catalogs, typically
+    ''' <c> Assembler\Scaffolds </c>, which EntryBuilder reads through its own setting.
+    ''' We take each family from the section headers, not the filenames.
     ''' Only the <c> Dir </c> property is used; <c> Name </c> is ignored.
     ''' </summary>
     Public Property UWPFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 
     ''' <summary>
-    ''' Indicates that the module settings have been modified from their defaults
+    ''' Indicates whether the module settings have been modified from their defaults
     ''' </summary>
     Public Property UWPBuilderModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Restores all UWPBuilder settings to their defaults and persists the reset to disk
+    ''' Restores all UWPBuilder settings to their defaults and records them in the settings
+    ''' file through <see cref="SaveModule"/>. Nothing is written to disk here.
+    ''' <see cref="FlushIfDirty"/> does that later, if the save gate allows it
     ''' </summary>
     Public Sub InitDefaultUWPBuilderSettings()
 
