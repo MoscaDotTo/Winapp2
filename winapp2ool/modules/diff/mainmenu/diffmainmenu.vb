@@ -24,8 +24,9 @@ Module diffmainmenu
 
     ''' <summary>
     ''' Builds the Diff main menu with all options and their dispatch handlers registered inline.
-    ''' Called by both <c> printDiffMainMenu </c> (to render) and <c> handleDiffUserInput </c>
-    ''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
+    ''' Called by both <see cref="printDiffMainMenu"/> (to render) and <see cref="handleDiffUserInput"/>
+    ''' (to dispatch), so the displayed option numbers and the dispatch table come from the same code.
+    ''' Building it also sets the console height and, when offline, turns <c> DownloadDiffFile </c> off.
     ''' </summary>
     Private Function buildDiffMenu() As MenuSection
 
@@ -89,7 +90,8 @@ Module diffmainmenu
     End Sub
 
     ''' <summary>
-    ''' Handles the user input from the Diff main menu
+    ''' Handles the user input from the Diff main menu. An empty input runs the Diff when a newer
+    ''' file is available, <c> 0 </c> exits the module, and any other number dispatches to its option.
     ''' </summary>
     '''
     ''' <param name="input">

@@ -20,24 +20,28 @@ Option Strict On
 Imports System.Text.RegularExpressions
 
 ''' <summary>
-''' Base class for key comparison strategies
+''' Base class for key comparison strategies. Each one decides whether a new key matches or
+''' covers an old key. The test is one-directional, so callers that want either direction call
+''' it twice with the keys swapped.
 ''' </summary>
 Public MustInherit Class KeyComparisonStrategy
 
     ''' <summary>
-    ''' Regex special characters to escape
+    ''' Characters rewritten before regex matching: <c> * </c> becomes a regex wildcard and
+    ''' the rest are escaped
     ''' </summary>
     Protected ReadOnly regexCharsIn As String() = {"*", "+", "{", "}", "[", "]", "$", "(", ")"}
 
     ''' <summary>
-    ''' Regex-escaped replacements corresponding to each entry in <c> regexCharsIn </c>
+    ''' Regex replacements corresponding to each entry in <see cref="regexCharsIn"/>
     ''' </summary>
     Protected ReadOnly regexCharsOut As String() = {".*", "\+", "\{", "\}", "\[", "\]", "\$", "\(", "\)"}
 
     Private Shared ReadOnly _regexCache As New Concurrent.ConcurrentDictionary(Of String, Regex)(StringComparer.Ordinal)
 
     ''' <summary>
-    ''' Compares two <c> iniKey </c> objects for equivalence
+    ''' Returns whether <paramref name="newKey"/> is equivalent to <paramref name="oldKey"/> or
+    ''' covers it, for example through a wildcard or a parent path
     ''' </summary>
     '''
     ''' <param name="newKey">
@@ -49,16 +53,16 @@ Public MustInherit Class KeyComparisonStrategy
     ''' </param>
     '''
     ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Indicates the new key has more parameters
+    ''' Assigned by strategies that compare FileKey patterns one by one: <c> True </c> when the
+    ''' new key has more patterns than the old. Other strategies leave it unchanged. <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <param name="possibleWildCardReduction">
-    ''' Indicates possible wildcard consolidation
+    ''' Assigned alongside <paramref name="matchedFileKeyHasMoreParams"/>: <c> True </c> when the
+    ''' match appears to narrow wildcard coverage <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
-    '''
-    ''' <returns>
-    ''' <c> True </c> if keys are equivalent
-    ''' </returns>
     Public MustOverride Function Compare(newKey As iniKey,
                                          oldKey As iniKey,
                           Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
@@ -66,29 +70,24 @@ Public MustInherit Class KeyComparisonStrategy
 
 
     ''' <summary>
-    ''' Checks the equivalence of two strings using regex. Regex matches must capture the 0th 
-    ''' character in the <c> <paramref name="oldVal"/> </c>to be considered equivalent. 
+    ''' Returns whether <paramref name="newVal"/> equals or captures <paramref name="oldVal"/>.
+    ''' A <paramref name="newVal"/> of <c> * </c> or <c> .* </c> captures anything, and equal values
+    ''' match ignoring case. Otherwise a <paramref name="newVal"/> without a <c> * </c> doesn't match.
+    ''' One starting with <c> .*. </c> matches any <paramref name="oldVal"/> ending in the text after
+    ''' the <c> .* </c>, ignoring case. Any other <paramref name="newVal"/> is used as a case-insensitive
+    ''' regex, and matches when <paramref name="oldVal"/> starts with the text of the regex's first
+    ''' match in it, so <c> History.* </c> doesn't match <c> Media History </c>. The match needn't
+    ''' reach the end of <paramref name="oldVal"/>.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="newVal">
-    ''' The new value, assessed to see if it is identical to or 
-    ''' captures via regex <c> <paramref name="oldVal"/> </c>
+    ''' The new value, expected to be regex text already (see <see cref="regexCharsIn"/>)
+    ''' when it holds a wildcard
     ''' </param>
-    ''' 
+    '''
     ''' <param name="oldVal">
-    ''' The old value, assessed to see if it is itentical to or 
-    ''' captured via regex by <c> <paramref name="newVal"/> </c>
+    ''' The old value, tested as plain text
     ''' </param>
-    ''' 
-    ''' <returns>
-    ''' <c> True </c> if values are equivalent <br />
-    ''' <c> False </c> otherwise
-    ''' </returns>
-    ''' 
-    ''' <remarks>
-    ''' Supports wildcards (*) 
-    ''' Attempts to prevent overly permissive captures (e.g., "History*" matching "Media History")
-    ''' </remarks>
     Protected Shared Function CompareValues(newVal As String,
                                             oldVal As String) As Boolean
 
@@ -135,15 +134,15 @@ Public MustInherit Class KeyComparisonStrategy
 End Class
 
 ''' <summary>
-''' Strategy for comparing simple keys (most key types)
+''' Strategy for every key type except FileKey, DetectFile, Detect and RegKey: values must be equal
 ''' </summary>
 Public Class SimpleKeyComparisonStrategy
 
     Inherits KeyComparisonStrategy
 
     ''' <summary>
-    ''' Returns <c> True </c> if <paramref name="newKey"/> and <paramref name="oldKey"/> share a type
-    ''' and have identical values (case-insensitive)
+    ''' Returns whether <paramref name="newKey"/> and <paramref name="oldKey"/> share a type
+    ''' and have identical values, both compared ignoring case
     ''' </summary>
     ''' 
     ''' <param name="newKey">
@@ -162,9 +161,6 @@ Public Class SimpleKeyComparisonStrategy
     ''' Unused by this strategy; present for interface compatibility
     ''' </param>
     ''' 
-    ''' <returns>
-    ''' <c> True </c> if the keys are of the same type and have equal values <br /> 
-    ''' <c> False </c>, otherwise </returns>
     Public Overrides Function Compare(newKey As iniKey,
                                       oldKey As iniKey,
                        Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
@@ -179,26 +175,40 @@ Public Class SimpleKeyComparisonStrategy
 End Class
 
 ''' <summary>
-''' Strategy for comparing FileKey and DetectFile keys (supports wildcards and paths)
+''' Strategy for comparing FileKey and DetectFile keys as paths, with wildcards
 ''' </summary>
 Public Class PathKeyComparisonStrategy
 
     Inherits KeyComparisonStrategy
 
     ''' <summary>
-    ''' Compares two FileKey or DetectFile <c> iniKey </c> objects by matching each backslash-delimited
-    ''' path component in turn, using wildcard/regex matching on non-root components and special
-    ''' handling for the pipe-delimited file pattern and flags in the final component
+    ''' Returns whether <paramref name="newKey"/> matches or covers <paramref name="oldKey"/>,
+    ''' comparing their backslash-delimited components in order with <see cref="CompareValues"/>.
+    ''' Types must match and equal values match at once, both ignoring case. <br /><br />
+    '''
+    ''' A new key with more components than the old never matches. A new FileKey needs the same
+    ''' number of components unless its value contains <c> RECURSE </c> or <c> REMOVESELF </c>
+    ''' (case-sensitive), when it may be shorter and so cover the old key's subfolders. A new
+    ''' DetectFile may always be shorter. The first component is compared as written (unless it's
+    ''' the only one), and the rest after <see cref="SanitizePath"/> has rewritten them. A component right after <c> Packages </c>
+    ''' also matches when the old key's wildcard there covers the new component, unless the old
+    ''' component is a bare <c> * </c>. <br /><br />
+    '''
+    ''' For a FileKey the new key's last component goes to <see cref="FinalizeFileKeyEquivalence"/>,
+    ''' which ignores the flag after the second pipe.
     ''' </summary>
     ''' <param name="newKey">The key from the new version</param>
     ''' <param name="oldKey">The key from the old version</param>
     ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Set to <c> True </c> if the new key's semicolon-delimited parameter list is longer than the old key's
+    ''' Assigned when a FileKey match is decided pattern by pattern: <c> True </c> if the new key
+    ''' has more semicolon-delimited patterns than the old key. Left unchanged otherwise. <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     ''' <param name="possibleWildCardReduction">
-    ''' Set to <c> True </c> if the match appears to reduce wildcard coverage
+    ''' Assigned with <paramref name="matchedFileKeyHasMoreParams"/>: <c> True </c> if the match
+    ''' appears to narrow wildcard coverage. Left unchanged otherwise. <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
-    ''' <returns><c> True </c> if all path components and file parameters are considered equivalent</returns>
     Public Overrides Function Compare(newKey As iniKey,
                                       oldKey As iniKey,
                        Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
@@ -254,11 +264,14 @@ Public Class PathKeyComparisonStrategy
     End Function
 
     ''' <summary>
-    ''' Escapes regex special characters in path components
+    ''' Rewrites path components as regex text with <see cref="SanitizeRegex"/>, deciding from
+    ''' <paramref name="keyValue"/>. If it has no <c> * </c>, we do nothing. If its first <c> * </c>
+    ''' comes before its first pipe, or it has no pipe, we rewrite every component of both splits.
+    ''' Otherwise we rewrite only the last component of each.
     ''' </summary>
     '''
     ''' <param name="keyValue">
-    ''' The full key value string, used to locate the position of the first wildcard and pipe separator
+    ''' The new key's full value, used to locate the first wildcard and pipe separator
     ''' </param>
     '''
     ''' <param name="newKeySplit">
@@ -296,7 +309,8 @@ Public Class PathKeyComparisonStrategy
     End Sub
 
     ''' <summary>
-    ''' Escapes regex special characters in string array
+    ''' Rewrites each string as regex text: <c> * </c> becomes <c> .* </c> and <c> + { } [ ] $ ( ) </c>
+    ''' are escaped. Other regex characters, including <c> . </c>, pass through unchanged.
     ''' </summary>
     ''' <param name="splitPath">The array of path components to sanitize in place</param>
     Private Sub SanitizeRegex(ByRef splitPath As String())
@@ -314,9 +328,9 @@ Public Class PathKeyComparisonStrategy
     End Sub
 
     ''' <summary>
-    ''' Returns <c> True </c> when the backslash component at <paramref name="index"/> is a UWP
-    ''' package-family folder — i.e. it directly follows a <c> Packages </c> component — so a scoped
-    ''' reverse-wildcard match may be applied to it
+    ''' Returns whether the component at <paramref name="index"/> directly follows a
+    ''' <c> Packages </c> component (ignoring case), which makes it a UWP package-family folder
+    ''' that may take a reverse-wildcard match
     ''' </summary>
     '''
     ''' <param name="keySplit">
@@ -326,11 +340,6 @@ Public Class PathKeyComparisonStrategy
     ''' <param name="index">
     ''' Index of the component under consideration
     ''' </param>
-    '''
-    ''' <returns>
-    ''' <c> True </c> if the preceding component is <c> Packages </c> <br />
-    ''' <c> False </c> otherwise
-    ''' </returns>
     Private Shared Function IsPackageMonikerComponent(keySplit As String(),
                                                       index As Integer) As Boolean
 
@@ -339,9 +348,16 @@ Public Class PathKeyComparisonStrategy
     End Function
 
     ''' <summary>
-    ''' Compares the final parameter components for FileKeys
+    ''' Returns whether the new FileKey's last component matches the old key's component at the
+    ''' same position. The text before the first pipe must match. Then the pattern lists (between
+    ''' the first and second pipe) match if <see cref="CompareValues"/> accepts them whole, or, when
+    ''' either list has a <c> ; </c>, if any new pattern matches any old pattern
+    ''' (<see cref="MatchParameters"/>). Nothing after the second pipe is compared, so adding or
+    ''' dropping <c> RECURSE </c> alone doesn't stop a match. When the old component is a mid-path
+    ''' folder (a shorter recursive new key), its pattern list is empty, so in practice only a
+    ''' bare <c> * </c> pattern, alone or in the list, covers it.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="oldVal">
     ''' The final path component of the old key value, including pipe-delimited pattern and flags
     ''' </param>
@@ -351,24 +367,20 @@ Public Class PathKeyComparisonStrategy
     ''' </param>
     '''
     ''' <param name="oldKeySplit">
-    ''' All backslash-split path components of the old key value
+    ''' All backslash-split path components of the old key value. Not used.
     ''' </param>
     '''
     ''' <param name="newKeySplit">
-    ''' All backslash-split path components of the new key value
+    ''' All backslash-split path components of the new key value. Not used.
     ''' </param>
     '''
     ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Set to <c> True </c> if the new key's parameter list is longer than the old key's
+    ''' Assigned by <see cref="MatchParameters"/> when it decides the match; left unchanged otherwise
     ''' </param>
     '''
     ''' <param name="possibleWildCardReduction">
-    ''' Set to <c> True </c> if the new key appears to have reduced wildcard specificity
+    ''' Assigned by <see cref="MatchParameters"/> when it decides the match; left unchanged otherwise
     ''' </param>
-    '''
-    ''' <returns>
-    ''' <c> True </c> if the final FileKey components are considered equivalent
-    ''' </returns>
     Private Function FinalizeFileKeyEquivalence(oldVal As String,
                                                newVal As String,
                                                oldKeySplit As String(),
@@ -396,28 +408,27 @@ Public Class PathKeyComparisonStrategy
     End Function
 
     ''' <summary>
-    ''' Confirms that any two parameters for a pair of FileKeys match
+    ''' Returns whether at least one new pattern matches at least one old pattern under
+    ''' <see cref="CompareValues"/>. On the first matching pair we assign both outputs, overwriting
+    ''' whatever they held, and stop. When nothing matches we leave them unchanged.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="flags">
-    ''' The semicolon-delimited parameter string from the new key's pipe section
+    ''' The semicolon-delimited pattern list from the new key's pipe section
     ''' </param>
     '''
     ''' <param name="oldFlags">
-    ''' The semicolon-delimited parameter string from the old key's pipe section
+    ''' The semicolon-delimited pattern list from the old key's pipe section
     ''' </param>
     '''
     ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Set to <c> True </c> if the new parameter list is longer than the old
+    ''' Set to whether the new list has more patterns than the old
     ''' </param>
     '''
     ''' <param name="possibleWildCardReduction">
-    ''' Set to <c> True </c> if the match appears to reduce wildcard coverage
+    ''' Set to whether the matched old pattern has a <c> * </c> that the matched new pattern lacks,
+    ''' or the new list is shorter than the old and has a <c> * </c> anywhere
     ''' </param>
-    '''
-    ''' <returns>
-    ''' <c> True </c> if at least one new parameter matches at least one old parameter
-    ''' </returns>
     Private Function MatchParameters(flags As String,
                                 oldFlags As String,
                                 ByRef matchedFileKeyHasMoreParams As Boolean,
@@ -454,14 +465,20 @@ Public Class PathKeyComparisonStrategy
 End Class
 
 ''' <summary>
-''' Strategy for comparing Detect keys
+''' Strategy for comparing Detect and RegKey keys as registry paths, where a parent path covers its children
 ''' </summary>
 Public Class DetectKeyComparisonStrategy
 
     Inherits KeyComparisonStrategy
 
     ''' <summary>
-    ''' Compares two Detect or RegKey <c> iniKey </c> objects, treating parent registry paths as capturing their children
+    ''' Returns whether <paramref name="newKey"/> matches or covers <paramref name="oldKey"/>.
+    ''' Types must match and equal values match at once, both ignoring case. A RegKey's value
+    ''' name (after its first pipe) is split off its path, and a Detect key's whole value is its
+    ''' path. On the same path (ignoring case), a new RegKey without a value name covers the old
+    ''' key, and one with a value name matches when <see cref="CompareValues"/> accepts the old
+    ''' value name. A new key whose path is a parent of the old key's path covers it, except a
+    ''' RegKey with a value name.
     ''' </summary>
     '''
     ''' <param name="newKey">
@@ -482,8 +499,8 @@ Public Class DetectKeyComparisonStrategy
     '''
     ''' <returns>
     ''' <c> True </c> if the keys are equivalent, or <paramref name="newKey"/> is a parent path of
-    ''' <paramref name="oldKey"/> — except a value-targeted RegKey, which requires an exact path match
-    ''' since a value deletion beneath one key is not subsumed by a parent path
+    ''' <paramref name="oldKey"/>. A value-targeted RegKey requires an exact path match, since a
+    ''' value deletion beneath one key is not subsumed by a parent path.
     ''' </returns>
     Public Overrides Function Compare(newKey As iniKey,
                                       oldKey As iniKey,
@@ -566,16 +583,15 @@ Public Class KeyComparisonStrategyFactory
     Private Shared ReadOnly detectStrategy As New DetectKeyComparisonStrategy()
 
     ''' <summary>
-    ''' Gets the appropriate strategy for the given <c> iniKey </c> key type
+    ''' Returns the strategy for <paramref name="key"/>'s type: paths for <c> FileKey </c> and
+    ''' <c> DetectFile </c>, registry paths for <c> Detect </c> and <c> RegKey </c>, and exact values
+    ''' for everything else. The type name match is case-sensitive.
     ''' </summary>
     '''
     ''' <param name="key">
     ''' The key whose type determines which strategy to return
     ''' </param>
     '''
-    ''' <returns>
-    ''' The <c> KeyComparisonStrategy </c> appropriate for <paramref name="key"/>'s type
-    ''' </returns>
     Public Shared Function GetStrategy(key As iniKey) As KeyComparisonStrategy
 
         Select Case key.KeyType
@@ -591,7 +607,9 @@ Public Class KeyComparisonStrategyFactory
     End Function
 
     ''' <summary>
-    ''' Compares two <c> iniKey </c> keys using the appropriate strategy.
+    ''' Returns whether <paramref name="newKey"/> matches or covers <paramref name="oldKey"/>, using
+    ''' the strategy <see cref="GetStrategy"/> picks for <paramref name="newKey"/>'s type. The test
+    ''' is one-directional.
     ''' </summary>
     '''
     ''' <param name="newKey">
@@ -603,16 +621,16 @@ Public Class KeyComparisonStrategyFactory
     ''' </param>
     '''
     ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Set to <c> True </c> if the new key has more pipe-delimited parameters than the old
+    ''' Assigned when a FileKey match is decided pattern by pattern: <c> True </c> if the new key
+    ''' has more semicolon-delimited patterns than the old. Left unchanged otherwise. <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <param name="possibleWildCardReduction">
-    ''' Set to <c> True </c> if the match appears to reduce wildcard coverage
+    ''' Assigned with <paramref name="matchedFileKeyHasMoreParams"/>: <c> True </c> if the match
+    ''' appears to narrow wildcard coverage. Left unchanged otherwise. <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
-    '''
-    ''' <returns>
-    ''' <c> True </c> if the two keys are considered equivalent under the appropriate strategy
-    ''' </returns>
     Public Shared Function CompareKeys(newKey As iniKey,
                                        oldKey As iniKey,
                         Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
@@ -626,17 +644,20 @@ Public Class KeyComparisonStrategyFactory
 End Class
 
 ''' <summary>
-''' Information about key matches between two <c> iniSection </c> entries.
+''' Information about how an old entry's FileKeys and RegKeys match a new entry's.
+''' Other key types aren't counted.
 ''' </summary>
 Public Class KeyMatchInfo
 
     ''' <summary>
-    ''' Number of FileKey values from the old entry matched in the new entry
+    ''' Number of FileKey values from the old entry matched in the new entry, not counting
+    ''' values in <c> DisallowedPaths </c>
     ''' </summary>
     Public Property FileKeyMatches As Integer
 
     ''' <summary>
-    ''' Number of RegKey values from the old entry matched in the new entry
+    ''' Number of RegKey values from the old entry matched in the new entry, not counting
+    ''' values in <c> DisallowedPaths </c>
     ''' </summary>
     Public Property RegKeyMatches As Integer
 
@@ -646,42 +667,47 @@ Public Class KeyMatchInfo
     Public Property TotalMatches As Integer
 
     ''' <summary>
-    ''' Whether all FileKeys from the old entry were matched in the new entry
+    ''' Indicates whether all FileKeys from the old entry were matched in the new entry
     ''' </summary>
     Public Property AllFileKeysMatched As Boolean = True
 
     ''' <summary>
-    ''' Whether all RegKeys from the old entry were matched in the new entry
+    ''' Indicates whether all RegKeys from the old entry were matched in the new entry
     ''' </summary>
     Public Property AllRegKeysMatched As Boolean = True
 
     ''' <summary>
-    ''' Whether every FileKey and RegKey from the old entry was matched
+    ''' Indicates whether every FileKey and RegKey from the old entry was matched
     ''' </summary>
     Public Property AllKeysMatched As Boolean
 
     ''' <summary>
-    ''' Whether the count of FileKeys is the same in both old and new entries
+    ''' Indicates whether every old FileKey matched and both entries have the same number of FileKeys.
+    ''' Stays <c> True </c> when the old entry has no FileKeys.
     ''' </summary>
     Public Property FileKeyCountsMatch As Boolean = True
 
     ''' <summary>
-    ''' Whether the count of RegKeys is the same in both old and new entries
+    ''' Indicates whether every old RegKey matched and both entries have the same number of RegKeys.
+    ''' Stays <c> True </c> when the old entry has no RegKeys.
     ''' </summary>
     Public Property RegKeyCountsMatch As Boolean = True
 
     ''' <summary>
-    ''' Whether FileKey and RegKey counts both match between old and new entries
+    ''' Indicates whether both <see cref="FileKeyCountsMatch"/> and <see cref="RegKeyCountsMatch"/> hold
     ''' </summary>
     Public Property CountsMatch As Boolean
 
     ''' <summary>
-    ''' Whether any matched new key has more pipe-delimited parameters than its old counterpart
+    ''' Indicates whether a matched new FileKey has more semicolon-delimited patterns than its old
+    ''' counterpart. Each FileKey match decided pattern by pattern overwrites it, so it reflects
+    ''' the last such match rather than any of them.
     ''' </summary>
     Public Property MatchHadMoreParams As Boolean
 
     ''' <summary>
-    ''' Whether any matched key appears to have reduced wildcard specificity
+    ''' Indicates whether a matched FileKey appears to have narrowed its wildcard coverage,
+    ''' overwritten the same way as <see cref="MatchHadMoreParams"/>
     ''' </summary>
     Public Property PossibleWildCardReduction As Boolean
 

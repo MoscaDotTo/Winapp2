@@ -21,8 +21,8 @@ Option Strict On
 '''
 ''' Compares two winapp2.ini format <c> iniFile </c>s and summarizes the changes to the user
 ''' <br />
-''' <br /> NOTE: to "exist" here means for an entry of the same exact name (case sensitive) to exist
-''' <br /> Changes fall three major categories:
+''' <br /> To "exist" here means for an entry of the same name (compared case-insensitively) to exist
+''' <br /> Changes fall into three major categories:
 '''
 ''' <list type="table">
 '''
@@ -129,13 +129,18 @@ Module Diff
     End Sub
 
     ''' <summary>
-    ''' Runs a diff using command line arguments, allowing Diff to be called programmatically
+    ''' Resets the Diff settings to their defaults, applies the command line arguments, and runs a
+    ''' diff if there is a newer file to compare against: the download when downloading is on,
+    ''' otherwise <c> -2f </c>. Online, <c> -d </c> without <c> -2f </c> leaves nothing to
+    ''' compare and the run does nothing. Under <c> -offline </c>, <c> -d </c> turns downloading
+    ''' on, and nothing checks the offline flag before the download.
     '''
-    ''' <br /> Valid Diff args:
-    ''' <br /> -d           : disable downloading (compare two local files)
-    ''' <br /> -donttrim    : disable trimming the downloaded file before diffing
-    ''' <br /> -savelog     : save the diff output to disk on exit
+    ''' <br /> Valid Diff args (each flag toggles its setting from the default):
+    ''' <br /> -d           : toggle downloading, which is on unless offline. Online this means comparing two local files; offline it turns downloading on
+    ''' <br /> -donttrim    : toggle trimming the downloaded file before diffing, also on unless offline
+    ''' <br /> -savelog     : save the diff output to disk
     ''' <br /> -verbose     : print the full text of changed entries in the diff output
+    ''' <br /> -1f/-2f/-3f  : the old file, the new file, and the log file
     ''' <br /> -4f/-summaryf: write the machine-readable outcome summary to this file
     ''' </summary>
     Public Sub HandleCmdLine()
@@ -160,6 +165,18 @@ Module Diff
     End Sub
 
 
+    ''' <summary>
+    ''' Diffs <paramref name="firstFile"/> against the remote winapp2.ini for the current flavor.
+    ''' We restore the download and trim settings afterward, but leave <c> DiffFile1 </c> pointing
+    ''' at <paramref name="firstFile"/>.
+    ''' </summary>
+    '''
+    ''' <param name="firstFile">The local file to use as the old version</param>
+    '''
+    ''' <param name="trimFile">
+    ''' Indicates whether to trim the downloaded file for the current system before diffing <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Sub DiffRemoteFile(firstFile As iniFileChooser,
                      Optional trimFile As Boolean = False)
 
@@ -180,8 +197,11 @@ Module Diff
     End Sub
 
     ''' <summary>
-    ''' Ensures both files have content before kicking off the Diff
-    ''' and then summarizes the output from the Diff
+    ''' Loads both files, trimming the downloaded one when <c> TrimRemoteFile </c> is set, and
+    ''' returns early with a header message if either has no sections. Otherwise runs the diff,
+    ''' prints the output unless output is suppressed, saves the log when <c> SaveDiffLog </c> is
+    ''' set, writes the outcome summary, and sets the next menu header. The trim path downloads
+    ''' the remote file a second time.
     ''' </summary>
     Public Sub ConductDiff()
 
@@ -250,7 +270,7 @@ Module Diff
     ''' <summary>
     ''' Writes the most recent Diff's outcome to <c> DiffFile4 </c> as parseable
     ''' <c> key=value </c> lines, so a calling script can act on what the Diff found without
-    ''' parsing the prose log. No-ops when no summary path was given
+    ''' parsing the prose log. No-ops when no summary path was given or no Diff has completed.
     ''' </summary>
     Private Sub WriteOutcomeSummary()
 
@@ -264,7 +284,9 @@ Module Diff
     End Sub
 
     ''' <summary>
-    ''' Gets the version string from the first comment of a winapp2.ini file
+    ''' Returns the version string from the first comment of a winapp2.ini file: the comment
+    ''' uppercased, with its leading semicolons trimmed and <c> VERSION: </c> replaced by
+    ''' <c> version </c>
     ''' </summary>
     ''' 
     ''' <param name="someFile">
@@ -282,8 +304,9 @@ Module Diff
     End Function
 
     ''' <summary>
-    ''' Runs the diff pipeline using the <c> iniFile </c>-based core classes.
-    ''' Returns all output sections for display and logging.
+    ''' Runs the diff pipeline over the two files and stores the result in
+    ''' <see cref="MostRecentDiffOutcome"/>. We normalize deprecated paths in both files in place
+    ''' first, so the caller's <c> iniFile </c> objects are changed.
     ''' </summary>
     '''
     ''' <param name="oldFile">
@@ -323,7 +346,7 @@ Module Diff
                          action()
                      End Sub
 
-        ' A step that found nothing contributes nothing — including its trailing divider. Adding
+        ' A step that found nothing contributes nothing, including its trailing divider. Adding
         ' the divider unconditionally left a diff with few changes (and a diff with none at all)
         ' rendering a stack of empty bordered rows with no content between them
         Dim collectStep = Sub(label As String, fn As Func(Of IEnumerable(Of MenuSection)))

@@ -35,50 +35,54 @@ Public Module diffsettings
 
     ''' <summary>
     ''' The "new" version of winapp2.ini against which <c> DiffFile1 </c> will be compared
-    ''' <br /> When downloading, this is the remote version of winapp2.ini
+    ''' <br /> When downloading, Diff doesn't read this file and compares against the remote
+    ''' winapp2.ini for the current flavor instead
     ''' </summary>
     Public Property DiffFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=True)
 
     ''' <summary>
-    ''' The path for the Diff log
+    ''' The path for the Diff log, written only when <c> SaveDiffLog </c> is set
     ''' </summary>
     Public Property DiffFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "diff.txt", "diff.txt", mustExist:=False)
 
     ''' <summary>
-    ''' The path for the machine-readable Diff outcome summary. Empty by default — the summary is
-    ''' written only when a caller names a path, which in practice means a scripted pipeline
-    ''' passing <c> -4f </c> / <c> -summaryf </c>
+    ''' The path for the machine-readable Diff outcome summary. It is empty by default, and the
+    ''' summary is written only when it names a file. The menu has no option to set it; the
+    ''' <c> -4f </c> / <c> -summaryf </c> argument does.
     ''' </summary>
     Public Property DiffFile4 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=False)
 
     ''' <summary>
-    ''' Indicates that a remote winapp2.ini should be downloaded to use as <c> DiffFile2 </c>
+    ''' Indicates whether to compare <c> DiffFile1 </c> against the remote winapp2.ini for the
+    ''' current flavor instead of <c> DiffFile2 </c>
     ''' </summary>
     Public Property DownloadDiffFile As Boolean = Not isOffline
 
     ''' <summary> 
-    ''' Indicates that the diff output from winapp2ool's global log should be saved to disk 
+    ''' Indicates whether the diff output from winapp2ool's global log should be saved to <c> DiffFile3 </c>
     ''' </summary>
     Public Property SaveDiffLog As Boolean = False
 
     ''' <summary> 
-    ''' Indicates that the module settings have been modified from their defaults 
+    ''' Indicates whether the module settings have been modified from their defaults
     ''' </summary>
     Public Property DiffModuleSettingsChanged As Boolean = False
 
     ''' <summary> 
-    ''' Indicates that the remote (online) should be trimmed for the local system before beginning the Diff 
+    ''' Indicates whether the downloaded winapp2.ini should be trimmed for the local system before
+    ''' beginning the Diff. Has no effect unless <c> DownloadDiffFile </c> is set.
     ''' </summary>
     Public Property TrimRemoteFile As Boolean = Not isOffline
 
     ''' <summary>
-    ''' Indicates that full entries should be printed in the Diff output. <br />
+    ''' Indicates whether full entries should be printed in the Diff output. <br />
     ''' Called "verbose mode" in the menu
     ''' </summary>
     Public Property ShowFullEntries As Boolean = False
 
     ''' <summary>
-    ''' Restores all Diff settings to their defaults and persists the reset to disk
+    ''' Restores all Diff settings to their defaults and records them in the in-memory settings
+    ''' file. Writing that to disk happens later, behind the settings save gate.
     ''' </summary>
     Public Sub InitDefaultDiffSettings()
 

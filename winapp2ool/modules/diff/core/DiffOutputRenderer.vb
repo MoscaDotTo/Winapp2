@@ -31,9 +31,9 @@ Public Class DiffOutputRenderer
     Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer
 
     ''' <summary>
-    ''' Label used in place of a key type when itemizing a detection-criteria modification —
-    ''' a change to an entry's <c> Detect </c>/<c> DetectFile </c> keys, which are reported as a
-    ''' single conceptual "detection criteria" change rather than by individual key type
+    ''' Label used in place of a key type when itemizing an update to an entry's <c> Detect </c> or
+    ''' <c> DetectFile </c> keys, which we report as one "detection criteria" change rather than
+    ''' by individual key type
     ''' </summary>
     Private Const DetectionCriteriaLabel As String = "Detection criteria"
 
@@ -130,7 +130,7 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Initializes a new instance of <c> DiffOutputRenderer </c>
+    ''' Creates a new <c> DiffOutputRenderer </c>
     ''' </summary>
     '''
     ''' <param name="state">
@@ -175,18 +175,18 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Records the summary of the diff results and reports them to the user
+    ''' Builds the Diff Summary section and writes the same lines to the global log. When
+    ''' <see cref="DiffOutcome.HasChanges"/> is <c> False </c>, the summary is a single
+    ''' <c> No changes detected across N entries </c> line, counting the new file's entries.
     ''' </summary>
     '''
     ''' <returns>
-    ''' A <c> MenuSection </c> containing the formatted diff summary
+    ''' A bordered <c> MenuSection </c> containing the formatted diff summary
     ''' </returns>
     Public Function LogPostDiff() As MenuSection
 
         Dim outcome = BuildOutcome()
 
-        ' An unchanged rebuild would otherwise render two dozen lines of zeroes, burying the
-        ' one fact the reader (or the build pipeline) wanted
         If Not outcome.HasChanges Then
 
             Dim nothingDoing As New MenuSection
@@ -323,12 +323,13 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Records each removed entry from the old version which
-    ''' has been merged into an entry in the new version
+    ''' Builds and logs a section for each removed entry that was merged into, or split across,
+    ''' entries in the new file
     ''' </summary>
     '''
     ''' <returns>
-    ''' One <c> MenuSection </c> per merged old entry
+    ''' A header section followed by one <c> MenuSection </c> per merged old entry, or an empty
+    ''' list if nothing was merged
     ''' </returns>
     Public Function SummarizeMergers() As List(Of MenuSection)
 
@@ -369,8 +370,8 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Creates a diff section for an entry that was
-    ''' split/merged into multiple new entries
+    ''' Creates a diff section for an entry that was split/merged into multiple new entries.
+    ''' In verbose mode it also lists the old entry and each target in full.
     ''' </summary>
     '''
     ''' <param name="oldSection">
@@ -429,11 +430,12 @@ Public Class DiffOutputRenderer
     ''' Records each removed entry from the old version
     ''' which has been given a new name in the new version.
     ''' Only emits entries that are name-only changes (no key differences);
-    ''' entries with key-level changes are handled by <c> ItemizeRenameChanges </c>.
+    ''' entries with key-level changes are handled by <see cref="ItemizeRenameChanges"/>.
     ''' </summary>
     '''
     ''' <returns>
-    ''' One <c> MenuSection </c> per name-only renamed entry
+    ''' A header section followed by one <c> MenuSection </c> per name-only renamed entry,
+    ''' or an empty list if there are none
     ''' </returns>
     Public Function SummarizeRenames() As List(Of MenuSection)
 
@@ -489,14 +491,16 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Conducts a Diff of each entry detected as containing merged content.
-    ''' Builds a combined <c> iniSection </c> from all contributing old entries and passes it
-    ''' directly to <c> FindModifications </c> without any string serialization roundtrip.
+    ''' Re-diffs each entry present in both files that received merged content, comparing its new
+    ''' keys against the combined keys of its own old version and every removed entry merged into
+    ''' it. When that comparison finds differences, they replace the entry's tracker contents. This runs after the modified-entry
+    ''' statistics were calculated, so those statistics still describe the plain old-to-new
+    ''' comparison. Added and renamed merge targets are left to other steps.
     ''' </summary>
     '''
     ''' <returns>
-    ''' <c> MenuSection </c>s itemizing key-level changes
-    ''' for each modified entry that received merged content
+    ''' A header section followed by <c> MenuSection </c>s itemizing key-level changes for each
+    ''' such entry, or an empty list if there are none
     ''' </returns>
     Public Function ItemizeMergers() As List(Of MenuSection)
 
@@ -538,11 +542,13 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Outputs each added entry and any entries which have been merged into it
+    ''' Builds and logs a section for each novel added entry: one that is neither a rename nor a
+    ''' merge target
     ''' </summary>
     '''
     ''' <returns>
-    ''' One <c> MenuSection </c> per added entry (excluding renames and added-with-merger entries)
+    ''' A header section followed by one <c> MenuSection </c> per novel entry, or an empty list
+    ''' if there are none
     ''' </returns>
     Public Function ItemizeAdditions() As List(Of MenuSection)
 
@@ -580,17 +586,19 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Itemizes the ways in which a given entry has been modified and outputs them to the user
+    ''' Itemizes the added, removed and updated keys of each modified entry and writes them to the
+    ''' global log. Renamed entries are always skipped.
     ''' </summary>
     '''
     ''' <param name="isMerger">
-    ''' Indicates that the current set of entries which have been 
-    ''' modified are the product of merging multiple entries together
+    ''' Indicates whether to itemize only the entries that received merged content. When
+    ''' <c> False </c>, those entries are skipped instead, and the output gets its own header. <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <returns>
-    ''' <c> MenuSection </c>s itemizing added, removed, and 
-    ''' updated keys for each qualifying modified entry
+    ''' <c> MenuSection </c>s itemizing added, removed, and updated keys for each qualifying
+    ''' entry, or an empty list if none qualify
     ''' </returns>
     Public Function ItemizeModifications(Optional isMerger As Boolean = False) As List(Of MenuSection)
 
@@ -664,13 +672,11 @@ Public Class DiffOutputRenderer
     ''' </param>
     '''
     ''' <param name="addedKeys">
-    ''' Keys that were purely added (not replacements);
-    ''' used to determine log indentation
+    ''' Keys that were purely added (not replacements). Not read.
     ''' </param>
     '''
     ''' <param name="removedKeys">
-    ''' Keys that were purely removed (not replacements);
-    ''' used to determine log indentation
+    ''' Keys that were purely removed (not replacements). Not read.
     ''' </param>
     '''
     ''' <param name="modKeyTypes">
@@ -679,13 +685,15 @@ Public Class DiffOutputRenderer
     ''' </param>
     '''
     ''' <param name="sourceEntryMap">
-    ''' Optional map of key value → source entry name, used
-    ''' to attribute old keys to their origin entries in merger output
+    ''' Map of key value → source entry name, used
+    ''' to attribute old keys to their origin entries in merger output <br /><br />
+    ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     '''
     ''' <returns>
     ''' <c> MenuSection </c>s describing each key update
-    ''' (one header section plus one detail section per updated key)
+    ''' (one header section plus one detail section per updated key),
+    ''' or an empty list if <paramref name="updatedKeysDict"/> is empty
     ''' </returns>
     Public Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey, List(Of iniKey)),
                                        addedKeys As List(Of iniKey),
@@ -762,7 +770,7 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Itemizes the names of any removed entries that were merged into <c> <paramref name="entry"/> </c>
+    ''' Itemizes the names of any removed entries that were merged into <paramref name="entry"/>
     ''' </summary>
     '''
     ''' <param name="entry">
@@ -802,12 +810,14 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Itemizes key-level changes for each renamed entry, pulling from
-    ''' the same trackers populated by the rename's <c> FindModifications </c> callback
+    ''' Itemizes key-level changes for each renamed entry that has any, pulling from
+    ''' the same trackers populated by the rename's <see cref="KeyModificationAnalyzer.FindModifications"/> callback.
+    ''' The synthetic <c> Name </c> update doesn't count as a change.
     ''' </summary>
     '''
     ''' <returns>
-    ''' <c> MenuSection </c>s describing added, removed, and updated keys for each rename
+    ''' A header section followed by <c> MenuSection </c>s describing added, removed, and updated
+    ''' keys for each such rename, or an empty list if there are none
     ''' </returns>
     Public Function ItemizeRenameChanges() As List(Of MenuSection)
 
@@ -871,7 +881,9 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Outputs the details of a modified entry's changes to the user
+    ''' Builds the one-line <c> X has been added </c> (or removed, modified, renamed to, merged
+    ''' into) header for an entry and logs it. In verbose mode it also appends the entry's full
+    ''' text, and for a rename or merge the new entry's text after it.
     ''' </summary>
     '''
     ''' <param name="section">
@@ -884,7 +896,8 @@ Public Class DiffOutputRenderer
     '''
     ''' <param name="newSection">
     ''' The new version of the entry; required when
-    ''' <paramref name="changeType"/> is 3 (rename) or 4 (merge)
+    ''' <paramref name="changeType"/> is 3 (rename) or 4 (merge) <br /><br />
+    ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     '''
     ''' <returns>
@@ -939,7 +952,7 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Appends each line of an entry string to the given <c> MenuSection </c>
+    ''' Appends each line of an entry string to the given <c> MenuSection </c> and the global log
     ''' </summary>
     '''
     ''' <param name="section">
@@ -947,7 +960,8 @@ Public Class DiffOutputRenderer
     ''' </param>
     ''' 
     ''' <param name="entry">
-    ''' The string representation of the entry, split on <c> vbCrLf </c>
+    ''' The string representation of the entry. We split it on carriage returns and strip line
+    ''' feeds, so a trailing newline adds an empty last line.
     ''' </param>
     Public Sub BuildEntrySection(ByRef section As MenuSection,
                                        entry As String)
@@ -1038,15 +1052,17 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Outputs detailed information for added entries 
-    ''' that contain merged content from removed entries.
-    ''' Builds combined old entry sections directly from 
-    ''' <c> iniKey </c> objects 
+    ''' Diffs each added entry that contains merged content from removed entries against the
+    ''' combined keys of those entries, and builds the output for it. Renamed entries are skipped.
+    ''' Key changes it finds replace that entry's tracker contents, and we append the keys
+    ''' carried over unchanged from a source to the entry's added-key tracker list when it has one,
+    ''' which <see cref="DiffStatisticsCalculator.CalculateAddedWithMergersStatistics"/> relies on.
     ''' </summary>
     '''
     ''' <returns>
     ''' <c> MenuSection </c>s describing each added-with-merger entry:
-    ''' header, source list, novel/dropped/capturing key breakdowns
+    ''' header, source list, novel/dropped/capturing key breakdowns,
+    ''' or an empty list if there are none
     ''' </returns>
     Public Function ItemizeAddedEntriesWithMergers() As List(Of MenuSection)
 
@@ -1196,7 +1212,7 @@ Public Class DiffOutputRenderer
     ''' </summary>
     '''
     ''' <returns>
-    ''' Zero or one <c> MenuSection </c> summarising new browser support
+    ''' Zero or one <c> MenuSection </c> summarizing new browser support
     ''' </returns>
     Public Function ItemizeNewBrowsers() As List(Of MenuSection)
 
@@ -1205,18 +1221,22 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Outputs a summary section listing Section values for Web Browsers which are either 
+    ''' Builds and logs a summary section listing Section values for Web Browsers which are either
     ''' newly added or newly removed
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="ObservedValues">
     ''' Section key values relating to web browsers
     ''' </param>
-    ''' 
+    '''
     ''' <param name="wasAdded">
-    ''' Indicates that the current assessment is for newly added browsers
+    ''' Indicates whether <paramref name="ObservedValues"/> are added browsers rather than removed ones
     ''' </param>
-    ''' <returns></returns>
+    '''
+    ''' <returns>
+    ''' A list holding one <c> MenuSection </c>, or an empty list if
+    ''' <paramref name="ObservedValues"/> is empty
+    ''' </returns>
     Public Shared Function ItemizeBrowserChanges(ByRef ObservedValues As List(Of String),
                                                 wasAdded As Boolean) As List(Of MenuSection)
 
@@ -1321,7 +1341,8 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Prints any added or removed keys from an updated entry to the user
+    ''' Builds and logs the itemized list of added or removed keys from an updated entry, headed
+    ''' by a per-type count summary
     ''' </summary>
     '''
     ''' <param name="kl">
@@ -1334,14 +1355,20 @@ Public Class DiffOutputRenderer
     ''' </param>
     '''
     ''' <param name="ktDict">
-    ''' Accumulator dictionary that tracks the count of 
+    ''' Accumulator dictionary that tracks the count of
     ''' changed keys per key type for the modification summary
     ''' </param>
     '''
     ''' <param name="sourceEntryMap">
-    ''' Optional map of key value → source entry name used to annotate 
-    ''' merger origin; novel keys are labeled "(novel)" when present
+    ''' Map of key value → source entry name used to annotate merger origin. When it is given,
+    ''' an added key whose value isn't in it is labeled <c> (novel) </c>. <br /><br />
+    ''' Optional, Default: <c> Nothing </c>
     ''' </param>
+    '''
+    ''' <returns>
+    ''' The summary section and the key list section, or an empty list if
+    ''' <paramref name="kl"/> is empty
+    ''' </returns>
     Private Function ItemizeChangesFromList(kl As List(Of iniKey),
                                             wasAdded As Boolean,
                                             ktDict As Dictionary(Of String, Integer),
@@ -1396,12 +1423,24 @@ Public Class DiffOutputRenderer
         gLog(text, cond:=condition)
     End Sub
 
+    ''' <summary>
+    ''' One entry's added, removed and updated keys, as held in the trackers
+    ''' </summary>
     Private Class EntryKeyChanges
 
         Public ReadOnly AddedKeys As List(Of iniKey)
         Public ReadOnly RemovedKeys As List(Of iniKey)
         Public ReadOnly UpdatedKeysDict As Dictionary(Of iniKey, List(Of iniKey))
 
+        ''' <summary>
+        ''' Creates a new <c> EntryKeyChanges </c> around the given collections, without copying them
+        ''' </summary>
+        '''
+        ''' <param name="added">The added keys</param>
+        '''
+        ''' <param name="removed">The removed keys</param>
+        '''
+        ''' <param name="updated">Map of new key → list of old keys it replaced</param>
         Public Sub New(added As List(Of iniKey),
                        removed As List(Of iniKey),
                        updated As Dictionary(Of iniKey, List(Of iniKey)))
@@ -1414,6 +1453,11 @@ Public Class DiffOutputRenderer
 
     End Class
 
+    ''' <summary>
+    ''' Returns <paramref name="entry"/>'s key changes from the trackers. Each collection is the
+    ''' tracker's own, not a copy, so changing it changes the tracker. A missing one comes back
+    ''' as a new empty collection that isn't stored.
+    ''' </summary>
     Private Function GetKeyChanges(entry As String) As EntryKeyChanges
 
         Dim added = If(_state.ModifiedEntries.AddedKeyTracker.ContainsKey(entry),
@@ -1430,11 +1474,21 @@ Public Class DiffOutputRenderer
 
     End Function
 
+    ''' <summary>
+    ''' The result of <see cref="BuildCombinedOldKeys"/>
+    ''' </summary>
     Private Class CombinedOldKeyResult
 
         Public ReadOnly Keys As List(Of iniKey)
         Public ReadOnly SourceEntryMap As Dictionary(Of String, String)
 
+        ''' <summary>
+        ''' Creates a new <c> CombinedOldKeyResult </c>
+        ''' </summary>
+        '''
+        ''' <param name="keys">The combined, deduplicated old keys</param>
+        '''
+        ''' <param name="sourceMap">Map of key value → name of the old entry it came from</param>
         Public Sub New(keys As List(Of iniKey), sourceMap As Dictionary(Of String, String))
 
             Me.Keys = keys
@@ -1445,10 +1499,11 @@ Public Class DiffOutputRenderer
     End Class
 
     ''' <summary>
-    ''' Builds a deduplicated list of <c> iniKey </c> objects from all old entries
+    ''' Builds a list of <c> iniKey </c> objects from all old entries
     ''' named in <paramref name="mergeSourceNames"/>, plus optionally from
     ''' <paramref name="targetEntry"/> itself if it existed in file1 and is not
-    ''' already a named merge source.
+    ''' already a named merge source. We drop a key whose value (case-insensitive) an earlier
+    ''' key already has, so the first source in order keeps the attribution.
     ''' </summary>
     '''
     ''' <param name="mergeSourceNames">

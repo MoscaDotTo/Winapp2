@@ -19,9 +19,9 @@ Option Strict On
 
 ''' <summary>
 ''' Detects when a removed entry has been renamed to or merged into one or more new entries.
-''' Matches candidates by comparing <c> iniKey </c> values, records confirmed renames and
-''' mergers in <c> DiffState </c>, and invokes a callback for key-level change tracking
-''' when a match is confirmed.
+''' Matches candidates by comparing their <c> FileKey </c> and <c> RegKey </c> values only,
+''' records renames and mergers in <see cref="DiffState"/>, and invokes a callback for
+''' key-level change tracking when it records a new rename.
 ''' </summary>
 Public Class MergeDetector
 
@@ -29,20 +29,19 @@ Public Class MergeDetector
     Private ReadOnly _diffFile As iniFile
     Private ReadOnly _findModificationsCallback As Action(Of iniSection, iniSection)
 
-    ''' <summary>
-    ''' Initializes a new instance of <c> MergeDetector </c>
-    ''' </summary>
-    ''' 
+    ''' <summary>Creates a new <c> MergeDetector </c></summary>
+    '''
     ''' <param name="diffState">
     ''' Shared diff state tracking all entry changes
     ''' </param>
-    ''' 
+    '''
     ''' <param name="newFile">
     ''' The new version of winapp2.ini
     ''' </param>
-    ''' 
+    '''
     ''' <param name="findModsCallback">
-    ''' Callback invoked to track key-level changes when a rename or merger is confirmed
+    ''' Callback invoked with the old and new sections to track key-level changes when a rename
+    ''' is newly recorded. Mergers don't invoke it. May be <c> Nothing </c>.
     ''' </param>
     Public Sub New(diffState As DiffState,
                    newFile As iniFile,
@@ -55,8 +54,9 @@ Public Class MergeDetector
     End Sub
 
     ''' <summary>
-    ''' Determines whether a removed entry has been renamed or merged into one or more new entries.
-    ''' Updates <c> DiffState </c> tracking collections accordingly.
+    ''' Determines whether a removed entry has been renamed or merged into one or more new entries,
+    ''' and updates the <see cref="DiffState"/> tracking collections. A rename whose target is
+    ''' already the rename of a different old entry is recorded as a merger into that target.
     ''' </summary>
     '''
     ''' <param name="candidates">
@@ -68,7 +68,8 @@ Public Class MergeDetector
     ''' </param>
     '''
     ''' <returns>
-    ''' <c> True </c> if a rename or merger was recorded; <c> False </c> if no match was found
+    ''' <c> True </c> if a rename or merger was recorded; <c> False </c> if
+    ''' <paramref name="candidates"/> is empty or none of them matched
     ''' </returns>
     Public Function AssessRenamesAndMergers(candidates As List(Of iniSection),
                                             oldSection As iniSection) As Boolean
@@ -82,7 +83,7 @@ Public Class MergeDetector
 
             If ConfirmRename(bestMatch.TargetName, oldSection) Then Return True
 
-            ' Rename rejected — target already renamed from another entry.
+            ' Rename rejected: target already renamed from another entry.
             ' Treat this as a merger instead so the entry isn't silently dropped.
             TrackBestMatches(False, bestMatch, oldSection)
             Return True
@@ -101,18 +102,18 @@ Public Class MergeDetector
     End Function
 
     ''' <summary>
-    ''' Dispatches merger tracking for all qualifying targets in <paramref name="bestMatch"/>.
-    ''' When <paramref name="isMerge"/> is <c> False </c>, only the primary target is tracked
-    ''' (used when a rename was rejected and the entry is reclassified as a merger).
+    ''' Records a merger from <paramref name="oldSection"/> into each qualifying target in
+    ''' <paramref name="bestMatch"/>. When <paramref name="isMerge"/> is <c> False </c>, only the
+    ''' primary target is tracked (for a rejected rename or a partial match).
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="isMerge">
-    ''' <c> True </c> to track all targets in <c> AllTargetNames </c> <br />
-    ''' <c> False </c> to track only <c> TargetName </c>
+    ''' Indicates whether to track every target in <c> AllTargetNames </c>.
+    ''' When <c> False </c>, we track only <c> TargetName </c>.
     ''' </param>
-    ''' 
+    '''
     ''' <param name="bestMatch">
-    ''' The match result from <c> FindBestMatch </c>
+    ''' The match result from <see cref="FindBestMatch"/>
     ''' </param>
     ''' 
     ''' <param name="oldSection">
@@ -199,10 +200,13 @@ Public Class MergeDetector
     End Function
 
     ''' <summary>
-    ''' Scores each candidate against the old entry's FileKeys and RegKeys and returns
-    ''' the best-fitting <c> MatchResult </c>. Evaluates rename (target is a newly added entry,
-    ''' all keys matched, counts equal, no structural changes), merger (one or more keys
-    ''' matched), and partial-match outcomes.
+    ''' Scores each candidate against the old entry's FileKeys and RegKeys and returns a
+    ''' <see cref="MatchResult"/>. The first candidate in <paramref name="candidates"/> that
+    ''' qualifies as a rename wins at once: it must be an added entry that matches every old
+    ''' FileKey and RegKey, has the same number of each, and raised neither the more-patterns
+    ''' nor the wildcard-reduction flag. Otherwise every candidate matching at least one key
+    ''' becomes a merger target. A candidate already recorded as this entry's rename is skipped,
+    ''' and if only such candidates matched, the result is a partial match on the highest scorer.
     ''' </summary>
     ''' 
     ''' <param name="candidates">
@@ -310,7 +314,8 @@ Public Class MergeDetector
     End Function
 
     ''' <summary>
-    ''' Returns <c> True </c> if <paramref name="newName"/> is already recorded as a rename of <paramref name="oldName"/>
+    ''' Returns whether <paramref name="newName"/> is already recorded as a rename of
+    ''' <paramref name="oldName"/>, comparing names ignoring case
     ''' </summary>
     ''' 
     ''' <param name="newName">
@@ -318,11 +323,8 @@ Public Class MergeDetector
     ''' </param>
     ''' 
     ''' <param name="oldName">
-    ''' The expected old entry name to match against the stored value</param>
-    ''' 
-    ''' <returns>
-    ''' <c> True </c> if the pair is an exact match; <c> False </c> otherwise
-    ''' </returns>
+    ''' The expected old entry name to match against the stored value
+    ''' </param>
     Private Function IsRenamedFrom(newName As String, oldName As String) As Boolean
 
         Dim storedOldName As String = Nothing
@@ -332,8 +334,8 @@ Public Class MergeDetector
     End Function
 
     ''' <summary>
-    ''' Returns a cached <c> KeyMatchInfo </c> for the old/new entry pair, computing and caching it on first access.
-    ''' The cache key is <c> "{oldName}|{newName}" </c>.
+    ''' Returns a cached <see cref="KeyMatchInfo"/> for the old/new entry pair, computing and caching it on first access.
+    ''' The cache key is <c> "{oldName}|{newName}" </c>, compared case-sensitively.
     ''' </summary>
     ''' 
     ''' <param name="oldName">
@@ -357,11 +359,11 @@ Public Class MergeDetector
     ''' </param>
     ''' 
     ''' <param name="oldHasFileKeys">
-    ''' Whether the old entry has any FileKeys
+    ''' Indicates whether the old entry has any FileKeys
     ''' </param>
     ''' 
     ''' <param name="oldHasRegKeys">
-    ''' Whether the old entry has any RegKeys
+    ''' Indicates whether the old entry has any RegKeys
     ''' </param>
     ''' 
     ''' <returns>
@@ -387,8 +389,10 @@ Public Class MergeDetector
 
     ''' <summary>
     ''' Compares the old entry's FileKeys and RegKeys against the corresponding lists in
-    ''' <paramref name="newSection"/> and returns a fully populated <c> KeyMatchInfo </c>.
-    ''' Key types absent from the old entry are treated as fully matched.
+    ''' <paramref name="newSection"/> and returns a fully populated <see cref="KeyMatchInfo"/>.
+    ''' Key types absent from the old entry are treated as fully matched. The counts match only
+    ''' when every old key of that type matched and the new entry has as many keys of that type,
+    ''' which doesn't require each old key to have matched a different new key.
     ''' </summary>
     ''' 
     ''' <param name="newSection">
@@ -404,11 +408,11 @@ Public Class MergeDetector
     ''' </param>
     ''' 
     ''' <param name="oldHasFileKeys">
-    ''' Whether the old entry has any FileKeys
+    ''' Indicates whether the old entry has any FileKeys
     ''' </param>
     ''' 
     ''' <param name="oldHasRegKeys">
-    ''' Whether the old entry has any RegKeys
+    ''' Indicates whether the old entry has any RegKeys
     ''' </param>
     ''' 
     ''' <returns>
@@ -466,8 +470,12 @@ Public Class MergeDetector
 
     ''' <summary>
     ''' Counts how many keys in <paramref name="oldKeys"/> are matched by at least one key in
-    ''' <paramref name="newKeys"/>, using exact-value fast-path and wildcard/regex fallback.
-    ''' Keys whose values appear in <paramref name="disallowedValues"/> are skipped.
+    ''' <paramref name="newKeys"/>. Several old keys may match the same new key. We try an exact
+    ''' value match (ignoring case) first, then <see cref="KeyComparisonStrategyFactory.CompareKeys"/>
+    ''' against each new key in turn. An old key whose whole value is in
+    ''' <paramref name="disallowedValues"/> never counts, and a <see cref="KeyComparisonStrategyFactory.CompareKeys"/>
+    ''' match is rejected when the new key's path (before its first <c> | </c>) is in it. Both
+    ''' lookups use the set's own comparer, which for <c> DisallowedPaths </c> is case-sensitive.
     ''' </summary>
     ''' 
     ''' <param name="oldKeys">
@@ -479,15 +487,18 @@ Public Class MergeDetector
     ''' </param>
     ''' 
     ''' <param name="disallowedValues">
-    ''' Path values too broad to count as meaningful matches; may be <c> Nothing </c>
+    ''' Values too broad to count as meaningful matches; may be <c> Nothing </c>
     ''' </param>
     ''' 
     ''' <param name="matchHadMoreParams">
-    ''' Set to <c> True </c> if any matched new key has more pipe-delimited parameters than its old 
+    ''' Receives the more-patterns verdict from <see cref="KeyComparisonStrategyFactory.CompareKeys"/>.
+    ''' Each FileKey match decided pattern by pattern overwrites it, so it reflects the last such
+    ''' match, not any of them. Other matches leave it unchanged.
     ''' </param>
-    ''' 
+    '''
     ''' <param name="possibleWildCardReduction">
-    ''' Set to <c> True </c> if any match appears to reduce wildcard coverage
+    ''' Receives the wildcard-reduction verdict, overwritten the same way as
+    ''' <paramref name="matchHadMoreParams"/>
     ''' </param>
     ''' 
     ''' <param name="matchedKeys">
@@ -569,7 +580,8 @@ Public Class MergeDetector
     ''' Attempts to record a rename from <paramref name="oldSection"/> to <paramref name="newName"/>.
     ''' If <paramref name="newName"/> is already registered as a rename target from a different entry,
     ''' the registration is rejected and the caller should fall back to merger tracking.
-    ''' On success, invokes the modifications callback to record key-level changes.
+    ''' When we record a new rename, we invoke the modifications callback outside the lock to
+    ''' record key-level changes. A pair that was already registered doesn't invoke it again.
     ''' </summary>
     ''' 
     ''' <param name="newName">
@@ -612,10 +624,11 @@ Public Class MergeDetector
 
     ''' <summary>
     ''' Records a merger relationship between <paramref name="oldSection"/> and <paramref name="newSection"/>
-    ''' in <c> MergeDict </c> and <c> OldToNewMergeDict </c>. If <paramref name="newSection"/> was previously
-    ''' recorded as a rename target, the rename is demoted to a merger and its source is folded in.
-    ''' 
+    ''' in <c> MergedEntryNames </c>, <c> MergeDict </c> and <c> OldToNewMergeDict </c>. If
+    ''' <paramref name="newSection"/> was previously recorded as a rename target, the rename is demoted
+    ''' to a merger and its source is folded in.
     ''' </summary>
+    '''
     ''' <param name="oldSection">
     ''' The removed entry that was merged
     ''' </param>
@@ -666,23 +679,27 @@ End Class
 Public Class MatchResult
 
     ''' <summary>
-    ''' Whether the match is a rename
-    ''' (all keys matched, counts equal, no structural changes)
+    ''' Indicates whether the match is a rename: the target is an added entry that matched every
+    ''' old FileKey and RegKey with equal counts and raised neither the more-patterns nor the
+    ''' wildcard-reduction flag
     ''' </summary>
     Public Property IsRename As Boolean
 
     ''' <summary>
-    ''' Whether the old entry was merged into one or more new entries
+    ''' Indicates whether the old entry was merged into one or more new entries
     ''' </summary>
     Public Property IsMerge As Boolean
 
     ''' <summary>
-    ''' Whether a best candidate was found but no full merge threshold was met
+    ''' Indicates whether some candidate matched keys but none qualified as a rename or merge
+    ''' target. That happens only when every matching candidate was skipped as already being
+    ''' this entry's rename.
     ''' </summary>
     Public Property HasPartialMatch As Boolean
 
     ''' <summary>
-    ''' The primary target entry name (rename target or best merge target)
+    ''' The primary target entry name: the rename target, the first qualifying merge target,
+    ''' or the highest-scoring candidate for a partial match
     ''' </summary>
     Public Property TargetName As String
 
@@ -692,7 +709,8 @@ Public Class MatchResult
     Public Property AllTargetNames As New List(Of String)
 
     ''' <summary>
-    ''' Number of old keys matched in the best candidate entry
+    ''' Number of old keys matched in the rename target, or the highest match count among all
+    ''' candidates for a merger or partial match
     ''' </summary>
     Public Property TotalMatchedKeys As Integer
 

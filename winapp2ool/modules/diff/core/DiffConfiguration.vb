@@ -24,7 +24,9 @@ Option Strict On
 Public Module DiffConfiguration
 
     ''' <summary>
-    ''' A set of Regex characters that need to be escaped when using Regex.Match
+    ''' Maps <c> * </c> to <c> .* </c> and eight regex metacharacters to their escaped forms,
+    ''' for turning a wildcard pattern into a regex. It doesn't cover <c> . </c>, <c> ? </c>,
+    ''' <c> \ </c>, <c> ^ </c> or <c> | </c>.
     ''' </summary>
     Public ReadOnly Property RegexCharsToEscape As New Dictionary(Of String, String) From {
         {"*", ".*"}, {"+", "\+"}, {"{", "\{"}, {"}", "\}"},
@@ -32,11 +34,10 @@ Public Module DiffConfiguration
     }
 
     ''' <summary>
-    ''' Deprecated values that are no longer used or being 
-    ''' phased out of winapp2.ini and their replacements. 
-    ''' 
-    ''' Keys will be replaced by their value for the purposes of not triggering a 
-    ''' "false positive" when diffing, particularly in the case of V22XXXX to V23XXXX or newer 
+    ''' Deprecated variables and patterns mapped to the forms that replaced them.
+    ''' <see cref="EntryChangeDetector.SnuffNoisyChanges"/> rewrites every key value in both files
+    ''' with these before comparing, so an old file that still uses a deprecated form doesn't show
+    ''' each key that uses it as changed. The rewrite is a case-sensitive <c> String.Replace </c>.
     ''' </summary>
     Public ReadOnly Property PathReplacements As New Dictionary(Of String, String) From {
         {"%CommonAppData%", "%ProgramData%"},
@@ -48,8 +49,9 @@ Public Module DiffConfiguration
     }
 
     ''' <summary>
-    ''' File system and registry locations which are considered too vague 
-    ''' to be used to establish matching key content across entries on their own
+    ''' File system and registry locations too vague to show on their own that two entries share
+    ''' content. Rename and merge detection doesn't count a key as matched when the old key's
+    ''' value, or a fuzzy-matched new key's path, is exactly one of these (case-sensitive).
     ''' </summary>
 
     Public ReadOnly Property DisallowedPaths As New HashSet(Of String) From {
@@ -63,9 +65,8 @@ Public Module DiffConfiguration
     }
 
     ''' <summary>
-    ''' Key types that are silently excluded from all diff comparisons.
-    ''' These keys carry no semantic information independent of the entry name
-    ''' and would produce only noise in diff output.
+    ''' Key types left out whenever Diff compares an old key list against a new one, so they never
+    ''' count as added, removed or updated. They carry nothing the entry name doesn't.
     ''' <br /> <br />
     ''' Currently: <c> ID </c> (CCleaner 7 format, duplicates the section name)
     ''' </summary>
@@ -85,11 +86,10 @@ Public Module DiffConfiguration
     Public ReadOnly Property ClassifierKeyTypes As String() = {"LangSecRef", "Section", "Tags"}
 
     ''' <summary>
-    ''' Key types that establish an entry's detection criteria — how winapp2ool decides the
-    ''' target application is present. These are counted together (not per individual type)
-    ''' when deciding whether a detection change is a modification rather than a remove + add,
-    ''' because an entry's detection is a single conceptual role even when spread across
-    ''' several keys of mixed type.
+    ''' Key types that make up an entry's detection criteria: how winapp2ool decides the target
+    ''' application is present. We treat them as one role even when an entry mixes types, so a lone
+    ''' removed <c> Detect </c> and a lone added <c> DetectFile </c> pair up as a modification
+    ''' rather than a remove and an add, and the output itemizes their updates under one label.
     ''' <br /> <br />
     ''' Excludes <c> DetectOS </c> (an OS-version gate, handled as a defunct singleton) and
     ''' <c> SpecialDetect </c> (deprecated).
@@ -112,9 +112,8 @@ Public Module DiffConfiguration
     }
 
     ''' <summary>
-    ''' Separator character used in movement key signatures stored
-    ''' in <c> KeyMovementTracker.MovedKeys </c>. <br /> Null character
-    ''' (Chr(0)) cannot appear in ini file key values, making it unambiguous as a delimiter
+    ''' Separator used in the movement signatures that key <see cref="KeyMovementTracker.MovedKeys"/>.
+    ''' We use <c> Chr(0) </c> because winapp2.ini key names and values don't contain it.
     ''' </summary>
     Public ReadOnly Property MovementKeySeparator As Char
 

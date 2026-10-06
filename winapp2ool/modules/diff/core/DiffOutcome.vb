@@ -21,16 +21,16 @@ Imports System.Text
 
 ''' <summary>
 ''' The bottom line of a completed Diff, reduced to counts. Where the diff log narrates every
-''' change at length, this answers only "did anything change, and how much" — the question a
-''' scripted build pipeline asks when deciding whether the rebuild is worth publishing
+''' change at length, this answers only "what changed, and how much", for a scripted caller to
+''' report without parsing the log.
 ''' </summary>
 '''
 ''' <remarks>
 ''' This is a semantic verdict, not a textual one. Diff normalizes deprecated paths on both
-''' sides before comparing (see <c> PathReplacements </c>), does not see comments outside the
-''' preamble, and ignores ordering, so <c> HasChanges </c> being <c> False </c> does NOT prove
-''' the two files are textually identical. Callers gating on "should this build be published"
-''' should compare the files themselves and use this for reporting
+''' sides before comparing (see <see cref="PathReplacements"/>), does not see comments outside the
+''' preamble, and ignores ordering, so <see cref="HasChanges"/> being <c> False </c> does NOT prove
+''' the two files are textually identical. Don't use it to decide whether a build should be
+''' published: compare the files themselves for that, and use this for reporting.
 ''' </remarks>
 Public Class DiffOutcome
 
@@ -41,7 +41,7 @@ Public Class DiffOutcome
 
     ''' <summary>
     ''' The number of entries present in the old file but not the new one, including
-    ''' those accounted for by a rename or a merge
+    ''' those counted in <see cref="RenamedEntries"/> and <see cref="MergedEntries"/>
     ''' </summary>
     Public ReadOnly Property RemovedEntries As Integer
 
@@ -56,17 +56,23 @@ Public Class DiffOutcome
     Public ReadOnly Property RenamedEntries As Integer
 
     ''' <summary>
-    ''' The number of removed entries whose content was folded into some other entry
+    ''' The number of removed entries whose content was folded into, or split across, other entries
     ''' </summary>
     Public ReadOnly Property MergedEntries As Integer
 
     ''' <summary>
-    ''' The number of keys added across all modified entries
+    ''' The number of keys added across all modified entries, minus every key move that
+    ''' <see cref="DiffStatisticsCalculator.DetectCrossEntryMovements"/> finds. Moves are
+    ''' subtracted even when the other entry isn't a modified one (a rename target, say), so
+    ''' this can undercount and can go negative
     ''' </summary>
     Public ReadOnly Property AddedKeys As Integer
 
     ''' <summary>
-    ''' The number of keys removed without replacement across all modified entries
+    ''' The number of keys removed without replacement across all modified entries, minus every
+    ''' key move that <see cref="DiffStatisticsCalculator.DetectCrossEntryMovements"/> finds.
+    ''' Moves are subtracted even when the other entry isn't a modified one (a rename target,
+    ''' say), so this can undercount and can go negative
     ''' </summary>
     Public ReadOnly Property RemovedKeys As Integer
 
@@ -91,7 +97,7 @@ Public Class DiffOutcome
     Public ReadOnly Property NewEntryCount As Integer
 
     ''' <summary>
-    ''' Indicates that the Diff observed at least one change of any kind
+    ''' Indicates whether the Diff observed at least one change of any kind
     ''' </summary>
     Public ReadOnly Property HasChanges As Boolean
         Get
@@ -109,11 +115,13 @@ Public Class DiffOutcome
     End Property
 
     ''' <summary>
-    ''' Collects the counts a completed Diff accumulated in its <c> DiffState </c>
+    ''' Creates a new <c> DiffOutcome </c> from the counts a completed Diff accumulated in its
+    ''' <see cref="DiffState"/>. A <c> Nothing </c> state is reported through <c> argIsNull </c>
+    ''' and leaves every count at zero.
     ''' </summary>
     '''
     ''' <param name="state">
-    ''' The <c> DiffState </c> of a Diff run whose pipeline has completed
+    ''' The <see cref="DiffState"/> of a Diff run whose pipeline has completed
     ''' </param>
     '''
     ''' <param name="oldEntries">
@@ -180,7 +188,8 @@ Public Class DiffOutcome
     ''' </summary>
     '''
     ''' <returns>
-    ''' A one-line description of everything the Diff found
+    ''' A one-line description of the nonzero entry and key counts, or
+    ''' <c> No changes detected </c> when <see cref="HasChanges"/> is <c> False </c>
     ''' </returns>
     Public Overrides Function ToString() As String
 

@@ -21,7 +21,8 @@ Option Strict On
 ''' Compares two versions of an entry at the key level, identifying added, removed,
 ''' and updated <c> iniKey </c> values. Also supports comparison against a flat key list
 ''' for entries built from multiple merged sources. All results are written to the
-''' <c> DiffState </c> key-change trackers.
+''' <see cref="DiffState"/> key-change trackers and <c> ModifiedEntryNames </c>. Key order and
+''' key numbering never count as changes, and <c> IgnoredKeyTypes </c> are left out entirely.
 ''' </summary>
 Public Class KeyModificationAnalyzer
 
@@ -41,9 +42,11 @@ Public Class KeyModificationAnalyzer
     End Sub
 
     ''' <summary>
-    ''' Determines the changes made to the <c> iniKey </c> values in an
-    ''' <c> iniSection </c> that has been updated between versions. <br /> <br />
-    ''' Callback-compatible with <c> Action(Of iniSection, iniSection) </c>.
+    ''' Records the key-level changes between two versions of an entry under the new entry's name,
+    ''' and adds that name to <c> ModifiedEntryNames </c> unless it's an added entry. When the names
+    ''' differ (a rename), we also record a <c> Name </c> change. If the keys are identical we record
+    ''' nothing, not even the name change. If the entry is already in <c> ModifiedEntryNames </c>,
+    ''' we discard its earlier results before writing the new ones.
     ''' </summary>
     '''
     ''' <param name="oldSection">
@@ -61,8 +64,9 @@ Public Class KeyModificationAnalyzer
     End Sub
 
     ''' <summary>
-    ''' Computes modifications between a combined old entry and a new added entry.
-    ''' Does NOT add to ModifiedEntryNames since this is an added entry.
+    ''' Records the key-level changes between a removed entry and an added entry. When the keys
+    ''' differ, we first discard any earlier results for the added entry. Doesn't add to
+    ''' <c> ModifiedEntryNames </c> or record a <c> Name </c> change.
     ''' </summary>
     '''
     ''' <param name="oldSection">
@@ -81,9 +85,9 @@ Public Class KeyModificationAnalyzer
 
     ''' <summary>
     ''' Variant of <see cref="FindModifications"/> that accepts a flat key list instead of an
-    ''' <c> iniSection </c> for the old side. Used when combining keys from multiple old entries into
-    ''' a synthetic section — avoids <c> iniKeyCollection </c>'s first-write-wins name deduplication
-    ''' dropping keys that share a name across source entries (e.g. two FileKey1 values).
+    ''' <c> iniSection </c> for the old side, for keys combined from several old entries. A list
+    ''' keeps keys that share a name across source entries (e.g. two FileKey1 values), which an
+    ''' <c> iniKeyCollection </c> would deduplicate. Records no <c> Name </c> change.
     ''' </summary>
     '''
     ''' <param name="oldKeys">
@@ -102,7 +106,7 @@ Public Class KeyModificationAnalyzer
 
     ''' <summary>
     ''' Variant of <see cref="FindModificationsForAddedEntry"/>
-    ''' that accepts a flat key list.
+    ''' that accepts a flat key list
     ''' </summary>
     '''
     ''' <param name="oldKeys">
@@ -122,8 +126,9 @@ Public Class KeyModificationAnalyzer
     ''' <summary>
     ''' Core implementation for flat-key-list comparisons.
     ''' Computes added, removed, and updated keys,
-    ''' then writes them to the <c> DiffState </c> trackers 
-    ''' under <paramref name="newSection"/>'s name.
+    ''' then writes them to the <c> DiffState </c> trackers
+    ''' under <paramref name="newSection"/>'s name. Returns without writing anything
+    ''' when the key lists are equivalent.
     ''' </summary>
     ''' 
     ''' <param name="oldKeys">
@@ -135,16 +140,16 @@ Public Class KeyModificationAnalyzer
     ''' </param>
     ''' 
     ''' <param name="addToModified">
-    ''' When <c> True </c>, adds <paramref name="newSection"/>'s
+    ''' Indicates whether to add <paramref name="newSection"/>'s
     ''' name to <c> ModifiedEntryNames </c>
     ''' (only if not already in <c> AddedEntryNames </c>)
     ''' </param>
-    ''' 
+    '''
     ''' <param name="clearExisting">
-    ''' When <c> True </c>, removes any prior tracker entries for 
-    ''' <paramref name="newSection"/> before writing;
-    ''' when <c> False </c>, rolls back and replaces prior 
-    ''' entries if the entry was already tracked as modified
+    ''' Indicates whether to remove any prior tracker entries for
+    ''' <paramref name="newSection"/> before writing.
+    ''' When <c> False </c>, we roll back and replace prior
+    ''' entries if the entry was already tracked as modified.
     ''' </param>
     Private Sub AnalyzeAndTrackSectionDiffWithKeyList(oldKeys As List(Of iniKey), newSection As iniSection,
                                                        addToModified As Boolean, clearExisting As Boolean)
@@ -158,9 +163,9 @@ Public Class KeyModificationAnalyzer
     End Sub
 
     ''' <summary>
-    ''' Core implementation for section-to-section comparisons. Computes added, removed, and updated keys,
-    ''' injects a Name-change sentinel pair when the section names differ, then writes results to the
-    ''' <c> DiffState </c> trackers under <paramref name="newSection"/>'s name.
+    ''' Core implementation for section-to-section comparisons. Computes added, removed, and updated
+    ''' keys and writes them to the <c> DiffState </c> trackers under <paramref name="newSection"/>'s
+    ''' name. Returns without writing anything when the key lists are equivalent.
     ''' </summary>
     ''' 
     ''' <param name="oldSection">
@@ -169,13 +174,14 @@ Public Class KeyModificationAnalyzer
     ''' <param name="newSection">The current version of the entry</param>
     ''' 
     ''' <param name="addToModified">
-    ''' When <c> True </c>, adds <paramref name="newSection"/>'s name to <c> ModifiedEntryNames </c>
-    ''' (only if not already in <c> AddedEntryNames </c>) and records a Name-change pair if names differ
+    ''' Indicates whether to add <paramref name="newSection"/>'s name to <c> ModifiedEntryNames </c>
+    ''' (only if not already in <c> AddedEntryNames </c>) and record a Name-change pair if the names
+    ''' differ, ignoring case
     ''' </param>
-    ''' 
+    '''
     ''' <param name="clearExisting">
-    ''' When <c> True </c>, removes any prior tracker entries for <paramref name="newSection"/> before writing;
-    ''' when <c> False </c>, rolls back and replaces prior entries if the entry was already tracked as modified
+    ''' Indicates whether to remove any prior tracker entries for <paramref name="newSection"/> before writing.
+    ''' When <c> False </c>, we roll back and replace prior entries if the entry was already tracked as modified.
     ''' </param>
     Private Sub AnalyzeAndTrackSectionDiff(oldSection As iniSection,
                                             newSection As iniSection,
@@ -191,10 +197,13 @@ Public Class KeyModificationAnalyzer
     End Sub
 
     ''' <summary>
-    ''' Compares two key sequences by <c> KeyType </c> and <c> Value </c>, populating
+    ''' Compares two key sequences as multisets by <c> KeyType </c> and <c> Value </c>, populating
     ''' <paramref name="removedKeys"/> and <paramref name="addedKeys"/> with the differences.
-    ''' Each new key is consumed at most once, so renumbered keys with the same type and value
-    ''' (e.g. FileKey1 → FileKey2) are treated as equivalent.
+    ''' Key names and order are ignored, so renumbered keys with the same type and value
+    ''' (e.g. FileKey1 → FileKey2) are treated as equivalent. Each old key, in order, takes the first
+    ''' unconsumed new key whose type (ignoring case) and value (see <see cref="KeyValuesAreEquivalent"/>)
+    ''' match, so each new key is consumed at most once and a duplicated key is a real change.
+    ''' Keys of <c> IgnoredKeyTypes </c> are dropped from both sides first.
     ''' Accepts any <c> IEnumerable(Of iniKey) </c> for the old side, supporting both
     ''' <c> iniSection.Keys </c> and flat key lists with duplicate names.
     ''' </summary>
@@ -208,15 +217,15 @@ Public Class KeyModificationAnalyzer
     ''' </param>
     ''' 
     ''' <param name="removedKeys">
-    ''' Populated with old keys not found in <paramref name="newKeys"/>
+    ''' Appended with old keys not found in <paramref name="newKeys"/>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="addedKeys">
-    ''' Populated with new keys not matched by any old key
+    ''' Appended with new keys not matched by any old key
     ''' </param>
-    ''' 
+    '''
     ''' <returns>
-    ''' <c> True </c> if the key lists are identical (no additions or removals)
+    ''' <c> True </c> if the key lists are equivalent (no additions or removals)
     ''' </returns>
     Private Shared Function CompareKeyLists(oldKeys As IEnumerable(Of iniKey),
                                             newKeys As IEnumerable(Of iniKey),
@@ -259,10 +268,11 @@ Public Class KeyModificationAnalyzer
     End Function
 
     ''' <summary>
-    ''' Determines whether two same-type keys have equivalent values for the purpose of the identical-key
-    ''' match. Exact case-insensitive equality is tried first; for <c> FileKey </c>s that are not string-equal,
-    ''' an order-insensitive comparison follows, since a FileKey's semicolon-delimited pattern list is an
-    ''' unordered OR-set (WinappDebug alphabetizes it), so a pure reordering is not a change.
+    ''' Returns whether two same-type keys have equivalent values for the purpose of the identical-key
+    ''' match. Exact case-insensitive equality is tried first. For <c> FileKey </c>s that are not string-equal,
+    ''' an order-insensitive comparison follows: a FileKey matches files against any of its patterns,
+    ''' so their order means nothing, and WinappDebug alphabetizes them, so a pure reordering is not a change.
+    ''' The FileKey test checks <paramref name="oldKey"/>'s type, case-sensitively.
     ''' </summary>
     '''
     ''' <param name="oldKey">
@@ -289,8 +299,9 @@ Public Class KeyModificationAnalyzer
 
     ''' <summary>
     ''' Compares two <c> FileKey </c> values treating the pattern list as an unordered multiset. Two values
-    ''' are equivalent when their paths and flags match and their patterns are equal as sorted,
-    ''' case-insensitive sequences. A duplicated, added, or removed pattern therefore remains a real change;
+    ''' are equivalent when their paths match ignoring case, their flags match (an unrecognized flag
+    ''' by its text, ignoring case), and their patterns are equal as sorted, case-insensitive
+    ''' sequences. A duplicated, added, or removed pattern therefore remains a real change;
     ''' only reordering is absorbed.
     ''' </summary>
     '''
@@ -334,8 +345,11 @@ Public Class KeyModificationAnalyzer
     ''' <summary>
     ''' Writes computed key-level changes to the <c> DiffState </c> trackers under the given section name.
     ''' Handles clearing/rolling back prior tracker entries, recording added/removed/updated keys,
-    ''' optionally adding the section to <c> ModifiedEntryNames </c>, and injecting a Name-change
-    ''' sentinel pair when <paramref name="oldSectionName"/> differs from <paramref name="newSectionName"/>.
+    ''' optionally adding the section to <c> ModifiedEntryNames </c>, and, with
+    ''' <paramref name="addToModified"/>, injecting a Name-change sentinel pair when
+    ''' <paramref name="oldSectionName"/> differs from <paramref name="newSectionName"/> ignoring case.
+    ''' Runs under a lock on <c> ModifiedEntryNames </c>, since rename detection calls it from
+    ''' parallel workers.
     ''' </summary>
     '''
     ''' <param name="newSectionName">
@@ -344,28 +358,32 @@ Public Class KeyModificationAnalyzer
     '''
     ''' <param name="oldSectionName">
     ''' The old entry name; when non-<c> Nothing </c> and different from <paramref name="newSectionName"/>,
-    ''' a Name-change sentinel pair is injected into the updated keys list. <br /> <br />
+    ''' a Name-change sentinel pair is injected into the updated keys list (with
+    ''' <paramref name="addToModified"/> only). <br /> <br />
     ''' Pass <c> Nothing </c> for flat-key-list comparisons where no name change applies.
     ''' </param>
     '''
     ''' <param name="addedKeys">
     ''' Keys present in the new version but not the old; updated in place
-    ''' by <c> DetermineModifiedKeys </c> which removes promoted entries
+    ''' by <see cref="DetermineModifiedKeys"/> which removes promoted entries. The tracker may
+    ''' keep this list object itself.
     ''' </param>
     '''
     ''' <param name="removedKeys">
     ''' Keys present in the old version but not the new; updated in place
-    ''' by <c> DetermineModifiedKeys </c> which removes promoted entries
+    ''' by <see cref="DetermineModifiedKeys"/> which removes promoted entries. The tracker may
+    ''' keep this list object itself.
     ''' </param>
     '''
     ''' <param name="addToModified">
-    ''' When <c> True </c>, adds <paramref name="newSectionName"/> to <c> ModifiedEntryNames </c>
-    ''' (only if not already in <c> AddedEntryNames </c>)
+    ''' Indicates whether to add <paramref name="newSectionName"/> to <c> ModifiedEntryNames </c>
+    ''' (only if not already in <c> AddedEntryNames </c>) and inject the Name-change pair.
+    ''' When <c> False </c>, no Name-change pair is recorded even if the names differ.
     ''' </param>
     '''
     ''' <param name="clearExisting">
-    ''' When <c> True </c>, removes any prior tracker entries before writing;
-    ''' when <c> False </c>, rolls back and replaces prior entries if already tracked as modified
+    ''' Indicates whether to remove any prior tracker entries before writing.
+    ''' When <c> False </c>, we roll back and replace prior entries if already tracked as modified.
     ''' </param>
     Private Sub WriteResultsToTrackers(newSectionName As String,
                                        oldSectionName As String,
@@ -432,8 +450,8 @@ Public Class KeyModificationAnalyzer
     ''' </param>
     '''
     ''' <param name="clearExisting">
-    ''' When <c> False </c> and the tracker already contains <paramref name="sectionName"/>,
-    ''' new entries are merged in; otherwise the tracker entry is replaced wholesale
+    ''' Indicates whether to replace the tracker entry wholesale. When <c> False </c> and the
+    ''' tracker already contains <paramref name="sectionName"/>, new entries are merged in.
     ''' </param>
     Private Sub MergeModificationsIntoTracker(sectionName As String,
                                               updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)),
@@ -474,8 +492,8 @@ Public Class KeyModificationAnalyzer
 
     ''' <summary>
     ''' Appends <paramref name="keys"/> into <paramref name="keyTracker"/> under
-    ''' <paramref name="newSectionName"/>, inserting a new list entry if one does 
-    ''' not yet exist and skipping duplicates otherwise
+    ''' <paramref name="newSectionName"/>. If there's no entry yet, we store <paramref name="keys"/>
+    ''' itself. Otherwise we append each key not already in the list, comparing by reference.
     ''' </summary>
     ''' 
     ''' <param name="keyTracker">
@@ -510,12 +528,13 @@ Public Class KeyModificationAnalyzer
     End Sub
 
     ''' <summary>
-    ''' Converts a flat list of (new key, old key) pairs into the tracker dictionary format,
-    ''' grouping multiple old keys under the same new key when they share a name and value
+    ''' Converts a flat list of (new key, old key) pairs into the tracker dictionary format.
+    ''' Pairs whose new keys share a name and value (ignoring case) are grouped under the first
+    ''' such new key, so one new key can list several old keys.
     ''' </summary>
     ''' 
     ''' <param name="updatedKeys">
-    ''' Pairs of (new <c> iniKey </c>, old <c> iniKey </c>) as produced by <c> DetermineModifiedKeys </c>
+    ''' Pairs of (new <c> iniKey </c>, old <c> iniKey </c>) as produced by <see cref="DetermineModifiedKeys"/>
     ''' </param>
     ''' 
     ''' <returns>
@@ -560,9 +579,14 @@ Public Class KeyModificationAnalyzer
 
     ''' <summary>
     ''' Promotes (new key, old key) pairs from <paramref name="addedKeys"/> and
-    ''' <paramref name="removedKeys"/> into an "updated" list when the keys are equivalent
-    ''' under the comparison strategy, share a singleton key type (e.g. LangSecRef), or represent
-    ''' a known defunct singleton replacement. Two further passes then pair RegKeys that share a
+    ''' <paramref name="removedKeys"/> into an "updated" list. The first pass pairs a new key with
+    ''' every removed key that either key covers under <see cref="KeyComparisonStrategyFactory.CompareKeys"/>
+    ''' (tried in both directions), when both are classifiers (<c> LangSecRef </c>, <c> Section </c>,
+    ''' <c> Tags </c>, in any combination), or when both are the same defunct singleton type
+    ''' (<c> Warning </c>, <c> DetectOS </c>, <c> SpecialDetect </c>). One new key may take several
+    ''' removed keys, but once a removed key is paired, every other removed key with the same value
+    ''' (ignoring case) is passed over. The classifier and singleton type tests are case-sensitive.
+    ''' Two further passes then pair RegKeys that share a
     ''' registry path but target different value-names (see <see cref="PairRegKeysBySharedPath"/>)
     ''' and one-for-one Detect/DetectFile detection-criteria swaps (same-type first, then cross-type;
     ''' see <see cref="PairDetectionCriteria"/>). Matched keys are removed from
@@ -578,8 +602,9 @@ Public Class KeyModificationAnalyzer
     ''' </param>
     ''' 
     ''' <returns>
-    ''' Pairs of (new <c> iniKey </c>, old <c> iniKey </c>) representing 
-    ''' keys that were updated rather than purely added/removed
+    ''' Pairs of (new <c> iniKey </c>, old <c> iniKey </c>) representing
+    ''' keys that were updated rather than purely added/removed. A new key can appear in
+    ''' several pairs.
     ''' </returns>
     Private Function DetermineModifiedKeys(ByRef removedKeys As List(Of iniKey),
                                            ByRef addedKeys As List(Of iniKey)) As List(Of KeyValuePair(Of iniKey, iniKey))
@@ -633,9 +658,9 @@ Public Class KeyModificationAnalyzer
     ''' An entry's detection criteria (its <c> Detect </c> and <c> DetectFile </c> keys) is a single
     ''' conceptual role: how winapp2ool decides the target application is present. <br /> <br />
     ''' Two passes run over the still-unmatched detection keys. First, any detection key type with
-    ''' exactly one added and one removed key is paired same-type — e.g. one <c> DetectFile </c>
+    ''' exactly one added and one removed key is paired same-type, e.g. one <c> DetectFile </c>
     ''' replaced by another at a different path. Then, if exactly one added and one removed detection
-    ''' key remain (necessarily of different types), they are paired as a cross-type swap — e.g. a
+    ''' key remain (necessarily of different types), they are paired as a cross-type swap, e.g. a
     ''' <c> Detect </c> becoming a <c> DetectFile </c>. Any detection key that cannot be paired one-for-one
     ''' this way is left as a plain add/remove, so a lone removed <c> Detect </c> alongside a matched
     ''' <c> DetectFile </c> swap stays reported as removed.

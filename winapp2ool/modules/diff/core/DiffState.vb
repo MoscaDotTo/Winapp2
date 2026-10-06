@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -20,7 +20,8 @@ Option Strict On
 Imports System.Collections.Concurrent
 
 ''' <summary>
-''' Encapsulates all state management for the Diff module
+''' Holds the shared, mutable state of one Diff run: the entry and key trackers, counters,
+''' caches and key movements that the core classes write to and read from
 ''' </summary>
 Public Class DiffState
 
@@ -50,7 +51,8 @@ Public Class DiffState
     Public Property KeyMovements As New KeyMovementTracker()
 
     ''' <summary>
-    ''' Resets all state to initial values
+    ''' Clears every tracker and cache and resets the counters. <see cref="DiffStatistics.Reset"/>
+    ''' leaves some counters alone.
     ''' </summary>
     Public Sub Clear()
 
@@ -70,11 +72,12 @@ End Class
 Public Class MergedEntryTracker
 
     ''' <summary>
-    ''' Tracks names of merged entries
+    ''' Names of the new-file entries that received content from one or more removed entries
     ''' </summary>
-    ''' 
-    ''' <remarks> 
-    ''' Use regular HashSet but always access under SyncLock 
+    '''
+    ''' <remarks>
+    ''' Not thread-safe. During the parallel removal pass, writes to this tracker happen under
+    ''' <c> SyncLock </c> on the <see cref="MergedEntryTracker"/> instance itself.
     ''' </remarks>
     Public Property MergedEntryNames As New HashSet(Of String)
 
@@ -89,7 +92,8 @@ Public Class MergedEntryTracker
     Public Property OldToNewMergeDict As New Dictionary(Of String, List(Of String))
 
     ''' <summary>
-    ''' Tracks names of renamed entries
+    ''' New names of the entries recognized as renames of a removed entry. A rename whose target
+    ''' later also takes in merged content is moved out of here and recorded as a merger.
     ''' </summary>
     Public Property RenamedEntryNames As New HashSet(Of String)
 
@@ -114,27 +118,36 @@ Public Class MergedEntryTracker
 End Class
 
 ''' <summary>
-''' Tracks entries that have been modified and the specific key changes
+''' Tracks which entries were added, removed and modified, and the key changes found for each.
+''' The three key trackers are keyed by the entry's new name and hold results for every entry
+''' Diff compared, including rename and merge targets, not only modified entries.
 ''' </summary>
+'''
+''' <remarks>
+''' Not thread-safe. Writes to the key trackers happen under <c> SyncLock </c> on
+''' <see cref="ModifiedEntryNames"/>.
+''' </remarks>
 Public Class ModifiedEntryTracker
 
     ''' <summary>
-    ''' Tracks names of modified entries
+    ''' Names of entries present in both files whose keys changed
     ''' </summary>
     Public Property ModifiedEntryNames As New HashSet(Of String)
 
     ''' <summary>
-    ''' Tracks names of added entries
+    ''' Names of entries present only in the new file, including rename and merge targets
     ''' </summary>
     Public Property AddedEntryNames As New HashSet(Of String)
 
     ''' <summary>
-    ''' Tracks names of removed entries
+    ''' Names of entries present only in the old file, including those later found to be
+    ''' renamed or merged
     ''' </summary>
     Public Property RemovedEntryNames As New HashSet(Of String)
 
     ''' <summary>
-    ''' Tracks modified keys per entry: EntryName -> (NewKey -> List(Of OldKeys))
+    ''' Updated keys per entry: EntryName -> (NewKey -> List(Of OldKeys)). A rename adds a
+    ''' synthetic <c> Name </c> key pair holding the new and old entry names.
     ''' </summary>
     Public Property ModifiedKeyTracker As New Dictionary(Of String, Dictionary(Of iniKey, List(Of iniKey)))
 
@@ -149,7 +162,8 @@ Public Class ModifiedEntryTracker
     Public Property AddedKeyTracker As New Dictionary(Of String, List(Of iniKey))
 
     ''' <summary>
-    ''' Tracks potential matching sections for modified entries: EntryName -> List(Of iniSection)
+    ''' The added and modified new-file sections that removed entries are matched against when
+    ''' looking for renames and mergers
     ''' </summary>
     Public Property PotentialMatches As New List(Of iniSection)
 
@@ -176,7 +190,9 @@ End Class
 Public Class DiffStatistics
 
     ''' <summary>
-    ''' Counts total keys added in modified entries
+    ''' Counts total keys added in modified entries, minus every key move that
+    ''' <see cref="DiffStatisticsCalculator.DetectCrossEntryMovements"/> finds, including moves
+    ''' that involve an entry which isn't modified, so it can go negative
     ''' </summary>
     Public Property ModEntriesAddedKeyTotal As Integer = 0
 
@@ -196,12 +212,14 @@ Public Class DiffStatistics
     Public Property ModEntriesUpdatedKeyTotal As Integer = 0
 
     ''' <summary>
-    ''' Counts total entries where keys were replaced by updates
+    ''' Counts total old keys in modified entries that an updated key replaced
     ''' </summary>
     Public Property ModEntriesReplacedByUpdateTotal As Integer = 0
 
     ''' <summary>
-    ''' Counts total entries where keys were removed without replacement
+    ''' Counts total keys removed without replacement from modified entries, minus every key
+    ''' move that <see cref="DiffStatisticsCalculator.DetectCrossEntryMovements"/> finds,
+    ''' including moves that involve an entry which isn't modified, so it can go negative
     ''' </summary>
     Public Property ModEntriesRemovedKeysWithoutReplacementTotal As Integer = 0
 
@@ -211,12 +229,12 @@ Public Class DiffStatistics
     Public Property ModEntriesMovedKeysTotal As Integer = 0
 
     ''' <summary>
-    ''' Counts total source entries providing keys that moved between entries
+    ''' Counts the distinct entries that lost a key to another entry
     ''' </summary>
     Public Property ModEntriesMovedKeysSourceCount As Integer = 0
 
     ''' <summary>
-    ''' Counts total target entries receiving keys that moved between entries
+    ''' Counts the distinct entries that gained a key from another entry
     ''' </summary>
     Public Property ModEntriesMovedKeysTargetCount As Integer = 0
 
@@ -226,20 +244,18 @@ Public Class DiffStatistics
     Public Property ModEntriesUpdatedKeyEntryCount As Integer = 0
 
     ''' <summary>
-    ''' Counts entries that were added with mergers (i.e., entries that were
-    ''' added and also had one or more old entries merged into them)
+    ''' Counts added entries, other than renames, that had one or more removed entries merged into them
     ''' </summary>
     Public Property AddedWithMergersEntryCount As Integer = 0
 
     ''' <summary>
-    ''' Counts entries that were merged into added entries (ie. old entries
-    ''' that were merged into entries which were added)
+    ''' Counts the distinct removed entries merged into those added entries
     ''' </summary>
     Public Property AddedWithMergersSourceEntryCount As Integer = 0
 
     ''' <summary>
-    ''' Counts total novel keys added in entries that were added with mergers <br /> ie. keys
-    ''' that were added in entries that had mergers, but were not part of the merged old entries)
+    ''' Counts total novel keys in added-with-merger entries: added keys whose value matches no key
+    ''' value in the entry's merged sources
     ''' </summary>
     Public Property AddedWithMergersNovelKeysTotal As Integer = 0
 
@@ -249,12 +265,15 @@ Public Class DiffStatistics
     Public Property AddedWithMergersNovelKeysEntryCount As Integer = 0
 
     ''' <summary>
-    ''' Counts total keys in added-with-merger entries that capture (i.e. match or subsume) one or more old keys from merged sources
+    ''' Counts total keys in added-with-merger entries that updated, rather than copied, one or more
+    ''' keys from their merged sources. Exact copies count as carried over instead.
     ''' </summary>
     Public Property AddedWithMergersCapturingKeysTotal As Integer = 0
 
     ''' <summary>
-    ''' Counts total old keys from merged source entries that were captured by a key in an added-with-merger entry
+    ''' Counts the distinct FileKey and RegKey values from merged source entries that reappear,
+    ''' exactly or as captured by another key, in any entry they were merged into. Only sources
+    ''' merged into at least one added entry are counted.
     ''' </summary>
     Public Property AddedWithMergersCapturedKeysTotal As Integer = 0
 
@@ -264,7 +283,8 @@ Public Class DiffStatistics
     Public Property AddedWithMergersCapturingEntryCount As Integer = 0
 
     ''' <summary>
-    ''' Counts total keys from merged source entries that were not carried over into the added-with-merger entry
+    ''' Counts the distinct FileKey and RegKey values from the same merged source entries that no
+    ''' merge target captured
     ''' </summary>
     Public Property AddedWithMergersDroppedKeysTotal As Integer = 0
 
@@ -326,22 +346,30 @@ Public Class DiffStatistics
     ''' <summary>
     ''' Section key values (e.g. <c> "Brave Web Browser" </c>) that appear in the new file
     ''' but not in the old file, indicating newly added browser support.
-    ''' Populated by <c> DiffStatisticsCalculator.DetectNewBrowserSupport </c>.
+    ''' Populated by <see cref="DiffStatisticsCalculator.DetectNewBrowserSupport"/>.
     ''' </summary>
     Public Property NewBrowserSectionValues As New List(Of String)
 
     ''' <summary>
     ''' Section key values (e.g. <c> "Internet Explorer" </c>) that appear in the old file
     ''' but not in the new file, indicating removed browser support.
-    ''' Populated by <c> DiffStatisticsCalculator.DetectNewBrowserSupport </c>.
+    ''' Populated by <see cref="DiffStatisticsCalculator.DetectNewBrowserSupport"/>.
     ''' </summary>
     Public Property RemovedBrowserSectionValues As New List(Of String)
 
     ''' <summary>
-    ''' Resets all counters to zero
+    ''' Resets the modified-entry, moved-key, added-with-mergers, and renamed-entry counters to zero and clears both
+    ''' browser lists.
     ''' </summary>
     Public Sub Reset()
 
+        AddedWithMergersCapturedKeysTotal = 0
+        AddedWithMergersCapturingEntryCount = 0
+        AddedWithMergersCapturingKeysTotal = 0
+        AddedWithMergersCarriedOverKeysEntryCount = 0
+        AddedWithMergersCarriedOverKeysTotal = 0
+        AddedWithMergersDroppedEntryCount = 0
+        AddedWithMergersDroppedKeysTotal = 0
         ModEntriesAddedKeyTotal = 0
         ModEntriesAddedKeyEntryCount = 0
         ModEntriesRemovedKeyEntryCount = 0
@@ -373,17 +401,17 @@ End Class
 Public Class DiffCaches
 
     ''' <summary>
-    ''' Caches old entries by name for quick lookup (iniSection variant)
+    ''' Caches old entries by name for quick lookup
     ''' </summary>
     Public Property CachedOldEntries As New Dictionary(Of String, iniSection)
 
     ''' <summary>
-    ''' Caches new entries by name for quick lookup (iniSection variant)
+    ''' Caches new entries by name for quick lookup
     ''' </summary>
     Public Property CachedNewEntries As New Dictionary(Of String, iniSection)
 
     ''' <summary>
-    ''' Caches key match information (KeyMatchInfo variant)
+    ''' Caches the key match assessment for each old/new entry pair, keyed <c> oldName|newName </c>
     ''' </summary>
     Public Property MatchInfoCache As New ConcurrentDictionary(Of String, KeyMatchInfo)
 
@@ -407,11 +435,11 @@ Public Class KeyMovementTracker
 
 
     ''' <summary>
-    ''' Tracks keys that moved between entries
+    ''' Maps each moved key's signature to where it moved from and to
     ''' </summary>
     ''' <remarks>
-    ''' Dictionary: Key signature -> Movement info <br />
-    ''' Key format: "{KeyName}{MovementKeySeparator}{KeyValue}{MovementKeySeparator}{SourceEntry}"
+    ''' Signature format: <c> {KeyName}{MovementKeySeparator}{KeyValue}{MovementKeySeparator}{SourceEntry} </c>,
+    ''' compared case-insensitively
     ''' </remarks>
     Public Property MovedKeys As New Dictionary(Of String, KeyMovementInfo)(StringComparer.OrdinalIgnoreCase)
 
@@ -442,7 +470,7 @@ Public Class KeyMovementInfo
     Public Property TargetEntry As String
 
     ''' <summary>
-    ''' Creates a new KeyMovementInfo instance
+    ''' Creates a new <c> KeyMovementInfo </c>
     ''' </summary>
     ''' 
     ''' <param name="source">

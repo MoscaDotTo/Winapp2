@@ -18,9 +18,9 @@
 Option Strict On
 
 ''' <summary>
-''' Aggregates raw key-change trackers from <c> DiffState </c> into summary statistics
-''' (added, removed, updated, and replaced key counts per entry category) and detects
-''' cross-entry key movements after all entry-level analysis is complete.
+''' Aggregates the raw key-change trackers in <see cref="DiffState"/> into summary statistics
+''' (added, removed, updated, and replaced key counts per entry category), detects keys that
+''' moved between entries, and finds browsers added or removed between the two files.
 ''' </summary>
 Public Class DiffStatisticsCalculator
 
@@ -29,7 +29,7 @@ Public Class DiffStatisticsCalculator
     Private ReadOnly _file2 As iniFile
 
     ''' <summary>
-    ''' Initializes a new instance of <c> DiffStatisticsCalculator </c>
+    ''' Creates a new <c> DiffStatisticsCalculator </c>
     ''' </summary>
     '''
     ''' <param name="state">
@@ -54,8 +54,8 @@ Public Class DiffStatisticsCalculator
     End Sub
 
     ''' <summary>
-    ''' Compares <c> Section </c> key values containing <c> "Web Browser" </c> between the two
-    ''' files and records any values present in the new file but absent from the old file in
+    ''' Compares <c> Section </c> key values containing <c> "Web Browser" </c> (case-insensitive)
+    ''' between the two files and records any values present in the new file but absent from the old file in
     ''' <c> DiffStatistics.NewBrowserSectionValues </c>, and any values present in the old file
     ''' but absent from the new file in <c> DiffStatistics.RemovedBrowserSectionValues </c>.
     ''' <br /><br />
@@ -113,10 +113,9 @@ Public Class DiffStatisticsCalculator
     End Sub
 
     ''' <summary>
-    ''' Calculates statistics from raw trackers before movement detection.
-    ''' Filters to <c> ModifiedEntryNames </c> only. the tracker dictionaries
-    ''' also contain added-merger entries populated by
-    ''' <c> FindModificationsForAddedEntry </c> which must not be counted here.
+    ''' Adds up the added, removed and updated key counts of modified entries from the raw
+    ''' trackers. We count only names in <c> ModifiedEntryNames </c>, because the trackers also
+    ''' hold results for rename and merge targets.
     ''' </summary>
     Public Sub CalculateInitialStatistics()
 
@@ -220,8 +219,12 @@ Public Class DiffStatisticsCalculator
     End Sub
 
     ''' <summary>
-    ''' Detects keys that were removed from one entry and added to another (cross-entry movements).
-    ''' Must be called after all parallel processing completes.
+    ''' Detects keys that were removed from one entry and added to another, records each in
+    ''' <see cref="KeyMovementTracker.MovedKeys"/>, and takes the moved keys out of the added and
+    ''' removed trackers. A removed key pairs with the first same-type added key in another entry
+    ''' that captures it or that it captures. We scan every tracked entry, not only modified ones,
+    ''' but subtract each move from the modified-entry totals. Run it after
+    ''' <see cref="CalculateInitialStatistics"/> and after all parallel processing completes.
     ''' </summary>
     Public Sub DetectCrossEntryMovements()
 
@@ -320,7 +323,9 @@ Public Class DiffStatisticsCalculator
     End Sub
 
     ''' <summary>
-    ''' Calculates accurate statistics for added entries with merged content.
+    ''' Calculates the statistics for added entries with merged content. Run it after
+    ''' <see cref="DiffOutputRenderer.ItemizeAddedEntriesWithMergers"/>, which writes the
+    ''' carried-over keys into the added-key tracker that this reads.
     ''' </summary>
     Public Sub CalculateAddedWithMergersStatistics()
 
@@ -396,7 +401,7 @@ Public Class DiffStatisticsCalculator
     End Sub
 
     ''' <summary>
-    ''' Initializes capture tracking for all old entries involved in mergers
+    ''' Initializes capture tracking for the old entries merged into added entries that aren't renames
     ''' </summary>
     '''
     ''' <param name="entriesWithMergers">
@@ -450,7 +455,8 @@ Public Class DiffStatisticsCalculator
 
     ''' <summary>
     ''' For each old entry in <paramref name="oldEntryCaptures"/>, checks which of its keys are present
-    ''' in the new entries it was merged into and marks them as captured in the tracking record
+    ''' in, or captured by a key of, any new entry it was merged into, added or modified, and marks
+    ''' them as captured in the tracking record
     ''' </summary>
     '''
     ''' <param name="oldEntryCaptures">
@@ -652,7 +658,7 @@ Public Class DiffStatisticsCalculator
     End Function
 
     ''' <summary>
-    ''' Helper class for tracking added key information
+    ''' An added key paired with the name of the entry to which it was added
     ''' </summary>
     Private Class AddedKeyInfo
 
@@ -693,12 +699,12 @@ Public Class DiffStatisticsCalculator
     Private Class KeyCaptureTotals
 
         ''' <summary>
-        ''' Total number of keys across all old entries (all types)
+        ''' Sum over the old entries of each entry's distinct key values (all types)
         ''' </summary>
         Public Property Total As Integer
 
         ''' <summary>
-        ''' Number of keys captured by any new entry (all types)
+        ''' Sum over the old entries of each entry's distinct key values that a merge target captured (all types)
         ''' </summary>
         Public Property Captured As Integer
 
@@ -715,7 +721,8 @@ Public Class DiffStatisticsCalculator
     End Class
 
     ''' <summary>
-    ''' Helper class for tracking key capture per old entry
+    ''' Tracks which of one old entry's key values its merge targets captured. Every set compares
+    ''' values case-insensitively.
     ''' </summary>
     Private Class OldEntryKeyTracking
 

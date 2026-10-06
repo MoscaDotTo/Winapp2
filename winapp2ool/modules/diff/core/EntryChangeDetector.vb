@@ -21,9 +21,10 @@ Imports System.Threading.Tasks
 
 ''' <summary>
 ''' Categorizes entries as added, removed, or modified between two versions of winapp2.ini.
-''' Normalizes deprecated path values to suppress false-positive diffs, delegates rename
-''' and merger detection to <c> MergeDetector </c>, and coordinates key-level analysis
-''' via <c> KeyModificationAnalyzer </c>.
+''' Entry names compare ignoring case, so an entry renamed only in case counts as present in
+''' both files. Normalizes deprecated values to suppress false-positive diffs, delegates rename
+''' and merger detection to <see cref="MergeDetector"/>, and coordinates key-level analysis
+''' via <see cref="KeyModificationAnalyzer"/>.
 ''' </summary>
 Public Class EntryChangeDetector
 
@@ -34,9 +35,7 @@ Public Class EntryChangeDetector
     Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer
     Private ReadOnly _renderer As DiffOutputRenderer
 
-    ''' <summary>
-    ''' Initializes a new instance of <c> EntryChangeDetector </c>
-    ''' </summary>
+    ''' <summary>Creates a new <c> EntryChangeDetector </c></summary>
     ''' 
     ''' <param name="state">
     ''' Shared diff state tracking all entry changes
@@ -53,13 +52,13 @@ Public Class EntryChangeDetector
     ''' <param name="mergeDetector">
     ''' Handles rename and merger detection for removed entries
     ''' </param>
-    ''' 
+    '''
     ''' <param name="keyAnalyzer">
     ''' Tracks key-level changes between entry versions
     ''' </param>
-    ''' 
+    '''
     ''' <param name="renderer">
-    ''' Produces <c> MenuSection </c> output for removed entries with no key matches
+    ''' Produces <c> MenuSection </c> output for entries removed without replacement
     ''' </param>
     Public Sub New(state As DiffState,
                    file1 As iniFile,
@@ -78,8 +77,11 @@ Public Class EntryChangeDetector
     End Sub
 
     ''' <summary>
-    ''' Replaces deprecated path values in all keys of a winapp2.ini <c> iniFile </c>
-    ''' to suppress false-positive diff entries caused by known path renames
+    ''' Replaces each deprecated value listed in <c> PathReplacements </c> (environment variables,
+    ''' and <c> *.* </c> becoming <c> * </c>) in every key of <paramref name="winapp"/>, so a change
+    ''' to the newer spelling doesn't show up as a diff. The match is case-sensitive. We change the
+    ''' keys in place, so everything that reads the file afterward, including the rendered
+    ''' output, sees the replaced values.
     ''' </summary>
     '''
     ''' <param name="winapp">
@@ -96,9 +98,10 @@ Public Class EntryChangeDetector
     End Sub
 
     ''' <summary>
-    ''' Replaces deprecated path values in a single key's value in-place
+    ''' Applies each <c> PathReplacements </c> pair to <paramref name="key"/>'s value in turn,
+    ''' with a case-sensitive <c> Replace </c>, so a later pair sees the output of earlier ones
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="key">
     ''' The key whose value is normalized against <c> PathReplacements </c>
     ''' </param>
@@ -117,7 +120,8 @@ Public Class EntryChangeDetector
     End Sub
 
     ''' <summary>
-    ''' Records entries present in the new file but not the old file as added
+    ''' Records each entry whose name (ignoring case) isn't in the old file as added, and adds
+    ''' its section to <c> PotentialMatches </c> as a rename or merger candidate
     ''' </summary>
     Public Sub ProcessNewEntries()
 
@@ -133,9 +137,10 @@ Public Class EntryChangeDetector
     End Sub
 
     ''' <summary>
-    ''' Processes the entries in the old file. If an entry is not present in the new file,
-    ''' it is recorded as removed. If an entry is present in both files, it is compared 
-    ''' against the new version for modifications.
+    ''' Records each old entry whose name (ignoring case) isn't in the new file as removed, and
+    ''' compares every other old entry against its new version through
+    ''' <see cref="KeyModificationAnalyzer.FindModifications"/>. Then adds the new version of each
+    ''' entry that comparison marked as modified to <c> PotentialMatches </c>.
     ''' </summary>
     Public Sub ProcessOldEntries()
 
@@ -159,12 +164,25 @@ Public Class EntryChangeDetector
     End Sub
 
     ''' <summary>
-    ''' Processes the entries determined to have been "Removed" and categorizes them into 3 bins: <br />
-    ''' Entries which have been renamed: all FileKeys / RegKeys match, but there may be minor changes <br />  <br />
-    ''' Entries which have been merged: all or most FileKeys / RegKeys / Detects / DetectFiles match,
-    ''' but there may be major changes <br /> <br />
-    ''' Entries which have actually been removed: key values not found in any new entries <br />
+    ''' Sorts the removed entries, in parallel, into three bins. Only <c> FileKey </c> and
+    ''' <c> RegKey </c> values decide the bin; other key types can differ freely. <br /><br />
+    '''
+    ''' Renamed: an added entry matches every old FileKey and RegKey, has the same number of each,
+    ''' and raised neither the more-patterns nor the wildcard-reduction flag. Each pattern-by-pattern
+    ''' FileKey match overwrites those flags, so they reflect only the last such match, and key
+    ''' order can decide between a rename and a merger (see <see cref="MergeDetector.CountMatches"/>). <br />
+    ''' Merged: at least one candidate matches at least one old FileKey or RegKey. <br />
+    ''' Removed without replacement: the entry has no FileKey or RegKey, or none of the candidates
+    ''' we found by name and content matched any of them. <br /><br />
+    '''
+    ''' Then converts any rename that a parallel merger claimed (see
+    ''' <see cref="ReconcileRenamesAndMergers"/>).
     ''' </summary>
+    '''
+    ''' <returns>
+    ''' A header with the removal counts, then one section per entry removed without replacement,
+    ''' ordered by name ignoring case. Empty when no entries were removed.
+    ''' </returns>
     Public Function ProcessRemovals() As List(Of MenuSection)
 
         Dim totalRemoved = _state.ModifiedEntries.RemovedEntryNames.Count
@@ -213,7 +231,7 @@ Public Class EntryChangeDetector
             Dim mergedCount = _state.MergedEntries.OldToNewMergeDict.Count
             noReplacementCount = totalRemoved - renamedCount - mergedCount
 
-            ' Nothing removed means nothing to announce — an "0 total entries removed" banner is
+            ' Nothing removed means nothing to announce: an "0 total entries removed" banner is
             ' noise the Diff Summary already covers. The global log still records the count below,
             ' so the saved changelog's shape is unchanged
             If totalRemoved > 0 Then
@@ -282,16 +300,16 @@ Public Class EntryChangeDetector
 
     ''' <summary>
     ''' Builds reverse indexes over the FileKey and RegKey values in <paramref name="potentialMatches"/>
-    ''' to enable fast content-aware candidate lookup during removal processing.
+    ''' for content-aware candidate lookup during removal processing. All three compare ignoring case.
     ''' <list type="bullet">
     '''   <item><term>KeyValueIndex</term>
-    '''     <description>Exact key value → set of section names containing that value</description></item>
+    '''     <description>Whole key value → set of section names containing that value</description></item>
     '''   <item><term>PathRootIndex</term>
-    '''     <description>First two backslash components → set of section names, catching
-    '''     wildcard pattern changes where the path root stays the same</description></item>
+    '''     <description>Path root from <see cref="GetPathRoot"/> → set of section names, catching
+    '''     pattern or flag changes where the path root stays the same</description></item>
     '''   <item><term>WildcardPrefixes</term>
-    '''     <description>For roots containing <c> * </c>, the prefix before <c> * </c> grouped
-    '''     by first path component for efficient lookup</description></item>
+    '''     <description>For roots with a <c> * </c> after the first character, the prefix before
+    '''     the <c> * </c>, grouped by first path component</description></item>
     ''' </list>
     ''' </summary>
     '''
@@ -378,9 +396,8 @@ Public Class EntryChangeDetector
     ''' <summary>
     ''' Processes a single removed entry: gathers rename/merger candidates from name heuristics
     ''' and content-aware index lookups, filters to eligible entries, and delegates to
-    ''' <c> MergeDetector.AssessRenamesAndMergers </c>. Returns a <c> MenuSection </c> for entries
-    ''' that were truly removed (no rename or merger found), or <c> Nothing </c> if a rename/merger
-    ''' was recorded.
+    ''' <see cref="MergeDetector.AssessRenamesAndMergers"/>. An entry with no FileKey or RegKey
+    ''' skips the search and counts as removed without replacement.
     ''' </summary>
     '''
     ''' <param name="entryName">
@@ -400,7 +417,7 @@ Public Class EntryChangeDetector
     ''' </param>
     '''
     ''' <param name="indexes">
-    ''' Reverse content indexes built by <c> BuildContentIndexes </c>
+    ''' Reverse content indexes built by <see cref="BuildContentIndexes"/>
     ''' </param>
     '''
     ''' <param name="eligibleNames">
@@ -436,9 +453,11 @@ Public Class EntryChangeDetector
     End Function
 
     ''' <summary>
-    ''' Gathers candidate section names for a removed entry using all three heuristics:
-    ''' name/browser-ref matching, exact key value index lookup, path root index lookup,
-    ''' and wildcard prefix index lookup
+    ''' Gathers candidate section names for a removed entry using four heuristics: name and
+    ''' browser LangSecRef matching (<see cref="FindProbableMatches"/>), then, for each old FileKey
+    ''' and RegKey, a whole-value lookup, a path root lookup, and a wildcard prefix lookup. The
+    ''' wildcard lookup adds a candidate when the old key's root, cut at its first <c> * </c>,
+    ''' starts with a new key's wildcard prefix under the same first component (ignoring case).
     ''' </summary>
     '''
     ''' <param name="entryName">
@@ -564,11 +583,11 @@ Public Class EntryChangeDetector
 
     ''' <summary>
     ''' Converts any remaining rename whose target is also in <c> MergedEntryNames </c>
-    ''' into a merger. When the <c> Parallel.ForEach </c> in <c> ProcessRemovals </c> runs,
-    ''' a merger's <c> TrackMerger </c> may execute before the competing rename's
-    ''' <c> ConfirmRename </c> has registered the rename, causing the cleanup branch
-    ''' (lines 385-400 of <c> TrackMerger </c>) to be skipped. This pass catches those
-    ''' cases after all parallel work is complete.
+    ''' into a merger, adding the renamed entry to <c> MergeDict </c> and <c> OldToNewMergeDict </c>
+    ''' and dropping the rename. In the <c> Parallel.ForEach </c> in <see cref="ProcessRemovals"/>,
+    ''' a merger's <c> TrackMerger </c> can run before the competing rename's <c> ConfirmRename </c>
+    ''' has registered the rename, so <c> TrackMerger </c> never sees the rename to fold it in.
+    ''' This pass catches those cases after all parallel work is complete.
     ''' </summary>
     Private Sub ReconcileRenamesAndMergers()
 
@@ -597,19 +616,19 @@ Public Class EntryChangeDetector
     End Sub
 
     ''' <summary>
-    ''' Returns the directory-level path root of a key value for indexing, stripping any
-    ''' pipe-delimited flags first. For paths with 3+ backslash components, returns the
+    ''' Returns the directory-level path root of a key value for indexing, cutting the value
+    ''' at its first pipe first. For paths with 3+ backslash components, returns the
     ''' first two (e.g. <c> %AppData%\SomeApp </c>). For paths with exactly 2 components,
     ''' returns the full directory path (e.g. <c> %AppData%\GetRight* </c> from
     ''' <c> %AppData%\GetRight*|GetRight.lst;*.data|RECURSE </c>).
     ''' </summary>
     '''
     ''' <param name="value">
-    ''' The raw key value string, optionally containing pipe-delimited flags
+    ''' The raw key value string, optionally containing pipe-delimited patterns and flags
     ''' </param>
     '''
     ''' <returns>
-    ''' The first one or two backslash-delimited path components, or <c> Nothing </c> if the value has no backslash
+    ''' The first two backslash-delimited path components, or <c> Nothing </c> if the path has no backslash
     ''' </returns>
     Private Shared Function GetPathRoot(value As String) As String
 
@@ -627,8 +646,7 @@ Public Class EntryChangeDetector
 
     ''' <summary>
     ''' Returns the first backslash-delimited component of a path (typically the environment
-    ''' variable or drive root), or <c> Nothing </c> if the path has no backslash.
-    ''' E.g. <c> %AppData%\GetRight* </c> → <c> %AppData% </c>
+    ''' variable or drive root). E.g. <c> %AppData%\GetRight* </c> → <c> %AppData% </c>
     ''' </summary>
     '''
     ''' <param name="pathRoot">
@@ -636,7 +654,8 @@ Public Class EntryChangeDetector
     ''' </param>
     '''
     ''' <returns>
-    ''' The substring before the first <c> \ </c>, or <c> Nothing </c> if no backslash is present
+    ''' The substring before the first <c> \ </c>, or <c> Nothing </c> if the path has no backslash
+    ''' or starts with one
     ''' </returns>
     Private Shared Function GetFirstComponent(pathRoot As String) As String
 
@@ -646,8 +665,11 @@ Public Class EntryChangeDetector
     End Function
 
     ''' <summary>
-    ''' Produces a list of <c> iniSection </c>s who may potentially be merger/rename candidates
-    ''' based on traits such as section and name similarities
+    ''' Returns the sections that may be merger/rename candidates by name or browser. A section
+    ''' qualifies when its text and the removed entry's text both contain the same value from
+    ''' <c> BrowserSecRefs </c> (anywhere in the text, not only in <c> LangSecRef </c>), or when its
+    ''' uppercased name contains a word of the old name followed by a space, as a substring.
+    ''' We stop reading old name words at the <c> * </c>.
     ''' </summary>
     '''
     ''' <param name="oldNameBroken">
@@ -659,7 +681,8 @@ Public Class EntryChangeDetector
     ''' </param>
     '''
     ''' <param name="snapshotTextMap">
-    ''' Pre-computed uppercased string representations of each candidate section, keyed by name
+    ''' Pre-computed uppercased string representations of each candidate section, keyed by name.
+    ''' A section missing from it is serialized on the spot.
     ''' </param>
     '''
     ''' <param name="oldEntryTextUpper">
@@ -726,7 +749,7 @@ Public Class EntryChangeDetector
 
         ''' <summary>
         ''' Path root (first two backslash components) → set of section names,
-        ''' catching wildcard pattern changes where the root stays the same
+        ''' catching pattern or flag changes where the root stays the same
         ''' </summary>
         Public ReadOnly PathRootIndex As New Dictionary(Of String, HashSet(Of String))(StringComparer.OrdinalIgnoreCase)
 
