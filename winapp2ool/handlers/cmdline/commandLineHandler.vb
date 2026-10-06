@@ -26,23 +26,27 @@ Imports System.Text
 Public Module commandLineHandler
 
     ''' <summary>
-    ''' The current list of the command line args (mutable)
+    ''' The command line args still waiting to be handled. Every handler removes the args it
+    ''' consumes, so the list shrinks as parsing goes on.
     ''' </summary>
     Public Property cmdargs As List(Of String)
 
     ''' <summary>
-    ''' Indicates whether Winapp2ool was launched from the command line with module arguments
-    ''' When True, prevents automatic saving of settings to preserve user's saved configuration
+    ''' Indicates whether Winapp2ool was launched from the command line with a module argument.
+    ''' When <c> True </c>, <see cref="SaveSettings"/> refuses to write, so a scripted run never
+    ''' changes the user's saved configuration.
     ''' </summary>
     Public Property IsCommandLineMode As Boolean = False
 
     ''' <summary>
-    ''' Configuration for module file requirements and handlers
-    ''' </summary> 
+    ''' Each module's file slot count and command line handler, keyed by every form of its
+    ''' identifier. The lookup is case-sensitive.
+    ''' </summary>
     Private ReadOnly ModuleConfigs As Dictionary(Of String, ModuleConfig) = CreateModuleConfigs()
 
     ''' <summary>
-    ''' Creates the module configuration dictionary with all aliases
+    ''' Builds the module configuration dictionary. Each module goes in under four keys: its
+    ''' number and its name, each with and without a leading dash.
     ''' </summary>
     Private Function CreateModuleConfigs() As Dictionary(Of String, ModuleConfig)
 
@@ -86,6 +90,15 @@ Public Module commandLineHandler
         Public ReadOnly FileCount As Integer
         Public ReadOnly Handler As Action
 
+        ''' <summary>Creates a new <c> ModuleConfig </c> from its two fields</summary>
+        '''
+        ''' <param name="fileCount">
+        ''' The number of file slots whose <c> -Nd </c> / <c> -Nf </c> args
+        ''' <see cref="validateArgs"/> checks. It only decides which args get a warning, and a
+        ''' module can bind slots past it.
+        ''' </param>
+        '''
+        ''' <param name="handler">The module's command line handler</param>
         Public Sub New(fileCount As Integer,
                        handler As Action)
 
@@ -97,16 +110,16 @@ Public Module commandLineHandler
     End Structure
 
     ''' <summary>
-    ''' Flips a boolean setting and removes its associated argument from the args list
+    ''' Flips a boolean setting and removes its argument from <see cref="cmdargs"/>, if the
+    ''' argument is there. Only the first copy of the argument is removed.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="setting">
-    ''' A boolean module setting whose state will be inverted 
+    ''' A boolean module setting whose state will be inverted
     ''' </param>
-    ''' 
+    '''
     ''' <param name="arg">
-    ''' A commandline argument targeting 
-    ''' <c> <paramref name="setting"/> </c>
+    ''' A commandline argument targeting <paramref name="setting"/> (case-sensitive)
     ''' </param>
     Public Sub invertSettingAndRemoveArg(ByRef setting As Boolean,
                                                arg As String)
@@ -120,8 +133,16 @@ Public Module commandLineHandler
     End Sub
 
     ''' <summary>
-    ''' Initializes the processing of the commandline args and hands the 
-    ''' remaining arguments off to the respective module's handler
+    ''' Reads the command line into <see cref="cmdargs"/>, strips <c> -offline </c> (the launcher
+    ''' has already acted on it), checks for and installs an update if <c> -autoupdate </c> is
+    ''' present, handles <c> -s </c>, <c> -writelog </c> and the flavor flags, then hands the
+    ''' rest to the module the first remaining arg names. <c> -autoupdate </c> stays in
+    ''' <see cref="cmdargs"/>.
+    ''' Returns without doing anything more when no args remain, so the interactive menu
+    ''' opens (under <c> -s </c> the launcher exits instead). An unknown module identifier logs an error and exits with code 1.
+    ''' <br /><br />
+    ''' Dispatching to a module sets <see cref="IsCommandLineMode"/>, which stops settings
+    ''' from being saved for the rest of the run.
     ''' </summary>
     Public Sub processCommandLineArgs()
 
@@ -166,7 +187,7 @@ Public Module commandLineHandler
     ''' </summary>
     ''' 
     ''' <param name="maxFiles">
-    ''' The maximum number of <c> iniFiles </c> for which arguments should be generated
+    ''' The number of file slots for which arguments should be generated
     ''' </param>
     ''' 
     ''' <returns>
@@ -189,11 +210,15 @@ Public Module commandLineHandler
     End Function
 
     ''' <summary>
-    ''' Enforces that commandline args are properly formatted and paths exist
+    ''' Logs a warning for each <c> -Nd </c> whose directory doesn't exist and each
+    ''' <c> -Nf </c> whose value names a parent directory that doesn't exist. It only warns,
+    ''' and never stops the run or changes <see cref="cmdargs"/>. We check each path as given,
+    ''' so a value with a leading <c> \ </c> is checked against the root of the current drive,
+    ''' not the folder the module will resolve it against.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="maxFiles">
-    ''' Maximum number of files to for which to validate the arguments 
+    ''' The number of file slots whose arguments we check
     ''' </param>
     Private Sub validateArgs(maxFiles As Integer)
 
@@ -237,7 +262,9 @@ Public Module commandLineHandler
     End Sub
 
     ''' <summary>
-    ''' Prints an error to the user and exits the application after they have pressed a key
+    ''' Logs an error, prints it and waits for a key unless output is suppressed, then exits
+    ''' with code 1. We save the global log first when output is suppressed or
+    ''' <see cref="SaveGlobalLogOnExit"/> is set.
     ''' </summary>
     ''' 
     ''' <param name="errTxt">
@@ -260,7 +287,8 @@ Public Module commandLineHandler
     End Sub
 
     ''' <summary>
-    ''' Handles flavor selection command line arguments and updates the current flavor setting
+    ''' Sets <see cref="CurrentWinappFlavor"/> to <paramref name="flavorValue"/> and removes
+    ''' <paramref name="flavorArg"/> from <see cref="cmdargs"/>, if the argument is there
     ''' </summary>
     ''' 
     ''' <param name="flavorArg">
@@ -284,7 +312,9 @@ Public Module commandLineHandler
     End Sub
 
     ''' <summary>
-    ''' Sets the winapp2 flavor appropriately based on commandline args 
+    ''' Sets the winapp2 flavor from the flavor flags in <see cref="cmdargs"/>. When more than
+    ''' one flavor flag is given, the one checked last here wins, whatever their order on the
+    ''' command line.
     ''' </summary>
     Public Sub processFlavorArgs()
 
@@ -305,15 +335,17 @@ Public Module commandLineHandler
     End Sub
 
     ''' <summary>
-    ''' Reconstructs commandline args to properly handle quoted arguments with spaces
+    ''' Rejoins args that still carry quote marks into one arg per quoted run, joined with
+    ''' single spaces, and strips the quotes
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="args">
-    ''' The set of commandline arguments passed to the application
+    ''' The command line as <c> Environment.GetCommandLineArgs </c> returns it. We skip the
+    ''' first element, which is the program itself.
     ''' </param>
-    ''' 
+    '''
     ''' <returns>
-    ''' List of properly reconstructed arguments with quoted paths handled
+    ''' The args after the program name, with quoted runs rejoined
     ''' </returns>
     Private Function ReconstructArgs(args As String()) As List(Of String)
 

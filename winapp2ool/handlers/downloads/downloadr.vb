@@ -26,8 +26,11 @@ Imports System.Net
 ''' </summary>
 Module downloadr
 
-    ''' <summary> 
-    ''' Attempts to download a file from the internet, returns a boolean indicating the success of the download 
+    ''' <summary>
+    ''' Attempts to download a file from the internet, overwriting any file already at
+    ''' <paramref name="path"/>. A network failure is only logged. Any other exception goes
+    ''' through <see cref="exc"/>, which marks the run failed and waits for Enter unless
+    ''' output is suppressed.
     ''' </summary>
     ''' 
     ''' <param name="link">
@@ -67,11 +70,14 @@ Module downloadr
 
     ''' <summary>
     ''' Downloads a file from the internet to the path described by an <c> iniFileChooser </c>,
-    ''' optionally prompting the user to rename the download or overwrite existing files
+    ''' creating its directory if needed. If the file already exists, we either offer to
+    ''' rename the download or overwrite it. A failed download marks the run failed and waits
+    ''' for Enter unless output is suppressed, even when <paramref name="quietly"/> is set.
     ''' </summary>
     '''
     ''' <param name="pathHolder">
-    ''' The <c> iniFileChooser </c> describing the save location
+    ''' The <c> iniFileChooser </c> describing the save location. A name the user types at the
+    ''' rename prompt replaces its <c> Name </c>.
     ''' </param>
     '''
     ''' <param name="link">
@@ -79,13 +85,16 @@ Module downloadr
     ''' </param>
     '''
     ''' <param name="prompt">
-    ''' Indicates that a "rename file" prompt should be shown if the target path already exists
-    ''' <br /> Optional, Default: <c> True </c>
+    ''' Indicates whether to offer a new file name when the target already exists. The prompt
+    ''' only appears when neither output is suppressed nor <paramref name="quietly"/> is set,
+    ''' and otherwise the download overwrites the file. When <c> False </c>, we delete the
+    ''' existing file before downloading. <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
     '''
     ''' <param name="quietly">
-    ''' Indicates that all downloading output should be suppressed
-    ''' <br /> Optional, Default: <c> False </c>
+    ''' Indicates whether to skip the progress messages and the rename prompt <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     Public Sub download(pathHolder As iniFileChooser,
                         link As String,
@@ -122,13 +131,21 @@ Module downloadr
     End Sub
 
     ''' <summary>
-    ''' Reads a file until a specified line number, returns the contents of that line
+    ''' Reads a file until a specified line number, returns the contents of that line.
+    ''' A missing or unreadable file throws to the caller.
     ''' </summary>
-    ''' 
-    ''' <param name="lineNum"> 
-    ''' The line number to return from the file 
+    '''
+    ''' <param name="path">The path of the file to read</param>
+    '''
+    ''' <param name="lineNum">
+    ''' The 1-based line number to return from the file <br /><br />
+    ''' Optional, Default: <c> 1 </c>
     ''' </param>
-    ''' 
+    '''
+    ''' <returns>
+    ''' The line's text, or <c> "" </c> if the file has fewer lines. We log that case without
+    ''' marking the run failed.
+    ''' </returns>
     Public Function getFileDataAtLineNum(path As String,
                                 Optional lineNum As Integer = 1) As String
 
@@ -153,8 +170,9 @@ Module downloadr
 
     End Function
 
-    ''' <summary> 
-    ''' Attempts to connect to the internet 
+    ''' <summary>
+    ''' Attempts to open <c> https://github.com </c>. A failure is logged through
+    ''' <see cref="handleWebException"/>, and only a <c> WebException </c> is caught.
     ''' </summary>
     ''' 
     ''' <returns> 
@@ -195,8 +213,9 @@ Module downloadr
     ''' The target line number 
     ''' </param>
     ''' 
-    ''' <returns> 
-    ''' The String on the line given by <paramref name="lineNum"/> 
+    ''' <returns>
+    ''' The String on the line given by <paramref name="lineNum"/>, <c> Nothing </c> if the
+    ''' file ends before it, or <c> "" </c> if <paramref name="lineNum"/> is less than 1
     ''' </returns>
     Private Function getTargetLine(reader As StreamReader,
                                    lineNum As Integer) As String
@@ -257,7 +276,9 @@ Module downloadr
 
     ''' <summary>
     ''' Attempts to create an <c> iniFile </c> using the data provided by <paramref name="address"/>.
-    ''' The download is parsed straight from the network, without staging a copy on disk
+    ''' The download is parsed straight from the network, without staging a copy on disk.
+    ''' The result's <c> Dir </c> is the <c> %temp% </c> folder and its <c> Name </c> is the
+    ''' last segment of the URL, though nothing is written there.
     ''' </summary>
     '''
     ''' <param name="address">
@@ -265,8 +286,8 @@ Module downloadr
     ''' </param>
     '''
     ''' <returns>
-    ''' An <c> iniFile </c> created using the remote data if that data is properly formatted, <br />
-    ''' <c> Nothing </c> otherwise
+    ''' An <c> iniFile </c> parsed from the remote data, whatever it contains, <br />
+    ''' <c> Nothing </c> if the download fails with a network or IO error
     ''' </returns>
     Public Function getRemoteIniFile(address As String) As iniFile
 

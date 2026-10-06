@@ -20,16 +20,16 @@ Option Strict On
 ''' <summary>
 ''' CLI argument specification for a single module. Declares which file slots,
 ''' boolean flags, and download support a module accepts, then parses those declarations
-''' against <c> cmdargs </c> when <c> Parse </c> is called.
+''' against <see cref="cmdargs"/> when <see cref="Parse"/> is called.
 ''' </summary>
 '''
 ''' <remarks>
 ''' Modules create and invoke a <c> CliArgSpec </c> at the top of their
 ''' <c> handleCmdLine </c> implementation, after settings have been initialized:
-''' 
+'''
 ''' <code>
 ''' New CliArgSpec("modulename") _
-'''     .WithFile(1, Me.InputFile, Alias (optional)) _
+'''     .WithFile(1, InputFile, "alias") _
 '''     .WithFlag("-flag", Sub() Setting = Not Setting) _
 '''     .Parse()
 ''' </code>
@@ -46,6 +46,10 @@ Public Class CliArgSpec
         Public ReadOnly File As iniFileChooser
         Public ReadOnly Aliases As String()
 
+        ''' <summary>Creates a new <c> FileBinding </c> from its three fields</summary>
+        ''' <param name="slot">The 1-indexed slot number</param>
+        ''' <param name="file">The chooser the slot's arguments modify</param>
+        ''' <param name="aliases">The slot's alias names, without dashes</param>
         Public Sub New(slot As Integer, file As iniFileChooser, aliases As String())
 
             Me.Slot = slot
@@ -56,11 +60,15 @@ Public Class CliArgSpec
 
     End Structure
 
+    ''' <summary>Binds a flag to the action that runs when the flag is present</summary>
     Private Structure FlagBinding
 
         Public ReadOnly Flag As String
         Public ReadOnly Toggle As Action
 
+        ''' <summary>Creates a new <c> FlagBinding </c> from its two fields</summary>
+        ''' <param name="flag">The flag, including its leading dash</param>
+        ''' <param name="toggle">The action to run when the flag is present</param>
         Public Sub New(flag As String, toggle As Action)
 
             Me.Flag = flag
@@ -80,6 +88,10 @@ Public Class CliArgSpec
         Public ReadOnly File As iniFileChooser
         Public ReadOnly NewName As String
 
+        ''' <summary>Creates a new <c> FileAliasBinding </c> from its three fields</summary>
+        ''' <param name="flag">The flag, including its leading dash</param>
+        ''' <param name="file">The chooser whose <c> Name </c> the flag replaces</param>
+        ''' <param name="newName">The filename the flag assigns</param>
         Public Sub New(flag As String, file As iniFileChooser, newName As String)
 
             Me.Flag = flag
@@ -114,9 +126,13 @@ Public Class CliArgSpec
     ''' <summary>
     ''' Binds a numbered file slot to an <c> iniFileChooser </c> instance.
     ''' The <c> -Nf </c> and <c> -Nd </c> command-line arguments (where N equals
-    ''' <paramref name="slot"/>) will set the file's path when <c> Parse </c> is called.
+    ''' <paramref name="slot"/>) will set the file's path when <see cref="Parse"/> is called.
     ''' Optional <paramref name="aliases"/> provide human-readable alternatives:
     ''' an alias of <c> "old" </c> also accepts <c> -oldf </c> and <c> -oldd </c>.
+    ''' <br /><br />
+    ''' We apply <c> -Nd </c> before <c> -Nf </c>, and the numbered forms before the aliases,
+    ''' so an alias wins over its numbered form. A <c> -Nd </c> path with a leading <c> \ </c>
+    ''' resolves against the working directory, not the folder holding winapp2ool.
     ''' </summary>
     '''
     ''' <param name="slot">
@@ -132,6 +148,8 @@ Public Class CliArgSpec
     ''' <c> -xf </c> (filename) and <c> -xd </c> (directory) in addition to the
     ''' numbered forms.
     ''' </param>
+    '''
+    ''' <returns>This spec, for chaining</returns>
     Public Function WithFile(slot As Integer,
                              file As iniFileChooser,
                   ParamArray aliases As String()) As CliArgSpec
@@ -143,8 +161,9 @@ Public Class CliArgSpec
 
     ''' <summary>
     ''' Binds a named flag to a toggle action.
-    ''' When <paramref name="flag"/> is present in <c> cmdargs </c>,
-    ''' <paramref name="toggle"/> is invoked and the flag is removed.
+    ''' When <paramref name="flag"/> is present in <see cref="cmdargs"/>,
+    ''' <paramref name="toggle"/> is invoked once and one copy of the flag is removed.
+    ''' The match is case-sensitive.
     ''' </summary>
     '''
     ''' <param name="flag">
@@ -154,6 +173,8 @@ Public Class CliArgSpec
     ''' <param name="toggle">
     ''' An action that toggles the associated module setting
     ''' </param>
+    '''
+    ''' <returns>This spec, for chaining</returns>
     Public Function WithFlag(flag As String,
                              toggle As Action) As CliArgSpec
 
@@ -164,9 +185,11 @@ Public Class CliArgSpec
 
     ''' <summary>
     ''' Binds a named flag to a file rename action.
-    ''' When <paramref name="flag"/> is present in <c> cmdargs </c>,
+    ''' When <paramref name="flag"/> is present in <see cref="cmdargs"/>,
     ''' <paramref name="file"/>.Name is set to <paramref name="newName"/>.
     ''' Used for preset filename shortcuts where a short flag selects a well-known source file.
+    ''' Aliases apply after the file slots, so the flag overrides a <c> -Nf </c> name for the
+    ''' same file.
     ''' </summary>
     '''
     ''' <param name="flag">
@@ -180,6 +203,8 @@ Public Class CliArgSpec
     ''' <param name="newName">
     ''' The filename to assign when <paramref name="flag"/> is found
     ''' </param>
+    '''
+    ''' <returns>This spec, for chaining</returns>
     Public Function WithFileAlias(flag As String,
                                   file As iniFileChooser,
                                   newName As String) As CliArgSpec
@@ -191,9 +216,11 @@ Public Class CliArgSpec
 
     ''' <summary>
     ''' Enables the <c> -d </c> download flag for this module.
-    ''' When <c> -d </c> is present in <c> cmdargs </c>, <paramref name="toggle"/> is invoked.
-    ''' If <paramref name="getState"/> is provided, an offline error is raised whenever
-    ''' the resolved download state is <c> True </c> and the application is offline.
+    ''' When <c> -d </c> is present in <see cref="cmdargs"/>, <paramref name="toggle"/> is invoked.
+    ''' If <paramref name="getState"/> is provided and the resolved download state is
+    ''' <c> True </c> while the application is offline, <see cref="Parse"/> prints an error,
+    ''' waits for a key and ends the process with exit code 0. Under <c> -s </c> it skips that
+    ''' check and carries on.
     ''' </summary>
     '''
     ''' <param name="toggle">
@@ -206,6 +233,8 @@ Public Class CliArgSpec
     ''' Optional, Default: <c> Nothing </c> <br />
     ''' omit if no offline guard is needed.
     ''' </param>
+    '''
+    ''' <returns>This spec, for chaining</returns>
     Public Function WithDownload(toggle As Action,
                         Optional getState As Func(Of Boolean) = Nothing) As CliArgSpec
 
@@ -217,13 +246,17 @@ Public Class CliArgSpec
 
     ''' <summary>
     ''' Registers a handler for the first positional (non-flag) argument.
-    ''' <c> ParsePositionalArg </c> runs before file binding, so the handler
-    ''' can set filenames that file-slot args then override.
+    ''' <see cref="ParsePositionalArg"/> runs before file binding, so the handler
+    ''' can set filenames that file-slot args then override. It takes the first token without
+    ''' a leading dash, which can be the value of a slot argument such as <c> -1d </c>, so the
+    ''' positional has to come before any slot arguments on the command line.
     ''' </summary>
     '''
     ''' <param name="handler">
-    ''' An action invoked with the first non-flag token found in <c> cmdargs </c>
+    ''' An action invoked with the first non-flag token found in <see cref="cmdargs"/>
     ''' </param>
+    '''
+    ''' <returns>This spec, for chaining</returns>
     Public Function WithPositional(handler As Action(Of String)) As CliArgSpec
 
         _positionalHandler = handler
@@ -232,9 +265,10 @@ Public Class CliArgSpec
     End Function
 
     ''' <summary>
-    ''' Parses <c> cmdargs </c> against this spec. Processes positional args, file slots,
-    ''' boolean flags, file aliases, and the download flag in order, then emits a
-    ''' diagnostic warning for any unrecognized <c> - </c>-prefixed args that remain.
+    ''' Parses <see cref="cmdargs"/> against this spec. Processes positional args, file slots,
+    ''' boolean flags, file aliases, and the download flag in order, then logs a
+    ''' warning for any unrecognized <c> - </c>-prefixed args that remain. The warning goes
+    ''' only to the log, and the unrecognized args are otherwise ignored.
     ''' </summary>
     Public Sub Parse()
 
@@ -340,7 +374,8 @@ Public Class CliArgSpec
     ''' <summary>
     ''' Processes the <c> -d </c> download flag. If the flag is present, invokes the
     ''' registered toggle. If a state reader was provided and the resolved download state
-    ''' is <c> True </c> while the application is offline, exits with an error message.
+    ''' is <c> True </c> while the application is offline, prints an error, waits for a key
+    ''' and exits with code 0. We skip the offline check entirely when output is suppressed.
     ''' </summary>
     Private Sub ParseDownloadArg()
 
@@ -368,7 +403,7 @@ Public Class CliArgSpec
 
     ''' <summary>
     ''' Logs a diagnostic warning for each remaining <c> - </c>-prefixed token in
-    ''' <c> cmdargs </c> that was not consumed during parsing.
+    ''' <see cref="cmdargs"/> that was not consumed during parsing.
     ''' </summary>
     Private Sub WarnUnknownArgs()
 
@@ -383,9 +418,12 @@ Public Class CliArgSpec
     End Sub
 
     ''' <summary>
-    ''' Applies a full directory path argument (<c> -Nd </c>) to an <c> iniFileChooser </c>.
-    ''' Splits the path into directory and filename components. Removes the flag and its
-    ''' value from <c> cmdargs </c>.
+    ''' Applies a full directory path argument (<c> -Nd </c>) to an <c> iniFileChooser </c>,
+    ''' replacing its <c> Dir </c>. A leading <c> \ </c> resolves against the working directory.
+    ''' If the last path component contains a <c> . </c>, we take it as the filename and set
+    ''' <c> Name </c> too, so a directory whose name has a dot in it needs a trailing <c> \ </c>.
+    ''' A value with no <c> \ </c> in it leaves <c> Dir </c> empty. Removes the flag and its value from <see cref="cmdargs"/>. A flag with no value after
+    ''' it is left in place.
     ''' </summary>
     '''
     ''' <param name="flag">
@@ -425,8 +463,9 @@ Public Class CliArgSpec
 
     ''' <summary>
     ''' Applies a filename argument (<c> -Nf </c>) to an <c> iniFileChooser </c>.
-    ''' Supports leading relative subdirectory paths (e.g. <c> "\subfolder\file.ini" </c>).
-    ''' Removes the flag and its value from <c> cmdargs </c>.
+    ''' A value with a leading <c> \ </c> and more than one <c> \ </c>, such as
+    ''' <c> "\subfolder\file.ini" </c>, appends its folders to the chooser's current
+    ''' <c> Dir </c>. Removes the flag and its value from <see cref="cmdargs"/>.
     ''' </summary>
     '''
     ''' <param name="flag">
@@ -464,8 +503,9 @@ Public Class CliArgSpec
     End Sub
 
     ''' <summary>
-    ''' Removes double slashes and trims leading/trailing slashes from an
-    ''' <c> iniFileChooser </c>'s path components.
+    ''' Replaces each <c> \\ </c> in an <c> iniFileChooser </c>'s <c> Dir </c> with one backslash in a
+    ''' single pass (three become two, and a UNC path's leading <c> \\ </c> becomes <c> \ </c>), then strips
+    ''' leading backslashes from its <c> Name </c> and trailing ones from its <c> Dir </c>.
     ''' </summary>
     '''
     ''' <param name="file">

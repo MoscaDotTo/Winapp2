@@ -30,13 +30,21 @@ Module exceptionHandler
 
     End Sub
 
-    ''' <summary> Catches general exceptions and logs them for debugging purposes  </summary>
+    ''' <summary>
+    ''' Reports an unexpected exception: logs it, prints it, saves the global log, marks the run
+    ''' failed and waits for Enter unless output is suppressed
+    ''' </summary>
     ''' <param name="ex"> Any given exception captured during winapp2ool's execution </param>
     Public Sub exc(ByRef ex As Exception)
         printAndLogExceptionForUser(ex.ToString, ex.GetType.ToString, True)
     End Sub
 
-    ''' <summary> Enters Exceptions caused by a lack of internet access into the global log </summary>
+    ''' <summary>
+    ''' Enters Exceptions caused by a lack of internet access into the global log. It doesn't
+    ''' mark the run failed and doesn't change <see cref="isOffline"/>, even though the logged
+    ''' message says winapp2ool will enter offline mode. Callers that want offline mode set it
+    ''' themselves.
+    ''' </summary>
     ''' <param name="ex"> An exception of type <c> Net.WebException </c> </param>
     Public Sub handleWebException(ex As Net.WebException)
 
@@ -50,7 +58,10 @@ Module exceptionHandler
 
     End Sub
 
-    ''' <summary> Enters Exceptions caused by being unable to access files into the global log </summary>
+    ''' <summary>
+    ''' Enters Exceptions caused by being unable to access files into the global log, marks the
+    ''' run failed and saves the global log to disk. Nothing is printed to the console.
+    ''' </summary>
     ''' <param name="ex"> An Exception of type <c> IOException </c> </param>
     Public Sub handleIOException(ex As IOException)
 
@@ -67,7 +78,10 @@ Module exceptionHandler
 
     End Sub
 
-    ''' <summary> Enters Exceptions caused by being denied access to a file or folder into the global log </summary>
+    ''' <summary>
+    ''' Enters Exceptions caused by being denied access to a file or folder into the global log,
+    ''' marks the run failed and saves the global log to disk. Nothing is printed to the console.
+    ''' </summary>
     ''' <param name="ex"> An Exception of type <c> UnauthorizedAccessException </c> </param>
     Public Sub handleUnauthorizedAccessException(ex As UnauthorizedAccessException)
 
@@ -84,39 +98,64 @@ Module exceptionHandler
 
     End Sub
 
-    ''' <summary> Creates a new <c> ArgumentNullException </c> when a public member is passed a <c> Null </c> parameter </summary>
-    ''' <param name="argName"> The name of the argument whose value is <c> Null </c> </param>
+    ''' <summary>
+    ''' Reports that a public member was passed <c> Nothing </c>, through
+    ''' <see cref="handleNullArgException"/>. It throws nothing, so the caller still has to return.
+    ''' </summary>
+    ''' <param name="argName"> The name of the argument whose value is <c> Nothing </c> </param>
     Public Sub argIsNull(argName As String)
         handleNullArgException(New ArgumentNullException(argName))
     End Sub
 
-    ''' <summary> Creates a new <c> ArgumentException </c> when a public member is passed an invalid parameter </summary>
+    ''' <summary>
+    ''' Reports that a public member was passed an invalid argument, through
+    ''' <see cref="handleInvalidArgException"/>. It throws nothing, so the caller still has to return.
+    ''' </summary>
     ''' <param name="argName"> The name of the argument whose value is invalid </param>
     Public Sub argIsInvalid(argName As String)
         handleInvalidArgException(New ArgumentException(argName))
     End Sub
 
-    ''' <summary> Passes off exceptions caused by invalid arugments to be logged and displayed to the user </summary>
+    ''' <summary> Passes off exceptions caused by invalid arguments to be logged and displayed to the user </summary>
     ''' <param name="ex"> An Exception of type <c> ArgumentException </c> </param>
+    '''
+    ''' <param name="forceAck">
+    ''' Indicates whether to wait for Enter after printing the error <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    '''
+    ''' <param name="onlyLog">
+    ''' Indicates whether to only log the exception, without printing it or marking the run
+    ''' failed <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Sub handleInvalidArgException(ex As ArgumentException, Optional forceAck As Boolean = True, Optional onlyLog As Boolean = False)
         printAndLogExceptionForUser(ex.ToString, ex.GetType.ToString, forceAck, onlyLog)
     End Sub
 
     ''' <summary>
-    ''' Informs the user that an exception occured and records it in the winapp2ool log 
+    ''' Records an exception in the winapp2ool log. Unless <paramref name="onlyLog"/> is set, it
+    ''' also marks the run failed, prints the error and saves the global log to disk.
     ''' </summary>
-    ''' 
-    ''' <param name="exTxt"> 
+    '''
+    ''' <param name="exTxt">
     ''' The full text of the exception
     ''' </param>
-    ''' 
-    ''' <param name="exType"> 
-    ''' The <c> Type </c> of the exception 
+    '''
+    ''' <param name="exType">
+    ''' The <c> Type </c> of the exception
     ''' </param>
-    ''' 
-    ''' <param name="forceAcknowledge"> 
-    ''' Indicates that the user should be forced to press enter before the application continues 
-    ''' <br /> Optional, Default: <c> False </c>
+    '''
+    ''' <param name="forceAcknowledge">
+    ''' Indicates whether the user must press Enter before the application continues. Ignored
+    ''' when <paramref name="onlyLog"/> is set or output is suppressed. <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
+    '''
+    ''' <param name="onlyLog">
+    ''' Indicates whether to only log the exception, for a diagnostic the caller recovers from.
+    ''' When <c> True </c>, the run isn't marked failed. <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     Public Sub printAndLogExceptionForUser(exTxt As String,
                                            exType As String,
@@ -141,12 +180,20 @@ Module exceptionHandler
         End If
     End Sub
 
-    ''' <summary> Passes off exceptions caused by Null arguments to be logged and displayed to the user </summary>
+    ''' <summary>
+    ''' Passes off exceptions caused by Null arguments to be logged and displayed to the user,
+    ''' waiting for Enter unless output is suppressed
+    ''' </summary>
     ''' <param name="ex"> An Exception of type <c> ArgumentNullException </c> </param>
     Public Sub handleNullArgException(ex As ArgumentNullException)
         printAndLogExceptionForUser(ex.ToString, ex.GetType.ToString, True)
     End Sub
 
+    ''' <summary>
+    ''' Reports a missing file: logs and prints it, saves the global log and marks the run
+    ''' failed, without waiting for the user to acknowledge it
+    ''' </summary>
+    ''' <param name="ex">An Exception of type <c> FileNotFoundException </c></param>
     Public Sub handleFileNotFoundException(ex As FileNotFoundException)
         printAndLogExceptionForUser(ex.ToString, ex.GetType.ToString, False)
     End Sub

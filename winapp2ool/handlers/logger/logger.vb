@@ -35,8 +35,8 @@ Public Module logger
     Public Property GlobalLog As New List(Of String)
 
     ''' <summary>
-    ''' When <c> True </c>, the global log is written to disk as the application exits, even
-    ''' on a clean silent-mode run. Set by the global <c> -writelog </c> command line flag.
+    ''' Indicates whether the global log is written to disk as the application exits, even
+    ''' on a clean silent-mode run. The global <c> -writelog </c> command line flag sets it.
     ''' A nonzero process exit code saves the log independently of this flag, so scripted and
     ''' CI runs always retain the diagnostics from a failed build.
     ''' </summary>
@@ -51,7 +51,7 @@ Public Module logger
     ''' <c> ThreadStatic </c> fields default to zero on every thread that has not
     ''' yet written to them, exactly the desired initial state. Threads spawned
     ''' inside a parallel section start at depth zero regardless of the calling
-    ''' thread's depth; use <c> gLogCapture </c> to record those threads' output
+    ''' thread's depth; use <see cref="gLogCapture"/> to record those threads' output
     ''' for later flush under the parent's depth.
     ''' </remarks>
     <ThreadStatic>
@@ -77,26 +77,31 @@ Public Module logger
         End Set
     End Property
 
-    ''' <summary> 
-    ''' Adds an item into the global log 
+    ''' <summary>
+    ''' Adds a line to the global log, indented two spaces per level of the calling thread's
+    ''' depth. While the thread has a <see cref="gLogCapture"/> open, the line goes to that
+    ''' capture's buffer instead.
     ''' </summary>
-    ''' 
-    ''' <param name="logstr"> 
-    ''' The <c> String </c> to be added into the log <br /> 
-    ''' Optional, Default: <c> "" </c> 
+    '''
+    ''' <param name="logstr">
+    ''' The <c> String </c> to be added into the log. <c> Nothing </c> adds no line, though
+    ''' <paramref name="buffr"/> and <paramref name="leadr"/> still add theirs. <br /><br />
+    ''' Optional, Default: <c> "" </c>
     ''' </param>
-    ''' 
-    ''' <param name="cond"> 
-    ''' Indicates that the <c> <paramref name="logstr"/> </c> should be added into the log <br /> 
-    ''' Optional, Default: <c> True </c> 
+    '''
+    ''' <param name="cond">
+    ''' Indicates whether to log anything at all <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
-    ''' 
-    ''' <param name="buffr"> 
-    ''' Indicates that an empty line should be added into the log following <c> <paramref name="logstr"/> </c> 
+    '''
+    ''' <param name="buffr">
+    ''' Indicates whether to add an empty line after <paramref name="logstr"/> <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
-    ''' 
-    ''' <param name="leadr"> 
-    ''' Indicates that an empty line should be added into the log before <c> <paramref name="logstr"/> </c> 
+    '''
+    ''' <param name="leadr">
+    ''' Indicates whether to add an empty line before <paramref name="logstr"/> <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     Public Sub gLog(Optional logstr As String = "",
                     Optional cond As Boolean = True,
@@ -142,26 +147,28 @@ Public Module logger
     End Sub
 
     ''' <summary>
-    ''' Lazy overload of <c> gLog </c>. The <paramref name="messageFactory"/> lambda is invoked
-    ''' only when <paramref name="cond"/> is <c> True </c>, avoiding allocations from
-    ''' string interpolation when the log call would have been suppressed.
+    ''' Adds a line to the global log like the other overload, but builds the line only when
+    ''' <paramref name="cond"/> is <c> True </c>, so a suppressed call costs no string
+    ''' interpolation.
     ''' </summary>
     '''
     ''' <param name="messageFactory">
     ''' Factory invoked to produce the log line. Not called when <paramref name="cond"/> is
-    ''' <c> False </c>
+    ''' <c> False </c>, and <c> Nothing </c> logs nothing at all
     ''' </param>
     '''
     ''' <param name="cond">
-    ''' Indicates that the message should be added into the log
+    ''' Indicates whether to log anything at all
     ''' </param>
     '''
     ''' <param name="buffr">
-    ''' Indicates that an empty line should be added into the log following the message
+    ''' Indicates whether to add an empty line after the message <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <param name="leadr">
-    ''' Indicates that an empty line should be added into the log before the message
+    ''' Indicates whether to add an empty line before the message <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     Public Sub gLog(messageFactory As Func(Of String),
                     cond As Boolean,
@@ -178,17 +185,22 @@ Public Module logger
     ''' <summary>
     ''' Opens a nested logging scope. The optional <paramref name="message"/> is logged at the
     ''' current depth, then the depth is increased by <paramref name="amount"/> until the
-    ''' returned <c> IDisposable </c> is disposed. Use with <c> Using </c> to make
-    ''' ascend/descend imbalance impossible by construction.
+    ''' returned <c> IDisposable </c> is disposed. Open it with <c> Using </c> so the depth
+    ''' always comes back down.
     ''' </summary>
     '''
     ''' <param name="message">
-    ''' Optional header line written before ascending. Pass <c> "" </c> for an anonymous scope
+    ''' Header line written before ascending. <c> "" </c> or <c> Nothing </c> opens a scope
+    ''' with no header. <br /><br />
+    ''' Optional, Default: <c> "" </c>
     ''' </param>
     '''
     ''' <param name="amount">
-    ''' Number of indentation levels to ascend. Optional, default: <c> 1 </c>
+    ''' Number of indentation levels to ascend <br /><br />
+    ''' Optional, Default: <c> 1 </c>
     ''' </param>
+    '''
+    ''' <returns>A <see cref="LogScope"/> that lowers the depth again when disposed</returns>
     '''
     ''' <example>
     ''' <code>
@@ -210,19 +222,19 @@ Public Module logger
     ''' Redirects the calling thread's <c> gLog </c> writes into a thread-local buffer
     ''' until the returned object is disposed. Captured lines preserve their relative
     ''' indentation (depth resets to zero on entry and restores on exit), so they can
-    ''' be replayed later under any parent depth via <c> EmitCaptured </c>.
+    ''' be replayed later under any parent depth via <see cref="EmitCaptured"/>.
     ''' </summary>
     '''
     ''' <returns>
-    ''' A <c> LogCapture </c> whose <c> Lines </c> contains the buffered output. The capture
-    ''' is active until <c> Dispose </c> is called (typically via <c> Using </c>)
+    ''' A <see cref="LogCapture"/> whose <c> Lines </c> contains the buffered output. The capture
+    ''' is active until <c> Dispose </c> is called (typically via <c> Using </c>), and its
+    ''' lines reach the log only if someone passes them to <see cref="EmitCaptured"/>
     ''' </returns>
     '''
     ''' <remarks>
     ''' Designed for parallel sections: each parallel task captures its own log slice,
     ''' and the orchestrating thread emits the slices in deterministic order after the
-    ''' parallel work finishes. This eliminates the need for per-module deferred-log
-    ''' workarounds (see <c> EntryLintResult.DiagLines </c>).
+    ''' parallel work finishes.
     ''' </remarks>
     Public Function gLogCapture() As LogCapture
 
@@ -231,12 +243,13 @@ Public Module logger
     End Function
 
     ''' <summary>
-    ''' Appends previously-captured lines to <c> GlobalLog </c>, indented at the calling
-    ''' thread's current depth. Acquires the log lock once for the whole batch.
+    ''' Appends previously-captured lines to <see cref="GlobalLog"/>, indented at the calling
+    ''' thread's current depth, taking the log lock once for the whole batch. If the calling
+    ''' thread has a capture open itself, the lines go to that capture's buffer instead.
     ''' </summary>
     '''
     ''' <param name="lines">
-    ''' The captured lines, as returned by <c> LogCapture.Lines </c>. <c> Nothing </c> is a no-op
+    ''' The captured lines, as returned by <see cref="LogCapture.Lines"/>. <c> Nothing </c> is a no-op
     ''' </param>
     Public Sub EmitCaptured(lines As IEnumerable(Of String))
 
@@ -266,13 +279,13 @@ Public Module logger
     End Sub
 
     ''' <summary>
-    ''' Disposable handle returned by <c> gLogScope </c>. On dispose, restores the
-    ''' nesting depth that was in effect at construction.
+    ''' Disposable handle returned by <see cref="gLogScope"/>. On dispose, lowers the
+    ''' calling thread's depth by the amount the constructor raised it.
     ''' </summary>
     '''
     ''' <remarks>
-    ''' Created and disposed on the same thread. Passing the handle to another thread
-    ''' for disposal would corrupt that thread's depth — don't do it.
+    ''' Create and dispose it on the same thread. Disposing it on another thread lowers that
+    ''' thread's depth instead, so don't pass it across threads.
     ''' </remarks>
     Public NotInheritable Class LogScope
 
@@ -281,6 +294,8 @@ Public Module logger
         Private ReadOnly _amount As Integer
         Private _disposed As Boolean
 
+        ''' <summary>Creates a new <c> LogScope </c>, raising the calling thread's depth by <paramref name="amount"/></summary>
+        ''' <param name="amount">The number of indentation levels to ascend</param>
         Friend Sub New(amount As Integer)
 
             _amount = amount
@@ -288,6 +303,7 @@ Public Module logger
 
         End Sub
 
+        ''' <summary>Lowers the depth by the amount the constructor raised it. Later calls do nothing.</summary>
         Public Sub Dispose() Implements IDisposable.Dispose
 
             If _disposed Then Return
@@ -299,14 +315,16 @@ Public Module logger
     End Class
 
     ''' <summary>
-    ''' Disposable handle returned by <c> gLogCapture </c>. While alive, redirects the
+    ''' Disposable handle returned by <see cref="gLogCapture"/>. While alive, redirects the
     ''' calling thread's <c> gLog </c> writes into <c> Lines </c>. Restores the previous
     ''' capture buffer and nesting depth on dispose.
     ''' </summary>
     '''
     ''' <remarks>
-    ''' Captures nest correctly: an inner capture saves and restores the outer capture's
-    ''' buffer, so its lines flow back to the outer buffer rather than to <c> GlobalLog </c>.
+    ''' Captures nest: an inner capture saves the outer capture's buffer and restores it on
+    ''' dispose. The inner capture's lines stay in its own <c> Lines </c>, and passing them to
+    ''' <see cref="EmitCaptured"/> while the outer capture is open adds them to the outer buffer
+    ''' rather than to <see cref="GlobalLog"/>.
     ''' </remarks>
     Public NotInheritable Class LogCapture
 
@@ -317,6 +335,10 @@ Public Module logger
         Private ReadOnly _buffer As New List(Of String)
         Private _disposed As Boolean
 
+        ''' <summary>
+        ''' Creates a new <c> LogCapture </c>, pointing the calling thread's writes at its
+        ''' buffer and resetting the thread's depth to zero
+        ''' </summary>
         Friend Sub New()
 
             _previousBuffer = _captureBuffer
@@ -335,6 +357,10 @@ Public Module logger
             End Get
         End Property
 
+        ''' <summary>
+        ''' Restores the capture buffer and depth the thread had before this capture opened.
+        ''' Later calls do nothing.
+        ''' </summary>
         Public Sub Dispose() Implements IDisposable.Dispose
 
             If _disposed Then Return
@@ -346,13 +372,14 @@ Public Module logger
 
     End Class
 
-    ''' <summary> 
-    ''' Saves the global log to disk if the given <c> <paramref name="cond"/> </c> is met 
+    ''' <summary>
+    ''' Writes the global log to <see cref="GlobalLogFile"/>, replacing whatever the file held.
+    ''' A write error goes uncaught to the caller.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="cond">
-    ''' Indicates that the global log should be saved to disk 
-    ''' <br /> Optional, Default: <c> False </c>
+    ''' Indicates whether to save the log at all <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
     Public Sub saveGlobalLog(Optional cond As Boolean = True)
 
@@ -361,7 +388,7 @@ Public Module logger
     End Sub
 
     ''' <summary>
-    ''' Returns the log as a single <c> String </c>
+    ''' Returns the log as a single <c> String </c>, with a newline after every line
     ''' </summary>
     Public Function toString() As String
 
@@ -393,21 +420,25 @@ Public Module logger
     End Sub
 
 
-    '''<summary> 
-    ''' Gets the most recent segment of the global log contained by two phrases (ie. a module name or subroutine) 
-    ''' As a <c> String </c> <br /> Can be used to simply fetch the logs from modules for saving to disk or displaying to the user after a run.
+    ''' <summary>
+    ''' Returns the most recent stretch of the global log that a module run left between two
+    ''' phrases, such as its start and end messages. The slice starts at the last line that
+    ''' contains <paramref name="startingPhrase"/> and ends at the first line from there on that
+    ''' ends with <paramref name="endingPhrase"/>. We strip up to the starting line's indentation
+    ''' from each line, but always at least one leading space, so when the starting line isn't
+    ''' indented every indented line below it loses one space.
     ''' </summary>
-    ''' 
-    ''' <param name="startingPhrase"> 
-    ''' The starting phrase of the requested log slice 
+    '''
+    ''' <param name="startingPhrase">
+    ''' Text the first line must contain (case-sensitive)
     ''' </param>
-    ''' 
-    ''' <param name="endingPhrase"> 
-    ''' The ending phrase of the requested log slice 
+    '''
+    ''' <param name="endingPhrase">
+    ''' Text the last line must end with (case-insensitive). The starting line itself can match.
     ''' </param>
-    ''' 
-    ''' <returns> 
-    ''' The set of log lines between the most recent incidences of the provided phrases from the log 
+    '''
+    ''' <returns>
+    ''' The slice with a newline after every line, or <c> "" </c> if either phrase isn't found
     ''' </returns>
     Public Function getLogSliceFromGlobal(startingPhrase As String, endingPhrase As String) As String
 

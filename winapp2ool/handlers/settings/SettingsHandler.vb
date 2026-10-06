@@ -23,21 +23,31 @@ Imports System.Reflection
 ''' <summary>
 ''' The sole settings backend, powered by <c> iniFile </c>.
 ''' <br />
-''' <c> SettingsFile </c> is the single authoritative in-memory representation of
-''' <c> winapp2ool.ini </c>. All modules are registered in <c> loadAllModuleSettings </c>
-''' and use <c> LoadModule </c> / <c> SaveModule </c> for persistence.
+''' <see cref="SettingsFile"/> is the single authoritative in-memory representation of
+''' <c> winapp2ool.ini </c>. All modules are registered in <see cref="loadAllModuleSettings"/>
+''' and use <see cref="LoadModule"/> / <see cref="SaveModule"/> to move values between their
+''' properties and <see cref="SettingsFile"/>. Only <see cref="SaveSettings"/> writes to disk.
 ''' </summary>
 Public Module SettingsHandler
 
+    ''' <summary>
+    ''' Indicates whether <see cref="SettingsFile"/> has changed since the last write.
+    ''' A save the gate refused leaves it set.
+    ''' </summary>
     Private _dirty As Boolean = False
 
     ''' <summary>
-    ''' The <c> iniFile </c>-backed representation of winapp2ool's settings.
+    ''' The <c> iniFile </c>-backed representation of winapp2ool's settings, pointing at
+    ''' <c> winapp2ool.ini </c> in the working directory.
     ''' </summary>
     Public Property SettingsFile As iniFile = iniFile.Empty(Environment.CurrentDirectory, "winapp2ool.ini")
 
     ''' <summary>
-    ''' Reads <c> winapp2ool.ini </c> from disk into <c> SettingsFile </c>.
+    ''' Reads <c> winapp2ool.ini </c> from disk into <see cref="SettingsFile"/>, then loads every
+    ''' module's settings from it. When the file doesn't exist, we turn
+    ''' <see cref="readSettingsFromDisk"/> and <see cref="saveSettingsToDisk"/> off and every
+    ''' module keeps its defaults. When the file turns <see cref="readSettingsFromDisk"/> off,
+    ''' only the <c> Winapp2ool </c> section is loaded.
     ''' </summary>
     Public Sub LoadWinapp2oolsettings()
 
@@ -68,7 +78,9 @@ Public Module SettingsHandler
     End Sub
 
     ''' <summary>
-    ''' Loads the settings for every module. A new module adds its <c> LoadModule </c> call here.
+    ''' Loads the settings for every module. A new module adds its <see cref="LoadModule"/>
+    ''' call here. The <c> Winapp2ool </c> section loads first, and the rest load only if it
+    ''' leaves <see cref="readSettingsFromDisk"/> on.
     ''' </summary>
     Private Sub loadAllModuleSettings()
 
@@ -94,9 +106,13 @@ Public Module SettingsHandler
     End Sub
 
     ''' <summary>
-    ''' Returns the value of a setting from <c> SettingsFile </c>,
+    ''' Returns the value of a setting from <see cref="SettingsFile"/>,
     ''' or <c> "" </c> if the module section or key is not found.
     ''' </summary>
+    '''
+    ''' <param name="moduleName">The name of the module's section</param>
+    '''
+    ''' <param name="settingName">The name of the setting's key</param>
     Public Function GetSetting(moduleName As String,
                                settingName As String) As String
 
@@ -109,10 +125,16 @@ Public Module SettingsHandler
     End Function
 
     ''' <summary>
-    ''' Sets or creates a setting in <c> SettingsFile </c>,
-    ''' creating the module section and/or key if absent.
-    ''' Marks the backend dirty; the write is deferred to <c> FlushIfDirty </c>.
+    ''' Sets a setting in <see cref="SettingsFile"/> in memory, creating the module section
+    ''' and key if absent, and marks the backend dirty. Nothing reaches disk until a later
+    ''' <see cref="FlushIfDirty"/> or <see cref="SaveSettings"/> gets past the save gate.
     ''' </summary>
+    '''
+    ''' <param name="moduleName">The name of the module's section</param>
+    '''
+    ''' <param name="settingName">The name of the setting's key</param>
+    '''
+    ''' <param name="value">The value to store</param>
     Public Sub SetSetting(moduleName As String,
                          settingName As String,
                          value As String)
@@ -135,18 +157,20 @@ Public Module SettingsHandler
     End Sub
 
     ''' <summary>
-    ''' Writes <c> SettingsFile </c> to disk, subject to <paramref name="condition"/> and to the
-    ''' global save gate (<c> saveSettingsToDisk </c>, and never during a command line run).
+    ''' Writes the whole of <see cref="SettingsFile"/> to disk and clears the dirty flag, subject
+    ''' to <paramref name="condition"/> and to the global save gate
+    ''' (<see cref="saveSettingsToDisk"/>, and never during a command line run). We clear the
+    ''' flag even when the write itself fails.
     ''' <br />
-    ''' The gate lives here rather than at the call sites because <c> FlushIfDirty </c> is also
-    ''' invoked ungated whenever a menu or the application closes. Any <c> SetSetting </c> caller
+    ''' The gate lives here rather than at the call sites because <see cref="FlushIfDirty"/> is also
+    ''' invoked ungated whenever a menu or the application closes. Any <see cref="SetSetting"/> caller
     ''' which neglects to gate its own flush would otherwise have its changes persisted by one of
     ''' those, writing settings the user asked not to save.
     ''' </summary>
     '''
     ''' <param name="condition">
-    ''' An additional condition which must hold for the write to occur
-    ''' <br /> Optional, Default: <c> True </c>
+    ''' An additional condition which must hold for the write to occur <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
     Public Sub SaveSettings(Optional condition As Boolean = True)
 
@@ -163,16 +187,17 @@ Public Module SettingsHandler
     End Sub
 
     ''' <summary>
-    ''' Writes <c> SettingsFile </c> to disk only if it has been modified since the last save.
+    ''' Calls <see cref="SaveSettings"/> only if <see cref="SettingsFile"/> has been modified
+    ''' since the last save, so the same gate applies.
     ''' <br />
     ''' A flush suppressed by the save gate leaves the backend dirty, so enabling
-    ''' <c> saveSettingsToDisk </c> later in the session still persists the changes made before it
+    ''' <see cref="saveSettingsToDisk"/> later in the session still persists the changes made before it
     ''' was turned on.
     ''' </summary>
     '''
     ''' <param name="condition">
-    ''' An additional condition which must hold for the write to occur
-    ''' <br /> Optional, Default: <c> True </c>
+    ''' An additional condition which must hold for the write to occur <br /><br />
+    ''' Optional, Default: <c> True </c>
     ''' </param>
     Public Sub FlushIfDirty(Optional condition As Boolean = True)
 
@@ -181,11 +206,18 @@ Public Module SettingsHandler
     End Sub
 
     ''' <summary>
-    ''' Populates a module's public static properties from <c> SettingsFile </c>.
+    ''' Populates a module's writable public properties from its section of
+    ''' <see cref="SettingsFile"/>, and does nothing if the section is missing.
     ''' <br />
     ''' Handles <c> Boolean </c>, <c> Enum </c>, and <c> iniFileChooser </c> property types.
-    ''' Silently skips properties whose keys are absent in <c> SettingsFile </c>.
+    ''' A property whose key is absent keeps its current value, and so does a
+    ''' <c> Boolean </c> whose value doesn't parse. Any other property type with a key present,
+    ''' or an enum value that isn't a member name or number, throws, and we don't catch it.
     ''' </summary>
+    '''
+    ''' <param name="moduleName">The name of the module's section</param>
+    '''
+    ''' <param name="moduleType">The settings module whose properties receive the values</param>
     Public Sub LoadModule(moduleName As String, moduleType As Type)
 
         Dim section = SettingsFile.GetSection(moduleName)
@@ -239,11 +271,19 @@ Public Module SettingsHandler
     End Sub
 
     ''' <summary>
-    ''' Writes a module's public static properties into <c> SettingsFile </c>.
+    ''' Copies a module's readable and writable public properties into
+    ''' <see cref="SettingsFile"/> through <see cref="SetSetting"/>. This only changes memory:
+    ''' the values reach disk when a later <see cref="FlushIfDirty"/> gets past the save gate,
+    ''' which is off by default and never opens during a command line run.
     ''' <br />
     ''' Handles <c> Boolean </c>, <c> Enum </c>, and <c> iniFileChooser </c> property types.
-    ''' Logs a warning and skips properties of any other type.
+    ''' Logs a warning and skips properties of any other type, and skips any property whose
+    ''' value is <c> Nothing </c>.
     ''' </summary>
+    '''
+    ''' <param name="moduleName">The name of the module's section</param>
+    '''
+    ''' <param name="moduleType">The settings module whose properties we save</param>
     Public Sub SaveModule(moduleName As String, moduleType As Type)
 
         For Each prop As PropertyInfo In moduleType.GetProperties()
