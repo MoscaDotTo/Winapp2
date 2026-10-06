@@ -31,9 +31,9 @@ Option Strict On
 ''' <item>
 ''' <b><c> EntryBuilderFile1 </c></b>
 ''' <description>
-''' Source directory — the folder containing per-letter <c> *.ini </c> source files.
+''' Source directory: the folder containing per-letter <c> *.ini </c> source files.
 ''' Each section in those files describes one output entry; the section header is the
-''' output entry name. All files in the directory are combined in alphabetical order
+''' output entry name. The top-level <c> *.ini </c> files are combined in sorted order
 ''' at runtime. Only the <c> Dir </c> of this chooser is used; the <c> Name </c> is
 ''' ignored.
 ''' </description>
@@ -42,8 +42,9 @@ Option Strict On
 ''' <item>
 ''' <b><c> EntryBuilderFile2 </c></b>
 ''' <description>
-''' Output file — where the generated entries are written. This file is consumed by
-''' the build pipeline to produce the final winapp2.ini.
+''' Output file: where the generated entries are written. With
+''' <see cref="EntryBuilderSplitOutput"/> only its <c> Dir </c> is used, and the 27
+''' per-letter files written there are what the build pipeline consumes.
 ''' </description>
 ''' </item>
 '''
@@ -55,8 +56,9 @@ Option Strict On
 ''' section headers (<c> [WebViewScaffold: ...] </c>, <c> [QtWebEngineScaffold: ...] </c>,
 ''' <c> [ElectronScaffold: ...] </c>), consumed when expanding entries that declare the
 ''' matching root key. Only the <c> Dir </c> of this chooser is used; the <c> Name </c> is
-''' ignored. A missing directory or catalog file continues the run with zero scaffold
-''' FileKeys for the affected families and a warning logged.
+''' ignored. A missing directory warns once and the run continues with no scaffold
+''' FileKeys. A family with no catalog in the directory yields none either, and each
+''' scaffold an entry requests from it warns as unknown.
 ''' </description>
 ''' </item>
 '''
@@ -72,8 +74,9 @@ Public Module entryBuilderSettings
     Public Property EntryBuilderFile1 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 
     ''' <summary>
-    ''' The output file to which the generated entries are saved.
-    ''' This file is consumed by the build pipeline to produce the final winapp2.ini.
+    ''' The output file to which the generated entries are saved. With
+    ''' <see cref="EntryBuilderSplitOutput"/> only its <c> Dir </c> is used, as the folder for
+    ''' the per-letter files.
     ''' </summary>
     Public Property EntryBuilderFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "entrybuilder.ini", "entrybuilder.ini", mustExist:=False)
 
@@ -85,21 +88,22 @@ Public Module entryBuilderSettings
     Public Property EntryBuilderFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "")
 
     ''' <summary>
-    ''' When <c> True </c>, output is written as per-letter artifact files
+    ''' Indicates whether output is written as per-letter artifact files
     ''' (<c> #.ini </c>, <c> A.ini </c> ... <c> Z.ini </c>) in the save target's directory,
     ''' bucketed by each entry name's first character, instead of a single output file.
-    ''' Used by the build pipeline to produce the committed <c> Assembler\Entries </c>
-    ''' artifacts. CLI: <c> -split </c>
+    ''' The build pipeline uses it to produce the committed <c> Assembler\Entries </c>
+    ''' artifacts. CLI: <c> -split </c>, which flips the current value.
     ''' </summary>
     Public Property EntryBuilderSplitOutput As Boolean = False
 
     ''' <summary>
-    ''' Indicates that the module settings have been modified from their defaults
+    ''' Indicates whether the module settings have been modified from their defaults
     ''' </summary>
     Public Property EntryBuilderModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Restores all EntryBuilder settings to their defaults and persists the reset to disk
+    ''' Restores all EntryBuilder settings to their defaults and records them in the in-memory
+    ''' settings file via <see cref="SaveModule"/>. This doesn't write to disk by itself.
     ''' </summary>
     Public Sub InitDefaultEntryBuilderSettings()
 

@@ -22,43 +22,48 @@ Imports System.Text
 
 ''' <summary>
 ''' EntryBuilder is a winapp2ool module which generates winapp2.ini entries from a
-''' shorthand DSL. It reads per-letter source files under
-''' <c> Assembler\EntryBuilder\*.ini </c>, expands winapp2ool-private shorthand keys,
-''' and emits a standard winapp2.ini-style output file consumed by the build
-''' pipeline. <br /><br />
+''' shorthand DSL. It reads every top-level <c> *.ini </c> in its source directory
+''' (<c> Assembler\EntryBuilder </c> in the build), expands winapp2ool-private shorthand keys,
+''' and writes standard winapp2.ini-style output for the build pipeline, either as one file or
+''' as 27 per-letter files. <br /><br />
 '''
 ''' Each section in a source file describes one application and corresponds to exactly
 ''' one output winapp2.ini entry: the section header is the entry name
-''' (e.g. <c> [Discord *] </c>) and is round-tripped verbatim into the output. Any
-''' valid winapp2 key passes through unchanged, so a raw entry can be pasted into a 
-''' source file and incrementally enriched with shorthand. 
-''' The deprecated <c> SpecialDetect= </c> is refused: the key is dropped with a
-''' warning rather than passed through or misparsed as a variable declaration. <br /><br />
+''' (e.g. <c> [Discord *] </c>) and is round-tripped verbatim into the output. Standard winapp2
+''' keys pass through, so a raw entry can be pasted into a source file and incrementally
+''' enriched with shorthand. Their values still go through the expansion described below, and
+''' we number the output keys afresh. The deprecated <c> SpecialDetect= </c> is refused: the
+''' key is dropped with a warning rather than passed through or misparsed as a variable
+''' declaration. <c> Default= </c> is dropped with a warning too, since this module never emits
+''' it: generated entries are opt-in by design to keep the cleaning UI uncluttered as small
+''' Electron apps proliferate. Any key not in <see cref="ReservedKeys"/> declares a list
+''' variable for <see cref="VariableExpander"/>, and a variable named <c> Root </c> also
+''' supplies detection (see <see cref="inferRootDetection"/>). <br /><br />
 '''
 ''' Scaffold families are the first shorthand category, and there are three. An entry opts into
 ''' a family by declaring one or more root paths for it: <c> WebViewRoot= </c> (one per WebView2 /
 ''' EBWebView data root), <c> QtWebEngineRoot= </c> (one per QtWebEngine profile directory), or
 ''' <c> ElectronRoot= </c> (one per Electron <c> userData </c> folder). The module then expands
-''' the selected scaffolds — <c> WebViewScaffolds= </c> / <c> ExcludeWebViewScaffolds= </c>,
+''' the selected scaffolds (<c> WebViewScaffolds= </c> / <c> ExcludeWebViewScaffolds= </c>,
 ''' <c> QtWebEngineScaffolds= </c> / <c> ExcludeQtWebEngineScaffolds= </c>, and
-''' <c> ElectronScaffolds= </c> / <c> ExcludeElectronScaffolds= </c> — into <c> FileKey </c>
+''' <c> ElectronScaffolds= </c> / <c> ExcludeElectronScaffolds= </c>) into <c> FileKey </c>
 ''' lines, substituting the family's placeholder (<c> %WebViewRoot% </c>,
 ''' <c> %QtWebEngineRoot% </c> or <c> %ElectronRoot% </c>) against each declared root. The
 ''' families are independent: an entry may declare any combination, or none. Non-scaffold
-''' targets are written via <c> FileKeyBase= </c> / <c> RegKeyBase= </c> with the same
-''' substitution rule (any placeholder). An entry without any root declaration emits no scaffold
-''' output, which is the correct default for entries that just want pass-through plus
-''' future shorthand. The DSL is open to additional scaffold catalogs in future (each
-''' introduces its own opt-in trigger key). <br /><br />
+''' targets are written via <c> FileKeyBase= </c> / <c> RegKeyBase= </c> /
+''' <c> ExcludeKeyBase= </c> with the same substitution rule (any placeholder), and literal
+''' <c> FileKey= </c> / <c> RegKey= </c> / <c> ExcludeKey= </c> values get it as well. An entry
+''' that declares no root gets no scaffold keys. <br /><br />
 '''
 ''' The Electron family carries a <b>second</b> root key, <c> ElectronUpdaterRoot= </c>
-''' (<c> %ElectronUpdaterRoot% </c>), naming the electron-updater download cache — a sibling of
-''' the userData folder under <c> %LocalAppData% </c> whose directory name is electron-builder's
-''' appId slug and therefore not derivable from the userData path. It is optional and orthogonal:
-''' declaring it alone opts the entry into the updater scaffolds only. Templates whose placeholder
-''' has no declared root are dropped rather than emitted with the placeholder left literal, so the
-''' default-on <c> UpdaterCache </c> scaffold is inert for an entry that declared only
-''' <c> ElectronRoot= </c>. Selecting a scaffold whose every template is dropped this way warns.
+''' (<c> %ElectronUpdaterRoot% </c>), naming the electron-updater download cache. That folder
+''' is a sibling of the userData folder under <c> %LocalAppData% </c>, and its name is
+''' electron-builder's appId slug, so it can't be derived from the userData path. It is
+''' optional and orthogonal: declaring it alone opts the entry into the updater scaffolds only.
+''' Templates whose placeholder has no declared root are dropped rather than emitted with the
+''' placeholder left literal, so the default-on <c> UpdaterCache </c> scaffold is inert for an
+''' entry that declared only <c> ElectronRoot= </c>. A scaffold the entry named explicitly warns
+''' when every one of its templates is dropped this way.
 ''' <br /><br />
 '''
 ''' The QtWebEngine family has a second root key on the same terms, <c> QtWebEngineCacheRoot= </c>
@@ -67,7 +72,7 @@ Imports System.Text
 ''' <c> QtWebEngineRoot= </c> names.
 ''' <br /><br />
 '''
-''' Recognised shorthand keys (stripped from output):
+''' Recognized shorthand keys (stripped from output, along with variable declarations):
 ''' <c> WebViewRoot= </c>, <c> WebViewScaffolds= </c>, <c> ExcludeWebViewScaffolds= </c>,
 ''' <c> QtWebEngineRoot= </c>, <c> QtWebEngineCacheRoot= </c>, <c> QtWebEngineScaffolds= </c>,
 ''' <c> ExcludeQtWebEngineScaffolds= </c>, <c> ElectronRoot= </c>,
@@ -77,16 +82,13 @@ Imports System.Text
 '''
 ''' Scaffolds are loaded from one shared scaffold <em>directory</em> (typically
 ''' <c> Assembler\Scaffolds </c>) via <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which
-''' discovers each family from its section headers rather than from a configured per-family
+''' takes each family from its section headers rather than from a configured per-family
 ''' path: <c> webview.ini </c> (<c> %WebViewRoot% </c> templates), <c> qtwebengine.ini </c>
 ''' (<c> %QtWebEngineRoot% </c> / <c> %QtWebEngineCacheRoot% </c> templates), and
-''' <c> electron.ini </c> (<c> %ElectronRoot% </c> / <c> %ElectronUpdaterRoot% </c> templates), each substituted per declared root at generation
-''' time. UWPBuilder reads the same directory and binds the same families — see
-''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> for the parity contract. <br /><br />
-'''
-''' Unlike <c> UWPBuilder </c>, this module never emits <c> Default= </c>. Generated
-''' entries are opt-in by design to keep the cleaning UI uncluttered as small Electron
-''' apps proliferate.
+''' <c> electron.ini </c> (<c> %ElectronRoot% </c> / <c> %ElectronUpdaterRoot% </c> templates),
+''' each substituted per declared root at generation time. UWPBuilder reads the same directory
+''' and binds the same families. See <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> for the
+''' parity contract.
 ''' </summary>
 Public Module EntryBuilder
 
@@ -101,28 +103,30 @@ Public Module EntryBuilder
     ''' <summary>
     ''' Nested-reference count at or above which an entry's variable block is reported as a
     ''' tangled abstraction in the run statistics. The trigger is <em>interdependency</em>,
-    ''' not raw variable count: real run data shows variable count flags the DSL's best work
-    ''' (e.g. an entry declaring 9 flat variables that fan out to 430 keys — a triumph, not a
-    ''' concern), whereas the genuinely hard-to-read blocks are the ones whose variables
-    ''' reference each other, forcing the reader to topologically sort a dependency graph.
-    ''' Across the source the distribution is near-bimodal — a large cluster at one nested ref
-    ''' (cheap one-hop convenience vars) and a small tail at 3-5 (the actual tangles) — so the
-    ''' threshold sits in that gap. Set to 4 to surface only the severe cases (ABBYY-, Acrobat-
-    ''' class); lower to 3 to also catch shallow multi-variable chains.
+    ''' not raw variable count: a large block of flat variables that fans out to hundreds of keys
+    ''' is the DSL working well, whereas the hard-to-read blocks are the ones whose variables
+    ''' reference each other, forcing the reader to work out a dependency order. Counts cluster
+    ''' at one nested reference (cheap one-hop convenience variables) with a small tail at 3 to 5,
+    ''' so 4 surfaces only the severe cases. Lower it to 3 to also catch shallow multi-variable
+    ''' chains.
     ''' </summary>
     Private Const NestedRefWatchThreshold As Integer = 4
 
     ''' <summary>
-    ''' The set of first-class key names the parser recognises (case-insensitive,
-    ''' matched after <c> StripNums </c>). Anything not in this set is treated as a
-    ''' variable declaration by <see cref="parseEntrySpec"/>. Centralised here so the
-    ''' parser's <c> Select Case </c> and the reserved-name collision check cannot
-    ''' drift apart.
+    ''' The first-class key names the parser recognizes, compared case-insensitively against
+    ''' each key's <see cref="iniKey.KeyType"/> (its name without digits).
+    ''' <see cref="parseEntrySpec"/> treats any other key as a variable declaration. The
+    ''' parser's <c> Select Case </c> spells these names out separately and doesn't read this
+    ''' array. A reserved name that loses its <c> Case </c> branch falls through to the
+    ''' declaration branch, whose collision check against this array warns. Apart from the
+    ''' scaffold-family keys the test below checks, nothing notices a branch added without a
+    ''' matching entry here.
     ''' <br /><br />
     '''
-    ''' <c> Friend </c> rather than <c> Private </c> so <c> ScaffoldParityTests </c> can walk
-    ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> and assert this parser knows every
-    ''' family's key vocabulary — the guard against a family shipping to one builder only.
+    ''' <c> Friend </c> rather than <c> Private </c> so the
+    ''' <c> ScaffoldFamilies_KeyVocabularyPresentInBothBuilders </c> test can walk
+    ''' <see cref="ScaffoldCatalogs.ScaffoldFamilies"/> and assert this parser reserves every
+    ''' family's key vocabulary, which guards against a family shipping to one builder only.
     ''' </summary>
     Friend ReadOnly ReservedKeys As String() = {
         "SECTION", "LANGSECREF",
@@ -142,14 +146,14 @@ Public Module EntryBuilder
     ''' author expected a comma-delimited list. Root keys are <em>repeatable</em>, not list-valued:
     ''' several roots are declared as <c> XRoot1= </c> / <c> XRoot2= </c>, or by putting a
     ''' <c> &lt;a,b&gt; </c> list inside the path where the alternatives differ. A bare comma in
-    ''' the value is taken literally and yields a path containing a comma — almost always a silent
-    ''' mistake, and the reason this guard exists.
+    ''' the value is taken literally and yields a path containing a comma, which is almost always
+    ''' a mistake nothing else would report.
     ''' <br /><br />
     ''' Commas inside a <c> &lt;...&gt; </c> group are legitimate list separators and are ignored,
     ''' so a declaration like
     ''' <c> %LocalAppData%\&lt;AMD\RadeonSoftware,RadeonSettings&gt;\QtWebEngine\Default </c>
-    ''' does not warn. Note the <c> &lt;&gt; </c> engine drops empty alternatives, so
-    ''' <c> Root&lt;,\Partitions\*&gt; </c> does <em>not</em> yield the bare root — use numbered
+    ''' does not warn. The <c> &lt;&gt; </c> engine drops empty alternatives, so
+    ''' <c> Root&lt;,\Partitions\*&gt; </c> does <em>not</em> yield the bare root. Use numbered
     ''' keys for "this folder and a subfolder of it".
     ''' </summary>
     '''
@@ -166,7 +170,7 @@ Public Module EntryBuilder
     ''' </param>
     '''
     ''' <param name="entryName">
-    ''' The entry name, embedded in the diagnostic for source localisation
+    ''' The entry name, embedded in the diagnostic so it names its source
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -191,9 +195,10 @@ Public Module EntryBuilder
     End Sub
 
     ''' <summary>
-    ''' Reports whether <paramref name="value"/> contains a comma at bracket depth zero — that is,
-    ''' outside every <c> &lt;...&gt; </c> group. Used to tell an author's mistaken comma-list from
-    ''' the legitimate separators inside a <c> &lt;&gt; </c> expansion group.
+    ''' Returns whether <paramref name="value"/> contains a comma at bracket depth zero, that is,
+    ''' outside every <c> &lt;...&gt; </c> group. That tells an author's mistaken comma-list from
+    ''' the legitimate separators inside a <c> &lt;&gt; </c> expansion group. A stray
+    ''' <c> &gt; </c> with no open group is ignored.
     ''' </summary>
     '''
     ''' <param name="value">
@@ -248,10 +253,9 @@ Public Module EntryBuilder
         Public LangSecRef As String
 
         ''' <summary>
-        ''' Root paths of the application's Chromium-data folders. Each entry is a
-        ''' literal path string used as the substitution value for <c> %WebViewRoot% </c>
-        ''' in scaffold and FileKeyBase templates. Multiple roots produce one scaffold
-        ''' expansion per root.
+        ''' Root paths of the application's Chromium-data folders, each substituted as written
+        ''' for <c> %WebViewRoot% </c> in scaffold templates and in every FileKey, RegKey and
+        ''' ExcludeKey value, base or literal. Multiple roots produce one expansion per root.
         ''' </summary>
         Public WebViewRoots As List(Of String)
 
@@ -278,59 +282,62 @@ Public Module EntryBuilder
         Public Warnings As List(Of String)
 
         ''' <summary>
-        ''' <c> FileKeyBase= </c> templates (the generative form) in file order, appended
-        ''' after the scaffold expansion. Templates containing <c> %WebViewRoot% </c> are
-        ''' expanded once per declared root; templates without the variable are emitted
-        ''' verbatim. Tracked separately from <see cref="FileKeys"/> so the statistics can
-        ''' distinguish generated output from pass-through.
+        ''' <c> FileKeyBase= </c> templates (the generative form) in file order, emitted
+        ''' after the scaffold expansion. A template containing a root placeholder is expanded
+        ''' once per root declared for it, and dropped when none is declared. Each result then
+        ''' goes through <c> &lt;var&gt; </c> expansion. Tracked separately from
+        ''' <see cref="FileKeys"/> so the statistics can distinguish generated output from
+        ''' pass-through.
         ''' </summary>
         Public FileKeyBases As List(Of String)
 
         ''' <summary>
-        ''' Pass-through <c> FileKey= </c> values in file order — keys the author wrote
-        ''' literally rather than via a <c> Base </c> template. Still subject to
-        ''' <c> %WebViewRoot% </c> and <c> &lt;var&gt; </c> expansion, but counted as
-        ''' pass-through (not generated) in the run statistics.
+        ''' Pass-through <c> FileKey= </c> values in file order: keys the author wrote
+        ''' literally rather than via a <c> Base </c> template. Still subject to root-placeholder
+        ''' and <c> &lt;var&gt; </c> expansion, but counted as pass-through (not generated) in
+        ''' the run statistics.
         ''' </summary>
         Public FileKeys As List(Of String)
 
         ''' <summary>
         ''' <c> RegKeyBase= </c> templates (the generative form) in file order. Expanded
-        ''' against <c> %WebViewRoot% </c> / variables and renumbered from 1. Tracked
-        ''' separately from <see cref="RegKeys"/> for the generated-vs-pass-through split.
+        ''' against the root placeholders and variables, then numbered from 1 ahead of
+        ''' <see cref="RegKeys"/>. Tracked separately from <see cref="RegKeys"/> for the
+        ''' generated-vs-pass-through split.
         ''' </summary>
         Public RegKeyBases As List(Of String)
 
         ''' <summary>
-        ''' Pass-through <c> RegKey= </c> values in file order — keys the author wrote
-        ''' literally rather than via a <c> Base </c> template. Counted as pass-through
-        ''' (not generated) in the run statistics.
+        ''' Pass-through <c> RegKey= </c> values in file order: keys the author wrote
+        ''' literally rather than via a <c> Base </c> template. Still subject to the same
+        ''' expansion, but counted as pass-through (not generated) in the run statistics.
         ''' </summary>
         Public RegKeys As List(Of String)
 
         ''' <summary>
-        ''' <c> ExcludeKeyBase= </c> templates (the generative form) in file order.
-        ''' Templates containing <c> %WebViewRoot% </c> are expanded once per declared root;
-        ''' others are emitted verbatim. Renumbered from 1. Tracked separately from
-        ''' <see cref="ExcludeKeys"/> for the generated-vs-pass-through split.
+        ''' <c> ExcludeKeyBase= </c> templates (the generative form) in file order. Expanded
+        ''' against the root placeholders and variables, then numbered from 1 ahead of
+        ''' <see cref="ExcludeKeys"/>. Tracked separately from <see cref="ExcludeKeys"/> for
+        ''' the generated-vs-pass-through split.
         ''' </summary>
         Public ExcludeKeyBases As List(Of String)
 
         ''' <summary>
-        ''' Pass-through <c> ExcludeKey= </c> values in file order — keys the author wrote
-        ''' literally rather than via a <c> Base </c> template. Counted as pass-through
-        ''' (not generated) in the run statistics.
+        ''' Pass-through <c> ExcludeKey= </c> values in file order: keys the author wrote
+        ''' literally rather than via a <c> Base </c> template. Still subject to the same
+        ''' expansion, but counted as pass-through (not generated) in the run statistics.
         ''' </summary>
         Public ExcludeKeys As List(Of String)
 
         ''' <summary>
         ''' Scaffold names explicitly selected via <c> WebViewScaffolds= </c>. The sentinel
-        ''' <c> All </c> (case-insensitive) expands to every scaffold in the catalog.
+        ''' <c> All </c> (case-insensitive) expands to every scaffold in the catalog except
+        ''' its <c> Tier=Legacy </c> ones.
         ''' </summary>
         Public WebViewScaffoldNames As List(Of String)
 
         ''' <summary>
-        ''' Tracks whether <c> WebViewScaffolds= </c> was declared at all, separately from
+        ''' Indicates whether <c> WebViewScaffolds= </c> was declared at all, separately from
         ''' whether the resulting list is empty. Distinguishes "key absent → use
         ''' <see cref="DefaultScaffolds"/>" from "key present but empty → emit no
         ''' scaffold FileKeys."
@@ -345,14 +352,13 @@ Public Module EntryBuilder
         Public ExcludedWebViewScaffolds As List(Of String)
 
         ''' <summary>
-        ''' Paths of the application's QtWebEngine profile directories — the storage folder
+        ''' Paths of the application's QtWebEngine profile directories: the storage folder
         ''' itself, profile segment included (e.g. <c> ...\QtWebEngine\Default </c>), unlike
-        ''' <see cref="WebViewRoots"/> which names the parent of <c> Default\ </c>. The
+        ''' <see cref="WebViewRoots"/>, which names the folder holding the profiles. The
         ''' QtWebEngine catalog does not bake the profile segment into its templates, so a
-        ''' host running several profiles declares one root per profile. Each entry is a
-        ''' literal path string substituted for <c> %QtWebEngineRoot% </c> in QtWebEngine
-        ''' scaffold and base templates. Declaring any root opts the entry into QtWebEngine
-        ''' scaffold emission.
+        ''' host running several profiles declares one root per profile. Each is substituted as
+        ''' written for <c> %QtWebEngineRoot% </c>. Declaring this or a
+        ''' <c> QtWebEngineCacheRoot= </c> opts the entry into QtWebEngine scaffold emission.
         ''' </summary>
         Public QtWebEngineRoots As List(Of String)
 
@@ -368,12 +374,12 @@ Public Module EntryBuilder
         ''' <summary>
         ''' QtWebEngine scaffold names explicitly selected via <c> QtWebEngineScaffolds= </c>.
         ''' The sentinel <c> All </c> (case-insensitive) expands to every scaffold in the
-        ''' QtWebEngine catalog.
+        ''' QtWebEngine catalog except its <c> Tier=Legacy </c> ones.
         ''' </summary>
         Public QtWebEngineScaffoldNames As List(Of String)
 
         ''' <summary>
-        ''' Tracks whether <c> QtWebEngineScaffolds= </c> was declared at all, separately from
+        ''' Indicates whether <c> QtWebEngineScaffolds= </c> was declared at all, separately from
         ''' whether the resulting list is empty (mirrors <see cref="WebViewScaffoldsKeyPresent"/>).
         ''' </summary>
         Public QtWebEngineScaffoldsKeyPresent As Boolean
@@ -387,19 +393,19 @@ Public Module EntryBuilder
         Public ExcludedQtWebEngineScaffolds As List(Of String)
 
         ''' <summary>
-        ''' Paths of the application's Electron <c> userData </c> folders — typically
+        ''' Paths of the application's Electron <c> userData </c> folders, typically
         ''' <c> %AppData%\&lt;ProductName&gt; </c>. For Electron this folder <em>is</em> the
         ''' Chromium profile directory, so unlike <see cref="WebViewRoots"/> there is no
-        ''' <c> Default\ </c> segment above or below it. Each entry is a literal path string
-        ''' substituted for <c> %ElectronRoot% </c>. An app using <c> session.fromPartition() </c>
+        ''' profile segment above or below it. Each is substituted as written for
+        ''' <c> %ElectronRoot% </c>. An app using <c> session.fromPartition() </c>
         ''' declares its sub-profiles as additional roots (<c> ...\Partitions\* </c>), since each
-        ''' partition directory is itself a complete profile. Declaring any root opts the entry
-        ''' into Electron scaffold emission.
+        ''' partition directory is itself a complete profile. Declaring this or an
+        ''' <c> ElectronUpdaterRoot= </c> opts the entry into Electron scaffold emission.
         ''' </summary>
         Public ElectronRoots As List(Of String)
 
         ''' <summary>
-        ''' Paths of the application's electron-updater download caches — typically
+        ''' Paths of the application's electron-updater download caches, typically
         ''' <c> %LocalAppData%\&lt;slug&gt;-updater </c>. Declared separately from
         ''' <see cref="ElectronRoots"/> because the directory name is electron-builder's appId
         ''' slug and is not derivable from the userData path (<c> %AppData%\Humble App </c> pairs
@@ -412,12 +418,12 @@ Public Module EntryBuilder
         ''' <summary>
         ''' Electron scaffold names explicitly selected via <c> ElectronScaffolds= </c>.
         ''' The sentinel <c> All </c> (case-insensitive) expands to every scaffold in the
-        ''' Electron catalog.
+        ''' Electron catalog except its <c> Tier=Legacy </c> ones.
         ''' </summary>
         Public ElectronScaffoldNames As List(Of String)
 
         ''' <summary>
-        ''' Tracks whether <c> ElectronScaffolds= </c> was declared at all, separately from
+        ''' Indicates whether <c> ElectronScaffolds= </c> was declared at all, separately from
         ''' whether the resulting list is empty (mirrors <see cref="WebViewScaffoldsKeyPresent"/>).
         ''' </summary>
         Public ElectronScaffoldsKeyPresent As Boolean
@@ -431,16 +437,15 @@ Public Module EntryBuilder
         Public ExcludedElectronScaffolds As List(Of String)
 
         ''' <summary>
-        ''' When True, the entry is structurally invalid or marked <c> Skip= </c>
-        ''' and is omitted from generation
+        ''' Indicates whether the entry is omitted from generation, because it declared
+        ''' <c> Skip= </c> or is structurally invalid
         ''' </summary>
         Public ShouldSkip As Boolean
 
         ''' <summary>
-        ''' When True, <see cref="inferRootDetection"/> synthesised a <c> Detect=&lt;Root&gt; </c>
-        ''' or <c> DetectFile=&lt;Root&gt; </c> for this entry from a reserved <c> Root </c>
-        ''' variable. Recorded so the run statistics can report how many entries received
-        ''' inferred (rather than hand-authored) detection.
+        ''' Indicates whether <see cref="inferRootDetection"/> added a <c> Detect=&lt;Root&gt; </c>
+        ''' or <c> DetectFile=&lt;Root&gt; </c> for this entry from its <c> Root </c> variable.
+        ''' The run statistics count these entries.
         ''' </summary>
         Public RootDetectionInferred As Boolean
 
@@ -461,7 +466,7 @@ Public Module EntryBuilder
 
         ''' <summary>
         ''' Creates a new <c> EntrySpec </c> for an entry with the given name,
-        ''' initialising all list fields to empty collections
+        ''' initializing all list fields to empty collections
         ''' </summary>
         '''
         ''' <param name="name">
@@ -526,7 +531,7 @@ Public Module EntryBuilder
         Public KeyCount As Integer
 
         ''' <summary>
-        ''' Creates a heavy-entry record
+        ''' Creates a new <c> TangledEntry </c>
         ''' </summary>
         '''
         ''' <param name="name"> The entry name </param>
@@ -551,8 +556,8 @@ Public Module EntryBuilder
     ''' Mutable accumulator for a single EntryBuilder run's generation statistics. One
     ''' instance is threaded through <see cref="generateEntry"/> and the expansion helpers
     ''' so every emitted key is tallied at its source, then rendered as a summary box by
-    ''' <see cref="renderStats"/>. A reference type by design — sharing one instance across
-    ''' the whole run lets counts accumulate without <c> ByRef </c> plumbing.
+    ''' <see cref="renderStats"/>. It is a class so that one shared instance accumulates
+    ''' counts across the whole run without <c> ByRef </c> plumbing.
     ''' </summary>
     Friend NotInheritable Class EntryBuilderStats
 
@@ -576,11 +581,11 @@ Public Module EntryBuilder
 
         ''' <summary>
         ''' Generated entries that declared at least one <c> ElectronRoot= </c> or
-        ''' <c> ElectronUpdaterRoot= </c> — either root opts the entry into the family
+        ''' <c> ElectronUpdaterRoot= </c>, since either root opts the entry into the family
         ''' </summary>
         Public EntriesWithElectronScaffolds As Integer
 
-        ''' <summary> Generated entries that received a synthesised <c> Root </c>-based detection </summary>
+        ''' <summary> Generated entries that received an inferred <c> Root </c>-based detection </summary>
         Public InferredRootEntries As Integer
 
         ''' <summary> Total <c> WebViewRoot= </c> declarations across all generated entries </summary>
@@ -659,10 +664,10 @@ Public Module EntryBuilder
         Public ExcludeKeyPassThroughKeys As Integer
 
         ''' <summary>
-        ''' Extra keys produced by <c> &lt;var&gt; </c> cartesian fan-out — the values
-        ''' beyond the first that each template contributed. Counts only the phase-2
-        ''' variable engine's multiplication, not the per-root <c> %WebViewRoot% </c> fan-out
-        ''' (already reflected in the scaffold / base FileKey counts).
+        ''' Extra keys produced by <c> &lt;var&gt; </c> cartesian fan-out: the values
+        ''' beyond the first that each phase-2 call contributed, across every key type. Counts
+        ''' only the variable engine's multiplication, not the phase-1 per-root fan-out
+        ''' (already reflected in the per-key-type counts).
         ''' </summary>
         Public VariableFanoutKeys As Integer
 
@@ -671,7 +676,7 @@ Public Module EntryBuilder
 
         ''' <summary>
         ''' Total nested variable references (declarations that reference another declaration)
-        ''' across all generated entries — the run-wide topological-sort tax
+        ''' across all generated entries, a measure of how much nesting readers must follow
         ''' </summary>
         Public NestedVariableRefs As Integer
 
@@ -682,15 +687,17 @@ Public Module EntryBuilder
         Public MaxVariablesEntryName As String = ""
 
         ''' <summary>
-        ''' Entries whose nested-reference count reached <see cref="NestedRefWatchThreshold"/> —
+        ''' Entries whose nested-reference count reached <see cref="NestedRefWatchThreshold"/>:
         ''' the abstraction-payoff watch list, surfaced so the maintainer can judge whether those
         ''' interdependent declaration blocks still earn their indirection
         ''' </summary>
         Public ReadOnly TangledEntries As New List(Of TangledEntry)
 
         ''' <summary>
-        ''' Content keys the builder generated from a template — scaffold expansion plus
-        ''' every <c> FileKeyBase= </c> / <c> RegKeyBase= </c> / <c> ExcludeKeyBase= </c>
+        ''' Content keys the builder generated from a template: WebView and QtWebEngine scaffold
+        ''' expansion plus every <c> FileKeyBase= </c> / <c> RegKeyBase= </c> /
+        ''' <c> ExcludeKeyBase= </c>. Electron scaffold keys
+        ''' (<see cref="ElectronScaffoldFileKeys"/>) are not included.
         ''' </summary>
         Public ReadOnly Property GeneratedContentKeys As Integer
             Get
@@ -708,7 +715,12 @@ Public Module EntryBuilder
             End Get
         End Property
 
-        ''' <summary> Total keys emitted across every generated entry (sum of the per-category counters) </summary>
+        ''' <summary>
+        ''' Total keys emitted across every generated entry: the category, detection and warning
+        ''' counters plus <see cref="GeneratedContentKeys"/> and <see cref="PassThroughContentKeys"/>.
+        ''' Electron scaffold keys are missing from it, as they are from
+        ''' <see cref="GeneratedContentKeys"/>.
+        ''' </summary>
         Public ReadOnly Property TotalKeys As Integer
             Get
                 Return CategoryKeys + DetectKeys + DetectFileKeys + DetectOSKeys + WarningKeys +
@@ -719,14 +731,18 @@ Public Module EntryBuilder
     End Class
 
     ''' <summary>
-    ''' Handles the command-line arguments for <c> EntryBuilder </c>
+    ''' Handles the command-line arguments for <c> EntryBuilder </c>, then runs
+    ''' <see cref="initEntryBuilder"/>. File slot 1 is the source directory, slot 2 the save
+    ''' target and slot 3 the shared scaffold directory.
     ''' </summary>
     '''
     ''' <remarks>
     ''' Flags:
     ''' <list type="bullet">
-    ''' <item><c> -split </c> — toggles per-letter artifact output (<c> #.ini </c> ...
-    ''' <c> Z.ini </c> in the save target's directory) instead of a single output file</item>
+    ''' <item><c> -split </c> flips <see cref="EntryBuilderSplitOutput"/>, which selects
+    ''' per-letter artifact output (<c> #.ini </c> ... <c> Z.ini </c> in the save target's
+    ''' directory) instead of a single output file. It inverts the current value rather than
+    ''' setting it to <c> True </c>.</item>
     ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
@@ -743,9 +759,11 @@ Public Module EntryBuilder
     End Sub
 
     ''' <summary>
-    ''' Reads the source directory, runs the generation pipeline, writes the output file,
-    ''' and displays the results. Bails early with a header message if the source directory
-    ''' contains no parseable sections.
+    ''' Reads the source directory, runs the generation pipeline, writes the output, and
+    ''' displays the results unless <c> SuppressOutput </c> is set. Bails early with a header
+    ''' message if the source directory is missing or contains no parseable sections. The
+    ''' closing "Entries built successfully" line doesn't depend on whether the write
+    ''' succeeded.
     ''' </summary>
     Public Sub initEntryBuilder()
 
@@ -785,10 +803,12 @@ Public Module EntryBuilder
     End Sub
 
     ''' <summary>
-    ''' Orchestrates the EntryBuilder pipeline: loads the scaffold catalog, parses each
-    ''' source section into an <c> EntrySpec </c>, generates one <c> iniSection </c>
-    ''' per non-skipped entry, and writes the result to the output file with a header
-    ''' comment block.
+    ''' Orchestrates the EntryBuilder pipeline: loads the scaffold directory, parses each
+    ''' source section into an <see cref="EntrySpec"/>, generates one <c> iniSection </c>
+    ''' per non-skipped entry, renders the run statistics, normalizes the result through
+    ''' <see cref="remotedebugGuarded"/>, and writes it with a do-not-edit header, either to
+    ''' <see cref="EntryBuilderFile2"/> or, with <see cref="EntryBuilderSplitOutput"/>, via
+    ''' <see cref="writeSplitOutput"/>. Also warns about declared variables nothing references.
     ''' </summary>
     '''
     ''' <param name="sourceIni">
@@ -799,8 +819,8 @@ Public Module EntryBuilder
     ''' Absolute path to the shared scaffold directory (typically
     ''' <c> Assembler\Scaffolds </c>). Every catalog in it is loaded once per run via
     ''' <see cref="ScaffoldCatalogs.LoadCatalogDirectory"/>, which derives each family from its
-    ''' section headers — so a family whose catalog file is absent costs its scaffold keys and a
-    ''' warning, never a failed run.
+    ''' section headers. A family with no catalog in the directory yields no scaffold keys, and
+    ''' each scaffold an entry requests from it warns as unknown.
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -867,8 +887,8 @@ Public Module EntryBuilder
                 Dim entrySection = generateEntry(spec, catalog, qtCatalog, electronCatalog, stats, menuOutput)
                 outputFile.AddSection(entrySection)
 
-                ' Abstraction payoff: an interdependent symbol table — variables referencing
-                ' other variables — is the maintainer's signal that a declaration block has
+                ' Abstraction payoff: an interdependent symbol table (variables referencing
+                ' other variables) is the maintainer's signal that a declaration block has
                 ' become noise rather than pattern-surfacing shorthand, since it forces the
                 ' reader to topologically sort a dependency graph. Raw variable count is NOT
                 ' the trigger: a large flat block of high-fan-out vars is the DSL succeeding.
@@ -945,8 +965,9 @@ Public Module EntryBuilder
 
     ''' <summary>
     ''' Formats one statistic as an aligned <c> label … value </c> line for the summary box.
-    ''' Values are right-aligned in a fixed column with thousands separators so the figures
-    ''' line up regardless of label length.
+    ''' Labels are padded to 28 characters and values right-aligned in 8 with thousands
+    ''' separators, so the figures line up for any label that fits in 28. A longer label
+    ''' pushes its value right.
     ''' </summary>
     '''
     ''' <param name="label">
@@ -970,10 +991,12 @@ Public Module EntryBuilder
     ''' Renders the run statistics as a summary box on <paramref name="menuOutput"/> and
     ''' mirrors a compact form to <c> gLog </c>. Grouped into entry counts, the shorthand
     ''' input declarations (the "bases" keys are generated from), the generated-key breakdown
-    ''' by provenance, and a generated-vs-pass-through summary. Pass-through tallies count
-    ''' keys the author wrote as literal <c> FileKey= </c> / <c> RegKey= </c> /
-    ''' <c> ExcludeKey= </c>; generated tallies count scaffold expansion plus the
-    ''' <c> ...Base= </c> template forms.
+    ''' by provenance, a generated-vs-pass-through summary, and the abstraction-payoff section
+    ''' from <see cref="renderAbstractionPayoff"/>. Pass-through tallies count keys the author
+    ''' wrote as literal <c> FileKey= </c> / <c> RegKey= </c> / <c> ExcludeKey= </c>; generated
+    ''' tallies count scaffold expansion plus the <c> ...Base= </c> template forms. The
+    ''' Electron scaffold count appears only on its own line: the totals and the
+    ''' <c> gLog </c> line leave it out.
     ''' </summary>
     '''
     ''' <param name="stats">
@@ -1095,10 +1118,18 @@ Public Module EntryBuilder
     End Sub
 
     ''' <summary>
-    ''' Parses one source section into a populated <c> EntrySpec </c>. Issues warnings
-    ''' and sets <c> ShouldSkip </c> for entries that are structurally invalid (no
-    ''' category, no content). Warns on stray <c> Default= </c> declarations (this
-    ''' builder never emits <c> Default </c>) and on missing detection.
+    ''' Parses one source section into a populated <see cref="EntrySpec"/>, resolves the
+    ''' nested references among its variables, and infers detection from a <c> Root </c>
+    ''' variable via <see cref="inferRootDetection"/>. Sets <c> ShouldSkip </c> with a warning
+    ''' when the entry has no category, or no content (no scaffold root, <c> FileKeyBase= </c>,
+    ''' <c> FileKey= </c>, <c> RegKeyBase= </c> or <c> RegKey= </c>; exclude keys alone don't
+    ''' count), and silently for <c> Skip= </c>. <br /><br />
+    '''
+    ''' Also warns on, and drops, <c> SpecialDetect= </c> and <c> Default= </c>; warns when
+    ''' both <c> Section= </c> and <c> LangSecRef= </c> are present, keeping
+    ''' <c> LangSecRef= </c>; and warns on missing detection unless the entry is already
+    ''' skipped. A repeated <c> Section= </c>, <c> LangSecRef= </c> or <c> DetectOS= </c> keeps
+    ''' its last value.
     ''' </summary>
     '''
     ''' <param name="entrySection">
@@ -1201,8 +1232,8 @@ Public Module EntryBuilder
                     '
                     ' Defensive collision check: if the declared name (after StripNums)
                     ' matches a reserved first-class key, warn. With the current Select
-                    ' Case structure this is dead code — every reserved name has a Case
-                    ' branch above — but the check keeps the ReservedKeys constant and
+                    ' Case structure this is dead code, since every reserved name has a Case
+                    ' branch above, but the check keeps the ReservedKeys constant and
                     ' the parser's Case set explicitly cross-referenced, so a future
                     ' parser refactor that drops a branch surfaces the omission.
                     If ReservedKeys.Any(Function(r) String.Equals(r, key.KeyType, StringComparison.InvariantCultureIgnoreCase)) Then
@@ -1219,7 +1250,7 @@ Public Module EntryBuilder
 
         Next
 
-        ' Capture the symbol table's nesting depth before ResolveAll flattens it — this
+        ' Capture the symbol table's nesting depth before ResolveAll flattens it: this
         ' feeds the abstraction-payoff statistic and would read as 0 afterwards.
         spec.NestedVariableRefs = spec.Variables.NestedReferenceCount()
 
@@ -1288,28 +1319,31 @@ Public Module EntryBuilder
     End Function
 
     ''' <summary>
-    ''' Synthesises detection from a reserved <c> Root </c> variable. When an entry declares
-    ''' <c> Root= </c>, EntryBuilder guarantees a <c> Detect=&lt;Root&gt; </c> (registry-domain
-    ''' root) or <c> DetectFile=&lt;Root&gt; </c> (filesystem-domain root) is present, classifying
-    ''' by the leading path segment of the resolved value against the known registry hives via
-    ''' <see cref="regKeyParams.HasValidRoot"/>. The synthesised key is the literal
+    ''' Infers detection from a reserved <c> Root </c> variable. When an entry declares
+    ''' <c> Root= </c> with at least one value, we make sure a <c> Detect=&lt;Root&gt; </c>
+    ''' (registry-domain root) or <c> DetectFile=&lt;Root&gt; </c> (filesystem-domain root) is
+    ''' present, classifying by the leading path segment of the first resolved value against the
+    ''' known registry hives via <see cref="regKeyParams.HasValidRoot"/>. A value that still
+    ''' holds a <c> &lt;token&gt; </c> after resolution skips inference with a warning, and
+    ''' values that mix domains warn but still follow the first. The added key is the literal
     ''' <c> &lt;Root&gt; </c> token rather than the expanded value, so the normal phase-2 pass in
     ''' <see cref="generateEntry"/> fans it out over multi-valued roots and marks <c> Root </c>
     ''' referenced for the unreferenced-variable typo backstop. <br /><br />
     '''
     ''' Injection is idempotent and additive: if the target list already holds a
-    ''' <c> &lt;Root&gt; </c> token (a hand-written <c> Detect=&lt;Root&gt; </c>) nothing is added,
-    ''' and any other detection criteria are left untouched. The token is prepended so the root
-    ''' anchor is the first detection key of its kind. <br /><br />
+    ''' <c> &lt;Root&gt; </c> token (a hand-written <c> Detect=&lt;Root&gt; </c>, compared
+    ''' trimmed and case-insensitively) nothing is added, and any other detection criteria are
+    ''' left untouched. The token is prepended so the root anchor is the first detection key of
+    ''' its kind. <br /><br />
     '''
-    ''' Authors who want a base-path variable WITHOUT automatic detection must name it something
+    ''' Authors who want a base-path variable without automatic detection must name it something
     ''' other than <c> Root </c>.
     ''' </summary>
     '''
     ''' <param name="spec">
-    ''' The entry being parsed; its <see cref="EntrySpec.Detects"/> /
-    ''' <see cref="EntrySpec.DetectFiles"/> are mutated in place when a <c> Root </c> variable
-    ''' is present
+    ''' The entry being parsed. When we add a key, its <see cref="EntrySpec.Detects"/> or
+    ''' <see cref="EntrySpec.DetectFiles"/> list gains it and
+    ''' <see cref="EntrySpec.RootDetectionInferred"/> is set.
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -1335,7 +1369,7 @@ Public Module EntryBuilder
         End If
 
         ' Classify each resolved value's domain by its leading path segment. A homogeneous list
-        ' routes to one Detect or DetectFile; a heterogeneous list is an authoring error — warn
+        ' routes to one Detect or DetectFile; a heterogeneous list is an authoring error, so warn
         ' and classify by the first value (its <Root> token still fans out, surfacing the
         ' domain mismatch downstream in WinappDebug).
         Dim firstIsRegistry = New regKeyParams(rootValues(0)).HasValidRoot
@@ -1361,9 +1395,10 @@ Public Module EntryBuilder
     End Sub
 
     ''' <summary>
-    ''' Splits a comma-separated value into a trimmed, non-empty list of tokens.
-    ''' Used by <c> WebViewScaffolds= </c> and <c> ExcludeWebViewScaffolds= </c>. An empty input
-    ''' yields an empty list.
+    ''' Splits a comma-separated value into a trimmed, non-empty list of tokens, for the six
+    ''' scaffold selection keys (<c> {Family}Scaffolds= </c> and
+    ''' <c> Exclude{Family}Scaffolds= </c>). Every comma splits: unlike variable declarations,
+    ''' this isn't <c> &lt;&gt; </c>-aware. An empty input yields an empty list.
     ''' </summary>
     '''
     ''' <param name="value">
@@ -1383,26 +1418,12 @@ Public Module EntryBuilder
     End Function
 
     ''' <summary>
-    ''' Selects the set of WebView scaffold names that should be emitted for the given
-    ''' entry. Resolution order:
-    ''' <list type="bullet">
-    ''' <item>
-    ''' If the entry declared <c> WebViewScaffolds= </c> (regardless of value), use that
-    ''' explicit list. A present-but-empty value yields no scaffolds.
-    ''' </item>
-    ''' <item>
-    ''' If the explicit list contains the sentinel <c> All </c> (case-insensitive), it is
-    ''' replaced with every scaffold name in <paramref name="available"/>; any other
-    ''' names listed alongside <c> All </c> are redundant and emit a warning.
-    ''' </item>
-    ''' <item>
-    ''' Otherwise, use <see cref="DefaultScaffolds"/>.
-    ''' </item>
-    ''' </list>
-    ''' Any names in <c> ExcludedWebViewScaffolds </c> are then subtracted, and unknown names
-    ''' (not present in <paramref name="available"/>) are dropped with a warning.
-    ''' Combining <c> WebViewScaffolds= </c> and <c> ExcludeWebViewScaffolds= </c> warns when the
-    ''' explicit list is anything other than <c> All </c>.
+    ''' Selects the WebView scaffold names to emit for the given entry from its
+    ''' <c> WebViewScaffolds= </c> / <c> ExcludeWebViewScaffolds= </c> keys, falling back to
+    ''' this module's <see cref="DefaultScaffolds"/>. Delegates to
+    ''' <see cref="ScaffoldCatalogs.ResolveScaffolds"/>, which owns the grammar: the
+    ''' <c> All </c> sentinel withholds the <c> Tier=Legacy </c> scaffolds, exclusions apply to
+    ''' every selection, and unknown names are dropped with a warning.
     ''' </summary>
     '''
     ''' <param name="spec">
@@ -1410,8 +1431,7 @@ Public Module EntryBuilder
     ''' </param>
     '''
     ''' <param name="available">
-    ''' The catalog of known scaffolds, keyed by name, loaded from
-    ''' <c> Assembler\Scaffolds\webview.ini </c>
+    ''' The WebView family's catalog from the scaffold directory, keyed by scaffold name
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -1419,7 +1439,8 @@ Public Module EntryBuilder
     ''' </param>
     '''
     ''' <returns>
-    ''' The ordered list of scaffold names to emit for this entry, with unknowns removed
+    ''' The ordered list of scaffold names to emit for this entry, with excluded and unknown
+    ''' names removed
     ''' </returns>
     Private Function resolveWebViewScaffolds(spec As EntrySpec,
                                        available As Dictionary(Of String, List(Of String)),
@@ -1443,8 +1464,7 @@ Public Module EntryBuilder
     ''' </param>
     '''
     ''' <param name="available">
-    ''' The catalog of known QtWebEngine scaffolds, keyed by name, loaded from
-    ''' <c> Assembler\Scaffolds\qtwebengine.ini </c>
+    ''' The QtWebEngine family's catalog from the scaffold directory, keyed by scaffold name
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -1473,7 +1493,8 @@ Public Module EntryBuilder
     '''
     ''' Selection is orthogonal to which roots the entry declared: a selected scaffold whose
     ''' templates all reference an undeclared root contributes nothing, and
-    ''' <see cref="expandScaffoldFamily"/> warns when that happens.
+    ''' <see cref="expandScaffoldFamily"/> warns when that happens to a scaffold the entry
+    ''' selected explicitly.
     ''' </summary>
     '''
     ''' <param name="spec">
@@ -1481,8 +1502,7 @@ Public Module EntryBuilder
     ''' </param>
     '''
     ''' <param name="available">
-    ''' The catalog of known Electron scaffolds, keyed by name, loaded from
-    ''' <c> Assembler\Scaffolds\electron.ini </c>
+    ''' The Electron family's catalog from the scaffold directory, keyed by scaffold name
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -1504,9 +1524,11 @@ Public Module EntryBuilder
 
     ''' <summary>
     ''' Generates one winapp2.ini section for the given entry. Emits keys in winapp2
-    ''' canonical order: category, Detect, DetectFile, DetectOS, Warning, FileKey
-    ''' (scaffold expansion followed by entry-level FileKeyBase), RegKey, ExcludeKey.
-    ''' Never emits <c> Default= </c>.
+    ''' canonical order: category, Detect, DetectFile, DetectOS, Warning, FileKey (WebView,
+    ''' QtWebEngine and Electron scaffold expansion, then <c> FileKeyBase= </c>, then literal
+    ''' <c> FileKey= </c>), RegKey, ExcludeKey. Detect and DetectFile are numbered only when there
+    ''' is more than one; FileKey, RegKey and ExcludeKey are always numbered from 1. Never emits
+    ''' <c> Default= </c>. The section hasn't been through WinappDebug yet.
     ''' </summary>
     '''
     ''' <param name="spec">
@@ -1535,7 +1557,7 @@ Public Module EntryBuilder
     ''' </param>
     '''
     ''' <returns>
-    ''' A fully populated <c> iniSection </c> ready to be added to the output file
+    ''' A new <c> iniSection </c> named after the entry, ready to be added to the output file
     ''' </returns>
     Friend Function generateEntry(spec As EntrySpec,
                                     catalog As Dictionary(Of String, List(Of String)),
@@ -1581,7 +1603,7 @@ Public Module EntryBuilder
 
         End If
 
-        ' 3. DetectFile keys (phase-2 expansion, Filesystem domain — no %WebViewRoot% by convention)
+        ' 3. DetectFile keys (phase-2 expansion, Filesystem domain; no %WebViewRoot% by convention)
         Dim detectFileValues As New List(Of String)
         For Each df In spec.DetectFiles : detectFileValues.AddRange(expandPhase2(df, spec, ExpansionDomain.Filesystem, "DetectFile", stats, menuOutput)) : Next
 
@@ -1604,7 +1626,7 @@ Public Module EntryBuilder
         ' 4. DetectOS
         If spec.DetectOS.Length > 0 Then section.AddKey(New iniKey($"DetectOS={spec.DetectOS}")) : stats.DetectOSKeys += 1
 
-        ' 5. Warnings (pass-through, verbatim — prose is never variable-expanded)
+        ' 5. Warnings (pass-through, verbatim: prose is never variable-expanded)
         For Each w In spec.Warnings
 
             section.AddKey(New iniKey($"Warning={w}"))
@@ -1724,7 +1746,7 @@ Public Module EntryBuilder
     ''' <summary>
     ''' Expands a list of ExcludeKey templates against the entry's roots and variables,
     ''' classifying each phase-1 result's variable-expansion domain by its parsed
-    ''' <c> excludeKeyParams.Flag </c> (REG → Registry; FILE, PATH, Unknown → Filesystem).
+    ''' <see cref="excludeKeyParams.Flag"/> (REG → Registry; FILE, PATH, Unknown → Filesystem).
     ''' Shared by the <c> ExcludeKeyBase= </c> (generated) and <c> ExcludeKey= </c>
     ''' (pass-through) tiers so both apply identical domain classification while being
     ''' counted separately by the caller.
@@ -1800,7 +1822,7 @@ Public Module EntryBuilder
     '''
     ''' <param name="keyLabel">
     ''' Short tag (e.g. <c> Detect </c>, <c> FileKey </c>) embedded into diagnostic
-    ''' messages for source-of-warning localisation
+    ''' messages so a warning names the key it came from
     ''' </param>
     '''
     ''' <param name="stats">
@@ -1841,14 +1863,13 @@ Public Module EntryBuilder
 
     ''' <summary>
     ''' Runs both expansion phases on <paramref name="template"/>: phase-1 root-placeholder
-    ''' substitution (<c> %WebViewRoot% </c> / <c> %QtWebEngineRoot% </c>) via
-    ''' <see cref="expandRoot"/>, then phase-2 variable expansion via
+    ''' substitution via <see cref="expandRoot"/>, then phase-2 variable expansion via
     ''' <see cref="expandPhase2"/> on each phase-1 result. Diagnostics are flushed to
     ''' <c> gLog </c> / <paramref name="menuOutput"/> as they are produced.
     ''' </summary>
     '''
     ''' <param name="template">
-    ''' One key value template, possibly containing <c> %WebViewRoot% </c> and
+    ''' One key value template, possibly containing root placeholders and
     ''' <c> &lt;var&gt; </c> tokens
     ''' </param>
     '''
@@ -1897,17 +1918,17 @@ Public Module EntryBuilder
     End Function
 
     ''' <summary>
-    ''' Expands a template's root placeholders against the entry's declared roots, composing
-    ''' the two scaffold families: <c> %WebViewRoot% </c> fans out against
-    ''' <see cref="EntrySpec.WebViewRoots"/> and <c> %QtWebEngineRoot% </c> against
-    ''' <see cref="EntrySpec.QtWebEngineRoots"/>. A template containing neither placeholder is
-    ''' returned verbatim as a single-element list (no duplication). The two fan-outs compose,
-    ''' so a template referencing both placeholders multiplies across both root lists.
+    ''' Expands a template's root placeholders against the entry's declared roots, chaining one
+    ''' <see cref="ScaffoldCatalogs.FanOutPlaceholder"/> pass for each of the five placeholders:
+    ''' <c> %WebViewRoot% </c>, <c> %QtWebEngineRoot% </c>, <c> %QtWebEngineCacheRoot% </c>,
+    ''' <c> %ElectronRoot% </c> and <c> %ElectronUpdaterRoot% </c>. Matching is case-sensitive.
+    ''' A template containing several placeholders multiplies across all of their root lists. A
+    ''' template containing a placeholder the entry declared no root for is dropped, with no
+    ''' warning.
     ''' </summary>
     '''
     ''' <param name="template">
-    ''' A key value string that may contain <c> %WebViewRoot% </c> and/or
-    ''' <c> %QtWebEngineRoot% </c>
+    ''' A key value string that may contain any of the root placeholders
     ''' </param>
     '''
     ''' <param name="spec">
@@ -1916,7 +1937,8 @@ Public Module EntryBuilder
     '''
     ''' <returns>
     ''' The fan-out of <paramref name="template"/> across whichever placeholders it contains,
-    ''' or a single-element list containing it verbatim when it contains neither
+    ''' a single-element list containing it verbatim when it contains none, or an empty list
+    ''' when one of its placeholders has no declared roots
     ''' </returns>
     Private Function expandRoot(template As String,
                                  spec As EntrySpec) As List(Of String)
@@ -1943,20 +1965,20 @@ Public Module EntryBuilder
     ''' placeholders multiplies across all of their root lists, and a template referencing a
     ''' placeholder whose binding has no roots is <em>dropped</em> rather than emitted with the
     ''' placeholder left literal. That drop rule is what makes the Electron family's
-    ''' two-placeholder catalog work: an entry declaring only <c> ElectronRoot= </c> silently
-    ''' contributes nothing from the <c> UpdaterCache </c> scaffold. UWPBuilder drives the same
-    ''' helper, so the substitution semantics cannot drift between the two builders.
+    ''' two-placeholder catalog work: an entry declaring only <c> ElectronRoot= </c> gets
+    ''' nothing from the <c> UpdaterCache </c> scaffold. UWPBuilder drives the same helper, so
+    ''' the substitution rules are shared between the two builders.
     ''' <br /><br />
     '''
-    ''' A scaffold that produced nothing at all warns only when the entry named its family's
-    ''' scaffolds <em>explicitly</em>. A default-set member yielding nothing is by design — the
-    ''' Electron defaults include <c> UpdaterCache </c> precisely because it costs nothing for the
-    ''' majority of entries that declare no <c> ElectronUpdaterRoot= </c> — so warning there would
-    ''' fire on nearly every entry and train the reader to ignore the diagnostic.
+    ''' A non-empty scaffold that produced nothing at all warns only when the entry declared its
+    ''' family's <c> {Family}Scaffolds= </c> key. A default-set member yielding nothing is
+    ''' expected: the Electron defaults include <c> UpdaterCache </c>, which costs nothing for an
+    ''' entry that declares no <c> ElectronUpdaterRoot= </c>, so warning there would fire on
+    ''' most Electron entries.
     ''' </summary>
     '''
     ''' <param name="bindings">
-    ''' The family's (placeholder, roots) pairs — one for WebView, two for QtWebEngine and Electron
+    ''' The family's (placeholder, roots) pairs: one for WebView, two for QtWebEngine and Electron
     ''' </param>
     '''
     ''' <param name="selectedScaffolds">
@@ -2030,9 +2052,10 @@ Public Module EntryBuilder
     End Function
 
     ''' <summary>
-    ''' Classifies an entry name into its per-letter artifact bucket: the uppercased
-    ''' first character when it is an ASCII letter, otherwise <c> # </c> (digits,
-    ''' punctuation, and anything non-alphabetic). Bucketing is by entry name rather
+    ''' Classifies an entry name into its per-letter artifact bucket: the first character,
+    ''' uppercased with the invariant culture, when that gives <c> A </c> to <c> Z </c>, and
+    ''' otherwise <c> # </c> (digits, punctuation, any other character, and an empty or
+    ''' <c> Nothing </c> name). Bucketing is by entry name rather
     ''' than by source file so an entry filed in the wrong source letter still lands
     ''' in its canonical artifact.
     ''' </summary>
@@ -2057,10 +2080,11 @@ Public Module EntryBuilder
     ''' <summary>
     ''' Writes the normalized output as 27 per-letter artifact files (<c> #.ini </c>,
     ''' <c> A.ini </c> ... <c> Z.ini </c>) in the save target's directory, each with a
-    ''' deterministic do-not-edit header. All 27 files are always written — a letter
-    ''' with no entries produces a header-only file — so the artifact set is stable
-    ''' across runs and deletions of a letter's last entry cannot leave a stale file
-    ''' behind.
+    ''' deterministic do-not-edit header. We write all 27 files on every run, a letter with
+    ''' no entries getting a header-only file, so the artifact set is stable across runs and
+    ''' deleting a letter's last entry can't leave a stale file behind. Only the save
+    ''' target's <c> Dir </c> is used. The summary line reports how many writes succeeded and
+    ''' turns red when any failed.
     ''' </summary>
     '''
     ''' <param name="outputFile">
@@ -2068,7 +2092,7 @@ Public Module EntryBuilder
     ''' </param>
     '''
     ''' <param name="menuOutput">
-    ''' The <c> MenuSection </c> receiving the per-run summary line
+    ''' The <c> MenuSection </c> receiving the summary line
     ''' </param>
     Private Sub writeSplitOutput(outputFile As iniFile,
                                  menuOutput As MenuSection)
@@ -2118,10 +2142,11 @@ Public Module EntryBuilder
     End Sub
 
     ''' <summary>
-    ''' Combines all <c> *.ini </c> files in <paramref name="sourceDir"/> into a single
-    ''' in-memory <c> iniFile </c>, processed in alphabetical order. Sections with
-    ''' duplicate names across files are silently ignored (first-file-wins). Returns
-    ''' an empty file if the directory does not exist or contains no parseable sections.
+    ''' Combines the top-level <c> *.ini </c> files in <paramref name="sourceDir"/> into a
+    ''' single in-memory <c> iniFile </c>, processed in sorted path order. A section whose
+    ''' name (case-insensitive) is already present is dropped without a warning, so the first
+    ''' file in that order wins. Returns an empty file if the directory does not exist or
+    ''' contains no parseable sections.
     ''' </summary>
     '''
     ''' <param name="sourceDir">

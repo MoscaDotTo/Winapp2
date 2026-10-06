@@ -69,7 +69,8 @@ Public Module entryBuilderMainMenu
     End Sub
 
     ''' <summary>
-    ''' Handles the user input from the EntryBuilder menu
+    ''' Handles the user input from the EntryBuilder menu. Empty input runs the module, <c> 0 </c>
+    ''' exits it, and any other number dispatches to the matching menu option.
     ''' </summary>
     '''
     ''' <param name="input">
