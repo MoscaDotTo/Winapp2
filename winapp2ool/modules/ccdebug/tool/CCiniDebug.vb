@@ -22,22 +22,27 @@ Option Strict On
 ''' configuration file ccleaner.ini to clean up leftovers from winapp2.ini
 ''' <br /><br />
 ''' As entries are removed or renamed in winapp2.ini over time, stale configuration keys are
-''' leftover in ccleaner.ini. CCiniDebug processes a ccleaner.ini for its entry configuration keys
-''' and checks them each against the names of entries in winapp2.ini. Any configuration keys found
-''' with the winapp2.ini indicator (*) in the name which do not have a corresponding entry by the
-''' same name in the most recent winapp2.ini can then be easily and automatically removed
+''' leftover in ccleaner.ini. CCiniDebug reads the <c> (App) </c> keys in the <c> [Options] </c>
+''' section of a ccleaner.ini and checks each one against the entry names in a local winapp2.ini.
+''' Any key with the winapp2.ini indicator (*) in its name which has no entry by the same name
+''' in that winapp2.ini is removed. It can also sort the <c> [Options] </c> keys by name.
 ''' </summary>
 Module CCiniDebug
 
     ''' <summary>
-    ''' Handles the commandline args for CCiniDebug
+    ''' Handles the commandline args for CCiniDebug, starting from the default settings rather
+    ''' than any saved ones, then runs the debugger
     ''' </summary>
     '''
     ''' <remarks>
-    ''' CCiniDebug setting toggles:
-    ''' -noprune    : disable pruning of stale winapp2.ini entries
-    ''' -nosort     : disable sorting ccleaner.ini alphabetically
-    ''' -nosave     : disable saving the modified ccleaner.ini back to file
+    ''' File arguments: <c> -1d </c>/<c> -1f </c> set the winapp2.ini, <c> -2d </c>/<c> -2f </c>
+    ''' the ccleaner.ini to debug, and <c> -3d </c>/<c> -3f </c> the save target.
+    ''' Setting toggles:
+    ''' <list type="bullet">
+    ''' <item><c> -noprune </c>: disable pruning of stale winapp2.ini entries</item>
+    ''' <item><c> -nosort </c>: disable sorting the <c> [Options] </c> keys</item>
+    ''' <item><c> -nosave </c>: disable saving the modified ccleaner.ini back to file</item>
+    ''' </list>
     ''' </remarks>
     Public Sub handleCmdlineArgs()
 
@@ -58,7 +63,9 @@ Module CCiniDebug
 
     ''' <summary>
     ''' Loads and analyzes <c> ccleaner.ini </c>, pruning orphaned entries and sorting if enabled,
-    ''' then displays the results.
+    ''' saves it if enabled, then displays the results and waits for a key press. We return early
+    ''' if ccleaner.ini, or winapp2.ini when pruning, is empty or missing. The completion line
+    ''' says the file was saved whenever saving is enabled, even if the write failed.
     ''' </summary>
     Public Sub initCCDebug()
 
@@ -107,7 +114,8 @@ Module CCiniDebug
     End Sub
 
     ''' <summary>
-    ''' Prunes, sorts, and saves ccleaner.ini using the given loaded files.
+    ''' Prunes, sorts, and saves ccleaner.ini using the given loaded files, each step only if its
+    ''' setting is on. We save to <c> CCDebugFile3 </c> and ignore whether the write succeeded.
     ''' </summary>
     '''
     ''' <param name="wa2file">
@@ -120,7 +128,7 @@ Module CCiniDebug
     '''
     ''' <returns>
     ''' A <c> List(Of String) </c> of orphaned entry names removed during pruning,
-    ''' or <c> Nothing </c> if pruning was not performed.
+    ''' or <c> Nothing </c> if pruning is off or ccleaner.ini has no <c> [Options] </c> section.
     ''' </returns>
     Private Function ccDebug(wa2file As iniFile,
                              ccinifile As iniFile) As List(Of String)
@@ -144,7 +152,9 @@ Module CCiniDebug
     End Function
 
     ''' <summary>
-    ''' Scans for and removes stale winapp2.ini entry settings from the Options section of ccleaner.ini
+    ''' Removes stale winapp2.ini entry settings from the Options section of ccleaner.ini: every key
+    ''' whose name starts with <c> (App) </c> and contains <c> * </c>, and whose entry name (the
+    ''' rest of the key name, trimmed) isn't a section in <paramref name="wa2file"/>
     ''' </summary>
     '''
     ''' <param name="optionsSec">
@@ -192,7 +202,8 @@ Module CCiniDebug
     End Function
 
     ''' <summary>
-    ''' Sorts the keys in the Options section of <c> f2 </c> alphabetically
+    ''' Sorts the keys in the Options section of <paramref name="ccinifile"/> by name, ignoring case.
+    ''' Does nothing if there is no Options section.
     ''' </summary>
     '''
     ''' <param name="ccinifile">
