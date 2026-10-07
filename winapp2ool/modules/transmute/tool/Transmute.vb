@@ -18,9 +18,9 @@
 Option Strict On
 
 ''' <summary>
-''' <c> Transmute </c> (formerly <c> Merge </c>) is a winapp2ool module which provides the ability
-''' to modify an <c> iniFile </c> object using the contents of a separate <c> iniFile </c> object
-''' with conflict resolution at different levels of granularity. <br /><br />
+''' Modifies a base <see cref="iniFile"/> using the content of a separate source
+''' <see cref="iniFile"/>, with conflict resolution at different levels of granularity.
+''' Transmute was formerly the Merge module. <br /><br />
 '''
 ''' In the parlance of Transmute, there are two files of interest: <br />
 ''' The 'base' file and the 'source' file <br /> <br />
@@ -41,7 +41,8 @@ Option Strict On
 '''
 ''' <description>
 ''' Adds sections to the base file from the source file <br />
-''' If a section from the source file exists in the base file, the individual keys will be added
+''' If a section from the source file exists in the base file, its keys are appended to the base
+''' section, even when the base section already has a key with the same Name
 ''' </description>
 ''' </item>
 '''
@@ -54,10 +55,10 @@ Option Strict On
 ''' ByKey (Default replace mode): Replaces the value of keys in the base file with values from the
 ''' source file based on their Name <br /><br />
 '''
-''' BySection: Replaces entire sections in the base file with the section of the same name 
+''' BySection: Replaces entire sections in the base file with the section of the same name
 ''' in the source file. <br /><br />
 '''
-''' Note: Replace does nothing with sections from the source file not found in the base file
+''' Replace skips source sections the base file doesn't have, with a warning
 ''' </description>
 ''' </item>
 '''
@@ -84,34 +85,26 @@ Option Strict On
 ''' </description>
 ''' </item>
 ''' </list>
-''' 
-''' <br /><br />
-''' Additionally, Transmute provides an important function called Flavorize. Flavorize is used to 
-''' apply "flavors" to an ini file. In the context on winapp2.ini, there has historically existed 
-''' at least one flavor: the "non-ccleaner" file. Flavorize automates and also democratizes what has 
-''' historically been a very labor intensive process: Maintaining a concise set of transformations
-''' on the base winapp2.ini that can be used to adapt it to different purposes. The flavorization 
-''' process always takes in a base ini file and then applies operations in the following order: <br />
+'''
+''' The three modes are wholly discrete: Add never replaces or removes anything, and Replace and
+''' Remove never add a section the base file lacks. <br /><br />
+'''
+''' Source files may also hold global sections (<c> [*] </c>, <c> [*Map: label] </c> and
+''' <c> [*Name: scaffold] </c>) that apply across the base file instead of to one section of
+''' the same name. <see cref="RecognizeGlobalSections"/> turns them on. <br /><br />
+'''
+''' <see cref="Flavorize"/> applies a "flavor" to an ini file: a set of transformations that adapts
+''' the base winapp2.ini to a different purpose, such as the format a particular cleaner expects.
+''' It always applies its operations in the following order: <br />
 ''' <br />
 ''' Section Removal -> Key Name Removal -> Key Value Removal -> Section Replacement ->
 ''' Key Replacement -> Section and Key Additions
 ''' <br />
 ''' </summary>
-''' <remarks> 
-''' <b> Remarks: </b> <br />
-''' Transmute replaces the Merge module and has has three modes which are wholly discrete from 
-''' one another. This is a breaking change from old versions of Merge prior to 2025, which 
-''' always add entries which don't exist and perform conflict resolution as part of that process.
-''' <br /><br />
-''' As the functionality of Merge evolved, it no longer felt appropriate to refer to its output as
-''' the result of a "merger" necessarily. We now consider the resulting output a Transmutation. 
-''' Nevertheless, this is still spiritually the Merge module 
-''' </remarks>
-'''
 Public Module Transmute
 
     ''' <summary>
-    ''' The token in a <c> [*] </c> global section key value which is replaced with each
+    ''' The token in a <c> [*] </c> or <c> [*Name:] </c> key value which is replaced with each
     ''' receiving section's name as the key is applied (case-insensitive). Named-section
     ''' operations leave the token literal
     ''' </summary>
@@ -133,17 +126,17 @@ Public Module Transmute
         ''' <summary>
         ''' Overwrite the content of individual sections or keys in the base file with 
         ''' content from the source file. <br />
-        ''' Whether replacements are done by section or by key is is controlled by a separate
-        ''' enum <c> ReplaceMode </c>
+        ''' Whether replacements are done by section or by key is controlled by a separate
+        ''' enum <see cref="ReplaceMode"/>
         ''' </summary>
         Replace = 1
 
         ''' <summary>
         ''' Remove from the base file any keys or sections found in the source file. <br />
-        ''' Whether replacements are done by section or by key is controlled by a separate enum
-        ''' called <c> RemoveMode </c> <br />
-        ''' Whether key removals are done by Name or by Value is controlled by a separate enum 
-        ''' called <c> RemoveKeyMode </c>
+        ''' Whether removals are done by section or by key is controlled by a separate enum
+        ''' called <see cref="RemoveMode"/> <br />
+        ''' Whether key removals are done by Name or by Value is controlled by a separate enum
+        ''' called <see cref="RemoveKeyMode"/>
         ''' </summary>
         Remove = 2
 
@@ -168,7 +161,7 @@ Public Module Transmute
         '''
         ''' This means that if a key exists in the base file, its value will be replaced with the
         ''' value from the source file. The key must exist in both files and have the same Name
-        ''' (case-insensitive). Only the Value is replaced — the base key's Name is untouched
+        ''' (case-insensitive). Only the Value is replaced. The base key's Name is untouched
         ''' </summary>
         ByKey = 1
 
@@ -191,8 +184,9 @@ Public Module Transmute
         ''' Remove individual keys when collisions occur <br />
         '''
         ''' This means that if a key exists in the base file, it will be removed if it also exists
-        ''' in the source file. The key must exist in both files and have the same KeyType (key name
-        ''' without numbers). Section names are matched case-insensitively
+        ''' in the source file. <see cref="RemoveKeyMode"/> decides what counts as the same key:
+        ''' the same Name, or the same KeyType (key name without numbers) and Value. Section names
+        ''' and keys are matched case-insensitively
         ''' </summary>
         ByKey = 1
 
@@ -216,12 +210,14 @@ Public Module Transmute
     End Enum
 
     ''' <summary>
-    ''' Handles the commandline args for Transmute
+    ''' Handles the commandline args for Transmute. Resets the module settings first, so a
+    ''' command line run never uses saved settings. Without a source file (<c> -2f </c> or a
+    ''' preset flag) we log a message and return without transmuting.
     ''' </summary>
     '''
     ''' <remarks>
     ''' Transmute args: <br />
-    ''' Primary modes: <br />
+    ''' Primary modes (the last one given wins): <br />
     '''
     ''' -add            : Add mode (default) <br />
     ''' -replace        : Replace mode <br />
@@ -230,14 +226,15 @@ Public Module Transmute
     ''' Sub-mode: shared by remove/replace since only one can be done at a time <br />
     '''
     ''' -bysection      : Replace/Remove by section <br />
-    ''' -bykey          : Replace/Remove by key (default) <br />
+    ''' -bykey          : Replace/Remove by key (default, accepted and ignored) <br />
     '''
     ''' Remove key criteria: <br />
-    ''' -byname         : Remove keys by name (default) <br />
+    ''' -byname         : Remove keys by name (default, accepted and ignored) <br />
     ''' -byvalue        : Remove keys by value <br />
     '''
     ''' Winapp2.ini syntax correction <br />
-    ''' -dontlint       : do not save output with winapp2.ini formatting
+    ''' -dontlint       : save the output as a plain ini file with alphabetized sections, instead
+    ''' of sorting and formatting it as winapp2.ini
     '''
     ''' Global section handling <br />
     ''' -noglobal       : treat [*], [*Map:] and [*Name:] source sections as ordinary section names
@@ -318,7 +315,9 @@ Public Module Transmute
     End Sub
 
     ''' <summary>
-    ''' Validates the files and kicks off the transmutation process
+    ''' Loads the base and source files, transmutes the base file with the current settings,
+    ''' writes the result to <see cref="TransmuteFile3"/> and displays the output. Returns
+    ''' without transmuting when either file is missing or empty.
     ''' </summary>
     Public Sub initTransmute()
 
@@ -358,30 +357,38 @@ Public Module Transmute
     End Sub
 
     ''' <summary>
-    ''' Conducts the transmutation on the base file using the source file and saves the
-    ''' output to the location provided within saveFile. <br /> By default, the output is saved
-    ''' to winapp2-transmuted.ini alongside the base file, which is left untouched. <br />
-    ''' If working on a winapp2.ini file, the output can be formatted accordingly
+    ''' Transmutes <paramref name="baseFile"/> in memory using <paramref name="sourceFile"/> and
+    ''' writes the result to the path held by <paramref name="saveFile"/>. The base file on disk
+    ''' is only overwritten when <paramref name="saveFile"/> points at it.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="baseFile">
-    ''' The <c> iniFile </c> whose content will be modified by the transmutation process
+    ''' The <c> iniFile </c> whose content will be modified by the transmutation process. When
+    ''' we save as winapp2.ini, we replace it with the sorted, reformatted result.
     ''' </param>
-    ''' 
+    '''
     ''' <param name="sourceFile">
-    ''' The <c> iniFile </c> providing the transmutation data 
+    ''' The <c> iniFile </c> providing the transmutation data
     ''' </param>
-    ''' 
+    '''
     ''' <param name="saveFile">
     ''' Contains the path to which the transmuted output will be written
     ''' </param>
-    ''' 
+    '''
     ''' <param name="menuOutput">
     ''' A <c> MenuSection </c> containing the Transmute output to be displayed to the user
     ''' </param>
-    ''' 
+    '''
     ''' <param name="isWinapp2">
-    ''' Indicates that the <c> saveFile </c> should be formatted as a winapp2.ini file
+    ''' Indicates whether to sort and format the output as a winapp2.ini file. When
+    ''' <c> False </c>, we write a plain ini file with its sections in alphabetical order. <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    '''
+    ''' <param name="skipFormat">
+    ''' Indicates whether to stop after modifying <paramref name="baseFile"/>, without
+    ''' formatting or writing anything <br /><br />
+    ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <returns>
@@ -413,55 +420,58 @@ Public Module Transmute
 
     End Function
 
-    ''' <summary> 
-    ''' Facilitates transmuting an <c> iniFile </c> from outside the module's UI
+    ''' <summary>
+    ''' Transmutes an <c> iniFile </c> from outside the module's UI. We set the module's mode
+    ''' settings to the given modes for the duration of the call and restore them afterward.
+    ''' <see cref="RecognizeGlobalSections"/> isn't a parameter, so its current value applies.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="baseFile">
-    ''' An <c> iniFile </c> whose content will be modified by the transmutation process
+    ''' An <c> iniFile </c> whose content will be modified by the transmutation process. When
+    ''' the output is saved as winapp2.ini, we replace it with the sorted, reformatted result.
     ''' </param>
-    ''' 
+    '''
     ''' <param name="sourceFile">
-    ''' An <c> iniFile </c> whose content will be used to modify to <c> <paramref name="baseFile"/> </c> 
+    ''' An <c> iniFile </c> whose content will be used to modify <paramref name="baseFile"/>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="outputFile">
     ''' An <c> iniFile </c> which will be written to disk with the result of the transmutation process
     ''' </param>
-    ''' 
-    ''' <param name="isWinapp"> 
-    ''' Indicates that the <c> iniFile </c>s being worked with contain winapp2.ini syntax 
+    '''
+    ''' <param name="isWinapp">
+    ''' Indicates whether to sort and format the output as a winapp2.ini file
     ''' </param>
     ''' 
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
     ''' 
-    ''' <param name="transmuteMode"> 
-    ''' Sets the primary <c> Transmutator </c> <br />
+    ''' <param name="transmuteMode">
+    ''' Sets the primary <c> Transmutator </c> <br /><br />
     ''' Optional, Default: <c> TransmuteMode.Add </c>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="replaceMode">
-    ''' Sets the sub mode for the <c> Replace </c> Transmutator  <br />
+    ''' Sets the sub mode for the <c> Replace </c> Transmutator <br /><br />
     ''' Optional, Default: <c> ReplaceMode.ByKey </c>
     ''' </param>
-    '''  
+    '''
     ''' <param name="removeMode">
-    ''' Sets the sub mode for the <c> Remove </c> Transmutator <br />
+    ''' Sets the sub mode for the <c> Remove </c> Transmutator <br /><br />
     ''' Optional, Default: <c> RemoveMode.ByKey </c>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="removeKeyMode">
-    ''' Sets the sub mode for key removal operations when <c> removeMode </c> is
-    ''' <c> RemoveMode.ByKey </c> <br />
+    ''' Sets the sub mode for key removal operations when <paramref name="removeMode"/> is
+    ''' <c> RemoveMode.ByKey </c> <br /><br />
     ''' Optional, Default: <c> RemoveKeyMode.ByName </c>
     ''' </param>
     '''
     ''' <param name="skipFormat">
-    ''' When <c> True </c>, skips the post-transmutation sort, format, and disk write. <br />
+    ''' Indicates whether to skip the post-transmutation sort, format, and disk write. <br />
     ''' Use this when chaining multiple transmutations against the same base file so that
-    ''' only the final step pays the cost of constructing a <c> winapp2file </c> and writing to disk. <br />
+    ''' only the final step pays the cost of constructing a <c> winapp2file </c> and writing to disk. <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
@@ -511,19 +521,19 @@ Public Module Transmute
     End Function
 
     ''' <summary>
-    ''' Steps through the sections in the <c> <paramref name="sourceFile"/> </c> and applies the
-    ''' transmutation to each. Sections found in the <c> <paramref name="sourceFile"/> </c> not
-    ''' found in the <c> <paramref name="baseFile"/> </c> when the transmutator is not <c> Add </c>
-    ''' will be ignored with an error message <br /> <br />
+    ''' Steps through the sections in the <paramref name="sourceFile"/> and applies the
+    ''' transmutation to each. Sections found in the <paramref name="sourceFile"/> but not
+    ''' in the <paramref name="baseFile"/> when the transmutator is not <c> Add </c>
+    ''' are skipped with a warning <br /> <br />
     '''
-    ''' When <c> RecognizeGlobalSections </c> is enabled, three sentinel section names are processed
-    ''' before any named sections, so that specific per-section operations can refine the result
-    ''' of global ones: <br />
+    ''' When <see cref="RecognizeGlobalSections"/> is enabled, three kinds of sentinel section are
+    ''' processed before any named sections, in this order, so that specific per-section
+    ''' operations can refine the result of global ones: <br />
     ''' <c> [*Map: label] </c> sections define key mapping rules (Replace ByKey mode only) <br />
     ''' A <c> [*] </c> section applies its keys to every section of the base file <br />
     ''' <c> [*Name: scaffold] </c> sections apply their payload keys to every base section whose
     ''' name ends with <c> " scaffold *" </c> and which satisfies the section's <c> Match= </c>
-    ''' predicates (engine in <c> tool/TransmuteNameFilter.vb </c>)
+    ''' predicates (see <see cref="applyNameFilterSections"/>)
     ''' </summary>
     '''
     ''' <param name="baseFile">
@@ -531,7 +541,7 @@ Public Module Transmute
     ''' </param>
     '''
     ''' <param name="sourceFile">
-    '''  The <c> iniFile </c> providing the content modification criteria for <c> <paramref name="baseFile"/> </c>
+    '''  The <c> iniFile </c> providing the content modification criteria for <paramref name="baseFile"/>
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -599,20 +609,21 @@ Public Module Transmute
 
     ''' <summary>
     ''' Applies the keys of a <c> [*] </c> sentinel section to every section in the
-    ''' <c> <paramref name="baseFile"/> </c> under the current transmute mode. <br /> <br />
+    ''' <paramref name="baseFile"/> under the current transmute mode. <br /> <br />
     '''
     ''' Section-level modes are refused with a warning: Remove BySection would empty the file
     ''' and Replace BySection is incoherent as a global operation. Numbered keys are refused
-    ''' in Add mode because adding them to every section creates instant duplicates. <br /> <br />
+    ''' in Add mode because adding them to every section creates instant duplicates. An
+    ''' unnumbered Add key skips any section that already has a key of that Name, as
+    ''' <c> [*Name:] </c> does. <br /> <br />
     '''
     ''' Key values containing the <c> %EntryName% </c> token (case-insensitive) have the token
     ''' replaced with each receiving section's name as the key is applied, enabling per-section
-    ''' values from a single global key (eg. <c> ID=%EntryName% </c>). The token is only
-    ''' recognized here — named-section operations leave it literal. <br /> <br />
+    ''' values from a single global key (eg. <c> ID=%EntryName% </c>). Named-section operations
+    ''' leave the token literal. <br /> <br />
     '''
-    ''' Unlike named-section operations, a global operation expects most sections not to match,
-    ''' so per-section misses are silent: the menu receives one summary line per source key and
-    ''' per-hit detail is written to the log
+    ''' Per-section misses are silent: the menu receives one summary line per source key
+    ''' and per-hit detail is written to the log
     ''' </summary>
     '''
     ''' <param name="baseFile">
@@ -690,6 +701,7 @@ Public Module Transmute
 
                         Case TransmuteMode.Add
 
+                            If baseSection.HasKey(appliedKey.Name) Then Continue For
                             hits = addKeysToBase(baseSection, appliedSource, menuOutput, quiet:=True)
 
                         Case TransmuteMode.Replace
@@ -742,8 +754,8 @@ Public Module Transmute
     End Sub
 
     ''' <summary>
-    ''' Replaces every occurrence of <c> EntryNameToken </c> in
-    ''' <c> <paramref name="value"/> </c> with <c> <paramref name="sectionName"/> </c>,
+    ''' Replaces every occurrence of <see cref="EntryNameToken"/> in
+    ''' <paramref name="value"/> with <paramref name="sectionName"/>,
     ''' matching the token case-insensitively
     ''' </summary>
     '''
@@ -756,7 +768,7 @@ Public Module Transmute
     ''' </param>
     '''
     ''' <returns>
-    ''' <c> <paramref name="value"/> </c> with all token occurrences replaced
+    ''' <paramref name="value"/> with all token occurrences replaced
     ''' </returns>
     Friend Function expandEntryNameToken(value As String, sectionName As String) As String
 
@@ -786,12 +798,12 @@ Public Module Transmute
     ''' 
     ''' <param name="sourceSection">
     ''' The <c> iniSection </c> from the source file whose content will be used to modify
-    ''' <c> <paramref name="baseFile"/> </c>
+    ''' <paramref name="baseFile"/>
     ''' </param>
     '''
     ''' <param name="baseSection">
-    ''' The <c> iniSection </c> from <c> <paramref name="baseFile"/> </c> which will be modified,
-    ''' or <c> Nothing </c> if the section does not exist in the base file
+    ''' The <c> iniSection </c> from <paramref name="baseFile"/> which will be modified,
+    ''' or <c> Nothing </c> if the section does not exist in the base file (possible only in Add mode)
     ''' </param>
     ''' 
     ''' <param name="menuOutput">
@@ -822,19 +834,20 @@ Public Module Transmute
     End Sub
 
     ''' <summary>
-    ''' Handles the <c> Add Transmutator </c>, either adding the <c> <paramref name="sourceSection"/> </c>
-    ''' to the <c> <paramref name="baseFile"/> </c> or adding the keys from the 
-    ''' <c> <paramref name="sourceSection"/> </c> to the <c> <paramref name="baseSection"/> </c>
+    ''' Handles the <c> Add Transmutator </c>, either adding the <paramref name="sourceSection"/>
+    ''' to the <paramref name="baseFile"/> or adding the keys from the
+    ''' <paramref name="sourceSection"/> to the <paramref name="baseSection"/>. A new section
+    ''' goes in as the source's own object, not a copy.
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
     ''' The <c> iniSection </c> from the <c> baseFile </c>, if it exists, which will have keys
-    ''' from the <c> <paramref name="sourceSection"/> </c> added to it 
+    ''' from the <paramref name="sourceSection"/> added to it 
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
-    ''' The <c> iniSection </c> to either be added to <c> <paramref name="baseFile"/> </c> or 
-    ''' whose keys will be added to the <c> <paramref name="baseSection"/> </c> <br />
+    ''' The <c> iniSection </c> to either be added to <paramref name="baseFile"/> or 
+    ''' whose keys will be added to the <paramref name="baseSection"/> <br />
     ''' 
     ''' If the section exists in the base file, its keys will be added to the base section.
     ''' If it does not exist, the section will be added as a new section in the base file
@@ -869,32 +882,33 @@ Public Module Transmute
     End Sub
 
     ''' <summary>
-    ''' Adds keys from <c> <paramref name="sourceSection"/> </c> to 
-    ''' <c> <paramref name="baseSection"/> </c>
+    ''' Appends a copy of every key in <paramref name="sourceSection"/> to
+    ''' <paramref name="baseSection"/>, including keys whose Name the base section already has
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="baseSection">
-    ''' The <c> iniSection </c> to which keys will be added from 
-    ''' <c> <paramref name="sourceSection"/> </c>
+    ''' The <c> iniSection </c> to which keys will be added from
+    ''' <paramref name="sourceSection"/>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="sourceSection">
-    ''' The <c> iniSection </c> providing the keys to be added to  
-    ''' <c> <paramref name="baseSection"/> </c>
+    ''' The <c> iniSection </c> providing the keys to be added to
+    ''' <paramref name="baseSection"/>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
     ''' <param name="quiet">
-    ''' When <c> True </c>, suppresses all menu and log output, leaving reporting to the caller.
-    ''' Used by global operations, which aggregate per-section results into summary lines <br />
+    ''' Indicates whether to suppress all menu and log output, leaving reporting to the caller.
+    ''' Global operations set it, since they aggregate per-section results into summary lines <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <returns>
-    ''' The number of keys added to <c> <paramref name="baseSection"/> </c>
+    ''' The number of keys added to <paramref name="baseSection"/>, which is always the number
+    ''' of keys in <paramref name="sourceSection"/>
     ''' </returns>
     Private Function addKeysToBase(baseSection As iniSection,
                                          sourceSection As iniSection,
@@ -929,27 +943,28 @@ Public Module Transmute
     End Function
 
     ''' <summary>
-    ''' Handles the <c> Replace Transmutator </c>, replacing sections or keys based on the 
-    ''' current replaceMode setting
+    ''' Handles the <c> Replace Transmutator </c>, replacing sections or keys based on
+    ''' <see cref="TransmuteReplaceMode"/>. A replaced section is removed and the source's own
+    ''' section object is added in its place, at the end of the file's section order.
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
     ''' The <c> iniSection </c> which will have its content mutated based on 
-    ''' <c> <paramref name="sourceSection"/> </c>
+    ''' <paramref name="sourceSection"/>
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
     ''' The <c> iniSection </c> providing the replacement values for 
-    ''' <c> <paramref name="baseSection"/> </c>
+    ''' <paramref name="baseSection"/>
     ''' </param>
     ''' 
     ''' <param name="baseFile">
-    ''' The <c> iniFile </c> containing <c> <paramref name="baseSection"/> </c>
+    ''' The <c> iniFile </c> containing <paramref name="baseSection"/>
     ''' </param>
     ''' 
     ''' <param name="sectionName">
-    ''' The name on disk of both <c> <paramref name="baseSection"/> </c>
-    ''' and also <c> <paramref name="sourceSection"/> </c>
+    ''' The name on disk of both <paramref name="baseSection"/>
+    ''' and also <paramref name="sourceSection"/>
     ''' </param>
     ''' 
     ''' <param name="menuOutput">
@@ -978,20 +993,21 @@ Public Module Transmute
 
     ''' <summary>
     ''' Handles the Replace by Key mode for the <c> Replace Transmutator </c>, replacing the values
-    ''' of keys in <c> <paramref name="baseSection"/> </c> with the ones provided in
-    ''' <c> <paramref name="sourceSection"/> </c> iff they have the same Name (case-insensitive) <br />
+    ''' of keys in <paramref name="baseSection"/> with the ones provided in
+    ''' <paramref name="sourceSection"/> iff they have the same Name (case-insensitive) <br />
     ''' Every base key sharing a source key's Name receives the replacement value, so duplicate
-    ''' key names in the base section are all updated
+    ''' key names in the base section are all updated. When the source repeats a Name, its
+    ''' last value wins.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="baseSection">
-    ''' The <c> iniSection </c> which will have its key values will be replaced with values
-    ''' provided in <c> <paramref name="sourceSection"/> </c>
+    ''' The <c> iniSection </c> whose key values will be replaced with values
+    ''' provided in <paramref name="sourceSection"/>
     ''' </param>
     ''' 
     ''' <param name="sourceSection">
     ''' The <c> iniSection </c> providing the replacement values for matching keys found within
-    ''' <c> <paramref name="baseSection"/> </c>
+    ''' <paramref name="baseSection"/>
     ''' </param>
     ''' 
     ''' <param name="menuOutput">
@@ -999,14 +1015,14 @@ Public Module Transmute
     ''' </param>
     '''
     ''' <param name="quiet">
-    ''' When <c> True </c>, suppresses all menu and log output, including the
+    ''' Indicates whether to suppress all menu and log output, including the
     ''' "replacement target not found" warnings, leaving reporting to the caller.
-    ''' Used by global operations, which expect most sections not to match <br />
+    ''' Global operations set it, since they expect most sections not to match <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <returns>
-    ''' The number of keys in <c> <paramref name="baseSection"/> </c> whose values were replaced
+    ''' The number of keys in <paramref name="baseSection"/> whose values were replaced
     ''' </returns>
     Friend Function replaceKeysInBase(baseSection As iniSection,
                                        sourceSection As iniSection,
@@ -1053,8 +1069,8 @@ Public Module Transmute
     End Function
 
     ''' <summary>
-    ''' Handles the <c> Remove Transmutator </c>, removing sections or keys based on the 
-    ''' current removeMode setting
+    ''' Handles the <c> Remove Transmutator </c>, removing sections or keys based on
+    ''' <see cref="TransmuteRemoveMode"/>
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
@@ -1070,8 +1086,8 @@ Public Module Transmute
     ''' </param>
     ''' 
     ''' <param name="sectionName">
-    ''' The name on disk of both <c> <paramref name="baseSection"/> </c>
-    ''' and also <c> <paramref name="sourceSection"/> </c>
+    ''' The name on disk of both <paramref name="baseSection"/>
+    ''' and also <paramref name="sourceSection"/>
     ''' </param>
     ''' 
     ''' <param name="menuOutput">
@@ -1100,34 +1116,34 @@ Public Module Transmute
     End Sub
 
     ''' <summary>
-    ''' Removes individual keys from the <c> <paramref name="baseSection"/> </c>, obeying the
-    ''' current <c> TransmuteRemoveMode </c> and <c> TransmuteRemoveKeyMode </c> settings. <br />
+    ''' Removes individual keys from the <paramref name="baseSection"/>, matching by Name or by
+    ''' KeyType and Value according to <see cref="TransmuteRemoveKeyMode"/>, case-insensitively. <br />
     ''' Every base key matching a removal criterion is removed, so duplicate key names
     ''' (ByName) or duplicate KeyType/Value pairs (ByValue) in the base section are all removed
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="baseSection">
-    ''' The <c> iniSection </c> from which keys will be removed 
+    ''' The <c> iniSection </c> from which keys will be removed
     ''' </param>
-    ''' 
+    '''
     ''' <param name="sourceSection">
-    ''' The <c> iniSection </c> providing the keys to be removed from 
-    ''' <c> <paramref name="baseSection"/> </c> <br />
+    ''' The <c> iniSection </c> providing the keys to be removed from
+    ''' <paramref name="baseSection"/> <br />
     ''' </param>
-    ''' 
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
     ''' <param name="quiet">
-    ''' When <c> True </c>, suppresses all menu and log output, including the
-    ''' "removal target not found" warnings, leaving reporting to the caller.
-    ''' Used by global operations, which expect most sections not to match <br />
+    ''' Indicates whether to suppress all menu and log output, including the
+    ''' "removal target not found" messages, leaving reporting to the caller.
+    ''' Global operations set it, since they expect most sections not to match <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
     ''' <returns>
-    ''' The number of keys removed from <c> <paramref name="baseSection"/> </c>
+    ''' The number of keys removed from <paramref name="baseSection"/>
     ''' </returns>
     Friend Function remKeys(baseSection As iniSection,
                                    sourceSection As iniSection,
@@ -1189,11 +1205,18 @@ Public Module Transmute
     ''' 
     ''' Always applies Flavorings in the following order: <br /><br />
     ''' Section Removal -> Key Name Removal -> Key Value Removal -> Section Replacement ->
-    ''' Key Replacement -> Section and Key Additions
+    ''' Key Replacement -> Section and Key Additions <br /><br />
+    '''
+    ''' Each stage is a <see cref="RemoteTransmute"/> pass in that stage's mode, so global
+    ''' sections in a flavor file act under that mode too. <c> [*Map:] </c> rules therefore only
+    ''' apply from <paramref name="keyReplacementFile"/>. A stage whose file is <c> Nothing </c>
+    ''' or empty is skipped. We write the output even when every stage was skipped.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="baseFile">
-    ''' The <c> iniFile </c> to whom a particular flavor will be applied
+    ''' The <c> iniFile </c> to whom a particular flavor will be applied. When
+    ''' <paramref name="isWinapp"/> is <c> True </c>, we replace it with the sorted,
+    ''' reformatted result.
     ''' </param>
     ''' 
     ''' <param name="outputFile">
@@ -1206,55 +1229,54 @@ Public Module Transmute
     ''' 
     ''' <param name="additionsFile">
     ''' The <c> iniFile </c> containing the set of sections and individual keys within sections
-    ''' which should be added to <c> <paramref name="baseFile"/> </c> to create the flavor <br />
+    ''' which should be added to <paramref name="baseFile"/> to create the flavor <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     ''' 
     ''' <param name="sectionRemovalFile">
     ''' The <c> iniFile </c> containing the set of sections to be removed from the 
-    ''' <c> <paramref name="baseFile"/> </c> to create the flavor <br /> 
-    ''' Sections will be removed regardless of whether or not keys are provided <br />
+    ''' <paramref name="baseFile"/> to create the flavor <br /> 
+    ''' Sections will be removed regardless of whether or not keys are provided <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     ''' 
     ''' <param name="keyNameRemovalFile">
     ''' The <c> iniFile </c> containing the set of individual keys to be removed 
-    ''' from the <c> <paramref name="baseFile"/> </c> when matched by their Name parameter 
+    ''' from the <paramref name="baseFile"/> when matched by their Name parameter 
     ''' to create the flavor <br />
-    ''' The values provided for keys in this file do not matter and will not be used for matching <br />
+    ''' The values provided for keys in this file do not matter and will not be used for matching <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     ''' 
     ''' <param name="keyValueRemovalFile">
     ''' The <c> iniFile </c> containing the set of individual keys to be removed from the 
-    ''' <c> <paramref name="baseFile"/> </c> when matched by their KeyName and Value pairs 
+    ''' <paramref name="baseFile"/> when matched by their KeyType and Value pairs
     ''' to create the flavor <br />
     ''' Numbers in key names will be ignored in this file and can be omitted. Numberless name
-    ''' and value pairs will be used for matching. <br />
+    ''' and value pairs will be used for matching. <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     ''' 
     ''' <param name="sectionReplacementFile">
     ''' The <c> iniFile </c> containing the set of sections to replace entire sections of a
-    ''' matching (case-insensitive) name in the <c> <paramref name="baseFile"/> </c>
+    ''' matching (case-insensitive) name in the <paramref name="baseFile"/>
     ''' to create the flavor <br />
-    ''' This will not preserve non-overlapping content from the base key <br />
+    ''' This will not preserve non-overlapping content from the base section <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     '''
     ''' <param name="keyReplacementFile">
     ''' The <c> iniFile </c> containing the set of individual keys to replace within a matching
-    ''' section within <c> <paramref name="baseFile"/> </c> to create the flavor <br />
+    ''' section within <paramref name="baseFile"/> to create the flavor <br />
     ''' Keys in this file will only replace keys in the base file if both their Section and Key
-    ''' names match (case-insensitive) <br />
+    ''' names match (case-insensitive) <br /><br />
     ''' Optional, Default: <c> Nothing </c>
-    '''
     ''' </param>
     ''' 
     ''' <param name="isWinapp">
-    ''' Indicates that the <c> iniFile </c> being flavorized has winapp2.ini syntax <br />
+    ''' Indicates whether to sort and format the output as a winapp2.ini file. When
+    ''' <c> False </c>, we write a plain ini file with its sections in alphabetical order. <br /><br />
     ''' Optional, Default: <c> True </c>
-    ''' 
     ''' </param>
     '''
     Public Sub Flavorize(ByRef baseFile As iniFile,

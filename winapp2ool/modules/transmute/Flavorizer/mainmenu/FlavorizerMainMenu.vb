@@ -23,8 +23,8 @@ Option Strict On
 Public Module FlavorizerMainMenu
 
     ''' <summary>
-    ''' Builds and returns the Flavorizer main menu. <br />
-    ''' Both <c> printFlavorizerMainMenu </c> and <c> handleFlavorizerMainMenuUserInput </c>
+    ''' Builds and returns the Flavorizer main menu, setting the console height to 45 rows first. <br />
+    ''' Both <see cref="printFlavorizerMainMenu"/> and <see cref="handleFlavorizerMainMenuUserInput"/>
     ''' call this function to ensure menu numbering seen by the user stays in sync with dispatch.
     ''' </summary>
     Private Function buildFlavorizerMenu() As MenuSection
@@ -125,7 +125,8 @@ Public Module FlavorizerMainMenu
     End Sub
 
     ''' <summary>
-    ''' Handles the user's input from the main menu
+    ''' Handles the user's input from the main menu. Empty input runs the flavorization, unless
+    ''' no base file is set, and <c> 0 </c> exits the module.
     ''' </summary>
     '''
     ''' <param name="input">

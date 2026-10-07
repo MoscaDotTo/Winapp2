@@ -20,8 +20,8 @@ Option Strict On
 ''' <summary>
 ''' Holds the settings for the Transmute module, which makes changes to a
 ''' base ini file based on the content of a source ini file.
-''' This module contains properties that will be synced to disk which define the current state of
-''' the Transmutator and its sub modes, the file locations of the transmute files,
+''' This module contains properties, saved through the settings system, which define the current
+''' state of the Transmutator and its sub modes, the file locations of the transmute files,
 ''' and whether the settings have been changed from their defaults.
 ''' </summary>
 Public Module transmuteSettings
@@ -40,12 +40,13 @@ Public Module transmuteSettings
 
     ''' <summary>
     ''' Stores the path to which the Transmuted file should be written back to disk <br />
-    ''' Default: <c> winapp2-transmuted.ini </c> alongside the base file, which is left untouched
+    ''' Default: <c> winapp2-transmuted.ini </c> in the current directory, so the base file on
+    ''' disk is left untouched
     ''' </summary>
     Public Property TransmuteFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "winapp2-transmuted.ini", "winapp2.ini", mustExist:=False)
 
     ''' <summary>
-    ''' Indicates that module's settings have been modified from their defaults
+    ''' Indicates whether the module's settings have been modified from their defaults
     ''' </summary>
     Public Property TransmuteModuleSettingsChanged As Boolean = False
 
@@ -158,16 +159,18 @@ Public Module transmuteSettings
     Public Property TransmuteRemoveKeyMode As RemoveKeyMode = RemoveKeyMode.ByName
 
     ''' <summary>
-    ''' Indicates that <c> TransmuteFile3 </c> should be saved with winapp2.ini formatting <br />
+    ''' Indicates whether <see cref="TransmuteFile3"/> should be sorted and saved with winapp2.ini
+    ''' formatting. When <c> False </c>, we save a plain ini file with alphabetized sections. <br />
     ''' Default: <c> True </c>
     ''' </summary>
     Public Property UseWinapp2Syntax As Boolean = True
 
     ''' <summary>
-    ''' Indicates that source file sections named <c> [*] </c> should be treated as global
-    ''' operations applying to every section in the base file, and that sections whose names
-    ''' begin with <c> *Map: </c> should be treated as key mapping rules during
-    ''' Replace ByKey operations <br />
+    ''' Indicates whether source file sentinel sections are treated as global operations: a
+    ''' <c> [*] </c> section applies to every section in the base file, sections whose names
+    ''' begin with <c> *Map: </c> are key mapping rules during Replace ByKey operations, and
+    ''' sections whose names begin with <c> *Name: </c> apply to the base sections their filters
+    ''' select <br />
     ''' When <c> False </c>, these sentinel names fall through to normal section name matching,
     ''' for generic ini files where they could be real section names <br />
     ''' Default: <c> True </c>
@@ -175,7 +178,9 @@ Public Module transmuteSettings
     Public Property RecognizeGlobalSections As Boolean = True
 
     ''' <summary>
-    ''' Restores the default state of the module's properties and persists them via <c> SaveModule </c>
+    ''' Restores the default state of the module's properties and records them in the settings
+    ''' file through <see cref="SaveModule"/>. Nothing is written to disk here.
+    ''' <see cref="FlushIfDirty"/> does that later, if the save gate allows it
     ''' </summary>
     Public Sub initDefaultTransmuteSettings()
 

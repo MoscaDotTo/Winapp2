@@ -24,39 +24,42 @@ Option Strict On
 ''' The flavorization process applies modifications in this specific order:
 '''
 ''' <list type="number">
-''' <item> Section Removal — Remove entire sections </item>
-''' <item> Key Name Removal — Remove keys by name matching </item>
-''' <item> Key Value Removal — Remove keys by value and keytype matching </item>
-''' <item> Section Replacement — Replace entire sections </item>
-''' <item> Key Replacement — Replace individual key values </item>
-''' <item> Section and Key Additions — Add new sections and keys </item>
+''' <item> Section Removal: Remove entire sections </item>
+''' <item> Key Name Removal: Remove keys by name matching </item>
+''' <item> Key Value Removal: Remove keys by value and keytype matching </item>
+''' <item> Section Replacement: Replace entire sections </item>
+''' <item> Key Replacement: Replace individual key values </item>
+''' <item> Section and Key Additions: Add new sections and keys </item>
 ''' </list>
 '''
 ''' If a modification file is not present, that modification step will be skipped. <br /><br />
 '''
-''' This module wraps <c> Transmute.Flavorize </c> with an intuitive UI for managing the multiple
+''' This module wraps <see cref="Flavorize"/> with a UI for managing the multiple
 ''' correction files used in the flavorization process, and also provides the ability to
 ''' auto-detect a group of flavor files within a target directory.
 ''' </summary>
 Public Module Flavorizer
 
     ''' <summary>
-    ''' Handles command line arguments for the Flavorizer module <br />
+    ''' Handles command line arguments for the Flavorizer module. Resets the module settings
+    ''' first, then runs the flavorization unless the base file name is empty. <br />
     ''' Flavorizer args:
-    ''' -nowinapp         : Disable processing as winapp2.ini format (default: true)
+    ''' -nowinapp         : Save the output as a plain ini file instead of formatting it as winapp2.ini
     ''' -autodetect       : Automatically detect a group of Flavor files in the target directory
     ''' </summary>
     '''
     ''' <remarks>
     ''' To refer -autodetect to a different directory than the current one, also provide
-    ''' -9d with the appropriate directory. <c> FlavorizerFile9 </c> holds the target directory
-    ''' for the auto detect function within its Dir property
+    ''' -9d with the appropriate directory. <see cref="FlavorizerFile9"/> holds the target directory
+    ''' for the auto detect function within its Dir property. With -autodetect, only file
+    ''' slots 1, 2 and 9 are bound, so the detected files can't be overridden with -3f
+    ''' through -8f.
     ''' </remarks>
     Public Sub handleCmdLine()
 
         initDefaultFlavorizerSettings()
 
-        ' Detect mode flags first — they affect which file slots are bound
+        ' Detect mode flags first: they affect which file slots are bound
         Dim autoDetect = False
 
         If cmdargs.Contains("-autodetect") Then
@@ -84,7 +87,9 @@ Public Module Flavorizer
     End Sub
 
     ''' <summary>
-    ''' Initializes the Flavorizer process and validates required files
+    ''' Runs the flavorization with the current settings and displays the output unless output
+    ''' is suppressed. We don't check the base file for content, and we report completion even
+    ''' when <see cref="Flavorize"/> couldn't save the output.
     ''' </summary>
     Public Sub initFlavorizer()
 
@@ -131,7 +136,8 @@ Public Module Flavorizer
     End Sub
 
     ''' <summary>
-    ''' Performs the actual flavorization using the Transmute.Flavorize function
+    ''' Reads the base file and every correction file that is set and exists, then runs
+    ''' <see cref="Flavorize"/> with them
     ''' </summary>
     '''
     ''' <param name="menuOutput">The <c> MenuSection </c> to which flavorization output lines are appended</param>
@@ -162,11 +168,16 @@ Public Module Flavorizer
     End Sub
 
     ''' <summary>
-    ''' Automatically detects and assigns flavor files based on standard naming conventions
+    ''' Assigns each correction file slot the first top-level file in
+    ''' <paramref name="targetDirectory"/> whose path contains that slot's standard name
+    ''' (case-sensitive), so prefixed names like <c> cc_additions.ini </c> are found. A slot
+    ''' with no matching file keeps its current value. Marks the settings changed and records
+    ''' them through <see cref="SaveModule"/>. A directory that doesn't exist throws.
     ''' </summary>
     '''
     ''' <param name="targetDirectory">
-    ''' The directory to search for flavor files. If empty, uses the current directory.
+    ''' The directory to search for flavor files. If empty, uses the current directory. <br /><br />
+    ''' Optional, Default: <c> "" </c>
     ''' </param>
     '''
     ''' <remarks>

@@ -23,8 +23,8 @@ Option Strict On
 Public Module transmuteMainMenu
 
     ''' <summary>
-    ''' Builds and returns the Transmute main menu. <br />
-    ''' Both <c> printTransmuteMainMenu </c> and <c> handleTransmuteUserInput </c>
+    ''' Builds and returns the Transmute main menu, growing the console first if it is too short. <br />
+    ''' Both <see cref="printTransmuteMainMenu"/> and <see cref="handleTransmuteUserInput"/>
     ''' call this function to ensure menu numbering seen by the user stays in sync with dispatch.
     ''' </summary>
     Private Function buildTransmuteMenu() As MenuSection
@@ -101,8 +101,8 @@ Public Module transmuteMainMenu
     End Function
 
     ''' <summary>
-    ''' Sets <c> TransmuteFile2 </c>'s name to <paramref name="fileName"/>, persists the change,
-    ''' and updates the menu header to confirm the selection
+    ''' Sets <see cref="TransmuteFile2"/>'s name to <paramref name="fileName"/>, records the change
+    ''' through <see cref="SaveModule"/>, and updates the menu header to confirm the selection
     ''' </summary>
     '''
     ''' <param name="fileName">The preset source file name to assign</param>
@@ -125,8 +125,8 @@ Public Module transmuteMainMenu
     End Sub
 
     ''' <summary>
-    ''' Once per run of the module, we'll set the console height to be large enough so as to
-    ''' be able to display the largest number of options that we display
+    ''' Grows the console to 44 rows, enough for the largest form of the menu, whenever it is
+    ''' shorter. Runs on every menu build.
     ''' </summary>
     Private Sub adjustTransmuteConsoleHeight()
 
@@ -135,7 +135,8 @@ Public Module transmuteMainMenu
     End Sub
 
     ''' <summary>
-    ''' Handles the user's input from the main menu
+    ''' Handles the user's input from the main menu. Empty input runs the transmutation, unless
+    ''' no source file is set, and <c> 0 </c> exits the module.
     ''' </summary>
     '''
     ''' <param name="input">

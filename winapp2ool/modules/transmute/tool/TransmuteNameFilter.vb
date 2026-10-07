@@ -23,14 +23,14 @@ Imports System.Text.RegularExpressions
 ''' <summary>
 ''' Implements Transmute's <c> [*Name: scaffold] </c> sentinel: a name-filtered global operation.
 ''' Where <c> [*] </c> applies its keys to every section, a <c> [*Name:] </c> section applies its
-''' payload keys only to base sections selected by two orthogonal filters — an anchored name suffix
+''' payload keys only to base sections selected by two orthogonal filters: an anchored name suffix
 ''' and an optional set of content predicates. <br /> <br />
 '''
 ''' The section header carries a <c> scaffold </c> label; a base section is selected when: <br />
 ''' 1. its name ends with <c> " scaffold *" </c> (case-insensitive, anchored on the winapp2 entry
 '''    terminator so <c> "… Web Browsing Session *" </c> does not also catch
 '''    <c> "… Web Browsing Session Backups *" </c>), AND <br />
-''' 2. it satisfies the rule's <c> Match= </c> predicates — no predicates means the name filter
+''' 2. it satisfies the rule's <c> Match= </c> predicates. No predicates means the name filter
 '''    alone decides; otherwise the section must contain at least one key matching any one predicate
 '''    (KeyType equal, value equal or glob-matched; OR-semantics across the set) <br /> <br />
 '''
@@ -70,12 +70,16 @@ Friend Module TransmuteNameFilter
 
     ''' <summary>
     ''' Parses and applies a set of <c> [*Name:] </c> rule sections against the sections of the
-    ''' <c> <paramref name="baseFile"/> </c> under the current transmute mode. <br /> <br />
+    ''' <paramref name="baseFile"/> under the current transmute mode. <br /> <br />
     '''
     ''' Section-level modes are refused (Remove BySection and Replace BySection ignore the payload
-    ''' keys entirely, making a name-filtered whole-section operation incoherent here). The menu
-    ''' receives one summary line per rule; per-hit detail is written to the log. A rule which
-    ''' selects no sections emits a warning, signalling that the rule may be stale
+    ''' keys entirely, making a name-filtered whole-section operation incoherent here). In Add
+    ''' mode, numbered payload keys are dropped from the rule with a warning, and a rule left with
+    ''' no payload is skipped. Replace sets the Value of payload-named keys the section already
+    ''' has, and Remove matches by <see cref="TransmuteRemoveKeyMode"/>. <br /> <br />
+    '''
+    ''' The menu receives one summary line per rule; per-hit detail is written to the log. A rule
+    ''' which selects no sections emits a warning, signalling that the rule may be stale
     ''' </summary>
     '''
     ''' <param name="baseFile">
@@ -132,7 +136,7 @@ Friend Module TransmuteNameFilter
             For Each rule In rules
 
                 ' Adding a numbered key to every selected section creates instant duplicates, so
-                ' refuse them the same way [*] does — drop the offenders and keep any unnumbered rest
+                ' refuse them the same way [*] does: drop the offenders and keep any unnumbered rest
                 If Transmutator = TransmuteMode.Add Then
 
                     For Each numberedKey In rule.Payload.Where(Function(k) Not k.Name.Equals(k.KeyType, StringComparison.OrdinalIgnoreCase)).ToList()
@@ -204,7 +208,7 @@ Friend Module TransmuteNameFilter
     End Sub
 
     ''' <summary>
-    ''' Applies a rule's payload keys to a single selected <c> <paramref name="baseSection"/> </c>
+    ''' Applies a rule's payload keys to a single selected <paramref name="baseSection"/>
     ''' under the current transmute mode, expanding the <c> %EntryName% </c> token per section.
     ''' In Add mode, a payload key whose Name already exists in the section is skipped
     ''' </summary>
@@ -218,11 +222,14 @@ Friend Module TransmuteNameFilter
     ''' </param>
     '''
     ''' <param name="menuOutput">
-    ''' The <c> MenuSection </c> passed through to the reused Replace/Remove helpers (quiet)
+    ''' The <c> MenuSection </c> passed through to the reused Replace/Remove helpers, which
+    ''' run quietly and write nothing to it
     ''' </param>
     '''
     ''' <returns>
-    ''' The number of payload keys applied to <c> <paramref name="baseSection"/> </c>
+    ''' The number of keys added to, replaced in, or removed from <paramref name="baseSection"/>.
+    ''' Replace and Remove count every matching base key, so duplicates can make this exceed
+    ''' the payload size.
     ''' </returns>
     Public Function applyPayload(baseSection As iniSection,
                                   payload As List(Of iniKey),
@@ -269,10 +276,10 @@ Friend Module TransmuteNameFilter
     End Function
 
     ''' <summary>
-    ''' Determines whether <c> <paramref name="baseSection"/> </c> satisfies a rule's content
+    ''' Returns whether <paramref name="baseSection"/> satisfies a rule's content
     ''' predicates: an empty predicate set is always satisfied; otherwise the section must contain
     ''' at least one key whose KeyType equals a predicate's and whose Value matches the predicate's
-    ''' (via <c> valueGlobMatches </c>), case-insensitively
+    ''' (via <see cref="valueGlobMatches"/>), case-insensitively
     ''' </summary>
     '''
     ''' <param name="baseSection">
@@ -283,6 +290,10 @@ Friend Module TransmuteNameFilter
     ''' The rule's content predicates
     ''' </param>
     '''
+    ''' <returns>
+    ''' <c> True </c> if <paramref name="matches"/> is empty or any one predicate matches a key,
+    ''' <c> False </c> otherwise
+    ''' </returns>
     Public Function sectionSatisfiesPredicates(baseSection As iniSection,
                                                 matches As List(Of iniKey)) As Boolean
 
@@ -304,7 +315,7 @@ Friend Module TransmuteNameFilter
     End Function
 
     ''' <summary>
-    ''' Matches <c> <paramref name="value"/> </c> against <c> <paramref name="pattern"/> </c>,
+    ''' Returns whether <paramref name="value"/> matches <paramref name="pattern"/>,
     ''' where <c> * </c> in the pattern is a wildcard matching any run of characters
     ''' (including none). A bare <c> * </c> matches anything, consistent with <c> [*Map:] </c>;
     ''' a pattern with no <c> * </c> is a case-insensitive equality check. All matching is
@@ -319,6 +330,10 @@ Friend Module TransmuteNameFilter
     ''' The base key value being tested
     ''' </param>
     '''
+    ''' <returns>
+    ''' <c> True </c> if the whole of <paramref name="value"/> matches the pattern,
+    ''' <c> False </c> otherwise
+    ''' </returns>
     Public Function valueGlobMatches(pattern As String, value As String) As Boolean
 
         If pattern = "*" Then Return True
@@ -394,14 +409,17 @@ Friend Module TransmuteNameFilter
     End Function
 
     ''' <summary>
-    ''' Parses a <c> Name=Value </c> line into an <c> iniKey </c>, returning <c> Nothing </c>
-    ''' when the line has no <c> = </c> or an empty Name
+    ''' Parses a <c> Name=Value </c> line into an <c> iniKey </c>
     ''' </summary>
     '''
     ''' <param name="line">
     ''' The raw key line, ie. the value of a <c> Match= </c> key
     ''' </param>
     '''
+    ''' <returns>
+    ''' The parsed key, or <c> Nothing </c> when <paramref name="line"/> has no <c> = </c> or an
+    ''' empty Name. An empty Value still parses, into a key whose KeyType is <c> DeleteMe </c>.
+    ''' </returns>
     Public Function splitNameValue(line As String) As iniKey
 
         Dim eqPos = line.IndexOf("="c)

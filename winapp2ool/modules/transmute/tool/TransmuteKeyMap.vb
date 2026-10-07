@@ -19,23 +19,25 @@ Option Strict On
 
 ''' <summary>
 ''' Implements Transmute's <c> [*Map: label] </c> key mapping rules: source-file sections which
-''' match keys anywhere in the base file by KeyType and Value, and replace the whole key —
-''' including its Name — with one or more replacement key lines. This is the only Transmute operation able
-''' to change a key's Name, which makes data-driven category conversions possible
-''' (eg. <c> Section=Google Chrome Web Browser </c> → <c> LangSecRef=3029 </c>) <br /> <br />
+''' match keys anywhere in the base file by KeyType and Value, and replace the whole key,
+''' including its Name, with one or more replacement key lines. Unlike a key-level Replace, which
+''' only changes Values, a rule can change a key's Name, which makes data-driven category
+''' conversions possible (eg. <c> Section=Google Chrome Web Browser </c> → <c> LangSecRef=3029 </c>) <br /> <br />
 '''
 ''' Rule sections contain: <br />
-''' <c> Match=&lt;Name&gt;=&lt;Value&gt; </c> — repeatable (as <c> Match1= </c>, <c> Match2= </c>, ...).
+''' <c> Match=&lt;Name&gt;=&lt;Value&gt; </c>, repeatable (as <c> Match1= </c>, <c> Match2= </c>, ...).
 ''' A base key matches when its KeyType (Name with numbers stripped) and Value both equal the
-''' match key's, case-insensitively — consistent with Remove ByValue matching. A match Value of
+''' match key's, case-insensitively, consistent with Remove ByValue matching. A match Value of
 ''' exactly <c> * </c> matches any value of that KeyType; because rules are first-match-wins,
 ''' a wildcard rule placed last serves as a fallback behind more specific rules <br />
-''' <c> Replace=&lt;Name&gt;=&lt;Value&gt; </c> — repeatable (as <c> Replace1= </c>, <c> Replace2= </c>, ...).
+''' <c> Replace=&lt;Name&gt;=&lt;Value&gt; </c>, repeatable (as <c> Replace1= </c>, <c> Replace2= </c>, ...).
 ''' The full replacement key line(s). The first replacement takes the matched key's ordinal
 ''' position and any remaining replacements are inserted immediately after it in file order,
 ''' so a single rule can de-abstract one key into several (eg. a wildcard
 ''' <c> DetectFile </c> into hardcoded per-variant paths). Replacement key numbering is the
-''' rule author's responsibility — keys are written as given, consistent with Add mode <br /> <br />
+''' rule author's responsibility: keys are written as given, consistent with Add mode <br /> <br />
+'''
+''' Any other key in a rule section makes the rule malformed. <br /> <br />
 '''
 ''' Rules are applied in a single pass in file order with first-match-wins semantics: each base
 ''' key is evaluated against its original value only, so a key replaced by an earlier rule is
@@ -50,12 +52,12 @@ Public Module TransmuteKeyMap
     Public Const MapSectionPrefix As String = "*Map:"
 
     ''' <summary>
-    ''' A parsed <c> [*Map: label] </c> rule: the match criteria, the replacement key,
+    ''' A parsed <c> [*Map: label] </c> rule: the match criteria, the replacement keys,
     ''' and hit counters populated during application
     ''' </summary>
     Private Class TransmuteMapRule
 
-        ''' <summary> The human-readable label from the section name, used in reporting </summary>
+        ''' <summary> The label after <c> *Map: </c> in the section name, or the whole section name if there is none, used in reporting </summary>
         Public Property Label As String
 
         ''' <summary> The match criteria, each parsed into an <c> iniKey </c> for KeyType+Value comparison </summary>
@@ -74,12 +76,12 @@ Public Module TransmuteKeyMap
 
     ''' <summary>
     ''' Parses and applies a set of <c> [*Map:] </c> rule sections against every section of the
-    ''' <c> <paramref name="baseFile"/> </c>. <br /> <br />
+    ''' <paramref name="baseFile"/>. <br /> <br />
     '''
     ''' Rules are only applied when the current transmute mode is Replace ByKey (the Flavorizer
     ''' key-replacement stage, or a standalone Replace ByKey run); under any other mode the rules
-    ''' are skipped with a warning. Malformed rules (no <c> Replace= </c>, no <c> Match= </c>, or
-    ''' an unsplittable value) are skipped individually with a warning. <br /> <br />
+    ''' are skipped with a warning. Malformed rules (no <c> Replace= </c>, no <c> Match= </c>,
+    ''' an unrecognized key, or an unsplittable value) are skipped individually with a warning. <br /> <br />
     '''
     ''' The menu receives one summary line per rule; per-hit detail is written to the log.
     ''' A rule which matches nothing across the whole file emits a warning, signalling that the
@@ -180,8 +182,8 @@ Public Module TransmuteKeyMap
     End Sub
 
     ''' <summary>
-    ''' Determines whether <c> <paramref name="baseKey"/> </c> satisfies any of the match criteria
-    ''' of <c> <paramref name="rule"/> </c>: KeyType and Value must both match, case-insensitively.
+    ''' Returns whether <paramref name="baseKey"/> satisfies any of the match criteria
+    ''' of <paramref name="rule"/>: KeyType and Value must both match, case-insensitively.
     ''' Comparing KeyTypes strips numbers from both sides, so <c> Match=FileKey=... </c> matches
     ''' any <c> FileKeyN </c> with that value. <br /> <br />
     '''
@@ -294,7 +296,8 @@ Public Module TransmuteKeyMap
 
     ''' <summary>
     ''' Parses a <c> Name=Value </c> line into an <c> iniKey </c>, returning <c> Nothing </c>
-    ''' when the line has no <c> = </c> or an empty Name
+    ''' when the line has no <c> = </c> or an empty Name. An empty Value still parses, into a
+    ''' key whose KeyType is <c> DeleteMe </c>.
     ''' </summary>
     '''
     ''' <param name="line">

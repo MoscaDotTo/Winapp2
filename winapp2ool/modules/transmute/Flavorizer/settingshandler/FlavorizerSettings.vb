@@ -24,12 +24,12 @@ Option Strict On
 ''' The flavorization process uses multiple correction files applied in this order:
 '''
 ''' <list type="number">
-''' <item> Section Removal (<c> File3 </c>) — Remove entire sections </item>
-''' <item> Key Name Removal (<c> File4 </c>) — Remove keys by name matching </item>
-''' <item> Key Value Removal (<c> File5 </c>) — Remove keys by value and keytype matching </item>
-''' <item> Section Replacement (<c> File6 </c>) — Replace entire sections </item>
-''' <item> Key Replacement (<c> File7 </c>) — Replace individual key values </item>
-''' <item> Section and Key Additions (<c> File8 </c>) — Add new sections and keys </item>
+''' <item> Section Removal (<c> File3 </c>): Remove entire sections </item>
+''' <item> Key Name Removal (<c> File4 </c>): Remove keys by name matching </item>
+''' <item> Key Value Removal (<c> File5 </c>): Remove keys by value and keytype matching </item>
+''' <item> Section Replacement (<c> File6 </c>): Replace entire sections </item>
+''' <item> Key Replacement (<c> File7 </c>): Replace individual key values </item>
+''' <item> Section and Key Additions (<c> File8 </c>): Add new sections and keys </item>
 ''' </list>
 '''
 ''' All correction files are optional. The flavorization process skips any that are not
@@ -83,7 +83,7 @@ Public Module FlavorizerSettings
     ''' Key replacement file - contains individual keys that will replace <br />
     ''' keys of the same name within matching sections in the base file. <br />
     ''' Section and key name matching is case-insensitive. <br />
-    ''' Applied in the fifth stage of flavorization.
+    ''' Applied in the fifth stage of flavorization, the only stage that runs <c> [*Map:] </c> rules.
     ''' </summary>
     Public Property FlavorizerFile7 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "", mustExist:=False)
 
@@ -98,7 +98,8 @@ Public Module FlavorizerSettings
     ''' <summary>
     ''' Holds the "Target Directory" for the Flavorizer module which is used to automatically
     ''' detect the set of Flavor files. <br />
-    ''' Never has a file name and is never saved to disk.
+    ''' Only its <c> Dir </c> is used. The menu clears its <c> Name </c> after each change, and
+    ''' it is saved with the other settings.
     ''' </summary>
     Public Property FlavorizerFile9 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "", mustExist:=False)
 
@@ -109,13 +110,15 @@ Public Module FlavorizerSettings
     Public Property FlavorizeAsWinapp As Boolean = True
 
     ''' <summary>
-    ''' Indicates that the module settings have been modified from their defaults <br />
+    ''' Indicates whether the module settings have been modified from their defaults <br />
     ''' Default: <c> False </c>
     ''' </summary>
     Public Property FlavorizerModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Restores the default state of the Flavorizer module's properties and persists them via <c> SaveModule </c>
+    ''' Restores the default state of the Flavorizer module's properties and records them in the
+    ''' settings file through <see cref="SaveModule"/>. Nothing is written to disk here.
+    ''' <see cref="FlushIfDirty"/> does that later, if the save gate allows it
     ''' </summary>
     Public Sub initDefaultFlavorizerSettings()
 
