@@ -27,8 +27,8 @@ Module entryLabMainMenu
 
     ''' <summary>
     ''' Builds the Entry Lab menu with all options and their dispatch handlers registered inline.
-    ''' Called by both <c> printEntryLabMenu </c> (to render) and <c> handleEntryLabInput </c>
-    ''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
+    ''' We build it fresh both to print and to dispatch, so the option numbers shown are the ones
+    ''' dispatched.
     ''' </summary>
     Private Function buildEntryLabMenu() As MenuSection
 
@@ -55,7 +55,8 @@ Module entryLabMainMenu
     End Sub
 
     ''' <summary>
-    ''' Handles user input for the Entry Lab menu
+    ''' Handles user input for the Entry Lab menu. An empty input opens BrowserBuilder, the
+    ''' first option.
     ''' </summary>
     '''
     ''' <param name="input">
