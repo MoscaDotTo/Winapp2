@@ -18,7 +18,9 @@
 Option Strict On
 
 ''' <summary> 
-''' This is the top level module for winapp2ool, through which all other user-facing modules are accessed. The "main menu" 
+''' Holds winapp2ool's flavor list, its startup state (offline, framework and self-update
+''' checks) and a few small helpers used across the modules. The main menu itself lives in
+''' <see cref="maintoolmenu"/>.
 ''' </summary>
 Public Module Winapp2ool
 
@@ -38,7 +40,7 @@ Public Module Winapp2ool
         NonCCleaner = 1
 
         ''' <summary>
-        ''' Designed to pass BleachBit's santity checker 
+        ''' Designed to pass BleachBit's sanity checker 
         ''' </summary>
         BleachBit = 2
 
@@ -65,17 +67,23 @@ Public Module Winapp2ool
     End Enum
 
     ''' <summary> 
-    ''' Indicates that the .NET Framework installed on the current machine is below the targeted version (.NET Framework 4.5)
+    ''' Indicates whether the .NET Framework installed on the current machine is older than the
+    ''' one this build targets. The launcher leaves it <c> False </c> when it can't tell.
     ''' </summary>
     Public Property DotNetFrameworkOutOfDate As Boolean = False
 
     ''' <summary> 
-    ''' Indicates that winapp2ool currently has access to the internet
+    ''' Indicates whether winapp2ool is in offline mode. When <c> True </c>, online-only options
+    ''' are refused. The launcher sets it from <c> -offline </c> or a connection check, and the
+    ''' global settings menu can toggle it.
     ''' </summary>
     Public Property isOffline As Boolean = False
 
     ''' <summary> 
-    ''' Indicates that we're unable to download the executable 
+    ''' Indicates whether winapp2ool can't replace its own executable, because it runs from the
+    ''' <c> %temp% </c> folder or the .NET Framework is out of date. When <c> True </c>, the
+    ''' Downloader menu refuses to download winapp2ool.exe into the running copy's folder and
+    ''' the main menu shows a warning.
     ''' </summary>
     Public Property cantDownloadExecutable As Boolean = False
 
@@ -110,7 +118,7 @@ Public Module Winapp2ool
     ''' </param>
     ''' 
     ''' <returns> 
-    ''' The root directory given by <paramref name="val"/> 
+    ''' The text before the first <c> \ </c> in <paramref name="val"/>, or all of it if there is none
     ''' </returns>
     Public Function getFirstDir(val As String) As String
 
@@ -132,16 +140,17 @@ Public Module Winapp2ool
     End Function
 
     ''' <summary>
-    ''' Ensures that an <c> iniFile </c> has content and informs the user if it does not.
-    ''' This does not trigger validation or the File Chooser, so the caller loads the file first.
+    ''' Returns whether an <c> iniFile </c> has at least one section, and sets an error as the
+    ''' next menu header if it doesn't. This does not trigger validation or the File Chooser, so
+    ''' the caller loads the file first.
     ''' </summary>
     '''
     ''' <param name="iFile">
-    ''' An <c> iniFile </c> to be checked for content
+    ''' An <c> iniFile </c> to be checked for content. <c> Nothing </c> counts as empty.
     ''' </param>
     '''
     ''' <returns>
-    ''' <c> True </c> if the <c> iniFile </c> has content,
+    ''' <c> True </c> if the <c> iniFile </c> has at least one section,
     ''' <br /><c> False </c> otherwise
     ''' </returns>
     Public Function enforceFileHasContent(iFile As iniFile) As Boolean

@@ -28,32 +28,42 @@ Public Module maintoolsettings
     Public Property GlobalLogFile As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "winapp2ool.log", mustExist:=False)
 
     ''' <summary>
-    ''' Indicates that the module's settings have been changed
+    ''' Indicates whether the module's settings have been changed from their defaults
     ''' </summary>
     Public Property toolSettingsHaveChanged As Boolean = False
 
     ''' <summary>
-    ''' Indicates that changes to the application's settings should be serialized back to the disk
+    ''' Indicates whether changes to the application's settings are written back to
+    ''' <c> winapp2ool.ini </c>. <see cref="SaveSettings"/> refuses to write while it is
+    ''' <c> False </c>. Turning it off is itself never written, so the file keeps the old
+    ''' <c> True </c> and saving comes back on at the next launch.
     ''' </summary>
     Public Property saveSettingsToDisk As Boolean = False
 
     ''' <summary>
-    ''' Indicates that settings who are read from the disk should override the corresponding default module settings
+    ''' Indicates whether the settings in <c> winapp2ool.ini </c> override the other modules'
+    ''' defaults at launch. When <c> False </c>, only this module's own settings are read.
     ''' </summary>
     Public Property readSettingsFromDisk As Boolean = False
 
     ''' <summary>
-    ''' Indicates that this build is beta and should check the beta branch link for updates
+    ''' Indicates whether to follow the beta builds. When <c> True </c>, the update check,
+    ''' the self-updater and the Downloader use the beta copies of winapp2ool.exe, its
+    ''' signature and its version file.
     ''' </summary>
     Public Property isBeta As Boolean = False
 
     ''' <summary>
-    ''' The currently selected winapp.ini flavor
+    ''' The currently selected winapp2.ini flavor
     ''' </summary>
     Public Property CurrentWinappFlavor As Winapp2ool.WinappFlavor = Winapp2ool.WinappFlavor.CCleaner
 
     ''' <summary>
-    ''' Restores all <c> Winapp2ool </c> settings to their defaults and persists the reset to disk
+    ''' Restores all <c> Winapp2ool </c> settings to their defaults and records them in
+    ''' <see cref="SettingsFile"/> through <see cref="SaveModule"/>. That only changes memory:
+    ''' the reset reaches disk when a later flush gets past the save gate, and since the reset
+    ''' turns <see cref="saveSettingsToDisk"/> off, that happens only if saving is turned back on
+    ''' this session.
     ''' </summary>
     Public Sub InitDefaultToolSettings()
 

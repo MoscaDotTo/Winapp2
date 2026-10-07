@@ -23,7 +23,8 @@ Option Strict On
 Module maintoolmenu
 
     ''' <summary>
-    ''' Builds the main winapp2ool menu
+    ''' Builds the main winapp2ool menu. Building it also widens the console to at least 130
+    ''' columns and, while online, checks for updates on every build until a check succeeds.
     ''' </summary>
     Private Function buildToolMainMenu() As MenuSection
 
@@ -130,7 +131,10 @@ Module maintoolmenu
     End Sub
 
     ''' <summary>
-    ''' Handles the user input for the menu
+    ''' Handles the user input for the menu. Besides the numbered options and <c> 0 </c> to
+    ''' exit, it accepts four unlisted commands: <c> m </c> opens Minefield, <c> savelog </c>
+    ''' writes the global log to <see cref="GlobalLogFile"/>, <c> printlog </c> prints it, and
+    ''' <c> forceupdate </c> runs the self-updater whether or not an update is available.
     ''' </summary>
     '''
     ''' <param name="input">
@@ -173,14 +177,12 @@ Module maintoolmenu
 
     ''' <summary>
     ''' Adds information to the menu indicating to the user that an
-    ''' update is available for <see cref="winapp2ool"/> or winapp2.ini
+    ''' update is available for <see cref="winapp2ool"/> or winapp2.ini. It also logs the
+    ''' update and makes the console window two rows taller.
     ''' </summary>
     '''
     ''' <param name="cond">
-    ''' Indicates whether or not an update for <see cref="winapp2ool"/>
-    ''' or winapp2.ini is available <br />
-    ''' <c> True </c> if an update is available <br />
-    ''' <c> False </c> if no update is available
+    ''' Indicates whether an update is available. When <c> False </c>, nothing happens.
     ''' </param>
     '''
     ''' <param name="updName">
@@ -195,6 +197,8 @@ Module maintoolmenu
     ''' <param name="newVer">
     ''' The updated version pending download
     ''' </param>
+    '''
+    ''' <param name="menu">The menu receiving the notice</param>
     Private Sub getUpdateNotification(cond As Boolean,
                                       updName As String,
                                       oldVer As String,
