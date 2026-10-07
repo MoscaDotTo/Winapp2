@@ -27,9 +27,8 @@ Imports System.Text
 ''' </summary>
 <TestClass()> Public Class DiffKeyComparisonTests
 
-    ''' <summary>
-    ''' Helper: parse an <c> iniFile </c> from literal ini text
-    ''' </summary>
+    ''' <summary>Returns an <c> iniFile </c> named <c> test.ini </c> parsed from <paramref name="text"/></summary>
+    ''' <param name="text">Literal ini text</param>
     Private Shared Function MakeIni(text As String) As winapp2ool.iniFile
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
@@ -41,9 +40,8 @@ Imports System.Text
 
     End Function
 
-    ''' <summary>
-    ''' Helper: build a one-entry section named <c> [App *] </c> from a list of key lines
-    ''' </summary>
+    ''' <summary>Returns a section named <c> App * </c> holding <paramref name="keyLines"/></summary>
+    ''' <param name="keyLines">The section's key lines, in order</param>
     Private Shared Function MakeSection(ParamArray keyLines As String()) As winapp2ool.iniSection
 
         Dim text = "[App *]" & vbCrLf & String.Join(vbCrLf, keyLines) & vbCrLf
@@ -52,9 +50,13 @@ Imports System.Text
     End Function
 
     ''' <summary>
-    ''' Helper: run key-level modification analysis on a single entry present in both versions,
-    ''' returning whether the entry was recorded as modified
+    ''' Returns whether <see cref="winapp2ool.KeyModificationAnalyzer.FindModifications"/>, run on a
+    ''' fresh <see cref="winapp2ool.DiffState"/>, records the entry as modified
     ''' </summary>
+    '''
+    ''' <param name="oldSection">The entry as it was</param>
+    '''
+    ''' <param name="newSection">The entry as it is now</param>
     Private Shared Function EntryModified(oldSection As winapp2ool.iniSection,
                                           newSection As winapp2ool.iniSection) As Boolean
 
@@ -135,7 +137,7 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' A duplicated pattern on only one side is not absorbed as a reorder — the multiset differs
+    ''' A pattern duplicated on only one side is a change, since we compare the patterns as a multiset
     ''' </summary>
     <TestMethod()> Public Sub FileKeyDuplicatePatternAsymmetry_IsAChange()
 

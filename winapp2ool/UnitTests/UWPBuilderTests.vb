@@ -23,14 +23,14 @@ Imports System.Text
 ''' Tests for UWPBuilder's integration of the shared <c> VariableExpander </c> substrate:
 ''' the three-phase expansion order (<c> %Package% </c> → root placeholder →
 ''' <c> &lt;var&gt; </c>), per-key-class domain classification, the open-vocabulary parser
-''' and its typo backstops, and the vocabulary shared with EntryBuilder. The expansion
-''' engine itself is covered by <c> VariableExpanderTests </c>; these tests cover the wiring.
+''' and its typo backstops, and the vocabulary shared with EntryBuilder. Also covers the
+''' Electron family's two roots and QtWebEngine's cache root. The expansion engine itself is
+''' covered by <see cref="VariableExpanderTests"/>; these tests cover the wiring.
 ''' </summary>
 <TestClass()> Public Class UWPBuilderTests
 
-    ''' <summary>
-    ''' Helper: parse literal ini text and return its first section
-    ''' </summary>
+    ''' <summary>Returns the first section parsed from <paramref name="text"/>, and throws if there is none</summary>
+    ''' <param name="text">Literal ini text</param>
     Private Shared Function FirstSection(text As String) As winapp2ool.iniSection
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
@@ -47,9 +47,11 @@ Imports System.Text
 
     End Function
 
-    ''' <summary>
-    ''' Helper: run an AppInfo section through the parser, capturing gLog diagnostics
-    ''' </summary>
+    ''' <summary>Returns the first section of <paramref name="text"/> parsed as an AppInfo section</summary>
+    '''
+    ''' <param name="text">Literal ini text for one AppInfo section</param>
+    '''
+    ''' <param name="diagnostics">Set to every line the parser wrote to the log</param>
     Private Shared Function ParseApp(text As String,
                                      ByRef diagnostics As List(Of String)) As winapp2ool.UWPBuilder.UWPAppInfo
 
@@ -65,8 +67,44 @@ Imports System.Text
     End Function
 
     ''' <summary>
-    ''' Helper: parse then generate, with optional scaffold inputs, returning the emitted section
+    ''' Parses the first section of <paramref name="text"/> as an AppInfo section and generates its
+    ''' entry, discarding the menu output and log. We generate even when the parser marks the
+    ''' entry skipped.
     ''' </summary>
+    '''
+    ''' <param name="text">Literal ini text for one AppInfo section</param>
+    '''
+    ''' <param name="scaffoldFileKeys">
+    ''' The shared <c> FileKeyBase= </c> templates from UWP.ini's entry scaffold <br /><br />
+    ''' Optional, Default: <c> Nothing </c> <br />
+    ''' treated as an empty list
+    ''' </param>
+    '''
+    ''' <param name="scaffoldDetectFiles">
+    ''' The shared <c> DetectFileBase= </c> templates from UWP.ini's entry scaffold <br /><br />
+    ''' Optional, Default: <c> Nothing </c> <br />
+    ''' treated as an empty list
+    ''' </param>
+    '''
+    ''' <param name="webViewCatalog">
+    ''' The WebView scaffold catalog <br /><br />
+    ''' Optional, Default: <c> Nothing </c> <br />
+    ''' leaves the family's catalog empty
+    ''' </param>
+    '''
+    ''' <param name="qtCatalog">
+    ''' The QtWebEngine scaffold catalog <br /><br />
+    ''' Optional, Default: <c> Nothing </c> <br />
+    ''' leaves the family's catalog empty
+    ''' </param>
+    '''
+    ''' <param name="electronCatalog">
+    ''' The Electron scaffold catalog <br /><br />
+    ''' Optional, Default: <c> Nothing </c> <br />
+    ''' leaves the family's catalog empty
+    ''' </param>
+    '''
+    ''' <returns>The generated entry section</returns>
     Private Shared Function Build(text As String,
                          Optional scaffoldFileKeys As List(Of String) = Nothing,
                          Optional scaffoldDetectFiles As List(Of String) = Nothing,
@@ -95,9 +133,14 @@ Imports System.Text
     End Function
 
     ''' <summary>
-    ''' Helper: fill one family's catalog inside a <c> ScaffoldCatalogSet </c> from a plain
-    ''' dictionary, so tests can keep expressing catalogs as literals
+    ''' Copies the entries of a plain dictionary into one family's catalog inside a
+    ''' <c> ScaffoldCatalogSet </c>, so tests can keep expressing catalogs as literals. The
+    ''' template lists are shared, not copied.
     ''' </summary>
+    '''
+    ''' <param name="source">The catalog to copy from, or <c> Nothing </c> to copy nothing</param>
+    '''
+    ''' <param name="target">The family's catalog to copy into</param>
     Private Shared Sub CopyCatalog(source As Dictionary(Of String, List(Of String)),
                                    target As Dictionary(Of String, List(Of String)))
 
@@ -107,9 +150,11 @@ Imports System.Text
 
     End Sub
 
-    ''' <summary>
-    ''' Helper: collect the values of every key of a given type from a generated section
-    ''' </summary>
+    ''' <summary>Returns the values of every key of a given type in a section, in key order</summary>
+    '''
+    ''' <param name="section">The generated section to read</param>
+    '''
+    ''' <param name="keyType">The KeyType to collect, matched case-insensitively</param>
     Private Shared Function ValuesOf(section As winapp2ool.iniSection, keyType As String) As List(Of String)
 
         Dim result As New List(Of String)
@@ -134,7 +179,7 @@ Imports System.Text
     ' ----- Open vocabulary -----
 
     ''' <summary>
-    ''' An unrecognised key is a variable declaration, not an error.
+    ''' An unrecognized key is a variable declaration, not an error.
     ''' </summary>
     <TestMethod()> Public Sub UnknownKey_BecomesVariableDeclaration()
 
@@ -187,7 +232,7 @@ Imports System.Text
 
     ''' <summary>
     ''' The canonical payoff case: a version list fans one RegKey template into one key
-    ''' per version, renumbered from 1
+    ''' per version
     ''' </summary>
     <TestMethod()> Public Sub RegKey_FansOutOverDeclaredVersions()
 
@@ -328,10 +373,9 @@ Imports System.Text
     ' ----- Electron family -----
 
     ''' <summary>
-    ''' The Electron family emits for a hybrid entry — the case that motivated shipping it here at
-    ''' all. The root is a plain win32 path with no <c> %Package% </c> reference (Electron lives in
-    ''' the desktop half of a hybrid, not inside the MSIX container), and both placeholders bind
-    ''' independently.
+    ''' The Electron family emits for a hybrid entry. The root is a plain win32 path with no
+    ''' <c> %Package% </c> reference (Electron lives in the desktop half of a hybrid, not inside
+    ''' the MSIX container), and both placeholders bind independently.
     ''' </summary>
     <TestMethod()> Public Sub Electron_EmitsForHybridWin32Root()
 
@@ -356,8 +400,8 @@ Imports System.Text
 
     ''' <summary>
     ''' An entry declaring only <c> ElectronRoot= </c> drops the updater templates rather than
-    ''' emitting a literal <c> %ElectronUpdaterRoot% </c> into a FileKey — the drop rule that lets
-    ''' <c> UpdaterCache </c> stay in the default set at no cost
+    ''' emitting a literal <c> %ElectronUpdaterRoot% </c> into a FileKey. That drop rule is what
+    ''' lets <c> UpdaterCache </c> stay in the default set at no cost.
     ''' </summary>
     <TestMethod()> Public Sub Electron_NoUpdaterRoot_DropsUpdaterTemplates()
 
@@ -398,8 +442,9 @@ Imports System.Text
     ' ----- QtWebEngine cache root -----
 
     ''' <summary>
-    ''' <c> QtWebEngineCachePath= </c> binds <c> %QtWebEngineCacheRoot% </c> independently of the
-    ''' profile root, and is package-expanded like every other root
+    ''' <c> QtWebEngineCachePath= </c>, UWPBuilder's alias of <c> QtWebEngineCacheRoot= </c>, binds
+    ''' <c> %QtWebEngineCacheRoot% </c> independently of the profile root, and is package-expanded
+    ''' like every other root
     ''' </summary>
     <TestMethod()> Public Sub QtWebEngine_CacheRoot_BindsAndSubstitutes()
 
@@ -538,7 +583,7 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' Default is ignored with a warning rather than becoming a variable — UWPBuilder,
+    ''' Default is ignored with a warning rather than becoming a variable, since UWPBuilder,
     ''' like EntryBuilder, never emits Default
     ''' </summary>
     <TestMethod()> Public Sub Default_IsIgnoredNotTreatedAsVariable()

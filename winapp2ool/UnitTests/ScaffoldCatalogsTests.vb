@@ -18,11 +18,15 @@
 Option Strict On
 
 ''' <summary>
-''' Tests for the shared scaffold substrate in <c> ScaffoldCatalogs </c> — the selection grammar
-''' every scaffold family resolves through (<c> ResolveScaffolds </c>), the catalog parser
-''' (<c> ParseSection </c>), the directory loader that discovers families from section headers
-''' (<c> LoadCatalogDirectory </c>), and the placeholder substitution engine both builders share
-''' (<c> FanOutPlaceholder </c> / <c> BindFamilyTemplates </c>).
+''' Tests for the shared scaffold substrate in <see cref="winapp2ool.ScaffoldCatalogs"/>: the
+''' selection grammar every scaffold family resolves through
+''' (<see cref="winapp2ool.ScaffoldCatalogs.ResolveScaffolds"/>), including the <c> Tier=Legacy </c>
+''' tier; the catalog parser (<see cref="winapp2ool.ScaffoldCatalogs.ParseSection"/>); the directory
+''' loader that discovers families from section headers
+''' (<see cref="winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory"/>); the placeholder substitution
+''' engine (<see cref="winapp2ool.ScaffoldCatalogs.FanOutPlaceholder"/> and
+''' <see cref="winapp2ool.ScaffoldCatalogs.BindFamilyTemplates"/>); the three families' default
+''' sets; and the guard that every family's key vocabulary reaches both builders.
 ''' <br /><br />
 '''
 ''' The selection grammar is the part worth pinning: explicit list, the <c> All </c> sentinel,
@@ -35,7 +39,8 @@ Option Strict On
 <TestClass()> Public Class ScaffoldCatalogsTests
 
     ''' <summary>
-    ''' Helper: build a catalog with the given scaffold names, each holding one dummy template
+    ''' Builds a catalog with the given scaffold names, each holding one dummy template
+    ''' (<c> %Root%\name|* </c>)
     ''' </summary>
     '''
     ''' <param name="names">
@@ -43,7 +48,8 @@ Option Strict On
     ''' </param>
     '''
     ''' <returns>
-    ''' A case-insensitive catalog dictionary shaped like <c> LoadCatalog </c>'s result
+    ''' A plain case-insensitive dictionary, which has no tiers. Use
+    ''' <see cref="BuildTieredCatalog"/> for a catalog that tracks <c> Tier=Legacy </c>.
     ''' </returns>
     Private Shared Function BuildCatalog(ParamArray names As String()) As Dictionary(Of String, List(Of String))
 
@@ -60,15 +66,16 @@ Option Strict On
     End Function
 
     ''' <summary>
-    ''' Helper: resolve a selection against a catalog, discarding the menu output
+    ''' Resolves a selection against a catalog for a family labeled <c> TestFamily </c>,
+    ''' discarding the menu output
     ''' </summary>
     '''
     ''' <param name="selected">
-    ''' The explicit selection list; ignored when <paramref name="keyPresent"/> is False
+    ''' The explicit selection list; ignored when <paramref name="keyPresent"/> is <c> False </c>
     ''' </param>
     '''
     ''' <param name="keyPresent">
-    ''' Whether the entry declared the family's scaffolds key at all
+    ''' Indicates whether the entry declared the family's scaffolds key at all
     ''' </param>
     '''
     ''' <param name="excluded">
@@ -84,7 +91,7 @@ Option Strict On
     ''' </param>
     '''
     ''' <returns>
-    ''' The resolved scaffold names
+    ''' The resolved scaffold names, in selection order
     ''' </returns>
     Private Shared Function Resolve(selected As String(),
                                     keyPresent As Boolean,
@@ -120,8 +127,8 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' A declared but empty scaffolds key means emit nothing — distinct from the key being absent,
-    ''' which falls back to the defaults
+    ''' A declared but empty scaffolds key means emit nothing, unlike an absent key, which falls
+    ''' back to the defaults
     ''' </summary>
     <TestMethod()> Public Sub Resolve_KeyPresentButEmpty_EmitsNothing()
 
@@ -133,7 +140,7 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' An explicit list is honoured verbatim and overrides the defaults
+    ''' An explicit list is honored as written and overrides the defaults
     ''' </summary>
     <TestMethod()> Public Sub Resolve_ExplicitList_OverridesDefaults()
 
@@ -146,7 +153,8 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' The <c> All </c> sentinel expands to every scaffold in the catalog, case-insensitively
+    ''' The <c> All </c> sentinel, matched case-insensitively, expands to every scaffold in a catalog
+    ''' with no tiers
     ''' </summary>
     <TestMethod()> Public Sub Resolve_AllSentinel_ExpandsWholeCatalog()
 
@@ -158,8 +166,8 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' <c> All </c> combined with exclusions yields the catalog minus the excluded names — the
-    ''' shape every WebView-declaring entry in the corpus actually uses
+    ''' <c> All </c> combined with exclusions yields the catalog minus the excluded names, the
+    ''' usual shape of a WebView entry
     ''' </summary>
     <TestMethod()> Public Sub Resolve_AllSentinelWithExclusions_SubtractsExcluded()
 
@@ -199,8 +207,8 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' Names absent from the catalog are dropped rather than emitted or throwing — a misspelled
-    ''' scaffold name must not abort a build
+    ''' Names absent from the catalog are dropped with a warning rather than emitted or thrown on,
+    ''' so a misspelled scaffold name can't abort a build
     ''' </summary>
     <TestMethod()> Public Sub Resolve_UnknownName_IsDropped()
 
@@ -228,8 +236,8 @@ Option Strict On
     ''' <summary>
     ''' The three shipping families' default sets are asserted here so a change to any of them is a
     ''' deliberate test edit rather than a silent shift in what every entry cleans. Electron's set
-    ''' deliberately omits <c> VisitedLinks </c> — the surface is absent from modern Electron — even
-    ''' though QtWebEngine's includes it.
+    ''' has no <c> VisitedLinks </c> scaffold, though QtWebEngine's does: Electron apps rarely write
+    ''' <c> Visited Links </c>, so its pattern rides in one of Electron's <c> Telemetry </c> templates.
     ''' </summary>
     <TestMethod()> Public Sub DefaultSets_MatchDocumentedTiers()
 
@@ -303,7 +311,8 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' Helper: build a tier-tracking catalog, marking the named scaffolds legacy
+    ''' Builds a tier-tracking catalog, each scaffold holding one dummy template, and marks the
+    ''' scaffolds named in <paramref name="legacy"/> as legacy
     ''' </summary>
     '''
     ''' <param name="legacy">
@@ -374,8 +383,8 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' A plain dictionary has no tiers, so <c> All </c> still expands to every key — the contract
-    ''' callers relied on before tiers existed
+    ''' A plain dictionary has no tiers, so <c> All </c> expands to every key in it, even one named
+    ''' like a legacy scaffold
     ''' </summary>
     <TestMethod()> Public Sub Resolve_AllOnUntieredCatalog_ExpandsEverything()
 
@@ -408,7 +417,8 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' Helper: write catalog files into a fresh temp directory and load them
+    ''' Writes catalog files into a fresh temp directory, loads it with
+    ''' <see cref="winapp2ool.ScaffoldCatalogs.LoadCatalogDirectory"/>, and deletes the directory
     ''' </summary>
     '''
     ''' <param name="files">
@@ -416,7 +426,7 @@ Option Strict On
     ''' </param>
     '''
     ''' <param name="warnings">
-    ''' Receives the loader's captured diagnostic lines
+    ''' Set to every line the loader wrote to the log, warnings and progress lines alike
     ''' </param>
     '''
     ''' <returns>
@@ -450,9 +460,10 @@ Option Strict On
 
     ''' <summary>
     ''' The directory loader routes sections into families by the text before <c> Scaffold: </c> in
-    ''' the header, not by filename. This is the property that lets a new family ship as a dropped-in
-    ''' file with no settings, CLI slot, or build-script argument of its own — and it means a catalog
-    ''' may be split or renamed freely.
+    ''' the header, not by filename, so one file here carries two families. That lets a new family's
+    ''' catalog load with no setting, CLI slot, or build-script argument of its own, and lets a catalog
+    ''' be split or renamed freely. A new family still warns as unconsumed until it's named in
+    ''' <see cref="winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/>.
     ''' </summary>
     <TestMethod()> Public Sub LoadCatalogDirectory_RoutesByHeaderNotFilename()
 
@@ -489,7 +500,7 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' Several files may contribute to one family — the family's catalog is the union of every
+    ''' Several files may contribute to one family: the family's catalog is the union of every
     ''' matching section in the directory
     ''' </summary>
     <TestMethod()> Public Sub LoadCatalogDirectory_MergesFamilyAcrossFiles()
@@ -507,7 +518,10 @@ Option Strict On
     ''' <summary>
     ''' A family no builder consumes warns rather than loading silently. This is the misspelling
     ''' backstop: <c> [ElctronScaffold: …] </c> parses fine as a family named <c> Elctron </c> and
-    ''' would otherwise cost every one of that catalog's keys with no diagnostic at all.
+    ''' would otherwise cost every one of that catalog's keys. An entry using <c> All </c> would get
+    ''' no warning at all, since <c> All </c> expands over the empty Electron catalog to nothing. An
+    ''' entry using the default set or a named list would get one unknown-scaffold warning per
+    ''' scaffold it requests, and none of them point at the catalog.
     ''' </summary>
     <TestMethod()> Public Sub LoadCatalogDirectory_UnknownFamily_Warns()
 
@@ -539,7 +553,7 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' A missing scaffold directory warns and yields an empty set — a build continues with no
+    ''' A missing scaffold directory warns and yields an empty set, so a build continues with no
     ''' scaffold keys rather than throwing
     ''' </summary>
     <TestMethod()> Public Sub LoadCatalogDirectory_MissingDirectory_WarnsAndReturnsEmpty()
@@ -565,8 +579,8 @@ Option Strict On
 
     ''' <summary>
     ''' A template referencing a placeholder whose binding has no roots is <em>dropped</em>. This is
-    ''' the whole mechanism behind Electron's default-on <c> UpdaterCache </c> costing nothing for the
-    ''' majority of entries that declare no <c> ElectronUpdaterRoot= </c>; without it a literal
+    ''' the whole mechanism behind Electron's default-on <c> UpdaterCache </c> costing nothing for an
+    ''' entry that declares no <c> ElectronUpdaterRoot= </c>; without it a literal
     ''' <c> %ElectronUpdaterRoot% </c> would ship inside a published FileKey.
     ''' </summary>
     <TestMethod()> Public Sub FanOutPlaceholder_EmptyRoots_DropsTemplate()
@@ -611,10 +625,10 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' <c> BindFamilyTemplates </c> reports the pre-substitution template count alongside the
-    ''' substituted results, so a consumer can tell an empty scaffold (a legitimate no-op) from a
-    ''' non-empty one whose every template was dropped for want of a root — only the latter is worth
-    ''' warning about
+    ''' <see cref="winapp2ool.ScaffoldCatalogs.BindFamilyTemplates"/> reports the pre-substitution
+    ''' template count alongside the substituted results, so a consumer can tell an empty scaffold (a
+    ''' legitimate no-op) from a non-empty one whose every template was dropped for want of a root.
+    ''' Only the latter is worth warning about.
     ''' </summary>
     <TestMethod()> Public Sub BindFamilyTemplates_ReportsTemplateCountSeparately()
 
@@ -637,13 +651,16 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' Every family in <c> ScaffoldFamilies </c> is known to <b> both </b> builders' parsers.
+    ''' Every family in <see cref="winapp2ool.ScaffoldCatalogs.ScaffoldFamilies"/> is reserved by
+    ''' <b> both </b> builders: each one's reserved-key array holds the family's <c> {Family}Root= </c>,
+    ''' <c> {Family}Scaffolds= </c> and <c> Exclude{Family}Scaffolds= </c> keys, and the family has
+    ''' a default set. Second root keys such as <c> ElectronUpdaterRoot= </c> and the placeholder
+    ''' bindings aren't checked.
     ''' <br /><br />
     '''
-    ''' This is the parity guard. Electron originally shipped to EntryBuilder alone, on the theory
-    ''' that MSIX packages rarely bundle Electron — which overlooked that UWPBuilder's hybrid
-    ''' win32+UWP entries carry the desktop install's paths too, and a hybrid's win32 half is exactly
-    ''' where Electron turns up. A family reaching one builder and not the other is not a visible
+    ''' This is the parity guard. UWPBuilder's hybrid win32+UWP entries carry the desktop install's
+    ''' paths too, and a hybrid's win32 half is where engines like Electron turn up, so every family
+    ''' belongs in both builders. A family reaching one builder and not the other is not a visible
     ''' failure; it is silently missing FileKeys. This test is what makes it visible.
     ''' </summary>
     <TestMethod()> Public Sub ScaffoldFamilies_KeyVocabularyPresentInBothBuilders()

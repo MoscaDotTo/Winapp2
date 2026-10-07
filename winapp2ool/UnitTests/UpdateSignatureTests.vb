@@ -22,9 +22,11 @@ Imports System.Security.Cryptography
 Imports System.Text
 
 ''' <summary>
-''' Tests for the self-updater's pure parts: signature verification against the trusted key list,
-''' the anti-downgrade version comparison, and the quoting of relaunch arguments. None of these
-''' touch the network or the file system
+''' Tests for the self-updater's pure parts: signature verification against a given key list,
+''' the well-formedness of the embedded trusted keys, the anti-downgrade version comparison, and
+''' the quoting of relaunch arguments. None of these touch the network or the file system. Each
+''' rejection test covers only the malformed or tampered inputs it builds, so together they don't
+''' show that every tampered file is rejected.
 ''' </summary>
 <TestClass()> Public Class UpdateSignatureTests
 
@@ -193,7 +195,8 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' Rejects a key carrying the <c> 0x04 </c> uncompressed-point prefix, the easiest paste mistake to make
+    ''' Rejects a key carrying the <c> 0x04 </c> uncompressed-point prefix, the easiest paste mistake to make,
+    ''' and a key cut to its X coordinate
     ''' </summary>
     <TestMethod()> Public Sub WrongLengthKey_Rejected()
 
@@ -273,7 +276,7 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' Every embedded trusted key must be a 64-byte point on P-256, so a bad paste fails the build's tests
+    ''' Every embedded trusted key must be a 64-byte point on P-256, so a bad paste fails this test
     ''' rather than every user's update
     ''' </summary>
     <TestMethod()> Public Sub TrustedUpdateKeys_AreWellFormedPoints()
@@ -304,7 +307,7 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' A build just after midnight has a short last segment, which the old digit-concatenation compare got wrong
+    ''' Segments compare as numbers, so a build just after midnight, whose last segment is short, still orders correctly
     ''' </summary>
     <TestMethod()> Public Sub ShortLastSegment_ComparedNumerically()
 

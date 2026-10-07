@@ -19,9 +19,9 @@ Option Strict On
 Imports System.Reflection
 
 ''' <summary>
-''' Data-driven repair tests for WinappDebug.
-''' Adding a test requires only adding matching sections to WinappDebugInputs.ini
-''' and WinappDebugOutputs.ini — no code changes needed.
+''' Data-driven repair tests for WinappDebug, plus tests of its command line handling.
+''' Adding a repair test requires only adding matching sections to WinappDebugInputs.ini
+''' and WinappDebugOutputs.ini (under <c> UnitTests\Fixtures\ </c>), with no code changes.
 '''
 ''' Input section conventions:
 ''' - Must include a <c> Rule= </c> metadata key (stripped before the section reaches WinappDebug):
@@ -29,13 +29,17 @@ Imports System.Reflection
 '''   <c> Rule=All </c> leaves all rules at their defaults
 ''' - May include a <c> ScanOnly=True </c> metadata key to assert error detection without applying repairs.
 '''   The expected output section must match the (unchanged) input for such tests.
-''' - May include an <c> ExpectedErrors= </c> metadata key to assert the initial scan error count
-''' - May include a <c> Flavor= </c> metadata key to set the winapp2.ini flavor (default: <c> NonCCleaner </c>)
+''' - May include an <c> ExpectedErrors= </c> metadata key to assert the initial scan error count.
+'''   A value that doesn't parse as an integer asserts a count of 0.
+''' - May include a <c> Flavor= </c> metadata key naming a <c> WinappFlavor </c> member, matched
+'''   case-insensitively, to set the winapp2.ini flavor. Without the key the flavor is
+'''   <c> NonCCleaner </c>; a value that doesn't parse gives <c> CCleaner </c>.
 ''' - May include a <c> Group=name </c> metadata key to combine multiple input sections into one
 '''   <c> winapp2file </c> for testing file-level checks (e.g. entry alphabetization).
 '''   All sections sharing the same <c> Group= </c> value are combined into a single test.
 '''   Only the FIRST section in a group carries <c> Rule= </c>, <c> ScanOnly= </c>,
-'''   <c> ExpectedErrors= </c>, and <c> Flavor= </c>; those keys are ignored on subsequent members.
+'''   <c> ExpectedErrors= </c>, and <c> Flavor= </c>. On later members we strip only
+'''   <c> Group= </c>, so any of those keys there reach WinappDebug as ordinary keys.
 ''' - All other keys must appear in winapp2.ini declaration order
 ''' - Name should end in <c> *] </c> for normal entries; omit <c> * </c> to test missing-star detection
 '''
@@ -50,11 +54,16 @@ Imports System.Reflection
     Public Property TestContext As TestContext
 
     ''' <summary>
-    ''' Yields one test case per input section (or group of sections sharing a <c> Group= </c> key)
-    ''' that has matching output sections.
-    ''' Strips all metadata keys from input sections before yielding.
-    ''' Skips sections with a missing or unparseable <c> Rule= </c> key, or no matching output section.
-    ''' Yields nothing when either data file does not exist.
+    ''' Yields one test case per input section (or group of sections sharing a <c> Group= </c> key).
+    ''' Ungrouped cases, and failures found while reading (a bad <c> Rule= </c>, or a group's first
+    ''' section with no output section), come in file order. The groups follow in order of first
+    ''' appearance, including a group that fails because a later member has no output section.
+    ''' Strips the metadata keys from each ungrouped section and the first section of each group,
+    ''' and only <c> Group= </c> from later group members.
+    ''' A section with a missing or unparseable <c> Rule= </c> key, or a section or group member
+    ''' with no matching output section, yields a case carrying a message that fails the test.
+    ''' When either data file doesn't exist we yield one placeholder case, which
+    ''' <see cref="debug_Repair"/> reports as inconclusive.
     ''' </summary>
     Private Shared Iterator Function GetRepairTestCases() As IEnumerable(Of Object())
 
@@ -68,7 +77,7 @@ Imports System.Reflection
         Dim inputFile = winapp2ool.iniFile.FromFile(inputPath)
         Dim outputFile = winapp2ool.iniFile.FromFile(outputPath)
 
-        ' Group accumulation — keyed by group name, preserving first-occurrence order
+        ' Group accumulation, keyed by group name, preserving first-occurrence order
         Dim pendingInputSections As New Dictionary(Of String, List(Of winapp2ool.iniSection))
         Dim pendingExpectedSections As New Dictionary(Of String, List(Of winapp2ool.iniSection))
         Dim groupOrder As New List(Of String)
@@ -154,7 +163,7 @@ Imports System.Reflection
 
             Else
 
-                ' Ungrouped — yield immediately
+                ' Ungrouped: yield immediately
                 If expectedSection Is Nothing Then
                     Yield SingleErrorCase(section, $"No matching output section for '{section.Name}'")
                     Continue For
@@ -190,14 +199,17 @@ Imports System.Reflection
 
     End Function
 
-    ''' <summary>Convenience helper for error-case yields where only a single input section is available</summary>
+    ''' <summary>Returns a test case that fails with <paramref name="msg"/>, carrying one input section</summary>
+    ''' <param name="section">The input section the failure is about</param>
+    ''' <param name="msg">The failure message <see cref="debug_Repair"/> reports</param>
     Private Shared Function SingleErrorCase(section As winapp2ool.iniSection, msg As String) As Object()
         Return {New winapp2ool.iniSection() {section}, Nothing, 0, -1, winapp2ool.WinappFlavor.NonCCleaner, False, msg}
     End Function
 
     ''' <summary>
-    ''' Loads both data files and confirms they contain at least one section each <br />
-    ''' Placed first alphabetically to eliminate I/O from any of the tests which follow
+    ''' Loads both data files and confirms they contain at least one section each, and is
+    ''' inconclusive when either file is missing. The repair cases read the files again
+    ''' themselves, so this test only makes a missing or empty fixture easy to spot.
     ''' </summary>
     <TestMethod()> Public Sub AALoadDataFiles_Success()
 
@@ -217,7 +229,13 @@ Imports System.Reflection
 
     End Sub
 
-    ''' <summary>Returns the first input section name as the displayed test name in the runner</summary>
+    ''' <summary>Returns the name of a repair case's first input section, for the test runner to display</summary>
+    '''
+    ''' <param name="methodInfo">The test method, which we don't use</param>
+    '''
+    ''' <param name="data">The case's arguments, as <see cref="GetRepairTestCases"/> yields them</param>
+    '''
+    ''' <returns>The first input section's name, or <c> No data files </c> for the missing-files placeholder</returns>
     Public Shared Function GetRepairTestDisplayName(methodInfo As MethodInfo, data As Object()) As String
         If data(0) Is Nothing Then Return "No data files"
         Return DirectCast(data(0), winapp2ool.iniSection())(0).Name
@@ -226,9 +244,12 @@ Imports System.Reflection
     ''' <summary>
     ''' Runs WinappDebug on one or more input sections (combined into a single <c> winapp2file </c>)
     ''' with the specified rule selection, optionally applies repairs, and asserts that each
-    ''' repaired entry matches its expected output section key-for-key.
+    ''' repaired entry, found by name ignoring case, matches its expected output section
+    ''' key-for-key. The initial scan's error count is asserted only when
+    ''' <paramref name="expectedErrors"/> isn't negative.
     ''' When <paramref name="scanOnly"/> is <c> True </c>, the repair pass is skipped and
-    ''' the expected output must match the unmodified input.
+    ''' the expected output must match the unmodified input. A <paramref name="skipReason"/>
+    ''' fails the test, and the missing-files placeholder is inconclusive.
     ''' </summary>
     <TestMethod()>
     <DynamicData(NameOf(GetRepairTestCases), DynamicDataSourceType.Method,
@@ -380,7 +401,7 @@ Imports System.Reflection
         setCmdLineArgs(AddressOf winapp2ool.WinappDebug.HandleLintCmdLine, args, addHalt)
     End Sub
 
-    ''' <summary>Tests CLI default state — no args leaves both files at their initial values and autocorrect off</summary>
+    ''' <summary>Tests CLI default state: no args leaves both files at their initial values and autocorrect off</summary>
     <TestMethod()> Public Sub handleCmdLine_NoInputSuccess()
         setDebugStage(Array.Empty(Of String)(), True)
         Assert.AreEqual(winapp2ool.winappDebugFile1.Dir, winapp2ool.winappDebugFile3.Dir)

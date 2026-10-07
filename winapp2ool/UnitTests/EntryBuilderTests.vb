@@ -20,15 +20,15 @@ Option Strict On
 Imports System.Text
 
 ''' <summary>
-''' Tests for EntryBuilder's scaffold-family wiring: that each root key is parsed, bound to its
-''' placeholder, and opts the entry into its family. The substitution engine itself is covered
-''' by <c> ScaffoldCatalogsTests </c>; these tests cover the parser and generator around it.
+''' Tests for EntryBuilder's scaffold-family wiring of <c> QtWebEngineCacheRoot= </c>: that the key
+''' is parsed, bound to <c> %QtWebEngineCacheRoot% </c> in catalog templates and <c> FileKeyBase= </c>
+''' values, and opts the entry into the QtWebEngine family on its own. The substitution engine itself
+''' is covered by <see cref="ScaffoldCatalogsTests"/>; these tests cover the parser and generator around it.
 ''' </summary>
 <TestClass()> Public Class EntryBuilderTests
 
-    ''' <summary>
-    ''' Helper: parse literal ini text and return its first section
-    ''' </summary>
+    ''' <summary>Returns the first section parsed from <paramref name="text"/>, and throws if there is none</summary>
+    ''' <param name="text">Literal ini text</param>
     Private Shared Function FirstSection(text As String) As winapp2ool.iniSection
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
@@ -46,9 +46,18 @@ Imports System.Text
     End Function
 
     ''' <summary>
-    ''' Helper: parse then generate one source section against the given QtWebEngine catalog,
-    ''' returning the parsed spec's skip flag and the emitted FileKey values
+    ''' Parses the first section of <paramref name="text"/> and generates its entry against
+    ''' <paramref name="qtCatalog"/>, with empty WebView and Electron catalogs. We generate even
+    ''' when the parser marks the entry skipped, so check <paramref name="skipped"/>.
     ''' </summary>
+    '''
+    ''' <param name="text">Literal source ini text for one EntryBuilder entry</param>
+    '''
+    ''' <param name="qtCatalog">The QtWebEngine scaffold catalog to generate against</param>
+    '''
+    ''' <param name="skipped">Set to the parsed entry's <c> ShouldSkip </c></param>
+    '''
+    ''' <returns>The values of the generated entry's FileKeys, in key order</returns>
     Private Shared Function BuildQt(text As String,
                                     qtCatalog As Dictionary(Of String, List(Of String)),
                                     ByRef skipped As Boolean) As List(Of String)
@@ -74,15 +83,16 @@ Imports System.Text
     End Function
 
     ''' <summary>
-    ''' Minimal valid source preamble: a category and a detection, so the entry is not skipped
-    ''' for lacking either
+    ''' Minimal valid source preamble: a category, so the entry isn't skipped, and a detection, so
+    ''' it isn't warned about as always-on
     ''' </summary>
     Private Const Preamble As String = "[Test App *]" & vbCrLf &
                                        "LangSecRef=3021" & vbCrLf &
                                        "DetectFile=%LocalAppData%\VideoKeeper" & vbCrLf
 
     ''' <summary>
-    ''' A catalog with one profile-relative template and one cache-relative template
+    ''' Returns a catalog whose one scaffold, <c> Caches </c>, holds one profile-relative template
+    ''' and one cache-relative template
     ''' </summary>
     Private Shared Function QtCatalog() As Dictionary(Of String, List(Of String))
 

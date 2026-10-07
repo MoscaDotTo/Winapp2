@@ -36,7 +36,8 @@ Imports System.IO
     End Sub
 
     ''' <summary>
-    ''' Anything that isn't a known .NET Framework 4.x version gives no answer rather than a guess
+    ''' A .NET Core name, an unlisted 4.x version, a non-framework string and <c> Nothing </c> give no
+    ''' required release rather than a guess, and an unlisted version gives no answer on whether it's met
     ''' </summary>
     <TestMethod()> Public Sub RequiredRelease_UnknownGivesNothing()
 
@@ -49,7 +50,8 @@ Imports System.IO
     End Sub
 
     ''' <summary>
-    ''' The tests themselves run on 4.8, so the registry must report at least 4.8 and a 4.8 target is met
+    ''' The tests themselves run on 4.8, so the registry must report at least 4.8, and both a 4.8 and a
+    ''' 4.6 target are met
     ''' </summary>
     <TestMethod()> Public Sub InstalledRelease_IsAtLeast48()
 
@@ -72,7 +74,8 @@ Imports System.IO
     End Sub
 
     ''' <summary>
-    ''' Target framework names read as a person would write them
+    ''' Target framework names read as a person would write them, and a missing name reads as
+    ''' <c> a newer version of .NET </c>
     ''' </summary>
     <TestMethod()> Public Sub DescribeFramework_IsReadable()
 

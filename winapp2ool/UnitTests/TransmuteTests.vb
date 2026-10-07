@@ -21,9 +21,10 @@ Imports System.Text
 
 ''' <summary>
 ''' Tests for Transmute's global operations: the <c> [*] </c> sentinel section (global
-''' add / remove / replace of keys across every base section) and <c> [*Map: label] </c>
+''' add / remove / replace of keys across every base section), <c> [*Map: label] </c>
 ''' key mapping rules (KeyType+Value match → whole-key replacement, including the Name,
-''' one-to-many via numbered Replace keys). <br />
+''' one-to-many via numbered Replace keys), and <c> [*Name: scaffold] </c> name-filtered
+''' operations (anchored name suffix plus optional <c> Match= </c> predicates). <br />
 ''' Covers the mode refusal table, numbered-key add refusal, first-match-wins/no-re-match
 ''' semantics, in-place ordering, one-to-many expansion, malformed and zero-hit rules,
 ''' global-then-named processing order, the <c> %EntryName% </c> token, wildcard
@@ -31,9 +32,8 @@ Imports System.Text
 ''' </summary>
 <TestClass()> Public Class TransmuteTests
 
-    ''' <summary>
-    ''' Helper: parse an <c> iniFile </c> from literal ini text
-    ''' </summary>
+    ''' <summary>Returns an <c> iniFile </c> named <c> test.ini </c> parsed from <paramref name="text"/></summary>
+    ''' <param name="text">Literal ini text</param>
     Private Shared Function MakeIni(text As String) As winapp2ool.iniFile
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
@@ -46,9 +46,33 @@ Imports System.Text
     End Function
 
     ''' <summary>
-    ''' Helper: run a transmutation of <paramref name="sourceText"/> against
-    ''' <paramref name="baseText"/> in memory and return the mutated base file
+    ''' Runs <see cref="winapp2ool.Transmute.RemoteTransmute"/> of <paramref name="sourceText"/> against
+    ''' <paramref name="baseText"/> in memory, as a plain ini file with the sort, format and write
+    ''' skipped, under the current <c> RecognizeGlobalSections </c> setting
     ''' </summary>
+    '''
+    ''' <param name="baseText">Literal ini text for the base file</param>
+    '''
+    ''' <param name="sourceText">Literal ini text for the source file</param>
+    '''
+    ''' <param name="mode">The primary transmute mode</param>
+    '''
+    ''' <param name="replaceMode">
+    ''' The sub mode for Replace <br /><br />
+    ''' Optional, Default: <c> ReplaceMode.ByKey </c>
+    ''' </param>
+    '''
+    ''' <param name="removeMode">
+    ''' The sub mode for Remove <br /><br />
+    ''' Optional, Default: <c> RemoveMode.ByKey </c>
+    ''' </param>
+    '''
+    ''' <param name="removeKeyMode">
+    ''' The sub mode for key removal <br /><br />
+    ''' Optional, Default: <c> RemoveKeyMode.ByName </c>
+    ''' </param>
+    '''
+    ''' <returns>The base file after the transmutation changed it in place</returns>
     Private Shared Function RunTransmute(baseText As String,
                                          sourceText As String,
                                          mode As winapp2ool.TransmuteMode,
@@ -70,7 +94,7 @@ Imports System.Text
 
     ''' <summary>
     ''' Sentinel recognition is on by default; reset it before every test since
-    ''' the opt-out test disables it
+    ''' the two opt-out tests disable it
     ''' </summary>
     <TestInitialize()> Public Sub ResetGlobalRecognition()
 
@@ -120,8 +144,8 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' Numbered keys are refused by global Add: adding FileKey1= to every section
-    ''' would create instant duplicates and standalone Transmute has no renumber pass
+    ''' Numbered keys are refused by global Add, since adding FileKey1= to every section
+    ''' would create instant duplicates. An unnumbered key in the same section still applies.
     ''' </summary>
     <TestMethod()> Public Sub GlobalAdd_RefusesNumberedKey()
 
@@ -249,7 +273,7 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' A basic [*Map:] rule replaces the whole key — including its Name — in place,
+    ''' A basic [*Map:] rule replaces the whole key, Name included, in place,
     ''' preserving the section's key order and updating the type index
     ''' </summary>
     <TestMethod()> Public Sub Map_BasicRename_ReplacesKeyInPlace()
@@ -342,9 +366,8 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' [*Map:] rules are only recognized in Replace ByKey mode; under any other mode
-    ''' they are skipped without touching the base file (and without being treated
-    ''' as removal criteria)
+    ''' [*Map:] rules only apply in Replace ByKey mode; under Remove ByName here they are
+    ''' skipped without touching the base file (and without being treated as removal criteria)
     ''' </summary>
     <TestMethod()> Public Sub Map_OutsideReplaceByKey_IsSkipped()
 
@@ -498,8 +521,8 @@ Imports System.Text
 
     ''' <summary>
     ''' Two one-to-many rules firing on different keys of the same section expand
-    ''' independently without disturbing each other's insertions (the Dell Stage Suite
-    ''' shape: two wildcards under different roots in one entry)
+    ''' independently without disturbing each other's insertions (two wildcards under
+    ''' different roots in one entry)
     ''' </summary>
     <TestMethod()> Public Sub Map_TwoOneToManyRules_SameSection()
 
@@ -572,7 +595,7 @@ Imports System.Text
 
     ''' <summary>
     ''' The %EntryName% token in a [*] key value is replaced with each receiving section's
-    ''' name — including the trailing " *" of winapp2 entry names — so a single global key
+    ''' name, including the trailing " *" of winapp2 entry names, so a single global key
     ''' yields a distinct value per section
     ''' </summary>
     <TestMethod()> Public Sub GlobalAdd_EntryNameToken_SubstitutesSectionName()
@@ -589,7 +612,7 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' The token is recognized case-insensitively, consistent with all other Transmute matching
+    ''' The token is recognized case-insensitively
     ''' </summary>
     <TestMethod()> Public Sub GlobalAdd_EntryNameToken_CaseInsensitive()
 
@@ -618,8 +641,8 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' Token-bearing and token-free keys coexist in the same [*] section: the token-free
-    ''' key follows the original build-once path and applies identically everywhere
+    ''' Token-bearing and token-free keys coexist in the same [*] section: the token-bearing
+    ''' key gets each section's name and the token-free key applies identically everywhere
     ''' </summary>
     <TestMethod()> Public Sub GlobalAdd_MixedTokenAndPlainKeys_BothApplied()
 
@@ -663,7 +686,7 @@ Imports System.Text
 
     ''' <summary>
     ''' A specific rule listed before a wildcard fallback wins for its value while the
-    ''' fallback catches everything else — the CC7 category-to-tag shape in miniature
+    ''' fallback catches everything else: the CC7 category-to-tag shape in miniature
     ''' </summary>
     <TestMethod()> Public Sub Map_SpecificRuleBeforeWildcardFallback_Wins()
 

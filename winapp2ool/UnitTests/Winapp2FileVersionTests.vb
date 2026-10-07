@@ -20,16 +20,14 @@ Option Strict On
 Imports System.Text
 
 ''' <summary>
-''' Tests for the version comment's survival across the <c> iniFile </c> to
-''' <c> winapp2file </c> round trip. Trim, Transmute, WinappDebug, and CC7Patcher all
-''' pass files back through <c> ToIni </c>, and Diff reads the version off the resulting
-''' file's first comment to build its header
+''' Tests for the survival of the version comment and the non-CCleaner marker across the
+''' <c> iniFile </c> to <c> winapp2file </c> round trip. Diff reads the version off the
+''' first comment of the file <see cref="winapp2ool.winapp2file.ToIni"/> returns to build its header
 ''' </summary>
 <TestClass()> Public Class Winapp2FileVersionTests
 
-    ''' <summary>
-    ''' Helper: parse an <c> iniFile </c> from literal ini text
-    ''' </summary>
+    ''' <summary>Returns an <c> iniFile </c> named <c> winapp2.ini </c> parsed from <paramref name="text"/></summary>
+    ''' <param name="text">Literal ini text</param>
     Private Shared Function MakeIni(text As String) As winapp2ool.iniFile
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
@@ -97,7 +95,7 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' The non-CCleaner marker must survive the round trip too — it selects the header text
+    ''' The non-CCleaner marker must survive the round trip too, since it selects the header text
     ''' and license link written by <c> ToWinapp2String </c>, so losing it mislabels the file
     ''' </summary>
     <TestMethod()> Public Sub ToIniPreservesNCCMarker()
@@ -116,7 +114,8 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' A CCleaner-variant file must not pick up the marker from its own round trip
+    ''' A CCleaner-variant file must not pick up the marker from its own round trip, and
+    ''' <c> ToIni </c> gives it only the version comment
     ''' </summary>
     <TestMethod()> Public Sub RoundTripDoesNotInventNCCMarker()
 

@@ -21,12 +21,13 @@ Option Strict On
 Imports System.IO
 
 ''' <summary>
-''' Tests for the startup check that decides whether winapp2ool relaunches with administrator rights
+''' Tests for the two inputs to the startup elevation check: <see cref="winapp2ool.ElevationHelper.needsElevationToWrite"/>
+''' and <see cref="winapp2ool.ElevationHelper.commandLineFolders"/>. Nothing here runs the relaunch itself.
 ''' </summary>
 <TestClass()> Public Class ElevationHelperTests
 
     ''' <summary>
-    ''' A folder we can write to never triggers elevation, and the probe file doesn't linger
+    ''' A fresh folder under the temp directory needs no elevation, and the probe file is gone afterward
     ''' </summary>
     <TestMethod()> Public Sub WritableFolder_NeedsNoElevation()
 
@@ -47,8 +48,8 @@ Imports System.IO
     End Sub
 
     ''' <summary>
-    ''' The Windows folder refuses writes to an unelevated process, so it needs elevation. Skipped when
-    ''' the tests themselves run elevated, where the folder is writable
+    ''' The Windows folder refuses writes to an unelevated process, so it needs elevation. Inconclusive
+    ''' when the tests themselves run elevated, where the folder is writable
     ''' </summary>
     <TestMethod()> Public Sub ProtectedFolder_NeedsElevation()
 
@@ -59,7 +60,8 @@ Imports System.IO
     End Sub
 
     ''' <summary>
-    ''' A folder that doesn't exist yet is judged by the folder it would be created in, which here is writable
+    ''' A folder whose parent is missing too is judged by the nearest folder above it that exists, which
+    ''' here is the writable temp directory two levels up
     ''' </summary>
     <TestMethod()> Public Sub MissingFolderUnderWritableParent_NeedsNoElevation()
 
@@ -68,7 +70,8 @@ Imports System.IO
     End Sub
 
     ''' <summary>
-    ''' A folder that doesn't exist yet under a protected one needs elevation, since creating it does
+    ''' A folder that doesn't exist yet under a protected one needs elevation, since creating it does.
+    ''' Inconclusive when the tests run elevated.
     ''' </summary>
     <TestMethod()> Public Sub MissingFolderUnderProtectedParent_NeedsElevation()
 
@@ -80,7 +83,9 @@ Imports System.IO
     End Sub
 
     ''' <summary>
-    ''' Only -Nd values count, resolved the way the command line handler resolves them
+    ''' Only <c> -Nd </c> values count: <c> -1f </c> and a trailing <c> -4d </c> with no value are
+    ''' ignored, a final segment with a dot is cut off as a file name, and a leading backslash is
+    ''' resolved against the working folder
     ''' </summary>
     <TestMethod()> Public Sub CommandLineFolders_ResolvesDirectoryArgs()
 

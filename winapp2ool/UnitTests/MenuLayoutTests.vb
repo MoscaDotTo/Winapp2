@@ -22,14 +22,15 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports winapp2ool
 
 ''' <summary>
-''' Covers the geometry of rendered <c> MenuSection </c> output: that every line in a box is
-''' the same width, that centered text is actually centered, and that a section with nothing
-''' in it renders nothing
+''' Covers the geometry of rendered <see cref="MenuSection"/> output: that every line in a box is
+''' the same width, that centered text is actually centered, that lines of any length start in
+''' the same column and an overlong one keeps its left frame, and that a section reports itself
+''' empty, and renders nothing, exactly when it has nothing in it
 ''' </summary>
 '''
 ''' <remarks>
 ''' There is no console in the test host, so <c> GetConsoleWidth </c> falls back to its cached
-''' default of 120. That is fine — these assertions are about the relationship between the
+''' default of 120. That is fine, because these assertions are about the relationship between the
 ''' border and the text, not about any particular width
 ''' </remarks>
 <TestClass>
@@ -77,11 +78,11 @@ Public Class MenuLayoutTests
     ''' </summary>
     '''
     ''' <param name="line">
-    ''' A rendered line whose first and last non-space characters are its border glyphs
+    ''' A rendered line made of one space, a border glyph, the interior, and a closing border glyph
     ''' </param>
     '''
     ''' <returns>
-    ''' Leading interior spaces minus trailing interior spaces — <c> 0 </c> when perfectly
+    ''' Leading interior spaces minus trailing interior spaces: <c> 0 </c> when perfectly
     ''' centered, positive when the text sits right of center
     ''' </returns>
     Private Shared Function CenteringOffset(line As String) As Integer

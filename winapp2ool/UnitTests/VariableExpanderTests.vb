@@ -18,16 +18,17 @@
 Option Strict On
 
 ''' <summary>
-''' Pure-function tests for <c> VariableExpander </c> and <c> VariableSet </c>.
-''' Covers cartesian ordering, co-varying repeats, single-element degenerate,
-''' undeclared-token domain handling, case-insensitivity, empty-list semantics,
-''' commutativity with %% tokens, and the unreferenced-variable typo backstop.
+''' In-memory tests for <see cref="winapp2ool.VariableExpander"/> and
+''' <see cref="winapp2ool.VariableSet"/>. Covers cartesian ordering, co-varying repeats,
+''' single-element degenerate, undeclared-token domain handling, case-insensitivity, empty-list
+''' semantics, commutativity with %% tokens, the unreferenced-variable typo backstop, nested
+''' declarations resolved by <see cref="winapp2ool.VariableExpander.ResolveAll"/> (including
+''' cycles), inline <c> &lt;a,b,c&gt; </c> lists, and how declarations split on commas.
 ''' </summary>
 <TestClass()> Public Class VariableExpanderTests
 
-    ''' <summary>
-    ''' Helper: build a <c> VariableSet </c> from name/csv pairs in declaration order
-    ''' </summary>
+    ''' <summary>Builds a <c> VariableSet </c> from name/csv pairs in declaration order</summary>
+    ''' <param name="decls">Alternating variable names and comma-separated value lists</param>
     Private Shared Function BuildVars(ParamArray decls As String()) As winapp2ool.VariableSet
 
         Dim vars As New winapp2ool.VariableSet
@@ -91,7 +92,7 @@ Option Strict On
             "[Entry]")
 
         Assert.AreEqual(6, result.Values.Count)
-        ' Outer (version) slowest — every version's mru block contiguous
+        ' Outer (version) slowest: every version's mru block contiguous
         Assert.AreEqual("HKCU\Software\Microsoft\Office\9.0\Outlook\Office Finder|MRU 1", result.Values(0))
         Assert.AreEqual("HKCU\Software\Microsoft\Office\9.0\Outlook\Office Finder|MRU 2", result.Values(1))
         Assert.AreEqual("HKCU\Software\Microsoft\Office\9.0\Outlook\Office Finder|MRU 3", result.Values(2))
@@ -102,7 +103,7 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' A variable referenced multiple times in the same template co-varies — the
+    ''' A variable referenced multiple times in the same template co-varies: the
     ''' same chosen value is substituted at every occurrence on each iteration,
     ''' producing one result per value (not a self-cartesian)
     ''' </summary>
@@ -123,7 +124,7 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' A declared variable with one value degenerates to plain substitution — no
+    ''' A declared variable with one value degenerates to plain substitution: no
     ''' fan-out, just a single result with the value substituted
     ''' </summary>
     <TestMethod()> Public Sub Expand_SingleElementList_NoFanOut()
@@ -163,7 +164,7 @@ Option Strict On
 
     ''' <summary>
     ''' An undeclared <c> &lt;name&gt; </c> in a registry-domain key passes through
-    ''' verbatim with an Advisory diagnostic — registry paths can legitimately
+    ''' verbatim with an Advisory diagnostic, since registry paths can legitimately
     ''' contain literal angle brackets
     ''' </summary>
     <TestMethod()> Public Sub Expand_UndeclaredTokenInRegistryKey_KeepsLiteral()
@@ -225,8 +226,8 @@ Option Strict On
 
     ''' <summary>
     ''' A declared variable with an empty value list, referenced by a template,
-    ''' drops the key and emits a Warning. This is the empty-list-semantics decision
-    ''' from the plan (lean: warn + drop, parallels Scaffolds=present-but-empty)
+    ''' drops the key and emits a Warning, as a declared but empty <c> Scaffolds= </c>
+    ''' key emits nothing
     ''' </summary>
     <TestMethod()> Public Sub Expand_EmptyValueList_DropsKey()
 
@@ -268,7 +269,7 @@ Option Strict On
 
     ''' <summary>
     ''' Mixed declared + undeclared in a filesystem-domain template: the whole key
-    ''' is dropped because the undeclared token cannot be safely passed through —
+    ''' is dropped because the undeclared token cannot be safely passed through:
     ''' literal <c> &lt; </c>/<c> &gt; </c> is impossible in a Win32 path
     ''' </summary>
     <TestMethod()> Public Sub Expand_MixedDeclaredAndUndeclared_Filesystem_DropsKey()
@@ -288,8 +289,8 @@ Option Strict On
 
     ''' <summary>
     ''' First-occurrence ordering uses position across the whole template, including
-    ''' across the <c> | </c> boundary in winapp2 key values — proving the engine
-    ''' doesn't special-case the pipe
+    ''' across the <c> | </c> boundary in winapp2 key values, so the engine doesn't
+    ''' special-case the pipe
     ''' </summary>
     <TestMethod()> Public Sub Expand_FirstOccurrenceSpansThePipe()
 
@@ -311,7 +312,7 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' Driving migration case from the plan: the Outlook RegKey template fans out
+    ''' A real-world shape: the Outlook RegKey template fans out
     ''' over both Office <c> &lt;version&gt; </c> (7 values, no Office 13.0) and MRU
     ''' <c> &lt;mrunums&gt; </c> (3 values), producing 21 keys with version varying
     ''' slowest
@@ -384,7 +385,7 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' Driving Auslogics-style case: a variable whose values themselves contain
+    ''' An Auslogics-style case: a variable whose values themselves contain
     ''' <c> &lt;&gt; </c> tokens (RegRoots = two templates each referencing a
     ''' different version list) resolves before any user-template expansion so
     ''' that <c> &lt;RegRoots&gt; </c> later behaves like a flat 7-element list
@@ -414,8 +415,8 @@ Option Strict On
     ''' <summary>
     ''' End-to-end Auslogics-style template: after <c> ResolveAll </c>, the
     ''' RegKeyBase template <c> &lt;RegRoots&gt;\Settings|&lt;SettingsKeys&gt; </c>
-    ''' fans 7×3 to 21 keys, with each RegRoots value carrying its own resolved
-    ''' version segment
+    ''' fans 5×3 to 15 keys (two HKCU and three HKLM roots), with each RegRoots value
+    ''' carrying its own resolved version segment
     ''' </summary>
     <TestMethod()> Public Sub ResolveAll_ThenExpand_AuslogicsRegKeyBase()
 
@@ -608,7 +609,7 @@ Option Strict On
 
     ''' <summary>
     ''' Two <em>different</em> inline lists in one template cross-product like any two
-    ''' axes, with the leftmost varying slowest — no advisory, this is legitimate use
+    ''' axes, with the leftmost varying slowest, and with no advisory, since this is legitimate use
     ''' </summary>
     <TestMethod()> Public Sub Expand_TwoDistinctInlineLists_CrossProduct()
 
@@ -642,7 +643,7 @@ Option Strict On
             winapp2ool.ExpansionDomain.Filesystem,
             "[Entry]")
 
-        ' One axis, two values — NOT 2x2. Positions move together.
+        ' One axis, two values, NOT 2x2. Positions move together.
         Assert.AreEqual(2, result.Values.Count)
         Assert.AreEqual("%WinDir%\System32\Macromed\backup-System32|*.log", result.Values(0))
         Assert.AreEqual("%WinDir%\SysWOW64\Macromed\backup-SysWOW64|*.log", result.Values(1))
@@ -654,7 +655,7 @@ Option Strict On
 
     ''' <summary>
     ''' A declared variable and an inline list compose in one template: both become
-    ''' axes, declared-first varying slowest, with no diagnostics
+    ''' axes, the leftmost (here the declared one) varying slowest, with no diagnostics
     ''' </summary>
     <TestMethod()> Public Sub Expand_DeclaredAndInlineList_Compose()
 
@@ -677,7 +678,7 @@ Option Strict On
     ''' <summary>
     ''' A degenerate inline list whose body trims to nothing (<c> &lt; , &gt; </c>)
     ''' has no values, so the cartesian product is empty and the key is dropped with
-    ''' a Warning — same path as a declared empty list
+    ''' a Warning, the same path as a declared empty list
     ''' </summary>
     <TestMethod()> Public Sub Expand_DegenerateInlineList_DropsKey()
 
@@ -697,9 +698,9 @@ Option Strict On
     ''' <summary>
     ''' An inline list inside a DECLARATION value survives comma-splitting: the
     ''' declaration is one value carrying an inline <c> &lt;a,b,c&gt; </c> list, not
-    ''' three fragments split at the list's commas. This is the [Ability Office Write *]
-    ''' Root scenario — <c> Root=...\&lt;6.0,7.0,11.0&gt;\... </c> must resolve to three
-    ''' clean roots so root-detection inference does not false-skip on a stray bracket.
+    ''' three fragments split at the list's commas. A declaration like
+    ''' <c> Root=...\&lt;6.0,7.0,11.0&gt;\... </c> must resolve to three clean roots, or
+    ''' EntryBuilder's root-detection inference sees a leftover bracket and skips with a warning.
     ''' </summary>
     <TestMethod()> Public Sub Add_InlineListInDeclaration_NotShreddedByCommaSplit()
 
@@ -741,8 +742,7 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' A plain comma-separated declaration with no brackets splits on every comma as
-    ''' before — the bracket-aware split is backward-compatible for the common case
+    ''' A plain comma-separated declaration with no brackets splits on every comma
     ''' </summary>
     <TestMethod()> Public Sub Add_PlainCsvDeclaration_UnchangedSplit()
 
@@ -758,9 +758,9 @@ Option Strict On
     End Sub
 
     ''' <summary>
-    ''' Stray <c> &lt; </c> or <c> &gt; </c> characters without a complete
-    ''' <c> &lt;name&gt; </c> form are left literal — the tokenizer requires the
-    ''' full pattern to match
+    ''' Angle brackets used as text in a registry-domain template stay literal. The tokenizer
+    ''' matches any bracketed run with no inner bracket, so <c> &lt; y &gt; </c> is read as a
+    ''' token, which is undeclared and so kept with an Advisory.
     ''' </summary>
     <TestMethod()> Public Sub Expand_StrayAngleBrackets_AreLiteral()
 
@@ -772,7 +772,7 @@ Option Strict On
             "[Entry]")
 
         Assert.AreEqual(1, result.Values.Count)
-        ' Note: "< y >" actually matches <[^<>]+> because " y " has no < or > — so this
+        ' Note: "< y >" actually matches <[^<>]+> because " y " has no < or >, so this
         ' DOES match a token "< y >" with name " y ". Verify it's treated as undeclared.
         Assert.AreEqual("x < y > z", result.Values(0))
         Assert.AreEqual(1, result.Diagnostics.Count)

@@ -20,18 +20,18 @@ Option Strict On
 Imports System.Text
 
 ''' <summary>
-''' Tests for the lint reconciliation gate (<c> LintReconciler </c>): the semantic-unit
-''' comparison around the generative modules' WinappDebug normalization pass must be
-''' blind to the three sanctioned optimization classes (key reordering/renumbering,
-''' FileKey pattern alphabetization, same-path FileKey merges) while reporting every
-''' semantic loss, rewrite, invented unit, or dropped entry. Also covers EntryBuilder's
-''' per-letter artifact bucketing rule.
+''' Tests for the semantic-unit comparison in <see cref="winapp2ool.LintReconciler"/>, run
+''' directly through <see cref="winapp2ool.LintReconciler.CollectSemanticUnits"/> and
+''' <see cref="winapp2ool.LintReconciler.FindSemanticLosses"/> on hand-written before and after
+''' text. The comparison must not see the sanctioned optimizations (key reordering and
+''' renumbering, FileKey pattern alphabetization, same-path FileKey merges, dropping exact
+''' duplicates, case changes) and must report lost and gained content, rewrites, and removed
+''' and introduced entries. Also covers EntryBuilder's per-letter artifact bucketing rule.
 ''' </summary>
 <TestClass()> Public Class LintReconcilerTests
 
-    ''' <summary>
-    ''' Helper: parse an <c> iniFile </c> from literal ini text
-    ''' </summary>
+    ''' <summary>Returns an <c> iniFile </c> named <c> test.ini </c> parsed from <paramref name="text"/></summary>
+    ''' <param name="text">Literal ini text</param>
     Private Shared Function MakeIni(text As String) As winapp2ool.iniFile
 
         Dim bytes = Encoding.UTF8.GetBytes(text)
@@ -43,9 +43,9 @@ Imports System.Text
 
     End Function
 
-    ''' <summary>
-    ''' Helper: reconcile two literal ini texts and return the findings
-    ''' </summary>
+    ''' <summary>Returns the findings from comparing the semantic units of two literal ini texts</summary>
+    ''' <param name="preText">The ini text before the optimization pass</param>
+    ''' <param name="postText">The ini text after the optimization pass</param>
     Private Shared Function Reconcile(preText As String, postText As String) As List(Of String)
 
         Return winapp2ool.LintReconciler.FindSemanticLosses(
@@ -226,7 +226,7 @@ Imports System.Text
 
     ''' <summary>
     ''' A FileKey gaining a flag (path and pattern unchanged) pairs into a single
-    ''' rewrite finding rather than being misread as a pattern change
+    ''' rewrite finding that names the new flag
     ''' </summary>
     <TestMethod()> Public Sub FileKeyFlagChange_IsReportedAsSingleRewrite()
 
@@ -267,8 +267,8 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' A lost key of one type alongside a gained key of another type is never paired —
-    ''' the gate does not guess at cross-type conversions
+    ''' A lost key of one type alongside a gained key of another type is never paired,
+    ''' since the gate doesn't guess at cross-type conversions
     ''' </summary>
     <TestMethod()> Public Sub CrossTypeChange_IsNotPaired()
 
@@ -327,7 +327,7 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' Removing an exact duplicate FileKey pattern is sanctioned deduplication and
+    ''' Dropping a repeated pattern and a duplicate FileKey is sanctioned deduplication and
     ''' must produce zero findings
     ''' </summary>
     <TestMethod()> Public Sub ExactDuplicateRemoval_IsInvisible()
@@ -346,8 +346,8 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' The per-letter artifact bucketing rule: uppercased ASCII first letter, with
-    ''' digits, punctuation, and anything non-alphabetic routed to <c> # </c>
+    ''' The per-letter artifact bucketing rule: the uppercased first character when it's
+    ''' <c> A </c> to <c> Z </c>, otherwise <c> # </c> (here a digit, a dot and an empty name)
     ''' </summary>
     <TestMethod()> Public Sub LetterBucketFor_ClassifiesByFirstCharacter()
 
