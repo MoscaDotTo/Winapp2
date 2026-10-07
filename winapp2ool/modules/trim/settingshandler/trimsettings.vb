@@ -36,7 +36,7 @@ Option Strict On
 ''' <item>
 ''' <b><c> TrimFile2 </c></b>
 ''' <description>
-''' Includes file — entry names listed here are never removed, regardless of
+''' Includes file: entry names listed here are never removed, regardless of
 ''' detection. Only consulted when <c> UseTrimIncludes </c> is <c> True </c>.
 ''' </description>
 ''' </item>
@@ -44,7 +44,7 @@ Option Strict On
 ''' <item>
 ''' <b><c> TrimFile3 </c></b>
 ''' <description>
-''' Output file — where the trimmed winapp2.ini is saved. Defaults to overwriting
+''' Output file: where the trimmed winapp2.ini is saved. Defaults to overwriting
 ''' the input file.
 ''' </description>
 ''' </item>
@@ -52,8 +52,8 @@ Option Strict On
 ''' <item>
 ''' <b><c> TrimFile4 </c></b>
 ''' <description>
-''' Excludes file — entry names listed here are always removed. Only consulted
-''' when <c> UseTrimExcludes </c> is <c> True </c>.
+''' Excludes file: entry names listed here are always removed unless the includes file
+''' also names them. Only consulted when <c> UseTrimExcludes </c> is <c> True </c>.
 ''' </description>
 ''' </item>
 '''
@@ -77,46 +77,48 @@ Public Module trimsettings
     Public Property TrimFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "includes.ini", mustExist:=False)
 
     ''' <summary>
-    ''' Output file: Location on disk to which the output will be saved 
+    ''' Output file: Location on disk to which the output will be saved
     ''' <br /> Default: <c> winapp2.ini </c>
     ''' <br /> Default rename: <c> winapp2-trimmed.ini </c>
     ''' </summary>
     Public Property TrimFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2-trimmed.ini", mustExist:=False)
 
     ''' <summary>
-    ''' Excludes file — sections listed here are always trimmed, regardless of detection criteria.
-    ''' Only consulted when <c> UseTrimExcludes </c> is <c> True </c>.
-    ''' <br /> 
+    ''' Excludes file: sections listed here are trimmed regardless of detection criteria, unless
+    ''' the includes file also lists them. Only consulted when <c> UseTrimExcludes </c> is <c> True </c>.
+    ''' <br /> Default: <c> excludes.ini </c>
     ''' </summary>
     Public Property TrimFile4 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "excludes.ini", mustExist:=False)
 
     ''' <summary>
-    ''' Indicates that the latest winapp2.ini should be downloaded from GitHub as the input file
+    ''' Indicates whether to download the current flavor's winapp2.ini from GitHub as the input file
     ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property DownloadFileToTrim As Boolean = False
 
     ''' <summary>
-    ''' Indicates that the includes file is consulted during trimming,
+    ''' Indicates whether the includes file is consulted during trimming,
     ''' automatically retaining entries whose name appears in <c> TrimFile2 </c>
     ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property UseTrimIncludes As Boolean = False
 
     ''' <summary>
-    ''' Indicates that the excludes file is consulted during trimming,
+    ''' Indicates whether the excludes file is consulted during trimming,
     ''' automatically removing entries whose name appears in <c> TrimFile4 </c>
     ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property UseTrimExcludes As Boolean = False
 
     ''' <summary>
-    ''' Indicates that the module settings have been modified from their defaults
+    ''' Indicates whether the module settings have been modified from their defaults
     ''' </summary>
     Public Property TrimModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Restores all <c> Trim </c> settings to their defaults and persists the reset to disk
+    ''' Restores all <c> Trim </c> settings to their defaults and records them in the settings
+    ''' file through <see cref="SaveModule"/>. Nothing is written to disk here.
+    ''' <see cref="FlushIfDirty"/> does that later, if the save gate allows it
     ''' </summary>
     Public Sub InitDefaultTrimSettings()
 

@@ -35,8 +35,8 @@ Imports System.IO
 ''' <item>
 ''' <term> DetectOS </term>
 ''' <description>
-''' Evaluated first. If present and not satisfied by the current Windows version, the entry is
-''' immediately discarded without checking any other criteria. <br />
+''' Evaluated before the other detection keys. If present and not satisfied by the current
+''' Windows version, the entry is immediately discarded without checking any other criteria. <br />
 ''' If satisfied and no other detection keys are present, the entry is retained. <br />
 ''' DetectOS values take the form <c> VERSION| </c> (minimum), <c> |VERSION </c> (maximum),
 ''' or <c> VERSION1|VERSION2 </c> (range), where version numbers are major.minor doubles
@@ -48,7 +48,8 @@ Imports System.IO
 ''' <term> Detect </term>
 ''' <description>
 ''' Registry paths checked for existence. If any Detect key matches a registry key
-''' present on the current system, the entry is retained.
+''' present on the current system, the entry is retained. For a key under
+''' <c> HKLM\Software </c> we also check <c> HKLM\SOFTWARE\WOW6432Node </c>.
 ''' </description>
 ''' </item>
 '''
@@ -57,6 +58,8 @@ Imports System.IO
 ''' <description>
 ''' Filesystem paths (supporting wildcards) checked for existence. If any DetectFile key
 ''' matches a file or directory present on the current system, the entry is retained.
+''' A wildcard only matches directory names, so a wildcard in a file name never matches, and
+''' a wildcard search that reaches a folder we aren't allowed to read counts as a match.
 ''' </description>
 ''' </item>
 '''
@@ -74,7 +77,7 @@ Imports System.IO
 ''' </list>
 '''
 ''' <br />
-''' Entries with no detection keys of any kind are always retained. <br /><br />
+''' Entries with no detection keys of any kind are retained unless the excludes file names them. <br /><br />
 '''
 ''' Include and exclude overrides: <br /><br />
 '''
@@ -83,12 +86,14 @@ Imports System.IO
 ''' the normal detection evaluation. An entry whose name appears in the includes file is always
 ''' retained regardless of whether its detection criteria are satisfied. An entry whose name
 ''' appears in the excludes file is always removed regardless of whether its detection criteria
-''' are satisfied. Include and exclude checks run before any detection evaluation. <br /><br />
+''' are satisfied. Include and exclude checks run before any detection evaluation, includes
+''' first, so an entry named in both files is retained. <br /><br />
 '''
 ''' Environment variable expansion: <br /><br />
 '''
 ''' In addition to standard Windows environment variables, Trim resolves several CCleaner-specific
-''' variables that do not exist natively in the Windows environment:
+''' variables that do not exist natively in the Windows environment. We expand only the first
+''' variable in a filesystem path and assume the path starts with it:
 '''
 ''' <list type="table">
 '''
@@ -132,12 +137,13 @@ Imports System.IO
 '''
 ''' VirtualStore augmentation: <br /><br />
 '''
-''' For entries that pass detection, Trim inspects the entry's FileKeys, RegKeys, and ExcludeKeys
-''' and generates additional keys covering VirtualStore locations that correspond to paths found
-''' under <c> %ProgramFiles% </c>, <c> %CommonAppData% </c>, <c> %CommonProgramFiles% </c>,
-''' and <c> HKLM\Software </c>. VirtualStore keys are only appended when the corresponding
-''' VirtualStore path actually exists on the current system, ensuring the output remains
-''' accurate to the machine.
+''' For every entry it keeps, including those kept by the includes file or for having no
+''' detection keys, Trim inspects the entry's FileKeys, RegKeys, and ExcludeKeys and generates
+''' additional keys covering VirtualStore locations that correspond to paths found under
+''' <c> %ProgramFiles% </c>, <c> %CommonAppData% </c>, <c> %CommonProgramFiles% </c>, and
+''' <c> HKLM\Software </c> (only <c> HKLM\Software </c> for RegKeys). The match is case-sensitive.
+''' VirtualStore keys are only appended when the corresponding VirtualStore path actually exists
+''' on the current system. When we add any, we re-sort and renumber the entry's FileKeys, RegKeys and ExcludeKeys.
 ''' </summary>
 Public Module Trim
 
@@ -150,14 +156,21 @@ Public Module Trim
     Private _excludes As iniFile = Nothing
 
     ''' <summary>
-    ''' Handles command-line arguments for <c> Trim </c>
+    ''' Handles command-line arguments for <c> Trim </c>, starting from the default settings
+    ''' rather than any saved ones, then runs the trim
     ''' </summary>
     '''
     ''' <remarks>
-    ''' Trim args:
-    ''' -d          : download the latest winapp2.ini
-    ''' -includes   : enable the includes file (entries listed within are never trimmed)
-    ''' -excludes   : enable the excludes file (entries listed within are always trimmed)
+    ''' File arguments: <c> -1d </c>/<c> -1f </c> set the winapp2.ini to trim, <c> -2d </c>/<c> -2f </c>
+    ''' the includes file, <c> -3d </c>/<c> -3f </c> the output file, and <c> -4d </c>/<c> -4f </c>
+    ''' the excludes file.
+    ''' Flags:
+    ''' <list type="bullet">
+    ''' <item><c> -d </c>: download the winapp2.ini for <see cref="CurrentWinappFlavor"/> and trim
+    ''' that instead of <c> TrimFile1 </c></item>
+    ''' <item><c> -includes </c>: enable the includes file (entries listed within are never trimmed)</item>
+    ''' <item><c> -excludes </c>: enable the excludes file (entries listed within are always trimmed)</item>
+    ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
 
@@ -175,7 +188,9 @@ Public Module Trim
     End Sub
 
     ''' <summary>
-    ''' Trims a winapp2.ini from outside the module
+    ''' Trims a winapp2.ini from outside the module. This overwrites the module's
+    ''' <c> TrimFile1 </c>, <c> TrimFile3 </c> and <c> DownloadFileToTrim </c> settings for the
+    ''' rest of the session, and the include and exclude settings still apply.
     ''' </summary>
     '''
     ''' <param name="firstFile">
@@ -187,7 +202,8 @@ Public Module Trim
     ''' </param>
     '''
     ''' <param name="d">
-    ''' Whether the input winapp2.ini should be downloaded from GitHub
+    ''' Indicates whether to download the input winapp2.ini from GitHub instead of reading
+    ''' <paramref name="firstFile"/>
     ''' </param>
     Public Sub remoteTrim(firstFile As iniFileChooser,
                           thirdFile As iniFileChooser,
@@ -201,7 +217,10 @@ Public Module Trim
     End Sub
 
     ''' <summary>
-    ''' Initiates the <c> Trim </c> process from the main menu or commandline
+    ''' Loads or downloads winapp2.ini, trims it, prints a summary, and writes the result to
+    ''' <c> TrimFile3 </c>. We return without trimming if the local input is empty or missing, or if we
+    ''' need to download and a live connection check fails. That check ignores <c> isOffline </c>. A download goes through <see cref="getWinappLink"/>, so
+    ''' it fetches the current flavor.
     ''' </summary>
     Public Sub initTrim()
 
@@ -264,7 +283,10 @@ Public Module Trim
     End Sub
 
     ''' <summary>
-    ''' Trims a <c> winapp2file </c>, removing entries not relevant to the current system
+    ''' Trims a <c> winapp2file </c> in place, removing entries not relevant to the current system,
+    ''' adding VirtualStore keys to the ones we keep, and then sorting the entries. We read the
+    ''' includes and excludes files from <c> TrimFile2 </c> and <c> TrimFile4 </c> here, when
+    ''' <c> UseTrimIncludes </c> and <c> UseTrimExcludes </c> are on.
     ''' </summary>
     '''
     ''' <param name="winapp2">
@@ -331,8 +353,8 @@ Public Module Trim
     End Function
 
     ''' <summary>
-    ''' Audits the detection criteria in a given <c> winapp2entry </c> against the current system <br /> <br />
-    ''' Returns <c> True </c> if the detection criteria are met, <c> False </c> otherwise
+    ''' Returns whether we keep <paramref name="entry"/>: the includes and excludes files decide
+    ''' first, then the detection criteria are audited against the current system
     ''' </summary>
     '''
     ''' <param name="entry">
@@ -392,7 +414,9 @@ Public Module Trim
     End Function
 
     ''' <summary>
-    ''' Audits the given entry for legacy codepaths in the machine's VirtualStore
+    ''' Adds VirtualStore counterparts of the entry's FileKeys, RegKeys and ExcludeKeys whose
+    ''' VirtualStore path exists on this machine. When we add any, we re-sort and renumber the
+    ''' entry's FileKeys, RegKeys and ExcludeKeys.
     ''' </summary>
     '''
     ''' <param name="entry">
@@ -419,12 +443,16 @@ Public Module Trim
     ''' <summary>
     ''' Collects new VirtualStore counterpart keys for the given key list and appends them to
     ''' <paramref name="newKeys"/>. Only keys whose corresponding VirtualStore path exists on
-    ''' the current system are included.
+    ''' the current system are included, and we skip a counterpart whose value is already in
+    ''' <paramref name="keys"/>. Each new key keeps its source key's name until the entry is
+    ''' renumbered.
     ''' </summary>
     '''
     ''' <param name="keys">
-    ''' The FileKey, RegKey, or ExcludeKey collection to scan
+    ''' The FileKey, RegKey, or ExcludeKey collection to scan. We read the key type from the
+    ''' first key and apply it to all of them.
     ''' </param>
+    '''
     ''' <param name="newKeys">
     ''' New VirtualStore keys are appended here
     ''' </param>
@@ -480,7 +508,8 @@ Public Module Trim
     End Sub
 
     ''' <summary>
-    ''' Extracts the filesystem or registry path from a key value string for use in an existence check
+    ''' Extracts the filesystem or registry path from a key value string for use in an existence
+    ''' check. A RegKey value comes back whole, including any <c> |ValueName </c> part.
     ''' </summary>
     '''
     ''' <param name="value">
@@ -501,8 +530,9 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> 
-    ''' Returns <c> True </c> if a SpecialDetect location exists, <c> False </c> otherwise 
+    ''' <summary>
+    ''' Returns whether any location for the SpecialDetect value exists. An unrecognized value
+    ''' returns <c> False </c>.
     ''' </summary>
     ''' 
     ''' <param name="key"> 
@@ -569,8 +599,9 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> 
-    ''' Handles passing off checks from sources that may vary between file system and registry 
+    ''' <summary>
+    ''' Returns whether <paramref name="path"/> exists, checking the registry when it starts with
+    ''' <c> HK </c> and the file system otherwise
     ''' </summary>
     ''' 
     ''' <param name="path">
@@ -583,8 +614,9 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> 
-    ''' Returns <c> True </c> if a given key exists in the Windows Registry, <c> False </c> otherwise 
+    ''' <summary>
+    ''' Returns whether a registry key exists, splitting the hive off the front of
+    ''' <paramref name="path"/>. Wildcards aren't expanded.
     ''' </summary>
     ''' 
     ''' <param name="path">
@@ -604,9 +636,12 @@ Public Module Trim
     End Function
 
     ''' <summary>
-    ''' Returns <c> True </c> if a given key exists in the registry, <c> False </c> otherwise 
+    ''' Returns whether a key exists in the registry. Under <c> HKLM </c> we fall back to the
+    ''' <c> SOFTWARE\WOW6432Node </c> view for 32-bit applications. An unrecognized hive logs a
+    ''' message and returns <c> False </c>, and an <c> UnauthorizedAccessException </c> returns
+    ''' <c> True </c>.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="root">
     ''' The registry hive that contains the key whose existence will be audited 
     ''' </param>
@@ -662,20 +697,24 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> 
-    ''' Handles some CCleaner variables and logs if the current variable is ProgramFiles so the 32bit location can be checked later 
+    ''' <summary>
+    ''' Expands the first environment variable in <paramref name="dir"/>, including the
+    ''' CCleaner-only ones, and flags <c> %ProgramFiles% </c> so the caller can retry under
+    ''' Program Files (x86). We keep only the text between that variable and the next
+    ''' <c> % </c>, so anything before the variable is dropped.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="dir">
-    ''' A filesystem path to process for environment variables 
+    ''' A filesystem path to process for environment variables. We replace it with the expanded path.
     ''' </param>
-    ''' 
-    ''' <param name="isProgramFiles"> 
-    ''' Indicates that the %ProgramFiles% variable has been seen 
+    '''
+    ''' <param name="isProgramFiles">
+    ''' Set to <c> True </c> if the variable is <c> %ProgramFiles% </c>. Never set back to <c> False </c>.
     ''' </param>
-    ''' 
-    ''' <returns> 
-    ''' <c> True </c>c> if an error occurred <br /> <c> False </c> otherwise 
+    '''
+    ''' <returns>
+    ''' <c> True </c> if the path has an opening <c> % </c> with no closing one, <br />
+    ''' <c> False </c> otherwise
     ''' </returns>
     ''' 
     Private Function processEnvDirs(ByRef dir As String,
@@ -756,12 +795,15 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> 
-    ''' Returns <c> True </c> if a path exists on the file system, <c> False </c> otherwise 
+    ''' <summary>
+    ''' Returns whether a path exists on the file system, after expanding its environment
+    ''' variable and any wildcards. A <c> %ProgramFiles% </c> path that isn't found is retried
+    ''' under Program Files (x86). A malformed variable counts as present: outside <c> -s </c> we print an error to
+    ''' the console and wait for a key press, from inside a parallel worker, before returning <c> True </c>.
     ''' </summary>
-    ''' 
-    ''' <param name="key"> 
-    ''' A filesystem path 
+    '''
+    ''' <param name="key">
+    ''' A filesystem path, possibly starting with an environment variable
     ''' </param>
     ''' 
     Private Function checkPathExist(key As String) As Boolean
@@ -822,16 +864,17 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> 
-    ''' Swaps out a directory with the ProgramFiles parameterization on 64bit computers 
+    ''' <summary>
+    ''' Sets <paramref name="dir"/> to <paramref name="key"/> with its leading
+    ''' <c> %ProgramFiles% </c> replaced by the Program Files (x86) directory
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="dir">
-    ''' The file system path to be modified
+    ''' The file system path to be replaced
     ''' </param>
-    ''' 
+    '''
     ''' <param name="key">
-    ''' The original state of the path 
+    ''' The unexpanded path, starting with <c> %ProgramFiles% </c>
     ''' </param>
     ''' 
     Private Sub swapDir(ByRef dir As String,
@@ -842,16 +885,20 @@ Public Module Trim
 
     End Sub
 
-    ''' <summary> 
-    ''' Interprets parameterized wildcards for the current system 
+    ''' <summary>
+    ''' Returns whether any path matching the wildcards in <paramref name="dir"/> exists. We expand
+    ''' each wildcard segment against directory names only, wherever it falls in the path. A
+    ''' folder we aren't allowed to list counts as a match, and a path with illegal characters
+    ''' counts as no match.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="dir">
-    ''' A path containing a wildcard 
+    ''' A path containing a wildcard
     ''' </param>
-    ''' 
-    ''' <param name="isFileSystem"> 
-    ''' Indicates that the path is a filesystem path, <c> False </c> if it is a registry path
+    '''
+    ''' <param name="isFileSystem">
+    ''' Indicates whether <paramref name="dir"/> is a filesystem path. The registry branch is
+    ''' empty, so <c> False </c> always returns <c> False </c>.
     ''' </param>
     ''' 
     Private Function expandWildcard(dir As String,
@@ -956,8 +1003,9 @@ Public Module Trim
 
     End Function
 
-    ''' <summary> 
-    ''' Returns <c> True </c> if the system satisfies the DetectOS criteria, <c> False </c> otherwise 
+    ''' <summary>
+    ''' Returns whether the system's Windows version satisfies a DetectOS value. Both bounds
+    ''' are inclusive.
     ''' </summary>
     ''' 
     ''' <param name="value"> 

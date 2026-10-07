@@ -25,7 +25,8 @@ Module trimmainmenu
     ''' <summary>
     ''' Builds the <c> Trim </c> main menu with all options and their dispatch handlers registered inline.
     ''' Called by both <c> printTrimMenu </c> and <c> handleTrimUserInput </c> so the
-    ''' displayed option numbers and the dispatch table are always in sync.
+    ''' displayed option numbers and the dispatch table are always in sync. While offline,
+    ''' building the menu also turns <c> DownloadFileToTrim </c> off.
     ''' </summary>
     '''
     ''' <returns>
