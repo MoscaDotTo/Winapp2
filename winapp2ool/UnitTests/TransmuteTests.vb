@@ -101,6 +101,25 @@ Imports System.Text
     End Sub
 
     ''' <summary>
+    ''' A [*] Add skips a section that already has a key of that Name, as [*Name:] does,
+    ''' so it never duplicates or overwrites an existing key
+    ''' </summary>
+    <TestMethod()> Public Sub GlobalAdd_SkipsSectionThatAlreadyHasKeyName()
+
+        Dim result = RunTransmute(
+            "[Alpha *]" & vbCrLf & "Detect=HKCU\Software\Alpha" & vbCrLf & "Author=Someone Else" & vbCrLf &
+            "[Beta *]" & vbCrLf & "Detect=HKCU\Software\Beta" & vbCrLf,
+            "[*]" & vbCrLf & "Author=Winapp2.ini Project" & vbCrLf,
+            winapp2ool.TransmuteMode.Add)
+
+        Dim alpha = result.GetSection("Alpha *")
+        Assert.AreEqual(2, alpha.Keys.Count)
+        Assert.AreEqual("Someone Else", alpha.GetKey("Author").Value)
+        Assert.AreEqual("Winapp2.ini Project", result.GetSection("Beta *").GetKey("Author").Value)
+
+    End Sub
+
+    ''' <summary>
     ''' Numbered keys are refused by global Add: adding FileKey1= to every section
     ''' would create instant duplicates and standalone Transmute has no renumber pass
     ''' </summary>
