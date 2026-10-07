@@ -25,8 +25,8 @@ Imports System.Text
 Module MenuMaker
 
     ''' <summary>
-    ''' Names the menu frame types, numbered the same as the <c> frameNum </c> and
-    ''' <c> borderInd </c> integers the frame builders take
+    ''' Names the four menu frames. Each value indexes <see cref="Openers"/> and
+    ''' <see cref="Closers"/>, so the numbering must match their order.
     ''' </summary>
     Public Enum FrameType
 
@@ -438,38 +438,9 @@ Module MenuMaker
     ''' Returns an empty menu line, or a variety of filled menu lines 
     ''' </summary>
     ''' 
-    ''' <param name="frameNum"> 
-    ''' Indicates which frame should be returned <br />
-    ''' 
-    ''' <list type="bullet">
-    ''' 
-    ''' <item>
-    ''' <description>
-    ''' 0: Vertical frames <c> ║     ║ </c>
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description> 
-    ''' 1: Downward opening 90° angle frames <c> ╔ ═ ═ ═ ═ ═╗ </c>
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description> 
-    ''' 2: Upward opening 90° angle frames <c> ╚ ═ ═ ═ ═ ═╝ </c>
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item> 
-    ''' <description> 
-    ''' 3: Inward facing T-frames <c> ╠ ═ ═ ═ ═ ═ ╣ </c> 
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' </list>
-    ''' 
-    ''' <br /> Optional, Default: <c> 0 </c>
+    ''' <param name="frame">
+    ''' The frame to return <br /><br />
+    ''' Optional, Default: <c> FrameType.Vertical </c>
     ''' </param>
     '''
     ''' <param name="fillFrame">
@@ -478,12 +449,12 @@ Module MenuMaker
     ''' </param>
     '''
     ''' <returns>
-    ''' A full-width line holding the frame requested by <paramref name="frameNum"/>
+    ''' A full-width line holding the frame requested by <paramref name="frame"/>
     ''' </returns>
-    Private Function getFrame(Optional frameNum As Integer = 0,
+    Private Function getFrame(Optional frame As FrameType = FrameType.Vertical,
                               Optional fillFrame As Nullable(Of Boolean) = False) As String
 
-        Return mkMenuLine("", 2, frameNum, fillFrame)
+        Return mkMenuLine("", 2, frame, fillFrame)
 
     End Function
 
@@ -723,39 +694,9 @@ Module MenuMaker
     ''' </list> 
     ''' </param>
     ''' 
-    ''' <param name="borderInd"> 
-    ''' Determines which characters should
-    ''' create the border for the menuline: <br />
-    ''' 
-    ''' <list type="bullet">
-    ''' 
-    ''' <item>
-    ''' <description> 
-    ''' 0: Vertical lines 
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item> 
-    ''' <description> 
-    ''' 1: Ceiling brackets 
-    ''' </description> 
-    ''' </item>
-    ''' 
-    ''' <item> 
-    ''' <description> 
-    ''' 2: Floor brackets 
-    ''' </description>
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <description> 
-    ''' 3: Conjoining brackets 
-    ''' </description> 
-    ''' </item> 
-    ''' 
-    ''' </list>
-    ''' 
-    ''' <br /> Optional, Default: <c> 0 </c> 
+    ''' <param name="frame">
+    ''' The frame whose characters open and close the line <br /><br />
+    ''' Optional, Default: <c> FrameType.Vertical </c>
     ''' </param>
     ''' 
     ''' <param name="fillBorder">
@@ -765,16 +706,12 @@ Module MenuMaker
     ''' </param>
     Private Function mkMenuLine(line As String,
                                 align As Integer,
-                                Optional borderInd As Integer = 0,
+                                Optional frame As FrameType = FrameType.Vertical,
                                 Optional fillBorder As Nullable(Of Boolean) = True) As String
 
-        Dim out As New StringBuilder($" {Openers(borderInd)}")
+        Dim out As New StringBuilder($" {Openers(frame)}")
 
-        ' Text with nowhere to put a closing border still gets the opener and the standard
-        ' one-space indent, so an overlong line starts in the same column as every other line in
-        ' the box and the left edge stays unbroken. It simply runs past where the right border
-        ' would have been. Centering is meaningless at this width, so these fall back to the
-        ' left-aligned indent regardless of the requested alignment
+
         If line.Length > MaxFramedLineLength() Then Return out.Append(" "c).Append(line).ToString()
 
         Select Case align
@@ -785,18 +722,18 @@ Module MenuMaker
                 ' so centering means starting the text at 2 + (interiorWidth - line.Length) \ 2 --
                 ' which reduces to the expression below. Integer division keeps odd-width cases
                 ' landing consistently one column left rather than alternating with CInt's rounding
-                padToEnd(out, (GetConsoleWidth() - line.Length) \ 2, Closers(borderInd))
+                padToEnd(out, (GetConsoleWidth() - line.Length) \ 2, Closers(frame))
                 out.Append(line)
-                padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd))
+                padToEnd(out, GetConsoleWidth() - 2, Closers(frame))
 
             Case 1
 
                 out.Append(" " & line)
-                padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd))
+                padToEnd(out, GetConsoleWidth() - 2, Closers(frame))
 
             Case 2
 
-                padToEnd(out, GetConsoleWidth() - 2, Closers(borderInd), If(fillBorder, "═", " "))
+                padToEnd(out, GetConsoleWidth() - 2, Closers(frame), If(fillBorder, "═", " "))
 
         End Select
 
@@ -1162,7 +1099,7 @@ Module MenuMaker
     ''' </param>
     Public Sub BeginMenu(Optional solid As Boolean = True)
 
-        printRenderedLine(getFrame(1, solid))
+        printRenderedLine(getFrame(FrameType.Top, solid))
 
     End Sub
 
@@ -1213,7 +1150,7 @@ Module MenuMaker
     ''' </param>
     Public Sub EndMenu(Optional filled As Boolean = True)
 
-        printRenderedLine(getFrame(2, filled))
+        printRenderedLine(getFrame(FrameType.Bottom, filled))
 
     End Sub
 
@@ -1227,7 +1164,7 @@ Module MenuMaker
     ''' </param>
     Public Sub PrintDivider(Optional solid As Boolean = True)
 
-        printRenderedLine(getFrame(3, solid))
+        printRenderedLine(getFrame(FrameType.Conjoin, solid))
 
     End Sub
 
