@@ -18,14 +18,15 @@
 Option Strict On
 
 ''' <summary>
-''' Displays the Combine module main menu and handles user input.
-''' Called by both <c> printCombineMainMenu </c> (to render) and <c> handleCombineUserInput </c>
-''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
+''' Displays the Combine module main menu and handles user input
 ''' </summary>
 Public Module combinemainmenu
 
     ''' <summary>
-    ''' Builds the Combine main menu with all options and their dispatch handlers registered inline
+    ''' Builds the Combine main menu with all options and their dispatch handlers registered inline.
+    ''' Called by both <see cref="printCombineMainMenu"/> (to render) and
+    ''' <see cref="handleCombineUserInput"/> (to dispatch), so the displayed option numbers and
+    ''' the dispatch table are always in sync.
     ''' </summary>
     Private Function buildCombineMenu() As MenuSection
 

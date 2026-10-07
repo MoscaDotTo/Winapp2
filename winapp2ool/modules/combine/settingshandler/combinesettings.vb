@@ -29,7 +29,7 @@ Option Strict On
 ''' <item>
 ''' <b><c> CombineFile1 </c></b>
 ''' <description>
-''' Target directory — the root folder to scan for <c> .ini </c> files.
+''' Target directory: the root folder to scan for <c> .ini </c> files.
 ''' Only the <c> Dir </c> property is used; <c> Name </c> is intentionally empty.
 ''' </description>
 ''' </item>
@@ -37,7 +37,7 @@ Option Strict On
 ''' <item>
 ''' <b><c> CombineFile3 </c></b>
 ''' <description>
-''' Output file — the combined <c> .ini </c> file written after all source files are merged.
+''' Output file: the combined <c> .ini </c> file written after all source files are merged.
 ''' </description>
 ''' </item>
 '''
@@ -60,23 +60,24 @@ Public Module combinesettings
     Public Property CombineFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "combined.ini", "combined.ini", mustExist:=False)
 
     ''' <summary>
-    ''' When <c> True </c>, a section name appearing in more than one input file is
-    ''' treated as an error: the collisions are reported, the output is not saved, and
-    ''' a nonzero process exit code is set so scripted builds fail. When <c> False </c>
-    ''' (the default), same-named sections are merged key-wise as before, with a
-    ''' warning listing the collisions. Intended for the winapp2.ini build pipeline,
-    ''' where the staged input files are expected to be disjoint and any collision is a
-    ''' maintainer error. CLI: <c> -strict </c>
+    ''' Indicates whether a section name appearing in more than one input file fails the run.
+    ''' When <c> True </c>, the collisions are reported, the output is not saved, and a nonzero
+    ''' process exit code is set so scripted builds fail. When <c> False </c> (the default),
+    ''' same-named sections are merged key-wise, with a warning listing the collisions.
+    ''' Intended for the winapp2.ini build pipeline, where the staged input files are expected
+    ''' to be disjoint and any collision is a maintainer error. CLI: <c> -strict </c>
     ''' </summary>
     Public Property CombineStrictNames As Boolean = False
 
     ''' <summary>
-    ''' Indicates that the module settings have been modified from their defaults
+    ''' Indicates whether the module settings have been modified from their defaults
     ''' </summary>
     Public Property CombineModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Restores all Combine settings to their defaults and persists the reset to disk
+    ''' Restores all Combine settings to their defaults and records them in the settings
+    ''' file through <see cref="SaveModule"/>. Nothing is written to disk here.
+    ''' <see cref="FlushIfDirty"/> does that later, if the save gate allows it
     ''' </summary>
     Public Sub InitDefaultCombineSettings()
 

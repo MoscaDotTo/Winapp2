@@ -23,12 +23,13 @@ Imports System.IO
 ''' Combine is a winapp2ool module that takes all files with the ini extension within a target
 ''' directory (including its subdirectories) and combines them into a single ini file. When
 ''' duplicate section names are encountered, their unique keys are merged together into the
-''' output and a warning lists the collisions; with strict name checking enabled
+''' output and a warning lists the collisions. With strict name checking enabled
 ''' (<see cref="combinesettings.CombineStrictNames"/>, <c> -strict </c> on the CLI), collisions
-''' instead fail the run — the output is not saved and a nonzero exit code is set — since the
+''' instead fail the run: the output is not saved and a nonzero exit code is set, because the
 ''' build pipeline's staged inputs are expected to be disjoint.
 ''' <br />
-''' Files that cannot be parsed or have no sections are ignored.
+''' Files with no sections are skipped. A file that throws while we read or merge it is skipped
+''' too, but it marks the run failed (nonzero exit code) while the rest of the output is still saved.
 ''' <br /><br />
 ''' If the final combined output contains no sections, it will not be saved to disk
 ''' </summary>
@@ -50,20 +51,21 @@ Public Module Combine
     Public Const CombineLogEndPhrase As String = "Combination complete!"
 
     ''' <summary>
-    ''' Handles command line arguments for the Combine module
+    ''' Handles command line arguments for the Combine module, starting from the default
+    ''' settings rather than any saved ones, then runs the combine
     ''' </summary>
     '''
     ''' <remarks>
     ''' File arguments:
     ''' <list type="bullet">
-    ''' <item><c> -1d path </c> — Set the target directory</item>
-    ''' <item><c> -3d path </c> — Set the output directory</item>
-    ''' <item><c> -3f name </c> — Set the output file name</item>
+    ''' <item><c> -1d path </c> or <c> -targetdird path </c>: Set the target directory</item>
+    ''' <item><c> -3d path </c> or <c> -outputd path </c>: Set the output directory</item>
+    ''' <item><c> -3f name </c> or <c> -outputf name </c>: Set the output file name</item>
     ''' </list>
     ''' Flags:
     ''' <list type="bullet">
-    ''' <item><c> -strict </c> — toggles strict name checking: a section name appearing in
-    ''' more than one input file fails the run instead of being merged</item>
+    ''' <item><c> -strict </c>: toggles strict name checking, so a section name appearing in
+    ''' more than one input file fails the run and the output isn't saved</item>
     ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
@@ -81,7 +83,10 @@ Public Module Combine
     End Sub
 
     ''' <summary>
-    ''' Initializes the combine process, validates the target directory, and displays the results
+    ''' Combines the ini files under <paramref name="targetDir"/> into
+    ''' <paramref name="outputFile"/>, displays the results and waits for a key press. If
+    ''' <paramref name="targetDir"/> doesn't exist we only set an error header for the next menu,
+    ''' with no failing exit code.
     ''' </summary>
     '''
     ''' <param name="targetDir">
@@ -118,7 +123,11 @@ Public Module Combine
     End Sub
 
     ''' <summary>
-    ''' Processes all files in the target directory and combines them into a single ini file
+    ''' Combines every ini file under the target directory and its subdirectories into
+    ''' <paramref name="combinedOutput"/>, in <c> List.Sort </c> order of their paths and
+    ''' skipping the output file itself. We save the result unless it is empty or strict name
+    ''' checking found a collision, then store this run's log slice in
+    ''' <see cref="MostRecentCombineLog"/>.
     ''' </summary>
     '''
     ''' <param name="outputMenu">
@@ -242,9 +251,9 @@ Public Module Combine
     End Sub
 
     ''' <summary>
-    ''' Handles logging of exceptions thrown during the Combine process. <br />
-    ''' Uses a broad <c> Exception </c> catch intentionally — each file is processed independently
-    ''' and a parse failure on one file should not abort the remaining files.
+    ''' Logs an exception thrown while combining one file, marks the run failed, warns the user
+    ''' where to find the log, and saves the global log to disk. <see cref="processCombine"/>
+    ''' catches every exception per file so one bad file doesn't stop the rest.
     ''' </summary>
     '''
     ''' <param name="filepath">
@@ -275,7 +284,8 @@ Public Module Combine
     End Sub
 
     ''' <summary>
-    ''' Tries to combine a single ini file into the combined output, logging the success of this operation
+    ''' Combines a single ini file into the combined output and reports it to the user.
+    ''' A file with no sections is skipped with only a log line, and isn't counted.
     ''' </summary>
     '''
     ''' <param name="filepath">
@@ -287,7 +297,8 @@ Public Module Combine
     ''' </param>
     '''
     ''' <param name="validFileCount">
-    ''' The number of files that have been successfully combined so far
+    ''' The number of files that have been successfully combined so far. We increment it when
+    ''' <paramref name="filepath"/> has at least one section.
     ''' </param>
     '''
     ''' <param name="outputMenu">
@@ -339,8 +350,8 @@ Public Module Combine
 
     ''' <summary>
     ''' Updates the console with the current progress of the combination process while it runs. <br />
-    ''' Does nothing in silent mode or when output is redirected. cursor positioning requires a real
-    ''' console buffer and throws <c> IOException </c> against a pipe or file
+    ''' Does nothing in silent mode or when output is redirected, because cursor positioning requires
+    ''' a real console buffer and throws <c> IOException </c> against a pipe or file
     ''' </summary>
     '''
     ''' <param name="processedCount">
@@ -361,8 +372,9 @@ Public Module Combine
     End Sub
 
     ''' <summary>
-    ''' Merges the sections from a source file into the combined output,
-    ''' merging keys when sections with the same name already exist
+    ''' Merges the sections from a source file into the combined output, merging keys when a
+    ''' section with the same name (case-insensitive) already exists and recording that as a
+    ''' collision. A new section is added as the same object, not a copy.
     ''' </summary>
     '''
     ''' <param name="sourceFile">
@@ -412,9 +424,10 @@ Public Module Combine
     End Sub
 
     ''' <summary>
-    ''' Merges keys from a source section into an existing section in the output, preventing
-    ''' any keys with duplicate names and values from being added. <br />
-    ''' Note: Matching values with unlike names will still be added
+    ''' Merges keys from a source section into an existing section in the output, skipping any
+    ''' key whose name and value both match an existing key, ignoring case. A matching value
+    ''' under a different name is still added. Added keys keep their names and aren't
+    ''' renumbered, so the section can end up with two keys of the same name.
     ''' </summary>
     '''
     ''' <param name="sourceSection">
@@ -457,8 +470,9 @@ Public Module Combine
 
     ''' <summary>
     ''' Facilitates combining files from outside the module's UI.
-    ''' Returns the combined <c> iniFile </c> after processing; the caller may inspect the
-    ''' result but does not need to save it — <c> processCombine </c> writes to disk automatically.
+    ''' Returns the combined <c> iniFile </c> after processing. The caller doesn't need to save
+    ''' it, because <see cref="processCombine"/> already wrote it to disk unless it was empty or
+    ''' strict name checking found a collision.
     ''' </summary>
     '''
     ''' <param name="targetDirectory">
@@ -474,8 +488,9 @@ Public Module Combine
     ''' </param>
     '''
     ''' <returns>
-    ''' The resulting combined <c> iniFile </c> if successful, or an empty <c> iniFile </c>
-    ''' if the target directory does not exist or otherwise lacks valid ini files
+    ''' The resulting combined <c> iniFile </c>, or an empty <c> iniFile </c> if the target
+    ''' directory does not exist or otherwise lacks valid ini files. After a strict-mode collision
+    ''' it holds the merged sections even though nothing was saved.
     ''' </returns>
     Public Function RemoteCombine(targetDirectory As String,
                                    outputDir As String,
