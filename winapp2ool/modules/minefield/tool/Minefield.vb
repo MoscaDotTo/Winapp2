@@ -40,7 +40,8 @@ Module Minefield
     End Sub
 
     ''' <summary>
-    ''' Handles user input for the main Minefield menu
+    ''' Handles user input for the main Minefield menu. The menu has no options, so <c> 0 </c>
+    ''' exits and anything else is reported as invalid input.
     ''' </summary>
     ''' 
     ''' <param name="input">
