@@ -23,7 +23,8 @@ Option Strict On
 Public Module cc7patchersettings
 
     ''' <summary>
-    ''' The winapp2.ini file to be used as input for patching ccleaner.ini
+    ''' The winapp2.ini file to be used as input for patching ccleaner.ini. Only read when
+    ''' <c> DownloadWinapp2 </c> is <c> False </c>.
     ''' </summary>
     Public Property CC7PatcherFile1 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2.ini", mustExist:=True)
 
@@ -38,22 +39,25 @@ Public Module cc7patchersettings
     Public Property CC7PatcherFile3 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner.ini", mustExist:=False)
 
     ''' <summary>
-    ''' Indicates that winapp2.ini should be downloaded from GitHub
+    ''' Indicates whether to download the CCleaner 7 flavor of winapp2.ini from GitHub instead of
+    ''' reading <c> CC7PatcherFile1 </c>
     ''' </summary>
     Public Property DownloadWinapp2 As Boolean = True
 
     ''' <summary>
-    ''' Indicates that winapp2.ini should be trimmed before patching
+    ''' Indicates whether winapp2.ini should be trimmed before patching
     ''' </summary>
     Public Property TrimBeforePatching As Boolean = False
 
     ''' <summary>
-    ''' Indicates that the module settings have been modified from their defaults
+    ''' Indicates whether the module settings have been modified from their defaults
     ''' </summary>
     Public Property CC7PatcherModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Restores all CC7Patcher settings to their defaults and persists the reset to disk
+    ''' Restores all CC7Patcher settings to their defaults and records them in the settings
+    ''' file through <see cref="SaveModule"/>. Nothing is written to disk here.
+    ''' <see cref="FlushIfDirty"/> does that later, if the save gate allows it
     ''' </summary>
     Public Sub InitDefaultCC7PatcherSettings()
 

@@ -18,30 +18,40 @@
 Option Strict On
 
 ''' <summary>
-''' CC7Patcher is a winapp2ool module that patches the CCleaner 7 ccleaner.ini 
+''' CC7Patcher is a winapp2ool module that patches the CCleaner 7 ccleaner.ini
 ''' with CCleaner 7 syntax winapp2.ini entries to enable CCleaner 7 compatibility
 ''' <br /><br />
-''' The module can optionally download the latest winapp2.ini from GitHub and trim it
-''' before applying the patches to ccleaner.ini
+''' By default the module downloads the CCleaner 7 flavor of winapp2.ini from GitHub, ignoring
+''' whatever <see cref="CurrentWinappFlavor"/> says. It can instead read a local file, which it
+''' uses as is without converting it. It can trim the input before applying the patches to
+''' ccleaner.ini. Patching first removes the entries a previous patch added, so running it
+''' again replaces them rather than duplicating them.
 ''' </summary>
 Public Module CC7Patcher
 
     ''' <summary>
     ''' The <c> Author </c> key value stamped onto every entry by the CCleaner7 flavor
-    ''' (<c> cc7_additions.ini </c>). It uniquely identifies winapp2-authored sections in a
+    ''' (<c> cc7_additions.ini </c>). It identifies winapp2-authored sections in a
     ''' previously-patched <c> ccleaner.ini </c>, so they can be pruned before re-patching to
-    ''' keep patching idempotent. Kept in sync with the value in <c> cc7_additions.ini </c>
+    ''' keep patching idempotent. It must match the value in <c> cc7_additions.ini </c>, and
+    ''' nothing checks that it does.
     ''' </summary>
     Private Const CC7AuthorStamp As String = "Winapp2.ini Project"
 
     ''' <summary>
-    ''' Handles the command line arguments for CC7Patcher
+    ''' Handles the command line arguments for CC7Patcher, starting from the default settings
+    ''' rather than any saved ones, then runs the patcher
     ''' </summary>
     '''
     ''' <remarks>
-    ''' CC7Patcher args:
-    ''' -nodownload     : Disable downloading winapp2.ini (download is enabled by default)
-    ''' -trim           : Trim winapp2.ini before patching
+    ''' File arguments: <c> -1d </c>/<c> -1f </c> (or <c> -winapp2d </c>/<c> -winapp2f </c>) set
+    ''' the local winapp2.ini, <c> -2d </c>/<c> -2f </c> (or <c> -ccleanerd </c>/<c> -ccleanerf </c>)
+    ''' the ccleaner.ini to patch, and <c> -3d </c>/<c> -3f </c> the output file.
+    ''' Flags:
+    ''' <list type="bullet">
+    ''' <item><c> -nodownload </c>: read the local winapp2.ini instead of downloading (download is enabled by default)</item>
+    ''' <item><c> -trim </c>: Trim winapp2.ini before patching</item>
+    ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
 
@@ -60,7 +70,11 @@ Public Module CC7Patcher
     End Sub
 
     ''' <summary>
-    ''' Initializes the CC7Patcher process
+    ''' Gets the winapp2.ini input, trims it if <c> TrimBeforePatching </c> is on, patches
+    ''' ccleaner.ini with it, and displays the results. If ccleaner.ini or the local winapp2.ini
+    ''' is missing, or the download can't happen, we set an error header for the next menu and
+    ''' return. A missing file or being offline doesn't set a failing exit code. Trimming uses
+    ''' the Trim module's include and exclude settings.
     ''' </summary>
     Public Sub initCC7Patcher()
 
@@ -147,7 +161,9 @@ Public Module CC7Patcher
     End Sub
 
     ''' <summary>
-    ''' Patches ccleaner.ini with entries from winapp2.ini using Transmute's Add mode
+    ''' Reloads ccleaner.ini from <c> CC7PatcherFile2 </c>, prunes the sections a previous patch
+    ''' added, and adds the entries from <paramref name="winapp2Input"/> using Transmute's Add
+    ''' mode as plain ini rather than winapp2.ini. The result goes to <c> CC7PatcherFile3 </c>.
     ''' </summary>
     '''
     ''' <param name="winapp2Input">
@@ -155,7 +171,7 @@ Public Module CC7Patcher
     ''' </param>
     '''
     ''' <param name="menuOutput">
-    ''' The menu output section for logging
+    ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     Private Sub patchCCleaner(winapp2Input As iniFile,
                               ByRef menuOutput As MenuSection)
@@ -191,15 +207,16 @@ Public Module CC7Patcher
     End Sub
 
     ''' <summary>
-    ''' Removes every winapp2-authored section from <c> <paramref name="baseFile"/> </c> in place,
+    ''' Removes every winapp2-authored section from <paramref name="baseFile"/> in place,
     ''' so that the subsequent Transmute Add starts from a clean slate rather than duplicating keys
     ''' into sections a previous patch already created. This makes patching idempotent and lets a
     ''' dirty <c> ccleaner.ini </c> be updated to a newer winapp2.ini, including dropping entries
     ''' that no longer exist upstream. <br /> <br />
     '''
     ''' winapp2 sections are identified by the <c> Author=Winapp2.ini Project </c> stamp the
-    ''' CCleaner7 flavor applies to every entry (see <c> CC7AuthorStamp </c>); sections without it
-    ''' (CCleaner's own settings, user-authored customs) are left untouched
+    ''' CCleaner7 flavor applies to every entry (see <see cref="CC7AuthorStamp"/>), compared
+    ''' ignoring case. Sections without it (CCleaner's own settings, user-authored customs) are
+    ''' left untouched, and any section that carries it is removed, whoever wrote it.
     ''' </summary>
     '''
     ''' <param name="baseFile">

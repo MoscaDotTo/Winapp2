@@ -18,15 +18,16 @@
 Option Strict On
 
 ''' <summary>
-''' Displays the CC7Patcher module main menu and handles user input.
-''' Called by both <c> printCC7PatcherMenu </c> (to render) and <c> handleCC7PatcherInput </c>
-''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
+''' Displays the CC7Patcher module main menu and handles user input
 ''' </summary>
 '''
 Public Module cc7patchermainmenu
 
     ''' <summary>
-    ''' Builds the CC7Patcher main menu with all options and their dispatch handlers registered inline
+    ''' Builds the CC7Patcher main menu with all options and their dispatch handlers registered
+    ''' inline. Called by both <see cref="printCC7PatcherMenu"/> (to render) and
+    ''' <see cref="handleCC7PatcherInput"/> (to dispatch), so the displayed option numbers and
+    ''' the dispatch table are always in sync.
     ''' </summary>
     Private Function buildCC7PatcherMenu() As MenuSection
 
