@@ -27,7 +27,9 @@ Imports System.Globalization
 Module SettingsManager
 
     ''' <summary>
-    ''' Prompts the user to change an <c> iniFileChooser </c>'s parameters, marks both settings and the chooser as having been changed
+    ''' Opens the file chooser menu for an <c> iniFileChooser </c>. If the user changed its
+    ''' name or directory, we save the new path through <see cref="saveChooserParams"/>.
+    ''' Either way, the next menu header reports whether the update happened.
     ''' </summary>
     '''
     ''' <param name="chooser">
@@ -35,7 +37,24 @@ Module SettingsManager
     ''' </param>
     '''
     ''' <param name="settingsChangedSetting">
-    ''' A pointer to the boolean indicating that a module's settings have been modified from their default state
+    ''' The module's settings-changed flag. Set to <c> True </c> if the path changed.
+    ''' </param>
+    '''
+    ''' <param name="callingModule">
+    ''' The name of the module owning <paramref name="chooser"/> as it appears in the settings file
+    ''' </param>
+    '''
+    ''' <param name="settingName">
+    ''' The name of <paramref name="chooser"/> as it appears in the codebase
+    ''' </param>
+    '''
+    ''' <param name="settingChangedName">
+    ''' The name of <paramref name="settingsChangedSetting"/> as it appears in the codebase
+    ''' </param>
+    '''
+    ''' <param name="fileDesc">
+    ''' A description of the file, shown in the header message <br /><br />
+    ''' Optional, Default: <c> "" </c>
     ''' </param>
     Public Sub changeFileParams(ByRef chooser As iniFileChooser,
                                  ByRef settingsChangedSetting As Boolean,
@@ -59,10 +78,11 @@ Module SettingsManager
     End Sub
 
     ''' <summary>
-    ''' Persists an <c> iniFileChooser </c>'s current parameters into the settings file, marking the
-    ''' owning module's settings as having been changed
-    ''' <br /> Called by every path which lets the user pick a file, including
-    ''' <c> iniFileChooser.Load </c>'s missing-file prompt
+    ''' Writes an <c> iniFileChooser </c>'s current parameters and the owning module's
+    ''' settings-changed flag into <see cref="SettingsFile"/>, then calls
+    ''' <see cref="FlushIfDirty"/>, so they reach disk only when the save gate allows it.
+    ''' <br /> Every path which lets the user pick a file has to come through here, including
+    ''' <c> iniFileChooser.Load </c>'s missing-file prompt, or the choice is lost at exit.
     ''' </summary>
     '''
     ''' <param name="chooser">
@@ -70,7 +90,7 @@ Module SettingsManager
     ''' </param>
     '''
     ''' <param name="settingsChangedSetting">
-    ''' A pointer to the boolean indicating that a module's settings have been modified from their default state
+    ''' The module's settings-changed flag. Always set to <c> True </c>.
     ''' </param>
     '''
     ''' <param name="callingModule">
@@ -82,7 +102,7 @@ Module SettingsManager
     ''' </param>
     '''
     ''' <param name="settingChangedName">
-    ''' The name of <c> <paramref name="settingsChangedSetting"/> </c> as it appears in the codebase
+    ''' The name of <paramref name="settingsChangedSetting"/> as it appears in the codebase
     ''' </param>
     Public Sub saveChooserParams(chooser As iniFileChooser,
                            ByRef settingsChangedSetting As Boolean,
@@ -102,7 +122,8 @@ Module SettingsManager
 
     ''' <summary>
     ''' Inverts a Boolean setting property, marks its owning module's settings as having been changed,
-    ''' and persists both to disk
+    ''' and records both in <see cref="SettingsFile"/>. The <see cref="FlushIfDirty"/> that follows
+    ''' writes them to disk only when the save gate allows it.
     ''' </summary>
     '''
     ''' <remarks>
@@ -168,7 +189,10 @@ Module SettingsManager
     End Sub
 
     ''' <summary>
-    ''' Resets a module's settings to the defaults
+    ''' Resets a module's settings to the defaults by calling <paramref name="setDefaultParams"/>,
+    ''' then reports the reset in the next menu header. We don't flush here, so whatever
+    ''' <paramref name="setDefaultParams"/> records in <see cref="SettingsFile"/> reaches disk only
+    ''' when a later flush gets past the save gate.
     ''' </summary>
     ''' 
     ''' <param name="name">
@@ -190,8 +214,13 @@ Module SettingsManager
     End Sub
 
     ''' <summary>
-    ''' Denies the ability to access online-only functions if offline
+    ''' Returns whether winapp2ool is offline, so a caller can refuse an online-only action.
+    ''' When it is, we also log the refusal and set an error as the next menu header.
     ''' </summary>
+    '''
+    ''' <returns>
+    ''' <c> True </c> if the caller should refuse the action, <c> False </c> if it can go ahead
+    ''' </returns>
     Public Function denySettingOffline() As Boolean
 
         gLog("An action was unable to complete because winapp2ool is offline", isOffline)
@@ -202,8 +231,10 @@ Module SettingsManager
     End Function
 
     ''' <summary>
-    ''' Cycles an enum property to its next value, marks its settings changed flag,
-    ''' and updates the disk-writable settings representation
+    ''' Cycles an enum property to its next value in numeric order, wrapping to the lowest,
+    ''' marks its settings changed flag, and records both in <see cref="SettingsFile"/>.
+    ''' We don't flush here, so the change reaches disk only when a later flush gets past
+    ''' the save gate.
     ''' </summary>
     ''' 
     ''' <param name="propName">
@@ -223,11 +254,12 @@ Module SettingsManager
     ''' </param>
     ''' 
     ''' <param name="mSettingsChanged">
-    ''' Indicates that the calling modules settings have been changed
+    ''' The calling module's settings-changed flag. Set to <c> True </c> once the property
+    ''' changes.
     ''' </param>
-    ''' 
+    '''
     ''' <param name="settingsChangedName">
-    ''' The name of <c> <paramref name="mSettingsChanged"/> </c> as it appears in the codebase
+    ''' The name of <paramref name="mSettingsChanged"/> as it appears in the codebase
     ''' </param>
     ''' 
     ''' <param name="printColor">

@@ -28,10 +28,15 @@ Imports System.Text.RegularExpressions
 '''
 ''' Winapp2ool runs as the user who started it. Most users keep it beside winapp2.ini, which for CCleaner
 ''' means Program Files, where writing needs administrator rights. At startup we check the working folder and
-''' every folder named on the command line, and relaunch once through a UAC prompt if we can't write to one of
-''' them. A save that is refused later in the menu offers the same restart. A folder that needs administrator
-''' rights to write is also one other programs can't tamper with, so we never run elevated from a folder
-''' anyone can write to.
+''' every folder named with <c> -Nd </c> on the command line, and if we can't write to one of them we relaunch
+''' through a UAC prompt with the same arguments. In the menu, a save refused for lack of permission offers a
+''' restart with administrator rights instead.
+''' <br /><br />
+'''
+''' Elevating a copy that sits in Program Files is safe, because other programs can't replace the exe there.
+''' Nothing checks whether the folder winapp2ool.exe itself sits in is protected before we elevate, though, so a
+''' copy in a folder anyone can write to, such as Downloads, still runs elevated when it's told to save into
+''' Program Files.
 ''' </summary>
 Module ElevationHelper
 
@@ -41,8 +46,8 @@ Module ElevationHelper
     Private Const ErrorCancelled As Integer = 1223
 
     ''' <summary>
-    ''' Indicates whether the user has already turned down administrator rights this session, so we
-    ''' don't ask again
+    ''' Indicates whether a restart with administrator rights was turned down or failed to start this
+    ''' session. When <c> True </c>, <see cref="offerElevatedRestart"/> doesn't ask again.
     ''' </summary>
     Private _declined As Boolean = False
 
@@ -62,7 +67,8 @@ Module ElevationHelper
     ''' <summary>
     ''' Returns whether creating a file in <paramref name="folder"/> is refused for lack of permission.
     ''' A folder that doesn't exist yet is judged by the nearest folder above it that does, since that is
-    ''' where it would be created
+    ''' where it would be created. We test by creating a uniquely named <c> .tmp </c> file there, which is
+    ''' deleted when we close it.
     ''' </summary>
     '''
     ''' <param name="folder">
@@ -71,7 +77,8 @@ Module ElevationHelper
     '''
     ''' <returns>
     ''' <c> True </c> if Windows denies us write access to <paramref name="folder"/>, <br />
-    ''' <c> False </c> if we can write there, or if the write fails for a reason administrator rights won't fix
+    ''' <c> False </c> if we can write there, if no folder above it exists, or if the write fails for a
+    ''' reason administrator rights won't fix
     ''' </returns>
     Friend Function needsElevationToWrite(folder As String) As Boolean
 
@@ -118,7 +125,8 @@ Module ElevationHelper
     ''' <summary>
     ''' Returns the folders named on the command line with <c> -1d </c>, <c> -2d </c> and so on, resolved the
     ''' way the command line handler resolves them: a leading backslash is relative to the working folder, and a
-    ''' final segment containing a dot is a file name
+    ''' final segment containing a dot is a file name. Every <c> -Nd </c> value counts, including a folder the
+    ''' module only reads from.
     ''' </summary>
     '''
     ''' <param name="args">
@@ -148,14 +156,20 @@ Module ElevationHelper
     End Function
 
     ''' <summary>
-    ''' Relaunches winapp2ool with administrator rights when it can't write to its working folder or to a folder
-    ''' named on the command line, then waits for that copy to finish
+    ''' Relaunches winapp2ool through a UAC prompt, with the same arguments and working folder, when it isn't
+    ''' elevated and can't write to its working folder or to a folder from <see cref="commandLineFolders"/>,
+    ''' then waits for that copy to finish.
+    ''' <br /><br />
+    '''
+    ''' If the launch fails, a declined prompt included, we log why, put a red header on the next menu and carry
+    ''' on unelevated. Saves to the protected folder then fail, and <see cref="offerElevatedRestart"/> doesn't
+    ''' ask again.
     ''' </summary>
     '''
     ''' <returns>
     ''' The elevated copy's exit code, which the caller should exit with, <br />
-    ''' <c> Nothing </c> if this process should carry on: every folder is writable, we're already elevated,
-    ''' or the user declined the UAC prompt
+    ''' <c> Nothing </c> if this process should carry on: we're already elevated, every folder is writable,
+    ''' Windows returned no process, or the launch failed
     ''' </returns>
     Friend Function relaunchElevatedIfNeeded() As Integer?
 
@@ -198,7 +212,13 @@ Module ElevationHelper
 
     ''' <summary>
     ''' Offers to restart winapp2ool with administrator rights after a save to <paramref name="folder"/> was refused.
-    ''' Does nothing in silent mode, when we're already elevated, or once the user has turned the offer down
+    ''' Does nothing in silent mode, when we're already elevated, or once a restart has been turned down or has
+    ''' failed this session. Any answer but <c> y </c> turns it down.
+    ''' <br /><br />
+    '''
+    ''' On <c> y </c> we flush settings if Saving Settings is on, start an elevated copy with no arguments in the
+    ''' same working folder, and exit with code 0 without waiting for it, so the refused save has to be redone in
+    ''' the new window. If the launch fails, a declined prompt included, we log why and return.
     ''' </summary>
     '''
     ''' <param name="folder">
@@ -240,7 +260,9 @@ Module ElevationHelper
     End Sub
 
     ''' <summary>
-    ''' Starts another copy of winapp2ool through a UAC prompt, in the current working folder
+    ''' Starts another copy of the running winapp2ool.exe with the <c> runas </c> verb, so Windows asks for
+    ''' administrator rights through UAC, in the current working folder. Throws <see cref="Win32Exception"/>
+    ''' if the launch fails, with native error 1223 when the user declines the prompt.
     ''' </summary>
     '''
     ''' <param name="arguments">
@@ -264,7 +286,9 @@ Module ElevationHelper
     End Function
 
     ''' <summary>
-    ''' Records that administrator rights were refused, so we don't ask again this session
+    ''' Records that a launch with administrator rights failed, so <see cref="offerElevatedRestart"/> doesn't
+    ''' ask again this session, and logs why: a declined UAC prompt, or the error's own message for any
+    ''' other failure
     ''' </summary>
     '''
     ''' <param name="ex">

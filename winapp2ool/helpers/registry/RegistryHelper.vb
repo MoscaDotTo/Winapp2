@@ -17,29 +17,53 @@
 Option Strict On
 Imports Microsoft.Win32
 ''' <summary>
-''' This module holds any functions winapp2ool might require for accessing and manipulating the windows registry
+''' Opens Windows registry keys read-only, one function per hive
 ''' </summary>
 Module RegistryHelper
     ''' <summary>Returns the requested key or subkey from the HKEY_LOCAL_MACHINE registry hive</summary>
-    ''' <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
+    '''
+    ''' <param name="subkey">
+    ''' The path to a subkey in the hive. <c> "" </c> opens the hive's root key. <br /><br />
+    ''' Optional, Default: <c> "" </c>
+    ''' </param>
+    '''
+    ''' <returns>The key, opened read-only, or <c> Nothing </c> if it doesn't exist</returns>
     Public Function getLMKey(Optional subkey As String = "") As RegistryKey
         Return Registry.LocalMachine.OpenSubKey(subkey)
     End Function
 
     ''' <summary>Returns the requested key or subkey from the HKEY_CLASSES_ROOT registry hive</summary>
-    ''' <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
+    '''
+    ''' <param name="subkey">
+    ''' The path to a subkey in the hive. <c> "" </c> opens the hive's root key. <br /><br />
+    ''' Optional, Default: <c> "" </c>
+    ''' </param>
+    '''
+    ''' <returns>The key, opened read-only, or <c> Nothing </c> if it doesn't exist</returns>
     Public Function getCRKey(Optional subkey As String = "") As RegistryKey
         Return Registry.ClassesRoot.OpenSubKey(subkey)
     End Function
 
     ''' <summary>Returns the requested key or subkey from the HKEY_CURRENT_USER registry hive</summary>
-    ''' <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
+    '''
+    ''' <param name="subkey">
+    ''' The path to a subkey in the hive. <c> "" </c> opens the hive's root key. <br /><br />
+    ''' Optional, Default: <c> "" </c>
+    ''' </param>
+    '''
+    ''' <returns>The key, opened read-only, or <c> Nothing </c> if it doesn't exist</returns>
     Public Function getCUKey(Optional subkey As String = "") As RegistryKey
         Return Registry.CurrentUser.OpenSubKey(subkey)
     End Function
 
     ''' <summary>Returns the requested key or subkey from the HKEY_USERS registry hive</summary>
-    ''' <param name="subkey">An optional string specifying the path to a subkey in the hive</param>
+    '''
+    ''' <param name="subkey">
+    ''' The path to a subkey in the hive. <c> "" </c> opens the hive's root key. <br /><br />
+    ''' Optional, Default: <c> "" </c>
+    ''' </param>
+    '''
+    ''' <returns>The key, opened read-only, or <c> Nothing </c> if it doesn't exist</returns>
     Public Function getUserKey(Optional subkey As String = "") As RegistryKey
         Return Registry.Users.OpenSubKey(subkey)
     End Function

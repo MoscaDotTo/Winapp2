@@ -34,7 +34,8 @@ Module FrameworkCheck
 
     ''' <summary>
     ''' The smallest <c> Release </c> value for each .NET Framework 4.x version, from Microsoft's
-    ''' "determine which .NET Framework versions are installed" documentation
+    ''' "determine which .NET Framework versions are installed" documentation. Lookups match the
+    ''' version exactly, so a version missing here, such as <c> v4.8.0 </c> or a later 4.8.x, is unknown.
     ''' </summary>
     Private ReadOnly MinimumReleases As New Dictionary(Of Version, Integer) From {
         {New Version(4, 5), 378389}, {New Version(4, 5, 1), 378675}, {New Version(4, 5, 2), 379893},
@@ -44,7 +45,9 @@ Module FrameworkCheck
     }
 
     ''' <summary>
-    ''' Returns the installed .NET Framework 4.x <c> Release </c> number, or 0 if none is recorded
+    ''' Returns the installed .NET Framework 4.x <c> Release </c> number, read from
+    ''' <c> HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full </c> through the 32-bit registry
+    ''' view, or 0 if the key is missing or its <c> Release </c> value isn't a DWORD
     ''' </summary>
     Friend Function installedFrameworkRelease() As Integer
 
@@ -73,7 +76,8 @@ Module FrameworkCheck
     '''
     ''' <returns>
     ''' The minimum <c> Release </c> number, <br />
-    ''' <c> Nothing </c> if <paramref name="frameworkName"/> isn't a .NET Framework 4.x version we know
+    ''' <c> Nothing </c> if <paramref name="frameworkName"/> isn't a .NET Framework version listed in
+    ''' <see cref="MinimumReleases"/>
     ''' </returns>
     Friend Function requiredFrameworkRelease(frameworkName As String) As Integer?
 
@@ -109,8 +113,11 @@ Module FrameworkCheck
     ''' </param>
     '''
     ''' <returns>
-    ''' <c> True </c> or <c> False </c> for a Framework version we know, <br />
-    ''' <c> Nothing </c> when we can't tell, including for anything that isn't .NET Framework 4.x
+    ''' <c> True </c> if the installed <c> Release </c> number is at least the one
+    ''' <paramref name="frameworkName"/> needs, <br />
+    ''' <c> False </c> if it is lower, <br />
+    ''' <c> Nothing </c> when <see cref="requiredFrameworkRelease"/> doesn't know the version,
+    ''' including for anything that isn't .NET Framework 4.x
     ''' </returns>
     Friend Function frameworkRequirementMet(frameworkName As String) As Boolean?
 
@@ -122,7 +129,10 @@ Module FrameworkCheck
     End Function
 
     ''' <summary>
-    ''' Returns the target framework compiled into an assembly, read from its bytes without loading it to run
+    ''' Returns the target framework compiled into an assembly's <see cref="TargetFrameworkAttribute"/>.
+    ''' We load the bytes reflection-only, so none of the assembly's code runs, but the assembly stays
+    ''' loaded in this process until it exits. Loading the same assembly a second time throws
+    ''' <see cref="FileLoadException"/>, so a repeat call in the same process returns <c> Nothing </c>.
     ''' </summary>
     '''
     ''' <param name="assemblyBytes">
@@ -131,7 +141,8 @@ Module FrameworkCheck
     '''
     ''' <returns>
     ''' The target framework name, such as <c> .NETFramework,Version=v4.8 </c>, <br />
-    ''' <c> Nothing </c> if the bytes aren't a .NET assembly or carry no target framework
+    ''' <c> Nothing </c> if the bytes aren't a .NET assembly, carry no target framework, or were
+    ''' already loaded by an earlier call
     ''' </returns>
     Friend Function targetFrameworkOf(assemblyBytes As Byte()) As String
 
@@ -160,7 +171,8 @@ Module FrameworkCheck
     End Function
 
     ''' <summary>
-    ''' Returns the target framework of the running winapp2ool
+    ''' Returns the target framework of the running winapp2ool, or <c> Nothing </c> if there's no
+    ''' entry assembly or it carries no <see cref="TargetFrameworkAttribute"/>
     ''' </summary>
     Friend Function runningTargetFramework() As String
 
@@ -175,6 +187,12 @@ Module FrameworkCheck
     ''' <param name="frameworkName">
     ''' A target framework name, such as <c> .NETFramework,Version=v4.8 </c>
     ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> .NET Framework </c> and the version for a .NET Framework name, <br />
+    ''' any other parseable name unchanged, <br />
+    ''' <c> "a newer version of .NET" </c> if <paramref name="frameworkName"/> is <c> Nothing </c> or can't be parsed
+    ''' </returns>
     Friend Function describeFramework(frameworkName As String) As String
 
         Try

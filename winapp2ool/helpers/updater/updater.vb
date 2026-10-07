@@ -14,28 +14,47 @@
 '
 '    You should have received a copy of the GNU General Public License
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
+
 Option Strict On
+
 Imports System.IO
 Imports System.Net
 Imports System.Reflection
 Imports System.Security.Cryptography
 Imports System.Text
-''' <summary> Holds functions used for checking for and updating winapp2.ini and winapp2ool.exe </summary>
+
+''' <summary>
+''' Checks GitHub for newer versions of winapp2ool and winapp2.ini, and replaces the running
+''' winapp2ool.exe with a signed update
+''' </summary>
 Public Module updater
 
-    ''' <summary> The latest available verson of winapp2ool from GitHub </summary>
+    ''' <summary>
+    ''' The winapp2ool version in <c> version.txt </c> on the branch the Beta setting selects, or an
+    ''' empty string until a check reads it. Once read, we don't read it again this session.
+    ''' </summary>
     Public Property latestVersion As String = ""
-    ''' <summary> The latest available version of winapp2.ini from GitHub </summary>
+    ''' <summary>The version of the current flavor's winapp2.ini on GitHub, or an empty string until a check reads it</summary>
     Public Property latestWa2Ver As String = ""
-    ''' <summary> The local version of winapp2.ini (if available) </summary>
+    ''' <summary>
+    ''' The version of the winapp2.ini in the working folder, or a string starting <c> 000000 </c> when
+    ''' there's no file, no version line, or no completed check
+    ''' </summary>
     Public Property localWa2Ver As String = "000000"
-    ''' <summary> Indicates that a winapp2ool update is available from GitHub </summary>
+    ''' <summary>
+    ''' Indicates whether <c> version.txt </c> names a newer winapp2ool than the one running. We set it from
+    ''' <c> version.txt </c> alone: <see cref="autoUpdate"/> checks the signature and the .NET Framework only
+    ''' when it installs the update.
+    ''' </summary>
     Public Property updateIsAvail As Boolean = False
-    ''' <summary> Indicates that a winapp2.ini update is available from GitHub </summary>
+    ''' <summary>Indicates whether the winapp2.ini on GitHub has a higher version number than the local one</summary>
     Public Property waUpdateIsAvail As Boolean = False
-    ''' <summary> The local version of winapp2ool </summary>
+    ''' <summary>The file version of the running winapp2ool, or an empty string until the launcher or an update check reads it</summary>
     Public Property currentVersion As String = ""
-    ''' <summary> Indicates that an update check has been performed </summary>
+    ''' <summary>
+    ''' Indicates whether an update check has completed this session. A failed check leaves it
+    ''' <c> False </c>, so a later call to <see cref="checkUpdates"/> can run the check again.
+    ''' </summary>
     Public Property checkedForUpdates As Boolean = False
 
     ''' <summary>
@@ -80,8 +99,21 @@ Public Module updater
 
     End Function
 
-    ''' <summary> Checks the versions of winapp2ool, .NET, and winapp2.ini and notes which, if any, are out of date </summary>
-    ''' <param name="cond"> Indicates that the update check should be performed <br /> Optional, Default: <c> False </c> </param>
+    ''' <summary>
+    ''' Compares the winapp2ool and winapp2.ini versions on GitHub with the local ones, sets
+    ''' <see cref="updateIsAvail"/> and <see cref="waUpdateIsAvail"/>, and puts a header naming any updates on
+    ''' the next menu. Does nothing when <paramref name="cond"/> is <c> False </c>, when a check has already
+    ''' completed, or when winapp2ool is offline.
+    ''' <br /><br />
+    '''
+    ''' If either remote version can't be read, we show a failure header and retest the connection, which can
+    ''' put winapp2ool into offline mode. A winapp2ool version that won't parse fails the check without the retest.
+    ''' </summary>
+    '''
+    ''' <param name="cond">
+    ''' Indicates whether to run the check <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Public Sub checkUpdates(Optional cond As Boolean = False)
         If checkedForUpdates Or Not cond Then Return
 
@@ -127,7 +159,7 @@ Public Module updater
 
     End Sub
 
-    '''<summary> Performs the version checking for winapp2ool.exe </summary>
+    ''' <summary>Reads <see cref="latestVersion"/> from <c> version.txt </c>, unless an earlier check already read it</summary>
     Private Sub toolVersionCheck()
         ' Let's just assume winapp2ool didn't update after we've checked for updates
         If Not latestVersion.Length = 0 Then Return
@@ -191,7 +223,7 @@ Public Module updater
     End Function
 
     ''' <summary>
-    ''' Reports whether <paramref name="candidate"/> is a strictly newer winapp2ool version than <paramref name="running"/>
+    ''' Returns whether <paramref name="candidate"/> is a strictly newer winapp2ool version than <paramref name="running"/>
     ''' </summary>
     '''
     ''' <param name="candidate">
@@ -236,7 +268,7 @@ Public Module updater
     End Function
 
     ''' <summary>
-    ''' Reports whether <paramref name="dir"/> is the folder that holds the running winapp2ool executable
+    ''' Returns whether <paramref name="dir"/> is the folder that holds the running winapp2ool executable
     ''' </summary>
     '''
     ''' <param name="dir">
@@ -273,17 +305,36 @@ Public Module updater
 
     End Function
 
-    ''' <summary> Handles the case where the update check has failed </summary>
-    ''' <param name="name"> The name of the component whose update check failed </param>
-    ''' <param name="chkOnline"> A flag specifying that the internet connection should be retested </param>
+    ''' <summary>
+    ''' Puts a red "update check failed" header on the next menu and resets <see cref="localWa2Ver"/>
+    ''' to <c> 000000 </c>
+    ''' </summary>
+    '''
+    ''' <param name="name">The word shown before "update check failed" in the header</param>
+    '''
+    ''' <param name="chkOnline">
+    ''' Indicates whether to retest the connection, which can put winapp2ool into offline mode <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
     Private Sub updateCheckFailed(name As String, Optional chkOnline As Boolean = False)
         setNextMenuHeaderText($"/!\ {name} update check failed. /!\", printColor:=ConsoleColor.Red)
         localWa2Ver = "000000"
         If chkOnline Then chkOfflineMode()
     End Sub
 
-    ''' <summary> Attempts to return the version number from a file found on disk, returns <c> "000000" </c> if it's unable to do so </summary>
-    ''' <param name="path"> The path of the file whose version number will be queried </param>
+    ''' <summary>Returns the version number from the first line of a winapp2.ini on disk</summary>
+    '''
+    ''' <param name="path">
+    ''' The path of the file to read <br /><br />
+    ''' Optional, Default: <c> "" </c> <br />
+    ''' which reads winapp2.ini in the working folder
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The version number, <br />
+    ''' <c> "000000 (file not found)" </c> if the file doesn't exist, <br />
+    ''' <c> "000000 (version not found)" </c> if its first line doesn't carry one
+    ''' </returns>
     Private Function getVersionFromLocalFile(Optional path As String = "") As String
         ' The main menu's winapp2.ini update downloads into the working folder, so that's the copy we compare
         If path.Length = 0 Then path = Environment.CurrentDirectory & "\winapp2.ini"
@@ -291,22 +342,32 @@ Public Module updater
         Return versionFromHeader(getFileDataAtLineNum(path))
     End Function
 
-    ''' <summary> Updates the offline status of winapp2ool </summary>
+    ''' <summary>Tests the connection to GitHub and sets <see cref="isOffline"/> from the result, so it can also bring winapp2ool back online</summary>
     Public Sub chkOfflineMode()
         gLog("Checking online status")
         isOffline = Not checkOnline()
     End Sub
 
     ''' <summary>
-    ''' Replaces the running winapp2ool executable with the latest signed build from GitHub, then relaunches it
-    ''' with the same arguments and exits. The running version is kept beside the new one as
-    ''' <c> winapp2ool v&lt;version&gt;.exe.bak </c>
+    ''' Replaces the running winapp2ool executable with the build GitHub publishes on the branch the Beta setting
+    ''' selects, then relaunches it with the same arguments and exits. The running version is kept beside the
+    ''' new one as <c> winapp2ool v&lt;version&gt;.exe.bak </c>. A build with no
+    ''' <see cref="TrustedUpdateKeys"/> refuses before downloading anything.
     ''' <br /><br />
     '''
-    ''' The download stays in memory until its signature checks out against <see cref="TrustedUpdateKeys"/>.
-    ''' We then stage it next to the executable, confirm the staged copy is the bytes we verified, that it is
-    ''' winapp2ool, and that it is a newer version, since an old build carries a valid signature too.
-    ''' Any failure leaves the running executable in place and tells the user why
+    ''' We download the exe and its <c> .sig </c> into memory, and install nothing unless the signature verifies
+    ''' against <see cref="TrustedUpdateKeys"/>. The signature covers only the exe's bytes, so we then check, in
+    ''' order, that this PC has the .NET Framework the new build targets (a target we don't recognize counts as
+    ''' missing, and so does a build already inspected earlier in this process, so retrying the same update in
+    ''' one session is refused), that the copy we stage next to the executable hashes the same as the verified bytes, that its
+    ''' assembly name is winapp2ool, and that its file version is newer than ours, since an old build carries a
+    ''' valid signature too.
+    ''' <br /><br />
+    '''
+    ''' A refused check, a download error or a file error stops the update, discards the staged copy and reports
+    ''' why. A missing <c> .sig </c> is reported as a failed download. The running executable
+    ''' stays in place unless putting it back after a failed swap also fails. We don't offer to restart elevated
+    ''' when the executable's folder refuses the write.
     ''' </summary>
     Public Sub autoUpdate()
 
@@ -358,7 +419,9 @@ Public Module updater
     End Sub
 
     ''' <summary>
-    ''' Downloads, verifies, stages, and swaps in the latest winapp2ool executable
+    ''' Downloads the latest winapp2ool executable and its signature, verifies the signature, checks the .NET
+    ''' Framework it needs, then stages it, checks the staged copy, and swaps it in. Download and file errors
+    ''' go to the caller.
     ''' </summary>
     '''
     ''' <param name="exePath">
@@ -441,7 +504,8 @@ Public Module updater
     End Function
 
     ''' <summary>
-    ''' Checks that the staged executable is the verified download, is winapp2ool, and is newer than the running version
+    ''' Checks that the staged executable has the same SHA-256 hash as the verified download, has the assembly
+    ''' name <c> winapp2ool </c>, and has a file version newer than the running one
     ''' </summary>
     '''
     ''' <param name="stagedPath">
@@ -489,8 +553,9 @@ Public Module updater
     End Function
 
     ''' <summary>
-    ''' Moves the running executable aside as a backup and puts the staged one in its place,
-    ''' restoring the backup if the second move fails
+    ''' Moves the running executable aside as a backup, replacing any file already at
+    ''' <paramref name="backupPath"/>, and puts the staged one in its place. If the second move fails, we
+    ''' move the backup back when nothing has taken its place, and let the error through to the caller.
     ''' </summary>
     '''
     ''' <param name="exePath">
@@ -553,7 +618,8 @@ Public Module updater
 
     ''' <summary>
     ''' Starts the freshly installed executable with this process's original arguments and working directory,
-    ''' then exits
+    ''' then exits with code 0 without waiting for it. The new process gets this process's rights, so no UAC
+    ''' prompt appears. If it won't start, we tell the user and return instead of exiting.
     ''' </summary>
     '''
     ''' <param name="exePath">
@@ -587,8 +653,10 @@ Public Module updater
     End Sub
 
     ''' <summary>
-    ''' Tells the user why an update did not happen and records it in the log. Silent and command line
-    ''' runs also get a nonzero exit code
+    ''' Tells the user why an update did not happen and records it in the log. Sets exit code 1 when
+    ''' <c> -s </c> is on the command line or a command line module has run this session (the flag stays
+    ''' set if the menu opens afterward). A non-silent
+    ''' <c> -autoupdate </c> run updates before any module starts, so this doesn't set its exit code.
     ''' </summary>
     '''
     ''' <param name="reason">
@@ -657,7 +725,8 @@ Public Module updater
     End Function
 
     ''' <summary>
-    ''' Joins arguments into a single command line string, quoting each with <see cref="QuoteArgument"/>
+    ''' Returns the arguments joined with spaces into a single command line string, each quoted with
+    ''' <see cref="QuoteArgument"/>
     ''' </summary>
     '''
     ''' <param name="args">
@@ -669,7 +738,13 @@ Public Module updater
 
     End Function
 
-    '''<summary> Deletes a file from the disk if it exists </summary>
+    ''' <summary>
+    ''' Deletes a file from the disk if it exists. An <see cref="IOException"/> goes to
+    ''' <see cref="handleIOException"/>, which marks the run failed. Other errors, such as a refused
+    ''' deletion, go to the caller.
+    ''' </summary>
+    '''
+    ''' <param name="path">The path of the file to delete</param>
     Public Sub fDelete(path As String)
         Try
             If File.Exists(path) Then File.Delete(path)

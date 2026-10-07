@@ -27,6 +27,11 @@ Imports System.Security.Cryptography
 ''' The signature is the 64-byte IEEE P1363 form (r followed by s), stored base64 on a single line in
 ''' <c> winapp2ool.exe.sig </c>. <c> scripts\New-UpdateSigningKey.ps1 </c> makes a signing key and
 ''' <c> scripts\Sign-Winapp2oolRelease.ps1 </c> writes the <c> .sig </c> file.
+''' <br /><br />
+'''
+''' The signature covers the exe's bytes and nothing else. It doesn't name a version, branch or file,
+''' so an older signed build passes this check too, and <see cref="autoUpdate"/> refuses it with a
+''' separate version check.
 ''' </summary>
 Module UpdateSignature
 
@@ -43,8 +48,9 @@ Module UpdateSignature
 
     ''' <summary>
     ''' The public keys trusted to sign winapp2ool releases, each the base64 of the raw point
-    ''' X followed by Y. The updater accepts a signature from any key in the list. 
-    ''' An empty list will cause the build to refuse to update itself.
+    ''' X followed by Y. The updater accepts a signature from any key in the list.
+    ''' The list is compiled in, so removing a key protects only the builds released after its removal.
+    ''' A build with an empty list refuses every self-update.
     ''' </summary>
     Friend ReadOnly Property TrustedUpdateKeys As IReadOnlyList(Of String) = New String() {
                              "gkxCzJm0znpBIcJ5fNR2u7AZRIUEbNs0zuPPJVMvBD7ViNrxDZyRKRX0XyuQACt4UqjsqiotqUafAISkrJaYBw==",
@@ -52,7 +58,8 @@ Module UpdateSignature
                             }
 
     ''' <summary>
-    ''' Checks a signature over <paramref name="data"/> against a set of trusted public keys
+    ''' Returns whether any of <paramref name="trustedKeys"/> verifies <paramref name="signatureText"/>
+    ''' as an ECDSA P-256 signature over the SHA-256 hash of <paramref name="data"/>
     ''' </summary>
     '''
     ''' <param name="data">
@@ -60,11 +67,12 @@ Module UpdateSignature
     ''' </param>
     '''
     ''' <param name="signatureText">
-    ''' The base64 signature as published, surrounding whitespace allowed
+    ''' The base64 signature as published. We ignore spaces, tabs and line breaks anywhere in it, and other whitespace only at the ends.
     ''' </param>
     '''
     ''' <param name="trustedKeys">
-    ''' The base64 public keys to accept a signature from
+    ''' The base64 public keys to accept a signature from. A malformed key is skipped and the
+    ''' rest are still tried.
     ''' </param>
     '''
     ''' <returns>
@@ -91,7 +99,7 @@ Module UpdateSignature
     End Function
 
     ''' <summary>
-    ''' Checks a decoded signature against a single base64 public key
+    ''' Returns whether a single base64 public key verifies a decoded signature
     ''' </summary>
     '''
     ''' <param name="data">
@@ -154,7 +162,7 @@ Module UpdateSignature
     ''' </summary>
     '''
     ''' <param name="text">
-    ''' The base64 text, surrounding whitespace allowed
+    ''' The base64 text. We ignore spaces, tabs and line breaks anywhere in it, and other whitespace only at the ends.
     ''' </param>
     '''
     ''' <param name="length">
