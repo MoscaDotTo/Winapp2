@@ -22,14 +22,19 @@ Option Strict On
 ''' </summary>
 Public Module launcher
 
-    ''' <summary> 
-    ''' Performs startup checks and then initializes the winapp2ool main menu module 
+    ''' <summary>
+    ''' Performs startup checks, loads settings and handles the command line, then opens the
+    ''' main menu. A silent (<c> -s </c>) run exits after the command line with the run's exit
+    ''' code instead, saving the global log first when that code is nonzero or
+    ''' <c> -writelog </c> was given. A command line run without <c> -s </c> opens the main
+    ''' menu once its module returns.
     ''' </summary>
-    ''' 
-    ''' <remarks> 
-    ''' Winapp2ool requires an internet connection for some functions 
-    ''' .NET 4.6 or higher is required to update the executable 
-    ''' When run from the temporary folder, winapp2ool.exe update functionality is disabled
+    '''
+    ''' <remarks>
+    ''' The startup checks may relaunch winapp2ool elevated, decide whether we're offline
+    ''' (skipped under <c> -offline </c>), and check the installed .NET Framework against the one
+    ''' this build targets. An out-of-date framework, or running from the <c> %temp% </c>
+    ''' folder, sets <see cref="cantDownloadExecutable"/>.
     ''' </remarks>
     Public Sub main()
 
@@ -105,7 +110,7 @@ Public Module launcher
     ''' no resizable console window, so <c> Console.WindowWidth </c> would throw <c> IOException </c>.
     ''' We detect that case via <c> Console.IsOutputRedirected </c> and skip resizing entirely.
     ''' This runs before the command line (and therefore <c> SuppressOutput </c>) is parsed, so we
-    ''' also pre-scan the raw args for <c> -s </c> mirroring the <c> -offline </c> pre-scan in
+    ''' also pre-scan the raw args for <c> -s </c>, mirroring the <c> -offline </c> pre-scan in
     ''' <see cref="main"/> to avoid briefly resizing a window that silent mode is about to abandon.
     ''' The target width/height are clamped to the host's largest permitted window so a small terminal
     ''' can't trip <c> ArgumentOutOfRangeException </c>, and the assignment is wrapped defensively for
