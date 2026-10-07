@@ -64,26 +64,6 @@ Public Class KeyModificationAnalyzer
     End Sub
 
     ''' <summary>
-    ''' Records the key-level changes between a removed entry and an added entry. When the keys
-    ''' differ, we first discard any earlier results for the added entry. Doesn't add to
-    ''' <c> ModifiedEntryNames </c> or record a <c> Name </c> change.
-    ''' </summary>
-    '''
-    ''' <param name="oldSection">
-    ''' The old (removed) entry being compared against
-    ''' </param>
-    ''' 
-    ''' <param name="newSection">
-    ''' The new (added) entry being analyzed
-    ''' </param>
-    Public Sub FindModificationsForAddedEntry(oldSection As iniSection,
-                                              newSection As iniSection)
-
-        AnalyzeAndTrackSectionDiff(oldSection, newSection, addToModified:=False, clearExisting:=True)
-
-    End Sub
-
-    ''' <summary>
     ''' Variant of <see cref="FindModifications"/> that accepts a flat key list instead of an
     ''' <c> iniSection </c> for the old side, for keys combined from several old entries. A list
     ''' keeps keys that share a name across source entries (e.g. two FileKey1 values), which an
@@ -105,8 +85,9 @@ Public Class KeyModificationAnalyzer
     End Sub
 
     ''' <summary>
-    ''' Variant of <see cref="FindModificationsForAddedEntry"/>
-    ''' that accepts a flat key list
+    ''' Records the key-level changes between keys combined from one or more removed entries and
+    ''' an added entry. When the keys differ, we first discard any earlier results for the added
+    ''' entry. Doesn't add to <c> ModifiedEntryNames </c> or record a <c> Name </c> change.
     ''' </summary>
     '''
     ''' <param name="oldKeys">

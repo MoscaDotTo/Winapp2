@@ -40,24 +40,6 @@ Public Module WinappDebug
     Public Property MostRecentLintLog As New System.Text.StringBuilder
 
     ''' <summary>
-    ''' Meant to hold the milliseconds spent in the parallel per-entry block of the most recent
-    ''' <see cref="Debug"/> call. Nothing assigns it, so it stays <c> 0 </c>.
-    ''' </summary>
-    Public Property LastParallelElapsedMs As Long = 0
-
-    ''' <summary>
-    ''' Meant to hold the milliseconds spent alphabetizing entries in the most recent
-    ''' <see cref="Debug"/> call. Nothing assigns it, so it stays <c> 0 </c>.
-    ''' </summary>
-    Public Property LastAlphabetizeElapsedMs As Long = 0
-
-    ''' <summary>
-    ''' Meant to hold the total milliseconds of the most recent <see cref="Debug"/> call.
-    ''' Nothing assigns it, so it stays <c> 0 </c>.
-    ''' </summary>
-    Public Property LastLintElapsedMs As Long = 0
-
-    ''' <summary>
     ''' The lint rules, in Scan Settings menu order. Each <c> lint* </c> property below picks
     ''' its rule from this list by index, so reordering the list reassigns them.
     ''' </summary>
@@ -1190,14 +1172,10 @@ Public Module WinappDebug
     ''' An <c> iniKey </c> whose value will be audited for syntax errors
     ''' </param>
     '''
-    ''' <param name="enVars">
-    ''' Unused. The check goes through <see cref="enVarBrokenPrefix"/> instead
-    ''' </param>
-    '''
     ''' <param name="cond">
     ''' Indicates whether to run the check
     ''' </param>
-    Private Sub fixBrokenEnVars(result As EntryLintResult, key As iniKey, enVars As String(), cond As Boolean)
+    Private Sub fixBrokenEnVars(result As EntryLintResult, key As iniKey, cond As Boolean)
 
         If Not cond Then Return
 
@@ -1250,7 +1228,7 @@ Public Module WinappDebug
         fullKeyErr(result, key, "Double '%' found in environment variable", key.vHas("%%"), lintSyntax.ShouldRepair, key.Value, Function() key.Value.Replace("%%", "%"))
 
         Dim envMatches = envVarRegex.Matches(key.Value)
-        fixBrokenEnVars(result, key, EnVars, lintSyntax.ShouldScan AndAlso key.vHas("%") AndAlso envMatches.Count = 0 OrElse key.vHasAny(EnVars) AndAlso Not key.vHas("%"))
+        fixBrokenEnVars(result, key, lintSyntax.ShouldScan AndAlso key.vHas("%") AndAlso envMatches.Count = 0 OrElse key.vHasAny(EnVars) AndAlso Not key.vHas("%"))
 
         For Each m As Match In envMatches
 
@@ -1275,10 +1253,6 @@ Public Module WinappDebug
     ''' <paramref name="key"/> even if the repair then fails.
     ''' </summary>
     '''
-    ''' <param name="result">
-    ''' Unused
-    ''' </param>
-    '''
     ''' <param name="key">
     ''' A misformatted <c> iniKey </c> to attempt to repair
     ''' </param>
@@ -1291,8 +1265,7 @@ Public Module WinappDebug
     ''' <c> True </c> if the key now has a value, <c> False </c> if no type matched or
     ''' nothing was left for the value
     ''' </returns>
-    Private Function fixMissingEquals(result As EntryLintResult,
-                                      key As iniKey,
+    Private Function fixMissingEquals(key As iniKey,
                                       cmds As String()) As Boolean
 
         gLog("Attempting missing equals repair")
@@ -1367,7 +1340,7 @@ Public Module WinappDebug
             gLog($"Broken Key Found: {key.Name}")
 
             ' If we didn't find a fixable situation, delete the key
-            Dim fixedMsngEq = fixMissingEquals(result, key, ValidCmds)
+            Dim fixedMsngEq = fixMissingEquals(key, ValidCmds)
 
             fullKeyErr(result, key, "Missing '=' detected and repaired in key.", fixedMsngEq)
 

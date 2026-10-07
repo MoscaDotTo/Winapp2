@@ -71,18 +71,6 @@ Module MenuMaker
     Private Property menuItemLength As Integer
 
     ''' <summary>
-    ''' Indicates whether the menu header should be printed with color. <see cref="setNextMenuHeaderText"/>
-    ''' sets it, but nothing reads it.
-    ''' </summary>
-    Public Property ColorHeader As Boolean
-
-    ''' <summary>
-    ''' The color most recently passed to <see cref="setNextMenuHeaderText"/>. Nothing reads it.
-    ''' Menus take the header color from <see cref="MenuHeaderTextColor"/>.
-    ''' </summary>
-    Public Property HeaderColor As ConsoleColor
-
-    ''' <summary>
     ''' Indicates whether winapp2ool runs silently. When <c> True </c>, <see cref="cwl"/>,
     ''' <see cref="crk"/>, <see cref="crl"/> and <see cref="clrConsole"/> do nothing, so exception
     ''' reports reach only the log, and <see cref="initModule"/> ends the process.
@@ -145,13 +133,6 @@ Module MenuMaker
     ''' <see cref="FlushBuffered"/> so every line of one box is measured against the same width
     ''' </summary>
     Private _pinnedWidth As Integer? = Nothing
-
-    ''' <summary>
-    ''' Indicates whether render passes are buffered. When <c> False </c>, <see cref="BeginBuffered"/>
-    ''' still pins the width but doesn't start a buffer, so each line goes straight to
-    ''' <c> Console.Out </c>.
-    ''' </summary>
-    Public Property BufferingEnabled As Boolean = True
 
     ''' <summary>
     ''' Returns the console window width. During a render pass we return the pinned width.
@@ -300,19 +281,19 @@ Module MenuMaker
     End Sub
 
     ''' <summary>
-    ''' Begins a render pass. We pin the console width for the whole pass and, unless buffering
-    ''' is off or output is suppressed, start a buffer that later <see cref="cwl"/> calls append to.
+    ''' Begins a render pass. We pin the console width for the whole pass and, unless output is
+    ''' suppressed, start a buffer that later <see cref="cwl"/> calls append to.
     ''' <see cref="FlushBuffered"/> writes the buffer as one <c> Write </c> and ends the pass.
     ''' Passes don't nest: a call during a pass does nothing, and the first
     ''' <see cref="FlushBuffered"/> ends it.
     ''' </summary>
     Public Sub BeginBuffered()
 
-        ' Pinned before the buffering guards below, so the width stays stable for the pass even
-        ' when buffering is switched off or output is suppressed
+        ' Pinned before the guards below, so the width stays stable for the pass even when
+        ' output is suppressed
         If Not _pinnedWidth.HasValue Then _pinnedWidth = GetConsoleWidth()
 
-        If Not BufferingEnabled OrElse SuppressOutput Then Return
+        If SuppressOutput Then Return
         If _outputBuffer IsNot Nothing Then Return
 
         _outputBuffer = New StringBuilder(4096)
@@ -486,8 +467,6 @@ Module MenuMaker
 
         MenuHeaderText = txt
         MenuHeaderTextColor = printColor
-        ColorHeader = True
-        HeaderColor = printColor
 
     End Sub
 
@@ -698,7 +677,7 @@ Module MenuMaker
     ''' The frame whose characters open and close the line <br /><br />
     ''' Optional, Default: <c> FrameType.Vertical </c>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="fillBorder">
     ''' Indicates whether a frame line (<paramref name="align"/> <c> 2 </c>) is filled with
     ''' <c> ═ </c> rather than spaces <br /><br />
@@ -794,41 +773,6 @@ Module MenuMaker
     Public Function replDir(dirStr As String) As String
 
         Return dirStr.Replace(Environment.CurrentDirectory, "..")
-
-    End Function
-
-    ''' <summary>
-    ''' Returns, as a String, <paramref name="defaultNumber"/> plus the weight of every
-    ''' component in <paramref name="weightedComponents"/> that is <c> True </c>
-    ''' </summary>
-    '''
-    ''' <param name="defaultNumber">
-    ''' The menu number associated with the option
-    ''' in winapp2ool's default, online configuration
-    ''' </param>
-    '''
-    ''' <param name="weightedComponents">
-    ''' A set of conditions which shift the
-    ''' position of a menu option in the menu
-    ''' </param>
-    '''
-    ''' <param name="weights">
-    ''' The weight of each condition in <paramref name="weightedComponents"/>, at the same index.
-    ''' It must be at least as long as <paramref name="weightedComponents"/>.
-    ''' </param>
-    Public Function computeMenuNumber(defaultNumber As Integer,
-                                      weightedComponents As Boolean(),
-                                      weights As Integer()) As String
-
-        Dim out = defaultNumber
-
-        For i = 0 To weightedComponents.Length - 1
-
-            If weightedComponents(i) Then out += weights(i)
-
-        Next
-
-        Return out.ToString
 
     End Function
 
@@ -1032,7 +976,7 @@ Module MenuMaker
 
             ' Inline VT escape, with no flush and no syscall. It sits between the
             ' surrounding text in the active buffer (or in Console.Out
-            ' directly when buffering is off).
+            ' directly outside a render pass).
             Dim escape = VtForegroundEscape(color)
 
             If _outputBuffer IsNot Nothing Then
@@ -1100,43 +1044,6 @@ Module MenuMaker
     Public Sub BeginMenu(Optional solid As Boolean = True)
 
         printRenderedLine(getFrame(FrameType.Top, solid))
-
-    End Sub
-
-    ''' <summary>
-    ''' Prints the top of a complete menu: a top border, the centered module name, a divider,
-    ''' the centered lines of <paramref name="centeredMenuText"/>, the menu prompt, and option
-    ''' <c> 0 </c>, Exit. Throws if <paramref name="centeredMenuText"/> is <c> Nothing </c>.
-    ''' </summary>
-    '''
-    ''' <param name="moduleName">The name shown in the header</param>
-    '''
-    ''' <param name="headerColor">The color of the header</param>
-    '''
-    ''' <param name="centeredMenuText">
-    ''' Description lines printed centered under the header <br /><br />
-    ''' Optional, Default: <c> Nothing </c> <br />
-    ''' but leaving it out throws, so always pass an array
-    ''' </param>
-    Public Sub OpenMenu(moduleName As String,
-                        headerColor As ConsoleColor,
-               Optional centeredMenuText As String() = Nothing)
-
-        BeginMenu()
-        PrintColored(moduleName, headerColor, True)
-        PrintDivider()
-
-        For Each line In centeredMenuText
-
-            PrintLine(line, True)
-
-        Next
-
-        PrintBlank()
-        PrintLine("Menu: Enter a number to select", True)
-        PrintBlank()
-        OptNum = 0
-        PrintOption("Exit", "Return to the previous menu", True)
 
     End Sub
 

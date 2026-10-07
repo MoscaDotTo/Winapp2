@@ -238,8 +238,7 @@ Public Class PathKeyComparisonStrategy
             Dim oldVal = oldKeySplit(i)
             Dim isLastPiece = i = newKeySplit.Length - 1
 
-            If isLastPiece AndAlso isFileKey Then Return FinalizeFileKeyEquivalence(oldVal, newVal, oldKeySplit, newKeySplit,
-                                                                                    matchedFileKeyHasMoreParams, possibleWildCardReduction)
+            If isLastPiece AndAlso isFileKey Then Return FinalizeFileKeyEquivalence(oldVal, newVal, matchedFileKeyHasMoreParams, possibleWildCardReduction)
 
             If CompareValues(newVal, oldVal) Then Continue For
 
@@ -366,14 +365,6 @@ Public Class PathKeyComparisonStrategy
     ''' The final path component of the new key value, including pipe-delimited pattern and flags
     ''' </param>
     '''
-    ''' <param name="oldKeySplit">
-    ''' All backslash-split path components of the old key value. Not used.
-    ''' </param>
-    '''
-    ''' <param name="newKeySplit">
-    ''' All backslash-split path components of the new key value. Not used.
-    ''' </param>
-    '''
     ''' <param name="matchedFileKeyHasMoreParams">
     ''' Assigned by <see cref="MatchParameters"/> when it decides the match; left unchanged otherwise
     ''' </param>
@@ -383,8 +374,6 @@ Public Class PathKeyComparisonStrategy
     ''' </param>
     Private Function FinalizeFileKeyEquivalence(oldVal As String,
                                                newVal As String,
-                                               oldKeySplit As String(),
-                                               newKeySplit As String(),
                                                ByRef matchedFileKeyHasMoreParams As Boolean,
                                                ByRef possibleWildCardReduction As Boolean) As Boolean
 

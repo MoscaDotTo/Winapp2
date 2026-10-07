@@ -226,7 +226,6 @@ Public Class MergeDetector
         Dim result As New MatchResult()
         Dim highestMatchCount = 0
         Dim bestCandidateName = ""
-        Dim foundMerger = False
         Dim qualifyingMergeTargets As New List(Of String)
 
         Dim oldFileKeys = oldSection.Keys.GetByType("FileKey")
@@ -278,19 +277,11 @@ Public Class MergeDetector
 
             End If
 
-            Dim meetsThreshold = matchInfo.TotalMatches >= 1
-            Dim isCompleteMerger = matchInfo.AllKeysMatched AndAlso Not isRename
-
-            If meetsThreshold OrElse isCompleteMerger Then
-
-                foundMerger = True
-                If Not qualifyingMergeTargets.Contains(candidateSection.Name) Then qualifyingMergeTargets.Add(candidateSection.Name)
-
-            End If
+            If Not qualifyingMergeTargets.Contains(candidateSection.Name) Then qualifyingMergeTargets.Add(candidateSection.Name)
 
         Next
 
-        If foundMerger AndAlso qualifyingMergeTargets.Count > 0 Then
+        If qualifyingMergeTargets.Count > 0 Then
 
             result.IsMerge = True
             result.AllTargetNames.AddRange(qualifyingMergeTargets)

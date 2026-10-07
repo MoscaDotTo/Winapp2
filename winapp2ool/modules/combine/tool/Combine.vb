@@ -468,46 +468,4 @@ Public Module Combine
 
     End Sub
 
-    ''' <summary>
-    ''' Facilitates combining files from outside the module's UI.
-    ''' Returns the combined <c> iniFile </c> after processing. The caller doesn't need to save
-    ''' it, because <see cref="processCombine"/> already wrote it to disk unless it was empty or
-    ''' strict name checking found a collision.
-    ''' </summary>
-    '''
-    ''' <param name="targetDirectory">
-    ''' The directory containing files to be combined
-    ''' </param>
-    '''
-    ''' <param name="outputDir">
-    ''' The directory component of the output file path
-    ''' </param>
-    '''
-    ''' <param name="outputName">
-    ''' The filename component of the output file path
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' The resulting combined <c> iniFile </c>, or an empty <c> iniFile </c> if the target
-    ''' directory does not exist or otherwise lacks valid ini files. After a strict-mode collision
-    ''' it holds the merged sections even though nothing was saved.
-    ''' </returns>
-    Public Function RemoteCombine(targetDirectory As String,
-                                   outputDir As String,
-                                   outputName As String) As iniFile
-
-        If Not Directory.Exists(targetDirectory) Then
-
-            gLog($"Target directory not found: {targetDirectory}")
-            Return iniFile.Empty(outputDir, outputName)
-
-        End If
-
-        Dim combinedOutput As iniFile = iniFile.Empty(outputDir, outputName)
-        processCombine(New MenuSection, targetDirectory, combinedOutput)
-
-        Return combinedOutput
-
-    End Function
-
 End Module

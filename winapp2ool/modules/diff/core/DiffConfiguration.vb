@@ -24,16 +24,6 @@ Option Strict On
 Public Module DiffConfiguration
 
     ''' <summary>
-    ''' Maps <c> * </c> to <c> .* </c> and eight regex metacharacters to their escaped forms,
-    ''' for turning a wildcard pattern into a regex. It doesn't cover <c> . </c>, <c> ? </c>,
-    ''' <c> \ </c>, <c> ^ </c> or <c> | </c>.
-    ''' </summary>
-    Public ReadOnly Property RegexCharsToEscape As New Dictionary(Of String, String) From {
-        {"*", ".*"}, {"+", "\+"}, {"{", "\{"}, {"}", "\}"},
-        {"[", "\["}, {"]", "\]"}, {"$", "\$"}, {"(", "\("}, {")", "\)"}
-    }
-
-    ''' <summary>
     ''' Deprecated variables and patterns mapped to the forms that replaced them.
     ''' <see cref="EntryChangeDetector.SnuffNoisyChanges"/> rewrites every key value in both files
     ''' with these before comparing, so an old file that still uses a deprecated form doesn't show

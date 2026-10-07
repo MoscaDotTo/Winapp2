@@ -634,7 +634,7 @@ Public Class DiffOutputRenderer
                                   results.Add(MakeDiff(newSectionVer, 2))
                                   results.AddRange(ItemizeChangesFromList(changes.AddedKeys, True, addKeyTypes, sourceMap))
                                   results.AddRange(ItemizeChangesFromList(changes.RemovedKeys, False, remKeyTypes, sourceMap))
-                                  results.AddRange(ItemizeUpdatedKeys(changes.UpdatedKeysDict, changes.AddedKeys, changes.RemovedKeys, modKeyTypes, sourceMap))
+                                  results.AddRange(ItemizeUpdatedKeys(changes.UpdatedKeysDict, modKeyTypes, sourceMap))
                                   results.Add(ItemizeMergedEntries(entry, isMerger))
 
                               Next
@@ -671,14 +671,6 @@ Public Class DiffOutputRenderer
     ''' as recorded by <c> KeyModificationAnalyzer </c>
     ''' </param>
     '''
-    ''' <param name="addedKeys">
-    ''' Keys that were purely added (not replacements). Not read.
-    ''' </param>
-    '''
-    ''' <param name="removedKeys">
-    ''' Keys that were purely removed (not replacements). Not read.
-    ''' </param>
-    '''
     ''' <param name="modKeyTypes">
     ''' Accumulator dictionary that tracks the count of updated
     ''' keys per key type for the modification summary
@@ -696,8 +688,6 @@ Public Class DiffOutputRenderer
     ''' or an empty list if <paramref name="updatedKeysDict"/> is empty
     ''' </returns>
     Public Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey, List(Of iniKey)),
-                                       addedKeys As List(Of iniKey),
-                                       removedKeys As List(Of iniKey),
                                        modKeyTypes As Dictionary(Of String, Integer),
                               Optional sourceEntryMap As Dictionary(Of String, String) = Nothing) As List(Of MenuSection)
 
@@ -868,7 +858,7 @@ Public Class DiffOutputRenderer
                 results.Add(MakeDiff(_file1.GetSection(oldName), 3, _file2.GetSection(newName)))
                 results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, Nothing))
                 results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, Nothing))
-                results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, addedKeys, removedKeys, modKeyTypes))
+                results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, modKeyTypes))
 
             Next
 
@@ -1186,7 +1176,7 @@ Public Class DiffOutputRenderer
                         gLog()
                         gLog(capturedMsg)
                         results.Add(capturedSection)
-                        results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, addedKeys, removedKeys, modKeyTypes, sourceEntryMap))
+                        results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, modKeyTypes, sourceEntryMap))
 
                     End If
 
