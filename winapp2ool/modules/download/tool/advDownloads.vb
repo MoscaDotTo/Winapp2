@@ -18,7 +18,7 @@
 Option Strict On
 
 ''' <summary>
-''' A sub menu of the Downloader module for advanced users who want more than just the CCleaner flavor of winapp2.ini from the repo
+''' A sub menu of the Downloader module for advanced users, offering winapp3.ini and Archived entries.ini
 ''' </summary>
 Public Module advDownloads
 

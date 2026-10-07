@@ -24,17 +24,21 @@ Option Strict On
 Public Module downloadersettings
 
     ''' <summary>
-    ''' The directory in which downloaded files are saved
+    ''' Where downloaded files are saved. Only <c> Dir </c> holds the user's choice: every
+    ''' download sets <c> Name </c> before it starts, and on the command line <c> -1f </c>
+    ''' then overrides it.
     ''' </summary>
     Public Property downloadFile As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=False)
 
     ''' <summary>
-    ''' Indicates that the Downloader module's settings have been changed from their defaults
+    ''' Indicates whether the Downloader module's settings have been changed from their defaults
     ''' </summary>
     Public Property DownloadModuleSettingsChanged As Boolean = False
 
     ''' <summary>
-    ''' Restores all Downloader settings to their defaults and persists the reset to disk
+    ''' Restores all Downloader settings to their defaults and records them in the settings
+    ''' file through <see cref="SaveModule"/>. Nothing is written to disk here.
+    ''' <see cref="FlushIfDirty"/> does that later, if the save gate allows it
     ''' </summary>
     Public Sub InitDefaultDownloadSettings()
 

@@ -84,7 +84,7 @@ Module Downloader
     Public ReadOnly Property betaToolSigLink As String = "https://github.com/MoscaDotTo/Winapp2/raw/Branch1/winapp2ool/bin/Release/winapp2ool.exe.sig"
 
     ''' <summary> 
-    ''' The web address of version.txt (winapp2ool's public version identifer) 
+    ''' The web address of version.txt (winapp2ool's public version identifier)
     ''' </summary>
     Public ReadOnly Property toolVerLink As String = "https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/winapp2ool/version.txt"
 
@@ -114,35 +114,37 @@ Module Downloader
     Public ReadOnly Property readMeUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/winapp2ool/Readme.md"
 
     ''' <summary>
-    ''' The web address of the winapp2.ini contribution guidelines 
+    ''' The web address of the winapp2.ini contribution guidelines
     ''' </summary>
-    ''' <returns></returns>
     Public ReadOnly Property contributionsUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/CONTRIBUTING.md"
 
     ''' <summary>
-    ''' The web address of the winapp2.ini license 
+    ''' The web address of the winapp2.ini license
     ''' </summary>
-    ''' <returns></returns>
     Public ReadOnly Property winapp2licenceUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"
 
     ''' <summary>
-    ''' Handles command line arguments for the Downloader module
+    ''' Handles command line arguments for the Downloader module and downloads the selected file.
+    ''' A missing or unknown positional argument lists the valid ones and exits with code 1.
+    ''' Downloading winapp2ool.exe into the running exe's own directory runs
+    ''' <see cref="autoUpdate"/> instead.
     ''' </summary>
     '''
     ''' <remarks>
     ''' File arguments:
     ''' <list type="bullet">
-    ''' <item><c> -1d path </c> — Set the save directory</item>
-    ''' <item><c> -1f name </c> — Set the save filename</item>
+    ''' <item><c> -1d path </c>: Set the save directory</item>
+    ''' <item><c> -1f name </c>: Set the save filename, overriding the name the positional argument picks</item>
     ''' </list>
     '''
     ''' Positional arguments (select the file to download):
     ''' <list type="bullet">
-    ''' <item><c> 1 </c> or <c> winapp2 </c> — winapp2.ini (flavor-aware)</item>
-    ''' <item><c> 2 </c> or <c> winapp2ool </c> — winapp2ool.exe</item>
-    ''' <item><c> 3 </c> or <c> readme </c> — readme.txt</item>
-    ''' <item><c> 4 </c> or <c> winapp3 </c> — winapp3.ini</item>
-    ''' <item><c> 5 </c> or <c> archived </c> — Archived entries.ini</item>
+    ''' <item><c> 1 </c> or <c> winapp2 </c>: winapp2.ini for <see cref="CurrentWinappFlavor"/>,
+    ''' saved as <c> winapp2.rules </c> for System Ninja</item>
+    ''' <item><c> 2 </c> or <c> winapp2ool </c>: winapp2ool.exe</item>
+    ''' <item><c> 3 </c> or <c> readme </c>: the winapp2ool README, saved as readme.txt</item>
+    ''' <item><c> 4 </c> or <c> winapp3 </c>: winapp3.ini</item>
+    ''' <item><c> 5 </c> or <c> archived </c>: Archived entries.ini</item>
     ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
@@ -230,7 +232,8 @@ Module Downloader
     End Function
 
     ''' <summary>
-    ''' Returns the link to the appropriate flavor of winapp2.ini based on the current Flavor configuration
+    ''' Returns the link to the winapp2.ini flavor named by <see cref="CurrentWinappFlavor"/>,
+    ''' which defaults to CCleaner. An unlisted flavor gets the base (Non-CCleaner) link.
     ''' </summary>
     Public Function getWinappLink() As String
 
@@ -270,12 +273,13 @@ Module Downloader
 
     End Function
 
-    ''' <summary> 
-    ''' Returns the online download status (name) of winapp2.ini as a <c> String </c>, empty string if not downloading 
+    ''' <summary>
+    ''' Returns a label naming the online winapp2.ini and its current flavor, or an empty string
+    ''' if <paramref name="shouldDownload"/> is <c> False </c>
     ''' </summary>
-    ''' 
-    ''' <param name="shouldDownload"> 
-    ''' Indicates that a module is configured to download a remote winapp2.ini 
+    '''
+    ''' <param name="shouldDownload">
+    ''' Indicates whether a module is configured to download a remote winapp2.ini
     ''' </param>
     Public Function GetNameFromDL(shouldDownload As Boolean) As String
 

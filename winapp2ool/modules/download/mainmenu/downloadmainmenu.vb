@@ -18,14 +18,16 @@
 Option Strict On
 
 ''' <summary>
-''' Displays the Downloader module main menu and handles user input.
-''' Called by both <c> printDownloadMainMenu </c> (to render) and <c> handleDownloadUserInput </c>
-''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
+''' Displays the Downloader module main menu and handles user input
 ''' </summary>
 Module downloadmainmenu
 
     ''' <summary>
-    ''' Builds the Downloader main menu with all options and their dispatch handlers registered inline
+    ''' Builds the Downloader main menu with all options and their dispatch handlers registered
+    ''' inline. Called by both <see cref="printDownloadMainMenu"/> (to render) and
+    ''' <see cref="handleDownloadUserInput"/> (to dispatch), so the displayed option numbers and
+    ''' the dispatch table are always in sync. Each winapp2.ini option downloads a fixed flavor
+    ''' and ignores <see cref="CurrentWinappFlavor"/>.
     ''' </summary>
     Private Function buildDownloadMenu() As MenuSection
 
