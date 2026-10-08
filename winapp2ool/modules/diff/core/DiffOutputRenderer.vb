@@ -646,15 +646,25 @@ Public Class DiffOutputRenderer
 
                               For Each entry In qualifying
 
-                                  Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
+                                  Dim addKeyTypes, remKeyTypes, dropKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
                                   Dim newSectionVer = _file2.GetSection(entry)
                                   Dim changes = GetKeyChanges(entry)
                                   Dim sourceMap As Dictionary(Of String, String) = Nothing
                                   If isMerger Then _mergerSourceMaps.TryGetValue(entry, sourceMap)
 
+                                  ' In a merger block, a removed key the entry never had came from a merged source that didn't survive
+                                  Dim ownOldKeys = _file1.GetSection(entry).Keys
+                                  Dim wasOwnKey = Function(key As iniKey) Not isMerger OrElse
+                                                                         ownOldKeys.Any(Function(own) String.Equals(own.KeyType, key.KeyType, StringComparison.OrdinalIgnoreCase) AndAlso
+                                                                                                      String.Equals(own.Value, key.Value, StringComparison.OrdinalIgnoreCase))
+
+                                  Dim ownRemoved = changes.RemovedKeys.Where(wasOwnKey).ToList()
+                                  Dim dropped = changes.RemovedKeys.Where(Function(key) Not wasOwnKey(key)).ToList()
+
                                   results.Add(MakeDiff(newSectionVer, 2))
                                   results.AddRange(ItemizeChangesFromList(changes.AddedKeys, True, addKeyTypes, sourceMap))
-                                  results.AddRange(ItemizeChangesFromList(changes.RemovedKeys, False, remKeyTypes, sourceMap))
+                                  results.AddRange(ItemizeChangesFromList(ownRemoved, False, remKeyTypes, sourceMap))
+                                  results.AddRange(ItemizeDroppedKeys(dropped, dropKeyTypes, sourceMap))
                                   results.AddRange(ItemizeUpdatedKeys(changes.UpdatedKeysDict, modKeyTypes, sourceMap))
                                   results.AddRange(ItemizeMovedKeys(entry, includeMovedIn:=Not isMerger))
                                   results.Add(ItemizeMergedEntries(entry, isMerger))
@@ -1179,18 +1189,7 @@ Public Class DiffOutputRenderer
 
                     End If
 
-                    If removedKeys.Count > 0 Then
-
-                        Dim droppedSection As New MenuSection
-
-                        Dim KeysNotMergedMsg = $"{Plural(removedKeys.Count, "key")} from merged entries not in this entry:"
-                        droppedSection.AddColoredLine(KeysNotMergedMsg, ConsoleColor.DarkYellow, centered:=True)
-                        gLog()
-                        gLog(KeysNotMergedMsg)
-                        results.Add(droppedSection)
-                        results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, sourceEntryMap))
-
-                    End If
+                    results.AddRange(ItemizeDroppedKeys(removedKeys, remKeyTypes, sourceEntryMap))
 
                     If updatedKeysDict.Count > 0 Then
 
@@ -1428,6 +1427,44 @@ Public Class DiffOutputRenderer
             out.Add(result)
 
         End Using
+
+        Return out
+
+    End Function
+
+    ''' <summary>
+    ''' Builds and logs the keys of merged source entries that didn't survive into the entry
+    ''' they were merged into, under a header that says so
+    ''' </summary>
+    '''
+    ''' <param name="keys">
+    ''' The merged sources' keys that the entry doesn't have
+    ''' </param>
+    '''
+    ''' <param name="ktDict">
+    ''' Accumulator dictionary that tracks the count of dropped keys per key type
+    ''' </param>
+    '''
+    ''' <param name="sourceEntryMap">
+    ''' Map of key value → its source entries as <see cref="CreditSources"/> formats them
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The header section followed by the summary and key list sections, or an empty list if
+    ''' <paramref name="keys"/> is empty
+    ''' </returns>
+    Private Function ItemizeDroppedKeys(keys As List(Of iniKey),
+                                        ktDict As Dictionary(Of String, Integer),
+                                        sourceEntryMap As Dictionary(Of String, String)) As List(Of MenuSection)
+
+        Dim out As New List(Of MenuSection)
+        If keys.Count = 0 Then Return out
+
+        Dim header = $"{Plural(keys.Count, "key")} from merged entries not in this entry:"
+        out.Add(New MenuSection().AddColoredLine(header, ConsoleColor.DarkYellow, centered:=True))
+        gLog()
+        gLog(header)
+        out.AddRange(ItemizeChangesFromList(keys, False, ktDict, sourceEntryMap))
 
         Return out
 

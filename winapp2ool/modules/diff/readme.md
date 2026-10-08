@@ -435,7 +435,7 @@ The replacement of `Detect` with `DetectFile` is paired into a single `Detection
 
 ### Modification by merger
 
-When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Each such block is followed by a note itemizing the removed entries against which the changes were measured.
+When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Keys the entry's prior version had and lost are listed as removed; keys that only a merged entry had and that didn't survive are listed separately, under `N keys from merged entries not in this entry:`, as in an added entry's merger block. Each such block is followed by a note itemizing the removed entries against which the changes were measured.
 
 In this example, two version-specific log path entries were merged into a single entry using a wildcard to cover both:
 
@@ -1029,9 +1029,9 @@ Entries present in both files (by name) that changed in any way.
 - `- N removed keys without replacement across N entries`: keys deleted with no equivalent in the new entry
 - `~ N updated keys replaced M old keys across N entries`: keys whose values changed; one new key captured one or more old keys via wildcard match or content consolidation
 - `~ N keys moved from X entries into Y entries`: cross-entry key movements; only shown when movements were detected. The X entries are always modified or renamed ones. A moved key isn't also counted as removed. Bullets split the moves by the kind of entry they landed in, each shown only when nonzero:
-  - `~ N into N modified entries`: entries present in both files under the same name
-  - `& N into N renamed entries`
-  - `+ N into N added entries`: new entries, whether novel or consolidating removed entries. Splitting part of an entry out into a new one shows up here
+  - `~ N keys moved into N modified entries`: entries present in both files under the same name
+  - `& N keys moved into N renamed entries`
+  - `+ N keys moved into N added entries`: new entries, whether novel or consolidating removed entries. Splitting part of an entry out into a new one shows up here
 - `+ N entries also received merged content from removed entries`: how many of the modified entries absorbed removed entries
 
 ---

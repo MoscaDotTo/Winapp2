@@ -276,6 +276,35 @@ Public Class DiffPipelineTests
     End Sub
 
     ''' <summary>
+    ''' Delta absorbs the removed Rho. Delta's own lost FileKey is a removal, but Rho's Detect,
+    ''' which Delta never had, is listed as a merged key that didn't survive.
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoModifiedEntry_SeparatesDroppedSourceKeys()
+
+        Dim oldText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Delta|*.old" & vbCrLf & vbCrLf &
+            "[Rho *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\Rho" & vbCrLf &
+            "FileKey1=%AppData%\Rho|*.log" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Rho|*.log" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        StringAssert.Contains(output, "1 modified entry incorporating merged content")
+
+        Dim ownRemoval = output.IndexOf("FileKey2=%AppData%\Delta|*.old", StringComparison.Ordinal)
+        Dim header = output.IndexOf("1 key from merged entries not in this entry:", StringComparison.Ordinal)
+        Dim dropped = output.IndexOf("Detect=HKCU\Software\Rho (from [Rho *])", StringComparison.Ordinal)
+
+        Assert.IsTrue(ownRemoval >= 0 AndAlso header > ownRemoval AndAlso dropped > header, output)
+
+    End Sub
+
+    ''' <summary>
     ''' A rename whose only key change is a key moved into it isn't a name-only rename. The moved
     ''' key is a Warning because gaining a FileKey would make Alpha a merger instead.
     ''' </summary>
