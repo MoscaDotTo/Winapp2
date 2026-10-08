@@ -31,7 +31,6 @@ Public Class MergeDetector
 
     Private ReadOnly _state As DiffState
     Private ReadOnly _diffFile As iniFile
-    Private ReadOnly _findModificationsCallback As Action(Of iniSection, iniSection)
 
     ''' <summary>Creates a new <c> MergeDetector </c></summary>
     '''
@@ -42,18 +41,11 @@ Public Class MergeDetector
     ''' <param name="newFile">
     ''' The new version of winapp2.ini
     ''' </param>
-    '''
-    ''' <param name="findModsCallback">
-    ''' Callback invoked with the old and new sections to track key-level changes when a rename
-    ''' is newly recorded. Mergers don't invoke it. May be <c> Nothing </c>.
-    ''' </param>
     Public Sub New(diffState As DiffState,
-                   newFile As iniFile,
-                   findModsCallback As Action(Of iniSection, iniSection))
+                   newFile As iniFile)
 
         _state = diffState
         _diffFile = newFile
-        _findModificationsCallback = findModsCallback
 
     End Sub
 
@@ -470,8 +462,8 @@ Public Class MergeDetector
     ''' <summary>
     ''' Attempts to record a rename from <paramref name="oldSection"/> to <paramref name="newName"/>.
     ''' If <paramref name="newName"/> is already registered as a rename target, the registration is
-    ''' rejected and the caller falls back to merger tracking. When we record the rename, we invoke
-    ''' the modifications callback to record key-level changes.
+    ''' rejected and the caller falls back to merger tracking. Records no key-level changes, since
+    ''' a later merger can still demote the rename.
     ''' </summary>
     '''
     ''' <param name="newName">
@@ -492,9 +484,6 @@ Public Class MergeDetector
 
         _state.MergedEntries.RenamedEntryNames.Add(newName)
         _state.MergedEntries.RenamedEntryPairs.Add(newName, oldSection.Name)
-
-        Dim newSection = _diffFile.GetSection(newName)
-        If _findModificationsCallback IsNot Nothing AndAlso newSection IsNot Nothing Then _findModificationsCallback(oldSection, newSection)
 
         Return True
 

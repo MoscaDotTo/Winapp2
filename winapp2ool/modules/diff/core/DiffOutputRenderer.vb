@@ -1050,8 +1050,8 @@ Public Class DiffOutputRenderer
     ''' <summary>
     ''' Diffs each added entry that contains merged content from removed entries against the
     ''' combined keys of those entries, and builds the output for it. Renamed entries are skipped.
-    ''' Key changes it finds replace that entry's tracker contents, and we append the keys
-    ''' carried over unchanged from a source to the entry's added-key tracker list when it has one,
+    ''' Key changes it finds replace that entry's tracker contents, and we add the keys carried
+    ''' over unchanged from a source to the entry's added-key tracker list, creating it if needed,
     ''' which <see cref="DiffStatisticsCalculator.CalculateAddedWithMergersStatistics"/> relies on.
     ''' </summary>
     '''
@@ -1144,6 +1144,7 @@ Public Class DiffOutputRenderer
                 Next
 
                 addedKeys.AddRange(carriedOverKeys)
+                If addedKeys.Count > 0 Then _state.ModifiedEntries.AddedKeyTracker(entry) = addedKeys
 
                 If addedKeys.Count + removedKeys.Count + updatedKeysDict.Count > 0 Then
 

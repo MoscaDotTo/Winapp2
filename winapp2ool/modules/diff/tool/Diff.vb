@@ -320,7 +320,7 @@ Module Diff
     ''' All <c> MenuSection </c>s produced by the diff pipeline, in display order
     ''' </returns>
     Friend Function CompareFiles(oldFile As iniFile,
-                                   newFile As iniFile) As List(Of MenuSection)
+                                  newFile As iniFile) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
 
@@ -328,7 +328,7 @@ Module Diff
         state.Clear()
 
         Dim keyAnalyzer = New KeyModificationAnalyzer(state)
-        Dim mergeDetector = New MergeDetector(state, newFile, AddressOf keyAnalyzer.FindModifications)
+        Dim mergeDetector = New MergeDetector(state, newFile)
         Dim renderer = New DiffOutputRenderer(state, oldFile, newFile, keyAnalyzer)
         Dim detector = New EntryChangeDetector(state, oldFile, newFile, mergeDetector, keyAnalyzer, renderer)
         Dim statsCalc = New DiffStatisticsCalculator(state, oldFile, newFile)

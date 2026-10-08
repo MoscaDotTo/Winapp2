@@ -179,7 +179,8 @@ Public Class EntryChangeDetector
     ''' time in name order, so when two entries contend for a rename, the same one is recorded
     ''' first on every run before both become mergers.
     ''' Then converts any rename whose target also took in a merger (see
-    ''' <see cref="ReconcileRenamesAndMergers"/>) and sorts the merge lists by name.
+    ''' <see cref="ReconcileRenamesAndMergers"/>), records the key changes of the renames that
+    ''' remain, and sorts the merge lists by name.
     ''' </summary>
     '''
     ''' <returns>
@@ -235,6 +236,12 @@ Public Class EntryChangeDetector
             Next
 
             ReconcileRenamesAndMergers()
+
+            ' Only now do we know which renames survived; a demoted one's key changes would be stale
+            For Each pair In _state.MergedEntries.RenamedEntryPairs.OrderBy(Function(p) p.Key, StringComparer.OrdinalIgnoreCase)
+                _keyAnalyzer.FindModifications(_file1.GetSection(pair.Value), _file2.GetSection(pair.Key))
+            Next
+
             _state.MergedEntries.SortMergeLists()
 
             Dim renamedCount = _state.MergedEntries.RenamedEntryNames.Count
