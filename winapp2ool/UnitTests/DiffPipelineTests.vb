@@ -181,6 +181,127 @@ Public Class DiffPipelineTests
         Assert.AreEqual(1, outcome.MovedKeys)
         Assert.AreEqual(0, outcome.RemovedKeys)
         StringAssert.Contains(output, "FileKey2=%AppData%\Delta\Sync|* moved to [Delta Sync *]")
+        StringAssert.Contains(output, "Moved 1 FileKey")
+        StringAssert.Contains(output, "+ 1 into 1 added entry")
+
+    End Sub
+
+    ''' <summary>
+    ''' A key moving between two entries that both exist shows in each one's itemized output,
+    ''' and an entry whose only change is a move still gets itemized
+    ''' </summary>
+    <TestMethod>
+    Public Sub KeyMovesIntoModifiedEntry_ItemizedOnBothSides()
+
+        Dim oldText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Shared|*.log" & vbCrLf & vbCrLf &
+            "[Epsilon *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Epsilon" & vbCrLf &
+            "FileKey1=%AppData%\Epsilon|*.dat" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & vbCrLf &
+            "[Epsilon *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Epsilon" & vbCrLf &
+            "FileKey1=%AppData%\Epsilon|*.dat" & vbCrLf & "FileKey2=%AppData%\Shared|*.log" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MovedKeys)
+        StringAssert.Contains(output, "2 modified entries")
+        StringAssert.Contains(output, "Moved 1 FileKey")
+        StringAssert.Contains(output, "FileKey2=%AppData%\Shared|*.log moved to [Epsilon *]")
+        StringAssert.Contains(output, "Moved in 1 FileKey")
+        StringAssert.Contains(output, "FileKey2=%AppData%\Shared|*.log (from [Delta *])")
+        StringAssert.Contains(output, "~ 1 into 1 modified entry")
+
+    End Sub
+
+    ''' <summary>
+    ''' Delta's unchanged Detect shares its value with the RegKey that moves in from Epsilon, and
+    ''' must not be listed as moved in alongside it
+    ''' </summary>
+    <TestMethod>
+    Public Sub MovedIn_ListsOnlyTheKeyThatMoved()
+
+        Dim oldText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\Shared" & vbCrLf &
+            "RegKey1=HKCU\Software\Delta" & vbCrLf & vbCrLf &
+            "[Epsilon *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\Epsilon" & vbCrLf &
+            "RegKey1=HKCU\Software\Epsilon" & vbCrLf & "RegKey2=HKCU\Software\Shared" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\Shared" & vbCrLf &
+            "RegKey1=HKCU\Software\Delta" & vbCrLf & "RegKey2=HKCU\Software\Shared" & vbCrLf & vbCrLf &
+            "[Epsilon *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\Epsilon" & vbCrLf &
+            "RegKey1=HKCU\Software\Epsilon" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MovedKeys)
+        StringAssert.Contains(output, "RegKey2=HKCU\Software\Shared (from [Epsilon *])")
+        Assert.IsFalse(output.Contains("Moved in 1 Detect"), output)
+        Assert.IsFalse(output.Contains("Detect=HKCU\Software\Shared (from"), output)
+
+    End Sub
+
+    ''' <summary>
+    ''' Delta absorbs the removed Rho and gives a key away to the new Zeta. The merger block's
+    ''' re-diff must list that key as moved, not removed.
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerTargetGivingAKeyAway_ListsItAsMoved()
+
+        Dim oldText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Delta\Sync|*" & vbCrLf & vbCrLf &
+            "[Rho *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Rho" & vbCrLf &
+            "FileKey1=%AppData%\Rho|*.log" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile1=%AppData%\Delta" & vbCrLf &
+            "DetectFile2=%AppData%\Rho" & vbCrLf & "FileKey1=%AppData%\Delta|*.dat" & vbCrLf &
+            "FileKey2=%AppData%\Rho|*.log" & vbCrLf & vbCrLf &
+            "[Zeta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta\Sync|*" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MergedEntries)
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MovedKeys)
+        StringAssert.Contains(output, "1 modified entry incorporating merged content")
+        StringAssert.Contains(output, "Moved 1 FileKey")
+        Assert.IsFalse(output.Contains("Removed 1 FileKey"), output)
+
+    End Sub
+
+    ''' <summary>
+    ''' A rename whose only key change is a key moved into it isn't a name-only rename. The moved
+    ''' key is a Warning because gaining a FileKey would make Alpha a merger instead.
+    ''' </summary>
+    <TestMethod>
+    Public Sub RenameReceivingAMovedKey_IsNotNameOnly()
+
+        Dim oldText =
+            "[Alpha *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha|*.log" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "Warning=Closes Alpha first" & vbCrLf
+
+        Dim newText =
+            "[Alpha Renamed *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha|*.log" & vbCrLf & "Warning=Closes Alpha first" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.RenamedEntries)
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MovedKeys)
+        StringAssert.Contains(output, "Minor changes to 1 renamed entry")
+        StringAssert.Contains(output, "Moved in 1 Warning")
+        StringAssert.Contains(output, "& 1 into 1 renamed entry")
+        Assert.IsFalse(output.Contains("name-only"), output)
 
     End Sub
 

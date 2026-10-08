@@ -365,11 +365,15 @@ An entry is **Modified** if it exists in both files with the same name but has c
 
 Keys annotated `(novel)` are new content with no detected equivalent in the old file. Keys annotated `(from [Entry Name *])` were sourced from a specific entry: the old version of the same entry, a removed entry that was merged in, or an entry the key [moved](#cross-entry-key-movements) from.
 
-Modified output itemizes three kinds of key-level change:
+Modified output itemizes five kinds of key-level change:
 
 - **Added keys**: present in the new entry with no detected equivalent in the old entry
-- **Removed keys**: present in the old entry with no detected equivalent in the new entry
+- **Removed keys**: present in the old entry with no detected equivalent in the new entry or anywhere else
 - **Modified keys**: a key whose value changed, shown as `X has been modified, replacing N old keys`; in the simple case one old key was updated to a new value; in more complex cases a single new key uses a wildcard or semicolon-joined pattern to capture multiple old keys
+- **Moved keys**: keys that left this entry for another one, listed under `Moved N FileKeys` as `FileKey2=... moved to [Other *]`. See [Cross-Entry Key Movements](#cross-entry-key-movements)
+- **Moved-in keys**: keys this entry took from another entry that still exists, listed under `Moved in N FileKeys` as `FileKey2=... (from [Other *])`. An entry that also absorbed removed entries lists these among its added keys instead, with the same credit
+
+An entry whose only change is a moved key is still itemized.
 
 Changes to detection keys (`Detect`, `DetectFile`) are grouped and reported together as `Detection criteria`.
 
@@ -587,6 +591,15 @@ The section is omitted entirely when no movements are detected.
 `[Windows Subsystems *]` gave keys to four entries. `[Microsoft PlayReady *]` is a renamed `[Media Play Ready Client *]`. The other three are new, and each also absorbed removed entries, so their merger output credits these keys `(from [Windows Subsystems *])`.
 
 Every source entry still exists in the new file, which is what distinguishes a movement from a merger.
+
+Each move also appears in the itemized output of both entries, under `Moved` in the source and `Moved in` in the receiving entry (see [Modified Entries](#modified-entries)):
+
+```
+     CleanMyPC Registry Cleaner * has been modified
+
+       Moved 1 FileKey
+             FileKey2=%WinDir%\$regcmp$|*|REMOVESELF moved to [Windows Subsystems *]
+```
 
 ## Removed Entries
 
@@ -1015,7 +1028,10 @@ Entries present in both files (by name) that changed in any way.
 - `+ N added keys across N entries`: new keys added to existing entries; includes keys absorbed from merged removed entries
 - `- N removed keys without replacement across N entries`: keys deleted with no equivalent in the new entry
 - `~ N updated keys replaced M old keys across N entries`: keys whose values changed; one new key captured one or more old keys via wildcard match or content consolidation
-- `~ N keys moved from X entries into Y entries`: cross-entry key movements; only shown when movements were detected. The X entries are always modified or renamed ones, but the Y entries can also be added ones. A moved key isn't also counted as removed.
+- `~ N keys moved from X entries into Y entries`: cross-entry key movements; only shown when movements were detected. The X entries are always modified or renamed ones. A moved key isn't also counted as removed. Bullets split the moves by the kind of entry they landed in, each shown only when nonzero:
+  - `~ N into N modified entries`: entries present in both files under the same name
+  - `& N into N renamed entries`
+  - `+ N into N added entries`: new entries, whether novel or consolidating removed entries. Splitting part of an entry out into a new one shows up here
 - `+ N entries also received merged content from removed entries`: how many of the modified entries absorbed removed entries
 
 ---

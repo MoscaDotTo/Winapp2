@@ -248,6 +248,36 @@ Public Class DiffStatistics
     Public Property ModEntriesMovedKeysTargetCount As Integer = 0
 
     ''' <summary>
+    ''' Counts moved keys whose new entry exists in both files under the same name
+    ''' </summary>
+    Public Property MovedIntoModifiedKeyTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts the distinct entries existing in both files under the same name that gained a moved key
+    ''' </summary>
+    Public Property MovedIntoModifiedEntryCount As Integer = 0
+
+    ''' <summary>
+    ''' Counts moved keys whose new entry is a renamed one
+    ''' </summary>
+    Public Property MovedIntoRenamedKeyTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts the distinct renamed entries that gained a moved key
+    ''' </summary>
+    Public Property MovedIntoRenamedEntryCount As Integer = 0
+
+    ''' <summary>
+    ''' Counts moved keys whose new entry is an added entry other than a rename
+    ''' </summary>
+    Public Property MovedIntoAddedKeyTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts the distinct added entries, other than renames, that gained a moved key
+    ''' </summary>
+    Public Property MovedIntoAddedEntryCount As Integer = 0
+
+    ''' <summary>
     ''' Counts modified entries that have at least one updated key
     ''' </summary>
     Public Property ModEntriesUpdatedKeyEntryCount As Integer = 0
@@ -388,6 +418,12 @@ Public Class DiffStatistics
         ModEntriesMovedKeysTotal = 0
         ModEntriesMovedKeysSourceCount = 0
         ModEntriesMovedKeysTargetCount = 0
+        MovedIntoModifiedKeyTotal = 0
+        MovedIntoModifiedEntryCount = 0
+        MovedIntoRenamedKeyTotal = 0
+        MovedIntoRenamedEntryCount = 0
+        MovedIntoAddedKeyTotal = 0
+        MovedIntoAddedEntryCount = 0
         ModEntriesUpdatedKeyEntryCount = 0
         RenamedEntriesAddedKeyTotal = 0
         RenamedEntriesAddedKeyEntryCount = 0
@@ -488,6 +524,32 @@ Public Class KeyMovementTracker
 
     End Function
 
+    ''' <summary>
+    ''' Returns the movements of keys that left <paramref name="sourceEntry"/>, in the order they were detected
+    ''' </summary>
+    '''
+    ''' <param name="sourceEntry">
+    ''' The entry the keys left
+    ''' </param>
+    Public Function MovedOutOf(sourceEntry As String) As List(Of KeyMovementInfo)
+
+        Return MovedKeys.Values.Where(Function(info) String.Equals(info.SourceEntry, sourceEntry, StringComparison.OrdinalIgnoreCase)).ToList()
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the movements of keys that landed in <paramref name="targetEntry"/>, in the order they were detected
+    ''' </summary>
+    '''
+    ''' <param name="targetEntry">
+    ''' The entry the keys landed in
+    ''' </param>
+    Public Function MovedInto(targetEntry As String) As List(Of KeyMovementInfo)
+
+        Return MovedKeys.Values.Where(Function(info) String.Equals(info.TargetEntry, targetEntry, StringComparison.OrdinalIgnoreCase)).ToList()
+
+    End Function
+
 End Class
 
 ''' <summary>
@@ -512,6 +574,11 @@ Public Class KeyMovementInfo
     Public Property TargetKey As iniKey
 
     ''' <summary>
+    ''' The key as it was in <c> SourceEntry </c>
+    ''' </summary>
+    Public Property MovedKey As iniKey
+
+    ''' <summary>
     ''' Creates a new <c> KeyMovementInfo </c>
     ''' </summary>
     '''
@@ -523,15 +590,21 @@ Public Class KeyMovementInfo
     ''' Target entry name
     ''' </param>
     '''
+    ''' <param name="movedKey">
+    ''' The key as it was in <paramref name="source"/>
+    ''' </param>
+    '''
     ''' <param name="targetKey">
     ''' The key in <paramref name="target"/> that the moved key landed in
     ''' </param>
     Public Sub New(source As String,
                    target As String,
+                   movedKey As iniKey,
                    targetKey As iniKey)
 
         SourceEntry = source
         TargetEntry = target
+        Me.MovedKey = movedKey
         Me.TargetKey = targetKey
 
     End Sub

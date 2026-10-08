@@ -186,7 +186,10 @@ Public Class DiffStatisticsCalculator
 
             End If
 
-            If Not hasAdded AndAlso Not hasRemoved AndAlso realUpdateCount = 0 Then
+            Dim hasMoves = _state.KeyMovements.MovedOutOf(newName).Count > 0 OrElse
+                           _state.KeyMovements.MovedInto(newName).Count > 0
+
+            If Not hasAdded AndAlso Not hasRemoved AndAlso realUpdateCount = 0 AndAlso Not hasMoves Then
 
                 _state.Statistics.RenamedEntriesNameOnlyCount += 1
                 Continue For
@@ -284,7 +287,7 @@ Public Class DiffStatisticsCalculator
 
                 Dim targetEntry = match.EntryName
                 Dim movementKey = $"{removedKey.Name}{MovementKeySeparator}{removedKey.Value}{MovementKeySeparator}{sourceEntry}"
-                _state.KeyMovements.MovedKeys(movementKey) = New KeyMovementInfo(sourceEntry, targetEntry, match.Key)
+                _state.KeyMovements.MovedKeys(movementKey) = New KeyMovementInfo(sourceEntry, targetEntry, removedKey, match.Key)
                 _state.Statistics.ModEntriesMovedKeysTotal += 1
 
                 If Not keysToRemoveFromRemoved.ContainsKey(sourceEntry) Then keysToRemoveFromRemoved(sourceEntry) = New List(Of iniKey)
@@ -318,17 +321,39 @@ Public Class DiffStatisticsCalculator
         Next
 
         Dim sourceEntries As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-        Dim targetEntries As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim intoModified As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim intoRenamed As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim intoAdded As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
         For Each movementInfo In _state.KeyMovements.MovedKeys.Values
 
             sourceEntries.Add(movementInfo.SourceEntry)
-            targetEntries.Add(movementInfo.TargetEntry)
+
+            Dim target = movementInfo.TargetEntry
+            If _state.MergedEntries.RenamedEntryNames.Contains(target) Then
+
+                intoRenamed.Add(target)
+                _state.Statistics.MovedIntoRenamedKeyTotal += 1
+
+            ElseIf _state.ModifiedEntries.ModifiedEntryNames.Contains(target) Then
+
+                intoModified.Add(target)
+                _state.Statistics.MovedIntoModifiedKeyTotal += 1
+
+            Else
+
+                intoAdded.Add(target)
+                _state.Statistics.MovedIntoAddedKeyTotal += 1
+
+            End If
 
         Next
 
         _state.Statistics.ModEntriesMovedKeysSourceCount = sourceEntries.Count
-        _state.Statistics.ModEntriesMovedKeysTargetCount = targetEntries.Count
+        _state.Statistics.ModEntriesMovedKeysTargetCount = intoModified.Count + intoRenamed.Count + intoAdded.Count
+        _state.Statistics.MovedIntoModifiedEntryCount = intoModified.Count
+        _state.Statistics.MovedIntoRenamedEntryCount = intoRenamed.Count
+        _state.Statistics.MovedIntoAddedEntryCount = intoAdded.Count
 
     End Sub
 
@@ -359,7 +384,7 @@ Public Class DiffStatisticsCalculator
         ' Keys that moved in from a surviving entry are neither, and are counted as moved.
         For Each newEntryName In entriesWithMergers
 
-            Dim movedIn = _state.KeyMovements.SourcesMovedInto(newEntryName)
+            Dim movedIn = _state.KeyMovements.MovedInto(newEntryName)
 
             Dim allMergedKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
@@ -388,7 +413,8 @@ Public Class DiffStatisticsCalculator
 
                     carriedOverCount += 1
 
-                ElseIf Not movedIn.ContainsKey(k.Value) Then
+                ElseIf Not movedIn.Any(Function(m) String.Equals(m.TargetKey.KeyType, k.KeyType, StringComparison.OrdinalIgnoreCase) AndAlso
+                                                   String.Equals(m.TargetKey.Value, k.Value, StringComparison.OrdinalIgnoreCase)) Then
 
                     novelCount += 1
 

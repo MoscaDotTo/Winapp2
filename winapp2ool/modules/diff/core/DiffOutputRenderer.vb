@@ -237,6 +237,9 @@ Public Class DiffOutputRenderer
         Dim modifiedRemoved = $" - {Plural(stats.ModEntriesRemovedKeysWithoutReplacementTotal, "removed key")} without replacement across {Entries(stats.ModEntriesRemovedKeyEntryCount)}"
         Dim modifiedUpdated = $" ~ {Plural(stats.ModEntriesUpdatedKeyTotal, "updated key")} replaced {Plural(stats.ModEntriesReplacedByUpdateTotal, "old key")} across {Entries(stats.ModEntriesUpdatedKeyEntryCount)}"
         Dim movedKeys = $" ~ {Plural(stats.ModEntriesMovedKeysTotal, "key")} moved from {Entries(stats.ModEntriesMovedKeysSourceCount)} into {Entries(stats.ModEntriesMovedKeysTargetCount)}"
+        Dim movedIntoModified = $"    ~ {Plural(stats.MovedIntoModifiedKeyTotal, "key")} moved into {Plural(stats.MovedIntoModifiedEntryCount, "modified entry", "modified entries")}"
+        Dim movedIntoRenamed = $"    & {Plural(stats.MovedIntoRenamedKeyTotal, "key")} moved into {Plural(stats.MovedIntoRenamedEntryCount, "renamed entry", "renamed entries")}"
+        Dim movedIntoAdded = $"    + {Plural(stats.MovedIntoAddedKeyTotal, "key")} moved into {Plural(stats.MovedIntoAddedEntryCount, "added entry", "added entries")}"
         Dim modifiedMergerNote = $" + {Entries(modifiedEntriesWithMergers)} also received merged content from removed entries (see merged entries below)"
 
         Dim removedSummary = $"Removed entries: {modified.RemovedEntryNames.Count}"
@@ -298,6 +301,9 @@ Public Class DiffOutputRenderer
             Emit(out, modifiedRemoved, ConsoleColor.Red, modEntriesHaveRemovals)
             Emit(out, modifiedUpdated, ConsoleColor.Yellow, modEntriesHaveUpdates)
             Emit(out, movedKeys, ConsoleColor.Cyan, hasMovedKeys)
+            Emit(out, movedIntoModified, ConsoleColor.Cyan, stats.MovedIntoModifiedKeyTotal > 0)
+            Emit(out, movedIntoRenamed, ConsoleColor.Cyan, stats.MovedIntoRenamedKeyTotal > 0)
+            Emit(out, movedIntoAdded, ConsoleColor.Cyan, stats.MovedIntoAddedKeyTotal > 0)
             Emit(out, modifiedMergerNote, ConsoleColor.DarkCyan, hasMergedIntoModified)
             Emit(out, removedSummary, ConsoleColor.Cyan)
             Emit(out, removedMergedSummary, ConsoleColor.Cyan, hasMerged)
@@ -466,7 +472,7 @@ Public Class DiffOutputRenderer
 
             End If
 
-            If Not hasChanges Then qualifying.Add(entry)
+            If Not hasChanges AndAlso Not HasMoves(entry, includeMovedIn:=True) Then qualifying.Add(entry)
 
         Next
 
@@ -521,6 +527,14 @@ Public Class DiffOutputRenderer
             Dim combined = BuildCombinedOldKeys(_state.MergedEntries.MergeDict(targetEntry), targetEntry)
             _mergerSourceMaps(targetEntry) = combined.SourceEntryMap
             _keyAnalyzer.FindModificationsFromCombinedKeys(combined.Keys, _file2.GetSection(targetEntry))
+
+            ' The re-diff starts over, so it lists the keys this entry gave away as removed again
+            Dim movedOut = _state.KeyMovements.MovedOutOf(targetEntry)
+            Dim removed As List(Of iniKey) = Nothing
+            If movedOut.Count = 0 OrElse Not _state.ModifiedEntries.RemovedKeyTracker.TryGetValue(targetEntry, removed) Then Continue For
+
+            removed.RemoveAll(Function(key) movedOut.Any(Function(m) String.Equals(m.MovedKey.KeyType, key.KeyType, StringComparison.OrdinalIgnoreCase) AndAlso
+                                                                     String.Equals(m.MovedKey.Value, key.Value, StringComparison.OrdinalIgnoreCase)))
 
         Next
 
@@ -619,7 +633,8 @@ Public Class DiffOutputRenderer
             If _state.MergedEntries.RenamedEntryNames.Contains(entry) Then Continue For
 
             Dim changes = GetKeyChanges(entry)
-            If changes.RemovedKeys.Count + changes.AddedKeys.Count + changes.UpdatedKeysDict.Count = 0 Then Continue For
+            Dim hasKeyChanges = changes.RemovedKeys.Count + changes.AddedKeys.Count + changes.UpdatedKeysDict.Count > 0
+            If Not hasKeyChanges AndAlso Not HasMoves(entry, includeMovedIn:=Not isMerger) Then Continue For
 
             qualifying.Add(entry)
 
@@ -641,6 +656,7 @@ Public Class DiffOutputRenderer
                                   results.AddRange(ItemizeChangesFromList(changes.AddedKeys, True, addKeyTypes, sourceMap))
                                   results.AddRange(ItemizeChangesFromList(changes.RemovedKeys, False, remKeyTypes, sourceMap))
                                   results.AddRange(ItemizeUpdatedKeys(changes.UpdatedKeysDict, modKeyTypes, sourceMap))
+                                  results.AddRange(ItemizeMovedKeys(entry, includeMovedIn:=Not isMerger))
                                   results.Add(ItemizeMergedEntries(entry, isMerger))
 
                               Next
@@ -835,7 +851,7 @@ Public Class DiffOutputRenderer
 
             Next
 
-            If removedKeys.Count + addedKeys.Count + updatedKeysDict.Count = 0 Then Continue For
+            If removedKeys.Count + addedKeys.Count + updatedKeysDict.Count = 0 AndAlso Not HasMoves(newName, includeMovedIn:=True) Then Continue For
 
             qualifying.Add(Tuple.Create(newName, addedKeys, removedKeys, updatedKeysDict))
 
@@ -865,6 +881,7 @@ Public Class DiffOutputRenderer
                 results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, Nothing))
                 results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, Nothing))
                 results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, modKeyTypes))
+                results.AddRange(ItemizeMovedKeys(newName, includeMovedIn:=True))
 
             Next
 
@@ -1413,6 +1430,108 @@ Public Class DiffOutputRenderer
         End Using
 
         Return out
+
+    End Function
+
+    ''' <summary>
+    ''' Indicates whether any key moved out of <paramref name="entry"/>, or, when
+    ''' <paramref name="includeMovedIn"/> is set, into it
+    ''' </summary>
+    '''
+    ''' <param name="entry">
+    ''' The entry to check
+    ''' </param>
+    '''
+    ''' <param name="includeMovedIn">
+    ''' Indicates whether keys moved into <paramref name="entry"/> count
+    ''' </param>
+    Private Function HasMoves(entry As String, includeMovedIn As Boolean) As Boolean
+
+        Return _state.KeyMovements.MovedOutOf(entry).Count > 0 OrElse
+               (includeMovedIn AndAlso _state.KeyMovements.MovedInto(entry).Count > 0)
+
+    End Function
+
+    ''' <summary>
+    ''' Builds and logs the keys that moved out of <paramref name="entry"/>, each with the entry
+    ''' it moved to, and optionally the keys that moved into it, each with the entries it came
+    ''' from. Each list is headed by a per-type count summary.
+    ''' </summary>
+    '''
+    ''' <param name="entry">
+    ''' The entry whose moves to itemize
+    ''' </param>
+    '''
+    ''' <param name="includeMovedIn">
+    ''' Indicates whether to itemize the keys that moved into <paramref name="entry"/>. A merger
+    ''' block already lists them among its added keys, credited to their sources.
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A summary section and a key list section for each kind of move that happened, or an
+    ''' empty list if neither did
+    ''' </returns>
+    Private Function ItemizeMovedKeys(entry As String, includeMovedIn As Boolean) As List(Of MenuSection)
+
+        Dim out As New List(Of MenuSection)
+
+        Dim movedOut = _state.KeyMovements.MovedOutOf(entry)
+        Dim movedIn = If(includeMovedIn, _state.KeyMovements.MovedInto(entry), New List(Of KeyMovementInfo))
+
+        ' Match on name as well as value, since a Detect and a RegKey often share a value
+        Dim landedIn = Function(key As iniKey) movedIn.Where(Function(m) String.Equals(m.TargetKey.Name, key.Name, StringComparison.OrdinalIgnoreCase) AndAlso
+                                                                         String.Equals(m.TargetKey.Value, key.Value, StringComparison.OrdinalIgnoreCase)).ToList()
+
+        Dim landed = _file2.GetSection(entry).Keys.Where(Function(key) landedIn(key).Count > 0).ToList()
+        Dim credit = Function(key As iniKey) CreditSources(landedIn(key).Select(Function(m) m.SourceEntry).
+                                                                           Distinct(StringComparer.OrdinalIgnoreCase).
+                                                                           OrderBy(Function(name) name, StringComparer.OrdinalIgnoreCase).ToList())
+
+        Using gLogScope()
+
+            If movedOut.Count > 0 Then
+
+                Dim ktDict As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
+                movedOut.ForEach(Sub(m) recordModification(ktDict, m.MovedKey.KeyType))
+                out.Add(summarizeEntryUpdate(ktDict, "Moved"))
+                out.Add(ListMovedKeys(movedOut.Select(Function(m) $"{m.MovedKey} moved to [{m.TargetEntry}]")))
+
+            End If
+
+            If landed.Count > 0 Then
+
+                Dim ktDict As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
+                landed.ForEach(Sub(key) recordModification(ktDict, key.KeyType))
+                out.Add(summarizeEntryUpdate(ktDict, "Moved in"))
+                out.Add(ListMovedKeys(landed.Select(Function(key) $"{key} (from {credit(key)})")))
+
+            End If
+
+        End Using
+
+        Return out
+
+    End Function
+
+    ''' <summary>
+    ''' Builds and logs a section with one line for each moved key
+    ''' </summary>
+    '''
+    ''' <param name="lines">
+    ''' The lines to list
+    ''' </param>
+    Private Shared Function ListMovedKeys(lines As IEnumerable(Of String)) As MenuSection
+
+        Dim result As New MenuSection
+
+        For Each line In lines
+
+            result.AddColoredLine(line, ConsoleColor.DarkCyan)
+            gLog($"        {line}")
+
+        Next
+
+        Return result.AddBlank()
 
     End Function
 
