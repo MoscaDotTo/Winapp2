@@ -329,8 +329,6 @@ Public Class KeyModificationAnalyzer
     ''' optionally adding the section to <c> ModifiedEntryNames </c>, and, with
     ''' <paramref name="addToModified"/>, injecting a Name-change sentinel pair when
     ''' <paramref name="oldSectionName"/> differs from <paramref name="newSectionName"/> ignoring case.
-    ''' Runs under a lock on <c> ModifiedEntryNames </c>, since rename detection calls it from
-    ''' parallel workers.
     ''' </summary>
     '''
     ''' <param name="newSectionName">
@@ -373,46 +371,42 @@ Public Class KeyModificationAnalyzer
                                        addToModified As Boolean,
                                        clearExisting As Boolean)
 
-        SyncLock _state.ModifiedEntries.ModifiedEntryNames
+        If clearExisting Then
 
-            If clearExisting Then
+            _state.ModifiedEntries.AddedKeyTracker.Remove(newSectionName)
+            _state.ModifiedEntries.RemovedKeyTracker.Remove(newSectionName)
+            _state.ModifiedEntries.ModifiedKeyTracker.Remove(newSectionName)
 
-                _state.ModifiedEntries.AddedKeyTracker.Remove(newSectionName)
-                _state.ModifiedEntries.RemovedKeyTracker.Remove(newSectionName)
-                _state.ModifiedEntries.ModifiedKeyTracker.Remove(newSectionName)
+        ElseIf _state.ModifiedEntries.ModifiedEntryNames.Contains(newSectionName) Then
 
-            ElseIf _state.ModifiedEntries.ModifiedEntryNames.Contains(newSectionName) Then
+            RollBackPreviouslyObservedChanges(newSectionName)
 
-                RollBackPreviouslyObservedChanges(newSectionName)
+        End If
 
-            End If
+        Dim updatedKeys = DetermineModifiedKeys(removedKeys, addedKeys)
+        If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Return
 
-            Dim updatedKeys = DetermineModifiedKeys(removedKeys, addedKeys)
-            If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Return
+        updateTrackingDictionary(_state.ModifiedEntries.RemovedKeyTracker, removedKeys, newSectionName)
+        updateTrackingDictionary(_state.ModifiedEntries.AddedKeyTracker, addedKeys, newSectionName)
 
-            updateTrackingDictionary(_state.ModifiedEntries.RemovedKeyTracker, removedKeys, newSectionName)
-            updateTrackingDictionary(_state.ModifiedEntries.AddedKeyTracker, addedKeys, newSectionName)
+        If addToModified Then
 
-            If addToModified Then
+            If Not _state.ModifiedEntries.AddedEntryNames.Contains(newSectionName) Then _state.ModifiedEntries.ModifiedEntryNames.Add(newSectionName)
 
-                If Not _state.ModifiedEntries.AddedEntryNames.Contains(newSectionName) Then _state.ModifiedEntries.ModifiedEntryNames.Add(newSectionName)
+            If oldSectionName IsNot Nothing AndAlso
+               Not oldSectionName.Equals(newSectionName, StringComparison.InvariantCultureIgnoreCase) Then
 
-                If oldSectionName IsNot Nothing AndAlso
-                   Not oldSectionName.Equals(newSectionName, StringComparison.InvariantCultureIgnoreCase) Then
-
-                    Dim oldName = New iniKey($"Name={oldSectionName}")
-                    Dim newName = New iniKey($"Name={newSectionName}")
-                    updatedKeys.Add(New KeyValuePair(Of iniKey, iniKey)(newName, oldName))
-
-                End If
+                Dim oldName = New iniKey($"Name={oldSectionName}")
+                Dim newName = New iniKey($"Name={newSectionName}")
+                updatedKeys.Add(New KeyValuePair(Of iniKey, iniKey)(newName, oldName))
 
             End If
 
-            If updatedKeys.Count = 0 Then Return
+        End If
 
-            MergeModificationsIntoTracker(newSectionName, updatedKeys, clearExisting)
+        If updatedKeys.Count = 0 Then Return
 
-        End SyncLock
+        MergeModificationsIntoTracker(newSectionName, updatedKeys, clearExisting)
 
     End Sub
 

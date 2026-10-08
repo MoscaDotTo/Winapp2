@@ -150,7 +150,7 @@ Set the flavor for a single run with a CLI flag (see [Flavor Selection](#flavor-
 
 # Diff Categories
 
-###### Note: The output excerpts in this section are taken verbatim from the saved log of a real Diff between base-flavor database versions 220510 (May 2022) and 251109 (November 2025). To reproduce them, extract `Non-CCleaner/Winapp2.ini` at commit `f5ea7371` and at tag `v251109`, then diff the two locally. Because removal processing runs in parallel, list ordering and source attribution for keys shared between multiple entries can vary between runs.
+###### Note: The output excerpts in this section are taken verbatim from the saved log of a real Diff between base-flavor database versions 220510 (May 2022) and 251109 (November 2025). To reproduce them, extract `Non-CCleaner/Winapp2.ini` at commit `f5ea7371` and at tag `v251109`, then diff the two locally.
 
 ## Added Entries
 
@@ -176,6 +176,8 @@ When a new entry contains keys from one or more removed entries, it is annotated
 | **Novel** | Added keys | `(novel)` | key is new content with no equivalent in any source entry |
 | **Dropped** | Removed keys | Appears in an `N keys from merged entries not in this entry:` block | the key existed in a source entry but is not captured by any new or modified key in the absorbing entry |
 | **Captured** | Modified keys | `(from [Source *])` on the old key | the key does not appear verbatim but is replaced by another key that covers it — typically a wildcard path that absorbs one or more specific old paths |
+
+A key that several source entries share is credited to each of them in name order, as in `(from [Source A *], [Source B *])`. Past three sources, Diff names the first three and counts the rest: `(from [Source A *], [Source B *], [Source C *] and 4 others)`.
 
 **Example 1: Novel and carried keys (Abelssoft PCFresh):**
 
@@ -251,13 +253,13 @@ FileKey1=%AppData%\EFSoftware|*Cache
 ```
    EFSoftware  * has been added (consolidating 2 removed entries)
    Merged from:
-     • EF Duplicate MP3 Finder *
      • EF Duplicate Files Manager *
+     • EF Duplicate MP3 Finder *
 
    1 key added or carried over from merged sources:
 
        Added 1 LangSecRef
-             LangSecRef=3024 (from [EF Duplicate MP3 Finder *])
+             LangSecRef=3024 (from [EF Duplicate Files Manager *], [EF Duplicate MP3 Finder *])
 
    2 keys capturing content from merged entries
 
@@ -266,17 +268,17 @@ FileKey1=%AppData%\EFSoftware|*Cache
 
        Detection criteria modified, replacing 2 old keys
               + New: DetectFile=%AppData%\EFSoftware
-              - Old: DetectFile=%AppData%\EFSoftware\MP3Cache (from [EF Duplicate MP3 Finder *])
               - Old: DetectFile=%AppData%\EFSoftware\DFMCache (from [EF Duplicate Files Manager *])
+              - Old: DetectFile=%AppData%\EFSoftware\MP3Cache (from [EF Duplicate MP3 Finder *])
        FileKey1 has been modified, replacing 2 old keys
               + New: FileKey1=%AppData%\EFSoftware|*Cache
-              - Old: FileKey1=%AppData%\EFSoftware|MP3Cache (from [EF Duplicate MP3 Finder *])
               - Old: FileKey1=%AppData%\EFSoftware|DFMCache (from [EF Duplicate Files Manager *])
+              - Old: FileKey1=%AppData%\EFSoftware|MP3Cache (from [EF Duplicate MP3 Finder *])
 ```
 
 **Explanation:**
 
-`LangSecRef` is carried over and attributed to `[EF Duplicate MP3 Finder *]`. Diff attributes a key shared by several sources to whichever source entry it processed first, which can vary between runs.
+`LangSecRef` is carried over and credited to both source entries.
 
 The `DetectFile` and `FileKey1` in the new entry each cover both old paths with a single pattern; `%AppData%\EFSoftware` is a parent path, and `*Cache` matches both old parameters. Both are reported as captured (modified) keys replacing 2 old keys each.
 
@@ -331,8 +333,8 @@ FileKey4=%UserProfile%\Documents\Cook'n*|*.log|RECURSE
        Added 1 LangSecRef
        Added 1 Detect
        Added 4 FileKeys
-             LangSecRef=3021 (from [Cook'n Cache *])
-             Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Cook'n (from [Cook'n Cache *])
+             LangSecRef=3021 (from [Cook'n Cache *], [Cook'n Dups *], [Cook'n Logs *])
+             Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Cook'n (from [Cook'n Cache *], [Cook'n Dups *], [Cook'n Logs *])
              FileKey1=%AppData%\Mozilla\eclipse\Cache|* (from [Cook'n Cache *])
              FileKey2=%LocalAppData%\DVO\Cook'n*App|*.log|RECURSE (from [Cook'n Logs *])
              FileKey3=%LocalAppData%\DVO\Cook'n10App\plugins|Getting Started Guide.rtf|RECURSE (from [Cook'n Dups *])
@@ -348,7 +350,7 @@ FileKey4=%UserProfile%\Documents\Cook'n*|*.log|RECURSE
 
 Every `FileKey` from all three source entries was carried over, attributed to its originating entry.
 
-For keys shared between multiple entries (`LangSecRef`, `Detect`), Diff attributes to whichever source entry it processes first
+Keys that all three source entries shared (`LangSecRef`, `Detect`) are credited to all three.
 
 The `Warning=` key from `Cook'n Dups *` was dropped, and is listed as removed with attribution to its originating entry.
 
@@ -428,7 +430,7 @@ The replacement of `Detect` with `DetectFile` is paired into a single `Detection
 
 ### Modification by merger
 
-When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies from which old entry it originated. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Each such block is followed by a note itemizing the removed entries against which the changes were measured.
+When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Each such block is followed by a note itemizing the removed entries against which the changes were measured.
 
 In this example, two version-specific log path entries were merged into a single entry using a wildcard to cover both:
 
@@ -713,8 +715,8 @@ FileKey9=%AppData%\Waterfox\Profiles\*|AlternateServices.txt
      Alternate Services * has been split/merged into 6 entries
        • ArtisBrowser Caches *
        • LibreWolf Caches *
-       • Pale Moon Caches *
        • Mozilla Firefox Caches *
+       • Pale Moon Caches *
        • SeaMonkey Caches *
        • Waterfox Caches *
 ```
@@ -1195,7 +1197,6 @@ Every value is an integer or `true`/`false`, so PowerShell can read the whole fi
 | "winapp2.ini was empty or not found" | The older/local file (or the selected newer file) does not exist or contains no entries |
 | Download fails | No internet connection, GitHub is unavailable, or the selected flavor has not been published yet |
 | An old key in the log does not match the archived file's text | Deprecated values are rewritten before comparison. See [Value Normalization](#value-normalization) |
-| Diff produces slightly different results on successive runs | Removal processing runs in parallel; ordering and shared-key attribution can vary between runs |
 | Log Viewer is not available | Diff has not been run yet during the current session |
 
 ---

@@ -222,14 +222,15 @@ Public Class DiffStatisticsCalculator
     ''' Detects keys that were removed from one entry and added to another, records each in
     ''' <see cref="KeyMovementTracker.MovedKeys"/>, and takes the moved keys out of the added and
     ''' removed trackers. A removed key pairs with the first same-type added key in another entry
-    ''' that captures it or that it captures. We scan every tracked entry, not only modified ones,
-    ''' but subtract each move from the modified-entry totals. Run it after
+    ''' that captures it or that it captures, taking entries in name order (ignoring case). We
+    ''' scan every tracked entry, not only modified ones, but subtract each move from the
+    ''' modified-entry totals. Run it after
     ''' <see cref="CalculateInitialStatistics"/> and after all parallel processing completes.
     ''' </summary>
     Public Sub DetectCrossEntryMovements()
 
         Dim addedKeyInfo As New List(Of AddedKeyInfo)()
-        For Each kvp In _state.ModifiedEntries.AddedKeyTracker
+        For Each kvp In _state.ModifiedEntries.AddedKeyTracker.OrderBy(Function(e) e.Key, StringComparer.OrdinalIgnoreCase)
 
             Dim entryName = kvp.Key
             Dim entryKeys = kvp.Value
@@ -248,7 +249,7 @@ Public Class DiffStatisticsCalculator
 
         Dim keysToRemoveFromAdded As New Dictionary(Of String, List(Of iniKey))
         Dim keysToRemoveFromRemoved As New Dictionary(Of String, List(Of iniKey))
-        For Each kvp In _state.ModifiedEntries.RemovedKeyTracker
+        For Each kvp In _state.ModifiedEntries.RemovedKeyTracker.OrderBy(Function(e) e.Key, StringComparer.OrdinalIgnoreCase)
 
             Dim sourceEntry = kvp.Key
             Dim removedKeyList = kvp.Value

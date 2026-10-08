@@ -38,7 +38,13 @@ Public Class DiffOutputRenderer
     Private Const DetectionCriteriaLabel As String = "Detection criteria"
 
     ''' <summary>
-    ''' Maps merged target entry name → (key value → source old entry name).
+    ''' The most source entries we name when a merged key came from several. A key shared by
+    ''' more usually comes from the old unified browser entries, where naming every one is noise.
+    ''' </summary>
+    Private Const MaxCreditedSources As Integer = 3
+
+    ''' <summary>
+    ''' Maps merged target entry name → (key value → its source old entries, as <see cref="CreditSources"/> formats them).
     ''' Built by <c> ItemizeMergers </c> and consumed by <c> ItemizeModifications </c>
     ''' to attribute old keys to their source entries in merger output.
     ''' </summary>
@@ -677,7 +683,7 @@ Public Class DiffOutputRenderer
     ''' </param>
     '''
     ''' <param name="sourceEntryMap">
-    ''' Map of key value → source entry name, used
+    ''' Map of key value → its source entries as <see cref="CreditSources"/> formats them, used
     ''' to attribute old keys to their origin entries in merger output <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
@@ -740,7 +746,7 @@ Public Class DiffOutputRenderer
 
                     Dim sourceInfo = ""
                     Dim hasSourceInfo = sourceEntryMap IsNot Nothing AndAlso sourceEntryMap.ContainsKey(oldKey.Value)
-                    If hasSourceInfo Then sourceInfo = $" (from [{sourceEntryMap(oldKey.Value)}])"
+                    If hasSourceInfo Then sourceInfo = $" (from {sourceEntryMap(oldKey.Value)})"
 
                     Dim old = $" - Old: {If(isRename, oldKey.Value, oldKey.ToString())}{sourceInfo}"
 
@@ -1350,7 +1356,8 @@ Public Class DiffOutputRenderer
     ''' </param>
     '''
     ''' <param name="sourceEntryMap">
-    ''' Map of key value → source entry name used to annotate merger origin. When it is given,
+    ''' Map of key value → its source entries as <see cref="CreditSources"/> formats them, used
+    ''' to annotate merger origin. When it is given,
     ''' an added key whose value isn't in it is labeled <c> (novel) </c>. <br /><br />
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
@@ -1386,7 +1393,7 @@ Public Class DiffOutputRenderer
                 Dim sourceInfo = ""
                 If sourceEntryMap IsNot Nothing AndAlso sourceEntryMap.ContainsKey(kl(i).Value) Then
 
-                    sourceInfo = $" (from [{sourceEntryMap(kl(i).Value)}])"
+                    sourceInfo = $" (from {sourceEntryMap(kl(i).Value)})"
 
                 ElseIf wasAdded AndAlso sourceEntryMap IsNot Nothing Then
 
@@ -1478,7 +1485,7 @@ Public Class DiffOutputRenderer
         '''
         ''' <param name="keys">The combined, deduplicated old keys</param>
         '''
-        ''' <param name="sourceMap">Map of key value → name of the old entry it came from</param>
+        ''' <param name="sourceMap">Map of key value → the old entries it came from, formatted by <see cref="CreditSources"/></param>
         Public Sub New(keys As List(Of iniKey), sourceMap As Dictionary(Of String, String))
 
             Me.Keys = keys
@@ -1493,7 +1500,8 @@ Public Class DiffOutputRenderer
     ''' named in <paramref name="mergeSourceNames"/>, plus optionally from
     ''' <paramref name="targetEntry"/> itself if it existed in file1 and is not
     ''' already a named merge source. We drop a key whose value (case-insensitive) an earlier
-    ''' key already has, so the first source in order keeps the attribution.
+    ''' key already has, and credit it to every source that has it, in source order.
+    ''' <paramref name="targetEntry"/> is credited only for values no source has.
     ''' </summary>
     '''
     ''' <param name="mergeSourceNames">
@@ -1513,9 +1521,8 @@ Public Class DiffOutputRenderer
     Private Function BuildCombinedOldKeys(mergeSourceNames As IEnumerable(Of String),
                                           targetEntry As String) As CombinedOldKeyResult
 
-        Dim uniqueKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
         Dim combinedKeys As New List(Of iniKey)
-        Dim sourceMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+        Dim sources As New Dictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
 
         For Each oldEntryName In mergeSourceNames
 
@@ -1524,11 +1531,14 @@ Public Class DiffOutputRenderer
 
             For Each key In oldEnt.Keys
 
-                If uniqueKeyValues.Contains(key.Value) Then Continue For
+                If Not sources.ContainsKey(key.Value) Then
 
-                combinedKeys.Add(key)
-                uniqueKeyValues.Add(key.Value)
-                sourceMap(key.Value) = oldEntryName
+                    combinedKeys.Add(key)
+                    sources.Add(key.Value, New List(Of String))
+
+                End If
+
+                If Not sources(key.Value).Contains(oldEntryName) Then sources(key.Value).Add(oldEntryName)
 
             Next
 
@@ -1540,17 +1550,38 @@ Public Class DiffOutputRenderer
 
             For Each key In _file1.GetSection(targetEntry).Keys
 
-                If uniqueKeyValues.Contains(key.Value) Then Continue For
+                If sources.ContainsKey(key.Value) Then Continue For
 
                 combinedKeys.Add(key)
-                uniqueKeyValues.Add(key.Value)
-                sourceMap(key.Value) = targetEntry
+                sources.Add(key.Value, New List(Of String) From {targetEntry})
 
             Next
 
         End If
 
+        Dim sourceMap = sources.ToDictionary(Function(kvp) kvp.Key, Function(kvp) CreditSources(kvp.Value), StringComparer.OrdinalIgnoreCase)
         Return New CombinedOldKeyResult(combinedKeys, sourceMap)
+
+    End Function
+
+    ''' <summary>
+    ''' Formats the entries a merged key came from as <c> [A], [B], [C] </c>, naming at most
+    ''' <see cref="MaxCreditedSources"/> and counting the rest, as in <c> [A], [B], [C] and 4 others </c>
+    ''' </summary>
+    '''
+    ''' <param name="names">
+    ''' The source entry names, in the order to credit them
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The bracketed names, comma-separated, with any uncredited count after them
+    ''' </returns>
+    Private Shared Function CreditSources(names As List(Of String)) As String
+
+        Dim credited = String.Join(", ", names.Take(MaxCreditedSources).Select(Function(name) $"[{name}]"))
+        Dim uncredited = names.Count - MaxCreditedSources
+
+        Return If(uncredited > 0, $"{credited} and {Plural(uncredited, "other")}", credited)
 
     End Function
 

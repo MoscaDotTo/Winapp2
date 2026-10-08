@@ -21,7 +21,11 @@ Option Strict On
 ''' Detects when a removed entry has been renamed to or merged into one or more new entries.
 ''' Matches candidates by comparing their <c> FileKey </c> and <c> RegKey </c> values only,
 ''' records renames and mergers in <see cref="DiffState"/>, and invokes a callback for
-''' key-level change tracking when it records a new rename.
+''' key-level change tracking when it records a new rename. <br /><br />
+'''
+''' Finding a match (<see cref="FindBestMatch"/>) reads no tracker state and is safe to run in
+''' parallel. Recording one (<see cref="RecordMatch"/>) is not, and the caller records matches
+''' one at a time in entry name order so contested renames resolve the same way on every run.
 ''' </summary>
 Public Class MergeDetector
 
@@ -54,83 +58,22 @@ Public Class MergeDetector
     End Sub
 
     ''' <summary>
-    ''' Determines whether a removed entry has been renamed or merged into one or more new entries,
-    ''' and updates the <see cref="DiffState"/> tracking collections. A rename whose target is
-    ''' already the rename of a different old entry is recorded as a merger into that target.
+    ''' Records the rename or mergers in <paramref name="bestMatch"/> in the <see cref="DiffState"/>
+    ''' tracking collections. A rename whose target is already the rename of a different old entry
+    ''' is recorded as a merger into that target. Not thread-safe.
     ''' </summary>
-    '''
-    ''' <param name="candidates">
-    ''' New entries (added or modified) that are potential rename or merger targets for <paramref name="oldSection"/>
-    ''' </param>
-    '''
-    ''' <param name="oldSection">
-    ''' The removed entry being assessed
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' <c> True </c> if a rename or merger was recorded; <c> False </c> if
-    ''' <paramref name="candidates"/> is empty or none of them matched
-    ''' </returns>
-    Public Function AssessRenamesAndMergers(candidates As List(Of iniSection),
-                                            oldSection As iniSection) As Boolean
-
-        If candidates.Count = 0 Then Return False
-
-        Dim cachedOld = GetOrCreateCachedSection(oldSection)
-        Dim bestMatch = FindBestMatch(candidates, cachedOld)
-
-        If bestMatch.IsRename Then
-
-            If ConfirmRename(bestMatch.TargetName, oldSection) Then Return True
-
-            ' Rename rejected: target already renamed from another entry.
-            ' Treat this as a merger instead so the entry isn't silently dropped.
-            TrackBestMatches(False, bestMatch, oldSection)
-            Return True
-
-        End If
-
-        If bestMatch.IsMerge OrElse bestMatch.HasPartialMatch Then
-
-            TrackBestMatches(bestMatch.IsMerge, bestMatch, oldSection)
-            Return True
-
-        End If
-
-        Return False
-
-    End Function
-
-    ''' <summary>
-    ''' Records a merger from <paramref name="oldSection"/> into each qualifying target in
-    ''' <paramref name="bestMatch"/>. When <paramref name="isMerge"/> is <c> False </c>, only the
-    ''' primary target is tracked (for a rejected rename or a partial match).
-    ''' </summary>
-    '''
-    ''' <param name="isMerge">
-    ''' Indicates whether to track every target in <c> AllTargetNames </c>.
-    ''' When <c> False </c>, we track only <c> TargetName </c>.
-    ''' </param>
     '''
     ''' <param name="bestMatch">
-    ''' The match result from <see cref="FindBestMatch"/>
+    ''' The result of <see cref="FindBestMatch"/> for <paramref name="oldSection"/>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="oldSection">
-    ''' The removed entry being tracked
+    ''' The removed entry being recorded
     ''' </param>
-    Private Sub TrackBestMatches(isMerge As Boolean,
-                                 bestMatch As MatchResult,
-                                 oldSection As iniSection)
+    Public Sub RecordMatch(bestMatch As MatchResult, oldSection As iniSection)
 
-        If Not isMerge Then
-
-            Dim singleTarget = _diffFile.GetSection(bestMatch.TargetName)
-            If singleTarget IsNot Nothing Then TrackMerger(oldSection, singleTarget)
-
-            Return
-
-        End If
+        If Not bestMatch.IsRename AndAlso Not bestMatch.IsMerge Then Return
+        If bestMatch.IsRename AndAlso ConfirmRename(bestMatch.TargetName, oldSection) Then Return
 
         For Each targetName In bestMatch.AllTargetNames
 
@@ -205,29 +148,28 @@ Public Class MergeDetector
     ''' qualifies as a rename wins at once: it must be an added entry that matches every old
     ''' FileKey and RegKey, has the same number of each, and raised neither the more-patterns
     ''' nor the wildcard-reduction flag. Otherwise every candidate matching at least one key
-    ''' becomes a merger target. A candidate already recorded as this entry's rename is skipped,
-    ''' and if only such candidates matched, the result is a partial match on the highest scorer.
+    ''' becomes a merger target. Reads no tracker state, so it is safe to call in parallel.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="candidates">
-    ''' New entries to score against <paramref name="oldSection"/>
+    ''' New entries (added or modified) to score against <paramref name="oldSection"/>
     ''' </param>
-    ''' 
+    '''
     ''' <param name="oldSection">
     ''' The removed entry whose keys are used as the match baseline
     ''' </param>
-    ''' 
+    '''
     ''' <returns>
     ''' A <c> MatchResult </c> describing the best outcome found; all flags <c> False </c> if no match qualifies
     ''' </returns>
-    Private Function FindBestMatch(candidates As List(Of iniSection),
-                                   oldSection As iniSection) As MatchResult
+    Public Function FindBestMatch(candidates As List(Of iniSection),
+                                  oldSection As iniSection) As MatchResult
 
         Dim result As New MatchResult()
         Dim highestMatchCount = 0
-        Dim bestCandidateName = ""
         Dim qualifyingMergeTargets As New List(Of String)
 
+        oldSection = GetOrCreateCachedSection(oldSection)
         Dim oldFileKeys = oldSection.Keys.GetByType("FileKey")
         Dim oldRegKeys = oldSection.Keys.GetByType("RegKey")
 
@@ -241,21 +183,9 @@ Public Class MergeDetector
             Dim newSection = GetOrCreateNewCachedSection(candidateSection)
             Dim matchInfo = GetOrComputeMatchInfo(oldSection.Name, candidateSection.Name, newSection, oldFileKeys, oldRegKeys, oldHasFileKeys, oldHasRegKeys)
 
-            If matchInfo.TotalMatches > highestMatchCount Then
-                highestMatchCount = matchInfo.TotalMatches
-                bestCandidateName = candidateSection.Name
-            End If
+            If matchInfo.TotalMatches > highestMatchCount Then highestMatchCount = matchInfo.TotalMatches
 
             If matchInfo.FileKeyMatches = 0 AndAlso matchInfo.RegKeyMatches = 0 Then Continue For
-
-            Dim thisSpecificPairIsRename As Boolean
-            SyncLock _state.MergedEntries
-
-                thisSpecificPairIsRename = _state.MergedEntries.RenamedEntryNames.Contains(candidateSection.Name) AndAlso
-                                           IsRenamedFrom(candidateSection.Name, oldSection.Name)
-
-            End SyncLock
-            If thisSpecificPairIsRename Then Continue For
 
             ' A rename target must be a name that didn't exist in the old file; matching onto a
             ' pre-existing (modified) entry means the old entry was absorbed into it - a merger
@@ -281,46 +211,13 @@ Public Class MergeDetector
 
         Next
 
-        If qualifyingMergeTargets.Count > 0 Then
+        If qualifyingMergeTargets.Count = 0 Then Return result
 
-            result.IsMerge = True
-            result.AllTargetNames.AddRange(qualifyingMergeTargets)
-            result.TargetName = qualifyingMergeTargets(0)
-            result.TotalMatchedKeys = highestMatchCount
-            Return result
-
-        End If
-
-        If Not String.IsNullOrEmpty(bestCandidateName) AndAlso highestMatchCount > 0 Then
-
-            result.HasPartialMatch = True
-            result.TargetName = bestCandidateName
-            result.AllTargetNames.Add(bestCandidateName)
-            result.TotalMatchedKeys = highestMatchCount
-
-        End If
-
+        result.IsMerge = True
+        result.AllTargetNames.AddRange(qualifyingMergeTargets)
+        result.TargetName = qualifyingMergeTargets(0)
+        result.TotalMatchedKeys = highestMatchCount
         Return result
-
-    End Function
-
-    ''' <summary>
-    ''' Returns whether <paramref name="newName"/> is already recorded as a rename of
-    ''' <paramref name="oldName"/>, comparing names ignoring case
-    ''' </summary>
-    ''' 
-    ''' <param name="newName">
-    ''' The new entry name to look up in <c> RenamedEntryPairs </c>
-    ''' </param>
-    ''' 
-    ''' <param name="oldName">
-    ''' The expected old entry name to match against the stored value
-    ''' </param>
-    Private Function IsRenamedFrom(newName As String, oldName As String) As Boolean
-
-        Dim storedOldName As String = Nothing
-        If Not _state.MergedEntries.RenamedEntryPairs.TryGetValue(newName, storedOldName) Then Return False
-        Return storedOldName.Equals(oldName, StringComparison.InvariantCultureIgnoreCase)
 
     End Function
 
@@ -569,44 +466,31 @@ Public Class MergeDetector
 
     ''' <summary>
     ''' Attempts to record a rename from <paramref name="oldSection"/> to <paramref name="newName"/>.
-    ''' If <paramref name="newName"/> is already registered as a rename target from a different entry,
-    ''' the registration is rejected and the caller should fall back to merger tracking.
-    ''' When we record a new rename, we invoke the modifications callback outside the lock to
-    ''' record key-level changes. A pair that was already registered doesn't invoke it again.
+    ''' If <paramref name="newName"/> is already registered as a rename target, the registration is
+    ''' rejected and the caller falls back to merger tracking. When we record the rename, we invoke
+    ''' the modifications callback to record key-level changes.
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="newName">
     ''' The candidate new entry name
     ''' </param>
-    ''' 
+    '''
     ''' <param name="oldSection">
     ''' The removed entry being renamed
     ''' </param>
-    ''' 
+    '''
     ''' <returns>
-    ''' <c> True </c> if the rename was accepted or was already registered for this exact pair <br />
-    ''' <c> False </c> if <paramref name="newName"/> is already a rename target from a different old entry
+    ''' <c> True </c> if the rename was recorded <br />
+    ''' <c> False </c> if <paramref name="newName"/> is already a rename target
     ''' </returns>
     Private Function ConfirmRename(newName As String, oldSection As iniSection) As Boolean
 
-        Dim newSection As iniSection = Nothing
+        If _state.MergedEntries.RenamedEntryPairs.ContainsKey(newName) Then Return False
 
-        SyncLock _state.MergedEntries
+        _state.MergedEntries.RenamedEntryNames.Add(newName)
+        _state.MergedEntries.RenamedEntryPairs.Add(newName, oldSection.Name)
 
-            Dim storedOldName As String = Nothing
-
-            If _state.MergedEntries.RenamedEntryPairs.TryGetValue(newName, storedOldName) Then
-
-                Return storedOldName.Equals(oldSection.Name, StringComparison.InvariantCultureIgnoreCase)
-
-            End If
-
-            _state.MergedEntries.RenamedEntryNames.Add(newName)
-            _state.MergedEntries.RenamedEntryPairs.Add(newName, oldSection.Name)
-            newSection = _diffFile.GetSection(newName)
-
-        End SyncLock
-
+        Dim newSection = _diffFile.GetSection(newName)
         If _findModificationsCallback IsNot Nothing AndAlso newSection IsNot Nothing Then _findModificationsCallback(oldSection, newSection)
 
         Return True
@@ -632,33 +516,29 @@ Public Class MergeDetector
         Dim mergeName = newSection.Name
         Dim oldName = oldSection.Name
 
-        SyncLock _state.MergedEntries
+        _state.MergedEntries.MergedEntryNames.Add(mergeName)
 
-            _state.MergedEntries.MergedEntryNames.Add(mergeName)
+        If Not _state.MergedEntries.MergeDict.ContainsKey(mergeName) Then _state.MergedEntries.MergeDict.Add(mergeName, New List(Of String))
 
-            If Not _state.MergedEntries.MergeDict.ContainsKey(mergeName) Then _state.MergedEntries.MergeDict.Add(mergeName, New List(Of String))
+        If Not _state.MergedEntries.MergeDict(mergeName).Contains(oldName) Then _state.MergedEntries.MergeDict(mergeName).Add(oldName)
 
-            If Not _state.MergedEntries.MergeDict(mergeName).Contains(oldName) Then _state.MergedEntries.MergeDict(mergeName).Add(oldName)
+        If Not _state.MergedEntries.OldToNewMergeDict.ContainsKey(oldName) Then _state.MergedEntries.OldToNewMergeDict.Add(oldName, New List(Of String))
 
-            If Not _state.MergedEntries.OldToNewMergeDict.ContainsKey(oldName) Then _state.MergedEntries.OldToNewMergeDict.Add(oldName, New List(Of String))
+        If Not _state.MergedEntries.OldToNewMergeDict(oldName).Contains(mergeName) Then _state.MergedEntries.OldToNewMergeDict(oldName).Add(mergeName)
 
-            If Not _state.MergedEntries.OldToNewMergeDict(oldName).Contains(mergeName) Then _state.MergedEntries.OldToNewMergeDict(oldName).Add(mergeName)
+        If Not _state.MergedEntries.RenamedEntryNames.Contains(mergeName) Then Return
 
-            If Not _state.MergedEntries.RenamedEntryNames.Contains(mergeName) Then Return
+        Dim renameHolder As String = Nothing
+        If Not _state.MergedEntries.RenamedEntryPairs.TryGetValue(mergeName, renameHolder) Then Return
 
-            Dim renameHolder As String = Nothing
-            If Not _state.MergedEntries.RenamedEntryPairs.TryGetValue(mergeName, renameHolder) Then Return
+        If Not _state.MergedEntries.MergeDict(mergeName).Contains(renameHolder) Then _state.MergedEntries.MergeDict(mergeName).Add(renameHolder)
 
-            If Not _state.MergedEntries.MergeDict(mergeName).Contains(renameHolder) Then _state.MergedEntries.MergeDict(mergeName).Add(renameHolder)
+        If Not _state.MergedEntries.OldToNewMergeDict.ContainsKey(renameHolder) Then _state.MergedEntries.OldToNewMergeDict.Add(renameHolder, New List(Of String))
 
-            If Not _state.MergedEntries.OldToNewMergeDict.ContainsKey(renameHolder) Then _state.MergedEntries.OldToNewMergeDict.Add(renameHolder, New List(Of String))
+        If Not _state.MergedEntries.OldToNewMergeDict(renameHolder).Contains(mergeName) Then _state.MergedEntries.OldToNewMergeDict(renameHolder).Add(mergeName)
 
-            If Not _state.MergedEntries.OldToNewMergeDict(renameHolder).Contains(mergeName) Then _state.MergedEntries.OldToNewMergeDict(renameHolder).Add(mergeName)
-
-            _state.MergedEntries.RenamedEntryPairs.Remove(mergeName)
-            _state.MergedEntries.RenamedEntryNames.Remove(mergeName)
-
-        End SyncLock
+        _state.MergedEntries.RenamedEntryPairs.Remove(mergeName)
+        _state.MergedEntries.RenamedEntryNames.Remove(mergeName)
 
     End Sub
 
@@ -682,15 +562,7 @@ Public Class MatchResult
     Public Property IsMerge As Boolean
 
     ''' <summary>
-    ''' Indicates whether some candidate matched keys but none qualified as a rename or merge
-    ''' target. That happens only when every matching candidate was skipped as already being
-    ''' this entry's rename.
-    ''' </summary>
-    Public Property HasPartialMatch As Boolean
-
-    ''' <summary>
-    ''' The primary target entry name: the rename target, the first qualifying merge target,
-    ''' or the highest-scoring candidate for a partial match
+    ''' The primary target entry name: the rename target or the first qualifying merge target
     ''' </summary>
     Public Property TargetName As String
 
@@ -701,7 +573,7 @@ Public Class MatchResult
 
     ''' <summary>
     ''' Number of old keys matched in the rename target, or the highest match count among all
-    ''' candidates for a merger or partial match
+    ''' candidates for a merger
     ''' </summary>
     Public Property TotalMatchedKeys As Integer
 

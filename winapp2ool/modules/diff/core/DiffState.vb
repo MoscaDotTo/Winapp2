@@ -76,8 +76,8 @@ Public Class MergedEntryTracker
     ''' </summary>
     '''
     ''' <remarks>
-    ''' Not thread-safe. During the parallel removal pass, writes to this tracker happen under
-    ''' <c> SyncLock </c> on the <see cref="MergedEntryTracker"/> instance itself.
+    ''' Not thread-safe. The removal pass writes this tracker from one thread, after its parallel
+    ''' matching finishes.
     ''' </remarks>
     Public Property MergedEntryNames As New HashSet(Of String)
 
@@ -103,6 +103,18 @@ Public Class MergedEntryTracker
     Public Property RenamedEntryPairs As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
 
     ''' <summary>
+    ''' Sorts every <see cref="MergeDict"/> and <see cref="OldToNewMergeDict"/> list by name,
+    ''' ignoring case. The output lists merge sources in this order, and a key that several
+    ''' sources share credits them in this order.
+    ''' </summary>
+    Public Sub SortMergeLists()
+
+        For Each names In MergeDict.Values : names.Sort(StringComparer.OrdinalIgnoreCase) : Next
+        For Each names In OldToNewMergeDict.Values : names.Sort(StringComparer.OrdinalIgnoreCase) : Next
+
+    End Sub
+
+    ''' <summary>
     ''' Clears all tracking data
     ''' </summary>
     Public Sub Clear()
@@ -124,8 +136,7 @@ End Class
 ''' </summary>
 '''
 ''' <remarks>
-''' Not thread-safe. Writes to the key trackers happen under <c> SyncLock </c> on
-''' <see cref="ModifiedEntryNames"/>.
+''' Not thread-safe. Every write to it happens on one thread.
 ''' </remarks>
 Public Class ModifiedEntryTracker
 

@@ -175,8 +175,11 @@ Public Class EntryChangeDetector
     ''' Removed without replacement: the entry has no FileKey or RegKey, or none of the candidates
     ''' we found by name and content matched any of them. <br /><br />
     '''
-    ''' Then converts any rename that a parallel merger claimed (see
-    ''' <see cref="ReconcileRenamesAndMergers"/>).
+    ''' Finding each entry's match runs in parallel. Recording the matches runs one entry at a
+    ''' time in name order, so when two entries contend for a rename, the same one is recorded
+    ''' first on every run before both become mergers.
+    ''' Then converts any rename whose target also took in a merger (see
+    ''' <see cref="ReconcileRenamesAndMergers"/>) and sorts the merge lists by name.
     ''' </summary>
     '''
     ''' <returns>
@@ -207,25 +210,32 @@ Public Class EntryChangeDetector
             Dim contentIndexes = BuildContentIndexes(potentialMatchesSnapshot)
             Dim eligibleNames = BuildEligibleNameSet(potentialMatchesSnapshot)
 
+            Dim matches = New Concurrent.ConcurrentDictionary(Of String, MatchResult)(StringComparer.OrdinalIgnoreCase)
+
             Parallel.ForEach(_state.ModifiedEntries.RemovedEntryNames,
                      Sub(entry)
 
-                         Dim result As MenuSection = Nothing
                          Dim capturedLines As New List(Of String)
 
                          Using cap = gLogCapture()
 
-                             result = ProcessSingleRemoval(entry, potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap, contentIndexes, eligibleNames)
+                             Dim match = FindRemovalMatch(entry, potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap, contentIndexes, eligibleNames)
+                             matches(entry) = match
+                             If Not match.IsRename AndAlso Not match.IsMerge Then results(entry) = _renderer.MakeDiff(_file1.GetSection(entry), 1)
                              capturedLines.AddRange(cap.Lines)
 
                          End Using
 
-                         If result IsNot Nothing Then results(entry) = result
                          If capturedLines.Count > 0 Then entryLogs(entry) = capturedLines
 
                      End Sub)
 
+            For Each entry In matches.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
+                _mergeDetector.RecordMatch(matches(entry), _file1.GetSection(entry))
+            Next
+
             ReconcileRenamesAndMergers()
+            _state.MergedEntries.SortMergeLists()
 
             Dim renamedCount = _state.MergedEntries.RenamedEntryNames.Count
             Dim mergedCount = _state.MergedEntries.OldToNewMergeDict.Count
@@ -394,10 +404,11 @@ Public Class EntryChangeDetector
     End Function
 
     ''' <summary>
-    ''' Processes a single removed entry: gathers rename/merger candidates from name heuristics
-    ''' and content-aware index lookups, filters to eligible entries, and delegates to
-    ''' <see cref="MergeDetector.AssessRenamesAndMergers"/>. An entry with no FileKey or RegKey
-    ''' skips the search and counts as removed without replacement.
+    ''' Finds a single removed entry's rename or merger match: gathers candidates from name
+    ''' heuristics and content-aware index lookups, filters to eligible entries, and delegates to
+    ''' <see cref="MergeDetector.FindBestMatch"/>. An entry with no FileKey or RegKey skips the
+    ''' search and gets an empty match, so it counts as removed without replacement. Records
+    ''' nothing, so it is safe to call in parallel.
     ''' </summary>
     '''
     ''' <param name="entryName">
@@ -425,30 +436,24 @@ Public Class EntryChangeDetector
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c> MenuSection </c> describing the removal if no rename/merger was found;
-    ''' <c> Nothing </c> if a rename or merger was recorded in <c> DiffState </c>
+    ''' The best rename or merger match for the entry; neither <c> IsRename </c> nor
+    ''' <c> IsMerge </c> is set when none was found
     ''' </returns>
-    Private Function ProcessSingleRemoval(entryName As String,
-                                           potentialMatches As List(Of iniSection),
-                                           snapshotTextMap As Dictionary(Of String, String),
-                                           oldEntryTextMap As Dictionary(Of String, String),
-                                           indexes As ContentIndexes,
-                                           eligibleNames As HashSet(Of String)) As MenuSection
+    Private Function FindRemovalMatch(entryName As String,
+                                      potentialMatches As List(Of iniSection),
+                                      snapshotTextMap As Dictionary(Of String, String),
+                                      oldEntryTextMap As Dictionary(Of String, String),
+                                      indexes As ContentIndexes,
+                                      eligibleNames As HashSet(Of String)) As MatchResult
 
         Dim oldSection = _file1.GetSection(entryName)
 
         If oldSection.Keys.GetByType("FileKey").Count = 0 AndAlso
-           oldSection.Keys.GetByType("RegKey").Count = 0 Then
-
-            Return _renderer.MakeDiff(oldSection, 1)
-
-        End If
+           oldSection.Keys.GetByType("RegKey").Count = 0 Then Return New MatchResult()
 
         Dim allCandidates = GatherCandidateNames(entryName, oldSection, potentialMatches, snapshotTextMap, oldEntryTextMap, indexes)
         Dim combinedMatches = FilterToEligibleSections(allCandidates, eligibleNames)
-        Dim changesRecorded = _mergeDetector.AssessRenamesAndMergers(combinedMatches, oldSection)
-
-        Return If(changesRecorded, Nothing, _renderer.MakeDiff(oldSection, 1))
+        Return _mergeDetector.FindBestMatch(combinedMatches, oldSection)
 
     End Function
 
@@ -584,10 +589,9 @@ Public Class EntryChangeDetector
     ''' <summary>
     ''' Converts any remaining rename whose target is also in <c> MergedEntryNames </c>
     ''' into a merger, adding the renamed entry to <c> MergeDict </c> and <c> OldToNewMergeDict </c>
-    ''' and dropping the rename. In the <c> Parallel.ForEach </c> in <see cref="ProcessRemovals"/>,
-    ''' a merger's <c> TrackMerger </c> can run before the competing rename's <c> ConfirmRename </c>
-    ''' has registered the rename, so <c> TrackMerger </c> never sees the rename to fold it in.
-    ''' This pass catches those cases after all parallel work is complete.
+    ''' and dropping the rename. <c> TrackMerger </c> folds in a rename recorded before the merger,
+    ''' and this pass catches a rename recorded after it: in <see cref="ProcessRemovals"/>, that
+    ''' happens when the merging entry's name sorts before the renamed one's.
     ''' </summary>
     Private Sub ReconcileRenamesAndMergers()
 
