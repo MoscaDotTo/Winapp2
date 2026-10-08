@@ -319,7 +319,7 @@ Module Diff
     ''' <returns>
     ''' All <c> MenuSection </c>s produced by the diff pipeline, in display order
     ''' </returns>
-    Private Function CompareFiles(oldFile As iniFile,
+    Friend Function CompareFiles(oldFile As iniFile,
                                    newFile As iniFile) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
