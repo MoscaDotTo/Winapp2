@@ -312,8 +312,10 @@ Public Module WinappDebug
     End Sub
 
     ''' <summary>
-    ''' Lints <paramref name="givenIni"/>'s winapp2.ini formatting from outside the module's UI,
-    ''' with the current scan settings, and throws the report away. Like any
+    ''' Lints <paramref name="givenIni"/>'s winapp2.ini formatting from outside the module's UI
+    ''' and throws the report away. It always lints with the default scan settings, every rule
+    ''' on except Optimizations and every repair forced, whatever the user has set in
+    ''' WinappDebug's menus, and restores the user's settings afterwards. Like any
     ''' <see cref="Debug"/> call, it resets <see cref="ErrorsFound"/> and
     ''' <see cref="MostRecentLintLog"/>.
     ''' <br /><br />
@@ -327,8 +329,7 @@ Public Module WinappDebug
     ''' </param>
     '''
     ''' <param name="forceOpti">
-    ''' Indicates whether to turn on the Optimizations scan and repair for this call. We restore
-    ''' their previous states afterwards <br /><br />
+    ''' Indicates whether to turn on the Optimizations scan and repair for this call <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     '''
@@ -341,21 +342,37 @@ Public Module WinappDebug
 
         If givenIni Is Nothing Then argIsNull(NameOf(givenIni)) : Return Nothing
 
-        Dim prevScan = lintOpti.ShouldScan
-        Dim prevRepair = lintOpti.ShouldRepair
+        Dim savedScan = Rules.Select(Function(rule) rule.ShouldScan).ToList()
+        Dim savedRepair = Rules.Select(Function(rule) rule.ShouldRepair).ToList()
+        Dim savedRepairAll = RepairErrsFound
+        Dim savedOverrideDefault = overrideDefaultVal
+        Dim savedPreserveDefaults = PreserveDefaultKeys
 
-        If forceOpti Then
-            lintOpti.ShouldScan = True
-            lintOpti.ShouldRepair = True
-        End If
+        Try
 
-        Dim wa2 As New winapp2file(givenIni)
-        Debug(wa2)
+            Rules.ForEach(Sub(rule) rule.resetParams())
+            If forceOpti Then lintOpti.turnOn()
+            RepairErrsFound = True
+            overrideDefaultVal = False
+            PreserveDefaultKeys = False
 
-        lintOpti.ShouldScan = prevScan
-        lintOpti.ShouldRepair = prevRepair
+            Dim wa2 As New winapp2file(givenIni)
+            Debug(wa2)
 
-        Return wa2.ToIni()
+            Return wa2.ToIni()
+
+        Finally
+
+            For i = 0 To Rules.Count - 1
+                Rules(i).ShouldScan = savedScan(i)
+                Rules(i).ShouldRepair = savedRepair(i)
+            Next
+
+            RepairErrsFound = savedRepairAll
+            overrideDefaultVal = savedOverrideDefault
+            PreserveDefaultKeys = savedPreserveDefaults
+
+        End Try
 
     End Function
 
