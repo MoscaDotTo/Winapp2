@@ -346,8 +346,8 @@ Imports System.Text
         Assert.AreEqual(2, fileKeys.Count)
         CollectionAssert.AreEquivalent(
             New List(Of String) From {
-                "%LocalAppData%\Packages\Contoso.App_8wekyb3d8bbwe\LocalState\A\EBWebView\Default\Cache|*|RECURSE",
-                "%LocalAppData%\Packages\Contoso.App_8wekyb3d8bbwe\LocalState\B\EBWebView\Default\Cache|*|RECURSE"},
+                "%LocalAppData%\Packages\Hazel.App_abc123\LocalState\A\EBWebView\Default\Cache|*|RECURSE",
+                "%LocalAppData%\Packages\Hazel.App_abc123\LocalState\B\EBWebView\Default\Cache|*|RECURSE"},
             fileKeys)
 
     End Sub
@@ -460,8 +460,8 @@ Imports System.Text
 
         CollectionAssert.AreEquivalent(
             New List(Of String) From {
-                "%LocalAppData%\Packages\Contoso.App_8wekyb3d8bbwe\LocalCache\QtWebEngine\Default\GPUCache|*",
-                "%LocalAppData%\Packages\Contoso.App_8wekyb3d8bbwe\LocalCache\cache\QtWebEngine\Default\Cache|*|RECURSE"},
+                "%LocalAppData%\Packages\Hazel.App_abc123\LocalCache\QtWebEngine\Default\GPUCache|*",
+                "%LocalAppData%\Packages\Hazel.App_abc123\LocalCache\cache\QtWebEngine\Default\Cache|*|RECURSE"},
             ValuesOf(section, "FileKey"))
 
     End Sub
