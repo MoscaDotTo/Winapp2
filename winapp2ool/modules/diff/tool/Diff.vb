@@ -132,8 +132,7 @@ Module Diff
     ''' Resets the Diff settings to their defaults, applies the command line arguments, and runs a
     ''' diff if there is a newer file to compare against: the download when downloading is on,
     ''' otherwise <c> -2f </c>. <c> -d </c> without <c> -2f </c> leaves nothing to compare and the
-    ''' compare and the run does nothing. Under <c> -offline </c>, <c> -d </c> turns downloading
-    ''' on, and nothing checks the offline flag before the download.
+    ''' run does nothing.
     '''
     ''' <br /> Valid Diff args:
     ''' <br /> -d           : turn downloading off and compare two local files. Downloading is on unless offline
@@ -366,8 +365,8 @@ Module Diff
         collectStep("· itemizing new browsers    ", Function() renderer.ItemizeNewBrowsers())
         collectStep("· itemizing removed browsers", Function() renderer.ItemizeRemovedBrowsers())
         collectStep($"· itemizing removals            ", Function() detector.ProcessRemovals())
-        doStep("· calculating initial statistics ", Sub() statsCalc.CalculateInitialStatistics())
         doStep("· tracking keys across entries   ", Sub() statsCalc.DetectCrossEntryMovements())
+        doStep("· calculating initial statistics ", Sub() statsCalc.CalculateInitialStatistics())
         doStep("· calculating rename statistics  ", Sub() statsCalc.CalculateRenameStatistics())
         collectStep("· tracking renamed entries      ", Function() renderer.SummarizeRenames())
         collectStep("· tracking splits and mergers   ", Function() renderer.SummarizeMergers())
