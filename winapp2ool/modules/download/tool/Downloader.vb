@@ -124,8 +124,8 @@ Module Downloader
     Public ReadOnly Property winapp2licenceUrl As String = "https://github.com/MoscaDotTo/Winapp2/blob/master/License.md"
 
     ''' <summary>
-    ''' Handles command line arguments for the Downloader module and downloads the selected file.
-    ''' A missing or unknown positional argument lists the valid ones and exits with code 1.
+    ''' Handles command line arguments for the Downloader module and downloads the selected file,
+    ''' starting from the default settings rather than any saved ones. A missing or unknown positional argument lists the valid ones and exits with code 1.
     ''' Downloading winapp2ool.exe into the running exe's own directory runs
     ''' <see cref="autoUpdate"/> instead.
     ''' </summary>
@@ -148,6 +148,8 @@ Module Downloader
     ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
+
+        InitDefaultDownloadSettings()
 
         Dim fileLink = ""
 

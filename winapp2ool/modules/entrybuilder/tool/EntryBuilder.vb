@@ -731,8 +731,8 @@ Public Module EntryBuilder
     End Class
 
     ''' <summary>
-    ''' Handles the command-line arguments for <c> EntryBuilder </c>, then runs
-    ''' <see cref="initEntryBuilder"/>. File slot 1 is the source directory, slot 2 the save
+    ''' Handles the command-line arguments for <c> EntryBuilder </c>, starting from the default
+    ''' settings rather than any saved ones, then runs <see cref="initEntryBuilder"/>. File slot 1 is the source directory, slot 2 the save
     ''' target and slot 3 the shared scaffold directory.
     ''' </summary>
     '''
@@ -741,11 +741,13 @@ Public Module EntryBuilder
     ''' <list type="bullet">
     ''' <item><c> -split </c> flips <see cref="EntryBuilderSplitOutput"/>, which selects
     ''' per-letter artifact output (<c> #.ini </c> ... <c> Z.ini </c> in the save target's
-    ''' directory) instead of a single output file. It inverts the current value rather than
-    ''' setting it to <c> True </c>.</item>
+    ''' directory) instead of a single output file. It inverts the default, so it turns split
+    ''' output on.</item>
     ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
+
+        InitDefaultEntryBuilderSettings()
 
         Dim spec As New CliArgSpec("entrybuilder")
         spec.WithFile(1, EntryBuilderFile1) _

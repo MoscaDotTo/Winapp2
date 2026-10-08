@@ -386,9 +386,12 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Binds the <c> -1f </c> / <c> -1d </c> through <c> -3f </c> / <c> -3d </c> arguments to <see cref="UWPFile1"/>,
-    ''' <see cref="UWPFile2"/> and <see cref="UWPFile3"/>, then runs the build
+    ''' <see cref="UWPFile2"/> and <see cref="UWPFile3"/>, starting from the default settings
+    ''' rather than any saved ones, then runs the build
     ''' </summary>
     Public Sub handleCmdLine()
+
+        InitDefaultUWPBuilderSettings()
 
         Dim spec As New CliArgSpec("uwpbuilder")
         spec.WithFile(1, UWPFile1).WithFile(2, UWPFile2).WithFile(3, UWPFile3).Parse()

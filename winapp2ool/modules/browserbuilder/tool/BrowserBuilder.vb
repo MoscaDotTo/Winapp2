@@ -55,7 +55,8 @@ Public Module BrowserBuilder
 
     ''' <summary>
     ''' Binds the command-line file arguments to <see cref="BuilderFile1"/> and
-    ''' <see cref="BuilderFile2"/>, then runs the build
+    ''' <see cref="BuilderFile2"/>, starting from the default settings rather than any saved
+    ''' ones, then runs the build
     ''' </summary>
     '''
     ''' <remarks>
@@ -67,6 +68,8 @@ Public Module BrowserBuilder
     ''' Defaults to <c> browsers.ini </c> in the current directory.
     ''' </remarks>
     Public Sub handleCmdLine()
+
+        InitDefaultBrowserBuilderSettings()
 
         Dim spec As New CliArgSpec(NameOf(BrowserBuilder))
         spec.WithFile(1, BuilderFile1) _
