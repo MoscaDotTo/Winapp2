@@ -131,15 +131,15 @@ Module Diff
     ''' <summary>
     ''' Resets the Diff settings to their defaults, applies the command line arguments, and runs a
     ''' diff if there is a newer file to compare against: the download when downloading is on,
-    ''' otherwise <c> -2f </c>. Online, <c> -d </c> without <c> -2f </c> leaves nothing to
+    ''' otherwise <c> -2f </c>. <c> -d </c> without <c> -2f </c> leaves nothing to compare and the
     ''' compare and the run does nothing. Under <c> -offline </c>, <c> -d </c> turns downloading
     ''' on, and nothing checks the offline flag before the download.
     '''
-    ''' <br /> Valid Diff args (each flag toggles its setting from the default):
-    ''' <br /> -d           : toggle downloading, which is on unless offline. Online this means comparing two local files; offline it turns downloading on
-    ''' <br /> -donttrim    : toggle trimming the downloaded file before diffing, also on unless offline
-    ''' <br /> -savelog     : save the diff output to disk
-    ''' <br /> -verbose     : print the full text of changed entries in the diff output
+    ''' <br /> Valid Diff args:
+    ''' <br /> -d           : turn downloading off and compare two local files. Downloading is on unless offline
+    ''' <br /> -donttrim    : turn off trimming the downloaded file before diffing, also on unless offline
+    ''' <br /> -savelog     : toggle saving the diff output to disk
+    ''' <br /> -verbose     : toggle printing the full text of changed entries in the diff output
     ''' <br /> -1f/-2f/-3f  : the old file, the new file, and the log file
     ''' <br /> -4f/-summaryf: write the machine-readable outcome summary to this file
     ''' </summary>
@@ -152,8 +152,8 @@ Module Diff
             .WithFile(2, DiffFile2, "new") _
             .WithFile(3, DiffFile3, "log") _
             .WithFile(4, DiffFile4, "summary") _
-            .WithDownload(Sub() DownloadDiffFile = Not DownloadDiffFile) _
-            .WithFlag("-donttrim", Sub() TrimRemoteFile = Not TrimRemoteFile) _
+            .WithDownload(Sub() DownloadDiffFile = False) _
+            .WithFlag("-donttrim", Sub() TrimRemoteFile = False) _
             .WithFlag("-savelog", Sub() SaveDiffLog = Not SaveDiffLog) _
             .WithFlag("-verbose", Sub() ShowFullEntries = Not ShowFullEntries) _
             .Parse()

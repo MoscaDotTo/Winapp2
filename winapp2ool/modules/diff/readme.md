@@ -1082,7 +1082,7 @@ After all per-entry blocks, a summary is shown:
 
 # Command-Line Arguments
 
-Diff's CLI resets all Diff settings to their defaults before applying arguments, so a command-line run never inherits settings saved from the menu. The toggles below flip their setting from its **default** value, not from whatever is on disk.
+Diff's CLI resets all Diff settings to their defaults before applying arguments, so a command-line run never inherits settings saved from the menu. `-d` and `-donttrim` always turn their setting off, so `-offline -d` still compares two local files. `-savelog` and `-verbose` flip their setting from its **default** value, not from whatever is on disk.
 
 ## Toggles
 
