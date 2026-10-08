@@ -146,8 +146,8 @@ Public Class MergeDetector
     ''' Scores each candidate against the old entry's FileKeys and RegKeys and returns a
     ''' <see cref="MatchResult"/>. The first candidate in <paramref name="candidates"/> that
     ''' qualifies as a rename wins at once: it must be an added entry that matches every old
-    ''' FileKey and RegKey, has the same number of each, and raised neither the more-patterns
-    ''' nor the wildcard-reduction flag. Otherwise every candidate matching at least one key
+    ''' FileKey and RegKey, has the same number of each, and raised no wildcard-reduction flag.
+    ''' Gaining patterns doesn't stop a rename. Otherwise every candidate matching at least one key
     ''' becomes a merger target. Reads no tracker state, so it is safe to call in parallel.
     ''' </summary>
     '''
@@ -194,7 +194,6 @@ Public Class MergeDetector
             Dim isRename = candidateIsAdded AndAlso
                       matchInfo.AllKeysMatched AndAlso
                       matchInfo.CountsMatch AndAlso
-                      Not matchInfo.MatchHadMoreParams AndAlso
                       Not matchInfo.PossibleWildCardReduction
 
             If isRename Then
@@ -320,8 +319,7 @@ Public Class MergeDetector
         If oldHasFileKeys Then
 
             info.FileKeyMatches = CountMatches(oldFileKeys, newFileKeys, DisallowedPaths,
-                                               info.MatchHadMoreParams, info.PossibleWildCardReduction,
-                                               info.MatchedOldFileKeys)
+                                               info.PossibleWildCardReduction, info.MatchedOldFileKeys)
 
             info.AllFileKeysMatched = info.FileKeyMatches = oldFileKeys.Count
             info.FileKeyCountsMatch = info.AllFileKeysMatched AndAlso newFileKeys.Count = oldFileKeys.Count
@@ -335,7 +333,7 @@ Public Class MergeDetector
 
         If oldHasRegKeys Then
 
-            info.RegKeyMatches = CountMatches(oldRegKeys, newRegKeys, DisallowedPaths, info.MatchHadMoreParams,
+            info.RegKeyMatches = CountMatches(oldRegKeys, newRegKeys, DisallowedPaths,
                                               info.PossibleWildCardReduction, info.MatchedOldRegKeys)
 
             info.AllRegKeysMatched = info.RegKeyMatches = oldRegKeys.Count
@@ -378,15 +376,10 @@ Public Class MergeDetector
     ''' Values too broad to count as meaningful matches; may be <c> Nothing </c>
     ''' </param>
     ''' 
-    ''' <param name="matchHadMoreParams">
-    ''' Receives the more-patterns verdict from <see cref="KeyComparisonStrategyFactory.CompareKeys"/>.
-    ''' Each FileKey match decided pattern by pattern overwrites it, so it reflects the last such
-    ''' match, not any of them. Other matches leave it unchanged.
-    ''' </param>
-    '''
     ''' <param name="possibleWildCardReduction">
-    ''' Receives the wildcard-reduction verdict, overwritten the same way as
-    ''' <paramref name="matchHadMoreParams"/>
+    ''' Set to <c> True </c> when some old key is covered only by new keys whose match raised the
+    ''' wildcard-reduction verdict from <see cref="KeyComparisonStrategyFactory.CompareKeys"/>.
+    ''' Never set back to <c> False </c>, and independent of key order.
     ''' </param>
     ''' 
     ''' <param name="matchedKeys">
@@ -399,7 +392,6 @@ Public Class MergeDetector
     Private Function CountMatches(oldKeys As IEnumerable(Of iniKey),
                                   newKeys As IEnumerable(Of iniKey),
                                   disallowedValues As HashSet(Of String),
-                            ByRef matchHadMoreParams As Boolean,
                             ByRef possibleWildCardReduction As Boolean,
                                   matchedKeys As HashSet(Of iniKey)) As Integer
 
@@ -416,6 +408,7 @@ Public Class MergeDetector
             If disallowedValues IsNot Nothing AndAlso disallowedValues.Contains(oldKey.Value) Then Continue For
 
             Dim matched = False
+            Dim keyWildCardReduction = False
 
             If newKeyValues.Contains(oldKey.Value) Then
 
@@ -423,9 +416,11 @@ Public Class MergeDetector
 
             Else
 
+                ' A key that one new key covers cleanly raises no flag, whichever new key comes first
                 For Each newKey In newKeysList
 
-                    Dim keyMatched = KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey, matchHadMoreParams, possibleWildCardReduction)
+                    Dim wildCardReduction = False
+                    Dim keyMatched = KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey, wildCardReduction)
                     If keyMatched AndAlso disallowedValues IsNot Nothing Then
 
                         Dim newKeyPath = GetPathWithoutFlags(newKey.Value)
@@ -433,13 +428,21 @@ Public Class MergeDetector
 
                     End If
 
-                    If keyMatched Then matched = True : Exit For
+                    If Not keyMatched Then Continue For
+
+                    matched = True
+                    keyWildCardReduction = wildCardReduction
+                    If Not wildCardReduction Then Exit For
 
                 Next
 
             End If
 
-            If matched Then matchCount += 1 : matchedKeys.Add(oldKey)
+            If Not matched Then Continue For
+
+            matchCount += 1
+            matchedKeys.Add(oldKey)
+            possibleWildCardReduction = possibleWildCardReduction OrElse keyWildCardReduction
 
         Next
 
@@ -551,8 +554,7 @@ Public Class MatchResult
 
     ''' <summary>
     ''' Indicates whether the match is a rename: the target is an added entry that matched every
-    ''' old FileKey and RegKey with equal counts and raised neither the more-patterns nor the
-    ''' wildcard-reduction flag
+    ''' old FileKey and RegKey with equal counts and raised no wildcard-reduction flag
     ''' </summary>
     Public Property IsRename As Boolean
 

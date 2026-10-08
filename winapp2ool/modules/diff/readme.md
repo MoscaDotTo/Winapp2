@@ -787,7 +787,7 @@ A set of locations is considered too generic to establish a content match on its
 
 | Outcome | Criteria |
 |:-|:-|
-| **Renamed** | The candidate's name is new to the database (an added entry, not a modified one); all FileKeys and RegKeys from the old entry are matched in the candidate; the match counts are identical; no wildcard reduction or parameter expansion occurred |
+| **Renamed** | The candidate's name is new to the database (an added entry, not a modified one); all FileKeys and RegKeys from the old entry are matched in the candidate; the match counts are identical; no wildcard reduction occurred (a key gaining patterns is still a rename, with the change itemized) |
 | **Merged** | At least one FileKey or RegKey from the old entry is matched in the candidate, but the rename criteria are not met. This includes the case where every key matched but the candidate already existed in the old file (the old entry was absorbed into it) |
 | **Removed without replacement** | No FileKeys or RegKeys from the old entry are matched in any candidate|
 

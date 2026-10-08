@@ -168,9 +168,9 @@ Public Class EntryChangeDetector
     ''' <c> RegKey </c> values decide the bin; other key types can differ freely. <br /><br />
     '''
     ''' Renamed: an added entry matches every old FileKey and RegKey, has the same number of each,
-    ''' and raised neither the more-patterns nor the wildcard-reduction flag. Each pattern-by-pattern
-    ''' FileKey match overwrites those flags, so they reflect only the last such match, and key
-    ''' order can decide between a rename and a merger (see <see cref="MergeDetector.CountMatches"/>). <br />
+    ''' and raised no wildcard-reduction flag. Gaining patterns doesn't stop a rename. An old
+    ''' FileKey raises the flag only when no new FileKey covers it without one (see
+    ''' <see cref="MergeDetector.CountMatches"/>). <br />
     ''' Merged: at least one candidate matches at least one old FileKey or RegKey. <br />
     ''' Removed without replacement: the entry has no FileKey or RegKey, or none of the candidates
     ''' we found by name and content matched any of them. <br /><br />

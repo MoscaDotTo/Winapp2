@@ -52,20 +52,13 @@ Public MustInherit Class KeyComparisonStrategy
     ''' The key from the old version
     ''' </param>
     '''
-    ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Assigned by strategies that compare FileKey patterns one by one: <c> True </c> when the
-    ''' new key has more patterns than the old. Other strategies leave it unchanged. <br /><br />
-    ''' Optional, Default: <c> False </c>
-    ''' </param>
-    '''
     ''' <param name="possibleWildCardReduction">
-    ''' Assigned alongside <paramref name="matchedFileKeyHasMoreParams"/>: <c> True </c> when the
-    ''' match appears to narrow wildcard coverage <br /><br />
+    ''' Assigned by strategies that compare FileKey patterns one by one: <c> True </c> when the
+    ''' match appears to narrow wildcard coverage. Other strategies leave it unchanged. <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     Public MustOverride Function Compare(newKey As iniKey,
                                          oldKey As iniKey,
-                          Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                           Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
 
@@ -153,17 +146,12 @@ Public Class SimpleKeyComparisonStrategy
     ''' The key from the old version
     ''' </param>
     ''' 
-    ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Unused by this strategy; present for interface compatibility
-    ''' </param>
-    ''' 
     ''' <param name="possibleWildCardReduction">
     ''' Unused by this strategy; present for interface compatibility
     ''' </param>
     ''' 
     Public Overrides Function Compare(newKey As iniKey,
                                       oldKey As iniKey,
-                       Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                        Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
         If Not newKey.compareTypes(oldKey) Then Return False
@@ -199,19 +187,13 @@ Public Class PathKeyComparisonStrategy
     ''' </summary>
     ''' <param name="newKey">The key from the new version</param>
     ''' <param name="oldKey">The key from the old version</param>
-    ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Assigned when a FileKey match is decided pattern by pattern: <c> True </c> if the new key
-    ''' has more semicolon-delimited patterns than the old key. Left unchanged otherwise. <br /><br />
-    ''' Optional, Default: <c> False </c>
-    ''' </param>
     ''' <param name="possibleWildCardReduction">
-    ''' Assigned with <paramref name="matchedFileKeyHasMoreParams"/>: <c> True </c> if the match
+    ''' Assigned when a FileKey match is decided pattern by pattern: <c> True </c> if the match
     ''' appears to narrow wildcard coverage. Left unchanged otherwise. <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     Public Overrides Function Compare(newKey As iniKey,
                                       oldKey As iniKey,
-                       Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                        Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
         If Not newKey.compareTypes(oldKey) Then Return False
@@ -238,7 +220,7 @@ Public Class PathKeyComparisonStrategy
             Dim oldVal = oldKeySplit(i)
             Dim isLastPiece = i = newKeySplit.Length - 1
 
-            If isLastPiece AndAlso isFileKey Then Return FinalizeFileKeyEquivalence(oldVal, newVal, matchedFileKeyHasMoreParams, possibleWildCardReduction)
+            If isLastPiece AndAlso isFileKey Then Return FinalizeFileKeyEquivalence(oldVal, newVal, possibleWildCardReduction)
 
             If CompareValues(newVal, oldVal) Then Continue For
 
@@ -365,16 +347,11 @@ Public Class PathKeyComparisonStrategy
     ''' The final path component of the new key value, including pipe-delimited pattern and flags
     ''' </param>
     '''
-    ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Assigned by <see cref="MatchParameters"/> when it decides the match; left unchanged otherwise
-    ''' </param>
-    '''
     ''' <param name="possibleWildCardReduction">
     ''' Assigned by <see cref="MatchParameters"/> when it decides the match; left unchanged otherwise
     ''' </param>
     Private Function FinalizeFileKeyEquivalence(oldVal As String,
                                                newVal As String,
-                                               ByRef matchedFileKeyHasMoreParams As Boolean,
                                                ByRef possibleWildCardReduction As Boolean) As Boolean
 
         Dim pipe = CChar("|")
@@ -392,14 +369,14 @@ Public Class PathKeyComparisonStrategy
 
         If Not (flags.Contains(semi) OrElse oldFlags.Contains(semi)) Then Return False
 
-        Return MatchParameters(flags, oldFlags, matchedFileKeyHasMoreParams, possibleWildCardReduction)
+        Return MatchParameters(flags, oldFlags, possibleWildCardReduction)
 
     End Function
 
     ''' <summary>
     ''' Returns whether at least one new pattern matches at least one old pattern under
-    ''' <see cref="CompareValues"/>. On the first matching pair we assign both outputs, overwriting
-    ''' whatever they held, and stop. When nothing matches we leave them unchanged.
+    ''' <see cref="CompareValues"/>. On the first matching pair we assign the output, overwriting
+    ''' whatever it held, and stop. When nothing matches we leave it unchanged.
     ''' </summary>
     '''
     ''' <param name="flags">
@@ -410,17 +387,12 @@ Public Class PathKeyComparisonStrategy
     ''' The semicolon-delimited pattern list from the old key's pipe section
     ''' </param>
     '''
-    ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Set to whether the new list has more patterns than the old
-    ''' </param>
-    '''
     ''' <param name="possibleWildCardReduction">
     ''' Set to whether the matched old pattern has a <c> * </c> that the matched new pattern lacks,
     ''' or the new list is shorter than the old and has a <c> * </c> anywhere
     ''' </param>
     Private Function MatchParameters(flags As String,
                                 oldFlags As String,
-                                ByRef matchedFileKeyHasMoreParams As Boolean,
                                 ByRef possibleWildCardReduction As Boolean) As Boolean
 
         Dim delimiter = CChar(";")
@@ -432,8 +404,6 @@ Public Class PathKeyComparisonStrategy
             For Each oldParam In oldSplitParams
 
                 If Not CompareValues(param, oldParam) Then Continue For
-
-                matchedFileKeyHasMoreParams = splitParams.Length > oldSplitParams.Length
 
                 ' Check for wildcard reduction in individual parameters OR overall parameter count
                 ' Example: *bookmarks.bak → bookmarks.bak (individual param loses wildcard)
@@ -478,10 +448,6 @@ Public Class DetectKeyComparisonStrategy
     ''' The key from the old version
     ''' </param>
     '''
-    ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Unused by this strategy; present for interface compatibility
-    ''' </param>
-    '''
     ''' <param name="possibleWildCardReduction">
     ''' Unused by this strategy; present for interface compatibility
     ''' </param>
@@ -493,7 +459,6 @@ Public Class DetectKeyComparisonStrategy
     ''' </returns>
     Public Overrides Function Compare(newKey As iniKey,
                                       oldKey As iniKey,
-                       Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                        Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
         If Not newKey.compareTypes(oldKey) Then Return False
@@ -609,24 +574,17 @@ Public Class KeyComparisonStrategyFactory
     ''' The key from the old version
     ''' </param>
     '''
-    ''' <param name="matchedFileKeyHasMoreParams">
-    ''' Assigned when a FileKey match is decided pattern by pattern: <c> True </c> if the new key
-    ''' has more semicolon-delimited patterns than the old. Left unchanged otherwise. <br /><br />
-    ''' Optional, Default: <c> False </c>
-    ''' </param>
-    '''
     ''' <param name="possibleWildCardReduction">
-    ''' Assigned with <paramref name="matchedFileKeyHasMoreParams"/>: <c> True </c> if the match
+    ''' Assigned when a FileKey match is decided pattern by pattern: <c> True </c> if the match
     ''' appears to narrow wildcard coverage. Left unchanged otherwise. <br /><br />
     ''' Optional, Default: <c> False </c>
     ''' </param>
     Public Shared Function CompareKeys(newKey As iniKey,
                                        oldKey As iniKey,
-                        Optional ByRef matchedFileKeyHasMoreParams As Boolean = False,
                         Optional ByRef possibleWildCardReduction As Boolean = False) As Boolean
 
         Dim strategy = GetStrategy(newKey)
-        Return strategy.Compare(newKey, oldKey, matchedFileKeyHasMoreParams, possibleWildCardReduction)
+        Return strategy.Compare(newKey, oldKey, possibleWildCardReduction)
 
     End Function
 
@@ -688,15 +646,8 @@ Public Class KeyMatchInfo
     Public Property CountsMatch As Boolean
 
     ''' <summary>
-    ''' Indicates whether a matched new FileKey has more semicolon-delimited patterns than its old
-    ''' counterpart. Each FileKey match decided pattern by pattern overwrites it, so it reflects
-    ''' the last such match rather than any of them.
-    ''' </summary>
-    Public Property MatchHadMoreParams As Boolean
-
-    ''' <summary>
-    ''' Indicates whether a matched FileKey appears to have narrowed its wildcard coverage,
-    ''' overwritten the same way as <see cref="MatchHadMoreParams"/>
+    ''' Indicates whether some old FileKey is matched only by new FileKeys whose match appears to
+    ''' narrow wildcard coverage
     ''' </summary>
     Public Property PossibleWildCardReduction As Boolean
 
