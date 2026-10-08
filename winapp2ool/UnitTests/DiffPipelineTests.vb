@@ -182,7 +182,7 @@ Public Class DiffPipelineTests
         Assert.AreEqual(0, outcome.RemovedKeys)
         StringAssert.Contains(output, "FileKey2=%AppData%\Delta\Sync|* moved to [Delta Sync *]")
         StringAssert.Contains(output, "Moved 1 FileKey")
-        StringAssert.Contains(output, "+ 1 into 1 added entry")
+        StringAssert.Contains(output, "+ 1 key moved into 1 added entry")
 
     End Sub
 
@@ -213,7 +213,7 @@ Public Class DiffPipelineTests
         StringAssert.Contains(output, "FileKey2=%AppData%\Shared|*.log moved to [Epsilon *]")
         StringAssert.Contains(output, "Moved in 1 FileKey")
         StringAssert.Contains(output, "FileKey2=%AppData%\Shared|*.log (from [Delta *])")
-        StringAssert.Contains(output, "~ 1 into 1 modified entry")
+        StringAssert.Contains(output, "~ 1 key moved into 1 modified entry")
 
     End Sub
 
@@ -300,7 +300,7 @@ Public Class DiffPipelineTests
         Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MovedKeys)
         StringAssert.Contains(output, "Minor changes to 1 renamed entry")
         StringAssert.Contains(output, "Moved in 1 Warning")
-        StringAssert.Contains(output, "& 1 into 1 renamed entry")
+        StringAssert.Contains(output, "& 1 key moved into 1 renamed entry")
         Assert.IsFalse(output.Contains("name-only"), output)
 
     End Sub
