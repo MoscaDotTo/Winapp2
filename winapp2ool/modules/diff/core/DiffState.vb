@@ -201,9 +201,8 @@ End Class
 Public Class DiffStatistics
 
     ''' <summary>
-    ''' Counts total keys added in modified entries, minus every key move that
-    ''' <see cref="DiffStatisticsCalculator.DetectCrossEntryMovements"/> finds, including moves
-    ''' that involve an entry which isn't modified, so it can go negative
+    ''' Counts total keys added in modified entries, not counting keys that moved there from
+    ''' another entry
     ''' </summary>
     Public Property ModEntriesAddedKeyTotal As Integer = 0
 
@@ -228,9 +227,8 @@ Public Class DiffStatistics
     Public Property ModEntriesReplacedByUpdateTotal As Integer = 0
 
     ''' <summary>
-    ''' Counts total keys removed without replacement from modified entries, minus every key
-    ''' move that <see cref="DiffStatisticsCalculator.DetectCrossEntryMovements"/> finds,
-    ''' including moves that involve an entry which isn't modified, so it can go negative
+    ''' Counts total keys removed without replacement from modified entries, not counting keys
+    ''' that moved to another entry
     ''' </summary>
     Public Property ModEntriesRemovedKeysWithoutReplacementTotal As Integer = 0
 

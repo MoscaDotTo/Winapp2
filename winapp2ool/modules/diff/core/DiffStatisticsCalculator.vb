@@ -115,7 +115,8 @@ Public Class DiffStatisticsCalculator
     ''' <summary>
     ''' Adds up the added, removed and updated key counts of modified entries from the raw
     ''' trackers. We count only names in <c> ModifiedEntryNames </c>, because the trackers also
-    ''' hold results for rename and merge targets.
+    ''' hold results for rename and merge targets. Run it after <see cref="DetectCrossEntryMovements"/>,
+    ''' so that moved keys are no longer in the trackers.
     ''' </summary>
     Public Sub CalculateInitialStatistics()
 
@@ -222,10 +223,11 @@ Public Class DiffStatisticsCalculator
     ''' Detects keys that were removed from one entry and added to another, records each in
     ''' <see cref="KeyMovementTracker.MovedKeys"/>, and takes the moved keys out of the added and
     ''' removed trackers. A removed key pairs with the first same-type added key in another entry
-    ''' that captures it or that it captures, taking entries in name order (ignoring case). We
-    ''' scan every tracked entry, not only modified ones, but subtract each move from the
-    ''' modified-entry totals. Run it after
-    ''' <see cref="CalculateInitialStatistics"/> and after all parallel processing completes.
+    ''' that captures it or that it captures, taking entries in name order (ignoring case).
+    ''' Several removed keys can move into one added key that covers them all. We scan every
+    ''' tracked entry, rename and merge targets included. Run it after all parallel processing
+    ''' completes and before <see cref="CalculateInitialStatistics"/>, which then counts only the
+    ''' keys that didn't move.
     ''' </summary>
     Public Sub DetectCrossEntryMovements()
 
@@ -258,33 +260,23 @@ Public Class DiffStatisticsCalculator
                 Dim sameTypeAdded As List(Of AddedKeyInfo) = Nothing
                 If Not addedByType.TryGetValue(removedKey.KeyType, sameTypeAdded) Then Continue For
 
-                For Each addedInfo In sameTypeAdded
+                Dim match = sameTypeAdded.FirstOrDefault(
+                    Function(added) Not String.Equals(sourceEntry, added.EntryName, StringComparison.OrdinalIgnoreCase) AndAlso
+                                    (KeyComparisonStrategyFactory.CompareKeys(added.Key, removedKey) OrElse
+                                     KeyComparisonStrategyFactory.CompareKeys(removedKey, added.Key)))
 
-                    Dim targetEntry = addedInfo.EntryName
-                    Dim addedKey = addedInfo.Key
+                If match Is Nothing Then Continue For
 
-                    If String.Equals(sourceEntry, targetEntry, StringComparison.OrdinalIgnoreCase) Then Continue For
+                Dim targetEntry = match.EntryName
+                Dim movementKey = $"{removedKey.Name}{MovementKeySeparator}{removedKey.Value}{MovementKeySeparator}{sourceEntry}"
+                _state.KeyMovements.MovedKeys(movementKey) = New KeyMovementInfo(sourceEntry, targetEntry)
+                _state.Statistics.ModEntriesMovedKeysTotal += 1
 
-                    Dim newCapturesOld = KeyComparisonStrategyFactory.CompareKeys(addedKey, removedKey)
-                    Dim oldCapturesNew = KeyComparisonStrategyFactory.CompareKeys(removedKey, addedKey)
+                If Not keysToRemoveFromRemoved.ContainsKey(sourceEntry) Then keysToRemoveFromRemoved(sourceEntry) = New List(Of iniKey)
+                keysToRemoveFromRemoved(sourceEntry).Add(removedKey)
 
-                    If Not (newCapturesOld OrElse oldCapturesNew) Then Continue For
-                    Dim movementKey = $"{removedKey.Name}{MovementKeySeparator}{removedKey.Value}{MovementKeySeparator}{sourceEntry}"
-                    _state.KeyMovements.MovedKeys(movementKey) = New KeyMovementInfo(sourceEntry, targetEntry)
-                    _state.Statistics.ModEntriesMovedKeysTotal += 1
-                    If Not keysToRemoveFromRemoved.ContainsKey(sourceEntry) Then keysToRemoveFromRemoved(sourceEntry) = New List(Of iniKey)
-
-                    keysToRemoveFromRemoved(sourceEntry).Add(removedKey)
-
-                    If Not keysToRemoveFromAdded.ContainsKey(targetEntry) Then keysToRemoveFromAdded(targetEntry) = New List(Of iniKey)
-
-                    keysToRemoveFromAdded(targetEntry).Add(addedKey)
-                    _state.Statistics.ModEntriesAddedKeyTotal -= 1
-                    _state.Statistics.ModEntriesRemovedKeysWithoutReplacementTotal -= 1
-
-                    Exit For
-
-                Next
+                If Not keysToRemoveFromAdded.ContainsKey(targetEntry) Then keysToRemoveFromAdded(targetEntry) = New List(Of iniKey)
+                keysToRemoveFromAdded(targetEntry).Add(match.Key)
 
             Next
 

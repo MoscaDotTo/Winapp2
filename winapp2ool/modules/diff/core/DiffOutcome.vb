@@ -61,18 +61,14 @@ Public Class DiffOutcome
     Public ReadOnly Property MergedEntries As Integer
 
     ''' <summary>
-    ''' The number of keys added across all modified entries, minus every key move that
-    ''' <see cref="DiffStatisticsCalculator.DetectCrossEntryMovements"/> finds. Moves are
-    ''' subtracted even when the other entry isn't a modified one (a rename target, say), so
-    ''' this can undercount and can go negative
+    ''' The number of keys added across all modified entries, not counting keys that moved there
+    ''' from another entry
     ''' </summary>
     Public ReadOnly Property AddedKeys As Integer
 
     ''' <summary>
-    ''' The number of keys removed without replacement across all modified entries, minus every
-    ''' key move that <see cref="DiffStatisticsCalculator.DetectCrossEntryMovements"/> finds.
-    ''' Moves are subtracted even when the other entry isn't a modified one (a rename target,
-    ''' say), so this can undercount and can go negative
+    ''' The number of keys removed without replacement across all modified entries, not
+    ''' counting keys that moved to another entry
     ''' </summary>
     Public ReadOnly Property RemovedKeys As Integer
 
