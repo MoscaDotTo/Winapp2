@@ -95,11 +95,11 @@ Public Class DiffPipelineTests
     End Function
 
     ''' <summary>
-    ''' A demoted rename must not leave key records behind: Gamma's Warning comes from no merged
-    ''' source, so Delta losing the same Warning is a removal, not a move into Gamma
+    ''' Gamma's Warning comes from no merged source, so Delta losing the same Warning is a move
+    ''' into Gamma, credited to Delta in the merger output rather than called novel
     ''' </summary>
     <TestMethod>
-    Public Sub DemotedRename_LeavesNoKeyMovement()
+    Public Sub DemotedRename_KeyMovesIntoMergerTarget()
 
         Dim oldText =
             "[Alpha *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Foo" & vbCrLf &
@@ -115,13 +115,146 @@ Public Class DiffPipelineTests
             "[Gamma *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Foo" & vbCrLf &
             "FileKey1=%AppData%\Foo|*.log;*.tmp" & vbCrLf & "Warning=Closes Foo first" & vbCrLf
 
-        RunDiff(oldText, newText)
+        Dim output = RunDiff(oldText, newText)
 
         Dim outcome = Diff.MostRecentDiffOutcome
         Assert.AreEqual(2, outcome.MergedEntries)
         Assert.AreEqual(0, outcome.RenamedEntries)
-        Assert.AreEqual(0, outcome.MovedKeys)
-        Assert.AreEqual(1, outcome.RemovedKeys)
+        Assert.AreEqual(1, outcome.MovedKeys)
+        Assert.AreEqual(0, outcome.RemovedKeys)
+        StringAssert.Contains(output, "Warning=Closes Foo first moved to [Gamma *]")
+        StringAssert.Contains(output, "Warning=Closes Foo first (from [Delta *])")
+        Assert.IsFalse(output.Contains("novel key"), output)
+
+    End Sub
+
+    ''' <summary>
+    ''' Gamma's Warning is carried over from Alpha and also left Delta, so it moves and both get
+    ''' the credit. A demoted rename's leftover records would measure Gamma against Alpha alone,
+    ''' drop the shared Warning from the candidates, and report no move.
+    ''' </summary>
+    <TestMethod>
+    Public Sub DemotedRename_SharedKeyStillMoves()
+
+        Dim oldText =
+            "[Alpha *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Foo" & vbCrLf &
+            "FileKey1=%AppData%\Foo|*.log" & vbCrLf & "Warning=Closes Foo first" & vbCrLf & vbCrLf &
+            "[Beta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Foo" & vbCrLf &
+            "FileKey1=%AppData%\Foo|*.tmp" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "Warning=Closes Foo first" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & vbCrLf &
+            "[Gamma *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Foo" & vbCrLf &
+            "FileKey1=%AppData%\Foo|*.log;*.tmp" & vbCrLf & "Warning=Closes Foo first" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Dim outcome = Diff.MostRecentDiffOutcome
+        Assert.AreEqual(2, outcome.MergedEntries)
+        Assert.AreEqual(1, outcome.MovedKeys)
+        StringAssert.Contains(output, "Warning=Closes Foo first (from [Alpha *], [Delta *])")
+
+    End Sub
+
+    ''' <summary>
+    ''' A key that leaves a surviving entry for an entry that didn't exist before has moved
+    ''' </summary>
+    <TestMethod>
+    Public Sub KeyMovesIntoNovelEntry()
+
+        Dim oldText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Delta\Sync|*" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & vbCrLf &
+            "[Delta Sync *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta\Sync|*" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Dim outcome = Diff.MostRecentDiffOutcome
+        Assert.AreEqual(1, outcome.MovedKeys)
+        Assert.AreEqual(0, outcome.RemovedKeys)
+        StringAssert.Contains(output, "FileKey2=%AppData%\Delta\Sync|* moved to [Delta Sync *]")
+
+    End Sub
+
+    ''' <summary>
+    ''' A moved key lands in an exact copy of itself before a broader key that captures it, even
+    ''' when the broader key's entry sorts first
+    ''' </summary>
+    <TestMethod>
+    Public Sub KeyMovement_PrefersExactMatch()
+
+        Dim oldText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Foo|*.log" & vbCrLf
+
+        Dim newText =
+            "[Alpha *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Foo|*" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & vbCrLf &
+            "[Zeta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Zeta" & vbCrLf &
+            "FileKey1=%AppData%\Foo|*.log" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MovedKeys)
+        StringAssert.Contains(output, "FileKey2=%AppData%\Foo|*.log moved to [Zeta *]")
+
+    End Sub
+
+    ''' <summary>
+    ''' A classifier shared by many entries never moves: Delta's dropped LangSecRef stays a removal
+    ''' even though a new entry uses the same value
+    ''' </summary>
+    <TestMethod>
+    Public Sub KeyMovement_IgnoresClassifiers()
+
+        Dim oldText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Section=Delta" & vbCrLf &
+            "DetectFile=%AppData%\Delta" & vbCrLf & "FileKey1=%AppData%\Delta|*.dat" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "Section=Delta" & vbCrLf &
+            "DetectFile=%AppData%\Delta" & vbCrLf & "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & vbCrLf &
+            "[Zeta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Zeta" & vbCrLf &
+            "FileKey1=%AppData%\Zeta|*.log" & vbCrLf
+
+        RunDiff(oldText, newText)
+
+        Assert.AreEqual(0, Diff.MostRecentDiffOutcome.MovedKeys)
+
+    End Sub
+
+    ''' <summary>
+    ''' A Detect on a parent path captures Delta's dropped child-path Detect, but that isn't
+    ''' where the key went, so it stays a removal
+    ''' </summary>
+    <TestMethod>
+    Public Sub KeyMovement_DetectNeedsExactMatch()
+
+        Dim oldText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect1=HKCU\Software\Delta" & vbCrLf &
+            "Detect2=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & vbCrLf &
+            "[Zeta *]" & vbCrLf & "LangSecRef=3025" & vbCrLf & "Detect=HKLM\Software\Microsoft\Windows" & vbCrLf &
+            "FileKey1=%WinDir%\INF|INFCACHE.1" & vbCrLf
+
+        RunDiff(oldText, newText)
+
+        Assert.AreEqual(0, Diff.MostRecentDiffOutcome.MovedKeys)
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.RemovedKeys)
 
     End Sub
 

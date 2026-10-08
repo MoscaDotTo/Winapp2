@@ -168,12 +168,13 @@ Entirely new entries with no connection to any removed entry appear as a single 
 
 ### Entries consolidating removed entries
 
-When a new entry contains keys from one or more removed entries, it is annotated with a count and followed by a `Merged from:` block listing the source entries. The content of those source entries is then tracked across four categories for each key:
+When a new entry contains keys from one or more removed entries, it is annotated with a count and followed by a `Merged from:` block listing the source entries. Diff then sorts the keys of the new entry and its sources into these categories:
 
 | Category | Type | Annotation | Conditions |
 |:-|:-|:-|:-|
 | **Carried over** | Added keys | `(from [Source *])` | key is carried over verbatim from the source entry |
 | **Novel** | Added keys | `(novel)` | key is new content with no equivalent in any source entry |
+| **Moved in** | Added keys | `(from [Other *])` | key [moved](#cross-entry-key-movements) here from an entry that still exists |
 | **Dropped** | Removed keys | Appears in an `N keys from merged entries not in this entry:` block | the key existed in a source entry but is not captured by any new or modified key in the absorbing entry |
 | **Captured** | Modified keys | `(from [Source *])` on the old key | the key does not appear verbatim but is replaced by another key that covers it — typically a wildcard path that absorbs one or more specific old paths |
 
@@ -362,7 +363,7 @@ The change from `%Documents%` to `%UserProfile%\Documents` is a deprecated-path 
 
 An entry is **Modified** if it exists in both files with the same name but has changed. Modifications include added keys, removed keys, and changed key values or parameters. Diff itemizes the specific key-level changes for each modified entry.
 
-Keys annotated `(novel)` are new content with no detected equivalent in the old file. Keys annotated `(from [Entry Name *])` were sourced from a specific entry, either the old version of the same entry or a removed entry that was merged in.
+Keys annotated `(novel)` are new content with no detected equivalent in the old file. Keys annotated `(from [Entry Name *])` were sourced from a specific entry: the old version of the same entry, a removed entry that was merged in, or an entry the key [moved](#cross-entry-key-movements) from.
 
 Modified output itemizes three kinds of key-level change:
 
@@ -531,7 +532,7 @@ The `FileKey` and `Detect` content of `[IDLE Recent Files *]` was found unchange
 
 ### Cross-Entry Key Movements
 
-Keys that shifted between two entries that both continue to exist are reported in a dedicated `Cross-Entry key movements:` section. Unlike mergers (where a removed entry's content lands in a new or modified entry), these are reassignments of keys from one extant entry to another.
+A key that leaves an entry present in both files and lands in any other entry has moved. Moves are reported in a dedicated `Cross-Entry key movements:` section, grouped by the entry the keys left. The receiving entry can be modified, renamed, or added, so splitting part of an entry out into a new one shows up here. Unlike with a merger, the source entry still exists.
 
 The section is omitted entirely when no movements are detected.
 
@@ -539,12 +540,24 @@ The section is omitted entirely when no movements are detected.
 
 ```
  Cross-Entry key movements:
+[...]
 
    CleanMyPC Registry Cleaner *
        -> FileKey2=%WinDir%\$regcmp$|*|REMOVESELF moved to [Windows Subsystems *]
+[...]
 
-   iExpert Registry Clean Expert *
-       -> FileKey3=%WinDir%\$regcmp$|*|REMOVESELF moved to [Windows Subsystems *]
+   MP3Gain *
+       -> RegKey1=HKCU\Software\VB and VBA Program Settings\MP3GainAnalysis\StartUp|AddFilesPath moved to [MP3Gain StartUp *]
+       -> RegKey2=HKCU\Software\VB and VBA Program Settings\MP3GainAnalysis\StartUp|AddFolderPath moved to [MP3Gain StartUp *]
+[...]
+
+   Soulseek *
+       -> FileKey1=%UserProfile%\Documents\Soulseek Chat Logs\Private|*.txt moved to [Soulseek Chat History *]
+       -> FileKey2=%LocalAppData%\Soulseek Chat Logs\*|*.log moved to [Soulseek Chat History *]
+       -> FileKey3=%LocalAppData%\SoulseekQt\Soulseek Chat Logs|*.log|RECURSE moved to [Soulseek Chat History *]
+       -> FileKey5=%ProgramFiles%\Soulseek*\Private_Chat_Logs|*.txt moved to [Soulseek Chat History *]
+       -> FileKey6=%ProgramFiles%\Soulseek*\Room_Chat_Logs|*.txt moved to [Soulseek Chat History *]
+[...]
 
    Windows Subsystems *
        -> FileKey1=%ProgramData%\Microsoft\PlayReady|*.hds moved to [Microsoft PlayReady *]
@@ -552,17 +565,28 @@ The section is omitted entirely when no movements are detected.
        -> FileKey6=%ProgramData%\Microsoft\Windows\DRM|*.log moved to [Microsoft PlayReady *]
        -> FileKey7=%ProgramData%\Microsoft\Windows\DRM\Cache|*|RECURSE moved to [Microsoft PlayReady *]
        -> FileKey8=%ProgramData%\Microsoft\Windows\DRM\PreUpgrade|*.log moved to [Microsoft PlayReady *]
+       -> FileKey11=%LocalAppData%\Microsoft\Windows\PRICache|*|RECURSE moved to [Universal Windows Platform *]
+       -> FileKey14=%SystemDrive%\spoolerlogs|spooler.xml moved to [Windows Printing *]
+       -> FileKey17=%WinDir%\System32\spool|spooler.xml moved to [Windows Printing *]
+       -> RegKey1=HKCU\Software\Microsoft\Direct3D\MostRecentApplication moved to [Microsoft DirectX *]
+       -> RegKey2=HKLM\Software\Microsoft\Direct3D\MostRecentApplication moved to [Microsoft DirectX *]
+       -> RegKey3=HKLM\Software\Microsoft\DirectDraw\MostRecentApplication moved to [Microsoft DirectX *]
+       -> RegKey5=HKLM\Software\Wow6432Node\Microsoft\Direct3D\MostRecentApplication moved to [Microsoft DirectX *]
+       -> RegKey6=HKLM\Software\Wow6432Node\Microsoft\DirectDraw\MostRecentApplication moved to [Microsoft DirectX *]
+[...]
 
- 7 keys moved between entries (3 source entries)
+ 100 keys moved between entries (41 source entries)
 ```
 
 **Explanation:**
 
-Two entries each contributed an identical `%WinDir%\$regcmp$|*|REMOVESELF` key to `[Windows Subsystems *]`.
+`[CleanMyPC Registry Cleaner *]` gave its `%WinDir%\$regcmp$` key to `[Windows Subsystems *]`, an entry that already existed.
 
-`[Windows Subsystems *]` in turn gave five PlayReady/DRM paths to the `[Microsoft PlayReady *]` entry.
+`[MP3Gain *]` and `[Soulseek *]` were each split: their recent-file and chat-log keys went into new entries of their own. The last two Soulseek keys landed in one wildcard key, `%ProgramFiles%\Soulseek*\*Chat_Logs|*.txt`, rather than identical ones.
 
-All three source entries continue to exist in the new file, which is what distinguishes a movement from a merger.
+`[Windows Subsystems *]` gave keys to four entries. `[Microsoft PlayReady *]` is a renamed `[Media Play Ready Client *]`. The other three are new, and each also absorbed removed entries, so their merger output credits these keys `(from [Windows Subsystems *])`.
+
+Every source entry still exists in the new file, which is what distinguishes a movement from a merger.
 
 ## Removed Entries
 
@@ -809,7 +833,7 @@ A diff run produces output in the following order. Only some sections have a des
 | 5 | Mergers, including split/merged entries | *(none)* | `N entries merged or split into other entries` |
 | 6 | Key diffs for renamed entries | `Minor changes to renamed entries:` | `Minor changes to N renamed entries` |
 | 7 | Modified entries that absorbed merged content, with per-entry source notes | *(none)* | `N modified entries incorporating merged content` |
-| 8 | Keys relocated between entries that both still exist | `Cross-Entry key movements:` | `N keys moved between entries (M source entries)` |
+| 8 | Keys relocated from entries that still exist into other entries | `Cross-Entry key movements:` | `N keys moved between entries (M source entries)` |
 | 9 | Ordinary modifications | `Modified entries:` | `N modified entries` |
 | 10 | Consolidating additions with per-key tracking | `Added entries containing merged content:` | `N added entries consolidating removed content` |
 | 11 | Novel additions | `Added entries:` | `N novel entries added` |
@@ -991,7 +1015,7 @@ Entries present in both files (by name) that changed in any way.
 - `+ N added keys across N entries`: new keys added to existing entries; includes keys absorbed from merged removed entries
 - `- N removed keys without replacement across N entries`: keys deleted with no equivalent in the new entry
 - `~ N updated keys replaced M old keys across N entries`: keys whose values changed; one new key captured one or more old keys via wildcard match or content consolidation
-- `~ N keys moved from X entries into Y entries`: cross-entry key movements; only shown when movements were detected
+- `~ N keys moved from X entries into Y entries`: cross-entry key movements; only shown when movements were detected. The X entries are always modified or renamed ones, but the Y entries can also be added ones. A moved key isn't also counted as removed.
 - `+ N entries also received merged content from removed entries`: how many of the modified entries absorbed removed entries
 
 ---
@@ -1013,7 +1037,7 @@ Entries present in the old file but absent from the new file.
 Entries present in the new file but absent from the old file.
 
 - `@ N entries consolidate content from N removed entries`: new entries that absorbed at least one removed entry; bullets:
-  - `+ N entries contain N novel keys`: keys with no equivalent in any source entry
+  - `+ N entries contain N novel keys`: keys with no equivalent in any source entry, leaving out keys moved in from an entry that still exists
   - `= N entries contain N keys carried over unchanged`: keys transferred verbatim from source entries
   - `~ N entries contain N keys capturing N removed keys`: keys that matched and replaced one or more old keys
   - `- N entries dropped N keys from merged sources`: keys from source entries that did not survive into the absorbing entry

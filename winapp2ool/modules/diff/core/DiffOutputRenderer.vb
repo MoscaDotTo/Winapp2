@@ -1086,7 +1086,7 @@ Public Class DiffOutputRenderer
                 Dim section = _file2.GetSection(entry)
                 Dim mergedCount = _state.MergedEntries.MergeDict(entry).Count
 
-                Dim combined = BuildCombinedOldKeys(_state.MergedEntries.MergeDict(entry), "")
+                Dim combined = BuildCombinedOldKeys(_state.MergedEntries.MergeDict(entry), entry)
                 Dim sourceEntryMap = combined.SourceEntryMap
 
                 _keyAnalyzer.FindModificationsForAddedEntryFromKeys(combined.Keys, _file2.GetSection(entry))
@@ -1502,7 +1502,9 @@ Public Class DiffOutputRenderer
     ''' <paramref name="targetEntry"/> itself if it existed in file1 and is not
     ''' already a named merge source. We drop a key whose value (case-insensitive) an earlier
     ''' key already has, and credit it to every source that has it, in source order.
-    ''' <paramref name="targetEntry"/> is credited only for values no source has.
+    ''' <paramref name="targetEntry"/> is credited only for values no source has. The entries that
+    ''' moved keys into <paramref name="targetEntry"/> are credited after the merge sources, but
+    ''' their keys aren't combined, so a moved key still compares as added.
     ''' </summary>
     '''
     ''' <param name="mergeSourceNames">
@@ -1512,7 +1514,8 @@ Public Class DiffOutputRenderer
     ''' <param name="targetEntry">
     ''' The entry receiving the merged content; when non-empty,
     ''' its own file1 keys are appended if it existed in file1
-    ''' and is not listed as a source. Pass an empty string to skip this step.
+    ''' and is not listed as a source, and the keys moved into it are credited.
+    ''' Pass an empty string to skip both.
     ''' </param>
     '''
     ''' <returns>
@@ -1555,6 +1558,17 @@ Public Class DiffOutputRenderer
 
                 combinedKeys.Add(key)
                 sources.Add(key.Value, New List(Of String) From {targetEntry})
+
+            Next
+
+        End If
+
+        If targetEntry <> "" Then
+
+            For Each moved In _state.KeyMovements.SourcesMovedInto(targetEntry)
+
+                If Not sources.ContainsKey(moved.Key) Then sources.Add(moved.Key, New List(Of String))
+                sources(moved.Key).AddRange(moved.Value.Except(sources(moved.Key)).ToList())
 
             Next
 

@@ -461,6 +461,33 @@ Public Class KeyMovementTracker
 
     End Sub
 
+    ''' <summary>
+    ''' Returns the entries that moved keys into <paramref name="targetEntry"/>, keyed by the
+    ''' value of the key each landed in. Sources are in name order (ignoring case).
+    ''' </summary>
+    '''
+    ''' <param name="targetEntry">
+    ''' The entry that received the moved keys
+    ''' </param>
+    Public Function SourcesMovedInto(targetEntry As String) As Dictionary(Of String, List(Of String))
+
+        Dim sources As New Dictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
+
+        For Each info In MovedKeys.Values
+
+            If Not String.Equals(info.TargetEntry, targetEntry, StringComparison.OrdinalIgnoreCase) Then Continue For
+
+            If Not sources.ContainsKey(info.TargetKey.Value) Then sources(info.TargetKey.Value) = New List(Of String)
+            If Not sources(info.TargetKey.Value).Contains(info.SourceEntry, StringComparer.OrdinalIgnoreCase) Then sources(info.TargetKey.Value).Add(info.SourceEntry)
+
+        Next
+
+        For Each names In sources.Values : names.Sort(StringComparer.OrdinalIgnoreCase) : Next
+
+        Return sources
+
+    End Function
+
 End Class
 
 ''' <summary>
@@ -479,21 +506,33 @@ Public Class KeyMovementInfo
     Public Property TargetEntry As String
 
     ''' <summary>
+    ''' The key in <c> TargetEntry </c> that the moved key landed in. It differs from the moved
+    ''' key when one captures the other.
+    ''' </summary>
+    Public Property TargetKey As iniKey
+
+    ''' <summary>
     ''' Creates a new <c> KeyMovementInfo </c>
     ''' </summary>
-    ''' 
+    '''
     ''' <param name="source">
     ''' Source entry name
     ''' </param>
-    ''' 
+    '''
     ''' <param name="target">
     ''' Target entry name
     ''' </param>
+    '''
+    ''' <param name="targetKey">
+    ''' The key in <paramref name="target"/> that the moved key landed in
+    ''' </param>
     Public Sub New(source As String,
-                   target As String)
+                   target As String,
+                   targetKey As iniKey)
 
         SourceEntry = source
         TargetEntry = target
+        Me.TargetKey = targetKey
 
     End Sub
 

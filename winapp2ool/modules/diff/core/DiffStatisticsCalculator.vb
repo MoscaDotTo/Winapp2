@@ -220,30 +220,39 @@ Public Class DiffStatisticsCalculator
     End Sub
 
     ''' <summary>
-    ''' Detects keys that were removed from one entry and added to another, records each in
-    ''' <see cref="KeyMovementTracker.MovedKeys"/>, and takes the moved keys out of the added and
-    ''' removed trackers. A removed key pairs with the first same-type added key in another entry
-    ''' that captures it or that it captures, taking entries in name order (ignoring case).
-    ''' Several removed keys can move into one added key that covers them all. We scan every
-    ''' tracked entry, rename and merge targets included. Run it after all parallel processing
-    ''' completes and before <see cref="CalculateInitialStatistics"/>, which then counts only the
-    ''' keys that didn't move.
+    ''' Detects keys that left an entry present in both files and landed in another entry, records
+    ''' each in <see cref="KeyMovementTracker.MovedKeys"/>, and takes the moved keys out of the
+    ''' added and removed trackers. The landing entry can be modified, renamed, or added; we
+    ''' consider every key of an added entry that isn't a rename, since none of them is tracked
+    ''' yet. Only <see cref="MovableKeyTypes"/> move. A removed key pairs with a same-type key in
+    ''' another entry, preferring one with the same value, then one that captures it or that it
+    ''' captures, taking entries in name order (ignoring case). Detection keys move only to the
+    ''' same value. Several removed keys can move into one key that covers them all. Run it after
+    ''' all parallel processing completes and before <see cref="CalculateInitialStatistics"/>,
+    ''' which then counts only the keys that didn't move.
     ''' </summary>
     Public Sub DetectCrossEntryMovements()
 
-        Dim addedKeyInfo As New List(Of AddedKeyInfo)()
-        For Each kvp In _state.ModifiedEntries.AddedKeyTracker.OrderBy(Function(e) e.Key, StringComparer.OrdinalIgnoreCase)
+        Dim candidates As New List(Of AddedKeyInfo)()
+        For Each kvp In _state.ModifiedEntries.AddedKeyTracker
 
-            Dim entryName = kvp.Key
-            Dim entryKeys = kvp.Value
+            For Each key In kvp.Value : candidates.Add(New AddedKeyInfo(kvp.Key, key)) : Next
 
-            For Each key In entryKeys : addedKeyInfo.Add(New AddedKeyInfo(entryName, key)) : Next
+        Next
+
+        For Each entryName In _state.ModifiedEntries.AddedEntryNames
+
+            If _state.MergedEntries.RenamedEntryNames.Contains(entryName) Then Continue For
+            If _state.ModifiedEntries.AddedKeyTracker.ContainsKey(entryName) Then Continue For
+
+            For Each key In _file2.GetSection(entryName).Keys : candidates.Add(New AddedKeyInfo(entryName, key)) : Next
 
         Next
 
         Dim addedByType As New Dictionary(Of String, List(Of AddedKeyInfo))(StringComparer.OrdinalIgnoreCase)
-        For Each info In addedKeyInfo
+        For Each info In candidates.OrderBy(Function(c) c.EntryName, StringComparer.OrdinalIgnoreCase)
 
+            If Not MovableKeyTypes.Contains(info.Key.KeyType) Then Continue For
             If Not addedByType.ContainsKey(info.Key.KeyType) Then addedByType(info.Key.KeyType) = New List(Of AddedKeyInfo)
             addedByType(info.Key.KeyType).Add(info)
 
@@ -260,21 +269,29 @@ Public Class DiffStatisticsCalculator
                 Dim sameTypeAdded As List(Of AddedKeyInfo) = Nothing
                 If Not addedByType.TryGetValue(removedKey.KeyType, sameTypeAdded) Then Continue For
 
-                Dim match = sameTypeAdded.FirstOrDefault(
-                    Function(added) Not String.Equals(sourceEntry, added.EntryName, StringComparison.OrdinalIgnoreCase) AndAlso
-                                    (KeyComparisonStrategyFactory.CompareKeys(added.Key, removedKey) OrElse
-                                     KeyComparisonStrategyFactory.CompareKeys(removedKey, added.Key)))
+                Dim elsewhere = sameTypeAdded.Where(Function(added) Not String.Equals(sourceEntry, added.EntryName, StringComparison.OrdinalIgnoreCase))
+                Dim match = elsewhere.FirstOrDefault(Function(added) String.Equals(added.Key.Value, removedKey.Value, StringComparison.OrdinalIgnoreCase))
+
+                ' A parent path Detect captures every child path under it, which says nothing about where a key went
+                If match Is Nothing AndAlso Not DetectionKeyTypes.Contains(removedKey.KeyType) Then
+
+                    match = elsewhere.FirstOrDefault(Function(added) KeyComparisonStrategyFactory.CompareKeys(added.Key, removedKey) OrElse
+                                                                     KeyComparisonStrategyFactory.CompareKeys(removedKey, added.Key))
+
+                End If
 
                 If match Is Nothing Then Continue For
 
                 Dim targetEntry = match.EntryName
                 Dim movementKey = $"{removedKey.Name}{MovementKeySeparator}{removedKey.Value}{MovementKeySeparator}{sourceEntry}"
-                _state.KeyMovements.MovedKeys(movementKey) = New KeyMovementInfo(sourceEntry, targetEntry)
+                _state.KeyMovements.MovedKeys(movementKey) = New KeyMovementInfo(sourceEntry, targetEntry, match.Key)
                 _state.Statistics.ModEntriesMovedKeysTotal += 1
 
                 If Not keysToRemoveFromRemoved.ContainsKey(sourceEntry) Then keysToRemoveFromRemoved(sourceEntry) = New List(Of iniKey)
                 keysToRemoveFromRemoved(sourceEntry).Add(removedKey)
 
+                ' An added entry has no tracker yet; its moved keys are credited when it is itemized
+                If Not _state.ModifiedEntries.AddedKeyTracker.ContainsKey(targetEntry) Then Continue For
                 If Not keysToRemoveFromAdded.ContainsKey(targetEntry) Then keysToRemoveFromAdded(targetEntry) = New List(Of iniKey)
                 keysToRemoveFromAdded(targetEntry).Add(match.Key)
 
@@ -339,7 +356,10 @@ Public Class DiffStatisticsCalculator
         ' Note: by the time this runs, AddedKeyTracker entries contain both truly novel keys
         ' and carried-over keys (added there by ItemizeAddedEntriesWithMergers for display).
         ' We separate them by checking against the set of key values from the merged old entries.
+        ' Keys that moved in from a surviving entry are neither, and are counted as moved.
         For Each newEntryName In entriesWithMergers
+
+            Dim movedIn = _state.KeyMovements.SourcesMovedInto(newEntryName)
 
             Dim allMergedKeyValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
 
@@ -364,7 +384,15 @@ Public Class DiffStatisticsCalculator
             Dim carriedOverCount = 0
             For Each k In addedKeys
 
-                If allMergedKeyValues.Contains(k.Value) Then carriedOverCount += 1 Else novelCount += 1
+                If allMergedKeyValues.Contains(k.Value) Then
+
+                    carriedOverCount += 1
+
+                ElseIf Not movedIn.ContainsKey(k.Value) Then
+
+                    novelCount += 1
+
+                End If
 
             Next
 
