@@ -328,6 +328,7 @@ Public Class DiffPipelineTests
         Dim dropped = output.IndexOf("Detect=HKCU\Software\Rho (from [Rho *])", StringComparison.Ordinal)
 
         Assert.IsTrue(ownRemoval >= 0 AndAlso header > ownRemoval AndAlso dropped > header, output)
+        StringAssert.Contains(output, "Dropped 1 Detect")
 
     End Sub
 
@@ -475,7 +476,8 @@ Public Class DiffPipelineTests
         Dim output = RunDiff(oldText, newText)
 
         Assert.AreEqual(2, Diff.MostRecentDiffOutcome.MergedEntries)
-        StringAssert.Contains(output, "1 entry contain 5 keys carried over unchanged from merged sources")
+        StringAssert.Contains(output, "1 entry contains 5 keys carried over unchanged from merged sources")
+        StringAssert.Contains(output, "1 entry consolidates content from")
 
     End Sub
 
@@ -502,6 +504,7 @@ Public Class DiffPipelineTests
         Assert.AreEqual(0, CountOf(output, "from merged entries not in this entry:"), output)
         Assert.AreEqual(1, CountOf(output, "Warning=Gone"), output)
         Assert.IsTrue(output.IndexOf("1 key not kept by any of these entries:", StringComparison.Ordinal) < output.IndexOf("Warning=Gone", StringComparison.Ordinal), output)
+        StringAssert.Contains(output, "Lost 1 Warning")
         StringAssert.Contains(output, "1 other key from merged entries went to [Split B *]")
         StringAssert.Contains(output, "1 other key from merged entries went to [Split A *]")
         Assert.AreEqual(2, CountOf(output, "1 other key that no entry kept is listed under [Split *]"), output)

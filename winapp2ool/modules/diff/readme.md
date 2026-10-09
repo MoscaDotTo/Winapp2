@@ -343,7 +343,7 @@ FileKey4=%UserProfile%\Documents\Cook'n*|*.log|RECURSE
 
    1 key from merged entries not in this entry:
 
-       Removed 1 Warning
+       Dropped 1 Warning
              Warning=This removes identical duplicates of the huge Getting Started Guide. (from [Cook'n Dups *])
 ```
 
@@ -760,9 +760,9 @@ FileKey10=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\F
    
    13 keys not kept by any of these entries:
 
-       Removed 9 Detects
-       Removed 1 DetectFile
-       Removed 3 FileKeys
+       Lost 9 Detects
+       Lost 1 DetectFile
+       Lost 3 FileKeys
              Detect1=HKCU\Software\ArtistScope\ArtisBrowser
              Detect2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Mozilla.Firefox_n80bbvh6b1yt2
              Detect3=HKCU\Software\LibreWolf

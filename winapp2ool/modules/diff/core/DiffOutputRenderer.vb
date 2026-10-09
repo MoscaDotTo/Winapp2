@@ -154,6 +154,28 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
+    ''' Selects the form of a verb agreeing with a subject of the given count
+    ''' </summary>
+    '''
+    ''' <param name="count">
+    ''' The number of items forming the subject of the clause
+    ''' </param>
+    '''
+    ''' <param name="verb">
+    ''' The plural form of a regular verb, such as <c> contain </c>
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <paramref name="verb"/> with an <c> s </c> appended when <paramref name="count"/> is
+    ''' exactly <c> 1 </c>, otherwise <paramref name="verb"/> unchanged
+    ''' </returns>
+    Private Shared Function Agree(count As Integer, verb As String) As String
+
+        Return If(count = 1, verb & "s", verb)
+
+    End Function
+
+    ''' <summary>
     ''' Creates a new <c> DiffOutputRenderer </c>
     ''' </summary>
     '''
@@ -272,11 +294,11 @@ Public Class DiffOutputRenderer
         Dim hasAddedWithMergers = stats.AddedWithMergersEntryCount > 0
         Dim hasMerged = removedMergedTotal > 0
 
-        Dim addedMergersSource = $" @ {Entries(stats.AddedWithMergersEntryCount)} consolidate content from {Plural(stats.AddedWithMergersSourceEntryCount, "removed entry", "removed entries")}"
-        Dim addedMergersNovel = $"    + {Entries(stats.AddedWithMergersNovelKeysEntryCount)} contain {Plural(stats.AddedWithMergersNovelKeysTotal, "novel key")} (not from merged sources)"
-        Dim addedMergersCapturing = $"    ~ {Entries(stats.AddedWithMergersCapturingEntryCount)} contain {Plural(stats.AddedWithMergersCapturingKeysTotal, "key")} capturing {Plural(stats.AddedWithMergersCapturedKeysTotal, "removed key")}"
+        Dim addedMergersSource = $" @ {Entries(stats.AddedWithMergersEntryCount)} {Agree(stats.AddedWithMergersEntryCount, "consolidate")} content from {Plural(stats.AddedWithMergersSourceEntryCount, "removed entry", "removed entries")}"
+        Dim addedMergersNovel = $"    + {Entries(stats.AddedWithMergersNovelKeysEntryCount)} {Agree(stats.AddedWithMergersNovelKeysEntryCount, "contain")} {Plural(stats.AddedWithMergersNovelKeysTotal, "novel key")} (not from merged sources)"
+        Dim addedMergersCapturing = $"    ~ {Entries(stats.AddedWithMergersCapturingEntryCount)} {Agree(stats.AddedWithMergersCapturingEntryCount, "contain")} {Plural(stats.AddedWithMergersCapturingKeysTotal, "key")} capturing {Plural(stats.AddedWithMergersCapturedKeysTotal, "removed key")}"
         Dim addedMergersDropped = $"    - {Entries(stats.AddedWithMergersDroppedEntryCount)} dropped {Plural(stats.AddedWithMergersDroppedKeysTotal, "key")} from merged sources"
-        Dim addedMergersCarriedOver = $"    = {Entries(stats.AddedWithMergersCarriedOverKeysEntryCount)} contain {Plural(stats.AddedWithMergersCarriedOverKeysTotal, "key")} carried over unchanged from merged sources"
+        Dim addedMergersCarriedOver = $"    = {Entries(stats.AddedWithMergersCarriedOverKeysEntryCount)} {Agree(stats.AddedWithMergersCarriedOverKeysEntryCount, "contain")} {Plural(stats.AddedWithMergersCarriedOverKeysTotal, "key")} carried over unchanged from merged sources"
 
         Dim plainAddedCount = modified.AddedEntryNames.Where(
             Function(e) Not merged.RenamedEntryNames.Contains(e) AndAlso
@@ -1404,6 +1426,12 @@ Public Class DiffOutputRenderer
     ''' Optional, Default: <c> Nothing </c>
     ''' </param>
     '''
+    ''' <param name="changeTxt">
+    ''' The verb that opens each per-type count line, for a list whose heading calls its keys
+    ''' something other than added or removed <br /><br />
+    ''' Optional, Default: <c> Added </c> or <c> Removed </c>, following <paramref name="wasAdded"/>
+    ''' </param>
+    '''
     ''' <returns>
     ''' The summary section and the key list section, or an empty list if
     ''' <paramref name="kl"/> is empty
@@ -1411,13 +1439,14 @@ Public Class DiffOutputRenderer
     Private Function ItemizeChangesFromList(kl As List(Of iniKey),
                                             wasAdded As Boolean,
                                             ktDict As Dictionary(Of String, Integer),
-                                   Optional sourceEntryMap As Dictionary(Of String, String) = Nothing) As List(Of MenuSection)
+                                   Optional sourceEntryMap As Dictionary(Of String, String) = Nothing,
+                                   Optional changeTxt As String = Nothing) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
 
         If kl.Count = 0 Then Return out
 
-        Dim changeTxt = If(wasAdded, "Added", "Removed")
+        If changeTxt Is Nothing Then changeTxt = If(wasAdded, "Added", "Removed")
 
         kl.ForEach(Sub(key) recordModification(ktDict, key.KeyType))
 
@@ -1496,7 +1525,7 @@ Public Class DiffOutputRenderer
             out.Add(New MenuSection().AddColoredLine(header, ConsoleColor.DarkYellow, centered:=True))
             gLog()
             gLog(header)
-            out.AddRange(ItemizeChangesFromList(keys, False, ktDict, sourceEntryMap))
+            out.AddRange(ItemizeChangesFromList(keys, False, ktDict, sourceEntryMap, "Dropped"))
 
         End If
 
@@ -1675,7 +1704,7 @@ Public Class DiffOutputRenderer
         out.Add(New MenuSection().AddBlank().AddColoredLine(header, ConsoleColor.DarkYellow, centered:=True))
         gLog()
         gLog(header)
-        out.AddRange(ItemizeChangesFromList(keys, False, New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)))
+        out.AddRange(ItemizeChangesFromList(keys, False, New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase), changeTxt:="Lost"))
 
         Return out
 
