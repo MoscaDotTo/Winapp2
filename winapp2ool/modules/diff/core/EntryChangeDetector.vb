@@ -198,7 +198,7 @@ Public Class EntryChangeDetector
 
         Dim noReplacementCount = 0
 
-        Using gLogScope("Entry removals:")
+        Using gLogScope("Entries removed without replacement:")
 
             Dim results = New Concurrent.ConcurrentDictionary(Of String, MenuSection)(StringComparer.OrdinalIgnoreCase)
             Dim entryLogs = New Concurrent.ConcurrentDictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)

@@ -399,7 +399,7 @@ Public Class DiffOutputRenderer
 
         gLog(Nothing, leadr:=True)
 
-        Using gLogScope()
+        Using gLogScope("Entries merged or split into other entries:")
 
             For Each oldEntry In _state.MergedEntries.OldToNewMergeDict.OrderBy(Function(kvp) kvp.Key, StringComparer.OrdinalIgnoreCase)
 
@@ -527,9 +527,9 @@ Public Class DiffOutputRenderer
         headerSection.AddColoredLine(header, ConsoleColor.Magenta, centered:=True).AddDivider(solid:=False)
         out.Add(headerSection)
 
-        gLog(Nothing)
+        gLog(Nothing, leadr:=True)
 
-        Using gLogScope()
+        Using gLogScope("Entries renamed without other changes:")
 
             For Each entry In qualifying
 
@@ -592,9 +592,9 @@ Public Class DiffOutputRenderer
         Dim results As New List(Of MenuSection)
         results.Add(headerSection)
 
-        gLog(Nothing)
+        gLog(Nothing, leadr:=True)
 
-        Using gLogScope()
+        Using gLogScope("Modified entries incorporating merged content:")
 
             results.AddRange(ItemizeModifications(True))
 

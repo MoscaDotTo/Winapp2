@@ -786,12 +786,12 @@ The remaining three (IceDragon, SlimBrowser, Basilisk) were not matched in any n
 
 ### Removed Without Replacement
 
-The entry is gone and its content does not appear in any other entry in the new file. These are listed individually under the `Entry removals:` header, closed by a count.
+The entry is gone and its content does not appear in any other entry in the new file. These are listed individually under the `Entries removed without replacement:` header, closed by a count.
 
 **Sample output:**
 
 ```
- Entry removals:
+ Entries removed without replacement:
 
      2K Launcher * has been removed
 
@@ -857,17 +857,17 @@ A set of locations is considered too generic to establish a content match on its
 
 ## Output Structure
 
-A diff run produces output in the following order. Only some sections have a descriptive header line, sections 4, 5 and 7 are identified solely by the count line that closes them.
+A diff run produces output in the following order. Each section opens with a descriptive header line and closes with a count line.
 
 | # | Section | Header line | Closing count line |
 |:-|:-|:-|:-|
 | 1 | Run header | `Beginning Diff`, `Diff:  version XXXXXX ->  version XXXXXX` | |
 | 2 | Browser categories new to the database | `Web Browser additions` | `N web browsers added` |
-| 3 | Entries removed without replacement | `Entry removals:` | `- N removed without replacement` |
-| 4 | Name-only renames, old name → new name | *(none)* | `N entries renamed (name-only changes)` |
-| 5 | Mergers, including split/merged entries | *(none)* | `N entries merged or split into other entries` |
+| 3 | Entries removed without replacement | `Entries removed without replacement:` | `- N removed without replacement` |
+| 4 | Name-only renames, old name → new name | `Entries renamed without other changes:` | `N entries renamed (name-only changes)` |
+| 5 | Mergers, including split/merged entries | `Entries merged or split into other entries:` | `N entries merged or split into other entries` |
 | 6 | Key diffs for renamed entries | `Minor changes to renamed entries:` | `Minor changes to N renamed entries` |
-| 7 | Modified entries that absorbed merged content, with per-entry source notes | *(none)* | `N modified entries incorporating merged content` |
+| 7 | Modified entries that absorbed merged content, with per-entry source notes | `Modified entries incorporating merged content:` | `N modified entries incorporating merged content` |
 | 8 | Keys relocated from entries that still exist into other entries | `Cross-Entry key movements:` | `N keys moved between entries (M source entries)` |
 | 9 | Ordinary modifications | `Modified entries:` | `N modified entries` |
 | 10 | Consolidating additions with per-key tracking | `Added entries containing merged content:` | `N added entries consolidating removed content` |
@@ -886,7 +886,7 @@ The interactive console and the saved log render the same data in two different 
 In the console:
 
 - The count line is printed as a leading header above its list, not below it.
-- The descriptive header lines (`Entry removals:`, `Modified entries:`, etc) do not appear at all
+- The descriptive header lines (`Entries removed without replacement:`, `Modified entries:`, etc) do not appear at all
 - Split/merge blocks gain a `Merged into:` label above the bullet list
 - The Source Entry Key Status Report is not shown at all.
 
@@ -907,7 +907,7 @@ Diff:  version 220510 ->  version 251109
 
  49 web browsers added
 
- Entry removals:
+ Entries removed without replacement:
 
      2K Launcher * has been removed
 
@@ -916,6 +916,8 @@ Diff:  version 220510 ->  version 251109
 
  - 526 removed without replacement
 
+ Entries renamed without other changes:
+
      3delite Filesystem Dialogs * has been renamed to 3delite Filesystem Dialogs Library *
 
      4Sync Extras * has been renamed to 4Sync *
@@ -923,6 +925,7 @@ Diff:  version 220510 ->  version 251109
 
  112 entries renamed (name-only changes)
 
+ Entries merged or split into other entries:
 
      .NET Application History * has been merged into .NET Framework *
 
@@ -944,6 +947,8 @@ Diff:  version 220510 ->  version 251109
 [...]
 
  Minor changes to 41 renamed entries
+
+ Modified entries incorporating merged content:
 
      Age of Wonders II * has been modified
 
@@ -1296,7 +1301,7 @@ Diff:  version 220510 ->  251109
 
  4 web browsers added
 
- Entry removals:
+ Entries removed without replacement:
 
      Boinc * has been removed
 
@@ -1307,12 +1312,15 @@ Diff:  version 220510 ->  251109
 
  - 157 removed without replacement
 
+ Entries renamed without other changes:
+
      RegEdit * has been renamed to Windows Registry Editor *
 
      Recent Colors History * has been renamed to Windows Shell - Theme Colors History *
 
  10 entries renamed (name-only changes)
 
+ Entries merged or split into other entries:
 
      .NET Framework Isolated Storage * has been merged into .NET Framework *
 
@@ -1420,18 +1428,21 @@ Diff:  version 220510 ->  version 251109
 
  49 web browsers added
 
- Entry removals:
+ Entries removed without replacement:
 
      2K Launcher * has been removed
 [...]
 
  - 526 removed without replacement
 
+ Entries renamed without other changes:
+
      3delite Filesystem Dialogs * has been renamed to 3delite Filesystem Dialogs Library *
 [...]
 
  112 entries renamed (name-only changes)
 
+ Entries merged or split into other entries:
 
      Abelssoft GoogleClean * has been merged into Abelssoft GClean *
 
@@ -1519,7 +1530,7 @@ Diff:  version 251002 ->  version 251109
 
  8 web browsers added
 
- Entry removals:
+ Entries removed without replacement:
 
      Abylon Protection Manager * has been removed
 [...]
