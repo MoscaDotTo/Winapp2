@@ -95,6 +95,33 @@ Public Class DiffPipelineTests
     End Function
 
     ''' <summary>
+    ''' Counts the occurrences of <paramref name="text"/> in <paramref name="output"/>
+    ''' </summary>
+    '''
+    ''' <param name="output">
+    ''' The rendered changelog
+    ''' </param>
+    '''
+    ''' <param name="text">
+    ''' The text to count
+    ''' </param>
+    Private Shared Function CountOf(output As String, text As String) As Integer
+
+        Dim count = 0
+        Dim at = output.IndexOf(text, StringComparison.Ordinal)
+
+        While at >= 0
+
+            count += 1
+            at = output.IndexOf(text, at + text.Length, StringComparison.Ordinal)
+
+        End While
+
+        Return count
+
+    End Function
+
+    ''' <summary>
     ''' Gamma's Warning comes from no merged source, so Delta losing the same Warning is a move
     ''' into Gamma, credited to Delta in the merger output rather than called novel
     ''' </summary>
@@ -452,4 +479,111 @@ Public Class DiffPipelineTests
 
     End Sub
 
+    ''' <summary>
+    ''' Split is divided between two added entries. Neither lists a key as dropped: each names its
+    ''' sibling as the home of the other half, and points to Split's own section for the Warning
+    ''' neither kept, which is listed there once.
+    ''' </summary>
+    <TestMethod>
+    Public Sub SplitEntry_SiblingKeysAreNotDropped()
+
+        Dim oldText =
+            "[Split *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Split" & vbCrLf & "Warning=Gone" & vbCrLf &
+            "FileKey1=%AppData%\Split\A|*.log" & vbCrLf & "FileKey2=%AppData%\Split\B|*.log" & vbCrLf
+
+        Dim newText =
+            "[Split A *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Split" & vbCrLf &
+            "FileKey1=%AppData%\Split\A|*.log" & vbCrLf & vbCrLf &
+            "[Split B *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Split" & vbCrLf &
+            "FileKey1=%AppData%\Split\B|*.log" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Assert.AreEqual(0, CountOf(output, "from merged entries not in this entry:"), output)
+        Assert.AreEqual(1, CountOf(output, "Warning=Gone"), output)
+        Assert.IsTrue(output.IndexOf("1 key not kept by any of these entries:", StringComparison.Ordinal) < output.IndexOf("Warning=Gone", StringComparison.Ordinal), output)
+        StringAssert.Contains(output, "1 other key from merged entries went to [Split B *]")
+        StringAssert.Contains(output, "1 other key from merged entries went to [Split A *]")
+        Assert.AreEqual(2, CountOf(output, "1 other key that no entry kept is listed under [Split *]"), output)
+        Assert.IsFalse(output.Contains("FileKey2=%AppData%\Split\B|*.log"), output)
+        Assert.IsFalse(output.Contains("dropped"), output)
+        StringAssert.Contains(output, "- 1 split entry lost 1 key that no entry kept")
+
+    End Sub
+
+    ''' <summary>
+    ''' The summary counts the old keys a capturing key replaced as the block itemizes them, not
+    ''' every source key that resurfaced. Gamma's third FileKey keeps Alpha from being a rename.
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoAddedEntry_CountsCapturedKeysAsItemized()
+
+        Dim oldText =
+            "[Alpha *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Foo" & vbCrLf &
+            "FileKey1=%AppData%\Foo|*.log" & vbCrLf & "FileKey2=%AppData%\Foo|*.tmp" & vbCrLf & vbCrLf &
+            "[Beta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Bar" & vbCrLf &
+            "FileKey1=%AppData%\Bar|*.log" & vbCrLf
+
+        Dim newText =
+            "[Gamma *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile1=%AppData%\Bar" & vbCrLf &
+            "DetectFile2=%AppData%\Foo" & vbCrLf & "FileKey1=%AppData%\Bar|*.log" & vbCrLf &
+            "FileKey2=%AppData%\Baz|*.log" & vbCrLf & "FileKey3=%AppData%\Foo|*.*" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        StringAssert.Contains(output, "1 key capturing 2 removed keys")
+
+    End Sub
+
+    ''' <summary>
+    ''' Keep absorbs half of Split and loses nothing of its own, so its block is only the line
+    ''' naming where the rest of Split went. The block still prints.
+    ''' </summary>
+    <TestMethod>
+    Public Sub SplitIntoModifiedEntry_KeepsBlockWhenEveryDropWentToASibling()
+
+        Dim oldText =
+            "[Keep *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Keep" & vbCrLf &
+            "FileKey1=%AppData%\Keep|*.log" & vbCrLf & vbCrLf &
+            "[Split *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Split" & vbCrLf &
+            "FileKey1=%AppData%\Split\A|*.log" & vbCrLf & "FileKey2=%AppData%\Split\B|*.log" & vbCrLf
+
+        Dim newText =
+            "[Keep *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Keep" & vbCrLf &
+            "FileKey1=%AppData%\Keep|*.log" & vbCrLf & "FileKey2=%AppData%\Split\A|*.log" & vbCrLf & vbCrLf &
+            "[Split B *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Split" & vbCrLf &
+            "FileKey1=%AppData%\Split\B|*.log" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        StringAssert.Contains(output, "Keep * has been modified")
+        StringAssert.Contains(output, "2 other keys from merged entries went to [Split B *]")
+
+    End Sub
+
+    ''' <summary>
+    ''' Both halves of Split keep its <c> *.log </c> wildcard, which covers <c> cache.log </c>, but
+    ''' neither block's re-diff can show that as a capture. The key must still appear somewhere
+    ''' rather than each block saying it went to the other.
+    ''' </summary>
+    <TestMethod>
+    Public Sub SplitEntry_KeyCoveredByEveryTarget_StillAppears()
+
+        Dim oldText =
+            "[Split *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Split" & vbCrLf &
+            "FileKey1=%AppData%\Split|*.log" & vbCrLf & "FileKey2=%AppData%\Split|cache.log" & vbCrLf &
+            "FileKey3=%AppData%\Split\A|*.tmp" & vbCrLf & "FileKey4=%AppData%\Split\B|*.tmp" & vbCrLf
+
+        Dim newText =
+            "[Split A *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Split" & vbCrLf &
+            "FileKey1=%AppData%\Split|*.log" & vbCrLf & "FileKey2=%AppData%\Split\A|*.tmp" & vbCrLf & vbCrLf &
+            "[Split B *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Split" & vbCrLf &
+            "FileKey1=%AppData%\Split|*.log" & vbCrLf & "FileKey2=%AppData%\Split\B|*.tmp" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        StringAssert.Contains(output, "%AppData%\Split|cache.log")
+        StringAssert.Contains(output, "1 other key from merged entries went to [Split B *]")
+
+    End Sub
 End Class

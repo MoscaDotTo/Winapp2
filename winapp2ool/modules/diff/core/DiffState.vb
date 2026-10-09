@@ -310,9 +310,8 @@ Public Class DiffStatistics
     Public Property AddedWithMergersCapturingKeysTotal As Integer = 0
 
     ''' <summary>
-    ''' Counts the distinct FileKey and RegKey values from merged source entries that reappear,
-    ''' exactly or as captured by another key, in any entry they were merged into. Only sources
-    ''' merged into at least one added entry are counted.
+    ''' Counts the old keys that the capturing keys in added-with-merger entries replaced, as
+    ''' those entries itemize them
     ''' </summary>
     Public Property AddedWithMergersCapturedKeysTotal As Integer = 0
 
@@ -322,8 +321,8 @@ Public Class DiffStatistics
     Public Property AddedWithMergersCapturingEntryCount As Integer = 0
 
     ''' <summary>
-    ''' Counts the distinct FileKey and RegKey values from the same merged source entries that no
-    ''' merge target captured
+    ''' Counts the keys from merged source entries that added-with-merger entries dropped, as those
+    ''' entries itemize them. A key that another entry the source went into kept isn't dropped.
     ''' </summary>
     Public Property AddedWithMergersDroppedKeysTotal As Integer = 0
 

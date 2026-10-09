@@ -368,14 +368,10 @@ Public Class DiffStatisticsCalculator
         Dim oldEntryCaptures = BuildOldEntryCaptureTracking(entriesWithMergers)
 
         ComputeKeyCaptureRates(oldEntryCaptures)
-
-        Dim totals = SummarizeCaptureStatistics(oldEntryCaptures)
         LogSourceEntryKeyStatus(oldEntryCaptures)
 
         _state.Statistics.AddedWithMergersEntryCount = entriesWithMergers.Count
         _state.Statistics.AddedWithMergersSourceEntryCount = oldEntryCaptures.Count
-        _state.Statistics.AddedWithMergersCapturedKeysTotal = totals.CapturedContent
-        _state.Statistics.AddedWithMergersDroppedKeysTotal = totals.TotalContent - totals.CapturedContent
 
         ' Compute per-new-entry stats from the tracked key data.
         ' Note: by the time this runs, AddedKeyTracker entries contain both truly novel keys
@@ -436,11 +432,17 @@ Public Class DiffStatisticsCalculator
 
             End If
 
-            If removedKeys.Count > 0 Then _state.Statistics.AddedWithMergersDroppedEntryCount += 1
+            If removedKeys.Count > 0 Then
+
+                _state.Statistics.AddedWithMergersDroppedKeysTotal += removedKeys.Count
+                _state.Statistics.AddedWithMergersDroppedEntryCount += 1
+
+            End If
 
             If updatedKeysDict.Count = 0 Then Continue For
 
             _state.Statistics.AddedWithMergersCapturingKeysTotal += updatedKeysDict.Count
+            _state.Statistics.AddedWithMergersCapturedKeysTotal += updatedKeysDict.Values.Sum(Function(oldKeys) oldKeys.Count)
             _state.Statistics.AddedWithMergersCapturingEntryCount += 1
 
         Next
@@ -478,17 +480,10 @@ Public Class DiffStatisticsCalculator
                 Dim oldSection = _file1.GetSection(oldEntryName)
                 Dim tracking As New OldEntryKeyTracking With {
                     .AllKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase),
-                    .CapturedKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase),
-                    .AllContentKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase),
-                    .CapturedContentKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+                    .CapturedKeyValues = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
                 }
 
-                For Each key In oldSection.Keys
-
-                    tracking.AllKeyValues.Add(key.Value)
-                    If key.KeyType = "FileKey" OrElse key.KeyType = "RegKey" Then tracking.AllContentKeyValues.Add(key.Value)
-
-                Next
+                For Each key In oldSection.Keys : tracking.AllKeyValues.Add(key.Value) : Next
 
                 oldEntryCaptures(oldEntryName) = tracking
 
@@ -544,8 +539,6 @@ Public Class DiffStatisticsCalculator
                     If newKeyValues.Contains(oldKey.Value) Then
 
                         tracking.CapturedKeyValues.Add(oldKey.Value)
-                        If oldKey.KeyType = "FileKey" OrElse oldKey.KeyType = "RegKey" Then tracking.CapturedContentKeyValues.Add(oldKey.Value)
-
                         Continue For
 
                     End If
@@ -555,7 +548,6 @@ Public Class DiffStatisticsCalculator
                         If Not KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey) Then Continue For
 
                         tracking.CapturedKeyValues.Add(oldKey.Value)
-                        If oldKey.KeyType = "FileKey" OrElse oldKey.KeyType = "RegKey" Then tracking.CapturedContentKeyValues.Add(oldKey.Value)
                         Exit For
 
                     Next
@@ -567,35 +559,6 @@ Public Class DiffStatisticsCalculator
         Next
 
     End Sub
-
-    ''' <summary>
-    ''' Sums key count totals across all old entry tracking records
-    ''' </summary>
-    '''
-    ''' <param name="oldEntryCaptures">
-    ''' Tracking dictionary whose values supply the per-entry key counts to aggregate
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' A <c> KeyCaptureTotals </c> with aggregate counts
-    ''' for all keys and content keys (FileKey/RegKey)
-    ''' </returns>
-    Private Function SummarizeCaptureStatistics(oldEntryCaptures As Dictionary(Of String, OldEntryKeyTracking)) As KeyCaptureTotals
-
-        Dim totals As New KeyCaptureTotals
-
-        For Each tracking In oldEntryCaptures.Values
-
-            totals.Total += tracking.AllKeyValues.Count
-            totals.Captured += tracking.CapturedKeyValues.Count
-            totals.TotalContent += tracking.AllContentKeyValues.Count
-            totals.CapturedContent += tracking.CapturedContentKeyValues.Count
-
-        Next
-
-        Return totals
-
-    End Function
 
     ''' <summary>
     ''' Logs per-entry key status showing captured and dropped keys together,
@@ -741,33 +704,6 @@ Public Class DiffStatisticsCalculator
     End Class
 
     ''' <summary>
-    ''' Holds aggregate key count totals from capture analysis
-    ''' </summary>
-    Private Class KeyCaptureTotals
-
-        ''' <summary>
-        ''' Sum over the old entries of each entry's distinct key values (all types)
-        ''' </summary>
-        Public Property Total As Integer
-
-        ''' <summary>
-        ''' Sum over the old entries of each entry's distinct key values that a merge target captured (all types)
-        ''' </summary>
-        Public Property Captured As Integer
-
-        ''' <summary>
-        ''' Total number of FileKey and RegKey values across all old entries
-        ''' </summary>
-        Public Property TotalContent As Integer
-
-        ''' <summary>
-        ''' Number of FileKey and RegKey values captured by any new entry
-        ''' </summary>
-        Public Property CapturedContent As Integer
-
-    End Class
-
-    ''' <summary>
     ''' Tracks which of one old entry's key values its merge targets captured. Every set compares
     ''' values case-insensitively.
     ''' </summary>
@@ -782,17 +718,6 @@ Public Class DiffStatisticsCalculator
         ''' Keys that have been captured by new entries
         ''' </summary>
         Public Property CapturedKeyValues As HashSet(Of String)
-
-        ''' <summary>
-        ''' Values of FileKey and RegKey keys in the old entry
-        ''' </summary>
-        Public Property AllContentKeyValues As HashSet(Of String)
-
-        ''' <summary>
-        ''' Values of FileKey and RegKey keys from the 
-        ''' old entry that were captured by any new entry
-        ''' </summary>
-        Public Property CapturedContentKeyValues As HashSet(Of String)
 
     End Class
 

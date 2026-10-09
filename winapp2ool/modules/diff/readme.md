@@ -175,10 +175,10 @@ When a new entry contains keys from one or more removed entries, it is annotated
 | **Carried over** | Added keys | `(from [Source *])` | key is carried over verbatim from the source entry |
 | **Novel** | Added keys | `(novel)` | key is new content with no equivalent in any source entry |
 | **Moved in** | Added keys | `(from [Other *])` | key [moved](#cross-entry-key-movements) here from an entry that still exists |
-| **Dropped** | Removed keys | Appears in an `N keys from merged entries not in this entry:` block | the key existed in a source entry but is not captured by any new or modified key in the absorbing entry |
+| **Dropped** | Removed keys | Appears in an `N keys from merged entries not in this entry:` block | the key existed in a source entry merged into this entry alone, and this entry doesn't have it, unchanged or captured. A split source's lost keys are listed under the split. |
 | **Captured** | Modified keys | `(from [Source *])` on the old key | the key does not appear verbatim but is replaced by another key that covers it — typically a wildcard path that absorbs one or more specific old paths |
 
-A key that several source entries share is credited to each of them in name order, as in `(from [Source A *], [Source B *])`. Past three sources, Diff names the first three and counts the rest: `(from [Source A *], [Source B *], [Source C *] and 4 others)`.
+A key that several source entries share is credited to each of them in name order, eg. `(from [Source A *], [Source B *])`. Past three sources, Diff names the first three and counts the rest: `(from [Source A *], [Source B *], [Source C *] and 4 others)`.
 
 **Example 1: Novel and carried keys (Abelssoft PCFresh):**
 
@@ -435,7 +435,7 @@ The replacement of `Detect` with `DetectFile` is paired into a single `Detection
 
 ### Modification by merger
 
-When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Keys the entry's prior version had and lost are listed as removed; keys that only a merged entry had and that didn't survive are listed separately, under `N keys from merged entries not in this entry:`, as in an added entry's merger block. Each such block is followed by a note itemizing the removed entries against which the changes were measured.
+When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Keys the entry's prior version had and lost are listed as removed; keys that only a merged entry had and that didn't survive are listed separately, under `N keys from merged entries not in this entry:`, as in an added entry's merger block. When a removed entry was split across several entries, its keys aren't listed as dropped here. A key that went to one of the others is counted on a closing line that names where it went, eg. `2 other keys from merged entries went to [Windows Font Cache *]`. A key that no entry kept is listed once, in the removed entry's own section under [Merged](#merged), and counted on a second closing line, eg. `173 other keys that no entry kept are listed under [Browser Metrics *], [Crash Reports *], [Download History *] and 8 others`. Each such block is followed by a note itemizing the removed entries against which the changes were measured.
 
 In this example, two version-specific log path entries were merged into a single entry using a wildcard to cover both:
 
@@ -716,9 +716,9 @@ Because `Clover *` is a *modified* entry rather than an added one, its source en
        • Adobe Acrobat Reader *
 ```
 
-A split/merged result means the old entry's content was distributed across more than one new entry, i.e. different keys matched in different places.
+A split/merged result means the old entry's content was distributed across more than one new entry, i.e. different keys matched in different places. The keys of a split entry that none of those entries kept, unchanged or captured, are listed once, here, under `N keys not kept by any of these entries:`. The merger blocks of the entries it went into don't list them as dropped; each ends with a line pointing back here instead (see [Modification by merger](#modification-by-merger)).
 
-**Example with before/after context (large split):** The following shows how `Alternate Services *`, a single legacy entry covering nine different Firefox-based browsers, was split into six browser-specific entries. Each browser that received a dedicated entry now appears as a separate absorbing target.
+**Example with before/after context (large split):** The following shows how `Alternate Services *`, a single legacy entry covering nine different Firefox-based browsers, was split into six browser-specific entries. Each browser that received a dedicated entry now appears as a separate absorbing target, and the keys for the three browsers that got no entry are listed under the split.
 
 **Old (v220510):**
 
@@ -726,7 +726,7 @@ A split/merged result means the old entry's content was distributed across more 
 [Alternate Services *]
 LangSecRef=3026
 Detect1=HKCU\Software\ArtistScope\ArtisBrowser
-Detect2=HKCU\Software\Classes\Local Settings\...\Mozilla.Firefox_n80bbvh6b1yt2
+Detect2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Mozilla.Firefox_n80bbvh6b1yt2
 Detect3=HKCU\Software\LibreWolf
 Detect4=HKLM\Software\ComodoGroup\IceDragon
 Detect5=HKLM\Software\FlashPeak\SlimBrowser
@@ -744,9 +744,10 @@ FileKey6=%AppData%\Moonchild Productions\Pale Moon\Profiles\*|AlternateServices.
 FileKey7=%AppData%\Mozilla\Firefox\Profiles\*|AlternateServices.txt
 FileKey8=%AppData%\Mozilla\SeaMonkey\Profiles\*|AlternateServices.txt
 FileKey9=%AppData%\Waterfox\Profiles\*|AlternateServices.txt
+FileKey10=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\Firefox\Profiles\*|AlternateServices.txt
 ```
 
-**Diff output:**
+**Diff output (220510→251109):**
 
 ```
      Alternate Services * has been split/merged into 6 entries
@@ -756,7 +757,28 @@ FileKey9=%AppData%\Waterfox\Profiles\*|AlternateServices.txt
        • Pale Moon Caches *
        • SeaMonkey Caches *
        • Waterfox Caches *
+   
+   13 keys not kept by any of these entries:
+
+       Removed 9 Detects
+       Removed 1 DetectFile
+       Removed 3 FileKeys
+             Detect1=HKCU\Software\ArtistScope\ArtisBrowser
+             Detect2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Mozilla.Firefox_n80bbvh6b1yt2
+             Detect3=HKCU\Software\LibreWolf
+             Detect4=HKLM\Software\ComodoGroup\IceDragon
+             Detect5=HKLM\Software\FlashPeak\SlimBrowser
+             Detect6=HKLM\Software\Mozilla\Basilisk
+             Detect7=HKLM\Software\Mozilla\Pale Moon
+             Detect8=HKLM\Software\Mozilla\SeaMonkey
+             Detect9=HKLM\Software\Mozilla\Waterfox
+             DetectFile=%AppData%\Mozilla\Firefox
+             FileKey2=%AppData%\Comodo\IceDragon\Profiles\*|AlternateServices.txt
+             FileKey3=%AppData%\FlashPeak\SlimBrowser\Profiles\*|AlternateServices.txt
+             FileKey5=%AppData%\Moonchild Productions\Basilisk\Profiles\*|AlternateServices.txt
 ```
+
+The new entries detect their browsers with other keys (`LibreWolf Caches *`, for one, uses `DetectFile1=%AppData%\librewolf\Profiles`), so none of the old Detects survive verbatim.
 
 Six of the nine browser FileKeys were matched in six new per-browser entries.
 
@@ -1042,6 +1064,7 @@ Entries present in the old file but absent from the new file.
 - `@ N removed entries have been merged into other entries`: total mergers, categorized:
   - `@ N merged into N modified entries`: absorbed by entries that already existed in the old file
   - `+ N merged into N added entries`: absorbed by entries new to the new file
+  - `- N split entries lost N keys that no entry kept`: keys of entries split across several new entries that none of them has, unchanged or captured, as each split entry's `not kept by any of these entries` list shows them
 - `& N removed entries have been renamed`: classified as renames; bullets counting how many were name-only vs. included minor changes
 - `- N entries have been removed without replacement`: no matching content found in the new file
 
@@ -1055,8 +1078,8 @@ Entries present in the new file but absent from the old file.
 - `@ N entries consolidate content from N removed entries`: new entries that absorbed at least one removed entry; bullets:
   - `+ N entries contain N novel keys`: keys with no equivalent in any source entry, leaving out keys moved in from an entry that still exists
   - `= N entries contain N keys carried over unchanged`: keys transferred verbatim from source entries
-  - `~ N entries contain N keys capturing N removed keys`: keys that matched and replaced one or more old keys
-  - `- N entries dropped N keys from merged sources`: keys from source entries that did not survive into the absorbing entry
+  - `~ N entries contain N keys capturing N removed keys`: keys that matched and replaced one or more old keys, and the old keys they replaced, as the entries' blocks list them
+  - `- N entries dropped N keys from merged sources`: the keys the entries' `not in this entry` blocks list. A split source's lost keys are counted under `Removed entries` instead
 - `+ N novel entries (without merged content)`: entirely new entries with no connection to any removed entry
 - `& N added entries are renamed versions of removed entries and may contain other minor changes`: the same rename set as the removed-side `& N removed entries have been renamed` line; the two counts always match
 

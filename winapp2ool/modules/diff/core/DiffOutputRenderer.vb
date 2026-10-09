@@ -51,6 +51,24 @@ Public Class DiffOutputRenderer
     Private ReadOnly _mergerSourceMaps As New Dictionary(Of String, Dictionary(Of String, String))(StringComparer.OrdinalIgnoreCase)
 
     ''' <summary>
+    ''' Maps merged source entry name → (key type and value → the new entries it went into that
+    ''' have the key, unchanged or captured). Built on first use by <c> TargetsKeeping </c>.
+    ''' </summary>
+    Private _keptBy As Dictionary(Of String, Dictionary(Of String, HashSet(Of String)))
+
+    ''' <summary>
+    ''' Maps merge target name → the source keys it doesn't have that another of their targets
+    ''' kept, and those targets. Set by <c> StripKeysKeptElsewhere </c>.
+    ''' </summary>
+    Private ReadOnly _keptElsewhere As New Dictionary(Of String, KeptElsewhereInfo)(StringComparer.OrdinalIgnoreCase)
+
+    ''' <summary>
+    ''' Maps removed entry name → its keys that no entry it was split into kept. Filled on first
+    ''' use by <c> UnkeptKeys </c>.
+    ''' </summary>
+    Private ReadOnly _unkeptKeys As New Dictionary(Of String, List(Of iniKey))(StringComparer.OrdinalIgnoreCase)
+
+    ''' <summary>
     ''' Renders a count alongside its noun, selecting the singular or plural form to match
     ''' </summary>
     '''
@@ -247,6 +265,8 @@ Public Class DiffOutputRenderer
         Dim removedMergedSummary = $" @ {Plural(removedMergedTotal, "removed entry", "removed entries")} {HasHave(removedMergedTotal)} been merged into other entries"
         Dim removedMergedIntoModified = $"    @ {oldEntriesMergedIntoModified} merged into {Plural(modifiedEntriesWithMergers, "modified entry", "modified entries")}"
         Dim removedMergedIntoAdded = $"    + {stats.AddedWithMergersSourceEntryCount} merged into {Plural(stats.AddedWithMergersEntryCount, "added entry", "added entries")}"
+        Dim splitLosses = merged.OldToNewMergeDict.Keys.Select(Function(source) UnkeptKeys(source).Count).Where(Function(count) count > 0).ToList()
+        Dim removedSplitUnkept = $"    - {Plural(splitLosses.Count, "split entry", "split entries")} lost {Plural(splitLosses.Sum(), "key")} that no entry kept"
         Dim removedRenamed = $" & {Plural(merged.RenamedEntryNames.Count, "removed entry", "removed entries")} {HasHave(merged.RenamedEntryNames.Count)} been renamed"
         Dim removedNoReplacement = $" - {Entries(oldRemovedNoRepl)} {HasHave(oldRemovedNoRepl)} been removed without replacement"
         Dim hasAddedWithMergers = stats.AddedWithMergersEntryCount > 0
@@ -309,6 +329,7 @@ Public Class DiffOutputRenderer
             Emit(out, removedMergedSummary, ConsoleColor.Cyan, hasMerged)
             Emit(out, removedMergedIntoModified, ConsoleColor.Cyan, hasMerged AndAlso hasMergedIntoModified)
             Emit(out, removedMergedIntoAdded, ConsoleColor.Green, hasMerged AndAlso hasMergedIntoAdded)
+            Emit(out, removedSplitUnkept, ConsoleColor.Red, splitLosses.Count > 0)
             Emit(out, removedRenamed, ConsoleColor.Magenta, hasRenames)
             Emit(out, renamedNameOnly, ConsoleColor.Magenta, hasRenames AndAlso renameStats.RenamedEntriesNameOnlyCount > 0)
             Emit(out, renamedAdded, ConsoleColor.Green, hasRenames AndAlso renameStats.RenamedEntriesAddedKeyTotal > 0)
@@ -370,6 +391,7 @@ Public Class DiffOutputRenderer
                               MakeDiffMultiTarget(_file1.GetSection(oldName), newTargets))
 
                 out.Add(result)
+                out.AddRange(ItemizeUnkeptKeys(oldName))
 
             Next
 
@@ -527,6 +549,7 @@ Public Class DiffOutputRenderer
             Dim combined = BuildCombinedOldKeys(_state.MergedEntries.MergeDict(targetEntry), targetEntry)
             _mergerSourceMaps(targetEntry) = combined.SourceEntryMap
             _keyAnalyzer.FindModificationsFromCombinedKeys(combined.Keys, _file2.GetSection(targetEntry))
+            StripKeysKeptElsewhere(targetEntry)
 
             ' The re-diff starts over, so it lists the keys this entry gave away as removed again
             Dim movedOut = _state.KeyMovements.MovedOutOf(targetEntry)
@@ -634,7 +657,8 @@ Public Class DiffOutputRenderer
 
             Dim changes = GetKeyChanges(entry)
             Dim hasKeyChanges = changes.RemovedKeys.Count + changes.AddedKeys.Count + changes.UpdatedKeysDict.Count > 0
-            If Not hasKeyChanges AndAlso Not HasMoves(entry, includeMovedIn:=Not isMerger) Then Continue For
+            Dim hasKeysElsewhere = isMerger AndAlso _keptElsewhere.ContainsKey(entry)
+            If Not hasKeyChanges AndAlso Not hasKeysElsewhere AndAlso Not HasMoves(entry, includeMovedIn:=Not isMerger) Then Continue For
 
             qualifying.Add(entry)
 
@@ -664,7 +688,7 @@ Public Class DiffOutputRenderer
                                   results.Add(MakeDiff(newSectionVer, 2))
                                   results.AddRange(ItemizeChangesFromList(changes.AddedKeys, True, addKeyTypes, sourceMap))
                                   results.AddRange(ItemizeChangesFromList(ownRemoved, False, remKeyTypes, sourceMap))
-                                  results.AddRange(ItemizeDroppedKeys(dropped, dropKeyTypes, sourceMap))
+                                  results.AddRange(ItemizeDroppedKeys(entry, dropped, dropKeyTypes, sourceMap))
                                   results.AddRange(ItemizeUpdatedKeys(changes.UpdatedKeysDict, modKeyTypes, sourceMap))
                                   results.AddRange(ItemizeMovedKeys(entry, includeMovedIn:=Not isMerger))
                                   results.Add(ItemizeMergedEntries(entry, isMerger))
@@ -1117,6 +1141,7 @@ Public Class DiffOutputRenderer
                 Dim sourceEntryMap = combined.SourceEntryMap
 
                 _keyAnalyzer.FindModificationsForAddedEntryFromKeys(combined.Keys, _file2.GetSection(entry))
+                StripKeysKeptElsewhere(entry)
 
                 Dim headerSection As New MenuSection
                 Dim headerText = $"{entry} has been added (consolidating {mergedCount} removed entr{If(mergedCount = 1, "y", "ies")})"
@@ -1173,7 +1198,7 @@ Public Class DiffOutputRenderer
                 addedKeys.AddRange(carriedOverKeys)
                 If addedKeys.Count > 0 Then _state.ModifiedEntries.AddedKeyTracker(entry) = addedKeys
 
-                If addedKeys.Count + removedKeys.Count + updatedKeysDict.Count > 0 Then
+                If addedKeys.Count + removedKeys.Count + updatedKeysDict.Count > 0 OrElse _keptElsewhere.ContainsKey(entry) Then
 
                     Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
 
@@ -1189,7 +1214,7 @@ Public Class DiffOutputRenderer
 
                     End If
 
-                    results.AddRange(ItemizeDroppedKeys(removedKeys, remKeyTypes, sourceEntryMap))
+                    results.AddRange(ItemizeDroppedKeys(entry, removedKeys, remKeyTypes, sourceEntryMap))
 
                     If updatedKeysDict.Count > 0 Then
 
@@ -1434,11 +1459,16 @@ Public Class DiffOutputRenderer
 
     ''' <summary>
     ''' Builds and logs the keys of merged source entries that didn't survive into the entry
-    ''' they were merged into, under a header that says so
+    ''' they were merged into, under a header that says so, then names the other entries that
+    ''' kept the source keys this one doesn't have
     ''' </summary>
     '''
+    ''' <param name="entry">
+    ''' The name of the entry the sources were merged into
+    ''' </param>
+    '''
     ''' <param name="keys">
-    ''' The merged sources' keys that the entry doesn't have
+    ''' The merged sources' keys that no entry they went into has
     ''' </param>
     '''
     ''' <param name="ktDict">
@@ -1450,23 +1480,312 @@ Public Class DiffOutputRenderer
     ''' </param>
     '''
     ''' <returns>
-    ''' The header section followed by the summary and key list sections, or an empty list if
-    ''' <paramref name="keys"/> is empty
+    ''' The header section followed by the summary and key list sections, then the line naming
+    ''' the other entries, each only when it has something to say
     ''' </returns>
-    Private Function ItemizeDroppedKeys(keys As List(Of iniKey),
+    Private Function ItemizeDroppedKeys(entry As String,
+                                        keys As List(Of iniKey),
                                         ktDict As Dictionary(Of String, Integer),
                                         sourceEntryMap As Dictionary(Of String, String)) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
-        If keys.Count = 0 Then Return out
 
-        Dim header = $"{Plural(keys.Count, "key")} from merged entries not in this entry:"
-        out.Add(New MenuSection().AddColoredLine(header, ConsoleColor.DarkYellow, centered:=True))
+        If keys.Count > 0 Then
+
+            Dim header = $"{Plural(keys.Count, "key")} from merged entries not in this entry:"
+            out.Add(New MenuSection().AddColoredLine(header, ConsoleColor.DarkYellow, centered:=True))
+            gLog()
+            gLog(header)
+            out.AddRange(ItemizeChangesFromList(keys, False, ktDict, sourceEntryMap))
+
+        End If
+
+        Dim elsewhere As KeptElsewhereInfo = Nothing
+        If Not _keptElsewhere.TryGetValue(entry, elsewhere) Then Return out
+
+        Dim notes As New MenuSection
         gLog()
-        gLog(header)
-        out.AddRange(ItemizeChangesFromList(keys, False, ktDict, sourceEntryMap))
+
+        If elsewhere.KeyCount > 0 Then
+
+            Dim wentTo = $"{Plural(elsewhere.KeyCount, "other key")} from merged entries went to {CreditSources(elsewhere.Entries)}"
+            notes.AddColoredLine(wentTo, ConsoleColor.DarkCyan, centered:=True)
+            gLog(wentTo)
+
+        End If
+
+        If elsewhere.UnkeptCount > 0 Then
+
+            Dim listedUnder = $"{Plural(elsewhere.UnkeptCount, "other key")} that no entry kept {If(elsewhere.UnkeptCount = 1, "is", "are")} listed under {CreditSources(elsewhere.UnkeptSources)}"
+            notes.AddColoredLine(listedUnder, ConsoleColor.DarkYellow, centered:=True)
+            gLog(listedUnder)
+
+        End If
+
+        out.Add(notes.AddBlank())
 
         Return out
+
+    End Function
+
+    ''' <summary>
+    ''' Removes from <paramref name="target"/>'s removed keys each merged source key that it
+    ''' needn't list, and records what it removed for <c> ItemizeDroppedKeys </c>: keys another
+    ''' entry the source went into kept, and keys of a split source that no entry kept, which the
+    ''' removed entry's own section lists instead (<c> ItemizeUnkeptKeys </c>). Without this, each
+    ''' piece of a split entry listed every one of its sibling's keys, and every key the split
+    ''' lost, as dropped. The target's own old keys are left alone.
+    ''' </summary>
+    '''
+    ''' <param name="target">
+    ''' The name of an entry that received merged content, after its re-diff
+    ''' </param>
+    Private Sub StripKeysKeptElsewhere(target As String)
+
+        Dim removed As List(Of iniKey) = Nothing
+        If Not _state.ModifiedEntries.RemovedKeyTracker.TryGetValue(target, removed) Then Return
+
+        Dim ownOldKeys = If(_file1.Contains(target), _file1.GetSection(target).Keys.Select(Function(own) KeyId(own)).ToList(), New List(Of String))
+        Dim keptBy As New SortedSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim listedWith As New SortedSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim keptCount = 0
+        Dim unkeptCount = 0
+
+        removed.RemoveAll(Function(key)
+
+                              If ownOldKeys.Contains(KeyId(key)) Then Return False
+
+                              Dim others = TargetsKeeping(target, key)
+                              If others.Count > 0 Then
+
+                                  keptBy.UnionWith(others)
+                                  keptCount += 1
+                                  Return True
+
+                              End If
+
+                              Dim splits = SplitSourcesListing(target, key)
+                              If splits.Count = 0 Then Return False
+
+                              listedWith.UnionWith(splits)
+                              unkeptCount += 1
+                              Return True
+
+                          End Function)
+
+        If keptCount + unkeptCount = 0 Then Return
+
+        _keptElsewhere(target) = New KeptElsewhereInfo(keptCount, keptBy.ToList(), unkeptCount, listedWith.ToList())
+
+    End Sub
+
+    ''' <summary>
+    ''' Finds the split sources of <paramref name="target"/> whose own section lists
+    ''' <paramref name="key"/> as kept by no entry
+    ''' </summary>
+    '''
+    ''' <param name="target">
+    ''' The name of the entry the sources were merged into
+    ''' </param>
+    '''
+    ''' <param name="key">
+    ''' A source key <paramref name="target"/> doesn't have
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The sources that have the key, or an empty list unless every one of them was split and
+    ''' lists it, since a source merged into <paramref name="target"/> alone has no other place
+    ''' to show it
+    ''' </returns>
+    Private Function SplitSourcesListing(target As String, key As iniKey) As List(Of String)
+
+        Dim id = KeyId(key)
+        Dim listing As New List(Of String)
+
+        For Each source In _state.MergedEntries.MergeDict(target)
+
+            Dim section = _file1.GetSection(source)
+            If section Is Nothing OrElse Not section.Keys.Any(Function(k) KeyId(k) = id) Then Continue For
+            If Not UnkeptKeys(source).Any(Function(k) KeyId(k) = id) Then Return New List(Of String)
+
+            listing.Add(source)
+
+        Next
+
+        Return listing
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the keys of a removed entry split across several entries that none of those
+    ''' entries has, unchanged or captured
+    ''' </summary>
+    '''
+    ''' <param name="source">
+    ''' The name of a removed entry that was merged into other entries
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The keys no entry kept, in the old entry's order, or an empty list when
+    ''' <paramref name="source"/> went into only one entry, whose merger block lists them instead
+    ''' </returns>
+    Private Function UnkeptKeys(source As String) As List(Of iniKey)
+
+        Dim unkept As List(Of iniKey) = Nothing
+        If _unkeptKeys.TryGetValue(source, unkept) Then Return unkept
+
+        unkept = New List(Of iniKey)
+        Dim targets As List(Of String) = Nothing
+        Dim section = _file1.GetSection(source)
+
+        If section IsNot Nothing AndAlso _state.MergedEntries.OldToNewMergeDict.TryGetValue(source, targets) AndAlso targets.Count > 1 Then
+
+            If _keptBy Is Nothing Then _keptBy = BuildKeptBy()
+
+            Dim kept As Dictionary(Of String, HashSet(Of String)) = Nothing
+            _keptBy.TryGetValue(source, kept)
+            unkept.AddRange(section.Keys.Where(Function(k) kept Is Nothing OrElse Not kept.ContainsKey(KeyId(k))))
+
+        End If
+
+        _unkeptKeys(source) = unkept
+        Return unkept
+
+    End Function
+
+    ''' <summary>
+    ''' Builds and logs the keys of a split removed entry that none of the entries it went into kept
+    ''' </summary>
+    '''
+    ''' <param name="source">
+    ''' The name of the removed entry
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The header section followed by the summary and key list sections, or an empty list if
+    ''' every key was kept or the entry wasn't split
+    ''' </returns>
+    Private Function ItemizeUnkeptKeys(source As String) As List(Of MenuSection)
+
+        Dim out As New List(Of MenuSection)
+        Dim keys = UnkeptKeys(source)
+        If keys.Count = 0 Then Return out
+
+        Dim header = $"{Plural(keys.Count, "key")} not kept by any of these entries:"
+        out.Add(New MenuSection().AddBlank().AddColoredLine(header, ConsoleColor.DarkYellow, centered:=True))
+        gLog()
+        gLog(header)
+        out.AddRange(ItemizeChangesFromList(keys, False, New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)))
+
+        Return out
+
+    End Function
+
+    ''' <summary>
+    ''' Finds the entries other than <paramref name="target"/> that have a key from one of
+    ''' <paramref name="target"/>'s merged sources, unchanged or captured
+    ''' </summary>
+    '''
+    ''' <param name="target">
+    ''' The name of the entry the sources were merged into
+    ''' </param>
+    '''
+    ''' <param name="key">
+    ''' The source key to look for
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The names of the other entries that kept <paramref name="key"/>, empty if none did or if
+    ''' <paramref name="target"/> kept it too. A wildcard can cover a key that the re-diff still
+    ''' lists as removed, because only an added key captures there, and stripping it then would
+    ''' leave every target pointing at another and none listing it.
+    ''' </returns>
+    Private Function TargetsKeeping(target As String, key As iniKey) As HashSet(Of String)
+
+        If _keptBy Is Nothing Then _keptBy = BuildKeptBy()
+
+        Dim id = KeyId(key)
+        Dim others As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
+        For Each source In _state.MergedEntries.MergeDict(target)
+
+            Dim keys As Dictionary(Of String, HashSet(Of String)) = Nothing
+            Dim keepers As HashSet(Of String) = Nothing
+            If _keptBy.TryGetValue(source, keys) AndAlso keys.TryGetValue(id, keepers) Then others.UnionWith(keepers)
+
+        Next
+
+        If others.Remove(target) Then others.Clear()
+        Return others
+
+    End Function
+
+    ''' <summary>
+    ''' Records, for every merged source entry, which of the new entries it went into have each of
+    ''' its keys, either unchanged or captured by one of their keys
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' The map <c> _keptBy </c> holds
+    ''' </returns>
+    Private Function BuildKeptBy() As Dictionary(Of String, Dictionary(Of String, HashSet(Of String)))
+
+        Dim keptBy As New Dictionary(Of String, Dictionary(Of String, HashSet(Of String)))(StringComparer.OrdinalIgnoreCase)
+
+        For Each merge In _state.MergedEntries.MergeDict
+
+            Dim newSection = _file2.GetSection(merge.Key)
+            If newSection Is Nothing Then Continue For
+
+            Dim newKeys = newSection.Keys.ToList()
+            Dim newIds = New HashSet(Of String)(newKeys.Select(Function(newKey) KeyId(newKey)))
+
+            For Each source In merge.Value
+
+                Dim oldSection = _file1.GetSection(source)
+                If oldSection Is Nothing Then Continue For
+
+                Dim keys As Dictionary(Of String, HashSet(Of String)) = Nothing
+                If Not keptBy.TryGetValue(source, keys) Then
+
+                    keys = New Dictionary(Of String, HashSet(Of String))
+                    keptBy(source) = keys
+
+                End If
+
+                For Each oldKey In oldSection.Keys
+
+                    Dim id = KeyId(oldKey)
+                    If Not newIds.Contains(id) AndAlso Not newKeys.Any(Function(newKey) KeyComparisonStrategyFactory.CompareKeys(newKey, oldKey)) Then Continue For
+
+                    If Not keys.ContainsKey(id) Then keys(id) = New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+                    keys(id).Add(merge.Key)
+
+                Next
+
+            Next
+
+        Next
+
+        Return keptBy
+
+    End Function
+
+    ''' <summary>
+    ''' Identifies a key by its type and value, ignoring case, so keys that differ only in their
+    ''' number compare equal
+    ''' </summary>
+    '''
+    ''' <param name="key">
+    ''' The key to identify
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The key's type and value, upper-cased
+    ''' </returns>
+    Private Shared Function KeyId(key As iniKey) As String
+
+        Return $"{key.KeyType}|{key.Value}".ToUpperInvariant()
 
     End Function
 
@@ -1627,6 +1946,39 @@ Public Class DiffOutputRenderer
         Return New EntryKeyChanges(added, removed, updated)
 
     End Function
+
+    ''' <summary>
+    ''' The source keys a merge target doesn't have and needn't list, as
+    ''' <c> StripKeysKeptElsewhere </c> found them
+    ''' </summary>
+    Private Class KeptElsewhereInfo
+
+        Public ReadOnly KeyCount As Integer
+        Public ReadOnly Entries As List(Of String)
+        Public ReadOnly UnkeptCount As Integer
+        Public ReadOnly UnkeptSources As List(Of String)
+
+        ''' <summary>
+        ''' Creates a new <c> KeptElsewhereInfo </c>
+        ''' </summary>
+        '''
+        ''' <param name="count">The number of source keys other entries kept</param>
+        '''
+        ''' <param name="keptBy">The entries that kept them, sorted by name</param>
+        '''
+        ''' <param name="unkept">The number of split sources' keys no entry kept</param>
+        '''
+        ''' <param name="listedWith">The split sources whose sections list those keys, sorted by name</param>
+        Public Sub New(count As Integer, keptBy As List(Of String), unkept As Integer, listedWith As List(Of String))
+
+            KeyCount = count
+            Entries = keptBy
+            UnkeptCount = unkept
+            UnkeptSources = listedWith
+
+        End Sub
+
+    End Class
 
     ''' <summary>
     ''' The result of <see cref="BuildCombinedOldKeys"/>
