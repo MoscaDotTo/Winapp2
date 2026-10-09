@@ -589,4 +589,44 @@ Public Class DiffPipelineTests
         StringAssert.Contains(output, "1 other key from merged entries went to [Split B *]")
 
     End Sub
+
+    ''' <summary>
+    ''' Gamma's block lists its novel key and the key that moved in from Delta as added, and the
+    ''' keys it kept from Alpha and Beta in their own group, matching the summary's two counts.
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoAddedEntry_GroupsCarriedOverKeysApart()
+
+        Dim oldText =
+            "[Alpha *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Foo" & vbCrLf &
+            "FileKey1=%AppData%\Foo|*.log" & vbCrLf & vbCrLf &
+            "[Beta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Bar" & vbCrLf &
+            "FileKey1=%AppData%\Bar|*.log" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Delta\Sync|*" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & vbCrLf &
+            "[Gamma *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile1=%AppData%\Bar" & vbCrLf &
+            "DetectFile2=%AppData%\Foo" & vbCrLf & "FileKey1=%AppData%\Bar|*.log" & vbCrLf &
+            "FileKey2=%AppData%\Delta\Sync|*" & vbCrLf & "FileKey3=%AppData%\Foo|*.log" & vbCrLf &
+            "FileKey4=%AppData%\Gamma|*.tmp" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Dim addedHeader = output.IndexOf("2 keys added:", StringComparison.Ordinal)
+        Dim novel = output.IndexOf("FileKey4=%AppData%\Gamma|*.tmp (novel)", StringComparison.Ordinal)
+        Dim movedIn = output.IndexOf("FileKey2=%AppData%\Delta\Sync|* (from [Delta *])", StringComparison.Ordinal)
+        Dim carriedHeader = output.IndexOf("5 keys carried over from merged entries:", StringComparison.Ordinal)
+        Dim carried = output.IndexOf("FileKey3=%AppData%\Foo|*.log (from [Alpha *])", StringComparison.Ordinal)
+
+        Assert.IsTrue(addedHeader >= 0 AndAlso novel > addedHeader AndAlso movedIn > addedHeader, output)
+        Assert.IsTrue(carriedHeader > novel AndAlso carriedHeader > movedIn AndAlso carried > carriedHeader, output)
+        StringAssert.Contains(output, "Carried over 2 FileKeys")
+        Assert.IsFalse(output.Contains("added or carried over"), output)
+        StringAssert.Contains(output, "1 entry contains 1 novel key")
+        StringAssert.Contains(output, "1 entry contains 5 keys carried over unchanged from merged sources")
+
+    End Sub
 End Class

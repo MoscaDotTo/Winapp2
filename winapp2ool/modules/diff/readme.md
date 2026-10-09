@@ -172,9 +172,9 @@ When a new entry contains keys from one or more removed entries, it is annotated
 
 | Category | Type | Annotation | Conditions |
 |:-|:-|:-|:-|
-| **Carried over** | Added keys | `(from [Source *])` | key is carried over verbatim from the source entry |
-| **Novel** | Added keys | `(novel)` | key is new content with no equivalent in any source entry |
-| **Moved in** | Added keys | `(from [Other *])` | key [moved](#cross-entry-key-movements) here from an entry that still exists |
+| **Novel** | Added keys | `(novel)` in an `N keys added:` block | key is new content with no equivalent in any source entry |
+| **Moved in** | Added keys | `(from [Other *])` in an `N keys added:` block | key [moved](#cross-entry-key-movements) here from an entry that still exists |
+| **Carried over** | Carried-over keys | `(from [Source *])` in an `N keys carried over from merged entries:` block | key is carried over verbatim from the source entry |
 | **Dropped** | Removed keys | Appears in an `N keys from merged entries not in this entry:` block | the key existed in a source entry merged into this entry alone, and this entry doesn't have it, unchanged or captured. A split source's lost keys are listed under the split. |
 | **Captured** | Modified keys | `(from [Source *])` on the old key | the key does not appear verbatim but is replaced by another key that covers it — typically a wildcard path that absorbs one or more specific old paths |
 
@@ -205,12 +205,16 @@ FileKey2=%LocalAppData%\Abelssoft\PCFresh\Backup|*
    Merged from:
      • Abelssoft PCFresh Backups *
 
-   4 keys added or carried over from merged sources:
+   1 key added:
 
-       Added 2 FileKeys
-       Added 1 LangSecRef
-       Added 1 DetectFile
+       Added 1 FileKey
              FileKey1=%LocalAppData%\Abelssoft\PCFresh|*.log (novel)
+
+   3 keys carried over from merged entries:
+
+       Carried over 1 LangSecRef
+       Carried over 1 DetectFile
+       Carried over 1 FileKey
              LangSecRef=3024 (from [Abelssoft PCFresh Backups *])
              DetectFile=%LocalAppData%\Abelssoft\PCFresh (from [Abelssoft PCFresh Backups *])
              FileKey2=%LocalAppData%\Abelssoft\PCFresh\Backup|* (from [Abelssoft PCFresh Backups *])
@@ -220,7 +224,7 @@ FileKey2=%LocalAppData%\Abelssoft\PCFresh\Backup|*
 
 `FileKey1` is novel; no equivalent exists in `[Abelssoft PCFresh Backups *]`.
 
-`LangSecRef`, `DetectFile`, and `FileKey2` were carried over unchanged and are listed with attribution to their source entry.
+`LangSecRef`, `DetectFile`, and `FileKey2` were carried over unchanged, so they're listed in their own group, with attribution to their source entry.
 
 Note that `FileKey2`'s pattern changed from `*.*` to `*`, and that the old key is printed as `|*`. Diff rewrites deprecated values in the old file before comparing, so the key counts as carried over rather than modified. See [Value Normalization](#value-normalization).
 
@@ -257,9 +261,9 @@ FileKey1=%AppData%\EFSoftware|*Cache
      • EF Duplicate Files Manager *
      • EF Duplicate MP3 Finder *
 
-   1 key added or carried over from merged sources:
+   1 key carried over from merged entries:
 
-       Added 1 LangSecRef
+       Carried over 1 LangSecRef
              LangSecRef=3024 (from [EF Duplicate Files Manager *], [EF Duplicate MP3 Finder *])
 
    2 keys capturing content from merged entries
@@ -329,11 +333,11 @@ FileKey4=%UserProfile%\Documents\Cook'n*|*.log|RECURSE
      • Cook'n Dups *
      • Cook'n Logs *
 
-   6 keys added or carried over from merged sources:
+   6 keys carried over from merged entries:
 
-       Added 1 LangSecRef
-       Added 1 Detect
-       Added 4 FileKeys
+       Carried over 1 LangSecRef
+       Carried over 1 Detect
+       Carried over 4 FileKeys
              LangSecRef=3021 (from [Cook'n Cache *], [Cook'n Dups *], [Cook'n Logs *])
              Detect=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Cook'n (from [Cook'n Cache *], [Cook'n Dups *], [Cook'n Logs *])
              FileKey1=%AppData%\Mozilla\eclipse\Cache|* (from [Cook'n Cache *])
@@ -353,7 +357,7 @@ Every `FileKey` from all three source entries was carried over, attributed to it
 
 Keys that all three source entries shared (`LangSecRef`, `Detect`) are credited to all three.
 
-The `Warning=` key from `Cook'n Dups *` was dropped, and is listed as removed with attribution to its originating entry.
+The `Warning=` key from `Cook'n Dups *` was dropped, and is listed under the dropped heading with attribution to its originating entry.
 
 The change from `%Documents%` to `%UserProfile%\Documents` is a deprecated-path rewrite, so `FileKey4` matches `Cook'n Logs *`'s `FileKey1` despite the textual difference. See [Value Normalization](#value-normalization).
 
@@ -984,9 +988,15 @@ Diff:  version 220510 ->  version 251109
    Merged from:
      • Abelssoft GoogleClean *
 
-   4 keys added or carried over from merged sources:
+   1 key added:
 
-       Added 3 FileKeys
+       Added 1 FileKey
+             FileKey2=%LocalAppData%\Abelssoft\GClean\Backups|* (novel)
+
+   3 keys carried over from merged entries:
+
+       Carried over 1 LangSecRef
+       Carried over 2 FileKeys
 [...]
 
  317 added entries consolidating removed content
@@ -1082,7 +1092,7 @@ Entries present in the new file but absent from the old file.
 
 - `@ N entries consolidate content from N removed entries`: new entries that absorbed at least one removed entry; bullets:
   - `+ N entries contain N novel keys`: keys with no equivalent in any source entry, leaving out keys moved in from an entry that still exists
-  - `= N entries contain N keys carried over unchanged`: keys transferred verbatim from source entries
+  - `= N entries contain N keys carried over unchanged`: keys transferred verbatim from source entries, as the entries' `carried over from merged entries` groups list them
   - `~ N entries contain N keys capturing N removed keys`: keys that matched and replaced one or more old keys, and the old keys they replaced, as the entries' blocks list them
   - `- N entries dropped N keys from merged sources`: the keys the entries' `not in this entry` blocks list. A split source's lost keys are counted under `Removed entries` instead
 - `+ N novel entries (without merged content)`: entirely new entries with no connection to any removed entry

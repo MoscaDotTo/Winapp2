@@ -1222,17 +1222,41 @@ Public Class DiffOutputRenderer
 
                 If addedKeys.Count + removedKeys.Count + updatedKeysDict.Count > 0 OrElse _keptElsewhere.ContainsKey(entry) Then
 
-                    Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
+                    Dim addKeyTypes, carryKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
 
-                    If addedKeys.Count > 0 Then
+                    ' The summary's carried-over count uses this same test, so the two groups add up to it.
+                    ' A key moved in from an entry that still exists stays with the added keys.
+                    Dim mergedValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+                    For Each source In _state.MergedEntries.MergeDict(entry).Where(Function(name) _file1.Contains(name))
+
+                        For Each key In _file1.GetSection(source).Keys : mergedValues.Add(key.Value) : Next
+
+                    Next
+
+                    Dim carriedKeys = addedKeys.Where(Function(key) mergedValues.Contains(key.Value)).ToList()
+                    Dim newKeys = addedKeys.Where(Function(key) Not mergedValues.Contains(key.Value)).ToList()
+
+                    If newKeys.Count > 0 Then
 
                         Dim newKeysSection As New MenuSection
-                        Dim novelKeysMsg = $"{Plural(addedKeys.Count, "key")} added or carried over from merged sources:"
-                        newKeysSection.AddColoredLine(novelKeysMsg, ConsoleColor.Green, centered:=True)
+                        Dim newKeysMsg = $"{Plural(newKeys.Count, "key")} added:"
+                        newKeysSection.AddColoredLine(newKeysMsg, ConsoleColor.Green, centered:=True)
                         gLog()
-                        gLog(novelKeysMsg)
+                        gLog(newKeysMsg)
                         results.Add(newKeysSection)
-                        results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, sourceEntryMap))
+                        results.AddRange(ItemizeChangesFromList(newKeys, True, addKeyTypes, sourceEntryMap))
+
+                    End If
+
+                    If carriedKeys.Count > 0 Then
+
+                        Dim carriedSection As New MenuSection
+                        Dim carriedMsg = $"{Plural(carriedKeys.Count, "key")} carried over from merged entries:"
+                        carriedSection.AddColoredLine(carriedMsg, ConsoleColor.DarkGreen, centered:=True)
+                        gLog()
+                        gLog(carriedMsg)
+                        results.Add(carriedSection)
+                        results.AddRange(ItemizeChangesFromList(carriedKeys, True, carryKeyTypes, sourceEntryMap, "Carried over"))
 
                     End If
 
