@@ -241,6 +241,9 @@ Public Class DiffPipelineTests
         StringAssert.Contains(output, "Moved in 1 FileKey")
         StringAssert.Contains(output, "FileKey2=%AppData%\Shared|*.log (from [Delta *])")
         StringAssert.Contains(output, "~ 1 key moved into 1 modified entry")
+        StringAssert.Contains(output, "1 key moved to other entries:")
+        StringAssert.Contains(output, "1 key moved in from other entries:")
+        StringAssert.Contains(output, "Delta * moved 1 key:")
 
     End Sub
 
@@ -328,6 +331,13 @@ Public Class DiffPipelineTests
         Dim dropped = output.IndexOf("Detect=HKCU\Software\Rho (from [Rho *])", StringComparison.Ordinal)
 
         Assert.IsTrue(ownRemoval >= 0 AndAlso header > ownRemoval AndAlso dropped > header, output)
+
+        Dim modifiedHeader = output.IndexOf("Delta * has been modified", StringComparison.Ordinal)
+        Dim sources = output.IndexOf("This entry contains merged keys from 1 removed entry:", StringComparison.Ordinal)
+        Assert.IsTrue(modifiedHeader >= 0 AndAlso sources > modifiedHeader AndAlso ownRemoval > sources, output)
+
+        Dim removedHeading = output.IndexOf("1 key removed:", StringComparison.Ordinal)
+        Assert.IsTrue(removedHeading > sources AndAlso ownRemoval > removedHeading, output)
         StringAssert.Contains(output, "Dropped 1 Detect")
 
     End Sub
@@ -357,6 +367,7 @@ Public Class DiffPipelineTests
         Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MovedKeys)
         StringAssert.Contains(output, "Minor changes to 1 renamed entry")
         StringAssert.Contains(output, "Moved in 1 Warning")
+        StringAssert.Contains(output, "1 key moved in from other entries:")
         StringAssert.Contains(output, "& 1 key moved into 1 renamed entry")
         Assert.IsFalse(output.Contains("name-only"), output)
 
@@ -450,7 +461,8 @@ Public Class DiffPipelineTests
         Dim output = RunDiff(ContestedRenameOld, newText)
 
         Assert.AreEqual(2, Diff.MostRecentDiffOutcome.MergedEntries)
-        StringAssert.Contains(output, "Gamma * has been added (consolidating 2 removed entries)")
+        StringAssert.Contains(output, "Gamma * has been added")
+        StringAssert.Contains(output, "This entry contains merged keys from 2 removed entries:")
         Assert.IsFalse(output.Contains("Entry Name has been modified"), output)
 
     End Sub
@@ -629,4 +641,34 @@ Public Class DiffPipelineTests
         StringAssert.Contains(output, "1 entry contains 5 keys carried over unchanged from merged sources")
 
     End Sub
+    ''' <summary>
+    ''' Each list in a modified entry's block has a heading with its total, ahead of its count lines
+    ''' </summary>
+    <TestMethod>
+    Public Sub ModifiedEntry_EveryListHasAHeadingWithItsTotal()
+
+        Dim oldText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Delta\Logs|*.log" & vbCrLf &
+            "FileKey3=%AppData%\Delta\Old|*" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Delta\Logs|*.log;*.txt" & vbCrLf &
+            "FileKey3=%AppData%\Delta\New|*" & vbCrLf & "Warning=Closes Delta first" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        For Each pair In {Tuple.Create("2 keys added:", "Added 1 Warning"),
+                          Tuple.Create("1 key removed:", "Removed 1 FileKey"),
+                          Tuple.Create("1 key modified:", "Modified 1 FileKey")}
+
+            Dim heading = output.IndexOf(pair.Item1, StringComparison.Ordinal)
+            Dim countLine = output.IndexOf(pair.Item2, StringComparison.Ordinal)
+            Assert.IsTrue(heading >= 0 AndAlso countLine > heading, $"{pair.Item1}{vbCrLf}{output}")
+
+        Next
+
+    End Sub
+
 End Class

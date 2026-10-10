@@ -168,7 +168,7 @@ Entirely new entries with no connection to any removed entry appear as a single 
 
 ### Entries consolidating removed entries
 
-When a new entry contains keys from one or more removed entries, it is annotated with a count and followed by a `Merged from:` block listing the source entries. Diff then sorts the keys of the new entry and its sources into these categories:
+When a new entry contains keys from one or more removed entries, its header is followed by a `This entry contains merged keys from N removed entries:` line listing the source entries. Diff then sorts the keys of the new entry and its sources into these categories:
 
 | Category | Type | Annotation | Conditions |
 |:-|:-|:-|:-|
@@ -201,9 +201,9 @@ FileKey2=%LocalAppData%\Abelssoft\PCFresh\Backup|*
 
 **Diff output:**
 ```
-   Abelssoft PCFresh * has been added (consolidating 1 removed entry)
-   Merged from:
-     • Abelssoft PCFresh Backups *
+   Abelssoft PCFresh * has been added
+   This entry contains merged keys from 1 removed entry:
+     - Abelssoft PCFresh Backups *
 
    1 key added:
 
@@ -256,17 +256,17 @@ FileKey1=%AppData%\EFSoftware|*Cache
 **Diff output:**
 
 ```
-   EFSoftware  * has been added (consolidating 2 removed entries)
-   Merged from:
-     • EF Duplicate Files Manager *
-     • EF Duplicate MP3 Finder *
+   EFSoftware  * has been added
+   This entry contains merged keys from 2 removed entries:
+     - EF Duplicate Files Manager *
+     - EF Duplicate MP3 Finder *
 
    1 key carried over from merged entries:
 
        Carried over 1 LangSecRef
              LangSecRef=3024 (from [EF Duplicate Files Manager *], [EF Duplicate MP3 Finder *])
 
-   2 keys capturing content from merged entries
+   2 keys capturing content from merged entries:
 
        Modified 1 Detection criteria
        Modified 1 FileKey
@@ -327,11 +327,11 @@ FileKey4=%UserProfile%\Documents\Cook'n*|*.log|RECURSE
 **Diff output:**
 
 ```
-   Cook'n * has been added (consolidating 3 removed entries)
-   Merged from:
-     • Cook'n Cache *
-     • Cook'n Dups *
-     • Cook'n Logs *
+   Cook'n * has been added
+   This entry contains merged keys from 3 removed entries:
+     - Cook'n Cache *
+     - Cook'n Dups *
+     - Cook'n Logs *
 
    6 keys carried over from merged entries:
 
@@ -374,10 +374,10 @@ Modified output itemizes five kinds of key-level change:
 - **Added keys**: present in the new entry with no detected equivalent in the old entry
 - **Removed keys**: present in the old entry with no detected equivalent in the new entry or anywhere else
 - **Modified keys**: a key whose value changed, shown as `X has been modified, replacing N old keys`; in the simple case one old key was updated to a new value; in more complex cases a single new key uses a wildcard or semicolon-joined pattern to capture multiple old keys
-- **Moved keys**: keys that left this entry for another one, listed under `Moved N FileKeys` as `FileKey2=... moved to [Other *]`. See [Cross-Entry Key Movements](#cross-entry-key-movements)
-- **Moved-in keys**: keys this entry took from another entry that still exists, listed under `Moved in N FileKeys` as `FileKey2=... (from [Other *])`. An entry that also absorbed removed entries lists these among its added keys instead, with the same credit
+- **Moved keys**: keys that left this entry for another one, listed under `N keys moved to other entries:` as `FileKey2=... moved to [Other *]`. See [Cross-Entry Key Movements](#cross-entry-key-movements)
+- **Moved-in keys**: keys this entry took from another entry that still exists, listed under `N keys moved in from other entries:` as `FileKey2=... (from [Other *])`. An entry that also absorbed removed entries lists these among its added keys instead, with the same credit
 
-An entry whose only change is a moved key is still itemized.
+Each kind has its own list, under a heading with its total (`13 keys added:`, `2 keys removed:`, `7 keys modified:`), followed by a count line for each key type (`Added 2 DetectFiles`). An entry whose only change is a moved key is still itemized.
 
 Changes to detection keys (`Detect`, `DetectFile`) are grouped and reported together as `Detection criteria`.
 
@@ -412,6 +412,8 @@ FileKey1=%LocalAppData%\Packages\Facebook.Facebook_*\AC|*|RECURSE
 ```
      Facebook * has been modified
 
+     3 keys modified:
+
        Modified 1 LangSecRef
        Modified 1 FileKey
        Modified 1 Detection criteria
@@ -439,7 +441,7 @@ The replacement of `Detect` with `DetectFile` is paired into a single `Detection
 
 ### Modification by merger
 
-When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Keys the entry's prior version had and lost are listed as removed; keys that only a merged entry had and that didn't survive are listed separately, under `N keys from merged entries not in this entry:`, as in an added entry's merger block. When a removed entry was split across several entries, its keys aren't listed as dropped here. A key that went to one of the others is counted on a closing line that names where it went, eg. `2 other keys from merged entries went to [Windows Font Cache *]`. A key that no entry kept is listed once, in the removed entry's own section under [Merged](#merged), and counted on a second closing line, eg. `173 other keys that no entry kept are listed under [Browser Metrics *], [Crash Reports *], [Download History *] and 8 others`. Each such block is followed by a note itemizing the removed entries against which the changes were measured.
+When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Keys the entry's prior version had and lost are listed as removed; keys that only a merged entry had and that didn't survive are listed separately, under `N keys from merged entries not in this entry:`, as in an added entry's merger block. When a removed entry was split across several entries, its keys aren't listed as dropped here. A key that went to one of the others is counted on a closing line that names where it went, eg. `2 other keys from merged entries went to [Windows Font Cache *]`. A key that no entry kept is listed once, in the removed entry's own section under [Merged](#merged), and counted on a second closing line, eg. `173 other keys that no entry kept are listed under [Browser Metrics *], [Crash Reports *], [Download History *] and 8 others`. Each such block opens with the same `This entry contains merged keys from N removed entries:` list as an added entry's, right under its header.
 
 In this example, two version-specific log path entries were merged into a single entry using a wildcard to cover both:
 
@@ -476,6 +478,10 @@ FileKey3=%ProgramFiles%\Age of Wonders*|*Log.txt
      Age of Wonders: Shadow Magic * has been merged into Age of Wonders II *
 
      Age of Wonders II * has been modified
+     This entry contains merged keys from 1 removed entry:
+       - Age of Wonders: Shadow Magic *
+
+     1 key modified:
 
        Modified 1 FileKey
 
@@ -483,9 +489,6 @@ FileKey3=%ProgramFiles%\Age of Wonders*|*Log.txt
               + New: FileKey3=%ProgramFiles%\Age of Wonders*|*Log.txt
               - Old: FileKey1=%ProgramFiles%\Age of Wonders Shadow Magic|*aowsmLog.txt (from [Age of Wonders: Shadow Magic *])
               - Old: FileKey1=%ProgramFiles%\Age of Wonders II|*aow2Log.txt (from [Age of Wonders II *])
-
-     The above changes are measured against the following removed/old entries
-     Age of Wonders: Shadow Magic *
 ```
 
 **Explanation:**
@@ -525,6 +528,8 @@ FileKey1=%UserProfile%\.idlerc|recent-files.lst
 ```
      IDLE Recent Files * has been renamed to IDLE *
 
+     1 key modified:
+
        Modified 1 LangSecRef
 
        LangSecRef has been modified, replacing 1 old key
@@ -540,7 +545,7 @@ The `FileKey` and `Detect` content of `[IDLE Recent Files *]` was found unchange
 
 ### Cross-Entry Key Movements
 
-A key that leaves an entry present in both files and lands in any other entry has moved. Moves are reported in a dedicated `Cross-Entry key movements:` section, grouped by the entry the keys left. The receiving entry can be modified, renamed, or added, so splitting part of an entry out into a new one shows up here. Unlike with a merger, the source entry still exists.
+A key that leaves an entry present in both files and lands in any other entry has moved. Moves are reported in a dedicated `Cross-Entry key movements:` section, grouped by the entry the keys left, each group headed with its total, eg. `MP3Gain * moved 2 keys:`. The receiving entry can be modified, renamed, or added, so splitting part of an entry out into a new one shows up here. Unlike with a merger, the source entry still exists.
 
 The section is omitted entirely when no movements are detected.
 
@@ -550,16 +555,16 @@ The section is omitted entirely when no movements are detected.
  Cross-Entry key movements:
 [...]
 
-   CleanMyPC Registry Cleaner *
+   CleanMyPC Registry Cleaner * moved 1 key:
        -> FileKey2=%WinDir%\$regcmp$|*|REMOVESELF moved to [Windows Subsystems *]
 [...]
 
-   MP3Gain *
+   MP3Gain * moved 2 keys:
        -> RegKey1=HKCU\Software\VB and VBA Program Settings\MP3GainAnalysis\StartUp|AddFilesPath moved to [MP3Gain StartUp *]
        -> RegKey2=HKCU\Software\VB and VBA Program Settings\MP3GainAnalysis\StartUp|AddFolderPath moved to [MP3Gain StartUp *]
 [...]
 
-   Soulseek *
+   Soulseek * moved 5 keys:
        -> FileKey1=%UserProfile%\Documents\Soulseek Chat Logs\Private|*.txt moved to [Soulseek Chat History *]
        -> FileKey2=%LocalAppData%\Soulseek Chat Logs\*|*.log moved to [Soulseek Chat History *]
        -> FileKey3=%LocalAppData%\SoulseekQt\Soulseek Chat Logs|*.log|RECURSE moved to [Soulseek Chat History *]
@@ -567,7 +572,7 @@ The section is omitted entirely when no movements are detected.
        -> FileKey6=%ProgramFiles%\Soulseek*\Room_Chat_Logs|*.txt moved to [Soulseek Chat History *]
 [...]
 
-   Windows Subsystems *
+   Windows Subsystems * moved 13 keys:
        -> FileKey1=%ProgramData%\Microsoft\PlayReady|*.hds moved to [Microsoft PlayReady *]
        -> FileKey2=%ProgramData%\Microsoft\PlayReady\Cache|* moved to [Microsoft PlayReady *]
        -> FileKey6=%ProgramData%\Microsoft\Windows\DRM|*.log moved to [Microsoft PlayReady *]
@@ -600,6 +605,8 @@ Each move also appears in the itemized output of both entries, under `Moved` in 
 
 ```
      CleanMyPC Registry Cleaner * has been modified
+
+     1 key moved to other entries:
 
        Moved 1 FileKey
              FileKey2=%WinDir%\$regcmp$|*|REMOVESELF moved to [Windows Subsystems *]
@@ -650,7 +657,7 @@ The entry no longer exists, but its content was absorbed into another entry in t
      Abelssoft GoogleClean * has been merged into Abelssoft GClean *
 ```
 
-In the added-entries output, an annotation is included: `Abelssoft GClean * has been added (consolidating 1 removed entry)`.
+In the added-entries output, the entry's header is followed by `This entry contains merged keys from 1 removed entry:` and the source's name.
 
 **Example with before/after context:**
 
@@ -695,6 +702,11 @@ FileKey3=%LocalAppData%\Clover\User Data\temp|*|RECURSE
      Clover Session * has been merged into Clover *
 
      Clover * has been modified
+     This entry contains merged keys from 2 removed entries:
+       - Clover Bookmarks Backups *
+       - Clover Session *
+
+     1 key modified:
 
        Modified 1 FileKey
 
@@ -702,10 +714,6 @@ FileKey3=%LocalAppData%\Clover\User Data\temp|*|RECURSE
               + New: FileKey1=%LocalAppData%\Clover\User Data\Default|Bookmarks.bak;Current *;Last *
               - Old: FileKey1=%LocalAppData%\Clover\User Data\Default|Bookmarks.bak (from [Clover Bookmarks Backups *])
               - Old: FileKey1=%LocalAppData%\Clover\User Data\Default|Current *;Last * (from [Clover Session *])
-
-     The above changes are measured against the following removed/old entries
-     Clover Bookmarks Backups *
-     Clover Session *
 ```
 
 The two removed entries each contributed a FileKey, and the new version of `Clover *` combines their values into a single `FileKey1`.
@@ -762,7 +770,7 @@ FileKey10=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\F
        • SeaMonkey Caches *
        • Waterfox Caches *
    
-   13 keys not kept by any of these entries:
+     13 keys not kept by any of these entries:
 
        Lost 9 Detects
        Lost 1 DetectFile
@@ -944,6 +952,8 @@ Diff:  version 220510 ->  version 251109
 
      Avast TuneUp * has been renamed to Avast Cleanup *
 
+     12 keys added:
+
        Added 1 Detect
        Added 1 DetectFile
        Added 10 FileKeys
@@ -955,6 +965,10 @@ Diff:  version 220510 ->  version 251109
  Modified entries incorporating merged content:
 
      Age of Wonders II * has been modified
+     This entry contains merged keys from 1 removed entry:
+       - Age of Wonders: Shadow Magic *
+
+     1 key modified:
 
        Modified 1 FileKey
 [...]
@@ -963,7 +977,7 @@ Diff:  version 220510 ->  version 251109
 
  Cross-Entry key movements:
 
-   CleanMyPC Registry Cleaner *
+   CleanMyPC Registry Cleaner * moved 1 key:
        -> FileKey2=%WinDir%\$regcmp$|*|REMOVESELF moved to [Windows Subsystems *]
 [...]
 
@@ -972,6 +986,8 @@ Diff:  version 220510 ->  version 251109
  Modified entries:
 
      //N.P.P.D. RUSH// - The Milk of Ultra Violet * has been modified
+
+     1 key modified:
 
        Modified 1 Detection criteria
 
@@ -984,9 +1000,9 @@ Diff:  version 220510 ->  version 251109
 
  Added entries containing merged content:
 
-   Abelssoft GClean * has been added (consolidating 1 removed entry)
-   Merged from:
-     • Abelssoft GoogleClean *
+   Abelssoft GClean * has been added
+   This entry contains merged keys from 1 removed entry:
+     - Abelssoft GoogleClean *
 
    1 key added:
 
@@ -1346,6 +1362,8 @@ Diff:  version 220510 ->  251109
 
      Discord * has been modified
 
+     5 keys added:
+
        Added 5 FileKeys
              FileKey1=%AppData%\BetterDiscord|*.log
              FileKey2=%AppData%\BetterDiscord\temp|*|REMOVESELF
@@ -1353,8 +1371,12 @@ Diff:  version 220510 ->  251109
              FileKey8=%AppData%\Discord*\module_data\crashlogs|*
              FileKey12=%LocalAppData%\Discord*\packages|*.nupkg
 
+     1 key removed:
+
        Removed 1 FileKey
              FileKey10=%LocalAppData%\SquirrelTemp|*|REMOVESELF
+
+     2 keys modified:
 
        Modified 2 FileKeys
 [...]
@@ -1363,11 +1385,11 @@ Diff:  version 220510 ->  251109
 
  Added entries containing merged content:
 
-   Chromium Caches * has been added (consolidating 14 removed entries)
-   Merged from:
-     • Download History *
-     • Blob Storage *
-     • Application Cache Extras *
+   Chromium Caches * has been added
+   This entry contains merged keys from 14 removed entries:
+     - Download History *
+     - Blob Storage *
+     - Application Cache Extras *
 [...]
 
  Total diff time: 00:00:00.4186843
@@ -1631,9 +1653,13 @@ A modified entry prints its new full text beneath the header, followed by the ke
            FileKey3=%LocalAppData%\4Team\Sync2Cloud|*.log
 
 
+     2 keys added:
+
        Added 2 FileKeys
              FileKey2=%AppData%\4Team\Sync2\Logs|*
              FileKey3=%LocalAppData%\4Team\Sync2Cloud|*.log
+
+     1 key modified:
 
        Modified 1 FileKey
 

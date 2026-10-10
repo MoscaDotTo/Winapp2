@@ -708,12 +708,12 @@ Public Class DiffOutputRenderer
                                   Dim dropped = changes.RemovedKeys.Where(Function(key) Not wasOwnKey(key)).ToList()
 
                                   results.Add(MakeDiff(newSectionVer, 2))
-                                  results.AddRange(ItemizeChangesFromList(changes.AddedKeys, True, addKeyTypes, sourceMap))
-                                  results.AddRange(ItemizeChangesFromList(ownRemoved, False, remKeyTypes, sourceMap))
-                                  results.AddRange(ItemizeDroppedKeys(entry, dropped, dropKeyTypes, sourceMap))
-                                  results.AddRange(ItemizeUpdatedKeys(changes.UpdatedKeysDict, modKeyTypes, sourceMap))
-                                  results.AddRange(ItemizeMovedKeys(entry, includeMovedIn:=Not isMerger))
-                                  results.Add(ItemizeMergedEntries(entry, isMerger))
+                                  If isMerger Then results.Add(ItemizeMergeSources(entry, "  "))
+                                  results.AddRange(ItemizeChangesFromList(changes.AddedKeys, True, addKeyTypes, "added:", ConsoleColor.Green, "  ", sourceMap))
+                                  results.AddRange(ItemizeChangesFromList(ownRemoved, False, remKeyTypes, "removed:", ConsoleColor.Red, "  ", sourceMap))
+                                  results.AddRange(ItemizeDroppedKeys(entry, dropped, dropKeyTypes, sourceMap, "  "))
+                                  results.AddRange(ItemizeUpdatedKeys(changes.UpdatedKeysDict, modKeyTypes, "modified:", "  ", sourceMap))
+                                  results.AddRange(ItemizeMovedKeys(entry, includeMovedIn:=Not isMerger, logIndent:="  "))
 
                               Next
 
@@ -754,6 +754,14 @@ Public Class DiffOutputRenderer
     ''' keys per key type for the modification summary
     ''' </param>
     '''
+    ''' <param name="heading">
+    ''' The heading over the list, after its key count, such as <c> added: </c>
+    ''' </param>
+    '''
+    ''' <param name="logIndent">
+    ''' Leading spaces matching the logged header of the entry's block
+    ''' </param>
+    '''
     ''' <param name="sourceEntryMap">
     ''' Map of key value → its source entries as <see cref="CreditSources"/> formats them, used
     ''' to attribute old keys to their origin entries in merger output <br /><br />
@@ -761,17 +769,21 @@ Public Class DiffOutputRenderer
     ''' </param>
     '''
     ''' <returns>
-    ''' <c> MenuSection </c>s describing each key update
-    ''' (one header section plus one detail section per updated key),
-    ''' or an empty list if <paramref name="updatedKeysDict"/> is empty
+    ''' <c> MenuSection </c>s describing each key update (the heading, a summary section and
+    ''' one detail section per updated key), or an empty list if
+    ''' <paramref name="updatedKeysDict"/> is empty
     ''' </returns>
     Public Function ItemizeUpdatedKeys(updatedKeysDict As Dictionary(Of iniKey, List(Of iniKey)),
                                        modKeyTypes As Dictionary(Of String, Integer),
+                                       heading As String,
+                                       logIndent As String,
                               Optional sourceEntryMap As Dictionary(Of String, String) = Nothing) As List(Of MenuSection)
 
         Dim result As New List(Of MenuSection)
 
         If updatedKeysDict.Count = 0 Then Return result
+
+        result.Add(ListHeading($"{Plural(updatedKeysDict.Count, "key")} {heading}", ConsoleColor.Yellow, logIndent))
 
         For Each kvp In updatedKeysDict
 
@@ -838,42 +850,38 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Itemizes the names of any removed entries that were merged into <paramref name="entry"/>
+    ''' Lists the removed entries merged into <paramref name="entry"/>, for the line under the
+    ''' header of its merger block
     ''' </summary>
     '''
     ''' <param name="entry">
     ''' The name of the target entry that received merged content
     ''' </param>
-    ''' 
-    ''' <param name="isMerger">
-    ''' When <c> True </c>, the section label describes changes measured against old entries;
-    ''' when <c> False </c>, it names the removed entries whose content was merged in
+    '''
+    ''' <param name="logIndent">
+    ''' Leading spaces matching the logged header above the list
     ''' </param>
     '''
     ''' <returns>
-    ''' A <c> MenuSection </c> listing the source entry names,
-    ''' or an empty section if <paramref name="entry"/> has no merge sources
+    ''' A <c> MenuSection </c> with the heading and the source entry names
     ''' </returns>
-    Public Function ItemizeMergedEntries(entry As String, isMerger As Boolean) As MenuSection
+    Private Function ItemizeMergeSources(entry As String, logIndent As String) As MenuSection
+
+        Dim sources = _state.MergedEntries.MergeDict(entry)
+        Dim heading = $"This entry contains content originating from {Plural(sources.Count, "removed entry", "removed entries")}:"
 
         Dim out As New MenuSection
-        If Not _state.MergedEntries.MergeDict.ContainsKey(entry) Then Return out
+        out.AddColoredLine(heading, ConsoleColor.Yellow, centered:=True)
+        gLog($"{logIndent}{heading}")
 
-        Dim outTxt = If(Not isMerger, "This entry contains keys merged from the following removed entries",
-                                   "The above changes are measured against the following removed/old entries")
+        For Each source In sources
 
-        out.AddBlank()
-        out.AddColoredLine(outTxt, ConsoleColor.Yellow, centered:=True)
-        gLog()
-        gLog($"  {outTxt}")
-
-        For Each mergedEntry In _state.MergedEntries.MergeDict(entry)
-
-            out.AddColoredLine(mergedEntry, ConsoleColor.DarkCyan, centered:=True)
-            gLog($"  {mergedEntry}")
+            out.AddColoredLine(source, ConsoleColor.DarkCyan, centered:=True)
+            gLog($"{logIndent}  - {source}")
 
         Next
-        Return out
+
+        Return out.AddBlank()
 
     End Function
 
@@ -934,10 +942,10 @@ Public Class DiffOutputRenderer
                 Dim addKeyTypes, remKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
 
                 results.Add(MakeDiff(_file1.GetSection(oldName), 3, _file2.GetSection(newName)))
-                results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, Nothing))
-                results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, Nothing))
-                results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, modKeyTypes))
-                results.AddRange(ItemizeMovedKeys(newName, includeMovedIn:=True))
+                results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, "added:", ConsoleColor.Green, "  "))
+                results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, "removed:", ConsoleColor.Red, "  "))
+                results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, modKeyTypes, "modified:", "  "))
+                results.AddRange(ItemizeMovedKeys(newName, includeMovedIn:=True, logIndent:="  "))
 
             Next
 
@@ -1095,8 +1103,9 @@ Public Class DiffOutputRenderer
             For Each sourceEntry In movementsBySource.OrderBy(Function(kvp) kvp.Key, StringComparer.OrdinalIgnoreCase)
 
                 Dim out As New MenuSection
-                out.AddColoredLine($"{sourceEntry.Key}", ConsoleColor.Cyan, centered:=True)
-                gLog($"{sourceEntry.Key}", leadr:=True)
+                Dim heading = $"{sourceEntry.Key} moved {Plural(sourceEntry.Value.Count, "key")}:"
+                out.AddColoredLine(heading, ConsoleColor.Cyan, centered:=True)
+                gLog(heading, leadr:=True)
 
                 For Each movement In sourceEntry.Value
 
@@ -1156,9 +1165,6 @@ Public Class DiffOutputRenderer
 
             For Each entry In qualifying
 
-                Dim section = _file2.GetSection(entry)
-                Dim mergedCount = _state.MergedEntries.MergeDict(entry).Count
-
                 Dim combined = BuildCombinedOldKeys(_state.MergedEntries.MergeDict(entry), entry)
                 Dim sourceEntryMap = combined.SourceEntryMap
 
@@ -1166,25 +1172,13 @@ Public Class DiffOutputRenderer
                 StripKeysKeptElsewhere(entry)
 
                 Dim headerSection As New MenuSection
-                Dim headerText = $"{entry} has been added (consolidating {mergedCount} removed entr{If(mergedCount = 1, "y", "ies")})"
+                Dim headerText = $"{entry} has been added"
 
                 headerSection.AddColoredLine(headerText, ConsoleColor.Green, centered:=True)
                 gLog(headerText, leadr:=True)
                 results.Add(headerSection)
 
-                Dim mergedListSection As New MenuSection
-                mergedListSection.AddColoredLine("Merged from:", ConsoleColor.Yellow, centered:=True)
-                gLog("Merged from:")
-
-                For Each mergedEntry In _state.MergedEntries.MergeDict(entry)
-
-                    mergedListSection.AddColoredLine($"{mergedEntry}", ConsoleColor.DarkCyan, centered:=True)
-                    gLog($"  • {mergedEntry}")
-
-                Next
-
-                mergedListSection.AddBlank()
-                results.Add(mergedListSection)
+                results.Add(ItemizeMergeSources(entry, ""))
 
                 Dim entryChanges = GetKeyChanges(entry)
                 Dim addedKeys = entryChanges.AddedKeys
@@ -1236,43 +1230,10 @@ Public Class DiffOutputRenderer
                     Dim carriedKeys = addedKeys.Where(Function(key) mergedValues.Contains(key.Value)).ToList()
                     Dim newKeys = addedKeys.Where(Function(key) Not mergedValues.Contains(key.Value)).ToList()
 
-                    If newKeys.Count > 0 Then
-
-                        Dim newKeysSection As New MenuSection
-                        Dim newKeysMsg = $"{Plural(newKeys.Count, "key")} added:"
-                        newKeysSection.AddColoredLine(newKeysMsg, ConsoleColor.Green, centered:=True)
-                        gLog()
-                        gLog(newKeysMsg)
-                        results.Add(newKeysSection)
-                        results.AddRange(ItemizeChangesFromList(newKeys, True, addKeyTypes, sourceEntryMap))
-
-                    End If
-
-                    If carriedKeys.Count > 0 Then
-
-                        Dim carriedSection As New MenuSection
-                        Dim carriedMsg = $"{Plural(carriedKeys.Count, "key")} carried over from merged entries:"
-                        carriedSection.AddColoredLine(carriedMsg, ConsoleColor.DarkGreen, centered:=True)
-                        gLog()
-                        gLog(carriedMsg)
-                        results.Add(carriedSection)
-                        results.AddRange(ItemizeChangesFromList(carriedKeys, True, carryKeyTypes, sourceEntryMap, "Carried over"))
-
-                    End If
-
-                    results.AddRange(ItemizeDroppedKeys(entry, removedKeys, remKeyTypes, sourceEntryMap))
-
-                    If updatedKeysDict.Count > 0 Then
-
-                        Dim capturedSection As New MenuSection
-                        Dim capturedMsg = $"{Plural(updatedKeysDict.Count, "key")} capturing content from merged entries"
-                        capturedSection.AddColoredLine(capturedMsg, ConsoleColor.Yellow, centered:=True)
-                        gLog()
-                        gLog(capturedMsg)
-                        results.Add(capturedSection)
-                        results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, modKeyTypes, sourceEntryMap))
-
-                    End If
+                    results.AddRange(ItemizeChangesFromList(newKeys, True, addKeyTypes, "added:", ConsoleColor.Green, "", sourceEntryMap))
+                    results.AddRange(ItemizeChangesFromList(carriedKeys, True, carryKeyTypes, "carried over from merged entries:", ConsoleColor.DarkGreen, "", sourceEntryMap, "Carried over"))
+                    results.AddRange(ItemizeDroppedKeys(entry, removedKeys, remKeyTypes, sourceEntryMap, ""))
+                    results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, modKeyTypes, "capturing content from merged entries:", "", sourceEntryMap))
 
                 End If
 
@@ -1425,8 +1386,8 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Builds and logs the itemized list of added or removed keys from an updated entry, headed
-    ''' by a per-type count summary
+    ''' Builds and logs the itemized list of added or removed keys from an updated entry, under
+    ''' a heading with their total and a per-type count summary
     ''' </summary>
     '''
     ''' <param name="kl">
@@ -1443,6 +1404,18 @@ Public Class DiffOutputRenderer
     ''' changed keys per key type for the modification summary
     ''' </param>
     '''
+    ''' <param name="heading">
+    ''' The heading over the list, after its key count, such as <c> added: </c>
+    ''' </param>
+    '''
+    ''' <param name="headingColor">
+    ''' The console color of the heading
+    ''' </param>
+    '''
+    ''' <param name="logIndent">
+    ''' Leading spaces matching the logged header of the entry's block
+    ''' </param>
+    '''
     ''' <param name="sourceEntryMap">
     ''' Map of key value → its source entries as <see cref="CreditSources"/> formats them, used
     ''' to annotate merger origin. When it is given,
@@ -1457,18 +1430,23 @@ Public Class DiffOutputRenderer
     ''' </param>
     '''
     ''' <returns>
-    ''' The summary section and the key list section, or an empty list if
-    ''' <paramref name="kl"/> is empty
+    ''' The heading, summary and key list sections, or an empty list if <paramref name="kl"/>
+    ''' is empty
     ''' </returns>
     Private Function ItemizeChangesFromList(kl As List(Of iniKey),
                                             wasAdded As Boolean,
                                             ktDict As Dictionary(Of String, Integer),
+                                            heading As String,
+                                            headingColor As ConsoleColor,
+                                            logIndent As String,
                                    Optional sourceEntryMap As Dictionary(Of String, String) = Nothing,
                                    Optional changeTxt As String = Nothing) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
 
         If kl.Count = 0 Then Return out
+
+        out.Add(ListHeading($"{Plural(kl.Count, "key")} {heading}", headingColor, logIndent))
 
         If changeTxt Is Nothing Then changeTxt = If(wasAdded, "Added", "Removed")
 
@@ -1532,6 +1510,10 @@ Public Class DiffOutputRenderer
     ''' Map of key value → its source entries as <see cref="CreditSources"/> formats them
     ''' </param>
     '''
+    ''' <param name="logIndent">
+    ''' Leading spaces matching the logged header of the entry's block
+    ''' </param>
+    '''
     ''' <returns>
     ''' The header section followed by the summary and key list sections, then the line naming
     ''' the other entries, each only when it has something to say
@@ -1539,19 +1521,12 @@ Public Class DiffOutputRenderer
     Private Function ItemizeDroppedKeys(entry As String,
                                         keys As List(Of iniKey),
                                         ktDict As Dictionary(Of String, Integer),
-                                        sourceEntryMap As Dictionary(Of String, String)) As List(Of MenuSection)
+                                        sourceEntryMap As Dictionary(Of String, String),
+                                        logIndent As String) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
 
-        If keys.Count > 0 Then
-
-            Dim header = $"{Plural(keys.Count, "key")} from merged entries not in this entry:"
-            out.Add(New MenuSection().AddColoredLine(header, ConsoleColor.DarkYellow, centered:=True))
-            gLog()
-            gLog(header)
-            out.AddRange(ItemizeChangesFromList(keys, False, ktDict, sourceEntryMap, "Dropped"))
-
-        End If
+        out.AddRange(ItemizeChangesFromList(keys, False, ktDict, "from merged entries not in this entry:", ConsoleColor.DarkYellow, logIndent, sourceEntryMap, "Dropped"))
 
         Dim elsewhere As KeptElsewhereInfo = Nothing
         If Not _keptElsewhere.TryGetValue(entry, elsewhere) Then Return out
@@ -1563,7 +1538,7 @@ Public Class DiffOutputRenderer
 
             Dim wentTo = $"{Plural(elsewhere.KeyCount, "other key")} from merged entries went to {CreditSources(elsewhere.Entries)}"
             notes.AddColoredLine(wentTo, ConsoleColor.DarkCyan, centered:=True)
-            gLog(wentTo)
+            gLog($"{logIndent}{wentTo}")
 
         End If
 
@@ -1571,7 +1546,7 @@ Public Class DiffOutputRenderer
 
             Dim listedUnder = $"{Plural(elsewhere.UnkeptCount, "other key")} that no entry kept {If(elsewhere.UnkeptCount = 1, "is", "are")} listed under {CreditSources(elsewhere.UnkeptSources)}"
             notes.AddColoredLine(listedUnder, ConsoleColor.DarkYellow, centered:=True)
-            gLog(listedUnder)
+            gLog($"{logIndent}{listedUnder}")
 
         End If
 
@@ -1724,11 +1699,9 @@ Public Class DiffOutputRenderer
         Dim keys = UnkeptKeys(source)
         If keys.Count = 0 Then Return out
 
-        Dim header = $"{Plural(keys.Count, "key")} not kept by any of these entries:"
-        out.Add(New MenuSection().AddBlank().AddColoredLine(header, ConsoleColor.DarkYellow, centered:=True))
-        gLog()
-        gLog(header)
-        out.AddRange(ItemizeChangesFromList(keys, False, New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase), changeTxt:="Lost"))
+        out.Add(New MenuSection().AddBlank())
+        out.AddRange(ItemizeChangesFromList(keys, False, New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase),
+                                            "not kept by any of these entries:", ConsoleColor.DarkYellow, "  ", changeTxt:="Lost"))
 
         Return out
 
@@ -1864,7 +1837,7 @@ Public Class DiffOutputRenderer
     ''' <summary>
     ''' Builds and logs the keys that moved out of <paramref name="entry"/>, each with the entry
     ''' it moved to, and optionally the keys that moved into it, each with the entries it came
-    ''' from. Each list is headed by a per-type count summary.
+    ''' from. Each list has a heading with its total and a per-type count summary.
     ''' </summary>
     '''
     ''' <param name="entry">
@@ -1876,11 +1849,15 @@ Public Class DiffOutputRenderer
     ''' block already lists them among its added keys, credited to their sources.
     ''' </param>
     '''
+    ''' <param name="logIndent">
+    ''' Leading spaces matching the logged header of the entry's block
+    ''' </param>
+    '''
     ''' <returns>
-    ''' A summary section and a key list section for each kind of move that happened, or an
-    ''' empty list if neither did
+    ''' A heading, a summary section and a key list section for each kind of move that
+    ''' happened, or an empty list if neither did
     ''' </returns>
-    Private Function ItemizeMovedKeys(entry As String, includeMovedIn As Boolean) As List(Of MenuSection)
+    Private Function ItemizeMovedKeys(entry As String, includeMovedIn As Boolean, logIndent As String) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
 
@@ -1896,29 +1873,65 @@ Public Class DiffOutputRenderer
                                                                            Distinct(StringComparer.OrdinalIgnoreCase).
                                                                            OrderBy(Function(name) name, StringComparer.OrdinalIgnoreCase).ToList())
 
-        Using gLogScope()
+        If movedOut.Count > 0 Then
 
-            If movedOut.Count > 0 Then
+            out.Add(ListHeading($"{Plural(movedOut.Count, "key")} moved to other entries:", ConsoleColor.DarkCyan, logIndent))
+
+            Using gLogScope()
 
                 Dim ktDict As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
                 movedOut.ForEach(Sub(m) recordModification(ktDict, m.MovedKey.KeyType))
                 out.Add(summarizeEntryUpdate(ktDict, "Moved"))
                 out.Add(ListMovedKeys(movedOut.Select(Function(m) $"{m.MovedKey} moved to [{m.TargetEntry}]")))
 
-            End If
+            End Using
 
-            If landed.Count > 0 Then
+        End If
+
+        If landed.Count > 0 Then
+
+            out.Add(ListHeading($"{Plural(landed.Count, "key")} moved in from other entries:", ConsoleColor.DarkCyan, logIndent))
+
+            Using gLogScope()
 
                 Dim ktDict As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
                 landed.ForEach(Sub(key) recordModification(ktDict, key.KeyType))
                 out.Add(summarizeEntryUpdate(ktDict, "Moved in"))
                 out.Add(ListMovedKeys(landed.Select(Function(key) $"{key} (from {credit(key)})")))
 
-            End If
+            End Using
 
-        End Using
+        End If
 
         Return out
+
+    End Function
+
+    ''' <summary>
+    ''' Builds and logs the heading over one of an entry's key lists
+    ''' </summary>
+    '''
+    ''' <param name="text">
+    ''' The heading, starting with the list's key count
+    ''' </param>
+    '''
+    ''' <param name="color">
+    ''' The console color of the heading
+    ''' </param>
+    '''
+    ''' <param name="logIndent">
+    ''' Leading spaces matching the logged header of the entry's block
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' A <c> MenuSection </c> holding the heading
+    ''' </returns>
+    Private Shared Function ListHeading(text As String, color As ConsoleColor, logIndent As String) As MenuSection
+
+        gLog()
+        gLog($"{logIndent}{text}")
+
+        Return New MenuSection().AddColoredLine(text, color, centered:=True)
 
     End Function
 
