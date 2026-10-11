@@ -166,8 +166,8 @@ Module Diff
 
     ''' <summary>
     ''' Diffs <paramref name="firstFile"/> against the remote winapp2.ini for the current flavor.
-    ''' We restore the download and trim settings afterward, but leave <c> DiffFile1 </c> pointing
-    ''' at <paramref name="firstFile"/>.
+    ''' The Diff settings are left alone: <paramref name="firstFile"/> stands in for
+    ''' <c> DiffFile1 </c> for this run only, and a file picked because it doesn't exist isn't saved.
     ''' </summary>
     '''
     ''' <param name="firstFile">The local file to use as the old version</param>
@@ -179,49 +179,72 @@ Module Diff
     Public Sub DiffRemoteFile(firstFile As iniFileChooser,
                      Optional trimFile As Boolean = False)
 
-        DiffFile1.Dir = firstFile.Dir
-        DiffFile1.Name = firstFile.Name
+        Dim oldFile = firstFile.Load()
+        If Not enforceFileHasContent(oldFile) Then Return
 
-        Dim initDDF = DownloadDiffFile
-        Dim initTrimRemote = TrimRemoteFile
+        Dim newFile = LoadRemoteFile(trimFile)
+        If Not enforceFileHasContent(newFile) Then Return
 
-        DownloadDiffFile = True
-        TrimRemoteFile = trimFile
-
-        ConductDiff()
-
-        DownloadDiffFile = initDDF
-        TrimRemoteFile = initTrimRemote
+        RunDiff(oldFile, newFile)
 
     End Sub
 
     ''' <summary>
-    ''' Loads both files, trimming the downloaded one when <c> TrimRemoteFile </c> is set, and
-    ''' returns early with a header message if either has no sections. Otherwise runs the diff,
-    ''' prints the output unless output is suppressed, saves the log when <c> SaveDiffLog </c> is
-    ''' set, writes the outcome summary, and sets the next menu header. The trim path downloads
-    ''' the remote file a second time.
+    ''' Diffs <c> DiffFile1 </c> against <c> DiffFile2 </c>, or against the remote winapp2.ini for
+    ''' the current flavor when <c> DownloadDiffFile </c> is set, trimmed for the current system
+    ''' when <c> TrimRemoteFile </c> is also set. Returns early with a header message if either
+    ''' file has no sections.
     ''' </summary>
     Public Sub ConductDiff()
 
-        Dim oldFile As iniFile
-        Dim newFile As iniFile
-
-        oldFile = DiffFile1.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))
+        Dim oldFile = DiffFile1.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile1), NameOf(DiffModuleSettingsChanged))
         If Not enforceFileHasContent(oldFile) Then Return
 
-        newFile = If(DownloadDiffFile, getRemoteIniFile(getWinappLink), DiffFile2.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged)))
+        Dim newFile = If(DownloadDiffFile, LoadRemoteFile(TrimRemoteFile), DiffFile2.Load(DiffModuleSettingsChanged, NameOf(Diff), NameOf(DiffFile2), NameOf(DiffModuleSettingsChanged)))
         If Not enforceFileHasContent(newFile) Then Return
 
-        If TrimRemoteFile AndAlso DownloadDiffFile Then
+        RunDiff(oldFile, newFile)
 
-            Dim tmp As New winapp2file(getRemoteIniFile(getWinappLink))
+    End Sub
 
-            Trim.trimFile(tmp)
-            newFile = tmp.ToIni()
-            If Not enforceFileHasContent(newFile) Then Return
+    ''' <summary>
+    ''' Downloads the remote winapp2.ini for the current flavor, trimmed for the current system
+    ''' when <paramref name="shouldTrim"/> is set
+    ''' </summary>
+    '''
+    ''' <param name="shouldTrim">
+    ''' Indicates whether to trim the downloaded file
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The file, or <c> Nothing </c> if the download failed
+    ''' </returns>
+    Private Function LoadRemoteFile(shouldTrim As Boolean) As iniFile
 
-        End If
+        Dim remoteFile = getRemoteIniFile(getWinappLink)
+        If Not shouldTrim OrElse remoteFile Is Nothing Then Return remoteFile
+
+        Dim trimmed As New winapp2file(remoteFile)
+        Trim.trimFile(trimmed)
+
+        Return trimmed.ToIni()
+
+    End Function
+
+    ''' <summary>
+    ''' Diffs <paramref name="oldFile"/> against <paramref name="newFile"/>, prints the output
+    ''' unless output is suppressed, saves the log when <c> SaveDiffLog </c> is set, writes the
+    ''' outcome summary, and sets the next menu header
+    ''' </summary>
+    '''
+    ''' <param name="oldFile">
+    ''' The old version of winapp2.ini
+    ''' </param>
+    '''
+    ''' <param name="newFile">
+    ''' The new version of winapp2.ini
+    ''' </param>
+    Private Sub RunDiff(oldFile As iniFile, newFile As iniFile)
 
         clrConsole()
 

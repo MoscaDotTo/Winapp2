@@ -31,14 +31,14 @@ Public Module diffsettings
     ''' The "old" version of winapp2.ini, against which <c> DiffFile2 </c> will be compared 
     ''' <br /> When downloading, this is the local version of winapp2.ini
     ''' </summary>
-    Public Property DiffFile1 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2.ini", mustExist:=True)
+    Public Property DiffFile1 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2-old.ini", mustExist:=True)
 
     ''' <summary>
     ''' The "new" version of winapp2.ini against which <c> DiffFile1 </c> will be compared
     ''' <br /> When downloading, Diff doesn't read this file and compares against the remote
     ''' winapp2.ini for the current flavor instead
     ''' </summary>
-    Public Property DiffFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", mustExist:=True)
+    Public Property DiffFile2 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "", "winapp2.ini", mustExist:=True)
 
     ''' <summary>
     ''' The path for the Diff log, written only when <c> SaveDiffLog </c> is set
