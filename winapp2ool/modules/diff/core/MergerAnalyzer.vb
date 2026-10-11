@@ -116,8 +116,8 @@ Public Class MergerAnalyzer
     ''' away as removed again, so we take those back out. For an added target, we then add the
     ''' keys carried over unchanged from a source to its added-key tracker list, creating it if
     ''' needed, which <see cref="DiffStatisticsCalculator.CalculateAddedWithMergersStatistics"/>
-    ''' relies on. Run it after <see cref="DiffStatisticsCalculator.CalculateInitialStatistics"/>,
-    ''' so those statistics still describe the plain old-to-new comparison.
+    ''' relies on. Run it after <see cref="DiffStatisticsCalculator.DetectCrossEntryMovements"/> and
+    ''' before <see cref="ModifiedEntryBlock.BuildAll"/>, which reads the re-diffs' results.
     ''' </summary>
     Public Sub Analyze()
 

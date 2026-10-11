@@ -701,10 +701,11 @@ Public Class DiffOutputRenderer
             If isMerger AndAlso Not _state.MergedEntries.MergedEntryNames.Contains(entry) Then Continue For
             If _state.MergedEntries.RenamedEntryNames.Contains(entry) Then Continue For
 
-            Dim changes = GetKeyChanges(entry)
-            Dim hasKeyChanges = changes.RemovedKeys.Count + changes.AddedKeys.Count + changes.UpdatedKeysDict.Count > 0
-            Dim hasKeysElsewhere = isMerger AndAlso _mergers.KeptElsewhere(entry) IsNot Nothing
-            If Not hasKeyChanges AndAlso Not hasKeysElsewhere AndAlso Not HasMoves(entry, includeMovedIn:=Not isMerger) Then Continue For
+            ' A merger block always prints, since its source list is news even when the entry
+            ' took in nothing it didn't already have
+            Dim block = _state.ModifiedBlocks(entry)
+            Dim hasKeyChanges = block.Added.Count + block.Removed.Count + block.Dropped.Count + block.Updated.Count > 0
+            If Not isMerger AndAlso Not hasKeyChanges AndAlso Not HasMoves(entry, includeMovedIn:=True) Then Continue For
 
             qualifying.Add(entry)
 
@@ -718,25 +719,16 @@ Public Class DiffOutputRenderer
 
                                   Dim addKeyTypes, remKeyTypes, dropKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
                                   Dim newSectionVer = _file2.GetSection(entry)
-                                  Dim changes = GetKeyChanges(entry)
+                                  Dim block = _state.ModifiedBlocks(entry)
                                   Dim sourceMap As Dictionary(Of String, String) = Nothing
                                   If isMerger Then sourceMap = _mergers.SourceMap(entry)
 
-                                  ' In a merger block, a removed key the entry never had came from a merged source that didn't survive
-                                  Dim ownOldKeys = _file1.GetSection(entry).Keys
-                                  Dim wasOwnKey = Function(key As iniKey) Not isMerger OrElse
-                                                                         ownOldKeys.Any(Function(own) String.Equals(own.KeyType, key.KeyType, StringComparison.OrdinalIgnoreCase) AndAlso
-                                                                                                      String.Equals(own.Value, key.Value, StringComparison.OrdinalIgnoreCase))
-
-                                  Dim ownRemoved = changes.RemovedKeys.Where(wasOwnKey).ToList()
-                                  Dim dropped = changes.RemovedKeys.Where(Function(key) Not wasOwnKey(key)).ToList()
-
                                   results.Add(MakeDiff(newSectionVer, 2))
                                   If isMerger Then results.Add(ItemizeMergeSources(entry, "  "))
-                                  results.AddRange(ItemizeChangesFromList(changes.AddedKeys, True, addKeyTypes, "added:", ConsoleColor.Green, "  ", sourceMap))
-                                  results.AddRange(ItemizeChangesFromList(ownRemoved, False, remKeyTypes, "removed:", ConsoleColor.Red, "  ", sourceMap))
-                                  results.AddRange(ItemizeDroppedKeys(entry, dropped, dropKeyTypes, sourceMap, "  "))
-                                  results.AddRange(ItemizeUpdatedKeys(changes.UpdatedKeysDict, modKeyTypes, "modified:", "  ", sourceMap))
+                                  results.AddRange(ItemizeChangesFromList(block.Added, True, addKeyTypes, "added:", ConsoleColor.Green, "  ", sourceMap))
+                                  results.AddRange(ItemizeChangesFromList(block.Removed, False, remKeyTypes, "removed:", ConsoleColor.Red, "  ", sourceMap))
+                                  results.AddRange(ItemizeDroppedKeys(entry, block.Dropped, dropKeyTypes, sourceMap, "  "))
+                                  results.AddRange(ItemizeUpdatedKeys(block.Updated, modKeyTypes, "modified:", "  ", sourceMap))
                                   results.AddRange(ItemizeMovedKeys(entry, includeMovedIn:=Not isMerger, logIndent:="  "))
 
                               Next

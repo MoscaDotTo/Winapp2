@@ -67,7 +67,8 @@ Public Class KeyModificationAnalyzer
     ''' Variant of <see cref="FindModifications"/> that accepts a flat key list instead of an
     ''' <c> iniSection </c> for the old side, for keys combined from several old entries. A list
     ''' keeps keys that share a name across source entries (e.g. two FileKey1 values), which an
-    ''' <c> iniKeyCollection </c> would deduplicate. Records no <c> Name </c> change.
+    ''' <c> iniKeyCollection </c> would deduplicate. The result replaces any earlier one for the
+    ''' entry, even when the keys turn out equivalent. Records no <c> Name </c> change.
     ''' </summary>
     '''
     ''' <param name="oldKeys">
@@ -86,8 +87,8 @@ Public Class KeyModificationAnalyzer
 
     ''' <summary>
     ''' Records the key-level changes between keys combined from one or more removed entries and
-    ''' an added entry. When the keys differ, we first discard any earlier results for the added
-    ''' entry. Doesn't add to <c> ModifiedEntryNames </c> or record a <c> Name </c> change.
+    ''' an added entry, discarding any earlier results for it. Doesn't add to
+    ''' <c> ModifiedEntryNames </c> or record a <c> Name </c> change.
     ''' </summary>
     '''
     ''' <param name="oldKeys">
@@ -108,8 +109,10 @@ Public Class KeyModificationAnalyzer
     ''' Core implementation for flat-key-list comparisons.
     ''' Computes added, removed, and updated keys,
     ''' then writes them to the <c> DiffState </c> trackers
-    ''' under <paramref name="newSection"/>'s name. Returns without writing anything
-    ''' when the key lists are equivalent.
+    ''' under <paramref name="newSection"/>'s name. When the key lists are equivalent we only
+    ''' clear the entry's key trackers: this comparison replaces any earlier one, so a record
+    ''' left from comparing the entry against its own old keys would be stale. The entry's
+    ''' place in <c> ModifiedEntryNames </c> is left alone.
     ''' </summary>
     ''' 
     ''' <param name="oldKeys">
@@ -137,7 +140,14 @@ Public Class KeyModificationAnalyzer
 
         Dim addedKeys, removedKeys As New List(Of iniKey)
 
-        If CompareKeyLists(oldKeys, newSection.Keys, removedKeys, addedKeys) Then Return
+        If CompareKeyLists(oldKeys, newSection.Keys, removedKeys, addedKeys) Then
+
+            _state.ModifiedEntries.AddedKeyTracker.Remove(newSection.Name)
+            _state.ModifiedEntries.RemovedKeyTracker.Remove(newSection.Name)
+            _state.ModifiedEntries.ModifiedKeyTracker.Remove(newSection.Name)
+            Return
+
+        End If
 
         WriteResultsToTrackers(newSection.Name, Nothing, addedKeys, removedKeys, addToModified, clearExisting)
 

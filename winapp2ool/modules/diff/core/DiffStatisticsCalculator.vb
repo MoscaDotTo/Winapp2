@@ -119,44 +119,35 @@ Public Class DiffStatisticsCalculator
     End Sub
 
     ''' <summary>
-    ''' Adds up the added, removed and updated key counts of modified entries from the raw
-    ''' trackers. We count only names in <c> ModifiedEntryNames </c>, because the trackers also
-    ''' hold results for rename and merge targets. Run it after <see cref="DetectCrossEntryMovements"/>,
-    ''' so that moved keys are no longer in the trackers.
+    ''' Adds up the added, removed and updated key counts of modified entries from the lists their
+    ''' blocks print (<c> ModifiedBlocks </c>), so the summary agrees with the blocks. An entry
+    ''' with merged content counts its merger block's lists. Added keys that moved in from another
+    ''' entry aren't counted as added, since the moved lines count them, and keys only a merged
+    ''' source had aren't counted as removed.
     ''' </summary>
-    Public Sub CalculateInitialStatistics()
+    Public Sub CalculateModifiedStatistics()
 
-        For Each kvp In _state.ModifiedEntries.AddedKeyTracker
+        For Each block In _state.ModifiedBlocks.Values
 
-            If Not _state.ModifiedEntries.ModifiedEntryNames.Contains(kvp.Key) Then Continue For
-            _state.Statistics.ModEntriesAddedKeyTotal += kvp.Value.Count
-            _state.Statistics.ModEntriesAddedKeyEntryCount += 1
+            If block.Novel.Count > 0 Then
 
-        Next
+                _state.Statistics.ModEntriesAddedKeyTotal += block.Novel.Count
+                _state.Statistics.ModEntriesAddedKeyEntryCount += 1
 
-        For Each kvp In _state.ModifiedEntries.RemovedKeyTracker
+            End If
 
-            If Not _state.ModifiedEntries.ModifiedEntryNames.Contains(kvp.Key) Then Continue For
-            _state.Statistics.ModEntriesRemovedKeysWithoutReplacementTotal += kvp.Value.Count
-            _state.Statistics.ModEntriesRemovedKeyEntryCount += 1
+            If block.Removed.Count > 0 Then
 
-        Next
+                _state.Statistics.ModEntriesRemovedKeysWithoutReplacementTotal += block.Removed.Count
+                _state.Statistics.ModEntriesRemovedKeyEntryCount += 1
 
-        ' ModEntriesUpdatedKeyTotal = number of new keys that replaced old keys
-        ' ModEntriesReplacedByUpdateTotal = number of old keys that were replaced
-        ' ModEntriesUpdatedKeyEntryCount = number of entries with key updates
-        For Each kvp In _state.ModifiedEntries.ModifiedKeyTracker
+            End If
 
-            If Not _state.ModifiedEntries.ModifiedEntryNames.Contains(kvp.Key) Then Continue For
+            If block.Updated.Count = 0 Then Continue For
 
             _state.Statistics.ModEntriesUpdatedKeyEntryCount += 1
-            _state.Statistics.ModEntriesUpdatedKeyTotal += kvp.Value.Count
-
-            For Each updateKvp In kvp.Value
-
-                _state.Statistics.ModEntriesReplacedByUpdateTotal += updateKvp.Value.Count
-
-            Next
+            _state.Statistics.ModEntriesUpdatedKeyTotal += block.Updated.Count
+            _state.Statistics.ModEntriesReplacedByUpdateTotal += block.Updated.Values.Sum(Function(oldKeys) oldKeys.Count)
 
         Next
 
@@ -237,8 +228,8 @@ Public Class DiffStatisticsCalculator
     ''' another entry, preferring one with the same value, then one that captures it or that it
     ''' captures, taking entries in name order (ignoring case). Detection keys move only to the
     ''' same value. Several removed keys can move into one key that covers them all. Run it after
-    ''' all parallel processing completes and before <see cref="CalculateInitialStatistics"/>,
-    ''' which then counts only the keys that didn't move.
+    ''' all parallel processing completes and before <see cref="MergerAnalyzer.Analyze"/>, which
+    ''' credits the moves in its merger blocks.
     ''' </summary>
     Public Sub DetectCrossEntryMovements()
 

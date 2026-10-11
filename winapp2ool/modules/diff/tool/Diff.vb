@@ -338,7 +338,7 @@ Module Diff
         detector.SnuffNoisyChanges(newFile)
 
         Dim stepNum = 0
-        Const totalSteps = 22
+        Const totalSteps = 23
 
         Dim doStep = Sub(label As String, action As Action)
                          stepNum += 1
@@ -365,10 +365,11 @@ Module Diff
         doStep("· detecting browser changes ", Sub() statsCalc.DetectNewBrowserSupport())
         doStep("· matching removed entries       ", Sub() detector.ProcessRemovals())
         doStep("· tracking keys across entries   ", Sub() statsCalc.DetectCrossEntryMovements())
-        doStep("· calculating initial statistics ", Sub() statsCalc.CalculateInitialStatistics())
-        doStep("· calculating rename statistics  ", Sub() statsCalc.CalculateRenameStatistics())
         doStep("· diffing merged entries        ", Sub() mergers.Analyze())
-        doStep("· calculating final statistics  ", Sub() statsCalc.CalculateAddedWithMergersStatistics())
+        doStep("· collecting modified entries   ", Sub() ModifiedEntryBlock.BuildAll(state, oldFile))
+        doStep("· calculating modified statistics", Sub() statsCalc.CalculateModifiedStatistics())
+        doStep("· calculating rename statistics  ", Sub() statsCalc.CalculateRenameStatistics())
+        doStep("· calculating merger statistics ", Sub() statsCalc.CalculateAddedWithMergersStatistics())
 
         collectStep("· itemizing new browsers    ", Function() renderer.ItemizeNewBrowsers())
         collectStep("· itemizing removed browsers", Function() renderer.ItemizeRemovedBrowsers())

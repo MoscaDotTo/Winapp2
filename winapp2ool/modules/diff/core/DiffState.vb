@@ -51,6 +51,12 @@ Public Class DiffState
     Public Property KeyMovements As New KeyMovementTracker()
 
     ''' <summary>
+    ''' The key lists each modified entry's block prints, by entry name. Empty until the analysis
+    ''' is complete (<see cref="ModifiedEntryBlock.BuildAll"/>).
+    ''' </summary>
+    Public Property ModifiedBlocks As New Dictionary(Of String, ModifiedEntryBlock)(StringComparer.OrdinalIgnoreCase)
+
+    ''' <summary>
     ''' Clears every tracker and cache and resets the counters. <see cref="DiffStatistics.Reset"/>
     ''' leaves some counters alone.
     ''' </summary>
@@ -61,6 +67,7 @@ Public Class DiffState
         Statistics.Reset()
         Caches.Clear()
         KeyMovements.Clear()
+        ModifiedBlocks.Clear()
 
     End Sub
 

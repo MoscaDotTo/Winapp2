@@ -671,4 +671,104 @@ Public Class DiffPipelineTests
 
     End Sub
 
+    ''' <summary>
+    ''' Builds the old and new text of a removed entry merged into a modified one
+    ''' </summary>
+    '''
+    ''' <param name="withNovelKey">
+    ''' Indicates whether the merge target also gains a key no source had
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The old text, then the new text
+    ''' </returns>
+    Private Shared Function MergeIntoModifiedTexts(withNovelKey As Boolean) As Tuple(Of String, String)
+
+        Dim oldText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf & vbCrLf &
+            "[Alpha Tool Cache *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%LocalAppData%\Alpha\Cache|*|RECURSE" & vbCrLf
+
+        Dim newText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf &
+            If(withNovelKey, "FileKey2=%AppData%\Alpha\Temp|*.tmp" & vbCrLf, "") &
+            $"FileKey{If(withNovelKey, 3, 2)}=%LocalAppData%\Alpha\Cache|*|RECURSE" & vbCrLf
+
+        Return Tuple.Create(oldText, newText)
+
+    End Function
+
+    ''' <summary>
+    ''' A modified entry that took in a removed entry's key and gained one of its own: the summary
+    ''' counts the one key its merger block lists as added, not the merged key as well
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoModifiedEntry_SummaryCountsWhatTheBlockLists()
+
+        Dim texts = MergeIntoModifiedTexts(withNovelKey:=True)
+        Dim output = RunDiff(texts.Item1, texts.Item2)
+
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MergedEntries)
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.AddedKeys)
+        StringAssert.Contains(output, "1 key added:")
+        StringAssert.Contains(output, "FileKey2=%AppData%\Alpha\Temp|*.tmp (novel)")
+        StringAssert.Contains(output, "+ 1 added key across 1 entry")
+        Assert.IsFalse(output.Contains("2 added keys"), output)
+
+    End Sub
+
+    ''' <summary>
+    ''' A modified entry whose only change is taking in a removed entry's key lists no added key,
+    ''' as when it also gains a key of its own, but still gets its block with the source list
+    ''' </summary>
+    <TestMethod>
+    Public Sub PureMergerIntoModifiedEntry_ListsNoMergedKeyAsAdded()
+
+        Dim texts = MergeIntoModifiedTexts(withNovelKey:=False)
+        Dim output = RunDiff(texts.Item1, texts.Item2)
+
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MergedEntries)
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.ModifiedEntries)
+        Assert.AreEqual(0, Diff.MostRecentDiffOutcome.AddedKeys)
+        StringAssert.Contains(output, "Alpha Tool * has been modified")
+        StringAssert.Contains(output, "1 removed entry:")
+        Assert.IsFalse(output.Contains("Added 1 FileKey"), output)
+        Assert.IsFalse(output.Contains("(from [Alpha Tool Cache *])"), output)
+
+    End Sub
+
+    ''' <summary>
+    ''' The summary's modified added and removed key totals equal the sums of the modified
+    ''' blocks' list headings, for a plain modified entry and a merger block together. That holds
+    ''' only while no key moves into a merger target: its block lists a moved-in key as added,
+    ''' and the summary counts it on the moved line instead.
+    ''' </summary>
+    <TestMethod>
+    Public Sub ModifiedTotals_EqualTheBlocksHeadings()
+
+        Dim texts = MergeIntoModifiedTexts(withNovelKey:=True)
+
+        Dim oldText = texts.Item1 & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Delta\Old|*.old" & vbCrLf
+
+        Dim newText = texts.Item2 & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Delta\Logs|*.log" & vbCrLf &
+            "Warning=Closes Delta first" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Dim sumHeadings = Function(listName As String) RegularExpressions.Regex.Matches(output, $"(\d+) keys? {listName}:").
+                                                           Cast(Of RegularExpressions.Match)().
+                                                           Sum(Function(m) Integer.Parse(m.Groups(1).Value, Globalization.CultureInfo.InvariantCulture))
+
+        Assert.AreEqual(3, Diff.MostRecentDiffOutcome.AddedKeys, output)
+        Assert.AreEqual(sumHeadings("added"), Diff.MostRecentDiffOutcome.AddedKeys, output)
+        Assert.AreEqual(sumHeadings("removed"), Diff.MostRecentDiffOutcome.RemovedKeys, output)
+
+    End Sub
+
 End Class
