@@ -853,4 +853,100 @@ Public Class DiffPipelineTests
 
     End Sub
 
+    ''' <summary>
+    ''' Alpha Tool's new cache key covers both its merged source's key and the key Delta gave
+    ''' up. The re-diff pairs it with the source's key as an update, credited only to the source,
+    ''' so the block lists it again as moved in from Delta. The summary counts each old key once.
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoModifiedEntry_ListsMovedInKeyPairedAsAnUpdate()
+
+        Dim oldText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf & vbCrLf &
+            "[Alpha Tool Cache *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%LocalAppData%\Alpha\Cache|*.tmp" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%LocalAppData%\Alpha\Cache|*.bak" & vbCrLf
+
+        Dim newText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf & "FileKey2=%LocalAppData%\Alpha\Cache|*" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Dim block = output.IndexOf("Alpha Tool * has been modified", StringComparison.Ordinal)
+        Dim update = output.IndexOf("- Old: FileKey1=%LocalAppData%\Alpha\Cache|*.tmp (from [Alpha Tool Cache *])", StringComparison.Ordinal)
+        Dim movedIn = output.IndexOf("1 key moved in from other entries:", StringComparison.Ordinal)
+        Dim movedKey = output.IndexOf("FileKey2=%LocalAppData%\Alpha\Cache|* (from [Delta *])", StringComparison.Ordinal)
+
+        Assert.IsTrue(block >= 0 AndAlso update > block AndAlso movedIn > update AndAlso movedKey > movedIn, output)
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.UpdatedKeys, output)
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MovedKeys, output)
+
+    End Sub
+
+    ''' <summary>
+    ''' Gamma's new Bar key captures Beta's merged key and the key Delta gave up. The block lists
+    ''' it as capturing Beta's key, then as moved in from Delta.
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoAddedEntry_ListsMovedInKeyPairedAsACapture()
+
+        Dim oldText =
+            "[Alpha *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Foo" & vbCrLf &
+            "FileKey1=%AppData%\Foo|*.log" & vbCrLf & vbCrLf &
+            "[Beta *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%AppData%\Bar" & vbCrLf &
+            "FileKey1=%AppData%\Bar|*.log" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%AppData%\Bar|*.bak" & vbCrLf
+
+        Dim newText =
+            "[Delta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & vbCrLf &
+            "[Gamma *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile1=%AppData%\Bar" & vbCrLf &
+            "DetectFile2=%AppData%\Foo" & vbCrLf & "FileKey1=%AppData%\Bar|*" & vbCrLf &
+            "FileKey2=%AppData%\Foo|*.log" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Dim capture = output.IndexOf("- Old: FileKey1=%AppData%\Bar|*.log (from [Beta *])", StringComparison.Ordinal)
+        Dim movedIn = output.IndexOf("1 key moved in from other entries:", StringComparison.Ordinal)
+        Dim movedKey = output.IndexOf("FileKey1=%AppData%\Bar|* (from [Delta *])", StringComparison.Ordinal)
+
+        Assert.IsTrue(capture >= 0 AndAlso movedIn > capture AndAlso movedKey > movedIn, output)
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.MovedKeys, output)
+
+    End Sub
+
+    ''' <summary>
+    ''' A key Alpha Tool carried over from its merged source that Delta also gave up is credited
+    ''' to both on its carried-over line, so the block has no moved-in list
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoModifiedEntry_CarriedOverMovedInKeyIsListedOnce()
+
+        Dim oldText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf & vbCrLf &
+            "[Alpha Tool Cache *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%LocalAppData%\Alpha\Cache|*|RECURSE" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf & "FileKey2=%LocalAppData%\Alpha\Cache|*|RECURSE" & vbCrLf
+
+        Dim newText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf & "FileKey2=%LocalAppData%\Alpha\Cache|*|RECURSE" & vbCrLf & vbCrLf &
+            "[Delta *]" & vbCrLf & "LangSecRef=3022" & vbCrLf & "DetectFile=%AppData%\Delta" & vbCrLf &
+            "FileKey1=%AppData%\Delta|*.dat" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        StringAssert.Contains(output, "FileKey2=%LocalAppData%\Alpha\Cache|*|RECURSE (from [Alpha Tool Cache *], [Delta *])")
+        Assert.IsFalse(output.Contains("moved in from other entries"), output)
+
+    End Sub
+
 End Class

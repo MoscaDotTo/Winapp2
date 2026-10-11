@@ -733,7 +733,7 @@ Public Class DiffOutputRenderer
                                   results.AddRange(ItemizeChangesFromList(block.Removed, False, remKeyTypes, "removed:", ConsoleColor.Red, "  ", sourceMap))
                                   results.AddRange(ItemizeDroppedKeys(entry, block.Dropped, dropKeyTypes, sourceMap, "  "))
                                   results.AddRange(ItemizeUpdatedKeys(block.Updated, modKeyTypes, "modified:", "  ", sourceMap))
-                                  results.AddRange(ItemizeMovedKeys(entry, includeMovedIn:=Not isMerger, logIndent:="  "))
+                                  results.AddRange(ItemizeMovedKeys(entry, If(isMerger, block.Added.Concat(block.CarriedOver), Enumerable.Empty(Of iniKey)), logIndent:="  "))
 
                               Next
 
@@ -965,7 +965,7 @@ Public Class DiffOutputRenderer
                 results.AddRange(ItemizeChangesFromList(addedKeys, True, addKeyTypes, "added:", ConsoleColor.Green, "  "))
                 results.AddRange(ItemizeChangesFromList(removedKeys, False, remKeyTypes, "removed:", ConsoleColor.Red, "  "))
                 results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, modKeyTypes, "modified:", "  "))
-                results.AddRange(ItemizeMovedKeys(newName, includeMovedIn:=True, logIndent:="  "))
+                results.AddRange(ItemizeMovedKeys(newName, Enumerable.Empty(Of iniKey), logIndent:="  "))
 
             Next
 
@@ -1218,6 +1218,8 @@ Public Class DiffOutputRenderer
                     results.AddRange(ItemizeUpdatedKeys(updatedKeysDict, modKeyTypes, "capturing content from merged entries:", "", sourceEntryMap))
 
                 End If
+
+                results.AddRange(ItemizeMovedKeys(entry, addedKeys, logIndent:=""))
 
                 results.Add(New MenuSection().AddBlank)
 
@@ -1585,17 +1587,19 @@ Public Class DiffOutputRenderer
 
     ''' <summary>
     ''' Builds and logs the keys that moved out of <paramref name="entry"/>, each with the entry
-    ''' it moved to, and optionally the keys that moved into it, each with the entries it came
-    ''' from. Each list has a heading with its total and a per-type count summary.
+    ''' it moved to, and the keys that moved into it, each with the entries it came from. Each
+    ''' list has a heading with its total and a per-type count summary.
     ''' </summary>
     '''
     ''' <param name="entry">
     ''' The entry whose moves to itemize
     ''' </param>
     '''
-    ''' <param name="includeMovedIn">
-    ''' Indicates whether to itemize the keys that moved into <paramref name="entry"/>. A merger
-    ''' block already lists them among its added keys, credited to their sources.
+    ''' <param name="creditedElsewhere">
+    ''' Keys of <paramref name="entry"/> another list in its block already shows credited to the
+    ''' entries they moved in from, which the moved-in list leaves out. A merger block passes its
+    ''' added and carried-over keys. A moved-in key its re-diff paired with a source key as an
+    ''' update is credited there only to that source, so the moved-in list still shows it.
     ''' </param>
     '''
     ''' <param name="logIndent">
@@ -1606,18 +1610,20 @@ Public Class DiffOutputRenderer
     ''' A heading, a summary section and a key list section for each kind of move that
     ''' happened, or an empty list if neither did
     ''' </returns>
-    Private Function ItemizeMovedKeys(entry As String, includeMovedIn As Boolean, logIndent As String) As List(Of MenuSection)
+    Private Function ItemizeMovedKeys(entry As String, creditedElsewhere As IEnumerable(Of iniKey), logIndent As String) As List(Of MenuSection)
 
         Dim out As New List(Of MenuSection)
 
         Dim movedOut = _state.KeyMovements.MovedOutOf(entry)
-        Dim movedIn = If(includeMovedIn, _state.KeyMovements.MovedInto(entry), New List(Of KeyMovementInfo))
+        Dim movedIn = _state.KeyMovements.MovedInto(entry)
 
         ' Match on name as well as value, since a Detect and a RegKey often share a value
-        Dim landedIn = Function(key As iniKey) movedIn.Where(Function(m) String.Equals(m.TargetKey.Name, key.Name, StringComparison.OrdinalIgnoreCase) AndAlso
-                                                                         String.Equals(m.TargetKey.Value, key.Value, StringComparison.OrdinalIgnoreCase)).ToList()
+        Dim isSameKey = Function(a As iniKey, b As iniKey) String.Equals(a.Name, b.Name, StringComparison.OrdinalIgnoreCase) AndAlso
+                                                           String.Equals(a.Value, b.Value, StringComparison.OrdinalIgnoreCase)
+        Dim landedIn = Function(key As iniKey) movedIn.Where(Function(m) isSameKey(m.TargetKey, key)).ToList()
 
-        Dim landed = _file2.GetSection(entry).Keys.Where(Function(key) landedIn(key).Count > 0).ToList()
+        Dim landed = _file2.GetSection(entry).Keys.Where(Function(key) landedIn(key).Count > 0 AndAlso
+                                                                       Not creditedElsewhere.Any(Function(shown) isSameKey(shown, key))).ToList()
         Dim credit = Function(key As iniKey) CreditSources(landedIn(key).Select(Function(m) m.SourceEntry).
                                                                            Distinct(StringComparer.OrdinalIgnoreCase).
                                                                            OrderBy(Function(name) name, StringComparer.OrdinalIgnoreCase).ToList())
