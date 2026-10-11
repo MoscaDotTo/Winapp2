@@ -516,9 +516,10 @@ Public Class MergerAnalyzer
     ''' Builds a list of <c> iniKey </c> objects from all old entries
     ''' named in <paramref name="mergeSourceNames"/>, plus optionally from
     ''' <paramref name="targetEntry"/> itself if it existed in file1 and is not
-    ''' already a named merge source. We drop a key whose value (case-insensitive) an earlier
-    ''' key already has, and credit it to every source that has it, in source order.
-    ''' <paramref name="targetEntry"/> is credited only for values no source has. The entries that
+    ''' already a named merge source. We drop a key whose type and value (case-insensitive) an
+    ''' earlier key already has. Credits are keyed by value alone: each value is credited to every
+    ''' source that has it, in source order, and <paramref name="targetEntry"/> only for values no
+    ''' source has. The entries that
     ''' moved keys into <paramref name="targetEntry"/> are credited after the merge sources, but
     ''' their keys aren't combined, so a moved key still compares as added.
     ''' </summary>
@@ -542,8 +543,10 @@ Public Class MergerAnalyzer
                                           targetEntry As String) As CombinedOldKeyResult
 
         Dim combinedKeys As New List(Of iniKey)
+        Dim combinedIds As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
         Dim sources As New Dictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
 
+        ' A Detect and a RegKey often share a value, so the keys dedupe on type and value both
         For Each oldEntryName In mergeSourceNames
 
             Dim oldEnt = _file1.GetSection(oldEntryName)
@@ -551,13 +554,8 @@ Public Class MergerAnalyzer
 
             For Each key In oldEnt.Keys
 
-                If Not sources.ContainsKey(key.Value) Then
-
-                    combinedKeys.Add(key)
-                    sources.Add(key.Value, New List(Of String))
-
-                End If
-
+                If combinedIds.Add($"{key.KeyType}|{key.Value}") Then combinedKeys.Add(key)
+                If Not sources.ContainsKey(key.Value) Then sources.Add(key.Value, New List(Of String))
                 If Not sources(key.Value).Contains(oldEntryName) Then sources(key.Value).Add(oldEntryName)
 
             Next
@@ -570,10 +568,8 @@ Public Class MergerAnalyzer
 
             For Each key In _file1.GetSection(targetEntry).Keys
 
-                If sources.ContainsKey(key.Value) Then Continue For
-
-                combinedKeys.Add(key)
-                sources.Add(key.Value, New List(Of String) From {targetEntry})
+                If combinedIds.Add($"{key.KeyType}|{key.Value}") Then combinedKeys.Add(key)
+                If Not sources.ContainsKey(key.Value) Then sources.Add(key.Value, New List(Of String) From {targetEntry})
 
             Next
 

@@ -823,4 +823,34 @@ Public Class DiffPipelineTests
 
     End Sub
 
+    ''' <summary>
+    ''' A merge target's own Detect shares its value with a source's RegKey. Both stay among the
+    ''' combined old keys, so the unchanged Detect isn't listed and the source's DetectFile is
+    ''' dropped rather than replaced by it.
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoModifiedEntry_KeepsOwnKeySharingASourceKeysValue()
+
+        Dim oldText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf & vbCrLf &
+            "[Alpha Tool Cache *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%ProgramFiles%\Alpha" & vbCrLf &
+            "FileKey1=%LocalAppData%\Alpha\Cache|*|RECURSE" & vbCrLf & "RegKey1=HKCU\Software\Alpha" & vbCrLf
+
+        Dim newText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf & "FileKey2=%LocalAppData%\Alpha\Cache|*|RECURSE" & vbCrLf &
+            "RegKey1=HKCU\Software\Alpha" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        Assert.AreEqual(0, Diff.MostRecentDiffOutcome.UpdatedKeys, output)
+        Assert.IsFalse(output.Contains("Detection criteria modified"), output)
+        StringAssert.Contains(output, "2 keys carried over from merged entries:")
+        StringAssert.Contains(output, "RegKey1=HKCU\Software\Alpha (from [Alpha Tool Cache *])")
+        StringAssert.Contains(output, "1 key from merged entries not in this entry:")
+        StringAssert.Contains(output, "DetectFile=%ProgramFiles%\Alpha (from [Alpha Tool Cache *])")
+
+    End Sub
+
 End Class
