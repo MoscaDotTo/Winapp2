@@ -329,15 +329,16 @@ Module Diff
 
         Dim keyAnalyzer = New KeyModificationAnalyzer(state)
         Dim mergeDetector = New MergeDetector(state, newFile)
-        Dim renderer = New DiffOutputRenderer(state, oldFile, newFile, keyAnalyzer)
-        Dim detector = New EntryChangeDetector(state, oldFile, newFile, mergeDetector, keyAnalyzer, renderer)
+        Dim mergers = New MergerAnalyzer(state, oldFile, newFile, keyAnalyzer)
+        Dim renderer = New DiffOutputRenderer(state, oldFile, newFile, mergers)
+        Dim detector = New EntryChangeDetector(state, oldFile, newFile, mergeDetector, keyAnalyzer)
         Dim statsCalc = New DiffStatisticsCalculator(state, oldFile, newFile)
 
         detector.SnuffNoisyChanges(oldFile)
         detector.SnuffNoisyChanges(newFile)
 
         Dim stepNum = 0
-        Const totalSteps = 19
+        Const totalSteps = 22
 
         Dim doStep = Sub(label As String, action As Action)
                          stepNum += 1
@@ -362,21 +363,25 @@ Module Diff
         doStep("· processing new entries ", Sub() detector.ProcessNewEntries())
         doStep("· processing old entries ", Sub() detector.ProcessOldEntries())
         doStep("· detecting browser changes ", Sub() statsCalc.DetectNewBrowserSupport())
-        collectStep("· itemizing new browsers    ", Function() renderer.ItemizeNewBrowsers())
-        collectStep("· itemizing removed browsers", Function() renderer.ItemizeRemovedBrowsers())
-        collectStep($"· itemizing removals            ", Function() detector.ProcessRemovals())
+        doStep("· matching removed entries       ", Sub() detector.ProcessRemovals())
         doStep("· tracking keys across entries   ", Sub() statsCalc.DetectCrossEntryMovements())
         doStep("· calculating initial statistics ", Sub() statsCalc.CalculateInitialStatistics())
         doStep("· calculating rename statistics  ", Sub() statsCalc.CalculateRenameStatistics())
+        doStep("· diffing merged entries        ", Sub() mergers.Analyze())
+        doStep("· calculating final statistics  ", Sub() statsCalc.CalculateAddedWithMergersStatistics())
+
+        collectStep("· itemizing new browsers    ", Function() renderer.ItemizeNewBrowsers())
+        collectStep("· itemizing removed browsers", Function() renderer.ItemizeRemovedBrowsers())
+        collectStep($"· itemizing removals            ", Function() renderer.ItemizeRemovals(detector.RemovedWithoutReplacement, detector.NoReplacementCount))
         collectStep("· tracking renamed entries      ", Function() renderer.SummarizeRenames())
         collectStep("· tracking splits and mergers   ", Function() renderer.SummarizeMergers())
         collectStep("· diffing renamed entries       ", Function() renderer.ItemizeRenameChanges())
-        collectStep("· diffing merged entries        ", Function() renderer.ItemizeMergers())
+        collectStep("· itemizing merged entries      ", Function() renderer.ItemizeMergers())
         collectStep("· itemizing key movement info   ", Function() renderer.ItemizeKeyMovements())
-        collectStep("· diffing modified entries      ", Function() renderer.ItemizeModifications())
+        collectStep("· itemizing modified entries    ", Function() renderer.ItemizeModifications())
         collectStep("· itemizing added-with-mergers  ", Function() renderer.ItemizeAddedEntriesWithMergers())
         collectStep("· itemizing novel entries       ", Function() renderer.ItemizeAdditions())
-        doStep("· calculating final statistics  ", Sub() statsCalc.CalculateAddedWithMergersStatistics())
+        doStep("· logging key status report     ", Sub() statsCalc.LogKeyStatusReport())
 
         Dim timeSpan = Now - start
         gLog($"Total diff time: {timeSpan}")

@@ -33,7 +33,29 @@ Public Class EntryChangeDetector
     Private ReadOnly _file2 As iniFile
     Private ReadOnly _mergeDetector As MergeDetector
     Private ReadOnly _keyAnalyzer As KeyModificationAnalyzer
-    Private ReadOnly _renderer As DiffOutputRenderer
+    Private _removedWithoutReplacement As New List(Of String)
+
+    ''' <summary>
+    ''' The removed entries that no candidate matched, sorted by name ignoring case. Set by
+    ''' <see cref="ProcessRemovals"/>.
+    ''' </summary>
+    Public ReadOnly Property RemovedWithoutReplacement As IReadOnlyList(Of String)
+        Get
+            Return _removedWithoutReplacement
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' The number of removed entries that are neither renamed nor merged. Set by
+    ''' <see cref="ProcessRemovals"/>.
+    ''' </summary>
+    Public ReadOnly Property NoReplacementCount As Integer
+        Get
+            Return _noReplacementCount
+        End Get
+    End Property
+
+    Private _noReplacementCount As Integer
 
     ''' <summary>Creates a new <c> EntryChangeDetector </c></summary>
     ''' 
@@ -56,23 +78,17 @@ Public Class EntryChangeDetector
     ''' <param name="keyAnalyzer">
     ''' Tracks key-level changes between entry versions
     ''' </param>
-    '''
-    ''' <param name="renderer">
-    ''' Produces <c> MenuSection </c> output for entries removed without replacement
-    ''' </param>
     Public Sub New(state As DiffState,
                    file1 As iniFile,
                    file2 As iniFile,
                    mergeDetector As MergeDetector,
-                   keyAnalyzer As KeyModificationAnalyzer,
-                   renderer As DiffOutputRenderer)
+                   keyAnalyzer As KeyModificationAnalyzer)
 
         _state = state
         _file1 = file1
         _file2 = file2
         _mergeDetector = mergeDetector
         _keyAnalyzer = keyAnalyzer
-        _renderer = renderer
 
     End Sub
 
@@ -180,103 +196,54 @@ Public Class EntryChangeDetector
     ''' first on every run before both become mergers.
     ''' Then converts any rename whose target also took in a merger (see
     ''' <see cref="ReconcileRenamesAndMergers"/>), records the key changes of the renames that
-    ''' remain, and sorts the merge lists by name.
+    ''' remain, sorts the merge lists by name, and sets <see cref="RemovedWithoutReplacement"/>
+    ''' and <see cref="NoReplacementCount"/> for <see cref="DiffOutputRenderer.ItemizeRemovals"/>.
     ''' </summary>
-    '''
-    ''' <returns>
-    ''' A header with the removal counts, then one section per entry removed without replacement,
-    ''' ordered by name ignoring case. Empty when no entries were removed.
-    ''' </returns>
-    Public Function ProcessRemovals() As List(Of MenuSection)
+    Public Sub ProcessRemovals()
 
         Dim totalRemoved = _state.ModifiedEntries.RemovedEntryNames.Count
-        Dim removedHeader = $"{totalRemoved} total entries removed"
 
-        Dim out As New List(Of MenuSection)
+        Dim unmatched = New Concurrent.ConcurrentDictionary(Of String, Boolean)(StringComparer.OrdinalIgnoreCase)
+        Dim potentialMatchesSnapshot = _state.ModifiedEntries.PotentialMatches.ToList()
 
-        gLog(Nothing, leadr:=True)
+        Dim snapshotTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+        Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
+        PrePopulateCachesAndTextMaps(potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap)
 
-        Dim noReplacementCount = 0
+        Dim contentIndexes = BuildContentIndexes(potentialMatchesSnapshot)
+        Dim eligibleNames = BuildEligibleNameSet(potentialMatchesSnapshot)
 
-        Using gLogScope("Entries removed without replacement:")
+        Dim matches = New Concurrent.ConcurrentDictionary(Of String, MatchResult)(StringComparer.OrdinalIgnoreCase)
 
-            Dim results = New Concurrent.ConcurrentDictionary(Of String, MenuSection)(StringComparer.OrdinalIgnoreCase)
-            Dim entryLogs = New Concurrent.ConcurrentDictionary(Of String, List(Of String))(StringComparer.OrdinalIgnoreCase)
-            Dim potentialMatchesSnapshot = _state.ModifiedEntries.PotentialMatches.ToList()
+        Parallel.ForEach(_state.ModifiedEntries.RemovedEntryNames,
+                 Sub(entry)
 
-            Dim snapshotTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
-            Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
-            PrePopulateCachesAndTextMaps(potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap)
+                     Dim match = FindRemovalMatch(entry, potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap, contentIndexes, eligibleNames)
+                     matches(entry) = match
+                     If Not match.IsRename AndAlso Not match.IsMerge Then unmatched(entry) = True
 
-            Dim contentIndexes = BuildContentIndexes(potentialMatchesSnapshot)
-            Dim eligibleNames = BuildEligibleNameSet(potentialMatchesSnapshot)
+                 End Sub)
 
-            Dim matches = New Concurrent.ConcurrentDictionary(Of String, MatchResult)(StringComparer.OrdinalIgnoreCase)
+        For Each entry In matches.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
+            _mergeDetector.RecordMatch(matches(entry), _file1.GetSection(entry))
+        Next
 
-            Parallel.ForEach(_state.ModifiedEntries.RemovedEntryNames,
-                     Sub(entry)
+        ReconcileRenamesAndMergers()
 
-                         Dim capturedLines As New List(Of String)
+        ' Only now do we know which renames survived; a demoted one's key changes would be stale
+        For Each pair In _state.MergedEntries.RenamedEntryPairs.OrderBy(Function(p) p.Key, StringComparer.OrdinalIgnoreCase)
+            _keyAnalyzer.FindModifications(_file1.GetSection(pair.Value), _file2.GetSection(pair.Key))
+        Next
 
-                         Using cap = gLogCapture()
+        _state.MergedEntries.SortMergeLists()
 
-                             Dim match = FindRemovalMatch(entry, potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap, contentIndexes, eligibleNames)
-                             matches(entry) = match
-                             If Not match.IsRename AndAlso Not match.IsMerge Then results(entry) = _renderer.MakeDiff(_file1.GetSection(entry), 1)
-                             capturedLines.AddRange(cap.Lines)
+        Dim renamedCount = _state.MergedEntries.RenamedEntryNames.Count
+        Dim mergedCount = _state.MergedEntries.OldToNewMergeDict.Count
+        _noReplacementCount = totalRemoved - renamedCount - mergedCount
 
-                         End Using
+        _removedWithoutReplacement = unmatched.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase).ToList()
 
-                         If capturedLines.Count > 0 Then entryLogs(entry) = capturedLines
-
-                     End Sub)
-
-            For Each entry In matches.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
-                _mergeDetector.RecordMatch(matches(entry), _file1.GetSection(entry))
-            Next
-
-            ReconcileRenamesAndMergers()
-
-            ' Only now do we know which renames survived; a demoted one's key changes would be stale
-            For Each pair In _state.MergedEntries.RenamedEntryPairs.OrderBy(Function(p) p.Key, StringComparer.OrdinalIgnoreCase)
-                _keyAnalyzer.FindModifications(_file1.GetSection(pair.Value), _file2.GetSection(pair.Key))
-            Next
-
-            _state.MergedEntries.SortMergeLists()
-
-            Dim renamedCount = _state.MergedEntries.RenamedEntryNames.Count
-            Dim mergedCount = _state.MergedEntries.OldToNewMergeDict.Count
-            noReplacementCount = totalRemoved - renamedCount - mergedCount
-
-            ' Nothing removed means nothing to announce: an "0 total entries removed" banner is
-            ' noise the Diff Summary already covers. The global log still records the count below,
-            ' so the saved changelog's shape is unchanged
-            If totalRemoved > 0 Then
-
-                Dim header As New MenuSection
-                header.AddColoredLine(removedHeader, ConsoleColor.DarkRed, True)
-                header.AddBlank()
-                header.AddColoredLine($"  - {noReplacementCount} entries removed without replacement", ConsoleColor.Red, True)
-                header.AddDivider(solid:=False)
-                out.Add(header)
-
-            End If
-
-            For Each key In results.Keys.OrderBy(Function(k) k, StringComparer.OrdinalIgnoreCase)
-
-                Dim logLines As List(Of String) = Nothing
-                If entryLogs.TryGetValue(key, logLines) Then EmitCaptured(logLines)
-                out.Add(results(key))
-
-            Next
-
-        End Using
-
-        gLog($"- {noReplacementCount} removed without replacement", leadr:=True)
-
-        Return out
-
-    End Function
+    End Sub
 
     ''' <summary>
     ''' Populates the new/old entry caches and pre-computes uppercased section text

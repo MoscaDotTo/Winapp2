@@ -29,6 +29,12 @@ Public Class DiffStatisticsCalculator
     Private ReadOnly _file2 As iniFile
 
     ''' <summary>
+    ''' Maps each old entry merged into an added entry → which of its key values the entries it
+    ''' went into kept. Set by <see cref="CalculateAddedWithMergersStatistics"/>.
+    ''' </summary>
+    Private _oldEntryCaptures As Dictionary(Of String, OldEntryKeyTracking)
+
+    ''' <summary>
     ''' Creates a new <c> DiffStatisticsCalculator </c>
     ''' </summary>
     '''
@@ -358,9 +364,10 @@ Public Class DiffStatisticsCalculator
     End Sub
 
     ''' <summary>
-    ''' Calculates the statistics for added entries with merged content. Run it after
-    ''' <see cref="DiffOutputRenderer.ItemizeAddedEntriesWithMergers"/>, which writes the
-    ''' carried-over keys into the added-key tracker that this reads.
+    ''' Calculates the statistics for added entries with merged content, and which keys of their
+    ''' sources they kept, for <see cref="LogKeyStatusReport"/>. Run it after
+    ''' <see cref="MergerAnalyzer.Analyze"/>, which writes the carried-over keys into the
+    ''' added-key tracker that this reads.
     ''' </summary>
     Public Sub CalculateAddedWithMergersStatistics()
 
@@ -368,14 +375,14 @@ Public Class DiffStatisticsCalculator
         Dim oldEntryCaptures = BuildOldEntryCaptureTracking(entriesWithMergers)
 
         ComputeKeyCaptureRates(oldEntryCaptures)
-        LogSourceEntryKeyStatus(oldEntryCaptures)
+        _oldEntryCaptures = oldEntryCaptures
 
         _state.Statistics.AddedWithMergersEntryCount = entriesWithMergers.Count
         _state.Statistics.AddedWithMergersSourceEntryCount = oldEntryCaptures.Count
 
         ' Compute per-new-entry stats from the tracked key data.
         ' Note: by the time this runs, AddedKeyTracker entries contain both truly novel keys
-        ' and carried-over keys (added there by ItemizeAddedEntriesWithMergers for display).
+        ' and carried-over keys (added there by MergerAnalyzer.Analyze for display).
         ' We separate them by checking against the set of key values from the merged old entries.
         ' Keys that moved in from a surviving entry are neither, and are counted as moved.
         For Each newEntryName In entriesWithMergers
@@ -557,6 +564,19 @@ Public Class DiffStatisticsCalculator
             Next
 
         Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Logs the SOURCE ENTRY KEY STATUS REPORT for the old entries merged into added entries.
+    ''' Logs nothing until <see cref="CalculateAddedWithMergersStatistics"/> has run, or when no
+    ''' old entry went into an added entry.
+    ''' </summary>
+    Public Sub LogKeyStatusReport()
+
+        If _oldEntryCaptures Is Nothing Then Return
+
+        LogSourceEntryKeyStatus(_oldEntryCaptures)
 
     End Sub
 
