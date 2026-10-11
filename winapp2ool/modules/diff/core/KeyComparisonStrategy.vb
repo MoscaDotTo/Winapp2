@@ -40,6 +40,25 @@ Public MustInherit Class KeyComparisonStrategy
     Private Shared ReadOnly _regexCache As New Concurrent.ConcurrentDictionary(Of String, Regex)(StringComparer.Ordinal)
 
     ''' <summary>
+    ''' Rewrites each string as regex text: <c> * </c> becomes <c> .* </c> and <c> + { } [ ] $ ( ) </c>
+    ''' are escaped. Other regex characters, including <c> . </c>, pass through unchanged.
+    ''' </summary>
+    ''' <param name="splitPath">The array of path components to sanitize in place</param>
+    Protected Sub SanitizeRegex(ByRef splitPath As String())
+
+        For k = 0 To splitPath.Length - 1
+
+            For j = 0 To regexCharsIn.Length - 1
+
+                If splitPath(k).Contains(regexCharsIn(j)) Then splitPath(k) = splitPath(k).Replace(regexCharsIn(j), regexCharsOut(j))
+
+            Next
+
+        Next
+
+    End Sub
+
+    ''' <summary>
     ''' Returns whether <paramref name="newKey"/> is equivalent to <paramref name="oldKey"/> or
     ''' covers it, for example through a wildcard or a parent path
     ''' </summary>
@@ -290,25 +309,6 @@ Public Class PathKeyComparisonStrategy
     End Sub
 
     ''' <summary>
-    ''' Rewrites each string as regex text: <c> * </c> becomes <c> .* </c> and <c> + { } [ ] $ ( ) </c>
-    ''' are escaped. Other regex characters, including <c> . </c>, pass through unchanged.
-    ''' </summary>
-    ''' <param name="splitPath">The array of path components to sanitize in place</param>
-    Private Sub SanitizeRegex(ByRef splitPath As String())
-
-        For k = 0 To splitPath.Length - 1
-
-            For j = 0 To regexCharsIn.Length - 1
-
-                If splitPath(k).Contains(regexCharsIn(j)) Then splitPath(k) = splitPath(k).Replace(regexCharsIn(j), regexCharsOut(j))
-
-            Next
-
-        Next
-
-    End Sub
-
-    ''' <summary>
     ''' Returns whether the component at <paramref name="index"/> directly follows a
     ''' <c> Packages </c> component (ignoring case), which makes it a UWP package-family folder
     ''' that may take a reverse-wildcard match
@@ -388,8 +388,7 @@ Public Class PathKeyComparisonStrategy
     ''' </param>
     '''
     ''' <param name="possibleWildCardReduction">
-    ''' Set to whether the matched old pattern has a <c> * </c> that the matched new pattern lacks,
-    ''' or the new list is shorter than the old and has a <c> * </c> anywhere
+    ''' Set to whether the new list is shorter than the old and has a <c> * </c> anywhere
     ''' </param>
     Private Function MatchParameters(flags As String,
                                 oldFlags As String,
@@ -405,11 +404,9 @@ Public Class PathKeyComparisonStrategy
 
                 If Not CompareValues(param, oldParam) Then Continue For
 
-                ' Check for wildcard reduction in individual parameters OR overall parameter count
-                ' Example: *bookmarks.bak → bookmarks.bak (individual param loses wildcard)
-                ' Example: *.bak;*.tmp → *.bak (parameter count reduction with wildcard)
-                possibleWildCardReduction = (oldParam.Contains("*") AndAlso Not param.Contains("*")) OrElse
-                                            (splitParams.Length < oldSplitParams.Length AndAlso flags.Contains("*"))
+                ' A new pattern without a * matches only an equal old one, so a single pattern can't
+                ' lose its wildcard here. Only a shorter list can narrow it: *.bak;*.tmp → *.bak
+                possibleWildCardReduction = splitParams.Length < oldSplitParams.Length AndAlso flags.Contains("*")
 
                 Return True
 
@@ -436,7 +433,8 @@ Public Class DetectKeyComparisonStrategy
     ''' name (after its first pipe) is split off its path, and a Detect key's whole value is its
     ''' path. On the same path (ignoring case), a new RegKey without a value name covers the old
     ''' key, and one with a value name matches when <see cref="CompareValues"/> accepts the old
-    ''' value name. A new key whose path is a parent of the old key's path covers it, except a
+    ''' value name, both rewritten as regex text by <see cref="SanitizeRegex"/> as FileKey patterns
+    ''' are. A new key whose path is a parent of the old key's path covers it, except a
     ''' RegKey with a value name.
     ''' </summary>
     '''
@@ -490,9 +488,12 @@ Public Class DetectKeyComparisonStrategy
 
         If String.Equals(newPath, oldPath, StringComparison.InvariantCultureIgnoreCase) Then
 
-            If isRegKey AndAlso newFlags.Length > 0 Then Return CompareValues(newFlags, oldFlags)
+            If Not isRegKey OrElse newFlags.Length = 0 Then Return True
 
-            Return True
+            Dim valueNames = {newFlags, oldFlags}
+            SanitizeRegex(valueNames)
+
+            Return CompareValues(valueNames(0), valueNames(1))
 
         End If
 

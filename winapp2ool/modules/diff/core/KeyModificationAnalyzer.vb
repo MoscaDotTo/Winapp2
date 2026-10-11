@@ -58,7 +58,11 @@ Public Class KeyModificationAnalyzer
     Public Sub FindModifications(oldSection As iniSection,
                                  newSection As iniSection)
 
-        AnalyzeAndTrackSectionDiff(oldSection, newSection, addToModified:=True)
+        Dim addedKeys, removedKeys As New List(Of iniKey)
+
+        If CompareKeyLists(oldSection.Keys, newSection.Keys, removedKeys, addedKeys) Then Return
+
+        WriteResultsToTrackers(newSection.Name, oldSection.Name, addedKeys, removedKeys, addToModified:=True)
 
     End Sub
 
@@ -142,34 +146,6 @@ Public Class KeyModificationAnalyzer
         End If
 
         WriteResultsToTrackers(newSection.Name, Nothing, addedKeys, removedKeys, addToModified)
-
-    End Sub
-
-    ''' <summary>
-    ''' Core implementation for section-to-section comparisons. Computes added, removed, and updated
-    ''' keys and writes them to the <c> DiffState </c> trackers under <paramref name="newSection"/>'s
-    ''' name. Returns without writing anything when the key lists are equivalent.
-    ''' </summary>
-    ''' 
-    ''' <param name="oldSection">
-    ''' The previous version of the entry</param>
-    ''' 
-    ''' <param name="newSection">The current version of the entry</param>
-    ''' 
-    ''' <param name="addToModified">
-    ''' Indicates whether to add <paramref name="newSection"/>'s name to <c> ModifiedEntryNames </c>
-    ''' (only if not already in <c> AddedEntryNames </c>) and record a Name-change pair if the names
-    ''' differ, ignoring case
-    ''' </param>
-    Private Sub AnalyzeAndTrackSectionDiff(oldSection As iniSection,
-                                            newSection As iniSection,
-                                            addToModified As Boolean)
-
-        Dim addedKeys, removedKeys As New List(Of iniKey)
-
-        If CompareKeyLists(oldSection.Keys, newSection.Keys, removedKeys, addedKeys) Then Return
-
-        WriteResultsToTrackers(newSection.Name, oldSection.Name, addedKeys, removedKeys, addToModified)
 
     End Sub
 

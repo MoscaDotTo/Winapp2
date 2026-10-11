@@ -153,4 +153,18 @@ Imports System.Text
 
     End Sub
 
+    ''' <summary>
+    ''' A RegKey value name with a leading wildcard covers the old value names it matches. It used
+    ''' to reach the regex engine as is and throw.
+    ''' </summary>
+    <TestMethod()> Public Sub RegKeyWildcardValueName_CoversMatchingNames()
+
+        Dim oldKeys = MakeSection("RegKey1=HKCU\Software\App|RecentFoo", "RegKey2=HKCU\Software\App|Bar").Keys.ToList()
+        Dim newKey = MakeSection("RegKey1=HKCU\Software\App|*Foo").Keys.First()
+
+        Assert.IsTrue(winapp2ool.KeyComparisonStrategyFactory.CompareKeys(newKey, oldKeys(0)))
+        Assert.IsFalse(winapp2ool.KeyComparisonStrategyFactory.CompareKeys(newKey, oldKeys(1)))
+
+    End Sub
+
 End Class
