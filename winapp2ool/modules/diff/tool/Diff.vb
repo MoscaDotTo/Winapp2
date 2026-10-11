@@ -253,7 +253,7 @@ Module Diff
         Dim diffOutput As New List(Of MenuSection)
 
         Dim out = New MenuSection
-        Dim headerText = $"Diff: {GetVer(oldFile)} -> {GetVer(newFile)}"
+        Dim headerText = $"Diff:{GetVer(oldFile)} ->{GetVer(newFile)}"
         out.AddTopBorder().AddColoredLine(headerText, color:=ConsoleColor.DarkGreen, centered:=True).AddDivider()
 
         diffOutput.Add(out)
