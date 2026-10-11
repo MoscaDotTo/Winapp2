@@ -325,7 +325,6 @@ Module Diff
         Dim out As New List(Of MenuSection)
 
         Dim state As New DiffState()
-        state.Clear()
 
         Dim keyAnalyzer = New KeyModificationAnalyzer(state)
         Dim mergeDetector = New MergeDetector(state, newFile)

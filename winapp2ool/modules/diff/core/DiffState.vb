@@ -17,11 +17,9 @@
 
 Option Strict On
 
-Imports System.Collections.Concurrent
-
 ''' <summary>
-''' Holds the shared, mutable state of one Diff run: the entry and key trackers, counters,
-''' caches and key movements that the core classes write to and read from
+''' Holds the shared, mutable state of one Diff run: the entry and key trackers, counters
+''' and key movements that the core classes write to and read from
 ''' </summary>
 Public Class DiffState
 
@@ -41,11 +39,6 @@ Public Class DiffState
     Public Property Statistics As New DiffStatistics()
 
     ''' <summary>
-    ''' Manages caches for performance optimization during diff operations
-    ''' </summary>
-    Public Property Caches As New DiffCaches()
-
-    ''' <summary>
     ''' Tracks keys that moved between entries
     ''' </summary>
     Public Property KeyMovements As New KeyMovementTracker()
@@ -55,21 +48,6 @@ Public Class DiffState
     ''' is complete (<see cref="ModifiedEntryBlock.BuildAll"/>).
     ''' </summary>
     Public Property ModifiedBlocks As New Dictionary(Of String, ModifiedEntryBlock)(StringComparer.OrdinalIgnoreCase)
-
-    ''' <summary>
-    ''' Clears every tracker and cache and resets the counters. <see cref="DiffStatistics.Reset"/>
-    ''' leaves some counters alone.
-    ''' </summary>
-    Public Sub Clear()
-
-        MergedEntries.Clear()
-        ModifiedEntries.Clear()
-        Statistics.Reset()
-        Caches.Clear()
-        KeyMovements.Clear()
-        ModifiedBlocks.Clear()
-
-    End Sub
 
 End Class
 
@@ -118,19 +96,6 @@ Public Class MergedEntryTracker
 
         For Each names In MergeDict.Values : names.Sort(StringComparer.OrdinalIgnoreCase) : Next
         For Each names In OldToNewMergeDict.Values : names.Sort(StringComparer.OrdinalIgnoreCase) : Next
-
-    End Sub
-
-    ''' <summary>
-    ''' Clears all tracking data
-    ''' </summary>
-    Public Sub Clear()
-
-        MergedEntryNames.Clear()
-        MergeDict.Clear()
-        OldToNewMergeDict.Clear()
-        RenamedEntryNames.Clear()
-        RenamedEntryPairs.Clear()
 
     End Sub
 
@@ -184,21 +149,6 @@ Public Class ModifiedEntryTracker
     ''' looking for renames and mergers
     ''' </summary>
     Public Property PotentialMatches As New List(Of iniSection)
-
-    ''' <summary>
-    ''' Clears all tracking data
-    ''' </summary>
-    Public Sub Clear()
-
-        ModifiedEntryNames.Clear()
-        AddedEntryNames.Clear()
-        RemovedEntryNames.Clear()
-        ModifiedKeyTracker.Clear()
-        RemovedKeyTracker.Clear()
-        AddedKeyTracker.Clear()
-        PotentialMatches.Clear()
-
-    End Sub
 
 End Class
 
@@ -413,83 +363,6 @@ Public Class DiffStatistics
     ''' </summary>
     Public Property RemovedBrowserSectionValues As New List(Of String)
 
-    ''' <summary>
-    ''' Resets the modified-entry, moved-key, added-with-mergers, and renamed-entry counters to zero and clears both
-    ''' browser lists.
-    ''' </summary>
-    Public Sub Reset()
-
-        AddedWithMergersCapturedKeysTotal = 0
-        AddedWithMergersCapturingEntryCount = 0
-        AddedWithMergersCapturingKeysTotal = 0
-        AddedWithMergersCarriedOverKeysEntryCount = 0
-        AddedWithMergersCarriedOverKeysTotal = 0
-        AddedWithMergersDroppedEntryCount = 0
-        AddedWithMergersDroppedKeysTotal = 0
-        ModEntriesAddedKeyTotal = 0
-        ModEntriesAddedKeyEntryCount = 0
-        ModEntriesCarriedOverKeysEntryCount = 0
-        ModEntriesCarriedOverKeysTotal = 0
-        ModEntriesRemovedKeyEntryCount = 0
-        ModEntriesUpdatedKeyTotal = 0
-        ModEntriesReplacedByUpdateTotal = 0
-        ModEntriesRemovedKeysWithoutReplacementTotal = 0
-        ModEntriesMovedKeysTotal = 0
-        ModEntriesMovedKeysSourceCount = 0
-        ModEntriesMovedKeysTargetCount = 0
-        MovedIntoModifiedKeyTotal = 0
-        MovedIntoModifiedEntryCount = 0
-        MovedIntoRenamedKeyTotal = 0
-        MovedIntoRenamedEntryCount = 0
-        MovedIntoAddedKeyTotal = 0
-        MovedIntoAddedEntryCount = 0
-        ModEntriesUpdatedKeyEntryCount = 0
-        RenamedEntriesAddedKeyTotal = 0
-        RenamedEntriesAddedKeyEntryCount = 0
-        RenamedEntriesRemovedKeyTotal = 0
-        RenamedEntriesRemovedKeyEntryCount = 0
-        RenamedEntriesUpdatedKeyTotal = 0
-        RenamedEntriesReplacedByUpdateTotal = 0
-        RenamedEntriesUpdatedKeyEntryCount = 0
-        RenamedEntriesNameOnlyCount = 0
-        NewBrowserSectionValues.Clear()
-        RemovedBrowserSectionValues.Clear()
-
-    End Sub
-
-End Class
-
-''' <summary>
-''' Manages caches for performance optimization during diff operations
-''' </summary>
-Public Class DiffCaches
-
-    ''' <summary>
-    ''' Caches old entries by name for quick lookup
-    ''' </summary>
-    Public Property CachedOldEntries As New Dictionary(Of String, iniSection)
-
-    ''' <summary>
-    ''' Caches new entries by name for quick lookup
-    ''' </summary>
-    Public Property CachedNewEntries As New Dictionary(Of String, iniSection)
-
-    ''' <summary>
-    ''' Caches the key match assessment for each old/new entry pair, keyed <c> oldName|newName </c>
-    ''' </summary>
-    Public Property MatchInfoCache As New ConcurrentDictionary(Of String, KeyMatchInfo)
-
-    ''' <summary>
-    ''' Clears all caches
-    ''' </summary>
-    Public Sub Clear()
-
-        CachedOldEntries.Clear()
-        CachedNewEntries.Clear()
-        MatchInfoCache.Clear()
-
-    End Sub
-
 End Class
 
 ''' <summary>
@@ -506,15 +379,6 @@ Public Class KeyMovementTracker
     ''' compared case-insensitively
     ''' </remarks>
     Public Property MovedKeys As New Dictionary(Of String, KeyMovementInfo)(StringComparer.OrdinalIgnoreCase)
-
-    ''' <summary>
-    ''' Clears all tracking data
-    ''' </summary>
-    Public Sub Clear()
-
-        MovedKeys.Clear()
-
-    End Sub
 
     ''' <summary>
     ''' Returns the entries that moved keys into <paramref name="targetEntry"/>, keyed by the

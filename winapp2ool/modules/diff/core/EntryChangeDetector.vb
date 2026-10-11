@@ -208,7 +208,7 @@ Public Class EntryChangeDetector
 
         Dim snapshotTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
         Dim oldEntryTextMap As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
-        PrePopulateCachesAndTextMaps(potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap)
+        BuildTextMaps(potentialMatchesSnapshot, snapshotTextMap, oldEntryTextMap)
 
         Dim contentIndexes = BuildContentIndexes(potentialMatchesSnapshot)
         Dim eligibleNames = BuildEligibleNameSet(potentialMatchesSnapshot)
@@ -246,12 +246,11 @@ Public Class EntryChangeDetector
     End Sub
 
     ''' <summary>
-    ''' Populates the new/old entry caches and pre-computes uppercased section text
-    ''' for each potential match and removed entry
+    ''' Pre-computes uppercased section text for each potential match and removed entry
     ''' </summary>
     '''
     ''' <param name="potentialMatches">
-    ''' Snapshot of added and modified entries to cache
+    ''' Snapshot of added and modified entries
     ''' </param>
     '''
     ''' <param name="snapshotTextMap">
@@ -261,23 +260,16 @@ Public Class EntryChangeDetector
     ''' <param name="oldEntryTextMap">
     ''' Populated with uppercased text for each removed entry, keyed by entry name
     ''' </param>
-    Private Sub PrePopulateCachesAndTextMaps(potentialMatches As List(Of iniSection),
-                                             snapshotTextMap As Dictionary(Of String, String),
-                                             oldEntryTextMap As Dictionary(Of String, String))
+    Private Sub BuildTextMaps(potentialMatches As List(Of iniSection),
+                              snapshotTextMap As Dictionary(Of String, String),
+                              oldEntryTextMap As Dictionary(Of String, String))
 
         For Each section In potentialMatches
-
-            _state.Caches.CachedNewEntries(section.Name) = section
             snapshotTextMap(section.Name) = section.ToString().ToUpperInvariant()
-
         Next
 
         For Each entryName In _state.ModifiedEntries.RemovedEntryNames
-
-            Dim oldSection = _file1.GetSection(entryName)
-            _state.Caches.CachedOldEntries(oldSection.Name) = oldSection
-            oldEntryTextMap(entryName) = oldSection.ToString().ToUpperInvariant()
-
+            oldEntryTextMap(entryName) = _file1.GetSection(entryName).ToString().ToUpperInvariant()
         Next
 
     End Sub

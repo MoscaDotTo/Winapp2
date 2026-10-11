@@ -45,8 +45,7 @@ Public Class KeyModificationAnalyzer
     ''' Records the key-level changes between two versions of an entry under the new entry's name,
     ''' and adds that name to <c> ModifiedEntryNames </c> unless it's an added entry. When the names
     ''' differ (a rename), we also record a <c> Name </c> change. If the keys are identical we record
-    ''' nothing, not even the name change. If the entry is already in <c> ModifiedEntryNames </c>,
-    ''' we discard its earlier results before writing the new ones.
+    ''' nothing, not even the name change.
     ''' </summary>
     '''
     ''' <param name="oldSection">
@@ -59,7 +58,7 @@ Public Class KeyModificationAnalyzer
     Public Sub FindModifications(oldSection As iniSection,
                                  newSection As iniSection)
 
-        AnalyzeAndTrackSectionDiff(oldSection, newSection, addToModified:=True, clearExisting:=False)
+        AnalyzeAndTrackSectionDiff(oldSection, newSection, addToModified:=True)
 
     End Sub
 
@@ -81,7 +80,7 @@ Public Class KeyModificationAnalyzer
     Public Sub FindModificationsFromCombinedKeys(oldKeys As List(Of iniKey),
                                                  newSection As iniSection)
 
-        AnalyzeAndTrackSectionDiffWithKeyList(oldKeys, newSection, addToModified:=True, clearExisting:=False)
+        AnalyzeAndTrackSectionDiffWithKeyList(oldKeys, newSection, addToModified:=True)
 
     End Sub
 
@@ -101,7 +100,7 @@ Public Class KeyModificationAnalyzer
     Public Sub FindModificationsForAddedEntryFromKeys(oldKeys As List(Of iniKey),
                                                       newSection As iniSection)
 
-        AnalyzeAndTrackSectionDiffWithKeyList(oldKeys, newSection, addToModified:=False, clearExisting:=True)
+        AnalyzeAndTrackSectionDiffWithKeyList(oldKeys, newSection, addToModified:=False)
 
     End Sub
 
@@ -128,15 +127,8 @@ Public Class KeyModificationAnalyzer
     ''' name to <c> ModifiedEntryNames </c>
     ''' (only if not already in <c> AddedEntryNames </c>)
     ''' </param>
-    '''
-    ''' <param name="clearExisting">
-    ''' Indicates whether to remove any prior tracker entries for
-    ''' <paramref name="newSection"/> before writing.
-    ''' When <c> False </c>, we roll back and replace prior
-    ''' entries if the entry was already tracked as modified.
-    ''' </param>
     Private Sub AnalyzeAndTrackSectionDiffWithKeyList(oldKeys As List(Of iniKey), newSection As iniSection,
-                                                       addToModified As Boolean, clearExisting As Boolean)
+                                                       addToModified As Boolean)
 
         Dim addedKeys, removedKeys As New List(Of iniKey)
 
@@ -149,7 +141,7 @@ Public Class KeyModificationAnalyzer
 
         End If
 
-        WriteResultsToTrackers(newSection.Name, Nothing, addedKeys, removedKeys, addToModified, clearExisting)
+        WriteResultsToTrackers(newSection.Name, Nothing, addedKeys, removedKeys, addToModified)
 
     End Sub
 
@@ -169,21 +161,15 @@ Public Class KeyModificationAnalyzer
     ''' (only if not already in <c> AddedEntryNames </c>) and record a Name-change pair if the names
     ''' differ, ignoring case
     ''' </param>
-    '''
-    ''' <param name="clearExisting">
-    ''' Indicates whether to remove any prior tracker entries for <paramref name="newSection"/> before writing.
-    ''' When <c> False </c>, we roll back and replace prior entries if the entry was already tracked as modified.
-    ''' </param>
     Private Sub AnalyzeAndTrackSectionDiff(oldSection As iniSection,
                                             newSection As iniSection,
-                                            addToModified As Boolean,
-                                            clearExisting As Boolean)
+                                            addToModified As Boolean)
 
         Dim addedKeys, removedKeys As New List(Of iniKey)
 
         If CompareKeyLists(oldSection.Keys, newSection.Keys, removedKeys, addedKeys) Then Return
 
-        WriteResultsToTrackers(newSection.Name, oldSection.Name, addedKeys, removedKeys, addToModified, clearExisting)
+        WriteResultsToTrackers(newSection.Name, oldSection.Name, addedKeys, removedKeys, addToModified)
 
     End Sub
 
@@ -334,10 +320,10 @@ Public Class KeyModificationAnalyzer
     End Function
 
     ''' <summary>
-    ''' Writes computed key-level changes to the <c> DiffState </c> trackers under the given section name.
-    ''' Handles clearing/rolling back prior tracker entries, recording added/removed/updated keys,
-    ''' optionally adding the section to <c> ModifiedEntryNames </c>, and, with
-    ''' <paramref name="addToModified"/>, injecting a Name-change sentinel pair when
+    ''' Writes computed key-level changes to the <c> DiffState </c> trackers under the given section name,
+    ''' replacing any records an earlier comparison left for it, including its place in
+    ''' <c> ModifiedEntryNames </c>. With <paramref name="addToModified"/>, adds the section to
+    ''' <c> ModifiedEntryNames </c> and injects a Name-change sentinel pair when
     ''' <paramref name="oldSectionName"/> differs from <paramref name="newSectionName"/> ignoring case.
     ''' </summary>
     '''
@@ -354,14 +340,14 @@ Public Class KeyModificationAnalyzer
     '''
     ''' <param name="addedKeys">
     ''' Keys present in the new version but not the old; updated in place
-    ''' by <see cref="DetermineModifiedKeys"/> which removes promoted entries. The tracker may
-    ''' keep this list object itself.
+    ''' by <see cref="DetermineModifiedKeys"/> which removes promoted entries. The tracker
+    ''' keeps this list object itself.
     ''' </param>
     '''
     ''' <param name="removedKeys">
     ''' Keys present in the old version but not the new; updated in place
-    ''' by <see cref="DetermineModifiedKeys"/> which removes promoted entries. The tracker may
-    ''' keep this list object itself.
+    ''' by <see cref="DetermineModifiedKeys"/> which removes promoted entries. The tracker
+    ''' keeps this list object itself.
     ''' </param>
     '''
     ''' <param name="addToModified">
@@ -369,35 +355,22 @@ Public Class KeyModificationAnalyzer
     ''' (only if not already in <c> AddedEntryNames </c>) and inject the Name-change pair.
     ''' When <c> False </c>, no Name-change pair is recorded even if the names differ.
     ''' </param>
-    '''
-    ''' <param name="clearExisting">
-    ''' Indicates whether to remove any prior tracker entries before writing.
-    ''' When <c> False </c>, we roll back and replace prior entries if already tracked as modified.
-    ''' </param>
     Private Sub WriteResultsToTrackers(newSectionName As String,
                                        oldSectionName As String,
                                        addedKeys As List(Of iniKey),
                                        removedKeys As List(Of iniKey),
-                                       addToModified As Boolean,
-                                       clearExisting As Boolean)
+                                       addToModified As Boolean)
 
-        If clearExisting Then
-
-            _state.ModifiedEntries.AddedKeyTracker.Remove(newSectionName)
-            _state.ModifiedEntries.RemovedKeyTracker.Remove(newSectionName)
-            _state.ModifiedEntries.ModifiedKeyTracker.Remove(newSectionName)
-
-        ElseIf _state.ModifiedEntries.ModifiedEntryNames.Contains(newSectionName) Then
-
-            RollBackPreviouslyObservedChanges(newSectionName)
-
-        End If
+        _state.ModifiedEntries.ModifiedEntryNames.Remove(newSectionName)
+        _state.ModifiedEntries.AddedKeyTracker.Remove(newSectionName)
+        _state.ModifiedEntries.RemovedKeyTracker.Remove(newSectionName)
+        _state.ModifiedEntries.ModifiedKeyTracker.Remove(newSectionName)
 
         Dim updatedKeys = DetermineModifiedKeys(removedKeys, addedKeys)
         If removedKeys.Count + addedKeys.Count + updatedKeys.Count = 0 Then Return
 
-        updateTrackingDictionary(_state.ModifiedEntries.RemovedKeyTracker, removedKeys, newSectionName)
-        updateTrackingDictionary(_state.ModifiedEntries.AddedKeyTracker, addedKeys, newSectionName)
+        If removedKeys.Count > 0 Then _state.ModifiedEntries.RemovedKeyTracker.Add(newSectionName, removedKeys)
+        If addedKeys.Count > 0 Then _state.ModifiedEntries.AddedKeyTracker.Add(newSectionName, addedKeys)
 
         If addToModified Then
 
@@ -416,99 +389,7 @@ Public Class KeyModificationAnalyzer
 
         If updatedKeys.Count = 0 Then Return
 
-        MergeModificationsIntoTracker(newSectionName, updatedKeys, clearExisting)
-
-    End Sub
-
-    ''' <summary>
-    ''' Merges computed updated-key pairs into the <c> ModifiedKeyTracker </c> for the given entry.
-    ''' When <paramref name="clearExisting"/> is <c> False </c> and the tracker already has entries,
-    ''' new modifications are added alongside existing ones without overwriting.
-    ''' </summary>
-    '''
-    ''' <param name="sectionName">
-    ''' The entry name used as the dictionary key in <c> ModifiedKeyTracker </c>
-    ''' </param>
-    '''
-    ''' <param name="updatedKeys">
-    ''' Pairs of (new key, old key) to write into the tracker
-    ''' </param>
-    '''
-    ''' <param name="clearExisting">
-    ''' Indicates whether to replace the tracker entry wholesale. When <c> False </c> and the
-    ''' tracker already contains <paramref name="sectionName"/>, new entries are merged in.
-    ''' </param>
-    Private Sub MergeModificationsIntoTracker(sectionName As String,
-                                              updatedKeys As List(Of KeyValuePair(Of iniKey, iniKey)),
-                                              clearExisting As Boolean)
-
-        If Not clearExisting AndAlso _state.ModifiedEntries.ModifiedKeyTracker.ContainsKey(sectionName) Then
-
-            For Each kvp In BuildModifications(updatedKeys)
-
-                If Not _state.ModifiedEntries.ModifiedKeyTracker(sectionName).ContainsKey(kvp.Key) Then _state.ModifiedEntries.ModifiedKeyTracker(sectionName).Add(kvp.Key, kvp.Value)
-
-            Next
-
-        Else
-
-            _state.ModifiedEntries.ModifiedKeyTracker(sectionName) = BuildModifications(updatedKeys)
-
-        End If
-
-    End Sub
-
-    ''' <summary>
-    ''' Removes all tracker entries for <paramref name="sectionName"/> so that 
-    ''' a subsequent comparison can replace them with a fresh, authoritative result
-    ''' </summary>
-    ''' 
-    ''' <param name="sectionName">
-    ''' The entry name whose tracker entries are to be cleared
-    ''' </param>
-    Private Sub RollBackPreviouslyObservedChanges(sectionName As String)
-
-        _state.ModifiedEntries.ModifiedEntryNames.Remove(sectionName)
-        _state.ModifiedEntries.AddedKeyTracker.Remove(sectionName)
-        _state.ModifiedEntries.RemovedKeyTracker.Remove(sectionName)
-        _state.ModifiedEntries.ModifiedKeyTracker.Remove(sectionName)
-
-    End Sub
-
-    ''' <summary>
-    ''' Appends <paramref name="keys"/> into <paramref name="keyTracker"/> under
-    ''' <paramref name="newSectionName"/>. If there's no entry yet, we store <paramref name="keys"/>
-    ''' itself. Otherwise we append each key not already in the list, comparing by reference.
-    ''' </summary>
-    ''' 
-    ''' <param name="keyTracker">
-    ''' The added or removed key tracker dictionary to update
-    ''' </param>
-    ''' 
-    ''' <param name="keys">
-    ''' The keys to add; no-ops if empty
-    ''' </param>
-    ''' 
-    ''' <param name="newSectionName">
-    ''' The entry name used as the dictionary key
-    ''' </param>
-    Private Sub updateTrackingDictionary(ByRef keyTracker As Dictionary(Of String, List(Of iniKey)),
-                                         keys As List(Of iniKey),
-                                         newSectionName As String)
-
-        If keys.Count = 0 Then Return
-
-        If keyTracker.ContainsKey(newSectionName) Then
-
-            For Each key In keys
-                If Not keyTracker(newSectionName).Contains(key) Then keyTracker(newSectionName).Add(key)
-            Next
-
-        Else
-
-            keyTracker.Add(newSectionName, keys)
-
-        End If
+        _state.ModifiedEntries.ModifiedKeyTracker.Add(newSectionName, BuildModifications(updatedKeys))
 
     End Sub
 

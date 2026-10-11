@@ -77,64 +77,6 @@ Public Class MergeDetector
     End Sub
 
     ''' <summary>
-    ''' Returns the cached <c> iniSection </c> for the given old entry, inserting it on first access
-    ''' </summary>
-    ''' 
-    ''' <param name="section">
-    ''' The old entry to cache
-    ''' </param>
-    ''' 
-    ''' <returns>
-    ''' The cached instance (always the same object for a given entry name)
-    ''' </returns>
-    Private Function GetOrCreateCachedSection(section As iniSection) As iniSection
-
-        SyncLock _state.Caches.CachedOldEntries
-
-            Dim cached As iniSection = Nothing
-            If Not _state.Caches.CachedOldEntries.TryGetValue(section.Name, cached) Then
-
-                cached = section
-                _state.Caches.CachedOldEntries(section.Name) = cached
-
-            End If
-
-            Return cached
-
-        End SyncLock
-
-    End Function
-
-    ''' <summary>
-    ''' Returns the cached <c> iniSection </c> for the given new entry, inserting it on first access
-    ''' </summary>
-    ''' 
-    ''' <param name="section">
-    ''' The new entry to cache
-    ''' </param>
-    ''' 
-    ''' <returns>
-    ''' The cached instance (always the same object for a given entry name)
-    ''' </returns>
-    Private Function GetOrCreateNewCachedSection(section As iniSection) As iniSection
-
-        SyncLock _state.Caches.CachedNewEntries
-
-            Dim cached As iniSection = Nothing
-            If Not _state.Caches.CachedNewEntries.TryGetValue(section.Name, cached) Then
-
-                cached = section
-                _state.Caches.CachedNewEntries(section.Name) = cached
-
-            End If
-
-            Return cached
-
-        End SyncLock
-
-    End Function
-
-    ''' <summary>
     ''' Scores each candidate against the old entry's FileKeys and RegKeys and returns a
     ''' <see cref="MatchResult"/>. The first candidate in <paramref name="candidates"/> that
     ''' qualifies as a rename wins at once: it must be an added entry that matches every old
@@ -161,7 +103,6 @@ Public Class MergeDetector
         Dim highestMatchCount = 0
         Dim qualifyingMergeTargets As New List(Of String)
 
-        oldSection = GetOrCreateCachedSection(oldSection)
         Dim oldFileKeys = oldSection.Keys.GetByType("FileKey")
         Dim oldRegKeys = oldSection.Keys.GetByType("RegKey")
 
@@ -172,8 +113,7 @@ Public Class MergeDetector
 
         For Each candidateSection In candidates
 
-            Dim newSection = GetOrCreateNewCachedSection(candidateSection)
-            Dim matchInfo = GetOrComputeMatchInfo(oldSection.Name, candidateSection.Name, newSection, oldFileKeys, oldRegKeys, oldHasFileKeys, oldHasRegKeys)
+            Dim matchInfo = AssessKeyMatches(candidateSection, oldFileKeys, oldRegKeys, oldHasFileKeys, oldHasRegKeys)
 
             If matchInfo.TotalMatches > highestMatchCount Then highestMatchCount = matchInfo.TotalMatches
 
@@ -209,60 +149,6 @@ Public Class MergeDetector
         result.TargetName = qualifyingMergeTargets(0)
         result.TotalMatchedKeys = highestMatchCount
         Return result
-
-    End Function
-
-    ''' <summary>
-    ''' Returns a cached <see cref="KeyMatchInfo"/> for the old/new entry pair, computing and caching it on first access.
-    ''' The cache key is <c> "{oldName}|{newName}" </c>, compared case-sensitively.
-    ''' </summary>
-    ''' 
-    ''' <param name="oldName">
-    ''' Name of the old (removed) entry; forms the cache key prefix
-    ''' </param>
-    ''' 
-    ''' <param name="newName">
-    ''' Name of the new (candidate) entry; forms the cache key suffix
-    ''' </param>
-    ''' 
-    ''' <param name="newSection">
-    ''' The candidate section whose keys are matched against the old entry's keys
-    ''' </param>
-    ''' 
-    ''' <param name="oldFileKeys">
-    ''' Pre-computed FileKey list from the old entry
-    ''' </param>
-    ''' 
-    ''' <param name="oldRegKeys">
-    ''' Pre-computed RegKey list from the old entry
-    ''' </param>
-    ''' 
-    ''' <param name="oldHasFileKeys">
-    ''' Indicates whether the old entry has any FileKeys
-    ''' </param>
-    ''' 
-    ''' <param name="oldHasRegKeys">
-    ''' Indicates whether the old entry has any RegKeys
-    ''' </param>
-    ''' 
-    ''' <returns>
-    ''' A <c> KeyMatchInfo </c> with match counts and flags for the old/new pair
-    ''' </returns>
-    Private Function GetOrComputeMatchInfo(oldName As String,
-                                           newName As String,
-                                           newSection As iniSection,
-                                           oldFileKeys As IReadOnlyList(Of iniKey),
-                                           oldRegKeys As IReadOnlyList(Of iniKey),
-                                           oldHasFileKeys As Boolean,
-                                           oldHasRegKeys As Boolean) As KeyMatchInfo
-
-        Dim cacheKey = $"{oldName}|{newName}"
-        Dim cachedResult As KeyMatchInfo = Nothing
-        If _state.Caches.MatchInfoCache.TryGetValue(cacheKey, cachedResult) Then Return cachedResult
-
-        Dim matchInfo = AssessKeyMatches(newSection, oldFileKeys, oldRegKeys, oldHasFileKeys, oldHasRegKeys)
-        _state.Caches.MatchInfoCache.TryAdd(cacheKey, matchInfo)
-        Return matchInfo
 
     End Function
 
