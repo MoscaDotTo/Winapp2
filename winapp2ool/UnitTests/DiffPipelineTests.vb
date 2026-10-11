@@ -333,7 +333,7 @@ Public Class DiffPipelineTests
         Assert.IsTrue(ownRemoval >= 0 AndAlso header > ownRemoval AndAlso dropped > header, output)
 
         Dim modifiedHeader = output.IndexOf("Delta * has been modified", StringComparison.Ordinal)
-        Dim sources = output.IndexOf("This entry contains merged keys from 1 removed entry:", StringComparison.Ordinal)
+        Dim sources = output.IndexOf("This entry contains content originating from 1 removed entry:", StringComparison.Ordinal)
         Assert.IsTrue(modifiedHeader >= 0 AndAlso sources > modifiedHeader AndAlso ownRemoval > sources, output)
 
         Dim removedHeading = output.IndexOf("1 key removed:", StringComparison.Ordinal)
@@ -462,7 +462,7 @@ Public Class DiffPipelineTests
 
         Assert.AreEqual(2, Diff.MostRecentDiffOutcome.MergedEntries)
         StringAssert.Contains(output, "Gamma * has been added")
-        StringAssert.Contains(output, "This entry contains merged keys from 2 removed entries:")
+        StringAssert.Contains(output, "This entry contains content originating from 2 removed entries:")
         Assert.IsFalse(output.Contains("Entry Name has been modified"), output)
 
     End Sub
