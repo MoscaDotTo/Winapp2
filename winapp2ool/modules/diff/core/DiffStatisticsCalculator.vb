@@ -136,6 +136,13 @@ Public Class DiffStatisticsCalculator
 
             End If
 
+            If block.CarriedOver.Count > 0 Then
+
+                _state.Statistics.ModEntriesCarriedOverKeysTotal += block.CarriedOver.Count
+                _state.Statistics.ModEntriesCarriedOverKeysEntryCount += 1
+
+            End If
+
             If block.Removed.Count > 0 Then
 
                 _state.Statistics.ModEntriesRemovedKeysWithoutReplacementTotal += block.Removed.Count

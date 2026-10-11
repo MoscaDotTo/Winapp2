@@ -42,6 +42,13 @@ Public Class ModifiedEntryBlock
     Public ReadOnly Property Added As List(Of iniKey)
 
     ''' <summary>
+    ''' In a merger block, the keys the entry took in unchanged from a merged source that its own
+    ''' old version didn't have. Its re-diff compares against the sources' keys too, so it counts
+    ''' them as unchanged and no other list shows them.
+    ''' </summary>
+    Public ReadOnly Property CarriedOver As List(Of iniKey)
+
+    ''' <summary>
     ''' The added keys that didn't move in from another entry. The summary counts moved-in keys
     ''' on their own line, so this is what it counts as added.
     ''' </summary>
@@ -75,11 +82,16 @@ Public Class ModifiedEntryBlock
     ''' were its own
     ''' </param>
     '''
+    ''' <param name="newFile">
+    ''' The new version of winapp2.ini, whose version of the entry holds the keys it carried over
+    ''' </param>
+    '''
     ''' <param name="name">
     ''' The name of an entry in <c> ModifiedEntryNames </c>
     ''' </param>
     Friend Sub New(state As DiffState,
                    oldFile As iniFile,
+                   newFile As iniFile,
                    name As String)
 
         Me.Name = name
@@ -99,6 +111,7 @@ Public Class ModifiedEntryBlock
             Novel = Added
             Removed = allRemoved
             Dropped = New List(Of iniKey)
+            CarriedOver = New List(Of iniKey)
             Return
 
         End If
@@ -117,6 +130,26 @@ Public Class ModifiedEntryBlock
         Removed = allRemoved.Where(wasOwnKey).ToList()
         Dropped = allRemoved.Where(Function(key) Not wasOwnKey(key)).ToList()
 
+        ' Sources match on value alone, as an added merger block's carried-over keys and the
+        ' source credits do
+        Dim sourceValues As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+        Dim sources As List(Of String) = Nothing
+        If Not state.MergedEntries.MergeDict.TryGetValue(name, sources) Then sources = New List(Of String)
+
+        For Each source In sources.Where(Function(n) oldFile.Contains(n))
+
+            For Each key In oldFile.GetSection(source).Keys : sourceValues.Add(key.Value) : Next
+
+        Next
+
+        Dim isSameKey = Function(a As iniKey, b As iniKey) String.Equals(a.KeyType, b.KeyType, StringComparison.OrdinalIgnoreCase) AndAlso
+                                                           String.Equals(a.Value, b.Value, StringComparison.OrdinalIgnoreCase)
+        Dim isListed = Function(key As iniKey) Added.Any(Function(a) isSameKey(a, key)) OrElse Updated.Keys.Any(Function(u) isSameKey(u, key))
+
+        CarriedOver = newFile.GetSection(name).Keys.Where(Function(key) sourceValues.Contains(key.Value) AndAlso
+                                                                        Not wasOwnKey(key) AndAlso
+                                                                        Not isListed(key)).ToList()
+
     End Sub
 
     ''' <summary>
@@ -132,11 +165,16 @@ Public Class ModifiedEntryBlock
     ''' <param name="oldFile">
     ''' The old version of winapp2.ini
     ''' </param>
+    '''
+    ''' <param name="newFile">
+    ''' The new version of winapp2.ini
+    ''' </param>
     Friend Shared Sub BuildAll(state As DiffState,
-                               oldFile As iniFile)
+                               oldFile As iniFile,
+                               newFile As iniFile)
 
         For Each entryName In state.ModifiedEntries.ModifiedEntryNames
-            state.ModifiedBlocks(entryName) = New ModifiedEntryBlock(state, oldFile, entryName)
+            state.ModifiedBlocks(entryName) = New ModifiedEntryBlock(state, oldFile, newFile, entryName)
         Next
 
     End Sub

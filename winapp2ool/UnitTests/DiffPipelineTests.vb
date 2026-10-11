@@ -721,10 +721,11 @@ Public Class DiffPipelineTests
 
     ''' <summary>
     ''' A modified entry whose only change is taking in a removed entry's key lists no added key,
-    ''' as when it also gains a key of its own, but still gets its block with the source list
+    ''' as when it also gains a key of its own. Its block lists the merged key as carried over
+    ''' instead, and the keys both entries already had not at all.
     ''' </summary>
     <TestMethod>
-    Public Sub PureMergerIntoModifiedEntry_ListsNoMergedKeyAsAdded()
+    Public Sub PureMergerIntoModifiedEntry_ListsMergedKeyAsCarriedOver()
 
         Dim texts = MergeIntoModifiedTexts(withNovelKey:=False)
         Dim output = RunDiff(texts.Item1, texts.Item2)
@@ -735,7 +736,58 @@ Public Class DiffPipelineTests
         StringAssert.Contains(output, "Alpha Tool * has been modified")
         StringAssert.Contains(output, "1 removed entry:")
         Assert.IsFalse(output.Contains("Added 1 FileKey"), output)
-        Assert.IsFalse(output.Contains("(from [Alpha Tool Cache *])"), output)
+        StringAssert.Contains(output, "1 key carried over from merged entries:")
+        StringAssert.Contains(output, "Carried over 1 FileKey")
+        StringAssert.Contains(output, "FileKey2=%LocalAppData%\Alpha\Cache|*|RECURSE (from [Alpha Tool Cache *])")
+        Assert.IsFalse(output.Contains("Carried over 1 DetectFile"), output)
+        StringAssert.Contains(output, "= 1 entry contains 1 key carried over unchanged from merged sources")
+
+    End Sub
+
+    ''' <summary>
+    ''' A modified entry that took in a removed entry's key and gained one of its own lists the
+    ''' first as carried over and the second as added, and the summary counts each on its own line
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoModifiedEntry_ListsCarriedOverKeysApartFromAdded()
+
+        Dim texts = MergeIntoModifiedTexts(withNovelKey:=True)
+        Dim output = RunDiff(texts.Item1, texts.Item2)
+
+        Dim added = output.IndexOf("1 key added:", StringComparison.Ordinal)
+        Dim carried = output.IndexOf("1 key carried over from merged entries:", StringComparison.Ordinal)
+        Dim carriedKey = output.IndexOf("FileKey3=%LocalAppData%\Alpha\Cache|*|RECURSE (from [Alpha Tool Cache *])", StringComparison.Ordinal)
+
+        Assert.IsTrue(added >= 0 AndAlso carried > added AndAlso carriedKey > carried, output)
+        Assert.AreEqual(1, Diff.MostRecentDiffOutcome.AddedKeys)
+        StringAssert.Contains(output, "+ 1 added key across 1 entry")
+        StringAssert.Contains(output, "= 1 entry contains 1 key carried over unchanged from merged sources")
+
+    End Sub
+
+    ''' <summary>
+    ''' A key carried over from a source is listed even when the entry's updated Detect has the
+    ''' same value, since a Detect and a RegKey often share one
+    ''' </summary>
+    <TestMethod>
+    Public Sub MergerIntoModifiedEntry_CarriesOverKeySharingAnUpdatedKeysValue()
+
+        Dim oldText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\AlphaSoft\Alpha Tool" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf & vbCrLf &
+            "[Alpha Tool Cache *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "DetectFile=%LocalAppData%\Alpha" & vbCrLf &
+            "FileKey1=%LocalAppData%\Alpha\Cache|*|RECURSE" & vbCrLf & "RegKey1=HKCU\Software\AlphaSoft\Alpha" & vbCrLf
+
+        Dim newText =
+            "[Alpha Tool *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\AlphaSoft\Alpha" & vbCrLf &
+            "FileKey1=%AppData%\Alpha\Logs|*.log" & vbCrLf & "FileKey2=%LocalAppData%\Alpha\Cache|*|RECURSE" & vbCrLf &
+            "RegKey1=HKCU\Software\AlphaSoft\Alpha" & vbCrLf
+
+        Dim output = RunDiff(oldText, newText)
+
+        StringAssert.Contains(output, "2 keys carried over from merged entries:")
+        StringAssert.Contains(output, "RegKey1=HKCU\Software\AlphaSoft\Alpha (from [Alpha Tool Cache *])")
+        StringAssert.Contains(output, "= 1 entry contains 2 keys carried over unchanged from merged sources")
 
     End Sub
 

@@ -366,7 +366,7 @@ Module Diff
         doStep("· matching removed entries       ", Sub() detector.ProcessRemovals())
         doStep("· tracking keys across entries   ", Sub() statsCalc.DetectCrossEntryMovements())
         doStep("· diffing merged entries        ", Sub() mergers.Analyze())
-        doStep("· collecting modified entries   ", Sub() ModifiedEntryBlock.BuildAll(state, oldFile))
+        doStep("· collecting modified entries   ", Sub() ModifiedEntryBlock.BuildAll(state, oldFile, newFile))
         doStep("· calculating modified statistics", Sub() statsCalc.CalculateModifiedStatistics())
         doStep("· calculating rename statistics  ", Sub() statsCalc.CalculateRenameStatistics())
         doStep("· calculating merger statistics ", Sub() statsCalc.CalculateAddedWithMergersStatistics())

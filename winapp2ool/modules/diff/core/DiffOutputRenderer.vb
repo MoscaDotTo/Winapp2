@@ -257,6 +257,7 @@ Public Class DiffOutputRenderer
         Dim movedIntoRenamed = $"    & {Plural(stats.MovedIntoRenamedKeyTotal, "key")} moved into {Plural(stats.MovedIntoRenamedEntryCount, "renamed entry", "renamed entries")}"
         Dim movedIntoAdded = $"    + {Plural(stats.MovedIntoAddedKeyTotal, "key")} moved into {Plural(stats.MovedIntoAddedEntryCount, "added entry", "added entries")}"
         Dim modifiedMergerNote = $" + {Entries(modifiedEntriesWithMergers)} also received merged content from removed entries (see merged entries below)"
+        Dim modifiedMergersCarriedOver = $"    = {Entries(stats.ModEntriesCarriedOverKeysEntryCount)} {Agree(stats.ModEntriesCarriedOverKeysEntryCount, "contain")} {Plural(stats.ModEntriesCarriedOverKeysTotal, "key")} carried over unchanged from merged sources"
 
         Dim removedSummary = $"Removed entries: {modified.RemovedEntryNames.Count}"
         Dim removedMergedTotal = merged.OldToNewMergeDict.Count
@@ -323,6 +324,7 @@ Public Class DiffOutputRenderer
             Emit(out, movedIntoRenamed, ConsoleColor.Cyan, stats.MovedIntoRenamedKeyTotal > 0)
             Emit(out, movedIntoAdded, ConsoleColor.Cyan, stats.MovedIntoAddedKeyTotal > 0)
             Emit(out, modifiedMergerNote, ConsoleColor.DarkCyan, hasMergedIntoModified)
+            Emit(out, modifiedMergersCarriedOver, ConsoleColor.Cyan, stats.ModEntriesCarriedOverKeysTotal > 0)
             Emit(out, removedSummary, ConsoleColor.Cyan)
             Emit(out, removedMergedSummary, ConsoleColor.Cyan, hasMerged)
             Emit(out, removedMergedIntoModified, ConsoleColor.Cyan, hasMerged AndAlso hasMergedIntoModified)
@@ -675,8 +677,9 @@ Public Class DiffOutputRenderer
     End Function
 
     ''' <summary>
-    ''' Itemizes the added, removed and updated keys of each modified entry and writes them to the
-    ''' global log. Renamed entries are always skipped.
+    ''' Itemizes the added, removed and updated keys of each modified entry, and the keys a merger
+    ''' block carried over or dropped from its sources, and writes them to the global log. Renamed
+    ''' entries are always skipped.
     ''' </summary>
     '''
     ''' <param name="isMerger">
@@ -704,7 +707,7 @@ Public Class DiffOutputRenderer
             ' A merger block always prints, since its source list is news even when the entry
             ' took in nothing it didn't already have
             Dim block = _state.ModifiedBlocks(entry)
-            Dim hasKeyChanges = block.Added.Count + block.Removed.Count + block.Dropped.Count + block.Updated.Count > 0
+            Dim hasKeyChanges = block.Added.Count + block.CarriedOver.Count + block.Removed.Count + block.Dropped.Count + block.Updated.Count > 0
             If Not isMerger AndAlso Not hasKeyChanges AndAlso Not HasMoves(entry, includeMovedIn:=True) Then Continue For
 
             qualifying.Add(entry)
@@ -717,7 +720,7 @@ Public Class DiffOutputRenderer
 
                               For Each entry In qualifying
 
-                                  Dim addKeyTypes, remKeyTypes, dropKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
+                                  Dim addKeyTypes, carryKeyTypes, remKeyTypes, dropKeyTypes, modKeyTypes As New Dictionary(Of String, Integer)(StringComparer.OrdinalIgnoreCase)
                                   Dim newSectionVer = _file2.GetSection(entry)
                                   Dim block = _state.ModifiedBlocks(entry)
                                   Dim sourceMap As Dictionary(Of String, String) = Nothing
@@ -726,6 +729,7 @@ Public Class DiffOutputRenderer
                                   results.Add(MakeDiff(newSectionVer, 2))
                                   If isMerger Then results.Add(ItemizeMergeSources(entry, "  "))
                                   results.AddRange(ItemizeChangesFromList(block.Added, True, addKeyTypes, "added:", ConsoleColor.Green, "  ", sourceMap))
+                                  results.AddRange(ItemizeChangesFromList(block.CarriedOver, True, carryKeyTypes, "carried over from merged entries:", ConsoleColor.DarkGreen, "  ", sourceMap, "Carried over"))
                                   results.AddRange(ItemizeChangesFromList(block.Removed, False, remKeyTypes, "removed:", ConsoleColor.Red, "  ", sourceMap))
                                   results.AddRange(ItemizeDroppedKeys(entry, block.Dropped, dropKeyTypes, sourceMap, "  "))
                                   results.AddRange(ItemizeUpdatedKeys(block.Updated, modKeyTypes, "modified:", "  ", sourceMap))

@@ -219,6 +219,17 @@ Public Class DiffStatistics
     Public Property ModEntriesAddedKeyEntryCount As Integer = 0
 
     ''' <summary>
+    ''' Counts total keys modified entries carried over unchanged from merged source entries
+    ''' </summary>
+    Public Property ModEntriesCarriedOverKeysTotal As Integer = 0
+
+    ''' <summary>
+    ''' Counts modified entries that carried over at least one key unchanged from a merged source
+    ''' entry
+    ''' </summary>
+    Public Property ModEntriesCarriedOverKeysEntryCount As Integer = 0
+
+    ''' <summary>
     ''' Counts modified entries that have at least one removed key
     ''' </summary>
     Public Property ModEntriesRemovedKeyEntryCount As Integer = 0
@@ -417,6 +428,8 @@ Public Class DiffStatistics
         AddedWithMergersDroppedKeysTotal = 0
         ModEntriesAddedKeyTotal = 0
         ModEntriesAddedKeyEntryCount = 0
+        ModEntriesCarriedOverKeysEntryCount = 0
+        ModEntriesCarriedOverKeysTotal = 0
         ModEntriesRemovedKeyEntryCount = 0
         ModEntriesUpdatedKeyTotal = 0
         ModEntriesReplacedByUpdateTotal = 0
