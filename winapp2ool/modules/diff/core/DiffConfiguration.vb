@@ -41,13 +41,14 @@ Public Module DiffConfiguration
     ''' <summary>
     ''' File system and registry locations too vague to show on their own that two entries share
     ''' content. Rename and merge detection doesn't count a key as matched when the old key's
-    ''' value, or a fuzzy-matched new key's path, is exactly one of these (case-sensitive).
+    ''' value, or a fuzzy-matched new key's path, is one of these, ignoring case. Matching runs
+    ''' after <see cref="PathReplacements"/> has rewritten both files, so an entry naming a form it
+    ''' replaces can never match. A FileKey's value includes its patterns, so the old-key test never
+    ''' rejects one: <c> %UserProfile%|Sti_Trace.log </c> in both entries is real evidence.
     ''' </summary>
-
-    Public ReadOnly Property DisallowedPaths As New HashSet(Of String) From {
-                "%Documents%\Add-in Express", "%UserProfile%\Desktop", "%LocalAppData%",
-                "%WinDir%\System32", "%SystemDrive%", "%WinDir%", "%UserProfile%", "%Documents%",
-                "%CommonAppData%", "%AppData%", "%Pictures%", "%Public%", "%Music%", "%Video%",
+    Public ReadOnly Property DisallowedPaths As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
+                "%UserProfile%\Desktop", "%LocalAppData%", "%WinDir%\System32", "%SystemDrive%", "%WinDir%",
+                "%UserProfile%", "%AppData%", "%Public%",
                 "HKCU\Software\Microsoft\Windows", "HKLM\Software\Microsoft\Windows",
                 "HKCU\Software\Microsoft\VisualStudio", "%LocalAppData%\Microsoft\Edge*",
                 "HKCU\Software\Opera Software", "HKCU\Software\Vivaldi", "HKCU\Software\BraveSoftware",

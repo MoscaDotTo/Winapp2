@@ -239,7 +239,7 @@ Public Class MergeDetector
     ''' against each new key in turn. An old key whose whole value is in
     ''' <paramref name="disallowedValues"/> never counts, and a <see cref="KeyComparisonStrategyFactory.CompareKeys"/>
     ''' match is rejected when the new key's path (before its first <c> | </c>) is in it. Both
-    ''' lookups use the set's own comparer, which for <c> DisallowedPaths </c> is case-sensitive.
+    ''' lookups use the set's own comparer, which for <c> DisallowedPaths </c> ignores case.
     ''' </summary>
     ''' 
     ''' <param name="oldKeys">
