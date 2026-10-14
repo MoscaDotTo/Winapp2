@@ -95,7 +95,7 @@ Before running Diff, you can toggle several settings from the Diff menu:
 
 - **Remote Diffing:** Downloading and diffing against GitHub is enabled by default. Select `Toggle diffing against GitHub` to disable.
 - **Verbose Mode:** Select `Toggle verbose mode` to print the full text of each changed entry alongside the key-change summary.
-- **Trimming:** When diffing against GitHub, trimming is enabled by default. Select `Toggle remote file trim` to disable.
+- **Trimming:** When diffing against GitHub, trimming is enabled by default. Select `Toggle remote file trim` to disable. In offline mode, both downloading and trimming default to off.
 - **Logging:** Saving the diff log (which includes the Source Entry Key Status Report) is disabled by default. Select `Toggle log saving` to enable.
 - Use `Choose older/local file` to specify an older/local `winapp2.ini` in a different directory or with a different name.
 - Use `Choose newer file` to specify a newer local `winapp2.ini` when diffing against GitHub is disabled.
@@ -121,6 +121,10 @@ Use this to compare two specific versions already on your machine.
 4. Select `Choose newer file` to select the newer copy of `winapp2.ini`.
 5. Select `Run`.
 
+### Running Diff from the winapp2ool main menu
+
+When a new winapp2.ini is available, the main menu offers `Show winapp2.ini changelog` and `Show trimmed changelog`. Both diff the `winapp2.ini` in the current directory against the latest file of the current flavor, and the second trims the download first. They follow the Diff module's other settings (verbose modeand log saving) but never change them.
+
 ## Flavors
 
 winapp2.ini is published in several **flavors** which are variants designed to suit individual applications. When Diff downloads the "newer" file it resolves the current flavor setting to pick which published file to fetch, exactly as the Download module does.
@@ -138,7 +142,7 @@ Set the flavor for a single run with a CLI flag (see [Flavor Selection](#flavor-
 | Run (default) | Compare the two files and display the changelog | A "newer" file must be selected or downloading must be enabled. Pressing `Enter` on an empty prompt runs it too |
 | Toggle diffing against GitHub | Enable or disable downloading the latest winapp2.ini as the "newer" file | Default: `Enabled`. Unavailable in offline mode |
 | Toggle remote file trim | Enable or disable trimming the downloaded file for the current system before diffing | Default: `Enabled`; only available when downloading |
-| Toggle log saving | Enable or disable saving the diff output to disk | Default: `False` |
+| Toggle log saving | Enable or disable saving the diff output to disk | Default: `Disabled` |
 | Toggle verbose mode | Print the full text of changed entries alongside each change | Default: `Disabled`; CLI: `-verbose` |
 | Choose older/local file | Select the "old" version of winapp2.ini | Default: `winapp2.ini` in the current directory |
 | Choose newer file | Select the "new" version of winapp2.ini | Only shown when downloading is disabled |
@@ -168,7 +172,7 @@ Entirely new entries with no connection to any removed entry appear as a single 
 
 ### Entries consolidating removed entries
 
-When a new entry contains keys from one or more removed entries, its header is followed by a `This entry contains merged keys from N removed entries:` line listing the source entries. Diff then sorts the keys of the new entry and its sources into these categories:
+When a new entry contains keys from one or more removed entries, its header is followed by a `This entry contains content originating from N removed entries:` line listing the source entries. Diff then sorts the keys of the new entry and its sources into these categories:
 
 | Category | Type | Annotation | Conditions |
 |:-|:-|:-|:-|
@@ -202,7 +206,7 @@ FileKey2=%LocalAppData%\Abelssoft\PCFresh\Backup|*
 **Diff output:**
 ```
    Abelssoft PCFresh * has been added
-   This entry contains merged keys from 1 removed entry:
+   This entry contains content originating from 1 removed entry:
      - Abelssoft PCFresh Backups *
 
    1 key added:
@@ -257,7 +261,7 @@ FileKey1=%AppData%\EFSoftware|*Cache
 
 ```
    EFSoftware  * has been added
-   This entry contains merged keys from 2 removed entries:
+   This entry contains content originating from 2 removed entries:
      - EF Duplicate Files Manager *
      - EF Duplicate MP3 Finder *
 
@@ -328,7 +332,7 @@ FileKey4=%UserProfile%\Documents\Cook'n*|*.log|RECURSE
 
 ```
    Cook'n * has been added
-   This entry contains merged keys from 3 removed entries:
+   This entry contains content originating from 3 removed entries:
      - Cook'n Cache *
      - Cook'n Dups *
      - Cook'n Logs *
@@ -375,7 +379,8 @@ Modified output itemizes five kinds of key-level change:
 - **Removed keys**: present in the old entry with no detected equivalent in the new entry or anywhere else
 - **Modified keys**: a key whose value changed, shown as `X has been modified, replacing N old keys`; in the simple case one old key was updated to a new value; in more complex cases a single new key uses a wildcard or semicolon-joined pattern to capture multiple old keys
 - **Moved keys**: keys that left this entry for another one, listed under `N keys moved to other entries:` as `FileKey2=... moved to [Other *]`. See [Cross-Entry Key Movements](#cross-entry-key-movements)
-- **Moved-in keys**: keys this entry took from another entry that still exists, listed under `N keys moved in from other entries:` as `FileKey2=... (from [Other *])`. An entry that also absorbed removed entries lists these among its added keys instead, with the same credit
+- **Moved-in keys**: keys this entry took from another entry that still exists, listed under `N keys moved in from other entries:` as `FileKey2=... (from [Other *])`. An entry that also absorbed removed entries lists these among its added keys instead, with the same credit. 
+ ###### Note: A moved-in key that the block shows as an update or capture of a merged source's key credits only the source, so the key is also listed under `N keys moved in from other entries:`
 
 Each kind has its own list, under a heading with its total (`13 keys added:`, `2 keys removed:`, `7 keys modified:`), followed by a count line for each key type (`Added 2 DetectFiles`). An entry whose only change is a moved key is still itemized.
 
@@ -441,7 +446,7 @@ The replacement of `Detect` with `DetectFile` is paired into a single `Detection
 
 ### Modification by merger
 
-When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Keys the entry's prior version had and lost are listed as removed; keys that only a merged entry had and that didn't survive are listed separately, under `N keys from merged entries not in this entry:`, as in an added entry's merger block. When a removed entry was split across several entries, its keys aren't listed as dropped here. A key that went to one of the others is counted on a closing line that names where it went, eg. `2 other keys from merged entries went to [Windows Font Cache *]`. A key that no entry kept is listed once, in the removed entry's own section under [Merged](#merged), and counted on a second closing line, eg. `173 other keys that no entry kept are listed under [Browser Metrics *], [Crash Reports *], [Download History *] and 8 others`. Each such block opens with the same `This entry contains merged keys from N removed entries:` list as an added entry's, right under its header.
+When entries from the old file are merged into a modified entry, their absorbed keys appear alongside the entry's own changes. The `(from [Entry Name *])` annotation on each old key identifies the old entry or entries from which it came. Keys labeled with the entry's own name came from its prior version; keys labeled with a different name came from a removed entry that was consolidated. Keys the entry's prior version had and lost are listed as removed; keys that only a merged entry had and that didn't survive are listed separately, under `N keys from merged entries not in this entry:`, as in an added entry's merger block. When a removed entry was split across several entries, its keys aren't listed as dropped here. A key that went to one of the others is counted on a closing line that names where it went, eg. `2 other keys from merged entries went to [Windows Font Cache *]`. A key that no entry kept is listed once, in the removed entry's own section under [Merged](#merged), and counted on a second closing line, eg. `173 other keys that no entry kept are listed under [Browser Metrics *], [Crash Reports *], [Download History *] and 8 others`. Each such block opens with the same `This entry contains content originating from N removed entries:` list as an added entry's, right under its header.
 
 In this example, two version-specific log path entries were merged into a single entry using a wildcard to cover both:
 
@@ -476,10 +481,16 @@ FileKey3=%ProgramFiles%\Age of Wonders*|*Log.txt
 
 ```
      Age of Wonders: Shadow Magic * has been merged into Age of Wonders II *
+[...]
 
      Age of Wonders II * has been modified
-     This entry contains merged keys from 1 removed entry:
+     This entry contains content originating from 1 removed entry:
        - Age of Wonders: Shadow Magic *
+
+     1 key carried over from merged entries:
+
+       Carried over 1 FileKey
+             FileKey2=%ProgramFiles%\Age of Wonders Shadow Magic\Resource\Maps|*.bak (from [Age of Wonders: Shadow Magic *])
 
      1 key modified:
 
@@ -496,6 +507,8 @@ FileKey3=%ProgramFiles%\Age of Wonders*|*Log.txt
 The merger itself is reported in the merged-entries list
 
 The key-level detail appears in the modified-with-merged-content section.
+
+Shadow Magic's `Resource\Maps` key survives unchanged as `FileKey2`, so it is listed as carried over and credited to the removed entry.
 
 The `FileKey3` wildcard captures both games' log paths into a single key, one from the removed entry and one from this entry's own prior version.
 
@@ -645,10 +658,12 @@ The entry no longer exists, but its content was absorbed into another entry in t
 
 ```
      .NET Application History * has been merged into .NET Framework *
-
-     Common Language Runtime * has been merged into .NET Framework *
+[...]
 
      Adobe Reader XI * has been merged into Adobe Acrobat Reader *
+[...]
+
+     Common Language Runtime * has been merged into .NET Framework *
 ```
 
 **Sample output (merged into a new entry):**
@@ -657,7 +672,7 @@ The entry no longer exists, but its content was absorbed into another entry in t
      Abelssoft GoogleClean * has been merged into Abelssoft GClean *
 ```
 
-In the added-entries output, the entry's header is followed by `This entry contains merged keys from 1 removed entry:` and the source's name.
+In the added-entries output, the entry's header is followed by `This entry contains content originating from 1 removed entry:` and the source's name.
 
 **Example with before/after context:**
 
@@ -700,9 +715,10 @@ FileKey3=%LocalAppData%\Clover\User Data\temp|*|RECURSE
      Clover Bookmarks Backups * has been merged into Clover *
 
      Clover Session * has been merged into Clover *
+[...]
 
      Clover * has been modified
-     This entry contains merged keys from 2 removed entries:
+     This entry contains content originating from 2 removed entries:
        - Clover Bookmarks Backups *
        - Clover Session *
 
@@ -770,11 +786,13 @@ FileKey10=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\F
        • SeaMonkey Caches *
        • Waterfox Caches *
    
-     13 keys not kept by any of these entries:
+     14 keys not kept by any of these entries:
 
+       Lost 1 LangSecRef
        Lost 9 Detects
        Lost 1 DetectFile
        Lost 3 FileKeys
+             LangSecRef=3026
              Detect1=HKCU\Software\ArtistScope\ArtisBrowser
              Detect2=HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\SystemAppData\Mozilla.Firefox_n80bbvh6b1yt2
              Detect3=HKCU\Software\LibreWolf
@@ -790,7 +808,7 @@ FileKey10=%LocalAppData%\Packages\Mozilla.Firefox_*\LocalCache\Roaming\Mozilla\F
              FileKey5=%AppData%\Moonchild Productions\Basilisk\Profiles\*|AlternateServices.txt
 ```
 
-The new entries detect their browsers with other keys (`LibreWolf Caches *`, for one, uses `DetectFile1=%AppData%\librewolf\Profiles`), so none of the old Detects survive verbatim.
+The new entries detect their browsers with other keys (`LibreWolf Caches *`, for one, uses `DetectFile1=%AppData%\librewolf\Profiles`), so none of the old Detects survive verbatim. They are categorized by `Section=` rather than `LangSecRef=3026`, so the old category key is lost too.
 
 Six of the nine browser FileKeys were matched in six new per-browser entries.
 
@@ -873,8 +891,8 @@ A diff run produces output in the following order. Each section opens with a des
 
 | # | Section | Header line | Closing count line |
 |:-|:-|:-|:-|
-| 1 | Run header | `Beginning Diff`, `Diff:  version XXXXXX ->  version XXXXXX` | |
-| 2 | Browser categories new to the database | `Web Browser additions` | `N web browsers added` |
+| 1 | Run header | `Beginning Diff`, `Diff: version XXXXXX -> version XXXXXX` | |
+| 2 | Browser categories new to the database, then any no longer in it | `Web Browser additions`, `Web Browser removals` | `N web browsers added`, `N web browsers removed` |
 | 3 | Entries removed without replacement | `Entries removed without replacement:` | `- N removed without replacement` |
 | 4 | Name-only renames, old name → new name | `Entries renamed without other changes:` | `N entries renamed (name-only changes)` |
 | 5 | Mergers, including split/merged entries | `Entries merged or split into other entries:` | `N entries merged or split into other entries` |
@@ -887,9 +905,9 @@ A diff run produces output in the following order. Each section opens with a des
 | 12 | Per-key capture status for merged sources | `SOURCE ENTRY KEY STATUS REPORT:` | `KEY STATUS SUMMARY:` table |
 | 13 | Timing and aggregate counts | `Total diff time:`, `Diff Summary` | `Diff complete` |
 
-Section 8 is omitted when no cross-entry movements were detected. Section 12 is written only to the saved log; use log saving (`-savelog`) or the Log Viewer to see it.
+Each browser list in section 2 is omitted when it would be empty, and so is section 8 when no cross-entry movements were detected. Section 12 is written only to the saved log; use log saving (`-savelog`) or the Log Viewer to see it. A file without a `; Version:` line reads as `version not given` in the run header.
 
-When a run finds nothing at all, section 13 is displayed instead as `No changes detected across N entries`
+When a run finds nothing at all, the Diff Summary is the single line `No changes detected across N entries`, counting the new file's entries. The log still carries an empty `Entries removed without replacement:` section closed by `- 0 removed without replacement`.
 
 ## Console Output vs. Saved Log
 
@@ -908,7 +926,7 @@ The following is a trimmed extract of the saved log for a real diff run comparin
 
 ```
 Beginning Diff
-Diff:  version 220510 ->  version 251109
+Diff: version 220510 -> version 251109
 
  Web Browser additions
 
@@ -946,42 +964,43 @@ Diff:  version 220510 ->  version 251109
      3D Viewer * has been merged into Microsoft 3D Viewer *
 [...]
 
- 548 entries merged or split into other entries
+ 547 entries merged or split into other entries
 
  Minor changes to renamed entries:
 
-     Avast TuneUp * has been renamed to Avast Cleanup *
-
-     12 keys added:
-
-       Added 1 Detect
-       Added 1 DetectFile
-       Added 10 FileKeys
-             Detect2=HKLM\Software\AVAST Software\Tuneup
-[...]
-
- Minor changes to 41 renamed entries
-
- Modified entries incorporating merged content:
-
-     Age of Wonders II * has been modified
-     This entry contains merged keys from 1 removed entry:
-       - Age of Wonders: Shadow Magic *
+     Abelssoft SSD Fresh Backups * has been renamed to Abelssoft SSD Fresh *
 
      1 key modified:
 
        Modified 1 FileKey
+
+       FileKey1 has been modified, replacing 1 old key
+              + New: FileKey1=%LocalAppData%\Abelssoft\SSD Fresh|backup.*;*.log
+              - Old: FileKey1=%LocalAppData%\Abelssoft\SSD Fresh|backup.*
+[...]
+
+ Minor changes to 42 renamed entries
+
+ Modified entries incorporating merged content:
+
+     .NET Framework * has been modified
+     This entry contains content originating from 5 removed entries:
+       - .NET Application History *
+       - .NET Framework Isolated Storage *
+       - Common Language Runtime *
+       - Font Cache *
+       - Presentation Foundation *
 [...]
 
  135 modified entries incorporating merged content
 
  Cross-Entry key movements:
 
-   CleanMyPC Registry Cleaner * moved 1 key:
-       -> FileKey2=%WinDir%\$regcmp$|*|REMOVESELF moved to [Windows Subsystems *]
+   Adobe Acrobat Distiller * moved 1 key:
+       -> FileKey1=%AppData%\Adobe\Acrobat\Distiller*|*.log moved to [Adobe *]
 [...]
 
- 7 keys moved between entries (3 source entries)
+ 100 keys moved between entries (41 source entries)
 
  Modified entries:
 
@@ -996,12 +1015,12 @@ Diff:  version 220510 ->  version 251109
               - Old: Detect=HKCU\Software\Valve\Steam\Apps\270090
 [...]
 
- 323 modified entries
+ 325 modified entries
 
  Added entries containing merged content:
 
    Abelssoft GClean * has been added
-   This entry contains merged keys from 1 removed entry:
+   This entry contains content originating from 1 removed entry:
      - Abelssoft GoogleClean *
 
    1 key added:
@@ -1013,9 +1032,10 @@ Diff:  version 220510 ->  version 251109
 
        Carried over 1 LangSecRef
        Carried over 2 FileKeys
+             LangSecRef=3024 (from [Abelssoft GoogleClean *])
 [...]
 
- 317 added entries consolidating removed content
+ 316 added entries consolidating removed content
 
  Added entries:
 
@@ -1028,35 +1048,40 @@ Diff:  version 220510 ->  version 251109
  SOURCE ENTRY KEY STATUS REPORT:
 [...]
 
- Total diff time: 00:00:02.1611092
+ Total diff time: 00:00:03.2057302
 
  Diff Summary
    Net entry count change: 3257 → 3715 (+458)
     + 49 new browsers added
    Modified entries: 460
-    + 878 added keys across 276 entries
-    - 430 removed keys without replacement across 191 entries
-    ~ 354 updated keys replaced 503 old keys across 211 entries
-    ~ 7 keys moved from 3 entries into 2 entries
+    + 486 added keys across 196 entries
+    - 344 removed keys without replacement across 163 entries
+    ~ 388 updated keys replaced 603 old keys across 220 entries
+    ~ 100 keys moved from 41 entries into 24 entries
+       ~ 2 keys moved into 1 modified entry
+       & 5 keys moved into 1 renamed entry
+       + 93 keys moved into 22 added entries
     + 135 entries also received merged content from removed entries (see merged entries below)
+       = 118 entries contain 365 keys carried over unchanged from merged sources
    Removed entries: 1227
-    @ 548 removed entries have been merged into other entries
+    @ 547 removed entries have been merged into other entries
        @ 175 merged into 135 modified entries
-       + 383 merged into 317 added entries
-    & 153 removed entries have been renamed
+       + 382 merged into 316 added entries
+       - 77 split entries lost 1481 keys that no entry kept
+    & 154 removed entries have been renamed
        = 112 are name-only changes (no key differences)
        + 25 added keys across 12 entries
        - 23 removed keys across 21 entries
-       ~ 65 updated keys replaced 77 old keys across 29 entries
+       ~ 66 updated keys replaced 78 old keys across 30 entries
     - 526 entries have been removed without replacement
    Added entries: 1685
-    @ 317 entries consolidate content from 383 removed entries
-       + 175 entries contain 1096 novel keys (not from merged sources)
-       = 139 entries contain 856 keys carried over unchanged from merged sources
-       ~ 259 entries contain 936 keys capturing 1826 removed keys
-       - 261 entries dropped 686 keys from merged sources
+    @ 316 entries consolidate content from 382 removed entries
+       + 174 entries contain 1078 novel keys (not from merged sources)
+       = 222 entries contain 1246 keys carried over unchanged from merged sources
+       ~ 258 entries contain 935 keys capturing 1278 removed keys
+       - 84 entries dropped 259 keys from merged sources
     + 1215 novel entries (without merged content)
-    & 153 added entries are renamed versions of removed entries and may contain other minor changes
+    & 154 added entries are renamed versions of removed entries and may contain other minor changes
 
 Diff complete
 ```
@@ -1073,19 +1098,24 @@ The entry counts of the old and new files, and the difference between them.
 
 The number of new browser categories detected among the added entries (itemized in the `Web Browser additions` section at the top of the output).
 
+**`- N browsers removed`**
+
+The number of browser categories in the old file that no longer appear in the new one (itemized in the `Web Browser removals` section). Like the line above, it is shown only when nonzero.
+
 ---
 
 **`Modified entries: N`**
 Entries present in both files (by name) that changed in any way.
 
-- `+ N added keys across N entries`: new keys added to existing entries; includes keys absorbed from merged removed entries
-- `- N removed keys without replacement across N entries`: keys deleted with no equivalent in the new entry
+- `+ N added keys across N entries`: new keys added to existing entries. Keys moved in from another entry are counted on the moved line instead, and keys taken over unchanged from merged removed entries on the carried-over line
+- `- N removed keys without replacement across N entries`: keys the entry's own old version had, with no equivalent in the new entry. Keys that only a merged removed entry had are not counted here
 - `~ N updated keys replaced M old keys across N entries`: keys whose values changed; one new key captured one or more old keys via wildcard match or content consolidation
 - `~ N keys moved from X entries into Y entries`: cross-entry key movements; only shown when movements were detected. The X entries are always modified or renamed ones. A moved key isn't also counted as removed. Bullets split the moves by the kind of entry they landed in, each shown only when nonzero:
   - `~ N keys moved into N modified entries`: entries present in both files under the same name
   - `& N keys moved into N renamed entries`
   - `+ N keys moved into N added entries`: new entries, whether novel or consolidating removed entries. Splitting part of an entry out into a new one shows up here
-- `+ N entries also received merged content from removed entries`: how many of the modified entries absorbed removed entries
+- `+ N entries also received merged content from removed entries`: how many of the modified entries absorbed removed entries; one bullet, shown only when nonzero:
+  - `= N entries contain N keys carried over unchanged from merged sources`: keys the entries took in verbatim from a merged source and that their own old version didn't have, as their `carried over from merged entries` groups list them
 
 ---
 
@@ -1099,7 +1129,7 @@ Entries present in the old file but absent from the new file.
 - `& N removed entries have been renamed`: classified as renames; bullets counting how many were name-only vs. included minor changes
 - `- N entries have been removed without replacement`: no matching content found in the new file
 
-> The two merger sub-counts can add up to more than their headline. An entry that was split across both a modified target and an added target is counted in each. In the sample above, 175 + 383 = 558 against a headline of 548, meaning 10 removed entries contributed content to both kinds of target. The same applies to the added-entries bullets, where one entry can appear in several categories at once.
+> The two merger sub-counts can add up to more than their headline. An entry that was split across both a modified target and an added target is counted in each. In the sample above, 175 + 382 = 557 against a headline of 547, meaning 10 removed entries contributed content to both kinds of target. The same applies to the added-entries bullets, where one entry can appear in several categories at once.
 
 ---
 
@@ -1124,7 +1154,7 @@ When **log saving** is enabled, the diff output is also written to disk (`diff.t
 
 When any mergers into *added* entries are present in the diff, a **Source Entry Key Status Report** is written to the saved log between the Added entries section and the Diff Summary. It does not appear in the interactive console output. Use log saving (`-savelog`) or the Log Viewer to see it.
 
-> **Scope:** the report covers only source entries absorbed by **added** entries. Entries merged into *modified* entries, the `@ N merged into N modified entries` line of the summary, are not included. In the sample run, that means 383 of the 548 merged entries appear here and 175 do not.
+> **Scope:** the report covers only source entries absorbed by **added** entries. Entries merged into *modified* entries, the `@ N merged into N modified entries` line of the summary, are not included. In the sample run, that means 382 of the 547 merged entries appear here and 175 do not.
 
 The report shows, for each covered source entry, the full capture status of every key: whether each key was found in the absorbing entry (✓ captured) or absent from it (✗ dropped). Keys are tagged by role:
 
@@ -1165,11 +1195,11 @@ After all per-entry blocks, a summary is shown:
 
 ```
  KEY STATUS SUMMARY:                 Total  Captured  Dropped  Capture Rate
- DELETION  (FileKey/RegKey):          2512      1826      686         72.7%
- DETECTION (Detect/DetectFile):       1252       274      978         21.9%
- CATEGORY  (Section/LangSecRef):       383       165      218         43.1%
+ DELETION  (FileKey/RegKey):          2511      1825      686         72.7%
+ DETECTION (Detect/DetectFile):       1251       273      978         21.8%
+ CATEGORY  (Section/LangSecRef):       382       164      218         42.9%
  OTHER     (Warning etc.):              92        18       74         19.6%
- All keys:                            4239      2283     1956         53.9%
+ All keys:                            4236      2280     1956         53.8%
 ```
 
 ---
@@ -1292,6 +1322,7 @@ Every value is an integer or `true`/`false`, so PowerShell can read the whole fi
 | Download fails | No internet connection, GitHub is unavailable, or the selected flavor has not been published yet |
 | An old key in the log does not match the archived file's text | Deprecated values are rewritten before comparison. See [Value Normalization](#value-normalization) |
 | Log Viewer is not available | Diff has not been run yet during the current session |
+| "Diff complete, but diff.txt was not saved" | Log saving is on, but the save target couldn't be written. Pick a writable folder with `Choose save target` |
 
 ---
 
@@ -1313,11 +1344,13 @@ winapp2ool -diff -base
 
 ```
 Beginning Diff
-Diff:  version 220510 ->  251109
+Diff: version 220510 -> version 260915
 
  Web Browser additions
 
    Chromium Web Browser
+
+   Google Chrome Web Browser
 
    Microsoft Edge Web Browser
 
@@ -1325,20 +1358,25 @@ Diff:  version 220510 ->  251109
 
    Opera Web Browser
 
- 4 web browsers added
+ 5 web browsers added
 
  Entries removed without replacement:
 
-     Boinc * has been removed
+     Accounts Control * has been removed
 
-     Bookmarks Backup * has been removed
+     ActiveSync * has been removed
 
-     Brave Blob Storage * has been removed
+     ART * has been removed
 [...]
 
- - 157 removed without replacement
+ - 167 removed without replacement
 
  Entries renamed without other changes:
+
+     MS Visual Studio Backups * has been renamed to Microsoft Visual Studio Backups *
+
+     MS Visual Studio Installation Packages * has been renamed to Microsoft Visual Studio Installation Packages *
+[...]
 
      RegEdit * has been renamed to Windows Registry Editor *
 
@@ -1350,15 +1388,22 @@ Diff:  version 220510 ->  251109
 
      .NET Framework Isolated Storage * has been merged into .NET Framework *
 
-     Accounts Control * has been merged into Windows Security *
-
-     ActiveSync * has been merged into Microsoft Outlook *
+     Active Setup Temp Folder * has been merged into Windows Subsystems *
 [...]
 
- 203 entries merged or split into other entries
+ 205 entries merged or split into other entries
 [...]
+
+ Cross-Entry key movements:
+
+   ASUS * moved 1 key:
+       -> FileKey2=%ProgramData%\ASUS\*|*.log|RECURSE moved to [ASUS USB Charger Plus *]
+[...]
+
+ 35 keys moved between entries (6 source entries)
 
  Modified entries:
+[...]
 
      Discord * has been modified
 
@@ -1381,45 +1426,51 @@ Diff:  version 220510 ->  251109
        Modified 2 FileKeys
 [...]
 
- 43 modified entries
+ 53 modified entries
 
  Added entries containing merged content:
-
-   Chromium Caches * has been added
-   This entry contains merged keys from 14 removed entries:
-     - Download History *
-     - Blob Storage *
-     - Application Cache Extras *
 [...]
 
- Total diff time: 00:00:00.4186843
+   Chromium Caches * has been added
+   This entry contains content originating from 13 removed entries:
+     - Application Cache Extras *
+     - Blob Storage *
+     - Budget Database *
+     - Code Cache *
+[...]
+
+ Total diff time: 00:00:00.6979621
 
  Diff Summary
-   Net entry count change: 471 → 350 (-121)
-    + 4 new browsers added
-   Modified entries: 57
-    + 239 added keys across 46 entries
-    - 63 removed keys without replacement across 23 entries
-    ~ 60 updated keys replaced 101 old keys across 32 entries
-    + 14 entries also received merged content from removed entries (see merged entries below)
-   Removed entries: 389
-    @ 203 removed entries have been merged into other entries
-       @ 31 merged into 14 modified entries
-       + 178 merged into 82 added entries
-    & 29 removed entries have been renamed
+   Net entry count change: 492 → 432 (-60)
+    + 5 new browsers added
+   Modified entries: 68
+    + 317 added keys across 52 entries
+    - 39 removed keys without replacement across 26 entries
+    ~ 108 updated keys replaced 168 old keys across 41 entries
+    ~ 35 keys moved from 6 entries into 8 entries
+       + 35 keys moved into 8 added entries
+    + 15 entries also received merged content from removed entries (see merged entries below)
+       = 14 entries contain 55 keys carried over unchanged from merged sources
+   Removed entries: 399
+    @ 205 removed entries have been merged into other entries
+       @ 31 merged into 15 modified entries
+       + 181 merged into 102 added entries
+       - 49 split entries lost 1379 keys that no entry kept
+    & 27 removed entries have been renamed
        = 10 are name-only changes (no key differences)
-       + 25 added keys across 7 entries
-       - 13 removed keys across 13 entries
-       ~ 33 updated keys replaced 40 old keys across 13 entries
-    - 157 entries have been removed without replacement
-   Added entries: 268
-    @ 82 entries consolidate content from 178 removed entries
-       + 59 entries contain 428 novel keys (not from merged sources)
-       = 50 entries contain 432 keys carried over unchanged from merged sources
-       ~ 62 entries contain 236 keys capturing 695 removed keys
-       - 65 entries dropped 1012 keys from merged sources
-    + 157 novel entries (without merged content)
-    & 29 added entries are renamed versions of removed entries and may contain other minor changes
+       + 21 added keys across 4 entries
+       - 10 removed keys across 10 entries
+       ~ 26 updated keys replaced 31 old keys across 11 entries
+    - 167 entries have been removed without replacement
+   Added entries: 339
+    @ 102 entries consolidate content from 181 removed entries
+       + 73 entries contain 641 novel keys (not from merged sources)
+       = 77 entries contain 491 keys carried over unchanged from merged sources
+       ~ 82 entries contain 356 keys capturing 509 removed keys
+       - 45 entries dropped 395 keys from merged sources
+    + 210 novel entries (without merged content)
+    & 27 added entries are renamed versions of removed entries and may contain other minor changes
 
 Diff complete
 ```
@@ -1429,9 +1480,10 @@ Diff complete
 - `-base` selects the base flavor 
 - Diff downloaded the latest winapp2.ini and trimmed it for the current system before comparing
 - Only entries for software detected on this machine appear in the output
-- `Net entry count change: 471 → 350 (-121)`: the new file has fewer *total* entries for this machine
-- Many entries were consolidated: 203 of the 389 removed entries were mergers
-- No `Cross-Entry key movements:` section appears, because no movements were detected in this subset
+- The header names the version that was current on GitHub at the time of the run, here 260915. The trimmed file keeps its version line
+- `Net entry count change: 492 → 432 (-60)`: the new file has fewer *total* entries for this machine
+- Many entries were consolidated: 205 of the 399 removed entries were mergers
+- All 35 moved keys landed in added entries, eg. `AVG *` gave 19 keys to the new `AVG AntiVirus *`
 
 **Notes:** The exact output and counts depend on what software is installed. Running with `-donttrim` shows the full database diff regardless of installed software; see Example 2.
 
@@ -1451,7 +1503,7 @@ winapp2ool -diff -d -1f winapp2-220510.ini -2f winapp2-251109.ini
 
 ```
 Beginning Diff
-Diff:  version 220510 ->  version 251109
+Diff: version 220510 -> version 251109
 
  Web Browser additions
 
@@ -1475,53 +1527,60 @@ Diff:  version 220510 ->  version 251109
  112 entries renamed (name-only changes)
 
  Entries merged or split into other entries:
+[...]
 
      Abelssoft GoogleClean * has been merged into Abelssoft GClean *
+[...]
 
      Adobe Reader DC * has been split/merged into 2 entries
        • Adobe Acrobat *
        • Adobe Acrobat Reader *
 [...]
 
- 548 entries merged or split into other entries
+ 547 entries merged or split into other entries
 [...]
 
- Total diff time: 00:00:02.1611092
+ Total diff time: 00:00:03.2057302
 
  Diff Summary
    Net entry count change: 3257 → 3715 (+458)
     + 49 new browsers added
    Modified entries: 460
-    + 878 added keys across 276 entries
-    - 430 removed keys without replacement across 191 entries
-    ~ 354 updated keys replaced 503 old keys across 211 entries
-    ~ 7 keys moved from 3 entries into 2 entries
+    + 486 added keys across 196 entries
+    - 344 removed keys without replacement across 163 entries
+    ~ 388 updated keys replaced 603 old keys across 220 entries
+    ~ 100 keys moved from 41 entries into 24 entries
+       ~ 2 keys moved into 1 modified entry
+       & 5 keys moved into 1 renamed entry
+       + 93 keys moved into 22 added entries
     + 135 entries also received merged content from removed entries (see merged entries below)
+       = 118 entries contain 365 keys carried over unchanged from merged sources
    Removed entries: 1227
-    @ 548 removed entries have been merged into other entries
+    @ 547 removed entries have been merged into other entries
        @ 175 merged into 135 modified entries
-       + 383 merged into 317 added entries
-    & 153 removed entries have been renamed
+       + 382 merged into 316 added entries
+       - 77 split entries lost 1481 keys that no entry kept
+    & 154 removed entries have been renamed
        = 112 are name-only changes (no key differences)
        + 25 added keys across 12 entries
        - 23 removed keys across 21 entries
-       ~ 65 updated keys replaced 77 old keys across 29 entries
+       ~ 66 updated keys replaced 78 old keys across 30 entries
     - 526 entries have been removed without replacement
    Added entries: 1685
-    @ 317 entries consolidate content from 383 removed entries
-       + 175 entries contain 1096 novel keys (not from merged sources)
-       = 139 entries contain 856 keys carried over unchanged from merged sources
-       ~ 259 entries contain 936 keys capturing 1826 removed keys
-       - 261 entries dropped 686 keys from merged sources
+    @ 316 entries consolidate content from 382 removed entries
+       + 174 entries contain 1078 novel keys (not from merged sources)
+       = 222 entries contain 1246 keys carried over unchanged from merged sources
+       ~ 258 entries contain 935 keys capturing 1278 removed keys
+       - 84 entries dropped 259 keys from merged sources
     + 1215 novel entries (without merged content)
-    & 153 added entries are renamed versions of removed entries and may contain other minor changes
+    & 154 added entries are renamed versions of removed entries and may contain other minor changes
 
 Diff complete
 ```
 
 **Explanation:**
 
-- Across three and a half years (May 2022 -> November 2025), 1227 entries were removed (526 without replacement, 153 renamed, and 548 merged into other entries), while 1685 new entries were added
+- Across three and a half years (May 2022 -> November 2025), 1227 entries were removed (526 without replacement, 154 renamed, and 547 merged into other entries), while 1685 new entries were added
 - `Net entry count change: 3257 → 3715 (+458)`: the new database has 458 more entries than the old one
 
 ---
@@ -1540,7 +1599,7 @@ winapp2ool -diff -d -1d C:\archive -1f winapp2-251002.ini -2d C:\archive -2f win
 
 ```
 Beginning Diff
-Diff:  version 251002 ->  version 251109
+Diff: version 251002 -> version 251109
 
  Web Browser additions
 
@@ -1567,32 +1626,38 @@ Diff:  version 251002 ->  version 251109
      Abylon Protection Manager * has been removed
 [...]
 
+ Total diff time: 00:00:00.2155657
+
  Diff Summary
    Net entry count change: 3519 → 3715 (+196)
     + 8 new browsers added
    Modified entries: 81
-    + 151 added keys across 57 entries
-    - 259 removed keys without replacement across 21 entries
+    + 150 added keys across 55 entries
+    - 242 removed keys without replacement across 17 entries
     ~ 53 updated keys replaced 54 old keys across 33 entries
-    ~ 1 key moved from 1 entry into 1 entry
+    ~ 18 keys moved from 6 entries into 7 entries
+       ~ 1 key moved into 1 modified entry
+       + 17 keys moved into 6 added entries
     + 1 entry also received merged content from removed entries (see merged entries below)
+       = 1 entry contains 1 key carried over unchanged from merged sources
    Removed entries: 313
-    @ 18 removed entries have been merged into other entries
+    @ 17 removed entries have been merged into other entries
        @ 1 merged into 1 modified entry
-       + 18 merged into 35 added entries
-    & 87 removed entries have been renamed
+       + 17 merged into 34 added entries
+       - 4 split entries lost 29 keys that no entry kept
+    & 88 removed entries have been renamed
        = 83 are name-only changes (no key differences)
        + 13 added keys across 2 entries
-       ~ 4 updated keys replaced 4 old keys across 3 entries
+       ~ 5 updated keys replaced 5 old keys across 4 entries
     - 208 entries have been removed without replacement
    Added entries: 509
-    @ 35 entries consolidate content from 18 removed entries
-       + 29 entries contain 227 novel keys (not from merged sources)
-       = 29 entries contain 117 keys carried over unchanged from merged sources
-       ~ 24 entries contain 40 keys capturing 103 removed keys
-       - 23 entries dropped 27 keys from merged sources
+    @ 34 entries consolidate content from 17 removed entries
+       + 29 entries contain 225 novel keys (not from merged sources)
+       = 34 entries contain 132 keys carried over unchanged from merged sources
+       ~ 23 entries contain 39 keys capturing 39 removed keys
+       - 3 entries dropped 5 keys from merged sources
     + 387 novel entries (without merged content)
-    & 87 added entries are renamed versions of removed entries and may contain other minor changes
+    & 88 added entries are renamed versions of removed entries and may contain other minor changes
 
 Diff complete
 ```
@@ -1712,11 +1777,11 @@ Opening `diff.txt`, the Source Entry Key Status Report appears between the Added
 [...]
 
  KEY STATUS SUMMARY:                 Total  Captured  Dropped  Capture Rate
- DELETION  (FileKey/RegKey):          2512      1826      686         72.7%
- DETECTION (Detect/DetectFile):       1252       274      978         21.9%
- CATEGORY  (Section/LangSecRef):       383       165      218         43.1%
+ DELETION  (FileKey/RegKey):          2511      1825      686         72.7%
+ DETECTION (Detect/DetectFile):       1251       273      978         21.8%
+ CATEGORY  (Section/LangSecRef):       382       164      218         42.9%
  OTHER     (Warning etc.):              92        18       74         19.6%
- All keys:                            4239      2283     1956         53.9%
+ All keys:                            4236      2280     1956         53.8%
 ```
 
 **Explanation:**
