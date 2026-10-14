@@ -54,12 +54,10 @@ Public Module browserbuildermainmenu
     End Function
 
     ''' <summary>
-    ''' Resizes the console window to 130 by 40 and prints the BrowserBuilder main menu
+    ''' Prints the BrowserBuilder main menu
     ''' </summary>
     Public Sub printBrowserBuilderMenu()
 
-        Console.WindowHeight = 40
-        Console.WindowWidth = 130
         buildBrowserBuilderMenu().Print()
 
     End Sub

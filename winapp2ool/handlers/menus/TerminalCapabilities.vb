@@ -25,9 +25,10 @@ Imports System.Runtime.InteropServices
 ''' <c> ENABLE_VIRTUAL_TERMINAL_PROCESSING </c> is set on stdout, and the probe
 ''' sets it if it isn't already. Older versions (Windows 7, 8.1, Windows 10
 ''' before 1607) return failure from <c> SetConsoleMode </c> when the flag is requested.
-''' A redirected stdout counts as unsupported.
+''' A redirected stdout counts as unsupported. It also probes whether the console is a
+''' pseudoconsole (<see cref="IsPseudoConsole"/>).
 '''
-''' The result is cached after the first probe. Tests may force a value via
+''' Each result is cached after the first probe. Tests may force a value via
 ''' <see cref="SetHasVTForTesting"/> to exercise either code path.
 ''' </summary>
 Friend Module TerminalCapabilities
@@ -37,6 +38,44 @@ Friend Module TerminalCapabilities
 
     Private _probed As Boolean = False
     Private _hasVT As Boolean = False
+
+    Private _pseudoConsoleProbed As Boolean = False
+    Private _isPseudoConsole As Boolean = False
+
+    ''' <summary>
+    ''' Indicates whether the console is a pseudoconsole (ConPTY), which is how Windows Terminal,
+    ''' VS Code and other modern terminals host console programs, probing on first access. Under
+    ''' ConPTY, the <c> Console </c> window and buffer size setters succeed but resize only
+    ''' ConPTY's own copy of the screen, never the terminal's window, so the two disagree about
+    ''' the screen's size and drawing breaks. <see cref="ConsoleWindow"/> resizes with a VT escape
+    ''' instead when this is <c> True </c>.
+    ''' </summary>
+    '''
+    ''' <remarks>
+    ''' ConPTY gives the process a hidden stand-in window of class <c> PseudoConsoleWindow </c>,
+    ''' where conhost gives it a real <c> ConsoleWindowClass </c> window. Checking that class covers
+    ''' every ConPTY host, unlike the <c> WT_SESSION </c> variable, which only Windows Terminal sets.
+    ''' </remarks>
+    Public ReadOnly Property IsPseudoConsole As Boolean
+        Get
+            If Not _pseudoConsoleProbed Then ProbePseudoConsole()
+            Return _isPseudoConsole
+        End Get
+    End Property
+
+    Private Sub ProbePseudoConsole()
+
+        _pseudoConsoleProbed = True
+
+        Dim hwnd = GetConsoleWindow()
+        If hwnd = IntPtr.Zero Then Return
+
+        Dim className As New Text.StringBuilder(64)
+        If GetClassName(hwnd, className, className.Capacity) = 0 Then Return
+
+        _isPseudoConsole = className.ToString() = "PseudoConsoleWindow"
+
+    End Sub
 
     ''' <summary>
     ''' Indicates whether the current console supports virtual terminal
@@ -113,6 +152,14 @@ Friend Module TerminalCapabilities
 
     <DllImport("kernel32.dll", SetLastError:=True)>
     Private Function SetConsoleMode(hConsoleHandle As IntPtr, dwMode As UInteger) As Boolean
+    End Function
+
+    <DllImport("kernel32.dll")>
+    Private Function GetConsoleWindow() As IntPtr
+    End Function
+
+    <DllImport("user32.dll", CharSet:=CharSet.Unicode)>
+    Private Function GetClassName(hWnd As IntPtr, lpClassName As Text.StringBuilder, nMaxCount As Integer) As Integer
     End Function
 
 End Module

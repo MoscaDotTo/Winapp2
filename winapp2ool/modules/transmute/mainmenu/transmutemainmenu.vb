@@ -23,13 +23,11 @@ Option Strict On
 Public Module transmuteMainMenu
 
     ''' <summary>
-    ''' Builds and returns the Transmute main menu, growing the console first if it is too short. <br />
+    ''' Builds and returns the Transmute main menu. <br />
     ''' Both <see cref="printTransmuteMainMenu"/> and <see cref="handleTransmuteUserInput"/>
     ''' call this function to ensure menu numbering seen by the user stays in sync with dispatch.
     ''' </summary>
     Private Function buildTransmuteMenu() As MenuSection
-
-        adjustTransmuteConsoleHeight()
 
         Dim TransmuteModeIsReplace = Transmutator = TransmuteMode.Replace
         Dim ReplaceModeIsByKey = TransmuteReplaceMode = ReplaceMode.ByKey
@@ -121,16 +119,6 @@ Public Module transmuteMainMenu
     Public Sub printTransmuteMainMenu()
 
         buildTransmuteMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Grows the console to 44 rows, enough for the largest form of the menu, whenever it is
-    ''' shorter. Runs on every menu build.
-    ''' </summary>
-    Private Sub adjustTransmuteConsoleHeight()
-
-        If Console.WindowHeight <= 43 Then Console.WindowHeight = 44
 
     End Sub
 

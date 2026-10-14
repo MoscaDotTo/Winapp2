@@ -102,65 +102,22 @@ Public Module launcher
     End Sub
 
     ''' <summary>
-    ''' Sizes the console window for interactive use, then enlarges its scrollback buffer
+    ''' Widens the console window to at least 130 columns for interactive use, then enlarges
+    ''' conhost's scrollback buffer. Each menu grows the window's height to fit itself as it's
+    ''' drawn (see <see cref="initModule"/>), so we set no height here.
     ''' </summary>
     '''
     ''' <remarks>
-    ''' When stdout is redirected (piped output, the build pipeline's silent mode, etc.) there is
-    ''' no resizable console window, so <c> Console.WindowWidth </c> would throw <c> IOException </c>.
-    ''' We detect that case via <c> Console.IsOutputRedirected </c> and skip resizing entirely.
     ''' This runs before the command line (and therefore <c> SuppressOutput </c>) is parsed, so we
-    ''' also pre-scan the raw args for <c> -s </c>, mirroring the <c> -offline </c> pre-scan in
-    ''' <see cref="main"/> to avoid briefly resizing a window that silent mode is about to abandon.
-    ''' The target width/height are clamped to the host's largest permitted window so a small terminal
-    ''' can't trip <c> ArgumentOutOfRangeException </c>, and the assignment is wrapped defensively for
-    ''' hosts that report a window but still reject sizing
+    ''' pre-scan the raw args for <c> -s </c>, mirroring the <c> -offline </c> pre-scan in
+    ''' <see cref="main"/>, to avoid resizing a window that silent mode is about to abandon
     ''' </remarks>
     Private Sub tryResizeWindow()
 
-        If Console.IsOutputRedirected Then Return
         If Environment.GetCommandLineArgs().Any(Function(a) a.Equals("-s", StringComparison.OrdinalIgnoreCase)) Then Return
 
-        Try
-
-            Console.WindowWidth = Math.Min(130, Console.LargestWindowWidth)
-            Console.WindowHeight = Math.Min(35, Console.LargestWindowHeight)
-            tryExpandScrollback()
-
-        Catch ex As IO.IOException
-            ' Host reports a window but won't accept sizing; nothing to do
-        Catch ex As PlatformNotSupportedException
-            ' Non-Windows or hosted environment without a conhost window
-        Catch ex As ArgumentOutOfRangeException
-            ' Requested size is out of the host's allowed range; not fatal
-        End Try
-
-    End Sub
-
-    ''' <summary>
-    ''' Attempts to enlarge the console scrollback buffer so long output isn't truncated
-    ''' </summary>
-    '''
-    ''' <remarks>
-    ''' Only effective on classic conhost. Windows Terminal, VS Code's integrated terminal,
-    ''' and other modern hosts control their own scrollback and will throw <c> IOException </c>
-    ''' or <c> PlatformNotSupportedException </c>; in those cases we silently fall through
-    ''' since the host's own scrollback is already in effect
-    ''' </remarks>
-    Private Sub tryExpandScrollback()
-
-        Try
-
-            Dim targetHeight = Math.Max(Console.WindowHeight, 32000)
-            Console.SetBufferSize(Console.BufferWidth, targetHeight)
-
-        Catch ex As IO.IOException
-            ' Modern terminal host buffer is host-controlled, nothing to do
-        Catch ex As PlatformNotSupportedException
-            ' Non-Windows or hosted environment without a conhost buffer
-        Catch ex As ArgumentOutOfRangeException
-            ' Window is already larger than the requested buffer; not fatal
-        End Try
+        EnsureMinimumSize(130, 0)
+        ExpandScrollback()
 
     End Sub
 

@@ -37,8 +37,6 @@ Module diffmainmenu
 
         If isOffline Then DownloadDiffFile = False
 
-        Console.WindowHeight = 36
-
         Return MenuSection.CreateCompleteMenu(NameOf(Diff), menuDesc, ConsoleColor.DarkCyan) _
             .AddDispatchedColoredOption("Run (default)", "Perform a Diff operation", GetRedGreen(Not newFileHasName),
                 Sub() If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then ConductDiff()) _

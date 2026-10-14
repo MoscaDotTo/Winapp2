@@ -23,13 +23,11 @@ Option Strict On
 Public Module FlavorizerMainMenu
 
     ''' <summary>
-    ''' Builds and returns the Flavorizer main menu, setting the console height to 45 rows first. <br />
+    ''' Builds and returns the Flavorizer main menu. <br />
     ''' Both <see cref="printFlavorizerMainMenu"/> and <see cref="handleFlavorizerMainMenuUserInput"/>
     ''' call this function to ensure menu numbering seen by the user stays in sync with dispatch.
     ''' </summary>
     Private Function buildFlavorizerMenu() As MenuSection
-
-        Console.WindowHeight = 45
 
         Dim menuDescriptionLines = {"Apply a 'flavor' to an ini file using a collection of correction files",
                                     "Flavorization is applied in this order:",

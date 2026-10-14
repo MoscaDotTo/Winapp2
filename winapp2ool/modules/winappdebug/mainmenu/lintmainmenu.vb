@@ -41,10 +41,7 @@ Module lintmainmenu
                 handler:=Sub() changeFileParams(winappDebugFile3, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(LintModuleSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedOption("Scan Settings", "Enable or disable individual scan and correction routines",
-                Sub()
-                    initModule("Scan Settings", AddressOf advSettings.printMenu, AddressOf advSettings.handleUserInput)
-                    Console.WindowHeight = 30
-                End Sub) _
+                Sub() initModule("Scan Settings", AddressOf advSettings.printMenu, AddressOf advSettings.handleUserInput)) _
             .AddBlank() _
             .AddDispatchedToggle("Default Value Audit", "enforcing a specific value for Default keys", overrideDefaultVal,
                 Sub() toggleModuleSetting("Default Value Overriding", NameOf(WinappDebug), GetType(lintsettings), NameOf(overrideDefaultVal), NameOf(LintModuleSettingsChanged))) _

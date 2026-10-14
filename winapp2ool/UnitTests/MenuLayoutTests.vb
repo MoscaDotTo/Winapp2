@@ -217,6 +217,85 @@ Public Class MenuLayoutTests
     End Sub
 
     <TestMethod>
+    Public Sub ScreenRows_CountsOneRowPerWidthFilled()
+
+        Assert.AreEqual(1, ScreenRows(Nothing, 120), "an empty line still takes a row")
+        Assert.AreEqual(1, ScreenRows(New String("x"c, 120), 120))
+        Assert.AreEqual(2, ScreenRows(New String("x"c, 121), 120))
+        Assert.AreEqual(4, ScreenRows(New String("x"c, 404), 120))
+
+    End Sub
+
+    <TestMethod>
+    Public Sub PassRows_CountsEveryRowAPrintWrote()
+
+        ' initModule sizes the window from PassRows, so a row written around cwl would leave the
+        ' menu taller than the window it fits
+        Dim menu = MenuSection.CreateCompleteMenu("Layout", {"A description line"}, ConsoleColor.Cyan)
+        menu.AddOption("First", "An option") _
+            .AddBlank() _
+            .AddColoredLine("A colored line", ConsoleColor.Green, centered:=True) _
+            .AddLine(New String("x"c, 400))
+
+        Dim original = Console.Out
+
+        Try
+
+            Using captured As New StringWriter
+
+                Console.SetOut(captured)
+                menu.Print()
+
+                Dim lines = captured.ToString().Split({Environment.NewLine}, StringSplitOptions.None)
+                ' The headless console is 120 columns wide, see the class remarks
+                Dim expected = lines.Take(lines.Length - 1).Sum(Function(line) Math.Max(1, (line.Length + 119) \ 120))
+
+                Assert.AreEqual(expected, PassRows)
+
+            End Using
+
+        Finally
+
+            Console.SetOut(original)
+
+        End Try
+
+    End Sub
+
+    <TestMethod>
+    Public Sub NestedPass_HoldsOutputUntilTheOutermostFlush()
+
+        ' initModule wraps the menu's own Print in a pass so it can size the window before
+        ' anything reaches the console
+        Dim section As New MenuSection
+        section.AddTopBorder().AddLine("held back").AddBottomBorder()
+
+        Dim original = Console.Out
+
+        Try
+
+            Using captured As New StringWriter
+
+                Console.SetOut(captured)
+
+                BeginBuffered()
+                section.Print()
+                Assert.AreEqual("", captured.ToString(), "the inner Print ended the outer pass")
+
+                FlushBuffered()
+                Assert.IsTrue(captured.ToString().Contains("held back"), "the outer flush wrote nothing")
+
+            End Using
+
+        Finally
+
+            Console.SetOut(original)
+
+        End Try
+
+    End Sub
+
+    <TestMethod>
     Public Sub SectionWithAnyItem_IsNotEmpty()
 
         Dim divider As New MenuSection

@@ -174,6 +174,7 @@
     <Compile Include="handlers\ini\iniFile\iniFile.vb" />
     <Compile Include="handlers\logger\logger.vb" />
     <Compile Include="handlers\menus\iniFileChooser\iniFileChooser.vb" />
+    <Compile Include="handlers\menus\ConsoleWindow.vb" />
     <Compile Include="handlers\menus\MenuMaker.vb" />
     <Compile Include="handlers\menus\TerminalCapabilities.vb" />
     <Compile Include="handlers\scaffolds\ScaffoldCatalogs.vb" />

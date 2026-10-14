@@ -89,7 +89,6 @@ Public Module advSettings
     ''' </summary>
     Public Sub printMenu()
 
-        Console.WindowHeight = 52
         buildAdvSettingsMenu().Print()
 
     End Sub

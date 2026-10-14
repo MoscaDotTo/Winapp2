@@ -23,12 +23,10 @@ Option Strict On
 Module maintoolmenu
 
     ''' <summary>
-    ''' Builds the main winapp2ool menu. Building it also widens the console to at least 130
-    ''' columns and, while online, checks for updates on every build until a check succeeds.
+    ''' Builds the main winapp2ool menu. While online, building it also checks for updates on
+    ''' every build until a check succeeds.
     ''' </summary>
     Private Function buildToolMainMenu() As MenuSection
-
-        If Console.WindowWidth < 130 Then Console.WindowWidth = 130
 
         checkUpdates(Not isOffline AndAlso Not checkedForUpdates)
         Dim UpdatesAvailable = Not isOffline AndAlso (waUpdateIsAvail OrElse updateIsAvail)
@@ -177,8 +175,7 @@ Module maintoolmenu
 
     ''' <summary>
     ''' Adds information to the menu indicating to the user that an
-    ''' update is available for <see cref="winapp2ool"/> or winapp2.ini. It also logs the
-    ''' update and makes the console window two rows taller.
+    ''' update is available for <see cref="winapp2ool"/> or winapp2.ini, and logs the update.
     ''' </summary>
     '''
     ''' <param name="cond">
@@ -213,8 +210,6 @@ Module maintoolmenu
             .AddColoredLine($"A new version of {updName} is available!", ConsoleColor.Green, True) _
             .AddColoredLine($"Current: v{oldVer}", ConsoleColor.DarkYellow, True) _
             .AddColoredLine($"Available: v{newVer}", ConsoleColor.DarkGreen, True)
-
-        Console.WindowHeight += 2
 
     End Sub
 

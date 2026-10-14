@@ -135,6 +135,19 @@ Module MenuMaker
     Private _pinnedWidth As Integer? = Nothing
 
     ''' <summary>
+    ''' How many <see cref="BeginBuffered"/> calls are waiting on their <see cref="FlushBuffered"/>.
+    ''' A render pass runs while this is above <c> 0 </c>.
+    ''' </summary>
+    Private _passDepth As Integer = 0
+
+    ''' <summary>
+    ''' The number of console rows the lines <see cref="cwl"/> wrote during the current render
+    ''' pass take up, counting each line long enough to wrap once per row it fills. Reset when
+    ''' a pass begins and kept after it ends.
+    ''' </summary>
+    Friend ReadOnly Property PassRows As Integer
+
+    ''' <summary>
     ''' Returns the console window width. During a render pass we return the pinned width.
     ''' Otherwise we read <c> Console.WindowWidth </c> at most once every 500 milliseconds and
     ''' keep the cached value if the read fails.
@@ -169,6 +182,10 @@ Module MenuMaker
     ''' to <paramref name="name"/>, and on exit to <c> "{name} closed" </c>. On exit we also call
     ''' <c> FlushIfDirty </c>, which writes changed settings only when <c> saveSettingsToDisk </c>
     ''' is on (it's off by default) and this isn't a command line run.
+    ''' <br /><br />
+    ''' The clear and the menu are drawn as one render pass. Before it reaches the console we
+    ''' grow the window, if it's too short, to fit the menu and the prompt under it, so no menu
+    ''' sets its own height. The window is never shrunk.
     ''' <br /><br />
     ''' In silent mode there's no input to read, so we save the global log and end the process
     ''' with exit code <c> 1 </c>.
@@ -213,8 +230,22 @@ Module MenuMaker
 
             Do Until ExitPending
 
-                clrConsole()
-                showMenu()
+                BeginBuffered()
+
+                Try
+
+                    clrConsole()
+                    showMenu()
+
+                    ' The prompt takes the blank row below the menu and the row after it
+                    EnsureMinimumSize(0, PassRows + 2)
+
+                Finally
+
+                    FlushBuffered()
+
+                End Try
+
                 Console.Write(Environment.NewLine & promptStr)
                 handleInput(Console.ReadLine)
 
@@ -268,6 +299,8 @@ Module MenuMaker
 
         If Not cond OrElse SuppressOutput Then Return
 
+        If _passDepth > 0 Then _PassRows += ScreenRows(msg, GetConsoleWidth())
+
         If _outputBuffer IsNot Nothing Then
 
             If msg IsNot Nothing Then _outputBuffer.Append(msg)
@@ -281,30 +314,55 @@ Module MenuMaker
     End Sub
 
     ''' <summary>
-    ''' Begins a render pass. We pin the console width for the whole pass and, unless output is
-    ''' suppressed, start a buffer that later <see cref="cwl"/> calls append to.
-    ''' <see cref="FlushBuffered"/> writes the buffer as one <c> Write </c> and ends the pass.
-    ''' Passes don't nest: a call during a pass does nothing, and the first
-    ''' <see cref="FlushBuffered"/> ends it.
+    ''' Returns the number of console rows <paramref name="line"/> takes up at
+    ''' <paramref name="width"/> columns: one, plus one for each time it wraps
+    ''' </summary>
+    '''
+    ''' <param name="line">The line, without its line break</param>
+    '''
+    ''' <param name="width">The console's width in columns</param>
+    Friend Function ScreenRows(line As String, width As Integer) As Integer
+
+        If String.IsNullOrEmpty(line) OrElse width <= 0 Then Return 1
+
+        Return (line.Length + width - 1) \ width
+
+    End Function
+
+    ''' <summary>
+    ''' Begins a render pass. We pin the console width for the whole pass, reset
+    ''' <see cref="PassRows"/> and, unless output is suppressed, start a buffer that later
+    ''' <see cref="cwl"/> calls append to. <see cref="FlushBuffered"/> writes the buffer as one
+    ''' <c> Write </c> and ends the pass. Passes nest: a call during a pass joins it, and only
+    ''' the <see cref="FlushBuffered"/> matching the outermost call ends it. That lets
+    ''' <see cref="initModule"/> hold the console back until the menu's <c> Print </c> has
+    ''' finished and the window has been sized to fit it.
     ''' </summary>
     Public Sub BeginBuffered()
 
-        ' Pinned before the guards below, so the width stays stable for the pass even when
+        _passDepth += 1
+        If _passDepth > 1 Then Return
+
+        _PassRows = 0
+
+        ' Pinned before the guard below, so the width stays stable for the pass even when
         ' output is suppressed
-        If Not _pinnedWidth.HasValue Then _pinnedWidth = GetConsoleWidth()
+        _pinnedWidth = GetConsoleWidth()
 
         If SuppressOutput Then Return
-        If _outputBuffer IsNot Nothing Then Return
 
         _outputBuffer = New StringBuilder(4096)
 
     End Sub
 
     ''' <summary>
-    ''' Ends a render pass, writing the accumulated buffer to <c> Console.Out </c> in a single
-    ''' call and releasing the pinned console width.
+    ''' Leaves a render pass. Leaving the outermost one ends it, writing the accumulated buffer
+    ''' to <c> Console.Out </c> in a single call and releasing the pinned console width.
     ''' </summary>
     Public Sub FlushBuffered()
+
+        If _passDepth > 0 Then _passDepth -= 1
+        If _passDepth > 0 Then Return
 
         Dim sb = _outputBuffer
         _outputBuffer = Nothing
@@ -330,25 +388,29 @@ Module MenuMaker
     End Sub
 
     ''' <summary>
-    ''' Waits for the user to press a key if output
-    ''' is not currently being suppressed
+    ''' Waits for the user to press a key if output is not currently being suppressed. Anything
+    ''' buffered by a render pass is written out first, so the user can see what they're
+    ''' answering.
     ''' </summary>
     Public Sub crk()
 
         If SuppressOutput Then Return
 
+        FlushBufferIfActive()
         Console.ReadKey()
 
     End Sub
 
     ''' <summary>
-    ''' Waits for the user to press Enter if output
-    ''' is not currently being suppressed
+    ''' Waits for the user to press Enter if output is not currently being suppressed. Anything
+    ''' buffered by a render pass is written out first, so the user can see what they're
+    ''' answering.
     ''' </summary>
     Public Sub crl()
 
         If SuppressOutput Then Return
 
+        FlushBufferIfActive()
         Console.ReadLine()
 
     End Sub
