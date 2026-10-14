@@ -1110,12 +1110,11 @@ Public Class DiffOutputRenderer
         Next
 
         Dim sourceCount = movementsBySource.Count
-        Dim movSources = $"({sourceCount} source {If(sourceCount = 1, "entry", "entries")})"
-        Dim movHeader = $"keys moved between entries {movSources}"
+        Dim totKeys = movementsBySource.Values.Sum(Function(moves) moves.Count)
+        Dim movCount = $"{Plural(totKeys, "key")} moved between entries ({sourceCount} source {If(sourceCount = 1, "entry", "entries")})"
         Dim movHeaderSection As New MenuSection
-        movHeaderSection.AddColoredLine(movHeader, ConsoleColor.Cyan, centered:=True).AddDivider(solid:=False)
+        movHeaderSection.AddColoredLine(movCount, ConsoleColor.Cyan, centered:=True).AddDivider(solid:=False)
         results.Add(movHeaderSection)
-        Dim totKeys = 0
         gLog(Nothing, leadr:=True)
 
         Using gLogScope("Cross-Entry key movements: ")
@@ -1132,7 +1131,6 @@ Public Class DiffOutputRenderer
                     Dim line = $"  -> {movement.KeyName}={movement.KeyValue} moved to [{movement.Target}]"
                     out.AddColoredLine(line, ConsoleColor.DarkCyan)
                     gLog($"  {line}")
-                    totKeys += 1
 
                 Next
 
@@ -1143,7 +1141,7 @@ Public Class DiffOutputRenderer
 
         End Using
 
-        gLog($"{Plural(totKeys, "key")} moved between entries {movSources}", leadr:=True)
+        gLog(movCount, leadr:=True)
 
         Return results
 

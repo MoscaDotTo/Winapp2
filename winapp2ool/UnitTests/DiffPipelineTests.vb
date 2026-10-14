@@ -207,6 +207,7 @@ Public Class DiffPipelineTests
         Dim outcome = Diff.MostRecentDiffOutcome
         Assert.AreEqual(1, outcome.MovedKeys)
         Assert.AreEqual(0, outcome.RemovedKeys)
+        StringAssert.Contains(output, "1 key moved between entries (1 source entry)")
         StringAssert.Contains(output, "FileKey2=%AppData%\Delta\Sync|* moved to [Delta Sync *]")
         StringAssert.Contains(output, "Moved 1 FileKey")
         StringAssert.Contains(output, "+ 1 key moved into 1 added entry")
