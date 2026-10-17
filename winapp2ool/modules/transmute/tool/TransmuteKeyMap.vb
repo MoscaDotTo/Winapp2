@@ -96,17 +96,22 @@ Public Module TransmuteKeyMap
     ''' The source-file sections whose names begin with <c> *Map: </c>
     ''' </param>
     '''
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
     Friend Sub applyKeyMapRules(ByRef baseFile As iniFile,
                                       mapSections As List(Of iniSection),
+                                      options As TransmuteOptions,
                                 ByRef menuOutput As MenuSection)
 
         If mapSections.Count = 0 Then Return
 
-        If Not (Transmutator = TransmuteMode.Replace AndAlso TransmuteReplaceMode = ReplaceMode.ByKey) Then
+        If Not (options.Mode = TransmuteMode.Replace AndAlso options.ReplaceBy = ReplaceMode.ByKey) Then
 
             Dim wrongModeMsg = $"[*Map:] rules are only applied in Replace ByKey mode - skipping {mapSections.Count} rule section(s)"
             menuOutput.AddWarning(wrongModeMsg)

@@ -91,7 +91,7 @@ Option Strict On
 '''
 ''' Source files may also hold global sections (<c> [*] </c>, <c> [*Map: label] </c> and
 ''' <c> [*Name: scaffold] </c>) that apply across the base file instead of to one section of
-''' the same name. <see cref="RecognizeGlobalSections"/> turns them on. <br /><br />
+''' the same name. <see cref="TransmuteOptions.RecognizeGlobalSections"/> turns them on. <br /><br />
 '''
 ''' <see cref="Flavorize"/> applies a "flavor" to an ini file: a set of transformations that adapts
 ''' the base winapp2.ini to a different purpose, such as the format a particular cleaner expects.
@@ -294,12 +294,13 @@ Public Module Transmute
             .WithFileAlias("-u", TransmuteFile2, "uwp.ini") _
         .Parse()
 
-        Transmutator = mode
-        TransmuteReplaceMode = If(byKeyMode, ReplaceMode.ByKey, ReplaceMode.BySection)
-        TransmuteRemoveMode = If(byKeyMode, RemoveMode.ByKey, RemoveMode.BySection)
-        TransmuteRemoveKeyMode = If(RemoveByName, RemoveKeyMode.ByName, RemoveKeyMode.ByValue)
-        UseWinapp2Syntax = isWinapp
-        RecognizeGlobalSections = recognizeGlobals
+        Dim options As New TransmuteOptions With {
+            .Mode = mode,
+            .ReplaceBy = If(byKeyMode, ReplaceMode.ByKey, ReplaceMode.BySection),
+            .RemoveBy = If(byKeyMode, RemoveMode.ByKey, RemoveMode.BySection),
+            .RemoveKeysBy = If(RemoveByName, RemoveKeyMode.ByName, RemoveKeyMode.ByValue),
+            .RecognizeGlobalSections = recognizeGlobals
+        }
 
         If TransmuteFile2.Name.Length = 0 Then
 
@@ -310,16 +311,35 @@ Public Module Transmute
 
         End If
 
-        initTransmute()
+        initTransmute(options, isWinapp)
 
     End Sub
 
     ''' <summary>
-    ''' Loads the base and source files, transmutes the base file with the current settings,
-    ''' writes the result to <see cref="TransmuteFile3"/> and displays the output. Returns
-    ''' without transmuting when either file is missing or empty.
+    ''' Runs <see cref="initTransmute(TransmuteOptions, Boolean)"/> with the modes and syntax
+    ''' setting the user has saved
     ''' </summary>
     Public Sub initTransmute()
+
+        initTransmute(TransmuteOptions.FromSettings(), UseWinapp2Syntax)
+
+    End Sub
+
+    ''' <summary>
+    ''' Loads the base and source files, transmutes the base file with
+    ''' <paramref name="options"/>, writes the result to <see cref="TransmuteFile3"/> and
+    ''' displays the output. Returns without transmuting when either file is missing or empty.
+    ''' </summary>
+    '''
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
+    ''' <param name="isWinapp">
+    ''' Indicates whether to sort and format the output as a winapp2.ini file
+    ''' </param>
+    Private Sub initTransmute(options As TransmuteOptions,
+                              isWinapp As Boolean)
 
         clrConsole()
 
@@ -333,18 +353,18 @@ Public Module Transmute
         menuOutput.AddBoxWithText(applyingChangesStr)
         gLog(applyingChangesStr)
 
-        Dim remModeStr = $"{TransmuteRemoveMode}{If(TransmuteRemoveMode = RemoveMode.ByKey, $" - {TransmuteRemoveKeyMode}", "")}"
-        Dim replaceModeStr = $"{TransmuteReplaceMode}"
-        Dim xmuteModeStr As String = $"Transmutator: {Transmutator}{If(Transmutator = TransmuteMode.Add, If(Transmutator = TransmuteMode.Replace, replaceModeStr, remModeStr), "")}"
+        Dim remModeStr = $"{options.RemoveBy}{If(options.RemoveBy = RemoveMode.ByKey, $" - {options.RemoveKeysBy}", "")}"
+        Dim replaceModeStr = $"{options.ReplaceBy}"
+        Dim xmuteModeStr As String = $"Transmutator: {options.Mode}{If(options.Mode = TransmuteMode.Add, If(options.Mode = TransmuteMode.Replace, replaceModeStr, remModeStr), "")}"
 
-        Dim color = If(Transmutator = TransmuteMode.Add, ConsoleColor.Green, If(Transmutator = TransmuteMode.Remove, ConsoleColor.Red, ConsoleColor.Yellow))
+        Dim color = If(options.Mode = TransmuteMode.Add, ConsoleColor.Green, If(options.Mode = TransmuteMode.Remove, ConsoleColor.Red, ConsoleColor.Yellow))
 
         menuOutput.AddColoredLine(xmuteModeStr, color)
         gLog(xmuteModeStr)
 
         Dim saveFile = iniFile.Empty(TransmuteFile3.Dir, TransmuteFile3.Name)
 
-        If Not transmute(baseFile, sourceFile, saveFile, menuOutput, UseWinapp2Syntax) Then menuOutput.AddWarning($"{saveFile.Name} was not saved")
+        If Not transmute(baseFile, sourceFile, saveFile, options, menuOutput, isWinapp) Then menuOutput.AddWarning($"{saveFile.Name} was not saved")
 
         menuOutput.AddLine("") _
                   .AddBottomBorder() _
@@ -375,6 +395,10 @@ Public Module Transmute
     ''' Contains the path to which the transmuted output will be written
     ''' </param>
     '''
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' A <c> MenuSection </c> containing the Transmute output to be displayed to the user
     ''' </param>
@@ -398,11 +422,12 @@ Public Module Transmute
     Private Function transmute(ByRef baseFile As iniFile,
                           ByRef sourceFile As iniFile,
                                 saveFile As iniFile,
+                                options As TransmuteOptions,
                           ByRef menuOutput As MenuSection,
                        Optional isWinapp2 As Boolean = True,
                        Optional skipFormat As Boolean = False) As Boolean
 
-        resolveConflicts(baseFile, sourceFile, menuOutput)
+        resolveConflicts(baseFile, sourceFile, options, menuOutput)
 
         If skipFormat Then Return False
 
@@ -421,9 +446,8 @@ Public Module Transmute
     End Function
 
     ''' <summary>
-    ''' Transmutes an <c> iniFile </c> from outside the module's UI. We set the module's mode
-    ''' settings to the given modes for the duration of the call and restore them afterward.
-    ''' <see cref="RecognizeGlobalSections"/> isn't a parameter, so its current value applies.
+    ''' Transmutes an <c> iniFile </c> from outside the module's UI. The module's saved settings
+    ''' play no part: the modes come from <paramref name="options"/> alone.
     ''' </summary>
     '''
     ''' <param name="baseFile">
@@ -447,25 +471,10 @@ Public Module Transmute
     ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
     ''' 
-    ''' <param name="transmuteMode">
-    ''' Sets the primary <c> Transmutator </c> <br /><br />
-    ''' Optional, Default: <c> TransmuteMode.Add </c>
-    ''' </param>
-    '''
-    ''' <param name="replaceMode">
-    ''' Sets the sub mode for the <c> Replace </c> Transmutator <br /><br />
-    ''' Optional, Default: <c> ReplaceMode.ByKey </c>
-    ''' </param>
-    '''
-    ''' <param name="removeMode">
-    ''' Sets the sub mode for the <c> Remove </c> Transmutator <br /><br />
-    ''' Optional, Default: <c> RemoveMode.ByKey </c>
-    ''' </param>
-    '''
-    ''' <param name="removeKeyMode">
-    ''' Sets the sub mode for key removal operations when <paramref name="removeMode"/> is
-    ''' <c> RemoveMode.ByKey </c> <br /><br />
-    ''' Optional, Default: <c> RemoveKeyMode.ByName </c>
+    ''' <param name="options">
+    ''' The modes to transmute with <br /><br />
+    ''' Optional, Default: <c> Nothing </c>, which means a new <c> TransmuteOptions </c>
+    ''' (Add, with global sections recognized)
     ''' </param>
     '''
     ''' <param name="skipFormat">
@@ -484,10 +493,7 @@ Public Module Transmute
                                      outputFile As iniFile,
                                      isWinapp As Boolean,
                                ByRef menuOutput As MenuSection,
-                            Optional transmuteMode As TransmuteMode = TransmuteMode.Add,
-                            Optional replaceMode As ReplaceMode = ReplaceMode.ByKey,
-                            Optional removeMode As RemoveMode = RemoveMode.ByKey,
-                            Optional removeKeyMode As RemoveKeyMode = RemoveKeyMode.ByName,
+                            Optional options As TransmuteOptions = Nothing,
                             Optional skipFormat As Boolean = False) As Boolean
 
         If sourceFile Is Nothing Then gLog("Source file not provided, skipping!") : Return False
@@ -499,24 +505,7 @@ Public Module Transmute
 
         If sourceFile.Count = 0 Then gLog($"{sourceFile.Name} is empty!") : Return False
 
-        Dim initTransmutator = Transmutator
-        Dim initReplMode = TransmuteReplaceMode
-        Dim initRemMode = TransmuteRemoveMode
-        Dim initRemKeyMode = TransmuteRemoveKeyMode
-
-        Transmutator = transmuteMode
-        TransmuteReplaceMode = replaceMode
-        TransmuteRemoveMode = removeMode
-        TransmuteRemoveKeyMode = removeKeyMode
-
-        Dim saved = transmute(baseFile, sourceFile, outputFile, menuOutput, isWinapp, skipFormat)
-
-        Transmutator = initTransmutator
-        TransmuteReplaceMode = initReplMode
-        TransmuteRemoveMode = initRemMode
-        TransmuteRemoveKeyMode = initRemKeyMode
-
-        Return saved
+        Return transmute(baseFile, sourceFile, outputFile, If(options, New TransmuteOptions), menuOutput, isWinapp, skipFormat)
 
     End Function
 
@@ -526,7 +515,7 @@ Public Module Transmute
     ''' in the <paramref name="baseFile"/> when the transmutator is not <c> Add </c>
     ''' are skipped with a warning <br /> <br />
     '''
-    ''' When <see cref="RecognizeGlobalSections"/> is enabled, three kinds of sentinel section are
+    ''' When <see cref="TransmuteOptions.RecognizeGlobalSections"/> is enabled, three kinds of sentinel section are
     ''' processed before any named sections, in this order, so that specific per-section
     ''' operations can refine the result of global ones: <br />
     ''' <c> [*Map: label] </c> sections define key mapping rules (Replace ByKey mode only) <br />
@@ -544,12 +533,17 @@ Public Module Transmute
     '''  The <c> iniFile </c> providing the content modification criteria for <paramref name="baseFile"/>
     ''' </param>
     '''
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
     Private Sub resolveConflicts(ByRef baseFile As iniFile,
                                        sourceFile As iniFile,
+                                       options As TransmuteOptions,
                                  ByRef menuOutput As MenuSection)
 
         Dim globalSection As iniSection = Nothing
@@ -559,15 +553,15 @@ Public Module Transmute
 
         For Each sourceSection In sourceFile
 
-            If RecognizeGlobalSections AndAlso sourceSection.Name = "*" Then
+            If options.RecognizeGlobalSections AndAlso sourceSection.Name = "*" Then
 
                 globalSection = sourceSection
 
-            ElseIf RecognizeGlobalSections AndAlso sourceSection.Name.StartsWith(MapSectionPrefix, StringComparison.OrdinalIgnoreCase) Then
+            ElseIf options.RecognizeGlobalSections AndAlso sourceSection.Name.StartsWith(MapSectionPrefix, StringComparison.OrdinalIgnoreCase) Then
 
                 mapSections.Add(sourceSection)
 
-            ElseIf RecognizeGlobalSections AndAlso sourceSection.Name.StartsWith(NameSectionPrefix, StringComparison.OrdinalIgnoreCase) Then
+            ElseIf options.RecognizeGlobalSections AndAlso sourceSection.Name.StartsWith(NameSectionPrefix, StringComparison.OrdinalIgnoreCase) Then
 
                 nameSections.Add(sourceSection)
 
@@ -579,17 +573,17 @@ Public Module Transmute
 
         Next
 
-        applyKeyMapRules(baseFile, mapSections, menuOutput)
+        applyKeyMapRules(baseFile, mapSections, options, menuOutput)
 
-        If globalSection IsNot Nothing Then applyGlobalSection(baseFile, globalSection, menuOutput)
+        If globalSection IsNot Nothing Then applyGlobalSection(baseFile, globalSection, options, menuOutput)
 
-        transmutenamefilter.applyNameFilterSections(baseFile, nameSections, menuOutput)
+        transmutenamefilter.applyNameFilterSections(baseFile, nameSections, options, menuOutput)
 
         For Each sourceSection In namedSections
 
             Dim baseFileHasSection = baseFile.Contains(sourceSection.Name)
 
-            If Not baseFileHasSection AndAlso Not Transmutator = TransmuteMode.Add Then
+            If Not baseFileHasSection AndAlso Not options.Mode = TransmuteMode.Add Then
 
                 Dim notFoundMsg = $"Target section not found in base file: [{sourceSection.Name}] - no changes applied"
                 menuOutput.AddWarning(notFoundMsg)
@@ -601,7 +595,7 @@ Public Module Transmute
 
             Dim baseSection = baseFile.GetSection(sourceSection.Name)
 
-            processTransmutator(baseFile, sourceSection, baseSection, menuOutput)
+            processTransmutator(baseFile, sourceSection, baseSection, options, menuOutput)
 
         Next
 
@@ -634,15 +628,20 @@ Public Module Transmute
     ''' The <c> [*] </c> section providing the keys to apply globally
     ''' </param>
     '''
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
     Private Sub applyGlobalSection(ByRef baseFile As iniFile,
                                          sourceSection As iniSection,
+                                         options As TransmuteOptions,
                                    ByRef menuOutput As MenuSection)
 
-        If Transmutator = TransmuteMode.Remove AndAlso TransmuteRemoveMode = RemoveMode.BySection Then
+        If options.Mode = TransmuteMode.Remove AndAlso options.RemoveBy = RemoveMode.BySection Then
 
             Dim refuseRemMsg = "[*] cannot be used with Remove BySection (this would remove every section) - skipping"
             menuOutput.AddWarning(refuseRemMsg)
@@ -651,7 +650,7 @@ Public Module Transmute
 
         End If
 
-        If Transmutator = TransmuteMode.Replace AndAlso TransmuteReplaceMode = ReplaceMode.BySection Then
+        If options.Mode = TransmuteMode.Replace AndAlso options.ReplaceBy = ReplaceMode.BySection Then
 
             Dim refuseReplMsg = "[*] cannot be used with Replace BySection (a global section replacement is incoherent) - skipping"
             menuOutput.AddWarning(refuseReplMsg)
@@ -662,11 +661,11 @@ Public Module Transmute
 
         Dim totalSections = baseFile.Count
 
-        Using gLogScope($"Applying global section [*] ({Transmutator}) to {totalSections} sections")
+        Using gLogScope($"Applying global section [*] ({options.Mode}) to {totalSections} sections")
 
             For Each sourceKey In sourceSection.Keys
 
-                If Transmutator = TransmuteMode.Add AndAlso Not sourceKey.Name.Equals(sourceKey.KeyType, StringComparison.OrdinalIgnoreCase) Then
+                If options.Mode = TransmuteMode.Add AndAlso Not sourceKey.Name.Equals(sourceKey.KeyType, StringComparison.OrdinalIgnoreCase) Then
 
                     Dim refuseKeyMsg = $"[*] Refusing to add numbered key {sourceKey.Name} to every section - global adds must be unnumbered"
                     menuOutput.AddWarning(refuseKeyMsg)
@@ -697,7 +696,7 @@ Public Module Transmute
 
                     Dim hits = 0
 
-                    Select Case Transmutator
+                    Select Case options.Mode
 
                         Case TransmuteMode.Add
 
@@ -710,7 +709,7 @@ Public Module Transmute
 
                         Case TransmuteMode.Remove
 
-                            hits = remKeys(baseSection, appliedSource, menuOutput, quiet:=True)
+                            hits = remKeys(baseSection, appliedSource, options, menuOutput, quiet:=True)
 
                     End Select
 
@@ -724,7 +723,7 @@ Public Module Transmute
                 Dim summary As String
                 Dim summaryColor As ConsoleColor
 
-                Select Case Transmutator
+                Select Case options.Mode
 
                     Case TransmuteMode.Add
 
@@ -738,7 +737,7 @@ Public Module Transmute
 
                     Case Else
 
-                        Dim keyDesc = If(TransmuteRemoveKeyMode = RemoveKeyMode.ByName, sourceKey.Name, $"{sourceKey.KeyType}={sourceKey.Value}")
+                        Dim keyDesc = If(options.RemoveKeysBy = RemoveKeyMode.ByName, sourceKey.Name, $"{sourceKey.KeyType}={sourceKey.Value}")
                         summary = $"-[*] Removed {keyDesc} from {sectionsHit} of {totalSections} sections"
                         summaryColor = ConsoleColor.Red
 
@@ -789,7 +788,7 @@ Public Module Transmute
 
     ''' <summary>
     ''' Hands off the processing of a section to the appropriate handler based on the
-    ''' current <c> Transmutator </c> setting. <br />
+    ''' <see cref="TransmuteOptions.Mode"/> in <paramref name="options"/>. <br />
     ''' </summary>
     ''' 
     ''' <param name="baseFile">
@@ -806,6 +805,10 @@ Public Module Transmute
     ''' or <c> Nothing </c> if the section does not exist in the base file (possible only in Add mode)
     ''' </param>
     ''' 
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
@@ -813,9 +816,10 @@ Public Module Transmute
     Private Sub processTransmutator(ByRef baseFile As iniFile,
                                           sourceSection As iniSection,
                                           baseSection As iniSection,
+                                          options As TransmuteOptions,
                                     ByRef menuOutput As MenuSection)
 
-        Select Case Transmutator
+        Select Case options.Mode
 
             Case TransmuteMode.Add
 
@@ -823,11 +827,11 @@ Public Module Transmute
 
             Case TransmuteMode.Replace
 
-                handleReplaceMode(baseSection, sourceSection, baseFile, sourceSection.Name, menuOutput)
+                handleReplaceMode(baseSection, sourceSection, baseFile, sourceSection.Name, options, menuOutput)
 
             Case TransmuteMode.Remove
 
-                handleRemoveMode(baseSection, sourceSection, baseFile, sourceSection.Name, menuOutput)
+                handleRemoveMode(baseSection, sourceSection, baseFile, sourceSection.Name, options, menuOutput)
 
         End Select
 
@@ -944,7 +948,7 @@ Public Module Transmute
 
     ''' <summary>
     ''' Handles the <c> Replace Transmutator </c>, replacing sections or keys based on
-    ''' <see cref="TransmuteReplaceMode"/>. A replaced section is removed and the source's own
+    ''' <see cref="TransmuteOptions.ReplaceBy"/>. A replaced section is removed and the source's own
     ''' section object is added in its place, at the end of the file's section order.
     ''' </summary>
     ''' 
@@ -967,6 +971,10 @@ Public Module Transmute
     ''' and also <paramref name="sourceSection"/>
     ''' </param>
     ''' 
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
@@ -975,13 +983,14 @@ Public Module Transmute
                                         sourceSection As iniSection,
                                   ByRef baseFile As iniFile,
                                         sectionName As String,
+                                        options As TransmuteOptions,
                                   ByRef menuOutput As MenuSection)
 
-        Dim ResolvingMsg = $"Resolving collisions in {sectionName} ({Transmutator} - {TransmuteReplaceMode} mode)"
+        Dim ResolvingMsg = $"Resolving collisions in {sectionName} ({options.Mode} - {options.ReplaceBy} mode)"
         menuOutput.AddColoredLine(ResolvingMsg, ConsoleColor.Cyan)
         gLog(ResolvingMsg)
 
-        If TransmuteReplaceMode = ReplaceMode.ByKey Then replaceKeysInBase(baseSection, sourceSection, menuOutput) : Return
+        If options.ReplaceBy = ReplaceMode.ByKey Then replaceKeysInBase(baseSection, sourceSection, menuOutput) : Return
 
         baseFile.RemoveSection(sectionName)
         baseFile.AddSection(sourceSection)
@@ -1070,7 +1079,7 @@ Public Module Transmute
 
     ''' <summary>
     ''' Handles the <c> Remove Transmutator </c>, removing sections or keys based on
-    ''' <see cref="TransmuteRemoveMode"/>
+    ''' <see cref="TransmuteOptions.RemoveBy"/>
     ''' </summary>
     ''' 
     ''' <param name="baseSection">
@@ -1090,6 +1099,10 @@ Public Module Transmute
     ''' and also <paramref name="sourceSection"/>
     ''' </param>
     ''' 
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user 
     ''' </param>
@@ -1098,15 +1111,16 @@ Public Module Transmute
                                  sourceSection As iniSection,
                            ByRef baseFile As iniFile,
                                  sectionName As String,
+                                 options As TransmuteOptions,
                            ByRef menuOutput As MenuSection)
 
-        Dim isKeyMode = TransmuteRemoveMode = RemoveMode.ByKey
+        Dim isKeyMode = options.RemoveBy = RemoveMode.ByKey
 
-        Dim conflictsStr = $"Resolving conflicts in {sectionName} ({Transmutator} - {TransmuteRemoveMode} - {If(isKeyMode, TransmuteRemoveKeyMode.ToString(), "")})"
+        Dim conflictsStr = $"Resolving conflicts in {sectionName} ({options.Mode} - {options.RemoveBy} - {If(isKeyMode, options.RemoveKeysBy.ToString(), "")})"
         menuOutput.AddColoredLine(conflictsStr, ConsoleColor.Cyan)
         gLog(conflictsStr)
 
-        If isKeyMode Then remKeys(baseSection, sourceSection, menuOutput) : Return
+        If isKeyMode Then remKeys(baseSection, sourceSection, options, menuOutput) : Return
 
         baseFile.RemoveSection(sectionName)
         Dim remMsg = $"  -§ Removed entire section: {sectionName}"
@@ -1117,7 +1131,7 @@ Public Module Transmute
 
     ''' <summary>
     ''' Removes individual keys from the <paramref name="baseSection"/>, matching by Name or by
-    ''' KeyType and Value according to <see cref="TransmuteRemoveKeyMode"/>, case-insensitively. <br />
+    ''' KeyType and Value according to <see cref="TransmuteOptions.RemoveKeysBy"/>, case-insensitively. <br />
     ''' Every base key matching a removal criterion is removed, so duplicate key names
     ''' (ByName) or duplicate KeyType/Value pairs (ByValue) in the base section are all removed
     ''' </summary>
@@ -1129,6 +1143,10 @@ Public Module Transmute
     ''' <param name="sourceSection">
     ''' The <c> iniSection </c> providing the keys to be removed from
     ''' <paramref name="baseSection"/> <br />
+    ''' </param>
+    '''
+    ''' <param name="options">
+    ''' The modes to transmute with
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -1147,11 +1165,12 @@ Public Module Transmute
     ''' </returns>
     Friend Function remKeys(baseSection As iniSection,
                                    sourceSection As iniSection,
+                                   options As TransmuteOptions,
                              ByRef menuOutput As MenuSection,
                           Optional quiet As Boolean = False) As Integer
 
         Dim sourceData As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
-        Dim isByName = TransmuteRemoveKeyMode = RemoveKeyMode.ByName
+        Dim isByName = options.RemoveKeysBy = RemoveKeyMode.ByName
 
         For Each key In sourceSection.Keys : sourceData.Add(If(isByName, key.Name, $"{key.KeyType}={key.Value}")) : Next
 
@@ -1294,29 +1313,23 @@ Public Module Transmute
         menuOutput.AddColoredLine(flavorizingMsg, ConsoleColor.Magenta)
         gLog(flavorizingMsg)
 
-        Dim flavorOperations As New Dictionary(Of String, Object()) From {
-            {"Removing sections", {sectionRemovalFile, TransmuteMode.Remove, ReplaceMode.ByKey, RemoveMode.BySection, RemoveKeyMode.ByName}},
-            {"Removing keys by name", {keyNameRemovalFile, TransmuteMode.Remove, ReplaceMode.ByKey, RemoveMode.ByKey, RemoveKeyMode.ByName}},
-            {"Removing keys by value", {keyValueRemovalFile, TransmuteMode.Remove, ReplaceMode.ByKey, RemoveMode.ByKey, RemoveKeyMode.ByValue}},
-            {"Replacing sections", {sectionReplacementFile, TransmuteMode.Replace, ReplaceMode.BySection, RemoveMode.ByKey, RemoveKeyMode.ByName}},
-            {"Replacing keys by name", {keyReplacementFile, TransmuteMode.Replace, ReplaceMode.ByKey, RemoveMode.ByKey, RemoveKeyMode.ByName}},
-            {"Adding keys and sections", {additionsFile, TransmuteMode.Add, ReplaceMode.ByKey, RemoveMode.ByKey, RemoveKeyMode.ByName}}
+        Dim flavorOperations As New Dictionary(Of String, Tuple(Of iniFile, TransmuteOptions)) From {
+            {"Removing sections", Tuple.Create(sectionRemovalFile, New TransmuteOptions With {.Mode = TransmuteMode.Remove, .RemoveBy = RemoveMode.BySection})},
+            {"Removing keys by name", Tuple.Create(keyNameRemovalFile, New TransmuteOptions With {.Mode = TransmuteMode.Remove})},
+            {"Removing keys by value", Tuple.Create(keyValueRemovalFile, New TransmuteOptions With {.Mode = TransmuteMode.Remove, .RemoveKeysBy = RemoveKeyMode.ByValue})},
+            {"Replacing sections", Tuple.Create(sectionReplacementFile, New TransmuteOptions With {.Mode = TransmuteMode.Replace, .ReplaceBy = ReplaceMode.BySection})},
+            {"Replacing keys by name", Tuple.Create(keyReplacementFile, New TransmuteOptions With {.Mode = TransmuteMode.Replace})},
+            {"Adding keys and sections", Tuple.Create(additionsFile, New TransmuteOptions)}
         }
 
         For Each operation In flavorOperations
 
             Dim description = operation.Key
-            Dim config = operation.Value
-            Dim flavorFile = DirectCast(config(0), iniFile)
-            Dim curMode = DirectCast(config(1), TransmuteMode)
-            Dim curReplMode = DirectCast(config(2), ReplaceMode)
-            Dim curRemMode = DirectCast(config(3), RemoveMode)
-            Dim curRemKMode = DirectCast(config(4), RemoveKeyMode)
 
             menuOutput.AddColoredLine(description, ConsoleColor.Cyan)
             gLog(description)
 
-            RemoteTransmute(baseFile, flavorFile, outputFile, isWinapp, menuOutput, curMode, curReplMode, curRemMode, curRemKMode, skipFormat:=True)
+            RemoteTransmute(baseFile, operation.Value.Item1, outputFile, isWinapp, menuOutput, operation.Value.Item2, skipFormat:=True)
 
         Next
 

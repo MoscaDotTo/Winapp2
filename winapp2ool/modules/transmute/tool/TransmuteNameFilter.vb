@@ -76,7 +76,7 @@ Friend Module TransmuteNameFilter
     ''' keys entirely, making a name-filtered whole-section operation incoherent here). In Add
     ''' mode, numbered payload keys are dropped from the rule with a warning, and a rule left with
     ''' no payload is skipped. Replace sets the Value of payload-named keys the section already
-    ''' has, and Remove matches by <see cref="TransmuteRemoveKeyMode"/>. <br /> <br />
+    ''' has, and Remove matches by <see cref="TransmuteOptions.RemoveKeysBy"/>. <br /> <br />
     '''
     ''' The menu receives one summary line per rule; per-hit detail is written to the log. A rule
     ''' which selects no sections emits a warning, signalling that the rule may be stale
@@ -90,17 +90,22 @@ Friend Module TransmuteNameFilter
     ''' The source-file sections whose names begin with <c> *Name: </c>
     ''' </param>
     '''
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> containing output to be displayed to the user
     ''' </param>
     '''
     Public Sub applyNameFilterSections(ByRef baseFile As iniFile,
                                              nameSections As List(Of iniSection),
+                                             options As TransmuteOptions,
                                        ByRef menuOutput As MenuSection)
 
         If nameSections.Count = 0 Then Return
 
-        If Transmutator = TransmuteMode.Remove AndAlso TransmuteRemoveMode = RemoveMode.BySection Then
+        If options.Mode = TransmuteMode.Remove AndAlso options.RemoveBy = RemoveMode.BySection Then
 
             Dim refuseRemMsg = "[*Name:] cannot be used with Remove BySection (a name-filtered section removal ignores the payload keys) - skipping"
             menuOutput.AddWarning(refuseRemMsg)
@@ -109,7 +114,7 @@ Friend Module TransmuteNameFilter
 
         End If
 
-        If Transmutator = TransmuteMode.Replace AndAlso TransmuteReplaceMode = ReplaceMode.BySection Then
+        If options.Mode = TransmuteMode.Replace AndAlso options.ReplaceBy = ReplaceMode.BySection Then
 
             Dim refuseReplMsg = "[*Name:] cannot be used with Replace BySection (a name-filtered section replacement ignores the payload keys) - skipping"
             menuOutput.AddWarning(refuseReplMsg)
@@ -131,13 +136,13 @@ Friend Module TransmuteNameFilter
 
         Dim totalSections = baseFile.Count
 
-        Using gLogScope($"Applying {rules.Count} name-filter section(s) ({Transmutator}) to {totalSections} sections")
+        Using gLogScope($"Applying {rules.Count} name-filter section(s) ({options.Mode}) to {totalSections} sections")
 
             For Each rule In rules
 
                 ' Adding a numbered key to every selected section creates instant duplicates, so
                 ' refuse them the same way [*] does: drop the offenders and keep any unnumbered rest
-                If Transmutator = TransmuteMode.Add Then
+                If options.Mode = TransmuteMode.Add Then
 
                     For Each numberedKey In rule.Payload.Where(Function(k) Not k.Name.Equals(k.KeyType, StringComparison.OrdinalIgnoreCase)).ToList()
 
@@ -162,7 +167,7 @@ Friend Module TransmuteNameFilter
                     If Not sectionSatisfiesPredicates(baseSection, rule.Matches) Then Continue For
 
                     matchedCount += 1
-                    If applyPayload(baseSection, rule.Payload, menuOutput) > 0 Then appliedCount += 1
+                    If applyPayload(baseSection, rule.Payload, options, menuOutput) > 0 Then appliedCount += 1
 
                 Next
 
@@ -179,7 +184,7 @@ Friend Module TransmuteNameFilter
                 Dim summary As String
                 Dim summaryColor As ConsoleColor
 
-                Select Case Transmutator
+                Select Case options.Mode
 
                     Case TransmuteMode.Add
 
@@ -221,6 +226,10 @@ Friend Module TransmuteNameFilter
     ''' The rule's payload keys
     ''' </param>
     '''
+    ''' <param name="options">
+    ''' The modes to transmute with
+    ''' </param>
+    '''
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> passed through to the reused Replace/Remove helpers, which
     ''' run quietly and write nothing to it
@@ -233,6 +242,7 @@ Friend Module TransmuteNameFilter
     ''' </returns>
     Public Function applyPayload(baseSection As iniSection,
                                   payload As List(Of iniKey),
+                                  options As TransmuteOptions,
                             ByRef menuOutput As MenuSection) As Integer
 
         Dim payloadSource As New iniSection(baseSection.Name)
@@ -245,7 +255,7 @@ Friend Module TransmuteNameFilter
 
         Next
 
-        Select Case Transmutator
+        Select Case options.Mode
 
             Case TransmuteMode.Add
 
@@ -269,7 +279,7 @@ Friend Module TransmuteNameFilter
 
             Case Else
 
-                Return remKeys(baseSection, payloadSource, menuOutput, quiet:=True)
+                Return remKeys(baseSection, payloadSource, options, menuOutput, quiet:=True)
 
         End Select
 

@@ -48,7 +48,7 @@ Imports System.Text
     ''' <summary>
     ''' Runs <see cref="winapp2ool.Transmute.RemoteTransmute"/> of <paramref name="sourceText"/> against
     ''' <paramref name="baseText"/> in memory, as a plain ini file with the sort, format and write
-    ''' skipped, under the current <c> RecognizeGlobalSections </c> setting
+    ''' skipped
     ''' </summary>
     '''
     ''' <param name="baseText">Literal ini text for the base file</param>
@@ -72,35 +72,38 @@ Imports System.Text
     ''' Optional, Default: <c> RemoveKeyMode.ByName </c>
     ''' </param>
     '''
+    ''' <param name="recognizeGlobals">
+    ''' Indicates whether global sections are recognized <br /><br />
+    ''' Optional, Default: <c> True </c>
+    ''' </param>
+    '''
     ''' <returns>The base file after the transmutation changed it in place</returns>
     Private Shared Function RunTransmute(baseText As String,
                                          sourceText As String,
                                          mode As winapp2ool.TransmuteMode,
                                 Optional replaceMode As winapp2ool.ReplaceMode = winapp2ool.ReplaceMode.ByKey,
                                 Optional removeMode As winapp2ool.RemoveMode = winapp2ool.RemoveMode.ByKey,
-                                Optional removeKeyMode As winapp2ool.RemoveKeyMode = winapp2ool.RemoveKeyMode.ByName) As winapp2ool.iniFile
+                                Optional removeKeyMode As winapp2ool.RemoveKeyMode = winapp2ool.RemoveKeyMode.ByName,
+                                Optional recognizeGlobals As Boolean = True) As winapp2ool.iniFile
 
         Dim baseFile = MakeIni(baseText)
         Dim sourceFile = MakeIni(sourceText)
         Dim outputFile = winapp2ool.iniFile.Empty("", "out.ini")
         Dim menuOutput As New winapp2ool.MenuSection
 
-        winapp2ool.RemoteTransmute(baseFile, sourceFile, outputFile, False, menuOutput,
-                                   mode, replaceMode, removeMode, removeKeyMode, skipFormat:=True)
+        Dim options As New winapp2ool.TransmuteOptions With {
+            .Mode = mode,
+            .ReplaceBy = replaceMode,
+            .RemoveBy = removeMode,
+            .RemoveKeysBy = removeKeyMode,
+            .RecognizeGlobalSections = recognizeGlobals
+        }
+
+        winapp2ool.RemoteTransmute(baseFile, sourceFile, outputFile, False, menuOutput, options, skipFormat:=True)
 
         Return baseFile
 
     End Function
-
-    ''' <summary>
-    ''' Sentinel recognition is on by default; reset it before every test since
-    ''' the two opt-out tests disable it
-    ''' </summary>
-    <TestInitialize()> Public Sub ResetGlobalRecognition()
-
-        winapp2ool.transmuteSettings.RecognizeGlobalSections = True
-
-    End Sub
 
     ''' <summary>
     ''' A [*] section in Add mode adds its unnumbered keys to every base section,
@@ -577,13 +580,12 @@ Imports System.Text
     ''' </summary>
     <TestMethod()> Public Sub NoGlobal_SentinelsTreatedAsOrdinarySections()
 
-        winapp2ool.transmuteSettings.RecognizeGlobalSections = False
-
         Dim result = RunTransmute(
             "[Alpha *]" & vbCrLf & "Detect=HKCU\Software\Alpha" & vbCrLf,
             "[*]" & vbCrLf & "Author=Winapp2.ini Project" & vbCrLf &
             "[*Map: Chrome]" & vbCrLf & "Match=Section=Games" & vbCrLf & "Replace=LangSecRef=3029" & vbCrLf,
-            winapp2ool.TransmuteMode.Add)
+            winapp2ool.TransmuteMode.Add,
+            recognizeGlobals:=False)
 
         ' The sentinels were added as literal sections instead of being interpreted
         Assert.IsTrue(result.Contains("*"))
@@ -911,12 +913,11 @@ Imports System.Text
     ''' </summary>
     <TestMethod()> Public Sub NameFilter_NoGlobal_TreatedAsOrdinarySection()
 
-        winapp2ool.transmuteSettings.RecognizeGlobalSections = False
-
         Dim result = RunTransmute(
             "[Chrome Pinned Tabs *]" & vbCrLf & "Section=Chrome Web Browser" & vbCrLf,
             "[*Name: Pinned Tabs]" & vbCrLf & "Default=False" & vbCrLf,
-            winapp2ool.TransmuteMode.Add)
+            winapp2ool.TransmuteMode.Add,
+            recognizeGlobals:=False)
 
         ' Added as a literal section instead of being interpreted
         Assert.IsTrue(result.Contains("*Name: Pinned Tabs"))
