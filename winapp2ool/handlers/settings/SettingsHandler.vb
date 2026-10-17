@@ -59,9 +59,7 @@ Public Module SettingsHandler
                 readSettingsFromDisk = False
                 saveSettingsToDisk = False
 
-                ' We still need to maintain an internal representation
-                ' of the settings so create the settingsFile and settingsDict
-                ' using the default winapp2ool configuration
+                ' We still keep an in-memory SettingsFile, built from every module's defaults
                 gLog("No settings file Found - loading default settings")
                 loadAllModuleSettings()
                 Return
@@ -159,8 +157,8 @@ Public Module SettingsHandler
     ''' <summary>
     ''' Writes the whole of <see cref="SettingsFile"/> to disk and clears the dirty flag, subject
     ''' to <paramref name="condition"/> and to the global save gate
-    ''' (<see cref="saveSettingsToDisk"/>, and never during a command line run). We clear the
-    ''' flag even when the write itself fails.
+    ''' (<see cref="saveSettingsToDisk"/>, and never during a command line run). A failed write
+    ''' leaves the flag set, so the next flush tries again.
     ''' <br />
     ''' The gate lives here rather than at the call sites because <see cref="FlushIfDirty"/> is also
     ''' invoked ungated whenever a menu or the application closes. Any <see cref="SetSetting"/> caller
@@ -181,8 +179,7 @@ Public Module SettingsHandler
 
         End If
 
-        SettingsFile.OverwriteToFile(SettingsFile.ToString())
-        _dirty = False
+        If SettingsFile.OverwriteToFile(SettingsFile.ToString()) Then _dirty = False
 
     End Sub
 
@@ -211,8 +208,8 @@ Public Module SettingsHandler
     ''' <br />
     ''' Handles <c> Boolean </c>, <c> Enum </c>, and <c> iniFileChooser </c> property types.
     ''' A property whose key is absent keeps its current value, and so does a
-    ''' <c> Boolean </c> whose value doesn't parse. Any other property type with a key present,
-    ''' or an enum value that isn't a member name or number, throws, and we don't catch it.
+    ''' <c> Boolean </c> whose value doesn't parse, or an enum whose value isn't one of its member
+    ''' names. Any other property type with a key present throws, and we don't catch it.
     ''' </summary>
     '''
     ''' <param name="moduleName">The name of the module's section</param>
@@ -255,9 +252,14 @@ Public Module SettingsHandler
                     Dim bVal As Boolean
                     If Boolean.TryParse(k.Value, bVal) Then prop.SetValue(Nothing, bVal)
 
-                Else
+                ElseIf [Enum].IsDefined(prop.PropertyType, k.Value) Then
 
                     prop.SetValue(Nothing, [Enum].Parse(prop.PropertyType, k.Value))
+
+                Else
+
+                    gLog($"{k.Value} is not a {prop.PropertyType.Name}, keeping the current value of {prop.Name}")
+                    Continue For
 
                 End If
 
