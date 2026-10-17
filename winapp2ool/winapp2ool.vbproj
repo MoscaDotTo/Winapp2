@@ -211,6 +211,7 @@
     <Compile Include="modules\trim\mainmenu\trimmainmenu.vb" />
     <Compile Include="modules\trim\settingshandler\trimsettings.vb" />
     <Compile Include="modules\trim\tool\Trim.vb" />
+    <Compile Include="modules\trim\tool\TrimOptions.vb" />
     <Compile Include="modules\winappdebug\components\advancedSettings\advSettings.vb" />
     <Compile Include="modules\winappdebug\components\landMine\experimentalScans.vb" />
     <Compile Include="modules\winappdebug\components\lintRules\lintRule.vb" />

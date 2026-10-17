@@ -224,8 +224,10 @@ Module Diff
         Dim remoteFile = getRemoteIniFile(getWinappLink)
         If Not shouldTrim OrElse remoteFile Is Nothing Then Return remoteFile
 
+        ' The local file was most likely trimmed with the user's Trim lists, so the menu trims
+        ' the remote one the same way. A command line run never reads saved settings
         Dim trimmed As New winapp2file(remoteFile)
-        Trim.trimFile(trimmed)
+        Trim.trimFile(trimmed, If(IsCommandLineMode, Nothing, TrimOptions.FromSettings()))
 
         Return trimmed.ToIni()
 

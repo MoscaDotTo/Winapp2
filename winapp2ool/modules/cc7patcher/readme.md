@@ -87,10 +87,14 @@ CCleaner 7 patching complete
 |:-|:-|:-|
 | Run (default) | Install winapp2.ini for CCleaner 7 | |
 | Toggle Trim | Enable or disable trimming winapp2.ini before patching | Default: `False` |
+| Toggle include list | Enable or disable CC7Patcher's includes file for the trim | Default: `False`; only shown when Trim is enabled |
+| Toggle exclude list | Enable or disable CC7Patcher's excludes file for the trim | Default: `False`; only shown when Trim is enabled |
 | Toggle Download | Enable or disable downloading the latest CCleaner 7 flavor from GitHub | Default: `True`; unavailable in offline mode |
 | Change winapp2.ini | Select the local winapp2.ini to use as input | Only shown when downloading is disabled |
 | Change ccleaner.ini | Select the `ccleaner.ini` file to patch | Default: `ccleaner.ini` in the current directory |
 | Change output file | Select where to save the patched `ccleaner.ini` | Default: `ccleaner.ini` in the current directory (overwrites the input when both are default) |
+| Choose includes file | Select the file naming entries the trim always keeps | Default: `cc7-includes.ini`; only shown when Trim and the include list are enabled |
+| Choose excludes file | Select the file naming entries the trim always removes | Default: `cc7-excludes.ini`; only shown when Trim and the exclude list are enabled |
 | Reset Settings | Restore all settings to their defaults | Only shown when settings have been changed |
 
 The menu also displays the currently selected winapp2.ini (shown as `Online` while downloading is enabled), ccleaner.ini, and output file paths.
@@ -137,6 +141,8 @@ CC7Patcher supports command-line automation for scripting environments. The modu
 |:-|:-|
 | `-nodownload` | Use a local winapp2.ini instead of downloading |
 | `-trim` | Trim winapp2.ini before patching |
+| `-includes` | When trimming, always keep the entries named in the includes file |
+| `-excludes` | When trimming, always remove the entries named in the excludes file |
 
 ### File Selection
 
@@ -148,6 +154,10 @@ CC7Patcher supports command-line automation for scripting environments. The modu
 | `-2f name` | Set ccleaner.ini file name | `ccleaner.ini` |
 | `-3d path` | Set output file directory | Current directory |
 | `-3f name` | Set output file name | `ccleaner.ini` (overwrites input) |
+| `-4d path` | Set includes file directory | Current directory |
+| `-4f name` | Set includes file name | `cc7-includes.ini` |
+| `-5d path` | Set excludes file directory | Current directory |
+| `-5f name` | Set excludes file name | `cc7-excludes.ini` |
 
 ###### Note: Winapp2ool does not expand environment variables in path arguments. `%AppData%` in the examples below works because the Command Prompt (cmd) expands it before winapp2ool sees it. From PowerShell, use `$env:APPDATA` instead.
 
@@ -159,6 +169,7 @@ CC7Patcher supports command-line automation for scripting environments. The modu
 | `winapp2ool -cc7patcher -trim` | Download, trim for the current system, then patch |
 | `winapp2ool -cc7patcher -nodownload -3f ccleaner-patched.ini` | Patch using a local CCleaner 7 format winapp2.ini, saving the result separately |
 | `winapp2ool -cc7patcher -trim -2d "%AppData%\CCleaner" -3d "%AppData%\CCleaner"` | Download, trim, and patch ccleaner.ini in place in CCleaner's configuration directory |
+| `winapp2ool -cc7patcher -trim -includes -4f keepers.ini` | Download, trim, but never remove the entries named in `keepers.ini`, then patch |
 
 ---
 
@@ -167,6 +178,10 @@ CC7Patcher supports command-line automation for scripting environments. The modu
 ### Back Up ccleaner.ini First
 
 The default output overwrites your input `ccleaner.ini`, and the overwrite also reorders the file and strips its comments. Back it up before running, or use **Change output file** (`-3f`) to write the patched result to a separate location for review first. See [Example 4](#example-4-review-before-deploying).
+
+### Include and Exclude Lists
+
+The trim before patching works like [Trim's](../trim/README.md#includes-and-excludes) include and exclude lists, but CC7Patcher keeps its own: its own toggles, and its own files (`cc7-includes.ini` and `cc7-excludes.ini` by default).
 
 ### Re-patching After Updates
 

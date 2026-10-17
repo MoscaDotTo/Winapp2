@@ -152,9 +152,6 @@ Public Module Trim
     ''' </summary>
     Private Property winVer As Double
 
-    Private _includes As iniFile = Nothing
-    Private _excludes As iniFile = Nothing
-
     ''' <summary>
     ''' Handles command-line arguments for <c> Trim </c>, starting from the default settings
     ''' rather than any saved ones, then runs the trim
@@ -188,9 +185,9 @@ Public Module Trim
     End Sub
 
     ''' <summary>
-    ''' Trims a winapp2.ini from outside the module. This overwrites the module's
-    ''' <c> TrimFile1 </c>, <c> TrimFile3 </c> and <c> DownloadFileToTrim </c> settings for the
-    ''' rest of the session, and the include and exclude settings still apply.
+    ''' Trims a winapp2.ini from outside the module, with the include and exclude lists saved for
+    ''' Trim. The module's file and download settings are left alone, and a file picked at a
+    ''' chooser prompt isn't saved to them.
     ''' </summary>
     '''
     ''' <param name="firstFile">
@@ -209,34 +206,74 @@ Public Module Trim
                           thirdFile As iniFileChooser,
                           d As Boolean)
 
-        TrimFile1 = firstFile
-        TrimFile3 = thirdFile
-        DownloadFileToTrim = d
-        initTrim()
+        If firstFile Is Nothing Then argIsNull(NameOf(firstFile)) : Return
+        If thirdFile Is Nothing Then argIsNull(NameOf(thirdFile)) : Return
+
+        runTrim(firstFile, thirdFile, d, TrimOptions.FromSettings(), saveChoices:=False)
+
+    End Sub
+
+    ''' <summary>
+    ''' Runs <see cref="runTrim"/> with the module's settings: <c> TrimFile1 </c> in,
+    ''' <c> TrimFile3 </c> out, and the saved download choice and include and exclude lists
+    ''' </summary>
+    Public Sub initTrim()
+
+        runTrim(TrimFile1, TrimFile3, DownloadFileToTrim, TrimOptions.FromSettings(), saveChoices:=True)
 
     End Sub
 
     ''' <summary>
     ''' Loads or downloads winapp2.ini, trims it, prints a summary, and writes the result to
-    ''' <c> TrimFile3 </c>. We return without trimming if the local input is empty or missing, or if we
-    ''' need to download and a live connection check fails. That check ignores <c> isOffline </c>. A download goes through <see cref="getWinappLink"/>, so
-    ''' it fetches the current flavor.
+    ''' <paramref name="outputFile"/>. We return without trimming if the local input is empty or
+    ''' missing, or if we need to download and a live connection check fails. That check ignores
+    ''' <c> isOffline </c>. A download goes through <see cref="getWinappLink"/>, so it fetches the
+    ''' current flavor.
     ''' </summary>
-    Public Sub initTrim()
+    '''
+    ''' <param name="inputFile">
+    ''' The winapp2.ini to trim, when <paramref name="download"/> is off
+    ''' </param>
+    '''
+    ''' <param name="outputFile">
+    ''' Where to save the trimmed file
+    ''' </param>
+    '''
+    ''' <param name="download">
+    ''' Indicates whether to trim the latest winapp2.ini from GitHub instead of
+    ''' <paramref name="inputFile"/>
+    ''' </param>
+    '''
+    ''' <param name="options">
+    ''' The include and exclude lists to trim with
+    ''' </param>
+    '''
+    ''' <param name="saveChoices">
+    ''' Indicates whether a file picked at a chooser prompt is saved as <c> TrimFile1 </c>
+    ''' </param>
+    Private Sub runTrim(inputFile As iniFileChooser,
+                        outputFile As iniFileChooser,
+                        download As Boolean,
+                        options As TrimOptions,
+                        saveChoices As Boolean)
+
+        Dim localFile As iniFile = Nothing
 
         ' Don't try to trim an empty file
-        If Not DownloadFileToTrim Then
+        If Not download Then
 
-            Dim winapp = TrimFile1.Load(TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged))
-            If Not enforceFileHasContent(winapp) Then Return
+            localFile = If(saveChoices,
+                inputFile.Load(TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged)),
+                inputFile.Load())
+            If Not enforceFileHasContent(localFile) Then Return
 
         End If
 
         ' Ensure we have an online connection before continuing if necessary
         Dim noNtwk = "Internet connection lost! Please check your network connection and try again"
-        If denyActionWithHeader(DownloadFileToTrim AndAlso Not checkOnline(), noNtwk) Then Return
+        If denyActionWithHeader(download AndAlso Not checkOnline(), noNtwk) Then Return
 
-        Dim winapp2 As New winapp2file(If(DownloadFileToTrim, getRemoteIniFile(getWinappLink), TrimFile1.Load(TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged))))
+        Dim winapp2 As New winapp2file(If(download, getRemoteIniFile(getWinappLink), localFile))
 
         clrConsole()
         Dim progress As New MenuSection
@@ -248,7 +285,7 @@ Public Module Trim
         Dim entryCountBeforeTrim = winapp2.Count
 
         ' Perform the trim
-        trimFile(winapp2)
+        trimFile(winapp2, options)
 
         Dim difference = entryCountBeforeTrim - winapp2.Count
         Dim pct = Math.Round((difference / entryCountBeforeTrim) * 100)
@@ -271,12 +308,12 @@ Public Module Trim
         out.Print()
 
         ' Save the trimmed file back to disk
-        Dim saved = iniFile.Empty(TrimFile3.Dir, TrimFile3.Name).OverwriteToFile(winapp2.ToWinapp2String())
+        Dim saved = iniFile.Empty(outputFile.Dir, outputFile.Name).OverwriteToFile(winapp2.ToWinapp2String())
 
         ' If we downloaded the latest file, then we probably can mark winapp2 as having been updated
-        If DownloadFileToTrim AndAlso saved Then waUpdateIsAvail = False
-        setNextMenuHeaderText($"{TrimFile3.Name} saved", saved)
-        setNextMenuHeaderText($"{TrimFile3.Name} was not saved", Not saved, ConsoleColor.Red)
+        If download AndAlso saved Then waUpdateIsAvail = False
+        setNextMenuHeaderText($"{outputFile.Name} saved", saved)
+        setNextMenuHeaderText($"{outputFile.Name} was not saved", Not saved, ConsoleColor.Red)
 
         crk()
 
@@ -285,19 +322,26 @@ Public Module Trim
     ''' <summary>
     ''' Trims a <c> winapp2file </c> in place, removing entries not relevant to the current system,
     ''' adding VirtualStore keys to the ones we keep, and then sorting the entries. We read the
-    ''' includes and excludes files from <c> TrimFile2 </c> and <c> TrimFile4 </c> here, when
-    ''' <c> UseTrimIncludes </c> and <c> UseTrimExcludes </c> are on.
+    ''' include and exclude lists named by <paramref name="options"/> here. The Trim module's
+    ''' settings play no part.
     ''' </summary>
     '''
     ''' <param name="winapp2">
     ''' A <c> winapp2file </c> to be trimmed to fit the current system
     ''' </param>
-    Public Sub trimFile(winapp2 As winapp2file)
+    '''
+    ''' <param name="options">
+    ''' The include and exclude lists to trim with <br /><br />
+    ''' Optional, Default: <c> Nothing </c>, which means no lists
+    ''' </param>
+    Public Sub trimFile(winapp2 As winapp2file,
+               Optional options As TrimOptions = Nothing)
 
         If winapp2 Is Nothing Then argIsNull(NameOf(winapp2)) : Return
 
-        _includes = If(UseTrimIncludes, iniFile.FromFile(TrimFile2.Path()), Nothing)
-        _excludes = If(UseTrimExcludes, iniFile.FromFile(TrimFile4.Path()), Nothing)
+        If options Is Nothing Then options = New TrimOptions
+        Dim includes = If(options.IncludesFile Is Nothing, Nothing, iniFile.FromFile(options.IncludesFile.Path()))
+        Dim excludes = If(options.ExcludesFile Is Nothing, Nothing, iniFile.FromFile(options.ExcludesFile.Path()))
 
         If winVer = Nothing Then winVer = getWinVer()
 
@@ -306,7 +350,7 @@ Public Module Trim
         Dim results = winapp2.Entries.AsParallel().AsOrdered().Select(
             Function(entry)
                 Using cap = gLogCapture()
-                    Dim retained = processEntryExistence(entry)
+                    Dim retained = processEntryExistence(entry, includes, excludes)
                     If retained Then virtualStoreChecker(entry)
                     Return New With {.Entry = entry, .Retained = retained, .Log = cap.Lines}
                 End Using
@@ -361,16 +405,25 @@ Public Module Trim
     ''' A <c> winapp2entry </c> whose detection criteria will be audited
     ''' </param>
     '''
-    Private Function processEntryExistence(entry As winapp2entry) As Boolean
+    ''' <param name="includes">
+    ''' The entries we always keep, or <c> Nothing </c> for none
+    ''' </param>
+    '''
+    ''' <param name="excludes">
+    ''' The entries we always discard, or <c> Nothing </c> for none
+    ''' </param>
+    Private Function processEntryExistence(entry As winapp2entry,
+                                           includes As iniFile,
+                                           excludes As iniFile) As Boolean
 
         gLog("", leadr:=True)
 
         Using gLogScope($"Processing entry: {entry.Name}")
 
             ' Respect the include/excludes
-            Dim IsInIncludes = UseTrimIncludes AndAlso _includes IsNot Nothing AndAlso _includes.Contains(entry.Name)
+            Dim IsInIncludes = includes IsNot Nothing AndAlso includes.Contains(entry.Name)
             If IsInIncludes Then gLog("Retaining entry: " & entry.Name, leadr:=True, buffr:=True) : Return True
-            Dim isInExcludes = UseTrimExcludes AndAlso _excludes IsNot Nothing AndAlso _excludes.Contains(entry.Name)
+            Dim isInExcludes = excludes IsNot Nothing AndAlso excludes.Contains(entry.Name)
             If isInExcludes Then gLog("Discarding entry: " & entry.Name, leadr:=True, buffr:=True) : Return False
 
             ' Process the DetectOS if we have one, take note if we meet the criteria, otherwise return false

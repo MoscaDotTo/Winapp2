@@ -46,11 +46,14 @@ Public Module CC7Patcher
     ''' <remarks>
     ''' File arguments: <c> -1d </c>/<c> -1f </c> (or <c> -winapp2d </c>/<c> -winapp2f </c>) set
     ''' the local winapp2.ini, <c> -2d </c>/<c> -2f </c> (or <c> -ccleanerd </c>/<c> -ccleanerf </c>)
-    ''' the ccleaner.ini to patch, and <c> -3d </c>/<c> -3f </c> the output file.
+    ''' the ccleaner.ini to patch, <c> -3d </c>/<c> -3f </c> the output file, and
+    ''' <c> -4d </c>/<c> -4f </c> and <c> -5d </c>/<c> -5f </c> the includes and excludes files.
     ''' Flags:
     ''' <list type="bullet">
     ''' <item><c> -nodownload </c>: read the local winapp2.ini instead of downloading (download is enabled by default)</item>
     ''' <item><c> -trim </c>: Trim winapp2.ini before patching</item>
+    ''' <item><c> -includes </c>: when trimming, never trim the entries named in the includes file</item>
+    ''' <item><c> -excludes </c>: when trimming, always trim the entries named in the excludes file</item>
     ''' </list>
     ''' </remarks>
     Public Sub handleCmdLine()
@@ -60,9 +63,13 @@ Public Module CC7Patcher
         Dim spec As New CliArgSpec(NameOf(CC7Patcher))
         spec.WithFlag("-nodownload", Sub() DownloadWinapp2 = Not DownloadWinapp2) _
             .WithFlag("-trim", Sub() TrimBeforePatching = Not TrimBeforePatching) _
+            .WithFlag("-includes", Sub() UseCC7PatcherIncludes = Not UseCC7PatcherIncludes) _
+            .WithFlag("-excludes", Sub() UseCC7PatcherExcludes = Not UseCC7PatcherExcludes) _
             .WithFile(1, CC7PatcherFile1, "winapp2") _
             .WithFile(2, CC7PatcherFile2, "ccleaner") _
             .WithFile(3, CC7PatcherFile3) _
+            .WithFile(4, CC7PatcherFile4) _
+            .WithFile(5, CC7PatcherFile5) _
             .Parse()
 
         initCC7Patcher()
@@ -74,7 +81,7 @@ Public Module CC7Patcher
     ''' ccleaner.ini with it, and displays the results. If ccleaner.ini or the local winapp2.ini
     ''' is missing, or the download can't happen, we set an error header for the next menu and
     ''' return. A missing file or being offline doesn't set a failing exit code. Trimming uses
-    ''' the Trim module's include and exclude settings.
+    ''' CC7Patcher's own include and exclude lists, never Trim's.
     ''' </summary>
     Public Sub initCC7Patcher()
 
@@ -136,7 +143,10 @@ Public Module CC7Patcher
                 gLog(trimMsg)
 
                 Dim wa2file As New winapp2file(winapp2Input)
-                Trim.trimFile(wa2file)
+                Trim.trimFile(wa2file, New TrimOptions With {
+                    .IncludesFile = If(UseCC7PatcherIncludes, CC7PatcherFile4, Nothing),
+                    .ExcludesFile = If(UseCC7PatcherExcludes, CC7PatcherFile5, Nothing)
+                })
                 winapp2Input = wa2file.ToIni()
 
                 Dim trimCompleteMsg = $"Trimming complete: {wa2file.Count} entries remain"

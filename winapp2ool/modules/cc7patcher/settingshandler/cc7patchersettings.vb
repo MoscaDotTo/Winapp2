@@ -50,6 +50,29 @@ Public Module cc7patchersettings
     Public Property TrimBeforePatching As Boolean = False
 
     ''' <summary>
+    ''' The file naming entries the trim before patching always keeps. CC7Patcher has its own,
+    ''' separate from Trim's, so the CCleaner 7 workflow doesn't depend on Trim's settings.
+    ''' Only read when <c> TrimBeforePatching </c> and <c> UseCC7PatcherIncludes </c> are on.
+    ''' </summary>
+    Public Property CC7PatcherFile4 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "cc7-includes.ini", mustExist:=False)
+
+    ''' <summary>
+    ''' The file naming entries the trim before patching always discards. Only read when
+    ''' <c> TrimBeforePatching </c> and <c> UseCC7PatcherExcludes </c> are on.
+    ''' </summary>
+    Public Property CC7PatcherFile5 As iniFileChooser = New iniFileChooser(Environment.CurrentDirectory, "cc7-excludes.ini", mustExist:=False)
+
+    ''' <summary>
+    ''' Indicates whether the trim before patching uses the includes file <c> CC7PatcherFile4 </c>
+    ''' </summary>
+    Public Property UseCC7PatcherIncludes As Boolean = False
+
+    ''' <summary>
+    ''' Indicates whether the trim before patching uses the excludes file <c> CC7PatcherFile5 </c>
+    ''' </summary>
+    Public Property UseCC7PatcherExcludes As Boolean = False
+
+    ''' <summary>
     ''' Indicates whether the module settings have been modified from their defaults
     ''' </summary>
     Public Property CC7PatcherModuleSettingsChanged As Boolean = False
@@ -63,10 +86,14 @@ Public Module cc7patchersettings
 
         DownloadWinapp2 = True
         TrimBeforePatching = False
+        UseCC7PatcherIncludes = False
+        UseCC7PatcherExcludes = False
         CC7PatcherModuleSettingsChanged = False
         CC7PatcherFile1 = New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2.ini", mustExist:=True)
         CC7PatcherFile2 = New iniFileChooser(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner.ini", mustExist:=True)
         CC7PatcherFile3 = New iniFileChooser(Environment.CurrentDirectory, "ccleaner.ini", "ccleaner.ini", mustExist:=False)
+        CC7PatcherFile4 = New iniFileChooser(Environment.CurrentDirectory, "cc7-includes.ini", mustExist:=False)
+        CC7PatcherFile5 = New iniFileChooser(Environment.CurrentDirectory, "cc7-excludes.ini", mustExist:=False)
         SaveModule(NameOf(CC7Patcher), GetType(cc7patchersettings))
 
     End Sub
