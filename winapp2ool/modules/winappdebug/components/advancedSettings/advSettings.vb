@@ -16,9 +16,8 @@
 '    along with Winapp2ool.  If not, see <http://www.gnu.org/licenses/>.
 Option Strict On
 ''' <summary>
-''' Runs WinappDebug's Scan Settings menu and turns its per-rule toggles into the
-''' <see cref="RepairErrsFound"/> and <see cref="RepairSomeErrsFound"/> flags that
-''' <see cref="lintRule.fixFormat"/> reads
+''' Runs WinappDebug's Scan Settings menu, where the user sets each rule's scan and repair
+''' toggles. <see cref="LintOptions.FromSettings"/> derives a run's repair flags from them.
 ''' </summary>
 Public Module advSettings
 
@@ -138,41 +137,22 @@ Public Module advSettings
 
     ''' <summary>
     ''' Sets <see cref="ScanSettingsChanged"/> when any rule differs from its defaults (it never
-    ''' clears it). Sets <see cref="RepairErrsFound"/> unless a changed rule has its repair off,
-    ''' and sets <see cref="RepairSomeErrsFound"/> when any rule has its repair on.
+    ''' clears it)
     ''' </summary>
     Private Sub determineScanSettings()
 
-        Dim repairAll = True
-        Dim repairAny = False
-
-        For Each rule In Rules
-
-            If rule.hasBeenChanged Then
-
-                ScanSettingsChanged = True
-                If Not rule.ShouldRepair Then repairAll = False
-
-            End If
-
-            If rule.ShouldRepair Then repairAny = True
-        Next
-
-        RepairErrsFound = repairAll
-        RepairSomeErrsFound = repairAny
+        If Rules.Any(Function(rule) rule.hasBeenChanged) Then ScanSettingsChanged = True
 
     End Sub
 
     ''' <summary>
     ''' Resets the individual scan/repair settings to their defaults and clears
-    ''' <see cref="ScanSettingsChanged"/> and <see cref="RepairSomeErrsFound"/>.
-    ''' <see cref="RepairErrsFound"/> keeps its value until <see cref="determineScanSettings"/> next runs.
+    ''' <see cref="ScanSettingsChanged"/>
     ''' </summary>
     Public Sub resetScanSettings()
 
         Rules.ForEach(Sub(rule) rule.resetParams())
         ScanSettingsChanged = False
-        RepairSomeErrsFound = False
 
     End Sub
 

@@ -31,7 +31,6 @@ Module lintsettingshandler
         winappDebugFile1.ResetParams()
         winappDebugFile3.ResetParams()
         LintModuleSettingsChanged = False
-        RepairErrsFound = True
         SaveChanges = False
         overrideDefaultVal = False
         expectedDefaultValue = False

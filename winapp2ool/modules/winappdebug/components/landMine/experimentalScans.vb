@@ -130,7 +130,7 @@ Module experimentalScans
         result.DeferSection(New MenuSection().AddColoredLine(result.EntryName & " has keys which can be merged", ConsoleColor.Magenta, centered:=True))
         result.DeferSection(buildOptiSect(removedKeys, resultKeys))
 
-        If lintOpti.ShouldRepair Then entry.ReplaceFileKeys(resultKeys)
+        If result.Options.Opti.ShouldRepair Then entry.ReplaceFileKeys(resultKeys)
 
     End Sub
 

@@ -74,10 +74,19 @@ Public Class EntryLintResult
         End Get
     End Property
 
+    ''' <summary>
+    ''' The options this entry is linted with. Every check reads its rules and settings from
+    ''' here, never from the module's settings.
+    ''' </summary>
+    Public ReadOnly Property Options As LintOptions
+
     ''' <summary>Creates a new <c> EntryLintResult </c> with no errors</summary>
     ''' <param name="entryName">The entry's full name, brackets included</param>
-    Public Sub New(entryName As String)
+    ''' <param name="options">The options the entry is linted with</param>
+    Public Sub New(entryName As String,
+                   options As LintOptions)
         Me.EntryName = entryName
+        Me.Options = options
     End Sub
 
     ''' <summary>

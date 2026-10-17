@@ -30,9 +30,16 @@ Public Class lintRule
 
     ''' <summary>
     ''' Indicates whether this rule's repairs should run. Most repairs go through
-    ''' <see cref="fixFormat"/>, which ignores this while <see cref="RepairErrsFound"/> is <c> True </c>.
+    ''' <see cref="fixFormat"/>, which ignores this while <see cref="LintOptions.RepairAll"/> is <c> True </c>.
     ''' </summary>
     Public Property ShouldRepair As Boolean
+
+    ''' <summary>
+    ''' The options of the lint run this rule belongs to, which <see cref="fixFormat"/> reads.
+    ''' <c> Nothing </c> for the rules in <see cref="WinappDebug.Rules"/>, which only hold the
+    ''' user's toggles and never take part in a run themselves.
+    ''' </summary>
+    Friend Property Owner As LintOptions
 
     ''' <summary> Describes to the user which type of scan routines this rule controls, starting with <c> detecting </c> </summary>
     Public Property ScanText As String
@@ -83,11 +90,19 @@ Public Class lintRule
     End Sub
 
     ''' <summary>
-    ''' Returns whether the repairs gated by this rule should run: always while
-    ''' <see cref="RepairErrsFound"/> is <c> True </c>, otherwise only when both
-    ''' <see cref="RepairSomeErrsFound"/> and <see cref="ShouldRepair"/> are
+    ''' Returns whether the repairs gated by this rule should run in its <see cref="Owner"/>'s
+    ''' run: always while <see cref="LintOptions.RepairAll"/> is <c> True </c>, otherwise only
+    ''' when both <see cref="LintOptions.RepairSome"/> and <see cref="ShouldRepair"/> are
     ''' </summary>
     Public Function fixFormat() As Boolean
-        Return RepairErrsFound Or (RepairSomeErrsFound And ShouldRepair)
+        Return Owner.RepairAll Or (Owner.RepairSome And ShouldRepair)
+    End Function
+
+    ''' <summary> Returns a copy of this rule, initial states included, that belongs to <paramref name="runOptions"/> </summary>
+    ''' <param name="runOptions"> The options of the run the copy belongs to </param>
+    Friend Function CloneFor(runOptions As LintOptions) As lintRule
+        Dim copy = DirectCast(MemberwiseClone(), lintRule)
+        copy.Owner = runOptions
+        Return copy
     End Function
 End Class

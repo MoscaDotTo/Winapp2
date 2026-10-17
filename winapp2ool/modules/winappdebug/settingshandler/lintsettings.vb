@@ -35,14 +35,6 @@ Public Module lintsettings
     Public Property winappDebugFile3 As New iniFileChooser(Environment.CurrentDirectory, "winapp2-debugged.ini", "winapp2-debugged.ini", mustExist:=False)
 
     ''' <summary>
-    ''' Indicates whether any rule had its repair on when <c> determineScanSettings </c> last
-    ''' ran (until then it holds the saved or default value). While <see cref="RepairErrsFound"/> is
-    ''' <c> False </c>, this is what lets each rule's own repair toggle apply.
-    ''' <br /> Default: <c> False </c>
-    ''' </summary>
-    Public Property RepairSomeErrsFound As Boolean = False
-
-    ''' <summary>
     ''' Indicates whether the scan settings have been modified from their defaults
     ''' <br /> Default: <c> False </c> 
     ''' </summary>
@@ -59,13 +51,6 @@ Public Module lintsettings
     ''' <br /> Default: <c> False </c>
     ''' </summary>
     Public Property SaveChanges As Boolean = False
-
-    ''' <summary>
-    ''' Indicates whether every rule repairs what it finds, whatever its own repair toggle says.
-    ''' The Scan Settings menu clears it when a changed rule has its repair off.
-    ''' <br /> Default: <c> True </c>
-    ''' </summary>
-    Public Property RepairErrsFound As Boolean = True
 
     ''' <summary>
     ''' Indicates whether every entry must have a Default key holding <see cref="expectedDefaultValue"/>.

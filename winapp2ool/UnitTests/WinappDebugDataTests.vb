@@ -283,16 +283,19 @@ Imports System.Reflection
             applyRuleSelection(ruleIndex, scanOnly)
 
             Dim testFile = buildTestFile(sections)
+            Dim options = winapp2ool.LintOptions.FromSettings()
 
             ' First pass: scan without repairs to assert error count
-            winapp2ool.WinappDebug.Debug(testFile).ForEach(Sub(s) s.Print(withDivider:=False))
+            options.RepairAll = False
+            options.RepairSome = False
+            winapp2ool.WinappDebug.Debug(testFile, options).ForEach(Sub(s) s.Print(withDivider:=False))
 
             If expectedErrors >= 0 Then Assert.AreEqual(expectedErrors, winapp2ool.WinappDebug.ErrorsFound, "Wrong error count on initial scan")
 
             ' Second pass: apply repairs (skipped for ScanOnly tests)
             If Not scanOnly Then
-                winapp2ool.lintsettings.RepairSomeErrsFound = True
-                winapp2ool.WinappDebug.Debug(testFile).ForEach(Sub(s) s.Print(withDivider:=False))
+                options.RepairSome = True
+                winapp2ool.WinappDebug.Debug(testFile, options).ForEach(Sub(s) s.Print(withDivider:=False))
             End If
 
             ' Assert each expected section against its matching repaired entry (matched by name)
@@ -361,9 +364,6 @@ Imports System.Reflection
     ''' after rule selection so that errors are detected but not applied.
     ''' </summary>
     Private Shared Sub applyRuleSelection(ruleIndex As Integer, scanOnly As Boolean)
-
-        winapp2ool.lintsettings.RepairErrsFound = False
-        winapp2ool.lintsettings.RepairSomeErrsFound = False
 
         Select Case ruleIndex
 

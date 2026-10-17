@@ -361,9 +361,8 @@ Imports System.Text
 
     ''' <summary>
     ''' The generators' lint pass must not depend on the user's WinappDebug settings. With every
-    ''' rule turned off, forced repairs off and Default keys preserved, <c> remotedebug </c> must
-    ''' still produce the same file as it does under the defaults, and must leave those settings
-    ''' as it found them
+    ''' rule turned off and Default keys preserved, <c> remotedebug </c> must still produce the
+    ''' same file as it does under the defaults, and must leave those settings as it found them
     ''' </summary>
     <TestMethod()> Public Sub Remotedebug_IgnoresUserLintSettings()
 
@@ -380,16 +379,14 @@ Imports System.Text
             Dim expected = winapp2ool.WinappDebug.remotedebug(MakeIni(text), True).ToString()
 
             winapp2ool.WinappDebug.Rules.ForEach(Sub(rule) rule.turnOff())
-            winapp2ool.RepairErrsFound = False
             winapp2ool.PreserveDefaultKeys = True
 
             Dim actual = winapp2ool.WinappDebug.remotedebug(MakeIni(text), True).ToString()
 
             Assert.AreEqual(expected, actual)
             Assert.IsFalse(expected.Contains("Default="), "The default settings should remove the Default key")
-            Assert.IsTrue(winapp2ool.WinappDebug.Rules.All(Function(rule) Not rule.ShouldScan AndAlso Not rule.ShouldRepair), "Rule toggles were not restored")
-            Assert.IsFalse(winapp2ool.RepairErrsFound, "RepairErrsFound was not restored")
-            Assert.IsTrue(winapp2ool.PreserveDefaultKeys, "PreserveDefaultKeys was not restored")
+            Assert.IsTrue(winapp2ool.WinappDebug.Rules.All(Function(rule) Not rule.ShouldScan AndAlso Not rule.ShouldRepair), "Rule toggles were changed")
+            Assert.IsTrue(winapp2ool.PreserveDefaultKeys, "PreserveDefaultKeys was changed")
 
         Finally
 
