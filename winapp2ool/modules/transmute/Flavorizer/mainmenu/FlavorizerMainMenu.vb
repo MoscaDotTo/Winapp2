@@ -93,8 +93,8 @@ Public Module FlavorizerMainMenu
                 End Sub) _
             .AddBlank() _
             .AddColoredLine("Base and save files:", ConsoleColor.Magenta) _
-            .AddLine($"Base file: {replDir(FlavorizerFile1.Path())}") _
-            .AddLine($"Save target: {replDir(FlavorizerFile2.Path())}") _
+            .AddFileInfo("Base file:   ", FlavorizerFile1.Path()) _
+            .AddColoredFileInfo("Save target: ", FlavorizerFile2.Path(), ConsoleColor.Yellow) _
             .AddBlank() _
             .AddColoredLine($"Auto detect target directory: {FlavorizerFile9.Dir}", ConsoleColor.Yellow) _
             .AddBlank() _

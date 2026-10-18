@@ -45,7 +45,7 @@ Public Module transmuteMainMenu
                                     "Remove entire sections or individual keys within specific sections by Name or Value"}
 
         Return MenuSection.CreateCompleteMenu("Transmute", menuDescriptionLines, ConsoleColor.Magenta) _
-            .AddDispatchedColoredOption("Run (default)", "Perform the transmutation", GetRedGreen(TransmuteFile1.Name.Length = 0),
+            .AddDispatchedColoredOption("Run (default)", "Perform the transmutation", GetRedGreen(TransmuteFile2.Name.Length = 0),
                 Sub() If Not denyActionWithHeader(TransmuteFile2.Name.Length = 0, "You must select a valid source file") Then initTransmute(), isDefault:=True) _
             .AddDispatchedColoredOption("Open Flavorizer", "Apply a complex series of modifications to an ini file", ConsoleColor.Yellow,
                 Sub() initModule("Flavorizer", AddressOf buildFlavorizerMenu)) _

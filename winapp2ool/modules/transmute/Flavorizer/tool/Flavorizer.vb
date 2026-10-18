@@ -146,12 +146,12 @@ Public Module Flavorizer
         Dim baseFile = iniFile.FromFile(FlavorizerFile1.Path())
         Dim saveFile = iniFile.Empty(FlavorizerFile2.Dir, FlavorizerFile2.Name)
 
-        Dim additionsFile = If(FlavorizerFile8.Name.Length > 0 AndAlso FlavorizerFile8.Exists(), iniFile.FromFile(FlavorizerFile8.Path()), Nothing)
-        Dim sectionRemovalFile = If(FlavorizerFile3.Name.Length > 0 AndAlso FlavorizerFile3.Exists(), iniFile.FromFile(FlavorizerFile3.Path()), Nothing)
-        Dim keyNameRemovalFile = If(FlavorizerFile4.Name.Length > 0 AndAlso FlavorizerFile4.Exists(), iniFile.FromFile(FlavorizerFile4.Path()), Nothing)
-        Dim keyValueRemovalFile = If(FlavorizerFile5.Name.Length > 0 AndAlso FlavorizerFile5.Exists(), iniFile.FromFile(FlavorizerFile5.Path()), Nothing)
-        Dim sectionReplacementFile = If(FlavorizerFile6.Name.Length > 0 AndAlso FlavorizerFile6.Exists(), iniFile.FromFile(FlavorizerFile6.Path()), Nothing)
-        Dim keyReplacementFile = If(FlavorizerFile7.Name.Length > 0 AndAlso FlavorizerFile7.Exists(), iniFile.FromFile(FlavorizerFile7.Path()), Nothing)
+        Dim additionsFile = FlavorizerFile8.ReadIfSet()
+        Dim sectionRemovalFile = FlavorizerFile3.ReadIfSet()
+        Dim keyNameRemovalFile = FlavorizerFile4.ReadIfSet()
+        Dim keyValueRemovalFile = FlavorizerFile5.ReadIfSet()
+        Dim sectionReplacementFile = FlavorizerFile6.ReadIfSet()
+        Dim keyReplacementFile = FlavorizerFile7.ReadIfSet()
 
         Using gLogScope("Flavorizing")
 
