@@ -838,11 +838,14 @@ Public Class MenuSection
     ''' </param>
     Private Sub registerHandler(handler As Action, isDefault As Boolean)
 
-        If Not isDefault Then _actions.Add(handler) : Return
+        If isDefault Then
 
-        If _defaultIndex >= 0 Then Throw New InvalidOperationException("A menu can have only one default option")
+            If _defaultIndex >= 0 Then Throw New InvalidOperationException("A menu can have only one default option")
+            _defaultIndex = _actions.Count
 
-        _defaultIndex = _actions.Count
+        End If
+
+        _actions.Add(handler)
 
     End Sub
 
