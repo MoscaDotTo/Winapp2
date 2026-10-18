@@ -18,6 +18,9 @@
 Option Strict On
 
 Imports System.IO
+Imports System.Security
+Imports System.Text.RegularExpressions
+Imports Microsoft.Win32
 
 ''' <summary>
 ''' <c> Trim </c> is a winapp2ool module that evaluates the detection criteria of each entry in
@@ -177,7 +180,7 @@ Public Module Trim
         spec.WithFile(1, TrimFile1).WithFile(2, TrimFile2).WithFile(3, TrimFile3).WithFile(4, TrimFile4) _
             .WithFlag("-includes", Sub() UseTrimIncludes = Not UseTrimIncludes) _
             .WithFlag("-excludes", Sub() UseTrimExcludes = Not UseTrimExcludes) _
-            .WithDownload(Sub() DownloadFileToTrim = Not DownloadFileToTrim, Function() DownloadFileToTrim) _
+            .WithDownload(Sub() DownloadFileToTrim = True, Function() DownloadFileToTrim) _
             .Parse()
 
         initTrim()
@@ -225,9 +228,10 @@ Public Module Trim
 
     ''' <summary>
     ''' Loads or downloads winapp2.ini, trims it, prints a summary, and writes the result to
-    ''' <paramref name="outputFile"/>. We return without trimming if the local input is empty or
-    ''' missing, or if we need to download and a live connection check fails. That check ignores
-    ''' <c> isOffline </c>. A download goes through <see cref="getWinappLink"/>, so it fetches the
+    ''' <paramref name="outputFile"/>. We mark the run failed and return without writing anything
+    ''' if a download is asked for in offline mode or without a connection, or if the download
+    ''' fails. An empty or missing input also returns without writing, and fails the run only on
+    ''' the command line. A download goes through <see cref="getWinappLink"/>, so it fetches the
     ''' current flavor.
     ''' </summary>
     '''
@@ -257,23 +261,46 @@ Public Module Trim
                         options As TrimOptions,
                         saveChoices As Boolean)
 
-        Dim localFile As iniFile = Nothing
+        Dim inputIni As iniFile
 
-        ' Don't try to trim an empty file
-        If Not download Then
+        If download Then
 
-            localFile = If(saveChoices,
+            Dim noNtwk = "Internet connection lost! Please check your network connection and try again"
+            If denyActionWithHeader(isOffline, "winapp2.ini can't be downloaded in offline mode") OrElse
+               denyActionWithHeader(Not checkOnline(), noNtwk) Then
+
+                markRunFailed()
+                Return
+
+            End If
+
+            inputIni = getRemoteIniFile(getWinappLink)
+
+            If denyActionWithHeader(inputIni Is Nothing, "Failed to download winapp2.ini") Then
+
+                markRunFailed()
+                Return
+
+            End If
+
+        Else
+
+            inputIni = If(saveChoices,
                 inputFile.Load(TrimModuleSettingsChanged, NameOf(Trim), NameOf(TrimFile1), NameOf(TrimModuleSettingsChanged)),
                 inputFile.Load())
-            If Not enforceFileHasContent(localFile) Then Return
 
         End If
 
-        ' Ensure we have an online connection before continuing if necessary
-        Dim noNtwk = "Internet connection lost! Please check your network connection and try again"
-        If denyActionWithHeader(download AndAlso Not checkOnline(), noNtwk) Then Return
+        ' Trimming an empty file would save an empty file over the output. In the menu this is
+        ' also how a cancelled File Chooser ends, which isn't a failure
+        If Not enforceFileHasContent(inputIni) Then
 
-        Dim winapp2 As New winapp2file(If(download, getRemoteIniFile(getWinappLink), localFile))
+            If IsCommandLineMode Then markRunFailed()
+            Return
+
+        End If
+
+        Dim winapp2 As New winapp2file(inputIni)
 
         clrConsole()
         Dim progress As New MenuSection
@@ -495,7 +522,8 @@ Public Module Trim
 
     ''' <summary>
     ''' Collects new VirtualStore counterpart keys for the given key list and appends them to
-    ''' <paramref name="newKeys"/>. Only keys whose corresponding VirtualStore path exists on
+    ''' <paramref name="newKeys"/>, matching the machine-wide paths case-insensitively. Only keys
+    ''' whose corresponding VirtualStore path exists on
     ''' the current system are included, and we skip a counterpart whose value is already in
     ''' <paramref name="keys"/>. Each new key keeps its source key's name until the entry is
     ''' renumbered.
@@ -545,7 +573,7 @@ Public Module Trim
             If Not key.vHasAny(findStrs, True) Then Continue For
 
             For i = 0 To findStrs.Length - 1
-                Dim newVal = key.Value.Replace(findStrs(i), replStrs(i))
+                Dim newVal = Regex.Replace(key.Value, Regex.Escape(findStrs(i)), replStrs(i), RegexOptions.IgnoreCase)
                 If initVals.Contains(newVal) Then Continue For
                 If key.Value = newVal Then Continue For
                 keysToAdd.Add(New iniKey($"{key.Name}={newVal}"))
@@ -562,7 +590,7 @@ Public Module Trim
 
     ''' <summary>
     ''' Extracts the filesystem or registry path from a key value string for use in an existence
-    ''' check. A RegKey value comes back whole, including any <c> |ValueName </c> part.
+    ''' check. A RegKey's <c> |ValueName </c> part is dropped, so we check the key that holds the value.
     ''' </summary>
     '''
     ''' <param name="value">
@@ -578,7 +606,7 @@ Public Module Trim
         Select Case keyType
             Case "FileKey" : Return New fileKeyParams(value).Path
             Case "ExcludeKey" : Return New excludeKeyParams(value).Path
-            Case Else : Return value
+            Case Else : Return New regKeyParams(value).Path
         End Select
 
     End Function
@@ -691,8 +719,8 @@ Public Module Trim
     ''' <summary>
     ''' Returns whether a key exists in the registry. Under <c> HKLM </c> we fall back to the
     ''' <c> SOFTWARE\WOW6432Node </c> view for 32-bit applications. An unrecognized hive logs a
-    ''' message and returns <c> False </c>, and an <c> UnauthorizedAccessException </c> returns
-    ''' <c> True </c>.
+    ''' message and returns <c> False </c>. A key we aren't allowed to read returns <c> True </c>,
+    ''' since only a key that exists can refuse us.
     ''' </summary>
     '''
     ''' <param name="root">
@@ -712,24 +740,24 @@ Public Module Trim
 
                 Case "HKCU"
 
-                    Return getCUKey(dir) IsNot Nothing
+                    Return closeIfOpen(getCUKey(dir))
 
                 Case "HKLM"
 
-                    If getLMKey(dir) IsNot Nothing Then Return True
+                    If closeIfOpen(getLMKey(dir)) Then Return True
 
                     ' Support checking for 32bit applications on Win64
                     dir = root + "\" + dir
                     dir = dir.ToUpperInvariant.Replace("HKLM\SOFTWARE", "SOFTWARE\WOW6432Node")
-                    Return getLMKey(dir) IsNot Nothing
+                    Return closeIfOpen(getLMKey(dir))
 
                 Case "HKU"
 
-                    Return getUserKey(dir) IsNot Nothing
+                    Return closeIfOpen(getUserKey(dir))
 
                 Case "HKCR"
 
-                    Return getCRKey(dir) IsNot Nothing
+                    Return closeIfOpen(getCRKey(dir))
 
                 Case Else
 
@@ -739,13 +767,33 @@ Public Module Trim
 
             End Select
 
+        Catch ex As SecurityException
+
+            ' OpenSubKey throws this when it can't read a key, which means the key exists
+            Return True
+
         Catch ex As UnauthorizedAccessException
 
-            ' The most common (only?) exception here is a permissions one, so assume true if we hit because a permissions exception implies the key exists anyway.
             Return True
 
         End Try
 
+        Return True
+
+    End Function
+
+    ''' <summary>
+    ''' Returns whether <paramref name="key"/> was opened, closing it if it was
+    ''' </summary>
+    '''
+    ''' <param name="key">
+    ''' A registry key from one of the <c> RegistryHelper </c> functions, or <c> Nothing </c>
+    ''' </param>
+    Private Function closeIfOpen(key As RegistryKey) As Boolean
+
+        If key Is Nothing Then Return False
+
+        key.Dispose()
         Return True
 
     End Function
@@ -851,8 +899,7 @@ Public Module Trim
     ''' <summary>
     ''' Returns whether a path exists on the file system, after expanding its environment
     ''' variable and any wildcards. A <c> %ProgramFiles% </c> path that isn't found is retried
-    ''' under Program Files (x86). A malformed variable counts as present: outside <c> -s </c> we print an error to
-    ''' the console and wait for a key press, from inside a parallel worker, before returning <c> True </c>.
+    ''' under Program Files (x86). A malformed variable counts as present, and we log it.
     ''' </summary>
     '''
     ''' <param name="key">
@@ -867,10 +914,7 @@ Public Module Trim
 
         If processEnvDirs(dir, isProgramFiles) Then
 
-            cwl("Error: " & key & " contains a malformatted environment variable and has been ignored")
-            cwl("The associated entry will be retained in the final output file")
-            cwl("Press any key to continue")
-            crk()
+            gLog($"{key} contains a malformed environment variable and was ignored. The entry will be retained", buffr:=True)
             Return True
 
         End If
@@ -940,9 +984,9 @@ Public Module Trim
 
     ''' <summary>
     ''' Returns whether any path matching the wildcards in <paramref name="dir"/> exists. We expand
-    ''' each wildcard segment against directory names only, wherever it falls in the path. A
-    ''' folder we aren't allowed to list counts as a match, and a path with illegal characters
-    ''' counts as no match.
+    ''' a wildcard segment wherever it falls in the path, against directory names, or against
+    ''' files and directories for the last segment. A folder we aren't allowed to list counts as a
+    ''' match, and a path with illegal characters counts as no match.
     ''' </summary>
     '''
     ''' <param name="dir">
@@ -965,7 +1009,12 @@ Public Module Trim
 
             ' Split the given string into sections by directory
             Dim splitDir = dir.Split(CChar("\"))
-            For Each pathPart In splitDir
+            For i = 0 To splitDir.Length - 1
+
+                Dim pathPart = splitDir(i)
+
+                ' Only the last segment can name a file
+                Dim isLast = i = splitDir.Length - 1
 
                 ' If this directory parameterization includes a wildcard, expand it appropriately
                 ' This probably wont work if a string for some reason starts with a *
@@ -983,7 +1032,7 @@ Public Module Trim
                             Try
 
                                 ' If there are any possibilities, add them to our possibility list
-                                Dim possibilities = Directory.GetDirectories(currentPath, pathPart)
+                                Dim possibilities = If(isLast, Directory.GetFileSystemEntries(currentPath, pathPart), Directory.GetDirectories(currentPath, pathPart))
                                 possibleDirs.AddRange(possibilities)
 
                             Catch ex As ArgumentException
@@ -1019,7 +1068,9 @@ Public Module Trim
 
                     If currentPaths.Count = 0 Then
 
-                        currentPaths.Add($"{pathPart}")
+                        ' A bare "C:" means the current folder on drive C, so we start a drive letter at its root
+                        Dim colon = pathPart.IndexOf(":"c)
+                        currentPaths.Add(If(colon > 0, $"{pathPart(colon - 1)}:\", pathPart))
                         Continue For
 
                     End If
@@ -1029,8 +1080,9 @@ Public Module Trim
                     For Each path In currentPaths
 
                         If Not path.EndsWith("\", StringComparison.InvariantCulture) AndAlso Not path.Length = 0 Then path += "\"
-                        If Directory.Exists($"{path}{pathPart}\") Then
-                            newCurPaths.Add($"{path}{pathPart}\")
+                        Dim candidate = path & pathPart
+                        If Directory.Exists(candidate) OrElse (isLast AndAlso File.Exists(candidate)) Then
+                            newCurPaths.Add(candidate)
                         End If
 
                     Next

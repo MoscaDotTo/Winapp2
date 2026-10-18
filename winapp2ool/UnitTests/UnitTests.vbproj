@@ -93,6 +93,7 @@
     <Compile Include="MenuInputTests.vb" />
     <Compile Include="MenuLayoutTests.vb" />
     <Compile Include="TransmuteTests.vb" />
+    <Compile Include="TrimDetectionTests.vb" />
     <Compile Include="TrimOptionsTests.vb" />
     <Compile Include="UnitTools.vb" />
     <Compile Include="UpdateSignatureTests.vb" />

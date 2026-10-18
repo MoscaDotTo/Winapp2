@@ -123,7 +123,7 @@ A failed version check removes the entry on the spot; Trim never looks at its ot
 
 `DetectFile` names a path that Trim checks for existence. It can point at either a file or a folder.
 
-- Wildcards (`*`) work anywhere in the path. Trim expands each wildcard segment against the folders actually on disk, and keeps the entry if any expansion resolves to something that exists. 
+- Wildcards (`*`) work anywhere in the path. Trim expands each wildcard segment against the folders actually on disk (the last segment against files too, eg. `%ProgramFiles%\App\*.exe`), and keeps the entry if any expansion resolves to something that exists. 
 - Paths under `%ProgramFiles%` are checked in both the native Program Files directory and the 32-bit `Program Files (x86)` directory. See [Environment Variables](#environment-variables)
 - If a folder can't be read because of permissions, Trim assumes the target exists and keeps the entry
 
@@ -178,12 +178,10 @@ Trim expands standard Windows environment variables in `DetectFile` paths, plus 
 
 On 64-bit systems, `%ProgramFiles%` covers both the native Program Files directory and `Program Files (x86)`. `HKLM\Software` registry paths get the same treatment through `WOW6432Node`.
 
-**Malformed variables:** a path whose environment variable is malformed (e.g. a value ending at the closing `%` with no path after it) prints an error and pauses:
+**Malformed variables:** a `DetectFile` whose `%` has no closing `%` (e.g. `%AppData\App`) counts as present, so the entry is kept. Trim notes it in the log:
 
 ```
-Error: <path> contains a malformatted environment variable and has been ignored
-The associated entry will be retained in the final output file
-Press any key to continue
+<path> contains a malformed environment variable and was ignored. The entry will be retained
 ```
 
 ## VirtualStore Handling
@@ -197,7 +195,7 @@ Pre-UAC applications that wrote to protected locations had those writes quietly 
 | FileKey / ExcludeKey | `%CommonProgramFiles%` | `%LocalAppData%\VirtualStore\Program Files*\Common Files` |
 | FileKey / ExcludeKey / RegKey | `HKLM\Software` | `HKCU\Software\Classes\VirtualStore\MACHINE\SOFTWARE` |
 
-On most systems no VirtualStore keys are generated at all. When keys are added, the entry's keys are renumbered. See [Example 5](#example-5-virtualstore-key-generation).
+The original location matches in any case (`HKLM\SOFTWARE` too). For a RegKey naming a value (`HKLM\Software\App|Setting`), Trim checks that the key holding the value exists in the VirtualStore. On most systems no VirtualStore keys are generated at all. When keys are added, the entry's keys are renumbered. See [Example 5](#example-5-virtualstore-key-generation).
 
 ---
 
@@ -279,7 +277,9 @@ CCleaner evaluates every entry in winapp2.ini when it starts, so a big file mean
 | "Internet connection lost! Please check your network connection and try again" | Downloading is enabled but no connection is available |
 | File Chooser appears with header "winapp2.ini does not exist" | The input file was not found |
 | "winapp2.ini was empty or not found" (red menu header) | The input file exists but contains no entries |
-| "Error: \<path\> contains a malformatted environment variable and has been ignored" | A `DetectFile` value has a broken `%Variable%`; the entry is retained, and Trim pauses for a keypress |
+| "Failed to download winapp2.ini" (red menu header) | The download didn't complete; nothing is saved and the run exits 1 |
+| "winapp2.ini can't be downloaded in offline mode" | `-d` was given with `-offline`; nothing is saved and the run exits 1 |
+| "\<path\> contains a malformed environment variable and was ignored" (log only) | A `DetectFile` value has a broken `%Variable%`; the entry is retained |
 | "Your key seems to be malformatted (bad root? ...)" (log only) | A `Detect` key uses a registry root other than `HKCU`/`HKLM`/`HKU`/`HKCR` |
 
 | Symptom | Cause |
