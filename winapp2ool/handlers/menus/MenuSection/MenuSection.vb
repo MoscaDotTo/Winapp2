@@ -1,4 +1,4 @@
-﻿'    Copyright (C) 2018-2025 Hazel Ward
+﻿'    Copyright (C) 2018-2026 Hazel Ward
 ' 
 '    This file is a part of Winapp2ool
 ' 
@@ -57,6 +57,28 @@ Public Class MenuSection
     ''' only when every numbered option in the menu was added through one of them.
     ''' </summary>
     Private _actions As New List(Of Action)
+
+    ''' <summary>
+    ''' The index in <see cref="_actions"/> of the handler an empty input runs, or <c> -1 </c>
+    ''' when the menu has no default option
+    ''' </summary>
+    Private _defaultIndex As Integer = -1
+
+    ''' <summary>
+    ''' The handler <see cref="HandleInput"/> passes input that isn't a number to, or
+    ''' <c> Nothing </c> when the menu takes no text
+    ''' </summary>
+    Private _textHandler As Func(Of String, Boolean) = Nothing
+
+    ''' <summary>
+    ''' The number of the option an empty input runs, or <c> 0 </c> when the menu has no default
+    ''' option
+    ''' </summary>
+    Friend ReadOnly Property DefaultOption As Integer
+        Get
+            Return _defaultIndex + 1
+        End Get
+    End Property
 
     ''' <summary>
     ''' The color of the title when printed, or <c> Nothing </c> for the default console color.
@@ -625,16 +647,22 @@ Public Class MenuSection
     ''' Optional, Default: <c> True </c>
     ''' </param>
     '''
+    ''' <param name="isDefault">
+    ''' Indicates whether an empty input runs this option. A menu can have only one default <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
+    '''
     ''' <returns>This section, for chaining</returns>
     Public Function AddDispatchedOption(name As String,
                                         description As String,
                                         handler As Action,
-                               Optional condition As Boolean = True) As MenuSection
+                               Optional condition As Boolean = True,
+                               Optional isDefault As Boolean = False) As MenuSection
 
         If Not condition Then Return Me
 
         AddOption(name, description)
-        _actions.Add(handler)
+        registerHandler(handler, isDefault)
 
         Return Me
 
@@ -667,17 +695,23 @@ Public Class MenuSection
     ''' Optional, Default: <c> True </c>
     ''' </param>
     '''
+    ''' <param name="isDefault">
+    ''' Indicates whether an empty input runs this option. A menu can have only one default <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
+    '''
     ''' <returns>This section, for chaining</returns>
     Public Function AddDispatchedToggle(name As String,
                                         description As String,
                                         isEnabled As Boolean,
                                         handler As Action,
-                               Optional condition As Boolean = True) As MenuSection
+                               Optional condition As Boolean = True,
+                               Optional isDefault As Boolean = False) As MenuSection
 
         If Not condition Then Return Me
 
         AddToggle(name, description, isEnabled)
-        _actions.Add(handler)
+        registerHandler(handler, isDefault)
 
         Return Me
 
@@ -710,17 +744,23 @@ Public Class MenuSection
     ''' Optional, Default: <c> True </c>
     ''' </param>
     '''
+    ''' <param name="isDefault">
+    ''' Indicates whether an empty input runs this option. A menu can have only one default <br /><br />
+    ''' Optional, Default: <c> False </c>
+    ''' </param>
+    '''
     ''' <returns>This section, for chaining</returns>
     Public Function AddDispatchedColoredOption(name As String,
                                                description As String,
                                                color As ConsoleColor,
                                                handler As Action,
-                                      Optional condition As Boolean = True) As MenuSection
+                                      Optional condition As Boolean = True,
+                                      Optional isDefault As Boolean = False) As MenuSection
 
         If Not condition Then Return Me
 
         AddColoredOption(name, description, color)
-        _actions.Add(handler)
+        registerHandler(handler, isDefault)
 
         Return Me
 
@@ -782,6 +822,102 @@ Public Class MenuSection
         Return True
 
     End Function
+
+    ''' <summary>
+    ''' Registers a dispatch handler, and records it as the menu's default when
+    ''' <paramref name="isDefault"/> is <c> True </c>. A second default throws, because it's a bug
+    ''' in the menu's builder and would otherwise silently run the wrong option.
+    ''' </summary>
+    '''
+    ''' <param name="handler">
+    ''' The action to invoke when the user selects the option
+    ''' </param>
+    '''
+    ''' <param name="isDefault">
+    ''' Indicates whether an empty input runs the option
+    ''' </param>
+    Private Sub registerHandler(handler As Action, isDefault As Boolean)
+
+        If isDefault Then
+
+            If _defaultIndex >= 0 Then Throw New InvalidOperationException("A menu can have only one default option")
+            _defaultIndex = _actions.Count
+
+        End If
+
+        _actions.Add(handler)
+
+    End Sub
+
+    ''' <summary>
+    ''' Sets the handler for input that isn't a number, such as the main menu's hidden commands or
+    ''' the file chooser's typed names. It receives an empty input only when the menu has no
+    ''' default option.
+    ''' </summary>
+    '''
+    ''' <param name="handler">
+    ''' Takes the user's input and returns <c> True </c> if it handled it. Unhandled input gets
+    ''' the invalid-input header
+    ''' </param>
+    '''
+    ''' <returns>This section, for chaining</returns>
+    Public Function OnText(handler As Func(Of String, Boolean)) As MenuSection
+
+        _textHandler = handler
+        Return Me
+
+    End Function
+
+    ''' <summary>
+    ''' Acts on a line the user entered at this menu's prompt. <c> 0 </c> exits the module and any
+    ''' other number runs that option. An empty line runs the default option, if the menu has one.
+    ''' Other text goes to the <see cref="OnText"/> handler. Anything left over, including the
+    ''' <c> Nothing </c> that <c> Console.ReadLine </c> returns at the end of input, sets the
+    ''' invalid-input header.
+    ''' </summary>
+    '''
+    ''' <param name="input">
+    ''' The user's input
+    ''' </param>
+    Public Sub HandleInput(input As String)
+
+        If input Is Nothing Then
+
+            MenuMaker.setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+            Return
+
+        End If
+
+        Dim intInput As Integer
+
+        If Integer.TryParse(input, intInput) Then
+
+            If intInput = 0 Then
+
+                MenuMaker.exitModule()
+
+            ElseIf Not Dispatch(intInput) Then
+
+                MenuMaker.setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+
+            End If
+
+            Return
+
+        End If
+
+        If input.Length = 0 AndAlso _defaultIndex >= 0 Then
+
+            _actions(_defaultIndex)()
+            Return
+
+        End If
+
+        If _textHandler IsNot Nothing AndAlso _textHandler(input) Then Return
+
+        MenuMaker.setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
+
+    End Sub
 
     ''' <summary>
     ''' Prints the section as one buffered render pass, as a complete menu or as a plain section
