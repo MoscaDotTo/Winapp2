@@ -87,7 +87,6 @@ Module maintoolmenu
                     remoteTrim(New iniFileChooser(Environment.CurrentDirectory, ""),
                                New iniFileChooser(Environment.CurrentDirectory, "winapp2.ini", "winapp2.ini"),
                                True)
-                    waUpdateIsAvail = False
                 End Sub, condition:=waUpdateIsAvail) _
             .AddDispatchedOption("Show winapp2.ini changelog", "See the difference between your local file and the latest",
                 Sub()
