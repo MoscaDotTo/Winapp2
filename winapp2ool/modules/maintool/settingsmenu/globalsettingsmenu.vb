@@ -54,7 +54,7 @@ Module globalsettingsmenu
     ''' <summary>
     ''' Builds the Winapp2ool global settings menu
     ''' </summary>
-    Private Function buildMainToolSettingsMenu() As MenuSection
+    Friend Function buildMainToolSettingsMenu() As MenuSection
 
         Dim menuDesc = {"Change high level settings for winapp2ool",
                        "Enable reading and writing settings from disk to persist any changes made here"}
@@ -93,40 +93,4 @@ Module globalsettingsmenu
         Return menu
 
     End Function
-
-    ''' <summary>
-    ''' Prints the Winapp2ool global settings menu to the user
-    ''' </summary>
-    Public Sub printMainToolSettingsMenu()
-
-        buildMainToolSettingsMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles user input for the Winapp2ool global settings menu
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleMainToolSettingsInput(input As String)
-
-        Dim intInput As Integer
-        If Not Integer.TryParse(input, intInput) Then
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-        End If
-
-        If intInput = 0 Then
-            exitModule()
-            Return
-        End If
-
-        If Not buildMainToolSettingsMenu().Dispatch(intInput) Then
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-        End If
-
-    End Sub
-
 End Module

@@ -30,7 +30,7 @@ Public Module browserbuildermainmenu
     ''' <returns>
     ''' A fully configured <c> MenuSection </c> ready to print or dispatch
     ''' </returns>
-    Private Function buildBrowserBuilderMenu() As MenuSection
+    Friend Function buildBrowserBuilderMenu() As MenuSection
 
         Dim menuDesc = {"Generate winapp2.ini entries for web browsers and web views",
                         "Supports both Chromium-based and Gecko-based entry generation",
@@ -38,7 +38,7 @@ Public Module browserbuildermainmenu
 
         Return MenuSection.CreateCompleteMenu(NameOf(BrowserBuilder), menuDesc, ConsoleColor.DarkMagenta) _
             .AddDispatchedOption("Run (default)", "Generate web browser winapp2.ini entries",
-                Sub() initBrowserBuilder()) _
+                Sub() initBrowserBuilder(), isDefault:=True) _
             .AddBlank() _
             .AddDispatchedOption("Choose source directory", "Select the directory containing chromium.ini, gecko.ini, and flavor correction files",
                 Sub() changeFileParams(BuilderFile1, BrowserBuilderModuleSettingsChanged, NameOf(BrowserBuilder), NameOf(BuilderFile1), NameOf(BrowserBuilderModuleSettingsChanged), "Source directory")) _
@@ -52,42 +52,4 @@ Public Module browserbuildermainmenu
                 Sub() resetModuleSettings(NameOf(BrowserBuilder), AddressOf InitDefaultBrowserBuilderSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the BrowserBuilder main menu
-    ''' </summary>
-    Public Sub printBrowserBuilderMenu()
-
-        buildBrowserBuilderMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user input from the BrowserBuilder menu. An empty input runs the build,
-    ''' <c> 0 </c> exits the module, and a number that matches an option runs it.
-    ''' Anything else reports invalid input.
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleBrowserBuilderInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            If input.Length = 0 Then initBrowserBuilder() : Return
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildBrowserBuilderMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

@@ -26,60 +26,20 @@ Option Strict On
 Module entryLabMainMenu
 
     ''' <summary>
-    ''' Builds the Entry Lab menu with all options and their dispatch handlers registered inline.
-    ''' We build it fresh both to print and to dispatch, so the option numbers shown are the ones
-    ''' dispatched.
+    ''' Builds the Entry Lab menu
     ''' </summary>
-    Private Function buildEntryLabMenu() As MenuSection
+    Friend Function buildEntryLabMenu() As MenuSection
 
         Dim menuDesc = {"Entry Lab is a collection of tools that generate winapp2.ini entries from templates",
                         "Select a tool below to get started"}
 
         Return MenuSection.CreateCompleteMenu("Entry Lab", menuDesc, ConsoleColor.Cyan).AddBlank() _
             .AddDispatchedColoredOption(NameOf(BrowserBuilder), "Generate winapp2.ini entries for web browsers", ConsoleColor.DarkYellow,
-                Sub() initModule(NameOf(BrowserBuilder), AddressOf printBrowserBuilderMenu, AddressOf handleBrowserBuilderInput)) _
+                Sub() initModule(NameOf(BrowserBuilder), AddressOf buildBrowserBuilderMenu), isDefault:=True) _
             .AddDispatchedColoredOption(NameOf(UWPBuilder), "Generate winapp2.ini entries for Universal Windows Platform apps", ConsoleColor.Blue,
-                Sub() initModule(NameOf(UWPBuilder), AddressOf printUWPBuilderMenu, AddressOf handleUWPBuilderInput)) _
+                Sub() initModule(NameOf(UWPBuilder), AddressOf buildUWPBuilderMenu)) _
             .AddDispatchedColoredOption(NameOf(EntryBuilder), "Generate winapp2.ini entries for win32 apps", ConsoleColor.DarkCyan,
-                Sub() initModule(NameOf(EntryBuilder), AddressOf printEntryBuilderMenu, AddressOf handleEntryBuilderInput))
+                Sub() initModule(NameOf(EntryBuilder), AddressOf buildEntryBuilderMenu))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the Entry Lab menu to the user
-    ''' </summary>
-    Public Sub printEntryLabMenu()
-
-        buildEntryLabMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles user input for the Entry Lab menu. An empty input opens BrowserBuilder, the
-    ''' first option.
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleEntryLabInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            ' Allow an empty input to default to BrowserBuilder (option 1)
-            If input.Length = 0 Then initModule(NameOf(BrowserBuilder), AddressOf printBrowserBuilderMenu, AddressOf handleBrowserBuilderInput) : Return
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildEntryLabMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

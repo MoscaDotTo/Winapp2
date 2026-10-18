@@ -23,18 +23,15 @@ Option Strict On
 Public Module combinemainmenu
 
     ''' <summary>
-    ''' Builds the Combine main menu with all options and their dispatch handlers registered inline.
-    ''' Called by both <see cref="printCombineMainMenu"/> (to render) and
-    ''' <see cref="handleCombineUserInput"/> (to dispatch), so the displayed option numbers and
-    ''' the dispatch table are always in sync.
+    ''' Builds the Combine main menu
     ''' </summary>
-    Private Function buildCombineMenu() As MenuSection
+    Friend Function buildCombineMenu() As MenuSection
 
         Dim menuDesc = {"Combine all ini files from a target directory and its children into a single file"}
         Dim noLog = MostRecentCombineLog.Length = 0
 
         Return MenuSection.CreateCompleteMenu(NameOf(Combine), menuDesc, ConsoleColor.DarkCyan) _
-            .AddDispatchedOption("Run (default)", "Combine ini files", Sub() initCombine(CombineFile1.Dir, CombineFile3)) _
+            .AddDispatchedOption("Run (default)", "Combine ini files", Sub() initCombine(CombineFile1.Dir, CombineFile3), isDefault:=True) _
             .AddBlank() _
             .AddDispatchedOption("Change the target directory", "File Chooser (target)",
                 Sub() changeFileParams(CombineFile1, CombineModuleSettingsChanged, NameOf(Combine),
@@ -56,40 +53,4 @@ Public Module combinemainmenu
                 Sub() resetModuleSettings(NameOf(Combine), AddressOf InitDefaultCombineSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the Combine menu to the user
-    ''' </summary>
-    Public Sub printCombineMainMenu()
-
-        buildCombineMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles user input for the Combine menu
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleCombineUserInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            If input.Length = 0 Then initCombine(CombineFile1.Dir, CombineFile3) : Return
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildCombineMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

@@ -25,12 +25,12 @@ Module lintmainmenu
     ''' <summary>
     ''' Builds the WinappDebug main menu
     ''' </summary>
-    Private Function buildLintMenu() As MenuSection
+    Friend Function buildLintMenu() As MenuSection
 
         Return MenuSection.CreateCompleteMenu("WinappDebug",
             {"Scan winapp2.ini for style and syntax errors, and attempt to repair them where possible."},
             ConsoleColor.DarkCyan) _
-            .AddDispatchedOption("Run (Default)", "Run the debugger", Sub() InitDebug()) _
+            .AddDispatchedOption("Run (Default)", "Run the debugger", Sub() InitDebug(), isDefault:=True) _
             .AddBlank() _
             .AddDispatchedOption("File Chooser (winapp2.ini)", "Choose a different file name or path for winapp2.ini",
                 Sub() changeFileParams(winappDebugFile1, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile1), NameOf(LintModuleSettingsChanged))) _
@@ -41,7 +41,10 @@ Module lintmainmenu
                 handler:=Sub() changeFileParams(winappDebugFile3, LintModuleSettingsChanged, NameOf(WinappDebug), NameOf(winappDebugFile3), NameOf(LintModuleSettingsChanged))) _
             .AddBlank() _
             .AddDispatchedOption("Scan Settings", "Enable or disable individual scan and correction routines",
-                Sub() initModule("Scan Settings", AddressOf advSettings.printMenu, AddressOf advSettings.handleUserInput)) _
+                Sub()
+                    initModule("Scan Settings", AddressOf buildAdvSettingsMenu)
+                    If ScanSettingsChanged Then LintModuleSettingsChanged = True
+                End Sub) _
             .AddBlank() _
             .AddDispatchedToggle("Default Value Audit", "enforcing a specific value for Default keys", overrideDefaultVal,
                 Sub() toggleModuleSetting("Default Value Overriding", NameOf(WinappDebug), GetType(lintsettings), NameOf(overrideDefaultVal), NameOf(LintModuleSettingsChanged))) _
@@ -60,40 +63,4 @@ Module lintmainmenu
                 MostRecentLintLog.Length > 0)
 
     End Function
-
-    ''' <summary>
-    ''' Displays the main <c> WinappDebug </c> menu to the user
-    ''' </summary>
-    Public Sub printLintMainMenu()
-
-        buildLintMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user input for the <c> WinappDebug </c> main menu. Empty input runs the
-    ''' linter and <c> 0 </c> exits the module.
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleLintUserInput(input As String)
-
-        If input Is Nothing Then argIsNull(NameOf(input)) : Return
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-            If input.Length = 0 Then initDebug() : Return
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildLintMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

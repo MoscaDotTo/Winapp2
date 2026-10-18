@@ -66,7 +66,7 @@ Module SettingsManager
         Dim curName = chooser.Name
         Dim curDir = chooser.Dir
 
-        initModule("File Chooser", AddressOf chooser.PrintMenu, AddressOf chooser.HandleInput)
+        initModule("File Chooser", AddressOf chooser.buildMenu)
 
         Dim fileChanged = Not chooser.Name = curName OrElse Not chooser.Dir = curDir
 

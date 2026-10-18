@@ -23,18 +23,16 @@ Option Strict On
 Module ccdbmainmenu
 
     ''' <summary>
-    ''' Builds and returns the CCiniDebug main menu. <br />
-    ''' Both <c> printCCDBMainMenu </c> and <c> handleCCDBMUserInput </c> call this function
-    ''' to ensure the menu numbering seen by the user is always in sync with dispatch.
+    ''' Builds the CCiniDebug main menu
     ''' </summary>
-    Private Function buildCCDBMenu() As MenuSection
+    Friend Function buildCCDBMenu() As MenuSection
 
         Dim menuDesc As String() = {"Sort alphabetically the contents of the CCleaner Classic (v1-6) ccleaner.ini and prune stale winapp2.ini settings",
                                     "This module is not compatible with CCleaner 7's ccleaner.ini"}
         Dim noOptionsSelected = Not (PruneStaleEntries OrElse SaveDebuggedFile OrElse SortFileForOutput)
 
         Return MenuSection.CreateCompleteMenu(NameOf(CCiniDebug), menuDesc, ConsoleColor.Red) _
-            .AddDispatchedColoredOption("Run (default)", "Debug ccleaner.ini", GetRedGreen(noOptionsSelected), AddressOf CheckOptsAndDebug) _
+            .AddDispatchedColoredOption("Run (default)", "Debug ccleaner.ini", GetRedGreen(noOptionsSelected), AddressOf CheckOptsAndDebug, isDefault:=True) _
             .AddBlank() _
             .AddDispatchedToggle("Toggle pruning", "removal of orphaned winapp2.ini settings", PruneStaleEntries,
                 Sub() toggleModuleSetting("Toggle pruning", NameOf(CCiniDebug), GetType(ccdebugsettings), NameOf(PruneStaleEntries), NameOf(CCDBSettingsChanged))) _
@@ -57,46 +55,6 @@ Module ccdbmainmenu
             .AddDispatchedResetOpt(NameOf(CCiniDebug), CCDBSettingsChanged, Sub() resetModuleSettings(NameOf(CCiniDebug), AddressOf initDefaultCCDBSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the CCiniDebug menu to the user
-    ''' </summary>
-    Public Sub printCCDBMainMenu()
-
-        buildCCDBMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user's input from the CCiniDebug main menu
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleCCDBMUserInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            If input.Length = 0 Then
-
-                CheckOptsAndDebug()
-                Return
-
-            End If
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildCCDBMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
 
     ''' <summary>
     ''' Ensures that at least one option has been selected and kicks off the debugger

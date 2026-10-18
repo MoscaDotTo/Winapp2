@@ -24,12 +24,9 @@ Option Strict On
 Public Module cc7patchermainmenu
 
     ''' <summary>
-    ''' Builds the CC7Patcher main menu with all options and their dispatch handlers registered
-    ''' inline. Called by both <see cref="printCC7PatcherMenu"/> (to render) and
-    ''' <see cref="handleCC7PatcherInput"/> (to dispatch), so the displayed option numbers and
-    ''' the dispatch table are always in sync.
+    ''' Builds the CC7Patcher main menu
     ''' </summary>
-    Private Function buildCC7PatcherMenu() As MenuSection
+    Friend Function buildCC7PatcherMenu() As MenuSection
 
         Dim menuDescLines = {"Patch ccleaner.ini with winapp2.ini entries compatible with CCleaner 7"}
         Dim settingsChangeName = NameOf(CC7PatcherModuleSettingsChanged)
@@ -37,7 +34,7 @@ Public Module cc7patchermainmenu
 
         Return MenuSection.CreateCompleteMenu(moduleName, menuDescLines, ConsoleColor.Yellow) _
             .AddDispatchedColoredOption("Run (default)", "Install winapp2.ini for CCleaner 7", ConsoleColor.Yellow,
-                Sub() initCC7Patcher()) _
+                Sub() initCC7Patcher(), isDefault:=True) _
             .AddBlank() _
             .AddDispatchedToggle("Trim", "trimming winapp2.ini before installation", TrimBeforePatching,
                 Sub() toggleModuleSetting("Trim", moduleName, GetType(cc7patchersettings), NameOf(TrimBeforePatching), settingsChangeName)) _
@@ -73,45 +70,4 @@ Public Module cc7patchermainmenu
                 Sub() resetModuleSettings(moduleName, AddressOf InitDefaultCC7PatcherSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the CC7Patcher menu to the user
-    ''' </summary>
-    Public Sub printCC7PatcherMenu()
-
-        buildCC7PatcherMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles user input for the CC7Patcher menu
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleCC7PatcherInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            If input.Length = 0 Then
-
-                If Not denyActionWithHeader(Not CC7PatcherFile2.Exists(), "CCleaner.ini not found") Then initCC7Patcher()
-                Return
-
-            End If
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildCC7PatcherMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

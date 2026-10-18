@@ -23,11 +23,9 @@ Option Strict On
 Public Module transmuteMainMenu
 
     ''' <summary>
-    ''' Builds and returns the Transmute main menu. <br />
-    ''' Both <see cref="printTransmuteMainMenu"/> and <see cref="handleTransmuteUserInput"/>
-    ''' call this function to ensure menu numbering seen by the user stays in sync with dispatch.
+    ''' Builds the Transmute main menu
     ''' </summary>
-    Private Function buildTransmuteMenu() As MenuSection
+    Friend Function buildTransmuteMenu() As MenuSection
 
         Dim TransmuteModeIsReplace = Transmutator = TransmuteMode.Replace
         Dim ReplaceModeIsByKey = TransmuteReplaceMode = ReplaceMode.ByKey
@@ -48,9 +46,9 @@ Public Module transmuteMainMenu
 
         Return MenuSection.CreateCompleteMenu("Transmute", menuDescriptionLines, ConsoleColor.Magenta) _
             .AddDispatchedColoredOption("Run (default)", "Perform the transmutation", GetRedGreen(TransmuteFile1.Name.Length = 0),
-                Sub() If Not denyActionWithHeader(TransmuteFile2.Name.Length = 0, "You must select a valid source file") Then initTransmute()) _
+                Sub() If Not denyActionWithHeader(TransmuteFile2.Name.Length = 0, "You must select a valid source file") Then initTransmute(), isDefault:=True) _
             .AddDispatchedColoredOption("Open Flavorizer", "Apply a complex series of modifications to an ini file", ConsoleColor.Yellow,
-                Sub() initModule("Flavorizer", AddressOf printFlavorizerMainMenu, AddressOf handleFlavorizerMainMenuUserInput)) _
+                Sub() initModule("Flavorizer", AddressOf buildFlavorizerMenu)) _
             .AddBlank() _
             .AddLine("Preset source file names:") _
             .AddDispatchedOption("Removed Entries", "Select 'Removed Entries.ini'", Sub() setSourceFileName("Removed Entries.ini")) _
@@ -112,46 +110,4 @@ Public Module transmuteMainMenu
         setNextMenuHeaderText($"Source file name set to {TransmuteFile2.Name}", printColor:=ConsoleColor.Yellow)
 
     End Sub
-
-    ''' <summary>
-    ''' Prints the <c> Transmute </c> menu to the user, includes predefined source file choices and sub mode options
-    ''' </summary>
-    Public Sub printTransmuteMainMenu()
-
-        buildTransmuteMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user's input from the main menu. Empty input runs the transmutation, unless
-    ''' no source file is set, and <c> 0 </c> exits the module.
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleTransmuteUserInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            If input.Length = 0 Then
-
-                If Not denyActionWithHeader(TransmuteFile2.Name.Length = 0, "You must select a valid source file") Then initTransmute()
-                Return
-
-            End If
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildTransmuteMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

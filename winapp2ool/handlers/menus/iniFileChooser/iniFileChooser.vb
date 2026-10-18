@@ -158,7 +158,7 @@ Public Class iniFileChooser
 
         While Not Exists()
 
-            initModule("File Chooser", AddressOf PrintMenu, AddressOf HandleInput)
+            initModule("File Chooser", AddressOf buildMenu)
 
             If Not Exists() Then Return Nothing
 
@@ -206,11 +206,10 @@ Public Class iniFileChooser
     End Function
 
     ''' <summary>
-    ''' Builds the File Chooser menu with all options and their dispatch handlers registered inline.
-    ''' Called by both <see cref="PrintMenu"/> (to render) and <see cref="HandleInput"/>
-    ''' (to dispatch), so the displayed option numbers and the dispatch table are always in sync.
+    ''' Builds the File Chooser menu, for <see cref="initModule"/> to run. Typed text that isn't
+    ''' a number goes to <see cref="HandleText"/>.
     ''' </summary>
-    Private Function buildMenu() As MenuSection
+    Friend Function buildMenu() As MenuSection
 
         Dim hasInitName = InitName.Length <> 0
         Dim hasSecondName = SecondName.Length <> 0
@@ -238,45 +237,34 @@ Public Class iniFileChooser
                 End Sub, hasReset) _
             .AddBlank() _
             .AddFileInfo("Current File:      ", Path()) _
-            .AddColoredLine($"Current Directory: {replDir(Dir)}", GetRedGreen(Not Directory.Exists(Dir)))
+            .AddColoredLine($"Current Directory: {replDir(Dir)}", GetRedGreen(Not Directory.Exists(Dir))) _
+            .OnText(AddressOf HandleText)
 
     End Function
 
     ''' <summary>
-    ''' Prints the unified file/directory chooser menu
-    ''' </summary>
-    Public Sub PrintMenu()
-
-        buildMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles user input for the file/directory chooser menu. A number selects an option and
-    ''' <c> 0 </c> leaves the chooser. Blank input leaves it too, subject to <see cref="MustExist"/>.
-    ''' Input containing a backslash becomes the new directory if that directory exists, and
-    ''' closes the chooser. Anything else becomes the new filename, except that with
-    ''' <see cref="MustExist"/> on, a name with no file behind it reverts to the old one.
+    ''' Handles text typed at the chooser that isn't a number. Blank input leaves the chooser,
+    ''' subject to <see cref="MustExist"/>. Input containing a backslash becomes the new directory
+    ''' if that directory exists, and closes the chooser. Anything else becomes the new filename,
+    ''' except that with <see cref="MustExist"/> on, a name with no file behind it reverts to the
+    ''' old one.
     ''' </summary>
     '''
     ''' <param name="input">
     ''' The user's input string
     ''' </param>
-    Public Sub HandleInput(input As String)
+    '''
+    ''' <returns>
+    ''' <c> True </c>, since every input is a name or a path
+    ''' </returns>
+    Private Function HandleText(input As String) As Boolean
 
-        If input Is Nothing Then argIsNull(NameOf(input)) : Return
+        If input.Length = 0 Then
 
-        Dim intInput As Integer
-
-        If Integer.TryParse(input, intInput) Then
-
-            If intInput = 0 Then exitModule() : Return
-            If Not buildMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
+            ExitIfExists()
+            Return True
 
         End If
-
-        If input.Length = 0 Then ExitIfExists() : Return
 
         If input.Contains("\"c) Then
 
@@ -293,13 +281,14 @@ Public Class iniFileChooser
 
             End If
 
-            Return
+            Return True
 
         End If
 
         Rename(input)
+        Return True
 
-    End Sub
+    End Function
 
     Private Sub Rename(nname As String)
 

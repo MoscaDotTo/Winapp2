@@ -30,14 +30,14 @@ Public Module uwpbuildermainmenu
     ''' <returns>
     ''' A fully configured <c> MenuSection </c> ready to print or dispatch
     ''' </returns>
-    Private Function buildUWPBuilderMenu() As MenuSection
+    Friend Function buildUWPBuilderMenu() As MenuSection
 
         Dim menuDesc = {"Generate winapp2.ini entries for Universal Windows Platform applications",
                         "Consult the winapp2ool ReadMe before using this module!"}
 
         Return MenuSection.CreateCompleteMenu(NameOf(UWPBuilder), menuDesc, ConsoleColor.DarkCyan) _
             .AddDispatchedOption("Run (default)", "Generate UWP app winapp2.ini entries",
-                Sub() initUWPBuilder()) _
+                Sub() initUWPBuilder(), isDefault:=True) _
             .AddBlank() _
             .AddDispatchedOption("Choose source directory", "Select the directory containing UWP.ini and AppInfo\",
                 Sub() changeFileParams(UWPFile1, UWPBuilderModuleSettingsChanged, NameOf(UWPBuilder), NameOf(UWPFile1), NameOf(UWPBuilderModuleSettingsChanged), "Source directory")) _
@@ -54,42 +54,4 @@ Public Module uwpbuildermainmenu
                 Sub() resetModuleSettings(NameOf(UWPBuilder), AddressOf InitDefaultUWPBuilderSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the UWPBuilder main menu to the user
-    ''' </summary>
-    Public Sub printUWPBuilderMenu()
-
-        buildUWPBuilderMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user input from the UWPBuilder menu. An empty input runs the build,
-    ''' <c> 0 </c> exits the module, and a number that matches an option runs it.
-    ''' Anything else reports invalid input.
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleUWPBuilderInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            If input.Length = 0 Then initUWPBuilder() : Return
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildUWPBuilderMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

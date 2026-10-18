@@ -25,7 +25,7 @@ Public Module advDownloads
     ''' <summary>
     ''' Builds the advanced downloads menu with all options and their dispatch handlers registered inline
     ''' </summary>
-    Private Function buildAdvMenu() As MenuSection
+    Friend Function buildAdvMenu() As MenuSection
 
         Dim menuDesc = {"Warning!", "Files in this menu are not recommended for use by beginners!"}
 
@@ -42,38 +42,4 @@ Public Module advDownloads
                 End Sub)
 
     End Function
-
-    ''' <summary>
-    ''' Prints the advanced downloads menu to the user
-    ''' </summary>
-    Public Sub printAdvMenu()
-
-        buildAdvMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles user input for the advanced downloads menu
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleAdvInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildAdvMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

@@ -23,13 +23,10 @@ Option Strict On
 Module downloadmainmenu
 
     ''' <summary>
-    ''' Builds the Downloader main menu with all options and their dispatch handlers registered
-    ''' inline. Called by both <see cref="printDownloadMainMenu"/> (to render) and
-    ''' <see cref="handleDownloadUserInput"/> (to dispatch), so the displayed option numbers and
-    ''' the dispatch table are always in sync. Each winapp2.ini option downloads a fixed flavor
-    ''' and ignores <see cref="CurrentWinappFlavor"/>.
+    ''' Builds the Downloader main menu. Each winapp2.ini option downloads a fixed flavor and
+    ''' ignores <see cref="CurrentWinappFlavor"/>.
     ''' </summary>
-    Private Function buildDownloadMenu() As MenuSection
+    Friend Function buildDownloadMenu() As MenuSection
 
         Dim menuDesc = {"Download files from the winapp2 GitHub"}
 
@@ -97,7 +94,7 @@ Module downloadmainmenu
                 End Sub) _
             .AddBlank() _
             .AddDispatchedOption("Advanced", "Additional downloads for power users",
-                Sub() initModule("Advanced Downloads", AddressOf printAdvMenu, AddressOf handleAdvInput)) _
+                Sub() initModule("Advanced Downloads", AddressOf buildAdvMenu)) _
             .AddBlank() _
             .AddDispatchedColoredOption("Change Save Directory", "Select a new target directory for Downloader", ConsoleColor.DarkYellow,
                 Sub() changeFileParams(downloadFile, DownloadModuleSettingsChanged, NameOf(Downloader), NameOf(downloadFile), NameOf(DownloadModuleSettingsChanged))) _
@@ -107,38 +104,4 @@ Module downloadmainmenu
                 Sub() resetModuleSettings(NameOf(Downloader), AddressOf InitDefaultDownloadSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the Downloader menu to the user
-    ''' </summary>
-    Public Sub printDownloadMainMenu()
-
-        buildDownloadMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles user input for the Downloader menu
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleDownloadUserInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildDownloadMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

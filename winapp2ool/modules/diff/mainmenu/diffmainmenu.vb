@@ -23,12 +23,9 @@ Option Strict On
 Module diffmainmenu
 
     ''' <summary>
-    ''' Builds the Diff main menu with all options and their dispatch handlers registered inline.
-    ''' Called by both <see cref="printDiffMainMenu"/> (to render) and <see cref="handleDiffUserInput"/>
-    ''' (to dispatch), so the displayed option numbers and the dispatch table come from the same code.
-    ''' Building it also sets the console height and, when offline, turns <c> DownloadDiffFile </c> off.
+    ''' Builds the Diff main menu. When offline, building it also turns <c> DownloadDiffFile </c> off.
     ''' </summary>
-    Private Function buildDiffMenu() As MenuSection
+    Friend Function buildDiffMenu() As MenuSection
 
         Dim newFileHasName = Not (DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile)
         Dim newerFileText = If(Not newFileHasName, "Not yet selected", If(DownloadDiffFile, GetNameFromDL(True), replDir(DiffFile2.Path())))
@@ -39,7 +36,7 @@ Module diffmainmenu
 
         Return MenuSection.CreateCompleteMenu(NameOf(Diff), menuDesc, ConsoleColor.DarkCyan) _
             .AddDispatchedColoredOption("Run (default)", "Perform a Diff operation", GetRedGreen(Not newFileHasName),
-                Sub() If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then ConductDiff()) _
+                Sub() If Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then ConductDiff(), isDefault:=True) _
             .AddBlank() _
             .AddDispatchedToggle("diffing against GitHub", "performing the Diff operation against the newest file on GitHub", DownloadDiffFile,
                 Sub() toggleModuleSetting("Remote Diffing", NameOf(Diff), GetType(diffsettings), NameOf(DownloadDiffFile), NameOf(DiffModuleSettingsChanged)),
@@ -77,42 +74,4 @@ Module diffmainmenu
                 Sub() resetModuleSettings(NameOf(Diff), AddressOf InitDefaultDiffSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the Diff main menu to the user
-    ''' </summary>
-    Public Sub printDiffMainMenu()
-
-        buildDiffMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user input from the Diff main menu. An empty input runs the Diff when a newer
-    ''' file is available, <c> 0 </c> exits the module, and any other number dispatches to its option.
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleDiffUserInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            ' Allow an empty input to trigger a run if the run conditions are otherwise satisfied
-            If input.Length = 0 AndAlso Not denyActionWithHeader(DiffFile2.Name.Length = 0 AndAlso Not DownloadDiffFile, "Please select a file against which to diff") Then ConductDiff() : Return
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildDiffMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

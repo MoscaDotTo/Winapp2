@@ -26,7 +26,7 @@ Module maintoolmenu
     ''' Builds the main winapp2ool menu. While online, building it also checks for updates on
     ''' every build until a check succeeds.
     ''' </summary>
-    Private Function buildToolMainMenu() As MenuSection
+    Friend Function buildToolMainMenu() As MenuSection
 
         checkUpdates(Not isOffline AndAlso Not checkedForUpdates)
         Dim UpdatesAvailable = Not isOffline AndAlso (waUpdateIsAvail OrElse updateIsAvail)
@@ -38,25 +38,25 @@ Module maintoolmenu
 
         menu.AddBlank() _
             .AddDispatchedOption("WinappDebug", "Scan for and correct style and syntax errors in winapp2.ini",
-                Sub() initModule(NameOf(WinappDebug), AddressOf printLintMainMenu, AddressOf handleLintUserInput)) _
+                Sub() initModule(NameOf(WinappDebug), AddressOf buildLintMenu)) _
             .AddDispatchedOption("Trim", "Optimize winapp2.ini for your system",
-                Sub() initModule(NameOf(Trim), AddressOf printTrimMenu, AddressOf handleTrimUserInput)) _
+                Sub() initModule(NameOf(Trim), AddressOf buildTrimMenu)) _
             .AddDispatchedOption("Transmute", "Add, replace, or remove entire sections or individual keys from winapp2.ini",
-                Sub() initModule(NameOf(Transmute), AddressOf printTransmuteMainMenu, AddressOf handleTransmuteUserInput)) _
+                Sub() initModule(NameOf(Transmute), AddressOf buildTransmuteMenu)) _
             .AddDispatchedOption("Diff", "Generate a context-aware changelog between two winapp2.ini files",
-                Sub() initModule(NameOf(Diff), AddressOf printDiffMainMenu, AddressOf handleDiffUserInput)) _
+                Sub() initModule(NameOf(Diff), AddressOf buildDiffMenu)) _
             .AddDispatchedOption("CCiniDebug", "Remove stale winapp2.ini configurations from ccleaner.ini",
-                Sub() initModule(NameOf(CCiniDebug), AddressOf printCCDBMainMenu, AddressOf handleCCDBMUserInput)) _
+                Sub() initModule(NameOf(CCiniDebug), AddressOf buildCCDBMenu)) _
             .AddDispatchedOption("Entry Lab", "Generate winapp2.ini entries from templates",
-                Sub() initModule("Entry Lab", AddressOf printEntryLabMenu, AddressOf handleEntryLabInput)) _
+                Sub() initModule("Entry Lab", AddressOf buildEntryLabMenu)) _
             .AddDispatchedOption("Combine", "Join together a collection of ini files into one",
-                Sub() initModule(NameOf(Combine), AddressOf printCombineMainMenu, AddressOf handleCombineUserInput)) _
+                Sub() initModule(NameOf(Combine), AddressOf buildCombineMenu)) _
             .AddDispatchedOption("CC7Patcher", "Install winapp2.ini for CCleaner 7",
-                Sub() initModule(NameOf(CC7Patcher), AddressOf printCC7PatcherMenu, AddressOf handleCC7PatcherInput)).AddBlank() _
+                Sub() initModule(NameOf(CC7Patcher), AddressOf buildCC7PatcherMenu)).AddBlank() _
             .AddDispatchedOption("Downloader", "Download files from the Winapp2 GitHub",
-                Sub() If Not denySettingOffline() Then initModule(NameOf(Downloader), AddressOf printDownloadMainMenu, AddressOf handleDownloadUserInput)) _
+                Sub() If Not denySettingOffline() Then initModule(NameOf(Downloader), AddressOf buildDownloadMenu)) _
             .AddDispatchedColoredOption("Settings", "Manage Winapp2ool's settings", ConsoleColor.Yellow,
-                Sub() initModule("Winapp2ool Settings", AddressOf printMainToolSettingsMenu, AddressOf handleMainToolSettingsInput))
+                Sub() initModule("Winapp2ool Settings", AddressOf buildMainToolSettingsMenu))
 
         ' Update notifications
         getUpdateNotification(waUpdateIsAvail, "winapp2.ini", localWa2Ver, latestWa2Ver, menu)
@@ -113,24 +113,15 @@ Module maintoolmenu
                 Sub()
                     chkOfflineMode()
                     setNextMenuHeaderText("Winapp2ool was unable to establish a network connection. You are still in offline mode.", printColor:=ConsoleColor.Red)
-                End Sub, condition:=isOffline)
+                End Sub, condition:=isOffline) _
+            .OnText(AddressOf handleHiddenCommand)
 
         Return menu
 
     End Function
 
     ''' <summary>
-    ''' Prints the main winapp2ool menu to the user
-    ''' </summary>
-    Public Sub printToolMainMenu()
-
-        buildToolMainMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user input for the menu. Besides the numbered options and <c> 0 </c> to
-    ''' exit, it accepts four unlisted commands: <c> m </c> opens Minefield, <c> savelog </c>
+    ''' Runs the main menu's four unlisted commands: <c> m </c> opens Minefield, <c> savelog </c>
     ''' writes the global log to <see cref="GlobalLogFile"/>, <c> printlog </c> prints it, and
     ''' <c> forceupdate </c> runs the self-updater whether or not an update is available.
     ''' </summary>
@@ -138,41 +129,28 @@ Module maintoolmenu
     ''' <param name="input">
     ''' The user's input
     ''' </param>
-    Public Sub handleToolMainUserInput(input As String)
+    '''
+    ''' <returns>
+    ''' <c> True </c> if <paramref name="input"/> was one of the commands
+    ''' </returns>
+    Private Function handleHiddenCommand(input As String) As Boolean
 
-        ' Hidden options not listed on the menu
         Select Case input
             Case "m"
-                initModule("Minefield", AddressOf Minefield.printMenu, AddressOf Minefield.handleUserInput)
-                Return
+                initModule("Minefield", AddressOf Minefield.buildMinefieldMenu)
             Case "savelog"
                 IO.File.WriteAllText(GlobalLogFile.Path(), logger.toString)
-                Return
             Case "printlog"
                 printLog()
-                Return
             Case "forceupdate"
                 autoUpdate()
-                Return
+            Case Else
+                Return False
         End Select
 
-        Dim intInput As Integer
-        If Not Integer.TryParse(input, intInput) Then
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-        End If
+        Return True
 
-        If intInput = 0 Then
-            exitModule()
-            Return
-        End If
-
-        If Not buildToolMainMenu().Dispatch(intInput) Then
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-        End If
-
-    End Sub
-
+    End Function
     ''' <summary>
     ''' Adds information to the menu indicating to the user that an
     ''' update is available for <see cref="winapp2ool"/> or winapp2.ini, and logs the update.

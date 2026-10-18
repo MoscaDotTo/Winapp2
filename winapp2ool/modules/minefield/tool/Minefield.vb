@@ -25,42 +25,16 @@ Option Strict On
 Module Minefield
 
     ''' <summary>
-    ''' Prints the main Minefield menu
+    ''' Builds the main Minefield menu, which currently has no options
     ''' </summary>
-    Public Sub printMenu()
+    Friend Function buildMinefieldMenu() As MenuSection
 
         Dim menuDescriptionLines = {"A testing ground for new ideas/features, watch your step!",
                                     "Items in this menu may be incomplete, experimental, or broken entirely",
                                     "Watch your step!"}
 
-        Dim menu = MenuSection.CreateCompleteMenu("Minefield", menuDescriptionLines, ConsoleColor.DarkBlue)
+        Return MenuSection.CreateCompleteMenu("Minefield", menuDescriptionLines, ConsoleColor.DarkBlue)
 
-        menu.Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles user input for the main Minefield menu. The menu has no options, so <c> 0 </c>
-    ''' exits and anything else is reported as invalid input.
-    ''' </summary>
-    ''' 
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleUserInput(input As String)
-
-        Select Case True
-
-            Case input = "0"
-
-                exitModule()
-
-            Case Else
-
-                setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.DarkRed)
-
-        End Select
-
-    End Sub
+    End Function
 
 End Module

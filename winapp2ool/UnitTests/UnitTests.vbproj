@@ -89,6 +89,7 @@
     <Compile Include="EntryBuilderTests.vb" />
     <Compile Include="LintOptionsTests.vb" />
     <Compile Include="LintReconcilerTests.vb" />
+    <Compile Include="MenuDefaultsTests.vb" />
     <Compile Include="MenuInputTests.vb" />
     <Compile Include="MenuLayoutTests.vb" />
     <Compile Include="TransmuteTests.vb" />

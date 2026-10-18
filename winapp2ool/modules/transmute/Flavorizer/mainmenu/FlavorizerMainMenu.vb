@@ -23,11 +23,9 @@ Option Strict On
 Public Module FlavorizerMainMenu
 
     ''' <summary>
-    ''' Builds and returns the Flavorizer main menu. <br />
-    ''' Both <see cref="printFlavorizerMainMenu"/> and <see cref="handleFlavorizerMainMenuUserInput"/>
-    ''' call this function to ensure menu numbering seen by the user stays in sync with dispatch.
+    ''' Builds the Flavorizer main menu
     ''' </summary>
-    Private Function buildFlavorizerMenu() As MenuSection
+    Friend Function buildFlavorizerMenu() As MenuSection
 
         Dim menuDescriptionLines = {"Apply a 'flavor' to an ini file using a collection of correction files",
                                     "Flavorization is applied in this order:",
@@ -36,7 +34,7 @@ Public Module FlavorizerMainMenu
 
         Return MenuSection.CreateCompleteMenu(NameOf(Flavorizer), menuDescriptionLines, ConsoleColor.Yellow) _
             .AddDispatchedColoredOption("Run (default)", "Apply the flavor to the base file", GetRedGreen(FlavorizerFile1.Name.Length = 0),
-                Sub() If Not denyActionWithHeader(FlavorizerFile1.Name.Length = 0, "You must select a base file") Then initFlavorizer()) _
+                Sub() If Not denyActionWithHeader(FlavorizerFile1.Name.Length = 0, "You must select a base file") Then initFlavorizer(), isDefault:=True) _
             .AddBlank() _
             .AddDispatchedColoredOption("Auto detect Flavor", "Attempt to detect the flavor files by name", ConsoleColor.Yellow,
                 Sub() DetectFlavorFiles(FlavorizerFile9.Dir)) _
@@ -112,45 +110,6 @@ Public Module FlavorizerMainMenu
                 Sub() resetModuleSettings(NameOf(Flavorizer), AddressOf initDefaultFlavorizerSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the Flavorizer menu to the user, showing all correction file options and current settings
-    ''' </summary>
-    Public Sub printFlavorizerMainMenu()
-
-        buildFlavorizerMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user's input from the main menu. Empty input runs the flavorization, unless
-    ''' no base file is set, and <c> 0 </c> exits the module.
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleFlavorizerMainMenuUserInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            If input.Length = 0 Then
-                If Not denyActionWithHeader(FlavorizerFile1.Name.Length = 0, "You must select a base file") Then initFlavorizer()
-                Return
-            End If
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildFlavorizerMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
 
     ''' <summary>
     ''' Returns a display name for a Flavorizer file chooser entry in the menu

@@ -23,9 +23,13 @@ Public Module advSettings
 
     ''' <summary>
     ''' Builds the scan/repair settings menu. Turning a rule's scan off also turns its repair
-    ''' off, and turning a repair on also turns its scan on.
+    ''' off, and turning a repair on also turns its scan on. We first check whether any rule
+    ''' differs from its defaults, so the Reset option shows whenever there's something to reset.
+    ''' The hidden <c> alloff </c> command turns every scan and repair off.
     ''' </summary>
-    Private Function buildAdvSettingsMenu() As MenuSection
+    Friend Function buildAdvSettingsMenu() As MenuSection
+
+        determineScanSettings()
 
         Dim menu = MenuSection.CreateCompleteMenu("Scan Settings",
                                                 {"Enable or disable specific scans or repairs"})
@@ -79,61 +83,17 @@ Public Module advSettings
                 setNextMenuHeaderText("Settings Reset", printColor:=ConsoleColor.Yellow)
             End Sub)
 
+        menu.OnText(
+            Function(input)
+                If input <> "alloff" Then Return False
+                Rules.ForEach(Sub(rule) rule.turnOff())
+                ScanSettingsChanged = True
+                Return True
+            End Function)
+
         Return menu
 
     End Function
-
-    ''' <summary> 
-    ''' Prints the scan/repair management menu to the user 
-    ''' </summary>
-    Public Sub printMenu()
-
-        buildAdvSettingsMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user input for the scan/repair management menu. We recompute the repair
-    ''' flags from the rules before acting on <paramref name="input"/>, so a toggle only reaches
-    ''' them on the next input, such as the <c> 0 </c> that leaves the menu. The hidden
-    ''' <c> alloff </c> command turns every scan and repair off.
-    ''' </summary>
-    ''' 
-    ''' <param name="input">
-    ''' The String containing the user's input 
-    ''' </param>
-    Public Sub handleUserInput(input As String)
-
-        determineScanSettings()
-
-        If input = "alloff" Then
-
-            Rules.ForEach(Sub(rule) rule.turnOff())
-            ScanSettingsChanged = True
-            Return
-
-        End If
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then
-
-            If ScanSettingsChanged Then LintModuleSettingsChanged = True
-            exitModule()
-            Return
-
-        End If
-
-        If Not buildAdvSettingsMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
 
     ''' <summary>
     ''' Sets <see cref="ScanSettingsChanged"/> when any rule differs from its defaults (it never

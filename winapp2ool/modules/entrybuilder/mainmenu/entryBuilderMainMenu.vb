@@ -31,14 +31,14 @@ Public Module entryBuilderMainMenu
     ''' <returns>
     ''' A fully configured <c> MenuSection </c> ready to print or dispatch
     ''' </returns>
-    Private Function buildEntryBuilderMenu() As MenuSection
+    Friend Function buildEntryBuilderMenu() As MenuSection
 
         Dim menuDesc = {"Generate winapp2.ini entries from a shorthand DSL (pass-through + WebView scaffold expansion)",
                         "Consult the winapp2ool ReadMe before using this module!"}
 
         Return MenuSection.CreateCompleteMenu(NameOf(EntryBuilder), menuDesc, ConsoleColor.DarkCyan) _
             .AddDispatchedOption("Run (default)", "Generate winapp2.ini entries from the shorthand source files",
-                Sub() initEntryBuilder()) _
+                Sub() initEntryBuilder(), isDefault:=True) _
             .AddBlank() _
             .AddDispatchedOption("Choose source directory", "Select the directory containing per-letter shorthand source files",
                 Sub() changeFileParams(EntryBuilderFile1, EntryBuilderModuleSettingsChanged, NameOf(EntryBuilder), NameOf(EntryBuilderFile1), NameOf(EntryBuilderModuleSettingsChanged), "Source directory")) _
@@ -58,41 +58,4 @@ Public Module entryBuilderMainMenu
                 Sub() resetModuleSettings(NameOf(EntryBuilder), AddressOf InitDefaultEntryBuilderSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the EntryBuilder main menu to the user
-    ''' </summary>
-    Public Sub printEntryBuilderMenu()
-
-        buildEntryBuilderMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the user input from the EntryBuilder menu. Empty input runs the module, <c> 0 </c>
-    ''' exits it, and any other number dispatches to the matching menu option.
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleEntryBuilderInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            If input.Length = 0 Then initEntryBuilder() : Return
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildEntryBuilderMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module

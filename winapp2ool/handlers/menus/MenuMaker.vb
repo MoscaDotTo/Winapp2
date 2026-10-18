@@ -176,8 +176,11 @@ Module MenuMaker
     End Function
 
     ''' <summary>
-    ''' Runs a menu loop: clears the console, shows the menu, reads a line and passes it to
-    ''' <paramref name="handleInput"/>, until <see cref="exitModule"/> is called. Exiting returns
+    ''' Runs a menu loop: clears the console, builds the menu with <paramref name="buildMenu"/>,
+    ''' prints it, reads a line and gives it to that same menu's <see cref="MenuSection.HandleInput"/>,
+    ''' until <see cref="exitModule"/> is called. Building once per pass keeps what's shown and
+    ''' what the input reaches in step. The build comes after the clear, because the main menu's
+    ''' update check can set the header the build then shows. Exiting returns
     ''' exactly one level up, to the menu that called this one. On entry the next header is set
     ''' to <paramref name="name"/>, and on exit to <c> "{name} closed" </c>. On exit we also call
     ''' <c> FlushIfDirty </c>, which writes changed settings only when <c> saveSettingsToDisk </c>
@@ -195,12 +198,8 @@ Module MenuMaker
     ''' The name of the module as it will be displayed to the user
     ''' </param>
     '''
-    ''' <param name="showMenu">
-    ''' The subroutine that prints the module's menu
-    ''' </param>
-    '''
-    ''' <param name="handleInput">
-    ''' The subroutine that handles the module's input
+    ''' <param name="buildMenu">
+    ''' The function that builds the module's menu
     ''' </param>
     '''
     ''' <param name="itmLen">
@@ -208,8 +207,7 @@ Module MenuMaker
     ''' Optional, Default: <c> 35 </c>
     ''' </param>
     Public Sub initModule(name As String,
-                          showMenu As Action,
-                          handleInput As Action(Of String),
+                          buildMenu As Func(Of MenuSection),
                  Optional itmLen As Integer = 35)
 
         Using gLogScope($"Loading module {name}")
@@ -232,10 +230,13 @@ Module MenuMaker
 
                 BeginBuffered()
 
+                Dim menu As MenuSection = Nothing
+
                 Try
 
                     clrConsole()
-                    showMenu()
+                    menu = buildMenu()
+                    menu.Print()
 
                     ' The prompt takes the blank row below the menu and the row after it
                     EnsureMinimumSize(0, PassRows + 2)
@@ -247,7 +248,7 @@ Module MenuMaker
                 End Try
 
                 Console.Write(Environment.NewLine & promptStr)
-                handleInput(Console.ReadLine)
+                menu.HandleInput(Console.ReadLine)
 
             Loop
 

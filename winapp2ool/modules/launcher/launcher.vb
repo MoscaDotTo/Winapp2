@@ -86,7 +86,7 @@ Public Module launcher
             Console.Title = $"Winapp2ool v{currentVersion}"
             Dim launchHeader = $"Winapp2ool v{currentVersion} - A multitool for winapp2.ini"
             setNextMenuHeaderText(launchHeader, printColor:=ConsoleColor.Cyan)
-            initModule(launchHeader, AddressOf printToolMainMenu, AddressOf handleToolMainUserInput)
+            initModule(launchHeader, AddressOf buildToolMainMenu)
 
             FlushIfDirty()
 

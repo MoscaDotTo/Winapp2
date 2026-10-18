@@ -23,23 +23,21 @@ Option Strict On
 Module trimmainmenu
 
     ''' <summary>
-    ''' Builds the <c> Trim </c> main menu with all options and their dispatch handlers registered inline.
-    ''' Called by both <c> printTrimMenu </c> and <c> handleTrimUserInput </c> so the
-    ''' displayed option numbers and the dispatch table are always in sync. While offline,
-    ''' building the menu also turns <c> DownloadFileToTrim </c> off.
+    ''' Builds the <c> Trim </c> main menu. While offline, building the menu also turns
+    ''' <c> DownloadFileToTrim </c> off.
     ''' </summary>
     '''
     ''' <returns>
     ''' A fully configured <c> MenuSection </c> ready to print or dispatch
     ''' </returns>
-    Private Function buildTrimMenu() As MenuSection
+    Friend Function buildTrimMenu() As MenuSection
 
         If isOffline Then DownloadFileToTrim = False
 
         Dim menuDesc = {"Trim winapp2.ini such that it only contains entries relevant to this machine"}
 
         Return MenuSection.CreateCompleteMenu(NameOf(Trim), menuDesc, ConsoleColor.DarkCyan) _
-            .AddDispatchedOption("Run (default)", "Optimize winapp2.ini for the current system", Sub() initTrim()) _
+            .AddDispatchedOption("Run (default)", "Optimize winapp2.ini for the current system", Sub() initTrim(), isDefault:=True) _
             .AddBlank() _
             .AddDispatchedToggle("downloading", "using the latest winapp2.ini from GitHub as the input file", DownloadFileToTrim,
                 Sub() toggleModuleSetting("Downloading", NameOf(Trim), GetType(trimsettings), NameOf(DownloadFileToTrim), NameOf(TrimModuleSettingsChanged)),
@@ -69,40 +67,4 @@ Module trimmainmenu
             .AddDispatchedResetOpt(NameOf(Trim), TrimModuleSettingsChanged, Sub() resetModuleSettings(NameOf(Trim), AddressOf InitDefaultTrimSettings))
 
     End Function
-
-    ''' <summary>
-    ''' Prints the <c> Trim </c> main menu to the user
-    ''' </summary>
-    Public Sub printTrimMenu()
-
-        buildTrimMenu().Print()
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles user input from the <c> Trim </c> main menu
-    ''' </summary>
-    '''
-    ''' <param name="input">
-    ''' The user's input
-    ''' </param>
-    Public Sub handleTrimUserInput(input As String)
-
-        Dim intInput As Integer
-
-        If Not Integer.TryParse(input, intInput) Then
-
-            If input.Length = 0 Then initTrim() : Return
-
-            setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-            Return
-
-        End If
-
-        If intInput = 0 Then exitModule() : Return
-
-        If Not buildTrimMenu().Dispatch(intInput) Then setNextMenuHeaderText(invInpStr, printColor:=ConsoleColor.Red)
-
-    End Sub
-
 End Module
