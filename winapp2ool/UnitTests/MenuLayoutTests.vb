@@ -296,6 +296,53 @@ Public Class MenuLayoutTests
     End Sub
 
     <TestMethod>
+    Public Sub AnyKeyPrompt_PrintsItsBlankLinesInPlace()
+
+        Dim section As New MenuSection
+        section.AddTopBorder().AddLine("result").AddBottomBorder().AddAnyKeyPrompt()
+
+        Dim original = Console.Out
+
+        Try
+
+            Using captured As New StringWriter
+
+                Console.SetOut(captured)
+                section.Print()
+
+                Dim lines = captured.ToString().Split({Environment.NewLine}, StringSplitOptions.None)
+
+                ' The text ends in a line break, so the last element is always empty
+                Assert.AreEqual(7, lines.Length, String.Join(Environment.NewLine, lines))
+                Assert.IsTrue(lines(1).Contains("result"), "a blank line printed ahead of the box")
+                Assert.AreEqual("", lines(3))
+                Assert.AreEqual(anyKeyStr, lines(4))
+                Assert.AreEqual("", lines(5))
+
+            End Using
+
+        Finally
+
+            Console.SetOut(original)
+
+        End Try
+
+    End Sub
+
+    <TestMethod>
+    Public Sub TitledSection_PrintsItsTitle()
+
+        Dim section As New MenuSection("A title")
+        section.AddLine("body")
+
+        Dim rendered = Render(section)
+
+        Assert.IsTrue(rendered(0).Contains("A title"), String.Join(Environment.NewLine, rendered))
+        Assert.IsTrue(rendered.Last().Contains("body"))
+
+    End Sub
+
+    <TestMethod>
     Public Sub SectionWithAnyItem_IsNotEmpty()
 
         Dim divider As New MenuSection

@@ -265,22 +265,6 @@ Module MenuMaker
     End Sub
 
     ''' <summary>
-    ''' Writes an empty line straight to the console. Unlike <see cref="cwl"/>, it ignores
-    ''' <see cref="SuppressOutput"/> and skips the render buffer, so inside a buffered pass the
-    ''' line comes out before everything buffered so far.
-    ''' </summary>
-    '''
-    ''' <param name="condition">
-    ''' Indicates whether the new line should be printed <br /><br />
-    ''' Optional, Default: <c> True </c>
-    ''' </param>
-    Public Sub PrintNewLine(Optional condition As Boolean = True)
-
-        If condition Then Console.WriteLine()
-
-    End Sub
-
-    ''' <summary>
     ''' Prints a line to the console if output isn't suppressed and <paramref name="cond"/> is
     ''' <c> True </c>. During a buffered render pass the line goes into the buffer instead.
     ''' </summary>

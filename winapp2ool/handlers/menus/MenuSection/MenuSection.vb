@@ -81,12 +81,6 @@ Public Class MenuSection
     End Property
 
     ''' <summary>
-    ''' The color of the title when printed, or <c> Nothing </c> for the default console color.
-    ''' Nothing in the class sets it, so titles always print in the default color.
-    ''' </summary>
-    Private _titleColor As ConsoleColor? = Nothing
-
-    ''' <summary>
     ''' Creates a new <c> MenuSection </c> with the given <paramref name="title"/>
     ''' </summary>
     '''
@@ -577,9 +571,7 @@ Public Class MenuSection
     End Function
 
     ''' <summary>
-    ''' Adds an unframed empty line, written by <see cref="MenuMaker.PrintNewLine"/>. That skips the
-    ''' render buffer, so during a buffered <see cref="Print"/> the line reaches the console ahead
-    ''' of the lines buffered before it. If <paramref name="condition"/> is <c> False </c>, nothing
+    ''' Adds an unframed empty line. If <paramref name="condition"/> is <c> False </c>, nothing
     ''' is added.
     ''' </summary>
     '''
@@ -593,7 +585,7 @@ Public Class MenuSection
 
         If Not condition Then Return Me
 
-        _items.Add(Sub() MenuMaker.PrintNewLine(condition))
+        _items.Add(Sub() MenuMaker.cwl())
 
         Return Me
 
@@ -601,8 +593,7 @@ Public Class MenuSection
 
     ''' <summary>
     ''' Adds the unframed line <c> "Press any key to return to the menu." </c> between two
-    ''' <see cref="AddNewLine"/> lines. During a buffered <c> Print </c>, both blank lines skip
-    ''' the buffer and reach the console ahead of the prompt. It only prints the prompt: waiting
+    ''' <see cref="AddNewLine"/> lines. It only prints the prompt: waiting
     ''' for the key is up to the caller. If <paramref name="condition"/> is <c> False </c>, nothing is added.
     ''' </summary>
     '''
@@ -956,14 +947,9 @@ Public Class MenuSection
     ''' </param>
     Private Sub PrintSection(withDivider As Boolean)
 
-        Dim hasTitle = Not String.IsNullOrEmpty(_title)
-        Dim hasColor = _titleColor.HasValue
+        If Not String.IsNullOrEmpty(_title) Then
 
-        If hasTitle Then
-
-            MenuMaker.PrintColored(_title, _titleColor.Value, centered:=True, hasColor)
-
-            MenuMaker.PrintLine(_title, centered:=True, Not hasColor)
+            MenuMaker.PrintLine(_title, centered:=True)
 
             If withDivider Then MenuMaker.PrintDivider()
 
