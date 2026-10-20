@@ -23,7 +23,8 @@ Option Strict On
 ''' single-element degenerate, undeclared-token domain handling, case-insensitivity, empty-list
 ''' semantics, commutativity with %% tokens, the unreferenced-variable typo backstop, nested
 ''' declarations resolved by <see cref="winapp2ool.VariableExpander.ResolveAll"/> (including
-''' cycles), inline <c> &lt;a,b,c&gt; </c> lists, and how declarations split on commas.
+''' cycles), inline <c> &lt;a,b,c&gt; </c> lists, how declarations split on commas, indexed
+''' <c> &lt;Name[N]&gt; </c> references, and literal declarations.
 ''' </summary>
 <TestClass()> Public Class VariableExpanderTests
 
@@ -777,6 +778,217 @@ Option Strict On
         Assert.AreEqual("x < y > z", result.Values(0))
         Assert.AreEqual(1, result.Diagnostics.Count)
         Assert.AreEqual(winapp2ool.DiagnosticSeverity.Advisory, result.Diagnostics(0).Severity)
+
+    End Sub
+
+    ''' <summary>
+    ''' An in-range <c> &lt;Name[N]&gt; </c> picks the Nth value (1-based), case-insensitively,
+    ''' with no fan-out and no diagnostics
+    ''' </summary>
+    <TestMethod()> Public Sub Expand_IndexedReferenceInRange_PicksThatValue()
+
+        Dim vars = BuildVars("Package", "PkgA,PkgB,PkgC")
+        Dim result = winapp2ool.VariableExpander.Expand(
+            "%LocalAppData%\Packages\<package[2]>\LocalCache|*.log",
+            vars,
+            winapp2ool.ExpansionDomain.Filesystem,
+            "[Entry]")
+
+        Assert.AreEqual(1, result.Values.Count)
+        Assert.AreEqual("%LocalAppData%\Packages\PkgB\LocalCache|*.log", result.Values(0))
+        Assert.AreEqual(0, result.Diagnostics.Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' Index 0 is out of range (indices are 1-based): the key is dropped with a Warning
+    ''' even in the registry domain, where an undeclared token would be kept
+    ''' </summary>
+    <TestMethod()> Public Sub Expand_IndexZero_DropsKeyInRegistryDomain()
+
+        Dim vars = BuildVars("Package", "PkgA,PkgB")
+        Dim result = winapp2ool.VariableExpander.Expand(
+            "HKCU\Software\<Package[0]>",
+            vars,
+            winapp2ool.ExpansionDomain.Registry,
+            "[Entry].RegKey")
+
+        Assert.AreEqual(0, result.Values.Count)
+        Assert.AreEqual(1, result.Diagnostics.Count)
+        Assert.AreEqual(winapp2ool.DiagnosticSeverity.Warning, result.Diagnostics(0).Severity)
+        Assert.AreEqual("[Entry].RegKey: <Package[0]> is out of range (2 values); dropping key", result.Diagnostics(0).Message)
+
+    End Sub
+
+    ''' <summary>
+    ''' An index past the end of the list drops the key with a Warning in both domains
+    ''' </summary>
+    <TestMethod()> Public Sub Expand_IndexPastEnd_DropsKeyInBothDomains()
+
+        Dim vars = BuildVars("Package", "PkgA,PkgB")
+
+        For Each domain In {winapp2ool.ExpansionDomain.Filesystem, winapp2ool.ExpansionDomain.Registry}
+
+            Dim result = winapp2ool.VariableExpander.Expand("x\<Package[3]>", vars, domain, "[Entry]")
+
+            Assert.AreEqual(0, result.Values.Count, domain.ToString())
+            Assert.AreEqual(1, result.Diagnostics.Count, domain.ToString())
+            Assert.AreEqual(winapp2ool.DiagnosticSeverity.Warning, result.Diagnostics(0).Severity, domain.ToString())
+            StringAssert.Contains(result.Diagnostics(0).Message, "<Package[3]> is out of range (2 values)")
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' An indexed token whose name isn't declared follows the undeclared-token rules:
+    ''' dropped in the filesystem domain, kept literal with an Advisory in the registry domain
+    ''' </summary>
+    <TestMethod()> Public Sub Expand_IndexedUndeclaredName_FollowsUndeclaredRules()
+
+        Dim vars = BuildVars("Package", "PkgA")
+
+        Dim fs = winapp2ool.VariableExpander.Expand("x\<Pakage[1]>", vars, winapp2ool.ExpansionDomain.Filesystem, "[Entry]")
+        Assert.AreEqual(0, fs.Values.Count)
+        Assert.AreEqual(winapp2ool.DiagnosticSeverity.Warning, fs.Diagnostics(0).Severity)
+        StringAssert.Contains(fs.Diagnostics(0).Message, "Undeclared variable <Pakage[1]>")
+
+        Dim reg = winapp2ool.VariableExpander.Expand("x\<Pakage[1]>", vars, winapp2ool.ExpansionDomain.Registry, "[Entry]")
+        Assert.AreEqual(1, reg.Values.Count)
+        Assert.AreEqual("x\<Pakage[1]>", reg.Values(0))
+        Assert.AreEqual(winapp2ool.DiagnosticSeverity.Advisory, reg.Diagnostics(0).Severity)
+
+    End Sub
+
+    ''' <summary>
+    ''' An indexed reference inside a declaration is a dependency on the indexed variable,
+    ''' so it resolves after that variable even when declared before it, and picks from its
+    ''' <em>resolved</em> list
+    ''' </summary>
+    <TestMethod()> Public Sub ResolveAll_IndexedReferenceInDeclaration_ResolvesAfterDependency()
+
+        Dim vars As New winapp2ool.VariableSet
+        vars.Add("Cache", "<Package[3]>\LocalCache")
+        vars.Add("Package", "<A,B>,C")
+
+        Dim diags = winapp2ool.VariableExpander.ResolveAll(vars)
+
+        Assert.AreEqual(0, diags.Count)
+        Assert.AreEqual(1, vars.Values("Cache").Count)
+        Assert.AreEqual("C\LocalCache", vars.Values("Cache")(0))
+
+    End Sub
+
+    ''' <summary>
+    ''' An out-of-range index inside a declaration drops that one value, with a Warning naming
+    ''' the declaration; the declaration's other values survive
+    ''' </summary>
+    <TestMethod()> Public Sub ResolveAll_OutOfRangeIndexInDeclaration_DropsThatValue()
+
+        Dim vars As New winapp2ool.VariableSet
+        vars.Add("Package", "PkgA,PkgB")
+        vars.Add("Cache", "<Package[1]>\LocalCache,<Package[3]>\LocalCache")
+
+        Dim diags = winapp2ool.VariableExpander.ResolveAll(vars)
+
+        Assert.AreEqual(1, vars.Values("Cache").Count)
+        Assert.AreEqual("PkgA\LocalCache", vars.Values("Cache")(0))
+        Assert.AreEqual(1, diags.Count)
+        Assert.AreEqual(winapp2ool.DiagnosticSeverity.Warning, diags(0).Severity)
+        StringAssert.StartsWith(diags(0).Message, "<Cache> declaration: <Package[3]> is out of range (2 values)")
+
+    End Sub
+
+    ''' <summary>
+    ''' <c> &lt;X&gt; </c> and <c> &lt;X[2]&gt; </c> in one template are separate axes, so
+    ''' they combine as a cartesian product rather than co-varying
+    ''' </summary>
+    <TestMethod()> Public Sub Expand_PlainAndIndexedReference_AreSeparateAxes()
+
+        Dim vars = BuildVars("X", "a,b,c")
+        Dim result = winapp2ool.VariableExpander.Expand(
+            "<X>\<X[2]>",
+            vars,
+            winapp2ool.ExpansionDomain.Filesystem,
+            "[Entry]")
+
+        Assert.AreEqual(3, result.Values.Count)
+        Assert.AreEqual("a\b", result.Values(0))
+        Assert.AreEqual("b\b", result.Values(1))
+        Assert.AreEqual("c\b", result.Values(2))
+        Assert.AreEqual(0, result.Diagnostics.Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' A comma body is an inline list even when an item looks like an indexed reference:
+    ''' <c> &lt;a[1],b&gt; </c> fans out to the literal text <c> a[1] </c> and <c> b </c>
+    ''' </summary>
+    <TestMethod()> Public Sub Expand_CommaBodyWithBrackets_IsInlineList()
+
+        Dim vars = BuildVars("a", "declared")
+        Dim result = winapp2ool.VariableExpander.Expand(
+            "x\<a[1],b>",
+            vars,
+            winapp2ool.ExpansionDomain.Filesystem,
+            "[Entry]")
+
+        Assert.AreEqual(2, result.Values.Count)
+        Assert.AreEqual("x\a[1]", result.Values(0))
+        Assert.AreEqual("x\b", result.Values(1))
+        Assert.AreEqual(0, result.Diagnostics.Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' <c> NestedReferenceCount </c> counts a declaration that references another only by
+    ''' index, and still ignores an indexed self-reference
+    ''' </summary>
+    <TestMethod()> Public Sub NestedReferenceCount_CountsIndexedReferences()
+
+        Dim vars As New winapp2ool.VariableSet
+        vars.Add("Package", "PkgA,PkgB")
+        vars.Add("Cache", "<Package[2]>\LocalCache")
+        vars.Add("Self", "<Self[1]>")
+
+        Assert.AreEqual(1, vars.NestedReferenceCount())
+
+    End Sub
+
+    ''' <summary>
+    ''' A variable referenced only by index counts as referenced, in a template and in
+    ''' another declaration
+    ''' </summary>
+    <TestMethod()> Public Sub Expand_IndexedOnlyReference_MarksVariableReferenced()
+
+        Dim vars = BuildVars("Package", "PkgA,PkgB", "Inner", "x,y", "Outer", "<Inner[2]>")
+        winapp2ool.VariableExpander.ResolveAll(vars)
+        winapp2ool.VariableExpander.Expand("<Package[1]>\file", vars, winapp2ool.ExpansionDomain.Filesystem, "[Entry]")
+
+        Dim unref = vars.UnreferencedNames()
+        Assert.AreEqual(1, unref.Count)
+        Assert.AreEqual("Outer", unref(0))
+
+    End Sub
+
+    ''' <summary>
+    ''' A variable declared with <c> AddLiteral </c> keeps its values verbatim: no comma
+    ''' split, and <c> ResolveAll </c> doesn't fan out the inline list inside it, so its
+    ''' indices stay as declared. Another declaration can still reference it.
+    ''' </summary>
+    <TestMethod()> Public Sub ResolveAll_LiteralVariable_LeftAlone()
+
+        Dim vars As New winapp2ool.VariableSet
+        vars.AddLiteral("Package", {"%LocalAppData%\Packages\<a,b>", "%LocalAppData%\Packages\C"})
+        vars.Add("Cache", "<Package[2]>\LocalCache")
+
+        Dim diags = winapp2ool.VariableExpander.ResolveAll(vars)
+
+        Assert.AreEqual(0, diags.Count)
+        Assert.IsTrue(vars.IsLiteral("package"))
+        Assert.AreEqual(2, vars.Values("Package").Count)
+        Assert.AreEqual("%LocalAppData%\Packages\<a,b>", vars.Values("Package")(0))
+        Assert.AreEqual("%LocalAppData%\Packages\C\LocalCache", vars.Values("Cache")(0))
 
     End Sub
 

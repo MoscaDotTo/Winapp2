@@ -174,10 +174,16 @@ Public Class VariableSet
     Private ReadOnly _referenced As New HashSet(Of String)(StringComparer.InvariantCultureIgnoreCase)
 
     ''' <summary>
+    ''' Set of variable names declared through <see cref="AddLiteral"/>, whose values
+    ''' <see cref="VariableExpander.ResolveAll"/> never rewrites
+    ''' </summary>
+    Private ReadOnly _literal As New HashSet(Of String)(StringComparer.InvariantCultureIgnoreCase)
+
+    ''' <summary>
     ''' Adds a variable declaration with values parsed from a comma-separated list.
     ''' Trimmed, non-empty tokens only, so a declaration with no values gives an empty list
     ''' and any template referencing it is dropped. Re-adding an existing name replaces the
-    ''' prior values.
+    ''' prior values, including those of a <see cref="AddLiteral"/> declaration.
     ''' <br /><br />
     '''
     ''' Splitting is bracket-aware: only commas at <c> &lt;&gt; </c> depth zero separate
@@ -201,8 +207,50 @@ Public Class VariableSet
                         .ToList()
 
         _vars(name) = parsed
+        _literal.Remove(name)
 
     End Sub
+
+    ''' <summary>
+    ''' Adds a variable declaration whose values are taken exactly as given, with no comma
+    ''' splitting or trimming. <see cref="VariableExpander.ResolveAll"/> leaves these values
+    ''' alone, so a <c> &lt;a,b&gt; </c> inside one is never fanned out and the list's
+    ''' length, which <c> &lt;Name[N]&gt; </c> indexes into, stays as declared. Other
+    ''' declarations can still reference it, but a token inside a literal value is text, so
+    ''' it doesn't mark the variable it names as referenced. Re-adding an existing name
+    ''' replaces the prior values.
+    ''' </summary>
+    '''
+    ''' <param name="name">
+    ''' The variable name (case-insensitive)
+    ''' </param>
+    '''
+    ''' <param name="values">
+    ''' The literal value list, copied as given
+    ''' </param>
+    Public Sub AddLiteral(name As String, values As IEnumerable(Of String))
+
+        _vars(name) = values.ToList()
+        _literal.Add(name)
+
+    End Sub
+
+    ''' <summary>
+    ''' Returns whether <paramref name="name"/> was declared via <see cref="AddLiteral"/>
+    ''' </summary>
+    '''
+    ''' <param name="name">
+    ''' The variable name to query (case-insensitive)
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> when <paramref name="name"/> holds literal values, otherwise <c> False </c>
+    ''' </returns>
+    Public Function IsLiteral(name As String) As Boolean
+
+        Return _literal.Contains(name)
+
+    End Function
 
     ''' <summary>
     ''' Splits a declaration value on its top-level commas, those at <c> &lt;&gt; </c>
@@ -296,9 +344,10 @@ Public Class VariableSet
     End Function
 
     ''' <summary>
-    ''' Records that <paramref name="name"/> appeared as a <c> &lt;name&gt; </c> token
-    ''' in at least one template. Idempotent. Undeclared names are silently ignored, so
-    ''' callers can mark every token they see without first checking
+    ''' Records that <paramref name="name"/> appeared as a <c> &lt;name&gt; </c> or
+    ''' <c> &lt;name[N]&gt; </c> token in at least one template. Idempotent. Undeclared
+    ''' names are silently ignored, so callers can mark every token they see without first
+    ''' checking
     ''' <see cref="IsDeclared"/>.
     ''' </summary>
     '''
@@ -337,8 +386,9 @@ Public Class VariableSet
 
     ''' <summary>
     ''' Returns how many declared variables reference at least one <em>other</em>
-    ''' declared variable by name in their values. A self-reference doesn't count, and
-    ''' neither does an inline list. EntryBuilder reports it as a measure of how much
+    ''' declared variable in their values, as <c> &lt;Name&gt; </c> or
+    ''' <c> &lt;Name[N]&gt; </c>. A self-reference doesn't count, and neither does an
+    ''' inline list. EntryBuilder reports it as a measure of how much
     ''' nesting a reader has to follow. Call it <em>before</em>
     ''' <see cref="VariableExpander.ResolveAll"/>, which replaces the
     ''' <c> &lt;token&gt; </c> references with literals.
@@ -350,25 +400,13 @@ Public Class VariableSet
     ''' </returns>
     Public Function NestedReferenceCount() As Integer
 
-        Dim names = _vars.Keys.ToList()
         Dim count = 0
 
-        For Each name In names
+        For Each name In _vars.Keys
 
-            Dim referencesAnother = False
-
-            For Each value In _vars(name)
-
-                For Each other In names
-
-                    If String.Equals(other, name, StringComparison.InvariantCultureIgnoreCase) Then Continue For
-                    If value.IndexOf("<" & other & ">", StringComparison.InvariantCultureIgnoreCase) >= 0 Then referencesAnother = True : Exit For
-
-                Next
-
-                If referencesAnother Then Exit For
-
-            Next
+            Dim referencesAnother = _vars(name).Any(
+                Function(value) VariableExpander.DeclaredReferences(value, Me).Any(
+                    Function(ref) Not String.Equals(ref, name, StringComparison.InvariantCultureIgnoreCase)))
 
             If referencesAnother Then count += 1
 
@@ -387,7 +425,7 @@ Public Class VariableSet
     '''
     ''' <param name="name">
     ''' The variable name (case-insensitive). Must already be declared via
-    ''' <see cref="Add"/>; otherwise the call is a no-op.
+    ''' <see cref="Add"/> or <see cref="AddLiteral"/>; otherwise the call is a no-op.
     ''' </param>
     '''
     ''' <param name="newValues">
@@ -410,7 +448,8 @@ End Class
 ''' leftmost-first occurrence varying slowest (outermost loop). A placeholder body
 ''' containing a comma (<c> &lt;a,b,c&gt; </c>) is an inline ad-hoc list: an
 ''' anonymous axis declared at its use site, for one-off leaf lists not worth a
-''' named declaration.
+''' named declaration. A placeholder <c> &lt;name[N]&gt; </c> picks the <c> N </c>th
+''' value of a declared list.
 ''' <br /><br />
 '''
 ''' The engine is string-generic. It knows nothing about winapp2 key types, ini
@@ -439,6 +478,55 @@ Public Module VariableExpander
     Private ReadOnly TokenPattern As New Regex("<([^<>]+)>", RegexOptions.Compiled)
 
     ''' <summary>
+    ''' Regex matching an indexed token body, <c> Name[N] </c>, capturing the name and the
+    ''' 1-based index. A body only counts as indexed when the captured name is declared.
+    ''' </summary>
+    Private ReadOnly IndexedPattern As New Regex("^(.+)\[([0-9]+)\]$", RegexOptions.Compiled)
+
+    ''' <summary>
+    ''' Returns the declared variables that <paramref name="value"/> references, as
+    ''' <c> &lt;Name&gt; </c> or <c> &lt;Name[N]&gt; </c>, in order of appearance.
+    ''' Inline lists and undeclared tokens are skipped.
+    ''' </summary>
+    '''
+    ''' <param name="value">
+    ''' The string to scan for tokens
+    ''' </param>
+    '''
+    ''' <param name="vars">
+    ''' The variable set the names are looked up in
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' The referenced declared names, spelled as they appear in <paramref name="value"/>,
+    ''' with repeats kept
+    ''' </returns>
+    Friend Function DeclaredReferences(value As String, vars As VariableSet) As List(Of String)
+
+        Dim names As New List(Of String)
+
+        For Each m As Match In TokenPattern.Matches(value)
+
+            Dim body = m.Groups(1).Value
+
+            If vars.IsDeclared(body) Then
+
+                names.Add(body)
+
+            Else
+
+                Dim indexed = IndexedPattern.Match(body)
+                If indexed.Success AndAlso vars.IsDeclared(indexed.Groups(1).Value) Then names.Add(indexed.Groups(1).Value)
+
+            End If
+
+        Next
+
+        Return names
+
+    End Function
+
+    ''' <summary>
     ''' Expands a template into its fan-out over the declared list variables it
     ''' references. Returns one string per cartesian combination, with leftmost-first
     ''' occurrence varying slowest. A template with no tokens returns a single-element
@@ -456,6 +544,15 @@ Public Module VariableExpander
     ''' co-variance across positions is wanted. Inline detection takes priority over the
     ''' declared-name lookup, but declared names never contain commas in practice so the
     ''' two never collide.
+    ''' <br /><br />
+    '''
+    ''' A token <c> &lt;Name[N]&gt; </c> whose <c> Name </c> is declared picks the
+    ''' <c> N </c>th value (1-based) of that variable's list. It is a one-value axis of its
+    ''' own, keyed on the whole body, so <c> &lt;Name&gt; </c> and <c> &lt;Name[2]&gt; </c>
+    ''' in one template combine as a cartesian product rather than co-varying. An index of
+    ''' <c> 0 </c> or past the end of the list drops the template with a Warning in either
+    ''' domain. When <c> Name </c> isn't declared, the token is an undeclared token like any
+    ''' other.
     ''' <br /><br />
     '''
     ''' Undeclared <c> &lt;name&gt; </c> tokens are resolved by <paramref name="domain"/>:
@@ -523,10 +620,12 @@ Public Module VariableExpander
         Dim axisKeySet As New HashSet(Of String)(StringComparer.InvariantCultureIgnoreCase)
         Dim undeclaredNames As New List(Of String)
         Dim undeclaredSet As New HashSet(Of String)(StringComparer.InvariantCultureIgnoreCase)
+        Dim indexOutOfRange = False
 
         For Each match As Match In TokenPattern.Matches(template)
 
             Dim body = match.Groups(1).Value
+            Dim indexed = IndexedPattern.Match(body)
 
             If body.IndexOf(","c) >= 0 Then
 
@@ -553,6 +652,34 @@ Public Module VariableExpander
 
                     axisKeys.Add(body)
                     axisValues.Add(vars.Values(body))
+
+                End If
+
+            ElseIf indexed.Success AndAlso vars.IsDeclared(indexed.Groups(1).Value) Then
+
+                ' An indexed reference is its own one-value axis, keyed on the whole body, so
+                ' <X[2]> never co-varies with <X> or with <X[1]>
+                Dim name = indexed.Groups(1).Value
+                vars.MarkReferenced(name)
+
+                If axisKeySet.Add(body) Then
+
+                    Dim declared = vars.Values(name)
+                    Dim index As Integer
+
+                    If Integer.TryParse(indexed.Groups(2).Value, index) AndAlso index >= 1 AndAlso index <= declared.Count Then
+
+                        axisKeys.Add(body)
+                        axisValues.Add(New List(Of String) From {declared(index - 1)})
+
+                    Else
+
+                        indexOutOfRange = True
+                        Dim noun = If(declared.Count = 1, "value", "values")
+                        diagnostics.Add(New ExpansionDiagnostic(DiagnosticSeverity.Warning,
+                            $"{context}: <{body}> is out of range ({declared.Count} {noun}); dropping key"))
+
+                    End If
 
                 End If
 
@@ -590,6 +717,10 @@ Public Module VariableExpander
             End If
 
         End If
+
+        ' An out-of-range index drops the key in either domain: unlike an undeclared token,
+        ' it names a declared variable, so it can't be a literal registry path
+        If indexOutOfRange Then Return New ExpansionResult(New List(Of String), diagnostics)
 
         ' Phase 3: any axis with no values yields an empty cartesian product, so the
         ' template would expand to nothing, so we drop it with a Warning. Covers both a
@@ -647,7 +778,13 @@ Public Module VariableExpander
     '''
     ''' We expand each value in the registry domain, so an undeclared token in a
     ''' declaration stays literal with an Advisory, and an inline list in a declaration
-    ''' fans out here. After this call returns, every variable's value list contains
+    ''' fans out here. An indexed <c> &lt;Name[N]&gt; </c> reference is a dependency on
+    ''' <c> Name </c> and picks from its resolved list; an index out of range drops that
+    ''' one value with a Warning naming the declaration. Variables declared with
+    ''' <see cref="VariableSet.AddLiteral"/> are never rewritten.
+    ''' <br /><br />
+    '''
+    ''' After this call returns, every variable's value list contains
     ''' literal strings (or, for unresolved variables, the original templated strings).
     ''' User templates that reference these variables therefore receive fully-resolved
     ''' substitution without the engine needing a second expansion pass.
@@ -688,12 +825,7 @@ Public Module VariableExpander
 
             For Each value In vars.Values(name)
 
-                For Each m As Match In TokenPattern.Matches(value)
-
-                    Dim refName = m.Groups(1).Value
-                    If vars.IsDeclared(refName) Then varDeps.Add(refName)
-
-                Next
+                varDeps.UnionWith(DeclaredReferences(value, vars))
 
             Next
 
@@ -702,8 +834,9 @@ Public Module VariableExpander
         Next
 
         ' Topological resolution: in each pass, resolve every variable whose
-        ' dependencies are already resolved. Stop when no progress is made.
-        Dim resolved As New HashSet(Of String)(StringComparer.InvariantCultureIgnoreCase)
+        ' dependencies are already resolved. Stop when no progress is made. Literal
+        ' variables start out resolved, so they are never re-expanded.
+        Dim resolved As New HashSet(Of String)(allNames.Where(AddressOf vars.IsLiteral), StringComparer.InvariantCultureIgnoreCase)
 
         Do
 

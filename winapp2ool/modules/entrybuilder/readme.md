@@ -39,6 +39,7 @@ EntryBuilder reads every `*.ini` file in its source directory, combines them in-
    - [Declaration](#declaration)
    - [Reference](#reference)
    - [Inline Lists](#inline-lists)
+   - [Indexed References](#indexed-references)
    - [Cartesian Fan-out and Co-variance](#cartesian-fan-out-and-co-variance)
    - [Nested References](#nested-references)
    - [The Reserved Root Variable](#the-reserved-root-variable)
@@ -368,6 +369,19 @@ Root=HKCU\Software\Ability <6.0,7.0,11.0>\Ability Write
 
 declares a three-value `Root`, which composes with [Root detection inference](#the-reserved-root-variable) to produce `Detect1` through `Detect3`.
 
+## Indexed References
+
+`<Name[N]>` picks the Nth value of a declared variable, indexed from 1, and doesn't fan out:
+
+```ini
+Versions=9.0,10.0,11.0
+DetectFile=%ProgramFiles%\App <Versions[3]>
+```
+
+gives `DetectFile=%ProgramFiles%\App 11.0`. The index counts the variable's values after nested references and inline lists in its declaration have been flattened. An index of 0 or past the end of the list drops the key with a warning, in registry keys too, since the name is declared and the token can't be a literal. An indexed name that isn't declared is an [undeclared token](#undeclared-tokens) like any other.
+
+`<Versions>` and `<Versions[2]>` in one key are two separate variables as far as fan-out goes, so they cross-multiply rather than co-vary. A comma still makes an inline list, so `<a[1],b>` is the two literal values `a[1]` and `b`.
+
 ## Cartesian Fan-out and Co-variance
 
 A key that references N variables of sizes A, B, C, ... produces A × B × C × ... output keys, one per combination. The leftmost reference varies slowest (outermost loop), so the `RegKeyBase` example under [Reference](#reference) produces 7 × 3 = 21 RegKey lines ordered as `(Versions[0], MRUNum[0])`, `(Versions[0], MRUNum[1])`, `(Versions[0], MRUNum[2])`, `(Versions[1], MRUNum[0])`, ...
@@ -384,7 +398,7 @@ ArcMapKey=ArcMap,Desktop<Versions>\ArcMap
 Detect=HKCU\Software\ESRI\<ArcMapKey>
 ```
 
-resolves `ArcMapKey` to `(ArcMap, Desktop10.0\ArcMap, Desktop10.1\ArcMap)`, then `Detect` fans across that 3-value list. Cyclic dependencies (A references B references A) are reported (`Variable <A> participates in a cyclic dependency with B; values left unresolved`) and the involved variables are passed through unresolved. 
+resolves `ArcMapKey` to `(ArcMap, Desktop10.0\ArcMap, Desktop10.1\ArcMap)`, then `Detect` fans across that 3-value list. Cyclic dependencies (A references B references A) are reported (`Variable <A> participates in a cyclic dependency with <B>; values left unresolved`) and the involved variables are passed through unresolved. 
 
 ## The Reserved Root Variable
 
@@ -415,7 +429,7 @@ Resolution of `<Name>` tokens whose name matches neither a declared variable nor
 | Domain | Behavior | Message | Why |
 |:-|:-|:-|:-|
 | Filesystem | Drop the key | `Undeclared variable <X> in filesystem-domain key [Entry].FileKey; dropping key` | Windows path syntax forbids `<` and `>`, so any such token is unambiguously a typo |
-| Registry | Emit the literal text | `Undeclared variable <X> in registry-domain key [Entry].RegKey; emitted as literal` | Registry key names can legitimately contain `<` and `>`; the engine cannot assume a typo |
+| Registry | Emit the literal text | `Undeclared variable <X> in registry-domain key [Entry].RegKey; passed through as literal` | Registry key names can legitimately contain `<` and `>`; the engine cannot assume a typo |
 
 The filesystem-domain drop is a warning shown in the menu output; the registry-domain literal emission is an advisory written to the log only (see [Validation and Warnings](#validation-and-warnings)).
 
@@ -435,20 +449,23 @@ Warnings are shown in the menu output after a run and recorded in the winapp2ool
 |:-|:-|:-|
 | Both `Section` and `LangSecRef` declared | `LangSecRef` wins, `Section` dropped | `Both Section and LangSecRef present in [Entry], using LangSecRef` |
 | Neither `Section` nor `LangSecRef` declared | Entry **skipped** | `No Section or LangSecRef in [Entry], skipping` |
-| No root keys and no FileKey/RegKey content in any form | Entry **skipped** | `[Entry] declares no WebViewRoot, QtWebEngineRoot, FileKeyBase, or RegKeyBase - nothing to emit, skipping` |
+| No root keys and no FileKey/RegKey content in any form | Entry **skipped** | `[Entry] declares no WebViewRoot, QtWebEngineRoot, ElectronRoot, FileKeyBase, or RegKeyBase — nothing to emit, skipping` |
 | No detection (after `Root` inference) | Entry emitted, always-on | `[Entry] declares no detection (Detect / DetectFile / DetectOS); generated entry will be always-on` |
 | `Default=` declared | Key dropped | `Default= declared in [Entry]; EntryBuilder never emits Default, ignoring` |
 | `SpecialDetect=` declared | Key dropped | `SpecialDetect is deprecated; key dropped from [Entry]. Replace with Detect or DetectFile` |
 | `All` mixed with non-legacy scaffold names | Extras ignored | `WebViewScaffolds=All in [Entry] with redundant additional names (X, Y); ignoring` |
 | Explicit scaffold list mixed with exclusions | Exclusions applied | `Both WebViewScaffolds and ExcludeWebViewScaffolds set in [Entry]; applying exclusions to explicit list` |
 | Unknown scaffold name requested | Scaffold dropped | `Unknown WebView scaffold 'X' requested by [Entry], skipping` |
-| Scaffold catalog missing or empty | Zero scaffold keys from that catalog | `WebViewScaffold: catalog at <path> is empty or missing` |
+| Scaffold directory missing | Zero scaffold keys from every catalog | `Scaffold directory not found: <dir>; no scaffold keys will be generated` |
+| Catalog file holds a section with no `Scaffold:` marker | Section ignored | `Unexpected section in scaffold catalog <file>: [Section]` |
 | Catalog section has a `Tier=` value other than `Legacy` | Tier ignored, scaffold stays in `All` | `Unknown tier 'X' in WebViewScaffold [WebViewScaffold: Name]; the only tier is Legacy` |
 | Undeclared `<X>` token, filesystem domain | Key dropped | `Undeclared variable <X> in filesystem-domain key [Entry].FileKey; dropping key` |
-| Undeclared `<X>` token, registry domain | Literal emitted *(advisory)* | `Undeclared variable <X> in registry-domain key [Entry].RegKey; emitted as literal` |
+| Undeclared `<X>` token, registry domain | Literal emitted *(advisory)* | `Undeclared variable <X> in registry-domain key [Entry].RegKey; passed through as literal` |
+| `<X[N]>` index is 0 or past the end of `X` | Key dropped | `[Entry].FileKey: <X[N]> is out of range (M values); dropping key` |
+| The same, inside a variable declaration | That one value dropped from the variable | `[Entry]: <Cache> declaration: <X[N]> is out of range (M values); dropping key` |
 | Referenced variable or inline list has no values | Key dropped | `Axis <X> has no values, referenced by [Entry].FileKey; dropping key` |
-| Cyclic variable references | Values left as authored | `Variable <X> participates in a cyclic dependency with Y; values left unresolved` |
-| Identical inline list repeated in one key | Occurrences co-vary *(advisory)* | `Inline list <a,b> appears more than once in [Entry].FileKey; occurrences co-vary - declare a named variable if that is not intended` |
+| Cyclic variable references | Values left as authored | `[Entry]: Variable <X> participates in a cyclic dependency with <Y>; values left unresolved` |
+| Identical inline list repeated in one key | Occurrences co-vary *(advisory)* | `Inline list <a,b> appears more than once in [Entry].FileKey; occurrences co-vary: declare a named variable if that is not intended` |
 | `Root` value has unresolved tokens | Detection inference skipped | `[Entry] Root has unresolved <token> references; skipping detection inference` |
 | `Root` mixes registry and filesystem values | First value's domain wins | `[Entry] Root mixes registry and filesystem values; inferring detection from the first value's domain` |
 | Declared variable never referenced | Warning only | `Variable 'X=' declared in [Entry] but never referenced by any <X> token; possible typo` |
@@ -560,10 +577,10 @@ When the same declared variable appears multiple times in a single key, referenc
 |:-|:-|:-|
 | `No EntryBuilder source definitions found in: <dir>` | Source directory is empty, missing, or contains no `*.ini` files with parseable sections | Verify the source directory in **Choose source directory** or via `-1d` |
 | Entry is silently absent from the output | `Skip=` is set, or the entry was skipped by validation (`No Section or LangSecRef...` / `...nothing to emit, skipping`), or a duplicate section name in an alphabetically-earlier file won | Check the run log for the corresponding message |
-| Output is missing expected scaffold FileKeys | Catalog failed to load (`...catalog at <path> is empty or missing`), scaffold name misspelled (`Unknown WebView scaffold 'X'...`), or scaffold excluded by `Exclude*Scaffolds=` | Check the `Loaded N WebView scaffold(s)` / `Loaded N QtWebEngine scaffold(s)` lines and the warnings |
+| Output is missing expected scaffold FileKeys | Scaffold directory not found (`Scaffold directory not found: <dir>...`), scaffold name misspelled (`Unknown WebView scaffold 'X'...`), or scaffold excluded by `Exclude*Scaffolds=` | Check the `Loaded N WebView scaffold(s)` / `Loaded N QtWebEngine scaffold(s)` lines and the warnings |
 | Output key contains a literal `%WebViewRoot%` / `%QtWebEngineRoot%` / `%QtWebEngineCacheRoot%` / `%ElectronRoot%` | The matching root key wasn't declared on the entry - or the placeholder was used in a `Detect`/`DetectFile`, where it is never substituted | Declare the root key, or write the path / a `<Variable>` directly in detection keys |
 | Entry gained a `Detect`/`DetectFile` you didn't write | The entry declares a variable named `Root` - detection inference is automatic | Intended? Delete your redundant hand-written detection. Not intended? Rename the variable (`DiskRoot`, `AppRoot`, ...) |
-| Output RegKey contains a literal `<Name>` | The variable wasn't declared - the registry domain emits literal text and logs `...emitted as literal` as an advisory | Declare the variable, or accept the literal if intentional |
+| Output RegKey contains a literal `<Name>` | The variable wasn't declared - the registry domain emits literal text and logs `...passed through as literal` as an advisory | Declare the variable, or accept the literal if intentional |
 | Output is missing a FileKey/DetectFile entirely | An undeclared `<Name>` token dropped the key (`...dropping key`), or a referenced variable had no values | Fix the typo, or declare the variable |
 | `Variable 'X=' declared ... but never referenced` warning | The declaration is unused - usually a typo in a `<X>` reference somewhere | Search the entry for the intended reference and correct it |
 | Output reorders keys differently from the source | WinappDebug normalization rewrites to canonical order and alphabetised numbering on every run | This is intentional; reformat the source to match if the diff bothers you |
@@ -895,7 +912,7 @@ RegKey1=HKCU\Software\Hazel\HSLSU\Recent|<default>
 **Explanation**
 
 - `<Root>` matches a declared variable and expands; `<default>` matches nothing
-- Because `RegKey` is a registry-domain key, the undeclared token is emitted **as literal text**, with a log-only advisory: `Undeclared variable <default> in registry-domain key [Hazel's Silly Little System Utility *].RegKey; emitted as literal`
+- Because `RegKey` is a registry-domain key, the undeclared token is emitted **as literal text**, with a log-only advisory: `Undeclared variable <default> in registry-domain key [Hazel's Silly Little System Utility *].RegKey; passed through as literal`
 - The same token in a `FileKeyBase` would instead **drop the key** with a menu-visible warning, since `<` / `>` can never appear in a Windows path
 
 **Notes**
