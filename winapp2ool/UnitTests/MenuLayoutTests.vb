@@ -342,6 +342,67 @@ Public Class MenuLayoutTests
 
     End Sub
 
+    ''' <summary>
+    ''' Runs <c> initModule </c> on a menu that records the pending header it was built with,
+    ''' then exits it with <c> 0 </c>
+    ''' </summary>
+    '''
+    ''' <returns>
+    ''' The pending header the menu's first build saw
+    ''' </returns>
+    Private Shared Function PendingHeaderOnEntry() As String
+
+        Dim seen As String = Nothing
+        Dim originalIn = Console.In
+        Dim originalOut = Console.Out
+
+        Try
+
+            Using input As New StringReader("0"), captured As New StringWriter
+
+                Console.SetIn(input)
+                Console.SetOut(captured)
+
+                initModule("Module",
+                    Function()
+                        If seen Is Nothing Then seen = MenuHeaderText
+                        Return MenuSection.CreateCompleteMenu("Module", {"A description line"}, ConsoleColor.Cyan)
+                    End Function)
+
+            End Using
+
+        Finally
+
+            Console.SetIn(originalIn)
+            Console.SetOut(originalOut)
+            MenuHeaderText = ""
+
+        End Try
+
+        Return seen
+
+    End Function
+
+    <TestMethod>
+    Public Sub InitModule_FirstScreenKeepsTheMenusOwnHeader()
+
+        ' A pending header replaces the menu's own header and its color
+        MenuHeaderText = ""
+
+        Assert.AreEqual("", PendingHeaderOnEntry())
+
+    End Sub
+
+    <TestMethod>
+    Public Sub InitModule_FirstScreenKeepsAHeaderSetBeforeEntry()
+
+        ' The launcher sets its colored header this way
+        setNextMenuHeaderText("Set before entry", printColor:=ConsoleColor.Cyan)
+
+        Assert.AreEqual("Set before entry", PendingHeaderOnEntry())
+
+    End Sub
+
     <TestMethod>
     Public Sub SectionWithAnyItem_IsNotEmpty()
 

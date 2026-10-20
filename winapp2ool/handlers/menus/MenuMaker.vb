@@ -181,8 +181,9 @@ Module MenuMaker
     ''' until <see cref="exitModule"/> is called. Building once per pass keeps what's shown and
     ''' what the input reaches in step. The build comes after the clear, because the main menu's
     ''' update check can set the header the build then shows. Exiting returns
-    ''' exactly one level up, to the menu that called this one. On entry the next header is set
-    ''' to <paramref name="name"/>, and on exit to <c> "{name} closed" </c>. On exit we also call
+    ''' exactly one level up, to the menu that called this one. The first screen shows the menu's
+    ''' own header, or a header set before the call, and on exit the next header is set to
+    ''' <c> "{name} closed" </c>. On exit we also call
     ''' <c> FlushIfDirty </c>, which writes changed settings only when <c> saveSettingsToDisk </c>
     ''' is on (it's off by default) and this isn't a command line run.
     ''' <br /><br />
@@ -195,7 +196,7 @@ Module MenuMaker
     ''' </summary>
     '''
     ''' <param name="name">
-    ''' The name of the module as it will be displayed to the user
+    ''' The name of the module, for the log and the <c> "{name} closed" </c> header
     ''' </param>
     '''
     ''' <param name="buildMenu">
@@ -222,7 +223,6 @@ Module MenuMaker
             End If
 
             ExitPending = False
-            setNextMenuHeaderText(name)
 
             menuItemLength = itmLen
 
