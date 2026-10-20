@@ -116,8 +116,10 @@ Public Class iniFileChooser
 
     ''' <summary>
     ''' Returns the chosen file as a parsed <c> iniFile </c>. If the file doesn't exist, we open the
-    ''' chooser menu once, and return <c> Nothing </c> if the user leaves it without an existing
-    ''' file. In silent mode that menu can't run, so a missing file ends the process instead.
+    ''' chooser menu, and return <c> Nothing </c> if the user leaves it without an existing file.
+    ''' With <see cref="MustExist"/> on, the chooser stays open until a choice finds a file or the
+    ''' user exits; with it off, any choice closes it. In silent mode that menu can't run, so a
+    ''' missing file ends the process instead.
     ''' <br /> When the caller identifies which setting this chooser backs, a file picked through the
     ''' prompt is persisted to the settings file so the choice survives the session
     ''' </summary>
@@ -156,13 +158,13 @@ Public Class iniFileChooser
         Dim curName = Name
         Dim curDir = Dir
 
-        While Not Exists()
+        If Not Exists() Then
 
             initModule("File Chooser", AddressOf buildMenu)
 
             If Not Exists() Then Return Nothing
 
-        End While
+        End If
 
         Dim fileChanged = Not Name = curName OrElse Not Dir = curDir
         Dim isSettingsBacked = callingModule.Length > 0 AndAlso settingName.Length > 0 AndAlso settingChangedName.Length > 0
@@ -220,16 +222,12 @@ Public Class iniFileChooser
              "Type a filename to change file  |  Type a path with \ to change directory"}) _
             .AddDispatchedOption(InitName, "Use the default name", Sub() Rename(InitName), hasInitName) _
             .AddDispatchedOption(SecondName, "Use the default rename", Sub() Rename(SecondName), hasSecondName) _
-            .AddDispatchedOption("Default directory", "Use the same folder as winapp2ool.exe",
+            .AddDispatchedOption("Default directory", "Use the folder winapp2ool was started in",
                 Sub()
                     Dir = Environment.CurrentDirectory
-                    exitModule()
+                    ExitIfExists()
                 End Sub) _
-            .AddDispatchedOption("Parent folder", "Go up one level",
-                Sub()
-                    Dir = Directory.GetParent(Dir).ToString()
-                    exitModule()
-                End Sub) _
+            .AddDispatchedOption("Parent folder", "Go up one level", AddressOf GoToParent) _
             .AddDispatchedOption("Restore defaults", "Restore the original name and directory",
                 Sub()
                     ResetParams()
@@ -245,9 +243,9 @@ Public Class iniFileChooser
     ''' <summary>
     ''' Handles text typed at the chooser that isn't a number. Blank input leaves the chooser,
     ''' subject to <see cref="MustExist"/>. Input containing a backslash becomes the new directory
-    ''' if that directory exists, and closes the chooser. Anything else becomes the new filename,
-    ''' except that with <see cref="MustExist"/> on, a name with no file behind it reverts to the
-    ''' old one.
+    ''' if that directory exists, and closes the chooser, again subject to <see cref="MustExist"/>.
+    ''' Anything else becomes the new filename, except that with <see cref="MustExist"/> on, a name
+    ''' with no file behind it reverts to the old one.
     ''' </summary>
     '''
     ''' <param name="input">
@@ -277,7 +275,7 @@ Public Class iniFileChooser
 
             Else
 
-                exitModule()
+                ExitIfExists()
 
             End If
 
@@ -289,6 +287,26 @@ Public Class iniFileChooser
         Return True
 
     End Function
+
+    ''' <summary>
+    ''' Moves <see cref="Dir"/> up one level, subject to <see cref="MustExist"/> like any other
+    ''' choice. At a drive root there is no parent, so we leave <see cref="Dir"/> as it is.
+    ''' </summary>
+    Private Sub GoToParent()
+
+        Dim parent = Directory.GetParent(Dir)
+
+        If parent Is Nothing Then
+
+            setNextMenuHeaderText($"{Dir} has no parent folder", printColor:=ConsoleColor.Red)
+            Return
+
+        End If
+
+        Dir = parent.FullName
+        ExitIfExists()
+
+    End Sub
 
     Private Sub Rename(nname As String)
 

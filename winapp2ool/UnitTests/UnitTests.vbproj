@@ -87,6 +87,7 @@
     <Compile Include="DiffKeyComparisonTests.vb" />
     <Compile Include="DiffPipelineTests.vb" />
     <Compile Include="EntryBuilderTests.vb" />
+    <Compile Include="IniFileChooserTests.vb" />
     <Compile Include="LintOptionsTests.vb" />
     <Compile Include="LintReconcilerTests.vb" />
     <Compile Include="MenuDefaultsTests.vb" />
