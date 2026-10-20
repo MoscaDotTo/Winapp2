@@ -96,6 +96,83 @@ Imports System.Text
     End Sub
 
     ''' <summary>
+    ''' Gives Scan Settings each input in turn against an empty settings file, then restores the
+    ''' rules to their defaults and reloads them from that file, as a restart does
+    ''' </summary>
+    ''' <param name="inputs">What the user types into Scan Settings, one line each</param>
+    Private Shared Sub RunScanSettingsThenRestart(ParamArray inputs As String())
+
+        Dim savedFile = winapp2ool.SettingsHandler.SettingsFile
+
+        Try
+
+            winapp2ool.SettingsHandler.SettingsFile = MakeIni("[WinappDebug]" & vbCrLf)
+
+            For Each line In inputs
+                winapp2ool.buildAdvSettingsMenu().HandleInput(line)
+            Next
+
+            winapp2ool.resetScanSettings()
+            winapp2ool.LoadLintRulesFromSettings()
+
+        Finally
+
+            winapp2ool.SettingsHandler.SettingsFile = savedFile
+
+        End Try
+
+    End Sub
+
+    ''' <summary>Turning a scan off also turns its repair off, and both survive a restart</summary>
+    <TestMethod()> Public Sub ScanTurnedOff_RepairStaysOffAfterRestart()
+
+        Dim rule = winapp2ool.WinappDebug.Rules(0)
+
+        RunScanSettingsThenRestart("1")
+
+        Assert.IsFalse(rule.ShouldScan, $"{rule.LintName}'s scan came back on")
+        Assert.IsFalse(rule.ShouldRepair, $"{rule.LintName}'s repair came back on")
+
+    End Sub
+
+    ''' <summary>Turning a repair on also turns its scan on, and both survive a restart</summary>
+    <TestMethod()> Public Sub RepairTurnedOn_ScanStaysOnAfterRestart()
+
+        Dim rule = winapp2ool.WinappDebug.Rules(0)
+        Dim count = winapp2ool.WinappDebug.Rules.Count
+
+        ' Scan off (which turns the repair off too), then the repair back on
+        RunScanSettingsThenRestart("1", CStr(count + 1))
+
+        Assert.IsTrue(rule.ShouldRepair, $"{rule.LintName}'s repair came back off")
+        Assert.IsTrue(rule.ShouldScan, $"{rule.LintName}'s scan came back off")
+
+    End Sub
+
+    ''' <summary>The hidden <c> alloff </c> command survives a restart</summary>
+    <TestMethod()> Public Sub AllOff_SurvivesRestart()
+
+        RunScanSettingsThenRestart("alloff")
+
+        Dim stillOn = winapp2ool.WinappDebug.Rules.Where(Function(r) r.ShouldScan OrElse r.ShouldRepair).Select(Function(r) r.LintName)
+        Assert.IsFalse(stillOn.Any(), "Came back on: " & String.Join(", ", stillOn))
+
+    End Sub
+
+    ''' <summary>Scan Settings' Reset option survives a restart</summary>
+    <TestMethod()> Public Sub ScanSettingsReset_SurvivesRestart()
+
+        Dim rule = winapp2ool.WinappDebug.Rules(0)
+        Dim count = winapp2ool.WinappDebug.Rules.Count
+
+        ' Reset is the option after every scan and repair toggle
+        RunScanSettingsThenRestart("1", CStr(2 * count + 1))
+
+        Assert.IsTrue(rule.ShouldScan AndAlso rule.ShouldRepair, $"{rule.LintName} came back as it was before the reset")
+
+    End Sub
+
+    ''' <summary>
     ''' A new <c> LintOptions </c> holds the defaults whatever the user's toggles are, and
     ''' changing its rules leaves the user's toggles alone
     ''' </summary>

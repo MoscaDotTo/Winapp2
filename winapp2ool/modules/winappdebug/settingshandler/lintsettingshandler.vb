@@ -50,6 +50,15 @@ Module lintsettingshandler
     Public Sub SaveLintSettings()
 
         SaveModule(NameOf(WinappDebug), GetType(lintsettings))
+        SaveLintRules()
+
+    End Sub
+
+    ''' <summary>
+    ''' Saves every rule's scan and repair flags to <c> SettingsFile </c>. This only changes the
+    ''' copy in memory. <see cref="FlushIfDirty"/> writes it to disk.
+    ''' </summary>
+    Public Sub SaveLintRules()
 
         For Each rule In Rules
             SetSetting(NameOf(WinappDebug), rule.LintName & "_Scan", tsInvariant(rule.ShouldScan))

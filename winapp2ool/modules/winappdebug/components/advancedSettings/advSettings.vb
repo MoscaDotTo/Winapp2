@@ -48,9 +48,8 @@ Public Module advSettings
                     setNextMenuHeaderText($"Scan {enStr(prev)}d", printColor:=If(Not prev, ConsoleColor.Green, ConsoleColor.Red))
                     r.ShouldScan = Not prev
                     ScanSettingsChanged = True
-                    SetSetting(NameOf(WinappDebug), r.LintName & "_Scan", tsInvariant(r.ShouldScan))
-                    FlushIfDirty()
                     If Not r.ShouldScan Then r.turnOff()
+                    saveRules()
                 End Sub)
 
         Next
@@ -69,9 +68,8 @@ Public Module advSettings
                     setNextMenuHeaderText($"Repair {enStr(prev)}d", printColor:=If(Not prev, ConsoleColor.Green, ConsoleColor.Red))
                     r.ShouldRepair = Not prev
                     ScanSettingsChanged = True
-                    SetSetting(NameOf(WinappDebug), r.LintName & "_Repair", tsInvariant(r.ShouldRepair))
-                    FlushIfDirty()
                     If r.ShouldRepair Then r.turnOn()
+                    saveRules()
                 End Sub)
 
         Next
@@ -80,6 +78,7 @@ Public Module advSettings
         menu.AddDispatchedResetOpt("Scan And Repair", ScanSettingsChanged,
             Sub()
                 resetScanSettings()
+                saveRules()
                 setNextMenuHeaderText("Settings Reset", printColor:=ConsoleColor.Yellow)
             End Sub)
 
@@ -88,12 +87,24 @@ Public Module advSettings
                 If input <> "alloff" Then Return False
                 Rules.ForEach(Sub(rule) rule.turnOff())
                 ScanSettingsChanged = True
+                saveRules()
                 Return True
             End Function)
 
         Return menu
 
     End Function
+
+    ''' <summary>
+    ''' Saves every rule's scan and repair, since a toggle can change both, and writes the
+    ''' settings to disk if saving is on
+    ''' </summary>
+    Private Sub saveRules()
+
+        SaveLintRules()
+        FlushIfDirty()
+
+    End Sub
 
     ''' <summary>
     ''' Sets <see cref="ScanSettingsChanged"/> when any rule differs from its defaults (it never
