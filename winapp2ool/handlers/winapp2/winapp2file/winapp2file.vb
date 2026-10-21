@@ -161,8 +161,9 @@ Public Class winapp2file
 
     ''' <summary>
     ''' Returns the flavor named by the first known <c> ; Flavor: </c> line in the preamble: the
-    ''' comments before the first section that has a line number. Sections built in code have
-    ''' none, so a file made only of those treats all its comments as preamble.
+    ''' comments on consecutive lines from line 1, which is the block the header and
+    ''' <see cref="ToIni"/> write. Section line numbers can't mark where it ends, since sections
+    ''' Transmute adds keep the line numbers they had in their own file.
     ''' </summary>
     '''
     ''' <param name="file">A winapp2.ini format <c> iniFile </c></param>
@@ -173,15 +174,12 @@ Public Class winapp2file
     ''' </returns>
     Private Shared Function ReadFlavor(file As iniFile) As WinappFlavor?
 
-        Dim firstSectionLine = Integer.MaxValue
-
-        For Each section In file
-            If section.StartingLineNumber > 0 Then firstSectionLine = Math.Min(firstSectionLine, section.StartingLineNumber)
-        Next
+        Dim expectedLine = 1
 
         For Each comment In file.Comments
 
-            If comment.LineNumber >= firstSectionLine Then Exit For
+            If comment.LineNumber <> expectedLine Then Exit For
+            expectedLine += 1
 
             Dim flavor = WinappFlavorInfo.ParseFlavorLine(comment.Text)
             If flavor.HasValue Then Return flavor

@@ -187,6 +187,37 @@ Imports System.Text
     End Sub
 
     ''' <summary>
+    ''' Sections added from another file keep the line numbers they had there, so one from that
+    ''' file's line 1 must not cut the flavor out of the preamble, as a Transmute add did
+    ''' </summary>
+    <TestMethod()> Public Sub AddedSectionFromLineOneKeepsFlavor()
+
+        Dim baseIni = MakeIni(WithPreambleLine("; Flavor: BleachBit"))
+        Dim source = MakeIni("[Added Entry *]" & vbCrLf & "LangSecRef=3021" & vbCrLf & "Detect=HKCU\Software\Added" & vbCrLf)
+        baseIni.AddSection(source.First())
+
+        Dim wa2 As New winapp2ool.winapp2file(baseIni)
+
+        Assert.AreEqual(winapp2ool.WinappFlavor.BleachBit, wa2.Flavor)
+
+    End Sub
+
+    ''' <summary>
+    ''' A flavor stamped on a file that had no header survives <c> ToIni </c>, though the file's
+    ''' first section was on line 1, below which <c> ToIni </c> writes the flavor comment
+    ''' </summary>
+    <TestMethod()> Public Sub StampedFlavorSurvivesToIniOfHeaderlessFile()
+
+        Dim first As New winapp2ool.winapp2file(MakeIni(VersionedFile.Substring(VersionedFile.IndexOf("[", StringComparison.Ordinal))))
+        first.Flavor = winapp2ool.WinappFlavor.Tron
+
+        Dim second As New winapp2ool.winapp2file(first.ToIni())
+
+        Assert.AreEqual(winapp2ool.WinappFlavor.Tron, second.Flavor)
+
+    End Sub
+
+    ''' <summary>
     ''' The version and the entry count stay the header's first two lines, with or without a
     ''' flavor, since the updater, Diff and the build read them there
     ''' </summary>
