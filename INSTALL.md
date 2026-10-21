@@ -2,7 +2,9 @@
 
 This page covers installing and configuring winapp2.ini in each application that supports it. For what winapp2.ini is and how it is built, see the [main readme](README.md).
 
-Whichever application you use, install winapp2.ini with [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) and keep a copy of it in the same folder as winapp2.ini. That is how you keep the file up to date afterwards.
+Whichever application you use, install winapp2.ini with [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) and keep a copy of it in the same folder as winapp2.ini. That is how you keep the file up to date afterwards.
+
+The download links on this page fetch each file from the [latest release](https://github.com/MoscaDotTo/Winapp2/releases/latest), where most file names carry their flavor, such as `winapp2-ccleaner.ini`. If you install one by hand, rename it to `winapp2.ini` first, or to `winapp2.rules` for System Ninja.
 
 ---
 
@@ -10,7 +12,7 @@ Whichever application you use, install winapp2.ini with [winapp2ool.exe](https:/
 
 Winapp2ool is the recommended way to install winapp2.ini for every application on this page, and the only one that also keeps it current afterwards. The procedure is the same everywhere:
 
-1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) and put it in the folder where your application looks for winapp2.ini. Each section below names that folder.
+1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) and put it in the folder where your application looks for winapp2.ini. Each section below names that folder.
 2. Run it, open **Settings**, and use **Change Flavor** until the flavor named in your application's section is shown. It cycles through CCleaner, NonCCleaner, BleachBit, SystemNinja, Tron, CCleaner7, and FluentCleaner. The default is CCleaner. Enable reading and writing settings from/to disk to persist your choice between sessions.
 3. Return to the main menu and choose **Update Winapp2.ini** to install, or **Update & Trim** to install a copy with the entries that do not apply to your machine removed.
 
@@ -69,7 +71,7 @@ Each application has a preferred [flavor](README.md#what-are-flavors) of winapp2
 
 ### Flavor
 
-You should use the [CCleaner flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Winapp2.ini) for ideal integration into the UI and minimized rule overlap, however the base ("Non-CCleaner") [Winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini) will also work
+You should use the [CCleaner flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner.ini) for ideal integration into the UI and minimized rule overlap, however the base ("Non-CCleaner") [Winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini) will also work
 
 ### Installation
 
@@ -103,13 +105,13 @@ CCleaner 7 no longer loads a separate winapp2.ini. Its cleaning definitions live
 
 ### Flavor
 
-You should use the [CCleaner 7 flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/CCleaner7/Winapp2.ini), which CC7Patcher downloads for you by default. You do not need to download or place this file yourself. If you choose to supply your own local copy instead, it must be in the CCleaner 7 format; no other flavor will produce functional entries.
+You should use the [CCleaner 7 flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner7.ini), which CC7Patcher downloads for you by default. You do not need to download or place this file yourself. If you choose to supply your own local copy instead, it must be in the CCleaner 7 format; no other flavor will produce functional entries.
 
 ### Installation
 
 Back up your `ccleaner.ini` before your first run. Patching rewrites the file in place, which reorders its sections and strips its comments.
 
-1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/raw/master/winapp2ool/bin/Release/winapp2ool.exe) and run it
+1. Download [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) and run it
 2. Select **CC7Patcher** from the main menu
 3. Use **Change ccleaner.ini** to point at CCleaner 7's `ccleaner.ini`, by default this is `..\Program Files\Piriform\CCleaner 7`
 4. Optionally enable **Toggle Trim** to install only the entries relevant to your system, which reduces CCleaner's startup time
@@ -143,9 +145,9 @@ All winapp2.ini entries are identified with a `custom-clean.name.` prefix which 
 
 ### Flavor
 
-**BleachBit 5 or earlier:** You should use the [BleachBit flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/BleachBit/Winapp2.ini), which removes registry exclusions not supported by BleachBit before version 6. Using any other flavor will throw a small number of errors and not allow you to run the entries which contain them, but will otherwise function correctly.
+**BleachBit 5 or earlier:** You should use the [BleachBit flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-bleachbit.ini), which removes registry exclusions not supported by BleachBit before version 6. Using any other flavor will throw a small number of errors and not allow you to run the entries which contain them, but will otherwise function correctly.
 
-**BleachBit 6 or newer:** You should use the base [winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)
+**BleachBit 6 or newer:** You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini)
 
 ### Installation
 
@@ -180,7 +182,7 @@ BleachBit will display the set of winapp2.ini entries which it detects as both h
 ###### [Download System Ninja](https://singularlabs.com/software/system-ninja)
 
 ### Flavor
-You should use the [System Ninja Flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/SystemNinja/Winapp2.rules). This flavor is designed to improve compatibility with System Ninja by replacing keys with unsupported features, such that they become functional in System Ninja. It is not advised you use any other flavor with System Ninja.
+You should use the [System Ninja Flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-systemninja.rules). This flavor is designed to improve compatibility with System Ninja by replacing keys with unsupported features, such that they become functional in System Ninja. It is not advised you use any other flavor with System Ninja.
 
 ### Installation
 System Ninja ships with a copy of Winapp2.ini by default, served from their servers, storing it in your `..\System Ninja\scripts\` directory as `winapp2.rules`
@@ -216,7 +218,7 @@ System Ninja does not provide an interface for individually configuring which wi
 
 ### Flavor
 
-You should use the base [winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)
+You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini)
 
 ### Installation
 Avira System Speedup ships with a copy of Winapp2.ini by default, served by Avira, storing it in your `..\Avira\System Speedup\sdf` directory. You can replace or update this local copy without issue or changing any of the Avira System Speedup settings.
@@ -239,7 +241,7 @@ Avira System Speedup scans every winapp2.ini entry and displays the results of t
 
 ### Flavor
 
-You should use the [Tron Flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Tron/Winapp2.ini). This flavor is designed to capture the downstream changes Tron makes to winapp2.ini while still otherwise remaining up-to-date with the latest changes.
+You should use the [Tron Flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-tron.ini). This flavor is designed to capture the downstream changes Tron makes to winapp2.ini while still otherwise remaining up-to-date with the latest changes.
 
 ### Installation
 
@@ -261,7 +263,7 @@ Tron ships with its own configuration. You can modify it by opening the copy of 
 
 ### Flavor
 
-You should use the base [winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)
+You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini)
 
 ### Installation
 
@@ -302,7 +304,7 @@ Configure the imported wipe lists individually just as you would R-Wipe & Clean'
 
 ### Flavor
 
-You should use the base [winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)
+You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini)
 
 ### Installation
 
@@ -331,7 +333,7 @@ This will override the built in HDCleaner entries with your drop-in replacement
 
 ### Flavor
 
-You should use the [FluentCleaner flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/FluentCleaner/Winapp2.ini). This flavor is designed to catch the downstream changes made by FluentCleaner to their winapp2.ini.
+You should use the [FluentCleaner flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-fluentcleaner.ini). This flavor is designed to catch the downstream changes made by FluentCleaner to their winapp2.ini.
 
 ### Installation
 
@@ -355,7 +357,7 @@ Almost all winapp2.ini entries are enabled by default in FluentCleaner when usin
 
 ### Flavor
 
-You should use the base [winapp2.ini](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/master/Non-CCleaner/Winapp2.ini)
+You should use the base [winapp2.ini](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2.ini)
 
 ### Installation
 

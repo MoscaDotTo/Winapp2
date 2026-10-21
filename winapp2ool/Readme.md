@@ -77,7 +77,7 @@ Because the artifacts under [Entries](../Assembler/Entries) are committed to the
 
 # Installation
 
-Download the latest winapp2ool.exe from the [Releases page](https://github.com/MoscaDotTo/Winapp2/releases/) or from the [Release directory](https://github.com/MoscaDotTo/Winapp2/tree/master/winapp2ool/bin/Release) and place it in the folder where you keep (or would like to keep) winapp2.ini.
+Download the latest [winapp2ool.exe](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe) and place it in the folder where you keep (or would like to keep) winapp2.ini.
 
 ### Updates
 

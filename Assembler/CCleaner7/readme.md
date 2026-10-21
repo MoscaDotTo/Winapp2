@@ -2,7 +2,7 @@
 
 ### What is this? 
 
-This folder contains the set of Transmutation rules required by Winapp2ool to produce the [CCleaner 7 flavor](https://raw.githubusercontent.com/MoscaDotTo/Winapp2/refs/heads/master/Non-CCleaner/CCleaner7/Winapp2.ini) of Winapp2.ini 
+This folder contains the set of Transmutation rules required by Winapp2ool to produce the [CCleaner 7 flavor](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2-ccleaner7.ini) of Winapp2.ini 
 
 ### What changes are made to create the CCleaner 7 flavor? 
 

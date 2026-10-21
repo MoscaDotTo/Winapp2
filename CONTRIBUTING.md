@@ -778,7 +778,7 @@ The [generated artifact guard](#what-happens-after-you-open-a-pr) will tell you,
 
 This is entirely optional, and you can open a PR without doing any of it. CI builds your PR and reports back, and a maintainer reviews it either way. 
 
-Everything below requires [winapp2ool](https://github.com/MoscaDotTo/Winapp2/raw/refs/heads/master/winapp2ool/bin/Release/winapp2ool.exe). It is also attached to every [release](https://github.com/MoscaDotTo/Winapp2/releases).
+Everything below requires [winapp2ool](https://github.com/MoscaDotTo/Winapp2/releases/latest/download/winapp2ool.exe).
 
 If you edited a generator's source files, regenerate its output before linting. In every case, finish by running WinappDebug on the file in the last column:
 
