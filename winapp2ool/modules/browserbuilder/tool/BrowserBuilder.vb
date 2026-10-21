@@ -267,6 +267,8 @@ Public Module BrowserBuilder
     ''' <c> UserDataPath= </c> or <c> Section= </c> warns but doesn't skip the browser, and an
     ''' unknown key type warns. <c> TruncateDetect= </c> and <c> Skip= </c> take effect by being
     ''' present, whatever their value. A <c> UserDataPath= </c> value with no backslash throws.
+    ''' A <c> UserDataPath= </c> or <c> RegistryRoot= </c> value holding <c> &lt; </c> or
+    ''' <c> &gt; </c> is skipped and fails the run (see <see cref="holdsBracket"/>).
     ''' </summary>
     '''
     ''' <param name="browserSection">
@@ -280,8 +282,8 @@ Public Module BrowserBuilder
     ''' <returns>
     ''' A <c> BrowserInfo </c> structure containing all parsed browser parameters
     ''' </returns>
-    Private Function parseBrowserInfo(browserSection As iniSection,
-                                ByRef menuOutput As MenuSection) As BrowserInfo
+    Friend Function parseBrowserInfo(browserSection As iniSection,
+                               ByRef menuOutput As MenuSection) As BrowserInfo
 
         Dim browserName As String = browserSection.Name.Substring("BrowserInfo: ".Length)
         Dim browserInfo As New BrowserInfo(browserName)
@@ -292,6 +294,8 @@ Public Module BrowserBuilder
 
                 Case "USERDATAPATH"
 
+                    If holdsBracket(key, browserSection.Name, menuOutput) Then Continue For
+
                     browserInfo.UserDataPaths.Add(key.Value)
                     browserInfo.UserDataParentPaths.Add(key.Value.Substring(0, key.Value.LastIndexOf("\"c)))
 
@@ -301,7 +305,11 @@ Public Module BrowserBuilder
 
                 Case "SKIP" : browserInfo.ShouldSkip = True
 
-                Case "REGISTRYROOT" : browserInfo.RegistryRoots.Add(key.Value)
+                Case "REGISTRYROOT"
+
+                    If holdsBracket(key, browserSection.Name, menuOutput) Then Continue For
+
+                    browserInfo.RegistryRoots.Add(key.Value)
 
                 Case Else
 
@@ -324,6 +332,40 @@ Public Module BrowserBuilder
         gLog(noValidSectionErr, cond:=noSection)
 
         Return browserInfo
+
+    End Function
+
+    ''' <summary>
+    ''' Returns whether a BrowserInfo path value holds <c> &lt; </c> or <c> &gt; </c>. Its
+    ''' value is a literal path, but it lands in a template before
+    ''' <see cref="VariableExpander.Expand"/> runs, where a <c> &lt;a,b&gt; </c> would fan the
+    ''' root out and any other token would drop every FileKey. When it does, we log and show
+    ''' why and fail the run, and the caller skips that one value.
+    ''' </summary>
+    '''
+    ''' <param name="key">
+    ''' The <c> UserDataPath= </c> or <c> RegistryRoot= </c> key
+    ''' </param>
+    '''
+    ''' <param name="browserSectionName">
+    ''' The full name of the BrowserInfo section, used in the message
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> accumulating user-visible output for this run
+    ''' </param>
+    Private Function holdsBracket(key As iniKey,
+                                  browserSectionName As String,
+                                  menuOutput As MenuSection) As Boolean
+
+        If key.Value.IndexOfAny({"<"c, ">"c}) < 0 Then Return False
+
+        Dim skipMsg = $"[{browserSectionName}].{key.Name} holds `<` or `>`, but BrowserInfo values are literal paths and take no tokens; skipping `{key.Name}={key.Value}`"
+        gLog(skipMsg)
+        menuOutput.AddWarning(skipMsg)
+        markRunFailed()
+
+        Return True
 
     End Function
 
@@ -351,6 +393,13 @@ Public Module BrowserBuilder
     ''' Browsers with no <c> RegistryRoot </c> are skipped, with a warning, when the scaffold
     ''' contains a <c> RequiresRegistryRoot </c> key. Key types other than
     ''' <c> FileKeyBase </c>, <c> RegKeyBase </c> and <c> RequiresRegistryRoot </c> warn.
+    ''' <br /><br />
+    '''
+    ''' We check each template once here, before any browser sees it, with
+    ''' <see cref="findTemplateError"/>. A template it refuses (a retired <c> %...% </c> token,
+    ''' an unknown <c> &lt;name&gt; </c> token, a misplaced or missing token) is dropped with a
+    ''' warning and fails the run through <see cref="markRunFailed"/>, and the scaffold's other
+    ''' templates still build.
     ''' </summary>
     '''
     ''' <param name="scaffoldSection">
@@ -372,11 +421,11 @@ Public Module BrowserBuilder
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> accumulating user-visible output for this run
     ''' </param>
-    Private Sub processEntryScaffold(scaffoldSection As iniSection,
-                                     browsers As List(Of BrowserInfo),
-                                     isGecko As Boolean,
-                               ByRef outputFile As iniFile,
-                               ByRef menuOutput As MenuSection)
+    Friend Sub processEntryScaffold(scaffoldSection As iniSection,
+                                    browsers As List(Of BrowserInfo),
+                                    isGecko As Boolean,
+                              ByRef outputFile As iniFile,
+                              ByRef menuOutput As MenuSection)
 
         Dim scaffoldName As String = scaffoldSection.Name.Substring("EntryScaffold: ".Length)
 
@@ -394,9 +443,13 @@ Public Module BrowserBuilder
 
                 Select Case key.KeyType.ToUpperInvariant()
 
-                    Case "FILEKEYBASE" : fileKeyBases.Add(key.Value)
+                    Case "FILEKEYBASE"
 
-                    Case "REGKEYBASE" : regKeyBases.Add(key.Value)
+                        If templateIsUsable(key, False, isGecko, scaffoldSection.Name, menuOutput) Then fileKeyBases.Add(key.Value)
+
+                    Case "REGKEYBASE"
+
+                        If templateIsUsable(key, True, isGecko, scaffoldSection.Name, menuOutput) Then regKeyBases.Add(key.Value)
 
                     Case "REQUIRESREGISTRYROOT" : requiresRegistryRoot = True
 
@@ -432,5 +485,48 @@ Public Module BrowserBuilder
         End Using
 
     End Sub
+
+    ''' <summary>
+    ''' Returns whether a <c> FileKeyBase= </c> or <c> RegKeyBase= </c> template passes
+    ''' <see cref="findTemplateError"/>. When it doesn't, we log and show why, name the dropped
+    ''' key, and fail the run.
+    ''' </summary>
+    '''
+    ''' <param name="key">
+    ''' The template key
+    ''' </param>
+    '''
+    ''' <param name="isRegKey">
+    ''' Indicates whether <paramref name="key"/> is a <c> RegKeyBase= </c>
+    ''' </param>
+    '''
+    ''' <param name="isGecko">
+    ''' Indicates whether the scaffold belongs to the Gecko ruleset
+    ''' </param>
+    '''
+    ''' <param name="scaffoldSectionName">
+    ''' The full name of the scaffold's section, used in the message
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> accumulating user-visible output for this run
+    ''' </param>
+    Private Function templateIsUsable(key As iniKey,
+                                      isRegKey As Boolean,
+                                      isGecko As Boolean,
+                                      scaffoldSectionName As String,
+                                      menuOutput As MenuSection) As Boolean
+
+        Dim templateError = findTemplateError(key.Value, isRegKey, isGecko, $"[{scaffoldSectionName}].{key.Name}")
+        If templateError.Length = 0 Then Return True
+
+        Dim dropMsg = $"{templateError}; dropping `{key.Name}={key.Value}`"
+        gLog(dropMsg)
+        menuOutput.AddWarning(dropMsg)
+        markRunFailed()
+
+        Return False
+
+    End Function
 
 End Module

@@ -31,13 +31,14 @@ Friend Structure BrowserInfo
 
     ''' <summary>
     ''' The set of provided user data (chromium) or profiles (gecko) paths, substituted for
-    ''' <c> %UserDataPath% </c>
+    ''' <c> &lt;UserDataPath&gt; </c>, and with <c> %AppData% </c> changed to
+    ''' <c> %LocalAppData% </c>, for Gecko's <c> &lt;LocalUserDataPath&gt; </c>
     ''' </summary>
     Public UserDataPaths As List(Of String)
 
     ''' <summary>
     ''' The parent of each path in <see cref="UserDataPaths"/> (everything before its last
-    ''' backslash), at the same index. Substituted for <c> %BrowserPath% </c>, and used for
+    ''' backslash), at the same index. Substituted for <c> &lt;UserDataParent&gt; </c>, and used for
     ''' the DetectFile keys when <see cref="TruncateDetect"/> is set.
     ''' </summary>
     Public UserDataParentPaths As List(Of String)
@@ -57,7 +58,7 @@ Friend Structure BrowserInfo
 
     ''' <summary>
     ''' The set of parent paths in the registry for the browser, substituted for
-    ''' <c> %RegistryRoot% </c> to generate RegKeys
+    ''' <c> &lt;RegistryRoot&gt; </c> to generate RegKeys
     ''' </summary>
     Public RegistryRoots As List(Of String)
 

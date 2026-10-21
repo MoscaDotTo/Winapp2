@@ -25,7 +25,7 @@ BrowserBuilder reads two DSL files (`chromium.ini` and `gecko.ini`) from a singl
 4. [Source File Format](#source-file-format)
    - [BrowserInfo Sections](#browserinfo-sections)
    - [EntryScaffold Sections](#entryscaffold-sections)
-   - [Template Variables](#template-variables)
+   - [Template Tokens](#template-tokens)
    - [Special Case: Opera GX](#special-case-opera-gx)
 5. [Post-Generation Flavorizing](#post-generation-flavorizing)
 6. [Output Format](#output-format)
@@ -40,8 +40,8 @@ BrowserBuilder reads two DSL files (`chromium.ini` and `gecko.ini`) from a singl
     - [Example 3: Multiple UserDataPaths](#example-3-multiple-userdatapaths)
     - [Example 4: TruncateDetect](#example-4-truncatedetect)
     - [Example 5: Registry Scaffolds and RequiresRegistryRoot](#example-5-registry-scaffolds-and-requiresregistryroot)
-    - [Example 6: BrowserPath and the ProgramFiles Mirror](#example-6-browserpath-and-the-programfiles-mirror)
-    - [Example 7: LocalDataPath (Gecko)](#example-7-localdatapath-gecko)
+    - [Example 6: UserDataParent and the ProgramFiles Mirror](#example-6-userdataparent-and-the-programfiles-mirror)
+    - [Example 7: LocalUserDataPath (Gecko)](#example-7-localuserdatapath-gecko)
     - [Example 8: Generating Entries for a Portable Browser](#example-8-generating-entries-for-a-portable-browser)
 
 ---
@@ -90,7 +90,7 @@ UserDataPath=%LocalAppData%\BrowserName\User Data
 RegistryRoot=HKCU\Software\BrowserName
 
 [EntryScaffold: Entry Description]
-FileKeyBase=%UserDataPath%\*\Cache|*|REMOVESELF
+FileKeyBase=<UserDataPath>\*\Cache|*|REMOVESELF
 ```
 
 The section type prefixes are **case-sensitive** and must include the space after the colon: exactly `[BrowserInfo: ...]` and `[EntryScaffold: ...]`. A section named `[browserinfo: ...]` or `[BrowserInfo:...]` is ignored as invalid. Key names *within* sections are case-insensitive.
@@ -103,7 +103,7 @@ Each `BrowserInfo` section describes a single browser. The browser name from the
 |:-|:-|:-|
 | `Section=<value>` | The `Section=` value for all entries generated for this browser | Required |
 | `UserDataPath=<path>` | The browser's user data directory | Required; multiple keys allowed for browsers with more than one possible path |
-| `RegistryRoot=<path>` | A registry path root for the browser | Optional; multiple keys allowed; used as `%RegistryRoot%` in `RegKeyBase` templates |
+| `RegistryRoot=<path>` | A registry path root for the browser | Optional; multiple keys allowed; used as `<RegistryRoot>` in `RegKeyBase` templates |
 | `TruncateDetect` | Use the parent of `UserDataPath` for the `DetectFile` instead | No value needed; useful when the path's parent directory contains a version wildcard |
 | `Skip` | Exclude this browser from generation | No value needed; the section is read but no entries are produced |
 
@@ -126,45 +126,86 @@ Each `EntryScaffold` section is a template for one winapp2.ini entry type. The d
 
 | Key | Effect | Notes |
 |:-|:-|:-|
-| `FileKeyBase=<template>` | A FileKey template to generate for each browser | Multiple keys allowed; must contain a [template variable](#template-variables), or the line is silently discarded |
-| `RegKeyBase=<template>` | A RegKey template to generate for each browser | Multiple keys allowed; use `%RegistryRoot%` for browser-specific registry paths |
+| `FileKeyBase=<template>` | A FileKey template to generate for each browser | Multiple keys allowed; must contain exactly one kind of [file token](#template-tokens), or the build fails |
+| `RegKeyBase=<template>` | A RegKey template to generate for each browser | Multiple keys allowed; must contain `<RegistryRoot>`, or the build fails |
 | `RequiresRegistryRoot` | Skip this scaffold for any browser without a `RegistryRoot` | No value needed; prevents generating entries with no working keys |
 
 ### Example
 
 ```ini
 [EntryScaffold: Web Browsing Cookies]
-FileKeyBase=%UserDataPath%\*\Network|Cookies*;Device Bound Sessions*
+FileKeyBase=<UserDataPath>\*\Network|Cookies*;Device Bound Sessions*
 ```
 
 For every `BrowserInfo` section, this scaffold produces an entry named `<browser name> Web Browsing Cookies *` with the corresponding `FileKey` values substituted in.
 
 Any other key in an `EntryScaffold` section produces a warning and is otherwise ignored.
 
-## Template Variables
+## Template Tokens
 
-| Variable | Replaced with | Available in |
+| Token | Replaced with | Available in |
 |:-|:-|:-|
-| `%UserDataPath%` | The browser's user data path from `BrowserInfo` | `FileKeyBase` |
-| `%BrowserPath%` | The parent directory of `UserDataPath` | `FileKeyBase` |
-| `%LocalDataPath%` | `UserDataPath` with `%AppData%` swapped for `%LocalAppData%` | `FileKeyBase` (Gecko only) |
-| `%RegistryRoot%` | A registry root path from `BrowserInfo` | `RegKeyBase` |
+| `<UserDataPath>` | The browser's user data path from `BrowserInfo` | `FileKeyBase` |
+| `<UserDataParent>` | The parent directory of `UserDataPath` | `FileKeyBase` |
+| `<LocalUserDataPath>` | `UserDataPath` with `%AppData%` swapped for `%LocalAppData%` | `FileKeyBase` (Gecko only) |
+| `<RegistryRoot>` | A registry root path from `BrowserInfo` | `RegKeyBase` |
 
-**A `FileKeyBase` which contains none of these variables generates nothing.** There is no warning; the template is silently skipped for every browser. Likewise, `%LocalDataPath%` used in `chromium.ini` is silently skipped. If an expected FileKey is missing from your output, check the template's variable first.
+Tokens match in any case, so `<userdatapath>` works too. These four are the whole vocabulary: unlike EntryBuilder and UWPBuilder, BrowserBuilder has no variable declarations.
 
-### Variable behavior details
+After the tokens are substituted, each value goes through the same `<>` expander the other builders use, with nothing declared. That makes inline lists work: `FileKeyBase=<UserDataPath>\*\<Cache,Code Cache>|*|REMOVESELF` produces one FileKey per value, and a `RegKeyBase` can hold one too.
 
-**`%UserDataPath%`** is substituted directly with the `UserDataPath` value. For browsers with multiple `UserDataPath` keys, one `DetectFile` and one set of FileKeys is generated per path. See [Example 3](#example-3-multiple-userdatapaths).
+### Refused templates
 
-**`%BrowserPath%`** resolves to the parent directory of `UserDataPath`. For Chromium browsers, each `%BrowserPath%` template generates a *second* FileKey with `%LocalAppData%` or `%AppData%` replaced by `%ProgramFiles%`, covering system-wide (All Users) installations. See [Example 6](#example-6-browserpath-and-the-programfiles-mirror). Gecko browsers do not receive the `%ProgramFiles%` mirror.
+BrowserBuilder checks each template once, before any browser sees it. A template that breaks one of these rules is dropped with a warning naming it, and the build fails (exit code 1). The scaffold's other templates still build.
 
-**`%LocalDataPath%`** is a Gecko-only variable that takes `UserDataPath` and replaces `%AppData%` with `%LocalAppData%`, targeting the local (non-roaming) profile data directory. See [Example 7](#example-7-localdatapath-gecko).
+| Template | Warning | Before these checks |
+|:-|:-|:-|
+| A `FileKeyBase` with no file token | `[EntryScaffold: X].FileKeyBase has no file token; a FileKeyBase needs one of <UserDataPath>, <UserDataParent> or <LocalUserDataPath>` | Silently skipped for every browser |
+| A `FileKeyBase` with two kinds of file token | ``[EntryScaffold: X].FileKeyBase mixes `<UserDataParent>` and `<UserDataPath>`; a FileKeyBase takes one kind of file token`` | One token was substituted (the user data path ahead of the parent, the parent ahead of the local path) and the other shipped as literal text |
+| `<LocalUserDataPath>` in `chromium.ini` | `[EntryScaffold: X].FileKeyBase uses <LocalUserDataPath>, which only Gecko browsers have` | Silently skipped for every browser |
+| `<RegistryRoot>` in a `FileKeyBase` | `[EntryScaffold: X].FileKeyBase uses <RegistryRoot>, which only a RegKeyBase takes` | Shipped as literal text beside a file token, or skipped without one |
+| A file token in a `RegKeyBase` | ``[EntryScaffold: X].RegKeyBase uses the file token `<UserDataPath>`; a RegKeyBase takes only <RegistryRoot>`` | Shipped as literal text, once per root |
+| A `RegKeyBase` without `<RegistryRoot>` | `[EntryScaffold: X].RegKeyBase has no <RegistryRoot> token` | Emitted unchanged, once per root |
+| Any other `<Name>` token, such as a misspelling | ``Unknown token `<Typo>` in [EntryScaffold: X].FileKeyBase; BrowserBuilder recognizes <UserDataPath>, <UserDataParent>, <LocalUserDataPath> and <RegistryRoot>`` | A misspelled `%...%` token shipped as literal text, except in a `FileKeyBase` with no other token, which was skipped |
+| An inline list with no values, such as `<,>` | ``Inline list `<,>` in [EntryScaffold: X].FileKeyBase has no values`` | New with inline lists. Without the check it drops for every browser and the run still succeeds. A list with at least one value (`<Cache,>`) is fine: the empty one is dropped |
+| An empty, stray or nested bracket: `<>`, `<UserDataPath>>`, `<<UserDataPath>,z>` | ``Malformed `<...>` token in [EntryScaffold: X].FileKeyBase; a token is one <Name> or one <a,b> list, not empty or nested`` | New with the `<Name>` grammar. Without the check the bracket ships as text, and a nested list ships its other value as the path |
 
-**`%RegistryRoot%`** is substituted in `RegKeyBase` templates. One `RegKey` is generated per `RegistryRoot` key per `RegKeyBase` template. See [Example 5](#example-5-registry-scaffolds-and-requiresregistryroot).
+Each warning ends with ``; dropping `FileKeyBase=...` `` or ``; dropping `RegKeyBase=...` ``, naming the whole key.
+
+### BrowserInfo values
+
+`UserDataPath=` and `RegistryRoot=` values are literal paths and take no tokens. A value holding `<` or `>` is skipped with a warning, and the build fails; the browser's other values still build:
+
+```
+[BrowserInfo: Chrome].UserDataPath holds `<` or `>`, but BrowserInfo values are literal paths and take no tokens; skipping `UserDataPath=%LocalAppData%\<Foo>\User Data`
+```
+
+Without the check such a value would land in each template ahead of the inline-list pass, so `RegistryRoot=HKCU\Software\<a,b>` would fan out into two roots and `<Foo>` in a `UserDataPath` would drop every FileKey.
+
+### Retired spelling
+
+Older versions of winapp2ool spelled these tokens `%UserDataPath%`, `%BrowserPath%`, `%LocalDataPath%` and `%RegistryRoot%`. `%X%` is how winapp2.ini writes environment variables, so a mistyped token looked like a real path. The old spelling is now refused like the templates above, with a warning naming the new one. Two tokens were renamed, not only respelled: `%BrowserPath%` is the folder above the user data folder, not the install folder, so it is now `<UserDataParent>`, and `%LocalDataPath%` is now `<LocalUserDataPath>`. A token with its closing `%` missing is caught too:
+
+```
+`%BrowserPath%` in [EntryScaffold: Logs].FileKeyBase is now spelled `<UserDataParent>`; dropping `FileKeyBase=%BrowserPath%\Application|debug.log`
+`%BrowserPath` in [EntryScaffold: Logs].FileKeyBase looks like the retired `%BrowserPath%` token, which is now spelled `<UserDataParent>`; dropping `FileKeyBase=%BrowserPath\Application|debug.log`
+```
+
+`BrowserInfo` values aren't checked for the retired spellings: they are literal paths, and one holding `<` or `>` is refused [on its own](#browserinfo-values).
+
+### Token behavior details
+
+**`<UserDataPath>`** is substituted directly with the `UserDataPath` value. For browsers with multiple `UserDataPath` keys, one `DetectFile` and one set of FileKeys is generated per path. See [Example 3](#example-3-multiple-userdatapaths).
+
+**`<UserDataParent>`** resolves to the parent directory of `UserDataPath`. For Chromium browsers, each `<UserDataParent>` template generates a *second* FileKey with `%LocalAppData%` or `%AppData%` replaced by `%ProgramFiles%`, covering system-wide (All Users) installations. See [Example 6](#example-6-userdataparent-and-the-programfiles-mirror). Gecko browsers do not receive the `%ProgramFiles%` mirror.
+
+**`<LocalUserDataPath>`** is a Gecko-only token that takes `UserDataPath` and replaces `%AppData%` with `%LocalAppData%`, targeting the local (non-roaming) profile data directory. See [Example 7](#example-7-localuserdatapath-gecko).
+
+**`<RegistryRoot>`** is substituted in `RegKeyBase` templates. One `RegKey` is generated per `RegistryRoot` key per `RegKeyBase` template. See [Example 5](#example-5-registry-scaffolds-and-requiresregistryroot).
 
 ## Special Case: Opera GX
 
-Opera GX stores profile data directly in its user data directory and keeps additional profiles under `_side_profiles\*` rather than the usual `Default`/`Profile 1` folders. BrowserBuilder recognizes the browser name `Opera GX` and rewrites every `%UserDataPath%` template into two FileKeys: one against the user data directory itself and one against `_side_profiles\*`. If you diff the generated output, Opera GX entries will structurally differ from every other Chromium browser's; this is intentional.
+Opera GX stores profile data directly in its user data directory and keeps additional profiles under `_side_profiles\*` rather than the usual `Default`/`Profile 1` folders. BrowserBuilder recognizes the browser name `Opera GX` and rewrites every `<UserDataPath>` template into two FileKeys: one against the user data directory itself and one against `_side_profiles\*`. If you diff the generated output, Opera GX entries will structurally differ from every other Chromium browser's; this is intentional.
 
 ---
 
@@ -196,7 +237,7 @@ The output file (`browsers.ini` by default) contains standard winapp2.ini format
 - A section header in the form `[<browser name> <scaffold name> *]`
 - A `Section=` key from the browser's `BrowserInfo`
 - `DetectFile=` (or numbered `DetectFile1=`, `DetectFile2=` for multiple paths) pointing to the `UserDataPath` (or its parent, if `TruncateDetect` is set)
-- Numbered `FileKey` and `RegKey` entries from the scaffold templates with variables substituted
+- Numbered `FileKey` and `RegKey` entries from the scaffold templates with tokens substituted
 
 Before saving, the entire output is run through **WinappDebug** with full optimizations forced: entries are alphabetized, keys are placed in standard winapp2.ini order, key numbering is normalized, and parameter lists are alphabetized. 
 
@@ -269,7 +310,8 @@ Use `TruncateDetect` when `UserDataPath` contains a wildcard in its direct paren
 | Warning: "Skipping [browser] for [scaffold]: scaffold requires RegistryRoot" | The scaffold declares `RequiresRegistryRoot` and the browser has no `RegistryRoot` key; no entry is generated for that pairing |
 | A browser is missing from the output entirely | It may have `Skip` set; check its `BrowserInfo` section |
 | One entry is missing for one browser | Likely a `RequiresRegistryRoot` scaffold and a browser without a `RegistryRoot` |
-| A scaffold key is missing from every entry | The `FileKeyBase` contains no template variable (or uses `%LocalDataPath%` in `chromium.ini`) and was silently discarded |
+| A scaffold key is missing from every entry, and the build failed | The template was [refused](#refused-templates); the warning names it and the reason |
+| A browser lost a path or registry root, and the build failed | The `BrowserInfo` value held `<` or `>` and was [skipped](#browserinfo-values) |
 | Flavor corrections aren't being applied | The flavor file's name doesn't exactly match its fixed name, or it isn't in the source directory. Missing files are skipped silently |
 | Generated entries are incomplete or wrong | Flavor files correct coverage issues; ensure the appropriate flavor files are present in the source directory |
 
@@ -300,7 +342,7 @@ UserDataPath=%LocalAppData%\Chromium\User Data
 RegistryRoot=HKCU\Software\Chromium
 
 [EntryScaffold: Bookmark Backups]
-FileKeyBase=%UserDataPath%\*|Bookmarks.bak
+FileKeyBase=<UserDataPath>\*|Bookmarks.bak
 ```
 
 **Command**
@@ -325,7 +367,7 @@ FileKey1=%LocalAppData%\Chromium\User Data\*|Bookmarks.bak
 - The entry name is the browser name + the scaffold name + ` *`: `Chromium` + `Bookmark Backups` → `[Chromium Bookmark Backups *]`
 - `Section=` is copied from the `BrowserInfo`
 - `DetectFile=` is the browser's `UserDataPath`
-- The `FileKeyBase` template becomes `FileKey1` with `%UserDataPath%` substituted
+- The `FileKeyBase` template becomes `FileKey1` with `<UserDataPath>` substituted
 - The `RegistryRoot` key goes unused here. This scaffold has no `RegKeyBase` templates
 
 ---
@@ -356,10 +398,10 @@ UserDataPath=%LocalAppData%\Chromium\User Data
 RegistryRoot=HKCU\Software\Chromium
 
 [EntryScaffold: Autoplay Preferences]
-FileKeyBase=%UserDataPath%\MEIPreload|*|REMOVESELF
+FileKeyBase=<UserDataPath>\MEIPreload|*|REMOVESELF
 
 [EntryScaffold: Bookmark Backups]
-FileKeyBase=%UserDataPath%\*|Bookmarks.bak
+FileKeyBase=<UserDataPath>\*|Bookmarks.bak
 ```
 
 **Command**
@@ -421,7 +463,7 @@ UserDataPath=%AppData%\Mozilla\Firefox\Profiles
 UserDataPath=%LocalAppData%\Packages\Mozilla.Firefox_n80bbvh6b1yt2\LocalCache\Roaming\Mozilla\Firefox\Profiles
 
 [EntryScaffold: Autocomplete History]
-FileKeyBase=%UserDataPath%\*|formhistory*
+FileKeyBase=<UserDataPath>\*|formhistory*
 ```
 
 **Command**
@@ -474,7 +516,7 @@ RegistryRoot=HKCU\Software\BraveSoftware\Brave-Browser-Beta
 RegistryRoot=HKCU\Software\BraveSoftware\Brave-Browser-Nightly
 
 [EntryScaffold: Bookmark Backups]
-FileKeyBase=%UserDataPath%\*|Bookmarks.bak
+FileKeyBase=<UserDataPath>\*|Bookmarks.bak
 ```
 
 **Command**
@@ -529,7 +571,7 @@ RegistryRoot=HKCU\Software\BraveSoftware\Brave-Browser-Nightly
 
 [EntryScaffold: Pinned Tabs]
 RequiresRegistryRoot=True
-RegKeyBase=%RegistryRoot%\PreferenceMACs\Default|pinned_tabs
+RegKeyBase=<RegistryRoot>\PreferenceMACs\Default|pinned_tabs
 ```
 
 **Command**
@@ -564,7 +606,7 @@ Skipping Arc for Pinned Tabs: scaffold requires RegistryRoot
 
 ---
 
-## Example 6: BrowserPath and the ProgramFiles Mirror
+## Example 6: UserDataParent and the ProgramFiles Mirror
 
 **Context**
 
@@ -585,8 +627,8 @@ UserDataPath=%LocalAppData%\Chromium\User Data
 RegistryRoot=HKCU\Software\Chromium
 
 [EntryScaffold: Telemetry]
-FileKeyBase=%BrowserPath%\Application|debug.log
-FileKeyBase=%BrowserPath%\Application\SetupMetrics|*|REMOVESELF
+FileKeyBase=<UserDataParent>\Application|debug.log
+FileKeyBase=<UserDataParent>\Application\SetupMetrics|*|REMOVESELF
 ```
 
 **Command**
@@ -612,13 +654,13 @@ FileKey21=%ProgramFiles%\Chromium\Application\SetupMetrics|*|REMOVESELF
 
 **Explanation**
 
-- `%BrowserPath%` is the parent of `UserDataPath`. Here: `%LocalAppData%\Chromium`
-- Each `%BrowserPath%` template produced two `FileKeys`: the substituted path, and a mirror with the user-profile variable swapped for `%ProgramFiles%`
+- `<UserDataParent>` is the parent of `UserDataPath`. Here: `%LocalAppData%\Chromium`
+- Each `<UserDataParent>` template produced two `FileKeys`: the substituted path, and a mirror with the user-profile variable swapped for `%ProgramFiles%`
 - The mirror is Chromium-only; Gecko browsers get just the direct substitution
 
 ---
 
-## Example 7: LocalDataPath (Gecko)
+## Example 7: LocalUserDataPath (Gecko)
 
 **Context**
 
@@ -638,15 +680,15 @@ Section=Waterfox Web Browser
 UserDataPath=%AppData%\Waterfox\Profiles
 
 [EntryScaffold: Caches]
-FileKeyBase=%LocalDataPath%\*\*cache*|*|REMOVESELF
-FileKeyBase=%LocalDataPath%\*\chrome_debugger_profile|*|REMOVESELF
-FileKeyBase=%LocalDataPath%\*\thumbnails|*|REMOVESELF
-FileKeyBase=%UserDataPath%\*|*.corrupt|RECURSE
-FileKeyBase=%UserDataPath%\*|AlternateServices.txt;notificationstore.json;parent.lock;serviceworker.txt;webappsstore.sqlite;cert9.db;ClientAuthRememberList.txt;SiteSecurityServiceState*
-FileKeyBase=%UserDataPath%\*\notificationstore|*
-FileKeyBase=%UserDataPath%\*\security_state|*
-FileKeyBase=%UserDataPath%\*\shader-cache|*
-FileKeyBase=%UserDataPath%\*\storage\temporary|*|RECURSE
+FileKeyBase=<LocalUserDataPath>\*\*cache*|*|REMOVESELF
+FileKeyBase=<LocalUserDataPath>\*\chrome_debugger_profile|*|REMOVESELF
+FileKeyBase=<LocalUserDataPath>\*\thumbnails|*|REMOVESELF
+FileKeyBase=<UserDataPath>\*|*.corrupt|RECURSE
+FileKeyBase=<UserDataPath>\*|AlternateServices.txt;notificationstore.json;parent.lock;serviceworker.txt;webappsstore.sqlite;cert9.db;ClientAuthRememberList.txt;SiteSecurityServiceState*
+FileKeyBase=<UserDataPath>\*\notificationstore|*
+FileKeyBase=<UserDataPath>\*\security_state|*
+FileKeyBase=<UserDataPath>\*\shader-cache|*
+FileKeyBase=<UserDataPath>\*\storage\temporary|*|RECURSE
 ```
 
 **Command**
@@ -676,7 +718,7 @@ FileKey9=%LocalAppData%\Waterfox\Profiles\*\thumbnails|*|REMOVESELF
 
 **Explanation**
 
-- `%LocalDataPath%` took the declared `UserDataPath` and swapped `%AppData%` → `%LocalAppData%`, producing FileKey7-9
+- `<LocalUserDataPath>` took the declared `UserDataPath` and swapped `%AppData%` → `%LocalAppData%`, producing FileKey7-9
 - The `DetectFile` still only points at the roaming path
 - The keys and their parameters have been reordered relative to their templates as a result of BrowserBuilder running its output through WinappDebug
 
@@ -702,10 +744,10 @@ Section=Chrome Portable Web Browser
 UserDataPath=D:\PortableApps\GoogleChromePortable\Data\profile
 
 [EntryScaffold: Web Browsing History]
-FileKeyBase=%UserDataPath%\*|History*;Visited Links*;Top Sites*;Network Action Predictor*;shortcuts*
+FileKeyBase=<UserDataPath>\*|History*;Visited Links*;Top Sites*;Network Action Predictor*;shortcuts*
 
 [EntryScaffold: Web Browsing Cookies]
-FileKeyBase=%UserDataPath%\*\Network|Cookies*;Device Bound Sessions*
+FileKeyBase=<UserDataPath>\*\Network|Cookies*;Device Bound Sessions*
 ```
 
 **Commands**
@@ -742,6 +784,6 @@ Two steps are chained:
 
 ###### Notes
 
-- Template variables accept absolute paths and also environment variables
+- `UserDataPath` and `RegistryRoot` values accept absolute paths and also environment variables
 - Because your additions live in the ruleset, you can regenerate and re-merge after each winapp2.ini update
 

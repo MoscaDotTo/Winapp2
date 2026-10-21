@@ -119,4 +119,70 @@ Option Strict On
 
     End Sub
 
+    ' ----- Renamed tokens -----
+
+    ''' <summary>A rename mapping like BrowserBuilder's, where one token also changed its name</summary>
+    Private Shared ReadOnly Renames As KeyValuePair(Of String, String)() = {
+        New KeyValuePair(Of String, String)("%UserDataPath", "UserDataPath"),
+        New KeyValuePair(Of String, String)("%BrowserPath", "UserDataParent")
+    }
+
+    ''' <summary>
+    ''' A renamed token is told its new name, not a respelling of its old one
+    ''' </summary>
+    <TestMethod()> Public Sub RenamedToken_NamesNewName()
+
+        Assert.AreEqual("`%BrowserPath%` in ctx is now spelled `<UserDataParent>`",
+                        winapp2ool.RetiredTokens.FindRetiredToken("%BrowserPath%\Application|debug.log", Renames, "ctx"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A renamed token with its closing <c> % </c> missing gets the hint with the new name
+    ''' </summary>
+    <TestMethod()> Public Sub RenamedToken_Unclosed_NamesNewName()
+
+        Assert.AreEqual("`%BrowserPath` in ctx looks like the retired `%BrowserPath%` token, which is now spelled `<UserDataParent>`",
+                        winapp2ool.RetiredTokens.FindRetiredToken("%BrowserPath\Application|x", Renames, "ctx"))
+
+    End Sub
+
+    ''' <summary>
+    ''' Extra letters after a renamed stem get the generic hint with the new name
+    ''' </summary>
+    <TestMethod()> Public Sub RenamedToken_ExtraLetters_NamesNewName()
+
+        Assert.AreEqual("`%BrowserPaths%` in ctx looks like the retired `%BrowserPath%` token, which is now spelled `<UserDataParent>`",
+                        winapp2ool.RetiredTokens.FindRetiredToken("%BrowserPaths%\x|*", Renames, "ctx"))
+
+    End Sub
+
+    ''' <summary>
+    ''' When the new tokens take no index, a numbered token gets the generic hint instead of
+    ''' an indexed spelling, closed or not
+    ''' </summary>
+    <TestMethod()> Public Sub NumberedToken_NotIndexable_GetsGenericHint()
+
+        Assert.AreEqual("`%BrowserPath2%` in ctx looks like the retired `%BrowserPath%` token, which is now spelled `<UserDataParent>`",
+                        winapp2ool.RetiredTokens.FindRetiredToken("%BrowserPath2%\x|*", Renames, "ctx", indexable:=False))
+        Assert.AreEqual("`%BrowserPath2` in ctx looks like the retired `%BrowserPath%` token, which is now spelled `<UserDataParent>`",
+                        winapp2ool.RetiredTokens.FindRetiredToken("%BrowserPath2\x|*", Renames, "ctx", indexable:=False))
+        Assert.AreEqual("`%BrowserPath2%` in ctx is now spelled `<UserDataParent[2]>`",
+                        winapp2ool.RetiredTokens.FindRetiredToken("%BrowserPath2%\x|*", Renames, "ctx"))
+
+    End Sub
+
+    ''' <summary>
+    ''' Matching a renamed stem ignores case, and an unrenamed entry in the same mapping keeps its name
+    ''' </summary>
+    <TestMethod()> Public Sub RenameMapping_IgnoresCase_AndKeepsIdentityEntries()
+
+        Assert.AreEqual("`%browserpath%` in ctx is now spelled `<UserDataParent>`",
+                        winapp2ool.RetiredTokens.FindRetiredToken("%browserpath%\x|*", Renames, "ctx"))
+        Assert.AreEqual("`%UserDataPath%` in ctx is now spelled `<UserDataPath>`",
+                        winapp2ool.RetiredTokens.FindRetiredToken("%UserDataPath%\*|*", Renames, "ctx"))
+        Assert.AreEqual("", winapp2ool.RetiredTokens.FindRetiredToken("<UserDataParent>\x|*", Renames, "ctx"))
+
+    End Sub
+
 End Class

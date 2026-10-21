@@ -434,7 +434,7 @@ DetectFile=%LocalAppData%\BraveSoftware\Brave-Browser*
 
 Gecko's `gecko.ini` supports an additional inferred variable in `EntryScaffold` patterns:
 
-- `%LocalDataPath%`: Gecko profile user data is stored in a folder located within `%AppData%`. Cache data is stored in a folder by the same name in `%LocalAppData%`. The `%LocalAppData%` path is inferred from `%UserDataPath%`.  
+- `<LocalUserDataPath>`: Gecko profile user data is stored in a folder located within `%AppData%`. Cache data is stored in a folder by the same name in `%LocalAppData%`. The `%LocalAppData%` path is inferred from `<UserDataPath>`. A Chromium (`chromium.ini`) template that uses it fails the build.  
 
 This is handled automatically and requires no action from contributors adding a Gecko browser.
 
@@ -493,22 +493,30 @@ Every `EntryScaffold` section name must follow the format `[EntryScaffold: Categ
 
 | Key | Purpose |
 | :- | :- |
-| `FileKeyBase=` | A FileKey template. BrowserBuilder substitutes browser-specific variables and adds the result as a numbered `FileKey` in the generated entry. Multiple values are supported; list them as separate keys. |
-| `RegKeyBase=` | A RegKey template. BrowserBuilder substitutes `%RegistryRoot%` and adds the result as a numbered `RegKey`. Multiple values are supported. |
+| `FileKeyBase=` | A FileKey template holding exactly one kind of file token (`<UserDataPath>`, `<UserDataParent>` or `<LocalUserDataPath>`). BrowserBuilder substitutes it and adds the result as a numbered `FileKey` in the generated entry. Multiple values are supported; list them as separate keys. |
+| `RegKeyBase=` | A RegKey template, which must hold `<RegistryRoot>`. BrowserBuilder substitutes it and adds the result as a numbered `RegKey`, once per root. Multiple values are supported. |
 | `RequiresRegistryRoot=` | BrowserBuilder skips this scaffold for any browser without a `RegistryRoot=` key. |
 
 A scaffold with neither `FileKeyBase=` nor `RegKeyBase=` produces no output.
 
-**Variables**
+**Tokens**
 
-Each template variable resolves to a value from the browser's `BrowserInfo` section.
+Each token resolves to a value from the browser's `BrowserInfo` section. Tokens match in any case. These four are the whole vocabulary: a scaffold can't declare its own.
 
-| Variable | Available in | Expands to |
+| Token | Available in | Expands to |
 | :- | :- | :- |
-| `%UserDataPath%` | `FileKeyBase` | The browser's user data directory, as declared by `UserDataPath=` in its `BrowserInfo` section. |
-| `%BrowserPath%` | `FileKeyBase` | The parent directory of `%UserDataPath%`. For Chromium browsers, also generates a second FileKey with the path mirrored under `%ProgramFiles%`. |
-| `%LocalDataPath%` | `FileKeyBase` (Gecko only) | The cache directory inferred from `%UserDataPath%` by substituting `%LocalAppData%` for `%AppData%`. |
-| `%RegistryRoot%` | `RegKeyBase` | The browser's registry root path, as declared by `RegistryRoot=` in its `BrowserInfo` section. Expands once per `RegistryRoot=` value, producing one `RegKey` per root. |
+| `<UserDataPath>` | `FileKeyBase` | The browser's user data directory, as declared by `UserDataPath=` in its `BrowserInfo` section. |
+| `<UserDataParent>` | `FileKeyBase` | The parent directory of `<UserDataPath>`. For Chromium browsers, also generates a second FileKey with the path mirrored under `%ProgramFiles%`. |
+| `<LocalUserDataPath>` | `FileKeyBase` (Gecko only) | The cache directory inferred from `<UserDataPath>` by substituting `%LocalAppData%` for `%AppData%`. |
+| `<RegistryRoot>` | `RegKeyBase` | The browser's registry root path, as declared by `RegistryRoot=` in its `BrowserInfo` section. Expands once per `RegistryRoot=` value, producing one `RegKey` per root. |
+
+A template may also hold an inline list, such as `<UserDataPath>\*\<Cache,Code Cache>|*|REMOVESELF`, which produces one key per value.
+
+The build fails, naming the template, when a `FileKeyBase=` has no file token, mixes two kinds of file token, or uses `<RegistryRoot>`; when a `RegKeyBase=` has no `<RegistryRoot>` or uses a file token; when a Chromium template uses `<LocalUserDataPath>`; when any other `<Name>` token appears; when an inline list has no values (`<,>`); and when a bracket is empty, stray or nested (`<>`, `<UserDataPath>>`, `<<UserDataPath>,z>`). That template is dropped, and the rest of the scaffold still builds.
+
+`UserDataPath=` and `RegistryRoot=` values in a `BrowserInfo` section are literal paths. One holding `<` or `>` is skipped with a warning, and the build fails.
+
+Older versions of winapp2ool spelled these tokens `%UserDataPath%`, `%BrowserPath%`, `%LocalDataPath%` and `%RegistryRoot%`. That spelling is no longer accepted: a template that uses it is dropped with a warning naming the new spelling, and the build fails. Two were renamed as well: `%BrowserPath%` is now `<UserDataParent>`, since it is the folder above the user data folder rather than the browser's install folder, and `%LocalDataPath%` is now `<LocalUserDataPath>`.
 
 **Example**
 
@@ -520,16 +528,18 @@ RegistryRoot=HKCU\Software\ExampleBrowser
 
 
 [EntryScaffold: Example Category]
-FileKeyBase=%UserDataPath%\*\ExampleData|*|REMOVESELF
-FileKeyBase=%BrowserPath%\Application|example.log
-RegKeyBase=%RegistryRoot%\ExampleKey
+FileKeyBase=<UserDataPath>\*\ExampleData|*|REMOVESELF
+FileKeyBase=<UserDataParent>\Application|example.log
+RegKeyBase=<RegistryRoot>\ExampleKey
 ```
 
 ```ini
 [Example Browser Example Category *]
 Section=Example Web Browser
-FileKey1=%AppData%\Example Browser\User Data\ExampleData|*|REMOVESELF
-FileKey2=%AppData%\Example Browser\Application|example.log
+DetectFile=%AppData%\Example Browser\User Data
+FileKey1=%AppData%\Example Browser\Application|example.log
+FileKey2=%AppData%\Example Browser\User Data\*\ExampleData|*|REMOVESELF
+FileKey3=%ProgramFiles%\Example Browser\Application|example.log
 RegKey1=HKCU\Software\ExampleBrowser\ExampleKey
 ```
 ---

@@ -84,6 +84,7 @@
     <Import Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BrowserBuilderTests.vb" />
     <Compile Include="DiffKeyComparisonTests.vb" />
     <Compile Include="DiffPipelineTests.vb" />
     <Compile Include="EntryBuilderTests.vb" />
