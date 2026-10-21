@@ -179,6 +179,7 @@
     <Compile Include="handlers\menus\TerminalCapabilities.vb" />
     <Compile Include="handlers\scaffolds\ScaffoldCatalogs.vb" />
     <Compile Include="handlers\scaffolds\ScaffoldCatalogSet.vb" />
+    <Compile Include="handlers\expansion\RetiredTokens.vb" />
     <Compile Include="handlers\expansion\VariableExpander.vb" />
     <Compile Include="helpers\elevation\ElevationHelper.vb" />
     <Compile Include="helpers\registry\RegistryHelper.vb" />

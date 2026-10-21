@@ -21,9 +21,10 @@ Imports System.Text
 
 ''' <summary>
 ''' Tests for UWPBuilder's integration of the shared <c> VariableExpander </c> substrate:
-''' the three-phase expansion order (<c> %Package% </c> → root placeholder →
-''' <c> &lt;var&gt; </c>), per-key-class domain classification, the open-vocabulary parser
-''' and its typo backstops, and the vocabulary shared with EntryBuilder. Also covers the
+''' the two-phase expansion order (root placeholder → <c> &lt;var&gt; </c>), the reserved
+''' <c> &lt;Package&gt; </c> variable and its indexes, the refusal of the retired
+''' <c> %Package% </c> spelling, per-key-class domain classification, the open-vocabulary
+''' parser and its typo backstops, and the vocabulary shared with EntryBuilder. Also covers the
 ''' Electron family's two roots and QtWebEngine's cache root. The expansion engine itself is
 ''' covered by <see cref="VariableExpanderTests"/>; these tests cover the wiring.
 ''' </summary>
@@ -133,6 +134,53 @@ Imports System.Text
     End Function
 
     ''' <summary>
+    ''' Parses the first section of <paramref name="text"/> as an AppInfo section and generates its
+    ''' entry with no scaffolds, keeping the log
+    ''' </summary>
+    '''
+    ''' <param name="text">Literal ini text for one AppInfo section</param>
+    '''
+    ''' <param name="log">Set to every line parsing and generation wrote to the log</param>
+    Private Shared Function BuildLogged(text As String, ByRef log As List(Of String)) As winapp2ool.iniSection
+
+        Dim menu As New winapp2ool.MenuSection
+        Using cap = winapp2ool.gLogCapture()
+
+            Dim app = winapp2ool.UWPBuilder.parseAppInfo(FirstSection(text), menu)
+            Dim section = winapp2ool.UWPBuilder.generateUWPEntry(app, New List(Of String), New List(Of String),
+                                                                 New winapp2ool.ScaffoldCatalogSet, menu)
+            log = cap.Lines.ToList()
+            Return section
+
+        End Using
+
+    End Function
+
+    ''' <summary>
+    ''' Runs <paramref name="action"/> from a zero exit code and returns the exit code it leaves,
+    ''' restoring the previous one afterwards
+    ''' </summary>
+    '''
+    ''' <param name="action">The work to run</param>
+    Private Shared Function ExitCodeAfter(action As Action) As Integer
+
+        Dim savedExitCode = Environment.ExitCode
+
+        Try
+
+            Environment.ExitCode = 0
+            action()
+            Return Environment.ExitCode
+
+        Finally
+
+            Environment.ExitCode = savedExitCode
+
+        End Try
+
+    End Function
+
+    ''' <summary>
     ''' Copies the entries of a plain dictionary into one family's catalog inside a
     ''' <c> ScaffoldCatalogSet </c>, so tests can keep expressing catalogs as literals. The
     ''' template lists are shared, not copied.
@@ -175,6 +223,244 @@ Imports System.Text
     Private Const Preamble As String = "[Test App *]" & vbCrLf &
                                        "Package=Hazel.App_abc123" & vbCrLf &
                                        "LangSecRef=3021" & vbCrLf
+
+    ''' <summary>
+    ''' AppInfo preamble declaring two packages, so tests can tell the packages apart
+    ''' </summary>
+    Private Const TwoPackages As String = "[Test App *]" & vbCrLf &
+                                          "Package1=Hazel.One_abc123" & vbCrLf &
+                                          "Package2=Hazel.Two_abc123" & vbCrLf &
+                                          "LangSecRef=3021" & vbCrLf
+
+    ' ----- The Package variable -----
+
+    ''' <summary>
+    ''' <c> &lt;Package&gt; </c> fans a key out once per package, in declaration order
+    ''' </summary>
+    <TestMethod()> Public Sub Package_FansOutOverAllPackages()
+
+        Dim section = Build(TwoPackages & "FileKey=<Package>\LocalState|*.log" & vbCrLf)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\Packages\Hazel.One_abc123\LocalState|*.log",
+                                      "%LocalAppData%\Packages\Hazel.Two_abc123\LocalState|*.log"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' <c> &lt;Package[2]&gt; </c> picks the second package declared
+    ''' </summary>
+    <TestMethod()> Public Sub PackageIndex_PicksThatPackage()
+
+        Dim section = Build(TwoPackages & "FileKey=<Package[2]>\LocalState|*.log" & vbCrLf)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\Packages\Hazel.Two_abc123\LocalState|*.log"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' An index past the package count drops the key with a warning, where the old
+    ''' <c> %Package3% </c> passed through as a junk path
+    ''' </summary>
+    <TestMethod()> Public Sub PackageIndex_PastTheEnd_WarnsAndDrops()
+
+        Dim log As List(Of String) = Nothing
+        Dim section = BuildLogged(TwoPackages & "FileKey=<Package[3]>\LocalState|*.log" & vbCrLf, log)
+
+        Assert.AreEqual(0, ValuesOf(section, "FileKey").Count)
+        Assert.IsTrue(log.Any(Function(l) l.Contains("<Package[3]> is out of range (2 values)")),
+                      "Expected an out-of-range warning, got: " & String.Join("; ", log))
+
+    End Sub
+
+    ''' <summary>
+    ''' A <c> Package= </c> value holding an inline list stays one package, so the indexes after
+    ''' it don't shift
+    ''' </summary>
+    <TestMethod()> Public Sub PackageWithInlineList_IsNotFannedOut()
+
+        Dim app = ParseApp("[Test App *]" & vbCrLf &
+                           "Package1=Contoso.<a,b>_abc123" & vbCrLf &
+                           "Package2=Hazel.Two_abc123" & vbCrLf &
+                           "LangSecRef=3021" & vbCrLf, Nothing)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\Packages\Contoso.<a,b>_abc123",
+                                      "%LocalAppData%\Packages\Hazel.Two_abc123"},
+            app.Variables.Values("Package"))
+
+        Dim section = Build("[Test App *]" & vbCrLf &
+                            "Package1=Contoso.<a,b>_abc123" & vbCrLf &
+                            "Package2=Hazel.Two_abc123" & vbCrLf &
+                            "LangSecRef=3021" & vbCrLf &
+                            "FileKey=<Package[2]>\LocalState|*.log" & vbCrLf)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {"%LocalAppData%\Packages\Hazel.Two_abc123\LocalState|*.log"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A root declared as <c> &lt;Package&gt;\... </c> yields one scaffold FileKey per package
+    ''' </summary>
+    <TestMethod()> Public Sub PackageInRoot_YieldsScaffoldFileKeysPerPackage()
+
+        Dim catalog As New Dictionary(Of String, List(Of String)) From {
+            {"Caches", New List(Of String) From {"%WebViewRoot%\*\Cache|*|RECURSE"}}
+        }
+
+        Dim section = Build(TwoPackages &
+                            "WebViewRoot=<Package>\LocalState\EBWebView" & vbCrLf &
+                            "WebViewScaffolds=Caches" & vbCrLf,
+                            webViewCatalog:=catalog)
+
+        CollectionAssert.AreEqual(
+            New List(Of String) From {
+                "%LocalAppData%\Packages\Hazel.One_abc123\LocalState\EBWebView\*\Cache|*|RECURSE",
+                "%LocalAppData%\Packages\Hazel.Two_abc123\LocalState\EBWebView\*\Cache|*|RECURSE"},
+            ValuesOf(section, "FileKey"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A variable declaration may reference <c> &lt;Package&gt; </c>, and the reference doesn't
+    ''' count toward the nesting statistic
+    ''' </summary>
+    <TestMethod()> Public Sub PackageInVariable_Resolves()
+
+        Dim app = ParseApp(Preamble & "Cache=<Package>\LocalCache" & vbCrLf, Nothing)
+
+        CollectionAssert.AreEqual(New List(Of String) From {"%LocalAppData%\Packages\Hazel.App_abc123\LocalCache"},
+                                  app.Variables.Values("Cache"))
+        Assert.AreEqual(0, app.NestedVariableRefs)
+
+    End Sub
+
+    ''' <summary>
+    ''' <c> Package </c> is never reported as unreferenced, since an entry with
+    ''' <c> SkipUWPFileKeys= </c> may legitimately never use it
+    ''' </summary>
+    <TestMethod()> Public Sub Package_IsNotReportedUnreferenced()
+
+        Dim app = ParseApp(Preamble & "SkipUWPFileKeys=True" & vbCrLf, Nothing)
+
+        Assert.IsTrue(app.Variables.IsDeclared("Package"))
+        Assert.AreEqual(0, app.Variables.UnreferencedNames().Count)
+
+    End Sub
+
+    ' ----- Retired %Package% spelling -----
+
+    ''' <summary>
+    ''' Parses <paramref name="text"/> as an AppInfo section, asserting that the run failed and
+    ''' that the log names <paramref name="newSpelling"/>
+    ''' </summary>
+    '''
+    ''' <param name="text">Literal ini text for one AppInfo section</param>
+    '''
+    ''' <param name="newSpelling">The spelling the refusal must suggest</param>
+    Private Shared Function ParseRefused(text As String, newSpelling As String) As winapp2ool.UWPBuilder.UWPAppInfo
+
+        Dim app As winapp2ool.UWPBuilder.UWPAppInfo = Nothing
+        Dim diags As List(Of String) = Nothing
+
+        Assert.AreEqual(1, ExitCodeAfter(Sub() app = ParseApp(text, diags)))
+        Assert.IsTrue(diags.Any(Function(d) d.Contains($"`{newSpelling}`") AndAlso d.Contains("key dropped")),
+                      "Expected a refusal naming " & newSpelling & ", got: " & String.Join("; ", diags))
+
+        Return app
+
+    End Function
+
+    ''' <summary>
+    ''' A FileKey still spelled <c> %Package% </c> is dropped and fails the run
+    ''' </summary>
+    <TestMethod()> Public Sub RetiredPackage_InFileKey_IsRefused()
+
+        Dim app = ParseRefused(Preamble & "FileKey=%Package%\LocalState|*.log" & vbCrLf, "<Package>")
+
+        Assert.AreEqual(0, app.AppKeys.Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' A <c> %Package </c> missing its closing <c> % </c> is refused too. That's the shape that
+    ''' once published <c> %Package\LocalCache|*.log </c>.
+    ''' </summary>
+    <TestMethod()> Public Sub RetiredPackage_MissingClosingPercent_IsRefused()
+
+        Dim app = ParseRefused(Preamble & "FileKeyBase=%Package\LocalCache|*.log" & vbCrLf, "<Package>")
+
+        Assert.AreEqual(0, app.AppKeys.Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' A numbered <c> %Package2% </c> is refused with its indexed spelling
+    ''' </summary>
+    <TestMethod()> Public Sub RetiredNumberedPackage_IsRefused()
+
+        Dim app = ParseRefused(TwoPackages & "ExcludeKey=FILE|%Package2%\LocalState\|settings.json" & vbCrLf, "<Package[2]>")
+
+        Assert.AreEqual(0, app.ExcludeKeys.Count)
+
+    End Sub
+
+    ''' <summary>
+    ''' Root declarations and variable declarations are checked like template keys
+    ''' </summary>
+    <TestMethod()> Public Sub RetiredPackage_InRootAndVariable_IsRefused()
+
+        Dim app = ParseRefused(Preamble & "WebViewRoot=%Package%\LocalState\EBWebView" & vbCrLf, "<Package>")
+        Assert.AreEqual(0, app.WebViewPaths.Count)
+
+        app = ParseRefused(Preamble & "Cache=%Package%\LocalCache" & vbCrLf, "<Package>")
+        Assert.IsFalse(app.Variables.IsDeclared("Cache"))
+
+    End Sub
+
+    ''' <summary>
+    ''' A <c> UWP.ini </c> scaffold template still spelled <c> %Package% </c> is dropped and fails
+    ''' the run
+    ''' </summary>
+    <TestMethod()> Public Sub RetiredPackage_InScaffold_IsRefused()
+
+        Dim scaffold = FirstSection("[EntryScaffold: UWP App]" & vbCrLf &
+                                    "DetectFileBase=<Package>" & vbCrLf &
+                                    "FileKeyBase=%Package%\AC|*|RECURSE" & vbCrLf &
+                                    "FileKeyBase=<Package>\TempState|*|REMOVESELF" & vbCrLf)
+        Dim fileKeys As New List(Of String)
+        Dim detectFiles As New List(Of String)
+
+        Dim exitCode = ExitCodeAfter(Sub()
+                                         Using winapp2ool.gLogCapture()
+                                             winapp2ool.UWPBuilder.parseScaffold(scaffold, fileKeys, detectFiles, New winapp2ool.MenuSection)
+                                         End Using
+                                     End Sub)
+
+        Assert.AreEqual(1, exitCode)
+        CollectionAssert.AreEqual(New List(Of String) From {"<Package>\TempState|*|REMOVESELF"}, fileKeys)
+        CollectionAssert.AreEqual(New List(Of String) From {"<Package>"}, detectFiles)
+
+    End Sub
+
+    ''' <summary>
+    ''' Package= values and Warning= prose are never checked, and a clean entry leaves the
+    ''' exit code alone
+    ''' </summary>
+    <TestMethod()> Public Sub CleanEntry_LeavesExitCodeAlone()
+
+        Dim exitCode = ExitCodeAfter(Sub() ParseApp(Preamble &
+                                                    "Warning=Replaces the old %Package% spelling" & vbCrLf &
+                                                    "FileKey=<Package>\LocalState|*.log" & vbCrLf, Nothing))
+
+        Assert.AreEqual(0, exitCode)
+
+    End Sub
 
     ' ----- Open vocabulary -----
 
@@ -255,7 +541,7 @@ Imports System.Text
     ''' </summary>
     <TestMethod()> Public Sub UndeclaredToken_InFileKey_DropsKey()
 
-        Dim section = Build(Preamble & "FileKey=%Package%\Cache\<Missing>|*" & vbCrLf)
+        Dim section = Build(Preamble & "FileKey=<Package>\Cache\<Missing>|*" & vbCrLf)
 
         Assert.AreEqual(0, ValuesOf(section, "FileKey").Count)
 
@@ -324,12 +610,12 @@ Imports System.Text
     ' ----- Phase ordering -----
 
     ''' <summary>
-    ''' The three phases must run %Package% → root substitution → variables. A root
-    ''' declaring both a package reference and a variable token exercises all three: the
-    ''' package resolves first, the root text is substituted into the scaffold template,
-    ''' and the token is expanded last against the entry's symbol table
+    ''' The two phases must run root substitution → variables. A root declaring both
+    ''' <c> &lt;Package&gt; </c> and another variable exercises both: the root text is
+    ''' substituted into the scaffold template, and both tokens are expanded last against the
+    ''' entry's symbol table
     ''' </summary>
-    <TestMethod()> Public Sub PhaseOrder_PackageThenRootThenVariables()
+    <TestMethod()> Public Sub PhaseOrder_RootThenVariables()
 
         Dim catalog As New Dictionary(Of String, List(Of String)) From {
             {"Caches", New List(Of String) From {"%WebViewRoot%\Default\Cache|*|RECURSE"}}
@@ -337,7 +623,7 @@ Imports System.Text
 
         Dim section = Build(Preamble &
                             "Profile=A,B" & vbCrLf &
-                            "WebViewRoot=%Package%\LocalState\<Profile>\EBWebView" & vbCrLf &
+                            "WebViewRoot=<Package>\LocalState\<Profile>\EBWebView" & vbCrLf &
                             "WebViewScaffolds=Caches" & vbCrLf,
                             webViewCatalog:=catalog)
 
@@ -362,7 +648,7 @@ Imports System.Text
         }
 
         Dim section = Build(Preamble &
-                            "QtWebEngineRoot=%Package%\LocalState\QtWebEngine\<Default,OffTheRecord>" & vbCrLf &
+                            "QtWebEngineRoot=<Package>\LocalState\QtWebEngine\<Default,OffTheRecord>" & vbCrLf &
                             "QtWebEngineScaffolds=Caches" & vbCrLf,
                             qtCatalog:=catalog)
 
@@ -374,7 +660,7 @@ Imports System.Text
 
     ''' <summary>
     ''' The Electron family emits for a hybrid entry. The root is a plain win32 path with no
-    ''' <c> %Package% </c> reference (Electron lives in the desktop half of a hybrid, not inside
+    ''' <c> &lt;Package&gt; </c> reference (Electron lives in the desktop half of a hybrid, not inside
     ''' the MSIX container), and both placeholders bind independently.
     ''' </summary>
     <TestMethod()> Public Sub Electron_EmitsForHybridWin32Root()
@@ -443,8 +729,8 @@ Imports System.Text
 
     ''' <summary>
     ''' <c> QtWebEngineCachePath= </c>, UWPBuilder's alias of <c> QtWebEngineCacheRoot= </c>, binds
-    ''' <c> %QtWebEngineCacheRoot% </c> independently of the profile root, and is package-expanded
-    ''' like every other root
+    ''' <c> %QtWebEngineCacheRoot% </c> independently of the profile root, and expands
+    ''' <c> &lt;Package&gt; </c> like every other root
     ''' </summary>
     <TestMethod()> Public Sub QtWebEngine_CacheRoot_BindsAndSubstitutes()
 
@@ -453,8 +739,8 @@ Imports System.Text
         }
 
         Dim section = Build(Preamble &
-                            "QtWebEngineRoot=%Package%\LocalCache\QtWebEngine\Default" & vbCrLf &
-                            "QtWebEngineCachePath=%Package%\LocalCache\cache\QtWebEngine\Default" & vbCrLf &
+                            "QtWebEngineRoot=<Package>\LocalCache\QtWebEngine\Default" & vbCrLf &
+                            "QtWebEngineCachePath=<Package>\LocalCache\cache\QtWebEngine\Default" & vbCrLf &
                             "QtWebEngineScaffolds=Caches" & vbCrLf,
                             qtCatalog:=catalog)
 
@@ -506,13 +792,14 @@ Imports System.Text
     End Sub
 
     ''' <summary>
-    ''' Scaffold FileKey templates from UWP.ini are package-expanded then variable-expanded,
-    ''' so a variable declared on the entry drives fan-out of the shared template
+    ''' Scaffold FileKey templates from UWP.ini are variable-expanded along with
+    ''' <c> &lt;Package&gt; </c>, so a variable declared on the entry drives fan-out of the
+    ''' shared template
     ''' </summary>
     <TestMethod()> Public Sub ScaffoldFileKeys_AreVariableExpanded()
 
         Dim section = Build(Preamble & "Sub=One,Two" & vbCrLf,
-                            scaffoldFileKeys:=New List(Of String) From {"%Package%\<Sub>|*"})
+                            scaffoldFileKeys:=New List(Of String) From {"<Package>\<Sub>|*"})
 
         Assert.AreEqual(2, ValuesOf(section, "FileKey").Count)
 

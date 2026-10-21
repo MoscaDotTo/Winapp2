@@ -53,11 +53,13 @@ Imports System.Text
 '''
 ''' </list>
 '''
-''' The <c> %Package% </c> DSL variable expands to
+''' The reserved <c> &lt;Package&gt; </c> variable expands to
 ''' <c> %LocalAppData%\Packages\&lt;PACKAGE_FOLDER&gt; </c>, once per package for an app
-''' with several. <c> %Package1% </c> / <c> %Package2% </c> in a key value select one
-''' package by its position among the entry's <c> Package= </c> keys. The digit in a source
-''' key name (<c> Package2= </c>) is ignored, so only declaration order counts.
+''' with several. <c> &lt;Package[1]&gt; </c> / <c> &lt;Package[2]&gt; </c> in a key value
+''' select one package by its position among the entry's <c> Package= </c> keys. The digit in
+''' a source key name (<c> Package2= </c>) is ignored, so only declaration order counts. The
+''' old <c> %Package% </c> / <c> %PackageN% </c> spelling is refused: the key is dropped and
+''' the run fails.
 '''
 ''' <br /><br />
 '''
@@ -108,6 +110,13 @@ Public Module UWPBuilder
     }
 
     ''' <summary>
+    ''' The token stems UWPBuilder refuses, passed to <see cref="RetiredTokens.FindRetiredToken"/>.
+    ''' <c> %Package% </c> and <c> %PackageN% </c> are now <c> &lt;Package&gt; </c> and
+    ''' <c> &lt;Package[N]&gt; </c>.
+    ''' </summary>
+    Friend ReadOnly UWPRetiredStems As String() = {"%Package"}
+
+    ''' <summary>
     ''' Stores the parsed information for a single UWP application entry
     ''' </summary>
     Friend Structure UWPAppInfo
@@ -120,8 +129,9 @@ Public Module UWPBuilder
         ''' <summary>
         ''' The package folder names under <c> %LocalAppData%\Packages </c>, in declaration
         ''' order. Every <c> Package= </c> key adds one, and any digits in the key name
-        ''' (<c> Package1= </c>, <c> Package2= </c>) are ignored, so <c> %Package1% </c> names
-        ''' the first one declared.
+        ''' (<c> Package1= </c>, <c> Package2= </c>) are ignored, so <c> &lt;Package[1]&gt; </c>
+        ''' names the first one declared. <see cref="parseAppInfo"/> also declares them as the
+        ''' literal <c> Package </c> variable in <see cref="Variables"/>.
         ''' </summary>
         Public Packages As List(Of String)
 
@@ -146,16 +156,15 @@ Public Module UWPBuilder
 
         ''' <summary>
         ''' Additional <c> DetectFile= </c> values in their original file order, appended after
-        ''' the scaffold-generated DetectFile keys. Generation variable-expands them but doesn't
-        ''' expand <c> %Package% </c> in them. Supports hybrid win32+UWP entries that need file
-        ''' system detection for the win32 installation alongside package detection.
+        ''' the scaffold-generated DetectFile keys. Generation variable-expands them. Supports
+        ''' hybrid win32+UWP entries that need file system detection for the win32 installation
+        ''' alongside package detection.
         ''' </summary>
         Public DetectFileKeys As List(Of String)
 
         ''' <summary>
         ''' App-specific FileKey and FileKeyBase values in their original file order.
-        ''' Generation expands <c> %Package% </c> / <c> %PackageN% </c> in them and then
-        ''' variable-expands every value.
+        ''' Generation variable-expands every value, <c> &lt;Package&gt; </c> included.
         ''' </summary>
         Public AppKeys As List(Of String)
 
@@ -167,8 +176,7 @@ Public Module UWPBuilder
 
         ''' <summary>
         ''' <c> ExcludeKey= </c> and <c> ExcludeKeyBase= </c> values in their original file order.
-        ''' Generation expands <c> %Package% </c> / <c> %PackageN% </c> in them and then
-        ''' variable-expands every value, in the domain its flag names.
+        ''' Generation variable-expands every value in the domain its flag names.
         ''' </summary>
         Public ExcludeKeys As List(Of String)
 
@@ -201,8 +209,8 @@ Public Module UWPBuilder
 
         ''' <summary>
         ''' Root paths of embedded WebView2 (EBWebView) data folders associated with this app.
-        ''' Each entry is a path template that may contain <c> %Package% </c> or
-        ''' <c> %PackageN% </c> references, expanded per package at generation time.
+        ''' Each entry is a path template that may contain <c> &lt;Package&gt; </c> or
+        ''' <c> &lt;Package[N]&gt; </c> references, expanded per package at generation time.
         ''' Declaring any path here opts the entry into <c> WebViewScaffold </c> emission;
         ''' an empty list disables WebView scaffolding entirely for this entry.
         ''' </summary>
@@ -243,9 +251,9 @@ Public Module UWPBuilder
         ''' unlike <see cref="WebViewPaths"/> which names the parent of <c> Default\ </c>. The
         ''' QtWebEngine catalog does not bake the profile segment into its templates, so a host
         ''' running several profiles declares one path per profile. Each entry is a path
-        ''' template that may contain <c> %Package% </c> / <c> %PackageN% </c> references,
-        ''' expanded per package at generation time, then substituted for
-        ''' <c> %QtWebEngineRoot% </c> in QtWebEngine scaffold templates. Declaring any path
+        ''' template that may contain <c> &lt;Package&gt; </c> / <c> &lt;Package[N]&gt; </c>
+        ''' references, substituted for <c> %QtWebEngineRoot% </c> in QtWebEngine scaffold
+        ''' templates and expanded per package with them. Declaring any path
         ''' here opts the entry into <c> QtWebEngineScaffold </c> emission.
         ''' </summary>
         Public QtWebEnginePaths As List(Of String)
@@ -283,8 +291,8 @@ Public Module UWPBuilder
         ''' Paths of the application's Electron <c> userData </c> folders. For Electron this
         ''' folder <em>is</em> the Chromium profile, with no <c> Default\ </c> segment, unlike
         ''' <see cref="WebViewPaths"/>. Each entry is a path template that may contain
-        ''' <c> %Package% </c> / <c> %PackageN% </c> references, expanded per package at
-        ''' generation time, then substituted for <c> %ElectronRoot% </c>.
+        ''' <c> &lt;Package&gt; </c> / <c> &lt;Package[N]&gt; </c> references, substituted for
+        ''' <c> %ElectronRoot% </c> and expanded per package with the template.
         ''' <br /><br />
         '''
         ''' Relevant to UWPBuilder because a <b> hybrid win32+UWP </b> entry carries the win32
@@ -328,7 +336,8 @@ Public Module UWPBuilder
         ''' without digits) the parser's <c> Select Case </c> has no branch for. Each declares a
         ''' comma-separated list of values fanned out at generation time by
         ''' <see cref="VariableExpander"/>, driving <c> &lt;token&gt; </c> expansion across this
-        ''' entry's key templates
+        ''' entry's key templates. Also holds the reserved literal <c> Package </c> variable,
+        ''' one <c> %LocalAppData%\Packages\... </c> path per <see cref="Packages"/> entry.
         ''' </summary>
         Public Variables As VariableSet
 
@@ -587,7 +596,8 @@ Public Module UWPBuilder
     ''' Parses an <c> [EntryScaffold: ...] </c> section from the template file, collecting
     ''' its <c> DetectFileBase= </c> values into <paramref name="scaffoldDetectFiles"/> and
     ''' its <c> FileKeyBase= </c> values into <paramref name="scaffoldFileKeys"/>.
-    ''' Warns on any unrecognized key types.
+    ''' Warns on any unrecognized key types, and refuses a key holding a retired token through
+    ''' <see cref="refuseRetiredToken"/>.
     ''' </summary>
     '''
     ''' <param name="scaffoldSection">
@@ -605,10 +615,10 @@ Public Module UWPBuilder
     ''' <param name="menuOutput">
     ''' The <c> MenuSection </c> receiving progress lines and warnings for display
     ''' </param>
-    Private Sub parseScaffold(scaffoldSection As iniSection,
-                               scaffoldFileKeys As List(Of String),
-                               scaffoldDetectFiles As List(Of String),
-                               menuOutput As MenuSection)
+    Friend Sub parseScaffold(scaffoldSection As iniSection,
+                              scaffoldFileKeys As List(Of String),
+                              scaffoldDetectFiles As List(Of String),
+                              menuOutput As MenuSection)
 
         Dim scaffoldName = scaffoldSection.Name.Substring("EntryScaffold:".Length).Trim()
         Dim scaffoldMsg = $"Processing scaffold: {scaffoldName}"
@@ -616,6 +626,8 @@ Public Module UWPBuilder
         gLog($"  {scaffoldMsg}")
 
         For Each key In scaffoldSection.Keys
+
+            If refuseRetiredToken(key.Value, $"[{scaffoldSection.Name}].{key.Name}", menuOutput) Then Continue For
 
             Select Case key.KeyType.ToUpperInvariant()
 
@@ -657,6 +669,43 @@ Public Module UWPBuilder
     End Function
 
     ''' <summary>
+    ''' Checks <paramref name="value"/> for a token in <see cref="UWPRetiredStems"/>. On a hit we
+    ''' warn, naming the new spelling, and fail the run, since generator warnings are invisible
+    ''' in a silent build and a dropped key would otherwise publish a thinner entry unnoticed.
+    ''' </summary>
+    '''
+    ''' <param name="value">
+    ''' The key value to check
+    ''' </param>
+    '''
+    ''' <param name="context">
+    ''' Where the value came from, e.g. <c> [Cortana *].FileKey1 </c>
+    ''' </param>
+    '''
+    ''' <param name="menuOutput">
+    ''' The <c> MenuSection </c> receiving the warning for display
+    ''' </param>
+    '''
+    ''' <returns>
+    ''' <c> True </c> when the caller should drop the key, otherwise <c> False </c>
+    ''' </returns>
+    Private Function refuseRetiredToken(value As String,
+                                        context As String,
+                                        menuOutput As MenuSection) As Boolean
+
+        Dim retiredMsg = RetiredTokens.FindRetiredToken(value, UWPRetiredStems, context)
+        If retiredMsg.Length = 0 Then Return False
+
+        Dim dropMsg = $"{retiredMsg}; key dropped"
+        gLog(dropMsg)
+        menuOutput.AddWarning(dropMsg)
+        markRunFailed()
+
+        Return True
+
+    End Function
+
+    ''' <summary>
     ''' Parses an AppInfo section and returns a populated <c> UWPAppInfo </c> structure.
     ''' Issues warnings and sets <c> ShouldSkip </c> for entries that are structurally
     ''' invalid (missing package or missing category). An entry declaring both
@@ -664,9 +713,11 @@ Public Module UWPBuilder
     ''' <br /><br />
     '''
     ''' <c> SpecialDetect= </c> and <c> Default= </c> warn and are dropped. Any key type
-    ''' without a branch here becomes a variable declaration, and we resolve the
-    ''' declarations' nested references through <see cref="VariableExpander.ResolveAll"/>
-    ''' before returning. A single-valued key that repeats (<c> DetectOS= </c>,
+    ''' without a branch here becomes a variable declaration. We then declare the packages as
+    ''' the literal <c> Package </c> variable and resolve the declarations' nested references
+    ''' through <see cref="VariableExpander.ResolveAll"/> before returning. A key other than
+    ''' <c> Package= </c> or <c> Warning= </c> holding a retired token is dropped through
+    ''' <see cref="refuseRetiredToken"/>. A single-valued key that repeats (<c> DetectOS= </c>,
     ''' <c> LangSecRef= </c>, a scaffold selection list) keeps its last value.
     ''' </summary>
     '''
@@ -689,13 +740,19 @@ Public Module UWPBuilder
 
         For Each key In appSection.Keys
 
-            Select Case key.KeyType.ToUpperInvariant()
+            Dim keyType = key.KeyType.ToUpperInvariant()
+
+            ' Package= is used literally and Warning= is prose, so neither can hold a token
+            If keyType <> "PACKAGE" AndAlso keyType <> "WARNING" AndAlso
+               refuseRetiredToken(key.Value, $"[{app.Name}].{key.Name}", menuOutput) Then Continue For
+
+            Select Case keyType
 
                 Case "PACKAGE"
 
                     ' Package values are not variable-expanded: a fan-out here would change
                     ' the package list's length and silently shift the meaning of every
-                    ' %PackageN% selector in the entry. Warn rather than emit a junk path.
+                    ' <Package[N]> selector in the entry. Warn rather than emit a junk path.
                     If key.Value.Contains("<") OrElse key.Value.Contains(">") Then
 
                         Dim pkgTokenMsg = $"Package= value in [{app.Name}] contains '<' or '>'; Package is never variable-expanded and the value is used literally"
@@ -803,6 +860,13 @@ Public Module UWPBuilder
         ' generation-time expansion sees fully-literal value lists.
         app.NestedVariableRefs = app.Variables.NestedReferenceCount()
 
+        ' Package is declared after the count so a <Package> reference doesn't move the stats.
+        ' It's literal so ResolveAll can't fan out a <a,b> in a package name and shift every
+        ' <Package[N]> index, and marked referenced because an entry with SkipUWPFileKeys may
+        ' never use it.
+        app.Variables.AddLiteral("Package", app.Packages.Select(Function(pkg) $"%LocalAppData%\Packages\{pkg}"))
+        app.Variables.MarkReferenced("Package")
+
         For Each diag In VariableExpander.ResolveAll(app.Variables)
 
             Dim contextualMsg = $"[{app.Name}] {diag.Message}"
@@ -864,8 +928,8 @@ Public Module UWPBuilder
         Public KeyPresent As Boolean
 
         ''' <summary>
-        ''' The family's (placeholder, roots) pairs, with <c> %Package% </c> already expanded in
-        ''' the roots. A root can still hold <c> &lt;token&gt; </c> references.
+        ''' The family's (placeholder, roots) pairs, with the roots as declared. A root can hold
+        ''' <c> &lt;token&gt; </c> references, <c> &lt;Package&gt; </c> among them.
         ''' QtWebEngine and Electron carry two pairs; WebView one.
         ''' </summary>
         Public Bindings As List(Of ScaffoldCatalogs.ScaffoldRootBinding)
@@ -900,8 +964,7 @@ Public Module UWPBuilder
         ''' </param>
         '''
         ''' <param name="bindings">
-        ''' The family's (placeholder, roots) pairs with <c> %Package% </c> already expanded in
-        ''' the roots
+        ''' The family's (placeholder, roots) pairs, with the roots as declared
         ''' </param>
         Public Sub New(label As String,
                        selection As List(Of String),
@@ -921,16 +984,14 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Builds the per-entry state of every scaffold family for <paramref name="app"/>, whether
-    ''' or not the entry declared it, expanding <c> %Package% </c> in each declared root. This
-    ''' list has to cover every family in <see cref="ScaffoldCatalogs.ScaffoldFamilies"/>. The
+    ''' or not the entry declared it. This list has to cover every family in <see cref="ScaffoldCatalogs.ScaffoldFamilies"/>. The
     ''' <c> ScaffoldFamilies_KeyVocabularyPresentInBothBuilders </c> test checks only
     ''' <see cref="UWPReservedKeys"/>, so a family missing from this list would not fail it.
     ''' <br /><br />
     '''
-    ''' Package expansion (phase 0) must happen here, before placeholder substitution (phase 1),
-    ''' because roots themselves reference <c> %Package% </c>
-    ''' (<c> WebViewRoot=%Package%\LocalState\EBWebView </c>). Phase 2 (<c> &lt;&gt; </c>
-    ''' expansion) then runs last on the merged string, so a token inside a root declaration
+    ''' The roots stay unexpanded here. Placeholder substitution (phase 1) puts their text into
+    ''' the template, and <c> &lt;&gt; </c> expansion (phase 2) runs on the merged string, so a
+    ''' token inside a root declaration (<c> WebViewRoot=&lt;Package&gt;\LocalState\EBWebView </c>)
     ''' joins the same cartesian product as the scaffold template's own tokens.
     ''' </summary>
     '''
@@ -943,25 +1004,21 @@ Public Module UWPBuilder
     ''' </returns>
     Private Function scaffoldFamiliesFor(app As UWPAppInfo) As List(Of UWPScaffoldFamily)
 
-        Dim expandRoots = Function(templates As List(Of String)) templates _
-            .SelectMany(Function(t) expandPackageKey(t, app.Packages)) _
-            .ToList()
-
         Return New List(Of UWPScaffoldFamily) From {
             New UWPScaffoldFamily("WebView", app.WebViewScaffoldNames, app.ExcludedWebViewScaffolds,
                                   app.WebViewScaffoldsKeyPresent,
                                   New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%WebViewRoot%", expandRoots(app.WebViewPaths))}),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%WebViewRoot%", app.WebViewPaths)}),
             New UWPScaffoldFamily("QtWebEngine", app.QtWebEngineScaffoldNames, app.ExcludedQtWebEngineScaffolds,
                                   app.QtWebEngineScaffoldsKeyPresent,
                                   New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", expandRoots(app.QtWebEnginePaths)),
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineCacheRoot%", expandRoots(app.QtWebEngineCachePaths))}),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineRoot%", app.QtWebEnginePaths),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%QtWebEngineCacheRoot%", app.QtWebEngineCachePaths)}),
             New UWPScaffoldFamily("Electron", app.ElectronScaffoldNames, app.ExcludedElectronScaffolds,
                                   app.ElectronScaffoldsKeyPresent,
                                   New List(Of ScaffoldCatalogs.ScaffoldRootBinding) From {
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronRoot%", expandRoots(app.ElectronPaths)),
-                                      New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronUpdaterRoot%", expandRoots(app.ElectronUpdaterPaths))})}
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronRoot%", app.ElectronPaths),
+                                      New ScaffoldCatalogs.ScaffoldRootBinding("%ElectronUpdaterRoot%", app.ElectronUpdaterPaths)})}
 
     End Function
 
@@ -986,7 +1043,7 @@ Public Module UWPBuilder
     ''' </summary>
     '''
     ''' <param name="family">
-    ''' The family's per-entry state, with roots already package-expanded
+    ''' The family's per-entry state, with roots as declared
     ''' </param>
     '''
     ''' <param name="app">
@@ -1044,9 +1101,9 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Generates a winapp2.ini entry section for the given <c> UWPAppInfo </c> by applying
-    ''' the scaffold template keys and app-specific keys, expanding any
-    ''' <c> %Package% </c> / <c> %PackageN% </c> variables and <c> &lt;token&gt; </c>
-    ''' references along the way. Keys are emitted in this order: category, Detect,
+    ''' the scaffold template keys and app-specific keys, expanding any <c> &lt;token&gt; </c>
+    ''' references, <c> &lt;Package&gt; </c> and <c> &lt;Package[N]&gt; </c> included, along
+    ''' the way. Keys are emitted in this order: category, Detect,
     ''' DetectFile, DetectOS, Warning, FileKey, RegKey, ExcludeKey. FileKeys run on from
     ''' <c> UWP.ini </c>'s scaffold templates to the app's own keys and then the shared
     ''' catalog families.
@@ -1104,7 +1161,6 @@ Public Module UWPBuilder
 
         ' 2. Detect keys (Registry domain: an undeclared token stays literal rather than
         '    dropping the key), unnumbered if single, numbered from 1 if multiple.
-        '    Detect values carry no %Package% reference, so phase 0 does not apply.
         Dim detectValues As New List(Of String)
         For Each d In app.DetectKeys
 
@@ -1127,12 +1183,9 @@ Public Module UWPBuilder
         End If
 
         ' 3. DetectFile keys, scaffold templates expanded per package first, then app-specific,
-        '    unnumbered if only one total. App-specific values are deliberately not phase-0
-        '    expanded, since only the scaffold templates reference %Package%.
+        '    unnumbered if only one total.
         Dim allDetectFiles As New List(Of String)
-        allDetectFiles.AddRange(expandPackageAndVars(scaffoldDetectFiles, app, ExpansionDomain.Filesystem, "DetectFile", menuOutput))
-
-        For Each df In app.DetectFileKeys
+        For Each df In scaffoldDetectFiles.Concat(app.DetectFileKeys)
 
             allDetectFiles.AddRange(expandPhase2(df, app, ExpansionDomain.Filesystem, "DetectFile", menuOutput))
 
@@ -1162,7 +1215,10 @@ Public Module UWPBuilder
 
         Next
 
-        ' 4. Scaffold template FileKeys applied to all packages (suppressed when SkipUWPFileKeys is set)
+        ' 4. Scaffold template FileKeys applied to all packages (suppressed when SkipUWPFileKeys is
+        '    set), then 5. the app-specific FileKey / FileKeyBase values in document order
+        Dim fileKeyTemplates As IEnumerable(Of String) = app.AppKeys
+
         If app.SkipUWPFileKeys Then
 
             Dim skipMsg = $"Skipping scaffold FileKeys for: {app.Name}"
@@ -1171,28 +1227,26 @@ Public Module UWPBuilder
 
         Else
 
-            For Each expanded In expandPackageAndVars(scaffoldFileKeys, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
+            fileKeyTemplates = scaffoldFileKeys.Concat(app.AppKeys)
+
+        End If
+
+        For Each template In fileKeyTemplates
+
+            For Each expanded In expandPhase2(template, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
 
                 section.AddKey(New iniKey($"FileKey{fileKeyNum}={expanded}"))
                 fileKeyNum += 1
 
             Next
 
-        End If
-
-        ' 5. App-specific FileKey / FileKeyBase values in document order
-        For Each expanded In expandPackageAndVars(app.AppKeys, app, ExpansionDomain.Filesystem, "FileKey", menuOutput)
-
-            section.AddKey(New iniKey($"FileKey{fileKeyNum}={expanded}"))
-            fileKeyNum += 1
-
         Next
 
         ' 5b. Scaffold FileKeys for every family the entry opted into by declaring a root.
-        '     Phase 0 (%Package% fan-out) already ran in scaffoldFamiliesFor; expandScaffoldFamily
-        '     does phase 1 (root substitution) then phase 2 (<> expansion) on the merged string,
-        '     so a <token> inside a root declaration joins the same cartesian product as the
-        '     template's own tokens. A family with no declared root emits nothing.
+        '     expandScaffoldFamily does phase 1 (root substitution) then phase 2 (<> expansion)
+        '     on the merged string, so a <token> inside a root declaration, <Package> included,
+        '     joins the same cartesian product as the template's own tokens. A family with no
+        '     declared root emits nothing.
         For Each family In scaffoldFamiliesFor(app)
 
             If Not family.IsDeclared Then Continue For
@@ -1206,9 +1260,7 @@ Public Module UWPBuilder
 
         Next
 
-        ' 6. RegKeys, variable-expanded in the Registry domain and renumbered from 1. Registry
-        '    paths never reference %Package% (which resolves to a file system path), so phase 0
-        '    does not apply here.
+        ' 6. RegKeys, variable-expanded in the Registry domain and renumbered from 1
         Dim regKeyNum As Integer = 1
         For Each regKey In app.RegKeys
 
@@ -1221,8 +1273,7 @@ Public Module UWPBuilder
 
         Next
 
-        ' 7. ExcludeKeys expanded for %Package% / %PackageN% then variables, renumbered from 1.
-        '    Domain is classified per expanded value from the key's own flag.
+        ' 7. ExcludeKeys variable-expanded in the domain of each key's own flag, renumbered from 1
         Dim exclNum As Integer = 1
         For Each expanded In expandExcludeKeys(app.ExcludeKeys, app, menuOutput)
 
@@ -1276,15 +1327,14 @@ Public Module UWPBuilder
 
     ''' <summary>
     ''' Runs the phase-2 variable-expansion pass on <paramref name="template"/> and routes any
-    ''' returned diagnostics onto <c> gLog </c> and <paramref name="menuOutput"/>. The caller is
-    ''' responsible for phase-0 <c> %Package% </c> fan-out and phase-1 root substitution
-    ''' beforehand. Running last means a root value's own <c> &lt;token&gt; </c> references are
+    ''' returned diagnostics onto <c> gLog </c> and <paramref name="menuOutput"/>. A scaffold
+    ''' family's caller does the phase-1 root substitution beforehand. Running last means a root value's own <c> &lt;token&gt; </c> references are
     ''' already inlined into <paramref name="template"/> and participate in the same cartesian
     ''' product as the surrounding template's tokens, matching EntryBuilder's semantics.
     ''' </summary>
     '''
     ''' <param name="template">
-    ''' One key value with phases 0 and 1 already applied, possibly containing
+    ''' One key value, with any root already substituted, possibly containing
     ''' <c> &lt;var&gt; </c> tokens
     ''' </param>
     '''
@@ -1329,62 +1379,9 @@ Public Module UWPBuilder
     End Function
 
     ''' <summary>
-    ''' Applies phase 0 (<c> %Package% </c> / <c> %PackageN% </c> fan-out) followed by phase 2
-    ''' (<c> &lt;var&gt; </c> expansion) to every template in <paramref name="templates"/>,
-    ''' returning the flattened result in fan-out order. Used for the key classes that carry no
-    ''' root placeholder; the scaffold blocks interleave phase-1 substitution themselves.
-    ''' </summary>
-    '''
-    ''' <param name="templates">
-    ''' The key value templates to expand, in declaration order
-    ''' </param>
-    '''
-    ''' <param name="app">
-    ''' The entry supplying both the package list and the variable symbol table
-    ''' </param>
-    '''
-    ''' <param name="domain">
-    ''' The domain of the emitting key class
-    ''' </param>
-    '''
-    ''' <param name="keyLabel">
-    ''' Short tag embedded into diagnostic messages
-    ''' </param>
-    '''
-    ''' <param name="menuOutput">
-    ''' The <c> MenuSection </c> receiving Warning-severity diagnostics for display
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' Every string produced by phase-0 × phase-2 expansion, in fan-out order
-    ''' </returns>
-    Friend Function expandPackageAndVars(templates As List(Of String),
-                                          app As UWPAppInfo,
-                                          domain As ExpansionDomain,
-                                          keyLabel As String,
-                                          menuOutput As MenuSection) As List(Of String)
-
-        Dim values As New List(Of String)
-
-        For Each template In templates
-
-            For Each packageExpanded In expandPackageKey(template, app.Packages)
-
-                values.AddRange(expandPhase2(packageExpanded, app, domain, keyLabel, menuOutput))
-
-            Next
-
-        Next
-
-        Return values
-
-    End Function
-
-    ''' <summary>
-    ''' Expands ExcludeKey templates through phases 0 and 2, classifying the expansion domain
-    ''' per phase-0 result rather than per template: an ExcludeKey's flag determines whether its
-    ''' value lands in the registry or the file system, and a <c> %Package% </c> fan-out can in
-    ''' principle yield values whose flags differ. Mirrors EntryBuilder's <c> expandExcludeKeys </c>.
+    ''' Expands ExcludeKey templates, classifying each template's domain from its own flag: the
+    ''' flag determines whether the value lands in the registry or the file system. A
+    ''' <c> &lt;Package&gt; </c> reference substitutes only a path, so it can't change the flag.
     ''' </summary>
     '''
     ''' <param name="templates">
@@ -1392,7 +1389,7 @@ Public Module UWPBuilder
     ''' </param>
     '''
     ''' <param name="app">
-    ''' The entry supplying both the package list and the variable symbol table
+    ''' The entry supplying the variable symbol table
     ''' </param>
     '''
     ''' <param name="menuOutput">
@@ -1410,97 +1407,16 @@ Public Module UWPBuilder
 
         For Each template In templates
 
-            For Each packageExpanded In expandPackageKey(template, app.Packages)
+            Dim parsed As New excludeKeyParams(template)
+            Dim exclDomain As ExpansionDomain = If(parsed.Flag = excludeKeyFlag.Reg,
+                                                   ExpansionDomain.Registry,
+                                                   ExpansionDomain.Filesystem)
 
-                Dim parsed As New excludeKeyParams(packageExpanded)
-                Dim exclDomain As ExpansionDomain = If(parsed.Flag = excludeKeyFlag.Reg,
-                                                       ExpansionDomain.Registry,
-                                                       ExpansionDomain.Filesystem)
-
-                values.AddRange(expandPhase2(packageExpanded, app, exclDomain, "ExcludeKey", menuOutput))
-
-            Next
+            values.AddRange(expandPhase2(template, app, exclDomain, "ExcludeKey", menuOutput))
 
         Next
 
         Return values
-
-    End Function
-
-    ''' <summary>
-    ''' Expands <c> %Package% </c> and <c> %PackageN% </c> variables in a key value template,
-    ''' returning one expanded string per applicable package.
-    ''' <br /><br />
-    ''' 
-    ''' Rules:
-    ''' <list type="bullet">
-    ''' 
-    ''' <item>
-    ''' <c> %PackageN% </c> (numbered): expands exactly once using the Nth package.
-    ''' Only the lowest such N in the template is replaced, and any other package
-    ''' reference in it, numbered or not, stays literal. An N past the package count
-    ''' isn't recognized and stays literal too, without a warning.
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' <c> %Package% </c> (unnumbered): expands once per package, producing one
-    ''' output string per package in order
-    ''' </item>
-    ''' 
-    ''' <item>
-    ''' No package variable: returned verbatim as a single-element list
-    ''' </item>
-    ''' 
-    ''' </list>
-    '''
-    ''' Matching is case-sensitive, so <c> %package% </c> isn't expanded.
-    ''' </summary>
-    '''
-    ''' <param name="template">
-    ''' A key value string optionally containing <c> %Package% </c> or
-    ''' <c> %PackageN% </c> variable references
-    ''' </param>
-    '''
-    ''' <param name="packages">
-    ''' The ordered list of package folder names for the current app
-    ''' </param>
-    '''
-    ''' <returns>
-    ''' One expanded string per applicable package, or a single-element list containing
-    ''' <paramref name="template"/> verbatim if no package variable is present
-    ''' </returns>
-    Friend Function expandPackageKey(template As String,
-                                      packages As List(Of String)) As List(Of String)
-
-        Dim result As New List(Of String)
-
-        ' Check for numbered package references (%Package1%, %Package2%, …)
-        ' These appear only in AppInfo FileKey values as package selectors. scaffold templates
-        ' always use unnumbered %Package%. A numbered reference selects exactly one package by position.
-        For i = 1 To packages.Count
-
-            Dim numberedVar = $"%Package{i}%"
-            If Not template.Contains(numberedVar) Then Continue For
-
-            result.Add(template.Replace(numberedVar, $"%LocalAppData%\Packages\{packages(i - 1)}"))
-            Return result
-
-        Next
-
-        ' Unnumbered %Package%, expand for every package
-        If template.Contains("%Package%") Then
-
-            For Each pkg In packages
-                result.Add(template.Replace("%Package%", $"%LocalAppData%\Packages\{pkg}"))
-            Next
-
-            Return result
-
-        End If
-
-        ' No package variable, pass through verbatim
-        result.Add(template)
-        Return result
 
     End Function
 

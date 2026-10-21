@@ -460,9 +460,8 @@ End Class
 ''' <br /><br />
 '''
 ''' This module is the phase-2 pass of the builder DSL pipeline. Before it, each builder
-''' runs its own percent-style substitution: root placeholders such as
-''' <c> %WebViewRoot% </c> in phase 1, preceded in UWPBuilder by <c> %Package% </c> in
-''' phase 0. We run last, on the merged string, so a <c> &lt;name&gt; </c> token that
+''' runs its own percent-style substitution of root placeholders such as
+''' <c> %WebViewRoot% </c> in phase 1. We run last, on the merged string, so a <c> &lt;name&gt; </c> token that
 ''' arrived inside a root (<c> WebViewRoot=&lt;Root&gt;\EBWebView </c>) joins the same
 ''' cartesian product as the template's own tokens. This engine leaves
 ''' <c> %...% </c> text alone.

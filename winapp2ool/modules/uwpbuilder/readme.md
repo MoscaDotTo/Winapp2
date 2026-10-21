@@ -5,11 +5,11 @@
 UWPBuilder is a build-pipeline module: its output is an intermediate file consumed by winapp2ool to produce the final winapp2.ini, and is not intended to be used directly with any cleaning software. If you are not maintaining winapp2.ini, you probably don't need this module.
 
 ### What does UWPBuilder do?
-UWPBuilder reads a source directory containing a scaffold template (`UWP.ini`) and per-letter application definition files (`AppInfo\*.ini`), and generates one winapp2.ini entry per defined application. Each entry receives package detection and a consistent baseline set of FileKeys automatically; app-specific keys are layered on top, with the `%Package%` variable saving you from ever writing a package path out in full.
+UWPBuilder reads a source directory containing a scaffold template (`UWP.ini`) and per-letter application definition files (`AppInfo\*.ini`), and generates one winapp2.ini entry per defined application. Each entry receives package detection and a consistent baseline set of FileKeys automatically; app-specific keys are layered on top, with the `<Package>` variable saving you from ever writing a package path out in full.
 
 ### Why UWPBuilder?
 - Consistency: every UWP entry receives the same baseline cleaning coverage, generated from a single template
-- Brevity: `Package=` + a category key is a complete entry; `%Package%` abstracts away verbose package folder paths everywhere else
+- Brevity: `Package=` + a category key is a complete entry; `<Package>` abstracts away verbose package folder paths everywhere else
 - Hybrid app support: apps with both a UWP package and a win32 installation can carry both sets of keys in one definition
 - Embedded browser coverage: apps using WebView2 (EBWebView), QtWebEngine, or Electron can generate FileKeys from shared scaffold catalogs
 
@@ -95,7 +95,7 @@ The menu also displays the current source directory, save target, and scaffolds 
 | Combine | All `AppInfo\*.ini` files are combined in-memory, in alphabetical path order. No intermediate file is created |
 | Load scaffolds | `[EntryScaffold: ...]` sections are read from `UWP.ini`; every catalog in the scaffolds directory is loaded |
 | Validate | Each AppInfo section is checked: at least one `Package=` and at least one category key are required. Sections failing either check are skipped with a warning; a section declaring *both* category keys warns but is still generated, using `LangSecRef` |
-| Generate | One entry is generated per valid section: package detection, scaffold FileKeys, app-specific keys, and any selected WebView/QtWebEngine/Electron scaffold keys, with `%Package%` variables expanded throughout |
+| Generate | One entry is generated per valid section: package detection, scaffold FileKeys, app-specific keys, and any selected WebView/QtWebEngine/Electron scaffold keys, with `<Package>` and every other variable expanded throughout |
 | Lint | The complete output is normalized by WinappDebug with optimizations force-enabled (see [Output Formatting](#output-formatting)) |
 | Write | The output file is written to disk |
 
@@ -133,11 +133,11 @@ The scaffold currently shipped with the winapp2.ini project:
 
 ```ini
 [EntryScaffold: UWP App]
-DetectFileBase=%Package%
-FileKeyBase=%Package%\AC|*|RECURSE
-FileKeyBase=%Package%\Settings|*.log*
-FileKeyBase=%Package%\SystemAppData\Helium|*.log*
-FileKeyBase=%Package%\TempState|*|REMOVESELF
+DetectFileBase=<Package>
+FileKeyBase=<Package>\AC|*|RECURSE
+FileKeyBase=<Package>\Settings|*.log*
+FileKeyBase=<Package>\SystemAppData\Helium|*.log*
+FileKeyBase=<Package>\TempState|*|REMOVESELF
 ```
 
 ## AppInfo files
@@ -164,11 +164,11 @@ These keys carry their normal winapp2.ini meaning and are passed into the genera
 |:-|:-|:-|
 | `LangSecRef=` / `Section=` | Category of the generated entry | Exactly one is required. If both are present, a warning is issued and `LangSecRef` is used |
 | `Detect=` | Registry detection | Repeatable. Unnumbered in the output when only one is present. `<>`-expanded |
-| `DetectFile=` | File system detection, appended after the scaffold-generated detection paths | Repeatable. Not `%Package%`-expanded, but `<>`-expanded. Use for hybrid apps that need win32 detection alongside package detection |
+| `DetectFile=` | File system detection, appended after the scaffold-generated detection paths | Repeatable. `<>`-expanded, `<Package>` included. Use for hybrid apps that need win32 detection alongside package detection |
 | `DetectOS=` | Windows kernel version filter, e.g. `6.1\|10.0` | Emitted verbatim, never expanded |
-| `FileKey=` | Cleaning target; equivalent to `FileKeyBase=` | `%Package%` and `<>` are expanded; keys without either pass through verbatim |
-| `RegKey=` | Registry cleaning target | Renumbered from 1. Not `%Package%`-expanded, but `<>`-expanded |
-| `ExcludeKey=` | Exclusion; equivalent to `ExcludeKeyBase=` | `%Package%` and `<>` are expanded. |
+| `FileKey=` | Cleaning target; equivalent to `FileKeyBase=` | `<>`-expanded, `<Package>` included; keys without a token pass through verbatim |
+| `RegKey=` | Registry cleaning target | Renumbered from 1. `<>`-expanded |
+| `ExcludeKey=` | Exclusion; equivalent to `ExcludeKeyBase=` | `<>`-expanded, `<Package>` included, in the domain its flag names |
 | `Warning=` | Warning shown to the user | Emitted verbatim, never expanded |
 
 ###### Note: Key numbers in the source are ignored: everything is renumbered during generation and normalized again by the lint pass.
@@ -182,34 +182,38 @@ Every other unrecognised key name is a [variable declaration](#variables). There
 | Key | Effect | Notes |
 |:-|:-|:-|
 | `Package=` | The application's package folder name under `%LocalAppData%\Packages` | At least one is required. Repeatable as `Package1=`, `Package2=`, ... for multi-package entries |
-| `FileKeyBase=` | A FileKey template; equivalent to `FileKey=` | Convention: use `FileKeyBase=` for `%Package%`-relative keys and `FileKey=` for win32 paths |
+| `FileKeyBase=` | A FileKey template; equivalent to `FileKey=` | Convention: use `FileKeyBase=` for `<Package>`-relative keys and `FileKey=` for win32 paths |
 | `ExcludeKeyBase=` | An ExcludeKey template; equivalent to `ExcludeKey=` | |
 | `RegKeyBase=` | A RegKey template; equivalent to `RegKey=` | |
 | `Skip` | Omits this application from generation entirely | Presence-based: see below |
 | `SkipUWPFileKeys` | Suppresses the scaffold `FileKeyBase=` templates for this entry only | Presence-based: see below. Detection keys are unaffected |
-| `WebViewRoot=` (alias `WebViewPath=`) | Declares an embedded WebView2/EBWebView data root; opts the entry into [WebView scaffolds](#webview-scaffolds) | Repeatable (numbered or not). `%Package%` variables are expanded |
+| `WebViewRoot=` (alias `WebViewPath=`) | Declares an embedded WebView2/EBWebView data root; opts the entry into [WebView scaffolds](#webview-scaffolds) | Repeatable (numbered or not). `<Package>` variables are expanded |
 | `WebViewScaffolds=` | Comma-separated scaffold selection, replacing the default set | `All` sentinel expands to the whole catalog except the legacy tier |
 | `ExcludeWebViewScaffolds=` | Comma-separated scaffold names subtracted from the active selection | |
-| `QtWebEngineRoot=` (alias `QtWebEnginePath=`) | Declares one embedded QtWebEngine profile directory (profile segment included, e.g. `...\QtWebEngine\Default`); opts the entry into [QtWebEngine scaffolds](#qtwebengine-scaffolds) | Repeatable, one per profile. `%Package%` variables are expanded |
-| `QtWebEngineCacheRoot=` (alias `QtWebEngineCachePath=`) | Declares a QtWebEngine HTTP cache directory for `%QtWebEngineCacheRoot%`; also opts the entry into QtWebEngine scaffolds | Repeatable. `%Package%` variables are expanded |
+| `QtWebEngineRoot=` (alias `QtWebEnginePath=`) | Declares one embedded QtWebEngine profile directory (profile segment included, e.g. `...\QtWebEngine\Default`); opts the entry into [QtWebEngine scaffolds](#qtwebengine-scaffolds) | Repeatable, one per profile. `<Package>` variables are expanded |
+| `QtWebEngineCacheRoot=` (alias `QtWebEngineCachePath=`) | Declares a QtWebEngine HTTP cache directory for `%QtWebEngineCacheRoot%`; also opts the entry into QtWebEngine scaffolds | Repeatable. `<Package>` variables are expanded |
 | `QtWebEngineScaffolds=` | Scaffold selection for the QtWebEngine family | Same grammar as `WebViewScaffolds=` |
 | `ExcludeQtWebEngineScaffolds=` | Exclusions for the QtWebEngine family | |
-| `ElectronRoot=` (alias `ElectronPath=`) | Declares an Electron `userData` folder; opts the entry into [Electron scaffolds](#electron-scaffolds) | Repeatable. `%Package%` variables are expanded |
-| `ElectronUpdaterRoot=` (alias `ElectronUpdaterPath=`) | Declares an electron-updater download cache for `%ElectronUpdaterRoot%`; also opts the entry into Electron scaffolds | Repeatable. `%Package%` variables are expanded |
+| `ElectronRoot=` (alias `ElectronPath=`) | Declares an Electron `userData` folder; opts the entry into [Electron scaffolds](#electron-scaffolds) | Repeatable. `<Package>` variables are expanded |
+| `ElectronUpdaterRoot=` (alias `ElectronUpdaterPath=`) | Declares an electron-updater download cache for `%ElectronUpdaterRoot%`; also opts the entry into Electron scaffolds | Repeatable. `<Package>` variables are expanded |
 | `ElectronScaffolds=` | Scaffold selection for the Electron family | Same grammar as `WebViewScaffolds=` |
 | `ExcludeElectronScaffolds=` | Exclusions for the Electron family | |
 
 ## Package variables
 
-`%Package%` expands to `%LocalAppData%\Packages\PACKAGE_FOLDER` and may be used in the value of any expanded key (`FileKeyBase=`/`FileKey=`, `ExcludeKeyBase=`/`ExcludeKey=`, `WebViewRoot=`, `QtWebEngineRoot=`):
+`<Package>` is a [variable](#variables) UWPBuilder declares on every entry, with one value per `Package=` key: `%LocalAppData%\Packages\PACKAGE_FOLDER`. It works in the value of any expanded key, the root keys (`WebViewRoot=` and the rest) and other variable declarations included:
 
-- **Unnumbered `%Package%`** expands once per package: a key containing it produces one output key per declared package, in order
-- **Numbered `%PackageN%`** selects exactly one package by position: a key containing `%Package2%` produces a single output key using the second package
+- **`<Package>`** expands once per package: a key containing it produces one output key per declared package, in declaration order
+- **`<Package[N]>`** selects exactly one package by position: a key containing `<Package[2]>` produces a single output key using the second package. An `N` of 0 or past the number of packages drops the key with a warning
 - A key containing no package variable passes through verbatim as a single key
 
-See [Example 4](#example-4-multi-package-applications) for both forms in action.
+`<Package>` and `<Package[2]>` in one key are two separate variables, so they multiply like any two variables. The same goes for `<Package>` beside a variable declared from it (`Cache=<Package>\LocalCache`): a key using both pairs every package with every other package's cache, so use one or the other in a key. See [Example 4](#example-4-multi-package-applications) for both forms in action.
 
-Note that `Detect=`, `DetectFile=`, and `RegKey=` in an AppInfo section are **not** `%Package%`-expanded: a `%Package%` in a `DetectFile=` reaches the output as a literal. Package detection comes from the scaffold's `DetectFileBase=`, so you should not need one. (These keys *are* `<>`-expanded: see [Variables](#variables).)
+Package detection comes from the scaffold's `DetectFileBase=`, so an app-specific `DetectFile=<Package>` is never needed.
+
+### The retired `%Package%` spelling
+
+Earlier versions spelled these `%Package%` and `%Package1%`, `%Package2%`. A key still written that way, including one with the closing `%` missing (`%Package\LocalCache`), is dropped with a warning naming the new spelling, and the run fails with exit code 1. `%...%` is winapp2.ini's environment-variable syntax, so a stale or mistyped token used to reach the output looking like a real path. `Package=` values and `Warning=` prose are not checked.
 
 ## Variables
 
@@ -249,7 +253,7 @@ What happens to a `<Token>` with no declaration depends on where the key lands:
 
 ### What is never expanded
 
-- **`Package=`**: a fan-out would change the package list's length and silently shift the meaning of every `%PackageN%` selector in the entry. A `<` or `>` in a `Package=` value is warned about and used literally
+- **`Package=`**: a fan-out would change the package list's length and silently shift the meaning of every `<Package[N]>` selector in the entry. A `<` or `>` in a `Package=` value is warned about and used literally, and the `Package` variable holds it unexpanded
 - **`Warning=`** and **`DetectOS=`**: prose and a version range respectively, not path templates
 
 ### Typo backstops
@@ -287,7 +291,7 @@ Declaring one or more `WebViewRoot=` keys. No `WebViewRoot=` means zero WebView 
 ```ini
 [GoldKey Acellus *]
 Package=GoldKeyCorporation.Acellus_v2rn50m687qry
-WebViewRoot=%Package%\LocalState\EBWebView
+WebViewRoot=<Package>\LocalState\EBWebView
 LangSecRef=3021
 ```
 
@@ -491,8 +495,8 @@ FileKey4=%LocalAppData%\Packages\B9ECED6F.ASUSQuickLaunch_qmba6cd70vzyy\TempStat
 ```
 
 **Explanation**
-- `DetectFile` is generated from the scaffold's `DetectFileBase=%Package%` template
-- The four FileKeys are the scaffold's `FileKeyBase=` templates with `%Package%` expanded
+- `DetectFile` is generated from the scaffold's `DetectFileBase=<Package>` template
+- The four FileKeys are the scaffold's `FileKeyBase=` templates with `<Package>` expanded
 - The category key passes through as written
 - Nothing in this entry was written by hand except the package name and category
 
@@ -515,9 +519,9 @@ We want to extend the baseline with three additional package-relative FileKeys.
 [Apple Devices *]
 Package=AppleInc.AppleDevices_nzyj5cx40ttqa
 LangSecRef=3024
-FileKeyBase=%Package%\LocalCache\Local\Logs|*
-FileKeyBase=%Package%\LocalCache\Roaming\Apple Computer\Logs|*
-FileKeyBase=%Package%\LocalState\Logs|*
+FileKeyBase=<Package>\LocalCache\Local\Logs|*
+FileKeyBase=<Package>\LocalCache\Roaming\Apple Computer\Logs|*
+FileKeyBase=<Package>\LocalState\Logs|*
 ```
 
 **Output**
@@ -549,7 +553,7 @@ Amazon Music ships as both a UWP package and a win32 installation. A single entr
 
 **Intent**
 
-We want package-relative keys (`FileKeyBase=` with `%Package%`) for the UWP install, verbatim win32 keys (`FileKey=`), and a registry detection for the win32 version alongside the generated package detection.
+We want package-relative keys (`FileKeyBase=` with `<Package>`) for the UWP install, verbatim win32 keys (`FileKey=`), and a registry detection for the win32 version alongside the generated package detection.
 
 **Files**
 
@@ -559,13 +563,13 @@ We want package-relative keys (`FileKeyBase=` with `%Package%`) for the UWP inst
 Detect=HKCU\Software\Amazon\Amazon Music
 LangSecRef=3023
 Package=AmazonMobileLLC.AmazonMusic_kc6t79cpj4tp0
-FileKeyBase=%Package%\LocalCache\Local\Amazon Music\Data\App Cache\*Cache*|RECURSE
-FileKeyBase=%Package%\LocalCache\Local\Amazon Music\Data\Artwork Cache|*.jpg;*.png|RECURSE
-FileKeyBase=%Package%\LocalCache\Local\Amazon Music\Data\Hammer Cache|*
-FileKeyBase=%Package%\LocalCache\Local\Amazon Music\Data\S*Cache|*
-FileKeyBase=%Package%\LocalCache\Local\Amazon Music\Logs|*
-FileKeyBase=%Package%\LocalCache\Local\Amazon Music\User Data|*.pma
-FileKeyBase=%Package%\LocalCache\Local\Amazon Music\User Data\Crashpad\Reports|*
+FileKeyBase=<Package>\LocalCache\Local\Amazon Music\Data\App Cache\*Cache*|RECURSE
+FileKeyBase=<Package>\LocalCache\Local\Amazon Music\Data\Artwork Cache|*.jpg;*.png|RECURSE
+FileKeyBase=<Package>\LocalCache\Local\Amazon Music\Data\Hammer Cache|*
+FileKeyBase=<Package>\LocalCache\Local\Amazon Music\Data\S*Cache|*
+FileKeyBase=<Package>\LocalCache\Local\Amazon Music\Logs|*
+FileKeyBase=<Package>\LocalCache\Local\Amazon Music\User Data|*.pma
+FileKeyBase=<Package>\LocalCache\Local\Amazon Music\User Data\Crashpad\Reports|*
 FileKey=%LocalAppData%\Amazon Music\Crash Dumps|*
 FileKey=%LocalAppData%\Amazon Music\data\App Cache|*-journal;ChromeDWriteFontCache;data_*;f_*;index
 FileKey=%LocalAppData%\Amazon Music\data\App Cache\*Cache|*|RECURSE
@@ -612,7 +616,7 @@ FileKey22=%UserProfile%\Documents\Amazon Music Importer\Logs|*|RECURSE
 
 **Explanation**
 - `Detect=` passes through verbatim, providing win32 detection; the package `DetectFile` is generated alongside it
-- The win32 `FileKey=` values contain no `%Package%` variable and pass through verbatim
+- The win32 `FileKey=` values contain no `<Package>` variable and pass through verbatim
 - One entry covers both installations
 
 ---
@@ -625,7 +629,7 @@ Cortana has shipped under two different package identities. Some data locations 
 
 **Intent**
 
-We want one entry covering both packages: shared keys should expand for every package (`%Package%`), package-specific keys should target only one (`%Package2%`).
+We want one entry covering both packages: shared keys should expand for every package (`<Package>`), package-specific keys should target only one (`<Package[2]>`).
 
 **Files**
 
@@ -635,9 +639,9 @@ We want one entry covering both packages: shared keys should expand for every pa
 Package1=Microsoft.549981C3F5F10_8wekyb3d8bbwe
 Package2=Microsoft.Cortana_8wekyb3d8bbwe
 LangSecRef=3025
-FileKeyBase=%Package%\LocalCache|*|RECURSE
-FileKeyBase=%Package2%\LocalState|*|RECURSE
-ExcludeKey1=FILE|%Package2%\LocalState\DeviceSearchCache\|SettingsCache.txt
+FileKeyBase=<Package>\LocalCache|*|RECURSE
+FileKeyBase=<Package[2]>\LocalState|*|RECURSE
+ExcludeKey1=FILE|<Package[2]>\LocalState\DeviceSearchCache\|SettingsCache.txt
 ```
 
 **Output**
@@ -662,9 +666,9 @@ ExcludeKey1=FILE|%LocalAppData%\Packages\Microsoft.Cortana_8wekyb3d8bbwe\LocalSt
 ```
 
 **Explanation**
-- One `DetectFile` was generated per package from the scaffold's `DetectFileBase=%Package%`
-- The scaffold baseline and the unnumbered `%Package%` FileKey expanded once per package: keys 1–5 for `Package1`, keys 6–7 and 9–11 for `Package2`
-- The `%Package2%` keys (FileKey8's `LocalState`, and the ExcludeKey) expanded exactly once, targeting only the second package
+- One `DetectFile` was generated per package from the scaffold's `DetectFileBase=<Package>`
+- The scaffold baseline and the `<Package>` FileKey expanded once per package: keys 1–5 for `Package1`, keys 6–7 and 9–11 for `Package2`
+- The `<Package[2]>` keys (FileKey8's `LocalState`, and the ExcludeKey) expanded exactly once, targeting only the second package
 
 ---
 
@@ -684,7 +688,7 @@ We want the entry to draw the default scaffold selection (Caches + Telemetry) fr
 ```ini
 [GoldKey Acellus *]
 Package=GoldKeyCorporation.Acellus_v2rn50m687qry
-WebViewRoot=%Package%\LocalState\EBWebView
+WebViewRoot=<Package>\LocalState\EBWebView
 LangSecRef=3021
 ```
 
@@ -753,7 +757,7 @@ We want every scaffold outside the legacy tier *except* the two that remove prim
 ```ini
 [GoldKey Acellus *]
 Package=GoldKeyCorporation.Acellus_v2rn50m687qry
-WebViewRoot=%Package%\LocalState\EBWebView
+WebViewRoot=<Package>\LocalState\EBWebView
 WebViewScaffolds=All
 ExcludeWebViewScaffolds=WebStorage,LoginData
 LangSecRef=3021
@@ -805,8 +809,8 @@ We want a primary `[Spotify *]` entry with full coverage, and a secondary `[Spot
 Package=SpotifyAB.SpotifyMusic_zpdnekdrzrea0
 LangSecRef=3023
 DetectFile=%AppData%\Spotify
-FileKeyBase=%Package%\LocalCache\Spotify|*|REMOVESELF
-FileKeyBase=%Package%\LocalState\Users\*|ad-state-storage.bnk;context_player_state_restore;cached
+FileKeyBase=<Package>\LocalCache\Spotify|*|REMOVESELF
+FileKeyBase=<Package>\LocalState\Users\*|ad-state-storage.bnk;context_player_state_restore;cached
 FileKey=%AppData%\Spotify|*.log
 FileKey=%AppData%\Spotify\users\*|ad-state-storage.bnk;frequency.pb;local-files.bnk;local_sync_state;watch-sources.bnk
 FileKey=%LocalAppData%\Spotify|*|REMOVESELF
@@ -817,7 +821,7 @@ Package=SpotifyAB.SpotifyMusic_zpdnekdrzrea0
 SkipUWPFileKeys=True
 LangSecRef=3023
 DetectFile=%AppData%\Spotify
-FileKeyBase=%Package%\LocalState\Spotify\Storage|*|REMOVESELF
+FileKeyBase=<Package>\LocalState\Spotify\Storage|*|REMOVESELF
 FileKey=%LocalAppData%\Spotify\Storage|*|REMOVESELF
 ```
 
@@ -870,7 +874,7 @@ We run three deliberately flawed sections through the builder: one with no `Pack
 ```ini
 [Hazel Notes *]
 LangSecRef=3021
-FileKeyBase=%Package%\LocalState\Logs|*
+FileKeyBase=<Package>\LocalState\Logs|*
 
 [Hazel Weather *]
 Package=Hazel.Weather_123abc

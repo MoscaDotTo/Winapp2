@@ -540,15 +540,15 @@ UWP entries cover Universal Windows Platform applications generally installed fr
 
 ### How UWPBuilder works
 
-UWPBuilder reads `Assembler/UWP/UWP.ini` (the baseline cleaning scaffold applied to every UWP app) alongside all 27 alphabetical AppInfo files. For each application, it generates a complete winapp2.ini entry by combining the scaffold's `FileKeyBase` patterns with app-specific keys, substituting the app's package folder name wherever `%Package%` appears.
+UWPBuilder reads `Assembler/UWP/UWP.ini` (the baseline cleaning scaffold applied to every UWP app) alongside all 27 alphabetical AppInfo files. For each application, it generates a complete winapp2.ini entry by combining the scaffold's `FileKeyBase` patterns with app-specific keys, substituting the app's package folder path wherever `<Package>` appears.
 
 ```ini
 [EntryScaffold: UWP App]
-DetectFileBase=%Package%
-FileKeyBase=%Package%\AC|*|RECURSE
-FileKeyBase=%Package%\Settings|*.log*
-FileKeyBase=%Package%\SystemAppData\Helium|*.log*
-FileKeyBase=%Package%\TempState|*|REMOVESELF
+DetectFileBase=<Package>
+FileKeyBase=<Package>\AC|*|RECURSE
+FileKeyBase=<Package>\Settings|*.log*
+FileKeyBase=<Package>\SystemAppData\Helium|*.log*
+FileKeyBase=<Package>\TempState|*|REMOVESELF
 ```
 
 The baseline scaffold above targets the standard UWP storage locations present in nearly every UWP application:
@@ -591,19 +591,21 @@ For multi-package applications, list each package folder separately as `Package1
 | :- | :- | :- |
 | `Package=` | Yes (at least one) | Package folder name under `%LocalAppData%\Packages\`. |
 | `LangSecRef=` or `Section=` | Yes (exactly one) | Categorization. |
-| `Detect=`, `Detect1`, `Detect2=`, ... | No | Additional registry detection criteria. Passed through verbatim and renumbered. |
-| `DetectFile=` | No | Additional filesystem detection criteria. Useful for hybrid win32+UWP apps. Each package folder is always generated as a `DetectFile` due to the root UWP.ini's scaffold containing `DetectFileBase=%Package%`  |
-| `FileKeyBase=` | No | App-specific FileKey templates using `%Package%` or `%PackageN%` variables. Added after the scaffold keys. This is a stylistic choice only, and providing a `FileKey` will also work. |
-| `FileKey=` | No | Standard winapp2.ini FileKey targeting win32 or non-package locations. Can also use `%Package%` variables. This is a stylistic choice only, and providing a `FileKeyBase` will also work. |
-| `RegKey=` | No | Standard winapp2.ini RegKey. Passed through verbatim and renumbered. |
-| `ExcludeKey=` | No | Standard winapp2.ini ExcludeKey. Can use `%Package%` variables. |
+| `Detect=`, `Detect1`, `Detect2=`, ... | No | Additional registry detection criteria. Variables are expanded and the keys renumbered. |
+| `DetectFile=` | No | Additional filesystem detection criteria. Useful for hybrid win32+UWP apps. Each package folder is always generated as a `DetectFile` due to the root UWP.ini's scaffold containing `DetectFileBase=<Package>`  |
+| `FileKeyBase=` | No | App-specific FileKey templates using `<Package>` or `<Package[N]>` variables. Added after the scaffold keys. This is a stylistic choice only, and providing a `FileKey` will also work. |
+| `FileKey=` | No | Standard winapp2.ini FileKey targeting win32 or non-package locations. Can also use `<Package>` variables. This is a stylistic choice only, and providing a `FileKeyBase` will also work. |
+| `RegKey=` | No | Standard winapp2.ini RegKey. Variables are expanded and the keys renumbered. |
+| `ExcludeKey=` | No | Standard winapp2.ini ExcludeKey. Can use `<Package>` variables. |
 | `Skip=` | No | Provide this key (any value) to exclude the app from generation without removing its configuration. This value appears boolean but it is not, provide this key if and only if you want the entry skipped |
 
-### The `%Package%` variable
+### The `<Package>` variable
 
-In `FileKeyBase=`, `FileKey=`, and `ExcludeKey=` values, `%Package%` expands to the full path `%LocalAppData%\Packages\<PackageFolderName>` in the generated output.
+In `FileKeyBase=`, `FileKey=`, `DetectFile=` and `ExcludeKey=` values, `<Package>` expands to the package's full path, `%LocalAppData%\Packages\` followed by the `Package=` value, in the generated output.
 
-For multi-package apps, `%Package%` expands to each of the packages. Use `%Package1%`, `%Package2%`, etc. to target a specific package. 
+For multi-package apps, `<Package>` expands to each of the packages. Use `<Package[1]>`, `<Package[2]>`, etc. to target a specific package, counted in the order the `Package` keys appear. An index past the number of packages drops the key with a warning.
+
+Older versions of winapp2ool spelled these `%Package%` and `%Package1%`, `%Package2%`. That spelling is no longer accepted: a key that uses it is dropped with a warning naming the new spelling, and the build fails. Since `%...%` is how winapp2.ini writes environment variables, a mistyped `%Package%` used to pass into the output looking like a real path.
 
 ### Single-package example
 
@@ -612,7 +614,7 @@ For multi-package apps, `%Package%` expands to each of the packages. Use `%Packa
 [Example UWP App *]
 LangSecRef=3024
 Package=ExampleCorp.ExampleApp_abc123xyz
-FileKeyBase=%Package%\LocalCache\Local\Logs|*.log
+FileKeyBase=<Package>\LocalCache\Local\Logs|*.log
 ```
 
 ###### UWPBuilder output (after linting)
@@ -634,8 +636,8 @@ FileKey5=%LocalAppData%\Packages\ExampleCorp.ExampleApp_abc123xyz\TempState|*|RE
 LangSecRef=3021
 Package1=Vendor.AppCore_abc123
 Package2=Vendor.AppService_def456
-FileKeyBase=%Package%\LocalCache\Local\Logs|*.log
-FileKeyBase=%Package2%\LocalState\Logs|*.log
+FileKeyBase=<Package>\LocalCache\Local\Logs|*.log
+FileKeyBase=<Package[2]>\LocalState\Logs|*.log
 FileKey=%ProgramData%\Vendor\AppService\Logs|*
 ```
 
@@ -659,7 +661,7 @@ FileKey11=%LocalAppData%\Packages\Vendor.AppService_def456\TempState|*|REMOVESEL
 FileKey12=%ProgramData%\Vendor\AppService\Logs|*
 ```
 
-This generates `DetectFile` entries for both packages. The scaffold is applied once per package. `%Package2%` targets only the second package in the app-specific `FileKey`.
+This generates `DetectFile` entries for both packages. The scaffold is applied once per package. `<Package[2]>` targets only the second package in the app-specific `FileKey`.
 
 ### Hybrid win32 + UWP example
 
@@ -671,7 +673,7 @@ Some applications have both a traditional desktop (Win32) installer and a Micros
 LangSecRef=3021
 Package=Vendor.HybridApp_ghi789
 DetectFile=%LocalAppData%\Vendor\HybridApp
-FileKeyBase=%Package%\LocalState\Cache|*|RECURSE
+FileKeyBase=<Package>\LocalState\Cache|*|RECURSE
 FileKey=%LocalAppData%\Vendor\HybridApp\Cache|*|RECURSE
 FileKey=%LocalAppData%\Vendor\HybridApp\Logs|*.log
 ```

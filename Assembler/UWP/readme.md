@@ -30,7 +30,7 @@ FileKey3=%LocalAppData%\Packages\3138AweZip.AweZip_ffd303wmbhcjt\SystemAppData\H
 FileKey4=%LocalAppData%\Packages\3138AweZip.AweZip_ffd303wmbhcjt\TempState|*|REMOVESELF
 ```
 
-The `DetectFile` and the four baseline FileKeys come from the `[EntryScaffold: UWP App]` section of `UWP.ini`, with `%Package%` expanded to the declared package folder. App-specific keys (additional FileKeys, RegKeys, win32 paths for hybrid apps) are layered on top and pass through with the same `%Package%` substitution.
+The `DetectFile` and the four baseline FileKeys come from the `[EntryScaffold: UWP App]` section of `UWP.ini`, with `<Package>` expanded to the declared package folder. App-specific keys (additional FileKeys, RegKeys, win32 paths for hybrid apps) are layered on top and pass through with the same `<Package>` substitution. `<Package[2]>` picks one package of an app that declares several. The old `%Package%` spelling is refused: the key is dropped and the build fails.
 
 ### Embedded browser data
 
